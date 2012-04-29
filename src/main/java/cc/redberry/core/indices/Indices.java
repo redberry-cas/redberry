@@ -89,7 +89,6 @@ public interface Indices {
      */
     int get(int position);
 
-
     /**
      * Returns new instance of
      * <code>Indices</code>, witch contains only non contracted indices from
@@ -175,11 +174,6 @@ public interface Indices {
      */
     String toString(ToStringMode mode);
 
-    /**
-     * {@inheritDoc}
-     *
-     * @return {@inheritDoc}
-     */
     @Override
     boolean equals(Object other);
 
@@ -198,6 +192,4 @@ public interface Indices {
      * @return the array of indices <b>id</b>s with respect to symmetries
      */
     short[] getDiffIds();
-
-    boolean similarTypeStructure(Indices indices);
 }

@@ -22,7 +22,8 @@
  */
 package cc.redberry.core.context;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import org.apache.commons.math.random.BitsStreamGenerator;
@@ -40,11 +41,8 @@ public class NameManager {
     private final Lock writeLock = readWriteLock.writeLock();
     private final Map<Integer, NameDescriptor> fromId = new HashMap<>();
     private final Map<NameDescriptor.IndicesTypeStructureAndName, NameDescriptor> fromStructure = new HashMap<>();
-    private final List<NewNameDescriptorListener> newNameDescriptorListeners = Collections.synchronizedList(new ArrayList<NewNameDescriptorListener>());
-    private final Context context;
 
-    public NameManager(Context context, Long seed) {
-        this.context = context;
+    public NameManager(Long seed) {
         if (seed == null) {
             random = new Well44497b();
             random.setSeed(this.seed = random.nextLong());
@@ -70,7 +68,6 @@ public class NameManager {
                         descriptor.setId(name);
                         fromId.put(name, descriptor);
                         fromStructure.put(descriptor.getKey(), descriptor);
-                        newDescriptor(descriptor); //TODO: synchronization conflicts (dead-locks) ?? [synchronized (context)]
                         return descriptor.getId();
                     }
                     readLock.lock();
@@ -144,21 +141,6 @@ public class NameManager {
         } finally {
             writeLock.unlock();
         }
-    }
-
-    private void newDescriptor(NameDescriptor nameDescriptor) {
-        synchronized (context) {
-            for (NewNameDescriptorListener listener : newNameDescriptorListeners)
-                listener.newNameDescriptor(nameDescriptor);
-        }
-    }
-
-    public void registerNewNameDescriptorListener(NewNameDescriptorListener listener) {
-        newNameDescriptorListeners.add(listener);
-    }
-
-    public void removeNewNameDescriptorListener(NewNameDescriptorListener listener) {
-        newNameDescriptorListeners.remove(listener);
     }
 
     public long getSeed() {

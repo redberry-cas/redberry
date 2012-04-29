@@ -89,10 +89,14 @@ public class IndicesSymmetries implements Iterable<Symmetry> {
         return diffIds;
     }
 
+    public boolean add(IndexType type, boolean sign, int... permutation) {
+        return add(type.getType(), new Symmetry(permutation, sign));
+    }
+
     public boolean add(byte type, Symmetry symmetry) {
         IndicesTypeStructure.TypeData data = indicesTypeStructure.getTypeDatas(type);
         if (data == null)
-            throw new IllegalArgumentException("No such type: "+ IndexType.getType(type));
+            throw new IllegalArgumentException("No such type: " + IndexType.getType(type));
         if (data.length != symmetry.dimension())
             throw new IllegalArgumentException("Wrong symmetry length.");
         int[] s = new int[indicesTypeStructure.size()];
@@ -113,11 +117,11 @@ public class IndicesSymmetries implements Iterable<Symmetry> {
             throw new InconsistentGeneratorsException("Adding inconsistent symmetry to tensor indices symmetries.");
         }
     }
-    
+
     public boolean addUnsafe(byte type, Symmetry symmetry) {
         IndicesTypeStructure.TypeData data = indicesTypeStructure.getTypeDatas(type);
         if (data == null)
-            throw new IllegalArgumentException("No such type: "+ IndexType.getType(type));
+            throw new IllegalArgumentException("No such type: " + IndexType.getType(type));
         if (data.length != symmetry.dimension())
             throw new IllegalArgumentException("Wrong symmetry length.");
         int[] s = new int[indicesTypeStructure.size()];
@@ -129,7 +133,7 @@ public class IndicesSymmetries implements Iterable<Symmetry> {
         for (; i < indicesTypeStructure.size(); ++i)
             s[i] = i;
         symmetries.addUnsafe(new Symmetry(s, symmetry.isAntiSymmetry()));
-            return true;
+        return true;
     }
 
     public boolean addUnsafe(Symmetry symmetry) {

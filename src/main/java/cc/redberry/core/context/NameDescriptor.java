@@ -22,7 +22,6 @@
  */
 package cc.redberry.core.context;
 
-import cc.redberry.core.combinatorics.Symmetry;
 import cc.redberry.core.indices.IndicesSymmetries;
 import cc.redberry.core.indices.IndicesTypeStructure;
 import java.util.Arrays;
@@ -40,7 +39,7 @@ public final class NameDescriptor {
         this.indexTypeStructures = indexTypeStructures;
         this.name = name;
         this.key = new IndicesTypeStructureAndName(name, indexTypeStructures);
-        this.symmetries = IndicesSymmetries.createNonCloneable(indexTypeStructures[0]);
+        this.symmetries = IndicesSymmetries.create(indexTypeStructures[0]);
     }
 
     public boolean isField() {
@@ -63,16 +62,12 @@ public final class NameDescriptor {
         return indexTypeStructures;
     }
 
-    public void addSymmetry(byte type, Symmetry p) {
-        symmetries.add(type, p);
-    }
-
     IndicesTypeStructureAndName getKey() {
         return key;
     }
 
     void setId(int id) {
-        assert (this.id == -1);
+        assert this.id == -1;
         this.id = id;
     }
 

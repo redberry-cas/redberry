@@ -32,7 +32,6 @@ import java.util.EnumSet;
  */
 public class ContextSettings {
     //bindings
-    private String imageOne;
     private ToStringMode defaultToStringMode;
     private String kronecker;
     //optional
@@ -40,19 +39,17 @@ public class ContextSettings {
     private EnumSet<IndexType> merticTypes = EnumSet.noneOf(IndexType.class);
     private Long nameManagerSeed;
 
-    public ContextSettings(String imageOne, ToStringMode defaultToStringMode, String kronecker) {
-        this.imageOne = imageOne;
+    public ContextSettings(ToStringMode defaultToStringMode, String kronecker) {
         this.defaultToStringMode = defaultToStringMode;
         this.kronecker = kronecker;
     }
 
-    byte[] getMetricTypes() {
-        byte[] mTypes = new byte[merticTypes.size()];
-        int i = 0;
-        for (IndexType type : merticTypes)
-            mTypes[i++] = type.getType();
-        Arrays.sort(mTypes);
-        return mTypes;
+    EnumSet<IndexType> getMetricTypes() {
+        return merticTypes;
+    }
+
+    public void removeMetricIndexType(IndexType type) {
+        merticTypes.remove(type);
     }
 
     public void addMetricIndexType(IndexType type) {
@@ -67,14 +64,6 @@ public class ContextSettings {
 
     public void setDefaultToStringMode(ToStringMode defaultToStringMode) {
         this.defaultToStringMode = defaultToStringMode;
-    }
-
-    public String getImageOne() {
-        return imageOne;
-    }
-
-    public void setImageOne(String imageOne) {
-        this.imageOne = imageOne;
     }
 
     public String getKronecker() {
@@ -102,7 +91,7 @@ public class ContextSettings {
     }
 
     public static ContextSettings createDefault() {
-        ContextSettings defaultSettings = new ContextSettings("I", ToStringMode.REDBERRY, "d");
+        ContextSettings defaultSettings = new ContextSettings(ToStringMode.REDBERRY, "d");
         defaultSettings.setMetricName("g");
 
         defaultSettings.addMetricIndexType(IndexType.LatinLower);

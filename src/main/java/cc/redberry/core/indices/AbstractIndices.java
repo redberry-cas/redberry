@@ -68,7 +68,7 @@ abstract class AbstractIndices implements Indices {
     public final IntArray getUpper() {
         WeakReference<UpperLowerIndices> wul = upperLower;
         UpperLowerIndices ul = wul.get();
-        if (ul == null){
+        if (ul == null) {
             ul = calculateUpperLower();
             upperLower = new WeakReference<>(ul);
         }
@@ -79,7 +79,7 @@ abstract class AbstractIndices implements Indices {
     public final IntArray getLower() {
         WeakReference<UpperLowerIndices> wul = upperLower;
         UpperLowerIndices ul = wul.get();
-        if (ul == null){
+        if (ul == null) {
             ul = calculateUpperLower();
             upperLower = new WeakReference<>(ul);
         }
@@ -96,18 +96,6 @@ abstract class AbstractIndices implements Indices {
         if (indices instanceof EmptyIndices)
             return data.length == 0;
         return Arrays.equals(getSortedData(), ((AbstractIndices) indices).getSortedData());
-    }
-
-    //TODO rename
-    @Override
-    public final boolean similarTypeStructure(Indices indices) {
-        if (data.length != indices.size())
-            return false;
-        for (int i = 0; i < data.length; ++i)
-            if (IndicesUtils.getType(data[i])
-                    != IndicesUtils.getType(indices.get(i)))
-                return false;
-        return true;
     }
 
     @Override
@@ -184,8 +172,8 @@ abstract class AbstractIndices implements Indices {
     public final String toString() {
         return toString(Context.get().getDefaultPrintMode());
     }
-    
-    protected static class UpperLowerIndices{
+
+    protected static class UpperLowerIndices {
         public final int[] upper;
         public final int[] lower;
 

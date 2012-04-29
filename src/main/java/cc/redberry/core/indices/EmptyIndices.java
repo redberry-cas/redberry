@@ -203,17 +203,6 @@ public final class EmptyIndices implements SimpleIndices {
     }
 
     /**
-     * Returns {@code indices.size() == 0}.
-     *
-     * @param indices
-     * @return {@code indices.size() == 0}
-     */
-    @Override
-    public boolean similarTypeStructure(Indices indices) {
-        return indices.size() == 0;
-    }
-
-    /**
      * Returns 1
      *
      * @return 1
