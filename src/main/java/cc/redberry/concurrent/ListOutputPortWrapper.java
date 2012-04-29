@@ -1,0 +1,56 @@
+/*
+ * Redberry: symbolic tensor computations.
+ *
+ * Copyright (c) 2010-2012:
+ *   Stanislav Poslavsky   <stvlpos@mail.ru>
+ *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
+ *
+ * This file is part of Redberry.
+ *
+ * Redberry is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Redberry is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+package cc.redberry.concurrent;
+
+import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
+
+/**
+ * 
+ * @author Bolotin Dmitriy (bolotin.dmitriy@gmail.com)
+ * @param <T> 
+ */
+public class ListOutputPortWrapper<T> implements OutputPort<T> {
+    private List<? extends T> list;
+    private final int size;
+    private AtomicInteger currentIndex = new AtomicInteger(0);
+
+    public ListOutputPortWrapper(List<? extends T> list) {
+        this.list = list;
+        size = list.size();
+    }
+
+    @Override
+    public T take() throws InterruptedException {
+        int index = currentIndex.getAndIncrement();
+        if (index >= size)
+            return null;
+        return list.get(index);
+    }
+
+    public int percentDone() {
+        int index = currentIndex.get();
+        return index * 100 / size;
+    }
+}
