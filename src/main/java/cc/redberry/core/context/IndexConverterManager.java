@@ -22,12 +22,15 @@
  */
 package cc.redberry.core.context;
 
+import cc.redberry.core.indices.IndexType;
+
 /**
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
 public final class IndexConverterManager {
+    public static final IndexConverterManager DEFAULT = new IndexConverterManager(IndexType.getAllConverters());
     private final IndexSymbolConverter[] converters;
 
     public IndexConverterManager(IndexSymbolConverter[] converters) {

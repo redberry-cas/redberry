@@ -23,7 +23,6 @@
 package cc.redberry.core.context;
 
 import cc.redberry.core.indices.IndexType;
-import java.util.Arrays;
 import java.util.EnumSet;
 
 /**
@@ -38,6 +37,7 @@ public class ContextSettings {
     private String metricName = null;
     private EnumSet<IndexType> merticTypes = EnumSet.noneOf(IndexType.class);
     private Long nameManagerSeed;
+    private IndexConverterManager converterManager = IndexConverterManager.DEFAULT;
 
     public ContextSettings(ToStringMode defaultToStringMode, String kronecker) {
         this.defaultToStringMode = defaultToStringMode;
@@ -88,6 +88,14 @@ public class ContextSettings {
 
     public void setNameManagerSeed(Long nameManagerSeed) {
         this.nameManagerSeed = nameManagerSeed;
+    }
+
+    public IndexConverterManager getConverterManager() {
+        return converterManager;
+    }
+
+    public void setConverterManager(IndexConverterManager converterManager) {
+        this.converterManager = converterManager;
     }
 
     public static ContextSettings createDefault() {

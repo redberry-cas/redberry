@@ -20,22 +20,20 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
-package cc.redberry.core.context.defaults;
+package cc.redberry.core.parser;
 
-import cc.redberry.core.context.Context;
-import cc.redberry.core.context.ContextFactory;
-import cc.redberry.core.context.ContextSettings;
+/**
+ *
+ * @author Dmitry Bolotin
+ * @author Stanislav Poslavsky
+ */
+public interface NodeParser {
+    ParseNode parseNode(String expression, Parser parser);
 
-public class DefaultContextFactory implements ContextFactory {
-    public static final DefaultContextFactory INSTANCE = new DefaultContextFactory();
-
-    private DefaultContextFactory() {
-    }
-
-    @Override
-    public Context createContext() {
-        //Creating context defaults
-        Context context = new Context(ContextSettings.createDefault());
-        return context;
-    }
+    /**
+     * The higher the priority, the earlier runs.
+     *
+     * @return priority
+     */
+    int priority();
 }

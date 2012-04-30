@@ -20,22 +20,25 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
-package cc.redberry.core.context.defaults;
+package cc.redberry.core.parser;
 
-import cc.redberry.core.context.Context;
-import cc.redberry.core.context.ContextFactory;
-import cc.redberry.core.context.ContextSettings;
+/**
+ *
+ * @author Dmitry Bolotin
+ * @author Stanislav Poslavsky
+ */
+public final class ParseNodeScalarFunction extends ParseNode {
+    public String function;
 
-public class DefaultContextFactory implements ContextFactory {
-    public static final DefaultContextFactory INSTANCE = new DefaultContextFactory();
-
-    private DefaultContextFactory() {
+    public ParseNodeScalarFunction(String function, ParseNode[] content) {
+        super(TensorType.ScalarFunction, content);
+        if (content.length != 1)
+            throw new IllegalArgumentException();
+        this.function = function;
     }
 
     @Override
-    public Context createContext() {
-        //Creating context defaults
-        Context context = new Context(ContextSettings.createDefault());
-        return context;
+    public String toString() {
+        return function + "[" + content[0] + "]";
     }
 }

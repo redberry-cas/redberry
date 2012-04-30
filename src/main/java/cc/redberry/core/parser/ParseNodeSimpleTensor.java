@@ -20,22 +20,33 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
-package cc.redberry.core.context.defaults;
+package cc.redberry.core.parser;
 
-import cc.redberry.core.context.Context;
-import cc.redberry.core.context.ContextFactory;
-import cc.redberry.core.context.ContextSettings;
+import cc.redberry.core.indices.SimpleIndices;
 
-public class DefaultContextFactory implements ContextFactory {
-    public static final DefaultContextFactory INSTANCE = new DefaultContextFactory();
+/**
+ *
+ * @author Dmitry Bolotin
+ * @author Stanislav Poslavsky
+ */
+public class ParseNodeSimpleTensor extends ParseNode {
+    public SimpleIndices indices;
+    public String name;
 
-    private DefaultContextFactory() {
+    protected ParseNodeSimpleTensor(SimpleIndices indices, String name, TensorType type, ParseNode[] content) {
+        super(type, content);
+        this.indices = indices;
+        this.name = name;
+    }
+
+    public ParseNodeSimpleTensor(SimpleIndices indices, String name) {
+        super(TensorType.SimpleTensor, new ParseNode[0]);
+        this.indices = indices;
+        this.name = name;
     }
 
     @Override
-    public Context createContext() {
-        //Creating context defaults
-        Context context = new Context(ContextSettings.createDefault());
-        return context;
+    public String toString() {
+        return name + indices.toString();
     }
 }

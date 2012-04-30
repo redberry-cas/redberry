@@ -20,22 +20,35 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
-package cc.redberry.core.context.defaults;
+package cc.redberry.core.parser;
 
-import cc.redberry.core.context.Context;
-import cc.redberry.core.context.ContextFactory;
-import cc.redberry.core.context.ContextSettings;
+import cc.redberry.core.number.ComplexElement;
+import java.util.List;
 
-public class DefaultContextFactory implements ContextFactory {
-    public static final DefaultContextFactory INSTANCE = new DefaultContextFactory();
+/**
+ *
+ * @author Dmitry Bolotin
+ * @author Stanislav Poslavsky
+ */
+public class ParserProduct extends ParserOperator {
+    public static final ParserProduct INSTANCE = new ParserProduct();
 
-    private DefaultContextFactory() {
+    private ParserProduct() {
+        super('*', '/');
     }
 
     @Override
-    public Context createContext() {
-        //Creating context defaults
-        Context context = new Context(ContextSettings.createDefault());
-        return context;
+    protected ParseNode compile(List<ParseNode> nodes) {
+        return new ParseNode(TensorType.Product, nodes.toArray(new ParseNode[nodes.size()]));
+    }
+
+    @Override
+    protected ParseNode inverseOperation(ParseNode node) {
+        return new ParseNode(TensorType.Pow, new ParseNode[]{node, new ParseNodeNumber(ComplexElement.MINUSONE)});
+    }
+
+    @Override
+    public int priority() {
+        return 999;
     }
 }

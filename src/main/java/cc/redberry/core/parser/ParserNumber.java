@@ -20,22 +20,34 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
-package cc.redberry.core.context.defaults;
+package cc.redberry.core.parser;
 
-import cc.redberry.core.context.Context;
-import cc.redberry.core.context.ContextFactory;
-import cc.redberry.core.context.ContextSettings;
+import cc.redberry.core.number.ComplexElement;
 
-public class DefaultContextFactory implements ContextFactory {
-    public static final DefaultContextFactory INSTANCE = new DefaultContextFactory();
+/**
+ *
+ * @author Dmitry Bolotin
+ * @author Stanislav Poslavsky
+ */
+public class ParserNumber implements NodeParser {
+    public static final ParserNumber INSTANCE = new ParserNumber();
 
-    private DefaultContextFactory() {
+    private ParserNumber() {
     }
 
     @Override
-    public Context createContext() {
-        //Creating context defaults
-        Context context = new Context(ContextSettings.createDefault());
-        return context;
+    public ParseNode parseNode(String expression, cc.redberry.core.parser.Parser parser) {
+        ComplexElement value;
+        try {
+            value = (ComplexElement) cc.redberry.core.number.parser.Parser.parse(expression);
+        } catch (NumberFormatException e) {
+            return null;
+        }
+        return new ParseNodeNumber(value);
+    }
+
+    @Override
+    public int priority() {
+        return 9999;
     }
 }

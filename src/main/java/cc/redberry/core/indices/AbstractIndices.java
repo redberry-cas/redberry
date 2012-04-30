@@ -24,7 +24,6 @@ package cc.redberry.core.indices;
 
 import cc.redberry.core.context.Context;
 import cc.redberry.core.context.ToStringMode;
-import cc.redberry.core.indexmapping.IndexMapping;
 import cc.redberry.core.utils.IntArray;
 import java.lang.ref.WeakReference;
 import java.util.Arrays;

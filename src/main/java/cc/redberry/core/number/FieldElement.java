@@ -20,22 +20,27 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
-package cc.redberry.core.context.defaults;
+package cc.redberry.core.number;
 
-import cc.redberry.core.context.Context;
-import cc.redberry.core.context.ContextFactory;
-import cc.redberry.core.context.ContextSettings;
+/**
+ *
+ * @author Dmitry Bolotin, Stanislav Poslavsky.
+ */
+public interface FieldElement<T> {
+    T add(T a);
 
-public class DefaultContextFactory implements ContextFactory {
-    public static final DefaultContextFactory INSTANCE = new DefaultContextFactory();
+    T subtract(T a);
 
-    private DefaultContextFactory() {
-    }
+    T multiply(T a);
 
-    @Override
-    public Context createContext() {
-        //Creating context defaults
-        Context context = new Context(ContextSettings.createDefault());
-        return context;
-    }
+    T divide(T a) throws ArithmeticException;
+
+    T negotiate();
+
+    boolean isEquals(T a);
+
+    Field<T> getField();
+
+    T clone();
+
 }

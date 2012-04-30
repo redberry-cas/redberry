@@ -20,22 +20,26 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
-package cc.redberry.core.context.defaults;
+package cc.redberry.core.number.parser;
 
-import cc.redberry.core.context.Context;
-import cc.redberry.core.context.ContextFactory;
-import cc.redberry.core.context.ContextSettings;
+import cc.redberry.core.number.ComplexElement;
 
-public class DefaultContextFactory implements ContextFactory {
-    public static final DefaultContextFactory INSTANCE = new DefaultContextFactory();
+public class IntegerParser implements ElementParser {
+    public static final IntegerParser INSTANCE = new IntegerParser();
 
-    private DefaultContextFactory() {
+    private IntegerParser() {
     }
 
-    @Override
-    public Context createContext() {
-        //Creating context defaults
-        Context context = new Context(ContextSettings.createDefault());
-        return context;
+    public boolean canParse(String expression) {
+        try {
+            Integer.parseInt(expression);
+            return true;
+        } catch (NumberFormatException e) {
+            return false;
+        }
+    }
+
+    public ComplexElement parse(String expression) {
+        return new ComplexElement(Integer.parseInt(expression), 0);
     }
 }

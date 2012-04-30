@@ -20,22 +20,27 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
-package cc.redberry.core.context.defaults;
+package cc.redberry.core.number;
 
-import cc.redberry.core.context.Context;
-import cc.redberry.core.context.ContextFactory;
-import cc.redberry.core.context.ContextSettings;
-
-public class DefaultContextFactory implements ContextFactory {
-    public static final DefaultContextFactory INSTANCE = new DefaultContextFactory();
-
-    private DefaultContextFactory() {
+/**
+ *
+ * @author Dmitry Bolotin
+ * @author Stanislav Poslavsky
+ */
+public class RationalElementField implements Field<RationalElement> {
+    public static RationalElementField getInstance() {
+        return LazyHolder.INSTANCE;
     }
 
-    @Override
-    public Context createContext() {
-        //Creating context defaults
-        Context context = new Context(ContextSettings.createDefault());
-        return context;
+    public RationalElement getOne() {
+        return RationalElement.ONE;
+    }
+
+    public RationalElement getZero() {
+        return RationalElement.ZERO;
+    }
+
+    private static class LazyHolder {
+        private static final RationalElementField INSTANCE = new RationalElementField();
     }
 }

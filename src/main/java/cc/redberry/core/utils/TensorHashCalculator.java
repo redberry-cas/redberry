@@ -22,11 +22,11 @@
  */
 package cc.redberry.core.utils;
 
-import java.util.Arrays;
-import cc.redberry.core.indices.Indices;
-import cc.redberry.core.indices.SimpleIndices;
-import cc.redberry.core.tensor.SimpleTensor;
-import cc.redberry.core.tensor.Tensor;
+//import java.util.Arrays;
+//import cc.redberry.core.indices.Indices;
+//import cc.redberry.core.indices.SimpleIndices;
+//import cc.redberry.core.tensor.SimpleTensor;
+//import cc.redberry.core.tensor.Tensor;
 
 /**
  *
@@ -34,36 +34,36 @@ import cc.redberry.core.tensor.Tensor;
  * @author Stanislav Poslavsky
  */
 public class TensorHashCalculator {
-    private static int _hashWithIndices(final Tensor tensor, final int[] indices) {
-        if (tensor instanceof SimpleTensor) {
-            SimpleIndices si = ((SimpleTensor) tensor).getIndices();
-            short[] sInds = si.getDiffIds();
-            int hash = tensor.hashCode();
-            int pos;
-            for (int i = 0; i < si.size(); ++i)
-                if ((pos = Arrays.binarySearch(indices, si.get(i))) >= 0)
-                    hash ^= HashFunctions.JenkinWang32shift(sInds[i])
-                            + HashFunctions.JenkinWang32shift(pos) * 7;
-            return HashFunctions.JenkinWang32shift(hash);
-        }
-        int hash = tensor.hashCode();
-        for (Tensor t : tensor)
-            hash ^= _hashWithIndices(t, indices);
-        return hash;
-    }
-
-    public static int hashWithIndices(final Tensor tensor, final int[] indices) {
-        if (indices.length == 0)
-            return tensor.hashCode();
-        Arrays.sort(indices);
-        return _hashWithIndices(tensor, indices);
-    }
-
-    public static int hashWithIndices(final Tensor tensor, final Indices indices) {
-        return hashWithIndices(tensor, indices.getAllIndices().copy());
-    }
-
-    public static int hashWithIndices(final Tensor tensor) {
-        return hashWithIndices(tensor, tensor.getIndices().getFreeIndices());
-    }
+//    private static int _hashWithIndices(final Tensor tensor, final int[] indices) {
+//        if (tensor instanceof SimpleTensor) {
+//            SimpleIndices si = ((SimpleTensor) tensor).getIndices();
+//            short[] sInds = si.getDiffIds();
+//            int hash = tensor.hashCode();
+//            int pos;
+//            for (int i = 0; i < si.size(); ++i)
+//                if ((pos = Arrays.binarySearch(indices, si.get(i))) >= 0)
+//                    hash ^= HashFunctions.JenkinWang32shift(sInds[i])
+//                            + HashFunctions.JenkinWang32shift(pos) * 7;
+//            return HashFunctions.JenkinWang32shift(hash);
+//        }
+//        int hash = tensor.hashCode();
+//        for (Tensor t : tensor)
+//            hash ^= _hashWithIndices(t, indices);
+//        return hash;
+//    }
+//
+//    public static int hashWithIndices(final Tensor tensor, final int[] indices) {
+//        if (indices.length == 0)
+//            return tensor.hashCode();
+//        Arrays.sort(indices);
+//        return _hashWithIndices(tensor, indices);
+//    }
+//
+//    public static int hashWithIndices(final Tensor tensor, final Indices indices) {
+//        return hashWithIndices(tensor, indices.getAllIndices().copy());
+//    }
+//
+//    public static int hashWithIndices(final Tensor tensor) {
+//        return hashWithIndices(tensor, tensor.getIndices().getFreeIndices());
+//    }
 }

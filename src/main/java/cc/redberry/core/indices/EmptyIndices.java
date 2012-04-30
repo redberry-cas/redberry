@@ -166,6 +166,17 @@ public final class EmptyIndices implements SimpleIndices {
     }
 
     /**
+     * Returns empty string.
+     *
+     * @param mode
+     * @return empty string
+     */
+    @Override
+    public String toString() {
+        return "";
+    }
+
+    /**
      * {@inheritDoc}
      *
      * @param obj {@inheritDoc}

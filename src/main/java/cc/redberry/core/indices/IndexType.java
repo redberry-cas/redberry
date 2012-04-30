@@ -23,6 +23,7 @@
 package cc.redberry.core.indices;
 
 import cc.redberry.core.context.ContextSettings;
+import cc.redberry.core.context.IndexConverterException;
 import cc.redberry.core.context.IndexSymbolConverter;
 import cc.redberry.core.context.defaults.*;
 
@@ -75,5 +76,13 @@ public enum IndexType {
             if (indexType.getType() == type)
                 return indexType;
         throw new IllegalArgumentException("Now such type: " + type);
+    }
+
+    public static IndexSymbolConverter[] getAllConverters() {
+        IndexSymbolConverter[] converters = new IndexSymbolConverter[values().length];
+        int i = -1;
+        for (IndexType type : values())
+            converters[++i] = type.getSymbolConverter();
+        return converters;
     }
 }

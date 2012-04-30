@@ -22,7 +22,7 @@
  */
 package cc.redberry.core.indices;
 
-import cc.redberry.core.context.CC;
+import cc.redberry.core.context.Context;
 import cc.redberry.core.context.ToStringMode;
 import cc.redberry.core.math.MathUtils;
 
@@ -285,33 +285,21 @@ public final class IndicesUtils {
     }
 
     public static String toString(int index, ToStringMode mode) {
-        return (getState(index) == true ? "^{" : "_{") + CC.getIndexConverterManager().getSymbol(index, mode) + "}";
+        return (getState(index) == true ? "^{" : "_{") + Context.get().getIndexConverterManager().getSymbol(index, mode) + "}";
     }
 
     public static String toString(int index) {
-        return toString(index, CC.getDefaultPrintMode());
+        return toString(index, Context.get().getDefaultPrintMode());
     }
 
     public static int parseIndex(String string) {
         boolean state = string.charAt(0) == '^';
         int nameWithType;
         if (string.charAt(1) == '{')
-            nameWithType = CC.getIndexConverterManager().getCode(string.substring(2, string.length() - 1));
+            nameWithType = Context.get().getIndexConverterManager().getCode(string.substring(2, string.length() - 1));
         else
-            nameWithType = CC.getIndexConverterManager().getCode(string.substring(1));
+            nameWithType = Context.get().getIndexConverterManager().getCode(string.substring(1));
         return state ? (0x80000000 ^ nameWithType) : nameWithType;
     }
-    //    /**
-    //     * Deprecated. Use {@link IndicesParser} to parse indices.
-    //     *
-    //     * @param expr indices string representation
-    //     * @return Indices
-    //     * @deprecated
-    //     */
-    //    @Deprecated
-    //    public static Indices parse(String expr) {
-    //        String _s = "A" + expr;
-    //        ParserSimpleTensorStructure s = new ParserSimpleTensorStructure(_s);
-    //        return s.getIndices();
-    //    }
+
 }

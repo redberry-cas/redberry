@@ -20,22 +20,38 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
-package cc.redberry.core.context.defaults;
+package cc.redberry.core.parser;
 
-import cc.redberry.core.context.Context;
-import cc.redberry.core.context.ContextFactory;
-import cc.redberry.core.context.ContextSettings;
+import org.junit.Test;
 
-public class DefaultContextFactory implements ContextFactory {
-    public static final DefaultContextFactory INSTANCE = new DefaultContextFactory();
-
-    private DefaultContextFactory() {
+/**
+ *
+ * @author Dmitry Bolotin
+ * @author Stanislav Poslavsky
+ */
+public class ParserTest {
+    @Test
+    public void test1() {
+        ParseNode node = Parser.DEFAULT.parse("2*a_\\mu-b_\\mu/(c*g)*g[x,y]");
+        System.out.println(node);
     }
 
-    @Override
-    public Context createContext() {
-        //Creating context defaults
-        Context context = new Context(ContextSettings.createDefault());
-        return context;
+    @Test
+    public void test2() {
+        ParseNode node = Parser.DEFAULT.parse("f[a_\\mu]-f[b_\\mu/(c*g)*g[x,y]]");
+        System.out.println(node);
+    }
+
+    @Test
+    public void test3() {
+        ParseNode node = Parser.DEFAULT.parse("f[b_\\mu/(c*g)*g[x,y]]");
+        System.out.println(node);
+        System.out.println(node.getClass());
+    }
+
+    @Test
+    public void test4() {
+        ParseNode node = Parser.DEFAULT.parse("a-b");
+        System.out.println(node);
     }
 }

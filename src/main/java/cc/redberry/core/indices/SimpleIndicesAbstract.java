@@ -22,6 +22,8 @@
  */
 package cc.redberry.core.indices;
 
+import cc.redberry.core.indexmapping.IndexMapping;
+import cc.redberry.core.combinatorics.Symmetries;
 import cc.redberry.core.combinatorics.Symmetry;
 import cc.redberry.core.utils.ArraysUtils;
 import cc.redberry.core.utils.IntArrayList;
