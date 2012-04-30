@@ -29,7 +29,7 @@ package cc.redberry.core.parser;
  */
 public class ParserFunctions implements NodeParser {
     public static final ParserFunctions INSTANCE = new ParserFunctions();
-    private static final String[] functions = {"Sin", "Cos", "Tan"};
+    private static final String[] functions = {"Sin", "Cos", "Tan","Log","Exp",""};
 
     private ParserFunctions() {
     }
