@@ -23,7 +23,6 @@
 package cc.redberry.core.indices;
 
 /**
- *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
@@ -47,6 +46,8 @@ public class IndicesFactory {
     }
 
     public static SimpleIndices createOfTensor(Indices indices) {
+        if (indices instanceof SimpleIndicesOfTensor)
+            return (SimpleIndicesOfTensor) indices;
         if (indices.size() == 0)
             return EmptyIndices.INSTANCE;
         return new SimpleIndicesOfTensor(indices.getAllIndices().copy(), null);
@@ -65,6 +66,7 @@ public class IndicesFactory {
     }
 
     // CHECKSTYLE
+
     /**
      * Holder for the instance. <p>We use here the Initialization On Demand
      * Holder Idiom.</p>

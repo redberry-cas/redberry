@@ -22,10 +22,9 @@
  */
 package cc.redberry.core.context;
 
-import cc.redberry.core.combinatorics.Symmetry;
 import cc.redberry.core.indices.*;
-import cc.redberry.core.parser.Parser;
-import cc.redberry.core.tensor.*;
+import cc.redberry.core.tensor.SimpleTensor;
+
 import java.util.Arrays;
 import java.util.EnumSet;
 
@@ -36,6 +35,7 @@ public final class Context {
     private final String metricName;
     private final int[] metricNames, kroneckerNames;
     private final EnumSet<IndexType> metricTypes;
+    private final byte[] metricTypesArray;
     private final IndexConverterManager converterManager;
 
     public Context(ContextSettings contextSettings) {
@@ -45,6 +45,13 @@ public final class Context {
         defaultPrintMode = contextSettings.getDefaultToStringMode();
         kroneckerName = contextSettings.getKronecker();
         metricTypes = contextSettings.getMetricTypes();
+        metricTypesArray = new byte[metricTypes.size()];
+
+        int i = -1;
+        for (IndexType it : metricTypes)
+            metricTypesArray[++i] = it.getType();
+        Arrays.sort(metricTypesArray);
+
         metricName = contextSettings.getMetricName();
 
         metricNames = new int[contextSettings.getMetricTypes().size()];
@@ -117,72 +124,61 @@ public final class Context {
     public boolean withMetric() {
         return metricName != null;
     }
-//
-//    public boolean isKronecker(SimpleTensor t) {
-//        if (kroneckerNames == null)
-//            return false;
-//        // kroneckerNames naturally sorted
-//        return Arrays.binarySearch(kroneckerNames, t.getName()) >= 0;
-//    }
-//
-//    public boolean isMetric(SimpleTensor t) {
-//        if (metricNames == null)
-//            return false;
-//        // metricNames naturally sorted
-//        synchronized (this) {
-//            return Arrays.binarySearch(metricNames, t.getName()) >= 0;
-//        }
-//    }
-//
-//    public SimpleTensor createKronecker(int index1, int index2) {
-//        if (IndicesUtils.getType(index1) != IndicesUtils.getType(index2) || IndicesUtils.getRawStateInt(index1) == IndicesUtils.getRawStateInt(index2))
-//            throw new IllegalArgumentException("This is not kronecker indices!");
-//        SimpleIndices indices = IndicesFactory.createSimple(index1, index2);
-//        NameDescriptor nd = new NameDescriptor(kroneckerName, new IndicesTypeStructure(indices));
-//        int name = nameManager.mapNameDescriptor(nd);
-//        return new SimpleTensor(name, indices);
-//    }
-//
-//    public SimpleTensor createMetric(int index1, int index2) {
-//        byte type;
-//        if ((type = IndicesUtils.getType(index1)) != IndicesUtils.getType(index2)
-//                || IndicesUtils.getRawStateInt(index1) != IndicesUtils.getRawStateInt(index2)
-//                || Arrays.binarySearch(metricTypes, type) < 0)
-//            throw new IllegalArgumentException("This is not metric indices!");
-//        SimpleIndices indices = IndicesFactory.createSimple(index1, index2);
-//        NameDescriptor nd = new NameDescriptor(metricName, new IndicesTypeStructure(indices));
-//        int name = nameManager.mapNameDescriptor(nd);
-//        return new SimpleTensor(name, indices);
-//    }
-//
-//    public SimpleTensor createMetricOrKronecker(int index1, int index2) {
-//        if (IndicesUtils.getRawStateInt(index1) == IndicesUtils.getRawStateInt(index2))
-//            return createMetric(index1, index2);
-//        return createKronecker(index1, index2);
-//    }
-//
-//    public Tensor parse(String expression) {
-//        return parser.parse(expression);
-//    }
-//
-//    public SimpleTensor parseSimple(String expression) {
-//        Tensor t = parser.parse(expression);
-//        if (t instanceof SimpleTensor)
-//            return (SimpleTensor) t;
-//        throw new RuntimeException("Not simple tensor");
-//    }
-//
-//    public SimpleTensor createSimpleTensor(String name, SimpleIndices indices) {
-//        NameDescriptor descriptor = new NameDescriptor(name, new IndicesTypeStructure(indices));
-//        int tensorName = nameManager.mapNameDescriptor(descriptor);
-//        //dumping symmetries
-//        SimpleIndices nIndices = IndicesFactory.createOfTensor(indices);
-//        //creating simple and binding nIndices and descriptor symmetries
-//        SimpleTensor t = new SimpleTensor(tensorName, nIndices);
-//        //adding additional symmetries
-//        nIndices.getSymmetries().addAllUnsafe(indices.getSymmetries());
-//        return t;
-//    }
+
+    public boolean isKronecker(SimpleTensor t) {
+        if (kroneckerNames == null)
+            return false;
+        // kroneckerNames naturally sorted
+        return Arrays.binarySearch(kroneckerNames, t.getName()) >= 0;
+    }
+
+    public boolean isMetric(SimpleTensor t) {
+        if (metricNames == null)
+            return false;
+        // metricNames naturally sorted
+        synchronized (this) {
+            return Arrays.binarySearch(metricNames, t.getName()) >= 0;
+        }
+    }
+
+    public SimpleTensor createKronecker(int index1, int index2) {
+        if (IndicesUtils.getType(index1) != IndicesUtils.getType(index2) || IndicesUtils.getRawStateInt(index1) == IndicesUtils.getRawStateInt(index2))
+            throw new IllegalArgumentException("This is not kronecker indices!");
+        SimpleIndices indices = IndicesFactory.createOfTensor(index1, index2);
+        NameDescriptor nd = new NameDescriptor(kroneckerName, new IndicesTypeStructure(indices));
+        int name = nameManager.mapNameDescriptor(nd);
+        return new SimpleTensor(name, indices);
+    }
+
+    public SimpleTensor createMetric(int index1, int index2) {
+        byte type;
+        if ((type = IndicesUtils.getType(index1)) != IndicesUtils.getType(index2)
+                || IndicesUtils.getRawStateInt(index1) != IndicesUtils.getRawStateInt(index2)
+                || Arrays.binarySearch(metricTypesArray, type) < 0)
+            throw new IllegalArgumentException("This is not metric indices!");
+        SimpleIndices indices = IndicesFactory.createOfTensor(index1, index2);
+        NameDescriptor nd = new NameDescriptor(metricName, new IndicesTypeStructure(indices));
+        int name = nameManager.mapNameDescriptor(nd);
+        return new SimpleTensor(name, indices);
+    }
+
+    public SimpleTensor createMetricOrKronecker(int index1, int index2) {
+        if (IndicesUtils.getRawStateInt(index1) == IndicesUtils.getRawStateInt(index2))
+            return createMetric(index1, index2);
+        return createKronecker(index1, index2);
+    }
+
+    public SimpleTensor createSimpleTensor(String name, SimpleIndices indices) {
+        NameDescriptor descriptor = new NameDescriptor(name, new IndicesTypeStructure(indices));
+        int tensorName = nameManager.mapNameDescriptor(descriptor);
+        //dumping symmetries
+        SimpleIndices nIndices = IndicesFactory.createOfTensor(indices);
+        //creating simple and binding nIndices and descriptor symmetries
+        SimpleTensor t = new SimpleTensor(tensorName, nIndices);
+        //adding additional symmetries
+        nIndices.getSymmetries().addAllUnsafe(indices.getSymmetries());
+        return t;
+    }
 
     public static Context get() {
         return ContextManager.getCurrentContext();
