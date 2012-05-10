@@ -18,6 +18,7 @@ package cc.redberry.core.tensor;
 import cc.redberry.core.context.Context;
 import cc.redberry.core.context.ToStringMode;
 import cc.redberry.core.indices.Indices;
+
 import java.util.Iterator;
 
 /**
@@ -114,7 +115,6 @@ public abstract class Tensor
      * in existing inheritors.
      *
      * @return hash code of this tensor
-     *
      * @see MultiTensor#hash()
      * @see SimpleTensor#hash()
      */
@@ -126,7 +126,6 @@ public abstract class Tensor
      * <code>Tensor</code>
      *
      * @return indices of this tensor
-     *
      * @see cc.redberry.core.indices.Indices
      */
     public abstract Indices getIndices();
@@ -156,6 +155,7 @@ public abstract class Tensor
     //public abstract Tensor set(int position, Tensor tensor);
     //TODO 
     //public abstract Tensor remove(int position);
+
     /**
      * Returns a string representation of tensor. Parameter
      * {@link cc.redberry.core.context.ToStringMode} mode specifies
@@ -173,14 +173,11 @@ public abstract class Tensor
      * <code>A_mn/B</code>
      *
      * @param mode symbols printing mode (e.g.
-     * <code>UTF8</code> or
-     * <code>LaTeX</code>)
-     *
+     *             <code>UTF8</code> or
+     *             <code>LaTeX</code>)
      * @return a string representation of tensor
-     *
      * @see cc.redberry.core.context.ToStringMode
-     * @see
-     * cc.redberry.core.indices.Indices#toString(cc.redberry.core.context.ToStringMode)
+     * @see cc.redberry.core.indices.Indices#toString(cc.redberry.core.context.ToStringMode)
      */
     public abstract String toString(final ToStringMode mode);
 
@@ -200,7 +197,6 @@ public abstract class Tensor
      * Comparing by hash code method.
      *
      * @param t tensor to compare
-     *
      * @return < code>(hash() < t.hash() ? -1 : (hash() == t.hash() ? 0 : 1))</code>
      */
     @Override

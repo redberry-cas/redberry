@@ -22,15 +22,14 @@
  */
 package cc.redberry.core.indices;
 
-import cc.redberry.core.indexmapping.IndexMapping;
-import cc.redberry.core.combinatorics.Symmetries;
 import cc.redberry.core.combinatorics.Symmetry;
+import cc.redberry.core.indexmapping.IndexMapping;
 import cc.redberry.core.utils.ArraysUtils;
 import cc.redberry.core.utils.IntArrayList;
+
 import java.util.Arrays;
 
 /**
- *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
@@ -39,11 +38,12 @@ public abstract class SimpleIndicesAbstract extends AbstractIndices implements S
 
     /**
      * Construct {@code SimpleIndicesOfTensor} instance from specified indices array
-     * and with {@link Symmetries#EMPTY_SYMMETRIES}.
+     * and with specified symmetries.
      *
-     * @param data array of indices
+     * @param data       array of indices
+     * @param symmetries symmetries of this indices
      */
-    SimpleIndicesAbstract(int... data) {
+    protected SimpleIndicesAbstract(int[] data, IndicesSymmetries symmetries) {
         super(data);
         int[] toSort = new int[data.length];
         for (int i = 0; i < data.length; ++i)
@@ -52,28 +52,12 @@ public abstract class SimpleIndicesAbstract extends AbstractIndices implements S
             ArraysUtils.timSort(toSort, data);
         else
             ArraysUtils.insertionSort(toSort, data);
+        this.symmetries = symmetries;
         testConsistentWithException();
     }
 
-    /**
-     * Construct {@code SimpleIndicesOfTensor} instance from specified indices and
-     * with identity symmetry.
-     *
-     * @param indices specified indices
-     */
-    SimpleIndicesAbstract(Indices indices) {
-        this(indices.getAllIndices().copy());
-    }
-
-    /**
-     * Construct {@code SimpleIndicesOfTensor} instance from specified indices array
-     * and with specified symmetries.
-     *
-     * @param data array of indices
-     * @param symmetries symmetries of this indices
-     */
-    protected SimpleIndicesAbstract(int[] data, IndicesSymmetries symmetries) {
-        this(data);
+    protected SimpleIndicesAbstract(boolean notResort, int[] data, IndicesSymmetries symmetries) {
+        super(data);
         this.symmetries = symmetries;
     }
 
@@ -94,9 +78,6 @@ public abstract class SimpleIndicesAbstract extends AbstractIndices implements S
         return new UpperLowerIndices(upper, lower);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public SimpleIndices getInverseIndices() {
         int[] dataInv = new int[data.length];
@@ -105,9 +86,6 @@ public abstract class SimpleIndicesAbstract extends AbstractIndices implements S
         return create(dataInv, symmetries);
     }
 
-    /**
-     * {@inheritDoc }
-     */
     @Override
     public SimpleIndices getFreeIndices() {
         IntArrayList dataList = new IntArrayList();
@@ -122,11 +100,12 @@ public abstract class SimpleIndicesAbstract extends AbstractIndices implements S
             if (y)
                 dataList.add(data[i]);
         }
-        return create(dataList.toArray(), symmetries);
+        //FAIL!
+        return UnsafeIndicesFactory.createIsolatedUnsafeWithoutSort(null, dataList.toArray());
     }
 
     @Override
-    public Indices applyIndexMapping(IndexMapping mapping) {
+    public SimpleIndices applyIndexMapping(IndexMapping mapping) {
         boolean changed = false;
         int newIndex;
         int[] data_ = data.clone();
@@ -137,7 +116,9 @@ public abstract class SimpleIndicesAbstract extends AbstractIndices implements S
             }
         if (!changed)
             return this;
-        return create(data_, symmetries);
+        SimpleIndices si = create(data_, symmetries);
+        si.testConsistentWithException();
+        return si;
     }
 
     protected abstract SimpleIndices create(int[] data, IndicesSymmetries symmetries);
@@ -171,11 +152,10 @@ public abstract class SimpleIndicesAbstract extends AbstractIndices implements S
      * <code>null</code> in other case.
      *
      * @param indices indices to compare with this
-     * @return
-     * <code>Boolean.FALSE</code> if indices are equals this,
-     * <code>Boolean.TRUE</code> if indices differs from this on -1 (i.e. on odd
-     * transposition) and
-     * <code>null</code> in other case.
+     * @return <code>Boolean.FALSE</code> if indices are equals this,
+     *         <code>Boolean.TRUE</code> if indices differs from this on -1 (i.e. on odd
+     *         transposition) and
+     *         <code>null</code> in other case.
      */
     public Boolean _equalsWithSymmetries(Indices indices) {
         if (indices.getClass() != this.getClass())

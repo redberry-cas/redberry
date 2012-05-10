@@ -27,30 +27,16 @@ package cc.redberry.core.indices;
  * @author Stanislav Poslavsky
  */
 public class IndicesFactory {
-    public static SimpleIndices createIsolated(int... data) {
+    public static SimpleIndices createSimple(IndicesSymmetries symmetries, int... data) {
         if (data.length == 0)
             return EmptyIndices.INSTANCE;
-        return new SimpleIndicesIsolated(data, null);
+        return new SimpleIndicesIsolated(data.clone(), symmetries);
     }
 
-    public static SimpleIndices createIsolated(Indices indices) {
+    public static SimpleIndices createSimple(IndicesSymmetries symmetries, Indices indices) {
         if (indices.size() == 0)
             return EmptyIndices.INSTANCE;
-        return new SimpleIndicesIsolated(indices.getAllIndices().copy(), null);
-    }
-
-    public static SimpleIndices createOfTensor(int... data) {
-        if (data.length == 0)
-            return EmptyIndices.INSTANCE;
-        return new SimpleIndicesOfTensor(data, null);
-    }
-
-    public static SimpleIndices createOfTensor(Indices indices) {
-        if (indices instanceof SimpleIndicesOfTensor)
-            return (SimpleIndicesOfTensor) indices;
-        if (indices.size() == 0)
-            return EmptyIndices.INSTANCE;
-        return new SimpleIndicesOfTensor(indices.getAllIndices().copy(), null);
+        return new SimpleIndicesIsolated(indices.getAllIndices().copy(), symmetries);
     }
 
     public static Indices createSorted(Indices indices) {
@@ -62,14 +48,12 @@ public class IndicesFactory {
     public static Indices createSorted(int... data) {
         if (data.length == 0)
             return LazyHolder.INSTANCE;
-        return new SortedIndices(data);
+        return new SortedIndices(data.clone());
     }
-
-    // CHECKSTYLE
 
     /**
      * Holder for the instance. <p>We use here the Initialization On Demand
-     * Holder Idiom.</p>
+     * Holder Idiom!</p>
      */
     private static class LazyHolder {
         /**

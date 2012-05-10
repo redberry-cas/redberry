@@ -41,29 +41,28 @@ public final class SimpleIndicesOfTensor extends SimpleIndicesAbstract {
         super(data, symmetries);
     }
 
+    public SimpleIndicesOfTensor(boolean notResort, int[] data, IndicesSymmetries symmetries) {
+        super(notResort, data, symmetries);
+    }
+
     /**
      * This method allows to set {@code Symmetries} of this {@code Indices}.
      *
      * @param symmetries {@code Symmetries} to be set as {@code Symmetries} of
-     * this {@code Indices}
+     *                   this {@code Indices}
      */
     @Override
     public void setSymmetries(IndicesSymmetries symmetries) {
-        if (this.symmetries != null)
-            throw new IllegalStateException("Symmetries are already set.");
-        this.symmetries = symmetries;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public IndicesSymmetries getSymmetries() {
-        if (symmetries == null)
-            throw new IllegalStateException("Symmeries are not attached.");
-            //symmetries = IndicesSymmetries.createCloneable(new IndicesTypeStructure(this));
         return symmetries;
     }
 
     @Override
     protected SimpleIndices create(int[] data, IndicesSymmetries symmetries) {
-        return new SimpleIndicesOfTensor(data, symmetries);
+        return new SimpleIndicesOfTensor(true, data, symmetries);
     }
 }

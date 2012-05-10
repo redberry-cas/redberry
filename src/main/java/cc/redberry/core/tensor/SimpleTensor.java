@@ -18,10 +18,10 @@ package cc.redberry.core.tensor;
 import cc.redberry.core.context.CC;
 import cc.redberry.core.context.NameDescriptor;
 import cc.redberry.core.context.ToStringMode;
-import cc.redberry.core.indices.InconsistentIndicesException;
-import cc.redberry.core.indices.IndicesFactory;
 import cc.redberry.core.indices.SimpleIndices;
+import cc.redberry.core.indices.UnsafeIndicesFactory;
 import cc.redberry.core.utils.EmptyIterator;
+
 import java.util.Iterator;
 
 /**
@@ -84,20 +84,10 @@ public class SimpleTensor extends Tensor {
      * @see cc.redberry.core.indices.Indices#testConsistent()
      */
     public SimpleTensor(int name, SimpleIndices indices) {
-        this.indices = IndicesFactory.createOfTensor(indices);
         this.name = name;
-        testConsistent();
         NameDescriptor descriptor = CC.getNameDescriptor(name);
-        this.indices.setSymmetries(descriptor.getSymmetries());
-    }
-
-    private void testConsistent() {
-        try {
-            indices.testConsistentWithException();
-        } catch (InconsistentIndicesException ex) {
-            //Adding information about source tensor
-            throw new InconsistentIndicesException(ex, this);
-        }
+        this.indices = UnsafeIndicesFactory.createOfTensor(descriptor.getSymmetries(),
+                indices);
     }
 
     /**
@@ -117,16 +107,6 @@ public class SimpleTensor extends Tensor {
     @Override
     protected int hash() {
         return name;
-    }
-
-    /**
-     * Returns empty content, because {@code SimpleTensor} has no any content.
-     *
-     * @return {@link TensorContentImpl#EMPTY}
-     */
-    @Override
-    public TensorContent getContent() {
-        return TensorContentImpl.EMPTY;
     }
 
     @Override

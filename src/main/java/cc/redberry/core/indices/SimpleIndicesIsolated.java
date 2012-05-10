@@ -32,9 +32,13 @@ public class SimpleIndicesIsolated extends SimpleIndicesAbstract {
         super(data, symmetries);
     }
 
+    public SimpleIndicesIsolated(boolean notResort, int[] data, IndicesSymmetries symmetries) {
+        super(notResort, data, symmetries);
+    }
+
     @Override
     protected SimpleIndices create(int[] data, IndicesSymmetries symmetries) {
-        return new SimpleIndicesIsolated(data, symmetries.clone());
+        return new SimpleIndicesIsolated(true, data, symmetries.clone());
     }
 
     @Override
@@ -47,10 +51,5 @@ public class SimpleIndicesIsolated extends SimpleIndicesAbstract {
     @Override
     public void setSymmetries(IndicesSymmetries symmetries) {
         this.symmetries = symmetries;
-    }
-    
-    @Override
-    public SimpleIndicesIsolated clone(){
-        return new SimpleIndicesIsolated(data.clone(), symmetries.clone());
     }
 }
