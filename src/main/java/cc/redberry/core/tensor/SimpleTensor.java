@@ -21,9 +21,7 @@ import cc.redberry.core.context.ToStringMode;
 import cc.redberry.core.indices.InconsistentIndicesException;
 import cc.redberry.core.indices.IndicesFactory;
 import cc.redberry.core.indices.SimpleIndices;
-import cc.redberry.core.indices.SimpleIndicesImpl;
 import cc.redberry.core.utils.EmptyIterator;
-
 import java.util.Iterator;
 
 /**

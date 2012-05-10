@@ -23,7 +23,6 @@
 package cc.redberry.core.indices;
 
 import cc.redberry.core.context.ContextSettings;
-import cc.redberry.core.context.IndexConverterException;
 import cc.redberry.core.context.IndexSymbolConverter;
 import cc.redberry.core.context.defaults.*;
 

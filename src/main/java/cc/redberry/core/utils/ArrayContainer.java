@@ -83,6 +83,7 @@ public class ArrayContainer<E> implements List<E> {
      * @throws NullPointerException {@inheritDoc}
      * @see #contains(Object)
      */
+    @Override
     public boolean containsAll(Collection<?> c) {
         for (Object e : c)
             if (!contains(e))
@@ -177,6 +178,7 @@ public class ArrayContainer<E> implements List<E> {
      *
      * @throws IndexOutOfBoundsException {@inheritDoc}
      */
+    @Override
     public ListIterator<E> listIterator(int index) {
         if (index < 0 || index > elementData.length)
             throw new IndexOutOfBoundsException("Index: " + index);
@@ -191,6 +193,7 @@ public class ArrayContainer<E> implements List<E> {
      *
      * @see #listIterator(int)
      */
+    @Override
     public ListIterator<E> listIterator() {
         return new ListItr(0);
     }
@@ -198,7 +201,7 @@ public class ArrayContainer<E> implements List<E> {
     @Override
     public List<E> subList(int fromIndex, int toIndex) {
         subListRangeCheck(fromIndex, toIndex, elementData.length);
-        return new ArrayContainer<E>(Arrays.copyOfRange(elementData, fromIndex, toIndex));
+        return new ArrayContainer<>(Arrays.copyOfRange(elementData, fromIndex, toIndex));
     }
 
     /**
@@ -240,11 +243,13 @@ public class ArrayContainer<E> implements List<E> {
         int cursor;       // index of next element to return
         int lastRet = -1; // index of last element returned; -1 if no such
 
+        @Override
         public boolean hasNext() {
             return cursor != elementData.length;
         }
 
         @SuppressWarnings("unchecked")
+        @Override
         public E next() {
             int i = cursor;
             if (i >= elementData.length)
@@ -254,6 +259,7 @@ public class ArrayContainer<E> implements List<E> {
             return (E) elementData[lastRet = i];
         }
 
+        @Override
         public void remove() {
             throw new UnsupportedOperationException();
         }
@@ -268,19 +274,23 @@ public class ArrayContainer<E> implements List<E> {
             cursor = index;
         }
 
+        @Override
         public boolean hasPrevious() {
             return cursor != 0;
         }
 
+        @Override
         public int nextIndex() {
             return cursor;
         }
 
+        @Override
         public int previousIndex() {
             return cursor - 1;
         }
 
         @SuppressWarnings("unchecked")
+        @Override
         public E previous() {
             int i = cursor - 1;
             if (i < 0)
@@ -290,14 +300,14 @@ public class ArrayContainer<E> implements List<E> {
             return (E) elementData[lastRet = i];
         }
 
+        @Override
         public void set(E e) {
             throw new UnsupportedOperationException();
         }
 
+        @Override
         public void add(E e) {
             throw new UnsupportedOperationException();
         }
     }
-
-
 }

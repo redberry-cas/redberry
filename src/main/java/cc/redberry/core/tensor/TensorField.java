@@ -62,84 +62,84 @@ public class TensorField extends SimpleTensor {
         return new TensorContentImpl(args);
     }
 
-    @Override
-    public TensorField clone() {
-        Tensor[] _args = new Tensor[args.length];
-        SimpleIndices[] _argIndices = new SimpleIndices[args.length];
-        for (int i = 0; i < args.length; ++i) {
-            _args[i] = args[i].clone();
-            _argIndices[i] = argIndices[i].clone();
-        }
-        return new TensorField(name, indices.clone(), true, _argIndices, _args);
-    }
-
-    @Override
-    public String toString(ToStringMode mode) {
-        StringBuilder sb = new StringBuilder();
-        sb.append('[');
-        for (Tensor t : args) {
-            sb.append(t.toString(mode));
-            sb.append(',');
-        }
-        sb.deleteCharAt(sb.length() - 1);
-        sb.append(']');
-        return super.toString(mode) + sb.toString();
-    }
-
-    public static Indicator<TensorIterator> FieldIteratorIndicator(final Indicator<TensorField> fieldIndicator) {
-        if (fieldIndicator == null)
-            return fieldIteratorIndicator;
-        return new AbstractTensorIteratorIndicator() {
-            @Override
-            public boolean _is(TensorIterator object) {
-                return (object instanceof FieldIterator) && fieldIndicator.is(((FieldIterator) object).field());
-            }
-        };
-    }
-
-    public static final Indicator<TensorIterator> fieldIteratorIndicator = new AbstractTensorIteratorIndicator() {
-        @Override
-        public boolean _is(TensorIterator iterator) {
-            return iterator instanceof FieldIterator;
-        }
-    };
-
-    public static Indicator<TensorIterator> FieldIteratorOnArgumentNoIndicator(final int indexOfArgument) {
-        return new AbstractTensorIteratorIndicator() {
-            @Override
-            public boolean _is(TensorIterator iterator) {
-                return (iterator instanceof FieldIterator) && ((FieldIterator) iterator).index == indexOfArgument;
-            }
-        };
-    }
-
-    protected class FieldIterator extends AbstractTensorIterator {
-        int index = -1;
-        int size = args.length;
-
-        @Override
-        public void set(Tensor t) {
-            t.parent = TensorField.this;
-            args[index] = t;
-        }
-
-        @Override
-        public boolean hasNext() {
-            return index < size - 1;
-        }
-
-        @Override
-        public Tensor next() {
-            return args[++index];
-        }
-
-        @Override
-        public void remove() {
-            throw new UnsupportedOperationException();
-        }
-
-        public TensorField field() {
-            return TensorField.this;
-        }
-    }
+//    @Override
+//    public TensorField clone() {
+//        Tensor[] _args = new Tensor[args.length];
+//        SimpleIndices[] _argIndices = new SimpleIndices[args.length];
+//        for (int i = 0; i < args.length; ++i) {
+//            _args[i] = args[i].clone();
+//            _argIndices[i] = argIndices[i].clone();
+//        }
+//        return new TensorField(name, indices.clone(), true, _argIndices, _args);
+//    }
+//
+//    @Override
+//    public String toString(ToStringMode mode) {
+//        StringBuilder sb = new StringBuilder();
+//        sb.append('[');
+//        for (Tensor t : args) {
+//            sb.append(t.toString(mode));
+//            sb.append(',');
+//        }
+//        sb.deleteCharAt(sb.length() - 1);
+//        sb.append(']');
+//        return super.toString(mode) + sb.toString();
+//    }
+//
+//    public static Indicator<TensorIterator> FieldIteratorIndicator(final Indicator<TensorField> fieldIndicator) {
+//        if (fieldIndicator == null)
+//            return fieldIteratorIndicator;
+//        return new AbstractTensorIteratorIndicator() {
+//            @Override
+//            public boolean _is(TensorIterator object) {
+//                return (object instanceof FieldIterator) && fieldIndicator.is(((FieldIterator) object).field());
+//            }
+//        };
+//    }
+//
+//    public static final Indicator<TensorIterator> fieldIteratorIndicator = new AbstractTensorIteratorIndicator() {
+//        @Override
+//        public boolean _is(TensorIterator iterator) {
+//            return iterator instanceof FieldIterator;
+//        }
+//    };
+//
+//    public static Indicator<TensorIterator> FieldIteratorOnArgumentNoIndicator(final int indexOfArgument) {
+//        return new AbstractTensorIteratorIndicator() {
+//            @Override
+//            public boolean _is(TensorIterator iterator) {
+//                return (iterator instanceof FieldIterator) && ((FieldIterator) iterator).index == indexOfArgument;
+//            }
+//        };
+//    }
+//
+//    protected class FieldIterator extends AbstractTensorIterator {
+//        int index = -1;
+//        int size = args.length;
+//
+//        @Override
+//        public void set(Tensor t) {
+//            t.parent = TensorField.this;
+//            args[index] = t;
+//        }
+//
+//        @Override
+//        public boolean hasNext() {
+//            return index < size - 1;
+//        }
+//
+//        @Override
+//        public Tensor next() {
+//            return args[++index];
+//        }
+//
+//        @Override
+//        public void remove() {
+//            throw new UnsupportedOperationException();
+//        }
+//
+//        public TensorField field() {
+//            return TensorField.this;
+//        }
+//    }
 }
