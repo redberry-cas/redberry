@@ -15,11 +15,9 @@
  */
 package cc.redberry.core.tensor;
 
-import cc.redberry.core.context.ToStringMode;
 import cc.redberry.core.indices.IndicesFactory;
 import cc.redberry.core.indices.SimpleIndices;
 import cc.redberry.core.utils.ArrayIterator;
-import cc.redberry.core.utils.Indicator;
 
 import java.util.Iterator;
 
@@ -37,7 +35,7 @@ public class TensorField extends SimpleTensor {
         argIndices = new SimpleIndices[args.length];
         int i = 0;
         for (Tensor t : args)
-            argIndices[i++] = IndicesFactory.createIsolated(t.getIndices().getFreeIndices());
+            argIndices[i++] = IndicesFactory.createSimple(null,t.getIndices().getFreeIndices());
     }
 
     public TensorField(int name, SimpleIndices indices, Tensor[] args, SimpleIndices[] argIndices) {

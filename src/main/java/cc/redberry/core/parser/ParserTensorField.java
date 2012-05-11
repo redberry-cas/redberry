@@ -96,7 +96,7 @@ public class ParserTensorField implements NodeParser {
                     if (split.length != 2)
                         throw new ParserException(expression);
                     a = parser.parse(split[0]);
-                    aIndices = ParserIndices.parseIsolated(split[1]);
+                    aIndices = ParserIndices.parseSimple(split[1]);
                     //TODO add assertion on indices compatability
                 }
                 arguments.add(a);

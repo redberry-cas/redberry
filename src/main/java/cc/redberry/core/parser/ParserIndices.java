@@ -33,14 +33,8 @@ import cc.redberry.core.utils.IntArrayList;
  * @author Stanislav Poslavsky
  */
 public class ParserIndices {
-    public static SimpleIndices parseIsolated(String expression) {
-        int[] indices = parse(expression);
-        return IndicesFactory.createIsolated(indices);
-    }
-
-    public static SimpleIndices parseOfTensor(String expression) {
-        int[] indices = parse(expression);
-        return IndicesFactory.createOfTensor(indices);
+    public static SimpleIndices parseSimple(String expression) {
+        return IndicesFactory.createSimple(null, parse(expression));
     }
 
     public static int[] parse(String expression) {
@@ -90,9 +84,9 @@ public class ParserIndices {
      *
      * @throws BracketsError if brackets are inconsistent (e.g. (a+(b)))) )
      *
-     * @param indices integer array list of parsed indices
+     * @param indices       integer array list of parsed indices
      * @param indicesString string representation of indices
-     * @param state index state (upper or lower)
+     * @param state         index state (upper or lower)
      */
     static void parseIndices(IntArrayList indices, StringBuilder indicesString, int state) {
         char c;

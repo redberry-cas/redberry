@@ -37,7 +37,8 @@ import java.util.List;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public final class IndicesBuilderSimple extends AbstractIndicesBuilder implements IndicesBuilder {
+public final class IndicesBuilderSimple extends AbstractIndicesBuilder
+        implements IndicesBuilder {
     private List<SymmetryContainer> symmetries = new ArrayList<>();
 
     public IndicesBuilderSimple() {
@@ -166,8 +167,9 @@ public final class IndicesBuilderSimple extends AbstractIndicesBuilder implement
                 permutation[j] = sort.inverse().newIndexOf(current.get(sort.newIndexOf(j)));
             resulting[i - 1] = new Symmetry(permutation, symmetries.get(i).sign);
         }
-        SimpleIndices simpleIndices = IndicesFactory.createIsolated(indices);
-        simpleIndices.getSymmetries().addAllUnsafe(resulting);
+        IndicesSymmetries indicesSymmetries = new IndicesSymmetries(new IndicesTypeStructure(indices));
+        indicesSymmetries.addAllUnsafe(resulting);
+        SimpleIndices simpleIndices = IndicesFactory.createSimple(indicesSymmetries, indices);
         return simpleIndices;
     }
 

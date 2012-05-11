@@ -35,6 +35,10 @@ public final class IndicesTypeStructure extends IndicesStructure {
         super(createData(types, counts));
     }
 
+    public IndicesTypeStructure(int[] indices) {
+        super(extractTypes(indices));
+    }
+
     public IndicesTypeStructure(Indices indices) {
         super(extractTypes(indices));
     }
@@ -43,6 +47,14 @@ public final class IndicesTypeStructure extends IndicesStructure {
         byte[] typeData = new byte[indices.size()];
         for (int i = 0; i < indices.size(); i++)
             typeData[i] = IndicesUtils.getType(indices.get(i));
+        Arrays.sort(typeData); //Redundant ?
+        return typeData;
+    }
+    
+    private static byte[] extractTypes(final int[] indices) {
+        byte[] typeData = new byte[indices.length];
+        for (int i = 0; i < indices.length; i++)
+            typeData[i] = IndicesUtils.getType(indices[i]);
         Arrays.sort(typeData); //Redundant ?
         return typeData;
     }

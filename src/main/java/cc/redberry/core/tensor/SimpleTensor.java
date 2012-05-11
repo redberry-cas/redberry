@@ -37,9 +37,9 @@ import java.util.Iterator;
  * <p><b>Name</b> <br>Name is an integer number, different for different
  * tensors, and map between integer name and its string representation is
  * keeping by
- * {@link cc.redberry.core.context.NameManager}, witch, in turn, are stored in {@code Context}. Integer
- * name assignment procedure and putting it in Redberry namespace happens on
- * parsing (for examples, see {@code NameManager}).
+ * {@link cc.redberry.core.context.NameManager}, witch, in turn, are stored in {@code Context}.
+ * Integer name assignment procedure and putting it in Redberry namespace
+ * happens on parsing (for examples, see {@code NameManager}).
  * {@code SimpleTensor} returns name value as its hash code. The specification
  * is so, that two tensors are different (i.e. has different names) if their
  * string names are different or their indices types structures are different.
@@ -51,8 +51,8 @@ import java.util.Iterator;
  * </BLOCKQUOTE> For more information about specification of name field see
  * {@code NameManager}.
  * <p/>
- * <p> NOTE: It is highly recommended to use {@link CC#parse(String)}
- * to construct new simple tensor object, instead of using class constructors,
+ * <p> NOTE: It is highly recommended to use {@link CC#parse(String)} to
+ * construct new simple tensor object, instead of using class constructors,
  * witch can cause namespace conflicts or constructor exceptions.
  *
  * @author Dmitry Bolotin
@@ -72,22 +72,24 @@ public class SimpleTensor extends Tensor {
      * during parsing. Constructor invokes {@link cc.redberry.core.indices.Indices#testConsistent()}
      * method and throws {@code InconsistentIndicesException} when specified
      * indices are inconsistent and context regime not testing. <p> NOTE: It is
-     * highly recommended to use {@link CC#parse(String)} to construct
-     * new simple tensor object, instead of using class constructors, witch can
+     * highly recommended to use {@link CC#parse(String)} to construct new
+     * simple tensor object, instead of using class constructors, witch can
      * cause namespace conflicts or constructor exceptions.
      *
      * @param name    integer tensor name representation
      * @param indices indices of this tensor
-     * @throws cc.redberry.core.indices.InconsistentIndicesException
-     *          when specified indices are
-     *          inconsistent and context regime not testing.
-     * @see cc.redberry.core.indices.Indices#testConsistent()
+     *
+     * @throws InconsistentIndicesException when specified indices are
+     *                                      inconsistent and context regime not
+     *                                      testing.
+     *
+     * @see Indices#testConsistent()
      */
     public SimpleTensor(int name, SimpleIndices indices) {
         this.name = name;
         NameDescriptor descriptor = CC.getNameDescriptor(name);
         this.indices = UnsafeIndicesFactory.createOfTensor(descriptor.getSymmetries(),
-                indices);
+                                                           indices);
     }
 
     /**
@@ -112,6 +114,16 @@ public class SimpleTensor extends Tensor {
     @Override
     public SimpleIndices getIndices() {
         return indices;
+    }
+
+    @Override
+    public Tensor get(int i) {
+        throw new IndexOutOfBoundsException();
+    }
+
+    @Override
+    public int size() {
+        return 0;
     }
 
     @Override

@@ -62,14 +62,14 @@ public final class Context {
         int i = -1;
         for (IndexType indexType : metricTypes) {
             NameDescriptor nd = new NameDescriptor(metricName,
-                    new IndicesTypeStructure(new byte[]{indexType.getType()}, new int[]{2}));
+                                                   new IndicesTypeStructure(new byte[]{indexType.getType()}, new int[]{2}));
             metricNames[++i] = nameManager.mapNameDescriptor(nd);
             nd.getSymmetries().add(indexType, false, new int[]{1, 0});
         }
 
         for (i = 0; i < kroneckerNames.length; ++i) {
             NameDescriptor nd = new NameDescriptor(metricName,
-                    new IndicesTypeStructure(new byte[]{IndexType.values()[i].getType()}, new int[]{2}));
+                                                   new IndicesTypeStructure(new byte[]{IndexType.values()[i].getType()}, new int[]{2}));
             kroneckerNames[i] = nameManager.mapNameDescriptor(nd);
             nd.getSymmetries().add(IndexType.values()[i], false, new int[]{1, 0});
         }
@@ -143,7 +143,7 @@ public final class Context {
     public SimpleTensor createKronecker(int index1, int index2) {
         if (IndicesUtils.getType(index1) != IndicesUtils.getType(index2) || IndicesUtils.getRawStateInt(index1) == IndicesUtils.getRawStateInt(index2))
             throw new IllegalArgumentException("This is not kronecker indices!");
-        SimpleIndices indices = IndicesFactory.createOfTensor(index1, index2);
+        SimpleIndices indices = IndicesFactory.createSimple(null, index1, index2);
         NameDescriptor nd = new NameDescriptor(kroneckerName, new IndicesTypeStructure(indices));
         int name = nameManager.mapNameDescriptor(nd);
         return new SimpleTensor(name, indices);
@@ -155,7 +155,7 @@ public final class Context {
                 || IndicesUtils.getRawStateInt(index1) != IndicesUtils.getRawStateInt(index2)
                 || Arrays.binarySearch(metricTypesArray, type) < 0)
             throw new IllegalArgumentException("This is not metric indices!");
-        SimpleIndices indices = IndicesFactory.createOfTensor(index1, index2);
+        SimpleIndices indices = IndicesFactory.createSimple(null, index1, index2);
         NameDescriptor nd = new NameDescriptor(metricName, new IndicesTypeStructure(indices));
         int name = nameManager.mapNameDescriptor(nd);
         return new SimpleTensor(name, indices);
@@ -171,7 +171,7 @@ public final class Context {
         NameDescriptor descriptor = new NameDescriptor(name, new IndicesTypeStructure(indices));
         int tensorName = nameManager.mapNameDescriptor(descriptor);
         //dumping symmetries
-        SimpleIndices nIndices = IndicesFactory.createOfTensor(indices);
+        SimpleIndices nIndices = IndicesFactory.createSimple(null, indices);
         //creating simple and binding nIndices and descriptor symmetries
         SimpleTensor t = new SimpleTensor(tensorName, nIndices);
         //adding additional symmetries

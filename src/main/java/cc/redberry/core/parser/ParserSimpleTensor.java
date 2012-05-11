@@ -80,7 +80,7 @@ public class ParserSimpleTensor implements NodeParser {
             throw new BracketsError();
         if (indexMode)
             ParserIndices.parseIndices(indicesList, indicesString, indexState);
-        SimpleIndices indices = IndicesFactory.createIsolated(indicesList.toArray());
+        SimpleIndices indices = IndicesFactory.createSimple(null, indicesList.toArray());
         String name = nameBuilder.toString();
         return new ParseNodeSimpleTensor(indices, name);
     }
