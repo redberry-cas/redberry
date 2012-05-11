@@ -20,23 +20,41 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
-package cc.redberry.core.number.parser;
+package cc.redberry.core.tensor;
 
-import cc.redberry.core.number.ComplexElement;
+import cc.redberry.core.context.*;
+import cc.redberry.core.indices.*;
 
-public class ImagineOneParser implements ElementParser {
-    public static final ImagineOneParser INSTANCE = new ImagineOneParser();
+/**
+ *
+ * @author Dmitry Bolotin
+ * @author Stanislav Poslavsky
+ */
+public class Product extends Tensor{
 
-    private ImagineOneParser() {
+    @Override
+    public Tensor get(int i) {
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
-    public boolean canParse(String expression) {
-        return expression.equals("I");
+    public Indices getIndices() {
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
-    public ComplexElement parse(String expression) {
-        return new ComplexElement(0, 1);
+    protected int hash() {
+        throw new UnsupportedOperationException("Not supported yet.");
     }
+
+    @Override
+    public int size() {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public String toString(ToStringMode mode) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
 }

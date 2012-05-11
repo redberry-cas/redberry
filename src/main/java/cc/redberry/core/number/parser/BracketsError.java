@@ -21,34 +21,16 @@
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
 package cc.redberry.core.number.parser;
-
-import cc.redberry.core.number.ComplexElement;
-
-
-
-public class BracketParser implements ElementParser {
-    public static final BracketParser INSTANCE = new BracketParser();
-
-    private BracketParser() {
-    }
-    public boolean canParse(String expression) {
-        if (expression.charAt(0) == '(' && expression.charAt(expression.length() - 1) == ')') {
-            char[] expressionChars = expression.toCharArray();
-            int level = 0;
-            for (char c : expressionChars) {
-                if (c == '(')
-                    level++;
-                if (level < 1)
-                    return false;
-                if (c == ')')
-                    level--;
-            }
-            return true;
-        } else
-            return false;
+/**
+ *
+ * @author Stanislav Poslavsky
+ */
+public class BracketsError extends RuntimeException {
+    public BracketsError(String message) {
+        super("Unbalanced brackets in " + message);
     }
 
-    public ComplexElement parse(String expression) {
-        return Parser.parse(expression.substring(1, expression.length() - 1));
+    public BracketsError() {
+        super("Unbalanced brackets.");
     }
 }

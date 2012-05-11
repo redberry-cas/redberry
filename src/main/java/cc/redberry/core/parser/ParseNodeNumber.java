@@ -22,7 +22,7 @@
  */
 package cc.redberry.core.parser;
 
-import cc.redberry.core.number.ComplexElement;
+import cc.redberry.core.number.Complex;
 
 /**
  *
@@ -30,15 +30,16 @@ import cc.redberry.core.number.ComplexElement;
  * @author Stanislav Poslavsky
  */
 public class ParseNodeNumber extends ParseNode {
-    private ComplexElement complexElement;
 
-    public ParseNodeNumber(ComplexElement complexElement) {
+    private Complex value;
+
+    public ParseNodeNumber(Complex value) {
         super(TensorType.Number, new ParseNode[0]);
-        this.complexElement = complexElement;
+        this.value = value;
     }
 
     @Override
     public String toString() {
-        return complexElement.toString();
+        return value.toString();
     }
 }

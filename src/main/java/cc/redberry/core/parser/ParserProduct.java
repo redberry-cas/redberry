@@ -22,7 +22,7 @@
  */
 package cc.redberry.core.parser;
 
-import cc.redberry.core.number.ComplexElement;
+import cc.redberry.core.number.Complex;
 import java.util.List;
 
 /**
@@ -44,7 +44,7 @@ public class ParserProduct extends ParserOperator {
 
     @Override
     protected ParseNode inverseOperation(ParseNode node) {
-        return new ParseNode(TensorType.Pow, new ParseNode[]{node, new ParseNodeNumber(ComplexElement.MINUSONE)});
+        return new ParseNode(TensorType.Pow, new ParseNode[]{node, new ParseNodeNumber(Complex.MINUSE_ONE)});
     }
 
     @Override

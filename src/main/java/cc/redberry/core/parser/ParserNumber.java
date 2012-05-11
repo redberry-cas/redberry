@@ -22,7 +22,8 @@
  */
 package cc.redberry.core.parser;
 
-import cc.redberry.core.number.ComplexElement;
+import cc.redberry.core.number.Complex;
+import cc.redberry.core.number.parser.*;
 
 /**
  *
@@ -37,9 +38,9 @@ public class ParserNumber implements NodeParser {
 
     @Override
     public ParseNode parseNode(String expression, cc.redberry.core.parser.Parser parser) {
-        ComplexElement value;
+        Complex value;
         try {
-            value = (ComplexElement) cc.redberry.core.number.parser.Parser.parse(expression);
+            value = (Complex) NumberParser.COMPLEXL_PARSER.parse(expression);
         } catch (NumberFormatException e) {
             return null;
         }

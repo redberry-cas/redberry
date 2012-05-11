@@ -30,30 +30,49 @@ import org.apache.commons.math3.FieldElement;
  *
  * @author Stanislav Poslavsky
  */
-public class ComplexField implements Field<Complex>, Serializable {
-    private ComplexField() {
+public class RealField implements Field<Real>, Serializable {
+    private RealField() {
     }
 
     @Override
-    public Complex getOne() {
-        return Complex.ONE;
+    public Real getOne() {
+        return Rational.ONE;
     }
 
     @Override
-    public Complex getZero() {
-        return Complex.ZERO;
+    public Real getZero() {
+        return Rational.ZERO;
     }
 
     @Override
-    public Class<? extends FieldElement<Complex>> getRuntimeClass() {
-        return Complex.class;
+    public Class<? extends FieldElement<Real>> getRuntimeClass() {
+        return null;
     }
 
-    public static ComplexField getInstance() {
-        return LazyHolder.INSANCE;
+    /**
+     * Get the unique instance.
+     *
+     * @return the unique instance
+     */
+    public static RealField getInstance() {
+        return RealField.LazyHolder.INSTANCE;
     }
 
     private static class LazyHolder {
-        private static final ComplexField INSANCE = new ComplexField();
+        /**
+         * Cached field instance.
+         */
+        private static final RealField INSTANCE = new RealField();
+    }
+    // CHECKSTYLE: resume HideUtilityClassConstructor
+
+    /**
+     * Handle deserialization of the singleton.
+     *
+     * @return the singleton instance
+     */
+    private Object readResolve() {
+        // return the singleton instance
+        return RealField.LazyHolder.INSTANCE;
     }
 }

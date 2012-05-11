@@ -22,25 +22,19 @@
  */
 package cc.redberry.core.number;
 
+import java.math.*;
+import org.junit.*;
+
 /**
  *
- * @author Dmitry Bolotin, Stanislav Poslavsky.
+ * @author Dmitry Bolotin
+ * @author Stanislav Poslavsky
  */
-public interface FieldElement<T> {
-    T add(T a);
+public class NumberUtilsTest {
 
-    T subtract(T a);
-
-    T multiply(T a);
-
-    T divide(T a) throws ArithmeticException;
-
-    T negotiate();
-
-    boolean isEquals(T a);
-
-    Field<T> getField();
-
-    T clone();
-
+    @Test
+    public void root() {
+        BigInteger five = new BigInteger("9");
+        System.out.println(NumberUtils.sqrt(five));
+    }
 }

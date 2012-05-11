@@ -18,7 +18,6 @@ package cc.redberry.core.tensor;
 import cc.redberry.core.indices.IndicesFactory;
 import cc.redberry.core.indices.SimpleIndices;
 import cc.redberry.core.utils.ArrayIterator;
-
 import java.util.Iterator;
 
 /**

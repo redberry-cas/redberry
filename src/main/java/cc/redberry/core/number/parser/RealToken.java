@@ -20,40 +20,34 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
-package cc.redberry.core.number;
+package cc.redberry.core.number.parser;
 
-import java.io.Serializable;
-import org.apache.commons.math3.Field;
-import org.apache.commons.math3.FieldElement;
+import cc.redberry.core.number.Numeric;
+import cc.redberry.core.number.Rational;
+import cc.redberry.core.number.Real;
+import java.math.BigInteger;
 
 /**
  *
  * @author Stanislav Poslavsky
  */
-public class ComplexField implements Field<Complex>, Serializable {
-    private ComplexField() {
+public class RealToken implements TokenParser<Real> {
+
+    public static final RealToken INSTANCE = new RealToken();
+
+    private RealToken() {
     }
 
     @Override
-    public Complex getOne() {
-        return Complex.ONE;
-    }
-
-    @Override
-    public Complex getZero() {
-        return Complex.ZERO;
-    }
-
-    @Override
-    public Class<? extends FieldElement<Complex>> getRuntimeClass() {
-        return Complex.class;
-    }
-
-    public static ComplexField getInstance() {
-        return LazyHolder.INSANCE;
-    }
-
-    private static class LazyHolder {
-        private static final ComplexField INSANCE = new ComplexField();
+    public Real parse(String expression, NumberParser<Real> parser) {
+        try {
+            return new Rational(new BigInteger(expression));
+        } catch (NumberFormatException exception) {
+        }
+        try {
+            return new Numeric(Double.parseDouble(expression));
+        } catch (NumberFormatException exception) {
+            return null;
+        }
     }
 }

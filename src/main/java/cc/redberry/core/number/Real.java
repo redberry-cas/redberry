@@ -22,12 +22,15 @@
  */
 package cc.redberry.core.number;
 
-public interface Field<T> {
-    T getZero();
+import org.apache.commons.math3.Field;
 
-    T getOne();
-
-//    boolean isCountable();
-//
-//    T getNextElement(T a);
+/**
+ *
+ * @author Stanislav Poslavsky
+ */
+public abstract class Real implements Number<Real>, Comparable<Real> {
+    @Override
+    public Field<Real> getField() {
+        return RealField.getInstance();
+    }
 }

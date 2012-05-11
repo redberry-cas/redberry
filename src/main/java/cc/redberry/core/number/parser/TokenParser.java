@@ -20,27 +20,13 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
-package cc.redberry.core.number;
+package cc.redberry.core.number.parser;
 
 /**
  *
- * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public class RationalElementField implements Field<RationalElement> {
-    public static RationalElementField getInstance() {
-        return LazyHolder.INSTANCE;
-    }
+public interface TokenParser<T extends cc.redberry.core.number.Number<T>> {
 
-    public RationalElement getOne() {
-        return RationalElement.ONE;
-    }
-
-    public RationalElement getZero() {
-        return RationalElement.ZERO;
-    }
-
-    private static class LazyHolder {
-        private static final RationalElementField INSTANCE = new RationalElementField();
-    }
+    T parse(String expression, NumberParser<T> parser);
 }

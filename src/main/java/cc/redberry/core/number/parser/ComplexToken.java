@@ -22,11 +22,31 @@
  */
 package cc.redberry.core.number.parser;
 
-import cc.redberry.core.number.ComplexElement;
+import cc.redberry.core.number.Complex;
+import java.math.BigInteger;
 
+/**
+ *
+ * @author Stanislav Poslavsky
+ */
+public class ComplexToken implements TokenParser<Complex> {
+    public static final ComplexToken INSTANCE = new ComplexToken();
 
-public interface ElementParser {
-    boolean canParse(String expression);
+    private ComplexToken() {
+    }
 
-    ComplexElement parse(String expression);
+    @Override
+    public Complex parse(String expression, NumberParser<Complex> parser) {
+        if (expression.equals("i"))
+            return Complex.IMAGEONE;
+        try {
+            return new Complex(new BigInteger(expression));
+        } catch (NumberFormatException exception) {
+        }
+        try {
+            return new Complex(Double.parseDouble(expression));
+        } catch (NumberFormatException exception) {
+            return null;
+        }
+    }
 }

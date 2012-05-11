@@ -22,24 +22,34 @@
  */
 package cc.redberry.core.number.parser;
 
-import cc.redberry.core.number.ComplexElement;
+/**
+ *
+ * @author Stanislav Poslavsky
+ */
+public class BracketToken<T extends cc.redberry.core.number.Number<T>>
+        implements TokenParser<T> {
 
-public class IntegerParser implements ElementParser {
-    public static final IntegerParser INSTANCE = new IntegerParser();
+    public static final BracketToken INSTANCE = new BracketToken();
 
-    private IntegerParser() {
+    private BracketToken() {
     }
 
-    public boolean canParse(String expression) {
-        try {
-            Integer.parseInt(expression);
-            return true;
-        } catch (NumberFormatException e) {
-            return false;
-        }
-    }
+    @Override
+    public T parse(String expression, NumberParser<T> parser) {
+        if (expression.charAt(0) == '(' && expression.charAt(expression.length() - 1) == ')') {
+            char[] expressionChars = expression.toCharArray();
+            int level = 0;
+            for (char c : expressionChars) {
+                if (c == '(')
+                    level++;
+                if (level < 1)
+                    return null;
+                if (c == ')')
+                    level--;
+            }
+            return parser.parse(expression.substring(1, expression.length() - 1));
+        } else
+            return null;
 
-    public ComplexElement parse(String expression) {
-        return new ComplexElement(Integer.parseInt(expression), 0);
     }
 }

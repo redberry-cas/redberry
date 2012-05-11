@@ -22,20 +22,19 @@
  */
 package cc.redberry.core.number.parser;
 
-import cc.redberry.core.number.ComplexElement;
-import cc.redberry.core.parser.BracketsError;
+/**
+ *
+ * @author Stanislav Poslavsky
+ */
+public abstract class OperatorToken<T extends cc.redberry.core.number.Number<T>> implements TokenParser<T> {
+    private final char operationSymbol, operationInverseSymbol;
 
-public abstract class OperatorParser implements ElementParser {
-    private char operatorSymbol;
-    private char operatorInverseSymbol;
-
-    public OperatorParser(char operatorSymbol, char operatorInverseSymbol) {
-        this.operatorSymbol = operatorSymbol;
-        this.operatorInverseSymbol = operatorInverseSymbol;
+    public OperatorToken(char operationSymbol, char operationInverseSymbol) {
+        this.operationSymbol = operationSymbol;
+        this.operationInverseSymbol = operationInverseSymbol;
     }
 
-    @Override
-    public boolean canParse(String expression) {
+    private boolean canParse(String expression) {
         char[] expressionChars = expression.toCharArray();
         int level = 0;
         for (char c : expressionChars) {
@@ -45,33 +44,23 @@ public abstract class OperatorParser implements ElementParser {
                 level--;
             if (level < 0)
                 throw new BracketsError(expression);
-            if (c == operatorSymbol && level == 0)
+            if (c == operationSymbol && level == 0)
                 return true;
-            if (c == operatorInverseSymbol && level == 0)
+            if (c == operationInverseSymbol && level == 0)
                 return true;
         }
         return false;
     }
 
-    protected enum Mode {
-        Direct, Inverse
-    };
-
-    public ComplexElement parse(String expression) {
+    @Override
+    public T parse(String expression, NumberParser<T> parser) {
+        if (!canParse(expression))
+            return null;
         char[] expressionChars = expression.toCharArray();
         StringBuffer buffer = new StringBuffer();
-        ComplexElement temp = null;
+        T temp = null;
         int level = 0;
-        Mode inverseMode = Mode.Direct;
-//        int i = 0;
-//        if (expressionChars[0] == operatorSymbol)
-//            i = 1;
-//        if (expressionChars[0] == operatorInverseSymbol) {
-//            i = 1;
-//            inverseMode = Mode.Inverse;
-//        }
-//        for (; i < expressionChars.length; ++i) {
-//            char c = expressionChars[i];
+        boolean mode = false;//true - inverse
         for (char c : expressionChars) {
             if (c == '(')
                 level++;
@@ -79,34 +68,34 @@ public abstract class OperatorParser implements ElementParser {
                 level--;
             if (level < 0)
                 throw new BracketsError();
-            if (c == operatorSymbol && level == 0) {
+            if (c == operationSymbol && level == 0) {
                 String toParse = buffer.toString();
                 if (!toParse.isEmpty())
                     if (temp == null)
-                        temp = Parser.parse(toParse);
+                        temp = parser.parse(toParse);
                     else
-                        temp = modeCompiler(temp, Parser.parse(toParse), inverseMode);
+                        temp = operation(temp, parser.parse(toParse), mode);
                 buffer = new StringBuffer();
-                inverseMode = Mode.Direct;
-            } else if (c == operatorInverseSymbol && level == 0) {
+                mode = false;
+            } else if (c == operationInverseSymbol && level == 0) {
                 String toParse = buffer.toString();
                 if (!toParse.isEmpty()) {
                     if (temp == null)
-                        temp = OperatorParser.this.getNeutralElement();
-                    temp = modeCompiler(temp, Parser.parse(toParse), inverseMode);
+                        temp = neutral();
+                    temp = operation(temp, parser.parse(toParse), mode);
                 }
                 buffer = new StringBuffer();
-                inverseMode = Mode.Inverse;
+                mode = true;
             } else
                 buffer.append(c);
         }
         if (temp == null)
-            temp = OperatorParser.this.getNeutralElement();
-        temp = modeCompiler(temp, Parser.parse(buffer.toString()), inverseMode);
+            temp = neutral();
+        temp = operation(temp, parser.parse(buffer.toString()), mode);
         return temp;
     }
 
-    protected abstract ComplexElement modeCompiler(ComplexElement first, ComplexElement second, Mode mode);
+    protected abstract T neutral();
 
-    protected abstract ComplexElement getNeutralElement();
+    protected abstract T operation(T c1, T c2, boolean mode);
 }
