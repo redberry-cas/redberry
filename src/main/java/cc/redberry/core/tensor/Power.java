@@ -22,41 +22,50 @@
  */
 package cc.redberry.core.tensor;
 
-import cc.redberry.core.context.*;
-import cc.redberry.core.indices.*;
+import cc.redberry.core.context.ToStringMode;
+import cc.redberry.core.indices.EmptyIndices;
+import cc.redberry.core.indices.Indices;
+import cc.redberry.core.utils.TensorUtils;
 
 /**
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public class Product extends Tensor {
+public class Power extends Tensor {
 
-    public Product(Tensor... tensors) {
+    private final Tensor[] data;
+
+    public Power(Tensor a, Tensor power) {
+        if (!TensorUtils.isScalar(a, power))
+            throw new TensorException("Non scalar power: Power[" + a + ", " + power + "]");
+        data = new Tensor[2];
+        data[0] = a;
+        data[1] = power;
     }
 
     @Override
     public Tensor get(int i) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return data[i];
     }
 
     @Override
     public Indices getIndices() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return EmptyIndices.INSTANCE;
     }
 
     @Override
     protected int hash() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return 37 * data[0].hash() + data[1].hash();
     }
 
     @Override
     public int size() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return 2;
     }
 
     @Override
     public String toString(ToStringMode mode) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return "Power[" + data[0].toString(mode) + ", " + data[1].toString(mode) + "]";
     }
 }

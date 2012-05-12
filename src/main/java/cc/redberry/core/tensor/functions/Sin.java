@@ -20,43 +20,35 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
-package cc.redberry.core.tensor;
+package cc.redberry.core.tensor.functions;
 
-import cc.redberry.core.context.*;
-import cc.redberry.core.indices.*;
+import cc.redberry.core.tensor.AbstractScalarFunction;
+import cc.redberry.core.tensor.Tensor;
 
 /**
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public class Product extends Tensor {
-
-    public Product(Tensor... tensors) {
+public class Sin extends AbstractScalarFunction {
+    public Sin(Tensor argument) {
+        super(argument);
     }
 
-    @Override
-    public Tensor get(int i) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
 
     @Override
-    public Indices getIndices() {
-        throw new UnsupportedOperationException("Not supported yet.");
+    public Tensor derivative() {
+        return new Cos(argument);
     }
+    
 
     @Override
     protected int hash() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return 7 * argument.hashCode();
     }
 
     @Override
-    public int size() {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public String toString(ToStringMode mode) {
-        throw new UnsupportedOperationException("Not supported yet.");
+    public String stringSymbol() {
+        return "Sin";
     }
 }

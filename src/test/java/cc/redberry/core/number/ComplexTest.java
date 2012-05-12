@@ -20,43 +20,27 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
-package cc.redberry.core.tensor;
+package cc.redberry.core.number;
 
-import cc.redberry.core.context.*;
-import cc.redberry.core.indices.*;
+import cc.redberry.core.number.parser.*;
+import org.junit.*;
 
 /**
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public class Product extends Tensor {
+public class ComplexTest {
 
-    public Product(Tensor... tensors) {
+    @Test
+    public void test1() {
+        Complex c = new Complex(new Rational(4), new Rational(3));
+        Assert.assertEquals(5, c.abs().intValue());
     }
 
-    @Override
-    public Tensor get(int i) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public Indices getIndices() {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    protected int hash() {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public int size() {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public String toString(ToStringMode mode) {
-        throw new UnsupportedOperationException("Not supported yet.");
+    @Test
+    public void test2() {
+        Complex c = NumberParser.COMPLEX_PARSER.parse("2+i*3/2");
+        Assert.assertEquals(2.5, c.abs().doubleValue(), Double.MIN_VALUE);
     }
 }

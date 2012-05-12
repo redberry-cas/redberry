@@ -51,6 +51,8 @@ public class Complex extends Tensor
             new Complex(Rational.ONE, Rational.ZERO);
     public static final Complex MINUSE_ONE =
             new Complex(Rational.MINUS_ONE, Rational.ZERO);
+    public static final Complex MINUSE_TWO =
+            new Complex(Rational.MINUSE_TWO, Rational.ZERO);
     public static final Complex IMAGEONE =
             new Complex(Rational.ZERO, Rational.ONE);
     private final Real real;

@@ -22,41 +22,46 @@
  */
 package cc.redberry.core.tensor;
 
-import cc.redberry.core.context.*;
-import cc.redberry.core.indices.*;
+import cc.redberry.core.context.ToStringMode;
+import cc.redberry.core.indices.Indices;
 
 /**
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public class Product extends Tensor {
+public class TensorWrapper extends Tensor {
 
-    public Product(Tensor... tensors) {
+    private final Tensor innerTensor;
+
+    public TensorWrapper(Tensor innerTensor) {
+        this.innerTensor = innerTensor;
     }
 
     @Override
     public Tensor get(int i) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        if (i != 0)
+            throw new IndexOutOfBoundsException();
+        return innerTensor;
     }
 
     @Override
     public Indices getIndices() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return innerTensor.getIndices();
     }
 
     @Override
     protected int hash() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return innerTensor.hash();
     }
 
     @Override
     public int size() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return 1;
     }
 
     @Override
     public String toString(ToStringMode mode) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return "Wrapper[" + innerTensor.toString(mode) + "]";
     }
 }

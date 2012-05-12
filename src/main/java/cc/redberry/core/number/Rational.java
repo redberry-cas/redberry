@@ -55,6 +55,10 @@ public class Rational extends Real implements Serializable {
      */
     public static final Rational TWO = new Rational(2);
     /**
+     * A fraction representing "-2 / 1".
+     */
+    public static final Rational MINUSE_TWO = new Rational(2);
+    /**
      * A fraction representing "1".
      */
     public static final Rational ONE = new Rational(1);
