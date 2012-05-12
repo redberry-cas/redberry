@@ -55,11 +55,9 @@ public class Complex extends Tensor
             new Complex(Rational.ZERO, Rational.ONE);
     private final Real real;
     private final Real imaginary;
-    private final boolean isNumeric;
 
     public Complex(Real real, Real imaginary) {
-        if (isNumeric =
-                (real instanceof Numeric || imaginary instanceof Numeric)) {
+        if (real instanceof Numeric || imaginary instanceof Numeric) {
             this.real = real.getNumericValue();
             this.imaginary = imaginary.getNumericValue();
         } else {
@@ -69,7 +67,7 @@ public class Complex extends Tensor
     }
 
     public Complex(Real real) {
-        if (isNumeric = (real instanceof Numeric)) {
+        if (real instanceof Numeric) {
             this.real = real.getNumericValue();
             this.imaginary = Numeric.ZERO;
         } else {
@@ -174,7 +172,7 @@ public class Complex extends Tensor
 
     @Override
     public boolean isNumeric() {
-        return isNumeric;
+        return real.isNumeric();
     }
 
     @Override
@@ -269,7 +267,7 @@ public class Complex extends Tensor
     @Override
     public Complex add(Complex a) {
         NumberUtils.checkNotNull(a);
-        return a.isZero() ? a.isNumeric ? this.getNumericValue() : this : new Complex(real.add(a.real), imaginary.add(a.imaginary));
+        return a.isZero() ? a.isNumeric() ? this.getNumericValue() : this : new Complex(real.add(a.real), imaginary.add(a.imaginary));
     }
 
     /**
@@ -309,7 +307,7 @@ public class Complex extends Tensor
     public Complex divide(Complex divisor) {
         NumberUtils.checkNotNull(divisor);
         if (divisor.isOne())
-            return divisor.isNumeric ? this.getNumericValue() : this;
+            return divisor.isNumeric() ? this.getNumericValue() : this;
         if (divisor.isNaN())
             return ComplexNaN;
 
@@ -324,8 +322,8 @@ public class Complex extends Tensor
         } else {
             Real q = d.divide(c);
             Real denominator = d.multiply(q).add(c);
-            return new Complex((imaginary.multiply(q).add(real)).divide(denominator),
-                               (imaginary.subtract(real).multiply(q)).divide(denominator));
+            return new Complex(((imaginary.multiply(q)).add(real)).divide(denominator),
+                               (imaginary.subtract(real.multiply(q))).divide(denominator));
         }
     }
 
@@ -379,7 +377,15 @@ public class Complex extends Tensor
     public Complex reciprocal() {
         if (isNaN())
             return ComplexNaN;
-
+//        if (FastMath.abs(real) < FastMath.abs(imaginary)) {
+//            double q = real / imaginary;
+//            double scale = 1. / (real * q + imaginary);
+//            return createComplex(scale * q, -scale);
+//        } else {
+//            double q = imaginary / real;
+//            double scale = 1. / (imaginary * q + real);
+//            return createComplex(scale, -scale * q);
+//        }
         if (real.abs().compareTo(imaginary.abs()) < 0) {
             Real q = real.divide(imaginary);
             Real scale = (real.multiply(q).add(imaginary)).reciprocal();
@@ -394,12 +400,12 @@ public class Complex extends Tensor
     @Override
     public Complex subtract(Complex a) {
         NumberUtils.checkNotNull(a);
-        return a.isZero() ? a.isNumeric ? this.getNumericValue() : this : new Complex(real.subtract(a.real), imaginary.subtract(a.imaginary));
+        return a.isZero() ? a.isNumeric() ? this.getNumericValue() : this : new Complex(real.subtract(a.real), imaginary.subtract(a.imaginary));
     }
 
     @Override
     public Complex getNumericValue() {
-        return isNumeric ? this : new Complex(real.getNumericValue(), imaginary.getNumericValue());
+        return isNumeric() ? this : new Complex(real.getNumericValue(), imaginary.getNumericValue());
     }
 
     @Override
@@ -407,7 +413,7 @@ public class Complex extends Tensor
         if (isZero() || isOne() || isInfinite() || isNaN())
             return this;
         Real abs2 = real.multiply(real).add(imaginary.multiply(imaginary));
-        if (isNumeric)
+        if (isNumeric())
             return new Complex(abs2.pow(0.5));
         Rational abs2r = (Rational) abs2;
         BigInteger num = abs2r.getNumerator();

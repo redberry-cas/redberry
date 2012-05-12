@@ -23,6 +23,8 @@
 package cc.redberry.core.utils;
 
 //import cc.redberry.core.indices.InconsistentIndicesException;
+import cc.redberry.core.tensor.Tensor;
+
 //import cc.redberry.core.indices.Indices;
 //import cc.redberry.core.indices.IndicesBuilderSorted;
 //import cc.redberry.core.math.MathUtils;
@@ -39,13 +41,28 @@ package cc.redberry.core.utils;
 //import org.apache.commons.math.fraction.Fraction;
 //import org.apache.commons.math.stat.inference.TTest;
 //import org.apache.commons.math.util.MathUtils;
-
 /**
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
 public class TensorUtils {
+
     private TensorUtils() {
+    }
+
+    public static boolean isSymbolic(Tensor... tensor) {
+        throw new UnsupportedOperationException("Unsupported yet");
+    }
+
+    public static boolean isScalar(Tensor... tensors) {
+        for (Tensor t : tensors)
+            if (!isScalar1(t))
+                return false;
+        return true;
+    }
+
+    private static boolean isScalar1(Tensor tensor) {
+        return tensor.getIndices().size() == 0;
     }
 //
 //    public static IndicesBuilderSorted getAllIndicesBuilder(final Tensor tensor) {

@@ -32,6 +32,7 @@ import org.junit.*;
  * @author Stanislav Poslavsky
  */
 public class NumberParserTest {
+
     @Test
     public void test1() {
         Real r1 = NumberParser.REAL_PARSER.parse("2/3");
@@ -99,23 +100,29 @@ public class NumberParserTest {
         Real r = NumberParser.REAL_PARSER.parse("1/(1-3/3*1.0-2.2+22/10)/(2/5+7/(3-(2+1/(4-9))*5/4)+1/0)");
         Assert.assertTrue(r.isNaN());
     }
-    
+
     @Test
     public void test12() {
         Real r = NumberParser.REAL_PARSER.parse("1+0.0");
         Assert.assertTrue(r.isNumeric());
     }
-    
+
     @Test
     public void test13() {
         Real r = NumberParser.REAL_PARSER.parse("2*1.0");
         Assert.assertTrue(r.isNumeric());
     }
-    
-    
+
     @Test
     public void test14() {
         Real r = NumberParser.REAL_PARSER.parse("2/1.0");
         Assert.assertTrue(r.isNumeric());
+    }
+
+    @Test
+    public void test15() {
+        Complex a = NumberParser.COMPLEX_PARSER.parse("4/2+i*3/2");
+        Complex b = new Complex(new Rational(4, 2), new Rational(3, 2));
+        Assert.assertEquals(b, a);
     }
 }

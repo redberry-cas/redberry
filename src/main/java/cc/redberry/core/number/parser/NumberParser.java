@@ -32,7 +32,7 @@ import cc.redberry.core.number.Real;
  */
 public class NumberParser<T extends cc.redberry.core.number.Number<T>> {
 
-    private static final TokenParser<Complex>[] ComplexParsers = new TokenParser[]{
+    private static final TokenParser<Complex>[] ComplexTokens = new TokenParser[]{
         BracketToken.INSTANCE,
         new OperatorToken<Complex>('+', '-') {
 
@@ -64,7 +64,7 @@ public class NumberParser<T extends cc.redberry.core.number.Number<T>> {
         },
         ComplexToken.INSTANCE
     };
-    private static final TokenParser<Real>[] RealParsers = new TokenParser[]{
+    private static final TokenParser<Real>[] RealTokens = new TokenParser[]{
         BracketToken.INSTANCE,
         new OperatorToken<Real>('+', '-') {
 
@@ -96,8 +96,8 @@ public class NumberParser<T extends cc.redberry.core.number.Number<T>> {
         },
         RealToken.INSTANCE
     };
-    public static final NumberParser<Real> REAL_PARSER = new NumberParser<>(RealParsers);
-    public static final NumberParser<Complex> COMPLEXL_PARSER = new NumberParser<>(ComplexParsers);
+    public static final NumberParser<Real> REAL_PARSER = new NumberParser<>(RealTokens);
+    public static final NumberParser<Complex> COMPLEX_PARSER = new NumberParser<>(ComplexTokens);
     private final TokenParser<T>[] parsers;
 
     private NumberParser(TokenParser<T>[] parsers) {

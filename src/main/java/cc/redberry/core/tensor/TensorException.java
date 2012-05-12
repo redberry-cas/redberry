@@ -1,5 +1,5 @@
 /*
- * Redberry: symbolic tensor computations.
+ * Redberry: symbolic tensors computations.
  *
  * Copyright (c) 2010-2012:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
@@ -22,23 +22,26 @@
  */
 package cc.redberry.core.tensor;
 
+import java.util.Arrays;
+
 /**
  *
  * @author Dmitry Bolotin, Stanislav Poslavsky.
  */
 public class TensorException extends RuntimeException {
-    Tensor tensor;
 
-    public TensorException(String message, Tensor tensor) {
-        super(message + " in tensor " + tensor.toString());
-        this.tensor = tensor;
+    Tensor[] tensors;
+
+    public TensorException(String message, Tensor... tensors) {
+        super(message + " in tensors " + Arrays.toString(tensors));
+        this.tensors = tensors;
     }
 
     public TensorException(String message) {
         super(message);
     }
 
-    public TensorException(Tensor tensor) {
+    public TensorException(Tensor... tensor) {
         this("Exception", tensor);
     }
 }
