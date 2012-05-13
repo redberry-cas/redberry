@@ -26,6 +26,7 @@ import cc.redberry.core.math.MathUtils;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.utils.IntArray;
 import cc.redberry.core.utils.IntArrayList;
+import java.util.*;
 
 /**
  * This class provides functionality to construct {@code Indices} object by
@@ -40,13 +41,21 @@ import cc.redberry.core.utils.IntArrayList;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public final class IndicesBuilderSorted extends AbstractIndicesBuilder implements IndicesBuilder {
+public final class IndicesBuilderSorted
+        implements IndicesBuilder {
+
+    private final IntArrayList data;
+
     public IndicesBuilderSorted() {
-        super(new IntArrayList());
+        data = new IntArrayList();
+    }
+
+    private IndicesBuilderSorted(IntArrayList data) {
+        this.data = data;
     }
 
     public IndicesBuilderSorted(int capacity) {
-        super(new IntArrayList(capacity));
+        data = new IntArrayList(capacity);
     }
 
     @Override
@@ -80,7 +89,7 @@ public final class IndicesBuilderSorted extends AbstractIndicesBuilder implement
 
     @Override
     public IndicesBuilderSorted append(IndicesBuilder ib) {
-        return append(((AbstractIndicesBuilder) ib).data);
+        return append(ib.toArray());
     }
 
     @Override
@@ -107,7 +116,8 @@ public final class IndicesBuilderSorted extends AbstractIndicesBuilder implement
      * @return integer array, representing indices, constructed in this
      * {@code IndicesBuilderSorted}
      */
-    public int[] asArray() {
+    @Override
+    public int[] toArray() {
         return data.toArray();
     }
 
@@ -119,5 +129,10 @@ public final class IndicesBuilderSorted extends AbstractIndicesBuilder implement
     @Override
     public String toString() {
         return getIndices().toString();
+    }
+
+    @Override
+    public IndicesBuilderSorted clone() {
+        return new IndicesBuilderSorted(data.clone());
     }
 }

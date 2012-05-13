@@ -37,20 +37,27 @@ import java.util.List;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public final class IndicesBuilderSimple extends AbstractIndicesBuilder
+public final class IndicesBuilderSimple
         implements IndicesBuilder {
+
+    private final IntArrayList data;
     private List<SymmetryContainer> symmetries = new ArrayList<>();
 
     public IndicesBuilderSimple() {
-        super(new IntArrayList());
+        data = new IntArrayList();
         //adding identity symmetry
         symmetries.add(new SymmetryContainer());
     }
 
     public IndicesBuilderSimple(int capacity) {
-        super(new IntArrayList(capacity));
+        data = new IntArrayList(capacity);
         //adding identity symmetry
         symmetries.add(new SymmetryContainer(capacity));
+    }
+
+    private IndicesBuilderSimple(IntArrayList data, List<SymmetryContainer> symmetries) {
+        this.data = data;
+        this.symmetries = symmetries;
     }
 
     @Override
@@ -174,11 +181,26 @@ public final class IndicesBuilderSimple extends AbstractIndicesBuilder
     }
 
     @Override
+    public int[] toArray() {
+        return data.toArray();
+    }
+
+    
+    @Override
     public String toString() {
         return getIndices().toString();
     }
 
+    @Override
+    public IndicesBuilderSimple clone() {
+        List<SymmetryContainer> _symmetries = new ArrayList<>(symmetries.size() * 2 / 3);
+        for (SymmetryContainer container : symmetries)
+            _symmetries.add(container.clone());
+        return new IndicesBuilderSimple(data.clone(), _symmetries);
+    }
+
     private static final class SymmetryContainer {
+
         final IntArrayList list;
         boolean sign;
 
@@ -193,6 +215,11 @@ public final class IndicesBuilderSimple extends AbstractIndicesBuilder
         SymmetryContainer(IntArrayList list, boolean sign) {
             this.list = list;
             this.sign = sign;
+        }
+
+        @Override
+        public SymmetryContainer clone() {
+            return new SymmetryContainer(list.clone(), sign);
         }
     }
 }

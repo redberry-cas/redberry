@@ -42,11 +42,13 @@ import cc.redberry.core.utils.IntArrayList;
  * @author Konstantin Kiselev
  */
 public interface IndicesBuilder {
+
     /**
      * Appends specified {@code Indices} to {@code IndicesBuilder} and returns
      * this (similarly to {@link StringBuilder}).
      *
      * @param indices indices to be appended
+     *
      * @return this
      */
     IndicesBuilder append(Indices indices);
@@ -56,6 +58,7 @@ public interface IndicesBuilder {
      * (similarly to {@link StringBuilder}).
      *
      * @param index index to be appended
+     *
      * @return this
      */
     IndicesBuilder append(int index);
@@ -65,6 +68,7 @@ public interface IndicesBuilder {
      * and returns this (similarly to {@link StringBuilder}).
      *
      * @param indices specified indices array to be appended
+     *
      * @return this
      */
     IndicesBuilder append(int[] indices);
@@ -74,6 +78,7 @@ public interface IndicesBuilder {
      * and returns this (similarly to {@link StringBuilder}).
      *
      * @param indices specified indices array to be appended
+     *
      * @return this
      */
     IndicesBuilder append(IntArray indices);
@@ -83,6 +88,7 @@ public interface IndicesBuilder {
      * and returns this (similarly to {@link StringBuilder}).
      *
      * @param indices specified indices array list to be appended
+     *
      * @return this
      */
     IndicesBuilder append(IntArrayList indices);
@@ -91,6 +97,7 @@ public interface IndicesBuilder {
      * Appends specified IndicesBuilder and returns this (similarly to {@link StringBuilder}).
      *
      * @param ib IndicesBuilder to be appended
+     *
      * @return this
      */
     IndicesBuilder append(IndicesBuilder ib);
@@ -99,6 +106,7 @@ public interface IndicesBuilder {
      * Appends indices of specified tensor and returns this (similarly to {@link StringBuilder}).
      *
      * @param ib IndicesBuilder to be appended
+     *
      * @return this
      */
     IndicesBuilder append(Tensor tensor);
@@ -107,6 +115,7 @@ public interface IndicesBuilder {
      * Appends indices of specified tensors and returns this (similarly to {@link StringBuilder}).
      *
      * @param ib IndicesBuilder to be appended
+     *
      * @return this
      */
     IndicesBuilder append(Tensor... tensor);
@@ -118,7 +127,11 @@ public interface IndicesBuilder {
      * @return result {@code Indices} with empty symmetries
      */
     Indices getIndices();
-    
+
+    int[] toArray();
+
     @Override
     String toString();
+
+    IndicesBuilder clone();
 }
