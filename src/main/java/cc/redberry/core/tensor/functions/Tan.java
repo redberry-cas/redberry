@@ -32,7 +32,7 @@ import cc.redberry.core.tensor.Tensor;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public class Tan extends AbstractScalarFunction {
+public final class Tan extends AbstractScalarFunction {
 
     public Tan(Tensor argument) {
         super(argument);

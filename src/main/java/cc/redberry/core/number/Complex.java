@@ -122,7 +122,8 @@ public class Complex extends Tensor
 
     @Override
     protected int hash() {
-        return 97 * real.hashCode() + imaginary.hashCode();
+        //Numbers are always first
+        return Integer.MIN_VALUE;
     }
 
     @Override

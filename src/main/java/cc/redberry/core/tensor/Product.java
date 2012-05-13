@@ -31,7 +31,7 @@ import cc.redberry.core.indices.IndicesBuilderSorted;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public class Product extends MultiTensor {
+public final class Product extends MultiTensor {
 
     public Product(Tensor... data) {
         super(data);
@@ -55,8 +55,24 @@ public class Product extends MultiTensor {
         return '*';
     }
 
+    public Tensor[] getScalars() {
+        throw new UnsupportedOperationException();
+    }
+
+    public Tensor getNonScalar() {
+        throw new UnsupportedOperationException();
+    }
+
+    public ContractionStructure getContractionStructure() {
+        throw new UnsupportedOperationException();
+    }
+
+    public FullContractionsStructure getFullContractionStructure() {
+        throw new UnsupportedOperationException();
+    }
+
     @Override
-    protected int hash() {
+    protected int calculateHash() {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 }

@@ -32,7 +32,7 @@ import cc.redberry.core.tensor.Tensor;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public class CoTan extends AbstractScalarFunction {
+public final class CoTan extends AbstractScalarFunction {
 
     public CoTan(Tensor argument) {
         super(argument);

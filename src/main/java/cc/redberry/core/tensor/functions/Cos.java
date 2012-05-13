@@ -32,7 +32,7 @@ import cc.redberry.core.tensor.Tensor;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public class Cos extends AbstractScalarFunction {
+public final class Cos extends AbstractScalarFunction {
 
     public Cos(Tensor argument) {
         super(argument);

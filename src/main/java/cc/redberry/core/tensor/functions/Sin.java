@@ -30,17 +30,16 @@ import cc.redberry.core.tensor.Tensor;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public class Sin extends AbstractScalarFunction {
+public final class Sin extends AbstractScalarFunction {
+
     public Sin(Tensor argument) {
         super(argument);
     }
-
 
     @Override
     public Tensor derivative() {
         return new Cos(argument);
     }
-    
 
     @Override
     protected int hash() {

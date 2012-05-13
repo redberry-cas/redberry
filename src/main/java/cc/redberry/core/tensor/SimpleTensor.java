@@ -63,13 +63,14 @@ import java.util.Iterator;
  * @see cc.redberry.core.context.Context
  */
 public class SimpleTensor extends Tensor {
+
     protected final SimpleIndices indices;
     protected final int name;
 
     /**
-     * Constructs {@code SimpleTensor} instance with given name, indices and
-     * parent tensor. In fact, this is the base constructor witch is using
-     * during parsing. Constructor invokes {@link cc.redberry.core.indices.Indices#testConsistent()}
+     * Constructs {@code SimpleTensor} instance with given name and indices. In
+     * fact, this is the base constructor witch is using during parsing.
+     * Constructor invokes {@link cc.redberry.core.indices.Indices#testConsistent()}
      * method and throws {@code InconsistentIndicesException} when specified
      * indices are inconsistent and context regime not testing. <p> NOTE: It is
      * highly recommended to use {@link CC#parse(String)} to construct new

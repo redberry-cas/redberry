@@ -25,6 +25,7 @@ package cc.redberry.core.tensor;
 import cc.redberry.core.context.ToStringMode;
 import cc.redberry.core.indices.Indices;
 import java.lang.ref.SoftReference;
+import java.util.Arrays;
 
 /**
  *
@@ -35,10 +36,11 @@ public abstract class MultiTensor extends Tensor {
 
     protected final Tensor[] data;
     private SoftReference<Indices> indicesReference = new SoftReference<>(null);
+    private SoftReference<Integer> hashReference = new SoftReference<>(null);
 
     MultiTensor(Tensor... data) {
         assert data.length != 0;
-        this.data = data;        
+        this.data = data;
     }
 
     @Override
@@ -59,9 +61,23 @@ public abstract class MultiTensor extends Tensor {
         return indices;
     }
 
+    @Override
+    public int hash() {
+        Integer hash = hashReference.get();
+        if (hash == null)
+            hashReference = new SoftReference<>(hash = calculateHash());
+        return hash;
+    }
+
     protected abstract char operationSymbol();
 
     protected abstract Indices calculateIndices();
+
+    protected abstract int calculateHash();
+
+    public Tensor[] getRange(int from, int to) {
+        return Arrays.copyOfRange(data, from, to);
+    }
 
     @Override
     public String toString(ToStringMode mode) {

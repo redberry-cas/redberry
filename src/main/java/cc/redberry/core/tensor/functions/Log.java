@@ -32,7 +32,7 @@ import cc.redberry.core.tensor.Tensor;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public class Log extends AbstractScalarFunction {
+public final class Log extends AbstractScalarFunction {
 
     public Log(Tensor argument) {
         super(argument);

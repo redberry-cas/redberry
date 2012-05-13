@@ -30,7 +30,7 @@ import cc.redberry.core.tensor.Tensor;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public class Exp extends AbstractScalarFunction {
+public final class Exp extends AbstractScalarFunction {
 
     public Exp(Tensor argument) {
         super(argument);

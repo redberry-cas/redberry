@@ -32,7 +32,7 @@ import cc.redberry.core.utils.TensorUtils;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public class Power extends Tensor {
+public final class Power extends Tensor {
 
     private final Tensor[] data;
 

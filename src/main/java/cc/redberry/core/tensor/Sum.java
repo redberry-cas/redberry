@@ -32,7 +32,7 @@ import java.util.Arrays;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public class Sum extends MultiTensor {
+public final class Sum extends MultiTensor {
 
     public Sum(Tensor... data) {
         super(data);
@@ -66,7 +66,7 @@ public class Sum extends MultiTensor {
     }
 
     @Override
-    protected int hash() {
+    protected int calculateHash() {
         return Arrays.hashCode(data);
     }
 }
