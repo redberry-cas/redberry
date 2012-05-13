@@ -27,6 +27,7 @@ package cc.redberry.core.indices;
  * @author Stanislav Poslavsky
  */
 public class IndicesFactory {
+
     public static SimpleIndices createSimple(IndicesSymmetries symmetries, int... data) {
         if (data.length == 0)
             return EmptyIndices.INSTANCE;
@@ -36,13 +37,17 @@ public class IndicesFactory {
     public static SimpleIndices createSimple(IndicesSymmetries symmetries, Indices indices) {
         if (indices.size() == 0)
             return EmptyIndices.INSTANCE;
-        return new SimpleIndicesIsolated(indices.getAllIndices().copy(), symmetries);
+        if (indices instanceof SimpleIndices)
+            return new SimpleIndicesIsolated(((AbstractIndices) indices).data, symmetries);
+        return new SimpleIndicesIsolated(((AbstractIndices) indices).data.clone(), symmetries);
     }
 
-    public static Indices createSorted(Indices indices) {
+    public static SortedIndices createSorted(Indices indices) {
         if (indices.size() == 0)
             return LazyHolder.INSTANCE;
-        return new SortedIndices(indices);
+        if (indices instanceof SortedIndices)
+            return (SortedIndices) indices;
+        return new SortedIndices(((AbstractIndices) indices).data.clone());
     }
 
     public static Indices createSorted(int... data) {
@@ -51,11 +56,16 @@ public class IndicesFactory {
         return new SortedIndices(data.clone());
     }
 
+    public static SortedIndices getEmptySortedIndices() {
+        return LazyHolder.INSTANCE;
+    }
+
     /**
      * Holder for the instance. <p>We use here the Initialization On Demand
      * Holder Idiom!</p>
      */
     private static class LazyHolder {
+
         /**
          * Cached field instance.
          */

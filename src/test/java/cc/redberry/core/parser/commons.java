@@ -35,6 +35,7 @@ import org.junit.Test;
  * @author Stanislav Poslavsky
  */
 public class commons {
+
     @Test
     public void sadasd() {
         Fraction f = new Fraction(2, 3);
@@ -78,19 +79,23 @@ public class commons {
         System.out.println(0x7ff8000000000000L);
 
         new IntArrayList().add(new Integer(2));
-        
-        
+
+
         Integer D = new Integer(2);
-        System.out.println(D+3);
-        int dsf = D+3;
-        Integer sadf = D+5;
+        System.out.println(D + 3);
+        int dsf = D + 3;
+        Integer sadf = D + 5;
         System.out.println(D);
         System.out.println(dsf);
         System.out.println(sadf);
-        System.out.println(D^1);
-        Iterable<Integer> i = null;
-        for(int j:i){
-            
-        }
+        System.out.println(D ^ 1);
+       
+
+        System.out.println(new String("a").hashCode());
+        System.out.println("a".hashCode());
+        System.out.println(new String("b").hashCode());
+        System.out.println("b".hashCode());
+        System.out.println(new String("c").hashCode());
+        System.out.println("c".hashCode());
     }
 }

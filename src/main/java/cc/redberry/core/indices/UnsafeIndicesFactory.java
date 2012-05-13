@@ -13,20 +13,14 @@
  * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
  * more details.
  */
-
 package cc.redberry.core.indices;
 
 public class UnsafeIndicesFactory {
+
     public static SimpleIndices createOfTensor(IndicesSymmetries symmetries, SimpleIndices indices) {
         if (indices.size() == 0)
             return EmptyIndices.INSTANCE;
         return new SimpleIndicesOfTensor(((AbstractIndices) indices).data, symmetries);
-    }
-
-    public static SimpleIndices createIsolatedUnsafe(IndicesSymmetries symmertries, int... data) {
-        if (data.length == 0)
-            return EmptyIndices.INSTANCE;
-        return new SimpleIndicesIsolated(data, symmertries);
     }
 
     public static SimpleIndices createIsolatedUnsafeWithoutSort(IndicesSymmetries symmertries, int... data) {

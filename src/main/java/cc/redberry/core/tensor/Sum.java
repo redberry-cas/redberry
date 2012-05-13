@@ -22,41 +22,51 @@
  */
 package cc.redberry.core.tensor;
 
-import cc.redberry.core.indices.InconsistentIndicesException;
 import cc.redberry.core.indices.Indices;
-import cc.redberry.core.indices.IndicesBuilderSorted;
+import cc.redberry.core.indices.IndicesFactory;
+import cc.redberry.core.indices.SortedIndices;
+import java.util.Arrays;
 
 /**
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public class Product extends MultiTensor {
+public class Sum extends MultiTensor {
 
-    public Product(Tensor... data) {
+    public Sum(Tensor... data) {
         super(data);
-        //TODO add sorting
+        Arrays.sort(data);
     }
 
     @Override
     protected Indices calculateIndices() {
-        IndicesBuilderSorted ibs = new IndicesBuilderSorted();
-        for (Tensor t : data)
-            ibs.append(t);
-        try {
-            return ibs.getIndices();
-        } catch (InconsistentIndicesException exception) {
-            throw new InconsistentIndicesException(exception.getIndex(), this);
+
+        int p = 0;
+        Indices indices = data[0].getIndices().getFreeIndices();
+        boolean sorted = indices instanceof SortedIndices;
+
+        Indices current;
+        for (int i = 1; i < data.length; ++i) {
+            current = data[i].getIndices().getFreeIndices();
+            if (!current.equalsIgnoreOrder(indices))
+                throw new TensorException("Inconsistent summands: " + data[p] + " and " + data[i] + " have differrent free indices.");
+            if (!sorted && current instanceof SortedIndices) {
+                indices = current;
+                p = i;
+                sorted = true;
+            }
         }
+        return IndicesFactory.createSorted(indices);
     }
 
     @Override
     protected char operationSymbol() {
-        return '*';
+        return '+';
     }
 
     @Override
     protected int hash() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return Arrays.hashCode(data);
     }
 }

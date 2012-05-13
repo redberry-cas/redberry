@@ -44,6 +44,7 @@ import java.util.Arrays;
  */
 public final class SortedIndices extends AbstractIndices {
     //position of the first lower index in array
+
     private final int firstLower;
 
     private SortedIndices(int[] data, int firstLower) {
@@ -54,10 +55,10 @@ public final class SortedIndices extends AbstractIndices {
     /**
      * Constructs {@code SortedIndices} instance from specified indices array
      * and with specified symmetries. {@code data} will be quickSort in
-     * constructor, using {@link cc.redberry.core.math.MathUtils#quickSort(int[])} to refactoring
-     * symmetries after sorting.
+     * constructor, using {@link cc.redberry.core.math.MathUtils#quickSort(int[])}
+     * to refactoring symmetries after sorting.
      *
-     * @param data array of indices
+     * @param data       array of indices
      * @param symmetries symmetries of this indices
      */
     SortedIndices(int[] data) {
@@ -65,10 +66,6 @@ public final class SortedIndices extends AbstractIndices {
         Arrays.sort(this.data);
         firstLower = ArraysUtils.binarySearch1(data, 0);
         testConsistentWithException();
-    }
-
-    SortedIndices(Indices indices) {
-        this(indices.getAllIndices().copy());
     }
 
     @Override
