@@ -22,7 +22,6 @@
  */
 package cc.redberry.core.parser;
 
-import cc.redberry.core.tensor.Tensor;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -113,7 +112,7 @@ abstract class ParserOperator implements NodeParser {
         if (mode == Mode.Inverse)
             nodes.add(inverseOperation(parser.parse(expression)));
         else
-            throw new RuntimeException("unrepoted operator parser mode");
+            throw new ParserException("unrepoted operator parser mode");
     }
 
     protected abstract ParseNode compile(List<ParseNode> nodes);

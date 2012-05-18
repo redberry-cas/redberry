@@ -29,7 +29,7 @@ import java.util.Comparator;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public class NodeParserComparator implements Comparator<NodeParser> {
+public final class NodeParserComparator implements Comparator<NodeParser> {
     public static final NodeParserComparator INSTANCE = new NodeParserComparator();
 
     private NodeParserComparator() {
