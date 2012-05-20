@@ -36,7 +36,7 @@ public final class Sum extends MultiTensor {
 
     public Sum(Tensor... data) {
         super(data);
-        Arrays.sort(data);
+        Arrays.sort(data);//TODO use non-stable sort
     }
 
     @Override

@@ -97,7 +97,7 @@ public final class SortedIndices extends AbstractIndices {
     }
 
     @Override
-    protected int[] getSortedData() {
+    int[] getSortedData() {
         return data;
     }
 

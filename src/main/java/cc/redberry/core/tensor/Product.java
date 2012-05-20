@@ -54,7 +54,7 @@ public final class Product extends MultiTensor {
         try {
             return ibs.getIndices();
         } catch (InconsistentIndicesException exception) {
-            throw new InconsistentIndicesException(exception.getIndex(), this);
+            throw new InconsistentIndicesException(exception.getIndex(), this);//TODO this->data
         }
     }
 
@@ -63,32 +63,32 @@ public final class Product extends MultiTensor {
         return '*';
     }
 
-    public Tensor[] getScalars() {
+    private ProductContent getContent() {
         ProductContent content = contentReference.get();
         if (content == null)
             contentReference = new SoftReference<>(content = calculateContent());
-        return content.scalars.clone();//CHECKSTYLE clone()
+        return content;
+    }
+
+    public Tensor[] getScalars() {
+        return getContent().scalars.clone();//CHECKSTYLE clone()
     }
 
     public Tensor getNonScalar() {
-        ProductContent content = contentReference.get();
-        if (content == null)
-            contentReference = new SoftReference<>(content = calculateContent());
-        return content.nonScalar;
+        return getContent().nonScalar;
     }
 
     public ContractionStructure getContractionStructure() {
-        ProductContent content = contentReference.get();
-        if (content == null)
-            contentReference = new SoftReference<>(content = calculateContent());
-        return content.contractionStructure;
+        return getContent().contractionStructure;
     }
 
+    //TODO rename FullContracyionStructure to ContractionStructure
     public FullContractionsStructure getFullContractionStructure() {
-        ProductContent content = contentReference.get();
-        if (content == null)
-            contentReference = new SoftReference<>(content = calculateContent());
-        return content.fullContractionsStructure;
+        return getContent().fullContractionsStructure;
+    }
+
+    public short[] getStretchIds() {
+        return getContent().stretchIndices.clone();
     }
 
     @Override
@@ -96,12 +96,12 @@ public final class Product extends MultiTensor {
         int result = 1;
         for (Tensor element : data)
             result = 47 * result + element.hashCode();
-        return HashFunctions.JenkinWang32shift(Arrays.hashCode(data));
+        return HashFunctions.JenkinWang32shift(result);
     }
 
     private ProductContent calculateContent() {
-        final Indices freeIndices;
-        final int differentIndicesCount = (getIndices().size() + (freeIndices = getIndices().getFreeIndices()).size()) / 2;
+        final Indices freeIndices = getIndices().getFreeIndices();
+        final int differentIndicesCount = (getIndices().size() + freeIndices.size()) / 2;
 
         //Names (names with type, see IndicesUtils.getNameWithType() ) of all indices in this multiplication
         //It will be used as index name -> index index [0,1,2,3...] mapping
@@ -125,7 +125,7 @@ public final class Product extends MultiTensor {
         //pointer[0] - pointer to lower
         //pointer[1] - pointer to upper
         final int[] pointer = new int[2];
-        final short[] stretchIndices = getStretchIndex(); //for preformance
+        final short[] stretchIndices = calculateStretchIndices(); //for preformance
 
         //Allocating array for results, one contraction for each tensor
         final TensorContraction[] contractions = new TensorContraction[data.length];
@@ -200,7 +200,7 @@ public final class Product extends MultiTensor {
         Tensor[] scalars = new Tensor[componentCount - 1];
         for (i = 1; i < componentCount; ++i)
             scalars[i - 1] = new Product(datas[i]);
-        Arrays.sort(scalars); //CHECKSTYLE
+        Arrays.sort(scalars); //TODO use nonstable sort
 
 
         //assert Arrays.equals(indices[0], indices[1]);
@@ -239,19 +239,15 @@ public final class Product extends MultiTensor {
         //Form resulting content
         ContractionStructure contractionStructure = new ContractionStructure(freeContraction, contractions);
         FullContractionsStructure fullContractionsStructure = new FullContractionsStructure(data, differentIndicesCount, freeIndices);
-        return new ProductContent(contractionStructure, fullContractionsStructure, scalars, nonScalar);
+        return new ProductContent(contractionStructure, fullContractionsStructure, scalars, nonScalar, stretchIndices);
     }
 
-    public final short[] getStretchIndex() {
-
+    private short[] calculateStretchIndices() {
         short[] stretchIndex = new short[data.length];
-        //stretchIndex[0] = 0;
-        if (data.length <= 1)
-            return stretchIndex;
+        //stretchIndex[0] = 0;       
         short index = 0;
-        int i = 1;
-        int oldHash = data[i - 1].hashCode();
-        for (; i < data.length; ++i)
+        int oldHash = data[0].hashCode();
+        for (int i = 1; i < data.length; ++i)
             if (oldHash == data[i].hashCode())
                 stretchIndex[i] = index;
             else {
@@ -293,12 +289,17 @@ public final class Product extends MultiTensor {
         final FullContractionsStructure fullContractionsStructure;
         final Tensor[] scalars;
         final Tensor nonScalar;
+        final short[] stretchIndices;
 
-        public ProductContent(ContractionStructure contractionStructure, FullContractionsStructure fullContractionsStructure, Tensor[] scalars, Tensor nonScalar) {
+        public ProductContent(ContractionStructure contractionStructure,
+                              FullContractionsStructure fullContractionsStructure,
+                              Tensor[] scalars, Tensor nonScalar,
+                              short[] stretchIndices) {
             this.contractionStructure = contractionStructure;
             this.fullContractionsStructure = fullContractionsStructure;
             this.scalars = scalars;
             this.nonScalar = nonScalar;
+            this.stretchIndices = stretchIndices;
         }
     }
 }

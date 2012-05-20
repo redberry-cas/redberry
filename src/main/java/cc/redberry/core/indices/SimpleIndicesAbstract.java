@@ -34,11 +34,12 @@ import java.util.Arrays;
  * @author Stanislav Poslavsky
  */
 public abstract class SimpleIndicesAbstract extends AbstractIndices implements SimpleIndices {
+
     protected IndicesSymmetries symmetries = null;
 
     /**
-     * Construct {@code SimpleIndicesOfTensor} instance from specified indices array
-     * and with specified symmetries.
+     * Construct {@code SimpleIndicesOfTensor} instance from specified indices
+     * array and with specified symmetries.
      *
      * @param data       array of indices
      * @param symmetries symmetries of this indices
@@ -124,7 +125,7 @@ public abstract class SimpleIndicesAbstract extends AbstractIndices implements S
     protected abstract SimpleIndices create(int[] data, IndicesSymmetries symmetries);
 
     @Override
-    protected int[] getSortedData() {
+    int[] getSortedData() {
         int[] sorted = data.clone();
         Arrays.sort(sorted);
         return sorted;
@@ -152,10 +153,12 @@ public abstract class SimpleIndicesAbstract extends AbstractIndices implements S
      * <code>null</code> in other case.
      *
      * @param indices indices to compare with this
-     * @return <code>Boolean.FALSE</code> if indices are equals this,
-     *         <code>Boolean.TRUE</code> if indices differs from this on -1 (i.e. on odd
-     *         transposition) and
-     *         <code>null</code> in other case.
+     *
+     * @return <
+     * code>Boolean.FALSE</code> if indices are equals this,
+     * <code>Boolean.TRUE</code> if indices differs from this on -1 (i.e. on odd
+     * transposition) and
+     * <code>null</code> in other case.
      */
     public Boolean _equalsWithSymmetries(Indices indices) {
         if (indices.getClass() != this.getClass())
@@ -164,7 +167,7 @@ public abstract class SimpleIndicesAbstract extends AbstractIndices implements S
             return null;
         SimpleIndicesOfTensor _indices = (SimpleIndicesOfTensor) indices;
         boolean sign1;
-        out_level_0:
+out_level_0:
         for (Symmetry s1 : symmetries) {
             sign1 = s1.isAntiSymmetry();
             for (int i = 0; i < data.length; ++i)

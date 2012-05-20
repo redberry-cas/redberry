@@ -46,6 +46,7 @@ import java.util.Arrays;
  */
 abstract class AbstractIndices implements Indices {
     //indices data
+
     protected final int[] data;
     //lazy fields
     private WeakReference<UpperLowerIndices> upperLower = new WeakReference<>(null);
@@ -61,7 +62,7 @@ abstract class AbstractIndices implements Indices {
 
     protected abstract UpperLowerIndices calculateUpperLower();
 
-    protected abstract int[] getSortedData();
+    abstract int[] getSortedData();
 
     @Override
     public final IntArray getUpper() {
@@ -132,6 +133,7 @@ abstract class AbstractIndices implements Indices {
      * {@inheritDoc}
      *
      * @param mode {@inheritDoc}
+     *
      * @return {@inheritDoc}
      */
     @Override
@@ -165,6 +167,7 @@ abstract class AbstractIndices implements Indices {
      * Returns {@code toString(Context.get().getDefaultPrintMode());}
      *
      * @return {@code toString(Context.get().getDefaultPrintMode());}
+     *
      * @see AbstractIndices#toString(cc.redberry.core.context.ToStringMode)
      */
     @Override
@@ -173,6 +176,7 @@ abstract class AbstractIndices implements Indices {
     }
 
     protected static class UpperLowerIndices {
+
         public final int[] upper;
         public final int[] lower;
 

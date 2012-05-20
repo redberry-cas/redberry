@@ -27,7 +27,7 @@
 
     <groupId>cc.redberry</groupId>
     <artifactId>core</artifactId>
-    <version>0.9.5-SNAPSHOT</version>
+    <version>1.0</version>
     <packaging>jar</packaging>
 
     <parent>

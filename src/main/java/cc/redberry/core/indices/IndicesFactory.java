@@ -37,9 +37,9 @@ public class IndicesFactory {
     public static SimpleIndices createSimple(IndicesSymmetries symmetries, Indices indices) {
         if (indices.size() == 0)
             return EmptyIndices.INSTANCE;
-        if (indices instanceof SimpleIndices)
-            return new SimpleIndicesIsolated(((AbstractIndices) indices).data, symmetries);
-        return new SimpleIndicesIsolated(((AbstractIndices) indices).data.clone(), symmetries);
+        if (indices instanceof SimpleIndicesAbstract)
+            return new SimpleIndicesIsolated(((SimpleIndicesAbstract) indices).data, symmetries);
+        return new SimpleIndicesIsolated(indices.getAllIndices().copy(), symmetries);
     }
 
     public static SortedIndices createSorted(Indices indices) {
@@ -47,7 +47,7 @@ public class IndicesFactory {
             return LazyHolder.INSTANCE;
         if (indices instanceof SortedIndices)
             return (SortedIndices) indices;
-        return new SortedIndices(((AbstractIndices) indices).data.clone());
+        return new SortedIndices(indices.getAllIndices().copy());
     }
 
     public static Indices createSorted(int... data) {
