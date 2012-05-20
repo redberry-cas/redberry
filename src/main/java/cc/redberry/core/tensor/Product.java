@@ -99,6 +99,11 @@ public final class Product extends MultiTensor {
         return HashFunctions.JenkinWang32shift(result);
     }
 
+    @Override
+    public TensorBuilder getBuilder() {
+        return new ProductBuilder(data.length);
+    }
+
     private ProductContent calculateContent() {
         final Indices freeIndices = getIndices().getFreeIndices();
         final int differentIndicesCount = (getIndices().size() + freeIndices.size()) / 2;

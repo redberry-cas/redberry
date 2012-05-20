@@ -22,46 +22,37 @@
  */
 package cc.redberry.core.tensor;
 
-import cc.redberry.core.context.ToStringMode;
-import cc.redberry.core.indices.Indices;
-
 /**
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public class TensorWrapper extends Tensor {
+class TensorFieldBuilder implements TensorBuilder {
 
-    private final Tensor innerTensor;
+    private final TensorField field;
+    private int pointer = 0;
+    private final Tensor[] data;
 
-    public TensorWrapper(Tensor innerTensor) {
-        this.innerTensor = innerTensor;
+    public TensorFieldBuilder(TensorField field) {
+        this.field = field;
+        this.data = new Tensor[field.size()];
     }
 
     @Override
-    public Tensor get(int i) {
-        if (i != 0)
-            throw new IndexOutOfBoundsException();
-        return innerTensor;
+    public Tensor buid() {
+        if (pointer != data.length)
+            throw new IllegalStateException("Tensor field not fully constructed.");
+        return new TensorField(field, data);
     }
 
     @Override
-    public Indices getIndices() {
-        return innerTensor.getIndices();
-    }
-
-    @Override
-    protected int hash() {
-        return innerTensor.hash();
-    }
-
-    @Override
-    public int size() {
-        return 1;
-    }
-
-    @Override
-    public String toString(ToStringMode mode) {
-        return "Wrapper[" + innerTensor.toString(mode) + "]";
+    public void put(Tensor tensor) {
+        if (pointer == data.length)
+            throw new IllegalStateException("No more arguments in field.");
+        if (tensor == null)
+            throw new NullPointerException();
+        if (!tensor.getIndices().getFreeIndices().equalsIgnoreOrder(field.getArgIndices(pointer)))
+            throw new IllegalArgumentException("Free indices of puted tensor differs from field argument binding indices!");
+        data[pointer++] = tensor;
     }
 }

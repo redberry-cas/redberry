@@ -46,6 +46,9 @@ public abstract class SimpleIndicesAbstract extends AbstractIndices implements S
      */
     protected SimpleIndicesAbstract(int[] data, IndicesSymmetries symmetries) {
         super(data);
+
+        assert data.length != 0;
+
         int[] toSort = new int[data.length];
         for (int i = 0; i < data.length; ++i)
             toSort[i] = data[i] & 0x7F000000;
@@ -59,6 +62,7 @@ public abstract class SimpleIndicesAbstract extends AbstractIndices implements S
 
     protected SimpleIndicesAbstract(boolean notResort, int[] data, IndicesSymmetries symmetries) {
         super(data);
+        assert data.length != 0;
         this.symmetries = symmetries;
     }
 
@@ -154,8 +158,7 @@ public abstract class SimpleIndicesAbstract extends AbstractIndices implements S
      *
      * @param indices indices to compare with this
      *
-     * @return <
-     * code>Boolean.FALSE</code> if indices are equals this,
+     * @return < code>Boolean.FALSE</code> if indices are equals this,
      * <code>Boolean.TRUE</code> if indices differs from this on -1 (i.e. on odd
      * transposition) and
      * <code>null</code> in other case.

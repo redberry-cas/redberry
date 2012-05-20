@@ -105,7 +105,8 @@ import java.util.Iterator;
  * @see cc.redberry.core.context.Context
  */
 public abstract class Tensor
-        implements Comparable<Tensor>, Iterable<Tensor> {
+        implements Comparable<Tensor>,
+                   Iterable<Tensor> {
 
     /**
      * This method was make abstract to bind all inheritors have their hash code
@@ -207,12 +208,14 @@ public abstract class Tensor
      */
     @Override
     public int compareTo(Tensor t) {
-        int hash, thash;
-        return ((hash = hash()) < (thash = t.hash()) ? -1 : (hash == thash ? 0 : 1));
+        int hash = hash(), thash = t.hash();
+        return hash < thash ? -1 : (hash == thash ? 0 : 1);
     }
 
     @Override
     public final int hashCode() {
         return hash();
     }
+
+    public abstract TensorBuilder getBuilder();
 }

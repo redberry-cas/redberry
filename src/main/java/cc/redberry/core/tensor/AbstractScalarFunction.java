@@ -76,4 +76,10 @@ public abstract class AbstractScalarFunction extends Tensor {
                 return stringSymbol + "(" + argument.toString(ToStringMode.UTF8) + ")";
         }
     }
+
+    @Override
+    public TensorBuilder getBuilder() {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
 }

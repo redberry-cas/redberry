@@ -37,6 +37,7 @@ import cc.redberry.core.utils.IntArray;
  * @author Stanislav Poslavsky
  */
 public final class EmptyIndices implements SimpleIndices {
+
     /**
      * Instance of {@code EmptyIndices}
      */
@@ -140,6 +141,7 @@ public final class EmptyIndices implements SimpleIndices {
      * Do nothing.
      *
      * @return false
+     *
      * @param mapping
      */
     @Override
@@ -158,6 +160,7 @@ public final class EmptyIndices implements SimpleIndices {
      * Returns empty string.
      *
      * @param mode
+     *
      * @return empty string
      */
     @Override
@@ -169,6 +172,7 @@ public final class EmptyIndices implements SimpleIndices {
      * Returns empty string.
      *
      * @param mode
+     *
      * @return empty string
      */
     @Override
@@ -180,13 +184,12 @@ public final class EmptyIndices implements SimpleIndices {
      * {@inheritDoc}
      *
      * @param obj {@inheritDoc}
+     *
      * @return {@inheritDoc}
      */
     @Override
     public boolean equals(Object obj) {
-        if (obj instanceof EmptyIndices)
-            return true;
-        return false;
+        return obj instanceof EmptyIndices;
     }
 
     /**

@@ -16,7 +16,6 @@
 package cc.redberry.core.tensor;
 
 import cc.redberry.core.context.ToStringMode;
-import cc.redberry.core.indices.IndicesFactory;
 import cc.redberry.core.indices.SimpleIndices;
 
 /**
@@ -28,23 +27,32 @@ public class TensorField extends SimpleTensor {
     private Tensor[] args;
     private SimpleIndices[] argIndices;
 
-    public TensorField(int name, SimpleIndices indices, Tensor[] args) {
-        super(name, indices);
-        this.args = args;
-        argIndices = new SimpleIndices[args.length];
-        int i = 0;
-        for (Tensor t : args)
-            argIndices[i++] = IndicesFactory.createSimple(null, t.getIndices().getFreeIndices());
-    }
-
+//    public TensorField(int name, SimpleIndices indices, Tensor[] args) {
+//        super(name, indices);
+//        this.args = args;
+//        argIndices = new SimpleIndices[args.length];
+//        int i = 0;
+//        for (Tensor t : args)
+//            argIndices[i++] = IndicesFactory.createSimple(null, t.getIndices().getFreeIndices());
+//    }
     public TensorField(int name, SimpleIndices indices, Tensor[] args, SimpleIndices[] argIndices) {
         super(name, indices);
         this.args = args;
         this.argIndices = argIndices;
     }
 
+    TensorField(TensorField field, Tensor[] args) {
+        super(field.name, field.indices);
+        this.args = args;
+        this.argIndices = field.argIndices;
+    }
+
     public SimpleIndices[] getArgIndices() {
-        return argIndices;
+        return argIndices.clone();
+    }
+
+    public SimpleIndices getArgIndices(int i) {
+        return argIndices[i];
     }
 
     @Override
@@ -59,6 +67,7 @@ public class TensorField extends SimpleTensor {
 
     @Override
     public String toString(ToStringMode mode) {
+        //TODO add argIndices toString(REDBERRY)
         StringBuilder sb = new StringBuilder();
         sb.append('[');
         for (Tensor t : args) {
@@ -68,5 +77,10 @@ public class TensorField extends SimpleTensor {
         sb.deleteCharAt(sb.length() - 1);
         sb.append(']');
         return super.toString(mode) + sb.toString();
+    }
+
+    @Override
+    public TensorBuilder getBuilder() {
+        return new TensorFieldBuilder(this);
     }
 }

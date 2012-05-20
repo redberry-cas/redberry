@@ -34,29 +34,35 @@ import cc.redberry.core.utils.TensorUtils;
  */
 public final class Power extends Tensor {
 
-    private final Tensor[] data;
+    private final Tensor argument, power;
 
     public Power(Tensor a, Tensor power) {
         if (!TensorUtils.isScalar(a, power))
             throw new TensorException("Non scalar power: Power[" + a + ", " + power + "]");
-        data = new Tensor[2];
-        data[0] = a;
-        data[1] = power;
+        this.argument = a;
+        this.power = power;
     }
 
     @Override
     public Tensor get(int i) {
-        return data[i];
+        switch (i) {
+            case 0:
+                return argument;
+            case 1:
+                return power;
+            default:
+                throw new IndexOutOfBoundsException();
+        }
     }
 
     @Override
     public Indices getIndices() {
-        return EmptyIndices.INSTANCE;
+        return EmptyIndices.INSTANCE;//CHECKSTYLE mb sorted?
     }
 
     @Override
     protected int hash() {
-        return 37 * data[0].hash() + data[1].hash();
+        return 37 * argument.hash() + power.hash();
     }
 
     @Override
@@ -66,6 +72,11 @@ public final class Power extends Tensor {
 
     @Override
     public String toString(ToStringMode mode) {
-        return "Power[" + data[0].toString(mode) + ", " + data[1].toString(mode) + "]";
+        return "Power[" + argument.toString(mode) + ", " + power.toString(mode) + "]";
+    }
+
+    @Override
+    public TensorBuilder getBuilder() {
+        return new PowerBuilder();
     }
 }

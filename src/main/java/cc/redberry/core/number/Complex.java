@@ -25,10 +25,12 @@ package cc.redberry.core.number;
 import cc.redberry.core.context.ToStringMode;
 import cc.redberry.core.indices.EmptyIndices;
 import cc.redberry.core.indices.Indices;
+import cc.redberry.core.tensor.*;
 import cc.redberry.core.tensor.Product;
 import cc.redberry.core.tensor.Tensor;
 import java.io.Serializable;
 import java.math.BigInteger;
+import java.util.*;
 import org.apache.commons.math3.Field;
 import org.apache.commons.math3.exception.NullArgumentException;
 import org.apache.commons.math3.fraction.BigFraction;
@@ -122,8 +124,7 @@ public class Complex extends Tensor
 
     @Override
     protected int hash() {
-        //Numbers are always first
-        return Integer.MIN_VALUE;
+        return 47 * (329 + real.hashCode()) + this.imaginary.hashCode();
     }
 
     @Override
@@ -142,6 +143,30 @@ public class Complex extends Tensor
         if (clazz == Product.class)
             return "(" + toString(mode) + ")";
         return super.toString(mode, clazz);
+    }
+
+    @Override
+    public TensorBuilder getBuilder() {
+        return new ComplexBuilder(this);
+    }
+
+    private static class ComplexBuilder implements TensorBuilder {
+
+        private final Complex complex;
+
+        public ComplexBuilder(Complex complex) {
+            this.complex = complex;
+        }
+
+        @Override
+        public Tensor buid() {
+            return complex;
+        }
+
+        @Override
+        public void put(Tensor tensor) {
+            throw new IllegalStateException("Can not put to Complex tensor builder!");
+        }
     }
 
     public Real getImaginary() {

@@ -23,6 +23,9 @@
 package cc.redberry.core.utils;
 
 //import cc.redberry.core.indices.InconsistentIndicesException;
+import cc.redberry.core.indices.*;
+import cc.redberry.core.number.Complex;
+import cc.redberry.core.tensor.SimpleTensor;
 import cc.redberry.core.tensor.Tensor;
 
 //import cc.redberry.core.indices.Indices;
@@ -63,6 +66,30 @@ public class TensorUtils {
 
     private static boolean isScalar1(Tensor tensor) {
         return tensor.getIndices().size() == 0;
+    }
+
+    public static boolean isOne(Tensor tensor) {
+        return tensor instanceof Complex && ((Complex) tensor).isOne();
+    }
+
+    public static boolean isZero(Tensor tensor) {
+        return tensor instanceof Complex && ((Complex) tensor).isZero();
+    }
+
+    public static boolean isImageOne(Tensor tensor) {
+        return tensor instanceof Complex && ((Complex) tensor).equals(Complex.IMAGEONE);
+    }
+
+    public static boolean isMinusOne(Tensor tensor) {
+        return tensor instanceof Complex && ((Complex) tensor).equals(Complex.MINUSE_ONE);
+    }
+
+    public static boolean isSymbol(Tensor t) {
+        return t.getClass() == SimpleTensor.class && t.getIndices().size() == 0;
+    }
+
+    public static boolean isSymbolOrNumber(Tensor t) {
+        return t instanceof Complex || isSymbol(t);
     }
 //
 //    public static IndicesBuilderSorted getAllIndicesBuilder(final Tensor tensor) {

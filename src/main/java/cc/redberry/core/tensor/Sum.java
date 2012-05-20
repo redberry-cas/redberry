@@ -69,4 +69,11 @@ public final class Sum extends MultiTensor {
     protected int calculateHash() {
         return Arrays.hashCode(data);
     }
+
+    @Override
+    public TensorBuilder getBuilder() {
+        return new SumBuilder(data.length);
+    }
+    
+    
 }

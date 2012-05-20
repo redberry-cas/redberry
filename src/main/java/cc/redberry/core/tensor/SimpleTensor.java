@@ -22,7 +22,7 @@ import cc.redberry.core.indices.SimpleIndices;
 import cc.redberry.core.indices.UnsafeIndicesFactory;
 import cc.redberry.core.utils.EmptyIterator;
 
-import java.util.Iterator;
+import java.util.*;
 
 /**
  * This class describes the most fundamental tensor object - simple tensor, such
@@ -138,5 +138,41 @@ public class SimpleTensor extends Tensor {
     @Override
     public Iterator<Tensor> iterator() {
         return EmptyIterator.INSTANCE;
+    }
+
+    @Override
+    public TensorBuilder getBuilder() {
+        return new Builder(this);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        final SimpleTensor other = (SimpleTensor) obj;
+        if (this.name != other.name)
+            return false;
+        return this.indices.equals(other.indices);
+    }
+
+    private static class Builder implements TensorBuilder {
+
+        private final SimpleTensor tensor;
+
+        public Builder(SimpleTensor tensor) {
+            this.tensor = tensor;
+        }
+
+        @Override
+        public Tensor buid() {
+            return tensor;
+        }
+
+        @Override
+        public void put(Tensor tensor) {
+            throw new IllegalStateException("Can not put to SimpleTensor builder!");
+        }
     }
 }
