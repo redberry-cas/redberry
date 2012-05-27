@@ -28,6 +28,7 @@ package cc.redberry.core.indices;
  * @author Stanislav Poslavsky
  */
 public class SimpleIndicesIsolated extends SimpleIndicesAbstract {
+
     SimpleIndicesIsolated(int[] data, IndicesSymmetries symmetries) {
         super(data, symmetries);
     }
@@ -43,13 +44,15 @@ public class SimpleIndicesIsolated extends SimpleIndicesAbstract {
 
     @Override
     public IndicesSymmetries getSymmetries() {
-        if(symmetries == null)
+        if (symmetries == null)
             symmetries = new IndicesSymmetries(new IndicesTypeStructure(this));
         return symmetries;
     }
 
     @Override
     public void setSymmetries(IndicesSymmetries symmetries) {
+        if (!symmetries.getIndicesTypeStructure().isStructureOf(this))
+            throw new IllegalArgumentException("Illegal symmetries instance.");
         this.symmetries = symmetries;
     }
 }

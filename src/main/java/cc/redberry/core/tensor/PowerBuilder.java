@@ -23,8 +23,9 @@
 package cc.redberry.core.tensor;
 
 import cc.redberry.core.number.Complex;
-import cc.redberry.core.utils.*;
-import java.math.*;
+import cc.redberry.core.number.Rational;
+import cc.redberry.core.utils.TensorUtils;
+import java.math.BigInteger;
 
 /**
  *
@@ -43,7 +44,43 @@ public class PowerBuilder implements TensorBuilder {
     public Tensor buid() {
         if (state != 2)
             throw new IllegalStateException("Power is not fully constructed.");
-        //TODO Complex^Complex incuding Infinity, NaN, Zero and so so so!!!
+        //TODO improve Complex^Complex
+        if (argument instanceof Complex && power instanceof Complex) {
+            Complex a = (Complex) argument;
+            Complex p = (Complex) power;
+            if (a.isInfinite())
+                if (p.isZero())
+                    return Complex.ComplexNaN;
+                else
+                    return a;
+            if (a.isOne())
+                if (p.isInfinite())
+                    return p.multiply(a);
+                else
+                    return a;
+            if (p.isOne())
+                return a;
+            if (a.isZero())
+                return a;
+            if (p.isZero())
+                return Complex.ONE;
+            if (a.isNumeric() || p.isNumeric())
+                return a.powNumeric(p);
+            if (p.isReal()) {
+                Rational pp = (Rational) p.getReal();
+                if (pp.isInteger()) {
+                    BigInteger exponent = pp.getNumerator();
+                    Complex result = Complex.ONE, base = a;
+                    while (exponent.signum() > 0) {
+                        if (exponent.testBit(0))
+                            result = result.multiply(base);
+                        base = base.multiply(base);
+                        exponent = exponent.shiftRight(1);
+                    }
+                    return result;
+                }
+            }
+        }
         if (TensorUtils.isOne(power))
             return argument;
         if (TensorUtils.isZero(power) || TensorUtils.isOne(argument))
@@ -51,13 +88,14 @@ public class PowerBuilder implements TensorBuilder {
         if (TensorUtils.isZero(argument))
             return Complex.ZERO;
         if (argument instanceof Product) {
-            TensorBuilder pb = argument.getBuilder();
-            for (Tensor t : argument)
-                pb.put(TensorsFactory.buildPower(t, power));
+            Tensor[] scalars = ((Product) argument).getScalars();
+            TensorBuilder pb = argument.getBuilder();//creating product builder 
+            for (Tensor t : scalars)
+                pb.put(TensorsFactory.pow(t, power));
             return pb.buid();
         }
         if (argument instanceof Power)
-            return TensorsFactory.buildPower(argument.get(0), TensorsFactory.buidProduct(argument.get(1), power));
+            return TensorsFactory.pow(argument.get(0), TensorsFactory.multiply(argument.get(1), power));
         return new Power(argument, power);
     }
 
@@ -65,7 +103,7 @@ public class PowerBuilder implements TensorBuilder {
     public void put(Tensor tensor) {
         if (tensor == null)
             throw new NullPointerException();
-        if (TensorUtils.isScalar(tensor))
+        if (!TensorUtils.isScalar(tensor))
             throw new IllegalArgumentException("Non-scalar tensor on input of Power builder.");
         switch (state) {
             case 0:

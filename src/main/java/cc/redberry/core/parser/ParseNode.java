@@ -22,17 +22,21 @@
  */
 package cc.redberry.core.parser;
 
+import cc.redberry.core.tensor.*;
+import java.util.*;
+
 /**
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
 public class ParseNode {
+
     public final TensorType tensorType;
     public ParseNode parent;
     public final ParseNode[] content;
 
-    public ParseNode(TensorType tensorType, ParseNode[] content) {
+    public ParseNode(TensorType tensorType, ParseNode... content) {
         this.tensorType = tensorType;
         this.content = content;
         for (ParseNode node : content)
@@ -51,5 +55,40 @@ public class ParseNode {
             builder.append(node).append(", ");
         builder.deleteCharAt(builder.length() - 1).deleteCharAt(builder.length() - 1).append("]");
         return builder.toString();
+    }
+
+    protected Tensor[] contentToTensors() {
+        Tensor[] tensors = new Tensor[content.length];
+        for (int i = 0; i < content.length; ++i)
+            tensors[i] = content[i].toTensor();
+        return tensors;
+    }
+
+    public Tensor toTensor() {
+        switch (tensorType) {
+            case Sum:
+                return TensorsFactory.sum(contentToTensors());
+            case Pow:
+                if (content.length != 2)
+                    throw new IllegalStateException("Incorrect power arguments count.");
+                return TensorsFactory.pow(content[0].toTensor(), content[1].toTensor());
+            case Product:
+                return TensorsFactory.multiply(contentToTensors());
+        }
+        throw new RuntimeException("Unknown type.");
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        final ParseNode other = (ParseNode) obj;
+        if (this.tensorType != other.tensorType)
+            return false;
+        if (!Arrays.deepEquals(this.content, other.content))
+            return false;
+        return true;
     }
 }

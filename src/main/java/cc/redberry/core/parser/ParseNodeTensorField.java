@@ -23,6 +23,7 @@
 package cc.redberry.core.parser;
 
 import cc.redberry.core.indices.SimpleIndices;
+import cc.redberry.core.tensor.*;
 
 /**
  *
@@ -30,6 +31,7 @@ import cc.redberry.core.indices.SimpleIndices;
  * @author Stanislav Poslavsky
  */
 public class ParseNodeTensorField extends ParseNodeSimpleTensor {
+
     public SimpleIndices[] argumentsIndices;
 
     public ParseNodeTensorField(SimpleIndices indices, String name, ParseNode[] content, SimpleIndices[] argumentsIndices) {
@@ -45,5 +47,10 @@ public class ParseNodeTensorField extends ParseNodeSimpleTensor {
             sb.append(node.toString()).append(", ");
         sb.deleteCharAt(sb.length() - 1).deleteCharAt(sb.length() - 1).append(']');
         return sb.toString();
+    }
+
+    @Override
+    public Tensor toTensor() {
+        return TensorsFactory.field(name, indices, argumentsIndices, contentToTensors());
     }
 }

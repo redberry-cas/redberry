@@ -174,9 +174,11 @@ public final class IndicesBuilderSimple
                 permutation[j] = sort.inverse().newIndexOf(current.get(sort.newIndexOf(j)));
             resulting[i - 1] = new Symmetry(permutation, symmetries.get(i).sign);
         }
-        IndicesSymmetries indicesSymmetries = new IndicesSymmetries(new IndicesTypeStructure(indices));
+       
+        SimpleIndices simpleIndices = IndicesFactory.createSimple(null, indices);
+        IndicesSymmetries indicesSymmetries = new IndicesSymmetries(new IndicesTypeStructure(simpleIndices));
         indicesSymmetries.addAllUnsafe(resulting);
-        SimpleIndices simpleIndices = IndicesFactory.createSimple(indicesSymmetries, indices);
+        simpleIndices.setSymmetries(indicesSymmetries);
         return simpleIndices;
     }
 

@@ -86,11 +86,9 @@ public class SimpleTensor extends Tensor {
      *
      * @see Indices#testConsistent()
      */
-    public SimpleTensor(int name, SimpleIndices indices) {
+    SimpleTensor(int name, SimpleIndices indices) {
         this.name = name;
-        NameDescriptor descriptor = CC.getNameDescriptor(name);
-        this.indices = UnsafeIndicesFactory.createOfTensor(descriptor.getSymmetries(),
-                                                           indices);
+        this.indices = indices;
     }
 
     /**

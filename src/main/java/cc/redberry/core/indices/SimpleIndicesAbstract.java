@@ -185,4 +185,9 @@ out_level_0:
     public short[] getDiffIds() {
         return symmetries.getDiffIds();
     }
+
+    @Override
+    public IndicesTypeStructure getIndicesTypeStructure() {
+        return new IndicesTypeStructure(this);
+    }
 }

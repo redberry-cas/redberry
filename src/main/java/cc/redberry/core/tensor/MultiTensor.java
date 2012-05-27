@@ -36,13 +36,11 @@ import java.util.Arrays;
 public abstract class MultiTensor extends Tensor {
 
     protected final Tensor[] data;
-    private Reference<Indices> indicesReference = new SoftReference<>(null);
-    private final int hash;
+    protected Reference<Indices> indicesReference = new SoftReference<>(null);
 
     MultiTensor(Tensor... data) {
-        assert data.length != 0;
+        assert data.length > 1;
         this.data = data;
-        this.hash = calculateHash();
     }
 
     @Override
@@ -63,11 +61,6 @@ public abstract class MultiTensor extends Tensor {
         return indices;
     }
 
-    @Override
-    public int hash() {
-        return hash;
-    }
-
     protected abstract char operationSymbol();
 
     protected abstract Indices calculateIndices();
@@ -85,7 +78,7 @@ public abstract class MultiTensor extends Tensor {
         char operation = operationSymbol();
         StringBuilder sb = new StringBuilder();
         for (int i = 0;; ++i) {
-            sb.append(data[i].toString(mode));
+            sb.append(data[i].toString(mode, this.getClass()));
             if (i == data.length - 1)
                 return sb.toString();
             sb.append(operation);

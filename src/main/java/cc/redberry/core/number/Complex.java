@@ -45,8 +45,21 @@ public class Complex extends Tensor
 
     public static final Complex ComplexNaN =
             new Complex(Numeric.NaN, Numeric.NaN);
-    public static final Complex ComplexInfinity =
+    public static final Complex REAL_POSITIVE_INFINITY =
+            new Complex(Numeric.POSITIVE_INFINITY, Numeric.ZERO);
+    public static final Complex REAL_NEGATIVE_INFINITY =
+            new Complex(Numeric.NEGATIVE_INFINITY, Numeric.ZERO);
+    public static final Complex IMAGINARY_POSITIVE_INFINITY =
+            new Complex(Numeric.ZERO, Numeric.POSITIVE_INFINITY);
+    public static final Complex IMAGINARY_NEGATIVE_INFINITY =
+            new Complex(Numeric.ZERO, Numeric.NEGATIVE_INFINITY);
+    public static final Complex COMPLEX_NEGATIVE_INFINITY =
+            new Complex(Numeric.NEGATIVE_INFINITY, Numeric.NEGATIVE_INFINITY);
+    public static final Complex COMPLEX_POSITIVE_INFINITY =
             new Complex(Numeric.POSITIVE_INFINITY, Numeric.POSITIVE_INFINITY);
+    
+    public static final Complex COMPLEX_INFINITY = COMPLEX_POSITIVE_INFINITY;
+    
     public static final Complex ZERO =
             new Complex(Rational.ZERO, Rational.ZERO);
     public static final Complex ONE =
@@ -175,6 +188,14 @@ public class Complex extends Tensor
 
     public Real getReal() {
         return real;
+    }
+
+    public boolean isReal() {
+        return imaginary.isZero();
+    }
+
+    public boolean isImaginary() {
+        return real.isZero();
     }
 
     public Complex getImaginaryAsComplex() {
@@ -336,12 +357,16 @@ public class Complex extends Tensor
         NumberUtils.checkNotNull(divisor);
         if (divisor.isOne())
             return divisor.isNumeric() ? this.getNumericValue() : this;
-        if (divisor.isNaN())
+        if (divisor.isNaN() || isNaN())
             return ComplexNaN;
+
 
         final Real c = divisor.real;
         final Real d = divisor.imaginary;
 
+//        Real denominator = (c.multiply(c)).add(d.multiply(d));
+//        return new Complex(((real.multiply(c)).add(imaginary.multiply(d))).divide(denominator),
+//                           ((imaginary.multiply(c)).subtract(real.multiply(d))).divide(denominator));
         if (c.abs().compareTo(d.abs()) < 0) {
             Real q = c.divide(d);
             Real denominator = c.multiply(q).add(d);
@@ -602,6 +627,10 @@ public class Complex extends Tensor
 
     @Override
     public Complex pow(int exponent) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public Complex powNumeric(Complex exponent) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 }

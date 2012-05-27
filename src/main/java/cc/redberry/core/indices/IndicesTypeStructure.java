@@ -28,48 +28,29 @@ import java.util.Arrays;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public final class IndicesTypeStructure extends IndicesStructure {
-    private TypeData[] typeDatas = null;
+public final class IndicesTypeStructure {
 
-    public IndicesTypeStructure(byte[] types, int[] counts) {
-        super(createData(types, counts));
+    public static final IndicesTypeStructure EMPTY = new IndicesTypeStructure((byte) 0, 0);
+    private final int[] typesCounts = new int[IndexType.TYPES_COUNT];
+    private final int size;
+
+    public IndicesTypeStructure(byte type, int count) {
+        typesCounts[type] = count;
+        size = count;
     }
 
-    public IndicesTypeStructure(int[] indices) {
-        super(extractTypes(indices));
+    public IndicesTypeStructure(IndexType type, int count) {
+        this(type.getType(), count);
     }
 
-    public IndicesTypeStructure(Indices indices) {
-        super(extractTypes(indices));
+    public IndicesTypeStructure(SimpleIndices indices) {
+        size = indices.size();
+        for (int i = 0; i < size; ++i)
+            ++typesCounts[IndicesUtils.getType(indices.get(i))];
     }
 
-    private static byte[] extractTypes(Indices indices) {
-        byte[] typeData = new byte[indices.size()];
-        for (int i = 0; i < indices.size(); i++)
-            typeData[i] = IndicesUtils.getType(indices.get(i));
-        Arrays.sort(typeData); //Redundant ?
-        return typeData;
-    }
-    
-    private static byte[] extractTypes(final int[] indices) {
-        byte[] typeData = new byte[indices.length];
-        for (int i = 0; i < indices.length; i++)
-            typeData[i] = IndicesUtils.getType(indices[i]);
-        Arrays.sort(typeData); //Redundant ?
-        return typeData;
-    }
-
-    private static byte[] createData(final byte[] types, final int[] counts) {
-        int sum = 0;
-        int i;
-        for (i = 0; i < counts.length; ++i)
-            sum += counts[i];
-        byte[] data = new byte[sum];
-        sum = 0;
-        for (i = 0; i < counts.length; ++i)
-            Arrays.fill(data, sum, sum += counts[i], types[i]);
-        Arrays.sort(data);
-        return data;
+    public int size() {
+        return size;
     }
 
     @Override
@@ -79,33 +60,32 @@ public final class IndicesTypeStructure extends IndicesStructure {
         if (getClass() != obj.getClass())
             return false;
         final IndicesTypeStructure other = (IndicesTypeStructure) obj;
-        if (!Arrays.equals(this.data, other.data))
+        if (!Arrays.equals(this.typesCounts, other.typesCounts))
             return false;
         return true;
     }
 
     @Override
     public int hashCode() {
-        return 365 + Arrays.hashCode(this.data);
+        return 469 + Arrays.hashCode(this.typesCounts);
     }
 
+    //TODO rename to getTypeData(byte type)
     public TypeData getTypeDatas(byte type) {
-        if (typeDatas == null)
-            calculateTypesData();
-        return typeDatas[type];
+        int from = 0;
+        for (int i = 0; i < type; ++i)
+            from += typesCounts[i];
+        return new TypeData(from, typesCounts[type]);
     }
 
-    private void calculateTypesData() {
-        int last = -1;
-        typeDatas = new TypeData[IndexType.TYPES_COUNT];
-        for (int i = 0; i < data.length; ++i)
-            if (i == data.length - 1 || data[i] != data[i + 1]) {
-                typeDatas[data[i]] = new TypeData(last + 1, i - last);
-                last = i;
-            }
+    public boolean isStructureOf(SimpleIndices indices) {
+        if (size != indices.size())
+            return false;
+        return Arrays.equals(typesCounts, indices.getIndicesTypeStructure().typesCounts);
     }
 
     public static class TypeData {
+
         public final int from;
         public final int length;
 

@@ -23,7 +23,6 @@
 package cc.redberry.core.number.parser;
 
 import cc.redberry.core.number.*;
-import org.apache.commons.math3.fraction.*;
 import org.junit.*;
 
 /**
@@ -123,6 +122,21 @@ public class NumberParserTest {
     public void test15() {
         Complex a = NumberParser.COMPLEX_PARSER.parse("4/2+i*3/2");
         Complex b = new Complex(new Rational(4, 2), new Rational(3, 2));
+        Assert.assertEquals(b, a);
+    }
+
+    @Test
+    public void test16() {
+        Complex a = NumberParser.COMPLEX_PARSER.parse("0/0");
+        Complex b = new Complex(Numeric.NaN, Numeric.NaN);
+        Assert.assertEquals(b, a);
+    }
+
+    @Test
+    public void test17() {
+        Complex a = NumberParser.COMPLEX_PARSER.parse("1/0");
+        System.out.println(a);
+        Complex b = new Complex(Numeric.NaN, Numeric.NaN);
         Assert.assertEquals(b, a);
     }
 }

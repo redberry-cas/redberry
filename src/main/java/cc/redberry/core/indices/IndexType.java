@@ -43,7 +43,7 @@ public enum IndexType {
     /**
      * Total number of available index types
      */
-    public static final byte TYPES_COUNT = 4;//redundant
+    public static final int TYPES_COUNT = 4;//redundant
     private final IndexSymbolConverter converter;
 
     private IndexType(IndexSymbolConverter converter) {

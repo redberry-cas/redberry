@@ -22,6 +22,11 @@
  */
 package cc.redberry.core.tensor;
 
+import cc.redberry.core.indices.*;
+import cc.redberry.core.number.*;
+import java.util.*;
+import java.util.List;
+
 /**
  *
  * @author Dmitry Bolotin
@@ -29,19 +34,34 @@ package cc.redberry.core.tensor;
  */
 public class SumBuilder implements TensorBuilder {
 
+    private final List<Tensor> summands;
+    private Indices freeIndices = null;
+
     public SumBuilder() {
+        summands = new ArrayList<>(7);
     }
 
     public SumBuilder(int initialCapacity) {
+        summands = new ArrayList<>(initialCapacity);
     }
 
     @Override
     public Tensor buid() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        if(summands.size() == 1)
+            return summands.get(0);
+        
+        if(summands.isEmpty())
+            return Complex.ZERO;
+        
+        return new Sum(summands.toArray(new Tensor[summands.size()]), freeIndices);
     }
 
     @Override
     public void put(Tensor tensor) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        if (freeIndices == null)//TODO check indices for sorted
+            freeIndices = IndicesFactory.createSorted(tensor.getIndices().getFreeIndices());
+        else if (!freeIndices.equalsIgnoreOrder(tensor.getIndices().getFreeIndices()))
+            throw new IllegalArgumentException("Inconsistent indices in added summand");
+        summands.add(tensor);
     }
 }

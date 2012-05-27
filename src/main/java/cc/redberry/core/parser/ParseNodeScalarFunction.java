@@ -22,12 +22,16 @@
  */
 package cc.redberry.core.parser;
 
+import cc.redberry.core.tensor.*;
+import java.util.*;
+
 /**
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
 public final class ParseNodeScalarFunction extends ParseNode {
+
     public String function;
 
     public ParseNodeScalarFunction(String function, ParseNode[] content) {
@@ -40,5 +44,35 @@ public final class ParseNodeScalarFunction extends ParseNode {
     @Override
     public String toString() {
         return function + "[" + content[0] + "]";
+    }
+
+    @Override
+    public Tensor toTensor() {
+        if (content.length != 1)
+            throw new IllegalArgumentException("Wrong scalar function node.");
+        Tensor arg = content[0].toTensor();
+        switch (function.toLowerCase()) {
+            case "sin":
+                return TensorsFactory.sin(arg);
+            case "cos":
+                return TensorsFactory.cos(arg);
+            case "tan":
+                return TensorsFactory.tan(arg);
+            case "cotan":
+                return TensorsFactory.cotan(arg);
+            case "log":
+                return TensorsFactory.log(arg);
+        }
+        throw new IllegalStateException("Unknown scalar function \"" + function + "\".");
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (!super.equals(obj))
+            return false;
+        final ParseNodeScalarFunction other = (ParseNodeScalarFunction) obj;
+        if (!Objects.equals(this.function, other.function))
+            return false;
+        return true;
     }
 }

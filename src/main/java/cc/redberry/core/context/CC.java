@@ -73,9 +73,9 @@ public final class CC {
         return current().withMetric();
     }
 
-    public static SimpleTensor createSimpleTensor(String name, SimpleIndices indices) {
-        return current().createSimpleTensor(name, indices);
-    }
+    //public static SimpleTensor createSimpleTensor(String name, SimpleIndices indices) {
+    //    return current().createSimpleTensor(name, indices);
+    //}
 
     /**
      * See {@link Context#resetTensorNames()}.

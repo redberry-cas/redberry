@@ -65,4 +65,6 @@ public interface SimpleIndices extends Indices {
      * <code>false</code> if not.
      */
     boolean equalsWithSymmetries(Indices indices);
+    
+    IndicesTypeStructure getIndicesTypeStructure();
 }

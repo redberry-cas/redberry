@@ -22,9 +22,11 @@
  */
 package cc.redberry.core.tensor;
 
+import cc.redberry.core.context.*;
 import cc.redberry.core.indices.Indices;
 import cc.redberry.core.indices.IndicesFactory;
 import cc.redberry.core.indices.SortedIndices;
+import java.lang.ref.SoftReference;
 import java.util.Arrays;
 
 /**
@@ -34,30 +36,39 @@ import java.util.Arrays;
  */
 public final class Sum extends MultiTensor {
 
-    public Sum(Tensor... data) {
+    private final int hash;
+
+    Sum(Tensor[] data, Indices freeIndices) {
         super(data);
+        this.indicesReference = new SoftReference<>(freeIndices);
         Arrays.sort(data);//TODO use non-stable sort
+        this.hash = calculateHash();
     }
 
     @Override
     protected Indices calculateIndices() {
-
-        int p = 0;
         Indices indices = data[0].getIndices().getFreeIndices();
-        boolean sorted = indices instanceof SortedIndices;
 
-        Indices current;
-        for (int i = 1; i < data.length; ++i) {
-            current = data[i].getIndices().getFreeIndices();
-            if (!current.equalsIgnoreOrder(indices))
-                throw new TensorException("Inconsistent summands: " + data[p] + " and " + data[i] + " have differrent free indices.");
-            if (!sorted && current instanceof SortedIndices) {
-                indices = current;
-                p = i;
-                sorted = true;
-            }
-        }
+//        int p = 0;
+//        boolean sorted = indices instanceof SortedIndices;
+//
+//        Indices current;
+//        for (int i = 1; i < data.length; ++i) {
+//            current = data[i].getIndices().getFreeIndices();
+//            if (!current.equalsIgnoreOrder(indices))
+//                throw new TensorException("Inconsistent summands: " + data[p] + " and " + data[i] + " have differrent free indices.");
+//            if (!sorted && current instanceof SortedIndices) {
+//                indices = current;
+//                p = i;
+//                sorted = true;
+//            }
+//        }
         return IndicesFactory.createSorted(indices);
+    }
+
+    @Override
+    public int hash() {
+        return hash;
     }
 
     @Override
@@ -74,6 +85,11 @@ public final class Sum extends MultiTensor {
     public TensorBuilder getBuilder() {
         return new SumBuilder(data.length);
     }
-    
-    
+
+    @Override
+    protected String toString(ToStringMode mode, Class<? extends Tensor> clazz) {
+        if (clazz == Product.class || clazz == Power.class)
+            return "(" + toString(mode) + ")";
+        return toString(mode);
+    }
 }

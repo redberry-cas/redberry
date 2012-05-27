@@ -22,6 +22,7 @@
  */
 package cc.redberry.core.context;
 
+import cc.redberry.core.indices.*;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.locks.Lock;
@@ -34,6 +35,7 @@ import org.apache.commons.math3.random.Well44497b;
  * @author Stanislav Poslavsky
  */
 public class NameManager {
+
     private long seed;
     private final BitsStreamGenerator random;// = new Well44497b(); //TODO: what is the best bit provider at this point???
     private final ReentrantReadWriteLock readWriteLock = new ReentrantReadWriteLock();
@@ -50,9 +52,8 @@ public class NameManager {
             random = new Well44497b(this.seed = seed.longValue());
     }
 
-    public int mapNameDescriptor(NameDescriptor descriptor) {
-        if (descriptor == null)
-            throw new NullPointerException();
+    public NameDescriptor mapNameDescriptor(String sname, IndicesTypeStructure... indicesTypeStructures) {
+        NameDescriptor descriptor = new NameDescriptor(sname, indicesTypeStructures);
         boolean rLocked = true;
         readLock.lock();
         try {
@@ -68,7 +69,7 @@ public class NameManager {
                         descriptor.setId(name);
                         fromId.put(name, descriptor);
                         fromStructure.put(descriptor.getKey(), descriptor);
-                        return descriptor.getId();
+                        return descriptor;
                     }
                     readLock.lock();
                     rLocked = true;
@@ -76,14 +77,51 @@ public class NameManager {
                     writeLock.unlock();
                 }
             }
-            descriptor.setId(knownND.getId());
-            return knownND.getId();
+            return knownND;
         } finally {
             if (rLocked)
                 readLock.unlock();
         }
     }
 
+    //    public int mapNameDescriptor(NameDescriptor descriptor) {
+    //        if (descriptor
+    //                == null)
+    //            throw new NullPointerException();
+    //        boolean rLocked = true;
+    //        readLock.lock();
+    //        try {
+    //            NameDescriptor knownND =
+    //                    fromStructure.get(descriptor.getKey());
+    //            if (knownND == null) {
+    //                readLock.unlock();
+    //                rLocked = false;
+    //                writeLock.lock();
+    //                try {
+    //                    knownND =
+    //                            fromStructure.get(descriptor.getKey());
+    //                    if (knownND == null) { //Double check
+    //                        int name = generateNewName();
+    //                        descriptor.setId(name);
+    //                        fromId.put(name, descriptor);
+    //                        fromStructure.put(descriptor.getKey(),
+    //                                          descriptor);
+    //                        return descriptor.getId();
+    //                    }
+    //                    readLock.lock();
+    //                    rLocked =
+    //                            true;
+    //                } finally {
+    //                    writeLock.unlock();
+    //                }
+    //            }
+    //            descriptor.setId(knownND.getId());
+    //            return knownND.getId();
+    //        } finally {
+    //            if (rLocked)
+    //                readLock.unlock();
+    //        }
+    //    }
     /**
      * See {@link Context#resetTensorNames()}.
      */

@@ -23,6 +23,8 @@
 package cc.redberry.core.parser;
 
 import cc.redberry.core.number.Complex;
+import cc.redberry.core.tensor.*;
+import java.util.Objects;
 
 /**
  *
@@ -31,7 +33,7 @@ import cc.redberry.core.number.Complex;
  */
 public class ParseNodeNumber extends ParseNode {
 
-    private Complex value;
+    public Complex value;
 
     public ParseNodeNumber(Complex value) {
         super(TensorType.Number, new ParseNode[0]);
@@ -41,5 +43,22 @@ public class ParseNodeNumber extends ParseNode {
     @Override
     public String toString() {
         return value.toString();
+    }
+
+    @Override
+    public Tensor toTensor() {
+        return value;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        final ParseNodeNumber other = (ParseNodeNumber) obj;
+        if (!Objects.equals(this.value, other.value))
+            return false;
+        return true;
     }
 }

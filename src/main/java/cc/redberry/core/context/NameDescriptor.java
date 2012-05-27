@@ -29,13 +29,16 @@ import java.util.Objects;
 
 public final class NameDescriptor {
     //first element is simple tensor indexTypeStructure, other apperars for tensor fields
+
     private final IndicesTypeStructure[] indexTypeStructures;
     private final String name;
     private final IndicesTypeStructureAndName key;
     private int id = -1;
     private final IndicesSymmetries symmetries;
 
-    public NameDescriptor(String name, IndicesTypeStructure... indexTypeStructures) {
+    NameDescriptor(String name, IndicesTypeStructure... indexTypeStructures) {
+        if (indexTypeStructures.length == 0)
+            throw new IllegalArgumentException();
         this.indexTypeStructures = indexTypeStructures;
         this.name = name;
         this.key = new IndicesTypeStructureAndName(name, indexTypeStructures);
@@ -81,6 +84,7 @@ public final class NameDescriptor {
     }
 
     static class IndicesTypeStructureAndName {
+
         private String name;
         private IndicesTypeStructure[] structure;
 

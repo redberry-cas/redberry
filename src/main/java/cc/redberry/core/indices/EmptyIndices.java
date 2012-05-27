@@ -235,4 +235,9 @@ public final class EmptyIndices implements SimpleIndices {
     public short[] getDiffIds() {
         return new short[0];
     }
+
+    @Override
+    public IndicesTypeStructure getIndicesTypeStructure() {
+        return IndicesTypeStructure.EMPTY;
+    }
 }

@@ -36,6 +36,7 @@ import java.util.List;
  * @author Stanislav Poslavsky
  */
 public class IndicesSymmetries implements Iterable<Symmetry> {
+
     private final IndicesTypeStructure indicesTypeStructure;
     private final Symmetries symmetries;
     private short[] diffIds = null;
@@ -54,6 +55,10 @@ public class IndicesSymmetries implements Iterable<Symmetry> {
     IndicesSymmetries(IndicesTypeStructure indicesTypeStructure, Symmetries symmetries) {
         this.indicesTypeStructure = indicesTypeStructure;
         this.symmetries = symmetries;
+    }
+
+    public IndicesTypeStructure getIndicesTypeStructure() {
+        return indicesTypeStructure;
     }
 
     public Symmetries getReference() {
@@ -91,6 +96,10 @@ public class IndicesSymmetries implements Iterable<Symmetry> {
 
     public boolean add(IndexType type, boolean sign, int... permutation) {
         return add(type.getType(), new Symmetry(permutation, sign));
+    }
+
+    public boolean add(byte type, boolean sign, int... permutation) {
+        return add(type, new Symmetry(permutation, sign));
     }
 
     public boolean add(byte type, Symmetry symmetry) {
@@ -168,18 +177,20 @@ public class IndicesSymmetries implements Iterable<Symmetry> {
         return symmetries.toString();
     }
 
-    private static void checkConsistent(IndicesTypeStructure indicesTypeStructure, Symmetries symmetries) {
-        List<Symmetry> list = symmetries.getBaseSymmetries();
-        for (Symmetry s : list)
-            checkConsistent(indicesTypeStructure, s);
+    /*
+     * private static void checkConsistent(IndicesTypeStructure
+     * indicesTypeStructure, Symmetries symmetries) { List<Symmetry> list =
+     * symmetries.getBaseSymmetries(); for (Symmetry s : list)
+     * checkConsistent(indicesTypeStructure, s); }
+     *
+     * private static void checkConsistent(IndicesTypeStructure
+     * indicesTypeStructure, Symmetry symmetry) { for (int i = 0; i <
+     * symmetry.dimension(); ++i) if (indicesTypeStructure.data[i] !=
+     * indicesTypeStructure.data[symmetry.newIndexOf(i)]) throw new
+     * IllegalArgumentException("Inconsistent symmetry: permutes indices with
+     * different types.");
     }
-
-    private static void checkConsistent(IndicesTypeStructure indicesTypeStructure, Symmetry symmetry) {
-        for (int i = 0; i < symmetry.dimension(); ++i)
-            if (indicesTypeStructure.data[i] != indicesTypeStructure.data[symmetry.newIndexOf(i)])
-                throw new IllegalArgumentException("Inconsistent symmetry: permutes indices with different types.");
-    }
-
+     */
     public static IndicesSymmetries create(IndicesTypeStructure indicesTypeStructure) {
         if (indicesTypeStructure.size() == 0)
             return EMPTY_SYMMETRIES;
@@ -187,7 +198,8 @@ public class IndicesSymmetries implements Iterable<Symmetry> {
     }
     public static final IndicesSymmetries EMPTY_SYMMETRIES =
             new IndicesSymmetries(new IndicesTypeStructure(EmptyIndices.INSTANCE),
-            Symmetries.EMPTY_SYMMETRIES, new short[0]) {
+                                  Symmetries.EMPTY_SYMMETRIES, new short[0]) {
+
                 @Override
                 public IndicesSymmetries clone() {
                     return this;

@@ -23,8 +23,11 @@
 package cc.redberry.core.tensor;
 
 import cc.redberry.core.number.Complex;
-import cc.redberry.core.utils.*;
-import java.util.*;
+import cc.redberry.core.utils.TensorUtils;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  *
@@ -52,14 +55,18 @@ public class ProductBuilder implements TensorBuilder {
         if (complex.isZero() || complex.isInfinite() || complex.isNaN())
             return complex;
 
-        List<Tensor> data = new ArrayList<>(elements.size() + powers.size() + 1);
+        ArrayList<Tensor> data = new ArrayList<>(elements.size() + powers.size() + 1);
         Complex complex = this.complex;
         for (Map.Entry<Tensor, SumBuilder> entry : powers.entrySet()) {
-            Tensor t = TensorsFactory.buildPower(entry.getKey(), entry.getValue().buid());
+            Tensor t = TensorsFactory.pow(entry.getKey(), entry.getValue().buid());
+
+            assert !(t instanceof Product);
+
             if (t instanceof Complex)
                 complex = complex.multiply((Complex) t);
             else
                 data.add(t);
+
         }
 
         //may be redundant...
@@ -70,11 +77,19 @@ public class ProductBuilder implements TensorBuilder {
             data.add(complex);
 
         data.addAll(elements);
+        
+        if(data.size() == 1)
+            return data.get(0);
+        
+        if(data.isEmpty())
+            return Complex.ONE;
+        
         return new Product(data.toArray(new Tensor[data.size()]));
     }
 
     @Override
     public void put(Tensor tensor) {
+        //TODO calculate indices
         if (tensor instanceof Product) {
             for (Tensor t : tensor)
                 put(t);

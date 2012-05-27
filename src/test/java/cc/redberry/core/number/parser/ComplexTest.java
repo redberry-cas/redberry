@@ -20,21 +20,29 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
-package cc.redberry.core.parser;
+package cc.redberry.core.number.parser;
+
+import cc.redberry.core.number.*;
+import org.junit.*;
 
 /**
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public interface NodeParser {
+public class ComplexTest {
 
-    ParseNode parseNode(String expression, Parser parser);
+    @Test
+    public void test1() {
+        Complex a = new Complex(1);
+        Complex b = new Complex(0);
+        System.out.println(a.divide(b));
+    }
 
-    /**
-     * The higher the priority, the earlier runs.
-     *
-     * @return priority
-     */
-    int priority();
+    @Test
+    public void test2() {
+        org.apache.commons.math3.complex.Complex a = new org.apache.commons.math3.complex.Complex(1);
+        org.apache.commons.math3.complex.Complex b = new org.apache.commons.math3.complex.Complex(0);
+        System.out.println(a.divide(b));
+    }
 }

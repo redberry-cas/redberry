@@ -40,10 +40,12 @@ import java.util.Arrays;
 public final class Product extends MultiTensor {
 
     private SoftReference<ProductContent> contentReference;
+    private final int hash;
 
     public Product(Tensor... data) {
         super(data);
-        contentReference = new SoftReference<>(calculateContent());
+        this.contentReference = new SoftReference<>(calculateContent());
+        this.hash = calculateHash();
     }
 
     @Override
@@ -182,7 +184,8 @@ public final class Product extends MultiTensor {
                 infoToTensorIndices(upperInfo), infoToTensorIndices(lowerInfo), data.length + 1);
 
         //the number of components
-        final int componentCount = components[components.length - 1];
+        final int componentCount = components[components.length - 1]; //Last element of this array contains components count 
+        //(this is specification of GraphUtils.calculateConnectedComponents method)
         int[] componentSizes = new int[componentCount];
 
         //finding each component size
@@ -201,12 +204,21 @@ public final class Product extends MultiTensor {
         for (i = 1; i < data.length + 1; ++i)
             datas[components[i]][componentSizes[components[i]]++] = data[i - 1];
 
-        Tensor nonScalar = new Product(datas[0]);//FIXME create factory method
-        Tensor[] scalars = new Tensor[componentCount - 1];
-        for (i = 1; i < componentCount; ++i)
-            scalars[i - 1] = new Product(datas[i]);
-        Arrays.sort(scalars); //TODO use nonstable sort
+        Tensor nonScalar = null;
+        if (componentCount == 1) //There are no scalar subproducts in this product
+            nonScalar = this;
+        else if (datas[0].length > 0)
+            nonScalar = TensorsFactory.multiply(datas[0]);
 
+        Tensor[] scalars = new Tensor[componentCount - 1];
+
+        if (nonScalar == null && componentCount == 2)
+            scalars[0] = this;
+        else {
+            for (i = 1; i < componentCount; ++i)
+                scalars[i - 1] = TensorsFactory.multiply(datas[i]);
+            Arrays.sort(scalars); //TODO use nonstable sort
+        }
 
         //assert Arrays.equals(indices[0], indices[1]);
         assert Arrays.equals(indices[0], indices[1]);
@@ -261,6 +273,11 @@ public final class Product extends MultiTensor {
             }
 
         return stretchIndex;
+    }
+
+    @Override
+    protected int hash() {
+        return hash;
     }
 
     /**

@@ -491,4 +491,8 @@ public class Rational extends Real implements Serializable {
     public boolean isOne() {
         return fraction.equals(BigFraction.ONE);
     }
+
+    public boolean isInteger() {
+        return fraction.getDenominator().compareTo(BigInteger.ONE) == 0;
+    }
 }

@@ -35,7 +35,7 @@ public class TensorField extends SimpleTensor {
 //        for (Tensor t : args)
 //            argIndices[i++] = IndicesFactory.createSimple(null, t.getIndices().getFreeIndices());
 //    }
-    public TensorField(int name, SimpleIndices indices, Tensor[] args, SimpleIndices[] argIndices) {
+    TensorField(int name, SimpleIndices indices, Tensor[] args, SimpleIndices[] argIndices) {
         super(name, indices);
         this.args = args;
         this.argIndices = argIndices;
