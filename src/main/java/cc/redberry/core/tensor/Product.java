@@ -93,8 +93,7 @@ public final class Product extends MultiTensor {
         return getContent().stretchIndices.clone();
     }
 
-    @Override
-    protected int calculateHash() {
+    private int calculateHash() {
         int result = 1;
         for (Tensor element : data)
             result = 47 * result + element.hashCode();

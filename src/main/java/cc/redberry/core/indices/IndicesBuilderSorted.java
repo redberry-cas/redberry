@@ -61,6 +61,7 @@ public final class IndicesBuilderSorted
     @Override
     public IndicesBuilderSorted append(int index) {
         data.add(index);
+//        PriorityQueue
         return this;
     }
 

@@ -89,7 +89,7 @@ public class commons {
         System.out.println(dsf);
         System.out.println(sadf);
         System.out.println(D ^ 1);
-       
+
 
         System.out.println(new String("a").hashCode());
         System.out.println("a".hashCode());
@@ -97,5 +97,13 @@ public class commons {
         System.out.println("b".hashCode());
         System.out.println(new String("c").hashCode());
         System.out.println("c".hashCode());
+
+
+        System.out.println(new Integer(3).compareTo(new Integer(2)));
+    }
+
+    @Test
+    public void sdsdAds() {
+        System.out.println((65 - 1) >>> 1);
     }
 }

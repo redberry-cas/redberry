@@ -22,10 +22,9 @@
  */
 package cc.redberry.core.tensor;
 
-import cc.redberry.core.context.*;
+import cc.redberry.core.context.ToStringMode;
 import cc.redberry.core.indices.Indices;
 import cc.redberry.core.indices.IndicesFactory;
-import cc.redberry.core.indices.SortedIndices;
 import java.lang.ref.SoftReference;
 import java.util.Arrays;
 
@@ -76,8 +75,8 @@ public final class Sum extends MultiTensor {
         return '+';
     }
 
-    @Override
-    protected int calculateHash() {
+    
+    private int calculateHash() {
         return Arrays.hashCode(data);
     }
 
