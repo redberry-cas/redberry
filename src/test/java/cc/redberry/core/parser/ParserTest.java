@@ -22,6 +22,7 @@
  */
 package cc.redberry.core.parser;
 
+import cc.redberry.core.context.*;
 import cc.redberry.core.indices.EmptyIndices;
 import cc.redberry.core.indices.SimpleIndices;
 import cc.redberry.core.number.Complex;
@@ -84,6 +85,21 @@ public class ParserTest {
     public void testReallySimpleTensor() {
         ParseNode node = Parser.DEFAULT.parse("S^k*(c_k*Power[a,1]/a-b_k)");
         Tensor t = node.toTensor();
-        System.out.println(((Product)t).getScalars()[0]);
+        System.out.println(((Product) t).getScalars()[0]);
+        System.currentTimeMillis();
+    }
+
+    @Test
+    public void testProductPowers1() {
+        Tensor t = CC.current().getParseManager().parse("a*c/b*1/4");
+        System.out.println(t);
+//        System.currentTimeMillis();
+    }
+
+    @Test
+    public void testProductPowers2() {
+        ParseNode node = Parser.DEFAULT.parse("a*c/b*1/4");
+        System.out.println(node);
+//        System.currentTimeMillis();
     }
 }

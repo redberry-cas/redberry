@@ -69,7 +69,9 @@ public class PowerBuilder implements TensorBuilder {
             if (p.isReal()) {
                 Rational pp = (Rational) p.getReal();
                 if (pp.isInteger()) {
-                    BigInteger exponent = pp.getNumerator();
+                    boolean sign = pp.getNumerator().compareTo(BigInteger.ZERO) > 0;
+                    BigInteger exponent = pp.getNumerator().abs();
+
                     Complex result = Complex.ONE, base = a;
                     while (exponent.signum() > 0) {
                         if (exponent.testBit(0))
@@ -77,7 +79,10 @@ public class PowerBuilder implements TensorBuilder {
                         base = base.multiply(base);
                         exponent = exponent.shiftRight(1);
                     }
-                    return result;
+                    if (sign)
+                        return result;
+                    else
+                        return result.reciprocal();
                 }
             }
         }
