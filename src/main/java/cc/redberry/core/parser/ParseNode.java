@@ -67,13 +67,13 @@ public class ParseNode {
     public Tensor toTensor() {
         switch (tensorType) {
             case Sum:
-                return TensorsFactory.sum(contentToTensors());
+                return Tensors.sum(contentToTensors());
             case Pow:
                 if (content.length != 2)
                     throw new IllegalStateException("Incorrect power arguments count.");
-                return TensorsFactory.pow(content[0].toTensor(), content[1].toTensor());
+                return Tensors.pow(content[0].toTensor(), content[1].toTensor());
             case Product:
-                return TensorsFactory.multiply(contentToTensors());
+                return Tensors.multiply(contentToTensors());
         }
         throw new RuntimeException("Unknown type.");
     }

@@ -23,6 +23,7 @@
 package cc.redberry.core.context;
 
 import cc.redberry.core.indices.*;
+import cc.redberry.core.parser.*;
 import cc.redberry.core.tensor.*;
 import java.util.Arrays;
 import java.util.EnumSet;
@@ -37,6 +38,7 @@ public final class Context {
     private final EnumSet<IndexType> metricTypes;
     private final byte[] metricTypesArray;
     private final IndexConverterManager converterManager;
+    private final ParseManager parseManager = new ParseManager();
 
     public Context(ContextSettings contextSettings) {
         this.converterManager = contextSettings.getConverterManager();
@@ -74,6 +76,9 @@ public final class Context {
             kroneckerNames[i] = nd.getId();
             nd.getSymmetries().add((byte) i, false, new int[]{1, 0});
         }
+
+        Arrays.sort(metricNames);
+        Arrays.sort(kroneckerNames);
     }
 
     /**
@@ -126,19 +131,17 @@ public final class Context {
     }
 
     public boolean isKronecker(SimpleTensor t) {
-        if (kroneckerNames == null)
-            return false;
         // kroneckerNames naturally sorted
         return Arrays.binarySearch(kroneckerNames, t.getName()) >= 0;
     }
 
     public boolean isMetric(SimpleTensor t) {
-        if (metricNames == null)
-            return false;
         // metricNames naturally sorted
-        synchronized (this) {
-            return Arrays.binarySearch(metricNames, t.getName()) >= 0;
-        }
+        return Arrays.binarySearch(metricNames, t.getName()) >= 0;
+    }
+
+    public ParseManager getParseManager() {
+        return parseManager;
     }
 
     public SimpleTensor createKronecker(int index1, int index2) {
@@ -147,7 +150,7 @@ public final class Context {
         SimpleIndices indices = IndicesFactory.createSimple(null, index1, index2);
         NameDescriptor nd = nameManager.mapNameDescriptor(kroneckerName, new IndicesTypeStructure(indices));
         int name = nd.getId();
-        return TensorsFactory.simpleTensor(name, indices);
+        return Tensors.simpleTensor(name, indices);
     }
 
     public SimpleTensor createMetric(int index1, int index2) {
@@ -159,7 +162,7 @@ public final class Context {
         SimpleIndices indices = IndicesFactory.createSimple(null, index1, index2);
         NameDescriptor nd = nameManager.mapNameDescriptor(kroneckerName, new IndicesTypeStructure(indices));
         int name = nd.getId();
-        return TensorsFactory.simpleTensor(name, indices);
+        return Tensors.simpleTensor(name, indices);
     }
 
     public SimpleTensor createMetricOrKronecker(int index1, int index2) {

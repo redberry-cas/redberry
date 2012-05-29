@@ -91,11 +91,11 @@ public class PowerBuilder implements TensorBuilder {
             Tensor[] scalars = ((Product) argument).getScalars();
             TensorBuilder pb = argument.getBuilder();//creating product builder 
             for (Tensor t : scalars)
-                pb.put(TensorsFactory.pow(t, power));
+                pb.put(Tensors.pow(t, power));
             return pb.buid();
         }
         if (argument instanceof Power)
-            return TensorsFactory.pow(argument.get(0), TensorsFactory.multiply(argument.get(1), power));
+            return Tensors.pow(argument.get(0), Tensors.multiply(argument.get(1), power));
         return new Power(argument, power);
     }
 

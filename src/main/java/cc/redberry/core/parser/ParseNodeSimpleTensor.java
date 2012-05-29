@@ -55,7 +55,7 @@ public class ParseNodeSimpleTensor extends ParseNode {
 
     @Override
     public Tensor toTensor() {
-        return TensorsFactory.simpleTensor(name, indices);
+        return Tensors.simpleTensor(name, indices);
     }
 
     @Override

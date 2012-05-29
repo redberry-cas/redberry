@@ -22,35 +22,29 @@
  */
 package cc.redberry.core.parser;
 
-import cc.redberry.core.indices.SimpleIndices;
-import cc.redberry.core.tensor.*;
+import cc.redberry.core.tensor.Tensor;
+import cc.redberry.transformations.Transformation;
+import java.util.*;
+import java.util.List;
 
 /**
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public class ParseNodeTensorField extends ParseNodeSimpleTensor {
+public final class ParseManager {
 
-    public SimpleIndices[] argumentsIndices;
+    private final Parser parser = Parser.DEFAULT;
+    public final List<Transformation> tensorPreprocessors = new ArrayList<>();
+    public final List<ParseNodeTransformer> nodesPreprocessors = new ArrayList<>();
 
-    public ParseNodeTensorField(SimpleIndices indices, String name, ParseNode[] content, SimpleIndices[] argumentsIndices) {
-        super(indices, name, TensorType.TensorField, content);
-        this.argumentsIndices = argumentsIndices;
-    }
-
-    @Override
-    public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(super.toString()).append('[');
-        for (ParseNode node : content)
-            sb.append(node.toString()).append(", ");
-        sb.deleteCharAt(sb.length() - 1).deleteCharAt(sb.length() - 1).append(']');
-        return sb.toString();
-    }
-
-    @Override
-    public Tensor toTensor() {
-        return Tensors.field(name, indices, argumentsIndices, contentToTensors());
+    public Tensor parse(String expression) {
+        ParseNode node = parser.parse(expression);
+        for (ParseNodeTransformer tr : nodesPreprocessors)
+            node = tr.transform(node);
+        Tensor t = node.toTensor();
+        for (Transformation tr : tensorPreprocessors)
+            t = tr.transform(t);
+        return t;
     }
 }

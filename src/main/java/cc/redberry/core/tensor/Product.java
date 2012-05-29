@@ -208,7 +208,7 @@ public final class Product extends MultiTensor {
         if (componentCount == 1) //There are no scalar subproducts in this product
             nonScalar = this;
         else if (datas[0].length > 0)
-            nonScalar = TensorsFactory.multiply(datas[0]);
+            nonScalar = Tensors.multiply(datas[0]);
 
         Tensor[] scalars = new Tensor[componentCount - 1];
 
@@ -216,7 +216,7 @@ public final class Product extends MultiTensor {
             scalars[0] = this;
         else {
             for (i = 1; i < componentCount; ++i)
-                scalars[i - 1] = TensorsFactory.multiply(datas[i]);
+                scalars[i - 1] = Tensors.multiply(datas[i]);
             Arrays.sort(scalars); //TODO use nonstable sort
         }
 

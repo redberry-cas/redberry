@@ -45,26 +45,6 @@ public final class CC {
         return current().getIndexConverterManager();
     }
 
-    public static SimpleTensor createKronecker(int index1, int index2) {
-        return current().createKronecker(index1, index2);
-    }
-
-    public static SimpleTensor createMetric(int index1, int index2) {
-        return current().createMetric(index1, index2);
-    }
-
-    public static SimpleTensor createMetricOrKronecker(int index1, int index2) {
-        return current().createMetricOrKronecker(index1, index2);
-    }
-
-    public static boolean isMetric(SimpleTensor t) {
-        return current().isMetric(t);
-    }
-
-    public static boolean isKronecker(SimpleTensor t) {
-        return current().isKronecker(t);
-    }
-
     public static ToStringMode getDefaultPrintMode() {
         return current().getDefaultPrintMode();
     }
@@ -72,10 +52,6 @@ public final class CC {
     public static boolean withMetric() {
         return current().withMetric();
     }
-
-    //public static SimpleTensor createSimpleTensor(String name, SimpleIndices indices) {
-    //    return current().createSimpleTensor(name, indices);
-    //}
 
     /**
      * See {@link Context#resetTensorNames()}.

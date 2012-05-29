@@ -58,7 +58,7 @@ public class ProductBuilder implements TensorBuilder {
         ArrayList<Tensor> data = new ArrayList<>(elements.size() + powers.size() + 1);
         Complex complex = this.complex;
         for (Map.Entry<Tensor, SumBuilder> entry : powers.entrySet()) {
-            Tensor t = TensorsFactory.pow(entry.getKey(), entry.getValue().buid());
+            Tensor t = Tensors.pow(entry.getKey(), entry.getValue().buid());
 
             assert !(t instanceof Product);
 

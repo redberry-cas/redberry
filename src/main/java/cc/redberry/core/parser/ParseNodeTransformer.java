@@ -22,35 +22,11 @@
  */
 package cc.redberry.core.parser;
 
-import cc.redberry.core.indices.SimpleIndices;
-import cc.redberry.core.tensor.*;
-
 /**
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public class ParseNodeTensorField extends ParseNodeSimpleTensor {
-
-    public SimpleIndices[] argumentsIndices;
-
-    public ParseNodeTensorField(SimpleIndices indices, String name, ParseNode[] content, SimpleIndices[] argumentsIndices) {
-        super(indices, name, TensorType.TensorField, content);
-        this.argumentsIndices = argumentsIndices;
-    }
-
-    @Override
-    public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(super.toString()).append('[');
-        for (ParseNode node : content)
-            sb.append(node.toString()).append(", ");
-        sb.deleteCharAt(sb.length() - 1).deleteCharAt(sb.length() - 1).append(']');
-        return sb.toString();
-    }
-
-    @Override
-    public Tensor toTensor() {
-        return Tensors.field(name, indices, argumentsIndices, contentToTensors());
-    }
+public interface ParseNodeTransformer {
+    ParseNode transform(ParseNode node);
 }

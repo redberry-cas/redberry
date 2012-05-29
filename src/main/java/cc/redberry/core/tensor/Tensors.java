@@ -22,8 +22,12 @@
  */
 package cc.redberry.core.tensor;
 
-import cc.redberry.core.context.*;
-import cc.redberry.core.indices.*;
+import cc.redberry.core.context.CC;
+import cc.redberry.core.context.NameDescriptor;
+import cc.redberry.core.indices.IndicesFactory;
+import cc.redberry.core.indices.IndicesTypeStructure;
+import cc.redberry.core.indices.SimpleIndices;
+import cc.redberry.core.indices.UnsafeIndicesFactory;
 import cc.redberry.core.tensor.functions.*;
 
 /**
@@ -31,7 +35,7 @@ import cc.redberry.core.tensor.functions.*;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public class TensorsFactory {
+public class Tensors {
 
     public static Tensor pow(Tensor argument, Tensor power) {
         PowerBuilder pb = new PowerBuilder();
@@ -144,5 +148,33 @@ public class TensorsFactory {
 
     public static Tensor log(Tensor argument) {
         return new Log(argument);
+    }
+
+    public static SimpleTensor createKronecker(int index1, int index2) {
+        return CC.current().createKronecker(index1, index2);
+    }
+
+    public static SimpleTensor createMetric(int index1, int index2) {
+        return CC.current().createMetric(index1, index2);
+    }
+
+    public static SimpleTensor createMetricOrKronecker(int index1, int index2) {
+        return CC.current().createMetricOrKronecker(index1, index2);
+    }
+
+    public static boolean isKronecker(Tensor t) {
+        if (!(t instanceof SimpleTensor))
+            return false;
+        return CC.current().isKronecker((SimpleTensor) t);
+    }
+
+    public static boolean isMetric(Tensor t) {
+        if (!(t instanceof SimpleTensor))
+            return false;
+        return CC.current().isMetric((SimpleTensor) t);
+    }
+
+    public static Tensor parse(String expression) {
+        return CC.current().getParseManager().parse(expression);
     }
 }

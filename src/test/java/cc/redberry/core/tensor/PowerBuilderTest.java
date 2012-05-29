@@ -28,7 +28,7 @@ import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import static cc.redberry.core.tensor.TensorsFactory.pow;
+import static cc.redberry.core.tensor.Tensors.pow;
 //import static сс.redberry.core.TAssert.*;
 
 /**

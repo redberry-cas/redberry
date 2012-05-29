@@ -53,15 +53,15 @@ public final class ParseNodeScalarFunction extends ParseNode {
         Tensor arg = content[0].toTensor();
         switch (function.toLowerCase()) {
             case "sin":
-                return TensorsFactory.sin(arg);
+                return Tensors.sin(arg);
             case "cos":
-                return TensorsFactory.cos(arg);
+                return Tensors.cos(arg);
             case "tan":
-                return TensorsFactory.tan(arg);
+                return Tensors.tan(arg);
             case "cotan":
-                return TensorsFactory.cotan(arg);
+                return Tensors.cotan(arg);
             case "log":
-                return TensorsFactory.log(arg);
+                return Tensors.log(arg);
         }
         throw new IllegalStateException("Unknown scalar function \"" + function + "\".");
     }
