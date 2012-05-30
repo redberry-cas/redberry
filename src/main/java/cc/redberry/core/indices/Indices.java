@@ -22,8 +22,8 @@
  */
 package cc.redberry.core.indices;
 
-import cc.redberry.core.indexmapping.IndexMapping;
 import cc.redberry.core.context.ToStringMode;
+import cc.redberry.core.indexmapping.IndexMapping;
 import cc.redberry.core.utils.IntArray;
 
 /**
@@ -45,11 +45,13 @@ import cc.redberry.core.utils.IntArray;
  * @see IndicesUtils
  */
 public interface Indices {
+
     /**
      * Return {@link IntArray} of upper case indices. Due to immutability of
      * indices this method returns simple wrapper of generic integer array.
      *
      * @return IntArray of upper case indices
+     *
      * @see IntArray
      */
     IntArray getUpper();
@@ -59,6 +61,7 @@ public interface Indices {
      * indices this method returns simple wrapper of generic integer array.
      *
      * @return IntArray of lower case indices
+     *
      * @see IntArray
      */
     IntArray getLower();
@@ -83,10 +86,12 @@ public interface Indices {
      * <code>Indices</code>.
      *
      * @param position position of the index to return
+     *
      * @return the index at the specified position in this
      * <code>Indices</code>
+     *
      * @throws IndexOutOfBoundsException - if the index is out of range (index <
-     * 0 || index >= size())
+     *                                   0 || index >= size())
      */
     int get(int position);
 
@@ -130,16 +135,15 @@ public interface Indices {
      * true, but for _{ab}^c and ^c_{ak}, of course it returns false.
      *
      * @param indices indices to be compared
+     *
      * @return true if the set of specified indices equals to this one
      */
-    boolean equalsIgnoreOrder(Indices indices);
+    boolean equalsRegardlessOrder(Indices indices);
 
     /**
      * Checks for the consistence of this Indices. Package specification forbids
      * more than one index with the same case, type and value ,i.e. _{a...a}
-     *
-     * @throws cc.redberry.core.tensor.InconsistentIndicesException if there are
-     * inconsistent indices
+     * indices
      */
     void testConsistentWithException();
 
@@ -148,7 +152,9 @@ public interface Indices {
      * returns true if mapping changed indices and false if not.
      *
      * @param mapping specified {@code IndexeMapping}
+     *
      * @return true if mapping changed indices and false if not
+     *
      * @see IndexMapping
      */
     Indices applyIndexMapping(IndexMapping mapping);
@@ -170,7 +176,9 @@ public interface Indices {
      * <code>_{&alpha &beta}^{&gamma &delta}</code>
      *
      * @param mode symbols printing mode
+     *
      * @return string representation due to mode
+     *
      * @see ToStringMode
      */
     String toString(ToStringMode mode);

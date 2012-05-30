@@ -54,7 +54,7 @@ public final class Sum extends MultiTensor {
 //        Indices current;
 //        for (int i = 1; i < data.length; ++i) {
 //            current = data[i].getIndices().getFreeIndices();
-//            if (!current.equalsIgnoreOrder(indices))
+//            if (!current.equalsRegardlessOrder(indices))
 //                throw new TensorException("Inconsistent summands: " + data[p] + " and " + data[i] + " have differrent free indices.");
 //            if (!sorted && current instanceof SortedIndices) {
 //                indices = current;

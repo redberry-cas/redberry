@@ -60,7 +60,7 @@ public class SumBuilder implements TensorBuilder {
     public void put(Tensor tensor) {
         if (freeIndices == null)//TODO check indices for sorted
             freeIndices = IndicesFactory.createSorted(tensor.getIndices().getFreeIndices());
-        else if (!freeIndices.equalsIgnoreOrder(tensor.getIndices().getFreeIndices()))
+        else if (!freeIndices.equalsRegardlessOrder(tensor.getIndices().getFreeIndices()))
             throw new IllegalArgumentException("Inconsistent indices in added summand");
         summands.add(tensor);
     }

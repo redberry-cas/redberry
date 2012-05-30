@@ -51,7 +51,7 @@ class TensorFieldBuilder implements TensorBuilder {
             throw new IllegalStateException("No more arguments in field.");
         if (tensor == null)
             throw new NullPointerException();
-        if (!tensor.getIndices().getFreeIndices().equalsIgnoreOrder(field.getArgIndices(pointer)))
+        if (!tensor.getIndices().getFreeIndices().equalsRegardlessOrder(field.getArgIndices(pointer)))
             throw new IllegalArgumentException("Free indices of puted tensor differs from field argument binding indices!");
         data[pointer++] = tensor;
     }

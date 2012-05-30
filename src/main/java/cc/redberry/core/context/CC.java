@@ -15,18 +15,13 @@
  */
 package cc.redberry.core.context;
 
-import cc.redberry.core.indices.SimpleIndices;
-import cc.redberry.core.tensor.SimpleTensor;
-
 /**
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
 public final class CC {
-    private CC() {
-    }
 
-    public static void initialize() {
+    private CC() {
     }
 
     public static Context current() {
@@ -49,22 +44,19 @@ public final class CC {
         return current().getDefaultPrintMode();
     }
 
+    public static void setDefaultPrintMode(ToStringMode mode) {
+        current().setDefaultPrintMode(mode);
+    }
+
     public static boolean withMetric() {
         return current().withMetric();
     }
 
-    /**
-     * See {@link Context#resetTensorNames()}.
-     */
     public static void resetTensorNames() {
         current().resetTensorNames();
     }
 
     public static void resetTensorNames(long seed) {
         current().resetTensorNames(seed);
-    }
-
-    public static void setDefaultPrintMode(ToStringMode mode) {
-        current().setDefaultPrintMode(mode);
     }
 }

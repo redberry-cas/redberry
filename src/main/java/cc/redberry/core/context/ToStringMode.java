@@ -41,6 +41,7 @@ package cc.redberry.core.context;
  * @author Stanislav Poslavsky
  */
 public enum ToStringMode {
+
     /**
      * This mode supports LaTeX code generating via
      * <code>toString(ToStringMode mode)</code>. If you use this mode for

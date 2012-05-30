@@ -28,23 +28,26 @@ package cc.redberry.core.indices;
  */
 public class IndicesFactory {
 
+    public static final Indices EMPTY_INDICES = EmptyIndices.EMPTY_INDICES_INSTANCE;
+    public static final SimpleIndices EMPTY_SIMPLE_INDICES = EmptySimpleIndices.EMPTY_SIMPLE_INDICES_INSTANCE;
+
     public static SimpleIndices createSimple(IndicesSymmetries symmetries, int... data) {
         if (data.length == 0)
-            return EmptyIndices.INSTANCE;
+            return EmptySimpleIndices.EMPTY_SIMPLE_INDICES_INSTANCE;
         return new SimpleIndicesIsolated(data.clone(), symmetries);
     }
 
     public static SimpleIndices createSimple(IndicesSymmetries symmetries, Indices indices) {
         if (indices.size() == 0)
-            return EmptyIndices.INSTANCE;
+            return EmptySimpleIndices.EMPTY_SIMPLE_INDICES_INSTANCE;
         if (indices instanceof SimpleIndicesAbstract)
             return new SimpleIndicesIsolated(((SimpleIndicesAbstract) indices).data, symmetries);
         return new SimpleIndicesIsolated(indices.getAllIndices().copy(), symmetries);
     }
 
-    public static SortedIndices createSorted(Indices indices) {
+    public static Indices createSorted(Indices indices) {
         if (indices.size() == 0)
-            return LazyHolder.INSTANCE;
+            return EMPTY_INDICES;
         if (indices instanceof SortedIndices)
             return (SortedIndices) indices;
         return new SortedIndices(indices.getAllIndices().copy());
@@ -52,23 +55,7 @@ public class IndicesFactory {
 
     public static Indices createSorted(int... data) {
         if (data.length == 0)
-            return LazyHolder.INSTANCE;
+            return EMPTY_INDICES;
         return new SortedIndices(data.clone());
-    }
-
-    public static SortedIndices getEmptySortedIndices() {
-        return LazyHolder.INSTANCE;
-    }
-
-    /**
-     * Holder for the instance. <p>We use here the Initialization On Demand
-     * Holder Idiom!</p>
-     */
-    private static class LazyHolder {
-
-        /**
-         * Cached field instance.
-         */
-        private static final SortedIndices INSTANCE = new SortedIndices(new int[0]);
     }
 }

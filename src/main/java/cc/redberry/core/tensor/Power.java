@@ -23,8 +23,7 @@
 package cc.redberry.core.tensor;
 
 import cc.redberry.core.context.ToStringMode;
-import cc.redberry.core.indices.EmptyIndices;
-import cc.redberry.core.indices.Indices;
+import cc.redberry.core.indices.*;
 import cc.redberry.core.utils.TensorUtils;
 
 /**
@@ -57,7 +56,7 @@ public final class Power extends Tensor {
 
     @Override
     public Indices getIndices() {
-        return EmptyIndices.INSTANCE;//CHECKSTYLE mb sorted?
+        return IndicesFactory.EMPTY_INDICES;
     }
 
     @Override

@@ -23,8 +23,7 @@
 package cc.redberry.core.parser;
 
 import cc.redberry.core.context.*;
-import cc.redberry.core.indices.EmptyIndices;
-import cc.redberry.core.indices.SimpleIndices;
+import cc.redberry.core.indices.*;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.tensor.*;
 import junit.framework.Assert;
@@ -47,19 +46,19 @@ public class ParserTest {
     public void test2() {
         ParseNode node = Parser.DEFAULT.parse("f[a_\\mu] - f[b_\\mu/ (c * g) * g[x, y]]");
         ParseNode expected = new ParseNode(TensorType.Sum,
-                                           new ParseNodeTensorField(EmptyIndices.INSTANCE, "f", new ParseNode[]{new ParseNodeSimpleTensor(ParserIndices.parseSimple("_\\mu"), "a")}, new SimpleIndices[]{EmptyIndices.INSTANCE}),
+                                           new ParseNodeTensorField(IndicesFactory.EMPTY_SIMPLE_INDICES, "f", new ParseNode[]{new ParseNodeSimpleTensor(ParserIndices.parseSimple("_\\mu"), "a")}, new SimpleIndices[]{IndicesFactory.EMPTY_SIMPLE_INDICES}),
                                            new ParseNode(TensorType.Product,
                                                          new ParseNodeNumber(Complex.MINUSE_ONE),
-                                                         new ParseNodeTensorField(EmptyIndices.INSTANCE, "f",
+                                                         new ParseNodeTensorField(IndicesFactory.EMPTY_SIMPLE_INDICES, "f",
                                                                                   new ParseNode[]{new ParseNode(TensorType.Product,
                                                                                                                 new ParseNodeSimpleTensor(ParserIndices.parseSimple("_\\mu"), "b"),
-                                                                                                                new ParseNode(TensorType.Pow, new ParseNode(TensorType.Product, new ParseNodeSimpleTensor(EmptyIndices.INSTANCE, "c"), new ParseNodeSimpleTensor(EmptyIndices.INSTANCE, "g")),
+                                                                                                                new ParseNode(TensorType.Pow, new ParseNode(TensorType.Product, new ParseNodeSimpleTensor(IndicesFactory.EMPTY_SIMPLE_INDICES, "c"), new ParseNodeSimpleTensor(IndicesFactory.EMPTY_SIMPLE_INDICES, "g")),
                                                                                                                               new ParseNodeNumber(Complex.MINUSE_ONE)),
-                                                                                                                new ParseNodeTensorField(EmptyIndices.INSTANCE, "g",
-                                                                                                                                         new ParseNode[]{new ParseNodeSimpleTensor(EmptyIndices.INSTANCE, "x"),
-                                                                                                                                                         new ParseNodeSimpleTensor(EmptyIndices.INSTANCE, "y")},
-                                                                                                                                         new SimpleIndices[]{EmptyIndices.INSTANCE, EmptyIndices.INSTANCE}))},
-                                                                                  new SimpleIndices[]{EmptyIndices.INSTANCE})));
+                                                                                                                new ParseNodeTensorField(IndicesFactory.EMPTY_SIMPLE_INDICES, "g",
+                                                                                                                                         new ParseNode[]{new ParseNodeSimpleTensor(IndicesFactory.EMPTY_SIMPLE_INDICES, "x"),
+                                                                                                                                                         new ParseNodeSimpleTensor(IndicesFactory.EMPTY_SIMPLE_INDICES, "y")},
+                                                                                                                                         new SimpleIndices[]{IndicesFactory.EMPTY_SIMPLE_INDICES, IndicesFactory.EMPTY_SIMPLE_INDICES}))},
+                                                                                  new SimpleIndices[]{IndicesFactory.EMPTY_SIMPLE_INDICES})));
         Assert.assertEquals(expected, node);
     }
 
@@ -74,10 +73,10 @@ public class ParserTest {
     public void test4() {
         ParseNode node = Parser.DEFAULT.parse("a-b");
         ParseNode expected = new ParseNode(TensorType.Sum,
-                                           new ParseNodeSimpleTensor(EmptyIndices.INSTANCE, "a"),
+                                           new ParseNodeSimpleTensor(IndicesFactory.EMPTY_SIMPLE_INDICES, "a"),
                                            new ParseNode(TensorType.Product,
                                                          new ParseNodeNumber(Complex.MINUSE_ONE),
-                                                         new ParseNodeSimpleTensor(EmptyIndices.INSTANCE, "b")));
+                                                         new ParseNodeSimpleTensor(IndicesFactory.EMPTY_SIMPLE_INDICES, "b")));
         Assert.assertEquals(expected, node);
     }
 

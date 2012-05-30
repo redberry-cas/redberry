@@ -45,10 +45,11 @@ import java.util.Arrays;
  * @author Stanislav Poslavsky
  */
 abstract class AbstractIndices implements Indices {
-    //indices data
 
+    //indices data
     protected final int[] data;
     //lazy fields
+    //TODO investigate performance
     private WeakReference<UpperLowerIndices> upperLower = new WeakReference<>(null);
 
     /**
@@ -92,8 +93,8 @@ abstract class AbstractIndices implements Indices {
     }
 
     @Override
-    public final boolean equalsIgnoreOrder(Indices indices) {
-        if (indices instanceof EmptyIndices)
+    public final boolean equalsRegardlessOrder(Indices indices) {
+        if (indices instanceof EmptySimpleIndices)
             return data.length == 0;
         return Arrays.equals(getSortedData(), ((AbstractIndices) indices).getSortedData());
     }

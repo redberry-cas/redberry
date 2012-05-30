@@ -27,7 +27,6 @@ package cc.redberry.core.indices;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-//CHECKSTYLE
 final class ShortArrayFactory {
     private static final int SIZE = 128;
     private static final short[][] zerofilledShorts = new short[SIZE][];
@@ -35,19 +34,6 @@ final class ShortArrayFactory {
     private ShortArrayFactory() {
     }
 
-//    static {
-//        for (int i = 0; i < zerofilledShorts.length; ++i) {
-//            short[] array = new short[i];
-//            //Arrays.fill(array, 0);
-//            zerofilledShorts[i] = array;
-//        }
-//    }
-//
-//    static short[] getZeroFilledShortArray(final int length) {
-//        if (length >= zerofilledShorts.length)
-//            return new short[length];
-//        return zerofilledShorts[length];
-//    }
     static short[] getZeroFilledShortArray(final int length) {
         if (length >= SIZE)
             return new short[length];

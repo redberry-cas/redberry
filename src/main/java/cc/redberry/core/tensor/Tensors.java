@@ -87,7 +87,7 @@ public class Tensors {
         if (arguments.length == 0)
             throw new IllegalArgumentException("No arguments in field.");
         for (int i = 0; i < argIndices.length; ++i)
-            if (!arguments[i].getIndices().getFreeIndices().equalsIgnoreOrder(argIndices[i]))
+            if (!arguments[i].getIndices().getFreeIndices().equalsRegardlessOrder(argIndices[i]))
                 throw new IllegalArgumentException("Arguments indices are inconsistent with arguments.");
 
         IndicesTypeStructure[] structures = new IndicesTypeStructure[argIndices.length + 1];
@@ -115,7 +115,7 @@ public class Tensors {
         for (int i = 0; i < argIndices.length; ++i) {
             if (!descriptor.getIndicesTypeStructures()[i + 1].isStructureOf(argIndices[i]))
                 throw new IllegalArgumentException("Arguments indices are inconsistent with field signature.");
-            if (!arguments[i].getIndices().getFreeIndices().equalsIgnoreOrder(argIndices[i]))
+            if (!arguments[i].getIndices().getFreeIndices().equalsRegardlessOrder(argIndices[i]))
                 throw new IllegalArgumentException("Arguments indices are inconsistent with arguments.");
         }
         return new TensorField(name, indices, arguments, argIndices);

@@ -27,24 +27,15 @@ import cc.redberry.core.indexmapping.IndexMapping;
 import cc.redberry.core.utils.IntArray;
 
 /**
- * This class is an implementation of {@link Indices} interface and represents
- * <i>empty indices</i>, i.e. indices that do not contains any index. For
- * example, if we have tensor X, method {@link cc.redberry.core.tensor.Tensor#getIndices()
- * } will return {@code EmptyIndices}, that means that X is scalar. This class
- * is singleton, and you can get instance throughout { @code INSTANCE} field.
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public final class EmptyIndices implements SimpleIndices {
+class EmptyIndices implements Indices {
 
-    /**
-     * Instance of {@code EmptyIndices}
-     */
-    public static final EmptyIndices INSTANCE = new EmptyIndices();
+    static final EmptyIndices EMPTY_INDICES_INSTANCE = new EmptyIndices();
 
-    //Singleton
-    private EmptyIndices() {
+    EmptyIndices() {
     }
 
     /**
@@ -60,41 +51,23 @@ public final class EmptyIndices implements SimpleIndices {
     }
 
     /**
-     * Returns {@code EmptyIndices} instance
+     * Returns {@code EmptySimpleIndices} instance
      *
-     * @return {@code EmptyIndices} instance
+     * @return {@code EmptySimpleIndices} instance
      */
     @Override
-    public SimpleIndices getInverseIndices() {
+    public Indices getInverseIndices() {
         return this;
     }
 
     /**
-     * Returns {@code EmptyIndices} instance
+     * Returns {@code EmptySimpleIndices} instance
      *
-     * @return {@code EmptyIndices} instance
+     * @return {@code EmptySimpleIndices} instance
      */
     @Override
     public Indices getFreeIndices() {
         return this;
-    }
-
-    /**
-     * Doing nothing
-     */
-    @Override
-    public void setSymmetries(IndicesSymmetries symmetries) {
-        //CHECKSTYLE maybe add assert symmetries.size == 0
-    }
-
-    /**
-     * Returns {@code Symmetries.EMPTY_SYMMETRIES}
-     *
-     * @return {@code Symmetries.EMPTY_SYMMETRIES}
-     */
-    @Override
-    public IndicesSymmetries getSymmetries() {
-        return IndicesSymmetries.EMPTY_SYMMETRIES;
     }
 
     /**
@@ -145,7 +118,7 @@ public final class EmptyIndices implements SimpleIndices {
      * @param mapping
      */
     @Override
-    public EmptyIndices applyIndexMapping(IndexMapping mapping) {
+    public Indices applyIndexMapping(IndexMapping mapping) {
         return this;
     }
 
@@ -189,19 +162,7 @@ public final class EmptyIndices implements SimpleIndices {
      */
     @Override
     public boolean equals(Object obj) {
-        return obj instanceof EmptyIndices;
-    }
-
-    /**
-     * Returns {@code equals(indices)}
-     *
-     * @param indices indices to compare
-     *
-     * @return {@code equals(indices)}
-     */
-    @Override
-    public boolean equalsWithSymmetries(Indices indices) {
-        return equals(indices);
+        return obj == EMPTY_INDICES_INSTANCE;
     }
 
     /**
@@ -212,7 +173,7 @@ public final class EmptyIndices implements SimpleIndices {
      * @return {@code indices.size() == 0}
      */
     @Override
-    public boolean equalsIgnoreOrder(Indices indices) {
+    public boolean equalsRegardlessOrder(Indices indices) {
         return indices.size() == 0;
     }
 
@@ -223,7 +184,7 @@ public final class EmptyIndices implements SimpleIndices {
      */
     @Override
     public int hashCode() {
-        return 1;
+        return 8758765;
     }
 
     /**
@@ -234,10 +195,5 @@ public final class EmptyIndices implements SimpleIndices {
     @Override
     public short[] getDiffIds() {
         return new short[0];
-    }
-
-    @Override
-    public IndicesTypeStructure getIndicesTypeStructure() {
-        return IndicesTypeStructure.EMPTY;
     }
 }

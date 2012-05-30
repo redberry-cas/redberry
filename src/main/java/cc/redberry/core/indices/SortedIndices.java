@@ -25,7 +25,6 @@ package cc.redberry.core.indices;
 import cc.redberry.core.indexmapping.IndexMapping;
 import cc.redberry.core.utils.ArraysUtils;
 import cc.redberry.core.utils.IntArrayList;
-
 import java.util.Arrays;
 
 /**
@@ -42,9 +41,9 @@ import java.util.Arrays;
  * @see Indices
  * @see OrderedIndices
  */
-public final class SortedIndices extends AbstractIndices {
-    //position of the first lower index in array
+final class SortedIndices extends AbstractIndices {
 
+    //position of the first lower index in array
     private final int firstLower;
 
     private SortedIndices(int[] data, int firstLower) {
@@ -76,7 +75,7 @@ public final class SortedIndices extends AbstractIndices {
     }
 
     @Override
-    public SortedIndices getFreeIndices() {
+    public Indices getFreeIndices() {
         IntArrayList list = new IntArrayList();
         int u, l;
         int iLower = firstLower, iUpper = 0;
@@ -93,7 +92,7 @@ public final class SortedIndices extends AbstractIndices {
         }
         list.add(data, iUpper, firstLower - iUpper);
         list.add(data, iLower, data.length - iLower);
-        return new SortedIndices(list.toArray());
+        return IndicesFactory.createSorted(list.toArray());
     }
 
     @Override
@@ -101,16 +100,12 @@ public final class SortedIndices extends AbstractIndices {
         return data;
     }
 
-    /**
-     * {@inheritDoc}
-     *
-     * @return {@inheritDoc}
-     */
     @Override
-    public SortedIndices getInverseIndices() {
+    public Indices getInverseIndices() {
         int[] dataInv = new int[data.length];
         for (int i = 0; i < data.length; ++i)
             dataInv[i] = data[i] ^ 0x80000000;
+        //TODO consider better implementation
         return new SortedIndices(dataInv);
     }
 

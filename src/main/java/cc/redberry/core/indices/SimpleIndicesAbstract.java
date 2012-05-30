@@ -26,7 +26,6 @@ import cc.redberry.core.combinatorics.Symmetry;
 import cc.redberry.core.indexmapping.IndexMapping;
 import cc.redberry.core.utils.ArraysUtils;
 import cc.redberry.core.utils.IntArrayList;
-
 import java.util.Arrays;
 
 /**
@@ -70,13 +69,13 @@ public abstract class SimpleIndicesAbstract extends AbstractIndices implements S
     protected UpperLowerIndices calculateUpperLower() {
         int upperCount = 0;
         for (int index : data)
-            if (index >>> 31 == 1)
+            if ((index & 0x80000000) == 0x80000000)
                 upperCount++;
         int[] lower = new int[data.length - upperCount];
         int[] upper = new int[upperCount];
         int ui = 0, li = 0;
         for (int index : data)
-            if (index >>> 31 == 1)
+            if ((index & 0x80000000) == 0x80000000)
                 upper[ui++] = index;
             else
                 lower[li++] = index;
@@ -122,6 +121,7 @@ public abstract class SimpleIndicesAbstract extends AbstractIndices implements S
         if (!changed)
             return this;
         SimpleIndices si = create(data_, symmetries);
+        //TODO we really need this check?
         si.testConsistentWithException();
         return si;
     }
@@ -144,7 +144,7 @@ public abstract class SimpleIndicesAbstract extends AbstractIndices implements S
     }
 
     @Override
-    public boolean equalsWithSymmetries(Indices indices) {
+    public boolean equalsWithSymmetries(SimpleIndices indices) {
         return _equalsWithSymmetries(indices) == Boolean.FALSE;
     }
 
@@ -163,14 +163,14 @@ public abstract class SimpleIndicesAbstract extends AbstractIndices implements S
      * transposition) and
      * <code>null</code> in other case.
      */
-    public Boolean _equalsWithSymmetries(Indices indices) {
+    public Boolean _equalsWithSymmetries(SimpleIndices indices) {
         if (indices.getClass() != this.getClass())
             return null;
         if (data.length != indices.size())
             return null;
         SimpleIndicesOfTensor _indices = (SimpleIndicesOfTensor) indices;
         boolean sign1;
-out_level_0:
+        out_level_0:
         for (Symmetry s1 : symmetries) {
             sign1 = s1.isAntiSymmetry();
             for (int i = 0; i < data.length; ++i)

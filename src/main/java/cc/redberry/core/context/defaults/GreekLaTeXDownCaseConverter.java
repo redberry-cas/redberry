@@ -42,11 +42,11 @@ public final class GreekLaTeXDownCaseConverter extends SymbolArrayConverter {
         symbols[11] = "\\mu";
         symbols[12] = "\\nu";
         symbols[13] = "\\xi";
-//        symbols[14] = "o";//\\omicron
+        //symbols[14] = "o";//\\omicron
         symbols[14] = "\\pi";
         symbols[15] = "\\rho";
         symbols[16] = "\\sigma";
-//        symbols[17]= "final sigma??"
+        //symbols[17]= "final sigma??"
         symbols[17] = "\\tau";
         symbols[18] = "\\upsilon";
         symbols[19] = "\\phi";
@@ -64,6 +64,7 @@ public final class GreekLaTeXDownCaseConverter extends SymbolArrayConverter {
             utf[i] = Character.toString(greekLetter);
         }
     }
+    
     //initialazing class after static block
     public static GreekLaTeXDownCaseConverter INSTANCE = new GreekLaTeXDownCaseConverter();
 

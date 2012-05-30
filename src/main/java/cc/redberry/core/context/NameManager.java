@@ -44,7 +44,7 @@ public class NameManager {
     private final Map<Integer, NameDescriptor> fromId = new HashMap<>();
     private final Map<NameDescriptor.IndicesTypeStructureAndName, NameDescriptor> fromStructure = new HashMap<>();
 
-    public NameManager(Long seed) {
+    NameManager(Long seed) {
         if (seed == null) {
             random = new Well44497b();
             random.setSeed(this.seed = random.nextLong());
@@ -125,7 +125,7 @@ public class NameManager {
     /**
      * See {@link Context#resetTensorNames()}.
      */
-    public void reset() {
+    void reset() {
         writeLock.lock();
         try {
             fromId.clear();
@@ -139,7 +139,7 @@ public class NameManager {
     /**
      * See {@link Context#resetTensorNames()}.
      */
-    public void reset(long seed) {
+    void reset(long seed) {
         writeLock.lock();
         try {
             fromId.clear();

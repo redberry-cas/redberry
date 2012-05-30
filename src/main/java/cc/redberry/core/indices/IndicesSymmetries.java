@@ -188,8 +188,7 @@ public class IndicesSymmetries implements Iterable<Symmetry> {
      * symmetry.dimension(); ++i) if (indicesTypeStructure.data[i] !=
      * indicesTypeStructure.data[symmetry.newIndexOf(i)]) throw new
      * IllegalArgumentException("Inconsistent symmetry: permutes indices with
-     * different types.");
-    }
+     * different types."); }
      */
     public static IndicesSymmetries create(IndicesTypeStructure indicesTypeStructure) {
         if (indicesTypeStructure.size() == 0)
@@ -197,7 +196,7 @@ public class IndicesSymmetries implements Iterable<Symmetry> {
         return new IndicesSymmetries(indicesTypeStructure);
     }
     public static final IndicesSymmetries EMPTY_SYMMETRIES =
-            new IndicesSymmetries(new IndicesTypeStructure(EmptyIndices.INSTANCE),
+            new IndicesSymmetries(new IndicesTypeStructure(EmptySimpleIndices.EMPTY_SIMPLE_INDICES_INSTANCE),
                                   Symmetries.EMPTY_SYMMETRIES, new short[0]) {
 
                 @Override

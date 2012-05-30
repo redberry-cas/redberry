@@ -23,8 +23,7 @@
 package cc.redberry.core.number;
 
 import cc.redberry.core.context.ToStringMode;
-import cc.redberry.core.indices.EmptyIndices;
-import cc.redberry.core.indices.Indices;
+import cc.redberry.core.indices.*;
 import cc.redberry.core.tensor.*;
 import cc.redberry.core.tensor.Product;
 import cc.redberry.core.tensor.Tensor;
@@ -57,9 +56,7 @@ public class Complex extends Tensor
             new Complex(Numeric.NEGATIVE_INFINITY, Numeric.NEGATIVE_INFINITY);
     public static final Complex COMPLEX_POSITIVE_INFINITY =
             new Complex(Numeric.POSITIVE_INFINITY, Numeric.POSITIVE_INFINITY);
-    
     public static final Complex COMPLEX_INFINITY = COMPLEX_POSITIVE_INFINITY;
-    
     public static final Complex ZERO =
             new Complex(Rational.ZERO, Rational.ZERO);
     public static final Complex ONE =
@@ -132,7 +129,7 @@ public class Complex extends Tensor
 
     @Override
     public Indices getIndices() {
-        return EmptyIndices.INSTANCE;
+        return IndicesFactory.EMPTY_INDICES;
     }
 
     @Override

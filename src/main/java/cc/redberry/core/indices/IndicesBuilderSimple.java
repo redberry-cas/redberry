@@ -22,7 +22,9 @@
  */
 package cc.redberry.core.indices;
 
-import cc.redberry.core.combinatorics.*;
+import cc.redberry.core.combinatorics.Combinatorics;
+import cc.redberry.core.combinatorics.Permutation;
+import cc.redberry.core.combinatorics.Symmetry;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.utils.ArraysUtils;
 import cc.redberry.core.utils.IntArray;
@@ -98,31 +100,33 @@ public final class IndicesBuilderSimple
     @Override
     public IndicesBuilderSimple append(Indices indices) {
 
-        if (indices instanceof EmptyIndices)
+        if (indices.size() == 0)
             return this;
-        if (indices instanceof SortedIndices)
-            return append(indices.getAllIndices());
+        if (indices instanceof SimpleIndices) {
 
-        //processing symmetries
+            //processing symmetries
 
-        final int oldSize = data.size();
+            final int oldSize = data.size();
 
-        addSymmetriesTail(indices.size());
-        List<Symmetry> addingSymmetries = ((SimpleIndices) indices).getSymmetries().getReference().getBaseSymmetries();
-        int i;
-        for (Symmetry s : addingSymmetries) {
-            //without identity
-            if (Combinatorics.isIdentity(s))
-                continue;
-            IntArrayList newPermutation = new IntArrayList();
-            for (i = 0; i < oldSize; ++i)
-                newPermutation.add(i);
-            for (i = 0; i < indices.size(); ++i)
-                newPermutation.add(oldSize + s.newIndexOf(i));
-            symmetries.add(new SymmetryContainer(newPermutation, s.isAntiSymmetry()));
+            addSymmetriesTail(indices.size());
+            List<Symmetry> addingSymmetries = ((SimpleIndices) indices).getSymmetries().getReference().getBaseSymmetries();
+            int i;
+            for (Symmetry s : addingSymmetries) {
+                //without identity
+                if (Combinatorics.isIdentity(s))
+                    continue;
+                IntArrayList newPermutation = new IntArrayList();
+                for (i = 0; i < oldSize; ++i)
+                    newPermutation.add(i);
+                for (i = 0; i < indices.size(); ++i)
+                    newPermutation.add(oldSize + s.newIndexOf(i));
+                symmetries.add(new SymmetryContainer(newPermutation, s.isAntiSymmetry()));
+            }
+            data.addAll(indices.getAllIndices());
+            return this;
         }
-        data.addAll(indices.getAllIndices());
-        return this;
+        return append(indices.getAllIndices());
+
     }
 
     @Override

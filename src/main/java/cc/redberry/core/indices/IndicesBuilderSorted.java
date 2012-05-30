@@ -26,7 +26,6 @@ import cc.redberry.core.math.MathUtils;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.utils.IntArray;
 import cc.redberry.core.utils.IntArrayList;
-import java.util.*;
 
 /**
  * This class provides functionality to construct {@code Indices} object by
@@ -61,7 +60,6 @@ public final class IndicesBuilderSorted
     @Override
     public IndicesBuilderSorted append(int index) {
         data.add(index);
-//        PriorityQueue
         return this;
     }
 
@@ -122,9 +120,9 @@ public final class IndicesBuilderSorted
         return data.toArray();
     }
 
-    public SortedIndices getDistinct() {
+    public Indices getDistinct() {
         //TODO review performance
-        return new SortedIndices(MathUtils.getSortedDistinct(data.toArray()));
+        return IndicesFactory.createSorted(MathUtils.getSortedDistinct(data.toArray()));
     }
 
     @Override

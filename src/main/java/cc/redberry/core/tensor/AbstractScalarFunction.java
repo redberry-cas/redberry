@@ -23,8 +23,7 @@
 package cc.redberry.core.tensor;
 
 import cc.redberry.core.context.ToStringMode;
-import cc.redberry.core.indices.EmptyIndices;
-import cc.redberry.core.indices.Indices;
+import cc.redberry.core.indices.*;
 
 /**
  *
@@ -43,7 +42,7 @@ public abstract class AbstractScalarFunction extends Tensor {
 
     @Override
     public Indices getIndices() {
-        return EmptyIndices.INSTANCE;
+       return IndicesFactory.EMPTY_INDICES;
     }
 
     public abstract String stringSymbol();

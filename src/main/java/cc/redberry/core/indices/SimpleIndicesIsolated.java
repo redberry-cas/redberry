@@ -33,7 +33,7 @@ public class SimpleIndicesIsolated extends SimpleIndicesAbstract {
         super(data, symmetries);
     }
 
-    public SimpleIndicesIsolated(boolean notResort, int[] data, IndicesSymmetries symmetries) {
+    SimpleIndicesIsolated(boolean notResort, int[] data, IndicesSymmetries symmetries) {
         super(notResort, data, symmetries);
     }
 

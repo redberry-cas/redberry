@@ -27,6 +27,7 @@ import cc.redberry.core.context.IndexSymbolConverter;
 import cc.redberry.core.context.ToStringMode;
 
 public abstract class SymbolArrayConverter implements IndexSymbolConverter {
+
     private final String[] symbols;
     private final String[] utf;
 

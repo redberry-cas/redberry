@@ -174,7 +174,8 @@ public class Symmetries implements Iterable<Symmetry> {
 
         PermutationsSpanIterator<Symmetry> it;
         boolean added = false;
-OUT:    for (Symmetry sym : symmetries) {
+        OUT:
+        for (Symmetry sym : symmetries) {
             it = new PermutationsSpanIterator<>(this.symmetries);
             //BOTTLENECK review
             while (it.hasNext()) {
@@ -216,7 +217,8 @@ OUT:    for (Symmetry sym : symmetries) {
 
         PermutationsSpanIterator<Symmetry> it;
         boolean added = false;
-OUT:    for (Symmetry sym : symmetries) {
+        OUT:
+        for (Symmetry sym : symmetries) {
             it = new PermutationsSpanIterator<>(this.symmetries);
 
             //BOTTLENECK review
@@ -248,7 +250,8 @@ OUT:    for (Symmetry sym : symmetries) {
             if (s.permutation.length != dimension)
                 throw new IllegalArgumentException("Not equal dimensions.");
         boolean b = false;
-OUT:    for (Symmetry add : symmetries) {
+        OUT:
+        for (Symmetry add : symmetries) {
             for (Symmetry s : this.symmetries)
                 if (s.equals(add))
                     continue OUT;
@@ -264,7 +267,8 @@ OUT:    for (Symmetry add : symmetries) {
             if (s.permutation.length != dimension)
                 throw new IllegalArgumentException("Not equal dimensions.");
         boolean b = false;
-OUT:    for (Symmetry add : symmetries) {
+        OUT:
+        for (Symmetry add : symmetries) {
             for (Symmetry s : this.symmetries)
                 if (s.equals(add))
                     continue OUT;

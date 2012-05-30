@@ -53,40 +53,41 @@ public final class GreekLaTeXUpperCaseConverter extends SymbolArrayConverter {
         utf[10] = Character.toString((char) 0x03A9);
 
     }
-//    static {
-//        symbols[0] = "\\Alpha";
-//        symbols[1] = "\\Beta";
-//        symbols[2] = "\\Gamma";
-//        symbols[3] = "\\Delta";
-//        symbols[4] = "\\Epsilon";
-//        symbols[5] = "\\Zeta";
-//        symbols[6] = "\\Eta";
-//        symbols[7] = "\\Theta";
-//        symbols[8] = "\\Iota";
-//        symbols[9] = "\\Kappa";
-//        symbols[10] = "\\Lambda";
-//        symbols[11] = "\\Mu";
-//        symbols[12] = "\\Nu";
-//        symbols[13] = "\\Xi";
-//        symbols[14] = "\\Omicron";
-//        symbols[15] = "\\Pi";
-//        symbols[16] = "\\Rho";
-//        symbols[17] = "\\Sigma";
-//        symbols[18] = "\\Tau";
-//        symbols[19] = "\\Upsilon";
-//        symbols[20] = "\\Phi";
-//        symbols[21] = "\\Chi";
-//        symbols[22] = "\\Psi";
-//        symbols[23] = "\\Omega";
-//        for (int i = 0; i < 24; ++i) {
-//            char greekLetter;
-//            if (i >= 17)
-//                greekLetter = (char) ((char) 0x0391 + i + 1);
-//            else
-//                greekLetter = (char) ((char) 0x0391 + i);
-//            utf[i] = Character.toString(greekLetter);
-//        }
-//    }
+    //    static {
+    //        symbols[0] = "\\Alpha";
+    //        symbols[1] = "\\Beta";
+    //        symbols[2] = "\\Gamma";
+    //        symbols[3] = "\\Delta";
+    //        symbols[4] = "\\Epsilon";
+    //        symbols[5] = "\\Zeta";
+    //        symbols[6] = "\\Eta";
+    //        symbols[7] = "\\Theta";
+    //        symbols[8] = "\\Iota";
+    //        symbols[9] = "\\Kappa";
+    //        symbols[10] = "\\Lambda";
+    //        symbols[11] = "\\Mu";
+    //        symbols[12] = "\\Nu";
+    //        symbols[13] = "\\Xi";
+    //        symbols[14] = "\\Omicron";
+    //        symbols[15] = "\\Pi";
+    //        symbols[16] = "\\Rho";
+    //        symbols[17] = "\\Sigma";
+    //        symbols[18] = "\\Tau";
+    //        symbols[19] = "\\Upsilon";
+    //        symbols[20] = "\\Phi";
+    //        symbols[21] = "\\Chi";
+    //        symbols[22] = "\\Psi";
+    //        symbols[23] = "\\Omega";
+    //        for (int i = 0; i < 24; ++i) {
+    //            char greekLetter;
+    //            if (i >= 17)
+    //                greekLetter = (char) ((char) 0x0391 + i + 1);
+    //            else
+    //                greekLetter = (char) ((char) 0x0391 + i);
+    //            utf[i] = Character.toString(greekLetter);
+    //        }
+    //    }
+    
     //initialazing class after static block
     public static GreekLaTeXUpperCaseConverter INSTANCE = new GreekLaTeXUpperCaseConverter();
 
