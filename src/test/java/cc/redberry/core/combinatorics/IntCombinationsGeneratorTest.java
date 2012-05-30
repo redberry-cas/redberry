@@ -22,21 +22,24 @@
  */
 package cc.redberry.core.combinatorics;
 
+import java.util.Arrays;
+import org.junit.Test;
+
 /**
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public final class CombinatoricsFactory {
-    private CombinatoricsFactory() {
+public class IntCombinationsGeneratorTest {
+    @Test
+    public void test0() {
+        for (int[] combination : new IntCombinationsGenerator(5, 3))
+            System.out.println(Arrays.toString(combination));
     }
 
-    public static IntCombinatoricGenerator createIntGenerator(int n, int k) {
-        if (n < k)
-            throw new IllegalArgumentException();
-        if (n == k)
-            return new IntPermutationsGenerator(n);
-        else
-            return new IntCombinationPermutationGenerator(n, k);
+    @Test
+    public void test1() {
+        for (int[] combination : new IntCombinationsGenerator(1, 1))
+            System.out.println(Arrays.toString(combination));
     }
 }

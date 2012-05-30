@@ -22,9 +22,7 @@
  */
 package cc.redberry.core.indices;
 
-import cc.redberry.core.combinatorics.Permutation;
-import cc.redberry.core.combinatorics.Permutations;
-import cc.redberry.core.combinatorics.Symmetry;
+import cc.redberry.core.combinatorics.*;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.utils.ArraysUtils;
 import cc.redberry.core.utils.IntArray;
@@ -114,7 +112,7 @@ public final class IndicesBuilderSimple
         int i;
         for (Symmetry s : addingSymmetries) {
             //without identity
-            if (Permutations.isIdentity(s))
+            if (Combinatorics.isIdentity(s))
                 continue;
             IntArrayList newPermutation = new IntArrayList();
             for (i = 0; i < oldSize; ++i)
@@ -152,7 +150,7 @@ public final class IndicesBuilderSimple
         for (int i = 0; i < indices.length; ++i)
             types[i] = indices[i] & 0x7F000000;
 
-        int[] sortPermutation = Permutations.createIdentity(indices.length);
+        int[] sortPermutation = Combinatorics.createIdentity(indices.length);
         if (types.length > 100)
             ArraysUtils.timSort(types, sortPermutation);
         else
@@ -174,7 +172,7 @@ public final class IndicesBuilderSimple
                 permutation[j] = sort.inverse().newIndexOf(current.get(sort.newIndexOf(j)));
             resulting[i - 1] = new Symmetry(permutation, symmetries.get(i).sign);
         }
-       
+
         SimpleIndices simpleIndices = IndicesFactory.createSimple(null, indices);
         IndicesSymmetries indicesSymmetries = new IndicesSymmetries(new IndicesTypeStructure(simpleIndices));
         indicesSymmetries.addAllUnsafe(resulting);
@@ -187,7 +185,6 @@ public final class IndicesBuilderSimple
         return data.toArray();
     }
 
-    
     @Override
     public String toString() {
         return getIndices().toString();

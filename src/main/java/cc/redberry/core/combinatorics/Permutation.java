@@ -22,55 +22,53 @@
  */
 package cc.redberry.core.combinatorics;
 
+import cc.redberry.core.utils.IntArray;
 import java.util.Arrays;
 import java.util.TreeMap;
-import cc.redberry.core.utils.IntArray;
 
 /**
- * This class is a representation of mathematical permutation. Fore information 
- * about math combinatorics and it properties see
- * (<a href="http://en.wikipedia.org/wiki/Permutation">http://en.wikipedia.org/wiki/Permutation</a>).
- * For keeping permutation it uses <i>one-line</i> notation. Instances of this 
+ * This class is a representation of mathematical permutation. Fore information
+ * about math combinatorics and it properties see (<a
+ * href="http://en.wikipedia.org/wiki/Permutation">http://en.wikipedia.org/wiki/Permutation</a>).
+ * For keeping permutation it uses <i>one-line</i> notation. Instances of this
  * class are immutable. {@link Comparable} implementation is necessary for using
  * {@link TreeMap} of combinatorics in {@link PermutationsSpanIterator}
- * 
+ *
  * @see Comparable
  * @see PermutationsSpanIterator
- * 
+ *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
 public class Permutation implements Comparable<Permutation> {
+
     protected final int[] permutation;
-    protected int[] inverse = null;
-    protected final int dimension;
 
     /**
      * Constructs identity permutation with specified dimension.
-     * 
+     *
      * @param dimension dimension of permutation
      */
     public Permutation(int dimension) {
-        this.dimension = dimension;
         permutation = new int[dimension];
         for (int i = 0; i < dimension; ++i)
             permutation[i] = i;
     }
 
     /**
-     * Constructs permutation, specified by {@code permutation} integer array in 
+     * Constructs permutation, specified by {@code permutation} integer array in
      * <i>single-line</i> notation.
-     * 
-     * @param permutation <i>single-line</i> notated integer array, representing 
-     * a permutation.
-     * @throws IllegalArgumentException if array is inconsistent with 
-     * <i>one-line</i> notation
+     *
+     * @param permutation <i>single-line</i> notated integer array, representing
+     *                    a permutation.
+     *
+     * @throws IllegalArgumentException if array is inconsistent with
+     *                                  <i>one-line</i> notation
      */
     public Permutation(int[] permutation) {
-        this.dimension = permutation.length;
         if (!testConsistent(permutation))
             throw new IllegalArgumentException("Wrong permutation input: input array is not consistent with one-line notation");
-        this.permutation = permutation;
+        this.permutation = permutation.clone();
     }
 
     private boolean testConsistent(int[] permutation) {
@@ -84,51 +82,54 @@ public class Permutation implements Comparable<Permutation> {
     }
 
     protected Permutation(int[] permutation, boolean b) {
-        this.dimension = permutation.length;
         this.permutation = permutation;
     }
 
     /**
      * Returns identity permutation.
-     * 
-     * @return  identity permutation
+     *
+     * @return identity permutation
      */
     public Permutation getOne() {
-        return new Permutation(dimension);
+        return new Permutation(permutation.length);
     }
 
     protected int[] compositionArray(Permutation element) {
-        if (dimension != element.dimension)
+        if (permutation.length != element.permutation.length)
             throw new IllegalArgumentException("different dimensions of compositing combinatorics");
-        int[] perm = new int[dimension];
-        for (int i = 0; i < dimension; ++i)
+        int[] perm = new int[permutation.length];
+        for (int i = 0; i < permutation.length; ++i)
             perm[i] = element.permutation[permutation[i]];
         return perm;
     }
 
     /**
-     * Returns new permutation, witch is a 'left' composition with specified 
-     * permutation. So, if this permutation A and specified permutation is B, it returns A*B.
-     * 
-     * @param element is a right multiplicand permutation  
+     * Returns new permutation, witch is a 'left' composition with specified
+     * permutation. So, if this permutation A and specified permutation is B, it
+     * returns A*B.
+     *
+     * @param element is a right multiplicand permutation
+     *
      * @return composition of element and this combinatorics
-     * @throws IllegalArgumentException if element has different dimension than 
-     * this one
+     *
+     * @throws IllegalArgumentException if element has different dimension than
+     *                                  this one
      */
     public Permutation composition(Permutation element) {
         return new Permutation(compositionArray(element), true);
     }
 
     /**
-     * 
+     *
      * @param array array to permute
+     *
      * @return permuted array copy
      */
     public int[] permute(int[] array) {
-        if (array.length != dimension)
+        if (array.length != permutation.length)
             throw new IllegalArgumentException("Wrong lenght");
-        int[] copy = new int[dimension];
-        for (int i = 0; i < dimension; ++i)
+        int[] copy = new int[permutation.length];
+        for (int i = 0; i < permutation.length; ++i)
             copy[permutation[i]] = array[i];
         return copy;
     }
@@ -137,16 +138,18 @@ public class Permutation implements Comparable<Permutation> {
         return new Symmetry(permutation, false);
     }
 
-    protected void calculateInverse() {
-        inverse = new int[dimension];
-        for (int i = 0; i < dimension; ++i)
+    protected int[] calculateInverse() {
+        int[] inverse = new int[permutation.length];
+        for (int i = 0; i < permutation.length; ++i)
             inverse[permutation[i]] = i;
+        return inverse;
     }
 
     /**
      * Returns new index of specified index, i.e. permutation[index]
-     * 
+     *
      * @param index old index
+     *
      * @return new index of specified index, i.e. permutation[index]
      */
     public int newIndexOf(int index) {
@@ -155,18 +158,20 @@ public class Permutation implements Comparable<Permutation> {
 
     /**
      * Returns dimension of permutation.
+     *
      * @return dimension of permutation
      */
     public int dimension() {
-        return dimension;
+        return permutation.length;
     }
 
     /**
-     * Due to immutability of {@code Permuatation} this method returns simple 
+     * Due to immutability of {@code Permuatation} this method returns simple
      * wrapper of integer array, representing one-line notated permutation.
-     * 
+     *
      * @see IntArray
-     * @return IntArray representing integer array - one-line notated permutation
+     * @return IntArray representing integer array - one-line notated
+     *         permutation
      */
     public IntArray getPermutation() {
         return new IntArray(permutation);
@@ -174,21 +179,20 @@ public class Permutation implements Comparable<Permutation> {
 
     /**
      * Returns inverse permutation of this one.
-     * 
+     *
      * @return inverse permutation of this one
      */
     public Permutation inverse() {
-        if (inverse == null)
-            calculateInverse();
-        return new Permutation(inverse, true);
+        return new Permutation(calculateInverse(), true);
     }
 
     /**
-     * Returns true if {@code obj} has the same class and represents the same 
+     * Returns true if {@code obj} has the same class and represents the same
      * permutation and false in the other case.
-     * 
+     *
      * @param obj object to be compared with this
-     * @return true if {@code obj} has the same class and represents the same 
+     *
+     * @return true if {@code obj} has the same class and represents the same
      * permutation and false in the other case
      */
     @Override
@@ -197,32 +201,25 @@ public class Permutation implements Comparable<Permutation> {
             return false;
         if (getClass() != obj.getClass())
             return false;
-        final Permutation other = (Permutation) obj;
-        if (this.dimension != other.dimension)
-            return false;
-        if (!Arrays.equals(this.permutation, other.permutation))
-            return false;
-        return true;
+        return Arrays.equals(permutation, ((Permutation) obj).permutation);
     }
 
     /**
-     * Returns hash code of this permutation, using Java 
-     * {@code Arrays.hashCode} method.
-     * 
-     * @return hash code of this permutation 
+     * Returns hash code of this permutation.
+     *
+     * @return hash code of this permutation
      */
     @Override
     public int hashCode() {
-        int hash = 7;
-        hash = 31 * hash + Arrays.hashCode(this.permutation);
-        hash = 31 * hash + this.dimension;
-        return hash;
+        return Arrays.hashCode(permutation) * 7 + 31;
     }
 
     /**
-     * Returns the string representation of this permutation in one-line notation.
-     * 
-     * @return the string representation of this permutation in one-line notation
+     * Returns the string representation of this permutation in one-line
+     * notation.
+     *
+     * @return the string representation of this permutation in one-line
+     *         notation
      */
     @Override
     public String toString() {
@@ -230,23 +227,26 @@ public class Permutation implements Comparable<Permutation> {
     }
 
     /**
-     * Compares this permutation with other. The algorithm sequentially compares 
-     * integers {@code i1} and {@code i2} in arrays, representing this permutation 
-     * and other permutation relatively. If on some step {@code i1 > i2} returns 
-     * 1, if one some step {@code i2 > i1 } returns -1, and if on all steps 
+     * Compares this permutation with other. The algorithm sequentially compares
+     * integers {@code i1} and {@code i2} in arrays, representing this
+     * permutation and other permutation relatively. If on some step {@code i1 > i2}
+     * returns 1, if one some step {@code i2 > i1 } returns -1, and if on all
+     * steps
      * {@code i1 == i2} returns 0 (combinatorics are equals).
-     * 
+     *
      * @param t permutation to compare
-     * @return 1 if this one is "greater" -1 if t is "greater", 0 if this and t 
-     * equals.
+     *
+     * @return 1 if this one is "greater" -1 if t is "greater", 0 if this and t
+     *         equals.
+     *
      * @throws IllegalArgumentException if dimensions of this and t are not '
-     * equals
+     *                                  equals
      */
     @Override
     public int compareTo(Permutation t) {
-        if (t.dimension != dimension)
+        if (t.permutation.length != permutation.length)
             throw new IllegalArgumentException("different dimensions of comparing combinatorics");
-        for (int i = 0; i < dimension; ++i)
+        for (int i = 0; i < permutation.length; ++i)
             if (permutation[i] < t.permutation[i])
                 return -1;
             else if (permutation[i] > t.permutation[i])

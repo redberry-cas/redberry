@@ -22,17 +22,24 @@
  */
 package cc.redberry.core.combinatorics;
 
+import org.junit.Test;
+import static org.junit.Assert.*;
+
 /**
- *
+ * Fore more examples look {@link PermutationTest}.
+ * 
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-class IntArrayPermutationWrapper extends Permutation {
-    IntArrayPermutationWrapper(int[] permutation) {
-        super(permutation, true);
+public class SymmetryTest {
+    public SymmetryTest() {
     }
     
-    public void arrayUpdated(){
-        inverse = null;
+    @Test
+    public void testComposition() {
+        Symmetry a = new Symmetry(new int[]{2, 3, 0, 1}, true);
+        Symmetry b = new Symmetry(new int[]{0, 1, 3, 2}, true);
+        Symmetry c = new Symmetry(new int[]{3, 2, 0, 1}, false);
+        assertTrue(a.composition(b).equals(c));
     }
 }

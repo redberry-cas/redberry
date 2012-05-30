@@ -29,7 +29,9 @@ import java.util.Iterator;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public interface IntCombinatoricGenerator extends Iterable<int[]>, Iterator<int[]> {
+public interface IntCombinatoricGenerator extends Iterable<int[]>,
+                                                  Iterator<int[]> {
+
     void reset();
     int[] getReference();
 }

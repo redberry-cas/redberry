@@ -22,105 +22,18 @@
  */
 package cc.redberry.core.math;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
-import cc.redberry.core.combinatorics.Permutation;
-import cc.redberry.core.combinatorics.PermutationsProvider;
-import cc.redberry.core.combinatorics.PermutationsProviderImpl;
-import cc.redberry.core.combinatorics.SimplePermutationProvider;
 
 public final class MathUtils {
+
     private MathUtils() {
-    }
-
-    /**
-     * Calculates greatest common divisor of two long
-     *
-     * @param p
-     * @param q
-     * @return greatest common divisor of p and q
-     */
-    public static long gcd(final long p, final long q) {
-        long u = p;
-        long v = q;
-        if ((u == 0) || (v == 0)) {
-            if ((u == Long.MIN_VALUE) || (v == Long.MIN_VALUE))
-                throw new RuntimeException("overflow: gcd({0}, {1}) is 2^63");
-            return Math.abs(u) + Math.abs(v);
-        }
-        if (u > 0)
-            u = -u;
-        if (v > 0)
-            v = -v;
-        int k = 0;
-        while ((u & 1) == 0 && (v & 1) == 0 && k < 63) {
-            u /= 2;
-            v /= 2;
-            k++;
-        }
-        if (k == 63)
-            throw new RuntimeException("overflow: gcd({0}, {1}) is 2^63");
-        long t = ((u & 1) == 1) ? v : -(u / 2);
-        do {
-            while ((t & 1) == 0)
-                t /= 2;
-            if (t > 0)
-                u = -t;
-            else
-                v = t;
-            t = (v - u) / 2;
-        } while (t != 0);
-        return -u * (1L << k);
-    }
-
-    /**
-     * Calculates greatest common divisor of two integers
-     *
-     * @param p
-     * @param q
-     * @return greatest common divisor of p and q
-     */
-    public static int gcd(final int p, final int q) {
-        int u = p;
-        int v = q;
-        if ((u == 0) || (v == 0)) {
-            if ((u == Integer.MIN_VALUE) || (v == Integer.MIN_VALUE))
-                throw new RuntimeException("overflow: gcd({0}, {1}) is 2^31");
-            return Math.abs(u) + Math.abs(v);
-        }
-
-        if (u > 0)
-            u = -u;
-        if (v > 0)
-            v = -v;
-        int k = 0;
-        while ((u & 1) == 0 && (v & 1) == 0 && k < 31) {
-//                        u >>= 1;
-//                        v >>= 1;
-            u /= 2;
-            v /= 2;
-            k++;
-        }
-        if (k == 31)
-            throw new RuntimeException("overflow: gcd({0}, {1}) is 2^31");
-        int t = ((u & 1) == 1) ? v : -(u / 2);
-        do {
-            while ((t & 1) == 0)
-                t /= 2;
-            if (t > 0)
-                u = -t;
-            else
-                v = t;
-            t = (v - u) / 2;
-        } while (t != 0);
-        return -u * (1 << k);
     }
 
     /**
      * Sort array & return array with removed repetitive values.
      *
      * @param values input array (this method will quickSort this array)
+     *
      * @return sorted array of distinct values
      */
     public static int[] getSortedDistinct(int[] values) {
@@ -147,6 +60,7 @@ public final class MathUtils {
      *
      * @param a sorted array of distinct values. (set A)
      * @param b sorted array of distinct values. (set B)
+     *
      * @return the set of elements in B but not in A
      */
     public static int[] intSetDifference(int[] a, int[] b) {
@@ -186,6 +100,7 @@ public final class MathUtils {
      *
      * @param a sorted array of distinct values. (set A)
      * @param b sorted array of distinct values. (set B)
+     *
      * @return the set of elements from B and from A
      */
     public static int[] intSetUnion(int[] a, int[] b) {
@@ -222,38 +137,5 @@ public final class MathUtils {
         else
             System.arraycopy(a, aPointer, result, counter, a.length - aPointer);
         return result;
-    }
-
-    public static PermutationsProvider generateProvider(final Object[] _array) {
-        int begin = 0;
-        int i;
-        List<PermutationsProvider> disjointProviders = new ArrayList<>();
-        for (i = 1; i < _array.length; ++i)
-            if (i == _array.length || _array[i].hashCode() != _array[i - 1].hashCode()) {
-                if (i - 1 != begin)
-                    disjointProviders.add(new SimplePermutationProvider(begin, i));
-                begin = i;
-            }
-        return new PermutationsProviderImpl(disjointProviders);
-    }
-
-    public static boolean compareArrays(final Object[] array1, final Object[] array2) {
-        int size;
-        if ((size = array1.length) != array2.length)
-            return false;
-        PermutationsProvider provider = generateProvider(array1);
-        int[] nonPermutablePositions = PermutationsProvider.Util.getNonpermutablePositions(size, provider);
-        for (int i : nonPermutablePositions)
-            if (!array1[i].equals(array2[i]))
-                return false;
-        int[] targetPositions = provider.targetPositions();
-        out_for:
-        for (Permutation permutation : provider.allPermutations()) {
-            for (int i = 0; i < targetPositions.length; ++i)
-                if (!array1[targetPositions[i]].equals(array2[targetPositions[permutation.newIndexOf(i)]]))
-                    continue out_for;
-            return true;
-        }
-        return false;
     }
 }

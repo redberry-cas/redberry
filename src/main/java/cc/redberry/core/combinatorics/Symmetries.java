@@ -22,8 +22,8 @@
  */
 package cc.redberry.core.combinatorics;
 
-import java.util.*;
 import cc.redberry.core.utils.EmptyIterator;
+import java.util.*;
 
 /**
  * This class is a representation of {@link Symmetry} set. It holds a set of
@@ -42,8 +42,8 @@ import cc.redberry.core.utils.EmptyIterator;
  * @author Stanislav Poslavsky
  */
 public class Symmetries implements Iterable<Symmetry> {
+
     private final List<Symmetry> symmetries;
-    private final List<Symmetry> symmetriesBase;
     private final int dimension;
     /**
      * Instance for {@code Symmetries} which doesn't contains any {@code Symmetry},
@@ -54,6 +54,7 @@ public class Symmetries implements Iterable<Symmetry> {
      * @see EmptyIterator
      */
     public static final Symmetries EMPTY_SYMMETRIES = new Symmetries(0) {
+
         /**
          * Returns empty iterator instance.
          *
@@ -99,14 +100,12 @@ public class Symmetries implements Iterable<Symmetry> {
     public Symmetries(int dimension) {
         this.dimension = dimension;
         this.symmetries = new ArrayList<>();
-        this.symmetriesBase = Collections.unmodifiableList(symmetries);
         this.symmetries.add(new Symmetry(dimension));
     }
 
     private Symmetries(List<Symmetry> list, int dimension) {
         this.dimension = dimension;
         this.symmetries = list;
-        this.symmetriesBase = Collections.unmodifiableList(symmetries);
     }
 
     public int dimension() {
@@ -128,6 +127,7 @@ public class Symmetries implements Iterable<Symmetry> {
      * will throws. Discover, what's wrong here?
      *
      * @param symmetry {@code Symmetry} to be added
+     *
      * @throws InconsistentGeneratorsException if adding {@code Symmetry} is
      * inconsistent with already added symmetries
      */
@@ -161,6 +161,7 @@ public class Symmetries implements Iterable<Symmetry> {
      * will throws. Discover, what's wrong here?
      *
      * @param symmetry {@code Symmetry} to be added
+     *
      * @throws InconsistentGeneratorsException if adding {@code Symmetry} is
      * inconsistent with already added symmetries
      */
@@ -168,13 +169,12 @@ public class Symmetries implements Iterable<Symmetry> {
         if (symmetries.length == 0)
             return false;
         for (Symmetry s : symmetries)
-            if (s.dimension != dimension)
+            if (s.permutation.length != dimension)
                 throw new IllegalArgumentException("Dimension of adding symmetry is deffers from this one.");
 
         PermutationsSpanIterator<Symmetry> it;
         boolean added = false;
-        OUT:
-        for (Symmetry sym : symmetries) {
+OUT:    for (Symmetry sym : symmetries) {
             it = new PermutationsSpanIterator<>(this.symmetries);
             //BOTTLENECK review
             while (it.hasNext()) {
@@ -203,6 +203,7 @@ public class Symmetries implements Iterable<Symmetry> {
      * will throws. Discover, what's wrong here?
      *
      * @param symmetry {@code Symmetry} to be added
+     *
      * @throws InconsistentGeneratorsException if adding {@code Symmetry} is
      * inconsistent with already added symmetries
      */
@@ -210,13 +211,12 @@ public class Symmetries implements Iterable<Symmetry> {
         if (symmetries.isEmpty())
             return false;
         for (Symmetry s : symmetries)
-            if (s.dimension != dimension)
+            if (s.permutation.length != dimension)
                 throw new IllegalArgumentException("Dimension of adding symmetry is deffers from this one.");
 
         PermutationsSpanIterator<Symmetry> it;
         boolean added = false;
-        OUT:
-        for (Symmetry sym : symmetries) {
+OUT:    for (Symmetry sym : symmetries) {
             it = new PermutationsSpanIterator<>(this.symmetries);
 
             //BOTTLENECK review
@@ -233,7 +233,7 @@ public class Symmetries implements Iterable<Symmetry> {
 
     //TODO comment
     public boolean addUnsafe(Symmetry symmetry) {
-        if (symmetry.dimension != dimension)
+        if (symmetry.permutation.length != dimension)
             throw new IllegalArgumentException("Not equal dimensions.");
         for (Symmetry s : symmetries)
             if (s.equals(symmetry))
@@ -245,11 +245,10 @@ public class Symmetries implements Iterable<Symmetry> {
     //TODO comment
     public boolean addAllUnsafe(Symmetry... symmetries) {
         for (Symmetry s : symmetries)
-            if (s.dimension != dimension)
+            if (s.permutation.length != dimension)
                 throw new IllegalArgumentException("Not equal dimensions.");
         boolean b = false;
-        OUT:
-        for (Symmetry add : symmetries) {
+OUT:    for (Symmetry add : symmetries) {
             for (Symmetry s : this.symmetries)
                 if (s.equals(add))
                     continue OUT;
@@ -262,11 +261,10 @@ public class Symmetries implements Iterable<Symmetry> {
     //TODO comment
     public boolean addAllUnsafe(Collection<Symmetry> symmetries) {
         for (Symmetry s : symmetries)
-            if (s.dimension != dimension)
+            if (s.permutation.length != dimension)
                 throw new IllegalArgumentException("Not equal dimensions.");
         boolean b = false;
-        OUT:
-        for (Symmetry add : symmetries) {
+OUT:    for (Symmetry add : symmetries) {
             for (Symmetry s : this.symmetries)
                 if (s.equals(add))
                     continue OUT;
@@ -298,7 +296,8 @@ public class Symmetries implements Iterable<Symmetry> {
      *
      * @param symmetry {@code Symmetry} permutation in one-line notation to be
      * added
-     * @param sign {@code Symmetry} sign
+     * @param sign     {@code Symmetry} sign
+     *
      * @throws InconsistentGeneratorsException if adding {@code Symmetry} is
      * inconsistent with already added symmetries
      */
@@ -329,7 +328,7 @@ public class Symmetries implements Iterable<Symmetry> {
     }
 
     public List<Symmetry> getBaseSymmetries() {
-        return symmetriesBase;
+        return Collections.unmodifiableList(symmetries);
     }
 
     protected void checkSymmetryConsistent() throws InconsistentGeneratorsException {

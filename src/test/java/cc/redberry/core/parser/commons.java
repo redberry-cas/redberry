@@ -104,6 +104,7 @@ public class commons {
 
     @Test
     public void sdsdAds() {
-        System.out.println((65 - 1) >>> 1);
+        int[] a;
+        System.out.println((a=new int[]{2,3}).equals(a));
     }
 }

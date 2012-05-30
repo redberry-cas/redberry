@@ -24,10 +24,7 @@ package cc.redberry.core.tensor;
 
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.utils.TensorUtils;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  *
@@ -77,13 +74,13 @@ public class ProductBuilder implements TensorBuilder {
             data.add(complex);
 
         data.addAll(elements);
-        
-        if(data.size() == 1)
+
+        if (data.size() == 1)
             return data.get(0);
-        
-        if(data.isEmpty())
+
+        if (data.isEmpty())
             return Complex.ONE;
-        
+
         return new Product(data.toArray(new Tensor[data.size()]));
     }
 

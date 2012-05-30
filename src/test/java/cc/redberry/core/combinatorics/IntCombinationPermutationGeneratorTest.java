@@ -22,35 +22,42 @@
  */
 package cc.redberry.core.combinatorics;
 
+import java.util.Arrays;
+import org.junit.Test;
+
 /**
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public final class Permutations {
-    private Permutations() {
+public class IntCombinationPermutationGeneratorTest {
+    @Test
+    public void test1() {
+        for (int[] cp : new IntCombinationPermutationGenerator(1, 1))
+            System.out.println(Arrays.toString(cp));
     }
 
-    public static boolean isIdentity(final int[] permutation) {
-        for (int i = 0; i < permutation.length; ++i)
-            if (permutation[i] != i)
-                return false;
-        return true;
-
+    @Test
+    public void test2() {
+        for (int[] cp : Combinatorics.createIntGenerator(0, 0))
+            System.out.println(Arrays.toString(cp));
     }
 
-    public static boolean isIdentity(Permutation permutation) {
-        return isIdentity(permutation.permutation);
+    @Test
+    public void test3() {
+        for (int[] cp : new IntCombinationPermutationGenerator(5, 1))
+            System.out.println(Arrays.toString(cp));
     }
 
-    public static boolean isIdentity(Symmetry symmetry) {
-        return !symmetry.isAntiSymmetry() && isIdentity(symmetry.permutation);
+    @Test
+    public void test4() {
+        for (int[] cp : new IntPermutationsGenerator(1))
+            System.out.println(Arrays.toString(cp));
     }
 
-    public static int[] createIdentity(final int dimension) {
-        int[] perm = new int[dimension];
-        for (int i = 0; i < dimension; ++i)
-            perm[i] = i;
-        return perm;
+    @Test
+    public void test5() {
+        for (int[] cp : new IntCombinationPermutationGenerator(3, 0))
+            System.out.println(Arrays.toString(cp));
     }
 }
