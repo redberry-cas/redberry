@@ -34,12 +34,13 @@ import static org.junit.Assert.assertTrue;
  * @author Stanislav Poslavsky
  */
 public class SymmetriesTest {
+
     public SymmetriesTest() {
     }
 
     @Test(expected = InconsistentGeneratorsException.class)
     public void testAdd1() {
-        Symmetries symmetries = new Symmetries(4);
+        SymmetriesImpl symmetries = new SymmetriesImpl(4);
         //This is inconsistent symmetry: there is N such that a^N = 1 with 
         //signum = true, but identity permutation can not change sign
         Symmetry a = new Symmetry(new int[]{2, 1, 3, 0}, true);
@@ -49,7 +50,7 @@ public class SymmetriesTest {
 
     @Test(expected = InconsistentGeneratorsException.class)
     public void testAdd2() {
-        Symmetries symmetries = new Symmetries(4);
+        SymmetriesImpl symmetries = new SymmetriesImpl(4);
         //This is consistent symmetry
         Symmetry a = new Symmetry(new int[]{2, 1, 3, 0}, false);
         //This is consistent symmetry to, but it is insonsistent with a: there 
@@ -66,7 +67,7 @@ public class SymmetriesTest {
         //In this method we checking well known theorem that one cycle and one 
         //transposition generates all combinatorics. We building all combinatorics
         //dimension 4
-        Symmetries symmetries = new Symmetries(4);
+        SymmetriesImpl symmetries = new SymmetriesImpl(4);
         //Sycle permutation
         Symmetry a = new Symmetry(new int[]{3, 0, 1, 2}, false);
         //Transposition 
@@ -100,7 +101,7 @@ public class SymmetriesTest {
         //transposition generates all combinatorics. We building symmetries of
         //levi-civita symbol (http://en.wikipedia.org/wiki/Levi-Civita_symbol)
         //with dimension = 3
-        Symmetries symmetries = new Symmetries(3);
+        SymmetriesImpl symmetries = new SymmetriesImpl(3);
         //Sycle permutation
         Symmetry a = new Symmetry(new int[]{2, 0, 1}, false);
         //Transposition witch is antysimmetry
@@ -131,8 +132,6 @@ public class SymmetriesTest {
         Arrays.sort(l);
         assertArrayEquals(arr, l);
     }
-    @Test
-    public void empty(){
-        assertTrue(Symmetries.EMPTY_SYMMETRIES.dimension() == 0);
-    } 
+    
+   
 }

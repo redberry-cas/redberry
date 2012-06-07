@@ -22,9 +22,7 @@
  */
 package cc.redberry.core.indices;
 
-import cc.redberry.core.combinatorics.InconsistentGeneratorsException;
-import cc.redberry.core.combinatorics.Symmetries;
-import cc.redberry.core.combinatorics.Symmetry;
+import cc.redberry.core.combinatorics.*;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
@@ -43,7 +41,7 @@ public class IndicesSymmetries implements Iterable<Symmetry> {
 
     IndicesSymmetries(IndicesTypeStructure indicesTypeStructure) {
         this.indicesTypeStructure = indicesTypeStructure;
-        this.symmetries = new Symmetries(indicesTypeStructure.size());
+        this.symmetries = SymmetriesFactory.createSymmetries(indicesTypeStructure.size());
     }
 
     IndicesSymmetries(IndicesTypeStructure indicesTypeStructure, Symmetries symmetries, short[] diffIds) {
@@ -179,7 +177,7 @@ public class IndicesSymmetries implements Iterable<Symmetry> {
 
     /*
      * private static void checkConsistent(IndicesTypeStructure
-     * indicesTypeStructure, Symmetries symmetries) { List<Symmetry> list =
+     * indicesTypeStructure, SymmetriesImpl symmetries) { List<Symmetry> list =
      * symmetries.getBaseSymmetries(); for (Symmetry s : list)
      * checkConsistent(indicesTypeStructure, s); }
      *
@@ -197,7 +195,7 @@ public class IndicesSymmetries implements Iterable<Symmetry> {
     }
     public static final IndicesSymmetries EMPTY_SYMMETRIES =
             new IndicesSymmetries(new IndicesTypeStructure(EmptySimpleIndices.EMPTY_SIMPLE_INDICES_INSTANCE),
-                                  Symmetries.EMPTY_SYMMETRIES, new short[0]) {
+                                  SymmetriesFactory.createSymmetries(0), new short[0]) {
 
                 @Override
                 public IndicesSymmetries clone() {

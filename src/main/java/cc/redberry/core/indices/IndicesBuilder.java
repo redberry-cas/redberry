@@ -22,7 +22,6 @@
  */
 package cc.redberry.core.indices;
 
-import cc.redberry.core.combinatorics.Symmetries;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.utils.IntArray;
 import cc.redberry.core.utils.IntArrayList;
@@ -122,7 +121,7 @@ public interface IndicesBuilder {
 
     /**
      * Returns result {@code Indices}. It returns {@code Indices }
-     * instance with {@link Symmetries#EMPTY_SYMMETRIES}
+     * instance with {@link SymmetriesImpl#EMPTY_SYMMETRIES}
      *
      * @return result {@code Indices} with empty symmetries
      */

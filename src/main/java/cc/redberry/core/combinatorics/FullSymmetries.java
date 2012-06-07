@@ -20,32 +20,38 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
-package cc.redberry.core.number.parser;
+package cc.redberry.core.combinatorics;
 
-import cc.redberry.core.number.*;
-import java.util.Collection;
-import org.junit.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public class ComplexTest {
+class FullSymmetries extends DummySymmetries {
 
-    @Test
-    public void test1() {
-        Complex a = new Complex(1);
-        Complex b = new Complex(0);
-        System.out.println(a.divide(b));
+    private final List<Symmetry> container;
+
+    FullSymmetries(int dimension) {
+        super(dimension);
+        List<Symmetry> list = new ArrayList<>(3);
+        list.add(new Symmetry(dimension));
+        list.add(new Symmetry(Combinatorics.createTransposition(dimension), false));
+        list.add(new Symmetry(Combinatorics.createCycle(dimension), false));
+        container = Collections.unmodifiableList(list);
     }
 
-    @Test
-    public void test2() {
-        org.apache.commons.math3.complex.Complex a = new org.apache.commons.math3.complex.Complex(1);
-        org.apache.commons.math3.complex.Complex b = new org.apache.commons.math3.complex.Complex(0);
-        System.out.println(a.divide(b));
-        Object[] s = new Integer[2];
-        System.out.println(s instanceof Double[]);
+    @Override
+    public List<Symmetry> getBaseSymmetries() {
+        return container;
+    }
+
+    @Override
+    public Iterator<Symmetry> iterator() {
+        return new PermutationsGenerator<>(dimension);
     }
 }

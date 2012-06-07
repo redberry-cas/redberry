@@ -63,4 +63,69 @@ public final class Combinatorics {
             perm[i] = i;
         return perm;
     }
+
+    public static int[] createTransposition(int dimension) {
+        if (dimension < 0)
+            throw new IllegalArgumentException("Dimension is negative.");
+        if (dimension > 1)
+            return createTransposition(dimension, 0, 1);
+        return new int[dimension];
+    }
+
+    public static int[] createTransposition(int dimension, int position1, int position2) {
+        if (dimension < 0)
+            throw new IllegalArgumentException("Dimension is negative.");
+        if (position1 < 0 || position2 < 0)
+            throw new IllegalArgumentException("Negative index.");
+        if (position1 >= dimension || position2 >= dimension)
+            throw new IndexOutOfBoundsException();
+
+        int[] transposition = new int[dimension];
+        int i = 1;
+        for (; i < dimension; ++i)
+            transposition[i] = i;
+        i = transposition[position1];
+        transposition[position1] = transposition[position2];
+        transposition[position2] = i;
+        return transposition;
+    }
+
+    public static int[] createCycle(int dimension) {
+        if (dimension < 0)
+            throw new IllegalArgumentException("Negative dimension");
+
+        int[] cycle = new int[dimension];
+        for (int i = 0; i < dimension; ++i)
+            cycle[i] = dimension - i - 1;
+        return cycle;
+    }
+
+    /**
+     * Check that fromIndex and toIndex are in range, and throw an appropriate
+     * exception if they aren't.
+     */
+    private static void rangeCheck(int arrayLen, int fromIndex, int toIndex) {
+        if (fromIndex > toIndex)
+            throw new IllegalArgumentException("fromIndex(" + fromIndex
+                    + ") > toIndex(" + toIndex + ")");
+        if (fromIndex < 0)
+            throw new ArrayIndexOutOfBoundsException(fromIndex);
+        if (toIndex > arrayLen)
+            throw new ArrayIndexOutOfBoundsException(toIndex);
+    }
+
+    /**
+     * Check that all positions are less than dimension, and throw an
+     * appropriate exception if they aren't.
+     */
+    private static void rangeCheck1(int dimension, int... positions) {
+        if (dimension < 0)
+            throw new IllegalArgumentException("Dimension is negative.");
+        for (int i : positions) {
+            if (i < 0)
+                throw new IllegalArgumentException("Negative index " + i + ".");
+            if (i >= dimension)
+                throw new IndexOutOfBoundsException();
+        }
+    }
 }

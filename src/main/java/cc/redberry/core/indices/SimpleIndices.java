@@ -22,20 +22,19 @@
  */
 package cc.redberry.core.indices;
 
-import cc.redberry.core.combinatorics.Symmetries;
 import cc.redberry.core.indexmapping.IndexMapping;
 import cc.redberry.core.tensor.SimpleTensor;
 
 /**
  * This interface states additional functionality of the indices of the
  * {@link SimpleTensor}. In contrast to {@link SortedIndices}, here we have
- * additional methods, which are responsible for the {@link Symmetries}
+ * additional methods, which are responsible for the {@link SymmetriesImpl}
  * manipulations.
  *
  * @see Indices
  * @see OrderedIndices
  * @see EmptyIndices
- * @see Symmetries
+ * @see SymmetriesImpl
  * @see SortedIndices
  *
  * @author Dmitry Bolotin
@@ -44,16 +43,16 @@ import cc.redberry.core.tensor.SimpleTensor;
 public interface SimpleIndices extends Indices {
 
     /**
-     * This method returns {@link Symmetries} of this {@code Indices}.
+     * This method returns {@link SymmetriesImpl} of this {@code Indices}.
      *
-     * @return {@code Symmetries} of this {@code Indices}
+     * @return {@code SymmetriesImpl} of this {@code Indices}
      */
     IndicesSymmetries getSymmetries();
 
     /**
-     * This method allows to set {@code Symmetries} of this {@code Indices}.
+     * This method allows to set {@code SymmetriesImpl} of this {@code Indices}.
      *
-     * @param symmetries {@code Symmetries} to be set as {@code Symmetries} of
+     * @param symmetries {@code SymmetriesImpl} to be set as {@code SymmetriesImpl} of
      * this {@code Indices}
      */
     void setSymmetries(IndicesSymmetries symmetries);
