@@ -20,8 +20,11 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
-package cc.redberry.core.combinatorics;
+package cc.redberry.core.combinatorics.symmetries;
 
+import cc.redberry.core.combinatorics.Combinatorics;
+import cc.redberry.core.combinatorics.PermutationsGenerator;
+import cc.redberry.core.combinatorics.Symmetry;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -34,7 +37,7 @@ import java.util.List;
  */
 class FullSymmetries extends DummySymmetries {
 
-    private final List<Symmetry> container;
+    private final List<Symmetry> basis;
 
     FullSymmetries(int dimension) {
         super(dimension);
@@ -42,16 +45,21 @@ class FullSymmetries extends DummySymmetries {
         list.add(new Symmetry(dimension));
         list.add(new Symmetry(Combinatorics.createTransposition(dimension), false));
         list.add(new Symmetry(Combinatorics.createCycle(dimension), false));
-        container = Collections.unmodifiableList(list);
+        basis = Collections.unmodifiableList(list);
     }
 
     @Override
-    public List<Symmetry> getBaseSymmetries() {
-        return container;
+    public List<Symmetry> getBasisSymmetries() {
+        return basis;
     }
 
     @Override
     public Iterator<Symmetry> iterator() {
         return new PermutationsGenerator<>(dimension);
+    }
+
+    @Override
+    public boolean isEmpty() {
+        return false;
     }
 }

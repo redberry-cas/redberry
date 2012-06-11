@@ -22,6 +22,7 @@
  */
 package cc.redberry.core.parser;
 
+import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.utils.*;
 import java.math.BigInteger;
 import org.apache.commons.math3.complex.Complex;
@@ -103,8 +104,16 @@ public class commons {
     }
 
     @Test
-    public void sdsdAds() {
-        int[] a;
-        System.out.println((a=new int[]{2,3}).equals(a));
+    protected void sdsdAds() {
+        
+        
+        Tensor tensor;
+        
+        
+        
+        
+        
+        
+        
     }
 }

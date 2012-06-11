@@ -22,9 +22,11 @@
  */
 package cc.redberry.core.indices;
 
-import cc.redberry.core.combinatorics.*;
+import cc.redberry.core.combinatorics.InconsistentGeneratorsException;
+import cc.redberry.core.combinatorics.Symmetry;
+import cc.redberry.core.combinatorics.symmetries.Symmetries;
+import cc.redberry.core.combinatorics.symmetries.SymmetriesFactory;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
@@ -71,7 +73,7 @@ public class IndicesSymmetries implements Iterable<Symmetry> {
     public short[] getDiffIds() {
         //TODO synchronize
         if (diffIds == null) {
-            List<Symmetry> list = symmetries.getBaseSymmetries();
+            List<Symmetry> list = symmetries.getBasisSymmetries();
             diffIds = new short[symmetries.dimension()];
             Arrays.fill(diffIds, (short) -1);
             short number = 0;
@@ -147,20 +149,6 @@ public class IndicesSymmetries implements Iterable<Symmetry> {
         return this.symmetries.addUnsafe(symmetry);
     }
 
-    public boolean addAllUnsafe(Collection<Symmetry> symmetries) {
-        return this.symmetries.addAllUnsafe(symmetries);
-    }
-
-    public boolean addAllUnsafe(Symmetry... symmetries) {
-        return this.symmetries.addAllUnsafe(symmetries);
-    }
-
-    public boolean addAllUnsafe(IndicesSymmetries indicesSymmetries) {
-        if (!indicesTypeStructure.equals(indicesSymmetries.indicesTypeStructure))
-            throw new IllegalArgumentException("Not compatible symmetries");
-        return this.symmetries.addAllUnsafe(indicesSymmetries.symmetries);
-    }
-
     public final boolean isEmpty() {
         return symmetries.isEmpty();
     }
@@ -178,7 +166,7 @@ public class IndicesSymmetries implements Iterable<Symmetry> {
     /*
      * private static void checkConsistent(IndicesTypeStructure
      * indicesTypeStructure, SymmetriesImpl symmetries) { List<Symmetry> list =
-     * symmetries.getBaseSymmetries(); for (Symmetry s : list)
+     * symmetries.getBasisSymmetries(); for (Symmetry s : list)
      * checkConsistent(indicesTypeStructure, s); }
      *
      * private static void checkConsistent(IndicesTypeStructure

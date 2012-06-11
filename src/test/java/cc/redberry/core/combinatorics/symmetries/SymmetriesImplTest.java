@@ -20,22 +20,24 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
-package cc.redberry.core.combinatorics;
+package cc.redberry.core.combinatorics.symmetries;
 
+import cc.redberry.core.combinatorics.InconsistentGeneratorsException;
+import cc.redberry.core.combinatorics.IntPermutationsGenerator;
+import cc.redberry.core.combinatorics.Symmetry;
 import java.util.Arrays;
 import org.junit.Test;
 
 import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertTrue;
 
 /**
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public class SymmetriesTest {
+public class SymmetriesImplTest {
 
-    public SymmetriesTest() {
+    public SymmetriesImplTest() {
     }
 
     @Test(expected = InconsistentGeneratorsException.class)

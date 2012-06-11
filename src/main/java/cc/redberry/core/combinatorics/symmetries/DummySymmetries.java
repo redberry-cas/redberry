@@ -20,9 +20,10 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
-package cc.redberry.core.combinatorics;
+package cc.redberry.core.combinatorics.symmetries;
 
-import java.util.Collection;
+import cc.redberry.core.combinatorics.InconsistentGeneratorsException;
+import cc.redberry.core.combinatorics.Symmetry;
 
 /**
  *
@@ -45,46 +46,6 @@ abstract class DummySymmetries implements Symmetries {
     }
 
     @Override
-    public boolean add(boolean sign, int... symmetry) throws InconsistentGeneratorsException {
-        if (symmetry.length != dimension || sign)
-            throw new IllegalArgumentException();
-        return false;
-    }
-
-    @Override
-    public boolean addAll(Symmetry... symmetries) throws InconsistentGeneratorsException {
-        for (Symmetry symmetry : symmetries)
-            if (symmetry.dimension() != dimension || symmetry.isAntiSymmetry())
-                throw new IllegalArgumentException();
-        return false;
-    }
-
-    @Override
-    public boolean addAll(Collection<Symmetry> symmetries) throws InconsistentGeneratorsException {
-        for (Symmetry symmetry : symmetries)
-            if (symmetry.dimension() != dimension || symmetry.isAntiSymmetry())
-                throw new IllegalArgumentException();
-        return false;
-    }
-
-    @Override
-    public boolean addAllUnsafe(Symmetry... symmetries) {
-        return addAll(symmetries);
-    }
-
-    @Override
-    public boolean addAllUnsafe(Collection<Symmetry> symmetries) {
-        return addAll(symmetries);
-    }
-
-    @Override
-    public boolean addAllUnsafe(Symmetries symmetries) {
-        if (symmetries.dimension() != dimension)
-            throw new IllegalArgumentException();
-        return false;
-    }
-
-    @Override
     public boolean addUnsafe(Symmetry symmetry) {
         return add(symmetry);
     }
@@ -97,10 +58,5 @@ abstract class DummySymmetries implements Symmetries {
     @Override
     public int dimension() {
         return dimension;
-    }
-
-    @Override
-    public boolean isEmpty() {
-        return true;
     }
 }

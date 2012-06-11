@@ -109,7 +109,7 @@ public final class IndicesBuilderSimple
             final int oldSize = data.size();
 
             addSymmetriesTail(indices.size());
-            List<Symmetry> addingSymmetries = ((SimpleIndices) indices).getSymmetries().getReference().getBaseSymmetries();
+            List<Symmetry> addingSymmetries = ((SimpleIndices) indices).getSymmetries().getReference().getBasisSymmetries();
             int i;
             for (Symmetry s : addingSymmetries) {
                 //without identity
@@ -179,7 +179,8 @@ public final class IndicesBuilderSimple
 
         SimpleIndices simpleIndices = IndicesFactory.createSimple(null, indices);
         IndicesSymmetries indicesSymmetries = new IndicesSymmetries(new IndicesTypeStructure(simpleIndices));
-        indicesSymmetries.addAllUnsafe(resulting);
+        for (Symmetry s : resulting)
+            indicesSymmetries.addUnsafe(s);
         simpleIndices.setSymmetries(indicesSymmetries);
         return simpleIndices;
     }
