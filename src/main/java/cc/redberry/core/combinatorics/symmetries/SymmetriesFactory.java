@@ -22,13 +22,8 @@
  */
 package cc.redberry.core.combinatorics.symmetries;
 
-import cc.redberry.core.combinatorics.*;
-import cc.redberry.core.utils.EmptyIterator;
-import cc.redberry.core.utils.SingleIterator;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
+import cc.redberry.core.combinatorics.Combinatorics;
+import cc.redberry.core.combinatorics.Symmetry;
 
 /**
  *

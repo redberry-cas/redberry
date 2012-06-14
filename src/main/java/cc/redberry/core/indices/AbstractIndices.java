@@ -109,15 +109,6 @@ abstract class AbstractIndices implements Indices {
         return data[position];
     }
 
-    @Override
-    public final boolean equals(Object obj) {
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        return Arrays.equals(this.data, ((AbstractIndices) obj).data);
-    }
-
     /**
      * Returns {@code Arrays.hashCode(this.data)}, where data - generic array of
      * integers, representing this indices
@@ -128,6 +119,15 @@ abstract class AbstractIndices implements Indices {
     @Override
     public final int hashCode() {
         return 291 + Arrays.hashCode(this.data);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        return Arrays.equals(this.data, ((AbstractIndices) obj).data);
     }
 
     /**

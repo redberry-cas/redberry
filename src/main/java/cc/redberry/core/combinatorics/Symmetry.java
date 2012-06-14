@@ -79,8 +79,8 @@ public class Symmetry extends Permutation {
         this.signum = false;
     }
 
-    protected Symmetry(int[] permutation, boolean signum, boolean b) {
-        super(permutation, b);
+    protected Symmetry(int[] permutation, boolean signum, boolean notClone) {
+        super(permutation, notClone);
         this.signum = signum;
     }
 

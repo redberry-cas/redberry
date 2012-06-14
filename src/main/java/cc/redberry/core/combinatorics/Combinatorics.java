@@ -100,6 +100,13 @@ public final class Combinatorics {
         return cycle;
     }
 
+    public static int[] inverse(int[] permutation) {
+        int[] inverse = new int[permutation.length];
+        for (int i = 0; i < permutation.length; ++i)
+            inverse[permutation[i]] = i;
+        return inverse;
+    }
+
     /**
      * Check that fromIndex and toIndex are in range, and throw an appropriate
      * exception if they aren't.

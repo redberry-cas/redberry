@@ -162,7 +162,7 @@ class EmptyIndices implements Indices {
      */
     @Override
     public boolean equals(Object obj) {
-        return obj == EMPTY_INDICES_INSTANCE;
+        return obj == this;
     }
 
     /**

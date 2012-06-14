@@ -26,9 +26,7 @@ import cc.redberry.core.combinatorics.InconsistentGeneratorsException;
 import cc.redberry.core.combinatorics.Symmetry;
 import cc.redberry.core.combinatorics.symmetries.Symmetries;
 import cc.redberry.core.combinatorics.symmetries.SymmetriesFactory;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 /**
  *
@@ -46,7 +44,7 @@ public class IndicesSymmetries implements Iterable<Symmetry> {
         this.symmetries = SymmetriesFactory.createSymmetries(indicesTypeStructure.size());
     }
 
-    IndicesSymmetries(IndicesTypeStructure indicesTypeStructure, Symmetries symmetries, short[] diffIds) {
+    private IndicesSymmetries(IndicesTypeStructure indicesTypeStructure, Symmetries symmetries, short[] diffIds) {
         this.indicesTypeStructure = indicesTypeStructure;
         this.symmetries = symmetries;
         this.diffIds = diffIds;
@@ -161,6 +159,26 @@ public class IndicesSymmetries implements Iterable<Symmetry> {
     @Override
     public String toString() {
         return symmetries.toString();
+    }
+
+//    @Override
+//    public boolean equals(Object obj) {
+//        if (obj == null)
+//            return false;
+//        if (getClass() != obj.getClass())
+//            return false;
+//        final IndicesSymmetries other = (IndicesSymmetries) obj;
+//        if (!this.indicesTypeStructure.equals(other.indicesTypeStructure))
+//            return false;
+//        if (!Objects.equals(this.symmetries, other.symmetries))
+//            return false;
+//        if (!Arrays.equals(this.diffIds, other.diffIds))
+//            return false;
+//        return true;
+//    }
+    @Override
+    public int hashCode() {
+        return 301 + Objects.hashCode(this.symmetries);
     }
 
     /*

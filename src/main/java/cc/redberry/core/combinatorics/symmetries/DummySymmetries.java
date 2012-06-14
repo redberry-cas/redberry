@@ -24,18 +24,17 @@ package cc.redberry.core.combinatorics.symmetries;
 
 import cc.redberry.core.combinatorics.InconsistentGeneratorsException;
 import cc.redberry.core.combinatorics.Symmetry;
+import java.util.List;
 
 /**
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-abstract class DummySymmetries implements Symmetries {
+abstract class DummySymmetries extends AbstractSymmetries {
 
-    protected final int dimension;
-
-    DummySymmetries(int dimension) {
-        this.dimension = dimension;
+    DummySymmetries(int dimension, List<Symmetry> basis) {
+        super(dimension, basis);
     }
 
     @Override

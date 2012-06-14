@@ -20,41 +20,23 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
-package cc.redberry.core.combinatorics.symmetries;
-
-import cc.redberry.core.combinatorics.Symmetry;
-import cc.redberry.core.utils.SingleIterator;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
+package cc.redberry.core.combinatorics;
 
 /**
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-class EmptySymmetries extends DummySymmetries {
+public class UnsafeCombinatorics {
 
-    EmptySymmetries(int dimension) {
-        super(dimension,
-              Collections.unmodifiableList(
-                Arrays.asList(new Symmetry(dimension))));
-        assert dimension == 0 || dimension == 1;
+    private UnsafeCombinatorics() {
     }
 
-    @Override
-    public List<Symmetry> getBasisSymmetries() {
-        return basis;
+    public static Permutation createUnsafe(int[] permutation) {
+        return new Permutation(permutation, true);
     }
 
-    @Override
-    public boolean isEmpty() {
-        return true;
-    }
-
-    @Override
-    public Iterator<Symmetry> iterator() {
-        return new SingleIterator<>(basis.get(0));
+    public static Symmetry createUnsafe(int[] permutation, boolean sign) {
+        return new Symmetry(permutation, sign, true);
     }
 }

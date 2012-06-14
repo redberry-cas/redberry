@@ -23,38 +23,29 @@
 package cc.redberry.core.combinatorics.symmetries;
 
 import cc.redberry.core.combinatorics.Symmetry;
-import cc.redberry.core.utils.SingleIterator;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 
 /**
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-class EmptySymmetries extends DummySymmetries {
+abstract class AbstractSymmetries implements Symmetries {
 
-    EmptySymmetries(int dimension) {
-        super(dimension,
-              Collections.unmodifiableList(
-                Arrays.asList(new Symmetry(dimension))));
-        assert dimension == 0 || dimension == 1;
+    protected final int dimension;
+    protected final List<Symmetry> basis;
+
+    public AbstractSymmetries(int dimension, List<Symmetry> basis) {
+        this.dimension = dimension;
+        this.basis = basis;
     }
 
     @Override
-    public List<Symmetry> getBasisSymmetries() {
-        return basis;
+    public int hashCode() {
+        return 235 + Objects.hashCode(this.basis);
     }
 
     @Override
-    public boolean isEmpty() {
-        return true;
-    }
-
-    @Override
-    public Iterator<Symmetry> iterator() {
-        return new SingleIterator<>(basis.get(0));
-    }
+    public abstract Symmetries clone();
 }

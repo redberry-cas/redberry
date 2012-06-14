@@ -177,4 +177,11 @@ public class Tensors {
     public static Tensor parse(String expression) {
         return CC.current().getParseManager().parse(expression);
     }
+
+    public static SimpleTensor parseSimple(String expression) {
+        Tensor t = CC.current().getParseManager().parse(expression);
+        if (!(t instanceof SimpleTensor))
+            throw new IllegalArgumentException("Input tensor is not SimpleTYensor.");
+        return (SimpleTensor) t;
+    }
 }

@@ -49,6 +49,16 @@ public final class IndicesTypeStructure {
             ++typesCounts[IndicesUtils.getType(indices.get(i))];
     }
 
+    /**
+     *
+     * @param indices sorted by type array of indices
+     */
+    IndicesTypeStructure(int[] indices) {
+        size = indices.length;
+        for (int i = 0; i < size; ++i)
+            ++typesCounts[IndicesUtils.getType(indices[i])];
+    }
+
     public int size() {
         return size;
     }

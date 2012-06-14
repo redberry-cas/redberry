@@ -81,7 +81,7 @@ public class Permutation implements Comparable<Permutation> {
         return true;
     }
 
-    protected Permutation(int[] permutation, boolean b) {
+    protected Permutation(int[] permutation, boolean notClone) {
         this.permutation = permutation;
     }
 

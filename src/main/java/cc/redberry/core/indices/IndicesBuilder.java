@@ -22,115 +22,166 @@
  */
 package cc.redberry.core.indices;
 
+import cc.redberry.core.math.MathUtils;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.utils.IntArray;
 import cc.redberry.core.utils.IntArrayList;
 
 /**
- * This class provides functionality to construct {@code Indices} object by
- * merging other {@code Indices} objects. For example, if we have a product
- * {@code X_mn*Y_ab} we can construct products indices by appending
+ * This class provides functionality to construct unordered {@code Indices}
+ * object by combining other {@code Indices} objects. For example, if we have a
+ * product {@code X_mn*Y_ab} we can construct products indices by appending
  * consequentially indices of tensor {@code X} and {@code Y} to
- * {@code IndicesBuilder}. As the result this class returns {@code Indices}
- * instance.
+ * {@code IndicesBuilder}. As the result this class returns
+ * {@code SortedIndices} instance.
  *
  * @see Indices
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
- * @author Konstantin Kiselev
  */
-public interface IndicesBuilder {
+public final class IndicesBuilder {
+
+    private final IntArrayList data;
+
+    public IndicesBuilder() {
+        data = new IntArrayList();
+    }
+
+    private IndicesBuilder(IntArrayList data) {
+        this.data = data;
+    }
+
+    public IndicesBuilder(int capacity) {
+        data = new IntArrayList(capacity);
+    }
 
     /**
-     * Appends specified {@code Indices} to {@code IndicesBuilder} and returns
-     * this (similarly to {@link StringBuilder}).
-     *
-     * @param indices indices to be appended
-     *
-     * @return this
-     */
-    IndicesBuilder append(Indices indices);
-
-    /**
-     * Appends specified index to {@code IndicesBuilder} and returns this
-     * (similarly to {@link StringBuilder}).
+     * Appends index representation of specified {@code int}.
      *
      * @param index index to be appended
      *
-     * @return this
+     * @return a reference to this object
      */
-    IndicesBuilder append(int index);
+    public IndicesBuilder append(int index) {
+        data.add(index);
+        return this;
+    }
 
     /**
-     * Appends specified indices, represented by {@code indices} integer array
-     * and returns this (similarly to {@link StringBuilder}).
+     * Appends indices representation of specified {@code int[]}.
      *
-     * @param indices specified indices array to be appended
+     * @param indices indices to be appended
      *
-     * @return this
+     * @return a reference to this object
      */
-    IndicesBuilder append(int[] indices);
+    public IndicesBuilder append(int[] indices) {
+        data.addAll(indices);
+        return this;
+    }
 
     /**
-     * Appends specified indices, represented by {@code indices} integer array
-     * and returns this (similarly to {@link StringBuilder}).
+     * Appends indices representation of specified {@code IntArray}.
      *
-     * @param indices specified indices array to be appended
+     * @param indices indices to be appended
      *
-     * @return this
+     * @return a reference to this object
      */
-    IndicesBuilder append(IntArray indices);
+    public IndicesBuilder append(IntArray indices) {
+        data.addAll(indices);
+        return this;
+    }
 
     /**
-     * Appends specified indices, represented by {@code indices} integer array
-     * and returns this (similarly to {@link StringBuilder}).
+     * Appends indices representation of specified {@code IntArrayList}.
      *
-     * @param indices specified indices array list to be appended
+     * @param indices indices to be appended
      *
-     * @return this
+     * @return a reference to this object
      */
-    IndicesBuilder append(IntArrayList indices);
+    public IndicesBuilder append(IntArrayList indices) {
+        data.addAll(indices);
+        return this;
+    }
 
     /**
-     * Appends specified IndicesBuilder and returns this (similarly to {@link StringBuilder}).
+     * Appends specified {@code Indices}.
      *
-     * @param ib IndicesBuilder to be appended
+     * @param indices indices to be appended
      *
-     * @return this
+     * @return a reference to this object
      */
-    IndicesBuilder append(IndicesBuilder ib);
+    public IndicesBuilder append(Indices indices) {
+        return append(indices.getAllIndices());
+    }
 
     /**
-     * Appends indices of specified tensor and returns this (similarly to {@link StringBuilder}).
+     * Appends specified {@code IndicesBuilder}.
      *
-     * @param ib IndicesBuilder to be appended
+     * @param ib IndicesBuilder
      *
-     * @return this
+     * @return a reference to this object
      */
-    IndicesBuilder append(Tensor tensor);
+    public IndicesBuilder append(IndicesBuilder ib) {
+        return append(ib.toArray());
+    }
 
     /**
-     * Appends indices of specified tensors and returns this (similarly to {@link StringBuilder}).
+     * Appends indices of specified {@code Tensor}.
      *
-     * @param ib IndicesBuilder to be appended
+     * @param tensor a tensor
      *
-     * @return this
+     * @return a reference to this object
      */
-    IndicesBuilder append(Tensor... tensor);
+    public IndicesBuilder append(Tensor tensor) {
+        return append(tensor.getIndices());
+    }
 
     /**
-     * Returns result {@code Indices}. It returns {@code Indices }
-     * instance with {@link SymmetriesImpl#EMPTY_SYMMETRIES}
+     * Appends consequentially indices of {@code tensors} in specified array.
      *
-     * @return result {@code Indices} with empty symmetries
+     * @param tensors an array of tensors
+     *
+     * @return a reference to this object
      */
-    Indices getIndices();
+    public IndicesBuilder append(Tensor... tensor) {
+        for (Tensor t : tensor)
+            append(t);
+        return this;
+    }
 
-    int[] toArray();
+    /**
+     * Returns resulting {@code Indices}.
+     *
+     * @return resulting {@code Indices}
+     */
+    public Indices getIndices() {
+        return IndicesFactory.createSorted(data.toArray());
+    }
+
+    /**
+     * Returns integer array, representing indices, constructed in this
+     * {@code IndicesBuilder}.
+     *
+     * @return integer array, representing indices, constructed in this
+     * {@code IndicesBuilder}
+     */
+    public int[] toArray() {
+        return data.toArray();
+    }
+
+    public Indices getDistinct() {
+        //TODO review performance
+        return IndicesFactory.createSorted(MathUtils.getSortedDistinct(data.toArray()));
+    }
 
     @Override
-    String toString();
+    public String toString() {
+        return getIndices().toString();
+    }
 
-    IndicesBuilder clone();
+    @Override
+    public IndicesBuilder clone() {
+        return new IndicesBuilder(data.clone());
+    }
 }

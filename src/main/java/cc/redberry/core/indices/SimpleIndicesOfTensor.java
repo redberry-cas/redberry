@@ -37,6 +37,7 @@ package cc.redberry.core.indices;
  * @see SortedIndices
  */
 public final class SimpleIndicesOfTensor extends SimpleIndicesAbstract {
+
     SimpleIndicesOfTensor(int[] data, IndicesSymmetries symmetries) {
         super(data, symmetries);
     }
@@ -49,7 +50,7 @@ public final class SimpleIndicesOfTensor extends SimpleIndicesAbstract {
      * This method allows to set {@code Symmetries} of this {@code Indices}.
      *
      * @param symmetries {@code Symmetries} to be set as {@code Symmetries} of
-     *                   this {@code Indices}
+     * this {@code Indices}
      */
     @Override
     public void setSymmetries(IndicesSymmetries symmetries) {
@@ -65,4 +66,15 @@ public final class SimpleIndicesOfTensor extends SimpleIndicesAbstract {
     protected SimpleIndices create(int[] data, IndicesSymmetries symmetries) {
         return new SimpleIndicesOfTensor(true, data, symmetries);
     }
+
+//    @Override
+//    public boolean equals(Object obj) {
+//        //TODO show to Dima
+//        if (obj == null)
+//            return false;
+//        if (getClass() != obj.getClass())
+//            return false;
+//        SimpleIndicesOfTensor oth = (SimpleIndicesOfTensor) obj;
+//        return oth.symmetries == symmetries && Arrays.equals(data, oth.data);
+//    }
 }

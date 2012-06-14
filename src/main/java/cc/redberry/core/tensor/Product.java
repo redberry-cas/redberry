@@ -24,7 +24,7 @@ package cc.redberry.core.tensor;
 
 import cc.redberry.core.indices.InconsistentIndicesException;
 import cc.redberry.core.indices.Indices;
-import cc.redberry.core.indices.IndicesBuilderSorted;
+import cc.redberry.core.indices.IndicesBuilder;
 import cc.redberry.core.indices.IndicesUtils;
 import cc.redberry.core.math.GraphUtils;
 import cc.redberry.core.utils.ArraysUtils;
@@ -50,7 +50,7 @@ public final class Product extends MultiTensor {
 
     @Override
     protected Indices calculateIndices() {
-        IndicesBuilderSorted ibs = new IndicesBuilderSorted();
+        IndicesBuilder ibs = new IndicesBuilder();
         for (Tensor t : data)
             ibs.append(t);
         try {

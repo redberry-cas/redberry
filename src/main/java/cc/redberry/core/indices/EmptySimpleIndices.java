@@ -22,9 +22,7 @@
  */
 package cc.redberry.core.indices;
 
-import cc.redberry.core.context.ToStringMode;
 import cc.redberry.core.indexmapping.IndexMapping;
-import cc.redberry.core.utils.IntArray;
 
 /**
  * This class is an implementation of {@link Indices} interface and represents
@@ -107,7 +105,7 @@ final class EmptySimpleIndices extends EmptyIndices implements SimpleIndices {
      */
     @Override
     public boolean equals(Object obj) {
-        return obj == EMPTY_SIMPLE_INDICES_INSTANCE;
+        return obj == this;
     }
 
     /**

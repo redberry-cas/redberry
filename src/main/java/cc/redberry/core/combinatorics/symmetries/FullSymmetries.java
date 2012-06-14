@@ -25,7 +25,7 @@ package cc.redberry.core.combinatorics.symmetries;
 import cc.redberry.core.combinatorics.Combinatorics;
 import cc.redberry.core.combinatorics.PermutationsGenerator;
 import cc.redberry.core.combinatorics.Symmetry;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -37,15 +37,12 @@ import java.util.List;
  */
 class FullSymmetries extends DummySymmetries {
 
-    private final List<Symmetry> basis;
-
     FullSymmetries(int dimension) {
-        super(dimension);
-        List<Symmetry> list = new ArrayList<>(3);
-        list.add(new Symmetry(dimension));
-        list.add(new Symmetry(Combinatorics.createTransposition(dimension), false));
-        list.add(new Symmetry(Combinatorics.createCycle(dimension), false));
-        basis = Collections.unmodifiableList(list);
+        super(dimension, Collections.unmodifiableList(
+                Arrays.asList(
+                new Symmetry(dimension),
+                new Symmetry(Combinatorics.createTransposition(dimension), false),
+                new Symmetry(Combinatorics.createCycle(dimension), false))));
     }
 
     @Override
