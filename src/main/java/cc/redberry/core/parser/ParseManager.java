@@ -24,7 +24,7 @@ package cc.redberry.core.parser;
 
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.transformations.Transformation;
-import java.util.*;
+import java.util.ArrayList;
 import java.util.List;
 
 /**

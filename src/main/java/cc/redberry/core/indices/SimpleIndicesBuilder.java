@@ -76,12 +76,13 @@ public final class SimpleIndicesBuilder {
         for (j = 0; j < data.length; ++j)
             types[j] = data[j] & 0x7F000000;
 
-        int[] coSort = Combinatorics.createIdentity(data.length);
+        int[] cosort = Combinatorics.createIdentity(data.length);
+        //only stable sort
         if (types.length > 100)
-            ArraysUtils.timSort(types, coSort);
+            ArraysUtils.timSort(types, cosort);
         else
-            ArraysUtils.insertionSort(types, coSort);
-        int[] coSortInv = Combinatorics.inverse(coSort);
+            ArraysUtils.insertionSort(types, cosort);
+        int[] cosortInv = Combinatorics.inverse(cosort);
 
         //Allocating resulting symmetries object
         //it already contains identity symmetry
@@ -99,10 +100,10 @@ public final class SimpleIndicesBuilder {
                 c = new int[data.length];
                 Symmetry s = basis.get(k);
                 for (j = 0; j < data.length; ++j)
-                    if (coSort[j] < position || coSort[j] >= position + s.dimension())
-                        c[j] = coSortInv[j];
+                    if (cosort[j] < position || cosort[j] >= position + s.dimension())
+                        c[j] = cosortInv[j];
                     else
-                        c[j] = coSortInv[s.newIndexOf(j - position) + position];
+                        c[j] = cosortInv[s.newIndexOf(j - position) + position];
                 resultingSymmetries.addUnsafe(UnsafeCombinatorics.createUnsafe(c, s.isAntiSymmetry()));
             }
             //increasing position in the total symmetry array

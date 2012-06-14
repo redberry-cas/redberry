@@ -22,8 +22,9 @@
  */
 package cc.redberry.core.parser;
 
-import cc.redberry.core.tensor.*;
-import java.util.*;
+import cc.redberry.core.tensor.Tensor;
+import cc.redberry.core.tensor.Tensors;
+import java.util.Arrays;
 
 /**
  *
@@ -43,7 +44,7 @@ public class ParseNode {
             node.setParent(this);
     }
 
-    public final void setParent(ParseNode parent) {
+    private void setParent(ParseNode parent) {
         this.parent = parent;
     }
 
@@ -75,7 +76,7 @@ public class ParseNode {
             case Product:
                 return Tensors.multiply(contentToTensors());
         }
-        throw new RuntimeException("Unknown type.");
+        throw new ParserException("Unknown tensor type: " + tensorType);
     }
 
     @Override
