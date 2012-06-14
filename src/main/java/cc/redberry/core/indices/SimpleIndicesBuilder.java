@@ -27,7 +27,8 @@ import cc.redberry.core.combinatorics.Symmetry;
 import cc.redberry.core.combinatorics.UnsafeCombinatorics;
 import cc.redberry.core.combinatorics.symmetries.Symmetries;
 import cc.redberry.core.combinatorics.symmetries.SymmetriesFactory;
-import cc.redberry.core.utils.*;
+import cc.redberry.core.utils.ArraysUtils;
+import cc.redberry.core.utils.IntArrayList;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -69,57 +70,45 @@ public final class SimpleIndicesBuilder {
     public SimpleIndices getIndices() {
         final int[] data = this.data.toArray();
 
-        int sCount = 0;
-        //calculating total number of symmetries except identities
-        for (Symmetries s : symmetries)
-            sCount += s.getBasisSymmetries().size() - 1;
-
-        //allocating arrays of resulting symmetries
-        final int[][] symmetries = new int[sCount][];
-        //allocating bit array which keeps signs of resulting symmetries
-        BitArray signs = new LongBackedBitArray(sCount);
-
-        int position = 0;
-        sCount = 0;
-        int[] c;
-        int j, k;
-        //rescaling symmetries to the actual length of resulting indices
-        for (Symmetries ss : this.symmetries) {
-            final List<Symmetry> basis = ss.getBasisSymmetries();
-            //iterating from 1 because zero'th element is always identity symmetry 
-            for (k = 1; k < basis.size(); ++k) {
-                c = symmetries[sCount] = new int[data.length];
-                Symmetry s = basis.get(k);
-                for (j = 0; j < position; ++j)
-                    c[j] = j;
-                for (; j < position + s.dimension(); ++j)
-                    c[j] = s.newIndexOf(j - position) + position;
-                for (; j < data.length; ++j)
-                    c[j] = j;
-                signs.set(sCount++, s.isAntiSymmetry());
-            }
-            //increasing position in the total symmetry array
-            position += ss.dimension();
-        }
-
-        int[] coSort = Combinatorics.createIdentity(data.length);
+        //Sorting indices by type
+        int j;
         int[] types = new int[data.length];
         for (j = 0; j < data.length; ++j)
             types[j] = data[j] & 0x7F000000;
+
+        int[] coSort = Combinatorics.createIdentity(data.length);
         if (types.length > 100)
             ArraysUtils.timSort(types, coSort);
         else
             ArraysUtils.insertionSort(types, coSort);
         int[] coSortInv = Combinatorics.inverse(coSort);
 
+        //Allocating resulting symmetries object
+        //it already contains identity symmetry
         Symmetries resultingSymmetries =
                 SymmetriesFactory.createSymmetries(data.length);
-        for (sCount = 0; sCount < symmetries.length; ++sCount) {
-            c = new int[data.length];
-            for (j = 0; j < data.length; ++j)
-                c[j] = coSortInv[symmetries[sCount][coSort[j]]];
-            resultingSymmetries.addUnsafe(UnsafeCombinatorics.createUnsafe(c, signs.get(sCount)));
+        int[] c;
+        int position = 0, k;
+
+        //rescaling symmetries to the actual length and positions corresponding 
+        //to the sorted indices
+        for (Symmetries ss : this.symmetries) {
+            final List<Symmetry> basis = ss.getBasisSymmetries();
+            //iterating from 1 because zero'th element is always identity symmetry 
+            for (k = 1; k < basis.size(); ++k) {
+                c = new int[data.length];
+                Symmetry s = basis.get(k);
+                for (j = 0; j < data.length; ++j)
+                    if (coSort[j] < position || coSort[j] >= position + s.dimension())
+                        c[j] = coSortInv[j];
+                    else
+                        c[j] = coSortInv[s.newIndexOf(j - position) + position];
+                resultingSymmetries.addUnsafe(UnsafeCombinatorics.createUnsafe(c, s.isAntiSymmetry()));
+            }
+            //increasing position in the total symmetry array
+            position += ss.dimension();
         }
+
         return IndicesFactory.createSimple(
                 new IndicesSymmetries(new IndicesTypeStructure(data),
                                       resultingSymmetries), data);

@@ -158,17 +158,15 @@ public class SimpleIndicesBuilderTest {
         System.out.println(ibs);
         assertTrue(ibs.getIndices().equals(expectedIndices));
 
-        SimpleTensor nSt = simpleTensor("S", ibs.getIndices());
-
         //Expected
         Symmetry s1 = new Symmetry(new int[]{0, 1, 2, 3, 4, 5, 6, 7}, false);
         Symmetry s2 = new Symmetry(new int[]{1, 0, 2, 3, 4, 5, 6, 7}, false);
         Symmetry s3 = new Symmetry(new int[]{0, 1, 3, 2, 4, 5, 6, 7}, false);
         Symmetry[] expected = {s1, s2, s3};
 
-        Symmetry[] actual = nSt.getIndices().getSymmetries().getReference().getBasisSymmetries().toArray(new Symmetry[3]);
+        Symmetry[] actual = ibs.getIndices().getSymmetries().getReference().getBasisSymmetries().toArray(new Symmetry[3]);
         Arrays.sort(actual);
         Arrays.sort(expected);
         assertTrue(Arrays.equals(actual, expected));
     }
-}s
+}

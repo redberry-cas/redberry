@@ -116,7 +116,4 @@ public interface Symmetries extends Iterable<Symmetry> {
      * @return a deep clone of this set
      */
     Symmetries clone();
-    
-    @Override
-    public boolean equals(Object other);
 }
