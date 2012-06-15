@@ -134,7 +134,7 @@ public class SimpleTensor extends Tensor {
     }
 
     @Override
-    public Iterator<Tensor> iterator() {
+    public final Iterator<Tensor> iterator() {
         return EmptyIterator.INSTANCE;
     }
 

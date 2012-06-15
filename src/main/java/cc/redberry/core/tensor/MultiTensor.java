@@ -24,8 +24,6 @@ package cc.redberry.core.tensor;
 
 import cc.redberry.core.context.ToStringMode;
 import cc.redberry.core.indices.Indices;
-import java.lang.ref.Reference;
-import java.lang.ref.SoftReference;
 import java.util.Arrays;
 
 /**
@@ -36,11 +34,12 @@ import java.util.Arrays;
 public abstract class MultiTensor extends Tensor {
 
     protected final Tensor[] data;
-    protected Reference<Indices> indicesReference = new SoftReference<>(null);
+    protected final Indices indices;
 
-    MultiTensor(Tensor... data) {
+    MultiTensor(Tensor[] data, Indices indices) {
         assert data.length > 1;
         this.data = data;
+        this.indices = indices;
     }
 
     @Override
@@ -55,19 +54,29 @@ public abstract class MultiTensor extends Tensor {
 
     @Override
     public Indices getIndices() {
-        Indices indices = indicesReference.get();
-        if (indices == null)
-            indicesReference = new SoftReference<>(indices = calculateIndices());
         return indices;
     }
 
     protected abstract char operationSymbol();
 
-    protected abstract Indices calculateIndices();
+    //protected abstract Indices calculateIndices();
     //protected abstract int calculateHash();
 
     public Tensor[] getRange(int from, int to) {
         return Arrays.copyOfRange(data, from, to);
+    }
+
+    public final Tensor remove(int position) {
+        int size = size();
+        if (position >= size || position < 0)
+            throw new IndexOutOfBoundsException();
+        TensorBuilder builder = getBuilder();
+        for (int i = 0; i < size; ++i)
+            if (i == position)
+                continue;
+            else
+                builder.put(get(i));
+        return builder.buid();
     }
 
     @Override

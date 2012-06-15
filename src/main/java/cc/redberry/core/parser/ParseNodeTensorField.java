@@ -22,8 +22,10 @@
  */
 package cc.redberry.core.parser;
 
-import cc.redberry.core.indices.*;
-import cc.redberry.core.tensor.*;
+import cc.redberry.core.indices.IndicesFactory;
+import cc.redberry.core.indices.SimpleIndices;
+import cc.redberry.core.tensor.Tensor;
+import cc.redberry.core.tensor.Tensors;
 
 /**
  *

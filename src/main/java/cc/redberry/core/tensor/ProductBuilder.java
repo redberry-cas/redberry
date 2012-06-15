@@ -22,9 +22,15 @@
  */
 package cc.redberry.core.tensor;
 
+import cc.redberry.core.indices.InconsistentIndicesException;
+import cc.redberry.core.indices.Indices;
+import cc.redberry.core.indices.IndicesBuilder;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.utils.TensorUtils;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  *
@@ -81,7 +87,17 @@ public class ProductBuilder implements TensorBuilder {
         if (data.isEmpty())
             return Complex.ONE;
 
-        return new Product(data.toArray(new Tensor[data.size()]));
+        IndicesBuilder ibs = new IndicesBuilder();
+        Indices indices;
+        for (Tensor t : data)
+            ibs.append(t);
+        try {
+            indices = ibs.getIndices();
+        } catch (InconsistentIndicesException exception) {
+            throw new InconsistentIndicesException(exception.getIndex());//TODO add info in exceptioon
+        }
+
+        return new Product(data.toArray(new Tensor[data.size()]), indices);
     }
 
     @Override

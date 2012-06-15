@@ -23,7 +23,8 @@
 package cc.redberry.core.tensor;
 
 import cc.redberry.core.context.ToStringMode;
-import cc.redberry.core.indices.*;
+import cc.redberry.core.indices.Indices;
+import cc.redberry.core.indices.IndicesFactory;
 
 /**
  *
@@ -34,36 +35,36 @@ public abstract class AbstractScalarFunction extends Tensor {
 
     protected final Tensor argument;
 
-    public AbstractScalarFunction(Tensor argument) {
+    protected AbstractScalarFunction(Tensor argument) {
         if (argument.getIndices().size() != 0)
             throw new TensorException("Non scalar argument " + argument + " in scalar function");
         this.argument = argument;
     }
 
     @Override
-    public Indices getIndices() {
-       return IndicesFactory.EMPTY_INDICES;
+    public final Indices getIndices() {
+        return IndicesFactory.EMPTY_INDICES;
     }
 
-    public abstract String stringSymbol();
+    protected abstract String functionName();
 
     public abstract Tensor derivative();
 
     @Override
-    public Tensor get(int i) {
+    public final Tensor get(int i) {
         if (i != 0)
             throw new IndexOutOfBoundsException();
         return argument;
     }
 
     @Override
-    public int size() {
+    public final int size() {
         return 1;
     }
 
     @Override
-    public String toString(ToStringMode mode) {
-        String stringSymbol = stringSymbol();
+    public final String toString(ToStringMode mode) {
+        String stringSymbol = functionName();
         switch (mode) {
             case UTF8:
                 return stringSymbol + "(" + argument.toString(ToStringMode.UTF8) + ")";
@@ -76,9 +77,10 @@ public abstract class AbstractScalarFunction extends Tensor {
         }
     }
 
+    
+    //TODO implement builders 
     @Override
     public TensorBuilder getBuilder() {
         throw new UnsupportedOperationException("Not supported yet.");
     }
-
 }

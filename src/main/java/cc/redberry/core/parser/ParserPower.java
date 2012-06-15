@@ -28,6 +28,7 @@ package cc.redberry.core.parser;
  * @author Stanislav Poslavsky
  */
 public class ParserPower implements NodeParser {
+
     public static final ParserPower INSTANCE = new ParserPower();
     private static final String power = "Power";
     private static final int minLength = power.length() + 2;
@@ -45,7 +46,6 @@ public class ParserPower implements NodeParser {
         if (expression.length() <= minLength)
             return null;
 
-        //FIXME situation Sin[x]+Cos[y] not good for this condition!
         if (!(power + '[').equals(expression.substring(0, power.length() + 1)) || expression.charAt(expression.length() - 1) != ']')
             return null;
         String[] parts = expression.substring(power.length() + 1, expression.length() - 1).split(",");

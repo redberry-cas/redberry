@@ -35,8 +35,16 @@ import java.util.List;
 public final class ParseManager {
 
     private final Parser parser = Parser.DEFAULT;
-    public final List<Transformation> tensorPreprocessors = new ArrayList<>();
-    public final List<ParseNodeTransformer> nodesPreprocessors = new ArrayList<>();
+    private final List<Transformation> tensorPreprocessors = new ArrayList<>();
+    private final List<ParseNodeTransformer> nodesPreprocessors = new ArrayList<>();
+
+    public List<ParseNodeTransformer> getNodesPreprocessors() {
+        return nodesPreprocessors;
+    }
+
+    public List<Transformation> getTensorPreprocessors() {
+        return tensorPreprocessors;
+    }
 
     public Tensor parse(String expression) {
         ParseNode node = parser.parse(expression);

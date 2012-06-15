@@ -38,8 +38,7 @@ class EmptySymmetries extends DummySymmetries {
 
     EmptySymmetries(int dimension) {
         super(dimension,
-              Collections.unmodifiableList(
-                Arrays.asList(new Symmetry(dimension))));
+              Collections.unmodifiableList(Arrays.asList(new Symmetry(dimension))));
         assert dimension == 0 || dimension == 1;
     }
 

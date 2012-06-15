@@ -24,8 +24,8 @@ package cc.redberry.core.tensor.functions;
 
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.tensor.AbstractScalarFunction;
-import cc.redberry.core.tensor.Product;
 import cc.redberry.core.tensor.Tensor;
+import cc.redberry.core.tensor.Tensors;
 
 /**
  *
@@ -40,7 +40,7 @@ public final class Cos extends AbstractScalarFunction {
 
     @Override
     public Tensor derivative() {
-        return new Product(Complex.MINUSE_ONE, new Sin(argument));
+        return Tensors.multiply(Complex.MINUSE_ONE, new Sin(argument));
     }
 
     @Override
@@ -49,7 +49,7 @@ public final class Cos extends AbstractScalarFunction {
     }
 
     @Override
-    public String stringSymbol() {
+    public String functionName() {
         return "Cos";
     }
 }

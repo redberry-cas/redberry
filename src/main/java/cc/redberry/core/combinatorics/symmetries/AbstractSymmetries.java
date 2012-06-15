@@ -24,7 +24,6 @@ package cc.redberry.core.combinatorics.symmetries;
 
 import cc.redberry.core.combinatorics.Symmetry;
 import java.util.List;
-import java.util.Objects;
 
 /**
  *
@@ -43,7 +42,7 @@ abstract class AbstractSymmetries implements Symmetries {
 
     @Override
     public int hashCode() {
-        return 235 + Objects.hashCode(this.basis);
+        return 235 + this.basis.hashCode();
     }
 
     @Override

@@ -22,9 +22,7 @@
  */
 package cc.redberry.core.tensor;
 
-import cc.redberry.core.indices.InconsistentIndicesException;
 import cc.redberry.core.indices.Indices;
-import cc.redberry.core.indices.IndicesBuilder;
 import cc.redberry.core.indices.IndicesUtils;
 import cc.redberry.core.math.GraphUtils;
 import cc.redberry.core.utils.ArraysUtils;
@@ -42,23 +40,23 @@ public final class Product extends MultiTensor {
     private SoftReference<ProductContent> contentReference;
     private final int hash;
 
-    public Product(Tensor... data) {
-        super(data);
+    Product(Tensor[] data, Indices indices) {
+        super(data, indices);
         this.contentReference = new SoftReference<>(calculateContent());
         this.hash = calculateHash();
     }
 
-    @Override
-    protected Indices calculateIndices() {
-        IndicesBuilder ibs = new IndicesBuilder();
-        for (Tensor t : data)
-            ibs.append(t);
-        try {
-            return ibs.getIndices();
-        } catch (InconsistentIndicesException exception) {
-            throw new InconsistentIndicesException(exception.getIndex(), this);//TODO this->data
-        }
-    }
+//    @Override
+//    protected Indices calculateIndices() {
+//        IndicesBuilder ibs = new IndicesBuilder();
+//        for (Tensor t : data)
+//            ibs.append(t);
+//        try {
+//            return ibs.getIndices();
+//        } catch (InconsistentIndicesException exception) {
+//            throw new InconsistentIndicesException(exception.getIndex(), this);//TODO this->data
+//        }
+//    }
 
     @Override
     protected char operationSymbol() {
@@ -106,7 +104,7 @@ public final class Product extends MultiTensor {
     }
 
     private ProductContent calculateContent() {
-        final Indices freeIndices = getIndices().getFreeIndices();
+        final Indices freeIndices = indices.getFreeIndices();
         final int differentIndicesCount = (getIndices().size() + freeIndices.size()) / 2;
 
         //Names (names with type, see IndicesUtils.getNameWithType() ) of all indices in this multiplication

@@ -22,19 +22,11 @@ import cc.redberry.core.indices.SimpleIndices;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public class TensorField extends SimpleTensor {
+public final class TensorField extends SimpleTensor {
 
     private Tensor[] args;
     private SimpleIndices[] argIndices;
 
-//    public TensorField(int name, SimpleIndices indices, Tensor[] args) {
-//        super(name, indices);
-//        this.args = args;
-//        argIndices = new SimpleIndices[args.length];
-//        int i = 0;
-//        for (Tensor t : args)
-//            argIndices[i++] = IndicesFactory.createSimple(null, t.getIndices().getFreeIndices());
-//    }
     TensorField(int name, SimpleIndices indices, Tensor[] args, SimpleIndices[] argIndices) {
         super(name, indices);
         this.args = args;
@@ -81,6 +73,36 @@ public class TensorField extends SimpleTensor {
 
     @Override
     public TensorBuilder getBuilder() {
-        return new TensorFieldBuilder(this);
+        return new Builder(this);
+    }
+
+    private static class Builder implements TensorBuilder {
+
+        private final TensorField field;
+        private int pointer = 0;
+        private final Tensor[] data;
+
+        public Builder(TensorField field) {
+            this.field = field;
+            this.data = new Tensor[field.size()];
+        }
+
+        @Override
+        public Tensor buid() {
+            if (pointer != data.length)
+                throw new IllegalStateException("Tensor field not fully constructed.");
+            return new TensorField(field, data);
+        }
+
+        @Override
+        public void put(Tensor tensor) {
+            if (pointer == data.length)
+                throw new IllegalStateException("No more arguments in field.");
+            if (tensor == null)
+                throw new NullPointerException();
+            if (!tensor.getIndices().getFreeIndices().equalsRegardlessOrder(field.getArgIndices(pointer)))
+                throw new IllegalArgumentException("Free indices of puted tensor differs from field argument binding indices!");
+            data[pointer++] = tensor;
+        }
     }
 }

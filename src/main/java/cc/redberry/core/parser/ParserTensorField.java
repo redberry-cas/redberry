@@ -33,6 +33,7 @@ import java.util.List;
  * @author Stanislav Poslavsky
  */
 public class ParserTensorField implements NodeParser {
+
     public static final ParserTensorField INSTANCE = new ParserTensorField();
 
     private ParserTensorField() {
@@ -91,13 +92,12 @@ public class ParserTensorField implements NodeParser {
                 String[] split = argument.split(":");
                 if (split.length == 1) {
                     a = parser.parse(argument);
-                    aIndices = null;//CHECKSTYLE IndicesFactory.createIsolated(a.getIndices().getFreeIndices());
+                    aIndices = null;
                 } else {
                     if (split.length != 2)
                         throw new ParserException(expression);
                     a = parser.parse(split[0]);
                     aIndices = ParserIndices.parseSimple(split[1]);
-                    //TODO add assertion on indices compatability
                 }
                 arguments.add(a);
                 indices.add(aIndices);

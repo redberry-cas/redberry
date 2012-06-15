@@ -47,7 +47,7 @@ public final class Exp extends AbstractScalarFunction {
     }
 
     @Override
-    public String stringSymbol() {
+    public String functionName() {
         return "Exp";
     }
 }

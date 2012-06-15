@@ -18,7 +18,6 @@ package cc.redberry.core.tensor;
 import cc.redberry.core.context.Context;
 import cc.redberry.core.context.ToStringMode;
 import cc.redberry.core.indices.Indices;
-
 import java.util.Iterator;
 
 /**
@@ -155,10 +154,21 @@ public abstract class Tensor
 
     public abstract int size();
 
-    //TODO 
-    //public abstract Tensor set(int position, Tensor tensor);
-    //TODO 
-    //public abstract Tensor remove(int position);
+    public final Tensor set(int position, Tensor tensor) {
+        int size = size();
+        if (position >= size || position < 0)
+            throw new IndexOutOfBoundsException();
+        if (tensor == null)
+            throw new NullPointerException();
+        TensorBuilder builder = getBuilder();
+        for (int i = 0; i < size; ++i)
+            if (i == position)
+                builder.put(tensor);
+            else
+                builder.put(get(i));
+        return builder.buid();
+    }
+
     /**
      * Returns a string representation of tensor. Parameter
      * {@link cc.redberry.core.context.ToStringMode} mode specifies
@@ -191,7 +201,7 @@ public abstract class Tensor
      * @return {@code toString(CC.getDefaultPrintMode())}
      */
     @Override
-    public String toString() {
+    public final String toString() {
         return toString(Context.get().getDefaultPrintMode());
     }
 
@@ -207,7 +217,7 @@ public abstract class Tensor
      * @return < code>(hash() < t.hash() ? -1 : (hash() == t.hash() ? 0 : 1))</code>
      */
     @Override
-    public int compareTo(Tensor t) {
+    public final int compareTo(Tensor t) {
         int hash = hash(), thash = t.hash();
         return hash < thash ? -1 : (hash == thash ? 0 : 1);
     }

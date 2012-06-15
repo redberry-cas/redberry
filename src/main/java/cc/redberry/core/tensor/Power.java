@@ -23,7 +23,8 @@
 package cc.redberry.core.tensor;
 
 import cc.redberry.core.context.ToStringMode;
-import cc.redberry.core.indices.*;
+import cc.redberry.core.indices.Indices;
+import cc.redberry.core.indices.IndicesFactory;
 import cc.redberry.core.utils.TensorUtils;
 
 /**
@@ -35,9 +36,7 @@ public final class Power extends Tensor {
 
     private final Tensor argument, power;
 
-    public Power(Tensor a, Tensor power) {
-        if (!TensorUtils.isScalar(a, power))
-            throw new TensorException("Non scalar power: Power[" + a + ", " + power + "]");
+    Power(Tensor a, Tensor power) {
         this.argument = a;
         this.power = power;
     }

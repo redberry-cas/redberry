@@ -24,8 +24,8 @@ package cc.redberry.core.tensor.functions;
 
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.tensor.AbstractScalarFunction;
-import cc.redberry.core.tensor.Power;
 import cc.redberry.core.tensor.Tensor;
+import cc.redberry.core.tensor.Tensors;
 
 /**
  *
@@ -40,7 +40,7 @@ public final class Log extends AbstractScalarFunction {
 
     @Override
     public Tensor derivative() {
-        return new Power(argument, Complex.MINUSE_ONE);
+        return Tensors.pow(argument, Complex.MINUSE_ONE);
     }
 
     @Override
@@ -49,7 +49,7 @@ public final class Log extends AbstractScalarFunction {
     }
 
     @Override
-    public String stringSymbol() {
+    public String functionName() {
         return "Log";
     }
 }

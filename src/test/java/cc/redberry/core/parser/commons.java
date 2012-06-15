@@ -101,10 +101,11 @@ public class commons {
 
 
         System.out.println(new Integer(3).compareTo(new Integer(2)));
+        int[] as = new int[12];
     }
 
     @Test
-    protected void sdsdAds() {
+    public void sdsdAds() {
         
         
         Tensor tensor;
