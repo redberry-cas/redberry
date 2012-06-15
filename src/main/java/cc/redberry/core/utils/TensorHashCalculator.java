@@ -22,11 +22,11 @@
  */
 package cc.redberry.core.utils;
 
-//import java.util.Arrays;
-//import cc.redberry.core.indices.Indices;
-//import cc.redberry.core.indices.SimpleIndices;
-//import cc.redberry.core.tensor.SimpleTensor;
-//import cc.redberry.core.tensor.Tensor;
+import cc.redberry.core.indices.Indices;
+import cc.redberry.core.indices.SimpleIndices;
+import cc.redberry.core.tensor.SimpleTensor;
+import cc.redberry.core.tensor.Tensor;
+import java.util.Arrays;
 
 /**
  *
@@ -34,6 +34,7 @@ package cc.redberry.core.utils;
  * @author Stanislav Poslavsky
  */
 public class TensorHashCalculator {
+//
 //    private static int _hashWithIndices(final Tensor tensor, final int[] indices) {
 //        if (tensor instanceof SimpleTensor) {
 //            SimpleIndices si = ((SimpleTensor) tensor).getIndices();

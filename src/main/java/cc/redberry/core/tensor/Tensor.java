@@ -169,6 +169,16 @@ public abstract class Tensor
         return builder.buid();
     }
 
+    public Tensor[] getRange(int from, final int to) {
+        int size = size();
+        if (from < 0 || from > to || to >= size)
+            throw new IndexOutOfBoundsException();
+        Tensor[] range = new Tensor[from - to];
+        for (size = 0; from < to; ++size, ++from)
+            range[size] = get(from);
+        return range;
+    }
+
     /**
      * Returns a string representation of tensor. Parameter
      * {@link cc.redberry.core.context.ToStringMode} mode specifies

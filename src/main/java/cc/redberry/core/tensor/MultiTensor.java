@@ -62,6 +62,7 @@ public abstract class MultiTensor extends Tensor {
     //protected abstract Indices calculateIndices();
     //protected abstract int calculateHash();
 
+    @Override
     public Tensor[] getRange(int from, int to) {
         return Arrays.copyOfRange(data, from, to);
     }

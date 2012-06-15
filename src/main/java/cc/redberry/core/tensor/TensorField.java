@@ -17,6 +17,7 @@ package cc.redberry.core.tensor;
 
 import cc.redberry.core.context.ToStringMode;
 import cc.redberry.core.indices.SimpleIndices;
+import java.util.*;
 
 /**
  * @author Dmitry Bolotin
@@ -55,6 +56,11 @@ public final class TensorField extends SimpleTensor {
     @Override
     public int size() {
         return args.length;
+    }
+
+    @Override
+    public Tensor[] getRange(int from, int to) {
+        return Arrays.copyOfRange(args, from, to);
     }
 
     @Override
