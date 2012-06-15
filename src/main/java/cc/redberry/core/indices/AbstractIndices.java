@@ -29,34 +29,18 @@ import java.lang.ref.WeakReference;
 import java.util.Arrays;
 
 /**
- * Basic abstract {@code Indices} interface implementation. Indices are stored
- * as final integer array. This class is abstract and has two main inheritors:
- * {@link SimpleIndicesImpl} and {@link SortedIndices}, due to different way of
- * indices array storing (sorted or not). This is because some methods for
- * sorted array can be written with faster algorithms. For more information see
- * links below.
- *
- * @see Indices
- * @see SortedIndices
- * @see SimpleIndicesImpl
- * @see IndicesUtils
+ * Basic abstract {@link Indices} implementation. Indices are stored as final
+ * integer array.
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
 abstract class AbstractIndices implements Indices {
 
-    //indices data
     protected final int[] data;
-    //lazy fields
     //TODO investigate performance
     private WeakReference<UpperLowerIndices> upperLower = new WeakReference<>(null);
 
-    /**
-     * Construct {@code AbstractIndices} instance from specified indices array.
-     *
-     * @param data array of indices
-     */
     AbstractIndices(int[] data) {
         this.data = data;
     }
@@ -109,13 +93,6 @@ abstract class AbstractIndices implements Indices {
         return data[position];
     }
 
-    /**
-     * Returns {@code Arrays.hashCode(this.data)}, where data - generic array of
-     * integers, representing this indices
-     *
-     * @return {@code Arrays.hashCode(this.data)}, where data - generic array of
-     * integers, representing this indices
-     */
     @Override
     public final int hashCode() {
         return 291 + Arrays.hashCode(this.data);
@@ -130,13 +107,6 @@ abstract class AbstractIndices implements Indices {
         return Arrays.equals(this.data, ((AbstractIndices) obj).data);
     }
 
-    /**
-     * {@inheritDoc}
-     *
-     * @param mode {@inheritDoc}
-     *
-     * @return {@inheritDoc}
-     */
     @Override
     public final String toString(ToStringMode mode) {
         if (data.length == 0)
@@ -164,13 +134,6 @@ abstract class AbstractIndices implements Indices {
         return sb.toString();
     }
 
-    /**
-     * Returns {@code toString(Context.get().getDefaultPrintMode());}
-     *
-     * @return {@code toString(Context.get().getDefaultPrintMode());}
-     *
-     * @see AbstractIndices#toString(cc.redberry.core.context.ToStringMode)
-     */
     @Override
     public final String toString() {
         return toString(Context.get().getDefaultPrintMode());
@@ -178,10 +141,10 @@ abstract class AbstractIndices implements Indices {
 
     protected static class UpperLowerIndices {
 
-        public final int[] upper;
-        public final int[] lower;
+        final int[] upper;
+        final int[] lower;
 
-        public UpperLowerIndices(int[] upper, int[] lower) {
+        UpperLowerIndices(int[] upper, int[] lower) {
             this.upper = upper;
             this.lower = lower;
         }

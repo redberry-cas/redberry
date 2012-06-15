@@ -101,4 +101,10 @@ public class ParserTest {
         System.out.println(node);
 //        System.currentTimeMillis();
     }
+
+    @Test
+    public void test5() {
+        Tensor t = Tensors.parse("Pow[x,x]+Pow[y,x]");
+        Assert.assertEquals(Sum.class, t.getClass());
+    }
 }

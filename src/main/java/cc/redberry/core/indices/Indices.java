@@ -29,20 +29,15 @@ import cc.redberry.core.utils.IntArray;
 /**
  * This interface states common tensor indices functionality. For specification
  * and more information see method summary and implementations. Indices objects
- * are considered to be immutable, and only way to change indices, is to
- * <i>apply index mapping</i>. For more information about index mapping see
- * <link>IndexMapping</link>. <p>For individual index structure see
- * <link>IndicesUtils</link>.</p>
+ * are considered to be immutable, so there is no way to change indices. <p>For
+ * individual index structure see <link>IndicesUtils</link>.</p>
  *
- * @author Dmitry Bolotin
- * @author Stanoslav Poslavsky
- * @see AbstractIndices
- * @see OrderedIndices
- * @see SortedIndices
- * @see EmptyIndices
  * @see IndicesBuilder
  * @see IndexMapping
  * @see IndicesUtils
+ *
+ * @author Dmitry Bolotin
+ * @author Stanislav Poslavsky
  */
 public interface Indices {
 

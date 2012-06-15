@@ -55,7 +55,7 @@ public final class SimpleIndicesBuilder {
         if (indices.size() == 0)
             return this;
         data.addAll(((SimpleIndicesAbstract) indices).data);
-        symmetries.add(indices.getSymmetries().getReference());
+        symmetries.add(indices.getSymmetries().getInnerSymmetries());
         return this;
     }
 
@@ -78,16 +78,14 @@ public final class SimpleIndicesBuilder {
 
         int[] cosort = Combinatorics.createIdentity(data.length);
         //only stable sort
-        if (types.length > 100)
-            ArraysUtils.timSort(types, cosort);
-        else
-            ArraysUtils.insertionSort(types, cosort);
+        ArraysUtils.stableSort(types, cosort);
         int[] cosortInv = Combinatorics.inverse(cosort);
 
         //Allocating resulting symmetries object
         //it already contains identity symmetry
         Symmetries resultingSymmetries =
                 SymmetriesFactory.createSymmetries(data.length);
+
         int[] c;
         int position = 0, k;
 
@@ -110,8 +108,7 @@ public final class SimpleIndicesBuilder {
             position += ss.dimension();
         }
 
-        return IndicesFactory.createSimple(
-                new IndicesSymmetries(new IndicesTypeStructure(data),
-                                      resultingSymmetries), data);
+        return UnsafeIndicesFactory.createIsolatedUnsafeWithoutSort(
+                new IndicesSymmetries(new IndicesTypeStructure(data), resultingSymmetries), data);
     }
 }

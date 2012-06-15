@@ -63,8 +63,8 @@ public class SimpleIndicesBuilderTest {
         expected.getSymmetries().add(IndexType.LatinLower, true, 1, 0, 2, 3);
 
         assertEquals(expected, indices);
-        unsafeAssertEquals(indices.getSymmetries().getReference(),
-                           expected.getSymmetries().getReference());
+        unsafeAssertEquals(indices.getSymmetries().getInnerSymmetries(),
+                           expected.getSymmetries().getInnerSymmetries());
     }
 
     @Test
@@ -83,8 +83,8 @@ public class SimpleIndicesBuilderTest {
         expected.getSymmetries().add(IndexType.LatinLower, true, 1, 0, 2, 3);
 
         assertEquals(expected, indices);
-        unsafeAssertEquals(indices.getSymmetries().getReference(),
-                           expected.getSymmetries().getReference());
+        unsafeAssertEquals(indices.getSymmetries().getInnerSymmetries(),
+                           expected.getSymmetries().getInnerSymmetries());
     }
 
     @Test
@@ -105,7 +105,7 @@ public class SimpleIndicesBuilderTest {
         Symmetry s3 = new Symmetry(new int[]{0, 1, 3, 2}, false);
         Symmetry[] expected = {s1, s2, s3};
 
-        Symmetry[] actual = ibs.getIndices().getSymmetries().getReference().getBasisSymmetries().toArray(new Symmetry[3]);
+        Symmetry[] actual = ibs.getIndices().getSymmetries().getInnerSymmetries().getBasisSymmetries().toArray(new Symmetry[3]);
         Arrays.sort(actual);
         Arrays.sort(expected);
         assertTrue(Arrays.equals(actual, expected));
@@ -134,7 +134,7 @@ public class SimpleIndicesBuilderTest {
         Symmetry s3 = new Symmetry(new int[]{0, 1, 2, 3, 5, 4, 6, 7}, false);
         Symmetry[] expected = {s1, s2, s3};
 
-        Symmetry[] actual = ibs.getIndices().getSymmetries().getReference().getBasisSymmetries().toArray(new Symmetry[3]);
+        Symmetry[] actual = ibs.getIndices().getSymmetries().getInnerSymmetries().getBasisSymmetries().toArray(new Symmetry[3]);
         Arrays.sort(actual);
         Arrays.sort(expected);
         assertTrue(Arrays.equals(actual, expected));
@@ -164,7 +164,7 @@ public class SimpleIndicesBuilderTest {
         Symmetry s3 = new Symmetry(new int[]{0, 1, 3, 2, 4, 5, 6, 7}, false);
         Symmetry[] expected = {s1, s2, s3};
 
-        Symmetry[] actual = ibs.getIndices().getSymmetries().getReference().getBasisSymmetries().toArray(new Symmetry[3]);
+        Symmetry[] actual = ibs.getIndices().getSymmetries().getInnerSymmetries().getBasisSymmetries().toArray(new Symmetry[3]);
         Arrays.sort(actual);
         Arrays.sort(expected);
         assertTrue(Arrays.equals(actual, expected));

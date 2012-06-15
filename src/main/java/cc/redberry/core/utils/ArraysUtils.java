@@ -37,9 +37,11 @@ import java.util.Objects;
  * @author Stanislav Poslavsky
  */
 public final class ArraysUtils {
+
     private ArraysUtils() {
     }
     public static final Comparator<Object> HASH_COMPARATOR = new Comparator<Object>() {
+
         @Override
         public int compare(Object o1, Object o2) {
             return Integer.compare(o1.hashCode(), o2.hashCode());
@@ -52,13 +54,15 @@ public final class ArraysUtils {
      * the position of the first element, witch is closest to key (i.e. if
      * Arrays.binarySearch returns {@code -low-1}, this method returns {@code low}).
      *
-     * @param a the array to be searched
+     * @param a   the array to be searched
      * @param key the value to be searched for
+     *
      * @return index of the search key, if it is contained in the array;
-     * otherwise, <tt><i>insertion point</i></tt>. The <i>insertion point</i> is
-     * defined as the point at which the key would be inserted into the array:
-     * the index of the first element greater than the key, or <tt>a.length</tt>
-     * if all elements in the array are less than the specified key.
+     *         otherwise, <tt><i>insertion point</i></tt>. The <i>insertion
+     *         point</i> is defined as the point at which the key would be
+     *         inserted into the array: the index of the first element greater
+     *         than the key, or <tt>a.length</tt> if all elements in the array
+     *         are less than the specified key.
      */
     public static int binarySearch1(int[] a, int key) {
         return binarySearch1(a, 0, a.length, key);
@@ -70,19 +74,21 @@ public final class ArraysUtils {
      * returns the position of the first element, witch is closest to key (i.e.
      * if Arrays.binarySearch returns {@code -low-1}, this method returns {@code low}).
      *
-     * @param a the array to be searched
-     * @param key the value to be searched for
+     * @param a         the array to be searched
+     * @param key       the value to be searched for
      * @param fromIndex the index of the first element (inclusive) to be
-     * searched
-     * @param toIndex the index of the last element (exclusive) to be searched
+     *                  searched
+     * @param toIndex   the index of the last element (exclusive) to be searched
+     *
      * @return index of the search key, if it is contained in the array;
-     * otherwise, <tt><i>insertion point</i></tt>. The <i>insertion point</i> is
-     * defined as the point at which the key would be inserted into the array:
-     * the index of the first element greater than the key, or <tt>toIndex</tt>
-     * if all elements in the array are less than the specified key.
+     *         otherwise, <tt><i>insertion point</i></tt>. The <i>insertion
+     *         point</i> is defined as the point at which the key would be
+     *         inserted into the array: the index of the first element greater
+     *         than the key, or <tt>toIndex</tt> if all elements in the array are
+     *         less than the specified key.
      */
     public static int binarySearch1(int[] a, int fromIndex, int toIndex,
-            int key) {
+                                    int key) {
         Arrays.binarySearch(a, key);
         int low = fromIndex;
         int high = toIndex - 1;
@@ -106,6 +112,7 @@ public final class ArraysUtils {
      *  {@link HashFunctions#JenkinWang32shift(int) }
      *
      * @param objects array
+     *
      * @return commutative hash
      */
     public static int commutativeHashCode(final Object[] objects) {
@@ -122,6 +129,7 @@ public final class ArraysUtils {
      *  {@link HashFunctions#JenkinWang32shift(int) }
      *
      * @param objects array
+     *
      * @return commutative hash
      */
     public static int commutativeHashCode(final Object[] objects, final int from, final int to) {
@@ -151,9 +159,10 @@ public final class ArraysUtils {
      *
      * @param target the array to be sorted
      * @param coSort the array, which will be permuted in the same way, then the
-     * specified target array, during sorting procedure
+     *               specified target array, during sorting procedure
+     *
      * @throws IllegalArgumentException if coSort length less then target
-     * length.
+     *                                  length.
      */
     public static void insertionSort(int[] target, int[] coSort) {
         insertionSort(target, 0, target.length, coSort);
@@ -176,16 +185,17 @@ public final class ArraysUtils {
      * to the initial order of elements and <i>in-place</i>: requires constant
      * amount of additional space.
      *
-     * @param target the array to be sorted
+     * @param target    the array to be sorted
      * @param fromIndex the index of the first element (inclusive) to be sorted
-     * @param toIndex the index of the last element (exclusive) to be sorted
-     * @param coSort the array, which will be permuted in the same way, then the
-     * specified target array, during sorting procedure
+     * @param toIndex   the index of the last element (exclusive) to be sorted
+     * @param coSort    the array, which will be permuted in the same way, then
+     *                  the specified target array, during sorting procedure
      *
-     * @throws IllegalArgumentException if <tt>fromIndex &gt; toIndex</tt>
+     * @throws IllegalArgumentException       if <tt>fromIndex &gt; toIndex</tt>
      * @throws ArrayIndexOutOfBoundsException if <tt>fromIndex &lt; 0</tt> or
-     * <tt>toIndex &gt; target.length</tt> or <tt>toIndex &gt;
-     * coSort.length</tt>
+     *                                        <tt>toIndex &gt; target.length</tt>
+     *                                        or <tt>toIndex &gt;
+     *                                        coSort.length</tt>
      */
     public static void insertionSort(int[] target, int fromIndex, int toIndex, int[] coSort) {
         rangeCheck(target.length, fromIndex, toIndex);
@@ -221,9 +231,10 @@ public final class ArraysUtils {
      *
      * @param target the array to be sorted
      * @param coSort the array, which will be permuted in the same way, then the
-     * specified target array, during sorting procedure
+     *               specified target array, during sorting procedure
+     *
      * @throws IllegalArgumentException if coSort length less then target
-     * length.
+     *                                  length.
      */
     public static void insertionSort(int[] target, long[] coSort) {
         insertionSort(target, 0, target.length, coSort);
@@ -246,16 +257,17 @@ public final class ArraysUtils {
      * to the initial order of elements and <i>in-place</i>: requires constant
      * amount of additional space.
      *
-     * @param target the array to be sorted
+     * @param target    the array to be sorted
      * @param fromIndex the index of the first element (inclusive) to be sorted
-     * @param toIndex the index of the last element (exclusive) to be sorted
-     * @param coSort the array, which will be permuted in the same way, then the
-     * specified target array, during sorting procedure
+     * @param toIndex   the index of the last element (exclusive) to be sorted
+     * @param coSort    the array, which will be permuted in the same way, then
+     *                  the specified target array, during sorting procedure
      *
-     * @throws IllegalArgumentException if <tt>fromIndex &gt; toIndex</tt>
+     * @throws IllegalArgumentException       if <tt>fromIndex &gt; toIndex</tt>
      * @throws ArrayIndexOutOfBoundsException if <tt>fromIndex &lt; 0</tt> or
-     * <tt>toIndex &gt; target.length</tt> or <tt>toIndex &gt;
-     * coSort.length</tt>
+     *                                        <tt>toIndex &gt; target.length</tt>
+     *                                        or <tt>toIndex &gt;
+     *                                        coSort.length</tt>
      */
     public static void insertionSort(int[] target, int fromIndex, int toIndex, long[] coSort) {
         rangeCheck(target.length, fromIndex, toIndex);
@@ -293,9 +305,10 @@ public final class ArraysUtils {
      *
      * @param target the array to be sorted
      * @param coSort the array, which will be permuted in the same way, then the
-     * specified target array, during sorting procedure
+     *               specified target array, during sorting procedure
+     *
      * @throws IllegalArgumentException if coSort length less then target
-     * length.
+     *                                  length.
      */
     public static <T extends Comparable<T>> void insertionSort(T[] target, Object[] coSort) {
         insertionSort(target, 0, target.length, coSort);
@@ -319,16 +332,17 @@ public final class ArraysUtils {
      * to the initial order of elements and <i>in-place</i>: requires constant
      * amount of additional space.
      *
-     * @param target the array to be sorted
+     * @param target    the array to be sorted
      * @param fromIndex the index of the first element (inclusive) to be sorted
-     * @param toIndex the index of the last element (exclusive) to be sorted
-     * @param coSort the array, which will be permuted in the same way, then the
-     * specified target array, during sorting procedure
+     * @param toIndex   the index of the last element (exclusive) to be sorted
+     * @param coSort    the array, which will be permuted in the same way, then
+     *                  the specified target array, during sorting procedure
      *
-     * @throws IllegalArgumentException if <tt>fromIndex &gt; toIndex</tt>
+     * @throws IllegalArgumentException       if <tt>fromIndex &gt; toIndex</tt>
      * @throws ArrayIndexOutOfBoundsException if <tt>fromIndex &lt; 0</tt> or
-     * <tt>toIndex &gt; target.length</tt> or <tt>toIndex &gt;
-     * coSort.length</tt>
+     *                                        <tt>toIndex &gt; target.length</tt>
+     *                                        or <tt>toIndex &gt;
+     *                                        coSort.length</tt>
      */
     public static <T extends Comparable<T>> void insertionSort(T[] target, int fromIndex, int toIndex, Object[] coSort) {
         int i, j;
@@ -364,14 +378,25 @@ public final class ArraysUtils {
      * @see Arrays#sort(java.lang.Object[])
      * @param target the array to be sorted
      * @param coSort the array, which will be permuted in the same way, then the
-     * specified target array, during sorting procedure
-     * @throws ClassCastException if the array contains elements that are not
-     * <i>mutually comparable</i> (for example, strings and integers)
+     *               specified target array, during sorting procedure
+     *
+     * @throws ClassCastException       if the array contains elements that are
+     *                                  not <i>mutually comparable</i> (for
+     *                                  example, strings and integers)
      * @throws IllegalArgumentException (optional) if the natural ordering of
-     * the array elements is found to violate the {@link Comparable} contract
+     *                                  the array elements is found to violate
+     *                                  the {@link Comparable} contract
      */
     public static void timSort(int target[], int[] coSort) {
         IntTimSort.sort(target, coSort);
+    }
+
+    public static void stableSort(int target[], int[] cosort) {
+        //TODO test 100
+        if (target.length > 100)
+            ArraysUtils.timSort(target, cosort);
+        else
+            ArraysUtils.insertionSort(target, cosort);
     }
 
     /**
@@ -388,9 +413,9 @@ public final class ArraysUtils {
      * to degrade to quadratic performance.
      *
      * <p><b>NOTE: remember this is unstable sort algorithm, so additional
-     * combinatorics of the {@code coSort} array can be perfomed. Use this method
-     * only if you are sure, in what you are doing. If not - use stable sort
-     * methods like an insertion sort or Tim sort.</b>
+     * combinatorics of the {@code coSort} array can be perfomed. Use this
+     * method only if you are sure, in what you are doing. If not - use stable
+     * sort methods like an insertion sort or Tim sort.</b>
      *
      * <p><b>NOTE:</b> The method throws {@code IllegalArgumentException} if
      * {@code target == coSort}, because in this case no sorting will be
@@ -398,10 +423,10 @@ public final class ArraysUtils {
      *
      * @param target the array to be sorted
      * @param coSort the array, which will be permuted in the same way, then the
-     * specified target array, during sorting procedure
+     *               specified target array, during sorting procedure
      *
      * @throws IllegalArgumentException if coSort length less then target
-     * length.
+     *                                  length.
      * @throws IllegalArgumentException if target == coSort (as references).
      */
     public static void quickSort(int[] target, int[] coSort) {
@@ -425,25 +450,27 @@ public final class ArraysUtils {
      * to degrade to quadratic performance.
      *
      * <p><b>NOTE: remember this is unstable sort algorithm, so additional
-     * combinatorics of the {@code coSort} array can be perfomed. Use this method
-     * only if you are sure, in what you are doing. If not - use stable sort
-     * methods like an insertion sort or Tim sort.</b>
+     * combinatorics of the {@code coSort} array can be perfomed. Use this
+     * method only if you are sure, in what you are doing. If not - use stable
+     * sort methods like an insertion sort or Tim sort.</b>
      *
      * <p><b>NOTE:</b> The method throws {@code IllegalArgumentException} if
      * {@code target == coSort}, because in this case no sorting will be
      * perfomed.
      *
-     * @param target the array to be sorted
+     * @param target    the array to be sorted
      * @param fromIndex the index of the first element (inclusive) to be sorted
-     * @param toIndex the index of the last element (exclusive) to be sorted
-     * @param coSort the array, which will be permuted in the same way, then the
-     * specified target array, during sorting procedure
+     * @param toIndex   the index of the last element (exclusive) to be sorted
+     * @param coSort    the array, which will be permuted in the same way, then
+     *                  the specified target array, during sorting procedure
      *
-     * @throws IllegalArgumentException if <tt>fromIndex &gt; toIndex</tt>
+     * @throws IllegalArgumentException       if <tt>fromIndex &gt; toIndex</tt>
      * @throws ArrayIndexOutOfBoundsException if <tt>fromIndex &lt; 0</tt> or
-     * <tt>toIndex &gt; target.length</tt> or <tt>toIndex &gt;
-     * coSort.length</tt>
-     * @throws IllegalArgumentException if target == coSort (as references).
+     *                                        <tt>toIndex &gt; target.length</tt>
+     *                                        or <tt>toIndex &gt;
+     *                                        coSort.length</tt>
+     * @throws IllegalArgumentException       if target == coSort (as
+     *                                        references).
      */
     public static void quickSort(int[] target, int fromIndex, int toIndex, int[] coSort) {
         rangeCheck(target.length, fromIndex, toIndex);
@@ -462,11 +489,11 @@ public final class ArraysUtils {
      * are sure, in what you are doing. If not - use stable sort methods like an
      * insertion sort or Tim sort.</b>
      *
-     * @param target the array to be sorted
+     * @param target    the array to be sorted
      * @param fromIndex the index of the first element (inclusive) to be sorted
-     * @param length the length of the sorting subarray.
-     * @param coSort the array, which will be permuted in the same way, then the
-     * specified target array, during sorting procedure
+     * @param length    the length of the sorting subarray.
+     * @param coSort    the array, which will be permuted in the same way, then
+     *                  the specified target array, during sorting procedure
      *
      * @throws IllegalArgumentException if target == coSort (as references).
      */
@@ -582,10 +609,10 @@ public final class ArraysUtils {
      *
      * @param target the array to be sorted
      * @param coSort the array, which will be permuted in the same way, then the
-     * specified target array, during sorting procedure
+     *               specified target array, during sorting procedure
      *
      * @throws IllegalArgumentException if coSort length less then target
-     * length.
+     *                                  length.
      *
      */
     public static void quickSort(int[] target, long[] coSort) {
@@ -614,16 +641,17 @@ public final class ArraysUtils {
      * are sure, in what you are doing. If not - use stable sort methods like an
      * insertion sort or Tim sort.</b>
      *
-     * @param target the array to be sorted
+     * @param target    the array to be sorted
      * @param fromIndex the index of the first element (inclusive) to be sorted
-     * @param toIndex the index of the last element (exclusive) to be sorted
-     * @param coSort the array, which will be permuted in the same way, then the
-     * specified target array, during sorting procedure
+     * @param toIndex   the index of the last element (exclusive) to be sorted
+     * @param coSort    the array, which will be permuted in the same way, then
+     *                  the specified target array, during sorting procedure
      *
-     * @throws IllegalArgumentException if <tt>fromIndex &gt; toIndex</tt>
+     * @throws IllegalArgumentException       if <tt>fromIndex &gt; toIndex</tt>
      * @throws ArrayIndexOutOfBoundsException if <tt>fromIndex &lt; 0</tt> or
-     * <tt>toIndex &gt; target.length</tt> or <tt>toIndex &gt;
-     * coSort.length</tt>
+     *                                        <tt>toIndex &gt; target.length</tt>
+     *                                        or <tt>toIndex &gt;
+     *                                        coSort.length</tt>
      */
     public static void quickSort(int[] target, int fromIndex, int toIndex, long[] coSort) {
         rangeCheck(target.length, fromIndex, toIndex);
@@ -640,11 +668,11 @@ public final class ArraysUtils {
      * are sure, in what you are doing. If not - use stable sort methods like an
      * insertion sort or Tim sort.</b>
      *
-     * @param target the array to be sorted
+     * @param target    the array to be sorted
      * @param fromIndex the index of the first element (inclusive) to be sorted
-     * @param length the length of the sorting subarray.
-     * @param coSort the array, which will be permuted in the same way, then the
-     * specified target array, during sorting procedure
+     * @param length    the length of the sorting subarray.
+     * @param coSort    the array, which will be permuted in the same way, then
+     *                  the specified target array, during sorting procedure
      */
     public static void quickSort1(int target[], int fromIndex, int length, long[] coSort) {
         // Insertion quickSort on smallest arrays
@@ -743,11 +771,11 @@ public final class ArraysUtils {
      *
      * @param target the array to be sorted
      * @param coSort the array, which will be permuted in the same way, then the
-     * specified target array, during sorting procedure
+     *               specified target array, during sorting procedure
      *
      * @throws IllegalArgumentException if <tt>fromIndex &gt; toIndex</tt>
      * @throws IllegalArgumentException if coSort length less then target
-     * length.
+     *                                  length.
      * @throws IllegalArgumentException if target == coSort (as references).
      */
     public static <T extends Comparable<T>> void quickSort(T[] target, Object[] coSort) {
@@ -775,17 +803,19 @@ public final class ArraysUtils {
      * are sure, in what you are doing. If not - use stable sort methods like an
      * insertion sort or Tim sort.</b>
      *
-     * @param target the array to be sorted
+     * @param target    the array to be sorted
      * @param fromIndex the index of the first element (inclusive) to be sorted
-     * @param toIndex the index of the last element (exclusive) to be sorted
-     * @param coSort the array, which will be permuted in the same way, then the
-     * specified target array, during sorting procedure
+     * @param toIndex   the index of the last element (exclusive) to be sorted
+     * @param coSort    the array, which will be permuted in the same way, then
+     *                  the specified target array, during sorting procedure
      *
-     * @throws IllegalArgumentException if <tt>fromIndex &gt; toIndex</tt>
+     * @throws IllegalArgumentException       if <tt>fromIndex &gt; toIndex</tt>
      * @throws ArrayIndexOutOfBoundsException if <tt>fromIndex &lt; 0</tt> or
-     * <tt>toIndex &gt; target.length</tt> or <tt>toIndex &gt;
-     * coSort.length</tt>
-     * @throws IllegalArgumentException if target == coSort (as references).
+     *                                        <tt>toIndex &gt; target.length</tt>
+     *                                        or <tt>toIndex &gt;
+     *                                        coSort.length</tt>
+     * @throws IllegalArgumentException       if target == coSort (as
+     *                                        references).
      */
     public static <T extends Comparable<T>> void quickSort(T[] target, int fromIndex, int toIndex, Object[] coSort) {
         if (target == coSort)
@@ -804,11 +834,11 @@ public final class ArraysUtils {
      * are sure, in what you are doing. If not - use stable sort methods like an
      * insertion sort or Tim sort.</b>
      *
-     * @param target the array to be sorted
+     * @param target    the array to be sorted
      * @param fromIndex the index of the first element (inclusive) to be sorted
-     * @param length the length of the sorting subarray.
-     * @param coSort the array, which will be permuted in the same way, then the
-     * specified target array, during sorting procedure
+     * @param length    the length of the sorting subarray.
+     * @param coSort    the array, which will be permuted in the same way, then
+     *                  the specified target array, during sorting procedure
      *
      * @throws IllegalArgumentException if target == coSort (as references).
      */
@@ -915,9 +945,10 @@ public final class ArraysUtils {
      *
      * @param target the array to be sorted
      * @param coSort the array, which will be permuted in the same way, then the
-     * specified target array, during sorting procedure
+     *               specified target array, during sorting procedure
+     *
      * @throws IllegalArgumentException if coSort length less then target
-     * length.
+     *                                  length.
      */
     public static void quickSort(int[] target, Object[] coSort) {
         quickSort1(target, 0, target.length, coSort);
@@ -945,16 +976,17 @@ public final class ArraysUtils {
      * are sure, in what you are doing. If not - use stable sort methods like an
      * insertion sort or Tim sort.</b>
      *
-     * @param target the array to be sorted
+     * @param target    the array to be sorted
      * @param fromIndex the index of the first element (inclusive) to be sorted
-     * @param toIndex the index of the last element (exclusive) to be sorted
-     * @param coSort the array, which will be permuted in the same way, then the
-     * specified target array, during sorting procedure
+     * @param toIndex   the index of the last element (exclusive) to be sorted
+     * @param coSort    the array, which will be permuted in the same way, then
+     *                  the specified target array, during sorting procedure
      *
-     * @throws IllegalArgumentException if <tt>fromIndex &gt; toIndex</tt>
+     * @throws IllegalArgumentException       if <tt>fromIndex &gt; toIndex</tt>
      * @throws ArrayIndexOutOfBoundsException if <tt>fromIndex &lt; 0</tt> or
-     * <tt>toIndex &gt; target.length</tt> or <tt>toIndex &gt;
-     * coSort.length</tt>
+     *                                        <tt>toIndex &gt; target.length</tt>
+     *                                        or <tt>toIndex &gt;
+     *                                        coSort.length</tt>
      */
     public static void quickSort(int[] target, int fromIndex, int toIndex, Object[] coSort) {
         rangeCheck(target.length, fromIndex, toIndex);
@@ -971,11 +1003,11 @@ public final class ArraysUtils {
      * are sure, in what you are doing. If not - use stable sort methods like an
      * insertion sort or Tim sort.</b>
      *
-     * @param target the array to be sorted
+     * @param target    the array to be sorted
      * @param fromIndex the index of the first element (inclusive) to be sorted
-     * @param length the length of the sorting subarray.
-     * @param coSort the array, which will be permuted in the same way, then the
-     * specified target array, during sorting procedure
+     * @param length    the length of the sorting subarray.
+     * @param coSort    the array, which will be permuted in the same way, then
+     *                  the specified target array, during sorting procedure
      *
      */
     public static void quickSort1(int target[], int fromIndex, int length, Object[] coSort) {
@@ -1067,9 +1099,9 @@ public final class ArraysUtils {
      * to degrade to quadratic performance.
      *
      * <p><b>NOTE: remember this is unstable sort algorithm, so additional
-     * combinatorics of the {@code coSort} array can be perfomed. Use this method
-     * only if you are sure, in what you are doing. If not - use stable sort
-     * methods like an insertion sort or Tim sort.</b>
+     * combinatorics of the {@code coSort} array can be perfomed. Use this
+     * method only if you are sure, in what you are doing. If not - use stable
+     * sort methods like an insertion sort or Tim sort.</b>
      *
      * <p><b>NOTE:</b> The method throws {@code IllegalArgumentException} if
      * {@code target == coSort}, because in this case no sorting will be
@@ -1077,10 +1109,10 @@ public final class ArraysUtils {
      *
      * @param target the array to be sorted
      * @param coSort the array, which will be permuted in the same way, then the
-     * specified target array, during sorting procedure
+     *               specified target array, during sorting procedure
      *
      * @throws IllegalArgumentException if coSort length less then target
-     * length.
+     *                                  length.
      */
     public static void quickSort(short[] target, int[] coSort) {
         quickSort(target, 0, target.length, coSort);
@@ -1103,24 +1135,25 @@ public final class ArraysUtils {
      * to degrade to quadratic performance.
      *
      * <p><b>NOTE: remember this is unstable sort algorithm, so additional
-     * combinatorics of the {@code coSort} array can be perfomed. Use this method
-     * only if you are sure, in what you are doing. If not - use stable sort
-     * methods like an insertion sort or Tim sort.</b>
+     * combinatorics of the {@code coSort} array can be perfomed. Use this
+     * method only if you are sure, in what you are doing. If not - use stable
+     * sort methods like an insertion sort or Tim sort.</b>
      *
      * <p><b>NOTE:</b> The method throws {@code IllegalArgumentException} if
      * {@code target == coSort}, because in this case no sorting will be
      * perfomed.
      *
-     * @param target the array to be sorted
+     * @param target    the array to be sorted
      * @param fromIndex the index of the first element (inclusive) to be sorted
-     * @param toIndex the index of the last element (exclusive) to be sorted
-     * @param coSort the array, which will be permuted in the same way, then the
-     * specified target array, during sorting procedure
+     * @param toIndex   the index of the last element (exclusive) to be sorted
+     * @param coSort    the array, which will be permuted in the same way, then
+     *                  the specified target array, during sorting procedure
      *
-     * @throws IllegalArgumentException if <tt>fromIndex &gt; toIndex</tt>
+     * @throws IllegalArgumentException       if <tt>fromIndex &gt; toIndex</tt>
      * @throws ArrayIndexOutOfBoundsException if <tt>fromIndex &lt; 0</tt> or
-     * <tt>toIndex &gt; target.length</tt> or <tt>toIndex &gt;
-     * coSort.length</tt>
+     *                                        <tt>toIndex &gt; target.length</tt>
+     *                                        or <tt>toIndex &gt;
+     *                                        coSort.length</tt>
      */
     public static void quickSort(short[] target, int fromIndex, int toIndex, int[] coSort) {
         rangeCheck(target.length, fromIndex, toIndex);
@@ -1139,11 +1172,11 @@ public final class ArraysUtils {
      * are sure, in what you are doing. If not - use stable sort methods like an
      * insertion sort or Tim sort.</b>
      *
-     * @param target the array to be sorted
+     * @param target    the array to be sorted
      * @param fromIndex the index of the first element (inclusive) to be sorted
-     * @param length the length of the sorting subarray.
-     * @param coSort the array, which will be permuted in the same way, then the
-     * specified target array, during sorting procedure
+     * @param length    the length of the sorting subarray.
+     * @param coSort    the array, which will be permuted in the same way, then
+     *                  the specified target array, during sorting procedure
      *
      */
     public static void quickSort1(short target[], int fromIndex, int length, int[] coSort) {

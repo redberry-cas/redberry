@@ -62,7 +62,8 @@ public class SymmetriesFactory {
             return SymmetriesFactory.createSymmetries(upperCount + lowerCount);
 
         SymmetriesImpl symmetries = new SymmetriesImpl(upperCount + lowerCount);
-
+        
+        //TODO refactor
         //transposition
         int i;
         if (upperCount > 1) {

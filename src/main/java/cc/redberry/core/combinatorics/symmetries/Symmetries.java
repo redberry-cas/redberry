@@ -72,10 +72,10 @@ public interface Symmetries extends Iterable<Symmetry> {
 
     /**
      * Returns <tt>true</tt> if and only if this set contains only identity
-     * symmetry and <tt>false</tt> in otherwise.
+     * symmetry and <tt>false</tt> otherwise.
      *
      * @return <tt>true</tt> if and only if this set contains only identity
-     *         symmetry and <tt>false</tt> in otherwise
+     *         symmetry and <tt>false</tt> otherwise
      */
     boolean isEmpty();
 

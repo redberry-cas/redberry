@@ -26,7 +26,10 @@ import cc.redberry.core.combinatorics.InconsistentGeneratorsException;
 import cc.redberry.core.combinatorics.Symmetry;
 import cc.redberry.core.combinatorics.symmetries.Symmetries;
 import cc.redberry.core.combinatorics.symmetries.SymmetriesFactory;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Objects;
 
 /**
  *
@@ -59,7 +62,7 @@ public class IndicesSymmetries implements Iterable<Symmetry> {
         return indicesTypeStructure;
     }
 
-    public Symmetries getReference() {
+    public Symmetries getInnerSymmetries() {
         return symmetries;
     }
 

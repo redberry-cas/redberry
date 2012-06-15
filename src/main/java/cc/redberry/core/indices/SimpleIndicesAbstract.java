@@ -51,10 +51,7 @@ public abstract class SimpleIndicesAbstract extends AbstractIndices implements S
         int[] toSort = new int[data.length];
         for (int i = 0; i < data.length; ++i)
             toSort[i] = data[i] & 0x7F000000;
-        if (toSort.length > 100)
-            ArraysUtils.timSort(toSort, data);
-        else
-            ArraysUtils.insertionSort(toSort, data);
+        ArraysUtils.stableSort(toSort, data);
         this.symmetries = symmetries;
         testConsistentWithException();
     }

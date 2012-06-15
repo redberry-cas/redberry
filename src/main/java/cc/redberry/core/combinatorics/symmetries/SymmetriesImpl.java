@@ -25,7 +25,10 @@ package cc.redberry.core.combinatorics.symmetries;
 import cc.redberry.core.combinatorics.InconsistentGeneratorsException;
 import cc.redberry.core.combinatorics.PermutationsSpanIterator;
 import cc.redberry.core.combinatorics.Symmetry;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
 
 class SymmetriesImpl extends AbstractSymmetries {
 
@@ -34,7 +37,7 @@ class SymmetriesImpl extends AbstractSymmetries {
         this.basis.add(new Symmetry(dimension));
     }
 
-    public SymmetriesImpl(int dimension, List<Symmetry> basis) {
+    SymmetriesImpl(int dimension, List<Symmetry> basis) {
         super(dimension, basis);
     }
 
@@ -66,11 +69,6 @@ class SymmetriesImpl extends AbstractSymmetries {
 
     @Override
     public boolean addUnsafe(Symmetry symmetry) {
-        if (symmetry.dimension() != dimension)
-            throw new IllegalArgumentException("Not equal dimensions.");
-        for (Symmetry s : basis)
-            if (s.equals(symmetry))
-                return false;
         basis.add(symmetry);
         return true;
     }
@@ -114,7 +112,6 @@ class SymmetriesImpl extends AbstractSymmetries {
             sb.append(s.toString()).append("\n");
         return sb.toString();
     }
-
 //    @Override
 //    public boolean equals(Object obj) {
 //        if (obj == null)
@@ -129,5 +126,4 @@ class SymmetriesImpl extends AbstractSymmetries {
 //        //FIXME this is not all cases
 //        return basis.containsAll(other.basis) && other.basis.containsAll(basis);
 //    }
-
 }
