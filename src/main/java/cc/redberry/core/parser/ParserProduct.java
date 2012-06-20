@@ -44,7 +44,7 @@ public class ParserProduct extends ParserOperator {
 
     @Override
     protected ParseNode inverseOperation(ParseNode node) {
-        return new ParseNode(TensorType.Pow, new ParseNode[]{node, new ParseNodeNumber(Complex.MINUSE_ONE)});
+        return new ParseNode(TensorType.Power, new ParseNode[]{node, new ParseNodeNumber(Complex.MINUSE_ONE)});
     }
 
     @Override
