@@ -129,7 +129,7 @@ public class ProductBuilder implements TensorBuilder {
                 SumBuilder sb = powers.get(argument);
                 if (sb == null) {
                     sb = new SumBuilder();
-                    powers.put(tensor, sb);
+                    powers.put(argument, sb);
                 }
                 sb.put(tensor.get(1));
                 return;
