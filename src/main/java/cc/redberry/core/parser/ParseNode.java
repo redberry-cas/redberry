@@ -69,7 +69,7 @@ public class ParseNode {
         switch (tensorType) {
             case Sum:
                 return Tensors.sum(contentToTensors());
-            case Pow:
+            case Power:
                 if (content.length != 2)
                     throw new IllegalStateException("Incorrect power arguments count.");
                 return Tensors.pow(content[0].toTensor(), content[1].toTensor());

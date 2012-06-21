@@ -23,10 +23,10 @@
 package cc.redberry.core.utils;
 
 //import cc.redberry.core.indices.InconsistentIndicesException;
+import cc.redberry.core.combinatorics.*;
 import cc.redberry.core.indices.*;
 import cc.redberry.core.number.Complex;
-import cc.redberry.core.tensor.SimpleTensor;
-import cc.redberry.core.tensor.Tensor;
+import cc.redberry.core.tensor.*;
 
 //import cc.redberry.core.indices.Indices;
 //import cc.redberry.core.indices.IndicesBuilderSorted;
@@ -51,10 +51,6 @@ import cc.redberry.core.tensor.Tensor;
 public class TensorUtils {
 
     private TensorUtils() {
-    }
-
-    public static boolean isSymbolic(Tensor... tensor) {
-        throw new UnsupportedOperationException("Unsupported yet");
     }
 
     public static boolean isScalar(Tensor... tensors) {
@@ -90,6 +86,79 @@ public class TensorUtils {
 
     public static boolean isSymbolOrNumber(Tensor t) {
         return t instanceof Complex || isSymbol(t);
+    }
+
+    public static boolean isSymbolic(Tensor t) {
+        if (t.getClass() == SimpleTensor.class)
+            return t.getIndices().size() == 0;
+        if (t instanceof Complex)
+            return true;
+        for (Tensor c : t)
+            if (!isSymbolic(c))
+                return false;
+        return true;
+    }
+
+    public static boolean isSymbolic(Tensor... tensors) {
+        for (Tensor t : tensors)
+            if (!isSymbolic(t))
+                return false;
+        return true;
+    }
+
+    public static boolean equals(Tensor u, Tensor v) {
+        if (u == v)
+            return true;
+        if (u.getClass() != v.getClass())
+            return false;
+        if (u instanceof Complex)
+            return u.equals(v);
+        if (u.hashCode() != v.hashCode())
+            return false;
+        if (u.getClass() == SimpleTensor.class)
+            return u.getIndices().equals(v.getIndices());
+        if (u.size() != v.size())
+            return false;
+        if (u instanceof MultiTensor) {
+            final int size = u.size();
+
+            int[] hashArray = new int[size];
+            int i;
+            for (i = 0; i < size; ++i)
+                if ((hashArray[i] = u.get(i).hashCode()) != u.get(i).hashCode())
+                    return false;
+            int begin = 0, stretchLength, j;
+            for (i = 1; i <= size; ++i)
+                if (i == size || hashArray[i] != hashArray[i - 1]) {
+                    if (i - 1 != begin) {
+                        stretchLength = i - begin;
+                        IntPermutationsGenerator enumerator = new IntPermutationsGenerator(stretchLength);
+                        int[] permutation;
+                        OUTFOR:
+                        while (enumerator.hasNext()) {
+                            permutation = enumerator.next();
+                            for (j = 0; j < stretchLength; ++j)
+                                if (!equals(u.get(i + begin), v.get(permutation[i] + begin)))
+                                    continue OUTFOR;
+                            return true;
+                        }
+                        return false;
+                    } else if (!equals(u.get(i - 1), v.get(i - 1)))
+                        return false;
+                    begin = i;
+                }
+        }
+        if (u.getClass() == TensorField.class) {
+            if (((SimpleTensor) u).getName() == ((SimpleTensor) v).getName()
+                    && u.getIndices().equals(v.getIndices()));
+            return false;
+        }
+
+        final int size = u.size();
+        for (int i = 0; i < size; ++i)
+            if (!equals(u.get(i), v.get(i)))
+                return false;
+        return true;
     }
 //
 //    public static IndicesBuilderSorted getAllIndicesBuilder(final Tensor tensor) {

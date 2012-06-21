@@ -17,7 +17,7 @@ package cc.redberry.core.tensor;
 
 import cc.redberry.core.context.ToStringMode;
 import cc.redberry.core.indices.SimpleIndices;
-import java.util.*;
+import java.util.Arrays;
 
 /**
  * @author Dmitry Bolotin

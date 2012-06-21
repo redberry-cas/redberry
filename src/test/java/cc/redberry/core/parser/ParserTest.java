@@ -22,10 +22,12 @@
  */
 package cc.redberry.core.parser;
 
-import cc.redberry.core.context.*;
-import cc.redberry.core.indices.*;
+import cc.redberry.core.context.CC;
+import cc.redberry.core.indices.IndicesFactory;
+import cc.redberry.core.indices.SimpleIndices;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.tensor.*;
+import cc.redberry.core.utils.*;
 import junit.framework.Assert;
 import org.junit.Test;
 
@@ -52,7 +54,7 @@ public class ParserTest {
                                                          new ParseNodeTensorField(IndicesFactory.EMPTY_SIMPLE_INDICES, "f",
                                                                                   new ParseNode[]{new ParseNode(TensorType.Product,
                                                                                                                 new ParseNodeSimpleTensor(ParserIndices.parseSimple("_\\mu"), "b"),
-                                                                                                                new ParseNode(TensorType.Pow, new ParseNode(TensorType.Product, new ParseNodeSimpleTensor(IndicesFactory.EMPTY_SIMPLE_INDICES, "c"), new ParseNodeSimpleTensor(IndicesFactory.EMPTY_SIMPLE_INDICES, "g")),
+                                                                                                                new ParseNode(TensorType.Power, new ParseNode(TensorType.Product, new ParseNodeSimpleTensor(IndicesFactory.EMPTY_SIMPLE_INDICES, "c"), new ParseNodeSimpleTensor(IndicesFactory.EMPTY_SIMPLE_INDICES, "g")),
                                                                                                                               new ParseNodeNumber(Complex.MINUSE_ONE)),
                                                                                                                 new ParseNodeTensorField(IndicesFactory.EMPTY_SIMPLE_INDICES, "g",
                                                                                                                                          new ParseNode[]{new ParseNodeSimpleTensor(IndicesFactory.EMPTY_SIMPLE_INDICES, "x"),
@@ -85,26 +87,42 @@ public class ParserTest {
         ParseNode node = Parser.DEFAULT.parse("S^k*(c_k*Power[a,1]/a-b_k)");
         Tensor t = node.toTensor();
         System.out.println(((Product) t).getScalars()[0]);
-        System.currentTimeMillis();
+    }
+
+    @Test
+    public void testProductPowers() {
+        ParseNode node = Parser.DEFAULT.parse("a/b");
+        Tensor tensor = node.toTensor();
+        ParseNode expectedNode = new ParseNode(TensorType.Product,
+                                               new ParseNodeSimpleTensor(IndicesFactory.EMPTY_SIMPLE_INDICES, "a"),
+                                               new ParseNode(TensorType.Power,
+                                                             new ParseNodeSimpleTensor(IndicesFactory.EMPTY_SIMPLE_INDICES, "b"),
+                                                             new ParseNodeNumber(Complex.MINUSE_ONE)));
+        Assert.assertEquals(expectedNode, node);
+        Assert.assertTrue(tensor instanceof Product);
+        Assert.assertTrue(tensor.getIndices().size() == 0);
+        Assert.assertTrue(tensor.size() == 2);
+        Assert.assertTrue(tensor.get(0) instanceof Power || tensor.get(1) instanceof Power);
+        Assert.assertTrue(TensorUtils.equals(tensor, Tensors.parse("a*1/b")));
     }
 
     @Test
     public void testProductPowers1() {
-        Tensor t = CC.current().getParseManager().parse("a*c/b*1/4");
-        System.out.println(t);
-//        System.currentTimeMillis();
+        Tensor u = Tensors.parse("a*c/b*1/4");
+        Tensor v = Tensors.parse("(a*c)/(4*b)");
+        Assert.assertTrue(TensorUtils.equals(u, v));
+        Assert.assertTrue(v instanceof Product);
     }
 
     @Test
-    public void testProductPowers2() {
-        ParseNode node = Parser.DEFAULT.parse("a*c/b*1/4");
-        System.out.println(node);
-//        System.currentTimeMillis();
+    public void testPower1() {
+        Tensor t = Tensors.parse("Power[x,y]");
+        Assert.assertTrue(t instanceof Power);
     }
 
     @Test
     public void test5() {
-        Tensor t = Tensors.parse("Pow[x,x]+Pow[y,x]");
+        Tensor t = Tensors.parse("Power[x,x]+Power[y,x]");
         Assert.assertEquals(Sum.class, t.getClass());
     }
 }

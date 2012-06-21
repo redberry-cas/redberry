@@ -112,18 +112,5 @@ class SymmetriesImpl extends AbstractSymmetries {
             sb.append(s.toString()).append("\n");
         return sb.toString();
     }
-//    @Override
-//    public boolean equals(Object obj) {
-//        if (obj == null)
-//            return false;
-//        if (getClass() != obj.getClass())
-//            return false;
-//        final SymmetriesImpl other = (SymmetriesImpl) obj;
-//        if (dimension != other.dimension)
-//            return false;
-//        if (basis.size() != other.basis.size())
-//            return false;
-//        //FIXME this is not all cases
-//        return basis.containsAll(other.basis) && other.basis.containsAll(basis);
-//    }
+
 }
