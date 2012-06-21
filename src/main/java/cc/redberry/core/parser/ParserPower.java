@@ -45,14 +45,23 @@ public class ParserPower implements NodeParser {
     public ParseNode parseNode(String expression, Parser parser) {
         if (expression.length() <= minLength)
             return null;
-
-        if (!(power + '[').equals(expression.substring(0, power.length() + 1)) || expression.charAt(expression.length() - 1) != ']')
+        if (!(power + '[').equals(expression.substring(0, power.length() + 1))
+                || expression.charAt(expression.length() - 1) != ']')
             return null;
+        int level = 0;
+        for (char c : expression.toCharArray()) {
+            if (c == '[')
+                ++level;
+            if (level < 1)
+                return null;
+            if (c == ']')
+                --level;
+        }
         String[] parts = expression.substring(power.length() + 1, expression.length() - 1).split(",");
         if (parts.length == 1)
             return null;
         ParseNode arg = parser.parse(parts[0]);
         ParseNode power = parser.parse(parts[1]);
-        return new ParseNode(TensorType.Pow, new ParseNode[]{arg, power});
+        return new ParseNode(TensorType.Power, new ParseNode[]{arg, power});
     }
 }
