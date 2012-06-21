@@ -59,10 +59,20 @@ public final class ParseNodeScalarFunction extends ParseNode {
                 return Tensors.cos(arg);
             case "tan":
                 return Tensors.tan(arg);
-            case "cotan":
-                return Tensors.cotan(arg);
+            case "cot":
+                return Tensors.cot(arg);
+            case "arcsin":
+                return Tensors.arcsin(arg);
+            case "arccos":
+                return Tensors.arccos(arg);
+            case "arctan":
+                return Tensors.arctan(arg);
+            case "arccot":
+                return Tensors.arccot(arg);
             case "log":
                 return Tensors.log(arg);
+            case "exp":
+                return Tensors.exp(arg);
         }
         throw new IllegalStateException("Unknown scalar function \"" + function + "\".");
     }

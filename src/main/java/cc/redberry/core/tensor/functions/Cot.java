@@ -33,39 +33,39 @@ import cc.redberry.core.tensor.Tensors;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public final class Log extends AbstractScalarFunction {
+public final class Cot extends AbstractScalarFunction {
 
-    Log(Tensor argument) {
+    Cot(Tensor argument) {
         super(argument);
     }
 
     @Override
     public Tensor derivative() {
-        return Tensors.pow(argument, Complex.MINUSE_ONE);
-    }
-
-    @Override
-    protected int hash() {
-        return 13 * argument.hashCode();
+        return Tensors.pow(new Sin(argument), Complex.MINUSE_TWO);
     }
 
     @Override
     public String functionName() {
-        return "Log";
+        return "Cot";
+    }
+
+    @Override
+    protected int hash() {
+        return 19 * argument.hashCode();
     }
 
     @Override
     public TensorBuilder getBuilder() {
-        return new LogBuilder();
+        return new CotBuilder();
     }
 
-    public static class LogBuilder extends AbstractScalarFunctionBuilder {
+    public static class CotBuilder extends AbstractScalarFunctionBuilder {
 
         @Override
         public Tensor buid() {
-            if (arg instanceof Exp)
+            if (arg instanceof ArcCot)
                 return arg.get(0);
-            return new Log(arg);
+            return new Cot(arg);
         }
     }
 }

@@ -28,8 +28,9 @@ package cc.redberry.core.parser;
  * @author Stanislav Poslavsky
  */
 public class ParserFunctions implements NodeParser {
+
     public static final ParserFunctions INSTANCE = new ParserFunctions();
-    private static final String[] functions = {"Sin", "Cos", "Tan","Log","Exp",""};
+    private static final String[] functions = {"Sin", "Cos", "Tan", "Log", "Exp", "Cot", "ArcSin", "ArcCos", "ArcTan", "ArcCot"};
 
     private ParserFunctions() {
     }
@@ -67,6 +68,8 @@ public class ParserFunctions implements NodeParser {
                 level--;
             if (level < 0)
                 return null;
+            if (c == ',' && level == 0)//case for Sin[x,y]
+                throw new ParserException("Sin, cos, tan and others scalar functions take only one argument.");
         }
         String argument = expression.substring(function.length() + 1, expression.length() - 1);
         return new ParseNodeScalarFunction(function, new ParseNode[]{parser.parse(argument)});

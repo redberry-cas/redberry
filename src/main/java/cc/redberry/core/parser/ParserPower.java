@@ -48,20 +48,24 @@ public class ParserPower implements NodeParser {
         if (!(power + '[').equals(expression.substring(0, power.length() + 1))
                 || expression.charAt(expression.length() - 1) != ']')
             return null;
-        int level = 0;
-        for (char c : expression.toCharArray()) {
+        int level = 0, i, comma = -1;
+        char c;
+        for (i = power.length(); i < expression.length(); ++i) {
+            c = expression.charAt(i);
             if (c == '[')
                 ++level;
             if (level < 1)
                 return null;
             if (c == ']')
                 --level;
+            if (c == ',' && level == 1) {
+                if (comma != -1)
+                    throw new ParserException("Power takes only two arguments.");
+                comma = i;
+            }
         }
-        String[] parts = expression.substring(power.length() + 1, expression.length() - 1).split(",");
-        if (parts.length == 1)
-            return null;
-        ParseNode arg = parser.parse(parts[0]);
-        ParseNode power = parser.parse(parts[1]);
+        ParseNode arg = parser.parse(expression.substring(power.length() + 1, comma));
+        ParseNode power = parser.parse(expression.substring(comma + 1, expression.length() - 1));
         return new ParseNode(TensorType.Power, new ParseNode[]{arg, power});
     }
 }

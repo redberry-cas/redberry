@@ -24,6 +24,7 @@ package cc.redberry.core.tensor.functions;
 
 import cc.redberry.core.tensor.AbstractScalarFunction;
 import cc.redberry.core.tensor.Tensor;
+import cc.redberry.core.tensor.TensorBuilder;
 
 /**
  *
@@ -32,7 +33,7 @@ import cc.redberry.core.tensor.Tensor;
  */
 public final class Sin extends AbstractScalarFunction {
 
-    public Sin(Tensor argument) {
+    Sin(Tensor argument) {
         super(argument);
     }
 
@@ -49,5 +50,20 @@ public final class Sin extends AbstractScalarFunction {
     @Override
     public String functionName() {
         return "Sin";
+    }
+
+    @Override
+    public TensorBuilder getBuilder() {
+        return new SinBuilder();
+    }
+
+    public static class SinBuilder extends AbstractScalarFunctionBuilder {
+
+        @Override
+        public Tensor buid() {
+            if (arg instanceof ArcSin)
+                return arg.get(0);
+            return new Sin(arg);
+        }
     }
 }

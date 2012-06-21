@@ -25,6 +25,7 @@ package cc.redberry.core.tensor.functions;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.tensor.AbstractScalarFunction;
 import cc.redberry.core.tensor.Tensor;
+import cc.redberry.core.tensor.TensorBuilder;
 import cc.redberry.core.tensor.Tensors;
 
 /**
@@ -34,7 +35,7 @@ import cc.redberry.core.tensor.Tensors;
  */
 public final class Tan extends AbstractScalarFunction {
 
-    public Tan(Tensor argument) {
+    Tan(Tensor argument) {
         super(argument);
     }
 
@@ -51,5 +52,20 @@ public final class Tan extends AbstractScalarFunction {
     @Override
     protected int hash() {
         return 17 * argument.hashCode();
+    }
+
+    @Override
+    public TensorBuilder getBuilder() {
+        return new TanBuilder();
+    }
+
+    public static class TanBuilder extends AbstractScalarFunctionBuilder {
+
+        @Override
+        public Tensor buid() {
+            if (arg instanceof ArcTan)
+                return arg.get(0);
+            return new Tan(arg);
+        }
     }
 }

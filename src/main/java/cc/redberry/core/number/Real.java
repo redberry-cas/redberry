@@ -29,8 +29,11 @@ import org.apache.commons.math3.Field;
  * @author Stanislav Poslavsky
  */
 public abstract class Real implements Number<Real>, Comparable<Real> {
+
     @Override
     public Field<Real> getField() {
         return RealField.getInstance();
     }
+
+    abstract int signum();
 }

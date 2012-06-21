@@ -22,34 +22,35 @@
  */
 package cc.redberry.core.tensor.functions;
 
-import cc.redberry.core.number.Complex;
-import cc.redberry.core.tensor.AbstractScalarFunction;
 import cc.redberry.core.tensor.Tensor;
-import cc.redberry.core.tensor.Tensors;
+import cc.redberry.core.tensor.TensorBuilder;
+import cc.redberry.core.utils.TensorUtils;
 
 /**
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public final class CoTan extends AbstractScalarFunction {
+abstract class AbstractScalarFunctionBuilder implements TensorBuilder {
 
-    public CoTan(Tensor argument) {
-        super(argument);
+    protected Tensor arg = null;
+
+    AbstractScalarFunctionBuilder() {
     }
 
     @Override
-    public Tensor derivative() {
-        return Tensors.pow(new Sin(argument), Complex.MINUSE_TWO);
+    public void put(Tensor tensor) {
+        if (arg != null)
+            throw new IllegalStateException();
+        if (tensor == null)
+            throw new NullPointerException();
+        if (!TensorUtils.isScalar(tensor))
+            throw new IllegalArgumentException();
+        arg = tensor;
     }
 
-    @Override
-    public String functionName() {
-        return "CoTan";
-    }
-
-    @Override
-    protected int hash() {
-        return 19 * argument.hashCode();
+    public Tensor eval(Tensor t) {
+        put(t);
+        return buid();
     }
 }

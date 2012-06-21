@@ -83,6 +83,10 @@ public class Rational extends Real implements Serializable {
      */
     public static final Rational ONE_HALF = new Rational(1, 2);
     /**
+     * A fraction representing "1/2".
+     */
+    public static final Rational MINUSE_ONE_HALF = new Rational(-1, 2);
+    /**
      * A fraction representing "1/4".
      */
     public static final Rational ONE_QUARTER = new Rational(1, 4);
@@ -494,5 +498,10 @@ public class Rational extends Real implements Serializable {
 
     public boolean isInteger() {
         return fraction.getDenominator().compareTo(BigInteger.ONE) == 0;
+    }
+
+    @Override
+    int signum() {
+        return fraction.getNumerator().signum();
     }
 }

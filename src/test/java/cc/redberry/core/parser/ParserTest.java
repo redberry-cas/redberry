@@ -22,12 +22,11 @@
  */
 package cc.redberry.core.parser;
 
-import cc.redberry.core.context.CC;
 import cc.redberry.core.indices.IndicesFactory;
 import cc.redberry.core.indices.SimpleIndices;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.tensor.*;
-import cc.redberry.core.utils.*;
+import cc.redberry.core.utils.TensorUtils;
 import junit.framework.Assert;
 import org.junit.Test;
 
@@ -115,14 +114,60 @@ public class ParserTest {
     }
 
     @Test
-    public void testPower1() {
-        Tensor t = Tensors.parse("Power[x,y]");
-        Assert.assertTrue(t instanceof Power);
+    public void testProductPowers2() {
+        Tensor u = Tensors.parse("2*a*a*c/b*1/4*b/a/a");
+        Tensor v = Tensors.parse("c/2");
+        Assert.assertTrue(TensorUtils.equals(u, v));
+        Assert.assertTrue(v instanceof Product);
     }
 
     @Test
-    public void test5() {
+    public void testProductPowers3() {
+        Tensor u = Tensors.parse("Power[2-3*i,2]*2*a*a*c/b*1/4*b/a/a/(2-3*i)");
+        Tensor v = Tensors.parse("c*(1+3/(-2)*i)");
+        Assert.assertTrue(TensorUtils.equals(u, v));
+        Assert.assertTrue(v instanceof Product);
+    }
+
+    @Test
+    public void testPower1() {
+        Tensor t = Tensors.parse("Power[x,y]");
+        Assert.assertEquals(Power.class, t.getClass());
+    }
+
+    @Test
+    public void testPower2() {
         Tensor t = Tensors.parse("Power[x,x]+Power[y,x]");
         Assert.assertEquals(Sum.class, t.getClass());
+        Assert.assertEquals(t.get(0).getClass(), Power.class);
+    }
+
+    @Test
+    public void testPower3() {
+        Tensor t = Tensors.parse("Power[Power[x,z],y]");
+        Assert.assertEquals(Power.class, t.getClass());
+    }
+
+    @Test(expected = ParserException.class)
+    public void testPower4() {
+        Tensors.parse("Power[Power[x,z,z],y]");
+    }
+
+    @Test(expected = ParserException.class)
+    public void testSin1() {
+        Tensors.parse("Sin[x,x]+Sin[y,x]");
+    }
+
+    @Test
+    public void testSin2() {
+        Tensor t = Tensors.parse("Sin[x]+Sin[y]");
+        Assert.assertEquals(Sum.class, t.getClass());
+    }
+
+    @Test
+    public void testSin3() {
+        Tensor t = Tensors.parse("Sin[ArcSin[x]]");
+        Tensor e = Tensors.parse("x");
+        Assert.assertTrue(TensorUtils.equals(e, t));
     }
 }

@@ -24,6 +24,7 @@ package cc.redberry.core.tensor.functions;
 
 import cc.redberry.core.tensor.AbstractScalarFunction;
 import cc.redberry.core.tensor.Tensor;
+import cc.redberry.core.tensor.TensorBuilder;
 
 /**
  *
@@ -32,7 +33,7 @@ import cc.redberry.core.tensor.Tensor;
  */
 public final class Exp extends AbstractScalarFunction {
 
-    public Exp(Tensor argument) {
+    Exp(Tensor argument) {
         super(argument);
     }
 
@@ -49,5 +50,20 @@ public final class Exp extends AbstractScalarFunction {
     @Override
     public String functionName() {
         return "Exp";
+    }
+
+    @Override
+    public TensorBuilder getBuilder() {
+        return new ExpBuilder();
+    }
+
+    public static class ExpBuilder extends AbstractScalarFunctionBuilder {
+
+        @Override
+        public Tensor buid() {
+            if (arg instanceof Log)
+                return arg.get(0);
+            return new Exp(arg);
+        }
     }
 }

@@ -23,13 +23,13 @@
 package cc.redberry.core.number;
 
 import cc.redberry.core.context.ToStringMode;
-import cc.redberry.core.indices.*;
-import cc.redberry.core.tensor.*;
+import cc.redberry.core.indices.Indices;
+import cc.redberry.core.indices.IndicesFactory;
 import cc.redberry.core.tensor.Product;
 import cc.redberry.core.tensor.Tensor;
+import cc.redberry.core.tensor.TensorBuilder;
 import java.io.Serializable;
 import java.math.BigInteger;
-import java.util.*;
 import org.apache.commons.math3.Field;
 import org.apache.commons.math3.exception.NullArgumentException;
 import org.apache.commons.math3.fraction.BigFraction;
@@ -61,8 +61,12 @@ public class Complex extends Tensor
             new Complex(Rational.ZERO, Rational.ZERO);
     public static final Complex ONE =
             new Complex(Rational.ONE, Rational.ZERO);
+    public static final Complex TWO =
+            new Complex(Rational.TWO, Rational.ZERO);
     public static final Complex MINUSE_ONE =
             new Complex(Rational.MINUS_ONE, Rational.ZERO);
+    public static final Complex MINUSE_ONE_HALF =
+            new Complex(Rational.MINUSE_ONE_HALF, Rational.ZERO);
     public static final Complex MINUSE_TWO =
             new Complex(Rational.MINUSE_TWO, Rational.ZERO);
     public static final Complex IMAGEONE =
@@ -144,14 +148,24 @@ public class Complex extends Tensor
 
     @Override
     public String toString(ToStringMode mode) {
-        return real.toString() + (imaginary.isZero() ? ""
-                                  : ("+I*" + imaginary));
+        if (real.isZero())
+            return imaginary.toString();
+        int is = imaginary.signum();
+        switch (is) {
+            case -1:
+                return real.toString() + "-I*" + imaginary.abs();
+            case 0:
+                return real.toString();
+            default:
+                return real.toString() + "-I*" + imaginary.abs();
+        }
     }
 
     @Override
     protected String toString(ToStringMode mode, Class<? extends Tensor> clazz) {
         if (clazz == Product.class)
-            return "(" + toString(mode) + ")";
+            if (!real.isZero() && !imaginary.isZero())
+                return "(" + toString(mode) + ")";
         return super.toString(mode, clazz);
     }
 

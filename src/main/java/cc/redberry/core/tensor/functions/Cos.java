@@ -25,6 +25,7 @@ package cc.redberry.core.tensor.functions;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.tensor.AbstractScalarFunction;
 import cc.redberry.core.tensor.Tensor;
+import cc.redberry.core.tensor.TensorBuilder;
 import cc.redberry.core.tensor.Tensors;
 
 /**
@@ -34,7 +35,7 @@ import cc.redberry.core.tensor.Tensors;
  */
 public final class Cos extends AbstractScalarFunction {
 
-    public Cos(Tensor argument) {
+    Cos(Tensor argument) {
         super(argument);
     }
 
@@ -51,5 +52,20 @@ public final class Cos extends AbstractScalarFunction {
     @Override
     public String functionName() {
         return "Cos";
+    }
+
+    @Override
+    public TensorBuilder getBuilder() {
+        return new CosBuilder();
+    }
+
+    public static class CosBuilder extends AbstractScalarFunctionBuilder {
+
+        @Override
+        public Tensor buid() {
+            if (arg instanceof ArcCos)
+                return arg.get(0);
+            return new Cos(arg);
+        }
     }
 }

@@ -50,6 +50,7 @@ import static cc.redberry.core.number.NumberUtils.createNumeric;
  * @see RationalNumber
  */
 public final class Numeric extends Real implements Serializable {
+
     /**
      * A constant holding 0 value.
      */
@@ -427,6 +428,8 @@ public final class Numeric extends Real implements Serializable {
         return value == 1.0;
     }
 
-    
-    
+    @Override
+    int signum() {
+        return value > 0 ? 1 : value == 0 ? 0 : -1;
+    }
 }

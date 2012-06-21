@@ -25,7 +25,6 @@ package cc.redberry.core.tensor;
 import cc.redberry.core.context.ToStringMode;
 import cc.redberry.core.indices.Indices;
 import cc.redberry.core.indices.IndicesFactory;
-import cc.redberry.core.utils.TensorUtils;
 
 /**
  *

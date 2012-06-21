@@ -131,23 +131,43 @@ public class Tensors {
     }
 
     public static Tensor sin(Tensor argument) {
-        return new Sin(argument);
+        return new Sin.SinBuilder().eval(argument);
     }
 
     public static Tensor cos(Tensor argument) {
-        return new Cos(argument);
+        return new Cos.CosBuilder().eval(argument);
     }
 
     public static Tensor tan(Tensor argument) {
-        return new Tan(argument);
+        return new Tan.TanBuilder().eval(argument);
     }
 
-    public static Tensor cotan(Tensor argument) {
-        return new CoTan(argument);
+    public static Tensor cot(Tensor argument) {
+        return new Cot.CotBuilder().eval(argument);
+    }
+
+    public static Tensor arcsin(Tensor argument) {
+        return new ArcSin.ArcSinBuilder().eval(argument);
+    }
+
+    public static Tensor arccos(Tensor argument) {
+        return new ArcCos.ArcCosBuilder().eval(argument);
+    }
+
+    public static Tensor arctan(Tensor argument) {
+        return new ArcTan.ArcTanBuilder().eval(argument);
+    }
+
+    public static Tensor arccot(Tensor argument) {
+        return new ArcCot.ArcCotBuilder().eval(argument);
     }
 
     public static Tensor log(Tensor argument) {
-        return new Log(argument);
+        return new Log.LogBuilder().eval(argument);
+    }
+
+    public static Tensor exp(Tensor argument) {
+        return new Exp.ExpBuilder().eval(argument);
     }
 
     public static SimpleTensor createKronecker(int index1, int index2) {
