@@ -499,7 +499,7 @@ public final class ArraysUtils {
      */
     public static void quickSort1(int target[], int fromIndex, int length, int[] coSort) {
         if (target == coSort)
-            throw new IllegalArgumentException();
+            throw new IllegalArgumentException("Target reference == coSort reference.");
         quickSort2(target, fromIndex, length, coSort);
     }
 

@@ -131,6 +131,7 @@ public class TensorUtils {
             for (i = 1; i <= size; ++i)
                 if (i == size || hashArray[i] != hashArray[i - 1]) {
                     if (i - 1 != begin) {
+                        //TODO use another algorithm
                         stretchLength = i - begin;
                         IntPermutationsGenerator enumerator = new IntPermutationsGenerator(stretchLength);
                         int[] permutation;

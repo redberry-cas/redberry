@@ -22,26 +22,42 @@
  */
 package cc.redberry.core.indexmapping;
 
-import cc.redberry.core.tensor.Power;
+import cc.redberry.concurrent.*;
+import cc.redberry.core.context.*;
+import cc.redberry.core.indices.*;
 import cc.redberry.core.tensor.Tensor;
+import static cc.redberry.core.tensor.Tensors.*;
+import org.junit.*;
 
 /**
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-class ProviderPowFactory implements IndexMappingProviderFactory {
-
-    static final ProviderPowFactory INSTANCE = new ProviderPowFactory();
-
-    private ProviderPowFactory() {
+public class ProviderSumTest {
+  @Test
+    public void test2() {
+        Tensor f = parse("a*d");
+        Tensor t = parse("-a*d");
+        MappingsPort opu = IndexMappings.createPort(f, t);
+        IndexMappingBuffer buffer;       
+        while ((buffer = opu.take()) != null)
+            System.out.println(buffer);
     }
+    
+    
+    @Test
+    public void test1() {
+        Tensor f = parse("A_ab^ab-d");
+        Tensor t = parse("A_ab^ab-d");
+        parseSimple("A_abmn").getIndices().getSymmetries().add(IndexType.LatinLower, true, 1, 0, 2, 3);
+        OutputPortUnsafe<IndexMappingBuffer> opu = IndexMappings.createPort(f, t);
+        int counter = 0;
+        IndexMappingBuffer buffer;
+        while ((buffer = opu.take()) != null)
+            System.out.println(buffer);
+//        assertTrue(counter == 2);
 
-    @Override
-    public IndexMappingProvider create(IndexMappingProvider opu, Tensor from, Tensor to, boolean allowDiffStates) {
-        final Power fromP = (Power) from, toP = (Power) to;
-        if (IndexMappings.mappingExists(fromP.get(1), toP.get(1), allowDiffStates) && IndexMappings.mappingExists(fromP.get(0), toP.get(0), allowDiffStates))
-            return new DummyIndexMappingProvider(opu);
-        return IndexMappingProvider.Util.EMPTY_PROVIDER;
+
     }
 }

@@ -23,6 +23,7 @@
 package cc.redberry.core.indexmapping;
 
 import cc.redberry.core.indices.IndicesUtils;
+import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.utils.ArraysUtils;
 import java.util.Arrays;
 import java.util.Map;
@@ -32,21 +33,25 @@ import java.util.Map;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public class IndexMappingBufferTester implements IndexMappingBuffer {
+public final class IndexMappingBufferTester implements IndexMappingBuffer {
+
     private IndexMappingBufferImpl innerBuffer;
     private final int[] from, to;
+    private final boolean signum;
 
-    public IndexMappingBufferTester(int[] from, final boolean allowDiffStates) {
+    public IndexMappingBufferTester(int[] from, boolean signum, final boolean allowDiffStates) {
         Arrays.sort(from);
         this.from = this.to = from;
+        this.signum = signum;
         innerBuffer = new IndexMappingBufferImpl(allowDiffStates);
     }
 
-    public IndexMappingBufferTester(int[] from, int[] to, final boolean allowDiffStates) {
+    public IndexMappingBufferTester(int[] from, int[] to, boolean signum, boolean allowDiffStates) {
         if (from.length != to.length)
             throw new IllegalArgumentException();
         this.from = from;
         this.to = to;
+        this.signum = signum;
         //Here we can use unstable sort method
         ArraysUtils.quickSort(this.from, this.to);
         innerBuffer = new IndexMappingBufferImpl(allowDiffStates);
@@ -57,6 +62,7 @@ public class IndexMappingBufferTester implements IndexMappingBuffer {
         final int size = map.size();
         from = new int[size];
         to = new int[size];
+        signum = buffer.getSignum();
         int i = 0;
         for (Map.Entry<Integer, IndexMappingBufferRecord> entry : map.entrySet()) {
             from[i] = entry.getKey();
@@ -70,6 +76,7 @@ public class IndexMappingBufferTester implements IndexMappingBuffer {
         int innerBufferSize = buffer.innerBuffer.map.size();
         from = new int[buffer.from.length + innerBufferSize];
         to = new int[buffer.from.length + innerBufferSize];
+        signum = buffer.getSignum();
         System.arraycopy(buffer.from, 0, from, 0, buffer.from.length);
         System.arraycopy(buffer.to, 0, to, 0, buffer.to.length);
         int i = buffer.from.length;
@@ -81,10 +88,11 @@ public class IndexMappingBufferTester implements IndexMappingBuffer {
         innerBuffer = new IndexMappingBufferImpl(buffer.allowDiffStates());
     }
 
-    private IndexMappingBufferTester(IndexMappingBufferImpl innerBuffer, int[] from, int[] to) {
+    private IndexMappingBufferTester(IndexMappingBufferImpl innerBuffer, int[] from, int[] to, boolean signum) {
         this.innerBuffer = innerBuffer;
         this.from = from;
         this.to = to;
+        this.signum = signum;
     }
 
     static IndexMappingBufferTester create(IndexMappingBuffer buffer) {
@@ -93,12 +101,24 @@ public class IndexMappingBufferTester implements IndexMappingBuffer {
         if (buffer instanceof IndexMappingBufferImpl)
             return new IndexMappingBufferTester((IndexMappingBufferImpl) buffer);
         throw new RuntimeException("Unknown IndexMappingBufferType");
+    }
 
+    static boolean test(IndexMappingBufferTester tester, Tensor from, Tensor to) {
+        tester.reset();
+        final IndexMappingProvider provider =
+                IndexMappings.createPort(IndexMappingProvider.Util.singleton(tester), from, to, tester.allowDiffStates());
+        provider.tick();
+        IndexMappingBuffer buffer;
+        while ((buffer = provider.take()) != null)
+            if (buffer.getSignum() == false)
+                return true;
+        return false;
     }
 
     @Override
     public boolean tryMap(int from, int to) {
-        int fromName = IndicesUtils.getNameWithType(from), toName = IndicesUtils.getNameWithType(to);
+        int fromName = IndicesUtils.getNameWithType(from),
+                toName = IndicesUtils.getNameWithType(to);
         int position;
         if ((position = Arrays.binarySearch(this.from, fromName)) < 0)
             return innerBuffer.tryMap(from, to);
@@ -107,7 +127,6 @@ public class IndexMappingBufferTester implements IndexMappingBuffer {
 
     @Override
     public void addSignum(boolean signum) {
-        //TODO THIS IS WRONG
         innerBuffer.addSignum(signum);
     }
 
@@ -118,12 +137,12 @@ public class IndexMappingBufferTester implements IndexMappingBuffer {
 
     @Override
     public boolean getSignum() {
-        return innerBuffer.signum;
+        return signum ^ innerBuffer.signum;
     }
 
     @Override
-    public IndexMappingBuffer clone() {
-        return new IndexMappingBufferTester(innerBuffer.clone(), from, to);
+    public IndexMappingBufferTester clone() {
+        return new IndexMappingBufferTester(innerBuffer.clone(), from, to, signum);
     }
 
     @Override
@@ -142,8 +161,7 @@ public class IndexMappingBufferTester implements IndexMappingBuffer {
     }
 
     public void reset() {
-        boolean allowDiffStates = innerBuffer.allowDiffStates();
-        innerBuffer = new IndexMappingBufferImpl(allowDiffStates);
+        innerBuffer = new IndexMappingBufferImpl(innerBuffer.allowDiffStates());
     }
 
     @Override

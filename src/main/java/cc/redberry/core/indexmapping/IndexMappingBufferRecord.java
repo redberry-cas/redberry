@@ -30,6 +30,7 @@ import cc.redberry.core.indices.IndicesUtils;
  * @author Stanislav Poslavsky
  */
 public final class IndexMappingBufferRecord {
+    
     /*
      * Mask 0b00000SUL
      *
@@ -37,7 +38,6 @@ public final class IndexMappingBufferRecord {
      * "to" lower index mapped
      *
      */
-
     byte states;
     private final int toName;
 

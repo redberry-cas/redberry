@@ -27,7 +27,7 @@ package cc.redberry.core.indexmapping;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-class DummyIndexMappingProvider extends IndexMappingProviderAbstract {
+final class DummyIndexMappingProvider extends IndexMappingProviderAbstract {
     public DummyIndexMappingProvider(MappingsPort opu) {
         super(opu);
     }

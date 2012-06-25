@@ -22,7 +22,7 @@
  */
 package cc.redberry.core.indexmapping;
 
-import cc.redberry.core.tensor.Power;
+import cc.redberry.core.number.Complex;
 import cc.redberry.core.tensor.Tensor;
 
 /**
@@ -30,18 +30,20 @@ import cc.redberry.core.tensor.Tensor;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-class ProviderPowFactory implements IndexMappingProviderFactory {
+final class ProviderComplex {
 
-    static final ProviderPowFactory INSTANCE = new ProviderPowFactory();
+    public static final IndexMappingProviderFactory FACTORY = new IndexMappingProviderFactory() {
 
-    private ProviderPowFactory() {
-    }
-
-    @Override
-    public IndexMappingProvider create(IndexMappingProvider opu, Tensor from, Tensor to, boolean allowDiffStates) {
-        final Power fromP = (Power) from, toP = (Power) to;
-        if (IndexMappings.mappingExists(fromP.get(1), toP.get(1), allowDiffStates) && IndexMappings.mappingExists(fromP.get(0), toP.get(0), allowDiffStates))
-            return new DummyIndexMappingProvider(opu);
-        return IndexMappingProvider.Util.EMPTY_PROVIDER;
-    }
+        @Override
+        public IndexMappingProvider create(final IndexMappingProvider opu,
+                                           final Tensor from,
+                                           final Tensor to,
+                                           boolean allowDiffStates) {
+            if (from.equals(to))
+                return new DummyIndexMappingProvider(opu);
+            else if (from.equals(((Complex) to).negate()))
+                return new MinusIndexMappingProvider(opu);
+            return IndexMappingProvider.Util.EMPTY_PROVIDER;
+        }
+    };
 }

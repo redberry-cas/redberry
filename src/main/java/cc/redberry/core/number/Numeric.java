@@ -211,7 +211,7 @@ public final class Numeric extends Real implements Serializable {
      */
     @Override
     public int hashCode() {
-        long bits = Double.doubleToLongBits(value);
+        long bits = Double.doubleToLongBits(value * value);
         return (int) (bits ^ (bits >>> 32));
     }
 

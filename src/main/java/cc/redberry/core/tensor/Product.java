@@ -25,8 +25,8 @@ package cc.redberry.core.tensor;
 import cc.redberry.core.indices.Indices;
 import cc.redberry.core.indices.IndicesUtils;
 import cc.redberry.core.math.GraphUtils;
+import cc.redberry.core.number.Complex;
 import cc.redberry.core.utils.ArraysUtils;
-import cc.redberry.core.utils.HashFunctions;
 import java.lang.ref.SoftReference;
 import java.util.Arrays;
 
@@ -42,6 +42,7 @@ public final class Product extends MultiTensor {
 
     Product(Tensor[] data, Indices indices) {
         super(data, indices);
+        Arrays.sort(data);
         this.contentReference = new SoftReference<>(calculateContent());
         this.hash = calculateHash();
     }
@@ -57,7 +58,6 @@ public final class Product extends MultiTensor {
 //            throw new InconsistentIndicesException(exception.getIndex(), this);//TODO this->data
 //        }
 //    }
-
     @Override
     protected char operationSymbol() {
         return '*';
@@ -92,10 +92,21 @@ public final class Product extends MultiTensor {
     }
 
     private int calculateHash() {
-        int result = 1;
-        for (Tensor element : data)
-            result = 47 * result + element.hashCode();
-        return HashFunctions.JenkinWang32shift(result);
+        int result = 0;
+        int elementHash;
+        boolean complexExists = false;
+        for (Tensor element : data) {
+            if (element instanceof Complex)
+                if (((Complex) element).equals(Complex.MINUSE_ONE))
+                    continue;
+                else
+                    complexExists = true;
+            elementHash = element.hashCode();
+            result = 47 * result + elementHash;
+        }
+        if (complexExists)
+            result ^= getContractionStructure().hashCode();
+        return result;
     }
 
     @Override

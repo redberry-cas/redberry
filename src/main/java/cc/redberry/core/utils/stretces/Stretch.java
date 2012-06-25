@@ -20,28 +20,23 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
-package cc.redberry.core.indexmapping;
-
-import cc.redberry.core.tensor.Power;
-import cc.redberry.core.tensor.Tensor;
+package cc.redberry.core.utils.stretces;
 
 /**
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-class ProviderPowFactory implements IndexMappingProviderFactory {
+public class Stretch {
+    public final int from, length;
 
-    static final ProviderPowFactory INSTANCE = new ProviderPowFactory();
-
-    private ProviderPowFactory() {
+    public Stretch(int from, int length) {
+        this.from = from;
+        this.length = length;
     }
 
     @Override
-    public IndexMappingProvider create(IndexMappingProvider opu, Tensor from, Tensor to, boolean allowDiffStates) {
-        final Power fromP = (Power) from, toP = (Power) to;
-        if (IndexMappings.mappingExists(fromP.get(1), toP.get(1), allowDiffStates) && IndexMappings.mappingExists(fromP.get(0), toP.get(0), allowDiffStates))
-            return new DummyIndexMappingProvider(opu);
-        return IndexMappingProvider.Util.EMPTY_PROVIDER;
+    public String toString() {
+        return "Stretch{" + "from=" + from + ", length=" + length + '}';
     }
 }

@@ -55,14 +55,14 @@ public final class IndexMappings {
         };
     }
 
-    public static OutputPortUnsafe<IndexMappingBuffer> createPort(Tensor from, Tensor to) {
+    public static MappingsPort createPort(Tensor from, Tensor to) {
         return createPort(from, to, CC.withMetric());
     }
 
-    public static OutputPortUnsafe<IndexMappingBuffer> createPort(Tensor from, Tensor to, boolean allowDiffStates) {
+    public static MappingsPort createPort(Tensor from, Tensor to, boolean allowDiffStates) {
         final IndexMappingProvider provider = createPort(IndexMappingProvider.Util.singleton(new IndexMappingBufferImpl(allowDiffStates)), from, to, allowDiffStates);
         provider.tick();
-        return new OutputPortUnsafe<IndexMappingBuffer>() {
+        return new MappingsPort() {
 
             @Override
             public IndexMappingBuffer take() {
@@ -74,11 +74,11 @@ public final class IndexMappings {
         };
     }
 
-    public static OutputPortUnsafe<IndexMappingBuffer> createPort(final IndexMappingBuffer buffer,
-                                                                  final Tensor from, final Tensor to) {
+    public static MappingsPort createPort(final IndexMappingBuffer buffer,
+                                          final Tensor from, final Tensor to) {
         final IndexMappingProvider provider = createPort(IndexMappingProvider.Util.singleton(buffer), from, to, buffer.allowDiffStates());
         provider.tick();
-        return new OutputPortUnsafe<IndexMappingBuffer>() {
+        return new MappingsPort() {
 
             @Override
             public IndexMappingBuffer take() {
@@ -104,38 +104,41 @@ public final class IndexMappings {
         return provider.take() != null;
     }
 
+    private static Tensor extractNonComplexFactor(Tensor t) {
+        for (int i = 0; i < 2; ++i)
+            if (t.get(i) instanceof Complex && ((Complex) t.get(i)).equals(Complex.MINUSE_ONE))
+                return t.get(1 - i);
+        return null;
+    }
+
     static IndexMappingProvider createPort(IndexMappingProvider opu, Tensor from, Tensor to, final boolean allowDiffStates) {
         if (from.hashCode() != to.hashCode())
             return IndexMappingProvider.Util.EMPTY_PROVIDER;
 
-//        if (from.getClass() != to.getClass()) {
-//            //Processing case -2*(1/2)*g_mn -> g_mn
-//            if (from instanceof Product && !(to instanceof Product)) {
-//                ProductContent fromC = (ProductContent) from.getContent();
-//                if (fromC.size() != 1)
-//                    return IndexMappingProvider.Util.EMPTY_PROVIDER;
-//                if (fromC.getFactor().isOne())
-//                    return createPort(opu, fromC.get(0), to, allowDiffStates);
-//                if (fromC.getFactor().isMinusOne())
-//                    return new MinusIndexMappingProvider(createPort(opu, fromC.get(0), to, allowDiffStates));
-//                return IndexMappingProvider.Util.EMPTY_PROVIDER;
-//            }
-//
-//            //Processing case g_mn -> -2*(1/2)*g_mn
-//            if (to instanceof Product && !(from instanceof Product)) {
-//                ProductContent toC = (ProductContent) to.getContent();
-//                if (toC.size() != 1)
-//                    return IndexMappingProvider.Util.EMPTY_PROVIDER;
-//                if (toC.getFactor().isOne())
-//                    return createPort(opu, from, toC.get(0), allowDiffStates);
-//                if (toC.getFactor().isMinusOne())
-//                    return new MinusIndexMappingProvider(createPort(opu, from, toC.get(0), allowDiffStates));
-//                return IndexMappingProvider.Util.EMPTY_PROVIDER;
-//            }
-//
-//            return IndexMappingProvider.Util.EMPTY_PROVIDER;
-//        }
-//
+        if (from.getClass() != to.getClass()) {
+            Tensor nonComplex;
+            //Processing case -2*(1/2)*g_mn -> g_mn
+            if (from instanceof Product && !(to instanceof Product)) {
+                if (from.size() != 2)
+                    return IndexMappingProvider.Util.EMPTY_PROVIDER;
+
+                if ((nonComplex = extractNonComplexFactor(from)) != null)
+                    return new MinusIndexMappingProvider(createPort(opu, nonComplex, to, allowDiffStates));
+                return IndexMappingProvider.Util.EMPTY_PROVIDER;
+            }
+
+            //Processing case g_mn -> -2*(1/2)*g_mn
+            if (to instanceof Product && !(from instanceof Product)) {
+                if (to.size() != 2)
+                    return IndexMappingProvider.Util.EMPTY_PROVIDER;
+                if ((nonComplex = extractNonComplexFactor(to)) != null)
+                    return new MinusIndexMappingProvider(createPort(opu, from, nonComplex, allowDiffStates));
+                return IndexMappingProvider.Util.EMPTY_PROVIDER;
+            }
+
+            return IndexMappingProvider.Util.EMPTY_PROVIDER;
+        }
+
         IndexMappingProviderFactory factory = map.get(from.getClass());
 //        if (factory == null)
 //            if (from instanceof AbstractScalarFunction)
@@ -151,9 +154,9 @@ public final class IndexMappings {
         map = new HashMap<>();
         map.put(SimpleTensor.class, ProviderSimpleTensor.FACTORY_SIMPLETENSOR);
         map.put(TensorField.class, ProviderSimpleTensor.FACTORY_TENSORFIELD);
-//        map.put(Product.class, ProviderProduct.FACTORY);
-//        map.put(Sum.class, ProviderSum.FACTORY);
-//        map.put(Complex.class, ProviderComplex.FACTORY);
+        map.put(Product.class, ProviderProduct.FACTORY);
+        map.put(Sum.class, ProviderSum.FACTORY);
+        map.put(Complex.class, ProviderComplex.FACTORY);
         map.put(Pow.class, ProviderPowFactory.INSTANCE);
     }
 }

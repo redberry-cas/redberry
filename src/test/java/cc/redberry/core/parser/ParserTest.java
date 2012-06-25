@@ -170,4 +170,11 @@ public class ParserTest {
         Tensor e = Tensors.parse("x");
         Assert.assertTrue(TensorUtils.equals(e, t));
     }
+    
+    @Test
+    public void testSim1() {
+        Tensor t = Tensors.parse("1^3");
+        Tensor e = Tensors.parse("x");
+        Assert.assertTrue(TensorUtils.equals(e, t));
+    }
 }

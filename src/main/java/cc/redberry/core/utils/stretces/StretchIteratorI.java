@@ -20,28 +20,45 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
-package cc.redberry.core.indexmapping;
+package cc.redberry.core.utils.stretces;
 
-import cc.redberry.core.tensor.Power;
-import cc.redberry.core.tensor.Tensor;
+import java.util.Iterator;
 
 /**
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-class ProviderPowFactory implements IndexMappingProviderFactory {
+public class StretchIteratorI implements Iterator<Stretch>, Iterable<Stretch> {
+    private final int[] values;
+    private int pointer = 0;
 
-    static final ProviderPowFactory INSTANCE = new ProviderPowFactory();
-
-    private ProviderPowFactory() {
+    public StretchIteratorI(int[] values) {
+        this.values = values;
     }
 
     @Override
-    public IndexMappingProvider create(IndexMappingProvider opu, Tensor from, Tensor to, boolean allowDiffStates) {
-        final Power fromP = (Power) from, toP = (Power) to;
-        if (IndexMappings.mappingExists(fromP.get(1), toP.get(1), allowDiffStates) && IndexMappings.mappingExists(fromP.get(0), toP.get(0), allowDiffStates))
-            return new DummyIndexMappingProvider(opu);
-        return IndexMappingProvider.Util.EMPTY_PROVIDER;
+    public boolean hasNext() {
+        return pointer < values.length;
+    }
+
+    @Override
+    public Stretch next() {
+        int i = pointer;
+        final int value = values[i];
+        final int begin = i;
+        while ((++i < values.length) && values[i] == value);
+        pointer = i;
+        return new Stretch(begin, i - begin);
+    }
+
+    @Override
+    public Iterator<Stretch> iterator() {
+        return this;
+    }
+
+    @Override
+    public void remove() {
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 }

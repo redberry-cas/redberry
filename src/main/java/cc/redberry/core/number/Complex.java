@@ -61,6 +61,7 @@ public class Complex extends Tensor
             new Complex(Rational.ZERO, Rational.ZERO);
     public static final Complex ONE =
             new Complex(Rational.ONE, Rational.ZERO);
+    public static final int HASHCODE_OF_ONE = ONE.hashCode();
     public static final Complex TWO =
             new Complex(Rational.TWO, Rational.ZERO);
     public static final Complex MINUSE_ONE =
