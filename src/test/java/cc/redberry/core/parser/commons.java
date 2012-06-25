@@ -22,10 +22,10 @@
  */
 package cc.redberry.core.parser;
 
-import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.utils.*;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
 import java.math.BigInteger;
-import java.util.*;
 import org.apache.commons.math3.complex.Complex;
 import org.apache.commons.math3.fraction.BigFraction;
 import org.apache.commons.math3.fraction.Fraction;
@@ -105,4 +105,20 @@ public class commons {
         int[] as = new int[12];
     }
 
+    @Test
+    public void teasjhd() {
+        try {
+            // Create file 
+            FileWriter fstream = new FileWriter("/home/stas/Projects/test.txt");
+            BufferedWriter out = new BufferedWriter(fstream);
+            out.write("Hello Java\n");
+            out.write("Hello Java\n");
+            out.write("Hello Java\n");
+            out.write("Hello Java");
+            //Close the output stream
+            out.close();
+        } catch (Exception e) {//Catch exception if any
+            System.err.println("Error: " + e.getMessage());
+        }
+    }
 }

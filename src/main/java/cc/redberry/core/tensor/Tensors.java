@@ -22,12 +22,10 @@
  */
 package cc.redberry.core.tensor;
 
+import cc.redberry.core.combinatorics.*;
 import cc.redberry.core.context.CC;
 import cc.redberry.core.context.NameDescriptor;
-import cc.redberry.core.indices.IndicesFactory;
-import cc.redberry.core.indices.IndicesTypeStructure;
-import cc.redberry.core.indices.SimpleIndices;
-import cc.redberry.core.indices.UnsafeIndicesFactory;
+import cc.redberry.core.indices.*;
 import cc.redberry.core.tensor.functions.*;
 
 /**
@@ -203,5 +201,9 @@ public class Tensors {
         if (!(t instanceof SimpleTensor))
             throw new IllegalArgumentException("Input tensor is not SimpleTYensor.");
         return (SimpleTensor) t;
+    }
+
+    public static void addSymmetry(String tensor, IndexType type, boolean sign, int... symmetry) {
+        parseSimple(tensor).getIndices().getSymmetries().add(type.getType(), new Symmetry(symmetry, sign));
     }
 }

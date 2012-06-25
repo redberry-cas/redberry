@@ -22,12 +22,13 @@
  */
 package cc.redberry.core.indexmapping;
 
-import cc.redberry.concurrent.*;
-import cc.redberry.core.context.*;
-import cc.redberry.core.indices.*;
+import cc.redberry.concurrent.OutputPortUnsafe;
+import cc.redberry.core.indices.IndexType;
 import cc.redberry.core.tensor.Tensor;
-import static cc.redberry.core.tensor.Tensors.*;
-import org.junit.*;
+import org.junit.Test;
+
+import static cc.redberry.core.tensor.Tensors.parse;
+import static cc.redberry.core.tensor.Tensors.parseSimple;
 
 /**
  *
