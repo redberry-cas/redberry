@@ -24,10 +24,10 @@ package cc.redberry.core.tensor;
 
 import cc.redberry.core.context.ToStringMode;
 import cc.redberry.core.indices.Indices;
+
 import java.util.Arrays;
 
 /**
- *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
@@ -82,13 +82,11 @@ public abstract class MultiTensor extends Tensor {
 
     @Override
     public String toString(ToStringMode mode) {
-        if (data.length == 0)
-            return "";
         char operation = operationSymbol();
         StringBuilder sb = new StringBuilder();
-        for (int i = 0;; ++i) {
-            sb.append(data[i].toString(mode, this.getClass()));
-            if (i == data.length - 1)
+        for (int i = 0; ; ++i) {
+            sb.append(get(i).toString(mode, this.getClass()));
+            if (i == size() - 1)
                 return sb.toString();
             sb.append(operation);
         }

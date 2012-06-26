@@ -26,7 +26,6 @@ import cc.redberry.core.number.Complex;
 import cc.redberry.core.tensor.Tensor;
 
 /**
- *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
@@ -40,7 +39,10 @@ final class ProviderComplex {
                                            final Tensor to,
                                            boolean allowDiffStates) {
             if (from.equals(to))
-                return new DummyIndexMappingProvider(opu);
+                if (((Complex) from).isZero())
+                    return new PlusMinusIndexMappingProvider(opu);
+                else
+                    return new DummyIndexMappingProvider(opu);
             else if (from.equals(((Complex) to).negate()))
                 return new MinusIndexMappingProvider(opu);
             return IndexMappingProvider.Util.EMPTY_PROVIDER;

@@ -22,14 +22,13 @@
  */
 package cc.redberry.core.tensor;
 
-import cc.redberry.core.combinatorics.*;
+import cc.redberry.core.combinatorics.Symmetry;
 import cc.redberry.core.context.CC;
 import cc.redberry.core.context.NameDescriptor;
 import cc.redberry.core.indices.*;
 import cc.redberry.core.tensor.functions.*;
 
 /**
- *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
@@ -59,8 +58,8 @@ public class Tensors {
     public static SimpleTensor simpleTensor(String name, SimpleIndices indices) {
         NameDescriptor descriptor = CC.getNameManager().mapNameDescriptor(name, indices.getIndicesTypeStructure());
         return new SimpleTensor(descriptor.getId(),
-                                UnsafeIndicesFactory.createOfTensor(descriptor.getSymmetries(),
-                                                                    indices));
+                UnsafeIndicesFactory.createOfTensor(descriptor.getSymmetries(),
+                        indices));
     }
 
     public static SimpleTensor simpleTensor(int name, SimpleIndices indices) {
@@ -68,8 +67,8 @@ public class Tensors {
         if (descriptor == null)
             throw new IllegalArgumentException("This name is not registered in the system.");
         return new SimpleTensor(name,
-                                UnsafeIndicesFactory.createOfTensor(descriptor.getSymmetries(),
-                                                                    indices));
+                UnsafeIndicesFactory.createOfTensor(descriptor.getSymmetries(),
+                        indices));
     }
 
     public static TensorField field(String name, SimpleIndices indices, Tensor[] arguments) {
@@ -94,8 +93,8 @@ public class Tensors {
             structures[i + 1] = argIndices[i].getIndicesTypeStructure();
         NameDescriptor descriptor = CC.getNameManager().mapNameDescriptor(name, structures);
         return new TensorField(descriptor.getId(),
-                               UnsafeIndicesFactory.createOfTensor(descriptor.getSymmetries(), indices),
-                               arguments.clone(), argIndices.clone());
+                UnsafeIndicesFactory.createOfTensor(descriptor.getSymmetries(), indices),
+                arguments.clone(), argIndices.clone());
     }
 
     public static TensorField field(int name, SimpleIndices indices, SimpleIndices[] argIndices, Tensor[] arguments) {
@@ -199,7 +198,7 @@ public class Tensors {
     public static SimpleTensor parseSimple(String expression) {
         Tensor t = CC.current().getParseManager().parse(expression);
         if (!(t instanceof SimpleTensor))
-            throw new IllegalArgumentException("Input tensor is not SimpleTYensor.");
+            throw new IllegalArgumentException("Input tensor is not SimpleTensor.");
         return (SimpleTensor) t;
     }
 

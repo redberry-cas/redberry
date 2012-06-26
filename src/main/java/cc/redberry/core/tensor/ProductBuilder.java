@@ -27,13 +27,13 @@ import cc.redberry.core.indices.Indices;
 import cc.redberry.core.indices.IndicesBuilder;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.utils.TensorUtils;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 /**
- *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
@@ -59,6 +59,10 @@ public class ProductBuilder implements TensorBuilder {
             return complex;
 
         ArrayList<Tensor> data = new ArrayList<>(elements.size() + powers.size() + 1);
+
+        //Reserving place for factor
+        data.add(null);
+
         Complex complex = this.complex;
         for (Map.Entry<Tensor, SumBuilder> entry : powers.entrySet()) {
             Tensor t = Tensors.pow(entry.getKey(), entry.getValue().buid());
@@ -76,17 +80,20 @@ public class ProductBuilder implements TensorBuilder {
         if (complex.isZero() || complex.isInfinite() || complex.isNaN())
             return complex;
 
-        if (!complex.isOne())
-            data.add(complex);
+        //Setting factor
+        data.set(0, complex);
 
         data.addAll(elements);
 
+        //Only complex factor
         if (data.size() == 1)
             return data.get(0);
 
-        if (data.isEmpty())
-            return Complex.ONE;
+        // 1 * (something)
+        if (data.size() == 2 && complex.isOne())
+            return data.get(1);
 
+        //Calculating product indices
         IndicesBuilder ibs = new IndicesBuilder();
         Indices indices;
         for (Tensor t : data)

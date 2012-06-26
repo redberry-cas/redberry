@@ -26,12 +26,12 @@ import cc.redberry.concurrent.OutputPortUnsafe;
 import cc.redberry.core.context.CC;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.tensor.*;
-import java.util.HashMap;
-import java.util.Map;
 import org.apache.commons.math3.analysis.function.Pow;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
- *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
@@ -105,10 +105,14 @@ public final class IndexMappings {
     }
 
     private static Tensor extractNonComplexFactor(Tensor t) {
-        for (int i = 0; i < 2; ++i)
-            if (t.get(i) instanceof Complex && ((Complex) t.get(i)).equals(Complex.MINUSE_ONE))
-                return t.get(1 - i);
-        return null;
+        //for (int i = 0; i < 2; ++i)
+        //    if (t.get(i) instanceof Complex && ((Complex) t.get(i)).equals(Complex.MINUSE_ONE))
+        //        return t.get(1 - i);
+        Product p = (Product) t;
+        if (p.getFactor().isMinusOne())
+            return p.fullGet(1);
+        else
+            return null;
     }
 
     static IndexMappingProvider createPort(IndexMappingProvider opu, Tensor from, Tensor to, final boolean allowDiffStates) {
@@ -116,6 +120,7 @@ public final class IndexMappings {
             return IndexMappingProvider.Util.EMPTY_PROVIDER;
 
         if (from.getClass() != to.getClass()) {
+
             Tensor nonComplex;
             //Processing case -2*(1/2)*g_mn -> g_mn
             if (from instanceof Product && !(to instanceof Product)) {
@@ -123,7 +128,7 @@ public final class IndexMappings {
                     return IndexMappingProvider.Util.EMPTY_PROVIDER;
 
                 if ((nonComplex = extractNonComplexFactor(from)) != null)
-                    return new MinusIndexMappingProvider(createPort(opu, nonComplex, to, allowDiffStates));
+                    return new MinusIndexMappingProviderWrapper(createPort(opu, nonComplex, to, allowDiffStates));
                 return IndexMappingProvider.Util.EMPTY_PROVIDER;
             }
 
@@ -132,7 +137,7 @@ public final class IndexMappings {
                 if (to.size() != 2)
                     return IndexMappingProvider.Util.EMPTY_PROVIDER;
                 if ((nonComplex = extractNonComplexFactor(to)) != null)
-                    return new MinusIndexMappingProvider(createPort(opu, from, nonComplex, allowDiffStates));
+                    return new MinusIndexMappingProviderWrapper(createPort(opu, from, nonComplex, allowDiffStates));
                 return IndexMappingProvider.Util.EMPTY_PROVIDER;
             }
 
@@ -140,14 +145,15 @@ public final class IndexMappings {
         }
 
         IndexMappingProviderFactory factory = map.get(from.getClass());
-//        if (factory == null)
-//            if (from instanceof AbstractScalarFunction)
-//                factory = ProviderScalarFunctionsFactory.INSTANCE;
-//            else
-//                throw new RuntimeException("Unsupported tensor type: " + from.getClass());
+        //        if (factory == null)
+        //            if (from instanceof AbstractScalarFunction)
+        //                factory = ProviderScalarFunctionsFactory.INSTANCE;
+        //            else
+        //                throw new RuntimeException("Unsupported tensor type: " + from.getClass());
 
         return factory.create(opu, from, to, allowDiffStates);
     }
+
     private static final Map<Class, IndexMappingProviderFactory> map;
 
     static {

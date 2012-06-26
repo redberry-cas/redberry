@@ -25,39 +25,47 @@ package cc.redberry.core.indexmapping;
 import cc.redberry.concurrent.OutputPortUnsafe;
 import cc.redberry.core.indices.IndexType;
 import cc.redberry.core.tensor.Tensor;
+import cc.redberry.core.tensor.Tensors;
 import org.junit.Test;
 
 import static cc.redberry.core.tensor.Tensors.parse;
-import static cc.redberry.core.tensor.Tensors.parseSimple;
 
 /**
- *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
 public class ProviderSumTest {
-  @Test
+    @Test
     public void test2() {
-        Tensor f = parse("a*d");
-        Tensor t = parse("-a*d");
+        Tensor f = parse("a*b");
+        Tensor t = parse("-a*b");
         MappingsPort opu = IndexMappings.createPort(f, t);
-        IndexMappingBuffer buffer;       
+        IndexMappingBuffer buffer;
         while ((buffer = opu.take()) != null)
             System.out.println(buffer);
     }
-    
-    
+
+    @Test
+    public void test3() {
+        Tensor f = parse("1");
+        Tensor t = parse("-1");
+        MappingsPort opu = IndexMappings.createPort(f, t);
+        IndexMappingBuffer buffer;
+        while ((buffer = opu.take()) != null)
+            System.out.println(buffer);
+    }
+
     @Test
     public void test1() {
         Tensor f = parse("A_ab^ab-d");
-        Tensor t = parse("A_ab^ab-d");
-        parseSimple("A_abmn").getIndices().getSymmetries().add(IndexType.LatinLower, true, 1, 0, 2, 3);
+        Tensor t = parse("A_ba^ab+d");
+        Tensors.addSymmetry("A_abmn", IndexType.LatinLower, true, 0, 1, 3, 2);
         OutputPortUnsafe<IndexMappingBuffer> opu = IndexMappings.createPort(f, t);
         int counter = 0;
         IndexMappingBuffer buffer;
         while ((buffer = opu.take()) != null)
             System.out.println(buffer);
-//        assertTrue(counter == 2);
+        //        assertTrue(counter == 2);
 
 
     }

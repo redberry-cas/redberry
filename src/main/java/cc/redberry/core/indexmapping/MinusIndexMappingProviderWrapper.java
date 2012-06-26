@@ -23,23 +23,28 @@
 package cc.redberry.core.indexmapping;
 
 /**
- *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-class MinusIndexMappingProvider extends IndexMappingProviderAbstract {
+class MinusIndexMappingProviderWrapper implements IndexMappingProvider {
+    private final IndexMappingProvider provider;
+    //private IndexMappingBuffer currentBuffer = null;
 
-    public MinusIndexMappingProvider(MappingsPort opu) {
-        super(opu);
+    public MinusIndexMappingProviderWrapper(IndexMappingProvider provider) {
+        this.provider = provider;
     }
 
     @Override
     public IndexMappingBuffer take() {
+        IndexMappingBuffer currentBuffer = provider.take();
         if (currentBuffer == null)
             return null;
-        IndexMappingBuffer buf = currentBuffer;
-        currentBuffer = null;
-        buf.addSignum(true);
-        return buf;
+        currentBuffer.addSignum(true);
+        return currentBuffer;
+    }
+
+    @Override
+    public boolean tick() {
+        return provider.tick();
     }
 }

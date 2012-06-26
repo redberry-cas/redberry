@@ -27,11 +27,11 @@ import cc.redberry.core.tensor.Product;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.utils.stretces.PrecalculatedStretches;
 import cc.redberry.core.utils.stretces.Stretch;
+
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
@@ -43,10 +43,10 @@ final class ProviderProduct implements IndexMappingProvider {
         public IndexMappingProvider create(IndexMappingProvider opu, Tensor from, Tensor to, boolean allowDiffStates) {
             Product pfrom = (Product) from,
                     pto = (Product) to;
-            if (pfrom.size() != pto.size())
+            if (pfrom.fullSize() != pto.fullSize())
                 return IndexMappingProvider.Util.EMPTY_PROVIDER;
-            for (int i = 0; i < pfrom.size(); ++i)
-                if (pfrom.get(i).hashCode() != pto.get(i).hashCode())
+            for (int i = 0; i < pfrom.fullSize(); ++i)
+                if (pfrom.fullGet(i).hashCode() != pto.fullGet(i).hashCode())
                     return IndexMappingProvider.Util.EMPTY_PROVIDER;
             if (!pfrom.getContractionStructure().equals(pto.getContractionStructure()))
                 return IndexMappingProvider.Util.EMPTY_PROVIDER;
@@ -96,6 +96,7 @@ final class ProviderProduct implements IndexMappingProvider {
         pp.tick();
         return pp.take() != null;
     }
+
     //private final ProductContent from, to;
     //private PermutationsProvider permutationsProvider;
     private final DummyIndexMappingProvider dummyProvider;
@@ -112,22 +113,24 @@ final class ProviderProduct implements IndexMappingProvider {
         List<Pair> stretches = new ArrayList<>();
         //non permutable
         List<Tensor> npFrom = new ArrayList<>(), npTo = new ArrayList<>();
-        for (i = 1; i <= from.size(); ++i)
-            if (i == from.size() || !from.getContractionStructure().get(i).equals(from.getContractionStructure().get(i - 1))) {
+        for (i = 1; i <= from.fullSize(); ++i)
+            if (i == from.fullSize() || !from.getContractionStructure().get(i).equals(from.getContractionStructure().get(i - 1))) {
                 if (i - 1 != begin)
-                    stretches.add(new Pair(from.getRange(begin, i), to.getRange(begin, i)));
+                    stretches.add(new Pair(from.getFullRange(begin, i), to.getFullRange(begin, i)));
                 else {
-                    npFrom.add(from.get(i - 1));
-                    npTo.add(to.get(i - 1));
+                    npFrom.add(from.fullGet(i - 1));
+                    npTo.add(to.fullGet(i - 1));
                 }
                 begin = i;
             }
+
         //TODO sort stretches by length
         MappingsPort lastOutput = dummyProvider;
         if (!npFrom.isEmpty())
             lastOutput = new SimpleProductProvider(dummyProvider,
-                                                   npFrom.toArray(new Tensor[npFrom.size()]),
-                                                   npTo.toArray(new Tensor[npTo.size()]), allowDiffStates);
+                    npFrom.toArray(new Tensor[npFrom.size()]),
+                    npTo.toArray(new Tensor[npTo.size()]), allowDiffStates);
+
         if (stretches.isEmpty())
             this.op = lastOutput;
         else {

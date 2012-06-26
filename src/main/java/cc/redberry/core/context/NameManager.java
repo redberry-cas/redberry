@@ -22,13 +22,14 @@
  */
 package cc.redberry.core.context;
 
-import cc.redberry.core.indices.*;
+import cc.redberry.core.indices.IndicesTypeStructure;
+import org.apache.commons.math3.random.BitsStreamGenerator;
+import org.apache.commons.math3.random.Well44497b;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
-import org.apache.commons.math3.random.BitsStreamGenerator;
-import org.apache.commons.math3.random.Well44497b;
 
 /**
  * @author Dmitry Bolotin
@@ -122,6 +123,7 @@ public class NameManager {
     //                readLock.unlock();
     //        }
     //    }
+
     /**
      * See {@link Context#resetTensorNames()}.
      */

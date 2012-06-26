@@ -22,10 +22,11 @@
  */
 package cc.redberry.core.number;
 
-import java.io.Serializable;
-import java.math.BigInteger;
 import org.apache.commons.math3.exception.NullArgumentException;
 import org.apache.commons.math3.fraction.BigFraction;
+
+import java.io.Serializable;
+import java.math.BigInteger;
 
 import static cc.redberry.core.number.NumberUtils.checkNotNull;
 import static cc.redberry.core.number.NumberUtils.createNumeric;
@@ -35,7 +36,7 @@ import static cc.redberry.core.number.NumberUtils.createNumeric;
  * {@link cc.redberry.core.number.Number} and gives numeric representation of
  * Redberry numbers. It is simply wraps a value of the primitive type
  * {@code double} in an object (like java {@link Double}).
- *
+ * <p/>
  * <p>This class implements all mathematical operations declared in
  * {@link cc.redberry.core.number.Number} as operations with doubles. So all
  * methods return numeric numbers. As for example, 1.0 + 2 &#47 3 will give
@@ -44,7 +45,6 @@ import static cc.redberry.core.number.NumberUtils.createNumeric;
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
- *
  * @see Number
  * @see Double
  * @see RationalNumber
@@ -59,6 +59,11 @@ public final class Numeric extends Real implements Serializable {
      * A constant holding 1 value.
      */
     public static final Numeric ONE = new Numeric(1);
+    /**
+     * A constant holding -1 value.
+     */
+    public static final Numeric MINUS_ONE = new Numeric(-1);
+
     /**
      * A constant holding the positive infinity of type
      * {@code double}. It is equal to the value returned by
@@ -131,12 +136,11 @@ public final class Numeric extends Real implements Serializable {
     /**
      * Constructs a new {@code Numeric} instance, which {@code double} variable
      * is taken from {@code value.doubleValue()}. So, this constructor makes <br>{@code
-     *   this.value = value.doubleValue();
+     * this.value = value.doubleValue();
      * }
      *
      * @param value the value, which double representation to be represented by
      *              the {@code Double}.
-     *
      * @throws NullArgumentException if value is {@code null}.
      */
     public Numeric(final Number value) {
@@ -204,9 +208,7 @@ public final class Numeric extends Real implements Serializable {
     }
 
     /**
-     *
      * @return similar to {@link Double}
-     *
      * @see Double#hashCode()
      */
     @Override
@@ -216,9 +218,7 @@ public final class Numeric extends Real implements Serializable {
     }
 
     /**
-     *
      * @return {@code Double.isInfinite(value)}
-     *
      * @see Double#isInfinite(double)
      */
     @Override
@@ -227,9 +227,7 @@ public final class Numeric extends Real implements Serializable {
     }
 
     /**
-     *
      * @return {@code Double.isNaN(value)}
-     *
      * @see Double#isNaN(double)
      */
     @Override
@@ -373,7 +371,6 @@ public final class Numeric extends Real implements Serializable {
     }
 
     /**
-     *
      * @see Double#equals(java.lang.Object)
      */
     @Override
@@ -386,7 +383,6 @@ public final class Numeric extends Real implements Serializable {
     }
 
     /**
-     *
      * @see Double#toString()
      */
     @Override
@@ -395,7 +391,6 @@ public final class Numeric extends Real implements Serializable {
     }
 
     /**
-     *
      * @return this
      */
     @Override
@@ -409,7 +404,6 @@ public final class Numeric extends Real implements Serializable {
     }
 
     /**
-     *
      * @see Double#compare(double, double)
      */
     @Override

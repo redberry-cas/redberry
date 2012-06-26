@@ -93,7 +93,7 @@ public class GraphUtils {
         int m1 = 0;
         Deque<BreakfastPointer> stack = new ArrayDeque<>();
         do {
-            currentComponent++;
+            ++currentComponent;
             components[m1] = currentComponent;
             
             if (fromIndex[m1] == -1)

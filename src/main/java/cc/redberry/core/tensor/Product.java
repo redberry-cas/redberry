@@ -27,11 +27,11 @@ import cc.redberry.core.indices.IndicesUtils;
 import cc.redberry.core.math.GraphUtils;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.utils.ArraysUtils;
+
 import java.lang.ref.SoftReference;
 import java.util.Arrays;
 
 /**
- *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
@@ -42,25 +42,67 @@ public final class Product extends MultiTensor {
 
     Product(Tensor[] data, Indices indices) {
         super(data, indices);
-        Arrays.sort(data);
+
+        //First element is a complex factor always
+        Arrays.sort(data, 1, data.length);
+
         this.contentReference = new SoftReference<>(calculateContent());
         this.hash = calculateHash();
     }
 
-//    @Override
-//    protected Indices calculateIndices() {
-//        IndicesBuilder ibs = new IndicesBuilder();
-//        for (Tensor t : data)
-//            ibs.append(t);
-//        try {
-//            return ibs.getIndices();
-//        } catch (InconsistentIndicesException exception) {
-//            throw new InconsistentIndicesException(exception.getIndex(), this);//TODO this->data
-//        }
-//    }
+    //    @Override
+    //    protected Indices calculateIndices() {
+    //        IndicesBuilder ibs = new IndicesBuilder();
+    //        for (Tensor t : data)
+    //            ibs.append(t);
+    //        try {
+    //            return ibs.getIndices();
+    //        } catch (InconsistentIndicesException exception) {
+    //            throw new InconsistentIndicesException(exception.getIndex(), this);//TODO this->data
+    //        }
+    //    }
     @Override
     protected char operationSymbol() {
         return '*';
+    }
+
+    @Override
+    public Tensor get(int i) {
+        if (getFactor().isOne())
+            return data[i + 1];
+        return data[i];
+        //return data[i + ((hash & 0x00080000) >> 19)]; // ;)
+    }
+
+    @Override
+    public int size() {
+        if (getFactor().isOne())
+            return data.length - 1;
+        return data.length;
+        //return data.length - ((hash & 0x00080000) >> 19); // ;)
+    }
+
+    @Override
+    public Tensor[] getRange(int from, int to) {
+        if (getFactor().isOne())
+            return Arrays.copyOfRange(data, from + 1, to + 1);
+        return Arrays.copyOfRange(data, from, to);
+    }
+
+    public Tensor fullGet(int i) {
+        return data[i];
+    }
+
+    public int fullSize() {
+        return data.length;
+    }
+
+    public Tensor[] getFullRange(int from, int to) {
+        return Arrays.copyOfRange(data, from, to);
+    }
+
+    public Complex getFactor() {
+        return (Complex) data[0];
     }
 
     private ProductContent getContent() {
@@ -93,19 +135,15 @@ public final class Product extends MultiTensor {
 
     private int calculateHash() {
         int result = 0;
-        int elementHash;
-        boolean complexExists = false;
-        for (Tensor element : data) {
-            if (element instanceof Complex)
-                if (((Complex) element).equals(Complex.MINUSE_ONE))
-                    continue;
-                else
-                    complexExists = true;
-            elementHash = element.hashCode();
-            result = 47 * result + elementHash;
-        }
-        if (complexExists)
-            result ^= getContractionStructure().hashCode();
+
+        if (!getFactor().isOneOrMinusOne())
+            result = data[0].hashCode();
+
+        for (int i = 1; i < data.length; ++i)
+            result = result * 47 + data[i].hashCode();
+
+        // ;)
+        //result = (result & 0xFFF7FFFF) | (getFactor().isOne() ? 0x00080000 : 0);
         return result;
     }
 
@@ -213,14 +251,14 @@ public final class Product extends MultiTensor {
             datas[components[i]][componentSizes[components[i]]++] = data[i - 1];
 
         Tensor nonScalar = null;
-        if (componentCount == 1) //There are no scalar subproducts in this product
+        if (componentCount == 2) //There are no scalar subproducts in this product
             nonScalar = this;
         else if (datas[0].length > 0)
             nonScalar = Tensors.multiply(datas[0]);
 
         Tensor[] scalars = new Tensor[componentCount - 1];
 
-        if (nonScalar == null && componentCount == 2)
+        if (nonScalar == null && componentCount == 3)
             scalars[0] = this;
         else {
             for (i = 1; i < componentCount; ++i)
@@ -259,10 +297,13 @@ public final class Product extends MultiTensor {
         freeContraction.sortContractions();
 
         //Here we can use unstable sort algorithm
-        ArraysUtils.quickSort(contractions, data);
+        //First element is factor always
+        ArraysUtils.quickSort(contractions, 1, contractions.length, data);
 
         //Form resulting content
         ContractionStructure contractionStructure = new ContractionStructure(freeContraction, contractions);
+
+        //TODO should be lazy field in ProductContent
         FullContractionsStructure fullContractionsStructure = new FullContractionsStructure(data, differentIndicesCount, freeIndices);
         return new ProductContent(contractionStructure, fullContractionsStructure, scalars, nonScalar, stretchIndices);
     }
@@ -297,7 +338,6 @@ public final class Product extends MultiTensor {
      *                     tensors hash in array)
      * @param id           id of index in tensor indices list (could be !=0 only
      *                     for simple tensors)
-     *
      * @return packed record (long)
      */
     private static long packToLong(final int tensorIndex, final short stretchIndex, final short id) {
@@ -310,6 +350,7 @@ public final class Product extends MultiTensor {
             result[i] = ((int) (info[i] >> 32)) + 1;
         return result;
     }
+
     //-65536 == packToLong(-1, (short) -1, (short) 0);
     private static final long dummyTensorInfo = -65536;
 

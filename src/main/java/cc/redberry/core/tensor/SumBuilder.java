@@ -22,14 +22,14 @@
  */
 package cc.redberry.core.tensor;
 
-import cc.redberry.core.indices.*;
-import cc.redberry.core.number.*;
-import java.util.*;
+import cc.redberry.core.indices.Indices;
+import cc.redberry.core.indices.IndicesFactory;
+import cc.redberry.core.number.Complex;
+
+import java.util.ArrayList;
 import java.util.List;
-import org.apache.commons.math3.fraction.*;
 
 /**
- *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
@@ -49,13 +49,15 @@ public class SumBuilder implements TensorBuilder {
 
     @Override
     public Tensor buid() {
-        if (complex.isZero() && summands.size() == 1)
+        if (!complex.isZero() && summands.size() == 1)
             return summands.get(0);
 
         if (summands.isEmpty())
             return complex;
 
-
+        if (complex.isZero()) {
+            return new Sum(summands.toArray(new Tensor[summands.size()]), freeIndices);
+        }
         Tensor[] ss = new Tensor[summands.size() + 1];
         ss[0] = complex;
         System.arraycopy(summands.toArray(new Tensor[summands.size()]), 0, ss, 1, summands.size());
