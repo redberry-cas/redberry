@@ -152,8 +152,8 @@ public class TensorUtils {
                 }
         }
         if (u.getClass() == TensorField.class) {
-            if (((SimpleTensor) u).getName() == ((SimpleTensor) v).getName()
-                    && u.getIndices().equals(v.getIndices()));
+            if (((SimpleTensor) u).getName() != ((SimpleTensor) v).getName()
+                    || !u.getIndices().equals(v.getIndices()));
             return false;
         }
 
