@@ -26,7 +26,8 @@ import java.util.Arrays;
 
 /**
  *
- * @author Dmitry Bolotin, Stanislav Poslavsky.
+ * @author Dmitry Bolotin
+ * @author Stanislav Poslavsky
  */
 public class TensorException extends RuntimeException {
 

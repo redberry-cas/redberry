@@ -23,13 +23,12 @@
 package cc.redberry.core.context;
 
 import cc.redberry.core.indices.IndicesTypeStructure;
-import org.apache.commons.math3.random.BitsStreamGenerator;
-import org.apache.commons.math3.random.Well44497b;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+import org.apache.commons.math3.random.RandomGenerator;
+import org.apache.commons.math3.random.Well44497b;
 
 /**
  * @author Dmitry Bolotin
@@ -38,7 +37,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 public class NameManager {
 
     private long seed;
-    private final BitsStreamGenerator random;// = new Well44497b(); //TODO: what is the best bit provider at this point???
+    private final RandomGenerator random;
     private final ReentrantReadWriteLock readWriteLock = new ReentrantReadWriteLock();
     private final Lock readLock = readWriteLock.readLock();
     private final Lock writeLock = readWriteLock.writeLock();
@@ -47,6 +46,7 @@ public class NameManager {
 
     NameManager(Long seed) {
         if (seed == null) {
+            //FUTURE what is the best bit provider at this point???
             random = new Well44497b();
             random.setSeed(this.seed = random.nextLong());
         } else
@@ -123,7 +123,6 @@ public class NameManager {
     //                readLock.unlock();
     //        }
     //    }
-
     /**
      * See {@link Context#resetTensorNames()}.
      */

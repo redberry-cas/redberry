@@ -104,7 +104,7 @@ public class IndicesSymmetries implements Iterable<Symmetry> {
     }
 
     public boolean add(byte type, Symmetry symmetry) {
-        IndicesTypeStructure.TypeData data = indicesTypeStructure.getTypeDatas(type);
+        IndicesTypeStructure.TypeData data = indicesTypeStructure.getTypeData(type);
         if (data == null)
             throw new IllegalArgumentException("No such type: " + IndexType.getType(type));
         if (data.length != symmetry.dimension())
@@ -129,7 +129,7 @@ public class IndicesSymmetries implements Iterable<Symmetry> {
     }
 
     public boolean addUnsafe(byte type, Symmetry symmetry) {
-        IndicesTypeStructure.TypeData data = indicesTypeStructure.getTypeDatas(type);
+        IndicesTypeStructure.TypeData data = indicesTypeStructure.getTypeData(type);
         if (data == null)
             throw new IllegalArgumentException("No such type: " + IndexType.getType(type));
         if (data.length != symmetry.dimension())

@@ -27,7 +27,6 @@ import cc.redberry.core.indices.Indices;
 import cc.redberry.core.indices.IndicesBuilder;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.utils.TensorUtils;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -101,7 +100,7 @@ public class ProductBuilder implements TensorBuilder {
         try {
             indices = ibs.getIndices();
         } catch (InconsistentIndicesException exception) {
-            throw new InconsistentIndicesException(exception.getIndex());//TODO add info in exceptioon
+            throw new InconsistentIndicesException(exception.getIndex());
         }
 
         return new Product(data.toArray(new Tensor[data.size()]), indices);
@@ -109,7 +108,7 @@ public class ProductBuilder implements TensorBuilder {
 
     @Override
     public void put(Tensor tensor) {
-        //TODO calculate indices
+        //FUTURE calculate indices
         if (tensor instanceof Product) {
             for (Tensor t : tensor)
                 put(t);

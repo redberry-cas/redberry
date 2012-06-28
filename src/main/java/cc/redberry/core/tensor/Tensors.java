@@ -205,4 +205,8 @@ public class Tensors {
     public static void addSymmetry(String tensor, IndexType type, boolean sign, int... symmetry) {
         parseSimple(tensor).getIndices().getSymmetries().add(type.getType(), new Symmetry(symmetry, sign));
     }
+    
+    public static void addSymmetry(SimpleTensor tensor, IndexType type, boolean sign, int... symmetry) {
+        tensor.getIndices().getSymmetries().add(type.getType(), new Symmetry(symmetry, sign));
+    }
 }

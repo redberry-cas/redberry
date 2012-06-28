@@ -42,7 +42,6 @@ public class DistinctCombinationsPort implements OutputPortUnsafe<int[]> {
     public DistinctCombinationsPort(int[][] sets) {
         int maxIndex = 0;
         for (int[] set : sets) {
-            //TODO discuss with Dima
             if(set.length == 0)
                 continue;
             Arrays.sort(set);

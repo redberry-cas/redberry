@@ -22,9 +22,8 @@
  */
 package cc.redberry.core.tensor;
 
-import java.util.Arrays;
 import cc.redberry.core.utils.HashFunctions;
-import java.util.zip.*;
+import java.util.Arrays;
 
 /**
  *

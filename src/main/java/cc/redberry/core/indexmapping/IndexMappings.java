@@ -26,10 +26,9 @@ import cc.redberry.concurrent.OutputPortUnsafe;
 import cc.redberry.core.context.CC;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.tensor.*;
-import org.apache.commons.math3.analysis.function.Pow;
-
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.commons.math3.analysis.function.Pow;
 
 /**
  * @author Dmitry Bolotin

@@ -69,9 +69,9 @@ public class DistinctCombinationsPortTest {
 
     @Test
     public void test4() {
-        int[] a1 = {};
-        int[] a2 = {};
-        int[] a3 = {};
+        int[] a1 = {1};
+        int[] a2 = {3};
+        int[] a3 = {1,2};
         int[][] aa = {a1, a2, a3};
         DistinctCombinationsPort dcp = new DistinctCombinationsPort(aa);
         int[] c;

@@ -64,8 +64,7 @@ public class RealField implements Field<Real>, Serializable {
          */
         private static final RealField INSTANCE = new RealField();
     }
-    // CHECKSTYLE: resume HideUtilityClassConstructor
-
+   
     /**
      * Handle deserialization of the singleton.
      *

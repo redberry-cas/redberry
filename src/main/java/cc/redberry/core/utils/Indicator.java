@@ -28,24 +28,28 @@ package cc.redberry.core.utils;
  * @author Stanislav Poslavsky
  */
 public interface Indicator<E> {
+
+    boolean is(E object);
     public static final Indicator TRUE_INDICATOR = new Indicator() {
+
         @Override
         public boolean is(Object object) {
             return true;
         }
     };
     public static final Indicator FALSE_INDICATOR = new Indicator() {
+
         @Override
         public boolean is(Object object) {
             return false;
         }
     };
 
-    boolean is(E object);
-
     public static class Utils {
+
         public static <T> Indicator<T> and(final Indicator<T>... indicators) {
             return new Indicator<T>() {
+
                 @Override
                 public boolean is(T object) {
                     for (Indicator<T> indicator : indicators)
@@ -55,6 +59,28 @@ public interface Indicator<E> {
                 }
             };
         }
-        //TODO add or & not
+
+        public static <T> Indicator<T> or(final Indicator<T>... indicators) {
+            return new Indicator<T>() {
+
+                @Override
+                public boolean is(T object) {
+                    for (Indicator<T> indicator : indicators)
+                        if (indicator.is(object))
+                            return true;
+                    return false;
+                }
+            };
+        }
+
+        public static <T> Indicator<T> not(final Indicator<T> indicator) {
+            return new Indicator<T>() {
+
+                @Override
+                public boolean is(T object) {
+                    return !indicator.is(object);
+                }
+            };
+        }
     }
 }

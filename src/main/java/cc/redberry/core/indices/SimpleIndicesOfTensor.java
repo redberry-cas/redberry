@@ -67,14 +67,4 @@ public final class SimpleIndicesOfTensor extends SimpleIndicesAbstract {
         return new SimpleIndicesOfTensor(true, data, symmetries);
     }
 
-//    @Override
-//    public boolean equals(Object obj) {
-//        //TODO show to Dima
-//        if (obj == null)
-//            return false;
-//        if (getClass() != obj.getClass())
-//            return false;
-//        SimpleIndicesOfTensor oth = (SimpleIndicesOfTensor) obj;
-//        return oth.symmetries == symmetries && Arrays.equals(data, oth.data);
-//    }
 }

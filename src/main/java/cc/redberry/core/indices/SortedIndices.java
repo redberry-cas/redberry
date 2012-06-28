@@ -103,10 +103,12 @@ final class SortedIndices extends AbstractIndices {
     @Override
     public Indices getInverseIndices() {
         int[] dataInv = new int[data.length];
-        for (int i = 0; i < data.length; ++i)
-            dataInv[i] = data[i] ^ 0x80000000;
-        //TODO consider better implementation
-        return new SortedIndices(dataInv);
+        int fl = data.length - firstLower, i = 0;
+        for (; i < firstLower; ++i)
+            dataInv[fl + i] = data[i] ^ 0x80000000;
+        for (; i < data.length; ++i)
+            dataInv[i - firstLower] = data[i] ^ 0x80000000;
+        return new SortedIndices(dataInv, fl);
     }
 
     @Override

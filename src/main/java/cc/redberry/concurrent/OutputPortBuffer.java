@@ -23,7 +23,7 @@
 
 package cc.redberry.concurrent;
 
-//TODO better implementation considered
+@Deprecated
 public class OutputPortBuffer<T> extends ConcurrentProcessorWrapper<T, T> {
     public OutputPortBuffer(OutputPort<T> input, int bufferSize) {
         super(input, new Processor<T>(), bufferSize, 1);

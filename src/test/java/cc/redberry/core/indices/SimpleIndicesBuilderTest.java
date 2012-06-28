@@ -30,7 +30,8 @@ import java.util.Arrays;
 import java.util.List;
 import org.junit.Test;
 
-import static cc.redberry.core.tensor.Tensors.*;
+import static cc.redberry.core.tensor.Tensors.parse;
+import static cc.redberry.core.tensor.Tensors.parseSimple;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 

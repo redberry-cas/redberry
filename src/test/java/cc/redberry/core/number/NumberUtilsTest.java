@@ -22,8 +22,8 @@
  */
 package cc.redberry.core.number;
 
-import java.math.*;
-import org.junit.*;
+import java.math.BigInteger;
+import org.junit.Test;
 
 /**
  *

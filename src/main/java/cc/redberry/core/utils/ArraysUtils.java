@@ -79,7 +79,7 @@ public final class ArraysUtils {
      * @param fromIndex the index of the first element (inclusive) to be
      *                  searched
      * @param toIndex   the index of the last element (exclusive) to be searched
-     *
+     *                 
      * @return index of the search key, if it is contained in the array;
      *         otherwise, <tt><i>insertion point</i></tt>. The <i>insertion
      *         point</i> is defined as the point at which the key would be
@@ -380,19 +380,38 @@ public final class ArraysUtils {
      * @param coSort the array, which will be permuted in the same way, then the
      *               specified target array, during sorting procedure
      *
-     * @throws ClassCastException       if the array contains elements that are
-     *                                  not <i>mutually comparable</i> (for
-     *                                  example, strings and integers)
-     * @throws IllegalArgumentException (optional) if the natural ordering of
-     *                                  the array elements is found to violate
-     *                                  the {@link Comparable} contract
+     * @throws ClassCastException if the array contains elements that are not
+     *                            <i>mutually comparable</i> (for example,
+     *                            strings and integers)
      */
     public static void timSort(int target[], int[] coSort) {
         IntTimSort.sort(target, coSort);
     }
 
+    /**
+     * Sorts the specified array of ints into ascending order using stable sort
+     * algorithm and simultaneously permutes the {@code coSort} ints array in
+     * the same way then specified target array. If length of specified array is
+     * less than 100 - insertion sort algorithm performed, otherwise - TimSort.
+     *
+     * <p>This sort is guaranteed to be <i>stable</i>: equal elements will not
+     * be reordered as a result of the sort.
+     *
+     * @see #insertionSort(int[], int[])
+     * @see #timSort(int[], int[])
+     * @param target the array to be sorted
+     * @param coSort the array, which will be permuted in the same way, then the
+     *               specified target array, during sorting procedure
+     *
+     * @throws ClassCastException       if the array contains elements that are
+     *                                  not <i>mutually comparable</i> (for
+     *                                  example, strings and integers)
+     *
+     * @throws IllegalArgumentException if coSort length less then target
+     *                                  length.
+     * @throws IllegalArgumentException if target == coSort (as references).
+     */
     public static void stableSort(int target[], int[] cosort) {
-        //TODO test 100
         if (target.length > 100)
             ArraysUtils.timSort(target, cosort);
         else
@@ -1280,5 +1299,39 @@ public final class ArraysUtils {
             throw new ArrayIndexOutOfBoundsException(fromIndex);
         if (toIndex > arrayLen)
             throw new ArrayIndexOutOfBoundsException(toIndex);
+    }
+
+    public static <T> String toString(T[] a, StringFormat<T> format) {
+        if (a == null)
+            return "null";
+        int iMax = a.length - 1;
+        if (iMax == -1)
+            return "[]";
+
+        StringBuilder b = new StringBuilder();
+        b.append('[');
+        for (int i = 0;; i++) {
+            b.append(format.toString(a[i]));
+            if (i == iMax)
+                return b.append(']').toString();
+            b.append(", ");
+        }
+    }
+
+    public static String toString(int[] a, StringFormat<Integer> format) {
+        if (a == null)
+            return "null";
+        int iMax = a.length - 1;
+        if (iMax == -1)
+            return "[]";
+
+        StringBuilder b = new StringBuilder();
+        b.append('[');
+        for (int i = 0;; i++) {
+            b.append(format.toString(a[i]));
+            if (i == iMax)
+                return b.append(']').toString();
+            b.append(", ");
+        }
     }
 }

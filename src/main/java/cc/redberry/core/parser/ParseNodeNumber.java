@@ -23,7 +23,7 @@
 package cc.redberry.core.parser;
 
 import cc.redberry.core.number.Complex;
-import cc.redberry.core.tensor.*;
+import cc.redberry.core.tensor.Tensor;
 import java.util.Objects;
 
 /**

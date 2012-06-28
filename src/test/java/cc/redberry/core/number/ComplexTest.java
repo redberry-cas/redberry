@@ -22,8 +22,9 @@
  */
 package cc.redberry.core.number;
 
-import cc.redberry.core.number.parser.*;
-import org.junit.*;
+import cc.redberry.core.number.parser.NumberParser;
+import org.junit.Assert;
+import org.junit.Test;
 
 /**
  *

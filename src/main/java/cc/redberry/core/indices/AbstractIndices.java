@@ -38,7 +38,7 @@ import java.util.Arrays;
 abstract class AbstractIndices implements Indices {
 
     protected final int[] data;
-    //TODO investigate performance
+    //FUTURE investigate performance
     private WeakReference<UpperLowerIndices> upperLower = new WeakReference<>(null);
 
     AbstractIndices(int[] data) {

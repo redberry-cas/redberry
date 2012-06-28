@@ -24,6 +24,7 @@ package cc.redberry.core.combinatorics;
 
 import java.util.Arrays;
 import org.junit.Test;
+
 import static org.junit.Assert.*;
 
 /**

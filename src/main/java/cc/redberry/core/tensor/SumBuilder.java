@@ -25,7 +25,6 @@ package cc.redberry.core.tensor;
 import cc.redberry.core.indices.Indices;
 import cc.redberry.core.indices.IndicesFactory;
 import cc.redberry.core.number.Complex;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -66,7 +65,7 @@ public class SumBuilder implements TensorBuilder {
 
     @Override
     public void put(Tensor tensor) {
-        if (freeIndices == null)//TODO check indices for sorted
+        if (freeIndices == null)//FUTURE check indices for sorted
             freeIndices = IndicesFactory.createSorted(tensor.getIndices().getFreeIndices());
         else if (!freeIndices.equalsRegardlessOrder(tensor.getIndices().getFreeIndices()))
             throw new IllegalArgumentException("Inconsistent indices in added summand");

@@ -80,8 +80,7 @@ public final class IndicesTypeStructure {
         return 469 + Arrays.hashCode(this.typesCounts);
     }
 
-    //TODO rename to getTypeData(byte type)
-    public TypeData getTypeDatas(byte type) {
+    public TypeData getTypeData(byte type) {
         int from = 0;
         for (int i = 0; i < type; ++i)
             from += typesCounts[i];

@@ -22,10 +22,14 @@
  */
 package cc.redberry.core.parser;
 
-import cc.redberry.core.utils.*;
+import cc.redberry.core.indices.IndicesUtils;
+import cc.redberry.core.utils.ArraysUtils;
+import cc.redberry.core.utils.IntArrayList;
+import cc.redberry.core.utils.StringFormat;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.math.BigInteger;
+import java.util.Arrays;
 import org.apache.commons.math3.complex.Complex;
 import org.apache.commons.math3.fraction.BigFraction;
 import org.apache.commons.math3.fraction.Fraction;
@@ -120,5 +124,37 @@ public class commons {
         } catch (Exception e) {//Catch exception if any
             System.err.println("Error: " + e.getMessage());
         }
+    }
+
+    public interface Converter {
+
+        int transform(int i);
+        public static Converter INVERSE = new Converter() {
+
+            @Override
+            public int transform(int i) {
+                return IndicesUtils.inverseIndexState(i);
+            }
+        };
+    }
+
+    int[] transform(int[] a, Converter c) {
+        int[] b = new int[a.length];
+        for (int i = 0; i < a.length; ++i)
+            b[i] = c.transform(a[i]);
+        return b;
+    }
+
+    @Test
+    public void aA() {
+        int[] a = {0x80000001, 0x80000002, 0x80000003};
+        System.out.println(ArraysUtils.toString(a, StringFormat.HEX));
+        Arrays.sort(a);
+        System.out.println(ArraysUtils.toString(a, StringFormat.HEX));
+        int[] b = transform(a, Converter.INVERSE);
+        System.out.println(ArraysUtils.toString(b, StringFormat.HEX));
+        Arrays.sort(b);
+        System.out.println(ArraysUtils.toString(b, StringFormat.HEX));
+        
     }
 }

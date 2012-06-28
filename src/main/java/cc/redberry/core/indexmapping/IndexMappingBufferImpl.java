@@ -25,7 +25,10 @@ package cc.redberry.core.indexmapping;
 import cc.redberry.core.context.Context;
 import cc.redberry.core.context.ToStringMode;
 import cc.redberry.core.indices.IndicesUtils;
-import java.util.*;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 import java.util.Map.Entry;
 
 /**
@@ -176,21 +179,22 @@ public final class IndexMappingBufferImpl implements IndexMappingBuffer {
             return false;
         if (hashCode() != other.hashCode())
             return false;
-        
-        //TODO use hashMap#equals ?
-        
-        Map.Entry<Integer, IndexMappingBufferRecord>[] first = map.entrySet().toArray(new Map.Entry[map.size()]);
-        Map.Entry<Integer, IndexMappingBufferRecord>[] second = other.map.entrySet().toArray(new Map.Entry[map.size()]);
+        return map.equals(other.map);
 
-        Arrays.sort(first, entryComparator);
-        Arrays.sort(second, entryComparator);
-        for (int i = 0; i < first.length; ++i) {
-            if (!first[i].getKey().equals(second[i].getKey()))
-                return false;
-            if (!first[i].getValue().equals(second[i].getValue()))
-                return false;
-        }
-        return true;
+//       
+//        
+//        Map.Entry<Integer, IndexMappingBufferRecord>[] first = map.entrySet().toArray(new Map.Entry[map.size()]);
+//        Map.Entry<Integer, IndexMappingBufferRecord>[] second = other.map.entrySet().toArray(new Map.Entry[map.size()]);
+//
+//        Arrays.sort(first, entryComparator);
+//        Arrays.sort(second, entryComparator);
+//        for (int i = 0; i < first.length; ++i) {
+//            if (!first[i].getKey().equals(second[i].getKey()))
+//                return false;
+//            if (!first[i].getValue().equals(second[i].getValue()))
+//                return false;
+//        }
+//        return true;
     }
     private static Comparator<Map.Entry<Integer, IndexMappingBufferRecord>> entryComparator = new Comparator<Map.Entry<Integer, IndexMappingBufferRecord>>() {
 

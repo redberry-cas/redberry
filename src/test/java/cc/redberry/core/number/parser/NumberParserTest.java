@@ -22,8 +22,12 @@
  */
 package cc.redberry.core.number.parser;
 
-import cc.redberry.core.number.*;
-import org.junit.*;
+import cc.redberry.core.number.Complex;
+import cc.redberry.core.number.Numeric;
+import cc.redberry.core.number.Rational;
+import cc.redberry.core.number.Real;
+import org.junit.Assert;
+import org.junit.Test;
 
 /**
  *

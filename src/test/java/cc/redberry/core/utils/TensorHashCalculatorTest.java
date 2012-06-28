@@ -22,12 +22,14 @@
  */
 package cc.redberry.core.utils;
 
-import org.junit.Test;
-import static org.junit.Assert.*;
-import cc.redberry.core.context.CC;
 import cc.redberry.core.indices.IndexType;
 import cc.redberry.core.tensor.Tensor;
-import static cc.redberry.core.tensor.Tensors.*;
+import org.junit.Test;
+
+import static cc.redberry.core.tensor.Tensors.addSymmetry;
+import static cc.redberry.core.tensor.Tensors.parse;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 /**
  *

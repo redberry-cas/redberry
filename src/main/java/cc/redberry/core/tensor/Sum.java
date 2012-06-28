@@ -37,7 +37,7 @@ public final class Sum extends MultiTensor {
 
     Sum(Tensor[] data, Indices indices) {
         super(data, indices);
-        Arrays.sort(data);//TODO use non-stable sort
+        Arrays.sort(data);//FUTURE use non-stable sort
         this.hash = Arrays.hashCode(data);
     }
 

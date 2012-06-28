@@ -20,31 +20,32 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
-package cc.redberry.core.number.parser;
+package cc.redberry.core.indices;
 
-import cc.redberry.core.number.Complex;
+import cc.redberry.core.context.ToStringMode;
 import org.junit.Test;
+
+import static org.junit.Assert.assertTrue;
 
 /**
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public class ComplexTest {
+public class IndicesUtilsTest {
 
-    @Test
-    public void test1() {
-        Complex a = new Complex(1);
-        Complex b = new Complex(0);
-        System.out.println(a.divide(b));
+    public IndicesUtilsTest() {
     }
 
     @Test
-    public void test2() {
-        org.apache.commons.math3.complex.Complex a = new org.apache.commons.math3.complex.Complex(1);
-        org.apache.commons.math3.complex.Complex b = new org.apache.commons.math3.complex.Complex(0);
-        System.out.println(a.divide(b));
-        Object[] s = new Integer[2];
-        System.out.println(s instanceof Double[]);
+    public void parse() {
+        int index = IndicesUtils.parseIndex("_{\\mu}");
+        assertTrue("_{\\mu }".equals(IndicesUtils.toString(index, ToStringMode.LaTeX)));
+
+        int index1 = IndicesUtils.parseIndex("_\\mu");
+        assertTrue("_{\\mu }".equals(IndicesUtils.toString(index1, ToStringMode.LaTeX)));
+
+        int index2 = IndicesUtils.parseIndex("_a");
+        assertTrue("_{a}".equals(IndicesUtils.toString(index2, ToStringMode.LaTeX)));
     }
 }

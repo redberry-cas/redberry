@@ -16,11 +16,15 @@
  */
 package cc.redberry.core.performance;
 
-import cc.redberry.core.utils.*;
-import java.io.*;
-import java.util.logging.*;
-import org.apache.commons.math3.random.*;
-import org.apache.commons.math3.stat.descriptive.*;
+import cc.redberry.core.utils.ArraysUtils;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.apache.commons.math3.random.BitsStreamGenerator;
+import org.apache.commons.math3.random.Well19937c;
+import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
 /**
  *

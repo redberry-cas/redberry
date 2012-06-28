@@ -101,7 +101,7 @@ public final class FullContractionsStructure {
             Indices tInds = data[tensorIndex].getIndices();
             short[] diffIds = tInds.getDiffIds();
 
-            //TODO move to other place
+            //FUTURE move to other place
             if (tInds.size() >= 0x10000)
                 throw new RuntimeException("Too many indices!!! max count = 2^16");
 

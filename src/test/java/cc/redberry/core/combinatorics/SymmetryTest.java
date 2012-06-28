@@ -23,7 +23,8 @@
 package cc.redberry.core.combinatorics;
 
 import org.junit.Test;
-import static org.junit.Assert.*;
+
+import static org.junit.Assert.assertTrue;
 
 /**
  * Fore more examples look {@link PermutationTest}.

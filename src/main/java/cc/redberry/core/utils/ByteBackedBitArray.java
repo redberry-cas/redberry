@@ -67,7 +67,6 @@ public final class ByteBackedBitArray implements BitArray {
             clear(i);
     }
 
-    //TODO Equals to load values
     public void set(ByteBackedBitArray ba) {
         if (ba.size != this.size)
             throw new IllegalArgumentException();

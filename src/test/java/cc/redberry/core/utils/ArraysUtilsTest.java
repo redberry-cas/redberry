@@ -22,7 +22,6 @@
  */
 package cc.redberry.core.utils;
 
-import org.apache.commons.math3.stat.descriptive.*;
 import org.junit.Test;
 
 import static org.junit.Assert.assertArrayEquals;

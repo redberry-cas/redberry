@@ -62,12 +62,28 @@ public final class IndicesUtils {
     private IndicesUtils() {
     }
 
-    //TODO documentation
+    /**
+     * Creates single index with specified name, type and state.
+     *
+     * @param name  index name
+     * @param type  index type
+     * @param state index state
+     *
+     * @return index
+     */
     public static int createIndex(int name, IndexType type, boolean state) {
         return createIndex(name, type.getType(), state);
     }
 
-    //TODO documentation
+    /**
+     * Creates single index with specified name, type and state.
+     *
+     * @param name  index name
+     * @param type  index type
+     * @param state index state
+     *
+     * @return index
+     */
     public static int createIndex(int name, byte type, boolean state) {
         return (name & 0xFFFF) | ((0x7F & type) << 24) | (state ? 0x80000000 : 0);
     }

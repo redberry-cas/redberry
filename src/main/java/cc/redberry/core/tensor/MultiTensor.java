@@ -24,7 +24,6 @@ package cc.redberry.core.tensor;
 
 import cc.redberry.core.context.ToStringMode;
 import cc.redberry.core.indices.Indices;
-
 import java.util.Arrays;
 
 /**

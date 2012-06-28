@@ -23,10 +23,12 @@
 package cc.redberry.core.utils;
 
 //import cc.redberry.core.indices.InconsistentIndicesException;
-import cc.redberry.core.combinatorics.*;
-import cc.redberry.core.indices.*;
+import cc.redberry.core.combinatorics.IntPermutationsGenerator;
 import cc.redberry.core.number.Complex;
-import cc.redberry.core.tensor.*;
+import cc.redberry.core.tensor.MultiTensor;
+import cc.redberry.core.tensor.SimpleTensor;
+import cc.redberry.core.tensor.Tensor;
+import cc.redberry.core.tensor.TensorField;
 
 //import cc.redberry.core.indices.Indices;
 //import cc.redberry.core.indices.IndicesBuilderSorted;

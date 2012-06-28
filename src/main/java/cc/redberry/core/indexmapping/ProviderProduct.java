@@ -27,7 +27,6 @@ import cc.redberry.core.tensor.Product;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.utils.stretces.PrecalculatedStretches;
 import cc.redberry.core.utils.stretces.Stretch;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -124,7 +123,7 @@ final class ProviderProduct implements IndexMappingProvider {
                 begin = i;
             }
 
-        //TODO sort stretches by length
+        //CHECKSTYLE sort stretches by length
         MappingsPort lastOutput = dummyProvider;
         if (!npFrom.isEmpty())
             lastOutput = new SimpleProductProvider(dummyProvider,

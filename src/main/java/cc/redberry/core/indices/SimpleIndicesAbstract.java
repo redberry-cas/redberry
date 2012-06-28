@@ -118,7 +118,7 @@ public abstract class SimpleIndicesAbstract extends AbstractIndices implements S
         if (!changed)
             return this;
         SimpleIndices si = create(data_, symmetries);
-        //TODO we really need this check?
+        //FUTURE we really need this check?
         si.testConsistentWithException();
         return si;
     }

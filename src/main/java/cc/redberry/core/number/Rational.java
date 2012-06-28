@@ -28,9 +28,7 @@ import org.apache.commons.math3.exception.MathIllegalArgumentException;
 import org.apache.commons.math3.fraction.BigFraction;
 import org.apache.commons.math3.fraction.FractionConversionException;
 
-import static cc.redberry.core.number.NumberUtils.checkNotNull;
-import static cc.redberry.core.number.NumberUtils.createRational;
-import static cc.redberry.core.number.NumberUtils.createNumeric;
+import static cc.redberry.core.number.NumberUtils.*;
 
 /**
  * Representation of a rational number without any overflow. This class is a

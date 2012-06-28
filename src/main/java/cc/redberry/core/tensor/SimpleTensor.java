@@ -16,13 +16,10 @@
 package cc.redberry.core.tensor;
 
 import cc.redberry.core.context.CC;
-import cc.redberry.core.context.NameDescriptor;
 import cc.redberry.core.context.ToStringMode;
 import cc.redberry.core.indices.SimpleIndices;
-import cc.redberry.core.indices.UnsafeIndicesFactory;
 import cc.redberry.core.utils.EmptyIterator;
-
-import java.util.*;
+import java.util.Iterator;
 
 /**
  * This class describes the most fundamental tensor object - simple tensor, such

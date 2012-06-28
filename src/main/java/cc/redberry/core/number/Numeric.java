@@ -22,11 +22,10 @@
  */
 package cc.redberry.core.number;
 
-import org.apache.commons.math3.exception.NullArgumentException;
-import org.apache.commons.math3.fraction.BigFraction;
-
 import java.io.Serializable;
 import java.math.BigInteger;
+import org.apache.commons.math3.exception.NullArgumentException;
+import org.apache.commons.math3.fraction.BigFraction;
 
 import static cc.redberry.core.number.NumberUtils.checkNotNull;
 import static cc.redberry.core.number.NumberUtils.createNumeric;
@@ -253,7 +252,7 @@ public final class Numeric extends Real implements Serializable {
     @Override
     public Numeric add(BigFraction fraction) {
         checkNotNull(fraction);
-        //CHECKSTYLE fraction.doubleValue() is very unefficient operation
+        //FUTURE fraction.doubleValue() is very unefficient operation
         return add(fraction.doubleValue());
     }
 
@@ -265,7 +264,7 @@ public final class Numeric extends Real implements Serializable {
     @Override
     public Numeric add(BigInteger bg) {
         checkNotNull(bg);
-        //CHECKSTYLE fraction.doubleValue() is very unefficient operation
+        //FUTURE fraction.doubleValue() is very unefficient operation
         return add(bg.doubleValue());
     }
 
@@ -277,7 +276,7 @@ public final class Numeric extends Real implements Serializable {
     @Override
     public Numeric divide(BigFraction fraction) {
         checkNotNull(fraction);
-        //CHECKSTYLE fraction.doubleValue() is very unefficient operation
+        //FUTURE fraction.doubleValue() is very unefficient operation
         return divide(fraction.doubleValue());
     }
 
@@ -294,7 +293,7 @@ public final class Numeric extends Real implements Serializable {
     @Override
     public Numeric divide(BigInteger bg) {
         checkNotNull(bg);
-        //CHECKSTYLE fraction.doubleValue() is very unefficient operation
+        //FUTURE fraction.doubleValue() is very unefficient operation
         return divide(bg.doubleValue());
 
     }
@@ -307,7 +306,7 @@ public final class Numeric extends Real implements Serializable {
     @Override
     public Numeric multiply(BigFraction fraction) {
         checkNotNull(fraction);
-        //CHECKSTYLE fraction.doubleValue() is very unefficient operation
+        //FUTURE fraction.doubleValue() is very unefficient operation
         return multiply(fraction.doubleValue());
     }
 
@@ -319,7 +318,7 @@ public final class Numeric extends Real implements Serializable {
     @Override
     public Numeric multiply(BigInteger bg) {
         checkNotNull(bg);
-        //CHECKSTYLE bg.doubleValue() is very unefficient operation
+        //FUTURE bg.doubleValue() is very unefficient operation
         return multiply(bg.doubleValue());
     }
 
@@ -356,7 +355,7 @@ public final class Numeric extends Real implements Serializable {
     @Override
     public Numeric pow(BigInteger exponent) {
         checkNotNull(exponent);
-        //CHECKSTYLE bg.doubleValue() is very unefficient operation
+        //FUTURE bg.doubleValue() is very unefficient operation
         return pow(exponent.doubleValue());
     }
 

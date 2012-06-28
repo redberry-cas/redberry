@@ -27,7 +27,6 @@ import cc.redberry.core.indices.IndicesUtils;
 import cc.redberry.core.math.GraphUtils;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.utils.ArraysUtils;
-
 import java.lang.ref.SoftReference;
 import java.util.Arrays;
 
@@ -113,7 +112,7 @@ public final class Product extends MultiTensor {
     }
 
     public Tensor[] getScalars() {
-        return getContent().scalars.clone();//CHECKSTYLE clone()
+        return getContent().scalars.clone();
     }
 
     public Tensor getNonScalar() {
