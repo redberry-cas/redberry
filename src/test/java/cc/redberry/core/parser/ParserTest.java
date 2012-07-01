@@ -85,7 +85,7 @@ public class ParserTest {
     public void testReallySimpleTensor() {
         ParseNode node = Parser.DEFAULT.parse("S^k*(c_k*Power[a,1]/a-b_k)");
         Tensor t = node.toTensor();
-        System.out.println(((Product) t).getScalars()[0]);
+        System.out.println(((Product) t).getAllScalars()[0]);
     }
 
     @Test
@@ -170,11 +170,17 @@ public class ParserTest {
         Tensor e = Tensors.parse("x");
         Assert.assertTrue(TensorUtils.equals(e, t));
     }
-    
-    @Test
+
+    @Test(expected = RuntimeException.class)
     public void testSim1() {
         Tensor t = Tensors.parse("1^3");
         Tensor e = Tensors.parse("x");
         Assert.assertTrue(TensorUtils.equals(e, t));
+    }
+    
+    @Test
+    public void testZeroProductInSum(){
+        
+        
     }
 }

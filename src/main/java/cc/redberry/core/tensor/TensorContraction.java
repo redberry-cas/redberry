@@ -31,7 +31,7 @@ import java.util.Arrays;
  * @author Stanislav Poslavsky
  */
 public final class TensorContraction implements Comparable<TensorContraction> {
-
+    
     public final short tensorId; //aka stretch Id
     public final long[] indexContractions;
     private int hash = -1;

@@ -23,10 +23,13 @@
 package cc.redberry.core.indexmapping;
 
 import cc.redberry.core.combinatorics.IntPermutationsGenerator;
+import cc.redberry.core.number.Complex;
+import cc.redberry.core.tensor.*;
 import cc.redberry.core.tensor.Product;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.utils.stretces.PrecalculatedStretches;
 import cc.redberry.core.utils.stretces.Stretch;
+import java.util.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -42,23 +45,38 @@ final class ProviderProduct implements IndexMappingProvider {
         public IndexMappingProvider create(IndexMappingProvider opu, Tensor from, Tensor to, boolean allowDiffStates) {
             Product pfrom = (Product) from,
                     pto = (Product) to;
-            if (pfrom.fullSize() != pto.fullSize())
+            if (pfrom.sizeWithoutFactor() != pto.sizeWithoutFactor())
                 return IndexMappingProvider.Util.EMPTY_PROVIDER;
-            for (int i = 0; i < pfrom.fullSize(); ++i)
-                if (pfrom.fullGet(i).hashCode() != pto.fullGet(i).hashCode())
-                    return IndexMappingProvider.Util.EMPTY_PROVIDER;
-            if (!pfrom.getContractionStructure().equals(pto.getContractionStructure()))
+            Boolean booluon = compareFactors(pfrom.getFactor(), pto.getFactor());
+            if (booluon == null)
                 return IndexMappingProvider.Util.EMPTY_PROVIDER;
-            if (!testScalars(pfrom.getScalars(), pto.getScalars(), allowDiffStates))
+            if (pfrom.getFactor().equals(pto.getFactor()))
+                for (int i = 0; i < pfrom.sizeWithoutFactor(); ++i)
+                    if (pfrom.getWithoutFactor(i).hashCode() != pto.getWithoutFactor(i).hashCode())
+                        return IndexMappingProvider.Util.EMPTY_PROVIDER;
+            ProductContent fromContent = pfrom.getContent(), toContent = pto.getContent();
+            if (!fromContent.getContractionStructure().equals(toContent.getContractionStructure()))
+                return IndexMappingProvider.Util.EMPTY_PROVIDER;
+            if (!testScalars(pfrom.getAllScalarsWithoutFactor(), pto.getAllScalarsWithoutFactor(), allowDiffStates))
                 return IndexMappingProvider.Util.EMPTY_PROVIDER;
 
-            //Temporary, until scalars mappings does not work
+//            Temporary, until scalars mappings does not work
+            if (booluon)
+                return new MinusIndexMappingProviderWrapper(new ProviderProduct(opu, pfrom, pto, allowDiffStates));
             return new ProviderProduct(opu, pfrom, pto, allowDiffStates);
 
-            //True variant
-            //return new ProviderProduct(opu, fromC.getNonScalarContent(), toC.getNonScalarContent(), allowDiffStates);
+//            True variant
+//            return new ProviderProduct(opu, fromC.getNonScalarContent(), toC.getNonScalarContent(), allowDiffStates);
         }
     };
+
+    private static Boolean compareFactors(Complex c1, Complex c2) {
+        if (c1.equals(c2))
+            return Boolean.FALSE;
+        if (c1.equals(c2.negate()))
+            return Boolean.TRUE;
+        return null;
+    }
 
     private static boolean testScalars(Tensor[] from, Tensor[] to, boolean allowDiffStates) {
         if (from.length != to.length)
@@ -95,50 +113,81 @@ final class ProviderProduct implements IndexMappingProvider {
         pp.tick();
         return pp.take() != null;
     }
-
-    //private final ProductContent from, to;
-    //private PermutationsProvider permutationsProvider;
+//    private final ProductContent from, to;
+//    private PermutationsProvider permutationsProvider;
     private final DummyIndexMappingProvider dummyProvider;
     private final MappingsPort op;
 
     private ProviderProduct(final MappingsPort opu,
-                            final Product from, final Product to, boolean allowDiffStates) {
+                            final Product from, final Product to,
+                            boolean allowDiffStates) {
         this.dummyProvider = new DummyIndexMappingProvider(opu);
-        //this.from = from;
-        //this.to = to;
+//        this.from = from;
+//        this.to = to;
         int begin = 0;
         int i;
-        //List<PermutationsProvider> disjointProviders = new ArrayList<>();
+        ProductContent fromContent = from.getContent(),
+                toContent = to.getContent();
+
+//        List<PermutationsProvider> disjointProviders = new ArrayList<>();
         List<Pair> stretches = new ArrayList<>();
         //non permutable
-        List<Tensor> npFrom = new ArrayList<>(), npTo = new ArrayList<>();
-        for (i = 1; i <= from.fullSize(); ++i)
-            if (i == from.fullSize() || !from.getContractionStructure().get(i).equals(from.getContractionStructure().get(i - 1))) {
+        //TODO uncomment
+        //List<Tensor> npFrom = new ArrayList<>(), npTo = new ArrayList<>();
+        List<IndexMappingProvider> providers = new ArrayList<>();
+
+        IndexMappingProvider lastOutput = dummyProvider;
+
+        Tensor[] indexlessFrom = from.getIndexless(), indexlessTo = to.getIndexless();
+
+        for (i = 1; i <= indexlessFrom.length; ++i)
+            if (i == indexlessFrom.length || indexlessFrom[i].hashCode() != indexlessFrom[i - 1].hashCode()) {
                 if (i - 1 != begin)
-                    stretches.add(new Pair(from.getFullRange(begin, i), to.getFullRange(begin, i)));
-                else {
-                    npFrom.add(from.fullGet(i - 1));
-                    npTo.add(to.fullGet(i - 1));
-                }
+                    providers.add(lastOutput =
+                            new PermutatorProvider(lastOutput, Arrays.copyOfRange(indexlessFrom, begin, i),
+                                                   Arrays.copyOfRange(indexlessTo, begin, i), allowDiffStates));
                 begin = i;
             }
 
-        //CHECKSTYLE sort stretches by length
-        MappingsPort lastOutput = dummyProvider;
-        if (!npFrom.isEmpty())
-            lastOutput = new SimpleProductProvider(dummyProvider,
-                    npFrom.toArray(new Tensor[npFrom.size()]),
-                    npTo.toArray(new Tensor[npTo.size()]), allowDiffStates);
+        begin = 0;
+        for (i = 1; i <= indexlessFrom.length; ++i)
+            if (i == indexlessFrom.length || indexlessFrom[i].hashCode() != indexlessFrom[i - 1].hashCode()) {
+                if (i - 1 == begin)
+                    providers.add(lastOutput =
+                            IndexMappings.createPort(lastOutput,
+                                                     indexlessFrom[begin],
+                                                     indexlessTo[begin], allowDiffStates));
+                begin = i;
+            }
 
-        if (stretches.isEmpty())
-            this.op = lastOutput;
-        else {
-            PermutatorProvider[] pProviders = new PermutatorProvider[stretches.size()];
-            i = 0;
-            for (Pair p : stretches)
-                lastOutput = pProviders[i++] = new PermutatorProvider(lastOutput, p.from, p.to, allowDiffStates);
-            this.op = new SimpleProductProvider(pProviders);
-        }
+        begin = 0;
+        for (i = 1; i <= fromContent.size(); ++i)
+            if (i == fromContent.size() || !fromContent.getContractionStructure().get(i).equals(fromContent.getContractionStructure().get(i - 1))) {
+                if (i - 1 != begin)
+                    stretches.add(new Pair(fromContent.getRange(begin, i), toContent.getRange(begin, i)));
+                else
+                    providers.add(lastOutput =
+                            IndexMappings.createPort(lastOutput,
+                                                     fromContent.get(begin),
+                                                     toContent.get(begin), allowDiffStates));
+                begin = i;
+            }
+
+        Collections.sort(stretches);
+
+//        if (!npFrom.isEmpty())
+//            lastOutput = new SimpleProductProvider(dummyProvider,
+//                                                   npFrom.toArray(new Tensor[npFrom.size()]),
+//                                                   npTo.toArray(new Tensor[npTo.size()]), allowDiffStates);
+
+//        if (stretches.isEmpty())
+//            this.op = lastOutput;
+//        else
+        for (Pair p : stretches)
+            providers.add(lastOutput = new PermutatorProvider(lastOutput,
+                                                              p.from, p.to, allowDiffStates));
+
+        this.op = new SimpleProductProvider(providers.toArray(new IndexMappingProvider[providers.size()]));
     }
 
     @Override
@@ -151,13 +200,18 @@ final class ProviderProduct implements IndexMappingProvider {
         return op.take();
     }
 
-    protected static class Pair {
+    protected static class Pair implements Comparable<Pair> {
 
         public final Tensor[] from, to;
 
         public Pair(final Tensor[] from, final Tensor[] to) {
             this.from = from;
             this.to = to;
+        }
+
+        @Override
+        public int compareTo(Pair o) {
+            return Integer.compare(from.length, o.from.length);
         }
     }
 }

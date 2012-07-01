@@ -24,7 +24,6 @@ package cc.redberry.core.tensor;
 
 import cc.redberry.core.context.ToStringMode;
 import cc.redberry.core.indices.Indices;
-import java.util.Arrays;
 
 /**
  * @author Dmitry Bolotin
@@ -32,25 +31,13 @@ import java.util.Arrays;
  */
 public abstract class MultiTensor extends Tensor {
 
-    protected final Tensor[] data;
     protected final Indices indices;
 
-    MultiTensor(Tensor[] data, Indices indices) {
-        assert data.length > 1;
-        this.data = data;
+    MultiTensor(Indices indices) {
         this.indices = indices;
     }
 
-    @Override
-    public Tensor get(int i) {
-        return data[i];
-    }
-
-    @Override
-    public int size() {
-        return data.length;
-    }
-
+   
     @Override
     public Indices getIndices() {
         return indices;
@@ -61,10 +48,7 @@ public abstract class MultiTensor extends Tensor {
     //protected abstract Indices calculateIndices();
     //protected abstract int calculateHash();
 
-    @Override
-    public Tensor[] getRange(int from, int to) {
-        return Arrays.copyOfRange(data, from, to);
-    }
+    
 
     public final Tensor remove(int position) {
         int size = size();

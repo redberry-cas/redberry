@@ -141,7 +141,7 @@ public class TensorUtils {
                         while (enumerator.hasNext()) {
                             permutation = enumerator.next();
                             for (j = 0; j < stretchLength; ++j)
-                                if (!equals(u.get(i + begin), v.get(permutation[i] + begin)))
+                                if (!equals(u.get(j + begin), v.get(permutation[j] + begin)))
                                     continue OUTFOR;
                             return true;
                         }

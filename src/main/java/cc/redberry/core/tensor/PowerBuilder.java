@@ -93,7 +93,7 @@ public class PowerBuilder implements TensorBuilder {
         if (TensorUtils.isZero(argument))
             return Complex.ZERO;
         if (argument instanceof Product) {
-            Tensor[] scalars = ((Product) argument).getScalars();
+            Tensor[] scalars = ((Product) argument).getAllScalars();
             TensorBuilder pb = argument.getBuilder();//creating product builder 
             for (Tensor t : scalars)
                 pb.put(Tensors.pow(t, power));

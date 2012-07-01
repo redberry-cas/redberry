@@ -109,7 +109,7 @@ public final class IndexMappings {
         //        return t.get(1 - i);
         Product p = (Product) t;
         if (p.getFactor().isMinusOne())
-            return p.fullGet(1);
+            return p.get(1);
         else
             return null;
     }

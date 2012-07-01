@@ -44,14 +44,16 @@ public class ParserFunctions implements NodeParser {
     public ParseNode parseNode(String expression, Parser parser) {
         if (!expression.contains("[") || expression.lastIndexOf(']') != expression.length() - 1)
             return null;
-        String function = null;
+        String temp = null, function = null;
         for (int i = 0; i < functions.length; ++i) {
-            function = functions[i];
-            if (expression.length() - 2 < function.length())
+            temp = functions[i];
+            if (expression.length() - 2 < temp.length())
                 continue;
-            if (expression.substring(0, function.length()).equals(function))
+            if (expression.substring(0, temp.length()).equalsIgnoreCase(temp)) {
+                function = temp;
                 break;
-            function = null;
+            };
+            temp = null;
         }
         if (function == null)
             return null;
@@ -60,7 +62,7 @@ public class ParserFunctions implements NodeParser {
 
         int level = 0;
         char c;
-        for (int i = function.length() + 1; i < expression.length() - 2; ++i) {
+        for (int i = temp.length() + 1; i < expression.length() - 2; ++i) {
             c = expression.charAt(i);
             if (c == '[')
                 level++;
@@ -71,7 +73,7 @@ public class ParserFunctions implements NodeParser {
             if (c == ',' && level == 0)//case for Sin[x,y]
                 throw new ParserException("Sin, cos, tan and others scalar functions take only one argument.");
         }
-        String argument = expression.substring(function.length() + 1, expression.length() - 1);
-        return new ParseNodeScalarFunction(function, new ParseNode[]{parser.parse(argument)});
+        String argument = expression.substring(temp.length() + 1, expression.length() - 1);
+        return new ParseNodeScalarFunction(temp, new ParseNode[]{parser.parse(argument)});
     }
 }

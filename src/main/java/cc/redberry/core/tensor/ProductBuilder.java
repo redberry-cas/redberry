@@ -26,6 +26,7 @@ import cc.redberry.core.indices.InconsistentIndicesException;
 import cc.redberry.core.indices.Indices;
 import cc.redberry.core.indices.IndicesBuilder;
 import cc.redberry.core.number.Complex;
+import cc.redberry.core.utils.*;
 import cc.redberry.core.utils.TensorUtils;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -40,16 +41,18 @@ public class ProductBuilder implements TensorBuilder {
 
     private Complex complex = Complex.ONE;
     private final List<Tensor> elements;
+    private final List<Tensor> indexlessElements;
     //Only SimpleTensor and Complex can be putted in this map
     //Both SimpleTensor and Complex have hashCode() and equals()
     private final Map<Tensor, SumBuilder> powers = new HashMap<>();
 
-    public ProductBuilder(int initialCapacity) {
-        elements = new ArrayList<>(initialCapacity);
+    public ProductBuilder(int initialCapacityIndexless, int initialCapacityData) {
+        elements = new ArrayList<>(initialCapacityData);
+        indexlessElements = new ArrayList<>(initialCapacityIndexless);
     }
 
     public ProductBuilder() {
-        this(7);
+        this(4, 3);
     }
 
     @Override
@@ -57,10 +60,7 @@ public class ProductBuilder implements TensorBuilder {
         if (complex.isZero() || complex.isInfinite() || complex.isNaN())
             return complex;
 
-        ArrayList<Tensor> data = new ArrayList<>(elements.size() + powers.size() + 1);
-
-        //Reserving place for factor
-        data.add(null);
+        ArrayList<Tensor> indexlessData = new ArrayList<>(powers.size() + indexlessElements.size());
 
         Complex complex = this.complex;
         for (Map.Entry<Tensor, SumBuilder> entry : powers.entrySet()) {
@@ -71,7 +71,7 @@ public class ProductBuilder implements TensorBuilder {
             if (t instanceof Complex)
                 complex = complex.multiply((Complex) t);
             else
-                data.add(t);
+                indexlessData.add(t);
 
         }
 
@@ -79,23 +79,24 @@ public class ProductBuilder implements TensorBuilder {
         if (complex.isZero() || complex.isInfinite() || complex.isNaN())
             return complex;
 
-        //Setting factor
-        data.set(0, complex);
-
-        data.addAll(elements);
+        indexlessData.addAll(indexlessElements);
 
         //Only complex factor
-        if (data.size() == 1)
-            return data.get(0);
+        if (indexlessData.isEmpty() && elements.isEmpty())
+            return complex;
 
         // 1 * (something)
-        if (data.size() == 2 && complex.isOne())
-            return data.get(1);
+        if (complex.isOne()) {
+            if (indexlessData.size() == 1 && elements.isEmpty())
+                return indexlessData.get(0);
+            if (indexlessData.isEmpty() && elements.size() == 1)
+                return elements.get(0);
+        }
 
         //Calculating product indices
         IndicesBuilder ibs = new IndicesBuilder();
         Indices indices;
-        for (Tensor t : data)
+        for (Tensor t : elements)
             ibs.append(t);
         try {
             indices = ibs.getIndices();
@@ -103,7 +104,9 @@ public class ProductBuilder implements TensorBuilder {
             throw new InconsistentIndicesException(exception.getIndex());
         }
 
-        return new Product(data.toArray(new Tensor[data.size()]), indices);
+        return new Product(indices, complex,
+                           indexlessData.toArray(new Tensor[indexlessData.size()]),
+                           elements.toArray(new Tensor[elements.size()]));
     }
 
     @Override
@@ -120,6 +123,7 @@ public class ProductBuilder implements TensorBuilder {
         }
         if (complex.isZero())
             return;
+
         if (TensorUtils.isSymbol(tensor)) {
             SumBuilder sb = powers.get(tensor);
             if (sb == null) {
@@ -141,6 +145,9 @@ public class ProductBuilder implements TensorBuilder {
                 return;
             }
         }
-        elements.add(tensor);
+        if (tensor.getIndices().size() == 0)
+            indexlessElements.add(tensor);
+        else
+            elements.add(tensor);
     }
 }

@@ -36,14 +36,26 @@ import java.util.Arrays;
  */
 public final class Product extends MultiTensor {
 
+    private final Complex factor;
+    /**
+     * Elements with zero size of indices.
+     */
+    private final Tensor[] indexlessData;
+    /**
+     * Elements with indices.
+     */
+    private final Tensor[] data;
     private SoftReference<ProductContent> contentReference;
     private final int hash;
 
-    Product(Tensor[] data, Indices indices) {
-        super(data, indices);
+    Product(Indices indices, Complex factor, Tensor[] indexless, Tensor[] data) {
+        super(indices);
+        this.factor = factor.isOne() ? Complex.ONE : factor.isMinusOne() ? Complex.MINUSE_ONE : factor;
+        this.indexlessData = indexless;
+        this.data = data;
 
-        //First element is a complex factor always
-        Arrays.sort(data, 1, data.length);
+        Arrays.sort(data);
+        Arrays.sort(indexless);
 
         this.contentReference = new SoftReference<>(calculateContent());
         this.hash = calculateHash();
@@ -61,97 +73,120 @@ public final class Product extends MultiTensor {
     //        }
     //    }
     @Override
+    public Indices getIndices() {
+        return indices;
+    }
+
+    @Override
     protected char operationSymbol() {
         return '*';
     }
 
     @Override
     public Tensor get(int i) {
-        if (getFactor().isOne())
-            return data[i + 1];
-        return data[i];
+        if (factor != Complex.ONE)
+            --i;
+        if (i == -1)
+            return factor;
+        if (i < indexlessData.length)
+            return indexlessData[i];
+        else
+            return data[i - indexlessData.length];
         //return data[i + ((hash & 0x00080000) >> 19)]; // ;)
     }
 
     @Override
-    public int size() {
-        if (getFactor().isOne())
-            return data.length - 1;
-        return data.length;
-        //return data.length - ((hash & 0x00080000) >> 19); // ;)
+    public Tensor[] getRange(int from, int to) {
+        throw new UnsupportedOperationException("Not implemented.");
     }
 
     @Override
-    public Tensor[] getRange(int from, int to) {
-        if (getFactor().isOne())
-            return Arrays.copyOfRange(data, from + 1, to + 1);
-        return Arrays.copyOfRange(data, from, to);
+    public int size() {
+        int size = data.length + indexlessData.length;
+        if (factor == Complex.ONE)
+            return size;
+        return size + 1;
+        //return data.length - ((hash & 0x00080000) >> 19); // ;)
     }
 
-    public Tensor fullGet(int i) {
-        return data[i];
+    public int sizeWithoutFactor() {
+        return data.length + indexlessData.length;
     }
 
-    public int fullSize() {
-        return data.length;
+    public Tensor getWithoutFactor(int i) {
+        return i < indexlessData.length ? indexlessData[i] : data[i - indexlessData.length];
     }
 
-    public Tensor[] getFullRange(int from, int to) {
-        return Arrays.copyOfRange(data, from, to);
-    }
-
+//     public Tensor[] getRangeWithoutFactor(int from,int to) {
+//         if(to < indexlessData.length)
+//             return Arrays.copyOfRange(data, to)
+//         return  null;
+////        return i < indexlessData.length ? indexlessData[i] : data[i - indexlessData.length];
+//    }
     public Complex getFactor() {
-        return (Complex) data[0];
+        return factor;
     }
 
-    private ProductContent getContent() {
+    private int calculateHash() {
+        int result;
+        if (factor == Complex.ONE || factor == Complex.MINUSE_ONE)
+            result = 0;
+        else
+            result = factor.hashCode();
+
+        for (Tensor t : indexlessData)
+            result = result * 31 + t.hashCode();
+        for (Tensor t : data)
+            result = result * 17 + t.hashCode();
+        if (factor == Complex.MINUSE_ONE && size() == 2)
+            return result;
+        return result - 79 * getContent().getContractionStructure().hashCode();
+    }
+
+    public ProductContent getContent() {
         ProductContent content = contentReference.get();
         if (content == null)
             contentReference = new SoftReference<>(content = calculateContent());
         return content;
     }
 
-    public Tensor[] getScalars() {
-        return getContent().scalars.clone();
-    }
-
-    public Tensor getNonScalar() {
-        return getContent().nonScalar;
-    }
-
-    public ContractionStructure getContractionStructure() {
-        return getContent().contractionStructure;
-    }
-
-    //TODO rename FullContracyionStructure to ContractionStructure
-    public FullContractionsStructure getFullContractionStructure() {
-        return getContent().fullContractionsStructure;
-    }
-
-    public short[] getStretchIds() {
-        return getContent().stretchIndices.clone();
-    }
-
-    private int calculateHash() {
-        int result = 0;
-
-        if (!getFactor().isOneOrMinusOne())
-            result = data[0].hashCode();
-
-        for (int i = 1; i < data.length; ++i)
-            result = result * 47 + data[i].hashCode();
-
-        // ;)
-        //result = (result & 0xFFF7FFFF) | (getFactor().isOne() ? 0x00080000 : 0);
-        return result;
+    public Tensor[] getIndexless() {
+        return indexlessData.clone();
     }
 
     @Override
     public TensorBuilder getBuilder() {
-        return new ProductBuilder(data.length);
+        return new ProductBuilder(indexlessData.length, data.length);
+    }
+
+    public Tensor[] getAllScalars() {
+        Tensor[] scalras = getContent().getScalars();
+        if (factor == Complex.ONE) {
+            Tensor[] allScalars = new Tensor[indexlessData.length + scalras.length];
+            System.arraycopy(indexlessData, 0, allScalars, 0, indexlessData.length);
+            System.arraycopy(scalras, 0, allScalars, indexlessData.length, scalras.length);
+            return allScalars;
+        } else {
+            Tensor[] allScalars = new Tensor[1 + indexlessData.length + scalras.length];
+            allScalars[0] = factor;
+            System.arraycopy(indexlessData, 0, allScalars, 1, indexlessData.length);
+            System.arraycopy(scalras, 0, allScalars, indexlessData.length + 1, scalras.length);
+            return allScalars;
+        }
+    }
+
+    public Tensor[] getAllScalarsWithoutFactor() {
+        Tensor[] scalras = getContent().getScalars();
+        Tensor[] allScalars = new Tensor[indexlessData.length + scalras.length];
+        System.arraycopy(indexlessData, 0, allScalars, 0, indexlessData.length);
+        System.arraycopy(scalras, 0, allScalars, indexlessData.length, scalras.length);
+        return allScalars;
+
     }
 
     private ProductContent calculateContent() {
+        if (data.length == 0)
+            return ProductContent.EMPTY_INSTANCE;
         final Indices freeIndices = indices.getFreeIndices();
         final int differentIndicesCount = (getIndices().size() + freeIndices.size()) / 2;
 
@@ -250,14 +285,14 @@ public final class Product extends MultiTensor {
             datas[components[i]][componentSizes[components[i]]++] = data[i - 1];
 
         Tensor nonScalar = null;
-        if (componentCount == 2) //There are no scalar subproducts in this product
+        if (componentCount == 1) //There are no scalar subproducts in this product
             nonScalar = this;
         else if (datas[0].length > 0)
             nonScalar = Tensors.multiply(datas[0]);
 
         Tensor[] scalars = new Tensor[componentCount - 1];
 
-        if (nonScalar == null && componentCount == 3)
+        if (nonScalar == null && componentCount == 2 && factor == Complex.ONE && indexlessData.length == 0)
             scalars[0] = this;
         else {
             for (i = 1; i < componentCount; ++i)
@@ -304,7 +339,7 @@ public final class Product extends MultiTensor {
 
         //TODO should be lazy field in ProductContent
         FullContractionsStructure fullContractionsStructure = new FullContractionsStructure(data, differentIndicesCount, freeIndices);
-        return new ProductContent(contractionStructure, fullContractionsStructure, scalars, nonScalar, stretchIndices);
+        return new ProductContent(contractionStructure, fullContractionsStructure, scalars, nonScalar, stretchIndices, data);
     }
 
     private short[] calculateStretchIndices() {
@@ -337,6 +372,7 @@ public final class Product extends MultiTensor {
      *                     tensors hash in array)
      * @param id           id of index in tensor indices list (could be !=0 only
      *                     for simple tensors)
+     *
      * @return packed record (long)
      */
     private static long packToLong(final int tensorIndex, final short stretchIndex, final short id) {
@@ -349,27 +385,25 @@ public final class Product extends MultiTensor {
             result[i] = ((int) (info[i] >> 32)) + 1;
         return result;
     }
-
     //-65536 == packToLong(-1, (short) -1, (short) 0);
     private static final long dummyTensorInfo = -65536;
-
-    private static class ProductContent {
-
-        final ContractionStructure contractionStructure;
-        final FullContractionsStructure fullContractionsStructure;
-        final Tensor[] scalars;
-        final Tensor nonScalar;
-        final short[] stretchIndices;
-
-        public ProductContent(ContractionStructure contractionStructure,
-                              FullContractionsStructure fullContractionsStructure,
-                              Tensor[] scalars, Tensor nonScalar,
-                              short[] stretchIndices) {
-            this.contractionStructure = contractionStructure;
-            this.fullContractionsStructure = fullContractionsStructure;
-            this.scalars = scalars;
-            this.nonScalar = nonScalar;
-            this.stretchIndices = stretchIndices;
-        }
-    }
+//    private static class ProductContent {
+//
+//        final ContractionStructure contractionStructure;
+//        final FullContractionsStructure fullContractionsStructure;
+//        final Tensor[] scalars;
+//        final Tensor nonScalar;
+//        final short[] stretchIndices;
+//
+//        public ProductContent(ContractionStructure contractionStructure,
+//                              FullContractionsStructure fullContractionsStructure,
+//                              Tensor[] scalars, Tensor nonScalar,
+//                              short[] stretchIndices) {
+//            this.contractionStructure = contractionStructure;
+//            this.fullContractionsStructure = fullContractionsStructure;
+//            this.scalars = scalars;
+//            this.nonScalar = nonScalar;
+//            this.stretchIndices = stretchIndices;
+//        }
+//    }
 }

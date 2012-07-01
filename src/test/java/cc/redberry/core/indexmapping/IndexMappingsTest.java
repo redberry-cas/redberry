@@ -13,7 +13,6 @@
  * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
  * more details.
  */
-
 package cc.redberry.core.indexmapping;
 
 import cc.redberry.concurrent.OutputPortUnsafe;
@@ -24,6 +23,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 public class IndexMappingsTest {
+
     @Test
     public void test4() {
         for (int i = 0; i < 10000; ++i) {
@@ -36,5 +36,4 @@ public class IndexMappingsTest {
             Assert.assertTrue(counter == 2);
         }
     }
-
 }

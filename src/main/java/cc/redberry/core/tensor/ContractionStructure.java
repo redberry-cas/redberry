@@ -31,6 +31,10 @@ import java.util.Arrays;
  */
 public final class ContractionStructure {
 
+    public static final ContractionStructure EMPTY_INSTANCE =
+            new ContractionStructure(new TensorContraction((short) -1, new long[0]),
+                                     new TensorContraction[0]);
+    
     private final TensorContraction freeContraction;
     private final TensorContraction[] contractions;
 

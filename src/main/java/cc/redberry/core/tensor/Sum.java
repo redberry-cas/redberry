@@ -33,10 +33,15 @@ import java.util.Arrays;
  */
 public final class Sum extends MultiTensor {
 
+    private final Tensor[] data;
     private final int hash;
 
     Sum(Tensor[] data, Indices indices) {
-        super(data, indices);
+        super(indices);
+
+        assert data.length > 1;
+
+        this.data = data;
         Arrays.sort(data);//FUTURE use non-stable sort
         this.hash = Arrays.hashCode(data);
     }
@@ -61,6 +66,21 @@ public final class Sum extends MultiTensor {
 ////        }
 //        return IndicesFactory.createSorted(indices);
 //    }
+    @Override
+    public Tensor get(int i) {
+        return data[i];
+    }
+
+    @Override
+    public int size() {
+        return data.length;
+    }
+
+    @Override
+    public Tensor[] getRange(int from, int to) {
+        return Arrays.copyOfRange(data, from, to);
+    }
+
     @Override
     public int hash() {
         return hash;
