@@ -26,7 +26,7 @@ public class IndexMappingsTest {
 
     @Test
     public void test4() {
-        for (int i = 0; i < 10000; ++i) {
+        for (int i = 0; i < 100; ++i) {
             CC.resetTensorNames();
             Tensor t = Tensors.parse("A_a*B_bc-A_b*B_ac");
             OutputPortUnsafe<IndexMappingBuffer> opu = IndexMappings.createPort(t, t);

@@ -68,7 +68,6 @@ public class ProductTest {
                             Tensors.parse("D").hashCode());
     }
 
-
     @Test
     public void contentTest0() {
         Product p = (Product) Tensors.parse("a*b*c*A^ij*A_i*A_j*b_u");
@@ -79,12 +78,12 @@ public class ProductTest {
         pb.put(Tensors.parse("b_u"));
         Assert.assertTrue(TensorUtils.equals(pb.build(), p));
     }
-    
+
     @Test
-    public void testRebuild(){
+    public void testRebuild() {
         Tensor t = Tensors.parse("a*b*c*A^ij*A_i*A_j*b_u");
         TensorBuilder builder = t.getBuilder();
-        for(Tensor c : t)
+        for (Tensor c : t)
             builder.put(c);
         Assert.assertTrue(TensorUtils.equals(t, builder.build()));
     }

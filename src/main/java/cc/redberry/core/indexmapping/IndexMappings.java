@@ -26,9 +26,9 @@ import cc.redberry.concurrent.OutputPortUnsafe;
 import cc.redberry.core.context.CC;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.tensor.*;
+import cc.redberry.core.tensor.functions.*;
 import java.util.HashMap;
 import java.util.Map;
-import org.apache.commons.math3.analysis.function.Pow;
 
 /**
  * @author Dmitry Bolotin
@@ -144,11 +144,8 @@ public final class IndexMappings {
         }
 
         IndexMappingProviderFactory factory = map.get(from.getClass());
-//                if (factory == null)
-//                    if (from instanceof AbstractScalarFunction)
-//                        factory = ProviderScalarFunctionsFactory.INSTANCE;
-//                    else
-//                        throw new RuntimeException("Unsupported tensor type: " + from.getClass());
+        if (factory == null)
+            throw new RuntimeException("Unsupported tensor type: " + from.getClass());
 
         return factory.create(opu, from, to, allowDiffStates);
     }
@@ -161,6 +158,16 @@ public final class IndexMappings {
         map.put(Product.class, ProviderProduct.FACTORY);
         map.put(Sum.class, ProviderSum.FACTORY);
         map.put(Complex.class, ProviderComplex.FACTORY);
-        map.put(Pow.class, ProviderPowFactory.INSTANCE);
+        map.put(Power.class, ProviderPowFactory.INSTANCE);
+
+        map.put(Sin.class, ProviderFunctions.ODD_FACTORY);
+        map.put(ArcSin.class, ProviderFunctions.ODD_FACTORY);
+        map.put(Tan.class, ProviderFunctions.ODD_FACTORY);
+        map.put(ArcTan.class, ProviderFunctions.ODD_FACTORY);
+
+        map.put(Cos.class, ProviderFunctions.EVEN_FACTORY);
+        map.put(ArcCos.class, ProviderFunctions.EVEN_FACTORY);
+        map.put(Cot.class, ProviderFunctions.EVEN_FACTORY);
+        map.put(ArcCot.class, ProviderFunctions.EVEN_FACTORY);
     }
 }

@@ -31,6 +31,7 @@ import cc.redberry.core.tensor.TensorBuilder;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
+@Deprecated
 public final class Exp extends AbstractScalarFunction {
 
     Exp(Tensor argument) {

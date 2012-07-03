@@ -36,7 +36,7 @@ import java.util.Arrays;
  */
 public final class Product extends MultiTensor {
 
-    private final Complex factor;
+     final Complex factor;
     /**
      * Elements with zero size of indices.
      */

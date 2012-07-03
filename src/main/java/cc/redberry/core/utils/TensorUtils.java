@@ -163,6 +163,7 @@ public class TensorUtils {
                 return false;
         return true;
     }
+    
 //
 //    public static IndicesBuilderSorted getAllIndicesBuilder(final Tensor tensor) {
 //        final IndicesBuilderSorted ib = new IndicesBuilderSorted();
