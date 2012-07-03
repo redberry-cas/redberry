@@ -62,7 +62,7 @@ public class ArcSin extends AbstractScalarFunction {
     public static class ArcSinBuilder extends AbstractScalarFunctionBuilder {
 
         @Override
-        public Tensor buid() {
+        public Tensor build() {
             if (arg instanceof Sin)
                 return arg.get(0);
             return new ArcSin(arg);

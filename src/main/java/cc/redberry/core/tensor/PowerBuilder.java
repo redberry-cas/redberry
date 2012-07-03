@@ -41,7 +41,7 @@ public class PowerBuilder implements TensorBuilder {
     }
 
     @Override
-    public Tensor buid() {
+    public Tensor build() {
         if (state != 2)
             throw new IllegalStateException("Power is not fully constructed.");
         //TODO improve Complex^Complex
@@ -97,7 +97,7 @@ public class PowerBuilder implements TensorBuilder {
             TensorBuilder pb = argument.getBuilder();//creating product builder 
             for (Tensor t : scalars)
                 pb.put(Tensors.pow(t, power));
-            return pb.buid();
+            return pb.build();
         }
         if (argument instanceof Power)
             return Tensors.pow(argument.get(0), Tensors.multiply(argument.get(1), power));

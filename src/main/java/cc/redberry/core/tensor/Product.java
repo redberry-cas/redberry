@@ -40,13 +40,13 @@ public final class Product extends MultiTensor {
     /**
      * Elements with zero size of indices.
      */
-    private final Tensor[] indexlessData;
+    final Tensor[] indexlessData;
     /**
      * Elements with indices.
      */
-    private final Tensor[] data;
-    private SoftReference<ProductContent> contentReference;
-    private final int hash;
+    final Tensor[] data;
+    SoftReference<ProductContent> contentReference;
+    final int hash;
 
     Product(Indices indices, Complex factor, Tensor[] indexless, Tensor[] data) {
         super(indices);
@@ -58,6 +58,15 @@ public final class Product extends MultiTensor {
         Arrays.sort(indexless);
 
         this.contentReference = new SoftReference<>(calculateContent());
+        this.hash = calculateHash();
+    }
+
+    Product(Complex factor, Tensor[] indexlessData, Tensor[] data, ProductContent content, Indices indices) {
+        super(indices);
+        this.factor = factor;
+        this.indexlessData = indexlessData;
+        this.data = data;
+        this.contentReference = new SoftReference<>(content);
         this.hash = calculateHash();
     }
 

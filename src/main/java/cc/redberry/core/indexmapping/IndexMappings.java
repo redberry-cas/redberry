@@ -144,15 +144,14 @@ public final class IndexMappings {
         }
 
         IndexMappingProviderFactory factory = map.get(from.getClass());
-        //        if (factory == null)
-        //            if (from instanceof AbstractScalarFunction)
-        //                factory = ProviderScalarFunctionsFactory.INSTANCE;
-        //            else
-        //                throw new RuntimeException("Unsupported tensor type: " + from.getClass());
+//                if (factory == null)
+//                    if (from instanceof AbstractScalarFunction)
+//                        factory = ProviderScalarFunctionsFactory.INSTANCE;
+//                    else
+//                        throw new RuntimeException("Unsupported tensor type: " + from.getClass());
 
         return factory.create(opu, from, to, allowDiffStates);
     }
-
     private static final Map<Class, IndexMappingProviderFactory> map;
 
     static {

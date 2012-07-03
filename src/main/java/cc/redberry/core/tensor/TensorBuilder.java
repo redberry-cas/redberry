@@ -28,6 +28,8 @@ package cc.redberry.core.tensor;
  * @author Stanislav Poslavsky
  */
 public interface TensorBuilder {
+
     void put(Tensor tensor);
-    Tensor buid();
+
+    Tensor build();
 }

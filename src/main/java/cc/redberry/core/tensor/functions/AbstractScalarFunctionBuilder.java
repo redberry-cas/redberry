@@ -51,6 +51,6 @@ abstract class AbstractScalarFunctionBuilder implements TensorBuilder {
 
     public Tensor eval(Tensor t) {
         put(t);
-        return buid();
+        return build();
     }
 }

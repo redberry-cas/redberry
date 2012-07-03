@@ -47,7 +47,7 @@ public class SumBuilder implements TensorBuilder {
     }
 
     @Override
-    public Tensor buid() {
+    public Tensor build() {
         if (!complex.isZero() && summands.size() == 1)
             return summands.get(0);
 
@@ -55,6 +55,8 @@ public class SumBuilder implements TensorBuilder {
             return complex;
 
         if (complex.isZero()) {
+            if (summands.size() == 1)
+                return summands.get(0);
             return new Sum(summands.toArray(new Tensor[summands.size()]), freeIndices);
         }
         Tensor[] ss = new Tensor[summands.size() + 1];

@@ -63,7 +63,7 @@ public class ArcTan extends AbstractScalarFunction {
     public static class ArcTanBuilder extends AbstractScalarFunctionBuilder {
 
         @Override
-        public Tensor buid() {
+        public Tensor build() {
             if (arg instanceof Tan)
                 return arg.get(0);
             return new ArcTan(arg);

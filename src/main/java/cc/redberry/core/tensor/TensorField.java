@@ -94,7 +94,7 @@ public final class TensorField extends SimpleTensor {
         }
 
         @Override
-        public Tensor buid() {
+        public Tensor build() {
             if (pointer != data.length)
                 throw new IllegalStateException("Tensor field not fully constructed.");
             return new TensorField(field, data);

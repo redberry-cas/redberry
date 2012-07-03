@@ -62,7 +62,7 @@ public final class Cot extends AbstractScalarFunction {
     public static class CotBuilder extends AbstractScalarFunctionBuilder {
 
         @Override
-        public Tensor buid() {
+        public Tensor build() {
             if (arg instanceof ArcCot)
                 return arg.get(0);
             return new Cot(arg);

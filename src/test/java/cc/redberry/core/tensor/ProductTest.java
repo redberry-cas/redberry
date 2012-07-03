@@ -77,6 +77,15 @@ public class ProductTest {
         for (Tensor t : p.getAllScalars())
             pb.put(t);
         pb.put(Tensors.parse("b_u"));
-        Assert.assertTrue(TensorUtils.equals(pb.buid(), p));
+        Assert.assertTrue(TensorUtils.equals(pb.build(), p));
+    }
+    
+    @Test
+    public void testRebuild(){
+        Tensor t = Tensors.parse("a*b*c*A^ij*A_i*A_j*b_u");
+        TensorBuilder builder = t.getBuilder();
+        for(Tensor c : t)
+            builder.put(c);
+        Assert.assertTrue(TensorUtils.equals(t, builder.build()));
     }
 }

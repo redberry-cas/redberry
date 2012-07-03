@@ -60,7 +60,7 @@ public final class Exp extends AbstractScalarFunction {
     public static class ExpBuilder extends AbstractScalarFunctionBuilder {
 
         @Override
-        public Tensor buid() {
+        public Tensor build() {
             if (arg instanceof Log)
                 return arg.get(0);
             return new Exp(arg);

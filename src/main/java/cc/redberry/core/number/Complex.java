@@ -183,7 +183,7 @@ public class Complex extends Tensor
         }
 
         @Override
-        public Tensor buid() {
+        public Tensor build() {
             return complex;
         }
 

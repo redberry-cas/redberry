@@ -60,7 +60,7 @@ public abstract class MultiTensor extends Tensor {
                 continue;
             else
                 builder.put(get(i));
-        return builder.buid();
+        return builder.build();
     }
 
     @Override

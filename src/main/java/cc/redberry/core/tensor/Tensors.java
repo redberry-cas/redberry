@@ -38,21 +38,21 @@ public class Tensors {
         PowerBuilder pb = new PowerBuilder();
         pb.put(argument);
         pb.put(power);
-        return pb.buid();
+        return pb.build();
     }
 
     public static Tensor multiply(Tensor... factors) {
         ProductBuilder pb = new ProductBuilder();
         for (Tensor t : factors)
             pb.put(t);
-        return pb.buid();
+        return pb.build();
     }
 
     public static Tensor sum(Tensor... tensors) {
         SumBuilder sb = new SumBuilder();
         for (Tensor t : tensors)
             sb.put(t);
-        return sb.buid();
+        return sb.build();
     }
 
     public static SimpleTensor simpleTensor(String name, SimpleIndices indices) {

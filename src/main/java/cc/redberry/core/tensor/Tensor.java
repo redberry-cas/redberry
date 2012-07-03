@@ -166,7 +166,7 @@ public abstract class Tensor
                 builder.put(tensor);
             else
                 builder.put(get(i));
-        return builder.buid();
+        return builder.build();
     }
 
     public Tensor[] getRange(int from, final int to) {

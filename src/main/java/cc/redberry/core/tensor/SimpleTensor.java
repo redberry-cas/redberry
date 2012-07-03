@@ -161,7 +161,7 @@ public class SimpleTensor extends Tensor {
         }
 
         @Override
-        public Tensor buid() {
+        public Tensor build() {
             return tensor;
         }
 

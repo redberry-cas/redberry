@@ -62,7 +62,7 @@ public class ArcCos extends AbstractScalarFunction {
     public static class ArcCosBuilder extends AbstractScalarFunctionBuilder {
 
         @Override
-        public Tensor buid() {
+        public Tensor build() {
             if (arg instanceof Cos)
                 return arg.get(0);
             return new ArcCos(arg);

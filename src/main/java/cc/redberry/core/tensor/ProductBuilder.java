@@ -26,7 +26,6 @@ import cc.redberry.core.indices.InconsistentIndicesException;
 import cc.redberry.core.indices.Indices;
 import cc.redberry.core.indices.IndicesBuilder;
 import cc.redberry.core.number.Complex;
-import cc.redberry.core.utils.*;
 import cc.redberry.core.utils.TensorUtils;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -56,7 +55,7 @@ public class ProductBuilder implements TensorBuilder {
     }
 
     @Override
-    public Tensor buid() {
+    public Tensor build() {
         if (complex.isZero() || complex.isInfinite() || complex.isNaN())
             return complex;
 
@@ -64,7 +63,7 @@ public class ProductBuilder implements TensorBuilder {
 
         Complex complex = this.complex;
         for (Map.Entry<Tensor, SumBuilder> entry : powers.entrySet()) {
-            Tensor t = Tensors.pow(entry.getKey(), entry.getValue().buid());
+            Tensor t = Tensors.pow(entry.getKey(), entry.getValue().build());
 
             assert !(t instanceof Product);
 
