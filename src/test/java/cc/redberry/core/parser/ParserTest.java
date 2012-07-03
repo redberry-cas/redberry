@@ -106,6 +106,12 @@ public class ParserTest {
     }
 
     @Test
+    public void testProductPowers0() {
+        ParseNode node = Parser.DEFAULT.parse("1/0*a");
+        System.out.println(node);
+    }
+
+    @Test
     public void testProductPowers1() {
         Tensor u = Tensors.parse("a*c/b*1/4");
         Tensor v = Tensors.parse("(a*c)/(4*b)");
@@ -177,10 +183,8 @@ public class ParserTest {
         Tensor e = Tensors.parse("x");
         Assert.assertTrue(TensorUtils.equals(e, t));
     }
-    
+
     @Test
-    public void testZeroProductInSum(){
-        
-        
+    public void testZeroProductInSum() {
     }
 }

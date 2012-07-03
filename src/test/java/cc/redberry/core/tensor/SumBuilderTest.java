@@ -22,7 +22,8 @@
  */
 package cc.redberry.core.tensor;
 
-import cc.redberry.core.indexmapping.*;
+import cc.redberry.core.indexmapping.IndexMappings;
+import cc.redberry.core.indices.IndexType;
 import cc.redberry.core.utils.TensorUtils;
 import org.junit.Assert;
 import org.junit.Test;
@@ -34,7 +35,7 @@ import static cc.redberry.core.tensor.Tensors.parse;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public class SumBuilderForIndexlessTensorsTest {
+public class SumBuilderTest {
 
     @Test
     public void test1() {
@@ -83,10 +84,53 @@ public class SumBuilderForIndexlessTensorsTest {
         isb.put(parse("a_mn"));
         isb.put(parse("2*a_mn"));
         isb.put(parse("-3*a_mn"));
-      
+
 
         System.out.println(isb.build());
         Tensor expected = Tensors.parse("0");
         Assert.assertTrue(IndexMappings.mappingExists(expected, isb.build(), false));
+    }
+
+    @Test
+    public void test6() {
+        Tensor t = Tensors.parse("0+a_m^m+2*a_m^m-3*a_m^m+3-3+Sin[x]");
+        Tensor expected = Tensors.parse("Sin[x]");
+        Assert.assertTrue(IndexMappings.mappingExists(expected, t, false));
+    }
+
+    @Test
+    public void test7() {
+        Tensor t = Tensors.parse("0*(a_m^m+2*a_m^m-3*a_m^m)+3-3+Sin[x]");
+        Tensor expected = Tensors.parse("Sin[x]");
+        Assert.assertTrue(IndexMappings.mappingExists(expected, t, false));
+    }
+
+    @Test
+    public void test8() {
+        Tensor t = Tensors.parse("1/(0*(a_m^m+2*a_m^m-3*a_m^m))+3-3+Sin[x]");
+        Tensor expected = Tensors.parse("NaN+I*NaN");
+        Assert.assertTrue(IndexMappings.mappingExists(expected, t, false));
+    }
+
+    @Test
+    public void test9() {
+        Tensors.addSymmetry("F_{ab}", IndexType.LatinLower, true, new int[]{1, 0});
+        Tensor e = Tensors.parse("F_{mn}*F^{mn}+F_{mn}*F^{nm}");
+        Tensor expected = Tensors.parse("0");
+        Assert.assertTrue(IndexMappings.mappingExists(expected, e, false));
+    }
+
+    @Test
+    public void test10() {
+        Tensor e = Tensors.parse("2*f_m+a*f_m");
+        Tensor expected = Tensors.parse("(2+a)*f_m");
+        Assert.assertTrue(IndexMappings.mappingExists(expected, e, false));
+    }
+
+    @Test
+    public void test11() {
+        Tensor e = Tensors.parse("2*f_m+a*f_m-a*b/b*f_m-f_m");
+        Tensor expected = Tensors.parse("f_m");
+        Assert.assertTrue(IndexMappings.mappingExists(expected, e, false));
     }
 }

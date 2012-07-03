@@ -26,7 +26,7 @@ import cc.redberry.concurrent.OutputPortUnsafe;
 import cc.redberry.core.indices.IndexType;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.tensor.Tensors;
-import org.junit.Test;
+import org.junit.*;
 
 import static cc.redberry.core.tensor.Tensors.parse;
 
@@ -35,24 +35,39 @@ import static cc.redberry.core.tensor.Tensors.parse;
  * @author Stanislav Poslavsky
  */
 public class ProviderSumTest {
+
     @Test
     public void test2() {
         Tensor f = parse("a*b");
         Tensor t = parse("-a*b");
-        MappingsPort opu = IndexMappings.createPort(f, t);
+        MappingsPort mp = IndexMappings.createPort(f, t);
+
         IndexMappingBuffer buffer;
-        while ((buffer = opu.take()) != null)
-            System.out.println(buffer);
+        boolean sign = false;
+        while ((buffer = mp.take()) != null)
+            if (!sign)
+                if (buffer.getSignum()) {
+                    sign = true;
+                    break;
+                }
+        Assert.assertTrue(sign);
     }
 
     @Test
     public void test3() {
         Tensor f = parse("1");
         Tensor t = parse("-1");
-        MappingsPort opu = IndexMappings.createPort(f, t);
+        MappingsPort mp = IndexMappings.createPort(f, t);
         IndexMappingBuffer buffer;
-        while ((buffer = opu.take()) != null)
-            System.out.println(buffer);
+
+        boolean sign = false;
+        while ((buffer = mp.take()) != null)
+            if (!sign)
+                if (buffer.getSignum()) {
+                    sign = true;
+                    break;
+                }
+        Assert.assertTrue(sign);
     }
 
     @Test
@@ -60,13 +75,17 @@ public class ProviderSumTest {
         Tensor f = parse("A_ab^ab-d");
         Tensor t = parse("A_ba^ab+d");
         Tensors.addSymmetry("A_abmn", IndexType.LatinLower, true, 0, 1, 3, 2);
-        OutputPortUnsafe<IndexMappingBuffer> opu = IndexMappings.createPort(f, t);
-        int counter = 0;
-        IndexMappingBuffer buffer;
-        while ((buffer = opu.take()) != null)
-            System.out.println(buffer);
-        //        assertTrue(counter == 2);
+        MappingsPort mp = IndexMappings.createPort(f, t);
 
+        IndexMappingBuffer buffer;
+        boolean sign = false;
+        while ((buffer = mp.take()) != null)
+            if (!sign)
+                if (buffer.getSignum()) {
+                    sign = true;
+                    break;
+                }
+        Assert.assertTrue(sign);
 
     }
 }

@@ -422,7 +422,7 @@ public final class Numeric extends Real implements Serializable {
     }
 
     @Override
-    int signum() {
+    public int signum() {
         return value > 0 ? 1 : value == 0 ? 0 : -1;
     }
 }

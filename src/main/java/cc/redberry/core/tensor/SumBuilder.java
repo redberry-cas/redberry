@@ -54,6 +54,9 @@ final class SumBuilder implements TensorBuilder {
 
     @Override
     public Tensor build() {
+        if (complex.isNaN() || complex.isInfinite())
+            return complex;
+        
         List<Tensor> sum = new ArrayList<>();
         if (!complex.isZero())
             sum.add(complex);
@@ -85,7 +88,6 @@ final class SumBuilder implements TensorBuilder {
         if (tensor instanceof Complex) {
             complex = complex.add((Complex) tensor);
             return;
-
         }
 
         Split split = split(tensor);
@@ -124,7 +126,7 @@ final class SumBuilder implements TensorBuilder {
         return Tensors.multiply(Complex.MINUSE_ONE, tensor);
     }
 
-    Split split(Tensor tensor) {
+    private static Split split(Tensor tensor) {
         if (tensor.getIndices().size() == 0) {
             Complex complex;
             Tensor factor;
@@ -166,7 +168,7 @@ final class SumBuilder implements TensorBuilder {
         }
     }
 
-    static class FactorNode {
+    private static class FactorNode {
 
         final Tensor factor;
         final TensorBuilder builder;
@@ -177,7 +179,7 @@ final class SumBuilder implements TensorBuilder {
         }
     }
 
-    abstract static class Split {
+    private abstract static class Split {
 
         final Tensor factor;
         final Tensor summand;
@@ -190,7 +192,7 @@ final class SumBuilder implements TensorBuilder {
         abstract TensorBuilder getBuilder();
     }
 
-    static class SplitNumbers extends Split {
+    private static class SplitNumbers extends Split {
 
         public SplitNumbers(Tensor factor, Tensor summand) {
             super(factor, summand);
@@ -204,7 +206,7 @@ final class SumBuilder implements TensorBuilder {
         }
     }
 
-    static class ComplexSumBuilder implements TensorBuilder {
+    private static class ComplexSumBuilder implements TensorBuilder {
 
         Complex complex = Complex.ZERO;
 
@@ -222,7 +224,7 @@ final class SumBuilder implements TensorBuilder {
         }
     }
 
-    static class SplitIndexless extends Split {
+    private static class SplitIndexless extends Split {
 
         public SplitIndexless(Tensor factor, Tensor summand) {
             super(factor, summand);

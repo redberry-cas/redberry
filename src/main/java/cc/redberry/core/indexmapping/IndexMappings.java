@@ -158,7 +158,7 @@ public final class IndexMappings {
         map.put(Product.class, ProviderProduct.FACTORY);
         map.put(Sum.class, ProviderSum.FACTORY);
         map.put(Complex.class, ProviderComplex.FACTORY);
-        map.put(Power.class, ProviderPowFactory.INSTANCE);
+        map.put(Power.class, ProviderPower.INSTANCE);
 
         map.put(Sin.class, ProviderFunctions.ODD_FACTORY);
         map.put(ArcSin.class, ProviderFunctions.ODD_FACTORY);

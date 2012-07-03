@@ -499,7 +499,7 @@ public class Rational extends Real implements Serializable {
     }
 
     @Override
-    int signum() {
+    public int signum() {
         return fraction.getNumerator().signum();
     }
 }

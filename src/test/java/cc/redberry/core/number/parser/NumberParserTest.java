@@ -139,7 +139,6 @@ public class NumberParserTest {
     @Test
     public void test17() {
         Complex a = NumberParser.COMPLEX_PARSER.parse("1/0");
-        System.out.println(a);
         Complex b = new Complex(Numeric.NaN, Numeric.NaN);
         Assert.assertEquals(b, a);
     }

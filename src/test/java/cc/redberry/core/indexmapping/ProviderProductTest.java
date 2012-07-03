@@ -22,26 +22,35 @@
  */
 package cc.redberry.core.indexmapping;
 
-import cc.redberry.core.tensor.Power;
+import cc.redberry.core.indices.IndexType;
 import cc.redberry.core.tensor.Tensor;
+import org.junit.Assert;
+import org.junit.Test;
+
+import static cc.redberry.core.tensor.Tensors.addSymmetry;
+import static cc.redberry.core.tensor.Tensors.parse;
 
 /**
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-class ProviderPowFactory implements IndexMappingProviderFactory {
+public class ProviderProductTest {
 
-    static final ProviderPowFactory INSTANCE = new ProviderPowFactory();
-
-    private ProviderPowFactory() {
-    }
-
-    @Override
-    public IndexMappingProvider create(IndexMappingProvider opu, Tensor from, Tensor to, boolean allowDiffStates) {
-        final Power fromP = (Power) from, toP = (Power) to;
-        if (IndexMappings.mappingExists(fromP.get(1), toP.get(1), allowDiffStates) && IndexMappings.mappingExists(fromP.get(0), toP.get(0), allowDiffStates))
-            return new DummyIndexMappingProvider(opu);
-        return IndexMappingProvider.Util.EMPTY_PROVIDER;
+    @Test
+    public void test1() {
+        addSymmetry("F_mn", IndexType.LatinLower, true, 1, 0);
+        Tensor from = parse("F_mn*F^mn");
+        Tensor to = parse("F_mn*F^nm");
+        MappingsPort mp = IndexMappings.createPort(from, to);
+        IndexMappingBuffer buffer;
+        boolean sign = false;
+        while ((buffer = mp.take()) != null)
+            if (!sign)
+                if (buffer.getSignum()) {
+                    sign = true;
+                    break;
+                }
+        Assert.assertTrue(sign);
     }
 }

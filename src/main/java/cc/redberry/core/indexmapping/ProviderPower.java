@@ -20,20 +20,28 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
-package cc.redberry.core.number;
+package cc.redberry.core.indexmapping;
 
-import org.apache.commons.math3.Field;
+import cc.redberry.core.tensor.Power;
+import cc.redberry.core.tensor.Tensor;
 
 /**
  *
+ * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public abstract class Real implements Number<Real>, Comparable<Real> {
+class ProviderPower implements IndexMappingProviderFactory {
 
-    @Override
-    public Field<Real> getField() {
-        return RealField.getInstance();
+    static final ProviderPower INSTANCE = new ProviderPower();
+
+    private ProviderPower() {
     }
 
-    public abstract int signum();
+    @Override
+    public IndexMappingProvider create(IndexMappingProvider opu, Tensor from, Tensor to, boolean allowDiffStates) {
+        final Power fromP = (Power) from, toP = (Power) to;
+        if (IndexMappings.mappingExists(fromP.get(1), toP.get(1), allowDiffStates) && IndexMappings.mappingExists(fromP.get(0), toP.get(0), allowDiffStates))
+            return new DummyIndexMappingProvider(opu);
+        return IndexMappingProvider.Util.EMPTY_PROVIDER;
+    }
 }

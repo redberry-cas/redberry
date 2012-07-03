@@ -168,4 +168,10 @@ public class PowerBuilderTest {
         a = Complex.IMAGINARY_POSITIVE_INFINITY;
         Assert.assertEquals(expected, pow(a, p));
     }
+
+    @Test
+    public void test14() {
+        Tensor t = Tensors.parse("1/0*a");
+        Assert.assertEquals(Complex.ComplexNaN, t);
+    }
 }
