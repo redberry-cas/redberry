@@ -60,8 +60,11 @@ public class PowerBuilder implements TensorBuilder {
                     return a;
             if (p.isOne())
                 return a;
-            if (a.isZero())
+            if (a.isZero()) {
+                if (p.getReal().signum() <= 0)
+                    return Complex.ComplexNaN;
                 return a;
+            }
             if (p.isZero())
                 return Complex.ONE;
             if (a.isNumeric() || p.isNumeric())
