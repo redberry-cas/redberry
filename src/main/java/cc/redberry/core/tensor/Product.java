@@ -66,7 +66,7 @@ public final class Product extends MultiTensor {
         this.factor = factor;
         this.indexlessData = indexlessData;
         this.data = data;
-        this.contentReference = new SoftReference<>(content);
+        this.contentReference = new SoftReference<>(content);//may be null
         this.hash = calculateHash();
     }
 

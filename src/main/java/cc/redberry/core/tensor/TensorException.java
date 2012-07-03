@@ -34,7 +34,7 @@ public class TensorException extends RuntimeException {
     Tensor[] tensors;
 
     public TensorException(String message, Tensor... tensors) {
-        super(message + " in tensors " + Arrays.toString(tensors));
+        super("\"" + message + "\" in tensors " + Arrays.toString(tensors));
         this.tensors = tensors;
     }
 

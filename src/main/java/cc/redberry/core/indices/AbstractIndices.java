@@ -78,8 +78,10 @@ abstract class AbstractIndices implements Indices {
 
     @Override
     public final boolean equalsRegardlessOrder(Indices indices) {
-        if (indices instanceof EmptySimpleIndices)
+        if (indices instanceof EmptyIndices)
             return data.length == 0;
+//        if (data.length == 0)
+//            return indices.size() == 0;
         return Arrays.equals(getSortedData(), ((AbstractIndices) indices).getSortedData());
     }
 

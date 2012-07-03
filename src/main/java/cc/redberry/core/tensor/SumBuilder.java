@@ -56,7 +56,7 @@ final class SumBuilder implements TensorBuilder {
     public Tensor build() {
         if (complex.isNaN() || complex.isInfinite())
             return complex;
-        
+
         List<Tensor> sum = new ArrayList<>();
         if (!complex.isZero())
             sum.add(complex);
@@ -78,8 +78,12 @@ final class SumBuilder implements TensorBuilder {
 
     @Override
     public void put(Tensor tensor) {
+        if (TensorUtils.isZero(tensor))
+            return;
         if (indices == null)
-            indices = IndicesFactory.createSorted(tensor.getIndices());
+            indices = IndicesFactory.createSorted(tensor.getIndices().getFreeIndices());
+        else if (!indices.equalsRegardlessOrder(tensor.getIndices().getFreeIndices()))
+            throw new TensorException("Inconsinstent indices in sum.", tensor);
         if (tensor instanceof Sum) {
             for (Tensor s : tensor)
                 put(s);
@@ -103,7 +107,7 @@ final class SumBuilder implements TensorBuilder {
             for (FactorNode node : factorNodes)
                 if ((b = compareFactors(split.factor, node.factor)) != null) {
                     if (b)
-                        node.builder.put(negate(split.summand));
+                        node.builder.put(Tensors.negate(split.summand));
                     else
                         node.builder.put(split.summand);
                     break;
@@ -120,31 +124,25 @@ final class SumBuilder implements TensorBuilder {
         return buffer.getSignum();
     }
 
-    private static Tensor negate(Tensor tensor) {
-        if (tensor instanceof Complex)
-            return ((Complex) tensor).negate();
-        return Tensors.multiply(Complex.MINUSE_ONE, tensor);
-    }
-
     private static Split split(Tensor tensor) {
-        if (tensor.getIndices().size() == 0) {
+        if (tensor.getIndices().size() == 0) {//case 2*a*b*c
             Complex complex;
             Tensor factor;
             if (tensor instanceof Product) {
                 Product product = (Product) tensor;
-                complex = product.getFactor();
-                if (complex == Complex.ONE)
+                complex = product.factor;
+                if (complex == Complex.ONE)//case a*b
                     factor = tensor;
-                else if (product.size() == 2)
+                else if (product.size() == 2)//case 2*a
                     factor = product.get(1);
-                else
+                else//case 2*a*b => factor = a*b
                     factor = new Product(Complex.ONE, product.indexlessData, product.data, product.contentReference.get(), product.indices);
             } else {
                 complex = Complex.ONE;
                 factor = tensor;
             }
             return new SplitNumbers(factor, complex);
-        } else {
+        } else {//case 2*a*g_mn*g_cd 
             Tensor summand;
             Tensor factor;
             if (tensor instanceof Product) {

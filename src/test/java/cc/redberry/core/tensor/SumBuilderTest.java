@@ -100,8 +100,8 @@ public class SumBuilderTest {
 
     @Test
     public void test7() {
-        Tensor t = Tensors.parse("0*(a_m^m+2*a_m^m-3*a_m^m)+3-3+Sin[x]");
-        Tensor expected = Tensors.parse("Sin[x]");
+        Tensor t = Tensors.parse("0*(a_m^m+2*a_m^m-3*a_m^m)+3-3+Sin[x]+Sin[-x]");
+        Tensor expected = Tensors.parse("0");
         Assert.assertTrue(IndexMappings.mappingExists(expected, t, false));
     }
 
@@ -129,7 +129,7 @@ public class SumBuilderTest {
 
     @Test
     public void test11() {
-        Tensor e = Tensors.parse("2*f_m+a*f_m-a*b/b*f_m-f_m");
+        Tensor e = Tensors.parse("0+2*f_m+a*f_m-a*b/b*f_m-f_m");
         Tensor expected = Tensors.parse("f_m");
         Assert.assertTrue(IndexMappings.mappingExists(expected, e, false));
     }

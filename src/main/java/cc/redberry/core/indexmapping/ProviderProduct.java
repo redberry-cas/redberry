@@ -61,7 +61,7 @@ final class ProviderProduct implements IndexMappingProvider {
             if (fromScalars.length != toScalars.length)
                 return IndexMappingProvider.Util.EMPTY_PROVIDER;
             if (fromScalars.length != 1 && !testScalars(fromScalars, toScalars, allowDiffStates))
-                return IndexMappingProvider.Util.EMPTY_PROVIDER;
+                return IndexMappingProvider.Util.EMPTY_PROVIDER; 
 
 //            Temporary, until scalars mappings does not work
             if (booluon)

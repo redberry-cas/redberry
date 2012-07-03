@@ -26,6 +26,7 @@ import cc.redberry.core.combinatorics.Symmetry;
 import cc.redberry.core.context.CC;
 import cc.redberry.core.context.NameDescriptor;
 import cc.redberry.core.indices.*;
+import cc.redberry.core.number.*;
 import cc.redberry.core.tensor.functions.*;
 
 /**
@@ -58,8 +59,8 @@ public class Tensors {
     public static SimpleTensor simpleTensor(String name, SimpleIndices indices) {
         NameDescriptor descriptor = CC.getNameManager().mapNameDescriptor(name, indices.getIndicesTypeStructure());
         return new SimpleTensor(descriptor.getId(),
-                UnsafeIndicesFactory.createOfTensor(descriptor.getSymmetries(),
-                        indices));
+                                UnsafeIndicesFactory.createOfTensor(descriptor.getSymmetries(),
+                                                                    indices));
     }
 
     public static SimpleTensor simpleTensor(int name, SimpleIndices indices) {
@@ -67,8 +68,8 @@ public class Tensors {
         if (descriptor == null)
             throw new IllegalArgumentException("This name is not registered in the system.");
         return new SimpleTensor(name,
-                UnsafeIndicesFactory.createOfTensor(descriptor.getSymmetries(),
-                        indices));
+                                UnsafeIndicesFactory.createOfTensor(descriptor.getSymmetries(),
+                                                                    indices));
     }
 
     public static TensorField field(String name, SimpleIndices indices, Tensor[] arguments) {
@@ -93,8 +94,8 @@ public class Tensors {
             structures[i + 1] = argIndices[i].getIndicesTypeStructure();
         NameDescriptor descriptor = CC.getNameManager().mapNameDescriptor(name, structures);
         return new TensorField(descriptor.getId(),
-                UnsafeIndicesFactory.createOfTensor(descriptor.getSymmetries(), indices),
-                arguments.clone(), argIndices.clone());
+                               UnsafeIndicesFactory.createOfTensor(descriptor.getSymmetries(), indices),
+                               arguments.clone(), argIndices.clone());
     }
 
     public static TensorField field(int name, SimpleIndices indices, SimpleIndices[] argIndices, Tensor[] arguments) {
@@ -205,8 +206,14 @@ public class Tensors {
     public static void addSymmetry(String tensor, IndexType type, boolean sign, int... symmetry) {
         parseSimple(tensor).getIndices().getSymmetries().add(type.getType(), new Symmetry(symmetry, sign));
     }
-    
+
     public static void addSymmetry(SimpleTensor tensor, IndexType type, boolean sign, int... symmetry) {
         tensor.getIndices().getSymmetries().add(type.getType(), new Symmetry(symmetry, sign));
+    }
+
+    public static Tensor negate(Tensor tensor) {
+        if (tensor instanceof Complex)
+            return ((Complex) tensor).negate();
+        return Tensors.multiply(Complex.MINUSE_ONE, tensor);
     }
 }
