@@ -62,7 +62,6 @@ public final class Numeric extends Real implements Serializable {
      * A constant holding -1 value.
      */
     public static final Numeric MINUS_ONE = new Numeric(-1);
-
     /**
      * A constant holding the positive infinity of type
      * {@code double}. It is equal to the value returned by
@@ -140,6 +139,7 @@ public final class Numeric extends Real implements Serializable {
      *
      * @param value the value, which double representation to be represented by
      *              the {@code Double}.
+     *
      * @throws NullArgumentException if value is {@code null}.
      */
     public Numeric(final Number value) {
@@ -208,6 +208,7 @@ public final class Numeric extends Real implements Serializable {
 
     /**
      * @return similar to {@link Double}
+     *
      * @see Double#hashCode()
      */
     @Override
@@ -218,6 +219,7 @@ public final class Numeric extends Real implements Serializable {
 
     /**
      * @return {@code Double.isInfinite(value)}
+     *
      * @see Double#isInfinite(double)
      */
     @Override
@@ -227,6 +229,7 @@ public final class Numeric extends Real implements Serializable {
 
     /**
      * @return {@code Double.isNaN(value)}
+     *
      * @see Double#isNaN(double)
      */
     @Override
@@ -419,6 +422,11 @@ public final class Numeric extends Real implements Serializable {
     @Override
     public boolean isOne() {
         return value == 1.0;
+    }
+
+    @Override
+    public boolean isMinusOne() {
+        return value == -1.0;
     }
 
     @Override

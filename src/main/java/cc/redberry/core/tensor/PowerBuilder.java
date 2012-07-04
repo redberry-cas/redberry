@@ -32,7 +32,7 @@ import java.math.BigInteger;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public class PowerBuilder implements TensorBuilder {
+public final class PowerBuilder implements TensorBuilder {
 
     private Tensor argument, power;
     private int state = 0;
@@ -97,9 +97,9 @@ public class PowerBuilder implements TensorBuilder {
             return Complex.ZERO;
         if (argument instanceof Product) {
             Tensor[] scalars = ((Product) argument).getAllScalars();
-            TensorBuilder pb = argument.getBuilder();//creating product builder 
+            TensorBuilder pb = argument.getBuilder();//creating product builder             
             for (Tensor t : scalars)
-                pb.put(Tensors.pow(t, power));
+                pb.put(Tensors.pow(t, power));//TODO refactor for performance
             return pb.build();
         }
         if (argument instanceof Power)

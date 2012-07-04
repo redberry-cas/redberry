@@ -48,6 +48,7 @@ public class NumberUtils {
     }
 
     public static Numeric createNumeric(double d) {
+        //FUTURE investigate performance
         if (d == 0)
             return Numeric.ZERO;
         else if (d == 1)
@@ -63,7 +64,8 @@ public class NumberUtils {
     }
 
     public static Rational createRational(BigFraction fraction) {
-        if (BigFraction.ZERO.equals(fraction))
+        //FUTURE investigate performance
+        if (fraction.getNumerator().equals(BigInteger.ZERO))
             return Rational.ZERO;
         if (BigFraction.ONE.equals(fraction))
             return Rational.ONE;

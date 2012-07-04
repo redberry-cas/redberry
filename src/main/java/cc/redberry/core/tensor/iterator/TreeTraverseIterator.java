@@ -31,7 +31,7 @@ import cc.redberry.core.tensor.TensorWrapper;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public class TreeTraverseIterator {
+public final class TreeTraverseIterator {
 
     private final TraverseGuide iterationGuide;
     private LinkedPointer currentPair;
@@ -99,7 +99,7 @@ public class TreeTraverseIterator {
         return currentPair.getTensor().get(0);
     }
 
-    private static class LinkedPointer {
+    private static final class LinkedPointer {
 
         int position = 0;
         Tensor tensor;

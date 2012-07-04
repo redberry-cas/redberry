@@ -36,7 +36,7 @@ import java.util.Map;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public class ProductBuilder implements TensorBuilder {
+public final class ProductBuilder implements TensorBuilder {
 
     private Complex complex = Complex.ONE;
     private final List<Tensor> elements;

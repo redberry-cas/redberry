@@ -472,11 +472,6 @@ public class Rational extends Real implements Serializable {
     }
 
     @Override
-    public boolean isZero() {
-        return fraction.equals(BigFraction.ZERO);
-    }
-
-    @Override
     public int compareTo(Real o) {
         NumberUtils.checkNotNull(o);
         if (o instanceof Numeric)
@@ -490,8 +485,26 @@ public class Rational extends Real implements Serializable {
     }
 
     @Override
+    public boolean isZero() {
+        //Here we do not use fraction.equals() because it has low performence
+        return fraction.getNumerator().equals(BigInteger.ZERO);//.equals(BigFraction.ZERO);
+    }
+
+    @Override
     public boolean isOne() {
-        return fraction.equals(BigFraction.ONE);
+        //Here we do not use fraction.equals() because it has low performence
+        return fraction.getNumerator().equals(BigInteger.ONE) && fraction.getDenominator().equals(BigInteger.ONE);//equals(BigFraction.ONE);
+    }
+
+    /*
+     * Chached instenance for comparing with it (for performance)
+     */
+    private static final BigInteger BI_MINUS_ONE = new BigInteger("-1");
+
+    @Override
+    public boolean isMinusOne() {
+        //Here we do not use fraction.equals() because it has low performence
+        return fraction.getNumerator().equals(BI_MINUS_ONE) && fraction.getDenominator().equals(BigInteger.ONE);//equals(BigFraction.ONE);
     }
 
     public boolean isInteger() {

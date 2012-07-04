@@ -74,5 +74,6 @@ public interface Number<T>
     boolean isNaN();
     boolean isZero();
     boolean isOne();
+    boolean isMinusOne();
     boolean isNumeric();
 }

@@ -38,7 +38,7 @@ import java.util.Map;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-final class SumBuilder implements TensorBuilder {
+public final class SumBuilder implements TensorBuilder {
 
     private final Map<Integer, List<FactorNode>> summands;
     private Complex complex = Complex.ZERO;
@@ -63,7 +63,7 @@ final class SumBuilder implements TensorBuilder {
 
         for (Map.Entry<Integer, List<FactorNode>> entry : summands.entrySet())
             for (FactorNode node : entry.getValue()) {
-                Tensor summand = Tensors.multiply(node.builder.build(), node.factor);//TODO improve, using nor Tensors.multiply, but special method
+                Tensor summand = multiply(node.builder.build(), node.factor);//for performance
                 if (!TensorUtils.isZero(summand))
                     sum.add(summand);
             }
@@ -74,6 +74,35 @@ final class SumBuilder implements TensorBuilder {
             return sum.get(0);
 
         return new Sum(sum.toArray(new Tensor[sum.size()]), indices);
+    }
+
+    private static Tensor multiply(Tensor summand, Tensor factor) {
+        if (TensorUtils.isZero(summand))
+            return Complex.ZERO;
+        else if (TensorUtils.isOne(summand))
+            return factor;
+        else if (factor.getIndices().size() == 0)
+            if (factor instanceof Product) {
+                Product p = (Product) factor;
+                return new Product((Complex) summand, p.indexlessData, p.data, ProductContent.EMPTY_INSTANCE, p.indices);
+            } else
+                return new Product((Complex) summand, new Tensor[]{factor}, new Tensor[0], null, IndicesFactory.EMPTY_INDICES);
+        else if (factor instanceof Product) {
+            Product p = (Product) factor;
+            if (summand instanceof Product) {
+                Product s = (Product) summand;
+                return new Product(s.factor, s.indexlessData, p.data, p.contentReference.get(), p.indices);
+            } else if (summand instanceof Complex)
+                return new Product(((Complex) summand), new Tensor[0], p.data, p.contentReference.get(), p.indices);
+            else
+                return new Product(Complex.ONE, new Tensor[]{summand}, p.data, p.contentReference.get(), p.indices);
+        } else if (summand instanceof Product) {
+            Product s = (Product) summand;
+            return new Product(s.factor, s.indexlessData, new Tensor[]{factor}, null, factor.getIndices());
+        } else if (summand instanceof Complex)
+            return new Product((Complex) summand, new Tensor[0], new Tensor[]{factor}, null, factor.getIndices());
+        else
+            return new Product(Complex.ONE, new Tensor[]{summand}, new Tensor[]{factor}, null, factor.getIndices());
     }
 
     @Override

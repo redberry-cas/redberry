@@ -29,7 +29,7 @@ import java.util.Arrays;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public class ProductContent {
+public final class ProductContent {
 
     public static final ProductContent EMPTY_INSTANCE =
             new ProductContent(ContractionStructure.EMPTY_INSTANCE,

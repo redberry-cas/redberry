@@ -241,21 +241,22 @@ public class Complex extends Tensor
     }
 
     @Override
+    public boolean isZero() {
+        return real.isZero() && imaginary.isZero();
+    }
+
+    @Override
     public boolean isOne() {
         return real.isOne() && imaginary.isZero();
     }
 
-    public boolean isOneOrMinusOne() {
-        return (real.isOne() || real.equals(Rational.MINUS_ONE) || real.equals(Numeric.MINUS_ONE)) && imaginary.isZero();
-    }
-
-    public boolean isMinusOne() {
-        return (real.equals(Rational.MINUS_ONE) || real.equals(Numeric.MINUS_ONE)) && imaginary.isZero();
-    }
-
     @Override
-    public boolean isZero() {
-        return real.isZero() && imaginary.isZero();
+    public boolean isMinusOne() {
+        return real.isMinusOne() && imaginary.isZero();
+    }
+
+    public boolean isOneOrMinusOne() {
+        return imaginary.isZero() && (real.isOne() || real.isMinusOne());
     }
 
     /**
