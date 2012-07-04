@@ -22,9 +22,10 @@
  */
 package cc.redberry.core.performance;
 
-import cc.redberry.core.tensor.*;
-import cc.redberry.core.tensor.iterator.*;
-import cc.redberry.core.utils.*;
+import cc.redberry.core.tensor.Tensor;
+import cc.redberry.core.tensor.Tensors;
+import cc.redberry.core.tensor.iterator.TreeTraverseIterator;
+import cc.redberry.core.utils.TensorUtils;
 
 /**
  *

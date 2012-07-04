@@ -22,6 +22,7 @@
  */
 package cc.redberry.core.indexmapping;
 
+import cc.redberry.core.context.*;
 import cc.redberry.core.indices.InconsistentIndicesException;
 import cc.redberry.core.indices.IndicesUtils;
 
@@ -30,7 +31,7 @@ import cc.redberry.core.indices.IndicesUtils;
  * @author Stanislav Poslavsky
  */
 public final class IndexMappingBufferRecord {
-    
+
     /*
      * Mask 0b00000SUL
      *
@@ -112,5 +113,16 @@ public final class IndexMappingBufferRecord {
     @Override
     public int hashCode() {
         return 31 * (31 * 7 + this.states) + this.toName;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+
+        sb.append(Context.get().getIndexConverterManager().getSymbol(getIndexName(), ToStringMode.UTF8));
+        sb.append(":");
+        for (int i = 2; i >= 0; --i)
+            sb.append(getStatesBit(i) ? 1 : 0);
+        return sb.toString();
     }
 }

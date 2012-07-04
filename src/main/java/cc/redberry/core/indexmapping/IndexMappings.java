@@ -27,8 +27,7 @@ import cc.redberry.core.context.CC;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.tensor.*;
 import cc.redberry.core.tensor.functions.*;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author Dmitry Bolotin
@@ -39,21 +38,20 @@ public final class IndexMappings {
     private IndexMappings() {
     }
 
-    public static OutputPortUnsafe<IndexMappingBuffer> createPortForSimpleTensor(SimpleTensor from, SimpleTensor to, boolean allowDiffStates) {
-        final IndexMappingProvider provider = map.get(SimpleTensor.class).create(IndexMappingProvider.Util.singleton(new IndexMappingBufferImpl(allowDiffStates)), from, to, allowDiffStates);
-        provider.tick();
-        return new OutputPortUnsafe<IndexMappingBuffer>() {
-
-            @Override
-            public IndexMappingBuffer take() {
-                IndexMappingBuffer buf = provider.take();
-                if (buf != null)
-                    buf.removeContracted();
-                return buf;
-            }
-        };
-    }
-
+//    public static OutputPortUnsafe<IndexMappingBuffer> createPortForSimpleTensor(SimpleTensor from, SimpleTensor to, boolean allowDiffStates) {
+//        final IndexMappingProvider provider = map.get(SimpleTensor.class).create(IndexMappingProvider.Util.singleton(new IndexMappingBufferImpl(allowDiffStates)), from, to, allowDiffStates);
+//        provider.tick();
+//        return new OutputPortUnsafe<IndexMappingBuffer>() {
+//
+//            @Override
+//            public IndexMappingBuffer take() {
+//                IndexMappingBuffer buf = provider.take();
+//                if (buf != null)
+//                    buf.removeContracted();
+//                return buf;
+//            }
+//        };
+//    }
     public static MappingsPort createPort(Tensor from, Tensor to) {
         return createPort(from, to, CC.withMetric());
     }
@@ -104,9 +102,6 @@ public final class IndexMappings {
     }
 
     private static Tensor extractNonComplexFactor(Tensor t) {
-        //for (int i = 0; i < 2; ++i)
-        //    if (t.get(i) instanceof Complex && ((Complex) t.get(i)).equals(Complex.MINUSE_ONE))
-        //        return t.get(1 - i);
         Product p = (Product) t;
         if (p.getFactor().isMinusOne())
             return p.get(1);
@@ -169,5 +164,21 @@ public final class IndexMappings {
         map.put(ArcCos.class, ProviderFunctions.EVEN_FACTORY);
         map.put(Cot.class, ProviderFunctions.EVEN_FACTORY);
         map.put(ArcCot.class, ProviderFunctions.EVEN_FACTORY);
+    }
+
+    public static Set<IndexMappingBuffer> createAllMappings(MappingsPort opu) {
+        Set<IndexMappingBuffer> res = new HashSet<>();
+        IndexMappingBuffer c;
+        while ((c = opu.take()) != null)
+            res.add(c);
+        return res;
+    }
+
+    public static Set<IndexMappingBuffer> createAllMappings(Tensor from, Tensor to, boolean allowDiffStates) {
+        return createAllMappings(IndexMappings.createPort(from, to, allowDiffStates));
+    }
+
+    public static Set<IndexMappingBuffer> createAllMappings(Tensor from, Tensor to) {
+        return createAllMappings(IndexMappings.createPort(from, to, CC.withMetric()));
     }
 }
