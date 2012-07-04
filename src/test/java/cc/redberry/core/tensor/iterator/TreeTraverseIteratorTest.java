@@ -22,7 +22,7 @@
  */
 package cc.redberry.core.tensor.iterator;
 
-import cc.redberry.core.number.*;
+import cc.redberry.core.number.Complex;
 import cc.redberry.core.tensor.Sum;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.tensor.Tensors;
@@ -328,6 +328,68 @@ public class TreeTraverseIteratorTest {
                 iterator.set(Tensors.pow(M, Complex.TWO));
         Tensor actual = iterator.result();
         Tensor expected = Tensors.parse("16*Power[M,20]");
+        Assert.assertTrue(TensorUtils.equals(expected, actual));
+    }
+
+    @Test
+    public void test9() {
+        /*
+         * Substituting s=M^2 in
+         *
+         * 9*M^20 + 18*M^18*(2*pT^2 - 3*s) + pT^4*(pT^2 - s)^4*s^4 +
+         * 3*M^16*(18*pT^4 - 70*pT^2*s + 51*s^2) + 6*M^14*(6*pT^6 - 54*pT^4*s +
+         * 98*pT^2*s^2 - 45*s^3) + 2*M^2*s^3*(pT^3 - pT*s)^2*(-3*pT^6 +
+         * 10*pT^4*s - 11*pT^2*s^2 + 3*s^3) - 2*M^10*s*(51*pT^8 - 377*pT^6*s +
+         * 753*pT^4*s^2 - 561*pT^2*s^3 + 135*s^4) + M^12*(9*pT^8 - 252*pT^6*s +
+         * 920*pT^4*s^2 - 1008*pT^2*s^3 + 324*s^4) + 2*M^6*s^2*(42*pT^10 -
+         * 227*pT^8*s + 456*pT^6*s^2 - 425*pT^4*s^3 + 180*pT^2*s^4 - 27*s^5) +
+         * M^8*s*(-18*pT^10 + 344*pT^8*s - 1142*pT^6*s^2 + 1476*pT^4*s^3 -
+         * 810*pT^2*s^4 + 153*s^5) + M^4*s^2*(9*pT^12 - 86*pT^10*s +
+         * 269*pT^8*s^2 - 374*pT^6*s^3 + 263*pT^4*s^4 - 84*pT^2*s^5 + 9*s^6)
+         *
+         *
+         */
+        Tensor t = Tensors.parse("9*Power[M, 20] + 18*Power[M, 18]*(-3*s + 2*Power[pT, 2]) + 3*Power[M, 16]*(-70*s*Power[pT, 2] + 18*Power[pT, 4] + 51*Power[s, 2]) + 6*Power[M, 14]*(-54*s*Power[pT, 4] + 6*Power[pT, 6] + 98*Power[pT, 2]*Power[s, 2] - 45*Power[s, 3]) + Power[pT, 4]*Power[Power[pT,2] - s, 4]*Power[s, 4] - 2*s*Power[M, 10]*(-377*s*Power[pT, 6] + 51*Power[pT, 8] + 753*Power[pT, 4]*Power[s, 2] - 561*Power[pT, 2]*Power[s, 3] + 135*Power[s, 4]) + Power[M, 12]*(-252*s*Power[pT, 6] + 9*Power[pT, 8] + 920*Power[pT, 4]*Power[s, 2] - 1008*Power[pT, 2]*Power[s, 3] + 324*Power[s, 4]) + 2*Power[M, 6]*Power[s, 2]*(-227*s*Power[pT, 8] + 42*Power[pT, 10] + 456*Power[pT, 6]*Power[s, 2] - 425*Power[pT, 4]*Power[s, 3] + 180*Power[pT, 2]*Power[s, 4] - 27*Power[s, 5]) + s*Power[M, 8]*(344*s*Power[pT, 8] - 18*Power[pT, 10] - 1142*Power[pT, 6]*Power[s, 2] + 1476*Power[pT, 4]*Power[s, 3] - 810*Power[pT, 2]*Power[s, 4] + 153*Power[s, 5]) + Power[M, 4]*Power[s, 2]*(-86*s*Power[pT, 10] + 9*Power[pT, 12] + 269*Power[pT, 8]*Power[s, 2] - 374*Power[pT, 6]*Power[s, 3] + 263*Power[pT, 4]*Power[s, 4] - 84*Power[pT, 2]*Power[s, 5] + 9*Power[s, 6]) + 2*Power[M, 2]*Power[s, 3]*(10*s*Power[pT, 4] - 3*Power[pT, 6] - 11*Power[pT, 2]*Power[s, 2] + 3*Power[s, 3])*Power[Power[pT,3] - pT*s, 2]");
+        TreeTraverseIterator iterator = new TreeTraverseIterator(t);
+        Tensor M = Tensors.parse("M");
+
+        while (iterator.next() != null)
+            if (TensorUtils.equals(iterator.current(), Tensors.parse("s")))
+                iterator.set(Tensors.pow(M, Complex.TWO));
+        Tensor actual = iterator.result();
+
+        Tensor expected = Tensors.parse("9*Power[M, 20] + 18*Power[M, 18]*(-3*Power[M, 2] + 2*Power[pT, 2]) + 3*Power[M, 16]*(51*Power[M, 4] - 70*Power[M, 2]*Power[pT, 2] + 18*Power[pT, 4]) + 6*Power[M, 14]*(-45*Power[M, 6] + 98*Power[M, 4]*Power[pT, 2] - 54*Power[M, 2]*Power[pT, 4] + 6*Power[pT, 6]) + Power[M, 12]*(324*Power[M, 8] - 1008*Power[M, 6]*Power[pT, 2] + 920*Power[M, 4]*Power[pT, 4] - 252*Power[M, 2]*Power[pT, 6] + 9*Power[pT, 8]) - 2*Power[M, 12]*(135*Power[M, 8] - 561*Power[M, 6]*Power[pT, 2] + 753*Power[M, 4]*Power[pT, 4] - 377*Power[M, 2]*Power[pT, 6] + 51*Power[pT, 8]) + Power[M, 10]*(153*Power[M, 10] - 810*Power[M, 8]*Power[pT, 2] + 1476*Power[M, 6]*Power[pT, 4] - 1142*Power[M, 4]*Power[pT, 6] + 344*Power[M, 2]*Power[pT, 8] - 18*Power[pT, 10]) + 2*Power[M, 10]*(-27*Power[M, 10] + 180*Power[M, 8]*Power[pT, 2] - 425*Power[M, 6]*Power[pT, 4] + 456*Power[M, 4]*Power[pT, 6] - 227*Power[M, 2]*Power[pT, 8] + 42*Power[pT, 10]) + Power[M, 8]*(9*Power[M, 12] - 84*Power[M, 10]*Power[pT, 2] + 263*Power[M, 8]*Power[pT, 4] - 374*Power[M, 6]*Power[pT, 6] + 269*Power[M, 4]*Power[pT, 8] - 86*Power[M, 2]*Power[pT, 10] + 9*Power[pT, 12]) + Power[M, 8]*Power[pT, 4]*Power[-Power[M, 2] + Power[pT, 2], 4] + 2*Power[M, 8]*(3*Power[M, 6] - 11*Power[M, 4]*Power[pT, 2] + 10*Power[M, 2]*Power[pT, 4] - 3*Power[pT, 6])*Power[-(pT*Power[M, 2]) + Power[pT, 3], 2]");
+        Assert.assertTrue(TensorUtils.equals(expected, actual));
+    }
+
+    @Test
+    public void test10() {
+        /*
+         * Substituting pT=M in
+         *
+         * 9*M^20 + 18*M^18*(2*pT^2 - 3*s) + pT^4*(pT^2 - s)^4*s^4 +
+         * 3*M^16*(18*pT^4 - 70*pT^2*s + 51*s^2) + 6*M^14*(6*pT^6 - 54*pT^4*s +
+         * 98*pT^2*s^2 - 45*s^3) + 2*M^2*s^3*(pT^3 - pT*s)^2*(-3*pT^6 +
+         * 10*pT^4*s - 11*pT^2*s^2 + 3*s^3) - 2*M^10*s*(51*pT^8 - 377*pT^6*s +
+         * 753*pT^4*s^2 - 561*pT^2*s^3 + 135*s^4) + M^12*(9*pT^8 - 252*pT^6*s +
+         * 920*pT^4*s^2 - 1008*pT^2*s^3 + 324*s^4) + 2*M^6*s^2*(42*pT^10 -
+         * 227*pT^8*s + 456*pT^6*s^2 - 425*pT^4*s^3 + 180*pT^2*s^4 - 27*s^5) +
+         * M^8*s*(-18*pT^10 + 344*pT^8*s - 1142*pT^6*s^2 + 1476*pT^4*s^3 -
+         * 810*pT^2*s^4 + 153*s^5) + M^4*s^2*(9*pT^12 - 86*pT^10*s +
+         * 269*pT^8*s^2 - 374*pT^6*s^3 + 263*pT^4*s^4 - 84*pT^2*s^5 + 9*s^6)
+         *
+         *
+         */
+        Tensor t = Tensors.parse("9*Power[M, 20] + 18*Power[M, 18]*(-3*s + 2*Power[pT, 2]) + 3*Power[M, 16]*(-70*s*Power[pT, 2] + 18*Power[pT, 4] + 51*Power[s, 2]) + 6*Power[M, 14]*(-54*s*Power[pT, 4] + 6*Power[pT, 6] + 98*Power[pT, 2]*Power[s, 2] - 45*Power[s, 3]) + Power[pT, 4]*Power[Power[pT,2] - s, 4]*Power[s, 4] - 2*s*Power[M, 10]*(-377*s*Power[pT, 6] + 51*Power[pT, 8] + 753*Power[pT, 4]*Power[s, 2] - 561*Power[pT, 2]*Power[s, 3] + 135*Power[s, 4]) + Power[M, 12]*(-252*s*Power[pT, 6] + 9*Power[pT, 8] + 920*Power[pT, 4]*Power[s, 2] - 1008*Power[pT, 2]*Power[s, 3] + 324*Power[s, 4]) + 2*Power[M, 6]*Power[s, 2]*(-227*s*Power[pT, 8] + 42*Power[pT, 10] + 456*Power[pT, 6]*Power[s, 2] - 425*Power[pT, 4]*Power[s, 3] + 180*Power[pT, 2]*Power[s, 4] - 27*Power[s, 5]) + s*Power[M, 8]*(344*s*Power[pT, 8] - 18*Power[pT, 10] - 1142*Power[pT, 6]*Power[s, 2] + 1476*Power[pT, 4]*Power[s, 3] - 810*Power[pT, 2]*Power[s, 4] + 153*Power[s, 5]) + Power[M, 4]*Power[s, 2]*(-86*s*Power[pT, 10] + 9*Power[pT, 12] + 269*Power[pT, 8]*Power[s, 2] - 374*Power[pT, 6]*Power[s, 3] + 263*Power[pT, 4]*Power[s, 4] - 84*Power[pT, 2]*Power[s, 5] + 9*Power[s, 6]) + 2*Power[M, 2]*Power[s, 3]*(10*s*Power[pT, 4] - 3*Power[pT, 6] - 11*Power[pT, 2]*Power[s, 2] + 3*Power[s, 3])*Power[Power[pT,3] - pT*s, 2]");
+        TreeTraverseIterator iterator = new TreeTraverseIterator(t);
+        Tensor M = Tensors.parse("M");
+
+        while (iterator.next() != null)
+            if (TensorUtils.equals(iterator.current(), Tensors.parse("pT")))
+                iterator.set(M);
+        Tensor actual = iterator.result();
+
+        Tensor expected = Tensors.parse("18*(-3*s + 2*Power[M, 2])*Power[M, 18] + 9*Power[M, 20] + 3*Power[M, 16]*(-70*s*Power[M, 2] + 18*Power[M, 4] + 51*Power[s, 2]) + 6*Power[M, 14]*(-54*s*Power[M, 4] + 6*Power[M, 6] + 98*Power[M, 2]*Power[s, 2] - 45*Power[s, 3]) - 2*s*Power[M, 10]*(-377*s*Power[M, 6] + 51*Power[M, 8] + 753*Power[M, 4]*Power[s, 2] - 561*Power[M, 2]*Power[s, 3] + 135*Power[s, 4]) + Power[M, 12]*(-252*s*Power[M, 6] + 9*Power[M, 8] + 920*Power[M, 4]*Power[s, 2] - 1008*Power[M, 2]*Power[s, 3] + 324*Power[s, 4]) + 2*Power[M, 6]*Power[s, 2]*(-227*s*Power[M, 8] + 42*Power[M, 10] + 456*Power[M, 6]*Power[s, 2] - 425*Power[M, 4]*Power[s, 3] + 180*Power[M, 2]*Power[s, 4] - 27*Power[s, 5]) + s*Power[M, 8]*(344*s*Power[M, 8] - 18*Power[M, 10] - 1142*Power[M, 6]*Power[s, 2] + 1476*Power[M, 4]*Power[s, 3] - 810*Power[M, 2]*Power[s, 4] + 153*Power[s, 5]) + Power[M, 4]*Power[s, 2]*(-86*s*Power[M, 10] + 9*Power[M, 12] + 269*Power[M, 8]*Power[s, 2] - 374*Power[M, 6]*Power[s, 3] + 263*Power[M, 4]*Power[s, 4] - 84*Power[M, 2]*Power[s, 5] + 9*Power[s, 6]) + Power[M, 4]*Power[s, 4]*Power[-s + Power[M, 2], 4] + 2*Power[M, 2]*Power[s, 3]*(10*s*Power[M, 4] - 3*Power[M, 6] - 11*Power[M, 2]*Power[s, 2] + 3*Power[s, 3])*Power[-(M*s) + Power[M, 3], 2]");
         Assert.assertTrue(TensorUtils.equals(expected, actual));
     }
 //    @Test
