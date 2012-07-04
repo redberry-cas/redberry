@@ -40,7 +40,7 @@ import static cc.redberry.core.tensor.Tensors.parse;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public class TensorTreeIteratorTest {
+public class TreeTraverseIteratorTest {
 
     @Test
     public void test1() {
