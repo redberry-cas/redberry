@@ -108,6 +108,15 @@ public class TensorUtils {
         return true;
     }
 
+    public static boolean equals(Tensor[] u, Tensor[] v) {
+        if (u.length != v.length)
+            return false;
+        for (int i = 0; i < u.length; ++i)
+            if (!TensorUtils.equals(u[i], v[i]))
+                return false;
+        return true;
+    }
+
     public static boolean equals(Tensor u, Tensor v) {
         if (u == v)
             return true;
@@ -163,7 +172,6 @@ public class TensorUtils {
                 return false;
         return true;
     }
-    
 //
 //    public static IndicesBuilderSorted getAllIndicesBuilder(final Tensor tensor) {
 //        final IndicesBuilderSorted ib = new IndicesBuilderSorted();

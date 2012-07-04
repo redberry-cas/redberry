@@ -147,14 +147,8 @@ public class commons {
 
     @Test
     public void aA() {
-        int[] a = {0x80000001, 0x80000002, 0x80000003};
-        System.out.println(ArraysUtils.toString(a, StringFormat.HEX));
-        Arrays.sort(a);
-        System.out.println(ArraysUtils.toString(a, StringFormat.HEX));
-        int[] b = transform(a, Converter.INVERSE);
-        System.out.println(ArraysUtils.toString(b, StringFormat.HEX));
-        Arrays.sort(b);
-        System.out.println(ArraysUtils.toString(b, StringFormat.HEX));
-        
+        System.out.println("a".hashCode());
+        System.out.println("b".hashCode());
+        System.out.println("cc".hashCode());
     }
 }

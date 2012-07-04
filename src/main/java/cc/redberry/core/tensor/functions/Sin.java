@@ -22,9 +22,11 @@
  */
 package cc.redberry.core.tensor.functions;
 
+import cc.redberry.core.number.*;
 import cc.redberry.core.tensor.AbstractScalarFunction;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.tensor.TensorBuilder;
+import cc.redberry.core.utils.*;
 
 /**
  *
@@ -63,6 +65,8 @@ public final class Sin extends AbstractScalarFunction {
         public Tensor build() {
             if (arg instanceof ArcSin)
                 return arg.get(0);
+            if (TensorUtils.isZero(arg))
+                return Complex.ZERO;
             return new Sin(arg);
         }
     }

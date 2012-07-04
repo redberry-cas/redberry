@@ -176,6 +176,13 @@ public class ParserTest {
         Tensor e = Tensors.parse("x");
         Assert.assertTrue(TensorUtils.equals(e, t));
     }
+    
+     @Test
+    public void testSin4() {
+        Tensor t = Tensors.parse("Sin[0]");
+        Tensor e = Tensors.parse("0");
+        Assert.assertTrue(TensorUtils.equals(e, t));
+    }
 
     @Test(expected = RuntimeException.class)
     public void testSim1() {

@@ -27,6 +27,7 @@ import cc.redberry.core.tensor.AbstractScalarFunction;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.tensor.TensorBuilder;
 import cc.redberry.core.tensor.Tensors;
+import cc.redberry.core.utils.*;
 
 /**
  *
@@ -66,6 +67,8 @@ public class ArcTan extends AbstractScalarFunction {
         public Tensor build() {
             if (arg instanceof Tan)
                 return arg.get(0);
+            if (TensorUtils.isZero(arg))
+                return Complex.ZERO;
             return new ArcTan(arg);
         }
     }

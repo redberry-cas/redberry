@@ -27,6 +27,7 @@ import cc.redberry.core.tensor.AbstractScalarFunction;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.tensor.TensorBuilder;
 import cc.redberry.core.tensor.Tensors;
+import cc.redberry.core.utils.*;
 
 /**
  *
@@ -63,8 +64,10 @@ public final class Log extends AbstractScalarFunction {
 
         @Override
         public Tensor build() {
-            if (arg instanceof Exp)
+            if (arg instanceof Exp)//TODO Log[Power[E,x]] = x
                 return arg.get(0);
+            if (TensorUtils.isOne(arg))
+                return Complex.ZERO;
             return new Log(arg);
         }
     }

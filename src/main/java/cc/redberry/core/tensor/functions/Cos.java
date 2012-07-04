@@ -27,6 +27,7 @@ import cc.redberry.core.tensor.AbstractScalarFunction;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.tensor.TensorBuilder;
 import cc.redberry.core.tensor.Tensors;
+import cc.redberry.core.utils.*;
 
 /**
  *
@@ -65,6 +66,8 @@ public final class Cos extends AbstractScalarFunction {
         public Tensor build() {
             if (arg instanceof ArcCos)
                 return arg.get(0);
+            if (TensorUtils.isZero(arg))
+                return Complex.ONE;
             return new Cos(arg);
         }
     }
