@@ -54,6 +54,8 @@ public class TreeTraverseIterator {
         while (true) {
             next = currentPair.next();
             if (next == null) {
+                if (currentPair.previous == null)
+                    return lastState = null;
                 current = currentPair.getTensor();
                 currentPair = currentPair.previous;
 
@@ -62,7 +64,7 @@ public class TreeTraverseIterator {
 
                 return lastState = TraverseState.Leaving;
             } else {
-                TraversePermission permission = iterationGuide.getPermission(currentPair.tensor, currentPair.position, next);
+                TraversePermission permission = iterationGuide.getPermission(currentPair.tensor, currentPair.position - 1, next);
                 if (permission == null)
                     throw new NullPointerException();
                 if (permission == TraversePermission.DontShow)
