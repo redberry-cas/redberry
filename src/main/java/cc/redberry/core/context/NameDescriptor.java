@@ -28,8 +28,8 @@ import java.util.Arrays;
 import java.util.Objects;
 
 public final class NameDescriptor {
-    //first element is simple tensor indexTypeStructure, other apperars for tensor fields
 
+    //first element is simple tensor indexTypeStructure, other apperars for tensor fields
     private final IndicesTypeStructure[] indexTypeStructures;
     private final String name;
     private final IndicesTypeStructureAndName key;

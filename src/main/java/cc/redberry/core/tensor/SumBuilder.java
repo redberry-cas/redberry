@@ -43,11 +43,11 @@ public final class SumBuilder implements TensorBuilder {
     private Complex complex = Complex.ZERO;
     private Indices indices = null;
 
-    SumBuilder() {
+    public SumBuilder() {
         this(7);
     }
 
-    SumBuilder(int initialCapacity) {
+    public SumBuilder(int initialCapacity) {
         summands = new HashMap<>(initialCapacity);
     }
 

@@ -43,6 +43,15 @@ public final class IndicesTypeStructure {
         this(type.getType(), count);
     }
 
+    public IndicesTypeStructure(final byte[] types, int[] count) {
+        int size = 0;
+        for (int i = 0; i < types.length; ++i) {
+            typesCounts[types[i]] = count[i];
+            size += count[i];
+        }
+        this.size = size;
+    }
+
     public IndicesTypeStructure(SimpleIndices indices) {
         size = indices.size();
         for (int i = 0; i < size; ++i)
