@@ -25,6 +25,7 @@ package cc.redberry.core.utils;
 //import cc.redberry.core.indices.InconsistentIndicesException;
 import cc.redberry.core.combinatorics.IntPermutationsGenerator;
 import cc.redberry.core.number.Complex;
+import cc.redberry.core.tensor.*;
 import cc.redberry.core.tensor.MultiTensor;
 import cc.redberry.core.tensor.SimpleTensor;
 import cc.redberry.core.tensor.Tensor;
@@ -115,6 +116,10 @@ public class TensorUtils {
             if (!TensorUtils.equals(u[i], v[i]))
                 return false;
         return true;
+    }
+
+    public static boolean equals(Tensor u, String v) {
+        return equals(u, Tensors.parse(v));
     }
 
     public static boolean equals(Tensor u, Tensor v) {

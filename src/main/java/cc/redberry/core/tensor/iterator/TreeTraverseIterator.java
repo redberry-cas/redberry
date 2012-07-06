@@ -27,6 +27,38 @@ import cc.redberry.core.tensor.TensorBuilder;
 import cc.redberry.core.tensor.TensorWrapper;
 
 /**
+ * An iterator for tensors that allows the programmer to traverse the tensor
+ * tree structure, modify the tensor during iteration, and obtain information
+ * about iterator's current position in the tensor. A {@code TensorTreeIterator}
+ * has current element, so all methods are defined in terms of the cursor
+ * position. *<p>Example: <blockquote><pre>
+ *      Tensor tensor = Tensors.parse("Cos[a+b+Sin[x]]");
+ *      TensorIterator iterator = new TreeTraverseIterator(tensor);
+ *      TraverseState state;
+ *      while ((state = iterator.next()) != null)
+ *           System.out.println(state + " " + iterator.depth() + " " + iterator.current());
+ * </pre></blockquote> This code will print: <blockquote><pre>
+ *    Entering   Cos[a+b+Sin[y*c+x]]
+ *    Entering   a+b+Sin[y*c+x]
+ *    Entering   a
+ *    Leaving   a
+ *    Entering   b
+ *    Leaving   b
+ *    Entering   Sin[y*c+x]
+ *    Entering   y*c+x
+ *    Entering   y*c
+ *    Entering   y
+ *    Leaving   y
+ *    Entering   c
+ *    Leaving   c
+ *    Leaving   y*c
+ *    Entering   x
+ *    Leaving   x
+ *    Leaving   y*c+x
+ *    Leaving   Sin[y*c+x]
+ *    Leaving   a+b+Sin[y*c+x]
+ *    Leaving   Cos[a+b+Sin[y*c+x]]
+ * </pre></blockquote> </p>
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
@@ -34,12 +66,12 @@ import cc.redberry.core.tensor.TensorWrapper;
 public final class TreeTraverseIterator {
 
     private final TraverseGuide iterationGuide;
-    private LinkedPointer currentPair;
+    private LinkedPointer currentPointer;
     private TraverseState lastState;
     private Tensor current = null;
 
     public TreeTraverseIterator(Tensor tensor, TraverseGuide guide) {
-        currentPair = new LinkedPointer(null, TensorWrapper.wrap(tensor), true);
+        currentPointer = new LinkedPointer(null, TensorWrapper.wrap(tensor), true);
         iterationGuide = guide;
     }
 
@@ -47,56 +79,111 @@ public final class TreeTraverseIterator {
         this(tensor, TraverseGuide.ALL);
     }
 
+    /**
+     *
+     * @return next traverse state and null if there is no next element
+     */
     public TraverseState next() {
-        if (current != null && currentPair.previous == null)
+        if (current != null && currentPointer.previous == null)
             return lastState = null;
         Tensor next;
         while (true) {
-            next = currentPair.next();
+            next = currentPointer.next();
             if (next == null) {
-                if (currentPair.previous == null)
+                if (currentPointer.previous == null)
                     return lastState = null;
-                current = currentPair.getTensor();
-                currentPair = currentPair.previous;
+                current = currentPointer.getTensor();
+                currentPointer = currentPointer.previous;
 
-                if (currentPair.current != null)
-                    currentPair.set(current);
+                if (currentPointer.current != null)
+                    currentPointer.set(current);
 
                 return lastState = TraverseState.Leaving;
             } else {
-                TraversePermission permission = iterationGuide.getPermission(currentPair.tensor, currentPair.position - 1, next);
+                TraversePermission permission = iterationGuide.getPermission(currentPointer.tensor, currentPointer.position - 1, next);
                 if (permission == null)
                     throw new NullPointerException();
                 if (permission == TraversePermission.DontShow)
                     continue;
 
                 current = next;
-                currentPair = new LinkedPointer(currentPair, next, permission == TraversePermission.Enter);
+                currentPointer = new LinkedPointer(currentPointer, next, permission == TraversePermission.Enter);
                 return lastState = TraverseState.Entering;
             }
         }
     }
 
+    /**
+     * Replaces the current cursor with the specified element.
+     *
+     * @param t the element with which to replace the current cursor
+     */
     public void set(Tensor tensor) {
         if (current == tensor)
             return;
         if (tensor == null)
             throw new NullPointerException();
         if (lastState == TraverseState.Entering) {
-            currentPair.previous.set(tensor);
-            currentPair = new LinkedPointer(currentPair.previous, tensor, false);
+            currentPointer.previous.set(tensor);
+            currentPointer = new LinkedPointer(currentPointer.previous, tensor, false);
         } else if (lastState == TraverseState.Leaving)
-            currentPair.set(tensor);
+            currentPointer.set(tensor);
     }
 
+    /**
+     * Returns depth in the tree, relatively to the current cursor position.
+     * Note that depth is counted from zero (e.g. zero will be returned after
+     * first next()). If next() never called or last next() was null , this
+     * method returns -1.
+     *
+     * @return depth in the tree relatively to the current cursor position
+     */
+    public int depth() {
+        LinkedPointer currentPointer = null;
+        if (lastState == TraverseState.Entering)
+            currentPointer = this.currentPointer.previous;
+        else if (lastState == TraverseState.Leaving)
+            currentPointer = this.currentPointer;
+        if (currentPointer == null)
+            return -1;
+        int depth = -1;
+        do {
+            ++depth;
+            currentPointer = currentPointer.previous;
+        } while (currentPointer != null);
+        return depth;
+    }
+
+//    public void levelUp(int levels) {
+//        if (levels == 0)
+//            return;
+//        LinkedPointer currentPointer = null;
+//        if (lastState == TraverseState.Entering)
+//            currentPointer = this.currentPointer.previous;
+//        else if (lastState == TraverseState.Leaving)
+//            currentPointer = this.currentPointer;
+//        while (--levels >= 0 && currentPointer != null)
+//            currentPointer = currentPointer.previous;
+//        this.currentPointer = currentPointer;
+//    }
+    /**
+     * Returns current cursor.
+     *
+     * @return current cursor.
+     */
     public Tensor current() {
         return current;
     }
 
+    /**
+     * Return the resulting tensor.
+     *
+     * @return the resulting tensor
+     */
     public Tensor result() {
-        if (currentPair.previous != null)
+        if (currentPointer.previous != null)
             throw new RuntimeException("Iteration not finished.");
-        return currentPair.getTensor().get(0);
+        return currentPointer.getTensor().get(0);
     }
 
     private static final class LinkedPointer {

@@ -392,25 +392,62 @@ public class TreeTraverseIteratorTest {
         Tensor expected = Tensors.parse("18*(-3*s + 2*Power[M, 2])*Power[M, 18] + 9*Power[M, 20] + 3*Power[M, 16]*(-70*s*Power[M, 2] + 18*Power[M, 4] + 51*Power[s, 2]) + 6*Power[M, 14]*(-54*s*Power[M, 4] + 6*Power[M, 6] + 98*Power[M, 2]*Power[s, 2] - 45*Power[s, 3]) - 2*s*Power[M, 10]*(-377*s*Power[M, 6] + 51*Power[M, 8] + 753*Power[M, 4]*Power[s, 2] - 561*Power[M, 2]*Power[s, 3] + 135*Power[s, 4]) + Power[M, 12]*(-252*s*Power[M, 6] + 9*Power[M, 8] + 920*Power[M, 4]*Power[s, 2] - 1008*Power[M, 2]*Power[s, 3] + 324*Power[s, 4]) + 2*Power[M, 6]*Power[s, 2]*(-227*s*Power[M, 8] + 42*Power[M, 10] + 456*Power[M, 6]*Power[s, 2] - 425*Power[M, 4]*Power[s, 3] + 180*Power[M, 2]*Power[s, 4] - 27*Power[s, 5]) + s*Power[M, 8]*(344*s*Power[M, 8] - 18*Power[M, 10] - 1142*Power[M, 6]*Power[s, 2] + 1476*Power[M, 4]*Power[s, 3] - 810*Power[M, 2]*Power[s, 4] + 153*Power[s, 5]) + Power[M, 4]*Power[s, 2]*(-86*s*Power[M, 10] + 9*Power[M, 12] + 269*Power[M, 8]*Power[s, 2] - 374*Power[M, 6]*Power[s, 3] + 263*Power[M, 4]*Power[s, 4] - 84*Power[M, 2]*Power[s, 5] + 9*Power[s, 6]) + Power[M, 4]*Power[s, 4]*Power[-s + Power[M, 2], 4] + 2*Power[M, 2]*Power[s, 3]*(10*s*Power[M, 4] - 3*Power[M, 6] - 11*Power[M, 2]*Power[s, 2] + 3*Power[s, 3])*Power[-(M*s) + Power[M, 3], 2]");
         Assert.assertTrue(TensorUtils.equals(expected, actual));
     }
-//    @Test
-//    public void testSequence0WithDepthCheck() {
-//        Tensor tensor = Tensors.parse("a+b+d*g*(m+f)");
-//        String[] assertedSequence = {"a",
-//                                     "b",
-//                                     "d",
-//                                     "g",
-//                                     "m",
-//                                     "f",
-//                                     "m+f",
-//                                     "d*g*(m+f)",
-//                                     "a+b+d*g*(m+f)"};
-//        int[] depths = {1, 1, 2, 2, 3, 3, 2, 1, 0};
-//        int i = -1;
-//        TreeTraverseIterator iterator = new TreeTraverseIterator(tensor);
-//        while (iterator.hasNext()) {
-//            Tensor t = iterator.next();
-//            assertEquals(t, assertedSequence[++i]);
-//            assertEquals(iterator.depth(), depths[i]);
-//        }
-//    }
+
+    @Test
+    public void test11() {
+        Tensor tensor = Tensors.parse("a");
+        TreeTraverseIterator iterator = new TreeTraverseIterator(tensor);
+        while (iterator.next() != null)
+            if (TensorUtils.equals(iterator.current(), "a"))
+                iterator.set(Tensors.parse("b"));
+        Assert.assertTrue(TensorUtils.equals(iterator.result(), "b"));
+    }
+
+    @Test
+    public void testDepth1() {
+        Tensor tensor = Tensors.parse("a+b+d*g*(m+f)");
+        TreeTraverseIterator iterator = new TreeTraverseIterator(tensor);
+        while (iterator.next() != null)
+            if (TensorUtils.equals(iterator.current(), "m"))
+                Assert.assertEquals(3, iterator.depth());
+            else if (TensorUtils.equals(iterator.current(), "a"))
+                Assert.assertEquals(1, iterator.depth());
+            else if (TensorUtils.equals(iterator.current(), "d"))
+                Assert.assertEquals(2, iterator.depth());
+            else if (TensorUtils.equals(iterator.current(), "m+f"))
+                Assert.assertEquals(2, iterator.depth());
+        Assert.assertTrue(iterator.depth() == -1);
+    }
+
+    @Test
+    public void testDepth2() {
+        Tensor tensor = parse("Cos[a+b+Sin[x]]");
+        TreeTraverseIterator iterator = new TreeTraverseIterator(tensor);
+        while (iterator.next() != null) {
+            Assert.assertTrue(iterator.depth() >= 0);
+            if (TensorUtils.equals(iterator.current(), "Cos[a+b+Sin[x]]"))
+                Assert.assertEquals(0, iterator.depth());
+            else if (TensorUtils.equals(iterator.current(), "a+b+Sin[x]"))
+                Assert.assertEquals(1, iterator.depth());
+            else if (TensorUtils.equals(iterator.current(), "a"))
+                Assert.assertEquals(2, iterator.depth());
+            else if (TensorUtils.equals(iterator.current(), "b"))
+                Assert.assertEquals(2, iterator.depth());
+            else if (TensorUtils.equals(iterator.current(), "Sin[x]"))
+                Assert.assertEquals(2, iterator.depth());
+            else if (TensorUtils.equals(iterator.current(), "x"))
+                Assert.assertEquals(3, iterator.depth());
+        }
+        Assert.assertTrue(iterator.depth() == -1);
+    }
+
+    @Test
+    public void testLevelUp() {
+        Tensor tensor = parse("Cos[a+b+Sin[x+y*c]]");
+        TreeTraverseIterator iterator = new TreeTraverseIterator(tensor);
+
+        TraverseState state;
+        while ((state = iterator.next()) != null)
+            System.out.println(state + "   " + iterator.current());
+    }
 }
