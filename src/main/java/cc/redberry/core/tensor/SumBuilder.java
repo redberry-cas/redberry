@@ -22,9 +22,13 @@
  */
 package cc.redberry.core.tensor;
 
-import cc.redberry.core.context.*;
-import cc.redberry.core.indexmapping.*;
-import cc.redberry.core.indices.*;
+import cc.redberry.core.context.CC;
+import cc.redberry.core.indexmapping.IndexMappingBuffer;
+import cc.redberry.core.indexmapping.IndexMappingBufferTester;
+import cc.redberry.core.indexmapping.IndexMappings;
+import cc.redberry.core.indices.Indices;
+import cc.redberry.core.indices.IndicesFactory;
+import cc.redberry.core.indices.IndicesUtils;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.utils.TensorUtils;
 import java.util.ArrayList;
@@ -76,7 +80,7 @@ public final class SumBuilder implements TensorBuilder {
     }
 
     //TODO check performance
-    private static Tensor multiply(Tensor summand, Tensor factor) {
+    static Tensor multiply(Tensor summand, Tensor factor) {
         if (TensorUtils.isZero(summand))
             return Complex.ZERO;
         else if (TensorUtils.isOne(summand))
@@ -109,7 +113,7 @@ public final class SumBuilder implements TensorBuilder {
             return new Product(Complex.ONE, new Tensor[]{summand}, new Tensor[]{factor}, null, factor.getIndices());
     }
 
-    private static Complex checkOneOrMinuseOne(Complex c) {
+    static Complex checkOneOrMinuseOne(Complex c) {
         if (c.isOne())
             return Complex.ONE;
         if (c.isMinusOne())
@@ -158,7 +162,7 @@ public final class SumBuilder implements TensorBuilder {
         }
     }
 
-    private static Boolean compareFactors(Tensor u, Tensor v) {
+     static Boolean compareFactors(Tensor u, Tensor v) {
         IndexMappingBuffer buffer;
         if (u.getIndices().size() == 0)
             buffer = IndexMappings.createPort(u, v).take();
@@ -174,7 +178,7 @@ public final class SumBuilder implements TensorBuilder {
         return buffer.getSignum();
     }
 
-    private static Split split(Tensor tensor) {
+    static Split split(Tensor tensor) {
         if (tensor.getIndices().size() == 0) {//case 2*a*b*c
             Complex complex;
             Tensor factor;
@@ -216,29 +220,6 @@ public final class SumBuilder implements TensorBuilder {
         }
     }
 
-    private static class FactorNode {
-
-        final Tensor factor;
-        final TensorBuilder builder;
-
-        public FactorNode(Tensor factor, TensorBuilder builder) {
-            this.factor = factor;
-            this.builder = builder;
-        }
-    }
-
-    private abstract static class Split {
-
-        final Tensor factor;
-        final Tensor summand;
-
-        public Split(Tensor factor, Tensor summand) {
-            this.factor = factor;
-            this.summand = summand;
-        }
-
-        abstract TensorBuilder getBuilder();
-    }
 
     private static class SplitNumbers extends Split {
 
