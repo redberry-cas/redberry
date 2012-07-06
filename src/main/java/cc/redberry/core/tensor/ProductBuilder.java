@@ -43,7 +43,7 @@ public final class ProductBuilder implements TensorBuilder {
     private final List<Tensor> indexlessElements;
     //Only SimpleTensor and Complex can be putted in this map
     //Both SimpleTensor and Complex have hashCode() and equals()
-    private final Map<Tensor, SumBuilder> powers = new HashMap<>();
+    private final Map<Tensor, TensorBuilder> powers = new HashMap<>();
 
     public ProductBuilder(int initialCapacityIndexless, int initialCapacityData) {
         elements = new ArrayList<>(initialCapacityData);
@@ -62,7 +62,7 @@ public final class ProductBuilder implements TensorBuilder {
         ArrayList<Tensor> indexlessData = new ArrayList<>(powers.size() + indexlessElements.size());
 
         Complex complex = this.complex;
-        for (Map.Entry<Tensor, SumBuilderConcurrent> entry : powers.entrySet()) {
+        for (Map.Entry<Tensor, TensorBuilder> entry : powers.entrySet()) {
             Tensor t = Tensors.pow(entry.getKey(), entry.getValue().build());
 
             assert !(t instanceof Product);
@@ -124,9 +124,9 @@ public final class ProductBuilder implements TensorBuilder {
             return;
 
         if (TensorUtils.isSymbol(tensor)) {
-            SumBuilderConcurrent sb = powers.get(tensor);
+            TensorBuilder sb = powers.get(tensor);
             if (sb == null) {
-                sb = new SumBuilderConcurrent();
+                sb = SumBuilderFactory.defaultSumBuilder();
                 powers.put(tensor, sb);
             }
             sb.put(Complex.ONE);
@@ -135,9 +135,9 @@ public final class ProductBuilder implements TensorBuilder {
         if (tensor instanceof Power) {
             Tensor argument = tensor.get(0);
             if (TensorUtils.isSymbolOrNumber(argument)) {
-                SumBuilderConcurrent sb = powers.get(argument);
+                TensorBuilder sb = powers.get(argument);
                 if (sb == null) {
-                    sb = new SumBuilderConcurrent();
+                    sb = SumBuilderFactory.defaultSumBuilder();
                     powers.put(argument, sb);
                 }
                 sb.put(tensor.get(1));

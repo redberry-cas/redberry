@@ -50,7 +50,7 @@ public class Tensors {
     }
 
     public static Tensor sum(Tensor... tensors) {
-        SumBuilder sb = new SumBuilder();
+        TensorBuilder sb = SumBuilderFactory.defaultSumBuilder(tensors.length);
         for (Tensor t : tensors)
             sb.put(t);
         return sb.build();

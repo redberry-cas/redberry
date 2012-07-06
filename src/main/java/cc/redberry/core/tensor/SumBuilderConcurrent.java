@@ -23,7 +23,7 @@
 package cc.redberry.core.tensor;
 
 import cc.redberry.concurrent.ConcurrentGrowingList;
-import cc.redberry.core.indices.Indices;
+import cc.redberry.core.indices.*;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.utils.TensorUtils;
 import java.util.ArrayList;
@@ -40,7 +40,6 @@ import java.util.concurrent.atomic.AtomicReference;
 public class SumBuilderConcurrent implements TensorBuilder {
 
     private final ConcurrentHashMap<Integer, ConcurrentGrowingList<FactorNode>> summands;
-    ;
     private final ThreadLocal<ConcurrentGrowingList<FactorNode>> threadLocalList = new ThreadLocal<ConcurrentGrowingList<FactorNode>>() {
 
         @Override
@@ -60,7 +59,7 @@ public class SumBuilderConcurrent implements TensorBuilder {
     }
 
     @Override
-    public synchronized Tensor build() {
+    public Tensor build() {
         Complex complex = atomicComplex.get();
         if (complex.isNaN() || complex.isInfinite())
             return complex;
@@ -93,7 +92,8 @@ public class SumBuilderConcurrent implements TensorBuilder {
             return;
 
         Indices currentIndices = tensor.getIndices().getFreeIndices();
-        atomicIndices.compareAndSet(null, currentIndices);
+        if (atomicIndices.get() == null)//CHECKSTYLE
+            atomicIndices.compareAndSet(null, IndicesFactory.createSorted(currentIndices));
         if (!atomicIndices.get().equalsRegardlessOrder(currentIndices))
             throw new TensorException("Inconsinstent indices in sum.", tensor);
 

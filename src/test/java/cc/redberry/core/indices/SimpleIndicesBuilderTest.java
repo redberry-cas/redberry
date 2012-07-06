@@ -78,7 +78,6 @@ public class SimpleIndicesBuilderTest {
         builder.append(indices1);
         builder.append(indices2);
         SimpleIndices indices = builder.getIndices();
-        System.out.println(indices);
         SimpleIndices expected = ParserIndices.parseSimple("_ab^cd_A^B");
         expected.getSymmetries().add(IndexType.LatinLower, false, 0, 1, 3, 2);
         expected.getSymmetries().add(IndexType.LatinLower, true, 1, 0, 2, 3);

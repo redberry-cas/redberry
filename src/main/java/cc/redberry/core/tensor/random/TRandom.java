@@ -292,7 +292,7 @@ public final class TRandom {
     }
 
     public Tensor nextSum(int sumSize, int averageProductSize, Indices indices) {//TODO introduce Poisson 
-        SumBuilder sum = new SumBuilder();
+        TensorBuilder sum = SumBuilderFactory.defaultSumBuilder();
         for (int i = 0; i < sumSize; ++i)
             sum.put(nextProduct(averageProductSize, indices));
         return sum.build();

@@ -85,6 +85,7 @@ public class ParserTest {
     public void testReallySimpleTensor() {
         ParseNode node = Parser.DEFAULT.parse("S^k*(c_k*Power[a,1]/a-b_k)");
         Tensor t = node.toTensor();
+        System.out.println(t);
         System.out.println(((Product) t).getAllScalars()[0]);
     }
 

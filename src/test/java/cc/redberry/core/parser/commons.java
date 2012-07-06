@@ -22,6 +22,7 @@
  */
 package cc.redberry.core.parser;
 
+import cc.redberry.core.combinatorics.*;
 import cc.redberry.core.indices.IndicesUtils;
 import cc.redberry.core.utils.ArraysUtils;
 import cc.redberry.core.utils.IntArrayList;
@@ -147,8 +148,21 @@ public class commons {
 
     @Test
     public void aA() {
-        do
-            System.out.println("A");
-        while (2 < 1);
+        int[] a = {5, 4, 3, 1, 2, 0};
+        int[] c = {0, 1, 2, 3, 4, 5};
+        ArraysUtils.stableSort(a, c);
+        int[] cInv = Combinatorics.inverse(c);
+        
+        System.out.println("a: "+Arrays.toString(a));
+        System.out.println("c: "+Arrays.toString(c));
+        System.out.println("i: "+Arrays.toString(cInv));
+        
+        int[] s0 = {0, 2, 1, 5, 4, 3};
+        int[] s = new int[6];
+        for (int i = 0; i < a.length; ++i)
+            s[i] = cInv[s0[c[i]]];
+//            s[cInv[i]] = cInv[s0[i]];
+        System.out.println(Arrays.toString(s));
+        
     }
 }
