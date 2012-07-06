@@ -89,6 +89,7 @@ public final class SimpleIndicesBuilder {
         int[] c;
         int position = 0, k;
 
+        SimpleIndices sd = IndicesFactory.createSimple(null, data);
         //rescaling symmetries to the actual length and positions corresponding 
         //to the sorted indices
         for (Symmetries ss : this.symmetries) {
@@ -99,16 +100,16 @@ public final class SimpleIndicesBuilder {
                 Symmetry s = basis.get(k);
                 for (j = 0; j < data.length; ++j)
                     if (cosort[j] < position || cosort[j] >= position + s.dimension())
-                        c[j] = cosortInv[j];
+                        c[j] = j;
                     else
-                        c[j] = cosortInv[s.newIndexOf(j - position) + position];
+                        c[j] = cosortInv[s.newIndexOf(cosort[j] - position) + position];
                 resultingSymmetries.addUnsafe(UnsafeCombinatorics.createUnsafe(c, s.isAntiSymmetry()));
             }
             //increasing position in the total symmetry array
             position += ss.dimension();
         }
 
-        return UnsafeIndicesFactory.createIsolatedUnsafeWithoutSort(
+        return IndicesFactory.createSimple(
                 new IndicesSymmetries(new IndicesTypeStructure(data), resultingSymmetries), data);
     }
 }
