@@ -27,7 +27,7 @@ package cc.redberry.core.parser;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-enum TensorType {
+public enum TensorType {
     /*
      * Enum values are equal to string representations of corresponfing classes:
      * (TensorType.Power <-> Power and so on)

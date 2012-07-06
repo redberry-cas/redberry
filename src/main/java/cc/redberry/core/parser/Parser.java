@@ -30,6 +30,7 @@ import java.util.Arrays;
  * @author Stanislav Poslavsky
  */
 public class Parser {
+
     public static final Parser DEFAULT =
             new Parser(new NodeParser[]{
                 ParserBrackets.INSTANCE,
@@ -39,15 +40,16 @@ public class Parser {
                 ParserTensorField.INSTANCE,
                 ParserPower.INSTANCE,
                 ParserNumber.INSTANCE,
-                ParserFunctions.INSTANCE
+                ParserFunctions.INSTANCE,
+                ParserExpression.INSTANCE
             });
     private final NodeParser[] nodeParsers;
-
+    
     public Parser(NodeParser... nodeParsers) {
         this.nodeParsers = nodeParsers;
         Arrays.sort(nodeParsers, NodeParserComparator.INSTANCE);
     }
-
+    
     public ParseNode parse(String expression) {
         for (NodeParser nodeParser : nodeParsers) {
             ParseNode node = nodeParser.parseNode(expression.trim(), this);

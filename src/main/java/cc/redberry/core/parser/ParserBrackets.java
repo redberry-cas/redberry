@@ -27,7 +27,7 @@ public class ParserBrackets implements NodeParser {
 
     private ParserBrackets() {
     }
-    private final static int parserID = 10000;
+    private final static int parserID = Integer.MAX_VALUE;
 
     @Override
     public ParseNode parseNode(String expression, Parser parser) {

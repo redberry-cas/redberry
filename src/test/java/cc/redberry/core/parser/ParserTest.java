@@ -177,8 +177,8 @@ public class ParserTest {
         Tensor e = Tensors.parse("x");
         Assert.assertTrue(TensorUtils.equals(e, t));
     }
-    
-     @Test
+
+    @Test
     public void testSin4() {
         Tensor t = Tensors.parse("Sin[0]");
         Tensor e = Tensors.parse("0");
@@ -193,6 +193,19 @@ public class ParserTest {
     }
 
     @Test
-    public void testZeroProductInSum() {
+    public void testExpression1() {
+        Tensor e = Tensors.parse("a = x+y");
+        Assert.assertEquals(Expression.class, e.getClass());
+    }
+
+    @Test(expected = TensorException.class)
+    public void testExpression2() {
+        Tensors.parse("a_m = x+y");
+    }
+
+    @Test
+    public void testExpression4() {
+        Tensor e = Tensors.parse("(a = x+y)*7");
+        Assert.assertEquals(Product.class, e.getClass());
     }
 }
