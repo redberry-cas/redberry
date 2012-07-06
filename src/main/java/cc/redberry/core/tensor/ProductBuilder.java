@@ -62,7 +62,7 @@ public final class ProductBuilder implements TensorBuilder {
         ArrayList<Tensor> indexlessData = new ArrayList<>(powers.size() + indexlessElements.size());
 
         Complex complex = this.complex;
-        for (Map.Entry<Tensor, SumBuilder> entry : powers.entrySet()) {
+        for (Map.Entry<Tensor, SumBuilderConcurrent> entry : powers.entrySet()) {
             Tensor t = Tensors.pow(entry.getKey(), entry.getValue().build());
 
             assert !(t instanceof Product);
@@ -124,9 +124,9 @@ public final class ProductBuilder implements TensorBuilder {
             return;
 
         if (TensorUtils.isSymbol(tensor)) {
-            SumBuilder sb = powers.get(tensor);
+            SumBuilderConcurrent sb = powers.get(tensor);
             if (sb == null) {
-                sb = new SumBuilder();
+                sb = new SumBuilderConcurrent();
                 powers.put(tensor, sb);
             }
             sb.put(Complex.ONE);
@@ -135,9 +135,9 @@ public final class ProductBuilder implements TensorBuilder {
         if (tensor instanceof Power) {
             Tensor argument = tensor.get(0);
             if (TensorUtils.isSymbolOrNumber(argument)) {
-                SumBuilder sb = powers.get(argument);
+                SumBuilderConcurrent sb = powers.get(argument);
                 if (sb == null) {
-                    sb = new SumBuilder();
+                    sb = new SumBuilderConcurrent();
                     powers.put(argument, sb);
                 }
                 sb.put(tensor.get(1));

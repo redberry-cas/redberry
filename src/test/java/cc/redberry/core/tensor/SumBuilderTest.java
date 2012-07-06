@@ -86,7 +86,6 @@ public class SumBuilderTest {
         isb.put(parse("-3*a_mn"));
 
 
-        System.out.println(isb.build());
         Tensor expected = Tensors.parse("0");
         Assert.assertTrue(IndexMappings.mappingExists(expected, isb.build(), false));
     }

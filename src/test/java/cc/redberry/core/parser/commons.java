@@ -147,8 +147,8 @@ public class commons {
 
     @Test
     public void aA() {
-        System.out.println("a".hashCode());
-        System.out.println("b".hashCode());
-        System.out.println("cc".hashCode());
+        do
+            System.out.println("A");
+        while (2 < 1);
     }
 }

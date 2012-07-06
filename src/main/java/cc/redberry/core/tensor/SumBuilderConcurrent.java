@@ -24,11 +24,13 @@ package cc.redberry.core.tensor;
 
 import cc.redberry.concurrent.ConcurrentGrowingList;
 import cc.redberry.core.indices.Indices;
-import cc.redberry.core.indices.IndicesFactory;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.utils.TensorUtils;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  *
@@ -37,7 +39,8 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class SumBuilderConcurrent implements TensorBuilder {
 
-    private final ConcurrentHashMap<Integer, ConcurrentGrowingList<FactorNode>> summands = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<Integer, ConcurrentGrowingList<FactorNode>> summands;
+    ;
     private final ThreadLocal<ConcurrentGrowingList<FactorNode>> threadLocalList = new ThreadLocal<ConcurrentGrowingList<FactorNode>>() {
 
         @Override
@@ -45,11 +48,20 @@ public class SumBuilderConcurrent implements TensorBuilder {
             return new ConcurrentGrowingList<>();
         }
     };
-    private volatile Indices indices;
-    private volatile Complex complex;
+    private final AtomicReference<Indices> atomicIndices = new AtomicReference<>(null);
+    private final AtomicReference<Complex> atomicComplex = new AtomicReference<>(Complex.ZERO);
+
+    public SumBuilderConcurrent(int initialCapacity) {
+        summands = new ConcurrentHashMap<>(initialCapacity);
+    }
+
+    public SumBuilderConcurrent() {
+        summands = new ConcurrentHashMap<>(7);
+    }
 
     @Override
-    public Tensor build() {
+    public synchronized Tensor build() {
+        Complex complex = atomicComplex.get();
         if (complex.isNaN() || complex.isInfinite())
             return complex;
 
@@ -72,20 +84,17 @@ public class SumBuilderConcurrent implements TensorBuilder {
         if (sum.size() == 1)
             return sum.get(0);
 
-        return new Sum(sum.toArray(new Tensor[sum.size()]), indices);
+        return new Sum(sum.toArray(new Tensor[sum.size()]), atomicIndices.get());
     }
 
     @Override
-    public void put(Tensor tensor) {
+    public void put(final Tensor tensor) {
         if (TensorUtils.isZero(tensor))
             return;
 
-        if (indices == null)
-            synchronized (indices) {
-                if (indices == null)
-                    indices = IndicesFactory.createSorted(tensor.getIndices().getFreeIndices());
-            }
-        if (!indices.equalsRegardlessOrder(tensor.getIndices().getFreeIndices()))
+        Indices currentIndices = tensor.getIndices().getFreeIndices();
+        atomicIndices.compareAndSet(null, currentIndices);
+        if (!atomicIndices.get().equalsRegardlessOrder(currentIndices))
             throw new TensorException("Inconsinstent indices in sum.", tensor);
 
         if (tensor instanceof Sum) {
@@ -93,14 +102,17 @@ public class SumBuilderConcurrent implements TensorBuilder {
                 put(s);
             return;
         }
+
         if (tensor instanceof Complex) {
-            synchronized (complex) {
-                complex = complex.add((Complex) tensor);
-            }
+            Complex oldVal, newVal, toAdd = (Complex) tensor;
+            do {
+                oldVal = atomicComplex.get();
+                newVal = oldVal.add(toAdd);
+            } while (!atomicComplex.compareAndSet(oldVal, newVal));
             return;
         }
 
-        Split split = SumBuilder.split(tensor);
+        Split split = Split.split(tensor, true);
 
         Integer hash = split.factor.hashCode();
 
@@ -134,9 +146,9 @@ public class SumBuilderConcurrent implements TensorBuilder {
             if (b == null)
                 continue;
             if (b)
-                current.builder.put(split.summand);
-            else
                 current.builder.put(Tensors.negate(split.summand));
+            else
+                current.builder.put(split.summand);
             break;
         }
     }
