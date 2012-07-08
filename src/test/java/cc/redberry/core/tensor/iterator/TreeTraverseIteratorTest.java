@@ -444,11 +444,14 @@ public class TreeTraverseIteratorTest {
 
     @Test
     public void testLevelUp() {
-        Tensor tensor = parse("Cos[a+b+Sin[x+y*c]]");
+        Tensor tensor = parse("Sin[1/4*x*y]");
         TreeTraverseIterator iterator = new TreeTraverseIterator(tensor);
 
         TraverseState state;
-        while ((state = iterator.next()) != null)
-            System.out.println(state + "   " + iterator.current());
+        while ((state = iterator.next()) != null) {
+            System.out.println(state + "  " + iterator.current());
+            if (TensorUtils.equals(iterator.current(), "y"))
+                iterator.set(Tensors.parse("4"));
+        }
     }
 }

@@ -24,12 +24,16 @@ package cc.redberry.core.utils;
 
 //import cc.redberry.core.indices.InconsistentIndicesException;
 import cc.redberry.core.combinatorics.IntPermutationsGenerator;
+import cc.redberry.core.indices.*;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.tensor.*;
 import cc.redberry.core.tensor.MultiTensor;
 import cc.redberry.core.tensor.SimpleTensor;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.tensor.TensorField;
+import cc.redberry.core.tensor.iterator.*;
+import java.util.*;
+import java.util.Set;
 
 //import cc.redberry.core.indices.Indices;
 //import cc.redberry.core.indices.IndicesBuilderSorted;
@@ -54,6 +58,14 @@ import cc.redberry.core.tensor.TensorField;
 public class TensorUtils {
 
     private TensorUtils() {
+    }
+
+    public static boolean isRealPositiveNumber(Tensor tensor) {
+        if (tensor instanceof Complex) {
+            Complex complex = (Complex) tensor;
+            return complex.isReal() && complex.getReal().signum() > 0;
+        }
+        return false;
     }
 
     public static boolean isIndexless(Tensor... tensors) {
@@ -187,6 +199,30 @@ public class TensorUtils {
             if (!equals(u.get(i), v.get(i)))
                 return false;
         return true;
+    }
+
+    public static Set<Integer> getAllIndices(Tensor tensor) {
+        Set<Integer> indices = new HashSet<>();
+        appendAllIndices(tensor, indices);
+        return indices;
+    }
+
+    private static void appendAllIndices(Tensor tensor, Set<Integer> indices) {
+        if (tensor instanceof SimpleTensor) {
+            Indices ind = tensor.getIndices();
+            final int size = ind.size();
+            for (int i = 0; i < size; ++i)
+                indices.add(IndicesUtils.getNameWithType(ind.get(i)));
+        } else {
+            final int size = tensor.size();
+            Tensor t;
+            for (int i = 0; i < size; ++i) {
+                t = tensor.get(i);
+                if (t instanceof AbstractScalarFunction)
+                    continue;
+                appendAllIndices(tensor.get(i), indices);
+            }
+        }
     }
 //
 //    public static IndicesBuilderSorted getAllIndicesBuilder(final Tensor tensor) {

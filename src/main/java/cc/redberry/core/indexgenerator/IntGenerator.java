@@ -30,6 +30,7 @@ import java.util.Arrays;
  * @author Stanislav Poslavsky
  */
 public final class IntGenerator {
+
     private int[] engagedData;
     private int counter, match;
 
@@ -79,7 +80,7 @@ public final class IntGenerator {
         int pointer = Arrays.binarySearch(engagedData, match, engagedData.length, index);
         if (pointer >= 0)
             return;
-        pointer = -pointer - 1;
+        pointer = ~pointer; //-pointer-1
         if (engagedData[engagedData.length - 1] != Integer.MAX_VALUE)
             ensureCapacity(engagedData.length + 1);
         System.arraycopy(engagedData, pointer, engagedData, pointer + 1, engagedData.length - pointer - 1);

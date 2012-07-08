@@ -165,4 +165,9 @@ public class commons {
         System.out.println(Arrays.toString(s));
         
     }
+    
+    @Test
+    public void asd(){
+        System.out.println(~0);
+    }
 }

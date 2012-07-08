@@ -29,5 +29,4 @@ package cc.redberry.core.indexmapping;
  */
 public interface IndexMapping {
     int map(int from);
-    boolean isEmpty();
 }

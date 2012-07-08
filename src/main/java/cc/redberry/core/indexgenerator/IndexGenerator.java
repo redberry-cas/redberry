@@ -48,7 +48,7 @@ public class IndexGenerator {
         this.generators = generators;
     }
 
-    public IndexGenerator(int[] indexArray) {
+    public IndexGenerator(final int[] indexArray) {
         if (indexArray.length == 0)
             return;
         for (int i = 0; i < indexArray.length; ++i)

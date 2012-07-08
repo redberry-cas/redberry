@@ -64,6 +64,10 @@ public final class IndexMappingBufferRecord {
         return true;
     }
 
+    /**
+     *
+     * @return name with type
+     */
     public int getIndexName() {
         return toName;
     }

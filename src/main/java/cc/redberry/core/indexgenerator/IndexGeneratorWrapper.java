@@ -22,9 +22,9 @@
  */
 package cc.redberry.core.indexgenerator;
 
+import cc.redberry.core.utils.IntArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import cc.redberry.core.utils.IntArrayList;
 
 /**
  *
