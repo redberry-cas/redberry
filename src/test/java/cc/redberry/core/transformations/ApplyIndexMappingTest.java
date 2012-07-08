@@ -22,16 +22,19 @@
  */
 package cc.redberry.core.transformations;
 
-import cc.redberry.core.combinatorics.*;
-import cc.redberry.core.context.*;
-import cc.redberry.core.indexmapping.*;
-import cc.redberry.core.indices.*;
-import cc.redberry.core.tensor.*;
-import cc.redberry.core.utils.*;
-import java.util.*;
-import org.apache.commons.math3.stat.inference.TTest;
-import org.junit.*;
-import static cc.redberry.core.tensor.Tensors.*;
+import cc.redberry.core.indexmapping.IndexMappingBuffer;
+import cc.redberry.core.indexmapping.IndexMappingBufferImpl;
+import cc.redberry.core.indexmapping.IndexMappings;
+import cc.redberry.core.indices.IndexType;
+import cc.redberry.core.tensor.Tensor;
+import cc.redberry.core.utils.TensorUtils;
+import java.util.Arrays;
+import java.util.Set;
+import org.junit.Assert;
+import org.junit.Test;
+
+import static cc.redberry.core.tensor.Tensors.addSymmetry;
+import static cc.redberry.core.tensor.Tensors.parse;
 
 /**
  *
