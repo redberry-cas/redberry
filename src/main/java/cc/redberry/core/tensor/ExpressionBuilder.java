@@ -38,7 +38,7 @@ public class ExpressionBuilder implements TensorBuilder {
     }
 
     @Override
-    public Tensor build() {
+    public Expression build() {
         return new Expression(indices, left, right);
     }
 

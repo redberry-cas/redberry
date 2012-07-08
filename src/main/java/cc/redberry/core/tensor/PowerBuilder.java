@@ -35,14 +35,13 @@ import java.math.BigInteger;
 public final class PowerBuilder implements TensorBuilder {
 
     private Tensor argument, power;
-    private int state = 0;
 
     public PowerBuilder() {
     }
 
     @Override
     public Tensor build() {
-        if (state != 2)
+        if (power == null)
             throw new IllegalStateException("Power is not fully constructed.");
         //TODO improve Complex^Complex
         if (argument instanceof Complex && power instanceof Complex) {
@@ -97,10 +96,12 @@ public final class PowerBuilder implements TensorBuilder {
             return Complex.ZERO;
         if (argument instanceof Product) {
             Tensor[] scalars = ((Product) argument).getAllScalars();
-            TensorBuilder pb = argument.getBuilder();//creating product builder             
-            for (Tensor t : scalars)
-                pb.put(Tensors.pow(t, power));//TODO refactor for performance
-            return pb.build();
+            if (scalars.length > 1) {
+                TensorBuilder pb = argument.getBuilder();//creating product builder             
+                for (Tensor t : scalars)
+                    pb.put(Tensors.pow(t, power));//TODO refactor for performance
+                return pb.build();
+            }
         }
         if (argument instanceof Power)
             return Tensors.pow(argument.get(0), Tensors.multiply(argument.get(1), power));
@@ -113,17 +114,11 @@ public final class PowerBuilder implements TensorBuilder {
             throw new NullPointerException();
         if (!TensorUtils.isScalar(tensor))
             throw new IllegalArgumentException("Non-scalar tensor on input of Power builder.");
-        switch (state) {
-            case 0:
-                argument = tensor;
-                ++state;
-                return;
-            case 1:
-                power = tensor;
-                ++state;
-                return;
-            default:
-                throw new IllegalStateException("Power buider can not take more than two put() invocations.");
-        }
+        if (argument == null)
+            argument = tensor;
+        else if (power == null)
+            power = tensor;
+        else
+            throw new IllegalStateException("Power buider can not take more than two put() invocations.");
     }
 }

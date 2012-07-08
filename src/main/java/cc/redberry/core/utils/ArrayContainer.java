@@ -13,12 +13,12 @@
  * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
  * more details.
  */
-
 package cc.redberry.core.utils;
 
 import java.util.*;
 
 public class ArrayContainer<E> implements List<E> {
+
     private final E[] elementData;
 
     public ArrayContainer(E[] array) {
@@ -74,10 +74,10 @@ public class ArrayContainer<E> implements List<E> {
     /**
      * {@inheritDoc}
      * <p/>
-     * <p>This implementation iterates over the specified collection,
-     * checking each element returned by the iterator in turn to see
-     * if it's contained in this collection.  If all elements are so
-     * contained <tt>true</tt> is returned, otherwise <tt>false</tt>.
+     * <p>This implementation iterates over the specified collection, checking
+     * each element returned by the iterator in turn to see if it's contained in
+     * this collection. If all elements are so contained <tt>true</tt> is
+     * returned, otherwise <tt>false</tt>.
      *
      * @throws ClassCastException   {@inheritDoc}
      * @throws NullPointerException {@inheritDoc}
@@ -90,7 +90,6 @@ public class ArrayContainer<E> implements List<E> {
                 return false;
         return true;
     }
-
 
     @Override
     public boolean addAll(Collection<? extends E> c) {
@@ -144,11 +143,10 @@ public class ArrayContainer<E> implements List<E> {
             for (int i = 0; i < elementData.length; i++)
                 if (elementData[i] == null)
                     return i;
-        } else {
+        } else
             for (int i = 0; i < elementData.length; i++)
                 if (o.equals(elementData[i]))
                     return i;
-        }
         return -1;
     }
 
@@ -158,23 +156,22 @@ public class ArrayContainer<E> implements List<E> {
             for (int i = elementData.length - 1; i >= 0; i--)
                 if (elementData[i] == null)
                     return i;
-        } else {
+        } else
             for (int i = elementData.length - 1; i >= 0; i--)
                 if (o.equals(elementData[i]))
                     return i;
-        }
         return -1;
     }
 
     /**
      * Returns a list iterator over the elements in this list (in proper
-     * sequence), starting at the specified position in the list.
-     * The specified index indicates the first element that would be
-     * returned by an initial call to {@link ListIterator#next next}.
-     * An initial call to {@link ListIterator#previous previous} would
-     * return the element with the specified index minus one.
+     * sequence), starting at the specified position in the list. The specified
+     * index indicates the first element that would be returned by an initial
+     * call to {@link ListIterator#next next}. An initial call to {@link ListIterator#previous previous}
+     * would return the element with the specified index minus one.
      * <p/>
-     * <p>The returned list iterator is <a href="#fail-fast"><i>fail-fast</i></a>.
+     * <p>The returned list iterator is <a
+     * href="#fail-fast"><i>fail-fast</i></a>.
      *
      * @throws IndexOutOfBoundsException {@inheritDoc}
      */
@@ -189,7 +186,8 @@ public class ArrayContainer<E> implements List<E> {
      * Returns a list iterator over the elements in this list (in proper
      * sequence).
      * <p/>
-     * <p>The returned list iterator is <a href="#fail-fast"><i>fail-fast</i></a>.
+     * <p>The returned list iterator is <a
+     * href="#fail-fast"><i>fail-fast</i></a>.
      *
      * @see #listIterator(int)
      */
@@ -205,10 +203,10 @@ public class ArrayContainer<E> implements List<E> {
     }
 
     /**
-     * Checks if the given index is in range.  If not, throws an appropriate
-     * runtime exception.  This method does *not* check if the index is
-     * negative: It is always used immediately prior to an array access,
-     * which throws an ArrayIndexOutOfBoundsException if index is negative.
+     * Checks if the given index is in range. If not, throws an appropriate
+     * runtime exception. This method does *not* check if the index is negative:
+     * It is always used immediately prior to an array access, which throws an
+     * ArrayIndexOutOfBoundsException if index is negative.
      */
     private void rangeCheck(int index) {
         if (index >= elementData.length)
@@ -216,14 +214,13 @@ public class ArrayContainer<E> implements List<E> {
     }
 
     /**
-     * Constructs an IndexOutOfBoundsException detail message.
-     * Of the many possible refactorings of the error handling code,
-     * this "outlining" performs best with both server and client VMs.
+     * Constructs an IndexOutOfBoundsException detail message. Of the many
+     * possible refactorings of the error handling code, this "outlining"
+     * performs best with both server and client VMs.
      */
     private String outOfBoundsMsg(int index) {
         return "Index: " + index + ", Size: " + elementData.length;
     }
-
 
     private static void subListRangeCheck(int fromIndex, int toIndex, int size) {
         if (fromIndex < 0)
@@ -231,15 +228,15 @@ public class ArrayContainer<E> implements List<E> {
         if (toIndex > size)
             throw new IndexOutOfBoundsException("toIndex = " + toIndex);
         if (fromIndex > toIndex)
-            throw new IllegalArgumentException("fromIndex(" + fromIndex +
-                    ") > toIndex(" + toIndex + ")");
+            throw new IllegalArgumentException("fromIndex(" + fromIndex
+                    + ") > toIndex(" + toIndex + ")");
     }
-
 
     /**
      * An optimized version of AbstractList.Itr
      */
     private class Itr implements Iterator<E> {
+
         int cursor;       // index of next element to return
         int lastRet = -1; // index of last element returned; -1 if no such
 
@@ -269,6 +266,7 @@ public class ArrayContainer<E> implements List<E> {
      * An optimized version of AbstractList.ListItr
      */
     private class ListItr extends Itr implements ListIterator<E> {
+
         ListItr(int index) {
             super();
             cursor = index;

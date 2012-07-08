@@ -128,11 +128,15 @@ public class Tensors {
         return new TensorField(name, indices, arguments, argIndices);
     }
 
-    public static Tensor expression(Tensor left, Tensor right) {
+    public static Expression expression(Tensor left, Tensor right) {
         ExpressionBuilder eb = new ExpressionBuilder();
         eb.put(left);
         eb.put(right);
         return eb.build();
+    }
+
+    public static Expression expression(String expression) {
+        return (Expression) parse(expression);
     }
 
     public static Tensor sin(Tensor argument) {

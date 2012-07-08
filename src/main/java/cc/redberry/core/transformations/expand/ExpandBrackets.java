@@ -20,37 +20,33 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
-package cc.redberry.core.tensor.functions;
+package cc.redberry.core.transformations.expand;
 
-import cc.redberry.core.tensor.Tensor;
-import cc.redberry.core.tensor.TensorBuilder;
-import cc.redberry.core.utils.TensorUtils;
+import cc.redberry.core.tensor.*;
+import cc.redberry.core.transformations.Transformation;
+import cc.redberry.core.utils.Indicator;
 
 /**
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-abstract class AbstractScalarFunctionBuilder implements TensorBuilder {
+public class ExpandBrackets implements Transformation {
 
-    protected Tensor arg = null;
+    private final Indicator<Tensor> indicator;
 
-    AbstractScalarFunctionBuilder() {
+    public ExpandBrackets(Indicator<Tensor> indicator) {
+        this.indicator = indicator;
+    }
+
+    public ExpandBrackets() {
+        this.indicator = Indicator.TRUE_INDICATOR;
     }
 
     @Override
-    public void put(Tensor tensor) {
-        if (arg != null)
-            throw new IllegalStateException();
-        if (tensor == null)
-            throw new NullPointerException();
-        if (!TensorUtils.isIndexless(tensor))
-            throw new IllegalArgumentException();
-        arg = tensor;
-    }
-
-    public Tensor eval(Tensor t) {
-        put(t);
-        return build();
+    public Tensor transform(Tensor t) {
+        if(!(t instanceof Product))
+            return t;
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 }

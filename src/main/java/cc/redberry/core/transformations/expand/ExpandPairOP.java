@@ -20,37 +20,36 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
-package cc.redberry.core.tensor.functions;
+package cc.redberry.core.transformations.expand;
 
+import cc.redberry.concurrent.OutputPort;
+import cc.redberry.core.tensor.Sum;
 import cc.redberry.core.tensor.Tensor;
-import cc.redberry.core.tensor.TensorBuilder;
-import cc.redberry.core.utils.TensorUtils;
+import cc.redberry.core.tensor.Tensors;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-abstract class AbstractScalarFunctionBuilder implements TensorBuilder {
+public final class ExpandPairOP implements OutputPort<Tensor> {
 
-    protected Tensor arg = null;
+    private final Tensor sum1, sum2;
+    private final AtomicLong atomicLong = new AtomicLong();
 
-    AbstractScalarFunctionBuilder() {
+    public ExpandPairOP(Sum s1, Sum s2) {
+        sum1 = s1;
+        sum2 = s2;
     }
 
     @Override
-    public void put(Tensor tensor) {
-        if (arg != null)
-            throw new IllegalStateException();
-        if (tensor == null)
-            throw new NullPointerException();
-        if (!TensorUtils.isIndexless(tensor))
-            throw new IllegalArgumentException();
-        arg = tensor;
-    }
-
-    public Tensor eval(Tensor t) {
-        put(t);
-        return build();
+    public Tensor take() {
+        long index = atomicLong.getAndIncrement();
+        if (index >= sum1.size() * sum2.size())
+            return null;
+        int i1 = (int) (index / sum2.size());
+        int i2 = (int) (index % sum2.size());
+        return Tensors.multiply(sum1.get(i1), sum2.get(i2));
     }
 }

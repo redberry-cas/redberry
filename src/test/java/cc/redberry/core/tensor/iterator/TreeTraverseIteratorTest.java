@@ -295,6 +295,7 @@ public class TreeTraverseIteratorTest {
             if (TensorUtils.equals(iterator.current(), Tensors.parse("x")))
                 iterator.set(Complex.ZERO);
         Tensor actual = iterator.result();
+        System.out.println(actual);
         Tensor expected = Tensors.parse("Power[a,2]");
         Assert.assertTrue(TensorUtils.equals(expected, actual));
     }

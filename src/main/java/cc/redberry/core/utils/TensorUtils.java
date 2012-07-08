@@ -56,6 +56,17 @@ public class TensorUtils {
     private TensorUtils() {
     }
 
+    public static boolean isIndexless(Tensor... tensors) {
+        for (Tensor t : tensors)
+            if (!isIndexless1(t))
+                return false;
+        return true;
+    }
+
+    private static boolean isIndexless1(Tensor tensor) {
+        return tensor.getIndices().size() == 0;
+    }
+
     public static boolean isScalar(Tensor... tensors) {
         for (Tensor t : tensors)
             if (!isScalar1(t))
@@ -64,7 +75,7 @@ public class TensorUtils {
     }
 
     private static boolean isScalar1(Tensor tensor) {
-        return tensor.getIndices().size() == 0;
+        return tensor.getIndices().getFreeIndices().size() == 0;
     }
 
     public static boolean isOne(Tensor tensor) {

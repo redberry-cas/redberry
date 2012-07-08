@@ -174,4 +174,6 @@ public class PowerBuilderTest {
         Tensor t = Tensors.parse("1/0*a");
         Assert.assertEquals(Complex.ComplexNaN, t);
     }
+    
+    
 }

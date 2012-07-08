@@ -164,7 +164,6 @@ public abstract class Split {
                 oldVal = atomicComplex.get();
                 newVal = oldVal.add(toAdd);
             } while (!atomicComplex.compareAndSet(oldVal, newVal));
-
         }
     }
 }

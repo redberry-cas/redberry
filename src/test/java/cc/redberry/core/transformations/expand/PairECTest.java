@@ -20,37 +20,28 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
-package cc.redberry.core.tensor.functions;
+package cc.redberry.core.transformations.expand;
 
-import cc.redberry.core.tensor.Tensor;
-import cc.redberry.core.tensor.TensorBuilder;
-import cc.redberry.core.utils.TensorUtils;
+import cc.redberry.core.tensor.*;
+import java.util.logging.*;
+import org.junit.*;
 
 /**
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-abstract class AbstractScalarFunctionBuilder implements TensorBuilder {
+public class PairECTest {
 
-    protected Tensor arg = null;
-
-    AbstractScalarFunctionBuilder() {
-    }
-
-    @Override
-    public void put(Tensor tensor) {
-        if (arg != null)
-            throw new IllegalStateException();
-        if (tensor == null)
-            throw new NullPointerException();
-        if (!TensorUtils.isIndexless(tensor))
-            throw new IllegalArgumentException();
-        arg = tensor;
-    }
-
-    public Tensor eval(Tensor t) {
-        put(t);
-        return build();
+    @Test
+    public void testSomeMethod() {
+        Sum s1 = (Sum) Tensors.parse("1+Power[b_m^m,2]+c");
+        Sum s2 = (Sum) Tensors.parse("1+b_n^n+c");
+        PairEC ec = new PairEC(s1, s2, 12);
+        try {
+            System.out.println(ec.result());
+        } catch (InterruptedException ex) {
+            Logger.getLogger(PairECTest.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 }

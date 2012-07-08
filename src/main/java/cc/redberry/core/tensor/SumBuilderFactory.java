@@ -33,7 +33,7 @@ public final class SumBuilderFactory {
     }
 
     public static TensorBuilder defaultSumBuilder(int initialCapacity) {
-        return new SumBuilderConcurrent(initialCapacity);
+        return new SumBuilder(initialCapacity);
     }
 
     public static TensorBuilder defaultSumBuilder() {
