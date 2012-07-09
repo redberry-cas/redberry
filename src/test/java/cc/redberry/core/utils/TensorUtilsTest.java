@@ -22,10 +22,63 @@
  */
 package cc.redberry.core.utils;
 
+import cc.redberry.core.tensor.Tensor;
+import cc.redberry.core.tensor.Tensors;
+import org.junit.Test;
+
+import static org.junit.Assert.assertTrue;
+
 /**
- *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
 public class TensorUtilsTest {
+    @Test
+    public void test1() {
+        Tensor tensor = Tensors.parse("A_ij");
+        Tensor expected = Tensors.parse("A_ij");
+        assertTrue(TensorUtils.equals(tensor, expected));
+    }
+
+    @Test
+    public void test2() {
+        Tensor tensor = Tensors.parse("A_ij*A_kl");
+        Tensor expected = Tensors.parse("A_kl*A_ij");
+        assertTrue(TensorUtils.equals(tensor, expected));
+    }
+
+    @Test
+    public void test3() {
+        Tensor tensor = Tensors.parse("A_ij*A_kl*A_mn+A_km*A_nl*A_ij");
+        Tensor expected = Tensors.parse("A_ij*A_kl*A_mn+A_km*A_nl*A_ij");
+        assertTrue(TensorUtils.equals(tensor, expected));
+    }
+
+    @Test
+    public void test4() {
+        Tensor tensor = Tensors.parse("A_ij*A_kl*A_mn+A_km*A_nl*A_ij");
+        Tensor expected = Tensors.parse("A_mn*A_kl*A_ij+A_nl*A_km*A_ij");
+        assertTrue(TensorUtils.equals(tensor, expected));
+    }
+
+    @Test
+    public void test5() {
+        Tensor tensor = Tensors.parse("A_ij*A_kl*A_mn+A_km*A_nl*B_ij+B_ijk*C_lmn");
+        Tensor expected = Tensors.parse("C_lmn*B_ijk+A_mn*A_kl*A_ij+A_nl*A_km*B_ij");
+        assertTrue(TensorUtils.equals(tensor, expected));
+    }
+
+    @Test
+    public void testParity1() {
+        Tensor tensor = Tensors.parse("A_ij*A_kl*A_mn+A_km*A_nl*B_ij+B_ijk*C_lmn");
+        Tensor expected = Tensors.parse("C_tmn*B_ijk+A_mn*A_kt*A_ij+A_nt*A_km*B_ij");
+        assertTrue(TensorUtils.testParity(tensor, expected));
+    }
+
+    @Test
+    public void testParity2() {
+        Tensor tensor =   Tensors.parse("A_ij^m*B_mlk+C_ijlkmn*T^mn");
+        Tensor expected = Tensors.parse("A_ij^u*B_ulk+C_ijlknp*T^np");
+        assertTrue(TensorUtils.testParity(tensor, expected));//TODO no mapping has been found, WTF???
+    }
 }
