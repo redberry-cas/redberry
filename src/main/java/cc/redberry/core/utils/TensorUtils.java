@@ -24,6 +24,8 @@ package cc.redberry.core.utils;
 
 //import cc.redberry.core.indices.InconsistentIndicesException;
 
+import cc.redberry.core.indexmapping.IndexMappings;
+import cc.redberry.core.indexmapping.MappingsPort;
 import cc.redberry.core.indices.Indices;
 import cc.redberry.core.indices.IndicesUtils;
 import cc.redberry.core.number.Complex;
@@ -221,6 +223,11 @@ public class TensorUtils {
                 appendAllIndices(tensor.get(i), indices);
             }
         }
+    }
+
+    public static boolean testParity(Tensor u, Tensor v){
+        MappingsPort mp = IndexMappings.createPort(u, v);
+        return mp.take() == null? false: true;
     }
 //
 //    public static IndicesBuilderSorted getAllIndicesBuilder(final Tensor tensor) {

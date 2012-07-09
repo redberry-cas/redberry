@@ -67,4 +67,18 @@ public class TensorUtilsTest {
         Tensor expected = Tensors.parse("C_lmn*B_ijk+A_mn*A_kl*A_ij+A_nl*A_km*B_ij");
         assertTrue(TensorUtils.equals(tensor, expected));
     }
+
+    @Test
+    public void testParity1() {
+        Tensor tensor = Tensors.parse("A_ij*A_kl*A_mn+A_km*A_nl*B_ij+B_ijk*C_lmn");
+        Tensor expected = Tensors.parse("C_tmn*B_ijk+A_mn*A_kt*A_ij+A_nt*A_km*B_ij");
+        assertTrue(TensorUtils.testParity(tensor, expected));
+    }
+
+    @Test
+    public void testParity2() {
+        Tensor tensor =   Tensors.parse("A_ij^m*B_mlk+C_ijlkmn*T^mn");
+        Tensor expected = Tensors.parse("A_ij^u*B_ulk+C_ijlknp*T^np");
+        assertTrue(TensorUtils.testParity(tensor, expected));//TODO no mapping has been found, WTF???
+    }
 }
