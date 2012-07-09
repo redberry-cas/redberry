@@ -23,16 +23,13 @@
 package cc.redberry.core.utils;
 
 //import cc.redberry.core.indices.InconsistentIndicesException;
-import cc.redberry.core.combinatorics.IntPermutationsGenerator;
-import cc.redberry.core.indices.*;
+
+import cc.redberry.core.indices.Indices;
+import cc.redberry.core.indices.IndicesUtils;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.tensor.*;
-import cc.redberry.core.tensor.MultiTensor;
-import cc.redberry.core.tensor.SimpleTensor;
-import cc.redberry.core.tensor.Tensor;
-import cc.redberry.core.tensor.TensorField;
-import cc.redberry.core.tensor.iterator.*;
-import java.util.*;
+
+import java.util.HashSet;
 import java.util.Set;
 
 //import cc.redberry.core.indices.Indices;
@@ -51,6 +48,7 @@ import java.util.Set;
 //import org.apache.commons.math.fraction.Fraction;
 //import org.apache.commons.math.stat.inference.TTest;
 //import org.apache.commons.math.util.MathUtils;
+
 /**
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
@@ -164,25 +162,25 @@ public class TensorUtils {
             int[] hashArray = new int[size];
             int i;
             for (i = 0; i < size; ++i)
-                if ((hashArray[i] = u.get(i).hashCode()) != u.get(i).hashCode())
+                if ((hashArray[i] = u.get(i).hashCode()) != v.get(i).hashCode())
                     return false;
-            int begin = 0, stretchLength, j;
+            int begin = 0, stretchLength, j, n;
             for (i = 1; i <= size; ++i)
                 if (i == size || hashArray[i] != hashArray[i - 1]) {
                     if (i - 1 != begin) {
-                        //TODO use another algorithm
                         stretchLength = i - begin;
-                        IntPermutationsGenerator enumerator = new IntPermutationsGenerator(stretchLength);
-                        int[] permutation;
-                        OUTFOR:
-                        while (enumerator.hasNext()) {
-                            permutation = enumerator.next();
-                            for (j = 0; j < stretchLength; ++j)
-                                if (!equals(u.get(j + begin), v.get(permutation[j] + begin)))
-                                    continue OUTFOR;
-                            return true;
+                        boolean[] usedPos = new boolean[stretchLength];
+                        for (n = begin; n < i; ++n) {
+                            j = begin;
+                            while (j < i && (usedPos[j - begin] || !equals(u.get(n), v.get(j)))) {
+                                ++j;
+                            }
+                            if (j == i)
+                                return false;
+                            usedPos[j] = true; // j'th tensor has pair
                         }
-                        return false;
+                        return true;
+
                     } else if (!equals(u.get(i - 1), v.get(i - 1)))
                         return false;
                     begin = i;
@@ -190,7 +188,7 @@ public class TensorUtils {
         }
         if (u.getClass() == TensorField.class) {
             if (((SimpleTensor) u).getName() != ((SimpleTensor) v).getName()
-                    || !u.getIndices().equals(v.getIndices()));
+                    || !u.getIndices().equals(v.getIndices())) ;
             return false;
         }
 
@@ -202,7 +200,7 @@ public class TensorUtils {
     }
 
     public static Set<Integer> getAllIndices(Tensor tensor) {
-        Set<Integer> indices = new HashSet<>();
+        Set<Integer> indices = new HashSet< >();
         appendAllIndices(tensor, indices);
         return indices;
     }
