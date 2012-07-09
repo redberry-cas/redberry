@@ -104,7 +104,7 @@ public final class PowerBuilder implements TensorBuilder {
             }
         }
         if (argument instanceof Power)
-            return Tensors.pow(argument.get(0), Tensors.multiply(argument.get(1), power));
+            return Tensors.pow(argument.get(0), Tensors.multiplyUnsafe(argument.get(1), power));
         return new Power(argument, power);
     }
 

@@ -47,7 +47,7 @@ import java.util.Set;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public class ApplyIndexMapping implements Transformation {
+public final class ApplyIndexMapping implements Transformation {
 
     private final int[] from, to, forbidden;
 
@@ -105,7 +105,7 @@ public class ApplyIndexMapping implements Transformation {
         return applyIndexMapping1(tensor, from, to, forbidden);
     }
 
-    private static Tensor applyIndexMapping1(Tensor tensor, int[] from, int[] to, int[] forbidden) {
+    public static Tensor applyIndexMapping1(Tensor tensor, int[] from, int[] to, int[] forbidden) {
         int i, rawState;
         for (i = from.length - 1; i >= 0; --i) {
             rawState = IndicesUtils.getRawStateInt(from[i]);

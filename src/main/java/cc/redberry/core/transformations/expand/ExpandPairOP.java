@@ -50,6 +50,6 @@ public final class ExpandPairOP implements OutputPort<Tensor> {
             return null;
         int i1 = (int) (index / sum2.size());
         int i2 = (int) (index % sum2.size());
-        return Tensors.multiply(sum1.get(i1), sum2.get(i2));
+        return Tensors.multiplyUnsafe(sum1.get(i1), sum2.get(i2));
     }
 }
