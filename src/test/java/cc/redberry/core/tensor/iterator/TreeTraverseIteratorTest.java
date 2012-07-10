@@ -454,4 +454,44 @@ public class TreeTraverseIteratorTest {
                 iterator.set(Tensors.parse("4"));
         }
     }
+
+    @Test
+    public void testSet1() {
+        Tensor tensor = parse("x*(a-b+c)");
+        TreeTraverseIterator iterator = new TreeTraverseIterator(tensor);
+        TraverseState state;
+        while ((state = iterator.next()) != null) {
+            System.out.println(state + "   " + iterator.current());
+            if (state == TraverseState.Leaving) {
+                if (TensorUtils.equals(parse("b"), iterator.current()))
+                    iterator.set(parse("d"));
+                if (TensorUtils.equals(parse("x*(a-d+c)"), iterator.current()))
+                    iterator.set(parse("a"));
+
+            }
+            System.out.println(state + "   " + iterator.current());
+        }
+        //no double set exception 
+        Assert.assertTrue(TensorUtils.equals(iterator.result(), parse("a")));
+    }
+    
+     @Test
+    public void testSet2() {
+        Tensor tensor = parse("d+x*(a-b+c)");
+        TreeTraverseIterator iterator = new TreeTraverseIterator(tensor);
+        TraverseState state;
+        while ((state = iterator.next()) != null) {
+            System.out.println(state + "   " + iterator.current());
+            if (state == TraverseState.Leaving) {
+                if (TensorUtils.equals(parse("b"), iterator.current()))
+                    iterator.set(parse("d"));
+                if (TensorUtils.equals(parse("x*(a-d+c)"), iterator.current()))
+                    iterator.set(parse("a"));
+
+            }
+            System.out.println(state + "   " + iterator.current());
+        }
+        //no double set exception 
+        Assert.assertTrue(TensorUtils.equals(iterator.result(), parse("d+a")));
+    }
 }

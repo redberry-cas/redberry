@@ -99,7 +99,7 @@ public final class ApplyIndexMapping implements Transformation {
         if (!Arrays.equals(freeIndices, _from))
             throw new IllegalArgumentException("From indices are not equal to free indices of tensor.");
 
-        return unsafeApplyIndexMappingFromSortedClonedSource(tensor, from, to, forbidden);
+        return unsafeApplyIndexMappingFromSortedClonedPreparedSource(tensor, from, to, forbidden);
     }
 
     public static Tensor renameDummy(Tensor tensor, int[] forbidden) {
@@ -111,10 +111,10 @@ public final class ApplyIndexMapping implements Transformation {
         for (int i = from.length - 1; i >= 0; --i)
             from[i] = IndicesUtils.getNameWithType(from[i]);
         Arrays.sort(from);
-        return unsafeApplyIndexMappingFromSortedClonedSource(tensor, from, from, forbidden);
+        return unsafeApplyIndexMappingFromSortedClonedPreparedSource(tensor, from, from, forbidden);
     }
 
-    public static Tensor unsafeApplyIndexMappingFromClonedSource(Tensor tensor, int[] from, int[] to, int[] forbidden) {
+    private static Tensor unsafeApplyIndexMappingFromClonedSource(Tensor tensor, int[] from, int[] to, int[] forbidden) {
         int i, rawState;
         for (i = from.length - 1; i >= 0; --i) {
             rawState = IndicesUtils.getRawStateInt(from[i]);
@@ -122,10 +122,10 @@ public final class ApplyIndexMapping implements Transformation {
             to[i] ^= rawState;
         }
         ArraysUtils.quickSort(from, to);
-        return unsafeApplyIndexMappingFromSortedClonedSource(tensor, from, to, forbidden);
+        return unsafeApplyIndexMappingFromSortedClonedPreparedSource(tensor, from, to, forbidden);
     }
 
-    public static Tensor unsafeApplyIndexMappingFromSortedClonedSource(
+    private static Tensor unsafeApplyIndexMappingFromSortedClonedPreparedSource(
             Tensor tensor, int[] from, int[] to, int[] forbidden) {
 
         Set<Integer> dummyIndices = TensorUtils.getAllIndices(tensor);

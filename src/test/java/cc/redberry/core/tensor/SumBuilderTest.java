@@ -139,6 +139,4 @@ public class SumBuilderTest {
         Tensor expected = Tensors.parse("5*A__M");
         Assert.assertTrue(IndexMappings.mappingExists(expected, e, false));
     }
-
-    
 }

@@ -396,7 +396,7 @@ public final class Product extends MultiTensor {
     }
     //-65536 == packToLong(-1, (short) -1, (short) 0);
     private static final long dummyTensorInfo = -65536;
-//    private static class ProductContent {
+//        private static class ProductContent {
 //
 //        final ContractionStructure contractionStructure;
 //        final FullContractionsStructure fullContractionsStructure;

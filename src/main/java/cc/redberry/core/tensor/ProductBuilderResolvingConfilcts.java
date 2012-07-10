@@ -79,8 +79,6 @@ public final class ProductBuilderResolvingConfilcts implements TensorBuilder {
         for (i = 0; i < p.data.length; ++i) {
             current = p.data[i];
             if (current instanceof Sum || current instanceof Power) {
-                //(a_m^m+...)*(a_m^m+...)*g_ab
-                //for 1st forbiden
                 free = new HashSet<>(current.getIndices().size());
                 for (j = current.getIndices().size() - 1; j >= 0; --j)
                     free.add(IndicesUtils.getNameWithType(current.getIndices().get(j)));

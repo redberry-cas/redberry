@@ -30,7 +30,6 @@ import cc.redberry.core.transformations.Transformation;
 import cc.redberry.core.utils.Indicator;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.Deque;
 
 /**
  *
@@ -54,12 +53,16 @@ public class ExpandBrackets implements Transformation {
         return expandBrackets(tensor, indicator);
     }
 
+    public static Tensor expandBrackets(Tensor tensor) {
+        return expandBrackets(tensor, Indicator.TRUE_INDICATOR);
+    }
+
     public static Tensor expandBrackets(Tensor tensor, Indicator<Tensor> indicator) {
         TreeTraverseIterator iterator = new TreeTraverseIterator(tensor, TraverseGuide.EXCEPT_FUNCTIONS_AND_FIELDS);
         TraverseState state;
         Tensor current;
         while ((state = iterator.next()) != null) {
-            if (state != TraverseState.Entering)
+            if (state != TraverseState.Leaving)
                 continue;
             current = iterator.current();
             if (!(current instanceof Product))
@@ -80,10 +83,10 @@ public class ExpandBrackets implements Transformation {
                 else
                     nonSums.add(t);
             }
-            
-            if(sums.isEmpty() && indexlessSums.isEmpty())
+
+            if (sums.isEmpty() && indexlessSums.isEmpty())
                 continue;
-            
+
             Sum s1, s2;
             Tensor temp;
             while (sums.size() > 1) {
@@ -104,15 +107,24 @@ public class ExpandBrackets implements Transformation {
                 else
                     nonSums.add(temp);
             }
-            if (sums.isEmpty()) {
-                if (indexlessSums.isEmpty())
-                   iterator.set(UnsafeTensors.unsafeMultiplyWithoutIndicesRenaming(nonSums.toArray(new Tensor[nonSums.size()])));
-                Sum sum = indexlessSums.peek();
-                Tensor[] newSum = new Tensor[sum.size()];
+            Tensor indexless = null;
+            if (indexlessSums.isEmpty())
+                indexless = UnsafeTensors.unsafeMultiplyWithoutIndicesRenaming(nonSums.toArray(new Tensor[nonSums.size()]));
+            else {
+                Sum indexlessSum = indexlessSums.peek();
+                Tensor[] newSum = new Tensor[indexlessSum.size()];
+                for (i = indexlessSum.size() - 1; i >= 0; --i)
+                    newSum[i] = multiply(nonSums, indexlessSum.get(i));
+                indexless = UnsafeTensors.unsafeSumWithouBuilder(newSum);
+            }
+            if (sums.isEmpty())
+                iterator.set(indexless);
+            else {
+                Sum sum = sums.peek();
+                Tensor[] newSum = new Tensor[sums.size()];
                 for (i = sum.size() - 1; i >= 0; --i)
-                    newSum[i] = multiply(nonSums, sum.get(i));
+                    newSum[i] = UnsafeTensors.unsafeSumWithouBuilder(indexless, sum.get(i));
                 iterator.set(UnsafeTensors.unsafeSumWithouBuilder(newSum));
-            } else {
             }
         }
 

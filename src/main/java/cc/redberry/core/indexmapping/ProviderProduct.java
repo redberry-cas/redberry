@@ -200,7 +200,6 @@ final class ProviderProduct implements IndexMappingProvider {
 
     @Override
     public IndexMappingBuffer take() {
-        //TODO discuss with Dima
         IndexMappingBuffer buffer = op.take();
         if (buffer == null)
             return null;

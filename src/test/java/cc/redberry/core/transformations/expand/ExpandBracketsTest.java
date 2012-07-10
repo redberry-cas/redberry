@@ -22,6 +22,8 @@
  */
 package cc.redberry.core.transformations.expand;
 
+import cc.redberry.core.context.*;
+import cc.redberry.core.tensor.*;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.utils.*;
 import org.junit.*;
@@ -37,7 +39,48 @@ public class ExpandBracketsTest {
     @Test
     public void test1() {
         Tensor t = parse("(a+b)*c+a*c");
-        System.out.println(t);
-        System.out.println(ExpandBrackets.expandBrackets(t, Indicator.TRUE_INDICATOR));
+        Tensor actual = ExpandBrackets.expandBrackets(t);
+        Tensor expected = Tensors.parse("2*a*c+b*c");
+        Assert.assertTrue(TensorUtils.equals(actual, expected));
+    }
+
+    @Test
+    public void test2() {
+        Tensor t = parse("(a+b)*c-a*c");
+        Tensor actual = ExpandBrackets.expandBrackets(t);
+        Tensor expected = Tensors.parse("b*c");
+        Assert.assertTrue(TensorUtils.equals(actual, expected));
+    }
+
+    @Test
+    public void test3() {
+        Tensor t = parse("(a*p_i+b*p_i)*c-a*c*p_i");
+        Tensor actual = ExpandBrackets.expandBrackets(t);
+        Tensor expected = Tensors.parse("b*c*p_i");
+        Assert.assertTrue(TensorUtils.equals(actual, expected));
+    }
+
+    @Test
+    public void test4() {
+        Tensor t = parse("(a*p_i+b*p_i)*c-a*c*k_i");
+        Tensor actual = ExpandBrackets.expandBrackets(t);
+        Tensor expected = Tensors.parse("(a*c+c*b)*p_i-a*c*k_i");
+        Assert.assertTrue(TensorUtils.equals(actual, expected));
+    }
+
+    @Test
+    public void test5() {
+        Tensor actual = parse("c*(a*(c+n)+b)");
+        actual = ExpandBrackets.expandBrackets(actual);
+        Tensor expected = parse("c*a*c+c*a*n+c*b");
+        Assert.assertTrue(TensorUtils.equals(actual, expected));
+    }
+
+    @Test
+    public void test6() {
+        Tensor actual = parse("a*(c+b)");
+        actual = ExpandBrackets.expandBrackets(actual);
+        Tensor expected = parse("a*c+a*b");
+        Assert.assertTrue(TensorUtils.equals(actual, expected));
     }
 }

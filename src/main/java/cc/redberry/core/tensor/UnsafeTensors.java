@@ -23,7 +23,8 @@
 package cc.redberry.core.tensor;
 
 import cc.redberry.core.context.*;
-import cc.redberry.core.indices.*;
+import cc.redberry.core.indices.IndicesFactory;
+import cc.redberry.core.indices.SimpleIndices;
 
 /**
  *
@@ -42,7 +43,7 @@ public final class UnsafeTensors {
         return pb.build();
     }
 
-    public static Tensor unsafeSumWithouBuilder(Tensor[] tensor) {
+    public static Tensor unsafeSumWithouBuilder(Tensor... tensor) {
         if (tensor.length == 0)
             throw new IllegalArgumentException();
         if (tensor.length == 1)
@@ -51,10 +52,12 @@ public final class UnsafeTensors {
     }
 
     public static TensorField unsafeSetIndicesToField(TensorField field, SimpleIndices newIndices) {
+        assert CC.getNameDescriptor(field.name).getSymmetries() == newIndices.getSymmetries();
         return new TensorField(field.name, newIndices, field.args, field.argIndices);
     }
 
     public static SimpleTensor unsafeSetIndicesToSimpleTensor(SimpleTensor simpleTensor, SimpleIndices newIndices) {
+        assert CC.getNameDescriptor(simpleTensor.name).getSymmetries() == newIndices.getSymmetries();
         return new SimpleTensor(simpleTensor.name, newIndices);
     }
 }
