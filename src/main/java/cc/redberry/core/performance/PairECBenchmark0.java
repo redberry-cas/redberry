@@ -39,7 +39,7 @@ public class PairECBenchmark0 {
     public static void go(int trys) {
         try {
             //Threads from 1 to maxThread inclusively
-            int maxThread = 1;
+            int maxThread = 5;
 
             //Initialization of outer statistic agregators
             DescriptiveStatistics[] statsMean = new DescriptiveStatistics[maxThread];
@@ -57,10 +57,9 @@ public class PairECBenchmark0 {
                     DescriptiveStatistics ds = new DescriptiveStatistics();
 
                     for (int i = 0; i < 10; ++i) { //Each random sum repeatedly tested 1000 times
-                        Sum[] sums_ = new Sum[]{sums[0], sums[1]};
                         long start = System.nanoTime();
-                        PairEC pec = new PairEC(sums_[0], sums_[1], threads);
-                        Sum res = (Sum) pec.result();
+                        PairEC pec = new PairEC(sums[0], sums[1], threads);
+                        Tensor res = pec.result();
 //                        System.out.println(res.size() + " " + res);
                         ds.addValue(System.nanoTime() - start);
                     }
@@ -91,12 +90,8 @@ public class PairECBenchmark0 {
 
     public static Sum[] random2Sums() { //Random sums pair with renamed indices
         Sum[] sums = random2Sums_();
-//        Product product = Tensors.multiply(sums);
-//        RenameConflictingIndices.INSTANCE.transform(product);
-        return new Sum[]{
-                    sums[0],
-                    sums[1]
-                };
+        Tensor p = Tensors.multiply(sums);
+        return new Sum[]{(Sum) p.get(0), (Sum) p.get(1)};
     }
     public static TRandom random;
 

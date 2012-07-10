@@ -22,6 +22,7 @@
  */
 package cc.redberry.core.tensor;
 
+import cc.redberry.core.indices.*;
 import cc.redberry.core.transformations.ApplyIndexMapping;
 import cc.redberry.core.utils.TensorUtils;
 import java.util.HashSet;
@@ -49,11 +50,14 @@ public final class ProductBuilderResolvingConfilcts implements TensorBuilder {
         Tensor t = builder.build();
         if (!(t instanceof Product))
             return t;
+        //postprocessing product
         Product p = (Product) t;
+        //all product indices
         Set<Integer> totalIndices = TensorUtils.getAllIndices(p);
         int i, j;
         int[] forbidden;
         Tensor current;
+        //processing indexless data
         for (i = 0; i < p.indexlessData.length; ++i) {
             current = p.indexlessData[i];
             if (current instanceof Sum || current instanceof Power) {
@@ -61,24 +65,31 @@ public final class ProductBuilderResolvingConfilcts implements TensorBuilder {
                 j = -1;
                 for (Integer index : totalIndices)
                     forbidden[++j] = index;
-                current = p.indexlessData[i] = ApplyIndexMapping.applyIndexMapping1(current, new int[0], new int[0], forbidden);
-                totalIndices.addAll(TensorUtils.getAllIndices(current));
+                p.indexlessData[i] = ApplyIndexMapping.applyIndexMapping1(current, new int[0], new int[0], forbidden);
+                if (current != p.indexlessData[i])//adding generated indices to totalIndices only if renames were performed
+                    totalIndices.addAll(TensorUtils.getAllIndices(p.indexlessData[i]));
             }
         }
         Set<Integer> free;
+        int[] from;
         for (i = 0; i < p.data.length; ++i) {
             current = p.data[i];
             if (current instanceof Sum || current instanceof Power) {
                 free = new HashSet<>(current.getIndices().size());
-                for (j = current.getIndices().size() - 1; j >= 0; --j)
-                    free.add(current.getIndices().get(j));
-                totalIndices.removeAll(free);
+                from = new int[current.getIndices().size()];
+                for (j = current.getIndices().size() - 1; j >= 0; --j){
+                    free.add(IndicesUtils.getNameWithType(current.getIndices().get(j)));
+                    from[j] =IndicesUtils.getNameWithType(current.getIndices().get(j));
+                }totalIndices.removeAll(free);
                 forbidden = new int[totalIndices.size()];
                 j = -1;
                 for (Integer index : totalIndices)
                     forbidden[++j] = index;
-                current = p.data[i] = ApplyIndexMapping.applyIndexMapping1(current, new int[0], new int[0], forbidden);
-                totalIndices.addAll(TensorUtils.getAllIndices(current));
+                p.data[i] = ApplyIndexMapping.applyIndexMapping1(current, from, from.clone(), forbidden);
+                if (current != p.data[i])//adding generated indices to totalIndices only if renames were performed                    
+                    totalIndices.addAll(TensorUtils.getAllIndices(p.data[i]));
+                else//otherwise adding removed free indices
+                    totalIndices.addAll(free);
             }
         }
         return p;

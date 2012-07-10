@@ -148,7 +148,7 @@ public class GraphUtils {
         return -1;
     }
     
-    private static class BreakfastPointer {
+    private static final class BreakfastPointer {
         final int vertex;
         int edgePointer;
         
