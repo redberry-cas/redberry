@@ -92,7 +92,7 @@ public class ProductTest {
     public void testBuilder() {
         Tensor t1 = Tensors.parse("p_m*p^m");
         Tensor t2 = Tensors.parse("Power[p_m*p^m,2]");
-        System.out.println(Tensors.multiplyUnsafe(t1, t2));
+        System.out.println(UnsafeTensors.unsafeMultiplyWithoutIndicesRenaming(t1, t2));
     }
 
     @Test
@@ -113,6 +113,13 @@ public class ProductTest {
     public void testRenameConflicts3() {
         Tensor t1 = Tensors.parse("A_a^a*A_b^b*A_c^c_m^n+A_d^e*A_e^d*A_f^f_m^n");
         Tensor t2 = Tensors.parse("A_a^a*A_b^b*A_c^c^m_n+A_d^e*A_e^d*A_f^f^m_n");
+        System.out.println(Tensors.multiply(t1, t2));
+    }
+
+    @Test
+    public void testRenameConflicts4() {
+        Tensor t1 = Tensors.parse("(A_a^a+B_a^a)");
+        Tensor t2 = Tensors.parse("(A_a^a+B_a^a)");
         System.out.println(Tensors.multiply(t1, t2));
     }
 }

@@ -132,4 +132,13 @@ public class SumBuilderTest {
         Tensor expected = Tensors.parse("f_m");
         Assert.assertTrue(IndexMappings.mappingExists(expected, e, false));
     }
+
+    @Test
+    public void test12() {
+        Tensor e = Tensors.parse("2*(A_M+A_M)+A_M");
+        Tensor expected = Tensors.parse("5*A__M");
+        Assert.assertTrue(IndexMappings.mappingExists(expected, e, false));
+    }
+
+    
 }

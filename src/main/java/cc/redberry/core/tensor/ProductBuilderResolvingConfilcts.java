@@ -22,7 +22,7 @@
  */
 package cc.redberry.core.tensor;
 
-import cc.redberry.core.indices.*;
+import cc.redberry.core.indices.IndicesUtils;
 import cc.redberry.core.transformations.ApplyIndexMapping;
 import cc.redberry.core.utils.TensorUtils;
 import java.util.HashSet;
@@ -57,6 +57,7 @@ public final class ProductBuilderResolvingConfilcts implements TensorBuilder {
         int i, j;
         int[] forbidden;
         Tensor current;
+
         //processing indexless data
         for (i = 0; i < p.indexlessData.length; ++i) {
             current = p.indexlessData[i];
@@ -65,27 +66,24 @@ public final class ProductBuilderResolvingConfilcts implements TensorBuilder {
                 j = -1;
                 for (Integer index : totalIndices)
                     forbidden[++j] = index;
-                p.indexlessData[i] = ApplyIndexMapping.unsafeApplyIndexMappingFromClonedSource(current, new int[0], new int[0], forbidden);
+                p.indexlessData[i] = ApplyIndexMapping.renameDummyFromClonedSource(current, forbidden);
                 if (current != p.indexlessData[i])//adding generated indices to totalIndices only if renames were performed
                     totalIndices.addAll(TensorUtils.getAllIndices(p.indexlessData[i]));
             }
         }
         Set<Integer> free;
-        int[] from;
         for (i = 0; i < p.data.length; ++i) {
             current = p.data[i];
             if (current instanceof Sum || current instanceof Power) {
                 free = new HashSet<>(current.getIndices().size());
-                from = new int[current.getIndices().size()];
-                for (j = current.getIndices().size() - 1; j >= 0; --j){
+                for (j = current.getIndices().size() - 1; j >= 0; --j)
                     free.add(IndicesUtils.getNameWithType(current.getIndices().get(j)));
-                    from[j] =IndicesUtils.getNameWithType(current.getIndices().get(j));
-                }totalIndices.removeAll(free);
+                totalIndices.removeAll(free);
                 forbidden = new int[totalIndices.size()];
                 j = -1;
                 for (Integer index : totalIndices)
                     forbidden[++j] = index;
-                p.data[i] = ApplyIndexMapping.unsafeApplyIndexMappingFromClonedSource(current, from, from.clone(), forbidden);
+                p.data[i] = ApplyIndexMapping.renameDummyFromClonedSource(current, forbidden);
                 if (current != p.data[i])//adding generated indices to totalIndices only if renames were performed                    
                     totalIndices.addAll(TensorUtils.getAllIndices(p.data[i]));
                 else//otherwise adding removed free indices

@@ -82,7 +82,6 @@ public final class ApplyIndexMapping implements Transformation {
     }
 
     public static Tensor applyIndexMapping(Tensor tensor, IndexMappingBuffer buffer, int[] forbidden) {
-        buffer.removeContracted();
         Map<Integer, IndexMappingBufferRecord> map = buffer.getMap();
         int[] from = new int[map.size()], to = new int[map.size()];
         int count = 0;
@@ -102,7 +101,7 @@ public final class ApplyIndexMapping implements Transformation {
         if (!Arrays.equals(freeIndices, _from))
             throw new IllegalArgumentException("From indices are not equal to free indices of tensor.");
 
-        return unsafeApplyIndexMappingFromClonedSource(tensor, from, to, forbidden);
+        return unsafeApplyIndexMappingFromSortedClonedSource(tensor, from, to, forbidden);
     }
 
     public static Tensor renameDummy(Tensor tensor, int[] forbidden) {

@@ -23,10 +23,7 @@
 package cc.redberry.core.tensor.functions;
 
 import cc.redberry.core.number.Complex;
-import cc.redberry.core.tensor.AbstractScalarFunction;
-import cc.redberry.core.tensor.Tensor;
-import cc.redberry.core.tensor.TensorBuilder;
-import cc.redberry.core.tensor.Tensors;
+import cc.redberry.core.tensor.*;
 import cc.redberry.core.utils.*;
 
 /**
@@ -42,7 +39,7 @@ public class ArcCos extends AbstractScalarFunction {
 
     @Override
     public Tensor derivative() {
-        return Tensors.multiplyUnsafe(Tensors.pow(Tensors.sum(Complex.ONE, Tensors.pow(argument, Complex.TWO)), Complex.MINUSE_ONE_HALF), Complex.MINUSE_ONE);
+        return UnsafeTensors.unsafeMultiplyWithoutIndicesRenaming(Tensors.pow(Tensors.sum(Complex.ONE, Tensors.pow(argument, Complex.TWO)), Complex.MINUSE_ONE_HALF), Complex.MINUSE_ONE);
     }
 
     @Override

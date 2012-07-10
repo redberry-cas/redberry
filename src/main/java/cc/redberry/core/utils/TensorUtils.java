@@ -237,6 +237,18 @@ public class TensorUtils {
 
         return false;
     }
+
+    public static Boolean compare1(Tensor u, Tensor v) {
+        Indices freeIndices = u.getIndices().getFreeIndices();
+        if (!freeIndices.equalsRegardlessOrder(v.getIndices().getFreeIndices()))
+            return false;
+        int[] free = freeIndices.getAllIndices().copy();
+        IndexMappingBuffer tester = new IndexMappingBufferTester(free, false, CC.withMetric());
+        IndexMappingBuffer buffer = IndexMappings.createPort(tester, u, v).take();
+        if (buffer == null)
+            return null;
+        return buffer.getSignum();
+    }
 //
 //    public static IndicesBuilderSorted getAllIndicesBuilder(final Tensor tensor) {
 //        final IndicesBuilderSorted ib = new IndicesBuilderSorted();
