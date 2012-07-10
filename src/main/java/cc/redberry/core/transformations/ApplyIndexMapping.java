@@ -74,7 +74,7 @@ public final class ApplyIndexMapping implements Transformation {
 
     public static Tensor applyIndexMapping(Tensor tensor, int[] from, int[] to, int[] forbidden) {
         checkConsistent(tensor, from);
-        return applyIndexMapping1(tensor, from.clone(), to.clone(), forbidden);
+        return unsafeApplyIndexMappingFromClonedSource(tensor, from.clone(), to.clone(), forbidden);
     }
 
     public static Tensor applyIndexMapping(Tensor tensor, IndexMappingBuffer buffer) {
@@ -102,10 +102,21 @@ public final class ApplyIndexMapping implements Transformation {
         if (!Arrays.equals(freeIndices, _from))
             throw new IllegalArgumentException("From indices are not equal to free indices of tensor.");
 
-        return applyIndexMapping1(tensor, from, to, forbidden);
+        return unsafeApplyIndexMappingFromClonedSource(tensor, from, to, forbidden);
     }
 
-    public static Tensor applyIndexMapping1(Tensor tensor, int[] from, int[] to, int[] forbidden) {
+    public static Tensor renameDummy(Tensor tensor, int[] forbidden) {
+        return renameDummy(tensor, forbidden.clone());
+    }
+
+    public static Tensor renameDummyFromClonedSource(Tensor tensor, int[] forbidden) {
+        int[] from = tensor.getIndices().getFreeIndices().getAllIndices().copy();
+        for (int i = from.length - 1; i >= 0; --i)
+            from[i] = IndicesUtils.getNameWithType(from[i]);
+        return unsafeApplyIndexMappingFromSortedClonedSource(tensor, from, from, forbidden);
+    }
+
+    public static Tensor unsafeApplyIndexMappingFromClonedSource(Tensor tensor, int[] from, int[] to, int[] forbidden) {
         int i, rawState;
         for (i = from.length - 1; i >= 0; --i) {
             rawState = IndicesUtils.getRawStateInt(from[i]);
@@ -113,10 +124,16 @@ public final class ApplyIndexMapping implements Transformation {
             to[i] ^= rawState;
         }
         ArraysUtils.quickSort(from, to);
+        return unsafeApplyIndexMappingFromSortedClonedSource(tensor, from, to, forbidden);
+    }
+
+    public static Tensor unsafeApplyIndexMappingFromSortedClonedSource(
+            Tensor tensor, int[] from, int[] to, int[] forbidden) {
         Set<Integer> allIndices = TensorUtils.getAllIndices(tensor);
 
         //extracting contracted only
         Indices indices = tensor.getIndices().getFreeIndices();
+        int i;
         for (i = indices.size() - 1; i >= 0; --i)
             allIndices.remove(IndicesUtils.getNameWithType(indices.get(i)));
 

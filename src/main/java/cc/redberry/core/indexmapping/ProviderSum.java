@@ -104,6 +104,7 @@ final class ProviderSum implements IndexMappingProvider {
             final IndexMappingBuffer buffer = mainProvider.take();
             if (buffer == null)
                 return null;
+            buffer.removeContracted();//FIXME discuss with Dima
             final IndexMappingBufferTester tester = IndexMappingBufferTester.create(buffer);
             for (Tester t : testers)
                 if (!t.test(tester))

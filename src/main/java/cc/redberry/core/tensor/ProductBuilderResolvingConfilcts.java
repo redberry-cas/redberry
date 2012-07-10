@@ -65,7 +65,7 @@ public final class ProductBuilderResolvingConfilcts implements TensorBuilder {
                 j = -1;
                 for (Integer index : totalIndices)
                     forbidden[++j] = index;
-                p.indexlessData[i] = ApplyIndexMapping.applyIndexMapping1(current, new int[0], new int[0], forbidden);
+                p.indexlessData[i] = ApplyIndexMapping.unsafeApplyIndexMappingFromClonedSource(current, new int[0], new int[0], forbidden);
                 if (current != p.indexlessData[i])//adding generated indices to totalIndices only if renames were performed
                     totalIndices.addAll(TensorUtils.getAllIndices(p.indexlessData[i]));
             }
@@ -85,7 +85,7 @@ public final class ProductBuilderResolvingConfilcts implements TensorBuilder {
                 j = -1;
                 for (Integer index : totalIndices)
                     forbidden[++j] = index;
-                p.data[i] = ApplyIndexMapping.applyIndexMapping1(current, from, from.clone(), forbidden);
+                p.data[i] = ApplyIndexMapping.unsafeApplyIndexMappingFromClonedSource(current, from, from.clone(), forbidden);
                 if (current != p.data[i])//adding generated indices to totalIndices only if renames were performed                    
                     totalIndices.addAll(TensorUtils.getAllIndices(p.data[i]));
                 else//otherwise adding removed free indices

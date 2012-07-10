@@ -23,9 +23,8 @@
 package cc.redberry.core.utils;
 
 //import cc.redberry.core.indices.InconsistentIndicesException;
-
-import cc.redberry.core.indexmapping.IndexMappings;
-import cc.redberry.core.indexmapping.MappingsPort;
+import cc.redberry.core.context.CC;
+import cc.redberry.core.indexmapping.*;
 import cc.redberry.core.indices.Indices;
 import cc.redberry.core.indices.IndicesUtils;
 import cc.redberry.core.number.Complex;
@@ -50,7 +49,6 @@ import java.util.Set;
 //import org.apache.commons.math.fraction.Fraction;
 //import org.apache.commons.math.stat.inference.TTest;
 //import org.apache.commons.math.util.MathUtils;
-
 /**
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
@@ -172,17 +170,16 @@ public class TensorUtils {
                     if (i - 1 != begin) {
                         stretchLength = i - begin;
                         boolean[] usedPos = new boolean[stretchLength];
+                        OUT:
                         for (n = begin; n < i; ++n) {
-                            j = begin;
-                            while (j < i && (usedPos[j - begin] || !equals(u.get(n), v.get(j)))) {
-                                ++j;
-                            }
-                            if (j == i)
-                                return false;
-                            usedPos[j] = true; // j'th tensor has pair
+                            for (j = begin; j < i; ++j)
+                                if (usedPos[j - begin] == false && equals(u.get(n), v.get(j))) {
+                                    usedPos[j - begin] = true;
+                                    continue OUT;
+                                }
+                            return false;
                         }
                         return true;
-
                     } else if (!equals(u.get(i - 1), v.get(i - 1)))
                         return false;
                     begin = i;
@@ -202,7 +199,7 @@ public class TensorUtils {
     }
 
     public static Set<Integer> getAllIndices(Tensor tensor) {
-        Set<Integer> indices = new HashSet< >();
+        Set<Integer> indices = new HashSet<>();
         appendAllIndices(tensor, indices);
         return indices;
     }
@@ -225,9 +222,20 @@ public class TensorUtils {
         }
     }
 
-    public static boolean testParity(Tensor u, Tensor v){
-        MappingsPort mp = IndexMappings.createPort(u, v);
-        return mp.take() == null? false: true;
+    public static boolean compare(Tensor u, Tensor v) {
+        Indices freeIndices = u.getIndices().getFreeIndices();
+        if (!freeIndices.equalsRegardlessOrder(v.getIndices().getFreeIndices()))
+            return false;
+        int[] free = freeIndices.getAllIndices().copy();
+        IndexMappingBuffer tester = new IndexMappingBufferTester(free, false, CC.withMetric());
+        MappingsPort mp = IndexMappings.createPort(tester, u, v);
+        IndexMappingBuffer buffer;
+
+        while ((buffer = mp.take()) != null)
+            if (buffer.getSignum() == false)
+                return true;
+
+        return false;
     }
 //
 //    public static IndicesBuilderSorted getAllIndicesBuilder(final Tensor tensor) {
@@ -431,7 +439,7 @@ public class TensorUtils {
 //        OUTER:
 //        for (int i = from; i < to; ++i) {
 //            for (j = i + 1; j < to; ++j)
-//                if (TTest.testParity(array[i], array[j]))
+//                if (TTest.compare(array[i], array[j]))
 //                    continue OUTER;
 //            tensors.add(array[i]);
 //        }
