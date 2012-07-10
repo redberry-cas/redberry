@@ -111,7 +111,7 @@ public class ExpandBrackets implements Transformation {
                 Tensor[] newSum = new Tensor[sum.size()];
                 for (i = sum.size() - 1; i >= 0; --i)
                     newSum[i] = multiply(nonSums, sum.get(i));
-                iterator.set(UnsafeTensors.unsafeSum(newSum));
+                iterator.set(UnsafeTensors.unsafeSumWithouBuilder(newSum));
             } else {
             }
         }

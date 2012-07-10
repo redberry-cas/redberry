@@ -25,8 +25,8 @@ import java.util.Arrays;
  */
 public final class TensorField extends SimpleTensor {
 
-    private Tensor[] args;
-    private SimpleIndices[] argIndices;
+    protected Tensor[] args;
+    protected SimpleIndices[] argIndices;
 
     TensorField(int name, SimpleIndices indices, Tensor[] args, SimpleIndices[] argIndices) {
         super(name, indices);
@@ -47,6 +47,7 @@ public final class TensorField extends SimpleTensor {
     public SimpleIndices getArgIndices(int i) {
         return argIndices[i];
     }
+    
 
     @Override
     public Tensor get(int i) {

@@ -33,7 +33,10 @@ import cc.redberry.core.tensor.functions.*;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public class Tensors {
+public final class Tensors {
+
+    private Tensors() {
+    }
 
     public static Tensor pow(Tensor argument, Tensor power) {
         PowerBuilder pb = new PowerBuilder();

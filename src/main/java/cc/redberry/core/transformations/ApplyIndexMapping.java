@@ -29,9 +29,7 @@ import cc.redberry.core.indexmapping.IndexMappingBufferRecord;
 import cc.redberry.core.indices.Indices;
 import cc.redberry.core.indices.IndicesUtils;
 import cc.redberry.core.indices.SimpleIndices;
-import cc.redberry.core.tensor.SimpleTensor;
-import cc.redberry.core.tensor.Tensor;
-import cc.redberry.core.tensor.Tensors;
+import cc.redberry.core.tensor.*;
 import cc.redberry.core.tensor.iterator.TraverseGuide;
 import cc.redberry.core.tensor.iterator.TraverseState;
 import cc.redberry.core.tensor.iterator.TreeTraverseIterator;
@@ -128,13 +126,13 @@ public final class ApplyIndexMapping implements Transformation {
 
     public static Tensor unsafeApplyIndexMappingFromSortedClonedSource(
             Tensor tensor, int[] from, int[] to, int[] forbidden) {
-        Set<Integer> allIndices = TensorUtils.getAllIndices(tensor);
 
+        Set<Integer> dummyIndices = TensorUtils.getAllIndices(tensor);
         //extracting contracted only
         Indices indices = tensor.getIndices().getFreeIndices();
         int i;
         for (i = indices.size() - 1; i >= 0; --i)
-            allIndices.remove(IndicesUtils.getNameWithType(indices.get(i)));
+            dummyIndices.remove(IndicesUtils.getNameWithType(indices.get(i)));
 
 
         int[] allForbidden = new int[to.length + forbidden.length];
@@ -147,8 +145,14 @@ public final class ApplyIndexMapping implements Transformation {
         fromL.addAll(from);
         toL.addAll(to);
 
-        IndexGenerator generator = new IndexGenerator(allForbidden);//also sorts allForbidden array
-        for (Integer index : allIndices)
+        int[] forbiddenGeneratorIndices = new int[allForbidden.length + dummyIndices.size()];
+        System.arraycopy(allForbidden, 0, forbiddenGeneratorIndices, 0, allForbidden.length);
+        i = allForbidden.length - 1;
+        for (Integer index : dummyIndices)
+            forbiddenGeneratorIndices[++i] = index;
+
+        IndexGenerator generator = new IndexGenerator(forbiddenGeneratorIndices);//also sorts allForbidden array
+        for (Integer index : dummyIndices)
             if (Arrays.binarySearch(allForbidden, index) >= 0 && Arrays.binarySearch(from, index) < 0) {
                 fromL.add(index);
                 toL.add(generator.generate(IndicesUtils.getType(index)));
@@ -174,7 +178,10 @@ public final class ApplyIndexMapping implements Transformation {
             oldIndices = simpleTensor.getIndices();
             newIndices = oldIndices.applyIndexMapping(mapper);
             if (oldIndices != newIndices)
-                iterator.set(Tensors.simpleTensor(simpleTensor.getName(), newIndices));
+                if (simpleTensor instanceof TensorField)
+                    iterator.set(UnsafeTensors.unsafeSetIndicesToField((TensorField) simpleTensor, newIndices));
+                else
+                    iterator.set(UnsafeTensors.unsafeSetIndicesToSimpleTensor(simpleTensor, newIndices));
         }
         return iterator.result();
     }

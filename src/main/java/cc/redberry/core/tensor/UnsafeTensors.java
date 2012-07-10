@@ -22,14 +22,18 @@
  */
 package cc.redberry.core.tensor;
 
-import cc.redberry.core.indices.IndicesFactory;
+import cc.redberry.core.context.*;
+import cc.redberry.core.indices.*;
 
 /**
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public class UnsafeTensors {
+public final class UnsafeTensors {
+
+    private UnsafeTensors() {
+    }
 
     public static Tensor unsafeMultiplyWithoutIndicesRenaming(Tensor... factors) {
         ProductBuilder pb = new ProductBuilder();
@@ -38,11 +42,19 @@ public class UnsafeTensors {
         return pb.build();
     }
 
-    public static Tensor unsafeSum(Tensor[] tensor) {
-        if(tensor.length == 0)
+    public static Tensor unsafeSumWithouBuilder(Tensor[] tensor) {
+        if (tensor.length == 0)
             throw new IllegalArgumentException();
-        if(tensor.length == 1)
+        if (tensor.length == 1)
             return tensor[0];
         return new Sum(tensor, IndicesFactory.createSorted(tensor[0].getIndices().getFreeIndices()));
+    }
+
+    public static TensorField unsafeSetIndicesToField(TensorField field, SimpleIndices newIndices) {
+        return new TensorField(field.name, newIndices, field.args, field.argIndices);
+    }
+
+    public static SimpleTensor unsafeSetIndicesToSimpleTensor(SimpleTensor simpleTensor, SimpleIndices newIndices) {
+        return new SimpleTensor(simpleTensor.name, newIndices);
     }
 }
