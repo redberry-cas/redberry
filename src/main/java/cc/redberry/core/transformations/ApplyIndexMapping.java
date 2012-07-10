@@ -151,6 +151,7 @@ public final class ApplyIndexMapping implements Transformation {
         for (Integer index : dummyIndices)
             forbiddenGeneratorIndices[++i] = index;
 
+        Arrays.sort(allForbidden);
         IndexGenerator generator = new IndexGenerator(forbiddenGeneratorIndices);//also sorts allForbidden array
         for (Integer index : dummyIndices)
             if (Arrays.binarySearch(allForbidden, index) >= 0 && Arrays.binarySearch(from, index) < 0) {
