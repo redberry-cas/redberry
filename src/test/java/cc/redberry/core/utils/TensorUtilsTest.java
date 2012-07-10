@@ -22,14 +22,13 @@
  */
 package cc.redberry.core.utils;
 
-import cc.redberry.core.context.*;
-import cc.redberry.core.indexmapping.*;
+import cc.redberry.core.context.CC;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.tensor.Tensors;
 import org.junit.Test;
 
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Dmitry Bolotin
@@ -93,10 +92,6 @@ public class TensorUtilsTest {
     public void testParity3() {
         Tensor tensor = Tensors.parse("A_ij^m*B_mlk");
         Tensor expected = Tensors.parse("A_ij^u*B_ulk");
-        MappingsPort mp = IndexMappings.createPort(tensor, expected);
-        IndexMappingBuffer buffer;
-        while ((buffer = mp.take()) != null)
-            System.out.println(buffer);
-//        assertTrue(TensorUtils.compare(tensor, expected));//TODO no mapping has been found, WTF???
+        assertTrue(TensorUtils.compare(tensor, expected));
     }
 }
