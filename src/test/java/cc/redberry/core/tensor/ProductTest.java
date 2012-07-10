@@ -122,4 +122,10 @@ public class ProductTest {
         Tensor t2 = Tensors.parse("(A_a^a+B_a^a)");
         System.out.println(Tensors.multiply(t1, t2));
     }
+
+    @Test
+    public void testRenameConflicts5() {
+        Tensor t = Tensors.parse("(A_mn*B^mn_ab+C_ab)*C^dc");
+        System.out.println(t);
+    }
 }

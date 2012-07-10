@@ -26,7 +26,7 @@ import cc.redberry.core.indexmapping.IndexMappingBuffer;
 import cc.redberry.core.indexmapping.IndexMappingBufferImpl;
 import cc.redberry.core.indexmapping.IndexMappings;
 import cc.redberry.core.indices.IndexType;
-import cc.redberry.core.tensor.Tensor;
+import cc.redberry.core.tensor.*;
 import cc.redberry.core.utils.TensorUtils;
 import org.junit.Assert;
 import org.junit.Test;
@@ -115,7 +115,7 @@ public class ApplyIndexMappingTest {
         int[] usedIndices = parse("B_mn").getIndices().getAllIndices().copy();
         Tensor target = parse("(A_mn*B^mn_ab+C_ab)*C^dc");
         target = ApplyIndexMapping.applyIndexMapping(target, imb, usedIndices);
-        Tensor standard = parse("(A_{ab}*B^{ab}_{wx}+C_{wx})*C^{zy}");
+        Tensor standard = UnsafeTensors.unsafeMultiplyWithoutIndicesRenaming(parse("(A_{ab}*B^{ab}_{wx}+C_{wx})"), parse("C^{zy}"));
         Assert.assertTrue(TensorUtils.equals(target, standard));
     }
 

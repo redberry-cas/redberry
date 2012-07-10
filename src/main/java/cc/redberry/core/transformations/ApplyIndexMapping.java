@@ -110,6 +110,7 @@ public final class ApplyIndexMapping implements Transformation {
         int[] from = tensor.getIndices().getFreeIndices().getAllIndices().copy();
         for (int i = from.length - 1; i >= 0; --i)
             from[i] = IndicesUtils.getNameWithType(from[i]);
+        Arrays.sort(from);
         return unsafeApplyIndexMappingFromSortedClonedSource(tensor, from, from, forbidden);
     }
 
@@ -145,13 +146,13 @@ public final class ApplyIndexMapping implements Transformation {
         fromL.addAll(from);
         toL.addAll(to);
 
+        Arrays.sort(allForbidden);
         int[] forbiddenGeneratorIndices = new int[allForbidden.length + dummyIndices.size()];
         System.arraycopy(allForbidden, 0, forbiddenGeneratorIndices, 0, allForbidden.length);
         i = allForbidden.length - 1;
         for (Integer index : dummyIndices)
             forbiddenGeneratorIndices[++i] = index;
 
-        Arrays.sort(allForbidden);
         IndexGenerator generator = new IndexGenerator(forbiddenGeneratorIndices);//also sorts allForbidden array
         for (Integer index : dummyIndices)
             if (Arrays.binarySearch(allForbidden, index) >= 0 && Arrays.binarySearch(from, index) < 0) {

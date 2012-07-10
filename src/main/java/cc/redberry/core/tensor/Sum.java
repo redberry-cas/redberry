@@ -77,7 +77,7 @@ public final class Sum extends MultiTensor {
     }
     
     @Override
-    public Tensor[] getRange(int from, int to) {
+    public Tensor[] getRange(int from, int to) {         
         return Arrays.copyOfRange(data, from, to);
     }
     
