@@ -22,12 +22,14 @@
  */
 package cc.redberry.core.transformations.expand;
 
-import cc.redberry.core.context.*;
-import cc.redberry.core.tensor.*;
+import cc.redberry.core.context.CC;
 import cc.redberry.core.tensor.Tensor;
-import cc.redberry.core.utils.*;
-import org.junit.*;
-import static cc.redberry.core.tensor.Tensors.*;
+import cc.redberry.core.tensor.Tensors;
+import cc.redberry.core.utils.TensorUtils;
+import org.junit.Assert;
+import org.junit.Test;
+
+import static cc.redberry.core.tensor.Tensors.parse;
 
 /**
  *
@@ -82,5 +84,51 @@ public class ExpandBracketsTest {
         actual = ExpandBrackets.expandBrackets(actual);
         Tensor expected = parse("a*c+a*b");
         Assert.assertTrue(TensorUtils.equals(actual, expected));
+    }
+
+    @Test
+    public void test7() {
+        Tensor actual = parse("Power[a+b,2]");
+        actual = ExpandBrackets.expandBrackets(actual);
+        Tensor expected = parse("a*a+b*b+2*a*b");
+        Assert.assertTrue(TensorUtils.equals(actual, expected));
+    }
+
+    @Test
+    public void test8() {
+        Tensor actual = parse("Power[a+b,3]");
+        actual = ExpandBrackets.expandBrackets(actual);
+        Tensor expected = parse("a*a*a+b*b*b+3*a*a*b+3*a*b*b");
+        Assert.assertTrue(TensorUtils.equals(actual, expected));
+    }
+
+    @Test
+    public void test9Concurrent() {
+        for (int i = 0; i < 100; ++i) {
+            CC.resetTensorNames();
+            Tensor actual = parse("Power[a+b,30]");
+            actual = ExpandBrackets.expandBrackets(actual, 4);
+            Assert.assertTrue(actual.size() == 31);
+        }
+    }
+
+    @Test
+    public void test10() {
+        for (int i = 2; i < 30; ++i) {
+            Tensor actual = Tensors.pow(parse("a+b"), i);
+            actual = ExpandBrackets.expandBrackets(actual);
+            Assert.assertTrue(actual.size() == i + 1);
+        }
+    }
+
+    @Test
+    public void test11() {
+        for (int i = 0; i < 100; ++i) {
+            CC.resetTensorNames();
+            Tensor actual = parse("Power[a_i^i+b_i^i,2]");
+            actual = ExpandBrackets.expandBrackets(actual);
+            Tensor expected = parse("2*b_{i}^{i}*a_{a}^{a}+a_{i}^{i}*a_{a}^{a}+b_{i}^{i}*b_{a}^{a}");
+            Assert.assertTrue(TensorUtils.compare(actual, expected));
+        }
     }
 }

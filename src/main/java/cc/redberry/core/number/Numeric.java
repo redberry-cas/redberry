@@ -433,4 +433,9 @@ public final class Numeric extends Real implements Serializable {
     public int signum() {
         return value > 0 ? 1 : value == 0 ? 0 : -1;
     }
+
+    @Override
+    public boolean isInteger() {
+        return false;
+    }
 }

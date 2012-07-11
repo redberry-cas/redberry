@@ -27,7 +27,9 @@ import cc.redberry.core.context.CC;
 import cc.redberry.core.context.NameDescriptor;
 import cc.redberry.core.indices.*;
 import cc.redberry.core.number.*;
+import cc.redberry.core.number.Complex;
 import cc.redberry.core.tensor.functions.*;
+import org.apache.commons.math3.complex.*;
 
 /**
  * @author Dmitry Bolotin
@@ -36,6 +38,10 @@ import cc.redberry.core.tensor.functions.*;
 public final class Tensors {
 
     private Tensors() {
+    }
+
+    public static Tensor pow(Tensor argument, int power) {
+        return pow(argument, new Complex(power));
     }
 
     public static Tensor pow(Tensor argument, Tensor power) {
@@ -51,8 +57,6 @@ public final class Tensors {
             pb.put(t);
         return pb.build();
     }
-
- 
 
     public static Tensor sum(Tensor... tensors) {
         TensorBuilder sb = SumBuilderFactory.defaultSumBuilder(tensors.length);

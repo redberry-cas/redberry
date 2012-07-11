@@ -37,11 +37,7 @@ public class PairECTest {
     public void testSomeMethod() {
         Sum s1 = (Sum) Tensors.parse("1+Power[b_m^m,2]+c");
         Sum s2 = (Sum) Tensors.parse("1+b_n^n+c");
-        try {
-           
-            ExpandUtils.expandPairOfSumsConcurrent(s1, s2, 12);
-        } catch (InterruptedException ex) {
-            Logger.getLogger(PairECTest.class.getName()).log(Level.SEVERE, null, ex);
-        }
+
+        ExpandUtils.expandPairOfSumsConcurrent(s1, s2, 12);
     }
 }

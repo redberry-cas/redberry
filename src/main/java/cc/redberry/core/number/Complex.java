@@ -653,4 +653,9 @@ public class Complex extends Tensor
     public Complex powNumeric(Complex exponent) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
+
+    @Override
+    public boolean isInteger() {
+        return imaginary.isZero() && real.isInteger();
+    }
 }
