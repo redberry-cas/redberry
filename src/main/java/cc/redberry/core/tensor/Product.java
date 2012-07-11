@@ -109,11 +109,13 @@ public final class Product extends MultiTensor {
     public Tensor[] getRange(int from, int to) {
         if (from < 0 || to > size())
             throw new ArrayIndexOutOfBoundsException();
-        if (from >= to)
+        if (from > to)
             throw new IllegalArgumentException();
 
         int indexlessMaxPos = indexlessData.length, dataMaxPos = indexlessMaxPos + data.length;
         Tensor[] result = new Tensor[to - from];
+        if (to == from)
+            return result;
         int n = 0;  //offset for result if factor isn't 1
         if (factor != Complex.ONE) {
             if (from == 0) {
