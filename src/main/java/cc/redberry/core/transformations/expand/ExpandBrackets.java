@@ -44,33 +44,33 @@ import java.util.Map;
  * @author Stanislav Poslavsky
  */
 public class ExpandBrackets implements Transformation {
-
+    
     private final Indicator<Tensor> indicator;
     private final int threads;
-
+    
     public ExpandBrackets(Indicator<Tensor> indicator, int threads) {
         this.indicator = indicator;
         this.threads = threads;
     }
-
+    
     public ExpandBrackets() {
         this.indicator = Indicator.TRUE_INDICATOR;
         this.threads = 1;
     }
-
+    
     @Override
     public Tensor transform(Tensor tensor) {
         return expandBrackets(tensor, indicator, threads);
     }
-
+    
     public static Tensor expandBrackets(Tensor tensor) {
         return expandBrackets(tensor, Indicator.TRUE_INDICATOR, 1);
     }
-
+    
     public static Tensor expandBrackets(Tensor tensor, int threads) {
         return expandBrackets(tensor, Indicator.TRUE_INDICATOR, threads);
     }
-
+    
     public static Tensor expandBrackets(Tensor tensor, Indicator<Tensor> indicator, int threads) {
         TreeTraverseIterator iterator = new TreeTraverseIterator(tensor, TraverseGuide.EXCEPT_FUNCTIONS_AND_FIELDS);
         TraverseState state;
@@ -87,10 +87,11 @@ public class ExpandBrackets implements Transformation {
         }
         return iterator.result();
     }
-
+    
     private static Tensor expandProductOfSums(Tensor current, final int threads) {
         ArrayDeque<Sum> indexlessSums = new ArrayDeque<>();
         ArrayDeque<Sum> sums = new ArrayDeque<>();
+        ArrayList<Tensor> indexlessNonSums = new ArrayList<>();
         ArrayList<Tensor> nonSums = new ArrayList<>();
         int i;
         Tensor t;
@@ -101,15 +102,17 @@ public class ExpandBrackets implements Transformation {
                     indexlessSums.push((Sum) t);
                 else
                     sums.push((Sum) t);
+            else if (t.getIndices().size() == 0)
+                indexlessNonSums.add(t);
             else
                 nonSums.add(t);
         }
-
+        
         if (sums.isEmpty() && indexlessSums.isEmpty())
             return current;
-
+        
         Sum s1, s2;
-        Tensor temp = null;
+        Tensor temp;
         while (sums.size() > 1) {
             s1 = sums.poll();
             s2 = sums.poll();
@@ -126,37 +129,58 @@ public class ExpandBrackets implements Transformation {
             if (temp instanceof Sum)
                 indexlessSums.add((Sum) temp);
             else
-                nonSums.add(temp);
+                indexlessNonSums.add(temp);
         }
-        Tensor indexless = null;
+
+        //processing indexless
         if (indexlessSums.isEmpty())
-            indexless = UnsafeTensors.unsafeMultiplyWithoutIndicesRenaming(nonSums.toArray(new Tensor[nonSums.size()]));
+            if (indexlessNonSums.isEmpty())
+                t = null;
+            else
+                t = UnsafeTensors.unsafeMultiplyWithoutIndicesRenaming(indexlessNonSums.toArray(new Tensor[indexlessNonSums.size()]));
         else {
             Sum indexlessSum = indexlessSums.peek();
             Tensor[] newSum = new Tensor[indexlessSum.size()];
             for (i = indexlessSum.size() - 1; i >= 0; --i)
-                newSum[i] = multiply(nonSums, indexlessSum.get(i));
-            indexless = UnsafeTensors.unsafeSumWithouBuilder(newSum);
+                newSum[i] = multiply(indexlessNonSums, indexlessSum.get(i));
+            t = UnsafeTensors.unsafeSumWithouBuilder(newSum);
         }
+
+        //processing part with free indices
         if (sums.isEmpty())
-            return indexless;
+            if (nonSums.isEmpty()) {
+                assert t != null;
+                return t;
+            } else {
+                temp = UnsafeTensors.unsafeMultiplyWithoutIndicesRenaming(nonSums.toArray(new Tensor[nonSums.size()]));
+                if (t != null)
+                    return UnsafeTensors.unsafeMultiplyWithoutIndicesRenaming(t, temp);
+                else
+                    return temp;                
+            }
         else {
             Sum sum = sums.peek();
-            Tensor[] newSum = new Tensor[sums.size()];
-            for (i = sum.size() - 1; i >= 0; --i)
-                newSum[i] = UnsafeTensors.unsafeSumWithouBuilder(indexless, sum.get(i));
+            Tensor[] newSum = new Tensor[sum.size()];
+            for (i = sum.size() - 1; i >= 0; --i) {
+                temp = multiply(nonSums, sum.get(i));
+                if (t != null)
+                    temp = UnsafeTensors.unsafeMultiplyWithoutIndicesRenaming(t, temp);
+                newSum[i] = temp;
+            }
             return UnsafeTensors.unsafeSumWithouBuilder(newSum);
         }
     }
-
+    
     private static Tensor multiply(ArrayList<Tensor> list, Tensor tensor) {
+        if (list.isEmpty())
+            return tensor;
         ProductBuilder builder = new ProductBuilder();
         for (Tensor t : list)
             builder.put(t);
         builder.put(tensor);
         return builder.build();
     }
-
+    
     private static Tensor expandPower(Sum argument, int power, final int threads) {
         //TODO improve algorithm using Newton formula!!!
         int i;
@@ -170,9 +194,9 @@ public class ExpandBrackets implements Transformation {
         for (i = power - 1; i >= 1; --i)
             temp = ExpandUtils.expandPairOfSumsConcurrent((Sum) temp, (Sum) renameDummy(argument, mapper), threads);
         return temp;
-
+        
     }
-
+    
     private static Tensor renameDummy(Tensor tensor, IndexMapper mapper) {
         TreeTraverseIterator iterator = new TreeTraverseIterator(tensor);
         TraverseState state;
@@ -181,7 +205,7 @@ public class ExpandBrackets implements Transformation {
         while ((state = iterator.next()) != null) {
             if (state != TraverseState.Leaving)
                 continue;
-
+            
             if (!(iterator.current() instanceof SimpleTensor))
                 continue;
             simpleTensor = (SimpleTensor) iterator.current();
@@ -195,17 +219,17 @@ public class ExpandBrackets implements Transformation {
         }
         return iterator.result();
     }
-
+    
     private static final class IndexMapper implements IndexMapping {
-
+        
         private final IndexGenerator generator;
         private final Map<Integer, Integer> map;
-
+        
         public IndexMapper(int[] initialUsed) {
             generator = new IndexGenerator(initialUsed);
             map = new HashMap<>(initialUsed.length);
         }
-
+        
         @Override
         public int map(int from) {
             Integer to = map.get(IndicesUtils.getNameWithType(from));

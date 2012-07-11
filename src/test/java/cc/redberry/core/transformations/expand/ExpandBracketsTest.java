@@ -26,6 +26,7 @@ import cc.redberry.core.context.CC;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.tensor.Tensors;
 import cc.redberry.core.utils.TensorUtils;
+import java.util.*;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -102,7 +103,7 @@ public class ExpandBracketsTest {
         Assert.assertTrue(TensorUtils.equals(actual, expected));
     }
 
-    @Test
+    @Test(timeout = 200)
     public void test9Concurrent() {
         for (int i = 0; i < 100; ++i) {
             CC.resetTensorNames();
@@ -130,5 +131,45 @@ public class ExpandBracketsTest {
             Tensor expected = parse("2*b_{i}^{i}*a_{a}^{a}+a_{i}^{i}*a_{a}^{a}+b_{i}^{i}*b_{a}^{a}");
             Assert.assertTrue(TensorUtils.compare(actual, expected));
         }
+    }
+
+    @Test
+    public void test12() {
+        Tensor actual = parse("f_mn*(f^mn+r^mn)-r_ab*f^ab");
+        actual = ExpandBrackets.expandBrackets(actual);
+        Tensor expected = parse("f_{mn}*f^{mn}");
+        Assert.assertTrue(TensorUtils.equals(actual, expected));
+    }
+
+    @Test
+    public void test13() {
+        Tensor actual = parse("((a+b)*(c+a)-b*a)*f_mn*(f^mn+r^mn)");
+        actual = ExpandBrackets.expandBrackets(actual);
+        Tensor expected = parse("(a*a+b*c+a*c)*f_mn*f^mn+(a*a+b*c+a*c)*f_mn*r^mn");
+        Assert.assertTrue(TensorUtils.equals(actual, expected));
+    }
+
+    @Test
+    public void test14() {
+        Tensor actual = parse("(a+b*(c+d))*f_mn*(f^mn+r^mn)-(a+b*(c+d))*r_ab*(f^ab+r^ab)");
+        System.out.println(actual);
+        actual = ExpandBrackets.expandBrackets(actual);
+        System.out.println(actual);
+    }
+
+    @Test
+    public void test15() {
+        Tensor actual = parse("(a+b)*(a*f_m+b*g_m)*(b*f^m+a*g^m)");
+        System.out.println(actual);
+        actual = ExpandBrackets.expandBrackets(actual);
+        System.out.println(actual);
+    }
+
+    @Test
+    public void test16() {
+        Tensor actual = parse("((a+b)*(c+a)-b*a)*f_mn*(f^mn+r^mn)-((a-b)*(c-a)+b*a)*r_ab*(f^ab+r^ab)");
+        System.out.println(actual);
+        actual = ExpandBrackets.expandBrackets(actual);
+        System.out.println(actual);
     }
 }

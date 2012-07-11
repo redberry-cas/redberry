@@ -168,11 +168,11 @@ public class ApplyIndexMappingTest {
         int[] usedIndices = parse("B_abcd").getIndices().getAllIndices().copy();
         Tensor target = parse("A_{a qw}^{qd}*B_{er}^{c ty}*D_{b ty}^{er ui}*E_{ui}*a*J^{w}*b");
 
-        //target = ApplyIndexMapping.applyIndexMapping(target, imb, usedIndices);
-        Tensor standard = parse("A_{wfexhk}*B^{xhk}_{z}*A^{z}_{sql}*B^{sql}_{yg}");
-        System.out.println(target);
-        //Assert.assertTrue(TensorUtils.equals(target, standard));
-        Assert.assertTrue(TensorUtils.equals(target, standard));
+        target = ApplyIndexMapping.applyIndexMapping(target, imb, usedIndices);
+        Tensor standard = parse("A_{w qt}^{qz}*B_{er}^{y tk}*D_{x pk}^{er ui}*E_{ui}*a*J^{p}*b");
+        System.out.println(target.getIndices().getFreeIndices());
+        System.out.println(standard.getIndices().getFreeIndices());
+        Assert.assertTrue(TensorUtils.compare(target, standard));
     }
 
     @Test
