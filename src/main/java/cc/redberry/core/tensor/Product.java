@@ -114,6 +114,8 @@ public final class Product extends MultiTensor {
 
         int indexlessMaxPos = indexlessData.length, dataMaxPos = indexlessMaxPos + data.length;
         Tensor[] result = new Tensor[to - from];
+        if (to == from)
+            return result;
         int n = 0;  //offset for result if factor isn't 1
         if (factor != Complex.ONE) {
             if (from == 0) {
