@@ -147,7 +147,7 @@ public class ProductTest {
     @Test
     public void testGetRange4() {
         Product product = (Product) Tensors.parse("2*e^i*A*B*C_i*N_j*T_r*a*b*15*R^jkl*B_kly");
-        Tensor[] tensors = product.getRange(0, 0);
+        Tensor[] tensors = product.getRange(0, 1);
         int i = 0;
         for (Tensor t : tensors)
             Assert.assertTrue(TensorUtils.equals(product.get(i++), t));
