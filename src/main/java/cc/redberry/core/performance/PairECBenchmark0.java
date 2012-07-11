@@ -26,7 +26,7 @@ import cc.redberry.core.context.CC;
 import cc.redberry.core.parser.ParserIndices;
 import cc.redberry.core.tensor.*;
 import cc.redberry.core.tensor.random.TRandom;
-import cc.redberry.core.transformations.expand.PairEC;
+import cc.redberry.core.transformations.expand.*;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
 public class PairECBenchmark0 {
@@ -58,8 +58,8 @@ public class PairECBenchmark0 {
 
                     for (int i = 0; i < 10; ++i) { //Each random sum repeatedly tested 1000 times
                         long start = System.nanoTime();
-                        PairEC pec = new PairEC(sums[0], sums[1], threads);
-                        Tensor res = pec.result();
+
+                        Tensor res = ExpandUtils.expandPairOfSumsConcurrent(sums[0], sums[1], threads);
 //                        System.out.println(res.size() + " " + res);
                         ds.addValue(System.nanoTime() - start);
                     }

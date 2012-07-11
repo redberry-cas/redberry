@@ -23,8 +23,13 @@
 package cc.redberry.core.transformations.expand;
 
 import cc.redberry.core.tensor.*;
+import cc.redberry.core.tensor.iterator.TraverseGuide;
+import cc.redberry.core.tensor.iterator.TraverseState;
+import cc.redberry.core.tensor.iterator.TreeTraverseIterator;
 import cc.redberry.core.transformations.Transformation;
 import cc.redberry.core.utils.Indicator;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
 
 /**
  *
@@ -44,9 +49,93 @@ public class ExpandBrackets implements Transformation {
     }
 
     @Override
-    public Tensor transform(Tensor t) {
-        if(!(t instanceof Product))
-            return t;
-        throw new UnsupportedOperationException("Not supported yet.");
+    public Tensor transform(Tensor tensor) {
+        return expandBrackets(tensor, indicator);
+    }
+
+    public static Tensor expandBrackets(Tensor tensor) {
+        return expandBrackets(tensor, Indicator.TRUE_INDICATOR);
+    }
+
+    public static Tensor expandBrackets(Tensor tensor, Indicator<Tensor> indicator) {
+        TreeTraverseIterator iterator = new TreeTraverseIterator(tensor, TraverseGuide.EXCEPT_FUNCTIONS_AND_FIELDS);
+        TraverseState state;
+        Tensor current;
+        while ((state = iterator.next()) != null) {
+            if (state != TraverseState.Leaving)
+                continue;
+            current = iterator.current();
+            if (!(current instanceof Product))
+                continue;
+            ArrayDeque<Sum> indexlessSums = new ArrayDeque<>();
+            ArrayDeque<Sum> sums = new ArrayDeque<>();
+            ArrayList<Tensor> nonSums = new ArrayList<>();
+
+            int i;
+            Tensor t;
+            for (i = current.size() - 1; i >= 0; --i) {
+                t = current.get(i);
+                if (t instanceof Sum)
+                    if (t.getIndices().size() == 0)
+                        indexlessSums.push((Sum) t);
+                    else
+                        sums.push((Sum) t);
+                else
+                    nonSums.add(t);
+            }
+
+            if (sums.isEmpty() && indexlessSums.isEmpty())
+                continue;
+
+            Sum s1, s2;
+            Tensor temp;
+            while (sums.size() > 1) {
+                s1 = sums.poll();
+                s2 = sums.poll();
+                temp = ExpandUtils.expandPairOfSums(s1, s2);
+                if (temp instanceof Sum)
+                    sums.add((Sum) temp);
+                else
+                    nonSums.add(temp);
+            }
+            while (indexlessSums.size() > 1) {
+                s1 = indexlessSums.poll();
+                s2 = indexlessSums.poll();
+                temp = ExpandUtils.expandPairOfSums(s1, s2);
+                if (temp instanceof Sum)
+                    indexlessSums.add((Sum) temp);
+                else
+                    nonSums.add(temp);
+            }
+            Tensor indexless = null;
+            if (indexlessSums.isEmpty())
+                indexless = UnsafeTensors.unsafeMultiplyWithoutIndicesRenaming(nonSums.toArray(new Tensor[nonSums.size()]));
+            else {
+                Sum indexlessSum = indexlessSums.peek();
+                Tensor[] newSum = new Tensor[indexlessSum.size()];
+                for (i = indexlessSum.size() - 1; i >= 0; --i)
+                    newSum[i] = multiply(nonSums, indexlessSum.get(i));
+                indexless = UnsafeTensors.unsafeSumWithouBuilder(newSum);
+            }
+            if (sums.isEmpty())
+                iterator.set(indexless);
+            else {
+                Sum sum = sums.peek();
+                Tensor[] newSum = new Tensor[sums.size()];
+                for (i = sum.size() - 1; i >= 0; --i)
+                    newSum[i] = UnsafeTensors.unsafeSumWithouBuilder(indexless, sum.get(i));
+                iterator.set(UnsafeTensors.unsafeSumWithouBuilder(newSum));
+            }
+        }
+
+        return iterator.result();
+    }
+
+    private static Tensor multiply(ArrayList<Tensor> list, Tensor tensor) {
+        ProductBuilder builder = new ProductBuilder();
+        for (Tensor t : list)
+            builder.put(t);
+        builder.put(tensor);
+        return builder.build();
     }
 }

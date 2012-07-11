@@ -94,7 +94,7 @@ public class ProductTest {
     public void testBuilder() {
         Tensor t1 = Tensors.parse("p_m*p^m");
         Tensor t2 = Tensors.parse("Power[p_m*p^m,2]");
-        System.out.println(Tensors.multiplyUnsafe(t1, t2));
+        System.out.println(UnsafeTensors.unsafeMultiplyWithoutIndicesRenaming(t1, t2));
     }
 
     @Test

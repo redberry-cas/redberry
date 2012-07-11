@@ -61,7 +61,7 @@ final class ProviderProduct implements IndexMappingProvider {
             if (fromScalars.length != toScalars.length)
                 return IndexMappingProvider.Util.EMPTY_PROVIDER;
             if (fromScalars.length != 1 && !testScalars(fromScalars, toScalars, allowDiffStates))
-                return IndexMappingProvider.Util.EMPTY_PROVIDER; 
+                return IndexMappingProvider.Util.EMPTY_PROVIDER;
 
 //            Temporary, until scalars mappings does not work
             if (booluon)
@@ -200,7 +200,11 @@ final class ProviderProduct implements IndexMappingProvider {
 
     @Override
     public IndexMappingBuffer take() {
-        return op.take();
+        IndexMappingBuffer buffer = op.take();
+        if (buffer == null)
+            return null;
+        buffer.removeContracted();
+        return buffer;
     }
 
     protected static class Pair implements Comparable<Pair> {

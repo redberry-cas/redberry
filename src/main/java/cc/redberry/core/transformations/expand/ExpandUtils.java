@@ -22,51 +22,63 @@
  */
 package cc.redberry.core.transformations.expand;
 
-import cc.redberry.core.context.ContextManager;
+import cc.redberry.core.context.*;
 import cc.redberry.core.tensor.Sum;
-import cc.redberry.core.tensor.SumBuilderConcurrent;
+import cc.redberry.core.tensor.SumBuilder;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.tensor.TensorBuilder;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
+import java.util.concurrent.*;
 
 /**
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public class PairEC {
+public class ExpandUtils {
 
-    private final ExpandPairOP expander;
-    private final TensorBuilder collector;
-    private final Future[] futures;
-
-    public PairEC(Sum s1, Sum s2, int threads) {
-        this.collector = new SumBuilderConcurrent();
-        this.expander = new ExpandPairOP(s1, s2);
-        this.futures = new Future[threads];
-        for (int i = 0; i < threads; ++i)
-            this.futures[i] = ContextManager.getExecutorService().submit(new Worker());
+    public static Tensor expandPairOfSums(Sum s1, Sum s2) {
+        ExpandPairPort epp = new ExpandPairPort(s1, s2);
+        TensorBuilder sum = new SumBuilder();
+        Tensor t;
+        while ((t = epp.take()) != null)
+            sum.put(t);
+        return sum.build();
     }
 
-    public Tensor result() throws InterruptedException {
+    public static Tensor expandPairOfSumsConcurrent(Sum s1, Sum s2, int threads) throws InterruptedException {
+        if (threads == 1)
+            return expandPairOfSums(s1, s2);
+        Future[] futures = new Future[threads];
+        ExpandPairPort epp = new ExpandPairPort(s1, s2);
+        TensorBuilder sum = new SumBuilder();
+
+        for (int i = 0; i < threads; ++i)
+            futures[i] = ContextManager.getExecutorService().submit(new Worker(epp, sum));
+
         try {
             for (Future future : futures)
                 future.get();
-            return collector.build();
+            return sum.build();
         } catch (ExecutionException ee) {
             throw new RuntimeException(ee);
         }
     }
 
-    private class Worker implements Runnable {
+    private static class Worker implements Runnable {
+
+        private final ExpandPairPort epp;
+        private final TensorBuilder builder;
+
+        public Worker(ExpandPairPort epp, TensorBuilder builder) {
+            this.epp = epp;
+            this.builder = builder;
+        }
 
         @Override
         public void run() {
-            final ExpandPairOP expander = PairEC.this.expander;
             Tensor term;
-            while ((term = expander.take()) != null)
-                collector.put(term);
+            while ((term = epp.take()) != null)
+                builder.put(term);
         }
     }
 }

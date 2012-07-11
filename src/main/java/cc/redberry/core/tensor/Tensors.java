@@ -33,7 +33,10 @@ import cc.redberry.core.tensor.functions.*;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public class Tensors {
+public final class Tensors {
+
+    private Tensors() {
+    }
 
     public static Tensor pow(Tensor argument, Tensor power) {
         PowerBuilder pb = new PowerBuilder();
@@ -49,12 +52,7 @@ public class Tensors {
         return pb.build();
     }
 
-    public static Tensor multiplyUnsafe(Tensor... factors) {
-        ProductBuilder pb = new ProductBuilder();
-        for (Tensor t : factors)
-            pb.put(t);
-        return pb.build();
-    }
+ 
 
     public static Tensor sum(Tensor... tensors) {
         TensorBuilder sb = SumBuilderFactory.defaultSumBuilder(tensors.length);
@@ -232,6 +230,6 @@ public class Tensors {
     public static Tensor negate(Tensor tensor) {
         if (tensor instanceof Complex)
             return ((Complex) tensor).negate();
-        return Tensors.multiplyUnsafe(Complex.MINUSE_ONE, tensor);
+        return UnsafeTensors.unsafeMultiplyWithoutIndicesRenaming(Complex.MINUSE_ONE, tensor);
     }
 }
