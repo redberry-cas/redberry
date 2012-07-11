@@ -226,7 +226,8 @@ public final class TreeTraverseIterator {
 
         void set(Tensor t) {
             if (current == null)
-                throw new IllegalStateException("Double set.");
+                builder = null;//TODO discuss with Dima
+//                throw new IllegalStateException("Double set.");
             if (current == t)
                 return;
             if (builder == null) {

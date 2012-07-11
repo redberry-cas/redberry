@@ -39,7 +39,7 @@ public class PairECBenchmark0 {
     public static void go(int trys) {
         try {
             //Threads from 1 to maxThread inclusively
-            int maxThread = 5;
+            int maxThread = 2;
 
             //Initialization of outer statistic agregators
             DescriptiveStatistics[] statsMean = new DescriptiveStatistics[maxThread];
