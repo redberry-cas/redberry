@@ -23,6 +23,7 @@
 package cc.redberry.core.tensor;
 
 import cc.redberry.core.utils.TensorUtils;
+import java.util.*;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -35,19 +36,19 @@ public class ProductTest {
     @Test
     public void testHashCode() {
         Assert.assertEquals(Tensors.parse("(-1)*D*S").hashCode(),
-                Tensors.parse("D*S").hashCode());
+                            Tensors.parse("D*S").hashCode());
     }
 
     @Test
     public void testHashCode1() {
         Assert.assertEquals(Tensors.parse("(-2)*D*S").hashCode(),
-                Tensors.parse("2*D*S").hashCode());
+                            Tensors.parse("2*D*S").hashCode());
     }
 
     @Test
     public void testHashCode3() {
         Assert.assertEquals(Tensors.parse("(-2)*4*D*S").hashCode(),
-                Tensors.parse("2*2*2*D*S").hashCode());
+                            Tensors.parse("2*2*2*D*S").hashCode());
     }
 
     @Test
@@ -65,7 +66,7 @@ public class ProductTest {
     @Test
     public void testHashCode2() {
         Assert.assertEquals(Tensors.parse("(-1)*D").hashCode(),
-                Tensors.parse("D").hashCode());
+                            Tensors.parse("D").hashCode());
     }
 
     @Test
@@ -115,7 +116,6 @@ public class ProductTest {
         Tensor t2 = Tensors.parse("A_a^a*A_b^b*A_c^c^m_n+A_d^e*A_e^d*A_f^f^m_n");
         System.out.println(Tensors.multiply(t1, t2));
     }
-
 
     @Test
     public void testGetRange1() {
@@ -178,5 +178,15 @@ public class ProductTest {
         int i = 1;
         for (Tensor t : tensors)
             Assert.assertTrue(TensorUtils.equals(product.get(i++), t));
+    }
+
+    @Test
+    public void testGetRange8() {
+        Product product = (Product) Tensors.parse("2*a*b*g_mn");
+        Tensor[] expected = {product.get(2)};
+        Tensor[] actual = product.getRange(2, 3);
+        Assert.assertTrue(expected.length == actual.length);
+        for (int i = 0; i < expected.length; ++i)
+            Assert.assertTrue(TensorUtils.equals(expected[i], actual[i]));
     }
 }
