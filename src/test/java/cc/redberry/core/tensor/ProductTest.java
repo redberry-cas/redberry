@@ -35,19 +35,19 @@ public class ProductTest {
     @Test
     public void testHashCode() {
         Assert.assertEquals(Tensors.parse("(-1)*D*S").hashCode(),
-                            Tensors.parse("D*S").hashCode());
+                Tensors.parse("D*S").hashCode());
     }
 
     @Test
     public void testHashCode1() {
         Assert.assertEquals(Tensors.parse("(-2)*D*S").hashCode(),
-                            Tensors.parse("2*D*S").hashCode());
+                Tensors.parse("2*D*S").hashCode());
     }
 
     @Test
     public void testHashCode3() {
         Assert.assertEquals(Tensors.parse("(-2)*4*D*S").hashCode(),
-                            Tensors.parse("2*2*2*D*S").hashCode());
+                Tensors.parse("2*2*2*D*S").hashCode());
     }
 
     @Test
@@ -65,7 +65,7 @@ public class ProductTest {
     @Test
     public void testHashCode2() {
         Assert.assertEquals(Tensors.parse("(-1)*D").hashCode(),
-                            Tensors.parse("D").hashCode());
+                Tensors.parse("D").hashCode());
     }
 
     @Test
@@ -118,56 +118,65 @@ public class ProductTest {
 
 
     @Test
-    public void testGetRange1(){
+    public void testGetRange1() {
         Product product = (Product) Tensors.parse("A*B");
-        Tensor[] tensors = product.getRange(0,1);
+        Tensor[] tensors = product.getRange(0, 1);
         int i = 0;
         for (Tensor t : tensors)
             Assert.assertTrue(TensorUtils.equals(product.get(i++), t));
     }
 
     @Test
-    public void testGetRange2(){
+    public void testGetRange2() {
         Product product = (Product) Tensors.parse("A*B*C_i*N_j*T_r*a*b");
-        Tensor[] tensors = product.getRange(4,6);
+        Tensor[] tensors = product.getRange(4, 6);
         int i = 4;
         for (Tensor t : tensors)
             Assert.assertTrue(TensorUtils.equals(product.get(i++), t));
     }
 
     @Test
-    public void testGetRange3(){
+    public void testGetRange3() {
         Product product = (Product) Tensors.parse("2*e^i*A*B*C_i*N_j*T_r*a*b*15*R^jkl*B_kly");
-        Tensor[] tensors = product.getRange(0,10);
+        Tensor[] tensors = product.getRange(0, 10);
         int i = 0;
         for (Tensor t : tensors)
             Assert.assertTrue(TensorUtils.equals(product.get(i++), t));
     }
 
     @Test
-    public void testGetRange4(){
+    public void testGetRange4() {
         Product product = (Product) Tensors.parse("2*e^i*A*B*C_i*N_j*T_r*a*b*15*R^jkl*B_kly");
-        Tensor[] tensors = product.getRange(0,0);
+        Tensor[] tensors = product.getRange(0, 0);
         int i = 0;
         for (Tensor t : tensors)
             Assert.assertTrue(TensorUtils.equals(product.get(i++), t));
     }
 
     @Test
-    public void testGetRange5(){
+    public void testGetRange5() {
         Product product = (Product) Tensors.parse("2*e^i*A*B*C_i*N_j*T_r*a*b*15*R^jkl*B_kly");
-        Tensor[] tensors = product.getRange(0,3);
+        Tensor[] tensors = product.getRange(0, 3);
         int i = 0;
         for (Tensor t : tensors)
-           Assert.assertTrue(TensorUtils.equals(product.get(i++), t));
+            Assert.assertTrue(TensorUtils.equals(product.get(i++), t));
     }
 
     @Test
-    public void testGetRange6(){
+    public void testGetRange6() {
         Product product = (Product) Tensors.parse("2*e^i*A*B*C_i*N_j*T_r*a*b*15*R^jkl*B_kly");
-        Tensor[] tensors = product.getRange(4,8);
+        Tensor[] tensors = product.getRange(4, 8);
         int i = 4;
         for (Tensor t : tensors)
-           Assert.assertTrue(TensorUtils.equals(product.get(i++), t));
+            Assert.assertTrue(TensorUtils.equals(product.get(i++), t));
+    }
+
+    @Test
+    public void testGetRange7() {
+        Product product = (Product) Tensors.parse("2*e^i*A*B*C_i*N_j*T_r*a*b*15*R^jkl*B_kly");
+        Tensor[] tensors = product.getRange(1, 3);
+        int i = 1;
+        for (Tensor t : tensors)
+            Assert.assertTrue(TensorUtils.equals(product.get(i++), t));
     }
 }
