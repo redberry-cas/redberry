@@ -26,8 +26,6 @@ import cc.redberry.core.utils.TensorUtils;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.util.Arrays;
-
 /**
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
@@ -123,23 +121,26 @@ public class ProductTest {
     public void testGetRange1(){
         Product product = (Product) Tensors.parse("A*B");
         Tensor[] tensors = product.getRange(0,1);
+        int i = 0;
         for (Tensor t : tensors)
-            System.out.println(t);
+            Assert.assertTrue(TensorUtils.equals(product.get(i++), t));
     }
 
     @Test
     public void testGetRange2(){
         Product product = (Product) Tensors.parse("A*B*C_i*N_j*T_r*a*b");
         Tensor[] tensors = product.getRange(4,6);
+        int i = 4;
         for (Tensor t : tensors)
-            System.out.println(t);
+            Assert.assertTrue(TensorUtils.equals(product.get(i++), t));
     }
 
     @Test
     public void testGetRange3(){
         Product product = (Product) Tensors.parse("2*e^i*A*B*C_i*N_j*T_r*a*b*15*R^jkl*B_kly");
         Tensor[] tensors = product.getRange(0,10);
-        System.out.println(product);
-        System.out.println(Arrays.toString(tensors));
+        int i = 0;
+        for (Tensor t : tensors)
+            Assert.assertTrue(TensorUtils.equals(product.get(i++), t));
     }
 }
