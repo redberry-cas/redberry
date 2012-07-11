@@ -27,6 +27,7 @@ import cc.redberry.core.indices.IndicesUtils;
 import cc.redberry.core.math.GraphUtils;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.utils.ArraysUtils;
+
 import java.lang.ref.SoftReference;
 import java.util.Arrays;
 
@@ -36,7 +37,7 @@ import java.util.Arrays;
  */
 public final class Product extends MultiTensor {
 
-     final Complex factor;
+    final Complex factor;
     /**
      * Elements with zero size of indices.
      */
@@ -57,7 +58,7 @@ public final class Product extends MultiTensor {
         Arrays.sort(data);
         Arrays.sort(indexless);
 
-        this.contentReference = new SoftReference<>(calculateContent());
+        this.contentReference = new SoftReference< >(calculateContent());
         this.hash = calculateHash();
     }
 
@@ -66,7 +67,7 @@ public final class Product extends MultiTensor {
         this.factor = factor;
         this.indexlessData = indexlessData;
         this.data = data;
-        this.contentReference = new SoftReference<>(content);//may be null
+        this.contentReference = new SoftReference< >(content);//may be null
         this.hash = calculateHash();
     }
 
@@ -106,7 +107,31 @@ public final class Product extends MultiTensor {
 
     @Override
     public Tensor[] getRange(int from, int to) {
-        throw new UnsupportedOperationException("Not implemented.");
+        if (from < 0 || to >= size())
+            throw new ArrayIndexOutOfBoundsException();
+        if (from > to)
+            throw new IllegalArgumentException();
+
+        int indexlessMaxPos = indexlessData.length, dataMaxPos = indexlessMaxPos + data.length;
+        Tensor[] result = new Tensor[to - from + 1];
+        int n = 0;  //offset for result if factor isn't 1
+        if (factor != Complex.ONE) {
+            if (from == 0) {
+                result[0] = factor;
+                ++n;
+            } else
+                --from;
+            --to;
+        }
+        if (to < indexlessMaxPos) {
+            System.arraycopy(indexlessData, from, result, n, to - from + 1);
+        } else if (from < indexlessMaxPos) {
+            System.arraycopy(indexlessData, from, result, n, indexlessMaxPos - from);
+            System.arraycopy(data, 0, result, indexlessMaxPos - from + n, to - indexlessMaxPos + 1);
+        } else
+            System.arraycopy(data, from - indexlessMaxPos, result, n, to - from + 1);
+
+        return result;
     }
 
     @Override
@@ -126,7 +151,7 @@ public final class Product extends MultiTensor {
         return i < indexlessData.length ? indexlessData[i] : data[i - indexlessData.length];
     }
 
-//     public Tensor[] getRangeWithoutFactor(int from,int to) {
+    //     public Tensor[] getRangeWithoutFactor(int from,int to) {
 //         if(to < indexlessData.length)
 //             return Arrays.copyOfRange(data, to)
 //         return  null;
@@ -155,7 +180,7 @@ public final class Product extends MultiTensor {
     public ProductContent getContent() {
         ProductContent content = contentReference.get();
         if (content == null)
-            contentReference = new SoftReference<>(content = calculateContent());
+            contentReference = new SoftReference< >(content = calculateContent());
         return content;
     }
 
@@ -381,7 +406,6 @@ public final class Product extends MultiTensor {
      *                     tensors hash in array)
      * @param id           id of index in tensor indices list (could be !=0 only
      *                     for simple tensors)
-     *
      * @return packed record (long)
      */
     private static long packToLong(final int tensorIndex, final short stretchIndex, final short id) {
@@ -394,6 +418,7 @@ public final class Product extends MultiTensor {
             result[i] = ((int) (info[i] >> 32)) + 1;
         return result;
     }
+
     //-65536 == packToLong(-1, (short) -1, (short) 0);
     private static final long dummyTensorInfo = -65536;
 //        private static class ProductContent {

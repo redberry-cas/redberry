@@ -26,7 +26,7 @@ import cc.redberry.core.indexmapping.IndexMappingBuffer;
 import cc.redberry.core.indexmapping.IndexMappingBufferImpl;
 import cc.redberry.core.indexmapping.IndexMappings;
 import cc.redberry.core.indices.IndexType;
-import cc.redberry.core.tensor.*;
+import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.utils.TensorUtils;
 import org.junit.Assert;
 import org.junit.Test;
@@ -115,7 +115,7 @@ public class ApplyIndexMappingTest {
         int[] usedIndices = parse("B_mn").getIndices().getAllIndices().copy();
         Tensor target = parse("(A_mn*B^mn_ab+C_ab)*C^dc");
         target = ApplyIndexMapping.applyIndexMapping(target, imb, usedIndices);
-        Tensor standard = UnsafeTensors.unsafeMultiplyWithoutIndicesRenaming(parse("(A_{ab}*B^{ab}_{wx}+C_{wx})"), parse("C^{zy}"));
+        Tensor standard = parse("(A_{ab}*B^{ab}_{wx}+C_{wx})*C^{zy}");
         Assert.assertTrue(TensorUtils.equals(target, standard));
     }
 
@@ -125,7 +125,7 @@ public class ApplyIndexMappingTest {
         Tensor to = parse("A^wxyz");
         IndexMappingBuffer imb = IndexMappings.getFirst(from, to, true);
         int[] usedIndices = parse("B_an").getIndices().getAllIndices().copy();
-        Tensor target = parse("A_{ab jxk}*B^{jxk}_dc+A_{bd ujxk}*B^{ujxk}_ac");
+        Tensor target =   parse("A_{ab jxk}*B^{jxk}_dc+A_{bd ujxk}*B^{ujxk}_ac");
         target = ApplyIndexMapping.applyIndexMapping(target, imb, usedIndices);
         Tensor standard = parse("A_{wx tbk}*B^{tbk}_zy+A_{xz tibk}*B^{tibk}_wy");
         Assert.assertTrue(TensorUtils.compare(target, standard));
@@ -138,7 +138,7 @@ public class ApplyIndexMappingTest {
         IndexMappingBuffer imb = IndexMappings.getFirst(from, to, false);
         int[] usedIndices = parse("B_mn").getIndices().getAllIndices().copy();
 
-        Tensor target = parse("A_{a txk}*B^{d txk}_w*A^w_{sqz}*B^{bc sqz}");
+        Tensor target =   parse("A_{a txk}*B^{d txk}_w*A^w_{sqz}*B^{bc sqz}");
         Tensor standard = parse("A_{w tak}*B^{z tak}_u*A^u_{sqd}*B^{xy sqd}");
         target = ApplyIndexMapping.applyIndexMapping(target, imb, usedIndices);
         Assert.assertTrue(TensorUtils.compare(target, standard));
@@ -149,13 +149,10 @@ public class ApplyIndexMappingTest {
         Tensor from = parse("A_abcd");
         Tensor to = parse("A_wxyz");
         IndexMappingBuffer imb = IndexMappings.getFirst(from, to, false);
-
-        int[] usedIndices = parse("B_abcd").getIndices().getAllIndices().copy();
+        int[] usedIndices = parse("B_ab").getIndices().getAllIndices().copy();
         Tensor target = parse("A_{a qw}^{q d}*B_{er}^{c ty}*D_{b ty}^{er ui}*E_{ui}*a*J^{w}*b");
 
         target = ApplyIndexMapping.applyIndexMapping(target, imb, usedIndices);
-
-        //Tensor standard = parse("A_{wfexhk}*B^{xhk}_{z}*A^{z}_{sql}*B^{sql}_{yg}");
         Tensor standard = parse("A_{w qv}^{q z}*B_{er}^{y tl}*D_{x tl}^{er ui}*E_{ui}*a*J^{v}*b");
         Assert.assertTrue(TensorUtils.compare(target, standard));
     }
@@ -166,13 +163,13 @@ public class ApplyIndexMappingTest {
         Tensor to = parse("A_wxyz");
         IndexMappingBuffer imb = IndexMappings.getFirst(from, to, false);
         int[] usedIndices = parse("B_abcd").getIndices().getAllIndices().copy();
-        Tensor target = parse("A_{a qw}^{qd}*B_{er}^{c ty}*D_{b ty}^{er ui}*E_{ui}*a*J^{w}*b");
+        Tensor target =   parse("A_{a qw}^{qd}*B_{er}^{c ty}*D_{b ty}^{er ui}*E_{ui}*a*J^{w}*b");
 
         target = ApplyIndexMapping.applyIndexMapping(target, imb, usedIndices);
-        Tensor standard = parse("A_{w qt}^{qz}*B_{er}^{y tk}*D_{x pk}^{er ui}*E_{ui}*a*J^{p}*b");
-        System.out.println(target.getIndices().getFreeIndices());
-        System.out.println(standard.getIndices().getFreeIndices());
-        Assert.assertTrue(TensorUtils.compare(target, standard));
+        Tensor standard = parse("A_{wfexhk}*B^{xhk}_{z}*A^{z}_{sql}*B^{sql}_{yg}");
+        System.out.println(target);
+        //Assert.assertTrue(TensorUtils.equals(target, standard));
+        Assert.assertTrue(TensorUtils.equals(target, standard));
     }
 
     @Test
@@ -201,15 +198,14 @@ public class ApplyIndexMappingTest {
     }
 
     @Test
-    public void testField1() { //TODO check tests with fields
+    public void testField1() {
         Tensor from = parse("A_ab");
         Tensor to = parse("A_xy");
         IndexMappingBuffer imb = IndexMappings.getFirst(from, to, false);
-        Tensor target = parse("F_ab[g_qw]");
+
+        Tensor target =   parse("F_ab[g_qw]");
         target = ApplyIndexMapping.applyIndexMapping(target, imb);
         Tensor standard = parse("F_xy[g_qx]");
-        System.out.println(target);
-        System.out.println(standard);
         Assert.assertTrue(TensorUtils.compare(target, standard));
     }
 
@@ -220,12 +216,10 @@ public class ApplyIndexMappingTest {
         IndexMappingBuffer imb = IndexMappings.getFirst(from, to, false);
         int[] usedIndices = parse("B_wxyzabcdmn").getIndices().getAllIndices().copy();
 
-        Tensor target = parse("F_ab[g_xyab*f[h_wxyzabcdmn]]");
-        //               CORRECT: F_exy[g_xyab*f[h_wxyzabcdmn]]
-
+        Tensor target =   parse("F_ab[g_ab*f[h_wxyzabcdmn]]");
         target = ApplyIndexMapping.applyIndexMapping(target, imb, usedIndices);
-        Tensor standard = parse("F_exy[g_xyab*f[h_wxyzabcdmn]]");
-        Assert.assertTrue(TensorUtils.equals(target, standard));
+        Tensor standard = parse("F_xy[g_ab*f[h_wxyzabcdmn]]");
+        Assert.assertTrue(TensorUtils.compare(target, standard));
     }
 
     @Test
@@ -299,4 +293,5 @@ public class ApplyIndexMappingTest {
         for (; i >= 0; --i)
             Assert.assertTrue(IndexMappings.createPort(targets[i], standarts[i]).take() != null);
     }
+
 }

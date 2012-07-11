@@ -22,7 +22,7 @@
  */
 package cc.redberry.core.tensor;
 
-import cc.redberry.core.utils.*;
+import cc.redberry.core.utils.TensorUtils;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -35,19 +35,19 @@ public class ProductTest {
     @Test
     public void testHashCode() {
         Assert.assertEquals(Tensors.parse("(-1)*D*S").hashCode(),
-                            Tensors.parse("D*S").hashCode());
+                Tensors.parse("D*S").hashCode());
     }
 
     @Test
     public void testHashCode1() {
         Assert.assertEquals(Tensors.parse("(-2)*D*S").hashCode(),
-                            Tensors.parse("2*D*S").hashCode());
+                Tensors.parse("2*D*S").hashCode());
     }
 
     @Test
     public void testHashCode3() {
         Assert.assertEquals(Tensors.parse("(-2)*4*D*S").hashCode(),
-                            Tensors.parse("2*2*2*D*S").hashCode());
+                Tensors.parse("2*2*2*D*S").hashCode());
     }
 
     @Test
@@ -65,7 +65,7 @@ public class ProductTest {
     @Test
     public void testHashCode2() {
         Assert.assertEquals(Tensors.parse("(-1)*D").hashCode(),
-                            Tensors.parse("D").hashCode());
+                Tensors.parse("D").hashCode());
     }
 
     @Test
@@ -116,16 +116,67 @@ public class ProductTest {
         System.out.println(Tensors.multiply(t1, t2));
     }
 
+
     @Test
-    public void testRenameConflicts4() {
-        Tensor t1 = Tensors.parse("(A_a^a+B_a^a)");
-        Tensor t2 = Tensors.parse("(A_a^a+B_a^a)");
-        System.out.println(Tensors.multiply(t1, t2));
+    public void testGetRange1() {
+        Product product = (Product) Tensors.parse("A*B");
+        Tensor[] tensors = product.getRange(0, 1);
+        int i = 0;
+        for (Tensor t : tensors)
+            Assert.assertTrue(TensorUtils.equals(product.get(i++), t));
     }
 
     @Test
-    public void testRenameConflicts5() {
-        Tensor t = Tensors.parse("(A_mn*B^mn_ab+C_ab)*C^dc");
-        System.out.println(t);
+    public void testGetRange2() {
+        Product product = (Product) Tensors.parse("A*B*C_i*N_j*T_r*a*b");
+        Tensor[] tensors = product.getRange(4, 6);
+        int i = 4;
+        for (Tensor t : tensors)
+            Assert.assertTrue(TensorUtils.equals(product.get(i++), t));
+    }
+
+    @Test
+    public void testGetRange3() {
+        Product product = (Product) Tensors.parse("2*e^i*A*B*C_i*N_j*T_r*a*b*15*R^jkl*B_kly");
+        Tensor[] tensors = product.getRange(0, 10);
+        int i = 0;
+        for (Tensor t : tensors)
+            Assert.assertTrue(TensorUtils.equals(product.get(i++), t));
+    }
+
+    @Test
+    public void testGetRange4() {
+        Product product = (Product) Tensors.parse("2*e^i*A*B*C_i*N_j*T_r*a*b*15*R^jkl*B_kly");
+        Tensor[] tensors = product.getRange(0, 0);
+        int i = 0;
+        for (Tensor t : tensors)
+            Assert.assertTrue(TensorUtils.equals(product.get(i++), t));
+    }
+
+    @Test
+    public void testGetRange5() {
+        Product product = (Product) Tensors.parse("2*e^i*A*B*C_i*N_j*T_r*a*b*15*R^jkl*B_kly");
+        Tensor[] tensors = product.getRange(0, 3);
+        int i = 0;
+        for (Tensor t : tensors)
+            Assert.assertTrue(TensorUtils.equals(product.get(i++), t));
+    }
+
+    @Test
+    public void testGetRange6() {
+        Product product = (Product) Tensors.parse("2*e^i*A*B*C_i*N_j*T_r*a*b*15*R^jkl*B_kly");
+        Tensor[] tensors = product.getRange(4, 8);
+        int i = 4;
+        for (Tensor t : tensors)
+            Assert.assertTrue(TensorUtils.equals(product.get(i++), t));
+    }
+
+    @Test
+    public void testGetRange7() {
+        Product product = (Product) Tensors.parse("2*e^i*A*B*C_i*N_j*T_r*a*b*15*R^jkl*B_kly");
+        Tensor[] tensors = product.getRange(1, 3);
+        int i = 1;
+        for (Tensor t : tensors)
+            Assert.assertTrue(TensorUtils.equals(product.get(i++), t));
     }
 }
