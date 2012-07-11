@@ -109,7 +109,7 @@ public final class Product extends MultiTensor {
     public Tensor[] getRange(int from, int to) {
         if (from < 0 || to > size())
             throw new ArrayIndexOutOfBoundsException();
-        if (from >= to)
+        if (from > to)
             throw new IllegalArgumentException();
 
         int indexlessMaxPos = indexlessData.length, dataMaxPos = indexlessMaxPos + data.length;

@@ -22,6 +22,8 @@
  */
 package cc.redberry.core.tensor;
 
+import cc.redberry.core.context.*;
+import cc.redberry.core.tensor.random.*;
 import cc.redberry.core.utils.TensorUtils;
 import java.util.*;
 import org.junit.Assert;
@@ -185,6 +187,34 @@ public class ProductTest {
         Product product = (Product) Tensors.parse("2*a*b*g_mn");
         Tensor[] expected = {product.get(2)};
         Tensor[] actual = product.getRange(2, 3);
+        Assert.assertTrue(expected.length == actual.length);
+        for (int i = 0; i < expected.length; ++i)
+            Assert.assertTrue(TensorUtils.equals(expected[i], actual[i]));
+    }
+
+    @Test
+    public void testGetRange9() {
+        TRandom random;
+        int minProductSize, from, to;
+        for (int count = 0; count < 1000; ++count) {
+            CC.resetTensorNames();
+            random = new TRandom(1, 2, new int[]{0, 0, 0, 0}, new int[]{2, 0, 0, 0}, true, 7643543L);
+            minProductSize = 2 + random.nextInt(200);
+            Product p = (Product) random.nextProduct(minProductSize);
+            to = random.nextInt(minProductSize);
+            from = random.nextInt(to);
+            assertArraysEquals(getRange(p, from, to), p.getRange(from, to));
+        }
+    }
+
+    private Tensor[] getRange(Tensor tensor, int from, int to) {
+        Tensor[] r = new Tensor[to - from];
+        for (int i = from; i < to; ++i)
+            r[i - from] = tensor.get(i);
+        return r;
+    }
+
+    private static void assertArraysEquals(Tensor[] expected, Tensor[] actual) {
         Assert.assertTrue(expected.length == actual.length);
         for (int i = 0; i < expected.length; ++i)
             Assert.assertTrue(TensorUtils.equals(expected[i], actual[i]));
