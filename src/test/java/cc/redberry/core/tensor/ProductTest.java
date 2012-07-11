@@ -198,10 +198,13 @@ public class ProductTest {
         int minProductSize, from, to;
         for (int count = 0; count < 1000; ++count) {
             CC.resetTensorNames();
-            random = new TRandom(1, 2, new int[]{0, 0, 0, 0}, new int[]{2, 0, 0, 0}, true, 7643543L);
+            random = new TRandom(1, 100, new int[]{0, 0, 0, 0}, new int[]{2, 0, 0, 0}, true);
             minProductSize = 2 + random.nextInt(200);
-            Product p = (Product) random.nextProduct(minProductSize);
-            to = random.nextInt(minProductSize);
+            Tensor tensor = random.nextProduct(minProductSize);
+            if (!(tensor instanceof Product))
+                continue;
+            Product p = (Product) tensor;
+            to = random.nextInt(p.size());
             from = random.nextInt(to);
             assertArraysEquals(getRange(p, from, to), p.getRange(from, to));
         }
