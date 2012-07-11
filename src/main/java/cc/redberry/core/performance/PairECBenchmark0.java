@@ -81,7 +81,7 @@ public class PairECBenchmark0 {
 
             System.out.println();
 
-        } catch (InterruptedException e) {
+        } catch (Exception e) {
             e.printStackTrace();
             System.exit(0);
         } finally {

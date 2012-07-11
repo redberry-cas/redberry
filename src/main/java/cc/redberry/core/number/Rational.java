@@ -507,12 +507,13 @@ public class Rational extends Real implements Serializable {
         return fraction.getNumerator().equals(BI_MINUS_ONE) && fraction.getDenominator().equals(BigInteger.ONE);//equals(BigFraction.ONE);
     }
 
-    public boolean isInteger() {
-        return fraction.getDenominator().compareTo(BigInteger.ONE) == 0;
-    }
-
     @Override
     public int signum() {
         return fraction.getNumerator().signum();
+    }
+
+    @Override
+    public boolean isInteger() {
+        return fraction.getNumerator().signum() >= 0 && fraction.getDenominator().compareTo(BigInteger.ONE) == 0;
     }
 }

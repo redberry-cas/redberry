@@ -22,12 +22,13 @@
  */
 package cc.redberry.core.transformations.expand;
 
-import cc.redberry.core.context.*;
+import cc.redberry.core.context.ContextManager;
 import cc.redberry.core.tensor.Sum;
 import cc.redberry.core.tensor.SumBuilder;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.tensor.TensorBuilder;
-import java.util.concurrent.*;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 /**
  *
@@ -45,7 +46,7 @@ public class ExpandUtils {
         return sum.build();
     }
 
-    public static Tensor expandPairOfSumsConcurrent(Sum s1, Sum s2, int threads) throws InterruptedException {
+    public static Tensor expandPairOfSumsConcurrent(final Sum s1, final Sum s2, final int threads) {
         if (threads == 1)
             return expandPairOfSums(s1, s2);
         Future[] futures = new Future[threads];
@@ -59,7 +60,7 @@ public class ExpandUtils {
             for (Future future : futures)
                 future.get();
             return sum.build();
-        } catch (ExecutionException ee) {
+        } catch (ExecutionException | InterruptedException ee) {
             throw new RuntimeException(ee);
         }
     }
