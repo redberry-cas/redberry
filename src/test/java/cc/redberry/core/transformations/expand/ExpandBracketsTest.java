@@ -151,7 +151,7 @@ public class ExpandBracketsTest {
 
     @Test
     public void test14() {
-        Tensor actual = parse("(a+b*(c+d))*f_mn*(f^mn+r^mn)-(a+b*(c+d))*r_ab*(f^ab+r^ab)");
+        Tensor actual = parse("(a+b)*f_mn*(f^mn+r^mn)-(a+b*(c+d))*r_ab*(f^ab+r^ab)");
         System.out.println(actual);
         actual = ExpandBrackets.expandBrackets(actual);
         System.out.println(actual);
@@ -160,9 +160,9 @@ public class ExpandBracketsTest {
     @Test
     public void test15() {
         Tensor actual = parse("(a+b)*(a*f_m+b*g_m)*(b*f^m+a*g^m)");
-        System.out.println(actual);
         actual = ExpandBrackets.expandBrackets(actual);
-        System.out.println(actual);
+        Tensor expected = parse("(Power[a, 2]*b+a*Power[b, 2])*g_{m}*g^{m}+(Power[a, 3]+Power[a, 2]*b+a*Power[b, 2]+Power[b, 3])*f^{m}*g_{m}+(Power[a, 2]*b+a*Power[b, 2])*f_{m}*f^{m}");
+        Assert.assertTrue(TensorUtils.equals(actual, expected));
     }
 
     @Test

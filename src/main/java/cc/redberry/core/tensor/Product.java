@@ -106,7 +106,7 @@ public final class Product extends MultiTensor {
     }
 
     @Override
-    public Tensor[] getRange(int from, int to) {
+    public Tensor[] getRange(int from, int to) {//TODO optimize and comment
         if (from < 0 || to > size())
             throw new ArrayIndexOutOfBoundsException();
         if (from > to)

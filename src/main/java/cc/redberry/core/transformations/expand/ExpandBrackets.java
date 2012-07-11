@@ -44,33 +44,33 @@ import java.util.Map;
  * @author Stanislav Poslavsky
  */
 public class ExpandBrackets implements Transformation {
-    
+
     private final Indicator<Tensor> indicator;
     private final int threads;
-    
+
     public ExpandBrackets(Indicator<Tensor> indicator, int threads) {
         this.indicator = indicator;
         this.threads = threads;
     }
-    
+
     public ExpandBrackets() {
         this.indicator = Indicator.TRUE_INDICATOR;
         this.threads = 1;
     }
-    
+
     @Override
     public Tensor transform(Tensor tensor) {
         return expandBrackets(tensor, indicator, threads);
     }
-    
+
     public static Tensor expandBrackets(Tensor tensor) {
         return expandBrackets(tensor, Indicator.TRUE_INDICATOR, 1);
     }
-    
+
     public static Tensor expandBrackets(Tensor tensor, int threads) {
         return expandBrackets(tensor, Indicator.TRUE_INDICATOR, threads);
     }
-    
+
     public static Tensor expandBrackets(Tensor tensor, Indicator<Tensor> indicator, int threads) {
         TreeTraverseIterator iterator = new TreeTraverseIterator(tensor, TraverseGuide.EXCEPT_FUNCTIONS_AND_FIELDS);
         TraverseState state;
@@ -87,7 +87,7 @@ public class ExpandBrackets implements Transformation {
         }
         return iterator.result();
     }
-    
+
     private static Tensor expandProductOfSums(Tensor current, final int threads) {
         ArrayDeque<Sum> indexlessSums = new ArrayDeque<>();
         ArrayDeque<Sum> sums = new ArrayDeque<>();
@@ -107,10 +107,10 @@ public class ExpandBrackets implements Transformation {
             else
                 nonSums.add(t);
         }
-        
+
         if (sums.isEmpty() && indexlessSums.isEmpty())
             return current;
-        
+
         Sum s1, s2;
         Tensor temp;
         while (sums.size() > 1) {
@@ -151,26 +151,24 @@ public class ExpandBrackets implements Transformation {
             if (nonSums.isEmpty()) {
                 assert t != null;
                 return t;
-            } else {
-                temp = UnsafeTensors.unsafeMultiplyWithoutIndicesRenaming(nonSums.toArray(new Tensor[nonSums.size()]));
+            } else
                 if (t != null)
-                    return UnsafeTensors.unsafeMultiplyWithoutIndicesRenaming(t, temp);
+                    return multiply(nonSums, t);
                 else
-                    return temp;                
-            }
+                    return UnsafeTensors.unsafeMultiplyWithoutIndicesRenaming(nonSums.toArray(new Tensor[nonSums.size()]));
         else {
             Sum sum = sums.peek();
             Tensor[] newSum = new Tensor[sum.size()];
             for (i = sum.size() - 1; i >= 0; --i) {
                 temp = multiply(nonSums, sum.get(i));
                 if (t != null)
-                    temp = UnsafeTensors.unsafeMultiplyWithoutIndicesRenaming(t, temp);
+                    temp = expandProductOfSums(UnsafeTensors.unsafeMultiplyWithoutIndicesRenaming(t, temp), threads);
                 newSum[i] = temp;
             }
             return UnsafeTensors.unsafeSumWithouBuilder(newSum);
         }
     }
-    
+
     private static Tensor multiply(ArrayList<Tensor> list, Tensor tensor) {
         if (list.isEmpty())
             return tensor;
@@ -180,7 +178,7 @@ public class ExpandBrackets implements Transformation {
         builder.put(tensor);
         return builder.build();
     }
-    
+
     private static Tensor expandPower(Sum argument, int power, final int threads) {
         //TODO improve algorithm using Newton formula!!!
         int i;
@@ -194,9 +192,9 @@ public class ExpandBrackets implements Transformation {
         for (i = power - 1; i >= 1; --i)
             temp = ExpandUtils.expandPairOfSumsConcurrent((Sum) temp, (Sum) renameDummy(argument, mapper), threads);
         return temp;
-        
+
     }
-    
+
     private static Tensor renameDummy(Tensor tensor, IndexMapper mapper) {
         TreeTraverseIterator iterator = new TreeTraverseIterator(tensor);
         TraverseState state;
@@ -205,7 +203,7 @@ public class ExpandBrackets implements Transformation {
         while ((state = iterator.next()) != null) {
             if (state != TraverseState.Leaving)
                 continue;
-            
+
             if (!(iterator.current() instanceof SimpleTensor))
                 continue;
             simpleTensor = (SimpleTensor) iterator.current();
@@ -219,17 +217,17 @@ public class ExpandBrackets implements Transformation {
         }
         return iterator.result();
     }
-    
+
     private static final class IndexMapper implements IndexMapping {
-        
+
         private final IndexGenerator generator;
         private final Map<Integer, Integer> map;
-        
+
         public IndexMapper(int[] initialUsed) {
             generator = new IndexGenerator(initialUsed);
             map = new HashMap<>(initialUsed.length);
         }
-        
+
         @Override
         public int map(int from) {
             Integer to = map.get(IndicesUtils.getNameWithType(from));
