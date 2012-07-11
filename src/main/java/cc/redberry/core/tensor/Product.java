@@ -108,25 +108,30 @@ public final class Product extends MultiTensor {
     @Override
     public Tensor[] getRange(int from, int to) {
         if (from > to || from < 0 || to < 0)
-            throw new ArithmeticException("Wrong ranges!");
-        int indexlessMaxPos  = indexlessData.length, dataMaxPos = indexlessMaxPos + data.length;
+            throw new ArrayIndexOutOfBoundsException();
+        int indexlessMaxPos = indexlessData.length, dataMaxPos = indexlessMaxPos + data.length;
 
         Tensor[] result = new Tensor[to - from + 1];
-        int n = 0;
-        if (from == 0 && factor != Complex.ONE) {
-            result[0] = factor;
+        int n = 0;  //offset for result if factor isn't 1
+        if (factor != Complex.ONE) {
+            if (from == 0) {
+                result[0] = factor;
+                ++n;
+            } else
+                --from;
             --to;
-            ++n;
         }
         if (to >= dataMaxPos)
-            throw new ArithmeticException("Wrong range: to >= size od product!");
-        for (int i = from; i <= to; ++i) {
-            if (i < indexlessMaxPos){
-                result[n++] = indexlessData[i];
-            }
-            else if (i < dataMaxPos)
-                result[n++] = data[i - indexlessMaxPos];
-        }
+            throw new ArrayIndexOutOfBoundsException();
+
+        if (to < indexlessMaxPos) {
+            System.arraycopy(indexlessData, from, result, n, to + 1);
+        } else if (from < indexlessMaxPos) {
+            System.arraycopy(indexlessData, from, result, n, indexlessMaxPos - from);
+            System.arraycopy(data, 0, result, indexlessMaxPos - from + n, to - indexlessMaxPos + 1);
+        } else
+            System.arraycopy(data, from - indexlessMaxPos, result, n, to - indexlessMaxPos + 1);
+
         return result;
     }
 
