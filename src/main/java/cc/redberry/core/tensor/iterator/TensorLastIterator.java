@@ -5,16 +5,16 @@ import cc.redberry.core.tensor.Tensor;
 /*
 * Wrapper for TreeTraverseIterator. Return only <blockquote>
 */
-public class TensorFirstIterator extends TensorIterator {
-    public TensorFirstIterator(Tensor tensor) {
+public class TensorLastIterator extends TensorIterator {
+    public TensorLastIterator(Tensor tensor) {
         super(tensor);
     }
 
-    public TensorFirstIterator(Tensor tensor, TraverseGuide guide) {
+    public TensorLastIterator(Tensor tensor, TraverseGuide guide) {
         super(tensor, guide);
     }
 
     public Tensor next(){
-        return super.next(TraverseState.Leaving);
+        return super.next(TraverseState.Entering);
     }
 }
