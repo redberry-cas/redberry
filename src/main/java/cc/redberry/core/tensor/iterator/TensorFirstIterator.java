@@ -15,4 +15,8 @@ public class TensorFirstIterator {
     public TensorFirstIterator(Tensor tensor) {
         traverseIterator = new TreeTraverseIterator(tensor);
     }
+
+    public void next(){
+
+    }
 }
