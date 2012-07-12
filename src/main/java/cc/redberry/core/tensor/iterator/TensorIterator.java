@@ -3,7 +3,8 @@ package cc.redberry.core.tensor.iterator;
 import cc.redberry.core.tensor.Tensor;
 
 /*
-* Wrapper for TreeTraverseIterator. Return only <blockquote>
+* Wrapper for TreeTraverseIterator.
+* Traverse tensor into or out according to mode params in next().
 */
 public class TensorIterator {
     private final TreeTraverseIterator traverseIterator;
