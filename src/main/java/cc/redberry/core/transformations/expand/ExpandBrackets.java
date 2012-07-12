@@ -91,48 +91,32 @@ public class ExpandBrackets implements Transformation {
     private static Tensor expandProductOfSums(Tensor current, final int threads) {
 
         // a*b | a_m*b_v | (a+b*f) | (a_i+(c+2)*b_i) 
-        ArrayDeque<Sum> indexlessSums = new ArrayDeque<>();
-        ArrayDeque<Sum> sums = new ArrayDeque<>();
+        
         ArrayList<Tensor> indexlessNonSums = new ArrayList<>();
         ArrayList<Tensor> nonSums = new ArrayList<>();
+        
+        Sum indexlessSum = null;
+        Sum sum = null;
+        
         int i;
-        Tensor t;
+        Tensor t,temp;
         for (i = current.size() - 1; i >= 0; --i) {
             t = current.get(i);
-            if (t instanceof Sum)
-                if (t.getIndices().size() == 0)
-                    indexlessSums.push((Sum) t);
-                else
-                    sums.push((Sum) t);
-            else if (t.getIndices().size() == 0)
-                indexlessNonSums.add(t);
-            else
-                nonSums.add(t);
+            if(t.getIndices().size() == 0){
+                if(t instanceof Sum){
+                    if(indexlessSum == null)
+                        indexlessSum = (Sum)t;else{
+                        temp= ExpandUtils.expandPairOfSums((Sum)t, indexlessSum);
+                    }
+                }else
+                    indexlessNonSums.add(t);
+            }
         }
 
         if (sums.isEmpty() && indexlessSums.isEmpty())
             return current;
 
-        Sum s1, s2;
-        Tensor temp;
-        while (sums.size() > 1) {
-            s1 = sums.poll();
-            s2 = sums.poll();
-            temp = ExpandUtils.expandPairOfSumsConcurrent(s1, s2, threads);
-            if (temp instanceof Sum)
-                sums.add((Sum) temp);
-            else
-                nonSums.add(temp);
-        }
-        while (indexlessSums.size() > 1) {
-            s1 = indexlessSums.poll();
-            s2 = indexlessSums.poll();
-            temp = ExpandUtils.expandPairOfSumsConcurrent(s1, s2, threads);
-            if (temp instanceof Sum)
-                indexlessSums.add((Sum) temp);
-            else
-                indexlessNonSums.add(temp);
-        }
+   
 
         // a*b | a_m*b_v | (a+b*f) | (a_i+(c+2)*b_i) 
 

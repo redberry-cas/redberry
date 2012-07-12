@@ -362,4 +362,21 @@ public final class Tensors {
             return ((Complex) tensor).negate();
         return multiplyComplexAndTensor(Complex.MINUSE_ONE, tensor);
     }
+
+    private static Tensor multiplyAndExpand(Sum sum, Tensor nonSum) {
+
+        assert !(nonSum instanceof Sum);
+
+        final Tensor[] newSumData = new Tensor[sum.size()];
+        for (int i = newSumData.length - 1; i >= 0; --i)
+            newSumData[i] = multiplyPair(nonSum, sum.get(i));
+        return new Sum(newSumData, IndicesFactory.createSorted(newSumData[0].getIndices().getFreeIndices()));
+    }
+
+    public static Tensor multiplyEndExpand(Tensor t1, Tensor t2) {
+        if (!(t1 instanceof Sum) && !(t2 instanceof Sum))
+            return multiplyPair(t1, t2);
+
+        return null;
+    }
 }
