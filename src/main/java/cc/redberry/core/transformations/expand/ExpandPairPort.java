@@ -23,9 +23,7 @@
 package cc.redberry.core.transformations.expand;
 
 import cc.redberry.concurrent.OutputPort;
-import cc.redberry.core.tensor.Sum;
-import cc.redberry.core.tensor.Tensor;
-import cc.redberry.core.tensor.UnsafeTensors;
+import cc.redberry.core.tensor.*;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
@@ -50,6 +48,6 @@ public final class ExpandPairPort implements OutputPort<Tensor> {
             return null;
         int i1 = (int) (index / sum2.size());
         int i2 = (int) (index % sum2.size());
-        return UnsafeTensors.unsafeMultiplyWithoutIndicesRenaming(sum1.get(i1), sum2.get(i2));
+        return Tensors.multiply(sum1.get(i1), sum2.get(i2));
     }
 }

@@ -23,10 +23,7 @@
 package cc.redberry.core.tensor.functions;
 
 import cc.redberry.core.number.Complex;
-import cc.redberry.core.tensor.AbstractScalarFunction;
-import cc.redberry.core.tensor.Tensor;
-import cc.redberry.core.tensor.TensorBuilder;
-import cc.redberry.core.tensor.UnsafeTensors;
+import cc.redberry.core.tensor.*;
 import cc.redberry.core.utils.*;
 
 /**
@@ -42,7 +39,7 @@ public final class Cos extends AbstractScalarFunction {
 
     @Override
     public Tensor derivative() {
-        return UnsafeTensors.unsafeMultiplyWithoutIndicesRenaming(Complex.MINUSE_ONE, new Sin(argument));
+        return Tensors.multiply(Complex.MINUSE_ONE, new Sin(argument));
     }
 
     @Override

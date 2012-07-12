@@ -26,10 +26,8 @@ import cc.redberry.core.combinatorics.Symmetry;
 import cc.redberry.core.context.CC;
 import cc.redberry.core.context.NameDescriptor;
 import cc.redberry.core.indices.*;
-import cc.redberry.core.number.*;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.tensor.functions.*;
-import org.apache.commons.math3.complex.*;
 
 /**
  * @author Dmitry Bolotin
@@ -51,11 +49,112 @@ public final class Tensors {
         return pb.build();
     }
 
-    public static Tensor multiply(Tensor... factors) {
-        ProductBuilderResolvingConfilcts pb = new ProductBuilderResolvingConfilcts();
-        for (Tensor t : factors)
-            pb.put(t);
-        return pb.build();
+    public static Tensor multiplyComplexAndTensor(Complex complex, Tensor tensor) {
+        if (tensor instanceof Complex)
+            return ((Complex) tensor).multiply(complex);
+        else if (complex.isZero())
+            return Complex.ZERO;
+        else if (complex.isOne())
+            return tensor;
+        else if (tensor instanceof Product) {
+            Product p = (Product) tensor;
+            return new Product(complex.multiply(p.factor), p.indexlessData, p.data, p.contentReference.get(), p.indices);
+        } else if (tensor.getIndices().size() == 0)
+            return new Product(complex, new Tensor[]{tensor}, new Tensor[0], ProductContent.EMPTY_INSTANCE, IndicesFactory.EMPTY_INDICES);
+        else
+            return new Product(complex, new Tensor[0], new Tensor[]{tensor}, null, IndicesFactory.createSorted(tensor.getIndices()));
+    }
+
+    private static Tensor multiplyIndexlessAndTensor(Tensor indexless, Tensor tensor) {
+
+        assert indexless.getIndices().size() == 0;
+        assert !(tensor instanceof Complex);
+        assert !(indexless instanceof Complex);
+
+        if (tensor instanceof Product && indexless instanceof Product) {
+            Product p = (Product) tensor;
+            if (p.indexlessData.length != 0)//TODO change condition if collect power strategy will change
+                return buildProduct(indexless, tensor);
+            Product ip = (Product) indexless;
+            return new Product(p.factor.multiply(ip.factor), ip.indexlessData, p.data, p.contentReference.get(), p.indices);
+        }
+        if (indexless instanceof Product) {
+            Product ip = (Product) indexless;
+            return new Product(ip.factor, ip.indexlessData, new Tensor[]{tensor}, ProductContent.EMPTY_INSTANCE, IndicesFactory.EMPTY_INDICES);
+        }
+        if (tensor instanceof Product) {
+            Product p = (Product) tensor;
+            return new Product(p.factor, new Tensor[]{indexless}, p.data, p.contentReference.get(), p.indices);
+        }
+
+        return new Product(Complex.ONE, new Tensor[]{indexless}, new Tensor[]{tensor}, null, IndicesFactory.createSorted(tensor.getIndices()));
+    }
+
+    public static Tensor multiplyPair(Tensor t1, Tensor t2) {
+        if (t1 instanceof Complex)
+            return multiplyComplexAndTensor((Complex) t1, t2);
+        if (t2 instanceof Complex)
+            return multiplyComplexAndTensor((Complex) t2, t1);
+
+        if (t1.getIndices().size() == 0)
+            return multiplyIndexlessAndTensor(t1, t2);
+        if (t2.getIndices().size() == 0)
+            return multiplyIndexlessAndTensor(t2, t1);
+
+        return buildProduct(t1, t2);
+    }
+
+    private static Tensor buildProduct(Tensor... tensors) {
+        ProductBuilder builder = new ProductBuilder();
+        for (Tensor t : tensors)
+            builder.put(t);
+        return builder.build();
+    }
+
+    private static Tensor buildProductRenamingConflictingIndices(Tensor... tensors) {
+        ProductBuilderResolvingConfilcts builder = new ProductBuilderResolvingConfilcts();
+        for (Tensor t : tensors)
+            builder.put(t);
+        return builder.build();
+    }
+
+    private static Tensor tryToMultiplyComplexFactors(final Tensor... factors) {
+        Complex complex = Complex.ONE;
+        Tensor nonComplex = null;
+        boolean allComplex = true;
+        for (Tensor tensor : factors)
+            if (tensor instanceof Complex)
+                complex = complex.multiply((Complex) tensor);
+            else if (nonComplex != null)
+                allComplex = false;
+            else
+                nonComplex = tensor;
+        if (complex.isZero() || complex.isNaN() || complex.isInfinite())
+            return complex;
+        if (allComplex)
+            if (nonComplex == null)
+                return complex;
+            else
+                return multiplyComplexAndTensor(complex, nonComplex);
+        return null;
+    }
+
+    public static Tensor multiply(final Tensor... factors) {
+        if (factors.length == 2)
+            return multiplyPair(factors[0], factors[1]);
+
+        Tensor temp = tryToMultiplyComplexFactors(factors);
+        if (temp != null)
+            return temp;
+
+        return buildProduct(factors);
+    }
+
+    public static Tensor multiplyAndRenameConflictingDummies(final Tensor... factors) {
+        Tensor temp = tryToMultiplyComplexFactors(factors);
+        if (temp != null)
+            return temp;
+        return buildProductRenamingConflictingIndices(factors);
     }
 
     public static Tensor sum(Tensor... tensors) {
@@ -76,6 +175,8 @@ public final class Tensors {
         NameDescriptor descriptor = CC.getNameDescriptor(name);
         if (descriptor == null)
             throw new IllegalArgumentException("This name is not registered in the system.");
+        if (!descriptor.getIndicesTypeStructure().isStructureOf(indices))
+            throw new IllegalArgumentException("Specified indices are not indices of specified tensor.");
         return new SimpleTensor(name,
                                 UnsafeIndicesFactory.createOfTensor(descriptor.getSymmetries(),
                                                                     indices));
@@ -104,7 +205,7 @@ public final class Tensors {
         NameDescriptor descriptor = CC.getNameManager().mapNameDescriptor(name, structures);
         return new TensorField(descriptor.getId(),
                                UnsafeIndicesFactory.createOfTensor(descriptor.getSymmetries(), indices),
-                               arguments.clone(), argIndices.clone());
+                               arguments, argIndices);
     }
 
     public static TensorField field(int name, SimpleIndices indices, SimpleIndices[] argIndices, Tensor[] arguments) {
@@ -119,22 +220,47 @@ public final class Tensors {
             throw new IllegalArgumentException("Name correspods to simple tensor (not a field).");
         if (descriptor.getIndicesTypeStructures().length - 1 != argIndices.length)
             throw new IllegalArgumentException("This name corresponds to field with different number of arguments.");
+        if (!descriptor.getIndicesTypeStructure().isStructureOf(indices))
+            throw new IllegalArgumentException("Specified indices are not indices of specified tensor.");
         for (int i = 0; i < argIndices.length; ++i) {
             if (!descriptor.getIndicesTypeStructures()[i + 1].isStructureOf(argIndices[i]))
                 throw new IllegalArgumentException("Arguments indices are inconsistent with field signature.");
             if (!arguments[i].getIndices().getFreeIndices().equalsRegardlessOrder(argIndices[i]))
                 throw new IllegalArgumentException("Arguments indices are inconsistent with arguments.");
         }
-        return new TensorField(name, indices, arguments, argIndices);
+        return new TensorField(name,
+                               UnsafeIndicesFactory.createOfTensor(descriptor.getSymmetries(), indices),
+                               arguments, argIndices);
     }
 
     public static TensorField field(int name, SimpleIndices indices, Tensor[] arguments) {
         if (arguments.length == 0)
             throw new IllegalArgumentException("No arguments in field.");
+        NameDescriptor descriptor = CC.getNameDescriptor(name);
+        if (descriptor == null)
+            throw new IllegalArgumentException("This name is not registered in the system.");
+        if (!descriptor.getIndicesTypeStructure().isStructureOf(indices))
+            throw new IllegalArgumentException("Specified indices are not indices of specified tensor.");
         SimpleIndices[] argIndices = new SimpleIndices[arguments.length];
         for (int i = 0; i < arguments.length; ++i)
             argIndices[i] = IndicesFactory.createSimple(null, arguments[i].getIndices().getFreeIndices());
-        return new TensorField(name, indices, arguments, argIndices);
+        return new TensorField(name,
+                               UnsafeIndicesFactory.createOfTensor(descriptor.getSymmetries(), indices),
+                               arguments, argIndices);
+    }
+
+    public static TensorField setIndicesToField(TensorField field, SimpleIndices newIndices) {
+        NameDescriptor descriptor = CC.getNameDescriptor(field.name);
+        if (!descriptor.getIndicesTypeStructure().isStructureOf(newIndices))
+            throw new IllegalArgumentException("Specified indices are not indices of specified tensor.");
+        return new TensorField(field.name, newIndices, field.args, field.argIndices);
+    }
+
+    public static SimpleTensor setIndicesToSimpleTensor(SimpleTensor simpleTensor, SimpleIndices newIndices) {
+        NameDescriptor descriptor = CC.getNameDescriptor(simpleTensor.name);
+        if (!descriptor.getIndicesTypeStructure().isStructureOf(newIndices))
+            throw new IllegalArgumentException("Specified indices are not indices of specified tensor.");
+        return new SimpleTensor(simpleTensor.name, UnsafeIndicesFactory.createOfTensor(descriptor.getSymmetries(), newIndices));
     }
 
     public static Expression expression(Tensor left, Tensor right) {
@@ -234,6 +360,6 @@ public final class Tensors {
     public static Tensor negate(Tensor tensor) {
         if (tensor instanceof Complex)
             return ((Complex) tensor).negate();
-        return UnsafeTensors.unsafeMultiplyWithoutIndicesRenaming(Complex.MINUSE_ONE, tensor);
+        return multiplyComplexAndTensor(Complex.MINUSE_ONE, tensor);
     }
 }

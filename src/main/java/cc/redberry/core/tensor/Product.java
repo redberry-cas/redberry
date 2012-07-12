@@ -58,16 +58,16 @@ public final class Product extends MultiTensor {
         Arrays.sort(data);
         Arrays.sort(indexless);
 
-        this.contentReference = new SoftReference< >(calculateContent());
+        this.contentReference = new SoftReference<>(calculateContent());
         this.hash = calculateHash();
     }
 
     Product(Complex factor, Tensor[] indexlessData, Tensor[] data, ProductContent content, Indices indices) {
         super(indices);
-        this.factor = factor;
+        this.factor = factor.isOne() ? Complex.ONE : factor.isMinusOne() ? Complex.MINUSE_ONE : factor;
         this.indexlessData = indexlessData;
         this.data = data;
-        this.contentReference = new SoftReference< >(content);//may be null
+        this.contentReference = new SoftReference<>(content);//may be null
         this.hash = calculateHash();
     }
 
@@ -125,9 +125,9 @@ public final class Product extends MultiTensor {
                 --from;
             --to;
         }
-        if (to < indexlessMaxPos) {
+        if (to < indexlessMaxPos)
             System.arraycopy(indexlessData, from, result, n, to - from);
-        } else if (from < indexlessMaxPos) {
+        else if (from < indexlessMaxPos) {
             System.arraycopy(indexlessData, from, result, n, indexlessMaxPos - from);
             System.arraycopy(data, 0, result, indexlessMaxPos - from + n, to - indexlessMaxPos);
         } else
@@ -182,7 +182,7 @@ public final class Product extends MultiTensor {
     public ProductContent getContent() {
         ProductContent content = contentReference.get();
         if (content == null)
-            contentReference = new SoftReference< >(content = calculateContent());
+            contentReference = new SoftReference<>(content = calculateContent());
         return content;
     }
 
@@ -324,7 +324,7 @@ public final class Product extends MultiTensor {
         if (componentCount == 1) //There are no scalar subproducts in this product
             nonScalar = this;
         else if (datas[0].length > 0)
-            nonScalar = UnsafeTensors.unsafeMultiplyWithoutIndicesRenaming(datas[0]);
+            nonScalar = Tensors.multiply(datas[0]);
 
         Tensor[] scalars = new Tensor[componentCount - 1];
 
@@ -332,7 +332,7 @@ public final class Product extends MultiTensor {
             scalars[0] = this;
         else {
             for (i = 1; i < componentCount; ++i)
-                scalars[i - 1] = UnsafeTensors.unsafeMultiplyWithoutIndicesRenaming(datas[i]);
+                scalars[i - 1] = Tensors.multiply(datas[i]);
             Arrays.sort(scalars); //TODO use nonstable sort
         }
 
@@ -408,6 +408,7 @@ public final class Product extends MultiTensor {
      *                     tensors hash in array)
      * @param id           id of index in tensor indices list (could be !=0 only
      *                     for simple tensors)
+     *
      * @return packed record (long)
      */
     private static long packToLong(final int tensorIndex, final short stretchIndex, final short id) {
@@ -420,7 +421,6 @@ public final class Product extends MultiTensor {
             result[i] = ((int) (info[i] >> 32)) + 1;
         return result;
     }
-
     //-65536 == packToLong(-1, (short) -1, (short) 0);
     private static final long dummyTensorInfo = -65536;
 //        private static class ProductContent {

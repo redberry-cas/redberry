@@ -77,4 +77,5 @@ public interface Number<T>
     boolean isMinusOne();
     boolean isNumeric();
     boolean isInteger();
+    boolean isNatural();
 }

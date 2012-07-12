@@ -124,6 +124,7 @@ public class ParserTest {
     public void testProductPowers2() {
         Tensor u = Tensors.parse("2*a*a*c/b*1/4*b/a/a");
         Tensor v = Tensors.parse("c/2");
+        System.out.println(u);
         Assert.assertTrue(TensorUtils.equals(u, v));
         Assert.assertTrue(v instanceof Product);
     }

@@ -181,9 +181,9 @@ public final class ApplyIndexMapping implements Transformation {
             newIndices = oldIndices.applyIndexMapping(mapper);
             if (oldIndices != newIndices)
                 if (simpleTensor instanceof TensorField)
-                    iterator.set(UnsafeTensors.unsafeSetIndicesToField((TensorField) simpleTensor, newIndices));
+                    iterator.set(Tensors.setIndicesToField((TensorField) simpleTensor, newIndices));
                 else
-                    iterator.set(UnsafeTensors.unsafeSetIndicesToSimpleTensor(simpleTensor, newIndices));
+                    iterator.set(Tensors.setIndicesToSimpleTensor(simpleTensor, newIndices));
         }
         return iterator.result();
     }

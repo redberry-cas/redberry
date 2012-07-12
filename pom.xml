@@ -135,7 +135,7 @@
                         </property>
                     </properties>
 
-                    <skipTests>true</skipTests>
+                    <skipTests>false</skipTests>
                 </configuration>
             </plugin>
             <plugin>
