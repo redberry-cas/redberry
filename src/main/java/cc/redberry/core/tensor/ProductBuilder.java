@@ -27,10 +27,7 @@ import cc.redberry.core.indices.Indices;
 import cc.redberry.core.indices.IndicesBuilder;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.utils.TensorUtils;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author Dmitry Bolotin
@@ -39,7 +36,7 @@ import java.util.Map;
 public final class ProductBuilder implements TensorBuilder {
 
     private Complex complex = Complex.ONE;
-    private final List<Tensor> elements;
+    private final ArrayList<Tensor> elements;
     private final List<Tensor> indexlessElements;
     //Only SimpleTensor and Complex can be putted in this map
     //Both SimpleTensor and Complex have hashCode() and equals()
@@ -52,6 +49,35 @@ public final class ProductBuilder implements TensorBuilder {
 
     public ProductBuilder() {
         this(4, 3);
+    }
+
+    public ProductBuilder(Product p) {
+        this.elements = new ArrayList<>(p.data.length);
+        this.indexlessElements = new ArrayList<>(p.indexlessData.length);
+        initializeData(complex, p.indexlessData, p.data);
+    }
+
+    private void initializeData(Complex complex, Tensor[] indexlessData, Tensor[] data) {
+        this.complex = complex.multiply(this.complex);
+        elements.addAll(Arrays.asList(data));
+        for (Tensor t : indexlessData)
+            if (TensorUtils.isSymbol(t)) {
+                TensorBuilder sb = SumBuilderFactory.defaultSumBuilder();
+                sb.put(Complex.ONE);
+                powers.put(t, sb);
+            } else if (t instanceof Power) {
+                Tensor argument = t.get(0);
+                if (TensorUtils.isSymbolOrNumber(argument)) {
+                    TensorBuilder sb = SumBuilderFactory.defaultSumBuilder();
+                    sb.put(t.get(1));
+                    powers.put(argument, sb);
+                }
+            } else
+                indexlessElements.add(t);
+    }
+
+    private boolean isEmpty() {
+        return indexlessElements.isEmpty() && elements.isEmpty() && powers.isEmpty();
     }
 
     @Override
@@ -112,14 +138,20 @@ public final class ProductBuilder implements TensorBuilder {
     public void put(Tensor tensor) {
         //FUTURE calculate indices
         if (tensor instanceof Product) {
-            for (Tensor t : tensor)
-                put(t);
+            //if no any elements were added yet
+            if (isEmpty()) {
+                Product p = (Product) tensor;
+                initializeData(p.factor, p.indexlessData, p.data);
+            } else
+                for (Tensor t : tensor)
+                    put(t);
             return;
         }
         if (tensor instanceof Complex) {
             complex = complex.multiply((Complex) tensor);
             return;
         }
+
         if (complex.isZero())
             return;
 
@@ -144,6 +176,7 @@ public final class ProductBuilder implements TensorBuilder {
                 return;
             }
         }
+
         if (tensor.getIndices().size() == 0)
             indexlessElements.add(tensor);
         else
