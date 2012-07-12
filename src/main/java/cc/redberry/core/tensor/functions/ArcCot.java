@@ -39,7 +39,7 @@ public class ArcCot extends AbstractScalarFunction {
 
     @Override
     public Tensor derivative() {
-        return UnsafeTensors.unsafeMultiplyWithoutIndicesRenaming(Tensors.pow(
+        return Tensors.multiply(Tensors.pow(
                 Tensors.sum(Complex.ONE, Tensors.pow(argument, Complex.TWO)), Complex.MINUSE_ONE), Complex.MINUSE_ONE);
     }
 

@@ -27,6 +27,7 @@ import cc.redberry.core.context.CC;
 import cc.redberry.core.context.NameDescriptor;
 import cc.redberry.core.indexgenerator.IndexGenerator;
 import cc.redberry.core.indices.*;
+import cc.redberry.core.number.Complex;
 import cc.redberry.core.tensor.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -284,9 +285,12 @@ public final class TRandom {
 
             pb.put(Tensors.simpleTensor(descriptor.getId(), IndicesFactory.createSimple(descriptor.getSymmetries(), factorIndices)));
         }
+        if(random.nextBoolean()){
+            pb.put(new Complex(nextInt(100)));
+        }
         return pb.build();
     }
-
+    
     public Tensor nextProduct(int minProductSize) {
         return nextProduct(minProductSize, IndicesFactory.createSimple(null, nextIndices(nextNameDescriptor().getIndicesTypeStructure())));
     }

@@ -95,28 +95,28 @@ public class ProductTest {
     public void testBuilder() {
         Tensor t1 = Tensors.parse("p_m*p^m");
         Tensor t2 = Tensors.parse("Power[p_m*p^m,2]");
-        System.out.println(UnsafeTensors.unsafeMultiplyWithoutIndicesRenaming(t1, t2));
+        System.out.println(Tensors.multiply(t1, t2));
     }
 
     @Test
     public void testRenameConflicts() {
         Tensor t1 = Tensors.parse("p_a");
         Tensor t2 = Tensors.parse("(a_i+b_a^a_i)");
-        System.out.println(Tensors.multiply(t1, t2));
+        System.out.println(Tensors.multiplyPair(t1, t2));
     }
 
     @Test
     public void testRenameConflicts2() {
         Tensor t1 = Tensors.parse("(p_a+d_a)");
         Tensor t2 = Tensors.parse("(a_i+b_a^a_i)");
-        System.out.println(Tensors.multiply(t1, t2));
+        System.out.println(Tensors.multiplyPair(t1, t2));
     }
 
     @Test
     public void testRenameConflicts3() {
         Tensor t1 = Tensors.parse("A_a^a*A_b^b*A_c^c_m^n+A_d^e*A_e^d*A_f^f_m^n");
         Tensor t2 = Tensors.parse("A_a^a*A_b^b*A_c^c^m_n+A_d^e*A_e^d*A_f^f^m_n");
-        System.out.println(Tensors.multiply(t1, t2));
+        System.out.println(Tensors.multiplyPair(t1, t2));
     }
 
     @Test
@@ -198,10 +198,13 @@ public class ProductTest {
         int minProductSize, from, to;
         for (int count = 0; count < 1000; ++count) {
             CC.resetTensorNames();
-            random = new TRandom(1, 2, new int[]{0, 0, 0, 0}, new int[]{2, 0, 0, 0}, true, 7643543L);
+            random = new TRandom(1, 100, new int[]{0, 0, 0, 0}, new int[]{2, 0, 0, 0}, true);
             minProductSize = 2 + random.nextInt(200);
-            Product p = (Product) random.nextProduct(minProductSize);
-            to = random.nextInt(minProductSize);
+            Tensor tensor = random.nextProduct(minProductSize);
+            if (!(tensor instanceof Product))
+                continue;
+            Product p = (Product) tensor;
+            to = random.nextInt(p.size());
             from = random.nextInt(to);
             assertArraysEquals(getRange(p, from, to), p.getRange(from, to));
         }

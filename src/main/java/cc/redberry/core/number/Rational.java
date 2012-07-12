@@ -514,6 +514,11 @@ public class Rational extends Real implements Serializable {
 
     @Override
     public boolean isInteger() {
-        return fraction.getNumerator().signum() >= 0 && fraction.getDenominator().compareTo(BigInteger.ONE) == 0;
+        return fraction.getDenominator().compareTo(BigInteger.ONE) == 0;
+    }
+
+    @Override
+    public boolean isNatural() {
+        return fraction.getNumerator().signum() >= 0 && isInteger();
     }
 }

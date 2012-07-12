@@ -438,4 +438,10 @@ public final class Numeric extends Real implements Serializable {
     public boolean isInteger() {
         return false;
     }
+
+    @Override
+    public boolean isNatural() {
+        return false;
+    }
+    
 }

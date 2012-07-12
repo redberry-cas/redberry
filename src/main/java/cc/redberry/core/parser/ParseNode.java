@@ -73,7 +73,7 @@ public class ParseNode {
                 assert content.length == 2;
                 return Tensors.pow(content[0].toTensor(), content[1].toTensor());
             case Product:
-                return Tensors.multiply(contentToTensors());
+                return Tensors.multiplyAndRenameConflictingDummies(contentToTensors());
             case Expression:
                 assert content.length == 2;
                 return Tensors.expression(content[0].toTensor(), content[1].toTensor());

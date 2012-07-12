@@ -152,22 +152,34 @@ public class commons {
         int[] c = {0, 1, 2, 3, 4, 5};
         ArraysUtils.stableSort(a, c);
         int[] cInv = Combinatorics.inverse(c);
-        
-        System.out.println("a: "+Arrays.toString(a));
-        System.out.println("c: "+Arrays.toString(c));
-        System.out.println("i: "+Arrays.toString(cInv));
-        
+
+        System.out.println("a: " + Arrays.toString(a));
+        System.out.println("c: " + Arrays.toString(c));
+        System.out.println("i: " + Arrays.toString(cInv));
+
         int[] s0 = {0, 2, 1, 5, 4, 3};
         int[] s = new int[6];
         for (int i = 0; i < a.length; ++i)
             s[i] = cInv[s0[c[i]]];
 //            s[cInv[i]] = cInv[s0[i]];
         System.out.println(Arrays.toString(s));
-        
+
     }
-    
+
     @Test
-    public void asd(){
-        System.out.println(~0);
+    public void asd() {
+        m(1);m(1,2);m(1,2,3);
+    }
+
+    private static void m(int... a) {
+        System.out.println("array");
+    }
+
+    private static void m(int a) {
+        System.out.println("simgle");
+    }
+
+    private static void m(int a, int b) {
+        System.out.println("pair");
     }
 }

@@ -224,9 +224,10 @@ public final class TreeTraverseIterator {
             position = tensor.size();
         }
 
+        //TODO preSet(..) method
         void set(Tensor t) {
             if (current == null)
-                builder = null;//TODO discuss with Dima
+                builder = null;
 //                throw new IllegalStateException("Double set.");
             if (current == t)
                 return;
