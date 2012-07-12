@@ -49,7 +49,7 @@ public final class Tensors {
         return pb.build();
     }
 
-    public static Tensor multiplyComplexAndTensor(Complex complex, Tensor tensor) {
+    private static Tensor multiplyComplexAndTensor(Complex complex, Tensor tensor) {
         if (tensor instanceof Complex)
             return ((Complex) tensor).multiply(complex);
         else if (complex.isZero())
@@ -73,7 +73,7 @@ public final class Tensors {
 
         if (tensor instanceof Product && indexless instanceof Product) {
             Product p = (Product) tensor;
-            if (p.indexlessData.length != 0)//TODO change condition if collect power strategy will change
+            if (p.indexlessData.length != 0)//TODO change condition if collect power strategy will change, e.g. a*Power[a_m^m,2] & a_m^m*g_ab
                 return buildProduct(indexless, tensor);
             Product ip = (Product) indexless;
             return new Product(p.factor.multiply(ip.factor), ip.indexlessData, p.data, p.contentReference.get(), p.indices);
@@ -90,7 +90,7 @@ public final class Tensors {
         return new Product(Complex.ONE, new Tensor[]{indexless}, new Tensor[]{tensor}, null, IndicesFactory.createSorted(tensor.getIndices()));
     }
 
-    public static Tensor multiplyPair(Tensor t1, Tensor t2) {
+    private static Tensor multiplyPair(Tensor t1, Tensor t2) {
         if (t1 instanceof Complex)
             return multiplyComplexAndTensor((Complex) t1, t2);
         if (t2 instanceof Complex)
@@ -361,5 +361,22 @@ public final class Tensors {
         if (tensor instanceof Complex)
             return ((Complex) tensor).negate();
         return multiplyComplexAndTensor(Complex.MINUSE_ONE, tensor);
+    }
+
+    private static Tensor multiplyAndExpand(Sum sum, Tensor nonSum) {
+
+        assert !(nonSum instanceof Sum);
+
+        final Tensor[] newSumData = new Tensor[sum.size()];
+        for (int i = newSumData.length - 1; i >= 0; --i)
+            newSumData[i] = multiplyPair(nonSum, sum.get(i));
+        return new Sum(newSumData, IndicesFactory.createSorted(newSumData[0].getIndices().getFreeIndices()));
+    }
+
+    public static Tensor multiplyEndExpand(Tensor t1, Tensor t2) {
+        if (!(t1 instanceof Sum) && !(t2 instanceof Sum))
+            return multiplyPair(t1, t2);
+
+        return null;
     }
 }

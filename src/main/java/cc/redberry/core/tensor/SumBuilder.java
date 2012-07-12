@@ -66,7 +66,7 @@ public final class SumBuilder implements TensorBuilder {
 
         for (Map.Entry<Integer, List<FactorNode>> entry : summands.entrySet())
             for (FactorNode node : entry.getValue()) {
-                Tensor summand = Tensors.multiplyPair(node.builder.build(), node.factor);
+                Tensor summand = Tensors.multiply(node.builder.build(), node.factor);
                 if (!TensorUtils.isZero(summand))
                     sum.add(summand);
             }
