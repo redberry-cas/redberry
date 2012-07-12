@@ -28,6 +28,9 @@ import cc.redberry.core.context.NameDescriptor;
 import cc.redberry.core.indices.*;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.tensor.functions.*;
+import cc.redberry.core.transformations.expand.*;
+import cc.redberry.core.utils.*;
+import java.util.*;
 
 /**
  * @author Dmitry Bolotin
@@ -80,13 +83,20 @@ public final class Tensors {
         }
         if (indexless instanceof Product) {
             Product ip = (Product) indexless;
-            return new Product(ip.factor, ip.indexlessData, new Tensor[]{tensor}, ProductContent.EMPTY_INSTANCE, IndicesFactory.EMPTY_INDICES);
+            if (tensor.getIndices().size() == 0)
+                return buildProduct(indexless, tensor);
+            else
+                return new Product(ip.factor, ip.indexlessData, new Tensor[]{tensor}, null, tensor.getIndices());
         }
         if (tensor instanceof Product) {
             Product p = (Product) tensor;
-            return new Product(p.factor, new Tensor[]{indexless}, p.data, p.contentReference.get(), p.indices);
+            if (p.indexlessData.length == 0)
+                return new Product(p.factor, new Tensor[]{indexless}, p.data, p.contentReference.get(), p.indices);
+            else
+                return buildProduct(indexless, tensor);
         }
-
+        if (tensor.getIndices().size() == 0)
+            return buildProduct(indexless, tensor);
         return new Product(Complex.ONE, new Tensor[]{indexless}, new Tensor[]{tensor}, null, IndicesFactory.createSorted(tensor.getIndices()));
     }
 
@@ -153,6 +163,10 @@ public final class Tensors {
     }
 
     public static Tensor multiply(final Tensor... factors) {
+        if (factors.length == 0)
+            return Complex.ONE;
+        if (factors.length == 1)
+            return factors[0];
         if (factors.length == 2)
             return multiplyPair(factors[0], factors[1]);
 
@@ -376,20 +390,25 @@ public final class Tensors {
         return multiplyComplexAndTensor(Complex.MINUSE_ONE, tensor);
     }
 
-    private static Tensor multiplyAndExpand(Sum sum, Tensor nonSum) {
-
-        assert !(nonSum instanceof Sum);
-
+    public static Tensor multiplySumElementsOnFactor(Sum sum, Tensor factor) {
+        if (TensorUtils.isZero(factor))
+            return Complex.ZERO;
+        if (TensorUtils.isOne(factor))
+            return sum;
         final Tensor[] newSumData = new Tensor[sum.size()];
         for (int i = newSumData.length - 1; i >= 0; --i)
-            newSumData[i] = multiplyPair(nonSum, sum.get(i));
+            newSumData[i] = multiplyPair(factor, sum.get(i));
         return new Sum(newSumData, IndicesFactory.createSorted(newSumData[0].getIndices().getFreeIndices()));
     }
 
-    public static Tensor multiplyEndExpand(Tensor t1, Tensor t2) {
-        if (!(t1 instanceof Sum) && !(t2 instanceof Sum))
-            return multiplyPair(t1, t2);
-
-        return null;
+    public static Tensor multiplySumElementsOnFactorAndExpandScalars(Sum sum, Tensor factor) {
+        if (TensorUtils.isZero(factor))
+            return Complex.ZERO;
+        if (TensorUtils.isOne(factor))
+            return sum;
+        final Tensor[] newSumData = new Tensor[sum.size()];
+        for (int i = newSumData.length - 1; i >= 0; --i)
+            newSumData[i] = ExpandBrackets.expandBrackets(multiplyPair(factor, sum.get(i)));
+        return new Sum(newSumData, IndicesFactory.createSorted(newSumData[0].getIndices().getFreeIndices()));
     }
 }

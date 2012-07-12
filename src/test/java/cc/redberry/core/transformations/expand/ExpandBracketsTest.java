@@ -37,13 +37,23 @@ import static cc.redberry.core.tensor.Tensors.parse;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-@Ignore
+//@Ignore
 public class ExpandBracketsTest {
+
+    @Test
+    public void test0() {
+        Tensor t = parse("a*c");
+        Tensor actual = ExpandBrackets.expandBrackets(t);
+        System.out.println(actual);
+        Tensor expected = Tensors.parse("a*c");
+        Assert.assertTrue(TensorUtils.equals(actual, expected));
+    }
 
     @Test
     public void test1() {
         Tensor t = parse("(a+b)*c+a*c");
         Tensor actual = ExpandBrackets.expandBrackets(t);
+        System.out.println(actual);
         Tensor expected = Tensors.parse("2*a*c+b*c");
         Assert.assertTrue(TensorUtils.equals(actual, expected));
     }
@@ -60,6 +70,7 @@ public class ExpandBracketsTest {
     public void test3() {
         Tensor t = parse("(a*p_i+b*p_i)*c-a*c*p_i");
         Tensor actual = ExpandBrackets.expandBrackets(t);
+        System.out.println(actual);
         Tensor expected = Tensors.parse("b*c*p_i");
         Assert.assertTrue(TensorUtils.equals(actual, expected));
     }
@@ -98,7 +109,7 @@ public class ExpandBracketsTest {
 
     @Test
     public void test8() {
-        Tensor actual = parse("Power[a+b,300]");
+        Tensor actual = parse("Power[a+b,30]");
         actual = ExpandBrackets.expandBrackets(actual);
         System.out.println(actual);
 //        Tensor expected = parse("a*a*a+b*b*b+3*a*a*b+3*a*b*b");
