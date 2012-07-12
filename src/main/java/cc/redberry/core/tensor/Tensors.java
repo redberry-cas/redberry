@@ -105,9 +105,22 @@ public final class Tensors {
     }
 
     private static Tensor buildProduct(Tensor... tensors) {
-        ProductBuilder builder = new ProductBuilder();
+        //we want initialize product builder in the most efficient way
+        Tensor maxProduct = null;
         for (Tensor t : tensors)
-            builder.put(t);
+            if (t instanceof Product)
+                if (maxProduct == null || t.size() > maxProduct.size())
+                    maxProduct = t;
+
+        ProductBuilder builder;
+        if (maxProduct != null)
+            builder = new ProductBuilder((Product) maxProduct);
+        else
+            builder = new ProductBuilder();
+
+        for (Tensor t : tensors)
+            if (t != maxProduct)
+                builder.put(t);
         return builder.build();
     }
 

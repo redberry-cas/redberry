@@ -166,6 +166,7 @@ public final class TreeTraverseIterator {
 //            currentPointer = currentPointer.previous;
 //        this.currentPointer = currentPointer;
 //    }
+    
     /**
      * Returns current cursor.
      *

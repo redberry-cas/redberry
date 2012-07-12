@@ -22,9 +22,10 @@
  */
 package cc.redberry.core.transformations.expand;
 
-import cc.redberry.core.indexgenerator.*;
-import cc.redberry.core.indexmapping.*;
-import cc.redberry.core.indices.*;
+import cc.redberry.core.indexgenerator.IndexGenerator;
+import cc.redberry.core.indexmapping.IndexMapping;
+import cc.redberry.core.indices.IndicesUtils;
+import cc.redberry.core.indices.SimpleIndices;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.tensor.*;
 import cc.redberry.core.tensor.iterator.TraverseGuide;
@@ -33,10 +34,10 @@ import cc.redberry.core.tensor.iterator.TreeTraverseIterator;
 import cc.redberry.core.transformations.Transformation;
 import cc.redberry.core.utils.Indicator;
 import cc.redberry.core.utils.TensorUtils;
-import java.util.*;
-import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 /**
  *
@@ -91,32 +92,52 @@ public class ExpandBrackets implements Transformation {
     private static Tensor expandProductOfSums(Tensor current, final int threads) {
 
         // a*b | a_m*b_v | (a+b*f) | (a_i+(c+2)*b_i) 
-        
+
         ArrayList<Tensor> indexlessNonSums = new ArrayList<>();
         ArrayList<Tensor> nonSums = new ArrayList<>();
-        
+
         Sum indexlessSum = null;
         Sum sum = null;
-        
+
         int i;
-        Tensor t,temp;
+        Tensor t, temp = null;
         for (i = current.size() - 1; i >= 0; --i) {
             t = current.get(i);
-            if(t.getIndices().size() == 0){
-                if(t instanceof Sum){
-                    if(indexlessSum == null)
-                        indexlessSum = (Sum)t;else{
-                        temp= ExpandUtils.expandPairOfSums((Sum)t, indexlessSum);
+            if (t.getIndices().size() == 0)
+                if (t instanceof Sum)
+                    if (indexlessSum == null)
+                        indexlessSum = (Sum) t;
+                    else {
+                        temp = ExpandUtils.expandPairOfSumsConcurrent((Sum) t, indexlessSum, threads);
+                        if (temp instanceof Sum)
+                            indexlessSum = (Sum) temp;
+                        else {
+                            indexlessNonSums.add(temp);
+                            indexlessSum = null;
+                        }
                     }
-                }else
+                else
                     indexlessNonSums.add(t);
-            }
+            else if (t instanceof Sum)
+                if (sum == null)
+                    sum = (Sum) t;
+                else {
+                    temp = ExpandUtils.expandPairOfSumsConcurrent((Sum) t, indexlessSum, threads);
+                    if (temp instanceof Sum)
+                        sum = (Sum) temp;
+                    else {
+                        nonSums.add(temp);
+                        sum = null;
+                    }
+                }
+            else
+                nonSums.add(t);
         }
 
-        if (sums.isEmpty() && indexlessSums.isEmpty())
+        if (temp == null)//no sums found
             return current;
 
-   
+return null;
 
         // a*b | a_m*b_v | (a+b*f) | (a_i+(c+2)*b_i) 
 
@@ -130,39 +151,39 @@ public class ExpandBrackets implements Transformation {
         // a_m^m * g_i  / Power[a_m^m,2] * g_i
 
         //processing indexless
-        if (indexlessSums.isEmpty())
-            if (indexlessNonSums.isEmpty())
-                t = null;
-            else
-                t = Tensors.multiply(indexlessNonSums.toArray(new Tensor[indexlessNonSums.size()]));
-        else {
-            Sum indexlessSum = indexlessSums.peek();
-            Tensor[] newSum = new Tensor[indexlessSum.size()];
-            for (i = indexlessSum.size() - 1; i >= 0; --i)
-                newSum[i] = multiply(indexlessNonSums, indexlessSum.get(i));
-            t = Tensors.sum(newSum);
-        }
-
-        //processing part with free indices
-        if (sums.isEmpty())
-            if (nonSums.isEmpty()) {
-                assert t != null;
-                return t;
-            } else if (t != null)
-                return multiply(nonSums, t);
-            else
-                return Tensors.multiply(nonSums.toArray(new Tensor[nonSums.size()]));
-        else {
-            Sum sum = sums.peek();
-            Tensor[] newSum = new Tensor[sum.size()];
-            for (i = sum.size() - 1; i >= 0; --i) {
-                temp = multiply(nonSums, sum.get(i));
-                if (t != null)
-                    temp = expandProductOfSums(Tensors.multiply(t, temp), threads);
-                newSum[i] = temp;
-            }
-            return Tensors.sum(newSum);
-        }
+//        if (indexlessSums.isEmpty())
+//            if (indexlessNonSums.isEmpty())
+//                t = null;
+//            else
+//                t = Tensors.multiply(indexlessNonSums.toArray(new Tensor[indexlessNonSums.size()]));
+//        else {
+//            Sum indexlessSum = indexlessSums.peek();
+//            Tensor[] newSum = new Tensor[indexlessSum.size()];
+//            for (i = indexlessSum.size() - 1; i >= 0; --i)
+//                newSum[i] = multiply(indexlessNonSums, indexlessSum.get(i));
+//            t = Tensors.sum(newSum);
+//        }
+//
+//        //processing part with free indices
+//        if (sums.isEmpty())
+//            if (nonSums.isEmpty()) {
+//                assert t != null;
+//                return t;
+//            } else if (t != null)
+//                return multiply(nonSums, t);
+//            else
+//                return Tensors.multiply(nonSums.toArray(new Tensor[nonSums.size()]));
+//        else {
+//            Sum sum = sums.peek();
+//            Tensor[] newSum = new Tensor[sum.size()];
+//            for (i = sum.size() - 1; i >= 0; --i) {
+//                temp = multiply(nonSums, sum.get(i));
+//                if (t != null)
+//                    temp = expandProductOfSums(Tensors.multiply(t, temp), threads);
+//                newSum[i] = temp;
+//            }
+//            return Tensors.sum(newSum);
+//        }
     }
 
     private static Tensor multiply(ArrayList<Tensor> list, Tensor tensor) {

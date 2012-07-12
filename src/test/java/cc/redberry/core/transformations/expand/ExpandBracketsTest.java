@@ -26,6 +26,7 @@ import cc.redberry.core.context.CC;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.tensor.Tensors;
 import cc.redberry.core.utils.TensorUtils;
+import org.junit.*;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -36,6 +37,7 @@ import static cc.redberry.core.tensor.Tensors.parse;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
+@Ignore
 public class ExpandBracketsTest {
 
     @Test
