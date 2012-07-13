@@ -40,11 +40,12 @@ public final class ProductBuilder implements TensorBuilder {
     private final List<Tensor> indexlessElements;
     //Only SimpleTensor and Complex can be putted in this map
     //Both SimpleTensor and Complex have hashCode() and equals()
-    private final Map<Tensor, TensorBuilder> powers = new HashMap<>();
+    private final Map<Tensor, TensorBuilder> powers;
 
     public ProductBuilder(int initialCapacityIndexless, int initialCapacityData) {
         elements = new ArrayList<>(initialCapacityData);
         indexlessElements = new ArrayList<>(initialCapacityIndexless);
+        powers = new HashMap<>();
     }
 
     public ProductBuilder() {
@@ -54,7 +55,15 @@ public final class ProductBuilder implements TensorBuilder {
     public ProductBuilder(Product p) {
         this.elements = new ArrayList<>(p.data.length);
         this.indexlessElements = new ArrayList<>(p.indexlessData.length);
+        powers = new HashMap<>();
         initializeData(complex, p.indexlessData, p.data);
+    }
+
+    private ProductBuilder(Complex complex, ArrayList<Tensor> elements, List<Tensor> indexlessElements, Map<Tensor, TensorBuilder> powers) {
+        this.complex = complex;
+        this.elements = elements;
+        this.indexlessElements = indexlessElements;
+        this.powers = powers;
     }
 
     private void initializeData(Complex complex, Tensor[] indexlessData, Tensor[] data) {
@@ -181,5 +190,10 @@ public final class ProductBuilder implements TensorBuilder {
             indexlessElements.add(tensor);
         else
             elements.add(tensor);
+    }
+
+    @Override
+    public ProductBuilder clone() {
+        return new ProductBuilder(complex, new ArrayList<>(elements), new ArrayList<>(indexlessElements), new HashMap<>(powers));
     }
 }

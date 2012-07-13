@@ -36,7 +36,7 @@ import java.util.concurrent.Future;
  * @author Stanislav Poslavsky
  */
 public class ExpandUtils {
-
+    
     public static Tensor expandPairOfSums(Sum s1, Sum s2) {
         ExpandPairPort epp = new ExpandPairPort(s1, s2);
         TensorBuilder sum = new SumBuilder();
