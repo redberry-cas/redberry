@@ -6,7 +6,7 @@ import cc.redberry.core.tensor.Tensor;
  * Wrapper for TreeTraverseIterator. Traverse tensor into or out according to
  * mode params in next().
  */
-public final class TensorFirstIterator extends TreeIteratorImpl {
+abstract class TreeIteratorAbstract implements TreeIterator {
 
     private final TreeTraverseIterator iterator;
     private final TraverseState state;
