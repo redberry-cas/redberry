@@ -15,8 +15,9 @@ public class TensorLastIteratorTest {
         TensorLastIterator tfi = new TensorLastIterator(t);
         Tensor[] expected = new Tensor[]{t, t.get(0), t.get(1), t.get(2)};
         List<Tensor> target = new ArrayList< >();
-        while (tfi.next() != null)
-            target.add(tfi.current());
+        Tensor current;
+        while ((current = tfi.next()) != null)
+            target.add(current);
         TensorFirstIteratorTest.compareTwoArrays(target.toArray(expected), expected);
     }
 
@@ -27,8 +28,9 @@ public class TensorLastIteratorTest {
         Tensor[] expected = new Tensor[]{t.get(0).get(0).get(1), t.get(0).get(0).get(0),
                 t.get(0).get(0), t.get(0), t};
         List<Tensor> target = new ArrayList< >();
-        while (tfi.next() != null)
-            target.add(tfi.current());
+        Tensor current;
+        while ((current = tfi.next()) != null)
+            target.add(current);
         TensorFirstIteratorTest.compareTwoArrays(target.toArray(expected), expected);
     }
 

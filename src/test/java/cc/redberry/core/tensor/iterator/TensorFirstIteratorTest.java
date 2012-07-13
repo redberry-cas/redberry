@@ -26,8 +26,9 @@ public class TensorFirstIteratorTest {
         TensorFirstIterator tfi = new TensorFirstIterator(t);
         Tensor[] expected = new Tensor[]{t, t.get(0), t.get(1), t.get(2)};
         List<Tensor> target = new ArrayList< >();
-        while (tfi.next() != null)
-            target.add(tfi.current());
+        Tensor current;
+        while ((current = tfi.next()) != null)
+            target.add(current);
         compareTwoArrays(target.toArray(expected), expected);
     }
 
@@ -39,8 +40,9 @@ public class TensorFirstIteratorTest {
                 t.get(0).get(0), t.get(0).get(0).get(0),
                 t.get(0).get(0).get(0), t.get(0).get(0).get(1)};
         List<Tensor> target = new ArrayList< >();
-        while (tfi.next() != null)
-            target.add(tfi.current());
+        Tensor current;
+        while ((current = tfi.next()) != null)
+            target.add(current);
         compareTwoArrays(target.toArray(expected), expected);
     }
 
@@ -54,8 +56,9 @@ public class TensorFirstIteratorTest {
                 t.get(0).get(1), t.get(0).get(1).get(0),
                 t.get(0).get(1).get(0).get(0), t.get(0).get(1).get(0).get(1)};
         List<Tensor> target = new ArrayList< >();
-        while (tfi.next() != null)
-            target.add(tfi.current());
+        Tensor current;
+        while ((current = tfi.next()) != null)
+            target.add(current);
         compareTwoArrays(target.toArray(expected), expected);
     }
 
