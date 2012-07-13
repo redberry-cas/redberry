@@ -8,6 +8,8 @@ import org.junit.Test;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.junit.Assert.assertTrue;
+
 public class TensorFirstIteratorTest {
 
     public static boolean compareTwoArrays(Tensor[] target, Tensor[] expeted) {
@@ -62,4 +64,74 @@ public class TensorFirstIteratorTest {
         compareTwoArrays(target.toArray(expected), expected);
     }
 
+
+    @Test
+    public void test4() {
+        Tensor tensor = Tensors.parse("sin[cos[a+b]+tan[e+l]]");
+
+        TensorFirstIterator tfi = new TensorFirstIterator(tensor);
+        while(!TensorUtils.equals(tfi.next(), Tensors.parse("a")));
+        tfi.set(Tensors.parse("x"));
+        while(tfi.next()!= null);
+
+        Tensor result = tfi.result();
+        Tensor expected = Tensors.parse("sin[cos[x+b]+tan[e+l]]");
+
+        assertTrue(TensorUtils.equals(result, expected));
+    }
+
+    @Test
+    public void test5() {
+        Tensor tensor = Tensors.parse("a*(a+b)*(a+b+4)");
+
+        TensorFirstIterator tfi = new TensorFirstIterator(tensor);
+        Tensor current;
+        while((current = tfi.next()) != null){
+            if (TensorUtils.equals(current, Tensors.parse("a")))
+                tfi.set(Tensors.parse("2"));
+            else if (TensorUtils.equals(current, Tensors.parse("b")))
+                tfi.set(Tensors.parse("3"));
+        }
+
+        Tensor result = tfi.result();
+        Tensor expected = Tensors.parse("90");
+
+        assertTrue(TensorUtils.equals(result, expected));
+    }
+
+    @Test
+    public void test6() {
+        Tensor tensor = Tensors.parse("a*(a+(b+c)*3)*(a+(b+c)*2+4)*A+(B/2+D)");
+        TensorFirstIterator tfi = new TensorFirstIterator(tensor);
+        Tensor current;
+        while((current = tfi.next()) != null){
+            if (TensorUtils.equals(current, Tensors.parse("a")))
+                tfi.set(Tensors.parse("2"));
+            else if (TensorUtils.equals(current, Tensors.parse("b+c"))){
+                tfi.set(Tensors.parse("4"));
+            }
+            else if (TensorUtils.equals(current, Tensors.parse("B"))){
+                tfi.set(Tensors.parse("1/5"));
+            }
+        }
+
+        Tensor result = tfi.result();
+        Tensor expected = Tensors.parse("392*A+1/10+D");
+        assertTrue(TensorUtils.equals(result, expected));
+    }
+
+    @Test
+    public void test7() {
+        Tensor tensor = Tensors.parse("cos[sin[a+b]]");
+        TensorFirstIterator tfi = new TensorFirstIterator(tensor);
+        Tensor current;
+        System.out.println(tfi.next());
+        System.out.println(tfi.next());
+        tfi.set(Tensors.parse("(x+y)*3"));
+        System.out.println(tfi.next());//TODO return NULL!!! why?
+        Tensor result = tfi.result();
+        System.out.println(result);
+        //Tensor expected = Tensors.parse("392*A+1/10+D");
+        //assertTrue(TensorUtils.equals(result, expected));
+    }
 }
