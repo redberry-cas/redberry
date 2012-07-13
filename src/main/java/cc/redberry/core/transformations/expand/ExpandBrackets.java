@@ -39,6 +39,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import static cc.redberry.core.tensor.Tensors.*;
+
 /**
  *
  * @author Dmitry Bolotin
@@ -133,12 +135,28 @@ public class ExpandBrackets implements Transformation {
             else
                 nonSums.add(t);
         }
+//
+//        if (temp == null)//no sums found
+//            return current;
 
-        if (temp == null)//no sums found
-            return current;
+        Tensor indexless;
+        if (indexlessSum == null)
+            indexless = multiply(indexlessNonSums.toArray(new Tensor[indexlessNonSums.size()]));
+        else
+            indexless = multiplySumElementsOnFactor(indexlessSum, multiply(indexlessNonSums.toArray(new Tensor[indexlessNonSums.size()])));
 
-return null;
+        Tensor main;
+        if (sum == null)
+            main = multiply(nonSums.toArray(new Tensor[nonSums.size()]));
+        else
+            main = multiplySumElementsOnFactor(sum, multiply(nonSums.toArray(new Tensor[nonSums.size()])));
 
+        if (main instanceof Sum)
+            main = multiplySumElementsOnFactorAndExpandScalars((Sum) main, indexless);
+        else
+            main = multiply(indexless, main);
+        
+        return main;
         // a*b | a_m*b_v | (a+b*f) | (a_i+(c+2)*b_i) 
 
         //1: a*b | (a+b*f)  => result1 = a**2*b+b**2*a*f    Tensors.multiplyAndExpand(nonSum, Sum)
@@ -149,6 +167,9 @@ return null;
         //Power[a_m^m,3] * a_m^m*h_i => Power[a_m^m,4]*h_i
 
         // a_m^m * g_i  / Power[a_m^m,2] * g_i
+
+
+
 
         //processing indexless
 //        if (indexlessSums.isEmpty())
@@ -186,16 +207,15 @@ return null;
 //        }
     }
 
-    private static Tensor multiply(ArrayList<Tensor> list, Tensor tensor) {
-        if (list.isEmpty())
-            return tensor;
-        ProductBuilder builder = new ProductBuilder();
-        for (Tensor t : list)
-            builder.put(t);
-        builder.put(tensor);
-        return builder.build();
-    }
-
+//    private static Tensor multiply(ArrayList<Tensor> list, Tensor tensor) {
+//        if (list.isEmpty())
+//            return tensor;
+//        ProductBuilder builder = new ProductBuilder();
+//        for (Tensor t : list)
+//            builder.put(t);
+//        builder.put(tensor);
+//        return builder.build();
+//    }
     private static Tensor expandPower(Sum argument, int power, final int threads) {
         //TODO improve algorithm using Newton formula!!!
         int i;
