@@ -5,7 +5,7 @@ import cc.redberry.core.tensor.Tensor;
 /*
 *
 */
-public class TensorFirstIterator {
+public final class TensorFirstIterator extends TreeIteratorImpl {
     private final TreeTraverseIterator traverseIterator;
 
     public TensorFirstIterator(Tensor tensor, TraverseGuide guide) {
