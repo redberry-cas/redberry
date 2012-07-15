@@ -28,15 +28,15 @@ import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.tensor.Tensors;
 import cc.redberry.core.tensor.functions.Sin;
 import cc.redberry.core.utils.TensorUtils;
-import java.util.ArrayList;
-import java.util.List;
 import org.junit.Assert;
 import org.junit.Test;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static cc.redberry.core.tensor.Tensors.parse;
 
 /**
- *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
@@ -46,13 +46,13 @@ public class TreeTraverseIteratorTest {
     public void test1() {
         Tensor t = parse("a+b+Sin[x]");
         Tensor[] expectedSequence = {t,//a+b+Sin[x]
-                                     t.get(0),//a
-                                     t.get(0),//a
-                                     t.get(1),//b
-                                     t.get(1),//b
-                                     t.get(2),//Sin[x]
-                                     t.get(2),//Sin[x]
-                                     t//a+b+Sin[x]
+                t.get(0),//a
+                t.get(0),//a
+                t.get(1),//b
+                t.get(1),//b
+                t.get(2),//Sin[x]
+                t.get(2),//Sin[x]
+                t//a+b+Sin[x]
         };
         TraverseGuide guide = new TraverseGuide() {
 
@@ -71,19 +71,30 @@ public class TreeTraverseIteratorTest {
         Assert.assertTrue(TensorUtils.equals(expectedSequence, actual));
     }
 
+    /*    @Test
+    public void test1x() {
+        Tensor t = parse("a+b+Sin[x]");
+        TreeTraverseIterator iterator = new TreeTraverseIterator(t);
+        while (iterator.next() != null)
+            System.out.println(iterator.current());
+        //Tensor[] actual = list.toArray(new Tensor[0]);
+        //Assert.assertTrue(TensorUtils.equals(expectedSequence, actual));
+    }*/
+
+
     @Test
     public void test2() {
         Tensor t = parse("Cos[a+b+Sin[x]]");
         Tensor[] expectedSequence = {t,//Cos[a+b+Sin[x]]
-                                     t.get(0),//a+b+Sin[x]
-                                     t.get(0).get(0),//a
-                                     t.get(0).get(0),//a
-                                     t.get(0).get(1),//b
-                                     t.get(0).get(1),//b
-                                     t.get(0).get(2),//Sin[x]
-                                     t.get(0).get(2),//Sin[x]
-                                     t.get(0),//a+b+Sin[x]
-                                     t//Cos[a+b+Sin[x]]
+                t.get(0),//a+b+Sin[x]
+                t.get(0).get(0),//a
+                t.get(0).get(0),//a
+                t.get(0).get(1),//b
+                t.get(0).get(1),//b
+                t.get(0).get(2),//Sin[x]
+                t.get(0).get(2),//Sin[x]
+                t.get(0),//a+b+Sin[x]
+                t//Cos[a+b+Sin[x]]
         };
         TraverseGuide guide = new TraverseGuide() {
 
@@ -106,15 +117,15 @@ public class TreeTraverseIteratorTest {
     public void test3() {
         Tensor t = parse("Cos[Sin[x+y]]");
         Tensor[] expectedSequence = {t,//Cos[Sin[x+y]]
-                                     t.get(0),//Sin[x+y]
-                                     t.get(0).get(0),//x+y
-                                     t.get(0).get(0).get(0),//x
-                                     t.get(0).get(0).get(0),//x
-                                     t.get(0).get(0).get(1),//y
-                                     t.get(0).get(0).get(1),//y
-                                     t.get(0).get(0),//x+y
-                                     t.get(0),//Sin[x+y]
-                                     t//Cos[Sin[x+y]]
+                t.get(0),//Sin[x+y]
+                t.get(0).get(0),//x+y
+                t.get(0).get(0).get(0),//x
+                t.get(0).get(0).get(0),//x
+                t.get(0).get(0).get(1),//y
+                t.get(0).get(0).get(1),//y
+                t.get(0).get(0),//x+y
+                t.get(0),//Sin[x+y]
+                t//Cos[Sin[x+y]]
         };
         List<Tensor> list = new ArrayList<>();
         TreeTraverseIterator iterator = new TreeTraverseIterator(t);
@@ -128,9 +139,9 @@ public class TreeTraverseIteratorTest {
     public void test4() {
         Tensor t = parse("Cos[Sin[x+y]]");
         Tensor[] expectedSequence = {t,//Cos[Sin[x+y]]
-                                     t.get(0),//Sin[x+y]                                    
-                                     t.get(0),//Sin[x+y]
-                                     t//Cos[Sin[x+y]]
+                t.get(0),//Sin[x+y]
+                t.get(0),//Sin[x+y]
+                t//Cos[Sin[x+y]]
         };
         TraverseGuide guide = new TraverseGuide() {
 
@@ -204,7 +215,7 @@ public class TreeTraverseIteratorTest {
         Assert.assertTrue(TensorUtils.equals(expectedSequence, actual));
 
         expectedSequence = new Tensor[]{t,//Cos[x]
-                                        t//Cos[x]
+                t//Cos[x]
         };
 
         guide = new TraverseGuide() {
@@ -228,11 +239,11 @@ public class TreeTraverseIteratorTest {
     public void test6() {
         Tensor t = parse("Cos[Sin[x+y]]");
         Tensor[] expectedSequence = {t,//Cos[Sin[x+y]]
-                                     t.get(0),//Sin[x+y]
-                                     t.get(0).get(0),//x+y
-                                     t.get(0).get(0),//x+y
-                                     t.get(0),//Sin[x+y]
-                                     t//Cos[Sin[x+y]]
+                t.get(0),//Sin[x+y]
+                t.get(0).get(0),//x+y
+                t.get(0).get(0),//x+y
+                t.get(0),//Sin[x+y]
+                t//Cos[Sin[x+y]]
         };
         TraverseGuide guide = new TraverseGuide() {
 

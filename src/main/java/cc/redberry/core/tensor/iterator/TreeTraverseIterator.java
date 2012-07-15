@@ -64,28 +64,27 @@ import cc.redberry.core.tensor.TensorWrapper;
  * @author Stanislav Poslavsky
  */
 public final class TreeTraverseIterator {
-    
+
     private final TraverseGuide iterationGuide;
     private LinkedPointer currentPointer;
     private TraverseState lastState;
     private Tensor current = null;
-    
+
     public TreeTraverseIterator(Tensor tensor, TraverseGuide guide) {
         currentPointer = new LinkedPointer(null, TensorWrapper.wrap(tensor), true);
         iterationGuide = guide;
     }
-    
+
     public TreeTraverseIterator(Tensor tensor) {
         this(tensor, TraverseGuide.ALL);
     }
 
     /**
-     *
      * @return next traverse state and null if there is no next element
      */
     public TraverseState next() {
-        if (current != null && currentPointer.previous == null)
-            return lastState = null;
+      //  if (current != null && currentPointer.previous == null)
+        //    return lastState = null;
         Tensor next;
         while (true) {
             next = currentPointer.next();
@@ -94,10 +93,9 @@ public final class TreeTraverseIterator {
                     return lastState = null;
                 current = currentPointer.getTensor();
                 currentPointer = currentPointer.previous;
-                
-                if (currentPointer.current != null)
-                    currentPointer.set(current);
-                
+
+                currentPointer.set(current);
+
                 return lastState = TraverseState.Leaving;
             } else {
                 TraversePermission permission = iterationGuide.getPermission(currentPointer.tensor, currentPointer.position - 1, next);
@@ -105,7 +103,7 @@ public final class TreeTraverseIterator {
                     throw new NullPointerException();
                 if (permission == TraversePermission.DontShow)
                     continue;
-                
+
                 current = next;
                 currentPointer = new LinkedPointer(currentPointer, next, permission == TraversePermission.Enter);
                 return lastState = TraverseState.Entering;
@@ -116,7 +114,7 @@ public final class TreeTraverseIterator {
     /**
      * Replaces the current cursor with the specified element.
      *
-     * @param t the element with which to replace the current cursor
+     * @param tensor the element with which to replace the current cursor
      */
     public void set(Tensor tensor) {
         if (current == tensor)
@@ -124,7 +122,7 @@ public final class TreeTraverseIterator {
         if (tensor == null)
             throw new NullPointerException();
         if (lastState == TraverseState.Entering) {
-            currentPointer.previous.set(tensor);
+            //currentPointer.previous.set(tensor);
             currentPointer = new LinkedPointer(currentPointer.previous, tensor, false);
         } else if (lastState == TraverseState.Leaving)
             currentPointer.set(tensor);
@@ -154,18 +152,19 @@ public final class TreeTraverseIterator {
         return depth;
     }
 
-//    public void levelUp(int levels) {
-//        if (levels == 0)
-//            return;
-//        LinkedPointer currentPointer = null;
-//        if (lastState == TraverseState.Entering)
-//            currentPointer = this.currentPointer.previous;
-//        else if (lastState == TraverseState.Leaving)
-//            currentPointer = this.currentPointer;
-//        while (--levels >= 0 && currentPointer != null)
-//            currentPointer = currentPointer.previous;
-//        this.currentPointer = currentPointer;
-//    }
+    //    public void levelUp(int levels) {
+    //        if (levels == 0)
+    //            return;
+    //        LinkedPointer currentPointer = null;
+    //        if (lastState == TraverseState.Entering)
+    //            currentPointer = this.currentPointer.previous;
+    //        else if (lastState == TraverseState.Leaving)
+    //            currentPointer = this.currentPointer;
+    //        while (--levels >= 0 && currentPointer != null)
+    //            currentPointer = currentPointer.previous;
+    //        this.currentPointer = currentPointer;
+    //    }
+
     /**
      * Returns current cursor.
      *
@@ -185,59 +184,60 @@ public final class TreeTraverseIterator {
             throw new RuntimeException("Iteration not finished.");
         return currentPointer.getTensor().get(0);
     }
-    
+
     private static final class LinkedPointer {
-        
+
         int position = 0;
         Tensor tensor;
         Tensor current = null;
+        Tensor toSet = null;
         TensorBuilder builder = null;
         final LinkedPointer previous;
-        
+
         public LinkedPointer(LinkedPointer pair, Tensor tensor, boolean goInside) {
             this.tensor = tensor;
             if (!goInside)
-                position = tensor.size();
+                position = Integer.MAX_VALUE;
             this.previous = pair;
         }
-        
+
         Tensor next() {
-            if (builder != null && current != null)
+            if (toSet != null) {
+                if (builder == null) {
+                    builder = tensor.getBuilder();
+                    for (int i = 0; i < position - 1; ++i)
+                        builder.put(tensor.get(i));
+                }
+                builder.put(toSet);
+                toSet = null;
+            } else if (builder != null)
                 builder.put(current);
-            if (position == tensor.size())
+
+            if (position >= tensor.size())
                 return current = null;
             return current = tensor.get(position++);
         }
-        
+
         Tensor getTensor() {
             if (builder != null)
                 if (position != tensor.size())
-                    throw new IllegalStateException();
+                    throw new IllegalStateException("Iteration not finished.");
                 else {
                     tensor = builder.build();
+                    position = Integer.MAX_VALUE;
                     builder = null;
                 }
             return tensor;
         }
-        
-        void close() {
-            position = tensor.size();
-        }
 
-        //TODO preset method
+        /*void close() {
+            position = tensor.size();
+        }*/
+
         void set(Tensor t) {
             if (current == t)
                 return;
-            if (current == null)
-                builder = null;
-//                throw new IllegalStateException("Double set.");
-            if (builder == null) {
-                builder = tensor.getBuilder();
-                for (int i = 0; i < position - 1; ++i)
-                    builder.put(tensor.get(i));
-            }
-            builder.put(t);
-            current = null;
+            toSet = t;
         }
     }
 }

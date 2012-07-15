@@ -60,6 +60,7 @@ public final class Tensors {
             return tensor;
         else if (tensor instanceof Product) {
             Product p = (Product) tensor;
+            //TODO (minor priority) p.contentReference could be passed to the constructor (so all equal contractions structures will be updated ...)
             return new Product(complex.multiply(p.factor), p.indexlessData, p.data, p.contentReference.get(), p.indices);
         } else if (tensor.getIndices().size() == 0)
             return new Product(complex, new Tensor[]{tensor}, new Tensor[0], ProductContent.EMPTY_INSTANCE, IndicesFactory.EMPTY_INDICES);
@@ -90,6 +91,7 @@ public final class Tensors {
         if (tensor instanceof Product) {
             Product p = (Product) tensor;
             if (p.indexlessData.length == 0)
+                //TODO change condition if collect power strategy will change, e.g. a*Power[a_m^m,2] & a_m^m*g_ab
                 return new Product(p.factor, new Tensor[]{indexless}, p.data, p.contentReference.get(), p.indices);
             else
                 return buildProduct(indexless, tensor);
@@ -120,6 +122,9 @@ public final class Tensors {
             if (t instanceof Product)
                 if (maxProduct == null || t.size() > maxProduct.size())
                     maxProduct = t;
+
+        //TODO in builder hold contraction structure inforamtion if only one poduct with indices is present
+        //TODO if there is only one element with indices
 
         ProductBuilder builder;
         if (maxProduct != null)
@@ -193,8 +198,8 @@ public final class Tensors {
     public static SimpleTensor simpleTensor(String name, SimpleIndices indices) {
         NameDescriptor descriptor = CC.getNameManager().mapNameDescriptor(name, indices.getIndicesTypeStructure());
         return new SimpleTensor(descriptor.getId(),
-                                UnsafeIndicesFactory.createOfTensor(descriptor.getSymmetries(),
-                                                                    indices));
+                UnsafeIndicesFactory.createOfTensor(descriptor.getSymmetries(),
+                        indices));
     }
 
     public static SimpleTensor simpleTensor(int name, SimpleIndices indices) {
@@ -204,8 +209,8 @@ public final class Tensors {
         if (!descriptor.getIndicesTypeStructure().isStructureOf(indices))
             throw new IllegalArgumentException("Specified indices are not indices of specified tensor.");
         return new SimpleTensor(name,
-                                UnsafeIndicesFactory.createOfTensor(descriptor.getSymmetries(),
-                                                                    indices));
+                UnsafeIndicesFactory.createOfTensor(descriptor.getSymmetries(),
+                        indices));
     }
 
     public static TensorField field(String name, SimpleIndices indices, Tensor[] arguments) {
@@ -230,8 +235,8 @@ public final class Tensors {
             structures[i + 1] = argIndices[i].getIndicesTypeStructure();
         NameDescriptor descriptor = CC.getNameManager().mapNameDescriptor(name, structures);
         return new TensorField(descriptor.getId(),
-                               UnsafeIndicesFactory.createOfTensor(descriptor.getSymmetries(), indices),
-                               arguments, argIndices);
+                UnsafeIndicesFactory.createOfTensor(descriptor.getSymmetries(), indices),
+                arguments, argIndices);
     }
 
     public static TensorField field(int name, SimpleIndices indices, SimpleIndices[] argIndices, Tensor[] arguments) {
@@ -255,8 +260,8 @@ public final class Tensors {
                 throw new IllegalArgumentException("Arguments indices are inconsistent with arguments.");
         }
         return new TensorField(name,
-                               UnsafeIndicesFactory.createOfTensor(descriptor.getSymmetries(), indices),
-                               arguments, argIndices);
+                UnsafeIndicesFactory.createOfTensor(descriptor.getSymmetries(), indices),
+                arguments, argIndices);
     }
 
     public static TensorField field(int name, SimpleIndices indices, Tensor[] arguments) {
@@ -271,8 +276,8 @@ public final class Tensors {
         for (int i = 0; i < arguments.length; ++i)
             argIndices[i] = IndicesFactory.createSimple(null, arguments[i].getIndices().getFreeIndices());
         return new TensorField(name,
-                               UnsafeIndicesFactory.createOfTensor(descriptor.getSymmetries(), indices),
-                               arguments, argIndices);
+                UnsafeIndicesFactory.createOfTensor(descriptor.getSymmetries(), indices),
+                arguments, argIndices);
     }
 
     public static TensorField setIndicesToField(TensorField field, SimpleIndices newIndices) {
@@ -400,7 +405,7 @@ public final class Tensors {
             return sum;
         final Tensor[] newSumData = new Tensor[sum.size()];
         for (int i = newSumData.length - 1; i >= 0; --i)
-            newSumData[i] = multiplyPair(factor, sum.get(i));
+            newSumData[i] = multiply(factor, sum.get(i));
         return new Sum(newSumData, IndicesFactory.createSorted(newSumData[0].getIndices().getFreeIndices()));
     }
 
@@ -411,7 +416,7 @@ public final class Tensors {
             return sum;
         final Tensor[] newSumData = new Tensor[sum.size()];
         for (int i = newSumData.length - 1; i >= 0; --i)
-            newSumData[i] = ExpandBrackets.expandBrackets(multiplyPair(factor, sum.get(i)));
+            newSumData[i] = ExpandBrackets.expandBrackets(multiply(factor, sum.get(i)));
         return new Sum(newSumData, IndicesFactory.createSorted(newSumData[0].getIndices().getFreeIndices()));
     }
 }

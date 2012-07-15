@@ -45,6 +45,7 @@ public class IndicesFactory {
         return new SimpleIndicesIsolated(indices.getAllIndices().copy(), symmetries);
     }
 
+    //Rename to just create
     public static Indices createSorted(Indices indices) {
         if (indices.size() == 0)
             return EMPTY_INDICES;
