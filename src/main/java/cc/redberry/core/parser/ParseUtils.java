@@ -23,48 +23,33 @@
 package cc.redberry.core.parser;
 
 import cc.redberry.core.indices.*;
-import cc.redberry.core.number.Complex;
-import cc.redberry.core.tensor.Tensor;
-import java.util.Objects;
+import java.util.*;
+import java.util.Set;
 
 /**
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public class ParseNodeNumber extends ParseNode {
+public class ParseUtils {
 
-    public Complex value;
-
-    public ParseNodeNumber(Complex value) {
-        super(TensorType.Number, new ParseNode[0]);
-        this.value = value;
+    private ParseUtils() {
     }
 
-    @Override
-    public String toString() {
-        return value.toString();
+    public static Set<Integer> getAllIndices(ParseNode node) {
+        Set<Integer> s = new HashSet<>();
+        getAllIndices1(node, s);
+        return s;
     }
 
-    @Override
-    public Tensor toTensor() {
-        return value;
-    }
-
-    @Override
-    public Indices getIndices() {
-        return IndicesFactory.EMPTY_INDICES;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        final ParseNodeNumber other = (ParseNodeNumber) obj;
-        if (!Objects.equals(this.value, other.value))
-            return false;
-        return true;
+    private static void getAllIndices1(ParseNode node, Set<Integer> set) {
+        if (node instanceof ParseNodeSimpleTensor) {
+            Indices indices = node.getIndices();
+            for (int i = indices.size() - 1; i >= 0; --i)
+                set.add(IndicesUtils.getNameWithType(indices.get(i)));
+        } else
+            for (ParseNode pn : node.content)
+                if (!(pn instanceof ParseNodeScalarFunction))
+                    getAllIndices1(pn, set);
     }
 }

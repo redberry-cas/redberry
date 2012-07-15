@@ -22,6 +22,8 @@
  */
 package cc.redberry.core.parser;
 
+import cc.redberry.core.indices.Indices;
+import cc.redberry.core.indices.IndicesFactory;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.tensor.Tensors;
 import java.util.Objects;
@@ -40,6 +42,11 @@ public final class ParseNodeScalarFunction extends ParseNode {
         if (content.length != 1)
             throw new IllegalArgumentException();
         this.function = function;
+    }
+
+    @Override
+    public Indices getIndices() {
+        return IndicesFactory.EMPTY_INDICES;
     }
 
     @Override
