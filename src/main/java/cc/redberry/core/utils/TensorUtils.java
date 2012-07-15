@@ -165,7 +165,10 @@ public class TensorUtils {
         if (u.hashCode() != v.hashCode())
             return false;
         if (u.getClass() == SimpleTensor.class)
-            return u.getIndices().equals(v.getIndices());
+            if (!u.getIndices().equals(v.getIndices()))
+                return false;
+            else
+                return true;
         if (u.size() != v.size())
             return false;
         if (u instanceof MultiTensor) {

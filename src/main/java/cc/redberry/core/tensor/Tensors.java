@@ -365,6 +365,10 @@ public final class Tensors {
         return CC.current().isMetric((SimpleTensor) t);
     }
 
+    public static boolean isKroneckerOrMetric(Tensor t) {
+        return isKronecker(t) || isMetric(t);
+    }
+
     public static Tensor parse(String expression) {
         return CC.current().getParseManager().parse(expression);
     }

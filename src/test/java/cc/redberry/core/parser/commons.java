@@ -34,6 +34,7 @@ import java.util.Arrays;
 import org.apache.commons.math3.complex.Complex;
 import org.apache.commons.math3.fraction.BigFraction;
 import org.apache.commons.math3.fraction.Fraction;
+import org.apache.commons.math3.random.*;
 import org.junit.Test;
 
 /**
@@ -168,7 +169,14 @@ public class commons {
 
     @Test
     public void asd() {
-        m(1);m(1,2);m(1,2,3);
+
+        BitsStreamGenerator bitsStreamGenerator = new Well44497a();
+        System.out.println(1 + bitsStreamGenerator.nextInt(6));
+        int[] a = new int[6];
+
+        for (int i = 0; i < 100; ++i)
+            ++a[bitsStreamGenerator.nextInt(5)];
+        System.out.println(Arrays.toString(a));
     }
 
     private static void m(int... a) {
@@ -180,6 +188,5 @@ public class commons {
     }
 
     private static void m(int a, int b) {
-        System.out.println("pair");
     }
 }
