@@ -139,43 +139,48 @@ public class IndicesInsertion implements ParseNodeTransformer {
     }
 
     private static IITransformer createTransformer(ParseNode node, Indicator<ParseNodeSimpleTensor> indicator) {
-        if (node instanceof ParseNodeSimpleTensor)
-            if (indicator.is((ParseNodeSimpleTensor) node))
-                return new SimpleTransformer((ParseNodeSimpleTensor) node);
-            else
+        IITransformer t;
+        switch (node.tensorType) {
+            case TensorField:
+            case SimpleTensor:
+                if (indicator.is((ParseNodeSimpleTensor) node))
+                    return new SimpleTransformer((ParseNodeSimpleTensor) node);
+                else
+                    return null;
+            case Product:
+                List<IITransformer> tranmsformers = new ArrayList<>();
+
+                for (ParseNode _node : node.content)
+                    if ((t = createTransformer(_node, indicator)) != null)
+                        tranmsformers.add(t);
+                if (tranmsformers.isEmpty())
+                    return null;
+                else if (tranmsformers.size() == 1)
+                    return tranmsformers.get(0);
+                else
+                    return new ProductTransformer(tranmsformers.toArray(new IITransformer[tranmsformers.size()]));
+            case Expression:
+            case Sum:
+                t = createTransformer(node.content[0], indicator);
+                IITransformer[] transformers = null;
+                if (t != null) {
+                    transformers = new IITransformer[node.content.length];
+                    transformers[0] = t;
+                }
+                int i;
+                for (i = 1; i < node.content.length; ++i)
+                    if ((t = createTransformer(node.content[i], indicator)) != null)
+                        if (transformers == null)
+                            throw new IllegalArgumentException();
+                        else
+                            transformers[i] = t;
+                if (transformers == null)
+                    return null;
+                else
+                    return new SumTransformer(transformers);
+            default:
                 return null;
-        else if (node.tensorType == TensorType.Product) {
-            List<IITransformer> tranmsformers = new ArrayList<>();
-            IITransformer t;
-            for (ParseNode _node : node.content)
-                if ((t = createTransformer(_node, indicator)) != null)
-                    tranmsformers.add(t);
-            if (tranmsformers.isEmpty())
-                return null;
-            else if (tranmsformers.size() == 1)
-                return tranmsformers.get(0);
-            else
-                return new ProductTransformer(tranmsformers.toArray(new IITransformer[tranmsformers.size()]));
-        } else if (node.tensorType == TensorType.Sum) {
-            IITransformer t = createTransformer(node.content[0], indicator);
-            IITransformer[] tranmsformers = null;
-            if (t != null) {
-                tranmsformers = new IITransformer[node.content.length];
-                tranmsformers[0] = t;
-            }
-            int i;
-            for (i = 1; i < node.content.length; ++i)
-                if ((t = createTransformer(node.content[i], indicator)) != null)
-                    if (tranmsformers == null)
-                        throw new IllegalArgumentException();
-                    else
-                        tranmsformers[i] = t;
-            if (tranmsformers == null)
-                return null;
-            else
-                return new SumTransformer(tranmsformers);
         }
-        return null;
     }
 
     private static interface IITransformer {
