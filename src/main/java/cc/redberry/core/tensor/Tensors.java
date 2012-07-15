@@ -28,9 +28,8 @@ import cc.redberry.core.context.NameDescriptor;
 import cc.redberry.core.indices.*;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.tensor.functions.*;
-import cc.redberry.core.transformations.expand.*;
-import cc.redberry.core.utils.*;
-import java.util.*;
+import cc.redberry.core.transformations.expand.ExpandBrackets;
+import cc.redberry.core.utils.TensorUtils;
 
 /**
  * @author Dmitry Bolotin
