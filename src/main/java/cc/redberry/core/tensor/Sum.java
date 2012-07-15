@@ -95,6 +95,11 @@ public final class Sum extends MultiTensor {
     public TensorBuilder getBuilder() {
         return SumBuilderFactory.defaultSumBuilder(data.length);
     }
+
+    @Override
+    public TensorFactory getFactory() {
+        return null;
+    }
     
     @Override
     protected String toString(ToStringMode mode, Class<? extends Tensor> clazz) {

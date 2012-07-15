@@ -27,7 +27,6 @@ import cc.redberry.core.indices.Indices;
 import cc.redberry.core.indices.IndicesFactory;
 
 /**
- *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
@@ -60,6 +59,11 @@ public abstract class AbstractScalarFunction extends Tensor {
     @Override
     public final int size() {
         return 1;
+    }
+
+    @Override
+    public TensorFactory getFactory() {
+        return null;
     }
 
     @Override
