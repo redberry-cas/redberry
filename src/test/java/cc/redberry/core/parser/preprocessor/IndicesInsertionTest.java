@@ -26,7 +26,7 @@ import cc.redberry.core.context.CC;
 import cc.redberry.core.indices.Indices;
 import cc.redberry.core.parser.ParseNodeSimpleTensor;
 import cc.redberry.core.parser.ParserIndices;
-import cc.redberry.core.tensor.*;
+import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.utils.Indicator;
 import org.junit.After;
 import org.junit.Test;
