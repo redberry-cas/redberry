@@ -23,10 +23,7 @@
 package cc.redberry.core.tensor.functions;
 
 import cc.redberry.core.number.Complex;
-import cc.redberry.core.tensor.AbstractScalarFunction;
-import cc.redberry.core.tensor.Tensor;
-import cc.redberry.core.tensor.TensorBuilder;
-import cc.redberry.core.tensor.Tensors;
+import cc.redberry.core.tensor.*;
 import cc.redberry.core.utils.*;
 
 /**
@@ -57,13 +54,23 @@ public final class Tan extends AbstractScalarFunction {
 
     @Override
     public TensorBuilder getBuilder() {
-        return new TanBuilder();
+        return new ScalarFunctionBuilder(TanFactory.FACTORY);
     }
 
-    public static class TanBuilder extends AbstractScalarFunctionBuilder {
+    @Override
+    public TensorFactory getFactory() {
+        return TanFactory.FACTORY;
+    }
+
+    public static class TanFactory extends AbstractScalarFunctionFactory {
+
+        public static final TanFactory FACTORY = new TanFactory();
+
+        private TanFactory() {
+        }
 
         @Override
-        public Tensor build() {
+        public Tensor create1(Tensor arg) {
             if (arg instanceof ArcTan)
                 return arg.get(0);
             if (TensorUtils.isZero(arg))

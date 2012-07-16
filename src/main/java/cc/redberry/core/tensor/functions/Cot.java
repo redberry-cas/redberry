@@ -23,10 +23,7 @@
 package cc.redberry.core.tensor.functions;
 
 import cc.redberry.core.number.Complex;
-import cc.redberry.core.tensor.AbstractScalarFunction;
-import cc.redberry.core.tensor.Tensor;
-import cc.redberry.core.tensor.TensorBuilder;
-import cc.redberry.core.tensor.Tensors;
+import cc.redberry.core.tensor.*;
 import cc.redberry.core.utils.*;
 
 /**
@@ -57,13 +54,23 @@ public final class Cot extends AbstractScalarFunction {
 
     @Override
     public TensorBuilder getBuilder() {
-        return new CotBuilder();
+        return new ScalarFunctionBuilder(CotFactory.FACTORY);
     }
 
-    public static class CotBuilder extends AbstractScalarFunctionBuilder {
+    @Override
+    public TensorFactory getFactory() {
+        return CotFactory.FACTORY;
+    }
+
+    public static final class CotFactory extends AbstractScalarFunctionFactory {
+
+        public static final CotFactory FACTORY = new CotFactory();
+
+        private CotFactory() {
+        }
 
         @Override
-        public Tensor build() {
+        public Tensor create1(Tensor arg) {
             if (arg instanceof ArcCot)
                 return arg.get(0);
             if (TensorUtils.isZero(arg))

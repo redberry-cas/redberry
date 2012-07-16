@@ -23,7 +23,7 @@
 package cc.redberry.core.tensor.functions;
 
 import cc.redberry.core.tensor.Tensor;
-import cc.redberry.core.tensor.TensorBuilder;
+import cc.redberry.core.tensor.TensorFactory;
 import cc.redberry.core.utils.TensorUtils;
 
 /**
@@ -31,26 +31,18 @@ import cc.redberry.core.utils.TensorUtils;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-abstract class AbstractScalarFunctionBuilder implements TensorBuilder {
-
-    protected Tensor arg = null;
-
-    AbstractScalarFunctionBuilder() {
-    }
+abstract class AbstractScalarFunctionFactory implements TensorFactory {
 
     @Override
-    public void put(Tensor tensor) {
-        if (arg != null)
-            throw new IllegalStateException();
-        if (tensor == null)
-            throw new NullPointerException();
-        if (!TensorUtils.isIndexless(tensor))
+    public Tensor create(Tensor... tensors) {
+        if (tensors.length != 1)
             throw new IllegalArgumentException();
-        arg = tensor;
+        if (tensors[0] == null)
+            throw new NullPointerException();
+        if (!TensorUtils.isIndexless(tensors[0]))
+            throw new IllegalArgumentException();
+        return create1(tensors[0]);
     }
 
-    public Tensor eval(Tensor t) {
-        put(t);
-        return build();
-    }
+    protected abstract Tensor create1(Tensor tensor);
 }

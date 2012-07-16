@@ -198,8 +198,8 @@ public final class Tensors {
     public static SimpleTensor simpleTensor(String name, SimpleIndices indices) {
         NameDescriptor descriptor = CC.getNameManager().mapNameDescriptor(name, indices.getIndicesTypeStructure());
         return new SimpleTensor(descriptor.getId(),
-                UnsafeIndicesFactory.createOfTensor(descriptor.getSymmetries(),
-                        indices));
+                                UnsafeIndicesFactory.createOfTensor(descriptor.getSymmetries(),
+                                                                    indices));
     }
 
     public static SimpleTensor simpleTensor(int name, SimpleIndices indices) {
@@ -209,8 +209,8 @@ public final class Tensors {
         if (!descriptor.getIndicesTypeStructure().isStructureOf(indices))
             throw new IllegalArgumentException("Specified indices are not indices of specified tensor.");
         return new SimpleTensor(name,
-                UnsafeIndicesFactory.createOfTensor(descriptor.getSymmetries(),
-                        indices));
+                                UnsafeIndicesFactory.createOfTensor(descriptor.getSymmetries(),
+                                                                    indices));
     }
 
     public static TensorField field(String name, SimpleIndices indices, Tensor[] arguments) {
@@ -235,8 +235,8 @@ public final class Tensors {
             structures[i + 1] = argIndices[i].getIndicesTypeStructure();
         NameDescriptor descriptor = CC.getNameManager().mapNameDescriptor(name, structures);
         return new TensorField(descriptor.getId(),
-                UnsafeIndicesFactory.createOfTensor(descriptor.getSymmetries(), indices),
-                arguments, argIndices);
+                               UnsafeIndicesFactory.createOfTensor(descriptor.getSymmetries(), indices),
+                               arguments, argIndices);
     }
 
     public static TensorField field(int name, SimpleIndices indices, SimpleIndices[] argIndices, Tensor[] arguments) {
@@ -260,8 +260,8 @@ public final class Tensors {
                 throw new IllegalArgumentException("Arguments indices are inconsistent with arguments.");
         }
         return new TensorField(name,
-                UnsafeIndicesFactory.createOfTensor(descriptor.getSymmetries(), indices),
-                arguments, argIndices);
+                               UnsafeIndicesFactory.createOfTensor(descriptor.getSymmetries(), indices),
+                               arguments, argIndices);
     }
 
     public static TensorField field(int name, SimpleIndices indices, Tensor[] arguments) {
@@ -276,8 +276,8 @@ public final class Tensors {
         for (int i = 0; i < arguments.length; ++i)
             argIndices[i] = IndicesFactory.createSimple(null, arguments[i].getIndices().getFreeIndices());
         return new TensorField(name,
-                UnsafeIndicesFactory.createOfTensor(descriptor.getSymmetries(), indices),
-                arguments, argIndices);
+                               UnsafeIndicesFactory.createOfTensor(descriptor.getSymmetries(), indices),
+                               arguments, argIndices);
     }
 
     public static TensorField setIndicesToField(TensorField field, SimpleIndices newIndices) {
@@ -306,43 +306,43 @@ public final class Tensors {
     }
 
     public static Tensor sin(Tensor argument) {
-        return new Sin.SinBuilder().eval(argument);
+        return Sin.SinFactory.FACTORY.create(argument);
     }
 
     public static Tensor cos(Tensor argument) {
-        return new Cos.CosBuilder().eval(argument);
+        return Cos.CosFactory.FACTORY.create(argument);
     }
 
     public static Tensor tan(Tensor argument) {
-        return new Tan.TanBuilder().eval(argument);
+        return Tan.TanFactory.FACTORY.create(argument);
     }
 
     public static Tensor cot(Tensor argument) {
-        return new Cot.CotBuilder().eval(argument);
+        return Cot.CotFactory.FACTORY.create(argument);
     }
 
     public static Tensor arcsin(Tensor argument) {
-        return new ArcSin.ArcSinBuilder().eval(argument);
+        return ArcSin.ArcSinFactory.FACTORY.create(argument);
     }
 
     public static Tensor arccos(Tensor argument) {
-        return new ArcCos.ArcCosBuilder().eval(argument);
+        return ArcCos.ArcCosFactory.FACTORY.create(argument);
     }
 
     public static Tensor arctan(Tensor argument) {
-        return new ArcTan.ArcTanBuilder().eval(argument);
+        return ArcTan.ArcTanFactory.FACTORY.create(argument);
     }
 
     public static Tensor arccot(Tensor argument) {
-        return new ArcCot.ArcCotBuilder().eval(argument);
+        return ArcCot.ArcCotFactory.FACTORY.create(argument);
     }
 
     public static Tensor log(Tensor argument) {
-        return new Log.LogBuilder().eval(argument);
+        return Log.LogFactory.FACTORY.create(argument);
     }
 
     public static Tensor exp(Tensor argument) {
-        return new Exp.ExpBuilder().eval(argument);
+        return Exp.ExpFactory.FACTORY.create(argument);
     }
 
     public static SimpleTensor createKronecker(int index1, int index2) {

@@ -142,7 +142,7 @@ public class SimpleTensor extends Tensor {
 
     @Override
     public TensorFactory getFactory() {
-        return null;
+        return new Factory(this);
     }
 
     @Override
@@ -157,7 +157,7 @@ public class SimpleTensor extends Tensor {
         return this.indices.equals(other.indices);
     }
 
-    private static class Builder implements TensorBuilder {
+    private static final class Builder implements TensorBuilder {
 
         private final SimpleTensor tensor;
 
@@ -173,6 +173,22 @@ public class SimpleTensor extends Tensor {
         @Override
         public void put(Tensor tensor) {
             throw new IllegalStateException("Can not put to SimpleTensor builder!");
+        }
+    }
+
+    private static final class Factory implements TensorFactory {
+
+        private final SimpleTensor st;
+
+        public Factory(SimpleTensor st) {
+            this.st = st;
+        }
+
+        @Override
+        public Tensor create(Tensor... tensors) {
+            if (tensors.length != 0)
+                throw new IllegalArgumentException();
+            return st;
         }
     }
 }

@@ -23,9 +23,7 @@
 package cc.redberry.core.tensor.functions;
 
 import cc.redberry.core.number.*;
-import cc.redberry.core.tensor.AbstractScalarFunction;
-import cc.redberry.core.tensor.Tensor;
-import cc.redberry.core.tensor.TensorBuilder;
+import cc.redberry.core.tensor.*;
 import cc.redberry.core.utils.*;
 
 /**
@@ -56,13 +54,23 @@ public final class Sin extends AbstractScalarFunction {
 
     @Override
     public TensorBuilder getBuilder() {
-        return new SinBuilder();
+        return new ScalarFunctionBuilder(SinFactory.FACTORY);
     }
 
-    public static class SinBuilder extends AbstractScalarFunctionBuilder {
+    @Override
+    public TensorFactory getFactory() {
+        return SinFactory.FACTORY;
+    }
+
+    public static final class SinFactory extends AbstractScalarFunctionFactory {
+
+        public static final SinFactory FACTORY = new SinFactory();
+
+        private SinFactory() {
+        }
 
         @Override
-        public Tensor build() {
+        public Tensor create1(Tensor arg) {
             if (arg instanceof ArcSin)
                 return arg.get(0);
             if (TensorUtils.isZero(arg))

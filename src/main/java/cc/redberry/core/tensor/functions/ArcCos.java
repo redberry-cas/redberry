@@ -54,13 +54,23 @@ public class ArcCos extends AbstractScalarFunction {
 
     @Override
     public TensorBuilder getBuilder() {
-        return new ArcCosBuilder();
+        return new ScalarFunctionBuilder(ArcCosFactory.FACTORY);
     }
 
-    public static class ArcCosBuilder extends AbstractScalarFunctionBuilder {
+    @Override
+    public TensorFactory getFactory() {
+        return ArcCosFactory.FACTORY;
+    }
+
+    public static final class ArcCosFactory extends AbstractScalarFunctionFactory {
+
+        public final static ArcCosFactory FACTORY = new ArcCosFactory();
+
+        private ArcCosFactory() {
+        }
 
         @Override
-        public Tensor build() {
+        public Tensor create1(Tensor arg) {
             if (arg instanceof Cos)
                 return arg.get(0);
             if (TensorUtils.isZero(arg))

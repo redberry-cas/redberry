@@ -62,11 +62,6 @@ public abstract class AbstractScalarFunction extends Tensor {
     }
 
     @Override
-    public TensorFactory getFactory() {
-        return null;
-    }
-
-    @Override
     public final String toString(ToStringMode mode) {
         String stringSymbol = functionName();
         switch (mode) {

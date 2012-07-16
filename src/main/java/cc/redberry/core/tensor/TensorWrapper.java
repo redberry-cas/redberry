@@ -47,14 +47,19 @@ public final class TensorWrapper extends Tensor {
         return new Builder();
     }
 
-    public static class Builder implements TensorBuilder {
+    @Override
+    public TensorFactory getFactory() {
+        return Factory.FACTORY;
+    }
+
+    private static final class Builder implements TensorBuilder {
 
         private Tensor innerTensor;
 
         @Override
         public Tensor build() {
             if (innerTensor == null)
-                throw new NullPointerException();
+                throw new IllegalStateException("No elements added.");
             return new TensorWrapper(innerTensor);
         }
 
@@ -68,9 +73,21 @@ public final class TensorWrapper extends Tensor {
         }
     }
 
-    @Override
-    public TensorFactory getFactory() {
-        return null;
+    private static final class Factory implements TensorFactory {
+
+        private static final Factory FACTORY = new Factory();
+
+        private Factory() {
+        }
+
+        @Override
+        public Tensor create(Tensor... tensors) {
+            if (tensors.length != 1)
+                throw new IllegalArgumentException();
+            if (tensors[0] == null)
+                throw new NullPointerException();
+            return new TensorWrapper(tensors[0]);
+        }
     }
 
     public static TensorWrapper wrap(Tensor tensor) {
