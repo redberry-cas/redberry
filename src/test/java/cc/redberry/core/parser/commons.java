@@ -169,14 +169,11 @@ public class commons {
 
     @Test
     public void asd() {
-
-        BitsStreamGenerator bitsStreamGenerator = new Well44497a();
-        System.out.println(1 + bitsStreamGenerator.nextInt(6));
-        int[] a = new int[6];
-
-        for (int i = 0; i < 100; ++i)
-            ++a[bitsStreamGenerator.nextInt(5)];
-        System.out.println(Arrays.toString(a));
+        System.out.println(1^1);
+        System.out.println(1^0);
+        System.out.println(0^1);
+        System.out.println(0^0);
+        
     }
 
     private static void m(int... a) {
