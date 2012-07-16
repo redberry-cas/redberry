@@ -79,6 +79,6 @@ public final class Power extends Tensor {
 
     @Override
     public TensorFactory getFactory() {
-        return null;
+        return PowerFactory.FACTORY;
     }
 }

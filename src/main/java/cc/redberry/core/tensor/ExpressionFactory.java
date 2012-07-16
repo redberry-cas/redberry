@@ -22,38 +22,24 @@
  */
 package cc.redberry.core.tensor;
 
-import cc.redberry.core.utils.TensorUtils;
-
 /**
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public final class PowerBuilder implements TensorBuilder {
+public class ExpressionFactory implements TensorFactory {
 
-    private Tensor argument, power;
+    public static final ExpressionFactory FACTORY = new ExpressionFactory();
 
-    public PowerBuilder() {
+    private ExpressionFactory() {
     }
 
     @Override
-    public Tensor build() {
-        if (power == null)
-            throw new IllegalStateException("Power is not fully constructed.");
-        return PowerFactory.power(argument, power);
+    public Tensor create(Tensor... tensors) {
+//        if()
+        throw new UnsupportedOperationException("Not supported yet.");
     }
-
-    @Override
-    public void put(Tensor tensor) {
-        if (tensor == null)
-            throw new NullPointerException();
-        if (!TensorUtils.isScalar(tensor))
-            throw new IllegalArgumentException("Non-scalar tensor on input of Power builder.");
-        if (argument == null)
-            argument = tensor;
-        else if (power == null)
-            power = tensor;
-        else
-            throw new IllegalStateException("Power buider can not take more than two put() invocations.");
+    private static void checkWithException(Tensor... tensors){
+//        if()
     }
 }
