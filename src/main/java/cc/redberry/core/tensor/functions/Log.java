@@ -31,7 +31,7 @@ import cc.redberry.core.utils.*;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public final class Log extends AbstractScalarFunction {
+public final class Log extends ScalarFunction {
 
     Log(Tensor argument) {
         super(argument);
@@ -62,7 +62,7 @@ public final class Log extends AbstractScalarFunction {
         return LogFactory.FACTORY;
     }
 
-    public static final class LogFactory extends AbstractScalarFunctionFactory {
+    public static final class LogFactory extends ScalarFunctionFactory {
 
         public static final LogFactory FACTORY = new LogFactory();
 

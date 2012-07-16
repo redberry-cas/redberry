@@ -23,6 +23,7 @@
 package cc.redberry.core.utils;
 
 //import cc.redberry.core.indices.InconsistentIndicesException;
+import cc.redberry.core.tensor.functions.ScalarFunction;
 import cc.redberry.core.context.CC;
 import cc.redberry.core.indexmapping.IndexMappingBuffer;
 import cc.redberry.core.indexmapping.IndexMappingBufferTester;
@@ -232,7 +233,7 @@ public class TensorUtils {
             Tensor t;
             for (int i = 0; i < size; ++i) {
                 t = tensor.get(i);
-                if (t instanceof AbstractScalarFunction)
+                if (t instanceof ScalarFunction)
                     continue;
                 appendAllIndices(tensor.get(i), indices);
             }

@@ -31,7 +31,7 @@ import cc.redberry.core.utils.*;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public class ArcTan extends AbstractScalarFunction {
+public class ArcTan extends ScalarFunction {
 
     ArcTan(Tensor argument) {
         super(argument);
@@ -63,7 +63,7 @@ public class ArcTan extends AbstractScalarFunction {
         return 2321 * argument.hashCode();
     }
 
-    public static final class ArcTanFactory extends AbstractScalarFunctionFactory {
+    public static final class ArcTanFactory extends ScalarFunctionFactory {
 
         public static final ArcTanFactory FACTORY = new ArcTanFactory();
 

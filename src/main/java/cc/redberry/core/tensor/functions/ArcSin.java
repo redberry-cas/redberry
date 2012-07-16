@@ -31,7 +31,7 @@ import cc.redberry.core.utils.*;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public class ArcSin extends AbstractScalarFunction {
+public class ArcSin extends ScalarFunction {
 
     ArcSin(Tensor argument) {
         super(argument);
@@ -62,7 +62,7 @@ public class ArcSin extends AbstractScalarFunction {
         return new ArcSinFactory();
     }
 
-    public static final class ArcSinFactory extends AbstractScalarFunctionFactory {
+    public static final class ArcSinFactory extends ScalarFunctionFactory {
 
         public static final ArcSinFactory FACTORY = new ArcSinFactory();
 

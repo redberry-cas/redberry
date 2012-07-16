@@ -47,11 +47,6 @@ public class Expression extends Tensor {
     }
 
     @Override
-    public TensorBuilder getBuilder() {
-        return new ExpressionBuilder();
-    }
-
-    @Override
     public Indices getIndices() {
         return indices;
     }
@@ -72,7 +67,12 @@ public class Expression extends Tensor {
     }
 
     @Override
+    public TensorBuilder getBuilder() {
+        return new ExpressionBuilder();
+    }
+
+    @Override
     public TensorFactory getFactory() {
-        return null;
+        return ExpressionFactory.FACTORY;
     }
 }

@@ -91,7 +91,7 @@ public final class ProductFactory implements TensorFactory {
             content = null;
             Arrays.sort(data);
             IndicesBuilder builder = new IndicesBuilder();
-            for (i = dataContainer.list.size(); i >= 0; --i)
+            for (i = dataContainer.list.size() - 1; i >= 0; --i)
                 builder.append(dataContainer.list.get(i));
             try {
                 indices = builder.getIndices();

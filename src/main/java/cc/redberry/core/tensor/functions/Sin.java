@@ -31,7 +31,7 @@ import cc.redberry.core.utils.*;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public final class Sin extends AbstractScalarFunction {
+public final class Sin extends ScalarFunction {
 
     Sin(Tensor argument) {
         super(argument);
@@ -62,7 +62,7 @@ public final class Sin extends AbstractScalarFunction {
         return SinFactory.FACTORY;
     }
 
-    public static final class SinFactory extends AbstractScalarFunctionFactory {
+    public static final class SinFactory extends ScalarFunctionFactory {
 
         public static final SinFactory FACTORY = new SinFactory();
 

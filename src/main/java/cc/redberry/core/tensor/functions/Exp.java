@@ -32,7 +32,7 @@ import cc.redberry.core.utils.*;
  * @author Stanislav Poslavsky
  */
 @Deprecated
-public final class Exp extends AbstractScalarFunction {
+public final class Exp extends ScalarFunction {
 
     Exp(Tensor argument) {
         super(argument);
@@ -63,7 +63,7 @@ public final class Exp extends AbstractScalarFunction {
         return ExpFactory.FACTORY;
     }
 
-    public static final class ExpFactory extends AbstractScalarFunctionFactory {
+    public static final class ExpFactory extends ScalarFunctionFactory {
 
         public static final ExpFactory FACTORY = new ExpFactory();
 

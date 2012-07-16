@@ -20,21 +20,23 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
-package cc.redberry.core.tensor;
+package cc.redberry.core.tensor.functions;
 
 import cc.redberry.core.context.ToStringMode;
 import cc.redberry.core.indices.Indices;
 import cc.redberry.core.indices.IndicesFactory;
+import cc.redberry.core.tensor.Tensor;
+import cc.redberry.core.tensor.TensorException;
 
 /**
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public abstract class AbstractScalarFunction extends Tensor {
+public abstract class ScalarFunction extends Tensor {
 
     protected final Tensor argument;
 
-    protected AbstractScalarFunction(Tensor argument) {
+    protected ScalarFunction(Tensor argument) {
         if (argument.getIndices().size() != 0)
             throw new TensorException("Non scalar argument " + argument + " in scalar function");
         this.argument = argument;

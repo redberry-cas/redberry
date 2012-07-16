@@ -22,6 +22,8 @@
  */
 package cc.redberry.core.tensor;
 
+import cc.redberry.core.indices.*;
+
 /**
  *
  * @author Dmitry Bolotin
@@ -35,11 +37,13 @@ public class ExpressionFactory implements TensorFactory {
     }
 
     @Override
-    public Tensor create(Tensor... tensors) {
-//        if()
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-    private static void checkWithException(Tensor... tensors){
-//        if()
+    public Expression create(Tensor... tensors) {
+        if (tensors.length != 2)
+            throw new IllegalArgumentException("Wrong number of arguments.");
+        if (tensors[0] == null || tensors[1] == null)
+            throw new NullPointerException();
+        if (!tensors[0].getIndices().getFreeIndices().equalsRegardlessOrder(tensors[1].getIndices().getFreeIndices()))
+            throw new TensorException("Inconsistent indices in expression.");
+        return new Expression(IndicesFactory.createSorted(tensors[0].getIndices().getFreeIndices()), tensors[0], tensors[1]);
     }
 }

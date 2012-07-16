@@ -31,7 +31,7 @@ import cc.redberry.core.utils.*;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public final class Cot extends AbstractScalarFunction {
+public final class Cot extends ScalarFunction {
 
     Cot(Tensor argument) {
         super(argument);
@@ -62,7 +62,7 @@ public final class Cot extends AbstractScalarFunction {
         return CotFactory.FACTORY;
     }
 
-    public static final class CotFactory extends AbstractScalarFunctionFactory {
+    public static final class CotFactory extends ScalarFunctionFactory {
 
         public static final CotFactory FACTORY = new CotFactory();
 

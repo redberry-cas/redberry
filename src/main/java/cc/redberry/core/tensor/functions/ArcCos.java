@@ -31,7 +31,7 @@ import cc.redberry.core.utils.*;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public class ArcCos extends AbstractScalarFunction {
+public class ArcCos extends ScalarFunction {
 
     ArcCos(Tensor argument) {
         super(argument);
@@ -62,7 +62,7 @@ public class ArcCos extends AbstractScalarFunction {
         return ArcCosFactory.FACTORY;
     }
 
-    public static final class ArcCosFactory extends AbstractScalarFunctionFactory {
+    public static final class ArcCosFactory extends ScalarFunctionFactory {
 
         public final static ArcCosFactory FACTORY = new ArcCosFactory();
 

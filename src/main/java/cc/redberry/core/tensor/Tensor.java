@@ -106,7 +106,7 @@ import java.util.Iterator;
  */
 public abstract class Tensor
         implements Comparable<Tensor>,
-        Iterable<Tensor> {
+                   Iterable<Tensor> {
 
     /**
      * This method was make abstract to bind all inheritors have their hash code
@@ -117,6 +117,7 @@ public abstract class Tensor
      * in existing inheritors.
      *
      * @return hash code of this tensor
+     *
      * @see MultiTensor#hash()
      * @see SimpleTensor#hash()
      */
@@ -128,6 +129,7 @@ public abstract class Tensor
      * <code>Tensor</code>
      *
      * @return indices of this tensor
+     *
      * @see cc.redberry.core.indices.Indices
      */
     public abstract Indices getIndices();
@@ -195,11 +197,14 @@ public abstract class Tensor
      * <code>A_mn/B</code>
      *
      * @param mode symbols printing mode (e.g.
-     *             <code>UTF8</code> or
-     *             <code>LaTeX</code>)
+     * <code>UTF8</code> or
+     * <code>LaTeX</code>)
+     *
      * @return a string representation of tensor
+     *
      * @see cc.redberry.core.context.ToStringMode
-     * @see cc.redberry.core.indices.Indices#toString(cc.redberry.core.context.ToStringMode)
+     * @see
+     * cc.redberry.core.indices.Indices#toString(cc.redberry.core.context.ToStringMode)
      */
     public abstract String toString(final ToStringMode mode);
 
@@ -219,6 +224,7 @@ public abstract class Tensor
      * Comparing by hash code method.
      *
      * @param t tensor to compare
+     *
      * @return < code>(hash() < t.hash() ? -1 : (hash() == t.hash() ? 0 : 1))</code>
      */
     @Override
@@ -232,9 +238,7 @@ public abstract class Tensor
         return hash();
     }
 
-    public TensorBuilder getBuilder() {
-        return new DefaultBuilder(getFactory(), size());
-    }
+    public abstract TensorBuilder getBuilder();
 
     public abstract TensorFactory getFactory();
 }

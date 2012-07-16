@@ -339,6 +339,7 @@ public class TreeTraverseIteratorTest {
                 iterator.set(Tensors.pow(M, Complex.TWO));
         Tensor actual = iterator.result();
         Tensor expected = Tensors.parse("16*Power[M,20]");
+        System.out.println(actual);
         Assert.assertTrue(TensorUtils.equals(expected, actual));
     }
 

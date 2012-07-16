@@ -31,7 +31,7 @@ import cc.redberry.core.utils.*;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public final class Tan extends AbstractScalarFunction {
+public final class Tan extends ScalarFunction {
 
     Tan(Tensor argument) {
         super(argument);
@@ -62,7 +62,7 @@ public final class Tan extends AbstractScalarFunction {
         return TanFactory.FACTORY;
     }
 
-    public static class TanFactory extends AbstractScalarFunctionFactory {
+    public static class TanFactory extends ScalarFunctionFactory {
 
         public static final TanFactory FACTORY = new TanFactory();
 

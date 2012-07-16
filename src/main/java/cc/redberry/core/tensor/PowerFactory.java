@@ -31,7 +31,7 @@ import java.math.*;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public class PowerFactory implements TensorFactory {
+public final class PowerFactory implements TensorFactory {
 
     public static final PowerFactory FACTORY = new PowerFactory();
 
@@ -112,7 +112,7 @@ public class PowerFactory implements TensorFactory {
 
     private static void checkWithException(Tensor[] tensors) {
         if (tensors.length != 2)
-            throw new IllegalArgumentException("Too many arguments.");
+            throw new IllegalArgumentException("Wrong number of arguments.");
         if (!TensorUtils.isScalar(tensors))
             throw new IllegalArgumentException("Non scalar power parametres.");
         for (Tensor t : tensors)

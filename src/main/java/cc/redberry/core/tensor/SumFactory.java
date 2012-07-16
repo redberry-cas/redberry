@@ -20,29 +20,25 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
-package cc.redberry.core.tensor.functions;
-
-import cc.redberry.core.tensor.Tensor;
-import cc.redberry.core.tensor.TensorFactory;
-import cc.redberry.core.utils.TensorUtils;
+package cc.redberry.core.tensor;
 
 /**
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-abstract class AbstractScalarFunctionFactory implements TensorFactory {
+public final class SumFactory implements TensorFactory {
+
+    public static final SumFactory FACTORY = new SumFactory();
+
+    private SumFactory() {
+    }
 
     @Override
     public Tensor create(Tensor... tensors) {
-        if (tensors.length != 1)
-            throw new IllegalArgumentException();
-        if (tensors[0] == null)
-            throw new NullPointerException();
-        if (!TensorUtils.isIndexless(tensors[0]))
-            throw new IllegalArgumentException();
-        return create1(tensors[0]);
+        TensorBuilder builder = SumBuilderFactory.defaultSumBuilder(tensors.length);
+        for (Tensor t : tensors)
+            builder.put(t);
+        return builder.build();
     }
-
-    protected abstract Tensor create1(Tensor tensor);
 }
