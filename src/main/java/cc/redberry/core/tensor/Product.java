@@ -22,8 +22,7 @@
  */
 package cc.redberry.core.tensor;
 
-import cc.redberry.core.indices.Indices;
-import cc.redberry.core.indices.IndicesUtils;
+import cc.redberry.core.indices.*;
 import cc.redberry.core.math.GraphUtils;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.utils.ArraysUtils;
@@ -217,7 +216,15 @@ public final class Product extends MultiTensor {
         System.arraycopy(indexlessData, 0, allScalars, 0, indexlessData.length);
         System.arraycopy(scalras, 0, allScalars, indexlessData.length, scalras.length);
         return allScalars;
+    }
 
+    public Tensor getIndexlessSubProduct() {
+        if (indexlessData.length == 0)
+            return factor;
+        else if (factor == Complex.ONE && indexlessData.length == 1)
+            return indexlessData[0];
+        else
+            return new Product(factor, indexlessData, new Tensor[0], ProductContent.EMPTY_INSTANCE, IndicesFactory.EMPTY_INDICES);
     }
 
     private ProductContent calculateContent() {
@@ -413,6 +420,7 @@ public final class Product extends MultiTensor {
      *                     tensors hash in array)
      * @param id           id of index in tensor indices list (could be !=0 only
      *                     for simple tensors)
+     *
      * @return packed record (long)
      */
     private static long packToLong(final int tensorIndex, final short stretchIndex, final short id) {
@@ -425,7 +433,6 @@ public final class Product extends MultiTensor {
             result[i] = ((int) (info[i] >> 32)) + 1;
         return result;
     }
-
     //-65536 == packToLong(-1, (short) -1, (short) 0);
     private static final long dummyTensorInfo = -65536;
     //        private static class ProductContent {
