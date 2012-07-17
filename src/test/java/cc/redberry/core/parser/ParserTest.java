@@ -22,6 +22,7 @@
  */
 package cc.redberry.core.parser;
 
+import cc.redberry.core.context.*;
 import cc.redberry.core.indices.IndicesFactory;
 import cc.redberry.core.indices.SimpleIndices;
 import cc.redberry.core.number.Complex;
@@ -136,6 +137,15 @@ public class ParserTest {
     }
 
     @Test
+    public void test123() {
+        CC.resetTensorNames(1202870200402377417L);
+        Tensor t = Tensors.parse("Power[Power[pT,2] - s, 4]*Power[s, 4]");
+        Assert.assertEquals(t.toString(), "Power[Power[pT, 2]+-1*s, 4]*Power[s, 4]");
+    }
+    
+  
+
+    @Test
     public void testPower1() {
         Tensor t = Tensors.parse("Power[x,y]");
         Assert.assertEquals(Power.class, t.getClass());
@@ -207,8 +217,8 @@ public class ParserTest {
         Tensor e = Tensors.parse("(a = x+y)*7");
         Assert.assertEquals(Product.class, e.getClass());
     }
-    
-      @Test
+
+    @Test
     public void testIndices1() {
         ParseNode node = Parser.DEFAULT.parse("f_a*f^a*j_nm^n");
         Assert.assertTrue(node.getIndices().equalsRegardlessOrder(ParserIndices.parseSimple("_a^a_nm^n")));

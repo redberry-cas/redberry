@@ -46,13 +46,13 @@ public class TreeTraverseIteratorTest {
     public void test1() {
         Tensor t = parse("a+b+Sin[x]");
         Tensor[] expectedSequence = {t,//a+b+Sin[x]
-                t.get(0),//a
-                t.get(0),//a
-                t.get(1),//b
-                t.get(1),//b
-                t.get(2),//Sin[x]
-                t.get(2),//Sin[x]
-                t//a+b+Sin[x]
+                                     t.get(0),//a
+                                     t.get(0),//a
+                                     t.get(1),//b
+                                     t.get(1),//b
+                                     t.get(2),//Sin[x]
+                                     t.get(2),//Sin[x]
+                                     t//a+b+Sin[x]
         };
         TraverseGuide guide = new TraverseGuide() {
 
@@ -71,30 +71,26 @@ public class TreeTraverseIteratorTest {
         Assert.assertTrue(TensorUtils.equals(expectedSequence, actual));
     }
 
-    /*    @Test
-    public void test1x() {
-        Tensor t = parse("a+b+Sin[x]");
-        TreeTraverseIterator iterator = new TreeTraverseIterator(t);
-        while (iterator.next() != null)
-            System.out.println(iterator.current());
-        //Tensor[] actual = list.toArray(new Tensor[0]);
-        //Assert.assertTrue(TensorUtils.equals(expectedSequence, actual));
-    }*/
-
-
+    /*
+     * @Test public void test1x() { Tensor t = parse("a+b+Sin[x]");
+     * TreeTraverseIterator iterator = new TreeTraverseIterator(t); while
+     * (iterator.next() != null) System.out.println(iterator.current());
+     * //Tensor[] actual = list.toArray(new Tensor[0]);
+     * //Assert.assertTrue(TensorUtils.equals(expectedSequence, actual)); }
+     */
     @Test
     public void test2() {
         Tensor t = parse("Cos[a+b+Sin[x]]");
         Tensor[] expectedSequence = {t,//Cos[a+b+Sin[x]]
-                t.get(0),//a+b+Sin[x]
-                t.get(0).get(0),//a
-                t.get(0).get(0),//a
-                t.get(0).get(1),//b
-                t.get(0).get(1),//b
-                t.get(0).get(2),//Sin[x]
-                t.get(0).get(2),//Sin[x]
-                t.get(0),//a+b+Sin[x]
-                t//Cos[a+b+Sin[x]]
+                                     t.get(0),//a+b+Sin[x]
+                                     t.get(0).get(0),//a
+                                     t.get(0).get(0),//a
+                                     t.get(0).get(1),//b
+                                     t.get(0).get(1),//b
+                                     t.get(0).get(2),//Sin[x]
+                                     t.get(0).get(2),//Sin[x]
+                                     t.get(0),//a+b+Sin[x]
+                                     t//Cos[a+b+Sin[x]]
         };
         TraverseGuide guide = new TraverseGuide() {
 
@@ -117,15 +113,15 @@ public class TreeTraverseIteratorTest {
     public void test3() {
         Tensor t = parse("Cos[Sin[x+y]]");
         Tensor[] expectedSequence = {t,//Cos[Sin[x+y]]
-                t.get(0),//Sin[x+y]
-                t.get(0).get(0),//x+y
-                t.get(0).get(0).get(0),//x
-                t.get(0).get(0).get(0),//x
-                t.get(0).get(0).get(1),//y
-                t.get(0).get(0).get(1),//y
-                t.get(0).get(0),//x+y
-                t.get(0),//Sin[x+y]
-                t//Cos[Sin[x+y]]
+                                     t.get(0),//Sin[x+y]
+                                     t.get(0).get(0),//x+y
+                                     t.get(0).get(0).get(0),//x
+                                     t.get(0).get(0).get(0),//x
+                                     t.get(0).get(0).get(1),//y
+                                     t.get(0).get(0).get(1),//y
+                                     t.get(0).get(0),//x+y
+                                     t.get(0),//Sin[x+y]
+                                     t//Cos[Sin[x+y]]
         };
         List<Tensor> list = new ArrayList<>();
         TreeTraverseIterator iterator = new TreeTraverseIterator(t);
@@ -139,9 +135,9 @@ public class TreeTraverseIteratorTest {
     public void test4() {
         Tensor t = parse("Cos[Sin[x+y]]");
         Tensor[] expectedSequence = {t,//Cos[Sin[x+y]]
-                t.get(0),//Sin[x+y]
-                t.get(0),//Sin[x+y]
-                t//Cos[Sin[x+y]]
+                                     t.get(0),//Sin[x+y]
+                                     t.get(0),//Sin[x+y]
+                                     t//Cos[Sin[x+y]]
         };
         TraverseGuide guide = new TraverseGuide() {
 
@@ -215,7 +211,7 @@ public class TreeTraverseIteratorTest {
         Assert.assertTrue(TensorUtils.equals(expectedSequence, actual));
 
         expectedSequence = new Tensor[]{t,//Cos[x]
-                t//Cos[x]
+                                        t//Cos[x]
         };
 
         guide = new TraverseGuide() {
@@ -239,11 +235,11 @@ public class TreeTraverseIteratorTest {
     public void test6() {
         Tensor t = parse("Cos[Sin[x+y]]");
         Tensor[] expectedSequence = {t,//Cos[Sin[x+y]]
-                t.get(0),//Sin[x+y]
-                t.get(0).get(0),//x+y
-                t.get(0).get(0),//x+y
-                t.get(0),//Sin[x+y]
-                t//Cos[Sin[x+y]]
+                                     t.get(0),//Sin[x+y]
+                                     t.get(0).get(0),//x+y
+                                     t.get(0).get(0),//x+y
+                                     t.get(0),//Sin[x+y]
+                                     t//Cos[Sin[x+y]]
         };
         TraverseGuide guide = new TraverseGuide() {
 
@@ -339,11 +335,9 @@ public class TreeTraverseIteratorTest {
                 iterator.set(Tensors.pow(M, Complex.TWO));
         Tensor actual = iterator.result();
         Tensor expected = Tensors.parse("16*Power[M,20]");
-        System.out.println(actual);
         Assert.assertTrue(TensorUtils.equals(expected, actual));
     }
 
-    
     @Test
     public void test81() {
         /*
@@ -362,7 +356,7 @@ public class TreeTraverseIteratorTest {
          *
          * Result: 16*M^20
          */
-        Tensor t = Tensors.parse("Power[M, 20] + Power[pT, 4]*Power[Power[pT,2] - s, 4]*Power[s, 4]");// - 2*s*Power[M, 10]*(-377*s*Power[pT, 6] + 51*Power[pT, 8] + 753*Power[pT, 4]*Power[s, 2] - 561*Power[pT, 2]*Power[s, 3] + 135*Power[s, 4]) + Power[M, 12]*(-252*s*Power[pT, 6] + 9*Power[pT, 8] + 920*Power[pT, 4]*Power[s, 2] - 1008*Power[pT, 2]*Power[s, 3] + 324*Power[s, 4]) + 2*Power[M, 6]*Power[s, 2]*(-227*s*Power[pT, 8] + 42*Power[pT, 10] + 456*Power[pT, 6]*Power[s, 2] - 425*Power[pT, 4]*Power[s, 3] + 180*Power[pT, 2]*Power[s, 4] - 27*Power[s, 5]) + s*Power[M, 8]*(344*s*Power[pT, 8] - 18*Power[pT, 10] - 1142*Power[pT, 6]*Power[s, 2] + 1476*Power[pT, 4]*Power[s, 3] - 810*Power[pT, 2]*Power[s, 4] + 153*Power[s, 5]) + Power[M, 4]*Power[s, 2]*(-86*s*Power[pT, 10] + 9*Power[pT, 12] + 269*Power[pT, 8]*Power[s, 2] - 374*Power[pT, 6]*Power[s, 3] + 263*Power[pT, 4]*Power[s, 4] - 84*Power[pT, 2]*Power[s, 5] + 9*Power[s, 6]) + 2*Power[M, 2]*Power[s, 3]*(10*s*Power[pT, 4] - 3*Power[pT, 6] - 11*Power[pT, 2]*Power[s, 2] + 3*Power[s, 3])*Power[Power[pT,3] - pT*s, 2]");
+        Tensor t = Tensors.parse("Power[M, 20] + Power[Power[pT,2] - s, 4]*Power[s, 4]");// - 2*s*Power[M, 10]*(-377*s*Power[pT, 6] + 51*Power[pT, 8] + 753*Power[pT, 4]*Power[s, 2] - 561*Power[pT, 2]*Power[s, 3] + 135*Power[s, 4]) + Power[M, 12]*(-252*s*Power[pT, 6] + 9*Power[pT, 8] + 920*Power[pT, 4]*Power[s, 2] - 1008*Power[pT, 2]*Power[s, 3] + 324*Power[s, 4]) + 2*Power[M, 6]*Power[s, 2]*(-227*s*Power[pT, 8] + 42*Power[pT, 10] + 456*Power[pT, 6]*Power[s, 2] - 425*Power[pT, 4]*Power[s, 3] + 180*Power[pT, 2]*Power[s, 4] - 27*Power[s, 5]) + s*Power[M, 8]*(344*s*Power[pT, 8] - 18*Power[pT, 10] - 1142*Power[pT, 6]*Power[s, 2] + 1476*Power[pT, 4]*Power[s, 3] - 810*Power[pT, 2]*Power[s, 4] + 153*Power[s, 5]) + Power[M, 4]*Power[s, 2]*(-86*s*Power[pT, 10] + 9*Power[pT, 12] + 269*Power[pT, 8]*Power[s, 2] - 374*Power[pT, 6]*Power[s, 3] + 263*Power[pT, 4]*Power[s, 4] - 84*Power[pT, 2]*Power[s, 5] + 9*Power[s, 6]) + 2*Power[M, 2]*Power[s, 3]*(10*s*Power[pT, 4] - 3*Power[pT, 6] - 11*Power[pT, 2]*Power[s, 2] + 3*Power[s, 3])*Power[Power[pT,3] - pT*s, 2]");
         TreeTraverseIterator iterator = new TreeTraverseIterator(t);
         Tensor M = Tensors.parse("M");
 
@@ -373,10 +367,9 @@ public class TreeTraverseIteratorTest {
                 iterator.set(Tensors.pow(M, Complex.TWO));
         Tensor actual = iterator.result();
         Tensor expected = Tensors.parse("Power[M,20]");
-        System.out.println(actual);
         Assert.assertTrue(TensorUtils.equals(expected, actual));
     }
-    
+
     @Test
     public void test9() {
         /*

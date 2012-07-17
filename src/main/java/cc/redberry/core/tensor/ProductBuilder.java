@@ -80,7 +80,8 @@ public final class ProductBuilder implements TensorBuilder {
                     TensorBuilder sb = SumBuilderFactory.defaultSumBuilder();
                     sb.put(t.get(1));
                     powers.put(argument, sb);
-                }
+                } else
+                    indexlessElements.add(t);
             } else
                 indexlessElements.add(t);
     }

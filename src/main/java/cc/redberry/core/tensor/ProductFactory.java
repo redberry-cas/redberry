@@ -128,7 +128,8 @@ public final class ProductFactory implements TensorFactory {
                             powers.put(argument, sb);
                         }
                         sb.put(tensor.get(1));
-                    }
+                    } else
+                        indexlessArray.add(tensor);
                 } else
                     indexlessArray.add(tensor);
             }

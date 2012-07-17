@@ -23,6 +23,7 @@
 package cc.redberry.core.tensor;
 
 import cc.redberry.core.context.*;
+import cc.redberry.core.number.*;
 import cc.redberry.core.tensor.random.*;
 import cc.redberry.core.utils.TensorUtils;
 import java.util.*;
@@ -221,5 +222,16 @@ public class ProductTest {
         Assert.assertTrue(expected.length == actual.length);
         for (int i = 0; i < expected.length; ++i)
             Assert.assertTrue(TensorUtils.equals(expected[i], actual[i]));
+    }
+
+    @Test
+    public void testBuilder1() {
+        Tensor x = Tensors.parse("Power[Power[pT,2] - s, 4]*Power[s, 4]");
+        ProductBuilder builder = new ProductBuilder();
+        builder.put(Complex.ONE);
+        builder.put(x);
+        Tensor t = builder.build();
+        Tensor e= Tensors.parse("Power[Power[pT,2] - s, 4]*Power[s, 4]");
+        Assert.assertTrue(TensorUtils.equals(t, e));
     }
 }
