@@ -27,6 +27,7 @@ import cc.redberry.core.indices.IndicesFactory;
 import cc.redberry.core.indices.SimpleIndices;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.tensor.*;
+import cc.redberry.core.transformations.expand.*;
 import cc.redberry.core.utils.TensorUtils;
 import junit.framework.Assert;
 import org.junit.Test;
@@ -142,8 +143,6 @@ public class ParserTest {
         Tensor t = Tensors.parse("Power[Power[pT,2] - s, 4]*Power[s, 4]");
         Assert.assertEquals(t.toString(), "Power[Power[pT, 2]+-1*s, 4]*Power[s, 4]");
     }
-    
-  
 
     @Test
     public void testPower1() {
@@ -222,5 +221,14 @@ public class ParserTest {
     public void testIndices1() {
         ParseNode node = Parser.DEFAULT.parse("f_a*f^a*j_nm^n");
         Assert.assertTrue(node.getIndices().equalsRegardlessOrder(ParserIndices.parseSimple("_a^a_nm^n")));
+    }
+
+    @Test
+    public void test15() {
+        for (int i = 0; i < 100; ++i) {
+            CC.resetTensorNames();
+            Tensors.parse("(a+b)*(a*f_m+b*g_m)*(b*f^m+a*g^m)");
+            Tensors.parse("(Power[a, 2]*b+a*Power[b, 2])*g_{m}*g^{m}+(Power[a, 3]+Power[a, 2]*b+a*Power[b, 2]+Power[b, 3])*f^{m}*g_{m}+(Power[a, 2]*b+a*Power[b, 2])*f_{m}*f^{m}");
+        }
     }
 }

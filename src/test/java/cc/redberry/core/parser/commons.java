@@ -24,17 +24,17 @@ package cc.redberry.core.parser;
 
 import cc.redberry.core.combinatorics.*;
 import cc.redberry.core.indices.IndicesUtils;
+import cc.redberry.core.tensor.*;
 import cc.redberry.core.utils.ArraysUtils;
 import cc.redberry.core.utils.IntArrayList;
-import cc.redberry.core.utils.StringFormat;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.math.BigInteger;
-import java.util.Arrays;
+import java.util.*;
+import junit.framework.*;
 import org.apache.commons.math3.complex.Complex;
 import org.apache.commons.math3.fraction.BigFraction;
 import org.apache.commons.math3.fraction.Fraction;
-import org.apache.commons.math3.random.*;
 import org.junit.Test;
 
 /**
@@ -169,11 +169,51 @@ public class commons {
 
     @Test
     public void asd() {
-        System.out.println(1^1);
-        System.out.println(1^0);
-        System.out.println(0^1);
-        System.out.println(0^0);
-        
+        ArrayList<int[]> a = new ArrayList<>();
+        int size = new Random().nextInt(1000);
+        int[] array;
+        int asas = new Random().nextInt(1212112);
+        for (int l = 0; l < asas; ++l) {
+            array = new int[size];
+            if (true)
+                array = new int[size];
+            if (true)
+                Arrays.sort(array);
+            a.add(array.clone());
+            array = null;
+            if (true)
+                array = new int[size];
+            array = new int[size];
+            if (true)
+                array = null;
+            if (true)
+                array = new int[size];
+            a.add(array.clone());
+            if (true)
+                Arrays.sort(array);
+            if (true)
+                array = new int[size];
+            array = null;
+            array = new int[size];
+            if (true)
+                array = new int[size];
+            if (true)
+                Arrays.sort(array);
+            array = new int[size];
+            if (size < 1000) {
+                for (int i = 0; i < array.length; ++i)
+                    if (array[i] != 0) {
+                        System.out.println(Arrays.toString(array));
+                        System.exit(0);
+                    }
+            } else
+                for (int i = 0; i < array.length; ++i)
+                    if (array[i] != 0) {
+                        System.out.println(Arrays.toString(array));
+                        System.exit(0);
+                    }
+            a.add(array.clone());
+        }
     }
 
     private static void m(int... a) {
