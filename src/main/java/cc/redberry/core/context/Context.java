@@ -72,7 +72,7 @@ public final class Context {
         }
 
         for (i = 0; i < kroneckerNames.length; ++i) {
-            NameDescriptor nd = nameManager.mapNameDescriptor(metricName,
+            NameDescriptor nd = nameManager.mapNameDescriptor(kroneckerName,
                                                               new IndicesTypeStructure((byte) i, 2));
             kroneckerNames[i] = nd.getId();
             nd.getSymmetries().add((byte) i, false, new int[]{1, 0});
