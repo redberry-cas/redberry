@@ -23,6 +23,7 @@
 package cc.redberry.core.tensor;
 
 import cc.redberry.core.indices.Indices;
+import cc.redberry.core.indices.IndicesFactory;
 
 /**
  *
@@ -48,7 +49,7 @@ public class ExpressionBuilder implements TensorBuilder {
             throw new NullPointerException();
         else if (left == null) {
             left = tensor;
-            indices = left.getIndices().getFreeIndices();
+            indices = IndicesFactory.createSorted(left.getIndices().getFreeIndices());
         } else if (right == null) {
             right = tensor;
             if (!indices.equalsRegardlessOrder(right.getIndices().getFreeIndices()))

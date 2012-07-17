@@ -28,18 +28,20 @@ import cc.redberry.core.indices.IndicesFactory;
 import cc.redberry.core.tensor.Product;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.tensor.TensorBuilder;
-import java.io.Serializable;
-import java.math.BigInteger;
+import cc.redberry.core.tensor.TensorFactory;
 import org.apache.commons.math3.Field;
 import org.apache.commons.math3.exception.NullArgumentException;
 import org.apache.commons.math3.fraction.BigFraction;
+
+import java.io.Serializable;
+import java.math.BigInteger;
 
 /**
  * @author Stanislav Poslavsky
  */
 public class Complex extends Tensor
         implements Number<Complex>,
-                   Serializable {
+        Serializable {
 
     public static final Complex ComplexNaN =
             new Complex(Numeric.NaN, Numeric.NaN);
@@ -172,6 +174,11 @@ public class Complex extends Tensor
     @Override
     public TensorBuilder getBuilder() {
         return new ComplexBuilder(this);
+    }
+
+    @Override
+    public TensorFactory getFactory() {
+        return null;
     }
 
     private static class ComplexBuilder implements TensorBuilder {
@@ -328,9 +335,7 @@ public class Complex extends Tensor
      * to the rules for {@link java.lang.Double} arithmetic.
      *
      * @param addend Value to be added to this {@code Complex}.
-     *
      * @return {@code this + addend}.
-     *
      * @throws NullArgumentException if {@code addend} is {@code null}.
      */
     @Override
@@ -367,9 +372,7 @@ public class Complex extends Tensor
      * results. </li> </ul>
      *
      * @param divisor Value by which this {@code Complex} is to be divided.
-     *
      * @return {@code this / divisor}.
-     *
      * @throws NullArgumentException if {@code divisor} is {@code null}.
      */
     @Override
@@ -391,12 +394,12 @@ public class Complex extends Tensor
             Real q = c.divide(d);
             Real denominator = c.multiply(q).add(d);
             return new Complex((real.multiply(q).add(imaginary)).divide(denominator),
-                               (imaginary.multiply(q).subtract(real)).divide(denominator));
+                    (imaginary.multiply(q).subtract(real)).divide(denominator));
         } else {
             Real q = d.divide(c);
             Real denominator = d.multiply(q).add(c);
             return new Complex(((imaginary.multiply(q)).add(real)).divide(denominator),
-                               (imaginary.subtract(real.multiply(q))).divide(denominator));
+                    (imaginary.subtract(real.multiply(q))).divide(denominator));
         }
     }
 
@@ -427,9 +430,7 @@ public class Complex extends Tensor
      * cases.
      *
      * @param factor value to be multiplied by this {@code Complex}.
-     *
      * @return {@code this * factor}.
-     *
      * @throws NullArgumentException if {@code factor} is {@code null}.
      */
     @Override
@@ -438,7 +439,7 @@ public class Complex extends Tensor
         if (factor.isNaN())
             return ComplexNaN;
         return new Complex(real.multiply(factor.real).subtract(imaginary.multiply(factor.imaginary)),
-                           real.multiply(factor.imaginary).add(imaginary.multiply(factor.real)));
+                real.multiply(factor.imaginary).add(imaginary.multiply(factor.real)));
     }
 
     @Override

@@ -154,11 +154,11 @@ public final class Product extends MultiTensor {
     }
 
     //     public Tensor[] getRangeWithoutFactor(int from,int to) {
-//         if(to < indexlessData.length)
-//             return Arrays.copyOfRange(data, to)
-//         return  null;
-////        return i < indexlessData.length ? indexlessData[i] : data[i - indexlessData.length];
-//    }
+    //         if(to < indexlessData.length)
+    //             return Arrays.copyOfRange(data, to)
+    //         return  null;
+    ////        return i < indexlessData.length ? indexlessData[i] : data[i - indexlessData.length];
+    //    }
     public Complex getFactor() {
         return factor;
     }
@@ -399,6 +399,11 @@ public final class Product extends MultiTensor {
         return hash;
     }
 
+    @Override
+    public TensorFactory getFactory() {
+        return null;
+    }
+
     /**
      * Function to pack data to intermediate 64-bit record.
      *
@@ -408,7 +413,6 @@ public final class Product extends MultiTensor {
      *                     tensors hash in array)
      * @param id           id of index in tensor indices list (could be !=0 only
      *                     for simple tensors)
-     *
      * @return packed record (long)
      */
     private static long packToLong(final int tensorIndex, final short stretchIndex, final short id) {
@@ -421,25 +425,26 @@ public final class Product extends MultiTensor {
             result[i] = ((int) (info[i] >> 32)) + 1;
         return result;
     }
+
     //-65536 == packToLong(-1, (short) -1, (short) 0);
     private static final long dummyTensorInfo = -65536;
-//        private static class ProductContent {
-//
-//        final ContractionStructure contractionStructure;
-//        final FullContractionsStructure fullContractionsStructure;
-//        final Tensor[] scalars;
-//        final Tensor nonScalar;
-//        final short[] stretchIndices;
-//
-//        public ProductContent(ContractionStructure contractionStructure,
-//                              FullContractionsStructure fullContractionsStructure,
-//                              Tensor[] scalars, Tensor nonScalar,
-//                              short[] stretchIndices) {
-//            this.contractionStructure = contractionStructure;
-//            this.fullContractionsStructure = fullContractionsStructure;
-//            this.scalars = scalars;
-//            this.nonScalar = nonScalar;
-//            this.stretchIndices = stretchIndices;
-//        }
-//    }
+    //        private static class ProductContent {
+    //
+    //        final ContractionStructure contractionStructure;
+    //        final FullContractionsStructure fullContractionsStructure;
+    //        final Tensor[] scalars;
+    //        final Tensor nonScalar;
+    //        final short[] stretchIndices;
+    //
+    //        public ProductContent(ContractionStructure contractionStructure,
+    //                              FullContractionsStructure fullContractionsStructure,
+    //                              Tensor[] scalars, Tensor nonScalar,
+    //                              short[] stretchIndices) {
+    //            this.contractionStructure = contractionStructure;
+    //            this.fullContractionsStructure = fullContractionsStructure;
+    //            this.scalars = scalars;
+    //            this.nonScalar = nonScalar;
+    //            this.stretchIndices = stretchIndices;
+    //        }
+    //    }
 }

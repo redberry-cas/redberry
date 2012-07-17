@@ -38,6 +38,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.*;
 
 import static cc.redberry.core.tensor.Tensors.*;
 
@@ -46,7 +47,7 @@ import static cc.redberry.core.tensor.Tensors.*;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public class ExpandBrackets implements Transformation {
+public final class ExpandBrackets implements Transformation {
 
     private final Indicator<Tensor> indicator;
     private final int threads;
@@ -84,7 +85,7 @@ public class ExpandBrackets implements Transformation {
             current = iterator.current();
             if (current instanceof Product && indicator.is(current))
                 iterator.set(expandProductOfSums(current, threads));
-            if (current instanceof Power && current.get(0) instanceof Sum
+            else if (current instanceof Power && current.get(0) instanceof Sum
                     && TensorUtils.isNatural(current.get(1)) && indicator.is(current))
                 iterator.set(expandPower((Sum) current.get(0), ((Complex) current.get(1)).getReal().intValue(), threads));
         }
@@ -95,6 +96,11 @@ public class ExpandBrackets implements Transformation {
 
         // a*b | a_m*b_v | (a+b*f) | (a_i+(c+2)*b_i) 
 
+        //1: a*b | (a+b*f)  => result1 = a**2*b+b**2*a*f    Tensors.multiplyAndExpand(nonSum, Sum)
+        //2: a_m*b_v | (a_i+(c+2)*b_i)   => result2 = a_m*b_v*a_i+(c+2)*a_m*b_v*b_i
+        //3: result1 * result2                              Tensors.multiplyAndExpand(scalarSum, nonScalarSum)
+        // (a_m^m**2*b+b**2*a*a_m^m) * (a_m^m*a_m*b_v*a_i+a_m^m**2*B_avi+(c+2)*a_m*b_v*b_i) => (.....)*a_m*b_v*a_i +(....)*B_avi + ( .....  )*a_m*b_v*b_i 
+
         ArrayList<Tensor> indexlessNonSums = new ArrayList<>();
         ArrayList<Tensor> nonSums = new ArrayList<>();
 
@@ -102,7 +108,17 @@ public class ExpandBrackets implements Transformation {
         Sum sum = null;
 
         int i;
-        Tensor t, temp = null;
+        Tensor t;
+        for (i = current.size() - 1; i >= 0; --i) {
+            t = current.get(i);
+            if (t instanceof Sum)
+                break;
+        }
+
+        if (i == -1)
+            return current;
+
+        Tensor temp;
         for (i = current.size() - 1; i >= 0; --i) {
             t = current.get(i);
             if (t.getIndices().size() == 0)
@@ -124,7 +140,7 @@ public class ExpandBrackets implements Transformation {
                 if (sum == null)
                     sum = (Sum) t;
                 else {
-                    temp = ExpandUtils.expandPairOfSumsConcurrent((Sum) t, indexlessSum, threads);
+                    temp = ExpandUtils.expandPairOfSumsConcurrent((Sum) t, sum, threads);
                     if (temp instanceof Sum)
                         sum = (Sum) temp;
                     else {
@@ -135,9 +151,6 @@ public class ExpandBrackets implements Transformation {
             else
                 nonSums.add(t);
         }
-//
-//        if (temp == null)//no sums found
-//            return current;
 
         Tensor indexless;
         if (indexlessSum == null)
@@ -155,67 +168,10 @@ public class ExpandBrackets implements Transformation {
             main = multiplySumElementsOnFactorAndExpandScalars((Sum) main, indexless);
         else
             main = multiply(indexless, main);
-        
+
         return main;
-        // a*b | a_m*b_v | (a+b*f) | (a_i+(c+2)*b_i) 
-
-        //1: a*b | (a+b*f)  => result1 = a**2*b+b**2*a*f    Tensors.multiplyAndExpand(nonSum, Sum)
-        //2: a_m*b_v | (a_i+(c+2)*b_i)   => result2 = a_m*b_v*a_i+(c+2)*a_m*b_v*b_i
-        //3: result1 * result2                              Tensors.multiplyAndExpand(scalarSum, nonScalarSum)
-        // (a_m^m**2*b+b**2*a*a_m^m) * (a_m^m*a_m*b_v*a_i+a_m^m**2*B_avi+(c+2)*a_m*b_v*b_i) => (.....)*a_m*b_v*a_i +(....)*B_avi + ( .....  )*a_m*b_v*b_i 
-
-        //Power[a_m^m,3] * a_m^m*h_i => Power[a_m^m,4]*h_i
-
-        // a_m^m * g_i  / Power[a_m^m,2] * g_i
-
-
-
-
-        //processing indexless
-//        if (indexlessSums.isEmpty())
-//            if (indexlessNonSums.isEmpty())
-//                t = null;
-//            else
-//                t = Tensors.multiply(indexlessNonSums.toArray(new Tensor[indexlessNonSums.size()]));
-//        else {
-//            Sum indexlessSum = indexlessSums.peek();
-//            Tensor[] newSum = new Tensor[indexlessSum.size()];
-//            for (i = indexlessSum.size() - 1; i >= 0; --i)
-//                newSum[i] = multiply(indexlessNonSums, indexlessSum.get(i));
-//            t = Tensors.sum(newSum);
-//        }
-//
-//        //processing part with free indices
-//        if (sums.isEmpty())
-//            if (nonSums.isEmpty()) {
-//                assert t != null;
-//                return t;
-//            } else if (t != null)
-//                return multiply(nonSums, t);
-//            else
-//                return Tensors.multiply(nonSums.toArray(new Tensor[nonSums.size()]));
-//        else {
-//            Sum sum = sums.peek();
-//            Tensor[] newSum = new Tensor[sum.size()];
-//            for (i = sum.size() - 1; i >= 0; --i) {
-//                temp = multiply(nonSums, sum.get(i));
-//                if (t != null)
-//                    temp = expandProductOfSums(Tensors.multiply(t, temp), threads);
-//                newSum[i] = temp;
-//            }
-//            return Tensors.sum(newSum);
-//        }
     }
 
-//    private static Tensor multiply(ArrayList<Tensor> list, Tensor tensor) {
-//        if (list.isEmpty())
-//            return tensor;
-//        ProductBuilder builder = new ProductBuilder();
-//        for (Tensor t : list)
-//            builder.put(t);
-//        builder.put(tensor);
-//        return builder.build();
-//    }
     private static Tensor expandPower(Sum argument, int power, final int threads) {
         //TODO improve algorithm using Newton formula!!!
         int i;
@@ -229,7 +185,6 @@ public class ExpandBrackets implements Transformation {
         for (i = power - 1; i >= 1; --i)
             temp = ExpandUtils.expandPairOfSumsConcurrent((Sum) temp, (Sum) renameDummy(argument, mapper), threads);
         return temp;
-
     }
 
     private static Tensor renameDummy(Tensor tensor, IndexMapper mapper) {

@@ -31,7 +31,7 @@ import cc.redberry.core.utils.*;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public final class Cos extends AbstractScalarFunction {
+public final class Cos extends ScalarFunction {
 
     Cos(Tensor argument) {
         super(argument);
@@ -54,13 +54,23 @@ public final class Cos extends AbstractScalarFunction {
 
     @Override
     public TensorBuilder getBuilder() {
-        return new CosBuilder();
+        return new ScalarFunctionBuilder(CosFactory.FACTORY);
     }
 
-    public static class CosBuilder extends AbstractScalarFunctionBuilder {
+    @Override
+    public TensorFactory getFactory() {
+        return CosFactory.FACTORY;
+    }
+
+    public static final class CosFactory extends ScalarFunctionFactory {
+
+        public static final CosFactory FACTORY = new CosFactory();
+
+        private CosFactory() {
+        }
 
         @Override
-        public Tensor build() {
+        public Tensor create1(Tensor arg) {
             if (arg instanceof ArcCos)
                 return arg.get(0);
             if (TensorUtils.isZero(arg))

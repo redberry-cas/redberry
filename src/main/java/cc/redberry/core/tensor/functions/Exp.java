@@ -23,9 +23,7 @@
 package cc.redberry.core.tensor.functions;
 
 import cc.redberry.core.number.*;
-import cc.redberry.core.tensor.AbstractScalarFunction;
-import cc.redberry.core.tensor.Tensor;
-import cc.redberry.core.tensor.TensorBuilder;
+import cc.redberry.core.tensor.*;
 import cc.redberry.core.utils.*;
 
 /**
@@ -34,7 +32,7 @@ import cc.redberry.core.utils.*;
  * @author Stanislav Poslavsky
  */
 @Deprecated
-public final class Exp extends AbstractScalarFunction {
+public final class Exp extends ScalarFunction {
 
     Exp(Tensor argument) {
         super(argument);
@@ -57,13 +55,23 @@ public final class Exp extends AbstractScalarFunction {
 
     @Override
     public TensorBuilder getBuilder() {
-        return new ExpBuilder();
+        return new ScalarFunctionBuilder(ExpFactory.FACTORY);
     }
 
-    public static class ExpBuilder extends AbstractScalarFunctionBuilder {
+    @Override
+    public TensorFactory getFactory() {
+        return ExpFactory.FACTORY;
+    }
+
+    public static final class ExpFactory extends ScalarFunctionFactory {
+
+        public static final ExpFactory FACTORY = new ExpFactory();
+
+        private ExpFactory() {
+        }
 
         @Override
-        public Tensor build() {
+        public Tensor create1(Tensor arg) {
             if (arg instanceof Log)
                 return arg.get(0);
             if (TensorUtils.isZero(arg))

@@ -20,24 +20,25 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
-package cc.redberry.core;
-
-import cc.redberry.core.context.CC;
-import org.junit.runner.Description;
-import org.junit.runner.notification.RunListener;
+package cc.redberry.core.tensor;
 
 /**
  *
- * @author Bolotin Dmitriy (bolotin.dmitriy@gmail.com)
+ * @author Dmitry Bolotin
+ * @author Stanislav Poslavsky
  */
-public class GlobalRunListener extends RunListener {
+public final class SumFactory implements TensorFactory {
 
-    public GlobalRunListener() {
-        System.out.println("UGxU!");
+    public static final SumFactory FACTORY = new SumFactory();
+
+    private SumFactory() {
     }
 
     @Override
-    public void testStarted(Description description) throws Exception {
-        CC.resetTensorNames();
+    public Tensor create(Tensor... tensors) {
+        TensorBuilder builder = SumBuilderFactory.defaultSumBuilder(tensors.length);
+        for (Tensor t : tensors)
+            builder.put(t);
+        return builder.build();
     }
 }

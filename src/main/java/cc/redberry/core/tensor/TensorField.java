@@ -47,7 +47,6 @@ public final class TensorField extends SimpleTensor {
     public SimpleIndices getArgIndices(int i) {
         return argIndices[i];
     }
-    
 
     @Override
     public Tensor get(int i) {
@@ -83,7 +82,12 @@ public final class TensorField extends SimpleTensor {
         return new Builder(this);
     }
 
-    private static class Builder implements TensorBuilder {
+    @Override
+    public TensorFactory getFactory() {
+        return new Factory(this);
+    }
+
+    private static final class Builder implements TensorBuilder {
 
         private final TensorField field;
         private int pointer = 0;
@@ -110,6 +114,28 @@ public final class TensorField extends SimpleTensor {
             if (!tensor.getIndices().getFreeIndices().equalsRegardlessOrder(field.getArgIndices(pointer)))
                 throw new IllegalArgumentException("Free indices of puted tensor differs from field argument binding indices!");
             data[pointer++] = tensor;
+        }
+    }
+
+    private static final class Factory implements TensorFactory {
+
+        private final TensorField field;
+
+        public Factory(TensorField field) {
+            this.field = field;
+        }
+
+        @Override
+        public Tensor create(Tensor... tensors) {
+            if (tensors.length != field.size())
+                throw new IllegalArgumentException("Wrong arguments count.");
+            for (int i = tensors.length - 1; i >= 0; --i) {
+                if (tensors[i] == null)
+                    throw new NullPointerException();
+                if (!tensors[i].getIndices().getFreeIndices().equalsRegardlessOrder(field.getArgIndices(i)))
+                    throw new IllegalArgumentException("Free indices of puted tensor differs from field argument binding indices!");
+            }
+            return new TensorField(field, tensors);
         }
     }
 }

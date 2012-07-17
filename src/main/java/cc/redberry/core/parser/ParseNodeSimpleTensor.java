@@ -22,7 +22,7 @@
  */
 package cc.redberry.core.parser;
 
-import cc.redberry.core.indices.SimpleIndices;
+import cc.redberry.core.indices.*;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.tensor.Tensors;
 import java.util.Objects;
@@ -47,6 +47,11 @@ public class ParseNodeSimpleTensor extends ParseNode {
         super(TensorType.SimpleTensor, new ParseNode[0]);
         this.indices = indices;
         this.name = name;
+    }
+
+    @Override
+    public Indices getIndices() {
+        return indices;
     }
 
     @Override

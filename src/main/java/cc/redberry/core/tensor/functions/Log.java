@@ -23,10 +23,7 @@
 package cc.redberry.core.tensor.functions;
 
 import cc.redberry.core.number.Complex;
-import cc.redberry.core.tensor.AbstractScalarFunction;
-import cc.redberry.core.tensor.Tensor;
-import cc.redberry.core.tensor.TensorBuilder;
-import cc.redberry.core.tensor.Tensors;
+import cc.redberry.core.tensor.*;
 import cc.redberry.core.utils.*;
 
 /**
@@ -34,7 +31,7 @@ import cc.redberry.core.utils.*;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public final class Log extends AbstractScalarFunction {
+public final class Log extends ScalarFunction {
 
     Log(Tensor argument) {
         super(argument);
@@ -57,13 +54,23 @@ public final class Log extends AbstractScalarFunction {
 
     @Override
     public TensorBuilder getBuilder() {
-        return new LogBuilder();
+        return new ScalarFunctionBuilder(LogFactory.FACTORY);
     }
 
-    public static class LogBuilder extends AbstractScalarFunctionBuilder {
+    @Override
+    public TensorFactory getFactory() {
+        return LogFactory.FACTORY;
+    }
+
+    public static final class LogFactory extends ScalarFunctionFactory {
+
+        public static final LogFactory FACTORY = new LogFactory();
+
+        private LogFactory() {
+        }
 
         @Override
-        public Tensor build() {
+        public Tensor create1(Tensor arg) {
             if (arg instanceof Exp)//TODO Log[Power[E,x]] = x
                 return arg.get(0);
             if (TensorUtils.isOne(arg))

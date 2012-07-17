@@ -55,8 +55,8 @@ public final class ProductBuilder implements TensorBuilder {
     public ProductBuilder(Product p) {
         this.elements = new ArrayList<>(p.data.length);
         this.indexlessElements = new ArrayList<>(p.indexlessData.length);
-        powers = new HashMap<>();
-        initializeData(complex, p.indexlessData, p.data);
+        this.powers = new HashMap<>();
+        initializeData(p.factor, p.indexlessData, p.data);
     }
 
     private ProductBuilder(Complex complex, ArrayList<Tensor> elements, List<Tensor> indexlessElements, Map<Tensor, TensorBuilder> powers) {
@@ -80,7 +80,8 @@ public final class ProductBuilder implements TensorBuilder {
                     TensorBuilder sb = SumBuilderFactory.defaultSumBuilder();
                     sb.put(t.get(1));
                     powers.put(argument, sb);
-                }
+                } else
+                    indexlessElements.add(t);
             } else
                 indexlessElements.add(t);
     }

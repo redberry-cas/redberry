@@ -34,6 +34,7 @@ import java.util.Arrays;
 import org.apache.commons.math3.complex.Complex;
 import org.apache.commons.math3.fraction.BigFraction;
 import org.apache.commons.math3.fraction.Fraction;
+import org.apache.commons.math3.random.*;
 import org.junit.Test;
 
 /**
@@ -168,7 +169,11 @@ public class commons {
 
     @Test
     public void asd() {
-        m(1);m(1,2);m(1,2,3);
+        System.out.println(1^1);
+        System.out.println(1^0);
+        System.out.println(0^1);
+        System.out.println(0^0);
+        
     }
 
     private static void m(int... a) {
@@ -180,6 +185,5 @@ public class commons {
     }
 
     private static void m(int a, int b) {
-        System.out.println("pair");
     }
 }

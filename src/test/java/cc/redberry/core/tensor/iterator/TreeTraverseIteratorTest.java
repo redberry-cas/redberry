@@ -28,15 +28,15 @@ import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.tensor.Tensors;
 import cc.redberry.core.tensor.functions.Sin;
 import cc.redberry.core.utils.TensorUtils;
-import java.util.ArrayList;
-import java.util.List;
 import org.junit.Assert;
 import org.junit.Test;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static cc.redberry.core.tensor.Tensors.parse;
 
 /**
- *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
@@ -71,6 +71,13 @@ public class TreeTraverseIteratorTest {
         Assert.assertTrue(TensorUtils.equals(expectedSequence, actual));
     }
 
+    /*
+     * @Test public void test1x() { Tensor t = parse("a+b+Sin[x]");
+     * TreeTraverseIterator iterator = new TreeTraverseIterator(t); while
+     * (iterator.next() != null) System.out.println(iterator.current());
+     * //Tensor[] actual = list.toArray(new Tensor[0]);
+     * //Assert.assertTrue(TensorUtils.equals(expectedSequence, actual)); }
+     */
     @Test
     public void test2() {
         Tensor t = parse("Cos[a+b+Sin[x]]");
@@ -128,7 +135,7 @@ public class TreeTraverseIteratorTest {
     public void test4() {
         Tensor t = parse("Cos[Sin[x+y]]");
         Tensor[] expectedSequence = {t,//Cos[Sin[x+y]]
-                                     t.get(0),//Sin[x+y]                                    
+                                     t.get(0),//Sin[x+y]
                                      t.get(0),//Sin[x+y]
                                      t//Cos[Sin[x+y]]
         };
@@ -332,6 +339,38 @@ public class TreeTraverseIteratorTest {
     }
 
     @Test
+    public void test81() {
+        /*
+         * Substituting s=M^2 and pT = M in
+         *
+         * 9*M^20 + 18*M^18*(2*pT^2 - 3*s) + pT^4*(pT^2 - s)^4*s^4 +
+         * 3*M^16*(18*pT^4 - 70*pT^2*s + 51*s^2) + 6*M^14*(6*pT^6 - 54*pT^4*s +
+         * 98*pT^2*s^2 - 45*s^3) + 2*M^2*s^3*(pT^3 - pT*s)^2*(-3*pT^6 +
+         * 10*pT^4*s - 11*pT^2*s^2 + 3*s^3) - 2*M^10*s*(51*pT^8 - 377*pT^6*s +
+         * 753*pT^4*s^2 - 561*pT^2*s^3 + 135*s^4) + M^12*(9*pT^8 - 252*pT^6*s +
+         * 920*pT^4*s^2 - 1008*pT^2*s^3 + 324*s^4) + 2*M^6*s^2*(42*pT^10 -
+         * 227*pT^8*s + 456*pT^6*s^2 - 425*pT^4*s^3 + 180*pT^2*s^4 - 27*s^5) +
+         * M^8*s*(-18*pT^10 + 344*pT^8*s - 1142*pT^6*s^2 + 1476*pT^4*s^3 -
+         * 810*pT^2*s^4 + 153*s^5) + M^4*s^2*(9*pT^12 - 86*pT^10*s +
+         * 269*pT^8*s^2 - 374*pT^6*s^3 + 263*pT^4*s^4 - 84*pT^2*s^5 + 9*s^6)
+         *
+         * Result: 16*M^20
+         */
+        Tensor t = Tensors.parse("Power[M, 20] + Power[Power[pT,2] - s, 4]*Power[s, 4]");// - 2*s*Power[M, 10]*(-377*s*Power[pT, 6] + 51*Power[pT, 8] + 753*Power[pT, 4]*Power[s, 2] - 561*Power[pT, 2]*Power[s, 3] + 135*Power[s, 4]) + Power[M, 12]*(-252*s*Power[pT, 6] + 9*Power[pT, 8] + 920*Power[pT, 4]*Power[s, 2] - 1008*Power[pT, 2]*Power[s, 3] + 324*Power[s, 4]) + 2*Power[M, 6]*Power[s, 2]*(-227*s*Power[pT, 8] + 42*Power[pT, 10] + 456*Power[pT, 6]*Power[s, 2] - 425*Power[pT, 4]*Power[s, 3] + 180*Power[pT, 2]*Power[s, 4] - 27*Power[s, 5]) + s*Power[M, 8]*(344*s*Power[pT, 8] - 18*Power[pT, 10] - 1142*Power[pT, 6]*Power[s, 2] + 1476*Power[pT, 4]*Power[s, 3] - 810*Power[pT, 2]*Power[s, 4] + 153*Power[s, 5]) + Power[M, 4]*Power[s, 2]*(-86*s*Power[pT, 10] + 9*Power[pT, 12] + 269*Power[pT, 8]*Power[s, 2] - 374*Power[pT, 6]*Power[s, 3] + 263*Power[pT, 4]*Power[s, 4] - 84*Power[pT, 2]*Power[s, 5] + 9*Power[s, 6]) + 2*Power[M, 2]*Power[s, 3]*(10*s*Power[pT, 4] - 3*Power[pT, 6] - 11*Power[pT, 2]*Power[s, 2] + 3*Power[s, 3])*Power[Power[pT,3] - pT*s, 2]");
+        TreeTraverseIterator iterator = new TreeTraverseIterator(t);
+        Tensor M = Tensors.parse("M");
+
+        while (iterator.next() != null)
+            if (TensorUtils.equals(iterator.current(), Tensors.parse("pT")))
+                iterator.set(M);
+            else if (TensorUtils.equals(iterator.current(), Tensors.parse("s")))
+                iterator.set(Tensors.pow(M, Complex.TWO));
+        Tensor actual = iterator.result();
+        Tensor expected = Tensors.parse("Power[M,20]");
+        Assert.assertTrue(TensorUtils.equals(expected, actual));
+    }
+
+    @Test
     public void test9() {
         /*
          * Substituting s=M^2 in
@@ -484,5 +523,22 @@ public class TreeTraverseIteratorTest {
             }
         //no double set exception 
         Assert.assertTrue(TensorUtils.equals(iterator.result(), parse("d+a")));
+    }
+
+    @Test
+    public void testSet3() {
+        Tensor tensor = parse("d*(a+b)+x*(a-b+c)");
+        TreeTraverseIterator iterator = new TreeTraverseIterator(tensor);
+        TraverseState state;
+        while ((state = iterator.next()) != null)
+            if (state == TraverseState.Leaving) {
+                if (TensorUtils.equals(parse("d"), iterator.current()))
+                    iterator.set(parse("1"));
+                if (TensorUtils.equals(parse("x"), iterator.current()))
+                    iterator.set(parse("1"));
+
+            }
+        //no double set exception 
+        Assert.assertTrue(TensorUtils.equals(iterator.result(), parse("2*a+c")));
     }
 }
