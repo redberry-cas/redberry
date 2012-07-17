@@ -3,20 +3,17 @@ package cc.redberry.core.tensor.iterator;
 import cc.redberry.core.tensor.Tensor;
 
 /*
-*
-*/
-public class TensorFirstIterator {
-    private final TreeTraverseIterator traverseIterator;
+ * Wrapper for TreeTraverseIterator. Return only
+ * <blockquote>Leaving</blockquote> elements. Traverse into.
+ */
+public final class TensorFirstIterator extends TreeIteratorAbstract {
 
     public TensorFirstIterator(Tensor tensor, TraverseGuide guide) {
-        traverseIterator = new TreeTraverseIterator(tensor, guide);
+        super(tensor, guide, TraverseState.Entering);
     }
 
     public TensorFirstIterator(Tensor tensor) {
-        traverseIterator = new TreeTraverseIterator(tensor);
+        super(tensor, TraverseState.Entering);
     }
-
-    public void next(){
-
-    }
+    
 }
