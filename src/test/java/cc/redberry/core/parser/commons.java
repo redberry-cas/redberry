@@ -24,9 +24,9 @@ package cc.redberry.core.parser;
 
 import cc.redberry.core.combinatorics.*;
 import cc.redberry.core.indices.IndicesUtils;
+import cc.redberry.core.tensor.*;
 import cc.redberry.core.utils.ArraysUtils;
 import cc.redberry.core.utils.IntArrayList;
-import cc.redberry.core.utils.StringFormat;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.math.BigInteger;
@@ -34,7 +34,6 @@ import java.util.Arrays;
 import org.apache.commons.math3.complex.Complex;
 import org.apache.commons.math3.fraction.BigFraction;
 import org.apache.commons.math3.fraction.Fraction;
-import org.apache.commons.math3.random.*;
 import org.junit.Test;
 
 /**
@@ -169,11 +168,10 @@ public class commons {
 
     @Test
     public void asd() {
-        System.out.println(1^1);
-        System.out.println(1^0);
-        System.out.println(0^1);
-        System.out.println(0^0);
-        
+        Product p = (Product) Tensors.parse("A_ij*B^j*F_km*G^m*G^ku");
+        System.out.println(p);
+        System.out.println(Arrays.toString(p.getContent().getFullContractionsStructure().components));
+
     }
 
     private static void m(int... a) {

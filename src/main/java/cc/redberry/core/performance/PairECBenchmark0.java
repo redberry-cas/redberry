@@ -90,7 +90,7 @@ public class PairECBenchmark0 {
 
     public static Sum[] random2Sums() { //Random sums pair with renamed indices
         Sum[] sums = random2Sums_();
-        Tensor p = Tensors.multiply(sums);
+        Tensor p = Tensors.multiplyAndRenameConflictingDummies(sums);
         return new Sum[]{(Sum) p.get(0), (Sum) p.get(1)};
     }
     public static TRandom random;
