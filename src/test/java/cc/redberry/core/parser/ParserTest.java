@@ -22,6 +22,7 @@
  */
 package cc.redberry.core.parser;
 
+import cc.redberry.core.context.*;
 import cc.redberry.core.indices.IndicesFactory;
 import cc.redberry.core.indices.SimpleIndices;
 import cc.redberry.core.number.Complex;
@@ -40,7 +41,7 @@ public class ParserTest {
     @Test
     public void test1() {
         ParseNode node = Parser.DEFAULT.parse("2*a_\\mu-b_\\mu/(c*x)*x[x,y]");
-        System.out.println(node);
+        Assert.assertTrue(node.getIndices().equalsRegardlessOrder(ParserIndices.parseSimple("_\\mu")));
     }
 
     @Test
@@ -61,13 +62,13 @@ public class ParserTest {
                                                                                                                                          new SimpleIndices[]{IndicesFactory.EMPTY_SIMPLE_INDICES, IndicesFactory.EMPTY_SIMPLE_INDICES}))},
                                                                                   new SimpleIndices[]{IndicesFactory.EMPTY_SIMPLE_INDICES})));
         Assert.assertEquals(expected, node);
+        Assert.assertTrue(node.getIndices().equalsRegardlessOrder(ParserIndices.parseSimple("")));
     }
 
     @Test
     public void test3() {
         ParseNode node = Parser.DEFAULT.parse("f[b_\\mu/(c*g)*g[x,y]]");
-        System.out.println(node);
-        System.out.println(node.getClass());
+        Assert.assertTrue(node.getIndices().equalsRegardlessOrder(ParserIndices.parseSimple("")));
     }
 
     @Test
@@ -84,9 +85,7 @@ public class ParserTest {
     @Test
     public void testReallySimpleTensor() {
         ParseNode node = Parser.DEFAULT.parse("S^k*(c_k*Power[a,1]/a-b_k)");
-        Tensor t = node.toTensor();
-        System.out.println(t);
-        System.out.println(((Product) t).getAllScalars()[0]);
+        Assert.assertTrue(node.getIndices().equalsRegardlessOrder(ParserIndices.parseSimple("^k_k")));
     }
 
     @Test
@@ -136,6 +135,15 @@ public class ParserTest {
         Assert.assertTrue(TensorUtils.equals(u, v));
         Assert.assertTrue(v instanceof Product);
     }
+
+    @Test
+    public void test123() {
+        CC.resetTensorNames(1202870200402377417L);
+        Tensor t = Tensors.parse("Power[Power[pT,2] - s, 4]*Power[s, 4]");
+        Assert.assertEquals(t.toString(), "Power[Power[pT, 2]+-1*s, 4]*Power[s, 4]");
+    }
+    
+  
 
     @Test
     public void testPower1() {
@@ -208,5 +216,11 @@ public class ParserTest {
     public void testExpression4() {
         Tensor e = Tensors.parse("(a = x+y)*7");
         Assert.assertEquals(Product.class, e.getClass());
+    }
+
+    @Test
+    public void testIndices1() {
+        ParseNode node = Parser.DEFAULT.parse("f_a*f^a*j_nm^n");
+        Assert.assertTrue(node.getIndices().equalsRegardlessOrder(ParserIndices.parseSimple("_a^a_nm^n")));
     }
 }

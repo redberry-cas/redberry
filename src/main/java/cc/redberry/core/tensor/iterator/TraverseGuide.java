@@ -22,6 +22,7 @@
  */
 package cc.redberry.core.tensor.iterator;
 
+import cc.redberry.core.tensor.functions.ScalarFunction;
 import cc.redberry.core.tensor.*;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.utils.*;
@@ -64,7 +65,7 @@ public interface TraverseGuide {
 
         @Override
         public TraversePermission getPermission(Tensor parent, int indexInParent, Tensor tensor) {
-            if (tensor instanceof AbstractScalarFunction)
+            if (tensor instanceof ScalarFunction)
                 return TraversePermission.DontShow;
             else if (tensor instanceof TensorField)
                 return TraversePermission.ShowButNotEnter;

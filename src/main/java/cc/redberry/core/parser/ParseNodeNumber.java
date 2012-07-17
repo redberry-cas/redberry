@@ -22,6 +22,7 @@
  */
 package cc.redberry.core.parser;
 
+import cc.redberry.core.indices.*;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.tensor.Tensor;
 import java.util.Objects;
@@ -48,6 +49,11 @@ public class ParseNodeNumber extends ParseNode {
     @Override
     public Tensor toTensor() {
         return value;
+    }
+
+    @Override
+    public Indices getIndices() {
+        return IndicesFactory.EMPTY_INDICES;
     }
 
     @Override

@@ -20,24 +20,29 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
-package cc.redberry.core;
+package cc.redberry.core.tensor.functions;
 
-import cc.redberry.core.context.CC;
-import org.junit.runner.Description;
-import org.junit.runner.notification.RunListener;
+import cc.redberry.core.tensor.Tensor;
+import cc.redberry.core.tensor.TensorFactory;
+import cc.redberry.core.utils.TensorUtils;
 
 /**
  *
- * @author Bolotin Dmitriy (bolotin.dmitriy@gmail.com)
+ * @author Dmitry Bolotin
+ * @author Stanislav Poslavsky
  */
-public class GlobalRunListener extends RunListener {
-
-    public GlobalRunListener() {
-        System.out.println("UGxU!");
-    }
+abstract class ScalarFunctionFactory implements TensorFactory {
 
     @Override
-    public void testStarted(Description description) throws Exception {
-        CC.resetTensorNames();
+    public Tensor create(Tensor... tensors) {
+        if (tensors.length != 1)
+            throw new IllegalArgumentException();
+        if (tensors[0] == null)
+            throw new NullPointerException();
+        if (!TensorUtils.isIndexless(tensors[0]))
+            throw new IllegalArgumentException();
+        return create1(tensors[0]);
     }
+
+    protected abstract Tensor create1(Tensor tensor);
 }

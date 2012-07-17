@@ -31,11 +31,18 @@ import cc.redberry.core.utils.TensorUtils;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-abstract class AbstractScalarFunctionBuilder implements TensorBuilder {
+public class ScalarFunctionBuilder implements TensorBuilder {
 
-    protected Tensor arg = null;
+    private final ScalarFunctionFactory factory;
+    private Tensor arg;
 
-    AbstractScalarFunctionBuilder() {
+    ScalarFunctionBuilder(ScalarFunctionFactory factory) {
+        this.factory = factory;
+    }
+
+    @Override
+    public Tensor build() {
+        return factory.create1(arg);
     }
 
     @Override
@@ -47,10 +54,5 @@ abstract class AbstractScalarFunctionBuilder implements TensorBuilder {
         if (!TensorUtils.isIndexless(tensor))
             throw new IllegalArgumentException();
         arg = tensor;
-    }
-
-    public Tensor eval(Tensor t) {
-        put(t);
-        return build();
     }
 }

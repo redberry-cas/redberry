@@ -76,4 +76,9 @@ public final class Power extends Tensor {
     public TensorBuilder getBuilder() {
         return new PowerBuilder();
     }
+
+    @Override
+    public TensorFactory getFactory() {
+        return PowerFactory.FACTORY;
+    }
 }

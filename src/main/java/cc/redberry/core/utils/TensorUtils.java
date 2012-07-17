@@ -23,13 +23,16 @@
 package cc.redberry.core.utils;
 
 //import cc.redberry.core.indices.InconsistentIndicesException;
+import cc.redberry.core.tensor.functions.ScalarFunction;
 import cc.redberry.core.context.CC;
-import cc.redberry.core.indexmapping.*;
+import cc.redberry.core.indexmapping.IndexMappingBuffer;
+import cc.redberry.core.indexmapping.IndexMappingBufferTester;
+import cc.redberry.core.indexmapping.IndexMappings;
+import cc.redberry.core.indexmapping.MappingsPort;
 import cc.redberry.core.indices.Indices;
 import cc.redberry.core.indices.IndicesUtils;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.tensor.*;
-
 import java.util.HashSet;
 import java.util.Set;
 
@@ -165,7 +168,10 @@ public class TensorUtils {
         if (u.hashCode() != v.hashCode())
             return false;
         if (u.getClass() == SimpleTensor.class)
-            return u.getIndices().equals(v.getIndices());
+            if (!u.getIndices().equals(v.getIndices()))
+                return false;
+            else
+                return true;
         if (u.size() != v.size())
             return false;
         if (u instanceof MultiTensor) {
@@ -227,7 +233,7 @@ public class TensorUtils {
             Tensor t;
             for (int i = 0; i < size; ++i) {
                 t = tensor.get(i);
-                if (t instanceof AbstractScalarFunction)
+                if (t instanceof ScalarFunction)
                     continue;
                 appendAllIndices(tensor.get(i), indices);
             }

@@ -20,24 +20,36 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
-package cc.redberry.core;
+package cc.redberry.core.parser;
 
-import cc.redberry.core.context.CC;
-import org.junit.runner.Description;
-import org.junit.runner.notification.RunListener;
+import cc.redberry.core.indices.*;
+import java.util.*;
+import java.util.Set;
 
 /**
  *
- * @author Bolotin Dmitriy (bolotin.dmitriy@gmail.com)
+ * @author Dmitry Bolotin
+ * @author Stanislav Poslavsky
  */
-public class GlobalRunListener extends RunListener {
+public class ParseUtils {
 
-    public GlobalRunListener() {
-        System.out.println("UGxU!");
+    private ParseUtils() {
     }
 
-    @Override
-    public void testStarted(Description description) throws Exception {
-        CC.resetTensorNames();
+    public static Set<Integer> getAllIndices(ParseNode node) {
+        Set<Integer> s = new HashSet<>();
+        getAllIndices1(node, s);
+        return s;
+    }
+
+    private static void getAllIndices1(ParseNode node, Set<Integer> set) {
+        if (node instanceof ParseNodeSimpleTensor) {
+            Indices indices = node.getIndices();
+            for (int i = indices.size() - 1; i >= 0; --i)
+                set.add(IndicesUtils.getNameWithType(indices.get(i)));
+        } else
+            for (ParseNode pn : node.content)
+                if (!(pn instanceof ParseNodeScalarFunction))
+                    getAllIndices1(pn, set);
     }
 }

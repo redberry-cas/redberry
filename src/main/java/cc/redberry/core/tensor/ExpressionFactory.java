@@ -20,24 +20,30 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
-package cc.redberry.core;
+package cc.redberry.core.tensor;
 
-import cc.redberry.core.context.CC;
-import org.junit.runner.Description;
-import org.junit.runner.notification.RunListener;
+import cc.redberry.core.indices.*;
 
 /**
  *
- * @author Bolotin Dmitriy (bolotin.dmitriy@gmail.com)
+ * @author Dmitry Bolotin
+ * @author Stanislav Poslavsky
  */
-public class GlobalRunListener extends RunListener {
+public class ExpressionFactory implements TensorFactory {
 
-    public GlobalRunListener() {
-        System.out.println("UGxU!");
+    public static final ExpressionFactory FACTORY = new ExpressionFactory();
+
+    private ExpressionFactory() {
     }
 
     @Override
-    public void testStarted(Description description) throws Exception {
-        CC.resetTensorNames();
+    public Expression create(Tensor... tensors) {
+        if (tensors.length != 2)
+            throw new IllegalArgumentException("Wrong number of arguments.");
+        if (tensors[0] == null || tensors[1] == null)
+            throw new NullPointerException();
+        if (!tensors[0].getIndices().getFreeIndices().equalsRegardlessOrder(tensors[1].getIndices().getFreeIndices()))
+            throw new TensorException("Inconsistent indices in expression.");
+        return new Expression(IndicesFactory.createSorted(tensors[0].getIndices().getFreeIndices()), tensors[0], tensors[1]);
     }
 }

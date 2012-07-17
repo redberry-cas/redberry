@@ -22,6 +22,9 @@
  */
 package cc.redberry.core.parser;
 
+import cc.redberry.core.indices.Indices;
+import cc.redberry.core.indices.IndicesBuilder;
+import cc.redberry.core.indices.IndicesFactory;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.tensor.Tensors;
 import java.util.Arrays;
@@ -46,6 +49,23 @@ public class ParseNode {
 
     private void setParent(ParseNode parent) {
         this.parent = parent;
+    }
+
+    public Indices getIndices() {
+        switch (tensorType) {
+            case Product:
+                IndicesBuilder builder = new IndicesBuilder();
+                for (ParseNode node : content)
+                    builder.append(node.getIndices());
+                return builder.getIndices();
+            case Sum:
+                return IndicesFactory.createSorted(content[0].getIndices());
+            case Power:
+                return IndicesFactory.EMPTY_INDICES;
+            case Expression:
+                return content[0].getIndices().getFreeIndices();
+        }
+        throw new ParserException("Unknown tensor type: " + tensorType);
     }
 
     @Override

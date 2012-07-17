@@ -31,7 +31,7 @@ import cc.redberry.core.utils.*;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public class ArcCot extends AbstractScalarFunction {
+public class ArcCot extends ScalarFunction {
 
     ArcCot(Tensor argument) {
         super(argument);
@@ -50,7 +50,12 @@ public class ArcCot extends AbstractScalarFunction {
 
     @Override
     public TensorBuilder getBuilder() {
-        return new ArcCotBuilder();
+        return new ScalarFunctionBuilder(ArcCotFactory.FACTORY);
+    }
+
+    @Override
+    public TensorFactory getFactory() {
+        return ArcCotFactory.FACTORY;
     }
 
     @Override
@@ -58,10 +63,15 @@ public class ArcCot extends AbstractScalarFunction {
         return 2311 * argument.hashCode();
     }
 
-    public static class ArcCotBuilder extends AbstractScalarFunctionBuilder {
+    public static final class ArcCotFactory extends ScalarFunctionFactory {
+
+        public static final ArcCotFactory FACTORY = new ArcCotFactory();
+
+        private ArcCotFactory() {
+        }
 
         @Override
-        public Tensor build() {
+        public Tensor create1(Tensor arg) {
             if (arg instanceof Cot)
                 return arg.get(0);
             if (TensorUtils.isZero(arg))
