@@ -46,7 +46,7 @@ import static cc.redberry.core.number.NumberUtils.*;
  *
  * @author Stanislav Poslavsky
  */
-public class Rational extends Real implements Serializable {
+public final class Rational extends Real implements Serializable {
 
     /**
      * A fraction representing "2 / 1".
