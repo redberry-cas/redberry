@@ -22,6 +22,8 @@
  */
 package cc.redberry.core;
 
+import cc.redberry.core.number.Complex;
+import cc.redberry.core.number.parser.NumberParser;
 import org.junit.Test;
 
 /**
@@ -33,8 +35,7 @@ public class BlackList {
 
     @Test
     public void test1() {
-        int i=0;
-        System.out.println(true | (i++ == 10));
-        System.out.println(i);
+        Complex c = NumberParser.COMPLEX_PARSER.parse("4+2*i");
+        System.out.println(c);
     }
 }
