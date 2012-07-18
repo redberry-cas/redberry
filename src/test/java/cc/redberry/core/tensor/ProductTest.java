@@ -74,13 +74,16 @@ public class ProductTest {
 
     @Test
     public void contentTest0() {
-        Product p = (Product) Tensors.parse("a*b*c*A^ij*A_i*A_j*b_u");
-        Assert.assertTrue(TensorUtils.equals(Tensors.parse("b_u"), p.getContent().getNonScalar()));
-        ProductBuilder pb = new ProductBuilder();
-        for (Tensor t : p.getAllScalars())
-            pb.put(t);
-        pb.put(Tensors.parse("b_u"));
-        Assert.assertTrue(TensorUtils.equals(pb.build(), p));
+        for (int i = 0; i < 100; ++i) {
+            CC.resetTensorNames();
+            Product p = (Product) Tensors.parse("a*b*c*A^ij*A_i*A_j*b_u");
+            Assert.assertTrue(TensorUtils.equals(Tensors.parse("b_u"), p.getContent().getNonScalar()));
+            ProductBuilder pb = new ProductBuilder();
+            for (Tensor t : p.getAllScalars())
+                pb.put(t);
+            pb.put(Tensors.parse("b_u"));
+            Assert.assertTrue(TensorUtils.equals(pb.build(), p));
+        }
     }
 
     @Test
@@ -231,7 +234,7 @@ public class ProductTest {
         builder.put(Complex.ONE);
         builder.put(x);
         Tensor t = builder.build();
-        Tensor e= Tensors.parse("Power[Power[pT,2] - s, 4]*Power[s, 4]");
+        Tensor e = Tensors.parse("Power[Power[pT,2] - s, 4]*Power[s, 4]");
         Assert.assertTrue(TensorUtils.equals(t, e));
     }
 }

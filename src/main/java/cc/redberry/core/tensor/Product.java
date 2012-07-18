@@ -374,7 +374,6 @@ public final class Product extends MultiTensor {
         freeContraction.sortContractions();
 
         //Here we can use unstable sort algorithm
-        //First element is factor always
         ArraysUtils.quickSort(contractions, 0, contractions.length, data);
 
         //Form resulting content
