@@ -71,6 +71,7 @@ public class ExpandBracketsTest {
 
     @Test
     public void test3() {
+        
         Tensor t = parse("(a*p_i+b*p_i)*c-a*c*p_i");
         Tensor actual = ExpandBrackets.expandBrackets(t);
         System.out.println(actual);
@@ -223,5 +224,12 @@ public class ExpandBracketsTest {
                 Assert.assertTrue(i2 == 0 && i1 < 2);
             }
         }
+    }
+    
+    @Test
+    public void test18(){
+        Tensor tensor = parse("(T_ij^ij+N_ij^ij)*K_ij^ij");
+        Tensor result =  ExpandBrackets.expandBrackets(tensor);
+        System.out.println(result);
     }
 }

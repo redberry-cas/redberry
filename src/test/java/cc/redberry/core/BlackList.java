@@ -20,39 +20,21 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
-package cc.redberry.core.tensor.functions;
+package cc.redberry.core;
 
-import cc.redberry.core.tensor.Tensor;
-import cc.redberry.core.tensor.TensorBuilder;
-import cc.redberry.core.utils.TensorUtils;
+import org.junit.Test;
 
 /**
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public class ScalarFunctionBuilder implements TensorBuilder {
+public class BlackList {
 
-    private final ScalarFunctionFactory factory;
-    private Tensor arg;
-
-    ScalarFunctionBuilder(ScalarFunctionFactory factory) {
-        this.factory = factory;
-    }
-
-    @Override
-    public Tensor build() {
-        return factory.create1(arg);
-    }
-
-    @Override
-    public void put(Tensor tensor) {
-        if (arg != null)
-            throw new IllegalStateException();
-        if (tensor == null)
-            throw new NullPointerException();
-        if (!TensorUtils.isScalar(tensor))
-            throw new IllegalArgumentException();
-        arg = tensor;
+    @Test
+    public void test1() {
+        int i=0;
+        System.out.println(true | (i++ == 10));
+        System.out.println(i);
     }
 }

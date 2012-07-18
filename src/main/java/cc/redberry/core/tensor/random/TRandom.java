@@ -301,6 +301,7 @@ public final class TRandom {
             sum.put(nextProduct(averageProductSize, indices));
         return sum.build();
     }
+   
 
     public int[] nextIndices(IndicesTypeStructure indicesTypeStructure) {
         int[] indices = new int[indicesTypeStructure.size()];
