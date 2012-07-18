@@ -287,17 +287,18 @@ public final class ContractIndices implements Transformation {
         }
 
         SimpleTensor apply(SimpleTensor t) {
-            IM im = new IM();
             SimpleIndices oldIndices = t.getIndices();
+            int from = -1, to = -1;
             OUTER:
             for (int i = 0; i < oldIndices.size(); ++i)
                 for (int j = 0; j < 2; ++j)
                     if ((oldIndices.get(i) ^ indices[j])
                             == 0x80000000) {
-                        im.add(oldIndices.get(i),
-                               indices[1 - j]);
+                        from = oldIndices.get(i);
+                        to = indices[1 - j];
                         break OUTER;
                     }
+            IM im = new IM(from, to);
             SimpleIndices newIndices = oldIndices.applyIndexMapping(im);
             if (oldIndices == newIndices)
                 return t;
@@ -331,21 +332,16 @@ public final class ContractIndices implements Transformation {
 
         private class IM implements IndexMapping {
 
-            Map<Integer, Integer> map = new HashMap<>();
+            final int from, to;
 
-            IM() {
-            }
-
-            public void add(int from, int to) {
-                map.put(from, to);
+            public IM(int from, int to) {
+                this.from = from;
+                this.to = to;
             }
 
             @Override
             public int map(int from) {
-                Integer to = map.get(from);
-                if (to != null)
-                    return to.intValue();
-                return from;
+                return from == this.from ? to : from;
             }
         }
 
