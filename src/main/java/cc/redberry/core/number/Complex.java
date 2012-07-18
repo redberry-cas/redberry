@@ -159,7 +159,7 @@ public class Complex extends Tensor
             case 0:
                 return real.toString();
             default:
-                return real.toString() + "I*" + imaginary.abs();
+                return real.toString() + "+I*" + imaginary.abs();
         }
     }
 
