@@ -20,39 +20,22 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
-package cc.redberry.core.tensor.functions;
+package cc.redberry.core.transformations.contractions;
 
-import cc.redberry.core.tensor.Tensor;
-import cc.redberry.core.tensor.TensorBuilder;
-import cc.redberry.core.utils.TensorUtils;
+import cc.redberry.core.tensor.SimpleTensor;
 
 /**
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public class ScalarFunctionBuilder implements TensorBuilder {
+interface MetricKroneckerContainer {
 
-    private final ScalarFunctionFactory factory;
-    private Tensor arg;
+    void add(MetricKroneckerWrapper mK);
 
-    ScalarFunctionBuilder(ScalarFunctionFactory factory) {
-        this.factory = factory;
-    }
+    SimpleTensor apply(SimpleTensor t);
 
-    @Override
-    public Tensor build() {
-        return factory.create1(arg);
-    }
+    MetricKroneckerContainer clone();
 
-    @Override
-    public void put(Tensor tensor) {
-        if (arg != null)
-            throw new IllegalStateException();
-        if (tensor == null)
-            throw new NullPointerException();
-        if (!TensorUtils.isScalar(tensor))
-            throw new IllegalArgumentException();
-        arg = tensor;
-    }
+    boolean equals(MetricKroneckerContainer container);
 }

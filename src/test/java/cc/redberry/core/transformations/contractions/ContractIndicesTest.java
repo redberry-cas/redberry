@@ -23,9 +23,13 @@
 package cc.redberry.core.transformations.contractions;
 
 import cc.redberry.core.*;
-import cc.redberry.core.tensor.Tensor;
+import cc.redberry.core.context.*;
+import cc.redberry.core.tensor.*;
+import cc.redberry.core.transformations.expand.*;
+import cc.redberry.core.utils.*;
 import org.junit.*;
 import static cc.redberry.core.tensor.Tensors.*;
+import static org.junit.Assert.*;
 
 /**
  *
@@ -35,7 +39,11 @@ import static cc.redberry.core.tensor.Tensors.*;
 public class ContractIndicesTest {
 
     private static Tensor contract(String tensor) {
-        return ContractIndices.CONTRACT_INDICES.transform(parse(tensor));
+        return contract(parse(tensor));
+    }
+
+    private static Tensor contract(Tensor tensor) {
+        return ContractIndices.CONTRACT_INDICES.transform(tensor);
     }
 
     @Test
@@ -135,12 +143,335 @@ public class ContractIndicesTest {
         Tensor e = parse("d_m^m*d_a^a");
         TAssert.assertParity(t, e);
     }
-    
+
     @Test
     public void test014() {
         Tensor t = contract("g_mn*g^ma*g_ab*g^bn");
         System.out.println(t);
         Tensor e = parse("d_m^m");
         TAssert.assertParity(t, e);
+    }
+
+    @Test
+    public void testProduct1() {
+        Tensor t = parse("g_mn*F^n*k");
+        t = contract(t);
+        Tensor expected = parse("F_m*k");
+        assertTrue(TensorUtils.equals(t, expected));
+    }
+
+    @Test
+    public void testProduct2() {
+        Tensor t = parse("g_mn*F^n");
+        t = contract(t);
+        Tensor expected = parse("F_m");
+        assertTrue(TensorUtils.equals(t, expected));
+    }
+
+    @Test
+    public void testProduct3() {
+        Tensor t = parse("g_mn*g_ab*F^n*F^m*F^ab");
+        t = contract(t);
+        Tensor expected = parse("F^n*F_n*F^a_a");
+        assertTrue(TensorUtils.compare(t, expected));
+    }
+
+    @Test
+    public void testProduct4() {
+        Tensor t = parse("F^n*F^m*F^ab");
+        t = contract(t);
+        Tensor expected = parse("F^n*F^m*F^ab");
+        assertTrue(TensorUtils.compare(t, expected));
+    }
+
+    @Test
+    public void testProduct6() {
+        Tensor t = parse("g^mc*g_am");
+        t = contract(t);
+        Tensor expected = parse("d_a^c");
+        assertTrue(TensorUtils.compare(t, expected));
+    }
+
+    @Test
+    public void testProduct7() {
+        Tensor t = parse("g_ab*F^ab");
+        t = contract(t);
+        Tensor expected = parse("F^a_a");
+        assertTrue(TensorUtils.compare(t, expected));
+    }
+
+    @Test
+    public void testProduct8() {
+        Tensor t = parse("g_ab*g^bc*(d_c^f*F_f+g_cd*g^de*X_e+g_cj*d^j_k*(X^k+X_l*g^lk))");
+        t = contract(t);
+        Tensor expected = parse("F_{a}+X_{a}+X_{a}+X_{a}");
+        assertTrue(TensorUtils.compare(t, expected));
+    }
+
+    @Test
+    public void testProduct9() {
+        Tensor t = parse("g^mn*g^ab*g^gd*(p_g*g_ba+p_a*g_bg)*(p_m*g_dn+p_n*g_dm)");
+        //                (p^d*d^b_b+p_g)*(p_d+p_d)
+        t = contract(t);
+
+        Tensor expected = parse("(p^{d}*d^{b}_{b}+p^{d})*(p_{d}+p_{d})");
+        assertTrue(TensorUtils.compare(t, expected));
+    }
+
+    @Test
+    public void testProduct10() {
+        Tensor t = parse("g^ab*g^gd*(p_g*g_ba+p_a*g_bg)");
+        t = contract(t);
+        Tensor expected = parse("p^{d}*d^{b}_{b}+p^{d}");
+        assertTrue(TensorUtils.compare(t, expected));
+    }
+
+    @Test
+    public void testProduct11() {
+        for (int i = 0; i < 100; ++i) {
+            CC.resetTensorNames();
+            Tensor t = parse("g_bg*(p^g*g^ba*p_a+p_a*g^ab*g^gd*p_d)");
+            t = contract(t);
+            Tensor expected = parse("p^{a}*p_{a}+p^{d}*p_{d}");
+            assertTrue(TensorUtils.compare(t, expected));
+        }
+    }
+
+    @Test
+    public void testSum1() {
+        Tensor t = parse("g_mn*g_ab*(F^n*F^m*F^ab+F^n*F^m*F^ab)");
+        t = contract(t);
+        Tensor expected = parse("F^n*F_n*F^a_a+F^r*F_r*F_x^x");
+        assertTrue(TensorUtils.compare(t, expected));
+    }
+
+    @Test
+    public void testSum2() {
+        Tensor t = parse("(F^n*F^m*F^ab+F^n*F^m*F^ab)*X_b");
+        t = contract(t);
+        Tensor expected = parse("(F^n*F^m*F^ab+F^n*F^m*F^ab)*X_b");
+        assertTrue(TensorUtils.compare(t, expected));
+    }
+
+    @Test
+    public void testSum3() {
+        Tensor t = parse("g_mn*(F^m_b+g_ab*(F^am+g_xy*F^xyam))");
+        t = contract(t);
+        Tensor expected = parse("F_{nb}+F_{bn}+F^{x}_{x}_{bn}");
+        assertTrue(TensorUtils.compare(t, expected));
+    }
+
+    @Test
+    public void testSum4() {
+        Tensor t = parse("g^nb*A_nb+g^nb*g_mn*(F^m_b+g_ab*(F^am+g_xy*F^xyam))");
+        t = contract(t);
+        Tensor expected = parse("A_n^n+F_n^n+F_n^n+F^{x}_{x}_n^n");
+        assertTrue(TensorUtils.compare(t, expected));
+    }
+
+    @Test
+    public void testSum5() {
+        Tensor t = parse("A_mn+g_mn*h");
+        t = contract(t);
+        Tensor expected = parse("A_mn+g_mn*h");
+        assertTrue(TensorUtils.compare(t, expected));
+    }
+
+    @Test
+    public void testSum6() {
+        Tensor t = parse("g^mc*(A_mn+g_mn*h)");
+        t = contract(t);
+        Tensor expected = parse("A^c_n+d^c_n*h");
+        assertTrue(TensorUtils.compare(t, expected));
+    }
+
+    @Test
+    public void testSum7() {
+        Tensor t = parse("g^ab*(g_mn*F_zxab^m+g^cd*g_mn*F_zxab^m*K_cd+g_zx*g_ab*X_n)");
+        t = contract(t);
+        Tensor expected = parse("F_zx^b_bn+F_zx^b_bn*K^d_d+X_n*g_zx*d^b_b");
+        assertTrue(TensorUtils.compare(t, expected));
+    }
+
+    @Test
+    public void testSum8() {
+        Tensor t = parse("X_a+g_ab*(X^b+g^bc*(X_c+d_c^f*F_f+g_cd*g^de*X_e+g_cj*d^j_k*(X^k+X_l*g^lk)))");
+        t = contract(t);
+        Tensor expected = parse("X_{a}+X_{a}+X_{a}+F_{a}+X_{a}+X_{a}+X_{a}");
+        assertTrue(TensorUtils.compare(t, expected));
+    }
+
+    @Test
+    public void testSum9() {
+        Tensor t = parse("A_mn+g_ma*B^a_n");
+        t = contract(t);
+        Tensor expected = parse("A_mn+B_mn");
+        assertTrue(TensorUtils.equals(t, expected));
+    }
+
+    @Test
+    public void testSum10() {
+        Tensor t = parse("g^ad*(g_ab*X^b+X_a)");
+        t = contract(t);
+        Tensor expected = parse("X^{d}+X^{d}");
+        assertTrue(TensorUtils.equals(t, expected));
+    }
+
+    @Test
+    public void testMK1() {
+        Tensor t = parse("g^mn*g_mn");
+        t = contract(t);
+        Tensor expected = parse("d^n_n");
+        assertTrue(TensorUtils.compare(t, expected));
+    }
+
+    @Test
+    public void testMK2() {
+        Tensor t = parse("g^ma*g_mn*g_ab*g^bc*d_c^n");
+        t = contract(t);
+        Tensor expected = parse("d^n_n");
+        assertTrue(TensorUtils.compare(t, expected));
+    }
+
+    @Test
+    public void testMK3() {
+        Tensor t = parse("d^c_a*d^a_b*d_o^b*g^ox");
+        t = contract(t);
+        Tensor expected = parse("g^cx");
+        assertTrue(TensorUtils.compare(t, expected));
+    }
+
+    @Test
+    public void testMK4() {
+        Tensor t = parse("d^c_o*g^ox");
+        t = contract(t);
+        Tensor expected = parse("g^cx");
+        assertTrue(TensorUtils.compare(t, expected));
+    }
+
+    @Test
+    public void testMK5() {
+        Tensor t = parse("p^n*d^a_d*g^db");
+        t = contract(t);
+        Tensor expected = parse("p^n*g^ab");
+        assertTrue(TensorUtils.compare(t, expected));
+    }
+
+    @Test
+    public void testMK6() {
+        Tensor t = parse("g^ab*(g_am*F_b+d_m^x*Y_xab+X_abm*g_pq*g^pq)");
+        t = contract(t);
+        System.out.println(t);
+        Tensor expected = parse("F_m+Y_m^b_b+X^b_bm*d_q^q");
+        assertTrue(TensorUtils.compare(t, expected));
+    }
+
+    @Test
+    public void testK1() {
+        Tensor t = parse("d^m_n*d^a_b*(F^nb+d^A_B*(M^B_A*X^n*X^b+M^Bnb_A))");
+        t = contract(t);
+        Tensor expected = parse("F^{ma}+M^{A}_{A}*X^{m}*X^{a}+M^{Ama}_{A}");
+        assertTrue(TensorUtils.compare(t, expected));
+    }
+
+//    @Test
+//    public void testDerivative1() {
+//        Tensor t = parse("g_mn*D[F_ab,x_mp]*d^a_p*g^bq");
+//        t = contract(t);
+//        Tensor expected = parse("D[F^aq,x^na]");
+//        assertTrue(TensorUtils.compare(t, expected));
+//    }
+    @Test
+    public void testGreek1() {
+        Tensor t = parse("g_{\\alpha \\beta}*(F^{\\alpha}+g^{\\gamma \\alpha}*U_{\\gamma})");
+        t = contract(t);
+        Tensor expected = parse("F_{\\beta}+U_{\\beta}");
+        assertTrue(TensorUtils.compare(t, expected));
+    }
+
+    @Test
+    public void testGreek2() {
+        Tensor t = parse("g^{\\alpha \\beta}*(F_{\\alpha}+g_{\\gamma \\alpha}*U^{\\gamma})");
+        t = contract(t);
+        Tensor expected = parse("F^{\\beta}+U^{\\beta}");
+        assertTrue(TensorUtils.compare(t, expected));
+    }
+
+    @Test
+    public void testGreek3() {
+        Tensor t = parse("g^{\\alpha \\beta}*g_{\\beta \\alpha}");
+        t = contract(t);
+        Tensor expected = parse("d^{\\alpha}_{\\alpha}");
+        assertTrue(TensorUtils.compare(t, expected));
+    }
+
+    @Test
+    public void performanceTest1() {
+        Tensor target = parse("g^ca*g^db*(p_g*(1/2)*(p_c*g_id+p_d*g_ic+(-1)*p_i*g_cd)*g^gm*g^in+p_g*(1/2)*g^gi*(p_c*d_i^m*d_d^n+p_d*d_i^m*d_c^n+(-1)*p_i*d_c^m*d_d^n)+p_d*(1/2)*(p_c*g_eg+p_g*g_ec+(-1)*p_e*g_cg)*g^gm*g^en+p_d*(1/2)*g^ge*(p_c*d_e^m*d_g^n+p_g*d_e^m*d_c^n+(-1)*p_e*d_c^m*d_g^n)+(1/2)*(p_h*g_fg+p_g*g_fh+(-1)*p_f*g_hg)*(1/2)*g^hk*(p_c*g_kd+p_d*g_kc+(-1)*p_k*g_cd)*g^gm*g^fn+(1/2)*g^gf*(1/2)*g^hk*(p_c*g_kd+p_d*g_kc+(-1)*p_k*g_cd)*(p_h*d_f^m*d_g^n+p_g*d_f^m*d_h^n+(-1)*p_f*d_h^m*d_g^n)+(1/2)*g^gf*(p_h*g_fg+p_g*g_fh+(-1)*p_f*g_hg)*(1/2)*(p_c*g_kd+p_d*g_kc+(-1)*p_k*g_cd)*g^hm*g^kn+(1/2)*g^gf*(p_h*g_fg+p_g*g_fh+(-1)*p_f*g_hg)*(1/2)*g^hk*(p_c*d_k^m*d_d^n+p_d*d_k^m*d_c^n+(-1)*p_k*d_c^m*d_d^n)+(-1)*(1/2)*(p_h*g_ld+p_d*g_lh+(-1)*p_l*g_hd)*(1/2)*g^ho*(p_c*g_og+p_g*g_oc+(-1)*p_o*g_cg)*g^gm*g^ln+(-1)*(1/2)*g^gl*(1/2)*g^ho*(p_c*g_og+p_g*g_oc+(-1)*p_o*g_cg)*(p_h*d_l^m*d_d^n+p_d*d_l^m*d_h^n+(-1)*p_l*d_h^m*d_d^n)+(-1)*(1/2)*g^gl*(p_h*g_ld+p_d*g_lh+(-1)*p_l*g_hd)*(1/2)*(p_c*g_og+p_g*g_oc+(-1)*p_o*g_cg)*g^hm*g^on+(-1)*(1/2)*g^gl*(p_h*g_ld+p_d*g_lh+(-1)*p_l*g_hd)*(1/2)*g^ho*(p_c*d_o^m*d_g^n+p_g*d_o^m*d_c^n+(-1)*p_o*d_c^m*d_g^n))+(p_g*(1/2)*g^gi*(p_c*g_id+p_d*g_ic+(-1)*p_i*g_cd)+p_d*(1/2)*g^ge*(p_c*g_eg+p_g*g_ec+(-1)*p_e*g_cg)+(1/2)*g^gf*(p_h*g_fg+p_g*g_fh+(-1)*p_f*g_hg)*(1/2)*g^hk*(p_c*g_kd+p_d*g_kc+(-1)*p_k*g_cd)+(-1)*(1/2)*g^gl*(p_h*g_ld+p_d*g_lh+(-1)*p_l*g_hd)*(1/2)*g^ho*(p_c*g_og+p_g*g_oc+(-1)*p_o*g_cg))*g^db*g^cm*g^an+(p_g*(1/2)*g^gi*(p_c*g_id+p_d*g_ic+(-1)*p_i*g_cd)+p_d*(1/2)*g^ge*(p_c*g_eg+p_g*g_ec+(-1)*p_e*g_cg)+(1/2)*g^gf*(p_h*g_fg+p_g*g_fh+(-1)*p_f*g_hg)*(1/2)*g^hk*(p_c*g_kd+p_d*g_kc+(-1)*p_k*g_cd)+(-1)*(1/2)*g^gl*(p_h*g_ld+p_d*g_lh+(-1)*p_l*g_hd)*(1/2)*g^ho*(p_c*g_og+p_g*g_oc+(-1)*p_o*g_cg))*g^ca*g^dm*g^bn+(p_g*(1/2)*(p_c*g_id+p_d*g_ic+(-1)*p_i*g_cd)*g^ga*g^ib+p_g*(1/2)*g^gi*(p_c*d_i^a*d_d^b+p_d*d_i^a*d_c^b+(-1)*p_i*d_c^a*d_d^b)+p_d*(1/2)*(p_c*g_eg+p_g*g_ec+(-1)*p_e*g_cg)*g^ga*g^eb+p_d*(1/2)*g^ge*(p_c*d_e^a*d_g^b+p_g*d_e^a*d_c^b+(-1)*p_e*d_c^a*d_g^b)+(1/2)*(p_h*g_fg+p_g*g_fh+(-1)*p_f*g_hg)*(1/2)*g^hk*(p_c*g_kd+p_d*g_kc+(-1)*p_k*g_cd)*g^ga*g^fb+(1/2)*g^gf*(1/2)*g^hk*(p_c*g_kd+p_d*g_kc+(-1)*p_k*g_cd)*(p_h*d_f^a*d_g^b+p_g*d_f^a*d_h^b+(-1)*p_f*d_h^a*d_g^b)+(1/2)*g^gf*(p_h*g_fg+p_g*g_fh+(-1)*p_f*g_hg)*(1/2)*(p_c*g_kd+p_d*g_kc+(-1)*p_k*g_cd)*g^ha*g^kb+(1/2)*g^gf*(p_h*g_fg+p_g*g_fh+(-1)*p_f*g_hg)*(1/2)*g^hk*(p_c*d_k^a*d_d^b+p_d*d_k^a*d_c^b+(-1)*p_k*d_c^a*d_d^b)+(-1)*(1/2)*(p_h*g_ld+p_d*g_lh+(-1)*p_l*g_hd)*(1/2)*g^ho*(p_c*g_og+p_g*g_oc+(-1)*p_o*g_cg)*g^ga*g^lb+(-1)*(1/2)*g^gl*(1/2)*g^ho*(p_c*g_og+p_g*g_oc+(-1)*p_o*g_cg)*(p_h*d_l^a*d_d^b+p_d*d_l^a*d_h^b+(-1)*p_l*d_h^a*d_d^b)+(-1)*(1/2)*g^gl*(p_h*g_ld+p_d*g_lh+(-1)*p_l*g_hd)*(1/2)*(p_c*g_og+p_g*g_oc+(-1)*p_o*g_cg)*g^ha*g^ob+(-1)*(1/2)*g^gl*(p_h*g_ld+p_d*g_lh+(-1)*p_l*g_hd)*(1/2)*g^ho*(p_c*d_o^a*d_g^b+p_g*d_o^a*d_c^b+(-1)*p_o*d_c^a*d_g^b))*g^cm*g^dn+g^cd*(p_g*(1/2)*g^ga*g^ib*(p_c*d_i^m*d_d^n+p_d*d_i^m*d_c^n+(-1)*p_i*d_c^m*d_d^n)+p_g*(1/2)*(p_c*g_id+p_d*g_ic+(-1)*p_i*g_cd)*g^ib*g^gm*g^an+p_g*(1/2)*(p_c*g_id+p_d*g_ic+(-1)*p_i*g_cd)*g^ga*g^im*g^bn+p_g*(1/2)*(p_c*d_i^a*d_d^b+p_d*d_i^a*d_c^b+(-1)*p_i*d_c^a*d_d^b)*g^gm*g^in+p_d*(1/2)*g^ga*g^eb*(p_c*d_e^m*d_g^n+p_g*d_e^m*d_c^n+(-1)*p_e*d_c^m*d_g^n)+p_d*(1/2)*(p_c*g_eg+p_g*g_ec+(-1)*p_e*g_cg)*g^eb*g^gm*g^an+p_d*(1/2)*(p_c*g_eg+p_g*g_ec+(-1)*p_e*g_cg)*g^ga*g^em*g^bn+p_d*(1/2)*(p_c*d_e^a*d_g^b+p_g*d_e^a*d_c^b+(-1)*p_e*d_c^a*d_g^b)*g^gm*g^en+(1/2)*(1/2)*g^hk*(p_c*g_kd+p_d*g_kc+(-1)*p_k*g_cd)*g^ga*g^fb*(p_h*d_f^m*d_g^n+p_g*d_f^m*d_h^n+(-1)*p_f*d_h^m*d_g^n)+(1/2)*(p_h*g_fg+p_g*g_fh+(-1)*p_f*g_hg)*(1/2)*(p_c*g_kd+p_d*g_kc+(-1)*p_k*g_cd)*g^ga*g^fb*g^hm*g^kn+(1/2)*(p_h*g_fg+p_g*g_fh+(-1)*p_f*g_hg)*(1/2)*g^hk*g^ga*g^fb*(p_c*d_k^m*d_d^n+p_d*d_k^m*d_c^n+(-1)*p_k*d_c^m*d_d^n)+(1/2)*(p_h*g_fg+p_g*g_fh+(-1)*p_f*g_hg)*(1/2)*g^hk*(p_c*g_kd+p_d*g_kc+(-1)*p_k*g_cd)*g^fb*g^gm*g^an+(1/2)*(p_h*g_fg+p_g*g_fh+(-1)*p_f*g_hg)*(1/2)*g^hk*(p_c*g_kd+p_d*g_kc+(-1)*p_k*g_cd)*g^ga*g^fm*g^bn+(1/2)*(1/2)*g^hk*(p_c*g_kd+p_d*g_kc+(-1)*p_k*g_cd)*(p_h*d_f^a*d_g^b+p_g*d_f^a*d_h^b+(-1)*p_f*d_h^a*d_g^b)*g^gm*g^fn+(1/2)*g^gf*(1/2)*(p_c*g_kd+p_d*g_kc+(-1)*p_k*g_cd)*(p_h*d_f^a*d_g^b+p_g*d_f^a*d_h^b+(-1)*p_f*d_h^a*d_g^b)*g^hm*g^kn+(1/2)*g^gf*(1/2)*g^hk*(p_h*d_f^a*d_g^b+p_g*d_f^a*d_h^b+(-1)*p_f*d_h^a*d_g^b)*(p_c*d_k^m*d_d^n+p_d*d_k^m*d_c^n+(-1)*p_k*d_c^m*d_d^n)+(1/2)*(p_h*g_fg+p_g*g_fh+(-1)*p_f*g_hg)*(1/2)*(p_c*g_kd+p_d*g_kc+(-1)*p_k*g_cd)*g^ha*g^kb*g^gm*g^fn+(1/2)*g^gf*(1/2)*(p_c*g_kd+p_d*g_kc+(-1)*p_k*g_cd)*g^ha*g^kb*(p_h*d_f^m*d_g^n+p_g*d_f^m*d_h^n+(-1)*p_f*d_h^m*d_g^n)+(1/2)*g^gf*(p_h*g_fg+p_g*g_fh+(-1)*p_f*g_hg)*(1/2)*g^ha*g^kb*(p_c*d_k^m*d_d^n+p_d*d_k^m*d_c^n+(-1)*p_k*d_c^m*d_d^n)+(1/2)*g^gf*(p_h*g_fg+p_g*g_fh+(-1)*p_f*g_hg)*(1/2)*(p_c*g_kd+p_d*g_kc+(-1)*p_k*g_cd)*g^kb*g^hm*g^an+(1/2)*g^gf*(p_h*g_fg+p_g*g_fh+(-1)*p_f*g_hg)*(1/2)*(p_c*g_kd+p_d*g_kc+(-1)*p_k*g_cd)*g^ha*g^km*g^bn+(1/2)*(p_h*g_fg+p_g*g_fh+(-1)*p_f*g_hg)*(1/2)*g^hk*(p_c*d_k^a*d_d^b+p_d*d_k^a*d_c^b+(-1)*p_k*d_c^a*d_d^b)*g^gm*g^fn+(1/2)*g^gf*(1/2)*g^hk*(p_c*d_k^a*d_d^b+p_d*d_k^a*d_c^b+(-1)*p_k*d_c^a*d_d^b)*(p_h*d_f^m*d_g^n+p_g*d_f^m*d_h^n+(-1)*p_f*d_h^m*d_g^n)+(1/2)*g^gf*(p_h*g_fg+p_g*g_fh+(-1)*p_f*g_hg)*(1/2)*(p_c*d_k^a*d_d^b+p_d*d_k^a*d_c^b+(-1)*p_k*d_c^a*d_d^b)*g^hm*g^kn+(-1)*(1/2)*(1/2)*g^ho*(p_c*g_og+p_g*g_oc+(-1)*p_o*g_cg)*g^ga*g^lb*(p_h*d_l^m*d_d^n+p_d*d_l^m*d_h^n+(-1)*p_l*d_h^m*d_d^n)+(-1)*(1/2)*(p_h*g_ld+p_d*g_lh+(-1)*p_l*g_hd)*(1/2)*(p_c*g_og+p_g*g_oc+(-1)*p_o*g_cg)*g^ga*g^lb*g^hm*g^on+(-1)*(1/2)*(p_h*g_ld+p_d*g_lh+(-1)*p_l*g_hd)*(1/2)*g^ho*g^ga*g^lb*(p_c*d_o^m*d_g^n+p_g*d_o^m*d_c^n+(-1)*p_o*d_c^m*d_g^n)+(-1)*(1/2)*(p_h*g_ld+p_d*g_lh+(-1)*p_l*g_hd)*(1/2)*g^ho*(p_c*g_og+p_g*g_oc+(-1)*p_o*g_cg)*g^lb*g^gm*g^an+(-1)*(1/2)*(p_h*g_ld+p_d*g_lh+(-1)*p_l*g_hd)*(1/2)*g^ho*(p_c*g_og+p_g*g_oc+(-1)*p_o*g_cg)*g^ga*g^lm*g^bn+(-1)*(1/2)*(1/2)*g^ho*(p_c*g_og+p_g*g_oc+(-1)*p_o*g_cg)*(p_h*d_l^a*d_d^b+p_d*d_l^a*d_h^b+(-1)*p_l*d_h^a*d_d^b)*g^gm*g^ln+(-1)*(1/2)*g^gl*(1/2)*(p_c*g_og+p_g*g_oc+(-1)*p_o*g_cg)*(p_h*d_l^a*d_d^b+p_d*d_l^a*d_h^b+(-1)*p_l*d_h^a*d_d^b)*g^hm*g^on+(-1)*(1/2)*g^gl*(1/2)*g^ho*(p_h*d_l^a*d_d^b+p_d*d_l^a*d_h^b+(-1)*p_l*d_h^a*d_d^b)*(p_c*d_o^m*d_g^n+p_g*d_o^m*d_c^n+(-1)*p_o*d_c^m*d_g^n)+(-1)*(1/2)*(p_h*g_ld+p_d*g_lh+(-1)*p_l*g_hd)*(1/2)*(p_c*g_og+p_g*g_oc+(-1)*p_o*g_cg)*g^ha*g^ob*g^gm*g^ln+(-1)*(1/2)*g^gl*(1/2)*(p_c*g_og+p_g*g_oc+(-1)*p_o*g_cg)*g^ha*g^ob*(p_h*d_l^m*d_d^n+p_d*d_l^m*d_h^n+(-1)*p_l*d_h^m*d_d^n)+(-1)*(1/2)*g^gl*(p_h*g_ld+p_d*g_lh+(-1)*p_l*g_hd)*(1/2)*g^ha*g^ob*(p_c*d_o^m*d_g^n+p_g*d_o^m*d_c^n+(-1)*p_o*d_c^m*d_g^n)+(-1)*(1/2)*g^gl*(p_h*g_ld+p_d*g_lh+(-1)*p_l*g_hd)*(1/2)*(p_c*g_og+p_g*g_oc+(-1)*p_o*g_cg)*g^ob*g^hm*g^an+(-1)*(1/2)*g^gl*(p_h*g_ld+p_d*g_lh+(-1)*p_l*g_hd)*(1/2)*(p_c*g_og+p_g*g_oc+(-1)*p_o*g_cg)*g^ha*g^om*g^bn+(-1)*(1/2)*(p_h*g_ld+p_d*g_lh+(-1)*p_l*g_hd)*(1/2)*g^ho*(p_c*d_o^a*d_g^b+p_g*d_o^a*d_c^b+(-1)*p_o*d_c^a*d_g^b)*g^gm*g^ln+(-1)*(1/2)*g^gl*(1/2)*g^ho*(p_c*d_o^a*d_g^b+p_g*d_o^a*d_c^b+(-1)*p_o*d_c^a*d_g^b)*(p_h*d_l^m*d_d^n+p_d*d_l^m*d_h^n+(-1)*p_l*d_h^m*d_d^n)+(-1)*(1/2)*g^gl*(p_h*g_ld+p_d*g_lh+(-1)*p_l*g_hd)*(1/2)*(p_c*d_o^a*d_g^b+p_g*d_o^a*d_c^b+(-1)*p_o*d_c^a*d_g^b)*g^hm*g^on)");
+        target = ExpandBrackets.expandBrackets(target);
+        target = contract(target);
+    }
+
+//    @Test
+//    public void testRimanDerivative() {
+//        Tensor riman = parse("g^{\\mu \\nu}*R_{\\mu \\nu}");
+//        Transformations.substitute(riman,
+//                "R_{\\mu \\nu}=R^{\\alpha}_{\\mu \\alpha \\nu}");
+//        Transformations.substitute(riman,
+//                "R^{\\alpha}_{\\beta \\mu \\nu}="
+//                + "p_{\\mu}*G^{\\alpha}_{\\beta \\nu}-p_{\\nu}*G^{\\alpha}_{\\beta \\mu}"
+//                + "+G^{\\alpha}_{\\gamma \\mu}*G^{\\gamma}_{\\beta \\nu}-G^{\\alpha}_{\\gamma \\nu}*G^{\\gamma}_{\\beta \\mu}");
+//        riman = Transformations.substitute(riman, "G^{\\alpha}_{\\mu \\nu}="
+//                + "g^{\\alpha \\gamma}*(p_{\\mu}*g_{\\gamma \\nu}+p_{\\nu}*g_{\\gamma \\mu}-p_{\\gamma}*g_{\\mu \\nu})");
+//        Tensor rimanClone = riman.clone();
+//        rimanClone = Transformations.renameConflictingIndices(rimanClone);
+//        assertTrue(TensorUtils.testIndicesConsistent(rimanClone));
+//
+//        contract(rimanClone);
+//        assertTrue(TensorUtils.testIndicesConsistent(rimanClone));
+//
+//        Tensor derivative = Derivative.create(riman,
+//                new SimpleTensor[]{
+//                    (SimpleTensor) parse("g_{\\alpha \\beta}"),
+//                    (SimpleTensor) parse("g_{\\mu \\nu}")});
+//        derivative = Transformations.renameConflictingIndices(derivative);
+//        derivative = GetDerivative1.INSTANCE.transform(derivative);
+//        assertTrue(TensorUtils.testIndicesConsistent(derivative));
+//        derivative = contract(derivative);
+//        assertTrue(TensorUtils.testIndicesConsistent(derivative));
+//    }
+    @Test
+    public void testAbstractScalarFunction2() {
+        Tensor t = parse("Sin[g^am*(X_a+g_ab*(X^b+g^bc*(X_c+d_c^f*F_f+g_cd*g^de*X_e+g_cj*d^j_k*(X^k+X_l*g^lk))))*J_m]");
+        t = contract(t);
+        Tensor expected = parse("Sin[(X_{a}+X_{a}+X_{a}+F_{a}+X_{a}+X_{a}+X_{a})*J^a]");
+        assertTrue(TensorUtils.compare(t, expected));
+    }
+
+    @Test
+    public void testAbstractScalarFunction3() {
+        Tensor t = parse("Sin[g^ac*(X_a+g_ab*(X^b+g^bc*(X_c+d_c^f*F_f+g_cd*g^de*X_e+g_cj*d^j_k*(X^k+X_l*g^lk))))*J_c]");
+        t = contract(t);
+        Tensor expected = parse("Sin[(X_{a}+X_{a}+X_{a}+F_{a}+X_{a}+X_{a}+X_{a})*J^a]");
+        assertTrue(TensorUtils.compare(t, expected));
+    }
+
+    @Ignore
+    @Test
+    public void testAbstractScalarFunction4() {
+        Tensor t = parse("Sin[g_mn*g^mn]*Sin[g^ac*(X_a+g_ab*(X^b+g^bc*(X_c+d_c^f*F_f+g_cd*g^de*X_e+g_cj*d^j_k*(X^k+X_l*g^lk))))*J_c]+d^y_x*d^x_y");
+        t = contract(t);
+        Tensor expected = parse("Sin[d^m_m]*Sin[(X_{a}+X_{a}+X_{a}+F_{a}+X_{a}+X_{a}+X_{a})*J^a]+d^m_m");
+        assertTrue(TensorUtils.compare(t, expected));
+    }
+
+    @Test
+    public void testFieldArg() {
+        Tensor t = parse("F[g_mn*A^m]");
+        t = contract(t);
+        Tensor expected = parse("F[A_n]");
+        System.out.println(t);
+        assertTrue(TensorUtils.compare(t, expected));
+
     }
 }

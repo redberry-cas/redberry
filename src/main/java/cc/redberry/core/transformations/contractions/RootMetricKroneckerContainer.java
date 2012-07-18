@@ -20,39 +20,45 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
-package cc.redberry.core.tensor.functions;
+package cc.redberry.core.transformations.contractions;
 
-import cc.redberry.core.tensor.Tensor;
-import cc.redberry.core.tensor.TensorBuilder;
-import cc.redberry.core.utils.TensorUtils;
+import cc.redberry.core.tensor.SimpleTensor;
 
 /**
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public class ScalarFunctionBuilder implements TensorBuilder {
+class RootMetricKroneckerContainer implements MetricKroneckerContainer {
 
-    private final ScalarFunctionFactory factory;
-    private Tensor arg;
+    static final RootMetricKroneckerContainer INSTANCE = new RootMetricKroneckerContainer();
 
-    ScalarFunctionBuilder(ScalarFunctionFactory factory) {
-        this.factory = factory;
+    private RootMetricKroneckerContainer() {
     }
 
     @Override
-    public Tensor build() {
-        return factory.create1(arg);
+    public void add(MetricKroneckerWrapper mK) {
+        throw new IllegalStateException();
+    }
+
+
+    @Override
+    public SimpleTensor apply(SimpleTensor t) {
+        return t;
     }
 
     @Override
-    public void put(Tensor tensor) {
-        if (arg != null)
-            throw new IllegalStateException();
-        if (tensor == null)
-            throw new NullPointerException();
-        if (!TensorUtils.isScalar(tensor))
-            throw new IllegalArgumentException();
-        arg = tensor;
+    public MetricKroneckerContainer clone() {
+        return INSTANCE;
+    }
+
+    @Override
+    public boolean equals(MetricKroneckerContainer gc) {
+        return gc instanceof RootMetricKroneckerContainer;
+    }
+
+    @Override
+    public String toString() {
+        return "RootMetricKroneckerContainer";
     }
 }
