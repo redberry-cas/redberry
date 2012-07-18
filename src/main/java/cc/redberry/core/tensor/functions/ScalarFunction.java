@@ -27,6 +27,7 @@ import cc.redberry.core.indices.Indices;
 import cc.redberry.core.indices.IndicesFactory;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.tensor.TensorException;
+import cc.redberry.core.utils.*;
 
 /**
  * @author Dmitry Bolotin
@@ -37,7 +38,7 @@ public abstract class ScalarFunction extends Tensor {
     protected final Tensor argument;
 
     protected ScalarFunction(Tensor argument) {
-        if (argument.getIndices().size() != 0)
+        if (!TensorUtils.isScalar(argument))
             throw new TensorException("Non scalar argument " + argument + " in scalar function");
         this.argument = argument;
     }

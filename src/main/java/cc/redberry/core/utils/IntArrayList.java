@@ -27,9 +27,10 @@ import java.util.Arrays;
 /**
  * @author stas
  */
-public class IntArrayList {
-    private int[] data;
-    private int size = 0;
+public final class IntArrayList {
+
+    int[] data;
+    int size = 0;
 
     public IntArrayList() {
         data = new int[10];
@@ -73,7 +74,7 @@ public class IntArrayList {
             throw new IndexOutOfBoundsException();
         ensureCapacity(size + 1);
         System.arraycopy(data, position, data, position + 1,
-                size - position);
+                         size - position);
         data[position] = num;
         size++;
     }
@@ -110,6 +111,7 @@ public class IntArrayList {
      * Alias for addAll(int) method.
      *
      * @param value
+     *
      * @return
      */
     public void push(int value) {
@@ -140,9 +142,9 @@ public class IntArrayList {
      * specified position. The number of components copied is equal to the
      * length argument.
      *
-     * @param src - the source array.
+     * @param src       - the source array.
      * @param fromIndex - starting position in the source array.
-     * @param lenght - the number of array elements to be copied.
+     * @param lenght    - the number of array elements to be copied.
      */
     public void add(int[] src, int fromIndex, int lenght) {
         ensureCapacity(size + lenght);

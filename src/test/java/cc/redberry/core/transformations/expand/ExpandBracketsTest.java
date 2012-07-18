@@ -22,6 +22,7 @@
  */
 package cc.redberry.core.transformations.expand;
 
+import cc.redberry.core.*;
 import cc.redberry.core.context.CC;
 import cc.redberry.core.tensor.Product;
 import cc.redberry.core.tensor.Sum;
@@ -70,6 +71,7 @@ public class ExpandBracketsTest {
 
     @Test
     public void test3() {
+        
         Tensor t = parse("(a*p_i+b*p_i)*c-a*c*p_i");
         Tensor actual = ExpandBrackets.expandBrackets(t);
         System.out.println(actual);
@@ -179,7 +181,7 @@ public class ExpandBracketsTest {
             Tensor actual = parse("(a+b)*(a*f_m+b*g_m)*(b*f^m+a*g^m)");
             actual = ExpandBrackets.expandBrackets(actual);
             Tensor expected = parse("(Power[a, 2]*b+a*Power[b, 2])*g_{m}*g^{m}+(Power[a, 3]+Power[a, 2]*b+a*Power[b, 2]+Power[b, 3])*f^{m}*g_{m}+(Power[a, 2]*b+a*Power[b, 2])*f_{m}*f^{m}");
-            Assert.assertTrue(TensorUtils.compare(actual, expected));            
+            Assert.assertTrue(TensorUtils.compare(actual, expected));
         }
     }
 
@@ -193,12 +195,16 @@ public class ExpandBracketsTest {
 
     @Test
     public void test17() {
-        Tensor actual = parse("((a+b)*(c+a)-a)*f_mn*(f^mn+r^mn)-((a-b)*(c-a)+a)*r_ab*(f^ab+r^ab)");
-        System.out.println(actual);
-        actual = ExpandBrackets.expandBrackets(actual);
-        System.out.println(actual);
+        Tensor actual = ExpandBrackets.expandBrackets(parse("((a+b)*(c+a)-a)*f_mn*(f^mn+r^mn)-((a-b)*(c-a)+a)*r_ab*(f^ab+r^ab)"));
         assertAllBracketsExpanded(actual);
+        Tensor expected = parse("(2*c*b+2*Power[a, 2]+-2*a)*r_{ab}*f^{ab}+(-1*b*a+c*b+-1*c*a+Power[a, 2]+-1*a)*r^{ab}*r_{ab}+(b*a+c*b+c*a+Power[a, 2]+-1*a)*f^{mn}*f_{mn}");
+        TAssert.assertParity(actual, expected);
     }
+    
+//    @Test
+//    public void test18(){
+//        Tensor actual = ExpandBrackets.expandBrackets(parse(""));
+//    }
 
     public static void assertAllBracketsExpanded(Tensor tensor) {
         TreeTraverseIterator iterator = new TreeTraverseIterator(tensor);
@@ -218,5 +224,12 @@ public class ExpandBracketsTest {
                 Assert.assertTrue(i2 == 0 && i1 < 2);
             }
         }
+    }
+    
+    @Test
+    public void test18(){
+        Tensor tensor = parse("(T_ij^ij+N_ij^ij)*K_ij^ij");
+        Tensor result =  ExpandBrackets.expandBrackets(tensor);
+        System.out.println(result);
     }
 }

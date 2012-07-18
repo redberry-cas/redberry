@@ -114,6 +114,10 @@ public final class ArraysUtils {
         return joinedArray;
     }
 
+    public static int binarySearch(IntArrayList list, int key) {
+        return Arrays.binarySearch(list.data, 0, list.size, key);
+    }
+
     /**
      * This is the same method to {@link Arrays#binarySearch(int[], int) }. The
      * differs is in the returned value. If key not found, this method returns

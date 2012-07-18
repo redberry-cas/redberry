@@ -33,6 +33,7 @@ import java.util.*;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
+//TODO refactor in future
 public final class ProductBuilder implements TensorBuilder {
 
     private Complex complex = Complex.ONE;
@@ -146,7 +147,6 @@ public final class ProductBuilder implements TensorBuilder {
 
     @Override
     public void put(Tensor tensor) {
-        //FUTURE calculate indices
         if (tensor instanceof Product) {
             //if no any elements were added yet
             if (isEmpty()) {

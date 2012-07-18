@@ -39,7 +39,7 @@ abstract class ScalarFunctionFactory implements TensorFactory {
             throw new IllegalArgumentException();
         if (tensors[0] == null)
             throw new NullPointerException();
-        if (!TensorUtils.isIndexless(tensors[0]))
+        if (!TensorUtils.isScalar(tensors[0]))
             throw new IllegalArgumentException();
         return create1(tensors[0]);
     }

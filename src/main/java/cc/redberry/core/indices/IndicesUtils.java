@@ -171,6 +171,20 @@ public final class IndicesUtils {
     }
 
     /**
+     * Changes index state to specified state of the form 0b1(0)000000.....
+     * <p/>
+     * <br/>Expression used by this method is: <b><code>rawState | index</code></b>
+     *
+     * @param rawState raw state
+     * @param index index to change type in
+     *
+     * @return index with new type
+     */
+    public static int setRawState(int rawState, int index) {
+        return rawState | index;
+    }
+
+    /**
      * Returns index name (code) without type.
      * <p/>
      * <br/>Expression used by this method is: <b><code>index & 0xFFFF</code></b>
