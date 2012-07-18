@@ -8,6 +8,8 @@ import org.junit.Test;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.junit.Assert.assertTrue;
+
 public class TensorFirstIteratorTest {
 
     public static boolean compareTwoArrays(Tensor[] target, Tensor[] expeted) {
@@ -62,4 +64,132 @@ public class TensorFirstIteratorTest {
         compareTwoArrays(target.toArray(expected), expected);
     }
 
+
+    @Test
+    public void test4() {
+        Tensor tensor = Tensors.parse("sin[cos[a+b]+tan[e+l]]");
+
+        TensorFirstIterator tfi = new TensorFirstIterator(tensor);
+        while(!TensorUtils.equals(tfi.next(), Tensors.parse("a")));
+        tfi.set(Tensors.parse("x"));
+        while(tfi.next()!= null);
+
+        Tensor result = tfi.result();
+        Tensor expected = Tensors.parse("sin[cos[x+b]+tan[e+l]]");
+
+        assertTrue(TensorUtils.equals(result, expected));
+    }
+
+    @Test
+    public void test5() {
+        Tensor tensor = Tensors.parse("a*(a+b)*(a+b+4)");
+
+        TensorFirstIterator tfi = new TensorFirstIterator(tensor);
+        Tensor current;
+        while((current = tfi.next()) != null){
+            if (TensorUtils.equals(current, Tensors.parse("a")))
+                tfi.set(Tensors.parse("2"));
+            else if (TensorUtils.equals(current, Tensors.parse("b")))
+                tfi.set(Tensors.parse("3"));
+        }
+
+        Tensor result = tfi.result();
+        Tensor expected = Tensors.parse("90");
+
+        assertTrue(TensorUtils.equals(result, expected));
+    }
+
+    @Test
+    public void test6() {
+        Tensor tensor = Tensors.parse("a*(a+(b+c)*3)*(a+(b+c)*2+4)*A+(B/2+D)");
+        TensorFirstIterator tfi = new TensorFirstIterator(tensor);
+        Tensor current;
+        while((current = tfi.next()) != null){
+            if (TensorUtils.equals(current, Tensors.parse("a")))
+                tfi.set(Tensors.parse("2"));
+            else if (TensorUtils.equals(current, Tensors.parse("b+c"))){
+                tfi.set(Tensors.parse("4"));
+            }
+            else if (TensorUtils.equals(current, Tensors.parse("B"))){
+                tfi.set(Tensors.parse("1/5"));
+            }
+        }
+
+        Tensor result = tfi.result();
+        Tensor expected = Tensors.parse("392*A+1/10+D");
+        assertTrue(TensorUtils.equals(result, expected));
+    }
+
+    @Test
+    public void test7() {
+        Tensor tensor = Tensors.parse("cos[sin[a+b]]");
+        TensorFirstIterator tfi = new TensorFirstIterator(tensor);
+        tfi.next();
+        tfi.next();
+        tfi.set(Tensors.parse("(x+y)*3"));
+        assertTrue(tfi.next() == null);
+        Tensor result = tfi.result();
+        Tensor expected = Tensors.parse("cos[(x+y)*3]");
+        assertTrue(TensorUtils.equals(result, expected));
+    }
+
+    @Test
+    public void test8() {
+        Tensor tensor = Tensors.parse("A_{\\alpha}*B^{\\alpha}_{i}*(R^i+T^i)");
+        TensorFirstIterator tfi = new TensorFirstIterator(tensor);
+        Tensor current;
+        while ((current = tfi.next()) != null){
+            if (TensorUtils.equals(current, Tensors.parse("R^i+T^i")))
+                tfi.set(Tensors.parse("W^j*3"));
+        }
+        Tensor result = tfi.result();
+        Tensor expected = Tensors.parse("A_\\alpha*B^\\alpha_i*W^j*3");
+        assertTrue(TensorUtils.equals(result, expected));
+    }
+
+    @Test
+    public void test9() {
+        Tensor tensor = Tensors.parse("A_{\\alpha}*B^{\\alpha}*(a+b)/(a+b*(W+U_i*U^i))*3");
+        TensorFirstIterator tfi = new TensorFirstIterator(tensor);
+        Tensor current;
+        while ((current = tfi.next()) != null) {
+            if (TensorUtils.equals(current, Tensors.parse("a+b*(W+U_i*U^i)")))
+                tfi.set(Tensors.parse("(a+b)*3"));
+        }
+        Tensor result = tfi.result();
+        Tensor expected = Tensors.parse("Power[a+b, -1]*(a+b)*B^{\\alpha }*A_{\\alpha }");
+        assertTrue(TensorUtils.equals(result, expected));
+    }
+
+    @Test
+    public void test10() {
+        Tensor tensor = Tensors.parse("A_{\\alpha}*B^{\\alpha}*(a+b)/(a+b*(W+U_i*U^i))*3*(K/(e+f)+(e+f)/K)");
+        TensorFirstIterator tfi = new TensorFirstIterator(tensor);
+        Tensor current;
+        while ((current = tfi.next()) != null) {
+            if (TensorUtils.equals(current, Tensors.parse("a+b*(W+U_i*U^i)")))
+                tfi.set(Tensors.parse("10"));
+            if (TensorUtils.equals(current, Tensors.parse("e+f")))
+                tfi.set(Tensors.parse("K*2"));
+        }
+        Tensor result = tfi.result();
+        Tensor expected = Tensors.parse("(a+b)*B^{\\alpha }*A_{\\alpha }*3/4");
+        assertTrue(TensorUtils.equals(result, expected));
+    }
+
+    @Test
+    public void test11() {
+        Tensor tensor = Tensors.parse("A_{\\alpha}^\\beta*B^{\\alpha}_ijk*T^ijf_\\beta+A_{\\alpha}^\\beta*U_{k\\beta}^{f\\alpha}*10");
+        TensorFirstIterator tfi = new TensorFirstIterator(tensor);
+        Tensor current;
+        while ((current = tfi.next()) != null) {
+            if (TensorUtils.equals(current, Tensors.parse("B^{\\alpha}_ijk")))
+                tfi.set(Tensors.parse("U_{k\\beta}^{f\\alpha}"));
+            if (TensorUtils.equals(current, Tensors.parse("T^ijf_\\beta")))
+                tfi.set(Tensors.parse("2"));
+        }
+        Tensor result = tfi.result();
+        Tensor expected = Tensors.parse("A_{\\alpha}^\\beta*U_{k\\beta}^{f\\alpha}*12");
+        assertTrue(TensorUtils.equals(result, expected));
+    }
 }

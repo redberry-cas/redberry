@@ -66,7 +66,7 @@ public final class Product extends MultiTensor {
         this.factor = factor.isOne() ? Complex.ONE : factor.isMinusOne() ? Complex.MINUSE_ONE : factor;
         this.indexlessData = indexlessData;
         this.data = data;
-        this.contentReference = new SoftReference<>(content);//may be null
+        this.contentReference = new SoftReference<>(content == null ? calculateContent() : content);
         this.hash = calculateHash();
     }
 
@@ -374,8 +374,7 @@ public final class Product extends MultiTensor {
         freeContraction.sortContractions();
 
         //Here we can use unstable sort algorithm
-        //First element is factor always
-        ArraysUtils.quickSort(contractions, 1, contractions.length, data);
+        ArraysUtils.quickSort(contractions, 0, contractions.length, data);
 
         //Form resulting content
         ContractionStructure contractionStructure = new ContractionStructure(freeContraction, contractions);
