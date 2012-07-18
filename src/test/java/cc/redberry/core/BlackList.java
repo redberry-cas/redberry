@@ -20,45 +20,21 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
-package cc.redberry.core.transformations.contractions;
+package cc.redberry.core;
 
-import cc.redberry.core.tensor.SimpleTensor;
+import org.junit.Test;
 
 /**
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-class RootMetricKroneckerContainer implements MetricKroneckerContainer {
+public class BlackList {
 
-    static final RootMetricKroneckerContainer INSTANCE = new RootMetricKroneckerContainer();
-
-    private RootMetricKroneckerContainer() {
-    }
-
-    @Override
-    public void add(MetricKroneckerWrapper mK) {
-        throw new IllegalStateException();
-    }
-
-
-    @Override
-    public SimpleTensor apply(SimpleTensor t) {
-        return t;
-    }
-
-    @Override
-    public MetricKroneckerContainer clone() {
-        return INSTANCE;
-    }
-
-    @Override
-    public boolean equals(MetricKroneckerContainer gc) {
-        return gc instanceof RootMetricKroneckerContainer;
-    }
-
-    @Override
-    public String toString() {
-        return "RootMetricKroneckerContainer";
+    @Test
+    public void test1() {
+        int i=0;
+        System.out.println(true | (i++ == 10));
+        System.out.println(i);
     }
 }

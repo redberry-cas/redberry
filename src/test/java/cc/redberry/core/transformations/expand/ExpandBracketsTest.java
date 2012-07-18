@@ -225,4 +225,11 @@ public class ExpandBracketsTest {
             }
         }
     }
+    
+    @Test
+    public void test18(){
+        Tensor tensor = parse("(T_ij^ij+N_ij^ij)*K_ij^ij");
+        Tensor result =  ExpandBrackets.expandBrackets(tensor);
+        System.out.println(result);
+    }
 }

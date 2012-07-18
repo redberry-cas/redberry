@@ -20,13 +20,18 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
-package cc.redberry.core.transformations.contractions;
+package cc.redberry.core.transformations;
 
+import cc.redberry.core.transformations.ContractIndices;
 import cc.redberry.core.*;
 import cc.redberry.core.context.*;
+import cc.redberry.core.indexgenerator.*;
+import cc.redberry.core.indices.*;
 import cc.redberry.core.tensor.*;
+import cc.redberry.core.tensor.random.*;
 import cc.redberry.core.transformations.expand.*;
 import cc.redberry.core.utils.*;
+import org.apache.commons.math3.analysis.function.*;
 import org.junit.*;
 import static cc.redberry.core.tensor.Tensors.*;
 import static org.junit.Assert.*;
@@ -156,6 +161,7 @@ public class ContractIndicesTest {
     public void testProduct1() {
         Tensor t = parse("g_mn*F^n*k");
         t = contract(t);
+        System.out.println(t);
         Tensor expected = parse("F_m*k");
         assertTrue(TensorUtils.equals(t, expected));
     }
@@ -318,6 +324,12 @@ public class ContractIndicesTest {
     }
 
     @Test
+    public void testSum11() {
+        Tensor t = parse("g^ed*(g_a*X+X_a)"), v = contract(t);
+        assertTrue(t == v);
+    }
+
+    @Test
     public void testMK1() {
         Tensor t = parse("g^mn*g_mn");
         t = contract(t);
@@ -405,13 +417,69 @@ public class ContractIndicesTest {
         assertTrue(TensorUtils.compare(t, expected));
     }
 
-    @Test
+    @Test(timeout = 3000L)
     public void performanceTest1() {
+        long start, stop;
+        start = System.currentTimeMillis();
         Tensor target = parse("g^ca*g^db*(p_g*(1/2)*(p_c*g_id+p_d*g_ic+(-1)*p_i*g_cd)*g^gm*g^in+p_g*(1/2)*g^gi*(p_c*d_i^m*d_d^n+p_d*d_i^m*d_c^n+(-1)*p_i*d_c^m*d_d^n)+p_d*(1/2)*(p_c*g_eg+p_g*g_ec+(-1)*p_e*g_cg)*g^gm*g^en+p_d*(1/2)*g^ge*(p_c*d_e^m*d_g^n+p_g*d_e^m*d_c^n+(-1)*p_e*d_c^m*d_g^n)+(1/2)*(p_h*g_fg+p_g*g_fh+(-1)*p_f*g_hg)*(1/2)*g^hk*(p_c*g_kd+p_d*g_kc+(-1)*p_k*g_cd)*g^gm*g^fn+(1/2)*g^gf*(1/2)*g^hk*(p_c*g_kd+p_d*g_kc+(-1)*p_k*g_cd)*(p_h*d_f^m*d_g^n+p_g*d_f^m*d_h^n+(-1)*p_f*d_h^m*d_g^n)+(1/2)*g^gf*(p_h*g_fg+p_g*g_fh+(-1)*p_f*g_hg)*(1/2)*(p_c*g_kd+p_d*g_kc+(-1)*p_k*g_cd)*g^hm*g^kn+(1/2)*g^gf*(p_h*g_fg+p_g*g_fh+(-1)*p_f*g_hg)*(1/2)*g^hk*(p_c*d_k^m*d_d^n+p_d*d_k^m*d_c^n+(-1)*p_k*d_c^m*d_d^n)+(-1)*(1/2)*(p_h*g_ld+p_d*g_lh+(-1)*p_l*g_hd)*(1/2)*g^ho*(p_c*g_og+p_g*g_oc+(-1)*p_o*g_cg)*g^gm*g^ln+(-1)*(1/2)*g^gl*(1/2)*g^ho*(p_c*g_og+p_g*g_oc+(-1)*p_o*g_cg)*(p_h*d_l^m*d_d^n+p_d*d_l^m*d_h^n+(-1)*p_l*d_h^m*d_d^n)+(-1)*(1/2)*g^gl*(p_h*g_ld+p_d*g_lh+(-1)*p_l*g_hd)*(1/2)*(p_c*g_og+p_g*g_oc+(-1)*p_o*g_cg)*g^hm*g^on+(-1)*(1/2)*g^gl*(p_h*g_ld+p_d*g_lh+(-1)*p_l*g_hd)*(1/2)*g^ho*(p_c*d_o^m*d_g^n+p_g*d_o^m*d_c^n+(-1)*p_o*d_c^m*d_g^n))+(p_g*(1/2)*g^gi*(p_c*g_id+p_d*g_ic+(-1)*p_i*g_cd)+p_d*(1/2)*g^ge*(p_c*g_eg+p_g*g_ec+(-1)*p_e*g_cg)+(1/2)*g^gf*(p_h*g_fg+p_g*g_fh+(-1)*p_f*g_hg)*(1/2)*g^hk*(p_c*g_kd+p_d*g_kc+(-1)*p_k*g_cd)+(-1)*(1/2)*g^gl*(p_h*g_ld+p_d*g_lh+(-1)*p_l*g_hd)*(1/2)*g^ho*(p_c*g_og+p_g*g_oc+(-1)*p_o*g_cg))*g^db*g^cm*g^an+(p_g*(1/2)*g^gi*(p_c*g_id+p_d*g_ic+(-1)*p_i*g_cd)+p_d*(1/2)*g^ge*(p_c*g_eg+p_g*g_ec+(-1)*p_e*g_cg)+(1/2)*g^gf*(p_h*g_fg+p_g*g_fh+(-1)*p_f*g_hg)*(1/2)*g^hk*(p_c*g_kd+p_d*g_kc+(-1)*p_k*g_cd)+(-1)*(1/2)*g^gl*(p_h*g_ld+p_d*g_lh+(-1)*p_l*g_hd)*(1/2)*g^ho*(p_c*g_og+p_g*g_oc+(-1)*p_o*g_cg))*g^ca*g^dm*g^bn+(p_g*(1/2)*(p_c*g_id+p_d*g_ic+(-1)*p_i*g_cd)*g^ga*g^ib+p_g*(1/2)*g^gi*(p_c*d_i^a*d_d^b+p_d*d_i^a*d_c^b+(-1)*p_i*d_c^a*d_d^b)+p_d*(1/2)*(p_c*g_eg+p_g*g_ec+(-1)*p_e*g_cg)*g^ga*g^eb+p_d*(1/2)*g^ge*(p_c*d_e^a*d_g^b+p_g*d_e^a*d_c^b+(-1)*p_e*d_c^a*d_g^b)+(1/2)*(p_h*g_fg+p_g*g_fh+(-1)*p_f*g_hg)*(1/2)*g^hk*(p_c*g_kd+p_d*g_kc+(-1)*p_k*g_cd)*g^ga*g^fb+(1/2)*g^gf*(1/2)*g^hk*(p_c*g_kd+p_d*g_kc+(-1)*p_k*g_cd)*(p_h*d_f^a*d_g^b+p_g*d_f^a*d_h^b+(-1)*p_f*d_h^a*d_g^b)+(1/2)*g^gf*(p_h*g_fg+p_g*g_fh+(-1)*p_f*g_hg)*(1/2)*(p_c*g_kd+p_d*g_kc+(-1)*p_k*g_cd)*g^ha*g^kb+(1/2)*g^gf*(p_h*g_fg+p_g*g_fh+(-1)*p_f*g_hg)*(1/2)*g^hk*(p_c*d_k^a*d_d^b+p_d*d_k^a*d_c^b+(-1)*p_k*d_c^a*d_d^b)+(-1)*(1/2)*(p_h*g_ld+p_d*g_lh+(-1)*p_l*g_hd)*(1/2)*g^ho*(p_c*g_og+p_g*g_oc+(-1)*p_o*g_cg)*g^ga*g^lb+(-1)*(1/2)*g^gl*(1/2)*g^ho*(p_c*g_og+p_g*g_oc+(-1)*p_o*g_cg)*(p_h*d_l^a*d_d^b+p_d*d_l^a*d_h^b+(-1)*p_l*d_h^a*d_d^b)+(-1)*(1/2)*g^gl*(p_h*g_ld+p_d*g_lh+(-1)*p_l*g_hd)*(1/2)*(p_c*g_og+p_g*g_oc+(-1)*p_o*g_cg)*g^ha*g^ob+(-1)*(1/2)*g^gl*(p_h*g_ld+p_d*g_lh+(-1)*p_l*g_hd)*(1/2)*g^ho*(p_c*d_o^a*d_g^b+p_g*d_o^a*d_c^b+(-1)*p_o*d_c^a*d_g^b))*g^cm*g^dn+g^cd*(p_g*(1/2)*g^ga*g^ib*(p_c*d_i^m*d_d^n+p_d*d_i^m*d_c^n+(-1)*p_i*d_c^m*d_d^n)+p_g*(1/2)*(p_c*g_id+p_d*g_ic+(-1)*p_i*g_cd)*g^ib*g^gm*g^an+p_g*(1/2)*(p_c*g_id+p_d*g_ic+(-1)*p_i*g_cd)*g^ga*g^im*g^bn+p_g*(1/2)*(p_c*d_i^a*d_d^b+p_d*d_i^a*d_c^b+(-1)*p_i*d_c^a*d_d^b)*g^gm*g^in+p_d*(1/2)*g^ga*g^eb*(p_c*d_e^m*d_g^n+p_g*d_e^m*d_c^n+(-1)*p_e*d_c^m*d_g^n)+p_d*(1/2)*(p_c*g_eg+p_g*g_ec+(-1)*p_e*g_cg)*g^eb*g^gm*g^an+p_d*(1/2)*(p_c*g_eg+p_g*g_ec+(-1)*p_e*g_cg)*g^ga*g^em*g^bn+p_d*(1/2)*(p_c*d_e^a*d_g^b+p_g*d_e^a*d_c^b+(-1)*p_e*d_c^a*d_g^b)*g^gm*g^en+(1/2)*(1/2)*g^hk*(p_c*g_kd+p_d*g_kc+(-1)*p_k*g_cd)*g^ga*g^fb*(p_h*d_f^m*d_g^n+p_g*d_f^m*d_h^n+(-1)*p_f*d_h^m*d_g^n)+(1/2)*(p_h*g_fg+p_g*g_fh+(-1)*p_f*g_hg)*(1/2)*(p_c*g_kd+p_d*g_kc+(-1)*p_k*g_cd)*g^ga*g^fb*g^hm*g^kn+(1/2)*(p_h*g_fg+p_g*g_fh+(-1)*p_f*g_hg)*(1/2)*g^hk*g^ga*g^fb*(p_c*d_k^m*d_d^n+p_d*d_k^m*d_c^n+(-1)*p_k*d_c^m*d_d^n)+(1/2)*(p_h*g_fg+p_g*g_fh+(-1)*p_f*g_hg)*(1/2)*g^hk*(p_c*g_kd+p_d*g_kc+(-1)*p_k*g_cd)*g^fb*g^gm*g^an+(1/2)*(p_h*g_fg+p_g*g_fh+(-1)*p_f*g_hg)*(1/2)*g^hk*(p_c*g_kd+p_d*g_kc+(-1)*p_k*g_cd)*g^ga*g^fm*g^bn+(1/2)*(1/2)*g^hk*(p_c*g_kd+p_d*g_kc+(-1)*p_k*g_cd)*(p_h*d_f^a*d_g^b+p_g*d_f^a*d_h^b+(-1)*p_f*d_h^a*d_g^b)*g^gm*g^fn+(1/2)*g^gf*(1/2)*(p_c*g_kd+p_d*g_kc+(-1)*p_k*g_cd)*(p_h*d_f^a*d_g^b+p_g*d_f^a*d_h^b+(-1)*p_f*d_h^a*d_g^b)*g^hm*g^kn+(1/2)*g^gf*(1/2)*g^hk*(p_h*d_f^a*d_g^b+p_g*d_f^a*d_h^b+(-1)*p_f*d_h^a*d_g^b)*(p_c*d_k^m*d_d^n+p_d*d_k^m*d_c^n+(-1)*p_k*d_c^m*d_d^n)+(1/2)*(p_h*g_fg+p_g*g_fh+(-1)*p_f*g_hg)*(1/2)*(p_c*g_kd+p_d*g_kc+(-1)*p_k*g_cd)*g^ha*g^kb*g^gm*g^fn+(1/2)*g^gf*(1/2)*(p_c*g_kd+p_d*g_kc+(-1)*p_k*g_cd)*g^ha*g^kb*(p_h*d_f^m*d_g^n+p_g*d_f^m*d_h^n+(-1)*p_f*d_h^m*d_g^n)+(1/2)*g^gf*(p_h*g_fg+p_g*g_fh+(-1)*p_f*g_hg)*(1/2)*g^ha*g^kb*(p_c*d_k^m*d_d^n+p_d*d_k^m*d_c^n+(-1)*p_k*d_c^m*d_d^n)+(1/2)*g^gf*(p_h*g_fg+p_g*g_fh+(-1)*p_f*g_hg)*(1/2)*(p_c*g_kd+p_d*g_kc+(-1)*p_k*g_cd)*g^kb*g^hm*g^an+(1/2)*g^gf*(p_h*g_fg+p_g*g_fh+(-1)*p_f*g_hg)*(1/2)*(p_c*g_kd+p_d*g_kc+(-1)*p_k*g_cd)*g^ha*g^km*g^bn+(1/2)*(p_h*g_fg+p_g*g_fh+(-1)*p_f*g_hg)*(1/2)*g^hk*(p_c*d_k^a*d_d^b+p_d*d_k^a*d_c^b+(-1)*p_k*d_c^a*d_d^b)*g^gm*g^fn+(1/2)*g^gf*(1/2)*g^hk*(p_c*d_k^a*d_d^b+p_d*d_k^a*d_c^b+(-1)*p_k*d_c^a*d_d^b)*(p_h*d_f^m*d_g^n+p_g*d_f^m*d_h^n+(-1)*p_f*d_h^m*d_g^n)+(1/2)*g^gf*(p_h*g_fg+p_g*g_fh+(-1)*p_f*g_hg)*(1/2)*(p_c*d_k^a*d_d^b+p_d*d_k^a*d_c^b+(-1)*p_k*d_c^a*d_d^b)*g^hm*g^kn+(-1)*(1/2)*(1/2)*g^ho*(p_c*g_og+p_g*g_oc+(-1)*p_o*g_cg)*g^ga*g^lb*(p_h*d_l^m*d_d^n+p_d*d_l^m*d_h^n+(-1)*p_l*d_h^m*d_d^n)+(-1)*(1/2)*(p_h*g_ld+p_d*g_lh+(-1)*p_l*g_hd)*(1/2)*(p_c*g_og+p_g*g_oc+(-1)*p_o*g_cg)*g^ga*g^lb*g^hm*g^on+(-1)*(1/2)*(p_h*g_ld+p_d*g_lh+(-1)*p_l*g_hd)*(1/2)*g^ho*g^ga*g^lb*(p_c*d_o^m*d_g^n+p_g*d_o^m*d_c^n+(-1)*p_o*d_c^m*d_g^n)+(-1)*(1/2)*(p_h*g_ld+p_d*g_lh+(-1)*p_l*g_hd)*(1/2)*g^ho*(p_c*g_og+p_g*g_oc+(-1)*p_o*g_cg)*g^lb*g^gm*g^an+(-1)*(1/2)*(p_h*g_ld+p_d*g_lh+(-1)*p_l*g_hd)*(1/2)*g^ho*(p_c*g_og+p_g*g_oc+(-1)*p_o*g_cg)*g^ga*g^lm*g^bn+(-1)*(1/2)*(1/2)*g^ho*(p_c*g_og+p_g*g_oc+(-1)*p_o*g_cg)*(p_h*d_l^a*d_d^b+p_d*d_l^a*d_h^b+(-1)*p_l*d_h^a*d_d^b)*g^gm*g^ln+(-1)*(1/2)*g^gl*(1/2)*(p_c*g_og+p_g*g_oc+(-1)*p_o*g_cg)*(p_h*d_l^a*d_d^b+p_d*d_l^a*d_h^b+(-1)*p_l*d_h^a*d_d^b)*g^hm*g^on+(-1)*(1/2)*g^gl*(1/2)*g^ho*(p_h*d_l^a*d_d^b+p_d*d_l^a*d_h^b+(-1)*p_l*d_h^a*d_d^b)*(p_c*d_o^m*d_g^n+p_g*d_o^m*d_c^n+(-1)*p_o*d_c^m*d_g^n)+(-1)*(1/2)*(p_h*g_ld+p_d*g_lh+(-1)*p_l*g_hd)*(1/2)*(p_c*g_og+p_g*g_oc+(-1)*p_o*g_cg)*g^ha*g^ob*g^gm*g^ln+(-1)*(1/2)*g^gl*(1/2)*(p_c*g_og+p_g*g_oc+(-1)*p_o*g_cg)*g^ha*g^ob*(p_h*d_l^m*d_d^n+p_d*d_l^m*d_h^n+(-1)*p_l*d_h^m*d_d^n)+(-1)*(1/2)*g^gl*(p_h*g_ld+p_d*g_lh+(-1)*p_l*g_hd)*(1/2)*g^ha*g^ob*(p_c*d_o^m*d_g^n+p_g*d_o^m*d_c^n+(-1)*p_o*d_c^m*d_g^n)+(-1)*(1/2)*g^gl*(p_h*g_ld+p_d*g_lh+(-1)*p_l*g_hd)*(1/2)*(p_c*g_og+p_g*g_oc+(-1)*p_o*g_cg)*g^ob*g^hm*g^an+(-1)*(1/2)*g^gl*(p_h*g_ld+p_d*g_lh+(-1)*p_l*g_hd)*(1/2)*(p_c*g_og+p_g*g_oc+(-1)*p_o*g_cg)*g^ha*g^om*g^bn+(-1)*(1/2)*(p_h*g_ld+p_d*g_lh+(-1)*p_l*g_hd)*(1/2)*g^ho*(p_c*d_o^a*d_g^b+p_g*d_o^a*d_c^b+(-1)*p_o*d_c^a*d_g^b)*g^gm*g^ln+(-1)*(1/2)*g^gl*(1/2)*g^ho*(p_c*d_o^a*d_g^b+p_g*d_o^a*d_c^b+(-1)*p_o*d_c^a*d_g^b)*(p_h*d_l^m*d_d^n+p_d*d_l^m*d_h^n+(-1)*p_l*d_h^m*d_d^n)+(-1)*(1/2)*g^gl*(p_h*g_ld+p_d*g_lh+(-1)*p_l*g_hd)*(1/2)*(p_c*d_o^a*d_g^b+p_g*d_o^a*d_c^b+(-1)*p_o*d_c^a*d_g^b)*g^hm*g^on)");
+        stop = System.currentTimeMillis();
+        System.out.println("Parse: " + (stop - start));
+        start = System.currentTimeMillis();
         target = ExpandBrackets.expandBrackets(target);
+        stop = System.currentTimeMillis();
+        System.out.println("Expand: " + (stop - start) + " , size: " + target.size());
+        start = System.currentTimeMillis();
         target = contract(target);
+        stop = System.currentTimeMillis();
+        System.out.println("Contract: " + (stop - start) + " , size: " + target.size());
+        assertTrue(target.size() == 19);
     }
 
+    private static Tensor generateContractedMetricSequence(int length) {
+        ProductBuilder builder = new ProductBuilder();
+        IndexGenerator generator = new IndexGenerator();
+        byte type = 0;
+        int a = generator.generate(type), b = generator.generate(type);
+        for (int i = 0; i < length; ++i) {
+            builder.put(Tensors.createMetric(a, b));
+            a = IndicesUtils.inverseIndexState(b);
+            b = IndicesUtils.setRawState(IndicesUtils.getRawStateInt(a), generator.generate(type));
+        }
+        return builder.build();
+    }
+
+    private static Tensor generateNotContractedMetricSequence(int length) {
+        ProductBuilder builder = new ProductBuilder();
+        IndexGenerator generator = new IndexGenerator();
+        byte type = 0;
+        for (int i = 0; i < length; ++i)
+            builder.put(Tensors.createMetric(generator.generate(type), generator.generate(type)));
+        return builder.build();
+    }
+
+    @Ignore
+    @Test(timeout = 2000)
+    public void testPerformance2() {
+        long stop, start;
+        start = System.currentTimeMillis();
+        for (int i = 0; i < 100; ++i)
+            assertTrue(Tensors.isKroneckerOrMetric(contract(generateContractedMetricSequence(1000))));
+        stop = System.currentTimeMillis();
+        System.out.println(stop - start);
+    }
+
+    @Test
+    public void testPerformance3() {
+        long stop, start;
+        start = System.currentTimeMillis();
+        Tensor t;
+        for (int i = 0; i < 100; ++i) {
+            t = generateNotContractedMetricSequence(1000);
+            assertTrue(t == contract(t));
+        }
+        stop = System.currentTimeMillis();
+        System.out.println(stop - start);
+    }
 //    @Test
 //    public void testRimanDerivative() {
 //        Tensor riman = parse("g^{\\mu \\nu}*R_{\\mu \\nu}");
@@ -440,6 +508,7 @@ public class ContractIndicesTest {
 //        derivative = contract(derivative);
 //        assertTrue(TensorUtils.testIndicesConsistent(derivative));
 //    }
+
     @Test
     public void testAbstractScalarFunction2() {
         Tensor t = parse("Sin[g^am*(X_a+g_ab*(X^b+g^bc*(X_c+d_c^f*F_f+g_cd*g^de*X_e+g_cj*d^j_k*(X^k+X_l*g^lk))))*J_m]");
@@ -472,6 +541,5 @@ public class ContractIndicesTest {
         Tensor expected = parse("F[A_n]");
         System.out.println(t);
         assertTrue(TensorUtils.compare(t, expected));
-
     }
 }
