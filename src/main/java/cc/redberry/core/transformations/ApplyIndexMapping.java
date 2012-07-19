@@ -99,7 +99,11 @@ public final class ApplyIndexMapping implements Transformation {
         if (!Arrays.equals(freeIndices, _from))
             throw new IllegalArgumentException("From indices are not equal to free indices of tensor.");
 
-        return unsafeApplyIndexMappingFromSortedClonedPreparedSource(tensor, from, to, forbidden);
+        Tensor result = unsafeApplyIndexMappingFromSortedClonedPreparedSource(tensor, from, to, forbidden);
+        if (buffer.getSignum())
+            return Tensors.negate(result);
+        else
+            return result;
     }
 
     public static Tensor renameDummy(Tensor tensor, int[] forbidden) {
