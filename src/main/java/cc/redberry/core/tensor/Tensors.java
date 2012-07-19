@@ -83,7 +83,7 @@ public final class Tensors {
                 for (Integer index : totalIndices)
                     forbidden[++j] = index;
                 p.indexlessData[i] = ApplyIndexMapping.renameDummyFromClonedSource(current, forbidden);
-                totalIndices.addAll(TensorUtils.getAllIndices(p.indexlessData[i]));
+                totalIndices.addAll(TensorUtils.getAllIndicesNames(p.indexlessData[i]));
             }
         }
         Set<Integer> free;
@@ -99,7 +99,7 @@ public final class Tensors {
                 for (Integer index : totalIndices)
                     forbidden[++j] = index;
                 p.data[i] = ApplyIndexMapping.renameDummyFromClonedSource(current, forbidden);
-                totalIndices.addAll(TensorUtils.getAllIndices(p.data[i]));
+                totalIndices.addAll(TensorUtils.getAllIndicesNames(p.data[i]));
             }
         }
         return p;

@@ -22,6 +22,8 @@
  */
 package cc.redberry.core.tensor;
 
+import cc.redberry.core.number.Complex;
+
 /**
  *
  * @author Dmitry Bolotin
@@ -36,6 +38,10 @@ public final class SumFactory implements TensorFactory {
 
     @Override
     public Tensor create(Tensor... tensors) {
+        if (tensors.length == 0)
+            return Complex.ZERO;
+        if (tensors.length == 1)
+            return tensors[0];
         TensorBuilder builder = SumBuilderFactory.defaultSumBuilder(tensors.length);
         for (Tensor t : tensors)
             builder.put(t);

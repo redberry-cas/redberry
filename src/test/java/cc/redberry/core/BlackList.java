@@ -35,6 +35,7 @@ public class BlackList {
 
     @Test
     public void test1() {
+        org.apache.commons.math3.complex.Complex a;
         Complex c = NumberParser.COMPLEX_PARSER.parse("4+2*i");
         System.out.println(c);
     }

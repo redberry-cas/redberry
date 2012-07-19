@@ -58,9 +58,7 @@ public final class ProductFactory implements TensorFactory {
         Product p;
         for (i = tensors.length - 1; i >= 0; --i) {
             current = tensors[i];
-            if (complex.isNaN())
-                return complex;
-            else if (current instanceof Complex)
+            if (current instanceof Complex)
                 complex = complex.multiply((Complex) current);
             else if (current instanceof Product) {
                 p = (Product) tensors[i];
@@ -71,6 +69,8 @@ public final class ProductFactory implements TensorFactory {
                 indexlessContainer.add(current);
             else
                 dataContainer.add(current);
+            if (complex.isNaN())
+                return complex;
         }
 
         if (complex.isZero() || complex.isNaN() || complex.isInfinite())

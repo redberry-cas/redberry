@@ -176,7 +176,7 @@ public final class IndicesUtils {
      * <br/>Expression used by this method is: <b><code>rawState | index</code></b>
      *
      * @param rawState raw state
-     * @param index index to change type in
+     * @param index    index to change type in
      *
      * @return index with new type
      */
@@ -362,5 +362,20 @@ public final class IndicesUtils {
         else
             nameWithType = Context.get().getIndexConverterManager().getCode(string.substring(1));
         return state ? (0x80000000 ^ nameWithType) : nameWithType;
+    }
+
+    /**
+     * Returns an array of indices names (with types), presented in specified {@code Indices}
+     * object with the same ordering.
+     *
+     * @param indices
+     *
+     * @return array of indices names (with types)
+     */
+    public static int[] getIndicesNames(Indices indices) {
+        int a[] = new int[indices.size()];
+        for (int i = indices.size() - 1; i >= 0; --i)
+            a[i] = getNameWithType(indices.get(i));
+        return a;
     }
 }

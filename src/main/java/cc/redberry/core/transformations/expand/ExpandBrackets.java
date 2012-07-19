@@ -93,6 +93,8 @@ public final class ExpandBrackets implements Transformation {
     }
 
     private static Tensor expandProductOfSums(Tensor current, final int threads) {
+        
+        // g_mn  {_m->^a, _n->_b}  => g^a_b  <=> d^a_b |           Tensors.isMetric(g_ab )  d_a^b
 
         // a*b | a_m*b_v | (a+b*f) | (a_i+(c+2)*b_i) 
 
@@ -176,7 +178,7 @@ public final class ExpandBrackets implements Transformation {
         //TODO improve algorithm using Newton formula!!!
         int i;
         Tensor temp = argument;
-        Set<Integer> initialDummy = TensorUtils.getAllIndices(argument);
+        Set<Integer> initialDummy = TensorUtils.getAllIndicesNames(argument);
         int[] initialForbidden = new int[initialDummy.size()];
         i = -1;
         for (Integer index : initialDummy)

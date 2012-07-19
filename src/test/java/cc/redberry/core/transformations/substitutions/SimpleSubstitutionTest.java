@@ -40,9 +40,9 @@ import static cc.redberry.core.tensor.Tensors.*;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public class SimpleTensorSubstitutionTest {
+public class SimpleSubstitutionTest {
 
-    public SimpleTensorSubstitutionTest() {
+    public SimpleSubstitutionTest() {
     }
 
     private static Tensor contract(Tensor tensor) {
@@ -112,7 +112,7 @@ public class SimpleTensorSubstitutionTest {
         SimpleSubstitution sp = new SimpleSubstitution(from, to);
         target = sp.transform(target);
         Tensor expected = parse("B_{ac}*C^{c}_{b}*d*B_{md}*C^{d}_{n}");
-        assertTrue(TensorUtils.equals(target, expected));
+        assertTrue(TensorUtils.compare(target, expected));
     }
 
     @Test
@@ -128,11 +128,11 @@ public class SimpleTensorSubstitutionTest {
     public void subs5_minusone() {
         SimpleTensor from = (SimpleTensor) parse("A_m^n");
         addSymmetry("A_a^b", IndexType.LatinLower, true, 1, 0);
-        Tensor to = parse("B_m*C^n");
+        Tensor to = parse("B_m*C^n-B^n*C_m");
         Tensor target = parse("A^a_b");
         SimpleSubstitution sp = new SimpleSubstitution(from, to);
         target = sp.transform(target);
-        Tensor expected = parse("-B_b*C^a");
+        Tensor expected = parse("B^a*C_b-B_b*C^a");
         assertTrue(TensorUtils.equals(target, expected));
     }
 
@@ -179,105 +179,15 @@ public class SimpleTensorSubstitutionTest {
     }
 
     @Test
-    public void subs9() {
-        for (int i = 0; i < 100; ++i) {
-            CC.resetTensorNames();
-            Tensor target = parse("L");
-            target = substitute(target,
-                                "L=(1/4)*F_{a \\mu \\nu}*F^{a \\mu \\nu}");
-            target = substitute(target,
-                                "F^a_{\\mu \\nu}=D[A^a_{\\mu}[x^{\\alpha}],x^{\\nu}]-D[A^a_{\\nu}[x^{\\alpha}],x^{\\mu}]+"
-                    + "g*f^{abc}*A_{b \\mu}[x^{\\alpha}]*A_{c \\nu}[x^{\\alpha}]");
-            target = contract(target);
-            Tensor expected = parse("(1/4)*(D[A_{a}^{\\alpha }[x^{\\alpha }],x_{\\beta }]-D[A_{a}^{\\beta }[x^{\\alpha }],x_{\\alpha }]+g*f_{a}^{bc}*A_{b}^{\\alpha }[x^{\\alpha }]*A_{c}^{\\beta }[x^{\\alpha }])*(D[A^{a}_{\\alpha }[x^{\\alpha }],x^{\\beta }]-D[A^{a}_{\\beta }[x^{\\alpha }],x^{\\alpha }]+g*f^{aef}*A_{e\\alpha }[x^{\\alpha }]*A_{f\\beta }[x^{\\alpha }])");
-            assertParity(target, expected);
-        }
-    }
-
-    @Test
-    public void subs9s0() {
-        for (int i = 0; i < 100; ++i) {
-            CC.resetTensorNames();
-            Tensor target = parse("L");
-            target = substitute(target,
-                                "L=(1/4)*F_{a \\mu \\nu}*F^{a \\mu \\nu}");
-            target = substitute(target,
-                                "F^a_{\\mu \\nu}=D[A^a_{\\mu}[x^{\\alpha}],x^{\\nu}]");
-            target = contract(target);
-            Tensor expected = parse("(1/4)*(D[A_{a}^{\\alpha }[x^{\\alpha }],x_{\\beta }])*(D[A^{a}_{\\alpha }[x^{\\alpha }],x^{\\beta }])");
-            assertParity(target, expected);
-        }
-    }
-
-    @Test(timeout = 10000)
-    public void subs10() {
-        Transformation Ric = (Transformation) parse("Ric_ab=E^r_a*E^d_c*R^c_bdr");
-        Transformation Riman = (Transformation) parse("R^a_bcd=i*D[w^a_db,x^c]-i*D[w^a_cb,x^d]+w^a_cr*w^r_db-w^a_dr*w^r_cb");
-        Transformation Torsion = (Transformation) parse("T^a_bc=i*D[h^a_c,x^b]-i*D[h^a_b,x^c]+w^a_bd*e^d_c-w^a_cd*e^d_b");
-        Transformation eTetrad = (Transformation) parse("e^a_b=d^a_b+h^a_b");
-        Transformation ETetrad = (Transformation) parse("E^a_b=d^a_b-h^a_b+h^a_c*h^c_b");
-        Transformation metricUP = (Transformation) parse("G^ab=g^ab-g^ca*h^b_c-g^cb*h^a_c+g^cb*h^a_d*h^d_c+g^ca*h^b_d*h^d_c+g^cd*h^a_c*h^b_d");
-        Transformation sqrt = (Transformation) parse("sqrt=1+h^a_a+(1/2)*(h^s_s*h^l_l-h^s_l*h^l_s)");
-        Transformation tetradGaugeFix = (Transformation) parse("Gf_a=f1*D[h^b_a,x^b]+f2*g^pq*g_ab*D[h^b_q,x^p]+f3*D[h^q_q,x^a]");
-        Tensor Lagrangian = parse("sqrt*(g^ab*Ric_ab+(e1*g_ab*G^xp*G^yq+e2*E^x_a*E^p_b*G^yq+e3*E^x_b*E^p_a*G^yq)*T^a_xy*T^b_pq+e6*Ric_ab*Ric_cd*g^ab*g^cd+e5*Ric_ab*Ric_cd*g^ac*g^bd+Gf_a*Gf_b*g^ab)+f*g^pq*g_ab*i*D[h^b_q,x^p]*g^cd*I*D[h^a_d,x^c]");
-        Transformation[] substitutions = {
-            Ric,
-            Riman,
-            Torsion,
-            eTetrad,
-            ETetrad,
-            metricUP,
-            sqrt,
-            tetradGaugeFix
-        };
-        for (int i = 0; i < substitutions.length; i++)
-            Lagrangian = substitutions[i].transform(Lagrangian);
-        Tensor clone = Lagrangian;
-        Lagrangian = contract(Lagrangian);
-        Lagrangian = expand(Lagrangian);
-        Lagrangian = contract(Lagrangian);
-        assertTrue(Lagrangian.getIndices().getFreeIndices().size() == 0);
-    }
-
-    @Test(timeout = 5000)
-    public void subs11() {
-        Transformation Ric = (Transformation) parse("Ric_ab=E^r_a*E^d_c*R^c_bdr");
-        Transformation Riman = (Transformation) parse("R^a_bcd=i*D[w^a_db,x^c]-i*D[w^a_cb,x^d]+w^a_cr*w^r_db-w^a_dr*w^r_cb");
-        Transformation Torsion = (Transformation) parse("T^a_bc=i*D[h^a_c,x^b]-i*D[h^a_b,x^c]+w^a_bd*e^d_c-w^a_cd*e^d_b");
-        Transformation eTetrad = (Transformation) parse("e^a_b=d^a_b+h^a_b");
-        Transformation ETetrad = (Transformation) parse("E^a_b=d^a_b-h^a_b+h^a_c*h^c_b");
-        Transformation metricUP = (Transformation) parse("G^ab=g^ab-g^ca*h^b_c-g^cb*h^a_c+g^cb*h^a_d*h^d_c+g^ca*h^b_d*h^d_c+g^cd*h^a_c*h^b_d");
-        Transformation sqrt = (Transformation) parse("sqrt=1+h^a_a+(1/2)*(h^s_s*h^l_l-h^s_l*h^l_s)");
-        Transformation tetradGaugeFix = (Transformation) parse("Gf_a=f1*D[h^b_a,x^b]+f2*g^pq*g_ab*D[h^b_q,x^p]+f3*D[h^q_q,x^a]");
-        Tensor Lagrangian = parse("sqrt*(g^ab*Ric_ab+(e1*g_ab*G^xp*G^yq+e2*E^x_a*E^p_b*G^yq+e3*E^x_b*E^p_a*G^yq)*T^a_xy*T^b_pq+e6*Ric_ab*Ric_cd*g^ab*g^cd+e5*Ric_ab*Ric_cd*g^ac*g^bd+Gf_a*Gf_b*g^ab)+f*g^pq*g_ab*i*D[h^b_q,x^p]*g^cd*I*D[h^a_d,x^c]");
-        Transformation[] substitutions = {
-            Ric,
-            Riman,
-            Torsion,
-            eTetrad,
-            ETetrad,
-            metricUP,
-            sqrt,
-            tetradGaugeFix
-        };
-        for (int i = 0; i < substitutions.length; i++)
-            Lagrangian = substitutions[i].transform(Lagrangian);
-
-        Lagrangian = expand(Lagrangian);
-        Lagrangian = contract(Lagrangian);
-        assertTrue(Lagrangian.getIndices().getFreeIndices().size() == 0);
-    }
-
-    @Test
     public void subsField1() {
         SimpleTensor from = (SimpleTensor) parse("A_m^n");
         addSymmetry("A_a^b", IndexType.LatinLower, true, 1, 0);
-        Tensor to = parse("B_m*C^n");
+        Tensor to = parse("B_m*C^n-B^n*C_m");
         Tensor target = parse("A^a_b+F^a_b[A_m^n]");
         SimpleSubstitution sp = new SimpleSubstitution(from, to);
         target = sp.transform(target);
         System.out.println(target);
-        Tensor expected = parse("-1*B_{b}*C^{a}+F^{a}_{b}[B_{m}*C^{n}]");
+        Tensor expected = parse("-B_{b}*C^{a}+B^a*C_b+F^{a}_{b}[B_{m}*C^{n}-B^n*C_m]");
         assertTrue(TensorUtils.compare(target, expected));
 
     }
@@ -301,8 +211,8 @@ public class SimpleTensorSubstitutionTest {
 
         //Riman without diff states
         Tensor target = parse("g^{mn}*R_{mn}");
-        substitute(target,
-                   "R_{mn}=R^{a}_{man}");
+        target = substitute(target,
+                            "R_{mn}=R^{a}_{man}");
         target = substitute(target,
                             "R^a_bmn=p_m*G^a_bn+p_n*G^a_bm+G^a_gm*G^g_bn-G^a_gn*G^g_bm");
         target = substitute(target,
@@ -320,9 +230,14 @@ public class SimpleTensorSubstitutionTest {
                              "G_gmn=(1/2)*(p_m*g_gn+p_n*g_gm-p_g*g_mn)");
 
         target1 = contract(target1);
-
+        System.out.println(target);
+        System.out.println(target1);
         assertTrue(TensorUtils.compare(target, target1));
+        assertTrue(target.getIndices().size() == 0);
+        assertTrue(target1.getIndices().size() == 0);
     }
+
+
 
     @Test
     public void subs12() {
@@ -371,21 +286,6 @@ public class SimpleTensorSubstitutionTest {
         System.out.println(t);
         t = expand(t);
         System.out.println(t);
-    }
-
-    @Test
-    public void test18() {
-        Tensor target = parse("g_{ax}*D[(1/2)*g^{xe}*D[g_{de},x^{b}],x^{c}]");
-
-        Tensor target1 = parse("g_ax*D[G^x_bd,x^c]");
-        substitute(target1, "G^a_bc="
-                + "(1/2)*g^ae*D[g_ce,x^b]");
-
-        System.out.println(target);
-        System.out.println(target1);
-        System.out.println(target.getIndices());
-        System.out.println(target1.getIndices());
-        assertTrue(target.getIndices().equals(target1.getIndices()));
     }
 
     @Test

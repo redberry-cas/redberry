@@ -22,15 +22,16 @@
  */
 package cc.redberry.core.transformations.substitutions;
 
+import cc.redberry.core.indexmapping.*;
+import cc.redberry.core.indices.*;
 import cc.redberry.core.tensor.Product;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.tensor.TensorField;
 import cc.redberry.core.tensor.iterator.TraverseState;
 import cc.redberry.core.tensor.iterator.TreeTraverseIterator;
+import cc.redberry.core.utils.*;
 import cc.redberry.core.utils.TensorUtils;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  *
@@ -77,18 +78,14 @@ public final class SubstitutionIterator {
     }
 
     //TODO chache forbidden in Stack after finishing all tests
-    public int[] forbiddenIndices() {
+    public Set<Integer> forbiddenIndices() {
         if (stack == null || waitingForProduct)
-            return new int[0];
-
-        Set<Integer> set = TensorUtils.getAllIndices(stack.tensor);
-        int[] result = new int[set.size()];
-        int i = -1;
-        for (Integer integer : set)
-            result[++i] = integer;
-        return result;
+            return new HashSet<>();
+        return stack.getForbidden();
     }
 
+   
+    
     public void set(Tensor tensor) {
         iterator.set(tensor);
     }
@@ -100,13 +97,21 @@ public final class SubstitutionIterator {
     private static final class Stack {
 
         private final Stack previous;
+        private Set<Integer> forbiddenIndices;
         private final Tensor tensor;
         private final int depth;
 
         public Stack(Stack previous, Tensor tensor, int depth) {
             this.previous = previous;
-            this.tensor = tensor;
             this.depth = depth;
+            this.tensor = tensor;
+            this.forbiddenIndices = null;
+        }
+
+        Set<Integer> getForbidden() {
+            if (forbiddenIndices == null)
+                forbiddenIndices = TensorUtils.getAllIndicesNames(tensor);
+            return forbiddenIndices;
         }
 
         @Override

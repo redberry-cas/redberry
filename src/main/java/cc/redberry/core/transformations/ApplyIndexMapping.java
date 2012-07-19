@@ -87,7 +87,7 @@ public final class ApplyIndexMapping implements Transformation {
         for (Map.Entry<Integer, IndexMappingBufferRecord> entry : map.entrySet()) {
             from[count] = entry.getKey();
             record = entry.getValue();
-            to[count++] = record.getIndexName() ^ (record.isContracted() ? 0x80000000 : 0);
+            to[count++] = record.getIndexName() ^ (record.diffStatesInitialized() ? 0x80000000 : 0);
         }
 
         final int[] freeIndices = tensor.getIndices().getFreeIndices().getAllIndices().copy();
@@ -132,7 +132,7 @@ public final class ApplyIndexMapping implements Transformation {
     private static Tensor unsafeApplyIndexMappingFromSortedClonedPreparedSource(
             Tensor tensor, int[] from, int[] to, int[] forbidden) {
 
-        Set<Integer> dummyIndices = TensorUtils.getAllIndices(tensor);
+        Set<Integer> dummyIndices = TensorUtils.getAllIndicesNames(tensor);
         //extracting contracted only
         Indices indices = tensor.getIndices().getFreeIndices();
         int i;
@@ -170,7 +170,7 @@ public final class ApplyIndexMapping implements Transformation {
         return applyIndexMapping(tensor, new IndexMapper(_from, _to));
     }
 
-    private static Tensor applyIndexMapping(Tensor tensor, IndexMapper mapper) {
+    public static Tensor applyIndexMapping(Tensor tensor, IndexMapper mapper) {
         TreeTraverseIterator iterator = new TreeTraverseIterator(tensor, TraverseGuide.EXCEPT_FUNCTIONS_AND_FIELDS);
         TraverseState state;
         SimpleIndices oldIndices, newIndices;
@@ -186,13 +186,15 @@ public final class ApplyIndexMapping implements Transformation {
             if (oldIndices != newIndices)
                 if (simpleTensor instanceof TensorField)
                     iterator.set(Tensors.setIndicesToField((TensorField) simpleTensor, newIndices));
+                else if (Tensors.isKroneckerOrMetric(simpleTensor))
+                    iterator.set(Tensors.createMetricOrKronecker(newIndices.get(0), newIndices.get(1)));
                 else
                     iterator.set(Tensors.setIndicesToSimpleTensor(simpleTensor, newIndices));
         }
         return iterator.result();
     }
 
-    private final static class IndexMapper implements IndexMapping {
+    public final static class IndexMapper implements IndexMapping {
 
         private final int[] from, to;
 
