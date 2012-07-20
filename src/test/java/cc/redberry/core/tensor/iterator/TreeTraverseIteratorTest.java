@@ -28,13 +28,12 @@ import cc.redberry.core.tensor.Sum;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.tensor.Tensors;
 import cc.redberry.core.tensor.functions.Sin;
-import cc.redberry.core.utils.*;
+import cc.redberry.core.utils.Indicator;
 import cc.redberry.core.utils.TensorUtils;
-import org.junit.Assert;
-import org.junit.Test;
-
 import java.util.ArrayList;
 import java.util.List;
+import org.junit.Assert;
+import org.junit.Test;
 
 import static cc.redberry.core.tensor.Tensors.parse;
 

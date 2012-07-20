@@ -22,11 +22,14 @@
  */
 package cc.redberry.core.transformations.substitutions;
 
-import cc.redberry.core.tensor.*;
+import cc.redberry.core.tensor.Power;
+import cc.redberry.core.tensor.SimpleTensor;
 import cc.redberry.core.tensor.Tensor;
+import cc.redberry.core.tensor.TensorField;
 import cc.redberry.core.tensor.functions.*;
 import cc.redberry.core.transformations.Transformation;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  *

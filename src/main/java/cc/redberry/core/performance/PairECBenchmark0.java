@@ -22,11 +22,13 @@
  */
 package cc.redberry.core.performance;
 
-import cc.redberry.core.transformations.Expand;
 import cc.redberry.core.context.CC;
 import cc.redberry.core.parser.ParserIndices;
-import cc.redberry.core.tensor.*;
+import cc.redberry.core.tensor.Sum;
+import cc.redberry.core.tensor.Tensor;
+import cc.redberry.core.tensor.Tensors;
 import cc.redberry.core.tensor.random.TRandom;
+import cc.redberry.core.transformations.Expand;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
 public class PairECBenchmark0 {

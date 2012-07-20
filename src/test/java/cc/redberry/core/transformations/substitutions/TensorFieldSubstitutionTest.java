@@ -27,11 +27,9 @@ import cc.redberry.core.tensor.Expression;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.tensor.TensorField;
 import cc.redberry.core.transformations.ContractIndices;
-import cc.redberry.core.transformations.Transformation;
 import cc.redberry.core.transformations.Expand;
+import cc.redberry.core.transformations.Transformation;
 import cc.redberry.core.utils.TensorUtils;
-import java.math.*;
-import org.apache.commons.math3.util.*;
 import org.junit.Test;
 
 import static cc.redberry.core.TAssert.assertParity;

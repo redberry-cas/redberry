@@ -23,7 +23,7 @@
 package cc.redberry.core.transformations.substitutions;
 
 import cc.redberry.core.tensor.Tensor;
-import cc.redberry.core.transformations.*;
+import cc.redberry.core.transformations.TransformationException;
 
 /**
  *

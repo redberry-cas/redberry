@@ -22,7 +22,6 @@
  */
 package cc.redberry.core.math.frobenius;
 
-import java.util.Arrays;
 import org.junit.Test;
 
 import static cc.redberry.core.math.frobenius.FrobeniusUtils.*;

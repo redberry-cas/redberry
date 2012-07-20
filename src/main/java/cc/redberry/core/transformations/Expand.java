@@ -33,7 +33,6 @@ import cc.redberry.core.tensor.*;
 import cc.redberry.core.tensor.iterator.TraverseGuide;
 import cc.redberry.core.tensor.iterator.TraverseState;
 import cc.redberry.core.tensor.iterator.TreeTraverseIterator;
-import cc.redberry.core.transformations.Transformation;
 import cc.redberry.core.utils.Indicator;
 import cc.redberry.core.utils.TensorUtils;
 import java.util.ArrayList;

@@ -23,8 +23,11 @@
 package cc.redberry.core.tensor.functions;
 
 import cc.redberry.core.number.Complex;
-import cc.redberry.core.tensor.*;
-import cc.redberry.core.utils.*;
+import cc.redberry.core.tensor.Tensor;
+import cc.redberry.core.tensor.TensorBuilder;
+import cc.redberry.core.tensor.TensorFactory;
+import cc.redberry.core.tensor.Tensors;
+import cc.redberry.core.utils.TensorUtils;
 
 /**
  *

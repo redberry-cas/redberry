@@ -22,15 +22,16 @@
  */
 package cc.redberry.core.transformations.substitutions;
 
-import java.util.ArrayList;
-import java.util.List;
+import cc.redberry.core.indexmapping.IndexMappingBuffer;
+import cc.redberry.core.indexmapping.IndexMappings;
 import cc.redberry.core.indices.Indices;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.tensor.TensorField;
-import cc.redberry.core.indexmapping.IndexMappingBuffer;
-import cc.redberry.core.indexmapping.IndexMappings;
-import cc.redberry.core.transformations.*;
-import cc.redberry.core.utils.*;
+import cc.redberry.core.transformations.ApplyIndexMapping;
+import cc.redberry.core.transformations.Transformation;
+import cc.redberry.core.utils.TensorUtils;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  *

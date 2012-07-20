@@ -22,8 +22,9 @@
  */
 package cc.redberry.core.parser;
 
-import cc.redberry.core.indices.*;
-import java.util.*;
+import cc.redberry.core.indices.Indices;
+import cc.redberry.core.indices.IndicesUtils;
+import java.util.HashSet;
 import java.util.Set;
 
 /**

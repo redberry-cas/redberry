@@ -22,20 +22,21 @@
  */
 package cc.redberry.core.transformations.substitutions;
 
-import cc.redberry.core.transformations.Expand;
-import cc.redberry.core.context.CC;
-import org.junit.Test;
 import cc.redberry.core.context.ToStringMode;
 import cc.redberry.core.indices.IndexType;
-import cc.redberry.core.number.*;
-import cc.redberry.core.tensor.*;
-import cc.redberry.core.transformations.*;
-import cc.redberry.core.transformations.expand.*;
+import cc.redberry.core.number.Complex;
+import cc.redberry.core.tensor.Expression;
+import cc.redberry.core.tensor.SimpleTensor;
+import cc.redberry.core.tensor.Tensor;
+import cc.redberry.core.transformations.ContractIndices;
+import cc.redberry.core.transformations.Expand;
+import cc.redberry.core.transformations.Transformation;
 import cc.redberry.core.utils.TensorUtils;
+import org.junit.Test;
 
+import static cc.redberry.core.tensor.Tensors.addSymmetry;
+import static cc.redberry.core.tensor.Tensors.parse;
 import static org.junit.Assert.assertTrue;
-import static cc.redberry.core.TAssert.assertParity;
-import static cc.redberry.core.tensor.Tensors.*;
 
 /**
  * @author Dmitry Bolotin

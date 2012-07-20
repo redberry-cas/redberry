@@ -22,15 +22,12 @@
  */
 package cc.redberry.core.tensor.random;
 
-import org.junit.Test;
 import cc.redberry.core.context.CC;
-import cc.redberry.core.indices.IndicesFactory;
 import cc.redberry.core.parser.ParserIndices;
-import cc.redberry.core.tensor.SimpleTensor;
 import cc.redberry.core.tensor.Tensor;
-import java.util.Arrays;
-import junit.framework.*;
+import junit.framework.Assert;
 import org.apache.commons.math3.random.Well19937c;
+import org.junit.Test;
 
 /**
  *

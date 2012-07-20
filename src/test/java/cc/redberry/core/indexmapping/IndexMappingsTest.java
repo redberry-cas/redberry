@@ -15,7 +15,7 @@
  */
 package cc.redberry.core.indexmapping;
 
-import cc.redberry.concurrent.*;
+import cc.redberry.concurrent.OutputPortUnsafe;
 import cc.redberry.core.context.CC;
 import cc.redberry.core.indices.IndexType;
 import cc.redberry.core.tensor.Tensor;

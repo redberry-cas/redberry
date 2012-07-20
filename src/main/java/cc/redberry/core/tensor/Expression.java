@@ -18,7 +18,7 @@ package cc.redberry.core.tensor;
 import cc.redberry.core.context.ToStringMode;
 import cc.redberry.core.indices.Indices;
 import cc.redberry.core.transformations.Transformation;
-import cc.redberry.core.transformations.substitutions.*;
+import cc.redberry.core.transformations.substitutions.Substitutions;
 
 /**
  *

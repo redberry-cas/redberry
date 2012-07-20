@@ -27,7 +27,10 @@ import cc.redberry.core.context.CC;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.tensor.*;
 import cc.redberry.core.tensor.functions.*;
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * @author Dmitry Bolotin

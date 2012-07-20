@@ -22,11 +22,12 @@
  */
 package cc.redberry.core.tensor;
 
-import cc.redberry.core.indices.*;
+import cc.redberry.core.indices.Indices;
+import cc.redberry.core.indices.IndicesFactory;
+import cc.redberry.core.indices.IndicesUtils;
 import cc.redberry.core.math.GraphUtils;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.utils.ArraysUtils;
-
 import java.lang.ref.SoftReference;
 import java.util.Arrays;
 

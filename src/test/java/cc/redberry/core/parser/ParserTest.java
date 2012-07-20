@@ -22,7 +22,7 @@
  */
 package cc.redberry.core.parser;
 
-import cc.redberry.core.context.*;
+import cc.redberry.core.context.CC;
 import cc.redberry.core.indices.IndicesFactory;
 import cc.redberry.core.indices.SimpleIndices;
 import cc.redberry.core.number.Complex;

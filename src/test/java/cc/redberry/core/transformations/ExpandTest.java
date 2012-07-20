@@ -20,16 +20,16 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
-package cc.redberry.core.transformations.expand;
+package cc.redberry.core.transformations;
 
-import cc.redberry.core.transformations.Expand;
-import cc.redberry.core.*;
+import cc.redberry.core.TAssert;
 import cc.redberry.core.context.CC;
 import cc.redberry.core.tensor.Product;
 import cc.redberry.core.tensor.Sum;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.tensor.Tensors;
-import cc.redberry.core.tensor.iterator.*;
+import cc.redberry.core.tensor.iterator.TraverseState;
+import cc.redberry.core.tensor.iterator.TreeTraverseIterator;
 import cc.redberry.core.utils.TensorUtils;
 import org.junit.Assert;
 import org.junit.Test;
@@ -42,7 +42,7 @@ import static cc.redberry.core.tensor.Tensors.parse;
  * @author Stanislav Poslavsky
  */
 //@Ignore
-public class ExpandBracketsTest {
+public class ExpandTest {
 
     @Test
     public void test0() {

@@ -22,11 +22,11 @@
  */
 package cc.redberry.core.indexmapping;
 
+import cc.redberry.core.context.CC;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import org.junit.Ignore;
-import cc.redberry.core.context.CC;
 
 /**
  *

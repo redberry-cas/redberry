@@ -22,19 +22,19 @@
  */
 package cc.redberry.core.transformations;
 
-import cc.redberry.core.transformations.ContractIndices;
-import cc.redberry.core.*;
-import cc.redberry.core.context.*;
-import cc.redberry.core.indexgenerator.*;
-import cc.redberry.core.indices.*;
-import cc.redberry.core.tensor.*;
-import cc.redberry.core.tensor.random.*;
-import cc.redberry.core.transformations.expand.*;
-import cc.redberry.core.utils.*;
-import org.apache.commons.math3.analysis.function.*;
-import org.junit.*;
-import static cc.redberry.core.tensor.Tensors.*;
-import static org.junit.Assert.*;
+import cc.redberry.core.TAssert;
+import cc.redberry.core.context.CC;
+import cc.redberry.core.indexgenerator.IndexGenerator;
+import cc.redberry.core.indices.IndicesUtils;
+import cc.redberry.core.tensor.ProductBuilder;
+import cc.redberry.core.tensor.Tensor;
+import cc.redberry.core.tensor.Tensors;
+import cc.redberry.core.utils.TensorUtils;
+import org.junit.Ignore;
+import org.junit.Test;
+
+import static cc.redberry.core.tensor.Tensors.parse;
+import static org.junit.Assert.assertTrue;
 
 /**
  *

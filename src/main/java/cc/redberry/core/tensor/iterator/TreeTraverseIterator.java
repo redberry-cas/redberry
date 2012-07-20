@@ -26,7 +26,6 @@ import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.tensor.TensorBuilder;
 import cc.redberry.core.tensor.TensorWrapper;
 import cc.redberry.core.utils.Indicator;
-import java.util.*;
 
 /**
  * An iterator for tensors that allows the programmer to traverse the tensor

@@ -22,9 +22,10 @@
  */
 package cc.redberry.core.tensor;
 
-import cc.redberry.core.number.*;
-import cc.redberry.core.utils.*;
-import java.math.*;
+import cc.redberry.core.number.Complex;
+import cc.redberry.core.number.Rational;
+import cc.redberry.core.utils.TensorUtils;
+import java.math.BigInteger;
 
 /**
  *

@@ -3,10 +3,9 @@ package cc.redberry.core.tensor.iterator;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.tensor.Tensors;
 import cc.redberry.core.utils.TensorUtils;
-import org.junit.Test;
-
 import java.util.ArrayList;
 import java.util.List;
+import org.junit.Test;
 
 import static org.junit.Assert.assertTrue;
 
