@@ -31,5 +31,6 @@ import cc.redberry.core.transformations.Transformation;
  * @author Stanislav Poslavsky
  */
 interface SubstitutionProvider {
-    Transformation createSubstitution(Tensor from, Tensor to, boolean allowDiffStates);
+
+    Transformation createSubstitution(Tensor from, Tensor to);
 }

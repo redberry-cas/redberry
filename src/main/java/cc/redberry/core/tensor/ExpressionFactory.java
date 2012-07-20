@@ -22,7 +22,7 @@
  */
 package cc.redberry.core.tensor;
 
-import cc.redberry.core.indices.*;
+import cc.redberry.core.indices.IndicesFactory;
 
 /**
  *

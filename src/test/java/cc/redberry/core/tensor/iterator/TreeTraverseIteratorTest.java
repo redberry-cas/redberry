@@ -23,16 +23,17 @@
 package cc.redberry.core.tensor.iterator;
 
 import cc.redberry.core.number.Complex;
+import cc.redberry.core.tensor.Product;
 import cc.redberry.core.tensor.Sum;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.tensor.Tensors;
 import cc.redberry.core.tensor.functions.Sin;
+import cc.redberry.core.utils.Indicator;
 import cc.redberry.core.utils.TensorUtils;
-import org.junit.Assert;
-import org.junit.Test;
-
 import java.util.ArrayList;
 import java.util.List;
+import org.junit.Assert;
+import org.junit.Test;
 
 import static cc.redberry.core.tensor.Tensors.parse;
 
@@ -57,7 +58,7 @@ public class TreeTraverseIteratorTest {
         TraverseGuide guide = new TraverseGuide() {
 
             @Override
-            public TraversePermission getPermission(Tensor parent, int indexInParent, Tensor tensor) {
+            public TraversePermission getPermission(Tensor tensor, Tensor parent, int indexInParent) {
                 if (parent.getClass() == Sin.class)
                     return TraversePermission.DontShow;
                 return TraversePermission.Enter;
@@ -95,7 +96,7 @@ public class TreeTraverseIteratorTest {
         TraverseGuide guide = new TraverseGuide() {
 
             @Override
-            public TraversePermission getPermission(Tensor parent, int indexInParent, Tensor tensor) {
+            public TraversePermission getPermission(Tensor tensor, Tensor parent, int indexInParent) {
                 if (parent.getClass() == Sin.class)
                     return TraversePermission.DontShow;
                 return TraversePermission.Enter;
@@ -142,7 +143,7 @@ public class TreeTraverseIteratorTest {
         TraverseGuide guide = new TraverseGuide() {
 
             @Override
-            public TraversePermission getPermission(Tensor parent, int indexInParent, Tensor tensor) {
+            public TraversePermission getPermission(Tensor tensor, Tensor parent, int indexInParent) {
                 if (parent.getClass() == Sin.class)
                     return TraversePermission.DontShow;
                 return TraversePermission.Enter;
@@ -159,7 +160,7 @@ public class TreeTraverseIteratorTest {
         guide = new TraverseGuide() {
 
             @Override
-            public TraversePermission getPermission(Tensor parent, int indexInParent, Tensor tensor) {
+            public TraversePermission getPermission(Tensor tensor, Tensor parent, int indexInParent) {
                 if (tensor.getClass() == Sum.class)
                     return TraversePermission.DontShow;
                 return TraversePermission.Enter;
@@ -176,7 +177,7 @@ public class TreeTraverseIteratorTest {
         guide = new TraverseGuide() {
 
             @Override
-            public TraversePermission getPermission(Tensor parent, int indexInParent, Tensor tensor) {
+            public TraversePermission getPermission(Tensor tensor, Tensor parent, int indexInParent) {
                 if (tensor.getClass() == Sum.class && parent.getClass() == Sin.class && indexInParent == 0)
                     return TraversePermission.DontShow;
                 return TraversePermission.Enter;
@@ -197,7 +198,7 @@ public class TreeTraverseIteratorTest {
         TraverseGuide guide = new TraverseGuide() {
 
             @Override
-            public TraversePermission getPermission(Tensor parent, int indexInParent, Tensor tensor) {
+            public TraversePermission getPermission(Tensor tensor, Tensor parent, int indexInParent) {
                 if (indexInParent == 0)
                     return TraversePermission.DontShow;
                 return TraversePermission.Enter;
@@ -217,7 +218,7 @@ public class TreeTraverseIteratorTest {
         guide = new TraverseGuide() {
 
             @Override
-            public TraversePermission getPermission(Tensor parent, int indexInParent, Tensor tensor) {
+            public TraversePermission getPermission(Tensor tensor, Tensor parent, int indexInParent) {
                 if (indexInParent == 0 && tensor.size() == 0)
                     return TraversePermission.DontShow;
                 return TraversePermission.Enter;
@@ -244,7 +245,7 @@ public class TreeTraverseIteratorTest {
         TraverseGuide guide = new TraverseGuide() {
 
             @Override
-            public TraversePermission getPermission(Tensor parent, int indexInParent, Tensor tensor) {
+            public TraversePermission getPermission(Tensor tensor, Tensor parent, int indexInParent) {
                 if (parent.getClass() == Sin.class)
                     return TraversePermission.ShowButNotEnter;
                 return TraversePermission.Enter;
@@ -263,7 +264,7 @@ public class TreeTraverseIteratorTest {
         guide = new TraverseGuide() {
 
             @Override
-            public TraversePermission getPermission(Tensor parent, int indexInParent, Tensor tensor) {
+            public TraversePermission getPermission(Tensor tensor, Tensor parent, int indexInParent) {
                 if (tensor.getClass() == Sum.class)
                     return TraversePermission.ShowButNotEnter;
                 return TraversePermission.Enter;
@@ -280,7 +281,7 @@ public class TreeTraverseIteratorTest {
         guide = new TraverseGuide() {
 
             @Override
-            public TraversePermission getPermission(Tensor parent, int indexInParent, Tensor tensor) {
+            public TraversePermission getPermission(Tensor tensor, Tensor parent, int indexInParent) {
                 if (tensor.getClass() == Sum.class && parent.getClass() == Sin.class && indexInParent == 0)
                     return TraversePermission.ShowButNotEnter;
                 return TraversePermission.Enter;
@@ -540,5 +541,61 @@ public class TreeTraverseIteratorTest {
             }
         //no double set exception 
         Assert.assertTrue(TensorUtils.equals(iterator.result(), parse("2*a+c")));
+    }
+
+    private static Indicator<Tensor> classIndicator(final Class<? extends Tensor> clazz) {
+        return new Indicator<Tensor>() {
+
+            @Override
+            public boolean is(Tensor object) {
+                return object.getClass() == clazz;
+            }
+        };
+    }
+
+    private static Indicator<Tensor> equalIndicator(final Tensor t) {
+        return new Indicator<Tensor>() {
+
+            @Override
+            public boolean is(Tensor object) {
+                return TensorUtils.compare(object, t);
+            }
+        };
+    }
+
+    @Test
+    public void testUnder1() {
+        Indicator indicator = classIndicator(Product.class);
+        TreeTraverseIterator iterator = new TreeTraverseIterator(parse("a*b*(c+Sin[x])"));
+        while (iterator.next() != null)
+            Assert.assertTrue(indicator.is(iterator.current()) == iterator.isUnder(indicator, 0));
+    }
+
+    @Test
+    public void testUnder2() {
+        Indicator indicator = equalIndicator(parse("a*b*(c+Sin[x])"));
+        TreeTraverseIterator iterator = new TreeTraverseIterator(parse("a*b*(c+Sin[x])"));
+        while (iterator.next() != null) {
+            Assert.assertTrue(iterator.isUnder(indicator, 3));
+            if (equalIndicator(parse("x")).is(iterator.current())) {
+                Assert.assertFalse(iterator.isUnder(indicator, 2));
+                Assert.assertTrue(iterator.isUnder(classIndicator(Sin.class), 1));
+            }
+        }
+    }
+
+    @Test
+    public void testCheckLevel1() {
+        Indicator indicator = equalIndicator(parse("a*b*(c+Sin[x])"));
+        TreeTraverseIterator iterator = new TreeTraverseIterator(parse("a*b*(c+Sin[x])"));
+        while (iterator.next() != null) {
+            Assert.assertTrue(iterator.isUnder(indicator, 3));
+            if (equalIndicator(parse("x")).is(iterator.current())) {
+                Assert.assertTrue(iterator.checkLevel(equalIndicator(parse("x")), 0));
+                Assert.assertTrue(iterator.checkLevel(classIndicator(Sin.class), 1));
+                Assert.assertTrue(iterator.checkLevel(classIndicator(Sum.class), 2));
+                Assert.assertTrue(iterator.checkLevel(indicator, 3));                
+            }
+        }
     }
 }

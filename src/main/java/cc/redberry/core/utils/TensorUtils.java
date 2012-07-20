@@ -23,7 +23,6 @@
 package cc.redberry.core.utils;
 
 //import cc.redberry.core.indices.InconsistentIndicesException;
-import cc.redberry.core.tensor.functions.ScalarFunction;
 import cc.redberry.core.context.CC;
 import cc.redberry.core.indexmapping.IndexMappingBuffer;
 import cc.redberry.core.indexmapping.IndexMappingBufferTester;
@@ -33,6 +32,7 @@ import cc.redberry.core.indices.Indices;
 import cc.redberry.core.indices.IndicesUtils;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.tensor.*;
+import cc.redberry.core.tensor.functions.ScalarFunction;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -130,6 +130,11 @@ public class TensorUtils {
     public static boolean isSymbolic(Tensor t) {
         if (t.getClass() == SimpleTensor.class)
             return t.getIndices().size() == 0;
+        if (t instanceof TensorField) {
+            boolean b = t.getIndices().size() == 0;
+            if (!b)
+                return false;
+        }
         if (t instanceof Complex)
             return true;
         for (Tensor c : t)
@@ -216,13 +221,21 @@ public class TensorUtils {
         return true;
     }
 
-    public static Set<Integer> getAllIndices(Tensor tensor) {
+    public static Set<Integer> getAllDummyIndicesNames(Tensor tensor) {
+        Set<Integer> dummy = getAllIndicesNames(tensor);
+        Indices ind = tensor.getIndices().getFreeIndices();
+        for (int i = ind.size() - 1; i >= 0; --i)
+            dummy.remove(IndicesUtils.getNameWithType(ind.get(i)));
+        return dummy;
+    }
+
+    public static Set<Integer> getAllIndicesNames(Tensor tensor) {
         Set<Integer> indices = new HashSet<>();
-        appendAllIndices(tensor, indices);
+        appendAllIndicesNames(tensor, indices);
         return indices;
     }
 
-    private static void appendAllIndices(Tensor tensor, Set<Integer> indices) {
+    private static void appendAllIndicesNames(Tensor tensor, Set<Integer> indices) {
         if (tensor instanceof SimpleTensor) {
             Indices ind = tensor.getIndices();
             final int size = ind.size();
@@ -235,7 +248,7 @@ public class TensorUtils {
                 t = tensor.get(i);
                 if (t instanceof ScalarFunction)
                     continue;
-                appendAllIndices(tensor.get(i), indices);
+                appendAllIndicesNames(tensor.get(i), indices);
             }
         }
     }
@@ -284,7 +297,7 @@ public class TensorUtils {
 //        return ib;
 //    }
 //
-//    public static Indices getAllIndices(final Tensor... tensors) {
+//    public static Indices getAllIndicesNames(final Tensor... tensors) {
 //        return getAllIndicesBuilder(tensors).getDistinct();
 //    }
 //
@@ -301,7 +314,7 @@ public class TensorUtils {
 //     * @param t tensor
 //     */
 //    public static int[] getAllIndicesNames(final Tensor t) {
-//        int[] indices = getAllIndices(t).getAllIndices().copy();
+//        int[] indices = getAllIndicesNames(t).getAllIndicesNames().copy();
 //        for (int i = 0; i < indices.length; ++i)
 //            indices[i] = getNameWithType(indices[i]);
 //        return MathUtils.getSortedDistinct(indices);
@@ -338,7 +351,7 @@ public class TensorUtils {
 //    public static IntArrayList getContractedIndicesNames(final Tensor first, final Tensor second) {
 //        //FIXME write better algotithm
 //        Indices firstIndices = first.getIndices().getFreeIndices();
-//        int[] secondIndices = second.getIndices().getFreeIndices().getAllIndices().copy();
+//        int[] secondIndices = second.getIndices().getFreeIndices().getAllIndicesNames().copy();
 //        Arrays.sort(secondIndices);
 //        IntArrayList result = new IntArrayList();
 //        for (int i = 0; i < firstIndices.size(); ++i)

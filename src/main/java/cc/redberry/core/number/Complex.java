@@ -29,12 +29,11 @@ import cc.redberry.core.tensor.Product;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.tensor.TensorBuilder;
 import cc.redberry.core.tensor.TensorFactory;
+import java.io.Serializable;
+import java.math.BigInteger;
 import org.apache.commons.math3.Field;
 import org.apache.commons.math3.exception.NullArgumentException;
 import org.apache.commons.math3.fraction.BigFraction;
-
-import java.io.Serializable;
-import java.math.BigInteger;
 
 /**
  * @author Stanislav Poslavsky

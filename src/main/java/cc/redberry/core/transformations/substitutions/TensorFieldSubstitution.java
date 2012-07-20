@@ -24,29 +24,34 @@ package cc.redberry.core.transformations.substitutions;
 
 import cc.redberry.core.indexmapping.IndexMappingBuffer;
 import cc.redberry.core.indexmapping.IndexMappings;
+import cc.redberry.core.indices.Indices;
 import cc.redberry.core.tensor.Tensor;
+import cc.redberry.core.tensor.TensorField;
 import cc.redberry.core.transformations.ApplyIndexMapping;
 import cc.redberry.core.transformations.Transformation;
 import cc.redberry.core.utils.TensorUtils;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-class SimpleSubstitution implements Transformation {
+class TensorFieldSubstitution implements Transformation {
 
-    static final SubstitutionProvider SIMPLE_SUBSTITUTION_PROVIDER = new SubstitutionProvider() {
+    final static SubstitutionProvider TENSOR_FIELD_PROVIDER = new SubstitutionProvider() {
 
         @Override
-        public SimpleSubstitution createSubstitution(Tensor from, Tensor to) {
-            return new SimpleSubstitution(from, to);
+        public Transformation createSubstitution(Tensor from, Tensor to) {
+            return new TensorFieldSubstitution((TensorField) from, to);
         }
     };
-    private final Tensor from, to;
+    private final TensorField from;
+    private final Tensor to;
     private final boolean symbolic;
 
-    private SimpleSubstitution(Tensor from, Tensor to) {
+    private TensorFieldSubstitution(TensorField from, Tensor to) {
         this.from = from;
         this.to = to;
         this.symbolic = TensorUtils.isSymbolic(to);
@@ -56,11 +61,36 @@ class SimpleSubstitution implements Transformation {
     public Tensor transform(Tensor tensor) {
         SubstitutionIterator iterator = new SubstitutionIterator(tensor);
         Tensor current;
+        OUT:
         while ((current = iterator.next()) != null) {
-            IndexMappingBuffer buffer =
-                    IndexMappings.getFirst(from, current, true);
+            if (!(current instanceof TensorField))
+                continue;
+            TensorField currentField = (TensorField) current;
+            IndexMappingBuffer buffer = IndexMappings.simpleTensorsPort(from, currentField, true).take();
             if (buffer == null)
                 continue;
+
+
+            Indices[] fromIndices = from.getArgIndices(), currentIndices = currentField.getArgIndices();
+
+            List<Transformation> transformations = new ArrayList<>();
+            Tensor fArg;
+            int[] cIndices, fIndices;
+            int i;
+            for (i = from.size() - 1; i >= 0; --i) {
+                if (IndexMappings.mappingExists(current.get(i), from.get(i), true))
+                    continue;
+                fIndices = fromIndices[i].getAllIndices().copy();
+                cIndices = currentIndices[i].getAllIndices().copy();
+
+                assert cIndices.length == fIndices.length;
+
+                fArg = ApplyIndexMapping.applyIndexMapping(from.get(i), fIndices, cIndices, new int[0]);
+
+
+                transformations.add(Substitutions.getTransformation(fArg, current.get(i)));
+            }
+
             Tensor newTo;
             if (symbolic)
                 newTo = to;
@@ -73,7 +103,22 @@ class SimpleSubstitution implements Transformation {
                 newTo = ApplyIndexMapping.applyIndexMapping(temp, buffer, forbidden);
                 if (temp != newTo)
                     iterator.forbiddenIndices().addAll(TensorUtils.getAllIndicesNames(newTo));
+
             }
+
+            for (Transformation transformation : transformations)
+                newTo = transformation.transform(newTo);
+            if (!symbolic) {
+                int[] forbidden = new int[iterator.forbiddenIndices().size()];
+                int c = -1;
+                for (Integer f : iterator.forbiddenIndices())
+                    forbidden[++c] = f;
+                Tensor temp = newTo;
+                newTo = ApplyIndexMapping.renameDummy(temp, forbidden);
+                if (temp != newTo)
+                    iterator.forbiddenIndices().addAll(TensorUtils.getAllIndicesNames(newTo));
+            }
+
             iterator.set(newTo);
         }
         return iterator.result();

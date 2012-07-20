@@ -20,34 +20,18 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
-package cc.redberry.core.transformations.expand;
+package cc.redberry.core.transformations;
 
-import cc.redberry.concurrent.OutputPort;
-import cc.redberry.core.tensor.*;
-import java.util.concurrent.atomic.AtomicLong;
+import cc.redberry.core.tensor.TensorException;
 
 /**
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public final class ExpandPairPort implements OutputPort<Tensor> {
+public class TransformationException extends TensorException {
 
-    private final Tensor sum1, sum2;
-    private final AtomicLong atomicLong = new AtomicLong();
-
-    public ExpandPairPort(Sum s1, Sum s2) {
-        sum1 = s1;
-        sum2 = s2;
-    }
-
-    @Override
-    public Tensor take() {
-        long index = atomicLong.getAndIncrement();
-        if (index >= sum1.size() * sum2.size())
-            return null;
-        int i1 = (int) (index / sum2.size());
-        int i2 = (int) (index % sum2.size());
-        return Tensors.multiply(sum1.get(i1), sum2.get(i2));
+    public TransformationException(String message) {
+        super(message);
     }
 }

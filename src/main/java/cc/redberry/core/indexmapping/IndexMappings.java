@@ -27,7 +27,10 @@ import cc.redberry.core.context.CC;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.tensor.*;
 import cc.redberry.core.tensor.functions.*;
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * @author Dmitry Bolotin
@@ -36,6 +39,21 @@ import java.util.*;
 public final class IndexMappings {
 
     private IndexMappings() {
+    }
+
+    public static MappingsPort simpleTensorsPort(SimpleTensor from, SimpleTensor to, boolean allowDiffStates) {
+        final IndexMappingProvider provider = ProviderSimpleTensor.FACTORY_SIMPLETENSOR.create(IndexMappingProvider.Util.singleton(new IndexMappingBufferImpl(allowDiffStates)), from, to, allowDiffStates);
+        provider.tick();
+        return new MappingsPort() {
+
+            @Override
+            public IndexMappingBuffer take() {
+                IndexMappingBuffer buf = provider.take();
+                if (buf != null)
+                    buf.removeContracted();
+                return buf;
+            }
+        };
     }
 
 //    public static OutputPortUnsafe<IndexMappingBuffer> createPortForSimpleTensor(SimpleTensor from, SimpleTensor to, boolean allowDiffStates) {

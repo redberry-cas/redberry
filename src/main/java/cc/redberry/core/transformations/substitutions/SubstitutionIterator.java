@@ -27,8 +27,10 @@ import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.tensor.TensorField;
 import cc.redberry.core.tensor.iterator.TraverseState;
 import cc.redberry.core.tensor.iterator.TreeTraverseIterator;
+import cc.redberry.core.utils.Indicator;
 import cc.redberry.core.utils.TensorUtils;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -46,20 +48,31 @@ public final class SubstitutionIterator {
     public SubstitutionIterator(Tensor tensor) {
         iterator = new TreeTraverseIterator(tensor);
     }
+    private static final Indicator<Tensor> FieldIndicator = Indicator.Utils.classIndicator(TensorField.class);
+    private int fieldDepth = 0;
 
     public Tensor next() {
         TraverseState state = iterator.next();
         if (state == null)
             return null;
+
         Tensor current = iterator.current();
         if (current instanceof TensorField)
-            if (state == TraverseState.Entering)
-                waitingForProduct = true;
-            else if (state == TraverseState.Leaving)
-                if (!waitingForProduct) {
-                    stack = stack.previous;
-                    return current;
-                }
+            if (state == TraverseState.Leaving)
+                if (fieldDepth == 0)
+                    if (!waitingForProduct) {
+                        stack = stack.previous;
+                        return current;
+                    } else
+                        waitingForProduct = false;
+                else
+                    --fieldDepth;
+        if (iterator.checkLevel(FieldIndicator, 1) && state == TraverseState.Entering) {
+            if (waitingForProduct)
+                ++fieldDepth;
+            waitingForProduct = true;
+        }
+
         if (current instanceof Product)
             if (state == TraverseState.Entering)
                 if (waitingForProduct) {
@@ -76,17 +89,10 @@ public final class SubstitutionIterator {
         return next();
     }
 
-    //TODO chache forbidden in Stack after finishing all tests
-    public int[] forbiddenIndices() {
+    public Set<Integer> forbiddenIndices() {
         if (stack == null || waitingForProduct)
-            return new int[0];
-
-        Set<Integer> set = TensorUtils.getAllIndices(stack.tensor);
-        int[] result = new int[set.size()];
-        int i = -1;
-        for (Integer integer : set)
-            result[++i] = integer;
-        return result;
+            return new HashSet<>();
+        return stack.getForbidden();
     }
 
     public void set(Tensor tensor) {
@@ -100,13 +106,21 @@ public final class SubstitutionIterator {
     private static final class Stack {
 
         private final Stack previous;
+        private Set<Integer> forbiddenIndices;
         private final Tensor tensor;
         private final int depth;
 
         public Stack(Stack previous, Tensor tensor, int depth) {
             this.previous = previous;
-            this.tensor = tensor;
             this.depth = depth;
+            this.tensor = tensor;
+            this.forbiddenIndices = null;
+        }
+
+        Set<Integer> getForbidden() {
+            if (forbiddenIndices == null)
+                forbiddenIndices = TensorUtils.getAllIndicesNames(tensor);
+            return forbiddenIndices;
         }
 
         @Override

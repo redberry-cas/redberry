@@ -24,13 +24,14 @@ package cc.redberry.core.indexmapping;
 
 import cc.redberry.core.combinatorics.IntPermutationsGenerator;
 import cc.redberry.core.number.Complex;
-import cc.redberry.core.tensor.*;
 import cc.redberry.core.tensor.Product;
+import cc.redberry.core.tensor.ProductContent;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.utils.stretces.PrecalculatedStretches;
 import cc.redberry.core.utils.stretces.Stretch;
-import java.util.*;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 /**

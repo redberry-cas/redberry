@@ -20,24 +20,19 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
-package cc.redberry.core.transformations.expand;
+package cc.redberry.core.transformations.substitutions;
 
-import cc.redberry.core.tensor.*;
-import java.util.logging.*;
-import org.junit.*;
+import cc.redberry.core.tensor.Tensor;
+import cc.redberry.core.transformations.TransformationException;
 
 /**
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public class PairECTest {
+public class InconsistentSubstitutionException extends TransformationException {
 
-    @Test
-    public void testSomeMethod() {
-        Sum s1 = (Sum) Tensors.parse("1+Power[b_m^m,2]+c");
-        Sum s2 = (Sum) Tensors.parse("1+b_n^n+c");
-
-        ExpandUtils.expandPairOfSumsConcurrent(s1, s2, 12);
+    public InconsistentSubstitutionException(Tensor from, Tensor to, Tensor current) {
+        super("Substitution: " + from + " = " + to + ".  Detected tensor " + current);
     }
 }

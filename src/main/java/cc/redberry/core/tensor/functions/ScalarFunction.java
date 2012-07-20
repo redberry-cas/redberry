@@ -27,7 +27,7 @@ import cc.redberry.core.indices.Indices;
 import cc.redberry.core.indices.IndicesFactory;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.tensor.TensorException;
-import cc.redberry.core.utils.*;
+import cc.redberry.core.utils.TensorUtils;
 
 /**
  * @author Dmitry Bolotin

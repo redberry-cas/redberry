@@ -22,10 +22,10 @@
  */
 package cc.redberry.core.performance;
 
-import cc.redberry.core.context.*;
-import cc.redberry.core.tensor.*;
-import cc.redberry.core.transformations.expand.*;
-import java.util.*;
+import cc.redberry.core.context.CC;
+import cc.redberry.core.tensor.Tensor;
+import cc.redberry.core.tensor.Tensors;
+import java.util.ArrayList;
 import java.util.List;
 
 /**

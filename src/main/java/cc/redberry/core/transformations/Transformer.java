@@ -23,7 +23,7 @@
 package cc.redberry.core.transformations;
 
 import cc.redberry.core.tensor.Tensor;
-import cc.redberry.core.tensor.iterator.*;
+import cc.redberry.core.tensor.iterator.TraverseGuide;
 import cc.redberry.core.tensor.iterator.TraverseState;
 import cc.redberry.core.tensor.iterator.TreeTraverseIterator;
 

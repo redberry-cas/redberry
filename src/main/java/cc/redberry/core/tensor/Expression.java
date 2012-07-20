@@ -17,13 +17,15 @@ package cc.redberry.core.tensor;
 
 import cc.redberry.core.context.ToStringMode;
 import cc.redberry.core.indices.Indices;
+import cc.redberry.core.transformations.Transformation;
+import cc.redberry.core.transformations.substitutions.Substitutions;
 
 /**
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public class Expression extends Tensor {
+public class Expression extends Tensor implements Transformation {
 
     private final Tensor right, left;
     private final Indices indices;
@@ -74,5 +76,10 @@ public class Expression extends Tensor {
     @Override
     public TensorFactory getFactory() {
         return ExpressionFactory.FACTORY;
+    }
+
+    @Override
+    public Tensor transform(Tensor t) {
+        return Substitutions.getTransformation(left, right).transform(t);
     }
 }

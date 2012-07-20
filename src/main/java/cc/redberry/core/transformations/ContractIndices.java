@@ -97,7 +97,7 @@ public final class ContractIndices implements Transformation {
             for (Tensor nonMetric : nonMetrics)
                 builder.put(transform(nonMetric, tempContainer));
             for (MetricWrapper mk : tempContainer.container)
-                builder.put(mk.tensorMK);
+                builder.put(mk.metric);
             return builder.build();
         } else if (tensor instanceof Sum) {
 
@@ -263,19 +263,19 @@ public final class ContractIndices implements Transformation {
     private static final class MetricWrapper implements Comparable<MetricWrapper> {
 
         final int[] indices = new int[2];
-        Tensor tensorMK;
+        Tensor metric;
 
         MetricWrapper(Tensor tensorMK) {
             this.indices[0] = tensorMK.getIndices().get(0);
             this.indices[1] = tensorMK.getIndices().get(1);
             Arrays.sort(this.indices);
-            this.tensorMK = tensorMK;
+            this.metric = tensorMK;
         }
 
         private MetricWrapper(int index1, int index2, Tensor tensorMK) {
             indices[0] = index1;
             indices[1] = index2;
-            this.tensorMK = tensorMK;
+            this.metric = tensorMK;
         }
 
         @Override
@@ -311,7 +311,7 @@ public final class ContractIndices implements Transformation {
             for (int i = 0; i < 2; ++i)
                 for (int j = 0; j < 2; ++j)
                     if ((indices[i] ^ mK.indices[j]) == 0x80000000) {
-                        tensorMK = Tensors.createMetricOrKronecker(indices[1 - i], mK.indices[1 - j]);
+                        metric = Tensors.createMetricOrKronecker(indices[1 - i], mK.indices[1 - j]);
                         indices[i] = mK.indices[1 - j];
                         Arrays.sort(this.indices);
                         return true;
@@ -327,7 +327,7 @@ public final class ContractIndices implements Transformation {
 
         @Override
         public String toString() {
-            return tensorMK.toString();
+            return metric.toString();
         }
 
         private class IM implements IndexMapping {

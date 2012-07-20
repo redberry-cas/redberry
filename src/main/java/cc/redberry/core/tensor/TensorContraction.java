@@ -66,7 +66,7 @@ public final class TensorContraction implements Comparable<TensorContraction> {
         return Arrays.equals(indexContractions, other.indexContractions);
     }
 
-    @Override
+    @Override//TODO improve hashCode(), may be precalculate with indices diff ids
     public int hashCode() {
         if (hash == -1) {
             long hash = 1L;
