@@ -55,7 +55,7 @@ public class SimpleSubstitutionTest {
 
     private static Tensor substitute(Tensor tensor, String substitution) {
         Expression e = (Expression) parse(substitution);
-        return SimpleSubstitution.SIMPLE_SUBSTITUTION_PROVIDER.createSubstitution(e.get(0), e.get(1), true).transform(tensor);
+        return e.transform(tensor);
     }
 
     @Test
@@ -218,6 +218,36 @@ public class SimpleSubstitutionTest {
         target = substitute(target,
                             "G^a_mn=(1/2)*g^ag*(p_m*g_gn+p_n*g_gm-p_g*g_mn)");
 
+        target = contract(expand(target));
+
+        //Riman with diff states
+        Tensor target1 = parse("g_{mn}*R^{mn}");
+        target1 = substitute(target1,
+                             "R_{mn}=g^ab*R_{bman}");
+        target1 = substitute(target1,
+                             "R^a_bmn=p_m*G^a_bn+p_n*G^a_bm+G^a_gm*G^g_bn-G^a_gn*G^g_bm");
+        target1 = substitute(target1,
+                             "G_gmn=(1/2)*(p_m*g_gn+p_n*g_gm-p_g*g_mn)");
+
+        target1 = contract(expand(target1));
+
+        assertTrue(TensorUtils.compare(target, target1));
+        assertTrue(target.getIndices().size() == 0);
+        assertTrue(target1.getIndices().size() == 0);
+    }
+
+    @Test
+    public void rimanTensorSubstitution_diffStates3() {
+
+        //Riman without diff states
+        Tensor target = parse("g^{mn}*R_{mn}");
+        target = substitute(target,
+                            "R_{mn}=R^{a}_{man}");
+        target = substitute(target,
+                            "R^a_bmn=p_m*G^a_bn+p_n*G^a_bm+G^a_gm*G^g_bn-G^a_gn*G^g_bm");
+        target = substitute(target,
+                            "G^a_mn=(1/2)*g^ag*(p_m*g_gn+p_n*g_gm-p_g*g_mn)");
+
         target = contract(target);
 
         //Riman with diff states
@@ -230,14 +260,11 @@ public class SimpleSubstitutionTest {
                              "G_gmn=(1/2)*(p_m*g_gn+p_n*g_gm-p_g*g_mn)");
 
         target1 = contract(target1);
-        System.out.println(target);
-        System.out.println(target1);
+
         assertTrue(TensorUtils.compare(target, target1));
         assertTrue(target.getIndices().size() == 0);
         assertTrue(target1.getIndices().size() == 0);
     }
-
-
 
     @Test
     public void subs12() {

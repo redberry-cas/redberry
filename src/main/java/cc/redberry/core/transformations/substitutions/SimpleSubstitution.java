@@ -22,14 +22,12 @@
  */
 package cc.redberry.core.transformations.substitutions;
 
-import cc.redberry.core.context.*;
-import cc.redberry.core.indexgenerator.*;
-import cc.redberry.core.indexmapping.*;
-import cc.redberry.core.indices.*;
+import cc.redberry.core.indexmapping.IndexMappingBuffer;
+import cc.redberry.core.indexmapping.IndexMappings;
 import cc.redberry.core.tensor.Tensor;
-import cc.redberry.core.transformations.*;
-import cc.redberry.core.utils.*;
-import java.util.*;
+import cc.redberry.core.transformations.ApplyIndexMapping;
+import cc.redberry.core.transformations.Transformation;
+import cc.redberry.core.utils.TensorUtils;
 
 /**
  *
@@ -41,81 +39,42 @@ public class SimpleSubstitution implements Transformation {
     static final SubstitutionProvider SIMPLE_SUBSTITUTION_PROVIDER = new SubstitutionProvider() {
 
         @Override
-        public SimpleSubstitution createSubstitution(Tensor from, Tensor to, boolean allowDiffStates) {
+        public SimpleSubstitution createSubstitution(Tensor from, Tensor to) {
             return new SimpleSubstitution(from, to);
         }
     };
     private final Tensor from, to;
-    private final boolean allowDiffStates;
-    private final Set<Integer> toDummyIndices;
-    SubstitutionIterator iterator;
+    private final boolean symbolic;
 
     public SimpleSubstitution(Tensor from, Tensor to) {
         this.from = from;
         this.to = to;
-        this.allowDiffStates = CC.withMetric();
-
-        toDummyIndices = TensorUtils.getAllIndicesNames(to);
-        int free[] = IndicesUtils.getIndicesNames(to.getIndices().getFreeIndices());
-        for (int i : free)
-            toDummyIndices.remove(i);
-
-    }
-
-    private Tensor applyIndexMapping(IndexMappingBuffer buffer) {
-//        Set<Integer> forbidden;
-//        if (toDummyIndices.isEmpty())
-//            forbidden = Collections.EMPTY_SET;
-//        else
-//            forbidden = iterator.forbiddenIndices();
-//
-//        Map<Integer, IndexMappingBufferRecord> map = buffer.getMap();
-//
-//        IntArrayList from = new IntArrayList(map.size()), to = new IntArrayList(map.size());
-//        IndexMappingBufferRecord record;
-//        for (Map.Entry<Integer, IndexMappingBufferRecord> entry : map.entrySet()) {
-//            from.add(entry.getKey());
-//            record = entry.getValue();
-//            to.add(record.getIndexName() ^ (record.isContracted() ? 0x80000000 : 0));
-//        }
-//
-//        if (!toDummyIndices.isEmpty()) {
-//            int[] _forbidden = new int[forbidden.size()];
-//            int count = -1;
-//            for (Integer f : forbidden)
-//                _forbidden[++count] = f;
-//            IndexGenerator generator = new IndexGenerator(_forbidden);
-//            for (Integer dummy : toDummyIndices)
-//                if (forbidden.contains(dummy)) {
-//                    from.add(dummy);
-//                    to.add(count = generator.generate(IndicesUtils.getType(dummy)));
-//                    forbidden.add(count);
-//                }
-//        }
-//        int[] _from = from.toArray(),_to = to.toArray();
-//        ArraysUtils.quickSort(_from, _to);
-//        return ApplyIndexMapping.applyIndexMapping(this.to, new ApplyIndexMapping.IndexMapper(_from, _to));
-        int[] forbidden = new int[iterator.forbiddenIndices().size()];
-        int c = -1;
-        for (Integer f : iterator.forbiddenIndices())
-            forbidden[++c] = f;
-        Tensor n = ApplyIndexMapping.applyIndexMapping(to, buffer, forbidden);
-        iterator.forbiddenIndices().addAll(TensorUtils.getAllIndicesNames(n));
-        return n;
-
+        this.symbolic = TensorUtils.isSymbolic(to);
     }
 
     @Override
     public Tensor transform(Tensor tensor) {
-        iterator = new SubstitutionIterator(tensor);
+        SubstitutionIterator iterator = new SubstitutionIterator(tensor);
         Tensor current;
         while ((current = iterator.next()) != null) {
             IndexMappingBuffer buffer =
-                    IndexMappings.getFirst(from, current, allowDiffStates);
+                    IndexMappings.getFirst(from, current, true);
             if (buffer == null)
                 continue;
-            Tensor n = applyIndexMapping(buffer);
-            iterator.set(n);
+            Tensor newTo;
+            if (symbolic)
+                newTo = to;
+            else {
+                int[] forbidden = new int[iterator.forbiddenIndices().size()];
+                int c = -1;
+                for (Integer f : iterator.forbiddenIndices())
+                    forbidden[++c] = f;
+                Tensor temp = to;
+                newTo = ApplyIndexMapping.applyIndexMapping(temp, buffer, forbidden);
+                if (temp != newTo)
+                    iterator.forbiddenIndices().addAll(TensorUtils.getAllIndicesNames(newTo));
+            }
+            iterator.set(newTo);
         }
         return iterator.result();
     }

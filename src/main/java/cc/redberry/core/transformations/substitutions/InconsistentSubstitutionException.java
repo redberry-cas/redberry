@@ -23,14 +23,16 @@
 package cc.redberry.core.transformations.substitutions;
 
 import cc.redberry.core.tensor.Tensor;
-import cc.redberry.core.transformations.Transformation;
+import cc.redberry.core.transformations.*;
 
 /**
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-interface SubstitutionProvider {
+public class InconsistentSubstitutionException extends TransformationException {
 
-    Transformation createSubstitution(Tensor from, Tensor to);
+    public InconsistentSubstitutionException(Tensor from, Tensor to, Tensor current) {
+        super("Substitution: " + from + " = " + to + ".  Detected tensor " + current);
+    }
 }

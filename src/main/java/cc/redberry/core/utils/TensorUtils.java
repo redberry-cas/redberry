@@ -130,6 +130,11 @@ public class TensorUtils {
     public static boolean isSymbolic(Tensor t) {
         if (t.getClass() == SimpleTensor.class)
             return t.getIndices().size() == 0;
+        if (t instanceof TensorField) {
+            boolean b = t.getIndices().size() == 0;
+            if (!b)
+                return false;
+        }
         if (t instanceof Complex)
             return true;
         for (Tensor c : t)

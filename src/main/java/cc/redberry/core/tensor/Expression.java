@@ -25,7 +25,7 @@ import cc.redberry.core.transformations.substitutions.*;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public class Expression extends Tensor implements Transformation{
+public class Expression extends Tensor implements Transformation {
 
     private final Tensor right, left;
     private final Indices indices;
@@ -80,8 +80,6 @@ public class Expression extends Tensor implements Transformation{
 
     @Override
     public Tensor transform(Tensor t) {
-        return new SimpleSubstitution(left, right).transform(t);
+        return Substitutions.getTransformation(left, right).transform(t);
     }
-    
-    
 }

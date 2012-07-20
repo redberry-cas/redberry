@@ -20,17 +20,19 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
-package cc.redberry.core.transformations.substitutions;
+package cc.redberry.core.transformations;
 
 import cc.redberry.core.tensor.Tensor;
-import cc.redberry.core.transformations.Transformation;
+import cc.redberry.core.tensor.TensorException;
 
 /**
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-interface SubstitutionProvider {
+public class TransformationException extends TensorException {
 
-    Transformation createSubstitution(Tensor from, Tensor to);
+    public TransformationException(String message) {
+        super(message);
+    }
 }

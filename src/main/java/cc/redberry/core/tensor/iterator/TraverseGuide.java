@@ -50,21 +50,21 @@ public interface TraverseGuide {
      * @see TraversePermission
      * @see TreeTraverseIterator
      */
-    TraversePermission getPermission(Tensor parent, int indexInParent, Tensor tensor);
+    TraversePermission getPermission(Tensor tensor, Tensor parent, int indexInParent);
     /**
      * Traverse guide, which always return {@link TraversePermission#Enter}.
      */
     public static final TraverseGuide ALL = new TraverseGuide() {
 
         @Override
-        public TraversePermission getPermission(Tensor parent, int indexInParent, Tensor tensor) {
+        public TraversePermission getPermission(Tensor tensor, Tensor parent, int indexInParent) {
             return TraversePermission.Enter;
         }
     };
     public static final TraverseGuide EXCEPT_FUNCTIONS_AND_FIELDS = new TraverseGuide() {
 
         @Override
-        public TraversePermission getPermission(Tensor parent, int indexInParent, Tensor tensor) {
+        public TraversePermission getPermission(Tensor tensor, Tensor parent, int indexInParent) {
             if (tensor instanceof ScalarFunction)
                 return TraversePermission.DontShow;
             else if (tensor instanceof TensorField)

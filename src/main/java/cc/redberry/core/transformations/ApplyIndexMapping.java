@@ -107,7 +107,7 @@ public final class ApplyIndexMapping implements Transformation {
     }
 
     public static Tensor renameDummy(Tensor tensor, int[] forbidden) {
-        return renameDummy(tensor, forbidden.clone());
+        return renameDummyFromClonedSource(tensor, forbidden.clone());
     }
 
     public static Tensor renameDummyFromClonedSource(Tensor tensor, int[] forbidden) {

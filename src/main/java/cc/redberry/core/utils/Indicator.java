@@ -22,6 +22,8 @@
  */
 package cc.redberry.core.utils;
 
+import cc.redberry.core.tensor.Tensor;
+
 /**
  *
  * @author Dmitry Bolotin
@@ -82,5 +84,16 @@ public interface Indicator<E> {
                 }
             };
         }
-    }
+
+        public static Indicator<Tensor> classIndicator(final Class<? extends Tensor> clazz) {
+            return new Indicator<Tensor>() {
+
+                @Override
+                public boolean is(Tensor object) {
+                    return clazz == object.getClass();
+                }
+            };
+        }
+    ;
+}
 }

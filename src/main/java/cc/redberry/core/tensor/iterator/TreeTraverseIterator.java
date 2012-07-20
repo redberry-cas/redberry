@@ -25,6 +25,8 @@ package cc.redberry.core.tensor.iterator;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.tensor.TensorBuilder;
 import cc.redberry.core.tensor.TensorWrapper;
+import cc.redberry.core.utils.Indicator;
+import java.util.*;
 
 /**
  * An iterator for tensors that allows the programmer to traverse the tensor
@@ -83,7 +85,7 @@ public final class TreeTraverseIterator {
      * @return next traverse state and null if there is no next element
      */
     public TraverseState next() {
-      //  if (current != null && currentPointer.previous == null)
+        //  if (current != null && currentPointer.previous == null)
         //    return lastState = null;
         Tensor next;
         while (true) {
@@ -98,7 +100,7 @@ public final class TreeTraverseIterator {
 
                 return lastState = TraverseState.Leaving;
             } else {
-                TraversePermission permission = iterationGuide.getPermission(currentPointer.tensor, currentPointer.position - 1, next);
+                TraversePermission permission = iterationGuide.getPermission(next, currentPointer.tensor, currentPointer.position - 1);
                 if (permission == null)
                     throw new NullPointerException();
                 if (permission == TraversePermission.DontShow)
@@ -121,10 +123,10 @@ public final class TreeTraverseIterator {
             return;
         if (tensor == null)
             throw new NullPointerException();
-        if (lastState == TraverseState.Entering) {
+        if (lastState == TraverseState.Entering)
             //currentPointer.previous.set(tensor);
             currentPointer = new LinkedPointer(currentPointer.previous, tensor, false);
-        } else if (lastState == TraverseState.Leaving)
+        else if (lastState == TraverseState.Leaving)
             currentPointer.set(tensor);
     }
 
@@ -137,19 +139,64 @@ public final class TreeTraverseIterator {
      * @return depth in the tree relatively to the current cursor position
      */
     public int depth() {
-        LinkedPointer currentPointer = null;
-        if (lastState == TraverseState.Entering)
-            currentPointer = this.currentPointer.previous;
-        else if (lastState == TraverseState.Leaving)
-            currentPointer = this.currentPointer;
-        if (currentPointer == null)
+        if (lastState == null)
             return -1;
         int depth = -1;
+        LinkedPointer currentPointer = this.currentPointer;
+        if (lastState == TraverseState.Entering)
+            --depth;
+        if (currentPointer == null)
+            return -1;
         do {
             ++depth;
             currentPointer = currentPointer.previous;
         } while (currentPointer != null);
         return depth;
+    }
+
+    public boolean isUnder(Indicator<Tensor> indicator, int searchDepth) {
+        if (lastState == null)
+            return false;
+        if (lastState == TraverseState.Leaving) {
+            if (indicator.is(current))
+                return true;
+            --searchDepth;
+        }
+        LinkedPointer pointer = currentPointer;
+        while (pointer != null && searchDepth >= 0) {
+            if (indicator.is(pointer.tensor))
+                return true;
+            pointer = pointer.previous;
+            --searchDepth;
+        }
+        return false;
+    }
+
+    /**
+     * Checks specified condition at position specified by relative level to
+     * current cursor.
+     *
+     * @param indicator level from current cursor
+     * @param level relative position of element to be test
+     *
+     * @return
+     */
+    public boolean checkLevel(Indicator<Tensor> indicator, int level) {
+        if (lastState == null)
+            return false;
+        if (lastState == TraverseState.Leaving) {
+            if (level == 0)
+                return indicator.is(current);
+            --level;
+        }
+        LinkedPointer pointer = currentPointer;
+        while (pointer != null && level > 0) {
+            pointer = pointer.previous;
+            --level;
+        }
+        if (pointer == null)
+            return false;
+        return indicator.is(pointer.tensor);
     }
 
     //    public void levelUp(int levels) {
@@ -164,7 +211,6 @@ public final class TreeTraverseIterator {
     //            currentPointer = currentPointer.previous;
     //        this.currentPointer = currentPointer;
     //    }
-
     /**
      * Returns current cursor.
      *
@@ -183,6 +229,8 @@ public final class TreeTraverseIterator {
         if (currentPointer.previous != null)
             throw new RuntimeException("Iteration not finished.");
         return currentPointer.getTensor().get(0);
+
+
     }
 
     private static final class LinkedPointer {
@@ -230,10 +278,9 @@ public final class TreeTraverseIterator {
             return tensor;
         }
 
-        /*void close() {
-            position = tensor.size();
-        }*/
-
+        /*
+         * void close() { position = tensor.size(); }
+         */
         void set(Tensor t) {
             if (current == t)
                 return;

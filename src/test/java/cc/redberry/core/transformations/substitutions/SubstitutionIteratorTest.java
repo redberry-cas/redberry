@@ -22,10 +22,12 @@
  */
 package cc.redberry.core.transformations.substitutions;
 
+import cc.redberry.core.context.*;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.utils.*;
 import org.junit.*;
 import static cc.redberry.core.tensor.Tensors.*;
+
 /**
  *
  * @author Dmitry Bolotin
@@ -35,28 +37,36 @@ public class SubstitutionIteratorTest {
 
     @Test
     public void test1() {
-        Tensor t= parse("A_mn*(a+b+c)");
+        Tensor t = parse("A_mn*(a+b+c)");
         SubstitutionIterator iterator = new SubstitutionIterator(t);
         Tensor f;
-        while((f = iterator.next())!=null)
-        {
+        while ((f = iterator.next()) != null)
 //            System.out.println(f);
-            if(TensorUtils.equals(f, parse("c")))
+            if (TensorUtils.equals(f, parse("c")))
                 System.out.println(iterator.stack);
-        }
-    }
-    
-     @Test
-    public void test2() {
-        Tensor t= parse("D_nm+A_mn*(a+b+f[A_ij*c])");
-        SubstitutionIterator iterator = new SubstitutionIterator(t);
-        Tensor f;
-        while((f = iterator.next())!=null)
-        {
-//            System.out.println(f);
-            if(TensorUtils.equals(f, parse("c")))
-                System.out.println(iterator.stack);
-        }
     }
 
+    @Test
+    public void test2() {
+        Tensor t = parse("D_nm+A_mn*(a+b+f[A_ij*c])");
+        SubstitutionIterator iterator = new SubstitutionIterator(t);
+        Tensor f;
+        while ((f = iterator.next()) != null)
+//            System.out.println(f);
+            if (TensorUtils.equals(f, parse("c")))
+                System.out.println(iterator.stack);
+    }
+
+    @Test
+    public void test3() {
+        CC.resetTensorNames(12445697);
+        Tensor t = parse("c*f[h*f[d*a*f]]");
+        SubstitutionIterator iterator = new SubstitutionIterator(t);
+        Tensor f;
+        while ((f = iterator.next()) != null){
+//            System.out.println(f);
+            if (TensorUtils.equals(f, parse("a")) || TensorUtils.equals(f, parse("d")) || TensorUtils.equals(f, parse("c")))
+                System.out.println(f + " " +iterator.stack);}
+
+    }
 }

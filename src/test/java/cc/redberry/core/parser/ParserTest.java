@@ -235,4 +235,11 @@ public class ParserTest {
     public void test16() {
          System.out.println(Tensors.parse("(a+b)/(a+b)"));
      }
+     
+     
+     @Test
+     public void testTensorFied1(){
+        Tensor t = Tensors.parse("f_a^b[x_m^n:_m^n]");
+        
+     }
 }
