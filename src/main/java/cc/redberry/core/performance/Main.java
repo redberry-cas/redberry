@@ -24,7 +24,6 @@ package cc.redberry.core.performance;
 
 import cc.redberry.core.context.*;
 import cc.redberry.core.tensor.*;
-import cc.redberry.core.transformations.expand.*;
 import java.util.*;
 import java.util.List;
 

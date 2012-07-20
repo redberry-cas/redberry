@@ -20,8 +20,10 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
-package cc.redberry.core.transformations.expand;
+package cc.redberry.core.transformations;
 
+import cc.redberry.concurrent.OutputPort;
+import cc.redberry.core.context.ContextManager;
 import cc.redberry.core.indexgenerator.IndexGenerator;
 import cc.redberry.core.indexmapping.IndexMapping;
 import cc.redberry.core.indices.IndicesUtils;
@@ -38,7 +40,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.*;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicLong;
 
 import static cc.redberry.core.tensor.Tensors.*;
 
@@ -47,35 +51,35 @@ import static cc.redberry.core.tensor.Tensors.*;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public final class ExpandBrackets implements Transformation {
+public final class Expand implements Transformation {
 
     private final Indicator<Tensor> indicator;
     private final int threads;
 
-    public ExpandBrackets(Indicator<Tensor> indicator, int threads) {
+    public Expand(Indicator<Tensor> indicator, int threads) {
         this.indicator = indicator;
         this.threads = threads;
     }
 
-    public ExpandBrackets() {
+    public Expand() {
         this.indicator = Indicator.TRUE_INDICATOR;
         this.threads = 1;
     }
 
     @Override
     public Tensor transform(Tensor tensor) {
-        return expandBrackets(tensor, indicator, threads);
+        return expand(tensor, indicator, threads);
     }
 
-    public static Tensor expandBrackets(Tensor tensor) {
-        return expandBrackets(tensor, Indicator.TRUE_INDICATOR, 1);
+    public static Tensor expand(Tensor tensor) {
+        return expand(tensor, Indicator.TRUE_INDICATOR, 1);
     }
 
-    public static Tensor expandBrackets(Tensor tensor, int threads) {
-        return expandBrackets(tensor, Indicator.TRUE_INDICATOR, threads);
+    public static Tensor expand(Tensor tensor, int threads) {
+        return expand(tensor, Indicator.TRUE_INDICATOR, threads);
     }
 
-    public static Tensor expandBrackets(Tensor tensor, Indicator<Tensor> indicator, int threads) {
+    public static Tensor expand(Tensor tensor, Indicator<Tensor> indicator, int threads) {
         TreeTraverseIterator iterator = new TreeTraverseIterator(tensor, TraverseGuide.EXCEPT_FUNCTIONS_AND_FIELDS);
         TraverseState state;
         Tensor current;
@@ -93,7 +97,7 @@ public final class ExpandBrackets implements Transformation {
     }
 
     private static Tensor expandProductOfSums(Tensor current, final int threads) {
-        
+
         // g_mn  {_m->^a, _n->_b}  => g^a_b  <=> d^a_b |           Tensors.isMetric(g_ab )  d_a^b
 
         // a*b | a_m*b_v | (a+b*f) | (a_i+(c+2)*b_i) 
@@ -110,17 +114,8 @@ public final class ExpandBrackets implements Transformation {
         Sum sum = null;
 
         int i;
-        Tensor t;
-        for (i = current.size() - 1; i >= 0; --i) {
-            t = current.get(i);
-            if (t instanceof Sum)
-                break;
-        }
-
-        if (i == -1)
-            return current;
-
-        Tensor temp;
+        Tensor t, temp;
+        boolean expand = false;
         for (i = current.size() - 1; i >= 0; --i) {
             t = current.get(i);
             if (t.getIndices().size() == 0)
@@ -128,7 +123,8 @@ public final class ExpandBrackets implements Transformation {
                     if (indexlessSum == null)
                         indexlessSum = (Sum) t;
                     else {
-                        temp = ExpandUtils.expandPairOfSumsConcurrent((Sum) t, indexlessSum, threads);
+                        temp = expandPairOfSumsConcurrent((Sum) t, indexlessSum, threads);
+                        expand = true;
                         if (temp instanceof Sum)
                             indexlessSum = (Sum) temp;
                         else {
@@ -142,7 +138,8 @@ public final class ExpandBrackets implements Transformation {
                 if (sum == null)
                     sum = (Sum) t;
                 else {
-                    temp = ExpandUtils.expandPairOfSumsConcurrent((Sum) t, sum, threads);
+                    temp = expandPairOfSumsConcurrent((Sum) t, sum, threads);
+                    expand = true;
                     if (temp instanceof Sum)
                         sum = (Sum) temp;
                     else {
@@ -154,16 +151,17 @@ public final class ExpandBrackets implements Transformation {
                 nonSums.add(t);
         }
 
-        Tensor indexless;
-        if (indexlessSum == null)
-            indexless = multiply(indexlessNonSums.toArray(new Tensor[indexlessNonSums.size()]));
-        else
-            indexless = multiplySumElementsOnFactor(indexlessSum, multiply(indexlessNonSums.toArray(new Tensor[indexlessNonSums.size()])));
+        if (!expand && sum == null)
+            if (indexlessSum == null || (indexlessNonSums.isEmpty()))
+                return current;
 
-        Tensor main;
-        if (sum == null)
-            main = multiply(nonSums.toArray(new Tensor[nonSums.size()]));
-        else
+
+        Tensor indexless = multiply(indexlessNonSums.toArray(new Tensor[indexlessNonSums.size()]));
+        if (indexlessSum != null)
+            indexless = multiplySumElementsOnFactor(indexlessSum, indexless);
+
+        Tensor main = multiply(nonSums.toArray(new Tensor[nonSums.size()]));
+        if (sum != null)
             main = multiplySumElementsOnFactor(sum, multiply(nonSums.toArray(new Tensor[nonSums.size()])));
 
         if (main instanceof Sum)
@@ -185,7 +183,7 @@ public final class ExpandBrackets implements Transformation {
             initialForbidden[++i] = index;
         IndexMapper mapper = new IndexMapper(initialForbidden);//(a_m^m+b_m^m)^30  
         for (i = power - 1; i >= 1; --i)
-            temp = ExpandUtils.expandPairOfSumsConcurrent((Sum) temp, (Sum) renameDummy(argument, mapper), threads);
+            temp = expandPairOfSumsConcurrent((Sum) temp, (Sum) renameDummy(argument, mapper), threads);
         return temp;
     }
 
@@ -228,6 +226,73 @@ public final class ExpandBrackets implements Transformation {
             if (to == null)
                 map.put(from, to = generator.generate(IndicesUtils.getType(from)));
             return IndicesUtils.getRawStateInt(from) ^ to;
+        }
+    }
+
+    public static final class ExpandPairPort implements OutputPort<Tensor> {
+
+        private final Tensor sum1, sum2;
+        private final AtomicLong atomicLong = new AtomicLong();
+
+        public ExpandPairPort(Sum s1, Sum s2) {
+            sum1 = s1;
+            sum2 = s2;
+        }
+
+        @Override
+        public Tensor take() {
+            long index = atomicLong.getAndIncrement();
+            if (index >= sum1.size() * sum2.size())
+                return null;
+            int i1 = (int) (index / sum2.size());
+            int i2 = (int) (index % sum2.size());
+            return Tensors.multiply(sum1.get(i1), sum2.get(i2));
+        }
+    }
+
+    public static Tensor expandPairOfSums(Sum s1, Sum s2) {
+        ExpandPairPort epp = new ExpandPairPort(s1, s2);
+        TensorBuilder sum = new SumBuilder();
+        Tensor t;
+        while ((t = epp.take()) != null)
+            sum.put(t);
+        return sum.build();
+    }
+
+    public static Tensor expandPairOfSumsConcurrent(final Sum s1, final Sum s2, final int threads) {
+        if (threads == 1)
+            return expandPairOfSums(s1, s2);
+        Future[] futures = new Future[threads];
+        ExpandPairPort epp = new ExpandPairPort(s1, s2);
+        TensorBuilder sum = new SumBuilder();
+
+        for (int i = 0; i < threads; ++i)
+            futures[i] = ContextManager.getExecutorService().submit(new Worker(epp, sum));
+
+        try {
+            for (Future future : futures)
+                future.get();
+            return sum.build();
+        } catch (ExecutionException | InterruptedException ee) {
+            throw new RuntimeException(ee);
+        }
+    }
+
+    private static final class Worker implements Runnable {
+
+        private final ExpandPairPort epp;
+        private final TensorBuilder builder;
+
+        public Worker(ExpandPairPort epp, TensorBuilder builder) {
+            this.epp = epp;
+            this.builder = builder;
+        }
+
+        @Override
+        public void run() {
+            Tensor term;
+            while ((term = epp.take()) != null)
+                builder.put(term);
         }
     }
 }

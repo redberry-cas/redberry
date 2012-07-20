@@ -34,7 +34,7 @@ import cc.redberry.core.utils.TensorUtils;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public class SimpleSubstitution implements Transformation {
+class SimpleSubstitution implements Transformation {
 
     static final SubstitutionProvider SIMPLE_SUBSTITUTION_PROVIDER = new SubstitutionProvider() {
 
@@ -46,7 +46,7 @@ public class SimpleSubstitution implements Transformation {
     private final Tensor from, to;
     private final boolean symbolic;
 
-    public SimpleSubstitution(Tensor from, Tensor to) {
+    private SimpleSubstitution(Tensor from, Tensor to) {
         this.from = from;
         this.to = to;
         this.symbolic = TensorUtils.isSymbolic(to);

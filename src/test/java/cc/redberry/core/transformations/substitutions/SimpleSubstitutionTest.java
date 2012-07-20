@@ -22,6 +22,7 @@
  */
 package cc.redberry.core.transformations.substitutions;
 
+import cc.redberry.core.transformations.Expand;
 import cc.redberry.core.context.CC;
 import org.junit.Test;
 import cc.redberry.core.context.ToStringMode;
@@ -50,7 +51,7 @@ public class SimpleSubstitutionTest {
     }
 
     private static Tensor expand(Tensor tensor) {
-        return ExpandBrackets.expandBrackets(tensor);
+        return Expand.Expand.super.expand(tensor);
     }
 
     private static Tensor substitute(Tensor tensor, String substitution) {
@@ -63,7 +64,7 @@ public class SimpleSubstitutionTest {
         SimpleTensor from = (SimpleTensor) parse("A_mn");
         Tensor to = parse("B_m*C_n");
         Tensor target = parse("A_ab");
-        SimpleSubstitution sp = new SimpleSubstitution(from, to);
+        Transformation sp = Substitutions.getTransformation(from, to);
         target = sp.transform(target);
         Tensor expected = parse("B_{a}*C_{b}");
         assertTrue(TensorUtils.equals(target, expected));
@@ -74,7 +75,7 @@ public class SimpleSubstitutionTest {
         SimpleTensor from = (SimpleTensor) parse("A_mn");
         Tensor to = parse("B_m*C_n");
         Tensor target = parse("A_ab*d*A_mn");
-        SimpleSubstitution sp = new SimpleSubstitution(from, to);
+        Transformation sp = Substitutions.getTransformation(from, to);
         target = sp.transform(target);
         Tensor expected = parse("B_{a}*C_{b}*d*B_{m}*C_{n}");
         assertTrue(TensorUtils.equals(target, expected));
@@ -85,7 +86,7 @@ public class SimpleSubstitutionTest {
         SimpleTensor from = (SimpleTensor) parse("A_mn");
         Tensor to = parse("B_mn");
         Tensor target = parse("A^mn");
-        SimpleSubstitution sp = new SimpleSubstitution(from, to);
+        Transformation sp = Substitutions.getTransformation(from, to);
         target = sp.transform(target);
         target = contract(target);
         Tensor expected = parse("B^mn");
@@ -97,7 +98,7 @@ public class SimpleSubstitutionTest {
         SimpleTensor from = (SimpleTensor) parse("A_mn");
         Tensor to = parse("B_mn");
         Tensor target = parse("A_ab*A^mn");
-        SimpleSubstitution sp = new SimpleSubstitution(from, to);
+        Transformation sp = Substitutions.getTransformation(from, to);
         target = sp.transform(target);
         target = contract(target);
         Tensor expected = parse("B_{ab}*B^{mn}");
@@ -109,7 +110,7 @@ public class SimpleSubstitutionTest {
         SimpleTensor from = (SimpleTensor) parse("A_mn");
         Tensor to = parse("B_ma*C^a_n");
         Tensor target = parse("A_ab*d*A_mn");
-        SimpleSubstitution sp = new SimpleSubstitution(from, to);
+        Transformation sp = Substitutions.getTransformation(from, to);
         target = sp.transform(target);
         Tensor expected = parse("B_{ac}*C^{c}_{b}*d*B_{md}*C^{d}_{n}");
         assertTrue(TensorUtils.compare(target, expected));
@@ -130,7 +131,7 @@ public class SimpleSubstitutionTest {
         addSymmetry("A_a^b", IndexType.LatinLower, true, 1, 0);
         Tensor to = parse("B_m*C^n-B^n*C_m");
         Tensor target = parse("A^a_b");
-        SimpleSubstitution sp = new SimpleSubstitution(from, to);
+        Transformation sp = Substitutions.getTransformation(from, to);
         target = sp.transform(target);
         Tensor expected = parse("B^a*C_b-B_b*C^a");
         assertTrue(TensorUtils.equals(target, expected));
@@ -143,7 +144,7 @@ public class SimpleSubstitutionTest {
         Tensor target = parse("1/2*g^{ag}*(p_{m}*g_{gn}+p_{n}*g_{gm}+-1*p_{g}*g_{mn})");
         Tensor expected = target;
 
-        SimpleSubstitution sp = new SimpleSubstitution(from, to);
+        Transformation sp = Substitutions.getTransformation(from, to);
         target = sp.transform(target);
         target = contract(target);
         expected = contract(expected);
@@ -157,7 +158,7 @@ public class SimpleSubstitutionTest {
         Tensor target = parse("1/2*g^{ag}*(p_{m}*g_{gn}+p_{n}*g_{gm}+-1*p_{g}*g_{mn})");
         Tensor expected = target;
 
-        SimpleSubstitution sp = new SimpleSubstitution(from, to);
+        Transformation sp = Substitutions.getTransformation(from, to);
         target = sp.transform(target);
         target = sp.transform(target);
         target = sp.transform(target);
@@ -173,7 +174,7 @@ public class SimpleSubstitutionTest {
         Tensor target = parse("g^ag");
         Tensor expected = target;
 
-        SimpleSubstitution sp = new SimpleSubstitution(from, to);
+        Transformation sp = Substitutions.getTransformation(from, to);
         sp.transform(target);
         assertTrue(TensorUtils.equals(target, expected));
     }
@@ -184,7 +185,7 @@ public class SimpleSubstitutionTest {
         addSymmetry("A_a^b", IndexType.LatinLower, true, 1, 0);
         Tensor to = parse("B_m*C^n-B^n*C_m");
         Tensor target = parse("A^a_b+F^a_b[A_m^n]");
-        SimpleSubstitution sp = new SimpleSubstitution(from, to);
+        Transformation sp = Substitutions.getTransformation(from, to);
         target = sp.transform(target);
         System.out.println(target);
         Tensor expected = parse("-B_{b}*C^{a}+B^a*C_b+F^{a}_{b}[B_{m}*C^{n}-B^n*C_m]");

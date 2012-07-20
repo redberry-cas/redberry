@@ -28,7 +28,7 @@ import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.tensor.TensorField;
 import cc.redberry.core.transformations.ContractIndices;
 import cc.redberry.core.transformations.Transformation;
-import cc.redberry.core.transformations.expand.ExpandBrackets;
+import cc.redberry.core.transformations.Expand;
 import cc.redberry.core.utils.TensorUtils;
 import java.math.*;
 import org.apache.commons.math3.util.*;
@@ -53,7 +53,7 @@ public class TensorFieldSubstitutionTest {
     }
 
     private static Tensor expand(Tensor tensor) {
-        return ExpandBrackets.expandBrackets(tensor);
+        return Expand.Expand.super.expand(tensor);
     }
 
     private static Tensor substitute(Tensor tensor, String substitution) {

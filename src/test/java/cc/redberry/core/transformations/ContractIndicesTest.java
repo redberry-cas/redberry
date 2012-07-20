@@ -425,7 +425,7 @@ public class ContractIndicesTest {
         stop = System.currentTimeMillis();
         System.out.println("Parse: " + (stop - start));
         start = System.currentTimeMillis();
-        target = ExpandBrackets.expandBrackets(target);
+        target = Expand.expand(target);
         stop = System.currentTimeMillis();
         System.out.println("Expand: " + (stop - start) + " , size: " + target.size());
         start = System.currentTimeMillis();

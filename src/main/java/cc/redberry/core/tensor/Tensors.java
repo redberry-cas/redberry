@@ -29,7 +29,7 @@ import cc.redberry.core.indices.*;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.tensor.functions.*;
 import cc.redberry.core.transformations.ApplyIndexMapping;
-import cc.redberry.core.transformations.expand.ExpandBrackets;
+import cc.redberry.core.transformations.Expand;
 import cc.redberry.core.utils.TensorUtils;
 import java.util.HashSet;
 import java.util.Set;
@@ -323,7 +323,7 @@ public final class Tensors {
             return sum;
         final Tensor[] newSumData = new Tensor[sum.size()];
         for (int i = newSumData.length - 1; i >= 0; --i)
-            newSumData[i] = ExpandBrackets.expandBrackets(multiply(factor, sum.get(i)));
+            newSumData[i] = Expand.expand(multiply(factor, sum.get(i)));
         return new Sum(newSumData, IndicesFactory.createSorted(newSumData[0].getIndices().getFreeIndices()));
     }
 }

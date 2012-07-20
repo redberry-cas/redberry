@@ -140,7 +140,7 @@ public class ApplyIndexMappingTest {
         int[] usedIndices = parse("B_an").getIndices().getAllIndices().copy();
         Tensor target = parse("A_{ab jxk}*B^{jxk}_dc+A_{bd ujxk}*B^{ujxk}_ac");
         target = ApplyIndexMapping.applyIndexMapping(target, imb, usedIndices);
-        Tensor standard = parse("A_{wx tbk}*B^{tbk}_zy+A_{xz tibk}*B^{tibk}_wy");
+        Tensor standard = parse("A^{xz}_{ujbk}*B^{ujbkwy}+A^{wx}_{jbk}*B^{jbkzy}");
         Assert.assertTrue(TensorUtils.compare(target, standard));
     }
 

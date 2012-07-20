@@ -27,7 +27,6 @@ import cc.redberry.core.indices.IndicesFactory;
 import cc.redberry.core.indices.SimpleIndices;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.tensor.*;
-import cc.redberry.core.transformations.expand.*;
 import cc.redberry.core.utils.TensorUtils;
 import junit.framework.Assert;
 import org.junit.Test;
@@ -231,15 +230,4 @@ public class ParserTest {
             Tensors.parse("(Power[a, 2]*b+a*Power[b, 2])*g_{m}*g^{m}+(Power[a, 3]+Power[a, 2]*b+a*Power[b, 2]+Power[b, 3])*f^{m}*g_{m}+(Power[a, 2]*b+a*Power[b, 2])*f_{m}*f^{m}");
         }
     }
-     @Test
-    public void test16() {
-         System.out.println(Tensors.parse("(a+b)/(a+b)"));
-     }
-     
-     
-     @Test
-     public void testTensorFied1(){
-        Tensor t = Tensors.parse("f_a^b[x_m^n:_m^n]");
-        
-     }
 }
