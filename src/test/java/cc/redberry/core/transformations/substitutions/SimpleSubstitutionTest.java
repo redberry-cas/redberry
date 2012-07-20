@@ -51,7 +51,7 @@ public class SimpleSubstitutionTest {
     }
 
     private static Tensor expand(Tensor tensor) {
-        return Expand.Expand.super.expand(tensor);
+        return Expand.expand(tensor);
     }
 
     private static Tensor substitute(Tensor tensor, String substitution) {
