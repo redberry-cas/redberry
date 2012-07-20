@@ -85,12 +85,16 @@ public final class ProductContent {
     public Tensor get(int i) {
         return data[i];
     }
-    
-    public int size(){
+
+    public int size() {
         return data.length;
     }
 
     public Tensor[] getRange(int from, int to) {
         return Arrays.copyOfRange(data, from, to);
+    }
+
+    public Tensor[] getDataCopy() {
+        return data.clone();
     }
 }

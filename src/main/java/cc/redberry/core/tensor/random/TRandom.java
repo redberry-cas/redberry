@@ -53,7 +53,7 @@ public final class TRandom {
     private final int[] minIndices, maxIndices;
     private final int diffStringNames;
     private final boolean withSymmetries;
-    private final NameDescriptor[] namespace;
+    private NameDescriptor[] namespace;
 
     /**
      *
@@ -71,7 +71,7 @@ public final class TRandom {
             boolean withSymmetries,
             BitsStreamGenerator random) {
         this.random = random;
-        reset();
+        this.random.setSeed(seed = random.nextLong());
         this.minIndices = minIndices;
         this.maxIndices = maxIndices;
         this.withSymmetries = withSymmetries;
@@ -79,7 +79,7 @@ public final class TRandom {
         for (int i = 0; i < TYPES.length; ++i)
             di *= (t = maxIndices[i] - minIndices[i]) == 0 ? 1 : t;
         this.diffStringNames = (maxDiffNDs - minDiffNDs) / di;
-        namespace = new NameDescriptor[minDiffNDs + nextInt(maxDiffNDs - minDiffNDs)];
+        namespace = new NameDescriptor[minDiffNDs + (int) (0.5 * (maxDiffNDs - minDiffNDs))];//TODO add randomization
         generateDescriptors();
     }
 
@@ -99,7 +99,7 @@ public final class TRandom {
             boolean withSymmetries,
             long seed) {
         this.random = new Well19937c();
-        reset(seed);
+        this.random.setSeed(seed = random.nextLong());
         this.minIndices = minIndices;
         this.maxIndices = maxIndices;
         this.withSymmetries = withSymmetries;
@@ -107,7 +107,7 @@ public final class TRandom {
         for (int i = 0; i < TYPES.length; ++i)
             di *= (t = maxIndices[i] - minIndices[i]) == 0 ? 1 : t;
         this.diffStringNames = (maxDiffNDs - minDiffNDs) / di;
-        namespace = new NameDescriptor[minDiffNDs + nextInt(maxDiffNDs - minDiffNDs)];
+        namespace = new NameDescriptor[minDiffNDs + (int) (0.5 * (maxDiffNDs - minDiffNDs))];//TODO add randomization
         generateDescriptors();
     }
 
@@ -130,10 +130,12 @@ public final class TRandom {
 
     public final void reset() {
         random.setSeed(seed = random.nextLong());
+        generateDescriptors();
     }
 
     public void reset(long seed) {
-        random.setSeed(seed);
+        random.setSeed(this.seed = seed);
+        generateDescriptors();
     }
 
     public final int nextInt(int n) {
@@ -207,6 +209,7 @@ public final class TRandom {
     public Tensor nextProduct(int minProductSize, Indices indices) {
         if (minProductSize < 2)
             throw new IllegalArgumentException();//CHECKSTYLE
+        indices = indices.getFreeIndices();
         IndicesTypeStructure typeStructure = new IndicesTypeStructure(IndicesFactory.createSimple(null, indices));
         List<NameDescriptor> descriptors = new ArrayList<>();
         int totalIndicesCounts[] = new int[TYPES.length];
@@ -285,12 +288,11 @@ public final class TRandom {
 
             pb.put(Tensors.simpleTensor(descriptor.getId(), IndicesFactory.createSimple(descriptor.getSymmetries(), factorIndices)));
         }
-        if(random.nextBoolean()){
+        if (random.nextBoolean())
             pb.put(new Complex(nextInt(100)));
-        }
         return pb.build();
     }
-    
+
     public Tensor nextProduct(int minProductSize) {
         return nextProduct(minProductSize, IndicesFactory.createSimple(null, nextIndices(nextNameDescriptor().getIndicesTypeStructure())));
     }
@@ -301,7 +303,6 @@ public final class TRandom {
             sum.put(nextProduct(averageProductSize, indices));
         return sum.build();
     }
-   
 
     public int[] nextIndices(IndicesTypeStructure indicesTypeStructure) {
         int[] indices = new int[indicesTypeStructure.size()];
