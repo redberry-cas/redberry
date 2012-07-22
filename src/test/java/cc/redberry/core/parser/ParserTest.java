@@ -140,7 +140,7 @@ public class ParserTest {
     public void test123() {
         CC.resetTensorNames(1202870200402377417L);
         Tensor t = Tensors.parse("Power[Power[pT,2] - s, 4]*Power[s, 4]");
-        Assert.assertEquals(t.toString(), "Power[Power[pT, 2]+-1*s, 4]*Power[s, 4]");
+        Assert.assertEquals(t.toString(), "Power[-1*s+Power[pT, 2], 4]*Power[s, 4]");
     }
 
     @Test

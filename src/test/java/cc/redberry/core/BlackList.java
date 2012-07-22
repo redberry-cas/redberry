@@ -22,8 +22,10 @@
  */
 package cc.redberry.core;
 
+import cc.redberry.core.context.*;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.number.parser.NumberParser;
+import cc.redberry.core.tensor.*;
 import org.junit.Test;
 
 /**
@@ -35,8 +37,11 @@ public class BlackList {
 
     @Test
     public void test1() {
-        org.apache.commons.math3.complex.Complex a;
-        Complex c = NumberParser.COMPLEX_PARSER.parse("4+2*i");
-        System.out.println(c);
+        Tensor t = Tensors.parse("g_mn");
+        System.out.println(t);
+        CC.current().setMetricName("AS");
+        System.out.println(t);
+        CC.current().setMetricName("x");
+        System.out.println(t);
     }
 }

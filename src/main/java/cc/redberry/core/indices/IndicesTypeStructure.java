@@ -96,6 +96,10 @@ public final class IndicesTypeStructure {
         return new TypeData(from, typesCounts[type]);
     }
 
+    public int typeCount(byte type) {
+        return typesCounts[type];
+    }
+
     public boolean isStructureOf(SimpleIndices indices) {
         if (size != indices.size())
             return false;

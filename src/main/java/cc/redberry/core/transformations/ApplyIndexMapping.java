@@ -189,8 +189,6 @@ public final class ApplyIndexMapping implements Transformation {
             if (oldIndices != newIndices)
                 if (simpleTensor instanceof TensorField)
                     iterator.set(Tensors.setIndicesToField((TensorField) simpleTensor, newIndices));
-                else if (Tensors.isKroneckerOrMetric(simpleTensor))
-                    iterator.set(Tensors.createMetricOrKronecker(newIndices.get(0), newIndices.get(1)));
                 else
                     iterator.set(Tensors.setIndicesToSimpleTensor(simpleTensor, newIndices));
         }

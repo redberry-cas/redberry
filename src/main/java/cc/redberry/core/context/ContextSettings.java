@@ -31,10 +31,11 @@ import java.util.EnumSet;
  */
 public class ContextSettings {
     //bindings
+
     private ToStringMode defaultToStringMode;
-    private String kronecker;
+    private String kronecker = "d";
+    private String metricName = "g";
     //optional
-    private String metricName = null;
     private EnumSet<IndexType> merticTypes = EnumSet.noneOf(IndexType.class);
     private Long nameManagerSeed;
     private IndexConverterManager converterManager = IndexConverterManager.DEFAULT;
@@ -53,8 +54,6 @@ public class ContextSettings {
     }
 
     public void addMetricIndexType(IndexType type) {
-        if (metricName == null)
-            throw new IllegalStateException("Metric name not set.");
         merticTypes.add(type);
     }
 
@@ -63,6 +62,8 @@ public class ContextSettings {
     }
 
     public void setDefaultToStringMode(ToStringMode defaultToStringMode) {
+        if (defaultToStringMode == null)
+            throw new NullPointerException();
         this.defaultToStringMode = defaultToStringMode;
     }
 
@@ -71,6 +72,10 @@ public class ContextSettings {
     }
 
     public void setKronecker(String kronecker) {
+        if (kronecker == null)
+            throw new NullPointerException();
+        if (kronecker.isEmpty())
+            throw new IllegalArgumentException();
         this.kronecker = kronecker;
     }
 
@@ -79,6 +84,10 @@ public class ContextSettings {
     }
 
     public void setMetricName(String metricName) {
+        if (metricName == null)
+            throw new NullPointerException();
+        if (metricName.isEmpty())
+            throw new IllegalArgumentException();
         this.metricName = metricName;
     }
 

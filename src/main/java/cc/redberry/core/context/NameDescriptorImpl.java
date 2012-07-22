@@ -20,23 +20,29 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
-package cc.redberry.core;
+package cc.redberry.core.context;
 
-import cc.redberry.core.context.*;
-import org.junit.runner.Description;
-import org.junit.runner.notification.RunListener;
+import cc.redberry.core.indices.IndicesTypeStructure;
+import cc.redberry.core.indices.SimpleIndices;
 
-/**
- *
- * @author Bolotin Dmitriy (bolotin.dmitriy@gmail.com)
- */
-public class GlobalRunListener extends RunListener {
+final class NameDescriptorImpl extends NameDescriptor {
 
-    public GlobalRunListener() {
+    private final String name;
+    private final IndicesTypeStructureAndName[] key;
+
+    NameDescriptorImpl(String name, IndicesTypeStructure[] indexTypeStructures, int id) {
+        super(indexTypeStructures, id);
+        this.name = name;
+        this.key = new IndicesTypeStructureAndName[]{new IndicesTypeStructureAndName(name, indexTypeStructures)};
     }
 
     @Override
-    public void testStarted(Description description) throws Exception {
-        ContextManager.initializeNew();
+    public String getName(SimpleIndices indices) {
+        return name;
+    }
+
+    @Override
+    IndicesTypeStructureAndName[] getKeys() {
+        return key;
     }
 }

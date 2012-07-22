@@ -233,6 +233,7 @@ public class SimpleSubstitutionTest {
 
         target1 = contract(expand(target1));
 
+        
         assertTrue(TensorUtils.compare(target, target1));
         assertTrue(target.getIndices().size() == 0);
         assertTrue(target1.getIndices().size() == 0);
@@ -262,7 +263,7 @@ public class SimpleSubstitutionTest {
                              "G_gmn=(1/2)*(p_m*g_gn+p_n*g_gm-p_g*g_mn)");
 
         target1 = contract(target1);
-
+      
         assertTrue(TensorUtils.compare(target, target1));
         assertTrue(target.getIndices().size() == 0);
         assertTrue(target1.getIndices().size() == 0);

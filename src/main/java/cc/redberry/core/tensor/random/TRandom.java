@@ -23,8 +23,7 @@
 package cc.redberry.core.tensor.random;
 
 import cc.redberry.core.combinatorics.Symmetry;
-import cc.redberry.core.context.CC;
-import cc.redberry.core.context.NameDescriptor;
+import cc.redberry.core.context.*;
 import cc.redberry.core.indexgenerator.IndexGenerator;
 import cc.redberry.core.indices.*;
 import cc.redberry.core.number.Complex;
@@ -80,7 +79,7 @@ public final class TRandom {
             di *= (t = maxIndices[i] - minIndices[i]) == 0 ? 1 : t;
         this.diffStringNames = (maxDiffNDs - minDiffNDs) / di;
         namespace = new NameDescriptor[minDiffNDs + (int) (0.5 * (maxDiffNDs - minDiffNDs))];//TODO add randomization
-        generateDescriptors();
+        generateDescriptors(); //TOOD add weak reference to nameManager and regenerate at CC.resetTensorNames(....)
     }
 
     /**
@@ -289,7 +288,7 @@ public final class TRandom {
             pb.put(Tensors.simpleTensor(descriptor.getId(), IndicesFactory.createSimple(descriptor.getSymmetries(), factorIndices)));
         }
         if (random.nextBoolean())
-            pb.put(new Complex(nextInt(100)));
+            pb.put(new Complex(1 + nextInt(100)));
         return pb.build();
     }
 

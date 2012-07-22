@@ -26,60 +26,24 @@ import cc.redberry.core.indices.*;
 import cc.redberry.core.parser.ParseManager;
 import cc.redberry.core.tensor.SimpleTensor;
 import cc.redberry.core.tensor.Tensors;
-import java.util.Arrays;
-import java.util.EnumSet;
+import cc.redberry.core.utils.LongBackedBitArray;
 
 public final class Context {
 
     private final NameManager nameManager;
     private ToStringMode defaultPrintMode;
-    private final String kroneckerName;
-    private final String metricName;
-    private final int[] metricNames, kroneckerNames;
-    private final EnumSet<IndexType> metricTypes;
-    private final byte[] metricTypesArray;
     private final IndexConverterManager converterManager;
     private final ParseManager parseManager = new ParseManager();
+    private final LongBackedBitArray metricTypes = new LongBackedBitArray(128);
 
     public Context(ContextSettings contextSettings) {
         this.converterManager = contextSettings.getConverterManager();
-        nameManager = new NameManager(contextSettings.getNameManagerSeed());
+        nameManager = new NameManager(contextSettings.getNameManagerSeed(), contextSettings.getKronecker(), contextSettings.getMetricName());
 
         defaultPrintMode = contextSettings.getDefaultToStringMode();
-        kroneckerName = contextSettings.getKronecker();
-        metricTypes = contextSettings.getMetricTypes();
-        metricTypesArray = new byte[metricTypes.size()];
 
-        int i = -1;
-        for (IndexType it : metricTypes)
-            metricTypesArray[++i] = it.getType();
-        Arrays.sort(metricTypesArray);
-
-        metricName = contextSettings.getMetricName();
-
-        metricNames = new int[contextSettings.getMetricTypes().size()];
-        kroneckerNames = new int[IndexType.TYPES_COUNT];
-        setMetricsAndKroneckersNames();
-    }
-
-    private void setMetricsAndKroneckersNames() {
-        int i = -1;
-        for (IndexType indexType : metricTypes) {
-            NameDescriptor nd = nameManager.mapNameDescriptor(metricName,
-                                                              new IndicesTypeStructure(indexType, 2));
-            metricNames[++i] = nd.getId();
-            nd.getSymmetries().add(indexType, false, new int[]{1, 0});
-        }
-
-        for (i = 0; i < kroneckerNames.length; ++i) {
-            NameDescriptor nd = nameManager.mapNameDescriptor(kroneckerName,
-                                                              new IndicesTypeStructure((byte) i, 2));
-            kroneckerNames[i] = nd.getId();
-            nd.getSymmetries().add((byte) i, false, new int[]{1, 0});
-        }
-
-        Arrays.sort(metricNames);
-        Arrays.sort(kroneckerNames);
+        for (IndexType type : contextSettings.getMetricTypes())
+            metricTypes.set(type.getType());
     }
 
     /**
@@ -91,12 +55,10 @@ public final class Context {
      */
     public synchronized void resetTensorNames() {
         nameManager.reset();
-        setMetricsAndKroneckersNames();
     }
 
     public synchronized void resetTensorNames(long seed) {
         nameManager.reset(seed);
-        setMetricsAndKroneckersNames();
     }
 
     public void setDefaultPrintMode(ToStringMode defaultPrintMode) {
@@ -120,25 +82,37 @@ public final class Context {
     }
 
     public String getKroneckerName() {
-        return kroneckerName;
+        return nameManager.getKroneckerName();
     }
 
     public String getMetricName() {
-        return metricName;
+        return nameManager.getMetricName();
+    }
+
+    public void setMetricName(String name) {
+        nameManager.setMetricName(name);
+    }
+
+    public void setKroneckerName(String name) {
+        nameManager.setKroneckerName(name);
     }
 
     public boolean withMetric() {
-        return metricName != null;
+        return true;
     }
 
     public boolean isKronecker(SimpleTensor t) {
-        // kroneckerNames naturally sorted
-        return Arrays.binarySearch(kroneckerNames, t.getName()) >= 0;
+        return nameManager.isKroneckerOrMetric(t.getName())
+                && !IndicesUtils.haveEqualStates(t.getIndices().get(0), t.getIndices().get(1));
     }
 
     public boolean isMetric(SimpleTensor t) {
-        // metricNames naturally sorted
-        return Arrays.binarySearch(metricNames, t.getName()) >= 0;
+        return nameManager.isKroneckerOrMetric(t.getName())
+                && IndicesUtils.haveEqualStates(t.getIndices().get(0), t.getIndices().get(1));
+    }
+
+    public boolean isKroneckerOrMetric(SimpleTensor s) {
+        return nameManager.isKroneckerOrMetric(s.getName());
     }
 
     public ParseManager getParseManager() {
@@ -146,24 +120,22 @@ public final class Context {
     }
 
     public SimpleTensor createKronecker(int index1, int index2) {
-        //TODO improve
         if (IndicesUtils.getType(index1) != IndicesUtils.getType(index2) || IndicesUtils.getRawStateInt(index1) == IndicesUtils.getRawStateInt(index2))
             throw new IllegalArgumentException("This is not kronecker indices!");
         SimpleIndices indices = IndicesFactory.createSimple(null, index1, index2);
-        NameDescriptor nd = nameManager.mapNameDescriptor(kroneckerName, new IndicesTypeStructure(indices));
+        NameDescriptor nd = nameManager.mapNameDescriptor(nameManager.getKroneckerName(), new IndicesTypeStructure(indices));
         int name = nd.getId();
         return Tensors.simpleTensor(name, indices);
     }
 
     public SimpleTensor createMetric(int index1, int index2) {
-        //TODO improve
         byte type;
         if ((type = IndicesUtils.getType(index1)) != IndicesUtils.getType(index2)
-                || IndicesUtils.getRawStateInt(index1) != IndicesUtils.getRawStateInt(index2)
-                || Arrays.binarySearch(metricTypesArray, type) < 0)
-            throw new IllegalArgumentException("This is not metric indices!");
+                || !IndicesUtils.haveEqualStates(index1, index2)
+                || !metricTypes.get(type))
+            throw new IllegalArgumentException("Not metric indices.");
         SimpleIndices indices = IndicesFactory.createSimple(null, index1, index2);
-        NameDescriptor nd = nameManager.mapNameDescriptor(metricName, new IndicesTypeStructure(indices));
+        NameDescriptor nd = nameManager.mapNameDescriptor(nameManager.getMetricName(), new IndicesTypeStructure(indices));
         int name = nd.getId();
         return Tensors.simpleTensor(name, indices);
     }
@@ -173,18 +145,6 @@ public final class Context {
             return createMetric(index1, index2);
         return createKronecker(index1, index2);
     }
-    //
-    //    public SimpleTensor createSimpleTensor(String name, SimpleIndices indices) {
-    //        NameDescriptor descriptor = nameManager.mapNameDescriptor(name, new IndicesTypeStructure(indices));
-    //        int tensorName = nameManager.mapNameDescriptor(descriptor);
-    //        //dumping symmetries
-    //        SimpleIndices nIndices = IndicesFactory.createSimple(null, indices);
-    //        //creating simple and binding nIndices and descriptor symmetries
-    //        SimpleTensor t = new SimpleTensor(tensorName, nIndices);
-    //        //adding additional symmetries
-    //        nIndices.getSymmetries().addAllUnsafe(indices.getSymmetries());
-    //        return t;
-    //    }
 
     public static Context get() {
         return ContextManager.getCurrentContext();

@@ -125,7 +125,7 @@ public class SimpleTensor extends Tensor {
     @Override
     public String toString(ToStringMode mode) {
         StringBuilder sb = new StringBuilder();
-        sb.append(CC.getNameDescriptor(name).getName());
+        sb.append(CC.getNameDescriptor(name).getName(indices));
         sb.append(indices.toString(mode));
         return sb.toString();
     }
