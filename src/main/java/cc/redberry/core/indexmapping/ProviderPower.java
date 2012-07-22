@@ -38,9 +38,9 @@ class ProviderPower implements IndexMappingProviderFactory {
     }
 
     @Override
-    public IndexMappingProvider create(IndexMappingProvider opu, Tensor from, Tensor to, boolean allowDiffStates) {
+    public IndexMappingProvider create(IndexMappingProvider opu, Tensor from, Tensor to) {
         final Power fromP = (Power) from, toP = (Power) to;
-        if (IndexMappings.mappingExists(fromP.get(1), toP.get(1), allowDiffStates) && IndexMappings.mappingExists(fromP.get(0), toP.get(0), allowDiffStates))
+        if (IndexMappings.mappingExists(fromP.get(1), toP.get(1)) && IndexMappings.mappingExists(fromP.get(0), toP.get(0)))
             return new DummyIndexMappingProvider(opu);
         return IndexMappingProvider.Util.EMPTY_PROVIDER;
     }

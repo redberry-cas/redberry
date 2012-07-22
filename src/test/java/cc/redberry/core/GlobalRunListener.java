@@ -22,7 +22,7 @@
  */
 package cc.redberry.core;
 
-import cc.redberry.core.context.*;
+import cc.redberry.core.context.ContextManager;
 import org.junit.runner.Description;
 import org.junit.runner.notification.RunListener;
 

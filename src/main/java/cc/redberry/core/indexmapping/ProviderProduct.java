@@ -43,7 +43,7 @@ final class ProviderProduct implements IndexMappingProvider {
     static final IndexMappingProviderFactory FACTORY = new IndexMappingProviderFactory() {
 
         @Override
-        public IndexMappingProvider create(IndexMappingProvider opu, Tensor from, Tensor to, boolean allowDiffStates) {
+        public IndexMappingProvider create(IndexMappingProvider opu, Tensor from, Tensor to) {
             Product pfrom = (Product) from,
                     pto = (Product) to;
             if (pfrom.sizeWithoutFactor() != pto.sizeWithoutFactor())
@@ -61,13 +61,13 @@ final class ProviderProduct implements IndexMappingProvider {
             Tensor[] fromScalars = pfrom.getAllScalarsWithoutFactor(), toScalars = pto.getAllScalarsWithoutFactor();
             if (fromScalars.length != toScalars.length)
                 return IndexMappingProvider.Util.EMPTY_PROVIDER;
-            if (fromScalars.length != 1 && !testScalars(fromScalars, toScalars, allowDiffStates))
+            if (fromScalars.length != 1 && !testScalars(fromScalars, toScalars))
                 return IndexMappingProvider.Util.EMPTY_PROVIDER;
 
 //            Temporary, until scalars mappings does not work
             if (booluon)
-                return new MinusIndexMappingProviderWrapper(new ProviderProduct(opu, pfrom, pto, allowDiffStates));
-            return new ProviderProduct(opu, pfrom, pto, allowDiffStates);
+                return new MinusIndexMappingProviderWrapper(new ProviderProduct(opu, pfrom, pto));
+            return new ProviderProduct(opu, pfrom, pto);
 
 //            True variant
 //            return new ProviderProduct(opu, fromC.getNonScalarContent(), toC.getNonScalarContent(), allowDiffStates);
@@ -82,7 +82,7 @@ final class ProviderProduct implements IndexMappingProvider {
         return null;
     }
 
-    private static boolean testScalars(Tensor[] from, Tensor[] to, boolean allowDiffStates) {
+    private static boolean testScalars(Tensor[] from, Tensor[] to) {
         if (from.length != to.length)
             return false;
         int i;
@@ -93,7 +93,7 @@ final class ProviderProduct implements IndexMappingProvider {
         PrecalculatedStretches precalculatedStretches = new PrecalculatedStretches(hashes);
         for (Stretch stretch : precalculatedStretches)
             if (stretch.length == 1)
-                if (!mappingExists(from[stretch.from], to[stretch.from], allowDiffStates))
+                if (!mappingExists(from[stretch.from], to[stretch.from]))
                     return false;
         OUTER:
         for (Stretch stretch : precalculatedStretches)
@@ -101,7 +101,7 @@ final class ProviderProduct implements IndexMappingProvider {
                 SEMIOUTER:
                 for (int[] permutation : new IntPermutationsGenerator(stretch.length)) {
                     for (i = 0; i < stretch.length; ++i)
-                        if (!mappingExists(from[stretch.from + i], to[stretch.from + permutation[i]], allowDiffStates))
+                        if (!mappingExists(from[stretch.from + i], to[stretch.from + permutation[i]]))
                             continue SEMIOUTER; // This permutation is bad
                     continue OUTER; //Good permutation has been found
                 }
@@ -110,10 +110,10 @@ final class ProviderProduct implements IndexMappingProvider {
         return true;
     }
 
-    private static boolean mappingExists(Tensor from, Tensor to, boolean allowDiffStates) {
+    private static boolean mappingExists(Tensor from, Tensor to) {
         final IndexMappingProvider pp = IndexMappings.createPort(
-                IndexMappingProvider.Util.singleton(new IndexMappingBufferImpl(allowDiffStates)),
-                from, to, allowDiffStates);
+                IndexMappingProvider.Util.singleton(new IndexMappingBufferImpl()),
+                from, to);
         pp.tick();
         return pp.take() != null;
     }
@@ -123,8 +123,7 @@ final class ProviderProduct implements IndexMappingProvider {
     private final MappingsPort op;
 
     private ProviderProduct(final MappingsPort opu,
-                            final Product from, final Product to,
-                            boolean allowDiffStates) {
+                            final Product from, final Product to) {
         this.dummyProvider = new DummyIndexMappingProvider(opu);
 //        this.from = from;
 //        this.to = to;
@@ -149,7 +148,7 @@ final class ProviderProduct implements IndexMappingProvider {
                 if (i - 1 != begin)
                     providers.add(lastOutput =
                             new PermutatorProvider(lastOutput, Arrays.copyOfRange(indexlessFrom, begin, i),
-                                                   Arrays.copyOfRange(indexlessTo, begin, i), allowDiffStates));
+                                                   Arrays.copyOfRange(indexlessTo, begin, i)));
                 begin = i;
             }
 
@@ -160,7 +159,7 @@ final class ProviderProduct implements IndexMappingProvider {
                     providers.add(lastOutput =
                             IndexMappings.createPort(lastOutput,
                                                      indexlessFrom[begin],
-                                                     indexlessTo[begin], allowDiffStates));
+                                                     indexlessTo[begin]));
                 begin = i;
             }
 
@@ -173,7 +172,7 @@ final class ProviderProduct implements IndexMappingProvider {
                     providers.add(lastOutput =
                             IndexMappings.createPort(lastOutput,
                                                      fromContent.get(begin),
-                                                     toContent.get(begin), allowDiffStates));
+                                                     toContent.get(begin)));
                 begin = i;
             }
 
@@ -189,7 +188,7 @@ final class ProviderProduct implements IndexMappingProvider {
 //        else
         for (Pair p : stretches)
             providers.add(lastOutput = new PermutatorProvider(lastOutput,
-                                                              p.from, p.to, allowDiffStates));
+                                                              p.from, p.to));
 
         this.op = new SimpleProductProvider(providers.toArray(new IndexMappingProvider[providers.size()]));
     }

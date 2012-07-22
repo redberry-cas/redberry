@@ -66,7 +66,7 @@ class TensorFieldSubstitution implements Transformation {
             if (!(current instanceof TensorField))
                 continue;
             TensorField currentField = (TensorField) current;
-            IndexMappingBuffer buffer = IndexMappings.simpleTensorsPort(from, currentField, true).take();
+            IndexMappingBuffer buffer = IndexMappings.simpleTensorsPort(from, currentField).take();
             if (buffer == null)
                 continue;
 
@@ -78,7 +78,7 @@ class TensorFieldSubstitution implements Transformation {
             int[] cIndices, fIndices;
             int i;
             for (i = from.size() - 1; i >= 0; --i) {
-                if (IndexMappings.mappingExists(current.get(i), from.get(i), true))
+                if (IndexMappings.mappingExists(current.get(i), from.get(i)))
                     continue;
                 fIndices = fromIndices[i].getAllIndices().copy();
                 cIndices = currentIndices[i].getAllIndices().copy();

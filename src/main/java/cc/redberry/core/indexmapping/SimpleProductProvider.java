@@ -39,11 +39,11 @@ final class SimpleProductProvider implements MappingsPort {
     }
 
     SimpleProductProvider(final IndexMappingProvider opu,
-                          final Tensor[] from, final Tensor[] to, boolean allowDiffStates) {
+                          final Tensor[] from, final Tensor[] to) {
         providers = new IndexMappingProvider[from.length];
-        providers[0] = IndexMappings.createPort(opu, from[0], to[0], allowDiffStates);
+        providers[0] = IndexMappings.createPort(opu, from[0], to[0]);
         for (int i = 1; i < from.length; ++i)
-            providers[i] = IndexMappings.createPort(providers[i - 1], from[i], to[i], allowDiffStates);
+            providers[i] = IndexMappings.createPort(providers[i - 1], from[i], to[i]);
     }
 
     @Override

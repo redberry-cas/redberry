@@ -39,8 +39,6 @@ public interface IndexMappingBuffer {
 
     boolean isEmpty();
 
-    boolean allowDiffStates();
-
     boolean getSignum();
 
     //TODO hashMap for ints

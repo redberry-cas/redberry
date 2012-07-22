@@ -31,5 +31,5 @@ import cc.redberry.core.tensor.Tensor;
  */
 interface IndexMappingProviderFactory {
 
-    IndexMappingProvider create(IndexMappingProvider opu, Tensor from, Tensor to, boolean allowDiffStates);
+    IndexMappingProvider create(IndexMappingProvider opu, Tensor from, Tensor to );
 }

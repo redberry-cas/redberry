@@ -34,8 +34,8 @@ public class ProviderFunctions {
     static final IndexMappingProviderFactory ODD_FACTORY = new IndexMappingProviderFactory() {
 
         @Override
-        public IndexMappingProvider create(IndexMappingProvider opu, Tensor from, Tensor to, boolean allowDiffStates) {
-            MappingsPort mp = IndexMappings.createPort(from.get(0), to.get(0), allowDiffStates);
+        public IndexMappingProvider create(IndexMappingProvider opu, Tensor from, Tensor to) {
+            MappingsPort mp = IndexMappings.createPort(from.get(0), to.get(0));
             IndexMappingBuffer buffer;
 
             byte state = 0;
@@ -61,8 +61,8 @@ public class ProviderFunctions {
     static final IndexMappingProviderFactory EVEN_FACTORY = new IndexMappingProviderFactory() {
 
         @Override
-        public IndexMappingProvider create(IndexMappingProvider opu, Tensor from, Tensor to, boolean allowDiffStates) {
-            if (IndexMappings.createPort(from.get(0), to.get(0), allowDiffStates).take() != null)
+        public IndexMappingProvider create(IndexMappingProvider opu, Tensor from, Tensor to) {
+            if (IndexMappings.createPort(from.get(0), to.get(0)).take() != null)
                 return new DummyIndexMappingProvider(opu);
             return IndexMappingProvider.Util.EMPTY_PROVIDER;
         }

@@ -129,7 +129,7 @@ public final class SumBuilder implements TensorBuilder {
             int[] fromIndices = u.getIndices().getFreeIndices().getAllIndices().copy();
             for (int i = 0; i < fromIndices.length; ++i)
                 fromIndices[i] = IndicesUtils.getNameWithType(fromIndices[i]);
-            buffer = IndexMappings.createPort(new IndexMappingBufferTester(fromIndices, false, CC.withMetric()), u, v).take();
+            buffer = IndexMappings.createPort(new IndexMappingBufferTester(fromIndices, false), u, v).take();
         }
         if (buffer == null)
             return null;

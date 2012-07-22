@@ -97,10 +97,6 @@ public final class Context {
         nameManager.setKroneckerName(name);
     }
 
-    public boolean withMetric() {
-        return true;
-    }
-
     public boolean isKronecker(SimpleTensor t) {
         return nameManager.isKroneckerOrMetric(t.getName())
                 && !IndicesUtils.haveEqualStates(t.getIndices().get(0), t.getIndices().get(1));
@@ -117,6 +113,17 @@ public final class Context {
 
     public ParseManager getParseManager() {
         return parseManager;
+    }
+
+    /**
+     * Returns true if metric is defined for specified index type.
+     *
+     * @param type index type
+     *
+     * @return true if metric is defined for specified index type
+     */
+    public boolean isMetric(byte type) {
+        return metricTypes.get(type);
     }
 
     public SimpleTensor createKronecker(int index1, int index2) {

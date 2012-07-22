@@ -23,7 +23,6 @@
 package cc.redberry.core.indexmapping;
 
 import cc.redberry.concurrent.OutputPortUnsafe;
-import cc.redberry.core.context.CC;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.tensor.*;
 import cc.redberry.core.tensor.functions.*;
@@ -41,8 +40,8 @@ public final class IndexMappings {
     private IndexMappings() {
     }
 
-    public static MappingsPort simpleTensorsPort(SimpleTensor from, SimpleTensor to, boolean allowDiffStates) {
-        final IndexMappingProvider provider = ProviderSimpleTensor.FACTORY_SIMPLETENSOR.create(IndexMappingProvider.Util.singleton(new IndexMappingBufferImpl(allowDiffStates)), from, to, allowDiffStates);
+    public static MappingsPort simpleTensorsPort(SimpleTensor from, SimpleTensor to) {
+        final IndexMappingProvider provider = ProviderSimpleTensor.FACTORY_SIMPLETENSOR.create(IndexMappingProvider.Util.singleton(new IndexMappingBufferImpl()), from, to);
         provider.tick();
         return new MappingsPort() {
 
@@ -71,11 +70,7 @@ public final class IndexMappings {
 //        };
 //    }
     public static MappingsPort createPort(Tensor from, Tensor to) {
-        return createPort(from, to, CC.withMetric());
-    }
-
-    public static MappingsPort createPort(Tensor from, Tensor to, boolean allowDiffStates) {
-        final IndexMappingProvider provider = createPort(IndexMappingProvider.Util.singleton(new IndexMappingBufferImpl(allowDiffStates)), from, to, allowDiffStates);
+        final IndexMappingProvider provider = createPort(IndexMappingProvider.Util.singleton(new IndexMappingBufferImpl()), from, to);
         provider.tick();
         return new MappingsPort() {
 
@@ -91,7 +86,7 @@ public final class IndexMappings {
 
     public static MappingsPort createPort(final IndexMappingBuffer buffer,
                                           final Tensor from, final Tensor to) {
-        final IndexMappingProvider provider = createPort(IndexMappingProvider.Util.singleton(buffer), from, to, buffer.allowDiffStates());
+        final IndexMappingProvider provider = createPort(IndexMappingProvider.Util.singleton(buffer), from, to);
         provider.tick();
         return new MappingsPort() {
 
@@ -105,15 +100,15 @@ public final class IndexMappings {
         };
     }
 
-    public static IndexMappingBuffer getFirst(Tensor from, Tensor to, final boolean allowDiffStates) {
-        return createPort(from, to, allowDiffStates).take();
+    public static IndexMappingBuffer getFirst(Tensor from, Tensor to) {
+        return createPort(from, to).take();
     }
 
-    public static boolean mappingExists(Tensor from, Tensor to, final boolean allowDiffStates) {
-        return getFirst(from, to, allowDiffStates) != null;
+    public static boolean mappingExists(Tensor from, Tensor to) {
+        return getFirst(from, to) != null;
     }
 
-    public static boolean testMapping(Tensor from, Tensor to, boolean allowDiffStates, IndexMappingBuffer buffer) {
+    public static boolean testMapping(Tensor from, Tensor to, IndexMappingBuffer buffer) {
         IndexMappingBufferTester tester = IndexMappingBufferTester.create(buffer);
         OutputPortUnsafe<IndexMappingBuffer> provider = createPort(tester, from, to);
         return provider.take() != null;
@@ -127,7 +122,7 @@ public final class IndexMappings {
             return null;
     }
 
-    static IndexMappingProvider createPort(IndexMappingProvider opu, Tensor from, Tensor to, final boolean allowDiffStates) {
+    static IndexMappingProvider createPort(IndexMappingProvider opu, Tensor from, Tensor to) {
         if (from.hashCode() != to.hashCode())
             return IndexMappingProvider.Util.EMPTY_PROVIDER;
 
@@ -140,7 +135,7 @@ public final class IndexMappings {
                     return IndexMappingProvider.Util.EMPTY_PROVIDER;
 
                 if ((nonComplex = extractNonComplexFactor(from)) != null)
-                    return new MinusIndexMappingProviderWrapper(createPort(opu, nonComplex, to, allowDiffStates));
+                    return new MinusIndexMappingProviderWrapper(createPort(opu, nonComplex, to));
                 return IndexMappingProvider.Util.EMPTY_PROVIDER;
             }
 
@@ -149,7 +144,7 @@ public final class IndexMappings {
                 if (to.size() != 2)
                     return IndexMappingProvider.Util.EMPTY_PROVIDER;
                 if ((nonComplex = extractNonComplexFactor(to)) != null)
-                    return new MinusIndexMappingProviderWrapper(createPort(opu, from, nonComplex, allowDiffStates));
+                    return new MinusIndexMappingProviderWrapper(createPort(opu, from, nonComplex));
                 return IndexMappingProvider.Util.EMPTY_PROVIDER;
             }
 
@@ -160,7 +155,7 @@ public final class IndexMappings {
         if (factory == null)
             throw new RuntimeException("Unsupported tensor type: " + from.getClass());
 
-        return factory.create(opu, from, to, allowDiffStates);
+        return factory.create(opu, from, to);
     }
     private static final Map<Class, IndexMappingProviderFactory> map;
 
@@ -192,11 +187,7 @@ public final class IndexMappings {
         return res;
     }
 
-    public static Set<IndexMappingBuffer> createAllMappings(Tensor from, Tensor to, boolean allowDiffStates) {
-        return createAllMappings(IndexMappings.createPort(from, to, allowDiffStates));
-    }
-
     public static Set<IndexMappingBuffer> createAllMappings(Tensor from, Tensor to) {
-        return createAllMappings(IndexMappings.createPort(from, to, CC.withMetric()));
+        return createAllMappings(IndexMappings.createPort(from, to));
     }
 }

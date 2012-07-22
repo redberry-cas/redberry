@@ -83,6 +83,8 @@ public final class ApplyIndexMapping implements Transformation {
     }
 
     public static Tensor applyIndexMapping(Tensor tensor, IndexMappingBuffer buffer, int[] forbidden) {
+        if (buffer == null)
+            throw new NullPointerException("Buffer is null.");
         Map<Integer, IndexMappingBufferRecord> map = buffer.getMap();
         int[] from = new int[map.size()], to = new int[map.size()];
         int count = 0;

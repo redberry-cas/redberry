@@ -39,14 +39,14 @@ public final class IndexMappingBufferTester implements IndexMappingBuffer {
     private final int[] from, to;
     private final boolean signum;
 
-    public IndexMappingBufferTester(int[] from, boolean signum, final boolean allowDiffStates) {
+    public IndexMappingBufferTester(int[] from, boolean signum) {
         Arrays.sort(from);
         this.from = this.to = from;
         this.signum = signum;
-        innerBuffer = new IndexMappingBufferImpl(allowDiffStates);
+        innerBuffer = new IndexMappingBufferImpl();
     }
 
-    public IndexMappingBufferTester(int[] from, int[] to, boolean signum, boolean allowDiffStates) {
+    public IndexMappingBufferTester(int[] from, int[] to, boolean signum) {
         if (from.length != to.length)
             throw new IllegalArgumentException();
         this.from = from;
@@ -54,7 +54,7 @@ public final class IndexMappingBufferTester implements IndexMappingBuffer {
         this.signum = signum;
         //Here we can use unstable sort method
         ArraysUtils.quickSort(this.from, this.to);
-        innerBuffer = new IndexMappingBufferImpl(allowDiffStates);
+        innerBuffer = new IndexMappingBufferImpl();
     }
 
     private IndexMappingBufferTester(IndexMappingBufferImpl buffer) {
@@ -69,7 +69,7 @@ public final class IndexMappingBufferTester implements IndexMappingBuffer {
             to[i++] = entry.getValue().getIndexName();
         }
         ArraysUtils.quickSort(this.from, this.to);
-        innerBuffer = new IndexMappingBufferImpl(buffer.allowDiffStates());
+        innerBuffer = new IndexMappingBufferImpl();
     }
 
     private IndexMappingBufferTester(IndexMappingBufferTester buffer) {
@@ -85,7 +85,7 @@ public final class IndexMappingBufferTester implements IndexMappingBuffer {
             to[i++] = entry.getValue().getIndexName();
         }
         ArraysUtils.quickSort(this.from, this.to);
-        innerBuffer = new IndexMappingBufferImpl(buffer.allowDiffStates());
+        innerBuffer = new IndexMappingBufferImpl();
     }
 
     private IndexMappingBufferTester(IndexMappingBufferImpl innerBuffer, int[] from, int[] to, boolean signum) {
@@ -106,7 +106,7 @@ public final class IndexMappingBufferTester implements IndexMappingBuffer {
     static boolean test(IndexMappingBufferTester tester, Tensor from, Tensor to) {
         tester.reset();
         final IndexMappingProvider provider =
-                IndexMappings.createPort(IndexMappingProvider.Util.singleton(tester), from, to, tester.allowDiffStates());
+                IndexMappings.createPort(IndexMappingProvider.Util.singleton(tester), from, to);
         provider.tick();
         IndexMappingBuffer buffer;
         while ((buffer = provider.take()) != null)
@@ -128,11 +128,6 @@ public final class IndexMappingBufferTester implements IndexMappingBuffer {
     @Override
     public void addSignum(boolean signum) {
         innerBuffer.addSignum(signum);
-    }
-
-    @Override
-    public boolean allowDiffStates() {
-        return innerBuffer.allowDiffStates();
     }
 
     @Override
@@ -161,7 +156,7 @@ public final class IndexMappingBufferTester implements IndexMappingBuffer {
     }
 
     public void reset() {
-        innerBuffer = new IndexMappingBufferImpl(innerBuffer.allowDiffStates());
+        innerBuffer = new IndexMappingBufferImpl();
     }
 
     @Override
