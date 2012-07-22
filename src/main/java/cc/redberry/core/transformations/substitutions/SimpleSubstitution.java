@@ -58,7 +58,7 @@ class SimpleSubstitution implements Transformation {
         Tensor current;
         while ((current = iterator.next()) != null) {
             IndexMappingBuffer buffer =
-                    IndexMappings.getFirst(from, current, true);
+                    IndexMappings.getFirst(from, current);
             if (buffer == null)
                 continue;
             Tensor newTo;

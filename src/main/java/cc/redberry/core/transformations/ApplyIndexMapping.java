@@ -83,6 +83,8 @@ public final class ApplyIndexMapping implements Transformation {
     }
 
     public static Tensor applyIndexMapping(Tensor tensor, IndexMappingBuffer buffer, int[] forbidden) {
+        if (buffer == null)
+            throw new NullPointerException("Buffer is null.");
         Map<Integer, IndexMappingBufferRecord> map = buffer.getMap();
         int[] from = new int[map.size()], to = new int[map.size()];
         int count = 0;
@@ -189,8 +191,6 @@ public final class ApplyIndexMapping implements Transformation {
             if (oldIndices != newIndices)
                 if (simpleTensor instanceof TensorField)
                     iterator.set(Tensors.setIndicesToField((TensorField) simpleTensor, newIndices));
-                else if (Tensors.isKroneckerOrMetric(simpleTensor))
-                    iterator.set(Tensors.createMetricOrKronecker(newIndices.get(0), newIndices.get(1)));
                 else
                     iterator.set(Tensors.setIndicesToSimpleTensor(simpleTensor, newIndices));
         }

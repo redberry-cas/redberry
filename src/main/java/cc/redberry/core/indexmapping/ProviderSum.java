@@ -38,19 +38,19 @@ final class ProviderSum implements IndexMappingProvider {
     static final IndexMappingProviderFactory FACTORY = new IndexMappingProviderFactory() {
 
         @Override
-        public IndexMappingProvider create(IndexMappingProvider opu, Tensor from, Tensor to, boolean allowDiffStates) {
+        public IndexMappingProvider create(IndexMappingProvider opu, Tensor from, Tensor to) {
             if (from.size() != to.size())
                 return IndexMappingProvider.Util.EMPTY_PROVIDER;
             for (int i = 0; i < from.size(); ++i)
                 if (from.get(i).hashCode() != to.get(i).hashCode())
                     return IndexMappingProvider.Util.EMPTY_PROVIDER;
-            return new ProviderSum(opu, from, to, allowDiffStates);
+            return new ProviderSum(opu, from, to);
         }
     };
     private final IndexMappingProvider mainProvider;
     private final Tester[] testers;
 
-    private ProviderSum(IndexMappingProvider opu, Tensor from, Tensor to, boolean allowDiffStates) {
+    private ProviderSum(IndexMappingProvider opu, Tensor from, Tensor to) {
         int begin = 0;
 
         //Search for main source
@@ -78,7 +78,7 @@ final class ProviderSum implements IndexMappingProvider {
             }
         if (mainStretchLength == 1) {
             this.mainProvider = IndexMappings.createPort(opu, from.get(mainStretchCoord),
-                                                         to.get(mainStretchCoord), allowDiffStates);
+                                                         to.get(mainStretchCoord));
             testersList.remove(mainStretchIndex);
         } else {
             final Tensor[] preFrom = from.getRange(mainStretchCoord,

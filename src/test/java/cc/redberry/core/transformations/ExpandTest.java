@@ -121,7 +121,7 @@ public class ExpandTest {
 //        Assert.assertTrue(TensorUtils.equals(actual, expected));
     }
 
-    @Test(timeout = 200)
+    @Test(timeout = 400)
     public void test9Concurrent() {
         for (int i = 0; i < 100; ++i) {
             CC.resetTensorNames();

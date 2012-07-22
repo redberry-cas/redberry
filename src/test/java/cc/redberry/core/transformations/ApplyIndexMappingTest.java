@@ -47,7 +47,7 @@ public class ApplyIndexMappingTest {
     public void testSimple1() {
         Tensor from = parse("A_m^n");
         Tensor to = parse("A_a^a");
-        IndexMappingBuffer imb = IndexMappings.getFirst(from, to, false);
+        IndexMappingBuffer imb = IndexMappings.getFirst(from, to);
 
         Tensor target = parse("A_m^n");
         target = ApplyIndexMapping.applyIndexMapping(target, imb, new int[0]);
@@ -60,7 +60,7 @@ public class ApplyIndexMappingTest {
     public void testSimple2() {
         Tensor from = parse("g_ab");
         Tensor to = parse("g^mn");
-        IndexMappingBuffer imb = IndexMappings.getFirst(from, to, true);
+        IndexMappingBuffer imb = IndexMappings.getFirst(from, to);
 
         Tensor target = parse("g_ab");
         target = ApplyIndexMapping.applyIndexMapping(target, imb, new int[0]);
@@ -73,7 +73,7 @@ public class ApplyIndexMappingTest {
     public void testSum1() {
         Tensor from = parse("A_mn");
         Tensor to = parse("A_cd");
-        IndexMappingBuffer imb = IndexMappings.getFirst(from, to, false);
+        IndexMappingBuffer imb = IndexMappings.getFirst(from, to);
 
 
         Tensor target = parse("C_mn+D_nm");
@@ -87,7 +87,7 @@ public class ApplyIndexMappingTest {
     public void testSum2() {
         Tensor from = parse("A_mn");
         Tensor to = parse("A_cd");
-        IndexMappingBuffer imb = IndexMappings.getFirst(from, to, false);
+        IndexMappingBuffer imb = IndexMappings.getFirst(from, to);
 
 
         Tensor target = parse("(C_ms+D_ms)*F^s_n");
@@ -101,7 +101,7 @@ public class ApplyIndexMappingTest {
     public void testSum3() {
         Tensor from = parse("A_mn");
         Tensor to = parse("A_cd");
-        IndexMappingBuffer imb = IndexMappings.getFirst(from, to, false);
+        IndexMappingBuffer imb = IndexMappings.getFirst(from, to);
         Tensor target = parse("(C_md+D_md)*F^d_n");
         target = ApplyIndexMapping.applyIndexMapping(target, imb);
         Tensor standard = parse("(C_{ca}+D_{ca})*F^{a}_{d}");
@@ -112,7 +112,7 @@ public class ApplyIndexMappingTest {
     public void testSum4() {
         Tensor from = parse("A_abmn");
         Tensor to = parse("A_acdx");
-        IndexMappingBuffer imb = IndexMappings.getFirst(from, to, false);
+        IndexMappingBuffer imb = IndexMappings.getFirst(from, to);
         Tensor target = parse("(C_mdb+D_mdb)*F^d_na");
         target = ApplyIndexMapping.applyIndexMapping(target, imb);
         Tensor standard = parse("(C_dbc+D_dbc)*F^b_xa");
@@ -123,7 +123,7 @@ public class ApplyIndexMappingTest {
     public void testSum5() {
         Tensor from = parse("A_abcd");
         Tensor to = parse("A_wxyz");
-        IndexMappingBuffer imb = IndexMappings.getFirst(from, to, false);
+        IndexMappingBuffer imb = IndexMappings.getFirst(from, to);
         int[] usedIndices = parse("B_mn").getIndices().getAllIndices().copy();
         Tensor target = parse("(A_mn*B^mn_ab+C_ab)*C^dc");
         target = ApplyIndexMapping.applyIndexMapping(target, imb, usedIndices);
@@ -135,7 +135,7 @@ public class ApplyIndexMappingTest {
     public void testSum6() {
         Tensor from = parse("A_abcd");
         Tensor to = parse("A^wxyz");
-        IndexMappingBuffer imb = IndexMappings.getFirst(from, to, true);
+        IndexMappingBuffer imb = IndexMappings.getFirst(from, to);
         int[] usedIndices = parse("B_an").getIndices().getAllIndices().copy();
         Tensor target = parse("A_{ab jxk}*B^{jxk}_dc+A_{bd ujxk}*B^{ujxk}_ac");
         target = ApplyIndexMapping.applyIndexMapping(target, imb, usedIndices);
@@ -147,7 +147,7 @@ public class ApplyIndexMappingTest {
     public void testProduct1() {
         Tensor from = parse("A^ab_cd");
         Tensor to = parse("A^wx_yz");
-        IndexMappingBuffer imb = IndexMappings.getFirst(from, to, false);
+        IndexMappingBuffer imb = IndexMappings.getFirst(from, to);
         int[] usedIndices = parse("B_mn").getIndices().getAllIndices().copy();
 
         Tensor target = parse("A_{a txk}*B^{d txk}_w*A^w_{sqz}*B^{bc sqz}");
@@ -160,7 +160,7 @@ public class ApplyIndexMappingTest {
     public void testProduct2() {
         Tensor from = parse("A_abcd");
         Tensor to = parse("A_wxyz");
-        IndexMappingBuffer imb = IndexMappings.getFirst(from, to, false);
+        IndexMappingBuffer imb = IndexMappings.getFirst(from, to);
         int[] usedIndices = parse("B_ab").getIndices().getAllIndices().copy();
         Tensor target = parse("A_{a qw}^{q d}*B_{er}^{c ty}*D_{b ty}^{er ui}*E_{ui}*a*J^{w}*b");
 
@@ -173,7 +173,7 @@ public class ApplyIndexMappingTest {
     public void testProduct3() {
         Tensor from = parse("A_abcd");
         Tensor to = parse("A_wxyz");
-        IndexMappingBuffer imb = IndexMappings.getFirst(from, to, false);
+        IndexMappingBuffer imb = IndexMappings.getFirst(from, to);
         int[] usedIndices = parse("B_abcd").getIndices().getAllIndices().copy();
         Tensor target = parse("A_{a qw}^{qd}*B_{er}^{c ty}*D_{b ty}^{er ui}*E_{ui}*a*J^{w}*b");
 
@@ -188,7 +188,7 @@ public class ApplyIndexMappingTest {
     public void testFraction1() {
         Tensor from = parse("A_ab");
         Tensor to = parse("A_xy");
-        IndexMappingBuffer imb = IndexMappings.getFirst(from, to, false);
+        IndexMappingBuffer imb = IndexMappings.getFirst(from, to);
 
         Tensor target = parse("(a*b*g_ab)/(A_x*A^x+B_y*B^y)");
         target = ApplyIndexMapping.applyIndexMapping(target, imb);
@@ -200,7 +200,7 @@ public class ApplyIndexMappingTest {
     public void testFraction2() {
         Tensor from = parse("A_ab");
         Tensor to = parse("A_xy");
-        IndexMappingBuffer imb = IndexMappings.getFirst(from, to, false);
+        IndexMappingBuffer imb = IndexMappings.getFirst(from, to);
         int[] usedIndices = parse("B_wxyzabcdmn").getIndices().getAllIndices().copy();
 
         Tensor target = parse("(a*b*g_xm*g^abxm)/(A_xwz*A^xwz+B_y*B^y/(k_max*H^amx))");
@@ -213,7 +213,7 @@ public class ApplyIndexMappingTest {
     public void testField1() {
         Tensor from = parse("A_ab");
         Tensor to = parse("A_xy");
-        IndexMappingBuffer imb = IndexMappings.getFirst(from, to, false);
+        IndexMappingBuffer imb = IndexMappings.getFirst(from, to);
 
         Tensor target = parse("F_ab[g_qw]");
         target = ApplyIndexMapping.applyIndexMapping(target, imb);
@@ -225,7 +225,7 @@ public class ApplyIndexMappingTest {
     public void testField2() {
         Tensor from = parse("A_ab");
         Tensor to = parse("A_xy");
-        IndexMappingBuffer imb = IndexMappings.getFirst(from, to, false);
+        IndexMappingBuffer imb = IndexMappings.getFirst(from, to);
         int[] usedIndices = parse("B_wxyzabcdmn").getIndices().getAllIndices().copy();
 
         Tensor target = parse("F_ab[g_ab*f[h_wxyzabcdmn]]");
@@ -238,7 +238,7 @@ public class ApplyIndexMappingTest {
     public void cloneSensitiveTest1() {
         Tensor from = parse("A_ab");
         Tensor to = parse("A_xy");
-        IndexMappingBuffer imb = IndexMappings.getFirst(from, to, false);
+        IndexMappingBuffer imb = IndexMappings.getFirst(from, to);
         int[] usedIndices = parse("B_md").getIndices().getAllIndices().copy();
 
         Tensor target = parse("A_mb^am+B_bd^kd*C_k^a");
@@ -251,7 +251,7 @@ public class ApplyIndexMappingTest {
     @Test
     public void emptyMapping1() {
         Tensor target = parse("A_mn*(B_m^m+C)*U^mn");
-        target = ApplyIndexMapping.applyIndexMapping(target, new IndexMappingBufferImpl(true));
+        target = ApplyIndexMapping.applyIndexMapping(target, new IndexMappingBufferImpl());
         Tensor standard = parse("A_mn*(B_m^m+C)*U^mn");
         Assert.assertTrue(TensorUtils.equals(target, standard));
     }
@@ -267,7 +267,7 @@ public class ApplyIndexMappingTest {
         addSymmetry("G^a_bc", IndexType.LatinLower, false, 0, 2, 1);
         addSymmetry("g_ab", IndexType.LatinLower, false, 1, 0);
 
-        Set<IndexMappingBuffer> buffers = IndexMappings.createAllMappings(riman1, riman2, false);
+        Set<IndexMappingBuffer> buffers = IndexMappings.createAllMappings(riman1, riman2);
         Tensor[] targets = new Tensor[buffers.size()];
         int i = 0;
         for (IndexMappingBuffer buffer : buffers)
@@ -294,7 +294,7 @@ public class ApplyIndexMappingTest {
         Tensor target = parse("B_mn+D_nm");
         addSymmetry("A_bc", IndexType.LatinLower, false, 1, 0);
 
-        Set<IndexMappingBuffer> buffers = IndexMappings.createAllMappings(t1, t2, false);
+        Set<IndexMappingBuffer> buffers = IndexMappings.createAllMappings(t1, t2);
         Tensor[] targets = new Tensor[buffers.size()];
         int i = -1;
         for (IndexMappingBuffer buffer : buffers)

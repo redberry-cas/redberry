@@ -28,6 +28,19 @@ public final class CC {
         return Context.get();
     }
 
+    /**
+     * Returns true if metric is defined for specified index type in current
+     * context.
+     *
+     * @param type index type
+     *
+     * @return true if metric is defined for specified index type in current
+     *         context
+     */
+    public static boolean isMetric(byte type) {
+        return current().isMetric(type);
+    }
+
     public static NameDescriptor getNameDescriptor(int name) {
         return current().getNameDescriptor(name);
     }
@@ -46,10 +59,6 @@ public final class CC {
 
     public static void setDefaultPrintMode(ToStringMode mode) {
         current().setDefaultPrintMode(mode);
-    }
-
-    public static boolean withMetric() {
-        return current().withMetric();
     }
 
     public static void resetTensorNames() {

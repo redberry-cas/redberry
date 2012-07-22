@@ -302,8 +302,6 @@ public final class ContractIndices implements Transformation {
             SimpleIndices newIndices = oldIndices.applyIndexMapping(im);
             if (oldIndices == newIndices)
                 return t;
-            if (Tensors.isKroneckerOrMetric(t))
-                return Tensors.createMetricOrKronecker(newIndices.get(0), newIndices.get(1));
             return Tensors.simpleTensor(t.getName(), newIndices);
         }
 

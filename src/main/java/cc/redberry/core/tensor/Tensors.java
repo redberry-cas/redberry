@@ -39,25 +39,25 @@ import java.util.Set;
  * @author Stanislav Poslavsky
  */
 public final class Tensors {
-    
+
     private Tensors() {
     }
-    
+
     public static Tensor pow(Tensor argument, int power) {
         return pow(argument, new Complex(power));
     }
-    
+
     public static Tensor pow(Tensor argument, Tensor power) {
         PowerBuilder pb = new PowerBuilder();
         pb.put(argument);
         pb.put(power);
         return pb.build();
     }
-    
+
     public static Tensor multiply(final Tensor... factors) {
         return ProductFactory.FACTORY.create(factors);
     }
-    
+
     public static Tensor multiplyAndRenameConflictingDummies(Tensor... tensors) {
         Tensor t = multiply(tensors);
         if (!(t instanceof Product))
@@ -71,7 +71,7 @@ public final class Tensors {
         Indices indices = p.indices;
         for (i = indices.size() - 1; i >= 0; --i)
             totalIndices.add(IndicesUtils.getNameWithType(indices.get(i)));
-        
+
         int[] forbidden;
         Tensor current;
         //processing indexless data
@@ -104,18 +104,18 @@ public final class Tensors {
         }
         return p;
     }
-    
+
     public static Tensor sum(Tensor... tensors) {
         return SumFactory.FACTORY.create(tensors);
     }
-    
+
     public static SimpleTensor simpleTensor(String name, SimpleIndices indices) {
         NameDescriptor descriptor = CC.getNameManager().mapNameDescriptor(name, indices.getIndicesTypeStructure());
         return new SimpleTensor(descriptor.getId(),
                                 UnsafeIndicesFactory.createOfTensor(descriptor.getSymmetries(),
                                                                     indices));
     }
-    
+
     public static SimpleTensor simpleTensor(int name, SimpleIndices indices) {
         NameDescriptor descriptor = CC.getNameDescriptor(name);
         if (descriptor == null)
@@ -126,14 +126,14 @@ public final class Tensors {
                                 UnsafeIndicesFactory.createOfTensor(descriptor.getSymmetries(),
                                                                     indices));
     }
-    
+
     public static TensorField field(String name, SimpleIndices indices, Tensor[] arguments) {
         SimpleIndices[] argIndices = new SimpleIndices[arguments.length];
         for (int i = 0; i < argIndices.length; ++i)
             argIndices[i] = IndicesFactory.createSimple(null, arguments[i].getIndices().getFreeIndices());
         return field(name, indices, argIndices, arguments);
     }
-    
+
     public static TensorField field(String name, SimpleIndices indices, SimpleIndices[] argIndices, Tensor[] arguments) {
         if (argIndices.length != arguments.length)
             throw new IllegalArgumentException("Argument indices array and arguments array have different length.");
@@ -142,7 +142,7 @@ public final class Tensors {
         for (int i = 0; i < argIndices.length; ++i)
             if (!arguments[i].getIndices().getFreeIndices().equalsRegardlessOrder(argIndices[i]))
                 throw new IllegalArgumentException("Arguments indices are inconsistent with arguments.");
-        
+
         IndicesTypeStructure[] structures = new IndicesTypeStructure[argIndices.length + 1];
         structures[0] = indices.getIndicesTypeStructure();
         for (int i = 0; i < argIndices.length; ++i)
@@ -152,7 +152,7 @@ public final class Tensors {
                                UnsafeIndicesFactory.createOfTensor(descriptor.getSymmetries(), indices),
                                arguments, argIndices);
     }
-    
+
     public static TensorField field(int name, SimpleIndices indices, SimpleIndices[] argIndices, Tensor[] arguments) {
         if (argIndices.length != arguments.length)
             throw new IllegalArgumentException("Argument indices array and arguments array have different length.");
@@ -177,7 +177,7 @@ public final class Tensors {
                                UnsafeIndicesFactory.createOfTensor(descriptor.getSymmetries(), indices),
                                arguments, argIndices);
     }
-    
+
     public static TensorField field(int name, SimpleIndices indices, Tensor[] arguments) {
         if (arguments.length == 0)
             throw new IllegalArgumentException("No arguments in field.");
@@ -193,118 +193,124 @@ public final class Tensors {
                                UnsafeIndicesFactory.createOfTensor(descriptor.getSymmetries(), indices),
                                arguments, argIndices);
     }
-    
+
     public static TensorField setIndicesToField(TensorField field, SimpleIndices newIndices) {
         NameDescriptor descriptor = CC.getNameDescriptor(field.name);
         if (!descriptor.getIndicesTypeStructure().isStructureOf(newIndices))
             throw new IllegalArgumentException("Specified indices are not indices of specified tensor.");
         return new TensorField(field.name, newIndices, field.args, field.argIndices);
     }
-    
+
     public static SimpleTensor setIndicesToSimpleTensor(SimpleTensor simpleTensor, SimpleIndices newIndices) {
         NameDescriptor descriptor = CC.getNameDescriptor(simpleTensor.name);
         if (!descriptor.getIndicesTypeStructure().isStructureOf(newIndices))
             throw new IllegalArgumentException("Specified indices are not indices of specified tensor.");
         return new SimpleTensor(simpleTensor.name, UnsafeIndicesFactory.createOfTensor(descriptor.getSymmetries(), newIndices));
     }
-    
+
     public static Expression expression(Tensor left, Tensor right) {
         return ExpressionFactory.FACTORY.create(left, right);
     }
-    
+
     public static Tensor sin(Tensor argument) {
         return Sin.SinFactory.FACTORY.create(argument);
     }
-    
+
     public static Tensor cos(Tensor argument) {
         return Cos.CosFactory.FACTORY.create(argument);
     }
-    
+
     public static Tensor tan(Tensor argument) {
         return Tan.TanFactory.FACTORY.create(argument);
     }
-    
+
     public static Tensor cot(Tensor argument) {
         return Cot.CotFactory.FACTORY.create(argument);
     }
-    
+
     public static Tensor arcsin(Tensor argument) {
         return ArcSin.ArcSinFactory.FACTORY.create(argument);
     }
-    
+
     public static Tensor arccos(Tensor argument) {
         return ArcCos.ArcCosFactory.FACTORY.create(argument);
     }
-    
+
     public static Tensor arctan(Tensor argument) {
         return ArcTan.ArcTanFactory.FACTORY.create(argument);
     }
-    
+
     public static Tensor arccot(Tensor argument) {
         return ArcCot.ArcCotFactory.FACTORY.create(argument);
     }
-    
+
     public static Tensor log(Tensor argument) {
         return Log.LogFactory.FACTORY.create(argument);
     }
-    
+
     public static Tensor exp(Tensor argument) {
         return Exp.ExpFactory.FACTORY.create(argument);
     }
-    
+
     public static SimpleTensor createKronecker(int index1, int index2) {
         return CC.current().createKronecker(index1, index2);
     }
-    
+
     public static SimpleTensor createMetric(int index1, int index2) {
         return CC.current().createMetric(index1, index2);
     }
-    
+
     public static SimpleTensor createMetricOrKronecker(int index1, int index2) {
         return CC.current().createMetricOrKronecker(index1, index2);
     }
-    
+
     public static boolean isKronecker(Tensor t) {
         if (!(t instanceof SimpleTensor))
             return false;
         return CC.current().isKronecker((SimpleTensor) t);
     }
-    
+
     public static boolean isMetric(Tensor t) {
         if (!(t instanceof SimpleTensor))
             return false;
         return CC.current().isMetric((SimpleTensor) t);
     }
-    
+
     public static boolean isKroneckerOrMetric(Tensor t) {
-        return isKronecker(t) || isMetric(t);
+        if (!(t instanceof SimpleTensor))
+            return false;
+        return CC.current().isKroneckerOrMetric((SimpleTensor) t);
     }
-    
+
+    public static boolean isKroneckerOrMetric(SimpleTensor t) {
+        return CC.current().isKroneckerOrMetric(t);
+    }
+
     public static Tensor parse(String expression) {
         return CC.current().getParseManager().parse(expression);
     }
-    
+
     public static SimpleTensor parseSimple(String expression) {
         Tensor t = CC.current().getParseManager().parse(expression);
         if (!(t instanceof SimpleTensor))
             throw new IllegalArgumentException("Input tensor is not SimpleTensor.");
         return (SimpleTensor) t;
     }
-    
+
     public static void addSymmetry(String tensor, IndexType type, boolean sign, int... symmetry) {
         parseSimple(tensor).getIndices().getSymmetries().add(type.getType(), new Symmetry(symmetry, sign));
     }
-    
+
     public static void addSymmetry(SimpleTensor tensor, IndexType type, boolean sign, int... symmetry) {
         tensor.getIndices().getSymmetries().add(type.getType(), new Symmetry(symmetry, sign));
     }
-    
+
     public static Tensor negate(Tensor tensor) {
         if (tensor instanceof Complex)
             return ((Complex) tensor).negate();
         return multiply(Complex.MINUSE_ONE, tensor);
     }
-    
+
     public static Tensor multiplySumElementsOnFactor(Sum sum, Tensor factor) {
         if (TensorUtils.isZero(factor))
             return Complex.ZERO;
@@ -315,7 +321,7 @@ public final class Tensors {
             newSumData[i] = multiply(factor, sum.get(i));
         return new Sum(newSumData, IndicesFactory.createSorted(newSumData[0].getIndices().getFreeIndices()));
     }
-    
+
     public static Tensor multiplySumElementsOnFactorAndExpandScalars(Sum sum, Tensor factor) {
         if (TensorUtils.isZero(factor))
             return Complex.ZERO;

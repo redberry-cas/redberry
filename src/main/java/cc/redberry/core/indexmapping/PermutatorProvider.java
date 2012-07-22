@@ -34,14 +34,12 @@ final class PermutatorProvider extends IndexMappingProviderAbstract {
     private final IntPermutationsGenerator generator;
     private final Tensor[] from, to;
     private SimpleProductProvider currentProvider = null;
-    private final boolean allowDiffStates;
-
+   
     PermutatorProvider(final MappingsPort opu,
-            final Tensor[] from, final Tensor[] to, boolean allowDiffStates) {
+            final Tensor[] from, final Tensor[] to) {
         super(opu);
         this.from = from;
         this.to = to;
-        this.allowDiffStates = allowDiffStates;
         generator = new IntPermutationsGenerator(from.length);
     }
 
@@ -61,7 +59,7 @@ final class PermutatorProvider extends IndexMappingProviderAbstract {
             final Tensor[] newTo = new Tensor[to.length];
             for (int i = 0; i < to.length; ++i)
                 newTo[i] = to[permutation[i]];
-            currentProvider = new SimpleProductProvider(IndexMappingProvider.Util.singleton(currentBuffer.clone()), from, newTo, allowDiffStates);
+            currentProvider = new SimpleProductProvider(IndexMappingProvider.Util.singleton(currentBuffer.clone()), from, newTo);
             final IndexMappingBuffer buffer = currentProvider.take();
             if (buffer != null)
                 return buffer;

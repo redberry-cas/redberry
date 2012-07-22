@@ -22,7 +22,7 @@
  */
 package cc.redberry.core;
 
-import cc.redberry.core.context.CC;
+import cc.redberry.core.context.ContextManager;
 import org.junit.runner.Description;
 import org.junit.runner.notification.RunListener;
 
@@ -33,11 +33,10 @@ import org.junit.runner.notification.RunListener;
 public class GlobalRunListener extends RunListener {
 
     public GlobalRunListener() {
-        System.out.println("UGxU!");
     }
 
     @Override
     public void testStarted(Description description) throws Exception {
-        CC.resetTensorNames();
+        ContextManager.initializeNew();
     }
 }

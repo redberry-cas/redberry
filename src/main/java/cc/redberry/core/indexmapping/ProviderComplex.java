@@ -36,8 +36,7 @@ final class ProviderComplex {
         @Override
         public IndexMappingProvider create(final IndexMappingProvider opu,
                                            final Tensor from,
-                                           final Tensor to,
-                                           boolean allowDiffStates) {
+                                           final Tensor to) {
             if (from.equals(to))
                 if (((Complex) from).isZero())
                     return new PlusMinusIndexMappingProvider(opu);

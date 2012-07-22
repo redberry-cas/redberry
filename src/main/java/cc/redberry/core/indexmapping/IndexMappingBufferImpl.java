@@ -22,9 +22,9 @@
  */
 package cc.redberry.core.indexmapping;
 
-import cc.redberry.core.context.Context;
-import cc.redberry.core.context.ToStringMode;
+import cc.redberry.core.context.*;
 import cc.redberry.core.indices.IndicesUtils;
+import cc.redberry.core.utils.*;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -40,17 +40,14 @@ public final class IndexMappingBufferImpl implements IndexMappingBuffer {
 
     protected final Map<Integer, IndexMappingBufferRecord> map;
     protected boolean signum = false;
-    private final boolean allowDifferentStates;
 
-    public IndexMappingBufferImpl(boolean allowDifferentStates) {
+    public IndexMappingBufferImpl() {
         this.map = new HashMap<>();
-        this.allowDifferentStates = allowDifferentStates;
     }
 
-    private IndexMappingBufferImpl(Map<Integer, IndexMappingBufferRecord> map, boolean signum, boolean allowDifferentStates) {
+    private IndexMappingBufferImpl(Map<Integer, IndexMappingBufferRecord> map, boolean signum) {
         this.map = map;
         this.signum = signum;
-        this.allowDifferentStates = allowDifferentStates;
     }
 
     @Override
@@ -61,7 +58,7 @@ public final class IndexMappingBufferImpl implements IndexMappingBuffer {
     @Override
     public boolean tryMap(int from, int to) {
         int fromState = IndicesUtils.getStateInt(from);
-        if (fromState != IndicesUtils.getStateInt(to) && !allowDifferentStates)
+        if (fromState != IndicesUtils.getStateInt(to) && !CC.isMetric(IndicesUtils.getType(from)))
             return false;
         int fromName = IndicesUtils.getNameWithType(from);
         IndexMappingBufferRecord record = map.get(fromName);
@@ -71,11 +68,6 @@ public final class IndexMappingBufferImpl implements IndexMappingBuffer {
             return true;
         }
         return record.tryMap(from, to);
-    }
-
-    @Override
-    public boolean allowDiffStates() {
-        return allowDifferentStates;
     }
 
     @Override
@@ -106,7 +98,7 @@ public final class IndexMappingBufferImpl implements IndexMappingBuffer {
         Map<Integer, IndexMappingBufferRecord> newMap = new HashMap<>();
         for (Map.Entry<Integer, IndexMappingBufferRecord> entry : map.entrySet())
             newMap.put(entry.getKey(), entry.getValue().clone());
-        return new IndexMappingBufferImpl(newMap, signum, allowDifferentStates);
+        return new IndexMappingBufferImpl(newMap, signum);
     }
 
     @Override

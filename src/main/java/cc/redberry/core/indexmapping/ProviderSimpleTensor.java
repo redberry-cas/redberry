@@ -39,7 +39,7 @@ final class ProviderSimpleTensor extends IndexMappingProviderAbstractFT<SimpleTe
     public static final IndexMappingProviderFactory FACTORY_SIMPLETENSOR = new IndexMappingProviderFactory() {
 
         @Override
-        public IndexMappingProvider create(IndexMappingProvider opu, Tensor from, Tensor to, boolean allowDiffStates) {
+        public IndexMappingProvider create(IndexMappingProvider opu, Tensor from, Tensor to) {
             if (((SimpleTensor) from).getName() != ((SimpleTensor) to).getName())
                 return IndexMappingProvider.Util.EMPTY_PROVIDER;
             if(from.getIndices().size() == 0)
@@ -50,11 +50,11 @@ final class ProviderSimpleTensor extends IndexMappingProviderAbstractFT<SimpleTe
     public static final IndexMappingProviderFactory FACTORY_TENSORFIELD = new IndexMappingProviderFactory() {
 
         @Override
-        public IndexMappingProvider create(IndexMappingProvider opu, Tensor from, Tensor to, boolean allowDiffStates) {
+        public IndexMappingProvider create(IndexMappingProvider opu, Tensor from, Tensor to) {
             if (((TensorField) from).getName() != ((TensorField) to).getName())
                 return IndexMappingProvider.Util.EMPTY_PROVIDER;
             for (int i = 0; i < from.size(); ++i)
-                if (!IndexMappings.mappingExists(from.get(i), to.get(i), allowDiffStates))
+                if (!IndexMappings.mappingExists(from.get(i), to.get(i)))
                     return IndexMappingProvider.Util.EMPTY_PROVIDER;
             return new ProviderSimpleTensor(opu, (SimpleTensor) from, (SimpleTensor) to);
         }

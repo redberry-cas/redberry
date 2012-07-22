@@ -258,7 +258,7 @@ public class TensorUtils {
         if (!freeIndices.equalsRegardlessOrder(v.getIndices().getFreeIndices()))
             return false;
         int[] free = freeIndices.getAllIndices().copy();
-        IndexMappingBuffer tester = new IndexMappingBufferTester(free, false, CC.withMetric());
+        IndexMappingBuffer tester = new IndexMappingBufferTester(free, false);
         MappingsPort mp = IndexMappings.createPort(tester, u, v);
         IndexMappingBuffer buffer;
 
@@ -274,7 +274,7 @@ public class TensorUtils {
         if (!freeIndices.equalsRegardlessOrder(v.getIndices().getFreeIndices()))
             return false;
         int[] free = freeIndices.getAllIndices().copy();
-        IndexMappingBuffer tester = new IndexMappingBufferTester(free, false, CC.withMetric());
+        IndexMappingBuffer tester = new IndexMappingBufferTester(free, false);
         IndexMappingBuffer buffer = IndexMappings.createPort(tester, u, v).take();
         if (buffer == null)
             return null;

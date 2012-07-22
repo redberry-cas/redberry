@@ -22,7 +22,8 @@
  */
 package cc.redberry.core.context;
 
-import cc.redberry.core.indices.IndicesTypeStructure;
+import cc.redberry.core.indices.*;
+import cc.redberry.core.utils.*;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.locks.Lock;
@@ -34,7 +35,7 @@ import org.apache.commons.math3.random.Well44497b;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public class NameManager {
+public final class NameManager {
 
     private long seed;
     private final RandomGenerator random;
@@ -42,34 +43,93 @@ public class NameManager {
     private final Lock readLock = readWriteLock.readLock();
     private final Lock writeLock = readWriteLock.writeLock();
     private final Map<Integer, NameDescriptor> fromId = new HashMap<>();
-    private final Map<NameDescriptor.IndicesTypeStructureAndName, NameDescriptor> fromStructure = new HashMap<>();
+    private final Map<IndicesTypeStructureAndName, NameDescriptor> fromStructure = new HashMap<>();
+    private final String[] kroneckerAndMetricNames = {"d", "g"};
+    private final IntArrayList kroneckerAndMetricIds = new IntArrayList();
 
-    NameManager(Long seed) {
+    NameManager(Long seed, String kronecker, String metric) {
         if (seed == null) {
             //FUTURE what is the best bit provider at this point???
             random = new Well44497b();
             random.setSeed(this.seed = random.nextLong());
         } else
             random = new Well44497b(this.seed = seed.longValue());
+        kroneckerAndMetricNames[0] = kronecker;
+        kroneckerAndMetricNames[1] = metric;
+    }
+
+    public boolean isKroneckerOrMetric(int name) {
+        return ArraysUtils.binarySearch(kroneckerAndMetricIds, name) >= 0;
+    }
+
+    public String getKroneckerName() {
+        return kroneckerAndMetricNames[0];
+    }
+
+    public String getMetricName() {
+        return kroneckerAndMetricNames[1];
+    }
+
+    public void setKroneckerName(String name) {
+        kroneckerAndMetricNames[0] = name;
+        rebuild();
+    }
+
+    public void setMetricName(String name) {
+        kroneckerAndMetricNames[1] = name;
+        rebuild();
+    }
+
+    private void rebuild() {
+        writeLock.lock();
+        try {
+            fromStructure.clear();
+            for (NameDescriptor descriptor : fromId.values())
+                for (IndicesTypeStructureAndName itsan : descriptor.getKeys())
+                    fromStructure.put(itsan, descriptor);
+        } finally {
+            writeLock.unlock();
+        }
+    }
+
+    private NameDescriptor createDescriptor(final String sname, final IndicesTypeStructure[] indicesTypeStructures, int id) {
+        if (indicesTypeStructures.length != 1)
+            return new NameDescriptorImpl(sname, indicesTypeStructures, id);
+        final IndicesTypeStructure its = indicesTypeStructures[0];
+        if (its.size() != 2)
+            return new NameDescriptorImpl(sname, indicesTypeStructures, id);
+        for (byte b = 0; b < IndexType.TYPES_COUNT; ++b)
+            if (its.typeCount(b) == 2)
+                if (sname.equals(kroneckerAndMetricNames[0]) || sname.equals(kroneckerAndMetricNames[1])) {
+                    NameDescriptor descriptor = new NameDescriptorForMetricAndKronecker(kroneckerAndMetricNames, b, id);
+                    descriptor.getSymmetries().add(b, false, 1, 0);
+                    return descriptor;
+                }
+        return new NameDescriptorImpl(sname, indicesTypeStructures, id);
     }
 
     public NameDescriptor mapNameDescriptor(String sname, IndicesTypeStructure... indicesTypeStructures) {
-        NameDescriptor descriptor = new NameDescriptor(sname, indicesTypeStructures);
+        IndicesTypeStructureAndName key = new IndicesTypeStructureAndName(sname, indicesTypeStructures);
         boolean rLocked = true;
         readLock.lock();
         try {
-            NameDescriptor knownND = fromStructure.get(descriptor.getKey());
+            NameDescriptor knownND = fromStructure.get(key);
             if (knownND == null) {
                 readLock.unlock();
                 rLocked = false;
                 writeLock.lock();
                 try {
-                    knownND = fromStructure.get(descriptor.getKey());
+                    knownND = fromStructure.get(key);
                     if (knownND == null) { //Double check
                         int name = generateNewName();
-                        descriptor.setId(name);
+                        NameDescriptor descriptor = createDescriptor(sname, indicesTypeStructures, name);
+                        if (descriptor instanceof NameDescriptorForMetricAndKronecker) {
+                            kroneckerAndMetricIds.add(name);
+                            kroneckerAndMetricIds.sort();
+                        }
                         fromId.put(name, descriptor);
-                        fromStructure.put(descriptor.getKey(), descriptor);
+                        for (IndicesTypeStructureAndName key1 : descriptor.getKeys())
+                            fromStructure.put(key1, descriptor);
                         return descriptor;
                     }
                     readLock.lock();
@@ -85,50 +145,13 @@ public class NameManager {
         }
     }
 
-    //    public int mapNameDescriptor(NameDescriptor descriptor) {
-    //        if (descriptor
-    //                == null)
-    //            throw new NullPointerException();
-    //        boolean rLocked = true;
-    //        readLock.lock();
-    //        try {
-    //            NameDescriptor knownND =
-    //                    fromStructure.get(descriptor.getKey());
-    //            if (knownND == null) {
-    //                readLock.unlock();
-    //                rLocked = false;
-    //                writeLock.lock();
-    //                try {
-    //                    knownND =
-    //                            fromStructure.get(descriptor.getKey());
-    //                    if (knownND == null) { //Double check
-    //                        int name = generateNewName();
-    //                        descriptor.setId(name);
-    //                        fromId.put(name, descriptor);
-    //                        fromStructure.put(descriptor.getKey(),
-    //                                          descriptor);
-    //                        return descriptor.getId();
-    //                    }
-    //                    readLock.lock();
-    //                    rLocked =
-    //                            true;
-    //                } finally {
-    //                    writeLock.unlock();
-    //                }
-    //            }
-    //            descriptor.setId(knownND.getId());
-    //            return knownND.getId();
-    //        } finally {
-    //            if (rLocked)
-    //                readLock.unlock();
-    //        }
-    //    }
     /**
      * See {@link Context#resetTensorNames()}.
      */
     void reset() {
         writeLock.lock();
         try {
+            kroneckerAndMetricIds.clear();
             fromId.clear();
             fromStructure.clear();
             random.setSeed(this.seed = random.nextLong());
@@ -143,6 +166,7 @@ public class NameManager {
     void reset(long seed) {
         writeLock.lock();
         try {
+            kroneckerAndMetricIds.clear();
             fromId.clear();
             fromStructure.clear();
             random.setSeed(this.seed = seed);

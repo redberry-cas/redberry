@@ -20,16 +20,29 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
-package cc.redberry.core.indexmapping;
+package cc.redberry.core.context;
 
-import cc.redberry.core.tensor.Tensor;
+import cc.redberry.core.indices.IndicesTypeStructure;
+import cc.redberry.core.indices.SimpleIndices;
 
-/**
- *
- * @author Dmitry Bolotin
- * @author Stanislav Poslavsky
- */
-interface IndexMappingProviderFactory {
+final class NameDescriptorImpl extends NameDescriptor {
 
-    IndexMappingProvider create(IndexMappingProvider opu, Tensor from, Tensor to );
+    private final String name;
+    private final IndicesTypeStructureAndName[] key;
+
+    NameDescriptorImpl(String name, IndicesTypeStructure[] indexTypeStructures, int id) {
+        super(indexTypeStructures, id);
+        this.name = name;
+        this.key = new IndicesTypeStructureAndName[]{new IndicesTypeStructureAndName(name, indexTypeStructures)};
+    }
+
+    @Override
+    public String getName(SimpleIndices indices) {
+        return name;
+    }
+
+    @Override
+    IndicesTypeStructureAndName[] getKeys() {
+        return key;
+    }
 }

@@ -75,7 +75,7 @@ public class SumBuilderTest {
         isb.put(parse("(1/2)*Cos[-c]"));
 
         Tensor expected = Tensors.parse("Cos[c]");
-        Assert.assertTrue(IndexMappings.mappingExists(expected, isb.build(), false));
+        Assert.assertTrue(IndexMappings.mappingExists(expected, isb.build()));
     }
 
     @Test
@@ -87,28 +87,28 @@ public class SumBuilderTest {
 
 
         Tensor expected = Tensors.parse("0");
-        Assert.assertTrue(IndexMappings.mappingExists(expected, isb.build(), false));
+        Assert.assertTrue(IndexMappings.mappingExists(expected, isb.build()));
     }
 
     @Test
     public void test6() {
         Tensor t = Tensors.parse("0+a_m^m+2*a_m^m-3*a_m^m+3-3+Sin[x]");
         Tensor expected = Tensors.parse("Sin[x]");
-        Assert.assertTrue(IndexMappings.mappingExists(expected, t, false));
+        Assert.assertTrue(IndexMappings.mappingExists(expected, t));
     }
 
     @Test
     public void test7() {
         Tensor t = Tensors.parse("0*(a_m^m+2*a_m^m-3*a_m^m)+3-3+Sin[x]+Sin[-x]");
         Tensor expected = Tensors.parse("0");
-        Assert.assertTrue(IndexMappings.mappingExists(expected, t, false));
+        Assert.assertTrue(IndexMappings.mappingExists(expected, t));
     }
 
     @Test
     public void test8() {
         Tensor t = Tensors.parse("1/(0*(a_m^m+2*a_m^m-3*a_m^m))+3-3+Sin[x]");
         Tensor expected = Tensors.parse("NaN+I*NaN");
-        Assert.assertTrue(IndexMappings.mappingExists(expected, t, false));
+        Assert.assertTrue(IndexMappings.mappingExists(expected, t));
     }
 
     @Test
@@ -116,27 +116,27 @@ public class SumBuilderTest {
         Tensors.addSymmetry("F_{ab}", IndexType.LatinLower, true, new int[]{1, 0});
         Tensor e = Tensors.parse("F_{mn}*F^{mn}+F_{mn}*F^{nm}");
         Tensor expected = Tensors.parse("0");
-        Assert.assertTrue(IndexMappings.mappingExists(expected, e, false));
+        Assert.assertTrue(IndexMappings.mappingExists(expected, e));
     }
 
     @Test
     public void test10() {
         Tensor e = Tensors.parse("2*f_m+a*f_m");
         Tensor expected = Tensors.parse("(2+a)*f_m");
-        Assert.assertTrue(IndexMappings.mappingExists(expected, e, false));
+        Assert.assertTrue(IndexMappings.mappingExists(expected, e));
     }
 
     @Test
     public void test11() {
         Tensor e = Tensors.parse("0+2*f_m+a*f_m-a*b/b*f_m-f_m");
         Tensor expected = Tensors.parse("f_m");
-        Assert.assertTrue(IndexMappings.mappingExists(expected, e, false));
+        Assert.assertTrue(IndexMappings.mappingExists(expected, e));
     }
 
     @Test
     public void test12() {
         Tensor e = Tensors.parse("2*(A_M+A_M)+A_M");
         Tensor expected = Tensors.parse("5*A__M");
-        Assert.assertTrue(IndexMappings.mappingExists(expected, e, false));
+        Assert.assertTrue(IndexMappings.mappingExists(expected, e));
     }
 }

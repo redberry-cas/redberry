@@ -42,7 +42,7 @@ public class IndexMappingTestUtils {
      */
     @SuppressWarnings("unchecked")
     public static IndexMappingBufferImpl parse(String str) {
-        IndexMappingBufferImpl im = new IndexMappingBufferImpl(true);
+        IndexMappingBufferImpl im = new IndexMappingBufferImpl();
         String[] singleMaps = str.split(";");
         switch (singleMaps[0]) {
             case "+":

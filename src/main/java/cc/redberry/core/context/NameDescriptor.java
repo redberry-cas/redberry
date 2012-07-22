@@ -24,37 +24,39 @@ package cc.redberry.core.context;
 
 import cc.redberry.core.indices.IndicesSymmetries;
 import cc.redberry.core.indices.IndicesTypeStructure;
+import cc.redberry.core.indices.SimpleIndices;
 import java.util.Arrays;
-import java.util.Objects;
 
-public final class NameDescriptor {
+/**
+ *
+ * @author Dmitry Bolotin
+ * @author Stanislav Poslavsky
+ */
+public abstract class NameDescriptor {
 
     //first element is simple tensor indexTypeStructure, other apperars for tensor fields
-    private final IndicesTypeStructure[] indexTypeStructures;
-    private final String name;
-    private final IndicesTypeStructureAndName key;
-    private int id = -1;
+    final IndicesTypeStructure[] indexTypeStructures;
+    private final int id;
     private final IndicesSymmetries symmetries;
 
-    NameDescriptor(String name, IndicesTypeStructure... indexTypeStructures) {
+    NameDescriptor(IndicesTypeStructure[] indexTypeStructures, int id) {
         if (indexTypeStructures.length == 0)
             throw new IllegalArgumentException();
+        this.id=id;
         this.indexTypeStructures = indexTypeStructures;
-        this.name = name;
-        this.key = new IndicesTypeStructureAndName(name, indexTypeStructures);
         this.symmetries = IndicesSymmetries.create(indexTypeStructures[0]);
     }
 
-    public boolean isField() {
-        return indexTypeStructures.length != 1;
-    }
-
-    public String getName() {
-        return name;
+    public int getId() {
+        return id;
     }
 
     public IndicesSymmetries getSymmetries() {
         return symmetries;
+    }
+
+    public boolean isField() {
+        return indexTypeStructures.length != 1;
     }
 
     public IndicesTypeStructure getIndicesTypeStructure() {
@@ -65,52 +67,12 @@ public final class NameDescriptor {
         return indexTypeStructures;
     }
 
-    IndicesTypeStructureAndName getKey() {
-        return key;
-    }
+    abstract IndicesTypeStructureAndName[] getKeys();
 
-    void setId(int id) {
-        assert this.id == -1;
-        this.id = id;
-    }
-
-    public int getId() {
-        return id;
-    }
+    public abstract String getName(SimpleIndices indices);
 
     @Override
     public String toString() {
-        return name + ":" + Arrays.toString(indexTypeStructures) + ": is field " + isField();
-    }
-
-    static class IndicesTypeStructureAndName {
-
-        private String name;
-        private IndicesTypeStructure[] structure;
-
-        public IndicesTypeStructureAndName(String name, IndicesTypeStructure[] structure) {
-            this.name = name;
-            this.structure = structure;
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            if (obj == null)
-                return false;
-            if (getClass() != obj.getClass())
-                return false;
-            final IndicesTypeStructureAndName other = (IndicesTypeStructureAndName) obj;
-            if (!Objects.equals(this.name, other.name))
-                return false;
-            return Arrays.equals(structure, structure);
-        }
-
-        @Override
-        public int hashCode() {
-            int hash = 3;
-            hash = 37 * hash + Objects.hashCode(this.name);
-            hash = 37 * hash + Arrays.hashCode(this.structure);
-            return hash;
-        }
+        return getName(null) + ":" + Arrays.toString(indexTypeStructures);
     }
 }

@@ -20,28 +20,43 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
-package cc.redberry.core.indexmapping;
+package cc.redberry.core.context;
 
-import cc.redberry.core.tensor.Power;
-import cc.redberry.core.tensor.Tensor;
+import cc.redberry.core.indices.*;
+import java.util.*;
 
 /**
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-class ProviderPower implements IndexMappingProviderFactory {
+public class IndicesTypeStructureAndName {
 
-    static final ProviderPower INSTANCE = new ProviderPower();
+    private String name;
+    private IndicesTypeStructure[] structure;
 
-    private ProviderPower() {
+    public IndicesTypeStructureAndName(String name, IndicesTypeStructure[] structure) {
+        this.name = name;
+        this.structure = structure;
     }
 
     @Override
-    public IndexMappingProvider create(IndexMappingProvider opu, Tensor from, Tensor to) {
-        final Power fromP = (Power) from, toP = (Power) to;
-        if (IndexMappings.mappingExists(fromP.get(1), toP.get(1)) && IndexMappings.mappingExists(fromP.get(0), toP.get(0)))
-            return new DummyIndexMappingProvider(opu);
-        return IndexMappingProvider.Util.EMPTY_PROVIDER;
+    public boolean equals(Object obj) {
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        final IndicesTypeStructureAndName other = (IndicesTypeStructureAndName) obj;
+        if (!Objects.equals(this.name, other.name))
+            return false;
+        return Arrays.equals(structure, structure);
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 3;
+        hash = 37 * hash + Objects.hashCode(this.name);
+        hash = 37 * hash + Arrays.hashCode(this.structure);
+        return hash;
     }
 }

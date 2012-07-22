@@ -124,7 +124,7 @@ public class IndexMappingsTest {
     public void testScalarTensors1() {
         Tensor t1 = parse("A_mn*B^mnpqr*A_pqr");
         Tensor t2 = parse("A_pq*B^mnpqr*A_mnr");
-        Set<IndexMappingBuffer> buffers = IndexMappings.createAllMappings(t1, t2, true);
+        Set<IndexMappingBuffer> buffers = IndexMappings.createAllMappings(t1, t2);
         Assert.assertTrue(buffers.isEmpty());
     }
 
@@ -132,7 +132,7 @@ public class IndexMappingsTest {
     public void testScalarTensors12() {
         Tensor t1 = parse("A_i*A^i");
         Tensor t2 = parse("A_i*A^i");
-        Set<IndexMappingBuffer> buffers = IndexMappings.createAllMappings(t1, t2, true);
+        Set<IndexMappingBuffer> buffers = IndexMappings.createAllMappings(t1, t2);
         Assert.assertTrue(buffers.size() >= 1);
     }
 
@@ -141,7 +141,7 @@ public class IndexMappingsTest {
         addSymmetry("B^abcde", IndexType.LatinLower, false, 2, 3, 0, 1, 4);
         Tensor t1 = parse("A_mn*B^mnpqr*A_pqr");
         Tensor t2 = parse("A_pq*B^mnpqr*A_mnr");
-        Set<IndexMappingBuffer> buffers = IndexMappings.createAllMappings(t1, t2, true);
+        Set<IndexMappingBuffer> buffers = IndexMappings.createAllMappings(t1, t2);
         Assert.assertTrue(buffers.size() == 1);
         Assert.assertTrue(buffers.iterator().next().isEmpty());
     }
@@ -150,7 +150,7 @@ public class IndexMappingsTest {
     public void testScalarTensors3() {
         Tensor t1 = parse("A_m^m*A_a^b");
         Tensor t2 = parse("A_a^n*A_n^b");
-        Set<IndexMappingBuffer> buffers = IndexMappings.createAllMappings(t1, t2, true);
+        Set<IndexMappingBuffer> buffers = IndexMappings.createAllMappings(t1, t2);
         Assert.assertTrue(buffers.isEmpty());
     }
 
@@ -158,7 +158,7 @@ public class IndexMappingsTest {
     public void testScalarTensors4() {
         Tensor t1 = parse("A_m^m");
         Tensor t2 = parse("A_a^n");
-        Set<IndexMappingBuffer> buffers = IndexMappings.createAllMappings(t1, t2, true);
+        Set<IndexMappingBuffer> buffers = IndexMappings.createAllMappings(t1, t2);
         Assert.assertTrue(buffers.isEmpty());
     }
 
@@ -175,7 +175,7 @@ public class IndexMappingsTest {
             System.out.println(buffera);
 
         //R_abcd -> R_pqrs
-        Set<IndexMappingBuffer> buffers = IndexMappings.createAllMappings(riman1, riman2, false);
+        Set<IndexMappingBuffer> buffers = IndexMappings.createAllMappings(riman1, riman2);
         IndexMappingBuffer[] target = buffers.toArray(new IndexMappingBuffer[2]);
 
 
@@ -214,7 +214,7 @@ public class IndexMappingsTest {
     public void testBuildSimpleTensor1() {
         Tensor from = parse("R^{\\alpha}_{\\beta \\mu \\nu}");
         Tensor to = parse("R^{\\alpha}_{\\mu \\beta \\nu}");
-        Set<IndexMappingBuffer> buffers = IndexMappings.createAllMappings(from, to, false);
+        Set<IndexMappingBuffer> buffers = IndexMappings.createAllMappings(from, to);
         Assert.assertTrue(buffers.size() == 1);
         IndexMappingBuffer target = buffers.iterator().next();
 //        System.out.println(target);
@@ -228,7 +228,7 @@ public class IndexMappingsTest {
     public void testScalarFunctions2() {
         Tensor from = parse("g_mn*Sin[x]");
         Tensor to = parse("g_ab*Sin[x]");
-        Set<IndexMappingBuffer> buffers = IndexMappings.createAllMappings(from, to, false);
+        Set<IndexMappingBuffer> buffers = IndexMappings.createAllMappings(from, to);
         Assert.assertTrue(buffers.size() == 2);
     }
 
@@ -236,7 +236,7 @@ public class IndexMappingsTest {
     public void testDiffStates() {
         Tensor from = parse("Tensor_mn");
         Tensor to = parse("Tensor^ab");
-        Set<IndexMappingBuffer> buffers = IndexMappings.createAllMappings(from, to, true);
+        Set<IndexMappingBuffer> buffers = IndexMappings.createAllMappings(from, to);
         Assert.assertTrue(buffers.size() == 1);
         IndexMappingBuffer expected = IndexMappingTestUtils.parse("+;_m->^a;_n->^b");
         Assert.assertTrue(expected.equals(buffers.iterator().next()));
@@ -246,14 +246,14 @@ public class IndexMappingsTest {
     public void testField1() {
         Tensor from = parse("g_mn*f[x]");
         Tensor to = parse("g_ab*f[x]");
-        Assert.assertTrue(IndexMappings.createPort(from, to, true).take() != null);
+        Assert.assertTrue(IndexMappings.createPort(from, to).take() != null);
     }
 
     @Test
     public void testField2() {
         Tensor from = parse("g_mn*f[x]");
         Tensor to = parse("g_ab*f[y]");
-        Assert.assertTrue(IndexMappings.createPort(from, to, true).take() == null);
+        Assert.assertTrue(IndexMappings.createPort(from, to).take() == null);
     }
 
     @Test

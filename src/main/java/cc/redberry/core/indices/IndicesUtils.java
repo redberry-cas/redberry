@@ -378,4 +378,8 @@ public final class IndicesUtils {
             a[i] = getNameWithType(indices.get(i));
         return a;
     }
+
+    public static boolean haveEqualStates(int index1, int index2) {
+        return getRawStateInt(index1) == getRawStateInt(index2);
+    }
 }

@@ -119,7 +119,7 @@ public class TAssert {
 
     public static void soutMappingsOP(Tensor from, Tensor to) {
         final OutputPortUnsafe<IndexMappingBuffer> opu =
-                IndexMappings.createPort(from, to, true);
+                IndexMappings.createPort(from, to);
         IndexMappingBuffer buffer;
         int count = 0;
         while ((buffer = opu.take()) != null) {
