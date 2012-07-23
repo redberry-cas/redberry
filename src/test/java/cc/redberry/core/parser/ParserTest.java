@@ -230,4 +230,36 @@ public class ParserTest {
             Tensors.parse("(Power[a, 2]*b+a*Power[b, 2])*g_{m}*g^{m}+(Power[a, 3]+Power[a, 2]*b+a*Power[b, 2]+Power[b, 3])*f^{m}*g_{m}+(Power[a, 2]*b+a*Power[b, 2])*f_{m}*f^{m}");
         }
     }
+
+    @Test
+    public void testIndices2() {
+        SimpleIndices indices = ParserIndices.parseSimple("_{\\mu_9}");
+        Assert.assertTrue(indices.size() == 1);
+    }
+
+    @Test
+    public void testIndices3() {
+        SimpleIndices indices = ParserIndices.parseSimple("_{m_{10}}");
+        System.out.println(indices.get(0));
+        indices = ParserIndices.parseSimple("_{m_{9}}");
+        System.out.println(indices.get(0));
+        indices = ParserIndices.parseSimple("_{m_{8}}");
+        System.out.println(indices.get(0));
+        indices = ParserIndices.parseSimple("_{m_{7}}");
+        System.out.println(indices.get(0));
+        indices = ParserIndices.parseSimple("_{m_{6}}");
+        System.out.println(indices.get(0));
+        indices = ParserIndices.parseSimple("_{m_{5}}");
+        System.out.println(indices.get(0));
+        indices = ParserIndices.parseSimple("_{m_{4}}");
+        System.out.println(indices.get(0));
+        indices = ParserIndices.parseSimple("_{m_{3}}");
+        System.out.println(indices.get(0));
+        indices = ParserIndices.parseSimple("_{m_{2}}");
+        System.out.println(indices.get(0));
+        indices = ParserIndices.parseSimple("_{m_{1}}");
+        System.out.println(indices.get(0));
+        System.out.println(Integer.MAX_VALUE);
+        Assert.assertTrue(indices.size() == 1);
+    }
 }

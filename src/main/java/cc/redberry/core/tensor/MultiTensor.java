@@ -49,7 +49,7 @@ public abstract class MultiTensor extends Tensor {
     //protected abstract int calculateHash();
 
     
-
+    //TODO implement without builder?
     public final Tensor remove(int position) {
         int size = size();
         if (position >= size || position < 0)

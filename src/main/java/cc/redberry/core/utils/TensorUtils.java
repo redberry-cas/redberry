@@ -229,9 +229,10 @@ public class TensorUtils {
         return dummy;
     }
 
-    public static Set<Integer> getAllIndicesNames(Tensor tensor) {
+    public static Set<Integer> getAllIndicesNames(Tensor... tensors) {
         Set<Integer> indices = new HashSet<>();
-        appendAllIndicesNames(tensor, indices);
+        for (Tensor tensor : tensors)
+            appendAllIndicesNames(tensor, indices);
         return indices;
     }
 

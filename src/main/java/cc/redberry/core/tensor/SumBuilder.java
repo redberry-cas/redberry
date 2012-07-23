@@ -22,7 +22,7 @@
  */
 package cc.redberry.core.tensor;
 
-import cc.redberry.core.context.CC;
+import cc.redberry.core.context.*;
 import cc.redberry.core.indexmapping.IndexMappingBuffer;
 import cc.redberry.core.indexmapping.IndexMappingBufferTester;
 import cc.redberry.core.indexmapping.IndexMappings;
@@ -35,6 +35,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.*;
 
 /**
  *
@@ -79,7 +80,6 @@ public final class SumBuilder implements TensorBuilder {
         return new Sum(sum.toArray(new Tensor[sum.size()]), indices);
     }
 
-
     @Override
     public void put(Tensor tensor) {
         if (TensorUtils.isZero(tensor))
@@ -120,6 +120,30 @@ public final class SumBuilder implements TensorBuilder {
                 factorNodes.add(new FactorNode(split.factor, split.getBuilder()));
         }
     }
+
+//    static Boolean compareFactors(final Tensor u, final Tensor v) {
+//        Callable<Boolean> callable = new Callable<Boolean>() {
+//
+//            @Override
+//            public Boolean call() throws Exception {
+//                return compareFactors1(u, v);
+//            }
+//        };
+//        RunnableFuture future = new FutureTask(callable);
+//        ExecutorService service = Executors.newSingleThreadExecutor();
+//        service.execute(future);
+//        Boolean b = null;
+//        try {
+//            b = (Boolean) future.get(10, TimeUnit.SECONDS);
+//        } catch (TimeoutException exception) {
+//            System.out.println(u);
+//            System.out.println(v);
+//            throw new RuntimeException();
+//        } catch (InterruptedException | ExecutionException exception) {
+//            System.out.println("ПАЩЁЛ НА ХУЙ");
+//        }
+//        return b;
+//    }
 
     static Boolean compareFactors(Tensor u, Tensor v) {
         IndexMappingBuffer buffer;

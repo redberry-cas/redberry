@@ -22,9 +22,10 @@
  */
 package cc.redberry.core.transformations.substitutions;
 
-import cc.redberry.core.context.ToStringMode;
+import cc.redberry.core.context.*;
 import cc.redberry.core.indices.IndexType;
 import cc.redberry.core.number.Complex;
+import cc.redberry.core.tensor.*;
 import cc.redberry.core.tensor.Expression;
 import cc.redberry.core.tensor.SimpleTensor;
 import cc.redberry.core.tensor.Tensor;
@@ -32,6 +33,7 @@ import cc.redberry.core.transformations.ContractIndices;
 import cc.redberry.core.transformations.Expand;
 import cc.redberry.core.transformations.Transformation;
 import cc.redberry.core.utils.TensorUtils;
+import junit.framework.*;
 import org.junit.Test;
 
 import static cc.redberry.core.tensor.Tensors.addSymmetry;
@@ -233,7 +235,7 @@ public class SimpleSubstitutionTest {
 
         target1 = contract(expand(target1));
 
-        
+
         assertTrue(TensorUtils.compare(target, target1));
         assertTrue(target.getIndices().size() == 0);
         assertTrue(target1.getIndices().size() == 0);
@@ -263,7 +265,7 @@ public class SimpleSubstitutionTest {
                              "G_gmn=(1/2)*(p_m*g_gn+p_n*g_gm-p_g*g_mn)");
 
         target1 = contract(target1);
-      
+
         assertTrue(TensorUtils.compare(target, target1));
         assertTrue(target.getIndices().size() == 0);
         assertTrue(target1.getIndices().size() == 0);
@@ -325,5 +327,16 @@ public class SimpleSubstitutionTest {
                             "f_ab^cd=a_ab*z^cd");
         Tensor expected = parse("a_ab*z^ab");
         assertTrue(TensorUtils.compare(target, expected));
+    }
+
+    @Test
+    public void subs20() {
+        CC.resetTensorNames(2074334866573507904L);
+        Tensor delta = Tensors.parse("DELTA^{ \\alpha \\beta \\mu_{1} }_{\\nu_{1} } "
+                + "= 1/2*(X^{ \\alpha \\beta \\mu_{1} }_{\\nu_{1} }+XX^{ \\alpha \\beta \\mu_{1} }_{\\nu_{1} }) +f^{\\mu_{1} }_{\\xi }*g^{ \\xi }*d_{\\gamma }*HATK^{\\alpha \\gamma }_{\\delta }*HATK^{\\beta \\delta }_{\\nu_{1} }");
+        Expression hatK = (Expression) contract(Tensors.parse("HATK^{\\beta \\gamma }_{\\delta } = f^{\\gamma \\alpha }*d^{\\beta }_{\\delta }*n_{\\alpha }"));
+        System.out.println(hatK);
+        delta = hatK.transform(delta);
+        Assert.assertTrue(true);
     }
 }

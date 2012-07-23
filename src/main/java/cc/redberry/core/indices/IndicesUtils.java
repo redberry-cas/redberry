@@ -354,6 +354,10 @@ public final class IndicesUtils {
         return toString(index, Context.get().getDefaultPrintMode());
     }
 
+    public static String toString(int[] indices, ToStringMode mode) {
+        return IndicesFactory.createSimple(null, indices).toString(mode);
+    }
+
     public static int parseIndex(String string) {
         boolean state = string.charAt(0) == '^';
         int nameWithType;

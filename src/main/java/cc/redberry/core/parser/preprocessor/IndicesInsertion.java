@@ -45,7 +45,7 @@ import java.util.Set;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public class IndicesInsertion implements ParseNodeTransformer {
+public final class IndicesInsertion implements ParseNodeTransformer {
 
     private final int[] upper, lower;
     private final Indicator<ParseNodeSimpleTensor> indicator;
@@ -174,7 +174,7 @@ public class IndicesInsertion implements ParseNodeTransformer {
                 for (i = 1; i < node.content.length; ++i)
                     if ((t = createTransformer(node.content[i], indicator)) != null)
                         if (transformers == null)
-                            throw new IllegalArgumentException();
+                            throw new IllegalArgumentException();//TODO wrong condition e.g. X + Y^i_i, where Y - matrix, bur X - not. 
                         else
                             transformers[i] = t;
                 if (transformers == null)
@@ -241,7 +241,8 @@ public class IndicesInsertion implements ParseNodeTransformer {
                     generatorTemp.merge(generatorClone);
             }
             transformers[transformers.length - 1].apply(indexMapper, generator, upper, lower);
-            generator.merge(generatorTemp);
+            if (generatorTemp != null)
+                generator.merge(generatorTemp);
         }
     }
 

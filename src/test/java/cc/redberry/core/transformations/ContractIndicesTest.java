@@ -539,7 +539,12 @@ public class ContractIndicesTest {
         Tensor t = parse("F[g_mn*A^m]");
         t = contract(t);
         Tensor expected = parse("F[A_n]");
-        System.out.println(t);
         assertTrue(TensorUtils.compare(t, expected));
+    }
+
+    @Test
+    public void testExpression1() {
+        Tensor t = parse("DELTA^{\\mu \\mu_9 }_{\\nu_9 } = -2*n_{\\alpha }*f^{\\mu_9 }_{\\epsilon }*g^{\\alpha \\epsilon }*d^{\\mu }_{\\nu_9 }");
+        System.out.println(contract(t));
     }
 }
