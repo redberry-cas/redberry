@@ -58,7 +58,7 @@ import cc.redberry.core.math.MathUtils;
  * @see Indices
  */
 public final class IndicesUtils {
-
+    
     private IndicesUtils() {
     }
 
@@ -345,19 +345,19 @@ public final class IndicesUtils {
             indsArray[i] = IndicesUtils.getNameWithType(indsArray[i]);
         return MathUtils.getSortedDistinct(indsArray);
     }
-
+    
     public static String toString(int index, ToStringMode mode) {
         return (getState(index) == true ? "^{" : "_{") + Context.get().getIndexConverterManager().getSymbol(index, mode) + "}";
     }
-
+    
     public static String toString(int index) {
         return toString(index, Context.get().getDefaultPrintMode());
     }
-
+    
     public static String toString(int[] indices, ToStringMode mode) {
         return IndicesFactory.createSimple(null, indices).toString(mode);
     }
-
+    
     public static int parseIndex(String string) {
         boolean state = string.charAt(0) == '^';
         int nameWithType;
@@ -383,6 +383,21 @@ public final class IndicesUtils {
         return a;
     }
 
+    /**
+     * Returns an array of indices names (with types), presented in specified {@code Indices}
+     * object with the same ordering.
+     *
+     * @param indices
+     *
+     * @return array of indices names (with types)
+     */
+    public static int[] getIndicesNames(int[] indices) {
+        int a[] = new int[indices.length];
+        for (int i = a.length - 1; i >= 0; --i)
+            a[i] = getNameWithType(indices[i]);
+        return a;
+    }
+    
     public static boolean haveEqualStates(int index1, int index2) {
         return getRawStateInt(index1) == getRawStateInt(index2);
     }

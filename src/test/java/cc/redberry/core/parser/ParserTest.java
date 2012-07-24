@@ -239,27 +239,25 @@ public class ParserTest {
 
     @Test
     public void testIndices3() {
-        SimpleIndices indices = ParserIndices.parseSimple("_{m_{10}}");
-        System.out.println(indices.get(0));
+        SimpleIndices indices = ParserIndices.parseSimple("_{m_{0}}");
+        Assert.assertTrue(indices.size() == 1);
         indices = ParserIndices.parseSimple("_{m_{9}}");
-        System.out.println(indices.get(0));
+        Assert.assertTrue(indices.size() == 1);
         indices = ParserIndices.parseSimple("_{m_{8}}");
-        System.out.println(indices.get(0));
+        Assert.assertTrue(indices.size() == 1);
         indices = ParserIndices.parseSimple("_{m_{7}}");
-        System.out.println(indices.get(0));
+        Assert.assertTrue(indices.size() == 1);
         indices = ParserIndices.parseSimple("_{m_{6}}");
-        System.out.println(indices.get(0));
+        Assert.assertTrue(indices.size() == 1);
         indices = ParserIndices.parseSimple("_{m_{5}}");
-        System.out.println(indices.get(0));
+        Assert.assertTrue(indices.size() == 1);
         indices = ParserIndices.parseSimple("_{m_{4}}");
-        System.out.println(indices.get(0));
+        Assert.assertTrue(indices.size() == 1);
         indices = ParserIndices.parseSimple("_{m_{3}}");
-        System.out.println(indices.get(0));
+        Assert.assertTrue(indices.size() == 1);
         indices = ParserIndices.parseSimple("_{m_{2}}");
-        System.out.println(indices.get(0));
+        Assert.assertTrue(indices.size() == 1);
         indices = ParserIndices.parseSimple("_{m_{1}}");
-        System.out.println(indices.get(0));
-        System.out.println(Integer.MAX_VALUE);
         Assert.assertTrue(indices.size() == 1);
     }
 }

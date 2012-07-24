@@ -24,43 +24,34 @@ public final class OneLoopInput {
     private final int operatorOrder, matrixIndicesCount;
     private final Expression[][] hatQuantities;
     private final Expression L;
+    private static final int HAT_QUANTITIES_GENERAL_COUNT = 5;//K,S,W,N,M
+    private static final int INPUT_VALUES_GENERAL_COUNT = 6;//K,S,W,N,M
+    private final int actualInput, actualHatQuantities;
 
     public OneLoopInput(int operatorOrder, Expression KINV, Expression K, Expression S, Expression W, Expression N, Expression M) {
         this.operatorOrder = operatorOrder;
         if (operatorOrder > 4)
             throw new IllegalArgumentException();
-        inputValues = new Expression[operatorOrder + 2];
-        int i;
-        for (i = 0; i < inputValues.length; ++i)
-            switch (i) {
-                case 0:
-                    inputValues[0] = KINV;
-                    break;
-                case 1:
-                    inputValues[1] = K;
-                    break;
-                case 2:
-                    inputValues[2] = S;
-                    break;
-                case 3:
-                    inputValues[3] = W;
-                    break;
-                case 4:
-                    inputValues[4] = N;
-                    break;
-                case 5:
-                    inputValues[5] = M;
-                    break;
-            }
+        this.actualInput = operatorOrder + 2;
+        this.actualHatQuantities = operatorOrder + 1;
+
+        inputValues = new Expression[INPUT_VALUES_GENERAL_COUNT];
+
+        inputValues[0] = KINV;
+        inputValues[1] = K;
+        inputValues[2] = S;
+        inputValues[3] = W;
+        inputValues[4] = N;
+        inputValues[5] = M;
 
         checkConsistency();
         this.L = Tensors.expression(Tensors.parse("L"), new Complex(operatorOrder));
-        this.hatQuantities = new Expression[operatorOrder + 1][];
+        this.hatQuantities = new Expression[HAT_QUANTITIES_GENERAL_COUNT][];
         this.matrixIndicesCount = inputValues[1].get(0).getIndices().size() - operatorOrder;
 
         //all are upper
         int[] covariantIndices = new int[operatorOrder];
-        int j, k;
+        int i, j, k;
         for (i = 0; i < operatorOrder; ++i)
             covariantIndices[i] = IndicesUtils.createIndex(i, IndexType.GreekLower, true);
 
@@ -76,11 +67,11 @@ public final class OneLoopInput {
             public boolean is(ParseNodeSimpleTensor object) {
                 String name = object.name;
                 int i;
-                for (i = 0; i < inputValues.length; ++i)
+                for (i = 0; i < INPUT_VALUES_GENERAL_COUNT; ++i)
                     if (name.equals(getStringInputName(i)))
                         return true;
 
-                for (i = 0; i < hatQuantities.length; ++i)
+                for (i = 0; i < HAT_QUANTITIES_GENERAL_COUNT; ++i)
                     if (name.equals(getStringHatQuantitieName(i)))
                         return true;
 
@@ -95,7 +86,7 @@ public final class OneLoopInput {
         StringBuilder sb;
         Tensor temp;
         String covariantIndicesString;
-        for (i = 0; i < hatQuantities.length; ++i) {
+        for (i = 0; i < actualHatQuantities; ++i) {
             hatQuantities[i] = new Expression[operatorOrder + 1 - i];
             covariantIndicesString = IndicesUtils.toString(Arrays.copyOfRange(covariantIndices, 0, covariantIndices.length - i), ToStringMode.REDBERRY);
             for (j = 0; j < operatorOrder + 1 - i; ++j) {
@@ -114,6 +105,12 @@ public final class OneLoopInput {
                 temp = Expand.expand(temp, Indicator.TRUE_INDICATOR, new Transformation[]{ContractIndices.CONTRACT_INDICES}, 1);
                 hatQuantities[i][j] = (Expression) temp;
             }
+        }
+        for (; i < HAT_QUANTITIES_GENERAL_COUNT; ++i) {
+            hatQuantities[i] = new Expression[1];
+            sb = new StringBuilder();
+            sb.append(getStringHatQuantitieName(i)).append("=0");
+            hatQuantities[i][0] = (Expression) Tensors.parse(sb.toString(), insertion);
         }
     }
 
@@ -154,8 +151,8 @@ public final class OneLoopInput {
     private void checkConsistency() {
         if (operatorOrder % 2 != 0)
             throw new IllegalArgumentException();
-
-        for (int i = 0; i < inputValues.length; ++i) {
+        int i;
+        for (i = 0; i < actualInput; ++i) {
             if (!(inputValues[i].get(0) instanceof SimpleTensor))
                 throw new IllegalArgumentException();
             SimpleTensor st = (SimpleTensor) inputValues[i].get(0);
@@ -163,6 +160,9 @@ public final class OneLoopInput {
             if (!nd.getName(null).equals(getStringInputName(i)))
                 throw new IllegalArgumentException();
         }
+        for (; i < INPUT_VALUES_GENERAL_COUNT; ++i)
+            if (inputValues[i] != null)
+                throw new IllegalArgumentException();
 
 
         SimpleIndices indices = (SimpleIndices) inputValues[1].get(0).getIndices();
@@ -177,7 +177,7 @@ public final class OneLoopInput {
         if (inputValues[0].get(0).getIndices().size() != matrixIndicesCount)
             throw new IllegalArgumentException();
 
-        for (int i = 1; i < inputValues.length; ++i) {
+        for (i = 1; i < actualInput; ++i) {
             indicesTypeStructure = ((SimpleIndices) inputValues[i].get(0).getIndices()).getIndicesTypeStructure();
             if (indicesTypeStructure.getTypeData(IndexType.GreekLower.getType()).length != indicesTypeStructure.size())
                 throw new IllegalArgumentException("Only Greek lower indices are legal.");
@@ -187,15 +187,15 @@ public final class OneLoopInput {
     }
 
     public Expression getInputParameter(int i) {
-        if (i >= inputValues.length)
-            throw new IllegalArgumentException();
         return inputValues[i];
     }
 
     public Expression[] getHatQuantities(int k) {
-        if (k >= hatQuantities.length)
-            throw new IllegalArgumentException();
         return hatQuantities[k];
+    }
+
+    Expression[][] getHatQuantities() {
+        return hatQuantities;
     }
     private final Expression F = (Expression) Tensors.parse("F_\\mu\\nu = 0");
     private final Expression HATF = (Expression) Tensors.parse("HATF_\\mu\\nu = 0");
@@ -217,7 +217,7 @@ public final class OneLoopInput {
         Expression[] nablaS = new Expression[getHatQuantities(1).length];
         StringBuilder sb;
         for (int i = 0; i < nablaS.length; ++i) {
-            sb = new StringBuilder().append("HATS").append(getHatQuantities(1)[i].get(0).getIndices().toString(ToStringMode.REDBERRY)).append("=0");
+            sb = new StringBuilder().append("NABLAS_{\\mu_{9}}").append(getHatQuantities(1)[i].get(0).getIndices().toString(ToStringMode.REDBERRY)).append("=0");
             nablaS[i] = (Expression) Tensors.parse(sb.toString());
         }
         return nablaS;
@@ -225,5 +225,13 @@ public final class OneLoopInput {
 
     public Expression getL() {
         return L;
+    }
+
+    public int getMatrixIndicesCount() {
+        return matrixIndicesCount;
+    }
+
+    public int getOperatorOrder() {
+        return operatorOrder;
     }
 }

@@ -187,7 +187,7 @@ public class IndicesInsertionTest {
     public void test11() {
         String expression = "DELTA^m=-L*HATK^m";
         Tensors.parse(expression);
-        
+
         final String[] matrices = new String[]{"KINV", "HATK", "HATW", "HATS", "NABLAS", "HATN", "HATF", "NABLAF", "HATM", "DELTA", "Flat", "FF", "WR", "SR", "SSR", "FR", "RR"};
         Indicator<ParseNodeSimpleTensor> matricesIndicator = new Indicator<ParseNodeSimpleTensor>() {
 
@@ -207,9 +207,9 @@ public class IndicesInsertionTest {
         Tensor expected = Tensors.parse("DELTA^ma_a=-L*HATK^ma_a");
         Assert.assertTrue(TensorUtils.equals(e, expected));
     }
-    
+
     @Test
-    public void test12(){
+    public void test12() {
         final String[] matrices = new String[]{"KINV", "HATK", "HATW", "HATS", "NABLAS", "HATN", "HATF", "NABLAF", "HATM", "DELTA", "Flat", "FF", "WR", "SR", "SSR", "FR", "RR"};
         Indicator<ParseNodeSimpleTensor> matricesIndicator = new Indicator<ParseNodeSimpleTensor>() {
 
@@ -225,6 +225,15 @@ public class IndicesInsertionTest {
 
         IndicesInsertion indicesInsertion = new IndicesInsertion(ParserIndices.parseSimple("^{a}"), ParserIndices.parseSimple("_{a}"), matricesIndicator);
         Expression e = (Expression) Tensors.parse("ACTION = Flat + WR + SR + SSR + FF + FR + RR ", indicesInsertion);
-        
+        assertTrue(true);
+    }
+
+    @Test
+    public void test13() {
+        attachPreprocessor("^i", "_i", "A");
+        Tensor t = parse("A+B");
+        clearPreprocessors();
+        Tensor e = parse("A^i_i+B");
+        assertEquals(t, e);
     }
 }

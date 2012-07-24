@@ -24,8 +24,8 @@ package cc.redberry.core.utils;
 
 import cc.redberry.core.indices.Indices;
 import cc.redberry.core.indices.SimpleIndices;
-import cc.redberry.core.tensor.SimpleTensor;
-import cc.redberry.core.tensor.Tensor;
+import cc.redberry.core.tensor.*;
+import cc.redberry.core.tensor.functions.*;
 import java.util.Arrays;
 
 /**
@@ -33,7 +33,10 @@ import java.util.Arrays;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public class TensorHashCalculator {
+public final class TensorHashCalculator {
+
+    private TensorHashCalculator() {
+    }
 
     private static int _hashWithIndices(final Tensor tensor, final int[] indices) {
         if (tensor instanceof SimpleTensor) {
@@ -43,11 +46,22 @@ public class TensorHashCalculator {
             int pos;
             for (int i = 0; i < si.size(); ++i)
                 if ((pos = Arrays.binarySearch(indices, si.get(i))) >= 0)
-                    hash ^= HashFunctions.JenkinWang32shift(sInds[i])
-                            + HashFunctions.JenkinWang32shift(pos) * 7;
+                    hash += (HashFunctions.JenkinWang32shift(sInds[i])
+                            * HashFunctions.JenkinWang32shift(pos) * 7);
             return HashFunctions.JenkinWang32shift(hash);
         }
+        if (tensor instanceof ScalarFunction)
+            return tensor.hashCode();
+
         int hash = tensor.hashCode();
+        if (tensor instanceof Product) {
+            ProductContent pc = ((Product) tensor).getContent();
+            //TODO may be refactor with noncommutative operation using stretcIds 
+            for (int i = pc.size() - 1; i >= 0; --i)
+                hash += HashFunctions.JenkinWang32shift((int) pc.getStretchId(i)) * _hashWithIndices(pc.get(i), indices);
+            return hash;
+        }
+
         for (Tensor t : tensor)
             hash ^= _hashWithIndices(t, indices);
         return hash;

@@ -35,13 +35,12 @@ import java.util.Arrays;
  */
 final class SqrSubs implements Transformation {
 
-    private int name, hashCode;
+    private int name;
 
     public SqrSubs(SimpleTensor st) {
         if (st.getIndices().size() != 1)
             throw new IllegalArgumentException();
         name = st.getName();
-        hashCode = st.hashCode();
     }
 
     @Override
@@ -52,7 +51,7 @@ final class SqrSubs implements Transformation {
 
         ProductContent content = product.getContent();
         ContractionStructure cs = content.getContractionStructure();
-        short si = content.getStretchIndexByHash(hashCode);
+        short si = content.getStretchIndexByHash(name);
         if (si == -1)
             return tensor;
 
@@ -60,7 +59,7 @@ final class SqrSubs implements Transformation {
         short[] sIndices = content.getStretchIds(); //For preformance.
         int index = Arrays.binarySearch(sIndices, si);
         while (index >= 0 && sIndices[index--] == si);
-        index++;
+        ++index;
         IntArrayList list = new IntArrayList();
         do {
             Tensor t = content.get(index);
@@ -93,21 +92,15 @@ final class SqrSubs implements Transformation {
             if (Arrays.binarySearch(indices, IndicesUtils.getNameWithType(st.getIndices().get(0))) >= 0)
                 toRemvoe.add(index);
         }
-        if (toRemvoe.size() == content.size())
+        if (toRemvoe.size() == 0)
             return tensor;
 
         Tensor indexless = product.getIndexlessSubProduct();
-        ProductBuilder pb;
-        if (indexless instanceof Product)
-            pb = new ProductBuilder((Product) indexless);
-        else {
-            pb = new ProductBuilder();
-            pb.put(product.getFactor());
-            for (Tensor t : product.getIndexless())
-                pb.put(t);
-        }
-        for (int i = toRemvoe.size() - 1; i >= 0; --i)
-            if (ArraysUtils.binarySearch(toRemvoe, i) < 0)
+        ProductBuilder pb = new ProductBuilder();
+        pb.put(indexless);
+
+        for (int i = size - 1; i >= 0; --i)
+            if (ArraysUtils.binarySearch(toRemvoe, i) < 0)//toRemove is sorted                
                 pb.put(content.get(i));
         return pb.build();
     }

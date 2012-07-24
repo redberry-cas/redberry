@@ -40,8 +40,8 @@ import org.apache.commons.math3.fraction.BigFraction;
  */
 public class Complex extends Tensor
         implements Number<Complex>,
-        Serializable {
-
+                   Serializable {
+    
     public static final Complex ComplexNaN =
             new Complex(Numeric.NaN, Numeric.NaN);
     public static final Complex REAL_POSITIVE_INFINITY =
@@ -74,7 +74,7 @@ public class Complex extends Tensor
             new Complex(Rational.ZERO, Rational.ONE);
     private final Real real;
     private final Real imaginary;
-
+    
     public Complex(Real real, Real imaginary) {
         if (real instanceof Numeric || imaginary instanceof Numeric) {
             this.real = real.getNumericValue();
@@ -84,7 +84,7 @@ public class Complex extends Tensor
             this.imaginary = imaginary;
         }
     }
-
+    
     public Complex(Real real) {
         if (real instanceof Numeric) {
             this.real = real.getNumericValue();
@@ -94,59 +94,67 @@ public class Complex extends Tensor
             this.imaginary = Rational.ZERO;
         }
     }
-
+    
     public Complex(int real, int imaginary) {
         this(new Rational(real), new Rational(imaginary));
     }
-
+    
     public Complex(int real) {
         this(new Rational(real), Rational.ZERO);
     }
-
+    
     public Complex(double real, double imaginary) {
         this(new Numeric(real), new Numeric(imaginary));
     }
-
+    
     public Complex(int real, double imaginary) {
         this(new Numeric(real), new Numeric(imaginary));
     }
-
+    
     public Complex(double real, int imaginary) {
         this(new Numeric(real), new Numeric(imaginary));
     }
-
+    
     public Complex(double real) {
         this(new Numeric(real), Numeric.ZERO);
     }
-
-    public Complex(BigInteger real, BigInteger imaginary) {
-        this(new Rational(real), new Rational(imaginary));
-    }
-
-    public Complex(BigInteger real) {
+    
+    public Complex(long real) {
         this(new Rational(real), Rational.ZERO);
     }
 
+    public Complex(long real, long imaginary) {
+        this(new Rational(real), new Rational(imaginary));
+    }
+    
+    public Complex(BigInteger real, BigInteger imaginary) {
+        this(new Rational(real), new Rational(imaginary));
+    }
+    
+    public Complex(BigInteger real) {
+        this(new Rational(real), Rational.ZERO);
+    }
+    
     @Override
     public Tensor get(int i) {
         throw new IndexOutOfBoundsException();
     }
-
+    
     @Override
     public Indices getIndices() {
         return IndicesFactory.EMPTY_INDICES;
     }
-
+    
     @Override
     protected int hash() {
         return 47 * (329 + real.hashCode()) + this.imaginary.hashCode();
     }
-
+    
     @Override
     public int size() {
         return 0;
     }
-
+    
     @Override
     public String toString(ToStringMode mode) {
         if (real.isZero())
@@ -161,7 +169,7 @@ public class Complex extends Tensor
                 return real.toString() + "+I*" + imaginary.abs();
         }
     }
-
+    
     @Override
     protected String toString(ToStringMode mode, Class<? extends Tensor> clazz) {
         if (clazz == Product.class)
@@ -169,52 +177,52 @@ public class Complex extends Tensor
                 return "(" + toString(mode) + ")";
         return super.toString(mode, clazz);
     }
-
+    
     @Override
     public TensorBuilder getBuilder() {
         return new ComplexBuilder(this);
     }
-
+    
     @Override
     public TensorFactory getFactory() {
         return null;
     }
-
+    
     private static class ComplexBuilder implements TensorBuilder {
-
+        
         private final Complex complex;
-
+        
         public ComplexBuilder(Complex complex) {
             this.complex = complex;
         }
-
+        
         @Override
         public Tensor build() {
             return complex;
         }
-
+        
         @Override
         public void put(Tensor tensor) {
             throw new IllegalStateException("Can not put to Complex tensor builder!");
         }
     }
-
+    
     public Real getImaginary() {
         return imaginary;
     }
-
+    
     public Real getReal() {
         return real;
     }
-
+    
     public boolean isReal() {
         return imaginary.isZero();
     }
-
+    
     public boolean isImaginary() {
         return real.isZero();
     }
-
+    
     public Complex getImaginaryAsComplex() {
         if (imaginary.isOne())
             return ONE;
@@ -222,7 +230,7 @@ public class Complex extends Tensor
             return ZERO;
         return new Complex(Rational.ZERO, imaginary);
     }
-
+    
     public Complex getRealAsComplex() {
         if (real.isOne())
             return ONE;
@@ -230,37 +238,37 @@ public class Complex extends Tensor
             return ZERO;
         return new Complex(real);
     }
-
+    
     @Override
     public boolean isNaN() {
         return real.isNaN() || imaginary.isNaN();
     }
-
+    
     @Override
     public boolean isNumeric() {
         return real.isNumeric();
     }
-
+    
     @Override
     public boolean isInfinite() {
         return real.isInfinite() || imaginary.isInfinite();
     }
-
+    
     @Override
     public boolean isZero() {
         return real.isZero() && imaginary.isZero();
     }
-
+    
     @Override
     public boolean isOne() {
         return real.isOne() && imaginary.isZero();
     }
-
+    
     @Override
     public boolean isMinusOne() {
         return real.isMinusOne() && imaginary.isZero();
     }
-
+    
     public boolean isOneOrMinusOne() {
         return imaginary.isZero() && (real.isOne() || real.isMinusOne());
     }
@@ -334,7 +342,9 @@ public class Complex extends Tensor
      * to the rules for {@link java.lang.Double} arithmetic.
      *
      * @param addend Value to be added to this {@code Complex}.
+     *
      * @return {@code this + addend}.
+     *
      * @throws NullArgumentException if {@code addend} is {@code null}.
      */
     @Override
@@ -371,7 +381,9 @@ public class Complex extends Tensor
      * results. </li> </ul>
      *
      * @param divisor Value by which this {@code Complex} is to be divided.
+     *
      * @return {@code this / divisor}.
+     *
      * @throws NullArgumentException if {@code divisor} is {@code null}.
      */
     @Override
@@ -381,8 +393,8 @@ public class Complex extends Tensor
             return divisor.isNumeric() ? this.getNumericValue() : this;
         if (divisor.isNaN() || isNaN())
             return ComplexNaN;
-
-
+        
+        
         final Real c = divisor.real;
         final Real d = divisor.imaginary;
 
@@ -393,20 +405,20 @@ public class Complex extends Tensor
             Real q = c.divide(d);
             Real denominator = c.multiply(q).add(d);
             return new Complex((real.multiply(q).add(imaginary)).divide(denominator),
-                    (imaginary.multiply(q).subtract(real)).divide(denominator));
+                               (imaginary.multiply(q).subtract(real)).divide(denominator));
         } else {
             Real q = d.divide(c);
             Real denominator = d.multiply(q).add(c);
             return new Complex(((imaginary.multiply(q)).add(real)).divide(denominator),
-                    (imaginary.subtract(real.multiply(q))).divide(denominator));
+                               (imaginary.subtract(real.multiply(q))).divide(denominator));
         }
     }
-
+    
     @Override
     public Field<Complex> getField() {
         return ComplexField.getInstance();
     }
-
+    
     @Override
     public Complex multiply(int n) {
         return n == 1 ? this : new Complex(real.multiply(n), imaginary.multiply(n));
@@ -429,7 +441,9 @@ public class Complex extends Tensor
      * cases.
      *
      * @param factor value to be multiplied by this {@code Complex}.
+     *
      * @return {@code this * factor}.
+     *
      * @throws NullArgumentException if {@code factor} is {@code null}.
      */
     @Override
@@ -438,14 +452,14 @@ public class Complex extends Tensor
         if (factor.isNaN())
             return ComplexNaN;
         return new Complex(real.multiply(factor.real).subtract(imaginary.multiply(factor.imaginary)),
-                real.multiply(factor.imaginary).add(imaginary.multiply(factor.real)));
+                           real.multiply(factor.imaginary).add(imaginary.multiply(factor.real)));
     }
-
+    
     @Override
     public Complex negate() {
         return new Complex(real.negate(), imaginary.negate());
     }
-
+    
     @Override
     public Complex reciprocal() {
         if (isNaN())
@@ -469,18 +483,18 @@ public class Complex extends Tensor
             return new Complex(scale, scale.multiply(q).negate());
         }
     }
-
+    
     @Override
     public Complex subtract(Complex a) {
         NumberUtils.checkNotNull(a);
         return a.isZero() ? a.isNumeric() ? this.getNumericValue() : this : new Complex(real.subtract(a.real), imaginary.subtract(a.imaginary));
     }
-
+    
     @Override
     public Complex getNumericValue() {
         return isNumeric() ? this : new Complex(real.getNumericValue(), imaginary.getNumericValue());
     }
-
+    
     @Override
     public Complex abs() {
         if (isZero() || isOne() || isInfinite() || isNaN())
@@ -491,135 +505,135 @@ public class Complex extends Tensor
         Rational abs2r = (Rational) abs2;
         BigInteger num = abs2r.getNumerator();
         BigInteger den = abs2r.getDenominator();
-
+        
         BigInteger nR = NumberUtils.sqrt(num);
         if (!NumberUtils.isSqrt(num, nR))
             throw new IllegalStateException();
-
+        
         BigInteger dR = NumberUtils.sqrt(den);
         if (!NumberUtils.isSqrt(den, dR))
             throw new IllegalStateException();
-
+        
         return new Complex(new Rational(nR, dR));
     }
-
+    
     @Override
     public Complex add(BigFraction fraction) {
         return fraction.compareTo(BigFraction.ZERO) == 0 ? this : new Complex(real.add(fraction), imaginary);
     }
-
+    
     @Override
     public Complex add(double d) {
         return d == 0.0 ? this.getNumericValue() : new Complex(real.add(d), imaginary);
     }
-
+    
     @Override
     public Complex add(long d) {
         return d == 0 ? this : new Complex(real.add(d), imaginary);
     }
-
+    
     @Override
     public Complex add(int d) {
         return d == 0 ? this : new Complex(real.add(d), imaginary);
     }
-
+    
     @Override
     public Complex add(BigInteger bg) {
         NumberUtils.checkNotNull(bg);
         return bg.equals(BigInteger.ZERO) ? this : new Complex(real.add(bg), imaginary);
     }
-
+    
     @Override
     public Complex subtract(BigFraction fraction) {
         return fraction.compareTo(BigFraction.ZERO) == 0 ? this : new Complex(real.subtract(fraction), imaginary);
     }
-
+    
     @Override
     public Complex subtract(double d) {
         return d == 0.0 ? this.getNumericValue() : new Complex(real.subtract(d), imaginary);
     }
-
+    
     @Override
     public Complex subtract(long l) {
         return l == 0 ? this : new Complex(real.subtract(l), imaginary);
     }
-
+    
     @Override
     public Complex subtract(int i) {
         return i == 0 ? this : new Complex(real.subtract(i), imaginary);
     }
-
+    
     @Override
     public Complex subtract(BigInteger bg) {
         NumberUtils.checkNotNull(bg);
         return bg.equals(BigInteger.ZERO) ? this : new Complex(real.subtract(bg), imaginary);
     }
-
+    
     @Override
     public Complex multiply(BigFraction fraction) {
         return fraction.compareTo(BigFraction.ONE) == 0 ? this : new Complex(real.multiply(fraction), imaginary.multiply(fraction));
     }
-
+    
     @Override
     public Complex multiply(double d) {
         return d == 1.0 ? this.getNumericValue() : Double.isNaN(d) ? ComplexNaN : new Complex(real.multiply(d), imaginary.multiply(d));
     }
-
+    
     @Override
     public Complex multiply(BigInteger bg) {
         return bg.compareTo(BigInteger.ONE) == 0 ? this : new Complex(real.multiply(bg), imaginary.multiply(bg));
     }
-
+    
     @Override
     public Complex multiply(long d) {
         return d == 1 ? this : new Complex(real.multiply(d), imaginary.multiply(d));
     }
-
+    
     @Override
     public Complex divide(BigFraction fraction) {
         return fraction.compareTo(BigFraction.ONE) == 0 ? this : new Complex(real.divide(fraction), imaginary.divide(fraction));
     }
-
+    
     @Override
     public Complex divide(long l) {
         return l == 1 ? this : new Complex(real.divide(l), imaginary.divide(l));
     }
-
+    
     @Override
     public Complex divide(int i) {
         return i == 1 ? this : new Complex(real.divide(i), imaginary.divide(i));
     }
-
+    
     @Override
     public Complex divide(BigInteger bg) {
         return bg.compareTo(BigInteger.ONE) == 0 ? this : new Complex(real.divide(bg), imaginary.divide(bg));
     }
-
+    
     @Override
     public Complex divide(double d) {
         return d == 1.0 ? this : new Complex(real.divide(d), imaginary.divide(d));
     }
-
+    
     public Complex add(Real d) {
         NumberUtils.checkNotNull(d);
         return d.isZero() ? (d.isNumeric() ? this.getNumericValue() : this) : new Complex(real.add(d), imaginary.add(d));
     }
-
+    
     public Complex subtract(Real d) {
         NumberUtils.checkNotNull(d);
         return d.isZero() ? (d.isNumeric() ? this.getNumericValue() : this) : new Complex(real.subtract(d), imaginary.add(d));
     }
-
+    
     public Complex multiply(Real d) {
         NumberUtils.checkNotNull(d);
         return d.isOne() ? (d.isNumeric() ? this.getNumericValue() : this) : new Complex(real.multiply(d), imaginary.multiply(d));
     }
-
+    
     public Complex divide(Real d) {
         NumberUtils.checkNotNull(d);
         return d.isOne() ? (d.isNumeric() ? this.getNumericValue() : this) : new Complex(real.divide(d), imaginary.divide(d));
     }
-
+    
     @Override
     public boolean equals(Object obj) {
         if (obj == null)
@@ -629,36 +643,36 @@ public class Complex extends Tensor
         final Complex other = (Complex) obj;
         return real.equals(other.real) && imaginary.equals(other.imaginary);
     }
-
+    
     @Override
     public Complex pow(double exponent) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
-
+    
     @Override
     public Complex pow(BigInteger exponent) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
-
+    
     @Override
     public Complex pow(long exponent) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
-
+    
     @Override
     public Complex pow(int exponent) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
-
+    
     public Complex powNumeric(Complex exponent) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
-
+    
     @Override
     public boolean isInteger() {
         return imaginary.isZero() && real.isInteger();
     }
-
+    
     @Override
     public boolean isNatural() {
         return imaginary.isZero() && real.isNatural();

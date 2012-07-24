@@ -22,16 +22,21 @@
  */
 package cc.redberry.core.performance.kv;
 
+import cc.redberry.core.context.*;
 import cc.redberry.core.indices.IndexType;
+import cc.redberry.core.indices.IndicesFactory;
 import cc.redberry.core.indices.IndicesTypeStructure;
+import cc.redberry.core.indices.IndicesUtils;
 import cc.redberry.core.parser.ParseNodeSimpleTensor;
-import cc.redberry.core.parser.ParserIndices;
 import cc.redberry.core.parser.preprocessor.IndicesInsertion;
 import cc.redberry.core.tensor.Expression;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.tensor.Tensors;
-import cc.redberry.core.tensor.iterator.*;
-import cc.redberry.core.transformations.*;
+import cc.redberry.core.tensor.iterator.TraverseState;
+import cc.redberry.core.transformations.ContractIndices;
+import cc.redberry.core.transformations.Expand;
+import cc.redberry.core.transformations.Transformation;
+import cc.redberry.core.transformations.Transformer;
 import cc.redberry.core.utils.Indicator;
 
 /**
@@ -41,7 +46,7 @@ import cc.redberry.core.utils.Indicator;
  */
 public final class OneLoopAction {
 
-    public static final String _Flat = "Flat=(1/4)*HATS*HATS*HATS*HATS-HATW*HATS*HATS+(1/2)*HATW*HATW+HATS*HATN-HATM+(L-2)*NABLAS_\\mu*HATW^\\mu"
+    public static final String Flat_ = "Flat=(1/4)*HATS*HATS*HATS*HATS-HATW*HATS*HATS+(1/2)*HATW*HATW+HATS*HATN-HATM+(L-2)*NABLAS_\\mu*HATW^\\mu"
             + "-L*NABLAS_\\mu*HATW*HATK^\\mu+(1/3)*((L-1)*NABLAS_\\mu^\\mu*HATS*HATS-L*NABLAS_\\mu*HATK^\\mu*HATS*HATS"
             + "-(L-1)*NABLAS_\\mu*HATS*HATS^\\mu+L*NABLAS_\\mu*HATS*HATS*HATK^\\mu)-(1/2)*NABLAS_\\mu*NABLAS_\\nu*DELTA^{\\mu\\nu}"
             + "-(1/4)*(L-1)*(L-2)*NABLAS_\\mu*NABLAS_\\nu^{\\mu\\nu}+(1/2)*L*(L-1)*(1/2)*(NABLAS_\\mu*NABLAS_{\\nu }^{\\nu}"
@@ -211,83 +216,301 @@ public final class OneLoopAction {
             + "HATK^{\\alpha}*HATK^{\\beta}*HATK^{\\nu}*HATK^{\\mu}+"
             + "HATK^{\\beta}*HATK^{\\alpha}*HATK^{\\nu}*HATK^{\\mu})";
     public static final String ACTION_ = "ACTION = Flat + WR + SR + SSR + FF + FR + RR";
-    private static final String[] matrices = new String[]{"ACTION", "KINV", "HATK", "HATW", "HATS", "NABLAS", "HATN", "HATF", "NABLAF", "HATM", "DELTA", "Flat", "FF", "WR", "SR", "SSR", "FR", "RR"};
-    private static final IndicesTypeStructure F_TYPE_STRUCTURE = new IndicesTypeStructure(IndexType.GreekLower.getType(), 2);
-    private static final Indicator<ParseNodeSimpleTensor> matricesIndicator = new Indicator<ParseNodeSimpleTensor>() {
+    private final Expression Flat, WR, SR, SSR, FF, FR, RR, DELTA_1, DELTA_2, DELTA_3, DELTA_4, ACTION;
 
-        @Override
-        public boolean is(ParseNodeSimpleTensor object) {
-            String name = object.name;
-            for (String matrix : matrices)
-                if (name.equals(matrix))
-                    return true;
-            if (name.equals("F") && object.indices.getIndicesTypeStructure().equals(F_TYPE_STRUCTURE))
-                return true;
-            return false;
-        }
-    };
-
-    private static Expression parseHATKAndDELTA(String expression) {
-        IndicesInsertion indicesInsertion = new IndicesInsertion(ParserIndices.parseSimple("^{\\mu_9}"), ParserIndices.parseSimple("_{\\nu_9}"), matricesIndicator);
-        return (Expression) Tensors.parse(expression, indicesInsertion);
+    private OneLoopAction(Expression Flat, Expression WR, Expression SR, Expression SSR, Expression FF, Expression FR, Expression RR, Expression DELTA_1, Expression DELTA_2, Expression DELTA_3, Expression DELTA_4, Expression ACTION) {
+        this.Flat = Flat;
+        this.WR = WR;
+        this.SR = SR;
+        this.SSR = SSR;
+        this.FF = FF;
+        this.FR = FR;
+        this.RR = RR;
+        this.DELTA_1 = DELTA_1;
+        this.DELTA_2 = DELTA_2;
+        this.DELTA_3 = DELTA_3;
+        this.DELTA_4 = DELTA_4;
+        this.ACTION = ACTION;
     }
 
-    private static Expression parseTerms(String expression) {
-        IndicesInsertion indicesInsertion = new IndicesInsertion(ParserIndices.parseSimple("^{\\mu_9}"), ParserIndices.parseSimple("_{\\mu_9}"), matricesIndicator);
-        return (Expression) Tensors.parse(expression, indicesInsertion);
+//    public Expression Flat(){return Flat;}
+//    public Expression WR(){return WR;}
+//    public Expression SR(){return SR;}
+//    public Expression SSR(){return SSR;}
+//    public Expression FF(){return FF;}
+//    public Expression FR(){return FR;}
+//    public Expression RR(){return RR;}
+//    public Expression ACTION(){return ACTION;}
+//    public Expression DELTA_1(){return DELTA_1;}
+//    public Expression DELTA_2(){return DELTA_2;}
+//    public Expression DELTA_3(){return DELTA_3;}
+//    public Expression DELTA_4(){return DELTA_4;}
+    public Expression Flat() {
+        return Flat;
     }
 
-    private static Expression parseExpression(String expression) {
-        return (Expression) Tensors.parse(expression);
+    public Expression WR() {
+        return WR;
     }
-    private Expression Flat, WR, SR, SSR, FF, FR, RR, DELTA_1, DELTA_2, DELTA_3, DELTA_4, ACTION;
 
-    public OneLoopAction(OneLoopInput input) {
+    public Expression SR() {
+        return SR;
+    }
+
+    public Expression SSR() {
+        return SSR;
+    }
+
+    public Expression FF() {
+        return FF;
+    }
+
+    public Expression FR() {
+        return FR;
+    }
+
+    public Expression RR() {
+        return RR;
+    }
+
+    public Expression ACTION() {
+        return ACTION;
+    }
+
+    public Expression DELTA_1() {
+        return DELTA_1;
+    }
+
+    public Expression DELTA_2() {
+        return DELTA_2;
+    }
+
+    public Expression DELTA_3() {
+        return DELTA_3;
+    }
+
+    public Expression DELTA_4() {
+        return DELTA_4;
+    }
+
+    public static OneLoopAction calculateOneLoopAction(OneLoopInput input) {
         Tensors.addSymmetry("R_\\mu\\nu", IndexType.GreekLower, false, new int[]{1, 0});
         Tensors.addSymmetry("R_\\mu\\nu\\alpha\\beta", IndexType.GreekLower, true, new int[]{0, 1, 3, 2});
         Tensors.addSymmetry("R_\\mu\\nu\\alpha\\beta", IndexType.GreekLower, false, new int[]{2, 3, 0, 1});
         Tensors.addSymmetry("F_\\mu\\nu\\alpha\\beta", IndexType.GreekLower, true, new int[]{1, 0, 2, 3});
         Tensors.addSymmetry("P_\\alpha\\beta", IndexType.GreekLower, false, new int[]{1, 0});
 
-        Flat = parseTerms(_Flat);
-        WR = parseTerms(WR_);
-        SR = parseTerms(SR_);
-        SSR = parseTerms(SSR_);
-        FF = parseTerms(FF_);
-        FR = parseTerms(FR_);
-        RR = parseTerms(RR_);
-        DELTA_1 = parseHATKAndDELTA(DELTA_1_);
-        DELTA_2 = parseHATKAndDELTA(DELTA_2_);
-        DELTA_3 = parseHATKAndDELTA(DELTA_3_);
-        DELTA_4 = parseHATKAndDELTA(DELTA_4_);
-        ACTION = parseTerms(ACTION_);
 
-        Expression kronecker = parseExpression("d_{\\mu}^{\\mu}=4");
+        //Parsing input strings
 
+        //matrices names
+        final String[] matrices = new String[]{"KINV", "HATK", "HATW", "HATS", "NABLAS", "HATN", "HATF", "NABLAF", "HATM", "DELTA", "Flat", "FF", "WR", "SR", "SSR", "FR", "RR"};
+        //F_{\\mu\\nu} type structure
+        final IndicesTypeStructure F_TYPE_STRUCTURE = new IndicesTypeStructure(IndexType.GreekLower.getType(), 2);
+        //matrices indicator for parse preprocessor
+        final Indicator<ParseNodeSimpleTensor> matricesIndicator = new Indicator<ParseNodeSimpleTensor>() {
+
+            @Override
+            public boolean is(ParseNodeSimpleTensor object) {
+                String name = object.name;
+                for (String matrix : matrices)
+                    if (name.equals(matrix))
+                        return true;
+                if (name.equals("F") && object.indices.getIndicesTypeStructure().equals(F_TYPE_STRUCTURE))
+                    return true;
+                return false;
+            }
+        };
+
+        int i, matrixIndicesCount = input.getMatrixIndicesCount(), operatorOrder = input.getOperatorOrder();
+
+        //indices to insert
+        int upper[] = new int[matrixIndicesCount / 2], lower[] = upper.clone();
+        for (i = 0; i < matrixIndicesCount / 2; ++i) {
+            upper[i] = IndicesUtils.createIndex(30 + i, IndexType.GreekLower, true);//30 
+            lower[i] = IndicesUtils.createIndex(30 + i + matrixIndicesCount / 2, IndexType.GreekLower, false);
+        }
+
+        Expression Flat, WR, SR, SSR, FF, FR, RR, DELTA_1, DELTA_2, DELTA_3, DELTA_4, ACTION;
+
+        //preprocessor for Flat, WR, SR, SSR, FF, FR, RR, ACTION
+        IndicesInsertion termIndicesInsertion = new IndicesInsertion(
+                IndicesFactory.createSimple(null, upper),
+                IndicesFactory.createSimple(null, IndicesUtils.getIndicesNames(upper)),
+                matricesIndicator);
+
+        Flat = (Expression) Tensors.parse(Flat_, termIndicesInsertion);
+        WR = (Expression) Tensors.parse(WR_, termIndicesInsertion);
+        SR = (Expression) Tensors.parse(SR_, termIndicesInsertion);
+        SSR = (Expression) Tensors.parse(SSR_, termIndicesInsertion);
+        FF = (Expression) Tensors.parse(FF_, termIndicesInsertion);
+        FR = (Expression) Tensors.parse(FR_, termIndicesInsertion);
+        RR = (Expression) Tensors.parse(RR_, termIndicesInsertion);
+        ACTION = (Expression) Tensors.parse(ACTION_, termIndicesInsertion);
+        Expression[] terms = new Expression[]{Flat, WR, SR, SSR, FF, FR, RR};
+
+        //preprocessor for DELTA_1,2,3,4
+        IndicesInsertion deltaIndicesInsertion = new IndicesInsertion(
+                IndicesFactory.createSimple(null, upper),
+                IndicesFactory.createSimple(null, lower),
+                matricesIndicator);
+
+        DELTA_1 = (Expression) Tensors.parse(DELTA_1_, deltaIndicesInsertion);
+        DELTA_2 = (Expression) Tensors.parse(DELTA_2_, deltaIndicesInsertion);
+        DELTA_3 = (Expression) Tensors.parse(DELTA_3_, deltaIndicesInsertion);
+        DELTA_4 = (Expression) Tensors.parse(DELTA_4_, deltaIndicesInsertion);
         Expression[] deltaExpressions = new Expression[]{DELTA_1, DELTA_2, DELTA_3, DELTA_4};
-        Expression[] terms = new Expression[]{ACTION, Flat, WR, SR, SSR, FF, FR, RR};
 
+        //Calculations        
+
+        Expression kronecker = (Expression) Tensors.parse("d_{\\mu}^{\\mu}=4");
         Transformation nn = new SqrSubs(Tensors.parseSimple("n_\\mu")), nnTransformer = new Transformer(TraverseState.Leaving, new Transformation[]{nn});
 
 
-        int i, j;
+        Expression riemann1 = (Expression) Tensors.parse("F_\\mu\\nu\\alpha\\beta=R_\\mu\\nu\\alpha\\beta");
+        Expression riemann2 = riemann1;//(Expression) Tensors.parse("R_{\\mu\\nu\\alpha\\beta}*R^{\\mu\\alpha\\nu\\beta}=(1/2)*R_{\\mu\\nu\\alpha\\beta}*R^{\\mu\\nu\\alpha\\beta}");
+        Expression riemann3 = riemann1;//(Expression) Tensors.parse("R_{\\mu\\nu\\alpha\\beta}*R^{\\mu\\nu\\alpha\\beta}=4*R_{\\mu\\nu}*R^{\\mu\\nu}-R*R");
+        Expression riemann4 = (Expression) Tensors.parse("R_{\\mu \\nu}^{\\mu}_{\\alpha} = R_{\\nu\\alpha}");
+        Expression riemann5 = (Expression) Tensors.parse("R_{\\mu\\nu}^{\\alpha}_{\\alpha}=0");
+        Expression riemann6 = (Expression) Tensors.parse("R_{\\mu}^{\\mu}= R");
+        Expression riemann7 = (Expression) Tensors.parse("P_{\\mu}^{\\mu}= P");
+        Expression[] riemansSubstitutions = new Expression[]{riemann1, riemann2, riemann3, riemann4, riemann5, riemann6, riemann7};
+
+        Expression ricciDeSitter = (Expression) Tensors.parse("R_{\\mu\\nu} = -g_{\\mu\\nu}*LAMBDA");
+        Expression riemannDeSitter = (Expression) Tensors.parse("R_{\\mu\\nu\\alpha\\beta} = (1/3)*(g_{\\mu\\beta}*g_{\\nu\\alpha}-g_{\\mu\\alpha}*g_{\\nu\\beta})*LAMBDA");
+
         Tensor temp;
-        System.out.println("Evaluating \\Delta-tensors.");
-        for (i = 0; i < deltaExpressions.length; ++i) {
+
+        //Calculating Delta- tensors
+        System.out.println("Evaluating \\Delta- tensors.");
+
+        //DELTA_1,2
+        for (i = 0; i < 2; ++i) {
+            System.out.println(i + 1);
             temp = deltaExpressions[i];
             temp = input.getL().transform(temp);
 
             for (Expression hatK : input.getHatQuantities(0))
                 temp = hatK.transform(temp);
-
-            System.out.println("expand");
-            temp = Expand.expand(temp, new Transformation[]{ContractIndices.CONTRACT_INDICES, nn});
+            temp = Expand.expand(temp, new Transformation[]{ContractIndices.CONTRACT_INDICES, nn, kronecker});
             temp = ContractIndices.CONTRACT_INDICES.transform(temp);
             temp = nnTransformer.transform(temp);
+            temp = kronecker.transform(temp);
 
             deltaExpressions[i] = (Expression) temp;
+        }
+
+        Tensor[] combinations;
+        Expression[] calculatedCombinations;
+
+        //DELTA_3
+        System.out.println(3);
+        combinations = new Tensor[]{
+            Tensors.parse("HATK^{\\mu\\nu}*HATK^{\\alpha}", deltaIndicesInsertion),
+            Tensors.parse("HATK^{\\alpha}*HATK^{\\mu\\nu}", deltaIndicesInsertion),
+            Tensors.parse("HATK^{\\mu}*HATK^{\\nu}*HATK^{\\alpha}", deltaIndicesInsertion)
+        };
+        calculatedCombinations = new Expression[combinations.length];
+        for (i = 0; i < combinations.length; ++i) {
+            temp = combinations[i];
+            for (Expression hatK : input.getHatQuantities(0))
+                temp = hatK.transform(temp);
+            temp = Expand.expand(temp, new Transformation[]{ContractIndices.CONTRACT_INDICES, nn, kronecker});
+            temp = ContractIndices.CONTRACT_INDICES.transform(temp);
+            temp = nnTransformer.transform(temp);
+            temp = kronecker.transform(temp);
+            calculatedCombinations[i] = Tensors.expression(combinations[i], temp);
+        }
+        temp = DELTA_3;
+        temp = input.getL().transform(temp);
+        for (Expression t : calculatedCombinations)
+            temp = new NaiveSubstitution(t.get(0), t.get(1)).transform(temp);
+        temp = Expand.expand(temp, new Transformation[]{ContractIndices.CONTRACT_INDICES, nn, kronecker});
+        temp = ContractIndices.CONTRACT_INDICES.transform(temp);
+        temp = nnTransformer.transform(temp);
+        temp = kronecker.transform(temp);
+        deltaExpressions[2] = (Expression) temp;
+
+        //DELTA_4
+        System.out.println(4);
+        combinations = new Tensor[]{
+            Tensors.parse("HATK^{\\alpha\\beta}*HATK^{\\mu\\nu}", deltaIndicesInsertion),
+            Tensors.parse("HATK^{\\mu}*HATK^{\\nu}*HATK^{\\alpha\\beta}", deltaIndicesInsertion),
+            Tensors.parse("HATK^{\\mu}*HATK^{\\alpha\\beta}*HATK^{\\nu}", deltaIndicesInsertion),
+            Tensors.parse("HATK^{\\alpha\\beta}*HATK^{\\mu}*HATK^{\\nu}", deltaIndicesInsertion),
+            Tensors.parse("HATK^{\\beta}*HATK^{\\alpha}*HATK^{\\mu}*HATK^{\\nu}", deltaIndicesInsertion)
+        };
+        calculatedCombinations = new Expression[combinations.length];
+        for (i = 0; i < combinations.length; ++i) {
+            temp = combinations[i];
+            System.out.println(temp);
+            for (Expression hatK : input.getHatQuantities(0))
+                temp = hatK.transform(temp);
+            temp = Expand.expand(temp, new Transformation[]{ContractIndices.CONTRACT_INDICES, nn, kronecker});
+            temp = ContractIndices.CONTRACT_INDICES.transform(temp);
+            temp = nnTransformer.transform(temp);
+            temp = kronecker.transform(temp);
+            calculatedCombinations[i] = Tensors.expression(combinations[i], temp);
+            System.out.println("X"+i);
+        }
+        System.out.println("XXX");
+        temp = DELTA_4;
+        temp = input.getL().transform(temp);
+        for (Expression t : calculatedCombinations)
+            temp = new NaiveSubstitution(t.get(0), t.get(1)).transform(temp);
+        System.out.println("XXX");
+        temp = Expand.expand(temp, new Transformation[]{ContractIndices.CONTRACT_INDICES, nn, kronecker});
+        temp = ContractIndices.CONTRACT_INDICES.transform(temp);
+        temp = nnTransformer.transform(temp);
+        temp = kronecker.transform(temp);
+        deltaExpressions[3] = (Expression) temp;
+
+
+        System.out.println("Evaluating \\Delta- tensors. Done.");
+
+        for (i = 0; i < terms.length; ++i) {
+            temp = terms[i];
+            System.out.println(temp.get(0));
+            temp = input.getL().transform(temp);
+
+            for (Expression[] hatQuantities : input.getHatQuantities())
+                for (Expression hatQ : hatQuantities)
+                    temp = hatQ.transform(temp);
+
+            for (Expression nabla : input.getNablaS())
+                temp = nabla.transform(temp);
+
+            temp = input.getF().transform(temp);
+            temp = input.getHatF().transform(temp);
+
+            temp = ricciDeSitter.transform(temp);
+            temp = riemannDeSitter.transform(temp);
+            temp = Expand.expand(temp, new Transformation[]{ContractIndices.CONTRACT_INDICES, nn, kronecker});
+
+            for (Expression delta : deltaExpressions)
+                temp = delta.transform(temp);
+            for (Expression hatK : input.getHatQuantities(0))
+                temp = hatK.transform(temp);
+
+            temp = Expand.expand(temp, new Transformation[]{ContractIndices.CONTRACT_INDICES, nn, kronecker});
+            temp = ContractIndices.CONTRACT_INDICES.transform(temp);
+            temp = nnTransformer.transform(temp);
+            temp = kronecker.transform(temp);
+
+            temp = Averaging.INSTANCE.transform(temp);
+            temp = Expand.expand(temp);
+            temp = ContractIndices.CONTRACT_INDICES.transform(temp);
+            temp = kronecker.transform(temp);
+            for (Expression riemann : riemansSubstitutions)
+                temp = riemann.transform(temp);
+
+            terms[i] = (Expression) temp;
             System.out.println(temp);
         }
-        System.out.println("Done.");
+
+        for (Expression term : terms)
+            ACTION = (Expression) term.transform(ACTION);
+
+        return new OneLoopAction(Flat, WR, SR, SSR, FF, FR, RR, DELTA_1, DELTA_2, DELTA_3, DELTA_4, ACTION);
     }
 }

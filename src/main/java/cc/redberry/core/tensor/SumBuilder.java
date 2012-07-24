@@ -30,7 +30,8 @@ import cc.redberry.core.indices.Indices;
 import cc.redberry.core.indices.IndicesFactory;
 import cc.redberry.core.indices.IndicesUtils;
 import cc.redberry.core.number.Complex;
-import cc.redberry.core.utils.TensorUtils;
+import cc.redberry.core.utils.*;
+import java.util.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -47,6 +48,7 @@ public final class SumBuilder implements TensorBuilder {
     private final Map<Integer, List<FactorNode>> summands;
     private Complex complex = Complex.ZERO;
     private Indices indices = null;
+    private int[] sortedFreeIndices;
 
     public SumBuilder() {
         this(7);
@@ -84,9 +86,11 @@ public final class SumBuilder implements TensorBuilder {
     public void put(Tensor tensor) {
         if (TensorUtils.isZero(tensor))
             return;
-        if (indices == null)
+        if (indices == null) {
             indices = IndicesFactory.createSorted(tensor.getIndices().getFreeIndices());
-        else if (!indices.equalsRegardlessOrder(tensor.getIndices().getFreeIndices()))
+            sortedFreeIndices = indices.getAllIndices().copy();
+            Arrays.sort(sortedFreeIndices);
+        } else if (!indices.equalsRegardlessOrder(tensor.getIndices().getFreeIndices()))
             throw new TensorException("Inconsinstent indices in sum.", tensor);
         if (tensor instanceof Sum) {
             for (Tensor s : tensor)
@@ -100,7 +104,7 @@ public final class SumBuilder implements TensorBuilder {
 
         Split split = Split.split(tensor, false);
 
-        Integer hash = split.factor.hashCode();
+        Integer hash = TensorHashCalculator.hashWithIndices(split.factor, sortedFreeIndices);//=split.factor.hashCode();
         List<FactorNode> factorNodes = summands.get(hash);
         if (factorNodes == null) {
             List<FactorNode> fns = new ArrayList<>();
@@ -144,7 +148,6 @@ public final class SumBuilder implements TensorBuilder {
 //        }
 //        return b;
 //    }
-
     static Boolean compareFactors(Tensor u, Tensor v) {
         IndexMappingBuffer buffer;
         if (u.getIndices().size() == 0)

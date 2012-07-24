@@ -78,7 +78,7 @@ public final class Expand implements Transformation {
         return expand(tensor, Indicator.TRUE_INDICATOR, new Transformation[0], threads);
     }
 
-    public static Tensor expand(Tensor tensor, Transformation[] transformations) {
+    public static Tensor expand(Tensor tensor, Transformation... transformations) {
         return expand(tensor, Indicator.TRUE_INDICATOR, transformations, 1);
     }
 
