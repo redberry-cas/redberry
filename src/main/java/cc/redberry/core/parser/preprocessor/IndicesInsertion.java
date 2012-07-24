@@ -28,10 +28,8 @@ import cc.redberry.core.indices.IndicesFactory;
 import cc.redberry.core.indices.IndicesUtils;
 import cc.redberry.core.indices.SimpleIndices;
 import cc.redberry.core.math.MathUtils;
-import cc.redberry.core.parser.ParseNode;
-import cc.redberry.core.parser.ParseNodeSimpleTensor;
-import cc.redberry.core.parser.ParseNodeTransformer;
-import cc.redberry.core.parser.ParseUtils;
+import cc.redberry.core.parser.*;
+import cc.redberry.core.tensor.*;
 import cc.redberry.core.utils.ArraysUtils;
 import cc.redberry.core.utils.Indicator;
 import cc.redberry.core.utils.IntArrayList;
@@ -151,36 +149,21 @@ public final class IndicesInsertion implements ParseNodeTransformer {
                 else
                     return null;
             case Product:
-                List<IITransformer> tranmsformers = new ArrayList<>();
-
-                for (ParseNode _node : node.content)
-                    if ((t = createTransformer(_node, indicator)) != null)
-                        tranmsformers.add(t);
-                if (tranmsformers.isEmpty())
-                    return null;
-                else if (tranmsformers.size() == 1)
-                    return tranmsformers.get(0);
-                else
-                    return new ProductTransformer(tranmsformers.toArray(new IITransformer[tranmsformers.size()]));
             case Expression:
             case Sum:
-                t = createTransformer(node.content[0], indicator);
-                IITransformer[] transformers = null;
-                if (t != null) {
-                    transformers = new IITransformer[node.content.length];
-                    transformers[0] = t;
-                }
-                int i;
-                for (i = 1; i < node.content.length; ++i)
-                    if ((t = createTransformer(node.content[i], indicator)) != null)
-                        if (transformers == null)
-                            throw new IllegalArgumentException();//TODO wrong condition e.g. X + Y^i_i, where Y - matrix, bur X - not. 
-                        else
-                            transformers[i] = t;
-                if (transformers == null)
+                List<IITransformer> transformers = new ArrayList<>();
+                for (ParseNode _node : node.content)
+                    if ((t = createTransformer(_node, indicator)) != null)
+                        transformers.add(t);
+                if (transformers.isEmpty())
                     return null;
+                else if (transformers.size() == 1)
+                    return transformers.get(0);
                 else
-                    return new SumTransformer(transformers);
+                    if (node.tensorType == TensorType.Product)
+                        return new ProductTransformer(transformers.toArray(new IITransformer[transformers.size()]));
+                    else
+                        return new SumTransformer(transformers.toArray(new IITransformer[transformers.size()]));
             default:
                 return null;
         }
