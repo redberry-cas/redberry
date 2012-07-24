@@ -28,6 +28,8 @@ import cc.redberry.core.indices.IndicesUtils;
 import cc.redberry.core.math.GraphUtils;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.utils.ArraysUtils;
+import cc.redberry.core.utils.HashFunctions;
+
 import java.lang.ref.SoftReference;
 import java.util.Arrays;
 
@@ -374,8 +376,19 @@ public final class Product extends MultiTensor {
             contraction.sortContractions();
         freeContraction.sortContractions();
 
+        int[] inds = IndicesUtils.getIndicesNames(this.indices.getFreeIndices());
+        Arrays.sort(inds);
+        ScaffoldWrapper[] wrappers = new ScaffoldWrapper[contractions.length];
+        for (i = 0; i < contractions.length; ++i)
+            wrappers[i] = new ScaffoldWrapper(inds, data[i], contractions[i]);
+
+        ArraysUtils.quickSort(wrappers, data);
+
+        for (i = 0; i < contractions.length; ++i)
+            contractions[i] = wrappers[i].tc;
+
         //Here we can use unstable sort algorithm
-        ArraysUtils.quickSort(contractions, 0, contractions.length, data);
+        //ArraysUtils.quickSort(contractions, 0, contractions.length, data);
 
         //Form resulting content
         ContractionStructure contractionStructure = new ContractionStructure(freeContraction, contractions);
@@ -420,7 +433,6 @@ public final class Product extends MultiTensor {
      *                     tensors hash in array)
      * @param id           id of index in tensor indices list (could be !=0 only
      *                     for simple tensors)
-     *
      * @return packed record (long)
      */
     private static long packToLong(final int tensorIndex, final short stretchIndex, final short id) {
@@ -433,6 +445,7 @@ public final class Product extends MultiTensor {
             result[i] = ((int) (info[i] >> 32)) + 1;
         return result;
     }
+
     //-65536 == packToLong(-1, (short) -1, (short) 0);
     private static final long dummyTensorInfo = -65536;
     //        private static class ProductContent {
@@ -454,4 +467,36 @@ public final class Product extends MultiTensor {
     //            this.stretchIndices = stretchIndices;
     //        }
     //    }
+
+    private static int hc(Tensor t, int[] inds) {
+        Indices ind = t.getIndices().getFreeIndices();
+        int h = 31;
+        int ii;
+        for (int i = ind.size() - 1; i >= 0; --i) {
+            ii = IndicesUtils.getNameWithType(ind.get(i));
+            if ((ii = Arrays.binarySearch(inds, ii)) >= 0)
+                h ^= HashFunctions.JenkinWang32shift(ii);
+        }
+        return h;
+    }
+
+    private static class ScaffoldWrapper implements Comparable<ScaffoldWrapper> {
+        public final int[] inds;
+        public final Tensor t;
+        public final TensorContraction tc;
+
+        private ScaffoldWrapper(int[] inds, Tensor t, TensorContraction tc) {
+            this.inds = inds;
+            this.t = t;
+            this.tc = tc;
+        }
+
+        @Override
+        public int compareTo(ScaffoldWrapper o) {
+            int r = tc.compareTo(o.tc);
+            if (r != 0)
+                return r;
+            return Integer.compare(hc(t, inds), hc(o.t, inds));
+        }
+    }
 }
