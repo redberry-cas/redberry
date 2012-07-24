@@ -22,20 +22,21 @@
  */
 package cc.redberry.core.performance.kv;
 
-import cc.redberry.core.context.*;
+import cc.redberry.core.indices.*;
 import cc.redberry.core.tensor.*;
 import org.junit.*;
-import static cc.redberry.core.TAssert.*;
 
 /**
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
+@Ignore
 public class OneLoopActionTest {
 
     @Test
     public void testDummyMatrices() {
+        Tensors.addSymmetry("f_\\mu\\nu", IndexType.GreekLower, false, 1, 0);
         Expression KINV = (Expression) Tensors.parse("KINV^\\mu_\\nu=f^\\mu_\\nu");
         Expression K = (Expression) Tensors.parse("K^\\mu_\\nu^\\alpha_\\beta=g^{\\mu\\alpha}*g_{\\nu\\beta}");
         Expression S = (Expression) Tensors.parse("S^\\rho^\\mu_\\nu=0");

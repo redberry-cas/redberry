@@ -309,7 +309,6 @@ public final class OneLoopAction {
         final IndicesTypeStructure F_TYPE_STRUCTURE = new IndicesTypeStructure(IndexType.GreekLower.getType(), 2);
         //matrices indicator for parse preprocessor
         final Indicator<ParseNodeSimpleTensor> matricesIndicator = new Indicator<ParseNodeSimpleTensor>() {
-
             @Override
             public boolean is(ParseNodeSimpleTensor object) {
                 String name = object.name;
@@ -451,7 +450,7 @@ public final class OneLoopAction {
             temp = nnTransformer.transform(temp);
             temp = kronecker.transform(temp);
             calculatedCombinations[i] = Tensors.expression(combinations[i], temp);
-            System.out.println("X"+i);
+            System.out.println("X" + i);
         }
         System.out.println("XXX");
         temp = DELTA_4;
@@ -486,6 +485,7 @@ public final class OneLoopAction {
             temp = ricciDeSitter.transform(temp);
             temp = riemannDeSitter.transform(temp);
             temp = Expand.expand(temp, new Transformation[]{ContractIndices.CONTRACT_INDICES, nn, kronecker});
+            temp = ContractIndices.CONTRACT_INDICES.transform(temp);
 
             for (Expression delta : deltaExpressions)
                 temp = delta.transform(temp);

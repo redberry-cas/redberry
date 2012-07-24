@@ -112,7 +112,7 @@ public final class IntPermutationsGenerator implements IntCombinatoricGenerator 
 
     private void checkSize(int size) {
         if (size >= 11)
-            System.out.println("Initializing PermutationsGenerator with size = " + size + ". Iteration may take awhile.");
+            System.out.println("Initializing PermutationsGenerator with size = " + size + ". Iteration may take a while.");
     }
 
     /**

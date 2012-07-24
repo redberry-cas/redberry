@@ -49,6 +49,7 @@ final class ProviderSum implements IndexMappingProvider {
     };
     private final IndexMappingProvider mainProvider;
     private final Tester[] testers;
+    private final SignumHolder holder;
 
     private ProviderSum(IndexMappingProvider opu, Tensor from, Tensor to) {
         int begin = 0;
@@ -76,8 +77,10 @@ final class ProviderSum implements IndexMappingProvider {
 
                 begin = i;
             }
+
+        holder = new SignumHolder(opu);
         if (mainStretchLength == 1) {
-            this.mainProvider = IndexMappings.createPort(opu, from.get(mainStretchCoord),
+            this.mainProvider = IndexMappings.createPort(holder, from.get(mainStretchCoord),
                                                          to.get(mainStretchCoord));
             testersList.remove(mainStretchIndex);
         } else {
@@ -86,7 +89,8 @@ final class ProviderSum implements IndexMappingProvider {
             final Tensor[] preTo = to.getRange(mainStretchCoord,
                                                mainStretchCoord + mainStretchLength);
 
-            this.mainProvider = new StretchPairSource(opu, preFrom, preTo);
+            this.mainProvider = new StretchPairSource(holder, preFrom, preTo);
+
             testersList.set(mainStretchIndex, (StretchPairSource) this.mainProvider);
         }
         this.testers = testersList.toArray(new Tester[testersList.size()]);
@@ -105,10 +109,38 @@ final class ProviderSum implements IndexMappingProvider {
             if (buffer == null)
                 return null;
             buffer.removeContracted();
+            if (holder.signum)
+                buffer.addSignum(true);
             final IndexMappingBufferTester tester = IndexMappingBufferTester.create(buffer);
             for (Tester t : testers)
                 if (!t.test(tester))
                     continue OUTER;
+            if (holder.signum)
+                buffer.addSignum(true);
+            return buffer;
+        }
+    }
+
+    private static class SignumHolder implements IndexMappingProvider {
+
+        private final IndexMappingProvider provider;
+        boolean signum;
+
+        public SignumHolder(IndexMappingProvider provider) {
+            this.provider = provider;
+        }
+
+        @Override
+        public boolean tick() {
+            return provider.tick();
+        }
+
+        @Override
+        public IndexMappingBuffer take() {
+            IndexMappingBuffer buffer = provider.take();
+            if (buffer == null)
+                return null;
+            signum = buffer.getSignum();
             return buffer;
         }
     }

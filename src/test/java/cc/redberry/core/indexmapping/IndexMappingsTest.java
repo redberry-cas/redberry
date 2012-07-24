@@ -17,9 +17,10 @@ package cc.redberry.core.indexmapping;
 
 import cc.redberry.concurrent.OutputPortUnsafe;
 import cc.redberry.core.context.CC;
-import cc.redberry.core.indices.IndexType;
+import cc.redberry.core.indices.*;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.tensor.Tensors;
+import cc.redberry.core.utils.*;
 import java.util.Arrays;
 import java.util.Set;
 import org.junit.*;
@@ -272,12 +273,59 @@ public class IndexMappingsTest {
     @Test
     public void performanceTest() {
         Tensor from = Tensors.parse("f^{\\gamma }_{\\epsilon }*f^{\\delta }_{\\phi }*f^{\\mu_{9} }_{\\psi }*n_{\\upsilon }*n_{\\chi }*d^{\\alpha }_{\\gamma }*d^{\\nu }_{\\delta }*g^{\\upsilon \\phi }*g^{\\chi \\psi }*g^{\\mu \\epsilon }*d^{\\beta }_{\\nu_{9} }+f^{\\gamma }_{\\zeta }*f^{\\delta }_{\\alpha_1 }*f^{\\mu_{9} }_{\\gamma_1 }*n_{\\omega }*n_{\\beta_1 }*d^{\\beta }_{\\gamma }*d^{\\nu }_{\\delta }*g^{\\omega \\alpha_1 }*g^{\\beta_1 \\gamma_1 }*g^{\\mu \\zeta }*d^{\\alpha }_{\\nu_{9} }+f^{\\gamma }_{\\eta }*f^{\\delta }_{\\epsilon_1 }*f^{\\mu_{9} }_{\\eta_1 }*n_{\\delta_1 }*n_{\\zeta_1 }*d^{\\alpha }_{\\gamma }*d^{\\beta }_{\\delta }*g^{\\delta_1 \\epsilon_1 }*g^{\\zeta_1 \\eta_1 }*g^{\\mu \\eta }*d^{\\nu }_{\\nu_{9} }+f^{\\gamma }_{\\theta }*f^{\\delta }_{\\iota_1 }*f^{\\mu_{9} }_{\\lambda_1 }*n_{\\theta_1 }*n_{\\kappa_1 }*d^{\\nu }_{\\gamma }*d^{\\beta }_{\\delta }*g^{\\theta_1 \\iota_1 }*g^{\\kappa_1 \\lambda_1 }*g^{\\mu \\theta }*d^{\\alpha }_{\\nu_{9} }+f^{\\gamma }_{\\iota }*f^{\\delta }_{\\nu_1 }*f^{\\mu_{9} }_{\\pi_1 }*n_{\\mu_1 }*n_{\\xi_1 }*d^{\\nu }_{\\gamma }*d^{\\alpha }_{\\delta }*g^{\\mu_1 \\nu_1 }*g^{\\xi_1 \\pi_1 }*g^{\\mu \\iota }*d^{\\beta }_{\\nu_{9} }+f^{\\gamma }_{\\kappa }*f^{\\delta }_{\\sigma_1 }*f^{\\mu_{9} }_{\\upsilon_1 }*n_{\\rho_1 }*n_{\\tau_1 }*d^{\\beta }_{\\gamma }*d^{\\alpha }_{\\delta }*g^{\\rho_1 \\sigma_1 }*g^{\\tau_1 \\upsilon_1 }*g^{\\mu \\kappa }*d^{\\nu }_{\\nu_{9} }+f^{\\gamma }_{\\lambda }*f^{\\delta }_{\\chi_1 }*f^{\\mu_{9} }_{\\omega_1 }*n_{\\phi_1 }*n_{\\psi_1 }*d^{\\mu }_{\\gamma }*d^{\\alpha }_{\\delta }*g^{\\phi_1 \\chi_1 }*g^{\\psi_1 \\omega_1 }*g^{\\nu \\lambda }*d^{\\beta }_{\\nu_{9} }+f^{\\gamma }_{\\xi }*f^{\\delta }_{\\beta_2 }*f^{\\mu_{9} }_{\\delta_2 }*n_{\\alpha_2 }*n_{\\gamma_2 }*d^{\\beta }_{\\gamma }*d^{\\alpha }_{\\delta }*g^{\\alpha_2 \\beta_2 }*g^{\\gamma_2 \\delta_2 }*g^{\\nu \\xi }*d^{\\mu }_{\\nu_{9} }+f^{\\gamma }_{\\pi }*f^{\\delta }_{\\zeta_2 }*f^{\\mu_{9} }_{\\theta_2 }*n_{\\epsilon_2 }*n_{\\eta_2 }*d^{\\alpha }_{\\gamma }*d^{\\beta }_{\\delta }*g^{\\epsilon_2 \\zeta_2 }*g^{\\eta_2 \\theta_2 }*g^{\\nu \\pi }*d^{\\mu }_{\\nu_{9} }+f^{\\gamma }_{\\rho }*f^{\\delta }_{\\kappa_2 }*f^{\\mu_{9} }_{\\mu_2 }*n_{\\iota_2 }*n_{\\lambda_2 }*d^{\\mu }_{\\gamma }*d^{\\beta }_{\\delta }*g^{\\iota_2 \\kappa_2 }*g^{\\lambda_2 \\mu_2 }*g^{\\nu \\rho }*d^{\\alpha }_{\\nu_{9} }+f^{\\gamma }_{\\sigma }*f^{\\delta }_{\\xi_2 }*f^{\\mu_{9} }_{\\rho_2 }*n_{\\nu_2 }*n_{\\pi_2 }*d^{\\mu }_{\\gamma }*d^{\\beta }_{\\delta }*g^{\\nu_2 \\xi_2 }*g^{\\pi_2 \\rho_2 }*g^{\\alpha \\sigma }*d^{\\nu }_{\\nu_{9} }+f^{\\gamma }_{\\tau }*f^{\\delta }_{\\tau_2 }*f^{\\mu_{9} }_{\\phi_2 }*n_{\\sigma_2 }*n_{\\upsilon_2 }*d^{\\nu }_{\\gamma }*d^{\\beta }_{\\delta }*g^{\\sigma_2 \\tau_2 }*g^{\\upsilon_2 \\phi_2 }*g^{\\alpha \\tau }*d^{\\mu }_{\\nu_{9} }");
-        Tensor   to = Tensors.parse("f^{\\delta }_{\\epsilon }*f^{\\gamma }_{\\phi }*f^{\\mu_{9} }_{\\psi }*n_{\\upsilon }*n_{\\chi }*d^{\\alpha }_{\\gamma }*d^{\\beta }_{\\delta }*g^{\\upsilon \\phi }*g^{\\chi \\psi }*g^{\\mu \\epsilon }*d^{\\nu }_{\\nu_{9} }+f^{\\delta }_{\\zeta }*f^{\\gamma }_{\\alpha_1 }*f^{\\mu_{9} }_{\\gamma_1 }*n_{\\omega }*n_{\\beta_1 }*d^{\\beta }_{\\gamma }*d^{\\alpha }_{\\delta }*g^{\\omega \\alpha_1 }*g^{\\beta_1 \\gamma_1 }*g^{\\mu \\zeta }*d^{\\nu }_{\\nu_{9} }+f^{\\delta }_{\\eta }*f^{\\gamma }_{\\epsilon_1 }*f^{\\mu_{9} }_{\\eta_1 }*n_{\\delta_1 }*n_{\\zeta_1 }*d^{\\alpha }_{\\gamma }*d^{\\nu }_{\\delta }*g^{\\delta_1 \\epsilon_1 }*g^{\\zeta_1 \\eta_1 }*g^{\\mu \\eta }*d^{\\beta }_{\\nu_{9} }+f^{\\delta }_{\\theta }*f^{\\gamma }_{\\iota_1 }*f^{\\mu_{9} }_{\\lambda_1 }*n_{\\theta_1 }*n_{\\kappa_1 }*d^{\\nu }_{\\gamma }*d^{\\alpha }_{\\delta }*g^{\\theta_1 \\iota_1 }*g^{\\kappa_1 \\lambda_1 }*g^{\\mu \\theta }*d^{\\beta }_{\\nu_{9} }+f^{\\delta }_{\\iota }*f^{\\gamma }_{\\nu_1 }*f^{\\mu_{9} }_{\\pi_1 }*n_{\\mu_1 }*n_{\\xi_1 }*d^{\\nu }_{\\gamma }*d^{\\beta }_{\\delta }*g^{\\mu_1 \\nu_1 }*g^{\\xi_1 \\pi_1 }*g^{\\mu \\iota }*d^{\\alpha }_{\\nu_{9} }+f^{\\delta }_{\\kappa }*f^{\\gamma }_{\\sigma_1 }*f^{\\mu_{9} }_{\\upsilon_1 }*n_{\\rho_1 }*n_{\\tau_1 }*d^{\\beta }_{\\gamma }*d^{\\nu }_{\\delta }*g^{\\rho_1 \\sigma_1 }*g^{\\tau_1 \\upsilon_1 }*g^{\\mu \\kappa }*d^{\\alpha }_{\\nu_{9} }+f^{\\delta }_{\\lambda }*f^{\\gamma }_{\\chi_1 }*f^{\\mu_{9} }_{\\omega_1 }*n_{\\phi_1 }*n_{\\psi_1 }*d^{\\mu }_{\\gamma }*d^{\\beta }_{\\delta }*g^{\\phi_1 \\chi_1 }*g^{\\psi_1 \\omega_1 }*g^{\\nu \\lambda }*d^{\\alpha }_{\\nu_{9} }+f^{\\delta }_{\\xi }*f^{\\gamma }_{\\beta_2 }*f^{\\mu_{9} }_{\\delta_2 }*n_{\\alpha_2 }*n_{\\gamma_2 }*d^{\\beta }_{\\gamma }*d^{\\mu }_{\\delta }*g^{\\alpha_2 \\beta_2 }*g^{\\gamma_2 \\delta_2 }*g^{\\nu \\xi }*d^{\\alpha }_{\\nu_{9} }+f^{\\delta }_{\\pi }*f^{\\gamma }_{\\zeta_2 }*f^{\\mu_{9} }_{\\theta_2 }*n_{\\epsilon_2 }*n_{\\eta_2 }*d^{\\alpha }_{\\gamma }*d^{\\mu }_{\\delta }*g^{\\epsilon_2 \\zeta_2 }*g^{\\eta_2 \\theta_2 }*g^{\\nu \\pi }*d^{\\beta }_{\\nu_{9} }+f^{\\delta }_{\\rho }*f^{\\gamma }_{\\kappa_2 }*f^{\\mu_{9} }_{\\mu_2 }*n_{\\iota_2 }*n_{\\lambda_2 }*d^{\\mu }_{\\gamma }*d^{\\alpha }_{\\delta }*g^{\\iota_2 \\kappa_2 }*g^{\\lambda_2 \\mu_2 }*g^{\\nu \\rho }*d^{\\beta }_{\\nu_{9} }+f^{\\delta }_{\\sigma }*f^{\\gamma }_{\\xi_2 }*f^{\\mu_{9} }_{\\rho_2 }*n_{\\nu_2 }*n_{\\pi_2 }*d^{\\mu }_{\\gamma }*d^{\\nu }_{\\delta }*g^{\\nu_2 \\xi_2 }*g^{\\pi_2 \\rho_2 }*g^{\\alpha \\sigma }*d^{\\beta }_{\\nu_{9} }+f^{\\delta }_{\\tau }*f^{\\gamma }_{\\tau_2 }*f^{\\mu_{9} }_{\\phi_2 }*n_{\\sigma_2 }*n_{\\upsilon_2 }*d^{\\nu }_{\\gamma }*d^{\\mu }_{\\delta }*g^{\\sigma_2 \\tau_2 }*g^{\\upsilon_2 \\phi_2 }*g^{\\alpha \\tau }*d^{\\beta }_{\\nu_{9} }");
+        Tensor to = Tensors.parse("f^{\\delta }_{\\epsilon }*f^{\\gamma }_{\\phi }*f^{\\mu_{9} }_{\\psi }*n_{\\upsilon }*n_{\\chi }*d^{\\alpha }_{\\gamma }*d^{\\beta }_{\\delta }*g^{\\upsilon \\phi }*g^{\\chi \\psi }*g^{\\mu \\epsilon }*d^{\\nu }_{\\nu_{9} }+f^{\\delta }_{\\zeta }*f^{\\gamma }_{\\alpha_1 }*f^{\\mu_{9} }_{\\gamma_1 }*n_{\\omega }*n_{\\beta_1 }*d^{\\beta }_{\\gamma }*d^{\\alpha }_{\\delta }*g^{\\omega \\alpha_1 }*g^{\\beta_1 \\gamma_1 }*g^{\\mu \\zeta }*d^{\\nu }_{\\nu_{9} }+f^{\\delta }_{\\eta }*f^{\\gamma }_{\\epsilon_1 }*f^{\\mu_{9} }_{\\eta_1 }*n_{\\delta_1 }*n_{\\zeta_1 }*d^{\\alpha }_{\\gamma }*d^{\\nu }_{\\delta }*g^{\\delta_1 \\epsilon_1 }*g^{\\zeta_1 \\eta_1 }*g^{\\mu \\eta }*d^{\\beta }_{\\nu_{9} }+f^{\\delta }_{\\theta }*f^{\\gamma }_{\\iota_1 }*f^{\\mu_{9} }_{\\lambda_1 }*n_{\\theta_1 }*n_{\\kappa_1 }*d^{\\nu }_{\\gamma }*d^{\\alpha }_{\\delta }*g^{\\theta_1 \\iota_1 }*g^{\\kappa_1 \\lambda_1 }*g^{\\mu \\theta }*d^{\\beta }_{\\nu_{9} }+f^{\\delta }_{\\iota }*f^{\\gamma }_{\\nu_1 }*f^{\\mu_{9} }_{\\pi_1 }*n_{\\mu_1 }*n_{\\xi_1 }*d^{\\nu }_{\\gamma }*d^{\\beta }_{\\delta }*g^{\\mu_1 \\nu_1 }*g^{\\xi_1 \\pi_1 }*g^{\\mu \\iota }*d^{\\alpha }_{\\nu_{9} }+f^{\\delta }_{\\kappa }*f^{\\gamma }_{\\sigma_1 }*f^{\\mu_{9} }_{\\upsilon_1 }*n_{\\rho_1 }*n_{\\tau_1 }*d^{\\beta }_{\\gamma }*d^{\\nu }_{\\delta }*g^{\\rho_1 \\sigma_1 }*g^{\\tau_1 \\upsilon_1 }*g^{\\mu \\kappa }*d^{\\alpha }_{\\nu_{9} }+f^{\\delta }_{\\lambda }*f^{\\gamma }_{\\chi_1 }*f^{\\mu_{9} }_{\\omega_1 }*n_{\\phi_1 }*n_{\\psi_1 }*d^{\\mu }_{\\gamma }*d^{\\beta }_{\\delta }*g^{\\phi_1 \\chi_1 }*g^{\\psi_1 \\omega_1 }*g^{\\nu \\lambda }*d^{\\alpha }_{\\nu_{9} }+f^{\\delta }_{\\xi }*f^{\\gamma }_{\\beta_2 }*f^{\\mu_{9} }_{\\delta_2 }*n_{\\alpha_2 }*n_{\\gamma_2 }*d^{\\beta }_{\\gamma }*d^{\\mu }_{\\delta }*g^{\\alpha_2 \\beta_2 }*g^{\\gamma_2 \\delta_2 }*g^{\\nu \\xi }*d^{\\alpha }_{\\nu_{9} }+f^{\\delta }_{\\pi }*f^{\\gamma }_{\\zeta_2 }*f^{\\mu_{9} }_{\\theta_2 }*n_{\\epsilon_2 }*n_{\\eta_2 }*d^{\\alpha }_{\\gamma }*d^{\\mu }_{\\delta }*g^{\\epsilon_2 \\zeta_2 }*g^{\\eta_2 \\theta_2 }*g^{\\nu \\pi }*d^{\\beta }_{\\nu_{9} }+f^{\\delta }_{\\rho }*f^{\\gamma }_{\\kappa_2 }*f^{\\mu_{9} }_{\\mu_2 }*n_{\\iota_2 }*n_{\\lambda_2 }*d^{\\mu }_{\\gamma }*d^{\\alpha }_{\\delta }*g^{\\iota_2 \\kappa_2 }*g^{\\lambda_2 \\mu_2 }*g^{\\nu \\rho }*d^{\\beta }_{\\nu_{9} }+f^{\\delta }_{\\sigma }*f^{\\gamma }_{\\xi_2 }*f^{\\mu_{9} }_{\\rho_2 }*n_{\\nu_2 }*n_{\\pi_2 }*d^{\\mu }_{\\gamma }*d^{\\nu }_{\\delta }*g^{\\nu_2 \\xi_2 }*g^{\\pi_2 \\rho_2 }*g^{\\alpha \\sigma }*d^{\\beta }_{\\nu_{9} }+f^{\\delta }_{\\tau }*f^{\\gamma }_{\\tau_2 }*f^{\\mu_{9} }_{\\phi_2 }*n_{\\sigma_2 }*n_{\\upsilon_2 }*d^{\\nu }_{\\gamma }*d^{\\mu }_{\\delta }*g^{\\sigma_2 \\tau_2 }*g^{\\upsilon_2 \\phi_2 }*g^{\\alpha \\tau }*d^{\\beta }_{\\nu_{9} }");
         MappingsPort opu = IndexMappings.createPort(from, to);
         IndexMappingBuffer buffer;
 
         buffer = opu.take();
 //        while ((buffer = opu.take()) != null)
 //            Assert.assertTrue(buffer.getSignum());
+    }
+
+    @Test
+    public void testScalars0() {
+        Tensor from = Tensors.parse(" (a+b)*(c+d)");
+        Tensor   to = Tensors.parse("(-a-b)*(-c-d)");
+        IndexMappingBuffer buffer = IndexMappings.createPort(from, to).take();
+        Assert.assertTrue(buffer != null);
+    }
+
+    @Test
+    public void testScalars1() {
+        Tensor from = Tensors.parse("(1/8*b+1/4*beta*b)*(1/2*b*c+beta*b*c)");
+        Tensor to = Tensors.parse("(-1/8*b-1/4*beta*b)*(-1/2*b*c-1*beta*b*c)");
+        IndexMappingBuffer buffer = IndexMappings.createPort(from, to).take();
+        Assert.assertTrue(buffer != null);
+    }
+
+    @Test
+    public void testScalars2() {
+        Tensor from = Tensors.parse("P_{\\psi }^{\\psi }_{\\gamma \\delta }*P^{\\tau \\xi }_{\\kappa_1 \\lambda_1 }*n_{\\tau }*n_{\\xi }*n^{\\epsilon }*n^{\\mu }*n^{\\zeta }*n^{\\nu }*n^{\\beta }*g^{\\theta_1 \\iota_1 }");
+        Tensor to = Tensors.parse("P_{\\upsilon }^{\\upsilon }_{\\kappa_1 \\lambda_1 }*P^{\\chi \\psi }_{\\gamma \\delta }*n_{\\chi }*n_{\\psi }*n^{\\epsilon }*n^{\\nu }*n^{\\zeta }*n^{\\mu }*n^{\\beta }*g^{\\theta_1 \\iota_1 }");
+        System.out.println(TensorHashCalculator.hashWithIndices(from));
+        System.out.println(TensorHashCalculator.hashWithIndices(to));
+
+        IndexMappingBuffer buffer = IndexMappings.createPort(from, to).take();
+        System.out.println(buffer);
+
+        int[] fromIndices = from.getIndices().getFreeIndices().getAllIndices().copy();
+        for (int i = 0; i < fromIndices.length; ++i)
+            fromIndices[i] = IndicesUtils.getNameWithType(fromIndices[i]);
+        buffer = IndexMappings.createPort(new IndexMappingBufferTester(fromIndices, false), from, to).take();
+        System.out.println(buffer);
+    }
+
+    @Test
+    public void testPerformance1() {
+        Tensor from = Tensors.parse("n^i*n^m*n^e*n_g*n_d*n^b*n^z*n^n*n_k*n^t*n_l");
+        Tensor   to = Tensors.parse("n_l*n^n*n_g*n^z*n^t*n^b*n^m*n_k*n^i*n_d*n^e");
+        int[] fromIndices = from.getIndices().getFreeIndices().getAllIndices().copy();
+        for (int i = 0; i < fromIndices.length; ++i)
+            fromIndices[i] = IndicesUtils.getNameWithType(fromIndices[i]);
+        long start = System.currentTimeMillis();
+        IndexMappingBuffer buffer = IndexMappings.createPort(new IndexMappingBufferTester(fromIndices, false), from, to).take();
+        long stop = System.currentTimeMillis();
+        System.out.println(buffer);
+        System.out.println("time " + (stop - start));
     }
 }
