@@ -34,7 +34,7 @@ import cc.redberry.core.transformations.Transformation;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-class NaiveSubstitution implements Transformation {
+final class NaiveSubstitution implements Transformation {
 
     private final Tensor from, to;
 
@@ -49,7 +49,7 @@ class NaiveSubstitution implements Transformation {
         TraverseState state;
         Tensor current;
         while ((state = iterator.next()) != null) {
-            if(state != TraverseState.Leaving)
+            if (state != TraverseState.Leaving)
                 continue;
             current = iterator.current();
             IndexMappingBuffer buffer = IndexMappings.getFirst(from, current);

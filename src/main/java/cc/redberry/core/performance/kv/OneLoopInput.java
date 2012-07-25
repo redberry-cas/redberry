@@ -14,7 +14,7 @@ import cc.redberry.core.tensor.Tensors;
 import cc.redberry.core.transformations.ContractIndices;
 import cc.redberry.core.transformations.Expand;
 import cc.redberry.core.transformations.Transformation;
-import cc.redberry.core.utils.Indicator;
+import cc.redberry.core.utils.*;
 import java.util.Arrays;
 
 public final class OneLoopInput {
@@ -27,11 +27,17 @@ public final class OneLoopInput {
     private static final int HAT_QUANTITIES_GENERAL_COUNT = 5;//K,S,W,N,M
     private static final int INPUT_VALUES_GENERAL_COUNT = 6;//K,S,W,N,M
     private final int actualInput, actualHatQuantities;
+    private final Transformation[] riemannBackround;
 
     public OneLoopInput(int operatorOrder, Expression KINV, Expression K, Expression S, Expression W, Expression N, Expression M) {
+        this(operatorOrder, KINV, K, S, W, N, M, new Transformation[0]);
+    }
+
+    public OneLoopInput(int operatorOrder, Expression KINV, Expression K, Expression S, Expression W, Expression N, Expression M, Transformation[] riemannBackround) {
         this.operatorOrder = operatorOrder;
         if (operatorOrder > 4)
             throw new IllegalArgumentException();
+        this.riemannBackround = riemannBackround;
         this.actualInput = operatorOrder + 2;
         this.actualHatQuantities = operatorOrder + 1;
 
@@ -86,6 +92,7 @@ public final class OneLoopInput {
         StringBuilder sb;
         Tensor temp;
         String covariantIndicesString;
+        Transformation[] transformations = ArraysUtils.addAll(new Transformation[]{ContractIndices.CONTRACT_INDICES}, riemannBackround);
         for (i = 0; i < actualHatQuantities; ++i) {
             hatQuantities[i] = new Expression[operatorOrder + 1 - i];
             covariantIndicesString = IndicesUtils.toString(Arrays.copyOfRange(covariantIndices, 0, covariantIndices.length - i), ToStringMode.REDBERRY);
@@ -102,7 +109,7 @@ public final class OneLoopInput {
                 temp = Tensors.parse(sb.toString(), insertion);
                 temp = inputValues[0].transform(temp);
                 temp = inputValues[i + 1].transform(temp);
-                temp = Expand.expand(temp, Indicator.TRUE_INDICATOR, new Transformation[]{ContractIndices.CONTRACT_INDICES}, 1);
+                temp = Expand.expand(temp, Indicator.TRUE_INDICATOR, transformations, 1);
                 hatQuantities[i][j] = (Expression) temp;
             }
         }
@@ -233,5 +240,9 @@ public final class OneLoopInput {
 
     public int getOperatorOrder() {
         return operatorOrder;
+    }
+
+    public Transformation[] getRiemannBackround() {
+        return riemannBackround;
     }
 }

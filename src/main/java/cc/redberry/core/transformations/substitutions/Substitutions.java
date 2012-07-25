@@ -27,7 +27,8 @@ import cc.redberry.core.tensor.SimpleTensor;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.tensor.TensorField;
 import cc.redberry.core.tensor.functions.*;
-import cc.redberry.core.transformations.Transformation;
+import cc.redberry.core.transformations.*;
+import cc.redberry.core.utils.*;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -42,6 +43,8 @@ public final class Substitutions {
     }
 
     public static Transformation getTransformation(Tensor from, Tensor to) {
+        if (TensorUtils.compare(from, to))
+            return DummyTransformation.DUMM_TRANSFORMATION;
         SubstitutionProvider provider = map.get(from.getClass());
         if (provider == null)
             throw new UnsupportedOperationException("Not supported");

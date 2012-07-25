@@ -42,7 +42,7 @@ import static cc.redberry.core.tensor.FullContractionsStructure.*;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public class ProductsBijectionsPort implements OutputPortUnsafe<int[]> {
+public final class ProductsBijectionsPort implements OutputPortUnsafe<int[]> {
     //private ProductContent targetContent;
     //private ProductContent fromContent;
     private Tensor[] fromData, targetData;

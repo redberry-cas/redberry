@@ -62,7 +62,6 @@ public final class ArraysUtils {
      * and {@code null} if no mapping exist
      */
     public static <T> int[] bijection(T[] from, T[] to, Comparator<? super T> comparator) {
-        Arrays.sort(from, comparator);
         if (from.length != to.length)
             return null;
         int length = from.length;
@@ -126,7 +125,7 @@ public final class ArraysUtils {
     }
 
     /**
-     * This code taken from Apache Commons Lang ArrayUtils.
+     * This code is taken from Apache Commons Lang ArrayUtils.
      *
      * <p>Adds all the elements of the given arrays into a new array.</p> <p>The
      * new array contains all of the element of {@code array1} followed by all

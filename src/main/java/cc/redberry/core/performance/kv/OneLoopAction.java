@@ -35,7 +35,7 @@ import cc.redberry.core.transformations.ContractIndices;
 import cc.redberry.core.transformations.Expand;
 import cc.redberry.core.transformations.Transformation;
 import cc.redberry.core.transformations.Transformer;
-import cc.redberry.core.utils.Indicator;
+import cc.redberry.core.utils.*;
 
 /**
  *
@@ -296,13 +296,15 @@ public final class OneLoopAction {
         Tensors.addSymmetry("R_\\mu\\nu\\alpha\\beta", IndexType.GreekLower, true, new int[]{0, 1, 3, 2});
         Tensors.addSymmetry("R_\\mu\\nu\\alpha\\beta", IndexType.GreekLower, false, new int[]{2, 3, 0, 1});
         Tensors.addSymmetry("F_\\mu\\nu\\alpha\\beta", IndexType.GreekLower, true, new int[]{1, 0, 2, 3});
-        Tensors.addSymmetry("P_\\alpha\\beta", IndexType.GreekLower, false, new int[]{1, 0});
-
 
         //Parsing input strings
 
         //matrices names
-        final String[] matrices = new String[]{"KINV", "HATK", "HATW", "HATS", "NABLAS", "HATN", "HATF", "NABLAF", "HATM", "DELTA", "Flat", "FF", "WR", "SR", "SSR", "FR", "RR"};
+        final String[] matrices = new String[]{
+            "KINV", "HATK", "HATW", "HATS", "NABLAS",
+            "HATN", "HATF", "NABLAF", "HATM", "DELTA",
+            "Flat", "FF", "WR", "SR", "SSR", "FR", "RR"};
+
         //F_{\\mu\\nu} type structure
         final IndicesTypeStructure F_TYPE_STRUCTURE = new IndicesTypeStructure(IndexType.GreekLower.getType(), 2);
         //matrices indicator for parse preprocessor
@@ -360,22 +362,22 @@ public final class OneLoopAction {
         Expression[] deltaExpressions = new Expression[]{DELTA_1, DELTA_2, DELTA_3, DELTA_4};
 
         //Calculations        
+        Expression[] riemansSubstitutions = new Expression[]{
+            Tensors.parseExpression("F_\\mu\\nu\\alpha\\beta=R_\\mu\\nu\\alpha\\beta"),
+            Tensors.parseExpression("R_{\\mu \\nu}^{\\mu}_{\\alpha} = R_{\\nu\\alpha}"),
+            Tensors.parseExpression("R_{\\mu\\nu}^{\\alpha}_{\\alpha}=0"),
+            //            Tensors.parseExpression("R_{\\mu\\nu\\alpha\\beta}*R^{\\mu\\alpha\\nu\\beta}=(1/2)*R_{\\mu\\nu\\alpha\\beta}*R^{\\mu\\nu\\alpha\\beta}"),
+            //            Tensors.parseExpression("R_{\\mu\\nu\\alpha\\beta}*R^{\\mu\\nu\\alpha\\beta}=4*R_{\\mu\\nu}*R^{\\mu\\nu}-R*R"),
+            Tensors.parseExpression("R_{\\mu}^{\\mu}= R"),
+            Tensors.parseExpression("P_{\\mu}^{\\mu}= P")};
+
 
         Expression kronecker = (Expression) Tensors.parse("d_{\\mu}^{\\mu}=4");
-        Transformation nn = new SqrSubs(Tensors.parseSimple("n_\\mu")), nnTransformer = new Transformer(TraverseState.Leaving, new Transformation[]{nn});
+        Transformation n2 = new SqrSubs(Tensors.parseSimple("n_\\mu")), n2Transformer = new Transformer(TraverseState.Leaving, new Transformation[]{n2});
+        Transformation[] common = new Transformation[]{ContractIndices.CONTRACT_INDICES, n2Transformer, kronecker};
+        Transformation[] all = ArraysUtils.addAll(common, riemansSubstitutions);
 
 
-        Expression riemann1 = (Expression) Tensors.parse("F_\\mu\\nu\\alpha\\beta=R_\\mu\\nu\\alpha\\beta");
-        Expression riemann2 = riemann1;//(Expression) Tensors.parse("R_{\\mu\\nu\\alpha\\beta}*R^{\\mu\\alpha\\nu\\beta}=(1/2)*R_{\\mu\\nu\\alpha\\beta}*R^{\\mu\\nu\\alpha\\beta}");
-        Expression riemann3 = riemann1;//(Expression) Tensors.parse("R_{\\mu\\nu\\alpha\\beta}*R^{\\mu\\nu\\alpha\\beta}=4*R_{\\mu\\nu}*R^{\\mu\\nu}-R*R");
-        Expression riemann4 = (Expression) Tensors.parse("R_{\\mu \\nu}^{\\mu}_{\\alpha} = R_{\\nu\\alpha}");
-        Expression riemann5 = (Expression) Tensors.parse("R_{\\mu\\nu}^{\\alpha}_{\\alpha}=0");
-        Expression riemann6 = (Expression) Tensors.parse("R_{\\mu}^{\\mu}= R");
-        Expression riemann7 = (Expression) Tensors.parse("P_{\\mu}^{\\mu}= P");
-        Expression[] riemansSubstitutions = new Expression[]{riemann1, riemann2, riemann3, riemann4, riemann5, riemann6, riemann7};
-
-        Expression ricciDeSitter = (Expression) Tensors.parse("R_{\\mu\\nu} = -g_{\\mu\\nu}*LAMBDA");
-        Expression riemannDeSitter = (Expression) Tensors.parse("R_{\\mu\\nu\\alpha\\beta} = (1/3)*(g_{\\mu\\beta}*g_{\\nu\\alpha}-g_{\\mu\\alpha}*g_{\\nu\\beta})*LAMBDA");
 
         Tensor temp;
 
@@ -384,16 +386,14 @@ public final class OneLoopAction {
 
         //DELTA_1,2
         for (i = 0; i < 2; ++i) {
-            System.out.println(i + 1);
             temp = deltaExpressions[i];
             temp = input.getL().transform(temp);
 
             for (Expression hatK : input.getHatQuantities(0))
                 temp = hatK.transform(temp);
-            temp = Expand.expand(temp, new Transformation[]{ContractIndices.CONTRACT_INDICES, nn, kronecker});
-            temp = ContractIndices.CONTRACT_INDICES.transform(temp);
-            temp = nnTransformer.transform(temp);
-            temp = kronecker.transform(temp);
+            temp = Expand.expand(temp, common);
+            for (Transformation tr : common)
+                temp = tr.transform(temp);
 
             deltaExpressions[i] = (Expression) temp;
         }
@@ -402,7 +402,6 @@ public final class OneLoopAction {
         Expression[] calculatedCombinations;
 
         //DELTA_3
-        System.out.println(3);
         combinations = new Tensor[]{
             Tensors.parse("HATK^{\\mu\\nu}*HATK^{\\alpha}", deltaIndicesInsertion),
             Tensors.parse("HATK^{\\alpha}*HATK^{\\mu\\nu}", deltaIndicesInsertion),
@@ -413,24 +412,21 @@ public final class OneLoopAction {
             temp = combinations[i];
             for (Expression hatK : input.getHatQuantities(0))
                 temp = hatK.transform(temp);
-            temp = Expand.expand(temp, new Transformation[]{ContractIndices.CONTRACT_INDICES, nn, kronecker});
-            temp = ContractIndices.CONTRACT_INDICES.transform(temp);
-            temp = nnTransformer.transform(temp);
-            temp = kronecker.transform(temp);
+            temp = Expand.expand(temp, common);
+            for (Transformation tr : common)
+                temp = tr.transform(temp);
             calculatedCombinations[i] = Tensors.expression(combinations[i], temp);
         }
         temp = DELTA_3;
         temp = input.getL().transform(temp);
         for (Expression t : calculatedCombinations)
             temp = new NaiveSubstitution(t.get(0), t.get(1)).transform(temp);
-        temp = Expand.expand(temp, new Transformation[]{ContractIndices.CONTRACT_INDICES, nn, kronecker});
-        temp = ContractIndices.CONTRACT_INDICES.transform(temp);
-        temp = nnTransformer.transform(temp);
-        temp = kronecker.transform(temp);
+        temp = Expand.expand(temp, common);
+        for (Transformation tr : common)
+            temp = tr.transform(temp);
         deltaExpressions[2] = (Expression) temp;
 
         //DELTA_4
-        System.out.println(4);
         combinations = new Tensor[]{
             Tensors.parse("HATK^{\\mu\\nu\\alpha\\beta}", deltaIndicesInsertion),
             Tensors.parse("HATK^{\\mu\\nu\\alpha}*HATK^{\\beta}", deltaIndicesInsertion),
@@ -439,95 +435,61 @@ public final class OneLoopAction {
             Tensors.parse("HATK^{\\mu}*HATK^{\\nu}*HATK^{\\alpha\\beta}", deltaIndicesInsertion),
             Tensors.parse("HATK^{\\mu}*HATK^{\\alpha\\beta}*HATK^{\\nu}", deltaIndicesInsertion),
             Tensors.parse("HATK^{\\alpha\\beta}*HATK^{\\mu}*HATK^{\\nu}", deltaIndicesInsertion),
-            Tensors.parse("HATK^{\\beta}*HATK^{\\alpha}*HATK^{\\mu}*HATK^{\\nu}", deltaIndicesInsertion)
-        };
+            Tensors.parse("HATK^{\\beta}*HATK^{\\alpha}*HATK^{\\mu}*HATK^{\\nu}", deltaIndicesInsertion)};
         calculatedCombinations = new Expression[combinations.length];
         for (i = 0; i < combinations.length; ++i) {
             temp = combinations[i];
-            System.out.println(temp);
             for (Expression hatK : input.getHatQuantities(0))
                 temp = hatK.transform(temp);
-            temp = Expand.expand(temp, new Transformation[]{ContractIndices.CONTRACT_INDICES, nn, kronecker});
-            temp = ContractIndices.CONTRACT_INDICES.transform(temp);
-            temp = nnTransformer.transform(temp);
-            temp = kronecker.transform(temp);
+            temp = Expand.expand(temp, common);
+            for (Transformation tr : common)
+                temp = tr.transform(temp);
             calculatedCombinations[i] = Tensors.expression(combinations[i], temp);
-            System.out.println("X" + i);
         }
-        System.out.println("XXX");
         temp = DELTA_4;
         temp = input.getL().transform(temp);
         for (Expression t : calculatedCombinations)
             temp = new NaiveSubstitution(t.get(0), t.get(1)).transform(temp);
-        System.out.println("XXX");
-        temp = Expand.expand(temp, new Transformation[]{ContractIndices.CONTRACT_INDICES, nn, kronecker});
-        temp = ContractIndices.CONTRACT_INDICES.transform(temp);
-        temp = nnTransformer.transform(temp);
-        temp = kronecker.transform(temp);
+        temp = Expand.expand(temp, common);
+        for (Transformation tr : common)
+            temp = tr.transform(temp);
         deltaExpressions[3] = (Expression) temp;
 
-//        System.out.println(deltaExpressions[2]);
-        System.out.println("Evaluating \\Delta- tensors. Done.");
+        System.out.println("Evaluating \\Delta- tensors done. Evaluating action terms.");
 
         for (i = 0; i < terms.length; ++i) {
             temp = terms[i];
-            System.out.println(temp.get(0));
             temp = input.getL().transform(temp);
 
-//            temp = ricciDeSitter.transform(temp);
-//            temp = riemannDeSitter.transform(temp);
-            System.out.println("riemann");
-            temp = Expand.expand(temp, new Transformation[]{ContractIndices.CONTRACT_INDICES, nn, kronecker});
-            temp = ContractIndices.CONTRACT_INDICES.transform(temp);
-            System.out.println("ok");
+            for (Transformation riemannBackround : input.getRiemannBackround())
+                temp = riemannBackround.transform(temp);
+
+            temp = Expand.expand(temp, all);//TODO may be redundant
+            for (Transformation tr : all)
+                temp = tr.transform(temp);
 
             for (Expression nabla : input.getNablaS())
                 temp = nabla.transform(temp);
 
             temp = input.getF().transform(temp);
             temp = input.getHatF().transform(temp);
-            System.out.println("XUY");
 
             for (Expression[] hatQuantities : input.getHatQuantities())
                 for (Expression hatQ : hatQuantities)
-//                    System.out.println(temp.toString(ToStringMode.REDBERRY_SOUT));
-//                    System.out.println(hatQ.toString(ToStringMode.REDBERRY_SOUT));
-                    temp = hatQ.transform(temp); //                    temp = Expand.expand(temp, new Transformation[]{ContractIndices.CONTRACT_INDICES, nn, kronecker});
-
-            System.out.println(temp);
-            TensorLastIterator iterator = new TensorLastIterator(temp);
-            Tensor c;
-            while ((c = iterator.next()) != null) {
-                if (!(c instanceof SimpleTensor))
-                    continue;
-                SimpleTensor st = (SimpleTensor) c;
-                NameDescriptor descriptor = CC.getNameDescriptor(st.getName());
-                if (descriptor.getName(st.getIndices()).equals("HATK"))
-                    throw new RuntimeException("ПАЩЕЛ НА ХУЙ.");
-
-            }
-
-            System.out.println("XUYZ");
+                    temp = hatQ.transform(temp);
 
             for (Expression delta : deltaExpressions)
                 temp = delta.transform(temp);
 
-//
-//            for (Expression hatK : input.getHatQuantities(0))
-//                temp = hatK.transform(temp);
+            temp = Expand.expand(temp, all);
+            for (Transformation tr : all)
+                temp = tr.transform(temp);
 
-            System.out.println("expand");
-            temp = Expand.expand(temp, new Transformation[]{ContractIndices.CONTRACT_INDICES, nn, kronecker});
-            temp = ContractIndices.CONTRACT_INDICES.transform(temp);
-            temp = nnTransformer.transform(temp);
-            temp = kronecker.transform(temp);
-
+            //FIXME !!! Averaging works not correctly
             temp = Averaging.INSTANCE.transform(temp);
-            temp = Expand.expand(temp);
-            temp = ContractIndices.CONTRACT_INDICES.transform(temp);
-            temp = kronecker.transform(temp);
-            for (Expression riemann : riemansSubstitutions)
-                temp = riemann.transform(temp);
+            temp = Expand.expand(temp, all);
+            for (Transformation tr : all)
+                temp = tr.transform(temp);
 
             terms[i] = (Expression) temp;
             System.out.println(temp);
