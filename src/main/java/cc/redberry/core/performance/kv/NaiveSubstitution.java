@@ -25,7 +25,7 @@ package cc.redberry.core.performance.kv;
 import cc.redberry.core.indexmapping.IndexMappingBuffer;
 import cc.redberry.core.indexmapping.IndexMappings;
 import cc.redberry.core.tensor.Tensor;
-import cc.redberry.core.tensor.iterator.TensorLastIterator;
+import cc.redberry.core.tensor.iterator.*;
 import cc.redberry.core.transformations.ApplyIndexMapping;
 import cc.redberry.core.transformations.Transformation;
 
@@ -45,12 +45,16 @@ class NaiveSubstitution implements Transformation {
 
     @Override
     public Tensor transform(Tensor tensor) {
-        TensorLastIterator iterator = new TensorLastIterator(tensor);
+        TreeTraverseIterator iterator = new TreeTraverseIterator(tensor);
+        TraverseState state;
         Tensor current;
-        while ((current = iterator.next()) != null) {
+        while ((state = iterator.next()) != null) {
+            if(state != TraverseState.Leaving)
+                continue;
+            current = iterator.current();
             IndexMappingBuffer buffer = IndexMappings.getFirst(from, current);
             if (buffer != null) {
-                Tensor newFrom = ApplyIndexMapping.applyIndexMapping(from, buffer);
+                Tensor newFrom = ApplyIndexMapping.applyIndexMapping(to, buffer);
                 iterator.set(newFrom);
             }
         }

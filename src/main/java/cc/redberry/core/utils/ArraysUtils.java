@@ -50,6 +50,74 @@ public final class ArraysUtils {
         }
     };
 
+    /**
+     * This method is similar to {@link #bijection(T[], T[]) }, but uses
+     * specified {@code comparator}.
+     *
+     * @param from       from array
+     * @param to         to array
+     * @param comparator comparator
+     *
+     * @return a bijective mapping from {@code from}-array to {@code to}-array
+     * and {@code null} if no mapping exist
+     */
+    public static <T> int[] bijection(T[] from, T[] to, Comparator<? super T> comparator) {
+        Arrays.sort(from, comparator);
+        if (from.length != to.length)
+            return null;
+        int length = from.length;
+        int[] bijection = new int[length];
+        Arrays.fill(bijection, -1);
+        int i, j;
+        OUT:
+        for (i = 0; i < length; ++i) {
+            for (j = 0; j < length; ++j)
+                if (bijection[j] == -1 && comparator.compare(from[i], to[j]) == 0) {
+                    bijection[j] = i;
+                    continue OUT;
+                }
+            return null;
+        }
+        return bijection;
+    }
+
+    /**
+     * Creates a bijective mapping between two arrays and returns the resulting
+     * bijection as array. Method returns null, if no mapping found.
+     *
+     * <p>Example: <blockquote><pre>
+     *      Integer from[] = {1,2,1,4};
+     *      Integer to[] = {2,4,1,1};
+     *      int[] bijection = bijection(from,to);
+     * </pre></blockquote>
+     *
+     * <p> The resulting bijection will be {@code [2,0,3,1]}
+     *
+     * @param from from array
+     * @param to   to array
+     *
+     * @return a bijective mapping from {@code from}-array to {@code to}-array
+     * and {@code null} if no mapping exist
+     */
+    public static <T extends Comparable<? super T>> int[] bijection(T[] from, T[] to) {
+        if (from.length != to.length)
+            return null;
+        int length = from.length;
+        int[] bijection = new int[length];
+        Arrays.fill(bijection, -1);
+        int i, j;
+        OUT:
+        for (i = 0; i < length; ++i) {
+            for (j = 0; j < length; ++j)
+                if (bijection[j] == -1 && from[i].compareTo(to[j]) == 0) {
+                    bijection[j] = i;
+                    continue OUT;
+                }
+            return null;
+        }
+        return bijection;
+    }
+
     public static Tensor[] addAll(Tensor[] array1, Tensor... array2) {
         Tensor[] r = new Tensor[array1.length + array2.length];
         System.arraycopy(array1, 0, r, 0, array1.length);

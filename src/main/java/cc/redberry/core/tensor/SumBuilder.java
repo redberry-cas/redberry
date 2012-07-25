@@ -122,38 +122,9 @@ public final class SumBuilder implements TensorBuilder {
                 }
             if (b == null)
                 factorNodes.add(new FactorNode(split.factor, split.getBuilder()));
-            
-            if (factorNodes.size() > 1) {
-                System.out.println(factorNodes.size());
-                for (FactorNode node : factorNodes)
-                    System.out.println(node.factor);
-            }
         }
     }
 
-//    static Boolean compareFactors(final Tensor u, final Tensor v) {
-//        Callable<Boolean> callable = new Callable<Boolean>() {
-//
-//            @Override
-//            public Boolean call() throws Exception {
-//                return compareFactors1(u, v);
-//            }
-//        };
-//        RunnableFuture future = new FutureTask(callable);
-//        ExecutorService service = Executors.newSingleThreadExecutor();
-//        service.execute(future);
-//        Boolean b = null;
-//        try {
-//            b = (Boolean) future.get(10, TimeUnit.SECONDS);
-//        } catch (TimeoutException exception) {
-//            System.out.println(u);
-//            System.out.println(v);
-//            throw new RuntimeException();
-//        } catch (InterruptedException | ExecutionException exception) {
-//            System.out.println("ПАЩЁЛ НА ХУЙ");
-//        }
-//        return b;
-//    }
     static Boolean compareFactors(Tensor u, Tensor v) {
         IndexMappingBuffer buffer;
         if (u.getIndices().size() == 0)
@@ -162,15 +133,15 @@ public final class SumBuilder implements TensorBuilder {
             int[] fromIndices = u.getIndices().getFreeIndices().getAllIndices().copy();
             for (int i = 0; i < fromIndices.length; ++i)
                 fromIndices[i] = IndicesUtils.getNameWithType(fromIndices[i]);
-            long start = System.currentTimeMillis();
+//            long start = System.currentTimeMillis();
             buffer = IndexMappings.createPort(new IndexMappingBufferTester(fromIndices, false), u, v).take();
-            long stop = System.currentTimeMillis();
-            if (stop - start > 3000) {
-                System.out.println("time " + (stop - start));
-
-                System.out.println(u);
-                System.out.println(v);
-            }
+//            long stop = System.currentTimeMillis();
+//            if (stop - start > 300) {
+//                System.out.println("time " + (stop - start));
+//
+//                System.out.println(u);
+//                System.out.println(v);
+//            }
         }
         if (buffer == null)
             return null;

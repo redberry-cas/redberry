@@ -303,6 +303,13 @@ public final class Tensors {
         return (SimpleTensor) t;
     }
 
+    public static Expression parseExpression(String expression) {
+        Tensor t = CC.current().getParseManager().parse(expression);
+        if (!(t instanceof Expression))
+            throw new IllegalArgumentException("Input tensor is not Expression.");
+        return (Expression) t;
+    }
+
     public static void addSymmetry(String tensor, IndexType type, boolean sign, int... symmetry) {
         parseSimple(tensor).getIndices().getSymmetries().add(type.getType(), new Symmetry(symmetry, sign));
     }

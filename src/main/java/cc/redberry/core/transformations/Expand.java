@@ -95,7 +95,7 @@ public final class Expand implements Transformation {
                 continue;
             current = iterator.current();
             if (current instanceof Product && indicator.is(current))
-                iterator.set(expandProductOfSums(current, transformations, threads));
+                iterator.set(expandProductOfSums(current, indicator, transformations, threads));
             else if (current instanceof Power && current.get(0) instanceof Sum
                     && TensorUtils.isNatural(current.get(1)) && indicator.is(current))
                 iterator.set(expandPower((Sum) current.get(0), ((Complex) current.get(1)).getReal().intValue(), transformations, threads));
@@ -103,7 +103,7 @@ public final class Expand implements Transformation {
         return iterator.result();
     }
 
-    private static Tensor expandProductOfSums(Tensor current, Transformation[] transformations, final int threads) {
+    private static Tensor expandProductOfSums(Tensor current, Indicator<Tensor> indicator, Transformation[] transformations, final int threads) {
 
         // g_mn  {_m->^a, _n->_b}  => g^a_b  <=> d^a_b |           Tensors.isMetric(g_ab )  d_a^b
 
@@ -146,6 +146,7 @@ public final class Expand implements Transformation {
                     sum = (Sum) t;
                 else {
                     temp = expandPairOfSumsConcurrent((Sum) t, sum, transformations, threads);
+                    temp = expand(temp, indicator, transformations, threads);
                     expand = true;
                     if (temp instanceof Sum)
                         sum = (Sum) temp;

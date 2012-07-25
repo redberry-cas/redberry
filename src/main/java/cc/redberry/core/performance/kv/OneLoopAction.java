@@ -29,10 +29,8 @@ import cc.redberry.core.indices.IndicesTypeStructure;
 import cc.redberry.core.indices.IndicesUtils;
 import cc.redberry.core.parser.ParseNodeSimpleTensor;
 import cc.redberry.core.parser.preprocessor.IndicesInsertion;
-import cc.redberry.core.tensor.Expression;
-import cc.redberry.core.tensor.Tensor;
-import cc.redberry.core.tensor.Tensors;
-import cc.redberry.core.tensor.iterator.TraverseState;
+import cc.redberry.core.tensor.*;
+import cc.redberry.core.tensor.iterator.*;
 import cc.redberry.core.transformations.ContractIndices;
 import cc.redberry.core.transformations.Expand;
 import cc.redberry.core.transformations.Transformation;
@@ -309,6 +307,7 @@ public final class OneLoopAction {
         final IndicesTypeStructure F_TYPE_STRUCTURE = new IndicesTypeStructure(IndexType.GreekLower.getType(), 2);
         //matrices indicator for parse preprocessor
         final Indicator<ParseNodeSimpleTensor> matricesIndicator = new Indicator<ParseNodeSimpleTensor>() {
+
             @Override
             public boolean is(ParseNodeSimpleTensor object) {
                 String name = object.name;
@@ -433,6 +432,9 @@ public final class OneLoopAction {
         //DELTA_4
         System.out.println(4);
         combinations = new Tensor[]{
+            Tensors.parse("HATK^{\\mu\\nu\\alpha\\beta}", deltaIndicesInsertion),
+            Tensors.parse("HATK^{\\mu\\nu\\alpha}*HATK^{\\beta}", deltaIndicesInsertion),
+            Tensors.parse("HATK^{\\beta}*HATK^{\\mu\\nu\\alpha }", deltaIndicesInsertion),
             Tensors.parse("HATK^{\\alpha\\beta}*HATK^{\\mu\\nu}", deltaIndicesInsertion),
             Tensors.parse("HATK^{\\mu}*HATK^{\\nu}*HATK^{\\alpha\\beta}", deltaIndicesInsertion),
             Tensors.parse("HATK^{\\mu}*HATK^{\\alpha\\beta}*HATK^{\\nu}", deltaIndicesInsertion),
@@ -464,7 +466,7 @@ public final class OneLoopAction {
         temp = kronecker.transform(temp);
         deltaExpressions[3] = (Expression) temp;
 
-
+//        System.out.println(deltaExpressions[2]);
         System.out.println("Evaluating \\Delta- tensors. Done.");
 
         for (i = 0; i < terms.length; ++i) {
@@ -472,26 +474,49 @@ public final class OneLoopAction {
             System.out.println(temp.get(0));
             temp = input.getL().transform(temp);
 
-            for (Expression[] hatQuantities : input.getHatQuantities())
-                for (Expression hatQ : hatQuantities)
-                    temp = hatQ.transform(temp);
+//            temp = ricciDeSitter.transform(temp);
+//            temp = riemannDeSitter.transform(temp);
+            System.out.println("riemann");
+            temp = Expand.expand(temp, new Transformation[]{ContractIndices.CONTRACT_INDICES, nn, kronecker});
+            temp = ContractIndices.CONTRACT_INDICES.transform(temp);
+            System.out.println("ok");
 
             for (Expression nabla : input.getNablaS())
                 temp = nabla.transform(temp);
 
             temp = input.getF().transform(temp);
             temp = input.getHatF().transform(temp);
+            System.out.println("XUY");
 
-            temp = ricciDeSitter.transform(temp);
-            temp = riemannDeSitter.transform(temp);
-            temp = Expand.expand(temp, new Transformation[]{ContractIndices.CONTRACT_INDICES, nn, kronecker});
-            temp = ContractIndices.CONTRACT_INDICES.transform(temp);
+            for (Expression[] hatQuantities : input.getHatQuantities())
+                for (Expression hatQ : hatQuantities)
+//                    System.out.println(temp.toString(ToStringMode.REDBERRY_SOUT));
+//                    System.out.println(hatQ.toString(ToStringMode.REDBERRY_SOUT));
+                    temp = hatQ.transform(temp); //                    temp = Expand.expand(temp, new Transformation[]{ContractIndices.CONTRACT_INDICES, nn, kronecker});
+
+            System.out.println(temp);
+            TensorLastIterator iterator = new TensorLastIterator(temp);
+            Tensor c;
+            while ((c = iterator.next()) != null) {
+                if (!(c instanceof SimpleTensor))
+                    continue;
+                SimpleTensor st = (SimpleTensor) c;
+                NameDescriptor descriptor = CC.getNameDescriptor(st.getName());
+                if (descriptor.getName(st.getIndices()).equals("HATK"))
+                    throw new RuntimeException("ПАЩЕЛ НА ХУЙ.");
+
+            }
+
+            System.out.println("XUYZ");
 
             for (Expression delta : deltaExpressions)
                 temp = delta.transform(temp);
-            for (Expression hatK : input.getHatQuantities(0))
-                temp = hatK.transform(temp);
 
+//
+//            for (Expression hatK : input.getHatQuantities(0))
+//                temp = hatK.transform(temp);
+
+            System.out.println("expand");
             temp = Expand.expand(temp, new Transformation[]{ContractIndices.CONTRACT_INDICES, nn, kronecker});
             temp = ContractIndices.CONTRACT_INDICES.transform(temp);
             temp = nnTransformer.transform(temp);

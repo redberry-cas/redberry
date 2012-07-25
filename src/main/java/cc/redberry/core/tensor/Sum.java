@@ -23,7 +23,8 @@
 package cc.redberry.core.tensor;
 
 import cc.redberry.core.context.ToStringMode;
-import cc.redberry.core.indices.Indices;
+import cc.redberry.core.indices.*;
+import cc.redberry.core.utils.*;
 import java.util.Arrays;
 
 /**
@@ -36,14 +37,37 @@ public final class Sum extends MultiTensor {
     private final Tensor[] data;
     private final int hash;
 
-    Sum(Tensor[] data, Indices indices) {
+    Sum(final Tensor[] data, Indices indices) {
         super(indices);
 
         assert data.length > 1;
 
         this.data = data;
-        Arrays.sort(data);//FUTURE use non-stable sort
+        TensorWrapper[] wrappers = new TensorWrapper[data.length];
+        int i;
+        for (i = 0; i < data.length; ++i)
+            wrappers[i] = new TensorWrapper(data[i]);
+        ArraysUtils.quickSort(wrappers, data);
         this.hash = Arrays.hashCode(data);
+    }
+
+    private static final class TensorWrapper implements Comparable<TensorWrapper> {
+
+        final Tensor tensor;
+        final int hashWithIndices;
+
+        public TensorWrapper(Tensor tensor) {
+            this.tensor = tensor;
+            hashWithIndices = TensorHashCalculator.hashWithIndices(tensor);
+        }
+
+        @Override
+        public int compareTo(TensorWrapper o) {
+            int i = tensor.compareTo(o.tensor);
+            if (i != 0)
+                return i;
+            return Integer.compare(hashWithIndices, o.hashWithIndices);
+        }
     }
 
 //    @Override

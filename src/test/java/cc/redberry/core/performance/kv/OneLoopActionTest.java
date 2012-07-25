@@ -31,7 +31,7 @@ import org.junit.*;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-@Ignore
+//@Ignore
 public class OneLoopActionTest {
 
     @Test
@@ -61,6 +61,12 @@ public class OneLoopActionTest {
                 + "(1/4)*(d^{\\nu}_{\\gamma}*g^{\\alpha \\mu}*d^{\\beta}_{\\delta} + d^{\\nu}_{\\delta}*g^{\\alpha \\mu}*d^{\\beta}_{\\gamma}+d^{\\nu}_{\\gamma}*g^{\\beta \\mu}*d^{\\alpha}_{\\delta}+ d^{\\nu}_{\\delta}*g^{\\beta \\mu}*d^{\\alpha}_{\\gamma}) -"
                 + "(1/4)*(g_{\\gamma\\delta}*g^{\\mu \\alpha}*g^{\\nu \\beta}+g_{\\gamma\\delta}*g^{\\mu \\beta}*g^{\\nu \\alpha})-"
                 + "(1/4)*(g^{\\alpha\\beta}*d^{\\mu}_{\\gamma}*d^{\\nu}_{\\delta}+g^{\\alpha\\beta}*d^{\\mu}_{\\delta}*d^{\\nu}_{\\gamma})+(1/8)*g^{\\mu\\nu}*g_{\\gamma\\delta}*g^{\\alpha\\beta})");
+        Expression P =
+                (Expression) Tensors.parse("P^{\\alpha\\beta}_{\\mu\\nu} = (1/2)*(d^{\\alpha}_{\\mu}*d^{\\beta}_{\\nu}+d^{\\alpha}_{\\nu}*d^{\\beta}_{\\mu})-"
+                + "(1/4)*g_{\\mu\\nu}*g^{\\alpha\\beta}");
+        KINV = (Expression) P.transform(KINV);
+        K = (Expression) P.transform(K);
+
         Expression S = (Expression) Tensors.parse("S^\\rho^{\\alpha\\beta}_{\\mu\\nu}=0");
         Expression W = (Expression) Tensors.parse("W^{\\alpha\\beta}_{\\mu\\nu}=0");
         OneLoopInput input = new OneLoopInput(2, KINV, K, S, W, null, null);
@@ -76,14 +82,15 @@ public class OneLoopActionTest {
     public void testVectorField() {
 
         Expression KINV =
-                (Expression) Tensors.parse("KINV_\\alpha^\\beta=d_\\alpha^\\beta");//+\\lambda/(1-\\lambda)*n_\\alpha*n^\\beta");
+                (Expression) Tensors.parse("KINV_\\alpha^\\beta=d_\\alpha^\\beta+\\lambda/(1-\\lambda)*n_\\alpha*n^\\beta");
         Expression K =
-                (Expression) Tensors.parse("K^{\\mu\\nu}_\\alpha^{\\beta}=g^{\\mu\\nu}*d_{\\alpha}^{\\beta}");//-\\lambda/2*(g^{\\mu\\beta}*d_\\alpha^\\nu+g^{\\nu\\beta}*d_\\alpha^\\mu)");
+                (Expression) Tensors.parse("K^{\\mu\\nu}_\\alpha^{\\beta}=g^{\\mu\\nu}*d_{\\alpha}^{\\beta}-\\lambda/2*(g^{\\mu\\beta}*d_\\alpha^\\nu+g^{\\nu\\beta}*d_\\alpha^\\mu)");
         Expression S =
                 (Expression) Tensors.parse("S^\\rho^\\mu_\\nu=0");
         Expression W =
-                (Expression) Tensors.parse("W^{\\alpha}_{\\beta}=P^{\\alpha}_{\\beta}");//+(\\lambda/2)*R^\\alpha_\\beta");
+                (Expression) Tensors.parse("W^{\\alpha}_{\\beta}=P^{\\alpha}_{\\beta}+(\\lambda/2)*R^\\alpha_\\beta");
         OneLoopInput input = new OneLoopInput(2, KINV, K, S, W, null, null);
+        Tensors.addSymmetry("P_\\mu\\nu", IndexType.GreekLower, false, 1, 0);
 
         for (Expression[] exps : input.getHatQuantities())
             for (Expression e : exps)

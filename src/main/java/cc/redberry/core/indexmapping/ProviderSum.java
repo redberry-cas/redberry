@@ -23,7 +23,6 @@
 package cc.redberry.core.indexmapping;
 
 import cc.redberry.core.combinatorics.IntPermutationsGenerator;
-import cc.redberry.core.combinatorics.PriorityPermutationGenerator;
 import cc.redberry.core.tensor.Tensor;
 import java.util.ArrayList;
 import java.util.List;
@@ -121,6 +120,7 @@ final class ProviderSum implements IndexMappingProvider {
         }
     }
 
+    //TODO review signum holder pattern
     private static class SignumHolder implements IndexMappingProvider {
 
         private final IndexMappingProvider provider;
@@ -200,29 +200,45 @@ final class ProviderSum implements IndexMappingProvider {
     private static class StretchPairTester implements Tester {
 
         private final Tensor[] from, to;
-        private final PriorityPermutationGenerator permutationGenerator;
+//        private final PriorityPermutationGenerator permutationGenerator;
+        private final int length;
 
         public StretchPairTester(final Tensor[] from, final Tensor[] to) {
             this.from = from;
             this.to = to;
-            this.permutationGenerator = new PriorityPermutationGenerator(from.length);
+            this.length = from.length;
+
+//            this.permutationGenerator = new PriorityPermutationGenerator(from.length);
         }
 
         @Override
         public boolean test(final IndexMappingBufferTester tester) {
-            int[] permutation;
-            final PriorityPermutationGenerator generator = permutationGenerator;
-            generator.reset();
-            int i;
-            OUTER:
-            while ((permutation = generator.next()) != null)
-                for (i = 0; i < from.length; ++i) {
-                    if (!IndexMappingBufferTester.test(tester, from[i], to[permutation[i]]))
-                        continue OUTER;
-                    generator.nice();
-                    return true;
-                }
-            return false;
+            //TODO discuss algorithm with Dima
+            boolean[] bijection = new boolean[length];
+            int i, j;
+            OUT:
+            for (i = 0; i < length; ++i) {
+                for (j = 0; j < length; ++j)
+                    if (!bijection[j] && IndexMappingBufferTester.test(tester, from[j], to[i])) {
+                        bijection[j] = true;
+                        continue OUT;
+                    }
+                return false;
+            }
+            return true;
+//            int[] permutation;
+//            final PriorityPermutationGenerator generator = permutationGenerator;
+//            generator.reset();
+//            int i;
+//            OUTER:
+//            while ((permutation = generator.next()) != null)
+//                for (i = 0; i < from.length; ++i) {
+//                    if (!IndexMappingBufferTester.test(tester, from[i], to[permutation[i]]))
+//                        continue OUTER;
+//                    generator.nice();
+//                    return true;
+//                }
+//            return false;
         }
     }
 

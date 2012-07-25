@@ -28,8 +28,8 @@ import java.util.Iterator;
 /**
  * This class represents iterator over all possible combinatorics of specified
  * dimension. Permutation receiving by {@code next()} represents integer array -
- * permutation in one-line notation. Number of all combinatorics with dimension D
- * is D!.
+ * permutation in one-line notation. Number of all combinatorics with dimension
+ * D is D!.
  *
  * <p>Example <blockquote><pre>
  *      IntPermutationsGenerator ig = new IntPermutationsGenerator(3);
@@ -66,6 +66,7 @@ import java.util.Iterator;
  * @author Stanislav Poslavsky
  */
 public final class IntPermutationsGenerator implements IntCombinatoricGenerator {
+
     final int[] permutation;
     private boolean onFirst = true;
     private final int size;
@@ -85,16 +86,17 @@ public final class IntPermutationsGenerator implements IntCombinatoricGenerator 
     }
 
     /**
-     * Construct iterator over combinatorics with specified permutation at start.
-     * In this way, iterator will not iterate over all possible combinatorics,
-     * but only from start permutation up to last permutation, witch is
-     * [size-1,size-2,....1,0]. NOTE: parameter {@code permutation} is not
-     * coping in constructor, so it will changing during iteration, as it was
-     * says in class documentation.
+     * Construct iterator over combinatorics with specified permutation at
+     * start. In this way, iterator will not iterate over all possible
+     * combinatorics, but only from start permutation up to last permutation,
+     * witch is [size-1,size-2,....1,0]. NOTE: parameter {@code permutation} is
+     * not coping in constructor, so it will changing during iteration, as it
+     * was says in class documentation.
      *
      * @param permutation start permutation of iterator.
+     *
      * @throws IllegalArgumentException if permutation is inconsistent with
-     * <i>single-line</i> notation
+     *                                  <i>single-line</i> notation
      */
     public IntPermutationsGenerator(int[] permutation) {
         this.permutation = permutation;
@@ -111,8 +113,8 @@ public final class IntPermutationsGenerator implements IntCombinatoricGenerator 
     }
 
     private void checkSize(int size) {
-        if (size >= 11)
-            System.out.println("Initializing PermutationsGenerator with size = " + size + ". Iteration may take a while.");
+//        if (size >= 11)
+//            System.out.println("Initializing PermutationsGenerator with size = " + size + ". Iteration may take a while.");
     }
 
     /**
@@ -249,7 +251,9 @@ public final class IntPermutationsGenerator implements IntCombinatoricGenerator 
     /**
      * Throws new UnsupportedOperationException("Not supported yet.").
      *
-     * @throws UnsupportedOperationException("Not supported yet.");
+     * @throws UnsupportedOperation("Not
+     *                                                                                                                                                           supported
+     *                                                                                                                                                           yet.");
      */
     @Override
     public void remove() {

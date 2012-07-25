@@ -263,7 +263,9 @@ public class ContractIndicesTest {
     public void testSum3() {
         Tensor t = parse("g_mn*(F^m_b+g_ab*(F^am+g_xy*F^xyam))");
         t = contract(t);
-        Tensor expected = parse("F_{nb}+F_{bn}+F^{x}_{x}_{bn}");
+        System.out.println(t);
+        Tensor expected = parse("F_{nb}+F_{bn}+F_{y}^{y}_{bn}");
+        System.out.println(expected);
         assertTrue(TensorUtils.compare(t, expected));
     }
 
