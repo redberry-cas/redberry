@@ -20,33 +20,28 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
-package cc.redberry.core.number;
+package cc.redberry.core.transformations.substitutions;
 
-import cc.redberry.core.number.parser.NumberParser;
-import org.junit.Assert;
-import org.junit.Test;
+import cc.redberry.core.tensor.*;
+import org.junit.*;
+import static cc.redberry.core.TAssert.*;
 
 /**
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public class ComplexTest {
+public class SumBijectionPortTest {
 
     @Test
-    public void test1() {
-        Complex c = new Complex(new Rational(4), new Rational(3));
-        Assert.assertEquals(5, c.abs().intValue());
-    }
-
-    @Test
-    public void test2() {
-        Complex c = NumberParser.COMPLEX_PARSER.parse("2+i*3/2");
-        Assert.assertEquals(2.5, c.abs().doubleValue(), Double.MIN_VALUE);
-    }
-    
-    @Test
-    public void test3(){
-        
+    public void testSomeMethod() {
+        Tensor from = Tensors.parse("a+b");
+        Tensor to = Tensors.parse("a+b+c");
+        System.out.println(from);
+        System.out.println(to);
+        SumBijectionPort port = new SumBijectionPort(from, to);
+        BijectionContainer bc;
+        while ((bc = port.take()) != null)
+            System.out.println(bc);
     }
 }

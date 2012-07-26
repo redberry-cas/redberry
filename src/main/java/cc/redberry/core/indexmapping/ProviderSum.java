@@ -51,10 +51,9 @@ final class ProviderSum implements IndexMappingProvider {
     private final SignumHolder holder;
 
     private ProviderSum(IndexMappingProvider opu, Tensor from, Tensor to) {
-        int begin = 0;
-
+        
         //Search for main source
-        int i;
+        int i,begin =0;
         final int size = from.size();
         int mainStretchCoord = -1;
         int mainStretchIndex = -1;

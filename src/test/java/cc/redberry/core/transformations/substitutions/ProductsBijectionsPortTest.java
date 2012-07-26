@@ -37,6 +37,22 @@ import org.junit.Ignore;
  */
 //@Ignore
 public class ProductsBijectionsPortTest {
+
+    @Test
+    public void test4() {
+        CC.resetTensorNames(-87093768113521644L);
+        Product from = (Product) Tensors.parse("f_mn*f^mn*f_ij");
+        Product to = (Product) Tensors.parse("x_mn*f_ab*f^ab*f_xy");
+        System.out.println(from);
+        System.out.println(to);
+        System.out.println(CC.getNameManager().getSeed());
+        ProductsBijectionsPort pbp = new ProductsBijectionsPort(from.getContent(), to.getContent());
+        int[] bijection;
+        while ((bijection = pbp.take()) != null)
+            System.out.println(Arrays.toString(bijection));
+
+    }
+
     @Ignore
     @Test
     public void test0() {
@@ -142,7 +158,6 @@ public class ProductsBijectionsPortTest {
             assertTrue(count == 2);
         }
     }
-
 //    @Test
 //    public void test31() {
 //        CC.resetTensorNames(5281301740134105709L);
@@ -272,6 +287,5 @@ public class ProductsBijectionsPortTest {
 //        }
 //        System.out.println(badCounter);
 //    }
-
     public static boolean debugFlag = false;
 }

@@ -20,33 +20,28 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
-package cc.redberry.core.number;
+package cc.redberry.core.transformations.substitutions;
 
-import cc.redberry.core.number.parser.NumberParser;
-import org.junit.Assert;
-import org.junit.Test;
+import cc.redberry.core.indexmapping.IndexMappingBuffer;
+import java.util.*;
 
 /**
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public class ComplexTest {
+public final class BijectionContainer {
 
-    @Test
-    public void test1() {
-        Complex c = new Complex(new Rational(4), new Rational(3));
-        Assert.assertEquals(5, c.abs().intValue());
+    final IndexMappingBuffer buffer;
+    final int[] bijection;
+
+    public BijectionContainer(IndexMappingBuffer buffer, int[] bijection) {
+        this.buffer = buffer;
+        this.bijection = bijection;
     }
 
-    @Test
-    public void test2() {
-        Complex c = NumberParser.COMPLEX_PARSER.parse("2+i*3/2");
-        Assert.assertEquals(2.5, c.abs().doubleValue(), Double.MIN_VALUE);
-    }
-    
-    @Test
-    public void test3(){
-        
+    @Override
+    public String toString() {
+        return Arrays.toString(bijection) + "\n" + buffer.toString();
     }
 }
