@@ -62,7 +62,23 @@ public final class IndexMappings {
             return IndexMappingProvider.Util.singleton(new IndexMappingBufferImpl());
         if (from.length == 1)
             return createPort(from[0], to[0]);
-        return new SimpleProductProvider(IndexMappingProvider.Util.singleton(new IndexMappingBufferImpl()), from, to);
+        return removingContractedWrapper(new SimpleProductProvider(IndexMappingProvider.Util.singleton(new IndexMappingBufferImpl()), from, to));
+    }
+
+    public static MappingsPort removingContractedWrapper(final MappingsPort port) {
+        return new MappingsPort() {
+
+            private final MappingsPort innerPort = port;
+
+            @Override
+            public IndexMappingBuffer take() {
+                IndexMappingBuffer buffer = innerPort.take();
+                if (buffer == null)
+                    return null;
+                buffer.removeContracted();
+                return buffer;
+            }
+        };
     }
 
     public static MappingsPort createPort(Tensor from, Tensor to) {

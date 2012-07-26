@@ -29,6 +29,7 @@ import cc.redberry.core.number.Complex;
 import cc.redberry.core.tensor.*;
 import cc.redberry.core.utils.TensorUtils;
 import junit.framework.Assert;
+import org.junit.*;
 import org.junit.Test;
 
 /**
@@ -210,6 +211,7 @@ public class ParserTest {
         Tensors.parse("a_m = x+y");
     }
 
+    @Ignore
     @Test
     public void testExpression4() {
         Tensor e = Tensors.parse("(a = x+y)*7");

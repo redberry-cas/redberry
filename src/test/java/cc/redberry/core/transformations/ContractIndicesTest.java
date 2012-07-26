@@ -419,6 +419,7 @@ public class ContractIndicesTest {
         assertTrue(TensorUtils.compare(t, expected));
     }
 
+    @Ignore
     @Test(timeout = 3000L)
     public void performanceTest1() {
         long start, stop;

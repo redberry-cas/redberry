@@ -88,6 +88,13 @@ public class TensorsTest {
         junit.framework.Assert.assertTrue(TensorUtils.compare(result, expected));
     }
 
+    @Test
+    public void testProductPower() {
+        Tensor t = Tensors.parse("Power[2*a,3]");
+        Tensor expected = Tensors.parse("8*Power[a,3]");
+        Assert.assertTrue(TensorUtils.compare(t, expected));
+    }
+
     private static Expression expression(String expression) {
         return (Expression) parse(expression);
     }

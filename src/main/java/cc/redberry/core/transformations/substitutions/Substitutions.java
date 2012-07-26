@@ -46,7 +46,7 @@ public final class Substitutions {
 
     public static Transformation getTransformation(Tensor from, Tensor to) {
         if (TensorUtils.compare(from, to))
-            return DummyTransformation.DUMM_TRANSFORMATION;
+            return DummyTransformation.INSTANCE;
         SubstitutionProvider provider = map.get(from.getClass());
         if (provider == null)
             throw new UnsupportedOperationException("Not supported");
@@ -70,5 +70,18 @@ public final class Substitutions {
         map.put(Exp.class, SimpleSubstitution.SIMPLE_SUBSTITUTION_PROVIDER);
         map.put(Power.class, SimpleSubstitution.SIMPLE_SUBSTITUTION_PROVIDER);
         map.put(Log.class, SimpleSubstitution.SIMPLE_SUBSTITUTION_PROVIDER);
+    }
+
+    private static final class DummyTransformation implements Transformation {
+
+        final static Transformation INSTANCE = new DummyTransformation();
+
+        private DummyTransformation() {
+        }
+
+        @Override
+        public Tensor transform(Tensor t) {
+            return t;
+        }
     }
 }

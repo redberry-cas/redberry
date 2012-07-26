@@ -31,6 +31,7 @@ import cc.redberry.core.tensor.Tensors;
 import cc.redberry.core.tensor.iterator.TraverseState;
 import cc.redberry.core.tensor.iterator.TreeTraverseIterator;
 import cc.redberry.core.utils.TensorUtils;
+import org.junit.*;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -72,7 +73,7 @@ public class ExpandTest {
 
     @Test
     public void test3() {
-        
+
         Tensor t = parse("(a*p_i+b*p_i)*c-a*c*p_i");
         Tensor actual = Expand.expand(t);
         System.out.println(actual);
@@ -121,6 +122,7 @@ public class ExpandTest {
 //        Assert.assertTrue(TensorUtils.equals(actual, expected));
     }
 
+    @Ignore
     @Test(timeout = 400)
     public void test9Concurrent() {
         for (int i = 0; i < 100; ++i) {
@@ -220,29 +222,29 @@ public class ExpandTest {
             }
         }
     }
-    
+
     @Test
-    public void test19(){
+    public void test19() {
         Tensor tensor = parse("T_ij^ij*N_as^sa*K^fd_df");
-        Tensor result =  Expand.expand(tensor);
+        Tensor result = Expand.expand(tensor);
         Assert.assertTrue(tensor == result);
     }
-    
+
     @Test
-    public void test20(){
+    public void test20() {
         Tensor tensor = parse("(a+b)*T_ij^ij*N_as^sa*K^fd_df+a*b*F_m^m");
-        Tensor result =  Expand.expand(tensor);
+        Tensor result = Expand.expand(tensor);
         Assert.assertTrue(tensor == result);
     }
-    
+
     @Test
-    public void test21(){
+    public void test21() {
         Tensor tensor = parse("(1/2*(a+b)*f_mn+g_mn)*((a+b)*(a+b)*3*g_ij+(a+b)*h_ij)");
         assertAllBracketsExpanded(Expand.expand(tensor));
     }
-    
+
     @Test
-    public void test22(){
+    public void test22() {
         Tensor tensor = parse("((a+b)*f_mn+g_mn)*((a+b)*g_ij+h_ij)");
         assertAllBracketsExpanded(Expand.expand(tensor));
     }

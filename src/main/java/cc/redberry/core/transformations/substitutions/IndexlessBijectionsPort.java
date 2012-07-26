@@ -58,7 +58,7 @@ final class IndexlessBijectionsPort implements OutputPortUnsafe<int[]> {
                 break;
             }
             for (; j < to.length; ++j) {
-                if (to[j].hashCode() != hash)
+                if (to[j].hashCode() != hash)//TODO  add mappings check
                     break;
                 hashReflections[i].add(j);
             }

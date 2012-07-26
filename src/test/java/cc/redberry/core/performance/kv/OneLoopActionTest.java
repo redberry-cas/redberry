@@ -32,7 +32,7 @@ import org.junit.*;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-//@Ignore
+@Ignore
 public class OneLoopActionTest {
 
 //    @Ignore
@@ -57,7 +57,7 @@ public class OneLoopActionTest {
     public void testVectorField() {
 
         Expression KINV =
-                (Expression) Tensors.parse("KINV_\\alpha^\\beta=d_\\alpha^\\beta+\\lambda/(1-\\lambda)*n_\\alpha*n^\\beta");
+                (Expression) Tensors.parse("KINV_\\alpha^\\beta=d_\\alpha^\\beta+\\gamma*n_\\alpha*n^\\beta");
         Expression K =
                 (Expression) Tensors.parse("K^{\\mu\\nu}_\\alpha^{\\beta}=g^{\\mu\\nu}*d_{\\alpha}^{\\beta}-\\lambda/2*(g^{\\mu\\beta}*d_\\alpha^\\nu+g^{\\nu\\beta}*d_\\alpha^\\mu)");
         Expression S =
@@ -67,11 +67,11 @@ public class OneLoopActionTest {
         OneLoopInput input = new OneLoopInput(2, KINV, K, S, W, null, null);
         Tensors.addSymmetry("P_\\mu\\nu", IndexType.GreekLower, false, 1, 0);
 
-        for (Expression[] exps : input.getHatQuantities())
-            for (Expression e : exps)
-                System.out.println(e);
-        for (Expression e : input.getNablaS())
-            System.out.println(e);
+//        for (Expression[] exps : input.getHatQuantities())
+//            for (Expression e : exps)
+//                System.out.println(e);
+//        for (Expression e : input.getNablaS())
+//            System.out.println(e);
 
         OneLoopAction action = OneLoopAction.calculateOneLoopAction(input);
     }
