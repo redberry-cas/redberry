@@ -67,6 +67,7 @@ public final class SubstitutionIterator {
                         waitingForProduct = false;
                 else
                     --fieldDepth;
+        //TODO may be scalar functions should be p[rocessed as fields?
         if (iterator.checkLevel(FieldIndicator, 1) && state == TraverseState.Entering) {
             if (waitingForProduct)
                 ++fieldDepth;
@@ -74,15 +75,18 @@ public final class SubstitutionIterator {
         }
 
         if (current instanceof Product)
-            if (state == TraverseState.Entering)
+            if (state == TraverseState.Entering) {
                 if (waitingForProduct) {
                     stack = new Stack(stack, current, iterator.depth());
                     waitingForProduct = false;
-                } else if (state == TraverseState.Leaving) {
-                    if (stack != null && stack.depth >= iterator.depth())
-                        stack = stack.previous;
-                    return current;
                 }
+            } else if (state == TraverseState.Leaving) {
+                if (stack != null && stack.depth >= iterator.depth()) {
+                    stack = stack.previous;
+                    waitingForProduct = true;
+                }
+                return current;
+            }
 
         if (state == TraverseState.Leaving)
             return current;

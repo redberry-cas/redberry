@@ -67,18 +67,26 @@ public final class Expand implements Transformation {
 
     @Override
     public Tensor transform(Tensor tensor) {
-        return expand(tensor, indicator, threads);
+        return expand(tensor, indicator, new Transformation[0], threads);
     }
 
     public static Tensor expand(Tensor tensor) {
-        return expand(tensor, Indicator.TRUE_INDICATOR, 1);
+        return expand(tensor, Indicator.TRUE_INDICATOR, new Transformation[0], 1);
     }
 
     public static Tensor expand(Tensor tensor, int threads) {
-        return expand(tensor, Indicator.TRUE_INDICATOR, threads);
+        return expand(tensor, Indicator.TRUE_INDICATOR, new Transformation[0], threads);
     }
 
-    public static Tensor expand(Tensor tensor, Indicator<Tensor> indicator, int threads) {
+    public static Tensor expand(Tensor tensor, Transformation... transformations) {
+        return expand(tensor, Indicator.TRUE_INDICATOR, transformations, 1);
+    }
+
+    public static Tensor expand(Tensor tensor, Transformation[] transformations, int threads) {
+        return expand(tensor, Indicator.TRUE_INDICATOR, transformations, threads);
+    }
+
+    public static Tensor expand(Tensor tensor, Indicator<Tensor> indicator, Transformation[] transformations, int threads) {
         TreeTraverseIterator iterator = new TreeTraverseIterator(tensor, TraverseGuide.EXCEPT_FUNCTIONS_AND_FIELDS);
         TraverseState state;
         Tensor current;
@@ -87,15 +95,15 @@ public final class Expand implements Transformation {
                 continue;
             current = iterator.current();
             if (current instanceof Product && indicator.is(current))
-                iterator.set(expandProductOfSums(current, threads));
+                iterator.set(expandProductOfSums(current, indicator, transformations, threads));
             else if (current instanceof Power && current.get(0) instanceof Sum
                     && TensorUtils.isNatural(current.get(1)) && indicator.is(current))
-                iterator.set(expandPower((Sum) current.get(0), ((Complex) current.get(1)).getReal().intValue(), threads));
+                iterator.set(expandPower((Sum) current.get(0), ((Complex) current.get(1)).getReal().intValue(), transformations, threads));
         }
         return iterator.result();
     }
 
-    private static Tensor expandProductOfSums(Tensor current, final int threads) {
+    private static Tensor expandProductOfSums(Tensor current, Indicator<Tensor> indicator, Transformation[] transformations, final int threads) {
 
         // g_mn  {_m->^a, _n->_b}  => g^a_b  <=> d^a_b |           Tensors.isMetric(g_ab )  d_a^b
 
@@ -122,7 +130,7 @@ public final class Expand implements Transformation {
                     if (indexlessSum == null)
                         indexlessSum = (Sum) t;
                     else {
-                        temp = expandPairOfSumsConcurrent((Sum) t, indexlessSum, threads);
+                        temp = expandPairOfSumsConcurrent((Sum) t, indexlessSum, transformations, threads);
                         expand = true;
                         if (temp instanceof Sum)
                             indexlessSum = (Sum) temp;
@@ -137,7 +145,8 @@ public final class Expand implements Transformation {
                 if (sum == null)
                     sum = (Sum) t;
                 else {
-                    temp = expandPairOfSumsConcurrent((Sum) t, sum, threads);
+                    temp = expandPairOfSumsConcurrent((Sum) t, sum, transformations, threads);
+                    temp = expand(temp, indicator, transformations, threads);
                     expand = true;
                     if (temp instanceof Sum)
                         sum = (Sum) temp;
@@ -171,7 +180,7 @@ public final class Expand implements Transformation {
         return main;
     }
 
-    private static Tensor expandPower(Sum argument, int power, final int threads) {
+    private static Tensor expandPower(Sum argument, int power, Transformation[] transformations, final int threads) {
         //TODO improve algorithm using Newton formula!!!
         int i;
         Tensor temp = argument;
@@ -182,7 +191,7 @@ public final class Expand implements Transformation {
             initialForbidden[++i] = index;
         IndexMapper mapper = new IndexMapper(initialForbidden);//(a_m^m+b_m^m)^30  
         for (i = power - 1; i >= 1; --i)
-            temp = expandPairOfSumsConcurrent((Sum) temp, (Sum) renameDummy(argument, mapper), threads);
+            temp = expandPairOfSumsConcurrent((Sum) temp, (Sum) renameDummy(argument, mapper), transformations, threads);
         return temp;
     }
 
@@ -250,23 +259,34 @@ public final class Expand implements Transformation {
     }
 
     public static Tensor expandPairOfSums(Sum s1, Sum s2) {
+        return expandPairOfSums(s1, s2, new Transformation[0]);
+    }
+
+    public static Tensor expandPairOfSums(Sum s1, Sum s2, Transformation[] transformations) {
         ExpandPairPort epp = new ExpandPairPort(s1, s2);
         TensorBuilder sum = new SumBuilder();
         Tensor t;
-        while ((t = epp.take()) != null)
+        while ((t = epp.take()) != null) {
+            for (Transformation transformation : transformations)
+                t = transformation.transform(t);
             sum.put(t);
+        }
         return sum.build();
     }
 
-    public static Tensor expandPairOfSumsConcurrent(final Sum s1, final Sum s2, final int threads) {
+    public static Tensor expandPairOfSumsConcurrent(final Sum s1, final Sum s2, int threads) {
+        return expandPairOfSumsConcurrent(s1, s2, new Transformation[0], threads);
+    }
+
+    public static Tensor expandPairOfSumsConcurrent(final Sum s1, final Sum s2, Transformation[] transformations, final int threads) {
         if (threads == 1)
-            return expandPairOfSums(s1, s2);
+            return expandPairOfSums(s1, s2, transformations);
         Future[] futures = new Future[threads];
         ExpandPairPort epp = new ExpandPairPort(s1, s2);
         TensorBuilder sum = new SumBuilder();
 
         for (int i = 0; i < threads; ++i)
-            futures[i] = ContextManager.getExecutorService().submit(new Worker(epp, sum));
+            futures[i] = ContextManager.getExecutorService().submit(new Worker(epp, sum, transformations));
 
         try {
             for (Future future : futures)
@@ -281,17 +301,22 @@ public final class Expand implements Transformation {
 
         private final ExpandPairPort epp;
         private final TensorBuilder builder;
+        private final Transformation[] transformations;
 
-        public Worker(ExpandPairPort epp, TensorBuilder builder) {
+        public Worker(ExpandPairPort epp, TensorBuilder builder, Transformation[] transformations) {
             this.epp = epp;
             this.builder = builder;
+            this.transformations = transformations;
         }
 
         @Override
         public void run() {
             Tensor term;
-            while ((term = epp.take()) != null)
+            while ((term = epp.take()) != null) {
+                for (Transformation transformation : transformations)
+                    term = transformation.transform(term);
                 builder.put(term);
+            }
         }
     }
 }

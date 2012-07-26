@@ -23,11 +23,14 @@
 package cc.redberry.core.transformations.substitutions;
 
 import cc.redberry.core.tensor.Power;
+import cc.redberry.core.tensor.Product;
 import cc.redberry.core.tensor.SimpleTensor;
+import cc.redberry.core.tensor.Sum;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.tensor.TensorField;
 import cc.redberry.core.tensor.functions.*;
-import cc.redberry.core.transformations.Transformation;
+import cc.redberry.core.transformations.*;
+import cc.redberry.core.utils.*;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -42,6 +45,8 @@ public final class Substitutions {
     }
 
     public static Transformation getTransformation(Tensor from, Tensor to) {
+        if (TensorUtils.compare(from, to))
+            return DummyTransformation.INSTANCE;
         SubstitutionProvider provider = map.get(from.getClass());
         if (provider == null)
             throw new UnsupportedOperationException("Not supported");
@@ -52,6 +57,8 @@ public final class Substitutions {
     static {
         map.put(SimpleTensor.class, SimpleSubstitution.SIMPLE_SUBSTITUTION_PROVIDER);
         map.put(TensorField.class, TensorFieldSubstitution.TENSOR_FIELD_PROVIDER);
+        map.put(Sum.class, SumSubstitution.SUM_SUBSTITUTION_PROVIDER);
+        map.put(Product.class, ProductSubstitution.PRODUCT_SUBSTITUTION_PROVIDER);
         map.put(Sin.class, SimpleSubstitution.SIMPLE_SUBSTITUTION_PROVIDER);
         map.put(Cos.class, SimpleSubstitution.SIMPLE_SUBSTITUTION_PROVIDER);
         map.put(Tan.class, SimpleSubstitution.SIMPLE_SUBSTITUTION_PROVIDER);
@@ -63,6 +70,18 @@ public final class Substitutions {
         map.put(Exp.class, SimpleSubstitution.SIMPLE_SUBSTITUTION_PROVIDER);
         map.put(Power.class, SimpleSubstitution.SIMPLE_SUBSTITUTION_PROVIDER);
         map.put(Log.class, SimpleSubstitution.SIMPLE_SUBSTITUTION_PROVIDER);
+    }
 
+    private static final class DummyTransformation implements Transformation {
+
+        final static Transformation INSTANCE = new DummyTransformation();
+
+        private DummyTransformation() {
+        }
+
+        @Override
+        public Tensor transform(Tensor t) {
+            return t;
+        }
     }
 }

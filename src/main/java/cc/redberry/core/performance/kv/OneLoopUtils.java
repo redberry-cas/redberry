@@ -20,27 +20,25 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
-package cc.redberry.core;
+package cc.redberry.core.performance.kv;
 
-import cc.redberry.core.context.*;
-import cc.redberry.core.number.Complex;
-import cc.redberry.core.number.parser.NumberParser;
-import cc.redberry.core.tensor.*;
-import org.junit.Test;
+import cc.redberry.core.tensor.Expression;
+import cc.redberry.core.tensor.Tensors;
 
 /**
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public class BlackList {
+public class OneLoopUtils {
 
-    @Test
-    public void test1() {
-        System.out.println("\nA");
-        System.out.print("A");
-        for (long i = 0; i < Long.MAX_VALUE; ++i);
-        System.out.print("A");
-        System.out.print("A");
+    private OneLoopUtils() {
+    }
+    private static Expression[] antiDeSitterBackround = {
+        Tensors.parseExpression("R_{\\mu\\nu} = -g_{\\mu\\nu}*LAMBDA"),
+        Tensors.parseExpression("R_{\\mu\\nu\\alpha\\beta} = (1/3)*(g_{\\mu\\beta}*g_{\\nu\\alpha}-g_{\\mu\\alpha}*g_{\\nu\\beta})*LAMBDA")};
+
+    public static Expression[] antiDeSitterBackround() {
+        return antiDeSitterBackround.clone();
     }
 }

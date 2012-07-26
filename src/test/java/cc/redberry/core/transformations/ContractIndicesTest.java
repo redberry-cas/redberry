@@ -263,7 +263,9 @@ public class ContractIndicesTest {
     public void testSum3() {
         Tensor t = parse("g_mn*(F^m_b+g_ab*(F^am+g_xy*F^xyam))");
         t = contract(t);
-        Tensor expected = parse("F_{nb}+F_{bn}+F^{x}_{x}_{bn}");
+        System.out.println(t);
+        Tensor expected = parse("F_{nb}+F_{bn}+F_{y}^{y}_{bn}");
+        System.out.println(expected);
         assertTrue(TensorUtils.compare(t, expected));
     }
 
@@ -417,6 +419,7 @@ public class ContractIndicesTest {
         assertTrue(TensorUtils.compare(t, expected));
     }
 
+    @Ignore
     @Test(timeout = 3000L)
     public void performanceTest1() {
         long start, stop;
@@ -539,7 +542,12 @@ public class ContractIndicesTest {
         Tensor t = parse("F[g_mn*A^m]");
         t = contract(t);
         Tensor expected = parse("F[A_n]");
-        System.out.println(t);
         assertTrue(TensorUtils.compare(t, expected));
+    }
+
+    @Test
+    public void testExpression1() {
+        Tensor t = parse("DELTA^{\\mu \\mu_9 }_{\\nu_9 } = -2*n_{\\alpha }*f^{\\mu_9 }_{\\epsilon }*g^{\\alpha \\epsilon }*d^{\\mu }_{\\nu_9 }");
+        System.out.println(contract(t));
     }
 }

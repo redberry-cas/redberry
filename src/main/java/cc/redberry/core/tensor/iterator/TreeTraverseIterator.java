@@ -175,12 +175,13 @@ public final class TreeTraverseIterator {
      * Checks specified condition at position specified by relative level to
      * current cursor.
      *
-     * @param indicator level from current cursor
-     * @param level relative position of element to be test
+     * @param indicator 
+     * @param level relative position of element to be tested
      *
      * @return
      */
-    public boolean checkLevel(Indicator<Tensor> indicator, int level) {
+    public boolean checkLevel(Indicator<Tensor> indicator, int level)//TODO better name
+    {
         if (lastState == null)
             return false;
         if (lastState == TraverseState.Leaving) {

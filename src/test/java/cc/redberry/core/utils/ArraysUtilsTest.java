@@ -22,6 +22,7 @@
  */
 package cc.redberry.core.utils;
 
+import org.junit.*;
 import org.junit.Test;
 
 import static org.junit.Assert.assertArrayEquals;
@@ -52,5 +53,21 @@ public class ArraysUtilsTest {
     public void testShort3() {
         short[] target = new short[0];
         assertArrayEquals(new int[0], ArraysUtils.quickSortP(target));
+    }
+
+    @Test
+    public void testBijection1() {
+        Integer[] from = {1, 3, 1};
+        Integer[] to = {1, 3, 1};
+        int[] bijection = {0, 1, 2};
+        Assert.assertArrayEquals(bijection, ArraysUtils.bijection(from, to));
+    }
+
+    @Test
+    public void testBijection2() {
+        Integer[] from = {1, 3, 1};
+        Integer[] to = {3, 1, 1};
+        int[] bijection = {1, 0, 2};
+        Assert.assertArrayEquals(bijection, ArraysUtils.bijection(from, to));
     }
 }

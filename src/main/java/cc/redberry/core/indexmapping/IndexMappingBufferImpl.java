@@ -24,7 +24,6 @@ package cc.redberry.core.indexmapping;
 
 import cc.redberry.core.context.*;
 import cc.redberry.core.indices.IndicesUtils;
-import cc.redberry.core.utils.*;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;

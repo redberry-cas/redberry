@@ -30,6 +30,7 @@ import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.utils.TensorUtils;
 import java.util.Arrays;
 import java.util.Set;
+import org.junit.*;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -169,6 +170,7 @@ public class ApplyIndexMappingTest {
         Assert.assertTrue(TensorUtils.compare(target, standard));
     }
 
+    @Ignore
     @Test
     public void testProduct3() {
         Tensor from = parse("A_abcd");

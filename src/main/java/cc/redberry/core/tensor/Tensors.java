@@ -27,6 +27,7 @@ import cc.redberry.core.context.CC;
 import cc.redberry.core.context.NameDescriptor;
 import cc.redberry.core.indices.*;
 import cc.redberry.core.number.Complex;
+import cc.redberry.core.parser.*;
 import cc.redberry.core.tensor.functions.*;
 import cc.redberry.core.transformations.ApplyIndexMapping;
 import cc.redberry.core.transformations.Expand;
@@ -290,11 +291,23 @@ public final class Tensors {
         return CC.current().getParseManager().parse(expression);
     }
 
+    //TODO improve API
+    public static Tensor parse(String expression, ParseNodeTransformer... preprocessors) {
+        return ParseManager.parse(expression, preprocessors);
+    }
+
     public static SimpleTensor parseSimple(String expression) {
         Tensor t = CC.current().getParseManager().parse(expression);
         if (!(t instanceof SimpleTensor))
             throw new IllegalArgumentException("Input tensor is not SimpleTensor.");
         return (SimpleTensor) t;
+    }
+
+    public static Expression parseExpression(String expression) {
+        Tensor t = CC.current().getParseManager().parse(expression);
+        if (!(t instanceof Expression))
+            throw new IllegalArgumentException("Input tensor is not Expression.");
+        return (Expression) t;
     }
 
     public static void addSymmetry(String tensor, IndexType type, boolean sign, int... symmetry) {

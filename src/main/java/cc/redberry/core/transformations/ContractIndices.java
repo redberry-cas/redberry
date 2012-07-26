@@ -99,7 +99,7 @@ public final class ContractIndices implements Transformation {
             for (MetricWrapper mk : tempContainer.container)
                 builder.put(mk.metric);
             return builder.build();
-        } else if (tensor instanceof Sum) {
+        } else if (tensor instanceof Sum || tensor instanceof Expression) {
 
             Tensor[] data = new Tensor[tensor.size()];
             boolean applied = false;
@@ -118,7 +118,10 @@ public final class ContractIndices implements Transformation {
             }
             if (!applied)
                 return tensor;
-            return Tensors.sum(data);
+            TensorBuilder builder = tensor.getBuilder();
+            for (Tensor term : data)
+                builder.put(term);
+            return builder.build();
         } else
             return tensor;
     }

@@ -481,16 +481,16 @@ public class TreeTraverseIteratorTest {
         Assert.assertTrue(iterator.depth() == -1);
     }
 
-    @Test
-    public void testLevelUp() {
-        Tensor tensor = parse("Sin[1/4*x*y]");
-        TreeTraverseIterator iterator = new TreeTraverseIterator(tensor);
-
-        TraverseState state;
-        while ((state = iterator.next()) != null)
-            if (TensorUtils.equals(iterator.current(), "y"))
-                iterator.set(Tensors.parse("4"));
-    }
+//    @Test
+//    public void testLevelUp() {
+//        Tensor tensor = parse("Sin[1/4*x*y]");
+//        TreeTraverseIterator iterator = new TreeTraverseIterator(tensor);
+//
+//        TraverseState state;
+//        while ((state = iterator.next()) != null)
+//            if (TensorUtils.equals(iterator.current(), "y"))
+//                iterator.set(Tensors.parse("4"));
+//    }
 
     @Test
     public void testSet1() {
@@ -594,7 +594,7 @@ public class TreeTraverseIteratorTest {
                 Assert.assertTrue(iterator.checkLevel(equalIndicator(parse("x")), 0));
                 Assert.assertTrue(iterator.checkLevel(classIndicator(Sin.class), 1));
                 Assert.assertTrue(iterator.checkLevel(classIndicator(Sum.class), 2));
-                Assert.assertTrue(iterator.checkLevel(indicator, 3));                
+                Assert.assertTrue(iterator.checkLevel(indicator, 3));
             }
         }
     }

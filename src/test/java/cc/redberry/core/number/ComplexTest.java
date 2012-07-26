@@ -44,4 +44,9 @@ public class ComplexTest {
         Complex c = NumberParser.COMPLEX_PARSER.parse("2+i*3/2");
         Assert.assertEquals(2.5, c.abs().doubleValue(), Double.MIN_VALUE);
     }
+    
+    @Test
+    public void test3(){
+        
+    }
 }

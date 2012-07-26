@@ -23,7 +23,6 @@
 package cc.redberry.core.indexmapping;
 
 import cc.redberry.core.combinatorics.IntPermutationsGenerator;
-import cc.redberry.core.combinatorics.PriorityPermutationGenerator;
 import cc.redberry.core.tensor.Tensor;
 import java.util.ArrayList;
 import java.util.List;
@@ -49,12 +48,12 @@ final class ProviderSum implements IndexMappingProvider {
     };
     private final IndexMappingProvider mainProvider;
     private final Tester[] testers;
+    private final SignumHolder holder;
 
     private ProviderSum(IndexMappingProvider opu, Tensor from, Tensor to) {
-        int begin = 0;
-
+        
         //Search for main source
-        int i;
+        int i,begin =0;
         final int size = from.size();
         int mainStretchCoord = -1;
         int mainStretchIndex = -1;
@@ -76,8 +75,10 @@ final class ProviderSum implements IndexMappingProvider {
 
                 begin = i;
             }
+
+        holder = new SignumHolder(opu);
         if (mainStretchLength == 1) {
-            this.mainProvider = IndexMappings.createPort(opu, from.get(mainStretchCoord),
+            this.mainProvider = IndexMappings.createPort(holder, from.get(mainStretchCoord),
                                                          to.get(mainStretchCoord));
             testersList.remove(mainStretchIndex);
         } else {
@@ -86,7 +87,8 @@ final class ProviderSum implements IndexMappingProvider {
             final Tensor[] preTo = to.getRange(mainStretchCoord,
                                                mainStretchCoord + mainStretchLength);
 
-            this.mainProvider = new StretchPairSource(opu, preFrom, preTo);
+            this.mainProvider = new StretchPairSource(holder, preFrom, preTo);
+
             testersList.set(mainStretchIndex, (StretchPairSource) this.mainProvider);
         }
         this.testers = testersList.toArray(new Tester[testersList.size()]);
@@ -105,10 +107,39 @@ final class ProviderSum implements IndexMappingProvider {
             if (buffer == null)
                 return null;
             buffer.removeContracted();
+            if (holder.signum)
+                buffer.addSignum(true);
             final IndexMappingBufferTester tester = IndexMappingBufferTester.create(buffer);
             for (Tester t : testers)
                 if (!t.test(tester))
                     continue OUTER;
+            if (holder.signum)
+                buffer.addSignum(true);
+            return buffer;
+        }
+    }
+
+    //TODO review signum holder pattern
+    private static class SignumHolder implements IndexMappingProvider {
+
+        private final IndexMappingProvider provider;
+        boolean signum;
+
+        public SignumHolder(IndexMappingProvider provider) {
+            this.provider = provider;
+        }
+
+        @Override
+        public boolean tick() {
+            return provider.tick();
+        }
+
+        @Override
+        public IndexMappingBuffer take() {
+            IndexMappingBuffer buffer = provider.take();
+            if (buffer == null)
+                return null;
+            signum = buffer.getSignum();
             return buffer;
         }
     }
@@ -168,29 +199,45 @@ final class ProviderSum implements IndexMappingProvider {
     private static class StretchPairTester implements Tester {
 
         private final Tensor[] from, to;
-        private final PriorityPermutationGenerator permutationGenerator;
+//        private final PriorityPermutationGenerator permutationGenerator;
+        private final int length;
 
         public StretchPairTester(final Tensor[] from, final Tensor[] to) {
             this.from = from;
             this.to = to;
-            this.permutationGenerator = new PriorityPermutationGenerator(from.length);
+            this.length = from.length;
+
+//            this.permutationGenerator = new PriorityPermutationGenerator(from.length);
         }
 
         @Override
         public boolean test(final IndexMappingBufferTester tester) {
-            int[] permutation;
-            final PriorityPermutationGenerator generator = permutationGenerator;
-            generator.reset();
-            int i;
-            OUTER:
-            while ((permutation = generator.next()) != null)
-                for (i = 0; i < from.length; ++i) {
-                    if (!IndexMappingBufferTester.test(tester, from[i], to[permutation[i]]))
-                        continue OUTER;
-                    generator.nice();
-                    return true;
-                }
-            return false;
+            //TODO discuss algorithm with Dima
+            boolean[] bijection = new boolean[length];
+            int i, j;
+            OUT:
+            for (i = 0; i < length; ++i) {
+                for (j = 0; j < length; ++j)
+                    if (!bijection[j] && IndexMappingBufferTester.test(tester, from[j], to[i])) {
+                        bijection[j] = true;
+                        continue OUT;
+                    }
+                return false;
+            }
+            return true;
+//            int[] permutation;
+//            final PriorityPermutationGenerator generator = permutationGenerator;
+//            generator.reset();
+//            int i;
+//            OUTER:
+//            while ((permutation = generator.next()) != null)
+//                for (i = 0; i < from.length; ++i) {
+//                    if (!IndexMappingBufferTester.test(tester, from[i], to[permutation[i]]))
+//                        continue OUTER;
+//                    generator.nice();
+//                    return true;
+//                }
+//            return false;
         }
     }
 

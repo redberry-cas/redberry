@@ -20,27 +20,28 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
-package cc.redberry.core;
+package cc.redberry.core.transformations.substitutions;
 
-import cc.redberry.core.context.*;
-import cc.redberry.core.number.Complex;
-import cc.redberry.core.number.parser.NumberParser;
-import cc.redberry.core.tensor.*;
-import org.junit.Test;
+import cc.redberry.core.indexmapping.IndexMappingBuffer;
+import java.util.*;
 
 /**
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public class BlackList {
+public final class BijectionContainer {
 
-    @Test
-    public void test1() {
-        System.out.println("\nA");
-        System.out.print("A");
-        for (long i = 0; i < Long.MAX_VALUE; ++i);
-        System.out.print("A");
-        System.out.print("A");
+    final IndexMappingBuffer buffer;
+    final int[] bijection;
+
+    public BijectionContainer(IndexMappingBuffer buffer, int[] bijection) {
+        this.buffer = buffer;
+        this.bijection = bijection;
+    }
+
+    @Override
+    public String toString() {
+        return Arrays.toString(bijection) + "\n" + buffer.toString();
     }
 }

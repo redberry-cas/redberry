@@ -20,27 +20,34 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
-package cc.redberry.core;
+package cc.redberry.core.performance.kv;
 
-import cc.redberry.core.context.*;
-import cc.redberry.core.number.Complex;
-import cc.redberry.core.number.parser.NumberParser;
 import cc.redberry.core.tensor.*;
-import org.junit.Test;
+import cc.redberry.core.tensor.iterator.*;
+import cc.redberry.core.transformations.*;
+import org.junit.*;
 
 /**
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public class BlackList {
+public class SqrSubsTest {
+
 
     @Test
     public void test1() {
-        System.out.println("\nA");
-        System.out.print("A");
-        for (long i = 0; i < Long.MAX_VALUE; ++i);
-        System.out.print("A");
-        System.out.print("A");
+        SimpleTensor n = (SimpleTensor) Tensors.parse("n_{a}");
+        Transformation tr = new Transformer(TraverseState.Leaving, new Transformation[]{new SqrSubs(n)});
+        Tensor t = Tensors.parse("n_m*n^m*a*n_a*n^a*n_i*n^j*b");
+        System.out.println(tr.transform(t));
+    }
+
+    @Test
+    public void test2() {
+        SimpleTensor n = (SimpleTensor) Tensors.parse("n_{a}");
+        Transformation tr = new Transformer(TraverseState.Leaving, new Transformation[]{new SqrSubs(n)});
+        Tensor t = Tensors.parse("n_m*n^m*n_a*n^a+2");
+        System.out.println(tr.transform(t));
     }
 }

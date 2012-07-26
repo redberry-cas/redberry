@@ -47,12 +47,26 @@ public final class ParseManager {
     }
 
     public Tensor parse(String expression) {
-        ParseNode node = parser.parse(expression);
+        ParseNode node = Parser.DEFAULT.parse(expression);
         for (ParseNodeTransformer tr : nodesPreprocessors)
             node = tr.transform(node);
         Tensor t = node.toTensor();
         for (Transformation tr : tensorPreprocessors)
             t = tr.transform(t);
         return t;
+    }
+
+    public static Tensor parse(String expression, Transformation[] tensorPreprocessors, ParseNodeTransformer[] nodesPreprocessors) {
+        ParseNode node = Parser.DEFAULT.parse(expression);
+        for (ParseNodeTransformer tr : nodesPreprocessors)
+            node = tr.transform(node);
+        Tensor t = node.toTensor();
+        for (Transformation tr : tensorPreprocessors)
+            t = tr.transform(t);
+        return t;
+    }
+    
+    public static Tensor parse(String expression,  ParseNodeTransformer[] nodesPreprocessors) {
+        return parse(expression, new Transformation[0], nodesPreprocessors);
     }
 }

@@ -95,7 +95,7 @@ public final class IndexMappingBufferTester implements IndexMappingBuffer {
         this.signum = signum;
     }
 
-    static IndexMappingBufferTester create(IndexMappingBuffer buffer) {
+    public static IndexMappingBufferTester create(IndexMappingBuffer buffer) {
         if (buffer instanceof IndexMappingBufferTester)
             return new IndexMappingBufferTester((IndexMappingBufferTester) buffer);
         if (buffer instanceof IndexMappingBufferImpl)
@@ -103,7 +103,7 @@ public final class IndexMappingBufferTester implements IndexMappingBuffer {
         throw new RuntimeException("Unknown IndexMappingBufferType");
     }
 
-    static boolean test(IndexMappingBufferTester tester, Tensor from, Tensor to) {
+    public static boolean test(IndexMappingBufferTester tester, Tensor from, Tensor to) {
         tester.reset();
         final IndexMappingProvider provider =
                 IndexMappings.createPort(IndexMappingProvider.Util.singleton(tester), from, to);

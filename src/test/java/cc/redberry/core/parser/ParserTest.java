@@ -29,6 +29,7 @@ import cc.redberry.core.number.Complex;
 import cc.redberry.core.tensor.*;
 import cc.redberry.core.utils.TensorUtils;
 import junit.framework.Assert;
+import org.junit.*;
 import org.junit.Test;
 
 /**
@@ -210,6 +211,7 @@ public class ParserTest {
         Tensors.parse("a_m = x+y");
     }
 
+    @Ignore
     @Test
     public void testExpression4() {
         Tensor e = Tensors.parse("(a = x+y)*7");
@@ -229,5 +231,35 @@ public class ParserTest {
             Tensors.parse("(a+b)*(a*f_m+b*g_m)*(b*f^m+a*g^m)");
             Tensors.parse("(Power[a, 2]*b+a*Power[b, 2])*g_{m}*g^{m}+(Power[a, 3]+Power[a, 2]*b+a*Power[b, 2]+Power[b, 3])*f^{m}*g_{m}+(Power[a, 2]*b+a*Power[b, 2])*f_{m}*f^{m}");
         }
+    }
+
+    @Test
+    public void testIndices2() {
+        SimpleIndices indices = ParserIndices.parseSimple("_{\\mu_9}");
+        Assert.assertTrue(indices.size() == 1);
+    }
+
+    @Test
+    public void testIndices3() {
+        SimpleIndices indices = ParserIndices.parseSimple("_{m_{0}}");
+        Assert.assertTrue(indices.size() == 1);
+        indices = ParserIndices.parseSimple("_{m_{9}}");
+        Assert.assertTrue(indices.size() == 1);
+        indices = ParserIndices.parseSimple("_{m_{8}}");
+        Assert.assertTrue(indices.size() == 1);
+        indices = ParserIndices.parseSimple("_{m_{7}}");
+        Assert.assertTrue(indices.size() == 1);
+        indices = ParserIndices.parseSimple("_{m_{6}}");
+        Assert.assertTrue(indices.size() == 1);
+        indices = ParserIndices.parseSimple("_{m_{5}}");
+        Assert.assertTrue(indices.size() == 1);
+        indices = ParserIndices.parseSimple("_{m_{4}}");
+        Assert.assertTrue(indices.size() == 1);
+        indices = ParserIndices.parseSimple("_{m_{3}}");
+        Assert.assertTrue(indices.size() == 1);
+        indices = ParserIndices.parseSimple("_{m_{2}}");
+        Assert.assertTrue(indices.size() == 1);
+        indices = ParserIndices.parseSimple("_{m_{1}}");
+        Assert.assertTrue(indices.size() == 1);
     }
 }

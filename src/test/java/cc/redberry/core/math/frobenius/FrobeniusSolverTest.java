@@ -22,6 +22,7 @@
  */
 package cc.redberry.core.math.frobenius;
 
+import org.junit.*;
 import org.junit.Test;
 
 import static cc.redberry.core.math.frobenius.FrobeniusUtils.*;
@@ -189,6 +190,7 @@ public class FrobeniusSolverTest {
         assertFbSystem(solutions, equations);
     }
 
+    @Ignore
     @Test(timeout = 500)
     public void test18() {
         int[][] equations = {

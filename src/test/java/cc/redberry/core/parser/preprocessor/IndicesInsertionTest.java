@@ -26,8 +26,9 @@ import cc.redberry.core.context.CC;
 import cc.redberry.core.indices.Indices;
 import cc.redberry.core.parser.ParseNodeSimpleTensor;
 import cc.redberry.core.parser.ParserIndices;
-import cc.redberry.core.tensor.Tensor;
-import cc.redberry.core.utils.Indicator;
+import cc.redberry.core.tensor.*;
+import cc.redberry.core.utils.*;
+import junit.framework.*;
 import org.junit.After;
 import org.junit.Test;
 
@@ -180,5 +181,59 @@ public class IndicesInsertionTest {
 
         Indices indices = ParserIndices.parseSimple("^ijpq_pqrs");
         assertIndicesParity(t.getIndices().getFreeIndices(), indices.getFreeIndices());
+    }
+
+    @Test
+    public void test11() {
+        String expression = "DELTA^m=-L*HATK^m";
+        Tensors.parse(expression);
+
+        final String[] matrices = new String[]{"KINV", "HATK", "HATW", "HATS", "NABLAS", "HATN", "HATF", "NABLAF", "HATM", "DELTA", "Flat", "FF", "WR", "SR", "SSR", "FR", "RR"};
+        Indicator<ParseNodeSimpleTensor> matricesIndicator = new Indicator<ParseNodeSimpleTensor>() {
+
+            @Override
+            public boolean is(ParseNodeSimpleTensor object) {
+                String name = object.name;
+                for (String matrix : matrices)
+                    if (name.equals(matrix))
+                        return true;
+                return false;
+            }
+        };
+
+        IndicesInsertion indicesInsertion = new IndicesInsertion(ParserIndices.parseSimple("^{a}"), ParserIndices.parseSimple("_{a}"), matricesIndicator);
+        Expression e = (Expression) Tensors.parse(expression, indicesInsertion);
+
+        Tensor expected = Tensors.parse("DELTA^ma_a=-L*HATK^ma_a");
+        Assert.assertTrue(TensorUtils.equals(e, expected));
+    }
+
+    @Test
+    public void test12() {
+        final String[] matrices = new String[]{"KINV", "HATK", "HATW", "HATS", "NABLAS", "HATN", "HATF", "NABLAF", "HATM", "DELTA", "Flat", "FF", "WR", "SR", "SSR", "FR", "RR"};
+        Indicator<ParseNodeSimpleTensor> matricesIndicator = new Indicator<ParseNodeSimpleTensor>() {
+
+            @Override
+            public boolean is(ParseNodeSimpleTensor object) {
+                String name = object.name;
+                for (String matrix : matrices)
+                    if (name.equals(matrix))
+                        return true;
+                return false;
+            }
+        };
+
+        IndicesInsertion indicesInsertion = new IndicesInsertion(ParserIndices.parseSimple("^{a}"), ParserIndices.parseSimple("_{a}"), matricesIndicator);
+        Expression e = (Expression) Tensors.parse("ACTION = Flat + WR + SR + SSR + FF + FR + RR ", indicesInsertion);
+        assertTrue(true);
+    }
+
+    @Test
+    public void test13() {
+        attachPreprocessor("^i", "_i", "A");
+        Tensor t = parse("A+B");
+        clearPreprocessors();
+        Tensor e = parse("A^i_i+B");
+        assertEquals(t, e);
     }
 }

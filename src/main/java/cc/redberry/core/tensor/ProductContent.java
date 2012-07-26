@@ -37,7 +37,8 @@ public final class ProductContent {
                                new Tensor[0],
                                null,
                                new short[0],
-                               new Tensor[0]);
+                               new Tensor[0],
+                               new int[0]);
     private final ContractionStructure contractionStructure;
     private final FullContractionsStructure fullContractionsStructure;
     private final Tensor[] scalars;
@@ -56,6 +57,21 @@ public final class ProductContent {
         this.nonScalar = nonScalar;
         this.stretchIndices = stretchIndices;
         this.data = data;
+    }
+
+    private ProductContent(ContractionStructure contractionStructure,
+                           FullContractionsStructure fullContractionsStructure,
+                           Tensor[] scalars, Tensor nonScalar,
+                           short[] stretchIndices,
+                           Tensor[] data,
+                           int[] stretchHashReflection) {
+        this.contractionStructure = contractionStructure;
+        this.fullContractionsStructure = fullContractionsStructure;
+        this.scalars = scalars;
+        this.nonScalar = nonScalar;
+        this.stretchIndices = stretchIndices;
+        this.data = data;
+        this.stretchHashReflection = stretchHashReflection;
     }
 
     public ContractionStructure getContractionStructure() {
@@ -96,5 +112,19 @@ public final class ProductContent {
 
     public Tensor[] getDataCopy() {
         return data.clone();
+    }
+    private int[] stretchHashReflection;
+
+    public short getStretchIndexByHash(final int hashCode) {
+        if (stretchHashReflection == null) {
+            stretchHashReflection = new int[stretchIndices[stretchIndices.length - 1] + 1];
+            //TODO performance (!!!)
+            for (int i = 0; i < stretchIndices.length; ++i)
+                stretchHashReflection[stretchIndices[i]] = data[i].hashCode();
+        }
+        int index = Arrays.binarySearch(stretchHashReflection, hashCode);
+        if (index < 0)
+            return -1;
+        return (short) index;
     }
 }
