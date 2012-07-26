@@ -433,6 +433,7 @@ public final class Product extends MultiTensor {
      *                     tensors hash in array)
      * @param id           id of index in tensor indices list (could be !=0 only
      *                     for simple tensors)
+     *
      * @return packed record (long)
      */
     private static long packToLong(final int tensorIndex, final short stretchIndex, final short id) {
@@ -445,7 +446,6 @@ public final class Product extends MultiTensor {
             result[i] = ((int) (info[i] >> 32)) + 1;
         return result;
     }
-
     //-65536 == packToLong(-1, (short) -1, (short) 0);
     private static final long dummyTensorInfo = -65536;
     //        private static class ProductContent {
@@ -481,6 +481,7 @@ public final class Product extends MultiTensor {
     }
 
     private static class ScaffoldWrapper implements Comparable<ScaffoldWrapper> {
+
         public final int[] inds;
         public final Tensor t;
         public final TensorContraction tc;

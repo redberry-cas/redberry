@@ -22,11 +22,15 @@
  */
 package cc.redberry.core.transformations.substitutions;
 
-import cc.redberry.concurrent.*;
-import cc.redberry.core.combinatorics.*;
-import cc.redberry.core.indexmapping.*;
+import cc.redberry.concurrent.OutputPortUnsafe;
+import cc.redberry.core.combinatorics.IntCombinationPermutationGenerator;
+import cc.redberry.core.indexmapping.IndexMappingBuffer;
+import cc.redberry.core.indexmapping.IndexMappingBufferTester;
+import cc.redberry.core.indexmapping.IndexMappings;
+import cc.redberry.core.indexmapping.MappingsPort;
 import cc.redberry.core.tensor.Tensor;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  *

@@ -565,4 +565,34 @@ public class SubstitutionsTest {
         target = parseExpression("c+d=-a-b").transform(target);
         Assert.assertTrue(TensorUtils.isZero(target));
     }
+    //TODO tests for Sum
+
+    @Test
+    public void testProduct1() {
+        Tensor target = parse("R^a_bmn*R_a^bmn");
+        target = parseExpression("R^a_bmn*R_a^bmn = 1").transform(target);
+        Assert.assertTrue(TensorUtils.isOne(target));
+    }
+
+    @Test
+    public void testProduct2() {
+        for (int i = 0; i < 100; ++i) {
+            CC.resetTensorNames();
+            Tensor target = parse("R^a_bmn*R_a^bmn*R^p_qrs*R_p^qrs");
+            target = parseExpression("R^a_bmn*R_a^bmn = 1").transform(target);
+            Assert.assertTrue(TensorUtils.isOne(target));
+        }
+    }
+
+    @Test
+    public void testProduct3() {
+        for (int i = 0; i < 30; ++i) {
+            CC.resetTensorNames();
+            Tensor target = parse("a*b*c*n_i*n^i*n_j*n^j*n_k*n^k*n_h*n^h*n_c*n^c*n_d*n^d*n_a*n^a");
+            target = parseExpression("n_i*n^i = 1").transform(target);
+            target = parseExpression("b*c = 1/a").transform(target);
+            Assert.assertTrue(TensorUtils.isOne(target));
+        }
+    }
+    //TODO tests for Product
 }

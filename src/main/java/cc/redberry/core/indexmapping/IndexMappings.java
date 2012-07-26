@@ -55,20 +55,16 @@ public final class IndexMappings {
         };
     }
 
-//    public static OutputPortUnsafe<IndexMappingBuffer> createPortForSimpleTensor(SimpleTensor from, SimpleTensor to, boolean allowDiffStates) {
-//        final IndexMappingProvider provider = map.get(SimpleTensor.class).create(IndexMappingProvider.Util.singleton(new IndexMappingBufferImpl(allowDiffStates)), from, to, allowDiffStates);
-//        provider.tick();
-//        return new OutputPortUnsafe<IndexMappingBuffer>() {
-//
-//            @Override
-//            public IndexMappingBuffer take() {
-//                IndexMappingBuffer buf = provider.take();
-//                if (buf != null)
-//                    buf.removeContracted();
-//                return buf;
-//            }
-//        };
-//    }
+    public static MappingsPort createBijectiveProductPort(Tensor[] from, Tensor[] to) {
+        if (from.length != to.length)
+            return IndexMappingProvider.Util.EMPTY_PROVIDER;
+        if (from.length == 0)
+            return IndexMappingProvider.Util.singleton(new IndexMappingBufferImpl());
+        if (from.length == 1)
+            return createPort(from[0], to[0]);
+        return new SimpleProductProvider(IndexMappingProvider.Util.singleton(new IndexMappingBufferImpl()), from, to);
+    }
+
     public static MappingsPort createPort(Tensor from, Tensor to) {
         final IndexMappingProvider provider = createPort(IndexMappingProvider.Util.singleton(new IndexMappingBufferImpl()), from, to);
         provider.tick();

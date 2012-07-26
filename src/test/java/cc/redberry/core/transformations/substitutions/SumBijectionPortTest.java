@@ -66,8 +66,8 @@ public class SumBijectionPortTest {
 
     @Test
     public void test3() {
-        Tensor from = Tensors.parse("a_mn+a_nm+x_mn");
-        Tensor to = Tensors.parse("a_mn+a_nm+c_mn+x_mn");
+        Tensor from = Tensors.parse("a_mn+a_nm+x_mn+x_nm");
+        Tensor to = Tensors.parse("a_mn+a_nm+c_mn+x_mn+x_nm");
         System.out.println(from);
         System.out.println(to);
         SumBijectionPort port = new SumBijectionPort(from, to);
