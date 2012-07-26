@@ -22,6 +22,12 @@
  */
 package cc.redberry.core.transformations.substitutions;
 
+import cc.redberry.core.indices.*;
+import cc.redberry.core.indices.*;
+import cc.redberry.core.indices.*;
+import cc.redberry.core.indices.*;
+import cc.redberry.core.indices.*;
+import cc.redberry.core.indices.*;
 import cc.redberry.core.tensor.*;
 import org.junit.*;
 import static cc.redberry.core.TAssert.*;
@@ -34,9 +40,34 @@ import static cc.redberry.core.TAssert.*;
 public class SumBijectionPortTest {
 
     @Test
-    public void testSomeMethod() {
+    public void test1() {
         Tensor from = Tensors.parse("a+b");
         Tensor to = Tensors.parse("a+b+c");
+        System.out.println(from);
+        System.out.println(to);
+        SumBijectionPort port = new SumBijectionPort(from, to);
+        BijectionContainer bc;
+        while ((bc = port.take()) != null)
+            System.out.println(bc);
+    }
+
+    @Test
+    public void test2() {
+        Tensors.addSymmetry("b_nm", IndexType.LatinLower, true, 1, 0);
+        Tensor from = Tensors.parse("a_mn+b_mn");
+        Tensor to = Tensors.parse("a_mn-b_nm+c_mn");
+        System.out.println(from);
+        System.out.println(to);
+        SumBijectionPort port = new SumBijectionPort(from, to);
+        BijectionContainer bc;
+        while ((bc = port.take()) != null)
+            System.out.println(bc);
+    }
+
+    @Test
+    public void test3() {
+        Tensor from = Tensors.parse("a_mn+a_nm+x_mn");
+        Tensor to = Tensors.parse("a_mn+a_nm+c_mn+x_mn");
         System.out.println(from);
         System.out.println(to);
         SumBijectionPort port = new SumBijectionPort(from, to);

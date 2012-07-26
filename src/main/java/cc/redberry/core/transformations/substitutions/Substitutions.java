@@ -24,6 +24,7 @@ package cc.redberry.core.transformations.substitutions;
 
 import cc.redberry.core.tensor.Power;
 import cc.redberry.core.tensor.SimpleTensor;
+import cc.redberry.core.tensor.Sum;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.tensor.TensorField;
 import cc.redberry.core.tensor.functions.*;
@@ -55,6 +56,7 @@ public final class Substitutions {
     static {
         map.put(SimpleTensor.class, SimpleSubstitution.SIMPLE_SUBSTITUTION_PROVIDER);
         map.put(TensorField.class, TensorFieldSubstitution.TENSOR_FIELD_PROVIDER);
+        map.put(Sum.class, SumSubstitution.SUM_SUBSTITUTION_PROVIDER);
         map.put(Sin.class, SimpleSubstitution.SIMPLE_SUBSTITUTION_PROVIDER);
         map.put(Cos.class, SimpleSubstitution.SIMPLE_SUBSTITUTION_PROVIDER);
         map.put(Tan.class, SimpleSubstitution.SIMPLE_SUBSTITUTION_PROVIDER);
@@ -66,6 +68,5 @@ public final class Substitutions {
         map.put(Exp.class, SimpleSubstitution.SIMPLE_SUBSTITUTION_PROVIDER);
         map.put(Power.class, SimpleSubstitution.SIMPLE_SUBSTITUTION_PROVIDER);
         map.put(Log.class, SimpleSubstitution.SIMPLE_SUBSTITUTION_PROVIDER);
-
     }
 }
