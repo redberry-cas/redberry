@@ -22,9 +22,11 @@
  */
 package cc.redberry.core.performance.kv;
 
+import cc.redberry.core.context.*;
 import cc.redberry.core.indices.*;
 import cc.redberry.core.tensor.*;
 import cc.redberry.core.transformations.*;
+import cc.redberry.core.utils.*;
 import org.junit.*;
 
 /**
@@ -32,10 +34,10 @@ import org.junit.*;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-@Ignore
+//@Ignore
 public class OneLoopActionTest {
 
-//    @Ignore
+    @Ignore
     @Test
     public void testDummyMatrices() {
         Tensors.addSymmetry("f_\\mu\\nu", IndexType.GreekLower, false, 1, 0);
@@ -54,28 +56,124 @@ public class OneLoopActionTest {
 
     @Ignore
     @Test
-    public void testVectorField() {
-
-        Expression KINV =
-                (Expression) Tensors.parse("KINV_\\alpha^\\beta=d_\\alpha^\\beta+\\gamma*n_\\alpha*n^\\beta");
-        Expression K =
-                (Expression) Tensors.parse("K^{\\mu\\nu}_\\alpha^{\\beta}=g^{\\mu\\nu}*d_{\\alpha}^{\\beta}-\\lambda/2*(g^{\\mu\\beta}*d_\\alpha^\\nu+g^{\\nu\\beta}*d_\\alpha^\\mu)");
-        Expression S =
-                (Expression) Tensors.parse("S^\\rho^\\mu_\\nu=0");
-        Expression W =
-                (Expression) Tensors.parse("W^{\\alpha}_{\\beta}=P^{\\alpha}_{\\beta}+(\\lambda/2)*R^\\alpha_\\beta");
-        OneLoopInput input = new OneLoopInput(2, KINV, K, S, W, null, null);
+    public void testVectorField0() {
         Tensors.addSymmetry("P_\\mu\\nu", IndexType.GreekLower, false, 1, 0);
 
-//        for (Expression[] exps : input.getHatQuantities())
-//            for (Expression e : exps)
-//                System.out.println(e);
-//        for (Expression e : input.getNablaS())
-//            System.out.println(e);
+        Expression KINV = Tensors.parseExpression("KINV_\\alpha^\\beta=d_\\alpha^\\beta+\\gamma*n_\\alpha*n^\\beta");
+        Expression K = Tensors.parseExpression("K^{\\mu\\nu}_\\alpha^{\\beta}=g^{\\mu\\nu}*d_{\\alpha}^{\\beta}-\\lambda/2*(g^{\\mu\\beta}*d_\\alpha^\\nu+g^{\\nu\\beta}*d_\\alpha^\\mu)");
+        Expression S = Tensors.parseExpression("S^\\rho^\\mu_\\nu=0");
+        Expression W = Tensors.parseExpression("W^{\\alpha}_{\\beta}=P^{\\alpha}_{\\beta}+(\\lambda/2)*R^\\alpha_\\beta");
 
+        Expression lambda = Tensors.parseExpression("\\lambda=0");//gamma/(1+gamma)");
+        Expression gamma = Tensors.parseExpression("\\gamma=0");//gamma");
+        KINV = (Expression) gamma.transform(lambda.transform(KINV));
+        K = (Expression) gamma.transform(lambda.transform(K));
+        S = (Expression) gamma.transform(lambda.transform(S));
+        W = (Expression) gamma.transform(lambda.transform(W));
+
+        OneLoopInput input = new OneLoopInput(2, KINV, K, S, W, null, null);
         OneLoopAction action = OneLoopAction.calculateOneLoopAction(input);
+        Tensor A = action.ACTION().get(1);
+        Tensor expected = Tensors.parse("7/60*Power[R, 2]+-4/15*R^{\\mu \\nu }*R_{\\mu \\nu }+1/2*P^{\\gamma }_{\\alpha }*P^{\\alpha }_{\\gamma }+1/6*P*R");
+        Assert.assertTrue(TensorUtils.compare(A, expected));
     }
 
+    @Ignore
+    @Test
+    public void testVectorField0AntiDeSitter() {
+        Tensors.addSymmetry("P_\\mu\\nu", IndexType.GreekLower, false, 1, 0);
+
+        Expression KINV = Tensors.parseExpression("KINV_\\alpha^\\beta=d_\\alpha^\\beta+\\gamma*n_\\alpha*n^\\beta");
+        Expression K = Tensors.parseExpression("K^{\\mu\\nu}_\\alpha^{\\beta}=g^{\\mu\\nu}*d_{\\alpha}^{\\beta}-\\lambda/2*(g^{\\mu\\beta}*d_\\alpha^\\nu+g^{\\nu\\beta}*d_\\alpha^\\mu)");
+        Expression S = Tensors.parseExpression("S^\\rho^\\mu_\\nu=0");
+        Expression W = Tensors.parseExpression("W^{\\alpha}_{\\beta}=P^{\\alpha}_{\\beta}+(\\lambda/2)*R^\\alpha_\\beta");
+
+        Expression lambda = Tensors.parseExpression("\\lambda=0");//gamma/(1+gamma)");
+        Expression gamma = Tensors.parseExpression("\\gamma=0");//gamma");
+        KINV = (Expression) gamma.transform(lambda.transform(KINV));
+        K = (Expression) gamma.transform(lambda.transform(K));
+        S = (Expression) gamma.transform(lambda.transform(S));
+        W = (Expression) gamma.transform(lambda.transform(W));
+
+        OneLoopInput input = new OneLoopInput(2, KINV, K, S, W, null, null, OneLoopUtils.antiDeSitterBackround());
+        OneLoopAction action = OneLoopAction.calculateOneLoopAction(input);
+        Tensor A = action.ACTION().get(1);
+        Tensor expected = Tensors.parse("-2/3*P*LAMBDA+4/5*Power[LAMBDA, 2]+1/2*P^{\\gamma }_{\\alpha }*P^{\\alpha }_{\\gamma }");
+        Assert.assertTrue(TensorUtils.compare(A, expected));
+    }
+
+//    @Ignore
+    @Test
+    public void testVectorField() {
+        CC.resetTensorNames(7400654047858175284L);
+        CC.setDefaultPrintMode(ToStringMode.REDBERRY_SOUT);
+        Tensors.addSymmetry("P_\\mu\\nu", IndexType.GreekLower, false, 1, 0);
+
+        Expression KINV = Tensors.parseExpression("KINV_\\alpha^\\beta=d_\\alpha^\\beta+\\gamma*n_\\alpha*n^\\beta");
+        Expression K = Tensors.parseExpression("K^{\\mu\\nu}_\\alpha^{\\beta}=g^{\\mu\\nu}*d_{\\alpha}^{\\beta}-\\lambda/2*(g^{\\mu\\beta}*d_\\alpha^\\nu+g^{\\nu\\beta}*d_\\alpha^\\mu)");
+        Expression S = Tensors.parseExpression("S^\\rho^\\mu_\\nu=0");
+        Expression W = Tensors.parseExpression("W^{\\alpha}_{\\beta}=P^{\\alpha}_{\\beta}+(\\lambda/2)*R^\\alpha_\\beta");
+
+        Expression lambda = Tensors.parseExpression("\\lambda=gamma/(1+gamma)");
+        Expression gamma = Tensors.parseExpression("\\gamma=gamma");
+        KINV = (Expression) gamma.transform(lambda.transform(KINV));
+        K = (Expression) gamma.transform(lambda.transform(K));
+        S = (Expression) gamma.transform(lambda.transform(S));
+        W = (Expression) gamma.transform(lambda.transform(W));
+
+        OneLoopInput input = new OneLoopInput(2, KINV, K, S, W, null, null);
+
+        for (Expression[] exps : input.getHatQuantities())
+            for (Expression e : exps)
+                System.out.println(e);
+
+        for (Expression e : input.getKnQuantities())
+            System.out.println(e);
+        System.out.println(input.getHatF());
+
+        OneLoopAction action = OneLoopAction.calculateOneLoopAction(input);
+        Tensor A = action.ACTION().get(1);
+
+        for (Tensor s : A)
+            if (s instanceof Product && s.getIndices().size() != 0) {
+                Product p = (Product) s;
+                System.out.println(p.getDataSubProduct() + ":  " + p.getIndexlessSubProduct());
+            }
+
+
+        Tensor expected =
+                Tensors.parse("(1/24*Power[gamma,2]+1/4*gamma+1/2)*P_\\mu\\nu*P^\\mu\\nu"
+                + "+1/48*Power[gamma,2]*Power[P,2]"
+                + "+(1/12*Power[gamma,2]+1/3*gamma)*R_\\mu\\nu*P^\\mu\\nu"
+                + "+(1/24*Power[gamma,2]+1/12*gamma+1/6)*R*P"
+                + "+(1/24*Power[gamma,2]+1/12*gamma-4/15)*R_\\mu\\nu*R^\\mu\\nu"
+                + "+(1/48*Power[gamma,2]+1/12*gamma+7/60)*Power[R,2]");
+    }
+
+    @Ignore
+    @Test
+    public void test12() {
+
+        Tensor expected =
+                Tensors.parse("(1/24*Power[gamma,2]+1/4*gamma+1/2)*P_\\mu\\nu*P^\\mu\\nu"
+                + "+1/48*Power[gamma,2]*Power[P,2]"
+                + "+(1/12*Power[gamma,2]+1/3*gamma)*R_\\mu\\nu*P^\\mu\\nu"
+                + "+(1/24*Power[gamma,2]+1/12*gamma+1/6)*R*P"
+                + "+(1/24*Power[gamma,2]+1/12*gamma-4/15)*R_\\mu\\nu*R^\\mu\\nu"
+                + "+(1/48*Power[gamma,2]+1/12*gamma+7/60)*Power[R,2]");
+        expected = Tensors.parseExpression("gamma=0").transform(expected);
+
+        Transformation[] deSitter = ArraysUtils.addAll(new Transformation[]{Tensors.parseExpression("R=R_\\mu^\\mu")}, OneLoopUtils.antiDeSitterBackround());
+        for (Transformation t : deSitter)
+            expected = t.transform(expected);
+        expected = Expand.expand(expected, ContractIndices.INSTANCE);
+        expected = Tensors.parseExpression("d_\\mu^\\mu=4").transform(expected);
+        expected = ContractIndices.INSTANCE.transform(expected);
+        expected = Tensors.parseExpression("d_\\mu^\\mu=4").transform(expected);
+        System.out.println(expected);
+    }
+
+    @Ignore
     @Test
     public void testSpin3() {
         Expression KINV = (Expression) Tensors.parse("KINV^{\\alpha\\beta}_{\\mu\\nu} = P^{\\alpha\\beta}_{\\mu\\nu}-1/4*c*g_{\\mu\\nu}*g^{\\alpha\\beta}+"

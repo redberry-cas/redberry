@@ -123,6 +123,13 @@ public final class ArraysUtils {
         System.arraycopy(array2, 0, r, array1.length, array2.length);
         return r;
     }
+    
+      public static int[] addAll(int[] array1, int... array2) {
+        int[] r = new int[array1.length + array2.length];
+        System.arraycopy(array1, 0, r, 0, array1.length);
+        System.arraycopy(array2, 0, r, array1.length, array2.length);
+        return r;
+    }
 
     /**
      * This code is taken from Apache Commons Lang ArrayUtils.

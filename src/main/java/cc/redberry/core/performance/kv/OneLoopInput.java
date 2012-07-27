@@ -23,11 +23,14 @@ public final class OneLoopInput {
     private final Expression[] inputValues;
     private final int operatorOrder, matrixIndicesCount;
     private final Expression[][] hatQuantities;
+    private final Expression[] kn;
     private final Expression L;
     private static final int HAT_QUANTITIES_GENERAL_COUNT = 5;//K,S,W,N,M
     private static final int INPUT_VALUES_GENERAL_COUNT = 6;//K,S,W,N,M
     private final int actualInput, actualHatQuantities;
     private final Transformation[] riemannBackround;
+    private final Expression F;
+    private final Expression HATF;
 
     public OneLoopInput(int operatorOrder, Expression KINV, Expression K, Expression S, Expression W, Expression N, Expression M) {
         this(operatorOrder, KINV, K, S, W, N, M, new Transformation[0]);
@@ -92,7 +95,7 @@ public final class OneLoopInput {
         StringBuilder sb;
         Tensor temp;
         String covariantIndicesString;
-        Transformation[] transformations = ArraysUtils.addAll(new Transformation[]{ContractIndices.CONTRACT_INDICES}, riemannBackround);
+        Transformation[] transformations = ArraysUtils.addAll(new Transformation[]{ContractIndices.INSTANCE}, riemannBackround);
         for (i = 0; i < actualHatQuantities; ++i) {
             hatQuantities[i] = new Expression[operatorOrder + 1 - i];
             covariantIndicesString = IndicesUtils.toString(Arrays.copyOfRange(covariantIndices, 0, covariantIndices.length - i), ToStringMode.REDBERRY);
@@ -119,6 +122,29 @@ public final class OneLoopInput {
             sb.append(getStringHatQuantitieName(i)).append("=0");
             hatQuantities[i][0] = (Expression) Tensors.parse(sb.toString(), insertion);
         }
+        kn = new Expression[operatorOrder + 1];
+        covariantIndicesString = IndicesUtils.toString(covariantIndices, ToStringMode.REDBERRY);
+        String matricIndices = IndicesUtils.toString(ArraysUtils.addAll(upper, lower), ToStringMode.REDBERRY);
+        for (i = 0; i < operatorOrder + 1; ++i) {
+            sb = new StringBuilder();
+            sb.append("Kn").append(IndicesUtils.toString(Arrays.copyOfRange(covariantIndices, i, covariantIndices.length), ToStringMode.REDBERRY)).
+                    append(matricIndices).
+                    append("=K").
+                    append(covariantIndicesString).
+                    append(matricIndices);
+            for (k = 0; k < i; ++k)
+                sb.append("*n").append(IndicesUtils.toString(IndicesUtils.inverseIndexState(covariantIndices[k]), ToStringMode.REDBERRY));
+            temp = Tensors.parse(sb.toString());
+            temp = inputValues[0].transform(temp);
+            temp = inputValues[1].transform(temp);
+            temp = Expand.expand(temp, Indicator.TRUE_INDICATOR, transformations, 1);
+            kn[i] = (Expression) temp;
+        }
+
+        //FIXME temporary
+        F = (Expression) Tensors.parse("F_\\mu\\nu\\alpha\\beta = R_\\mu\\nu\\alpha\\beta");
+        HATF = (Expression) inputValues[0].transform(F.transform(Tensors.parse("HATF_\\mu\\nu^\\alpha_\\beta = KINV^\\alpha_\\gamma*R_\\mu\\nu^\\gamma_\\beta")));
+        
     }
 
     private String getStringInputName(int i) {
@@ -204,18 +230,21 @@ public final class OneLoopInput {
     Expression[][] getHatQuantities() {
         return hatQuantities;
     }
-    private final Expression F = (Expression) Tensors.parse("F_\\mu\\nu = 0");
-    private final Expression HATF = (Expression) Tensors.parse("HATF_\\mu\\nu = 0");
+
+    public Expression[] getKnQuantities() {
+        return kn.clone();
+    }
 
     public Expression getHatF() {
         return HATF;
     }
 
     public Expression getF() {
-        int[] indices = new int[2 + matrixIndicesCount];
-        for (int i = 0; i < indices.length; ++i)
-            indices[i] = IndicesUtils.createIndex(i, IndexType.GreekLower, false);
-        return (Expression) Tensors.parse("F" + IndicesUtils.toString(indices, ToStringMode.REDBERRY) + "=0");
+        return F;
+//        int[] indices = new int[2 + matrixIndicesCount];
+//        for (int i = 0; i < indices.length; ++i)
+//            indices[i] = IndicesUtils.createIndex(i, IndexType.GreekLower, false);
+//        return (Expression) Tensors.parse("F" + IndicesUtils.toString(indices, ToStringMode.REDBERRY) + "=0");
     }
 
     public Expression[] getNablaS() {

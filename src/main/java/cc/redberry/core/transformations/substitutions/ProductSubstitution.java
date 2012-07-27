@@ -69,8 +69,9 @@ class ProductSubstitution implements Transformation {
         while ((current = iterator.next()) != null) {
             if (!(current instanceof Product))
                 continue;
-            Product cp = (Product) current;
-            while (true) {
+
+            while (current instanceof Product) {
+                Product cp = (Product) current;
                 IndexMappingBuffer buffer = null;
 
                 final Tensor[] currentIndexless = cp.getIndexless();
@@ -107,10 +108,9 @@ class ProductSubstitution implements Transformation {
                     int c = -1;
                     for (Integer f : iterator.forbiddenIndices())
                         forbidden[++c] = f;
-                    Tensor temp = to;
-                    newTo = ApplyIndexMapping.applyIndexMapping(temp, buffer, forbidden);
-                    if (temp != newTo)
-                        iterator.forbiddenIndices().addAll(TensorUtils.getAllIndicesNames(newTo));
+                    newTo = ApplyIndexMapping.applyIndexMapping(to, buffer, forbidden);
+//                    if (newTo != to)
+                    iterator.forbiddenIndices().addAll(TensorUtils.getAllIndicesNames(newTo));
                 }
 
                 Arrays.sort(indexlessBijection);
@@ -130,9 +130,6 @@ class ProductSubstitution implements Transformation {
 
                 builder.put(cp.getFactor().divide(fromFactor));
                 current = builder.build();
-                if (!(current instanceof Product))
-                    break;
-                cp = (Product) current;
             }
             iterator.set(current);
         }

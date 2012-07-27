@@ -66,20 +66,12 @@ public class Permutation implements Comparable<Permutation> {
      *                                  <i>one-line</i> notation
      */
     public Permutation(int[] permutation) {
-        if (!testConsistent(permutation))
+        if (!Combinatorics.testPermutationСorrectness(permutation))
             throw new IllegalArgumentException("Wrong permutation input: input array is not consistent with one-line notation");
         this.permutation = permutation.clone();
     }
 
-    private boolean testConsistent(int[] permutation) {
-        int[] _permutation = new int[permutation.length];
-        System.arraycopy(permutation, 0, _permutation, 0, permutation.length);
-        Arrays.sort(_permutation);
-        for (int i = 0; i < _permutation.length; ++i)
-            if (_permutation[i] != i)
-                return false;
-        return true;
-    }
+   
 
     protected Permutation(int[] permutation, boolean notClone) {
         this.permutation = permutation;

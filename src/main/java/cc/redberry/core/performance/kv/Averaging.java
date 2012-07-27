@@ -71,7 +71,7 @@ public class Averaging implements Transformation {
             count = count / 2;
             Tensor averaged = average(ib.getIndices().getAllIndices().copy());
             long factor = ArithmeticUtils.pow((long) 2, count) * ArithmeticUtils.factorial(count + 1);
-            Complex number = new Complex((long) factor);
+            Complex number = new Complex((long) factor).reciprocal();
             averaged = Expand.expand(averaged);
             newProductElements.add(number);
             newProductElements.add(averaged);

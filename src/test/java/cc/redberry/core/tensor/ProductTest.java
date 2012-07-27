@@ -22,6 +22,7 @@
  */
 package cc.redberry.core.tensor;
 
+import cc.redberry.core.*;
 import cc.redberry.core.context.CC;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.tensor.random.TRandom;
@@ -98,28 +99,40 @@ public class ProductTest {
     public void testBuilder() {
         Tensor t1 = Tensors.parse("p_m*p^m");
         Tensor t2 = Tensors.parse("Power[p_m*p^m,2]");
-        System.out.println(Tensors.multiplyAndRenameConflictingDummies(t1, t2));
+        TAssert.assertIndicesConsistency(Tensors.multiplyAndRenameConflictingDummies(t1, t2));
     }
 
     @Test
     public void testRenameConflicts() {
         Tensor t1 = Tensors.parse("p_a");
         Tensor t2 = Tensors.parse("(a_i+b_a^a_i)");
-        System.out.println(Tensors.multiplyAndRenameConflictingDummies(t1, t2));
+        TAssert.assertIndicesConsistency(Tensors.multiplyAndRenameConflictingDummies(t1, t2));
     }
 
     @Test
     public void testRenameConflicts2() {
         Tensor t1 = Tensors.parse("(p_a+d_a)");
         Tensor t2 = Tensors.parse("(a_i+b_a^a_i)");
-        System.out.println(Tensors.multiplyAndRenameConflictingDummies(t1, t2));
+        TAssert.assertIndicesConsistency(Tensors.multiplyAndRenameConflictingDummies(t1, t2));
     }
 
     @Test
     public void testRenameConflicts3() {
         Tensor t1 = Tensors.parse("A_a^a*A_b^b*A_c^c_m^n+A_d^e*A_e^d*A_f^f_m^n");
         Tensor t2 = Tensors.parse("A_a^a*A_b^b*A_c^c^m_n+A_d^e*A_e^d*A_f^f^m_n");
-        System.out.println(Tensors.multiplyAndRenameConflictingDummies(t1, t2));
+        TAssert.assertIndicesConsistency(Tensors.multiplyAndRenameConflictingDummies(t1, t2));
+    }
+
+    @Test
+    public void testRenameConflicts4() {
+        Tensor t = Tensors.parse("(1/12*gamma+1/1440*Power[gamma, 3]*g^{\\delta \\zeta }*g_{\\delta \\zeta }+1/2880*Power[gamma, 3]*d^{\\delta }_{\\delta }*d^{\\zeta }_{\\zeta })*d^{\\beta }_{\\gamma }*d^{\\alpha }_{\\sigma }*P^{\\gamma }_{\\beta }*R_{\\alpha }^{\\sigma }");
+        TAssert.assertIndicesConsistency(t);
+    }
+
+    @Test
+    public void testRenameConflicts5() {
+        Tensor t = Tensors.parse("k_a*(f_m^m+g_m^m)*(k_b*d_m^m+k_b*h_m^m*(d_m^m+f_m^m)*(k_m^m+f_m^m))");
+        TAssert.assertIndicesConsistency(t);
     }
 
     @Test

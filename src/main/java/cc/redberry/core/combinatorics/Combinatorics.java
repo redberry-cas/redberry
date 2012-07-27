@@ -22,6 +22,9 @@
  */
 package cc.redberry.core.combinatorics;
 
+import java.lang.reflect.*;
+import java.util.*;
+
 /**
  *
  * @author Dmitry Bolotin
@@ -105,6 +108,29 @@ public final class Combinatorics {
         for (int i = 0; i < permutation.length; ++i)
             inverse[permutation[i]] = i;
         return inverse;
+    }
+
+    public static <T> T[] shuffle(T[] array, final int[] permutation) {
+        if (array.length != permutation.length)
+            throw new IllegalArgumentException();
+        if (!testPermutationСorrectness(permutation))
+            throw new IllegalArgumentException();
+        Class<?> type = array.getClass().getComponentType();
+        @SuppressWarnings("unchecked") // OK, because array is of type T
+        T[] newArray = (T[]) Array.newInstance(type, array.length);
+        for (int i = 0; i < permutation.length; ++i)
+            newArray[i] = array[permutation[i]];
+        return newArray;
+    }
+
+    public static boolean testPermutationСorrectness(int[] permutation) {
+        int[] _permutation = new int[permutation.length];
+        System.arraycopy(permutation, 0, _permutation, 0, permutation.length);
+        Arrays.sort(_permutation);
+        for (int i = 0; i < _permutation.length; ++i)
+            if (_permutation[i] != i)
+                return false;
+        return true;
     }
 
     /**

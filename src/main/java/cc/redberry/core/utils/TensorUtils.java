@@ -281,6 +281,54 @@ public class TensorUtils {
             return null;
         return buffer.getSignum();
     }
+
+    /**
+     *
+     * @param t
+     * @throws  AssertionError
+     */
+    public static void assertIndicesConsistency(Tensor t) {
+        assertIndicesConsistency(t, new HashSet<Integer>());
+    }
+
+    private static void assertIndicesConsistency(Tensor t, Set<Integer> indices) {
+        if (t instanceof SimpleTensor) {
+            Indices ind = t.getIndices();
+            for (int i = ind.size() - 1; i >= 0; --i)
+                if (indices.contains(ind.get(i)))
+                    throw new AssertionError();
+                else
+                    indices.add(ind.get(i));
+        }
+        if (t instanceof Product)
+            for (int i = t.size() - 1; i >= 0; --i)
+                assertIndicesConsistency(t.get(i), indices);
+        if (t instanceof Sum) {
+            Set<Integer> sumIndices = new HashSet<>(), temp;
+            for (int i = t.size() - 1; i >= 0; --i) {
+                temp = new HashSet<>(indices);
+                assertIndicesConsistency(t.get(i), temp);
+                appendAllIndices(t.get(i), sumIndices);
+            }
+            indices.addAll(sumIndices);
+        }
+        if (t instanceof Expression)//FUTURE incorporate expression correctly
+            for (Tensor c : t)
+                assertIndicesConsistency(c, new HashSet<>(indices));
+    }
+
+    private static void appendAllIndices(Tensor t, Set<Integer> set) {
+        if (t instanceof SimpleTensor) {
+            Indices ind = t.getIndices();
+            for (int i = ind.size() - 1; i >= 0; --i)
+                set.add(ind.get(i));
+        } else
+            for (Tensor c : t)
+                if (c instanceof ScalarFunction)
+                    continue;
+                else
+                    appendAllIndices(c, set);
+    }
 //
 //    public static IndicesBuilderSorted getAllIndicesBuilder(final Tensor tensor) {
 //        final IndicesBuilderSorted ib = new IndicesBuilderSorted();

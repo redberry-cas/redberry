@@ -22,6 +22,8 @@
  */
 package cc.redberry.core.transformations.substitutions;
 
+import cc.redberry.core.*;
+import cc.redberry.core.combinatorics.*;
 import cc.redberry.core.context.CC;
 import cc.redberry.core.context.ToStringMode;
 import cc.redberry.core.indices.IndexType;
@@ -46,7 +48,7 @@ import static cc.redberry.core.tensor.Tensors.*;
 public class SubstitutionsTest {
 
     private static Tensor contract(Tensor tensor) {
-        return ContractIndices.CONTRACT_INDICES.transform(tensor);
+        return ContractIndices.INSTANCE.transform(tensor);
     }
 
     private static Tensor expand(Tensor tensor) {
@@ -334,6 +336,63 @@ public class SubstitutionsTest {
         assertTrue(TensorUtils.compare(target, target1));
         assertTrue(target.getIndices().size() == 0);
         assertTrue(target1.getIndices().size() == 0);
+    }
+
+    @Test
+    public void testSimple21() {
+        Tensor t = parse("(f+g)*(d+h*(d+f)*(k+f))");
+        Expression f = parseExpression("f=f_m^m");
+        Expression g = parseExpression("g=g_m^m");
+        Expression d = parseExpression("d = d_m^m");
+        Expression h = parseExpression("h=h_m^m");
+        Expression k = parseExpression("k=k_m^m");
+        Expression[] es = {f, g, d, h, k};
+        IntPermutationsGenerator generator = new IntPermutationsGenerator(es.length);
+        int[] permutation;
+        Expression[] temp;
+        while (generator.hasNext()) {
+            permutation = generator.next();
+            temp = Combinatorics.shuffle(es, permutation);
+            for (Expression e : temp)
+                t = e.transform(t);
+            TAssert.assertIndicesConsistency(t);
+        }
+    }
+
+    @Test
+    public void testSimple22() {
+        CC.resetTensorNames(123);
+        Tensor t = parse("(f+g)*(d+h)*(f+h)");
+        Expression f = parseExpression("f=f_m^m");
+        Expression g = parseExpression("g=g_m^m");
+        Expression d = parseExpression("d = d_m^m");
+        Expression h = parseExpression("h=h_m^m");
+        Expression[] es = {f, g, d, h};
+        for (Expression e : es)
+            t = e.transform(t);
+        TAssert.assertIndicesConsistency(t);
+
+    }
+
+    @Test
+    public void testSimple23() {
+        Tensor t = parse("f*g*k*(f+g*(k+f))*(d+h*(d+f)*(k*(g+k)+f))+(f+g*(k+f))*(d+h*(d+f)*(k*(g+k)+f))");
+        Expression f = parseExpression("f=f_m^m+f1_a^a");
+        Expression g = parseExpression("g=g_m^m+g1_b^b");
+        Expression d = parseExpression("d = d_m^m+d1_c^c");
+        Expression h = parseExpression("h=h_m^m+h1_d^d");
+        Expression k = parseExpression("k=k_m^m+k1_e^e");
+        Expression[] es = {f, g, d, h, k};
+        IntPermutationsGenerator generator = new IntPermutationsGenerator(es.length);
+        int[] permutation;
+        Expression[] temp;
+        while (generator.hasNext()) {
+            permutation = generator.next();
+            temp = Combinatorics.shuffle(es, permutation);
+            for (Expression e : temp)
+                t = e.transform(t);
+            TAssert.assertIndicesConsistency(t);
+        }
     }
 
     @Test

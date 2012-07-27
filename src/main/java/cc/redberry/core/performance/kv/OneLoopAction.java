@@ -22,11 +22,7 @@
  */
 package cc.redberry.core.performance.kv;
 
-import cc.redberry.core.context.*;
-import cc.redberry.core.indices.IndexType;
-import cc.redberry.core.indices.IndicesFactory;
-import cc.redberry.core.indices.IndicesTypeStructure;
-import cc.redberry.core.indices.IndicesUtils;
+import cc.redberry.core.indices.*;
 import cc.redberry.core.parser.ParseNodeSimpleTensor;
 import cc.redberry.core.parser.preprocessor.IndicesInsertion;
 import cc.redberry.core.tensor.*;
@@ -303,7 +299,7 @@ public final class OneLoopAction {
         final String[] matrices = new String[]{
             "KINV", "HATK", "HATW", "HATS", "NABLAS",
             "HATN", "HATF", "NABLAF", "HATM", "DELTA",
-            "Flat", "FF", "WR", "SR", "SSR", "FR", "RR"};
+            "Flat", "FF", "WR", "SR", "SSR", "FR", "RR","Kn"};
 
         //F_{\\mu\\nu} type structure
         final IndicesTypeStructure F_TYPE_STRUCTURE = new IndicesTypeStructure(IndexType.GreekLower.getType(), 2);
@@ -327,8 +323,8 @@ public final class OneLoopAction {
         //indices to insert
         int upper[] = new int[matrixIndicesCount / 2], lower[] = upper.clone();
         for (i = 0; i < matrixIndicesCount / 2; ++i) {
-            upper[i] = IndicesUtils.createIndex(30 + i, IndexType.GreekLower, true);//30 
-            lower[i] = IndicesUtils.createIndex(30 + i + matrixIndicesCount / 2, IndexType.GreekLower, false);
+            upper[i] = IndicesUtils.createIndex(130 + i, IndexType.GreekLower, true);//30 
+            lower[i] = IndicesUtils.createIndex(130 + i + matrixIndicesCount / 2, IndexType.GreekLower, false);
         }
 
         Expression Flat, WR, SR, SSR, FF, FR, RR, DELTA_1, DELTA_2, DELTA_3, DELTA_4, ACTION;
@@ -361,24 +357,26 @@ public final class OneLoopAction {
         DELTA_4 = (Expression) Tensors.parse(DELTA_4_, deltaIndicesInsertion);
         Expression[] deltaExpressions = new Expression[]{DELTA_1, DELTA_2, DELTA_3, DELTA_4};
 
+        Expression FSubstitution = Tensors.parseExpression("F_\\mu\\nu\\alpha\\beta=R_\\mu\\nu\\alpha\\beta");
+        for (Transformation backround : input.getRiemannBackround())
+            FSubstitution = (Expression) backround.transform(FSubstitution);
+
         //Calculations        
         Expression[] riemansSubstitutions = new Expression[]{
-            Tensors.parseExpression("F_\\mu\\nu\\alpha\\beta=R_\\mu\\nu\\alpha\\beta"),
+            FSubstitution,
             Tensors.parseExpression("R_{\\mu \\nu}^{\\mu}_{\\alpha} = R_{\\nu\\alpha}"),
             Tensors.parseExpression("R_{\\mu\\nu}^{\\alpha}_{\\alpha}=0"),
             Tensors.parseExpression("R_{\\mu\\nu\\alpha\\beta}*R^{\\mu\\alpha\\nu\\beta}=(1/2)*R_{\\mu\\nu\\alpha\\beta}*R^{\\mu\\nu\\alpha\\beta}"),
             Tensors.parseExpression("R_{\\mu\\nu\\alpha\\beta}*R^{\\mu\\nu\\alpha\\beta}=4*R_{\\mu\\nu}*R^{\\mu\\nu}-R*R"),
             Tensors.parseExpression("R_{\\mu}^{\\mu}= R"),
-            Tensors.parseExpression("P_{\\mu}^{\\mu}= P")};
+            Tensors.parseExpression("P_{\\mu}^{\\mu}= P")
+        };
 
 
         Expression kronecker = (Expression) Tensors.parse("d_{\\mu}^{\\mu}=4");
         Transformation n2 = new SqrSubs(Tensors.parseSimple("n_\\mu")), n2Transformer = new Transformer(TraverseState.Leaving, new Transformation[]{n2});
-        Transformation[] common = new Transformation[]{ContractIndices.CONTRACT_INDICES, n2Transformer, kronecker};
+        Transformation[] common = new Transformation[]{ContractIndices.INSTANCE, n2Transformer, kronecker};
         Transformation[] all = ArraysUtils.addAll(common, riemansSubstitutions);
-
-
-
         Tensor temp;
 
         //Calculating Delta- tensors
@@ -397,10 +395,8 @@ public final class OneLoopAction {
 
             deltaExpressions[i] = (Expression) temp;
         }
-
         Tensor[] combinations;
         Expression[] calculatedCombinations;
-
         //DELTA_3
         combinations = new Tensor[]{
             Tensors.parse("HATK^{\\mu\\nu}*HATK^{\\alpha}", deltaIndicesInsertion),
@@ -420,12 +416,11 @@ public final class OneLoopAction {
         temp = DELTA_3;
         temp = input.getL().transform(temp);
         for (Expression t : calculatedCombinations)
-            temp = new NaiveSubstitution(t.get(0), t.get(1)).transform(temp);
+            temp = new NaiveSubstitution(t.get(0), t.get(1)).transform(temp);//t.transform(temp);
         temp = Expand.expand(temp, common);
         for (Transformation tr : common)
             temp = tr.transform(temp);
         deltaExpressions[2] = (Expression) temp;
-
         //DELTA_4
         combinations = new Tensor[]{
             Tensors.parse("HATK^{\\mu\\nu\\alpha\\beta}", deltaIndicesInsertion),
@@ -449,7 +444,7 @@ public final class OneLoopAction {
         temp = DELTA_4;
         temp = input.getL().transform(temp);
         for (Expression t : calculatedCombinations)
-            temp = new NaiveSubstitution(t.get(0), t.get(1)).transform(temp);
+            temp = new NaiveSubstitution(t.get(0), t.get(1)).transform(temp);//t.transform(temp);
         temp = Expand.expand(temp, common);
         for (Transformation tr : common)
             temp = tr.transform(temp);
@@ -474,6 +469,9 @@ public final class OneLoopAction {
             temp = input.getF().transform(temp);
             temp = input.getHatF().transform(temp);
 
+            for(Expression kn : input.getKnQuantities())
+                temp = kn.transform(temp);
+            
             for (Expression[] hatQuantities : input.getHatQuantities())
                 for (Expression hatQ : hatQuantities)
                     temp = hatQ.transform(temp);
@@ -490,13 +488,16 @@ public final class OneLoopAction {
             temp = Expand.expand(temp, all);
             for (Transformation tr : all)
                 temp = tr.transform(temp);
-
+            temp = Expand.expand(temp, all);
+            
             terms[i] = (Expression) temp;
             System.out.println(temp);
         }
 
         for (Expression term : terms)
             ACTION = (Expression) term.transform(ACTION);
+
+        System.out.println(ACTION);
 
         return new OneLoopAction(Flat, WR, SR, SSR, FF, FR, RR, DELTA_1, DELTA_2, DELTA_3, DELTA_4, ACTION);
     }

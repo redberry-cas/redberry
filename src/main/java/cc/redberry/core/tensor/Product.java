@@ -230,6 +230,14 @@ public final class Product extends MultiTensor {
             return new Product(factor, indexlessData, new Tensor[0], ProductContent.EMPTY_INSTANCE, IndicesFactory.EMPTY_INDICES);
     }
 
+    public Tensor getDataSubProduct() {
+        if (data.length == 0)
+            return Complex.ONE;
+        if (data.length == 1)
+            return data[0];
+        return new Product(Complex.ONE, new Tensor[0], data, contentReference.get(), indices);
+    }
+
     private ProductContent calculateContent() {
         if (data.length == 0)
             return ProductContent.EMPTY_INSTANCE;
