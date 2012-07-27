@@ -22,6 +22,10 @@
  */
 package cc.redberry.core.tensor;
 
+import cc.redberry.core.transformations.*;
+import cc.redberry.core.utils.*;
+import java.util.*;
+
 /**
  *
  * @author Dmitry Bolotin
@@ -30,10 +34,25 @@ package cc.redberry.core.tensor;
 class FactorNode {
 
     final Tensor factor;
-    final TensorBuilder builder;
+    private final TensorBuilder builder;
+    int[] factorForbiddenIndices;
 
     FactorNode(Tensor factor, TensorBuilder builder) {
         this.factor = factor;
         this.builder = builder;
+        Set<Integer> factorIndices = TensorUtils.getAllIndicesNames(factor);
+        factorForbiddenIndices = new int[factorIndices.size()];
+        int i = -1;
+        for (Integer ii : factorIndices)
+            factorForbiddenIndices[++i] = ii;
+    }
+
+    void put(Tensor t) {
+        t = ApplyIndexMapping.renameDummy(t, factorForbiddenIndices);//TODO improve performance!!!!!!!
+        builder.put(t);
+    }
+
+    Tensor build() {
+        return builder.build();
     }
 }

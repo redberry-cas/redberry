@@ -73,7 +73,7 @@ public class SumBuilderConcurrent implements TensorBuilder {
         for (Map.Entry<Integer, ConcurrentGrowingList<FactorNode>> entry : summands.entrySet()) {
             ConcurrentGrowingList<FactorNode>.GrowingIterator gi = entry.getValue().iterator();
             while ((node = gi.next()) != null) {
-                Tensor summand = Tensors.multiply(node.builder.build(), node.factor);//for performance
+                Tensor summand = Tensors.multiply(node.build(), node.factor);//for performance
                 if (!TensorUtils.isZero(summand))
                     sum.add(summand);
             }
@@ -146,9 +146,9 @@ public class SumBuilderConcurrent implements TensorBuilder {
             if (b == null)
                 continue;
             if (b)
-                current.builder.put(Tensors.negate(split.summand));
+                current.put(Tensors.negate(split.summand));
             else
-                current.builder.put(split.summand);
+                current.put(split.summand);
             break;
         }
     }

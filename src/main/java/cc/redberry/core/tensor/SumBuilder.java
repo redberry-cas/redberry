@@ -30,6 +30,7 @@ import cc.redberry.core.indices.Indices;
 import cc.redberry.core.indices.IndicesFactory;
 import cc.redberry.core.indices.IndicesUtils;
 import cc.redberry.core.number.Complex;
+import cc.redberry.core.transformations.*;
 import cc.redberry.core.utils.*;
 import java.util.*;
 import java.util.ArrayList;
@@ -69,7 +70,7 @@ public final class SumBuilder implements TensorBuilder {
 
         for (Map.Entry<Integer, List<FactorNode>> entry : summands.entrySet())
             for (FactorNode node : entry.getValue()) {
-                Tensor summand = Tensors.multiply(node.builder.build(), node.factor);
+                Tensor summand = Tensors.multiply(node.build(), node.factor);
                 if (!TensorUtils.isZero(summand))
                     sum.add(summand);
             }
@@ -91,7 +92,7 @@ public final class SumBuilder implements TensorBuilder {
             sortedFreeIndices = indices.getAllIndices().copy();
             Arrays.sort(sortedFreeIndices);
         } else if (!indices.equalsRegardlessOrder(tensor.getIndices().getFreeIndices()))
-            throw new TensorException("Inconsinstent indices in sum.", tensor);
+            throw new TensorException("Inconsinstent indices in sum.", tensor);//TODO improve message
         if (tensor instanceof Sum) {
             for (Tensor s : tensor)
                 put(s);
@@ -115,9 +116,9 @@ public final class SumBuilder implements TensorBuilder {
             for (FactorNode node : factorNodes)
                 if ((b = compareFactors(split.factor, node.factor)) != null) {
                     if (b)
-                        node.builder.put(Tensors.negate(split.summand));
+                        node.put(Tensors.negate(split.summand));
                     else
-                        node.builder.put(split.summand);
+                        node.put(split.summand);
                     break;
                 }
             if (b == null)
@@ -133,15 +134,7 @@ public final class SumBuilder implements TensorBuilder {
             int[] fromIndices = u.getIndices().getFreeIndices().getAllIndices().copy();
             for (int i = 0; i < fromIndices.length; ++i)
                 fromIndices[i] = IndicesUtils.getNameWithType(fromIndices[i]);
-//            long start = System.currentTimeMillis();
             buffer = IndexMappings.createPort(new IndexMappingBufferTester(fromIndices, false), u, v).take();
-//            long stop = System.currentTimeMillis();
-//            if (stop - start > 300) {
-//                System.out.println("time " + (stop - start));
-//
-//                System.out.println(u);
-//                System.out.println(v);
-//            }
         }
         if (buffer == null)
             return null;
