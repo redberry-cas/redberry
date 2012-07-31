@@ -39,14 +39,16 @@ public class OneLoopInputTest {
         Expression K = (Expression) Tensors.parse("K^\\mu_\\nu^\\alpha_\\beta=g^{\\mu\\alpha}_{\\nu\\beta}");
         Expression S = (Expression) Tensors.parse("S^\\mu^\\alpha_\\beta=g^{\\mu\\alpha}_{\\beta}");
         Expression W = (Expression) Tensors.parse("W^\\alpha_\\beta=d^{\\alpha}_{\\beta}");
-        OneLoopInput input = new OneLoopInput(operatorOrder, KINV, K, S, W, null, null);
+        Expression F = Tensors.parseExpression("F_\\mu\\nu\\alpha\\beta=R_\\mu\\nu\\alpha\\beta");
+
+        OneLoopInput input = new OneLoopInput(operatorOrder, KINV, K, S, W, null, null, F);
         for (int k = 0; k < 3; ++k)
             for (int i = 0; i < operatorOrder + 1 - k; ++i)
                 System.out.println(input.getHatQuantities(k)[i]);
-        
-        for(Tensor t : input.getNablaS())
+
+        for (Tensor t : input.getNablaS())
             System.out.println(t);
-        
+
         System.out.println(input.getF());
     }
 }

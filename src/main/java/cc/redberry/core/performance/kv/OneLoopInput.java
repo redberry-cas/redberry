@@ -11,10 +11,10 @@ import cc.redberry.core.tensor.Expression;
 import cc.redberry.core.tensor.SimpleTensor;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.tensor.Tensors;
-import cc.redberry.core.transformations.ContractIndices;
-import cc.redberry.core.transformations.Expand;
-import cc.redberry.core.transformations.Transformation;
-import cc.redberry.core.utils.*;
+import cc.redberry.core.tensor.iterator.*;
+import cc.redberry.core.transformations.*;
+import cc.redberry.core.utils.ArraysUtils;
+import cc.redberry.core.utils.Indicator;
 import java.util.Arrays;
 
 public final class OneLoopInput {
@@ -32,11 +32,11 @@ public final class OneLoopInput {
     private final Expression F;
     private final Expression HATF;
 
-    public OneLoopInput(int operatorOrder, Expression KINV, Expression K, Expression S, Expression W, Expression N, Expression M) {
-        this(operatorOrder, KINV, K, S, W, N, M, new Transformation[0]);
+    public OneLoopInput(int operatorOrder, Expression KINV, Expression K, Expression S, Expression W, Expression N, Expression M, Expression F) {
+        this(operatorOrder, KINV, K, S, W, N, M, F, new Transformation[0]);
     }
 
-    public OneLoopInput(int operatorOrder, Expression KINV, Expression K, Expression S, Expression W, Expression N, Expression M, Transformation[] riemannBackround) {
+    public OneLoopInput(int operatorOrder, Expression KINV, Expression K, Expression S, Expression W, Expression N, Expression M, Expression F, Transformation[] riemannBackround) {
         this.operatorOrder = operatorOrder;
         if (operatorOrder > 4)
             throw new IllegalArgumentException();
@@ -72,6 +72,8 @@ public final class OneLoopInput {
 
         Indicator<ParseNodeSimpleTensor> indicator = new Indicator<ParseNodeSimpleTensor>() {
 
+            private final IndicesTypeStructure F_TYPES = new IndicesTypeStructure(IndexType.GreekLower, 2);
+
             @Override
             public boolean is(ParseNodeSimpleTensor object) {
                 String name = object.name;
@@ -83,7 +85,10 @@ public final class OneLoopInput {
                 for (i = 0; i < HAT_QUANTITIES_GENERAL_COUNT; ++i)
                     if (name.equals(getStringHatQuantitieName(i)))
                         return true;
-
+                if (name.equals("F") && F_TYPES.isStructureOf(object.indices))
+                    return true;
+                if (name.equals("HATF"))
+                    return true;
                 return false;
             }
         };
@@ -95,7 +100,8 @@ public final class OneLoopInput {
         StringBuilder sb;
         Tensor temp;
         String covariantIndicesString;
-        Transformation[] transformations = ArraysUtils.addAll(new Transformation[]{ContractIndices.INSTANCE}, riemannBackround);
+        Transformation n2 = new SqrSubs(Tensors.parseSimple("n_\\mu")), n2Transformer = new Transformer(TraverseState.Leaving, new Transformation[]{n2});
+        Transformation[] transformations = ArraysUtils.addAll(new Transformation[]{ContractIndices.INSTANCE, n2Transformer}, riemannBackround);
         for (i = 0; i < actualHatQuantities; ++i) {
             hatQuantities[i] = new Expression[operatorOrder + 1 - i];
             covariantIndicesString = IndicesUtils.toString(Arrays.copyOfRange(covariantIndices, 0, covariantIndices.length - i), ToStringMode.REDBERRY);
@@ -113,6 +119,8 @@ public final class OneLoopInput {
                 temp = inputValues[0].transform(temp);
                 temp = inputValues[i + 1].transform(temp);
                 temp = Expand.expand(temp, Indicator.TRUE_INDICATOR, transformations, 1);
+                for (Transformation t : transformations)
+                    temp = t.transform(temp);
                 hatQuantities[i][j] = (Expression) temp;
             }
         }
@@ -138,13 +146,30 @@ public final class OneLoopInput {
             temp = inputValues[0].transform(temp);
             temp = inputValues[1].transform(temp);
             temp = Expand.expand(temp, Indicator.TRUE_INDICATOR, transformations, 1);
+            for (Transformation t : transformations)
+                temp = t.transform(temp);
             kn[i] = (Expression) temp;
         }
 
-        //FIXME temporary
-        F = (Expression) Tensors.parse("F_\\mu\\nu\\alpha\\beta = R_\\mu\\nu\\alpha\\beta");
-        HATF = (Expression) inputValues[0].transform(F.transform(Tensors.parse("HATF_\\mu\\nu^\\alpha_\\beta = KINV^\\alpha_\\gamma*R_\\mu\\nu^\\gamma_\\beta")));
-        
+        final int[] symmetry = new int[F.get(0).getIndices().size()];
+        symmetry[0] = 1;
+        symmetry[1] = 0;
+        for (i = 2; i < symmetry.length; ++i)
+            symmetry[i] = i;
+        Tensors.addSymmetry((SimpleTensor) F.get(0), IndexType.GreekLower, true, symmetry);
+        this.F = F;
+
+        covariantIndicesString = IndicesUtils.toString(Arrays.copyOfRange(covariantIndices, 0, 2), ToStringMode.REDBERRY);
+        sb = new StringBuilder();
+        sb.append("HATF").
+                append(covariantIndicesString).
+                append("=KINV*F").
+                append(covariantIndicesString);
+        Tensor HATF = (Expression) Tensors.parse(sb.toString(), insertion);
+
+        HATF = F.transform(HATF);
+        HATF = inputValues[0].transform(HATF);
+        this.HATF = (Expression) HATF;
     }
 
     private String getStringInputName(int i) {

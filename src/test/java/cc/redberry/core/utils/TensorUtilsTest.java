@@ -23,8 +23,16 @@
 package cc.redberry.core.utils;
 
 import cc.redberry.core.context.CC;
+import cc.redberry.core.indices.*;
+import cc.redberry.core.indices.*;
+import cc.redberry.core.indices.*;
+import cc.redberry.core.indices.*;
+import cc.redberry.core.indices.*;
+import cc.redberry.core.indices.*;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.tensor.Tensors;
+import cc.redberry.core.transformations.*;
+import junit.framework.*;
 import org.junit.Test;
 
 import static org.junit.Assert.assertFalse;
@@ -93,5 +101,41 @@ public class TensorUtilsTest {
         Tensor tensor = Tensors.parse("A_ij^m*B_mlk");
         Tensor expected = Tensors.parse("A_ij^u*B_ulk");
         assertTrue(TensorUtils.compare(tensor, expected));
+    }
+
+    @Test
+    public void testIsZeroDueToSymmetry1() {
+        Tensors.addSymmetry("A_mn", IndexType.LatinLower, true, 1, 0);
+        Tensors.addSymmetry("S_mn", IndexType.LatinLower, false, 1, 0);
+        Tensor t = Tensors.parse("A_mn*S^mn");
+        Assert.assertTrue(TensorUtils.isZeroDueToSymmetry(t));
+    }
+
+    @Test
+    public void testIsZeroDueToSymmetry2() {
+        Tensors.addSymmetry("A_mn", IndexType.LatinLower, true, 1, 0);
+        Tensors.addSymmetry("S_mn", IndexType.LatinLower, false, 1, 0);
+        Tensors.addSymmetry("F_mnab", IndexType.LatinLower, false, 1, 0, 2, 3);
+        Tensors.addSymmetry("F_mnab", IndexType.LatinLower, true, 0, 1, 3, 2);
+        Tensor t = Tensors.parse("A_mn*S^mn+F_mn^mn");
+        Assert.assertTrue(TensorUtils.isZeroDueToSymmetry(t));
+    }
+
+    @Test
+    public void testIsZeroDueToSymmetry3() {
+        Tensors.addSymmetry("F_\\mu\\nu\\alpha\\beta", IndexType.GreekLower, true, 1, 0, 2, 3);
+        Tensors.addSymmetry("R_\\mu\\nu", IndexType.GreekLower, false, 1, 0);
+        Tensor t = Tensors.parse("-23/60*R^{\\gamma \\mu }*F_{\\gamma \\mu }^{\\rho_5 }_{\\rho_5 }");
+        Assert.assertTrue(TensorUtils.isZeroDueToSymmetry(t));
+    }
+
+    @Test
+    public void testIsZeroDueToSymmetry4() {
+        Tensors.addSymmetry("F_\\mu\\nu\\alpha\\beta", IndexType.GreekLower, true, 1, 0, 2, 3);
+        Tensors.addSymmetry("R_\\mu\\nu", IndexType.GreekLower, false, 1, 0);
+        Tensor t = Tensors.parse("1/15*R_{\\delta }^{\\rho }*R_{\\rho }^{\\delta }+-23/60*R^{\\gamma \\mu }*F_{\\gamma \\mu }^{\\rho_5 }_{\\rho_5 }+1/12*F^{\\alpha }_{\\nu }^{\\rho_5 }_{\\zeta }*F_{\\alpha }^{\\nu \\zeta }_{\\rho_5 }+1/2*W^{\\alpha }_{\\rho_5 }*W^{\\rho_5 }_{\\alpha }+1/30*Power[R, 2]+1/6*R*W^{\\beta }_{\\beta }");
+        t = RemoveDueToSymmetry.INSANCE.transform(t);
+        Tensor e = Tensors.parse("1/15*R_{\\delta }^{\\rho }*R_{\\rho }^{\\delta }+1/12*F^{\\alpha }_{\\nu }^{\\rho_5 }_{\\zeta }*F_{\\alpha }^{\\nu \\zeta }_{\\rho_5 }+1/2*W^{\\alpha }_{\\rho_5 }*W^{\\rho_5 }_{\\alpha }+1/30*Power[R, 2]+1/6*R*W^{\\beta }_{\\beta }");
+        Assert.assertTrue(TensorUtils.compare(t, e));
     }
 }

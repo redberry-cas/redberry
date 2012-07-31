@@ -490,14 +490,16 @@ public final class Product extends MultiTensor {
 
     private static class ScaffoldWrapper implements Comparable<ScaffoldWrapper> {
 
-        public final int[] inds;
-        public final Tensor t;
-        public final TensorContraction tc;
+        final int[] inds;
+        final Tensor t;
+        final TensorContraction tc;
+        final int hashWithIndices;
 
         private ScaffoldWrapper(int[] inds, Tensor t, TensorContraction tc) {
             this.inds = inds;
             this.t = t;
             this.tc = tc;
+            hashWithIndices = hc(t, inds);
         }
 
         @Override
@@ -505,7 +507,7 @@ public final class Product extends MultiTensor {
             int r = tc.compareTo(o.tc);
             if (r != 0)
                 return r;
-            return Integer.compare(hc(t, inds), hc(o.t, inds));
+            return Integer.compare(hashWithIndices, o.hashWithIndices);
         }
     }
 }

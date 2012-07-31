@@ -11,10 +11,10 @@ import org.apache.commons.math3.util.*;
 
 public class Averaging implements Transformation {
 
-    public static final Averaging INSTANCE = new Averaging();
-    private final static SimpleTensor const_n = Tensors.parseSimple("n_\\mu");
+    private final SimpleTensor const_n;
 
-    private Averaging() {
+    public Averaging(SimpleTensor const_n) {
+        this.const_n = const_n;
     }
 
     private static Tensor average(final int[] indices) {

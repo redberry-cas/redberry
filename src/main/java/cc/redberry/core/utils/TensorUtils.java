@@ -285,7 +285,8 @@ public class TensorUtils {
     /**
      *
      * @param t
-     * @throws  AssertionError
+*
+     * s AssertionError
      */
     public static void assertIndicesConsistency(Tensor t) {
         assertIndicesConsistency(t, new HashSet<Integer>());
@@ -328,6 +329,17 @@ public class TensorUtils {
                     continue;
                 else
                     appendAllIndices(c, set);
+    }
+
+    public static boolean isZeroDueToSymmetry(Tensor t) {
+        int[] indices = IndicesUtils.getIndicesNames(t.getIndices().getFreeIndices());
+        IndexMappingBufferTester bufferTester = new IndexMappingBufferTester(indices, false);
+        MappingsPort mp = IndexMappings.createPort(bufferTester, t, t);
+        IndexMappingBuffer buffer;
+        while ((buffer = mp.take()) != null)
+            if (buffer.getSignum())
+                return true;
+        return false;
     }
 //
 //    public static IndicesBuilderSorted getAllIndicesBuilder(final Tensor tensor) {
