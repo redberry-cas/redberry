@@ -115,7 +115,7 @@ public final class ProductFactory implements TensorFactory {
                 if (TensorUtils.isSymbol(tensor)) {
                     TensorBuilder sb = powers.get(tensor);
                     if (sb == null) {
-                        sb = SumBuilderFactory.defaultSumBuilder();
+                        sb = new SumBuilder();
                         powers.put(tensor, sb);
                     }
                     sb.put(Complex.ONE);
@@ -124,7 +124,7 @@ public final class ProductFactory implements TensorFactory {
                     if (TensorUtils.isSymbolOrNumber(argument)) {
                         TensorBuilder sb = powers.get(argument);
                         if (sb == null) {
-                            sb = SumBuilderFactory.defaultSumBuilder();
+                            sb = new SumBuilder();
                             powers.put(argument, sb);
                         }
                         sb.put(tensor.get(1));

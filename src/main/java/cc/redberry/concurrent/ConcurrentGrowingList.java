@@ -22,6 +22,7 @@
  */
 package cc.redberry.concurrent;
 
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.atomic.AtomicReferenceArray;
 
@@ -30,7 +31,9 @@ import java.util.concurrent.atomic.AtomicReferenceArray;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public class ConcurrentGrowingList<T> {
+@Deprecated
+public final class ConcurrentGrowingList<T> {
+
     private final AtomicReference<AtomicReferenceArray<T>> array =
             new AtomicReference<>(new AtomicReferenceArray<T>(3));
 
@@ -42,7 +45,8 @@ public class ConcurrentGrowingList<T> {
     }
 
     public class GrowingIterator {
-        int position = -1;
+
+        volatile int position = -1;
 
         private GrowingIterator() {
         }
@@ -53,16 +57,19 @@ public class ConcurrentGrowingList<T> {
 
         public T set(T t) {
             AtomicReferenceArray<T> _array = array.get();
+            //todo discuss with Dima
+            int position = this.position;
             if (position == _array.length() - 1) {
                 T[] newInstance = (T[]) new Object[3 * (position + 1) / 2 + 1];
                 for (int i = 0; i <= position; ++i)
                     newInstance[i] = _array.get(i);
                 AtomicReferenceArray<T> newArray = new AtomicReferenceArray<>(newInstance);
 
+                //this is meaningless //FIXME 
                 if (!array.compareAndSet(_array, newArray))
                     _array = array.get();
                 else
-                    _array = newArray;
+                    _array = newArray;               
             }
             return _array.compareAndSet(position, null, t) ? null : _array.get(position);
         }

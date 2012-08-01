@@ -72,13 +72,13 @@ public final class ProductBuilder implements TensorBuilder {
         elements.addAll(Arrays.asList(data));
         for (Tensor t : indexlessData)
             if (TensorUtils.isSymbol(t)) {
-                TensorBuilder sb = SumBuilderFactory.defaultSumBuilder();
+                TensorBuilder sb = new SumBuilder();
                 sb.put(Complex.ONE);
                 powers.put(t, sb);
             } else if (t instanceof Power) {
                 Tensor argument = t.get(0);
                 if (TensorUtils.isSymbolOrNumber(argument)) {
-                    TensorBuilder sb = SumBuilderFactory.defaultSumBuilder();
+                    TensorBuilder sb = new SumBuilder();
                     sb.put(t.get(1));
                     powers.put(argument, sb);
                 } else
@@ -168,7 +168,7 @@ public final class ProductBuilder implements TensorBuilder {
         if (TensorUtils.isSymbol(tensor)) {
             TensorBuilder sb = powers.get(tensor);
             if (sb == null) {
-                sb = SumBuilderFactory.defaultSumBuilder();
+                sb = new SumBuilder();
                 powers.put(tensor, sb);
             }
             sb.put(Complex.ONE);
@@ -179,7 +179,7 @@ public final class ProductBuilder implements TensorBuilder {
             if (TensorUtils.isSymbolOrNumber(argument)) {
                 TensorBuilder sb = powers.get(argument);
                 if (sb == null) {
-                    sb = SumBuilderFactory.defaultSumBuilder();
+                    sb = new SumBuilder();
                     powers.put(argument, sb);
                 }
                 sb.put(tensor.get(1));

@@ -122,17 +122,6 @@ public class ExpandTest {
 //        Assert.assertTrue(TensorUtils.equals(actual, expected));
     }
 
-    @Ignore
-    @Test(timeout = 400)
-    public void test9Concurrent() {
-        for (int i = 0; i < 100; ++i) {
-            CC.resetTensorNames();
-            Tensor actual = parse("Power[a+b,30]");
-            actual = Expand.expand(actual, 4);
-            Assert.assertTrue(actual.size() == 31);
-        }
-    }
-
     @Test
     public void test10() {
         for (int i = 2; i < 30; ++i) {

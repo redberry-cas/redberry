@@ -226,7 +226,7 @@ public class OneLoopActionTest {
         System.out.println(action.DELTA_3());
         System.out.println(action.DELTA_4());
 
-        TensorBuilder sb = SumBuilderFactory.defaultSumBuilder();
+        TensorBuilder sb = new SumBuilder();
         for (Tensor s : A)
             if (s instanceof Product && s.getIndices().size() != 0) {
                 Product p = (Product) s;
@@ -374,7 +374,7 @@ public class OneLoopActionTest {
         Assert.assertTrue(TensorUtils.compare(A, expected));
 
         
-        TensorBuilder sb = SumBuilderFactory.defaultSumBuilder();
+        TensorBuilder sb = new SumBuilder();
         for (Tensor s : A)
             if (s instanceof Product && s.getIndices().size() != 0) {
                 Product p = (Product) s;
