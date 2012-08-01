@@ -26,7 +26,6 @@ import cc.redberry.core.indexmapping.IndexMapping;
 import cc.redberry.core.indices.SimpleIndices;
 import cc.redberry.core.tensor.*;
 import cc.redberry.core.tensor.functions.ScalarFunction;
-import cc.redberry.core.utils.*;
 import java.util.*;
 
 /**
