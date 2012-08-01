@@ -159,9 +159,8 @@ public final class Expand implements Transformation {
                 nonSums.add(t);
         }
 
-        if (!expand && sum == null)
-            if (indexlessSum == null || (indexlessNonSums.isEmpty()))
-                return current;
+        if (!expand && sum == null && (indexlessSum == null || indexlessNonSums.isEmpty()))
+            return current;
 
 
         Tensor indexless = multiply(indexlessNonSums.toArray(new Tensor[indexlessNonSums.size()]));
@@ -170,7 +169,7 @@ public final class Expand implements Transformation {
 
         Tensor main = multiply(nonSums.toArray(new Tensor[nonSums.size()]));
         if (sum != null)
-            main = multiplySumElementsOnFactor(sum, multiply(nonSums.toArray(new Tensor[nonSums.size()])));
+            main = multiplySumElementsOnFactor(sum, main);
 
         if (main instanceof Sum)
             main = multiplySumElementsOnFactorAndExpandScalars((Sum) main, indexless);

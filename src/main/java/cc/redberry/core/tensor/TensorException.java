@@ -22,6 +22,7 @@
  */
 package cc.redberry.core.tensor;
 
+import cc.redberry.core.context.*;
 import java.util.Arrays;
 
 /**
@@ -34,12 +35,12 @@ public class TensorException extends RuntimeException {
     Tensor[] tensors;
 
     public TensorException(String message, Tensor... tensors) {
-        super("\"" + message + "\" in tensors " + Arrays.toString(tensors));
+        super("\"" + message + "\" in tensors " + Arrays.toString(tensors) + "\n nmseed: " + CC.getNameManager().getSeed());
         this.tensors = tensors;
     }
 
     public TensorException(String message) {
-        super(message);
+        super(message + "\n nmseed: " + CC.getNameManager().getSeed());
     }
 
     public TensorException(Tensor... tensor) {

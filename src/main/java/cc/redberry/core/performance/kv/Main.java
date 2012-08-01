@@ -58,7 +58,9 @@ public class Main {
 
         Expression S = (Expression) Tensors.parse("S^\\rho^{\\alpha\\beta}_{\\mu\\nu}=0");
         Expression W = (Expression) Tensors.parse("W^{\\alpha\\beta}_{\\mu\\nu}=0");
-        OneLoopInput input = new OneLoopInput(2, KINV, K, S, W, null, null, OneLoopUtils.antiDeSitterBackround());
+        Expression F = Tensors.parseExpression("F_\\mu\\nu\\alpha\\beta=0");
+
+        OneLoopInput input = new OneLoopInput(2, KINV, K, S, W, null, null, F, OneLoopUtils.antiDeSitterBackround());
 
         OneLoopAction action = OneLoopAction.calculateOneLoopAction(input);
         System.out.println(action.ACTION());

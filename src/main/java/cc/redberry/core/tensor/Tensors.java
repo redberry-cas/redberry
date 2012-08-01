@@ -32,6 +32,7 @@ import cc.redberry.core.tensor.functions.*;
 import cc.redberry.core.transformations.ApplyIndexMapping;
 import cc.redberry.core.transformations.Expand;
 import cc.redberry.core.utils.TensorUtils;
+import java.util.*;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -59,8 +60,8 @@ public final class Tensors {
         return ProductFactory.FACTORY.create(factors);
     }
 
-    public static Tensor multiplyAndRenameConflictingDummies(Tensor... tensors) {
-        Tensor t = multiply(tensors);
+    public static Tensor multiplyAndRenameConflictingDummies(Tensor... factors) {
+        Tensor t = ProductFactory.FACTORY.create(factors);
         if (!(t instanceof Product))
             return t;
 

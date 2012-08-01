@@ -11,10 +11,10 @@ import org.apache.commons.math3.util.*;
 
 public class Averaging implements Transformation {
 
-    public static final Averaging INSTANCE = new Averaging();
-    private final static SimpleTensor const_n = Tensors.parseSimple("n_\\mu");
+    private final SimpleTensor const_n;
 
-    private Averaging() {
+    public Averaging(SimpleTensor const_n) {
+        this.const_n = const_n;
     }
 
     private static Tensor average(final int[] indices) {
@@ -71,7 +71,7 @@ public class Averaging implements Transformation {
             count = count / 2;
             Tensor averaged = average(ib.getIndices().getAllIndices().copy());
             long factor = ArithmeticUtils.pow((long) 2, count) * ArithmeticUtils.factorial(count + 1);
-            Complex number = new Complex((long) factor);
+            Complex number = new Complex((long) factor).reciprocal();
             averaged = Expand.expand(averaged);
             newProductElements.add(number);
             newProductElements.add(averaged);

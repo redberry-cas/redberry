@@ -69,10 +69,9 @@ class SimpleSubstitution implements Transformation {
                 int c = -1;
                 for (Integer f : iterator.forbiddenIndices())
                     forbidden[++c] = f;
-                Tensor temp = to;
-                newTo = ApplyIndexMapping.applyIndexMapping(temp, buffer, forbidden);
-                if (temp != newTo)
-                    iterator.forbiddenIndices().addAll(TensorUtils.getAllIndicesNames(newTo));
+                newTo = ApplyIndexMapping.applyIndexMapping(to, buffer, forbidden);
+//                if (newTo != to)
+                iterator.forbiddenIndices().addAll(TensorUtils.getAllIndicesNames(newTo));
             }
             iterator.set(newTo);
         }

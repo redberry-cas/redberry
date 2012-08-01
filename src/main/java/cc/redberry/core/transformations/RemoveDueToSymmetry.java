@@ -20,39 +20,38 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
-package cc.redberry.core.tensor;
+package cc.redberry.core.transformations;
 
-import cc.redberry.core.transformations.*;
+import cc.redberry.core.indexmapping.*;
+import cc.redberry.core.number.*;
+import cc.redberry.core.tensor.*;
+import cc.redberry.core.tensor.iterator.*;
 import cc.redberry.core.utils.*;
-import java.util.*;
 
 /**
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-class FactorNode {
+public class RemoveDueToSymmetry implements Transformation {
 
-    final Tensor factor;
-    private final TensorBuilder builder;
-    int[] factorForbiddenIndices;
+    public static final RemoveDueToSymmetry INSANCE = new RemoveDueToSymmetry();
 
-    FactorNode(Tensor factor, TensorBuilder builder) {
-        this.factor = factor;
-        this.builder = builder;
-        Set<Integer> factorIndices = TensorUtils.getAllIndicesNames(factor);
-        factorForbiddenIndices = new int[factorIndices.size()];
-        int i = -1;
-        for (Integer ii : factorIndices)
-            factorForbiddenIndices[++i] = ii;
+    private RemoveDueToSymmetry() {
     }
 
-    void put(Tensor t) {
-        t = ApplyIndexMapping.renameDummy(t, factorForbiddenIndices);//TODO improve performance!!!!!!!
-        builder.put(t);
-    }
-
-    Tensor build() {
-        return builder.build();
+    @Override
+    public Tensor transform(Tensor t) {
+        TreeTraverseIterator iterator = new TreeTraverseIterator(t);
+        TraverseState state;
+        Tensor c;
+        while ((state = iterator.next()) != null) {
+            if (state != TraverseState.Leaving)
+                continue;
+            c = iterator.current();
+            if (TensorUtils.isZeroDueToSymmetry(c))
+                iterator.set(Complex.ZERO);
+        }
+        return iterator.result();
     }
 }

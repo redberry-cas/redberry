@@ -35,7 +35,11 @@ import java.util.*;
  */
 public final class ContractIndices implements Transformation {
 
-    public static final ContractIndices CONTRACT_INDICES = new ContractIndices();
+    public static final ContractIndices INSTANCE = new ContractIndices();
+
+    public static Tensor contract(Tensor t) {
+        return INSTANCE.transform(t);
+    }
 
     private ContractIndices() {
     }
@@ -47,6 +51,7 @@ public final class ContractIndices implements Transformation {
 
     //TODO possibly refactor using iteration guide
     private Tensor transform(Tensor tensor, MetricsChain chain) {
+        //TODO if tensor is symbolic return tensor
         if (tensor instanceof SimpleTensor) {
             tensor = chain.apply((SimpleTensor) tensor);
 
@@ -62,20 +67,13 @@ public final class ContractIndices implements Transformation {
                 builder.put(transform(tensor.get(i)));
             return builder.build();
         } else if (tensor instanceof Product) {
-            Product p = (Product) tensor;
-
-            ProductContent content = p.getContent();
-            //no tensors with indices in product
-            if (content.size() == 0)
-                return tensor;
-
             MetricsChainImpl tempContainer = new MetricsChainImpl(chain);
             List<Tensor> nonMetrics = new ArrayList<>();
             Tensor current, temp;
             int i;
             boolean applied = false;
-            for (i = content.size() - 1; i >= 0; --i) {
-                current = content.get(i);
+            for (i = tensor.size() - 1; i >= 0; --i) {
+                current = tensor.get(i);
                 if (Tensors.isKroneckerOrMetric(current))
                     applied = applied | (tempContainer.add(new MetricWrapper(current)));
                 else
@@ -93,9 +91,8 @@ public final class ContractIndices implements Transformation {
                 return tensor;
 
             ProductBuilder builder = new ProductBuilder();
-            builder.put(p.getIndexlessSubProduct());
             for (Tensor nonMetric : nonMetrics)
-                builder.put(transform(nonMetric, tempContainer));
+                builder.put(nonMetric);// builder.put(transform(nonMetric, tempContainer));
             for (MetricWrapper mk : tempContainer.container)
                 builder.put(mk.metric);
             return builder.build();
@@ -114,7 +111,6 @@ public final class ContractIndices implements Transformation {
                 data[i] = newTensor;
                 if (oldTensor != newTensor)
                     applied = true;
-
             }
             if (!applied)
                 return tensor;

@@ -177,6 +177,7 @@ public final class IndexMappings {
         map.put(TensorField.class, ProviderSimpleTensor.FACTORY_TENSORFIELD);
         map.put(Product.class, ProviderProduct.FACTORY);
         map.put(Sum.class, ProviderSum.FACTORY);
+        map.put(Expression.class, ProviderSum.FACTORY);
         map.put(Complex.class, ProviderComplex.FACTORY);
         map.put(Power.class, ProviderPower.INSTANCE);
 

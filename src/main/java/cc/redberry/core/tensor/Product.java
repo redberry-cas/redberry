@@ -230,6 +230,14 @@ public final class Product extends MultiTensor {
             return new Product(factor, indexlessData, new Tensor[0], ProductContent.EMPTY_INSTANCE, IndicesFactory.EMPTY_INDICES);
     }
 
+    public Tensor getDataSubProduct() {
+        if (data.length == 0)
+            return Complex.ONE;
+        if (data.length == 1)
+            return data[0];
+        return new Product(Complex.ONE, new Tensor[0], data, contentReference.get(), indices);
+    }
+
     private ProductContent calculateContent() {
         if (data.length == 0)
             return ProductContent.EMPTY_INSTANCE;
@@ -482,14 +490,16 @@ public final class Product extends MultiTensor {
 
     private static class ScaffoldWrapper implements Comparable<ScaffoldWrapper> {
 
-        public final int[] inds;
-        public final Tensor t;
-        public final TensorContraction tc;
+        final int[] inds;
+        final Tensor t;
+        final TensorContraction tc;
+        final int hashWithIndices;
 
         private ScaffoldWrapper(int[] inds, Tensor t, TensorContraction tc) {
             this.inds = inds;
             this.t = t;
             this.tc = tc;
+            hashWithIndices = hc(t, inds);
         }
 
         @Override
@@ -497,7 +507,7 @@ public final class Product extends MultiTensor {
             int r = tc.compareTo(o.tc);
             if (r != 0)
                 return r;
-            return Integer.compare(hc(t, inds), hc(o.t, inds));
+            return Integer.compare(hashWithIndices, o.hashWithIndices);
         }
     }
 }

@@ -23,9 +23,11 @@
 package cc.redberry.core.transformations;
 
 import cc.redberry.core.TAssert;
-import cc.redberry.core.context.CC;
+import cc.redberry.core.context.*;
 import cc.redberry.core.indexgenerator.IndexGenerator;
-import cc.redberry.core.indices.IndicesUtils;
+import cc.redberry.core.indices.*;
+import cc.redberry.core.performance.kv.*;
+import cc.redberry.core.tensor.Expression;
 import cc.redberry.core.tensor.ProductBuilder;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.tensor.Tensors;
@@ -48,7 +50,7 @@ public class ContractIndicesTest {
     }
 
     private static Tensor contract(Tensor tensor) {
-        return ContractIndices.CONTRACT_INDICES.transform(tensor);
+        return ContractIndices.INSTANCE.transform(tensor);
     }
 
     @Test
@@ -83,6 +85,13 @@ public class ContractIndicesTest {
     public void test05() {
         Tensor t = contract("g_mn*g^mn");
         Tensor e = parse("d^n_n");
+        TAssert.assertParity(t, e);
+    }
+
+    @Test
+    public void test051() {
+        Tensor t = contract("g_\\mu\\nu*g^\\mu\\nu");
+        Tensor e = parse("d^\\mu_\\mu");
         TAssert.assertParity(t, e);
     }
 
@@ -546,8 +555,11 @@ public class ContractIndicesTest {
     }
 
     @Test
-    public void testExpression1() {
-        Tensor t = parse("DELTA^{\\mu \\mu_9 }_{\\nu_9 } = -2*n_{\\alpha }*f^{\\mu_9 }_{\\epsilon }*g^{\\alpha \\epsilon }*d^{\\mu }_{\\nu_9 }");
-        System.out.println(contract(t));
+    public void test1() {
+        Tensor t = parse("1/48*(16+2*g^{\\mu \\nu }*g_{\\mu \\nu })");
+        Expression d = Tensors.parseExpression("d_\\mu^\\mu=4");
+        t = contract(t);
+        t = d.transform(t);
+        assertTrue(TensorUtils.compare(t, parse("1/2")));
     }
 }

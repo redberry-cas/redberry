@@ -89,10 +89,16 @@ public class TensorsTest {
     }
 
     @Test
-    public void testProductPower() {
+    public void testProductPower1() {
         Tensor t = Tensors.parse("Power[2*a,3]");
         Tensor expected = Tensors.parse("8*Power[a,3]");
         Assert.assertTrue(TensorUtils.compare(t, expected));
+    }
+
+    @Test
+    public void testPowerPower1() {
+        Tensor t = Tensors.parse("Power[a,4]*Power[Power[a,2],-2]");
+        Assert.assertTrue(TensorUtils.isOne(t));
     }
 
     private static Expression expression(String expression) {
@@ -140,7 +146,7 @@ public class TensorsTest {
         t = e1.transform(t);
         t = e2.transform(t);
         Expression kronecker = (Expression) Tensors.parse("d_\\mu^\\mu=4");
-        t = Expand.expand(t, new Transformation[]{ContractIndices.CONTRACT_INDICES, kronecker}, 4);
+        t = Expand.expand(t, new Transformation[]{ContractIndices.INSTANCE, kronecker}, 4);
         System.out.println(t);
     }
 }
