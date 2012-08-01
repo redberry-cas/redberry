@@ -44,13 +44,15 @@ public class Parser {
                 ParserExpression.INSTANCE
             });
     private final NodeParser[] nodeParsers;
-    
+
     public Parser(NodeParser... nodeParsers) {
         this.nodeParsers = nodeParsers;
         Arrays.sort(nodeParsers, NodeParserComparator.INSTANCE);
     }
-    
+
     public ParseNode parse(String expression) {
+        if (expression.isEmpty())
+            throw new IllegalArgumentException("Empty expression.");
         for (NodeParser nodeParser : nodeParsers) {
             ParseNode node = nodeParser.parseNode(expression.trim(), this);
             if (node != null)

@@ -31,6 +31,7 @@ import java.util.List;
  * @author Stanislav Poslavsky
  */
 abstract class ParserOperator implements NodeParser {
+
     private char operatorSymbol;
     private char operatorInverseSymbol;
 
@@ -58,6 +59,7 @@ abstract class ParserOperator implements NodeParser {
     }
 
     private enum Mode {
+
         Direct, Inverse
     };
 
@@ -65,8 +67,11 @@ abstract class ParserOperator implements NodeParser {
     public ParseNode parseNode(String expression, Parser parser) {
         if (!canParse(expression))
             return null;
+        expression = expression.replace("--", "+");
+        expression = expression.replace("++", "+");
+        expression = expression.replace("+-", "-");
+        expression = expression.replace("-+", "-");
         char[] expressionChars = expression.toCharArray();
-
         StringBuffer buffer = new StringBuffer();
         List<ParseNode> nodes = new ArrayList<>();
         int level = 0, indicesLevel = 0;
