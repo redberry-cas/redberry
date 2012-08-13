@@ -23,8 +23,21 @@
 package cc.redberry.core.tensor;
 
 /**
- * <p>Builder of a tensor. Objects of this type are produced by
- * {@link cc.redberry.core.tensor.Tensor#getBuilder()} method.</p>
+ * <p>All tensors in the system are reduced to the general form. For example:
+ * if there are several numerical factors in the product they will be
+ * multiplied and only one resulting numerical factor will be in the
+ * resulting product. To maintain this reduced form of expressions, specific
+ * infrastructure for tensor creation is provided. All creations of tensors
+ * are performed using this infrastructure and explicit tensor creation
+ * is architecturally forbidden for the user. Tensor creation infrastructure
+ * consists of two functionally redundant but optimized for different usage
+ * strategies interfaces: <code>TensorBuilder</code> and
+ * <code>TensorFactory</code>. In fact TensorBuilder and TensorFactory for one
+ * particular tensor will produce exactly the same result for the same input
+ * sub-tensor sequence.</p>
+ * <p>This class determines the common interface for tensor builders. Objects
+ * of this type are produced by {@link cc.redberry.core.tensor.Tensor#getBuilder()}
+ * method.</p>
  * <p>Main contract for the builder infrastructure could be expressed
  * in the following code:</p>
  * <pre><code>
@@ -57,8 +70,10 @@ package cc.redberry.core.tensor;
  * builder.put(Tensors.parse("1/2"));
  * builder.put(Tensors.parse("a+q"));
  * assert builder.build().equals(Tensors.parse("a+q")); //Resulting tensor class is Sum</code></pre>
- * <p>Fof explicit tensor creation use factory methods in {@link Tensors} class.</p>
- * <p>There is a mimic infrastructure for tensor creation in the system, see {@link TensorFactory} for more information.</p>
+ * <p>There is a mimic infrastructure for tensor creation in the system,
+ * see {@link TensorFactory} for more information.</p>
+ * <p>For general tensor creation use factory methods in {@link Tensors}
+ * class.</p>
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky

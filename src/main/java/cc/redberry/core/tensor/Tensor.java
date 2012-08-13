@@ -22,6 +22,7 @@ import cc.redberry.core.indices.Indices;
 import java.util.Iterator;
 
 //TODO rewrite or remove before 1.0
+
 /**
  * <p>Abstract class which defines common tensor methods and properties.</p>
  * <p/>
@@ -91,13 +92,11 @@ import java.util.Iterator;
  * {@link #clone() } and
  * {@link #iterator() } methods.
  *
+ * @author Dmitry Bolotin
+ * @author Stanislav Poslavsky
  * @see cc.redberry.core.indices.Indices
  * @see cc.redberry.core.context.ToStringMode
  * @see cc.redberry.core.context.Context
- *
- * @author Dmitry Bolotin
- * @author Stanislav Poslavsky
- *
  */
 public abstract class Tensor
         implements Comparable<Tensor>,
@@ -236,7 +235,17 @@ public abstract class Tensor
         return hash();
     }
 
+    /**
+     * Creates a builder for this tensor. See {@link TensorBuilder} for more information.
+     *
+     * @return builder for this tensor
+     */
     public abstract TensorBuilder getBuilder();
 
+    /**
+     * Returns a factory for this tensor. See {@link TensorFactory} for more information.
+     *
+     * @return builder for this tensor
+     */
     public abstract TensorFactory getFactory();
 }
