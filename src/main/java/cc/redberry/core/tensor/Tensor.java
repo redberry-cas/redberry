@@ -21,6 +21,7 @@ import cc.redberry.core.indices.Indices;
 
 import java.util.Iterator;
 
+//TODO rewrite or remove before 1.0
 /**
  * <p>Abstract class which defines common tensor methods and properties.</p>
  * <p/>
@@ -90,52 +91,44 @@ import java.util.Iterator;
  * {@link #clone() } and
  * {@link #iterator() } methods.
  *
- * @author Dmitry Bolotin
- * @author Stanislav Poslavsky
  * @see cc.redberry.core.indices.Indices
- * @see MultiTensor
- * @see Observer
- * @see java.util.Iterator
- * @see TensorIterator
  * @see cc.redberry.core.context.ToStringMode
  * @see cc.redberry.core.context.Context
+ *
+ * @author Dmitry Bolotin
+ * @author Stanislav Poslavsky
+ *
  */
 public abstract class Tensor
         implements Comparable<Tensor>,
         Iterable<Tensor> {
 
     /**
-     * This method was make abstract to bind all inheritors have their hash code
-     * function.
-     * <code>Object</code> method <strong><code>hashCode()</code> </strong>
-     * simply returns the result of this method. Always try to make unique hash
-     * function when implementing this method. For examples see implementation
-     * in existing inheritors.
+     * <p>This method was added to the Tensor interface to obligate all tensors to
+     * implement custom hash codes. This hash code should reflects only tensor structure
+     * whatever the particular indices are.</p>
+     * <p>There are other ways to calculate hash code for Tensor object (see
+     * {@link cc.redberry.core.utils.TensorHashCalculator}).</p>
      *
      * @return hash code of this tensor
-     * @see MultiTensor#hash()
-     * @see SimpleTensor#hash()
      */
     protected abstract int hash();
 
     /**
-     * Returns
-     * <code>Indices</code> of this
-     * <code>Tensor</code>
+     * <p>Returns indices of this tensor. For more information see {@link cc.redberry.core.indices.Indices}.</p>
      *
      * @return indices of this tensor
-     * @see cc.redberry.core.indices.Indices
      */
     public abstract Indices getIndices();
 
     /**
      * <p>Returns iterator over sub-tensors of current tensor (eg. summnads of sum, multipliers of
      * product, etc..).</p>
-     * <p/>
      * <p>For iteration through whole tensor tree use: {@link cc.redberry.core.tensor.iterator.TreeTraverseIterator}
-     * or implementations of {@link cc.redberry.core.tensor.iterator.TreeIteratorAbstract} abstract class.</p>
+     * or {@link cc.redberry.core.tensor.iterator.TensorFirstIterator} and
+     * {@link cc.redberry.core.tensor.iterator.TensorLastIterator}.</p>
      *
-     * @return iterator over subtensors
+     * @return iterator over sub-tensors
      */
     @Override
     public Iterator<Tensor> iterator() {
@@ -143,7 +136,7 @@ public abstract class Tensor
     }
 
     /**
-     * <p>Returns i-th sub-tensor of this tensor (eg. summnad of sum, argument of tensor field etc...)</p>
+     * <p>Returns i-th sub-tensor of this tensor (eg. summand of sum, argument of tensor field, etc...)</p>
      *
      * @param i index of sub-tensor
      * @return i-th subtensor
@@ -158,7 +151,12 @@ public abstract class Tensor
     public abstract int size();
 
     /**
-     * <p>Returns new tensor instance with i-th sub-tensor replaced by provided tensor.</p>
+     * <p>Returns new tensor instance with i-th sub-tensor replaced by provided tensor.
+     * <p>Better tools for tensors manipulations are tree iterators. See:
+     * {@link cc.redberry.core.tensor.iterator.TensorFirstIterator},
+     * {@link cc.redberry.core.tensor.iterator.TensorLastIterator} and
+     * {@link cc.redberry.core.tensor.iterator.TreeTraverseIterator}.</p>
+     * </p>
      *
      * @param i      index of sub-tensor to be replaced
      * @param tensor tensor to replace i-th sub-tensor
@@ -171,11 +169,11 @@ public abstract class Tensor
         if (tensor == null)
             throw new NullPointerException();
         TensorBuilder builder = getBuilder();
-        for (int i = 0; i < size; ++i)
-            if (i == i)
+        for (int j = 0; j < size; ++j)
+            if (j == i)
                 builder.put(tensor);
             else
-                builder.put(get(i));
+                builder.put(get(j));
         return builder.build();
     }
 
