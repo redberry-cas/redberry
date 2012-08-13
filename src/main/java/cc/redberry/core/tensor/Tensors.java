@@ -27,28 +27,52 @@ import cc.redberry.core.context.CC;
 import cc.redberry.core.context.NameDescriptor;
 import cc.redberry.core.indices.*;
 import cc.redberry.core.number.Complex;
-import cc.redberry.core.parser.*;
+import cc.redberry.core.parser.ParseManager;
+import cc.redberry.core.parser.ParseNodeTransformer;
 import cc.redberry.core.tensor.functions.*;
 import cc.redberry.core.transformations.ApplyIndexMapping;
 import cc.redberry.core.transformations.Expand;
 import cc.redberry.core.utils.TensorUtils;
-import java.util.*;
+
 import java.util.HashSet;
 import java.util.Set;
 
 /**
+ * <p>Factory methods to create any tensor are collected in this class. Using methods
+ * provided in this class is preferable way co create tensors.</p>
+ *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @see TensorFactory
+ * @see TensorBuilder
  */
 public final class Tensors {
 
     private Tensors() {
     }
 
+    // ==========================  Factory Methods ============================
+
+    /**
+     * Returns tensor in the integer power. Common result is an object of class Power,
+     * but for some input arguments result could have different type.
+     *
+     * @param argument base
+     * @param power    power
+     * @return result of argument exponentiation
+     */
     public static Tensor pow(Tensor argument, int power) {
         return pow(argument, new Complex(power));
     }
 
+    /**
+     * Returns tensor in the scalar power. Common result is an object of class Power,
+     * but for some input arguments result could have different type.
+     *
+     * @param argument base
+     * @param power    power
+     * @return result of argument exponentiation
+     */
     public static Tensor pow(Tensor argument, Tensor power) {
         PowerBuilder pb = new PowerBuilder();
         pb.put(argument);
@@ -56,10 +80,28 @@ public final class Tensors {
         return pb.build();
     }
 
+    /**
+     * <p>Returns result of multiplication of several tensors. Einstein notation assumed.
+     * Common result is an object of class Product, but for some input arguments result
+     * could have different type.</p>
+     * <p>If there is a chance that some factors have conflicting (same name) dummy indices
+     * use {@link #multiplyAndRenameConflictingDummies(Tensor...)} instead.</p>
+     *
+     * @param factors array of factors to be multiplied
+     * @return result of multiplication
+     */
     public static Tensor multiply(final Tensor... factors) {
         return ProductFactory.FACTORY.create(factors);
     }
 
+    /**
+     * <p>Returns result of multiplication of several tensors taking care about all conflicting
+     * dummy indices in the factors. Einstein notation assumed. Common result is an object
+     * of class Product, but for some input arguments result could have different type.</p>
+     *
+     * @param factors array of factors to be multiplied
+     * @return result of multiplication
+     */
     public static Tensor multiplyAndRenameConflictingDummies(Tensor... factors) {
         Tensor t = ProductFactory.FACTORY.create(factors);
         if (!(t instanceof Product))
@@ -107,17 +149,39 @@ public final class Tensors {
         return p;
     }
 
+    /**
+     * Returns result of summation of several tensors. Common result is an object of class Sum,
+     * but for some input arguments result could have different type.
+     *
+     * @param tensors array of summands
+     * @return result of summation
+     */
     public static Tensor sum(Tensor... tensors) {
         return SumFactory.FACTORY.create(tensors);
     }
 
+    /**
+     * Returns new simple tensor with specified string name and indices.
+     *
+     * @param name    string name of the tensor
+     * @param indices indices
+     * @return new instance of {@link SimpleTensor} object
+     */
     public static SimpleTensor simpleTensor(String name, SimpleIndices indices) {
         NameDescriptor descriptor = CC.getNameManager().mapNameDescriptor(name, indices.getIndicesTypeStructure());
         return new SimpleTensor(descriptor.getId(),
-                                UnsafeIndicesFactory.createOfTensor(descriptor.getSymmetries(),
-                                                                    indices));
+                UnsafeIndicesFactory.createOfTensor(descriptor.getSymmetries(),
+                        indices));
     }
 
+    /**
+     * Returns new simple tensor with specified int name (see {@link cc.redberry.core.context.NameManager}
+     * for details) and indices.
+     *
+     * @param name    int name of the tensor
+     * @param indices indices
+     * @return new instance of {@link SimpleTensor} object
+     */
     public static SimpleTensor simpleTensor(int name, SimpleIndices indices) {
         NameDescriptor descriptor = CC.getNameDescriptor(name);
         if (descriptor == null)
@@ -125,10 +189,19 @@ public final class Tensors {
         if (!descriptor.getIndicesTypeStructure().isStructureOf(indices))
             throw new IllegalArgumentException("Specified indices are not indices of specified tensor.");
         return new SimpleTensor(name,
-                                UnsafeIndicesFactory.createOfTensor(descriptor.getSymmetries(),
-                                                                    indices));
+                UnsafeIndicesFactory.createOfTensor(descriptor.getSymmetries(),
+                        indices));
     }
 
+    /**
+     * Returns new tensor field with specified string name, indices and arguments list. Free indices of
+     * arguments assumed as arguments indices bindings of this field bindings.
+     *
+     * @param name      int name of the field
+     * @param indices   indices
+     * @param arguments arguments list
+     * @return new instance of {@link TensorField} object
+     */
     public static TensorField field(String name, SimpleIndices indices, Tensor[] arguments) {
         SimpleIndices[] argIndices = new SimpleIndices[arguments.length];
         for (int i = 0; i < argIndices.length; ++i)
@@ -136,6 +209,16 @@ public final class Tensors {
         return field(name, indices, argIndices, arguments);
     }
 
+    /**
+     * Returns new tensor field with specified string name, indices, arguments list and explicit argument
+     * indices bindings.
+     *
+     * @param name       int name of the field
+     * @param indices    indices
+     * @param argIndices argument indices bindings
+     * @param arguments  arguments list
+     * @return new instance of {@link TensorField} object
+     */
     public static TensorField field(String name, SimpleIndices indices, SimpleIndices[] argIndices, Tensor[] arguments) {
         if (argIndices.length != arguments.length)
             throw new IllegalArgumentException("Argument indices array and arguments array have different length.");
@@ -151,10 +234,20 @@ public final class Tensors {
             structures[i + 1] = argIndices[i].getIndicesTypeStructure();
         NameDescriptor descriptor = CC.getNameManager().mapNameDescriptor(name, structures);
         return new TensorField(descriptor.getId(),
-                               UnsafeIndicesFactory.createOfTensor(descriptor.getSymmetries(), indices),
-                               arguments, argIndices);
+                UnsafeIndicesFactory.createOfTensor(descriptor.getSymmetries(), indices),
+                arguments, argIndices);
     }
 
+    /**
+     * Returns new tensor field with specified int name (see {@link cc.redberry.core.context.NameManager}
+     * for details), indices, arguments list and explicit argument indices bindings.
+     *
+     * @param name       int name of the field
+     * @param indices    indices
+     * @param argIndices argument indices bindings
+     * @param arguments  arguments list
+     * @return new instance of {@link TensorField} object
+     */
     public static TensorField field(int name, SimpleIndices indices, SimpleIndices[] argIndices, Tensor[] arguments) {
         if (argIndices.length != arguments.length)
             throw new IllegalArgumentException("Argument indices array and arguments array have different length.");
@@ -176,10 +269,20 @@ public final class Tensors {
                 throw new IllegalArgumentException("Arguments indices are inconsistent with arguments.");
         }
         return new TensorField(name,
-                               UnsafeIndicesFactory.createOfTensor(descriptor.getSymmetries(), indices),
-                               arguments, argIndices);
+                UnsafeIndicesFactory.createOfTensor(descriptor.getSymmetries(), indices),
+                arguments, argIndices);
     }
 
+    /**
+     * Returns new tensor field with specified int name (see {@link cc.redberry.core.context.NameManager}
+     * for details), indices and arguments list. Free indices of arguments assumed as arguments indices
+     * bindings of this field bindings.
+     *
+     * @param name      int name of the field
+     * @param indices   indices
+     * @param arguments arguments list
+     * @return new instance of {@link TensorField} object
+     */
     public static TensorField field(int name, SimpleIndices indices, Tensor[] arguments) {
         if (arguments.length == 0)
             throw new IllegalArgumentException("No arguments in field.");
@@ -192,64 +295,127 @@ public final class Tensors {
         for (int i = 0; i < arguments.length; ++i)
             argIndices[i] = IndicesFactory.createSimple(null, arguments[i].getIndices().getFreeIndices());
         return new TensorField(name,
-                               UnsafeIndicesFactory.createOfTensor(descriptor.getSymmetries(), indices),
-                               arguments, argIndices);
+                UnsafeIndicesFactory.createOfTensor(descriptor.getSymmetries(), indices),
+                arguments, argIndices);
     }
 
-    public static TensorField setIndicesToField(TensorField field, SimpleIndices newIndices) {
-        NameDescriptor descriptor = CC.getNameDescriptor(field.name);
-        if (!descriptor.getIndicesTypeStructure().isStructureOf(newIndices))
-            throw new IllegalArgumentException("Specified indices are not indices of specified tensor.");
-        return new TensorField(field.name, newIndices, field.args, field.argIndices);
-    }
-
-    public static SimpleTensor setIndicesToSimpleTensor(SimpleTensor simpleTensor, SimpleIndices newIndices) {
-        NameDescriptor descriptor = CC.getNameDescriptor(simpleTensor.name);
-        if (!descriptor.getIndicesTypeStructure().isStructureOf(newIndices))
-            throw new IllegalArgumentException("Specified indices are not indices of specified tensor.");
-        return new SimpleTensor(simpleTensor.name, UnsafeIndicesFactory.createOfTensor(descriptor.getSymmetries(), newIndices));
-    }
-
+    /**
+     * Creates an expression object from two tensors.
+     *
+     * @param left  left part of expression
+     * @param right right part of expression
+     * @return new object of type {@link Expression}
+     */
     public static Expression expression(Tensor left, Tensor right) {
         return ExpressionFactory.FACTORY.create(left, right);
     }
 
+    /**
+     * Creates a sinus object from scalar argument. Common result is an object of class Sin,
+     * but for some input argument result could have different type.
+     *
+     * @param argument scalar argument of sinus
+     * @return sinus of argument
+     */
     public static Tensor sin(Tensor argument) {
         return Sin.SinFactory.FACTORY.create(argument);
     }
 
+    /**
+     * Creates a cosine object from scalar argument. Common result is an object of class Cos,
+     * but for some input argument result could have different type.
+     *
+     * @param argument scalar argument of cosine
+     * @return cosine of argument
+     */
     public static Tensor cos(Tensor argument) {
         return Cos.CosFactory.FACTORY.create(argument);
     }
 
+    /**
+     * Creates a tangent object from scalar argument. Common result is an object of class Tan,
+     * but for some input argument result could have different type.
+     *
+     * @param argument scalar argument of tangent
+     * @return tangent of argument
+     */
     public static Tensor tan(Tensor argument) {
         return Tan.TanFactory.FACTORY.create(argument);
     }
 
+    /**
+     * Creates a cotangent object from scalar argument. Common result is an object of class Cot,
+     * but for some input argument result could have different type.
+     *
+     * @param argument scalar argument of cotangent
+     * @return cotangent of argument
+     */
     public static Tensor cot(Tensor argument) {
         return Cot.CotFactory.FACTORY.create(argument);
     }
 
+    /**
+     * Creates a arcsinus object from scalar argument. Common result is an object of class ArcSin,
+     * but for some input argument result could have different type.
+     *
+     * @param argument scalar argument of arcsinus
+     * @return arcsinus of argument
+     */
     public static Tensor arcsin(Tensor argument) {
         return ArcSin.ArcSinFactory.FACTORY.create(argument);
     }
 
+    /**
+     * Creates a arccosine object from scalar argument. Common result is an object of class ArcCos,
+     * but for some input argument result could have different type.
+     *
+     * @param argument scalar argument of arccosine
+     * @return arccosine of argument
+     */
     public static Tensor arccos(Tensor argument) {
         return ArcCos.ArcCosFactory.FACTORY.create(argument);
     }
 
+    /**
+     * Creates a arctangent object from scalar argument. Common result is an object of class ArcTan,
+     * but for some input argument result could have different type.
+     *
+     * @param argument scalar argument of arctangent
+     * @return arctangent of argument
+     */
     public static Tensor arctan(Tensor argument) {
         return ArcTan.ArcTanFactory.FACTORY.create(argument);
     }
 
+    /**
+     * Creates a arcotangent object from scalar argument. Common result is an object of class ArcCot,
+     * but for some input argument result could have different type.
+     *
+     * @param argument scalar argument of arccotangent
+     * @return arcotangent of argument
+     */
     public static Tensor arccot(Tensor argument) {
         return ArcCot.ArcCotFactory.FACTORY.create(argument);
     }
 
+    /**
+     * Creates a natural logarithm object from scalar argument. Common result is an object of class Log,
+     * but for some input argument result could have different type.
+     *
+     * @param argument scalar argument of logarithm
+     * @return natural logarithm of argument
+     */
     public static Tensor log(Tensor argument) {
         return Log.LogFactory.FACTORY.create(argument);
     }
 
+    /**
+     * Creates a exponent object from scalar argument. Common result is an object of class Exp,
+     * but for some input argument result could have different type. See {@link #pow(Tensor, Tensor)}.
+     *
+     * @param argument scalar argument of exponent
+     * @return exponent of argument
+     */
     public static Tensor exp(Tensor argument) {
         return Exp.ExpFactory.FACTORY.create(argument);
     }
@@ -345,5 +511,19 @@ public final class Tensors {
         for (int i = newSumData.length - 1; i >= 0; --i)
             newSumData[i] = Expand.expand(multiply(factor, sum.get(i)));
         return new Sum(newSumData, IndicesFactory.createSorted(newSumData[0].getIndices().getFreeIndices()));
+    }
+
+    public static TensorField setIndicesToField(TensorField field, SimpleIndices newIndices) {
+        NameDescriptor descriptor = CC.getNameDescriptor(field.name);
+        if (!descriptor.getIndicesTypeStructure().isStructureOf(newIndices))
+            throw new IllegalArgumentException("Specified indices are not indices of specified tensor.");
+        return new TensorField(field.name, newIndices, field.args, field.argIndices);
+    }
+
+    public static SimpleTensor setIndicesToSimpleTensor(SimpleTensor simpleTensor, SimpleIndices newIndices) {
+        NameDescriptor descriptor = CC.getNameDescriptor(simpleTensor.name);
+        if (!descriptor.getIndicesTypeStructure().isStructureOf(newIndices))
+            throw new IllegalArgumentException("Specified indices are not indices of specified tensor.");
+        return new SimpleTensor(simpleTensor.name, UnsafeIndicesFactory.createOfTensor(descriptor.getSymmetries(), newIndices));
     }
 }
