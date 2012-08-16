@@ -28,16 +28,16 @@ import cc.redberry.core.utils.IntArray;
 
 /**
  * This interface states common tensor indices functionality. For specification
- * and more information see method summary and implementations. Indices objects
- * are considered to be immutable, so there is no way to change indices. <p>For
- * individual index structure see <link>IndicesUtils</link>.</p>
- *
- * @see IndicesBuilder
- * @see IndexMapping
- * @see IndicesUtils
+ * and more information see methods summary and implementations. Indices objects
+ * are considered to be immutable, so there is no way to change the indices
+ * object. <p>For individual index structure (bit masks in the int representation)
+ * see <link>IndicesUtils</link>.</p>
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @see IndicesBuilder
+ * @see IndexMapping
+ * @see IndicesUtils
  */
 public interface Indices {
 
@@ -46,7 +46,6 @@ public interface Indices {
      * indices this method returns simple wrapper of generic integer array.
      *
      * @return IntArray of upper case indices
-     *
      * @see IntArray
      */
     IntArray getUpper();
@@ -56,7 +55,6 @@ public interface Indices {
      * indices this method returns simple wrapper of generic integer array.
      *
      * @return IntArray of lower case indices
-     *
      * @see IntArray
      */
     IntArray getLower();
@@ -81,10 +79,8 @@ public interface Indices {
      * <code>Indices</code>.
      *
      * @param position position of the index to return
-     *
      * @return the index at the specified position in this
-     * <code>Indices</code>
-     *
+     *         <code>Indices</code>
      * @throws IndexOutOfBoundsException - if the index is out of range (index <
      *                                   0 || index >= size())
      */
@@ -130,7 +126,6 @@ public interface Indices {
      * true, but for _{ab}^c and ^c_{ak}, of course it returns false.
      *
      * @param indices indices to be compared
-     *
      * @return true if the set of specified indices equals to this one
      */
     boolean equalsRegardlessOrder(Indices indices);
@@ -147,9 +142,7 @@ public interface Indices {
      * returns true if mapping changed indices and false if not.
      *
      * @param mapping specified {@code IndexeMapping}
-     *
      * @return true if mapping changed indices and false if not
-     *
      * @see IndexMapping
      */
     Indices applyIndexMapping(IndexMapping mapping);
@@ -171,9 +164,7 @@ public interface Indices {
      * <code>_{&alpha &beta}^{&gamma &delta}</code>
      *
      * @param mode symbols printing mode
-     *
      * @return string representation due to mode
-     *
      * @see ToStringMode
      */
     String toString(ToStringMode mode);

@@ -454,6 +454,12 @@ public final class Tensors {
         return CC.current().isKroneckerOrMetric(t);
     }
 
+    /**
+     * Parses a string to tensor.
+     *
+     * @param expression string to be parsed
+     * @return result of parsing
+     */
     public static Tensor parse(String expression) {
         return CC.current().getParseManager().parse(expression);
     }
@@ -463,20 +469,33 @@ public final class Tensors {
         return ParseManager.parse(expression, preprocessors);
     }
 
+    /**
+     * Parses a string to tensor and casts it to SimpleTensor.
+     *
+     * @param expression string to be parsed
+     * @return simple tensor
+     */
     public static SimpleTensor parseSimple(String expression) {
-        Tensor t = CC.current().getParseManager().parse(expression);
+        Tensor t = parse(expression);
         if (!(t instanceof SimpleTensor))
             throw new IllegalArgumentException("Input tensor is not SimpleTensor.");
         return (SimpleTensor) t;
     }
 
+    /**
+     * Parses a string to tensor and casts it to Expression.
+     *
+     * @param expression expression to be parsed
+     * @return expression object
+     */
     public static Expression parseExpression(String expression) {
-        Tensor t = CC.current().getParseManager().parse(expression);
+        Tensor t = parse(expression);
         if (!(t instanceof Expression))
             throw new IllegalArgumentException("Input tensor is not Expression.");
         return (Expression) t;
     }
 
+    //TODO ???
     public static void addSymmetry(String tensor, IndexType type, boolean sign, int... symmetry) {
         parseSimple(tensor).getIndices().getSymmetries().add(type.getType(), new Symmetry(symmetry, sign));
     }
@@ -485,12 +504,19 @@ public final class Tensors {
         tensor.getIndices().getSymmetries().add(type.getType(), new Symmetry(symmetry, sign));
     }
 
+    /**
+     * Multiplies a tensor by minus one.
+     *
+     * @param tensor tensor to be negotiated
+     * @return tensor of opposite sign
+     */
     public static Tensor negate(Tensor tensor) {
         if (tensor instanceof Complex)
             return ((Complex) tensor).negate();
         return multiply(Complex.MINUSE_ONE, tensor);
     }
 
+    //TODO discuss with Stas (move multiplySumElementsOnFactor and multiplySumElementsOnFactorAndExpandScalars to other class)
     public static Tensor multiplySumElementsOnFactor(Sum sum, Tensor factor) {
         if (TensorUtils.isZero(factor))
             return Complex.ZERO;
@@ -513,6 +539,7 @@ public final class Tensors {
         return new Sum(newSumData, IndicesFactory.createSorted(newSumData[0].getIndices().getFreeIndices()));
     }
 
+    //TODO discuss with Stas (move setIndicesToField and setIndicesToField to other class, may be into SimpelTensor class) ??
     public static TensorField setIndicesToField(TensorField field, SimpleIndices newIndices) {
         NameDescriptor descriptor = CC.getNameDescriptor(field.name);
         if (!descriptor.getIndicesTypeStructure().isStructureOf(newIndices))
@@ -520,7 +547,7 @@ public final class Tensors {
         return new TensorField(field.name, newIndices, field.args, field.argIndices);
     }
 
-    public static SimpleTensor setIndicesToSimpleTensor(SimpleTensor simpleTensor, SimpleIndices newIndices) {
+    public static SimpleTensor setIndicesToField(SimpleTensor simpleTensor, SimpleIndices newIndices) {
         NameDescriptor descriptor = CC.getNameDescriptor(simpleTensor.name);
         if (!descriptor.getIndicesTypeStructure().isStructureOf(newIndices))
             throw new IllegalArgumentException("Specified indices are not indices of specified tensor.");
