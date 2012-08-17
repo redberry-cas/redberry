@@ -27,32 +27,66 @@ import cc.redberry.core.context.ToStringMode;
 import cc.redberry.core.math.MathUtils;
 
 /**
- * This class provides static methods to work with individual indices. <h5>Index
+ * This class provides static methods to work with individual index. <h5>Index
  * representation</h5> All information about single index is enclosed in 32-bit
  * word (int). The following bit structure is used: <p style='font-family: monospace;font-length:13px;'>
  * <pre> Index: stttttttXXXXXXXXcccccccccccccccc  -  per-bit representetion
- *      |       |       |       |      |
- *      31      23      15      7      0  -  bit index<br>
+        |       |       |       |      |
+ *        31      23      15      7      0  -  bit index<br>
  * s - one bit representing index state (0 - lower; 1 - upper)
  * t - 7-bits representing index type (lower latin, upper latin, etc...) [for concrete codes see below]
  * c - code of concrete index (a - 0, b - 1, c - 2, etc...) [index name]
  * X - reserved (always 0)</pre></p> <h5>Index types</h5> By
  * default there are four different index types:
- * <p style='font-family:monospace;font-length:13px;'>
- * <b><pre>   HexCode   BitCode    Description</pre></b>
- * <pre>
- * 0x00      00000000   Latin lower case symbols
- * 0x01      00000001   Latin upper case symbols
- * 0x02      00000010   Greek lower case symbols
- * 0x03      00000011   Greek upper case symbols</pre></p>
+  <TABLE CELLSPACING="0" CELLPADDING="5">
+  <CAPTION>  </CAPTION>
+  <TH> HexCode </TH> 
+  <TH> BitCode </TH>
+  <TH> Description </TH>
+  <TR>
+    <TD> 0x00 </TD> 
+    <TD> 00000000 </TD>
+    <TD> Latin lower case symbols </TD>
+  </TR>
+  <TR>
+    <TD> 0x01 </TD> 
+    <TD> 00000001 </TD>
+    <TD> Latin upper case symbols </TD>
+  </TR>
+  <TR>
+    <TD> 0x02 </TD> 
+    <TD> 00000010 </TD>
+    <TD> Greek lower case symbols </TD>
+  </TR>
+  <TR>
+    <TD> 0x03 </TD> 
+    <TD> 00000011 </TD>
+    <TD> Greek upper case symbols </TD>
+  </TR>
+ </TABLE>
  * <h5>Examples</h5>
  * <p>Here are some examples of how concrete indices are presented in Redberry.
- * <p style='font-family:monospace;font-length:13px;'><b><pre>   Index        Hex </pre></b>
- * <pre>   _a           0x00000000
- * _C           0x01000002
- * ^{\beta}     0x82000001
- * ^{\Chi}      0x83000015
- * </pre></p></p>
+  <TABLE CELLSPACING="0" CELLPADDING="5">
+  <CAPTION>  </CAPTION>
+  <TH> Index </TH> 
+  <TH> Hex </TH>
+  <TR>
+    <TD> _a </TD> 
+    <TD> 0x00000000 </TD>    
+  </TR>
+  <TR>
+    <TD> _C </TD> 
+    <TD> 0x01000002 </TD>
+  </TR>
+  <TR>
+    <TD> ^{\beta} </TD> 
+    <TD> 0x82000001 </TD>
+  </TR>
+  <TR>
+    <TD> ^{\Chi} </TD> 
+    <TD> 0x83000015 </TD>
+   </TR>
+ </TABLE> 
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky

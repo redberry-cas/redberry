@@ -86,15 +86,15 @@
     </developers>
 
     <scm>
-        <connection>scm:hg:http://bitbucket.org/redberry/redberry-1.0</connection>
+        <connection>scm:hg:http://bitbucket.org/redberry/redberry</connection>
         <!-- Releases are made manually -->
         <!-- <developerConnection>scm:hg:https://bitbucket.org/redberry/redberry-1.0</developerConnection> -->
-        <url>https://bitbucket.org/redberry/redberry-1.0/src</url>
+        <url>https://bitbucket.org/redberry/redberry/src</url>
     </scm>
 
     <issueManagement>
         <system>Bitbucket</system>
-        <url>https://bitbucket.org/redberry/redberry-1.0/issues</url>
+        <url>https://bitbucket.org/redberry/redberry/issues</url>
     </issueManagement>
 
     <build>

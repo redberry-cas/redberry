@@ -35,6 +35,9 @@ public class IndicesFactory {
      * Singleton object for empty indices.
      */
     public static final Indices EMPTY_INDICES = EmptyIndices.EMPTY_INDICES_INSTANCE;
+    /**
+     * Singleton object for empty simple indices.
+     */
     public static final SimpleIndices EMPTY_SIMPLE_INDICES = EmptySimpleIndices.EMPTY_SIMPLE_INDICES_INSTANCE;
 
     public static SimpleIndices createSimple(IndicesSymmetries symmetries, int... data) {

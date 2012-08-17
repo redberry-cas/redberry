@@ -10,7 +10,7 @@
  example code please visit our site:
  
    homepage:   http://redberry.cc/
-   repository:   https://bitbucket.org/redberry/redberry-1.0
+   repository:   https://bitbucket.org/redberry/redberry
 
  This program is a free software: you can redistribute it and/or
  modify it under the terms of the GNU General Public License v3 as
@@ -37,9 +37,10 @@
  <dependency>
  	<groupId>cc.redberry</groupId>
  	<artifactId>core</artifactId>
- 	<version>0.9.9</version>
+ 	<version>X.X.X</version>
  </dependency>
 
+Here X.X.X - Redberry version you want to use.  
 
  Building Redberry from the source
 -------------------------------------------
@@ -48,12 +49,11 @@
  (http://maven.apache.org/).
  To clone latest version of Redberry repository type in this command:
  
-     hg clone https://bitbucket.org/redberry/redberry-1.0
+     hg clone https://bitbucket.org/redberry/redberry
 	 
  Or you can download a package with source code from our bitbucket
  page.
  
- To build Redberry from source Maven 2.2 or later required (http://maven.apache.org/).
  Use this command to build cc.redberry with all dependencies:
  
      mvn install

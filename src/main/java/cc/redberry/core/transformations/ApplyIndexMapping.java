@@ -192,7 +192,7 @@ public final class ApplyIndexMapping implements Transformation {
                 if (simpleTensor instanceof TensorField)
                     iterator.set(Tensors.setIndicesToField((TensorField) simpleTensor, newIndices));
                 else
-                    iterator.set(Tensors.simpleTensor(simpleTensor.getName(), newIndices));
+                    iterator.set(Tensors.setIndicesToSimpleTensor(simpleTensor, newIndices));
         }
         return iterator.result();
     }

@@ -22,6 +22,8 @@
  */
 package cc.redberry.core.tensor;
 
+import cc.redberry.core.utils.*;
+
 /**
  * <p>All tensors in the system are reduced to the general form. For example:
  * if there are several numerical factors in the product they will be
@@ -37,7 +39,7 @@ package cc.redberry.core.tensor;
  * sub-tensor sequence.</p>
  * <p>This class determines the common interface for tensor builders. Objects
  * of this type are produced by {@link cc.redberry.core.tensor.Tensor#getBuilder()}
- * method.</p>
+ * method, or can be directly created using constructors.</p>
  * <p>Main contract for the builder infrastructure could be expressed
  * in the following code:</p>
  * <pre><code>
@@ -45,7 +47,7 @@ package cc.redberry.core.tensor;
  * TensorBuilder builder = tensor.getBuilder();
  * for(Tensor t: tensor)
  *     builder.put(t);
- * assert builder.build().equals(tensor);</code></pre>
+ * assert TensorUtils.compare(builder.build(),tensor);</code></pre>
  * <p>So, using a builder of any tensor you can rebuild it into the
  * equivalent tensor.</p>
  * <p>The main goal of the builders infrastructure is reduction of all
@@ -56,12 +58,11 @@ package cc.redberry.core.tensor;
  * original one. Here are several examples:</p>
  * <p>Example 1</p>
  * <pre><code>
- * Tensor tensor = Tensors.parse("b*a");
- * TensorBuilder builder = tensor.getBuilder(); //builder of product
+ * TensorBuilder builder = new ProductBuilder(); //builder of product
  * builder.put(Tensors.parse("2"));
  * builder.put(Tensors.parse("3"));
  * builder.put(Tensors.parse("a"));
- * assert builder.build().equals(Tensors.parse("6*a"));</code></pre>
+ * assert TensorUtils.equals(builder.build(),Tensors.parse("6*a"));</code></pre>
  * <p>Example 2</p>
  * <pre><code>
  * Tensor tensor = Tensors.parse("b*a");
@@ -69,7 +70,7 @@ package cc.redberry.core.tensor;
  * builder.put(Tensors.parse("2"));
  * builder.put(Tensors.parse("1/2"));
  * builder.put(Tensors.parse("a+q"));
- * assert builder.build().equals(Tensors.parse("a+q")); //Resulting tensor class is Sum</code></pre>
+ * assert TensorUtils.equals(builder.build(),Tensors.parse("a+q")); //Resulting tensor class is Sum</code></pre>
  * <p>There is a mimic infrastructure for tensor creation in the system,
  * see {@link TensorFactory} for more information.</p>
  * <p>For general tensor creation use factory methods in {@link Tensors}
@@ -78,6 +79,8 @@ package cc.redberry.core.tensor;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  * @see cc.redberry.core.tensor.Tensor#getBuilder()
+ * @see TensorUtils#compare(cc.redberry.core.tensor.Tensor, cc.redberry.core.tensor.Tensor) 
+ * @see TensorUtils#equals(cc.redberry.core.tensor.Tensor, cc.redberry.core.tensor.Tensor) 
  * @see <a href="http://en.wikipedia.org/wiki/Builder_pattern">http://en.wikipedia.org/wiki/Builder_pattern</a>
  */
 public interface TensorBuilder {
