@@ -201,7 +201,7 @@ public final class Expand implements Transformation {
                 if (simpleTensor instanceof TensorField)
                     iterator.set(Tensors.setIndicesToField((TensorField) simpleTensor, newIndices));
                 else
-                    iterator.set(Tensors.setIndicesToSimpleTensor(simpleTensor, newIndices));
+                    iterator.set(Tensors.simpleTensor(simpleTensor.getName(), newIndices));
         }
         return iterator.result();
     }
