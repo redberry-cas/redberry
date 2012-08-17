@@ -23,11 +23,17 @@
 package cc.redberry.core.indices;
 
 /**
+ * Factory methods for indices creation are collected in this class.
+ *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
+//TODO discuss with Stas. Final revision of indices types....
 public class IndicesFactory {
 
+    /**
+     * Singleton object for empty indices.
+     */
     public static final Indices EMPTY_INDICES = EmptyIndices.EMPTY_INDICES_INSTANCE;
     public static final SimpleIndices EMPTY_SIMPLE_INDICES = EmptySimpleIndices.EMPTY_SIMPLE_INDICES_INSTANCE;
 

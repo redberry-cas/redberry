@@ -87,9 +87,8 @@ final class EmptySimpleIndices extends EmptyIndices implements SimpleIndices {
     /**
      * Do nothing.
      *
-     * @return false
-     *
      * @param mapping
+     * @return false
      */
     @Override
     public SimpleIndices applyIndexMapping(IndexMapping mapping) {
@@ -100,24 +99,22 @@ final class EmptySimpleIndices extends EmptyIndices implements SimpleIndices {
      * {@inheritDoc}
      *
      * @param obj {@inheritDoc}
-     *
      * @return {@inheritDoc}
      */
     @Override
     public boolean equals(Object obj) {
-        return obj == this;
+        return obj == this; // :))
     }
 
     /**
      * Returns {@code equals(indices)}
      *
      * @param indices indices to compare
-     *
      * @return {@code equals(indices)}
      */
     @Override
     public boolean equalsWithSymmetries(SimpleIndices indices) {
-        return indices == EMPTY_SIMPLE_INDICES_INSTANCE;
+        return indices == EMPTY_SIMPLE_INDICES_INSTANCE; //There is only one instance of empty SimpleIndices
     }
 
     /**

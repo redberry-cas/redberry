@@ -26,24 +26,21 @@ import cc.redberry.core.indexmapping.IndexMapping;
 import cc.redberry.core.tensor.SimpleTensor;
 
 /**
- * This interface states additional functionality of the indices of the
- * {@link SimpleTensor}. In contrast to {@link SortedIndices}, here we have
- * additional methods, which are responsible for the {@link SymmetriesImpl}
- * manipulations.
- *
- * @see Indices
- * @see OrderedIndices
- * @see EmptyIndices
- * @see SymmetriesImpl
- * @see SortedIndices
+ * <p>This interface states additional functionality of the indices of the
+ * {@link SimpleTensor}. Indices of this type stores not only set of indices
+ * but also their order and symmetries.</p>
+ * <p>To create objects of this type use
+ * {@link IndicesFactory#createSimple(IndicesSymmetries, int...)}.</p>
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @see Indices
+ * @see IndicesFactory
  */
 public interface SimpleIndices extends Indices {
 
     /**
-     * This method returns {@link SymmetriesImpl} of this {@code Indices}.
+     * This method returns {@link IndicesSymmetries} of this {@code Indices}.
      *
      * @return {@code SymmetriesImpl} of this {@code Indices}
      */
@@ -52,8 +49,8 @@ public interface SimpleIndices extends Indices {
     /**
      * This method allows to set {@code SymmetriesImpl} of this {@code Indices}.
      *
-     * @param symmetries {@code SymmetriesImpl} to be set as {@code SymmetriesImpl} of
-     * this {@code Indices}
+     * @param symmetries {@link IndicesSymmetries} to be set as symmetries of
+     *                   this indices
      */
     void setSymmetries(IndicesSymmetries symmetries);
 
@@ -70,11 +67,8 @@ public interface SimpleIndices extends Indices {
      * Returns result of indices comparing, using their symmetries lists.
      *
      * @param indices indices to compare with this
-     *
-     * @return
-     * <
-     * code>true</code> if indices are equals and
-     * <code>false</code> if not.
+     * @return <code>true</code> if indices are equals and
+     *         <code>false</code> if not.
      */
     boolean equalsWithSymmetries(SimpleIndices indices);
 

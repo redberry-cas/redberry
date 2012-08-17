@@ -27,7 +27,7 @@
 
     <groupId>cc.redberry</groupId>
     <artifactId>core</artifactId>
-    <version>0.9.9</version>
+    <version>1.0-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <parent>
@@ -37,9 +37,10 @@
     </parent>
 
     <name>redberry</name>
-    <url>http://redberry.bitbucket.org/</url>
+    <url>http://redberry.cc/</url>
 
-    <description>Redberry is an open source Java framework providing capabilities
+    <description>
+        Redberry is an open source Java framework providing capabilities
         for manipulation with tensors. The framework contains wide spectrum of
         algorithms required by tensor algebra. It is designed to find analytical
         solutions of complicated mathematical and physical problems.
@@ -85,14 +86,15 @@
     </developers>
 
     <scm>
-        <connection>scm:hg:http://bitbucket.org/redberry/redberry</connection>
-        <developerConnection>scm:hg:https://bitbucket.org/redberry/redberry</developerConnection>
-        <url>https://bitbucket.org/redberry/redberry/src</url>
+        <connection>scm:hg:http://bitbucket.org/redberry/redberry-1.0</connection>
+        <!-- Releases are made manually -->
+        <!-- <developerConnection>scm:hg:https://bitbucket.org/redberry/redberry-1.0</developerConnection> -->
+        <url>https://bitbucket.org/redberry/redberry-1.0/src</url>
     </scm>
 
     <issueManagement>
         <system>Bitbucket</system>
-        <url>https://bitbucket.org/redberry/redberry/issues</url>
+        <url>https://bitbucket.org/redberry/redberry-1.0/issues</url>
     </issueManagement>
 
     <build>
@@ -106,19 +108,6 @@
                     <target>1.7</target>
                 </configuration>
             </plugin>
-<!--            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-gpg-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>sign-artifacts</id>
-                        <phase>verify</phase>
-                        <goals>
-                            <goal>sign</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>-->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
@@ -127,9 +116,11 @@
                     <properties>
                         <property>
                             <name>listener</name>
+                            <!-- Resets the context before running each test -->
                             <value>cc.redberry.core.GlobalRunListener</value>
                         </property>
                         <property>
+                            <!-- It works??? -->
                             <name>forkedProcessTimeoutInSeconds</name>
                             <value>5</value>
                         </property>
@@ -139,6 +130,7 @@
                 </configuration>
             </plugin>
             <plugin>
+                <!-- TODO: remove or replace with castom assembly descriptor -->
                 <artifactId>maven-assembly-plugin</artifactId>
                 <configuration>
                     <descriptorRefs>
@@ -159,6 +151,8 @@
             <artifactId>commons-math3</artifactId>
             <version>3.0</version>
         </dependency>
+
+        <!-- TODO discuss with Stas (??) -->
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-math3</artifactId>
