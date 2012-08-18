@@ -30,8 +30,8 @@ import cc.redberry.core.utils.IntArray;
  * This interface states common tensor indices functionality. For specification
  * and more information see methods summary and implementations. Indices objects
  * are considered to be immutable, so there is no way to change the indices
- * object. <p>For individual index structure (bit masks in the int representation)
- * see <link>IndicesUtils</link>.</p>
+ * object. <p>For individual index structure (bit masks in the int
+ * representation) see <link>IndicesUtils</link>.</p>
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
@@ -46,6 +46,7 @@ public interface Indices {
      * indices this method returns simple wrapper of generic integer array.
      *
      * @return IntArray of upper case indices
+     *
      * @see IntArray
      */
     IntArray getUpper();
@@ -55,6 +56,7 @@ public interface Indices {
      * indices this method returns simple wrapper of generic integer array.
      *
      * @return IntArray of lower case indices
+     *
      * @see IntArray
      */
     IntArray getLower();
@@ -79,8 +81,10 @@ public interface Indices {
      * <code>Indices</code>.
      *
      * @param position position of the index to return
+     *
      * @return the index at the specified position in this
-     *         <code>Indices</code>
+     * <code>Indices</code>
+     *
      * @throws IndexOutOfBoundsException - if the index is out of range (index <
      *                                   0 || index >= size())
      */
@@ -94,14 +98,13 @@ public interface Indices {
      * order of indices.
      * <p/>
      * <h4><a name="Indices">Example:</a></h4> If Indices are
-     * <code>_{mn}^{nop}</code>, getFreeIndices() will return
+     * <code>_{mn}^{nop}</code>, getFree() will return
      * <code>Indices</code> that are
      * <code>_{n}^{op}</code>.
      *
      * @return non contracted indices Indices instance
      */
-    //TODO rename to getFree()
-    Indices getFreeIndices();
+    Indices getFree();
 
     /**
      * Returns new instance of Indices, witch contains inverse indices, i.e. all
@@ -110,14 +113,12 @@ public interface Indices {
      * and they are not cloning (same references).
      * <p/>
      * <h4><a name="Indices">Example:</a></h4> If Indices are
-     * <code>_{mn}^{nop}</code>, getInverseIndices() will return Indices that
-     * are
+     * <code>_{mn}^{nop}</code>, getInverse() will return Indices that are
      * <code>^{mn}_{nop}</code>
      *
      * @return same indices but with the inverse states
      */
-    //TODO rename to getInverse()
-    Indices getInverseIndices();
+    Indices getInverse();
 
     /**
      * Returns true if this indices are equals to specified indices, without
@@ -126,6 +127,7 @@ public interface Indices {
      * true, but for _{ab}^c and ^c_{ak}, of course it returns false.
      *
      * @param indices indices to be compared
+     *
      * @return true if the set of specified indices equals to this one
      */
     boolean equalsRegardlessOrder(Indices indices);
@@ -142,7 +144,9 @@ public interface Indices {
      * returns true if mapping changed indices and false if not.
      *
      * @param mapping specified {@code IndexeMapping}
+     *
      * @return true if mapping changed indices and false if not
+     *
      * @see IndexMapping
      */
     Indices applyIndexMapping(IndexMapping mapping);
@@ -164,7 +168,9 @@ public interface Indices {
      * <code>_{&alpha &beta}^{&gamma &delta}</code>
      *
      * @param mode symbols printing mode
+     *
      * @return string representation due to mode
+     *
      * @see ToStringMode
      */
     String toString(ToStringMode mode);

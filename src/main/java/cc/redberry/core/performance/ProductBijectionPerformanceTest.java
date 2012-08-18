@@ -22,12 +22,12 @@
  */
 package cc.redberry.core.performance;
 
-import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import cc.redberry.core.context.CC;
 import cc.redberry.core.tensor.Product;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.tensor.random.TRandom;
 import cc.redberry.core.transformations.substitutions.ProductsBijectionsPort;
+import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
 /**
  *

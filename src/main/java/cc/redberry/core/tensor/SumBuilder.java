@@ -22,7 +22,6 @@
  */
 package cc.redberry.core.tensor;
 
-import cc.redberry.core.context.*;
 import cc.redberry.core.indexmapping.IndexMappingBuffer;
 import cc.redberry.core.indexmapping.IndexMappingBufferTester;
 import cc.redberry.core.indexmapping.IndexMappings;
@@ -30,14 +29,9 @@ import cc.redberry.core.indices.Indices;
 import cc.redberry.core.indices.IndicesFactory;
 import cc.redberry.core.indices.IndicesUtils;
 import cc.redberry.core.number.Complex;
-import cc.redberry.core.transformations.*;
-import cc.redberry.core.utils.*;
+import cc.redberry.core.utils.TensorHashCalculator;
+import cc.redberry.core.utils.TensorUtils;
 import java.util.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.*;
 
 /**
  *
@@ -88,10 +82,10 @@ public final class SumBuilder implements TensorBuilder {
         if (TensorUtils.isZero(tensor))
             return;
         if (indices == null) {
-            indices = IndicesFactory.createSorted(tensor.getIndices().getFreeIndices());
+            indices = IndicesFactory.createSorted(tensor.getIndices().getFree());
             sortedFreeIndices = indices.getAllIndices().copy();
             Arrays.sort(sortedFreeIndices);
-        } else if (!indices.equalsRegardlessOrder(tensor.getIndices().getFreeIndices()))
+        } else if (!indices.equalsRegardlessOrder(tensor.getIndices().getFree()))
             throw new TensorException("Inconsinstent indices in sum.", tensor);//TODO improve message
         if (tensor instanceof Sum) {
             for (Tensor s : tensor)
@@ -131,7 +125,7 @@ public final class SumBuilder implements TensorBuilder {
         if (u.getIndices().size() == 0)
             buffer = IndexMappings.createPort(u, v).take();
         else {
-            int[] fromIndices = u.getIndices().getFreeIndices().getAllIndices().copy();
+            int[] fromIndices = u.getIndices().getFree().getAllIndices().copy();
             for (int i = 0; i < fromIndices.length; ++i)
                 fromIndices[i] = IndicesUtils.getNameWithType(fromIndices[i]);
             buffer = IndexMappings.createPort(new IndexMappingBufferTester(fromIndices, false), u, v).take();

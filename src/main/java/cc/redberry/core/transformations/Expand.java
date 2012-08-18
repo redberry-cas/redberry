@@ -23,7 +23,6 @@
 package cc.redberry.core.transformations;
 
 import cc.redberry.concurrent.OutputPort;
-import cc.redberry.core.context.ContextManager;
 import cc.redberry.core.indexgenerator.IndexGenerator;
 import cc.redberry.core.indexmapping.IndexMapping;
 import cc.redberry.core.indices.IndicesUtils;
@@ -39,8 +38,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicLong;
 
 import static cc.redberry.core.tensor.Tensors.*;

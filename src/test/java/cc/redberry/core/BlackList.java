@@ -22,8 +22,7 @@
  */
 package cc.redberry.core;
 
-import junit.framework.*;
-import org.junit.Ignore;
+import junit.framework.Assert;
 import org.junit.Test;
 
 /**

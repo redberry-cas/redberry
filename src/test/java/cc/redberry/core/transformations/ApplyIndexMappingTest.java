@@ -30,8 +30,8 @@ import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.utils.TensorUtils;
 import java.util.Arrays;
 import java.util.Set;
-import org.junit.*;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import static cc.redberry.core.tensor.Tensors.addSymmetry;

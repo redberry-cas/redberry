@@ -22,15 +22,10 @@
  */
 package cc.redberry.core.transformations.substitutions;
 
-import cc.redberry.core.indices.*;
-import cc.redberry.core.indices.*;
-import cc.redberry.core.indices.*;
-import cc.redberry.core.indices.*;
-import cc.redberry.core.indices.*;
-import cc.redberry.core.indices.*;
-import cc.redberry.core.tensor.*;
-import org.junit.*;
-import static cc.redberry.core.TAssert.*;
+import cc.redberry.core.indices.IndexType;
+import cc.redberry.core.tensor.Tensor;
+import cc.redberry.core.tensor.Tensors;
+import org.junit.Test;
 
 /**
  *

@@ -22,11 +22,11 @@
  */
 package cc.redberry.core.transformations;
 
-import cc.redberry.core.indexmapping.*;
-import cc.redberry.core.number.*;
-import cc.redberry.core.tensor.*;
-import cc.redberry.core.tensor.iterator.*;
-import cc.redberry.core.utils.*;
+import cc.redberry.core.number.Complex;
+import cc.redberry.core.tensor.Tensor;
+import cc.redberry.core.tensor.iterator.TraverseState;
+import cc.redberry.core.tensor.iterator.TreeTraverseIterator;
+import cc.redberry.core.utils.TensorUtils;
 
 /**
  *

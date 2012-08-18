@@ -49,9 +49,8 @@ public final class ContractIndices implements Transformation {
         return transform(tensor, DummyMetricsChain.INSTANCE);
     }
 
-    //TODO possibly refactor using iteration guide
     private Tensor transform(Tensor tensor, MetricsChain chain) {
-        //TODO if tensor is symbolic return tensor
+        //FUTURE if tensor is symbolic return tensor
         if (tensor instanceof SimpleTensor) {
             tensor = chain.apply((SimpleTensor) tensor);
 

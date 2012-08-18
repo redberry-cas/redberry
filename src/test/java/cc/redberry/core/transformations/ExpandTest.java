@@ -31,7 +31,6 @@ import cc.redberry.core.tensor.Tensors;
 import cc.redberry.core.tensor.iterator.TraverseState;
 import cc.redberry.core.tensor.iterator.TreeTraverseIterator;
 import cc.redberry.core.utils.TensorUtils;
-import org.junit.*;
 import org.junit.Assert;
 import org.junit.Test;
 

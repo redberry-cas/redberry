@@ -22,8 +22,6 @@
  */
 package cc.redberry.concurrent;
 
-import java.util.List;
-
 /**
  * Interface for passive objects provider.
  *

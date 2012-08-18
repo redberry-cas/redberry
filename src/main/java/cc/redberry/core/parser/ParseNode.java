@@ -63,7 +63,7 @@ public class ParseNode {
             case Power:
                 return IndicesFactory.EMPTY_INDICES;
             case Expression:
-                return content[0].getIndices().getFreeIndices();
+                return content[0].getIndices().getFree();
         }
         throw new ParserException("Unknown tensor type: " + tensorType);
     }

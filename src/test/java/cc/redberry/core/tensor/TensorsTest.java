@@ -22,11 +22,12 @@
  */
 package cc.redberry.core.tensor;
 
-import cc.redberry.core.transformations.*;
+import cc.redberry.core.transformations.ContractIndices;
 import cc.redberry.core.transformations.Expand;
+import cc.redberry.core.transformations.Transformation;
 import cc.redberry.core.utils.TensorUtils;
-import org.junit.*;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import static cc.redberry.core.tensor.Tensors.*;

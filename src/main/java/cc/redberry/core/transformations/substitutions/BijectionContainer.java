@@ -23,7 +23,7 @@
 package cc.redberry.core.transformations.substitutions;
 
 import cc.redberry.core.indexmapping.IndexMappingBuffer;
-import java.util.*;
+import java.util.Arrays;
 
 /**
  *

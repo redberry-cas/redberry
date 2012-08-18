@@ -26,14 +26,15 @@ import cc.redberry.core.context.CC;
 import cc.redberry.core.indices.Indices;
 import cc.redberry.core.parser.ParseNodeSimpleTensor;
 import cc.redberry.core.parser.ParserIndices;
-import cc.redberry.core.tensor.*;
-import cc.redberry.core.utils.*;
-import junit.framework.*;
-import org.junit.After;
+import cc.redberry.core.tensor.Expression;
+import cc.redberry.core.tensor.Tensor;
+import cc.redberry.core.tensor.Tensors;
+import cc.redberry.core.utils.Indicator;
+import cc.redberry.core.utils.TensorUtils;
+import junit.framework.Assert;
 import org.junit.Test;
 
 import static cc.redberry.core.TAssert.*;
-import static cc.redberry.core.tensor.Tensors.parse;
 
 /**
  *
@@ -68,7 +69,7 @@ public class IndicesInsertionTest {
     public void test1() {
         Tensor t = parse("A*B*C", "^i", "_j", "A", "B", "C");
         Indices indices = ParserIndices.parseSimple("^i_j");
-        assertIndicesParity(t.getIndices().getFreeIndices(), indices);
+        assertIndicesParity(t.getIndices().getFree(), indices);
     }
 
     @Test
@@ -76,21 +77,21 @@ public class IndicesInsertionTest {
         Tensor t = parse("A*(B*A+C*K)*F", "^i", "_j");
         Indices indices = ParserIndices.parseSimple("^i_j");
         Tensor e = Tensors.parse("A^{i}_{a}*F^{b}_{j}*(B^{a}_{c}*A^{c}_{b}+K^{c}_{b}*C^{a}_{c})");
-        assertIndicesParity(t.getIndices().getFreeIndices(), indices);
+        assertIndicesParity(t.getIndices().getFree(), indices);
         assertParity(t, e);
     }
 
     @Test
     public void test3() {
         Tensor t = parse("A^{\\alpha n}*B*C", "^ij", "_pq");
-        assertIndicesParity(t.getIndices().getFreeIndices(), ParserIndices.parseSimple("^{\\alpha n i j}_pq"));
+        assertIndicesParity(t.getIndices().getFree(), ParserIndices.parseSimple("^{\\alpha n i j}_pq"));
     }
 
     @Test
     public void test4() {
         Tensor t = parse("a*b*A*c*B*C", "^ij", "_pq", "a", "b", "c", "d");
         Indices indices = ParserIndices.parseSimple("^ij_pq");
-        assertIndicesParity(t.getIndices().getFreeIndices(), indices);
+        assertIndicesParity(t.getIndices().getFree(), indices);
     }
 
     @Test
@@ -104,7 +105,7 @@ public class IndicesInsertionTest {
     public void test6() {
         Tensor t = parse("a*(b+a)*A*(c+d)*B*C", "^ij", "_pq", "A", "B", "C", "F");
         Indices indices = ParserIndices.parseSimple("^ij_pq");
-        assertIndicesParity(t.getIndices().getFreeIndices(), indices);
+        assertIndicesParity(t.getIndices().getFree(), indices);
     }
 
     @Test
@@ -112,7 +113,7 @@ public class IndicesInsertionTest {
         Tensor t = parse("A*(B+E*(R+K*U))", "^i", "_j");
         Indices indices = ParserIndices.parseSimple("^i_j");
         Tensor e = Tensors.parse("A^i_a*(B^a_j+E^a_b*(R^b_j+K^b_c*U^c_j))");
-        assertIndicesParity(t.getIndices().getFreeIndices(), indices);
+        assertIndicesParity(t.getIndices().getFree(), indices);
         assertEquals(t, e);
     }
 
@@ -122,7 +123,7 @@ public class IndicesInsertionTest {
             CC.resetTensorNames();
             Tensor t = parse("L*L*(L-1)*A*B", "^ijpq", "_pqrs", "A", "B");
             Indices indices = ParserIndices.parseSimple("^ijpq_pqrs");
-            assertIndicesParity(t.getIndices().getFreeIndices(), indices.getFreeIndices());
+            assertIndicesParity(t.getIndices().getFree(), indices.getFree());
         }
     }
 
@@ -130,14 +131,14 @@ public class IndicesInsertionTest {
     public void test9() {
         Tensor t = parse("a*A*B+((1/2)*a+b)*A*(A+B*(A+X*A))*c", "^a", "_b", "A", "B");
         Indices indices = ParserIndices.parseSimple("^a_b");
-        assertIndicesParity(t.getIndices().getFreeIndices(), indices.getFreeIndices());
+        assertIndicesParity(t.getIndices().getFree(), indices.getFree());
     }
 
     @Test
     public void test10() {
         Tensor t = parse("A=2*B+A*B", "^i", "_j");
         Indices indices = ParserIndices.parseSimple("^i_j");
-        assertIndicesParity(t.getIndices().getFreeIndices(), indices.getFreeIndices());
+        assertIndicesParity(t.getIndices().getFree(), indices.getFree());
     }
 
     @Test
@@ -153,7 +154,7 @@ public class IndicesInsertionTest {
                 + "L*L*(L-1)*HATK^{\\alpha\\beta}*DELTA^{\\mu\\nu}*HATK^{\\gamma}*n_{\\lambda}*((1/20)*R^{\\sigma}_{\\mu\\nu\\beta}*R^{\\lambda}_{\\gamma\\sigma\\alpha}-(7/60)*R^{\\sigma}_{\\beta\\mu\\alpha}*R^{\\lambda}_{\\gamma\\nu\\sigma}+(1/20)*R^{\\sigma}_{\\beta\\mu\\alpha}*R^{\\lambda}_{\\sigma\\nu\\gamma}+(1/10)*R^{\\sigma}_{\\mu\\beta\\gamma}*R^{\\lambda}_{\\nu\\alpha\\sigma}+(1/60)*R^{\\sigma}_{\\mu\\beta\\gamma}*R^{\\lambda}_{\\alpha\\nu\\sigma}+(7/120)*R_{\\alpha\\beta}*R^{\\lambda}_{\\nu\\gamma\\mu}+(11/60)*R_{\\beta\\mu}*R^{\\lambda}_{\\nu\\alpha\\gamma})", "^ijpq", "_pqrs", "HATK", "DELTA");
 
         Indices indices = ParserIndices.parseSimple("^ijpq_pqrs");
-        assertIndicesParity(t.getIndices().getFreeIndices(), indices.getFreeIndices());
+        assertIndicesParity(t.getIndices().getFree(), indices.getFree());
     }
 
     @Test

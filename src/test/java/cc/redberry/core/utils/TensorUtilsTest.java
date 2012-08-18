@@ -23,16 +23,11 @@
 package cc.redberry.core.utils;
 
 import cc.redberry.core.context.CC;
-import cc.redberry.core.indices.*;
-import cc.redberry.core.indices.*;
-import cc.redberry.core.indices.*;
-import cc.redberry.core.indices.*;
-import cc.redberry.core.indices.*;
-import cc.redberry.core.indices.*;
+import cc.redberry.core.indices.IndexType;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.tensor.Tensors;
-import cc.redberry.core.transformations.*;
-import junit.framework.*;
+import cc.redberry.core.transformations.RemoveDueToSymmetry;
+import junit.framework.Assert;
 import org.junit.Test;
 
 import static org.junit.Assert.assertFalse;

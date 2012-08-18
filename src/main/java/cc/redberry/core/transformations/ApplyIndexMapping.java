@@ -65,7 +65,7 @@ public final class ApplyIndexMapping implements Transformation {
     }
 
     private static void checkConsistent(Tensor tensor, final int[] from) {
-        int[] freeIndices = tensor.getIndices().getFreeIndices().getAllIndices().copy();
+        int[] freeIndices = tensor.getIndices().getFree().getAllIndices().copy();
         Arrays.sort(freeIndices);
         int[] _from = from.clone();
         Arrays.sort(_from);
@@ -95,7 +95,7 @@ public final class ApplyIndexMapping implements Transformation {
             to[count++] = record.getIndexName() ^ (record.diffStatesInitialized() ? 0x80000000 : 0);
         }
 
-        final int[] freeIndices = tensor.getIndices().getFreeIndices().getAllIndices().copy();
+        final int[] freeIndices = tensor.getIndices().getFree().getAllIndices().copy();
         for (int i = 0; i < freeIndices.length; ++i)
             freeIndices[i] = IndicesUtils.getNameWithType(freeIndices[i]);
         Arrays.sort(freeIndices);
@@ -116,7 +116,7 @@ public final class ApplyIndexMapping implements Transformation {
     }
 
     public static Tensor renameDummyFromClonedSource(Tensor tensor, int[] forbidden) {
-        int[] from = tensor.getIndices().getFreeIndices().getAllIndices().copy();
+        int[] from = tensor.getIndices().getFree().getAllIndices().copy();
         for (int i = from.length - 1; i >= 0; --i)
             from[i] = IndicesUtils.getNameWithType(from[i]);
         Arrays.sort(from);
@@ -139,7 +139,7 @@ public final class ApplyIndexMapping implements Transformation {
 
         Set<Integer> dummyIndices = TensorUtils.getAllIndicesNames(tensor);
         //extracting contracted only
-        Indices indices = tensor.getIndices().getFreeIndices();
+        Indices indices = tensor.getIndices().getFree();
         int i;
         for (i = indices.size() - 1; i >= 0; --i)
             dummyIndices.remove(IndicesUtils.getNameWithType(indices.get(i)));

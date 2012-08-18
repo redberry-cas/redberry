@@ -22,15 +22,16 @@
  */
 package cc.redberry.core.utils;
 
-import cc.redberry.core.combinatorics.*;
-import cc.redberry.core.combinatorics.symmetries.*;
+import cc.redberry.core.combinatorics.Symmetry;
+import cc.redberry.core.combinatorics.symmetries.Symmetries;
+import cc.redberry.core.combinatorics.symmetries.SymmetriesFactory;
 import cc.redberry.core.indexmapping.*;
 import cc.redberry.core.indices.Indices;
 import cc.redberry.core.indices.IndicesUtils;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.tensor.*;
 import cc.redberry.core.tensor.functions.ScalarFunction;
-import java.util.*;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -82,7 +83,7 @@ public class TensorUtils {
     }
 
     private static boolean isScalar1(Tensor tensor) {
-        return tensor.getIndices().getFreeIndices().size() == 0;
+        return tensor.getIndices().getFree().size() == 0;
     }
 
     public static boolean isOne(Tensor tensor) {
@@ -205,7 +206,7 @@ public class TensorUtils {
 
     public static Set<Integer> getAllDummyIndicesNames(Tensor tensor) {
         Set<Integer> dummy = getAllIndicesNames(tensor);
-        Indices ind = tensor.getIndices().getFreeIndices();
+        Indices ind = tensor.getIndices().getFree();
         for (int i = ind.size() - 1; i >= 0; --i)
             dummy.remove(IndicesUtils.getNameWithType(ind.get(i)));
         return dummy;
@@ -237,8 +238,8 @@ public class TensorUtils {
     }
 
     public static boolean equals(Tensor u, Tensor v) {
-        Indices freeIndices = u.getIndices().getFreeIndices();
-        if (!freeIndices.equalsRegardlessOrder(v.getIndices().getFreeIndices()))
+        Indices freeIndices = u.getIndices().getFree();
+        if (!freeIndices.equalsRegardlessOrder(v.getIndices().getFree()))
             return false;
         int[] free = freeIndices.getAllIndices().copy();
         IndexMappingBuffer tester = new IndexMappingBufferTester(free, false);
@@ -253,8 +254,8 @@ public class TensorUtils {
     }
 
     public static Boolean compare1(Tensor u, Tensor v) {
-        Indices freeIndices = u.getIndices().getFreeIndices();
-        if (!freeIndices.equalsRegardlessOrder(v.getIndices().getFreeIndices()))
+        Indices freeIndices = u.getIndices().getFree();
+        if (!freeIndices.equalsRegardlessOrder(v.getIndices().getFree()))
             return false;
         int[] free = freeIndices.getAllIndices().copy();
         IndexMappingBuffer tester = new IndexMappingBufferTester(free, false);
@@ -314,7 +315,7 @@ public class TensorUtils {
     }
 
     public static boolean isZeroDueToSymmetry(Tensor t) {
-        int[] indices = IndicesUtils.getIndicesNames(t.getIndices().getFreeIndices());
+        int[] indices = IndicesUtils.getIndicesNames(t.getIndices().getFree());
         IndexMappingBufferTester bufferTester = new IndexMappingBufferTester(indices, false);
         MappingsPort mp = IndexMappings.createPort(bufferTester, t, t);
         IndexMappingBuffer buffer;
@@ -367,35 +368,10 @@ public class TensorUtils {
     public static Symmetries getIndicesSymmetries(int[] indices, Tensor tensor) {
         return getSymmetriesFromMappings(indices, IndexMappings.createPort(tensor, tensor));
     }
-//
-//    /**
-//     * Returns list of contracted indices of two tensors, i.e. similar of free
-//     * indices of first and second tensors. E.g. for tensors
-//     * {@code A_mn} and {@code B^am}, list will contains only index {@code m}.
-//     *
-//     * @param first first tensor
-//     * @param second second tensor
-//     * @return list of contracted indices of two tensors, i.e. similar of free
-//     * indices of first and second tensors
-//     */
-//    public static IntArrayList getContractedIndicesNames(final Tensor first, final Tensor second) {
-//        //FIXME write better algotithm
-//        Indices firstIndices = first.getIndices().getFreeIndices();
-//        int[] secondIndices = second.getIndices().getFreeIndices().getAllIndicesNames().copy();
-//        Arrays.sort(secondIndices);
-//        IntArrayList result = new IntArrayList();
-//        for (int i = 0; i < firstIndices.size(); ++i)
-//            if (Arrays.binarySearch(secondIndices, 0x80000000 ^ firstIndices.get(i)) >= 0)
-//                result.add(getNameWithType(firstIndices.get(i)));
-//        return result;
-//    }
-//
-//    /**
-//     * //TODO comment
-//     */
+
 //    public static Tensor[] getDistinct(final Tensor[] array) {
 //        final int length = array.length;
-//        final Indices indices = array[0].getIndices().getFreeIndices();
+//        final Indices indices = array[0].getIndices().getFree();
 //        final int[] hashes = new int[length];
 //        int i;
 //        for (i = 0; i < length; ++i)

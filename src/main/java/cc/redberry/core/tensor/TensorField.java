@@ -111,7 +111,7 @@ public final class TensorField extends SimpleTensor {
                 throw new IllegalStateException("No more arguments in field.");
             if (tensor == null)
                 throw new NullPointerException();
-            if (!tensor.getIndices().getFreeIndices().equalsRegardlessOrder(field.getArgIndices(pointer)))
+            if (!tensor.getIndices().getFree().equalsRegardlessOrder(field.getArgIndices(pointer)))
                 throw new IllegalArgumentException("Free indices of puted tensor differs from field argument binding indices!");
             data[pointer++] = tensor;
         }
@@ -132,7 +132,7 @@ public final class TensorField extends SimpleTensor {
             for (int i = tensors.length - 1; i >= 0; --i) {
                 if (tensors[i] == null)
                     throw new NullPointerException();
-                if (!tensors[i].getIndices().getFreeIndices().equalsRegardlessOrder(field.getArgIndices(i)))
+                if (!tensors[i].getIndices().getFree().equalsRegardlessOrder(field.getArgIndices(i)))
                     throw new IllegalArgumentException("Free indices of puted tensor differs from field argument binding indices!");
             }
             return new TensorField(field, tensors);

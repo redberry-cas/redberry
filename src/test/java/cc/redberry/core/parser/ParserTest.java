@@ -29,7 +29,7 @@ import cc.redberry.core.number.Complex;
 import cc.redberry.core.tensor.*;
 import cc.redberry.core.utils.TensorUtils;
 import junit.framework.Assert;
-import org.junit.*;
+import org.junit.Ignore;
 import org.junit.Test;
 
 /**

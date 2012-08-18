@@ -26,10 +26,9 @@ import cc.redberry.concurrent.OutputPortUnsafe;
 import cc.redberry.core.indexmapping.IndexMappingBuffer;
 import cc.redberry.core.indexmapping.IndexMappings;
 import cc.redberry.core.indices.Indices;
-import cc.redberry.core.tensor.*;
-import cc.redberry.core.tensor.functions.*;
+import cc.redberry.core.tensor.Tensor;
+import cc.redberry.core.tensor.Tensors;
 import cc.redberry.core.utils.TensorUtils;
-import java.util.*;
 
 /**
  *

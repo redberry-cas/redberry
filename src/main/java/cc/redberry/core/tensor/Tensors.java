@@ -27,13 +27,11 @@ import cc.redberry.core.context.CC;
 import cc.redberry.core.context.NameDescriptor;
 import cc.redberry.core.indices.*;
 import cc.redberry.core.number.Complex;
-import cc.redberry.core.parser.ParseManager;
 import cc.redberry.core.parser.ParseNodeTransformer;
 import cc.redberry.core.tensor.functions.*;
 import cc.redberry.core.transformations.ApplyIndexMapping;
 import cc.redberry.core.transformations.Expand;
 import cc.redberry.core.utils.TensorUtils;
-
 import java.util.HashSet;
 import java.util.Set;
 
@@ -217,7 +215,7 @@ public final class Tensors {
     public static TensorField field(String name, SimpleIndices indices, Tensor[] arguments) {
         SimpleIndices[] argIndices = new SimpleIndices[arguments.length];
         for (int i = 0; i < argIndices.length; ++i)
-            argIndices[i] = IndicesFactory.createSimple(null, arguments[i].getIndices().getFreeIndices());
+            argIndices[i] = IndicesFactory.createSimple(null, arguments[i].getIndices().getFree());
         return field(name, indices, argIndices, arguments);
     }
 
@@ -238,7 +236,7 @@ public final class Tensors {
         if (arguments.length == 0)
             throw new IllegalArgumentException("No arguments in field.");
         for (int i = 0; i < argIndices.length; ++i)
-            if (!arguments[i].getIndices().getFreeIndices().equalsRegardlessOrder(argIndices[i]))
+            if (!arguments[i].getIndices().getFree().equalsRegardlessOrder(argIndices[i]))
                 throw new IllegalArgumentException("Arguments indices are inconsistent with arguments.");
 
         IndicesTypeStructure[] structures = new IndicesTypeStructure[argIndices.length + 1];
@@ -280,7 +278,7 @@ public final class Tensors {
         for (int i = 0; i < argIndices.length; ++i) {
             if (!descriptor.getIndicesTypeStructures()[i + 1].isStructureOf(argIndices[i]))
                 throw new IllegalArgumentException("Arguments indices are inconsistent with field signature.");
-            if (!arguments[i].getIndices().getFreeIndices().equalsRegardlessOrder(argIndices[i]))
+            if (!arguments[i].getIndices().getFree().equalsRegardlessOrder(argIndices[i]))
                 throw new IllegalArgumentException("Arguments indices are inconsistent with arguments.");
         }
         return new TensorField(name,
@@ -309,7 +307,7 @@ public final class Tensors {
             throw new IllegalArgumentException("Specified indices are not indices of specified tensor.");
         SimpleIndices[] argIndices = new SimpleIndices[arguments.length];
         for (int i = 0; i < arguments.length; ++i)
-            argIndices[i] = IndicesFactory.createSimple(null, arguments[i].getIndices().getFreeIndices());
+            argIndices[i] = IndicesFactory.createSimple(null, arguments[i].getIndices().getFree());
         return new TensorField(name,
                                UnsafeIndicesFactory.createOfTensor(descriptor.getSymmetries(), indices),
                                arguments, argIndices);
@@ -502,7 +500,6 @@ public final class Tensors {
         return CC.current().getParseManager().parse(expression);
     }
 
-    //TODO improve API
     public static Tensor parse(String expression, ParseNodeTransformer... preprocessors) {
         return CC.current().getParseManager().parse(expression, preprocessors);
     }
@@ -535,7 +532,6 @@ public final class Tensors {
         return (Expression) t;
     }
 
-    //TODO ???
     public static void addSymmetry(String tensor, IndexType type, boolean sign, int... symmetry) {
         parseSimple(tensor).getIndices().getSymmetries().add(type.getType(), new Symmetry(symmetry, sign));
     }
@@ -566,7 +562,7 @@ public final class Tensors {
         final Tensor[] newSumData = new Tensor[sum.size()];
         for (int i = newSumData.length - 1; i >= 0; --i)
             newSumData[i] = multiply(factor, sum.get(i));
-        return new Sum(newSumData, IndicesFactory.createSorted(newSumData[0].getIndices().getFreeIndices()));
+        return new Sum(newSumData, IndicesFactory.createSorted(newSumData[0].getIndices().getFree()));
     }
 
     public static Tensor multiplySumElementsOnFactorAndExpandScalars(Sum sum, Tensor factor) {
@@ -577,7 +573,7 @@ public final class Tensors {
         final Tensor[] newSumData = new Tensor[sum.size()];
         for (int i = newSumData.length - 1; i >= 0; --i)
             newSumData[i] = Expand.expand(multiply(factor, sum.get(i)));
-        return new Sum(newSumData, IndicesFactory.createSorted(newSumData[0].getIndices().getFreeIndices()));
+        return new Sum(newSumData, IndicesFactory.createSorted(newSumData[0].getIndices().getFree()));
     }
 
     //TODO discuss with Stas (move setIndicesToSimpleTensor and setIndicesToField to other class, may be into SimpelTensor class) ??

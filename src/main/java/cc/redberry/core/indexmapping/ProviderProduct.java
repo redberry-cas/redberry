@@ -135,8 +135,6 @@ final class ProviderProduct implements IndexMappingProvider {
 //        List<PermutationsProvider> disjointProviders = new ArrayList<>();
         List<Pair> stretches = new ArrayList<>();
         //non permutable
-        //TODO uncomment
-        //List<Tensor> npFrom = new ArrayList<>(), npTo = new ArrayList<>();
         List<IndexMappingProvider> providers = new ArrayList<>();
 
         IndexMappingProvider lastOutput = dummyProvider;

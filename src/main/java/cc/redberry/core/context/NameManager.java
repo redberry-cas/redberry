@@ -22,8 +22,10 @@
  */
 package cc.redberry.core.context;
 
-import cc.redberry.core.indices.*;
-import cc.redberry.core.utils.*;
+import cc.redberry.core.indices.IndexType;
+import cc.redberry.core.indices.IndicesTypeStructure;
+import cc.redberry.core.utils.ArraysUtils;
+import cc.redberry.core.utils.IntArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.locks.Lock;
@@ -49,7 +51,6 @@ public final class NameManager {
 
     NameManager(Long seed, String kronecker, String metric) {
         if (seed == null) {
-            //FUTURE what is the best bit provider at this point???
             random = new Well44497b();
             random.setSeed(this.seed = random.nextLong());
         } else

@@ -34,7 +34,6 @@ import java.math.BigInteger;
 import org.apache.commons.math3.Field;
 import org.apache.commons.math3.exception.NullArgumentException;
 import org.apache.commons.math3.fraction.BigFraction;
-import org.apache.commons.math3.util.*;
 
 /**
  * @author Stanislav Poslavsky

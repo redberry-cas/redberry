@@ -23,9 +23,9 @@
 package cc.redberry.core.transformations;
 
 import cc.redberry.core.TAssert;
-import cc.redberry.core.context.*;
+import cc.redberry.core.context.CC;
 import cc.redberry.core.indexgenerator.IndexGenerator;
-import cc.redberry.core.indices.*;
+import cc.redberry.core.indices.IndicesUtils;
 import cc.redberry.core.tensor.Expression;
 import cc.redberry.core.tensor.ProductBuilder;
 import cc.redberry.core.tensor.Tensor;

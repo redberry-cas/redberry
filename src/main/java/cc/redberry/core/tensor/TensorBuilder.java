@@ -22,7 +22,7 @@
  */
 package cc.redberry.core.tensor;
 
-import cc.redberry.core.utils.*;
+import cc.redberry.core.utils.TensorUtils;
 
 /**
  * <p>All tensors in the system are reduced to the general form. For example:

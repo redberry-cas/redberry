@@ -26,7 +26,6 @@ import cc.redberry.core.combinatorics.Permutation;
 import cc.redberry.core.context.Context;
 import cc.redberry.core.context.ToStringMode;
 import cc.redberry.core.math.MathUtils;
-
 import java.util.Arrays;
 
 /**

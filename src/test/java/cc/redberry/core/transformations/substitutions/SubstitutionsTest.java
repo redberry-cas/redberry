@@ -22,8 +22,9 @@
  */
 package cc.redberry.core.transformations.substitutions;
 
-import cc.redberry.core.*;
-import cc.redberry.core.combinatorics.*;
+import cc.redberry.core.TAssert;
+import cc.redberry.core.combinatorics.Combinatorics;
+import cc.redberry.core.combinatorics.IntPermutationsGenerator;
 import cc.redberry.core.context.CC;
 import cc.redberry.core.context.ToStringMode;
 import cc.redberry.core.indices.IndexType;
@@ -33,7 +34,7 @@ import cc.redberry.core.transformations.ContractIndices;
 import cc.redberry.core.transformations.Expand;
 import cc.redberry.core.transformations.Transformation;
 import cc.redberry.core.utils.TensorUtils;
-import junit.framework.*;
+import junit.framework.Assert;
 import org.junit.Test;
 
 import static cc.redberry.core.TAssert.assertParity;
@@ -120,7 +121,7 @@ public class SubstitutionsTest {
     @Test
     public void testSimple6() {
         Tensor t = parse("H^{\\sigma\\lambda\\epsilon\\zeta }_{\\alpha\\beta}*E_{\\mu\\nu}^{\\alpha\\beta}_{\\delta\\gamma }*n_{\\sigma}*n_{\\lambda}*H^{\\mu\\nu\\delta\\gamma}_{\\epsilon\\zeta}");
-        assertTrue(t.getIndices().getFreeIndices().size() == 0);
+        assertTrue(t.getIndices().getFree().size() == 0);
         System.out.println(t.toString(ToStringMode.UTF8));
         Expression ex = (Expression) parse("E^{\\mu \\nu \\gamma \\delta }_{\\epsilon \\zeta }=H^{\\mu \\nu \\gamma \\delta }_{\\epsilon \\zeta }+4*H^{\\mu \\gamma \\delta }_{\\eta \\theta }*H^{\\nu \\eta \\theta }_{\\epsilon \\zeta }+4*H^{\\nu \\gamma \\delta }_{\\lambda \\xi }*H^{\\mu \\lambda \\xi }_{\\epsilon \\zeta }");
         System.out.println(ex.toString(ToStringMode.UTF8));
@@ -133,7 +134,7 @@ public class SubstitutionsTest {
     @Test
     public void testSimple7() {
         Tensor t = parse("H^{rkef}_{ab}*E_{lm}^{ab}_{dc}*n_{r}*n_{k}*H^{lmdc}_{ef}");
-        assertTrue(t.getIndices().getFreeIndices().size() == 0);
+        assertTrue(t.getIndices().getFree().size() == 0);
         Expression ex = (Expression) parse("E^{lmcd}_{ef}=H^{lmcd}_{ef}+4*H^{lcd}_{gh}*H^{mgh}_{ef}+4*H^{mcd}_{kn}*H^{lkn}_{ef}");
         System.out.println(ex);
         t = testSimpletitute(t, "E^{lmcd}_{ef}=H^{lmcd}_{ef}+4*H^{lcd}_{gh}*H^{mgh}_{ef}+4*H^{mcd}_{kn}*H^{lkn}_{ef}");

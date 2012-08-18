@@ -24,7 +24,7 @@ package cc.redberry.core.tensor;
 
 import cc.redberry.core.indices.Indices;
 import cc.redberry.core.indices.IndicesFactory;
-import cc.redberry.core.utils.*;
+import cc.redberry.core.utils.TensorUtils;
 
 /**
  *
@@ -50,10 +50,10 @@ public class ExpressionBuilder implements TensorBuilder {
             throw new NullPointerException();
         else if (left == null) {
             left = tensor;
-            indices = IndicesFactory.createSorted(left.getIndices().getFreeIndices());
+            indices = IndicesFactory.createSorted(left.getIndices().getFree());
         } else if (right == null) {
             right = tensor;
-            if (!indices.equalsRegardlessOrder(right.getIndices().getFreeIndices()) && !TensorUtils.isZero(right))
+            if (!indices.equalsRegardlessOrder(right.getIndices().getFree()) && !TensorUtils.isZero(right))
                 throw new TensorException("Inconsistent indices in expression.", tensor);
         } else
             throw new TensorException("Expression have only two parts.");

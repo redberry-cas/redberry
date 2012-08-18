@@ -22,9 +22,12 @@
  */
 package cc.redberry.core.performance;
 
-import cc.redberry.core.context.*;
-import cc.redberry.core.indexmapping.*;
-import cc.redberry.core.tensor.*;
+import cc.redberry.core.context.ContextManager;
+import cc.redberry.core.indexmapping.IndexMappingBuffer;
+import cc.redberry.core.indexmapping.IndexMappings;
+import cc.redberry.core.indexmapping.MappingsPort;
+import cc.redberry.core.tensor.Tensor;
+import cc.redberry.core.tensor.Tensors;
 
 /**
  *
