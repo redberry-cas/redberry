@@ -68,7 +68,7 @@ public class SubstitutionsTest {
         Transformation sp = Substitutions.getTransformation(from, to);
         target = sp.transform(target);
         Tensor expected = parse("B_{a}*C_{b}");
-        assertTrue(TensorUtils.equals(target, expected));
+        assertTrue(TensorUtils.equalsExactly(target, expected));
     }
 
     @Test
@@ -79,7 +79,7 @@ public class SubstitutionsTest {
         Transformation sp = Substitutions.getTransformation(from, to);
         target = sp.transform(target);
         Tensor expected = parse("B_{a}*C_{b}*d*B_{m}*C_{n}");
-        assertTrue(TensorUtils.equals(target, expected));
+        assertTrue(TensorUtils.equalsExactly(target, expected));
     }
 
     @Test
@@ -90,7 +90,7 @@ public class SubstitutionsTest {
         Transformation sp = Substitutions.getTransformation(from, to);
         target = sp.transform(target);
         Tensor expected = parse("B_{ac}*C^{c}_{b}*d*B_{md}*C^{d}_{n}");
-        assertTrue(TensorUtils.compare(target, expected));
+        assertTrue(TensorUtils.equals(target, expected));
     }
 
     @Test
@@ -99,7 +99,7 @@ public class SubstitutionsTest {
         target = testSimpletitute(target, "R_mn=R^a_man");
         target = testSimpletitute(target, "R^a_bcd=A^a*A_b*B_c*B_d");
         Tensor expected = parse("g^{mn}*A^{a}*A_{m}*B_{a}*B_{n}");
-        assertTrue(TensorUtils.equals(target, expected));
+        assertTrue(TensorUtils.equalsExactly(target, expected));
     }
 
     @Test
@@ -107,14 +107,14 @@ public class SubstitutionsTest {
         Tensor target = parse("N*(N-1)+N+1/N");
         target = testSimpletitute(target, "N=3");
         Tensor expacted = parse("3*(3-1)+3+1/3");
-        assertTrue(TensorUtils.equals(target, expacted));
+        assertTrue(TensorUtils.equalsExactly(target, expacted));
     }
 
     @Test
     public void testSimple5() {
         Tensor target = parse("L*(L-1)*F");
         target = testSimpletitute(target, ("L=1"));
-        assertTrue(TensorUtils.equals(target, Complex.ZERO));
+        assertTrue(TensorUtils.equalsExactly(target, Complex.ZERO));
     }
 
     @Test
@@ -157,7 +157,7 @@ public class SubstitutionsTest {
         target = testSimpletitute(target,
                                   "f_ab^cd=a_ab*z^cd");
         Tensor expected = parse("a_ab*z^ab");
-        assertTrue(TensorUtils.compare(target, expected));
+        assertTrue(TensorUtils.equals(target, expected));
     }
 
     @Test
@@ -180,7 +180,7 @@ public class SubstitutionsTest {
         target = sp.transform(target);
         target = contract(target);
         Tensor expected = parse("B^mn");
-        assertTrue(TensorUtils.equals(target, expected));
+        assertTrue(TensorUtils.equalsExactly(target, expected));
     }
 
     @Test
@@ -192,7 +192,7 @@ public class SubstitutionsTest {
         target = sp.transform(target);
         target = contract(target);
         Tensor expected = parse("B_{ab}*B^{mn}");
-        assertTrue(TensorUtils.equals(target, expected));
+        assertTrue(TensorUtils.equalsExactly(target, expected));
     }
 
     @Test
@@ -204,7 +204,7 @@ public class SubstitutionsTest {
         Transformation sp = Substitutions.getTransformation(from, to);
         target = sp.transform(target);
         Tensor expected = parse("B^a*C_b-B_b*C^a");
-        assertTrue(TensorUtils.equals(target, expected));
+        assertTrue(TensorUtils.equalsExactly(target, expected));
     }
 
     @Test
@@ -218,7 +218,7 @@ public class SubstitutionsTest {
         target = sp.transform(target);
         target = contract(target);
         expected = contract(expected);
-        assertTrue(TensorUtils.equals(target, expected));
+        assertTrue(TensorUtils.equalsExactly(target, expected));
     }
 
     @Test
@@ -234,7 +234,7 @@ public class SubstitutionsTest {
         target = sp.transform(target);
         target = contract(target);
         expected = contract(expected);
-        assertTrue(TensorUtils.equals(target, expected));
+        assertTrue(TensorUtils.equalsExactly(target, expected));
     }
 
     @Test
@@ -246,7 +246,7 @@ public class SubstitutionsTest {
 
         Transformation sp = Substitutions.getTransformation(from, to);
         sp.transform(target);
-        assertTrue(TensorUtils.equals(target, expected));
+        assertTrue(TensorUtils.equalsExactly(target, expected));
     }
 
     @Test
@@ -259,7 +259,7 @@ public class SubstitutionsTest {
         target = sp.transform(target);
         System.out.println(target);
         Tensor expected = parse("-B_{b}*C^{a}+B^a*C_b+F^{a}_{b}[B_{m}*C^{n}-B^n*C_m]");
-        assertTrue(TensorUtils.compare(target, expected));
+        assertTrue(TensorUtils.equals(target, expected));
 
     }
 
@@ -303,7 +303,7 @@ public class SubstitutionsTest {
         target1 = contract(expand(target1));
 
 
-        assertTrue(TensorUtils.compare(target, target1));
+        assertTrue(TensorUtils.equals(target, target1));
         assertTrue(target.getIndices().size() == 0);
         assertTrue(target1.getIndices().size() == 0);
     }
@@ -333,7 +333,7 @@ public class SubstitutionsTest {
 
         target1 = contract(target1);
 
-        assertTrue(TensorUtils.compare(target, target1));
+        assertTrue(TensorUtils.equals(target, target1));
         assertTrue(target.getIndices().size() == 0);
         assertTrue(target1.getIndices().size() == 0);
     }
@@ -403,7 +403,7 @@ public class SubstitutionsTest {
         Transformation transformation = Substitutions.getTransformation(from, to);
         target = transformation.transform(target);
         System.out.println(target);
-        assertTrue(TensorUtils.equals(target, parse("g+y")));
+        assertTrue(TensorUtils.equalsExactly(target, parse("g+y")));
     }
 
     @Test
@@ -413,7 +413,7 @@ public class SubstitutionsTest {
         Tensor target = parse("f_a[g_p]");
         Transformation transformation = Substitutions.getTransformation(from, to);
         target = transformation.transform(target);
-        assertTrue(TensorUtils.equals(target, parse("g_a+y_a")));
+        assertTrue(TensorUtils.equalsExactly(target, parse("g_a+y_a")));
     }
 
     @Test
@@ -423,7 +423,7 @@ public class SubstitutionsTest {
         Tensor target = parse("f_a[g_p,k_k]");
         Transformation transformation = Substitutions.getTransformation(from, to);
         target = transformation.transform(target);
-        assertTrue(TensorUtils.equals(target, parse("g_a+k_a")));
+        assertTrue(TensorUtils.equalsExactly(target, parse("g_a+k_a")));
     }
 
     @Test
@@ -436,7 +436,7 @@ public class SubstitutionsTest {
         System.out.println(target);
         target = contract(target);
         System.out.println(target);
-        assertTrue(TensorUtils.equals(target, parse("g_a+y_a")));
+        assertTrue(TensorUtils.equalsExactly(target, parse("g_a+y_a")));
     }
 
     @Test
@@ -448,7 +448,7 @@ public class SubstitutionsTest {
         target = transformation.transform(target);
         System.out.println(target);
         target = contract(target);
-        assertTrue(TensorUtils.equals(target, parse("X^a+Y^a")));
+        assertTrue(TensorUtils.equalsExactly(target, parse("X^a+Y^a")));
     }
 
     @Test
@@ -459,7 +459,7 @@ public class SubstitutionsTest {
         Transformation transformation = Substitutions.getTransformation(from, to);
         target = transformation.transform(target);
         target = contract(target);
-        assertTrue(TensorUtils.equals(target, parse("X^a+Y^i_i^a")));
+        assertTrue(TensorUtils.equalsExactly(target, parse("X^a+Y^i_i^a")));
     }
 
     @Test
@@ -472,7 +472,7 @@ public class SubstitutionsTest {
         target = contract(target);
 
         Tensor expected = parse(target.toString(ToStringMode.REDBERRY_SOUT));
-        assertTrue(TensorUtils.equals(target, expected));
+        assertTrue(TensorUtils.equalsExactly(target, expected));
     }
 
     @Test
@@ -482,7 +482,7 @@ public class SubstitutionsTest {
         Tensor target = parse("f[g]");
         Transformation transformation = Substitutions.getTransformation(from, to);
         target = transformation.transform(target);
-        assertTrue(TensorUtils.equals(target, parse("g+y")));
+        assertTrue(TensorUtils.equalsExactly(target, parse("g+y")));
     }
 
     @Test
@@ -492,7 +492,7 @@ public class SubstitutionsTest {
         Tensor target = parse("f_a[g_p]");
         Transformation transformation = Substitutions.getTransformation(from, to);
         target = transformation.transform(target);
-        assertTrue(TensorUtils.equals(target, parse("g_a+y_a")));
+        assertTrue(TensorUtils.equalsExactly(target, parse("g_a+y_a")));
     }
 
     @Test
@@ -502,7 +502,7 @@ public class SubstitutionsTest {
         Tensor target = parse("f_a[g_p,k_k]");
         Transformation transformation = Substitutions.getTransformation(from, to);
         target = transformation.transform(target);
-        assertTrue(TensorUtils.equals(target, parse("g_a+k_a")));
+        assertTrue(TensorUtils.equalsExactly(target, parse("g_a+k_a")));
     }
 
 //    @Test
@@ -512,7 +512,7 @@ public class SubstitutionsTest {
 //        Tensor target = parse("f_a[g^p]");
 //        Transformation transformation = Substitutions.getTransformation(from, to);
 //        target = transformation.transform(target);
-//        assertTrue(TensorUtils.equals(target, parse("f_{a}[g^{p}]")));
+//        assertTrue(TensorUtils.equalsExactly(target, parse("f_{a}[g^{p}]")));
 //    }
     @Test
     public void testField13() {
@@ -521,7 +521,7 @@ public class SubstitutionsTest {
         Tensor target = parse("f_mn[z_i*y_j]");
         Transformation transformation = Substitutions.getTransformation(from, to);
         target = transformation.transform(target);
-        assertTrue(TensorUtils.equals(target, parse("z_{m}*y_{n}")));
+        assertTrue(TensorUtils.equalsExactly(target, parse("z_{m}*y_{n}")));
     }
 
     @Test
@@ -531,7 +531,7 @@ public class SubstitutionsTest {
         Tensor target = parse("f_mn[y_j*z_i]");
         Transformation transformation = Substitutions.getTransformation(from, to);
         target = transformation.transform(target);
-        assertTrue(TensorUtils.equals(target, parse("z_{m}*y_{n}")));
+        assertTrue(TensorUtils.equalsExactly(target, parse("z_{m}*y_{n}")));
     }
 
     @Test
@@ -554,7 +554,7 @@ public class SubstitutionsTest {
 
         target1 = contract(target1);
 
-        assertTrue(TensorUtils.compare(target, target1));
+        assertTrue(TensorUtils.equals(target, target1));
     }
 
     @Test

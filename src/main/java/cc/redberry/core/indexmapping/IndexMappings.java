@@ -43,73 +43,28 @@ public final class IndexMappings {
     public static MappingsPort simpleTensorsPort(SimpleTensor from, SimpleTensor to) {
         final IndexMappingProvider provider = ProviderSimpleTensor.FACTORY_SIMPLETENSOR.create(IndexMappingProvider.Util.singleton(new IndexMappingBufferImpl()), from, to);
         provider.tick();
-        return new MappingsPort() {
-
-            @Override
-            public IndexMappingBuffer take() {
-                IndexMappingBuffer buf = provider.take();
-                if (buf != null)
-                    buf.removeContracted();
-                return buf;
-            }
-        };
+        return new MappingsPortRemovingContracted(provider);
     }
 
     public static MappingsPort createBijectiveProductPort(Tensor[] from, Tensor[] to) {
         if (from.length != to.length)
-            return IndexMappingProvider.Util.EMPTY_PROVIDER;
+            throw new IllegalArgumentException("From length != to length.");
         if (from.length == 0)
             return IndexMappingProvider.Util.singleton(new IndexMappingBufferImpl());
         if (from.length == 1)
             return createPort(from[0], to[0]);
-        return removingContractedWrapper(new SimpleProductProvider(IndexMappingProvider.Util.singleton(new IndexMappingBufferImpl()), from, to));
-    }
-
-    public static MappingsPort removingContractedWrapper(final MappingsPort port) {
-        return new MappingsPort() {
-
-            private final MappingsPort innerPort = port;
-
-            @Override
-            public IndexMappingBuffer take() {
-                IndexMappingBuffer buffer = innerPort.take();
-                if (buffer == null)
-                    return null;
-                buffer.removeContracted();
-                return buffer;
-            }
-        };
+        return new MappingsPortRemovingContracted(new SimpleProductMappingsPort(IndexMappingProvider.Util.singleton(new IndexMappingBufferImpl()), from, to));
     }
 
     public static MappingsPort createPort(Tensor from, Tensor to) {
-        final IndexMappingProvider provider = createPort(IndexMappingProvider.Util.singleton(new IndexMappingBufferImpl()), from, to);
-        provider.tick();
-        return new MappingsPort() {
-
-            @Override
-            public IndexMappingBuffer take() {
-                IndexMappingBuffer buf = provider.take();
-                if (buf != null)
-                    buf.removeContracted();
-                return buf;
-            }
-        };
+        return createPort(new IndexMappingBufferImpl(), from, to);
     }
 
     public static MappingsPort createPort(final IndexMappingBuffer buffer,
                                           final Tensor from, final Tensor to) {
         final IndexMappingProvider provider = createPort(IndexMappingProvider.Util.singleton(buffer), from, to);
         provider.tick();
-        return new MappingsPort() {
-
-            @Override
-            public IndexMappingBuffer take() {
-                IndexMappingBuffer buf = provider.take();
-                if (buf != null)
-                    buf.removeContracted();
-                return buf;
-            }
-        };
+        return new MappingsPortRemovingContracted(provider);
     }
 
     public static IndexMappingBuffer getFirst(Tensor from, Tensor to) {
@@ -121,9 +76,7 @@ public final class IndexMappings {
     }
 
     public static boolean testMapping(Tensor from, Tensor to, IndexMappingBuffer buffer) {
-        IndexMappingBufferTester tester = IndexMappingBufferTester.create(buffer);
-        OutputPortUnsafe<IndexMappingBuffer> provider = createPort(tester, from, to);
-        return provider.take() != null;
+        return createPort(IndexMappingBufferTester.create(buffer), from, to).take() != null;
     }
 
     private static Tensor extractNonComplexFactor(Tensor t) {
@@ -192,7 +145,7 @@ public final class IndexMappings {
         map.put(ArcCot.class, ProviderFunctions.EVEN_FACTORY);
     }
 
-    public static Set<IndexMappingBuffer> createAllMappings(MappingsPort opu) {
+    private static Set<IndexMappingBuffer> getAllMappings(MappingsPort opu) {
         Set<IndexMappingBuffer> res = new HashSet<>();
         IndexMappingBuffer c;
         while ((c = opu.take()) != null)
@@ -200,7 +153,7 @@ public final class IndexMappings {
         return res;
     }
 
-    public static Set<IndexMappingBuffer> createAllMappings(Tensor from, Tensor to) {
-        return createAllMappings(IndexMappings.createPort(from, to));
+    public static Set<IndexMappingBuffer> getAllMappings(Tensor from, Tensor to) {
+        return getAllMappings(IndexMappings.createPort(from, to));
     }
 }

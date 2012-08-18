@@ -43,7 +43,7 @@ public class TensorsTest {
         Tensor tensor = parse("(A_ijk^ij+B_ijk^ij)*K_ij^ij");
         Tensor result = Expand.expand(tensor);
         Tensor expected = parse("K_{ij}^{ij}*A_{abk}^{ab}+K_{ij}^{ij}*B_{abk}^{ab}");
-        junit.framework.Assert.assertTrue(TensorUtils.compare(result, expected));
+        junit.framework.Assert.assertTrue(TensorUtils.equals(result, expected));
     }
 
     @Test
@@ -51,7 +51,7 @@ public class TensorsTest {
         Tensor tensor = parse("(A_ijk^ij+B_ijk^ij)*(K_ij^ij+T)");
         Tensor result = Expand.expand(tensor);
         Tensor expected = parse("(T+K_{ij}^{ij})*B_{abk}^{ab}+(T+K_{ij}^{ij})*A_{abk}^{ab}");
-        junit.framework.Assert.assertTrue(TensorUtils.compare(result, expected));
+        junit.framework.Assert.assertTrue(TensorUtils.equals(result, expected));
     }
 
     @Test
@@ -59,7 +59,7 @@ public class TensorsTest {
         Tensor tensor = parse("(A_ijk^ij+B_ijk^ij)*(K_ij^ijk+T^k)*a_ij");
         Tensor result = Expand.expand(tensor);
         Tensor expected = parse("T^{k}*A_{abk}^{ab}*a_{ij}+T^{k}*B_{abk}^{ab}*a_{ij}+K_{cd}^{cdk}*A_{abk}^{ab}*a_{ij}+B_{abk}^{ab}*K_{cd}^{cdk}*a_{ij}");
-        junit.framework.Assert.assertTrue(TensorUtils.compare(result, expected));
+        junit.framework.Assert.assertTrue(TensorUtils.equals(result, expected));
     }
 
     @Test
@@ -67,7 +67,7 @@ public class TensorsTest {
         Tensor tensor = parse("(A_ij^ijt+B_ijk^ijt*(H_ij^ijk+L_ij^ijk))*(K_ij^ijp+T^p)*a_ijpt");
         Tensor result = Expand.expand(tensor);
         Tensor expected = parse("K_{ab}^{abp}*H_{cd}^{cdk}*B_{efk}^{eft}*a_{ijpt}+K_{ab}^{abp}*A_{ef}^{eft}*a_{ijpt}+K_{ab}^{abp}*L_{cd}^{cdk}*B_{efk}^{eft}*a_{ijpt}+T^{p}*L_{cd}^{cdk}*B_{efk}^{eft}*a_{ijpt}+A_{ef}^{eft}*T^{p}*a_{ijpt}+H_{cd}^{cdk}*T^{p}*B_{efk}^{eft}*a_{ijpt}");
-        junit.framework.Assert.assertTrue(TensorUtils.compare(result, expected));
+        junit.framework.Assert.assertTrue(TensorUtils.equals(result, expected));
     }
 
     @Test
@@ -76,7 +76,7 @@ public class TensorsTest {
         Tensor result = multiplyAndRenameConflictingDummies(tensors);
         result = Expand.expand(result);
         Tensor expected = parse("B^{k}*N_{bk}^{bl}*L_{l}+A_{ij}^{ijk}*B_{ak}^{a}+A_{ij}^{ijk}*N_{bk}^{bl}*L_{l}+B^{k}*B_{ak}^{a}");
-        junit.framework.Assert.assertTrue(TensorUtils.compare(result, expected));
+        junit.framework.Assert.assertTrue(TensorUtils.equals(result, expected));
     }
 
     @Test
@@ -85,14 +85,14 @@ public class TensorsTest {
         Tensor result = multiplyAndRenameConflictingDummies(tensors);
         result = Expand.expand(result);
         Tensor expected = parse("Y_{k}*A_{ij}^{ijk}*C_{abc}^{abcl}+A_{ij}^{ijk}*B_{dk}^{d}*C_{abc}^{abcl}+Y_{k}*A_{ij}^{ijk}*O^{l}+A_{ij}^{ijk}*B_{dk}^{d}*O^{l}");
-        junit.framework.Assert.assertTrue(TensorUtils.compare(result, expected));
+        junit.framework.Assert.assertTrue(TensorUtils.equals(result, expected));
     }
 
     @Test
     public void testProductPower1() {
         Tensor t = Tensors.parse("Power[2*a,3]");
         Tensor expected = Tensors.parse("8*Power[a,3]");
-        Assert.assertTrue(TensorUtils.compare(t, expected));
+        Assert.assertTrue(TensorUtils.equals(t, expected));
     }
 
     @Test
@@ -114,27 +114,27 @@ public class TensorsTest {
 
         Tensor temp = target;
         temp = s.transform(pT.transform(temp));
-        Assert.assertTrue(TensorUtils.equals(temp, wolframResult));
+        Assert.assertTrue(TensorUtils.equalsExactly(temp, wolframResult));
 
         temp = target;
         temp = pT.transform(s.transform(temp));
-        Assert.assertTrue(TensorUtils.equals(temp, wolframResult));
+        Assert.assertTrue(TensorUtils.equalsExactly(temp, wolframResult));
 
         temp = target;
         temp = pT.transform(s.transform(Expand.expand(temp)));
-        Assert.assertTrue(TensorUtils.equals(temp, wolframResult));
+        Assert.assertTrue(TensorUtils.equalsExactly(temp, wolframResult));
 
         temp = target;
         temp = pT.transform(Expand.expand(s.transform(temp)));
-        Assert.assertTrue(TensorUtils.equals(temp, wolframResult));
+        Assert.assertTrue(TensorUtils.equalsExactly(temp, wolframResult));
 
         temp = target;
         temp = s.transform(Expand.expand(pT.transform(temp)));
-        Assert.assertTrue(TensorUtils.equals(temp, wolframResult));
+        Assert.assertTrue(TensorUtils.equalsExactly(temp, wolframResult));
 
         temp = pow(target, 2);
         temp = s.transform(pT.transform(Expand.expand(temp)));
-        Assert.assertTrue(TensorUtils.equals(temp, Expand.expand(pow(wolframResult, 2))));//135424*Power[M, 32]+1600*Power[M, 40]-29440*Power[M, 36]
+        Assert.assertTrue(TensorUtils.equalsExactly(temp, Expand.expand(pow(wolframResult, 2))));//135424*Power[M, 32]+1600*Power[M, 40]-29440*Power[M, 36]
     }
 
     @Ignore

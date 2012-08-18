@@ -40,7 +40,7 @@ public final class ProductBuilder implements TensorBuilder {
     private final ArrayList<Tensor> elements;
     private final List<Tensor> indexlessElements;
     //Only SimpleTensor and Complex can be putted in this map
-    //Both SimpleTensor and Complex have hashCode() and equals()
+    //Both SimpleTensor and Complex have hashCode() and equalsExactly()
     private final Map<Tensor, TensorBuilder> powers;
 
     public ProductBuilder(int initialCapacityIndexless, int initialCapacityData) {

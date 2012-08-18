@@ -103,7 +103,7 @@ public class ParserTest {
         Assert.assertTrue(tensor.getIndices().size() == 0);
         Assert.assertTrue(tensor.size() == 2);
         Assert.assertTrue(tensor.get(0) instanceof Power || tensor.get(1) instanceof Power);
-        Assert.assertTrue(TensorUtils.equals(tensor, Tensors.parse("a*1/b")));
+        Assert.assertTrue(TensorUtils.equalsExactly(tensor, Tensors.parse("a*1/b")));
     }
 
     @Test
@@ -116,7 +116,7 @@ public class ParserTest {
     public void testProductPowers1() {
         Tensor u = Tensors.parse("a*c/b*1/4");
         Tensor v = Tensors.parse("(a*c)/(4*b)");
-        Assert.assertTrue(TensorUtils.equals(u, v));
+        Assert.assertTrue(TensorUtils.equalsExactly(u, v));
         Assert.assertTrue(v instanceof Product);
     }
 
@@ -125,7 +125,7 @@ public class ParserTest {
         Tensor u = Tensors.parse("2*a*a*c/b*1/4*b/a/a");
         Tensor v = Tensors.parse("c/2");
         System.out.println(u);
-        Assert.assertTrue(TensorUtils.equals(u, v));
+        Assert.assertTrue(TensorUtils.equalsExactly(u, v));
         Assert.assertTrue(v instanceof Product);
     }
 
@@ -133,7 +133,7 @@ public class ParserTest {
     public void testProductPowers3() {
         Tensor u = Tensors.parse("Power[2-3*i,2]*2*a*a*c/b*1/4*b/a/a/(2-3*i)");
         Tensor v = Tensors.parse("c*(1+3/(-2)*i)");
-        Assert.assertTrue(TensorUtils.equals(u, v));
+        Assert.assertTrue(TensorUtils.equalsExactly(u, v));
         Assert.assertTrue(v instanceof Product);
     }
 
@@ -183,21 +183,21 @@ public class ParserTest {
     public void testSin3() {
         Tensor t = Tensors.parse("Sin[ArcSin[x]]");
         Tensor e = Tensors.parse("x");
-        Assert.assertTrue(TensorUtils.equals(e, t));
+        Assert.assertTrue(TensorUtils.equalsExactly(e, t));
     }
 
     @Test
     public void testSin4() {
         Tensor t = Tensors.parse("Sin[0]");
         Tensor e = Tensors.parse("0");
-        Assert.assertTrue(TensorUtils.equals(e, t));
+        Assert.assertTrue(TensorUtils.equalsExactly(e, t));
     }
 
     @Test(expected = RuntimeException.class)
     public void testSim1() {
         Tensor t = Tensors.parse("1^3");
         Tensor e = Tensors.parse("x");
-        Assert.assertTrue(TensorUtils.equals(e, t));
+        Assert.assertTrue(TensorUtils.equalsExactly(e, t));
     }
 
     @Test
@@ -222,14 +222,14 @@ public class ParserTest {
     public void testMinusMinus1() {
         Tensor t = Tensors.parse("--a");
         Tensor e = Tensors.parse("a");
-        Assert.assertTrue(TensorUtils.compare(t, e));
+        Assert.assertTrue(TensorUtils.equals(t, e));
     }
 
     @Test
     public void testMinusMinus2() {
         Tensor t = Tensors.parse("1--a*(b+--c)");
         Tensor e = Tensors.parse("1+a*(b+c)");
-        Assert.assertTrue(TensorUtils.compare(t, e));
+        Assert.assertTrue(TensorUtils.equals(t, e));
     }
 
     @Test(expected = IllegalArgumentException.class)

@@ -205,7 +205,7 @@ public class IndicesInsertionTest {
         Expression e = (Expression) Tensors.parse(expression, indicesInsertion);
 
         Tensor expected = Tensors.parse("DELTA^ma_a=-L*HATK^ma_a");
-        Assert.assertTrue(TensorUtils.equals(e, expected));
+        Assert.assertTrue(TensorUtils.equalsExactly(e, expected));
     }
 
     @Test

@@ -20,38 +20,32 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
-package cc.redberry.core.transformations;
+package cc.redberry.core.context.defaults;
 
-import cc.redberry.core.indexmapping.*;
-import cc.redberry.core.number.*;
-import cc.redberry.core.tensor.*;
-import cc.redberry.core.tensor.iterator.*;
-import cc.redberry.core.utils.*;
+import cc.redberry.core.context.ContextSettings;
+import cc.redberry.core.context.ToStringMode;
+import cc.redberry.core.indices.IndexType;
 
 /**
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public final class RemoveDueToSymmetry implements Transformation {
+public class DefaultContextSettings {
 
-    public static final RemoveDueToSymmetry INSANCE = new RemoveDueToSymmetry();
+    public static ContextSettings create() {
+        ContextSettings defaultSettings = new ContextSettings(ToStringMode.REDBERRY, "d");
+        defaultSettings.setMetricName("g");
 
-    private RemoveDueToSymmetry() {
-    }
+        defaultSettings.addMetricIndexType(IndexType.LatinLower);
+        defaultSettings.addMetricIndexType(IndexType.GreekLower);
+        defaultSettings.addMetricIndexType(IndexType.LatinUpper);
+        //defaultSettings.addMetricIndexType(IndexType.GreekUpper);
 
-    @Override
-    public Tensor transform(Tensor t) {
-        TreeTraverseIterator iterator = new TreeTraverseIterator(t);
-        TraverseState state;
-        Tensor c;
-        while ((state = iterator.next()) != null) {
-            if (state != TraverseState.Leaving)
-                continue;
-            c = iterator.current();
-            if (TensorUtils.isZeroDueToSymmetry(c))
-                iterator.set(Complex.ZERO);
-        }
-        return iterator.result();
+        //Reading seed from property if exists
+        if (System.getProperty("redberry.nmseed") != null)
+            defaultSettings.setNameManagerSeed(Long.parseLong(System.getProperty("redberry.nmseed"), 10));
+
+        return defaultSettings;
     }
 }

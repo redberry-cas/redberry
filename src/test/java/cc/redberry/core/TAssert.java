@@ -39,7 +39,7 @@ import java.util.*;
 public class TAssert {
     
     public static void assertEquals(Tensor target, Tensor expected) {
-        org.junit.Assert.assertTrue(TensorUtils.equals(target, expected));
+        org.junit.Assert.assertTrue(TensorUtils.equalsExactly(target, expected));
     }
     
     public static void assertEquals(Tensor target, String expected) {
@@ -47,7 +47,7 @@ public class TAssert {
     }
     
     public static void assertParity(Tensor target, Tensor expected) {
-        org.junit.Assert.assertTrue(target.toString(), TensorUtils.compare(target, expected));
+        org.junit.Assert.assertTrue(target.toString(), TensorUtils.equals(target, expected));
     }
     
     public static void assertParity(Tensor target, String expected) {
@@ -67,7 +67,7 @@ public class TAssert {
     }
     
     public static void assertParityFalse(Tensor target, Tensor expected) {
-        assertFalse(TensorUtils.compare(target, expected));
+        assertFalse(TensorUtils.equals(target, expected));
     }
     
     public static void assertParityFalse(Tensor target, String expected) {
@@ -85,11 +85,11 @@ public class TAssert {
     }
     
     public static boolean isEquals(Tensor tensor, String what) {
-        return TensorUtils.equals(tensor, Tensors.parse(what));
+        return TensorUtils.equalsExactly(tensor, Tensors.parse(what));
     }
     
     public static boolean parity(Tensor tensor, String what) {
-        return TensorUtils.compare(tensor, Tensors.parse(what));
+        return TensorUtils.equals(tensor, Tensors.parse(what));
     }
     
     public static void assertTrue(boolean condition) {

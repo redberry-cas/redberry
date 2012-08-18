@@ -59,14 +59,14 @@ public class TensorLastIteratorTest {
         Tensor tensor = Tensors.parse("sin[cos[a+b]+tan[e+l]]");
 
         TensorLastIterator tfi = new TensorLastIterator(tensor);
-        while (!TensorUtils.equals(tfi.next(), Tensors.parse("a"))) ;
+        while (!TensorUtils.equalsExactly(tfi.next(), Tensors.parse("a"))) ;
         tfi.set(Tensors.parse("x"));
         while (tfi.next() != null) ;
 
         Tensor result = tfi.result();
         Tensor expected = Tensors.parse("sin[cos[x+b]+tan[e+l]]");
 
-        assertTrue(TensorUtils.equals(result, expected));
+        assertTrue(TensorUtils.equalsExactly(result, expected));
     }
 
     @Test
@@ -78,17 +78,17 @@ public class TensorLastIteratorTest {
         Tensor current;
         int i = 0;
         while ((current = tfi.next()) != null) {
-            if (TensorUtils.equals(current, Tensors.parse("a")))
+            if (TensorUtils.equalsExactly(current, Tensors.parse("a")))
                 tfi.set(Tensors.parse("2"));
-            else if (TensorUtils.equals(current, Tensors.parse("b")))
+            else if (TensorUtils.equalsExactly(current, Tensors.parse("b")))
                 tfi.set(Tensors.parse("3"));
-            else if (TensorUtils.equals(current, Tensors.parse("c")))
+            else if (TensorUtils.equalsExactly(current, Tensors.parse("c")))
                 tfi.set(Tensors.parse("2"));
-            assertTrue(TensorUtils.equals(current, expectedArray[i++]));
+            assertTrue(TensorUtils.equalsExactly(current, expectedArray[i++]));
         }
         Tensor result = tfi.result();
         Tensor expected = Tensors.parse("25");
-        assertTrue(TensorUtils.equals(result, expected));
+        assertTrue(TensorUtils.equalsExactly(result, expected));
     }
 
     @Test
@@ -97,18 +97,18 @@ public class TensorLastIteratorTest {
         TensorLastIterator tfi = new TensorLastIterator(tensor);
         Tensor current;
         while ((current = tfi.next()) != null) {
-            if (TensorUtils.equals(current, Tensors.parse("a")))
+            if (TensorUtils.equalsExactly(current, Tensors.parse("a")))
                 tfi.set(Tensors.parse("2"));
-            else if (TensorUtils.equals(current, Tensors.parse("b+c"))) {
+            else if (TensorUtils.equalsExactly(current, Tensors.parse("b+c"))) {
                 tfi.set(Tensors.parse("4"));
-            } else if (TensorUtils.equals(current, Tensors.parse("B"))) {
+            } else if (TensorUtils.equalsExactly(current, Tensors.parse("B"))) {
                 tfi.set(Tensors.parse("1/5"));
             }
         }
 
         Tensor result = tfi.result();
         Tensor expected = Tensors.parse("392*A+1/10+D");
-        assertTrue(TensorUtils.equals(result, expected));
+        assertTrue(TensorUtils.equalsExactly(result, expected));
     }
 
     @Test
@@ -117,11 +117,11 @@ public class TensorLastIteratorTest {
         TensorLastIterator tfi = new TensorLastIterator(tensor);
         Tensor current;
         while((current=tfi.next()) != null)
-            if (TensorUtils.equals(current, Tensors.parse("a+b")))
+            if (TensorUtils.equalsExactly(current, Tensors.parse("a+b")))
                 tfi.set(Tensors.parse("(x+y)*3"));
         Tensor result = tfi.result();
         Tensor expected = Tensors.parse("cos[sin[(x+y)*3]]");
-        assertTrue(TensorUtils.equals(result, expected));
+        assertTrue(TensorUtils.equalsExactly(result, expected));
     }
 
     @Test
@@ -130,12 +130,12 @@ public class TensorLastIteratorTest {
         TensorLastIterator tfi = new TensorLastIterator(tensor);
         Tensor current;
         while ((current = tfi.next()) != null) {
-            if (TensorUtils.equals(current, Tensors.parse("R^i+T^i")))
+            if (TensorUtils.equalsExactly(current, Tensors.parse("R^i+T^i")))
                 tfi.set(Tensors.parse("W^j*3"));
         }
         Tensor result = tfi.result();
         Tensor expected = Tensors.parse("A_\\alpha*B^\\alpha_i*W^j*3");
-        assertTrue(TensorUtils.equals(result, expected));
+        assertTrue(TensorUtils.equalsExactly(result, expected));
     }
 
     @Test
@@ -144,12 +144,12 @@ public class TensorLastIteratorTest {
         TensorLastIterator tfi = new TensorLastIterator(tensor);
         Tensor current;
         while ((current = tfi.next()) != null) {
-            if (TensorUtils.equals(current, Tensors.parse("a+b*(W+U_i*U^i)")))
+            if (TensorUtils.equalsExactly(current, Tensors.parse("a+b*(W+U_i*U^i)")))
                 tfi.set(Tensors.parse("(a+b)*3"));
         }
         Tensor result = tfi.result();
         Tensor expected = Tensors.parse("Power[a+b, -1]*(a+b)*B^{\\alpha }*A_{\\alpha }");
-        assertTrue(TensorUtils.equals(result, expected));
+        assertTrue(TensorUtils.equalsExactly(result, expected));
     }
 
     @Test
@@ -158,14 +158,14 @@ public class TensorLastIteratorTest {
         TensorLastIterator tfi = new TensorLastIterator(tensor);
         Tensor current;
         while ((current = tfi.next()) != null) {
-            if (TensorUtils.equals(current, Tensors.parse("a+b*(W+U_i*U^i)")))
+            if (TensorUtils.equalsExactly(current, Tensors.parse("a+b*(W+U_i*U^i)")))
                 tfi.set(Tensors.parse("10"));
-            if (TensorUtils.equals(current, Tensors.parse("e+f")))
+            if (TensorUtils.equalsExactly(current, Tensors.parse("e+f")))
                 tfi.set(Tensors.parse("K*2"));
         }
         Tensor result = tfi.result();
         Tensor expected = Tensors.parse("(a+b)*B^{\\alpha }*A_{\\alpha }*3/4");
-        assertTrue(TensorUtils.equals(result, expected));
+        assertTrue(TensorUtils.equalsExactly(result, expected));
     }
 
     @Test
@@ -174,13 +174,13 @@ public class TensorLastIteratorTest {
         TensorLastIterator tfi = new TensorLastIterator(tensor);
         Tensor current;
         while ((current = tfi.next()) != null) {
-            if (TensorUtils.equals(current, Tensors.parse("B^{\\alpha}_ijk")))
+            if (TensorUtils.equalsExactly(current, Tensors.parse("B^{\\alpha}_ijk")))
                 tfi.set(Tensors.parse("U_{k\\beta}^{f\\alpha}"));
-            if (TensorUtils.equals(current, Tensors.parse("T^ijf_\\beta")))
+            if (TensorUtils.equalsExactly(current, Tensors.parse("T^ijf_\\beta")))
                 tfi.set(Tensors.parse("2"));
         }
         Tensor result = tfi.result();
         Tensor expected = Tensors.parse("A_{\\alpha}^\\beta*U_{k\\beta}^{f\\alpha}*12");
-        assertTrue(TensorUtils.equals(result, expected));
+        assertTrue(TensorUtils.equalsExactly(result, expected));
     }
 }

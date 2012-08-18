@@ -77,12 +77,12 @@ public class ProductTest {
         for (int i = 0; i < 100; ++i) {
             CC.resetTensorNames();
             Product p = (Product) Tensors.parse("a*b*c*A^ij*A_i*A_j*b_u");
-            Assert.assertTrue(TensorUtils.equals(Tensors.parse("b_u"), p.getContent().getNonScalar()));
+            Assert.assertTrue(TensorUtils.equalsExactly(Tensors.parse("b_u"), p.getContent().getNonScalar()));
             ProductBuilder pb = new ProductBuilder();
             for (Tensor t : p.getAllScalars())
                 pb.put(t);
             pb.put(Tensors.parse("b_u"));
-            Assert.assertTrue(TensorUtils.equals(pb.build(), p));
+            Assert.assertTrue(TensorUtils.equalsExactly(pb.build(), p));
         }
     }
 
@@ -92,7 +92,7 @@ public class ProductTest {
         TensorBuilder builder = t.getBuilder();
         for (Tensor c : t)
             builder.put(c);
-        Assert.assertTrue(TensorUtils.equals(t, builder.build()));
+        Assert.assertTrue(TensorUtils.equalsExactly(t, builder.build()));
     }
 
     @Test
@@ -141,7 +141,7 @@ public class ProductTest {
         Tensor[] tensors = product.getRange(0, 1);
         int i = 0;
         for (Tensor t : tensors)
-            Assert.assertTrue(TensorUtils.equals(product.get(i++), t));
+            Assert.assertTrue(TensorUtils.equalsExactly(product.get(i++), t));
     }
 
     @Test
@@ -150,7 +150,7 @@ public class ProductTest {
         Tensor[] tensors = product.getRange(4, 6);
         int i = 4;
         for (Tensor t : tensors)
-            Assert.assertTrue(TensorUtils.equals(product.get(i++), t));
+            Assert.assertTrue(TensorUtils.equalsExactly(product.get(i++), t));
     }
 
     @Test
@@ -159,7 +159,7 @@ public class ProductTest {
         Tensor[] tensors = product.getRange(0, 10);
         int i = 0;
         for (Tensor t : tensors)
-            Assert.assertTrue(TensorUtils.equals(product.get(i++), t));
+            Assert.assertTrue(TensorUtils.equalsExactly(product.get(i++), t));
     }
 
     @Test
@@ -168,7 +168,7 @@ public class ProductTest {
         Tensor[] tensors = product.getRange(0, 1);
         int i = 0;
         for (Tensor t : tensors)
-            Assert.assertTrue(TensorUtils.equals(product.get(i++), t));
+            Assert.assertTrue(TensorUtils.equalsExactly(product.get(i++), t));
     }
 
     @Test
@@ -177,7 +177,7 @@ public class ProductTest {
         Tensor[] tensors = product.getRange(0, 3);
         int i = 0;
         for (Tensor t : tensors)
-            Assert.assertTrue(TensorUtils.equals(product.get(i++), t));
+            Assert.assertTrue(TensorUtils.equalsExactly(product.get(i++), t));
     }
 
     @Test
@@ -186,7 +186,7 @@ public class ProductTest {
         Tensor[] tensors = product.getRange(4, 8);
         int i = 4;
         for (Tensor t : tensors)
-            Assert.assertTrue(TensorUtils.equals(product.get(i++), t));
+            Assert.assertTrue(TensorUtils.equalsExactly(product.get(i++), t));
     }
 
     @Test
@@ -195,7 +195,7 @@ public class ProductTest {
         Tensor[] tensors = product.getRange(1, 3);
         int i = 1;
         for (Tensor t : tensors)
-            Assert.assertTrue(TensorUtils.equals(product.get(i++), t));
+            Assert.assertTrue(TensorUtils.equalsExactly(product.get(i++), t));
     }
 
     @Test
@@ -205,7 +205,7 @@ public class ProductTest {
         Tensor[] actual = product.getRange(2, 3);
         Assert.assertTrue(expected.length == actual.length);
         for (int i = 0; i < expected.length; ++i)
-            Assert.assertTrue(TensorUtils.equals(expected[i], actual[i]));
+            Assert.assertTrue(TensorUtils.equalsExactly(expected[i], actual[i]));
     }
 
     @Test
@@ -236,7 +236,7 @@ public class ProductTest {
     private static void assertArraysEquals(Tensor[] expected, Tensor[] actual) {
         Assert.assertTrue(expected.length == actual.length);
         for (int i = 0; i < expected.length; ++i)
-            Assert.assertTrue(TensorUtils.equals(expected[i], actual[i]));
+            Assert.assertTrue(TensorUtils.equalsExactly(expected[i], actual[i]));
     }
 
     @Test
@@ -247,6 +247,6 @@ public class ProductTest {
         builder.put(x);
         Tensor t = builder.build();
         Tensor e = Tensors.parse("Power[Power[pT,2] - s, 4]*Power[s, 4]");
-        Assert.assertTrue(TensorUtils.equals(t, e));
+        Assert.assertTrue(TensorUtils.equalsExactly(t, e));
     }
 }

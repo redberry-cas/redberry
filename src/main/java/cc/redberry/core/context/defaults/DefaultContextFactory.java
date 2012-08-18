@@ -24,7 +24,6 @@ package cc.redberry.core.context.defaults;
 
 import cc.redberry.core.context.Context;
 import cc.redberry.core.context.ContextFactory;
-import cc.redberry.core.context.ContextSettings;
 
 public class DefaultContextFactory implements ContextFactory {
     public static final DefaultContextFactory INSTANCE = new DefaultContextFactory();
@@ -35,7 +34,7 @@ public class DefaultContextFactory implements ContextFactory {
     @Override
     public Context createContext() {
         //Creating context defaults
-        Context context = new Context(ContextSettings.createDefault());
+        Context context = new Context(DefaultContextSettings.create());
         return context;
     }
 }

@@ -106,20 +106,4 @@ public class ContextSettings {
     public void setConverterManager(IndexConverterManager converterManager) {
         this.converterManager = converterManager;
     }
-
-    public static ContextSettings createDefault() {
-        ContextSettings defaultSettings = new ContextSettings(ToStringMode.REDBERRY, "d");
-        defaultSettings.setMetricName("g");
-
-        defaultSettings.addMetricIndexType(IndexType.LatinLower);
-        defaultSettings.addMetricIndexType(IndexType.GreekLower);
-        defaultSettings.addMetricIndexType(IndexType.LatinUpper);
-        defaultSettings.addMetricIndexType(IndexType.GreekUpper);
-
-        //Reading seed from property if exists
-        if (System.getProperty("redberry.nmseed") != null)
-            defaultSettings.setNameManagerSeed(Long.parseLong(System.getProperty("redberry.nmseed"), 10));
-
-        return defaultSettings;
-    }
 }

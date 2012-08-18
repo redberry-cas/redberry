@@ -34,7 +34,7 @@ import static cc.redberry.core.indices.IndicesUtils.*;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public class IndexGenerator {
+public final class IndexGenerator {
     protected Map<Byte, IntGenerator> generators = new HashMap<>();
 
     public IndexGenerator() {

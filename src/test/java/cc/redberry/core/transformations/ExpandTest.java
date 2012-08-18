@@ -51,7 +51,7 @@ public class ExpandTest {
         Tensor actual = Expand.expand(t);
         System.out.println(actual);
         Tensor expected = Tensors.parse("a*c");
-        Assert.assertTrue(TensorUtils.equals(actual, expected));
+        Assert.assertTrue(TensorUtils.equalsExactly(actual, expected));
     }
 
     @Test
@@ -60,7 +60,7 @@ public class ExpandTest {
         Tensor actual = Expand.expand(t);
         System.out.println(actual);
         Tensor expected = Tensors.parse("2*a*c+b*c");
-        Assert.assertTrue(TensorUtils.equals(actual, expected));
+        Assert.assertTrue(TensorUtils.equalsExactly(actual, expected));
     }
 
     @Test
@@ -68,7 +68,7 @@ public class ExpandTest {
         Tensor t = parse("(a+b)*c-a*c");
         Tensor actual = Expand.expand(t);
         Tensor expected = Tensors.parse("b*c");
-        Assert.assertTrue(TensorUtils.equals(actual, expected));
+        Assert.assertTrue(TensorUtils.equalsExactly(actual, expected));
     }
 
     @Test
@@ -78,7 +78,7 @@ public class ExpandTest {
         Tensor actual = Expand.expand(t);
         System.out.println(actual);
         Tensor expected = Tensors.parse("b*c*p_i");
-        Assert.assertTrue(TensorUtils.equals(actual, expected));
+        Assert.assertTrue(TensorUtils.equalsExactly(actual, expected));
     }
 
     @Test
@@ -86,7 +86,7 @@ public class ExpandTest {
         Tensor t = parse("(a*p_i+b*p_i)*c-a*c*k_i");
         Tensor actual = Expand.expand(t);
         Tensor expected = Tensors.parse("(a*c+c*b)*p_i-a*c*k_i");
-        Assert.assertTrue(TensorUtils.equals(actual, expected));
+        Assert.assertTrue(TensorUtils.equalsExactly(actual, expected));
     }
 
     @Test
@@ -94,7 +94,7 @@ public class ExpandTest {
         Tensor actual = parse("c*(a*(c+n)+b)");
         actual = Expand.expand(actual);
         Tensor expected = parse("c*a*c+c*a*n+c*b");
-        Assert.assertTrue(TensorUtils.equals(actual, expected));
+        Assert.assertTrue(TensorUtils.equalsExactly(actual, expected));
     }
 
     @Test
@@ -102,7 +102,7 @@ public class ExpandTest {
         Tensor actual = parse("a*(c+b)");
         actual = Expand.expand(actual);
         Tensor expected = parse("a*c+a*b");
-        Assert.assertTrue(TensorUtils.equals(actual, expected));
+        Assert.assertTrue(TensorUtils.equalsExactly(actual, expected));
     }
 
     @Test
@@ -110,7 +110,7 @@ public class ExpandTest {
         Tensor actual = parse("Power[a+b,2]");
         actual = Expand.expand(actual);
         Tensor expected = parse("a*a+b*b+2*a*b");
-        Assert.assertTrue(TensorUtils.equals(actual, expected));
+        Assert.assertTrue(TensorUtils.equalsExactly(actual, expected));
     }
 
     @Test
@@ -119,7 +119,7 @@ public class ExpandTest {
         actual = Expand.expand(actual);
         System.out.println(actual);
 //        Tensor expected = parse("a*a*a+b*b*b+3*a*a*b+3*a*b*b");
-//        Assert.assertTrue(TensorUtils.equals(actual, expected));
+//        Assert.assertTrue(TensorUtils.equalsExactly(actual, expected));
     }
 
     @Test
@@ -138,7 +138,7 @@ public class ExpandTest {
             Tensor actual = parse("Power[a_i^i+b_i^i,2]");
             actual = Expand.expand(actual);
             Tensor expected = parse("2*b_{i}^{i}*a_{a}^{a}+a_{i}^{i}*a_{a}^{a}+b_{i}^{i}*b_{a}^{a}");
-            Assert.assertTrue(TensorUtils.compare(actual, expected));
+            Assert.assertTrue(TensorUtils.equals(actual, expected));
         }
     }
 
@@ -147,7 +147,7 @@ public class ExpandTest {
         Tensor actual = parse("f_mn*(f^mn+r^mn)-r_ab*f^ab");
         actual = Expand.expand(actual);
         Tensor expected = parse("f_{mn}*f^{mn}");
-        Assert.assertTrue(TensorUtils.equals(actual, expected));
+        Assert.assertTrue(TensorUtils.equalsExactly(actual, expected));
     }
 
     @Test
@@ -155,7 +155,7 @@ public class ExpandTest {
         Tensor actual = parse("((a+b)*(c+a)-b*a)*f_mn*(f^mn+r^mn)");
         actual = Expand.expand(actual);
         Tensor expected = parse("(a*a+b*c+a*c)*f_mn*f^mn+(a*a+b*c+a*c)*f_mn*r^mn");
-        Assert.assertTrue(TensorUtils.equals(actual, expected));
+        Assert.assertTrue(TensorUtils.equalsExactly(actual, expected));
     }
 
     @Test
@@ -172,7 +172,7 @@ public class ExpandTest {
             Tensor actual = parse("(a+b)*(a*f_m+b*g_m)*(b*f^m+a*g^m)");
             actual = Expand.expand(actual);
             Tensor expected = parse("(Power[a, 2]*b+a*Power[b, 2])*g_{m}*g^{m}+(Power[a, 3]+Power[a, 2]*b+a*Power[b, 2]+Power[b, 3])*f^{m}*g_{m}+(Power[a, 2]*b+a*Power[b, 2])*f_{m}*f^{m}");
-            Assert.assertTrue(TensorUtils.compare(actual, expected));
+            Assert.assertTrue(TensorUtils.equals(actual, expected));
         }
     }
 
@@ -181,7 +181,7 @@ public class ExpandTest {
         Tensor actual = parse("((a+b)*(c+a)-a)*f_mn*(f^mn+r^mn)-((a-b)*(c-a)+a)*r_ab*(f^ab+r^ab)");
         actual = Expand.expand(actual);
         Tensor expected = Tensors.parse("(Power[a, 2]+c*b+-1*a+c*a+b*a)*f^{mn}*f_{mn}+(-2*a+2*Power[a, 2]+2*c*b)*r^{mn}*f_{mn}+(Power[a, 2]+c*b+-1*a+-1*c*a+-1*b*a)*r^{ab}*r_{ab}");
-        Assert.assertTrue(TensorUtils.compare(actual, expected));
+        Assert.assertTrue(TensorUtils.equals(actual, expected));
     }
 
     @Test

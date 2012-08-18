@@ -20,38 +20,26 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
-package cc.redberry.core.transformations;
-
-import cc.redberry.core.indexmapping.*;
-import cc.redberry.core.number.*;
-import cc.redberry.core.tensor.*;
-import cc.redberry.core.tensor.iterator.*;
-import cc.redberry.core.utils.*;
+package cc.redberry.core.indexmapping;
 
 /**
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public final class RemoveDueToSymmetry implements Transformation {
+final class MappingsPortRemovingContracted implements MappingsPort {
 
-    public static final RemoveDueToSymmetry INSANCE = new RemoveDueToSymmetry();
+    private final MappingsPort provider;
 
-    private RemoveDueToSymmetry() {
+    public MappingsPortRemovingContracted(MappingsPort provider) {
+        this.provider = provider;
     }
 
     @Override
-    public Tensor transform(Tensor t) {
-        TreeTraverseIterator iterator = new TreeTraverseIterator(t);
-        TraverseState state;
-        Tensor c;
-        while ((state = iterator.next()) != null) {
-            if (state != TraverseState.Leaving)
-                continue;
-            c = iterator.current();
-            if (TensorUtils.isZeroDueToSymmetry(c))
-                iterator.set(Complex.ZERO);
-        }
-        return iterator.result();
+    public IndexMappingBuffer take() {
+        IndexMappingBuffer buf = provider.take();
+        if (buf != null)
+            buf.removeContracted();
+        return buf;
     }
 }

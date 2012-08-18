@@ -29,16 +29,16 @@ import cc.redberry.core.tensor.Tensor;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-final class SimpleProductProvider implements MappingsPort {
+final class SimpleProductMappingsPort implements MappingsPort {
 
     private final IndexMappingProvider[] providers;
     private boolean inited = false;
 
-    SimpleProductProvider(final IndexMappingProvider[] providers) {
+    SimpleProductMappingsPort(final IndexMappingProvider[] providers) {
         this.providers = providers;
     }
 
-    SimpleProductProvider(final IndexMappingProvider opu,
+    SimpleProductMappingsPort(final IndexMappingProvider opu,
                           final Tensor[] from, final Tensor[] to) {
         providers = new IndexMappingProvider[from.length];
         providers[0] = IndexMappings.createPort(opu, from[0], to[0]);

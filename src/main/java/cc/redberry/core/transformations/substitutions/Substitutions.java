@@ -45,7 +45,7 @@ public final class Substitutions {
     }
 
     public static Transformation getTransformation(Tensor from, Tensor to) {
-        if (TensorUtils.compare(from, to))
+        if (TensorUtils.equals(from, to))
             return DummyTransformation.INSTANCE;
         SubstitutionProvider provider = map.get(from.getClass());
         if (provider == null)
