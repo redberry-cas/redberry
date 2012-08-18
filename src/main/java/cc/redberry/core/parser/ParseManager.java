@@ -34,20 +34,18 @@ import java.util.List;
  */
 public final class ParseManager {
 
-    private final Parser parser = Parser.DEFAULT;
-    private final List<Transformation> tensorPreprocessors = new ArrayList<>();
-    private final List<ParseNodeTransformer> nodesPreprocessors = new ArrayList<>();
+    private final Parser parser;
 
-    public List<ParseNodeTransformer> getNodesPreprocessors() {
-        return nodesPreprocessors;
-    }
-
-    public List<Transformation> getTensorPreprocessors() {
-        return tensorPreprocessors;
+    public ParseManager(Parser parser) {
+        this.parser = parser;
     }
 
     public Tensor parse(String expression) {
-        ParseNode node = Parser.DEFAULT.parse(expression);
+        return parser.parse(expression).toTensor();
+    }
+
+    public Tensor parse(String expression, Transformation[] tensorPreprocessors, ParseNodeTransformer[] nodesPreprocessors) {
+        ParseNode node = parser.parse(expression);
         for (ParseNodeTransformer tr : nodesPreprocessors)
             node = tr.transform(node);
         Tensor t = node.toTensor();
@@ -56,17 +54,7 @@ public final class ParseManager {
         return t;
     }
 
-    public static Tensor parse(String expression, Transformation[] tensorPreprocessors, ParseNodeTransformer[] nodesPreprocessors) {
-        ParseNode node = Parser.DEFAULT.parse(expression);
-        for (ParseNodeTransformer tr : nodesPreprocessors)
-            node = tr.transform(node);
-        Tensor t = node.toTensor();
-        for (Transformation tr : tensorPreprocessors)
-            t = tr.transform(t);
-        return t;
-    }
-    
-    public static Tensor parse(String expression,  ParseNodeTransformer[] nodesPreprocessors) {
+    public Tensor parse(String expression, ParseNodeTransformer... nodesPreprocessors) {
         return parse(expression, new Transformation[0], nodesPreprocessors);
     }
 }

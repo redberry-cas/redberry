@@ -59,81 +59,59 @@ public class IndicesInsertionTest {
         }
     }
 
-    public static void attachPreprocessor(String upper, String lower, String... indicator) {
-        CC.current().getParseManager().getNodesPreprocessors().add(new IndicesInsertion(ParserIndices.parseSimple(upper), ParserIndices.parseSimple(lower), new NamesIndicator(indicator)));
-    }
-
-    public static void attachPreprocessorWithTrueIndicator(String upper, String lower) {
-        CC.current().getParseManager().getNodesPreprocessors().add(new IndicesInsertion(ParserIndices.parseSimple(upper), ParserIndices.parseSimple(lower), Indicator.TRUE_INDICATOR));
-    }
-
-    public static void clearPreprocessors() {
-        CC.current().getParseManager().getNodesPreprocessors().clear();
-    }
-
-    @After
-    public void clearAfterMethod() {
-        clearPreprocessors();
+    public static Tensor parse(String tensor, String upper, String lower, String... indicator) {
+        Indicator indicator1 = indicator.length == 0 ? Indicator.TRUE_INDICATOR : new NamesIndicator(indicator);
+        return CC.current().getParseManager().parse(tensor, new IndicesInsertion(ParserIndices.parseSimple(upper), ParserIndices.parseSimple(lower), indicator1));
     }
 
     @Test
     public void test1() {
-        attachPreprocessor("^i", "_j", "A", "B", "C");
-        Tensor t = parse("A*B*C");
+        Tensor t = parse("A*B*C", "^i", "_j", "A", "B", "C");
         Indices indices = ParserIndices.parseSimple("^i_j");
         assertIndicesParity(t.getIndices().getFreeIndices(), indices);
     }
 
     @Test
     public void test2() {
-        attachPreprocessorWithTrueIndicator("^i", "_j");
-        Tensor t = parse("A*(B*A+C*K)*F");
+        Tensor t = parse("A*(B*A+C*K)*F", "^i", "_j");
         Indices indices = ParserIndices.parseSimple("^i_j");
-        clearPreprocessors();
-        Tensor e = parse("A^{i}_{a}*F^{b}_{j}*(B^{a}_{c}*A^{c}_{b}+K^{c}_{b}*C^{a}_{c})");
+        Tensor e = Tensors.parse("A^{i}_{a}*F^{b}_{j}*(B^{a}_{c}*A^{c}_{b}+K^{c}_{b}*C^{a}_{c})");
         assertIndicesParity(t.getIndices().getFreeIndices(), indices);
         assertParity(t, e);
     }
 
     @Test
     public void test3() {
-        attachPreprocessorWithTrueIndicator("^ij", "_pq");
-        Tensor t = parse("A^{\\alpha n}*B*C");
+        Tensor t = parse("A^{\\alpha n}*B*C", "^ij", "_pq");
         assertIndicesParity(t.getIndices().getFreeIndices(), ParserIndices.parseSimple("^{\\alpha n i j}_pq"));
     }
 
     @Test
     public void test4() {
-        attachPreprocessor("^ij", "_pq", "a", "b", "c", "d");
-        Tensor t = parse("a*b*A*c*B*C");
+        Tensor t = parse("a*b*A*c*B*C", "^ij", "_pq", "a", "b", "c", "d");
         Indices indices = ParserIndices.parseSimple("^ij_pq");
         assertIndicesParity(t.getIndices().getFreeIndices(), indices);
     }
 
     @Test
     public void test5() {
-        attachPreprocessor("^ij", "_pq", "a", "b", "c", "d");
-        Tensor t = parse("a*(b+a)*A*(c+d)*B*C");
-        clearPreprocessors();
-        Tensor e = parse("a^{ij}_{ab}*(b^{ab}_{cd}+a^{ab}_{cd})*A*(d^{cd}_{pq}+c^{cd}_{pq})*B*C");
+        Tensor t = parse("a*(b+a)*A*(c+d)*B*C", "^ij", "_pq", "a", "b", "c", "d");
+        Tensor e = Tensors.parse("a^{ij}_{ab}*(b^{ab}_{cd}+a^{ab}_{cd})*A*(d^{cd}_{pq}+c^{cd}_{pq})*B*C");
         assertParity(t, e);
     }
 
     @Test
     public void test6() {
-        attachPreprocessor("^ij", "_pq", "A", "B", "C", "F");
-        Tensor t = parse("a*(b+a)*A*(c+d)*B*C");
+        Tensor t = parse("a*(b+a)*A*(c+d)*B*C", "^ij", "_pq", "A", "B", "C", "F");
         Indices indices = ParserIndices.parseSimple("^ij_pq");
         assertIndicesParity(t.getIndices().getFreeIndices(), indices);
     }
 
     @Test
     public void test7() {
-        attachPreprocessorWithTrueIndicator("^i", "_j");
-        Tensor t = parse("A*(B+E*(R+K*U))");
+        Tensor t = parse("A*(B+E*(R+K*U))", "^i", "_j");
         Indices indices = ParserIndices.parseSimple("^i_j");
-        clearPreprocessors();
-        Tensor e = parse("A^i_a*(B^a_j+E^a_b*(R^b_j+K^b_c*U^c_j))");
+        Tensor e = Tensors.parse("A^i_a*(B^a_j+E^a_b*(R^b_j+K^b_c*U^c_j))");
         assertIndicesParity(t.getIndices().getFreeIndices(), indices);
         assertEquals(t, e);
     }
@@ -142,9 +120,7 @@ public class IndicesInsertionTest {
     public void test8() {
         for (int i = 0; i < 100; ++i) {
             CC.resetTensorNames();
-            attachPreprocessor("^ijpq", "_pqrs", "A", "B");
-            Tensor t = parse("L*L*(L-1)*A*B");
-            clearPreprocessors();
+            Tensor t = parse("L*L*(L-1)*A*B", "^ijpq", "_pqrs", "A", "B");
             Indices indices = ParserIndices.parseSimple("^ijpq_pqrs");
             assertIndicesParity(t.getIndices().getFreeIndices(), indices.getFreeIndices());
         }
@@ -152,23 +128,20 @@ public class IndicesInsertionTest {
 
     @Test
     public void test9() {
-        attachPreprocessor("^a", "_b", "A", "B");
-        Tensor t = parse("a*A*B+((1/2)*a+b)*A*(A+B*(A+X*A))*c");
+        Tensor t = parse("a*A*B+((1/2)*a+b)*A*(A+B*(A+X*A))*c", "^a", "_b", "A", "B");
         Indices indices = ParserIndices.parseSimple("^a_b");
         assertIndicesParity(t.getIndices().getFreeIndices(), indices.getFreeIndices());
     }
 
     @Test
     public void test10() {
-        attachPreprocessorWithTrueIndicator("^i", "_j");
-        Tensor t = parse("A=2*B+A*B");
+        Tensor t = parse("A=2*B+A*B", "^i", "_j");
         Indices indices = ParserIndices.parseSimple("^i_j");
         assertIndicesParity(t.getIndices().getFreeIndices(), indices.getFreeIndices());
     }
 
     @Test
     public void performance() {
-        attachPreprocessor("^ijpq", "_pqrs", "HATK", "DELTA");
         Tensor t = parse("(1/10)*L*L*HATK^{\\delta}*DELTA^{\\mu\\nu\\alpha\\beta}*HATK^{\\gamma}*n_{\\sigma}*n_{\\lambda}*R^{\\sigma}_{\\alpha\\beta\\gamma}*R^{\\lambda}_{\\mu\\nu\\delta} + "
                 + "L*L*(L-1)*(L-1)*(L-2)*HATK^{\\beta\\gamma\\delta}*DELTA^{\\alpha}*HATK^{\\mu\\nu}*n_{\\sigma}*n_{\\lambda}*((2/45)*R^{\\lambda}_{\\alpha\\delta\\nu}*R^{\\sigma}_{\\beta\\mu\\gamma}-(1/120)*R^{\\lambda}_{\\delta\\alpha\\nu}*R^{\\sigma}_{\\beta\\mu\\gamma}) +"
                 + "L*L*(L-1)*HATK^{\\delta}*DELTA^{\\alpha\\beta\\gamma}*HATK^{\\mu\\nu}*n_{\\sigma}*n_{\\lambda}*(-(1/10)*R^{\\lambda}_{\\mu\\gamma\\nu}*R^{\\sigma}_{\\alpha\\delta\\beta}+(1/15)*R^{\\lambda}_{\\delta\\alpha\\nu}*R^{\\sigma}_{\\beta\\mu\\gamma}+(1/60)*R^{\\lambda}_{\\beta\\delta\\nu}*R^{\\sigma}_{\\gamma\\mu\\alpha})+"
@@ -177,7 +150,7 @@ public class IndicesInsertionTest {
                 + "L*L*HATK^{\\mu}*DELTA^{\\alpha\\beta\\gamma}*HATK^{\\nu}*{\\nu}_{\\lambda}*(-(1/8)*R_{\\beta\\gamma}*R^{\\lambda}_{\\nu\\alpha\\mu}+(3/20)*R_{\\beta\\gamma}*R^{\\lambda}_{\\mu\\alpha\\nu}+(3/40)*R_{\\alpha\\mu}*R^{\\lambda}_{\\beta\\gamma\\nu}+(1/40)*R^{\\sigma}_{\\beta\\gamma\\mu}*R^{\\lambda}_{\\nu\\alpha\\sigma}-(3/20)*R^{\\sigma}_{\\alpha\\beta\\mu}*R^{\\lambda}_{\\gamma\\nu\\sigma}+(1/10)*R^{\\sigma}_{\\alpha\\beta\\nu}*R^{\\lambda}_{\\gamma\\mu\\sigma})+"
                 + "L*L*(L-1)*HATK^{\\gamma}*DELTA^{\\alpha\\beta}*HATK^{\\mu\\nu}*n_{\\lambda}*((1/20)*R_{\\alpha\\nu}*R^{\\lambda}_{\\gamma\\beta\\mu}+(1/20)*R_{\\alpha\\gamma}*R^{\\lambda}_{\\mu\\beta\\nu}+(1/10)*R_{\\alpha\\beta}*R^{\\lambda}_{\\mu\\gamma\\nu}+(1/20)*R^{\\sigma}_{\\alpha\\nu\\gamma}*R^{\\lambda}_{\\sigma\\beta\\mu}-(1/60)*R^{\\sigma}_{\\mu\\alpha\\nu}*R^{\\lambda}_{\\beta\\sigma\\gamma}+(1/10)*R^{\\sigma}_{\\alpha\\beta\\gamma}*R^{\\lambda}_{\\mu\\sigma\\nu}-(1/12)*R^{\\sigma}_{\\alpha\\beta\\nu}*R^{\\lambda}_{\\mu\\sigma\\gamma})+"
                 + "L*L*(L-1)*(L-1)*HATK^{\\alpha\\beta}*DELTA^{\\gamma}*HATK^{\\mu\\nu}*n_{\\lambda}*((1/60)*R_{\\alpha\\mu}*R^{\\lambda}_{\\beta\\nu\\gamma}-(1/20)*R_{\\alpha\\mu}*R^{\\lambda}_{\\gamma\\nu\\beta}+(1/120)*R_{\\alpha\\beta}*R^{\\lambda}_{\\mu\\nu\\gamma}+(3/40)*R_{\\alpha\\gamma}*R^{\\lambda}_{\\nu\\beta\\mu}+(1/20)*R^{\\sigma}_{\\gamma\\mu\\alpha}*R^{\\lambda}_{\\nu\\sigma\\beta}+(1/120)*R^{\\sigma}_{\\alpha\\mu\\gamma}*R^{\\lambda}_{\\beta\\nu\\sigma}-(1/40)*R^{\\sigma}_{\\alpha\\mu\\gamma}*R^{\\lambda}_{\\sigma\\nu\\beta}+(1/40)*R^{\\sigma}_{\\alpha\\mu\\beta}*R^{\\lambda}_{\\sigma\\nu\\gamma}-(1/20)*R^{\\sigma}_{\\alpha\\mu\\beta}*R^{\\lambda}_{\\gamma\\nu\\sigma}-(1/40)*R^{\\sigma}_{\\mu\\beta\\nu}*R^{\\lambda}_{\\gamma\\sigma\\alpha})+"
-                + "L*L*(L-1)*HATK^{\\alpha\\beta}*DELTA^{\\mu\\nu}*HATK^{\\gamma}*n_{\\lambda}*((1/20)*R^{\\sigma}_{\\mu\\nu\\beta}*R^{\\lambda}_{\\gamma\\sigma\\alpha}-(7/60)*R^{\\sigma}_{\\beta\\mu\\alpha}*R^{\\lambda}_{\\gamma\\nu\\sigma}+(1/20)*R^{\\sigma}_{\\beta\\mu\\alpha}*R^{\\lambda}_{\\sigma\\nu\\gamma}+(1/10)*R^{\\sigma}_{\\mu\\beta\\gamma}*R^{\\lambda}_{\\nu\\alpha\\sigma}+(1/60)*R^{\\sigma}_{\\mu\\beta\\gamma}*R^{\\lambda}_{\\alpha\\nu\\sigma}+(7/120)*R_{\\alpha\\beta}*R^{\\lambda}_{\\nu\\gamma\\mu}+(11/60)*R_{\\beta\\mu}*R^{\\lambda}_{\\nu\\alpha\\gamma})");
+                + "L*L*(L-1)*HATK^{\\alpha\\beta}*DELTA^{\\mu\\nu}*HATK^{\\gamma}*n_{\\lambda}*((1/20)*R^{\\sigma}_{\\mu\\nu\\beta}*R^{\\lambda}_{\\gamma\\sigma\\alpha}-(7/60)*R^{\\sigma}_{\\beta\\mu\\alpha}*R^{\\lambda}_{\\gamma\\nu\\sigma}+(1/20)*R^{\\sigma}_{\\beta\\mu\\alpha}*R^{\\lambda}_{\\sigma\\nu\\gamma}+(1/10)*R^{\\sigma}_{\\mu\\beta\\gamma}*R^{\\lambda}_{\\nu\\alpha\\sigma}+(1/60)*R^{\\sigma}_{\\mu\\beta\\gamma}*R^{\\lambda}_{\\alpha\\nu\\sigma}+(7/120)*R_{\\alpha\\beta}*R^{\\lambda}_{\\nu\\gamma\\mu}+(11/60)*R_{\\beta\\mu}*R^{\\lambda}_{\\nu\\alpha\\gamma})", "^ijpq", "_pqrs", "HATK", "DELTA");
 
         Indices indices = ParserIndices.parseSimple("^ijpq_pqrs");
         assertIndicesParity(t.getIndices().getFreeIndices(), indices.getFreeIndices());
@@ -230,10 +203,8 @@ public class IndicesInsertionTest {
 
     @Test
     public void test13() {
-        attachPreprocessor("^i", "_i", "A");
-        Tensor t = parse("A+B");
-        clearPreprocessors();
-        Tensor e = parse("A^i_i+B");
+        Tensor t = parse("A+B","^i", "_i", "A");
+        Tensor e = Tensors.parse("A^i_i+B");
         assertEquals(t, e);
     }
 }

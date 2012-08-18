@@ -23,6 +23,7 @@
 package cc.redberry.core.context;
 
 import cc.redberry.core.indices.IndexType;
+import cc.redberry.core.parser.Parser;
 import java.util.EnumSet;
 
 /**
@@ -39,6 +40,7 @@ public class ContextSettings {
     private EnumSet<IndexType> merticTypes = EnumSet.noneOf(IndexType.class);
     private Long nameManagerSeed;
     private IndexConverterManager converterManager = IndexConverterManager.DEFAULT;
+    private Parser parser = Parser.DEFAULT;
 
     public ContextSettings(ToStringMode defaultToStringMode, String kronecker) {
         this.defaultToStringMode = defaultToStringMode;
@@ -105,5 +107,13 @@ public class ContextSettings {
 
     public void setConverterManager(IndexConverterManager converterManager) {
         this.converterManager = converterManager;
+    }
+
+    public void setParser(Parser parser) {
+        this.parser = parser;
+    }
+
+    public Parser getParser() {
+        return parser;
     }
 }

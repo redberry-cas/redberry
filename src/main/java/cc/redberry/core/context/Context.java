@@ -33,10 +33,11 @@ public final class Context {
     private final NameManager nameManager;
     private ToStringMode defaultPrintMode;
     private final IndexConverterManager converterManager;
-    private final ParseManager parseManager = new ParseManager();
+    private final ParseManager parseManager;
     private final LongBackedBitArray metricTypes = new LongBackedBitArray(128);
 
     public Context(ContextSettings contextSettings) {
+        this.parseManager = new ParseManager(contextSettings.getParser());
         this.converterManager = contextSettings.getConverterManager();
         nameManager = new NameManager(contextSettings.getNameManagerSeed(), contextSettings.getKronecker(), contextSettings.getMetricName());
 

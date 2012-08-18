@@ -25,6 +25,7 @@ package cc.redberry.core.performance;
 import cc.redberry.core.context.CC;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.tensor.Tensors;
+import java.util.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -38,7 +39,14 @@ public class Main {
     public static void main(String[] args) {
         CC.resetTensorNames(121313L);
         List<Tensor> l = new ArrayList<>();
-        for (int i = 0; i < 1000; ++i) {
+//        new Thread(new Runnable() {
+//
+//            @Override
+//            public void run() {
+//                while (true);
+//            }
+//        }).start();
+        for (int i = 0; i < Integer.MAX_VALUE; ++i) {
             System.out.println(i);
             Tensor t = Tensors.parse("(a+b)*(a*f_m+b*g_m)*(b*f^m+a*g^m)");
             Tensor y = Tensors.parse("(Power[a, 2]*b+a*Power[b, 2])*g_{m}*g^{m}+(Power[a, 3]+Power[a, 2]*b+a*Power[b, 2]+Power[b, 3])*f^{m}*g_{m}+(Power[a, 2]*b+a*Power[b, 2])*f_{m}*f^{m}");

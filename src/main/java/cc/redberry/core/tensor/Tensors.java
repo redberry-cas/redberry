@@ -504,7 +504,7 @@ public final class Tensors {
 
     //TODO improve API
     public static Tensor parse(String expression, ParseNodeTransformer... preprocessors) {
-        return ParseManager.parse(expression, preprocessors);
+        return CC.current().getParseManager().parse(expression, preprocessors);
     }
 
     /**
