@@ -20,23 +20,17 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
-
 package cc.redberry.concurrent;
 
 import java.util.List;
 
 /**
  * Interface for passive objects provider.
- * 
+ *
  * @author Bolotin Dmitriy (bolotin.dmitriy@gmail.com)
- * @param <T> 
+ * @param <T>
  */
 public interface OutputPort<T> {
-    T take() throws InterruptedException;
 
-    public static class Utill {
-        public static <T> OutputPort<T> wrap(List<T> list) {
-            return new ListOutputPortWrapper<>(list);
-        }
-    }
+    T take() throws InterruptedException;
 }
