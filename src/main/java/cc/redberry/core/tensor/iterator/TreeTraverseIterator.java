@@ -81,7 +81,9 @@ public final class TreeTraverseIterator {
     }
 
     /**
-     * @return next traverse state and null if there is no next element
+     * Moves iterator to the next state.
+     *
+     * @return next traverse state or {@code null} if there is no next element
      */
     public TraverseState next() {
         //  if (current != null && currentPointer.previous == null)

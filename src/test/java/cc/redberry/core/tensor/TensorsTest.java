@@ -146,7 +146,7 @@ public class TensorsTest {
         t = e1.transform(t);
         t = e2.transform(t);
         Expression kronecker = (Expression) Tensors.parse("d_\\mu^\\mu=4");
-        t = Expand.expand(t, new Transformation[]{ContractIndices.INSTANCE, kronecker}, 4);
+        t = Expand.expand(t, new Transformation[]{ContractIndices.INSTANCE, kronecker});
         System.out.println(t);
     }
 }

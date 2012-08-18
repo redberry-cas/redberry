@@ -23,16 +23,16 @@
 package cc.redberry.core.utils;
 
 //import cc.redberry.core.indices.InconsistentIndicesException;
-import cc.redberry.core.context.CC;
-import cc.redberry.core.indexmapping.IndexMappingBuffer;
-import cc.redberry.core.indexmapping.IndexMappingBufferTester;
-import cc.redberry.core.indexmapping.IndexMappings;
-import cc.redberry.core.indexmapping.MappingsPort;
+import cc.redberry.concurrent.*;
+import cc.redberry.core.combinatorics.*;
+import cc.redberry.core.combinatorics.symmetries.*;
+import cc.redberry.core.indexmapping.*;
 import cc.redberry.core.indices.Indices;
 import cc.redberry.core.indices.IndicesUtils;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.tensor.*;
 import cc.redberry.core.tensor.functions.ScalarFunction;
+import java.util.*;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -285,7 +285,7 @@ public class TensorUtils {
     /**
      *
      * @param t
-*
+     *
      * s AssertionError
      */
     public static void assertIndicesConsistency(Tensor t) {
@@ -340,6 +340,50 @@ public class TensorUtils {
             if (buffer.getSignum())
                 return true;
         return false;
+    }
+
+    private static Symmetry getSymmetryFromMapping1(final int[] indicesNames, IndexMappingBuffer indexMappingBuffer) {
+        final int dimension = indicesNames.length;
+        int[] permutation = new int[dimension];
+        Arrays.fill(permutation, -1);
+        int i;
+        for (i = 0; i < dimension; ++i) {
+            int fromIndex = indicesNames[i];
+            IndexMappingBufferRecord record = indexMappingBuffer.getMap().get(fromIndex);
+            if (record == null)
+                throw new IllegalArgumentException("Index " + IndicesUtils.toString(fromIndex) + " does not contains in specified IndexMappingBuffer.");
+            int newPosition = -1;
+            //TODO refactor with sort and binary search
+            for (int j = 0; j < dimension; ++j)
+                if (indicesNames[j] == record.getIndexName()) {
+                    newPosition = j;
+                    break;
+                }
+            if (newPosition < 0)
+                throw new IllegalArgumentException("Index " + IndicesUtils.toString(record.getIndexName()) + " does not contains in specified indices array.");
+            permutation[i] = newPosition;
+        }
+        for (i = 0; i < dimension; ++i)
+            if (permutation[i] == -1)
+                permutation[i] = i;
+        return new Symmetry(permutation, indexMappingBuffer.getSignum());
+    }
+
+    public static Symmetry getSymmetryFromMapping(final int[] indices, IndexMappingBuffer indexMappingBuffer) {
+        return getSymmetryFromMapping1(IndicesUtils.getIndicesNames(indices), indexMappingBuffer);
+    }
+
+    public static Symmetries getSymmetriesFromMappings(final int[] indices, MappingsPort mappingsPort) {
+        Symmetries symmetries = SymmetriesFactory.createSymmetries(indices.length);
+        int[] indicesNames = IndicesUtils.getIndicesNames(indices);
+        IndexMappingBuffer buffer;
+        while ((buffer = mappingsPort.take()) != null)
+            symmetries.add(getSymmetryFromMapping1(indicesNames, buffer));
+        return symmetries;
+    }
+
+    public static Symmetries getIndicesSymmetries(int[] indices, Tensor tensor) {
+        return getSymmetriesFromMappings(indices, IndexMappings.createPort(tensor, tensor));
     }
 //
 //    public static IndicesBuilderSorted getAllIndicesBuilder(final Tensor tensor) {

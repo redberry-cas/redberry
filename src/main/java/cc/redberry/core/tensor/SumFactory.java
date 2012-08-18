@@ -42,7 +42,7 @@ public final class SumFactory implements TensorFactory {
             return Complex.ZERO;
         if (tensors.length == 1)
             return tensors[0];
-        TensorBuilder builder = SumBuilderFactory.defaultSumBuilder(tensors.length);
+        TensorBuilder builder = new SumBuilder(tensors.length);
         for (Tensor t : tensors)
             builder.put(t);
         return builder.build();

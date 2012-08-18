@@ -39,16 +39,25 @@ import java.util.Arrays;
  */
 public final class Product extends MultiTensor {
 
+    /**
+     * Numerical factor.
+     */
     final Complex factor;
     /**
-     * Elements with zero size of indices.
+     * Elements with zero size of indices (without indices).
      */
     final Tensor[] indexlessData;
     /**
      * Elements with indices.
      */
     final Tensor[] data;
+    /**
+     * Reference to cached ProductContent object.
+     */
     SoftReference<ProductContent> contentReference;
+    /**
+     * Hash code of this product.
+     */
     final int hash;
 
     Product(Indices indices, Complex factor, Tensor[] indexless, Tensor[] data) {

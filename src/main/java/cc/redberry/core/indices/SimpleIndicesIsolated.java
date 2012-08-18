@@ -27,6 +27,7 @@ package cc.redberry.core.indices;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
+//TODO discuss with Stas. Maybe we can hide Isolated/OfTensor infrastructure?
 public class SimpleIndicesIsolated extends SimpleIndicesAbstract {
 
     SimpleIndicesIsolated(int[] data, IndicesSymmetries symmetries) {

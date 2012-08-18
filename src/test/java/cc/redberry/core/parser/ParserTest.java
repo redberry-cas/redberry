@@ -219,6 +219,25 @@ public class ParserTest {
     }
 
     @Test
+    public void testMinusMinus1() {
+        Tensor t = Tensors.parse("--a");
+        Tensor e = Tensors.parse("a");
+        Assert.assertTrue(TensorUtils.compare(t, e));
+    }
+
+    @Test
+    public void testMinusMinus2() {
+        Tensor t = Tensors.parse("1--a*(b+--c)");
+        Tensor e = Tensors.parse("1+a*(b+c)");
+        Assert.assertTrue(TensorUtils.compare(t, e));
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testEmptyStatement() {
+        Tensors.parse("");
+    }
+
+    @Test
     public void testIndices1() {
         ParseNode node = Parser.DEFAULT.parse("f_a*f^a*j_nm^n");
         Assert.assertTrue(node.getIndices().equalsRegardlessOrder(ParserIndices.parseSimple("_a^a_nm^n")));

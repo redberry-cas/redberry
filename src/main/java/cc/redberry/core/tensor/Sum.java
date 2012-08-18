@@ -117,7 +117,7 @@ public final class Sum extends MultiTensor {
 
     @Override
     public TensorBuilder getBuilder() {
-        return SumBuilderFactory.defaultSumBuilder(data.length);
+        return new SumBuilder(data.length);
     }
 
     @Override

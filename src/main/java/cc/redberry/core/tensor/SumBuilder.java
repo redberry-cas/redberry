@@ -103,7 +103,7 @@ public final class SumBuilder implements TensorBuilder {
             return;
         }
 
-        Split split = Split.split(tensor, false);
+        Split split = Split.split(tensor);
 
         Integer hash = TensorHashCalculator.hashWithIndices(split.factor, sortedFreeIndices);//=split.factor.hashCode();
         List<FactorNode> factorNodes = summands.get(hash);

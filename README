@@ -1,5 +1,5 @@
 ===================================================
-   Redberry - Symbolic Tensor Algebra. Pure Java
+   Redberry - Symbolic Tensor Algebra System
 ===================================================
 
  Redberry  is an open source Java framework providing
@@ -9,16 +9,14 @@
  For information about latests releases, downloads and 
  example code please visit our site:
  
-   homepage:   http://cc.redberry.bitbucket.org/
-   bitbucket:   https://bitbucket.org/cc.redberry/cc.redberry
-   
+   homepage:   http://redberry.cc/
+   repository:   https://bitbucket.org/redberry/redberry
 
  This program is a free software: you can redistribute it and/or
- modify it under the terms of the GNU General Public License as
- published by the Free Software Foundation, either version 2 of the
+ modify it under the terms of the GNU General Public License v3 as
+ published by the Free Software Foundation, either version 3 of the
  License, or (at your option) any later version. Full license text 
  you can find in COPYING file.
-
 
 
  Requirements
@@ -26,69 +24,39 @@
 
  JDK 7 or later (http://jdk7.java.net/download.html)
  
- To build cc.redberry from source Maven 2.2 or later required (http://maven.apache.org/).
- 
- Working with Redberry source code or repository requires both 
- Maven and Mercurial 1.9.0 or later (http://mercurial.selenic.com/)
-
- 
- Working with jar
----------------------------------
-
- Download  cc.redberry-x.x.x-jar-with-dependencies.jar.tar.gz file
- (x.x.x - current version) from Redberry site or bitbucket 
- page and unpack it. Create your java project and add 
- cc.redberry-x.x.x-jar-with-dependencies.jar file to your  project
- dependencies as jar library. Now you can work with Redberry API
- in your project.
+ To build cc.redberry from source Maven 2.2 or later required
+ (http://maven.apache.org/).
 
 
- Working with maven
----------------------------------------
+ Depending on Redberry using maven
+------------------------------------------
 
- Public maven repository coming soon!!!
+ To include latest version of Redberry in your Maven project just
+ add this lines to your pom's dependency section:
 
- To include cc.redberry now follow instructions below:
- 
- Download  cc.redberry-x.x.x.jar.tar.gz file  (x.x.x - current version
- indices) from Redberry site or bitbucket page and unpack it.
- Now add cc.redberry-x.x.x.jar file to your maven repositorie by
- typing in command line:
- 
-           mvn install:install-file -DgroupId=cc.redberry
-           -DartifactId=cc.redberry -Dversion=x.x.x
-           -Dfile=cc.redberry-x.x.x.jar -Dpackaging=jar -DgeneratePom=true
+ <dependency>
+ 	<groupId>cc.redberry</groupId>
+ 	<artifactId>core</artifactId>
+ 	<version>X.X.X</version>
+ </dependency>
 
- Add following lines in dependencies section in your pom.xml file:
+Here X.X.X - Redberry version you want to use.  
 
-         <dependency>
-            <groupId>cc.redberry</groupId>
-            <artifactId>cc.redberry</artifactId>
-            <version>0.8.0</version>
-            <scope>compile</scope>
-         </dependency>
-         <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-classic</artifactId>
-            <version>0.9.29</version>
-         </dependency>
-
-
-Working with source code
+ Building Redberry from the source
 -------------------------------------------
- To work with Redberry source code use Mercurial 1.9.0 or later
- (http://mercurial.selenic.com/). To clone cc.redberry repository
- type in command line:
+ To build Redberry from the source code you will need Mercurial 1.9.0
+ or later (http://mercurial.selenic.com/) and Maven 2.2 of later
+ (http://maven.apache.org/).
+ To clone latest version of Redberry repository type in this command:
  
-     hg clone https://bitbucket.org/cc.redberry/cc.redberry
+     hg clone https://bitbucket.org/redberry/redberry
 	 
  Or you can download a package with source code from our bitbucket
  page.
  
- To build cc.redberry from source Maven 2.2 or later required (http://maven.apache.org/).
  Use this command to build cc.redberry with all dependencies:
  
-     mvn assembly:single
+     mvn install
  
  Or this:
  
@@ -104,7 +72,7 @@ Working with Redberry repositorie
  contact authors and pull your module in main repositories.
  
  
- Copyright (C) 2010-2011:
+ Copyright (C) 2010-2012:
   Stanislav Poslavsky <stvlpos@mail.ru>
   Dmitry Bolotin <bolotin.dmitriy@gmail.com>
  

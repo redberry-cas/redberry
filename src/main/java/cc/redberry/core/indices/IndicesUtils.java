@@ -22,43 +22,80 @@
  */
 package cc.redberry.core.indices;
 
+import cc.redberry.core.combinatorics.Permutation;
 import cc.redberry.core.context.Context;
 import cc.redberry.core.context.ToStringMode;
 import cc.redberry.core.math.MathUtils;
+import java.util.*;
 
 /**
- * This class provides static methods to work with individual indices. <h5>Index
+ * This class provides static methods to work with individual index and indices objects. <h5>Index
  * representation</h5> All information about single index is enclosed in 32-bit
- * word (int). The following bit structure is used: <p style='font-family: monospace;font-length:13px;'><pre> Index: stttttttXXXXXXXXcccccccccccccccc  -  per-bit representetion
- *      |       |       |       |      |
- *      31      23      15      7      0  -  bit index
- * <p/>
- * s - one bit representing index state (0 - lower; 1 - upper) t - 7-bits
- * representing index type (lower latin, upper latin, etc...) [for concrete
- * codes see below] c - code of concrete index (a - 0, b - 1, c - 2, etc...)
- * [index name] X - reserved (always 0)</pre></p> <h5>Index types</h5> By
- * default there are four different index types: <p style='font-family:
- * monospace;font-length:13px;'> <b><pre> HexCode   BitCode    Description</pre></b><pre>
- * 0x00      00000000   Latin lower case symbols
- * 0x01      00000001   Latin upper case symbols
- * 0x02      00000010   Greek lower case symbols
- * 0x03      00000011   Greek upper case symbols
- * </pre> </p> <h5>Examples</h5> Here are some examples of how concrete indices
- * are presented in Redberry. <p style='font-family:
- * monospace;font-length:13px;'> <b><pre> Index        Hex </pre></b><pre>
- * _a           0x00000000
- * _C           0x01000002
- * ^{\beta}     0x82000001
- * ^{\Chi}      0x83000015
- * <p/>
- * </pre> </p>
+ * word (int). The following bit structure is used: <p style='font-family: monospace;font-length:13px;'>
+ * <pre> Index: stttttttXXXXXXXXcccccccccccccccc  -  per-bit representetion
+        |       |       |       |      |
+ *        31      23      15      7      0  -  bit index<br>
+ * s - one bit representing index state (0 - lower; 1 - upper)
+ * t - 7-bits representing index type (lower latin, upper latin, etc...) [for concrete codes see below]
+ * c - code of concrete index (a - 0, b - 1, c - 2, etc...) [index name]
+ * X - reserved (always 0)</pre></p> <h5>Index types</h5> By
+ * default there are four different index types:
+ * <TABLE CELLSPACING="0" CELLPADDING="5">
+ * <CAPTION>  </CAPTION>
+ * <TH> HexCode </TH> 
+ * <TH> BitCode </TH>
+ * <TH> Description </TH>
+ * <TR>
+ *   <TD> 0x00 </TD> 
+ *   <TD> 00000000 </TD>
+ *   <TD> Latin lower case symbols </TD>
+ * </TR>
+ * <TR>
+ *   <TD> 0x01 </TD> 
+ *   <TD> 00000001 </TD>
+ *   <TD> Latin upper case symbols </TD>
+ * </TR>
+ * <TR>
+ *   <TD> 0x02 </TD> 
+ *   <TD> 00000010 </TD>
+ *   <TD> Greek lower case symbols </TD>
+ * </TR>
+ * <TR>
+ *   <TD> 0x03 </TD> 
+ *   <TD> 00000011 </TD>
+ *   <TD> Greek upper case symbols </TD>
+ * </TR>
+ *</TABLE>
+ * <h5>Examples</h5>
+ * <p>Here are some examples of how concrete indices are presented in Redberry.
+ * <TABLE CELLSPACING="0" CELLPADDING="5">
+ * <CAPTION>  </CAPTION>
+ * <TH> Index </TH> 
+ * <TH> Hex </TH>
+ * <TR>
+ *   <TD> _a </TD> 
+ *   <TD> 0x00000000 </TD>    
+ * </TR>
+ * <TR>
+ *   <TD> _C </TD> 
+ *   <TD> 0x01000002 </TD>
+ * </TR>
+ * <TR>
+ *   <TD> ^{\beta} </TD> 
+ *   <TD> 0x82000001 </TD>
+ * </TR>
+ * <TR>
+ *   <TD> ^{\Chi} </TD> 
+ *   <TD> 0x83000015 </TD>
+ *  </TR>
+ *</TABLE> 
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  * @see Indices
  */
 public final class IndicesUtils {
-    
+
     private IndicesUtils() {
     }
 
@@ -68,7 +105,6 @@ public final class IndicesUtils {
      * @param name  index name
      * @param type  index type
      * @param state index state
-     *
      * @return index
      */
     public static int createIndex(int name, IndexType type, boolean state) {
@@ -81,7 +117,6 @@ public final class IndicesUtils {
      * @param name  index name
      * @param type  index type
      * @param state index state
-     *
      * @return index
      */
     public static int createIndex(int name, byte type, boolean state) {
@@ -94,7 +129,6 @@ public final class IndicesUtils {
      * <br/>Expression used by this method is: <b><code>index & 0x80000000</code></b>
      *
      * @param index index
-     *
      * @return (1 << 31) for upper index & 0 for lower index
      */
     public static int getRawStateInt(int index) {
@@ -107,7 +141,6 @@ public final class IndicesUtils {
      * <br/>Expression used by this method is: <b><code>(index & 0x80000000) >>> 31</code></b>
      *
      * @param index index
-     *
      * @return 1 for upper index & 0 for lower index
      */
     public static int getStateInt(int index) {
@@ -120,7 +153,6 @@ public final class IndicesUtils {
      * <br/>Expression used by this method is: <b><code>(index & 0x80000000) == 0x80000000</code></b>
      *
      * @param index index
-     *
      * @return 1 for upper index & 0 for lower index
      */
     public static boolean getState(int index) {
@@ -134,7 +166,6 @@ public final class IndicesUtils {
      * <br/>Expression used by this method is: <b><code>0x80000000 ^ index</code></b>
      *
      * @param index index
-     *
      * @return index with inverse state bit
      */
     public static int inverseIndexState(int index) {
@@ -148,7 +179,6 @@ public final class IndicesUtils {
      * <br/>Expression used by this method is: <b><code>index & 0x7FFFFFFF</code></b>
      *
      * @param index specified index
-     *
      * @return index name (code) with type (first 30 bits), but without state
      *         bit (in other words with state bit set to zero)
      */
@@ -163,7 +193,6 @@ public final class IndicesUtils {
      *
      * @param type  type
      * @param index index to change type in
-     *
      * @return index with new type
      */
     public static int setType(byte type, int index) {
@@ -177,7 +206,6 @@ public final class IndicesUtils {
      *
      * @param rawState raw state
      * @param index    index to change type in
-     *
      * @return index with new type
      */
     public static int setRawState(int rawState, int index) {
@@ -190,7 +218,6 @@ public final class IndicesUtils {
      * <br/>Expression used by this method is: <b><code>index & 0xFFFF</code></b>
      *
      * @param index index
-     *
      * @return index name
      */
     public static int getNameWithoutType(int index) {
@@ -203,7 +230,6 @@ public final class IndicesUtils {
      * <br/>Expression used by this method is: <b><code>((byte) ((index & 0x7FFFFFFF) >>> 24))</code></b>
      *
      * @param index index
-     *
      * @return index type
      */
     public static byte getType(int index) {
@@ -218,7 +244,6 @@ public final class IndicesUtils {
      * }.
      *
      * @param index index
-     *
      * @return index type enum value
      */
     public static IndexType getTypeEnum(int index) {
@@ -235,7 +260,6 @@ public final class IndicesUtils {
      * <br/>Expression used by this method is: <b><code>(index & 0x7FFFFFFF) >>> 24</code></b>
      *
      * @param index index
-     *
      * @return index type
      */
     public static int getTypeInt(int index) {
@@ -249,7 +273,6 @@ public final class IndicesUtils {
      * <br/>Expression used by this method is: <b><code>index & 0x7F000000</code></b>
      *
      * @param index index
-     *
      * @return index type
      */
     public static int getRawTypeInt(int index) {
@@ -262,7 +285,6 @@ public final class IndicesUtils {
      * <br/>Expression used by this method is: <b><code>((byte) (index >>> 24))</code></b>
      *
      * @param index index
-     *
      * @return index type with state
      */
     public static byte getTypeWithState(int index) {
@@ -272,6 +294,7 @@ public final class IndicesUtils {
     /*
      * Test methods
      */
+
     /**
      * Indicates whether two indices has the same type and name.
      * <p/>
@@ -279,7 +302,6 @@ public final class IndicesUtils {
      *
      * @param index0 first index
      * @param index1 second index
-     *
      * @return whether all bits except state bit are equals
      */
     public static boolean hasEqualTypeAndName(int index0, int index1) {
@@ -293,7 +315,6 @@ public final class IndicesUtils {
      *
      * @param index0 first index
      * @param index1 second index
-     *
      * @return true if type bits in indices are the same
      */
     public static boolean hasEqualTypes(int index0, int index1) {
@@ -307,7 +328,6 @@ public final class IndicesUtils {
      *
      * @param index0 first index
      * @param index1 second index
-     *
      * @return true if type and state bits in indices are the same
      */
     public static boolean hasEqualTypesAndStates(int index0, int index1) {
@@ -324,7 +344,6 @@ public final class IndicesUtils {
      *
      * @param index0 first index
      * @param index1 second index
-     *
      * @return true if type and state bits in indices are the same
      */
     public static boolean areContracted(int index0, int index1) {
@@ -336,7 +355,6 @@ public final class IndicesUtils {
      * present in the {@link Indices} object.
      *
      * @param indices object to process
-     *
      * @return see description
      */
     public static int[] getSortedDistinctIndicesNames(Indices indices) {
@@ -345,19 +363,19 @@ public final class IndicesUtils {
             indsArray[i] = IndicesUtils.getNameWithType(indsArray[i]);
         return MathUtils.getSortedDistinct(indsArray);
     }
-    
+
     public static String toString(int index, ToStringMode mode) {
         return (getState(index) == true ? "^{" : "_{") + Context.get().getIndexConverterManager().getSymbol(index, mode) + "}";
     }
-    
+
     public static String toString(int index) {
         return toString(index, Context.get().getDefaultPrintMode());
     }
-    
+
     public static String toString(int[] indices, ToStringMode mode) {
         return IndicesFactory.createSimple(null, indices).toString(mode);
     }
-    
+
     public static int parseIndex(String string) {
         boolean state = string.charAt(0) == '^';
         int nameWithType;
@@ -373,7 +391,6 @@ public final class IndicesUtils {
      * object with the same ordering.
      *
      * @param indices
-     *
      * @return array of indices names (with types)
      */
     public static int[] getIndicesNames(Indices indices) {
@@ -388,7 +405,6 @@ public final class IndicesUtils {
      * object with the same ordering.
      *
      * @param indices
-     *
      * @return array of indices names (with types)
      */
     public static int[] getIndicesNames(int[] indices) {
@@ -397,8 +413,64 @@ public final class IndicesUtils {
             a[i] = getNameWithType(indices[i]);
         return a;
     }
-    
+
     public static boolean haveEqualStates(int index1, int index2) {
         return getRawStateInt(index1) == getRawStateInt(index2);
     }
+ 
+    /**
+     * This method checks whether specified permutation is consistent with 
+     * specified indices. Permutation considered to be consistent if it has 
+     * similar length and does not permutes indices with different types.
+     * 
+     * @param indices indices array to be checked
+     * @param permutation permutation in one-line notation
+     * @return {@code false} if permutation permutes indices with different types or have different length and true in other case
+     */
+    public static boolean isPermutationConsistentWithIndices(final int[] indices, final int[] permutation){
+        if(indices.length != permutation.length)
+            return false;
+        for(int i=0; i<permutation.length;++i)
+            if(getRawTypeInt(indices[i]) != getRawTypeInt(indices[permutation[i]]))
+                return false;        
+        return true;
+    }
+    
+     /**
+     * This method checks whether specified permutation is consistent with 
+     * specified indices. Permutation considered to be consistent if it has 
+     * similar length and does not permutes indices with different types.
+     * 
+     * @param indices indices array to be checked
+     * @param permutation permutation in one-line notation
+     * @return {@code false} if permutation permutes indices with different types or have different length and true in other case
+     */
+    public static boolean isPermutationConsistentWithIndices(final int[] indices, Permutation permutation){
+       if(indices.length != permutation.dimension())
+            return false;
+       for(int i=0; i<permutation.dimension();++i)
+            if(getRawTypeInt(indices[i]) != getRawTypeInt(indices[permutation.newIndexOf(i)]))
+                return false;        
+        return true;
+    }
+    
+    public static boolean equalsRegardlessOrder(Indices indices1, int[] indices2){
+        if(indices1 instanceof EmptyIndices)
+            return indices2.length == 0;
+        if(indices1.size() != indices2.length)
+            return false;
+        int[] temp = indices2.clone();
+        Arrays.sort(temp);
+        return Arrays.equals(((AbstractIndices)indices1).getSortedData(), temp);
+    }
+    
+    public static boolean equalsRegardlessOrder(int[] indices1, int[] indices2){
+         if(indices1.length != indices2.length)
+            return false;
+         int[] temp1 = indices1.clone(), temp2 = indices2.clone();
+         Arrays.sort(temp1);
+         Arrays.sort(temp2);
+         return Arrays.equals(temp1, temp2);
+    }
+    
 }

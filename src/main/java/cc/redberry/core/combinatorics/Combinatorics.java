@@ -98,8 +98,9 @@ public final class Combinatorics {
             throw new IllegalArgumentException("Negative dimension");
 
         int[] cycle = new int[dimension];
-        for (int i = 0; i < dimension; ++i)
-            cycle[i] = dimension - i - 1;
+        for (int i = 0; i < dimension - 1; ++i)
+            cycle[i + 1] = i;
+        cycle[0] = dimension - 1;
         return cycle;
     }
 

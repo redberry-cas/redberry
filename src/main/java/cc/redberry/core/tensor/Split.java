@@ -43,7 +43,7 @@ public abstract class Split {
 
     abstract TensorBuilder getBuilder();
 
-    static Split split(final Tensor tensor, final boolean concurrent) {
+    static Split split(final Tensor tensor) {
         if (tensor.getIndices().size() == 0) {//case 2*a*b*c
             Complex complex;
             Tensor factor;
@@ -60,7 +60,7 @@ public abstract class Split {
                 complex = Complex.ONE;
                 factor = tensor;
             }
-            return new SplitNumbers(factor, complex, concurrent);
+            return new SplitNumbers(factor, complex);
         } else {//case 2*a*g_mn*g_cd 
             Tensor summand;
             Tensor factor;
@@ -81,26 +81,19 @@ public abstract class Split {
                 summand = Complex.ONE;
                 factor = tensor;
             }
-            return new SplitIndexless(factor, summand, concurrent);
+            return new SplitIndexless(factor, summand);
         }
     }
 
     private static class SplitNumbers extends Split {
 
-        private final boolean concurrent;
-
-        public SplitNumbers(Tensor factor, Tensor summand, boolean concurrent) {
+        public SplitNumbers(Tensor factor, Tensor summand) {
             super(factor, summand);
-            this.concurrent = concurrent;
         }
 
         @Override
         TensorBuilder getBuilder() {
-            TensorBuilder builder;
-            if (concurrent)
-                builder = new ComplexSumBuilderConcurrent();
-            else
-                builder = new ComplexSumBuilder();
+            TensorBuilder builder = new ComplexSumBuilder();
             builder.put(summand);
             return builder;
         }
@@ -108,20 +101,13 @@ public abstract class Split {
 
     private static final class SplitIndexless extends Split {
 
-        private final boolean concurrent;
-
-        public SplitIndexless(Tensor factor, Tensor summand, boolean concurrent) {
+        public SplitIndexless(Tensor factor, Tensor summand) {
             super(factor, summand);
-            this.concurrent = concurrent;
         }
 
         @Override
         TensorBuilder getBuilder() {
-            TensorBuilder builder;
-            if (concurrent)
-                builder = new SumBuilderConcurrent();
-            else
-                builder = new SumBuilder();
+            TensorBuilder builder = new SumBuilder();
             builder.put(summand);
             return builder;
         }
@@ -145,9 +131,10 @@ public abstract class Split {
         }
     }
 
+    @Deprecated
     private static final class ComplexSumBuilderConcurrent implements TensorBuilder {
 
-        AtomicReference< Complex> atomicComplex = new AtomicReference<>(Complex.ZERO);
+        final AtomicReference< Complex> atomicComplex = new AtomicReference<>(Complex.ZERO);
 
         public ComplexSumBuilderConcurrent() {
         }
