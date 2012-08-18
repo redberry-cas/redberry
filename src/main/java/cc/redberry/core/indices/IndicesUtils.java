@@ -22,12 +22,14 @@
  */
 package cc.redberry.core.indices;
 
+import cc.redberry.core.combinatorics.Permutation;
 import cc.redberry.core.context.Context;
 import cc.redberry.core.context.ToStringMode;
 import cc.redberry.core.math.MathUtils;
+import java.util.*;
 
 /**
- * This class provides static methods to work with individual index. <h5>Index
+ * This class provides static methods to work with individual index and indices objects. <h5>Index
  * representation</h5> All information about single index is enclosed in 32-bit
  * word (int). The following bit structure is used: <p style='font-family: monospace;font-length:13px;'>
  * <pre> Index: stttttttXXXXXXXXcccccccccccccccc  -  per-bit representetion
@@ -38,55 +40,55 @@ import cc.redberry.core.math.MathUtils;
  * c - code of concrete index (a - 0, b - 1, c - 2, etc...) [index name]
  * X - reserved (always 0)</pre></p> <h5>Index types</h5> By
  * default there are four different index types:
-  <TABLE CELLSPACING="0" CELLPADDING="5">
-  <CAPTION>  </CAPTION>
-  <TH> HexCode </TH> 
-  <TH> BitCode </TH>
-  <TH> Description </TH>
-  <TR>
-    <TD> 0x00 </TD> 
-    <TD> 00000000 </TD>
-    <TD> Latin lower case symbols </TD>
-  </TR>
-  <TR>
-    <TD> 0x01 </TD> 
-    <TD> 00000001 </TD>
-    <TD> Latin upper case symbols </TD>
-  </TR>
-  <TR>
-    <TD> 0x02 </TD> 
-    <TD> 00000010 </TD>
-    <TD> Greek lower case symbols </TD>
-  </TR>
-  <TR>
-    <TD> 0x03 </TD> 
-    <TD> 00000011 </TD>
-    <TD> Greek upper case symbols </TD>
-  </TR>
- </TABLE>
+ * <TABLE CELLSPACING="0" CELLPADDING="5">
+ * <CAPTION>  </CAPTION>
+ * <TH> HexCode </TH> 
+ * <TH> BitCode </TH>
+ * <TH> Description </TH>
+ * <TR>
+ *   <TD> 0x00 </TD> 
+ *   <TD> 00000000 </TD>
+ *   <TD> Latin lower case symbols </TD>
+ * </TR>
+ * <TR>
+ *   <TD> 0x01 </TD> 
+ *   <TD> 00000001 </TD>
+ *   <TD> Latin upper case symbols </TD>
+ * </TR>
+ * <TR>
+ *   <TD> 0x02 </TD> 
+ *   <TD> 00000010 </TD>
+ *   <TD> Greek lower case symbols </TD>
+ * </TR>
+ * <TR>
+ *   <TD> 0x03 </TD> 
+ *   <TD> 00000011 </TD>
+ *   <TD> Greek upper case symbols </TD>
+ * </TR>
+ *</TABLE>
  * <h5>Examples</h5>
  * <p>Here are some examples of how concrete indices are presented in Redberry.
-  <TABLE CELLSPACING="0" CELLPADDING="5">
-  <CAPTION>  </CAPTION>
-  <TH> Index </TH> 
-  <TH> Hex </TH>
-  <TR>
-    <TD> _a </TD> 
-    <TD> 0x00000000 </TD>    
-  </TR>
-  <TR>
-    <TD> _C </TD> 
-    <TD> 0x01000002 </TD>
-  </TR>
-  <TR>
-    <TD> ^{\beta} </TD> 
-    <TD> 0x82000001 </TD>
-  </TR>
-  <TR>
-    <TD> ^{\Chi} </TD> 
-    <TD> 0x83000015 </TD>
-   </TR>
- </TABLE> 
+ * <TABLE CELLSPACING="0" CELLPADDING="5">
+ * <CAPTION>  </CAPTION>
+ * <TH> Index </TH> 
+ * <TH> Hex </TH>
+ * <TR>
+ *   <TD> _a </TD> 
+ *   <TD> 0x00000000 </TD>    
+ * </TR>
+ * <TR>
+ *   <TD> _C </TD> 
+ *   <TD> 0x01000002 </TD>
+ * </TR>
+ * <TR>
+ *   <TD> ^{\beta} </TD> 
+ *   <TD> 0x82000001 </TD>
+ * </TR>
+ * <TR>
+ *   <TD> ^{\Chi} </TD> 
+ *   <TD> 0x83000015 </TD>
+ *  </TR>
+ *</TABLE> 
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
@@ -415,4 +417,60 @@ public final class IndicesUtils {
     public static boolean haveEqualStates(int index1, int index2) {
         return getRawStateInt(index1) == getRawStateInt(index2);
     }
+ 
+    /**
+     * This method checks whether specified permutation is consistent with 
+     * specified indices. Permutation considered to be consistent if it has 
+     * similar length and does not permutes indices with different types.
+     * 
+     * @param indices indices array to be checked
+     * @param permutation permutation in one-line notation
+     * @return {@code false} if permutation permutes indices with different types or have different length and true in other case
+     */
+    public static boolean isPermutationConsistentWithIndices(final int[] indices, final int[] permutation){
+        if(indices.length != permutation.length)
+            return false;
+        for(int i=0; i<permutation.length;++i)
+            if(getRawTypeInt(indices[i]) != getRawTypeInt(indices[permutation[i]]))
+                return false;        
+        return true;
+    }
+    
+     /**
+     * This method checks whether specified permutation is consistent with 
+     * specified indices. Permutation considered to be consistent if it has 
+     * similar length and does not permutes indices with different types.
+     * 
+     * @param indices indices array to be checked
+     * @param permutation permutation in one-line notation
+     * @return {@code false} if permutation permutes indices with different types or have different length and true in other case
+     */
+    public static boolean isPermutationConsistentWithIndices(final int[] indices, Permutation permutation){
+       if(indices.length != permutation.dimension())
+            return false;
+       for(int i=0; i<permutation.dimension();++i)
+            if(getRawTypeInt(indices[i]) != getRawTypeInt(indices[permutation.newIndexOf(i)]))
+                return false;        
+        return true;
+    }
+    
+    public static boolean equalsRegardlessOrder(Indices indices1, int[] indices2){
+        if(indices1 instanceof EmptyIndices)
+            return indices2.length == 0;
+        if(indices1.size() != indices2.length)
+            return false;
+        int[] temp = indices2.clone();
+        Arrays.sort(temp);
+        return Arrays.equals(((AbstractIndices)indices1).getSortedData(), temp);
+    }
+    
+    public static boolean equalsRegardlessOrder(int[] indices1, int[] indices2){
+         if(indices1.length != indices2.length)
+            return false;
+         int[] temp1 = indices1.clone(), temp2 = indices2.clone();
+         Arrays.sort(temp1);
+         Arrays.sort(temp2);
+         return Arrays.equals(temp1, temp2);
+    }
+    
 }
