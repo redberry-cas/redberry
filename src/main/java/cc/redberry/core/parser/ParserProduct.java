@@ -23,10 +23,10 @@
 package cc.redberry.core.parser;
 
 import cc.redberry.core.number.Complex;
+
 import java.util.List;
 
 /**
- *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
@@ -45,6 +45,14 @@ public class ParserProduct extends ParserOperator {
     @Override
     protected ParseNode inverseOperation(ParseNode node) {
         return new ParseNode(TensorType.Power, new ParseNode[]{node, new ParseNodeNumber(Complex.MINUSE_ONE)});
+    }
+
+    @Override
+    protected boolean testOperator(char[] expressionChars, int position) {
+        if ((position + 1 < expressionChars.length && expressionChars[position + 1] == '*') ||
+                (position - 1 >= 0 && expressionChars[position - 1] == '*'))
+            return false;
+        return true;
     }
 
     @Override

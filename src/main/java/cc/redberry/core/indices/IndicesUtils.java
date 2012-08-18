@@ -26,7 +26,8 @@ import cc.redberry.core.combinatorics.Permutation;
 import cc.redberry.core.context.Context;
 import cc.redberry.core.context.ToStringMode;
 import cc.redberry.core.math.MathUtils;
-import java.util.*;
+
+import java.util.Arrays;
 
 /**
  * This class provides static methods to work with individual index and indices
@@ -67,7 +68,7 @@ import java.util.*;
  *   <TD> 00000011 </TD>
  *   <TD> Greek upper case symbols </TD>
  * </TR>
- *</TABLE>
+ * </TABLE>
  * </pre> <h5>Examples</h5> <p>Here are some examples of how concrete indices
  * are presented in Redberry.
  * <pre>
@@ -91,7 +92,7 @@ import java.util.*;
  *   <TD> ^{\Chi} </TD>
  *   <TD> 0x83000015 </TD>
  *  </TR>
- *</TABLE>
+ * </TABLE>
  * </pre>
  *
  * @author Dmitry Bolotin
@@ -109,7 +110,6 @@ public final class IndicesUtils {
      * @param name  index name
      * @param type  index type
      * @param state index state
-     *
      * @return index
      */
     public static int createIndex(int name, IndexType type, boolean state) {
@@ -122,7 +122,6 @@ public final class IndicesUtils {
      * @param name  index name
      * @param type  index type
      * @param state index state
-     *
      * @return index
      */
     public static int createIndex(int name, byte type, boolean state) {
@@ -135,7 +134,6 @@ public final class IndicesUtils {
      * <br/>Expression used by this method is: <b><code>index & 0x80000000</code></b>
      *
      * @param index index
-     *
      * @return (1 << 31) for upper index & 0 for lower index
      */
     public static int getRawStateInt(int index) {
@@ -148,7 +146,6 @@ public final class IndicesUtils {
      * <br/>Expression used by this method is: <b><code>(index & 0x80000000) >>> 31</code></b>
      *
      * @param index index
-     *
      * @return 1 for upper index & 0 for lower index
      */
     public static int getStateInt(int index) {
@@ -161,7 +158,6 @@ public final class IndicesUtils {
      * <br/>Expression used by this method is: <b><code>(index & 0x80000000) == 0x80000000</code></b>
      *
      * @param index index
-     *
      * @return 1 for upper index & 0 for lower index
      */
     public static boolean getState(int index) {
@@ -175,7 +171,6 @@ public final class IndicesUtils {
      * <br/>Expression used by this method is: <b><code>0x80000000 ^ index</code></b>
      *
      * @param index index
-     *
      * @return index with inverse state bit
      */
     public static int inverseIndexState(int index) {
@@ -189,7 +184,6 @@ public final class IndicesUtils {
      * <br/>Expression used by this method is: <b><code>index & 0x7FFFFFFF</code></b>
      *
      * @param index specified index
-     *
      * @return index name (code) with type (first 30 bits), but without state
      *         bit (in other words with state bit set to zero)
      */
@@ -204,7 +198,6 @@ public final class IndicesUtils {
      *
      * @param type  type
      * @param index index to change type in
-     *
      * @return index with new type
      */
     public static int setType(byte type, int index) {
@@ -218,7 +211,6 @@ public final class IndicesUtils {
      *
      * @param rawState raw state
      * @param index    index to change type in
-     *
      * @return index with new type
      */
     public static int setRawState(int rawState, int index) {
@@ -231,7 +223,6 @@ public final class IndicesUtils {
      * <br/>Expression used by this method is: <b><code>index & 0xFFFF</code></b>
      *
      * @param index index
-     *
      * @return index name
      */
     public static int getNameWithoutType(int index) {
@@ -244,7 +235,6 @@ public final class IndicesUtils {
      * <br/>Expression used by this method is: <b><code>((byte) ((index & 0x7FFFFFFF) >>> 24))</code></b>
      *
      * @param index index
-     *
      * @return index type
      */
     public static byte getType(int index) {
@@ -259,7 +249,6 @@ public final class IndicesUtils {
      * }.
      *
      * @param index index
-     *
      * @return index type enum value
      */
     public static IndexType getTypeEnum(int index) {
@@ -276,7 +265,6 @@ public final class IndicesUtils {
      * <br/>Expression used by this method is: <b><code>(index & 0x7FFFFFFF) >>> 24</code></b>
      *
      * @param index index
-     *
      * @return index type
      */
     public static int getTypeInt(int index) {
@@ -290,7 +278,6 @@ public final class IndicesUtils {
      * <br/>Expression used by this method is: <b><code>index & 0x7F000000</code></b>
      *
      * @param index index
-     *
      * @return index type
      */
     public static int getRawTypeInt(int index) {
@@ -303,7 +290,6 @@ public final class IndicesUtils {
      * <br/>Expression used by this method is: <b><code>((byte) (index >>> 24))</code></b>
      *
      * @param index index
-     *
      * @return index type with state
      */
     public static byte getTypeWithState(int index) {
@@ -313,6 +299,7 @@ public final class IndicesUtils {
     /*
      * Test methods
      */
+
     /**
      * Indicates whether two indices has the same type and name.
      * <p/>
@@ -320,7 +307,6 @@ public final class IndicesUtils {
      *
      * @param index0 first index
      * @param index1 second index
-     *
      * @return whether all bits except state bit are equals
      */
     public static boolean hasEqualTypeAndName(int index0, int index1) {
@@ -334,7 +320,6 @@ public final class IndicesUtils {
      *
      * @param index0 first index
      * @param index1 second index
-     *
      * @return true if type bits in indices are the same
      */
     public static boolean hasEqualTypes(int index0, int index1) {
@@ -348,7 +333,6 @@ public final class IndicesUtils {
      *
      * @param index0 first index
      * @param index1 second index
-     *
      * @return true if type and state bits in indices are the same
      */
     public static boolean hasEqualTypesAndStates(int index0, int index1) {
@@ -365,7 +349,6 @@ public final class IndicesUtils {
      *
      * @param index0 first index
      * @param index1 second index
-     *
      * @return true if type and state bits in indices are the same
      */
     public static boolean areContracted(int index0, int index1) {
@@ -377,7 +360,6 @@ public final class IndicesUtils {
      * present in the {@link Indices} object.
      *
      * @param indices object to process
-     *
      * @return see description
      */
     public static int[] getSortedDistinctIndicesNames(Indices indices) {
@@ -414,7 +396,6 @@ public final class IndicesUtils {
      * object with the same ordering.
      *
      * @param indices
-     *
      * @return array of indices names (with types)
      */
     public static int[] getIndicesNames(Indices indices) {
@@ -429,7 +410,6 @@ public final class IndicesUtils {
      * object with the same ordering.
      *
      * @param indices
-     *
      * @return array of indices names (with types)
      */
     public static int[] getIndicesNames(int[] indices) {
@@ -450,9 +430,8 @@ public final class IndicesUtils {
      *
      * @param indices     indices array to be checked
      * @param permutation permutation in one-line notation
-     *
      * @return {@code false} if permutation permutes indices with different
-     * types or have different length and true in other case
+     *         types or have different length and true in other case
      */
     public static boolean isPermutationConsistentWithIndices(final int[] indices, final int[] permutation) {
         if (indices.length != permutation.length)
@@ -470,9 +449,8 @@ public final class IndicesUtils {
      *
      * @param indices     indices array to be checked
      * @param permutation permutation in one-line notation
-     *
      * @return {@code false} if permutation permutes indices with different
-     * types or have different length and true in other case
+     *         types or have different length and true in other case
      */
     public static boolean isPermutationConsistentWithIndices(final int[] indices, Permutation permutation) {
         if (indices.length != permutation.dimension())

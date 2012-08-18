@@ -22,24 +22,21 @@
  */
 package cc.redberry.core;
 
-import cc.redberry.core.context.*;
-import cc.redberry.core.number.Complex;
-import cc.redberry.core.number.parser.NumberParser;
-import cc.redberry.core.tensor.*;
+import org.junit.Ignore;
 import org.junit.Test;
 
 /**
- *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
 public class BlackList {
 
+    @Ignore
     @Test
     public void test1() {
         System.out.println("\nA");
         System.out.print("A");
-        for (long i = 0; i < Long.MAX_VALUE; ++i);
+        for (long i = 0; i < Long.MAX_VALUE; ++i) ;
         System.out.print("A");
         System.out.print("A");
     }
