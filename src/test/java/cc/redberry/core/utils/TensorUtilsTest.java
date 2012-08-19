@@ -23,16 +23,11 @@
 package cc.redberry.core.utils;
 
 import cc.redberry.core.context.CC;
-import cc.redberry.core.indices.*;
-import cc.redberry.core.indices.*;
-import cc.redberry.core.indices.*;
-import cc.redberry.core.indices.*;
-import cc.redberry.core.indices.*;
-import cc.redberry.core.indices.*;
+import cc.redberry.core.indices.IndexType;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.tensor.Tensors;
-import cc.redberry.core.transformations.*;
-import junit.framework.*;
+import cc.redberry.core.transformations.RemoveDueToSymmetry;
+import junit.framework.Assert;
 import org.junit.Test;
 
 import static org.junit.Assert.assertFalse;
@@ -48,28 +43,28 @@ public class TensorUtilsTest {
     public void test1() {
         Tensor tensor = Tensors.parse("A_ij");
         Tensor expected = Tensors.parse("A_ij");
-        assertTrue(TensorUtils.equals(tensor, expected));
+        assertTrue(TensorUtils.equalsExactly(tensor, expected));
     }
 
     @Test
     public void test2() {
         Tensor tensor = Tensors.parse("A_ij*A_kl");
         Tensor expected = Tensors.parse("A_kl*A_ij");
-        assertTrue(TensorUtils.equals(tensor, expected));
+        assertTrue(TensorUtils.equalsExactly(tensor, expected));
     }
 
     @Test
     public void test3() {
         Tensor tensor = Tensors.parse("A_ij*A_kl*A_mn+A_km*A_nl*A_ij");
         Tensor expected = Tensors.parse("A_ij*A_kl*A_mn+A_km*A_nl*A_ij");
-        assertTrue(TensorUtils.equals(tensor, expected));
+        assertTrue(TensorUtils.equalsExactly(tensor, expected));
     }
 
     @Test
     public void test4() {
         Tensor tensor = Tensors.parse("A_ij*A_kl*A_mn+A_km*A_nl*A_ij");
         Tensor expected = Tensors.parse("A_mn*A_kl*A_ij+A_nl*A_km*A_ij");
-        assertTrue(TensorUtils.equals(tensor, expected));
+        assertTrue(TensorUtils.equalsExactly(tensor, expected));
     }
 
     @Test
@@ -78,7 +73,7 @@ public class TensorUtilsTest {
             CC.resetTensorNames();
             Tensor tensor = Tensors.parse("A_ij*A_kl*A_mn+A_km*A_nl*B_ij+B_ijk*C_lmn");
             Tensor expected = Tensors.parse("C_lmn*B_ijk+A_mn*A_kl*A_ij+A_nl*A_km*B_ij");
-            assertTrue(TensorUtils.equals(tensor, expected));
+            assertTrue(TensorUtils.equalsExactly(tensor, expected));
         }
     }
 
@@ -86,21 +81,21 @@ public class TensorUtilsTest {
     public void testParity1() {
         Tensor tensor = Tensors.parse("A_ij*A_kl*A_mn+A_km*A_nl*B_ij+B_ijk*C_lmn");
         Tensor expected = Tensors.parse("A_mn*A_kt*A_ij+A_nt*A_km*B_ij+C_tmn*B_ijk");
-        assertFalse(TensorUtils.compare(tensor, expected));
+        assertFalse(TensorUtils.equals(tensor, expected));
     }
 
     @Test
     public void testParity2() {
         Tensor tensor = Tensors.parse("A_ij^m*B_mlk+C_ijlkmn*T^mn");
         Tensor expected = Tensors.parse("A_ij^u*B_ulk+C_ijlknp*T^np");
-        assertTrue(TensorUtils.compare(tensor, expected));
+        assertTrue(TensorUtils.equals(tensor, expected));
     }
 
     @Test
     public void testParity3() {
         Tensor tensor = Tensors.parse("A_ij^m*B_mlk");
         Tensor expected = Tensors.parse("A_ij^u*B_ulk");
-        assertTrue(TensorUtils.compare(tensor, expected));
+        assertTrue(TensorUtils.equals(tensor, expected));
     }
 
     @Test
@@ -136,6 +131,6 @@ public class TensorUtilsTest {
         Tensor t = Tensors.parse("1/15*R_{\\delta }^{\\rho }*R_{\\rho }^{\\delta }+-23/60*R^{\\gamma \\mu }*F_{\\gamma \\mu }^{\\rho_5 }_{\\rho_5 }+1/12*F^{\\alpha }_{\\nu }^{\\rho_5 }_{\\zeta }*F_{\\alpha }^{\\nu \\zeta }_{\\rho_5 }+1/2*W^{\\alpha }_{\\rho_5 }*W^{\\rho_5 }_{\\alpha }+1/30*Power[R, 2]+1/6*R*W^{\\beta }_{\\beta }");
         t = RemoveDueToSymmetry.INSANCE.transform(t);
         Tensor e = Tensors.parse("1/15*R_{\\delta }^{\\rho }*R_{\\rho }^{\\delta }+1/12*F^{\\alpha }_{\\nu }^{\\rho_5 }_{\\zeta }*F_{\\alpha }^{\\nu \\zeta }_{\\rho_5 }+1/2*W^{\\alpha }_{\\rho_5 }*W^{\\rho_5 }_{\\alpha }+1/30*Power[R, 2]+1/6*R*W^{\\beta }_{\\beta }");
-        Assert.assertTrue(TensorUtils.compare(t, e));
+        Assert.assertTrue(TensorUtils.equals(t, e));
     }
 }

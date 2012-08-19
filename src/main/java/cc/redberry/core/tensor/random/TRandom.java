@@ -23,7 +23,8 @@
 package cc.redberry.core.tensor.random;
 
 import cc.redberry.core.combinatorics.Symmetry;
-import cc.redberry.core.context.*;
+import cc.redberry.core.context.CC;
+import cc.redberry.core.context.NameDescriptor;
 import cc.redberry.core.indexgenerator.IndexGenerator;
 import cc.redberry.core.indices.*;
 import cc.redberry.core.number.Complex;
@@ -207,8 +208,8 @@ public final class TRandom {
 
     public Tensor nextProduct(int minProductSize, Indices indices) {
         if (minProductSize < 2)
-            throw new IllegalArgumentException();//CHECKSTYLE
-        indices = indices.getFreeIndices();
+            throw new IllegalArgumentException();
+        indices = indices.getFree();
         IndicesTypeStructure typeStructure = new IndicesTypeStructure(IndicesFactory.createSimple(null, indices));
         List<NameDescriptor> descriptors = new ArrayList<>();
         int totalIndicesCounts[] = new int[TYPES.length];
@@ -249,7 +250,7 @@ public final class TRandom {
         }
 
         //Creating indices for Indices instances
-        int[] _freeIndices = indices.getFreeIndices().getAllIndices().copy();
+        int[] _freeIndices = indices.getFree().getAllIndices().copy();
         int[][] freeIndices = new int[TYPES.length][];
         int[][] indicesSpace = new int[TYPES.length][];
         IndexGenerator indexGenerator = new IndexGenerator(_freeIndices.clone());

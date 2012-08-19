@@ -177,8 +177,7 @@ public final class TreeTraverseIterator {
      * Checks specified condition at position specified by relative level to
      * current cursor.
      *
-     * @param indicator 
-     * @param level relative position of element to be tested
+     * @param indicator level relative position of element to be tested
      *
      * @return
      */

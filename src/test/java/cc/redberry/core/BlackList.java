@@ -22,25 +22,29 @@
  */
 package cc.redberry.core;
 
-import cc.redberry.core.context.*;
-import cc.redberry.core.number.Complex;
-import cc.redberry.core.number.parser.NumberParser;
-import cc.redberry.core.tensor.*;
+import junit.framework.Assert;
 import org.junit.Test;
 
 /**
- *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
 public class BlackList {
 
+    public static void fill(int[] a, int val) {
+        for (int i = 0, len = a.length; i < len; i++)
+            a[i] = val;
+    }
+
     @Test
     public void test1() {
-        System.out.println("\nA");
-        System.out.print("A");
-        for (long i = 0; i < Long.MAX_VALUE; ++i);
-        System.out.print("A");
-        System.out.print("A");
+        
+        int a[] = new int[37];
+        for (int i = 0; i < 10000000; ++i) {
+            a = a.clone();
+            fill(a, -1);
+            for (int d : a)
+                Assert.assertTrue(d == -1);
+        }
     }
 }

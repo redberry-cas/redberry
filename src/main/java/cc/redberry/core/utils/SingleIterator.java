@@ -29,7 +29,7 @@ import java.util.Iterator;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public class SingleIterator<T> implements Iterator<T> {
+public final class SingleIterator<T> implements Iterator<T> {
     private T element;
     private boolean ended = false;
 

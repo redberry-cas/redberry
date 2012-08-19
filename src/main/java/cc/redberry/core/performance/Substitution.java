@@ -48,9 +48,9 @@ public class Substitution {
             TreeTraverseIterator iterator = new TreeTraverseIterator(target);
 
             while (iterator.next() != null)
-                if (TensorUtils.equals(iterator.current(), pT))
+                if (TensorUtils.equalsExactly(iterator.current(), pT))
                     iterator.set(M8);
-                else if (TensorUtils.equals(iterator.current(), s))
+                else if (TensorUtils.equalsExactly(iterator.current(), s))
                     iterator.set(AllToM);
             iterator.result();
         }
@@ -75,12 +75,12 @@ public class Substitution {
         for (i = 0; i < 100; ++i) {
             iterator = new TreeTraverseIterator(target);
             while (iterator.next() != null)
-                if (TensorUtils.equals(iterator.current(), pT))
+                if (TensorUtils.equalsExactly(iterator.current(), pT))
                     iterator.set(M);
             ptM = iterator.result();
         }
         stop = System.currentTimeMillis();
-        status = TensorUtils.equals(ptM, pTToM);
+        status = TensorUtils.equalsExactly(ptM, pTToM);
         System.out.println("pT -> M : " + status + ". Time: " + (stop - start) + " ms");
 
         start = System.currentTimeMillis();
@@ -88,11 +88,11 @@ public class Substitution {
         for (i = 0; i < 100; ++i) {
             iterator = new TreeTraverseIterator(target);
             while (iterator.next() != null)
-                if (TensorUtils.equals(iterator.current(), s))
+                if (TensorUtils.equalsExactly(iterator.current(), s))
                     iterator.set(M2);
             sM = iterator.result();
         }
-        status = TensorUtils.equals(sM, sToM);
+        status = TensorUtils.equalsExactly(sM, sToM);
         stop = System.currentTimeMillis();
         System.out.println("s -> M^2 : " + status + ". Time: " + (stop - start) + " ms");
 
@@ -101,13 +101,13 @@ public class Substitution {
         for (i = 0; i < 100; ++i) {
             iterator = new TreeTraverseIterator(target);
             while (iterator.next() != null)
-                if (TensorUtils.equals(iterator.current(), pT))
+                if (TensorUtils.equalsExactly(iterator.current(), pT))
                     iterator.set(M);
-                else if (TensorUtils.equals(iterator.current(), s))
+                else if (TensorUtils.equalsExactly(iterator.current(), s))
                     iterator.set(M2);
             allM = iterator.result();
         }
-        status = TensorUtils.equals(allM, AllToM);
+        status = TensorUtils.equalsExactly(allM, AllToM);
         stop = System.currentTimeMillis();
         System.out.println("pT-> M and s -> M^2 : " + status + ". Time: " + (stop - start) + " ms");
     }

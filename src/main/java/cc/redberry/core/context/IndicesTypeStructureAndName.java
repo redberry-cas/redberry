@@ -22,8 +22,9 @@
  */
 package cc.redberry.core.context;
 
-import cc.redberry.core.indices.*;
-import java.util.*;
+import cc.redberry.core.indices.IndicesTypeStructure;
+import java.util.Arrays;
+import java.util.Objects;
 
 /**
  *

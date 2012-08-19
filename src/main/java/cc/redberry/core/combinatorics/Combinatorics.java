@@ -22,8 +22,8 @@
  */
 package cc.redberry.core.combinatorics;
 
-import java.lang.reflect.*;
-import java.util.*;
+import java.lang.reflect.Array;
+import java.util.Arrays;
 
 /**
  *

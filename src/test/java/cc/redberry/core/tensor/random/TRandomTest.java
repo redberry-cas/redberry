@@ -45,7 +45,7 @@ public class TRandomTest {
                 new int[]{10, 0, 0, 0},
                 false, new Well19937c());
         Tensor t = rp.nextProduct(4, ParserIndices.parseSimple("_nm"));
-        Assert.assertTrue(t.getIndices().getFreeIndices().equalsRegardlessOrder(ParserIndices.parseSimple("_nm")));
+        Assert.assertTrue(t.getIndices().getFree().equalsRegardlessOrder(ParserIndices.parseSimple("_nm")));
     }
 
     @Test
@@ -65,7 +65,7 @@ public class TRandomTest {
         TRandom random = new TRandom(5, 20, new int[]{2, 0, 0, 0}, new int[]{10, 0, 0, 0}, true, 76543L);
         for (int i = 0; i < 100; ++i) {
             Tensor t = random.nextProduct(5, ParserIndices.parseSimple("_mnab^cd"));
-            Assert.assertTrue(t.getIndices().getFreeIndices().equalsRegardlessOrder(ParserIndices.parseSimple("_mnab^cd")));
+            Assert.assertTrue(t.getIndices().getFree().equalsRegardlessOrder(ParserIndices.parseSimple("_mnab^cd")));
         }
     }
 

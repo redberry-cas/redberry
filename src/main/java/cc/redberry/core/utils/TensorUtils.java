@@ -22,36 +22,19 @@
  */
 package cc.redberry.core.utils;
 
-//import cc.redberry.core.indices.InconsistentIndicesException;
-import cc.redberry.concurrent.*;
-import cc.redberry.core.combinatorics.*;
-import cc.redberry.core.combinatorics.symmetries.*;
+import cc.redberry.core.combinatorics.Symmetry;
+import cc.redberry.core.combinatorics.symmetries.Symmetries;
+import cc.redberry.core.combinatorics.symmetries.SymmetriesFactory;
 import cc.redberry.core.indexmapping.*;
 import cc.redberry.core.indices.Indices;
 import cc.redberry.core.indices.IndicesUtils;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.tensor.*;
 import cc.redberry.core.tensor.functions.ScalarFunction;
-import java.util.*;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-//import cc.redberry.core.indices.Indices;
-//import cc.redberry.core.indices.IndicesBuilderSorted;
-//import cc.redberry.core.math.MathUtils;
-//import cc.redberry.core.tensor.*;
-//import cc.redberry.core.tensor.iterators.IterationGuide;
-//import cc.redberry.core.tensor.iterators.TensorFirstTreeIterator;
-//import cc.redberry.core.tensor.iterators.TensorLastTreeIterator;
-//import cc.redberry.core.tensor.iterators.TensorTreeIterator;
-//import cc.redberry.core.tensor.testing.TTest;
-//
-//import java.util.*;
-//
-//import static cc.redberry.core.indices.IndicesUtils.getNameWithType;
-//import org.apache.commons.math.fraction.Fraction;
-//import org.apache.commons.math.stat.inference.TTest;
-//import org.apache.commons.math.util.MathUtils;
 /**
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
@@ -100,7 +83,7 @@ public class TensorUtils {
     }
 
     private static boolean isScalar1(Tensor tensor) {
-        return tensor.getIndices().getFreeIndices().size() == 0;
+        return tensor.getIndices().getFree().size() == 0;
     }
 
     public static boolean isOne(Tensor tensor) {
@@ -150,20 +133,20 @@ public class TensorUtils {
         return true;
     }
 
-    public static boolean equals(Tensor[] u, Tensor[] v) {
+    public static boolean equalsExactly(Tensor[] u, Tensor[] v) {
         if (u.length != v.length)
             return false;
         for (int i = 0; i < u.length; ++i)
-            if (!TensorUtils.equals(u[i], v[i]))
+            if (!TensorUtils.equalsExactly(u[i], v[i]))
                 return false;
         return true;
     }
 
-    public static boolean equals(Tensor u, String v) {
-        return equals(u, Tensors.parse(v));
+    public static boolean equalsExactly(Tensor u, String v) {
+        return equalsExactly(u, Tensors.parse(v));
     }
 
-    public static boolean equals(Tensor u, Tensor v) {
+    public static boolean equalsExactly(Tensor u, Tensor v) {
         if (u == v)
             return true;
         if (u.getClass() != v.getClass())
@@ -196,14 +179,14 @@ public class TensorUtils {
                         OUT:
                         for (n = begin; n < i; ++n) {
                             for (j = begin; j < i; ++j)
-                                if (usedPos[j - begin] == false && equals(u.get(n), v.get(j))) {
+                                if (usedPos[j - begin] == false && equalsExactly(u.get(n), v.get(j))) {
                                     usedPos[j - begin] = true;
                                     continue OUT;
                                 }
                             return false;
                         }
                         return true;
-                    } else if (!equals(u.get(i - 1), v.get(i - 1)))
+                    } else if (!equalsExactly(u.get(i - 1), v.get(i - 1)))
                         return false;
                     begin = i;
                 }
@@ -216,14 +199,14 @@ public class TensorUtils {
 
         final int size = u.size();
         for (int i = 0; i < size; ++i)
-            if (!equals(u.get(i), v.get(i)))
+            if (!equalsExactly(u.get(i), v.get(i)))
                 return false;
         return true;
     }
 
     public static Set<Integer> getAllDummyIndicesNames(Tensor tensor) {
         Set<Integer> dummy = getAllIndicesNames(tensor);
-        Indices ind = tensor.getIndices().getFreeIndices();
+        Indices ind = tensor.getIndices().getFree();
         for (int i = ind.size() - 1; i >= 0; --i)
             dummy.remove(IndicesUtils.getNameWithType(ind.get(i)));
         return dummy;
@@ -254,9 +237,9 @@ public class TensorUtils {
         }
     }
 
-    public static boolean compare(Tensor u, Tensor v) {
-        Indices freeIndices = u.getIndices().getFreeIndices();
-        if (!freeIndices.equalsRegardlessOrder(v.getIndices().getFreeIndices()))
+    public static boolean equals(Tensor u, Tensor v) {
+        Indices freeIndices = u.getIndices().getFree();
+        if (!freeIndices.equalsRegardlessOrder(v.getIndices().getFree()))
             return false;
         int[] free = freeIndices.getAllIndices().copy();
         IndexMappingBuffer tester = new IndexMappingBufferTester(free, false);
@@ -271,8 +254,8 @@ public class TensorUtils {
     }
 
     public static Boolean compare1(Tensor u, Tensor v) {
-        Indices freeIndices = u.getIndices().getFreeIndices();
-        if (!freeIndices.equalsRegardlessOrder(v.getIndices().getFreeIndices()))
+        Indices freeIndices = u.getIndices().getFree();
+        if (!freeIndices.equalsRegardlessOrder(v.getIndices().getFree()))
             return false;
         int[] free = freeIndices.getAllIndices().copy();
         IndexMappingBuffer tester = new IndexMappingBufferTester(free, false);
@@ -332,7 +315,7 @@ public class TensorUtils {
     }
 
     public static boolean isZeroDueToSymmetry(Tensor t) {
-        int[] indices = IndicesUtils.getIndicesNames(t.getIndices().getFreeIndices());
+        int[] indices = IndicesUtils.getIndicesNames(t.getIndices().getFree());
         IndexMappingBufferTester bufferTester = new IndexMappingBufferTester(indices, false);
         MappingsPort mp = IndexMappings.createPort(bufferTester, t, t);
         IndexMappingBuffer buffer;
@@ -385,183 +368,10 @@ public class TensorUtils {
     public static Symmetries getIndicesSymmetries(int[] indices, Tensor tensor) {
         return getSymmetriesFromMappings(indices, IndexMappings.createPort(tensor, tensor));
     }
-//
-//    public static IndicesBuilderSorted getAllIndicesBuilder(final Tensor tensor) {
-//        final IndicesBuilderSorted ib = new IndicesBuilderSorted();
-//        TensorLastTreeIterator iterator = new TensorLastTreeIterator(tensor, IterationGuide.EXCEPT_DENOMINATOR_TENSORFIELD_ARGUMENTS);
-//        Tensor current;
-//        while (iterator.hasNext()) {
-//            current = iterator.next();
-//            if (!(current instanceof SimpleTensor))
-//                continue;
-//            if (Derivative.onVarsIndicator.is(iterator))
-//                ib.append(current.getIndices().getInverseIndices());
-//            else
-//                ib.append(current.getIndices());
-//        }
-//        return ib;
-//    }
-//
-//    public static Indices getAllIndicesNames(final Tensor... tensors) {
-//        return getAllIndicesBuilder(tensors).getDistinct();
-//    }
-//
-//    public static IndicesBuilderSorted getAllIndicesBuilder(final Tensor... tensors) {
-//        final IndicesBuilderSorted ib = new IndicesBuilderSorted();
-//        for (Tensor t : tensors)
-//            ib.append(getAllIndicesBuilder(t));
-//        return ib;
-//    }
-//
-//    /**
-//     * Return sorted int array of distinct indices names
-//     *
-//     * @param t tensor
-//     */
-//    public static int[] getAllIndicesNames(final Tensor t) {
-//        int[] indices = getAllIndicesNames(t).getAllIndicesNames().copy();
-//        for (int i = 0; i < indices.length; ++i)
-//            indices[i] = getNameWithType(indices[i]);
-//        return MathUtils.getSortedDistinct(indices);
-//    }
-//
-//    /**
-//     * Utility method. Only in develop version.
-//     *
-//     * @param t
-//     * @return false if specified indices are inconsistent and true if not
-//     */
-//    //TODO consider different implementation
-//    public static boolean testIndicesConsistent(final Tensor t) {
-//        try {
-//            TensorFirstTreeIterator it = new TensorFirstTreeIterator(t);
-//            while (it.hasNext())
-//                it.next().getIndices().testConsistentWithException();
-//        } catch (InconsistentIndicesException e) {
-//            return false;
-//        }
-//        return true;
-//    }
-//
-//    /**
-//     * Returns list of contracted indices of two tensors, i.e. similar of free
-//     * indices of first and second tensors. E.g. for tensors
-//     * {@code A_mn} and {@code B^am}, list will contains only index {@code m}.
-//     *
-//     * @param first first tensor
-//     * @param second second tensor
-//     * @return list of contracted indices of two tensors, i.e. similar of free
-//     * indices of first and second tensors
-//     */
-//    public static IntArrayList getContractedIndicesNames(final Tensor first, final Tensor second) {
-//        //FIXME write better algotithm
-//        Indices firstIndices = first.getIndices().getFreeIndices();
-//        int[] secondIndices = second.getIndices().getFreeIndices().getAllIndicesNames().copy();
-//        Arrays.sort(secondIndices);
-//        IntArrayList result = new IntArrayList();
-//        for (int i = 0; i < firstIndices.size(); ++i)
-//            if (Arrays.binarySearch(secondIndices, 0x80000000 ^ firstIndices.get(i)) >= 0)
-//                result.add(getNameWithType(firstIndices.get(i)));
-//        return result;
-//    }
-//
-//    /**
-//     * Returns length of the specified tensor. Specification : <br> If tensor
-//     * instance of sum or product this method returns their size. <br> If tensor
-//     * instance of Fraction this method returns 2. <br> If tensor instance of
-//     * TensorField this method returns arguments number + 1. <br> If tensor
-//     * instance of Derivative this method returns variations number + 1. <br>
-//     * Else returns 1.
-//     *
-//     * @param t specified tensor
-//     * @return length as in description explained
-//     */
-//    public static int size(final Tensor t) {
-//        if (t instanceof MultiTensor)
-//            return ((MultiTensor) t).size();
-//        if (t instanceof Fraction)
-//            return 2;
-//        if (t instanceof TensorField)
-//            return ((TensorField) t).getArgs().length + 1;
-//        if (t instanceof Derivative)
-//            return ((Derivative) t).getDerivativeOrder() + 1;
-//        return 1;
-//    }
-//
-//
-//
-//    /**
-//     * Detects whether target tensor contains in its tree one of the simple
-//     * tensors in the keys array, with no respect to their indices.
-//     *
-//     * @param target target tensor to find whether it contains one of the keys
-//     * @param keys simple tensors array
-//     * @return true if target tensor contains one of the keys and false if not
-//     */
-//    public static boolean contains(final Tensor target, final SimpleTensor... keys) {
-//        final TensorTreeIterator iterator = new TensorLastTreeIterator(target);
-//        Tensor c;
-//        SimpleTensor s;
-//        while (iterator.hasNext()) {
-//            c = iterator.next();
-//            if (!(c instanceof SimpleTensor))
-//                continue;
-//            s = (SimpleTensor) c;
-//            for (SimpleTensor k : keys)
-//                if (k.getName() == s.getName())
-//                    return true;
-//        }
-//        return false;
-//    }
-//
-//    /**
-//     * Returns list of simple tensors, which are occurs in target tensor tree.
-//     *
-//     * @param target target tensor
-//     * @return list of simple tensors, which are occurs in target tensor
-//     */
-//    public static Collection<SimpleTensor> getSimpleTensorContent(Tensor target) {
-//        final List<SimpleTensor> result = new LinkedList<>();
-//        final TensorTreeIterator iterator = new TensorLastTreeIterator(target);
-//        Tensor c;
-//        while (iterator.hasNext()) {
-//            c = iterator.next();
-//            if (c instanceof SimpleTensor)
-//                result.add((SimpleTensor) c);
-//        }
-//        return result;
-//    }
-//
-//    /**
-//     * Returns list of simple tensors, which are occurs in target tensor tree
-//     * and have different names.
-//     *
-//     * @param target target tensor
-//     * @return list of simple tensors, which are occurs in target tensor and
-//     * have different names.
-//     */
-//    public static Collection<SimpleTensor> getDiffSimpleTensorContent(Tensor target) {
-//        final Map<Integer, SimpleTensor> map = new HashMap<>();
-//        final TensorTreeIterator iterator = new TensorLastTreeIterator(target);
-//        Tensor c;
-//        while (iterator.hasNext()) {
-//            c = iterator.next();
-//            if (c instanceof SimpleTensor) {
-//                SimpleTensor st = (SimpleTensor) c;
-//                if (map.containsKey(st.getName()))
-//                    continue;
-//                map.put(st.getName(), st);
-//            }
-//        }
-//        return map.values();
-//    }
-//
-//    /**
-//     * //TODO comment
-//     */
+
 //    public static Tensor[] getDistinct(final Tensor[] array) {
 //        final int length = array.length;
-//        final Indices indices = array[0].getIndices().getFreeIndices();
+//        final Indices indices = array[0].getIndices().getFree();
 //        final int[] hashes = new int[length];
 //        int i;
 //        for (i = 0; i < length; ++i)
@@ -587,7 +397,7 @@ public class TensorUtils {
 //        OUTER:
 //        for (int i = from; i < to; ++i) {
 //            for (j = i + 1; j < to; ++j)
-//                if (TTest.compare(array[i], array[j]))
+//                if (TTest.equals(array[i], array[j]))
 //                    continue OUTER;
 //            tensors.add(array[i]);
 //        }

@@ -33,7 +33,7 @@ import cc.redberry.core.tensor.Tensor;
 final class PermutatorProvider extends IndexMappingProviderAbstract {
     private final IntPermutationsGenerator generator;
     private final Tensor[] from, to;
-    private SimpleProductProvider currentProvider = null;
+    private SimpleProductMappingsPort currentProvider = null;
    
     PermutatorProvider(final MappingsPort opu,
             final Tensor[] from, final Tensor[] to) {
@@ -59,7 +59,7 @@ final class PermutatorProvider extends IndexMappingProviderAbstract {
             final Tensor[] newTo = new Tensor[to.length];
             for (int i = 0; i < to.length; ++i)
                 newTo[i] = to[permutation[i]];
-            currentProvider = new SimpleProductProvider(IndexMappingProvider.Util.singleton(currentBuffer.clone()), from, newTo);
+            currentProvider = new SimpleProductMappingsPort(IndexMappingProvider.Util.singleton(currentBuffer.clone()), from, newTo);
             final IndexMappingBuffer buffer = currentProvider.take();
             if (buffer != null)
                 return buffer;

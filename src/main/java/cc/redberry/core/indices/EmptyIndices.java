@@ -56,7 +56,7 @@ class EmptyIndices implements Indices {
      * @return {@code EmptySimpleIndices} instance
      */
     @Override
-    public Indices getInverseIndices() {
+    public Indices getInverse() {
         return this;
     }
 
@@ -66,7 +66,7 @@ class EmptyIndices implements Indices {
      * @return {@code EmptySimpleIndices} instance
      */
     @Override
-    public Indices getFreeIndices() {
+    public Indices getFree() {
         return this;
     }
 

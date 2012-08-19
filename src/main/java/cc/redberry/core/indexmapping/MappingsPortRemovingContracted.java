@@ -20,13 +20,26 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
-package cc.redberry.concurrent;
+package cc.redberry.core.indexmapping;
 
 /**
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public interface InputPortUnsafe<T> {
-    void put(T object);
+final class MappingsPortRemovingContracted implements MappingsPort {
+
+    private final MappingsPort provider;
+
+    public MappingsPortRemovingContracted(MappingsPort provider) {
+        this.provider = provider;
+    }
+
+    @Override
+    public IndexMappingBuffer take() {
+        IndexMappingBuffer buf = provider.take();
+        if (buf != null)
+            buf.removeContracted();
+        return buf;
+    }
 }

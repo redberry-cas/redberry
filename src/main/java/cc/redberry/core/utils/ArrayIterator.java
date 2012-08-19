@@ -18,7 +18,7 @@ package cc.redberry.core.utils;
 
 import java.util.Iterator;
 
-public class ArrayIterator<T> implements Iterator<T> {
+public final class ArrayIterator<T> implements Iterator<T> {
     private final T[] array;
     private int i = -1;
 

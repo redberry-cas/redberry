@@ -23,8 +23,9 @@
 package cc.redberry.core.tensor;
 
 import cc.redberry.core.context.ToStringMode;
-import cc.redberry.core.indices.*;
-import cc.redberry.core.utils.*;
+import cc.redberry.core.indices.Indices;
+import cc.redberry.core.utils.ArraysUtils;
+import cc.redberry.core.utils.TensorHashCalculator;
 import java.util.Arrays;
 
 /**

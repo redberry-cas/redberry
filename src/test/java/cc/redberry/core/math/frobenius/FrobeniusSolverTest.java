@@ -22,13 +22,12 @@
  */
 package cc.redberry.core.math.frobenius;
 
-import org.junit.*;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import static cc.redberry.core.math.frobenius.FrobeniusUtils.*;
 
 /**
- *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
@@ -58,8 +57,8 @@ public class FrobeniusSolverTest {
     @Test
     public void test4() {
         int[][] equations = {
-            {17, 1, 2, 5, 1, 2, 9, 1, 49},
-            {17, 1, 2, 5, 1, 2, 9, 1, 48}};
+                {17, 1, 2, 5, 1, 2, 9, 1, 49},
+                {17, 1, 2, 5, 1, 2, 9, 1, 48}};
         assertSolutionsCount(0, equations);
     }
 
@@ -107,9 +106,9 @@ public class FrobeniusSolverTest {
     @Test
     public void test11() {
         int[][] equations = {
-            {2, 0, 0, 4},
-            {0, 1, 0, 3},
-            {0, 0, 7, 21}};
+                {2, 0, 0, 4},
+                {0, 1, 0, 3},
+                {0, 0, 7, 21}};
         int[][] solutions = {{2, 3, 3}};
         assertFbSystem(solutions, equations);
     }
@@ -117,46 +116,46 @@ public class FrobeniusSolverTest {
     @Test
     public void test12() {
         int[][] equations = {
-            {2, 2, 0, 0, 4},
-            {0, 0, 2, 2, 4}};
+                {2, 2, 0, 0, 4},
+                {0, 0, 2, 2, 4}};
         int[][] solutions = {
-            {1, 1, 1, 1},
-            {1, 1, 0, 2},
-            {1, 1, 2, 0},
-            {2, 0, 1, 1},
-            {2, 0, 2, 0},
-            {2, 0, 0, 2},
-            {0, 2, 1, 1},
-            {0, 2, 0, 2},
-            {0, 2, 2, 0}};
+                {1, 1, 1, 1},
+                {1, 1, 0, 2},
+                {1, 1, 2, 0},
+                {2, 0, 1, 1},
+                {2, 0, 2, 0},
+                {2, 0, 0, 2},
+                {0, 2, 1, 1},
+                {0, 2, 0, 2},
+                {0, 2, 2, 0}};
         assertFbSystem(solutions, equations);
     }
 
     @Test
     public void test13() {
         int[][] equations = {
-            {0, 2, 1, 0, 1, 3},
-            {2, 0, 1, 1, 0, 3}};
+                {0, 2, 1, 0, 1, 3},
+                {2, 0, 1, 1, 0, 3}};
         int[][] solutions = {
-            {0, 0, 0, 3, 3},
-            {0, 0, 1, 2, 2},
-            {0, 0, 2, 1, 1},
-            {0, 0, 3, 0, 0},
-            {0, 1, 0, 3, 1},
-            {0, 1, 1, 2, 0},
-            {1, 0, 0, 1, 3},
-            {1, 0, 1, 0, 2},
-            {1, 1, 0, 1, 1},
-            {1, 1, 1, 0, 0}};
+                {0, 0, 0, 3, 3},
+                {0, 0, 1, 2, 2},
+                {0, 0, 2, 1, 1},
+                {0, 0, 3, 0, 0},
+                {0, 1, 0, 3, 1},
+                {0, 1, 1, 2, 0},
+                {1, 0, 0, 1, 3},
+                {1, 0, 1, 0, 2},
+                {1, 1, 0, 1, 1},
+                {1, 1, 1, 0, 0}};
         assertFbSystem(solutions, equations);
     }
 
     @Test
     public void test14() {
         int[][] equations = {
-            {2, 0, 0, 0, 4},
-            {0, 1, 0, 0, 3},
-            {0, 0, 7, 0, 21}};
+                {2, 0, 0, 0, 4},
+                {0, 1, 0, 0, 3},
+                {0, 0, 7, 0, 21}};
         int[][] solutions = {{2, 3, 3, -1}};
         assertFbSystem(solutions, equations);
     }
@@ -164,9 +163,9 @@ public class FrobeniusSolverTest {
     @Test
     public void test15() {
         int[][] equations = {
-            {2, 0, 0, 0, 4},
-            {0, 1, 0, 0, 3},
-            {0, 0, 0, 7, 21}};
+                {2, 0, 0, 0, 4},
+                {0, 1, 0, 0, 3},
+                {0, 0, 0, 7, 21}};
         int[][] solutions = {{2, 3, -1, 3}};
         assertFbSystem(solutions, equations);
     }
@@ -174,9 +173,9 @@ public class FrobeniusSolverTest {
     @Test
     public void test16() {
         int[][] equations = {
-            {0, 2, 0, 0, 4},
-            {0, 0, 1, 0, 3},
-            {0, 0, 0, 7, 21}};
+                {0, 2, 0, 0, 4},
+                {0, 0, 1, 0, 3},
+                {0, 0, 0, 7, 21}};
         int[][] solutions = {{-1, 2, 3, 3}};
         assertFbSystem(solutions, equations);
     }
@@ -184,8 +183,8 @@ public class FrobeniusSolverTest {
     @Test
     public void test17() {
         int[][] equations = {
-            {1, 2},
-            {1, 2}};
+                {1, 2},
+                {1, 2}};
         int[][] solutions = {{2}};
         assertFbSystem(solutions, equations);
     }
@@ -194,8 +193,8 @@ public class FrobeniusSolverTest {
     @Test(timeout = 500)
     public void test18() {
         int[][] equations = {
-            {1, 0, 12, 3, 43, 1, 4, 54, 1, 32, 9, 1, 242131},
-            {12, 2, 0, 213, 0, 11, 7, 8, 9, 67, 4, 0, 21242432}};
+                {1, 0, 12, 3, 43, 1, 4, 54, 1, 32, 9, 1, 242131},
+                {12, 2, 0, 213, 0, 11, 7, 8, 9, 67, 4, 0, 21242432}};
         FrobeniusSolver solver = new FrobeniusSolver(equations);
 
         //from Wolfram Mathematica

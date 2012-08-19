@@ -29,7 +29,6 @@ import cc.redberry.core.math.GraphUtils;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.utils.ArraysUtils;
 import cc.redberry.core.utils.HashFunctions;
-
 import java.lang.ref.SoftReference;
 import java.util.Arrays;
 
@@ -82,17 +81,6 @@ public final class Product extends MultiTensor {
         this.hash = calculateHash();
     }
 
-    //    @Override
-    //    protected Indices calculateIndices() {
-    //        IndicesBuilder ibs = new IndicesBuilder();
-    //        for (Tensor t : data)
-    //            ibs.append(t);
-    //        try {
-    //            return ibs.getIndices();
-    //        } catch (InconsistentIndicesException exception) {
-    //            throw new InconsistentIndicesException(exception.getIndex(), this);//TODO this->data
-    //        }
-    //    }
     @Override
     public Indices getIndices() {
         return indices;
@@ -250,7 +238,7 @@ public final class Product extends MultiTensor {
     private ProductContent calculateContent() {
         if (data.length == 0)
             return ProductContent.EMPTY_INSTANCE;
-        final Indices freeIndices = indices.getFreeIndices();
+        final Indices freeIndices = indices.getFree();
         final int differentIndicesCount = (getIndices().size() + freeIndices.size()) / 2;
 
         //Names (names with type, see IndicesUtils.getNameWithType() ) of all indices in this multiplication
@@ -330,7 +318,11 @@ public final class Product extends MultiTensor {
         final int componentCount = components[components.length - 1]; //Last element of this array contains components count 
         //(this is specification of GraphUtils.calculateConnectedComponents method)
         int[] componentSizes = new int[componentCount];
-
+        
+        //TODO remove after Oracle fix
+        //patch for jvm bug (u4 or later) 
+        Arrays.fill(componentSizes, 0);
+        
         //finding each component size
         for (i = 1; i < components.length - 1; ++i)
             ++componentSizes[components[i]];
@@ -393,7 +385,7 @@ public final class Product extends MultiTensor {
             contraction.sortContractions();
         freeContraction.sortContractions();
 
-        int[] inds = IndicesUtils.getIndicesNames(this.indices.getFreeIndices());
+        int[] inds = IndicesUtils.getIndicesNames(this.indices.getFree());
         Arrays.sort(inds);
         ScaffoldWrapper[] wrappers = new ScaffoldWrapper[contractions.length];
         for (i = 0; i < contractions.length; ++i)
@@ -486,7 +478,7 @@ public final class Product extends MultiTensor {
     //    }
 
     private static int hc(Tensor t, int[] inds) {
-        Indices ind = t.getIndices().getFreeIndices();
+        Indices ind = t.getIndices().getFree();
         int h = 31;
         int ii;
         for (int i = ind.size() - 1; i >= 0; --i) {

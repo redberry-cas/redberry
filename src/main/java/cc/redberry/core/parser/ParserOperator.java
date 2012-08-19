@@ -26,7 +26,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
@@ -43,14 +42,18 @@ abstract class ParserOperator implements NodeParser {
     protected final boolean canParse(String expression) {
         char[] expressionChars = expression.toCharArray();
         int level = 0;
-        for (char c : expressionChars) {
+
+        char c;
+        for (int i = 0; i < expressionChars.length; ++i) {
+            c = expressionChars[i];
+
             if (c == '(' || c == '[')
                 level++;
             if (c == ')' || c == ']')
                 level--;
             if (level < 0)
                 throw new BracketsError();
-            if (c == operatorSymbol && level == 0)
+            if (c == operatorSymbol && level == 0 && testOperator(expressionChars, i))
                 return true;
             if (c == operatorInverseSymbol && level == 0)
                 return true;
@@ -61,7 +64,9 @@ abstract class ParserOperator implements NodeParser {
     private enum Mode {
 
         Direct, Inverse
-    };
+    }
+
+    ;
 
     @Override
     public ParseNode parseNode(String expression, Parser parser) {
@@ -77,7 +82,10 @@ abstract class ParserOperator implements NodeParser {
         int level = 0, indicesLevel = 0;
         Mode mode = Mode.Direct;
 
-        for (char c : expressionChars) {
+        char c;
+        for (int i = 0; i < expressionChars.length; ++i) {
+            c = expressionChars[i];
+
             if (c == '(' || c == '[')
                 level++;
             if (c == '{')
@@ -90,7 +98,7 @@ abstract class ParserOperator implements NodeParser {
                 throw new BracketsError();
             if (c == ' ' && indicesLevel == 0)
                 continue;
-            if (c == operatorSymbol && level == 0) {
+            if (c == operatorSymbol && level == 0 && testOperator(expressionChars, i)) {
                 String toParse = buffer.toString();
                 if (!toParse.isEmpty())
                     modeParser(toParse, mode, parser, nodes);
@@ -118,6 +126,10 @@ abstract class ParserOperator implements NodeParser {
             nodes.add(inverseOperation(parser.parse(expression)));
         else
             throw new ParserException("unrepoted operator parser mode");
+    }
+
+    protected boolean testOperator(char[] expressionChars, int position) {
+        return true;
     }
 
     protected abstract ParseNode compile(List<ParseNode> nodes);

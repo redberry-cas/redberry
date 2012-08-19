@@ -23,7 +23,7 @@
 package cc.redberry.core.tensor;
 
 import cc.redberry.core.indices.IndicesFactory;
-import cc.redberry.core.utils.*;
+import cc.redberry.core.utils.TensorUtils;
 
 /**
  *
@@ -43,8 +43,8 @@ public class ExpressionFactory implements TensorFactory {
             throw new IllegalArgumentException("Wrong number of arguments.");
         if (tensors[0] == null || tensors[1] == null)
             throw new NullPointerException();
-        if (!tensors[0].getIndices().getFreeIndices().equalsRegardlessOrder(tensors[1].getIndices().getFreeIndices()) && !TensorUtils.isZero(tensors[1]))
+        if (!tensors[0].getIndices().getFree().equalsRegardlessOrder(tensors[1].getIndices().getFree()) && !TensorUtils.isZero(tensors[1]))
             throw new TensorException("Inconsistent indices in expression.");
-        return new Expression(IndicesFactory.createSorted(tensors[0].getIndices().getFreeIndices()), tensors[0], tensors[1]);
+        return new Expression(IndicesFactory.createSorted(tensors[0].getIndices().getFree()), tensors[0], tensors[1]);
     }    
 }

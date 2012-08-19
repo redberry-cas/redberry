@@ -22,7 +22,9 @@
  */
 package cc.redberry.core.indexmapping;
 
-import cc.redberry.core.context.*;
+import cc.redberry.core.context.CC;
+import cc.redberry.core.context.Context;
+import cc.redberry.core.context.ToStringMode;
 import cc.redberry.core.indices.IndicesUtils;
 import java.util.Comparator;
 import java.util.HashMap;

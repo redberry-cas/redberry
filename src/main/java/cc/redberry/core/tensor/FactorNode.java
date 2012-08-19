@@ -22,9 +22,9 @@
  */
 package cc.redberry.core.tensor;
 
-import cc.redberry.core.transformations.*;
-import cc.redberry.core.utils.*;
-import java.util.*;
+import cc.redberry.core.transformations.ApplyIndexMapping;
+import cc.redberry.core.utils.TensorUtils;
+import java.util.Set;
 
 /**
  *
