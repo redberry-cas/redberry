@@ -30,7 +30,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
-class SymmetriesImpl extends AbstractSymmetries {
+final class SymmetriesImpl extends AbstractSymmetries {
 
     SymmetriesImpl(int dimension) {
         super(dimension, new ArrayList<Symmetry>());

@@ -22,6 +22,8 @@
  */
 package cc.redberry.core.utils;
 
+import cc.redberry.core.combinatorics.Symmetry;
+import cc.redberry.core.combinatorics.symmetries.*;
 import cc.redberry.core.context.CC;
 import cc.redberry.core.indices.IndexType;
 import cc.redberry.core.tensor.Tensor;
@@ -132,5 +134,36 @@ public class TensorUtilsTest {
         t = RemoveDueToSymmetry.INSANCE.transform(t);
         Tensor e = Tensors.parse("1/15*R_{\\delta }^{\\rho }*R_{\\rho }^{\\delta }+1/12*F^{\\alpha }_{\\nu }^{\\rho_5 }_{\\zeta }*F_{\\alpha }^{\\nu \\zeta }_{\\rho_5 }+1/2*W^{\\alpha }_{\\rho_5 }*W^{\\rho_5 }_{\\alpha }+1/30*Power[R, 2]+1/6*R*W^{\\beta }_{\\beta }");
         Assert.assertTrue(TensorUtils.equals(t, e));
+    }
+
+    @Test
+    public void testSymmetries1() {
+        CC.resetTensorNames(2103403802553543528L);
+        Tensor t = Tensors.parse("g_{ab}*g^{rs}*g_{mn}*g^{pq}");
+        //t.indices = ^{pqrs}_{abmn}
+        Symmetries s = TensorUtils.getIndicesSymmetries(t.getIndices().getAllIndices().copy(), t);
+        Symmetry[] symmetries = new Symmetry[]{
+            new Symmetry(new int[]{0, 1, 2, 3, 4, 5, 6, 7}, false),
+            new Symmetry(new int[]{1, 0, 2, 3, 4, 5, 6, 7}, false),
+            new Symmetry(new int[]{0, 1, 2, 3, 4, 5, 7, 6}, false),
+            new Symmetry(new int[]{0, 1, 3, 2, 4, 5, 6, 7}, false),
+            new Symmetry(new int[]{0, 1, 2, 3, 5, 4, 6, 7}, false),
+            new Symmetry(new int[]{6, 7, 2, 3, 4, 5, 0, 1}, false),
+            new Symmetry(new int[]{0, 1, 6, 7, 4, 5, 2, 3}, false),
+            new Symmetry(new int[]{0, 1, 4, 5, 2, 3, 6, 7}, false)};
+        Symmetries expected = SymmetriesFactory.createSymmetries(8);
+        for (Symmetry symmetry : symmetries)
+            expected.add(symmetry);
+        int basisDimension = s.getBasisSymmetries().size();
+
+        for (Symmetry s1 : symmetries)
+            s.add(s1);
+
+        Assert.assertTrue(s.getBasisSymmetries().size() == basisDimension);
+
+        for (Symmetry s1 : s)
+            expected.add(s1);
+
+        Assert.assertTrue(expected.getBasisSymmetries().size() == basisDimension);
     }
 }

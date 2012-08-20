@@ -500,6 +500,20 @@ public final class Tensors {
         return CC.current().getParseManager().parse(expression);
     }
 
+    /**
+     * Parses an array strings and returns array of parsed tensors.
+     *
+     * @param expressions array of strings to be parsed
+     *
+     * @return array of parsed tensors
+     */
+    public static Tensor[] parse(final String... expressions) {
+        Tensor[] r = new Tensor[expressions.length];
+        for (int i = 0; i < expressions.length; ++i)
+            r[i] = parse(expressions[i]);
+        return r;
+    }
+
     public static Tensor parse(String expression, ParseNodeTransformer... preprocessors) {
         return CC.current().getParseManager().parse(expression, preprocessors);
     }
