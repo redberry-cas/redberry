@@ -25,13 +25,11 @@ package cc.redberry.tensorgenerator;
 import cc.redberry.core.combinatorics.IntPermutationsGenerator;
 import cc.redberry.core.combinatorics.Symmetry;
 import cc.redberry.core.combinatorics.symmetries.Symmetries;
-import cc.redberry.core.indexmapping.IndexMappings;
 import cc.redberry.core.indices.Indices;
 import cc.redberry.core.indices.IndicesFactory;
-import cc.redberry.core.indices.IndicesUtils;
 import cc.redberry.core.tensor.Tensor;
-import cc.redberry.core.transformations.*;
-import cc.redberry.core.utils.*;
+import cc.redberry.core.transformations.ApplyIndexMapping;
+import cc.redberry.core.utils.TensorUtils;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -41,7 +39,7 @@ import java.util.List;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public final class IndexMappingPermutationsGenerator {
+final class IndexMappingPermutationsGenerator {
 
     private final Tensor tensor;
     private final int[] indicesNames;
@@ -50,16 +48,11 @@ public final class IndexMappingPermutationsGenerator {
 
     private IndexMappingPermutationsGenerator(Tensor tensor) {
         this.tensor = tensor;
-        Indices indices = IndicesFactory.createSorted(tensor.getIndices().getFreeIndices());
-
+        Indices indices = IndicesFactory.createSorted(tensor.getIndices().getFree());
         symmetries = TensorUtils.getIndicesSymmetries(indices.getAllIndices().copy(), tensor);
         lowerCount = indices.getLower().length();
         upperCount = indices.getUpper().length();
-
         this.indicesNames = indices.getAllIndices().copy();
-        for (int i = 0; i < this.indicesNames.length; ++i)
-            this.indicesNames[i] = IndicesUtils.getNameWithType(this.indicesNames[i]);
-
     }
     private final List<Tensor> result = new ArrayList<>();
 
@@ -106,8 +99,9 @@ public final class IndexMappingPermutationsGenerator {
         //TODO discover better algorithm (possible using stretches of symmetries)
         //checking wheather the way beetween current permutation and already
         //generated combinatorics exists throw any possible combination of symmetries
-        for (int[] p : generatedPermutations)
-            for (Symmetry symmetry : symmetries)
+
+        for (Symmetry symmetry : symmetries)
+            for (int[] p : generatedPermutations)
                 if (Arrays.equals(permutation, symmetry.permute(p)))
                     return;
         generatedPermutations.add(permutation);

@@ -22,28 +22,21 @@
  */
 package cc.redberry.tensorgenerator;
 
-import cc.redberry.core.number.*;
-import cc.redberry.core.tensor.Tensor;
-import cc.redberry.core.tensor.Tensors;
+import org.junit.Test;
 
 /**
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
- * @author Konstantin Kiselev
  */
-public final class ScalarTensorGenerator {
-
-    private final String name;
-    private int count = 0;
-
-    public ScalarTensorGenerator(String name) {
-        this.name = name;
+public class ScalarTensorGeneratorTest {
+    public ScalarTensorGeneratorTest() {
     }
 
-    public Tensor next() {
-        if (name.isEmpty())
-            return Complex.ONE;
-        return Tensors.parse(name + (count++));
+    @Test
+    public void testSomeMethod() {
+        ScalarTensorGenerator generator = new ScalarTensorGenerator("c");
+        for (int i = 0; i < 10; ++i)
+            System.out.println(generator.next());
     }
 }

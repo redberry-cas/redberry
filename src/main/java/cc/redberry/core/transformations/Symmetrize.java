@@ -49,7 +49,10 @@ public final class Symmetrize implements Transformation {
     public Symmetrize(int[] freeIndices, Permutation[] symmetries, boolean multiplyFactorial) {
         checkConsistensy(freeIndices, symmetries);
         this.freeIndices = freeIndices;
-        this.symmetries = SymmetriesFactory.createSymmetries(symmetries[0].dimension());
+        if (symmetries.length == 0)
+            this.symmetries = SymmetriesFactory.createSymmetries(0);
+        else
+            this.symmetries = SymmetriesFactory.createSymmetries(symmetries[0].dimension());
         for (Permutation s : symmetries)
             this.symmetries.add(s.asSymmetry());
         this.multiplyFactorial = multiplyFactorial;
@@ -69,7 +72,7 @@ public final class Symmetrize implements Transformation {
     }
 
     private static Tensor symmetrizeWithoutCheck(Tensor tensor, int[] freeIndicesNames, Symmetries symmetries, boolean multiplyFactorial) {
-        if (!IndicesUtils.equalsRegardlessOrder(tensor.getIndices().getFreeIndices(), freeIndicesNames))
+        if (!IndicesUtils.equalsRegardlessOrder(tensor.getIndices().getFree(), freeIndicesNames))
             throw new IllegalArgumentException("Specified indices are not equal (regardless order) to the free indices of specified tensor .");
 
         if (symmetries.dimension() == 0)

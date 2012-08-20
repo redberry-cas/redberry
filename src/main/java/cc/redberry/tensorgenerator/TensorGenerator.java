@@ -22,15 +22,17 @@
  */
 package cc.redberry.tensorgenerator;
 
+import cc.redberry.core.combinatorics.Symmetry;
 import cc.redberry.core.combinatorics.symmetries.Symmetries;
+import cc.redberry.core.combinatorics.symmetries.SymmetriesFactory;
 import cc.redberry.core.indices.Indices;
 import cc.redberry.core.indices.IndicesFactory;
 import cc.redberry.core.math.frobenius.FrobeniusSolver;
 import cc.redberry.core.parser.ParserIndices;
-import cc.redberry.core.tensor.Product;
 import cc.redberry.core.tensor.Sum;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.tensor.Tensors;
+import cc.redberry.core.transformations.ApplyIndexMapping;
 import cc.redberry.core.transformations.Symmetrize;
 import cc.redberry.core.utils.IntArray;
 import java.util.ArrayList;
@@ -44,142 +46,135 @@ import java.util.List;
  * @author Stanislav Poslavsky
  */
 public class TensorGenerator {
-//    private final Tensor[] samples;
-//    private final Indices indices;
-//    private final int[] lowArray;
-//    private final int[] upArray;
-//    private final ScalarTensorGenerator scalarTensorGenerator;
-//    private final List<Tensor> sumands = new ArrayList<Tensor>();
-//    private final List<Tensor> coefficients;
-//    private final Symmetries symmetries;
-//
+
+    private final Tensor[] samples;
+    private final int[] indices;
+    private final int[] lowArray;
+    private final int[] upArray;
+    private final ScalarTensorGenerator scalarTensorGenerator;
+    private final List<Tensor> sumands = new ArrayList<>();
+    private final List<Tensor> coefficients;
+    private final Symmetries symmetries;
+
 //    private TensorGenerator(String indices, Symmetries symmetries, String... samples) {
-//        this("c", ParserIndices.parse(indices), symmetries, Tensors.parse(samples));
+//        this("c", ParserIndices.parseSimple(indices), symmetries, Tensors.parse(samples));
 //    }
 //
 //    private TensorGenerator(Indices indices, Symmetries symmetries, Tensor... samples) {
 //        this("c", indices, symmetries, samples);
 //    }
-//
-//    private TensorGenerator(String coef, Indices indices, Symmetries symmetries, Tensor... samples) {
-//        this.samples = samples;
-//        this.scalarTensorGenerator = new ScalarTensorGenerator(coef);
-//        this.lowArray = indices.getLower().copy();
-//        this.upArray = indices.getUpper().copy();
-//        this.coefficients = new ArrayList<>();
-//        this.symmetries = symmetries;
-//        Arrays.sort(lowArray);
-//        Arrays.sort(upArray);
-//        this.indices = IndicesFactory.createSorted(indices.getFreeIndices().getAllIndices().copy());
-//        generate();
-//    }
-//
-//    private void generate() {
-//
-//        //processing low indices
-//        int totalLowCount = lowArray.length, i;
-//        int[] lowCounts = new int[samples.length + 1];
-//        for (i = 0; i < samples.length; ++i)
-//            lowCounts[i] = samples[i].getIndices().getLower().length();
-//        lowCounts[i] = totalLowCount;
-//
-//        //processing up indices
-//        int totalUpCount = upArray.length;
-//        int[] upCounts = new int[samples.length + 1];
-//        for (i = 0; i < samples.length; ++i)
-//            upCounts[i] = samples[i].getIndices().getUpper().length();
-//        upCounts[i] = totalUpCount;
-//
-//        //solving Frobenius equations
-//        FrobeniusSolver fbSolver = new FrobeniusSolver(lowCounts, upCounts);
-//
-//        //processing combinations
-//        int u, l;
-//        int[] combination;
-//        while((combination = fbSolver.take()) != null) {
-//
-//            LinkedList<Tensor> tCombination = new LinkedList<>();
-//            u = 0;
-//            l = 0;
-//            for (i = 0; i < combination.length; ++i)
-//                for (int j = 0; j < combination[i]; ++j) {
-//                    Tensor temp = samples[i];
-//
+    private TensorGenerator(String coef, Indices indices, Symmetries symmetries, Tensor... samples) {
+        this.samples = samples;
+        this.scalarTensorGenerator = new ScalarTensorGenerator(coef);
+        this.lowArray = indices.getLower().copy();
+        this.upArray = indices.getUpper().copy();
+        this.coefficients = new ArrayList<>();
+        this.symmetries = symmetries;
+        Arrays.sort(lowArray);
+        Arrays.sort(upArray);
+        this.indices = IndicesFactory.createSorted(indices.getFree()).getAllIndices().copy();
+        generate();
+    }
+
+    private void generate() {
+
+        //processing low indices
+        int totalLowCount = lowArray.length, i, k;
+        int[] lowCounts = new int[samples.length + 1];
+        for (i = 0; i < samples.length; ++i)
+            lowCounts[i] = samples[i].getIndices().getLower().length();
+        lowCounts[i] = totalLowCount;
+
+        //processing up indices
+        int totalUpCount = upArray.length;
+        int[] upCounts = new int[samples.length + 1];
+        for (i = 0; i < samples.length; ++i)
+            upCounts[i] = samples[i].getIndices().getUpper().length();
+        upCounts[i] = totalUpCount;
+
+        //solving Frobenius equations
+        FrobeniusSolver fbSolver = new FrobeniusSolver(lowCounts, upCounts);
+
+        //processing combinations
+        int u, l;
+        int[] combination;
+        while ((combination = fbSolver.take()) != null) {
+
+            LinkedList<Tensor> tCombination = new LinkedList<>();
+            u = 0;
+            l = 0;
+            for (i = 0; i < combination.length; ++i)
+                for (int j = 0; j < combination[i]; ++j) {
+                    Tensor temp = samples[i];
+
 //                    IndexMappingDirect im = new IndexMappingDirect();
-//                    IntArray termLow = temp.getIndices().getLower();
+                    IntArray termLow = temp.getIndices().getLower();
+                    IntArray termUp = temp.getIndices().getUpper();
+
+                    int[] oldIndices = new int[termUp.length() + termLow.length()],
+                            newIndices = oldIndices.clone();
+                    for (k = 0; k < termUp.length(); ++k) {
+                        oldIndices[k] = termUp.get(k);
+                        newIndices[k] = upArray[u++];
+                    }
+                    for (k = 0; k < termLow.length(); ++k) {
+                        oldIndices[k + termUp.length()] = termLow.get(k);
+                        newIndices[k + termUp.length()] = lowArray[l++];
+                    }
+//                    
 //                    im.add(termLow, Arrays.copyOfRange(lowArray, l, l + termLow.length()));
 //                    l += termLow.length();
 //
-//                    IntArray termUp = temp.getIndices().getUpper();
 //                    im.add(termUp, Arrays.copyOfRange(upArray, u, u + termUp.length()));
 //                    u += termUp.length();
 //
 //                    temp = ApplyIndexMappingDirectTransformation.INSTANCE.perform(temp, im);
 //                    tCombination.add(temp);
-//                }
-//
-//            //creating term & processing combinatorics
-//            Tensor coefficient;
-//            if (symmetries == null) {
-//                Symmetrize symmetrize = new Symmetrize(indices,
-//                        Symmetries.getFullSymmetriesForSortedIndices(totalUpCount, totalLowCount), false);
-//                Tensor terms = symmetrize.transform(new Product(tCombination));
-//                if (terms instanceof Sum)
-//                    for (Tensor t : terms) {
-//                        sumands.add(new Product(coefficient = scalarTensorGenerator.next(), t));
-//                        coefficients.add(coefficient.clone());
-//                    }
-//                else {
-//                    sumands.add(new Product(coefficient = scalarTensorGenerator.next(), terms));
-//                    coefficients.add(coefficient.clone());
-//                }
-//            } else {
-//                Symmetrize symmetrize = new Symmetrize(indices,
-//                        symmetries, true);
-//                Tensor terms = symmetrize.transform(new Product(tCombination));
-//                sumands.add(new Product(coefficient = scalarTensorGenerator.next(), terms));
-//                coefficients.add(coefficient.clone());
-//            }
-//        }
-//    }
-//
-//    public static Tensor generate(String coef, Indices indices, Tensor... samples) {
-//        return new TensorGenerator(coef, indices, null, samples).sumands;
-//    }
-//
-//    public static Tensor generate(Indices indices, Tensor... samples) {
-//        return new TensorGenerator(indices, null, samples).sumands;
-//    }
-//
-//    public static Tensor generate(String indices, String... samples) {
-//        return new TensorGenerator(indices, null, samples).sumands;
-//    }
-//
-//    public static Tensor generate(String indices, Symmetries symmetries, String... samples) {
-//        return new TensorGenerator(indices, symmetries, samples).sumands;
-//    }
-//
-//    public static GeneratedTensor generateStructure(String coef, Indices indices, Tensor... samples) {
-//        TensorGenerator generator = new TensorGenerator(coef, indices, null, samples);
-//        return new GeneratedTensor(generator.coefficients.toArray(new Tensor[generator.coefficients.size()]),
-//                generator.sumands);
-//    }
-//
-//    public static GeneratedTensor generateStructure(Indices indices, Tensor... samples) {
-//        TensorGenerator generator = new TensorGenerator(indices, null, samples);
-//        return new GeneratedTensor(generator.coefficients.toArray(new Tensor[generator.coefficients.size()]),
-//                generator.sumands);
-//    }
-//
-//    public static GeneratedTensor generateStructure(Indices indices, Symmetries symmetries, Tensor... samples) {
-//        TensorGenerator generator = new TensorGenerator(indices, symmetries, samples);
-//        return new GeneratedTensor(generator.coefficients.toArray(new Tensor[generator.coefficients.size()]),
-//                generator.sumands);
-//    }
-//
-//    public static GeneratedTensor generateStructure(String indices, String... samples) {
-//        TensorGenerator generator = new TensorGenerator(indices, null, samples);
-//        return new GeneratedTensor(generator.coefficients.toArray(new Tensor[generator.coefficients.size()]),
-//                generator.sumands);
-//    }
+                    temp = ApplyIndexMapping.applyIndexMapping(temp, oldIndices, newIndices, new int[0]);
+                    tCombination.add(temp);
+                }
+
+            //creating term & processing combinatorics
+            Tensor coefficient;
+            if (symmetries == null) {
+                Symmetrize symmetrize = new Symmetrize(
+                        indices,
+                        SymmetriesFactory.createFullSymmetries(totalUpCount, totalLowCount).getBasisSymmetries().toArray(new Symmetry[0]),
+                        false);
+                Tensor terms = symmetrize.transform(Tensors.multiplyAndRenameConflictingDummies(tCombination.toArray(new Tensor[tCombination.size()])));
+                if (terms instanceof Sum)
+                    for (Tensor t : terms) {
+                        sumands.add(Tensors.multiply(coefficient = scalarTensorGenerator.next(), t));
+                        coefficients.add(coefficient);
+                    }
+                else {
+                    sumands.add(Tensors.multiply(coefficient = scalarTensorGenerator.next(), terms));
+                    coefficients.add(coefficient);
+                }
+            } else {
+                Symmetrize symmetrize = new Symmetrize(
+                        indices,
+                        symmetries.getBasisSymmetries().toArray(new Symmetry[0]),
+                        true);
+                Tensor terms = symmetrize.transform(Tensors.multiplyAndRenameConflictingDummies(tCombination.toArray(new Tensor[tCombination.size()])));
+                sumands.add(Tensors.multiply(coefficient = scalarTensorGenerator.next(), terms));
+                coefficients.add(coefficient);
+            }
+        }
+    }
+
+    private Tensor result() {
+        return Tensors.sum(sumands.toArray(new Tensor[sumands.size()]));
+    }
+
+    public static Tensor generate(String coef, Indices indices, Symmetries symmetries, Tensor... samples) {
+        return new TensorGenerator(coef, indices, symmetries, samples).result();
+    }
+
+    public static GeneratedTensor generateStructure(String coef, Indices indices, Symmetries symmetries, Tensor... samples) {
+        TensorGenerator generator = new TensorGenerator(coef, indices, symmetries, samples);
+        return new GeneratedTensor(generator.coefficients.toArray(new Tensor[generator.coefficients.size()]),
+                                   generator.result());
+    }
+    
 }

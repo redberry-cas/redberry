@@ -43,6 +43,7 @@ public class SymmetrizeTest {
                 ParserIndices.parse("_abmn"),
                 new Symmetry[0], true);
         Tensor t = Tensors.parse("g_mn*g_ab");
+        System.out.println(symmetrize.transform(t));
         assertParity(symmetrize.transform(t), "g_mn*g_ab");
     }
 
