@@ -281,4 +281,9 @@ public class ParserTest {
         indices = ParserIndices.parseSimple("_{m_{1}}");
         Assert.assertTrue(indices.size() == 1);
     }
+    
+    @Test
+    public void testPowerAsp(){
+        System.out.println(Tensors.parse("24**2"));
+    }
 }

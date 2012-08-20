@@ -20,20 +20,15 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
-package cc.redberry.tensorgenerator;
+package cc.redberry.core.tensorgenerator;
 
-import org.junit.Test;
 import cc.redberry.core.context.CC;
-import cc.redberry.core.indices.*;
-import cc.redberry.core.indices.*;
-import cc.redberry.core.indices.*;
-import cc.redberry.core.indices.*;
-import cc.redberry.core.indices.*;
-import cc.redberry.core.indices.*;
+import cc.redberry.core.tensor.SumBuilder;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.tensor.Tensors;
-import cc.redberry.core.utils.*;
-import static org.junit.Assert.*;
+import org.junit.Test;
+
+import static org.junit.Assert.assertTrue;
 
 /**
  *
@@ -41,6 +36,7 @@ import static org.junit.Assert.*;
  * @author Stanislav Poslavsky
  */
 public class IndexMappingPermutationsGeneratorTest {
+
     public IndexMappingPermutationsGeneratorTest() {
     }
 
@@ -58,15 +54,28 @@ public class IndexMappingPermutationsGeneratorTest {
 
     @Test
     public void test3() {
-        int c = 0;        
-        Tensor erpziv = Tensors.parse("g^pq*g^rs*g_mn*g_ab");
-        System.out.println(erpziv);
-        System.out.println(erpziv.getIndices());
-        System.out.println(TensorUtils.getIndicesSymmetries(erpziv.getIndices().getAllIndices().copy(), erpziv));
-        for (Tensor t : IndexMappingPermutationsGenerator.getAllPermutations(Tensors.parse("g_mn*g_ab*g^pq*g^rs"))) {
+        CC.resetTensorNames(-9039046884230366966L);
+        Tensor tensor = Tensors.parse("g_ab*g^rs*g^pq*g_mn");
+        //g_{ab}*g^{rs}*g_{mn}*g^{pq}
+        //indices ^{pqrs}_{abmn}
+
+        int c = 0;
+        SumBuilder sb = new SumBuilder();
+        for (Tensor t : IndexMappingPermutationsGenerator.getAllPermutations(tensor)) {
             c++;
-            System.out.println(t);
+            sb.put(t);
         }
-        assertTrue(c== 9);
+        assertTrue(c == 9);
+
+//          g_{mn}*g_{ab}*g^{pq}*g^{rs} 
+//          g_{mn}*g_{ab}*g^{pr}*g^{qs}
+//          g_{mn}*g_{ab}*g^{ps}*g^{qr} 
+//          g_{bn}*g_{am}*g^{pq}*g^{rs}
+//          g_{bn}*g_{am}*g^{pr}*g^{qs} 
+//          g_{bn}*g_{am}*g^{ps}*g^{qr}
+//          g_{bm}*g_{an}*g^{pq}*g^{rs} 
+//          g_{bm}*g_{an}*g^{pr}*g^{qs}
+//          g_{bm}*g_{an}*g^{ps}*g^{qr}
+
     }
 }

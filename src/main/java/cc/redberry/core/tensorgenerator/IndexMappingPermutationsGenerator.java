@@ -20,7 +20,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
-package cc.redberry.tensorgenerator;
+package cc.redberry.core.tensorgenerator;
 
 import cc.redberry.core.combinatorics.IntPermutationsGenerator;
 import cc.redberry.core.combinatorics.Symmetry;
@@ -42,46 +42,48 @@ import java.util.List;
 final class IndexMappingPermutationsGenerator {
 
     private final Tensor tensor;
-    private final int[] indicesNames;
+    private final int[] indices;
     private final int lowerCount, upperCount;
     private final Symmetries symmetries;
 
     private IndexMappingPermutationsGenerator(Tensor tensor) {
         this.tensor = tensor;
         Indices indices = IndicesFactory.createSorted(tensor.getIndices().getFree());
-        symmetries = TensorUtils.getIndicesSymmetries(indices.getAllIndices().copy(), tensor);
-        lowerCount = indices.getLower().length();
-        upperCount = indices.getUpper().length();
-        this.indicesNames = indices.getAllIndices().copy();
+        this.indices = indices.getAllIndices().copy();
+        this.symmetries = TensorUtils.getIndicesSymmetriesForIndicesWithSameStates(this.indices, tensor);
+        this.lowerCount = indices.getLower().length();
+        this.upperCount = indices.getUpper().length();
+        
     }
     private final List<Tensor> result = new ArrayList<>();
 
     private List<Tensor> get() {
-        IntPermutationsGenerator lowIndicesPermutator, upperIndicesPermutator;
+        IntPermutationsGenerator lowIndicesPermutationsGenerator,
+                upperIndicesPermutationGenerator;
 
         if (upperCount != 0 && lowerCount != 0) {
-            lowIndicesPermutator = new IntPermutationsGenerator(lowerCount);
-            while (lowIndicesPermutator.hasNext()) {
-                int[] lowerPermutation = lowIndicesPermutator.next().clone();
+            lowIndicesPermutationsGenerator = new IntPermutationsGenerator(lowerCount);
+            while (lowIndicesPermutationsGenerator.hasNext()) {
+                int[] lowerPermutation = lowIndicesPermutationsGenerator.next().clone();
                 for (int i = 0; i < lowerCount; ++i)
                     lowerPermutation[i] = lowerPermutation[i] + upperCount;
-                upperIndicesPermutator = new IntPermutationsGenerator(upperCount);
+                upperIndicesPermutationGenerator = new IntPermutationsGenerator(upperCount);
                 UPPER:
-                while (upperIndicesPermutator.hasNext()) {
-                    int[] upperPermutation = upperIndicesPermutator.next();
+                while (upperIndicesPermutationGenerator.hasNext()) {
+                    int[] upperPermutation = upperIndicesPermutationGenerator.next();
                     permute(upperPermutation, lowerPermutation);
                 }
             }
         } else if (upperCount == 0) {
-            lowIndicesPermutator = new IntPermutationsGenerator(lowerCount);
-            while (lowIndicesPermutator.hasNext()) {
-                int[] lowerPermutation = lowIndicesPermutator.next();
+            lowIndicesPermutationsGenerator = new IntPermutationsGenerator(lowerCount);
+            while (lowIndicesPermutationsGenerator.hasNext()) {
+                int[] lowerPermutation = lowIndicesPermutationsGenerator.next();
                 permute(new int[0], lowerPermutation);
             }
         } else if (lowerCount == 0) {
-            upperIndicesPermutator = new IntPermutationsGenerator(upperCount);
-            while (upperIndicesPermutator.hasNext()) {
-                int[] upperPermutation = upperIndicesPermutator.next();
+            upperIndicesPermutationGenerator = new IntPermutationsGenerator(upperCount);
+            while (upperIndicesPermutationGenerator.hasNext()) {
+                int[] upperPermutation = upperIndicesPermutationGenerator.next();
                 permute(upperPermutation, new int[0]);
             }
         }
@@ -100,22 +102,22 @@ final class IndexMappingPermutationsGenerator {
         //checking wheather the way beetween current permutation and already
         //generated combinatorics exists throw any possible combination of symmetries
 
-        for (Symmetry symmetry : symmetries)
-            for (int[] p : generatedPermutations)
+        for (int[] p : generatedPermutations)
+            for (Symmetry symmetry : symmetries)
                 if (Arrays.equals(permutation, symmetry.permute(p)))
                     return;
         generatedPermutations.add(permutation);
 
         //processing new indices from permutation
-        final int[] newIndicesNames = new int[indicesNames.length];
-        for (int i = 0; i < indicesNames.length; ++i)
-            newIndicesNames[i] = indicesNames[permutation[i]];
+        final int[] newIndices = new int[indices.length];
+        for (int i = 0; i < indices.length; ++i)
+            newIndices[i] = indices[permutation[i]];
 
         //processing new tensor
-        result.add(ApplyIndexMapping.applyIndexMapping(tensor, indicesNames, newIndicesNames, new int[0]));
+        result.add(ApplyIndexMapping.applyIndexMapping(tensor, indices, newIndices, new int[0]));
     }
 
-    public static List<Tensor> getAllPermutations(Tensor tensor) {
+    static List<Tensor> getAllPermutations(Tensor tensor) {
         return new IndexMappingPermutationsGenerator(tensor).get();
     }
 }

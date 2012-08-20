@@ -20,23 +20,30 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
-package cc.redberry.tensorgenerator;
+package cc.redberry.core.tensorgenerator;
 
-import org.junit.Test;
+import cc.redberry.core.number.Complex;
+import cc.redberry.core.tensor.Tensor;
+import cc.redberry.core.tensor.Tensors;
 
 /**
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @author Konstantin Kiselev
  */
-public class ScalarTensorGeneratorTest {
-    public ScalarTensorGeneratorTest() {
+public final class ScalarTensorGenerator {
+
+    private final String name;
+    private int count = 0;
+
+    public ScalarTensorGenerator(String name) {
+        this.name = name;
     }
 
-    @Test
-    public void testSomeMethod() {
-        ScalarTensorGenerator generator = new ScalarTensorGenerator("c");
-        for (int i = 0; i < 10; ++i)
-            System.out.println(generator.next());
+    public Tensor next() {
+        if (name.isEmpty())
+            return Complex.ONE;
+        return Tensors.parse(name + (count++));
     }
 }

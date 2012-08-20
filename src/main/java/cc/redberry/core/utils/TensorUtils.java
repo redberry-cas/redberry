@@ -369,6 +369,19 @@ public class TensorUtils {
         return getSymmetriesFromMappings(indices, IndexMappings.createPort(tensor, tensor));
     }
 
+    public static Symmetries getIndicesSymmetriesForIndicesWithSameStates(final int[] indices, Tensor tensor) {
+        Symmetries total = getIndicesSymmetries(indices, tensor);
+        Symmetries symmetries = SymmetriesFactory.createSymmetries(indices.length);
+        int i;
+        OUT:
+        for (Symmetry s : total) {
+            for (i = 0; i < indices.length; ++i)
+                if (IndicesUtils.getRawStateInt(indices[i]) != IndicesUtils.getRawStateInt(indices[s.newIndexOf(i)]))
+                    continue OUT;
+            symmetries.add(s);
+        }
+        return symmetries;
+    }
 //    public static Tensor[] getDistinct(final Tensor[] array) {
 //        final int length = array.length;
 //        final Indices indices = array[0].getIndices().getFree();

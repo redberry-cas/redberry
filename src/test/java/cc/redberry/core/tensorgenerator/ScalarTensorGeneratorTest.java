@@ -20,21 +20,23 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
-package cc.redberry.tensorgenerator;
+package cc.redberry.core.tensorgenerator;
 
-import cc.redberry.core.tensor.Tensor;
+import org.junit.Test;
 
 /**
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public class GeneratedTensor {
-    public final Tensor[] coefficients;
-    public final Tensor generatedTensor;
+public class ScalarTensorGeneratorTest {
+    public ScalarTensorGeneratorTest() {
+    }
 
-    public GeneratedTensor(Tensor[] coefficients, Tensor generatedTensor) {
-        this.coefficients = coefficients;
-        this.generatedTensor = generatedTensor;
+    @Test
+    public void testSomeMethod() {
+        ScalarTensorGenerator generator = new ScalarTensorGenerator("c");
+        for (int i = 0; i < 10; ++i)
+            System.out.println(generator.next());
     }
 }
