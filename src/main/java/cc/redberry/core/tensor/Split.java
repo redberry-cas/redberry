@@ -33,17 +33,17 @@ import java.util.concurrent.atomic.AtomicReference;
  */
 public abstract class Split {
 
-    final Tensor factor;
-    final Tensor summand;
+    public final Tensor factor;
+    public final Tensor summand;
 
     public Split(Tensor factor, Tensor summand) {
         this.factor = factor;
         this.summand = summand;
     }
 
-    abstract TensorBuilder getBuilder();
+    public abstract TensorBuilder getBuilder();
 
-    static Split split(final Tensor tensor) {
+    public static Split split(final Tensor tensor) {
         if (tensor.getIndices().size() == 0) {//case 2*a*b*c
             Complex complex;
             Tensor factor;
@@ -92,7 +92,7 @@ public abstract class Split {
         }
 
         @Override
-        TensorBuilder getBuilder() {
+        public TensorBuilder getBuilder() {
             TensorBuilder builder = new ComplexSumBuilder();
             builder.put(summand);
             return builder;
@@ -106,7 +106,7 @@ public abstract class Split {
         }
 
         @Override
-        TensorBuilder getBuilder() {
+        public TensorBuilder getBuilder() {
             TensorBuilder builder = new SumBuilder();
             builder.put(summand);
             return builder;
