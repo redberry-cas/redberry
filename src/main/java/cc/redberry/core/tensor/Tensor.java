@@ -129,6 +129,10 @@ public abstract class Tensor
         return range;
     }
 
+    public Tensor[] toArray() {
+        return getRange(0, size());
+    }
+
     /**
      * <p>Returns a string representation of a tensor. See {@link cc.redberry.core.context.ToStringMode}
      * for available modes.</p>

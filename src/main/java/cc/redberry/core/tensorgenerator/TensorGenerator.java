@@ -22,10 +22,13 @@
  */
 package cc.redberry.core.tensorgenerator;
 
+import cc.redberry.core.transformations.SymmetrizeUpperLowerIndices;
 import cc.redberry.core.indices.Indices;
 import cc.redberry.core.math.frobenius.FrobeniusSolver;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.number.Rational;
+import cc.redberry.core.tensor.*;
+import cc.redberry.core.tensor.Sum;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.tensor.Tensors;
 import cc.redberry.core.transformations.ApplyIndexMapping;
@@ -44,14 +47,14 @@ public class TensorGenerator {
     private final Tensor[] samples;
     private final int[] lowArray;
     private final int[] upArray;
-    private final ScalarTensorGenerator scalarTensorGenerator;
-    private final List<Tensor> sumands = new ArrayList<>();
+    private final ScalarTensorGenerator coefficientsGenerator;
+    private final SumBuilder result = new SumBuilder();
     private final List<Tensor> coefficients;
     private final boolean symmetricForm;
 
     private TensorGenerator(String coefficientName, Indices indices, boolean symmetricForm, Tensor... samples) {
         this.samples = samples;
-        this.scalarTensorGenerator = new ScalarTensorGenerator(coefficientName);
+        this.coefficientsGenerator = new ScalarTensorGenerator(coefficientName, true);
         this.symmetricForm = symmetricForm;
         this.lowArray = indices.getLower().copy();
         this.upArray = indices.getUpper().copy();
@@ -111,25 +114,17 @@ public class TensorGenerator {
                 }
 
             //creating term & processing combinatorics            
-            Tensor coefficient;
-            Tensor term = Tensors.multiplyAndRenameConflictingDummies(tCombination.toArray(new Tensor[tCombination.size()]));
-            List<Tensor> indicesCombinations = IndexMappingPermutationsGenerator.getAllPermutations(term);
-            if (symmetricForm) {
-                term = Tensors.sum(indicesCombinations.toArray(new Tensor[indicesCombinations.size()]));
-                term = Tensors.multiply(coefficient = scalarTensorGenerator.next(), term, new Complex(new Rational(1, indicesCombinations.size())));
-                sumands.add(term);
-                coefficients.add(coefficient);
-            } else
-                for (Tensor tt : indicesCombinations) {
-                    term = Tensors.multiply(coefficient = scalarTensorGenerator.next(), tt);
-                    sumands.add(term);
-                    coefficients.add(coefficient);
-                }
+            Tensor term = SymmetrizeUpperLowerIndices.symmetrizeUpperLowerIndices(Tensors.multiplyAndRenameConflictingDummies(tCombination.toArray(new Tensor[tCombination.size()])));
+            if (symmetricForm || !(term instanceof Sum))
+                term = Tensors.multiply(coefficientsGenerator.take(), term, term instanceof Sum ? new Complex(new Rational(1, term.size())) : Complex.ONE);
+            else
+                term = Tensors.multiplySumElementsOnFactors((Sum) term, coefficientsGenerator);
+            result.put(term);
         }
     }
 
     private Tensor result() {
-        return Tensors.sum(sumands.toArray(new Tensor[sumands.size()]));
+        return result.build();
     }
 
     public static Tensor generate(String coefficientName, Indices indices, boolean symmetricForm, Tensor... samples) {
