@@ -40,6 +40,7 @@ public final class IndexMappingBufferTester implements IndexMappingBuffer {
     private final boolean signum;
 
     public IndexMappingBufferTester(int[] from, boolean signum) {
+        from = IndicesUtils.getIndicesNames(from);
         Arrays.sort(from);
         this.from = this.to = from;
         this.signum = signum;
@@ -49,6 +50,8 @@ public final class IndexMappingBufferTester implements IndexMappingBuffer {
     public IndexMappingBufferTester(int[] from, int[] to, boolean signum) {
         if (from.length != to.length)
             throw new IllegalArgumentException();
+        from = IndicesUtils.getIndicesNames(from);
+        to = IndicesUtils.getIndicesNames(to);
         this.from = from;
         this.to = to;
         this.signum = signum;
