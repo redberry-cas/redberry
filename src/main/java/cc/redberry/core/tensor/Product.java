@@ -22,6 +22,7 @@
  */
 package cc.redberry.core.tensor;
 
+import cc.redberry.core.context.*;
 import cc.redberry.core.indices.Indices;
 import cc.redberry.core.indices.IndicesFactory;
 import cc.redberry.core.indices.IndicesUtils;
@@ -84,11 +85,6 @@ public final class Product extends MultiTensor {
     @Override
     public Indices getIndices() {
         return indices;
-    }
-
-    @Override
-    protected char operationSymbol() {
-        return '*';
     }
 
     @Override
@@ -227,6 +223,10 @@ public final class Product extends MultiTensor {
             return new Product(factor, indexlessData, new Tensor[0], ProductContent.EMPTY_INSTANCE, IndicesFactory.EMPTY_INDICES);
     }
 
+    public Tensor getSubProductWithoutFactor() {
+        return Tensors.multiply(ArraysUtils.addAll(indexlessData, data));
+    }
+
     public Tensor getDataSubProduct() {
         if (data.length == 0)
             return Complex.ONE;
@@ -318,11 +318,11 @@ public final class Product extends MultiTensor {
         final int componentCount = components[components.length - 1]; //Last element of this array contains components count 
         //(this is specification of GraphUtils.calculateConnectedComponents method)
         int[] componentSizes = new int[componentCount];
-        
+
         //TODO remove after Oracle fix
         //patch for jvm bug (u4 or later) 
         Arrays.fill(componentSizes, 0);
-        
+
         //finding each component size
         for (i = 1; i < components.length - 1; ++i)
             ++componentSizes[components[i]];
@@ -510,5 +510,41 @@ public final class Product extends MultiTensor {
                 return r;
             return Integer.compare(hashWithIndices, o.hashWithIndices);
         }
+    }
+
+    @Override
+    public String toString(ToStringMode mode) {
+        StringBuilder sb = new StringBuilder();
+
+        if (factor.isReal() && factor.getReal().signum() < 0) {
+            sb.append('-');
+            Complex f = factor.abs();
+            if (!f.isOne())
+                sb.append(((Tensor) f).toString(mode, Product.class)).append('*');
+        } else if (factor != Complex.ONE)
+            sb.append(((Tensor) factor).toString(mode, Product.class)).append('*');
+
+        int i = 0, size = factor == Complex.ONE ? size() : size() - 1;
+
+        for (; i < indexlessData.length; ++i) {
+            sb.append(indexlessData[i].toString(mode, Product.class));
+            if (i == size - 1)
+                return sb.toString();
+            sb.append('*');
+        }
+        for (;; ++i) {
+            sb.append(data[i - indexlessData.length].toString(mode, Product.class));
+            if (i == size - 1)
+                return sb.toString();
+            sb.append('*');
+        }
+    }
+
+    @Override
+    protected String toString(ToStringMode mode, Class<? extends Tensor> clazz) {
+        if (clazz == Power.class)
+            return "(" + toString(mode) + ")";
+        else
+            return toString(mode);
     }
 }

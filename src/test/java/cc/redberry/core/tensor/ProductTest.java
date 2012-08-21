@@ -249,4 +249,46 @@ public class ProductTest {
         Tensor e = Tensors.parse("Power[Power[pT,2] - s, 4]*Power[s, 4]");
         Assert.assertTrue(TensorUtils.equalsExactly(t, e));
     }
+
+    @Test
+    public void toString1() {
+        Tensor t = Tensors.parse("-a*b");
+        Assert.assertTrue(TensorUtils.equals(t, Tensors.parse(t.toString())));
+    }
+
+    @Test
+    public void toString2() {
+        Tensor t = Tensors.parse("-a*b*g_mn");
+        Assert.assertTrue(TensorUtils.equals(t, Tensors.parse(t.toString())));
+    }
+
+    @Test
+    public void toString3() {
+        Tensor t = Tensors.parse("-a*b*g_mn*g^mn");
+        Assert.assertTrue(TensorUtils.equals(t, Tensors.parse(t.toString())));
+    }
+
+    @Test
+    public void toString4() {
+        Tensor t = Tensors.parse("a*b");
+        Assert.assertTrue(TensorUtils.equals(t, Tensors.parse(t.toString())));
+    }
+
+    @Test
+    public void toString5() {
+        Tensor t = Tensors.parse("a*b*g_mn");
+        Assert.assertTrue(TensorUtils.equals(t, Tensors.parse(t.toString())));
+    }
+
+    @Test
+    public void toString6() {
+        Tensor t = Tensors.parse("a*b*g_mn*g^mn");
+        Assert.assertTrue(TensorUtils.equals(t, Tensors.parse(t.toString())));
+    }
+
+    @Test
+    public void toString7() {
+        Tensor t = Tensors.parse("(2-i)*a*b*g_mn*g^mn");
+        Assert.assertTrue(TensorUtils.equals(t, Tensors.parse(t.toString())));
+    }
 }

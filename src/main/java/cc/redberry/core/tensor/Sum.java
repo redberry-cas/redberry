@@ -24,6 +24,7 @@ package cc.redberry.core.tensor;
 
 import cc.redberry.core.context.ToStringMode;
 import cc.redberry.core.indices.Indices;
+import cc.redberry.core.number.*;
 import cc.redberry.core.utils.ArraysUtils;
 import cc.redberry.core.utils.TensorHashCalculator;
 import java.util.Arrays;
@@ -112,11 +113,6 @@ public final class Sum extends MultiTensor {
     }
 
     @Override
-    protected char operationSymbol() {
-        return '+';
-    }
-
-    @Override
     public TensorBuilder getBuilder() {
         return new SumBuilder(data.length);
     }
@@ -127,9 +123,25 @@ public final class Sum extends MultiTensor {
     }
 
     @Override
+    public String toString(ToStringMode mode) {
+        StringBuilder sb = new StringBuilder();
+        String temp;
+        for (int i = 0;; ++i) {
+            temp = get(i).toString(mode, Sum.class);
+            if ((temp.charAt(0) == '-' || temp.charAt(0) == '+') && sb.length() != 0)
+                sb.deleteCharAt(sb.length() - 1);
+            sb.append(get(i).toString(mode, Sum.class));
+            if (i == size() - 1)
+                return sb.toString();
+            sb.append('+');
+        }
+    }
+
+    @Override
     protected String toString(ToStringMode mode, Class<? extends Tensor> clazz) {
-        if (clazz == Product.class || clazz == Power.class)
+        if (clazz == Power.class || clazz == Product.class)
             return "(" + toString(mode) + ")";
-        return toString(mode);
+        else
+            return toString(mode);
     }
 }
