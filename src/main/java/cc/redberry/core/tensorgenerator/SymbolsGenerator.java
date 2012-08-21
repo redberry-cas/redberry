@@ -24,6 +24,7 @@ package cc.redberry.core.tensorgenerator;
 
 import cc.redberry.concurrent.*;
 import cc.redberry.core.number.Complex;
+import cc.redberry.core.tensor.SimpleTensor;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.tensor.Tensors;
 import java.util.*;
@@ -34,35 +35,35 @@ import java.util.*;
  * @author Stanislav Poslavsky
  * @author Konstantin Kiselev
  */
-public final class ScalarTensorGenerator implements OutputPortUnsafe<Tensor> {
+final class SymbolsGenerator implements OutputPortUnsafe<Tensor> {
 
     private final String name;
     private int count = 0;
-    final List<Tensor> generatedTensors;
+    final List<SimpleTensor> generatedSymbols;
     private final boolean rememberHistory;
 
-    public ScalarTensorGenerator(String name) {
+    public SymbolsGenerator(String name) {
         this(name, false);
     }
 
-    public ScalarTensorGenerator(String name, boolean rememberHistory) {
+    public SymbolsGenerator(String name, boolean rememberHistory) {
         this.name = name;
         this.rememberHistory = rememberHistory;
         if (rememberHistory)
-            generatedTensors = new ArrayList<>();
+            generatedSymbols = new ArrayList<>();
         else
-            generatedTensors = Collections.EMPTY_LIST;
+            generatedSymbols = Collections.EMPTY_LIST;
     }
 
     @Override
     public Tensor take() {
-        Tensor t;
+        SimpleTensor t;
         if (name.isEmpty())
-            t = Complex.ONE;
+            return Complex.ONE;
         else
-            t = Tensors.parse(name + (count++));
+            t = Tensors.parseSimple(name + (count++));
         if (rememberHistory)
-            generatedTensors.add(t);
+            generatedSymbols.add(t);
         return t;
     }
 }

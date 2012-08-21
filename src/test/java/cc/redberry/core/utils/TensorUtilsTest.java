@@ -166,4 +166,11 @@ public class TensorUtilsTest {
 
         Assert.assertTrue(expected.getBasisSymmetries().size() == basisDimension);
     }
+
+    @Test
+    public void testEquals1() {
+        Tensor a = Tensors.parse("d_{b}^{a}*d_{c}^{s}*d^{r}_{q}");
+        Tensor b = Tensors.parse("d^{a}_{q}*d_{c}^{s}*d_{b}^{r}");
+        Assert.assertFalse(TensorUtils.equals(a, b));
+    }
 }

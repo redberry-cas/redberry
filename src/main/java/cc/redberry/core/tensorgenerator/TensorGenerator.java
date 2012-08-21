@@ -47,13 +47,13 @@ public class TensorGenerator {
     private final Tensor[] samples;
     private final int[] lowArray;
     private final int[] upArray;
-    private final ScalarTensorGenerator coefficientsGenerator;
+    private final SymbolsGenerator coefficientsGenerator;
     private final SumBuilder result = new SumBuilder();
     private final boolean symmetricForm;
 
     private TensorGenerator(String coefficientName, Indices indices, boolean symmetricForm, Tensor... samples) {
         this.samples = samples;
-        this.coefficientsGenerator = new ScalarTensorGenerator(coefficientName, true);
+        this.coefficientsGenerator = new SymbolsGenerator(coefficientName, true);
         this.symmetricForm = symmetricForm;
         this.lowArray = indices.getLower().copy();
         this.upArray = indices.getUpper().copy();
@@ -131,7 +131,7 @@ public class TensorGenerator {
 
     public static GeneratedTensor generateStructure(String coefficientName, Indices indices, boolean symmetricForm, Tensor... samples) {
         TensorGenerator generator = new TensorGenerator(coefficientName, indices, symmetricForm, samples);
-        return new GeneratedTensor(generator.coefficientsGenerator.generatedTensors.toArray(new Tensor[generator.coefficientsGenerator.generatedTensors.size()]),
+        return new GeneratedTensor(generator.coefficientsGenerator.generatedSymbols.toArray(new SimpleTensor[generator.coefficientsGenerator.generatedSymbols.size()]),
                                    generator.result());
     }
 }

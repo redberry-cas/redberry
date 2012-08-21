@@ -27,12 +27,13 @@ import cc.redberry.core.combinatorics.Symmetry;
 import cc.redberry.core.combinatorics.symmetries.Symmetries;
 import cc.redberry.core.indices.Indices;
 import cc.redberry.core.indices.IndicesFactory;
+import cc.redberry.core.number.*;
 import cc.redberry.core.tensor.*;
-import cc.redberry.core.transformations.*;
 import cc.redberry.core.utils.TensorUtils;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import org.apache.commons.math3.fraction.*;
 
 /**
  *
@@ -52,6 +53,10 @@ public final class SymmetrizeUpperLowerIndices implements Transformation {
     }
 
     public static Tensor symmetrizeUpperLowerIndices(Tensor tensor) {
+        return symmetrizeUpperLowerIndices(tensor, false);
+    }
+
+    public static Tensor symmetrizeUpperLowerIndices(Tensor tensor, boolean multiplyOnSymmetryFactor) {
         Indices indices = IndicesFactory.createSorted(tensor.getIndices().getFree());
         int[] indicesArray = indices.getAllIndices().copy();
         Symmetries symmetries = TensorUtils.getIndicesSymmetriesForIndicesWithSameStates(indicesArray, tensor);
@@ -94,7 +99,10 @@ public final class SymmetrizeUpperLowerIndices implements Transformation {
                     sumBuilder.put(summand);
             }
         }
-        return sumBuilder.build();
+        if (multiplyOnSymmetryFactor)
+            return Tensors.multiply(new Complex(new Rational(1, generatedPermutations.size())), sumBuilder.build());
+        else
+            return sumBuilder.build();
     }
 
     private static Tensor permute(Tensor tensor,

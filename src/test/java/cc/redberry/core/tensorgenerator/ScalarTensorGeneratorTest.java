@@ -35,7 +35,7 @@ public class ScalarTensorGeneratorTest {
 
     @Test
     public void testSomeMethod() {
-        ScalarTensorGenerator generator = new ScalarTensorGenerator("c");
+        SymbolsGenerator generator = new SymbolsGenerator("c");
         for (int i = 0; i < 10; ++i)
             System.out.println(generator.take());
     }

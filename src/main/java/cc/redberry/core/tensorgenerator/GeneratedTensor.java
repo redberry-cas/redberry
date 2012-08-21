@@ -22,6 +22,7 @@
  */
 package cc.redberry.core.tensorgenerator;
 
+import cc.redberry.core.tensor.SimpleTensor;
 import cc.redberry.core.tensor.Tensor;
 
 /**
@@ -30,10 +31,10 @@ import cc.redberry.core.tensor.Tensor;
  * @author Stanislav Poslavsky
  */
 public final class GeneratedTensor {
-    public final Tensor[] coefficients;
+    public final SimpleTensor[] coefficients;
     public final Tensor generatedTensor;
 
-    public GeneratedTensor(Tensor[] coefficients, Tensor generatedTensor) {
+    public GeneratedTensor(SimpleTensor[] coefficients, Tensor generatedTensor) {
         this.coefficients = coefficients;
         this.generatedTensor = generatedTensor;
     }
