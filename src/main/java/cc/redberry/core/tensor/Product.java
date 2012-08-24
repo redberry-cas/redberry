@@ -214,27 +214,25 @@ public final class Product extends MultiTensor {
         return allScalars;
     }
 
-    public Tensor getIndexlessSubProduct() {
-        if (indexlessData.length == 0)
-            return factor;
-        else if (factor == Complex.ONE && indexlessData.length == 1)
-            return indexlessData[0];
-        else
-            return new Product(factor, indexlessData, new Tensor[0], ProductContent.EMPTY_INSTANCE, IndicesFactory.EMPTY_INDICES);
-    }
-
-    public Tensor getSubProductWithoutFactor() {
-        return Tensors.multiply(ArraysUtils.addAll(indexlessData, data));
-    }
-
-    public Tensor getDataSubProduct() {
-        if (data.length == 0)
-            return Complex.ONE;
-        if (data.length == 1)
-            return data[0];
-        return new Product(Complex.ONE, new Tensor[0], data, contentReference.get(), indices);
-    }
-
+//    public Tensor getIndexlessSubProduct() {
+//        if (indexlessData.length == 0)
+//            return factor;
+//        else if (factor == Complex.ONE && indexlessData.length == 1)
+//            return indexlessData[0];
+//        else
+//            return new Product(factor, indexlessData, new Tensor[0], ProductContent.EMPTY_INSTANCE, IndicesFactory.EMPTY_INDICES);
+//    }
+//    public Tensor getSubProductWithoutFactor() {
+//        return Tensors.multiply(ArraysUtils.addAll(indexlessData, data));
+//    }
+//
+//    public Tensor getDataSubProduct() {
+//        if (data.length == 0)
+//            return Complex.ONE;
+//        if (data.length == 1)
+//            return data[0];
+//        return new Product(Complex.ONE, new Tensor[0], data, contentReference.get(), indices);
+//    }
     private ProductContent calculateContent() {
         if (data.length == 0)
             return ProductContent.EMPTY_INSTANCE;
@@ -341,7 +339,10 @@ public final class Product extends MultiTensor {
 
         Tensor nonScalar = null;
         if (componentCount == 1) //There are no scalar subproducts in this product
-            nonScalar = this;
+            if (data.length == 1)
+                nonScalar = data[0];
+            else
+                nonScalar = new Product(Complex.ONE, new Tensor[0], data, ProductContent.EMPTY_INSTANCE, this.indices);
         else if (datas[0].length > 0)
             nonScalar = Tensors.multiply(datas[0]);
 
@@ -404,7 +405,10 @@ public final class Product extends MultiTensor {
 
         //TODO should be lazy field in ProductContent
         FullContractionsStructure fullContractionsStructure = new FullContractionsStructure(data, differentIndicesCount, freeIndices);
-        return new ProductContent(contractionStructure, fullContractionsStructure, scalars, nonScalar, stretchIndices, data);
+        ProductContent content = new ProductContent(contractionStructure, fullContractionsStructure, scalars, nonScalar, stretchIndices, data);
+        if (componentCount == 1 && nonScalar instanceof Product)
+            ((Product) nonScalar).contentReference = new SoftReference<>(content);
+        return content;
     }
 
     private short[] calculateStretchIndices() {
