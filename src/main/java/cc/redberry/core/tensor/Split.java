@@ -22,8 +22,10 @@
  */
 package cc.redberry.core.tensor;
 
-import cc.redberry.core.indices.IndicesFactory;
+import cc.redberry.core.indices.*;
 import cc.redberry.core.number.Complex;
+import java.util.*;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
@@ -43,7 +45,60 @@ public abstract class Split {
 
     public abstract TensorBuilder getBuilder();
 
-    public static Split split(final Tensor tensor) {
+    public static Split splitScalars(final Tensor tensor) {
+        if (tensor.getIndices().getFree().size() == 0)//case 2*a*b*c            
+            return new SplitNumbers(tensor, Complex.ONE);
+        else {//case 2*a*g_mn*g_cd 
+            Tensor summand;
+            Tensor factor;
+            if (tensor instanceof Product) {
+                Product product = (Product) tensor;
+                ProductContent content = product.getContent();
+                factor = content.getNonScalar();
+                Tensor[] scalars = content.getScalars();
+                int dataLength = factor instanceof Product
+                                 ? product.data.length - ((Product) factor).data.length
+                                 : product.data.length == 0
+                                   ? 0
+                                   : (product.data.length - 1);
+                if (factor == null)
+                    factor = Complex.ONE;
+                if (dataLength == 0)
+                    if (product.indexlessData.length == 0)
+                        summand = product.factor;
+                    else if (product.indexlessData.length == 1 && product.factor == Complex.ONE)
+                        summand = product.indexlessData[0];
+                    else
+                        summand = new Product(product.factor, product.indexlessData, new Tensor[0], ProductContent.EMPTY_INSTANCE, IndicesFactory.EMPTY_INDICES);
+                else if (dataLength == 1 && product.indexlessData.length == 0 && product.factor == Complex.ONE)
+                    summand = scalars[0];
+                else {
+                    Tensor[] data = new Tensor[dataLength];
+                    IndicesBuilder ib = new IndicesBuilder();
+                    dataLength = -1;
+                    for (Tensor t : scalars)
+                        if (t instanceof Product)
+                            for (Tensor d : t) {
+                                data[++dataLength] = d;
+                                ib.append(d);
+                            }
+                        else {
+                            data[++dataLength] = t;
+                            ib.append(t);
+                        }
+                    assert dataLength == data.length - 1;
+                    Arrays.sort(data);
+                    summand = new Product(product.factor, product.indexlessData, data, null, ib.getIndices());
+                }
+            } else {
+                summand = Complex.ONE;
+                factor = tensor;
+            }
+            return new SplitIndexless(factor, summand);
+        }
+    }
+
+    public static Split splitIndexless(final Tensor tensor) {
         if (tensor.getIndices().size() == 0) {//case 2*a*b*c
             Complex complex;
             Tensor factor;
@@ -83,6 +138,11 @@ public abstract class Split {
             }
             return new SplitIndexless(factor, summand);
         }
+    }
+
+    @Override
+    public String toString() {
+        return summand + " * " + factor;
     }
 
     private static class SplitNumbers extends Split {

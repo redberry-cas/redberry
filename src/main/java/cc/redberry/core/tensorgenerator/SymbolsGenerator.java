@@ -22,48 +22,66 @@
  */
 package cc.redberry.core.tensorgenerator;
 
-import cc.redberry.concurrent.*;
-import cc.redberry.core.number.Complex;
+import cc.redberry.concurrent.OutputPortUnsafe;
 import cc.redberry.core.tensor.SimpleTensor;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.tensor.Tensors;
-import java.util.*;
+import cc.redberry.core.tensor.iterator.TensorLastIterator;
+import cc.redberry.core.utils.TensorUtils;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
- * @author Konstantin Kiselev
  */
-final class SymbolsGenerator implements OutputPortUnsafe<Tensor> {
+public final class SymbolsGenerator implements OutputPortUnsafe<Tensor> {
 
     private final String name;
     private int count = 0;
-    final List<SimpleTensor> generatedSymbols;
-    private final boolean rememberHistory;
+    private final String[] usedNames;
 
-    public SymbolsGenerator(String name) {
-        this(name, false);
+    public SymbolsGenerator(String name, Tensor... forbiddenTensors) {
+        checkName(name);
+        this.name = name;
+
+        Set<String> set = new HashSet<>();
+        TensorLastIterator iterator;
+        for (Tensor f : forbiddenTensors) {
+            iterator = new TensorLastIterator(f);
+            Tensor c;
+            while ((c = iterator.next()) != null)
+                if (TensorUtils.isSymbol(c))
+                    set.add(((SimpleTensor) c).toString());
+        }
+        this.usedNames = new String[set.size()];
+        int i = -1;
+        for (String str : set)
+            usedNames[++i] = str;
+        Arrays.sort(usedNames);
+        i = 0;
+
     }
 
-    public SymbolsGenerator(String name, boolean rememberHistory) {
+    public SymbolsGenerator(String name) {
+        checkName(name);
         this.name = name;
-        this.rememberHistory = rememberHistory;
-        if (rememberHistory)
-            generatedSymbols = new ArrayList<>();
-        else
-            generatedSymbols = Collections.EMPTY_LIST;
+        this.usedNames = new String[0];
+    }
+
+    private static void checkName(String name) {
+        if (name.isEmpty())
+            throw new IllegalArgumentException("Empty string is illegal.");
     }
 
     @Override
-    public Tensor take() {
-        SimpleTensor t;
-        if (name.isEmpty())
-            return Complex.ONE;
-        else
-            t = Tensors.parseSimple(name + (count++));
-        if (rememberHistory)
-            generatedSymbols.add(t);
-        return t;
+    public SimpleTensor take() {
+        String newName;
+        do
+            newName = name + (count++);
+        while (Arrays.binarySearch(usedNames, newName) >= 0);
+        return Tensors.parseSimple(newName);
     }
 }

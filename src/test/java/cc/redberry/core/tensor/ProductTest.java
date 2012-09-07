@@ -119,6 +119,7 @@ public class ProductTest {
     @Test
     public void testRenameConflicts3() {
         Tensor t1 = Tensors.parse("A_a^a*A_b^b*A_c^c_m^n+A_d^e*A_e^d*A_f^f_m^n");
+        System.out.println(t1);
         Tensor t2 = Tensors.parse("A_a^a*A_b^b*A_c^c^m_n+A_d^e*A_e^d*A_f^f^m_n");
         TAssert.assertIndicesConsistency(Tensors.multiplyAndRenameConflictingDummies(t1, t2));
     }

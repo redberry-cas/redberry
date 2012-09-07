@@ -303,7 +303,7 @@ public class SubstitutionsTest {
 
         target1 = contract(expand(target1));
 
-
+        
         assertTrue(TensorUtils.equals(target, target1));
         assertTrue(target.getIndices().size() == 0);
         assertTrue(target1.getIndices().size() == 0);

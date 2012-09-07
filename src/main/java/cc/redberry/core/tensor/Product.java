@@ -214,25 +214,25 @@ public final class Product extends MultiTensor {
         return allScalars;
     }
 
-//    public Tensor getIndexlessSubProduct() {
-//        if (indexlessData.length == 0)
-//            return factor;
-//        else if (factor == Complex.ONE && indexlessData.length == 1)
-//            return indexlessData[0];
-//        else
-//            return new Product(factor, indexlessData, new Tensor[0], ProductContent.EMPTY_INSTANCE, IndicesFactory.EMPTY_INDICES);
-//    }
-//    public Tensor getSubProductWithoutFactor() {
-//        return Tensors.multiply(ArraysUtils.addAll(indexlessData, data));
-//    }
-//
-//    public Tensor getDataSubProduct() {
-//        if (data.length == 0)
-//            return Complex.ONE;
-//        if (data.length == 1)
-//            return data[0];
-//        return new Product(Complex.ONE, new Tensor[0], data, contentReference.get(), indices);
-//    }
+    public Tensor getIndexlessSubProduct() {
+        if (indexlessData.length == 0)
+            return factor;
+        else if (factor == Complex.ONE && indexlessData.length == 1)
+            return indexlessData[0];
+        else
+            return new Product(factor, indexlessData, new Tensor[0], ProductContent.EMPTY_INSTANCE, IndicesFactory.EMPTY_INDICES);
+    }
+    public Tensor getSubProductWithoutFactor() {
+        return Tensors.multiply(ArraysUtils.addAll(indexlessData, data));
+    }
+
+    public Tensor getDataSubProduct() {
+        if (data.length == 0)
+            return Complex.ONE;
+        if (data.length == 1)
+            return data[0];
+        return new Product(Complex.ONE, new Tensor[0], data, contentReference.get(), indices);
+    }
     private ProductContent calculateContent() {
         if (data.length == 0)
             return ProductContent.EMPTY_INSTANCE;
