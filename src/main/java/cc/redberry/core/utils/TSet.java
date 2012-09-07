@@ -23,47 +23,47 @@
 package cc.redberry.core.utils;
 
 import cc.redberry.core.tensor.Tensor;
-import java.lang.reflect.*;
 import java.util.*;
 
 /**
- *
+ * Implementation of tensors set.
+ * 
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public class TensorsSet<T extends Tensor> implements Set<T> {
+public final class TSet<T extends Tensor> implements Set<T> {
 
-    private final HashSet<TensorWrapper> set;
+    private final HashSet<TensorWrapperWithEquals> set;
 
-    public TensorsSet() {
+    public TSet() {
         set = new HashSet<>();
     }
 
-    public TensorsSet(int initialCapacity) {
+    public TSet(int initialCapacity) {
         set = new HashSet<>(initialCapacity);
     }
 
-    public TensorsSet(int initialCapacity, float loadFactor) {
+    public TSet(int initialCapacity, float loadFactor) {
         set = new HashSet<>(initialCapacity, loadFactor);
     }
 
-    public TensorsSet(Collection<? extends Tensor> tensors) {
-        List<TensorWrapper> wrappers = new ArrayList<>(tensors.size());
+    public TSet(Collection<? extends Tensor> tensors) {
+        List<TensorWrapperWithEquals> wrappers = new ArrayList<>(tensors.size());
         for (Tensor t : tensors)
-            wrappers.add(new TensorWrapper(t));
+            wrappers.add(new TensorWrapperWithEquals(t));
         set = new HashSet<>(wrappers);
     }
 
     @Override
     public boolean add(T e) {
-        return set.add(new TensorWrapper(e));
+        return set.add(new TensorWrapperWithEquals(e));
     }
 
     @Override
     public boolean addAll(Collection<? extends T> c) {
-        List<TensorWrapper> wrappers = new ArrayList<>(c.size());
+        List<TensorWrapperWithEquals> wrappers = new ArrayList<>(c.size());
         for (Tensor t : c)
-            wrappers.add(new TensorWrapper(t));
+            wrappers.add(new TensorWrapperWithEquals(t));
         return set.addAll(wrappers);
     }
 
@@ -75,7 +75,7 @@ public class TensorsSet<T extends Tensor> implements Set<T> {
     @Override
     public boolean contains(Object o) {
         if (o instanceof Tensor)
-            return set.contains(new TensorWrapper((Tensor) o));
+            return set.contains(new TensorWrapperWithEquals((Tensor) o));
         return false;
     }
 
@@ -94,9 +94,9 @@ public class TensorsSet<T extends Tensor> implements Set<T> {
 
     private final class SetIterator<T> implements Iterator<T> {
 
-        private final Iterator<TensorWrapper> iterator;
+        private final Iterator<TensorWrapperWithEquals> iterator;
 
-        public SetIterator(Iterator<TensorWrapper> iterator) {
+        public SetIterator(Iterator<TensorWrapperWithEquals> iterator) {
             this.iterator = iterator;
         }
 
@@ -124,7 +124,7 @@ public class TensorsSet<T extends Tensor> implements Set<T> {
     @Override
     public boolean remove(Object o) {
         if (o instanceof Tensor)
-            return set.remove(new TensorWrapper((Tensor) o));
+            return set.remove(new TensorWrapperWithEquals((Tensor) o));
         return false;
     }
 
@@ -151,7 +151,7 @@ public class TensorsSet<T extends Tensor> implements Set<T> {
     public Object[] toArray() {
         Object[] a = new Object[size()];
         int i = -1;
-        for (TensorWrapper tw : set)
+        for (TensorWrapperWithEquals tw : set)
             a[++i] = tw.tensor;
         return a;
     }
@@ -161,32 +161,8 @@ public class TensorsSet<T extends Tensor> implements Set<T> {
         T[] r = a.length >= size() ? a
                 : (T[]) java.lang.reflect.Array.newInstance(a.getClass().getComponentType(), size());
         int i = -1;
-        for (TensorWrapper tw : set)
+        for (TensorWrapperWithEquals tw : set)
             r[++i] = (T) tw.tensor;
         return r;
-    }
-
-    private static class TensorWrapper {
-
-        private final Tensor tensor;
-
-        public TensorWrapper(Tensor tensor) {
-            this.tensor = tensor;
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            if (obj == null)
-                return false;
-            if (getClass() != obj.getClass())
-                return false;
-            final TensorWrapper other = (TensorWrapper) obj;
-            return TensorUtils.equals(tensor, other.tensor);
-        }
-
-        @Override
-        public int hashCode() {
-            return tensor.hashCode();
-        }
     }
 }
