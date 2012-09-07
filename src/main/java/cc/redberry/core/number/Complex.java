@@ -25,6 +25,7 @@ package cc.redberry.core.number;
 import cc.redberry.core.context.ToStringMode;
 import cc.redberry.core.indices.Indices;
 import cc.redberry.core.indices.IndicesFactory;
+import cc.redberry.core.tensor.Power;
 import cc.redberry.core.tensor.Product;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.tensor.TensorBuilder;
@@ -160,22 +161,27 @@ public class Complex extends Tensor
         if (real.isZero())
             return imaginary.toString();
         int is = imaginary.signum();
-        switch (is) {
-            case -1:
-                return real.toString() + "-I*" + imaginary.abs();
-            case 0:
-                return real.toString();
-            default:
-                return real.toString() + "+I*" + imaginary.abs();
-        }
+        if (is == 0)
+            return real.toString();
+        Real abs = imaginary.abs();
+        if (is < 0)
+            if (abs.isOne())
+                return real.toString() + "-i";
+            else
+                return real.toString() + "-i*" + imaginary.abs();
+        if (abs.isOne())
+            return real.toString() + "+i";
+        else
+            return real.toString() + "+i*" + imaginary.abs();
+
     }
 
     @Override
     protected String toString(ToStringMode mode, Class<? extends Tensor> clazz) {
-        if (clazz == Product.class)
-            if (!real.isZero() && !imaginary.isZero())
+        if (clazz == Product.class || clazz == Power.class)
+            if ((!real.isZero() && !imaginary.isZero()) || real.signum() < 0)
                 return "(" + toString(mode) + ")";
-        return super.toString(mode, clazz);
+        return toString(mode);
     }
 
     @Override

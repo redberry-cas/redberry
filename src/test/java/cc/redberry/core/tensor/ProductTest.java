@@ -119,6 +119,7 @@ public class ProductTest {
     @Test
     public void testRenameConflicts3() {
         Tensor t1 = Tensors.parse("A_a^a*A_b^b*A_c^c_m^n+A_d^e*A_e^d*A_f^f_m^n");
+        System.out.println(t1);
         Tensor t2 = Tensors.parse("A_a^a*A_b^b*A_c^c^m_n+A_d^e*A_e^d*A_f^f^m_n");
         TAssert.assertIndicesConsistency(Tensors.multiplyAndRenameConflictingDummies(t1, t2));
     }
@@ -248,5 +249,47 @@ public class ProductTest {
         Tensor t = builder.build();
         Tensor e = Tensors.parse("Power[Power[pT,2] - s, 4]*Power[s, 4]");
         Assert.assertTrue(TensorUtils.equalsExactly(t, e));
+    }
+
+    @Test
+    public void toString1() {
+        Tensor t = Tensors.parse("-a*b");
+        Assert.assertTrue(TensorUtils.equals(t, Tensors.parse(t.toString())));
+    }
+
+    @Test
+    public void toString2() {
+        Tensor t = Tensors.parse("-a*b*g_mn");
+        Assert.assertTrue(TensorUtils.equals(t, Tensors.parse(t.toString())));
+    }
+
+    @Test
+    public void toString3() {
+        Tensor t = Tensors.parse("-a*b*g_mn*g^mn");
+        Assert.assertTrue(TensorUtils.equals(t, Tensors.parse(t.toString())));
+    }
+
+    @Test
+    public void toString4() {
+        Tensor t = Tensors.parse("a*b");
+        Assert.assertTrue(TensorUtils.equals(t, Tensors.parse(t.toString())));
+    }
+
+    @Test
+    public void toString5() {
+        Tensor t = Tensors.parse("a*b*g_mn");
+        Assert.assertTrue(TensorUtils.equals(t, Tensors.parse(t.toString())));
+    }
+
+    @Test
+    public void toString6() {
+        Tensor t = Tensors.parse("a*b*g_mn*g^mn");
+        Assert.assertTrue(TensorUtils.equals(t, Tensors.parse(t.toString())));
+    }
+
+    @Test
+    public void toString7() {
+        Tensor t = Tensors.parse("(2-i)*a*b*g_mn*g^mn");
+        Assert.assertTrue(TensorUtils.equals(t, Tensors.parse(t.toString())));
     }
 }

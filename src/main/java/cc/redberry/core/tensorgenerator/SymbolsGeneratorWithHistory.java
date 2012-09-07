@@ -22,28 +22,34 @@
  */
 package cc.redberry.core.tensorgenerator;
 
-import cc.redberry.core.number.Complex;
+import cc.redberry.concurrent.OutputPortUnsafe;
+import cc.redberry.core.tensor.SimpleTensor;
 import cc.redberry.core.tensor.Tensor;
-import cc.redberry.core.tensor.Tensors;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
- * @author Konstantin Kiselev
  */
-public final class ScalarTensorGenerator {
+public class SymbolsGeneratorWithHistory implements OutputPortUnsafe<Tensor> {
 
-    private final String name;
-    private int count = 0;
+    final SymbolsGenerator generator;
+    final List<SimpleTensor> generated = new ArrayList<>();
 
-    public ScalarTensorGenerator(String name) {
-        this.name = name;
+    public SymbolsGeneratorWithHistory(String name, Tensor... forbiddenTensors) {
+        generator = new SymbolsGenerator(name, forbiddenTensors);
     }
 
-    public Tensor next() {
-        if (name.isEmpty())
-            return Complex.ONE;
-        return Tensors.parse(name + (count++));
+    public SymbolsGeneratorWithHistory(String name) {
+        generator = new SymbolsGenerator(name);
+    }
+
+    @Override
+    public SimpleTensor take() {
+        SimpleTensor st = generator.take();
+        generated.add(st);
+        return st;
     }
 }

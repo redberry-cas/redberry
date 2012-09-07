@@ -22,13 +22,14 @@
  */
 package cc.redberry.core.tensorgenerator;
 
+import cc.redberry.concurrent.OutputPortUnsafe;
 import cc.redberry.core.indices.Indices;
 import cc.redberry.core.math.frobenius.FrobeniusSolver;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.number.Rational;
-import cc.redberry.core.tensor.Tensor;
-import cc.redberry.core.tensor.Tensors;
+import cc.redberry.core.tensor.*;
 import cc.redberry.core.transformations.ApplyIndexMapping;
+import cc.redberry.core.transformations.SymmetrizeUpperLowerIndices;
 import cc.redberry.core.utils.IntArray;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -42,36 +43,36 @@ import java.util.List;
 public class TensorGenerator {
 
     private final Tensor[] samples;
-    private final int[] lowArray;
-    private final int[] upArray;
-    private final ScalarTensorGenerator scalarTensorGenerator;
-    private final List<Tensor> sumands = new ArrayList<>();
-    private final List<Tensor> coefficients;
+    private final int[] lowerArray, upperArray;
+    private final OutputPortUnsafe<Tensor> coefficientsGenerator;
+    private final SumBuilder result = new SumBuilder();
     private final boolean symmetricForm;
 
     private TensorGenerator(String coefficientName, Indices indices, boolean symmetricForm, Tensor... samples) {
         this.samples = samples;
-        this.scalarTensorGenerator = new ScalarTensorGenerator(coefficientName);
+        if (coefficientName.isEmpty())
+            this.coefficientsGenerator = OnePort.INSTANCE;
+        else
+            this.coefficientsGenerator = new SymbolsGeneratorWithHistory(coefficientName);
         this.symmetricForm = symmetricForm;
-        this.lowArray = indices.getLower().copy();
-        this.upArray = indices.getUpper().copy();
-        this.coefficients = new ArrayList<>();
-        Arrays.sort(lowArray);
-        Arrays.sort(upArray);
+        this.lowerArray = indices.getLower().copy();
+        this.upperArray = indices.getUpper().copy();
+        Arrays.sort(lowerArray);
+        Arrays.sort(upperArray);
         generate();
     }
 
     private void generate() {
 
         //processing low indices
-        int totalLowCount = lowArray.length, i, k;
+        int totalLowCount = lowerArray.length, i, k;
         int[] lowCounts = new int[samples.length + 1];
         for (i = 0; i < samples.length; ++i)
             lowCounts[i] = samples[i].getIndices().getLower().length();
         lowCounts[i] = totalLowCount;
 
         //processing up indices
-        int totalUpCount = upArray.length;
+        int totalUpCount = upperArray.length;
         int[] upCounts = new int[samples.length + 1];
         for (i = 0; i < samples.length; ++i)
             upCounts[i] = samples[i].getIndices().getUpper().length();
@@ -100,36 +101,28 @@ public class TensorGenerator {
                             newIndices = oldIndices.clone();
                     for (k = 0; k < termUp.length(); ++k) {
                         oldIndices[k] = termUp.get(k);
-                        newIndices[k] = upArray[u++];
+                        newIndices[k] = upperArray[u++];
                     }
                     for (k = 0; k < termLow.length(); ++k) {
                         oldIndices[k + termUp.length()] = termLow.get(k);
-                        newIndices[k + termUp.length()] = lowArray[l++];
+                        newIndices[k + termUp.length()] = lowerArray[l++];
                     }
                     temp = ApplyIndexMapping.applyIndexMapping(temp, oldIndices, newIndices, new int[0]);
                     tCombination.add(temp);
                 }
 
             //creating term & processing combinatorics            
-            Tensor coefficient;
-            Tensor term = Tensors.multiplyAndRenameConflictingDummies(tCombination.toArray(new Tensor[tCombination.size()]));
-            List<Tensor> indicesCombinations = IndexMappingPermutationsGenerator.getAllPermutations(term);
-            if (symmetricForm) {
-                term = Tensors.sum(indicesCombinations.toArray(new Tensor[indicesCombinations.size()]));
-                term = Tensors.multiply(coefficient = scalarTensorGenerator.next(), term, new Complex(new Rational(1, indicesCombinations.size())));
-                sumands.add(term);
-                coefficients.add(coefficient);
-            } else
-                for (Tensor tt : indicesCombinations) {
-                    term = Tensors.multiply(coefficient = scalarTensorGenerator.next(), tt);
-                    sumands.add(term);
-                    coefficients.add(coefficient);
-                }
+            Tensor term = SymmetrizeUpperLowerIndices.symmetrizeUpperLowerIndices(Tensors.multiplyAndRenameConflictingDummies(tCombination.toArray(new Tensor[tCombination.size()])));
+            if (symmetricForm || !(term instanceof Sum))
+                term = Tensors.multiply(coefficientsGenerator.take(), term, term instanceof Sum ? new Complex(new Rational(1, term.size())) : Complex.ONE);
+            else
+                term = Tensors.multiplySumElementsOnFactors((Sum) term, coefficientsGenerator);
+            result.put(term);
         }
     }
 
     private Tensor result() {
-        return Tensors.sum(sumands.toArray(new Tensor[sumands.size()]));
+        return result.build();
     }
 
     public static Tensor generate(String coefficientName, Indices indices, boolean symmetricForm, Tensor... samples) {
@@ -138,7 +131,27 @@ public class TensorGenerator {
 
     public static GeneratedTensor generateStructure(String coefficientName, Indices indices, boolean symmetricForm, Tensor... samples) {
         TensorGenerator generator = new TensorGenerator(coefficientName, indices, symmetricForm, samples);
-        return new GeneratedTensor(generator.coefficients.toArray(new Tensor[generator.coefficients.size()]),
+        SimpleTensor[] generatedCoefficients;
+        if (coefficientName.isEmpty())
+            generatedCoefficients = new SimpleTensor[0];
+        else {
+            SymbolsGeneratorWithHistory coefficientsGenerator = (SymbolsGeneratorWithHistory) generator.coefficientsGenerator;
+            generatedCoefficients = coefficientsGenerator.generated.toArray(new SimpleTensor[coefficientsGenerator.generated.size()]);
+        }
+        return new GeneratedTensor(generatedCoefficients,
                                    generator.result());
+    }
+
+    private static final class OnePort implements OutputPortUnsafe<Tensor> {
+
+        public static final OnePort INSTANCE = new OnePort();
+
+        private OnePort() {
+        }
+
+        @Override
+        public Tensor take() {
+            return Complex.ONE;
+        }
     }
 }

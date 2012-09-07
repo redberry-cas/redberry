@@ -20,25 +20,39 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
-package cc.redberry.core;
+package cc.redberry.core.utils;
 
-import java.util.*;
-import org.junit.Test;
+import cc.redberry.core.tensor.Tensor;
 
 /**
+ *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public class BlackList {
+public final class TensorWrapperWithEquals {
 
-    public static void fill(int[] a, int val) {
-        for (int i = 0, len = a.length; i < len; i++)
-            a[i] = val;
+    final Tensor tensor;
+
+    public TensorWrapperWithEquals(Tensor tensor) {
+        this.tensor = tensor;
     }
 
-    @Test
-    public void test1() {
-     HashMap<Integer,Integer> map = new HashMap<>();
-        System.out.println(map.get(new BitSet(12)));
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        final TensorWrapperWithEquals other = (TensorWrapperWithEquals) obj;
+        return TensorUtils.equals(tensor, other.tensor);
+    }
+
+    @Override
+    public int hashCode() {
+        return tensor.hashCode();
+    }
+
+    public Tensor getTensor() {
+        return tensor;
     }
 }

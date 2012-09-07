@@ -22,6 +22,7 @@
  */
 package cc.redberry.core.tensor;
 
+import cc.redberry.concurrent.*;
 import cc.redberry.core.combinatorics.Symmetry;
 import cc.redberry.core.context.CC;
 import cc.redberry.core.context.NameDescriptor;
@@ -576,6 +577,22 @@ public final class Tensors {
         final Tensor[] newSumData = new Tensor[sum.size()];
         for (int i = newSumData.length - 1; i >= 0; --i)
             newSumData[i] = multiply(factor, sum.get(i));
+        return new Sum(newSumData, IndicesFactory.createSorted(newSumData[0].getIndices().getFree()));
+    }
+
+    public static Tensor multiplySumElementsOnFactors(Sum sum, Tensor[] factors) {
+        if (sum.size() != factors.length)
+            throw new IllegalArgumentException();
+        final Tensor[] newSumData = new Tensor[sum.size()];
+        for (int i = newSumData.length - 1; i >= 0; --i)
+            newSumData[i] = multiply(factors[i], sum.get(i));
+        return new Sum(newSumData, IndicesFactory.createSorted(newSumData[0].getIndices().getFree()));
+    }
+
+    public static Tensor multiplySumElementsOnFactors(Sum sum, OutputPortUnsafe<Tensor> factorsProvider) {
+        final Tensor[] newSumData = new Tensor[sum.size()];
+        for (int i = newSumData.length - 1; i >= 0; --i)
+            newSumData[i] = multiply(factorsProvider.take(), sum.get(i));
         return new Sum(newSumData, IndicesFactory.createSorted(newSumData[0].getIndices().getFree()));
     }
 

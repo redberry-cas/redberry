@@ -20,47 +20,53 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
-package cc.redberry.core.tensorgenerator;
+package cc.redberry.core.transformations;
 
 import cc.redberry.core.combinatorics.IntPermutationsGenerator;
 import cc.redberry.core.combinatorics.Symmetry;
 import cc.redberry.core.combinatorics.symmetries.Symmetries;
 import cc.redberry.core.indices.Indices;
 import cc.redberry.core.indices.IndicesFactory;
-import cc.redberry.core.tensor.Tensor;
-import cc.redberry.core.transformations.ApplyIndexMapping;
+import cc.redberry.core.number.*;
+import cc.redberry.core.tensor.*;
 import cc.redberry.core.utils.TensorUtils;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import org.apache.commons.math3.fraction.*;
 
 /**
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-final class IndexMappingPermutationsGenerator {
+public final class SymmetrizeUpperLowerIndices implements Transformation {
 
-    private final Tensor tensor;
-    private final int[] indices;
-    private final int lowerCount, upperCount;
-    private final Symmetries symmetries;
+    public final static SymmetrizeUpperLowerIndices INSTANCE = new SymmetrizeUpperLowerIndices();
 
-    private IndexMappingPermutationsGenerator(Tensor tensor) {
-        this.tensor = tensor;
-        Indices indices = IndicesFactory.createSorted(tensor.getIndices().getFree());
-        this.indices = indices.getAllIndices().copy();
-        this.symmetries = TensorUtils.getIndicesSymmetriesForIndicesWithSameStates(this.indices, tensor);
-        this.lowerCount = indices.getLower().length();
-        this.upperCount = indices.getUpper().length();
-        
+    private SymmetrizeUpperLowerIndices() {
     }
-    private final List<Tensor> result = new ArrayList<>();
 
-    private List<Tensor> get() {
+    @Override
+    public Tensor transform(Tensor t) {
+        return symmetrizeUpperLowerIndices(t);
+    }
+
+    public static Tensor symmetrizeUpperLowerIndices(Tensor tensor) {
+        return symmetrizeUpperLowerIndices(tensor, false);
+    }
+
+    public static Tensor symmetrizeUpperLowerIndices(Tensor tensor, boolean multiplyOnSymmetryFactor) {
+        Indices indices = IndicesFactory.createSorted(tensor.getIndices().getFree());
+        int[] indicesArray = indices.getAllIndices().copy();
+        Symmetries symmetries = TensorUtils.getIndicesSymmetriesForIndicesWithSameStates(indicesArray, tensor);
+        int lowerCount = indices.getLower().length(), upperCount = indices.getUpper().length();
+
         IntPermutationsGenerator lowIndicesPermutationsGenerator,
                 upperIndicesPermutationGenerator;
-
+        SumBuilder sumBuilder = new SumBuilder();
+        Tensor summand;
+        List<int[]> generatedPermutations = new ArrayList<>();
         if (upperCount != 0 && lowerCount != 0) {
             lowIndicesPermutationsGenerator = new IntPermutationsGenerator(lowerCount);
             while (lowIndicesPermutationsGenerator.hasNext()) {
@@ -71,32 +77,45 @@ final class IndexMappingPermutationsGenerator {
                 UPPER:
                 while (upperIndicesPermutationGenerator.hasNext()) {
                     int[] upperPermutation = upperIndicesPermutationGenerator.next();
-                    permute(upperPermutation, lowerPermutation);
+                    summand = permute(tensor, indicesArray, upperPermutation, lowerPermutation, generatedPermutations, symmetries);
+                    if (summand != null)
+                        sumBuilder.put(summand);
                 }
             }
         } else if (upperCount == 0) {
             lowIndicesPermutationsGenerator = new IntPermutationsGenerator(lowerCount);
             while (lowIndicesPermutationsGenerator.hasNext()) {
                 int[] lowerPermutation = lowIndicesPermutationsGenerator.next();
-                permute(new int[0], lowerPermutation);
+                summand = permute(tensor, indicesArray, new int[0], lowerPermutation, generatedPermutations, symmetries);
+                if (summand != null)
+                    sumBuilder.put(summand);
             }
         } else if (lowerCount == 0) {
             upperIndicesPermutationGenerator = new IntPermutationsGenerator(upperCount);
             while (upperIndicesPermutationGenerator.hasNext()) {
                 int[] upperPermutation = upperIndicesPermutationGenerator.next();
-                permute(upperPermutation, new int[0]);
+                summand = permute(tensor, indicesArray, upperPermutation, new int[0], generatedPermutations, symmetries);
+                if (summand != null)
+                    sumBuilder.put(summand);
             }
         }
-        return result;
+        if (multiplyOnSymmetryFactor)
+            return Tensors.multiply(new Complex(new Rational(1, generatedPermutations.size())), sumBuilder.build());
+        else
+            return sumBuilder.build();
     }
-    private final List<int[]> generatedPermutations = new ArrayList<>();
 
-    private void permute(int[] upperPermutation, int[] lowerPermutation) {
+    private static Tensor permute(Tensor tensor,
+                                  int[] indicesArray,
+                                  int[] upperPermutation,
+                                  int[] lowerPermutation,
+                                  List<int[]> generatedPermutations,
+                                  Symmetries symmetries) {
         //creating resulting permutation upper indices are first,
         //because initial indices are sorted
-        int[] permutation = new int[lowerCount + upperCount];
-        System.arraycopy(upperPermutation, 0, permutation, 0, upperCount);
-        System.arraycopy(lowerPermutation, 0, permutation, upperCount, lowerCount);
+        int[] permutation = new int[upperPermutation.length + lowerPermutation.length];
+        System.arraycopy(upperPermutation, 0, permutation, 0, upperPermutation.length);
+        System.arraycopy(lowerPermutation, 0, permutation, upperPermutation.length, lowerPermutation.length);
 
         //TODO discover better algorithm (possible using stretches of symmetries)
         //checking wheather the way beetween current permutation and already
@@ -105,19 +124,19 @@ final class IndexMappingPermutationsGenerator {
         for (int[] p : generatedPermutations)
             for (Symmetry symmetry : symmetries)
                 if (Arrays.equals(permutation, symmetry.permute(p)))
-                    return;
+                    return null;
         generatedPermutations.add(permutation);
 
         //processing new indices from permutation
-        final int[] newIndices = new int[indices.length];
-        for (int i = 0; i < indices.length; ++i)
-            newIndices[i] = indices[permutation[i]];
+        final int[] newIndices = new int[indicesArray.length];
+        for (int i = 0; i < indicesArray.length; ++i)
+            newIndices[i] = indicesArray[permutation[i]];
 
         //processing new tensor
-        result.add(ApplyIndexMapping.applyIndexMapping(tensor, indices, newIndices, new int[0]));
+        return ApplyIndexMapping.applyIndexMapping(tensor, indicesArray, newIndices, new int[0]);
     }
 
-    static List<Tensor> getAllPermutations(Tensor tensor) {
-        return new IndexMappingPermutationsGenerator(tensor).get();
+    static Tensor[] getAllPermutations(Tensor tensor) {
+        return symmetrizeUpperLowerIndices(tensor).toArray();
     }
 }
