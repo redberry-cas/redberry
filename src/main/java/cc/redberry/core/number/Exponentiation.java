@@ -6,20 +6,39 @@ import java.math.BigInteger;
  * This class contains methods for complex numbers exponentiation.
  */
 public final class Exponentiation {
-    public static Real exponentiate(Real base, Real power) {
+    public static Real exponentiateIfPossible(Real base, Real power) {
+        if (base.isZero())
+            if (power.isInfinite())
+                return Numeric.NaN;
+            else
+                return Rational.ZERO;
+
         if (base.isNumeric() || power.isNumeric()) { // Bease or power are numeric
             return new Numeric(Math.pow(base.getNumericValue().doubleValue(), power.getNumericValue().doubleValue()));
         }
 
-        //Power and Base are rational
+        //TODO some more ONE, ZERO etc. tests
+
+        //<-- Power and Base are rational
 
         if (power.isInteger())
             return new Rational(((Rational) base).getBigFraction().pow(((Rational) power).getNumerator())); //Using BigFraction pow method.
 
-        //Power is not integer
+        //<-- Power is not integer
 
+        BigInteger powerNum = ((Rational) power).getNumerator();
+        BigInteger powerDen = ((Rational) power).getDenominator();
 
-        return null;
+        BigInteger baseNum = ((Rational) base).getNumerator();
+        BigInteger baseDen = ((Rational) base).getDenominator();
+
+        baseNum = findIntegerRoot(baseNum, powerDen);
+        baseDen = findIntegerRoot(baseDen, powerDen);
+
+        if (baseNum == null || baseDen == null) //Result is irrational
+            return null;
+
+        return exponentiateIfPossible(new Rational(baseNum, baseDen), new Rational(powerNum));
     }
 
     private static BigInteger BI_MINUS_ONE = BigInteger.ONE.negate();
@@ -58,6 +77,71 @@ public final class Exponentiation {
                 return testValue;
             if (cValue > 0)
                 result[resultLengthM1 - (bitNumber >> 3)] &= ~(1 << (bitNumber & 0x7));
+        }
+
+        return null;
+    }
+
+    public static Complex exponentiateIfPossible(Complex base, Complex power) {
+        //Partially copied from PowerFactory
+
+        if (base.isInfinite())
+            if (power.isZero())
+                return Complex.ComplexNaN;
+            else
+                return base;
+
+        if (base.isOne())
+            if (power.isInfinite())
+                return power.multiply(base);
+            else
+                return base;
+
+        if (power.isOne())
+            return base;
+
+        if (base.isZero()) {
+            if (power.getReal().signum() <= 0)
+                return Complex.ComplexNaN;
+            return base;
+        }
+
+        if (power.isZero())
+            return Complex.ONE;
+
+        if (base.isNumeric() || power.isNumeric())
+            return base.powNumeric(power);
+
+        if (power.isReal()) {
+            Rational pp = (Rational) power.getReal();
+
+            if (base.isReal()) {
+                Real value = exponentiateIfPossible(base.getReal(), pp);
+                if (value == null)
+                    return null;
+                return new Complex(value);
+            }
+
+            if (pp.isInteger()) {
+
+                boolean sign = pp.getNumerator().signum() > 0;
+                BigInteger exponent = pp.getNumerator().abs();
+
+                Complex result = Complex.ONE;
+
+                //base ~ k2
+                while (exponent.signum() != 0) {
+                    if (exponent.testBit(0))
+                        result = result.multiply(base);
+                    base = base.multiply(base);
+                    exponent = exponent.shiftRight(1);
+                }
+
+                if (sign)
+                    return result;
+                else
+                    return result.reciprocal();
+            }
         }
 
         return null;
