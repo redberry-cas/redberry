@@ -34,7 +34,7 @@ import java.util.Arrays;
  * {@code Product} indices. Really, if we consider tensor A_m*B_n, we cannot
  * prefer what index is first and what is the second (m or n). So it is useful
  * to quickSort indices array to provide fast algorithms, for example for
- * methods {@code getFreeIndices(), getUpper(), testConsistent()} and so on.
+ * methods {@code getFree(), getUpper(), testConsistent()} and so on.
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
@@ -75,7 +75,7 @@ final class SortedIndices extends AbstractIndices {
     }
 
     @Override
-    public Indices getFreeIndices() {
+    public Indices getFree() {
         IntArrayList list = new IntArrayList();
         int u, l;
         int iLower = firstLower, iUpper = 0;
@@ -101,7 +101,7 @@ final class SortedIndices extends AbstractIndices {
     }
 
     @Override
-    public Indices getInverseIndices() {
+    public Indices getInverse() {
         int[] dataInv = new int[data.length];
         int fl = data.length - firstLower, i = 0;
         for (; i < firstLower; ++i)

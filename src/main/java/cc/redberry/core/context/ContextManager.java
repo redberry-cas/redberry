@@ -61,7 +61,7 @@ public class ContextManager {
     }
 
     public static Context initializeNew() {
-        Context context = new Context(ContextSettings.createDefault());
+        Context context = DefaultContextFactory.INSTANCE.createContext();
         threadLocalContainer.get().context = context;
         return context;
     }

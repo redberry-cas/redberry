@@ -69,7 +69,7 @@ public class TreeTraverseIteratorTest {
         while (iterator.next() != null)
             list.add(iterator.current());
         Tensor[] actual = list.toArray(new Tensor[0]);
-        Assert.assertTrue(TensorUtils.equals(expectedSequence, actual));
+        Assert.assertTrue(TensorUtils.equalsExactly(expectedSequence, actual));
     }
 
     /*
@@ -77,7 +77,7 @@ public class TreeTraverseIteratorTest {
      * TreeTraverseIterator iterator = new TreeTraverseIterator(t); while
      * (iterator.next() != null) System.out.println(iterator.current());
      * //Tensor[] actual = list.toArray(new Tensor[0]);
-     * //Assert.assertTrue(TensorUtils.equals(expectedSequence, actual)); }
+     * //Assert.assertTrue(TensorUtils.equalsExactly(expectedSequence, actual)); }
      */
     @Test
     public void test2() {
@@ -107,7 +107,7 @@ public class TreeTraverseIteratorTest {
         while (iterator.next() != null)
             list.add(iterator.current());
         Tensor[] actual = list.toArray(new Tensor[0]);
-        Assert.assertTrue(TensorUtils.equals(expectedSequence, actual));
+        Assert.assertTrue(TensorUtils.equalsExactly(expectedSequence, actual));
     }
 
     @Test
@@ -129,7 +129,7 @@ public class TreeTraverseIteratorTest {
         while (iterator.next() != null)
             list.add(iterator.current());
         Tensor[] actual = list.toArray(new Tensor[0]);
-        Assert.assertTrue(TensorUtils.equals(expectedSequence, actual));
+        Assert.assertTrue(TensorUtils.equalsExactly(expectedSequence, actual));
     }
 
     @Test
@@ -154,7 +154,7 @@ public class TreeTraverseIteratorTest {
         while (iterator.next() != null)
             list.add(iterator.current());
         Tensor[] actual = list.toArray(new Tensor[0]);
-        Assert.assertTrue(TensorUtils.equals(expectedSequence, actual));
+        Assert.assertTrue(TensorUtils.equalsExactly(expectedSequence, actual));
 
         //equivalent guide
         guide = new TraverseGuide() {
@@ -171,7 +171,7 @@ public class TreeTraverseIteratorTest {
         while (iterator.next() != null)
             list.add(iterator.current());
         actual = list.toArray(new Tensor[0]);
-        Assert.assertTrue(TensorUtils.equals(expectedSequence, actual));
+        Assert.assertTrue(TensorUtils.equalsExactly(expectedSequence, actual));
 
         //equivalent guide
         guide = new TraverseGuide() {
@@ -188,7 +188,7 @@ public class TreeTraverseIteratorTest {
         while (iterator.next() != null)
             list.add(iterator.current());
         actual = list.toArray(new Tensor[0]);
-        Assert.assertTrue(TensorUtils.equals(expectedSequence, actual));
+        Assert.assertTrue(TensorUtils.equalsExactly(expectedSequence, actual));
     }
 
     @Test
@@ -209,7 +209,7 @@ public class TreeTraverseIteratorTest {
         while (iterator.next() != null)
             list.add(iterator.current());
         Tensor[] actual = list.toArray(new Tensor[0]);
-        Assert.assertTrue(TensorUtils.equals(expectedSequence, actual));
+        Assert.assertTrue(TensorUtils.equalsExactly(expectedSequence, actual));
 
         expectedSequence = new Tensor[]{t,//Cos[x]
                                         t//Cos[x]
@@ -229,7 +229,7 @@ public class TreeTraverseIteratorTest {
         while (iterator.next() != null)
             list.add(iterator.current());
         actual = list.toArray(new Tensor[0]);
-        Assert.assertTrue(TensorUtils.equals(expectedSequence, actual));
+        Assert.assertTrue(TensorUtils.equalsExactly(expectedSequence, actual));
     }
 
     @Test
@@ -257,7 +257,7 @@ public class TreeTraverseIteratorTest {
                 != null)
             list.add(iterator.current());
         Tensor[] actual = list.toArray(new Tensor[0]);
-        Assert.assertTrue(TensorUtils.equals(expectedSequence, actual));
+        Assert.assertTrue(TensorUtils.equalsExactly(expectedSequence, actual));
 
 
         //equivalent guide
@@ -275,7 +275,7 @@ public class TreeTraverseIteratorTest {
         while (iterator.next() != null)
             list.add(iterator.current());
         actual = list.toArray(new Tensor[0]);
-        Assert.assertTrue(TensorUtils.equals(expectedSequence, actual));
+        Assert.assertTrue(TensorUtils.equalsExactly(expectedSequence, actual));
 
         //equivalent guide
         guide = new TraverseGuide() {
@@ -292,7 +292,7 @@ public class TreeTraverseIteratorTest {
         while (iterator.next() != null)
             list.add(iterator.current());
         actual = list.toArray(new Tensor[0]);
-        Assert.assertTrue(TensorUtils.equals(expectedSequence, actual));
+        Assert.assertTrue(TensorUtils.equalsExactly(expectedSequence, actual));
     }
 
     @Test
@@ -300,11 +300,11 @@ public class TreeTraverseIteratorTest {
         Tensor t = Tensors.parse("(x*y+(a-2*b)*Sin[x]-Cos[x+Sin[x]/Power[a,2]])*(a*a*Power[a,Sin[x-Cos[x]+1]] -32*a*a*2)/63");
         TreeTraverseIterator iterator = new TreeTraverseIterator(t);
         while (iterator.next() != null)
-            if (TensorUtils.equals(iterator.current(), Tensors.parse("x")))
+            if (TensorUtils.equalsExactly(iterator.current(), Tensors.parse("x")))
                 iterator.set(Complex.ZERO);
         Tensor actual = iterator.result();
         Tensor expected = Tensors.parse("Power[a,2]");
-        Assert.assertTrue(TensorUtils.equals(expected, actual));
+        Assert.assertTrue(TensorUtils.equalsExactly(expected, actual));
     }
 
     @Test
@@ -330,13 +330,13 @@ public class TreeTraverseIteratorTest {
         Tensor M = Tensors.parse("M");
 
         while (iterator.next() != null)
-            if (TensorUtils.equals(iterator.current(), Tensors.parse("pT")))
+            if (TensorUtils.equalsExactly(iterator.current(), Tensors.parse("pT")))
                 iterator.set(M);
-            else if (TensorUtils.equals(iterator.current(), Tensors.parse("s")))
+            else if (TensorUtils.equalsExactly(iterator.current(), Tensors.parse("s")))
                 iterator.set(Tensors.pow(M, Complex.TWO));
         Tensor actual = iterator.result();
         Tensor expected = Tensors.parse("16*Power[M,20]");
-        Assert.assertTrue(TensorUtils.equals(expected, actual));
+        Assert.assertTrue(TensorUtils.equalsExactly(expected, actual));
     }
 
     @Test
@@ -362,13 +362,13 @@ public class TreeTraverseIteratorTest {
         Tensor M = Tensors.parse("M");
 
         while (iterator.next() != null)
-            if (TensorUtils.equals(iterator.current(), Tensors.parse("pT")))
+            if (TensorUtils.equalsExactly(iterator.current(), Tensors.parse("pT")))
                 iterator.set(M);
-            else if (TensorUtils.equals(iterator.current(), Tensors.parse("s")))
+            else if (TensorUtils.equalsExactly(iterator.current(), Tensors.parse("s")))
                 iterator.set(Tensors.pow(M, Complex.TWO));
         Tensor actual = iterator.result();
         Tensor expected = Tensors.parse("Power[M,20]");
-        Assert.assertTrue(TensorUtils.equals(expected, actual));
+        Assert.assertTrue(TensorUtils.equalsExactly(expected, actual));
     }
 
     @Test
@@ -394,12 +394,12 @@ public class TreeTraverseIteratorTest {
         Tensor M = Tensors.parse("M");
 
         while (iterator.next() != null)
-            if (TensorUtils.equals(iterator.current(), Tensors.parse("s")))
+            if (TensorUtils.equalsExactly(iterator.current(), Tensors.parse("s")))
                 iterator.set(Tensors.pow(M, Complex.TWO));
         Tensor actual = iterator.result();
 
         Tensor expected = Tensors.parse("9*Power[M, 20] + 18*Power[M, 18]*(-3*Power[M, 2] + 2*Power[pT, 2]) + 3*Power[M, 16]*(51*Power[M, 4] - 70*Power[M, 2]*Power[pT, 2] + 18*Power[pT, 4]) + 6*Power[M, 14]*(-45*Power[M, 6] + 98*Power[M, 4]*Power[pT, 2] - 54*Power[M, 2]*Power[pT, 4] + 6*Power[pT, 6]) + Power[M, 12]*(324*Power[M, 8] - 1008*Power[M, 6]*Power[pT, 2] + 920*Power[M, 4]*Power[pT, 4] - 252*Power[M, 2]*Power[pT, 6] + 9*Power[pT, 8]) - 2*Power[M, 12]*(135*Power[M, 8] - 561*Power[M, 6]*Power[pT, 2] + 753*Power[M, 4]*Power[pT, 4] - 377*Power[M, 2]*Power[pT, 6] + 51*Power[pT, 8]) + Power[M, 10]*(153*Power[M, 10] - 810*Power[M, 8]*Power[pT, 2] + 1476*Power[M, 6]*Power[pT, 4] - 1142*Power[M, 4]*Power[pT, 6] + 344*Power[M, 2]*Power[pT, 8] - 18*Power[pT, 10]) + 2*Power[M, 10]*(-27*Power[M, 10] + 180*Power[M, 8]*Power[pT, 2] - 425*Power[M, 6]*Power[pT, 4] + 456*Power[M, 4]*Power[pT, 6] - 227*Power[M, 2]*Power[pT, 8] + 42*Power[pT, 10]) + Power[M, 8]*(9*Power[M, 12] - 84*Power[M, 10]*Power[pT, 2] + 263*Power[M, 8]*Power[pT, 4] - 374*Power[M, 6]*Power[pT, 6] + 269*Power[M, 4]*Power[pT, 8] - 86*Power[M, 2]*Power[pT, 10] + 9*Power[pT, 12]) + Power[M, 8]*Power[pT, 4]*Power[-Power[M, 2] + Power[pT, 2], 4] + 2*Power[M, 8]*(3*Power[M, 6] - 11*Power[M, 4]*Power[pT, 2] + 10*Power[M, 2]*Power[pT, 4] - 3*Power[pT, 6])*Power[-(pT*Power[M, 2]) + Power[pT, 3], 2]");
-        Assert.assertTrue(TensorUtils.equals(expected, actual));
+        Assert.assertTrue(TensorUtils.equalsExactly(expected, actual));
     }
 
     @Test
@@ -425,12 +425,12 @@ public class TreeTraverseIteratorTest {
         Tensor M = Tensors.parse("M");
 
         while (iterator.next() != null)
-            if (TensorUtils.equals(iterator.current(), Tensors.parse("pT")))
+            if (TensorUtils.equalsExactly(iterator.current(), Tensors.parse("pT")))
                 iterator.set(M);
         Tensor actual = iterator.result();
 
         Tensor expected = Tensors.parse("18*(-3*s + 2*Power[M, 2])*Power[M, 18] + 9*Power[M, 20] + 3*Power[M, 16]*(-70*s*Power[M, 2] + 18*Power[M, 4] + 51*Power[s, 2]) + 6*Power[M, 14]*(-54*s*Power[M, 4] + 6*Power[M, 6] + 98*Power[M, 2]*Power[s, 2] - 45*Power[s, 3]) - 2*s*Power[M, 10]*(-377*s*Power[M, 6] + 51*Power[M, 8] + 753*Power[M, 4]*Power[s, 2] - 561*Power[M, 2]*Power[s, 3] + 135*Power[s, 4]) + Power[M, 12]*(-252*s*Power[M, 6] + 9*Power[M, 8] + 920*Power[M, 4]*Power[s, 2] - 1008*Power[M, 2]*Power[s, 3] + 324*Power[s, 4]) + 2*Power[M, 6]*Power[s, 2]*(-227*s*Power[M, 8] + 42*Power[M, 10] + 456*Power[M, 6]*Power[s, 2] - 425*Power[M, 4]*Power[s, 3] + 180*Power[M, 2]*Power[s, 4] - 27*Power[s, 5]) + s*Power[M, 8]*(344*s*Power[M, 8] - 18*Power[M, 10] - 1142*Power[M, 6]*Power[s, 2] + 1476*Power[M, 4]*Power[s, 3] - 810*Power[M, 2]*Power[s, 4] + 153*Power[s, 5]) + Power[M, 4]*Power[s, 2]*(-86*s*Power[M, 10] + 9*Power[M, 12] + 269*Power[M, 8]*Power[s, 2] - 374*Power[M, 6]*Power[s, 3] + 263*Power[M, 4]*Power[s, 4] - 84*Power[M, 2]*Power[s, 5] + 9*Power[s, 6]) + Power[M, 4]*Power[s, 4]*Power[-s + Power[M, 2], 4] + 2*Power[M, 2]*Power[s, 3]*(10*s*Power[M, 4] - 3*Power[M, 6] - 11*Power[M, 2]*Power[s, 2] + 3*Power[s, 3])*Power[-(M*s) + Power[M, 3], 2]");
-        Assert.assertTrue(TensorUtils.equals(expected, actual));
+        Assert.assertTrue(TensorUtils.equalsExactly(expected, actual));
     }
 
     @Test
@@ -438,9 +438,9 @@ public class TreeTraverseIteratorTest {
         Tensor tensor = Tensors.parse("a");
         TreeTraverseIterator iterator = new TreeTraverseIterator(tensor);
         while (iterator.next() != null)
-            if (TensorUtils.equals(iterator.current(), "a"))
+            if (TensorUtils.equalsExactly(iterator.current(), "a"))
                 iterator.set(Tensors.parse("b"));
-        Assert.assertTrue(TensorUtils.equals(iterator.result(), "b"));
+        Assert.assertTrue(TensorUtils.equalsExactly(iterator.result(), "b"));
     }
 
     @Test
@@ -448,13 +448,13 @@ public class TreeTraverseIteratorTest {
         Tensor tensor = Tensors.parse("a+b+d*g*(m+f)");
         TreeTraverseIterator iterator = new TreeTraverseIterator(tensor);
         while (iterator.next() != null)
-            if (TensorUtils.equals(iterator.current(), "m"))
+            if (TensorUtils.equalsExactly(iterator.current(), "m"))
                 Assert.assertEquals(3, iterator.depth());
-            else if (TensorUtils.equals(iterator.current(), "a"))
+            else if (TensorUtils.equalsExactly(iterator.current(), "a"))
                 Assert.assertEquals(1, iterator.depth());
-            else if (TensorUtils.equals(iterator.current(), "d"))
+            else if (TensorUtils.equalsExactly(iterator.current(), "d"))
                 Assert.assertEquals(2, iterator.depth());
-            else if (TensorUtils.equals(iterator.current(), "m+f"))
+            else if (TensorUtils.equalsExactly(iterator.current(), "m+f"))
                 Assert.assertEquals(2, iterator.depth());
         Assert.assertTrue(iterator.depth() == -1);
     }
@@ -465,17 +465,17 @@ public class TreeTraverseIteratorTest {
         TreeTraverseIterator iterator = new TreeTraverseIterator(tensor);
         while (iterator.next() != null) {
             Assert.assertTrue(iterator.depth() >= 0);
-            if (TensorUtils.equals(iterator.current(), "Cos[a+b+Sin[x]]"))
+            if (TensorUtils.equalsExactly(iterator.current(), "Cos[a+b+Sin[x]]"))
                 Assert.assertEquals(0, iterator.depth());
-            else if (TensorUtils.equals(iterator.current(), "a+b+Sin[x]"))
+            else if (TensorUtils.equalsExactly(iterator.current(), "a+b+Sin[x]"))
                 Assert.assertEquals(1, iterator.depth());
-            else if (TensorUtils.equals(iterator.current(), "a"))
+            else if (TensorUtils.equalsExactly(iterator.current(), "a"))
                 Assert.assertEquals(2, iterator.depth());
-            else if (TensorUtils.equals(iterator.current(), "b"))
+            else if (TensorUtils.equalsExactly(iterator.current(), "b"))
                 Assert.assertEquals(2, iterator.depth());
-            else if (TensorUtils.equals(iterator.current(), "Sin[x]"))
+            else if (TensorUtils.equalsExactly(iterator.current(), "Sin[x]"))
                 Assert.assertEquals(2, iterator.depth());
-            else if (TensorUtils.equals(iterator.current(), "x"))
+            else if (TensorUtils.equalsExactly(iterator.current(), "x"))
                 Assert.assertEquals(3, iterator.depth());
         }
         Assert.assertTrue(iterator.depth() == -1);
@@ -488,7 +488,7 @@ public class TreeTraverseIteratorTest {
 //
 //        TraverseState state;
 //        while ((state = iterator.next()) != null)
-//            if (TensorUtils.equals(iterator.current(), "y"))
+//            if (TensorUtils.equalsExactly(iterator.current(), "y"))
 //                iterator.set(Tensors.parse("4"));
 //    }
 
@@ -499,14 +499,14 @@ public class TreeTraverseIteratorTest {
         TraverseState state;
         while ((state = iterator.next()) != null)
             if (state == TraverseState.Leaving) {
-                if (TensorUtils.equals(parse("b"), iterator.current()))
+                if (TensorUtils.equalsExactly(parse("b"), iterator.current()))
                     iterator.set(parse("d"));
-                if (TensorUtils.equals(parse("x*(a-d+c)"), iterator.current()))
+                if (TensorUtils.equalsExactly(parse("x*(a-d+c)"), iterator.current()))
                     iterator.set(parse("a"));
 
             }
         //no double set exception 
-        Assert.assertTrue(TensorUtils.equals(iterator.result(), parse("a")));
+        Assert.assertTrue(TensorUtils.equalsExactly(iterator.result(), parse("a")));
     }
 
     @Test
@@ -516,14 +516,14 @@ public class TreeTraverseIteratorTest {
         TraverseState state;
         while ((state = iterator.next()) != null)
             if (state == TraverseState.Leaving) {
-                if (TensorUtils.equals(parse("b"), iterator.current()))
+                if (TensorUtils.equalsExactly(parse("b"), iterator.current()))
                     iterator.set(parse("d"));
-                if (TensorUtils.equals(parse("x*(a-d+c)"), iterator.current()))
+                if (TensorUtils.equalsExactly(parse("x*(a-d+c)"), iterator.current()))
                     iterator.set(parse("a"));
 
             }
         //no double set exception 
-        Assert.assertTrue(TensorUtils.equals(iterator.result(), parse("d+a")));
+        Assert.assertTrue(TensorUtils.equalsExactly(iterator.result(), parse("d+a")));
     }
 
     @Test
@@ -533,14 +533,14 @@ public class TreeTraverseIteratorTest {
         TraverseState state;
         while ((state = iterator.next()) != null)
             if (state == TraverseState.Leaving) {
-                if (TensorUtils.equals(parse("d"), iterator.current()))
+                if (TensorUtils.equalsExactly(parse("d"), iterator.current()))
                     iterator.set(parse("1"));
-                if (TensorUtils.equals(parse("x"), iterator.current()))
+                if (TensorUtils.equalsExactly(parse("x"), iterator.current()))
                     iterator.set(parse("1"));
 
             }
         //no double set exception 
-        Assert.assertTrue(TensorUtils.equals(iterator.result(), parse("2*a+c")));
+        Assert.assertTrue(TensorUtils.equalsExactly(iterator.result(), parse("2*a+c")));
     }
 
     private static Indicator<Tensor> classIndicator(final Class<? extends Tensor> clazz) {
@@ -558,7 +558,7 @@ public class TreeTraverseIteratorTest {
 
             @Override
             public boolean is(Tensor object) {
-                return TensorUtils.compare(object, t);
+                return TensorUtils.equals(object, t);
             }
         };
     }

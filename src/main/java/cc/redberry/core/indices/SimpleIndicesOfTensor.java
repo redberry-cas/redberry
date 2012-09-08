@@ -36,7 +36,7 @@ package cc.redberry.core.indices;
  * @see AbstractIndices
  * @see SortedIndices
  */
-public final class SimpleIndicesOfTensor extends SimpleIndicesAbstract {
+final class SimpleIndicesOfTensor extends SimpleIndicesAbstract {
 
     SimpleIndicesOfTensor(int[] data, IndicesSymmetries symmetries) {
         super(data, symmetries);
@@ -66,5 +66,4 @@ public final class SimpleIndicesOfTensor extends SimpleIndicesAbstract {
     protected SimpleIndices create(int[] data, IndicesSymmetries symmetries) {
         return new SimpleIndicesOfTensor(true, data, symmetries);
     }
-
 }

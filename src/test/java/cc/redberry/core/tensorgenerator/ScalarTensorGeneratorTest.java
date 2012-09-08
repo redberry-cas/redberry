@@ -20,37 +20,23 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
+package cc.redberry.core.tensorgenerator;
 
-package cc.redberry.concurrent;
-
-import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
+import org.junit.Test;
 
 /**
- * 
- * @author Bolotin Dmitriy (bolotin.dmitriy@gmail.com)
- * @param <T> 
+ *
+ * @author Dmitry Bolotin
+ * @author Stanislav Poslavsky
  */
-public class ListOutputPortWrapper<T> implements OutputPort<T> {
-    private List<? extends T> list;
-    private final int size;
-    private AtomicInteger currentIndex = new AtomicInteger(0);
-
-    public ListOutputPortWrapper(List<? extends T> list) {
-        this.list = list;
-        size = list.size();
+public class ScalarTensorGeneratorTest {
+    public ScalarTensorGeneratorTest() {
     }
 
-    @Override
-    public T take() throws InterruptedException {
-        int index = currentIndex.getAndIncrement();
-        if (index >= size)
-            return null;
-        return list.get(index);
-    }
-
-    public int percentDone() {
-        int index = currentIndex.get();
-        return index * 100 / size;
+    @Test
+    public void testSomeMethod() {
+        SymbolsGenerator generator = new SymbolsGenerator("c");
+        for (int i = 0; i < 10; ++i)
+            System.out.println(generator.take());
     }
 }

@@ -22,14 +22,15 @@
  */
 package cc.redberry.core.transformations.substitutions;
 
-import java.util.Arrays;
-import static cc.redberry.core.TAssert.*;
-
-import org.junit.Test;
 import cc.redberry.core.context.CC;
 import cc.redberry.core.indices.IndexType;
 import cc.redberry.core.tensor.*;
+import java.util.Arrays;
 import org.junit.Ignore;
+import org.junit.Test;
+
+import static cc.redberry.core.TAssert._;
+import static cc.redberry.core.TAssert.assertTrue;
 
 /**
  * @author Dmitry Bolotin

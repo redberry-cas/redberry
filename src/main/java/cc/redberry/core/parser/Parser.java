@@ -25,7 +25,6 @@ package cc.redberry.core.parser;
 import java.util.Arrays;
 
 /**
- *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
@@ -33,15 +32,16 @@ public class Parser {
 
     public static final Parser DEFAULT =
             new Parser(new NodeParser[]{
-                ParserBrackets.INSTANCE,
-                ParserSum.INSTANCE,
-                ParserProduct.INSTANCE,
-                ParserSimpleTensor.INSTANCE,
-                ParserTensorField.INSTANCE,
-                ParserPower.INSTANCE,
-                ParserNumber.INSTANCE,
-                ParserFunctions.INSTANCE,
-                ParserExpression.INSTANCE
+                    ParserBrackets.INSTANCE,
+                    ParserSum.INSTANCE,
+                    ParserProduct.INSTANCE,
+                    ParserSimpleTensor.INSTANCE,
+                    ParserTensorField.INSTANCE,
+                    ParserPower.INSTANCE,
+                    ParserNumber.INSTANCE,
+                    ParserFunctions.INSTANCE,
+                    ParserExpression.INSTANCE,
+                    ParserPowerAst.INSTANCE
             });
     private final NodeParser[] nodeParsers;
 

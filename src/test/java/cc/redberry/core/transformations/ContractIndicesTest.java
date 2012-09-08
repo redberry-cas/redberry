@@ -23,10 +23,9 @@
 package cc.redberry.core.transformations;
 
 import cc.redberry.core.TAssert;
-import cc.redberry.core.context.*;
+import cc.redberry.core.context.CC;
 import cc.redberry.core.indexgenerator.IndexGenerator;
-import cc.redberry.core.indices.*;
-import cc.redberry.core.performance.kv.*;
+import cc.redberry.core.indices.IndicesUtils;
 import cc.redberry.core.tensor.Expression;
 import cc.redberry.core.tensor.ProductBuilder;
 import cc.redberry.core.tensor.Tensor;
@@ -172,7 +171,7 @@ public class ContractIndicesTest {
         t = contract(t);
         System.out.println(t);
         Tensor expected = parse("F_m*k");
-        assertTrue(TensorUtils.equals(t, expected));
+        assertTrue(TensorUtils.equalsExactly(t, expected));
     }
 
     @Test
@@ -180,7 +179,7 @@ public class ContractIndicesTest {
         Tensor t = parse("g_mn*F^n");
         t = contract(t);
         Tensor expected = parse("F_m");
-        assertTrue(TensorUtils.equals(t, expected));
+        assertTrue(TensorUtils.equalsExactly(t, expected));
     }
 
     @Test
@@ -188,7 +187,7 @@ public class ContractIndicesTest {
         Tensor t = parse("g_mn*g_ab*F^n*F^m*F^ab");
         t = contract(t);
         Tensor expected = parse("F^n*F_n*F^a_a");
-        assertTrue(TensorUtils.compare(t, expected));
+        assertTrue(TensorUtils.equals(t, expected));
     }
 
     @Test
@@ -196,7 +195,7 @@ public class ContractIndicesTest {
         Tensor t = parse("F^n*F^m*F^ab");
         t = contract(t);
         Tensor expected = parse("F^n*F^m*F^ab");
-        assertTrue(TensorUtils.compare(t, expected));
+        assertTrue(TensorUtils.equals(t, expected));
     }
 
     @Test
@@ -204,7 +203,7 @@ public class ContractIndicesTest {
         Tensor t = parse("g^mc*g_am");
         t = contract(t);
         Tensor expected = parse("d_a^c");
-        assertTrue(TensorUtils.compare(t, expected));
+        assertTrue(TensorUtils.equals(t, expected));
     }
 
     @Test
@@ -212,7 +211,7 @@ public class ContractIndicesTest {
         Tensor t = parse("g_ab*F^ab");
         t = contract(t);
         Tensor expected = parse("F^a_a");
-        assertTrue(TensorUtils.compare(t, expected));
+        assertTrue(TensorUtils.equals(t, expected));
     }
 
     @Test
@@ -220,7 +219,7 @@ public class ContractIndicesTest {
         Tensor t = parse("g_ab*g^bc*(d_c^f*F_f+g_cd*g^de*X_e+g_cj*d^j_k*(X^k+X_l*g^lk))");
         t = contract(t);
         Tensor expected = parse("F_{a}+X_{a}+X_{a}+X_{a}");
-        assertTrue(TensorUtils.compare(t, expected));
+        assertTrue(TensorUtils.equals(t, expected));
     }
 
     @Test
@@ -230,7 +229,7 @@ public class ContractIndicesTest {
         t = contract(t);
 
         Tensor expected = parse("(p^{d}*d^{b}_{b}+p^{d})*(p_{d}+p_{d})");
-        assertTrue(TensorUtils.compare(t, expected));
+        assertTrue(TensorUtils.equals(t, expected));
     }
 
     @Test
@@ -238,7 +237,7 @@ public class ContractIndicesTest {
         Tensor t = parse("g^ab*g^gd*(p_g*g_ba+p_a*g_bg)");
         t = contract(t);
         Tensor expected = parse("p^{d}*d^{b}_{b}+p^{d}");
-        assertTrue(TensorUtils.compare(t, expected));
+        assertTrue(TensorUtils.equals(t, expected));
     }
 
     @Test
@@ -248,7 +247,7 @@ public class ContractIndicesTest {
             Tensor t = parse("g_bg*(p^g*g^ba*p_a+p_a*g^ab*g^gd*p_d)");
             t = contract(t);
             Tensor expected = parse("p^{a}*p_{a}+p^{d}*p_{d}");
-            assertTrue(TensorUtils.compare(t, expected));
+            assertTrue(TensorUtils.equals(t, expected));
         }
     }
 
@@ -257,7 +256,7 @@ public class ContractIndicesTest {
         Tensor t = parse("g_mn*g_ab*(F^n*F^m*F^ab+F^n*F^m*F^ab)");
         t = contract(t);
         Tensor expected = parse("F^n*F_n*F^a_a+F^r*F_r*F_x^x");
-        assertTrue(TensorUtils.compare(t, expected));
+        assertTrue(TensorUtils.equals(t, expected));
     }
 
     @Test
@@ -265,7 +264,7 @@ public class ContractIndicesTest {
         Tensor t = parse("(F^n*F^m*F^ab+F^n*F^m*F^ab)*X_b");
         t = contract(t);
         Tensor expected = parse("(F^n*F^m*F^ab+F^n*F^m*F^ab)*X_b");
-        assertTrue(TensorUtils.compare(t, expected));
+        assertTrue(TensorUtils.equals(t, expected));
     }
 
     @Test
@@ -275,7 +274,7 @@ public class ContractIndicesTest {
         System.out.println(t);
         Tensor expected = parse("F_{nb}+F_{bn}+F_{y}^{y}_{bn}");
         System.out.println(expected);
-        assertTrue(TensorUtils.compare(t, expected));
+        assertTrue(TensorUtils.equals(t, expected));
     }
 
     @Test
@@ -283,7 +282,7 @@ public class ContractIndicesTest {
         Tensor t = parse("g^nb*A_nb+g^nb*g_mn*(F^m_b+g_ab*(F^am+g_xy*F^xyam))");
         t = contract(t);
         Tensor expected = parse("A_n^n+F_n^n+F_n^n+F^{x}_{x}_n^n");
-        assertTrue(TensorUtils.compare(t, expected));
+        assertTrue(TensorUtils.equals(t, expected));
     }
 
     @Test
@@ -291,7 +290,7 @@ public class ContractIndicesTest {
         Tensor t = parse("A_mn+g_mn*h");
         t = contract(t);
         Tensor expected = parse("A_mn+g_mn*h");
-        assertTrue(TensorUtils.compare(t, expected));
+        assertTrue(TensorUtils.equals(t, expected));
     }
 
     @Test
@@ -299,7 +298,7 @@ public class ContractIndicesTest {
         Tensor t = parse("g^mc*(A_mn+g_mn*h)");
         t = contract(t);
         Tensor expected = parse("A^c_n+d^c_n*h");
-        assertTrue(TensorUtils.compare(t, expected));
+        assertTrue(TensorUtils.equals(t, expected));
     }
 
     @Test
@@ -307,7 +306,7 @@ public class ContractIndicesTest {
         Tensor t = parse("g^ab*(g_mn*F_zxab^m+g^cd*g_mn*F_zxab^m*K_cd+g_zx*g_ab*X_n)");
         t = contract(t);
         Tensor expected = parse("F_zx^b_bn+F_zx^b_bn*K^d_d+X_n*g_zx*d^b_b");
-        assertTrue(TensorUtils.compare(t, expected));
+        assertTrue(TensorUtils.equals(t, expected));
     }
 
     @Test
@@ -315,7 +314,7 @@ public class ContractIndicesTest {
         Tensor t = parse("X_a+g_ab*(X^b+g^bc*(X_c+d_c^f*F_f+g_cd*g^de*X_e+g_cj*d^j_k*(X^k+X_l*g^lk)))");
         t = contract(t);
         Tensor expected = parse("X_{a}+X_{a}+X_{a}+F_{a}+X_{a}+X_{a}+X_{a}");
-        assertTrue(TensorUtils.compare(t, expected));
+        assertTrue(TensorUtils.equals(t, expected));
     }
 
     @Test
@@ -323,7 +322,7 @@ public class ContractIndicesTest {
         Tensor t = parse("A_mn+g_ma*B^a_n");
         t = contract(t);
         Tensor expected = parse("A_mn+B_mn");
-        assertTrue(TensorUtils.equals(t, expected));
+        assertTrue(TensorUtils.equalsExactly(t, expected));
     }
 
     @Test
@@ -331,7 +330,7 @@ public class ContractIndicesTest {
         Tensor t = parse("g^ad*(g_ab*X^b+X_a)");
         t = contract(t);
         Tensor expected = parse("X^{d}+X^{d}");
-        assertTrue(TensorUtils.equals(t, expected));
+        assertTrue(TensorUtils.equalsExactly(t, expected));
     }
 
     @Test
@@ -345,7 +344,7 @@ public class ContractIndicesTest {
         Tensor t = parse("g^mn*g_mn");
         t = contract(t);
         Tensor expected = parse("d^n_n");
-        assertTrue(TensorUtils.compare(t, expected));
+        assertTrue(TensorUtils.equals(t, expected));
     }
 
     @Test
@@ -353,7 +352,7 @@ public class ContractIndicesTest {
         Tensor t = parse("g^ma*g_mn*g_ab*g^bc*d_c^n");
         t = contract(t);
         Tensor expected = parse("d^n_n");
-        assertTrue(TensorUtils.compare(t, expected));
+        assertTrue(TensorUtils.equals(t, expected));
     }
 
     @Test
@@ -361,7 +360,7 @@ public class ContractIndicesTest {
         Tensor t = parse("d^c_a*d^a_b*d_o^b*g^ox");
         t = contract(t);
         Tensor expected = parse("g^cx");
-        assertTrue(TensorUtils.compare(t, expected));
+        assertTrue(TensorUtils.equals(t, expected));
     }
 
     @Test
@@ -369,7 +368,7 @@ public class ContractIndicesTest {
         Tensor t = parse("d^c_o*g^ox");
         t = contract(t);
         Tensor expected = parse("g^cx");
-        assertTrue(TensorUtils.compare(t, expected));
+        assertTrue(TensorUtils.equals(t, expected));
     }
 
     @Test
@@ -377,7 +376,7 @@ public class ContractIndicesTest {
         Tensor t = parse("p^n*d^a_d*g^db");
         t = contract(t);
         Tensor expected = parse("p^n*g^ab");
-        assertTrue(TensorUtils.compare(t, expected));
+        assertTrue(TensorUtils.equals(t, expected));
     }
 
     @Test
@@ -386,7 +385,7 @@ public class ContractIndicesTest {
         t = contract(t);
         System.out.println(t);
         Tensor expected = parse("F_m+Y_m^b_b+X^b_bm*d_q^q");
-        assertTrue(TensorUtils.compare(t, expected));
+        assertTrue(TensorUtils.equals(t, expected));
     }
 
     @Test
@@ -394,7 +393,7 @@ public class ContractIndicesTest {
         Tensor t = parse("d^m_n*d^a_b*(F^nb+d^A_B*(M^B_A*X^n*X^b+M^Bnb_A))");
         t = contract(t);
         Tensor expected = parse("F^{ma}+M^{A}_{A}*X^{m}*X^{a}+M^{Ama}_{A}");
-        assertTrue(TensorUtils.compare(t, expected));
+        assertTrue(TensorUtils.equals(t, expected));
     }
 
 //    @Test
@@ -402,14 +401,14 @@ public class ContractIndicesTest {
 //        Tensor t = parse("g_mn*D[F_ab,x_mp]*d^a_p*g^bq");
 //        t = contract(t);
 //        Tensor expected = parse("D[F^aq,x^na]");
-//        assertTrue(TensorUtils.compare(t, expected));
+//        assertTrue(TensorUtils.equals(t, expected));
 //    }
     @Test
     public void testGreek1() {
         Tensor t = parse("g_{\\alpha \\beta}*(F^{\\alpha}+g^{\\gamma \\alpha}*U_{\\gamma})");
         t = contract(t);
         Tensor expected = parse("F_{\\beta}+U_{\\beta}");
-        assertTrue(TensorUtils.compare(t, expected));
+        assertTrue(TensorUtils.equals(t, expected));
     }
 
     @Test
@@ -417,7 +416,7 @@ public class ContractIndicesTest {
         Tensor t = parse("g^{\\alpha \\beta}*(F_{\\alpha}+g_{\\gamma \\alpha}*U^{\\gamma})");
         t = contract(t);
         Tensor expected = parse("F^{\\beta}+U^{\\beta}");
-        assertTrue(TensorUtils.compare(t, expected));
+        assertTrue(TensorUtils.equals(t, expected));
     }
 
     @Test
@@ -425,7 +424,7 @@ public class ContractIndicesTest {
         Tensor t = parse("g^{\\alpha \\beta}*g_{\\beta \\alpha}");
         t = contract(t);
         Tensor expected = parse("d^{\\alpha}_{\\alpha}");
-        assertTrue(TensorUtils.compare(t, expected));
+        assertTrue(TensorUtils.equals(t, expected));
     }
 
     @Ignore
@@ -526,7 +525,7 @@ public class ContractIndicesTest {
         Tensor t = parse("Sin[g^am*(X_a+g_ab*(X^b+g^bc*(X_c+d_c^f*F_f+g_cd*g^de*X_e+g_cj*d^j_k*(X^k+X_l*g^lk))))*J_m]");
         t = contract(t);
         Tensor expected = parse("Sin[(X_{a}+X_{a}+X_{a}+F_{a}+X_{a}+X_{a}+X_{a})*J^a]");
-        assertTrue(TensorUtils.compare(t, expected));
+        assertTrue(TensorUtils.equals(t, expected));
     }
 
     @Test
@@ -534,7 +533,7 @@ public class ContractIndicesTest {
         Tensor t = parse("Sin[g^ac*(X_a+g_ab*(X^b+g^bc*(X_c+d_c^f*F_f+g_cd*g^de*X_e+g_cj*d^j_k*(X^k+X_l*g^lk))))*J_c]");
         t = contract(t);
         Tensor expected = parse("Sin[(X_{a}+X_{a}+X_{a}+F_{a}+X_{a}+X_{a}+X_{a})*J^a]");
-        assertTrue(TensorUtils.compare(t, expected));
+        assertTrue(TensorUtils.equals(t, expected));
     }
 
     @Ignore
@@ -543,7 +542,7 @@ public class ContractIndicesTest {
         Tensor t = parse("Sin[g_mn*g^mn]*Sin[g^ac*(X_a+g_ab*(X^b+g^bc*(X_c+d_c^f*F_f+g_cd*g^de*X_e+g_cj*d^j_k*(X^k+X_l*g^lk))))*J_c]+d^y_x*d^x_y");
         t = contract(t);
         Tensor expected = parse("Sin[d^m_m]*Sin[(X_{a}+X_{a}+X_{a}+F_{a}+X_{a}+X_{a}+X_{a})*J^a]+d^m_m");
-        assertTrue(TensorUtils.compare(t, expected));
+        assertTrue(TensorUtils.equals(t, expected));
     }
 
     @Test
@@ -551,7 +550,7 @@ public class ContractIndicesTest {
         Tensor t = parse("F[g_mn*A^m]");
         t = contract(t);
         Tensor expected = parse("F[A_n]");
-        assertTrue(TensorUtils.compare(t, expected));
+        assertTrue(TensorUtils.equals(t, expected));
     }
 
     @Test
@@ -560,6 +559,6 @@ public class ContractIndicesTest {
         Expression d = Tensors.parseExpression("d_\\mu^\\mu=4");
         t = contract(t);
         t = d.transform(t);
-        assertTrue(TensorUtils.compare(t, parse("1/2")));
+        assertTrue(TensorUtils.equals(t, parse("1/2")));
     }
 }

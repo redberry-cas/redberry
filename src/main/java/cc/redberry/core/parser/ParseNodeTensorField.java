@@ -59,7 +59,7 @@ public class ParseNodeTensorField extends ParseNodeSimpleTensor {
         Tensor[] arguments = contentToTensors();
         for (int i = 0; i < arguments.length; ++i)
             if (argumentsIndices[i] == null)
-                argumentsIndices[i] = IndicesFactory.createSimple(null, arguments[i].getIndices().getFreeIndices());
+                argumentsIndices[i] = IndicesFactory.createSimple(null, arguments[i].getIndices().getFree());
         return Tensors.field(name, indices, argumentsIndices, contentToTensors());
     }
 }

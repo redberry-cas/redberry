@@ -47,7 +47,7 @@ import java.util.TreeSet;
  * 
  * @param <T> some inheritor of Permutation, e.g. {@code Permutation} or {@code Symmetry}
  */
-public class PermutationsSpanIterator<T extends Permutation> implements Iterator<T> {
+public final class PermutationsSpanIterator<T extends Permutation> implements Iterator<T> {
     private TreeSet<T> set = null;
     public Iterator<T> iterator = null;
     private List<T> upperLayer;

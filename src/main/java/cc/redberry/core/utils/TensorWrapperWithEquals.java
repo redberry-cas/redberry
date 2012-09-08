@@ -20,35 +20,39 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
+package cc.redberry.core.utils;
 
-package cc.redberry.concurrent;
+import cc.redberry.core.tensor.Tensor;
 
 /**
  *
- * @author dmitriybolotin
+ * @author Dmitry Bolotin
+ * @author Stanislav Poslavsky
  */
-public class O2IConnector<T> implements Runnable {
-    public OutputPort<T> oPort;
-    public InputPort iPort;
+public final class TensorWrapperWithEquals {
 
-    public O2IConnector(OutputPort<T> output, InputPort<T> input) {
-        this.oPort = output;
-        this.iPort = input;
+    final Tensor tensor;
+
+    public TensorWrapperWithEquals(Tensor tensor) {
+        this.tensor = tensor;
     }
 
     @Override
-    public void run() {
-        try {
-            T element;
-            while ((element = oPort.take()) != null)
-                iPort.put(element);
-        } catch (InterruptedException ex) {
-        } catch (RuntimeException re) {
-        } finally {
-            try {
-                iPort.put(null);
-            } catch (InterruptedException ex) {
-            }
-        }
+    public boolean equals(Object obj) {
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        final TensorWrapperWithEquals other = (TensorWrapperWithEquals) obj;
+        return TensorUtils.equals(tensor, other.tensor);
+    }
+
+    @Override
+    public int hashCode() {
+        return tensor.hashCode();
+    }
+
+    public Tensor getTensor() {
+        return tensor;
     }
 }

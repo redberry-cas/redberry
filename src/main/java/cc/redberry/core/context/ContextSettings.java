@@ -23,6 +23,7 @@
 package cc.redberry.core.context;
 
 import cc.redberry.core.indices.IndexType;
+import cc.redberry.core.parser.Parser;
 import java.util.EnumSet;
 
 /**
@@ -39,6 +40,7 @@ public class ContextSettings {
     private EnumSet<IndexType> merticTypes = EnumSet.noneOf(IndexType.class);
     private Long nameManagerSeed;
     private IndexConverterManager converterManager = IndexConverterManager.DEFAULT;
+    private Parser parser = Parser.DEFAULT;
 
     public ContextSettings(ToStringMode defaultToStringMode, String kronecker) {
         this.defaultToStringMode = defaultToStringMode;
@@ -107,19 +109,11 @@ public class ContextSettings {
         this.converterManager = converterManager;
     }
 
-    public static ContextSettings createDefault() {
-        ContextSettings defaultSettings = new ContextSettings(ToStringMode.REDBERRY, "d");
-        defaultSettings.setMetricName("g");
+    public void setParser(Parser parser) {
+        this.parser = parser;
+    }
 
-        defaultSettings.addMetricIndexType(IndexType.LatinLower);
-        defaultSettings.addMetricIndexType(IndexType.GreekLower);
-        defaultSettings.addMetricIndexType(IndexType.LatinUpper);
-        defaultSettings.addMetricIndexType(IndexType.GreekUpper);
-
-        //Reading seed from property if exists
-        if (System.getProperty("redberry.nmseed") != null)
-            defaultSettings.setNameManagerSeed(Long.parseLong(System.getProperty("redberry.nmseed"), 10));
-
-        return defaultSettings;
+    public Parser getParser() {
+        return parser;
     }
 }

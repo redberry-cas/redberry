@@ -2,9 +2,9 @@ package cc.redberry.core.tensor.iterator;
 
 import cc.redberry.core.tensor.Tensor;
 
-/*
+/**
  * Wrapper for TreeTraverseIterator. Return only
- * <blockquote>Leaving</blockquote> elements. Traverse into.
+ * <code>Leaving</code> elements. Traverse into.
  */
 public final class TensorFirstIterator extends TreeIteratorAbstract {
 

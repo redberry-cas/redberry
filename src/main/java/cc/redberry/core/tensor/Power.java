@@ -69,7 +69,8 @@ public final class Power extends Tensor {
 
     @Override
     public String toString(ToStringMode mode) {
-        return "Power[" + argument.toString(mode) + ", " + power.toString(mode) + "]";
+        return argument.toString(mode, Power.class) + "**" + power.toString(mode, Power.class);
+//        return "Power[" + argument.toString(mode) + ", " + power.toString(mode) + "]";
     }
 
     @Override

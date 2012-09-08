@@ -43,7 +43,7 @@ public class SubstitutionIteratorTest {
         Tensor f;
         while ((f = iterator.next()) != null)
 //            System.out.println(f);
-            if (TensorUtils.equals(f, parse("c")))
+            if (TensorUtils.equalsExactly(f, parse("c")))
                 System.out.println(iterator.stack);
     }
 
@@ -54,7 +54,7 @@ public class SubstitutionIteratorTest {
         Tensor f;
         while ((f = iterator.next()) != null)
 //            System.out.println(f);
-            if (TensorUtils.equals(f, parse("c")))
+            if (TensorUtils.equalsExactly(f, parse("c")))
                 System.out.println(iterator.stack);
     }
 
@@ -66,7 +66,7 @@ public class SubstitutionIteratorTest {
         Tensor f;
         while ((f = iterator.next()) != null){
 //            System.out.println(f);
-            if (TensorUtils.equals(f, parse("a")) || TensorUtils.equals(f, parse("d")) || TensorUtils.equals(f, parse("c")))
+            if (TensorUtils.equalsExactly(f, parse("a")) || TensorUtils.equalsExactly(f, parse("d")) || TensorUtils.equalsExactly(f, parse("c")))
                 System.out.println(f + " " +iterator.stack);}
 
     }

@@ -19,6 +19,7 @@ import cc.redberry.core.context.ToStringMode;
 import cc.redberry.core.indices.Indices;
 import cc.redberry.core.transformations.Transformation;
 import cc.redberry.core.transformations.substitutions.Substitutions;
+import cc.redberry.core.utils.*;
 
 /**
  *
@@ -81,5 +82,13 @@ public class Expression extends Tensor implements Transformation {
     @Override
     public Tensor transform(Tensor t) {
         return Substitutions.getTransformation(left, right).transform(t);
+    }
+
+    public boolean isIdentity() {
+        return TensorUtils.equals(left, right);
+    }
+
+    public Expression transpose() {
+        return new Expression(indices, right, left);
     }
 }

@@ -20,14 +20,31 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
+package cc.redberry.core.utils;
 
-package cc.redberry.concurrent;
+import cc.redberry.core.tensor.*;
+import cc.redberry.core.tensor.Expression;
+import org.junit.*;
 
 /**
- * Factory of VoidProcessors
- * 
- * @author Bolotin Dmitriy (bolotin.dmitriy@gmail.com)
+ *
+ * @author Dmitry Bolotin
+ * @author Stanislav Poslavsky
  */
-public interface VoidProcessorFactory<InputT> {
-    VoidProcessor<InputT> create();
+public class TensorsSetTest {
+
+    @Test
+    public void test1() {
+        TSet<Expression> set = new TSet<>();
+        set.add(Tensors.parseExpression("a=2"));
+        set.add(Tensors.parseExpression("a=2"));
+        set.add(Tensors.parseExpression("b=3"));
+//        Assert.assertTrue(set.size() == 2);
+        int i = 0;
+        for (Expression e : set){
+            System.out.println(e);
+            i++;
+        }
+        Assert.assertTrue(i == 2);
+    }
 }

@@ -22,7 +22,7 @@
  */
 package cc.redberry.core.tensor;
 
-import cc.redberry.core.*;
+import cc.redberry.core.TAssert;
 import cc.redberry.core.context.CC;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.tensor.random.TRandom;
@@ -77,12 +77,12 @@ public class ProductTest {
         for (int i = 0; i < 100; ++i) {
             CC.resetTensorNames();
             Product p = (Product) Tensors.parse("a*b*c*A^ij*A_i*A_j*b_u");
-            Assert.assertTrue(TensorUtils.equals(Tensors.parse("b_u"), p.getContent().getNonScalar()));
+            Assert.assertTrue(TensorUtils.equalsExactly(Tensors.parse("b_u"), p.getContent().getNonScalar()));
             ProductBuilder pb = new ProductBuilder();
             for (Tensor t : p.getAllScalars())
                 pb.put(t);
             pb.put(Tensors.parse("b_u"));
-            Assert.assertTrue(TensorUtils.equals(pb.build(), p));
+            Assert.assertTrue(TensorUtils.equalsExactly(pb.build(), p));
         }
     }
 
@@ -92,7 +92,7 @@ public class ProductTest {
         TensorBuilder builder = t.getBuilder();
         for (Tensor c : t)
             builder.put(c);
-        Assert.assertTrue(TensorUtils.equals(t, builder.build()));
+        Assert.assertTrue(TensorUtils.equalsExactly(t, builder.build()));
     }
 
     @Test
@@ -119,6 +119,7 @@ public class ProductTest {
     @Test
     public void testRenameConflicts3() {
         Tensor t1 = Tensors.parse("A_a^a*A_b^b*A_c^c_m^n+A_d^e*A_e^d*A_f^f_m^n");
+        System.out.println(t1);
         Tensor t2 = Tensors.parse("A_a^a*A_b^b*A_c^c^m_n+A_d^e*A_e^d*A_f^f^m_n");
         TAssert.assertIndicesConsistency(Tensors.multiplyAndRenameConflictingDummies(t1, t2));
     }
@@ -141,7 +142,7 @@ public class ProductTest {
         Tensor[] tensors = product.getRange(0, 1);
         int i = 0;
         for (Tensor t : tensors)
-            Assert.assertTrue(TensorUtils.equals(product.get(i++), t));
+            Assert.assertTrue(TensorUtils.equalsExactly(product.get(i++), t));
     }
 
     @Test
@@ -150,7 +151,7 @@ public class ProductTest {
         Tensor[] tensors = product.getRange(4, 6);
         int i = 4;
         for (Tensor t : tensors)
-            Assert.assertTrue(TensorUtils.equals(product.get(i++), t));
+            Assert.assertTrue(TensorUtils.equalsExactly(product.get(i++), t));
     }
 
     @Test
@@ -159,7 +160,7 @@ public class ProductTest {
         Tensor[] tensors = product.getRange(0, 10);
         int i = 0;
         for (Tensor t : tensors)
-            Assert.assertTrue(TensorUtils.equals(product.get(i++), t));
+            Assert.assertTrue(TensorUtils.equalsExactly(product.get(i++), t));
     }
 
     @Test
@@ -168,7 +169,7 @@ public class ProductTest {
         Tensor[] tensors = product.getRange(0, 1);
         int i = 0;
         for (Tensor t : tensors)
-            Assert.assertTrue(TensorUtils.equals(product.get(i++), t));
+            Assert.assertTrue(TensorUtils.equalsExactly(product.get(i++), t));
     }
 
     @Test
@@ -177,7 +178,7 @@ public class ProductTest {
         Tensor[] tensors = product.getRange(0, 3);
         int i = 0;
         for (Tensor t : tensors)
-            Assert.assertTrue(TensorUtils.equals(product.get(i++), t));
+            Assert.assertTrue(TensorUtils.equalsExactly(product.get(i++), t));
     }
 
     @Test
@@ -186,7 +187,7 @@ public class ProductTest {
         Tensor[] tensors = product.getRange(4, 8);
         int i = 4;
         for (Tensor t : tensors)
-            Assert.assertTrue(TensorUtils.equals(product.get(i++), t));
+            Assert.assertTrue(TensorUtils.equalsExactly(product.get(i++), t));
     }
 
     @Test
@@ -195,7 +196,7 @@ public class ProductTest {
         Tensor[] tensors = product.getRange(1, 3);
         int i = 1;
         for (Tensor t : tensors)
-            Assert.assertTrue(TensorUtils.equals(product.get(i++), t));
+            Assert.assertTrue(TensorUtils.equalsExactly(product.get(i++), t));
     }
 
     @Test
@@ -205,7 +206,7 @@ public class ProductTest {
         Tensor[] actual = product.getRange(2, 3);
         Assert.assertTrue(expected.length == actual.length);
         for (int i = 0; i < expected.length; ++i)
-            Assert.assertTrue(TensorUtils.equals(expected[i], actual[i]));
+            Assert.assertTrue(TensorUtils.equalsExactly(expected[i], actual[i]));
     }
 
     @Test
@@ -236,7 +237,7 @@ public class ProductTest {
     private static void assertArraysEquals(Tensor[] expected, Tensor[] actual) {
         Assert.assertTrue(expected.length == actual.length);
         for (int i = 0; i < expected.length; ++i)
-            Assert.assertTrue(TensorUtils.equals(expected[i], actual[i]));
+            Assert.assertTrue(TensorUtils.equalsExactly(expected[i], actual[i]));
     }
 
     @Test
@@ -247,6 +248,48 @@ public class ProductTest {
         builder.put(x);
         Tensor t = builder.build();
         Tensor e = Tensors.parse("Power[Power[pT,2] - s, 4]*Power[s, 4]");
-        Assert.assertTrue(TensorUtils.equals(t, e));
+        Assert.assertTrue(TensorUtils.equalsExactly(t, e));
+    }
+
+    @Test
+    public void toString1() {
+        Tensor t = Tensors.parse("-a*b");
+        Assert.assertTrue(TensorUtils.equals(t, Tensors.parse(t.toString())));
+    }
+
+    @Test
+    public void toString2() {
+        Tensor t = Tensors.parse("-a*b*g_mn");
+        Assert.assertTrue(TensorUtils.equals(t, Tensors.parse(t.toString())));
+    }
+
+    @Test
+    public void toString3() {
+        Tensor t = Tensors.parse("-a*b*g_mn*g^mn");
+        Assert.assertTrue(TensorUtils.equals(t, Tensors.parse(t.toString())));
+    }
+
+    @Test
+    public void toString4() {
+        Tensor t = Tensors.parse("a*b");
+        Assert.assertTrue(TensorUtils.equals(t, Tensors.parse(t.toString())));
+    }
+
+    @Test
+    public void toString5() {
+        Tensor t = Tensors.parse("a*b*g_mn");
+        Assert.assertTrue(TensorUtils.equals(t, Tensors.parse(t.toString())));
+    }
+
+    @Test
+    public void toString6() {
+        Tensor t = Tensors.parse("a*b*g_mn*g^mn");
+        Assert.assertTrue(TensorUtils.equals(t, Tensors.parse(t.toString())));
+    }
+
+    @Test
+    public void toString7() {
+        Tensor t = Tensors.parse("(2-i)*a*b*g_mn*g^mn");
+        Assert.assertTrue(TensorUtils.equals(t, Tensors.parse(t.toString())));
     }
 }

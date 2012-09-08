@@ -22,7 +22,7 @@
  */
 package cc.redberry.core.tensor;
 
-import cc.redberry.core.context.ToStringMode;
+import cc.redberry.core.context.*;
 import cc.redberry.core.indices.Indices;
 
 /**
@@ -37,18 +37,13 @@ public abstract class MultiTensor extends Tensor {
         this.indices = indices;
     }
 
-   
     @Override
     public Indices getIndices() {
         return indices;
     }
 
-    protected abstract char operationSymbol();
-
     //protected abstract Indices calculateIndices();
     //protected abstract int calculateHash();
-
-    
     //TODO implement without builder?
     public final Tensor remove(int position) {
         int size = size();
@@ -63,15 +58,5 @@ public abstract class MultiTensor extends Tensor {
         return builder.build();
     }
 
-    @Override
-    public String toString(ToStringMode mode) {
-        char operation = operationSymbol();
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; ; ++i) {
-            sb.append(get(i).toString(mode, this.getClass()));
-            if (i == size() - 1)
-                return sb.toString();
-            sb.append(operation);
-        }
-    }
+
 }

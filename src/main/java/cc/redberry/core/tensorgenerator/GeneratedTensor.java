@@ -20,29 +20,22 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
+package cc.redberry.core.tensorgenerator;
 
-package cc.redberry.concurrent;
+import cc.redberry.core.tensor.SimpleTensor;
+import cc.redberry.core.tensor.Tensor;
 
 /**
- * 
- * @author Bolotin Dmitriy (bolotin.dmitriy@gmail.com)
- * @param <InputT>
- * @param <OutputT> 
+ *
+ * @author Dmitry Bolotin
+ * @author Stanislav Poslavsky
  */
-public class SimpleProcessorWrapper<InputT, OutputT> implements OutputPort<OutputT> {
-    private OutputPort<? extends InputT> inputPort;
-    private Processor<? super InputT, ? extends OutputT> processor;
+public final class GeneratedTensor {
+    public final SimpleTensor[] coefficients;
+    public final Tensor generatedTensor;
 
-    public SimpleProcessorWrapper(OutputPort<? extends InputT> inputPort, Processor<? super InputT, ? extends OutputT> processor) {
-        this.inputPort = inputPort;
-        this.processor = processor;
-    }
-
-    @Override
-    public OutputT take() throws InterruptedException {
-        InputT input = inputPort.take();
-        if (input == null)
-            return null;
-        return processor.process(input);
+    public GeneratedTensor(SimpleTensor[] coefficients, Tensor generatedTensor) {
+        this.coefficients = coefficients;
+        this.generatedTensor = generatedTensor;
     }
 }

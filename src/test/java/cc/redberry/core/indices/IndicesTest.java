@@ -52,30 +52,30 @@ public class IndicesTest {
     public void testGetUpper1() {
         Indices indices = parse("g_mn*T^ab*D^n_b").getIndices(); //sorted indices
         Indices upper = ParserIndices.parseSimple("^a");
-        assertTrue(indices.getFreeIndices().getUpper().equals(upper.getAllIndices()));
+        assertTrue(indices.getFree().getUpper().equals(upper.getAllIndices()));
     }
 
     @Test
     public void testGetLower() {
         Indices indices = parse("g_mn*T^ab*D^n_b").getIndices(); //sorted indices
         Indices upper = ParserIndices.parseSimple("_m");
-        assertTrue(indices.getFreeIndices().getLower().equals(upper.getAllIndices()));
+        assertTrue(indices.getFree().getLower().equals(upper.getAllIndices()));
     }
 
     @Test
     public void testGetFreeIndices() {
         Indices indices = parse("g_mn*T^ab*D^n_b").getIndices(); //sorted indices
         Indices free = ParserIndices.parseSimple("_m^a");
-        assertTrue(indices.getFreeIndices().equalsRegardlessOrder(free));
+        assertTrue(indices.getFree().equalsRegardlessOrder(free));
 
         Indices indices1 = parse("g_mn^abn_b").getIndices(); //ordered indices
-        assertTrue(indices1.getFreeIndices().equalsRegardlessOrder(free));
+        assertTrue(indices1.getFree().equalsRegardlessOrder(free));
     }
 
     @Test
     public void testGetInverseIndices1() {
         Indices indices = parse("g_mn*T^ab*D^n_b").getIndices(); //sorted indices
-        Indices inverse = indices.getInverseIndices();
+        Indices inverse = indices.getInverse();
         Indices expected = ParserIndices.parseSimple("^mn_abn^b");
 
         assertTrue(expected.equalsRegardlessOrder(inverse));
@@ -84,14 +84,14 @@ public class IndicesTest {
         assertTrue(inverse.getUpper().equals(expected.getUpper()));
 
         SimpleIndices indices1 = (SimpleIndices) parse("g_mn^abn_b").getIndices(); //ordered indices
-        assertTrue(indices1.getInverseIndices().equalsRegardlessOrder(expected));
-        assertTrue(indices1.getSymmetries() == indices1.getInverseIndices().getSymmetries());
+        assertTrue(indices1.getInverse().equalsRegardlessOrder(expected));
+        assertTrue(indices1.getSymmetries() == indices1.getInverse().getSymmetries());
     }
 
     @Test
     public void testGetInverseIndices2() {
         Indices indices = parse("g_mn*T_ab").getIndices(); //sorted indices
-        Indices inverse = indices.getInverseIndices();
+        Indices inverse = indices.getInverse();
         Indices expected = ParserIndices.parseSimple("^abmn");
 
         assertTrue(expected.equalsRegardlessOrder(inverse));
@@ -102,7 +102,7 @@ public class IndicesTest {
     @Test
     public void testGetInverseIndices3() {
         Indices indices = parse("g^mn*T^ab").getIndices(); //sorted indices
-        Indices inverse = indices.getInverseIndices();
+        Indices inverse = indices.getInverse();
         Indices expected = ParserIndices.parseSimple("_abmn");
 
         assertTrue(expected.equalsRegardlessOrder(inverse));
@@ -113,7 +113,7 @@ public class IndicesTest {
     @Test
     public void testGetInverseIndices4() {
         Indices indices = parse("g_n*T^a*D_bzx").getIndices(); //sorted indices
-        Indices inverse = indices.getInverseIndices();
+        Indices inverse = indices.getInverse();
         Indices expected = ParserIndices.parseSimple("^n_a^bzx");
 
         assertTrue(expected.equalsRegardlessOrder(inverse));

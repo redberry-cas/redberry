@@ -62,6 +62,7 @@ public final class ArraysUtils {
      * and {@code null} if no mapping exist
      */
     public static <T> int[] bijection(T[] from, T[] to, Comparator<? super T> comparator) {
+        //TODO refactor with sorting !!!!
         if (from.length != to.length)
             return null;
         int length = from.length;
@@ -99,6 +100,7 @@ public final class ArraysUtils {
      * and {@code null} if no mapping exist
      */
     public static <T extends Comparable<? super T>> int[] bijection(T[] from, T[] to) {
+        //TODO refactor with sorting !!!!
         if (from.length != to.length)
             return null;
         int length = from.length;

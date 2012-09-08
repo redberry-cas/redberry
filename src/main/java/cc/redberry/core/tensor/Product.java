@@ -22,6 +22,7 @@
  */
 package cc.redberry.core.tensor;
 
+import cc.redberry.core.context.*;
 import cc.redberry.core.indices.Indices;
 import cc.redberry.core.indices.IndicesFactory;
 import cc.redberry.core.indices.IndicesUtils;
@@ -29,7 +30,6 @@ import cc.redberry.core.math.GraphUtils;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.utils.ArraysUtils;
 import cc.redberry.core.utils.HashFunctions;
-
 import java.lang.ref.SoftReference;
 import java.util.Arrays;
 
@@ -82,25 +82,9 @@ public final class Product extends MultiTensor {
         this.hash = calculateHash();
     }
 
-    //    @Override
-    //    protected Indices calculateIndices() {
-    //        IndicesBuilder ibs = new IndicesBuilder();
-    //        for (Tensor t : data)
-    //            ibs.append(t);
-    //        try {
-    //            return ibs.getIndices();
-    //        } catch (InconsistentIndicesException exception) {
-    //            throw new InconsistentIndicesException(exception.getIndex(), this);//TODO this->data
-    //        }
-    //    }
     @Override
     public Indices getIndices() {
         return indices;
-    }
-
-    @Override
-    protected char operationSymbol() {
-        return '*';
     }
 
     @Override
@@ -238,6 +222,9 @@ public final class Product extends MultiTensor {
         else
             return new Product(factor, indexlessData, new Tensor[0], ProductContent.EMPTY_INSTANCE, IndicesFactory.EMPTY_INDICES);
     }
+    public Tensor getSubProductWithoutFactor() {
+        return Tensors.multiply(ArraysUtils.addAll(indexlessData, data));
+    }
 
     public Tensor getDataSubProduct() {
         if (data.length == 0)
@@ -246,11 +233,10 @@ public final class Product extends MultiTensor {
             return data[0];
         return new Product(Complex.ONE, new Tensor[0], data, contentReference.get(), indices);
     }
-
     private ProductContent calculateContent() {
         if (data.length == 0)
             return ProductContent.EMPTY_INSTANCE;
-        final Indices freeIndices = indices.getFreeIndices();
+        final Indices freeIndices = indices.getFree();
         final int differentIndicesCount = (getIndices().size() + freeIndices.size()) / 2;
 
         //Names (names with type, see IndicesUtils.getNameWithType() ) of all indices in this multiplication
@@ -331,6 +317,10 @@ public final class Product extends MultiTensor {
         //(this is specification of GraphUtils.calculateConnectedComponents method)
         int[] componentSizes = new int[componentCount];
 
+        //TODO remove after Oracle fix
+        //patch for jvm bug (u4 or later) 
+        Arrays.fill(componentSizes, 0);
+
         //finding each component size
         for (i = 1; i < components.length - 1; ++i)
             ++componentSizes[components[i]];
@@ -349,7 +339,10 @@ public final class Product extends MultiTensor {
 
         Tensor nonScalar = null;
         if (componentCount == 1) //There are no scalar subproducts in this product
-            nonScalar = this;
+            if (data.length == 1)
+                nonScalar = data[0];
+            else
+                nonScalar = new Product(Complex.ONE, new Tensor[0], data, ProductContent.EMPTY_INSTANCE, this.indices);
         else if (datas[0].length > 0)
             nonScalar = Tensors.multiply(datas[0]);
 
@@ -393,7 +386,7 @@ public final class Product extends MultiTensor {
             contraction.sortContractions();
         freeContraction.sortContractions();
 
-        int[] inds = IndicesUtils.getIndicesNames(this.indices.getFreeIndices());
+        int[] inds = IndicesUtils.getIndicesNames(this.indices.getFree());
         Arrays.sort(inds);
         ScaffoldWrapper[] wrappers = new ScaffoldWrapper[contractions.length];
         for (i = 0; i < contractions.length; ++i)
@@ -412,7 +405,10 @@ public final class Product extends MultiTensor {
 
         //TODO should be lazy field in ProductContent
         FullContractionsStructure fullContractionsStructure = new FullContractionsStructure(data, differentIndicesCount, freeIndices);
-        return new ProductContent(contractionStructure, fullContractionsStructure, scalars, nonScalar, stretchIndices, data);
+        ProductContent content = new ProductContent(contractionStructure, fullContractionsStructure, scalars, nonScalar, stretchIndices, data);
+        if (componentCount == 1 && nonScalar instanceof Product)
+            ((Product) nonScalar).contentReference = new SoftReference<>(content);
+        return content;
     }
 
     private short[] calculateStretchIndices() {
@@ -486,7 +482,7 @@ public final class Product extends MultiTensor {
     //    }
 
     private static int hc(Tensor t, int[] inds) {
-        Indices ind = t.getIndices().getFreeIndices();
+        Indices ind = t.getIndices().getFree();
         int h = 31;
         int ii;
         for (int i = ind.size() - 1; i >= 0; --i) {
@@ -518,5 +514,41 @@ public final class Product extends MultiTensor {
                 return r;
             return Integer.compare(hashWithIndices, o.hashWithIndices);
         }
+    }
+
+    @Override
+    public String toString(ToStringMode mode) {
+        StringBuilder sb = new StringBuilder();
+
+        if (factor.isReal() && factor.getReal().signum() < 0) {
+            sb.append('-');
+            Complex f = factor.abs();
+            if (!f.isOne())
+                sb.append(((Tensor) f).toString(mode, Product.class)).append('*');
+        } else if (factor != Complex.ONE)
+            sb.append(((Tensor) factor).toString(mode, Product.class)).append('*');
+
+        int i = 0, size = factor == Complex.ONE ? size() : size() - 1;
+
+        for (; i < indexlessData.length; ++i) {
+            sb.append(indexlessData[i].toString(mode, Product.class));
+            if (i == size - 1)
+                return sb.toString();
+            sb.append('*');
+        }
+        for (;; ++i) {
+            sb.append(data[i - indexlessData.length].toString(mode, Product.class));
+            if (i == size - 1)
+                return sb.toString();
+            sb.append('*');
+        }
+    }
+
+    @Override
+    protected String toString(ToStringMode mode, Class<? extends Tensor> clazz) {
+        if (clazz == Power.class)
+            return "(" + toString(mode) + ")";
+        else
+            return toString(mode);
     }
 }

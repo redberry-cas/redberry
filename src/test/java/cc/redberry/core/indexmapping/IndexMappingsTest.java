@@ -15,16 +15,16 @@
  */
 package cc.redberry.core.indexmapping;
 
-import cc.redberry.concurrent.OutputPortUnsafe;
 import cc.redberry.core.context.CC;
-import cc.redberry.core.indices.*;
+import cc.redberry.core.indices.IndexType;
+import cc.redberry.core.indices.IndicesUtils;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.tensor.Tensors;
-import cc.redberry.core.utils.*;
+import cc.redberry.core.utils.TensorHashCalculator;
 import java.util.Arrays;
 import java.util.Set;
-import org.junit.*;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import static cc.redberry.core.tensor.Tensors.addSymmetry;
@@ -126,7 +126,7 @@ public class IndexMappingsTest {
     public void testScalarTensors1() {
         Tensor t1 = parse("A_mn*B^mnpqr*A_pqr");
         Tensor t2 = parse("A_pq*B^mnpqr*A_mnr");
-        Set<IndexMappingBuffer> buffers = IndexMappings.createAllMappings(t1, t2);
+        Set<IndexMappingBuffer> buffers = IndexMappings.getAllMappings(t1, t2);
         Assert.assertTrue(buffers.isEmpty());
     }
 
@@ -134,7 +134,7 @@ public class IndexMappingsTest {
     public void testScalarTensors12() {
         Tensor t1 = parse("A_i*A^i");
         Tensor t2 = parse("A_i*A^i");
-        Set<IndexMappingBuffer> buffers = IndexMappings.createAllMappings(t1, t2);
+        Set<IndexMappingBuffer> buffers = IndexMappings.getAllMappings(t1, t2);
         Assert.assertTrue(buffers.size() >= 1);
     }
 
@@ -143,7 +143,7 @@ public class IndexMappingsTest {
         addSymmetry("B^abcde", IndexType.LatinLower, false, 2, 3, 0, 1, 4);
         Tensor t1 = parse("A_mn*B^mnpqr*A_pqr");
         Tensor t2 = parse("A_pq*B^mnpqr*A_mnr");
-        Set<IndexMappingBuffer> buffers = IndexMappings.createAllMappings(t1, t2);
+        Set<IndexMappingBuffer> buffers = IndexMappings.getAllMappings(t1, t2);
         Assert.assertTrue(buffers.size() == 1);
         Assert.assertTrue(buffers.iterator().next().isEmpty());
     }
@@ -152,7 +152,7 @@ public class IndexMappingsTest {
     public void testScalarTensors3() {
         Tensor t1 = parse("A_m^m*A_a^b");
         Tensor t2 = parse("A_a^n*A_n^b");
-        Set<IndexMappingBuffer> buffers = IndexMappings.createAllMappings(t1, t2);
+        Set<IndexMappingBuffer> buffers = IndexMappings.getAllMappings(t1, t2);
         Assert.assertTrue(buffers.isEmpty());
     }
 
@@ -160,7 +160,7 @@ public class IndexMappingsTest {
     public void testScalarTensors4() {
         Tensor t1 = parse("A_m^m");
         Tensor t2 = parse("A_a^n");
-        Set<IndexMappingBuffer> buffers = IndexMappings.createAllMappings(t1, t2);
+        Set<IndexMappingBuffer> buffers = IndexMappings.getAllMappings(t1, t2);
         Assert.assertTrue(buffers.isEmpty());
     }
 
@@ -177,7 +177,7 @@ public class IndexMappingsTest {
             System.out.println(buffera);
 
         //R_abcd -> R_pqrs
-        Set<IndexMappingBuffer> buffers = IndexMappings.createAllMappings(riman1, riman2);
+        Set<IndexMappingBuffer> buffers = IndexMappings.getAllMappings(riman1, riman2);
         IndexMappingBuffer[] target = buffers.toArray(new IndexMappingBuffer[2]);
 
 
@@ -216,7 +216,7 @@ public class IndexMappingsTest {
     public void testBuildSimpleTensor1() {
         Tensor from = parse("R^{\\alpha}_{\\beta \\mu \\nu}");
         Tensor to = parse("R^{\\alpha}_{\\mu \\beta \\nu}");
-        Set<IndexMappingBuffer> buffers = IndexMappings.createAllMappings(from, to);
+        Set<IndexMappingBuffer> buffers = IndexMappings.getAllMappings(from, to);
         Assert.assertTrue(buffers.size() == 1);
         IndexMappingBuffer target = buffers.iterator().next();
 //        System.out.println(target);
@@ -230,7 +230,7 @@ public class IndexMappingsTest {
     public void testScalarFunctions2() {
         Tensor from = parse("g_mn*Sin[x]");
         Tensor to = parse("g_ab*Sin[x]");
-        Set<IndexMappingBuffer> buffers = IndexMappings.createAllMappings(from, to);
+        Set<IndexMappingBuffer> buffers = IndexMappings.getAllMappings(from, to);
         Assert.assertTrue(buffers.size() == 2);
     }
 
@@ -238,7 +238,7 @@ public class IndexMappingsTest {
     public void testDiffStates() {
         Tensor from = parse("Tensor_mn");
         Tensor to = parse("Tensor^ab");
-        Set<IndexMappingBuffer> buffers = IndexMappings.createAllMappings(from, to);
+        Set<IndexMappingBuffer> buffers = IndexMappings.getAllMappings(from, to);
         Assert.assertTrue(buffers.size() == 1);
         IndexMappingBuffer expected = IndexMappingTestUtils.parse("+;_m->^a;_n->^b");
         Assert.assertTrue(expected.equals(buffers.iterator().next()));
@@ -308,7 +308,7 @@ public class IndexMappingsTest {
         IndexMappingBuffer buffer = IndexMappings.createPort(from, to).take();
         System.out.println(buffer);
 
-        int[] fromIndices = from.getIndices().getFreeIndices().getAllIndices().copy();
+        int[] fromIndices = from.getIndices().getFree().getAllIndices().copy();
         for (int i = 0; i < fromIndices.length; ++i)
             fromIndices[i] = IndicesUtils.getNameWithType(fromIndices[i]);
         buffer = IndexMappings.createPort(new IndexMappingBufferTester(fromIndices, false), from, to).take();
@@ -319,7 +319,7 @@ public class IndexMappingsTest {
     public void testPerformance1() {
         Tensor from = Tensors.parse("n^i*n^m*n^e*n_g*n_d*n^b*n^z*n^n*n_k*n^t*n_l");
         Tensor to = Tensors.parse("n_l*n^n*n_g*n^z*n^t*n^b*n^m*n_k*n^i*n_d*n^e");
-        int[] fromIndices = from.getIndices().getFreeIndices().getAllIndices().copy();
+        int[] fromIndices = from.getIndices().getFree().getAllIndices().copy();
         for (int i = 0; i < fromIndices.length; ++i)
             fromIndices[i] = IndicesUtils.getNameWithType(fromIndices[i]);
         long start = System.currentTimeMillis();
@@ -336,7 +336,7 @@ public class IndexMappingsTest {
         System.out.println(from.getClass());
         System.out.println(from.getIndices());
         System.out.println(to.getIndices());
-        int[] fromIndices = from.getIndices().getFreeIndices().getAllIndices().copy();
+        int[] fromIndices = from.getIndices().getFree().getAllIndices().copy();
         for (int i = 0; i < fromIndices.length; ++i)
             fromIndices[i] = IndicesUtils.getNameWithType(fromIndices[i]);
         long start = System.currentTimeMillis();
@@ -350,9 +350,9 @@ public class IndexMappingsTest {
     public void testProduct1() {
         Tensor from = Tensors.parse("HATK^{\\alpha \\beta \\gamma }_{\\kappa_1 \\lambda_1 }*HATK^{\\mu \\nu \\theta_1 \\iota_1 }_{\\beta \\gamma }");
         Tensor to = Tensors.parse("HATK^{\\alpha \\theta_1 \\iota_1 }_{\\beta \\gamma }*HATK^{\\mu \\nu \\beta \\gamma }_{\\kappa_1 \\lambda_1 }");
-        Assert.assertTrue(from.getIndices().size() - 4 == from.getIndices().getFreeIndices().size());
-        Assert.assertTrue(to.getIndices().size() - 4 == to.getIndices().getFreeIndices().size());
-        Assert.assertTrue(from.getIndices().getFreeIndices().size() == to.getIndices().getFreeIndices().size());
+        Assert.assertTrue(from.getIndices().size() - 4 == from.getIndices().getFree().size());
+        Assert.assertTrue(to.getIndices().size() - 4 == to.getIndices().getFree().size());
+        Assert.assertTrue(from.getIndices().getFree().size() == to.getIndices().getFree().size());
         IndexMappingBuffer buffer = IndexMappings.getFirst(from, to);
 //        Assert.assertTrue(buffer != null);
     }

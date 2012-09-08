@@ -22,24 +22,24 @@
  */
 package cc.redberry.core.tensor;
 
+import cc.redberry.concurrent.*;
 import cc.redberry.core.combinatorics.Symmetry;
 import cc.redberry.core.context.CC;
 import cc.redberry.core.context.NameDescriptor;
 import cc.redberry.core.indices.*;
 import cc.redberry.core.number.Complex;
-import cc.redberry.core.parser.ParseManager;
 import cc.redberry.core.parser.ParseNodeTransformer;
 import cc.redberry.core.tensor.functions.*;
 import cc.redberry.core.transformations.ApplyIndexMapping;
 import cc.redberry.core.transformations.Expand;
 import cc.redberry.core.utils.TensorUtils;
-
 import java.util.HashSet;
 import java.util.Set;
 
 /**
- * <p>Factory methods to create any tensor are collected in this class. Using methods
- * provided in this class is preferable way co create tensors.</p>
+ * <p>Factory methods to create any tensor are collected in this class. Using
+ * the methods implemented in this class is the preferred way to create a
+ * tensor.</p>
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
@@ -52,13 +52,13 @@ public final class Tensors {
     }
 
     // ==========================  Factory Methods ============================
-
     /**
-     * Returns tensor in the integer power. Common result is an object of class Power,
-     * but for some input arguments result could have different type.
+     * Returns tensor in the integer power. Common result is an object of class
+     * Power, but for some input arguments result could have different type.
      *
      * @param argument base
      * @param power    power
+     *
      * @return result of argument exponentiation
      */
     public static Tensor pow(Tensor argument, int power) {
@@ -66,11 +66,12 @@ public final class Tensors {
     }
 
     /**
-     * Returns tensor in the scalar power. Common result is an object of class Power,
-     * but for some input arguments result could have different type.
+     * Returns tensor in the scalar power. Common result is an object of class
+     * Power, but for some input arguments result could have different type.
      *
      * @param argument base
      * @param power    power
+     *
      * @return result of argument exponentiation
      */
     public static Tensor pow(Tensor argument, Tensor power) {
@@ -81,25 +82,29 @@ public final class Tensors {
     }
 
     /**
-     * <p>Returns result of multiplication of several tensors. Einstein notation assumed.
-     * Common result is an object of class Product, but for some input arguments result
-     * could have different type.</p>
-     * <p>If there is a chance that some factors have conflicting (same name) dummy indices
-     * use {@link #multiplyAndRenameConflictingDummies(Tensor...)} instead.</p>
+     * <p>Returns result of multiplication of several tensors. Einstein notation
+     * assumed. Common result is an object of class Product, but for some input
+     * arguments result could have different type.</p> <p>If there is a chance
+     * that some factors have conflicting (same name) dummy indices use {@link #multiplyAndRenameConflictingDummies(Tensor...)}
+     * instead.</p>
      *
      * @param factors array of factors to be multiplied
+     *
      * @return result of multiplication
      */
     public static Tensor multiply(final Tensor... factors) {
+        //TODO add check for indices consistency
         return ProductFactory.FACTORY.create(factors);
     }
 
     /**
-     * <p>Returns result of multiplication of several tensors taking care about all conflicting
-     * dummy indices in the factors. Einstein notation assumed. Common result is an object
-     * of class Product, but for some input arguments result could have different type.</p>
+     * <p>Returns result of multiplication of several tensors taking care about
+     * all conflicting dummy indices in the factors. Einstein notation assumed.
+     * Common result is an object of class Product, but for some input arguments
+     * result could have different type.</p>
      *
      * @param factors array of factors to be multiplied
+     *
      * @return result of multiplication
      */
     public static Tensor multiplyAndRenameConflictingDummies(Tensor... factors) {
@@ -150,10 +155,12 @@ public final class Tensors {
     }
 
     /**
-     * Returns result of summation of several tensors. Common result is an object of class Sum,
-     * but for some input arguments result could have different type.
+     * Returns result of summation of several tensors. Common result is an
+     * object of class Sum, but for some input arguments result could have
+     * different type.
      *
      * @param tensors array of summands
+     *
      * @return result of summation
      */
     public static Tensor sum(Tensor... tensors) {
@@ -165,13 +172,14 @@ public final class Tensors {
      *
      * @param name    string name of the tensor
      * @param indices indices
+     *
      * @return new instance of {@link SimpleTensor} object
      */
     public static SimpleTensor simpleTensor(String name, SimpleIndices indices) {
         NameDescriptor descriptor = CC.getNameManager().mapNameDescriptor(name, indices.getIndicesTypeStructure());
         return new SimpleTensor(descriptor.getId(),
-                UnsafeIndicesFactory.createOfTensor(descriptor.getSymmetries(),
-                        indices));
+                                UnsafeIndicesFactory.createOfTensor(descriptor.getSymmetries(),
+                                                                    indices));
     }
 
     /**
@@ -180,6 +188,7 @@ public final class Tensors {
      *
      * @param name    int name of the tensor
      * @param indices indices
+     *
      * @return new instance of {@link SimpleTensor} object
      */
     public static SimpleTensor simpleTensor(int name, SimpleIndices indices) {
@@ -189,34 +198,37 @@ public final class Tensors {
         if (!descriptor.getIndicesTypeStructure().isStructureOf(indices))
             throw new IllegalArgumentException("Specified indices are not indices of specified tensor.");
         return new SimpleTensor(name,
-                UnsafeIndicesFactory.createOfTensor(descriptor.getSymmetries(),
-                        indices));
+                                UnsafeIndicesFactory.createOfTensor(descriptor.getSymmetries(),
+                                                                    indices));
     }
 
     /**
-     * Returns new tensor field with specified string name, indices and arguments list. Free indices of
-     * arguments assumed as arguments indices bindings of this field bindings.
+     * Returns new tensor field with specified string name, indices and
+     * arguments list. Free indices of arguments assumed as arguments indices
+     * bindings of this field bindings.
      *
      * @param name      int name of the field
      * @param indices   indices
      * @param arguments arguments list
+     *
      * @return new instance of {@link TensorField} object
      */
     public static TensorField field(String name, SimpleIndices indices, Tensor[] arguments) {
         SimpleIndices[] argIndices = new SimpleIndices[arguments.length];
         for (int i = 0; i < argIndices.length; ++i)
-            argIndices[i] = IndicesFactory.createSimple(null, arguments[i].getIndices().getFreeIndices());
+            argIndices[i] = IndicesFactory.createSimple(null, arguments[i].getIndices().getFree());
         return field(name, indices, argIndices, arguments);
     }
 
     /**
-     * Returns new tensor field with specified string name, indices, arguments list and explicit argument
-     * indices bindings.
+     * Returns new tensor field with specified string name, indices, arguments
+     * list and explicit argument indices bindings.
      *
      * @param name       int name of the field
      * @param indices    indices
      * @param argIndices argument indices bindings
      * @param arguments  arguments list
+     *
      * @return new instance of {@link TensorField} object
      */
     public static TensorField field(String name, SimpleIndices indices, SimpleIndices[] argIndices, Tensor[] arguments) {
@@ -225,7 +237,7 @@ public final class Tensors {
         if (arguments.length == 0)
             throw new IllegalArgumentException("No arguments in field.");
         for (int i = 0; i < argIndices.length; ++i)
-            if (!arguments[i].getIndices().getFreeIndices().equalsRegardlessOrder(argIndices[i]))
+            if (!arguments[i].getIndices().getFree().equalsRegardlessOrder(argIndices[i]))
                 throw new IllegalArgumentException("Arguments indices are inconsistent with arguments.");
 
         IndicesTypeStructure[] structures = new IndicesTypeStructure[argIndices.length + 1];
@@ -234,18 +246,20 @@ public final class Tensors {
             structures[i + 1] = argIndices[i].getIndicesTypeStructure();
         NameDescriptor descriptor = CC.getNameManager().mapNameDescriptor(name, structures);
         return new TensorField(descriptor.getId(),
-                UnsafeIndicesFactory.createOfTensor(descriptor.getSymmetries(), indices),
-                arguments, argIndices);
+                               UnsafeIndicesFactory.createOfTensor(descriptor.getSymmetries(), indices),
+                               arguments, argIndices);
     }
 
     /**
      * Returns new tensor field with specified int name (see {@link cc.redberry.core.context.NameManager}
-     * for details), indices, arguments list and explicit argument indices bindings.
+     * for details), indices, arguments list and explicit argument indices
+     * bindings.
      *
      * @param name       int name of the field
      * @param indices    indices
      * @param argIndices argument indices bindings
      * @param arguments  arguments list
+     *
      * @return new instance of {@link TensorField} object
      */
     public static TensorField field(int name, SimpleIndices indices, SimpleIndices[] argIndices, Tensor[] arguments) {
@@ -265,22 +279,23 @@ public final class Tensors {
         for (int i = 0; i < argIndices.length; ++i) {
             if (!descriptor.getIndicesTypeStructures()[i + 1].isStructureOf(argIndices[i]))
                 throw new IllegalArgumentException("Arguments indices are inconsistent with field signature.");
-            if (!arguments[i].getIndices().getFreeIndices().equalsRegardlessOrder(argIndices[i]))
+            if (!arguments[i].getIndices().getFree().equalsRegardlessOrder(argIndices[i]))
                 throw new IllegalArgumentException("Arguments indices are inconsistent with arguments.");
         }
         return new TensorField(name,
-                UnsafeIndicesFactory.createOfTensor(descriptor.getSymmetries(), indices),
-                arguments, argIndices);
+                               UnsafeIndicesFactory.createOfTensor(descriptor.getSymmetries(), indices),
+                               arguments, argIndices);
     }
 
     /**
      * Returns new tensor field with specified int name (see {@link cc.redberry.core.context.NameManager}
-     * for details), indices and arguments list. Free indices of arguments assumed as arguments indices
-     * bindings of this field bindings.
+     * for details), indices and arguments list. Free indices of arguments
+     * assumed as arguments indices bindings of this field bindings.
      *
      * @param name      int name of the field
      * @param indices   indices
      * @param arguments arguments list
+     *
      * @return new instance of {@link TensorField} object
      */
     public static TensorField field(int name, SimpleIndices indices, Tensor[] arguments) {
@@ -293,10 +308,10 @@ public final class Tensors {
             throw new IllegalArgumentException("Specified indices are not indices of specified tensor.");
         SimpleIndices[] argIndices = new SimpleIndices[arguments.length];
         for (int i = 0; i < arguments.length; ++i)
-            argIndices[i] = IndicesFactory.createSimple(null, arguments[i].getIndices().getFreeIndices());
+            argIndices[i] = IndicesFactory.createSimple(null, arguments[i].getIndices().getFree());
         return new TensorField(name,
-                UnsafeIndicesFactory.createOfTensor(descriptor.getSymmetries(), indices),
-                arguments, argIndices);
+                               UnsafeIndicesFactory.createOfTensor(descriptor.getSymmetries(), indices),
+                               arguments, argIndices);
     }
 
     /**
@@ -304,6 +319,7 @@ public final class Tensors {
      *
      * @param left  left part of expression
      * @param right right part of expression
+     *
      * @return new object of type {@link Expression}
      */
     public static Expression expression(Tensor left, Tensor right) {
@@ -311,10 +327,12 @@ public final class Tensors {
     }
 
     /**
-     * Creates a sinus object from scalar argument. Common result is an object of class Sin,
-     * but for some input argument result could have different type.
+     * Creates a sinus object from scalar argument. Common result is an object
+     * of class Sin, but for some input argument result could have different
+     * type.
      *
      * @param argument scalar argument of sinus
+     *
      * @return sinus of argument
      */
     public static Tensor sin(Tensor argument) {
@@ -322,10 +340,12 @@ public final class Tensors {
     }
 
     /**
-     * Creates a cosine object from scalar argument. Common result is an object of class Cos,
-     * but for some input argument result could have different type.
+     * Creates a cosine object from scalar argument. Common result is an object
+     * of class Cos, but for some input argument result could have different
+     * type.
      *
      * @param argument scalar argument of cosine
+     *
      * @return cosine of argument
      */
     public static Tensor cos(Tensor argument) {
@@ -333,10 +353,12 @@ public final class Tensors {
     }
 
     /**
-     * Creates a tangent object from scalar argument. Common result is an object of class Tan,
-     * but for some input argument result could have different type.
+     * Creates a tangent object from scalar argument. Common result is an object
+     * of class Tan, but for some input argument result could have different
+     * type.
      *
      * @param argument scalar argument of tangent
+     *
      * @return tangent of argument
      */
     public static Tensor tan(Tensor argument) {
@@ -344,10 +366,12 @@ public final class Tensors {
     }
 
     /**
-     * Creates a cotangent object from scalar argument. Common result is an object of class Cot,
-     * but for some input argument result could have different type.
+     * Creates a cotangent object from scalar argument. Common result is an
+     * object of class Cot, but for some input argument result could have
+     * different type.
      *
      * @param argument scalar argument of cotangent
+     *
      * @return cotangent of argument
      */
     public static Tensor cot(Tensor argument) {
@@ -355,10 +379,12 @@ public final class Tensors {
     }
 
     /**
-     * Creates a arcsinus object from scalar argument. Common result is an object of class ArcSin,
-     * but for some input argument result could have different type.
+     * Creates a arcsinus object from scalar argument. Common result is an
+     * object of class ArcSin, but for some input argument result could have
+     * different type.
      *
      * @param argument scalar argument of arcsinus
+     *
      * @return arcsinus of argument
      */
     public static Tensor arcsin(Tensor argument) {
@@ -366,10 +392,12 @@ public final class Tensors {
     }
 
     /**
-     * Creates a arccosine object from scalar argument. Common result is an object of class ArcCos,
-     * but for some input argument result could have different type.
+     * Creates a arccosine object from scalar argument. Common result is an
+     * object of class ArcCos, but for some input argument result could have
+     * different type.
      *
      * @param argument scalar argument of arccosine
+     *
      * @return arccosine of argument
      */
     public static Tensor arccos(Tensor argument) {
@@ -377,10 +405,12 @@ public final class Tensors {
     }
 
     /**
-     * Creates a arctangent object from scalar argument. Common result is an object of class ArcTan,
-     * but for some input argument result could have different type.
+     * Creates a arctangent object from scalar argument. Common result is an
+     * object of class ArcTan, but for some input argument result could have
+     * different type.
      *
      * @param argument scalar argument of arctangent
+     *
      * @return arctangent of argument
      */
     public static Tensor arctan(Tensor argument) {
@@ -388,10 +418,12 @@ public final class Tensors {
     }
 
     /**
-     * Creates a arcotangent object from scalar argument. Common result is an object of class ArcCot,
-     * but for some input argument result could have different type.
+     * Creates a arcotangent object from scalar argument. Common result is an
+     * object of class ArcCot, but for some input argument result could have
+     * different type.
      *
      * @param argument scalar argument of arccotangent
+     *
      * @return arcotangent of argument
      */
     public static Tensor arccot(Tensor argument) {
@@ -399,10 +431,12 @@ public final class Tensors {
     }
 
     /**
-     * Creates a natural logarithm object from scalar argument. Common result is an object of class Log,
-     * but for some input argument result could have different type.
+     * Creates a natural logarithm object from scalar argument. Common result is
+     * an object of class Log, but for some input argument result could have
+     * different type.
      *
      * @param argument scalar argument of logarithm
+     *
      * @return natural logarithm of argument
      */
     public static Tensor log(Tensor argument) {
@@ -410,10 +444,12 @@ public final class Tensors {
     }
 
     /**
-     * Creates a exponent object from scalar argument. Common result is an object of class Exp,
-     * but for some input argument result could have different type. See {@link #pow(Tensor, Tensor)}.
+     * Creates a exponent object from scalar argument. Common result is an
+     * object of class Exp, but for some input argument result could have
+     * different type. See {@link #pow(Tensor, Tensor)}.
      *
      * @param argument scalar argument of exponent
+     *
      * @return exponent of argument
      */
     public static Tensor exp(Tensor argument) {
@@ -458,21 +494,36 @@ public final class Tensors {
      * Parses a string to tensor.
      *
      * @param expression string to be parsed
+     *
      * @return result of parsing
      */
     public static Tensor parse(String expression) {
         return CC.current().getParseManager().parse(expression);
     }
 
-    //TODO improve API
+    /**
+     * Parses an array strings and returns array of parsed tensors.
+     *
+     * @param expressions array of strings to be parsed
+     *
+     * @return array of parsed tensors
+     */
+    public static Tensor[] parse(final String... expressions) {
+        Tensor[] r = new Tensor[expressions.length];
+        for (int i = 0; i < expressions.length; ++i)
+            r[i] = parse(expressions[i]);
+        return r;
+    }
+
     public static Tensor parse(String expression, ParseNodeTransformer... preprocessors) {
-        return ParseManager.parse(expression, preprocessors);
+        return CC.current().getParseManager().parse(expression, preprocessors);
     }
 
     /**
      * Parses a string to tensor and casts it to SimpleTensor.
      *
      * @param expression string to be parsed
+     *
      * @return simple tensor
      */
     public static SimpleTensor parseSimple(String expression) {
@@ -486,6 +537,7 @@ public final class Tensors {
      * Parses a string to tensor and casts it to Expression.
      *
      * @param expression expression to be parsed
+     *
      * @return expression object
      */
     public static Expression parseExpression(String expression) {
@@ -495,7 +547,6 @@ public final class Tensors {
         return (Expression) t;
     }
 
-    //TODO ???
     public static void addSymmetry(String tensor, IndexType type, boolean sign, int... symmetry) {
         parseSimple(tensor).getIndices().getSymmetries().add(type.getType(), new Symmetry(symmetry, sign));
     }
@@ -508,6 +559,7 @@ public final class Tensors {
      * Multiplies a tensor by minus one.
      *
      * @param tensor tensor to be negotiated
+     *
      * @return tensor of opposite sign
      */
     public static Tensor negate(Tensor tensor) {
@@ -525,7 +577,23 @@ public final class Tensors {
         final Tensor[] newSumData = new Tensor[sum.size()];
         for (int i = newSumData.length - 1; i >= 0; --i)
             newSumData[i] = multiply(factor, sum.get(i));
-        return new Sum(newSumData, IndicesFactory.createSorted(newSumData[0].getIndices().getFreeIndices()));
+        return new Sum(newSumData, IndicesFactory.createSorted(newSumData[0].getIndices().getFree()));
+    }
+
+    public static Tensor multiplySumElementsOnFactors(Sum sum, Tensor[] factors) {
+        if (sum.size() != factors.length)
+            throw new IllegalArgumentException();
+        final Tensor[] newSumData = new Tensor[sum.size()];
+        for (int i = newSumData.length - 1; i >= 0; --i)
+            newSumData[i] = multiply(factors[i], sum.get(i));
+        return new Sum(newSumData, IndicesFactory.createSorted(newSumData[0].getIndices().getFree()));
+    }
+
+    public static Tensor multiplySumElementsOnFactors(Sum sum, OutputPortUnsafe<Tensor> factorsProvider) {
+        final Tensor[] newSumData = new Tensor[sum.size()];
+        for (int i = newSumData.length - 1; i >= 0; --i)
+            newSumData[i] = multiply(factorsProvider.take(), sum.get(i));
+        return new Sum(newSumData, IndicesFactory.createSorted(newSumData[0].getIndices().getFree()));
     }
 
     public static Tensor multiplySumElementsOnFactorAndExpandScalars(Sum sum, Tensor factor) {
@@ -536,10 +604,10 @@ public final class Tensors {
         final Tensor[] newSumData = new Tensor[sum.size()];
         for (int i = newSumData.length - 1; i >= 0; --i)
             newSumData[i] = Expand.expand(multiply(factor, sum.get(i)));
-        return new Sum(newSumData, IndicesFactory.createSorted(newSumData[0].getIndices().getFreeIndices()));
+        return new Sum(newSumData, IndicesFactory.createSorted(newSumData[0].getIndices().getFree()));
     }
 
-    //TODO discuss with Stas (move setIndicesToField and setIndicesToField to other class, may be into SimpelTensor class) ??
+    //TODO discuss with Stas (move setIndicesToSimpleTensor and setIndicesToField to other class, may be into SimpelTensor class) ??
     public static TensorField setIndicesToField(TensorField field, SimpleIndices newIndices) {
         NameDescriptor descriptor = CC.getNameDescriptor(field.name);
         if (!descriptor.getIndicesTypeStructure().isStructureOf(newIndices))
@@ -547,7 +615,7 @@ public final class Tensors {
         return new TensorField(field.name, newIndices, field.args, field.argIndices);
     }
 
-    public static SimpleTensor setIndicesToField(SimpleTensor simpleTensor, SimpleIndices newIndices) {
+    public static SimpleTensor setIndicesToSimpleTensor(SimpleTensor simpleTensor, SimpleIndices newIndices) {
         NameDescriptor descriptor = CC.getNameDescriptor(simpleTensor.name);
         if (!descriptor.getIndicesTypeStructure().isStructureOf(newIndices))
             throw new IllegalArgumentException("Specified indices are not indices of specified tensor.");

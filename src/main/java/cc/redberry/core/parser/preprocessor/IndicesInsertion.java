@@ -29,7 +29,6 @@ import cc.redberry.core.indices.IndicesUtils;
 import cc.redberry.core.indices.SimpleIndices;
 import cc.redberry.core.math.MathUtils;
 import cc.redberry.core.parser.*;
-import cc.redberry.core.tensor.*;
 import cc.redberry.core.utils.ArraysUtils;
 import cc.redberry.core.utils.Indicator;
 import cc.redberry.core.utils.IntArrayList;
@@ -75,7 +74,7 @@ public final class IndicesInsertion implements ParseNodeTransformer {
 
     @Override
     public ParseNode transform(ParseNode node) {
-        final int[] freeIndices = node.getIndices().getFreeIndices().getAllIndices().copy();
+        final int[] freeIndices = node.getIndices().getFree().getAllIndices().copy();
         int i;
         for (i = 0; i < freeIndices.length; ++i)
             freeIndices[i] = IndicesUtils.getNameWithType(freeIndices[i]);

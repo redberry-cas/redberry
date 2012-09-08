@@ -135,8 +135,6 @@ final class ProviderProduct implements IndexMappingProvider {
 //        List<PermutationsProvider> disjointProviders = new ArrayList<>();
         List<Pair> stretches = new ArrayList<>();
         //non permutable
-        //TODO uncomment
-        //List<Tensor> npFrom = new ArrayList<>(), npTo = new ArrayList<>();
         List<IndexMappingProvider> providers = new ArrayList<>();
 
         IndexMappingProvider lastOutput = dummyProvider;
@@ -179,7 +177,7 @@ final class ProviderProduct implements IndexMappingProvider {
         Collections.sort(stretches);
 
 //        if (!npFrom.isEmpty())
-//            lastOutput = new SimpleProductProvider(dummyProvider,
+//            lastOutput = new SimpleProductMappingsPort(dummyProvider,
 //                                                   npFrom.toArray(new Tensor[npFrom.size()]),
 //                                                   npTo.toArray(new Tensor[npTo.size()]), allowDiffStates);
 
@@ -190,7 +188,7 @@ final class ProviderProduct implements IndexMappingProvider {
             providers.add(lastOutput = new PermutatorProvider(lastOutput,
                                                               p.from, p.to));
 
-        this.op = new SimpleProductProvider(providers.toArray(new IndexMappingProvider[providers.size()]));
+        this.op = new SimpleProductMappingsPort(providers.toArray(new IndexMappingProvider[providers.size()]));
     }
 
     @Override

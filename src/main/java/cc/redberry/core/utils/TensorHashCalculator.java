@@ -24,8 +24,11 @@ package cc.redberry.core.utils;
 
 import cc.redberry.core.indices.Indices;
 import cc.redberry.core.indices.SimpleIndices;
-import cc.redberry.core.tensor.*;
-import cc.redberry.core.tensor.functions.*;
+import cc.redberry.core.tensor.Product;
+import cc.redberry.core.tensor.ProductContent;
+import cc.redberry.core.tensor.SimpleTensor;
+import cc.redberry.core.tensor.Tensor;
+import cc.redberry.core.tensor.functions.ScalarFunction;
 import java.util.Arrays;
 
 /**
@@ -79,6 +82,6 @@ public final class TensorHashCalculator {
     }
 
     public static int hashWithIndices(final Tensor tensor) {
-        return hashWithIndices(tensor, tensor.getIndices().getFreeIndices());
+        return hashWithIndices(tensor, tensor.getIndices().getFree());
     }
 }

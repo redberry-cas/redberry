@@ -20,15 +20,26 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
-
-package cc.redberry.concurrent;
+package cc.redberry.core.indexmapping;
 
 /**
- * By implementing this interface with Processor interface one can mark processor implementation as thread-safe.
- * So no additional synchronization is needed.<br/>
- * Main Target of this interface is Processor.Utils.wrap(...) method.
- * 
- * @author Bolotin Dmitriy (bolotin.dmitriy@gmail.com)
+ *
+ * @author Dmitry Bolotin
+ * @author Stanislav Poslavsky
  */
-public interface ThreadSafe {
+final class MappingsPortRemovingContracted implements MappingsPort {
+
+    private final MappingsPort provider;
+
+    public MappingsPortRemovingContracted(MappingsPort provider) {
+        this.provider = provider;
+    }
+
+    @Override
+    public IndexMappingBuffer take() {
+        IndexMappingBuffer buf = provider.take();
+        if (buf != null)
+            buf.removeContracted();
+        return buf;
+    }
 }

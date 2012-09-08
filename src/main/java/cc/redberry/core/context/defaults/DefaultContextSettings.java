@@ -20,23 +20,32 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
-package cc.redberry.core.tensor;
+package cc.redberry.core.context.defaults;
+
+import cc.redberry.core.context.ContextSettings;
+import cc.redberry.core.context.ToStringMode;
+import cc.redberry.core.indices.IndexType;
 
 /**
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public final class SumBuilderFactory {
+public class DefaultContextSettings {
 
-    private SumBuilderFactory() {
-    }
+    public static ContextSettings create() {
+        ContextSettings defaultSettings = new ContextSettings(ToStringMode.REDBERRY, "d");
+        defaultSettings.setMetricName("g");
 
-    public static TensorBuilder defaultSumBuilder(int initialCapacity) {
-        return new SumBuilder(initialCapacity);
-    }
+        defaultSettings.addMetricIndexType(IndexType.LatinLower);
+        defaultSettings.addMetricIndexType(IndexType.GreekLower);
+        defaultSettings.addMetricIndexType(IndexType.LatinUpper);
+        //defaultSettings.addMetricIndexType(IndexType.GreekUpper);
 
-    public static TensorBuilder defaultSumBuilder() {
-        return defaultSumBuilder(7);
+        //Reading seed from property if exists
+        if (System.getProperty("redberry.nmseed") != null)
+            defaultSettings.setNameManagerSeed(Long.parseLong(System.getProperty("redberry.nmseed"), 10));
+
+        return defaultSettings;
     }
 }
