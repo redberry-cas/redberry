@@ -22,29 +22,29 @@
  */
 package cc.redberry.core.number;
 
-import java.io.Serializable;
-import java.math.BigInteger;
 import org.apache.commons.math3.exception.MathIllegalArgumentException;
 import org.apache.commons.math3.fraction.BigFraction;
 import org.apache.commons.math3.fraction.FractionConversionException;
+
+import java.io.Serializable;
+import java.math.BigInteger;
 
 import static cc.redberry.core.number.NumberUtils.*;
 
 /**
  * Representation of a rational number without any overflow. This class is a
  * wrapper of {@link BigInteger}.
- *
+ * <p/>
  * <p>This class implements mathematical operations declared in
  * {@link cc.redberry.core.number.Number} as operations with in the following
  * way. If argument is {@link Numeric}, the result will be {@code Numeric} too.
  * For example, 2 &#47 3 +1.0 will give 1.666666 and so on. If argument is {@code Rational}
  * number, the result will be {@code Rational} too.
  *
+ * @author Stanislav Poslavsky
  * @see Number
  * @see Numeric
  * @see BigFraction
- *
- * @author Stanislav Poslavsky
  */
 public final class Rational extends Real implements Serializable {
 
@@ -127,7 +127,6 @@ public final class Rational extends Real implements Serializable {
     }
 
     /**
-     *
      * @see BigFraction#BigFraction(java.math.BigInteger)
      */
     public Rational(BigInteger num) {
@@ -136,7 +135,6 @@ public final class Rational extends Real implements Serializable {
     }
 
     /**
-     *
      * @see BigFraction#BigFraction(java.math.BigInteger, java.math.BigInteger)
      */
     public Rational(BigInteger num, BigInteger den) {
@@ -146,7 +144,6 @@ public final class Rational extends Real implements Serializable {
     }
 
     /**
-     *
      * @see BigFraction#BigFraction(double)
      */
     public Rational(double value) throws MathIllegalArgumentException {
@@ -154,7 +151,6 @@ public final class Rational extends Real implements Serializable {
     }
 
     /**
-     *
      * @see BigFraction#BigFraction(double, double, int)
      */
     public Rational(double value, double epsilon, int maxIterations) throws FractionConversionException {
@@ -162,7 +158,6 @@ public final class Rational extends Real implements Serializable {
     }
 
     /**
-     *
      * @see BigFraction#BigFraction(double, int)
      */
     public Rational(double value, int maxDenominator) throws FractionConversionException {
@@ -170,7 +165,6 @@ public final class Rational extends Real implements Serializable {
     }
 
     /**
-     *
      * @see BigFraction#BigFraction(int)
      */
     public Rational(int num) {
@@ -178,7 +172,6 @@ public final class Rational extends Real implements Serializable {
     }
 
     /**
-     *
      * @see BigFraction#BigFraction(int, int)
      */
     public Rational(int num, int den) {
@@ -186,7 +179,6 @@ public final class Rational extends Real implements Serializable {
     }
 
     /**
-     *
      * @see BigFraction#BigFraction(long)
      */
     public Rational(long num) {
@@ -194,7 +186,6 @@ public final class Rational extends Real implements Serializable {
     }
 
     /**
-     *
      * @see BigFraction#BigFraction(long, long)
      */
     public Rational(long num, long den) {
@@ -290,6 +281,11 @@ public final class Rational extends Real implements Serializable {
         if (arg0 instanceof Numeric)
             return arg0.multiply(this);
         return arg0.isOne() ? this : arg0.isZero() ? ZERO : createRational(fraction.multiply(((Rational) arg0).fraction));
+    }
+
+    public Rational multiply(Rational arg0) {
+        checkNotNull(arg0);
+        return arg0.isOne() ? this : arg0.isZero() ? ZERO : createRational(fraction.multiply((arg0).fraction));
     }
 
     @Override
