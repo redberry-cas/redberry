@@ -502,7 +502,7 @@ public final class Tensors {
     }
 
     /**
-     * Parses an array strings and returns array of parsed tensors.
+     * Parses an array of strings and returns array of parsed tensors.
      *
      * @param expressions array of strings to be parsed
      *
