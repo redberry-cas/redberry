@@ -26,7 +26,9 @@ package cc.redberry.core.number.parser;
  *
  * @author Stanislav Poslavsky
  */
-public abstract class OperatorToken<T extends cc.redberry.core.number.Number<T>> implements TokenParser<T> {
+public abstract class OperatorToken<T extends cc.redberry.core.number.Number<T>>
+        implements TokenParser<T> {
+
     private final char operationSymbol, operationInverseSymbol;
 
     public OperatorToken(char operationSymbol, char operationInverseSymbol) {
@@ -35,6 +37,9 @@ public abstract class OperatorToken<T extends cc.redberry.core.number.Number<T>>
     }
 
     private boolean canParse(String expression) {
+        //TODO improve
+        if (expression.contains("**"))
+            return false;
         char[] expressionChars = expression.toCharArray();
         int level = 0;
         for (char c : expressionChars) {
