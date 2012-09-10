@@ -54,13 +54,13 @@ public class Together implements Transformation {
         return t;
     }
     
-    private static class Denominator{
-        final Tensor denominator;
-        Tensor power;
+    private static class Term{
+        final Tensor numerator;
+//        final Map<> power;
 
-        public Denominator(Tensor denominator, Tensor power) {
-            this.denominator = denominator;
-            this.power = power;
+        public Term(Tensor denominator, Tensor power) {
+            this.numerator = denominator;
+//            this.power = power;
         }
         
     }

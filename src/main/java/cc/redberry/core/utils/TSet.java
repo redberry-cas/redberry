@@ -58,7 +58,7 @@ public final class TSet<T extends Tensor> implements Set<T> {
     public boolean add(T e) {
         return set.add(new TensorWrapperWithEquals(e));
     }
-
+    
     @Override
     public boolean addAll(Collection<? extends T> c) {
         List<TensorWrapperWithEquals> wrappers = new ArrayList<>(c.size());
