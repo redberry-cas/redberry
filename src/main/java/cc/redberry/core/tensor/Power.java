@@ -69,7 +69,10 @@ public final class Power extends Tensor {
 
     @Override
     public String toString(ToStringMode mode) {
+        if (mode == ToStringMode.WolframMathematica)
+            return "Power[" + argument.toString(mode, Power.class) + ", " + power.toString(mode, Power.class) + "]";
         return argument.toString(mode, Power.class) + "**" + power.toString(mode, Power.class);
+
 //        return "Power[" + argument.toString(mode) + ", " + power.toString(mode) + "]";
     }
 

@@ -64,6 +64,14 @@ public class TensorUtils {
         return false;
     }
 
+    public static boolean isRealNegativeNumber(Tensor tensor) {
+        if (tensor instanceof Complex) {
+            Complex complex = (Complex) tensor;
+            return complex.isReal() && complex.getReal().signum() < 0;
+        }
+        return false;
+    }
+
     public static boolean isIndexless(Tensor... tensors) {
         for (Tensor t : tensors)
             if (!isIndexless1(t))
@@ -238,6 +246,8 @@ public class TensorUtils {
     }
 
     public static boolean equals(Tensor u, Tensor v) {
+        if (u == v)
+            return true;
         Indices freeIndices = u.getIndices().getFree();
         if (!freeIndices.equalsRegardlessOrder(v.getIndices().getFree()))
             return false;

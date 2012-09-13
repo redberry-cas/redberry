@@ -56,84 +56,84 @@ public class ContractIndicesTest {
     public void test01() {
         Tensor t = contract("g_mn*A^mn");
         Tensor e = parse("A^n_n");
-        TAssert.assertParity(t, e);
+        TAssert.assertEquals(t, e);
     }
 
     @Test
     public void test02() {
         Tensor t = contract("d^n_m*A^m_n");
         Tensor e = parse("A^n_n");
-        TAssert.assertParity(t, e);
+        TAssert.assertEquals(t, e);
     }
 
     @Test
     public void test03() {
         Tensor t = contract("d_m^n*A^m_n");
         Tensor e = parse("A^n_n");
-        TAssert.assertParity(t, e);
+        TAssert.assertEquals(t, e);
     }
 
     @Test
     public void test04() {
         Tensor t = contract("d_m^n*d^m_n");
         Tensor e = parse("d^n_n");
-        TAssert.assertParity(t, e);
+        TAssert.assertEquals(t, e);
     }
 
     @Test
     public void test05() {
         Tensor t = contract("g_mn*g^mn");
         Tensor e = parse("d^n_n");
-        TAssert.assertParity(t, e);
+        TAssert.assertEquals(t, e);
     }
 
     @Test
     public void test051() {
         Tensor t = contract("g_\\mu\\nu*g^\\mu\\nu");
         Tensor e = parse("d^\\mu_\\mu");
-        TAssert.assertParity(t, e);
+        TAssert.assertEquals(t, e);
     }
 
     @Test
     public void test06() {
         Tensor t = contract("2*a*g_mn*g^mn");
         Tensor e = parse("2*a*d^n_n");
-        TAssert.assertParity(t, e);
+        TAssert.assertEquals(t, e);
     }
 
     @Test
     public void test07() {
         Tensor t = contract("B^ma*g_mn*A^nb");
         Tensor e = parse("B^ma*A_m^b");
-        TAssert.assertParity(t, e);
+        TAssert.assertEquals(t, e);
     }
 
     @Test
     public void test08() {
         Tensor t = contract("B^ma*d_m^n*A_n^b");
         Tensor e = parse("B^ma*A_m^b");
-        TAssert.assertParity(t, e);
+        TAssert.assertEquals(t, e);
     }
 
     @Test
     public void test09() {
         Tensor t = contract("g^mx*g_xa");
         Tensor e = parse("d^m_a");
-        TAssert.assertParity(t, e);
+        TAssert.assertEquals(t, e);
     }
 
     @Test
     public void test010() {
         Tensor t = contract("d^m_x*g^xa");
         Tensor e = parse("g^ma");
-        TAssert.assertParity(t, e);
+        TAssert.assertEquals(t, e);
     }
 
     @Test
     public void test011() {
         Tensor t = contract("d^m_x*d^x_a");
         Tensor e = parse("d^m_a");
-        TAssert.assertParity(t, e);
+        TAssert.assertEquals(t, e);
     }
 
     @Test
@@ -141,20 +141,20 @@ public class ContractIndicesTest {
         Tensor t;
         t = contract("g_mn*g^na*g_ab");
         Tensor e = parse("g_mb");
-        TAssert.assertParity(t, e);
+        TAssert.assertEquals(t, e);
         t = contract("g^na*g_mn*g_ab");
-        TAssert.assertParity(t, e);
+        TAssert.assertEquals(t, e);
         t = contract("g^na*g_ab*g_mn");
-        TAssert.assertParity(t, e);
+        TAssert.assertEquals(t, e);
         t = contract("g_ab*g^na*g_mn");
-        TAssert.assertParity(t, e);
+        TAssert.assertEquals(t, e);
     }
 
     @Test
     public void test013() {
         Tensor t = contract("g_mn*g^mn*g_ab*g^ab");
         Tensor e = parse("d_m^m*d_a^a");
-        TAssert.assertParity(t, e);
+        TAssert.assertEquals(t, e);
     }
 
     @Test
@@ -162,7 +162,7 @@ public class ContractIndicesTest {
         Tensor t = contract("g_mn*g^ma*g_ab*g^bn");
         System.out.println(t);
         Tensor e = parse("d_m^m");
-        TAssert.assertParity(t, e);
+        TAssert.assertEquals(t, e);
     }
 
     @Test

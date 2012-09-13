@@ -37,40 +37,40 @@ import cc.redberry.core.utils.TensorUtils;
  */
 public class TAssert {
     
-    public static void assertEquals(Tensor target, Tensor expected) {
-        org.junit.Assert.assertTrue(TensorUtils.equalsExactly(target, expected));
+    public static void assertEqualsExactly(Tensor actual, Tensor expected) {
+        org.junit.Assert.assertTrue(TensorUtils.equalsExactly(actual, expected));
     }
     
-    public static void assertEquals(Tensor target, String expected) {
-        assertEquals(target, Tensors.parse(expected));
+    public static void assertEqualsExactly(Tensor actual, String expected) {
+        assertEqualsExactly(actual, Tensors.parse(expected));
     }
     
-    public static void assertParity(Tensor target, Tensor expected) {
-        org.junit.Assert.assertTrue(target.toString(), TensorUtils.equals(target, expected));
+    public static void assertEquals(Tensor actual, Tensor expected) {
+        org.junit.Assert.assertTrue(actual.toString(), TensorUtils.equals(actual, expected));
     }
     
-    public static void assertParity(Tensor target, String expected) {
-        assertParity(target, Tensors.parse(expected));
+    public static void assertEquals(Tensor actual, String expected) {
+        assertEquals(actual, Tensors.parse(expected));
     }
     
-    public static void assertParity(Tensor[] target, Tensor[] expected) {
-        org.junit.Assert.assertTrue(target.length == expected.length);
-        for (int i = 0; i < target.length; ++i)
-            assertParity(target[i], expected[i]);
+    public static void assertEquals(Tensor[] actual, Tensor[] expected) {
+        org.junit.Assert.assertTrue(actual.length == expected.length);
+        for (int i = 0; i < actual.length; ++i)
+            assertEquals(actual[i], expected[i]);
     }
     
-    public static void assertParity(Tensor[] target, String[] expected) {
-        org.junit.Assert.assertTrue(target.length == expected.length);
-        for (int i = 0; i < target.length; ++i)
-            assertParity(target[i], expected[i]);
+    public static void assertEquals(Tensor[] actual, String[] expected) {
+        org.junit.Assert.assertTrue(actual.length == expected.length);
+        for (int i = 0; i < actual.length; ++i)
+            assertEquals(actual[i], expected[i]);
     }
     
-    public static void assertParityFalse(Tensor target, Tensor expected) {
+    public static void assertEqualsFalse(Tensor target, Tensor expected) {
         assertFalse(TensorUtils.equals(target, expected));
     }
     
-    public static void assertParityFalse(Tensor target, String expected) {
-        assertParityFalse(target, Tensors.parse(expected));
+    public static void assertEqualsFalse(Tensor target, String expected) {
+        assertEqualsFalse(target, Tensors.parse(expected));
     }
     
     public static void assertIndicesParity(Tensor... tensors) {
@@ -83,7 +83,7 @@ public class TAssert {
             org.junit.Assert.assertTrue(indiceses[0].equalsRegardlessOrder(indiceses[i]));
     }
     
-    public static boolean isEquals(Tensor tensor, String what) {
+    public static boolean isEqualsExactly(Tensor tensor, String what) {
         return TensorUtils.equalsExactly(tensor, Tensors.parse(what));
     }
     

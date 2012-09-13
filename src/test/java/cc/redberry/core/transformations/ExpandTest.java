@@ -188,7 +188,7 @@ public class ExpandTest {
         Tensor actual = Expand.expand(parse("((a+b)*(c+a)-a)*f_mn*(f^mn+r^mn)-((a-b)*(c-a)+a)*r_ab*(f^ab+r^ab)"));
         assertAllBracketsExpanded(actual);
         Tensor expected = parse("(2*c*b+2*Power[a, 2]+-2*a)*r_{ab}*f^{ab}+(-1*b*a+c*b+-1*c*a+Power[a, 2]+-1*a)*r^{ab}*r_{ab}+(b*a+c*b+c*a+Power[a, 2]+-1*a)*f^{mn}*f_{mn}");
-        TAssert.assertParity(actual, expected);
+        TAssert.assertEquals(actual, expected);
     }
 
     public static void assertAllBracketsExpanded(Tensor tensor) {

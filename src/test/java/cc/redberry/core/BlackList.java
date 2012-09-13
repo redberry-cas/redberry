@@ -38,7 +38,7 @@ public class BlackList {
 
     @Test
     public void test1() {
-     HashMap<Integer,Integer> map = new HashMap<>();
+        HashMap<Integer,Integer> map = new HashMap<>();
         System.out.println(map.get(new BitSet(12)));
     }
 }

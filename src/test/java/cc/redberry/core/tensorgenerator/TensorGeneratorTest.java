@@ -28,7 +28,7 @@ import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.tensor.Tensors;
 import org.junit.Test;
 
-import static cc.redberry.core.TAssert.assertParity;
+import static cc.redberry.core.TAssert.assertEquals;
 import static cc.redberry.core.TAssert.assertTrue;
 
 /**
@@ -45,7 +45,7 @@ public class TensorGeneratorTest {
     @Test
     public void test0() {
         Tensor res = Tensors.parse("g_{ab}*g_{mn}+g_{bm}*g_{na}+g_{am}*g_{nb}");
-        assertParity(TensorGenerator.generate("",
+        assertEquals(TensorGenerator.generate("",
                                               ParserIndices.parseSimple("_{mnab}"),
                                               false,
                                               Tensors.parse("g_mn", "g^mn", "d_m^n")), res);
@@ -54,7 +54,7 @@ public class TensorGeneratorTest {
     @Test
     public void test1() {
         Tensor res = Tensors.parse("d_{m}^{a}*d_{n}^{b}+d_{m}^{b}*d_{n}^{a}+g_{mn}*g^{ab}");
-        assertParity(res, TensorGenerator.generate("",
+        assertEquals(res, TensorGenerator.generate("",
                                                    ParserIndices.parseSimple("_{mn}^{ab}"),
                                                    false,
                                                    Tensors.parse("g_mn", "g^mn", "d_m^n")));
@@ -63,7 +63,7 @@ public class TensorGeneratorTest {
     @Test
     public void test2() {
         Tensor res = Tensors.parse("d_{m}^{a}*d_{n}^{b}+d_{m}^{b}*d_{n}^{a}");
-        assertParity(TensorGenerator.generate("",
+        assertEquals(TensorGenerator.generate("",
                                               ParserIndices.parseSimple("_{mn}^{ab}"),
                                               false,
                                               Tensors.parse("d_m^n")), res);
@@ -72,7 +72,7 @@ public class TensorGeneratorTest {
     @Test
     public void test3() {
         Tensor res = Tensors.parse("d_{a}^{m}*d_{y}^{x}+g_{ay}*g^{mx}+d_{a}^{x}*d_{y}^{m}+k^{x}*k_{y}*d_{a}^{m}+k^{m}*k_{y}*d_{a}^{x}+k_{a}*k_{y}*g^{mx}+k_{a}*k^{m}*d_{y}^{x}+k^{m}*k^{x}*g_{ay}+k_{a}*k^{x}*d_{y}^{m}+k_{a}*k^{m}*k^{x}*k_{y}");
-        assertParity(res, TensorGenerator.generate("",
+        assertEquals(res, TensorGenerator.generate("",
                                                    ParserIndices.parseSimple("_{ay}^{mx}"),
                                                    false,
                                                    Tensors.parse("k_a", "k^b", "g_mn", "g^mn", "d_m^n")));
@@ -104,7 +104,7 @@ public class TensorGeneratorTest {
                                             true,
                                             Tensors.parse("d_m^n"));
 
-        assertParity(res, t);
+        assertEquals(res, t);
     }
 //
 //    @Test
@@ -115,7 +115,7 @@ public class TensorGeneratorTest {
 //        symmetries.add(s);
 //        symmetries.add(s2);
 //        Tensor res = Tensors.parse("(g_{ab}*g_{mn}+g_{bm}*g_{na}+g_{am}*g_{nb})");
-//        assertParity(res, TensorGenerator.generate("",
+//        assertEquals(res, TensorGenerator.generate("",
 //                                                   ParserIndices.parseSimple("_{mnab}"),
 //                                                   symmetries,
 //                                                   false,
@@ -139,12 +139,12 @@ public class TensorGeneratorTest {
 //            else
 //                System.out.println(s);
 //        }
-////        assertParity(res, TensorGenerator.generate("_{abc}^{pqr}", symmetries, "g_mn", "g^mn", "d_m^n", "n_i", "n^j"));
+////        assertEquals(res, TensorGenerator.generate("_{abc}^{pqr}", symmetries, "g_mn", "g^mn", "d_m^n", "n_i", "n^j"));
 //    }
     @Test
     public void test7() {
         Tensor res = Tensors.parse("1/2*(d_{m}^{a}*d_{n}^{b}+d_{m}^{b}*d_{n}^{a})");
-        assertParity(TensorGenerator.generate("",
+        assertEquals(TensorGenerator.generate("",
                                               ParserIndices.parseSimple("_{mn}^{ab}"),
                                               true,
                                               Tensors.parse("d_m^n")), res);
@@ -155,7 +155,7 @@ public class TensorGeneratorTest {
         Tensor expected = Tensors.parse("1/3*(g_mn*g_ab+g_ma*g_nb+g_mb*g_na)+"
                 + "1/6*(g_ab*k_n*k_m+g_mn*k_a*k_b+g_am*k_n*k_b+g_an*k_b*k_m+g_nb*k_a*k_m+g_mb*k_n*k_a)+"
                 + "k_a*k_b*k_m*k_n");
-        assertParity(TensorGenerator.generate("",
+        assertEquals(TensorGenerator.generate("",
                                               ParserIndices.parseSimple("_{mnab}"),
                                               true,
                                               Tensors.parse("g_mn", "k_a")), expected);

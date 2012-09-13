@@ -37,7 +37,7 @@ import cc.redberry.core.utils.TensorUtils;
 import junit.framework.Assert;
 import org.junit.Test;
 
-import static cc.redberry.core.TAssert.assertParity;
+import static cc.redberry.core.TAssert.assertEquals;
 import static cc.redberry.core.TAssert.assertTrue;
 import static cc.redberry.core.tensor.Tensors.*;
 
@@ -584,7 +584,7 @@ public class SubstitutionsTest {
         Tensor target = parse("f_a^a[z_c^d+w_c^d]");
         target = t.transform(target);
         System.out.println(target);
-        assertParity(target, "z_{m}^{m}+w_{m}^{m}+y_{m}^{m}");
+        assertEquals(target, "z_{m}^{m}+w_{m}^{m}+y_{m}^{m}");
     }
 
     @Test
@@ -595,7 +595,7 @@ public class SubstitutionsTest {
         Tensor target = parse("f_a[x^a]");
         target = t.transform(target);
         System.out.println(target);
-        assertParity(target, "x_a");
+        assertEquals(target, "x_a");
     }
 
     @Test
@@ -605,7 +605,7 @@ public class SubstitutionsTest {
         Transformation t = Substitutions.getTransformation(from, to);
         Tensor target = parse("f_a^a[z_c^a+w_c^a:_c^a]");
         target = t.transform(target);
-        assertParity(target, "z_{m}^{m}+w_{m}^{m}+y_{m}^{m}");
+        assertEquals(target, "z_{m}^{m}+w_{m}^{m}+y_{m}^{m}");
     }
 
     @Test
@@ -615,7 +615,7 @@ public class SubstitutionsTest {
         Transformation t = Substitutions.getTransformation(from, to);
         Tensor target = parse("f_a^a[z_c^a+w_c^a:_c^a]");
         target = t.transform(target);
-        assertParity(target, "z_{m}^{m}+w_{m}^{m}+y_{m}^{m}");
+        assertEquals(target, "z_{m}^{m}+w_{m}^{m}+y_{m}^{m}");
     }
     //TODO additional tests with specified field arguments indices
 

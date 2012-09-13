@@ -44,7 +44,7 @@ public class SymmetrizeTest {
                 new Symmetry[0], true);
         Tensor t = Tensors.parse("g_mn*g_ab");
         System.out.println(symmetrize.transform(t));
-        assertParity(symmetrize.transform(t), "g_mn*g_ab");
+        assertEquals(symmetrize.transform(t), "g_mn*g_ab");
     }
 
     @Test
@@ -56,7 +56,7 @@ public class SymmetrizeTest {
                 symmetries.getBasisSymmetries().toArray(new Symmetry[0]),
                 true);
         Tensor t = Tensors.parse("g_mn*g_ab");
-        assertParity(symmetrize.transform(t), t);
+        assertEquals(symmetrize.transform(t), t);
     }
 
     @Test
@@ -68,7 +68,7 @@ public class SymmetrizeTest {
                 false);
         Tensor t = Tensors.parse("g_mn*g_ab");
         System.out.println(symmetrize.transform(t));
-        assertParity(symmetrize.transform(t), "g_mn*g_ab+g_am*g_bn+g_an*g_bm");
+        assertEquals(symmetrize.transform(t), "g_mn*g_ab+g_am*g_bn+g_an*g_bm");
     }
 
     @Test
@@ -79,7 +79,7 @@ public class SymmetrizeTest {
                 symmetries.getBasisSymmetries().toArray(new Symmetry[0]),
                 true);
         Tensor t = Tensors.parse("A_a*B_b");
-        assertParity(symmetrize.transform(t), "(1/2)*(A_a*B_b+A_b*B_a)");
+        assertEquals(symmetrize.transform(t), "(1/2)*(A_a*B_b+A_b*B_a)");
     }
 
     @Test
@@ -90,7 +90,7 @@ public class SymmetrizeTest {
                 symmetries.getBasisSymmetries().toArray(new Symmetry[0]),
                 true);
         Tensor t = Tensors.parse("A_a*A^c");
-        assertParity(symmetrize.transform(t), "A_a*A^c");
+        assertEquals(symmetrize.transform(t), "A_a*A^c");
     }
 
     @Test
@@ -101,6 +101,6 @@ public class SymmetrizeTest {
                 symmetries.getBasisSymmetries().toArray(new Symmetry[0]),
                 true);
         Tensor t = Tensors.parse("A_a*B^c");
-        assertParity(symmetrize.transform(t), "(1/2)*(A_a*B^c+B_a*A^c)");
+        assertEquals(symmetrize.transform(t), "(1/2)*(A_a*B^c+B_a*A^c)");
     }
 }

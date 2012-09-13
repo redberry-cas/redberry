@@ -80,5 +80,6 @@ public enum ToStringMode {
      * {@link #REDBERRY}, Greek indices converted to string with this mode will
      * look like "\\alpha".
      */
-    REDBERRY_SOUT
+    REDBERRY_SOUT,
+    WolframMathematica
 }
