@@ -39,6 +39,12 @@ public class ExpressionBuilder implements TensorBuilder {
     public ExpressionBuilder() {
     }
 
+    private ExpressionBuilder(Tensor left, Tensor right, Indices indices) {
+        this.left = left;
+        this.right = right;
+        this.indices = indices;
+    }
+
     @Override
     public Expression build() {
         return new Expression(indices, left, right);
@@ -57,5 +63,10 @@ public class ExpressionBuilder implements TensorBuilder {
                 throw new TensorException("Inconsistent indices in expression.", tensor);
         } else
             throw new TensorException("Expression have only two parts.");
+    }
+
+    @Override
+    public TensorBuilder clone() {
+        return new ExpressionBuilder(left, right, indices);
     }
 }

@@ -20,42 +20,36 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
-package cc.redberry.core.tensor;
+package cc.redberry.core.combinatorics;
 
-import cc.redberry.core.indices.Indices;
+import cc.redberry.concurrent.*;
+import java.util.*;
+import org.apache.commons.math3.complex.*;
+import org.junit.*;
+import static cc.redberry.core.TAssert.*;
 
 /**
+ *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public abstract class MultiTensor extends Tensor {
+public class IntTuplesPortTest {
 
-    protected final Indices indices;
-
-    MultiTensor(Indices indices) {
-        this.indices = indices;
+    @Test
+    public void test1() {
+        IntTuplesPort port = new IntTuplesPort(3, 3, 3);
+        int count = 0;
+        while (port.take() != null)
+            ++count;
+        Assert.assertEquals(count, 27);
     }
 
-    @Override
-    public Indices getIndices() {
-        return indices;
+    @Test
+    public void test2() {
+        IntTuplesPort port = new IntTuplesPort(4, 4, 4, 4);
+        int count = 0;
+        while (port.take() != null)
+            ++count;
+        Assert.assertEquals(count, 256);
     }
-
-    //protected abstract Indices calculateIndices();
-    //protected abstract int calculateHash();
-    //TODO implement without builder?
-    public final Tensor remove(int position) {
-        int size = size();
-        if (position >= size || position < 0)
-            throw new IndexOutOfBoundsException();
-        TensorBuilder builder = getBuilder();
-        for (int i = 0; i < size; ++i)
-            if (i == position)
-                continue;
-            else
-                builder.put(get(i));
-        return builder.build();
-    }
-
-
 }

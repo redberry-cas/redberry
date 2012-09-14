@@ -211,6 +211,11 @@ public class Complex extends Tensor
         public void put(Tensor tensor) {
             throw new IllegalStateException("Can not put to Complex tensor builder!");
         }
+
+        @Override
+        public TensorBuilder clone() {
+            return this;
+        }
     }
 
     public Real getImaginary() {

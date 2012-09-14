@@ -180,6 +180,10 @@ public abstract class Split {
         public ComplexSumBuilder() {
         }
 
+        public ComplexSumBuilder(Complex complex) {
+            this.complex = complex;
+        }
+
         @Override
         public Tensor build() {
             return complex;
@@ -189,28 +193,10 @@ public abstract class Split {
         public void put(Tensor tensor) {
             complex = complex.add((Complex) tensor);
         }
-    }
-
-    @Deprecated
-    private static final class ComplexSumBuilderConcurrent implements TensorBuilder {
-
-        final AtomicReference< Complex> atomicComplex = new AtomicReference<>(Complex.ZERO);
-
-        public ComplexSumBuilderConcurrent() {
-        }
 
         @Override
-        public Tensor build() {
-            return atomicComplex.get();
-        }
-
-        @Override
-        public void put(Tensor tensor) {
-            Complex oldVal, newVal, toAdd = (Complex) tensor;
-            do {
-                oldVal = atomicComplex.get();
-                newVal = oldVal.add(toAdd);
-            } while (!atomicComplex.compareAndSet(oldVal, newVal));
+        public TensorBuilder clone() {
+            return new ComplexSumBuilder(complex);
         }
     }
 }

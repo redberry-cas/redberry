@@ -36,6 +36,11 @@ public final class PowerBuilder implements TensorBuilder {
     public PowerBuilder() {
     }
 
+    private PowerBuilder(Tensor argument, Tensor power) {
+        this.argument = argument;
+        this.power = power;
+    }
+
     @Override
     public Tensor build() {
         if (power == null)
@@ -55,5 +60,10 @@ public final class PowerBuilder implements TensorBuilder {
             power = tensor;
         else
             throw new IllegalStateException("Power buider can not take more than two put() invocations.");
+    }
+
+    @Override
+    public TensorBuilder clone() {
+        return new PowerBuilder(argument, power);
     }
 }

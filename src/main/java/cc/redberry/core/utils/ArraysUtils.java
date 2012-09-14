@@ -27,6 +27,7 @@ import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * This class contains additional methods for manipulating arrays (such as
@@ -125,8 +126,8 @@ public final class ArraysUtils {
         System.arraycopy(array2, 0, r, array1.length, array2.length);
         return r;
     }
-    
-      public static int[] addAll(int[] array1, int... array2) {
+
+    public static int[] addAll(int[] array1, int... array2) {
         int[] r = new int[array1.length + array2.length];
         System.arraycopy(array1, 0, r, 0, array1.length);
         System.arraycopy(array2, 0, r, array1.length, array2.length);
@@ -188,6 +189,14 @@ public final class ArraysUtils {
             throw ase; // No, so rethrow original
         }
         return joinedArray;
+    }
+
+    public static int[] toArray(Set<Integer> set) {
+        int i = -1;
+        int[] a = new int[set.size()];
+        for (Integer ii : set)
+            a[++i] = ii;
+        return a;
     }
 
     public static int binarySearch(IntArrayList list, int key) {

@@ -56,6 +56,13 @@ public final class TensorWrapper extends Tensor {
 
         private Tensor innerTensor;
 
+        Builder() {
+        }
+
+        Builder(Tensor innerTensor) {
+            this.innerTensor = innerTensor;
+        }
+
         @Override
         public Tensor build() {
             if (innerTensor == null)
@@ -70,6 +77,11 @@ public final class TensorWrapper extends Tensor {
             if (innerTensor != null)
                 throw new TensorException("Wrapper have only one element!");
             innerTensor = tensor;
+        }
+
+        @Override
+        public TensorBuilder clone() {
+            return new Builder(innerTensor);
         }
     }
 

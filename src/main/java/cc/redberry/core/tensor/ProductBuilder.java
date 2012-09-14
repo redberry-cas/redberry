@@ -195,6 +195,9 @@ public final class ProductBuilder implements TensorBuilder {
 
     @Override
     public ProductBuilder clone() {
-        return new ProductBuilder(complex, new ArrayList<>(elements), new ArrayList<>(indexlessElements), new HashMap<>(powers));
+        Map<Tensor, TensorBuilder> powers = new HashMap<>(this.powers);
+        for (Map.Entry<Tensor, TensorBuilder> entry : powers.entrySet())
+            entry.setValue(entry.getValue().clone());
+        return new ProductBuilder(complex, new ArrayList<>(elements), new ArrayList<>(indexlessElements), powers);
     }
 }

@@ -98,6 +98,11 @@ public final class TensorField extends SimpleTensor {
             this.data = new Tensor[field.size()];
         }
 
+        Builder(TensorField field, Tensor[] data, int pointer) {
+            this.field = field;
+            this.data = data;
+        }
+
         @Override
         public Tensor build() {
             if (pointer != data.length)
@@ -114,6 +119,11 @@ public final class TensorField extends SimpleTensor {
             if (!tensor.getIndices().getFree().equalsRegardlessOrder(field.getArgIndices(pointer)))
                 throw new IllegalArgumentException("Free indices of puted tensor differs from field argument binding indices!");
             data[pointer++] = tensor;
+        }
+
+        @Override
+        public TensorBuilder clone() {
+            return new Builder(field, data.clone(), pointer);
         }
     }
 

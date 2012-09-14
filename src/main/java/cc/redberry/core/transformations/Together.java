@@ -22,17 +22,22 @@
  */
 package cc.redberry.core.transformations;
 
-import cc.redberry.core.number.*;
+import cc.redberry.core.number.Complex;
 import cc.redberry.core.tensor.*;
-import cc.redberry.core.tensor.iterator.*;
-import cc.redberry.core.utils.*;
-import java.util.*;
+import cc.redberry.core.tensor.iterator.TensorLastIterator;
+import cc.redberry.core.utils.TMap;
+import cc.redberry.core.utils.TensorUtils;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 /**
+ * Puts terms in a sum over a common denominator.
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
+//TODO review after logical completion of tensors standard form strategy 
 public final class Together implements Transformation {
 
     public static final Together INSTANCE = new Together();
@@ -171,7 +176,7 @@ public final class Together implements Transformation {
 
     private static Tensor togetherProduct(Product t) {
         //TODO add quick check
-        Map<TensorWrapperWithEquals, SumBuilder> map = new HashMap<>();
+        TMap<Tensor, SumBuilder> map = new TMap<>();
         Tensor a, p;
         SumBuilder temp;
         for (Tensor m : t.getAllScalars()) {
@@ -183,19 +188,19 @@ public final class Together implements Transformation {
                 a = m;
                 p = Complex.ONE;
             }
-            temp = map.get(new TensorWrapperWithEquals(a));
+            temp = map.get(a);
             if (temp == null) {
                 temp = new SumBuilder();
                 temp.put(p);
-                map.put(new TensorWrapperWithEquals(a), temp);
+                map.put(a, temp);
             } else
                 temp.put(p);
         }
         if (map.size() == t.size())
             return t;
         ProductBuilder pb = new ProductBuilder();
-        for (Map.Entry<TensorWrapperWithEquals, SumBuilder> entry : map.entrySet())
-            pb.put(Tensors.pow(entry.getKey().getTensor(), entry.getValue().build()));
+        for (Map.Entry<Tensor, SumBuilder> entry : map.entrySet())
+            pb.put(Tensors.pow(entry.getKey(), entry.getValue().build()));
         return pb.build();
     }
 

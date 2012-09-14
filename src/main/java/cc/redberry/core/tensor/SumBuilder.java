@@ -53,6 +53,13 @@ public final class SumBuilder implements TensorBuilder {
         summands = new HashMap<>(initialCapacity);
     }
 
+    private SumBuilder(Map<Integer, List<FactorNode>> summands, Complex complex, Indices indices, int[] sortedFreeIndices) {
+        this.summands = summands;
+        this.complex = complex;
+        this.indices = indices;
+        this.sortedFreeIndices = sortedFreeIndices;
+    }
+
     @Override
     public Tensor build() {
         if (complex.isNaN() || complex.isInfinite())
@@ -118,6 +125,17 @@ public final class SumBuilder implements TensorBuilder {
             if (b == null)
                 factorNodes.add(new FactorNode(split.factor, split.getBuilder()));
         }
+    }
+
+    @Override
+    public TensorBuilder clone() {
+        Map<Integer, List<FactorNode>> summands = new HashMap<>(this.summands);
+        for (Map.Entry<Integer, List<FactorNode>> entry : summands.entrySet()) {
+            List<FactorNode> fns = entry.getValue();
+            for (int i = fns.size() - 1; i >= 0; --i)
+                fns.set(i, fns.get(i).clone());
+        }
+        return new SumBuilder(summands, complex, indices, sortedFreeIndices.clone());
     }
 
     static Boolean compareFactors(Tensor u, Tensor v) {

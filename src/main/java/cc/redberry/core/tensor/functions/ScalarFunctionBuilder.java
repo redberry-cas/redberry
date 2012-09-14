@@ -40,6 +40,11 @@ public class ScalarFunctionBuilder implements TensorBuilder {
         this.factory = factory;
     }
 
+    ScalarFunctionBuilder(ScalarFunctionFactory factory, Tensor arg) {
+        this.factory = factory;
+        this.arg = arg;
+    }
+
     @Override
     public Tensor build() {
         return factory.create1(arg);
@@ -54,5 +59,10 @@ public class ScalarFunctionBuilder implements TensorBuilder {
         if (!TensorUtils.isScalar(tensor))
             throw new IllegalArgumentException();
         arg = tensor;
+    }
+
+    @Override
+    public TensorBuilder clone() {
+        return new ScalarFunctionBuilder(factory, arg);
     }
 }
