@@ -29,10 +29,12 @@ import cc.redberry.core.tensor.*;
 import cc.redberry.core.tensor.iterator.TraverseState;
 import cc.redberry.core.tensor.iterator.TreeTraverseIterator;
 import cc.redberry.core.utils.TensorUtils;
+import org.junit.*;
 import org.junit.Assert;
 import org.junit.Test;
 
 import static cc.redberry.core.tensor.Tensors.parse;
+import static cc.redberry.core.transformations.Expand.*;
 
 /**
  *
@@ -110,6 +112,7 @@ public class ExpandTest {
         Assert.assertTrue(TensorUtils.equalsExactly(actual, expected));
     }
 
+    @Ignore
     @Test
     public void test8() {
         Tensor actual = parse("Power[a+b,30]");
@@ -119,6 +122,7 @@ public class ExpandTest {
 //        Assert.assertTrue(TensorUtils.equalsExactly(actual, expected));
     }
 
+    @Ignore
     @Test
     public void test10() {
         for (int i = 2; i < 30; ++i) {
@@ -254,21 +258,12 @@ public class ExpandTest {
         TAssert.assertIndicesConsistency(t);
     }
 
-    private static Tensor expandThroughPort(Tensor t) {
-        SumBuilder sb = new SumBuilder();
-        OutputPortUnsafe<Tensor> opu = Expand.createPort(t);
-        Tensor c;
-        while ((c = opu.take()) != null)
-            sb.put(c);
-        return sb.build();
-    }
-
     @Test
     public void test25() {
         for (int i = 0; i < 100; ++i) {
             CC.resetTensorNames();
             Tensor t = Tensors.parse("(b+a)*(c+a)+(a+b)*(c+b)");
-            TAssert.assertEquals(Tensors.parse("2*c*a+2*b*a+a**2+2*c*b+b**2"), expandThroughPort(t));
+            TAssert.assertEquals(Tensors.parse("2*c*a+2*b*a+a**2+2*c*b+b**2"), expandUsingPort(t));
         }
     }
 
@@ -277,7 +272,7 @@ public class ExpandTest {
         for (int i = 0; i < 100; ++i) {
             CC.resetTensorNames();
             Tensor t = Tensors.parse("((a+b)*(c+a)-a)*f_mn*(f^mn+r^mn)-((a-b)*(c-a)+a)*r_ab*(f^ab+r^ab)");
-            Tensor expected = Expand.expand(t), actual = expandThroughPort(t);
+            Tensor expected = Expand.expand(t), actual = expandUsingPort(t);
             TAssert.assertEquals(expected, actual);
         }
     }
@@ -287,7 +282,7 @@ public class ExpandTest {
         for (int i = 0; i < 100; ++i) {
             CC.resetTensorNames();
             Tensor t = Tensors.parse("((a+b)*(c+a)-a)*f_mn*(f^mn+r^mn)-((a-b)*(c-a)+a)*r_ab*(f^ab+r^ab)*(f_a^a+r_b^b)**5");
-            Tensor expected = Expand.expand(t), actual = expandThroughPort(t);
+            Tensor expected = Expand.expand(t), actual = expandUsingPort(t);
             assertAllBracketsExpanded(expected);
             assertAllBracketsExpanded(actual);
             System.out.println(actual);
@@ -312,17 +307,19 @@ public class ExpandTest {
             CC.resetTensorNames();
             Tensor t = Tensors.parse("(a+b)*(a_b^b+b_a^a)**5");
             Tensor expected = Expand.expand(t),
-                    actual = expandThroughPort(t);
+                    actual = expandUsingPort(t);
             TAssert.assertEquals(expected, actual);
         }
     }
 
     @Test
-    public void test29a() {
-        Tensor t = Tensors.parse("(a+b)*(a+b)**2");
-        OutputPortUnsafe<Tensor> opu = Expand.createPort(t);
-        Tensor c;
-        while ((c = opu.take()) != null)
-            System.out.println(c);
+    public void test30() {
+        for (int i = 0; i < 100; ++i) {
+            CC.resetTensorNames();
+            Tensor t = Tensors.parse("1/21*((a_mn+b_mn)*2*(3*a_b^b+b_a^a)**2+c*(2*((d_m+3*(i_m+n_m))*(f_n+2*h_n)-e_m*e_n)+4*(a_i^i-n_i^i)*h_m*h_n))*(d+h)+2*(b_m*b_n+R_nmiu^ui)");
+            Tensor e1 = expand(t), e2 = expandUsingPort(t);
+            assertAllBracketsExpanded(e1);
+            assertAllBracketsExpanded(e2);
+        }
     }
 }

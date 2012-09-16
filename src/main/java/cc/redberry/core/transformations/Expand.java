@@ -22,19 +22,20 @@
  */
 package cc.redberry.core.transformations;
 
-import cc.redberry.concurrent.*;
-import cc.redberry.core.combinatorics.*;
+import cc.redberry.concurrent.OutputPort;
+import cc.redberry.concurrent.OutputPortUnsafe;
+import cc.redberry.core.combinatorics.IntTuplesPort;
 import cc.redberry.core.indexgenerator.IndexGenerator;
 import cc.redberry.core.indexmapping.IndexMapping;
 import cc.redberry.core.indices.IndicesUtils;
 import cc.redberry.core.indices.SimpleIndices;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.tensor.*;
-import cc.redberry.core.tensor.iterator.TraverseGuide;
-import cc.redberry.core.tensor.iterator.TraverseState;
-import cc.redberry.core.tensor.iterator.TreeTraverseIterator;
-import cc.redberry.core.utils.*;
-import java.math.*;
+import cc.redberry.core.tensor.iterator.*;
+import cc.redberry.core.utils.ArraysUtils;
+import cc.redberry.core.utils.Indicator;
+import cc.redberry.core.utils.TensorUtils;
+import java.math.BigInteger;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -266,6 +267,52 @@ public final class Expand implements Transformation {
         return sum.build();
     }
 
+    //TODO review and add Indicator
+    private static boolean canBeExpanded(Tensor tensor) {
+        TensorLastIterator iterator = new TensorLastIterator(tensor);
+        Tensor c;
+        int sumsCount = 0;
+        while ((c = iterator.next()) != null) {
+            if (!(c instanceof Product))
+                continue;
+            for (Tensor m : c) {
+                if (m instanceof Sum) {
+                    ++sumsCount;
+                    if (!TensorUtils.isIndexless(m))
+                        return true;
+                }
+                if (sumsCount >= 2)
+                    return true;
+            }
+        }
+        return false;
+    }
+
+    /*
+     * Ports infrastructure.
+     */
+    public static Tensor expandUsingPort(Tensor t) {
+        return expandUsingPort(t, new Transformation[0]);
+    }
+
+    public static Tensor expandUsingPort(Tensor t, Transformation[] transformations) {
+        if (t instanceof Expression)
+            return Tensors.expression(expandUsingPort(t.get(0)), expandUsingPort(t.get(1)));
+        SumBuilder sb = new SumBuilder();
+        OutputPortUnsafe<Tensor> opu = Expand.createPort(t);
+        Tensor c;
+        while ((c = opu.take()) != null) {
+            if (transformations.length != 0) {
+                for (Transformation tr : transformations)
+                    c = tr.transform(c);
+                while (canBeExpanded(c))
+                    c = expandUsingPort(c, transformations);
+            }
+            sb.put(c);
+        }
+        return sb.build();
+    }
+
     public static OutputPortUnsafe<Tensor> createPort(Tensor tensor) {
         if (tensor instanceof Product)
             return new ProductPort(tensor);
@@ -277,7 +324,12 @@ public final class Expand implements Transformation {
             return new OutputPortUnsafe.Singleton<>(tensor);
     }
 
-    private static final class PowerPort implements Resetable {
+    private static interface ResetablePort extends OutputPortUnsafe<Tensor> {
+
+        void reset();
+    }
+
+    private static final class PowerPort implements ResetablePort {
 
         private final Tensor base;
         private final int power;
@@ -336,14 +388,14 @@ public final class Expand implements Transformation {
 
         private final ProductBuilder base;
         private ProductBuilder currentBuilder;
-        private final Resetable[] sumsAndPowers;
+        private final ResetablePort[] sumsAndPowers;
         private final Tensor[] currentMultipliers;
         private final Tensor tensor;
 
         public ProductPort(Tensor tensor) {
             this.tensor = tensor;
             this.base = new ProductBuilder();
-            List<Resetable> sumOrPowerPorts = new ArrayList<>();
+            List<ResetablePort> sumOrPowerPorts = new ArrayList<>();
             int theLargestSumPosition = 0, theLargestSumSize = 0, productSize = tensor.size();
             Tensor m;
             for (int i = 0; i < productSize; ++i) {
@@ -363,13 +415,13 @@ public final class Expand implements Transformation {
                 } else
                     base.put(m);
             }
-            sumsAndPowers = sumOrPowerPorts.toArray(new Resetable[sumOrPowerPorts.size()]);
+            sumsAndPowers = sumOrPowerPorts.toArray(new ResetablePort[sumOrPowerPorts.size()]);
 
             if (sumsAndPowers.length <= 1) {
                 currentMultipliers = new Tensor[0];
                 currentBuilder = base;
             } else {
-                Resetable temp = sumsAndPowers[theLargestSumPosition];
+                ResetablePort temp = sumsAndPowers[theLargestSumPosition];
                 sumsAndPowers[theLargestSumPosition] = sumsAndPowers[sumsAndPowers.length - 1];
                 sumsAndPowers[sumsAndPowers.length - 1] = temp;
                 currentMultipliers = new Tensor[sumsAndPowers.length - 2];
@@ -431,12 +483,7 @@ public final class Expand implements Transformation {
         }
     }
 
-    private static interface Resetable extends OutputPortUnsafe<Tensor> {
-
-        void reset();
-    }
-
-    private static final class SumPort implements Resetable {
+    private static final class SumPort implements ResetablePort {
 
         private final OutputPortUnsafe<Tensor>[] ports;
         private final Tensor tensor;

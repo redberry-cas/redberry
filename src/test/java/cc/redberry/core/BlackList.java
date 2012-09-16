@@ -84,9 +84,8 @@ public class BlackList {
 
     @Test
     public void wqe() throws IOException {
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter("suka.txt"))) {
-            writer.write("a"); //write it in the file
-            writer.flush();
-        }
+        boolean x = false, y = false, z = false;
+        if (x && !y || z == x)
+            System.out.println("x");
     }
 }

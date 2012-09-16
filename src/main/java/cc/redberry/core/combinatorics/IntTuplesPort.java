@@ -23,7 +23,7 @@
 package cc.redberry.core.combinatorics;
 
 import cc.redberry.concurrent.OutputPortUnsafe;
-import java.util.*;
+import java.util.Arrays;
 
 /**
  * Generates combinations of integers {a_1,a_2,...,a_N}, where
