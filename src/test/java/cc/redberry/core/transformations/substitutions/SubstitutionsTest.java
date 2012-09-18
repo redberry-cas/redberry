@@ -303,7 +303,7 @@ public class SubstitutionsTest {
 
         target1 = contract(expand(target1));
 
-        
+
         assertTrue(TensorUtils.equals(target, target1));
         assertTrue(target.getIndices().size() == 0);
         assertTrue(target1.getIndices().size() == 0);
@@ -434,9 +434,7 @@ public class SubstitutionsTest {
         Tensor target = parse("f_a[g^p]");
         Transformation transformation = Substitutions.getTransformation(from, to);
         target = transformation.transform(target);
-        System.out.println(target);
         target = contract(target);
-        System.out.println(target);
         assertTrue(TensorUtils.equalsExactly(target, parse("g_a+y_a")));
     }
 
@@ -447,7 +445,6 @@ public class SubstitutionsTest {
         Tensor target = parse("f^a[X^i,Y_j]");
         Transformation transformation = Substitutions.getTransformation(from, to);
         target = transformation.transform(target);
-        System.out.println(target);
         target = contract(target);
         assertTrue(TensorUtils.equalsExactly(target, parse("X^a+Y^a")));
     }
@@ -536,7 +533,7 @@ public class SubstitutionsTest {
     }
 
     @Test
-    public void testField115() {
+    public void testField15() {
 
         //Riman without diff states
         Tensor target = parse("Rf[g_mn]");
@@ -616,6 +613,43 @@ public class SubstitutionsTest {
         Tensor target = parse("f_a^a[z_c^a+w_c^a:_c^a]");
         target = t.transform(target);
         assertEquals(target, "z_{m}^{m}+w_{m}^{m}+y_{m}^{m}");
+    }
+
+    @Test
+    public void testField22() {
+        //parsing tensor field
+        Expression field = Tensors.parseExpression("F_{ij}[p_a, q_b] = "
+                + "g_{ij}*p_a*q^a - (p_i*q_j + p_j*q_i)");
+
+        //parsing some expression 
+        Tensor e = Tensors.parse("E = F_ab[k^n - p^n, q_n] * F^ab[q_n, k_n]");
+
+        //substituting field value in expression
+        e = field.transform(e);
+        System.out.println(e);
+        e = Expand.expand(e);
+
+        //sipmlifying
+        System.out.println(e);
+    }
+    
+    
+    @Test
+    public void testField22a() {
+        //parsing tensor field
+        Expression field = Tensors.parseExpression("F_{ij}[p_a, q_b] = "
+                + "g_{ij}*p_a*q^a - (p_i*q_j + p_j*q_i)");
+
+        //parsing some expression 
+        Tensor e = Tensors.parse("E = F_ab[p^n, q_n] * F^ab[p_n, q_n]");
+
+        //substituting field value in expression
+        e = field.transform(e);
+        System.out.println(e);
+        e = Expand.expand(e);
+
+        //sipmlifying
+        System.out.println(e);
     }
     //TODO additional tests with specified field arguments indices
 

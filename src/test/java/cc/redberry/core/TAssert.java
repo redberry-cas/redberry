@@ -110,6 +110,9 @@ public class TAssert {
     public static void assertEquals(String expected, String actual) {
         org.junit.Assert.assertEquals(expected, actual);
     }
+    public static void assertTensorEquals(String expected, String actual) {
+        assertEquals(Tensors.parse(expected), Tensors.parse(actual));
+    }
     
     public static Tensor _(String tensor) {
         return Tensors.parse(tensor);

@@ -49,7 +49,9 @@ public final class SubstitutionIterator {
         iterator = new TreeTraverseIterator(tensor);
     }
     private static final Indicator<Tensor> FieldIndicator = Indicator.Utils.classIndicator(TensorField.class);
-    private int fieldDepth = 0;
+    /*
+     * private
+     */ int fieldDepth = 0;
 
     public Tensor next() {
         TraverseState state = iterator.next();
@@ -57,22 +59,6 @@ public final class SubstitutionIterator {
             return null;
 
         Tensor current = iterator.current();
-        if (current instanceof TensorField)
-            if (state == TraverseState.Leaving)
-                if (fieldDepth == 0)
-                    if (!waitingForProduct) {
-                        stack = stack.previous;
-                        return current;
-                    } else
-                        waitingForProduct = false;
-                else
-                    --fieldDepth;
-        //TODO may be scalar functions should be p[rocessed as fields?
-        if (iterator.checkLevel(FieldIndicator, 1) && state == TraverseState.Entering) {
-            if (waitingForProduct)
-                ++fieldDepth;
-            waitingForProduct = true;
-        }
 
         if (current instanceof Product)
             if (state == TraverseState.Entering) {

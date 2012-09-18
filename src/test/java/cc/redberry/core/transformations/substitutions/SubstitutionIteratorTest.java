@@ -64,10 +64,24 @@ public class SubstitutionIteratorTest {
         Tensor t = parse("c*f[h*f[d*a*f]]");
         SubstitutionIterator iterator = new SubstitutionIterator(t);
         Tensor f;
-        while ((f = iterator.next()) != null){
+        while ((f = iterator.next()) != null)
 //            System.out.println(f);
             if (TensorUtils.equalsExactly(f, parse("a")) || TensorUtils.equalsExactly(f, parse("d")) || TensorUtils.equalsExactly(f, parse("c")))
-                System.out.println(f + " " +iterator.stack);}
+                System.out.println(f + " " + iterator.stack);
 
+    }
+
+    @Test
+    public void test4() {
+        CC.resetTensorNames(212499456971L);
+        Tensor t = parse("F[p,q]*G_i");
+        SubstitutionIterator iterator = new SubstitutionIterator(t);
+        Tensor f;
+        while ((f = iterator.next()) != null) {
+            System.out.println(f + ":");
+            System.out.println("\t Field depth: " + iterator.fieldDepth);
+            System.out.println("\t Stack: " + iterator.stack);
+            System.out.println("\t Forbidden indices size: " + iterator.forbiddenIndices().size());
+        }
     }
 }

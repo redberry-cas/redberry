@@ -112,7 +112,7 @@ public class ExpandTest {
         Assert.assertTrue(TensorUtils.equalsExactly(actual, expected));
     }
 
-    @Ignore
+//    @Ignore
     @Test
     public void test8() {
         Tensor actual = parse("Power[a+b,30]");
@@ -122,7 +122,7 @@ public class ExpandTest {
 //        Assert.assertTrue(TensorUtils.equalsExactly(actual, expected));
     }
 
-    @Ignore
+//    @Ignore
     @Test
     public void test10() {
         for (int i = 2; i < 30; ++i) {

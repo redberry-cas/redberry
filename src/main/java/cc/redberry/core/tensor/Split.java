@@ -22,18 +22,18 @@
  */
 package cc.redberry.core.tensor;
 
-import cc.redberry.core.indices.*;
+import cc.redberry.core.indices.IndicesBuilder;
+import cc.redberry.core.indices.IndicesFactory;
 import cc.redberry.core.number.Complex;
-import java.util.*;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.Arrays;
 
 /**
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public abstract class Split {
+//TODO review with Dima and consider usage in future Collect 
+public class Split {
 
     public final Tensor factor;
     public final Tensor summand;
@@ -43,7 +43,11 @@ public abstract class Split {
         this.summand = summand;
     }
 
-    public abstract TensorBuilder getBuilder();
+    public TensorBuilder getBuilder() {
+        TensorBuilder builder = new SumBuilder();
+        builder.put(summand);
+        return builder;
+    }
 
     public static Split splitScalars(final Tensor tensor) {
         if (tensor.getIndices().getFree().size() == 0)//case 2*a*b*c            
@@ -94,7 +98,7 @@ public abstract class Split {
                 summand = Complex.ONE;
                 factor = tensor;
             }
-            return new SplitIndexless(factor, summand);
+            return new Split(factor, summand);
         }
     }
 
@@ -136,7 +140,7 @@ public abstract class Split {
                 summand = Complex.ONE;
                 factor = tensor;
             }
-            return new SplitIndexless(factor, summand);
+            return new Split(factor, summand);
         }
     }
 
@@ -154,20 +158,6 @@ public abstract class Split {
         @Override
         public TensorBuilder getBuilder() {
             TensorBuilder builder = new ComplexSumBuilder();
-            builder.put(summand);
-            return builder;
-        }
-    }
-
-    private static final class SplitIndexless extends Split {
-
-        public SplitIndexless(Tensor factor, Tensor summand) {
-            super(factor, summand);
-        }
-
-        @Override
-        public TensorBuilder getBuilder() {
-            TensorBuilder builder = new SumBuilder();
             builder.put(summand);
             return builder;
         }
