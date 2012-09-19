@@ -323,14 +323,19 @@ public class ParserTest {
     public void testPowerAsp3() {
         TAssert.assertTensorEquals("(1/25**2)**(1/2)", "1/25");;
     }
-    
+
     @Test
     public void testPowerAsp4() {
         TAssert.assertTensorEquals("(1/25**2)**(1/2)", "1/25");;
     }
-    
-      @Test
+
+    @Test
     public void testPowerAsp5() {
         TAssert.assertTensorEquals("((1/(5+25-5))**2)**(1/2)", "1/25");;
+    }
+    
+    @Test
+    public void test1211(){
+        Tensors.parse("(A_i^i*A_m^n+A_k^k*A_m^n)*(A_i^i*A_d^c+A_k^k*A_d^c)");
     }
 }

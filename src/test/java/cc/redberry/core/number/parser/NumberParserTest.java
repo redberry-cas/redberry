@@ -142,4 +142,18 @@ public class NumberParserTest {
         Complex b = new Complex(Numeric.NaN, Numeric.NaN);
         Assert.assertEquals(b, a);
     }
+
+    @Test
+    public void test18() {
+        Complex a = NumberParser.COMPLEX_PARSER.parse("-2+3");
+        Complex b = Complex.ONE;
+        Assert.assertEquals(b, a);
+    }
+
+    @Test
+    public void test19() {
+        Real r = NumberParser.REAL_PARSER.parse("2/5+7/(-3-(-2+1/(-4-9))*5/4)");
+        Real exp = new Rational(-254, 15);
+        Assert.assertTrue(r.equals(exp));
+    }
 }

@@ -626,14 +626,10 @@ public class SubstitutionsTest {
 
         //substituting field value in expression
         e = field.transform(e);
-        System.out.println(e);
         e = Expand.expand(e);
-
-        //sipmlifying
-        System.out.println(e);
+        TAssert.assertIndicesConsistency(e);
     }
-    
-    
+
     @Test
     public void testField22a() {
         //parsing tensor field
@@ -645,11 +641,8 @@ public class SubstitutionsTest {
 
         //substituting field value in expression
         e = field.transform(e);
-        System.out.println(e);
         e = Expand.expand(e);
-
-        //sipmlifying
-        System.out.println(e);
+        TAssert.assertIndicesConsistency(e);
     }
     //TODO additional tests with specified field arguments indices
 

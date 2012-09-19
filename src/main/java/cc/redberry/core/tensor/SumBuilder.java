@@ -139,18 +139,19 @@ public final class SumBuilder implements TensorBuilder {
     }
 
     static Boolean compareFactors(Tensor u, Tensor v) {
-        IndexMappingBuffer buffer;
-        if (u.getIndices().size() == 0)
-            buffer = IndexMappings.createPort(u, v).take();
-        else {
-            int[] fromIndices = u.getIndices().getFree().getAllIndices().copy();
-            for (int i = 0; i < fromIndices.length; ++i)
-                fromIndices[i] = IndicesUtils.getNameWithType(fromIndices[i]);
-            buffer = IndexMappings.createPort(new IndexMappingBufferTester(fromIndices, false), u, v).take();
-        }
-        if (buffer == null)
-            return null;
-        assert buffer.isEmpty();
-        return buffer.getSignum();
+        return TensorUtils.compare1(u, v);
+//        IndexMappingBuffer buffer;
+//        if (u.getIndices().size() == 0)
+//            buffer = IndexMappings.createPort(u, v).take();
+//        else {
+//            int[] fromIndices = u.getIndices().getFree().getAllIndices().copy();
+//            for (int i = 0; i < fromIndices.length; ++i)
+//                fromIndices[i] = IndicesUtils.getNameWithType(fromIndices[i]);
+//            buffer = IndexMappings.createPort(new IndexMappingBufferTester(fromIndices, false), u, v).take();
+//        }
+//        if (buffer == null)
+//            return null;
+//        assert buffer.isEmpty();
+//        return buffer.getSignum();
     }
 }
