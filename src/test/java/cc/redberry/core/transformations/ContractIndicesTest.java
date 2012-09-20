@@ -49,7 +49,7 @@ public class ContractIndicesTest {
     }
 
     private static Tensor contract(Tensor tensor) {
-        return ContractIndices.INSTANCE.transform(tensor);
+        return ContractIndices.ContractIndices.transform(tensor);
     }
 
     @Test
@@ -514,7 +514,7 @@ public class ContractIndicesTest {
 //                    (SimpleTensor) parse("g_{\\alpha \\beta}"),
 //                    (SimpleTensor) parse("g_{\\mu \\nu}")});
 //        derivative = Transformations.renameConflictingIndices(derivative);
-//        derivative = GetDerivative1.INSTANCE.transform(derivative);
+//        derivative = GetDerivative1.ContractIndices.transform(derivative);
 //        assertTrue(TensorUtils.testIndicesConsistent(derivative));
 //        derivative = contract(derivative);
 //        assertTrue(TensorUtils.testIndicesConsistent(derivative));

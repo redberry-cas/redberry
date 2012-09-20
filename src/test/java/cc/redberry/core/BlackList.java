@@ -22,6 +22,7 @@
  */
 package cc.redberry.core;
 
+import cc.redberry.core.indexmapping.*;
 import cc.redberry.core.tensor.*;
 import java.util.*;
 import java.util.Map;
@@ -47,8 +48,8 @@ public class BlackList {
 
     @Test
     public void te() {
-        Name[] a = Name.values;
-        for (Name n : a)
-            System.out.println(n);
+        System.out.println(IndexMappings.getAllMappings(Tensors.parse("F_mn"), Tensors.parse("F_\\mu\\nu")).size());
     }
+    
+    
 }

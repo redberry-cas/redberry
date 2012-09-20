@@ -49,7 +49,7 @@ import static cc.redberry.core.tensor.Tensors.*;
 public class SubstitutionsTest {
 
     private static Tensor contract(Tensor tensor) {
-        return ContractIndices.INSTANCE.transform(tensor);
+        return ContractIndices.ContractIndices.transform(tensor);
     }
 
     private static Tensor expand(Tensor tensor) {
@@ -469,7 +469,7 @@ public class SubstitutionsTest {
         target = expand(target);
         target = contract(target);
 
-        Tensor expected = parse(target.toString(ToStringMode.REDBERRY_SOUT));
+        Tensor expected = parse(target.toString(ToStringMode.RedberryConsole));
         assertTrue(TensorUtils.equalsExactly(target, expected));
     }
 
@@ -626,7 +626,7 @@ public class SubstitutionsTest {
 
         //substituting field value in expression
         e = field.transform(e);
-        e = Expand.expand(e, ContractIndices.INSTANCE, Tensors.parseExpression("d_a^a=4"));
+        e = Expand.expand(e, ContractIndices.ContractIndices, Tensors.parseExpression("d_a^a=4"));
         TAssert.assertIndicesConsistency(e);
     }
 

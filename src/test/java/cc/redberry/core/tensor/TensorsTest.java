@@ -150,7 +150,7 @@ public class TensorsTest {
         t = e1.transform(t);
         t = e2.transform(t);
         Expression kronecker = (Expression) Tensors.parse("d_\\mu^\\mu=4");
-        t = Expand.expand(t, new Transformation[]{ContractIndices.INSTANCE, kronecker});
+        t = Expand.expand(t, new Transformation[]{ContractIndices.ContractIndices, kronecker});
         System.out.println(t);
     }
 
@@ -204,7 +204,7 @@ public class TensorsTest {
         Tensor M2 = Tensors.parse("M2 = -(1/2)*M_ij*M^ij");
         M2 = ((Expression) M).transform(M2);
         //expand squared matrix element and contract indices
-        M2 = Expand.expand(M2, ContractIndices.INSTANCE);
+        M2 = Expand.expand(M2, ContractIndices.ContractIndices);
         M2 = Tensors.parseExpression("d_i^i = 4").transform(M2);
 
         //substituting mass shell and Mandelstam definitions 

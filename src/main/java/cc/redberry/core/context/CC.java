@@ -57,8 +57,8 @@ public final class CC {
         return current().getDefaultPrintMode();
     }
 
-    public static void setDefaultPrintMode(ToStringMode mode) {
-        current().setDefaultPrintMode(mode);
+    public static void setDefaultToStringFormat(ToStringMode mode) {
+        current().setDefaultToStringFormat(mode);
     }
 
     public static void resetTensorNames() {

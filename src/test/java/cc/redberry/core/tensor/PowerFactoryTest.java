@@ -24,10 +24,10 @@ public class PowerFactoryTest {
     @Test
     public void rationalValuesNegativeTest() {
         Assert.assertEquals("1/2**1/2",
-                            Tensors.parse("Power[1/2,1/2]").toString(ToStringMode.REDBERRY));
+                            Tensors.parse("Power[1/2,1/2]").toString(ToStringMode.Redberry));
 
         Assert.assertEquals("1/2**1/3",
-                            Tensors.parse("Power[1/2,1/3]").toString(ToStringMode.REDBERRY));
+                            Tensors.parse("Power[1/2,1/3]").toString(ToStringMode.Redberry));
     }
 
     @Test

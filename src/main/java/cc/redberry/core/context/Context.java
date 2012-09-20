@@ -62,7 +62,7 @@ public final class Context {
         nameManager.reset(seed);
     }
 
-    public void setDefaultPrintMode(ToStringMode defaultPrintMode) {
+    public void setDefaultToStringFormat(ToStringMode defaultPrintMode) {
         this.defaultPrintMode = defaultPrintMode;
     }
 

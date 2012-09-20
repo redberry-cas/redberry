@@ -34,7 +34,7 @@ import cc.redberry.core.indices.IndexType;
 public class DefaultContextSettings {
 
     public static ContextSettings create() {
-        ContextSettings defaultSettings = new ContextSettings(ToStringMode.REDBERRY, "d");
+        ContextSettings defaultSettings = new ContextSettings(ToStringMode.Redberry, "d");
         defaultSettings.setMetricName("g");
 
         defaultSettings.addMetricIndexType(IndexType.LatinLower);
