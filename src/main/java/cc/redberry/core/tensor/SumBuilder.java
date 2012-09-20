@@ -141,7 +141,7 @@ public final class SumBuilder implements TensorBuilder {
     static Boolean compareFactors(Tensor u, Tensor v) {
         return TensorUtils.compare1(u, v);
 //        IndexMappingBuffer buffer;
-//        if (u.getIndices().size() == 0)
+//        if (u.getIndices().size() == 0) <- getFree() !!!
 //            buffer = IndexMappings.createPort(u, v).take();
 //        else {
 //            int[] fromIndices = u.getIndices().getFree().getAllIndices().copy();

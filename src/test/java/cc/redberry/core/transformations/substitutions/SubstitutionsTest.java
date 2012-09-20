@@ -626,7 +626,7 @@ public class SubstitutionsTest {
 
         //substituting field value in expression
         e = field.transform(e);
-        e = Expand.expand(e);
+        e = Expand.expand(e, ContractIndices.INSTANCE, Tensors.parseExpression("d_a^a=4"));
         TAssert.assertIndicesConsistency(e);
     }
 
@@ -680,6 +680,21 @@ public class SubstitutionsTest {
             target = parseExpression("b*c = 1/a").transform(target);
             Assert.assertTrue(TensorUtils.isOne(target));
         }
+    }
+
+    @Test
+    public void testProduct4() {
+        Tensor target = parse("g_ab*g_cd+2*e_a^\\alpha*e_{b \\alpha}*e_c^\\beta*e_{d \\beta}");
+        target = parseExpression("e_a^\\alpha*e_{b \\alpha} = -g_ab").transform(target);
+        TAssert.assertEquals(target, "3*g_ab*g_cd");
+    }
+
+    @Test
+    public void testProduct5() {
+        Tensor target = parse("k^a*k^b*p^c*p^d*2*e_a^\\alpha*e_{b \\alpha}*e_c^\\beta*e_{d \\beta}");
+        target = parseExpression("e_a^\\alpha*e_{b \\alpha} = -g_ab").transform(target);
+        target = ContractIndices.contract(target);
+        TAssert.assertEquals(target, "k^a*k_a*p^b*p_b");
     }
     //TODO tests for Product
 }

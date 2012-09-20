@@ -322,4 +322,40 @@ public class ExpandTest {
             assertAllBracketsExpanded(e2);
         }
     }
+
+    @Test
+    public void test31() {
+        Tensor t = parse("(p_{a}*k_{b}+(k^{d}*k_{d}-m**2)**2*k_{a}*k_{b})");
+        t = expand(t);
+        TAssert.assertIndicesConsistency(t);
+    }
+
+    @Test
+    public void test32() {
+        Tensor t = expand(parse(("(a*b+(c*d-m**2)**2*a*b)")));
+        assertAllBracketsExpanded(t);
+    }
+
+    @Test
+    public void test33() {
+        CC.resetTensorNames(-1920349242311093308L);
+        Tensors.parse("k_a*k_b/(k_a*k^a-m**2)+p_a*k_b/(k_a*k^a-m**2)**3");//for debug in order to restore tensors hashes
+        Tensor t = Tensors.parse("(-m**2+k_{d}*k^{d})**2*k_{a}*k_{b}+p_{a}*k_{b}");
+        t = expand(t);
+        TAssert.assertIndicesConsistency(t);
+    }
+
+    @Test
+    public void test34() {
+        CC.resetTensorNames(-1920349242311093308L);
+        Tensor t = Tensors.parse("k_a*k_b/(k_a*k^a-m**2)+p_a*k_b/(k_a*k^a-m**2)**3");
+        t = Together.together(t);
+        TAssert.assertIndicesConsistency(t);
+        Tensor tt = Tensors.parse("(-m**2+k_{c}*k^{c})**(-3)*((-m**2+k_{d}*k^{d})**2*k_{a}*k_{b}+p_{a}*k_{b})");
+        TAssert.assertEqualsExactly(t, tt);
+        tt = expand(tt);
+        TAssert.assertIndicesConsistency(tt);
+        t = expand(t);
+        TAssert.assertIndicesConsistency(t);
+    }
 }
