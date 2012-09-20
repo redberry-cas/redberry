@@ -122,12 +122,19 @@ public final class Together implements Transformation {
         }
         SumBuilder numeratorSumBuilder = new SumBuilder();
         for (List<Tensor> term : numeratorTerms)
-            numeratorSumBuilder.put(togetherProduct1(Tensors.multiply(term.toArray(new Tensor[term.size()]))));
-        ProductBuilder resultBuilder = new ProductBuilder();
-        resultBuilder.put(numeratorSumBuilder.build());
+            numeratorSumBuilder.put(togetherProduct1(Tensors.multiplyAndRenameConflictingDummies(term.toArray(new Tensor[term.size()]))));//TODO ?rename conflicts
+        //TODO improve performance
+        Tensor[] resultProduct = new Tensor[1 + base.denominators.size()];
+        resultProduct[0] = numeratorSumBuilder.build();
+        i = 0;
         for (Map.Entry<Tensor, Complex> baseEntry : base.denominators.entrySet())
-            resultBuilder.put(Tensors.pow(baseEntry.getKey(), baseEntry.getValue().negate()));
-        return togetherProduct1(resultBuilder.build());
+            resultProduct[++i] = Tensors.pow(baseEntry.getKey(), baseEntry.getValue().negate());
+        return togetherProduct1(Tensors.multiplyAndRenameConflictingDummies(resultProduct));
+//        ProductBuilder resultBuilder = new ProductBuilder();
+//        resultBuilder.put(numeratorSumBuilder.build());
+//        for (Map.Entry<Tensor, Complex> baseEntry : base.denominators.entrySet())
+//            resultBuilder.put(Tensors.pow(baseEntry.getKey(), baseEntry.getValue().negate()));
+//        return togetherProduct1(resultBuilder.build());
     }
 
     private static class SplitStruct {
@@ -150,7 +157,7 @@ public final class Together implements Transformation {
         if (tensor instanceof Product) {
             Product product = (Product) tensor;
             Tensor temp = null, m;
-            for (int i = 0; i < tensor.size(); ++i) {
+            for (int i = tensor.size() - 1; i >= 0; --i) {
                 m = tensor.get(i);
                 if (checkPower(m)) {
                     map.put(m.get(0), ((Complex) m.get(1)).negate());
@@ -179,7 +186,8 @@ public final class Together implements Transformation {
         TMap<Tensor, SumBuilder> map = new TMap<>();
         Tensor a, p;
         SumBuilder temp;
-        for (Tensor m : t.getAllScalars()) {
+        Tensor[] scalars = t.getAllScalars();
+        for (Tensor m : scalars) {
             if (m instanceof Power) {
                 a = m.get(0);
                 p = m.get(1);
@@ -196,11 +204,15 @@ public final class Together implements Transformation {
             } else
                 temp.put(p);
         }
-        if (map.size() == t.size())
+        if (map.size() == scalars.length)
             return t;
         ProductBuilder pb = new ProductBuilder();
+        Tensor nonScalar = t.getContent().getNonScalar();
+        if (nonScalar != null)
+            pb.put(nonScalar);
         for (Map.Entry<Tensor, SumBuilder> entry : map.entrySet())
             pb.put(Tensors.pow(entry.getKey(), entry.getValue().build()));
+
         return pb.build();
     }
 
