@@ -70,6 +70,7 @@ public final class Expand implements Transformation {
     public static Tensor expand(Tensor tensor, Transformation... transformations) {
         return expand(tensor, Indicator.TRUE_INDICATOR, transformations);
     }
+    private static final Indicator<Tensor> productIndicator = Indicator.Utils.classIndicator(Product.class);
 
     public static Tensor expand(Tensor tensor, Indicator<Tensor> indicator, Transformation[] transformations) {
         TreeTraverseIterator iterator = new TreeTraverseIterator(tensor, TraverseGuide.EXCEPT_FUNCTIONS_AND_FIELDS);
@@ -81,8 +82,13 @@ public final class Expand implements Transformation {
             current = iterator.current();
             if (current instanceof Product && indicator.is(current))
                 iterator.set(expandProductOfSums(current, indicator, transformations));
-            else if (isExpandablePower(current) && indicator.is(current))
-                iterator.set(expandPower((Sum) current.get(0), ((Complex) current.get(1)).getReal().intValue(), transformations));
+            else if (isExpandablePower(current) && indicator.is(current) && !iterator.checkLevel(productIndicator, 1)) {
+                Sum sum = (Sum) current.get(0);
+                iterator.set(expandPower(sum,
+                                         ((Complex) current.get(1)).getReal().intValue(),
+                                         ArraysUtils.toArray(TensorUtils.getAllIndicesNames(sum)),
+                                         transformations));
+            }
         }
         return iterator.result();
     }
@@ -110,9 +116,20 @@ public final class Expand implements Transformation {
 
         int i;
         Tensor t, temp;
+        Set<Integer> initialForbiddenIndices = null;
         boolean expand = false;
         for (i = current.size() - 1; i >= 0; --i) {
             t = current.get(i);
+            if (isExpandablePower(t)) {
+                if (initialForbiddenIndices == null)
+                    initialForbiddenIndices = TensorUtils.getAllIndicesNames(current);
+                t = expandPower((Sum) t.get(0),
+                                ((Complex) t.get(1)).getReal().intValue(),
+                                ArraysUtils.toArray(initialForbiddenIndices),
+                                transformations);
+                initialForbiddenIndices.addAll(TensorUtils.getAllIndicesNames(t));
+                expand = true;
+            }
             if (t.getIndices().size() == 0)
                 if (t instanceof Sum)
                     if (indexlessSum == null)
@@ -167,15 +184,15 @@ public final class Expand implements Transformation {
         return main;
     }
 
-    private static Tensor expandPower(Sum argument, int power, Transformation[] transformations) {
+    private static Tensor expandPower(Sum argument, int power, int[] initialForbidden, Transformation[] transformations) {
         //TODO improve algorithm using Newton formula!!!
         int i;
         Tensor temp = argument;
-        Set<Integer> initialDummy = TensorUtils.getAllIndicesNames(argument);
-        int[] initialForbidden = new int[initialDummy.size()];
-        i = -1;
-        for (Integer index : initialDummy)
-            initialForbidden[++i] = index;
+//        Set<Integer> initialDummy = TensorUtils.getAllIndicesNames(argument);
+//        int[] initialForbidden = new int[initialDummy.size()];
+//        i = -1;
+//        for (Integer index : initialDummy)
+//            initialForbidden[++i] = index;
         IndexMapper mapper = new IndexMapper(initialForbidden);//(a_m^m+b_m^m)^30  
         for (i = power - 1; i >= 1; --i) {
             temp = expandPairOfSums((Sum) temp, (Sum) renameDummy(argument, mapper), transformations);
@@ -219,9 +236,10 @@ public final class Expand implements Transformation {
 
         @Override
         public int map(int from) {
-            Integer to = map.get(IndicesUtils.getNameWithType(from));
+            int fromName = IndicesUtils.getNameWithType(from);
+            Integer to = map.get(fromName);
             if (to == null)
-                map.put(from, to = generator.generate(IndicesUtils.getType(from)));
+                map.put(fromName, to = generator.generate(IndicesUtils.getType(from)));
             return IndicesUtils.getRawStateInt(from) ^ to;
         }
 
