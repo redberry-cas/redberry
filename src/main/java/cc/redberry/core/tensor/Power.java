@@ -25,6 +25,7 @@ package cc.redberry.core.tensor;
 import cc.redberry.core.context.ToStringMode;
 import cc.redberry.core.indices.Indices;
 import cc.redberry.core.indices.IndicesFactory;
+import cc.redberry.core.utils.*;
 
 /**
  *
@@ -71,6 +72,11 @@ public final class Power extends Tensor {
     public String toString(ToStringMode mode) {
         if (mode == ToStringMode.WolframMathematica)
             return "Power[" + argument.toString(mode, Power.class) + ", " + power.toString(mode, Power.class) + "]";
+        if (mode == ToStringMode.LaTeX)
+            if (TensorUtils.isRealNegativeNumber(power))
+                return "\\frac{" + argument.toString(mode, Power.class) + "}{" + power.toString(mode) + "}";
+            else
+                return argument.toString(mode, Power.class) + "^{" + power.toString(mode) + "}";
         return argument.toString(mode, Power.class) + "**" + power.toString(mode, Power.class);
 
 //        return "Power[" + argument.toString(mode) + ", " + power.toString(mode) + "]";
