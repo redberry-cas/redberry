@@ -163,13 +163,13 @@ public class ProductsBijectionsPortTest {
 
     @Test
     public void test5() {
-        Product target = (Product) Tensors.parse("k^a*k^b*e_a^p*e_{b p}");
-        Product from = (Product) Tensors.parse("e_a^s*e_{b s}");
+        Product target = (Product) Tensors.parse("k^a*k^b*e_a^p*e_bp");
+        Product from = (Product) Tensors.parse("e_a^p*e_bp");
         ProductsBijectionsPort port = new ProductsBijectionsPort(from.getContent(), target.getContent());
         int count = 0;
         while (port.take() != null)
             count++;
-        Assert.assertEquals(1, count);
+        Assert.assertEquals(2, count);
     }
 //    @Test
 //    public void test31() {
@@ -300,5 +300,4 @@ public class ProductsBijectionsPortTest {
 //        }
 //        System.out.println(badCounter);
 //    }
-    public static boolean debugFlag = false;
 }

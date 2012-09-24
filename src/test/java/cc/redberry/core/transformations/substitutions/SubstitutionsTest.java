@@ -691,7 +691,7 @@ public class SubstitutionsTest {
 
     @Test
     public void testProduct5() {
-        Tensor target = parse("k^a*k^b*p^c*p^d*2*e_a^\\alpha*e_{b \\alpha}*e_c^\\beta*e_{d \\beta}");
+        Tensor target = parse("k^a*k^b*p^c*p^d*e_a^\\alpha*e_{b \\alpha}*e_c^\\beta*e_{d \\beta}");
         target = parseExpression("e_a^\\alpha*e_{b \\alpha} = -g_ab").transform(target);
         target = ContractIndices.contract(target);
         TAssert.assertEquals(target, "k^a*k_a*p^b*p_b");

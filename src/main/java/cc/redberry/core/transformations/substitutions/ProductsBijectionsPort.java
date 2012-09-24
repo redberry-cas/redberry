@@ -45,6 +45,7 @@ import static cc.redberry.core.tensor.FullContractionsStructure.*;
 public final class ProductsBijectionsPort implements OutputPortUnsafe<int[]> {
     //private ProductContent targetContent;
     //private ProductContent fromContent;
+
     private Tensor[] fromData, targetData;
     private final int[] seeds;
     private FullContractionsStructure targetFContractions, fromFContractions;
@@ -122,6 +123,7 @@ public final class ProductsBijectionsPort implements OutputPortUnsafe<int[]> {
     }
 
     private class InnerPort implements OutputPortUnsafe<int[]> {
+
         boolean closed = false;
         final int[] bijection;
         final int[] seeds;
@@ -326,8 +328,8 @@ public final class ProductsBijectionsPort implements OutputPortUnsafe<int[]> {
                         }
 
                         previousInfo = new PermutationInfo(previousInfo,
-                                fromContractions_,
-                                targetContractions_);
+                                                           fromContractions_,
+                                                           targetContractions_);
                         if (firstInfo == null)
                             firstInfo = previousInfo;
                     }
@@ -338,6 +340,7 @@ public final class ProductsBijectionsPort implements OutputPortUnsafe<int[]> {
     }
 
     private static final class PermutationInfo {
+
         /**
          * Previous Permutation info in chain
          */
@@ -401,6 +404,7 @@ public final class ProductsBijectionsPort implements OutputPortUnsafe<int[]> {
     }
 
     private final class SeedPlanter {
+
         final DistinctCombinationsPort combinationsPort;
 
         public SeedPlanter() {
@@ -410,7 +414,8 @@ public final class ProductsBijectionsPort implements OutputPortUnsafe<int[]> {
                 hitList.clear();
                 for (int i = 0; i < targetData.length; ++i)
                     if (weakMatch(fromData[seeds[seedIndex]], targetData[i])
-                            && GraphUtils.componentSize(seeds[seedIndex], fromFContractions.components) >= GraphUtils.componentSize(i, targetFContractions.components))
+                            && GraphUtils.componentSize(seeds[seedIndex], fromFContractions.components)
+                            <= GraphUtils.componentSize(i, targetFContractions.components))
                         hitList.add(i);
                 hits[seedIndex] = hitList.toArray();
             }
