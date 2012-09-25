@@ -13,19 +13,24 @@
  * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
  * more details.
  */
-
 package cc.redberry.core.tensor;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class DefaultBuilder implements TensorBuilder {
+
     private final TensorFactory factory;
     private final List<Tensor> list;
 
     public DefaultBuilder(TensorFactory factory, int capacity) {
         this.factory = factory;
         this.list = new ArrayList<>(capacity);
+    }
+
+    private DefaultBuilder(TensorFactory factory, List<Tensor> list) {
+        this.factory = factory;
+        this.list = list;
     }
 
     @Override
@@ -36,5 +41,10 @@ public class DefaultBuilder implements TensorBuilder {
     @Override
     public Tensor build() {
         return factory.create(list.toArray(new Tensor[list.size()]));
+    }
+
+    @Override
+    public TensorBuilder clone() {
+        return new DefaultBuilder(factory, new ArrayList<>(list));
     }
 }

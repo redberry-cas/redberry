@@ -42,13 +42,13 @@ public class SymmetrizeUpperLowerIndicesTest {
     @Test
     public void test1() {
         Tensor expected = Tensors.parse("g_mn*g_ab+g_ma*g_nb+g_mb*g_an");
-        TAssert.assertParity(expected, SymmetrizeUpperLowerIndices.symmetrizeUpperLowerIndices(Tensors.parse("g_mn*g_ab")));
+        TAssert.assertEquals(expected, SymmetrizeUpperLowerIndices.symmetrizeUpperLowerIndices(Tensors.parse("g_mn*g_ab")));
     }
 
     @Test
     public void test2() {
         Tensor expected = Tensors.parse("g_mn*g^ab");
-        TAssert.assertParity(expected, SymmetrizeUpperLowerIndices.symmetrizeUpperLowerIndices(Tensors.parse("g_mn*g^ab")));
+        TAssert.assertEquals(expected, SymmetrizeUpperLowerIndices.symmetrizeUpperLowerIndices(Tensors.parse("g_mn*g^ab")));
     }
 
     @Test
@@ -63,6 +63,6 @@ public class SymmetrizeUpperLowerIndicesTest {
                 + "+g_{bm}*g_{an}*g^{pq}*g^{rs}"
                 + "+g_{bm}*g_{an}*g^{pr}*g^{qs}"
                 + "+g_{bm}*g_{an}*g^{ps}*g^{qr}");
-        TAssert.assertParity(expected, SymmetrizeUpperLowerIndices.symmetrizeUpperLowerIndices(Tensors.parse("g_ab*g^rs*g^pq*g_mn")));
+        TAssert.assertEquals(expected, SymmetrizeUpperLowerIndices.symmetrizeUpperLowerIndices(Tensors.parse("g_ab*g^rs*g^pq*g_mn")));
     }
 }

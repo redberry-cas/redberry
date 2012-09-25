@@ -167,6 +167,10 @@ public final class Tensors {
         return SumFactory.FACTORY.create(tensors);
     }
 
+    public static Tensor subtract(Tensor a, Tensor b) {
+        return sum(a, negate(b));
+    }
+
     /**
      * Returns new simple tensor with specified string name and indices.
      *

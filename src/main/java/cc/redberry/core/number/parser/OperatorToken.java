@@ -26,7 +26,9 @@ package cc.redberry.core.number.parser;
  *
  * @author Stanislav Poslavsky
  */
-public abstract class OperatorToken<T extends cc.redberry.core.number.Number<T>> implements TokenParser<T> {
+public abstract class OperatorToken<T extends cc.redberry.core.number.Number<T>>
+        implements TokenParser<T> {
+
     private final char operationSymbol, operationInverseSymbol;
 
     public OperatorToken(char operationSymbol, char operationInverseSymbol) {
@@ -35,6 +37,9 @@ public abstract class OperatorToken<T extends cc.redberry.core.number.Number<T>>
     }
 
     private boolean canParse(String expression) {
+        //TODO improve
+        if (expression.contains("**"))
+            return false;
         char[] expressionChars = expression.toCharArray();
         int level = 0;
         for (char c : expressionChars) {
@@ -58,7 +63,7 @@ public abstract class OperatorToken<T extends cc.redberry.core.number.Number<T>>
             return null;
         char[] expressionChars = expression.toCharArray();
         StringBuffer buffer = new StringBuffer();
-        T temp = null;
+        T temp = neutral();
         int level = 0;
         boolean mode = false;//true - inverse
         for (char c : expressionChars) {
@@ -69,21 +74,13 @@ public abstract class OperatorToken<T extends cc.redberry.core.number.Number<T>>
             if (level < 0)
                 throw new BracketsError();
             if (c == operationSymbol && level == 0) {
-                String toParse = buffer.toString();
-                if (!toParse.isEmpty())
-                    if (temp == null)
-                        temp = parser.parse(toParse);
-                    else
-                        temp = operation(temp, parser.parse(toParse), mode);
+                if (buffer.length() != 0)
+                    temp = operation(temp, parser.parse(buffer.toString()), mode);
                 buffer = new StringBuffer();
                 mode = false;
             } else if (c == operationInverseSymbol && level == 0) {
-                String toParse = buffer.toString();
-                if (!toParse.isEmpty()) {
-                    if (temp == null)
-                        temp = neutral();
-                    temp = operation(temp, parser.parse(toParse), mode);
-                }
+                if (buffer.length() != 0)
+                    temp = operation(temp, parser.parse(buffer.toString()), mode);
                 buffer = new StringBuffer();
                 mode = true;
             } else

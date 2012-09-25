@@ -68,17 +68,18 @@ public enum ToStringMode {
     /**
      * This mode specifies such output format, that can be parsed again, by
      * directly call in parser, i.e.
-     * {@code CC.parser(t.toString(ToStringMode.REDBERRY))}. Most of all it
+     * {@code CC.parser(t.toString(ToStringMode.Redberry))}. Most of all it
      * touches tensor fields, functions and derivatives. Greek indices converted
      * to string with this mode will look like "\alpha" (as LaTeX mode)
      */
-    REDBERRY,
+    Redberry,
     /**
      * This mode specifies such output format, that can be parsed again, by
      * copying string from output and pasting in parser metho argument. Most of
      * all it touches tensor fields, functions and derivatives. In opposite to
-     * {@link #REDBERRY}, Greek indices converted to string with this mode will
+     * {@link #Redberry}, Greek indices converted to string with this mode will
      * look like "\\alpha".
      */
-    REDBERRY_SOUT
+    RedberryConsole,
+    WolframMathematica
 }

@@ -22,6 +22,7 @@
  */
 package cc.redberry.core.parser;
 
+import cc.redberry.core.*;
 import cc.redberry.core.context.CC;
 import cc.redberry.core.indices.IndicesFactory;
 import cc.redberry.core.indices.SimpleIndices;
@@ -309,7 +310,32 @@ public class ParserTest {
     }
 
     @Test
-    public void testPowerAsp() {
-        System.out.println(Tensors.parse("24**2"));
+    public void testPowerAsp1() {
+        TAssert.assertTensorEquals("25**2", "625");;
+    }
+
+    @Test
+    public void testPowerAsp2() {
+        TAssert.assertTensorEquals("1/25**2", "1/625");;
+    }
+
+    @Test
+    public void testPowerAsp3() {
+        TAssert.assertTensorEquals("(1/25**2)**(1/2)", "1/25");;
+    }
+
+    @Test
+    public void testPowerAsp4() {
+        TAssert.assertTensorEquals("(1/25**2)**(1/2)", "1/25");;
+    }
+
+    @Test
+    public void testPowerAsp5() {
+        TAssert.assertTensorEquals("((1/(5+25-5))**2)**(1/2)", "1/25");;
+    }
+    
+    @Test
+    public void testConflictingIndices1(){
+        Tensors.parse("(A_i^i*A_m^n+A_k^k*A_m^n)*(A_i^i*A_d^c+A_k^k*A_d^c)");
     }
 }

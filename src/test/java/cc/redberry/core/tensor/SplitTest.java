@@ -52,10 +52,16 @@ public class SplitTest {
 
     @Test
     public void testSplitScalars3() {
-        Tensor t = Tensors.parse("g^ab*g^cd*g_mn*F_zxab^m*K_cd");
+        Tensor t = Tensors.parse("g^ab*g^cd*g_mn*F_ab*K_cd");
         Split split = Split.splitScalars(t);
-        System.out.println(split);
-//        Assert.assertTrue(TensorUtils.equals(split.factor, Tensors.parse("g_mn")));
-//        Assert.assertTrue(TensorUtils.equals(split.summand, Tensors.parse("2*a")));
+        Assert.assertTrue(TensorUtils.equals(split.factor, Tensors.parse("g_mn")));
+        Assert.assertTrue(TensorUtils.equals(split.summand, Tensors.parse("g^ab*g^cd*F_ab*K_cd")));
+    }
+
+    @Test
+    public void testSplitScalars4() {
+        Split s1 = Split.splitScalars(Tensors.parse("c1*k_{b}*k^{c}"));
+        Split s2 = Split.splitScalars(Tensors.parse("(c0-c0*a**(-1))*k_{i}*k^{i}*k_{b}*k^{c}"));
+        Assert.assertEquals(s1.factor.hashCode(), s2.factor.hashCode());
     }
 }

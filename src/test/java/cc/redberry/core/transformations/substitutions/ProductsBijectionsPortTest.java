@@ -26,6 +26,7 @@ import cc.redberry.core.context.CC;
 import cc.redberry.core.indices.IndexType;
 import cc.redberry.core.tensor.*;
 import java.util.Arrays;
+import junit.framework.*;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -159,6 +160,17 @@ public class ProductsBijectionsPortTest {
             assertTrue(count == 2);
         }
     }
+
+    @Test
+    public void test5() {
+        Product target = (Product) Tensors.parse("k^a*k^b*e_a^p*e_bp");
+        Product from = (Product) Tensors.parse("e_a^p*e_bp");
+        ProductsBijectionsPort port = new ProductsBijectionsPort(from.getContent(), target.getContent());
+        int count = 0;
+        while (port.take() != null)
+            count++;
+        Assert.assertEquals(2, count);
+    }
 //    @Test
 //    public void test31() {
 //        CC.resetTensorNames(5281301740134105709L);
@@ -288,5 +300,4 @@ public class ProductsBijectionsPortTest {
 //        }
 //        System.out.println(badCounter);
 //    }
-    public static boolean debugFlag = false;
 }

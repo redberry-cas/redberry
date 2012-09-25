@@ -20,37 +20,39 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
-package cc.redberry.core;
+package cc.redberry.core.transformations;
 
-import cc.redberry.core.indexmapping.*;
 import cc.redberry.core.tensor.*;
-import java.util.*;
-import java.util.Map;
-import java.util.regex.*;
-import org.junit.Test;
+import cc.redberry.core.tensor.iterator.*;
 
 /**
+ *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public class BlackList {
+public final class CollectNonScalars implements Transformation {
 
-    public enum Name {
+    public static final CollectNonScalars CollectNonScalars = new CollectNonScalars();
 
-        E1("a"), E2("b");
-        final String name;
-
-        Name(String name) {
-            this.name = name;
-        }
-        public static final Name[] values = values();
+    private CollectNonScalars() {
     }
 
-    @Test
-    public void te() {
-       List<Tensor> l = new ArrayList<>();
-        System.out.println(l instanceof List);
+    @Override
+    public Tensor transform(Tensor t) {
+        return collectNonScalars(t);
     }
-    
-    
+
+    public static Tensor collectNonScalars(Tensor t) {
+        TensorLastIterator iterator = new TensorLastIterator(t);
+        Tensor c;
+        while ((c = iterator.next()) != null)
+            if (c instanceof Sum) {
+                //TODO add check whether we need to do this transformation
+                SumBuilderSplitingScalars sbss = new SumBuilderSplitingScalars(c.size());
+                for (Tensor tt : c)
+                    sbss.put(tt);
+                iterator.set(sbss.build());
+            }
+        return iterator.result();
+    }
 }

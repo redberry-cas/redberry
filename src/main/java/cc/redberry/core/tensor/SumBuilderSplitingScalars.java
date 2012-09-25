@@ -22,33 +22,31 @@
  */
 package cc.redberry.core.tensor;
 
-import cc.redberry.core.indices.Indices;
-import cc.redberry.core.number.Complex;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import cc.redberry.core.indices.*;
+import cc.redberry.core.number.*;
+import java.util.*;
 
 /**
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public final class SumBuilder extends AbstractSumBuilder {
+public final class SumBuilderSplitingScalars extends AbstractSumBuilder {
 
-    public SumBuilder(int initialCapacity) {
+    SumBuilderSplitingScalars(Map<Integer, List<FactorNode>> summands, Complex complex, Indices indices, int[] sortedFreeIndices) {
+        super(summands, complex, indices, sortedFreeIndices);
+    }
+
+    public SumBuilderSplitingScalars(int initialCapacity) {
         super(initialCapacity);
     }
 
-    public SumBuilder() {
-    }
-
-    SumBuilder(Map<Integer, List<FactorNode>> summands, Complex complex, Indices indices, int[] sortedFreeIndices) {
-        super(summands, complex, indices, sortedFreeIndices);
+    public SumBuilderSplitingScalars() {
     }
 
     @Override
     protected Split split(Tensor tensor) {
-        return Split.splitIndexless(tensor);
+        return Split.splitScalars(tensor);
     }
 
     @Override
@@ -59,6 +57,6 @@ public final class SumBuilder extends AbstractSumBuilder {
             for (int i = fns.size() - 1; i >= 0; --i)
                 fns.set(i, fns.get(i).clone());
         }
-        return new SumBuilder(summands, complex, indices, sortedFreeIndices.clone());
+        return new SumBuilderSplitingScalars(summands, complex, indices, sortedFreeIndices.clone());
     }
 }

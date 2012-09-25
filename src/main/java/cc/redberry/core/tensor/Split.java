@@ -22,18 +22,18 @@
  */
 package cc.redberry.core.tensor;
 
-import cc.redberry.core.indices.*;
+import cc.redberry.core.indices.IndicesBuilder;
+import cc.redberry.core.indices.IndicesFactory;
 import cc.redberry.core.number.Complex;
-import java.util.*;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.Arrays;
 
 /**
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public abstract class Split {
+//TODO review with Dima and consider usage in future Collect 
+public class Split {
 
     public final Tensor factor;
     public final Tensor summand;
@@ -43,7 +43,11 @@ public abstract class Split {
         this.summand = summand;
     }
 
-    public abstract TensorBuilder getBuilder();
+    public TensorBuilder getBuilder() {
+        TensorBuilder builder = new SumBuilder();
+        builder.put(summand);
+        return builder;
+    }
 
     public static Split splitScalars(final Tensor tensor) {
         if (tensor.getIndices().getFree().size() == 0)//case 2*a*b*c            
@@ -94,7 +98,7 @@ public abstract class Split {
                 summand = Complex.ONE;
                 factor = tensor;
             }
-            return new SplitIndexless(factor, summand);
+            return new Split(factor, summand);
         }
     }
 
@@ -136,7 +140,7 @@ public abstract class Split {
                 summand = Complex.ONE;
                 factor = tensor;
             }
-            return new SplitIndexless(factor, summand);
+            return new Split(factor, summand);
         }
     }
 
@@ -159,25 +163,15 @@ public abstract class Split {
         }
     }
 
-    private static final class SplitIndexless extends Split {
-
-        public SplitIndexless(Tensor factor, Tensor summand) {
-            super(factor, summand);
-        }
-
-        @Override
-        public TensorBuilder getBuilder() {
-            TensorBuilder builder = new SumBuilder();
-            builder.put(summand);
-            return builder;
-        }
-    }
-
     private static final class ComplexSumBuilder implements TensorBuilder {
 
         Complex complex = Complex.ZERO;
 
         public ComplexSumBuilder() {
+        }
+
+        public ComplexSumBuilder(Complex complex) {
+            this.complex = complex;
         }
 
         @Override
@@ -189,28 +183,10 @@ public abstract class Split {
         public void put(Tensor tensor) {
             complex = complex.add((Complex) tensor);
         }
-    }
-
-    @Deprecated
-    private static final class ComplexSumBuilderConcurrent implements TensorBuilder {
-
-        final AtomicReference< Complex> atomicComplex = new AtomicReference<>(Complex.ZERO);
-
-        public ComplexSumBuilderConcurrent() {
-        }
 
         @Override
-        public Tensor build() {
-            return atomicComplex.get();
-        }
-
-        @Override
-        public void put(Tensor tensor) {
-            Complex oldVal, newVal, toAdd = (Complex) tensor;
-            do {
-                oldVal = atomicComplex.get();
-                newVal = oldVal.add(toAdd);
-            } while (!atomicComplex.compareAndSet(oldVal, newVal));
+        public TensorBuilder clone() {
+            return new ComplexSumBuilder(complex);
         }
     }
 }

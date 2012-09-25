@@ -72,8 +72,8 @@ public abstract class ScalarFunction extends Tensor {
                 return stringSymbol + "(" + argument.toString(ToStringMode.UTF8) + ")";
             case LaTeX:
                 return "\\" + stringSymbol.toLowerCase() + "(" + argument.toString(ToStringMode.UTF8) + ")";
-            case REDBERRY:
-                return Character.toString(Character.toUpperCase(stringSymbol.charAt(0))) + stringSymbol.substring(1, stringSymbol.length()) + "[" + argument.toString(ToStringMode.REDBERRY) + "]";
+            case Redberry:
+                return Character.toString(Character.toUpperCase(stringSymbol.charAt(0))) + stringSymbol.substring(1, stringSymbol.length()) + "[" + argument.toString(ToStringMode.Redberry) + "]";
             default:
                 return stringSymbol + "(" + argument.toString(ToStringMode.UTF8) + ")";
         }

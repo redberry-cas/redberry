@@ -39,7 +39,7 @@ import java.util.concurrent.ThreadFactory;
  * finished, so use it carefully, because interface could change in future
  * releases.</li> </ul>
  */
-public class ContextManager {
+public final class ContextManager {
     private final static ThreadLocal<ContextContainer> threadLocalContainer = new ThreadLocal<ContextContainer>() {
         @Override
         protected ContextContainer initialValue() {

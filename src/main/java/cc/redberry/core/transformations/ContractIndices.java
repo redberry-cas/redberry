@@ -35,10 +35,10 @@ import java.util.*;
  */
 public final class ContractIndices implements Transformation {
 
-    public static final ContractIndices INSTANCE = new ContractIndices();
+    public static final ContractIndices ContractIndices = new ContractIndices();
 
     public static Tensor contract(Tensor t) {
-        return INSTANCE.transform(t);
+        return ContractIndices.transform(t);
     }
 
     private ContractIndices() {

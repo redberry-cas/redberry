@@ -292,4 +292,11 @@ public class ProductTest {
         Tensor t = Tensors.parse("(2-i)*a*b*g_mn*g^mn");
         Assert.assertTrue(TensorUtils.equals(t, Tensors.parse(t.toString())));
     }
+
+    @Test
+    public void testNonScalar1() {
+        Product p1 = (Product) Tensors.parse("c1*k_{b}*k^{c}");
+        Product p2 = (Product) Tensors.parse("(c0-c0*a**(-1))*k_{i}*k^{i}*k_{b}*k^{c}");
+        TAssert.assertEquals(p1.getContent().getNonScalar(), p2.getContent().getNonScalar());
+    }
 }

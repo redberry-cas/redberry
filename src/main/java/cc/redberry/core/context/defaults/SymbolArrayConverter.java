@@ -59,12 +59,12 @@ public abstract class SymbolArrayConverter implements IndexSymbolConverter {
         try {
             switch (mode) {
                 default:
-                case REDBERRY:
+                case Redberry:
                 case LaTeX:
                     return symbols[code];
                 case UTF8:
                     return utf[code];
-                case REDBERRY_SOUT:
+                case RedberryConsole:
                     return "\\" + symbols[code];
             }
         } catch (ArrayIndexOutOfBoundsException e) {

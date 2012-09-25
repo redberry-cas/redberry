@@ -78,7 +78,7 @@ public class IndicesInsertionTest {
         Indices indices = ParserIndices.parseSimple("^i_j");
         Tensor e = Tensors.parse("A^{i}_{a}*F^{b}_{j}*(B^{a}_{c}*A^{c}_{b}+K^{c}_{b}*C^{a}_{c})");
         assertIndicesParity(t.getIndices().getFree(), indices);
-        assertParity(t, e);
+        assertEquals(t, e);
     }
 
     @Test
@@ -98,7 +98,7 @@ public class IndicesInsertionTest {
     public void test5() {
         Tensor t = parse("a*(b+a)*A*(c+d)*B*C", "^ij", "_pq", "a", "b", "c", "d");
         Tensor e = Tensors.parse("a^{ij}_{ab}*(b^{ab}_{cd}+a^{ab}_{cd})*A*(d^{cd}_{pq}+c^{cd}_{pq})*B*C");
-        assertParity(t, e);
+        assertEquals(t, e);
     }
 
     @Test
@@ -114,7 +114,7 @@ public class IndicesInsertionTest {
         Indices indices = ParserIndices.parseSimple("^i_j");
         Tensor e = Tensors.parse("A^i_a*(B^a_j+E^a_b*(R^b_j+K^b_c*U^c_j))");
         assertIndicesParity(t.getIndices().getFree(), indices);
-        assertEquals(t, e);
+        assertEqualsExactly(t, e);
     }
 
     @Test
@@ -206,6 +206,6 @@ public class IndicesInsertionTest {
     public void test13() {
         Tensor t = parse("A+B","^i", "_i", "A");
         Tensor e = Tensors.parse("A^i_i+B");
-        assertEquals(t, e);
+        assertEqualsExactly(t, e);
     }
 }

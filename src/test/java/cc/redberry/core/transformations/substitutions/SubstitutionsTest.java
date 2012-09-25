@@ -37,7 +37,7 @@ import cc.redberry.core.utils.TensorUtils;
 import junit.framework.Assert;
 import org.junit.Test;
 
-import static cc.redberry.core.TAssert.assertParity;
+import static cc.redberry.core.TAssert.assertEquals;
 import static cc.redberry.core.TAssert.assertTrue;
 import static cc.redberry.core.tensor.Tensors.*;
 
@@ -49,7 +49,7 @@ import static cc.redberry.core.tensor.Tensors.*;
 public class SubstitutionsTest {
 
     private static Tensor contract(Tensor tensor) {
-        return ContractIndices.INSTANCE.transform(tensor);
+        return ContractIndices.ContractIndices.transform(tensor);
     }
 
     private static Tensor expand(Tensor tensor) {
@@ -303,7 +303,7 @@ public class SubstitutionsTest {
 
         target1 = contract(expand(target1));
 
-        
+
         assertTrue(TensorUtils.equals(target, target1));
         assertTrue(target.getIndices().size() == 0);
         assertTrue(target1.getIndices().size() == 0);
@@ -434,9 +434,7 @@ public class SubstitutionsTest {
         Tensor target = parse("f_a[g^p]");
         Transformation transformation = Substitutions.getTransformation(from, to);
         target = transformation.transform(target);
-        System.out.println(target);
         target = contract(target);
-        System.out.println(target);
         assertTrue(TensorUtils.equalsExactly(target, parse("g_a+y_a")));
     }
 
@@ -447,7 +445,6 @@ public class SubstitutionsTest {
         Tensor target = parse("f^a[X^i,Y_j]");
         Transformation transformation = Substitutions.getTransformation(from, to);
         target = transformation.transform(target);
-        System.out.println(target);
         target = contract(target);
         assertTrue(TensorUtils.equalsExactly(target, parse("X^a+Y^a")));
     }
@@ -472,7 +469,7 @@ public class SubstitutionsTest {
         target = expand(target);
         target = contract(target);
 
-        Tensor expected = parse(target.toString(ToStringMode.REDBERRY_SOUT));
+        Tensor expected = parse(target.toString(ToStringMode.RedberryConsole));
         assertTrue(TensorUtils.equalsExactly(target, expected));
     }
 
@@ -536,7 +533,7 @@ public class SubstitutionsTest {
     }
 
     @Test
-    public void testField115() {
+    public void testField15() {
 
         //Riman without diff states
         Tensor target = parse("Rf[g_mn]");
@@ -584,7 +581,7 @@ public class SubstitutionsTest {
         Tensor target = parse("f_a^a[z_c^d+w_c^d]");
         target = t.transform(target);
         System.out.println(target);
-        assertParity(target, "z_{m}^{m}+w_{m}^{m}+y_{m}^{m}");
+        assertEquals(target, "z_{m}^{m}+w_{m}^{m}+y_{m}^{m}");
     }
 
     @Test
@@ -595,7 +592,7 @@ public class SubstitutionsTest {
         Tensor target = parse("f_a[x^a]");
         target = t.transform(target);
         System.out.println(target);
-        assertParity(target, "x_a");
+        assertEquals(target, "x_a");
     }
 
     @Test
@@ -605,7 +602,7 @@ public class SubstitutionsTest {
         Transformation t = Substitutions.getTransformation(from, to);
         Tensor target = parse("f_a^a[z_c^a+w_c^a:_c^a]");
         target = t.transform(target);
-        assertParity(target, "z_{m}^{m}+w_{m}^{m}+y_{m}^{m}");
+        assertEquals(target, "z_{m}^{m}+w_{m}^{m}+y_{m}^{m}");
     }
 
     @Test
@@ -615,7 +612,37 @@ public class SubstitutionsTest {
         Transformation t = Substitutions.getTransformation(from, to);
         Tensor target = parse("f_a^a[z_c^a+w_c^a:_c^a]");
         target = t.transform(target);
-        assertParity(target, "z_{m}^{m}+w_{m}^{m}+y_{m}^{m}");
+        assertEquals(target, "z_{m}^{m}+w_{m}^{m}+y_{m}^{m}");
+    }
+
+    @Test
+    public void testField22() {
+        //parsing tensor field
+        Expression field = Tensors.parseExpression("F_{ij}[p_a, q_b] = "
+                + "g_{ij}*p_a*q^a - (p_i*q_j + p_j*q_i)");
+
+        //parsing some expression 
+        Tensor e = Tensors.parse("E = F_ab[k^n - p^n, q_n] * F^ab[q_n, k_n]");
+
+        //substituting field value in expression
+        e = field.transform(e);
+        e = Expand.expand(e, ContractIndices.ContractIndices, Tensors.parseExpression("d_a^a=4"));
+        TAssert.assertIndicesConsistency(e);
+    }
+
+    @Test
+    public void testField22a() {
+        //parsing tensor field
+        Expression field = Tensors.parseExpression("F_{ij}[p_a, q_b] = "
+                + "g_{ij}*p_a*q^a - (p_i*q_j + p_j*q_i)");
+
+        //parsing some expression 
+        Tensor e = Tensors.parse("E = F_ab[p^n, q_n] * F^ab[p_n, q_n]");
+
+        //substituting field value in expression
+        e = field.transform(e);
+        e = Expand.expand(e);
+        TAssert.assertIndicesConsistency(e);
     }
     //TODO additional tests with specified field arguments indices
 
@@ -653,6 +680,28 @@ public class SubstitutionsTest {
             target = parseExpression("b*c = 1/a").transform(target);
             Assert.assertTrue(TensorUtils.isOne(target));
         }
+    }
+
+    @Test
+    public void testProduct4() {
+        Tensor target = parse("g_ab*g_cd+2*e_a^\\alpha*e_{b \\alpha}*e_c^\\beta*e_{d \\beta}");
+        target = parseExpression("e_a^\\alpha*e_{b \\alpha} = -g_ab").transform(target);
+        TAssert.assertEquals(target, "3*g_ab*g_cd");
+    }
+
+    @Test
+    public void testProduct5() {
+        Tensor target = parse("k^a*k^b*p^c*p^d*e_a^\\alpha*e_{b \\alpha}*e_c^\\beta*e_{d \\beta}");
+        target = parseExpression("e_a^\\alpha*e_{b \\alpha} = -g_ab").transform(target);
+        target = ContractIndices.contract(target);
+        TAssert.assertEquals(target, "k^a*k_a*p^b*p_b");
+    }
+
+    @Test
+    public void testProduct6() {
+        Tensor target = parse("a[p]*b[k]");
+        target = parseExpression("a[q]*b[s] = q+s").transform(target);
+        TAssert.assertEquals(target, "q+s");
     }
     //TODO tests for Product
 }

@@ -99,4 +99,6 @@ public interface TensorBuilder {
      * @return resulting tensor
      */
     Tensor build();
+    
+    TensorBuilder clone();
 }

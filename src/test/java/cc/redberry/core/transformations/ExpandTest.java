@@ -22,19 +22,19 @@
  */
 package cc.redberry.core.transformations;
 
+import cc.redberry.concurrent.*;
 import cc.redberry.core.TAssert;
 import cc.redberry.core.context.CC;
-import cc.redberry.core.tensor.Product;
-import cc.redberry.core.tensor.Sum;
-import cc.redberry.core.tensor.Tensor;
-import cc.redberry.core.tensor.Tensors;
+import cc.redberry.core.tensor.*;
 import cc.redberry.core.tensor.iterator.TraverseState;
 import cc.redberry.core.tensor.iterator.TreeTraverseIterator;
 import cc.redberry.core.utils.TensorUtils;
+import org.junit.*;
 import org.junit.Assert;
 import org.junit.Test;
 
 import static cc.redberry.core.tensor.Tensors.parse;
+import static cc.redberry.core.transformations.Expand.*;
 
 /**
  *
@@ -112,6 +112,7 @@ public class ExpandTest {
         Assert.assertTrue(TensorUtils.equalsExactly(actual, expected));
     }
 
+//    @Ignore
     @Test
     public void test8() {
         Tensor actual = parse("Power[a+b,30]");
@@ -121,6 +122,7 @@ public class ExpandTest {
 //        Assert.assertTrue(TensorUtils.equalsExactly(actual, expected));
     }
 
+//    @Ignore
     @Test
     public void test10() {
         for (int i = 2; i < 30; ++i) {
@@ -188,7 +190,7 @@ public class ExpandTest {
         Tensor actual = Expand.expand(parse("((a+b)*(c+a)-a)*f_mn*(f^mn+r^mn)-((a-b)*(c-a)+a)*r_ab*(f^ab+r^ab)"));
         assertAllBracketsExpanded(actual);
         Tensor expected = parse("(2*c*b+2*Power[a, 2]+-2*a)*r_{ab}*f^{ab}+(-1*b*a+c*b+-1*c*a+Power[a, 2]+-1*a)*r^{ab}*r_{ab}+(b*a+c*b+c*a+Power[a, 2]+-1*a)*f^{mn}*f_{mn}");
-        TAssert.assertParity(actual, expected);
+        TAssert.assertEquals(actual, expected);
     }
 
     public static void assertAllBracketsExpanded(Tensor tensor) {
@@ -243,7 +245,7 @@ public class ExpandTest {
             CC.resetTensorNames();
             Tensor t = parse("WR^{\\rho_5 }_{\\rho_5 } = 1/1080*Power[gamma, 3]*g_{\\gamma \\eta }*g^{\\gamma \\eta }*d^{\\beta }_{\\zeta }*d^{\\mu }_{\\sigma }*g^{\\alpha \\nu }*P^{\\zeta }_{\\beta }*R^{\\sigma }_{\\mu \\alpha \\nu }+1/2160*Power[gamma, 3]*d^{\\eta }_{\\eta }*d^{\\gamma }_{\\gamma }*d^{\\beta }_{\\zeta }*d^{\\mu }_{\\sigma }*g^{\\alpha \\nu }*P^{\\zeta }_{\\beta }*R^{\\sigma }_{\\mu \\alpha \\nu }+1/120*Power[gamma, 2]*d^{\\gamma }_{\\gamma }*d^{\\beta }_{\\zeta }*g^{\\alpha \\nu }*d^{\\mu }_{\\sigma }*P^{\\zeta }_{\\beta }*R^{\\sigma }_{\\mu \\alpha \\nu }+1/120960*Power[gamma, 4]*d^{\\rho_5 }_{\\rho_5 }*d^{\\eta }_{\\eta }*d^{\\epsilon }_{\\epsilon }*d^{\\beta }_{\\zeta }*d^{\\mu }_{\\sigma }*g^{\\alpha \\nu }*P^{\\zeta }_{\\beta }*R^{\\sigma }_{\\mu \\alpha \\nu }+1/360*Power[gamma, 3]*d^{\\zeta }_{\\gamma }*g^{\\alpha \\gamma }*g_{\\zeta \\sigma }*d^{\\beta }_{\\eta }*P^{\\eta }_{\\beta }*R_{\\alpha }^{\\sigma }+1/18*gamma*d^{\\beta }_{\\gamma }*g^{\\alpha \\nu }*d^{\\mu }_{\\sigma }*P^{\\gamma }_{\\beta }*R^{\\sigma }_{\\mu \\alpha \\nu }+1/2520*Power[gamma, 4]*g^{\\beta \\rho_5 }*g_{\\zeta \\rho_5 }*g_{\\epsilon \\sigma }*g^{\\epsilon \\mu }*g^{\\eta \\nu }*d^{\\alpha }_{\\eta }*P^{\\zeta }_{\\beta }*R^{\\sigma }_{\\mu \\alpha \\nu }+1/48*Power[gamma, 2]*g^{\\beta \\epsilon }*g_{\\epsilon \\eta }*d^{\\alpha }_{\\sigma }*P^{\\eta }_{\\beta }*R_{\\alpha }^{\\sigma }+1/5040*Power[gamma, 4]*d^{\\epsilon }_{\\rho_5 }*d^{\\eta }_{\\eta }*g^{\\beta \\rho_5 }*g_{\\epsilon \\zeta }*d^{\\mu }_{\\sigma }*g^{\\alpha \\nu }*P^{\\zeta }_{\\beta }*R^{\\sigma }_{\\mu \\alpha \\nu }+1/270*Power[gamma, 3]*g^{\\gamma \\eta }*d^{\\beta }_{\\gamma }*g_{\\zeta \\eta }*d^{\\mu }_{\\sigma }*g^{\\alpha \\nu }*P^{\\zeta }_{\\beta }*R^{\\sigma }_{\\mu \\alpha \\nu }+1/135*Power[gamma, 3]*g^{\\gamma \\eta }*d^{\\mu }_{\\gamma }*g_{\\eta \\sigma }*d^{\\beta }_{\\zeta }*g^{\\alpha \\nu }*P^{\\zeta }_{\\beta }*R^{\\sigma }_{\\mu \\alpha \\nu }+1/2520*Power[gamma, 4]*d^{\\epsilon }_{\\rho_5 }*g_{\\epsilon \\eta }*g^{\\beta \\rho_5 }*d^{\\eta }_{\\zeta }*d^{\\mu }_{\\sigma }*g^{\\alpha \\nu }*P^{\\zeta }_{\\beta }*R^{\\sigma }_{\\mu \\alpha \\nu }+(1/6*gamma+1/1440*Power[gamma, 3]*g_{\\gamma \\zeta }*g^{\\gamma \\zeta }+1/2880*Power[gamma, 3]*d^{\\zeta }_{\\zeta }*d^{\\gamma }_{\\gamma })*g^{\\alpha \\beta }*g_{\\gamma \\sigma }*P^{\\gamma }_{\\beta }*R_{\\alpha }^{\\sigma }+1/720*Power[gamma, 3]*d^{\\zeta }_{\\zeta }*g^{\\beta \\gamma }*g_{\\gamma \\eta }*d^{\\alpha }_{\\sigma }*P^{\\eta }_{\\beta }*R_{\\alpha }^{\\sigma }+(1/12*gamma+1/1440*Power[gamma, 3]*g_{\\gamma \\zeta }*g^{\\gamma \\zeta }+1/2880*Power[gamma, 3]*d^{\\zeta }_{\\zeta }*d^{\\gamma }_{\\gamma })*d^{\\beta }_{\\gamma }*d^{\\alpha }_{\\sigma }*P^{\\gamma }_{\\beta }*R_{\\alpha }^{\\sigma }+1/540*Power[gamma, 3]*d^{\\eta }_{\\eta }*d^{\\beta }_{\\gamma }*d^{\\gamma }_{\\zeta }*d^{\\mu }_{\\sigma }*g^{\\alpha \\nu }*P^{\\zeta }_{\\beta }*R^{\\sigma }_{\\mu \\alpha \\nu }+1/48*Power[gamma, 2]*g^{\\alpha \\epsilon }*g_{\\epsilon \\sigma }*d^{\\beta }_{\\eta }*P^{\\eta }_{\\beta }*R_{\\alpha }^{\\sigma }+1/20160*Power[gamma, 4]*g_{\\eta \\rho_5 }*g^{\\eta \\rho_5 }*d^{\\epsilon }_{\\epsilon }*d^{\\beta }_{\\zeta }*d^{\\mu }_{\\sigma }*g^{\\alpha \\nu }*P^{\\zeta }_{\\beta }*R^{\\sigma }_{\\mu \\alpha \\nu }+1/20160*Power[gamma, 4]*d^{\\epsilon }_{\\epsilon }*d^{\\eta }_{\\eta }*g^{\\beta \\rho_5 }*g_{\\zeta \\rho_5 }*d^{\\mu }_{\\sigma }*g^{\\alpha \\nu }*P^{\\zeta }_{\\beta }*R^{\\sigma }_{\\mu \\alpha \\nu }+1/5040*Power[gamma, 4]*d^{\\rho_5 }_{\\rho_5 }*d^{\\alpha }_{\\eta }*g^{\\epsilon \\mu }*g^{\\eta \\nu }*g_{\\epsilon \\sigma }*d^{\\beta }_{\\zeta }*P^{\\zeta }_{\\beta }*R^{\\sigma }_{\\mu \\alpha \\nu }+-1/1260*Power[gamma, 4]*d^{\\eta }_{\\epsilon }*g^{\\beta \\rho_5 }*d^{\\alpha }_{\\eta }*d^{\\mu }_{\\rho_5 }*g^{\\epsilon \\nu }*g_{\\zeta \\sigma }*P^{\\zeta }_{\\beta }*R^{\\sigma }_{\\mu \\alpha \\nu }+1/270*Power[gamma, 3]*d^{\\alpha }_{\\eta }*g^{\\gamma \\mu }*g^{\\eta \\nu }*g_{\\gamma \\sigma }*d^{\\beta }_{\\zeta }*P^{\\zeta }_{\\beta }*R^{\\sigma }_{\\mu \\alpha \\nu }+1/96*Power[gamma, 2]*d^{\\epsilon }_{\\epsilon }*d^{\\beta }_{\\eta }*d^{\\alpha }_{\\sigma }*P^{\\eta }_{\\beta }*R_{\\alpha }^{\\sigma }+1/1440*Power[gamma, 3]*g_{\\gamma \\zeta }*g^{\\gamma \\zeta }*g^{\\alpha \\beta }*g_{\\eta \\sigma }*P^{\\eta }_{\\beta }*R_{\\alpha }^{\\sigma }+1/360*Power[gamma, 3]*d^{\\zeta }_{\\gamma }*g^{\\beta \\gamma }*g_{\\zeta \\eta }*d^{\\alpha }_{\\sigma }*P^{\\eta }_{\\beta }*R_{\\alpha }^{\\sigma }+1/9*P*g^{\\alpha \\nu }*d^{\\mu }_{\\sigma }*R^{\\sigma }_{\\mu \\alpha \\nu }+1/60*Power[gamma, 2]*g^{\\beta \\gamma }*g_{\\gamma \\zeta }*g^{\\alpha \\nu }*d^{\\mu }_{\\sigma }*P^{\\zeta }_{\\beta }*R^{\\sigma }_{\\mu \\alpha \\nu }+1/15120*Power[gamma, 4]*d^{\\rho_5 }_{\\epsilon }*g_{\\eta \\rho_5 }*g^{\\epsilon \\eta }*d^{\\beta }_{\\zeta }*d^{\\mu }_{\\sigma }*g^{\\alpha \\nu }*P^{\\zeta }_{\\beta }*R^{\\sigma }_{\\mu \\alpha \\nu }+1/180*Power[gamma, 3]*d^{\\zeta }_{\\zeta }*g_{\\gamma \\eta }*g^{\\alpha \\gamma }*d^{\\beta }_{\\sigma }*P^{\\eta }_{\\beta }*R_{\\alpha }^{\\sigma }+1/48*Power[gamma, 2]*d^{\\epsilon }_{\\epsilon }*g^{\\alpha \\beta }*g_{\\eta \\sigma }*P^{\\eta }_{\\beta }*R_{\\alpha }^{\\sigma }+1/2880*Power[gamma, 3]*d^{\\zeta }_{\\zeta }*d^{\\gamma }_{\\gamma }*g^{\\alpha \\beta }*g_{\\eta \\sigma }*P^{\\eta }_{\\beta }*R_{\\alpha }^{\\sigma }+1/720*Power[gamma, 3]*d^{\\zeta }_{\\zeta }*g^{\\alpha \\gamma }*g_{\\gamma \\sigma }*d^{\\beta }_{\\eta }*P^{\\eta }_{\\beta }*R_{\\alpha }^{\\sigma }+1/12*Power[gamma, 2]*g_{\\epsilon \\eta }*g^{\\alpha \\epsilon }*d^{\\beta }_{\\sigma }*P^{\\eta }_{\\beta }*R_{\\alpha }^{\\sigma }+1/360*Power[gamma, 3]*g^{\\beta \\zeta }*g_{\\zeta \\eta }*g^{\\alpha \\gamma }*g_{\\gamma \\sigma }*P^{\\eta }_{\\beta }*R_{\\alpha }^{\\sigma }+1/90*Power[gamma, 3]*g^{\\gamma \\zeta }*g_{\\zeta \\eta }*g_{\\gamma \\sigma }*g^{\\alpha \\beta }*P^{\\eta }_{\\beta }*R_{\\alpha }^{\\sigma }+1/6*P*d^{\\alpha }_{\\sigma }*R_{\\alpha }^{\\sigma }+2/135*Power[gamma, 3]*g^{\\gamma \\eta }*d^{\\mu }_{\\gamma }*g_{\\eta \\sigma }*g^{\\beta \\nu }*d^{\\alpha }_{\\zeta }*P^{\\zeta }_{\\beta }*R^{\\sigma }_{\\mu \\alpha \\nu }+1/180*Power[gamma, 3]*d^{\\beta }_{\\gamma }*d^{\\zeta }_{\\eta }*g^{\\alpha \\gamma }*g_{\\zeta \\sigma }*P^{\\eta }_{\\beta }*R_{\\alpha }^{\\sigma }+1/10080*Power[gamma, 4]*d^{\\epsilon }_{\\eta }*d^{\\eta }_{\\epsilon }*g^{\\beta \\rho_5 }*g_{\\zeta \\rho_5 }*d^{\\mu }_{\\sigma }*g^{\\alpha \\nu }*P^{\\zeta }_{\\beta }*R^{\\sigma }_{\\mu \\alpha \\nu }");
             TAssert.assertIndicesConsistency(t);
-            t = Expand.expand(t, ContractIndices.INSTANCE, Tensors.parseExpression("d_\\mu^\\mu=4"));
+            t = Expand.expand(t, ContractIndices.ContractIndices, Tensors.parseExpression("d_\\mu^\\mu=4"));
             TAssert.assertIndicesConsistency(t);
         }
     }
@@ -255,10 +257,105 @@ public class ExpandTest {
         assertAllBracketsExpanded(t);
         TAssert.assertIndicesConsistency(t);
     }
+
     @Test
-    public void test25(){
-        Tensor t = parse("-1*(a+b-1)");
-        t = Expand.expand(t);
-        System.out.println(t);
+    public void test25() {
+        for (int i = 0; i < 100; ++i) {
+            CC.resetTensorNames();
+            Tensor t = Tensors.parse("(b+a)*(c+a)+(a+b)*(c+b)");
+            TAssert.assertEquals(Tensors.parse("2*c*a+2*b*a+a**2+2*c*b+b**2"), expandUsingPort(t));
+        }
+    }
+
+    @Test
+    public void test26() {
+        for (int i = 0; i < 100; ++i) {
+            CC.resetTensorNames();
+            Tensor t = Tensors.parse("((a+b)*(c+a)-a)*f_mn*(f^mn+r^mn)-((a-b)*(c-a)+a)*r_ab*(f^ab+r^ab)");
+            Tensor expected = Expand.expand(t), actual = expandUsingPort(t);
+            TAssert.assertEquals(expected, actual);
+        }
+    }
+
+    @Test
+    public void test27() {
+        for (int i = 0; i < 100; ++i) {
+            CC.resetTensorNames();
+            Tensor t = Tensors.parse("((a+b)*(c+a)-a)*f_mn*(f^mn+r^mn)-((a-b)*(c-a)+a)*r_ab*(f^ab+r^ab)*(f_a^a+r_b^b)**5");
+            Tensor expected = Expand.expand(t), actual = expandUsingPort(t);
+            assertAllBracketsExpanded(expected);
+            assertAllBracketsExpanded(actual);
+            System.out.println(actual);
+            System.out.println(expected);
+            TAssert.assertEquals(expected, actual);
+        }
+    }
+
+    @Test
+    public void test28() {
+        for (int i = 0; i < 100; ++i) {
+            CC.resetTensorNames();
+            Tensor t = Tensors.parse("(a_i^i+b_i^i)**5");
+            Tensor expected = Expand.expand(t);
+            TAssert.assertIndicesConsistency(expected);
+        }
+    }
+
+    @Test
+    public void test29() {
+        for (int i = 0; i < 100; ++i) {
+            CC.resetTensorNames();
+            Tensor t = Tensors.parse("(a+b)*(a_b^b+b_a^a)**5");
+            Tensor expected = Expand.expand(t),
+                    actual = expandUsingPort(t);
+            TAssert.assertEquals(expected, actual);
+        }
+    }
+
+    @Test
+    public void test30() {
+        for (int i = 0; i < 100; ++i) {
+            CC.resetTensorNames();
+            Tensor t = Tensors.parse("1/21*((a_mn+b_mn)*2*(3*a_b^b+b_a^a)**2+c*(2*((d_m+3*(i_m+n_m))*(f_n+2*h_n)-e_m*e_n)+4*(a_i^i-n_i^i)*h_m*h_n))*(d+h)+2*(b_m*b_n+R_nmiu^ui)");
+            Tensor e1 = expand(t), e2 = expandUsingPort(t);
+            assertAllBracketsExpanded(e1);
+            assertAllBracketsExpanded(e2);
+        }
+    }
+
+    @Test
+    public void test31() {
+        Tensor t = parse("(p_{a}*k_{b}+(k^{d}*k_{d}-m**2)**2*k_{a}*k_{b})");
+        t = expand(t);
+        TAssert.assertIndicesConsistency(t);
+    }
+
+    @Test
+    public void test32() {
+        Tensor t = expand(parse(("(a*b+(c*d-m**2)**2*a*b)")));
+        assertAllBracketsExpanded(t);
+    }
+
+    @Test
+    public void test33() {
+        CC.resetTensorNames(-1920349242311093308L);
+        Tensors.parse("k_a*k_b/(k_a*k^a-m**2)+p_a*k_b/(k_a*k^a-m**2)**3");//for debug in order to restore tensors hashes
+        Tensor t = Tensors.parse("(-m**2+k_{d}*k^{d})**2*k_{a}*k_{b}+p_{a}*k_{b}");
+        t = expand(t);
+        TAssert.assertIndicesConsistency(t);
+    }
+
+    @Test
+    public void test34() {
+        CC.resetTensorNames(-1920349242311093308L);
+        Tensor t = Tensors.parse("k_a*k_b/(k_a*k^a-m**2)+p_a*k_b/(k_a*k^a-m**2)**3");
+        t = Together.together(t);
+        TAssert.assertIndicesConsistency(t);
+        Tensor tt = Tensors.parse("(-m**2+k_{c}*k^{c})**(-3)*((-m**2+k_{d}*k^{d})**2*k_{a}*k_{b}+p_{a}*k_{b})");
+        TAssert.assertEqualsExactly(t, tt);
+        tt = expand(tt);
+        TAssert.assertIndicesConsistency(tt);
+        t = expand(t);
+        TAssert.assertIndicesConsistency(t);
     }
 }

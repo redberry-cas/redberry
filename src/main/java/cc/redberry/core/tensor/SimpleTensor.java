@@ -174,6 +174,11 @@ public class SimpleTensor extends Tensor {
         public void put(Tensor tensor) {
             throw new IllegalStateException("Can not put to SimpleTensor builder!");
         }
+
+        @Override
+        public TensorBuilder clone() {
+            return this;
+        }
     }
 
     private static final class Factory implements TensorFactory {

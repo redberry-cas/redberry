@@ -23,21 +23,20 @@
 package cc.redberry.core.transformations;
 
 import cc.redberry.concurrent.OutputPort;
+import cc.redberry.concurrent.OutputPortUnsafe;
+import cc.redberry.core.combinatorics.IntTuplesPort;
 import cc.redberry.core.indexgenerator.IndexGenerator;
 import cc.redberry.core.indexmapping.IndexMapping;
 import cc.redberry.core.indices.IndicesUtils;
 import cc.redberry.core.indices.SimpleIndices;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.tensor.*;
-import cc.redberry.core.tensor.iterator.TraverseGuide;
-import cc.redberry.core.tensor.iterator.TraverseState;
-import cc.redberry.core.tensor.iterator.TreeTraverseIterator;
+import cc.redberry.core.tensor.iterator.*;
+import cc.redberry.core.utils.ArraysUtils;
 import cc.redberry.core.utils.Indicator;
 import cc.redberry.core.utils.TensorUtils;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.math.BigInteger;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
 
 import static cc.redberry.core.tensor.Tensors.*;
@@ -71,6 +70,7 @@ public final class Expand implements Transformation {
     public static Tensor expand(Tensor tensor, Transformation... transformations) {
         return expand(tensor, Indicator.TRUE_INDICATOR, transformations);
     }
+    private static final Indicator<Tensor> productIndicator = Indicator.Utils.classIndicator(Product.class);
 
     public static Tensor expand(Tensor tensor, Indicator<Tensor> indicator, Transformation[] transformations) {
         TreeTraverseIterator iterator = new TreeTraverseIterator(tensor, TraverseGuide.EXCEPT_FUNCTIONS_AND_FIELDS);
@@ -82,11 +82,19 @@ public final class Expand implements Transformation {
             current = iterator.current();
             if (current instanceof Product && indicator.is(current))
                 iterator.set(expandProductOfSums(current, indicator, transformations));
-            else if (current instanceof Power && current.get(0) instanceof Sum
-                    && TensorUtils.isNatural(current.get(1)) && indicator.is(current))
-                iterator.set(expandPower((Sum) current.get(0), ((Complex) current.get(1)).getReal().intValue(), transformations));
+            else if (isExpandablePower(current) && indicator.is(current) && !iterator.checkLevel(productIndicator, 1)) {
+                Sum sum = (Sum) current.get(0);
+                iterator.set(expandPower(sum,
+                                         ((Complex) current.get(1)).getReal().intValue(),
+                                         ArraysUtils.toArray(TensorUtils.getAllIndicesNames(sum)),
+                                         transformations));
+            }
         }
         return iterator.result();
+    }
+
+    private static boolean isExpandablePower(Tensor t) {
+        return t instanceof Power && t.get(0) instanceof Sum && TensorUtils.isNatural(t.get(1));
     }
 
     private static Tensor expandProductOfSums(Tensor current, Indicator<Tensor> indicator, Transformation[] transformations) {
@@ -108,9 +116,20 @@ public final class Expand implements Transformation {
 
         int i;
         Tensor t, temp;
+        Set<Integer> initialForbiddenIndices = null;
         boolean expand = false;
         for (i = current.size() - 1; i >= 0; --i) {
             t = current.get(i);
+            if (isExpandablePower(t)) {
+                if (initialForbiddenIndices == null)
+                    initialForbiddenIndices = TensorUtils.getAllIndicesNames(current);
+                t = expandPower((Sum) t.get(0),
+                                ((Complex) t.get(1)).getReal().intValue(),
+                                ArraysUtils.toArray(initialForbiddenIndices),
+                                transformations);
+                initialForbiddenIndices.addAll(TensorUtils.getAllIndicesNames(t));
+                expand = true;
+            }
             if (t.getIndices().size() == 0)
                 if (t instanceof Sum)
                     if (indexlessSum == null)
@@ -165,18 +184,20 @@ public final class Expand implements Transformation {
         return main;
     }
 
-    private static Tensor expandPower(Sum argument, int power, Transformation[] transformations) {
+    private static Tensor expandPower(Sum argument, int power, int[] initialForbidden, Transformation[] transformations) {
         //TODO improve algorithm using Newton formula!!!
         int i;
         Tensor temp = argument;
-        Set<Integer> initialDummy = TensorUtils.getAllIndicesNames(argument);
-        int[] initialForbidden = new int[initialDummy.size()];
-        i = -1;
-        for (Integer index : initialDummy)
-            initialForbidden[++i] = index;
+//        Set<Integer> initialDummy = TensorUtils.getAllIndicesNames(argument);
+//        int[] initialForbidden = new int[initialDummy.size()];
+//        i = -1;
+//        for (Integer index : initialDummy)
+//            initialForbidden[++i] = index;
         IndexMapper mapper = new IndexMapper(initialForbidden);//(a_m^m+b_m^m)^30  
-        for (i = power - 1; i >= 1; --i)
+        for (i = power - 1; i >= 1; --i) {
             temp = expandPairOfSums((Sum) temp, (Sum) renameDummy(argument, mapper), transformations);
+            mapper.reset();
+        }
         return temp;
     }
 
@@ -206,7 +227,7 @@ public final class Expand implements Transformation {
     private static final class IndexMapper implements IndexMapping {
 
         private final IndexGenerator generator;
-        private final Map<Integer, Integer> map;
+        private Map<Integer, Integer> map;
 
         public IndexMapper(int[] initialUsed) {
             generator = new IndexGenerator(initialUsed);
@@ -215,10 +236,15 @@ public final class Expand implements Transformation {
 
         @Override
         public int map(int from) {
-            Integer to = map.get(IndicesUtils.getNameWithType(from));
+            int fromName = IndicesUtils.getNameWithType(from);
+            Integer to = map.get(fromName);
             if (to == null)
-                map.put(from, to = generator.generate(IndicesUtils.getType(from)));
+                map.put(fromName, to = generator.generate(IndicesUtils.getType(from)));
             return IndicesUtils.getRawStateInt(from) ^ to;
+        }
+
+        void reset() {
+            map = new HashMap<>();
         }
     }
 
@@ -257,5 +283,254 @@ public final class Expand implements Transformation {
             sum.put(t);
         }
         return sum.build();
+    }
+
+    //TODO review and add Indicator
+    private static boolean canBeExpanded(Tensor tensor) {
+        TensorLastIterator iterator = new TensorLastIterator(tensor);
+        Tensor c;
+        int sumsCount = 0;
+        while ((c = iterator.next()) != null) {
+            if (!(c instanceof Product))
+                continue;
+            for (Tensor m : c) {
+                if (m instanceof Sum) {
+                    ++sumsCount;
+                    if (!TensorUtils.isIndexless(m))
+                        return true;
+                }
+                if (sumsCount >= 2)
+                    return true;
+            }
+        }
+        return false;
+    }
+
+    /*
+     * Ports infrastructure.
+     */
+    public static Tensor expandUsingPort(Tensor t) {
+        return expandUsingPort(t, new Transformation[0]);
+    }
+
+    public static Tensor expandUsingPort(Tensor t, Transformation[] transformations) {
+        if (t instanceof Expression)
+            return Tensors.expression(expandUsingPort(t.get(0)), expandUsingPort(t.get(1)));
+        SumBuilder sb = new SumBuilder();
+        OutputPortUnsafe<Tensor> opu = Expand.createPort(t);
+        Tensor c;
+        while ((c = opu.take()) != null) {
+            if (transformations.length != 0) {
+                for (Transformation tr : transformations)
+                    c = tr.transform(c);
+                while (canBeExpanded(c))
+                    c = expandUsingPort(c, transformations);
+            }
+            sb.put(c);
+        }
+        return sb.build();
+    }
+
+    public static OutputPortUnsafe<Tensor> createPort(Tensor tensor) {
+        if (tensor instanceof Product)
+            return new ProductPort(tensor);
+        if (tensor instanceof Sum)
+            return new SumPort(tensor);
+        if (isExpandablePower(tensor))
+            return new PowerPort(tensor);
+        else
+            return new OutputPortUnsafe.Singleton<>(tensor);
+    }
+
+    private static interface ResetablePort extends OutputPortUnsafe<Tensor> {
+
+        void reset();
+    }
+
+    private static final class PowerPort implements ResetablePort {
+
+        private final Tensor base;
+        private final int power;
+        private IntTuplesPort tuplesPort;
+        private final int[] initialForbidden;
+        private OutputPortUnsafe<Tensor> currentPort;
+
+        public PowerPort(Tensor tensor, int[] initialForbidden) {
+            base = tensor.get(0);
+            power = ((Complex) tensor.get(1)).getReal().intValue();
+            int[] upperBounds = new int[power];
+            Arrays.fill(upperBounds, base.size());
+            tuplesPort = new IntTuplesPort(upperBounds);
+            this.initialForbidden = initialForbidden;
+            currentPort = nextPort();
+        }
+
+        public PowerPort(Tensor tensor) {
+            this(tensor, ArraysUtils.toArray(TensorUtils.getAllIndicesNames(tensor.get(0))));
+        }
+
+        OutputPortUnsafe<Tensor> nextPort() {
+            final int[] tuple = tuplesPort.take();
+            if (tuple == null)
+                return null;
+            IndexMapper mapper = new IndexMapper(initialForbidden);//(a_m^m+b_m^m)^30  
+            ProductBuilder builder = new ProductBuilder();
+            builder.put(base.get(tuple[0]));
+            for (int i = 1; i < tuple.length; ++i) {
+                builder.put(renameDummy(base.get(tuple[i]), mapper));
+                mapper.reset();
+            }
+            return createPort(builder.build());
+        }
+
+        @Override
+        public Tensor take() {
+            if (currentPort == null)
+                return null;
+            Tensor t = currentPort.take();
+            if (t == null) {
+                currentPort = nextPort();
+                return take();
+            }
+            return t;
+        }
+
+        @Override
+        public void reset() {
+            tuplesPort.reset();
+            currentPort = nextPort();
+        }
+    }
+
+    private static final class ProductPort implements OutputPortUnsafe<Tensor> {
+
+        private final ProductBuilder base;
+        private ProductBuilder currentBuilder;
+        private final ResetablePort[] sumsAndPowers;
+        private final Tensor[] currentMultipliers;
+        private final Tensor tensor;
+
+        public ProductPort(Tensor tensor) {
+            this.tensor = tensor;
+            this.base = new ProductBuilder();
+            List<ResetablePort> sumOrPowerPorts = new ArrayList<>();
+            int theLargestSumPosition = 0, theLargestSumSize = 0, productSize = tensor.size();
+            Tensor m;
+            for (int i = 0; i < productSize; ++i) {
+                m = tensor.get(i);
+                if (m instanceof Sum) {
+                    if (m.size() > theLargestSumSize) {
+                        theLargestSumPosition = sumOrPowerPorts.size();
+                        theLargestSumSize = m.size();
+                    }
+                    sumOrPowerPorts.add(new SumPort(m));
+                } else if (isExpandablePower(m)) {
+                    if (BigInteger.valueOf(m.get(0).size()).pow(((Complex) m.get(1)).getReal().intValue()).compareTo(BigInteger.valueOf(theLargestSumSize)) > 0) {
+                        theLargestSumPosition = sumOrPowerPorts.size();
+                        theLargestSumSize = m.size();
+                    }
+                    sumOrPowerPorts.add(new PowerPort(m, ArraysUtils.toArray(TensorUtils.getAllIndicesNames(tensor))));
+                } else
+                    base.put(m);
+            }
+            sumsAndPowers = sumOrPowerPorts.toArray(new ResetablePort[sumOrPowerPorts.size()]);
+
+            if (sumsAndPowers.length <= 1) {
+                currentMultipliers = new Tensor[0];
+                currentBuilder = base;
+            } else {
+                ResetablePort temp = sumsAndPowers[theLargestSumPosition];
+                sumsAndPowers[theLargestSumPosition] = sumsAndPowers[sumsAndPowers.length - 1];
+                sumsAndPowers[sumsAndPowers.length - 1] = temp;
+                currentMultipliers = new Tensor[sumsAndPowers.length - 2];
+                for (productSize = 0; productSize < sumsAndPowers.length - 2; ++productSize)
+                    currentMultipliers[productSize] = sumsAndPowers[productSize].take();
+                currentBuilder = nextCombination();
+            }
+        }
+
+        private ProductBuilder nextCombination() {
+            if (sumsAndPowers.length == 1)
+                return null;
+            int pointer = sumsAndPowers.length - 2;
+            ProductBuilder temp = base.clone();
+            boolean next = false;
+            Tensor c;
+            c = sumsAndPowers[pointer].take();
+            if (c == null) {
+                sumsAndPowers[pointer].reset();
+                c = sumsAndPowers[pointer].take();
+                next = true;
+            }
+            temp.put(c);
+            while (--pointer >= 0) {
+                if (next) {
+                    next = false;
+                    c = sumsAndPowers[pointer].take();
+                    if (c == null) {
+                        sumsAndPowers[pointer].reset();
+                        c = sumsAndPowers[pointer].take();
+                        next = true;
+                    }
+                    currentMultipliers[pointer] = c;
+                }
+                temp.put(currentMultipliers[pointer]);
+            }
+            if (next)
+                return null;
+            return temp;
+        }
+
+        @Override
+        public Tensor take() {
+            if (currentBuilder == null)
+                return null;
+            if (sumsAndPowers.length == 0) {
+                currentBuilder = null;
+                return tensor;
+            }
+            Tensor t = sumsAndPowers[sumsAndPowers.length - 1].take();
+            if (t == null) {
+                currentBuilder = nextCombination();
+                sumsAndPowers[sumsAndPowers.length - 1].reset();
+                return take();
+            }
+            ProductBuilder temp = currentBuilder.clone();
+            temp.put(t);
+            return temp.build();
+        }
+    }
+
+    private static final class SumPort implements ResetablePort {
+
+        private final OutputPortUnsafe<Tensor>[] ports;
+        private final Tensor tensor;
+        private int pointer;
+
+        public SumPort(Tensor tensor) {
+            this.tensor = tensor;
+            this.ports = new OutputPortUnsafe[tensor.size()];
+            reset();
+        }
+
+        @Override
+        public void reset() {
+            pointer = 0;
+            for (int i = tensor.size() - 1; i >= 0; --i)
+                ports[i] = createPort(tensor.get(i));
+        }
+
+        @Override
+        public Tensor take() {
+            Tensor t = null;
+            while (pointer < tensor.size()) {
+                t = ports[pointer].take();
+                if (t == null)
+                    ++pointer;
+                else
+                    return t;
+            }
+            return t;
+        }
     }
 }

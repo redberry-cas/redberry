@@ -20,37 +20,28 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
-package cc.redberry.core;
+package cc.redberry.core.transformations;
 
-import cc.redberry.core.indexmapping.*;
 import cc.redberry.core.tensor.*;
-import java.util.*;
-import java.util.Map;
-import java.util.regex.*;
-import org.junit.Test;
+import org.junit.*;
+import static cc.redberry.core.TAssert.*;
 
 /**
+ *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public class BlackList {
+public class CollectNonScalarsTest {
 
-    public enum Name {
-
-        E1("a"), E2("b");
-        final String name;
-
-        Name(String name) {
-            this.name = name;
-        }
-        public static final Name[] values = values();
-    }
 
     @Test
-    public void te() {
-       List<Tensor> l = new ArrayList<>();
-        System.out.println(l instanceof List);
+    public void test1() {
+        Tensor t = Tensors.parse("-c1*a**(-1)*k_{i}*k^{i}*d_{b}^{c}+(c0-c0*a**(-1))*k_{i}*k^{i}*k_{b}*k^{c}+c1*k_{b}*k^{c}");
+        SumBuilderSplitingScalars sbss = new SumBuilderSplitingScalars();
+        for(Tensor c : t)
+            sbss.put(c);
+        System.out.println(sbss.build());
+        System.out.println(CollectNonScalars.collectNonScalars(t));
     }
-    
-    
+
 }

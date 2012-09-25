@@ -58,7 +58,7 @@ public final class Product extends MultiTensor {
     /**
      * Hash code of this product.
      */
-    final int hash;
+    int hash;
 
     Product(Indices indices, Complex factor, Tensor[] indexless, Tensor[] data) {
         super(indices);
@@ -222,6 +222,7 @@ public final class Product extends MultiTensor {
         else
             return new Product(factor, indexlessData, new Tensor[0], ProductContent.EMPTY_INSTANCE, IndicesFactory.EMPTY_INDICES);
     }
+
     public Tensor getSubProductWithoutFactor() {
         return Tensors.multiply(ArraysUtils.addAll(indexlessData, data));
     }
@@ -233,6 +234,7 @@ public final class Product extends MultiTensor {
             return data[0];
         return new Product(Complex.ONE, new Tensor[0], data, contentReference.get(), indices);
     }
+
     private ProductContent calculateContent() {
         if (data.length == 0)
             return ProductContent.EMPTY_INSTANCE;
@@ -406,8 +408,10 @@ public final class Product extends MultiTensor {
         //TODO should be lazy field in ProductContent
         FullContractionsStructure fullContractionsStructure = new FullContractionsStructure(data, differentIndicesCount, freeIndices);
         ProductContent content = new ProductContent(contractionStructure, fullContractionsStructure, scalars, nonScalar, stretchIndices, data);
-        if (componentCount == 1 && nonScalar instanceof Product)
+        if (componentCount == 1 && nonScalar instanceof Product) {
             ((Product) nonScalar).contentReference = new SoftReference<>(content);
+            ((Product) nonScalar).hash = ((Product) nonScalar).calculateHash(); //TODO !!!discuss with Dima!!!
+        }
         return content;
     }
 
