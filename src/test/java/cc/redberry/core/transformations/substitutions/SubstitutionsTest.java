@@ -696,5 +696,12 @@ public class SubstitutionsTest {
         target = ContractIndices.contract(target);
         TAssert.assertEquals(target, "k^a*k_a*p^b*p_b");
     }
+
+    @Test
+    public void testProduct6() {
+        Tensor target = parse("a[p]*b[k]");
+        target = parseExpression("a[q]*b[s] = q+s").transform(target);
+        TAssert.assertEquals(target, "q+s");
+    }
     //TODO tests for Product
 }

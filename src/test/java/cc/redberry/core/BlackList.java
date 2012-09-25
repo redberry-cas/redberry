@@ -48,7 +48,8 @@ public class BlackList {
 
     @Test
     public void te() {
-        System.out.println(IndexMappings.getAllMappings(Tensors.parse("F_mn"), Tensors.parse("F_\\mu\\nu")).size());
+       List<Tensor> l = new ArrayList<>();
+        System.out.println(l instanceof List);
     }
     
     
