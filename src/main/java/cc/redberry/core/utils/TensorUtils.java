@@ -31,6 +31,8 @@ import cc.redberry.core.indices.IndicesUtils;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.tensor.*;
 import cc.redberry.core.tensor.functions.ScalarFunction;
+import gnu.trove.set.hash.TIntHashSet;
+
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
@@ -245,6 +247,31 @@ public class TensorUtils {
         }
     }
 
+    public static TIntHashSet getAllIndicesNamesT(Tensor... tensors) {
+        TIntHashSet set = new TIntHashSet();
+        for (Tensor tensor : tensors)
+            appendAllIndicesNamesT(tensor, set);
+        return set;
+    }
+
+    private static void appendAllIndicesNamesT(Tensor tensor, TIntHashSet set) {
+        if (tensor instanceof SimpleTensor) {
+            Indices ind = tensor.getIndices();
+            final int size = ind.size();
+            for (int i = 0; i < size; ++i)
+                set.add(IndicesUtils.getNameWithType(ind.get(i)));
+        } else {
+            final int size = tensor.size();
+            Tensor t;
+            for (int i = 0; i < size; ++i) {
+                t = tensor.get(i);
+                if (t instanceof ScalarFunction)
+                    continue;
+                appendAllIndicesNamesT(tensor.get(i), set);
+            }
+        }
+    }
+
     public static boolean equals(Tensor u, Tensor v) {
         if (u == v)
             return true;
@@ -276,10 +303,7 @@ public class TensorUtils {
     }
 
     /**
-     *
-     * @param t
-     *
-     * s AssertionError
+     * @param t s AssertionError
      */
     public static void assertIndicesConsistency(Tensor t) {
         assertIndicesConsistency(t, new HashSet<Integer>());
