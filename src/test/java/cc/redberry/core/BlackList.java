@@ -22,11 +22,7 @@
  */
 package cc.redberry.core;
 
-import cc.redberry.core.indexmapping.*;
-import cc.redberry.core.tensor.*;
 import java.util.*;
-import java.util.Map;
-import java.util.regex.*;
 import org.junit.Test;
 
 /**
@@ -46,11 +42,5 @@ public class BlackList {
         public static final Name[] values = values();
     }
 
-    @Test
-    public void te() {
-       List<Tensor> l = new ArrayList<>();
-        System.out.println(l instanceof List);
-    }
-    
-    
+   
 }
