@@ -214,6 +214,7 @@ public class TensorUtils {
         return true;
     }
 
+    @Deprecated
     public static Set<Integer> getAllDummyIndicesNames(Tensor tensor) {
         Set<Integer> dummy = getAllIndicesNames(tensor);
         Indices ind = tensor.getIndices().getFree();
@@ -245,6 +246,12 @@ public class TensorUtils {
                 appendAllIndicesNames(tensor.get(i), indices);
             }
         }
+    }
+
+    public static TIntHashSet getAllDummyIndicesT(Tensor tensor) {
+        TIntHashSet indices = getAllIndicesNamesT(tensor);
+        indices.removeAll(IndicesUtils.getIndicesNames(tensor.getIndices().getFree()));
+        return indices;
     }
 
     public static TIntHashSet getAllIndicesNamesT(Tensor... tensors) {
