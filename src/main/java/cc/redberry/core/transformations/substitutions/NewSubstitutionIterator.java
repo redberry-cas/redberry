@@ -158,6 +158,9 @@ public final class NewSubstitutionIterator implements TreeIterator {
 
         @Override
         public void insureInitialized() {
+            if (forbidden != null)
+                return;
+
             forbidden = new TIntHashSet(parent.getForbidden());
             forbidden.addAll(TensorUtils.getAllIndicesNamesT(tensor));
         }
@@ -178,6 +181,9 @@ public final class NewSubstitutionIterator implements TreeIterator {
         }
 
         public void insureInitialized() {
+            if (forbidden != null)
+                return;
+
             //Getting parent forbidden indices
             //The set of forbidden indices do not contain current sum
             //dummy indices (see getForbidden() e.g. for Product)
@@ -272,11 +278,14 @@ public final class NewSubstitutionIterator implements TreeIterator {
 
         @Override
         public void insureInitialized() {
+            if (forbidden != null)
+                return;
             forbidden = TensorUtils.getAllIndicesNamesT(tensor);
         }
 
         @Override
         public void submit(TIntSet removed, TIntSet added) {
+            insureInitialized();
             forbidden.addAll(added);
             forbidden.removeAll(removed);
         }
