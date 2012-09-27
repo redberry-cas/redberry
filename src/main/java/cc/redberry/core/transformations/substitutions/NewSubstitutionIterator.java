@@ -1,108 +1,284 @@
 package cc.redberry.core.transformations.substitutions;
 
+import cc.redberry.core.tensor.Product;
+import cc.redberry.core.tensor.SimpleTensor;
+import cc.redberry.core.tensor.Sum;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.tensor.iterator.TraverseState;
 import cc.redberry.core.tensor.iterator.TreeIterator;
 import cc.redberry.core.tensor.iterator.TreeTraverseIterator;
+import cc.redberry.core.utils.ByteBackedBitArray;
 import cc.redberry.core.utils.TensorUtils;
+import gnu.trove.TCollections;
+import gnu.trove.iterator.TIntIterator;
+import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
 
-public class NewSubstitutionIterator implements TreeIterator {
-    TreeTraverseIterator innerIterator;
-    private ForbiddenCounter fc = null;
+import java.util.Arrays;
+
+public final class NewSubstitutionIterator implements TreeIterator {
+    private static final TIntSet EMPTY_INT_SET = TCollections.unmodifiableSet(new TIntHashSet(0));
+    private final TreeTraverseIterator innerIterator;
+    private ForbiddenContainer fc = null;
+
+    public NewSubstitutionIterator(Tensor tensor) {
+        this.innerIterator = new TreeTraverseIterator(tensor);
+    }
 
     @Override
     public Tensor next() {
         TraverseState nextState;
-        while ((nextState = innerIterator.next()) != TraverseState.Leaving
-                && nextState != null) {
-            //"Diving"
+        Tensor tensor;
+        boolean isSimpleTensor = false;
+
+        if (fc != null)
+            fc.next();
+
+        while ((nextState = innerIterator.next()) == TraverseState.Entering) { //"Diving"
+            tensor = innerIterator.current();
+            if (fc == null && (tensor instanceof Product))
+                fc = new TopProductFC(null, tensor);
+            else {
+                if (tensor instanceof Sum)
+                    fc = new SumFC(fc, tensor);
+                else if (tensor instanceof Product)
+                    fc = new ProductFC(fc, tensor);
+                else if (tensor instanceof SimpleTensor) //Next state will be leaving
+                    isSimpleTensor = true;
+            }
 
         }
+
+
         if (nextState == null)
             return null;
+
+        //assert nextState == Leaving
+
+        if (!isSimpleTensor) {
+            fc = fc.getParent();
+        }
+
+        /*ForbiddenContainer f = fc;
+
+        do {
+            System.out.println(((AbstractFC) f).currentBranch + " : " +
+                    f.getClass().getSimpleName() + " : " +
+                    ((AbstractFC) f).tensor);
+        } while ((f = f.getParent()) != null);*/
+
         return innerIterator.current();
     }
 
     @Override
     public void set(Tensor tensor) {
+        Tensor oldTensor = innerIterator.current();
 
+        if (!tensor.getIndices().getFree().equalsRegardlessOrder(tensor.getIndices().getFree()))
+            throw new RuntimeException("Substitution with different free indices.");
+
+        TIntHashSet oldDummyIndices = TensorUtils.getAllDummyIndicesT(oldTensor);
+        TIntHashSet newDummyIndices = TensorUtils.getAllDummyIndicesT(tensor);
+
+        TIntHashSet removed = new TIntHashSet(oldDummyIndices),
+                added = new TIntHashSet(newDummyIndices);
+
+        removed.removeAll(newDummyIndices);
+        added.removeAll(oldDummyIndices);
+
+        if (fc != null)
+            fc.submit(removed, added);
+
+        innerIterator.set(tensor);
     }
 
     @Override
     public Tensor result() {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        return innerIterator.result();
     }
 
     @Override
     public int depth() {
-        return 0;  //To change body of implemented methods use File | Settings | File Templates.
+        return innerIterator.depth();
     }
 
-    private static interface ForbiddenCounter {
-        TIntHashSet getForbidden();
-
-        void submitRemoved(int[] removed);
-
-        void submitAdded(int[] added);
+    public int[] getForbidden() {
+        if (fc == null)
+            return new int[0];
+        return fc.getForbidden().toArray();
     }
 
-    private static abstract class AbstractFC implements ForbiddenCounter {
-        protected final ForbiddenCounter parent;
+    private static interface ForbiddenContainer {
+        TIntSet getForbidden();
+
+        void submit(TIntSet removed, TIntSet added);
+
+        void next();
+
+        ForbiddenContainer getParent();
+    }
+
+
+    private static abstract class AbstractFC implements ForbiddenContainer {
+        protected final ForbiddenContainer parent;
         protected final Tensor tensor;
-        protected TIntHashSet forbidden = null;
+        protected int currentBranch = 0;
+        protected TIntSet forbidden = null;
 
-        private AbstractFC(ForbiddenCounter parent, Tensor tensor) {
+        private AbstractFC(ForbiddenContainer parent, Tensor tensor) {
             this.parent = parent;
             this.tensor = tensor;
         }
 
-        public abstract void calculateForbidden();
+        @Override
+        public void next() {
+            ++currentBranch;
+        }
+
+        public abstract void insureInitialized();
 
         @Override
-        public TIntHashSet getForbidden() {
-            return forbidden;
+        public ForbiddenContainer getParent() {
+            return parent;
         }
 
         @Override
-        public void submitRemoved(int[] removed) {
-            if (forbidden == null)
-                calculateForbidden();
-            forbidden.removeAll(removed);
-            if (parent != null)
-                parent.submitRemoved(removed);
-        }
-
-        @Override
-        public void submitAdded(int[] added) {
-            if (forbidden == null)
-                calculateForbidden();
-            forbidden.addAll(added);
-            if (parent != null)
-                parent.submitAdded(added);
+        public TIntSet getForbidden() {
+            insureInitialized();
+            TIntHashSet result = new TIntHashSet(forbidden);
+            result.removeAll(TensorUtils.getAllIndicesNamesT(tensor.get(currentBranch)));
+            return result;
         }
     }
+
+    private final static class ProductFC extends AbstractFC {
+        private ProductFC(ForbiddenContainer parent, Tensor tensor) {
+            super(parent, tensor);
+        }
+
+        @Override
+        public void insureInitialized() {
+            forbidden = new TIntHashSet(parent.getForbidden());
+            forbidden.addAll(TensorUtils.getAllIndicesNamesT(tensor));
+        }
+
+        @Override
+        public void submit(TIntSet removed, TIntSet added) {
+            forbidden.addAll(added);
+            forbidden.removeAll(removed);
+        }
+    }
+
+    private final static class SumFC extends AbstractFC {
+        private int[] allDummyIndices;
+        private ByteBackedBitArray[] usedArrays; //index index in allDummyIndices is index
+
+        private SumFC(ForbiddenContainer parent, Tensor tensor) {
+            super(parent, tensor);
+        }
+
+        public void insureInitialized() {
+            //Getting parent forbidden indices
+            //The set of forbidden indices do not contain current sum
+            //dummy indices (see getForbidden() e.g. for Product)
+            forbidden = parent.getForbidden();
+
+            //All dummy indices in this sum
+            TIntHashSet allDummyIndicesT = TensorUtils.getAllDummyIndicesT(tensor);
+
+            //Creating array to index individual indices origin
+            allDummyIndices = allDummyIndicesT.toArray();
+            Arrays.sort(allDummyIndices);
+
+            //For performance
+            final int size = tensor.size();
+
+            TIntHashSet dummy;
+            int i;
+
+            //Allocating origins arrays
+            usedArrays = new ByteBackedBitArray[allDummyIndices.length];
+            for (i = allDummyIndices.length - 1; i >= 0; --i)
+                usedArrays[i] = new ByteBackedBitArray(size);
+
+            //Full-filling origins array
+            for (i = size - 1; i >= 0; --i) {
+                dummy = TensorUtils.getAllDummyIndicesT(tensor.get(i));
+                TIntIterator iterator = dummy.iterator();
+
+                while (iterator.hasNext())
+                    usedArrays[Arrays.binarySearch(allDummyIndices, iterator.next())].set(i);
+            }
+        }
+
+        @Override
+        public void submit(TIntSet removed, TIntSet added) {
+            TIntSet parentRemoved = null, parentAdded;
+
+            //Calculating really removed indices set
+            TIntIterator iterator = removed.iterator();
+            int iIndex, index;
+            while (iterator.hasNext()) {
+                iIndex = Arrays.binarySearch(allDummyIndices, index = iterator.next());
+                usedArrays[iIndex].clear(currentBranch);
+
+                if (usedArrays[iIndex].bitCount() == 0) {
+                    if (parentRemoved == null)
+                        parentRemoved = new TIntHashSet();
+                    parentRemoved.add(index);
+                }
+            }
+            if (parentRemoved == null)
+                parentRemoved = EMPTY_INT_SET;
+
+            //Processing added indices and calculating added set to
+            //propagate to parent.
+            parentAdded = new TIntHashSet(added);
+            iterator = parentAdded.iterator();
+            while (iterator.hasNext()) {
+                //Searching index in initial dummy indices set
+                iIndex = Arrays.binarySearch(allDummyIndices, index = iterator.next());
+
+                //If this index is new for this sum it will never be removed,
+                //so we don't need to store information about it.
+                if (iIndex < 0)
+                    continue;
+
+                //If this index was already somewhere in the sum,
+                //we don't have to propagate it to parent
+                if (usedArrays[iIndex].bitCount() >= 0)
+                    iterator.remove();
+
+                //Marking this index as added to current summand
+                usedArrays[iIndex].set(currentBranch);
+            }
+
+            //Propagating events to parent
+            parent.submit(parentRemoved, parentAdded);
+        }
+
+        @Override
+        public TIntSet getForbidden() {
+            insureInitialized();
+            return new TIntHashSet(forbidden);
+        }
+    }
+
 
     private final static class TopProductFC extends AbstractFC {
-        private TopProductFC(ForbiddenCounter parent, Tensor tensor) {
+        private TopProductFC(ForbiddenContainer parent, Tensor tensor) {
             super(parent, tensor);
         }
 
         @Override
-        public void calculateForbidden() {
+        public void insureInitialized() {
             forbidden = TensorUtils.getAllIndicesNamesT(tensor);
         }
-    }
-
-    private final static class SimpleFC extends AbstractFC {
-        private SimpleFC(ForbiddenCounter parent, Tensor tensor) {
-            super(parent, tensor);
-        }
 
         @Override
-        public void calculateForbidden() {
-            forbidden = new TIntHashSet(parent.getForbidden());
-            forbidden.removeAll(TensorUtils.getAllIndicesNamesT(tensor));
+        public void submit(TIntSet removed, TIntSet added) {
+            forbidden.addAll(added);
+            forbidden.removeAll(removed);
         }
     }
 }
