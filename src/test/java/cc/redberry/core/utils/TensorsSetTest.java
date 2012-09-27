@@ -35,7 +35,7 @@ public class TensorsSetTest {
 
     @Test
     public void test1() {
-        TSet<Expression> set = new TSet<>();
+        THashSet<Expression> set = new THashSet<>();
         set.add(Tensors.parseExpression("a=2"));
         set.add(Tensors.parseExpression("a=2"));
         set.add(Tensors.parseExpression("b=3"));

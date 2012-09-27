@@ -25,7 +25,7 @@ package cc.redberry.core.transformations;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.tensor.*;
 import cc.redberry.core.tensor.iterator.TensorLastIterator;
-import cc.redberry.core.utils.TMap;
+import cc.redberry.core.utils.THashMap;
 import cc.redberry.core.utils.TensorUtils;
 import java.util.ArrayList;
 import java.util.List;
@@ -139,17 +139,17 @@ public final class Together implements Transformation {
 
     private static class SplitStruct {
 
-        final TMap<Tensor, Complex> denominators;
+        final THashMap<Tensor, Complex> denominators;
         final Tensor numerator;
 
-        public SplitStruct(TMap<Tensor, Complex> denominators, Tensor numerator) {
+        public SplitStruct(THashMap<Tensor, Complex> denominators, Tensor numerator) {
             this.denominators = denominators;
             this.numerator = numerator;
         }
     }
 
     private static SplitStruct splitFraction(Tensor tensor) {
-        TMap<Tensor, Complex> map = new TMap<>();
+        THashMap<Tensor, Complex> map = new THashMap<>();
         if (checkPower(tensor)) {
             map.put(tensor.get(0), ((Complex) tensor.get(1)).negate());
             return new SplitStruct(map, Complex.ONE);
@@ -183,7 +183,7 @@ public final class Together implements Transformation {
 
     private static Tensor togetherProduct(Product t) {
         //TODO add quick check
-        TMap<Tensor, SumBuilder> map = new TMap<>();
+        THashMap<Tensor, SumBuilder> map = new THashMap<>();
         Tensor a, p;
         SumBuilder temp;
         Tensor[] scalars = t.getAllScalars();
