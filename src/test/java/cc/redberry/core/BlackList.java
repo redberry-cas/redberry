@@ -23,8 +23,12 @@
 package cc.redberry.core;
 
 import gnu.trove.set.hash.TIntHashSet;
-import java.util.*;
+import org.junit.Ignore;
 import org.junit.Test;
+
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Random;
 
 /**
  * @author Dmitry Bolotin
@@ -40,9 +44,11 @@ public class BlackList {
         Name(String name) {
             this.name = name;
         }
+
         public static final Name[] values = values();
     }
 
+    @Ignore
     @Test
     public void te() {
         TIntHashSet ihs = new TIntHashSet();
@@ -69,6 +75,7 @@ public class BlackList {
         System.out.println("object   " + t);
     }
 
+    @Ignore
     @Test
     public void te1() {
         TIntHashSet ihs = new TIntHashSet();

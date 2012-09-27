@@ -416,6 +416,23 @@ public class TensorUtils {
         }
         return symmetries;
     }
+
+    public static Set<SimpleTensor> getAllSymbols(Tensor... tensors) {
+        Set<SimpleTensor> set = new HashSet<>();
+        for (Tensor tensor : tensors)
+            addSymbols(tensor, set);
+        return set;
+    }
+
+
+    private static void addSymbols(Tensor tensor, Set<SimpleTensor> set) {
+        if (isSymbol(tensor)) {
+            set.add((SimpleTensor) tensor);
+        } else
+            for (Tensor t : tensor)
+                addSymbols(t, set);
+    }
+
 //    public static Tensor[] getDistinct(final Tensor[] array) {
 //        final int length = array.length;
 //        final Indices indices = array[0].getIndices().getFree();
