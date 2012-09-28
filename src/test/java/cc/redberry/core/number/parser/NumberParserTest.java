@@ -124,7 +124,7 @@ public class NumberParserTest {
 
     @Test
     public void test15() {
-        Complex a = NumberParser.COMPLEX_PARSER.parse("4/2+i*3/2");
+        Complex a = NumberParser.COMPLEX_PARSER.parse("4/2+I*3/2");
         Complex b = new Complex(new Rational(4, 2), new Rational(3, 2));
         Assert.assertEquals(b, a);
     }

@@ -157,22 +157,24 @@ public class Complex extends Tensor
     public String toString(ToStringMode mode) {
         if (real.isZero())
             if (imaginary.isOne())
-                return "i";
+                return "I";
+            else if (imaginary.isMinusOne())
+                return "-I";
             else
-                return imaginary.toString() + "*i";
+                return imaginary.toString() + "*I";
         int is = imaginary.signum();
         if (is == 0)
             return real.toString();
         Real abs = imaginary.abs();
         if (is < 0)
             if (abs.isOne())
-                return real.toString() + "-i";
+                return real.toString() + "-I";
             else
-                return real.toString() + "-i*" + imaginary.abs();
+                return real.toString() + "-I*" + imaginary.abs();
         if (abs.isOne())
-            return real.toString() + "+i";
+            return real.toString() + "+I";
         else
-            return real.toString() + "+i*" + imaginary.abs();
+            return real.toString() + "+I*" + imaginary.abs();
 
     }
 

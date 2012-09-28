@@ -38,7 +38,7 @@ public final class NewSubstitutionIterator implements TreeIterator {
             tensor = innerIterator.current();
             if (fc == null && (tensor instanceof Product))
                 fc = new TopProductFC(null, tensor);
-            else {
+            else if(fc != null){
                 if (tensor instanceof Sum)
                     fc = new SumFC(fc, tensor);
                 else if (tensor instanceof Product)
@@ -55,7 +55,7 @@ public final class NewSubstitutionIterator implements TreeIterator {
 
         //assert nextState == Leaving
 
-        if (!isSimpleTensor) {
+        if (!isSimpleTensor && fc != null) {
             fc = fc.getParent();
         }
 
@@ -167,6 +167,7 @@ public final class NewSubstitutionIterator implements TreeIterator {
 
         @Override
         public void submit(TIntSet removed, TIntSet added) {
+            insureInitialized();
             forbidden.addAll(added);
             forbidden.removeAll(removed);
         }

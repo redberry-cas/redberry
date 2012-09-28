@@ -162,12 +162,12 @@ public class TensorsTest {
 
         //photon-scalar-scalar vertex
         Expression V1 = Tensors.parseExpression("V_{i}[p_a, q_b] = "
-                + "-i*e*(p_i+q_i)");
+                + "-I*e*(p_i+q_i)");
         //photon-photon-scalar-scalar vertex
         Expression V2 = Tensors.parseExpression("V_{ij} = "
-                + "2*i*e**2*g_ij");
+                + "2*I*e**2*g_ij");
         //scalar propagator                
-        Expression P = Tensors.parseExpression("D[k_a] = -i/(k^a*k_a-m**2)");
+        Expression P = Tensors.parseExpression("D[k_a] = -I/(k^a*k_a-m**2)");
 
         //matrix element
         Tensor M = Tensors.parseExpression("M^ij ="

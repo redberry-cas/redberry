@@ -160,4 +160,13 @@ public class TensorGeneratorTest {
                                               true,
                                               Tensors.parse("g_mn", "k_a")), expected);
     }
+
+    @Test
+    public void test9() {
+        Tensor expected = Tensors.parse("p_\\mu*G^{\\mu i}_j+d^i_j");
+        assertEquals(TensorGenerator.generate("",
+                ParserIndices.parseSimple("^i_j"),
+                true,
+                Tensors.parse("d^i_j", "p_\\mu*G^{\\mu i}_j")), expected);
+    }
 }

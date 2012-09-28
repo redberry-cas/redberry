@@ -68,14 +68,14 @@ public class TensorGenerator {
         int totalLowCount = lowerArray.length, i, k;
         int[] lowCounts = new int[samples.length + 1];
         for (i = 0; i < samples.length; ++i)
-            lowCounts[i] = samples[i].getIndices().getLower().length();
+            lowCounts[i] = samples[i].getIndices().getFree().getLower().length();
         lowCounts[i] = totalLowCount;
 
         //processing up indices
         int totalUpCount = upperArray.length;
         int[] upCounts = new int[samples.length + 1];
         for (i = 0; i < samples.length; ++i)
-            upCounts[i] = samples[i].getIndices().getUpper().length();
+            upCounts[i] = samples[i].getIndices().getFree().getUpper().length();
         upCounts[i] = totalUpCount;
 
         //solving Frobenius equations
@@ -94,8 +94,8 @@ public class TensorGenerator {
                     Tensor temp = samples[i];
 
 //                    IndexMappingDirect im = new IndexMappingDirect();
-                    IntArray termLow = temp.getIndices().getLower();
-                    IntArray termUp = temp.getIndices().getUpper();
+                    IntArray termLow = temp.getIndices().getFree().getLower();
+                    IntArray termUp = temp.getIndices().getFree().getUpper();
 
                     int[] oldIndices = new int[termUp.length() + termLow.length()],
                             newIndices = oldIndices.clone();

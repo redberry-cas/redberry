@@ -32,8 +32,8 @@ public class PowerFactoryTest {
 
     @Test
     public void testPower1() {
-        Tensor expected = Tensors.parse("3+i");
-        Tensor actual = Tensors.parse("(28+i*96)**(1/4)");
+        Tensor expected = Tensors.parse("3+I");
+        Tensor actual = Tensors.parse("(28+I*96)**(1/4)");
         Assert.assertEquals(expected, actual);
     }
 }

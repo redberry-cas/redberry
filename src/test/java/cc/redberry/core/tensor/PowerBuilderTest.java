@@ -128,7 +128,7 @@ public class PowerBuilderTest {
 
     @Test
     public void test10() {
-        Complex a = parseComplex("1+3*i");
+        Complex a = parseComplex("1+3*I");
         Complex p = parseComplex("0");
         Complex expected = Complex.ONE;
         Assert.assertEquals(expected, pow(a, p));
@@ -136,7 +136,7 @@ public class PowerBuilderTest {
 
     @Test
     public void test11() {
-        Complex a = parseComplex("1+3*i");
+        Complex a = parseComplex("1+3*I");
         Complex p = parseComplex("1");
         Complex expected = a;
         Assert.assertEquals(expected, pow(a, p));
@@ -144,9 +144,9 @@ public class PowerBuilderTest {
 
     @Test
     public void test12() {
-        Complex a = parseComplex("2+3*i");
+        Complex a = parseComplex("2+3*I");
         Complex p = parseComplex("4");
-        Complex expected = parseComplex("-119-120*i");
+        Complex expected = parseComplex("-119-120*I");
         Assert.assertEquals(expected, pow(a, p));
     }
 

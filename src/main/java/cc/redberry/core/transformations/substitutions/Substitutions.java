@@ -26,11 +26,11 @@ import cc.redberry.core.tensor.*;
 import cc.redberry.core.tensor.functions.*;
 import cc.redberry.core.transformations.Transformation;
 import cc.redberry.core.utils.TensorUtils;
+
 import java.util.HashMap;
 import java.util.Map;
 
 /**
- *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
@@ -43,10 +43,12 @@ public final class Substitutions {
         if (TensorUtils.equals(from, to))
             return DummyTransformation.INSTANCE;
         SubstitutionProvider provider = map.get(from.getClass());
-        if (provider == null)
-            throw new UnsupportedOperationException("Not supported");
+        if (provider == null) {
+            throw new UnsupportedOperationException("Not supported for class " + from.getClass().getSimpleName());
+        }
         return provider.createSubstitution(from, to);
     }
+
     private static final Map<Class, SubstitutionProvider> map = new HashMap<>();
 
     static {
