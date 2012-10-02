@@ -37,12 +37,10 @@ import cc.redberry.core.utils.TensorUtils;
 import junit.framework.Assert;
 import org.junit.Test;
 
-import static cc.redberry.core.TAssert.assertEquals;
-import static cc.redberry.core.TAssert.assertTrue;
+import static cc.redberry.core.TAssert.*;
 import static cc.redberry.core.tensor.Tensors.*;
 
 /**
- *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
@@ -266,20 +264,6 @@ public class SubstitutionsTest {
     }
 
     @Test
-    public void testSimple18() {
-
-        //Riman with diff states
-        Tensor target = parse("g^{mn}*g^{ab}*R_{bman}");
-        target = substitute(target,
-                "R^a_bmn=p_m*G^a_bn+p_n*G^a_bm+G^a_gm*G^g_bn-G^a_gn*G^g_bm");
-        target = substitute(target,
-                "G_gmn=(1/2)*(p_m*g_gn+p_n*g_gm-p_g*g_mn)");
-
-        target = contract(target);
-        assertTrue(true);
-    }
-
-    @Test
     public void testSimple19() {
 
         //Riman without diff states
@@ -308,6 +292,32 @@ public class SubstitutionsTest {
         assertTrue(TensorUtils.equals(target, target1));
         assertTrue(target.getIndices().size() == 0);
         assertTrue(target1.getIndices().size() == 0);
+    }
+
+    @Test
+    public void testSimple18() {
+        //Riman with diff states
+        Tensor target = parse("g^{mn}*g^{ab}*R_{bman}");
+        target = substitute(target,
+                "R^a_bmn=p_m*G^a_bn+p_n*G^a_bm+G^a_gm*G^g_bn-G^a_gn*G^g_bm");
+        target = substitute(target,
+                "G_gmn=(1/2)*(p_m*g_gn+p_n*g_gm-p_g*g_mn)");
+
+        target = contract(target);
+        assertTrue(true);
+    }
+
+    @Test
+    public void testSimple18a() {
+        CC.resetTensorNames(-2492126546111636082L);
+        //Riman with diff states
+        Tensor target = parse("(-G^{g}_{ma}*G_{bgn}+G^{g}_{mn}*G_{bga})*g^{ab}*g^{mn}");
+        target = substitute(target,
+                "G_gmn=(1/2)*(p_m*g_gn+p_n*g_gm-p_g*g_mn)");
+
+        target = contract(target);
+        target = expand(target);
+        assertIndicesConsistency(target);
     }
 
     @Test
@@ -396,6 +406,17 @@ public class SubstitutionsTest {
             TAssert.assertIndicesConsistency(t);
         }
     }
+
+    @Test
+    public void testSimple23a() {
+        CC.resetTensorNames(-1030130556496293426L);
+        Tensor t = parse("(f+g*k)*(d+h*f*f)");
+        Expression f = parseExpression("f=f_m^m+f1_a^a");
+        t = f.transform(t);
+        System.out.println(t);
+        TAssert.assertIndicesConsistency(t);
+    }
+
 
     @Test
     public void testField1() {
@@ -504,7 +525,7 @@ public class SubstitutionsTest {
         assertTrue(TensorUtils.equalsExactly(target, parse("g_a+k_a")));
     }
 
-//    @Test
+    //    @Test
 //    public void testField12() {
 //        TensorField from = (TensorField) parse("f_m[x_i]");
 //        Tensor to = parse("x_m+y_m");
@@ -645,7 +666,40 @@ public class SubstitutionsTest {
         e = Expand.expand(e);
         TAssert.assertIndicesConsistency(e);
     }
+
+    @Test
+    public void testField23() {
+        Expression field = parseExpression("a = a_a^a");
+        Tensor target = parse("f[a]*g_a");
+        target = field.transform(target);
+        Tensor expected = parse("f[a_a^a]*g_a");
+        System.out.println(target);
+        assertEqualsExactly(target, expected);
+    }
+
+    @Test
+    public void testField24() {
+        Expression field = parseExpression("a = a_a^a");
+        Tensor target = parse("f[f[a]]*g_a");
+        target = field.transform(target);
+        Tensor expected = parse("f[f[a_a^a]]*g_a");
+        assertEqualsExactly(target, expected);
+    }
+
+    @Test
+    public void testField25() {
+        Expression field = parseExpression("a = a_a^a");
+        Tensor target = parse("f[f[a],a]*g_a");
+        target = field.transform(target);
+        Tensor expected = parse("f[f[a_a^a],a_a^a]*g_a");
+        assertEqualsExactly(target, expected);
+    }
     //TODO additional tests with specified field arguments indices
+
+
+    private static void compact(Tensor before, Tensor after, Tensor to) {
+
+    }
 
     @Test
     public void testSum1() {

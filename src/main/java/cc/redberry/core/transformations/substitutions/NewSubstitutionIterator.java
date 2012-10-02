@@ -1,9 +1,6 @@
 package cc.redberry.core.transformations.substitutions;
 
-import cc.redberry.core.tensor.Product;
-import cc.redberry.core.tensor.SimpleTensor;
-import cc.redberry.core.tensor.Sum;
-import cc.redberry.core.tensor.Tensor;
+import cc.redberry.core.tensor.*;
 import cc.redberry.core.tensor.iterator.TraverseState;
 import cc.redberry.core.tensor.iterator.TreeIterator;
 import cc.redberry.core.tensor.iterator.TreeTraverseIterator;
@@ -36,28 +33,40 @@ public final class NewSubstitutionIterator implements TreeIterator {
 
         while ((nextState = innerIterator.next()) == TraverseState.Entering) { //"Diving"
             tensor = innerIterator.current();
-            if (fc == null && (tensor instanceof Product))
-                fc = new TopProductFC(null, tensor);
-            else if(fc != null){
+            if (fc == null || fc instanceof OpaqueFC) {
+                if (tensor instanceof Product)
+                    fc = new TopProductFC(fc, tensor);
+            } else {
                 if (tensor instanceof Sum)
                     fc = new SumFC(fc, tensor);
                 else if (tensor instanceof Product)
                     fc = new ProductFC(fc, tensor);
-                else if (tensor instanceof SimpleTensor) //Next state will be leaving
+                else if (tensor instanceof Power)
+                    fc = new TransparentFC(fc);
+                else if (tensor instanceof TensorField)
+                    fc = new OpaqueFC(fc);
+                else //Next state will be leaving
                     isSimpleTensor = true;
             }
-
         }
 
 
         if (nextState == null)
             return null;
 
-        //assert nextState == Leaving
 
-        if (!isSimpleTensor && fc != null) {
-            fc = fc.getParent();
+        //assert nextState == Leaving
+        if (fc != null) {
+            if (!isSimpleTensor || (fc instanceof OpaqueFC && innerIterator.current() instanceof TensorField)) {
+                fc = fc.getParent();
+            }
         }
+
+//        if (!isSimpleTensor &&
+//                (!waitingForProduct ||
+//                        (innerIterator.current() instanceof TensorField && fc != null))) {
+//            fc = fc.getParent();
+//        }
 
         /*ForbiddenContainer f = fc;
 
@@ -77,17 +86,18 @@ public final class NewSubstitutionIterator implements TreeIterator {
         if (!tensor.getIndices().getFree().equalsRegardlessOrder(tensor.getIndices().getFree()))
             throw new RuntimeException("Substitution with different free indices.");
 
-        TIntHashSet oldDummyIndices = TensorUtils.getAllDummyIndicesT(oldTensor);
-        TIntHashSet newDummyIndices = TensorUtils.getAllDummyIndicesT(tensor);
+        if (fc != null) {
+            TIntHashSet oldDummyIndices = TensorUtils.getAllDummyIndicesT(oldTensor);
+            TIntHashSet newDummyIndices = TensorUtils.getAllDummyIndicesT(tensor);
 
-        TIntHashSet removed = new TIntHashSet(oldDummyIndices),
-                added = new TIntHashSet(newDummyIndices);
+            TIntHashSet removed = new TIntHashSet(oldDummyIndices),
+                    added = new TIntHashSet(newDummyIndices);
 
-        removed.removeAll(newDummyIndices);
-        added.removeAll(oldDummyIndices);
+            removed.removeAll(newDummyIndices);
+            added.removeAll(oldDummyIndices);
 
-        if (fc != null)
             fc.submit(removed, added);
+        }
 
         innerIterator.set(tensor);
     }
@@ -170,6 +180,7 @@ public final class NewSubstitutionIterator implements TreeIterator {
             insureInitialized();
             forbidden.addAll(added);
             forbidden.removeAll(removed);
+            parent.submit(removed, added);
         }
     }
 
@@ -289,6 +300,59 @@ public final class NewSubstitutionIterator implements TreeIterator {
             insureInitialized();
             forbidden.addAll(added);
             forbidden.removeAll(removed);
+        }
+    }
+
+    private static final class TransparentFC implements ForbiddenContainer {
+        private final ForbiddenContainer parent;
+
+        private TransparentFC(ForbiddenContainer parent) {
+            this.parent = parent;
+        }
+
+        @Override
+        public TIntSet getForbidden() {
+            return parent.getForbidden();
+        }
+
+        @Override
+        public void submit(TIntSet removed, TIntSet added) {
+            parent.submit(removed, added);
+        }
+
+        @Override
+        public void next() {
+        }
+
+        @Override
+        public ForbiddenContainer getParent() {
+            return parent;
+        }
+    }
+
+    private static final class OpaqueFC implements ForbiddenContainer {
+        private final ForbiddenContainer parent;
+
+        private OpaqueFC(ForbiddenContainer parent) {
+            this.parent = parent;
+        }
+
+        @Override
+        public TIntSet getForbidden() {
+            return EMPTY_INT_SET;
+        }
+
+        @Override
+        public void submit(TIntSet removed, TIntSet added) {
+        }
+
+        @Override
+        public void next() {
+        }
+
+        @Override
+        public ForbiddenContainer getParent() {
+            return parent;
         }
     }
 }
