@@ -60,8 +60,6 @@ public class ProductBuilder1Test {
     public void test3() {
         CC.resetTensorNames(-1394473649739479577L);
         Tensor t = parse("(-a+b)**2*(a-b)");
-        System.out.println(t);
-        System.out.println(CC.getNameManager().getSeed());
         TAssert.assertEquals(t, "(a-b)**3");
     }
 

@@ -46,7 +46,7 @@ public class TAssert {
     }
     
     public static void assertEquals(Tensor actual, Tensor expected) {
-        org.junit.Assert.assertTrue(actual.toString(), TensorUtils.equals(actual, expected));
+        org.junit.Assert.assertTrue(TensorUtils.equals(actual, expected));
     }
     
     public static void assertEquals(Tensor actual, String expected) {
