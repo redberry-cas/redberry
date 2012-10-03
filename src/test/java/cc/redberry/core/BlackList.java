@@ -48,6 +48,11 @@ public class BlackList {
         public static final Name[] values = values();
     }
 
+    @Test
+    public void etwer(){
+        System.out.println(-7 %2);
+    }
+
     @Ignore
     @Test
     public void te() {

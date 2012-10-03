@@ -22,11 +22,11 @@
  */
 package cc.redberry.core.number;
 
-import java.math.BigInteger;
 import org.apache.commons.math3.fraction.BigFraction;
 
+import java.math.BigInteger;
+
 /**
- *
  * @author Stanislav Poslavsky
  */
 public class NumberUtils {
@@ -38,7 +38,6 @@ public class NumberUtils {
      * Checks that an object is not null.
      *
      * @param o Object to be checked.
-     *
      * @throws NullPointerException if {@code o} is {@code null}.
      */
     static void checkNotNull(Object o)
@@ -71,13 +70,13 @@ public class NumberUtils {
             return Rational.ONE;
         return new Rational(fraction);
     }
+
     private final static BigInteger TWO = new BigInteger("2");
 
     /**
      * Computes the integer square root of a number.
      *
      * @param n The number.
-     *
      * @return The integer square root, i.e. the largest number whose square
      *         doesn't exceed n.
      */
@@ -102,5 +101,17 @@ public class NumberUtils {
 
     public static boolean isSqrt(BigInteger n, BigInteger root) {
         return n.compareTo(root.pow(2)) == 0;
+    }
+
+    public static boolean isIntegerOdd(Complex complex) {
+        if (complex.isInteger())
+            return complex.getReal().abs().intValue() % 2 == 1;
+        return false;
+    }
+
+    public static boolean isIntegerEven(Complex complex) {
+        if (complex.isInteger())
+            return complex.getReal().intValue() % 2 == 0;
+        return false;
     }
 }

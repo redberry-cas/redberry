@@ -29,6 +29,7 @@ import cc.redberry.core.indexmapping.*;
 import cc.redberry.core.indices.Indices;
 import cc.redberry.core.indices.IndicesUtils;
 import cc.redberry.core.number.Complex;
+import cc.redberry.core.number.NumberUtils;
 import cc.redberry.core.tensor.*;
 import cc.redberry.core.tensor.functions.ScalarFunction;
 import gnu.trove.set.hash.TIntHashSet;
@@ -110,6 +111,14 @@ public class TensorUtils {
 
     public static boolean isMinusOne(Tensor tensor) {
         return tensor instanceof Complex && ((Complex) tensor).equals(Complex.MINUSE_ONE);
+    }
+
+    public static boolean isIntegerOdd(Tensor tensor) {
+        return tensor instanceof Complex && NumberUtils.isIntegerOdd((Complex) tensor);
+    }
+
+    public static boolean isIntegerEven(Tensor tensor) {
+        return tensor instanceof Complex && NumberUtils.isIntegerEven((Complex) tensor);
     }
 
     public static boolean isSymbol(Tensor t) {
