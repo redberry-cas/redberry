@@ -43,7 +43,7 @@ import static cc.redberry.core.utils.TensorUtils.isScalar;
 public class ProductBuilder1 implements TensorBuilder {
     private Complex complex = Complex.ONE;
     private final HashMap<Integer, ArrayList<PowerNode>> scalarPowers;
-    private final ArrayList<Component> connectedComponents;
+    private final ArrayList<Component> connectedComponents; //may be map freeIndex -> List<Tensor> todo discuss
 
     public ProductBuilder1(int initialScalarsCapacity, int initialDataCapacity) {
         connectedComponents = new ArrayList<>(initialDataCapacity);
@@ -132,11 +132,8 @@ public class ProductBuilder1 implements TensorBuilder {
                     compare = null;
                 }
             }
-            if (compare == null) {
-                SumBuilder exponentBuilder = new SumBuilder();
-                exponentBuilder.put(exponent);
+            if (compare == null)
                 nodes.add(new PowerNode(base, exponent));
-            }
         }
     }
 

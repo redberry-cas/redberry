@@ -232,6 +232,7 @@ public class TensorUtils {
         return dummy;
     }
 
+    @Deprecated
     public static Set<Integer> getAllIndicesNames(Tensor... tensors) {
         Set<Integer> indices = new HashSet<>();
         for (Tensor tensor : tensors)
