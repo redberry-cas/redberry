@@ -20,6 +20,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package cc.redberry.core.context.defaults;
 
 import cc.redberry.core.context.IndexConverterException;
@@ -35,13 +36,19 @@ public final class IndexConverterExtender implements IndexSymbolConverter {
 
     @Override
     public boolean applicableToSymbol(String symbol) {
-        int _position = symbol.lastIndexOf('_');
-        if (_position == -1)
+        if (!symbol.contains("_"))
             return innerConverter.applicableToSymbol(symbol);
-        try {
-            if (Integer.parseInt(symbol.substring(_position + 1)) > 9)
+        String[] split = symbol.split("_");
+        if (split.length != 2 || split[1].length() == 0)
+            return false;
+        if (split[1].charAt(0) == '{') {
+            if (split[1].length() < 3)
                 return false;
-            return innerConverter.applicableToSymbol(symbol.substring(0, _position));
+            split[1] = split[1].substring(1, split[1].length() - 1);
+        }
+        try {
+            Integer.parseInt(split[1]);
+            return innerConverter.applicableToSymbol(split[0]);
         } catch (NumberFormatException e) {
             return false;
         }
@@ -49,11 +56,23 @@ public final class IndexConverterExtender implements IndexSymbolConverter {
 
     @Override
     public int getCode(String symbol) throws IndexConverterException {
-        int _position = symbol.lastIndexOf('_');
-        if (_position == -1)
+        if (!symbol.contains("_"))
             return innerConverter.getCode(symbol);
-        int num = Integer.parseInt(symbol.substring(_position + 1));
-        return (num) * (1 + innerConverter.maxSymbolsCount()) + innerConverter.getCode(symbol.substring(0, _position));
+        String[] split = symbol.split("_");
+        if (split.length != 2 || split[1].length() == 0)
+            throw new IndexConverterException();
+        if (split[1].charAt(0) == '{') {
+            if (split[1].length() < 3)
+                throw new IndexConverterException();
+            split[1] = split[1].substring(1, split[1].length() - 1);
+        }
+        int num = -1;
+        try {
+            num = Integer.parseInt(split[1]);
+        } catch (NumberFormatException e) {
+            throw new IndexConverterException();
+        }
+        return (num) * (1 + innerConverter.maxSymbolsCount()) + innerConverter.getCode(split[0]);
     }
 
     @Override

@@ -20,12 +20,12 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package cc.redberry.core.context;
 
 import cc.redberry.core.indices.IndexType;
 
 /**
- *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
@@ -45,7 +45,7 @@ public final class IndexConverterManager {
             for (IndexSymbolConverter converter : converters)
                 if (converter.getType() == typeId) {
                     String symbol = converter.getSymbol(number, mode);
-                    return symbol.length() == 1 ? symbol : symbol + " ";
+                    return symbol;//symbol.length() == 1 ? symbol : symbol + " ";
                 }
             throw new RuntimeException("No appropriate converter for typeId 0x" + Integer.toHexString(typeId));
         } catch (IndexConverterException e) {
@@ -60,7 +60,7 @@ public final class IndexConverterManager {
                     return (converter.getCode(symbol) & 0xFFFF) | ((converter.getType() & 0x7F) << 24);
             throw new RuntimeException("No available converters for such symbol : " + symbol);
         } catch (IndexConverterException e) {
-            throw new RuntimeException("Index " + symbol + " conversion error");
+            throw new RuntimeException("No available converters for such symbol : " + symbol);
         }
     }
 }

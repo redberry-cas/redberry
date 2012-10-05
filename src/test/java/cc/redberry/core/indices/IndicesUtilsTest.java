@@ -20,6 +20,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package cc.redberry.core.indices;
 
 import cc.redberry.core.context.ToStringMode;
@@ -40,10 +41,10 @@ public class IndicesUtilsTest {
     @Test
     public void parse() {
         int index = IndicesUtils.parseIndex("_{\\mu}");
-        assertTrue("_{\\mu }".equals(IndicesUtils.toString(index, ToStringMode.LaTeX)));
+        assertTrue("_{\\mu}".equals(IndicesUtils.toString(index, ToStringMode.LaTeX)));
 
         int index1 = IndicesUtils.parseIndex("_\\mu");
-        assertTrue("_{\\mu }".equals(IndicesUtils.toString(index1, ToStringMode.LaTeX)));
+        assertTrue("_{\\mu}".equals(IndicesUtils.toString(index1, ToStringMode.LaTeX)));
 
         int index2 = IndicesUtils.parseIndex("_a");
         assertTrue("_{a}".equals(IndicesUtils.toString(index2, ToStringMode.LaTeX)));

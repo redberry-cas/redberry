@@ -20,11 +20,13 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package cc.redberry.core.indices;
 
 import cc.redberry.core.context.Context;
 import cc.redberry.core.context.ToStringMode;
 import cc.redberry.core.utils.IntArray;
+
 import java.lang.ref.WeakReference;
 import java.util.Arrays;
 

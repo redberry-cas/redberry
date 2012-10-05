@@ -20,6 +20,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package cc.redberry.core.parser;
 
 import cc.redberry.core.indices.IndicesFactory;
@@ -27,7 +28,6 @@ import cc.redberry.core.indices.SimpleIndices;
 import cc.redberry.core.utils.IntArrayList;
 
 /**
- *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
@@ -48,11 +48,13 @@ public class ParserSimpleTensor implements NodeParser {
         for (char c : expression.toCharArray()) {
             if (c == '{') {
                 level++;
-                continue;
+                if (!indexMode)
+                    continue;
             }
             if (c == '}') {
                 level--;
-                continue;
+                if (!indexMode)
+                    continue;
             }
             if (c == '^') {
                 assert level == 0;

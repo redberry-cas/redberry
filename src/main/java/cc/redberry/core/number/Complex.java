@@ -20,6 +20,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package cc.redberry.core.number;
 
 import cc.redberry.core.context.ToStringMode;
@@ -156,7 +157,9 @@ public class Complex extends Tensor
     @Override
     public String toString(ToStringMode mode) {
         if (real.isZero())
-            if (imaginary.isOne())
+            if (imaginary.isZero())
+                return "0";
+            else if (imaginary.isOne())
                 return "I";
             else if (imaginary.isMinusOne())
                 return "-I";
@@ -329,7 +332,7 @@ public class Complex extends Tensor
     /**
      * Return the conjugate of this complex number. The conjugate of {@code a + bi}
      * is {@code a - bi}. <br/>
-     * {@link #NaN} is returned if either the real or imaginary part of this
+     * {@link #ComplexNaN} is returned if either the real or imaginary part of this
      * Complex number equals {@code Double.NaN}. <br/> If the imaginary part is
      * infinite, and the real part is not
      * {@code NaN}, the returned value has infinite imaginary part of the
@@ -350,11 +353,11 @@ public class Complex extends Tensor
      *   (a + bi) + (c + di) = (a+c) + (b+d)i
      * </code>
      * </pre> <br/> If either {@code this} or {@code addend} has a {@code NaN}
-     * value in either part, {@link #NaN} is returned; otherwise {@code Infinite}
+     * value in either part, {@link #ComplexNaN} is returned; otherwise {@code Infinite}
      * and {@code NaN} values are returned in the parts of the result according
      * to the rules for {@link java.lang.Double} arithmetic.
      *
-     * @param addend Value to be added to this {@code Complex}.
+     * @param a value to be added to this {@code Complex}.
      * @return {@code this + addend}.
      * @throws NullArgumentException if {@code addend} is {@code null}.
      */
@@ -378,11 +381,11 @@ public class Complex extends Tensor
      * underflows in the computation. <br/>
      * {@code Infinite} and {@code NaN} values are handled according to the
      * following rules, applied in the order presented: <ul> <li>If either {@code this}
-     * or {@code divisor} has a {@code NaN} value in either part, {@link #NaN}
-     * is returned. </li> <li>If {@code divisor} equals {@link #ZERO}, {@link #NaN}
+     * or {@code divisor} has a {@code NaN} value in either part, {@link #ComplexNaN}
+     * is returned. </li> <li>If {@code divisor} equals {@link #ZERO}, {@link #ComplexNaN}
      * is returned. </li> <li>If {@code this} and {@code divisor} are both
      * infinite,
-     * {@link #NaN} is returned. </li> <li>If {@code this} is finite (i.e., has
+     * {@link #ComplexNaN} is returned. </li> <li>If {@code this} is finite (i.e., has
      * no {@code Infinite} or
      * {@code NaN} parts) and {@code divisor} is infinite (one or both parts
      * infinite), {@link #ZERO} is returned. </li> <li>If {@code this} is
@@ -441,8 +444,8 @@ public class Complex extends Tensor
      * <code>
      *   (a + bi)(c + di) = (ac - bd) + (ad + bc)i
      * </code>
-     * </pre> Returns {@link #NaN} if either {@code this} or {@code factor} has
-     * one or more {@code NaN} parts. <br/> Returns {@link #INF} if neither {@code this}
+     * </pre> Returns {@link #ComplexNaN} if either {@code this} or {@code factor} has
+     * one or more {@code NaN} parts. <br/> Returns {@link #COMPLEX_INFINITY} if neither {@code this}
      * nor {@code factor} has one or more {@code NaN} parts and if either {@code this}
      * or {@code factor} has one or more infinite parts (same result is returned
      * regardless of the sign of the components). <br/> Returns finite values in

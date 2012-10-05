@@ -20,6 +20,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package cc.redberry.core.parser;
 
 import cc.redberry.core.context.Context;
@@ -28,7 +29,6 @@ import cc.redberry.core.indices.SimpleIndices;
 import cc.redberry.core.utils.IntArrayList;
 
 /**
- *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
@@ -46,11 +46,9 @@ public class ParserIndices {
         for (char c : expression.toCharArray()) {
             if (c == '{') {
                 level++;
-                continue;
             }
             if (c == '}') {
                 level--;
-                continue;
             }
             if (c == '^') {
                 assert level == 0;
@@ -79,23 +77,38 @@ public class ParserIndices {
     }
 
     /**
-     *
      * Parse string representation and put result indices in indices
-     *
-     * @throws BracketsError if brackets are inconsistent (e.g. (a+(b)))) )
      *
      * @param indices       integer array list of parsed indices
      * @param indicesString string representation of indices
      * @param state         index state (upper or lower)
+     * @throws BracketsError if brackets are inconsistent (e.g. (a+(b)))) )
      */
     static void parseIndices(IntArrayList indices, StringBuilder indicesString, int state) {
         char c;
         boolean toBuffer = false;
         StringBuilder indexBuffer = new StringBuilder();
+        boolean openBracket = false;
         for (int i = 0; i < indicesString.length(); ++i) {
             c = indicesString.charAt(i);
-            if (c == '{' || c == '}')
-                continue;
+            if (c == '{') {
+                if (i != 0 && indicesString.charAt(i - 1) == '_') {
+                    indexBuffer.append(c);
+                    openBracket = true;
+                    continue;
+                } else continue;
+            }
+            if (c == '}') {
+                if (openBracket) {
+                    openBracket = false;
+                    indexBuffer.append(c);
+                    if (indexBuffer.length() != 0) {
+                        indices.add(Context.get().getIndexConverterManager().getCode(indexBuffer.toString()) | state << 31);
+                        indexBuffer = new StringBuilder();
+                    }
+                    continue;
+                } else continue;
+            }
 
             if (c == '_') {
                 indexBuffer.append(c);

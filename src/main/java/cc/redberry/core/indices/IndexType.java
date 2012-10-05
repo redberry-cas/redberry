@@ -20,6 +20,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package cc.redberry.core.indices;
 
 import cc.redberry.core.context.ContextSettings;
@@ -54,7 +55,6 @@ public enum IndexType {
      * Returns the appropriate string<->integer converter for this index type.
      *
      * @return the appropriate string<->integer converter for this index type
-     *
      * @see IndexSymbolConverter
      */
     public IndexSymbolConverter getSymbolConverter() {
@@ -83,5 +83,9 @@ public enum IndexType {
         for (IndexType type : values())
             converters[++i] = type.getSymbolConverter();
         return converters;
+    }
+
+    public static boolean isLatin(IndexType type) {
+        return type == LatinLower || type == LatinUpper;
     }
 }

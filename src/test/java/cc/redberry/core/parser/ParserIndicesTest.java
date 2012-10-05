@@ -21,19 +21,20 @@
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package cc.redberry.core.transformations.substitutions;
+package cc.redberry.core.parser;
 
-import cc.redberry.core.tensor.Tensor;
-import cc.redberry.core.transformations.TransformationException;
+import cc.redberry.core.indices.Indices;
+import junit.framework.Assert;
+import org.junit.Test;
 
 /**
- *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public class InconsistentSubstitutionException extends TransformationException {
-
-    public InconsistentSubstitutionException(Tensor from, Tensor to, Tensor current) {
-        super("Substitution: " + from + " = " + to + ".  Detected tensor " + current);
+public class ParserIndicesTest {
+    @Test
+    public void test1() {
+        Indices in = ParserIndices.parseSimple("_{AC_{21}B}");
+        Assert.assertTrue(in.size() == 3);
     }
 }
