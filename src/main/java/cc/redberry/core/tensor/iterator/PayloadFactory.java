@@ -27,5 +27,5 @@ package cc.redberry.core.tensor.iterator;
  * @author Stanislav Poslavsky
  */
 public interface PayloadFactory<T extends Payload<T>> {
-    Payload<T> create(StackPosition<T> stackPosition);
+    T create(StackPosition<T> stackPosition);
 }

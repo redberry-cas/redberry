@@ -255,7 +255,7 @@ public final class TreeTraverseIterator<T extends Payload<T>> {
         TensorBuilder builder = null;
         final LinkedPointer previous;
         boolean isModified = false;
-        Payload<T> payload = null;
+        T payload = null;
 
         public LinkedPointer(LinkedPointer pair, Tensor tensor, boolean goInside) {
             this.tensor = tensor;
@@ -312,7 +312,7 @@ public final class TreeTraverseIterator<T extends Payload<T>> {
         }
 
         @Override
-        public Payload<T> getPayload() {
+        public T getPayload() {
             if (payloadFactory == null)
                 return null;
             if (payload == null)

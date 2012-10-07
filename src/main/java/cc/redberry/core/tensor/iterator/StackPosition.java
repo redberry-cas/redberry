@@ -64,12 +64,12 @@ public interface StackPosition<T extends Payload<T>> {
      *
      * @return the parent tree node
      */
-    StackPosition previous();
+    StackPosition<T> previous();
 
     /**
      * Returns the payload of current stack position.
      *
      * @return the payload of current stack position
      */
-    Payload<T> getPayload();
+    T getPayload();
 }

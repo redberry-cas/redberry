@@ -30,10 +30,11 @@ import cc.redberry.core.tensor.Tensors;
 import cc.redberry.core.tensor.functions.Sin;
 import cc.redberry.core.utils.Indicator;
 import cc.redberry.core.utils.TensorUtils;
-import java.util.ArrayList;
-import java.util.List;
 import org.junit.Assert;
 import org.junit.Test;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static cc.redberry.core.tensor.Tensors.parse;
 
@@ -47,13 +48,13 @@ public class TreeTraverseIteratorTest {
     public void test1() {
         Tensor t = parse("a+b+Sin[x]");
         Tensor[] expectedSequence = {t,//a+b+Sin[x]
-                                     t.get(0),//a
-                                     t.get(0),//a
-                                     t.get(1),//b
-                                     t.get(1),//b
-                                     t.get(2),//Sin[x]
-                                     t.get(2),//Sin[x]
-                                     t//a+b+Sin[x]
+                t.get(0),//a
+                t.get(0),//a
+                t.get(1),//b
+                t.get(1),//b
+                t.get(2),//Sin[x]
+                t.get(2),//Sin[x]
+                t//a+b+Sin[x]
         };
         TraverseGuide guide = new TraverseGuide() {
 
@@ -83,15 +84,15 @@ public class TreeTraverseIteratorTest {
     public void test2() {
         Tensor t = parse("Cos[a+b+Sin[x]]");
         Tensor[] expectedSequence = {t,//Cos[a+b+Sin[x]]
-                                     t.get(0),//a+b+Sin[x]
-                                     t.get(0).get(0),//a
-                                     t.get(0).get(0),//a
-                                     t.get(0).get(1),//b
-                                     t.get(0).get(1),//b
-                                     t.get(0).get(2),//Sin[x]
-                                     t.get(0).get(2),//Sin[x]
-                                     t.get(0),//a+b+Sin[x]
-                                     t//Cos[a+b+Sin[x]]
+                t.get(0),//a+b+Sin[x]
+                t.get(0).get(0),//a
+                t.get(0).get(0),//a
+                t.get(0).get(1),//b
+                t.get(0).get(1),//b
+                t.get(0).get(2),//Sin[x]
+                t.get(0).get(2),//Sin[x]
+                t.get(0),//a+b+Sin[x]
+                t//Cos[a+b+Sin[x]]
         };
         TraverseGuide guide = new TraverseGuide() {
 
@@ -114,15 +115,15 @@ public class TreeTraverseIteratorTest {
     public void test3() {
         Tensor t = parse("Cos[Sin[x+y]]");
         Tensor[] expectedSequence = {t,//Cos[Sin[x+y]]
-                                     t.get(0),//Sin[x+y]
-                                     t.get(0).get(0),//x+y
-                                     t.get(0).get(0).get(0),//x
-                                     t.get(0).get(0).get(0),//x
-                                     t.get(0).get(0).get(1),//y
-                                     t.get(0).get(0).get(1),//y
-                                     t.get(0).get(0),//x+y
-                                     t.get(0),//Sin[x+y]
-                                     t//Cos[Sin[x+y]]
+                t.get(0),//Sin[x+y]
+                t.get(0).get(0),//x+y
+                t.get(0).get(0).get(0),//x
+                t.get(0).get(0).get(0),//x
+                t.get(0).get(0).get(1),//y
+                t.get(0).get(0).get(1),//y
+                t.get(0).get(0),//x+y
+                t.get(0),//Sin[x+y]
+                t//Cos[Sin[x+y]]
         };
         List<Tensor> list = new ArrayList<>();
         TreeTraverseIterator iterator = new TreeTraverseIterator(t);
@@ -136,9 +137,9 @@ public class TreeTraverseIteratorTest {
     public void test4() {
         Tensor t = parse("Cos[Sin[x+y]]");
         Tensor[] expectedSequence = {t,//Cos[Sin[x+y]]
-                                     t.get(0),//Sin[x+y]
-                                     t.get(0),//Sin[x+y]
-                                     t//Cos[Sin[x+y]]
+                t.get(0),//Sin[x+y]
+                t.get(0),//Sin[x+y]
+                t//Cos[Sin[x+y]]
         };
         TraverseGuide guide = new TraverseGuide() {
 
@@ -212,7 +213,7 @@ public class TreeTraverseIteratorTest {
         Assert.assertTrue(TensorUtils.equalsExactly(expectedSequence, actual));
 
         expectedSequence = new Tensor[]{t,//Cos[x]
-                                        t//Cos[x]
+                t//Cos[x]
         };
 
         guide = new TraverseGuide() {
@@ -236,11 +237,11 @@ public class TreeTraverseIteratorTest {
     public void test6() {
         Tensor t = parse("Cos[Sin[x+y]]");
         Tensor[] expectedSequence = {t,//Cos[Sin[x+y]]
-                                     t.get(0),//Sin[x+y]
-                                     t.get(0).get(0),//x+y
-                                     t.get(0).get(0),//x+y
-                                     t.get(0),//Sin[x+y]
-                                     t//Cos[Sin[x+y]]
+                t.get(0),//Sin[x+y]
+                t.get(0).get(0),//x+y
+                t.get(0).get(0),//x+y
+                t.get(0),//Sin[x+y]
+                t//Cos[Sin[x+y]]
         };
         TraverseGuide guide = new TraverseGuide() {
 
@@ -596,6 +597,56 @@ public class TreeTraverseIteratorTest {
                 Assert.assertTrue(iterator.checkLevel(classIndicator(Sum.class), 2));
                 Assert.assertTrue(iterator.checkLevel(indicator, 3));
             }
+        }
+    }
+
+    private static class PayloadC implements Payload<PayloadC> {
+        public int sums, products;
+
+        private PayloadC(int sums, int products) {
+            this.sums = sums;
+            this.products = products;
+        }
+
+        @Override
+        public Tensor onLeaving(StackPosition<PayloadC> stackPosition) {
+            return stackPosition.getTensor();
+        }
+
+        @Override
+        public String toString() {
+            return "{" +
+                    "sums=" + sums +
+                    ", products=" + products +
+                    '}';
+        }
+    }
+
+    @Test
+    public void testPayload1() {
+        PayloadFactory<PayloadC> factory = new PayloadFactory<PayloadC>() {
+            @Override
+            public PayloadC create(StackPosition<PayloadC> stackPosition) {
+                int s, p;
+                StackPosition<PayloadC> pr = stackPosition.previous();
+                if (pr == null)
+                    s = p = 0;
+                else {
+                    s = pr.getPayload().sums;
+                    p = pr.getPayload().products;
+                }
+                if (stackPosition.getInitialTensor() instanceof Sum)
+                    ++s;
+                if (stackPosition.getInitialTensor() instanceof Product)
+                    ++p;
+                return new PayloadC(s, p);
+            }
+        };
+        Tensor t = parse("(a+b)*(c+d*(k+c))");
+        TreeTraverseIterator<PayloadC> iterator = new TreeTraverseIterator<>(t, factory);
+        TraverseState state;
+        while ((state = iterator.next()) != null) {
+            System.out.println(state + "\t" + iterator.current() + "\t" + iterator.currentStackPosition().getPayload());
         }
     }
 }
