@@ -155,6 +155,7 @@ public final class Tensors {
     }
 
     public static Tensor[] resolveDummy(Tensor[] factors) {
+        //TODO preserve ordering
         Tensor[] result = new Tensor[factors.length];
         TIntHashSet forbidden = new TIntHashSet();
         ArrayList<Tensor> toResolve = new ArrayList<>();
