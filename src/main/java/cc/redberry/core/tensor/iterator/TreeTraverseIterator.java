@@ -186,7 +186,7 @@ public final class TreeTraverseIterator<T extends Payload<T>> {
         StackPosition s = currentPointer.previous(level);
         if (s == null)
             return false;
-        return indicator.is(s.getTensor());
+        return indicator.is(s.getInitialTensor());
     }
 
     //    public void levelUp(int levels) {
@@ -242,8 +242,11 @@ public final class TreeTraverseIterator<T extends Payload<T>> {
             if (!goInside)
                 position = Integer.MAX_VALUE;
             this.previous = pair;
-            if (payloadFactory != null && !payloadFactory.allowLazyInitialization())
+            if (previous != null && payloadFactory != null && !payloadFactory.allowLazyInitialization()) {
                 this.payload = payloadFactory.create(this);
+                if (this.payload == null)
+                    throw new NullPointerException("Payload factory returned null payload.");
+            }
         }
 
         Tensor next() {
@@ -290,15 +293,20 @@ public final class TreeTraverseIterator<T extends Payload<T>> {
 
         @Override
         public StackPosition previous() {
+            if (previous.previous == null)
+                return null;
             return previous;
         }
 
         @Override
         public T getPayload() {
-            if (payloadFactory == null)
+            if (payloadFactory == null || previous == null)
                 return null;
-            if (payload == null)
+            if (payload == null) {
                 payload = payloadFactory.create(this);
+                if (this.payload == null)
+                    throw new NullPointerException("Payload factory returned null payload.");
+            }
             return payload;
         }
 
