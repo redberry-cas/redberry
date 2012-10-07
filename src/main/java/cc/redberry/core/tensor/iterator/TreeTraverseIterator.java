@@ -64,20 +64,30 @@ import cc.redberry.core.utils.Indicator;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public final class TreeTraverseIterator {
+public final class TreeTraverseIterator<T extends Payload<T>> {
 
     private final TraverseGuide iterationGuide;
     private LinkedPointer currentPointer;
     private TraverseState lastState;
     private Tensor current = null;
+    private final PayloadFactory<T> payloadFactory;
 
-    public TreeTraverseIterator(Tensor tensor, TraverseGuide guide) {
+    public TreeTraverseIterator(Tensor tensor, TraverseGuide guide, PayloadFactory<T> payloadFactory) {
         currentPointer = new LinkedPointer(null, TensorWrapper.wrap(tensor), true);
         iterationGuide = guide;
+        this.payloadFactory = payloadFactory;
+    }
+
+    public TreeTraverseIterator(Tensor tensor, TraverseGuide guide) {
+        this(tensor, guide, null);
     }
 
     public TreeTraverseIterator(Tensor tensor) {
         this(tensor, TraverseGuide.ALL);
+    }
+
+    public TreeTraverseIterator(Tensor tensor, PayloadFactory<T> payloadFactory) {
+        this(tensor, TraverseGuide.ALL, payloadFactory);
     }
 
     /**
@@ -178,7 +188,6 @@ public final class TreeTraverseIterator {
      * current cursor.
      *
      * @param indicator level relative position of element to be tested
-     *
      * @return
      */
     public boolean checkLevel(Indicator<Tensor> indicator, int level)//TODO better name
@@ -212,6 +221,7 @@ public final class TreeTraverseIterator {
     //            currentPointer = currentPointer.previous;
     //        this.currentPointer = currentPointer;
     //    }
+
     /**
      * Returns current cursor.
      *
@@ -230,11 +240,13 @@ public final class TreeTraverseIterator {
         if (currentPointer.previous != null)
             throw new RuntimeException("Iteration not finished.");
         return currentPointer.getTensor().get(0);
-
-
     }
 
-    private static final class LinkedPointer {
+    public StackPosition<T> currentStackPosition() {
+        return currentPointer;
+    }
+
+    private final class LinkedPointer implements StackPosition<T> {
 
         int position = 0;
         Tensor tensor;
@@ -242,6 +254,8 @@ public final class TreeTraverseIterator {
         Tensor toSet = null;
         TensorBuilder builder = null;
         final LinkedPointer previous;
+        boolean isModified = false;
+        Payload<T> payload = null;
 
         public LinkedPointer(LinkedPointer pair, Tensor tensor, boolean goInside) {
             this.tensor = tensor;
@@ -267,7 +281,8 @@ public final class TreeTraverseIterator {
             return current = tensor.get(position++);
         }
 
-        Tensor getTensor() {
+        @Override
+        public Tensor getTensor() {
             if (builder != null)
                 if (position != tensor.size())
                     throw new IllegalStateException("Iteration not finished.");
@@ -279,13 +294,46 @@ public final class TreeTraverseIterator {
             return tensor;
         }
 
+        @Override
+        public Tensor getInitialTensor() {
+            if (position == Integer.MAX_VALUE)
+                throw new IllegalStateException("Initial tensor was rebuilt.");
+            return tensor;
+        }
+
+        @Override
+        public boolean isModified() {
+            return isModified;
+        }
+
+        @Override
+        public StackPosition previous() {
+            return previous;
+        }
+
+        @Override
+        public Payload<T> getPayload() {
+            if (payloadFactory == null)
+                return null;
+            if (payload == null)
+                payload = payloadFactory.create(this);
+            return payload;
+        }
+
+        void setModified() {
+            isModified = true;
+            if (previous != null)
+                previous.setModified();
+        }
+
         /*
-         * void close() { position = tensor.size(); }
-         */
+        * void close() { position = tensor.size(); }
+        */
         void set(Tensor t) {
             if (current == t)
                 return;
             toSet = t;
+            setModified();
         }
     }
 }
