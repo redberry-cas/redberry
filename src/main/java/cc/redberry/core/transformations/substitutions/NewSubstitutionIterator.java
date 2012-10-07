@@ -24,9 +24,7 @@
 package cc.redberry.core.transformations.substitutions;
 
 import cc.redberry.core.tensor.*;
-import cc.redberry.core.tensor.iterator.TraverseState;
-import cc.redberry.core.tensor.iterator.TreeIterator;
-import cc.redberry.core.tensor.iterator.TreeTraverseIterator;
+import cc.redberry.core.tensor.iterator.*;
 import cc.redberry.core.utils.ByteBackedBitArray;
 import cc.redberry.core.utils.TensorUtils;
 import gnu.trove.TCollections;
@@ -38,24 +36,20 @@ import java.util.Arrays;
 
 public final class NewSubstitutionIterator implements TreeIterator {
     private static final TIntSet EMPTY_INT_SET = TCollections.unmodifiableSet(new TIntHashSet(0));
-    private final TreeTraverseIterator innerIterator;
-    private ForbiddenContainer fc = null;
+    private final TreeTraverseIterator<ForbiddenContainer> innerIterator;
+    //private ForbiddenContainer fc = null;
 
     public NewSubstitutionIterator(Tensor tensor) {
-        this.innerIterator = new TreeTraverseIterator(tensor);
+        this.innerIterator = new TreeTraverseIterator<>(tensor, new FCPayloadFactory());
     }
 
     @Override
     public Tensor next() {
         TraverseState nextState;
         Tensor tensor;
-        boolean isSimpleTensor = false;
-
-        if (fc != null)
-            fc.next();
 
         while ((nextState = innerIterator.next()) == TraverseState.Entering) { //"Diving"
-            tensor = innerIterator.current();
+            /*tensor = innerIterator.current();
             if (fc == null || fc instanceof OpaqueFC) {
                 if (tensor instanceof Product)
                     fc = new TopProductFC(fc, tensor);
@@ -69,8 +63,8 @@ public final class NewSubstitutionIterator implements TreeIterator {
                 else if (tensor instanceof TensorField)
                     fc = new OpaqueFC(fc);
                 else //Next state will be leaving
-                    isSimpleTensor = true;
-            }
+                    isSimpleTensor = true;*/
+            //}
         }
 
 
@@ -79,11 +73,13 @@ public final class NewSubstitutionIterator implements TreeIterator {
 
 
         //assert nextState == Leaving
-        if (fc != null) {
+        /*if (fc != null)
+
+        {
             if (!isSimpleTensor || (fc instanceof OpaqueFC && innerIterator.current() instanceof TensorField)) {
                 fc = fc.getParent();
             }
-        }
+        } */
 
 //        if (!isSimpleTensor &&
 //                (!waitingForProduct ||
@@ -93,11 +89,11 @@ public final class NewSubstitutionIterator implements TreeIterator {
 
         /*ForbiddenContainer f = fc;
 
-        do {
-            System.out.println(((AbstractFC) f).currentBranch + " : " +
-                    f.getClass().getSimpleName() + " : " +
-                    ((AbstractFC) f).tensor);
-        } while ((f = f.getParent()) != null);*/
+  do {
+    System.out.println(((AbstractFC) f).currentBranch + " : " +
+            f.getClass().getSimpleName() + " : " +
+            ((AbstractFC) f).tensor);
+  } while ((f = f.getParent()) != null);*/
 
         return innerIterator.current();
     }
@@ -105,6 +101,7 @@ public final class NewSubstitutionIterator implements TreeIterator {
     @Override
     public void set(Tensor tensor) {
         Tensor oldTensor = innerIterator.current();
+        ForbiddenContainer fc = innerIterator.currentStackPosition().getPayload();
 
         if (!tensor.getIndices().getFree().equalsRegardlessOrder(tensor.getIndices().getFree()))
             throw new RuntimeException("Substitution with different free indices.");
@@ -136,23 +133,61 @@ public final class NewSubstitutionIterator implements TreeIterator {
     }
 
     public int[] getForbidden() {
+        ForbiddenContainer fc = innerIterator.currentStackPosition().getPayload();
         if (fc == null)
             return new int[0];
         return fc.getForbidden().toArray();
     }
 
-    private static interface ForbiddenContainer {
+    private static interface ForbiddenContainer extends Payload<ForbiddenContainer> {
         TIntSet getForbidden();
 
         void submit(TIntSet removed, TIntSet added);
 
         void next();
-
-        ForbiddenContainer getParent();
     }
 
+    private class FCPayloadFactory implements PayloadFactory<ForbiddenContainer> {
+        @Override
+        public boolean allowLazyInitialization() {
+            return true;
+        }
 
-    private static abstract class AbstractFC implements ForbiddenContainer {
+        @Override
+        public ForbiddenContainer create(StackPosition<ForbiddenContainer> stackPosition) {
+            Tensor tensor = stackPosition.getInitialTensor();
+            StackPosition<ForbiddenContainer> previousPosition = stackPosition.previous();
+            ForbiddenContainer parent;
+            if (previousPosition == null)
+                parent = null;
+            else
+                parent = previousPosition.getPayload();
+
+            if (parent == null)
+                parent = EMTY_CONTAINER;
+
+            if (parent == EMTY_CONTAINER || parent instanceof OpaqueFC) {
+                if (tensor instanceof Product)
+                    return new TopProductFC(parent, tensor);
+                if (parent == null)
+                    return EMTY_CONTAINER;
+                else
+                    return new OpaqueFC(parent);
+            }
+
+            if (tensor instanceof Product)
+                return new ProductFC(parent, tensor);
+            if (tensor instanceof Sum)
+                return new SumFC(parent, tensor);
+            if (tensor instanceof Power)
+                return new TransparentFC(parent);
+            if (tensor instanceof TensorField)
+                return new OpaqueFC(parent);
+            return new TransparentFC(parent);
+        }
+    }
+
+    private static abstract class AbstractFC extends DummyPayload<ForbiddenContainer> implements ForbiddenContainer {
         protected final ForbiddenContainer parent;
         protected final Tensor tensor;
         protected int currentBranch = 0;
@@ -169,11 +204,6 @@ public final class NewSubstitutionIterator implements TreeIterator {
         }
 
         public abstract void insureInitialized();
-
-        @Override
-        public ForbiddenContainer getParent() {
-            return parent;
-        }
 
         @Override
         public TIntSet getForbidden() {
@@ -326,7 +356,7 @@ public final class NewSubstitutionIterator implements TreeIterator {
         }
     }
 
-    private static final class TransparentFC implements ForbiddenContainer {
+    private static final class TransparentFC extends DummyPayload<ForbiddenContainer> implements ForbiddenContainer {
         private final ForbiddenContainer parent;
 
         private TransparentFC(ForbiddenContainer parent) {
@@ -346,14 +376,9 @@ public final class NewSubstitutionIterator implements TreeIterator {
         @Override
         public void next() {
         }
-
-        @Override
-        public ForbiddenContainer getParent() {
-            return parent;
-        }
     }
 
-    private static final class OpaqueFC implements ForbiddenContainer {
+    private static final class OpaqueFC extends DummyPayload<ForbiddenContainer> implements ForbiddenContainer {
         private final ForbiddenContainer parent;
 
         private OpaqueFC(ForbiddenContainer parent) {
@@ -372,10 +397,25 @@ public final class NewSubstitutionIterator implements TreeIterator {
         @Override
         public void next() {
         }
+    }
+
+    ForbiddenContainer EMTY_CONTAINER = new ForbiddenContainer() {
+        @Override
+        public TIntSet getForbidden() {
+            return EMPTY_INT_SET;
+        }
 
         @Override
-        public ForbiddenContainer getParent() {
-            return parent;
+        public void submit(TIntSet removed, TIntSet added) {
         }
-    }
+
+        @Override
+        public void next() {
+        }
+
+        @Override
+        public Tensor onLeaving(StackPosition<ForbiddenContainer> stackPosition) {
+            return null;  //To change body of implemented methods use File | Settings | File Templates.
+        }
+    };
 }

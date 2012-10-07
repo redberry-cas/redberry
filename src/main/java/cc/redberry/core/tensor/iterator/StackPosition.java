@@ -23,6 +23,7 @@
 package cc.redberry.core.tensor.iterator;
 
 import cc.redberry.core.tensor.Tensor;
+import cc.redberry.core.utils.Indicator;
 
 /**
  * @author Dmitry Bolotin
@@ -67,9 +68,25 @@ public interface StackPosition<T extends Payload<T>> {
     StackPosition<T> previous();
 
     /**
+     * Returns the i-th level parent of tree node.
+     *
+     * @return the i-th level parent of tree node
+     */
+    StackPosition<T> previous(int level);
+
+    /**
      * Returns the payload of current stack position.
      *
      * @return the payload of current stack position
      */
     T getPayload();
+
+    /**
+     * Returns depth in the tree, relatively to the current cursor position.
+     *
+     * @return depth in the tree relatively to the current cursor position
+     */
+    int getDepth();
+
+    boolean isUnder(Indicator<Tensor> indicator, int searchDepth);
 }
