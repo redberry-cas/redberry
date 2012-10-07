@@ -144,8 +144,6 @@ class EmptyIndices implements Indices {
     /**
      * Returns empty string.
      *
-     * @param mode
-     *
      * @return empty string
      */
     @Override

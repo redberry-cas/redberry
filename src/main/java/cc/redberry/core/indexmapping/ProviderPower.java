@@ -22,11 +22,11 @@
  */
 package cc.redberry.core.indexmapping;
 
-import cc.redberry.core.tensor.Power;
+import cc.redberry.core.number.Complex;
+import cc.redberry.core.number.NumberUtils;
 import cc.redberry.core.tensor.Tensor;
 
 /**
- *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
@@ -39,9 +39,27 @@ class ProviderPower implements IndexMappingProviderFactory {
 
     @Override
     public IndexMappingProvider create(IndexMappingProvider opu, Tensor from, Tensor to) {
-        final Power fromP = (Power) from, toP = (Power) to;
-        if (IndexMappings.mappingExists(fromP.get(1), toP.get(1)) && IndexMappings.mappingExists(fromP.get(0), toP.get(0)))
+        IndexMappingBuffer exponentMapping = IndexMappings.getFirst(from.get(1), to.get(1));   //todo try get first positive mapping
+        if (exponentMapping == null || exponentMapping.getSignum())
+            return IndexMappingProvider.Util.EMPTY_PROVIDER;
+
+        //todo two signs are possible
+        IndexMappingBuffer baseMapping = IndexMappings.getFirst(from.get(0), to.get(0));
+        if (baseMapping == null)
+            return IndexMappingProvider.Util.EMPTY_PROVIDER;
+
+        if (baseMapping.getSignum() == false)
             return new DummyIndexMappingProvider(opu);
+        if (!(from.get(1) instanceof Complex))
+            return IndexMappingProvider.Util.EMPTY_PROVIDER;
+
+        assert to.get(1) instanceof Complex;
+        Complex exponent = (Complex) from.get(1);
+        if (NumberUtils.isIntegerEven(exponent))
+            return new DummyIndexMappingProvider(opu);
+        if (NumberUtils.isIntegerOdd(exponent))
+            return new MinusIndexMappingProvider(opu);
+
         return IndexMappingProvider.Util.EMPTY_PROVIDER;
     }
 }

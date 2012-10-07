@@ -30,7 +30,6 @@ import cc.redberry.core.transformations.Transformation;
 import cc.redberry.core.utils.TensorUtils;
 
 /**
- *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
@@ -54,7 +53,7 @@ class SimpleSubstitution implements Transformation {
 
     @Override
     public Tensor transform(Tensor tensor) {
-        SubstitutionIterator iterator = new SubstitutionIterator(tensor);
+        NewSubstitutionIterator iterator = new NewSubstitutionIterator(tensor);
         Tensor current;
         while ((current = iterator.next()) != null) {
             IndexMappingBuffer buffer =
@@ -65,13 +64,7 @@ class SimpleSubstitution implements Transformation {
             if (symbolic)
                 newTo = to;
             else {
-                int[] forbidden = new int[iterator.forbiddenIndices().size()];
-                int c = -1;
-                for (Integer f : iterator.forbiddenIndices())
-                    forbidden[++c] = f;
-                newTo = ApplyIndexMapping.applyIndexMapping(to, buffer, forbidden);
-//                if (newTo != to)
-                iterator.forbiddenIndices().addAll(TensorUtils.getAllIndicesNames(newTo));
+                newTo = ApplyIndexMapping.applyIndexMapping(to, buffer, iterator.getForbidden());
             }
             iterator.set(newTo);
         }

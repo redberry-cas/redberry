@@ -30,19 +30,19 @@ import java.util.*;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public class TMap<K extends Tensor, V> extends AbstractMap<K, V> {
+public class THashMap<K extends Tensor, V> extends AbstractMap<K, V> {
 
     private final HashMap<TensorWrapperWithEquals, V> map;
 
-    public TMap() {
+    public THashMap() {
         map = new HashMap<>();
     }
 
-    public TMap(int initialCapacity) {
+    public THashMap(int initialCapacity) {
         map = new HashMap<>(initialCapacity);
     }
 
-    public TMap(int initialCapacity, float loadFactor) {
+    public THashMap(int initialCapacity, float loadFactor) {
         map = new HashMap<>(initialCapacity, loadFactor);
     }
 
@@ -85,7 +85,7 @@ public class TMap<K extends Tensor, V> extends AbstractMap<K, V> {
             return false;
         if (getClass() != obj.getClass())
             return false;
-        final TMap<K, V> other = (TMap<K, V>) obj;
+        final THashMap<K, V> other = (THashMap<K, V>) obj;
         return map.equals(other.map);
     }
 
@@ -121,7 +121,7 @@ public class TMap<K extends Tensor, V> extends AbstractMap<K, V> {
 
     private final class KeySet extends AbstractSet<K> {
 
-        final Set<TensorWrapperWithEquals> innerSet = TMap.this.map.keySet();
+        final Set<TensorWrapperWithEquals> innerSet = THashMap.this.map.keySet();
 
         public KeySet() {
         }
@@ -167,7 +167,7 @@ public class TMap<K extends Tensor, V> extends AbstractMap<K, V> {
 
     private final class EntrySet extends AbstractSet<Entry<K, V>> {
 
-        final Set<Entry<TensorWrapperWithEquals, V>> innerSet = TMap.this.map.entrySet();
+        final Set<Entry<TensorWrapperWithEquals, V>> innerSet = THashMap.this.map.entrySet();
 
         public EntrySet() {
         }

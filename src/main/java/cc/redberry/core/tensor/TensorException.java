@@ -1,5 +1,5 @@
 /*
- * Redberry: symbolic tensors computations.
+ * Redberry: symbolic tensor computations.
  *
  * Copyright (c) 2010-2012:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>

@@ -154,6 +154,8 @@ public final class Tensors {
         return p;
     }
 
+
+
     /**
      * Returns result of summation of several tensors. Common result is an
      * object of class Sum, but for some input arguments result could have

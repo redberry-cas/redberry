@@ -31,23 +31,23 @@ import java.util.*;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public final class TSet<T extends Tensor> implements Set<T> {
+public final class THashSet<T extends Tensor> implements Set<T> {
 
     private final HashSet<TensorWrapperWithEquals> set;
 
-    public TSet() {
+    public THashSet() {
         set = new HashSet<>();
     }
 
-    public TSet(int initialCapacity) {
+    public THashSet(int initialCapacity) {
         set = new HashSet<>(initialCapacity);
     }
 
-    public TSet(int initialCapacity, float loadFactor) {
+    public THashSet(int initialCapacity, float loadFactor) {
         set = new HashSet<>(initialCapacity, loadFactor);
     }
 
-    public TSet(Collection<? extends Tensor> tensors) {
+    public THashSet(Collection<? extends Tensor> tensors) {
         List<TensorWrapperWithEquals> wrappers = new ArrayList<>(tensors.size());
         for (Tensor t : tensors)
             wrappers.add(new TensorWrapperWithEquals(t));

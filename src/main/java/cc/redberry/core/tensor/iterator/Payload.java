@@ -20,43 +20,14 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
-package cc.redberry.core.utils;
+package cc.redberry.core.tensor.iterator;
+
+import cc.redberry.core.tensor.Tensor;
 
 /**
- *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public interface BitArray {
-    void and(BitArray bitArray);
-
-    int bitCount();
-
-    void clear(int i);
-
-    void clearAll();
-
-    BitArray clone();
-
-    boolean get(int i);
-
-    int[] getBits();
-
-    boolean intersects(BitArray bitArray);
-
-    void loadValueFrom(BitArray bitArray);
-
-    void or(BitArray bitArray);
-
-    void set(int i);
-
-    void set(int i, boolean value);
-
-    void setAll();
-
-    int size();
-
-    void xor(BitArray bitArray);
-
-    int nextTrailingBit(int position);
+public interface Payload<T extends Payload<T>> {
+    Tensor onLeaving(StackPosition<T> stackPosition);
 }

@@ -132,8 +132,8 @@ public class ParserTest {
 
     @Test
     public void testProductPowers3() {
-        Tensor u = Tensors.parse("Power[2-3*i,2]*2*a*a*c/b*1/4*b/a/a/(2-3*i)");
-        Tensor v = Tensors.parse("c*(1+3/(-2)*i)");
+        Tensor u = Tensors.parse("Power[2-3*I,2]*2*a*a*c/b*1/4*b/a/a/(2-3*I)");
+        Tensor v = Tensors.parse("c*(1+3/(-2)*I)");
         Assert.assertTrue(TensorUtils.equalsExactly(u, v));
         Assert.assertTrue(v instanceof Product);
     }

@@ -37,12 +37,10 @@ import cc.redberry.core.utils.TensorUtils;
 import junit.framework.Assert;
 import org.junit.Test;
 
-import static cc.redberry.core.TAssert.assertEquals;
-import static cc.redberry.core.TAssert.assertTrue;
+import static cc.redberry.core.TAssert.*;
 import static cc.redberry.core.tensor.Tensors.*;
 
 /**
- *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
@@ -56,7 +54,7 @@ public class SubstitutionsTest {
         return Expand.expand(tensor);
     }
 
-    private static Tensor testSimpletitute(Tensor tensor, String testSimpletitution) {
+    private static Tensor substitute(Tensor tensor, String testSimpletitution) {
         Expression e = (Expression) parse(testSimpletitution);
         return e.transform(tensor);
     }
@@ -97,8 +95,8 @@ public class SubstitutionsTest {
     @Test
     public void testSimple3() {
         Tensor target = parse("g^mn*R_mn");
-        target = testSimpletitute(target, "R_mn=R^a_man");
-        target = testSimpletitute(target, "R^a_bcd=A^a*A_b*B_c*B_d");
+        target = substitute(target, "R_mn=R^a_man");
+        target = substitute(target, "R^a_bcd=A^a*A_b*B_c*B_d");
         Tensor expected = parse("g^{mn}*A^{a}*A_{m}*B_{a}*B_{n}");
         assertTrue(TensorUtils.equalsExactly(target, expected));
     }
@@ -106,7 +104,8 @@ public class SubstitutionsTest {
     @Test
     public void testSimple4() {
         Tensor target = parse("N*(N-1)+N+1/N");
-        target = testSimpletitute(target, "N=3");
+        target = substitute(target, "N=3");
+        System.out.println(target);
         Tensor expacted = parse("3*(3-1)+3+1/3");
         assertTrue(TensorUtils.equalsExactly(target, expacted));
     }
@@ -114,7 +113,7 @@ public class SubstitutionsTest {
     @Test
     public void testSimple5() {
         Tensor target = parse("L*(L-1)*F");
-        target = testSimpletitute(target, ("L=1"));
+        target = substitute(target, ("L=1"));
         assertTrue(TensorUtils.equalsExactly(target, Complex.ZERO));
     }
 
@@ -125,7 +124,7 @@ public class SubstitutionsTest {
         System.out.println(t.toString(ToStringMode.UTF8));
         Expression ex = (Expression) parse("E^{\\mu \\nu \\gamma \\delta }_{\\epsilon \\zeta }=H^{\\mu \\nu \\gamma \\delta }_{\\epsilon \\zeta }+4*H^{\\mu \\gamma \\delta }_{\\eta \\theta }*H^{\\nu \\eta \\theta }_{\\epsilon \\zeta }+4*H^{\\nu \\gamma \\delta }_{\\lambda \\xi }*H^{\\mu \\lambda \\xi }_{\\epsilon \\zeta }");
         System.out.println(ex.toString(ToStringMode.UTF8));
-        t = testSimpletitute(t, "E^{\\mu \\nu \\gamma \\delta }_{\\epsilon \\zeta }=H^{\\mu \\nu \\gamma \\delta }_{\\epsilon \\zeta }+4*H^{\\mu \\gamma \\delta }_{\\eta \\theta }*H^{\\nu \\eta \\theta }_{\\epsilon \\zeta }+4*H^{\\nu \\gamma \\delta }_{\\lambda \\xi }*H^{\\mu \\lambda \\xi }_{\\epsilon \\zeta }");
+        t = substitute(t, "E^{\\mu \\nu \\gamma \\delta }_{\\epsilon \\zeta }=H^{\\mu \\nu \\gamma \\delta }_{\\epsilon \\zeta }+4*H^{\\mu \\gamma \\delta }_{\\eta \\theta }*H^{\\nu \\eta \\theta }_{\\epsilon \\zeta }+4*H^{\\nu \\gamma \\delta }_{\\lambda \\xi }*H^{\\mu \\lambda \\xi }_{\\epsilon \\zeta }");
         System.out.println(t.toString(ToStringMode.UTF8));
         t = expand(t);
         assertTrue(true);
@@ -137,7 +136,7 @@ public class SubstitutionsTest {
         assertTrue(t.getIndices().getFree().size() == 0);
         Expression ex = (Expression) parse("E^{lmcd}_{ef}=H^{lmcd}_{ef}+4*H^{lcd}_{gh}*H^{mgh}_{ef}+4*H^{mcd}_{kn}*H^{lkn}_{ef}");
         System.out.println(ex);
-        t = testSimpletitute(t, "E^{lmcd}_{ef}=H^{lmcd}_{ef}+4*H^{lcd}_{gh}*H^{mgh}_{ef}+4*H^{mcd}_{kn}*H^{lkn}_{ef}");
+        t = substitute(t, "E^{lmcd}_{ef}=H^{lmcd}_{ef}+4*H^{lcd}_{gh}*H^{mgh}_{ef}+4*H^{mcd}_{kn}*H^{lkn}_{ef}");
         System.out.println(t);
         t = expand(t);
         System.out.println(t);
@@ -146,7 +145,7 @@ public class SubstitutionsTest {
     @Test
     public void testSimple8() {
         Tensor t = parse("H^{slez}_{ab}*E_{mn}^{ab}_{dg}*n_{s}*n_{l}*H^{mndg}_{ez}");
-        t = testSimpletitute(t, "E^{mngd}_{ez}=H^{mngd}_{ez}+4*H^{mgd}_{yt}*H^{nyt}_{ez}+4*H^{ngd}_{lx}*H^{mlx}_{ez}");
+        t = substitute(t, "E^{mngd}_{ez}=H^{mngd}_{ez}+4*H^{mgd}_{yt}*H^{nyt}_{ez}+4*H^{ngd}_{lx}*H^{mlx}_{ez}");
         System.out.println(t);
         t = expand(t);
         System.out.println(t);
@@ -155,8 +154,8 @@ public class SubstitutionsTest {
     @Test
     public void testSimple9() {
         Tensor target = parse("f_mn^mn");
-        target = testSimpletitute(target,
-                                  "f_ab^cd=a_ab*z^cd");
+        target = substitute(target,
+                "f_ab^cd=a_ab*z^cd");
         Tensor expected = parse("a_ab*z^ab");
         assertTrue(TensorUtils.equals(target, expected));
     }
@@ -265,41 +264,27 @@ public class SubstitutionsTest {
     }
 
     @Test
-    public void testSimple18() {
-
-        //Riman with diff states
-        Tensor target = parse("g^{mn}*g^{ab}*R_{bman}");
-        target = testSimpletitute(target,
-                                  "R^a_bmn=p_m*G^a_bn+p_n*G^a_bm+G^a_gm*G^g_bn-G^a_gn*G^g_bm");
-        target = testSimpletitute(target,
-                                  "G_gmn=(1/2)*(p_m*g_gn+p_n*g_gm-p_g*g_mn)");
-
-        target = contract(target);
-        assertTrue(true);
-    }
-
-    @Test
     public void testSimple19() {
 
         //Riman without diff states
         Tensor target = parse("g^{mn}*R_{mn}");
-        target = testSimpletitute(target,
-                                  "R_{mn}=R^{a}_{man}");
-        target = testSimpletitute(target,
-                                  "R^a_bmn=p_m*G^a_bn+p_n*G^a_bm+G^a_gm*G^g_bn-G^a_gn*G^g_bm");
-        target = testSimpletitute(target,
-                                  "G^a_mn=(1/2)*g^ag*(p_m*g_gn+p_n*g_gm-p_g*g_mn)");
+        target = substitute(target,
+                "R_{mn}=R^{a}_{man}");
+        target = substitute(target,
+                "R^a_bmn=p_m*G^a_bn+p_n*G^a_bm+G^a_gm*G^g_bn-G^a_gn*G^g_bm");
+        target = substitute(target,
+                "G^a_mn=(1/2)*g^ag*(p_m*g_gn+p_n*g_gm-p_g*g_mn)");
 
         target = contract(expand(target));
 
         //Riman with diff states
         Tensor target1 = parse("g_{mn}*R^{mn}");
-        target1 = testSimpletitute(target1,
-                                   "R_{mn}=g^ab*R_{bman}");
-        target1 = testSimpletitute(target1,
-                                   "R^a_bmn=p_m*G^a_bn+p_n*G^a_bm+G^a_gm*G^g_bn-G^a_gn*G^g_bm");
-        target1 = testSimpletitute(target1,
-                                   "G_gmn=(1/2)*(p_m*g_gn+p_n*g_gm-p_g*g_mn)");
+        target1 = substitute(target1,
+                "R_{mn}=g^ab*R_{bman}");
+        target1 = substitute(target1,
+                "R^a_bmn=p_m*G^a_bn+p_n*G^a_bm+G^a_gm*G^g_bn-G^a_gn*G^g_bm");
+        target1 = substitute(target1,
+                "G_gmn=(1/2)*(p_m*g_gn+p_n*g_gm-p_g*g_mn)");
 
         target1 = contract(expand(target1));
 
@@ -310,27 +295,53 @@ public class SubstitutionsTest {
     }
 
     @Test
+    public void testSimple18() {
+        //Riman with diff states
+        Tensor target = parse("g^{mn}*g^{ab}*R_{bman}");
+        target = substitute(target,
+                "R^a_bmn=p_m*G^a_bn+p_n*G^a_bm+G^a_gm*G^g_bn-G^a_gn*G^g_bm");
+        target = substitute(target,
+                "G_gmn=(1/2)*(p_m*g_gn+p_n*g_gm-p_g*g_mn)");
+
+        target = contract(target);
+        assertTrue(true);
+    }
+
+    @Test
+    public void testSimple18a() {
+        CC.resetTensorNames(-2492126546111636082L);
+        //Riman with diff states
+        Tensor target = parse("(-G^{g}_{ma}*G_{bgn}+G^{g}_{mn}*G_{bga})*g^{ab}*g^{mn}");
+        target = substitute(target,
+                "G_gmn=(1/2)*(p_m*g_gn+p_n*g_gm-p_g*g_mn)");
+
+        target = contract(target);
+        target = expand(target);
+        assertIndicesConsistency(target);
+    }
+
+    @Test
     public void testSimple20() {
 
         //Riman without diff states
         Tensor target = parse("g^{mn}*R_{mn}");
-        target = testSimpletitute(target,
-                                  "R_{mn}=R^{a}_{man}");
-        target = testSimpletitute(target,
-                                  "R^a_bmn=p_m*G^a_bn+p_n*G^a_bm+G^a_gm*G^g_bn-G^a_gn*G^g_bm");
-        target = testSimpletitute(target,
-                                  "G^a_mn=(1/2)*g^ag*(p_m*g_gn+p_n*g_gm-p_g*g_mn)");
+        target = substitute(target,
+                "R_{mn}=R^{a}_{man}");
+        target = substitute(target,
+                "R^a_bmn=p_m*G^a_bn+p_n*G^a_bm+G^a_gm*G^g_bn-G^a_gn*G^g_bm");
+        target = substitute(target,
+                "G^a_mn=(1/2)*g^ag*(p_m*g_gn+p_n*g_gm-p_g*g_mn)");
 
         target = contract(target);
 
         //Riman with diff states
         Tensor target1 = parse("g_{mn}*R^{mn}");
-        target1 = testSimpletitute(target1,
-                                   "R_{mn}=g^ab*R_{bman}");
-        target1 = testSimpletitute(target1,
-                                   "R^a_bmn=p_m*G^a_bn+p_n*G^a_bm+G^a_gm*G^g_bn-G^a_gn*G^g_bm");
-        target1 = testSimpletitute(target1,
-                                   "G_gmn=(1/2)*(p_m*g_gn+p_n*g_gm-p_g*g_mn)");
+        target1 = substitute(target1,
+                "R_{mn}=g^ab*R_{bman}");
+        target1 = substitute(target1,
+                "R^a_bmn=p_m*G^a_bn+p_n*G^a_bm+G^a_gm*G^g_bn-G^a_gn*G^g_bm");
+        target1 = substitute(target1,
+                "G_gmn=(1/2)*(p_m*g_gn+p_n*g_gm-p_g*g_mn)");
 
         target1 = contract(target1);
 
@@ -395,6 +406,17 @@ public class SubstitutionsTest {
             TAssert.assertIndicesConsistency(t);
         }
     }
+
+    @Test
+    public void testSimple23a() {
+        CC.resetTensorNames(-1030130556496293426L);
+        Tensor t = parse("(f+g*k)*(d+h*f*f)");
+        Expression f = parseExpression("f=f_m^m+f1_a^a");
+        t = f.transform(t);
+        System.out.println(t);
+        TAssert.assertIndicesConsistency(t);
+    }
+
 
     @Test
     public void testField1() {
@@ -503,7 +525,7 @@ public class SubstitutionsTest {
         assertTrue(TensorUtils.equalsExactly(target, parse("g_a+k_a")));
     }
 
-//    @Test
+    //    @Test
 //    public void testField12() {
 //        TensorField from = (TensorField) parse("f_m[x_i]");
 //        Tensor to = parse("x_m+y_m");
@@ -644,7 +666,40 @@ public class SubstitutionsTest {
         e = Expand.expand(e);
         TAssert.assertIndicesConsistency(e);
     }
+
+    @Test
+    public void testField23() {
+        Expression field = parseExpression("a = a_a^a");
+        Tensor target = parse("f[a]*g_a");
+        target = field.transform(target);
+        Tensor expected = parse("f[a_a^a]*g_a");
+        System.out.println(target);
+        assertEqualsExactly(target, expected);
+    }
+
+    @Test
+    public void testField24() {
+        Expression field = parseExpression("a = a_a^a");
+        Tensor target = parse("f[f[a]]*g_a");
+        target = field.transform(target);
+        Tensor expected = parse("f[f[a_a^a]]*g_a");
+        assertEqualsExactly(target, expected);
+    }
+
+    @Test
+    public void testField25() {
+        Expression field = parseExpression("a = a_a^a");
+        Tensor target = parse("f[f[a],a]*g_a");
+        target = field.transform(target);
+        Tensor expected = parse("f[f[a_a^a],a_a^a]*g_a");
+        assertEqualsExactly(target, expected);
+    }
     //TODO additional tests with specified field arguments indices
+
+
+    private static void compact(Tensor before, Tensor after, Tensor to) {
+
+    }
 
     @Test
     public void testSum1() {
