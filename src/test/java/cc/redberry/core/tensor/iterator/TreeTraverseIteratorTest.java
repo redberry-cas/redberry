@@ -30,6 +30,8 @@ import cc.redberry.core.tensor.Tensors;
 import cc.redberry.core.tensor.functions.Sin;
 import cc.redberry.core.utils.Indicator;
 import cc.redberry.core.utils.TensorUtils;
+import org.apache.commons.math3.random.BitsStreamGenerator;
+import org.apache.commons.math3.random.Well19937c;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -641,12 +643,47 @@ public class TreeTraverseIteratorTest {
                     ++p;
                 return new PayloadC(s, p);
             }
+
+            @Override
+            public boolean allowLazyInitialization() {
+                return true;
+            }
         };
-        Tensor t = parse("(a+b)*(c+d*(k+c))");
-        TreeTraverseIterator<PayloadC> iterator = new TreeTraverseIterator<>(t, factory);
-        TraverseState state;
-        while ((state = iterator.next()) != null) {
-            System.out.println(state + "\t" + iterator.current() + "\t" + iterator.currentStackPosition().getPayload());
+
+        int s = 0, p = 0, m;
+        Tensor t = parse("(a+b)*(c+d*(k+c))*(a+b)*(c+d*(a+b)*(c+d*(a+b)*(c+(a+b)*(c+d*(k+c))" +
+                "*(a+b)*(c+d*(a+b*((a+b)*(c+d*(k+c))*(a*((a+b)*(c+d*(k+c))*(a+b)*(c+d*(a+b)*" +
+                "(c+d*(a+b)*(c+d*(k+c))*(k*(a+b)*(c+d*(k+c))+(a+b)*(c+d*(k+(a+b)*(c+d*(k+c))+c))+" +
+                "c))*(k+c)))+b)*(c+d*(a+b)*(c+d*(a+b)*(c+d*(k+c))*(k*(a+b)*(c+d*(k+c))+(a+b)*" +
+                "(c+d*(k+(a+b)*(c+d*(k+c))+c))+c))*(k+c))))*(c+d*(a+b)*(c+d*(k+c))*(k*(a+b)*(c+d*" +
+                "(k+c))+(a+b)*(c+d*(k+(a+b)*(c+d*(k+c))+c))+c))*(k+c))+d*(k+c))*(k*(a+b)*(c+d*(k+c))+" +
+                "(a+b)*(c+d*(k+(a+b)*(c+d*(k+c))+c))+c))*(k+c))");
+
+        BitsStreamGenerator bsg = new Well19937c();
+
+        for (int i = 0; i < 300; ++i) {
+            TreeTraverseIterator<PayloadC> iterator = new TreeTraverseIterator<>(t, factory);
+            TraverseState state;
+            while ((state = iterator.next()) != null) {
+                if (state == TraverseState.Entering) {
+                    if (iterator.current() instanceof Product)
+                        ++p;
+                    if (iterator.current() instanceof Sum)
+                        ++s;
+                }
+
+                if (bsg.nextInt(100) < 5) {
+                    Assert.assertEquals(p, iterator.currentStackPosition().getPayload().products);
+                    Assert.assertEquals(s, iterator.currentStackPosition().getPayload().sums);
+                }
+
+                if (state == TraverseState.Leaving) {
+                    if (iterator.current() instanceof Product)
+                        --p;
+                    if (iterator.current() instanceof Sum)
+                        --s;
+                }
+            }
         }
     }
 }

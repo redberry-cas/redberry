@@ -27,5 +27,7 @@ package cc.redberry.core.tensor.iterator;
  * @author Stanislav Poslavsky
  */
 public interface PayloadFactory<T extends Payload<T>> {
+    boolean allowLazyInitialization();
+
     T create(StackPosition<T> stackPosition);
 }
