@@ -35,6 +35,7 @@ import cc.redberry.core.transformations.Expand;
 import cc.redberry.core.transformations.Transformation;
 import cc.redberry.core.utils.TensorUtils;
 import junit.framework.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import static cc.redberry.core.TAssert.*;
@@ -413,6 +414,16 @@ public class SubstitutionsTest {
         Tensor t = parse("(f+g*k)*(d+h*f*f)");
         Expression f = parseExpression("f=f_m^m+f1_a^a");
         t = f.transform(t);
+        TAssert.assertIndicesConsistency(t);
+    }
+
+    @Test
+    public void testSimple24() {
+        CC.resetTensorNames(-1030130556496293426L);
+        Tensor t = parse("(f+g*k)*(d+h*f*f)");
+        System.out.println(t);
+        Expression f = parseExpression("f=f_m^m+f1_a^a");
+        t = f.transform(t);
         System.out.println(t);
         TAssert.assertIndicesConsistency(t);
     }
@@ -581,6 +592,7 @@ public class SubstitutionsTest {
     public void testField16() {
         Tensor target = parse("Gf^a_gm[g_ab]*Gf^g_bn[g_ab]");
         target = Tensors.parseExpression("Gf^a_mn[r^mn]=(1/2)*r^ag*p_m*r_gn").transform(target);
+        TAssert.assertIndicesConsistency(target);
 
     }
 
@@ -752,6 +764,7 @@ public class SubstitutionsTest {
         TAssert.assertEquals(target, "k^a*k_a*p^b*p_b");
     }
 
+    @Ignore
     @Test
     public void testProduct6() {
         Tensor target = parse("a[p]*b[k]");

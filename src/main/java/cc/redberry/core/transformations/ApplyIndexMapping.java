@@ -39,12 +39,12 @@ import cc.redberry.core.tensor.iterator.TreeTraverseIterator;
 import cc.redberry.core.utils.ArraysUtils;
 import cc.redberry.core.utils.IntArrayList;
 import cc.redberry.core.utils.TensorUtils;
+
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Set;
 
 /**
- *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
@@ -85,6 +85,8 @@ public final class ApplyIndexMapping implements Transformation {
     public static Tensor applyIndexMapping(Tensor tensor, IndexMappingBuffer buffer, int[] forbidden) {
         if (buffer == null)
             throw new NullPointerException("Buffer is null.");
+        if (TensorUtils.isZero(tensor))//todo isNaN etc.
+            return tensor;
         Map<Integer, IndexMappingBufferRecord> map = buffer.getMap();
         int[] from = new int[map.size()], to = new int[map.size()];
         int count = 0;

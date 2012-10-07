@@ -53,7 +53,7 @@ class SimpleSubstitution implements Transformation {
 
     @Override
     public Tensor transform(Tensor tensor) {
-        NewSubstitutionIterator iterator = new NewSubstitutionIterator(tensor);
+        SubstitutionIterator iterator = new SubstitutionIterator(tensor);
         Tensor current;
         while ((current = iterator.next()) != null) {
             IndexMappingBuffer buffer =

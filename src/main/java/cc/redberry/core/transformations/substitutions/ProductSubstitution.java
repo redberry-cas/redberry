@@ -32,10 +32,11 @@ import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.transformations.ApplyIndexMapping;
 import cc.redberry.core.transformations.Transformation;
 import cc.redberry.core.utils.TensorUtils;
+import gnu.trove.set.hash.TIntHashSet;
+
 import java.util.Arrays;
 
 /**
- *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
@@ -69,7 +70,7 @@ class ProductSubstitution implements Transformation {
         while ((current = iterator.next()) != null) {
             if (!(current instanceof Product))
                 continue;
-
+            TIntHashSet forbidden = null;
             while (current instanceof Product) {
                 Product cp = (Product) current;
                 IndexMappingBuffer buffer = null;
@@ -101,16 +102,32 @@ class ProductSubstitution implements Transformation {
 
                 buffer.addSignum(sign);
                 Tensor newTo;
+                int i;
                 if (symbolic)
                     newTo = to;
                 else {
-                    int[] forbidden = new int[iterator.forbiddenIndices().size()];
-                    int c = -1;
-                    for (Integer f : iterator.forbiddenIndices())
-                        forbidden[++c] = f;
-                    newTo = ApplyIndexMapping.applyIndexMapping(to, buffer, forbidden);
-//                    if (newTo != to)
-                    iterator.forbiddenIndices().addAll(TensorUtils.getAllIndicesNames(newTo));
+                    if (forbidden == null) {
+                        //TODO review
+                        forbidden = new TIntHashSet(iterator.getForbidden());
+                        int pivot = 0;
+                        for (i = 0; i < currentIndexless.length; ++i) {
+                            if (pivot < indexlessBijection.length && i == indexlessBijection[pivot])
+                                ++pivot;
+                            else
+                                forbidden.addAll(TensorUtils.getAllIndicesNames(currentIndexless[i]));
+                        }
+                        pivot = 0;
+                        for (i = 0; i < currentData.length; ++i) {
+                            if (pivot < dataBijection.length && i == dataBijection[pivot])
+                                ++pivot;
+                            else
+                                forbidden.addAll(TensorUtils.getAllIndicesNames(currentData[i]));
+                        }
+
+                    }
+                    newTo = ApplyIndexMapping.applyIndexMapping(to, buffer, forbidden.toArray());
+                    if (newTo != to)
+                        forbidden.addAll(TensorUtils.getAllIndicesNames(newTo));
                 }
 
                 Arrays.sort(indexlessBijection);
@@ -119,14 +136,21 @@ class ProductSubstitution implements Transformation {
                 ProductBuilder builder = new ProductBuilder();
                 builder.put(newTo);
 
-                int i;
-                for (i = 0; i < currentIndexless.length; ++i)
-                    if (Arrays.binarySearch(indexlessBijection, i) < 0)
+                int pivot = 0;
+                for (i = 0; i < currentIndexless.length; ++i) {
+                    if (pivot < indexlessBijection.length && i == indexlessBijection[pivot])
+                        ++pivot;
+                    else
                         builder.put(currentIndexless[i]);
-
-                for (i = 0; i < currentData.length; ++i)
-                    if (Arrays.binarySearch(dataBijection, i) < 0)
+                }
+                pivot = 0;
+                for (i = 0; i < currentData.length; ++i) {
+                    if (pivot < dataBijection.length && i == dataBijection[pivot])
+                        ++pivot;
+                    else
                         builder.put(currentData[i]);
+                }
+
 
                 builder.put(cp.getFactor().divide(fromFactor));
                 current = builder.build();

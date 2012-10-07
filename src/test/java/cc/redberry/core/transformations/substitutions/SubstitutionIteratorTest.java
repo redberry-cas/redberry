@@ -20,68 +20,49 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package cc.redberry.core.transformations.substitutions;
 
 import cc.redberry.core.context.CC;
+import cc.redberry.core.indices.IndicesFactory;
 import cc.redberry.core.tensor.Tensor;
+import cc.redberry.core.tensor.Tensors;
 import cc.redberry.core.utils.TensorUtils;
 import org.junit.Test;
 
-import static cc.redberry.core.tensor.Tensors.parse;
-
-/**
- *
- * @author Dmitry Bolotin
- * @author Stanislav Poslavsky
- */
 public class SubstitutionIteratorTest {
+    @Test
+    public void test0() {
+        CC.resetTensorNames(1423);
+        Tensor tensor = Tensors.parse("A_mk*G^amn_a*(S^k_g*(D^g+Q^gz_z)+N^k_ez^ez)*E");
+        SubstitutionIterator si = new SubstitutionIterator(tensor);
+        System.out.println(IndicesFactory.createSorted(TensorUtils.getAllIndicesNamesT(tensor).toArray()));
+        Tensor current;
+        while ((current = si.next()) != null) {
+            if (current.equals(Tensors.parse("E")))
+                si.set(Tensors.parse("H^l_l"));
+            System.out.println(current + " : " + IndicesFactory.createSorted(si.getForbidden()).toString() + "\n");
+            int k=0;
+        }
+
+        System.out.println(si.result());
+    }
 
     @Test
     public void test1() {
-        Tensor t = parse("A_mn*(a+b+c)");
-        SubstitutionIterator iterator = new SubstitutionIterator(t);
-        Tensor f;
-        while ((f = iterator.next()) != null)
-//            System.out.println(f);
-            if (TensorUtils.equalsExactly(f, parse("c")))
-                System.out.println(iterator.stack);
-    }
-
-    @Test
-    public void test2() {
-        Tensor t = parse("D_nm+A_mn*(a+b+f[A_ij*c])");
-        SubstitutionIterator iterator = new SubstitutionIterator(t);
-        Tensor f;
-        while ((f = iterator.next()) != null)
-//            System.out.println(f);
-            if (TensorUtils.equalsExactly(f, parse("c")))
-                System.out.println(iterator.stack);
-    }
-
-    @Test
-    public void test3() {
-        CC.resetTensorNames(12445697);
-        Tensor t = parse("c*f[h*f[d*a*f]]");
-        SubstitutionIterator iterator = new SubstitutionIterator(t);
-        Tensor f;
-        while ((f = iterator.next()) != null)
-//            System.out.println(f);
-            if (TensorUtils.equalsExactly(f, parse("a")) || TensorUtils.equalsExactly(f, parse("d")) || TensorUtils.equalsExactly(f, parse("c")))
-                System.out.println(f + " " + iterator.stack);
-
-    }
-
-    @Test
-    public void test4() {
-        CC.resetTensorNames(212499456971L);
-        Tensor t = parse("F[p,q]*G_i");
-        SubstitutionIterator iterator = new SubstitutionIterator(t);
-        Tensor f;
-        while ((f = iterator.next()) != null) {
-            System.out.println(f + ":");
-            System.out.println("\t Field depth: " + iterator.fieldDepth);
-            System.out.println("\t Stack: " + iterator.stack);
-            System.out.println("\t Forbidden indices size: " + iterator.forbiddenIndices().size());
+        CC.resetTensorNames(1423);
+        Tensor tensor = Tensors.parse("a*b");
+        SubstitutionIterator si = new SubstitutionIterator(tensor);
+        System.out.println(IndicesFactory.createSorted(TensorUtils.getAllIndicesNamesT(tensor).toArray()));
+        Tensor current;
+        while ((current = si.next()) != null) {
+            System.out.println(current + " : " + IndicesFactory.createSorted(si.getForbidden()).toString() + "\n");
+            if (current.equals(Tensors.parse("a*b")))
+                si.set(Tensors.parse("H^l_l"));
+            System.out.println(current + " : " + IndicesFactory.createSorted(si.getForbidden()).toString() + "\n");
+            int k=0;
         }
+
+        System.out.println(si.result());
     }
 }

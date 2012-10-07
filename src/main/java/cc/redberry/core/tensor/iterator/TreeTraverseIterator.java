@@ -355,5 +355,10 @@ public final class TreeTraverseIterator<T extends Payload<T>> {
                 pointer = pointer.previous;
             return pointer;
         }
+
+        @Override
+        public int currentIndex() {
+            return position - 1;
+        }
     }
 }

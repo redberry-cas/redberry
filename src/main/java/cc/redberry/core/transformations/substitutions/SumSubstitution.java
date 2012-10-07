@@ -28,10 +28,10 @@ import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.transformations.ApplyIndexMapping;
 import cc.redberry.core.transformations.Transformation;
 import cc.redberry.core.utils.TensorUtils;
+
 import java.util.Arrays;
 
 /**
- *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
@@ -67,15 +67,8 @@ final class SumSubstitution implements Transformation {
             Tensor newTo;
             if (symbolic)
                 newTo = to;
-            else {
-                int[] forbidden = new int[iterator.forbiddenIndices().size()];
-                int c = -1;
-                for (Integer f : iterator.forbiddenIndices())
-                    forbidden[++c] = f;
-                newTo = ApplyIndexMapping.applyIndexMapping(to, buffer, forbidden);
-//                if (newTo != to)
-                iterator.forbiddenIndices().addAll(TensorUtils.getAllIndicesNames(newTo));
-            }
+            else
+                newTo = ApplyIndexMapping.applyIndexMapping(to, buffer, iterator.getForbidden());
 
             SumBuilder builder = new SumBuilder();
             int[] bijection = bc.bijection;

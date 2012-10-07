@@ -61,16 +61,16 @@ public interface StackPosition<T extends Payload<T>> {
     boolean isModified();
 
     /**
-     * Returns the parent tree node.
+     * Returns the position tree node.
      *
-     * @return the parent tree node
+     * @return the position tree node
      */
     StackPosition<T> previous();
 
     /**
-     * Returns the i-th level parent of tree node.
+     * Returns the i-th level position of tree node.
      *
-     * @return the i-th level parent of tree node
+     * @return the i-th level position of tree node
      */
     StackPosition<T> previous(int level);
 
@@ -89,4 +89,13 @@ public interface StackPosition<T extends Payload<T>> {
     int getDepth();
 
     boolean isUnder(Indicator<Tensor> indicator, int searchDepth);
+
+    /**
+     * Returns current index in initial tensor and {@link Integer#MAX_VALUE}
+     * if initial tensor was rebuilt.
+     *
+     * @return current index in initial tensor and {@link Integer#MAX_VALUE}
+     *         if initial tensor was rebuilt
+     */
+    public int currentIndex();
 }
