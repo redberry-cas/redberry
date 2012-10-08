@@ -336,7 +336,7 @@ public class ParserTest {
     @Test
     public void testPowerAsp6() {
         Tensor t = Tensors.parse("Power[1/2,1/2]");
-        TAssert.assertEquals(t,Tensors.parse(t.toString()));
+        TAssert.assertEquals(t, Tensors.parse(t.toString()));
     }
 
     @Test

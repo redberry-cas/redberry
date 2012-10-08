@@ -252,7 +252,7 @@ public class BulkTestsForParser {
 
         for (String str : deltas) {
             tensor = Tensors.parse(str, deltaIndicesInsertion);
-            TAssert.assertTrue(simpleTensorCount(tensor) > 6);
+            TAssert.assertTrue(simpleTensorCount(tensor) >= 3);
             TAssert.assertEqualsExactly(tensor, Tensors.parse(tensor.toString()));
         }
     }

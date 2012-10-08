@@ -37,6 +37,10 @@ import gnu.trove.set.hash.TIntHashSet;
 
 import java.util.Arrays;
 
+/**
+ * @author Dmitry Bolotin
+ * @author Stanislav Poslavsky
+ */
 public final class SubstitutionIterator implements TreeIterator {
     private static final TIntSet EMPTY_INT_SET = TCollections.unmodifiableSet(new TIntHashSet(0));
     private final TreeTraverseIterator<ForbiddenContainer> innerIterator;

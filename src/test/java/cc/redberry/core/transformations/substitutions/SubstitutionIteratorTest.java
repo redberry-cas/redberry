@@ -30,6 +30,10 @@ import cc.redberry.core.tensor.Tensors;
 import cc.redberry.core.utils.TensorUtils;
 import org.junit.Test;
 
+/**
+ * @author Dmitry Bolotin
+ * @author Stanislav Poslavsky
+ */
 public class SubstitutionIteratorTest {
     @Test
     public void test0() {
@@ -42,7 +46,7 @@ public class SubstitutionIteratorTest {
             if (current.equals(Tensors.parse("E")))
                 si.set(Tensors.parse("H^l_l"));
             System.out.println(current + " : " + IndicesFactory.createSorted(si.getForbidden()).toString() + "\n");
-            int k=0;
+            int k = 0;
         }
 
         System.out.println(si.result());
@@ -60,7 +64,7 @@ public class SubstitutionIteratorTest {
             if (current.equals(Tensors.parse("a*b")))
                 si.set(Tensors.parse("H^l_l"));
             System.out.println(current + " : " + IndicesFactory.createSorted(si.getForbidden()).toString() + "\n");
-            int k=0;
+            int k = 0;
         }
 
         System.out.println(si.result());
