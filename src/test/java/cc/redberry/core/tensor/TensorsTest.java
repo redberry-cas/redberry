@@ -22,21 +22,24 @@
  */
 package cc.redberry.core.tensor;
 
-import cc.redberry.core.*;
-import cc.redberry.core.context.*;
-import cc.redberry.core.transformations.*;
+import cc.redberry.concurrent.OutputPortUnsafe;
+import cc.redberry.core.TAssert;
 import cc.redberry.core.transformations.ContractIndices;
 import cc.redberry.core.transformations.Expand;
+import cc.redberry.core.transformations.Together;
 import cc.redberry.core.transformations.Transformation;
 import cc.redberry.core.utils.TensorUtils;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import java.io.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import static cc.redberry.core.tensor.Tensors.*;
 
 /**
- *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
@@ -183,16 +186,16 @@ public class TensorsTest {
 
         //defining mass shell and Mandelstam variables
         Expression[] mandelstam = new Expression[]{
-            Tensors.parseExpression("k1_a*k1^a = 0"),
-            Tensors.parseExpression("k2_a*k2^a = 0"),
-            Tensors.parseExpression("p1_a*p1^a = m**2"),
-            Tensors.parseExpression("p2_a*p2^a = m**2"),
-            Tensors.parseExpression("2*p1_a*k1^a = s-m**2"),
-            Tensors.parseExpression("2*p2_a*k2^a = s-m**2"),
-            Tensors.parseExpression("-2*k1_a*k2^a = t"),
-            Tensors.parseExpression("-2*p1_a*p2^a = t-2*m**2"),
-            Tensors.parseExpression("-2*k1_a*p2^a = u-m**2"),
-            Tensors.parseExpression("-2*p1_a*k2^a = u-m**2")
+                Tensors.parseExpression("k1_a*k1^a = 0"),
+                Tensors.parseExpression("k2_a*k2^a = 0"),
+                Tensors.parseExpression("p1_a*p1^a = m**2"),
+                Tensors.parseExpression("p2_a*p2^a = m**2"),
+                Tensors.parseExpression("2*p1_a*k1^a = s-m**2"),
+                Tensors.parseExpression("2*p2_a*k2^a = s-m**2"),
+                Tensors.parseExpression("-2*k1_a*k2^a = t"),
+                Tensors.parseExpression("-2*p1_a*p2^a = t-2*m**2"),
+                Tensors.parseExpression("-2*k1_a*p2^a = u-m**2"),
+                Tensors.parseExpression("-2*p1_a*k2^a = u-m**2")
         };
         //subsituting in matrix element
         for (Expression e : mandelstam)
@@ -222,4 +225,5 @@ public class TensorsTest {
         Tensor expected = Tensors.parse("1/16*(-s+m**2-t)**(-2)*(s-m**2)**(-2)*s**(-1)*m**4*pi**(-2)*t**2*e**4-1/4*(-s+m**2-t)**(-2)*(s-m**2)**(-2)*m**6*pi**(-2)*e**4+1/16*(-s+m**2-t)**(-2)*(s-m**2)**(-2)*s*pi**(-2)*t**2*e**4+1/8*(-s+m**2-t)**(-2)*(s-m**2)**(-2)*m**4*pi**(-2)*t*e**4+1/16*(-s+m**2-t)**(-2)*(s-m**2)**(-2)*s**(-1)*m**8*pi**(-2)*e**4-1/4*(-s+m**2-t)**(-2)*(s-m**2)**(-2)*s*m**2*pi**(-2)*t*e**4+1/16*(-s+m**2-t)**(-2)*(s-m**2)**(-2)*s**3*pi**(-2)*e**4+3/8*(-s+m**2-t)**(-2)*(s-m**2)**(-2)*s*m**4*pi**(-2)*e**4+1/8*(-s+m**2-t)**(-2)*(s-m**2)**(-2)*s**2*pi**(-2)*t*e**4-1/4*(-s+m**2-t)**(-2)*(s-m**2)**(-2)*s**2*m**2*pi**(-2)*e**4");
         TAssert.assertEquals(cs, expected);
     }
+
 }

@@ -332,7 +332,7 @@ public class ExpandTest {
 
     @Test
     public void test32() {
-        Tensor t = expand(parse(("(a*b+(c*d-m**2)**2*a*b)")));
+        Tensor t = expand(parse("(a*b+(c*d-m**2)**2*a*b)"));
         assertAllBracketsExpanded(t);
     }
 

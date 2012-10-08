@@ -180,9 +180,10 @@ public class Complex extends Tensor
 
     @Override
     protected String toString(ToStringMode mode, Class<? extends Tensor> clazz) {
-        if (clazz == Product.class || clazz == Power.class)
-            if ((!real.isZero() && !imaginary.isZero()) || real.signum() < 0)
+        if (clazz == Product.class || clazz == Power.class) {
+            if (!imaginary.isZero() || real.signum() < 0 || !real.isInteger())
                 return "(" + toString(mode) + ")";
+        }
         return toString(mode);
     }
 
