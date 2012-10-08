@@ -20,36 +20,27 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
-package cc.redberry.core.combinatorics;
+package cc.redberry.core.transformations.substitutions;
 
-import cc.redberry.concurrent.*;
-import java.util.*;
-import org.apache.commons.math3.complex.*;
-import org.junit.*;
-import static cc.redberry.core.TAssert.*;
+import cc.redberry.core.context.CC;
+import cc.redberry.core.indices.IndicesFactory;
+import cc.redberry.core.tensor.Tensor;
+import cc.redberry.core.tensor.Tensors;
+import org.junit.Test;
 
-/**
- *
- * @author Dmitry Bolotin
- * @author Stanislav Poslavsky
- */
-public class IntTuplesPortTest {
-
+public class NewSubstitutionIteratorTest {
     @Test
-    public void test1() {
-        IntTuplesPort port = new IntTuplesPort(3, 3, 3);
-        int count = 0;
-        while (port.take() != null)
-            ++count;
-        Assert.assertEquals(count, 27);
-    }
+    public void test0() {
+        CC.resetTensorNames(1423);
+        NewSubstitutionIterator si = new NewSubstitutionIterator(Tensors.parse("A_mk*G^mn*(S^k_g*(D^g+Q^gz_z)+N^k_ez^ez)*E"));
 
-    @Test
-    public void test2() {
-        IntTuplesPort port = new IntTuplesPort(4, 4, 4, 4);
-        int count = 0;
-        while (port.take() != null)
-            ++count;
-        Assert.assertEquals(count, 256);
+        Tensor tensor;
+        while ((tensor = si.next()) != null) {
+            if (tensor.equals(Tensors.parse("E")))
+                si.set(Tensors.parse("H^l_l"));
+            System.out.println(tensor + " : " + IndicesFactory.createSimple(null, si.getForbidden()).toString() + "\n");
+        }
+
+        System.out.println(si.result());
     }
 }

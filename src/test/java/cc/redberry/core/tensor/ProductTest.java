@@ -113,6 +113,7 @@ public class ProductTest {
     public void testRenameConflicts2() {
         Tensor t1 = Tensors.parse("(p_a+d_a)");
         Tensor t2 = Tensors.parse("(a_i+b_a^a_i)");
+        System.out.println(Tensors.multiplyAndRenameConflictingDummies(t1,t2));
         TAssert.assertIndicesConsistency(Tensors.multiplyAndRenameConflictingDummies(t1, t2));
     }
 

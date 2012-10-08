@@ -27,7 +27,6 @@ import cc.redberry.core.indices.SimpleIndices;
 import cc.redberry.core.utils.IntArrayList;
 
 /**
- *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
@@ -48,11 +47,13 @@ public class ParserSimpleTensor implements NodeParser {
         for (char c : expression.toCharArray()) {
             if (c == '{') {
                 level++;
-                continue;
+                if (!indexMode)
+                    continue;
             }
             if (c == '}') {
                 level--;
-                continue;
+                if (!indexMode)
+                    continue;
             }
             if (c == '^') {
                 assert level == 0;

@@ -20,36 +20,20 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
-package cc.redberry.core.combinatorics;
+package cc.redberry.core.parser;
 
-import cc.redberry.concurrent.*;
-import java.util.*;
-import org.apache.commons.math3.complex.*;
-import org.junit.*;
-import static cc.redberry.core.TAssert.*;
+import cc.redberry.core.indices.Indices;
+import junit.framework.Assert;
+import org.junit.Test;
 
 /**
- *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public class IntTuplesPortTest {
-
+public class ParserIndicesTest {
     @Test
     public void test1() {
-        IntTuplesPort port = new IntTuplesPort(3, 3, 3);
-        int count = 0;
-        while (port.take() != null)
-            ++count;
-        Assert.assertEquals(count, 27);
-    }
-
-    @Test
-    public void test2() {
-        IntTuplesPort port = new IntTuplesPort(4, 4, 4, 4);
-        int count = 0;
-        while (port.take() != null)
-            ++count;
-        Assert.assertEquals(count, 256);
+        Indices in = ParserIndices.parseSimple("_{AC_{21}B}");
+        Assert.assertTrue(in.size() == 3);
     }
 }

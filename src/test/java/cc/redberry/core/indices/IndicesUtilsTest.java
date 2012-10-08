@@ -40,10 +40,10 @@ public class IndicesUtilsTest {
     @Test
     public void parse() {
         int index = IndicesUtils.parseIndex("_{\\mu}");
-        assertTrue("_{\\mu }".equals(IndicesUtils.toString(index, ToStringMode.LaTeX)));
+        assertTrue("_{\\mu}".equals(IndicesUtils.toString(index, ToStringMode.LaTeX)));
 
         int index1 = IndicesUtils.parseIndex("_\\mu");
-        assertTrue("_{\\mu }".equals(IndicesUtils.toString(index1, ToStringMode.LaTeX)));
+        assertTrue("_{\\mu}".equals(IndicesUtils.toString(index1, ToStringMode.LaTeX)));
 
         int index2 = IndicesUtils.parseIndex("_a");
         assertTrue("_{a}".equals(IndicesUtils.toString(index2, ToStringMode.LaTeX)));

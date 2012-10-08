@@ -133,10 +133,13 @@ public class IndexMappingsTest {
 
     @Test
     public void testScalarTensors1() {
-        Tensor t1 = parse("A_mn*B^mnpqr*A_pqr");
-        Tensor t2 = parse("A_pq*B^mnpqr*A_mnr");
-        Set<IndexMappingBuffer> buffers = IndexMappings.getAllMappings(t1, t2);
-        Assert.assertTrue(buffers.isEmpty());
+        for (int i = 0; i < 100; ++i) {
+            CC.resetTensorNames();
+            Tensor t1 = parse("A_mn*B^mnpqr*A_pqr");
+            Tensor t2 = parse("A_pq*B^mnpqr*A_mnr");
+            Set<IndexMappingBuffer> buffers = IndexMappings.getAllMappings(t1, t2);
+            Assert.assertTrue(buffers.isEmpty());
+        }
     }
 
     @Test
