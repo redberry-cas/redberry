@@ -66,7 +66,7 @@ public final class Context {
         this.defaultPrintMode = defaultPrintMode;
     }
 
-    public ToStringMode getDefaultPrintMode() {
+    public ToStringMode getDefaultToStringFormat() {
         return defaultPrintMode;
     }
 

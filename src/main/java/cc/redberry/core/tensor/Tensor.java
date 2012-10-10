@@ -151,15 +151,15 @@ public abstract class Tensor
     public abstract String toString(final ToStringMode mode);
 
     /**
-     * <p>Returns string representation of a tensor in default (see {@link cc.redberry.core.context.CC#getDefaultPrintMode()})
+     * <p>Returns string representation of a tensor in default (see {@link cc.redberry.core.context.CC#getDefaultToStringFormat()})
      * mode. <p>Equivalent to:
-     * <code>this.toString(CC.getDefaultPrintMode())</code> </p></p>
+     * <code>this.toString(CC.getDefaultToStringFormat())</code> </p></p>
      *
      * @return string representation of a tensor in default mode
      */
     @Override
     public final String toString() {
-        return toString(Context.get().getDefaultPrintMode());
+        return toString(Context.get().getDefaultToStringFormat());
     }
 
     /**

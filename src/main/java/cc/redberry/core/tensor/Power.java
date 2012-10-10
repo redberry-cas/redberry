@@ -71,7 +71,8 @@ public final class Power extends Tensor {
     @Override
     public String toString(ToStringMode mode) {
         if (mode == ToStringMode.WolframMathematica)
-            return "Power[" + argument.toString(mode, Power.class) + ", " + power.toString(mode, Power.class) + "]";
+            return "Power[" + argument.toString(mode) + ", " + power.toString(mode) + "]";
+
         if (mode == ToStringMode.LaTeX)
             if (TensorUtils.isRealNegativeNumber(power))
                 return "\\frac{1}{" + argument.toString(mode, Power.class) +

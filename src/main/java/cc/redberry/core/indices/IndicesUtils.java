@@ -373,7 +373,7 @@ public final class IndicesUtils {
     }
 
     public static String toString(int index) {
-        return toString(index, Context.get().getDefaultPrintMode());
+        return toString(index, Context.get().getDefaultToStringFormat());
     }
 
     public static String toString(int[] indices, ToStringMode mode) {

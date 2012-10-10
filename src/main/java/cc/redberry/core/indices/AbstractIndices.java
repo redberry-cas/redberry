@@ -141,7 +141,7 @@ abstract class AbstractIndices implements Indices {
 
     @Override
     public final String toString() {
-        return toString(Context.get().getDefaultPrintMode());
+        return toString(Context.get().getDefaultToStringFormat());
     }
 
     protected static class UpperLowerIndices {

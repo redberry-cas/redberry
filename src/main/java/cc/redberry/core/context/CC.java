@@ -40,7 +40,6 @@ public final class CC {
      * context.
      *
      * @param type index type
-     *
      * @return true if metric is defined for specified index type in current
      *         context
      */
@@ -60,8 +59,8 @@ public final class CC {
         return current().getIndexConverterManager();
     }
 
-    public static ToStringMode getDefaultPrintMode() {
-        return current().getDefaultPrintMode();
+    public static ToStringMode getDefaultToStringFormat() {
+        return current().getDefaultToStringFormat();
     }
 
     public static void setDefaultToStringFormat(ToStringMode mode) {

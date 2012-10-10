@@ -22,6 +22,9 @@
  */
 package cc.redberry.core.context;
 
+import cc.redberry.core.indices.Indices;
+import cc.redberry.core.tensor.Tensor;
+
 /**
  * This
  * <code>enum</code> specifies common modes of string representation of objects.
@@ -30,15 +33,13 @@ package cc.redberry.core.context;
  * <code>toString(ToStringMode mode)</code>. For the defaults, we provides two
  * modes {
  *
+ * @author Dmitry Bolotin
+ * @author Stanislav Poslavsky
  * @link #UTF8} and {
  * @link #LaTeX}. Examples of using, you can find in see also section.
- *
  * @see Tensor#toString(ToStringMode)
  * @see Indices#toString(ToStringMode)
  * @see Tensor#toString()
- *
- * @author Dmitry Bolotin
- * @author Stanislav Poslavsky
  */
 public enum ToStringMode {
 
@@ -50,19 +51,17 @@ public enum ToStringMode {
      *
      * @see Tensor#toString(ToStringMode)
      * @see Indices#toString(ToStringMode)
-     *
      */
     LaTeX,
     /**
      * This mode specifies the simplest free output format. For, example Greek
      * letters will be represent directly &alpha &beta, and so on.
-     *
+     * <p/>
      * <p>NOTE: some systems does not supports direct Greek printing, so instead
      * of '&alpha' you will see '?' </p>
      *
      * @see Tensor#toString(ToStringMode)
      * @see Indices#toString(ToStringMode)
-     *
      */
     UTF8,
     /**
@@ -75,11 +74,12 @@ public enum ToStringMode {
     Redberry,
     /**
      * This mode specifies such output format, that can be parsed again, by
-     * copying string from output and pasting in parser metho argument. Most of
+     * copying string from output and pasting in parser method argument. Most of
      * all it touches tensor fields, functions and derivatives. In opposite to
      * {@link #Redberry}, Greek indices converted to string with this mode will
      * look like "\\alpha".
      */
+    @Deprecated
     RedberryConsole,
     WolframMathematica
 }
