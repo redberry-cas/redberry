@@ -22,22 +22,23 @@
  */
 package cc.redberry.core.transformations;
 
-import cc.redberry.concurrent.*;
 import cc.redberry.core.TAssert;
 import cc.redberry.core.context.CC;
-import cc.redberry.core.tensor.*;
+import cc.redberry.core.tensor.Product;
+import cc.redberry.core.tensor.Sum;
+import cc.redberry.core.tensor.Tensor;
+import cc.redberry.core.tensor.Tensors;
 import cc.redberry.core.tensor.iterator.TraverseState;
 import cc.redberry.core.tensor.iterator.TreeTraverseIterator;
 import cc.redberry.core.utils.TensorUtils;
-import org.junit.*;
 import org.junit.Assert;
 import org.junit.Test;
 
 import static cc.redberry.core.tensor.Tensors.parse;
-import static cc.redberry.core.transformations.Expand.*;
+import static cc.redberry.core.transformations.Expand.expand;
+import static cc.redberry.core.transformations.Expand.expandUsingPort;
 
 /**
- *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
@@ -112,7 +113,7 @@ public class ExpandTest {
         Assert.assertTrue(TensorUtils.equalsExactly(actual, expected));
     }
 
-//    @Ignore
+    //    @Ignore
     @Test
     public void test8() {
         Tensor actual = parse("Power[a+b,30]");
@@ -122,7 +123,7 @@ public class ExpandTest {
 //        Assert.assertTrue(TensorUtils.equalsExactly(actual, expected));
     }
 
-//    @Ignore
+    //    @Ignore
     @Test
     public void test10() {
         for (int i = 2; i < 30; ++i) {
@@ -357,5 +358,12 @@ public class ExpandTest {
         TAssert.assertIndicesConsistency(tt);
         t = expand(t);
         TAssert.assertIndicesConsistency(t);
+    }
+
+    @Test
+    public void test35() {
+        Tensor t1 = expand(parse("a_a^a*F_mn+(b_m^m-a_m^m)*F_mn"));
+        Tensor t2 = expandUsingPort(t1);
+        TAssert.assertEquals(t1, t2);
     }
 }
