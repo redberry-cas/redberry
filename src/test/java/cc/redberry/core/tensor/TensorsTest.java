@@ -22,7 +22,6 @@
  */
 package cc.redberry.core.tensor;
 
-import cc.redberry.concurrent.OutputPortUnsafe;
 import cc.redberry.core.TAssert;
 import cc.redberry.core.transformations.ContractIndices;
 import cc.redberry.core.transformations.Expand;
@@ -32,10 +31,6 @@ import cc.redberry.core.utils.TensorUtils;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
-
-import java.io.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import static cc.redberry.core.tensor.Tensors.*;
 
@@ -106,6 +101,13 @@ public class TensorsTest {
     public void testPowerPower1() {
         Tensor t = Tensors.parse("Power[a,4]*Power[Power[a,2],-2]");
         Assert.assertTrue(TensorUtils.isOne(t));
+    }
+
+    @Test
+    public void testSum1() {
+        Tensor actual = parse("(x_a^a+y_b^b)*X_m*X^m - (z_n^n+y_d^d)*X_a*X^a ");
+        Tensor expected = parse("(x_a^a-z_n^n)*X_m*X^m");
+        TAssert.assertEquals(actual, expected);
     }
 
     private static Expression expression(String expression) {
