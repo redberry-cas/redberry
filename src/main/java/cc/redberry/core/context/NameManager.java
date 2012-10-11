@@ -26,12 +26,13 @@ import cc.redberry.core.indices.IndexType;
 import cc.redberry.core.indices.IndicesTypeStructure;
 import cc.redberry.core.utils.ArraysUtils;
 import cc.redberry.core.utils.IntArrayList;
+import org.apache.commons.math3.random.RandomGenerator;
+import org.apache.commons.math3.random.Well44497b;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
-import org.apache.commons.math3.random.RandomGenerator;
-import org.apache.commons.math3.random.Well44497b;
 
 /**
  * @author Dmitry Bolotin
