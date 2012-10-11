@@ -110,6 +110,13 @@ public class TensorsTest {
         TAssert.assertEquals(actual, expected);
     }
 
+
+    @Test
+    public void testSum2() {
+        Tensor actual = parse("a+b-(a+b)");
+        TAssert.assertTrue(TensorUtils.isZero(actual));
+    }
+
     private static Expression expression(String expression) {
         return (Expression) parse(expression);
     }
