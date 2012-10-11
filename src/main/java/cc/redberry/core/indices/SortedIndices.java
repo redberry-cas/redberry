@@ -25,6 +25,7 @@ package cc.redberry.core.indices;
 import cc.redberry.core.indexmapping.IndexMapping;
 import cc.redberry.core.utils.ArraysUtils;
 import cc.redberry.core.utils.IntArrayList;
+
 import java.util.Arrays;
 
 /**
@@ -39,7 +40,6 @@ import java.util.Arrays;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  * @see Indices
- * @see OrderedIndices
  */
 final class SortedIndices extends AbstractIndices {
 
@@ -53,12 +53,10 @@ final class SortedIndices extends AbstractIndices {
 
     /**
      * Constructs {@code SortedIndices} instance from specified indices array
-     * and with specified symmetries. {@code data} will be quickSort in
-     * constructor, using {@link cc.redberry.core.math.MathUtils#quickSort(int[])}
-     * to refactoring symmetries after sorting.
+     * and with specified symmetries. {@code data} will be sorted in
+     * constructor.
      *
-     * @param data       array of indices
-     * @param symmetries symmetries of this indices
+     * @param data array of indices
      */
     SortedIndices(int[] data) {
         super(data);
@@ -73,6 +71,7 @@ final class SortedIndices extends AbstractIndices {
         int[] lower = Arrays.copyOfRange(data, firstLower, data.length);
         return new UpperLowerIndices(upper, lower);
     }
+
 
     @Override
     public Indices getFree() {

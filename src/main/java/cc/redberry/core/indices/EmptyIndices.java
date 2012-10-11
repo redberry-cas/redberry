@@ -27,7 +27,6 @@ import cc.redberry.core.indexmapping.IndexMapping;
 import cc.redberry.core.utils.IntArray;
 
 /**
- *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
@@ -42,11 +41,21 @@ class EmptyIndices implements Indices {
      * Always throws {@code IndexOutOfBoundsException} because size is zero.
      *
      * @return throws IndexOutOfBoundsException
-     *
      * @throws IndexOutOfBoundsException always
      */
     @Override
     public int get(int position) {
+        throw new IndexOutOfBoundsException();
+    }
+
+    /**
+     * Always throws {@code IndexOutOfBoundsException} because size is zero.
+     *
+     * @return throws IndexOutOfBoundsException
+     * @throws IndexOutOfBoundsException always
+     */
+    @Override
+    public int get(int position, IndexType type) {
         throw new IndexOutOfBoundsException();
     }
 
@@ -113,9 +122,8 @@ class EmptyIndices implements Indices {
     /**
      * Do nothing.
      *
-     * @return false
-     *
      * @param mapping
+     * @return false
      */
     @Override
     public Indices applyIndexMapping(IndexMapping mapping) {
@@ -133,7 +141,6 @@ class EmptyIndices implements Indices {
      * Returns empty string.
      *
      * @param mode
-     *
      * @return empty string
      */
     @Override
@@ -155,7 +162,6 @@ class EmptyIndices implements Indices {
      * {@inheritDoc}
      *
      * @param obj {@inheritDoc}
-     *
      * @return {@inheritDoc}
      */
     @Override
@@ -167,7 +173,6 @@ class EmptyIndices implements Indices {
      * Returns {@code indices.size() == 0}.
      *
      * @param indices indices to testing similarity
-     *
      * @return {@code indices.size() == 0}
      */
     @Override

@@ -25,6 +25,9 @@ package cc.redberry.core.indices;
 import cc.redberry.core.context.CC;
 import cc.redberry.core.parser.ParserIndices;
 import cc.redberry.core.tensor.SimpleTensor;
+import cc.redberry.core.tensor.random.TRandom;
+import junit.framework.Assert;
+import org.apache.commons.math3.random.Well19937c;
 import org.junit.Test;
 
 import static cc.redberry.core.tensor.Tensors.addSymmetry;
@@ -32,7 +35,6 @@ import static cc.redberry.core.tensor.Tensors.parse;
 import static org.junit.Assert.assertTrue;
 
 /**
- *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
@@ -143,4 +145,62 @@ public class IndicesTest {
 //        indices.applyIndexMapping(im);
 //        assertTrue(indices.equals(copy));
 //    }
+
+    @Test
+    public void testGet1() {
+        TRandom tRandom = new TRandom(100,
+                1000,
+                new int[]{0, 0, 0, 0},
+                new int[]{10, 10, 10, 10},
+                false, new Well19937c());
+        IndicesTypeStructure typeStructure;
+        Indices indices;
+        SimpleIndicesBuilder builder;
+        for (int i = 0; i < 1000; ++i) {
+            builder = new SimpleIndicesBuilder();
+            typeStructure = tRandom.nextNameDescriptor().getIndicesTypeStructure();
+            indices = IndicesFactory.createSimple(null, tRandom.nextIndices(typeStructure));
+            int typeCount;
+            for (int k = 0; k < IndexType.TYPES_COUNT; ++k) {
+                typeCount = typeStructure.typeCount((byte) k);
+                if (typeCount == 0)
+                    continue;
+                for (int p = 0; p < typeCount; ++p) {
+                    int index = indices.get(p, IndexType.getType((byte) k));
+                    Assert.assertEquals(IndicesUtils.getType(index), (byte) k);
+                    builder.append(IndicesFactory.createSimple(null, index));
+                }
+            }
+            Assert.assertEquals(indices, builder.getIndices());
+        }
+    }
+
+    @Test
+    public void testGet2() {
+        TRandom tRandom = new TRandom(100,
+                1000,
+                new int[]{0, 0, 0, 0},
+                new int[]{10, 10, 10, 10},
+                false, new Well19937c());
+        IndicesTypeStructure typeStructure;
+        Indices indices;
+        IndicesBuilder builder;
+        for (int i = 0; i < 1000; ++i) {
+            builder = new IndicesBuilder();
+            typeStructure = tRandom.nextNameDescriptor().getIndicesTypeStructure();
+            indices = IndicesFactory.createSorted(tRandom.nextIndices(typeStructure));
+            int typeCount;
+            for (int k = 0; k < IndexType.TYPES_COUNT; ++k) {
+                typeCount = typeStructure.typeCount((byte) k);
+                if (typeCount == 0)
+                    continue;
+                for (int p = 0; p < typeCount; ++p) {
+                    int index = indices.get(p, IndexType.getType((byte) k));
+                    Assert.assertEquals(IndicesUtils.getType(index), (byte) k);
+                    builder.append(IndicesFactory.createSimple(null, index));
+                }
+            }
+            Assert.assertEquals(indices, builder.getIndices());
+        }
+    }
 }

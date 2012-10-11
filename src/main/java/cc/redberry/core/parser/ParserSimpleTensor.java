@@ -83,6 +83,8 @@ public class ParserSimpleTensor implements NodeParser {
             ParserIndices.parseIndices(indicesList, indicesString, indexState);
         SimpleIndices indices = IndicesFactory.createSimple(null, indicesList.toArray());
         String name = nameBuilder.toString();
+        if (name.isEmpty())
+            throw new ParserException("Simple tensor with empty name.");
         return new ParseNodeSimpleTensor(indices, name);
     }
 

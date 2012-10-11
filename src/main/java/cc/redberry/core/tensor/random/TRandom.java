@@ -57,10 +57,10 @@ public final class TRandom {
 
     /**
      *
-     * @param minDiffNDs     minimum number of different tensors
-     * @param maxDiffNDs     maximum number of different tensors
-     * @param minIndices     minimum number of indices in each tensor.
-     * @param maxIndices     maximum number of indices in each tensor.
+     * @param minDiffNDs     min number of different tensors
+     * @param maxDiffNDs     max number of different tensors
+     * @param minIndices     min number of indices in each tensor.
+     * @param maxIndices     max number of indices in each tensor.
      * @param withSymmetries add symmetries to tensors
      */
     public TRandom(

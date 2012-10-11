@@ -57,8 +57,7 @@ public class BulkTestsForParser {
 
     @Test
     public void testAllExpressionsInTestDirectory() {
-        String nam = "src/test";
-        File testDirectory = new File(nam);
+        File testDirectory = new File("src/test");
         Counter c = new Counter(), m = new Counter();
         DescriptiveStatistics statistics = new DescriptiveStatistics();
         testParseRecurrently(testDirectory, c, m, statistics);
@@ -173,9 +172,7 @@ public class BulkTestsForParser {
                 throw new RuntimeException();
             }
 
-        } else if (file.isDirectory())
-
-        {
+        } else if (file.isDirectory()) {
             File[] listOfFiles = file.listFiles();
             if (listOfFiles != null) {
                 for (int i = 0; i < listOfFiles.length; i++)

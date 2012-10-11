@@ -26,6 +26,7 @@ import cc.redberry.core.combinatorics.Symmetry;
 import cc.redberry.core.indexmapping.IndexMapping;
 import cc.redberry.core.utils.ArraysUtils;
 import cc.redberry.core.utils.IntArrayList;
+
 import java.util.Arrays;
 
 /**
@@ -77,6 +78,17 @@ public abstract class SimpleIndicesAbstract extends AbstractIndices implements S
             else
                 lower[li++] = index;
         return new UpperLowerIndices(upper, lower);
+    }
+
+    @Override
+    public int get(int position, IndexType type) {
+        int type_ = type.getType() << 24;
+        int i;
+        for (i = 0; i < data.length && (data[i] & 0x7F000000) != type_; ++i) ;
+        int index = data[i + position];
+        if ((index & 0x7F000000) != type_)
+            throw new IndexOutOfBoundsException();
+        return index;
     }
 
     @Override
@@ -154,11 +166,10 @@ public abstract class SimpleIndicesAbstract extends AbstractIndices implements S
      * <code>null</code> in other case.
      *
      * @param indices indices to compare with this
-     *
      * @return < code>Boolean.FALSE</code> if indices are equals this,
-     * <code>Boolean.TRUE</code> if indices differs from this on -1 (i.e. on odd
-     * transposition) and
-     * <code>null</code> in other case.
+     *         <code>Boolean.TRUE</code> if indices differs from this on -1 (i.e. on odd
+     *         transposition) and
+     *         <code>null</code> in other case.
      */
     public Boolean _equalsWithSymmetries(SimpleIndices indices) {
         if (indices.getClass() != this.getClass())
