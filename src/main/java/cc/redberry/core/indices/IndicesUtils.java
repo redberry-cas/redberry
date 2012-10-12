@@ -23,9 +23,11 @@
 package cc.redberry.core.indices;
 
 import cc.redberry.core.combinatorics.Permutation;
+import cc.redberry.core.context.CC;
 import cc.redberry.core.context.Context;
 import cc.redberry.core.context.ToStringMode;
 import cc.redberry.core.math.MathUtils;
+
 import java.util.Arrays;
 
 /**
@@ -378,6 +380,10 @@ public final class IndicesUtils {
 
     public static String toString(int[] indices, ToStringMode mode) {
         return IndicesFactory.createSimple(null, indices).toString(mode);
+    }
+
+    public static String toString(int[] indices) {
+        return toString(indices, CC.getDefaultToStringFormat());
     }
 
     public static int parseIndex(String string) {
