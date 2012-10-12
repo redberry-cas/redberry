@@ -26,6 +26,7 @@ import cc.redberry.core.combinatorics.Symmetry;
 import cc.redberry.core.indexmapping.IndexMapping;
 import cc.redberry.core.utils.ArraysUtils;
 import cc.redberry.core.utils.IntArrayList;
+import org.apache.commons.math3.util.FastMath;
 
 import java.util.Arrays;
 
@@ -78,6 +79,16 @@ public abstract class SimpleIndicesAbstract extends AbstractIndices implements S
             else
                 lower[li++] = index;
         return new UpperLowerIndices(upper, lower);
+    }
+
+    @Override
+    public int size(IndexType type) {
+        int type_ = type.getType() << 24;
+        int i = 0;
+        for(; i < data.length && (data[i] & 0x7F000000) != type_; ++i);
+        int size = 0;
+        for (; i + size < data.length && (data[i + size] & 0x7F000000) == type_; ++size) ;
+        return size;
     }
 
     @Override

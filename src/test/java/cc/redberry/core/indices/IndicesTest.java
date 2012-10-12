@@ -147,7 +147,7 @@ public class IndicesTest {
 //    }
 
     @Test
-    public void testGet1() {
+    public void testGetByTypeSimpleIndices() {
         TRandom tRandom = new TRandom(100,
                 1000,
                 new int[]{0, 0, 0, 0},
@@ -163,6 +163,7 @@ public class IndicesTest {
             int typeCount;
             for (int k = 0; k < IndexType.TYPES_COUNT; ++k) {
                 typeCount = typeStructure.typeCount((byte) k);
+                Assert.assertEquals(typeCount, indices.size(IndexType.getType((byte) k)));
                 if (typeCount == 0)
                     continue;
                 for (int p = 0; p < typeCount; ++p) {
@@ -176,7 +177,7 @@ public class IndicesTest {
     }
 
     @Test
-    public void testGet2() {
+    public void testGetByTypeSortedIndices() {
         TRandom tRandom = new TRandom(100,
                 1000,
                 new int[]{0, 0, 0, 0},
@@ -192,6 +193,7 @@ public class IndicesTest {
             int typeCount;
             for (int k = 0; k < IndexType.TYPES_COUNT; ++k) {
                 typeCount = typeStructure.typeCount((byte) k);
+                Assert.assertEquals(typeCount, indices.size(IndexType.getType((byte) k)));
                 if (typeCount == 0)
                     continue;
                 for (int p = 0; p < typeCount; ++p) {

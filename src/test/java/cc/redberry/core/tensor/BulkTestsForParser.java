@@ -33,6 +33,8 @@ import cc.redberry.core.number.parser.NumberParserTest;
 import cc.redberry.core.parser.ParseNodeSimpleTensor;
 import cc.redberry.core.parser.ParserTest;
 import cc.redberry.core.parser.preprocessor.IndicesInsertion;
+import cc.redberry.core.tensor.iterator.TensorLastIterator;
+import cc.redberry.core.tensor.iterator.TraverseGuide;
 import cc.redberry.core.utils.Indicator;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.junit.Assert;
@@ -143,7 +145,7 @@ public class BulkTestsForParser {
                         try {
                             statistics.addValue(tensorString.length());
                             tensor = Tensors.parse(tensorString);
-                            TAssert.assertEqualsExactly(Tensors.parse(tensor.toString()), tensor);
+                            checkTensor(tensor);
                         } catch (AssertionError | RuntimeException e) {
 
                             System.out.println(e.getClass().getSimpleName() + ":");
@@ -180,6 +182,28 @@ public class BulkTestsForParser {
             }
         } else
             throw new RuntimeException();
+    }
+
+    private static void checkTensor(Tensor t) {
+        TAssert.assertEqualsExactly(t, Tensors.parse(t.toString()));
+        //t = inverseIndices(t);
+        //TAssert.assertEqualsExactly(t, Tensors.parse(t.toString()));
+    }
+
+    private static Tensor inverseIndices(Tensor t) {
+        TensorLastIterator iterator = new TensorLastIterator(t, TraverseGuide.EXCEPT_FUNCTIONS_AND_FIELDS);
+        Tensor c;
+        while ((c = iterator.next()) != null) {
+            if (c instanceof SimpleTensor) {
+                SimpleTensor st = (SimpleTensor) c;
+                iterator.set(Tensors.simpleTensor(st.getName(), st.getIndices().getInverse()));
+            }
+            if (c instanceof TensorField) {
+                TensorField f = (TensorField) c;
+                iterator.set(Tensors.field(f.getName(), f.getIndices().getInverse(), f.argIndices, f.args));
+            }
+        }
+        return iterator.result();
     }
 
     private static final String Flat_ = "Flat=(1/4)*HATS*HATS*HATS*HATS-HATW*HATS*HATS+(1/2)*HATW*HATW+HATS*HATN-HATM+(L-2)*NABLAS_\\mu*HATW^\\mu-L*NABLAS_\\mu*HATW*HATK^\\mu+(1/3)*((L-1)*NABLAS_\\mu^\\mu*HATS*HATS-L*NABLAS_\\mu*HATK^\\mu*HATS*HATS-(L-1)*NABLAS_\\mu*HATS*HATS^\\mu+L*NABLAS_\\mu*HATS*HATS*HATK^\\mu)-(1/2)*NABLAS_\\mu*NABLAS_\\nu*DELTA^{\\mu\\nu}-(1/4)*(L-1)*(L-2)*NABLAS_\\mu*NABLAS_\\nu^{\\mu\\nu}+(1/2)*L*(L-1)*(1/2)*(NABLAS_\\mu*NABLAS_{\\nu }^{\\nu}+NABLAS_{\\nu }*NABLAS_{\\mu }^{\\nu})*HATK^\\mu";
@@ -250,7 +274,7 @@ public class BulkTestsForParser {
         for (String str : deltas) {
             tensor = Tensors.parse(str, deltaIndicesInsertion);
             TAssert.assertTrue(simpleTensorCount(tensor) >= 3);
-            TAssert.assertEqualsExactly(tensor, Tensors.parse(tensor.toString()));
+            checkTensor(tensor);
         }
     }
 
@@ -312,7 +336,7 @@ public class BulkTestsForParser {
         Tensor tensor;
         for (String str : testStrings3) {
             tensor = Tensors.parse(str);
-            TAssert.assertEqualsExactly(tensor, Tensors.parse(tensor.toString()));
+            checkTensor(tensor);
         }
     }
 

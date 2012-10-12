@@ -50,34 +50,14 @@ abstract class AbstractIndices implements Indices {
 
     abstract int[] getSortedData();
 
-
-    @Override
-    public int get(int position, IndexType type) {
+    protected UpperLowerIndices getUpperLowerIndices() {
         WeakReference<UpperLowerIndices> wul = upperLower;
         UpperLowerIndices ul = wul.get();
-        int[] upper, lower;
         if (ul == null) {
             ul = calculateUpperLower();
             upperLower = new WeakReference<>(ul);
         }
-        upper = ul.upper;
-        lower = ul.lower;
-
-        int type_ = type.getType() << 24;
-
-        int p = Arrays.binarySearch(upper, type_ | 0x80000000);
-        if (p < 0) p = ~p;
-        if (p < upper.length) {
-            for (; p < upper.length && (upper[p] & 0x7F000000) == type_ && position >= 0; ++p, --position) ;
-            if (position == -1)
-                return upper[p - 1];
-        }
-        p = Arrays.binarySearch(lower, type_);
-        if (p < 0) p = ~p;
-        int index = lower[p + position];
-        if ((index & 0x7F000000) != type_)
-            throw new IndexOutOfBoundsException();
-        return index;
+        return ul;
     }
 
     @Override

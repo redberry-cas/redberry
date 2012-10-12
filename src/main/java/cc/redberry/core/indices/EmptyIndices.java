@@ -115,6 +115,16 @@ class EmptyIndices implements Indices {
      * @return 0
      */
     @Override
+    public int size(IndexType type) {
+        return 0;
+    }
+
+    /**
+     * Returns 0.
+     *
+     * @return 0
+     */
+    @Override
     public int size() {
         return 0;
     }

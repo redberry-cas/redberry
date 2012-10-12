@@ -74,6 +74,15 @@ public interface Indices {
      */
     int size();
 
+
+    /**
+     * Returns the number of indices of specified type.
+     *
+     * @param type type of indices
+     * @return number of indices of specified type
+     */
+    int size(IndexType type);
+
     /**
      * Returns the index at the specified position in this
      * <code>Indices</code>.
