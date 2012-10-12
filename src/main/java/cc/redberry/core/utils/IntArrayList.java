@@ -74,7 +74,7 @@ public final class IntArrayList {
             throw new IndexOutOfBoundsException();
         ensureCapacity(size + 1);
         System.arraycopy(data, position, data, position + 1,
-                         size - position);
+                size - position);
         data[position] = num;
         size++;
     }
@@ -107,11 +107,16 @@ public final class IntArrayList {
         Arrays.sort(data, 0, size);
     }
 
+    public void sort(IntArrayList cosort) {
+        if (size != cosort.size)
+            throw new IllegalArgumentException();
+        ArraysUtils.quickSort(data, 0, size, cosort.data);
+    }
+
     /**
      * Alias for addAll(int) method.
      *
      * @param value
-     *
      * @return
      */
     public void push(int value) {
@@ -233,7 +238,7 @@ public final class IntArrayList {
             return "[]";
         StringBuilder b = new StringBuilder();
         b.append('[');
-        for (int i = 0;; i++) {
+        for (int i = 0; ; i++) {
             b.append(data[i]);
             if (i == iMax)
                 return b.append(']').toString();

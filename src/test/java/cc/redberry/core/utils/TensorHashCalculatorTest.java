@@ -28,11 +28,11 @@ import org.junit.Test;
 
 import static cc.redberry.core.tensor.Tensors.addSymmetry;
 import static cc.redberry.core.tensor.Tensors.parse;
+import static cc.redberry.core.utils.TensorHashCalculator.hashWithIndices;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 /**
- *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
@@ -40,23 +40,23 @@ public class TensorHashCalculatorTest {
 
     @Test
     public void testSomeMethod() {
-        assertTrue(TensorHashCalculator.hashWithIndices(parse("T^i_j*T^j_k"))
-                == TensorHashCalculator.hashWithIndices(parse("T^i_s*T^s_k")));
+        assertTrue(hashWithIndices(parse("T^i_j*T^j_k"))
+                == hashWithIndices(parse("T^i_s*T^s_k")));
     }
 
     @Test
     public void test1() {
         addSymmetry("T_mnpq", IndexType.LatinLower, false, 1, 0, 3, 2);
-        assertTrue(TensorHashCalculator.hashWithIndices(parse("T^ijpq*T_pqrs"))
-                == TensorHashCalculator.hashWithIndices(parse("T^jipq*T_pqsr")));
-        assertFalse(TensorHashCalculator.hashWithIndices(parse("T^ijpq*T_pqrs"))
-                == TensorHashCalculator.hashWithIndices(parse("T^jpiq*T_pqsr")));
+        assertTrue(hashWithIndices(parse("T^ijpq*T_pqrs"))
+                == hashWithIndices(parse("T^jipq*T_pqsr")));
+        assertFalse(hashWithIndices(parse("T^ijpq*T_pqrs"))
+                == hashWithIndices(parse("T^jpiq*T_pqsr")));
     }
 
-//    @Test
+    //    @Test
 //    public void test2() {
 //        assertTrue(parse("(A^mi*B^jk+A^ji*B^mk)").hashCode() == parse("(A^ji*B^mk+A^ji*B^mk)").hashCode());
-//        
+//
 //        Tensor u = parse("T_mn*(A^mi*B^jk+A^ji*B^mk)");
 //        Tensor v = parse("T_mn*(A^ji*B^mk+A^ji*B^mk)");
 //
@@ -66,6 +66,6 @@ public class TensorHashCalculatorTest {
 //    }
 
     private static int h(Tensor str) {
-        return TensorHashCalculator.hashWithIndices(str);
+        return hashWithIndices(str);
     }
 }

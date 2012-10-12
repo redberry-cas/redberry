@@ -26,13 +26,15 @@ import cc.redberry.core.combinatorics.InconsistentGeneratorsException;
 import cc.redberry.core.combinatorics.Symmetry;
 import cc.redberry.core.combinatorics.symmetries.Symmetries;
 import cc.redberry.core.combinatorics.symmetries.SymmetriesFactory;
+import cc.redberry.core.utils.ArraysUtils;
+import cc.redberry.core.utils.IntArrayList;
+
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 
 /**
- *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
@@ -78,19 +80,32 @@ public class IndicesSymmetries implements Iterable<Symmetry> {
             diffIds = new short[symmetries.dimension()];
             Arrays.fill(diffIds, (short) -1);
             short number = 0;
+            IntArrayList removed = new IntArrayList(2);
             int i0, i1;
             for (Symmetry symmetry : list)
-                for (i0 = 0; i0 < symmetry.dimension(); ++i0)
+                for (i0 = diffIds.length - 1; i0 >= 0; --i0)
                     if ((i1 = symmetry.newIndexOf(i0)) != i0)
                         if (diffIds[i0] == -1 && diffIds[i1] == -1)
                             diffIds[i0] = diffIds[i1] = number++;
                         else if (diffIds[i0] == -1)
                             diffIds[i0] = diffIds[i1];
-                        else
+                        else if (diffIds[i1] == -1)
                             diffIds[i1] = diffIds[i0];
+                        else if (diffIds[i1] != diffIds[i0]) {
+                            int n = diffIds[i1];
+                            for (int k = 0; k < diffIds.length; ++k)
+                                if (diffIds[k] == n)
+                                    diffIds[k] = diffIds[i0];
+                            removed.add(n);
+                        }
             for (i1 = 0; i1 < diffIds.length; ++i1)
                 if (diffIds[i1] == -1)
                     diffIds[i1] = number++;
+
+            removed.sort();
+            for (i0 = diffIds.length - 1; i0 >= 0; --i0) {
+                diffIds[i0] += ArraysUtils.binarySearch(removed, diffIds[i0]) + 1;
+            }
         }
         return diffIds;
     }
@@ -164,7 +179,7 @@ public class IndicesSymmetries implements Iterable<Symmetry> {
         return symmetries.toString();
     }
 
-//    @Override
+    //    @Override
 //    public boolean equals(Object obj) {
 //        if (obj == null)
 //            return false;
@@ -202,9 +217,10 @@ public class IndicesSymmetries implements Iterable<Symmetry> {
             return EMPTY_SYMMETRIES;
         return new IndicesSymmetries(indicesTypeStructure);
     }
+
     public static final IndicesSymmetries EMPTY_SYMMETRIES =
             new IndicesSymmetries(new IndicesTypeStructure(EmptySimpleIndices.EMPTY_SIMPLE_INDICES_INSTANCE),
-                                  SymmetriesFactory.createSymmetries(0), new short[0]) {
+                    SymmetriesFactory.createSymmetries(0), new short[0]) {
 
                 @Override
                 public IndicesSymmetries clone() {

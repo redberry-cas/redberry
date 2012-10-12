@@ -23,6 +23,8 @@
 package cc.redberry.core.tensor;
 
 import cc.redberry.core.TAssert;
+import cc.redberry.core.indices.IndexType;
+import cc.redberry.core.number.Complex;
 import cc.redberry.core.transformations.ContractIndices;
 import cc.redberry.core.transformations.Expand;
 import cc.redberry.core.transformations.Together;
@@ -116,6 +118,16 @@ public class TensorsTest {
         Tensor actual = parse("a+b-(a+b)");
         TAssert.assertTrue(TensorUtils.isZero(actual));
     }
+
+    @Test
+    public void testSum3() {
+        SimpleTensor r = parseSimple("R_abcd");
+        addSymmetry(r, IndexType.LatinLower, false, 2, 3, 0, 1);
+        addSymmetry(r, IndexType.LatinLower, true, 1, 0, 2, 3);
+        Tensor actual = parse("R^abcd*R_abcd + R^abcd*R_abdc");
+        TAssert.assertEquals(actual, Complex.ZERO);
+    }
+
 
     private static Expression expression(String expression) {
         return (Expression) parse(expression);

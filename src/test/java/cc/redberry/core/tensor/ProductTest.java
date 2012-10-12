@@ -24,11 +24,16 @@ package cc.redberry.core.tensor;
 
 import cc.redberry.core.TAssert;
 import cc.redberry.core.context.CC;
+import cc.redberry.core.indices.IndexType;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.tensor.random.TRandom;
 import cc.redberry.core.utils.TensorUtils;
 import org.junit.Assert;
 import org.junit.Test;
+
+import java.util.Arrays;
+
+import static cc.redberry.core.tensor.Tensors.*;
 
 /**
  * @author Dmitry Bolotin
@@ -39,19 +44,19 @@ public class ProductTest {
     @Test
     public void testHashCode() {
         Assert.assertEquals(Tensors.parse("(-1)*D*S").hashCode(),
-                            Tensors.parse("D*S").hashCode());
+                Tensors.parse("D*S").hashCode());
     }
 
     @Test
     public void testHashCode1() {
         Assert.assertEquals(Tensors.parse("(-2)*D*S").hashCode(),
-                            Tensors.parse("2*D*S").hashCode());
+                Tensors.parse("2*D*S").hashCode());
     }
 
     @Test
     public void testHashCode3() {
         Assert.assertEquals(Tensors.parse("(-2)*4*D*S").hashCode(),
-                            Tensors.parse("2*2*2*D*S").hashCode());
+                Tensors.parse("2*2*2*D*S").hashCode());
     }
 
     @Test
@@ -69,7 +74,20 @@ public class ProductTest {
     @Test
     public void testHashCode2() {
         Assert.assertEquals(Tensors.parse("(-1)*D").hashCode(),
-                            Tensors.parse("D").hashCode());
+                Tensors.parse("D").hashCode());
+    }
+
+    @Test
+    public void testHashCode6() {
+        SimpleTensor r = parseSimple("R_abcd");
+        addSymmetry(r, IndexType.LatinLower, false, 2, 3, 0, 1);
+        addSymmetry(r, IndexType.LatinLower, true, 1, 0, 2, 3);
+
+        Product t1 = (Product) parse("R^abcd*R_abcd");
+        Product t2 = (Product) parse("R^abcd*R_abdc");
+
+        Assert.assertEquals(t1.getContent().getContractionStructure(), t2.getContent().getContractionStructure());
+        Assert.assertEquals(t1.hashCode(), t2.hashCode());
     }
 
     @Test
@@ -113,7 +131,7 @@ public class ProductTest {
     public void testRenameConflicts2() {
         Tensor t1 = Tensors.parse("(p_a+d_a)");
         Tensor t2 = Tensors.parse("(a_i+b_a^a_i)");
-        System.out.println(Tensors.multiplyAndRenameConflictingDummies(t1,t2));
+        System.out.println(Tensors.multiplyAndRenameConflictingDummies(t1, t2));
         TAssert.assertIndicesConsistency(Tensors.multiplyAndRenameConflictingDummies(t1, t2));
     }
 

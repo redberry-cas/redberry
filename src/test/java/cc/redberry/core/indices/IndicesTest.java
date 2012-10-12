@@ -30,8 +30,9 @@ import junit.framework.Assert;
 import org.apache.commons.math3.random.Well19937c;
 import org.junit.Test;
 
-import static cc.redberry.core.tensor.Tensors.addSymmetry;
-import static cc.redberry.core.tensor.Tensors.parse;
+import java.util.Arrays;
+
+import static cc.redberry.core.tensor.Tensors.*;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -204,5 +205,15 @@ public class IndicesTest {
             }
             Assert.assertEquals(indices, builder.getIndices());
         }
+    }
+
+    @Test
+    public void testDiffIds() {
+        SimpleTensor r = parseSimple("R_abcd");
+        addSymmetry(r, IndexType.LatinLower, false, 2, 3, 0, 1);
+        addSymmetry(r, IndexType.LatinLower, true, 1, 0, 2, 3);
+        short[] diffIds = r.getIndices().getDiffIds();
+        short[] expected = new short[4];
+        Assert.assertTrue(Arrays.equals(diffIds, expected));
     }
 }
