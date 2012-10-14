@@ -170,7 +170,7 @@ public class IndicesTest {
                 if (typeCount == 0)
                     continue;
                 for (int p = 0; p < typeCount; ++p) {
-                    int index = indices.get(p, IndexType.getType((byte) k));
+                    int index = indices.get(IndexType.getType((byte) k), p);
                     Assert.assertEquals(IndicesUtils.getType(index), (byte) k);
                     builder.append(IndicesFactory.createSimple(null, index));
                 }
@@ -200,7 +200,7 @@ public class IndicesTest {
                 if (typeCount == 0)
                     continue;
                 for (int p = 0; p < typeCount; ++p) {
-                    int index = indices.get(p, IndexType.getType((byte) k));
+                    int index = indices.get(IndexType.getType((byte) k), p);
                     Assert.assertEquals(IndicesUtils.getType(index), (byte) k);
                     builder.append(IndicesFactory.createSimple(null, index));
                 }

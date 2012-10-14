@@ -55,7 +55,7 @@ class EmptyIndices implements Indices {
      * @throws IndexOutOfBoundsException always
      */
     @Override
-    public int get(int position, IndexType type) {
+    public int get(IndexType type, int position) {
         throw new IndexOutOfBoundsException();
     }
 

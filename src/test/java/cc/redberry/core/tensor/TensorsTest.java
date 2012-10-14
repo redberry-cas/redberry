@@ -23,16 +23,19 @@
 package cc.redberry.core.tensor;
 
 import cc.redberry.core.TAssert;
+import cc.redberry.core.combinatorics.IntPermutationsGenerator;
 import cc.redberry.core.indices.IndexType;
 import cc.redberry.core.number.Complex;
-import cc.redberry.core.transformations.ContractIndices;
-import cc.redberry.core.transformations.Expand;
-import cc.redberry.core.transformations.Together;
-import cc.redberry.core.transformations.Transformation;
+import cc.redberry.core.parser.ParserIndices;
+import cc.redberry.core.transformations.*;
+import cc.redberry.core.utils.IntArrayList;
 import cc.redberry.core.utils.TensorUtils;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
+
+import java.util.HashSet;
+import java.util.Set;
 
 import static cc.redberry.core.tensor.Tensors.*;
 
@@ -128,6 +131,68 @@ public class TensorsTest {
         TAssert.assertEquals(actual, Complex.ZERO);
     }
 
+    @Test
+    public void test121378() {
+
+    }
+
+
+    @Test
+    public void riemannInvariants3() {
+        SimpleTensor r = parseSimple("R_abcd");
+        addSymmetry(r, IndexType.LatinLower, false, 2, 3, 0, 1);
+        addSymmetry(r, IndexType.LatinLower, true, 1, 0, 2, 3);
+
+        Tensor t = parse("R^abcd*R^efkl*R^mnop");
+        int[] upper = ParserIndices.parseSimple("^abcdef").getAllIndices().copy();
+        int[] lower = ParserIndices.parseSimple("_klmnop").getAllIndices().copy();
+        IntPermutationsGenerator generator = new IntPermutationsGenerator(6);
+        Set<Wrr> set = new HashSet<>();
+        for (int[] permutation : generator) {
+            IntArrayList from = new IntArrayList(upper.length * 2);
+            IntArrayList to = new IntArrayList(upper.length * 2);
+            for (int i = 0; i < permutation.length; ++i) {
+                from.add(upper[i]);
+                from.add(0x80000000 | lower[permutation[i]]);
+                to.add(0x80000000 | lower[permutation[i]]);
+                to.add(lower[permutation[i]]);
+            }
+//            System.out.println(IndicesUtils.toString(from.toArray()));
+//            System.out.println(IndicesUtils.toString(to.toArray()));
+            Product att = (Product) ApplyIndexMapping.applyIndexMapping(t, from.toArray(), to.toArray(), new int[0]);
+            if (att.factor.isMinusOne()) {
+                System.out.println(att + "   asasasas");
+            }
+            set.add(new Wrr(att));
+        }
+
+        Expression[] expressions = {parseExpression("R^a_man = R_mn"), parseExpression("R^a_a = R")};
+        System.out.println(set.size());
+        for (Wrr wrr : set) {
+            Tensor tt = wrr.tensor;
+            tt = expressions[0].transform(tt);
+            tt = expressions[1].transform(tt);
+            System.out.println(tt);
+        }
+    }
+
+    private static class Wrr {
+        final Tensor tensor;
+
+        private Wrr(Tensor tensor) {
+            this.tensor = tensor;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            return TensorUtils.compare1(tensor, ((Wrr) o).tensor) != null;
+        }
+
+        @Override
+        public int hashCode() {
+            return tensor.hashCode();
+        }
+    }
 
     private static Expression expression(String expression) {
         return (Expression) parse(expression);

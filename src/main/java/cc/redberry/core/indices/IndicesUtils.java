@@ -379,6 +379,7 @@ public final class IndicesUtils {
     }
 
     public static String toString(int[] indices, ToStringMode mode) {
+        //todo refactor using StringBuilder since InconsistensIndicesException can be thrown
         return IndicesFactory.createSimple(null, indices).toString(mode);
     }
 

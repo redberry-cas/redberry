@@ -99,13 +99,14 @@ public interface Indices {
      * Returns the index of the specified type at the
      * specified position in this <code>Indices</code>.
      *
-     * @param position position of the index to return
+     *
      * @param type     IndexType
+     * @param position position of the index to return
      * @return the index of the specified type at the
      *         specified position in this <code>Indices</code>
      * @throws IndexOutOfBoundsException - if the index is out of range
      */
-    int get(int position, IndexType type);
+    int get(IndexType type, int position);
 
     /**
      * Returns new instance of

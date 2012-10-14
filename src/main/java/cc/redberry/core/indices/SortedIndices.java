@@ -74,46 +74,40 @@ final class SortedIndices extends AbstractIndices {
 
     @Override
     public int size(IndexType type) {
-        UpperLowerIndices ul = getUpperLowerIndices();
-        int[] upper = ul.upper, lower = ul.lower;
-
         int type_ = type.getType(), size = 0;
 
-        int lowerPosition = Arrays.binarySearch(upper, (type_ << 24) | 0x80000000);
+        int lowerPosition = Arrays.binarySearch(data, 0, firstLower, (type_ << 24) | 0x80000000);
         if (lowerPosition < 0) lowerPosition = ~lowerPosition;
-        int upperPosition = Arrays.binarySearch(upper, ((type_ + 1) << 24) | 0x80000000);
+        int upperPosition = Arrays.binarySearch(data, lowerPosition, firstLower, ((type_ + 1) << 24) | 0x80000000);
         if (upperPosition < 0) upperPosition = ~upperPosition;
         size += upperPosition - lowerPosition;
 
-        lowerPosition = Arrays.binarySearch(lower, type_ << 24);
+        lowerPosition = Arrays.binarySearch(data, firstLower, data.length, type_ << 24);
         if (lowerPosition < 0) lowerPosition = ~lowerPosition;
-        upperPosition = Arrays.binarySearch(lower, (type_ + 1) << 24);
+        upperPosition = Arrays.binarySearch(data, lowerPosition, data.length, (type_ + 1) << 24);
         if (upperPosition < 0) upperPosition = ~upperPosition;
         size += upperPosition - lowerPosition;
         return size;
     }
 
     @Override
-    public int get(int position, IndexType type) {
-        UpperLowerIndices ul = getUpperLowerIndices();
-        int[] upper = ul.upper, lower = ul.lower;
-
+    public int get(IndexType type, int position) {
         int type_ = type.getType();
 
-        int lowerPosition = Arrays.binarySearch(upper, (type_ << 24) | 0x80000000);
+        int lowerPosition = Arrays.binarySearch(data, 0, firstLower, (type_ << 24) | 0x80000000);
         if (lowerPosition < 0) lowerPosition = ~lowerPosition;
-        int upperPosition = Arrays.binarySearch(upper, ((type_ + 1) << 24) | 0x80000000);
+        int upperPosition = Arrays.binarySearch(data, lowerPosition, firstLower, ((type_ + 1) << 24) | 0x80000000);
         if (upperPosition < 0) upperPosition = ~upperPosition;
         if (lowerPosition + position < upperPosition)
-            return upper[lowerPosition + position];
+            return data[lowerPosition + position];
         position = position - (upperPosition - lowerPosition);
 
-        lowerPosition = Arrays.binarySearch(lower, type_ << 24);
+        lowerPosition = Arrays.binarySearch(data, firstLower, data.length, type_ << 24);
         if (lowerPosition < 0) lowerPosition = ~lowerPosition;
-        upperPosition = Arrays.binarySearch(lower, (type_ + 1) << 24);
+        upperPosition = Arrays.binarySearch(data, lowerPosition, data.length, (type_ + 1) << 24);
         if (upperPosition < 0) upperPosition = ~upperPosition;
         if (lowerPosition + position < upperPosition)
-            return lower[lowerPosition + position];
+            return data[lowerPosition + position];
         throw new IndexOutOfBoundsException();
     }
 
