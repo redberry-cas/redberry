@@ -22,7 +22,7 @@
  */
 package cc.redberry.core.tensor;
 
-import cc.redberry.core.context.ToStringMode;
+import cc.redberry.core.context.OutputFormat;
 import junit.framework.Assert;
 import org.junit.Test;
 
@@ -46,10 +46,10 @@ public class PowerFactoryTest {
     @Test
     public void rationalValuesNegativeTest() {
         Assert.assertEquals("(1/2)**(1/2)",
-                            Tensors.parse("Power[1/2,1/2]").toString(ToStringMode.Redberry));
+                            Tensors.parse("Power[1/2,1/2]").toString(OutputFormat.Redberry));
 
         Assert.assertEquals("(1/2)**(1/3)",
-                            Tensors.parse("Power[1/2,1/3]").toString(ToStringMode.Redberry));
+                            Tensors.parse("Power[1/2,1/3]").toString(OutputFormat.Redberry));
     }
 
     @Test

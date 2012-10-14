@@ -23,7 +23,7 @@
 package cc.redberry.core.tensor;
 
 import cc.redberry.core.context.Context;
-import cc.redberry.core.context.ToStringMode;
+import cc.redberry.core.context.OutputFormat;
 import cc.redberry.core.indices.Indices;
 import java.util.Iterator;
 
@@ -33,7 +33,7 @@ import java.util.Iterator;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  * @see cc.redberry.core.indices.Indices
- * @see cc.redberry.core.context.ToStringMode
+ * @see cc.redberry.core.context.OutputFormat
  * @see cc.redberry.core.context.Context
  */
 public abstract class Tensor
@@ -141,31 +141,31 @@ public abstract class Tensor
     }
 
     /**
-     * <p>Returns a string representation of a tensor. See {@link cc.redberry.core.context.ToStringMode}
+     * <p>Returns a string representation of a tensor. See {@link cc.redberry.core.context.OutputFormat}
      * for available modes.</p>
      *
-     * @param mode printing mode (see. {@link cc.redberry.core.context.ToStringMode})
+     * @param mode printing mode (see. {@link cc.redberry.core.context.OutputFormat})
      *
      * @return a string representation of a tensor
      */
-    public abstract String toString(final ToStringMode mode);
+    public abstract String toString(final OutputFormat mode);
 
     /**
-     * <p>Returns string representation of a tensor in default (see {@link cc.redberry.core.context.CC#getDefaultToStringFormat()})
+     * <p>Returns string representation of a tensor in default (see {@link cc.redberry.core.context.CC#getDefaultOutputFormat()})
      * mode. <p>Equivalent to:
-     * <code>this.toString(CC.getDefaultToStringFormat())</code> </p></p>
+     * <code>this.toString(CC.getDefaultOutputFormat())</code> </p></p>
      *
      * @return string representation of a tensor in default mode
      */
     @Override
     public final String toString() {
-        return toString(Context.get().getDefaultToStringFormat());
+        return toString(Context.get().getDefaultOutputFormat());
     }
 
     /**
      * For internal use.
      */
-    protected String toString(ToStringMode mode, Class<? extends Tensor> clazz) {
+    protected String toString(OutputFormat mode, Class<? extends Tensor> clazz) {
         return toString(mode);
     }
 

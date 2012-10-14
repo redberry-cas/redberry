@@ -22,7 +22,7 @@
  */
 package cc.redberry.core.indices;
 
-import cc.redberry.core.context.ToStringMode;
+import cc.redberry.core.context.OutputFormat;
 import cc.redberry.core.indexmapping.IndexMapping;
 import cc.redberry.core.utils.IntArray;
 
@@ -169,7 +169,7 @@ public interface Indices {
     /**
      * This method returns string representation of indices due to symbols print
      * mode, specified in
-     * <code>enum</code> {@link ToStringMode}. General convention for indices
+     * <code>enum</code> {@link cc.redberry.core.context.OutputFormat}. General convention for indices
      * output is LaTeX-base code for indices, i.e. string
      * <code>_{mn}^{a}</code> represents indices with length 3, where first
      * <code>m</code> down, second
@@ -184,9 +184,9 @@ public interface Indices {
      *
      * @param mode symbols printing mode
      * @return string representation due to mode
-     * @see ToStringMode
+     * @see cc.redberry.core.context.OutputFormat
      */
-    String toString(ToStringMode mode);
+    String toString(OutputFormat mode);
 
     @Override
     boolean equals(Object other);

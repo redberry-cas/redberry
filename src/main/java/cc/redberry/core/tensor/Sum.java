@@ -22,7 +22,7 @@
  */
 package cc.redberry.core.tensor;
 
-import cc.redberry.core.context.ToStringMode;
+import cc.redberry.core.context.OutputFormat;
 import cc.redberry.core.indices.Indices;
 import cc.redberry.core.utils.ArraysUtils;
 import cc.redberry.core.utils.TensorHashCalculator;
@@ -122,7 +122,7 @@ public final class Sum extends MultiTensor {
     }
 
     @Override
-    public String toString(ToStringMode mode) {
+    public String toString(OutputFormat mode) {
         StringBuilder sb = new StringBuilder();
         String temp;
         for (int i = 0;; ++i) {
@@ -137,7 +137,7 @@ public final class Sum extends MultiTensor {
     }
 
     @Override
-    protected String toString(ToStringMode mode, Class<? extends Tensor> clazz) {
+    protected String toString(OutputFormat mode, Class<? extends Tensor> clazz) {
         if (clazz == Power.class || clazz == Product.class)
             return "(" + toString(mode) + ")";
         else

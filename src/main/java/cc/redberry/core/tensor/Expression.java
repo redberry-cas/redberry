@@ -22,7 +22,7 @@
  */
 package cc.redberry.core.tensor;
 
-import cc.redberry.core.context.ToStringMode;
+import cc.redberry.core.context.OutputFormat;
 import cc.redberry.core.indices.Indices;
 import cc.redberry.core.transformations.Transformation;
 import cc.redberry.core.transformations.substitutions.Substitutions;
@@ -72,7 +72,7 @@ public class Expression extends Tensor implements Transformation {
     }
 
     @Override
-    public String toString(ToStringMode mode) {
+    public String toString(OutputFormat mode) {
         return left.toString(mode) + " = " + right.toString(mode);
     }
 

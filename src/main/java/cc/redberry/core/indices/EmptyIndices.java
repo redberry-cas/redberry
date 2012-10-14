@@ -22,7 +22,7 @@
  */
 package cc.redberry.core.indices;
 
-import cc.redberry.core.context.ToStringMode;
+import cc.redberry.core.context.OutputFormat;
 import cc.redberry.core.indexmapping.IndexMapping;
 import cc.redberry.core.utils.IntArray;
 
@@ -154,7 +154,7 @@ class EmptyIndices implements Indices {
      * @return empty string
      */
     @Override
-    public String toString(ToStringMode mode) {
+    public String toString(OutputFormat mode) {
         return "";
     }
 

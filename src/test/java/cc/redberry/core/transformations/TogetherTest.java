@@ -24,7 +24,7 @@ package cc.redberry.core.transformations;
 
 import cc.redberry.core.TAssert;
 import cc.redberry.core.context.CC;
-import cc.redberry.core.context.ToStringMode;
+import cc.redberry.core.context.OutputFormat;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.tensor.Tensors;
 import org.junit.Test;
@@ -131,6 +131,6 @@ public class TogetherTest {
         t = Together.together(t);
         t = Expand.expand(t);
         TAssert.assertIndicesConsistency(t);
-        CC.setDefaultToStringFormat(ToStringMode.LaTeX);
+        CC.setDefaultOutputFormat(OutputFormat.LaTeX);
     }
 }

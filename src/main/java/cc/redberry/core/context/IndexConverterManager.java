@@ -37,7 +37,7 @@ public final class IndexConverterManager {
         this.converters = converters;
     }
 
-    public String getSymbol(int code, ToStringMode mode) {
+    public String getSymbol(int code, OutputFormat mode) {
         byte typeId = (byte) ((code >>> 24) & 0x7F);
         int number = code & 0xFFFF;
         try {

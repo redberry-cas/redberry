@@ -23,7 +23,7 @@
 package cc.redberry.core.tensor;
 
 import cc.redberry.core.context.CC;
-import cc.redberry.core.context.ToStringMode;
+import cc.redberry.core.context.OutputFormat;
 import cc.redberry.core.indices.SimpleIndices;
 import cc.redberry.core.utils.EmptyIterator;
 import java.util.Iterator;
@@ -130,7 +130,7 @@ public class SimpleTensor extends Tensor {
     }
 
     @Override
-    public String toString(ToStringMode mode) {
+    public String toString(OutputFormat mode) {
         StringBuilder sb = new StringBuilder();
         sb.append(CC.getNameDescriptor(name).getName(indices));
         sb.append(indices.toString(mode));

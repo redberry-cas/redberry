@@ -23,7 +23,7 @@
 package cc.redberry.core.indices;
 
 import cc.redberry.core.context.Context;
-import cc.redberry.core.context.ToStringMode;
+import cc.redberry.core.context.OutputFormat;
 import cc.redberry.core.utils.IntArray;
 
 import java.lang.ref.WeakReference;
@@ -123,10 +123,10 @@ abstract class AbstractIndices implements Indices {
     }
 
     @Override
-    public final String toString(ToStringMode mode) {
+    public final String toString(OutputFormat mode) {
         if (data.length == 0)
             return "";
-        boolean latex = mode == ToStringMode.LaTeX;
+        boolean latex = mode == OutputFormat.LaTeX;
         StringBuilder sb = new StringBuilder();
         int stateMode = (data[0] >>> 31);
         int currentState = stateMode;
@@ -151,7 +151,7 @@ abstract class AbstractIndices implements Indices {
 
     @Override
     public final String toString() {
-        return toString(Context.get().getDefaultToStringFormat());
+        return toString(Context.get().getDefaultOutputFormat());
     }
 
     protected static class UpperLowerIndices {

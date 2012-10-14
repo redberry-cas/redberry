@@ -31,7 +31,7 @@ import cc.redberry.core.utils.LongBackedBitArray;
 public final class Context {
 
     private final NameManager nameManager;
-    private ToStringMode defaultPrintMode;
+    private OutputFormat defaultOutputFormat;
     private final IndexConverterManager converterManager;
     private final ParseManager parseManager;
     private final LongBackedBitArray metricTypes = new LongBackedBitArray(128);
@@ -41,7 +41,7 @@ public final class Context {
         this.converterManager = contextSettings.getConverterManager();
         nameManager = new NameManager(contextSettings.getNameManagerSeed(), contextSettings.getKronecker(), contextSettings.getMetricName());
 
-        defaultPrintMode = contextSettings.getDefaultToStringMode();
+        defaultOutputFormat = contextSettings.getDefaultOutputFormat();
 
         for (IndexType type : contextSettings.getMetricTypes())
             metricTypes.set(type.getType());
@@ -62,12 +62,12 @@ public final class Context {
         nameManager.reset(seed);
     }
 
-    public void setDefaultToStringFormat(ToStringMode defaultPrintMode) {
-        this.defaultPrintMode = defaultPrintMode;
+    public void setDefaultOutputFormat(OutputFormat defaultOutputFormat) {
+        this.defaultOutputFormat = defaultOutputFormat;
     }
 
-    public ToStringMode getDefaultToStringFormat() {
-        return defaultPrintMode;
+    public OutputFormat getDefaultOutputFormat() {
+        return defaultOutputFormat;
     }
 
     public IndexConverterManager getIndexConverterManager() {

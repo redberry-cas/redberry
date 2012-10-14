@@ -24,7 +24,7 @@ package cc.redberry.core.tensor;
 
 import cc.redberry.core.TAssert;
 import cc.redberry.core.context.CC;
-import cc.redberry.core.context.ToStringMode;
+import cc.redberry.core.context.OutputFormat;
 import cc.redberry.core.indices.IndexType;
 import cc.redberry.core.indices.IndicesFactory;
 import cc.redberry.core.indices.IndicesTypeStructure;
@@ -53,7 +53,7 @@ public class BulkTestsForParser {
 
     @Before
     public void beforeMethod() {
-        CC.setDefaultToStringFormat(ToStringMode.Redberry);
+        CC.setDefaultOutputFormat(OutputFormat.Redberry);
     }
 
 

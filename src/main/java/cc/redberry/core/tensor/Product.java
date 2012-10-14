@@ -22,7 +22,7 @@
  */
 package cc.redberry.core.tensor;
 
-import cc.redberry.core.context.ToStringMode;
+import cc.redberry.core.context.OutputFormat;
 import cc.redberry.core.indices.Indices;
 import cc.redberry.core.indices.IndicesFactory;
 import cc.redberry.core.indices.IndicesUtils;
@@ -522,9 +522,9 @@ public final class Product extends MultiTensor {
     }
 
     @Override
-    public String toString(ToStringMode mode) {
+    public String toString(OutputFormat mode) {
         StringBuilder sb = new StringBuilder();
-        char operatorChar = mode == ToStringMode.LaTeX ? ' ' : '*';
+        char operatorChar = mode == OutputFormat.LaTeX ? ' ' : '*';
 
         if (factor.isReal() && factor.getReal().signum() < 0) {
             sb.append('-');
@@ -551,7 +551,7 @@ public final class Product extends MultiTensor {
     }
 
     @Override
-    protected String toString(ToStringMode mode, Class<? extends Tensor> clazz) {
+    protected String toString(OutputFormat mode, Class<? extends Tensor> clazz) {
         if (clazz == Power.class)
             return "(" + toString(mode) + ")";
         else

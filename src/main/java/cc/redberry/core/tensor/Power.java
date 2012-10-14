@@ -22,7 +22,7 @@
  */
 package cc.redberry.core.tensor;
 
-import cc.redberry.core.context.ToStringMode;
+import cc.redberry.core.context.OutputFormat;
 import cc.redberry.core.indices.Indices;
 import cc.redberry.core.indices.IndicesFactory;
 import cc.redberry.core.number.Complex;
@@ -69,11 +69,11 @@ public final class Power extends Tensor {
     }
 
     @Override
-    public String toString(ToStringMode mode) {
-        if (mode == ToStringMode.WolframMathematica)
+    public String toString(OutputFormat mode) {
+        if (mode == OutputFormat.WolframMathematica)
             return "Power[" + argument.toString(mode) + ", " + power.toString(mode) + "]";
 
-        if (mode == ToStringMode.LaTeX)
+        if (mode == OutputFormat.LaTeX)
             if (TensorUtils.isRealNegativeNumber(power))
                 return "\\frac{1}{" + argument.toString(mode, Power.class) +
                         (TensorUtils.isMinusOne(power) ?

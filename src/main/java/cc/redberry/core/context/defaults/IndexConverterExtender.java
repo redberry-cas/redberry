@@ -24,7 +24,7 @@ package cc.redberry.core.context.defaults;
 
 import cc.redberry.core.context.IndexConverterException;
 import cc.redberry.core.context.IndexSymbolConverter;
-import cc.redberry.core.context.ToStringMode;
+import cc.redberry.core.context.OutputFormat;
 
 public final class IndexConverterExtender implements IndexSymbolConverter {
     private final IndexSymbolConverter innerConverter;
@@ -75,7 +75,7 @@ public final class IndexConverterExtender implements IndexSymbolConverter {
     }
 
     @Override
-    public String getSymbol(int code, ToStringMode mode) throws IndexConverterException {
+    public String getSymbol(int code, OutputFormat mode) throws IndexConverterException {
         int num = code / (innerConverter.maxSymbolsCount() + 1);
         if (num == 0)
             return innerConverter.getSymbol(code, mode);

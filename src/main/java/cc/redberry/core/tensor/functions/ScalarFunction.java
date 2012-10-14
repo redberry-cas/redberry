@@ -22,7 +22,7 @@
  */
 package cc.redberry.core.tensor.functions;
 
-import cc.redberry.core.context.ToStringMode;
+import cc.redberry.core.context.OutputFormat;
 import cc.redberry.core.indices.Indices;
 import cc.redberry.core.indices.IndicesFactory;
 import cc.redberry.core.tensor.Tensor;
@@ -65,17 +65,17 @@ public abstract class ScalarFunction extends Tensor {
     }
 
     @Override
-    public final String toString(ToStringMode mode) {
+    public final String toString(OutputFormat mode) {
         String stringSymbol = functionName();
         switch (mode) {
             case UTF8:
-                return stringSymbol + "(" + argument.toString(ToStringMode.UTF8) + ")";
+                return stringSymbol + "(" + argument.toString(OutputFormat.UTF8) + ")";
             case LaTeX:
-                return "\\" + stringSymbol.toLowerCase() + "(" + argument.toString(ToStringMode.UTF8) + ")";
+                return "\\" + stringSymbol.toLowerCase() + "(" + argument.toString(OutputFormat.UTF8) + ")";
             case Redberry:
-                return Character.toString(Character.toUpperCase(stringSymbol.charAt(0))) + stringSymbol.substring(1, stringSymbol.length()) + "[" + argument.toString(ToStringMode.Redberry) + "]";
+                return Character.toString(Character.toUpperCase(stringSymbol.charAt(0))) + stringSymbol.substring(1, stringSymbol.length()) + "[" + argument.toString(OutputFormat.Redberry) + "]";
             default:
-                return stringSymbol + "(" + argument.toString(ToStringMode.UTF8) + ")";
+                return stringSymbol + "(" + argument.toString(OutputFormat.UTF8) + ")";
         }
     }
 }

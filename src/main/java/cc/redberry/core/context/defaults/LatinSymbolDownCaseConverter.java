@@ -24,7 +24,7 @@ package cc.redberry.core.context.defaults;
 
 import cc.redberry.core.context.IndexConverterException;
 import cc.redberry.core.context.IndexSymbolConverter;
-import cc.redberry.core.context.ToStringMode;
+import cc.redberry.core.context.OutputFormat;
 
 public final class LatinSymbolDownCaseConverter implements IndexSymbolConverter {
     private static final byte converterID = 0;
@@ -49,7 +49,7 @@ public final class LatinSymbolDownCaseConverter implements IndexSymbolConverter 
     }
 
     @Override
-    public String getSymbol(int code, ToStringMode mode) throws IndexConverterException {
+    public String getSymbol(int code, OutputFormat mode) throws IndexConverterException {
         int number = code + 0x61;
         if (number > 0x7A)
             throw new IndexConverterException();

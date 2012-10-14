@@ -59,12 +59,12 @@ public final class CC {
         return current().getIndexConverterManager();
     }
 
-    public static ToStringMode getDefaultToStringFormat() {
-        return current().getDefaultToStringFormat();
+    public static OutputFormat getDefaultOutputFormat() {
+        return current().getDefaultOutputFormat();
     }
 
-    public static void setDefaultToStringFormat(ToStringMode mode) {
-        current().setDefaultToStringFormat(mode);
+    public static void setDefaultOutputFormat(OutputFormat mode) {
+        current().setDefaultOutputFormat(mode);
     }
 
     public static void resetTensorNames() {

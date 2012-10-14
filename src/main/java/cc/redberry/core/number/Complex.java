@@ -22,7 +22,7 @@
  */
 package cc.redberry.core.number;
 
-import cc.redberry.core.context.ToStringMode;
+import cc.redberry.core.context.OutputFormat;
 import cc.redberry.core.indices.Indices;
 import cc.redberry.core.indices.IndicesFactory;
 import cc.redberry.core.tensor.*;
@@ -154,7 +154,7 @@ public class Complex extends Tensor
     }
 
     @Override
-    public String toString(ToStringMode mode) {
+    public String toString(OutputFormat mode) {
         if (real.isZero())
             if (imaginary.isZero())
                 return "0";
@@ -181,7 +181,7 @@ public class Complex extends Tensor
     }
 
     @Override
-    protected String toString(ToStringMode mode, Class<? extends Tensor> clazz) {
+    protected String toString(OutputFormat mode, Class<? extends Tensor> clazz) {
         if (clazz == Product.class || clazz == Power.class) {
             if (!imaginary.isZero() || real.signum() < 0 || !real.isInteger())
                 return "(" + toString(mode) + ")";

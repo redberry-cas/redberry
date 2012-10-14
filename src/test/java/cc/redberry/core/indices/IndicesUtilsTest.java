@@ -22,7 +22,7 @@
  */
 package cc.redberry.core.indices;
 
-import cc.redberry.core.context.ToStringMode;
+import cc.redberry.core.context.OutputFormat;
 import org.junit.Test;
 
 import static org.junit.Assert.assertTrue;
@@ -40,12 +40,12 @@ public class IndicesUtilsTest {
     @Test
     public void parse() {
         int index = IndicesUtils.parseIndex("_{\\mu}");
-        assertTrue("_{\\mu}".equals(IndicesUtils.toString(index, ToStringMode.LaTeX)));
+        assertTrue("_{\\mu}".equals(IndicesUtils.toString(index, OutputFormat.LaTeX)));
 
         int index1 = IndicesUtils.parseIndex("_\\mu");
-        assertTrue("_{\\mu}".equals(IndicesUtils.toString(index1, ToStringMode.LaTeX)));
+        assertTrue("_{\\mu}".equals(IndicesUtils.toString(index1, OutputFormat.LaTeX)));
 
         int index2 = IndicesUtils.parseIndex("_a");
-        assertTrue("_{a}".equals(IndicesUtils.toString(index2, ToStringMode.LaTeX)));
+        assertTrue("_{a}".equals(IndicesUtils.toString(index2, OutputFormat.LaTeX)));
     }
 }

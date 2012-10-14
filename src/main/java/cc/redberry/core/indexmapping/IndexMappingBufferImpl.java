@@ -24,7 +24,7 @@ package cc.redberry.core.indexmapping;
 
 import cc.redberry.core.context.CC;
 import cc.redberry.core.context.Context;
-import cc.redberry.core.context.ToStringMode;
+import cc.redberry.core.context.OutputFormat;
 import cc.redberry.core.indices.IndicesUtils;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -109,9 +109,9 @@ public final class IndexMappingBufferImpl implements IndexMappingBuffer {
         if (map.isEmpty())
             return sb.append(":empty buffer").toString();
         for (Map.Entry<Integer, IndexMappingBufferRecord> entry : map.entrySet()) {
-            sb.append(Context.get().getIndexConverterManager().getSymbol(entry.getKey().intValue(), ToStringMode.UTF8));
+            sb.append(Context.get().getIndexConverterManager().getSymbol(entry.getKey().intValue(), OutputFormat.UTF8));
             sb.append("->");
-            sb.append(Context.get().getIndexConverterManager().getSymbol(entry.getValue().getIndexName(), ToStringMode.UTF8));
+            sb.append(Context.get().getIndexConverterManager().getSymbol(entry.getValue().getIndexName(), OutputFormat.UTF8));
             sb.append(":");
             for (int i = 2; i >= 0; --i)
                 sb.append(entry.getValue().getStatesBit(i) ? 1 : 0);
@@ -134,13 +134,13 @@ public final class IndexMappingBufferImpl implements IndexMappingBuffer {
 //                sb.append("^");
 //            }else
 //                sb.append("_");
-//            sb.append(Context.get().getIndexConverterManager().getSymbol(from & 0x7FFFFFFF , ToStringMode.UTF8));
+//            sb.append(Context.get().getIndexConverterManager().getSymbol(from & 0x7FFFFFFF , OutputFormat.UTF8));
 //            sb.append("->");
 //              if((to & 0x80000000) == 0x80000000){
 //                sb.append("^");
 //            }else
 //                sb.append("_");
-//            sb.append(Context.get().getIndexConverterManager().getSymbol(to & 0x7FFFFFFF, ToStringMode.UTF8));            
+//            sb.append(Context.get().getIndexConverterManager().getSymbol(to & 0x7FFFFFFF, OutputFormat.UTF8));
 //            sb.append(",");
 //        }
 //        sb.deleteCharAt(sb.length() - 1);

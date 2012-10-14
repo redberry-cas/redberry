@@ -26,7 +26,7 @@ import cc.redberry.core.TAssert;
 import cc.redberry.core.combinatorics.Combinatorics;
 import cc.redberry.core.combinatorics.IntPermutationsGenerator;
 import cc.redberry.core.context.CC;
-import cc.redberry.core.context.ToStringMode;
+import cc.redberry.core.context.OutputFormat;
 import cc.redberry.core.indices.IndexType;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.tensor.*;
@@ -122,11 +122,11 @@ public class SubstitutionsTest {
     public void testSimple6() {
         Tensor t = parse("H^{\\sigma\\lambda\\epsilon\\zeta }_{\\alpha\\beta}*E_{\\mu\\nu}^{\\alpha\\beta}_{\\delta\\gamma }*n_{\\sigma}*n_{\\lambda}*H^{\\mu\\nu\\delta\\gamma}_{\\epsilon\\zeta}");
         assertTrue(t.getIndices().getFree().size() == 0);
-        System.out.println(t.toString(ToStringMode.UTF8));
+        System.out.println(t.toString(OutputFormat.UTF8));
         Expression ex = (Expression) parse("E^{\\mu \\nu \\gamma \\delta }_{\\epsilon \\zeta }=H^{\\mu \\nu \\gamma \\delta }_{\\epsilon \\zeta }+4*H^{\\mu \\gamma \\delta }_{\\eta \\theta }*H^{\\nu \\eta \\theta }_{\\epsilon \\zeta }+4*H^{\\nu \\gamma \\delta }_{\\lambda \\xi }*H^{\\mu \\lambda \\xi }_{\\epsilon \\zeta }");
-        System.out.println(ex.toString(ToStringMode.UTF8));
+        System.out.println(ex.toString(OutputFormat.UTF8));
         t = substitute(t, "E^{\\mu \\nu \\gamma \\delta }_{\\epsilon \\zeta }=H^{\\mu \\nu \\gamma \\delta }_{\\epsilon \\zeta }+4*H^{\\mu \\gamma \\delta }_{\\eta \\theta }*H^{\\nu \\eta \\theta }_{\\epsilon \\zeta }+4*H^{\\nu \\gamma \\delta }_{\\lambda \\xi }*H^{\\mu \\lambda \\xi }_{\\epsilon \\zeta }");
-        System.out.println(t.toString(ToStringMode.UTF8));
+        System.out.println(t.toString(OutputFormat.UTF8));
         t = expand(t);
         assertTrue(true);
     }
@@ -502,7 +502,7 @@ public class SubstitutionsTest {
         target = expand(target);
         target = contract(target);
 
-        Tensor expected = parse(target.toString(ToStringMode.RedberryConsole));
+        Tensor expected = parse(target.toString(OutputFormat.RedberryConsole));
         assertTrue(TensorUtils.equalsExactly(target, expected));
     }
 

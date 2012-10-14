@@ -23,7 +23,7 @@
 package cc.redberry.core.indexmapping;
 
 import cc.redberry.core.context.Context;
-import cc.redberry.core.context.ToStringMode;
+import cc.redberry.core.context.OutputFormat;
 import cc.redberry.core.indices.InconsistentIndicesException;
 import cc.redberry.core.indices.IndicesUtils;
 
@@ -124,7 +124,7 @@ public final class IndexMappingBufferRecord {
     public String toString() {
         StringBuilder sb = new StringBuilder();
 
-        sb.append(Context.get().getIndexConverterManager().getSymbol(getIndexName(), ToStringMode.UTF8));
+        sb.append(Context.get().getIndexConverterManager().getSymbol(getIndexName(), OutputFormat.UTF8));
         sb.append(":");
         for (int i = 2; i >= 0; --i)
             sb.append(getStatesBit(i) ? 1 : 0);

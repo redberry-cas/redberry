@@ -40,9 +40,9 @@ public interface IndexSymbolConverter {
      * the specified to string mode.
      * @throws IndexConverterException if code does not corresponds to this
      * converter.
-     * @see ToStringMode
+     * @see OutputFormat
      */
-    String getSymbol(int code, ToStringMode mode) throws IndexConverterException;
+    String getSymbol(int code, OutputFormat mode) throws IndexConverterException;
 
     /**
      *

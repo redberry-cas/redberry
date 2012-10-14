@@ -30,27 +30,27 @@ import cc.redberry.core.tensor.Tensor;
  * <code>enum</code> specifies common modes of string representation of objects.
  * For using this
  * <code>enum</code> class must specifies method
- * <code>toString(ToStringMode mode)</code>. For the defaults, we provides two
+ * <code>toString(OutputFormat mode)</code>. For the defaults, we provides two
  * modes {
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  * @link #UTF8} and {
  * @link #LaTeX}. Examples of using, you can find in see also section.
- * @see Tensor#toString(ToStringMode)
- * @see Indices#toString(ToStringMode)
+ * @see Tensor#toString(OutputFormat)
+ * @see Indices#toString(OutputFormat)
  * @see Tensor#toString()
  */
-public enum ToStringMode {
+public enum OutputFormat {
 
     /**
      * This mode supports LaTeX code generating via
-     * <code>toString(ToStringMode mode)</code>. If you use this mode for
+     * <code>toString(OutputFormat mode)</code>. If you use this mode for
      * outputting expression, the result will be a LaTeX code, representing
      * expression, using common LaTeX functions.
      *
-     * @see Tensor#toString(ToStringMode)
-     * @see Indices#toString(ToStringMode)
+     * @see Tensor#toString(OutputFormat)
+     * @see Indices#toString(OutputFormat)
      */
     LaTeX,
     /**
@@ -60,14 +60,14 @@ public enum ToStringMode {
      * <p>NOTE: some systems does not supports direct Greek printing, so instead
      * of '&alpha' you will see '?' </p>
      *
-     * @see Tensor#toString(ToStringMode)
-     * @see Indices#toString(ToStringMode)
+     * @see Tensor#toString(OutputFormat)
+     * @see Indices#toString(OutputFormat)
      */
     UTF8,
     /**
      * This mode specifies such output format, that can be parsed again, by
      * directly call in parser, i.e.
-     * {@code CC.parser(t.toString(ToStringMode.Redberry))}. Most of all it
+     * {@code CC.parser(t.toString(OutputFormat.Redberry))}. Most of all it
      * touches tensor fields, functions and derivatives. Greek indices converted
      * to string with this mode will look like "\alpha" (as LaTeX mode)
      */

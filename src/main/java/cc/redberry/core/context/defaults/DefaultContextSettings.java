@@ -23,7 +23,7 @@
 package cc.redberry.core.context.defaults;
 
 import cc.redberry.core.context.ContextSettings;
-import cc.redberry.core.context.ToStringMode;
+import cc.redberry.core.context.OutputFormat;
 import cc.redberry.core.indices.IndexType;
 
 /**
@@ -34,7 +34,7 @@ import cc.redberry.core.indices.IndexType;
 public class DefaultContextSettings {
 
     public static ContextSettings create() {
-        ContextSettings defaultSettings = new ContextSettings(ToStringMode.Redberry, "d");
+        ContextSettings defaultSettings = new ContextSettings(OutputFormat.Redberry, "d");
         defaultSettings.setMetricName("g");
 
         defaultSettings.addMetricIndexType(IndexType.LatinLower);
