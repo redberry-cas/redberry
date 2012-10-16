@@ -99,7 +99,6 @@ public interface Indices {
      * Returns the index of the specified type at the
      * specified position in this <code>Indices</code>.
      *
-     *
      * @param type     IndexType
      * @param position position of the index to return
      * @return the index of the specified type at the
@@ -107,6 +106,13 @@ public interface Indices {
      * @throws IndexOutOfBoundsException - if the index is out of range
      */
     int get(IndexType type, int position);
+
+//    /**
+//     * Returns sorted array of dummy indices names.
+//     *
+//     * @return sorted array of dummy indices names
+//     */
+//    int[] getDummyNames();
 
     /**
      * Returns new instance of
