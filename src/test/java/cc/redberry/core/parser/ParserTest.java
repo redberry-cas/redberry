@@ -24,6 +24,7 @@ package cc.redberry.core.parser;
 
 import cc.redberry.core.TAssert;
 import cc.redberry.core.context.CC;
+import cc.redberry.core.indices.InconsistentIndicesException;
 import cc.redberry.core.indices.IndicesFactory;
 import cc.redberry.core.indices.SimpleIndices;
 import cc.redberry.core.number.Complex;
@@ -32,6 +33,8 @@ import cc.redberry.core.utils.TensorUtils;
 import junit.framework.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
+
+import static cc.redberry.core.tensor.Tensors.parse;
 
 /**
  * @author Dmitry Bolotin
@@ -355,5 +358,8 @@ public class ParserTest {
                 == Tensors.parseSimple("F_{BA_{21}C\\mu\\nu}").getName());
     }
 
-
+    @Test(expected = InconsistentIndicesException.class)
+    public void testII1() {
+        parse("A_mn*B^mn*A_mn*B^mn");
+    }
 }

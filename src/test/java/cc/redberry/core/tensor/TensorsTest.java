@@ -110,20 +110,6 @@ public class TensorsTest {
     }
 
     @Test
-    public void testPowerPower2() {
-        Tensor t = Tensors.parse("Sin[a-b]*Sin[b-a]");
-        TAssert.assertEquals(t, "-Sin[a-b]**2");
-        TAssert.assertEquals(t, "-Sin[b-a]**2");
-    }
-
-    @Test
-    public void testPowerPower3() {
-        Tensor t = Tensors.parse("Cos[a-b]*Cos[b-a]");
-        TAssert.assertEquals(t, "Cos[a-b]**2");
-        TAssert.assertEquals(t, "Cos[b-a]**2");
-    }
-
-    @Test
     public void testSum1() {
         Tensor actual = parse("(x_a^a+y_b^b)*X_m*X^m - (z_n^n+y_d^d)*X_a*X^a ");
         Tensor expected = parse("(x_a^a-z_n^n)*X_m*X^m");
@@ -153,11 +139,6 @@ public class TensorsTest {
         Tensors.addSymmetry("R_\\mu\\nu\\alpha\\beta", IndexType.GreekLower, false, new int[]{2, 3, 0, 1});
         Tensor t = parse("d^{\\alpha}_{\\sigma}*g^{\\beta\\gamma}*R^{\\sigma}_{\\alpha\\beta\\gamma}+g^{\\alpha\\gamma}*d^{\\beta}_{\\sigma}*R^{\\sigma}_{\\alpha\\beta\\gamma}+g^{\\alpha\\beta}*d^{\\gamma}_{\\sigma}*R^{\\sigma}_{\\alpha\\beta\\gamma}");
         TAssert.assertEquals(t, parse("g^{\\beta\\gamma}*d^{\\alpha}_{\\sigma}*R^{\\sigma}_{\\alpha\\beta\\gamma}"));
-    }
-
-    @Test(expected = InconsistentIndicesException.class)
-    public void testII1() {
-        parse("A_mn*B^mn*A_mn*B^mn");
     }
 
     @Test
