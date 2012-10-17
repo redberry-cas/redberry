@@ -22,12 +22,14 @@
  */
 package cc.redberry.core.tensor;
 
-import cc.redberry.core.indices.InconsistentIndicesException;
-import cc.redberry.core.indices.Indices;
 import cc.redberry.core.indices.IndicesBuilder;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.utils.TensorUtils;
-import java.util.*;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+
+import static cc.redberry.core.number.NumberUtils.isZeroOrIndeterminate;
 
 /**
  * @author Dmitry Bolotin
@@ -36,168 +38,135 @@ import java.util.*;
 //TODO refactor in future
 public final class ProductBuilder implements TensorBuilder {
 
-    private Complex complex = Complex.ONE;
-    private final ArrayList<Tensor> elements;
-    private final List<Tensor> indexlessElements;
-    //Only SimpleTensor and Complex can be putted in this map
-    //Both SimpleTensor and Complex have hashCode() and equalsExactly()
-    private final Map<Tensor, TensorBuilder> powers;
+    private Complex factor = Complex.ONE;
+    private final ArrayList<Tensor> elements, indexLess;
+    /* hash -> list of power nodes */
+    private final PowersContainer symbolicPowers;
 
     public ProductBuilder(int initialCapacityIndexless, int initialCapacityData) {
         elements = new ArrayList<>(initialCapacityData);
-        indexlessElements = new ArrayList<>(initialCapacityIndexless);
-        powers = new HashMap<>();
+        symbolicPowers = new PowersContainer(initialCapacityIndexless);
+        indexLess = new ArrayList<>();
     }
 
     public ProductBuilder() {
         this(4, 3);
     }
 
-    public ProductBuilder(Product p) {
-        this.elements = new ArrayList<>(p.data.length);
-        this.indexlessElements = new ArrayList<>(p.indexlessData.length);
-        this.powers = new HashMap<>();
-        initializeData(p.factor, p.indexlessData, p.data);
+    private ProductBuilder(Complex factor, ArrayList<Tensor> elements, ArrayList<Tensor> indexLess, PowersContainer powers) {
+        this.factor = factor;
+        this.elements = elements;
+        this.indexLess = indexLess;
+        this.symbolicPowers = powers;
     }
 
-    private ProductBuilder(Complex complex, ArrayList<Tensor> elements, List<Tensor> indexlessElements, Map<Tensor, TensorBuilder> powers) {
-        this.complex = complex;
-        this.elements = elements;
-        this.indexlessElements = indexlessElements;
-        this.powers = powers;
-    }
 
     private void initializeData(Complex complex, Tensor[] indexlessData, Tensor[] data) {
-        this.complex = complex.multiply(this.complex);
+        this.factor = complex.multiply(this.factor);
+        if (isZeroOrIndeterminate(this.factor))
+            return;
         elements.addAll(Arrays.asList(data));
-        for (Tensor t : indexlessData)
-            if (TensorUtils.isSymbol(t)) {
-                TensorBuilder sb = new SumBuilder();
-                sb.put(Complex.ONE);
-                powers.put(t, sb);
-            } else if (t instanceof Power) {
-                Tensor argument = t.get(0);
-                if (TensorUtils.isSymbolOrNumber(argument)) {
-                    TensorBuilder sb = new SumBuilder();
-                    sb.put(t.get(1));
-                    powers.put(argument, sb);
-                } else
-                    indexlessElements.add(t);
+        Tensor base, exponent;
+        for (Tensor t : indexlessData) {
+            if (TensorUtils.isSymbolic(t)) {
+                if (t instanceof Power) {
+                    //case x^y
+                    base = t.get(0);
+                    exponent = t.get(1);
+                } else {
+                    //case x^1 (= x)
+                    base = t;
+                    exponent = Complex.ONE;
+                }
+                symbolicPowers.putNew(base, exponent);
             } else
-                indexlessElements.add(t);
+                indexLess.add(t);
+        }
     }
 
     private boolean isEmpty() {
-        return indexlessElements.isEmpty() && elements.isEmpty() && powers.isEmpty();
+        return symbolicPowers.isEmpty() && elements.isEmpty();
     }
 
     @Override
     public Tensor build() {
-        if (complex.isZero() || complex.isInfinite() || complex.isNaN())
-            return complex;
-
-        ArrayList<Tensor> indexlessData = new ArrayList<>(powers.size() + indexlessElements.size());
-
-        Complex complex = this.complex;
-        for (Map.Entry<Tensor, TensorBuilder> entry : powers.entrySet()) {
-            Tensor t = Tensors.pow(entry.getKey(), entry.getValue().build());
-
+        if (isZeroOrIndeterminate(factor))
+            return factor;
+        for (Tensor t : symbolicPowers) {
             assert !(t instanceof Product);
 
-            if (t instanceof Complex)
-                complex = complex.multiply((Complex) t);
-            else
-                indexlessData.add(t);
-
+//            if (t instanceof Product)
+//                for (Tensor m : t)
+//                    indexLess.add(m);
+//            else
+           if (t instanceof Complex) {
+                factor = factor.multiply((Complex) t);
+                if (isZeroOrIndeterminate(factor))
+                    return factor;
+            } else
+                indexLess.add(t);
         }
 
-        //may be redundant...
-        if (complex.isZero() || complex.isInfinite() || complex.isNaN())
-            return complex;
+        if (symbolicPowers.isSign())
+            factor = factor.negate();
 
-        indexlessData.addAll(indexlessElements);
-
-        //Only complex factor
-        if (indexlessData.isEmpty() && elements.isEmpty())
-            return complex;
+        //Only factor factor
+        if (indexLess.isEmpty() && elements.isEmpty())
+            return factor;
 
         // 1 * (something)
-        if (complex.isOne()) {
-            if (indexlessData.size() == 1 && elements.isEmpty())
-                return indexlessData.get(0);
-            if (indexlessData.isEmpty() && elements.size() == 1)
+        if (factor.isOne()) {
+            if (indexLess.size() == 1 && elements.isEmpty())
+                return indexLess.get(0);
+            if (indexLess.isEmpty() && elements.size() == 1)
                 return elements.get(0);
         }
 
         //Calculating product indices
         IndicesBuilder ibs = new IndicesBuilder();
-        Indices indices;
-        for (Tensor t : elements)
-            ibs.append(t);
-        try {
-            indices = ibs.getIndices();
-        } catch (InconsistentIndicesException exception) {
-            throw new InconsistentIndicesException(exception.getIndex());
-        }
-
-        return new Product(indices, complex,
-                           indexlessData.toArray(new Tensor[indexlessData.size()]),
-                           elements.toArray(new Tensor[elements.size()]));
+        for (Tensor m : elements)
+            ibs.append(m);
+        return new Product(ibs.getIndices(), factor,
+                indexLess.toArray(new Tensor[indexLess.size()]),
+                elements.toArray(new Tensor[elements.size()]));
     }
 
     @Override
     public void put(Tensor tensor) {
+        if (tensor instanceof Complex) {
+            factor = factor.multiply((Complex) tensor);
+            return;
+        }
+
         if (tensor instanceof Product) {
+            Product p = (Product) tensor;
             //if no any elements were added yet
             if (isEmpty()) {
-                Product p = (Product) tensor;
                 initializeData(p.factor, p.indexlessData, p.data);
-            } else
-                for (Tensor t : tensor)
+            } else {
+                factor = factor.multiply(p.factor);
+                if (isZeroOrIndeterminate(factor))
+                    return;
+                for (Tensor t : p.indexlessData)
                     put(t);
-            return;
-        }
-        if (tensor instanceof Complex) {
-            complex = complex.multiply((Complex) tensor);
-            return;
-        }
-
-        if (complex.isZero())
-            return;
-
-        if (TensorUtils.isSymbol(tensor)) {
-            TensorBuilder sb = powers.get(tensor);
-            if (sb == null) {
-                sb = new SumBuilder();
-                powers.put(tensor, sb);
+                elements.addAll(Arrays.asList(p.data));
             }
-            sb.put(Complex.ONE);
             return;
         }
-        if (tensor instanceof Power) {
-            Tensor argument = tensor.get(0);
-            if (TensorUtils.isSymbolOrNumber(argument)) {
-                TensorBuilder sb = powers.get(argument);
-                if (sb == null) {
-                    sb = new SumBuilder();
-                    powers.put(argument, sb);
-                }
-                sb.put(tensor.get(1));
-                return;
-            }
-        }
+        if (isZeroOrIndeterminate(factor))
+            return;
 
-        if (tensor.getIndices().size() == 0)
-            indexlessElements.add(tensor);
+        if (TensorUtils.isSymbolic(tensor)) {
+            symbolicPowers.putSymbolic(tensor);
+        } else if (tensor.getIndices().size() == 0)
+            indexLess.add(tensor);
         else
             elements.add(tensor);
     }
 
+
     @Override
     public ProductBuilder clone() {
-        Map<Tensor, TensorBuilder> powers = new HashMap<>(this.powers);
-        for (Map.Entry<Tensor, TensorBuilder> entry : powers.entrySet())
-            entry.setValue(entry.getValue().clone());
-        return new ProductBuilder(complex, new ArrayList<>(elements), new ArrayList<>(indexlessElements), powers);
+        return new ProductBuilder(factor, new ArrayList<>(elements), new ArrayList<>(indexLess), symbolicPowers.clone());
     }
 }

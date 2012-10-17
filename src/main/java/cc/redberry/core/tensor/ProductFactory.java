@@ -28,10 +28,14 @@ import cc.redberry.core.indices.IndicesBuilder;
 import cc.redberry.core.indices.IndicesFactory;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.utils.TensorUtils;
-import java.util.*;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+import static cc.redberry.core.number.NumberUtils.isZeroOrIndeterminate;
 
 /**
- *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
@@ -44,12 +48,13 @@ public final class ProductFactory implements TensorFactory {
 
     @Override
     public Tensor create(final Tensor... tensors) {
+//        return new DefaultFactory(new ProductBuilder()).create(tensors);
         if (tensors.length == 0)
             return Complex.ONE;
         else if (tensors.length == 1)
             return tensors[0];
 
-        Complex complex = Complex.ONE;
+        Complex factor = Complex.ONE;
 
         IndexlessWrapper indexlessContainer = new IndexlessWrapper();
         DataWrapper dataContainer = new DataWrapper();
@@ -59,22 +64,22 @@ public final class ProductFactory implements TensorFactory {
         for (i = tensors.length - 1; i >= 0; --i) {
             current = tensors[i];
             if (current instanceof Complex)
-                complex = complex.multiply((Complex) current);
+                factor = factor.multiply((Complex) current);
             else if (current instanceof Product) {
                 p = (Product) tensors[i];
                 indexlessContainer.add(p.indexlessData);
                 dataContainer.add(p.data, p.contentReference.get(), p.indices);
-                complex = complex.multiply(p.factor);
+                factor = factor.multiply(p.factor);
             } else if (current.getIndices().size() == 0)
                 indexlessContainer.add(current);
             else
                 dataContainer.add(current);
-            if (complex.isNaN())
-                return complex;
+            if (factor.isNaN())
+                return factor;
         }
 
-        if (complex.isZero() || complex.isNaN() || complex.isInfinite())
-            return complex;
+        if (isZeroOrIndeterminate(factor))
+            return factor;
 
         //Processing data with indices
         ProductContent content;
@@ -107,47 +112,30 @@ public final class ProductFactory implements TensorFactory {
         else if (indexlessContainer.count == 1)
             indexless = indexlessContainer.list.toArray(new Tensor[indexlessContainer.list.size()]);
         else {
-            Map<Tensor, TensorBuilder> powers = new HashMap<>(indexlessContainer.list.size());
+            PowersContainer powersContainer = new PowersContainer(indexlessContainer.list.size());
             List<Tensor> indexlessArray = new ArrayList<>();
             Tensor tensor;
             for (i = indexlessContainer.list.size() - 1; i >= 0; --i) {
                 tensor = indexlessContainer.list.get(i);
-                if (TensorUtils.isSymbol(tensor)) {
-                    TensorBuilder sb = powers.get(tensor);
-                    if (sb == null) {
-                        sb = new SumBuilder();
-                        powers.put(tensor, sb);
-                    }
-                    sb.put(Complex.ONE);
-                } else if (tensor instanceof Power) {
-                    Tensor argument = tensor.get(0);
-                    if (TensorUtils.isSymbolOrNumber(argument)) {
-                        TensorBuilder sb = powers.get(argument);
-                        if (sb == null) {
-                            sb = new SumBuilder();
-                            powers.put(argument, sb);
-                        }
-                        sb.put(tensor.get(1));
-                    } else
-                        indexlessArray.add(tensor);
+                if (TensorUtils.isSymbolic(tensor)) {
+                    powersContainer.putSymbolic(tensor);
                 } else
                     indexlessArray.add(tensor);
             }
 
-            for (Map.Entry<Tensor, TensorBuilder> entry : powers.entrySet()) {
-                Tensor t = Tensors.pow(entry.getKey(), entry.getValue().build());
-
+            for (Tensor t : powersContainer) {
                 assert !(t instanceof Product);
 
-                if (t instanceof Complex)
-                    complex = complex.multiply((Complex) t);
-                else
+                if (t instanceof Complex) {
+                    factor = factor.multiply((Complex) t);
+                    if (isZeroOrIndeterminate(factor))
+                        return factor;
+                } else
                     indexlessArray.add(t);
-
             }
-            //complex may change
-            if (complex.isZero() || complex.isNaN() || complex.isInfinite())
-                return complex;
+
+            if (powersContainer.isSign())
+                factor = factor.negate();
 
             indexless = indexlessArray.toArray(new Tensor[indexlessArray.size()]);
             Arrays.sort(indexless);
@@ -155,14 +143,14 @@ public final class ProductFactory implements TensorFactory {
 
         //Constructing result
         if (data.length == 0 && indexless.length == 0)
-            return complex;
-        if (complex.isOne()) {
+            return factor;
+        if (factor.isOne()) {
             if (data.length == 1 && indexless.length == 0)
                 return data[0];
             if (data.length == 0 && indexless.length == 1)
                 return indexless[0];
         }
-        return new Product(complex, indexless, data, content, indices);
+        return new Product(factor, indexless, data, content, indices);
     }
 
     private static class ListWrapper {
