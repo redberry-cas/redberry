@@ -99,7 +99,7 @@ public final class ProductBuilder implements TensorBuilder {
 //                for (Tensor m : t)
 //                    indexLess.add(m);
 //            else
-           if (t instanceof Complex) {
+            if (t instanceof Complex) {
                 factor = factor.multiply((Complex) t);
                 if (isZeroOrIndeterminate(factor))
                     return factor;
@@ -120,6 +120,22 @@ public final class ProductBuilder implements TensorBuilder {
                 return indexLess.get(0);
             if (indexLess.isEmpty() && elements.size() == 1)
                 return elements.get(0);
+        }
+
+        if (factor.isMinusOne()) {
+            Sum s = null;
+            if (indexLess.size() == 1 && elements.isEmpty() && indexLess.get(0) instanceof Sum)
+                //case (-1)*(a+b) -> -a-b
+                s = ((Sum) indexLess.get(0));
+            if (indexLess.isEmpty() && elements.size() == 1 && elements.get(0) instanceof Sum)
+                //case (-1)*(a_i+b_i) -> -a_i-b_i
+                s = ((Sum) elements.get(0));
+            if (s != null) {
+                Tensor sumData[] = s.data.clone();
+                for (int i = sumData.length - 1; i >= 0; --i)
+                    sumData[i] = Tensors.negate(sumData[i]);
+                return new Sum(s.indices, sumData, s.hashCode());
+            }
         }
 
         //Calculating product indices

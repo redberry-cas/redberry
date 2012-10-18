@@ -35,7 +35,7 @@ import java.util.Arrays;
  */
 public final class Sum extends MultiTensor {
 
-    private final Tensor[] data;
+    final Tensor[] data;
     private final int hash;
 
     Sum(final Tensor[] data, Indices indices) {
@@ -50,6 +50,12 @@ public final class Sum extends MultiTensor {
             wrappers[i] = new TensorWrapper(data[i]);
         ArraysUtils.quickSort(wrappers, data);
         this.hash = Arrays.hashCode(data);
+    }
+
+    public Sum(Indices indices, Tensor[] data, int hash) {
+        super(indices);
+        this.data = data;
+        this.hash = hash;
     }
 
     private static final class TensorWrapper implements Comparable<TensorWrapper> {

@@ -25,10 +25,10 @@ package cc.redberry.core.tensor;
 import cc.redberry.core.indices.IndicesBuilder;
 import cc.redberry.core.indices.IndicesFactory;
 import cc.redberry.core.number.Complex;
+
 import java.util.Arrays;
 
 /**
- *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
@@ -61,10 +61,10 @@ public class Split {
                 factor = content.getNonScalar();
                 Tensor[] scalars = content.getScalars();
                 int dataLength = factor instanceof Product
-                                 ? product.data.length - ((Product) factor).data.length
-                                 : product.data.length == 0
-                                   ? 0
-                                   : (product.data.length - 1);
+                        ? product.data.length - ((Product) factor).data.length
+                        : product.data.length == 0
+                        ? 0
+                        : (product.data.length - 1);
                 if (factor == null)
                     factor = Complex.ONE;
                 if (dataLength == 0)
@@ -72,7 +72,14 @@ public class Split {
                         summand = product.factor;
                     else if (product.indexlessData.length == 1 && product.factor == Complex.ONE)
                         summand = product.indexlessData[0];
-                    else
+                    else if (product.factor.isMinusOne() && product.indexlessData.length == 1 && product.indexlessData[0] instanceof Sum) {
+                        Sum s = (Sum) product.indexlessData[0];
+                        Tensor sumData[] = s.data.clone();
+                        for (int i = sumData.length - 1; i >= 0; --i)
+                            sumData[i] = Tensors.negate(sumData[i]);
+                        summand = new Sum(s.indices, sumData, s.hashCode());
+                    } else
+
                         summand = new Product(product.factor, product.indexlessData, new Tensor[0], ProductContent.EMPTY_INSTANCE, IndicesFactory.EMPTY_INDICES);
                 else if (dataLength == 1 && product.indexlessData.length == 0 && product.factor == Complex.ONE)
                     summand = scalars[0];
@@ -129,7 +136,13 @@ public class Split {
                     summand = product.factor;
                 else if (product.factor == Complex.ONE && product.indexlessData.length == 1)
                     summand = product.indexlessData[0];
-                else
+                else if (product.factor.isMinusOne() && product.indexlessData.length == 1 && product.indexlessData[0] instanceof Sum) {
+                    Sum s = (Sum) product.indexlessData[0];
+                    Tensor sumData[] = s.data.clone();
+                    for (int i = sumData.length - 1; i >= 0; --i)
+                        sumData[i] = Tensors.negate(sumData[i]);
+                    summand = new Sum(s.indices, sumData, s.hashCode());
+                } else
                     summand = new Product(product.factor, product.indexlessData, new Tensor[0], ProductContent.EMPTY_INSTANCE, IndicesFactory.EMPTY_INDICES);
 
                 if (product.data.length == 1)

@@ -150,6 +150,21 @@ public final class ProductFactory implements TensorFactory {
             if (data.length == 0 && indexless.length == 1)
                 return indexless[0];
         }
+        if (factor.isMinusOne()) {
+            Sum s = null;
+            if (indexless.length == 1 && data.length == 0 && indexless[0] instanceof Sum)
+                //case (-1)*(a+b) -> -a-b
+                s = ((Sum) indexless[0]);
+            if (indexless.length == 0 && data.length == 1 && data[0] instanceof Sum)
+                //case (-1)*(a_i+b_i) -> -a_i-b_i
+                s = ((Sum) data[0]);
+            if (s != null) {
+                Tensor sumData[] = s.data.clone();
+                for (i = sumData.length - 1; i >= 0; --i)
+                    sumData[i] = Tensors.negate(sumData[i]);
+                return new Sum(s.indices, sumData, s.hashCode());
+            }
+        }
         return new Product(factor, indexless, data, content, indices);
     }
 
