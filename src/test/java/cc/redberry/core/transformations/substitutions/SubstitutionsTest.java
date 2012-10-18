@@ -706,6 +706,15 @@ public class SubstitutionsTest {
         Tensor expected = parse("f[f[a_a^a],a_a^a]*g_a");
         assertEqualsExactly(target, expected);
     }
+
+    @Test
+    public void testField26() {
+        Expression s = parseExpression("F_i[x_mn] = x_ik*f^k");
+        Tensor t1 = parse("F_k[x_i*y_j]");// same as parse('F_k[x_i*y_j:_ij]')
+        Tensor t2 = parse("F_k[x_i*y_j:_ji]");
+        TAssert.assertEquals(s.transform(t1), "x_k*y_m*f^m");
+        TAssert.assertEquals(s.transform(t2), "x_m*y_k*f^m");
+    }
     //TODO additional tests with specified field arguments indices
 
 
@@ -719,6 +728,25 @@ public class SubstitutionsTest {
         target = parseExpression("c+d=-a-b").transform(target);
         Assert.assertTrue(TensorUtils.isZero(target));
     }
+
+    @Test
+    public void testSum2() {
+        Tensor target = parse("(f_m + (f_ij + M_ij)*(t^i+k^i)*f_k*G^jk_m + T^a*f_am + (f_ij + V_ij)*(t^i+k^i)*f_k*G^jk_m)" +
+                "*(f^m + (f_ij + M_ij)*(t^i+k^i)*f_k*G^jkm + T^a*f_a^m + (f_ij + V_ij)*(t^i+k^i)*f_k*G^jkm)");
+        target = parseExpression("(f_ij + M_ij)*(t^i+k^i)*f_k*G^jk_m + (f_ij + V_ij)*(t^i+k^i)*f_k*G^jk_m = f_m").transform(target);
+        TAssert.assertEquals(target, "(f_{bm}*T^{b}+2*f_{m})*(f_{a}^{m}*T^{a}+2*f^{m})");
+    }
+
+    @Test
+    public void testSum2a() {
+        CC.resetTensorNames(-74951565663283894L);
+        Tensor target = parse("(f_m + (f_ij + M_ij)*(t^i+k^i)*f_k*G^jk_m + T^a*f_am + (f_ij + V_ij)*(t^i+k^i)*f_k*G^jk_m)" +
+                "*(f^m + (f_ij + M_ij)*(t^i+k^i)*f_k*G^jkm + T^a*f_a^m + (f_ij + V_ij)*(t^i+k^i)*f_k*G^jkm)");
+        Tensor old = target;
+        target = parseExpression("c+d=-a-b").transform(target);
+        Assert.assertTrue(old == target);
+    }
+
     //TODO tests for Sum
 
     @Test

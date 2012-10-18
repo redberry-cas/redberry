@@ -29,11 +29,11 @@ import cc.redberry.core.indexmapping.IndexMappingBufferTester;
 import cc.redberry.core.indexmapping.IndexMappings;
 import cc.redberry.core.indexmapping.MappingsPort;
 import cc.redberry.core.tensor.Tensor;
+
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
@@ -51,14 +51,15 @@ public final class SumBijectionPort implements OutputPortUnsafe<BijectionContain
         }
         mappers = new ArrayList<>();
         int i, j = 0, fromBegin = 0, toBegin, fromSize = from.size(), toSize = to.size();
-        int mainStretchFromCoord = -1, mainStretchFromPointer = -1, mainStretchFromLength = -1, mainStretchToLength = Integer.MAX_VALUE, maintStretchIndex = -1;
+        int mainStretchFromCoord = -1, mainStretchFromPointer = -1, mainStretchFromLength = -1,
+                mainStretchToLength = Integer.MAX_VALUE, maintStretchIndex = -1;
         int hash = from.get(0).hashCode();
         for (i = 1; i <= fromSize; ++i) {
             if (i == fromSize || from.get(i).hashCode() != hash) {
                 for (; j < toSize; ++j)
                     if (to.get(j).hashCode() >= hash)
                         break;
-                if (to.get(j).hashCode() > hash) {
+                if (j == toSize || to.get(j).hashCode() > hash) {
                     finished = true;
                     break;
                 }
@@ -87,6 +88,8 @@ public final class SumBijectionPort implements OutputPortUnsafe<BijectionContain
             if (i != fromSize)
                 hash = from.get(i).hashCode();
         }
+        if (finished)
+            return;
         if (mainStretchToLength == 1)
             source = new SinglePairSource(from.get(mainStretchFromCoord), to.get(mainStretchFromPointer), mainStretchFromPointer);
         else
@@ -95,8 +98,7 @@ public final class SumBijectionPort implements OutputPortUnsafe<BijectionContain
                     to.getRange(mainStretchFromPointer, mainStretchFromPointer + mainStretchToLength),
                     mainStretchFromPointer);
         mappers.set(maintStretchIndex, source);
-        if (!finished)
-            bijection = new int[from.size()];
+        bijection = new int[from.size()];
     }
 
     @Override

@@ -25,10 +25,10 @@ package cc.redberry.core.transformations.substitutions;
 import cc.redberry.core.indices.IndexType;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.tensor.Tensors;
+import junit.framework.Assert;
 import org.junit.Test;
 
 /**
- *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
@@ -69,5 +69,12 @@ public class SumBijectionPortTest {
         BijectionContainer bc;
         while ((bc = port.take()) != null)
             System.out.println(bc);
+    }
+
+    @Test
+    public void test4() {
+        Tensor u = Tensors.parse("f_{cd}+V_{cd}");
+        Tensor v = Tensors.parse("c + d");
+        Assert.assertTrue(new SumBijectionPort(v, u).take() == null);
     }
 }

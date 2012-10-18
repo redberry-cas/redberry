@@ -23,6 +23,7 @@
 package cc.redberry.core.transformations.substitutions;
 
 import cc.redberry.core.indexmapping.IndexMappingBuffer;
+import cc.redberry.core.tensor.Sum;
 import cc.redberry.core.tensor.SumBuilder;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.transformations.ApplyIndexMapping;
@@ -58,8 +59,15 @@ final class SumSubstitution implements Transformation {
         SubstitutionIterator iterator = new SubstitutionIterator(tensor);
         Tensor current;
         while ((current = iterator.next()) != null) {
-
-            BijectionContainer bc = new SumBijectionPort(from, current).take();
+            if (!(current instanceof Sum))
+                continue;
+            BijectionContainer bc;
+//            try {
+                bc = new SumBijectionPort(from, current).take();
+//            } catch (Exception e) {
+//                System.out.println(current);
+//                throw new RuntimeException();
+//            }
             if (bc == null)
                 continue;
 
