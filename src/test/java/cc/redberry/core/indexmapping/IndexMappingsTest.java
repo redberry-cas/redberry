@@ -410,4 +410,14 @@ public class IndexMappingsTest {
         Assert.assertTrue(mapping != null);
         Assert.assertTrue(mapping.getSignum());
     }
+
+    @Test
+    public void test13() {
+        Tensor from = parse("Sin[a-b]");
+        MappingsPort mapping = IndexMappings.createPort(from, from);
+        IndexMappingBuffer first = mapping.take();
+        Assert.assertTrue(first.isEmpty());
+        Assert.assertTrue(!first.getSignum());
+        Assert.assertTrue(mapping.take() == null);
+    }
 }

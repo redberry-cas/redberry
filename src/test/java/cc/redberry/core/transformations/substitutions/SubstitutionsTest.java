@@ -717,9 +717,13 @@ public class SubstitutionsTest {
     }
     //TODO additional tests with specified field arguments indices
 
-
-    private static void compact(Tensor before, Tensor after, Tensor to) {
-
+    @Test
+    public void testPower1() {
+        Expression s = parseExpression("Sin[a - b] = c");
+        Tensor t = parse("Sin[b-a]**3");
+        TAssert.assertEquals(s.transform(t), "-c**3");
+        t = parse("Sin[b-a]**2");
+        TAssert.assertEquals(s.transform(t), "c**2");
     }
 
     @Test
@@ -819,5 +823,69 @@ public class SubstitutionsTest {
         target = parseExpression("a[q]*b[s] = q+s").transform(target);
         TAssert.assertEquals(target, "q+s");
     }
+
+    @Test
+    public void testProduct7() {
+        Tensor target = parse("F^c*(A_cb - A_bc)*K^bjp*K_japm*F^a + F^c*F^b*F_bcm");
+        target = parseExpression("(A^ab - A^ba)*K_ajp*K^jcpm = F^bcm").transform(target);
+        TAssert.assertEquals(target, "0");
+    }
+
+    @Test
+    public void testProduct8() {
+        Tensor target = parse("Sin[a-b*c]*F^c*(A_cb - A_bc)*K^bjp*K_japm*F^a + F^c*F^b*F_bcm");
+        target = parseExpression("Sin[-a+b*c]*(A^ab - A^ba)*K_ajp*K^jcpm = -F^bcm").transform(target);
+        TAssert.assertEquals(target, "0");
+    }
+
+    @Test
+    public void testProduct9() {
+        Tensor target = parse("Cos[a-b*c]*F^c*(A_cb - A_bc)*K^bjp*K_japm*F^a + F^c*F^b*F_bcm");
+        target = parseExpression("Cos[-a+b*c]*(A^ab - A^ba)*K_ajp*K^jcpm = F^bcm").transform(target);
+        TAssert.assertEquals(target, "0");
+    }
+
+    @Test
+    public void testProduct10() {
+        Tensor target = parse("Sin[a-b*c]**2*F^c*(A_cb - A_bc)*K^bjp*K_japm*F^a + F^c*F^b*F_bcm");
+        target = parseExpression("Sin[-a+b*c]**2*(A^ab - A^ba)*K_ajp*K^jcpm = F^bcm").transform(target);
+        TAssert.assertEquals(target, "0");
+    }
+
+
+    @Test
+    public void testProduct11() {
+        Tensor target = parse("Sin[a-b*c]**a*F^c*(A_cb - A_bc)*K^bjp*K_japm*F^a + F^c*F^b*F_bcm");
+        Tensor old = target;
+        target = parseExpression("Sin[-a+b*c]**a*(A^ab - A^ba)*K_ajp*K^jcpm = F^bcm").transform(target);
+        TAssert.assertTrue(old == target);
+    }
+
+    @Test
+    public void testProduct12() {
+        for (int i = 0; i < 100; ++i) {
+            CC.resetTensorNames();
+            Tensor target = parse("Sin[a-b*c]**a*b*c*d");
+            Tensor old = target;
+            target = parseExpression("Sin[-a+b*c]**a*b = c").transform(target);
+            TAssert.assertTrue(old == target);
+        }
+    }
+
+    @Test
+    public void testPower13() {
+        Expression s = parseExpression("d*Sin[a - b]*f_mn = k_mn");
+        Tensor t = parse("d*Sin[b - a]*f_mn ");
+        TAssert.assertEquals(s.transform(t), "-k_mn");
+    }
+
+    @Test
+    public void testPower14() {
+        addSymmetry("f_mn", IndexType.LatinLower, true, 1, 0);
+        Expression s = parseExpression("d*Sin[a - b]*f_mn*H^n = k_m");
+        Tensor t = parse("d*Sin[b - a]*f_mn*H^m");
+        TAssert.assertEquals(s.transform(t), "k_n");
+    }
+
     //TODO tests for Product
 }
