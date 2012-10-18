@@ -22,11 +22,16 @@
  */
 package cc.redberry.core.transformations.substitutions;
 
+import cc.redberry.core.context.CC;
 import cc.redberry.core.indices.IndexType;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.tensor.Tensors;
 import junit.framework.Assert;
 import org.junit.Test;
+
+import java.util.Arrays;
+
+import static cc.redberry.core.tensor.Tensors.parse;
 
 /**
  * @author Dmitry Bolotin
@@ -76,5 +81,13 @@ public class SumBijectionPortTest {
         Tensor u = Tensors.parse("f_{cd}+V_{cd}");
         Tensor v = Tensors.parse("c + d");
         Assert.assertTrue(new SumBijectionPort(v, u).take() == null);
+    }
+
+    @Test
+    public void test5() {
+        CC.resetTensorNames(2634486062579664417L);
+        Tensor target = parse("f_i + R_ijk*F^kj + R_ijk*F^jk - R_kij*F^jk");
+        Tensor from = parse("f_i + R_ijk*F^kj - R_kij*F^jk");
+        Assert.assertTrue(Arrays.equals(new SumBijectionPort(from, target).take().bijection, new int[]{0, 1, 3}));
     }
 }

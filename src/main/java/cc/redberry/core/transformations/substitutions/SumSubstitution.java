@@ -61,13 +61,7 @@ final class SumSubstitution implements Transformation {
         while ((current = iterator.next()) != null) {
             if (!(current instanceof Sum))
                 continue;
-            BijectionContainer bc;
-//            try {
-                bc = new SumBijectionPort(from, current).take();
-//            } catch (Exception e) {
-//                System.out.println(current);
-//                throw new RuntimeException();
-//            }
+            BijectionContainer bc = new SumBijectionPort(from, current).take();
             if (bc == null)
                 continue;
 

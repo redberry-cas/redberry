@@ -747,6 +747,26 @@ public class SubstitutionsTest {
         Assert.assertTrue(old == target);
     }
 
+
+    @Test
+    public void testSum3() {
+        for (int i = 0; i < 1000; ++i) {
+            CC.resetTensorNames();
+            addSymmetry("R_mnp", IndexType.LatinLower, true, 2, 1, 0);
+            Tensor target = parse("f_i + R_ijk*F^jk + R_ijk*F^kj - R_kij*F^jk");
+            target = parseExpression("f_m + R_bma*F^ba - R_ljm*F^lj =  R_bam*F^ab ").transform(target);
+            TAssert.assertEquals(target, "0");
+        }
+    }
+
+    @Test
+    public void testSum3a() {
+        CC.resetTensorNames(2634486062579664417L);
+        Tensor target = parse("f_i + R_ijk*F^kj + R_ijk*F^jk - R_kij*F^jk");
+        target = parseExpression("f_i + R_ijk*F^kj - R_kij*F^jk = - R_ikj*F^jk ").transform(target);
+        TAssert.assertEquals(target, "-F^{jk}*R_{ikj}+F^{jk}*R_{ijk}");
+    }
+
     //TODO tests for Sum
 
     @Test

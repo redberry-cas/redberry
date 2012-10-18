@@ -136,7 +136,7 @@ public final class SumBijectionPort implements OutputPortUnsafe<BijectionContain
         for (int i = 0; i < size; ++i) {
             temp = list.get(i);
             System.arraycopy(temp, 0, r, begin, temp.length);
-            begin = temp.length;
+            begin += temp.length;
         }
         return r;
     }

@@ -400,4 +400,14 @@ public class IndexMappingsTest {
         Tensor from = parse("(a-b)**3"), to = parse("-(b-a)**3");
         Assert.assertTrue(IndexMappings.getFirst(from, to).getSignum() == false);
     }
+
+    @Test
+    public void test12() {
+        addSymmetry("R_ijk", IndexType.LatinLower, true, 0, 2, 1);
+        Tensor from = parse("R_ijk*F^jk");
+        Tensor to = parse("R_ijk*F^kj");
+        IndexMappingBuffer mapping = IndexMappings.getFirst(from, to);
+        Assert.assertTrue(mapping != null);
+        Assert.assertTrue(mapping.getSignum());
+    }
 }
