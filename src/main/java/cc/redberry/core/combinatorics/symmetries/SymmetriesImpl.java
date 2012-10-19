@@ -112,5 +112,4 @@ final class SymmetriesImpl extends AbstractSymmetries {
             sb.append(s.toString()).append("\n");
         return sb.toString();
     }
-
 }

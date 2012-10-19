@@ -1,17 +1,24 @@
 /*
- * org.redberry.concurrent: high-level Java concurrent library.
- * Copyright (c) 2010-2012.
- * Bolotin Dmitriy <bolotin.dmitriy@gmail.com>
+ * Redberry: symbolic tensor computations.
  *
- * This program is free software: you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the Free
- * Software Foundation, either version 3 of the License, or (at your option)
- * any later version.
+ * Copyright (c) 2010-2012:
+ *   Stanislav Poslavsky   <stvlpos@mail.ru>
+ *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
+ * This file is part of Redberry.
+ *
+ * Redberry is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Redberry is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
 package cc.redberry.core.context;
 
@@ -33,7 +40,6 @@ public final class CC {
      * context.
      *
      * @param type index type
-     *
      * @return true if metric is defined for specified index type in current
      *         context
      */
@@ -53,12 +59,12 @@ public final class CC {
         return current().getIndexConverterManager();
     }
 
-    public static ToStringMode getDefaultPrintMode() {
-        return current().getDefaultPrintMode();
+    public static OutputFormat getDefaultOutputFormat() {
+        return current().getDefaultOutputFormat();
     }
 
-    public static void setDefaultPrintMode(ToStringMode mode) {
-        current().setDefaultPrintMode(mode);
+    public static void setDefaultOutputFormat(OutputFormat mode) {
+        current().setDefaultOutputFormat(mode);
     }
 
     public static void resetTensorNames() {

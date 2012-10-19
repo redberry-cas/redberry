@@ -22,7 +22,9 @@
  */
 package cc.redberry.core.parser;
 
+import cc.redberry.core.TAssert;
 import cc.redberry.core.context.CC;
+import cc.redberry.core.indices.InconsistentIndicesException;
 import cc.redberry.core.indices.IndicesFactory;
 import cc.redberry.core.indices.SimpleIndices;
 import cc.redberry.core.number.Complex;
@@ -32,8 +34,9 @@ import junit.framework.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import static cc.redberry.core.tensor.Tensors.parse;
+
 /**
- *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
@@ -49,19 +52,19 @@ public class ParserTest {
     public void test2() {
         ParseNode node = Parser.DEFAULT.parse("f[a_\\mu] - f[b_\\mu/ (c * g) * g[x, y]]");
         ParseNode expected = new ParseNode(TensorType.Sum,
-                                           new ParseNodeTensorField(IndicesFactory.EMPTY_SIMPLE_INDICES, "f", new ParseNode[]{new ParseNodeSimpleTensor(ParserIndices.parseSimple("_\\mu"), "a")}, new SimpleIndices[]{IndicesFactory.EMPTY_SIMPLE_INDICES}),
-                                           new ParseNode(TensorType.Product,
-                                                         new ParseNodeNumber(Complex.MINUSE_ONE),
-                                                         new ParseNodeTensorField(IndicesFactory.EMPTY_SIMPLE_INDICES, "f",
-                                                                                  new ParseNode[]{new ParseNode(TensorType.Product,
-                                                                                                                new ParseNodeSimpleTensor(ParserIndices.parseSimple("_\\mu"), "b"),
-                                                                                                                new ParseNode(TensorType.Power, new ParseNode(TensorType.Product, new ParseNodeSimpleTensor(IndicesFactory.EMPTY_SIMPLE_INDICES, "c"), new ParseNodeSimpleTensor(IndicesFactory.EMPTY_SIMPLE_INDICES, "g")),
-                                                                                                                              new ParseNodeNumber(Complex.MINUSE_ONE)),
-                                                                                                                new ParseNodeTensorField(IndicesFactory.EMPTY_SIMPLE_INDICES, "g",
-                                                                                                                                         new ParseNode[]{new ParseNodeSimpleTensor(IndicesFactory.EMPTY_SIMPLE_INDICES, "x"),
-                                                                                                                                                         new ParseNodeSimpleTensor(IndicesFactory.EMPTY_SIMPLE_INDICES, "y")},
-                                                                                                                                         new SimpleIndices[]{IndicesFactory.EMPTY_SIMPLE_INDICES, IndicesFactory.EMPTY_SIMPLE_INDICES}))},
-                                                                                  new SimpleIndices[]{IndicesFactory.EMPTY_SIMPLE_INDICES})));
+                new ParseNodeTensorField(IndicesFactory.EMPTY_SIMPLE_INDICES, "f", new ParseNode[]{new ParseNodeSimpleTensor(ParserIndices.parseSimple("_\\mu"), "a")}, new SimpleIndices[]{IndicesFactory.EMPTY_SIMPLE_INDICES}),
+                new ParseNode(TensorType.Product,
+                        new ParseNodeNumber(Complex.MINUSE_ONE),
+                        new ParseNodeTensorField(IndicesFactory.EMPTY_SIMPLE_INDICES, "f",
+                                new ParseNode[]{new ParseNode(TensorType.Product,
+                                        new ParseNodeSimpleTensor(ParserIndices.parseSimple("_\\mu"), "b"),
+                                        new ParseNode(TensorType.Power, new ParseNode(TensorType.Product, new ParseNodeSimpleTensor(IndicesFactory.EMPTY_SIMPLE_INDICES, "c"), new ParseNodeSimpleTensor(IndicesFactory.EMPTY_SIMPLE_INDICES, "g")),
+                                                new ParseNodeNumber(Complex.MINUSE_ONE)),
+                                        new ParseNodeTensorField(IndicesFactory.EMPTY_SIMPLE_INDICES, "g",
+                                                new ParseNode[]{new ParseNodeSimpleTensor(IndicesFactory.EMPTY_SIMPLE_INDICES, "x"),
+                                                        new ParseNodeSimpleTensor(IndicesFactory.EMPTY_SIMPLE_INDICES, "y")},
+                                                new SimpleIndices[]{IndicesFactory.EMPTY_SIMPLE_INDICES, IndicesFactory.EMPTY_SIMPLE_INDICES}))},
+                                new SimpleIndices[]{IndicesFactory.EMPTY_SIMPLE_INDICES})));
         Assert.assertEquals(expected, node);
         Assert.assertTrue(node.getIndices().equalsRegardlessOrder(ParserIndices.parseSimple("")));
     }
@@ -76,10 +79,10 @@ public class ParserTest {
     public void test4() {
         ParseNode node = Parser.DEFAULT.parse("a-b");
         ParseNode expected = new ParseNode(TensorType.Sum,
-                                           new ParseNodeSimpleTensor(IndicesFactory.EMPTY_SIMPLE_INDICES, "a"),
-                                           new ParseNode(TensorType.Product,
-                                                         new ParseNodeNumber(Complex.MINUSE_ONE),
-                                                         new ParseNodeSimpleTensor(IndicesFactory.EMPTY_SIMPLE_INDICES, "b")));
+                new ParseNodeSimpleTensor(IndicesFactory.EMPTY_SIMPLE_INDICES, "a"),
+                new ParseNode(TensorType.Product,
+                        new ParseNodeNumber(Complex.MINUSE_ONE),
+                        new ParseNodeSimpleTensor(IndicesFactory.EMPTY_SIMPLE_INDICES, "b")));
         Assert.assertEquals(expected, node);
     }
 
@@ -94,10 +97,10 @@ public class ParserTest {
         ParseNode node = Parser.DEFAULT.parse("a/b");
         Tensor tensor = node.toTensor();
         ParseNode expectedNode = new ParseNode(TensorType.Product,
-                                               new ParseNodeSimpleTensor(IndicesFactory.EMPTY_SIMPLE_INDICES, "a"),
-                                               new ParseNode(TensorType.Power,
-                                                             new ParseNodeSimpleTensor(IndicesFactory.EMPTY_SIMPLE_INDICES, "b"),
-                                                             new ParseNodeNumber(Complex.MINUSE_ONE)));
+                new ParseNodeSimpleTensor(IndicesFactory.EMPTY_SIMPLE_INDICES, "a"),
+                new ParseNode(TensorType.Power,
+                        new ParseNodeSimpleTensor(IndicesFactory.EMPTY_SIMPLE_INDICES, "b"),
+                        new ParseNodeNumber(Complex.MINUSE_ONE)));
         Assert.assertEquals(expectedNode, node);
         Assert.assertTrue(tensor instanceof Product);
         Assert.assertTrue(tensor.getIndices().size() == 0);
@@ -131,8 +134,8 @@ public class ParserTest {
 
     @Test
     public void testProductPowers3() {
-        Tensor u = Tensors.parse("Power[2-3*i,2]*2*a*a*c/b*1/4*b/a/a/(2-3*i)");
-        Tensor v = Tensors.parse("c*(1+3/(-2)*i)");
+        Tensor u = Tensors.parse("Power[2-3*I,2]*2*a*a*c/b*1/4*b/a/a/(2-3*I)");
+        Tensor v = Tensors.parse("c*(1+3/(-2)*I)");
         Assert.assertTrue(TensorUtils.equalsExactly(u, v));
         Assert.assertTrue(v instanceof Product);
     }
@@ -309,7 +312,54 @@ public class ParserTest {
     }
 
     @Test
-    public void testPowerAsp() {
-        System.out.println(Tensors.parse("24**2"));
+    public void testPowerAsp1() {
+        TAssert.assertTensorEquals("25**2", "625");
+    }
+
+    @Test
+    public void testPowerAsp2() {
+        TAssert.assertTensorEquals("1/25**2", "1/625");
+    }
+
+    @Test
+    public void testPowerAsp3() {
+        TAssert.assertTensorEquals("(1/25**2)**(1/2)", "1/25");
+    }
+
+    @Test
+    public void testPowerAsp4() {
+        TAssert.assertTensorEquals("(1/25**2)**(1/2)", "1/25");
+    }
+
+    @Test
+    public void testPowerAsp5() {
+        TAssert.assertTensorEquals("((1/(5+25-5))**2)**(1/2)", "1/25");
+    }
+
+    @Test
+    public void testPowerAsp6() {
+        Tensor t = Tensors.parse("Power[1/2,1/2]");
+        TAssert.assertEquals(t, Tensors.parse(t.toString()));
+    }
+
+    @Test
+    public void testConflictingIndices1() {
+        Tensors.parse("(A_i^i*A_m^n+A_k^k*A_m^n)*(A_i^i*A_d^c+A_k^k*A_d^c)");
+    }
+
+    @Test
+    public void testSubscripted1() {
+        Assert.assertTrue(Tensors.parse("F_{BA_{21}C\\mu\\nu}").getIndices().size() == 5);
+    }
+
+    @Test
+    public void blankBrace1() {
+        Assert.assertTrue(Tensors.parseSimple("F{}_{BA_{21}C\\mu\\nu}").getName()
+                == Tensors.parseSimple("F_{BA_{21}C\\mu\\nu}").getName());
+    }
+
+    @Test(expected = InconsistentIndicesException.class)
+    public void testII1() {
+        parse("A_mn*B^mn*A_mn*B^mn");
     }
 }

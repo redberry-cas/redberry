@@ -31,7 +31,7 @@ import java.util.Set;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-class FactorNode {
+final class FactorNode {
 
     final Tensor factor;
     private final TensorBuilder builder;
@@ -47,6 +47,12 @@ class FactorNode {
             factorForbiddenIndices[++i] = ii;
     }
 
+    private FactorNode(Tensor factor, TensorBuilder builder, int[] factorForbiddenIndices) {
+        this.factor = factor;
+        this.builder = builder;
+        this.factorForbiddenIndices = factorForbiddenIndices;
+    }
+
     void put(Tensor t) {
         t = ApplyIndexMapping.renameDummy(t, factorForbiddenIndices);//TODO improve performance!!!!!!!
         builder.put(t);
@@ -54,5 +60,11 @@ class FactorNode {
 
     Tensor build() {
         return builder.build();
+    }
+
+    @Override
+    public FactorNode clone() {
+        //factorForbiddenIndices are immuable
+        return new FactorNode(factor, builder.clone(), factorForbiddenIndices);
     }
 }

@@ -54,15 +54,13 @@ public final class SymbolsGenerator implements OutputPortUnsafe<Tensor> {
             Tensor c;
             while ((c = iterator.next()) != null)
                 if (TensorUtils.isSymbol(c))
-                    set.add(((SimpleTensor) c).toString());
+                    set.add(c.toString());
         }
         this.usedNames = new String[set.size()];
         int i = -1;
         for (String str : set)
             usedNames[++i] = str;
         Arrays.sort(usedNames);
-        i = 0;
-
     }
 
     public SymbolsGenerator(String name) {

@@ -25,7 +25,6 @@ package cc.redberry.core.context;
 import cc.redberry.core.indices.IndexType;
 
 /**
- *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
@@ -38,14 +37,13 @@ public final class IndexConverterManager {
         this.converters = converters;
     }
 
-    public String getSymbol(int code, ToStringMode mode) {
+    public String getSymbol(int code, OutputFormat mode) {
         byte typeId = (byte) ((code >>> 24) & 0x7F);
         int number = code & 0xFFFF;
         try {
             for (IndexSymbolConverter converter : converters)
                 if (converter.getType() == typeId) {
-                    String symbol = converter.getSymbol(number, mode);
-                    return symbol.length() == 1 ? symbol : symbol + " ";
+                    return converter.getSymbol(number, mode);//symbol.length() == 1 ? symbol : symbol + " ";
                 }
             throw new RuntimeException("No appropriate converter for typeId 0x" + Integer.toHexString(typeId));
         } catch (IndexConverterException e) {
@@ -60,7 +58,7 @@ public final class IndexConverterManager {
                     return (converter.getCode(symbol) & 0xFFFF) | ((converter.getType() & 0x7F) << 24);
             throw new RuntimeException("No available converters for such symbol : " + symbol);
         } catch (IndexConverterException e) {
-            throw new RuntimeException("Index " + symbol + " conversion error");
+            throw new RuntimeException("No available converters for such symbol : " + symbol);
         }
     }
 }

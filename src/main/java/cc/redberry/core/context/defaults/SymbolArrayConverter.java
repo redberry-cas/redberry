@@ -24,7 +24,7 @@ package cc.redberry.core.context.defaults;
 
 import cc.redberry.core.context.IndexConverterException;
 import cc.redberry.core.context.IndexSymbolConverter;
-import cc.redberry.core.context.ToStringMode;
+import cc.redberry.core.context.OutputFormat;
 
 public abstract class SymbolArrayConverter implements IndexSymbolConverter {
 
@@ -55,16 +55,16 @@ public abstract class SymbolArrayConverter implements IndexSymbolConverter {
     }
 
     @Override
-    public String getSymbol(int code, ToStringMode mode) throws IndexConverterException {
+    public String getSymbol(int code, OutputFormat mode) throws IndexConverterException {
         try {
             switch (mode) {
                 default:
-                case REDBERRY:
+                case Redberry:
                 case LaTeX:
                     return symbols[code];
                 case UTF8:
                     return utf[code];
-                case REDBERRY_SOUT:
+                case RedberryConsole:
                     return "\\" + symbols[code];
             }
         } catch (ArrayIndexOutOfBoundsException e) {

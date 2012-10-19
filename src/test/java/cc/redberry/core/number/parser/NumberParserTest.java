@@ -124,7 +124,7 @@ public class NumberParserTest {
 
     @Test
     public void test15() {
-        Complex a = NumberParser.COMPLEX_PARSER.parse("4/2+i*3/2");
+        Complex a = NumberParser.COMPLEX_PARSER.parse("4/2+I*3/2");
         Complex b = new Complex(new Rational(4, 2), new Rational(3, 2));
         Assert.assertEquals(b, a);
     }
@@ -141,5 +141,19 @@ public class NumberParserTest {
         Complex a = NumberParser.COMPLEX_PARSER.parse("1/0");
         Complex b = new Complex(Numeric.NaN, Numeric.NaN);
         Assert.assertEquals(b, a);
+    }
+
+    @Test
+    public void test18() {
+        Complex a = NumberParser.COMPLEX_PARSER.parse("-2+3");
+        Complex b = Complex.ONE;
+        Assert.assertEquals(b, a);
+    }
+
+    @Test
+    public void test19() {
+        Real r = NumberParser.REAL_PARSER.parse("2/5+7/(-3-(-2+1/(-4-9))*5/4)");
+        Real exp = new Rational(-254, 15);
+        Assert.assertTrue(r.equals(exp));
     }
 }

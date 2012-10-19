@@ -37,11 +37,11 @@ public class ComplexToken implements TokenParser<Complex> {
 
     @Override
     public Complex parse(String expression, NumberParser<Complex> parser) {
-        if (expression.equals("i"))
+        if (expression.equals("I"))
             return Complex.IMAGEONE;
         try {
             return new Complex(new BigInteger(expression));
-        } catch (NumberFormatException exception) {
+        } catch (NumberFormatException ignored) {
         }
         try {
             return new Complex(Double.parseDouble(expression));

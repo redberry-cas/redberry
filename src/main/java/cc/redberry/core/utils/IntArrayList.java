@@ -74,7 +74,7 @@ public final class IntArrayList {
             throw new IndexOutOfBoundsException();
         ensureCapacity(size + 1);
         System.arraycopy(data, position, data, position + 1,
-                         size - position);
+                size - position);
         data[position] = num;
         size++;
     }
@@ -107,11 +107,16 @@ public final class IntArrayList {
         Arrays.sort(data, 0, size);
     }
 
+    public void sort(IntArrayList cosort) {
+        if (size != cosort.size)
+            throw new IllegalArgumentException();
+        ArraysUtils.quickSort(data, 0, size, cosort.data);
+    }
+
     /**
      * Alias for addAll(int) method.
      *
      * @param value
-     *
      * @return
      */
     public void push(int value) {
@@ -186,9 +191,7 @@ public final class IntArrayList {
     }
 
     public boolean contains(int value) {
-        if (indexOf(value) < 0)
-            return false;
-        return true;
+        return indexOf(value) >= 0;
     }
 
     public int indexOf(int value) {
@@ -196,6 +199,10 @@ public final class IntArrayList {
             if (data[i] == value)
                 return i;
         return -1;
+    }
+
+    public boolean isEmpty() {
+        return size == 0;
     }
 
     @Override
@@ -233,7 +240,7 @@ public final class IntArrayList {
             return "[]";
         StringBuilder b = new StringBuilder();
         b.append('[');
-        for (int i = 0;; i++) {
+        for (int i = 0; ; i++) {
             b.append(data[i]);
             if (i == iMax)
                 return b.append(']').toString();

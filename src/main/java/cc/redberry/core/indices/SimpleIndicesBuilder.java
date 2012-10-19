@@ -89,8 +89,7 @@ public final class SimpleIndicesBuilder {
         int[] c;
         int position = 0, k;
 
-        SimpleIndices sd = IndicesFactory.createSimple(null, data);
-        //rescaling symmetries to the actual length and positions corresponding 
+        //rescaling symmetries to the actual length and positions corresponding
         //to the sorted indices
         for (Symmetries ss : this.symmetries) {
             final List<Symmetry> basis = ss.getBasisSymmetries();

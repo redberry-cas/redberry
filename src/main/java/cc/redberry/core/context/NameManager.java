@@ -55,7 +55,7 @@ public final class NameManager {
             random = new Well44497b();
             random.setSeed(this.seed = random.nextLong());
         } else
-            random = new Well44497b(this.seed = seed.longValue());
+            random = new Well44497b(this.seed = seed);
         kroneckerAndMetricNames[0] = kronecker;
         kroneckerAndMetricNames[1] = metric;
     }

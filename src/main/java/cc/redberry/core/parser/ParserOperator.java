@@ -62,11 +62,8 @@ abstract class ParserOperator implements NodeParser {
     }
 
     private enum Mode {
-
         Direct, Inverse
     }
-
-    ;
 
     @Override
     public ParseNode parseNode(String expression, Parser parser) {

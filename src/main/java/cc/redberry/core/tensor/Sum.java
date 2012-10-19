@@ -22,9 +22,8 @@
  */
 package cc.redberry.core.tensor;
 
-import cc.redberry.core.context.ToStringMode;
+import cc.redberry.core.context.OutputFormat;
 import cc.redberry.core.indices.Indices;
-import cc.redberry.core.number.*;
 import cc.redberry.core.utils.ArraysUtils;
 import cc.redberry.core.utils.TensorHashCalculator;
 import java.util.Arrays;
@@ -36,7 +35,7 @@ import java.util.Arrays;
  */
 public final class Sum extends MultiTensor {
 
-    private final Tensor[] data;
+    final Tensor[] data;
     private final int hash;
 
     Sum(final Tensor[] data, Indices indices) {
@@ -51,6 +50,12 @@ public final class Sum extends MultiTensor {
             wrappers[i] = new TensorWrapper(data[i]);
         ArraysUtils.quickSort(wrappers, data);
         this.hash = Arrays.hashCode(data);
+    }
+
+    public Sum(Indices indices, Tensor[] data, int hash) {
+        super(indices);
+        this.data = data;
+        this.hash = hash;
     }
 
     private static final class TensorWrapper implements Comparable<TensorWrapper> {
@@ -123,7 +128,7 @@ public final class Sum extends MultiTensor {
     }
 
     @Override
-    public String toString(ToStringMode mode) {
+    public String toString(OutputFormat mode) {
         StringBuilder sb = new StringBuilder();
         String temp;
         for (int i = 0;; ++i) {
@@ -138,7 +143,7 @@ public final class Sum extends MultiTensor {
     }
 
     @Override
-    protected String toString(ToStringMode mode, Class<? extends Tensor> clazz) {
+    protected String toString(OutputFormat mode, Class<? extends Tensor> clazz) {
         if (clazz == Power.class || clazz == Product.class)
             return "(" + toString(mode) + ")";
         else

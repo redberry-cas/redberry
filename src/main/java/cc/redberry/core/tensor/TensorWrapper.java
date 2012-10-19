@@ -1,21 +1,28 @@
 /*
- * org.redberry.concurrent: high-level Java concurrent library.
- * Copyright (c) 2010-2012.
- * Bolotin Dmitriy <bolotin.dmitriy@gmail.com>
+ * Redberry: symbolic tensor computations.
  *
- * This program is free software: you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the Free
- * Software Foundation, either version 3 of the License, or (at your option)
- * any later version.
+ * Copyright (c) 2010-2012:
+ *   Stanislav Poslavsky   <stvlpos@mail.ru>
+ *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
+ * This file is part of Redberry.
+ *
+ * Redberry is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Redberry is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
 package cc.redberry.core.tensor;
 
-import cc.redberry.core.context.ToStringMode;
+import cc.redberry.core.context.OutputFormat;
 import cc.redberry.core.indices.Indices;
 
 /**
@@ -56,6 +63,13 @@ public final class TensorWrapper extends Tensor {
 
         private Tensor innerTensor;
 
+        Builder() {
+        }
+
+        Builder(Tensor innerTensor) {
+            this.innerTensor = innerTensor;
+        }
+
         @Override
         public Tensor build() {
             if (innerTensor == null)
@@ -70,6 +84,11 @@ public final class TensorWrapper extends Tensor {
             if (innerTensor != null)
                 throw new TensorException("Wrapper have only one element!");
             innerTensor = tensor;
+        }
+
+        @Override
+        public TensorBuilder clone() {
+            return new Builder(innerTensor);
         }
     }
 
@@ -105,7 +124,7 @@ public final class TensorWrapper extends Tensor {
     }
 
     @Override
-    public String toString(ToStringMode mode) {
+    public String toString(OutputFormat mode) {
         return "@[" + innerTensor.toString(mode) + "]";
     }
 }

@@ -79,9 +79,7 @@ public final class IndicesTypeStructure {
         if (getClass() != obj.getClass())
             return false;
         final IndicesTypeStructure other = (IndicesTypeStructure) obj;
-        if (!Arrays.equals(this.typesCounts, other.typesCounts))
-            return false;
-        return true;
+        return Arrays.equals(this.typesCounts, other.typesCounts);
     }
 
     @Override

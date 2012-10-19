@@ -1,22 +1,29 @@
 /*
- * org.redberry.concurrent: high-level Java concurrent library.
- * Copyright (c) 2010-2012.
- * Bolotin Dmitriy <bolotin.dmitriy@gmail.com>
+ * Redberry: symbolic tensor computations.
  *
- * This program is free software: you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the Free
- * Software Foundation, either version 3 of the License, or (at your option)
- * any later version.
+ * Copyright (c) 2010-2012:
+ *   Stanislav Poslavsky   <stvlpos@mail.ru>
+ *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
+ * This file is part of Redberry.
+ *
+ * Redberry is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Redberry is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
 package cc.redberry.core.tensor;
 
 import cc.redberry.core.context.Context;
-import cc.redberry.core.context.ToStringMode;
+import cc.redberry.core.context.OutputFormat;
 import cc.redberry.core.indices.Indices;
 import java.util.Iterator;
 
@@ -26,7 +33,7 @@ import java.util.Iterator;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  * @see cc.redberry.core.indices.Indices
- * @see cc.redberry.core.context.ToStringMode
+ * @see cc.redberry.core.context.OutputFormat
  * @see cc.redberry.core.context.Context
  */
 public abstract class Tensor
@@ -134,31 +141,31 @@ public abstract class Tensor
     }
 
     /**
-     * <p>Returns a string representation of a tensor. See {@link cc.redberry.core.context.ToStringMode}
+     * <p>Returns a string representation of a tensor. See {@link cc.redberry.core.context.OutputFormat}
      * for available modes.</p>
      *
-     * @param mode printing mode (see. {@link cc.redberry.core.context.ToStringMode})
+     * @param mode printing mode (see. {@link cc.redberry.core.context.OutputFormat})
      *
      * @return a string representation of a tensor
      */
-    public abstract String toString(final ToStringMode mode);
+    public abstract String toString(final OutputFormat mode);
 
     /**
-     * <p>Returns string representation of a tensor in default (see {@link cc.redberry.core.context.CC#getDefaultPrintMode()})
+     * <p>Returns string representation of a tensor in default (see {@link cc.redberry.core.context.CC#getDefaultOutputFormat()})
      * mode. <p>Equivalent to:
-     * <code>this.toString(CC.getDefaultPrintMode())</code> </p></p>
+     * <code>this.toString(CC.getDefaultOutputFormat())</code> </p></p>
      *
      * @return string representation of a tensor in default mode
      */
     @Override
     public final String toString() {
-        return toString(Context.get().getDefaultPrintMode());
+        return toString(Context.get().getDefaultOutputFormat());
     }
 
     /**
      * For internal use.
      */
-    protected String toString(ToStringMode mode, Class<? extends Tensor> clazz) {
+    protected String toString(OutputFormat mode, Class<? extends Tensor> clazz) {
         return toString(mode);
     }
 

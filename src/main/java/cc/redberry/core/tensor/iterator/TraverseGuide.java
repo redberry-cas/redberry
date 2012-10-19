@@ -37,11 +37,11 @@ public interface TraverseGuide {
      * This method specifies restrictions on iteration procedure. Possible kinds
      * of restrictions specified in {@link TraversePermission} {@code enum}. Any
      * cursor position can be characterized by three parameters: current cursor,
-     * its parent tensor and position in parent tensor. So, they are the method
+     * its position tensor and position in position tensor. So, they are the method
      * arguments.
      *
-     * @param parent        current cursor parent tensor
-     * @param indexInParent position of the current cursor in parent tensor
+     * @param parent        current cursor position tensor
+     * @param indexInParent position of the current cursor in position tensor
      * @param tensor        current cursor
      *
      * @return TraversePermission

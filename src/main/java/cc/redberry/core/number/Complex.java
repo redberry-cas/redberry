@@ -22,26 +22,23 @@
  */
 package cc.redberry.core.number;
 
-import cc.redberry.core.context.ToStringMode;
+import cc.redberry.core.context.OutputFormat;
 import cc.redberry.core.indices.Indices;
 import cc.redberry.core.indices.IndicesFactory;
-import cc.redberry.core.tensor.Power;
-import cc.redberry.core.tensor.Product;
-import cc.redberry.core.tensor.Tensor;
-import cc.redberry.core.tensor.TensorBuilder;
-import cc.redberry.core.tensor.TensorFactory;
-import java.io.Serializable;
-import java.math.BigInteger;
+import cc.redberry.core.tensor.*;
 import org.apache.commons.math3.Field;
 import org.apache.commons.math3.exception.NullArgumentException;
 import org.apache.commons.math3.fraction.BigFraction;
+
+import java.io.Serializable;
+import java.math.BigInteger;
 
 /**
  * @author Stanislav Poslavsky
  */
 public class Complex extends Tensor
         implements Number<Complex>,
-                   Serializable {
+        Serializable {
 
     public static final Complex ComplexNaN =
             new Complex(Numeric.NaN, Numeric.NaN);
@@ -157,30 +154,38 @@ public class Complex extends Tensor
     }
 
     @Override
-    public String toString(ToStringMode mode) {
+    public String toString(OutputFormat mode) {
         if (real.isZero())
-            return imaginary.toString();
+            if (imaginary.isZero())
+                return "0";
+            else if (imaginary.isOne())
+                return "I";
+            else if (imaginary.isMinusOne())
+                return "-I";
+            else
+                return imaginary.toString() + "*I";
         int is = imaginary.signum();
         if (is == 0)
             return real.toString();
         Real abs = imaginary.abs();
         if (is < 0)
             if (abs.isOne())
-                return real.toString() + "-i";
+                return real.toString() + "-I";
             else
-                return real.toString() + "-i*" + imaginary.abs();
+                return real.toString() + "-I*" + imaginary.abs();
         if (abs.isOne())
-            return real.toString() + "+i";
+            return real.toString() + "+I";
         else
-            return real.toString() + "+i*" + imaginary.abs();
+            return real.toString() + "+I*" + imaginary.abs();
 
     }
 
     @Override
-    protected String toString(ToStringMode mode, Class<? extends Tensor> clazz) {
-        if (clazz == Product.class || clazz == Power.class)
-            if ((!real.isZero() && !imaginary.isZero()) || real.signum() < 0)
+    protected String toString(OutputFormat mode, Class<? extends Tensor> clazz) {
+        if (clazz == Product.class || clazz == Power.class) {
+            if (!imaginary.isZero() || real.signum() < 0 || !real.isInteger())
                 return "(" + toString(mode) + ")";
+        }
         return toString(mode);
     }
 
@@ -210,6 +215,11 @@ public class Complex extends Tensor
         @Override
         public void put(Tensor tensor) {
             throw new IllegalStateException("Can not put to Complex tensor builder!");
+        }
+
+        @Override
+        public TensorBuilder clone() {
+            return this;
         }
     }
 
@@ -322,7 +332,7 @@ public class Complex extends Tensor
     /**
      * Return the conjugate of this complex number. The conjugate of {@code a + bi}
      * is {@code a - bi}. <br/>
-     * {@link #NaN} is returned if either the real or imaginary part of this
+     * {@link #ComplexNaN} is returned if either the real or imaginary part of this
      * Complex number equals {@code Double.NaN}. <br/> If the imaginary part is
      * infinite, and the real part is not
      * {@code NaN}, the returned value has infinite imaginary part of the
@@ -343,14 +353,12 @@ public class Complex extends Tensor
      *   (a + bi) + (c + di) = (a+c) + (b+d)i
      * </code>
      * </pre> <br/> If either {@code this} or {@code addend} has a {@code NaN}
-     * value in either part, {@link #NaN} is returned; otherwise {@code Infinite}
+     * value in either part, {@link #ComplexNaN} is returned; otherwise {@code Infinite}
      * and {@code NaN} values are returned in the parts of the result according
      * to the rules for {@link java.lang.Double} arithmetic.
      *
-     * @param addend Value to be added to this {@code Complex}.
-     *
+     * @param a value to be added to this {@code Complex}.
      * @return {@code this + addend}.
-     *
      * @throws NullArgumentException if {@code addend} is {@code null}.
      */
     @Override
@@ -373,11 +381,11 @@ public class Complex extends Tensor
      * underflows in the computation. <br/>
      * {@code Infinite} and {@code NaN} values are handled according to the
      * following rules, applied in the order presented: <ul> <li>If either {@code this}
-     * or {@code divisor} has a {@code NaN} value in either part, {@link #NaN}
-     * is returned. </li> <li>If {@code divisor} equals {@link #ZERO}, {@link #NaN}
+     * or {@code divisor} has a {@code NaN} value in either part, {@link #ComplexNaN}
+     * is returned. </li> <li>If {@code divisor} equals {@link #ZERO}, {@link #ComplexNaN}
      * is returned. </li> <li>If {@code this} and {@code divisor} are both
      * infinite,
-     * {@link #NaN} is returned. </li> <li>If {@code this} is finite (i.e., has
+     * {@link #ComplexNaN} is returned. </li> <li>If {@code this} is finite (i.e., has
      * no {@code Infinite} or
      * {@code NaN} parts) and {@code divisor} is infinite (one or both parts
      * infinite), {@link #ZERO} is returned. </li> <li>If {@code this} is
@@ -387,9 +395,7 @@ public class Complex extends Tensor
      * results. </li> </ul>
      *
      * @param divisor Value by which this {@code Complex} is to be divided.
-     *
      * @return {@code this / divisor}.
-     *
      * @throws NullArgumentException if {@code divisor} is {@code null}.
      */
     @Override
@@ -411,12 +417,12 @@ public class Complex extends Tensor
             Real q = c.divide(d);
             Real denominator = c.multiply(q).add(d);
             return new Complex((real.multiply(q).add(imaginary)).divide(denominator),
-                               (imaginary.multiply(q).subtract(real)).divide(denominator));
+                    (imaginary.multiply(q).subtract(real)).divide(denominator));
         } else {
             Real q = d.divide(c);
             Real denominator = d.multiply(q).add(c);
             return new Complex(((imaginary.multiply(q)).add(real)).divide(denominator),
-                               (imaginary.subtract(real.multiply(q))).divide(denominator));
+                    (imaginary.subtract(real.multiply(q))).divide(denominator));
         }
     }
 
@@ -438,8 +444,8 @@ public class Complex extends Tensor
      * <code>
      *   (a + bi)(c + di) = (ac - bd) + (ad + bc)i
      * </code>
-     * </pre> Returns {@link #NaN} if either {@code this} or {@code factor} has
-     * one or more {@code NaN} parts. <br/> Returns {@link #INF} if neither {@code this}
+     * </pre> Returns {@link #ComplexNaN} if either {@code this} or {@code factor} has
+     * one or more {@code NaN} parts. <br/> Returns {@link #COMPLEX_INFINITY} if neither {@code this}
      * nor {@code factor} has one or more {@code NaN} parts and if either {@code this}
      * or {@code factor} has one or more infinite parts (same result is returned
      * regardless of the sign of the components). <br/> Returns finite values in
@@ -447,9 +453,7 @@ public class Complex extends Tensor
      * cases.
      *
      * @param factor value to be multiplied by this {@code Complex}.
-     *
      * @return {@code this * factor}.
-     *
      * @throws NullArgumentException if {@code factor} is {@code null}.
      */
     @Override
@@ -458,7 +462,7 @@ public class Complex extends Tensor
         if (factor.isNaN())
             return ComplexNaN;
         return new Complex(real.multiply(factor.real).subtract(imaginary.multiply(factor.imaginary)),
-                           real.multiply(factor.imaginary).add(imaginary.multiply(factor.real)));
+                real.multiply(factor.imaginary).add(imaginary.multiply(factor.real)));
     }
 
     @Override

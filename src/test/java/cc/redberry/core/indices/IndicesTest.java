@@ -22,17 +22,22 @@
  */
 package cc.redberry.core.indices;
 
+import cc.redberry.core.combinatorics.IntPermutationsGenerator;
+import cc.redberry.core.combinatorics.Symmetry;
 import cc.redberry.core.context.CC;
 import cc.redberry.core.parser.ParserIndices;
 import cc.redberry.core.tensor.SimpleTensor;
+import cc.redberry.core.tensor.random.TRandom;
+import junit.framework.Assert;
+import org.apache.commons.math3.random.Well19937c;
 import org.junit.Test;
 
-import static cc.redberry.core.tensor.Tensors.addSymmetry;
-import static cc.redberry.core.tensor.Tensors.parse;
+import java.util.Arrays;
+
+import static cc.redberry.core.tensor.Tensors.*;
 import static org.junit.Assert.assertTrue;
 
 /**
- *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
@@ -143,4 +148,100 @@ public class IndicesTest {
 //        indices.applyIndexMapping(im);
 //        assertTrue(indices.equals(copy));
 //    }
+
+    @Test
+    public void testGetByTypeSimpleIndices() {
+        TRandom tRandom = new TRandom(100,
+                1000,
+                new int[]{0, 0, 0, 0},
+                new int[]{10, 10, 10, 10},
+                false, new Well19937c());
+        IndicesTypeStructure typeStructure;
+        Indices indices;
+        SimpleIndicesBuilder builder;
+        for (int i = 0; i < 1000; ++i) {
+            builder = new SimpleIndicesBuilder();
+            typeStructure = tRandom.nextNameDescriptor().getIndicesTypeStructure();
+            indices = IndicesFactory.createSimple(null, tRandom.nextIndices(typeStructure));
+            int typeCount;
+            for (int k = 0; k < IndexType.TYPES_COUNT; ++k) {
+                typeCount = typeStructure.typeCount((byte) k);
+                Assert.assertEquals(typeCount, indices.size(IndexType.getType((byte) k)));
+                if (typeCount == 0)
+                    continue;
+                for (int p = 0; p < typeCount; ++p) {
+                    int index = indices.get(IndexType.getType((byte) k), p);
+                    Assert.assertEquals(IndicesUtils.getType(index), (byte) k);
+                    builder.append(IndicesFactory.createSimple(null, index));
+                }
+            }
+            Assert.assertEquals(indices, builder.getIndices());
+        }
+    }
+
+    @Test
+    public void testGetByTypeSortedIndices() {
+        TRandom tRandom = new TRandom(100,
+                1000,
+                new int[]{0, 0, 0, 0},
+                new int[]{10, 10, 10, 10},
+                false, new Well19937c());
+        IndicesTypeStructure typeStructure;
+        Indices indices;
+        IndicesBuilder builder;
+        for (int i = 0; i < 1000; ++i) {
+            builder = new IndicesBuilder();
+            typeStructure = tRandom.nextNameDescriptor().getIndicesTypeStructure();
+            indices = IndicesFactory.createSorted(tRandom.nextIndices(typeStructure));
+            int typeCount;
+            for (int k = 0; k < IndexType.TYPES_COUNT; ++k) {
+                typeCount = typeStructure.typeCount((byte) k);
+                Assert.assertEquals(typeCount, indices.size(IndexType.getType((byte) k)));
+                if (typeCount == 0)
+                    continue;
+                for (int p = 0; p < typeCount; ++p) {
+                    int index = indices.get(IndexType.getType((byte) k), p);
+                    Assert.assertEquals(IndicesUtils.getType(index), (byte) k);
+                    builder.append(IndicesFactory.createSimple(null, index));
+                }
+            }
+            Assert.assertEquals(indices, builder.getIndices());
+        }
+    }
+
+    @Test
+    public void testDiffIds1() {
+        SimpleTensor r = parseSimple("R_abcd");
+        addSymmetry(r, IndexType.LatinLower, false, 2, 3, 0, 1);
+        addSymmetry(r, IndexType.LatinLower, true, 1, 0, 2, 3);
+        short[] diffIds = r.getIndices().getDiffIds();
+        short[] expected = new short[4];
+        Assert.assertTrue(Arrays.equals(diffIds, expected));
+    }
+
+    @Test
+    public void testDiffIds2() {
+        Symmetry[] symmetries = new Symmetry[]{
+                new Symmetry(new int[]{1, 0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11}, false),
+                new Symmetry(new int[]{0, 2, 1, 3, 4, 5, 6, 7, 8, 9, 10, 11}, false),
+                new Symmetry(new int[]{0, 1, 3, 2, 4, 5, 6, 7, 8, 9, 10, 11}, false),
+                new Symmetry(new int[]{0, 1, 2, 4, 3, 5, 6, 7, 8, 9, 10, 11}, false),
+                new Symmetry(new int[]{0, 1, 2, 3, 5, 4, 6, 7, 8, 9, 10, 11}, false),
+                new Symmetry(new int[]{0, 1, 2, 3, 4, 6, 7, 11, 10, 9, 8, 5}, false),
+                new Symmetry(new int[]{0, 1, 2, 3, 4, 5, 6, 7, 8, 11, 10, 9}, false)
+        };
+        IntPermutationsGenerator gen = new IntPermutationsGenerator(symmetries.length);
+        int[] p;
+        while (gen.hasNext()) {
+            CC.resetTensorNames();
+            SimpleTensor r = parseSimple("R_abcdefghijkl");
+            p = gen.next();
+            for (int i = 0; i < p.length; ++i)
+                r.getIndices().getSymmetries().addUnsafe(symmetries[p[i]]);
+
+            short[] diffIds = r.getIndices().getDiffIds();
+            short[] expected = {0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0};
+            Assert.assertTrue(Arrays.equals(diffIds, expected));
+        }
+    }
 }

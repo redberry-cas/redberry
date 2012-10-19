@@ -33,7 +33,7 @@ import java.util.EnumSet;
 public class ContextSettings {
     //bindings
 
-    private ToStringMode defaultToStringMode;
+    private OutputFormat defaultOutputFormat;
     private String kronecker = "d";
     private String metricName = "g";
     //optional
@@ -42,8 +42,8 @@ public class ContextSettings {
     private IndexConverterManager converterManager = IndexConverterManager.DEFAULT;
     private Parser parser = Parser.DEFAULT;
 
-    public ContextSettings(ToStringMode defaultToStringMode, String kronecker) {
-        this.defaultToStringMode = defaultToStringMode;
+    public ContextSettings(OutputFormat defaultOutputFormat, String kronecker) {
+        this.defaultOutputFormat = defaultOutputFormat;
         this.kronecker = kronecker;
     }
 
@@ -59,14 +59,14 @@ public class ContextSettings {
         merticTypes.add(type);
     }
 
-    public ToStringMode getDefaultToStringMode() {
-        return defaultToStringMode;
+    public OutputFormat getDefaultOutputFormat() {
+        return defaultOutputFormat;
     }
 
-    public void setDefaultToStringMode(ToStringMode defaultToStringMode) {
-        if (defaultToStringMode == null)
+    public void setDefaultOutputFormat(OutputFormat defaultOutputFormat) {
+        if (defaultOutputFormat == null)
             throw new NullPointerException();
-        this.defaultToStringMode = defaultToStringMode;
+        this.defaultOutputFormat = defaultOutputFormat;
     }
 
     public String getKronecker() {

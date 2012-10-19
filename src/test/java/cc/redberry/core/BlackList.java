@@ -22,8 +22,13 @@
  */
 package cc.redberry.core;
 
-import java.util.*;
+import gnu.trove.set.hash.TIntHashSet;
+import org.junit.Ignore;
 import org.junit.Test;
+
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Random;
 
 /**
  * @author Dmitry Bolotin
@@ -31,14 +36,89 @@ import org.junit.Test;
  */
 public class BlackList {
 
-    public static void fill(int[] a, int val) {
-        for (int i = 0, len = a.length; i < len; i++)
-            a[i] = val;
+    public enum Name {
+
+        E1("a"), E2("b");
+        final String name;
+
+        Name(String name) {
+            this.name = name;
+        }
+
+        public static final Name[] values = values();
     }
 
     @Test
-    public void test1() {
-     HashMap<Integer,Integer> map = new HashMap<>();
-        System.out.println(map.get(new BitSet(12)));
+    public void etwer(){
+        System.out.println(-7 %2);
+    }
+
+    @Ignore
+    @Test
+    public void te() {
+        TIntHashSet ihs = new TIntHashSet();
+        HashSet<Integer> hs = new HashSet<>();
+        Random random = new Random();
+        long it = 0, t = 0, start, stop;
+        for (int i = 0; i < 10000000; ++i) {
+            int r = random.nextInt(Integer.MAX_VALUE);
+            start = System.currentTimeMillis();
+            ihs.add(r);
+            ihs.remove(r);
+            ihs.contains(r);
+            stop = System.currentTimeMillis();
+            it += stop - start;
+
+            start = System.currentTimeMillis();
+            hs.add(r);
+            hs.remove(r);
+            hs.contains(r);
+            stop = System.currentTimeMillis();
+            t += stop - start;
+        }
+        System.out.println("primitive   " + it);
+        System.out.println("object   " + t);
+    }
+
+    @Ignore
+    @Test
+    public void te1() {
+        TIntHashSet ihs = new TIntHashSet();
+        HashSet<Integer> hs = new HashSet<>();
+        Random random = new Random();
+        long it = 0, t = 0, start, stop;
+        int size = 10000000;
+        int[] r = new int[size];
+        for (int i = 0; i < size; ++i)
+            r[i] = random.nextInt(Integer.MAX_VALUE);
+
+        start = System.currentTimeMillis();
+        for (int i = 0; i < size; ++i)
+            ihs.add(r[i]);
+        for (int i = 0; i < size; ++i) {
+            ihs.remove(r[i]);
+            ihs.contains(r[i]);
+        }
+        stop = System.currentTimeMillis();
+        it += stop - start;
+
+        start = System.currentTimeMillis();
+        for (int i = 0; i < size; ++i)
+            hs.add(r[i]);
+        for (int i = 0; i < size; ++i) {
+            hs.remove(r[i]);
+            hs.contains(r[i]);
+        }
+        stop = System.currentTimeMillis();
+        t += stop - start;
+        System.out.println("primitive   " + it);
+        System.out.println("object   " + t);
+    }
+
+    @Test
+    public void werq() {
+        for (Map.Entry<String, String> e : System.getenv().entrySet())
+            System.out.println(e.getKey() + " -> " + e.getValue());
+        System.out.println(System.getenv("MAPLE"));
     }
 }

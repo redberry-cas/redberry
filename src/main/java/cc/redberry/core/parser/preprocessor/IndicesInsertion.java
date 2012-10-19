@@ -59,7 +59,7 @@ public final class IndicesInsertion implements ParseNodeTransformer {
 
     private static void checkIndices(SimpleIndices upper, SimpleIndices lower) {
         if (upper.size() != lower.size())
-            throw new IllegalArgumentException();
+            throw new IllegalArgumentException("Upper indices size not equal to lower indices size.");
         int size = upper.size();
         for (int i = 0; i < size; ++i) {
             if (!IndicesUtils.getState(upper.get(i)) || IndicesUtils.getState(lower.get(i)))

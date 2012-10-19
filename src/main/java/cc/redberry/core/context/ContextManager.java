@@ -39,7 +39,7 @@ import java.util.concurrent.ThreadFactory;
  * finished, so use it carefully, because interface could change in future
  * releases.</li> </ul>
  */
-public class ContextManager {
+public final class ContextManager {
     private final static ThreadLocal<ContextContainer> threadLocalContainer = new ThreadLocal<ContextContainer>() {
         @Override
         protected ContextContainer initialValue() {
@@ -93,8 +93,7 @@ public class ContextManager {
 
         @Override
         public Thread newThread(Runnable r) {
-            Thread thread = new Thread(new RunnableWrapper(container, r));
-            return thread;
+            return new Thread(new RunnableWrapper(container, r));
         }
     }
 

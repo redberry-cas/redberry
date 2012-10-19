@@ -66,6 +66,6 @@ public class ParserPower implements NodeParser {
         }
         ParseNode arg = parser.parse(expression.substring(power.length() + 1, comma));
         ParseNode power = parser.parse(expression.substring(comma + 1, expression.length() - 1));
-        return new ParseNode(TensorType.Power, new ParseNode[]{arg, power});
+        return new ParseNode(TensorType.Power, arg, power);
     }
 }

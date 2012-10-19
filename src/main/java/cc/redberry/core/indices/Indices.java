@@ -22,7 +22,7 @@
  */
 package cc.redberry.core.indices;
 
-import cc.redberry.core.context.ToStringMode;
+import cc.redberry.core.context.OutputFormat;
 import cc.redberry.core.indexmapping.IndexMapping;
 import cc.redberry.core.utils.IntArray;
 
@@ -46,7 +46,6 @@ public interface Indices {
      * indices this method returns simple wrapper of generic integer array.
      *
      * @return IntArray of upper case indices
-     *
      * @see IntArray
      */
     IntArray getUpper();
@@ -56,7 +55,6 @@ public interface Indices {
      * indices this method returns simple wrapper of generic integer array.
      *
      * @return IntArray of lower case indices
-     *
      * @see IntArray
      */
     IntArray getLower();
@@ -76,19 +74,45 @@ public interface Indices {
      */
     int size();
 
+
+    /**
+     * Returns the number of indices of specified type.
+     *
+     * @param type type of indices
+     * @return number of indices of specified type
+     */
+    int size(IndexType type);
+
     /**
      * Returns the index at the specified position in this
      * <code>Indices</code>.
      *
      * @param position position of the index to return
-     *
      * @return the index at the specified position in this
-     * <code>Indices</code>
-     *
+     *         <code>Indices</code>
      * @throws IndexOutOfBoundsException - if the index is out of range (index <
      *                                   0 || index >= size())
      */
     int get(int position);
+
+    /**
+     * Returns the index of the specified type at the
+     * specified position in this <code>Indices</code>.
+     *
+     * @param type     IndexType
+     * @param position position of the index to return
+     * @return the index of the specified type at the
+     *         specified position in this <code>Indices</code>
+     * @throws IndexOutOfBoundsException - if the index is out of range
+     */
+    int get(IndexType type, int position);
+
+//    /**
+//     * Returns sorted array of dummy indices names.
+//     *
+//     * @return sorted array of dummy indices names
+//     */
+//    int[] getDummyNames();
 
     /**
      * Returns new instance of
@@ -127,7 +151,6 @@ public interface Indices {
      * true, but for _{ab}^c and ^c_{ak}, of course it returns false.
      *
      * @param indices indices to be compared
-     *
      * @return true if the set of specified indices equals to this one
      */
     boolean equalsRegardlessOrder(Indices indices);
@@ -144,9 +167,7 @@ public interface Indices {
      * returns true if mapping changed indices and false if not.
      *
      * @param mapping specified {@code IndexeMapping}
-     *
      * @return true if mapping changed indices and false if not
-     *
      * @see IndexMapping
      */
     Indices applyIndexMapping(IndexMapping mapping);
@@ -154,7 +175,7 @@ public interface Indices {
     /**
      * This method returns string representation of indices due to symbols print
      * mode, specified in
-     * <code>enum</code> {@link ToStringMode}. General convention for indices
+     * <code>enum</code> {@link cc.redberry.core.context.OutputFormat}. General convention for indices
      * output is LaTeX-base code for indices, i.e. string
      * <code>_{mn}^{a}</code> represents indices with length 3, where first
      * <code>m</code> down, second
@@ -168,12 +189,10 @@ public interface Indices {
      * <code>_{&alpha &beta}^{&gamma &delta}</code>
      *
      * @param mode symbols printing mode
-     *
      * @return string representation due to mode
-     *
-     * @see ToStringMode
+     * @see cc.redberry.core.context.OutputFormat
      */
-    String toString(ToStringMode mode);
+    String toString(OutputFormat mode);
 
     @Override
     boolean equals(Object other);

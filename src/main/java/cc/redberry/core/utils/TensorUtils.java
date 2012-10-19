@@ -29,8 +29,11 @@ import cc.redberry.core.indexmapping.*;
 import cc.redberry.core.indices.Indices;
 import cc.redberry.core.indices.IndicesUtils;
 import cc.redberry.core.number.Complex;
+import cc.redberry.core.number.NumberUtils;
 import cc.redberry.core.tensor.*;
 import cc.redberry.core.tensor.functions.ScalarFunction;
+import gnu.trove.set.hash.TIntHashSet;
+
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
@@ -60,6 +63,14 @@ public class TensorUtils {
         if (tensor instanceof Complex) {
             Complex complex = (Complex) tensor;
             return complex.isReal() && complex.getReal().signum() > 0;
+        }
+        return false;
+    }
+
+    public static boolean isRealNegativeNumber(Tensor tensor) {
+        if (tensor instanceof Complex) {
+            Complex complex = (Complex) tensor;
+            return complex.isReal() && complex.getReal().signum() < 0;
         }
         return false;
     }
@@ -95,11 +106,19 @@ public class TensorUtils {
     }
 
     public static boolean isImageOne(Tensor tensor) {
-        return tensor instanceof Complex && ((Complex) tensor).equals(Complex.IMAGEONE);
+        return tensor instanceof Complex && tensor.equals(Complex.IMAGEONE);
     }
 
     public static boolean isMinusOne(Tensor tensor) {
-        return tensor instanceof Complex && ((Complex) tensor).equals(Complex.MINUSE_ONE);
+        return tensor instanceof Complex && tensor.equals(Complex.MINUSE_ONE);
+    }
+
+    public static boolean isIntegerOdd(Tensor tensor) {
+        return tensor instanceof Complex && NumberUtils.isIntegerOdd((Complex) tensor);
+    }
+
+    public static boolean isIntegerEven(Tensor tensor) {
+        return tensor instanceof Complex && NumberUtils.isIntegerEven((Complex) tensor);
     }
 
     public static boolean isSymbol(Tensor t) {
@@ -156,10 +175,7 @@ public class TensorUtils {
         if (u.hashCode() != v.hashCode())
             return false;
         if (u.getClass() == SimpleTensor.class)
-            if (!u.getIndices().equals(v.getIndices()))
-                return false;
-            else
-                return true;
+            return u.getIndices().equals(v.getIndices());
         if (u.size() != v.size())
             return false;
         if (u instanceof MultiTensor) {
@@ -179,7 +195,7 @@ public class TensorUtils {
                         OUT:
                         for (n = begin; n < i; ++n) {
                             for (j = begin; j < i; ++j)
-                                if (usedPos[j - begin] == false && equalsExactly(u.get(n), v.get(j))) {
+                                if (!usedPos[(j - begin)] && equalsExactly(u.get(n), v.get(j))) {
                                     usedPos[j - begin] = true;
                                     continue OUT;
                                 }
@@ -193,8 +209,8 @@ public class TensorUtils {
         }
         if (u.getClass() == TensorField.class) {
             if (((SimpleTensor) u).getName() != ((SimpleTensor) v).getName()
-                    || !u.getIndices().equals(v.getIndices())) ;
-            return false;
+                    || !u.getIndices().equals(v.getIndices()))
+                return false;
         }
 
         final int size = u.size();
@@ -204,6 +220,7 @@ public class TensorUtils {
         return true;
     }
 
+    @Deprecated
     public static Set<Integer> getAllDummyIndicesNames(Tensor tensor) {
         Set<Integer> dummy = getAllIndicesNames(tensor);
         Indices ind = tensor.getIndices().getFree();
@@ -212,6 +229,7 @@ public class TensorUtils {
         return dummy;
     }
 
+    @Deprecated
     public static Set<Integer> getAllIndicesNames(Tensor... tensors) {
         Set<Integer> indices = new HashSet<>();
         for (Tensor tensor : tensors)
@@ -237,7 +255,40 @@ public class TensorUtils {
         }
     }
 
+    public static TIntHashSet getAllDummyIndicesT(Tensor tensor) {
+        TIntHashSet indices = getAllIndicesNamesT(tensor);
+        indices.removeAll(IndicesUtils.getIndicesNames(tensor.getIndices().getFree()));
+        return indices;
+    }
+
+    public static TIntHashSet getAllIndicesNamesT(Tensor... tensors) {
+        TIntHashSet set = new TIntHashSet();
+        for (Tensor tensor : tensors)
+            appendAllIndicesNamesT(tensor, set);
+        return set;
+    }
+
+    private static void appendAllIndicesNamesT(Tensor tensor, TIntHashSet set) {
+        if (tensor instanceof SimpleTensor) {
+            Indices ind = tensor.getIndices();
+            final int size = ind.size();
+            for (int i = 0; i < size; ++i)
+                set.add(IndicesUtils.getNameWithType(ind.get(i)));
+        } else {
+            final int size = tensor.size();
+            Tensor t;
+            for (int i = 0; i < size; ++i) {
+                t = tensor.get(i);
+                if (t instanceof ScalarFunction)
+                    continue;
+                appendAllIndicesNamesT(tensor.get(i), set);
+            }
+        }
+    }
+
     public static boolean equals(Tensor u, Tensor v) {
+        if (u == v)
+            return true;
         Indices freeIndices = u.getIndices().getFree();
         if (!freeIndices.equalsRegardlessOrder(v.getIndices().getFree()))
             return false;
@@ -266,10 +317,7 @@ public class TensorUtils {
     }
 
     /**
-     *
-     * @param t
-     *
-     * s AssertionError
+     * @param t s AssertionError
      */
     public static void assertIndicesConsistency(Tensor t) {
         assertIndicesConsistency(t, new HashSet<Integer>());
@@ -308,9 +356,7 @@ public class TensorUtils {
                 set.add(ind.get(i));
         } else
             for (Tensor c : t)
-                if (c instanceof ScalarFunction)
-                    continue;
-                else
+                if (!(c instanceof ScalarFunction))
                     appendAllIndices(c, set);
     }
 
@@ -382,6 +428,23 @@ public class TensorUtils {
         }
         return symmetries;
     }
+
+    public static Set<SimpleTensor> getAllSymbols(Tensor... tensors) {
+        Set<SimpleTensor> set = new HashSet<>();
+        for (Tensor tensor : tensors)
+            addSymbols(tensor, set);
+        return set;
+    }
+
+
+    private static void addSymbols(Tensor tensor, Set<SimpleTensor> set) {
+        if (isSymbol(tensor)) {
+            set.add((SimpleTensor) tensor);
+        } else
+            for (Tensor t : tensor)
+                addSymbols(t, set);
+    }
+
 //    public static Tensor[] getDistinct(final Tensor[] array) {
 //        final int length = array.length;
 //        final Indices indices = array[0].getIndices().getFree();

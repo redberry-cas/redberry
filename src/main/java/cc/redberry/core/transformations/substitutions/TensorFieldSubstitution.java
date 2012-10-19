@@ -27,14 +27,15 @@ import cc.redberry.core.indexmapping.IndexMappings;
 import cc.redberry.core.indices.Indices;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.tensor.TensorField;
+import cc.redberry.core.tensor.Tensors;
 import cc.redberry.core.transformations.ApplyIndexMapping;
 import cc.redberry.core.transformations.Transformation;
 import cc.redberry.core.utils.TensorUtils;
+
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
@@ -49,12 +50,11 @@ class TensorFieldSubstitution implements Transformation {
     };
     private final TensorField from;
     private final Tensor to;
-    private final boolean symbolic;
 
     private TensorFieldSubstitution(TensorField from, Tensor to) {
         this.from = from;
         this.to = to;
-        this.symbolic = TensorUtils.isSymbolic(to);
+ //       this.symbolic = TensorUtils.isSymbolic(to);
     }
 
     @Override
@@ -69,7 +69,6 @@ class TensorFieldSubstitution implements Transformation {
             IndexMappingBuffer buffer = IndexMappings.simpleTensorsPort(from, currentField).take();
             if (buffer == null)
                 continue;
-
 
             Indices[] fromIndices = from.getArgIndices(), currentIndices = currentField.getArgIndices();
 
@@ -87,37 +86,17 @@ class TensorFieldSubstitution implements Transformation {
 
                 fArg = ApplyIndexMapping.applyIndexMapping(from.get(i), fIndices, cIndices, new int[0]);
 
-
                 transformations.add(Substitutions.getTransformation(fArg, current.get(i)));
             }
 
-            Tensor newTo;
-            if (symbolic)
-                newTo = to;
-            else {
-                int[] forbidden = new int[iterator.forbiddenIndices().size()];
-                int c = -1;
-                for (Integer f : iterator.forbiddenIndices())
-                    forbidden[++c] = f;
-                newTo = ApplyIndexMapping.applyIndexMapping(to, buffer, forbidden);
-//                if (newTo != to)
-                iterator.forbiddenIndices().addAll(TensorUtils.getAllIndicesNames(newTo));
-
-            }
+            Tensor newTo = to;
 
             for (Transformation transformation : transformations)
                 newTo = transformation.transform(newTo);
-            if (!symbolic) {
-                int[] forbidden = new int[iterator.forbiddenIndices().size()];
-                int c = -1;
-                for (Integer f : iterator.forbiddenIndices())
-                    forbidden[++c] = f;
-                Tensor temp = newTo;
-                newTo = ApplyIndexMapping.renameDummy(temp, forbidden);
-                if (temp != newTo)
-                    iterator.forbiddenIndices().addAll(TensorUtils.getAllIndicesNames(newTo));
-            }
-
+            if (!TensorUtils.isSymbolic(newTo))
+                newTo = ApplyIndexMapping.applyIndexMapping(newTo, buffer, iterator.getForbidden());
+            if (buffer.getSignum())
+                newTo = Tensors.negate(newTo);
             iterator.set(newTo);
         }
         return iterator.result();

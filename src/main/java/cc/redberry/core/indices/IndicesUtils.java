@@ -23,9 +23,11 @@
 package cc.redberry.core.indices;
 
 import cc.redberry.core.combinatorics.Permutation;
+import cc.redberry.core.context.CC;
 import cc.redberry.core.context.Context;
-import cc.redberry.core.context.ToStringMode;
+import cc.redberry.core.context.OutputFormat;
 import cc.redberry.core.math.MathUtils;
+
 import java.util.Arrays;
 
 /**
@@ -368,16 +370,21 @@ public final class IndicesUtils {
         return MathUtils.getSortedDistinct(indsArray);
     }
 
-    public static String toString(int index, ToStringMode mode) {
-        return (getState(index) == true ? "^{" : "_{") + Context.get().getIndexConverterManager().getSymbol(index, mode) + "}";
+    public static String toString(int index, OutputFormat mode) {
+        return (getState(index) ? "^{" : "_{") + Context.get().getIndexConverterManager().getSymbol(index, mode) + "}";
     }
 
     public static String toString(int index) {
-        return toString(index, Context.get().getDefaultPrintMode());
+        return toString(index, Context.get().getDefaultOutputFormat());
     }
 
-    public static String toString(int[] indices, ToStringMode mode) {
+    public static String toString(int[] indices, OutputFormat mode) {
+        //todo refactor using StringBuilder since InconsistensIndicesException can be thrown
         return IndicesFactory.createSimple(null, indices).toString(mode);
+    }
+
+    public static String toString(int[] indices) {
+        return toString(indices, CC.getDefaultOutputFormat());
     }
 
     public static int parseIndex(String string) {
@@ -405,8 +412,7 @@ public final class IndicesUtils {
     }
 
     /**
-     * Returns an array of indices names (with types), presented in specified {@code Indices}
-     * object with the same ordering.
+     * Returns an array of indices names (with types)
      *
      * @param indices
      * @return array of indices names (with types)
@@ -416,6 +422,16 @@ public final class IndicesUtils {
         for (int i = a.length - 1; i >= 0; --i)
             a[i] = getNameWithType(indices[i]);
         return a;
+    }
+
+    /**
+     * Returns an array of free indices only
+     *
+     * @param indices
+     * @return array of free indices only
+     */
+    public static int[] getFree(int[] indices) {
+        return IndicesFactory.createSimple(null, indices).getFree().getAllIndices().copy();
     }
 
     public static boolean haveEqualStates(int index1, int index2) {

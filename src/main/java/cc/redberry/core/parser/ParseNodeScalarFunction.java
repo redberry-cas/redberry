@@ -89,8 +89,6 @@ public final class ParseNodeScalarFunction extends ParseNode {
         if (!super.equals(obj))
             return false;
         final ParseNodeScalarFunction other = (ParseNodeScalarFunction) obj;
-        if (!Objects.equals(this.function, other.function))
-            return false;
-        return true;
+        return Objects.equals(this.function, other.function);
     }
 }

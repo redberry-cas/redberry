@@ -27,7 +27,6 @@ import cc.redberry.core.indices.SimpleIndices;
 import cc.redberry.core.utils.IntArrayList;
 
 /**
- *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
@@ -48,11 +47,13 @@ public class ParserSimpleTensor implements NodeParser {
         for (char c : expression.toCharArray()) {
             if (c == '{') {
                 level++;
-                continue;
+                if (!indexMode)
+                    continue;
             }
             if (c == '}') {
                 level--;
-                continue;
+                if (!indexMode)
+                    continue;
             }
             if (c == '^') {
                 assert level == 0;
@@ -82,6 +83,8 @@ public class ParserSimpleTensor implements NodeParser {
             ParserIndices.parseIndices(indicesList, indicesString, indexState);
         SimpleIndices indices = IndicesFactory.createSimple(null, indicesList.toArray());
         String name = nameBuilder.toString();
+        if (name.isEmpty())
+            throw new ParserException("Simple tensor with empty name.");
         return new ParseNodeSimpleTensor(indices, name);
     }
 

@@ -69,6 +69,18 @@ public class ApplyIndexMappingTest {
         Tensor standard = parse("g^mn");
         Assert.assertTrue(TensorUtils.equalsExactly(target, standard));
     }
+    @Test
+    public void testSimple3() {
+        Tensor from = parse("A_mnpqrs");
+        Tensor to = parse("A_a^a_b^b_c^c");
+        IndexMappingBuffer imb = IndexMappings.getFirst(from, to);
+
+        Tensor target = parse("A_mnpqrs");
+        target = ApplyIndexMapping.applyIndexMapping(target, imb, new int[0]);
+
+        Tensor standard = parse("A_a^a_b^b_c^c");
+        Assert.assertTrue(TensorUtils.equalsExactly(target, standard));
+    }
 
     @Test
     public void testSum1() {

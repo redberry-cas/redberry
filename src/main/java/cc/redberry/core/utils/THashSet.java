@@ -31,23 +31,23 @@ import java.util.*;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public final class TSet<T extends Tensor> implements Set<T> {
+public final class THashSet<T extends Tensor> implements Set<T> {
 
     private final HashSet<TensorWrapperWithEquals> set;
 
-    public TSet() {
+    public THashSet() {
         set = new HashSet<>();
     }
 
-    public TSet(int initialCapacity) {
+    public THashSet(int initialCapacity) {
         set = new HashSet<>(initialCapacity);
     }
 
-    public TSet(int initialCapacity, float loadFactor) {
+    public THashSet(int initialCapacity, float loadFactor) {
         set = new HashSet<>(initialCapacity, loadFactor);
     }
 
-    public TSet(Collection<? extends Tensor> tensors) {
+    public THashSet(Collection<? extends Tensor> tensors) {
         List<TensorWrapperWithEquals> wrappers = new ArrayList<>(tensors.size());
         for (Tensor t : tensors)
             wrappers.add(new TensorWrapperWithEquals(t));
@@ -58,7 +58,7 @@ public final class TSet<T extends Tensor> implements Set<T> {
     public boolean add(T e) {
         return set.add(new TensorWrapperWithEquals(e));
     }
-
+    
     @Override
     public boolean addAll(Collection<? extends T> c) {
         List<TensorWrapperWithEquals> wrappers = new ArrayList<>(c.size());
@@ -105,6 +105,7 @@ public final class TSet<T extends Tensor> implements Set<T> {
             return iterator.hasNext();
         }
 
+        @SuppressWarnings("unchecked")
         @Override
         public T next() {
             return (T) iterator.next().tensor;
@@ -116,9 +117,10 @@ public final class TSet<T extends Tensor> implements Set<T> {
         }
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public Iterator<T> iterator() {
-        return new SetIterator<>(set.iterator());
+        return new SetIterator<T>(set.iterator());
     }
 
     @Override
@@ -156,9 +158,10 @@ public final class TSet<T extends Tensor> implements Set<T> {
         return a;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public <T> T[] toArray(T[] a) {
-        T[] r = a.length >= size() ? a
+         T[] r = a.length >= size() ? a
                 : (T[]) java.lang.reflect.Array.newInstance(a.getClass().getComponentType(), size());
         int i = -1;
         for (TensorWrapperWithEquals tw : set)

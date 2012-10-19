@@ -35,10 +35,10 @@ import java.util.*;
  */
 public final class ContractIndices implements Transformation {
 
-    public static final ContractIndices INSTANCE = new ContractIndices();
+    public static final ContractIndices ContractIndices = new ContractIndices();
 
     public static Tensor contract(Tensor t) {
-        return INSTANCE.transform(t);
+        return ContractIndices.transform(t);
     }
 
     private ContractIndices() {
@@ -348,9 +348,7 @@ public final class ContractIndices implements Transformation {
             if (getClass() != obj.getClass())
                 return false;
             final MetricWrapper other = (MetricWrapper) obj;
-            if (!Arrays.equals(this.indices, other.indices))
-                return false;
-            return true;
+            return Arrays.equals(this.indices, other.indices);
         }
     }
 }

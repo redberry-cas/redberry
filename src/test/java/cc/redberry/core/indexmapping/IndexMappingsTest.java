@@ -1,17 +1,24 @@
 /*
- * org.redberry.concurrent: high-level Java concurrent library.
- * Copyright (c) 2010-2012.
- * Bolotin Dmitriy <bolotin.dmitriy@gmail.com>
+ * Redberry: symbolic tensor computations.
  *
- * This program is free software: you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the Free
- * Software Foundation, either version 3 of the License, or (at your option)
- * any later version.
+ * Copyright (c) 2010-2012:
+ *   Stanislav Poslavsky   <stvlpos@mail.ru>
+ *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
+ * This file is part of Redberry.
+ *
+ * Redberry is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Redberry is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
 package cc.redberry.core.indexmapping;
 
@@ -21,11 +28,13 @@ import cc.redberry.core.indices.IndicesUtils;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.tensor.Tensors;
 import cc.redberry.core.utils.TensorHashCalculator;
-import java.util.Arrays;
-import java.util.Set;
+import cc.redberry.core.utils.TensorUtils;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
+
+import java.util.Arrays;
+import java.util.Set;
 
 import static cc.redberry.core.tensor.Tensors.addSymmetry;
 import static cc.redberry.core.tensor.Tensors.parse;
@@ -124,10 +133,13 @@ public class IndexMappingsTest {
 
     @Test
     public void testScalarTensors1() {
-        Tensor t1 = parse("A_mn*B^mnpqr*A_pqr");
-        Tensor t2 = parse("A_pq*B^mnpqr*A_mnr");
-        Set<IndexMappingBuffer> buffers = IndexMappings.getAllMappings(t1, t2);
-        Assert.assertTrue(buffers.isEmpty());
+        for (int i = 0; i < 100; ++i) {
+            CC.resetTensorNames();
+            Tensor t1 = parse("A_mn*B^mnpqr*A_pqr");
+            Tensor t2 = parse("A_pq*B^mnpqr*A_mnr");
+            Set<IndexMappingBuffer> buffers = IndexMappings.getAllMappings(t1, t2);
+            Assert.assertTrue(buffers.isEmpty());
+        }
     }
 
     @Test
@@ -355,5 +367,57 @@ public class IndexMappingsTest {
         Assert.assertTrue(from.getIndices().getFree().size() == to.getIndices().getFree().size());
         IndexMappingBuffer buffer = IndexMappings.getFirst(from, to);
 //        Assert.assertTrue(buffer != null);
+    }
+
+    @Test(timeout = 200)
+    public void testPerformance3() {
+        CC.resetTensorNames(-4892047359897376321L);
+        Tensors.addSymmetry("R_\\mu\\nu", IndexType.GreekLower, false, new int[]{1, 0});
+        Tensors.addSymmetry("R_\\mu\\nu\\alpha\\beta", IndexType.GreekLower, true, new int[]{0, 1, 3, 2});
+        Tensors.addSymmetry("R_\\mu\\nu\\alpha\\beta", IndexType.GreekLower, false, new int[]{2, 3, 0, 1});
+        Tensor u = Tensors.parse("R_{\\delta }^{\\sigma }*(g^{\\gamma \\mu }*d^{\\delta }_{\\rho }*d^{\\nu }_{\\sigma }+d^{\\gamma }_{\\sigma }*g^{\\delta \\nu }*d^{\\mu }_{\\rho }+d^{\\gamma }_{\\rho }*g^{\\delta \\nu }*d^{\\mu }_{\\sigma }+g^{\\gamma \\mu }*d^{\\nu }_{\\rho }*d^{\\delta }_{\\sigma }+g^{\\gamma \\delta }*d^{\\mu }_{\\sigma }*d^{\\nu }_{\\rho }+d^{\\gamma }_{\\rho }*g^{\\delta \\mu }*d^{\\nu }_{\\sigma }+g^{\\gamma \\delta }*g^{\\mu \\nu }*g_{\\rho \\sigma }+g^{\\gamma \\nu }*d^{\\mu }_{\\rho }*d^{\\delta }_{\\sigma }+d^{\\gamma }_{\\rho }*g^{\\mu \\nu }*d^{\\delta }_{\\sigma }+g^{\\gamma \\mu }*g^{\\delta \\nu }*g_{\\rho \\sigma }+d^{\\gamma }_{\\sigma }*g^{\\delta \\mu }*d^{\\nu }_{\\rho }+g^{\\gamma \\nu }*d^{\\mu }_{\\sigma }*d^{\\delta }_{\\rho }+g^{\\gamma \\nu }*g_{\\rho \\sigma }*g^{\\delta \\mu }+d^{\\gamma }_{\\sigma }*g^{\\mu \\nu }*d^{\\delta }_{\\rho }+g^{\\gamma \\delta }*d^{\\nu }_{\\sigma }*d^{\\mu }_{\\rho })*R^{\\rho }_{\\mu \\gamma \\nu }");
+        Tensor v = Tensors.parse("R_{\\mu }^{\\sigma }*(g^{\\beta \\mu }*d^{\\delta }_{\\rho }*d^{\\nu }_{\\sigma }+d^{\\beta }_{\\sigma }*g^{\\delta \\nu }*d^{\\mu }_{\\rho }+d^{\\beta }_{\\rho }*g^{\\delta \\nu }*d^{\\mu }_{\\sigma }+g^{\\beta \\mu }*d^{\\nu }_{\\rho }*d^{\\delta }_{\\sigma }+g^{\\beta \\delta }*d^{\\mu }_{\\sigma }*d^{\\nu }_{\\rho }+d^{\\beta }_{\\rho }*g^{\\delta \\mu }*d^{\\nu }_{\\sigma }+g^{\\beta \\delta }*g^{\\mu \\nu }*g_{\\rho \\sigma }+g^{\\beta \\nu }*d^{\\mu }_{\\rho }*d^{\\delta }_{\\sigma }+d^{\\beta }_{\\rho }*g^{\\mu \\nu }*d^{\\delta }_{\\sigma }+g^{\\beta \\mu }*g^{\\delta \\nu }*g_{\\rho \\sigma }+d^{\\beta }_{\\sigma }*g^{\\delta \\mu }*d^{\\nu }_{\\rho }+g^{\\beta \\nu }*d^{\\mu }_{\\sigma }*d^{\\delta }_{\\rho }+g^{\\beta \\nu }*g_{\\rho \\sigma }*g^{\\delta \\mu }+d^{\\beta }_{\\sigma }*g^{\\mu \\nu }*d^{\\delta }_{\\rho }+g^{\\beta \\delta }*d^{\\nu }_{\\sigma }*d^{\\mu }_{\\rho })*R^{\\rho }_{\\beta \\delta \\nu }");
+        for (Tensor uu : u)
+            System.out.println(uu);
+        System.out.println("as");
+        for (Tensor vv : v)
+            System.out.println(vv);
+        System.out.println(TensorHashCalculator.hashWithIndices(u));
+        System.out.println(TensorHashCalculator.hashWithIndices(v));
+        System.out.println("AS");
+        System.out.println(TensorUtils.equals(u, v));
+
+    }
+
+    @Test
+    public void testPower1() {
+        Tensor from = parse("(a-b)**3"), to = parse("(b-a)**3");
+        Assert.assertTrue(IndexMappings.getFirst(from, to).getSignum() == true);
+    }
+
+    @Test
+    public void testPower2() {
+        Tensor from = parse("(a-b)**3"), to = parse("-(b-a)**3");
+        Assert.assertTrue(IndexMappings.getFirst(from, to).getSignum() == false);
+    }
+
+    @Test
+    public void test12() {
+        addSymmetry("R_ijk", IndexType.LatinLower, true, 0, 2, 1);
+        Tensor from = parse("R_ijk*F^jk");
+        Tensor to = parse("R_ijk*F^kj");
+        IndexMappingBuffer mapping = IndexMappings.getFirst(from, to);
+        Assert.assertTrue(mapping != null);
+        Assert.assertTrue(mapping.getSignum());
+    }
+
+    @Test
+    public void test13() {
+        Tensor from = parse("Sin[a-b]");
+        MappingsPort mapping = IndexMappings.createPort(from, from);
+        IndexMappingBuffer first = mapping.take();
+        Assert.assertTrue(first.isEmpty());
+        Assert.assertTrue(!first.getSignum());
+        Assert.assertTrue(mapping.take() == null);
     }
 }

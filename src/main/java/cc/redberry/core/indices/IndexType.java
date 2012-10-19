@@ -54,7 +54,6 @@ public enum IndexType {
      * Returns the appropriate string<->integer converter for this index type.
      *
      * @return the appropriate string<->integer converter for this index type
-     *
      * @see IndexSymbolConverter
      */
     public IndexSymbolConverter getSymbolConverter() {
@@ -83,5 +82,9 @@ public enum IndexType {
         for (IndexType type : values())
             converters[++i] = type.getSymbolConverter();
         return converters;
+    }
+
+    public static boolean isLatin(IndexType type) {
+        return type == LatinLower || type == LatinUpper;
     }
 }

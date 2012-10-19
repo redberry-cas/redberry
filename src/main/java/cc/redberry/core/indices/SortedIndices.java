@@ -25,6 +25,7 @@ package cc.redberry.core.indices;
 import cc.redberry.core.indexmapping.IndexMapping;
 import cc.redberry.core.utils.ArraysUtils;
 import cc.redberry.core.utils.IntArrayList;
+
 import java.util.Arrays;
 
 /**
@@ -39,7 +40,6 @@ import java.util.Arrays;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  * @see Indices
- * @see OrderedIndices
  */
 final class SortedIndices extends AbstractIndices {
 
@@ -53,12 +53,10 @@ final class SortedIndices extends AbstractIndices {
 
     /**
      * Constructs {@code SortedIndices} instance from specified indices array
-     * and with specified symmetries. {@code data} will be quickSort in
-     * constructor, using {@link cc.redberry.core.math.MathUtils#quickSort(int[])}
-     * to refactoring symmetries after sorting.
+     * and with specified symmetries. {@code data} will be sorted in
+     * constructor.
      *
-     * @param data       array of indices
-     * @param symmetries symmetries of this indices
+     * @param data array of indices
      */
     SortedIndices(int[] data) {
         super(data);
@@ -72,6 +70,45 @@ final class SortedIndices extends AbstractIndices {
         int[] upper = Arrays.copyOfRange(data, 0, firstLower);
         int[] lower = Arrays.copyOfRange(data, firstLower, data.length);
         return new UpperLowerIndices(upper, lower);
+    }
+
+    @Override
+    public int size(IndexType type) {
+        int type_ = type.getType(), size = 0;
+
+        int lowerPosition = Arrays.binarySearch(data, 0, firstLower, (type_ << 24) | 0x80000000);
+        if (lowerPosition < 0) lowerPosition = ~lowerPosition;
+        int upperPosition = Arrays.binarySearch(data, lowerPosition, firstLower, ((type_ + 1) << 24) | 0x80000000);
+        if (upperPosition < 0) upperPosition = ~upperPosition;
+        size += upperPosition - lowerPosition;
+
+        lowerPosition = Arrays.binarySearch(data, firstLower, data.length, type_ << 24);
+        if (lowerPosition < 0) lowerPosition = ~lowerPosition;
+        upperPosition = Arrays.binarySearch(data, lowerPosition, data.length, (type_ + 1) << 24);
+        if (upperPosition < 0) upperPosition = ~upperPosition;
+        size += upperPosition - lowerPosition;
+        return size;
+    }
+
+    @Override
+    public int get(IndexType type, int position) {
+        int type_ = type.getType();
+
+        int lowerPosition = Arrays.binarySearch(data, 0, firstLower, (type_ << 24) | 0x80000000);
+        if (lowerPosition < 0) lowerPosition = ~lowerPosition;
+        int upperPosition = Arrays.binarySearch(data, lowerPosition, firstLower, ((type_ + 1) << 24) | 0x80000000);
+        if (upperPosition < 0) upperPosition = ~upperPosition;
+        if (lowerPosition + position < upperPosition)
+            return data[lowerPosition + position];
+        position = position - (upperPosition - lowerPosition);
+
+        lowerPosition = Arrays.binarySearch(data, firstLower, data.length, type_ << 24);
+        if (lowerPosition < 0) lowerPosition = ~lowerPosition;
+        upperPosition = Arrays.binarySearch(data, lowerPosition, data.length, (type_ + 1) << 24);
+        if (upperPosition < 0) upperPosition = ~upperPosition;
+        if (lowerPosition + position < upperPosition)
+            return data[lowerPosition + position];
+        throw new IndexOutOfBoundsException();
     }
 
     @Override

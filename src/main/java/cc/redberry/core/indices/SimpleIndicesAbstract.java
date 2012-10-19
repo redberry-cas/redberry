@@ -26,6 +26,7 @@ import cc.redberry.core.combinatorics.Symmetry;
 import cc.redberry.core.indexmapping.IndexMapping;
 import cc.redberry.core.utils.ArraysUtils;
 import cc.redberry.core.utils.IntArrayList;
+
 import java.util.Arrays;
 
 /**
@@ -77,6 +78,27 @@ public abstract class SimpleIndicesAbstract extends AbstractIndices implements S
             else
                 lower[li++] = index;
         return new UpperLowerIndices(upper, lower);
+    }
+
+    @Override
+    public int size(IndexType type) {
+        int type_ = type.getType() << 24;
+        int i = 0;
+        for (; i < data.length && (data[i] & 0x7F000000) != type_; ++i) ;
+        int size = 0;
+        for (; i + size < data.length && (data[i + size] & 0x7F000000) == type_; ++size) ;
+        return size;
+    }
+
+    @Override
+    public int get(IndexType type, int position) {
+        int type_ = type.getType() << 24;
+        int i;
+        for (i = 0; i < data.length && (data[i] & 0x7F000000) != type_; ++i) ;
+        int index = data[i + position];
+        if ((index & 0x7F000000) != type_)
+            throw new IndexOutOfBoundsException();
+        return index;
     }
 
     @Override
@@ -154,11 +176,10 @@ public abstract class SimpleIndicesAbstract extends AbstractIndices implements S
      * <code>null</code> in other case.
      *
      * @param indices indices to compare with this
-     *
      * @return < code>Boolean.FALSE</code> if indices are equals this,
-     * <code>Boolean.TRUE</code> if indices differs from this on -1 (i.e. on odd
-     * transposition) and
-     * <code>null</code> in other case.
+     *         <code>Boolean.TRUE</code> if indices differs from this on -1 (i.e. on odd
+     *         transposition) and
+     *         <code>null</code> in other case.
      */
     public Boolean _equalsWithSymmetries(SimpleIndices indices) {
         if (indices.getClass() != this.getClass())
@@ -167,13 +188,13 @@ public abstract class SimpleIndicesAbstract extends AbstractIndices implements S
             return null;
         SimpleIndicesOfTensor _indices = (SimpleIndicesOfTensor) indices;
         boolean sign1;
-        out_level_0:
+        out:
         for (Symmetry s1 : symmetries) {
             sign1 = s1.isAntiSymmetry();
             for (int i = 0; i < data.length; ++i)
                 if (data[s1.newIndexOf(i)] != (_indices).data[i])
-                    continue;
-            return Boolean.valueOf(sign1);
+                    continue out;
+            return sign1;
         }
         return null;
     }

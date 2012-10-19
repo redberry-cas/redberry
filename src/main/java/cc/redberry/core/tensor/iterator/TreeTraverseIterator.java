@@ -1,5 +1,5 @@
 /*
- * Redberry: symbolic current computations.
+ * Redberry: symbolic tensor computations.
  *
  * Copyright (c) 2010-2012:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
@@ -64,20 +64,30 @@ import cc.redberry.core.utils.Indicator;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public final class TreeTraverseIterator {
+public final class TreeTraverseIterator<T extends Payload<T>> {
 
     private final TraverseGuide iterationGuide;
     private LinkedPointer currentPointer;
     private TraverseState lastState;
     private Tensor current = null;
+    private final PayloadFactory<T> payloadFactory;
 
-    public TreeTraverseIterator(Tensor tensor, TraverseGuide guide) {
+    public TreeTraverseIterator(Tensor tensor, TraverseGuide guide, PayloadFactory<T> payloadFactory) {
         currentPointer = new LinkedPointer(null, TensorWrapper.wrap(tensor), true);
         iterationGuide = guide;
+        this.payloadFactory = payloadFactory;
+    }
+
+    public TreeTraverseIterator(Tensor tensor, TraverseGuide guide) {
+        this(tensor, guide, null);
     }
 
     public TreeTraverseIterator(Tensor tensor) {
         this(tensor, TraverseGuide.ALL);
+    }
+
+    public TreeTraverseIterator(Tensor tensor, PayloadFactory<T> payloadFactory) {
+        this(tensor, TraverseGuide.ALL, payloadFactory);
     }
 
     /**
@@ -86,24 +96,36 @@ public final class TreeTraverseIterator {
      * @return next traverse state or {@code null} if there is no next element
      */
     public TraverseState next() {
-        //  if (current != null && currentPointer.previous == null)
-        //    return lastState = null;
+
+        if (lastState == TraverseState.Leaving) {
+
+            Tensor cur = null;
+            if (currentPointer.payload != null)
+                cur = currentPointer.payload.onLeaving(currentPointer);
+
+            if (cur != null)
+                current = cur;
+
+            currentPointer = currentPointer.previous;
+            currentPointer.set(current);
+        }
+
         Tensor next;
         while (true) {
             next = currentPointer.next();
             if (next == null) {
                 if (currentPointer.previous == null)
                     return lastState = null;
-                current = currentPointer.getTensor();
-                currentPointer = currentPointer.previous;
 
-                currentPointer.set(current);
+                current = currentPointer.getTensor();
 
                 return lastState = TraverseState.Leaving;
             } else {
                 TraversePermission permission = iterationGuide.getPermission(next, currentPointer.tensor, currentPointer.position - 1);
+
                 if (permission == null)
                     throw new NullPointerException();
+
                 if (permission == TraversePermission.DontShow)
                     continue;
 
@@ -124,11 +146,16 @@ public final class TreeTraverseIterator {
             return;
         if (tensor == null)
             throw new NullPointerException();
-        if (lastState == TraverseState.Entering)
+
+        current = currentPointer.tensor = tensor;
+
+        lastState = TraverseState.Leaving;
+
+        /*if (lastState == TraverseState.Entering)
             //currentPointer.previous.set(tensor);
             currentPointer = new LinkedPointer(currentPointer.previous, tensor, false);
         else if (lastState == TraverseState.Leaving)
-            currentPointer.set(tensor);
+            currentPointer.set(tensor);*/
     }
 
     /**
@@ -140,37 +167,11 @@ public final class TreeTraverseIterator {
      * @return depth in the tree relatively to the current cursor position
      */
     public int depth() {
-        if (lastState == null)
-            return -1;
-        int depth = -1;
-        LinkedPointer currentPointer = this.currentPointer;
-        if (lastState == TraverseState.Entering)
-            --depth;
-        if (currentPointer == null)
-            return -1;
-        do {
-            ++depth;
-            currentPointer = currentPointer.previous;
-        } while (currentPointer != null);
-        return depth;
+        return currentPointer.getDepth();
     }
 
     public boolean isUnder(Indicator<Tensor> indicator, int searchDepth) {
-        if (lastState == null)
-            return false;
-        if (lastState == TraverseState.Leaving) {
-            if (indicator.is(current))
-                return true;
-            --searchDepth;
-        }
-        LinkedPointer pointer = currentPointer;
-        while (pointer != null && searchDepth >= 0) {
-            if (indicator.is(pointer.tensor))
-                return true;
-            pointer = pointer.previous;
-            --searchDepth;
-        }
-        return false;
+        return currentPointer.isUnder(indicator, searchDepth);
     }
 
     /**
@@ -178,26 +179,14 @@ public final class TreeTraverseIterator {
      * current cursor.
      *
      * @param indicator level relative position of element to be tested
-     *
      * @return
      */
     public boolean checkLevel(Indicator<Tensor> indicator, int level)//TODO better name
     {
-        if (lastState == null)
+        StackPosition s = currentPointer.previous(level);
+        if (s == null)
             return false;
-        if (lastState == TraverseState.Leaving) {
-            if (level == 0)
-                return indicator.is(current);
-            --level;
-        }
-        LinkedPointer pointer = currentPointer;
-        while (pointer != null && level > 0) {
-            pointer = pointer.previous;
-            --level;
-        }
-        if (pointer == null)
-            return false;
-        return indicator.is(pointer.tensor);
+        return indicator.is(s.getInitialTensor());
     }
 
     //    public void levelUp(int levels) {
@@ -212,6 +201,7 @@ public final class TreeTraverseIterator {
     //            currentPointer = currentPointer.previous;
     //        this.currentPointer = currentPointer;
     //    }
+
     /**
      * Returns current cursor.
      *
@@ -230,11 +220,13 @@ public final class TreeTraverseIterator {
         if (currentPointer.previous != null)
             throw new RuntimeException("Iteration not finished.");
         return currentPointer.getTensor().get(0);
-
-
     }
 
-    private static final class LinkedPointer {
+    public StackPosition<T> currentStackPosition() {
+        return currentPointer;
+    }
+
+    private final class LinkedPointer implements StackPosition<T> {
 
         int position = 0;
         Tensor tensor;
@@ -242,12 +234,19 @@ public final class TreeTraverseIterator {
         Tensor toSet = null;
         TensorBuilder builder = null;
         final LinkedPointer previous;
+        boolean isModified = false;
+        T payload = null;
 
         public LinkedPointer(LinkedPointer pair, Tensor tensor, boolean goInside) {
             this.tensor = tensor;
             if (!goInside)
                 position = Integer.MAX_VALUE;
             this.previous = pair;
+            if (previous != null && payloadFactory != null && !payloadFactory.allowLazyInitialization()) {
+                this.payload = payloadFactory.create(this);
+                if (this.payload == null)
+                    throw new NullPointerException("Payload factory returned null payload.");
+            }
         }
 
         Tensor next() {
@@ -267,7 +266,8 @@ public final class TreeTraverseIterator {
             return current = tensor.get(position++);
         }
 
-        Tensor getTensor() {
+        @Override
+        public Tensor getTensor() {
             if (builder != null)
                 if (position != tensor.size())
                     throw new IllegalStateException("Iteration not finished.");
@@ -279,13 +279,87 @@ public final class TreeTraverseIterator {
             return tensor;
         }
 
+        @Override
+        public Tensor getInitialTensor() {
+            if (position == Integer.MAX_VALUE)
+                throw new IllegalStateException("Initial tensor was rebuilt.");
+            return tensor;
+        }
+
+        @Override
+        public boolean isModified() {
+            return isModified;
+        }
+
+        @SuppressWarnings("unchecked")
+        @Override
+        public StackPosition previous() {
+            if (previous.previous == null)
+                return null;
+            return previous;
+        }
+
+        @Override
+        public T getPayload() {
+            if (payloadFactory == null || previous == null)
+                return null;
+            if (payload == null) {
+                payload = payloadFactory.create(this);
+                if (this.payload == null)
+                    throw new NullPointerException("Payload factory returned null payload.");
+            }
+            return payload;
+        }
+
+        void setModified() {
+            isModified = true;
+            if (previous != null)
+                previous.setModified();
+        }
+
         /*
-         * void close() { position = tensor.size(); }
-         */
+        * void close() { position = tensor.size(); }
+        */
         void set(Tensor t) {
             if (current == t)
                 return;
             toSet = t;
+            setModified();
+        }
+
+        @Override
+        public int getDepth() {
+            int depth = -2;
+            LinkedPointer pointer = this;
+            while (pointer != null) {
+                pointer = pointer.previous;
+                ++depth;
+            }
+            return depth;
+        }
+
+        @Override
+        public boolean isUnder(Indicator<Tensor> indicator, int searchDepth) {
+            LinkedPointer pointer = this;
+            do {
+                if (indicator.is(pointer.tensor))
+                    return true;
+                pointer = pointer.previous;
+            } while (pointer != null && searchDepth-- > 0);
+            return false;
+        }
+
+        @Override
+        public StackPosition<T> previous(int level) {
+            LinkedPointer pointer = this;
+            while (pointer != null && level-- > 0)
+                pointer = pointer.previous;
+            return pointer;
+        }
+
+        @Override
+        public int currentIndex() {
+            return position - 1;
         }
     }
 }
