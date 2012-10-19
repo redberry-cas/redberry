@@ -412,8 +412,7 @@ public final class IndicesUtils {
     }
 
     /**
-     * Returns an array of indices names (with types), presented in specified {@code Indices}
-     * object with the same ordering.
+     * Returns an array of indices names (with types)
      *
      * @param indices
      * @return array of indices names (with types)
@@ -423,6 +422,16 @@ public final class IndicesUtils {
         for (int i = a.length - 1; i >= 0; --i)
             a[i] = getNameWithType(indices[i]);
         return a;
+    }
+
+    /**
+     * Returns an array of free indices only
+     *
+     * @param indices
+     * @return array of free indices only
+     */
+    public static int[] getFree(int[] indices) {
+        return IndicesFactory.createSimple(null, indices).getFree().getAllIndices().copy();
     }
 
     public static boolean haveEqualStates(int index1, int index2) {
