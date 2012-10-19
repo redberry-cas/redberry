@@ -203,6 +203,10 @@ public final class IntArrayList {
         return -1;
     }
 
+    public boolean isEmpty() {
+        return size == 0;
+    }
+
     @Override
     public IntArrayList clone() {
         return new IntArrayList(Arrays.copyOf(data, data.length), size);

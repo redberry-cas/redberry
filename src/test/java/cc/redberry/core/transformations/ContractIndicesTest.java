@@ -509,15 +509,15 @@ public class ContractIndicesTest {
 //        contract(rimanClone);
 //        assertTrue(TensorUtils.testIndicesConsistent(rimanClone));
 //
-//        Tensor derivative = Derivative.create(riman,
+//        Tensor differentiate = Differentiate.create(riman,
 //                new SimpleTensor[]{
 //                    (SimpleTensor) parse("g_{\\alpha \\beta}"),
 //                    (SimpleTensor) parse("g_{\\mu \\nu}")});
-//        derivative = Transformations.renameConflictingIndices(derivative);
-//        derivative = GetDerivative1.ContractIndices.transform(derivative);
-//        assertTrue(TensorUtils.testIndicesConsistent(derivative));
-//        derivative = contract(derivative);
-//        assertTrue(TensorUtils.testIndicesConsistent(derivative));
+//        differentiate = Transformations.renameConflictingIndices(differentiate);
+//        differentiate = GetDerivative1.ContractIndices.transform(differentiate);
+//        assertTrue(TensorUtils.testIndicesConsistent(differentiate));
+//        differentiate = contract(differentiate);
+//        assertTrue(TensorUtils.testIndicesConsistent(differentiate));
 //    }
 
     @Test
