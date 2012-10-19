@@ -65,7 +65,7 @@ public class SubstitutionsTest {
         SimpleTensor from = (SimpleTensor) parse("A_mn");
         Tensor to = parse("B_m*C_n");
         Tensor target = parse("A_ab");
-        Transformation sp = Substitutions.getTransformation(from, to);
+        Transformation sp = new Substitution(from, to);
         target = sp.transform(target);
         Tensor expected = parse("B_{a}*C_{b}");
         assertTrue(TensorUtils.equalsExactly(target, expected));
@@ -76,7 +76,7 @@ public class SubstitutionsTest {
         SimpleTensor from = (SimpleTensor) parse("A_mn");
         Tensor to = parse("B_m*C_n");
         Tensor target = parse("A_ab*d*A_mn");
-        Transformation sp = Substitutions.getTransformation(from, to);
+        Transformation sp = new Substitution(from, to);
         target = sp.transform(target);
         Tensor expected = parse("B_{a}*C_{b}*d*B_{m}*C_{n}");
         assertTrue(TensorUtils.equalsExactly(target, expected));
@@ -87,7 +87,7 @@ public class SubstitutionsTest {
         SimpleTensor from = (SimpleTensor) parse("A_mn");
         Tensor to = parse("B_ma*C^a_n");
         Tensor target = parse("A_ab*d*A_mn");
-        Transformation sp = Substitutions.getTransformation(from, to);
+        Transformation sp = new Substitution(from, to);
         target = sp.transform(target);
         Tensor expected = parse("B_{ac}*C^{c}_{b}*d*B_{md}*C^{d}_{n}");
         assertTrue(TensorUtils.equals(target, expected));
@@ -177,7 +177,7 @@ public class SubstitutionsTest {
         SimpleTensor from = (SimpleTensor) parse("A_mn");
         Tensor to = parse("B_mn");
         Tensor target = parse("A^mn");
-        Transformation sp = Substitutions.getTransformation(from, to);
+        Transformation sp = new Substitution(from, to);
         target = sp.transform(target);
         target = contract(target);
         Tensor expected = parse("B^mn");
@@ -189,7 +189,7 @@ public class SubstitutionsTest {
         SimpleTensor from = (SimpleTensor) parse("A_mn");
         Tensor to = parse("B_mn");
         Tensor target = parse("A_ab*A^mn");
-        Transformation sp = Substitutions.getTransformation(from, to);
+        Transformation sp = new Substitution(from, to);
         target = sp.transform(target);
         target = contract(target);
         Tensor expected = parse("B_{ab}*B^{mn}");
@@ -202,7 +202,7 @@ public class SubstitutionsTest {
         addSymmetry("A_a^b", IndexType.LatinLower, true, 1, 0);
         Tensor to = parse("B_m*C^n-B^n*C_m");
         Tensor target = parse("A^a_b");
-        Transformation sp = Substitutions.getTransformation(from, to);
+        Transformation sp = new Substitution(from, to);
         target = sp.transform(target);
         Tensor expected = parse("B^a*C_b-B_b*C^a");
         assertTrue(TensorUtils.equalsExactly(target, expected));
@@ -215,7 +215,7 @@ public class SubstitutionsTest {
         Tensor target = parse("1/2*g^{ag}*(p_{m}*g_{gn}+p_{n}*g_{gm}+-1*p_{g}*g_{mn})");
         Tensor expected = target;
 
-        Transformation sp = Substitutions.getTransformation(from, to);
+        Transformation sp = new Substitution(from, to);
         target = sp.transform(target);
         target = contract(target);
         expected = contract(expected);
@@ -229,7 +229,7 @@ public class SubstitutionsTest {
         Tensor target = parse("1/2*g^{ag}*(p_{m}*g_{gn}+p_{n}*g_{gm}+-1*p_{g}*g_{mn})");
         Tensor expected = target;
 
-        Transformation sp = Substitutions.getTransformation(from, to);
+        Transformation sp = new Substitution(from, to);
         target = sp.transform(target);
         target = sp.transform(target);
         target = sp.transform(target);
@@ -245,7 +245,7 @@ public class SubstitutionsTest {
         Tensor target = parse("g^ag");
         Tensor expected = target;
 
-        Transformation sp = Substitutions.getTransformation(from, to);
+        Transformation sp = new Substitution(from, to);
         sp.transform(target);
         assertTrue(TensorUtils.equalsExactly(target, expected));
     }
@@ -256,7 +256,7 @@ public class SubstitutionsTest {
         addSymmetry("A_a^b", IndexType.LatinLower, true, 1, 0);
         Tensor to = parse("B_m*C^n-B^n*C_m");
         Tensor target = parse("A^a_b+F^a_b[A_m^n]");
-        Transformation sp = Substitutions.getTransformation(from, to);
+        Transformation sp = new Substitution(from, to);
         target = sp.transform(target);
         System.out.println(target);
         Tensor expected = parse("-B_{b}*C^{a}+B^a*C_b+F^{a}_{b}[B_{m}*C^{n}-B^n*C_m]");
@@ -434,7 +434,7 @@ public class SubstitutionsTest {
         TensorField from = (TensorField) parse("f[x]");
         Tensor to = parse("x+y");
         Tensor target = parse("f[g]");
-        Transformation transformation = Substitutions.getTransformation(from, to);
+        Transformation transformation = new Substitution(from, to);
         target = transformation.transform(target);
         System.out.println(target);
         assertTrue(TensorUtils.equalsExactly(target, parse("g+y")));
@@ -445,7 +445,7 @@ public class SubstitutionsTest {
         TensorField from = (TensorField) parse("f_m[x_i]");
         Tensor to = parse("x_m+y_m");
         Tensor target = parse("f_a[g_p]");
-        Transformation transformation = Substitutions.getTransformation(from, to);
+        Transformation transformation = new Substitution(from, to);
         target = transformation.transform(target);
         assertTrue(TensorUtils.equalsExactly(target, parse("g_a+y_a")));
     }
@@ -455,9 +455,19 @@ public class SubstitutionsTest {
         TensorField from = (TensorField) parse("f_m[x_i,y_j]");
         Tensor to = parse("x_m+y_m");
         Tensor target = parse("f_a[g_p,k_k]");
-        Transformation transformation = Substitutions.getTransformation(from, to);
+        Transformation transformation = new Substitution(from, to);
         target = transformation.transform(target);
         assertTrue(TensorUtils.equalsExactly(target, parse("g_a+k_a")));
+    }
+
+    @Test
+    public void testField3a() {
+        TensorField from = (TensorField) parse("f[x,y]");
+        Tensor to = parse("x+y");
+        Tensor target = parse("f[g,k]");
+        Transformation transformation = new Substitution(from, to);
+        target = transformation.transform(target);
+        assertTrue(TensorUtils.equalsExactly(target, parse("g+k")));
     }
 
     @Test
@@ -465,7 +475,7 @@ public class SubstitutionsTest {
         TensorField from = (TensorField) parse("f_m[x_i]");
         Tensor to = parse("x_m+y_m");
         Tensor target = parse("f_a[g^p]");
-        Transformation transformation = Substitutions.getTransformation(from, to);
+        Transformation transformation = new Substitution(from, to);
         target = transformation.transform(target);
         target = contract(target);
         assertTrue(TensorUtils.equalsExactly(target, parse("g_a+y_a")));
@@ -476,7 +486,7 @@ public class SubstitutionsTest {
         TensorField from = (TensorField) parse("f_m[x_i,y^k]");
         Tensor to = parse("x_m+y_m");
         Tensor target = parse("f^a[X^i,Y_j]");
-        Transformation transformation = Substitutions.getTransformation(from, to);
+        Transformation transformation = new Substitution(from, to);
         target = transformation.transform(target);
         target = contract(target);
         assertTrue(TensorUtils.equalsExactly(target, parse("X^a+Y^a")));
@@ -487,7 +497,7 @@ public class SubstitutionsTest {
         TensorField from = (TensorField) parse("f_m[x_i,y^kpq]");
         Tensor to = parse("x_m+y^i_i_m");
         Tensor target = parse("f^a[X^i,Y_jzx]");
-        Transformation transformation = Substitutions.getTransformation(from, to);
+        Transformation transformation = new Substitution(from, to);
         target = transformation.transform(target);
         target = contract(target);
         assertTrue(TensorUtils.equalsExactly(target, parse("X^a+Y^i_i^a")));
@@ -511,7 +521,7 @@ public class SubstitutionsTest {
         TensorField from = (TensorField) parse("f[x]");
         Tensor to = parse("x+y");
         Tensor target = parse("f[g]");
-        Transformation transformation = Substitutions.getTransformation(from, to);
+        Transformation transformation = new Substitution(from, to);
         target = transformation.transform(target);
         assertTrue(TensorUtils.equalsExactly(target, parse("g+y")));
     }
@@ -521,7 +531,7 @@ public class SubstitutionsTest {
         TensorField from = (TensorField) parse("f_m[x_i]");
         Tensor to = parse("x_m+y_m");
         Tensor target = parse("f_a[g_p]");
-        Transformation transformation = Substitutions.getTransformation(from, to);
+        Transformation transformation = new Substitution(from, to);
         target = transformation.transform(target);
         assertTrue(TensorUtils.equalsExactly(target, parse("g_a+y_a")));
     }
@@ -531,7 +541,7 @@ public class SubstitutionsTest {
         TensorField from = (TensorField) parse("f_m[x_i,y_j]");
         Tensor to = parse("x_m+y_m");
         Tensor target = parse("f_a[g_p,k_k]");
-        Transformation transformation = Substitutions.getTransformation(from, to);
+        Transformation transformation = new Substitution(from, to);
         target = transformation.transform(target);
         assertTrue(TensorUtils.equalsExactly(target, parse("g_a+k_a")));
     }
@@ -541,7 +551,7 @@ public class SubstitutionsTest {
 //        TensorField from = (TensorField) parse("f_m[x_i]");
 //        Tensor to = parse("x_m+y_m");
 //        Tensor target = parse("f_a[g^p]");
-//        Transformation transformation = Substitutions.getTransformation(from, to);
+//        Transformation transformation = new Substitution(from, to);
 //        target = transformation.transform(target);
 //        assertTrue(TensorUtils.equalsExactly(target, parse("f_{a}[g^{p}]")));
 //    }
@@ -550,7 +560,7 @@ public class SubstitutionsTest {
         TensorField from = (TensorField) parse("f_ab[x_mn]");
         Tensor to = parse("x_ab");
         Tensor target = parse("f_mn[z_i*y_j]");
-        Transformation transformation = Substitutions.getTransformation(from, to);
+        Transformation transformation = new Substitution(from, to);
         target = transformation.transform(target);
         assertTrue(TensorUtils.equalsExactly(target, parse("z_{m}*y_{n}")));
     }
@@ -560,7 +570,7 @@ public class SubstitutionsTest {
         TensorField from = (TensorField) parse("f_ab[x_mn]");
         Tensor to = parse("x_ab");
         Tensor target = parse("f_mn[y_j*z_i]");
-        Transformation transformation = Substitutions.getTransformation(from, to);
+        Transformation transformation = new Substitution(from, to);
         target = transformation.transform(target);
         assertTrue(TensorUtils.equalsExactly(target, parse("z_{m}*y_{n}")));
     }
@@ -611,7 +621,7 @@ public class SubstitutionsTest {
     public void testField18() {
         Tensor from = parse("f_a^b[x_m^n:_m^n]");
         Tensor to = parse("x_a^b+y_a^b");
-        Transformation t = Substitutions.getTransformation(from, to);
+        Transformation t = new Substitution(from, to);
         Tensor target = parse("f_a^a[z_c^d+w_c^d]");
         target = t.transform(target);
         System.out.println(target);
@@ -622,7 +632,7 @@ public class SubstitutionsTest {
     public void testField19() {
         Tensor from = parse("f_a[x_a]");
         Tensor to = parse("x_a");
-        Transformation t = Substitutions.getTransformation(from, to);
+        Transformation t = new Substitution(from, to);
         Tensor target = parse("f_a[x^a]");
         target = t.transform(target);
         System.out.println(target);
@@ -633,7 +643,7 @@ public class SubstitutionsTest {
     public void testField20() {
         Tensor from = parse("f_a^b[x_m^n:_m^n]");
         Tensor to = parse("x_a^b+y_a^b");
-        Transformation t = Substitutions.getTransformation(from, to);
+        Transformation t = new Substitution(from, to);
         Tensor target = parse("f_a^a[z_c^a+w_c^a:_c^a]");
         target = t.transform(target);
         assertEquals(target, "z_{m}^{m}+w_{m}^{m}+y_{m}^{m}");
@@ -643,7 +653,7 @@ public class SubstitutionsTest {
     public void testField21() {
         Tensor from = parse("f_a^b[x_m^n:_m^n]");
         Tensor to = parse("x_a^b+y_a^b");
-        Transformation t = Substitutions.getTransformation(from, to);
+        Transformation t = new Substitution(from, to);
         Tensor target = parse("f_a^a[z_c^a+w_c^a:_c^a]");
         target = t.transform(target);
         assertEquals(target, "z_{m}^{m}+w_{m}^{m}+y_{m}^{m}");
@@ -729,6 +739,7 @@ public class SubstitutionsTest {
         Expression s = parseExpression("f[x,y]=x+y");
         Tensor t = parse("f[0,x]");
         t = s.transform(t);
+        System.out.println(t);
         TAssert.assertEquals(t, "x");
     }
     //TODO additional tests with specified field arguments indices
