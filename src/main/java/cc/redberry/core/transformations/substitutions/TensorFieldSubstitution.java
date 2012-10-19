@@ -50,12 +50,11 @@ class TensorFieldSubstitution implements Transformation {
     };
     private final TensorField from;
     private final Tensor to;
-    private final boolean symbolic;
 
     private TensorFieldSubstitution(TensorField from, Tensor to) {
         this.from = from;
         this.to = to;
-        this.symbolic = TensorUtils.isSymbolic(to);
+ //       this.symbolic = TensorUtils.isSymbolic(to);
     }
 
     @Override

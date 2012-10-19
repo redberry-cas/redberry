@@ -420,7 +420,7 @@ public final class HashFunctions {
 
         int i = 0;
         while (len >= 4) {
-            int k = data[i + 0] & 0xFF;
+            int k = data[i] & 0xFF;
             k |= (data[i + 1] & 0xFF) << 8;
             k |= (data[i + 2] & 0xFF) << 16;
             k |= (data[i + 3] & 0xFF) << 24;
@@ -442,7 +442,7 @@ public final class HashFunctions {
             case 2:
                 h ^= (data[i + 1] & 0xFF) << 8;
             case 1:
-                h ^= (data[i + 0] & 0xFF);
+                h ^= (data[i] & 0xFF);
                 h *= m;
         }
 

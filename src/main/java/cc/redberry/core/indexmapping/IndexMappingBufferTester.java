@@ -113,7 +113,7 @@ public final class IndexMappingBufferTester implements IndexMappingBuffer {
         provider.tick();
         IndexMappingBuffer buffer;
         while ((buffer = provider.take()) != null)
-            if (buffer.getSignum() == false)
+            if (!buffer.getSignum())
                 return true;
         return false;
     }

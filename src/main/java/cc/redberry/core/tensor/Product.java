@@ -108,7 +108,7 @@ public final class Product extends MultiTensor {
         if (from > to)
             throw new IllegalArgumentException();
 
-        int indexlessMaxPos = indexlessData.length, dataMaxPos = indexlessMaxPos + data.length;
+        int indexlessMaxPos = indexlessData.length;
         Tensor[] result = new Tensor[to - from];
         if (to == from)
             return result;

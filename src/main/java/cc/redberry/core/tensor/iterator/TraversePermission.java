@@ -41,5 +41,5 @@ public enum TraversePermission {
     /**
      * Do not show and do not enter the tensor
      */
-    DontShow;
+    DontShow
 }

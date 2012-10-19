@@ -34,7 +34,6 @@ public class DefaultContextFactory implements ContextFactory {
     @Override
     public Context createContext() {
         //Creating context defaults
-        Context context = new Context(DefaultContextSettings.create());
-        return context;
+        return new Context(DefaultContextSettings.create());
     }
 }

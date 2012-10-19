@@ -77,9 +77,7 @@ final class SumSubstitution implements Transformation {
             Arrays.sort(bijection);
             builder.put(newTo);
             for (int i = current.size() - 1; i >= 0; --i)
-                if (Arrays.binarySearch(bijection, i) >= 0)
-                    continue;
-                else
+                if (Arrays.binarySearch(bijection, i) < 0)
                     builder.put(current.get(i));
             iterator.set(builder.build());
         }

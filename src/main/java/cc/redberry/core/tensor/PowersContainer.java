@@ -124,6 +124,7 @@ class PowersContainer implements Iterable<Tensor> {
 
     private class It implements Iterator<Tensor> {
         private final Iterator<ArrayList<PowerNode>> lists = symbolicPowers.valueCollection().iterator();
+        @SuppressWarnings("unchecked")
         private Iterator<PowerNode> nodes = EmptyIterator.INSTANCE;
 
         @Override

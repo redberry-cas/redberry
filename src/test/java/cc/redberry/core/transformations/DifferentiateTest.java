@@ -138,7 +138,8 @@ public class DifferentiateTest {
 
     @Test
     public void test10() {
+        setSymmetric(parseSimple("g_abc"), IndexType.LatinLower);
         Tensor u = differentiate(parse("g_abc"), parseSimple("g^mnp"));
-        TAssert.assertEquals(u, "1/2*(g_am*g_bn+g_bm*g_an)");
+        TAssert.assertEquals(u, "(1/4)*(g_{ap}*g_{cm}*g_{bn}+g_{an}*g_{bm}*g_{cp}+g_{ap}*g_{bm}*g_{cn}+g_{am}*g_{cp}*g_{bn})");
     }
 }

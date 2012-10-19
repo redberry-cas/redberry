@@ -30,14 +30,13 @@ import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.tensor.Tensors;
 
 /**
- *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
 public class IndexMappingPerformance {
 
     public static void main(String[] args) {
-        while (true)
+        for (int i = 0; i < 10000; ++i)
             System.out.println(t());
     }
 
@@ -58,7 +57,7 @@ public class IndexMappingPerformance {
             for (int i = 0; i < 1000; ++i) {
                 MappingsPort mp = IndexMappings.createPort(riman1, riman2);
                 IndexMappingBuffer buffera;
-                while ((buffera = mp.take()) != null);
+                while ((buffera = mp.take()) != null) ;
             }
             time += System.currentTimeMillis() - start;
         }

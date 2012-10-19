@@ -23,10 +23,9 @@
 package cc.redberry.core.tensor.iterator;
 
 /**
- *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
 public enum TraverseState {
-    Entering, Leaving;
+    Entering, Leaving
 }

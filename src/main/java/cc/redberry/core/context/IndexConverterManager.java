@@ -43,8 +43,7 @@ public final class IndexConverterManager {
         try {
             for (IndexSymbolConverter converter : converters)
                 if (converter.getType() == typeId) {
-                    String symbol = converter.getSymbol(number, mode);
-                    return symbol;//symbol.length() == 1 ? symbol : symbol + " ";
+                    return converter.getSymbol(number, mode);//symbol.length() == 1 ? symbol : symbol + " ";
                 }
             throw new RuntimeException("No appropriate converter for typeId 0x" + Integer.toHexString(typeId));
         } catch (IndexConverterException e) {

@@ -25,13 +25,13 @@ package cc.redberry.core.utils;
 import cc.redberry.core.tensor.Tensor;
 
 /**
- *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
 public interface Indicator<E> {
 
     boolean is(E object);
+
     public static final Indicator TRUE_INDICATOR = new Indicator() {
 
         @Override
@@ -49,6 +49,7 @@ public interface Indicator<E> {
 
     public static class Utils {
 
+        @SafeVarargs
         public static <T> Indicator<T> and(final Indicator<T>... indicators) {
             return new Indicator<T>() {
 
@@ -62,6 +63,7 @@ public interface Indicator<E> {
             };
         }
 
+        @SafeVarargs
         public static <T> Indicator<T> or(final Indicator<T>... indicators) {
             return new Indicator<T>() {
 
@@ -94,6 +96,6 @@ public interface Indicator<E> {
                 }
             };
         }
-    ;
-}
+
+    }
 }

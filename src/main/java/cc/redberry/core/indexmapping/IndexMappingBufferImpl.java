@@ -109,7 +109,7 @@ public final class IndexMappingBufferImpl implements IndexMappingBuffer {
         if (map.isEmpty())
             return sb.append(":empty buffer").toString();
         for (Map.Entry<Integer, IndexMappingBufferRecord> entry : map.entrySet()) {
-            sb.append(Context.get().getIndexConverterManager().getSymbol(entry.getKey().intValue(), OutputFormat.UTF8));
+            sb.append(Context.get().getIndexConverterManager().getSymbol(entry.getKey(), OutputFormat.UTF8));
             sb.append("->");
             sb.append(Context.get().getIndexConverterManager().getSymbol(entry.getValue().getIndexName(), OutputFormat.UTF8));
             sb.append(":");

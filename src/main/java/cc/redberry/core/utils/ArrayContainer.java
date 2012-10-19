@@ -59,9 +59,11 @@ public class ArrayContainer<E> implements List<E> {
 
     @Override
     public <T> T[] toArray(T[] a) {
-        if (a.length < elementData.length)
+        if (a.length < elementData.length) {
             // Make a new array of a's runtime type, but my contents:
-            return (T[]) Arrays.copyOf(elementData, elementData.length, a.getClass());
+            @SuppressWarnings("unchecked") T[] result = (T[]) Arrays.copyOf(elementData, elementData.length, a.getClass());
+            return result;
+        }
         System.arraycopy(elementData, 0, a, 0, elementData.length);
         if (a.length > elementData.length)
             a[elementData.length] = null;

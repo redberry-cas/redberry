@@ -188,13 +188,13 @@ public abstract class SimpleIndicesAbstract extends AbstractIndices implements S
             return null;
         SimpleIndicesOfTensor _indices = (SimpleIndicesOfTensor) indices;
         boolean sign1;
-        out_level_0:
+        out:
         for (Symmetry s1 : symmetries) {
             sign1 = s1.isAntiSymmetry();
             for (int i = 0; i < data.length; ++i)
                 if (data[s1.newIndexOf(i)] != (_indices).data[i])
-                    continue;
-            return Boolean.valueOf(sign1);
+                    continue out;
+            return sign1;
         }
         return null;
     }

@@ -110,8 +110,6 @@ public class ParseNode {
         final ParseNode other = (ParseNode) obj;
         if (this.tensorType != other.tensorType)
             return false;
-        if (!Arrays.deepEquals(this.content, other.content))
-            return false;
-        return true;
+        return Arrays.deepEquals(this.content, other.content);
     }
 }

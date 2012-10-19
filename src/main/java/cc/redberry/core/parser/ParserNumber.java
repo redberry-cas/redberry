@@ -40,7 +40,7 @@ public class ParserNumber implements NodeParser {
     public ParseNode parseNode(String expression, cc.redberry.core.parser.Parser parser) {
         Complex value;
         try {
-            value = (Complex) NumberParser.COMPLEX_PARSER.parse(expression);
+            value = NumberParser.COMPLEX_PARSER.parse(expression);
         } catch (NumberFormatException e) {
             return null;
         }

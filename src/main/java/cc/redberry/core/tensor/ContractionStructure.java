@@ -25,16 +25,14 @@ package cc.redberry.core.tensor;
 import java.util.Arrays;
 
 /**
- *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
 public final class ContractionStructure {
 
     public static final ContractionStructure EMPTY_INSTANCE =
-            new ContractionStructure(new TensorContraction((short) -1, new long[0]),
-                                     new TensorContraction[0]);
-    
+            new ContractionStructure(new TensorContraction((short) -1, new long[0]));
+
     private final TensorContraction freeContraction;
     private final TensorContraction[] contractions;
 

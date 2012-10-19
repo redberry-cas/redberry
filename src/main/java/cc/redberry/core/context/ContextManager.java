@@ -93,8 +93,7 @@ public final class ContextManager {
 
         @Override
         public Thread newThread(Runnable r) {
-            Thread thread = new Thread(new RunnableWrapper(container, r));
-            return thread;
+            return new Thread(new RunnableWrapper(container, r));
         }
     }
 

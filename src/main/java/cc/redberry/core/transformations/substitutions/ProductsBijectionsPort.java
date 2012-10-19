@@ -110,9 +110,7 @@ public final class ProductsBijectionsPort implements OutputPortUnsafe<int[]> {
         //BEWARE!
         if (t0.getIndices().getClass() != t1.getIndices().getClass())
             return false;
-        if (t0.getIndices().size() != t1.getIndices().size())
-            return false;
-        return true;
+        return t0.getIndices().size() == t1.getIndices().size();
     }
 
     private static boolean alreadyContains(final int[] bijection, int value) {

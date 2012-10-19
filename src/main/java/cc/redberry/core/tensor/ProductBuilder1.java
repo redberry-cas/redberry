@@ -84,10 +84,8 @@ public class ProductBuilder1 implements TensorBuilder {
         }
         if (isScalar(tensor)) {
             putScalar(tensor);
-            return;
         } else
             putNonScalar(tensor);
-
     }
 
     private boolean complexIsZero() {
@@ -113,9 +111,11 @@ public class ProductBuilder1 implements TensorBuilder {
             Boolean compare = null;
             for (PowerNode node : nodes) {
                 compare = TensorUtils.compare1(base, node.base);
-                if (compare == null)
+                if (compare == null) {
                     continue;
-                else if (!compare.booleanValue()) {
+                }
+
+                if (!compare) {
                     node.power.put(exponent);
                     return;
                 } else {
@@ -139,7 +139,7 @@ public class ProductBuilder1 implements TensorBuilder {
     private void putNonScalar(Tensor tensor) {
         Indices freeIndices = tensor.getIndices().getFree();
         int matchedPosition = -1;
-        int freeIndex = 0;
+        int freeIndex;
         for (int i = freeIndices.size() - 1; i >= 0; --i) {
             freeIndex = freeIndices.get(i);
             for (matchedPosition = connectedComponents.size() - 1; matchedPosition >= 0; --matchedPosition) {
@@ -162,7 +162,6 @@ public class ProductBuilder1 implements TensorBuilder {
         if (component.freeIndices.isEmpty()) {
             connectedComponents.remove(matchedPosition);
             putScalar(new Product(component.indicesBuilder.getIndices(), Complex.ONE, new Tensor[0], component.toArray()));
-            return;
         }
     }
 

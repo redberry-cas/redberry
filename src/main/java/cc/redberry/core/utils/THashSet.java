@@ -105,6 +105,7 @@ public final class THashSet<T extends Tensor> implements Set<T> {
             return iterator.hasNext();
         }
 
+        @SuppressWarnings("unchecked")
         @Override
         public T next() {
             return (T) iterator.next().tensor;
@@ -116,9 +117,10 @@ public final class THashSet<T extends Tensor> implements Set<T> {
         }
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public Iterator<T> iterator() {
-        return new SetIterator<>(set.iterator());
+        return new SetIterator<T>(set.iterator());
     }
 
     @Override
@@ -156,9 +158,10 @@ public final class THashSet<T extends Tensor> implements Set<T> {
         return a;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public <T> T[] toArray(T[] a) {
-        T[] r = a.length >= size() ? a
+         T[] r = a.length >= size() ? a
                 : (T[]) java.lang.reflect.Array.newInstance(a.getClass().getComponentType(), size());
         int i = -1;
         for (TensorWrapperWithEquals tw : set)

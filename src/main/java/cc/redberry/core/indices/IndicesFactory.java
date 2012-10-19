@@ -59,7 +59,7 @@ public class IndicesFactory {
         if (indices.size() == 0)
             return EMPTY_INDICES;
         if (indices instanceof SortedIndices)
-            return (SortedIndices) indices;
+            return indices;
         return new SortedIndices(indices.getAllIndices().copy());
     }
 

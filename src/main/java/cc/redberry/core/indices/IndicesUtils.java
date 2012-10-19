@@ -371,7 +371,7 @@ public final class IndicesUtils {
     }
 
     public static String toString(int index, OutputFormat mode) {
-        return (getState(index) == true ? "^{" : "_{") + Context.get().getIndexConverterManager().getSymbol(index, mode) + "}";
+        return (getState(index) ? "^{" : "_{") + Context.get().getIndexConverterManager().getSymbol(index, mode) + "}";
     }
 
     public static String toString(int index) {

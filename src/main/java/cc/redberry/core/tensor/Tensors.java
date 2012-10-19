@@ -23,6 +23,7 @@
 package cc.redberry.core.tensor;
 
 import cc.redberry.concurrent.OutputPortUnsafe;
+import cc.redberry.core.combinatorics.Combinatorics;
 import cc.redberry.core.combinatorics.Symmetry;
 import cc.redberry.core.context.CC;
 import cc.redberry.core.context.NameDescriptor;
@@ -560,6 +561,12 @@ public final class Tensors {
 
     public static void addSymmetry(SimpleTensor tensor, IndexType type, boolean sign, int... symmetry) {
         tensor.getIndices().getSymmetries().add(type.getType(), new Symmetry(symmetry, sign));
+    }
+
+    public static void setSymmetric(SimpleTensor tensor, IndexType type) {
+        int dimension = tensor.getIndices().size(type);
+        addSymmetry(tensor, type, false, Combinatorics.createCycle(dimension));
+        addSymmetry(tensor, type, false, Combinatorics.createTransposition(dimension));
     }
 
     /**

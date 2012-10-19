@@ -56,10 +56,10 @@ public class ProductBijectionPerformanceTest {
             if (!(t instanceof Product))
                 continue;
 
-            Product from = (Product) t, target = from;
+            Product from = (Product) t;
 
             long start = System.nanoTime();
-            ProductsBijectionsPort port = new ProductsBijectionsPort(from.getContent(), target.getContent());
+            ProductsBijectionsPort port = new ProductsBijectionsPort(from.getContent(), from.getContent());
 
             int[] bijection;
             boolean good = false;

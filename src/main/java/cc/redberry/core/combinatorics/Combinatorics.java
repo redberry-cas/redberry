@@ -114,7 +114,7 @@ public final class Combinatorics {
     public static <T> T[] shuffle(T[] array, final int[] permutation) {
         if (array.length != permutation.length)
             throw new IllegalArgumentException();
-        if (!testPermutationСorrectness(permutation))
+        if (!testPermutationCorrectness(permutation))
             throw new IllegalArgumentException();
         Class<?> type = array.getClass().getComponentType();
         @SuppressWarnings("unchecked") // OK, because array is of type T
@@ -124,7 +124,7 @@ public final class Combinatorics {
         return newArray;
     }
 
-    public static boolean testPermutationСorrectness(int[] permutation) {
+    public static boolean testPermutationCorrectness(int[] permutation) {
         int[] _permutation = new int[permutation.length];
         System.arraycopy(permutation, 0, _permutation, 0, permutation.length);
         Arrays.sort(_permutation);
