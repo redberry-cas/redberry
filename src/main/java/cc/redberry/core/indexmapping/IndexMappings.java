@@ -25,6 +25,7 @@ package cc.redberry.core.indexmapping;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.tensor.*;
 import cc.redberry.core.tensor.functions.*;
+
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;

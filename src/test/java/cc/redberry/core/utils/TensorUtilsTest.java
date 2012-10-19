@@ -23,7 +23,8 @@
 package cc.redberry.core.utils;
 
 import cc.redberry.core.combinatorics.Symmetry;
-import cc.redberry.core.combinatorics.symmetries.*;
+import cc.redberry.core.combinatorics.symmetries.Symmetries;
+import cc.redberry.core.combinatorics.symmetries.SymmetriesFactory;
 import cc.redberry.core.context.CC;
 import cc.redberry.core.indices.IndexType;
 import cc.redberry.core.tensor.Tensor;

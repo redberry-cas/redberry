@@ -26,6 +26,7 @@ import cc.redberry.core.context.CC;
 import cc.redberry.core.context.Context;
 import cc.redberry.core.context.OutputFormat;
 import cc.redberry.core.indices.IndicesUtils;
+
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;

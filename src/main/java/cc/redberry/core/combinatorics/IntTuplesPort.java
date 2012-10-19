@@ -23,6 +23,7 @@
 package cc.redberry.core.combinatorics;
 
 import cc.redberry.concurrent.OutputPortUnsafe;
+
 import java.util.Arrays;
 
 /**

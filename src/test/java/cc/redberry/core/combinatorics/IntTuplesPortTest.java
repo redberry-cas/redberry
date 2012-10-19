@@ -22,11 +22,8 @@
  */
 package cc.redberry.core.combinatorics;
 
-import cc.redberry.concurrent.*;
-import java.util.*;
-import org.apache.commons.math3.complex.*;
-import org.junit.*;
-import static cc.redberry.core.TAssert.*;
+import org.junit.Assert;
+import org.junit.Test;
 
 /**
  *

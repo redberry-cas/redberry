@@ -23,20 +23,16 @@
 package cc.redberry.core.tensor;
 
 import cc.redberry.core.TAssert;
-import cc.redberry.core.combinatorics.IntPermutationsGenerator;
-import cc.redberry.core.indices.InconsistentIndicesException;
 import cc.redberry.core.indices.IndexType;
 import cc.redberry.core.number.Complex;
-import cc.redberry.core.parser.ParserIndices;
-import cc.redberry.core.transformations.*;
-import cc.redberry.core.utils.IntArrayList;
+import cc.redberry.core.transformations.ContractIndices;
+import cc.redberry.core.transformations.Expand;
+import cc.redberry.core.transformations.Together;
+import cc.redberry.core.transformations.Transformation;
 import cc.redberry.core.utils.TensorUtils;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
-
-import java.util.HashSet;
-import java.util.Set;
 
 import static cc.redberry.core.tensor.Tensors.*;
 

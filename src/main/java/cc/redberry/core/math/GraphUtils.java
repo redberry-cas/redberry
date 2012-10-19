@@ -23,6 +23,7 @@
 package cc.redberry.core.math;
 
 import cc.redberry.core.utils.ArraysUtils;
+
 import java.util.ArrayDeque;
 import java.util.Arrays;
 import java.util.Deque;

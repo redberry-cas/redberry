@@ -24,6 +24,7 @@ package cc.redberry.core.indexmapping;
 
 import cc.redberry.core.combinatorics.IntPermutationsGenerator;
 import cc.redberry.core.tensor.Tensor;
+
 import java.util.ArrayList;
 import java.util.List;
 

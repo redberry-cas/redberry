@@ -26,6 +26,7 @@ import cc.redberry.core.indices.Indices;
 import cc.redberry.core.indices.IndicesFactory;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.tensor.Tensor;
+
 import java.util.Objects;
 
 /**

@@ -25,8 +25,9 @@ package cc.redberry.core.combinatorics.symmetries;
 import cc.redberry.core.combinatorics.InconsistentGeneratorsException;
 import cc.redberry.core.combinatorics.IntPermutationsGenerator;
 import cc.redberry.core.combinatorics.Symmetry;
-import java.util.Arrays;
 import org.junit.Test;
+
+import java.util.Arrays;
 
 import static org.junit.Assert.assertArrayEquals;
 

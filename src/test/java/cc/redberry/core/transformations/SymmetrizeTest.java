@@ -22,13 +22,15 @@
  */
 package cc.redberry.core.transformations;
 
-import cc.redberry.core.combinatorics.*;
-import cc.redberry.core.combinatorics.symmetries.*;
-import cc.redberry.core.context.*;
-import cc.redberry.core.parser.*;
-import cc.redberry.core.tensor.*;
-import org.junit.*;
-import static cc.redberry.core.TAssert.*;
+import cc.redberry.core.combinatorics.Symmetry;
+import cc.redberry.core.combinatorics.symmetries.Symmetries;
+import cc.redberry.core.combinatorics.symmetries.SymmetriesFactory;
+import cc.redberry.core.parser.ParserIndices;
+import cc.redberry.core.tensor.Tensor;
+import cc.redberry.core.tensor.Tensors;
+import org.junit.Test;
+
+import static cc.redberry.core.TAssert.assertEquals;
 
 /**
  *

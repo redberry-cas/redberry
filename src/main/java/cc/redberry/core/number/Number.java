@@ -22,9 +22,10 @@
  */
 package cc.redberry.core.number;
 
-import java.math.BigInteger;
 import org.apache.commons.math3.FieldElement;
 import org.apache.commons.math3.fraction.BigFraction;
+
+import java.math.BigInteger;
 
 /**
  *

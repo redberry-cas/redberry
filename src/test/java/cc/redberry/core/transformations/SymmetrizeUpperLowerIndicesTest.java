@@ -22,8 +22,7 @@
  */
 package cc.redberry.core.transformations;
 
-import cc.redberry.core.transformations.SymmetrizeUpperLowerIndices;
-import cc.redberry.core.*;
+import cc.redberry.core.TAssert;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.tensor.Tensors;
 import org.junit.Test;

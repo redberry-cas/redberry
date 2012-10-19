@@ -29,6 +29,7 @@ import cc.redberry.core.tensor.ProductContent;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.utils.stretces.PrecalculatedStretches;
 import cc.redberry.core.utils.stretces.Stretch;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;

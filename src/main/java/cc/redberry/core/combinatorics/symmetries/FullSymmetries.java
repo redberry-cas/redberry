@@ -25,6 +25,7 @@ package cc.redberry.core.combinatorics.symmetries;
 import cc.redberry.core.combinatorics.Combinatorics;
 import cc.redberry.core.combinatorics.PermutationsGenerator;
 import cc.redberry.core.combinatorics.Symmetry;
+
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
