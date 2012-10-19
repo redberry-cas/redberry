@@ -50,9 +50,7 @@ public abstract class MultiTensor extends Tensor {
             throw new IndexOutOfBoundsException();
         TensorBuilder builder = getBuilder();
         for (int i = 0; i < size; ++i)
-            if (i == position)
-                continue;
-            else
+            if (i != position)
                 builder.put(get(i));
         return builder.build();
     }

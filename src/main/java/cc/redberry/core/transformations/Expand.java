@@ -31,10 +31,14 @@ import cc.redberry.core.indices.IndicesUtils;
 import cc.redberry.core.indices.SimpleIndices;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.tensor.*;
-import cc.redberry.core.tensor.iterator.*;
+import cc.redberry.core.tensor.iterator.TensorLastIterator;
+import cc.redberry.core.tensor.iterator.TraverseGuide;
+import cc.redberry.core.tensor.iterator.TraverseState;
+import cc.redberry.core.tensor.iterator.TreeTraverseIterator;
 import cc.redberry.core.utils.ArraysUtils;
 import cc.redberry.core.utils.Indicator;
 import cc.redberry.core.utils.TensorUtils;
+
 import java.math.BigInteger;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
@@ -42,7 +46,6 @@ import java.util.concurrent.atomic.AtomicLong;
 import static cc.redberry.core.tensor.Tensors.*;
 
 /**
- *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
@@ -70,6 +73,7 @@ public final class Expand implements Transformation {
     public static Tensor expand(Tensor tensor, Transformation... transformations) {
         return expand(tensor, Indicator.TRUE_INDICATOR, transformations);
     }
+
     private static final Indicator<Tensor> productIndicator = Indicator.Utils.classIndicator(Product.class);
 
     public static Tensor expand(Tensor tensor, Indicator<Tensor> indicator, Transformation[] transformations) {
@@ -85,9 +89,9 @@ public final class Expand implements Transformation {
             else if (isExpandablePower(current) && indicator.is(current) && !iterator.checkLevel(productIndicator, 1)) {
                 Sum sum = (Sum) current.get(0);
                 iterator.set(expandPower(sum,
-                                         ((Complex) current.get(1)).getReal().intValue(),
-                                         ArraysUtils.toArray(TensorUtils.getAllIndicesNames(sum)),
-                                         transformations));
+                        ((Complex) current.get(1)).getReal().intValue(),
+                        ArraysUtils.toArray(TensorUtils.getAllIndicesNames(sum)),
+                        transformations));
             }
         }
         return iterator.result();
@@ -124,9 +128,9 @@ public final class Expand implements Transformation {
                 if (initialForbiddenIndices == null)
                     initialForbiddenIndices = TensorUtils.getAllIndicesNames(current);
                 t = expandPower((Sum) t.get(0),
-                                ((Complex) t.get(1)).getReal().intValue(),
-                                ArraysUtils.toArray(initialForbiddenIndices),
-                                transformations);
+                        ((Complex) t.get(1)).getReal().intValue(),
+                        ArraysUtils.toArray(initialForbiddenIndices),
+                        transformations);
                 initialForbiddenIndices.addAll(TensorUtils.getAllIndicesNames(t));
                 expand = true;
             }
@@ -509,6 +513,7 @@ public final class Expand implements Transformation {
 
         public SumPort(Tensor tensor) {
             this.tensor = tensor;
+            //noinspection unchecked
             this.ports = new OutputPortUnsafe[tensor.size()];
             reset();
         }

@@ -104,9 +104,7 @@ public final class PriorityPermutationGenerator {
             if (getClass() != obj.getClass())
                 return false;
             final PermutationPriorityTuple other = (PermutationPriorityTuple) obj;
-            if (!Arrays.equals(this.permutation, other.permutation))
-                return false;
-            return true;
+            return Arrays.equals(this.permutation, other.permutation);
         }
 
         @Override

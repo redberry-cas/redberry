@@ -23,7 +23,6 @@
 package cc.redberry.core.indices;
 
 /**
- *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
@@ -39,7 +38,7 @@ final class SimpleIndicesIsolated extends SimpleIndicesAbstract {
 
     @Override
     protected SimpleIndices create(int[] data, IndicesSymmetries symmetries) {
-        return new SimpleIndicesIsolated(true, data, symmetries.clone());
+        return new SimpleIndicesIsolated(true, data, symmetries == null ? null : symmetries.clone());
     }
 
     @Override

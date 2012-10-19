@@ -27,6 +27,7 @@ import cc.redberry.core.indexmapping.IndexMappings;
 import cc.redberry.core.indices.Indices;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.tensor.TensorField;
+import cc.redberry.core.tensor.Tensors;
 import cc.redberry.core.transformations.ApplyIndexMapping;
 import cc.redberry.core.transformations.Transformation;
 import cc.redberry.core.utils.TensorUtils;
@@ -49,12 +50,11 @@ class TensorFieldSubstitution implements Transformation {
     };
     private final TensorField from;
     private final Tensor to;
-    private final boolean symbolic;
 
     private TensorFieldSubstitution(TensorField from, Tensor to) {
         this.from = from;
         this.to = to;
-        this.symbolic = TensorUtils.isSymbolic(to);
+ //       this.symbolic = TensorUtils.isSymbolic(to);
     }
 
     @Override
@@ -95,7 +95,8 @@ class TensorFieldSubstitution implements Transformation {
                 newTo = transformation.transform(newTo);
             if (!TensorUtils.isSymbolic(newTo))
                 newTo = ApplyIndexMapping.applyIndexMapping(newTo, buffer, iterator.getForbidden());
-
+            if (buffer.getSignum())
+                newTo = Tensors.negate(newTo);
             iterator.set(newTo);
         }
         return iterator.result();

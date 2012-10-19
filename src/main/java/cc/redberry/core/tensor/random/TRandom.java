@@ -99,7 +99,7 @@ public final class TRandom {
             boolean withSymmetries,
             long seed) {
         this.random = new Well19937c();
-        this.random.setSeed(seed = random.nextLong());
+        this.random.setSeed(seed);
         this.minIndices = minIndices;
         this.maxIndices = maxIndices;
         this.withSymmetries = withSymmetries;

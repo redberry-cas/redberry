@@ -70,8 +70,7 @@ public final class ByteBackedBitArray implements BitArray {
     public void set(ByteBackedBitArray ba) {
         if (ba.size != this.size)
             throw new IllegalArgumentException();
-        for (int i = 0; i < this.data.length; ++i)
-            this.data[i] = ba.data[i];
+        System.arraycopy(ba.data, 0, this.data, 0, this.data.length);
     }
 
     @Override
@@ -173,9 +172,7 @@ public final class ByteBackedBitArray implements BitArray {
         final ByteBackedBitArray other = (ByteBackedBitArray) obj;
         if (!Arrays.equals(this.data, other.data))
             return false;
-        if (this.size != other.size)
-            return false;
-        return true;
+        return this.size == other.size;
     }
 
     @Override

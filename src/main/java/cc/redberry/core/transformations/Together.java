@@ -79,7 +79,7 @@ public final class Together implements Transformation {
             return t;
 
         SplitStruct base = splitFraction(t.get(0)), temp;
-        List<Tensor> numeratorTerms[] = new List[t.size()];
+        @SuppressWarnings("unchecked") List<Tensor> numeratorTerms[] = new List[t.size()];
         numeratorTerms[0] = new ArrayList<>();
         numeratorTerms[0].add(base.numerator);
         Tensor s, power;

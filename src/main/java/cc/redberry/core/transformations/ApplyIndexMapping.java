@@ -118,6 +118,8 @@ public final class ApplyIndexMapping implements Transformation {
     }
 
     public static Tensor renameDummyFromClonedSource(Tensor tensor, int[] forbidden) {
+        if (forbidden.length == 0)
+            return tensor;
         int[] from = tensor.getIndices().getFree().getAllIndices().copy();
         for (int i = from.length - 1; i >= 0; --i)
             from[i] = IndicesUtils.getNameWithType(from[i]);

@@ -191,9 +191,7 @@ public final class IntArrayList {
     }
 
     public boolean contains(int value) {
-        if (indexOf(value) < 0)
-            return false;
-        return true;
+        return indexOf(value) >= 0;
     }
 
     public int indexOf(int value) {
@@ -201,6 +199,10 @@ public final class IntArrayList {
             if (data[i] == value)
                 return i;
         return -1;
+    }
+
+    public boolean isEmpty() {
+        return size == 0;
     }
 
     @Override

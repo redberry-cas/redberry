@@ -34,10 +34,9 @@ public final class IntCombinationPermutationGenerator implements IntCombinatoric
     final int[] combinationPermutation;
     private final IntPermutationsGenerator permutationsGenerator;
     private final IntCombinationsGenerator combinationsGenerator;
-    private final int n, k;
+    private final int k;
 
     public IntCombinationPermutationGenerator(int n, int k) {
-        this.n = n;
         this.k = k;
         this.combinationsGenerator = new IntCombinationsGenerator(n, k);
         this.combination = this.combinationsGenerator.combination;

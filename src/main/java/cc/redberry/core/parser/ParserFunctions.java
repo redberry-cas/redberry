@@ -52,7 +52,7 @@ public class ParserFunctions implements NodeParser {
             if (expression.substring(0, temp.length()).equals(temp)) {
                 function = temp;
                 break;
-            };
+            }
             temp = null;
         }
         if (function == null)

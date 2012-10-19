@@ -85,7 +85,7 @@ public class THashMap<K extends Tensor, V> extends AbstractMap<K, V> {
             return false;
         if (getClass() != obj.getClass())
             return false;
-        final THashMap<K, V> other = (THashMap<K, V>) obj;
+        @SuppressWarnings("unchecked") final THashMap<K, V> other = (THashMap<K, V>) obj;
         return map.equals(other.map);
     }
 
@@ -143,6 +143,7 @@ public class THashMap<K extends Tensor, V> extends AbstractMap<K, V> {
                 return innerIterator.hasNext();
             }
 
+            @SuppressWarnings("unchecked")
             @Override
             public K next() {
                 return (K) innerIterator.next().tensor;
@@ -189,6 +190,7 @@ public class THashMap<K extends Tensor, V> extends AbstractMap<K, V> {
                 return innerIterator.hasNext();
             }
 
+            @SuppressWarnings("unchecked")
             @Override
             public Entry<K, V> next() {
                 Entry<TensorWrapperWithEquals, V> e = innerIterator.next();

@@ -32,6 +32,7 @@ import cc.redberry.core.number.Real;
  */
 public class NumberParser<T extends cc.redberry.core.number.Number<T>> {
 
+    @SuppressWarnings("unchecked")
     private static final TokenParser<Complex>[] ComplexTokens = new TokenParser[]{
         BracketToken.INSTANCE,
         new OperatorToken<Complex>('+', '-') {
@@ -64,6 +65,7 @@ public class NumberParser<T extends cc.redberry.core.number.Number<T>> {
         },
         ComplexToken.INSTANCE
     };
+    @SuppressWarnings("unchecked")
     private static final TokenParser<Real>[] RealTokens = new TokenParser[]{
         BracketToken.INSTANCE,
         new OperatorToken<Real>('+', '-') {
@@ -106,7 +108,7 @@ public class NumberParser<T extends cc.redberry.core.number.Number<T>> {
 
     public T parse(String expression) {
         for (TokenParser parser : parsers) {
-            T element = (T) parser.parse(expression, this);
+            @SuppressWarnings("unchecked") T element = (T) parser.parse(expression, this);
             if (element == null)
                 continue;
             return element;

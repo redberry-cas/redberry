@@ -41,7 +41,7 @@ public class ComplexToken implements TokenParser<Complex> {
             return Complex.IMAGEONE;
         try {
             return new Complex(new BigInteger(expression));
-        } catch (NumberFormatException exception) {
+        } catch (NumberFormatException ignored) {
         }
         try {
             return new Complex(Double.parseDouble(expression));

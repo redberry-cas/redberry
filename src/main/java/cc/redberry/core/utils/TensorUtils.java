@@ -106,11 +106,11 @@ public class TensorUtils {
     }
 
     public static boolean isImageOne(Tensor tensor) {
-        return tensor instanceof Complex && ((Complex) tensor).equals(Complex.IMAGEONE);
+        return tensor instanceof Complex && tensor.equals(Complex.IMAGEONE);
     }
 
     public static boolean isMinusOne(Tensor tensor) {
-        return tensor instanceof Complex && ((Complex) tensor).equals(Complex.MINUSE_ONE);
+        return tensor instanceof Complex && tensor.equals(Complex.MINUSE_ONE);
     }
 
     public static boolean isIntegerOdd(Tensor tensor) {
@@ -175,10 +175,7 @@ public class TensorUtils {
         if (u.hashCode() != v.hashCode())
             return false;
         if (u.getClass() == SimpleTensor.class)
-            if (!u.getIndices().equals(v.getIndices()))
-                return false;
-            else
-                return true;
+            return u.getIndices().equals(v.getIndices());
         if (u.size() != v.size())
             return false;
         if (u instanceof MultiTensor) {
@@ -198,7 +195,7 @@ public class TensorUtils {
                         OUT:
                         for (n = begin; n < i; ++n) {
                             for (j = begin; j < i; ++j)
-                                if (usedPos[j - begin] == false && equalsExactly(u.get(n), v.get(j))) {
+                                if (!usedPos[(j - begin)] && equalsExactly(u.get(n), v.get(j))) {
                                     usedPos[j - begin] = true;
                                     continue OUT;
                                 }
@@ -359,9 +356,7 @@ public class TensorUtils {
                 set.add(ind.get(i));
         } else
             for (Tensor c : t)
-                if (c instanceof ScalarFunction)
-                    continue;
-                else
+                if (!(c instanceof ScalarFunction))
                     appendAllIndices(c, set);
     }
 

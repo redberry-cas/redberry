@@ -53,7 +53,6 @@ public final class SubstitutionIterator implements TreeIterator {
     @Override
     public Tensor next() {
         TraverseState nextState;
-        Tensor tensor;
 
         while ((nextState = innerIterator.next()) == TraverseState.Entering) { //"Diving"
             /*tensor = innerIterator.current();
@@ -304,7 +303,7 @@ public final class SubstitutionIterator implements TreeIterator {
             iterator = parentAdded.iterator();
             while (iterator.hasNext()) {
                 //Searching index in initial dummy indices set
-                iIndex = Arrays.binarySearch(allDummyIndices, index = iterator.next());
+                iIndex = Arrays.binarySearch(allDummyIndices, iterator.next());
 
                 //If this index is new for this sum it will never be removed,
                 //so we don't need to store information about it.

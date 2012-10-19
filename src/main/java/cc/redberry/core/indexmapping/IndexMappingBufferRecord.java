@@ -110,9 +110,7 @@ public final class IndexMappingBufferRecord {
         final IndexMappingBufferRecord other = (IndexMappingBufferRecord) obj;
         if (this.states != other.states)
             return false;
-        if (this.toName != other.toName)
-            return false;
-        return true;
+        return this.toName == other.toName;
     }
 
     @Override

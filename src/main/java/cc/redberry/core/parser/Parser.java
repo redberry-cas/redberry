@@ -31,8 +31,7 @@ import java.util.Arrays;
 public class Parser {
 
     public static final Parser DEFAULT =
-            new Parser(new NodeParser[]{
-                    ParserBrackets.INSTANCE,
+            new Parser(ParserBrackets.INSTANCE,
                     ParserSum.INSTANCE,
                     ParserProduct.INSTANCE,
                     ParserSimpleTensor.INSTANCE,
@@ -41,8 +40,7 @@ public class Parser {
                     ParserNumber.INSTANCE,
                     ParserFunctions.INSTANCE,
                     ParserExpression.INSTANCE,
-                    ParserPowerAst.INSTANCE
-            });
+                    ParserPowerAst.INSTANCE);
     private final NodeParser[] nodeParsers;
 
     public Parser(NodeParser... nodeParsers) {

@@ -31,21 +31,20 @@ import java.util.TreeSet;
  * This class provides generating all compositions of given set of combinatorics.
  * So, if we have some set of combinatorics S={p1,p2,...,pN}, this class can iterate
  * over all possible compositions in all possible orders of combinatorics p1,p2,....
- * In this way, we iterating over combinations 
+ * In this way, we iterating over combinations
  * <var>p<sub>i<sub>1</sub></sub><sup>n<sub>1</sub><sup></var>
  * <var>p<sub>i<sub>2</sub></sub><sup>n<sub>2</sub><sup></var>....
  * <var>p<sub>i<sub>N</sub></sub><sup>n<sub>N</sub><sup></var>
- * throughout all possible combinations of 
+ * throughout all possible combinations of
  * {<var>i<sub>1</sub></var>,<var>i<sub>2</sub></var>,...<var>i<sub>N</sub></var>}
- * and {<var>n<sub>1</sub></var>,<var>n<sub>2</sub></var>,...<var>n<sub>N</sub></var>}, 
- * where each i index runs 0...N and each n index runs 0...&#8734;, until the 
+ * and {<var>n<sub>1</sub></var>,<var>n<sub>2</sub></var>,...<var>n<sub>N</sub></var>},
+ * where each i index runs 0...N and each n index runs 0...&#8734;, until the
  * result is unique. Algorithm, witch provides such iterating, uses {@link TreeSet}
  * for store generated combinatorics.
- * 
+ *
+ * @param <T> some inheritor of Permutation, e.g. {@code Permutation} or {@code Symmetry}
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
- * 
- * @param <T> some inheritor of Permutation, e.g. {@code Permutation} or {@code Symmetry}
  */
 public final class PermutationsSpanIterator<T extends Permutation> implements Iterator<T> {
     private TreeSet<T> set = null;
@@ -60,19 +59,21 @@ public final class PermutationsSpanIterator<T extends Permutation> implements It
     public PermutationsSpanIterator(List<T> permutations) {
         set = new TreeSet<>();
         this.upperLayer = new ArrayList<>();
+        //noinspection unchecked
         this.upperLayer.add((T) permutations.get(0).getOne());
         this.lowerLayer = permutations;
     }
+
     T current;
 
     /**
-     * 
      * {@inheritDoc }
-     * 
+     *
      * @return {@inheritDoc}
-     * @throws InconsistentGeneratorsException if combinatorics are inconsistent,
-     * e.g. it can happens when symmetries represents identical permutation but 
-     * has different {@code signums}
+     * @throws InconsistentGeneratorsException
+     *          if combinatorics are inconsistent,
+     *          e.g. it can happens when symmetries represents identical permutation but
+     *          has different {@code signums}
      */
     @Override
     public boolean hasNext() {
@@ -80,9 +81,8 @@ public final class PermutationsSpanIterator<T extends Permutation> implements It
     }
 
     /**
-     * 
      * {@inheritDoc }
-     * 
+     *
      * @return {@inheritDoc}
      */
     @Override
@@ -99,7 +99,6 @@ public final class PermutationsSpanIterator<T extends Permutation> implements It
                 if (lowerLayer.isEmpty())
                     break;
                 forward = !forward;
-                continue;
             } else {
                 composition = tryPair(lowerLayer.get(lowerIndex), upperLayer.get(upperIndex));
                 forward = !forward;
@@ -120,7 +119,7 @@ public final class PermutationsSpanIterator<T extends Permutation> implements It
     }
 
     private T tryPair(T p0, T p1) {
-        T composition = (T) p0.composition(p1);
+        @SuppressWarnings("unchecked") T composition = (T) p0.composition(p1);
         T setComposition = set.ceiling(composition);
         if (setComposition != null && setComposition.compareTo(composition) == 0)
             if (setComposition.equals(composition))
@@ -134,7 +133,7 @@ public final class PermutationsSpanIterator<T extends Permutation> implements It
 
     /**
      * Throws UnsupportedOperationException.
-     * 
+     *
      * @throws UnsupportedOperationException always
      */
     @Override

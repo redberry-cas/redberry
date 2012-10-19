@@ -28,7 +28,6 @@ import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.utils.IntArrayList;
 
 /**
- *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
@@ -53,7 +52,7 @@ final class IndexlessBijectionsPort implements OutputPortUnsafe<int[]> {
             for (j = 0; j < to.length; ++j)
                 if (to[j].hashCode() >= hash)
                     break;
-            if (to[j].hashCode() > hash) {
+            if (j == to.length || to[j].hashCode() > hash) {
                 finished = true;
                 break;
             }
@@ -62,6 +61,10 @@ final class IndexlessBijectionsPort implements OutputPortUnsafe<int[]> {
                     break;
                 hashReflections[i].add(j);
             }
+        }
+        if (finished) {
+            combinationsPort = null;
+            return;
         }
         int[][] r = new int[from.length][];
         for (i = 0; i < from.length; ++i)

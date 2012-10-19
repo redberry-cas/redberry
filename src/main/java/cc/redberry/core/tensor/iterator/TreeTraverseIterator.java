@@ -291,6 +291,7 @@ public final class TreeTraverseIterator<T extends Payload<T>> {
             return isModified;
         }
 
+        @SuppressWarnings("unchecked")
         @Override
         public StackPosition previous() {
             if (previous.previous == null)

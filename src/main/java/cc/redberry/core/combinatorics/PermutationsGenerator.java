@@ -80,9 +80,11 @@ public class PermutationsGenerator<T extends Permutation> implements Iterator<T>
      *
      * @return the next element in the iteration
      */
+    @SuppressWarnings("unchecked")
     @Override
     public T next() {
         generator.next();
+        //noinspection unchecked
         return (T) new Symmetry(generator.permutation.clone(), false);
     }
 

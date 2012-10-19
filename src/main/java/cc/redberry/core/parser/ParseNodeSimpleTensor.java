@@ -45,7 +45,7 @@ public class ParseNodeSimpleTensor extends ParseNode {
     }
 
     public ParseNodeSimpleTensor(SimpleIndices indices, String name) {
-        super(TensorType.SimpleTensor, new ParseNode[0]);
+        super(TensorType.SimpleTensor);
         this.indices = indices;
         this.name = name;
     }
@@ -72,8 +72,6 @@ public class ParseNodeSimpleTensor extends ParseNode {
         final ParseNodeSimpleTensor other = (ParseNodeSimpleTensor) obj;
         if (!Objects.equals(this.indices, other.indices))
             return false;
-        if (!Objects.equals(this.name, other.name))
-            return false;
-        return true;
+        return Objects.equals(this.name, other.name);
     }
 }

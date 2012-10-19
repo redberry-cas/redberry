@@ -137,6 +137,7 @@ public class SimpleTensor extends Tensor {
         return sb.toString();
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public final Iterator<Tensor> iterator() {
         return EmptyIterator.INSTANCE;

@@ -38,7 +38,7 @@ public class ParseNodeNumber extends ParseNode {
     public Complex value;
 
     public ParseNodeNumber(Complex value) {
-        super(TensorType.Number, new ParseNode[0]);
+        super(TensorType.Number);
         this.value = value;
     }
 
@@ -64,8 +64,6 @@ public class ParseNodeNumber extends ParseNode {
         if (getClass() != obj.getClass())
             return false;
         final ParseNodeNumber other = (ParseNodeNumber) obj;
-        if (!Objects.equals(this.value, other.value))
-            return false;
-        return true;
+        return Objects.equals(this.value, other.value);
     }
 }

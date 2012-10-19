@@ -65,7 +65,7 @@ public final class IndexConverterExtender implements IndexSymbolConverter {
                 throw new IndexConverterException();
             split[1] = split[1].substring(1, split[1].length() - 1);
         }
-        int num = -1;
+        int num;
         try {
             num = Integer.parseInt(split[1]);
         } catch (NumberFormatException e) {

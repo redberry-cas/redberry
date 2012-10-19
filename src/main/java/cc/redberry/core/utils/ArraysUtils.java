@@ -164,6 +164,7 @@ public final class ArraysUtils {
      * @since 2.1
      * @throws IllegalArgumentException if the array types are incompatible
      */
+    @SafeVarargs
     public static <T> T[] addAll(T[] array1, T... array2) {
         if (array1 == null)
             return array2.clone();

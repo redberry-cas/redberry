@@ -80,7 +80,7 @@ public interface OutputPortUnsafe<T> {
 
         @Override
         public Iterator<T> iterator() {
-            return new PortIterator<T>(opu);
+            return new PortIterator<>(opu);
         }
     }
 }
