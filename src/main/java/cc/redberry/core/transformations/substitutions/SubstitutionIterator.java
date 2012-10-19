@@ -107,6 +107,8 @@ public final class SubstitutionIterator implements TreeIterator {
     @Override
     public void set(Tensor tensor) {
         Tensor oldTensor = innerIterator.current();
+        if (oldTensor == tensor)
+            return;
 
         if (!tensor.getIndices().getFree().equalsRegardlessOrder(tensor.getIndices().getFree()))
             throw new RuntimeException("Substitution with different free indices.");

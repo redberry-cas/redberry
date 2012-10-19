@@ -715,6 +715,22 @@ public class SubstitutionsTest {
         TAssert.assertEquals(s.transform(t1), "x_k*y_m*f^m");
         TAssert.assertEquals(s.transform(t2), "x_m*y_k*f^m");
     }
+
+    @Test
+    public void testField27() {
+        Expression s = parseExpression("V_{i}[p_a, q_b] = -I*e*(p_i+q_i)");
+        Tensor t = parse("V^{i}[k_a,k_a-p_a+q_a]");
+        t = s.transform(t);
+        TAssert.assertEquals(t, "-I*e*(2*k^i-p^i+q^i)");
+    }
+
+    @Test
+    public void testField28() {
+        Expression s = parseExpression("f[x,y]=x+y");
+        Tensor t = parse("f[0,x]");
+        t = s.transform(t);
+        TAssert.assertEquals(t, "x");
+    }
     //TODO additional tests with specified field arguments indices
 
     @Test

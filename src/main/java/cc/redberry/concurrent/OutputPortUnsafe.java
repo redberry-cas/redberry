@@ -25,14 +25,13 @@ package cc.redberry.concurrent;
 import java.util.Iterator;
 
 /**
- *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
 public interface OutputPortUnsafe<T> {
     T take();
 
-    public static class Singleton<T> implements OutputPortUnsafe<T> {
+    public static final class Singleton<T> implements OutputPortUnsafe<T> {
         private T element;
 
         public Singleton(T element) {
@@ -47,7 +46,7 @@ public interface OutputPortUnsafe<T> {
         }
     }
 
-    public static class PortIterator<T> implements Iterator<T> {
+    public static final class PortIterator<T> implements Iterator<T> {
         private final OutputPortUnsafe<T> opu;
         private T next;
 
@@ -71,7 +70,7 @@ public interface OutputPortUnsafe<T> {
         }
     }
 
-    public static class PortIterable<T> implements Iterable<T> {
+    public static final class PortIterable<T> implements Iterable<T> {
         private final OutputPortUnsafe<T> opu;
 
         public PortIterable(OutputPortUnsafe<T> opu) {
