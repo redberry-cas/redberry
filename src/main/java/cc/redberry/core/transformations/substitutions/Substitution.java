@@ -9,25 +9,25 @@ import cc.redberry.core.transformations.Transformation;
  */
 public final class Substitution implements Transformation {
     private TreeNodeSubstitution[] treeNodeSubstitutions;
-    private final boolean transformUntilComplete;
+    private final boolean transformUntilFirstMatch;
 
     public Substitution(Tensor from, Tensor to) {
         treeNodeSubstitutions = new TreeNodeSubstitution[1];
         treeNodeSubstitutions[0] = createTreeNodeSubstitution(from, to);
-        transformUntilComplete = false;
+        transformUntilFirstMatch = true;
     }
 
     public Substitution(Tensor[] from, Tensor[] to) {
-        this(from, to, false);
+        this(from, to, true);
     }
 
-    public Substitution(Tensor[] from, Tensor[] to, boolean transformUntilComplete) {
+    public Substitution(Tensor[] from, Tensor[] to, boolean transformUntilFirstMatch) {
         if (from.length != to.length)
             throw new IllegalArgumentException();
         treeNodeSubstitutions = new TreeNodeSubstitution[from.length];
         for (int i = 0; i < from.length; ++i)
             treeNodeSubstitutions[i] = createTreeNodeSubstitution(from[i], to[i]);
-        this.transformUntilComplete = transformUntilComplete;
+        this.transformUntilFirstMatch = transformUntilFirstMatch;
     }
 
     private static TreeNodeSubstitution createTreeNodeSubstitution(Tensor from, Tensor to) {
@@ -47,19 +47,15 @@ public final class Substitution implements Transformation {
         SubstitutionIterator iterator = new SubstitutionIterator(t);
         Tensor currentNode;
         while ((currentNode = iterator.next()) != null) {
-            Tensor old, oldOld;
-            out:
-            do {
-                oldOld = old = currentNode;
-                for (TreeNodeSubstitution nodeSubstitution : treeNodeSubstitutions) {
-                    currentNode = nodeSubstitution.newTo(old, iterator.getForbidden());
-                    if (currentNode != old && !transformUntilComplete)
-                        break out;
-                    old = currentNode;
-                }
-                if (!transformUntilComplete)
+            if (iterator.isCurrentModified())
+                continue;
+            Tensor old = currentNode;
+            for (TreeNodeSubstitution nodeSubstitution : treeNodeSubstitutions) {
+                currentNode = nodeSubstitution.newTo(old, iterator.getForbidden());
+                if (currentNode != old && transformUntilFirstMatch)
                     break;
-            } while (oldOld != currentNode);
+                old = currentNode;
+            }
             iterator.set(currentNode);
         }
         return iterator.result();

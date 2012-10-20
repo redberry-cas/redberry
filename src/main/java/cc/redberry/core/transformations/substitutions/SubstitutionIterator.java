@@ -130,6 +130,10 @@ public final class SubstitutionIterator implements TreeIterator {
         innerIterator.set(tensor);
     }
 
+    public boolean isCurrentModified() {
+        return innerIterator.currentStackPosition().isModified();
+    }
+
     @Override
     public Tensor result() {
         return innerIterator.result();

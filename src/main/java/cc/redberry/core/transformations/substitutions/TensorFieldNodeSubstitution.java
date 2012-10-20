@@ -53,7 +53,7 @@ public class TensorFieldNodeSubstitution extends TreeNodeSubstitution {
         newTo = new Substitution(
                 argFrom.toArray(new Tensor[argFrom.size()]),
                 argTo.toArray(new Tensor[argTo.size()]),
-                false).transform(newTo);
+                true).transform(newTo);
         if (!TensorUtils.isSymbolic(newTo))
             newTo = ApplyIndexMapping.applyIndexMapping(newTo, buffer, forbiddenIndices);
         if (buffer.getSignum())
