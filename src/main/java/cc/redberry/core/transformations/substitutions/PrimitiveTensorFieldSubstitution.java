@@ -56,7 +56,7 @@ class PrimitiveTensorFieldSubstitution extends PrimitiveSubstitution {
                 false).transform(newTo);
         if (!TensorUtils.isSymbolic(newTo))
             newTo = ApplyIndexMapping.applyIndexMapping(newTo, buffer, forbiddenIndices);
-        if (buffer.getSignum())
+        else if (buffer.getSignum())
             newTo = Tensors.negate(newTo);
         return newTo;
     }

@@ -23,12 +23,10 @@ class PrimitiveSimpleTensorSubstitution extends PrimitiveSubstitution {
             return currentNode;
         Tensor newTo;
         if (toIsSymbolic)
-            newTo = to;
+            newTo = buffer.getSignum() ? Tensors.negate(to) : to;
         else
             newTo = ApplyIndexMapping.applyIndexMapping(to, buffer, forbiddenIndices);
 
-        if (buffer.getSignum())
-            newTo = Tensors.negate(newTo);
         return newTo;
     }
 }

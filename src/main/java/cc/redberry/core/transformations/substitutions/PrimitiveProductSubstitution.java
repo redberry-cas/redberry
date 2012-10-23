@@ -3,10 +3,7 @@ package cc.redberry.core.transformations.substitutions;
 import cc.redberry.core.indexmapping.IndexMappingBuffer;
 import cc.redberry.core.indexmapping.IndexMappings;
 import cc.redberry.core.number.Complex;
-import cc.redberry.core.tensor.Product;
-import cc.redberry.core.tensor.ProductBuilder;
-import cc.redberry.core.tensor.ProductContent;
-import cc.redberry.core.tensor.Tensor;
+import cc.redberry.core.tensor.*;
 import cc.redberry.core.transformations.ApplyIndexMapping;
 import cc.redberry.core.utils.TensorUtils;
 import gnu.trove.set.hash.TIntHashSet;
@@ -67,7 +64,7 @@ class PrimitiveProductSubstitution extends PrimitiveSubstitution {
             Tensor newTo;
             int i;
             if (toIsSymbolic)
-                newTo = to;
+                newTo = buffer.getSignum() ? Tensors.negate(to) : to;
             else {
                 if (forbidden == null) {
                     //TODO review
