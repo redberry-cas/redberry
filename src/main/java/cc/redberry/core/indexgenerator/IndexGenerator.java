@@ -23,6 +23,7 @@
 package cc.redberry.core.indexgenerator;
 
 import cc.redberry.core.indices.Indices;
+
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;

@@ -29,6 +29,7 @@ import cc.redberry.core.tensor.ProductContent;
 import cc.redberry.core.tensor.SimpleTensor;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.tensor.functions.ScalarFunction;
+
 import java.util.Arrays;
 
 /**

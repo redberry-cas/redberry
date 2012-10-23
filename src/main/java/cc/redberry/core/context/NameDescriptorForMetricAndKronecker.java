@@ -25,6 +25,7 @@ package cc.redberry.core.context;
 import cc.redberry.core.indices.IndicesTypeStructure;
 import cc.redberry.core.indices.IndicesUtils;
 import cc.redberry.core.indices.SimpleIndices;
+
 import java.util.Arrays;
 
 /**

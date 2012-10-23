@@ -25,11 +25,11 @@ package cc.redberry.core.indexmapping;
 import cc.redberry.core.indices.IndicesUtils;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.utils.ArraysUtils;
+
 import java.util.Arrays;
 import java.util.Map;
 
 /**
- *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */

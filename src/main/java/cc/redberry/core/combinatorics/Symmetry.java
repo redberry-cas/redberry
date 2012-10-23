@@ -24,6 +24,7 @@ package cc.redberry.core.combinatorics;
 
 import cc.redberry.core.indices.Indices;
 import cc.redberry.core.tensor.Tensor;
+
 import java.util.Arrays;
 
 /**

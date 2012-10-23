@@ -27,6 +27,7 @@ import cc.redberry.core.indices.SimpleIndices;
 import cc.redberry.core.tensor.SimpleTensor;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.tensor.TensorField;
+
 import java.util.Iterator;
 
 /**

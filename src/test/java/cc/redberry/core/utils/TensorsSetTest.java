@@ -22,9 +22,10 @@
  */
 package cc.redberry.core.utils;
 
-import cc.redberry.core.tensor.*;
 import cc.redberry.core.tensor.Expression;
-import org.junit.*;
+import cc.redberry.core.tensor.Tensors;
+import org.junit.Assert;
+import org.junit.Test;
 
 /**
  *

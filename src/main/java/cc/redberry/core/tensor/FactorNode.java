@@ -24,6 +24,7 @@ package cc.redberry.core.tensor;
 
 import cc.redberry.core.transformations.ApplyIndexMapping;
 import cc.redberry.core.utils.TensorUtils;
+
 import java.util.Set;
 
 /**

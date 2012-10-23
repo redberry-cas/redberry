@@ -26,7 +26,8 @@ import org.apache.commons.math3.random.BitsStreamGenerator;
 import org.apache.commons.math3.random.Well19937c;
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  *

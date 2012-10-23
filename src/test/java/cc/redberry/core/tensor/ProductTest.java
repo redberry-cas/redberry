@@ -31,8 +31,6 @@ import cc.redberry.core.utils.TensorUtils;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.util.Arrays;
-
 import static cc.redberry.core.tensor.Tensors.*;
 
 /**

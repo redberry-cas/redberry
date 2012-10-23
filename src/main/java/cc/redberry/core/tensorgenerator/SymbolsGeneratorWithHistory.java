@@ -25,6 +25,7 @@ package cc.redberry.core.tensorgenerator;
 import cc.redberry.concurrent.OutputPortUnsafe;
 import cc.redberry.core.tensor.SimpleTensor;
 import cc.redberry.core.tensor.Tensor;
+
 import java.util.ArrayList;
 import java.util.List;
 

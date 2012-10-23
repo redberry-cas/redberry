@@ -23,6 +23,7 @@
 package cc.redberry.core.combinatorics;
 
 import cc.redberry.core.utils.IntArray;
+
 import java.util.Arrays;
 import java.util.TreeMap;
 
