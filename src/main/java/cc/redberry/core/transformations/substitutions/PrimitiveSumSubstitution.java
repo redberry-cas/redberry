@@ -11,8 +11,8 @@ import java.util.Arrays;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public class SumNodeSubstitution extends TreeNodeSubstitution {
-    public SumNodeSubstitution(Tensor from, Tensor to) {
+class PrimitiveSumSubstitution extends PrimitiveSubstitution {
+    public PrimitiveSumSubstitution(Tensor from, Tensor to) {
         super(from, to);
     }
 
@@ -34,7 +34,7 @@ public class SumNodeSubstitution extends TreeNodeSubstitution {
         Arrays.sort(bijection);
         builder.put(newTo);
         for (int i = currentNode.size() - 1; i >= 0; --i)
-            if (Arrays.binarySearch(bijection, i) < 0)
+            if (Arrays.binarySearch(bijection, i) < 0) //todo may be improved
                 builder.put(currentNode.get(i));
         return builder.build();
     }

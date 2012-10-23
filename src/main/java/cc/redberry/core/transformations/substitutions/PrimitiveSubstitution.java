@@ -7,11 +7,11 @@ import cc.redberry.core.utils.TensorUtils;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-abstract class TreeNodeSubstitution {
+abstract class PrimitiveSubstitution {
     final Tensor from, to;
     final boolean toIsSymbolic;
 
-    TreeNodeSubstitution(Tensor from, Tensor to) {
+    PrimitiveSubstitution(Tensor from, Tensor to) {
         this.from = from;
         this.to = to;
         this.toIsSymbolic = TensorUtils.isSymbolic(to);

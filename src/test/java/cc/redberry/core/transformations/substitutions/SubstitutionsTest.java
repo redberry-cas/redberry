@@ -215,7 +215,7 @@ public class SubstitutionsTest {
         Tensor target = parse("1/2*g^{ag}*(p_{m}*g_{gn}+p_{n}*g_{gm}+-1*p_{g}*g_{mn})");
         Tensor expected = target;
 
-        Transformation sp = new Substitution(from, to);
+        Transformation sp = new Substitution(from, to, false);
         target = sp.transform(target);
         target = contract(target);
         expected = contract(expected);
@@ -229,7 +229,7 @@ public class SubstitutionsTest {
         Tensor target = parse("1/2*g^{ag}*(p_{m}*g_{gn}+p_{n}*g_{gm}+-1*p_{g}*g_{mn})");
         Tensor expected = target;
 
-        Transformation sp = new Substitution(from, to);
+        Transformation sp = new Substitution(from, to, false);
         target = sp.transform(target);
         target = sp.transform(target);
         target = sp.transform(target);
@@ -245,7 +245,7 @@ public class SubstitutionsTest {
         Tensor target = parse("g^ag");
         Tensor expected = target;
 
-        Transformation sp = new Substitution(from, to);
+        Transformation sp = new Substitution(from, to, false);
         sp.transform(target);
         assertTrue(TensorUtils.equalsExactly(target, expected));
     }
@@ -742,6 +742,14 @@ public class SubstitutionsTest {
         System.out.println(t);
         TAssert.assertEquals(t, "x");
     }
+
+    @Test
+    public void testField29() {
+        Expression s = parseExpression("f[x,y]=x**y");
+        Tensor t = parse("f[y,x]");
+        t = s.transform(t);
+        TAssert.assertEquals(t, "y**x");
+    }
     //TODO additional tests with specified field arguments indices
 
     @Test
@@ -897,6 +905,14 @@ public class SubstitutionsTest {
             target = parseExpression("Sin[-a+b*c]**a*b = c").transform(target);
             TAssert.assertTrue(old == target);
         }
+    }
+
+    @Test
+    public void testProduct13() {
+        Tensor t = parse("p_i*p^i*(p_j+(p_i*p^i - m**2) *x_j)*(p^j+(p_i*p^i - m**2) *x^j)");
+        Expression e = parseExpression("p_i*p^i = m**2");
+        t = e.transform(t);
+        TAssert.assertEquals(t, "m**4");
     }
 
     @Test

@@ -87,7 +87,7 @@ public class Expression extends Tensor implements Transformation {
 
     @Override
     public Tensor transform(Tensor t) {
-        return new Substitution(left, right).transform(t);
+        return new Substitution(this).transform(t);
     }
 
     public boolean isIdentity() {

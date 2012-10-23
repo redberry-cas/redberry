@@ -17,12 +17,12 @@ import java.util.Arrays;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public class ProductNodeSubstituiton extends TreeNodeSubstitution {
+class PrimitiveProductSubstitution extends PrimitiveSubstitution {
     private final Complex fromFactor;
     private final Tensor[] fromIndexless, fromData;
     private final ProductContent fromContent;
 
-    public ProductNodeSubstituiton(Tensor from, Tensor to) {
+    public PrimitiveProductSubstitution(Tensor from, Tensor to) {
         super(from, to);
         Product product = (Product) from;
         this.fromFactor = product.getFactor();

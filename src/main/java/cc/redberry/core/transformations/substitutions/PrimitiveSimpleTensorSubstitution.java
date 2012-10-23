@@ -10,8 +10,8 @@ import cc.redberry.core.transformations.ApplyIndexMapping;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-class SimpleTensorNodeSubstitution extends TreeNodeSubstitution {
-    SimpleTensorNodeSubstitution(Tensor from, Tensor to) {
+class PrimitiveSimpleTensorSubstitution extends PrimitiveSubstitution {
+    PrimitiveSimpleTensorSubstitution(Tensor from, Tensor to) {
         super(from, to);
     }
 

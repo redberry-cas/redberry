@@ -16,8 +16,8 @@ import java.util.List;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public class TensorFieldNodeSubstitution extends TreeNodeSubstitution {
-    public TensorFieldNodeSubstitution(Tensor from, Tensor to) {
+class PrimitiveTensorFieldSubstitution extends PrimitiveSubstitution {
+    public PrimitiveTensorFieldSubstitution(Tensor from, Tensor to) {
         super(from, to);
     }
 
@@ -53,7 +53,7 @@ public class TensorFieldNodeSubstitution extends TreeNodeSubstitution {
         newTo = new Substitution(
                 argFrom.toArray(new Tensor[argFrom.size()]),
                 argTo.toArray(new Tensor[argTo.size()]),
-                true).transform(newTo);
+                false).transform(newTo);
         if (!TensorUtils.isSymbolic(newTo))
             newTo = ApplyIndexMapping.applyIndexMapping(newTo, buffer, forbiddenIndices);
         if (buffer.getSignum())
