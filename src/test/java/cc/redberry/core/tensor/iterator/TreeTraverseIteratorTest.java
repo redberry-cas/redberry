@@ -22,11 +22,9 @@
  */
 package cc.redberry.core.tensor.iterator;
 
+import cc.redberry.core.TAssert;
 import cc.redberry.core.number.Complex;
-import cc.redberry.core.tensor.Product;
-import cc.redberry.core.tensor.Sum;
-import cc.redberry.core.tensor.Tensor;
-import cc.redberry.core.tensor.Tensors;
+import cc.redberry.core.tensor.*;
 import cc.redberry.core.tensor.functions.Sin;
 import cc.redberry.core.utils.Indicator;
 import cc.redberry.core.utils.TensorUtils;
@@ -39,6 +37,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static cc.redberry.core.tensor.Tensors.parse;
+import static cc.redberry.core.tensor.Tensors.parseExpression;
 
 /**
  * @author Dmitry Bolotin
@@ -546,6 +545,26 @@ public class TreeTraverseIteratorTest {
         Assert.assertTrue(TensorUtils.equalsExactly(iterator.result(), parse("2*a+c")));
     }
 
+    @Test
+    public void testSet4() {
+        Tensor tensor = parse("(a+b*(c+x*(y+z)*c))*(a+b*x)");
+        Expression[] subs = {
+                parseExpression("z = y"),
+                parseExpression("x*y = 1/2"),
+                parseExpression("b*c = a/2"),
+                parseExpression("b*x = 0")};
+        TreeTraverseIterator iterator = new TreeTraverseIterator(tensor);
+        TraverseState state;
+        while ((state = iterator.next()) != null)
+            if (state == TraverseState.Leaving) {
+                Tensor t = iterator.current();
+                for (Expression e : subs)
+                    t = e.transform(t);
+                iterator.set(t);
+            }
+        TAssert.assertEquals(iterator.result(), "2*a**2");
+    }
+
     private static Indicator<Tensor> classIndicator(final Class<? extends Tensor> clazz) {
         return new Indicator<Tensor>() {
 
@@ -686,4 +705,5 @@ public class TreeTraverseIteratorTest {
             }
         }
     }
+
 }

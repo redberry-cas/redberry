@@ -32,6 +32,7 @@ import cc.redberry.core.parser.*;
 import cc.redberry.core.utils.ArraysUtils;
 import cc.redberry.core.utils.Indicator;
 import cc.redberry.core.utils.IntArrayList;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;

@@ -24,6 +24,7 @@ package cc.redberry.core.combinatorics.symmetries;
 
 import cc.redberry.core.combinatorics.InconsistentGeneratorsException;
 import cc.redberry.core.combinatorics.Symmetry;
+
 import java.util.List;
 
 /**

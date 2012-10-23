@@ -22,8 +22,10 @@
  */
 package cc.redberry.core.transformations;
 
-import cc.redberry.core.tensor.*;
-import cc.redberry.core.tensor.iterator.*;
+import cc.redberry.core.tensor.Sum;
+import cc.redberry.core.tensor.SumBuilderSplitingScalars;
+import cc.redberry.core.tensor.Tensor;
+import cc.redberry.core.tensor.iterator.TensorLastIterator;
 
 /**
  *

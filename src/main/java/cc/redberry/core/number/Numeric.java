@@ -22,10 +22,11 @@
  */
 package cc.redberry.core.number;
 
-import java.io.Serializable;
-import java.math.BigInteger;
 import org.apache.commons.math3.exception.NullArgumentException;
 import org.apache.commons.math3.fraction.BigFraction;
+
+import java.io.Serializable;
+import java.math.BigInteger;
 
 import static cc.redberry.core.number.NumberUtils.checkNotNull;
 import static cc.redberry.core.number.NumberUtils.createNumeric;

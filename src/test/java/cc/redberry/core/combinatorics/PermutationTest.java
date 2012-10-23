@@ -22,10 +22,12 @@
  */
 package cc.redberry.core.combinatorics;
 
-import java.util.Arrays;
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import java.util.Arrays;
+
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  *

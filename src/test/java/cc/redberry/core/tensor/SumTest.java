@@ -22,7 +22,6 @@
  */
 package cc.redberry.core.tensor;
 
-import cc.redberry.core.context.*;
 import cc.redberry.core.utils.TensorUtils;
 import org.junit.Assert;
 import org.junit.Test;

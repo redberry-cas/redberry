@@ -22,9 +22,10 @@
  */
 package cc.redberry.core.number;
 
-import java.io.Serializable;
 import org.apache.commons.math3.Field;
 import org.apache.commons.math3.FieldElement;
+
+import java.io.Serializable;
 
 /**
  *

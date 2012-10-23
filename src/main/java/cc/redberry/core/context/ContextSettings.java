@@ -24,6 +24,7 @@ package cc.redberry.core.context;
 
 import cc.redberry.core.indices.IndexType;
 import cc.redberry.core.parser.Parser;
+
 import java.util.EnumSet;
 
 /**

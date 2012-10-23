@@ -29,10 +29,11 @@ import cc.redberry.core.indexgenerator.IndexGenerator;
 import cc.redberry.core.indices.*;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.tensor.*;
-import java.util.ArrayList;
-import java.util.List;
 import org.apache.commons.math3.random.BitsStreamGenerator;
 import org.apache.commons.math3.random.Well19937c;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  *

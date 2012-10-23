@@ -31,6 +31,7 @@ import cc.redberry.core.tensor.*;
 import cc.redberry.core.transformations.ApplyIndexMapping;
 import cc.redberry.core.transformations.SymmetrizeUpperLowerIndices;
 import cc.redberry.core.utils.IntArray;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;

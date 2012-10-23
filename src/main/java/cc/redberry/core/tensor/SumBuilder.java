@@ -24,6 +24,7 @@ package cc.redberry.core.tensor;
 
 import cc.redberry.core.indices.Indices;
 import cc.redberry.core.number.Complex;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;

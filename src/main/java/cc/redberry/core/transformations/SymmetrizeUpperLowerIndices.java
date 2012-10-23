@@ -27,13 +27,16 @@ import cc.redberry.core.combinatorics.Symmetry;
 import cc.redberry.core.combinatorics.symmetries.Symmetries;
 import cc.redberry.core.indices.Indices;
 import cc.redberry.core.indices.IndicesFactory;
-import cc.redberry.core.number.*;
-import cc.redberry.core.tensor.*;
+import cc.redberry.core.number.Complex;
+import cc.redberry.core.number.Rational;
+import cc.redberry.core.tensor.SumBuilder;
+import cc.redberry.core.tensor.Tensor;
+import cc.redberry.core.tensor.Tensors;
 import cc.redberry.core.utils.TensorUtils;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import org.apache.commons.math3.fraction.*;
 
 /**
  *

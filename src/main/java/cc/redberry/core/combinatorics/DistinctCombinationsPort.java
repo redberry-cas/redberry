@@ -25,6 +25,7 @@ package cc.redberry.core.combinatorics;
 import cc.redberry.concurrent.OutputPortUnsafe;
 import cc.redberry.core.utils.BitArray;
 import cc.redberry.core.utils.LongBackedBitArray;
+
 import java.util.Arrays;
 
 /**

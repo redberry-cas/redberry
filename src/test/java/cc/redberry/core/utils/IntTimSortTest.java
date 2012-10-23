@@ -22,8 +22,9 @@
  */
 package cc.redberry.core.utils;
 
-import java.util.Random;
 import org.junit.Test;
+
+import java.util.Random;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;

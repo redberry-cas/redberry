@@ -34,6 +34,7 @@ import cc.redberry.core.utils.ArraysUtils;
 import cc.redberry.core.utils.IntArrayList;
 import cc.redberry.core.utils.stretces.Stretch;
 import cc.redberry.core.utils.stretces.StretchIteratorS;
+
 import java.util.Arrays;
 
 import static cc.redberry.core.tensor.FullContractionsStructure.*;

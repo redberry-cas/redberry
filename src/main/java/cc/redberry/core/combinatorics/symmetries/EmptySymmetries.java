@@ -24,6 +24,7 @@ package cc.redberry.core.combinatorics.symmetries;
 
 import cc.redberry.core.combinatorics.Symmetry;
 import cc.redberry.core.utils.SingleIterator;
+
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;

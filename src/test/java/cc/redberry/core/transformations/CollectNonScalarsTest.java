@@ -22,9 +22,10 @@
  */
 package cc.redberry.core.transformations;
 
-import cc.redberry.core.tensor.*;
-import org.junit.*;
-import static cc.redberry.core.TAssert.*;
+import cc.redberry.core.tensor.SumBuilderSplitingScalars;
+import cc.redberry.core.tensor.Tensor;
+import cc.redberry.core.tensor.Tensors;
+import org.junit.Test;
 
 /**
  *
