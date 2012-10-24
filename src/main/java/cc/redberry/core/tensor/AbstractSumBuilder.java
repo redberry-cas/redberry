@@ -31,7 +31,6 @@ import cc.redberry.core.utils.TensorUtils;
 import java.util.*;
 
 /**
- *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
@@ -144,5 +143,10 @@ public abstract class AbstractSumBuilder implements TensorBuilder {
 //            return null;
 //        assert buffer.isEmpty();
 //        return buffer.getSignum();
+    }
+
+    @Override
+    public String toString() {
+        return build().toString();
     }
 }

@@ -36,11 +36,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
 //TODO include antisymmetries
+@Deprecated
 public final class Symmetrize implements Transformation {
 
     private final int[] freeIndices;
