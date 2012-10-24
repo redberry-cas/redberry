@@ -78,7 +78,7 @@ public final class Symmetrize implements Transformation {
 
         if (symmetries.dimension() <= 1)
             return tensor;
-        Symmetries tensorSymmetries = TensorUtils.getIndicesSymmetries(freeIndicesNames, tensor);
+        Symmetries tensorSymmetries = TensorUtils.findIndicesSymmetries(freeIndicesNames, tensor);
         List<Tensor> generatedTensors = new ArrayList<>();
         List<Permutation> generatedPermutations = new ArrayList<>();
 

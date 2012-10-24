@@ -415,12 +415,12 @@ public class TensorUtils {
         return symmetries;
     }
 
-    public static Symmetries getIndicesSymmetries(int[] indices, Tensor tensor) {
+    public static Symmetries findIndicesSymmetries(int[] indices, Tensor tensor) {
         return getSymmetriesFromMappings(indices, IndexMappings.createPort(tensor, tensor));
     }
 
     public static Symmetries getIndicesSymmetriesForIndicesWithSameStates(final int[] indices, Tensor tensor) {
-        Symmetries total = getIndicesSymmetries(indices, tensor);
+        Symmetries total = findIndicesSymmetries(indices, tensor);
         Symmetries symmetries = SymmetriesFactory.createSymmetries(indices.length);
         int i;
         OUT:

@@ -142,7 +142,7 @@ public class TensorUtilsTest {
         CC.resetTensorNames(2103403802553543528L);
         Tensor t = Tensors.parse("g_{ab}*g^{rs}*g_{mn}*g^{pq}");
         //t.indices = ^{pqrs}_{abmn}
-        Symmetries s = TensorUtils.getIndicesSymmetries(t.getIndices().getAllIndices().copy(), t);
+        Symmetries s = TensorUtils.findIndicesSymmetries(t.getIndices().getAllIndices().copy(), t);
         Symmetry[] symmetries = new Symmetry[]{
             new Symmetry(new int[]{0, 1, 2, 3, 4, 5, 6, 7}, false),
             new Symmetry(new int[]{1, 0, 2, 3, 4, 5, 6, 7}, false),
