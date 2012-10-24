@@ -66,7 +66,19 @@ public class DifferentiateTest {
         Tensor v = differentiate(t, var2, var1);
         v = contract(expand(v));
         TAssert.assertEquals(u, v);
-        TAssert.assertEquals(u, "g^{an}*x^{mb}+g^{bm}*x^{an}+g^{bn}*x^{am}+g^{am}*x^{nb}+3*g^{am}*f^{nb}+3*g^{bn}*f^{ma}+3*g^{bm}*f^{na}+3*g^{an}*f^{mb}");
+        TAssert.assertEquals(u, "(1/2)*g^{bm}*x^{an}+(1/2)*g^{am}*x^{nb}+(1/2)*g^{bn}*x^{am}+(1/2)*g^{an}*x^{mb}+(3/2)*f^{na}*g^{bm}+(3/2)*f^{nb}*g^{am}+(3/2)*f^{mb}*g^{an}+(3/2)*f^{ma}*g^{bn}\n");
+    }
+
+    @Test
+    public void test4a() {
+        addSymmetry("f_mn", IndexType.LatinLower, false, 1, 0);
+        Tensor t = parse("f^mn*f_n^b*f_mb");
+        SimpleTensor var1 = parseSimple("f_cd");
+        Tensor u = differentiate(t, var1);
+        System.out.println(u);
+        u = contract(expand(u));
+        System.out.println(u);
+
     }
 
     @Test
@@ -114,7 +126,7 @@ public class DifferentiateTest {
         Tensor t = parse("R_abcd");
         SimpleTensor var1 = parseSimple("R_mnpq");
         Tensor u = differentiate(t, var1);
-        TAssert.assertEquals(u, "(1/4)*(-d_{a}^{q}*d_{d}^{n}*d_{b}^{p}*d_{c}^{m}-d_{a}^{n}*d_{d}^{q}*d_{c}^{p}*d_{b}^{m}+d_{a}^{m}*d_{d}^{q}*d_{c}^{p}*d_{b}^{n}+d_{b}^{q}*d_{a}^{p}*d_{d}^{n}*d_{c}^{m})");
+        TAssert.assertEquals(u, "(1/8)*(-d_{a}^{m}*d_{c}^{q}*d_{d}^{p}*d_{b}^{n}-d_{a}^{n}*d_{d}^{q}*d_{c}^{p}*d_{b}^{m}-d_{a}^{q}*d_{d}^{n}*d_{b}^{p}*d_{c}^{m}+d_{c}^{q}*d_{a}^{n}*d_{d}^{p}*d_{b}^{m}+d_{c}^{n}*d_{a}^{q}*d_{b}^{p}*d_{d}^{m}+d_{b}^{q}*d_{a}^{p}*d_{d}^{n}*d_{c}^{m}+d_{a}^{m}*d_{d}^{q}*d_{c}^{p}*d_{b}^{n}-d_{b}^{q}*d_{a}^{p}*d_{c}^{n}*d_{d}^{m})");
     }
 
     @Test
@@ -140,6 +152,20 @@ public class DifferentiateTest {
     public void test10() {
         setSymmetric(parseSimple("g_abc"), IndexType.LatinLower);
         Tensor u = differentiate(parse("g_abc"), parseSimple("g^mnp"));
-        TAssert.assertEquals(u, "(1/4)*(g_{ap}*g_{cm}*g_{bn}+g_{an}*g_{bm}*g_{cp}+g_{ap}*g_{bm}*g_{cn}+g_{am}*g_{cp}*g_{bn})");
+        TAssert.assertEquals(u, "(1/6)*(g_{am}*g_{cn}*g_{bp}+g_{ap}*g_{cm}*g_{bn}+g_{am}*g_{cp}*g_{bn}+g_{an}*g_{cm}*g_{bp}+g_{ap}*g_{bm}*g_{cn}+g_{an}*g_{bm}*g_{cp})");
+    }
+
+    @Test
+    public void test12() {
+        Tensor t = parse("1/(f_m*(f^m+a^m*f_i*f^i)*Cos[f_i*f^i])");
+        t = differentiate(t, parseSimple("f_l"), parseSimple("f^l"));
+        Expression s = parseExpression("f_m*f^m = m**2");
+        t = s.transform(t);
+        t = parseExpression("a_j = 0").transform(t);
+        t = ContractIndices.contract(t);
+        t = s.transform(t);
+        t = parseExpression("d_m^m = 4").transform(t);
+        t = Together.together(t);
+        TAssert.assertEquals(t, "(m**4*(8*Sin[m**2]**2+4*Cos[m**2]**2)+(-8*m**2*Sin[m**2]+8*Cos[m**2])*Cos[m**2]+4*(2*m**2*Sin[m**2]-2*Cos[m**2])*Cos[m**2])*Cos[m**2]**(-3)*m**(-4)");
     }
 }

@@ -32,6 +32,7 @@ import cc.redberry.core.number.Complex;
 import cc.redberry.core.tensor.*;
 import cc.redberry.core.transformations.ContractIndices;
 import cc.redberry.core.transformations.Expand;
+import cc.redberry.core.transformations.Together;
 import cc.redberry.core.transformations.Transformation;
 import cc.redberry.core.utils.TensorUtils;
 import junit.framework.Assert;
@@ -512,7 +513,7 @@ public class SubstitutionsTest {
         target = expand(target);
         target = contract(target);
 
-        Tensor expected = parse(target.toString(OutputFormat.RedberryConsole));
+        Tensor expected = parse(target.toString(OutputFormat.Redberry));
         assertTrue(TensorUtils.equalsExactly(target, expected));
     }
 
@@ -913,6 +914,19 @@ public class SubstitutionsTest {
         Expression e = parseExpression("p_i*p^i = m**2");
         t = e.transform(t);
         TAssert.assertEquals(t, "m**4");
+    }
+
+    @Test
+    public void testProduct15() {
+        Tensor t = parse("(8*Sin[f^{i}*f_{i}]+4*((f^{m}+a^{m}*f^{a}*f_{a})*f_{m})**(-1)*Cos[f^{i}*f_{i}]**(-2)*Cos[f^{i}*f_{i}])*f^{l}*f_{l}-4*((f^{m}+a^{m}*f^{a}*f_{a})*f_{m})**(-2)*Cos[f^{i}*f_{i}]**(-2)*Sin[f^{i}*f_{i}]*f^{l}*(f_{l}+a_{l}*f_{a}*f^{a}+f_{m}*(2*a^{m}*f_{l}+d^{m}_{l}))-((f^{m}+a^{m}*f^{a}*f_{a})*f_{m})**(-2)*Cos[f^{i}*f_{i}]**(-1)*(2*d^{l}_{l}+4*a^{a}*f_{a}+2*a^{m}*f_{m}*d^{l}_{l})+2*((f^{m}+a^{m}*f^{a}*f_{a})*f_{m})**(-3)*Cos[f^{i}*f_{i}]**(-1)*(f_{l}+a_{l}*f_{a}*f^{a}+f_{m}*(2*a^{m}*f_{l}+d^{m}_{l}))*(f^{l}+a^{l}*f_{a}*f^{a}+f_{m}*(2*a^{m}*f^{l}+g^{ml}))+2*((f^{m}+a^{m}*f^{a}*f_{a})*f_{m})**(-1)*Cos[f^{i}*f_{i}]**(-2)*Sin[f^{i}*f_{i}]*d^{l}_{l}");
+        Expression s = parseExpression("f_m*f^m = m**2");
+        t = s.transform(t);
+        t = parseExpression("a_j = 0").transform(t);
+        t = ContractIndices.contract(t);
+        t = s.transform(t);
+        t = parseExpression("d_m^m = 4").transform(t);
+        t = Together.together(t);
+        TAssert.assertEquals(t, "(Cos[m**2]*(8*Cos[m**2]*m**2*Sin[m**2]+4)*m**4+8*Cos[m**2]+4*(-2*Cos[m**2]+2*m**2*Sin[m**2])-8*m**2*Sin[m**2])*m**(-4)*Cos[m**2]**(-2)");
     }
 
     @Test
