@@ -2,9 +2,11 @@ package cc.redberry.core.transformations;
 
 import cc.redberry.core.TAssert;
 import cc.redberry.core.indices.IndexType;
+import cc.redberry.core.parser.ParserIndices;
 import cc.redberry.core.tensor.Expression;
 import cc.redberry.core.tensor.SimpleTensor;
 import cc.redberry.core.tensor.Tensor;
+import cc.redberry.core.utils.TensorUtils;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -141,5 +143,28 @@ public class DifferentiateTest {
         setSymmetric(parseSimple("g_abc"), IndexType.LatinLower);
         Tensor u = differentiate(parse("g_abc"), parseSimple("g^mnp"));
         TAssert.assertEquals(u, "(1/4)*(g_{ap}*g_{cm}*g_{bn}+g_{an}*g_{bm}*g_{cp}+g_{ap}*g_{bm}*g_{cn}+g_{am}*g_{cp}*g_{bn})");
+    }
+
+    @Test
+    public void test11() {
+        setSymmetric(parseSimple("T_abc"), IndexType.LatinLower);
+        Tensor u = differentiate(parse("T_abc"), parseSimple("T_mnp"));
+        System.out.println(u);
+        System.out.println(TensorUtils.getIndicesSymmetries(ParserIndices.parseSimple("_abc^mnp").getAllIndices().copy(), u));
+//          TAssert.assertEquals(u, "(1/4)*(g_{ap}*g_{cm}*g_{bn}+g_{an}*g_{bm}*g_{cp}+g_{ap}*g_{bm}*g_{cn}+g_{am}*g_{cp}*g_{bn})");
+    }
+
+    @Test
+    public void test12() {
+        Tensor t = parse("1/(f_m*(f^m+a^m*f_i*f^i)*Cos[f_i*f^i])");
+        t = differentiate(t, parseSimple("f_l"), parseSimple("f^l"));
+        Expression s = parseExpression("f_m*f^m = m**2");
+        t = s.transform(t);
+        t = parseExpression("a_j = 0").transform(t);
+        t = ContractIndices.contract(t);
+        t = s.transform(t);
+        t = parseExpression("d_m^m = 4").transform(t);
+        t = Together.together(t);
+        TAssert.assertEquals(t, "(m**4*(8*Sin[m**2]**2+4*Cos[m**2]**2)+(-8*m**2*Sin[m**2]+8*Cos[m**2])*Cos[m**2]+4*(2*m**2*Sin[m**2]-2*Cos[m**2])*Cos[m**2])*Cos[m**2]**(-3)*m**(-4)");
     }
 }

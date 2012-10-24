@@ -251,9 +251,9 @@ public class TensorUtils {
             final int size = tensor.size();
             Tensor t;
             for (int i = 0; i < size; ++i) {
-                t = tensor.get(i);
-                if (t instanceof ScalarFunction)
-                    continue;
+                //t = tensor.get(i);
+                //if (t instanceof ScalarFunction)
+                //    continue;
                 appendAllIndicesNames(tensor.get(i), indices);
             }
         }
@@ -282,9 +282,9 @@ public class TensorUtils {
             final int size = tensor.size();
             Tensor t;
             for (int i = 0; i < size; ++i) {
-                t = tensor.get(i);
-                if (t instanceof ScalarFunction)
-                    continue;
+                //t = tensor.get(i);
+                //if (t instanceof ScalarFunction)
+                //    continue;
                 appendAllIndicesNamesT(tensor.get(i), set);
             }
         }

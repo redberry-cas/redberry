@@ -76,7 +76,7 @@ public final class Symmetrize implements Transformation {
         if (!IndicesUtils.equalsRegardlessOrder(tensor.getIndices().getFree(), freeIndicesNames))
             throw new IllegalArgumentException("Specified indices are not equal (regardless order) to the free indices of specified tensor .");
 
-        if (symmetries.dimension() == 0)
+        if (symmetries.dimension() <= 1)
             return tensor;
         Symmetries tensorSymmetries = TensorUtils.getIndicesSymmetries(freeIndicesNames, tensor);
         List<Tensor> generatedTensors = new ArrayList<>();
