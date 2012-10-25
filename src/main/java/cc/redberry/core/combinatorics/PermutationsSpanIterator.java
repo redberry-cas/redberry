@@ -53,7 +53,6 @@ public final class PermutationsSpanIterator<T extends Permutation> implements It
     private List<T> lowerLayer = new ArrayList<>();
     private List<T> nextLayer = new ArrayList<>();
     private boolean forward = false;
-    T setPermutation, layerPermutation;
     private int upperIndex = 0, lowerIndex = 0;
 
     public PermutationsSpanIterator(List<T> permutations) {
@@ -67,9 +66,6 @@ public final class PermutationsSpanIterator<T extends Permutation> implements It
     T current;
 
     /**
-     * {@inheritDoc }
-     *
-     * @return {@inheritDoc}
      * @throws InconsistentGeneratorsException
      *          if combinatorics are inconsistent,
      *          e.g. it can happens when symmetries represents identical permutation but
@@ -80,11 +76,6 @@ public final class PermutationsSpanIterator<T extends Permutation> implements It
         return (current = next1()) != null;
     }
 
-    /**
-     * {@inheritDoc }
-     *
-     * @return {@inheritDoc}
-     */
     @Override
     public T next() {
         return current;

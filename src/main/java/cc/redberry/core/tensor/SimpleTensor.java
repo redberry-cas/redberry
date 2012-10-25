@@ -140,7 +140,7 @@ public class SimpleTensor extends Tensor {
 
     @SuppressWarnings("unchecked")
     @Override
-    public final Iterator<Tensor> iterator() {
+    public Iterator<Tensor> iterator() {
         return EmptyIterator.INSTANCE;
     }
 

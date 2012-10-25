@@ -26,6 +26,7 @@ import cc.redberry.core.context.OutputFormat;
 import cc.redberry.core.indices.SimpleIndices;
 
 import java.util.Arrays;
+import java.util.Iterator;
 
 /**
  * @author Dmitry Bolotin
@@ -64,6 +65,11 @@ public final class TensorField extends SimpleTensor {
     @Override
     public int size() {
         return args.length;
+    }
+
+    @Override
+    public Iterator<Tensor> iterator() {
+        return new BasicTensorIterator(this);
     }
 
     @Override

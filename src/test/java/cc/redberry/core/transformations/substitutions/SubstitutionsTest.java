@@ -751,6 +751,14 @@ public class SubstitutionsTest {
         t = s.transform(t);
         TAssert.assertEquals(t, "y**x");
     }
+
+    @Test
+    public void testField30() {
+        Expression s = parseExpression("f[x,y, x+z]=x+y+z");
+        Tensor t = parse("f[a,b,c]");
+        t = s.transform(t);
+        TAssert.assertEquals(t, "f[a,b,c]");
+    }
     //TODO additional tests with specified field arguments indices
 
     @Test
