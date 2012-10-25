@@ -110,11 +110,43 @@ public class IndicesSymmetries implements Iterable<Symmetry> {
         return diffIds;
     }
 
+    public boolean addSymmetry(int... permutation) {
+        return add(false, permutation);
+    }
+
+    public boolean addAntiSymmetry(int... permutation) {
+        return add(true, permutation);
+    }
+
+    public boolean addSymmetry(IndexType type, int... permutation) {
+        return add(type, false, permutation);
+    }
+
+    public boolean addAntiSymmetry(IndexType type, int... permutation) {
+        return add(type, true, permutation);
+    }
+
     public boolean add(IndexType type, boolean sign, int... permutation) {
         return add(type.getType(), new Symmetry(permutation, sign));
     }
 
     public boolean add(byte type, boolean sign, int... permutation) {
+        return add(type, new Symmetry(permutation, sign));
+    }
+
+    public boolean add(boolean sign, int... permutation) {
+        byte type = -1;
+        IndicesTypeStructure.TypeData typeData;
+        for (int i = 0; i < IndexType.TYPES_COUNT; ++i) {
+            typeData = indicesTypeStructure.getTypeData((byte) i);
+            if (typeData.length != 0) {
+                if (type != -1)
+                    throw new IllegalArgumentException();
+                if (typeData.length != permutation.length)
+                    throw new IllegalArgumentException();
+                type = (byte) i;
+            }
+        }
         return add(type, new Symmetry(permutation, sign));
     }
 

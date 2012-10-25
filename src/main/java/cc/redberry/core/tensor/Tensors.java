@@ -555,12 +555,44 @@ public final class Tensors {
         return (Expression) t;
     }
 
-    public static void addSymmetry(String tensor, IndexType type, boolean sign, int... symmetry) {
-        parseSimple(tensor).getIndices().getSymmetries().add(type.getType(), new Symmetry(symmetry, sign));
+    public static void addSymmetry(String tensor, IndexType type, boolean sign, int... permutation) {
+        parseSimple(tensor).getIndices().getSymmetries().add(type.getType(), new Symmetry(permutation, sign));
     }
 
-    public static void addSymmetry(SimpleTensor tensor, IndexType type, boolean sign, int... symmetry) {
-        tensor.getIndices().getSymmetries().add(type.getType(), new Symmetry(symmetry, sign));
+    public static void addSymmetry(SimpleTensor tensor, IndexType type, boolean sign, int... permutation) {
+        tensor.getIndices().getSymmetries().add(type.getType(), new Symmetry(permutation, sign));
+    }
+
+    public static void addSymmetry(String tensor, IndexType type, int... permutation) {
+        addSymmetry(tensor, type, false, permutation);
+    }
+
+    public static void addSymmetry(SimpleTensor tensor, IndexType type, int... permutation) {
+        addSymmetry(tensor, type, false, permutation);
+    }
+
+    public static void addAntiSymmetry(String tensor, IndexType type, int... permutation) {
+        addSymmetry(tensor, type, true, permutation);
+    }
+
+    public static void addAntiSymmetry(SimpleTensor tensor, IndexType type, int... permutation) {
+        addSymmetry(tensor, type, true, permutation);
+    }
+
+    public static void addSymmetry(String tensor, int... permutation) {
+        parseSimple(tensor).getIndices().getSymmetries().addSymmetry(permutation);
+    }
+
+    public static void addSymmetry(SimpleTensor tensor, int... permutation) {
+        tensor.getIndices().getSymmetries().addSymmetry(permutation);
+    }
+
+    public static void addAntiSymmetry(String tensor, int... permutation) {
+        parseSimple(tensor).getIndices().getSymmetries().addAntiSymmetry(permutation);
+    }
+
+    public static void addAntiSymmetry(SimpleTensor tensor, int... permutation) {
+        tensor.getIndices().getSymmetries().addAntiSymmetry(permutation);
     }
 
     public static void setSymmetric(SimpleTensor tensor, IndexType type) {
