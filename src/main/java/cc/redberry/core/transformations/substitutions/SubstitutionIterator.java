@@ -214,8 +214,9 @@ public final class SubstitutionIterator implements TreeIterator {
             return result;
         }
 
-//        @Override
-//        public Tensor onLeaving(StackPosition<ForbiddenContainer> stackPosition) {
+        @Override
+        public Tensor onLeaving(StackPosition<ForbiddenContainer> stackPosition) {
+            return null;
 //            assert position == stackPosition;
 //            if (!stackPosition.isModified())
 //                return null;
@@ -227,7 +228,7 @@ public final class SubstitutionIterator implements TreeIterator {
 //            tensor = ApplyIndexMapping.renameDummy(tensor, prev.getPayload().getForbidden().toArray(), removed, added);
 //            prev.getPayload().submit(removed, added);
 //            return tensor;
-//        }
+        }
     }
 
     private final static class ProductFC extends AbstractFC {
