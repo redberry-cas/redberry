@@ -4,6 +4,7 @@ import cc.redberry.core.TAssert;
 import cc.redberry.core.combinatorics.Symmetry;
 import cc.redberry.core.combinatorics.symmetries.Symmetries;
 import cc.redberry.core.combinatorics.symmetries.SymmetriesFactory;
+import cc.redberry.core.context.CC;
 import cc.redberry.core.tensor.SimpleTensor;
 import cc.redberry.core.tensor.Tensor;
 import org.junit.Test;
@@ -21,10 +22,13 @@ import static cc.redberry.core.transformations.SymmetrizeSimpleTensor.symmetrize
 public class SymmetrizeSimpleTensorTest {
     @Test
     public void test1() {
-        SimpleTensor t = parseSimple("T_abcd");
-        TAssert.assertEquals(
-                symmetrize(t, new int[]{0, 1, 2}, createFullSymmetries(3)),
-                "1/6*(T_{acbd}+T_{abcd}+T_{cbad}+T_{cabd}+T_{bcad}+T_{bacd})");
+        for (int i = 0; i < 100; ++i) {
+            CC.resetTensorNames();
+            SimpleTensor t = parseSimple("T_abcd");
+            TAssert.assertEquals(
+                    symmetrize(t, new int[]{0, 1, 2}, createFullSymmetries(3)),
+                    "1/6*(T_{acbd}+T_{abcd}+T_{cbad}+T_{cabd}+T_{bcad}+T_{bacd})");
+        }
     }
 
     @Test

@@ -31,7 +31,6 @@ import cc.redberry.core.indices.*;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.parser.ParseNodeTransformer;
 import cc.redberry.core.tensor.functions.*;
-import cc.redberry.core.transformations.ApplyIndexMapping;
 import cc.redberry.core.transformations.Expand;
 import cc.redberry.core.utils.TensorUtils;
 import gnu.trove.set.hash.TIntHashSet;
@@ -161,7 +160,7 @@ public final class Tensors {
         ArrayList<Tensor> toResolve = new ArrayList<>();
         int position = -1;
         for (Tensor f : factors) {
-            if (f instanceof Sum || f instanceof Power) {
+            if (f instanceof Sum || f instanceof Power || f instanceof ScalarFunction) {
                 toResolve.add(f);
                 forbidden.addAll(f.getIndices().getFree().getAllIndices().copy());
             } else {
@@ -173,7 +172,7 @@ public final class Tensors {
         Tensor factor, newFactor;
         for (int i = toResolve.size() - 1; i >= 0; --i) {
             factor = toResolve.get(i);
-            newFactor = ApplyIndexMapping.renameDummyFromClonedSource(factor, forbidden.toArray());
+            newFactor = ApplyIndexMapping.renameDummy(factor, forbidden.toArray());
             forbidden.addAll(TensorUtils.getAllIndicesNamesT(newFactor));
             result[++position] = newFactor;
         }
@@ -599,6 +598,12 @@ public final class Tensors {
         int dimension = tensor.getIndices().size(type);
         addSymmetry(tensor, type, false, Combinatorics.createCycle(dimension));
         addSymmetry(tensor, type, false, Combinatorics.createTransposition(dimension));
+    }
+
+    public static void setSymmetric(SimpleTensor tensor) {
+        int dimension = tensor.getIndices().size();
+        addSymmetry(tensor, Combinatorics.createCycle(dimension));
+        addSymmetry(tensor, Combinatorics.createTransposition(dimension));
     }
 
     /**

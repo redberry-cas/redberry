@@ -10,9 +10,8 @@ import cc.redberry.core.tensor.*;
 
 import java.util.Arrays;
 
+import static cc.redberry.core.tensor.ApplyIndexMapping.applyIndexMapping;
 import static cc.redberry.core.tensor.Tensors.*;
-import static cc.redberry.core.transformations.ApplyIndexMapping.applyIndexMapping;
-
 /**
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky

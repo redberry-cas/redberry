@@ -28,6 +28,7 @@ import cc.redberry.core.combinatorics.symmetries.SymmetriesFactory;
 import cc.redberry.core.indexmapping.*;
 import cc.redberry.core.indices.Indices;
 import cc.redberry.core.indices.IndicesUtils;
+import cc.redberry.core.indices.SimpleIndices;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.number.NumberUtils;
 import cc.redberry.core.tensor.*;
@@ -224,45 +225,11 @@ public class TensorUtils {
         return true;
     }
 
-    @Deprecated
-    public static Set<Integer> getAllDummyIndicesNames(Tensor tensor) {
-        Set<Integer> dummy = getAllIndicesNames(tensor);
-        Indices ind = tensor.getIndices().getFree();
-        for (int i = ind.size() - 1; i >= 0; --i)
-            dummy.remove(IndicesUtils.getNameWithType(ind.get(i)));
-        return dummy;
-    }
-
-    @Deprecated
-    public static Set<Integer> getAllIndicesNames(Tensor... tensors) {
-        Set<Integer> indices = new HashSet<>();
-        for (Tensor tensor : tensors)
-            appendAllIndicesNames(tensor, indices);
-        return indices;
-    }
-
-    private static void appendAllIndicesNames(Tensor tensor, Set<Integer> indices) {
-        if (tensor instanceof SimpleTensor) {
-            Indices ind = tensor.getIndices();
-            final int size = ind.size();
-            for (int i = 0; i < size; ++i)
-                indices.add(IndicesUtils.getNameWithType(ind.get(i)));
-        } else {
-            final int size = tensor.size();
-            Tensor t;
-            for (int i = 0; i < size; ++i) {
-                //t = tensor.get(i);
-                //if (t instanceof ScalarFunction)
-                //    continue;
-                appendAllIndicesNames(tensor.get(i), indices);
-            }
-        }
-    }
-
     public static TIntHashSet getAllDummyIndicesT(Tensor tensor) {
-        TIntHashSet indices = getAllIndicesNamesT(tensor);
-        indices.removeAll(IndicesUtils.getIndicesNames(tensor.getIndices().getFree()));
-        return indices;
+        TIntHashSet set = new TIntHashSet();
+        appendAllIndicesNamesT(tensor, set);
+        set.removeAll(IndicesUtils.getIndicesNames(tensor.getIndices().getFree()));
+        return set;
     }
 
     public static TIntHashSet getAllIndicesNamesT(Tensor... tensors) {
@@ -279,13 +246,12 @@ public class TensorUtils {
             for (int i = 0; i < size; ++i)
                 set.add(IndicesUtils.getNameWithType(ind.get(i)));
         } else {
-            final int size = tensor.size();
             Tensor t;
-            for (int i = 0; i < size; ++i) {
-                //t = tensor.get(i);
-                //if (t instanceof ScalarFunction)
-                //    continue;
-                appendAllIndicesNamesT(tensor.get(i), set);
+            for (int i = tensor.size() - 1; i >= 0; --i) {
+                t = tensor.get(i);
+                if (t instanceof ScalarFunction)
+                    continue;
+                appendAllIndicesNamesT(t, set);
             }
         }
     }
@@ -417,6 +383,10 @@ public class TensorUtils {
 
     public static Symmetries findIndicesSymmetries(int[] indices, Tensor tensor) {
         return getSymmetriesFromMappings(indices, IndexMappings.createPort(tensor, tensor));
+    }
+
+    public static Symmetries findIndicesSymmetries(SimpleIndices indices, Tensor tensor) {
+        return getSymmetriesFromMappings(indices.getAllIndices().copy(), IndexMappings.createPort(tensor, tensor));
     }
 
     public static Symmetries getIndicesSymmetriesForIndicesWithSameStates(final int[] indices, Tensor tensor) {

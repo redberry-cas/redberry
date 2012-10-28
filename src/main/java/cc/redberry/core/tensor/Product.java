@@ -30,8 +30,8 @@ import cc.redberry.core.math.GraphUtils;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.utils.ArraysUtils;
 import cc.redberry.core.utils.HashFunctions;
+import cc.redberry.core.utils.SoftReferenceWrapper;
 
-import java.lang.ref.SoftReference;
 import java.util.Arrays;
 
 /**
@@ -55,7 +55,8 @@ public final class Product extends MultiTensor {
     /**
      * Reference to cached ProductContent object.
      */
-    SoftReference<ProductContent> contentReference;
+    final SoftReferenceWrapper<ProductContent> contentReference;
+//    SoftReference<ProductContent> contentReference;
     /**
      * Hash code of this product.
      */
@@ -70,7 +71,8 @@ public final class Product extends MultiTensor {
         Arrays.sort(data);
         Arrays.sort(indexless);
 
-        this.contentReference = new SoftReference<>(calculateContent());
+        this.contentReference = new SoftReferenceWrapper<>();
+        calculateContent();
         this.hash = calculateHash();
     }
 
@@ -79,7 +81,31 @@ public final class Product extends MultiTensor {
         this.factor = factor.isOne() ? Complex.ONE : factor.isMinusOne() ? Complex.MINUSE_ONE : factor;
         this.indexlessData = indexlessData;
         this.data = data;
-        this.contentReference = new SoftReference<>(content == null ? calculateContent() : content);
+        this.contentReference = new SoftReferenceWrapper<>();
+        if (content == null)
+            calculateContent();
+        else
+            this.contentReference.resetReferent(content);
+        this.hash = calculateHash();
+    }
+
+    //very unsafe
+    Product(Indices indices, Complex factor, Tensor[] indexlessData, Tensor[] data, SoftReferenceWrapper<ProductContent> contentReference, int hash) {
+        super(indices);
+        this.factor = factor;
+        this.indexlessData = indexlessData;
+        this.data = data;
+        this.contentReference = contentReference;
+        this.hash = hash;
+    }
+
+    //very unsafe
+    Product(Indices indices, Complex factor, Tensor[] indexlessData, Tensor[] data, SoftReferenceWrapper<ProductContent> contentReference) {
+        super(indices);
+        this.factor = factor;
+        this.indexlessData = indexlessData;
+        this.data = data;
+        this.contentReference = contentReference;
         this.hash = calculateHash();
     }
 
@@ -176,9 +202,9 @@ public final class Product extends MultiTensor {
     }
 
     public ProductContent getContent() {
-        ProductContent content = contentReference.get();
+        ProductContent content = contentReference.getReference().get();
         if (content == null)
-            contentReference = new SoftReference<>(content = calculateContent());
+            content = calculateContent();
         return content;
     }
 
@@ -233,12 +259,14 @@ public final class Product extends MultiTensor {
             return Complex.ONE;
         if (data.length == 1)
             return data[0];
-        return new Product(Complex.ONE, new Tensor[0], data, contentReference.get(), indices);
+        return new Product(indices, Complex.ONE, new Tensor[0], data, contentReference);
     }
 
     private ProductContent calculateContent() {
-        if (data.length == 0)
+        if (data.length == 0) {
+            contentReference.resetReferent(ProductContent.EMPTY_INSTANCE);
             return ProductContent.EMPTY_INSTANCE;
+        }
         final Indices freeIndices = indices.getFree();
         final int differentIndicesCount = (getIndices().size() + freeIndices.size()) / 2;
 
@@ -264,7 +292,7 @@ public final class Product extends MultiTensor {
         //pointer[0] - pointer to lower
         //pointer[1] - pointer to upper
         final int[] pointer = new int[2];
-        final short[] stretchIndices = calculateStretchIndices(); //for preformance
+        final short[] stretchIndices = calculateStretchIndices(); //for performance
 
         //Allocating array for results, one contraction for each tensor
         final TensorContraction[] contractions = new TensorContraction[data.length];
@@ -345,7 +373,8 @@ public final class Product extends MultiTensor {
             if (data.length == 1)
                 nonScalar = data[0];
             else
-                nonScalar = new Product(Complex.ONE, new Tensor[0], data, ProductContent.EMPTY_INSTANCE, this.indices);
+                nonScalar = new Product(this.indices, Complex.ONE, new Tensor[0], data, this.contentReference, 0);
+//                nonScalar = new Product(Complex.ONE, new Tensor[0], data, ProductContent.EMPTY_INSTANCE, this.indices);
         else if (datas[0].length > 0)
             nonScalar = Tensors.multiply(datas[0]);
 
@@ -409,8 +438,9 @@ public final class Product extends MultiTensor {
         //TODO should be lazy field in ProductContent
         FullContractionsStructure fullContractionsStructure = new FullContractionsStructure(data, differentIndicesCount, freeIndices);
         ProductContent content = new ProductContent(contractionStructure, fullContractionsStructure, scalars, nonScalar, stretchIndices, data);
+        contentReference.resetReferent(content);
+
         if (componentCount == 1 && nonScalar instanceof Product) {
-            ((Product) nonScalar).contentReference = new SoftReference<>(content);
             ((Product) nonScalar).hash = ((Product) nonScalar).calculateHash(); //TODO !!!discuss with Dima!!!
         }
         return content;

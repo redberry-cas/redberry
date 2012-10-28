@@ -28,6 +28,7 @@ import cc.redberry.core.combinatorics.symmetries.SymmetriesFactory;
 import cc.redberry.core.indices.IndicesUtils;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.number.Rational;
+import cc.redberry.core.tensor.ApplyIndexMapping;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.tensor.Tensors;
 import cc.redberry.core.utils.TensorUtils;

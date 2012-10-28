@@ -35,9 +35,9 @@ import cc.redberry.core.tensor.iterator.TensorLastIterator;
 import cc.redberry.core.tensor.iterator.TraverseGuide;
 import cc.redberry.core.tensor.iterator.TraverseState;
 import cc.redberry.core.tensor.iterator.TreeTraverseIterator;
-import cc.redberry.core.utils.ArraysUtils;
 import cc.redberry.core.utils.Indicator;
 import cc.redberry.core.utils.TensorUtils;
+import gnu.trove.set.TIntSet;
 
 import java.math.BigInteger;
 import java.util.*;
@@ -50,6 +50,7 @@ import static cc.redberry.core.tensor.Tensors.*;
  * @author Stanislav Poslavsky
  */
 public final class Expand implements Transformation {
+    public static final Expand ExpandAll = new Expand();
 
     private final Indicator<Tensor> indicator;
 
@@ -90,7 +91,7 @@ public final class Expand implements Transformation {
                 Sum sum = (Sum) current.get(0);
                 iterator.set(expandPower(sum,
                         ((Complex) current.get(1)).getReal().intValue(),
-                        ArraysUtils.toArray(TensorUtils.getAllIndicesNames(sum)),
+                        TensorUtils.getAllIndicesNamesT(sum).toArray(),
                         transformations));
             }
         }
@@ -120,18 +121,18 @@ public final class Expand implements Transformation {
 
         int i;
         Tensor t, temp;
-        Set<Integer> initialForbiddenIndices = null;
+        TIntSet initialForbiddenIndices = null;
         boolean expand = false;
         for (i = current.size() - 1; i >= 0; --i) {
             t = current.get(i);
             if (isExpandablePower(t)) {
                 if (initialForbiddenIndices == null)
-                    initialForbiddenIndices = TensorUtils.getAllIndicesNames(current);
+                    initialForbiddenIndices = TensorUtils.getAllIndicesNamesT(current);
                 t = expandPower((Sum) t.get(0),
                         ((Complex) t.get(1)).getReal().intValue(),
-                        ArraysUtils.toArray(initialForbiddenIndices),
+                        initialForbiddenIndices.toArray(),
                         transformations);
-                initialForbiddenIndices.addAll(TensorUtils.getAllIndicesNames(t));
+                initialForbiddenIndices.addAll(TensorUtils.getAllIndicesNamesT(t));
                 expand = true;
             }
             if (t.getIndices().size() == 0)
@@ -370,7 +371,7 @@ public final class Expand implements Transformation {
         }
 
         public PowerPort(Tensor tensor) {
-            this(tensor, ArraysUtils.toArray(TensorUtils.getAllIndicesNames(tensor.get(0))));
+            this(tensor, TensorUtils.getAllIndicesNamesT(tensor.get(0)).toArray());
         }
 
         OutputPortUnsafe<Tensor> nextPort() {
@@ -433,7 +434,7 @@ public final class Expand implements Transformation {
                         theLargestSumPosition = sumOrPowerPorts.size();
                         theLargestSumSize = m.size();
                     }
-                    sumOrPowerPorts.add(new PowerPort(m, ArraysUtils.toArray(TensorUtils.getAllIndicesNames(tensor))));
+                    sumOrPowerPorts.add(new PowerPort(m, TensorUtils.getAllIndicesNamesT(tensor).toArray()));
                 } else
                     base.put(m);
             }

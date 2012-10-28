@@ -13,8 +13,8 @@ import cc.redberry.core.utils.TensorUtils;
 import gnu.trove.set.hash.TIntHashSet;
 
 import static cc.redberry.core.indices.IndicesUtils.*;
+import static cc.redberry.core.tensor.ApplyIndexMapping.applyIndexMapping;
 import static cc.redberry.core.tensor.Tensors.*;
-import static cc.redberry.core.transformations.ApplyIndexMapping.applyIndexMapping;
 import static cc.redberry.core.transformations.ContractIndices.contract;
 
 /**
@@ -118,55 +118,6 @@ public final class Differentiate implements Transformation {
         throw new UnsupportedOperationException();
     }
 
-    //    private static Tensor symmetricDifferentiate(SimpleTensor tensor, SimpleTensor var) {
-//        if (tensor.getIndices().getSymmetries().isEmpty()) {
-//            Indices tensorIndices = tensor.getIndices();
-//            ProductBuilder pb = new ProductBuilder(0, tensorIndices.size());
-//            for (int i = 0, size = tensorIndices.size(); i < size; ++i) {
-//                pb.put(createMetricOrKronecker(
-//                        tensorIndices.get(i),
-//                        inverseIndexState(var.getIndices().get(i))));
-//            }
-//            return pb.build();
-//        }
-//        List<Symmetry> symmetries = tensor.getIndices().getSymmetries().getInnerSymmetries().getBasisSymmetries();
-//        int[] indices = tensor.getIndices().getAllIndices().copy();
-//        int[] freeIndices = new int[indices.length];
-//        IndexGenerator generator = new IndexGenerator(var.getIndices());
-//        int i;
-//        for (i = 0; i < indices.length; ++i)
-//            freeIndices[i] = getRawStateInt(indices[i]) | generator.generate(getType(indices[i]));
-//
-//
-//        ProductBuilder pb = new ProductBuilder(0, freeIndices.length);
-//        for (i = 0; i < indices.length; ++i)
-//            pb.put(createMetricOrKronecker(freeIndices[i], inverseIndexState(var.getIndices().get(i))));
-//        Tensor temp = pb.build();
-//
-//        int[] varFreeIndices = var.getIndices().getFree().getInverse().getAllIndices().copy();
-//        SumBuilder builder = new SumBuilder();
-//        builder.put(temp);
-//        Symmetry s;
-//        for (i = symmetries.size() - 1; i >= 1; --i) {
-//            if (temp == null)//preventing build on first iteration
-//                temp = builder.build();
-//            s = symmetries.get(i);
-//            temp = applyIndexMapping(temp,
-//                    ArraysUtils.addAll(getFree(freeIndices), varFreeIndices),
-//                    ArraysUtils.addAll(getFree(s.permute(freeIndices)), varFreeIndices),
-//                    new int[0]);
-//            builder.put(s.isAntiSymmetry() ? negate(temp) : temp);
-//            temp = null;
-//        }
-//        temp = builder.build();
-//        if (temp instanceof Sum)
-//            temp = multiply(new Complex(new Rational(1, temp.size())), temp);
-//
-//        return applyIndexMapping(temp,
-//                ArraysUtils.addAll(freeIndices, varFreeIndices),
-//                ArraysUtils.addAll(indices, varFreeIndices),
-//                new int[0]);
-//    }
     private static SimpleTensorDifferentiationRule createRule(SimpleTensor var) {
         if (var.getIndices().size() == 0)
             return new SymbolicDifferentiationRule(var);
@@ -243,7 +194,7 @@ public final class Differentiate implements Transformation {
         Tensor differentiateSimpleTensorWithoutCheck(SimpleTensor simpleTensor) {
             int[] to = simpleTensor.getIndices().getAllIndices().copy();
             to = ArraysUtils.addAll(to, freeVarIndices);
-            return ApplyIndexMapping.applyIndexMapping(derivative, allFreeFrom.clone(), to, new int[0]);
+            return applyIndexMapping(derivative, allFreeFrom, to, new int[0]);
         }
     }
 }

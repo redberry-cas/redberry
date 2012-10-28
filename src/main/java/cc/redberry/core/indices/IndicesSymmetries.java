@@ -68,6 +68,10 @@ public class IndicesSymmetries implements Iterable<Symmetry> {
         return symmetries;
     }
 
+    public List<Symmetry> getBasis() {
+        return symmetries.getBasisSymmetries();
+    }
+
     @Override
     public Iterator<Symmetry> iterator() {
         return symmetries.iterator();

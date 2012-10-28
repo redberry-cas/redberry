@@ -1,11 +1,10 @@
 package cc.redberry.core.transformations.substitutions;
 
 import cc.redberry.core.indexmapping.IndexMappingBuffer;
+import cc.redberry.core.tensor.ApplyIndexMapping;
 import cc.redberry.core.tensor.SumBuilder;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.tensor.Tensors;
-import cc.redberry.core.transformations.ApplyIndexMapping;
-
 import java.util.Arrays;
 
 /**

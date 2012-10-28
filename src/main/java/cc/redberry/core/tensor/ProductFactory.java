@@ -68,7 +68,7 @@ public final class ProductFactory implements TensorFactory {
             else if (current instanceof Product) {
                 p = (Product) tensors[i];
                 indexlessContainer.add(p.indexlessData);
-                dataContainer.add(p.data, p.contentReference.get(), p.indices);
+                dataContainer.add(p.data, p.contentReference.getReferent(), p.indices);
                 factor = factor.multiply(p.factor);
             } else if (current.getIndices().size() == 0)
                 indexlessContainer.add(current);

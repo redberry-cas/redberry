@@ -168,4 +168,20 @@ public class DifferentiateTest {
         t = Together.together(t);
         TAssert.assertEquals(t, "(m**4*(8*Sin[m**2]**2+4*Cos[m**2]**2)+(-8*m**2*Sin[m**2]+8*Cos[m**2])*Cos[m**2]+4*(2*m**2*Sin[m**2]-2*Cos[m**2])*Cos[m**2])*Cos[m**2]**(-3)*m**(-4)");
     }
+
+    @Test
+    public void test13() {
+        addAntiSymmetry("R_abcd", 1, 0, 2, 3);
+        addSymmetry("R_abcd", 2, 3, 0, 1);
+        Tensor tensor = parse("R_mnab*R^pqnm*Sin[R_abcd*R^cdab]");
+        SimpleTensor var1 = parseSimple("R_abmn");
+        SimpleTensor var2 = parseSimple("R^pqmn");
+        tensor = differentiate(tensor, var1);
+        tensor = differentiate(tensor, var2);
+        tensor = parseExpression("R_mnab = 1/3*(g_mb*g_na - g_ma*g_nb)*la").transform(tensor);
+        tensor = expand(tensor);
+        tensor = contract(tensor);
+        tensor = parseExpression("d_m^m = 4").transform(tensor);
+        System.out.println(tensor);
+    }
 }
