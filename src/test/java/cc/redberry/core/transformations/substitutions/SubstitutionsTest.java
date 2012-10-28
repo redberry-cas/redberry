@@ -953,4 +953,11 @@ public class SubstitutionsTest {
     }
 
     //TODO tests for Product
+
+    @Test
+    public void testScalarFunction1() {
+        Expression s = parseExpression("x = ArcSin[F_ab*F^ab]");
+        Tensor t = parse("(F_ab*F^ab + 1)*Sin[x]");
+        TAssert.assertIndicesConsistency(s.transform(t));
+    }
 }

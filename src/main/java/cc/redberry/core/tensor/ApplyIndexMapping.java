@@ -24,6 +24,33 @@ import java.util.Map;
  * @author Stanislav Poslavsky
  */
 public final class ApplyIndexMapping {
+    public static Tensor renameDummy(Tensor tensor, int[] forbiddenNames, TIntSet removed, TIntSet added) {
+        if (forbiddenNames.length == 0)
+            return tensor;
+        TIntSet allIndicesNames = TensorUtils.getAllDummyIndicesT(tensor);
+        IntArrayList fromL = null;
+        for (int forbidden : forbiddenNames) {
+            if (!allIndicesNames.add(forbidden)) {
+                if (fromL == null)
+                    fromL = new IntArrayList();
+                fromL.add(forbidden);
+                removed.add(forbidden);
+            }
+        }
+
+        if (fromL == null)
+            return tensor;
+
+        allIndicesNames.addAll(IndicesUtils.getIndicesNames(tensor.getIndices().getFree()));
+        IndexGenerator generator = new IndexGenerator(allIndicesNames.toArray());
+        int[] from = fromL.toArray(), to = new int[fromL.size()];
+        Arrays.sort(from);
+        int i;
+        for (i = from.length - 1; i >= 0; --i)
+            added.add(to[i] = generator.generate(IndicesUtils.getType(from[i])));
+
+        return applyIndexMapping(tensor, new IndexMapper(from, to));
+    }
 
     public static Tensor renameDummy(Tensor tensor, int[] forbiddenNames) {
         if (forbiddenNames.length == 0)
@@ -174,9 +201,6 @@ public final class ApplyIndexMapping {
             TensorBuilder builder = tensor.getBuilder();
             for (Tensor t : tensor)
                 builder.put(applyIndexMapping(t, indexMapper));
-            System.out.println("ХУЙ!!!");
-//            throw new BootstrapMethodError();
-//            throw new RuntimeException();
             return builder.build();
         }
 

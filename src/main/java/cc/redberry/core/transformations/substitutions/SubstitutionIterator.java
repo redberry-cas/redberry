@@ -23,10 +23,8 @@
 
 package cc.redberry.core.transformations.substitutions;
 
-import cc.redberry.core.tensor.Product;
-import cc.redberry.core.tensor.Sum;
-import cc.redberry.core.tensor.Tensor;
-import cc.redberry.core.tensor.TensorField;
+import cc.redberry.core.tensor.*;
+import cc.redberry.core.tensor.functions.ScalarFunction;
 import cc.redberry.core.tensor.iterator.*;
 import cc.redberry.core.utils.ByteBackedBitArray;
 import cc.redberry.core.utils.TensorUtils;
@@ -189,11 +187,13 @@ public final class SubstitutionIterator implements TreeIterator {
                 return new SumFC(stackPosition);
             if (tensor instanceof TensorField)
                 return EMPTY_CONTAINER;
+            if (tensor instanceof ScalarFunction)
+                return EMPTY_CONTAINER;
             return new TransparentFC(parent);
         }
     }
 
-    private static abstract class AbstractFC extends DummyPayload<ForbiddenContainer> implements ForbiddenContainer {
+    private static abstract class AbstractFC implements ForbiddenContainer {
         protected final StackPosition<ForbiddenContainer> position;
         protected TIntSet forbidden = null;
         protected final Tensor tensor;
@@ -213,6 +213,21 @@ public final class SubstitutionIterator implements TreeIterator {
             result.removeAll(TensorUtils.getAllIndicesNamesT(tensor.get(position.currentIndex())));
             return result;
         }
+
+//        @Override
+//        public Tensor onLeaving(StackPosition<ForbiddenContainer> stackPosition) {
+//            assert position == stackPosition;
+//            if (!stackPosition.isModified())
+//                return null;
+//            Tensor tensor = stackPosition.getTensor();
+//            TIntSet removed = new TIntHashSet(), added = new TIntHashSet();
+//            StackPosition<ForbiddenContainer> prev = position.previous();
+//            if (prev == null)
+//                return null;
+//            tensor = ApplyIndexMapping.renameDummy(tensor, prev.getPayload().getForbidden().toArray(), removed, added);
+//            prev.getPayload().submit(removed, added);
+//            return tensor;
+//        }
     }
 
     private final static class ProductFC extends AbstractFC {
