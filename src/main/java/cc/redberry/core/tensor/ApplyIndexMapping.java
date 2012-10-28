@@ -34,7 +34,8 @@ public final class ApplyIndexMapping {
                 if (fromL == null)
                     fromL = new IntArrayList();
                 fromL.add(forbidden);
-                removed.add(forbidden);
+                if (removed != null)
+                    removed.add(forbidden);
             }
         }
 
@@ -45,9 +46,12 @@ public final class ApplyIndexMapping {
         IndexGenerator generator = new IndexGenerator(allIndicesNames.toArray());
         int[] from = fromL.toArray(), to = new int[fromL.size()];
         Arrays.sort(from);
-        int i;
-        for (i = from.length - 1; i >= 0; --i)
-            added.add(to[i] = generator.generate(IndicesUtils.getType(from[i])));
+        int i, ii;
+        for (i = from.length - 1; i >= 0; --i) {
+            ii = to[i] = generator.generate(IndicesUtils.getType(from[i]));
+            if (added != null)
+                added.add(ii);
+        }
 
         return applyIndexMapping(tensor, new IndexMapper(from, to));
     }

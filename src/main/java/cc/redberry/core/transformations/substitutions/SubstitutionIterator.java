@@ -188,12 +188,12 @@ public final class SubstitutionIterator implements TreeIterator {
             if (tensor instanceof TensorField)
                 return EMPTY_CONTAINER;
             if (tensor instanceof ScalarFunction)
-                return EMPTY_CONTAINER;
+                return scalarFunctionContainer;
             return new TransparentFC(parent);
         }
     }
 
-    private static abstract class AbstractFC implements ForbiddenContainer {
+    private static abstract class AbstractFC extends DummyPayload<ForbiddenContainer> implements ForbiddenContainer {
         protected final StackPosition<ForbiddenContainer> position;
         protected TIntSet forbidden = null;
         protected final Tensor tensor;
@@ -212,22 +212,6 @@ public final class SubstitutionIterator implements TreeIterator {
 //            result.removeAll(TensorUtils.getAllIndicesNamesT(position.tensor.get(currentBranch)));
             result.removeAll(TensorUtils.getAllIndicesNamesT(tensor.get(position.currentIndex())));
             return result;
-        }
-
-        @Override
-        public Tensor onLeaving(StackPosition<ForbiddenContainer> stackPosition) {
-            return null;
-//            assert position == stackPosition;
-//            if (!stackPosition.isModified())
-//                return null;
-//            Tensor tensor = stackPosition.getTensor();
-//            TIntSet removed = new TIntHashSet(), added = new TIntHashSet();
-//            StackPosition<ForbiddenContainer> prev = position.previous();
-//            if (prev == null)
-//                return null;
-//            tensor = ApplyIndexMapping.renameDummy(tensor, prev.getPayload().getForbidden().toArray(), removed, added);
-//            prev.getPayload().submit(removed, added);
-//            return tensor;
         }
     }
 
@@ -391,6 +375,30 @@ public final class SubstitutionIterator implements TreeIterator {
         }
     }
 
+    private static final ForbiddenContainer scalarFunctionContainer = new ForbiddenContainer() {
+        @Override
+        public TIntSet getForbidden() {
+            return EMPTY_INT_SET;
+        }
+
+        @Override
+        public void submit(TIntSet removed, TIntSet added) {
+        }
+
+        @Override
+        public Tensor onLeaving(StackPosition<ForbiddenContainer> stackPosition) {
+            if (!stackPosition.isModified())
+                return null;
+            StackPosition<ForbiddenContainer> prev = stackPosition.previous();
+            if (prev == null)
+                return null;
+            Tensor tensor = stackPosition.getTensor();
+            tensor = ApplyIndexMapping.renameDummy(tensor, prev.getPayload().getForbidden().toArray());
+            prev.getPayload().submit(EMPTY_INT_SET, TensorUtils.getAllIndicesNamesT(tensor));
+            return tensor;
+        }
+    };
+
     private static final ForbiddenContainer EMPTY_CONTAINER = new ForbiddenContainer() {
         @Override
         public TIntSet getForbidden() {
@@ -406,4 +414,5 @@ public final class SubstitutionIterator implements TreeIterator {
             return null;
         }
     };
+
 }

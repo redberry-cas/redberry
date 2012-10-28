@@ -960,4 +960,50 @@ public class SubstitutionsTest {
         Tensor t = parse("(F_ab*F^ab + 1)*Sin[x]");
         TAssert.assertIndicesConsistency(s.transform(t));
     }
+
+    @Test
+    public void testScalarFunction2() {
+        Tensor t = parse("Sin[f]*(Sin[f]+Sin[g]*(Sin[k]+Sin[f]))*(Sin[d]+Sin[h])");
+         t = parse("Sin[f]*(Sin[g]+Sin[k])");
+
+        Expression f = parseExpression("f = ArcSin[f_m^m+f1_a^a]");
+        Expression g = parseExpression("g = ArcSin[g_m^m+g1_b^b]");
+        Expression d = parseExpression("d = ArcSin[d_m^m+d1_c^c]");
+        Expression h = parseExpression("h = ArcSin[h_m^m+h1_d^d]");
+        Expression k = parseExpression("k = ArcSin[k_m^m+k1_e^e]");
+        Expression[] es = new Expression[]{f, g, d, h, k};
+        Substitution s  = new Substitution(es);
+        t = s.transform(t);
+        TAssert.assertIndicesConsistency(t);
+    }
+
+    @Test
+    public void testScalarFunction3() {
+        Tensor t = parse("f*g*k*(f+g*(k+f))*(d+h*(d+f)*(k*(g+k)+f))+(f+g*(k+f))*(d+h*(d+f)*(k*(g+k)+f))");
+        Expression f = parseExpression("f = Sin[f]");
+        Expression g = parseExpression("g = Sin[g]");
+        Expression d = parseExpression("d = Sin[d]");
+        Expression h = parseExpression("h = Sin[h]");
+        Expression k = parseExpression("k = Sin[k]");
+        Expression[] es = {f, g, d, h, k};
+        t = new Substitution(es).transform(t);
+
+        f = parseExpression("f = ArcSin[f_m^m+f1_a^a]");
+        g = parseExpression("g = ArcSin[g_m^m+g1_b^b]");
+        d = parseExpression("d = ArcSin[d_m^m+d1_c^c]");
+        h = parseExpression("h = ArcSin[h_m^m+h1_d^d]");
+        k = parseExpression("k = ArcSin[k_m^m+k1_e^e]");
+        es = new Expression[]{f, g, d, h, k};
+        IntPermutationsGenerator generator = new IntPermutationsGenerator(es.length);
+        int[] permutation;
+        Expression[] temp;
+        while (generator.hasNext()) {
+            permutation = generator.next();
+            temp = Combinatorics.shuffle(es, permutation);
+            for (Expression e : temp)
+                t = e.transform(t);
+            TAssert.assertIndicesConsistency(t);
+        }
+    }
+
 }
