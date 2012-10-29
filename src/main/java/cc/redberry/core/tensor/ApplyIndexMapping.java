@@ -70,7 +70,10 @@ public final class ApplyIndexMapping {
         if (buffer.isEmpty()) {
             if (tensor.getIndices().getFree().size() != 0)
                 throw new IllegalArgumentException("From indices are not equal to free indices of tensor.");
-            return renameDummy(tensor, forbidden);
+            Tensor t = renameDummy(tensor, forbidden);
+            if (buffer.getSignum())
+                return Tensors.negate(t);
+            return t;
         }
         if (tensor instanceof Complex || tensor instanceof ScalarFunction)
             return tensor;
