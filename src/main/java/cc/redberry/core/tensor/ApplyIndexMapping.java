@@ -67,11 +67,11 @@ public final class ApplyIndexMapping {
     }
 
     public static Tensor applyIndexMapping(Tensor tensor, IndexMappingBuffer buffer, int[] forbidden) {
-        if (buffer.isEmpty())
+        if (buffer.isEmpty()) {
             if (tensor.getIndices().getFree().size() != 0)
                 throw new IllegalArgumentException("From indices are not equal to free indices of tensor.");
-            else
-                return renameDummy(tensor, forbidden);
+            return renameDummy(tensor, forbidden);
+        }
         if (tensor instanceof Complex || tensor instanceof ScalarFunction)
             return tensor;
 
@@ -111,12 +111,11 @@ public final class ApplyIndexMapping {
     }
 
     public static Tensor applyIndexMapping(Tensor tensor, int[] from, int[] to, int[] forbidden) {
-        if (from.length == 0)
+        if (from.length == 0) {
             if (tensor.getIndices().getFree().size() != 0 || to.length != 0)
                 throw new IllegalArgumentException("from legth does not match free indices size or to length.");
-            else
-                return renameDummy(tensor, forbidden);
-
+            return renameDummy(tensor, forbidden);
+        }
         return applyIndexMapping1(tensor, from.clone(), to.clone(), forbidden);
     }
 
@@ -126,9 +125,6 @@ public final class ApplyIndexMapping {
 
         ArraysUtils.quickSort(from, to);
         checkConsistent(tensor, from);
-
-        if (from.length == 0 && forbidden.length == 0)
-            return tensor;
 
         int i, rawState;
         for (i = from.length - 1; i >= 0; --i) {
