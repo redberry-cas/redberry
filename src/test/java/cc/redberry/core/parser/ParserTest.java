@@ -353,6 +353,11 @@ public class ParserTest {
     }
 
     @Test
+    public void testSubscripted2() {
+        Assert.assertTrue(Tensors.parse("F_{a_{1}b_{1}}").getIndices().size() == 2);
+    }
+
+    @Test
     public void blankBrace1() {
         Assert.assertTrue(Tensors.parseSimple("F{}_{BA_{21}C\\mu\\nu}").getName()
                 == Tensors.parseSimple("F_{BA_{21}C\\mu\\nu}").getName());

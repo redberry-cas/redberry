@@ -245,6 +245,8 @@ public class TensorUtils {
             final int size = ind.size();
             for (int i = 0; i < size; ++i)
                 set.add(IndicesUtils.getNameWithType(ind.get(i)));
+        } else if (tensor instanceof Power) {
+            appendAllIndicesNamesT(tensor.get(0), set);
         } else {
             Tensor t;
             for (int i = tensor.size() - 1; i >= 0; --i) {
@@ -286,14 +288,11 @@ public class TensorUtils {
         return buffer.getSignum();
     }
 
-    /**
-     * @param t s AssertionError
-     */
     public static void assertIndicesConsistency(Tensor t) {
-        assertIndicesConsistency(t, new HashSet<Integer>());
+        assertIndicesConsistency(t, new TIntHashSet());
     }
 
-    private static void assertIndicesConsistency(Tensor t, Set<Integer> indices) {
+    private static void assertIndicesConsistency(Tensor t, TIntHashSet indices) {
         if (t instanceof SimpleTensor) {
             Indices ind = t.getIndices();
             for (int i = ind.size() - 1; i >= 0; --i)
@@ -306,28 +305,36 @@ public class TensorUtils {
             for (int i = t.size() - 1; i >= 0; --i)
                 assertIndicesConsistency(t.get(i), indices);
         if (t instanceof Sum) {
-            Set<Integer> sumIndices = new HashSet<>(), temp;
+            TIntHashSet sumIndices = new TIntHashSet(), temp;
             for (int i = t.size() - 1; i >= 0; --i) {
-                temp = new HashSet<>(indices);
+                temp = new TIntHashSet(indices);
                 assertIndicesConsistency(t.get(i), temp);
-                appendAllIndices(t.get(i), sumIndices);
+                appendAllIndicesT(t.get(i), sumIndices);
             }
             indices.addAll(sumIndices);
         }
         if (t instanceof Expression)//FUTURE incorporate expression correctly
             for (Tensor c : t)
-                assertIndicesConsistency(c, new HashSet<>(indices));
+                assertIndicesConsistency(c, new TIntHashSet(indices));
     }
 
-    private static void appendAllIndices(Tensor t, Set<Integer> set) {
-        if (t instanceof SimpleTensor) {
-            Indices ind = t.getIndices();
-            for (int i = ind.size() - 1; i >= 0; --i)
+    private static void appendAllIndicesT(Tensor tensor, TIntHashSet set) {
+        if (tensor instanceof SimpleTensor) {
+            Indices ind = tensor.getIndices();
+            final int size = ind.size();
+            for (int i = 0; i < size; ++i)
                 set.add(ind.get(i));
-        } else
-            for (Tensor c : t)
-                if (!(c instanceof ScalarFunction))
-                    appendAllIndices(c, set);
+        } else if (tensor instanceof Power) {
+            appendAllIndicesT(tensor.get(0), set);
+        } else {
+            Tensor t;
+            for (int i = tensor.size() - 1; i >= 0; --i) {
+                t = tensor.get(i);
+                if (t instanceof ScalarFunction)
+                    continue;
+                appendAllIndicesT(t, set);
+            }
+        }
     }
 
     public static boolean isZeroDueToSymmetry(Tensor t) {
@@ -452,4 +459,17 @@ public class TensorUtils {
 //            tensors.add(array[i]);
 //        }
 //    }
+
+    public static int treeDepth(Tensor tensor) {
+        if (tensor.getClass() == SimpleTensor.class
+                || tensor instanceof Complex)
+            return 0;
+        int depth = 1, temp;
+        for (Tensor t : tensor) {
+            if ((temp = treeDepth(t) + 1) > depth)
+                depth = temp;
+        }
+        return depth;
+    }
+
 }

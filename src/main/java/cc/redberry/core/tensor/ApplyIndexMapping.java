@@ -13,53 +13,32 @@ import cc.redberry.core.tensor.functions.ScalarFunction;
 import cc.redberry.core.utils.ArraysUtils;
 import cc.redberry.core.utils.IntArrayList;
 import cc.redberry.core.utils.TensorUtils;
-import gnu.trove.iterator.TIntIterator;
-import gnu.trove.set.TIntSet;
+import gnu.trove.set.hash.TIntHashSet;
 
 import java.util.Arrays;
 import java.util.Map;
+
+import static cc.redberry.core.indices.IndicesUtils.getIndicesNames;
 
 /**
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
 public final class ApplyIndexMapping {
-    public static Tensor renameDummy(Tensor tensor, int[] forbiddenNames, TIntSet removed, TIntSet added) {
-        if (forbiddenNames.length == 0)
-            return tensor;
-        TIntSet allIndicesNames = TensorUtils.getAllDummyIndicesT(tensor);
-        IntArrayList fromL = null;
-        for (int forbidden : forbiddenNames) {
-            if (!allIndicesNames.add(forbidden)) {
-                if (fromL == null)
-                    fromL = new IntArrayList();
-                fromL.add(forbidden);
-                if (removed != null)
-                    removed.add(forbidden);
-            }
-        }
-
-        if (fromL == null)
-            return tensor;
-
-        allIndicesNames.addAll(IndicesUtils.getIndicesNames(tensor.getIndices().getFree()));
-        IndexGenerator generator = new IndexGenerator(allIndicesNames.toArray());
-        int[] from = fromL.toArray(), to = new int[fromL.size()];
-        Arrays.sort(from);
-        int i, ii;
-        for (i = from.length - 1; i >= 0; --i) {
-            ii = to[i] = generator.generate(IndicesUtils.getType(from[i]));
-            if (added != null)
-                added.add(ii);
-        }
-
-        return applyIndexMapping(tensor, new IndexMapper(from, to));
-    }
 
     public static Tensor renameDummy(Tensor tensor, int[] forbiddenNames) {
         if (forbiddenNames.length == 0)
             return tensor;
-        TIntSet allIndicesNames = TensorUtils.getAllDummyIndicesT(tensor);
+        if (tensor instanceof Complex || tensor instanceof ScalarFunction)
+            return tensor;
+
+        TIntHashSet allIndicesNames = TensorUtils.getAllDummyIndicesT(tensor);
+        //no indices in tensor
+        if (allIndicesNames.isEmpty())
+            return tensor;
+
+        allIndicesNames.ensureCapacity(forbiddenNames.length);
+
         IntArrayList fromL = null;
         for (int forbidden : forbiddenNames) {
             if (!allIndicesNames.add(forbidden)) {
@@ -72,7 +51,7 @@ public final class ApplyIndexMapping {
         if (fromL == null)
             return tensor;
 
-        allIndicesNames.addAll(IndicesUtils.getIndicesNames(tensor.getIndices().getFree()));
+        allIndicesNames.addAll(getIndicesNames(tensor.getIndices().getFree()));
         IndexGenerator generator = new IndexGenerator(allIndicesNames.toArray());
         int[] from = fromL.toArray(), to = new int[fromL.size()];
         Arrays.sort(from);
@@ -80,7 +59,7 @@ public final class ApplyIndexMapping {
         for (i = from.length - 1; i >= 0; --i)
             to[i] = generator.generate(IndicesUtils.getType(from[i]));
 
-        return applyIndexMapping(tensor, new IndexMapper(from, to));
+        return applyIndexMapping(tensor, new IndexMapper(from, to), false);
     }
 
     public static Tensor applyIndexMapping(Tensor tensor, IndexMappingBuffer buffer) {
@@ -88,10 +67,14 @@ public final class ApplyIndexMapping {
     }
 
     public static Tensor applyIndexMapping(Tensor tensor, IndexMappingBuffer buffer, int[] forbidden) {
-        if (buffer == null)
-            throw new NullPointerException("Buffer is null.");
+        if (buffer.isEmpty())
+            if (tensor.getIndices().getFree().size() != 0)
+                throw new IllegalArgumentException("From indices are not equal to free indices of tensor.");
+            else
+                return renameDummy(tensor, forbidden);
         if (tensor instanceof Complex || tensor instanceof ScalarFunction)
             return tensor;
+
         Map<Integer, IndexMappingBufferRecord> map = buffer.getMap();
         int[] from = new int[map.size()], to = new int[map.size()];
         int count = 0;
@@ -102,9 +85,7 @@ public final class ApplyIndexMapping {
             to[count++] = record.getIndexName() ^ (record.diffStatesInitialized() ? 0x80000000 : 0);
         }
 
-        final int[] freeIndices = tensor.getIndices().getFree().getAllIndices().copy();
-        for (int i = 0; i < freeIndices.length; ++i)
-            freeIndices[i] = IndicesUtils.getNameWithType(freeIndices[i]);
+        final int[] freeIndices = getIndicesNames(tensor.getIndices().getFree());
         Arrays.sort(freeIndices);
         int[] _from = from.clone();
         Arrays.sort(_from);
@@ -130,6 +111,12 @@ public final class ApplyIndexMapping {
     }
 
     public static Tensor applyIndexMapping(Tensor tensor, int[] from, int[] to, int[] forbidden) {
+        if (from.length == 0)
+            if (tensor.getIndices().getFree().size() != 0 || to.length != 0)
+                throw new IllegalArgumentException("from legth does not match free indices size or to length.");
+            else
+                return renameDummy(tensor, forbidden);
+
         return applyIndexMapping1(tensor, from.clone(), to.clone(), forbidden);
     }
 
@@ -154,7 +141,6 @@ public final class ApplyIndexMapping {
     }
 
     private static Tensor applyIndexMappingFromPreparedSource(Tensor tensor, int[] from, int[] to, int[] forbidden) {
-        TIntSet dummyIndices = TensorUtils.getAllDummyIndicesT(tensor);
 
         int[] allForbidden = new int[to.length + forbidden.length];
         System.arraycopy(to, 0, allForbidden, 0, to.length);
@@ -168,18 +154,21 @@ public final class ApplyIndexMapping {
         toL.addAll(to);
 
         Arrays.sort(allForbidden);
-        int[] forbiddenGeneratorIndices = new int[allForbidden.length + dummyIndices.size()];
+
+        final int[] dummyIndices = TensorUtils.getAllDummyIndicesT(tensor).toArray();
+        final int[] forbiddenGeneratorIndices = new int[allForbidden.length + dummyIndices.length];
         System.arraycopy(allForbidden, 0, forbiddenGeneratorIndices, 0, allForbidden.length);
-        System.arraycopy(dummyIndices.toArray(), 0, forbiddenGeneratorIndices, allForbidden.length, dummyIndices.size());
+        System.arraycopy(dummyIndices, 0, forbiddenGeneratorIndices, allForbidden.length, dummyIndices.length);
 
         IndexGenerator generator = new IndexGenerator(forbiddenGeneratorIndices);//also sorts allForbidden array
-        for (TIntIterator iterator = dummyIndices.iterator(); iterator.hasNext(); ) {
-            int index = iterator.next();
-            if (Arrays.binarySearch(allForbidden, index) >= 0 && Arrays.binarySearch(from, index) < 0) {
+        for (int index : dummyIndices)
+            if (Arrays.binarySearch(allForbidden, index) >= 0) {
+                //if index is dummy it cannot be free, so from (which is equal to free)
+                //cannot contain it
+                //assert Arrays.binarySearch(from, index) < 0;
                 fromL.add(index);
                 toL.add(generator.generate(IndicesUtils.getType(index)));
             }
-        }
 
         int[] _from = fromL.toArray(), _to = toL.toArray();
         ArraysUtils.quickSort(_from, _to);
@@ -188,6 +177,15 @@ public final class ApplyIndexMapping {
     }
 
     private static Tensor applyIndexMapping(Tensor tensor, IndexMapper indexMapper) {
+        if (tensor instanceof SimpleTensor)
+            return applyIndexMapping(tensor, indexMapper, false);
+        if (tensor instanceof Complex || tensor instanceof ScalarFunction)
+            return tensor;
+
+        return applyIndexMapping(tensor, indexMapper, indexMapper.contract(getIndicesNames(tensor.getIndices().getFree())));
+    }
+
+    private static Tensor applyIndexMapping(Tensor tensor, IndexMapper indexMapper, boolean contractIndices) {
         if (tensor instanceof SimpleTensor) {
             SimpleTensor simpleTensor = (SimpleTensor) tensor;
             SimpleIndices oldIndices = simpleTensor.getIndices(),
@@ -200,14 +198,31 @@ public final class ApplyIndexMapping {
             }
             return Tensors.simpleTensor(simpleTensor.name, newIndices);
         }
+        if (tensor instanceof Complex || tensor instanceof ScalarFunction)
+            return tensor;
 
-        if (indexMapper.contract(IndicesUtils.getIndicesNames(tensor.getIndices().getFree()))) {
+        if (tensor instanceof Expression) {
+            boolean contract = indexMapper.contract(getIndicesNames(tensor.getIndices()));
+            return Tensors.expression(applyIndexMapping(tensor.get(0), indexMapper, contract),
+                    applyIndexMapping(tensor.get(1), indexMapper, contract));
+        }
+
+        if (tensor instanceof Power) {
+            Tensor oldBase = tensor.get(0),
+                    newBase = applyIndexMapping(oldBase, indexMapper, false);
+            if (oldBase == newBase)
+                return tensor;
+            return new Power(newBase, tensor.get(1));
+        }
+
+        // all types except sums and products are already processed at this point
+
+        if (contractIndices) {
             TensorBuilder builder = tensor.getBuilder();
             for (Tensor t : tensor)
                 builder.put(applyIndexMapping(t, indexMapper));
             return builder.build();
         }
-
 
         if (tensor instanceof Product) {
 
@@ -219,7 +234,7 @@ public final class ApplyIndexMapping {
             Tensor oldTensor, newTensor;
             for (i = indexless.length - 1; i >= 0; --i) {
                 oldTensor = indexless[i];
-                newTensor = applyIndexMapping(oldTensor, indexMapper);
+                newTensor = applyIndexMapping(oldTensor, indexMapper, false);
                 if (oldTensor != newTensor) {
                     if (newIndexless == null)
                         newIndexless = indexless.clone();
@@ -229,7 +244,7 @@ public final class ApplyIndexMapping {
 
             for (i = data.length - 1; i >= 0; --i) {
                 oldTensor = data[i];
-                newTensor = applyIndexMapping(oldTensor, indexMapper);
+                newTensor = applyIndexMapping(oldTensor, indexMapper, false);
                 if (oldTensor != newTensor) {
                     if (newData == null)
                         newData = data.clone();
@@ -251,7 +266,7 @@ public final class ApplyIndexMapping {
             Tensor oldTensor, newTensor;
             for (int i = data.length - 1; i >= 0; --i) {
                 oldTensor = data[i];
-                newTensor = applyIndexMapping(oldTensor, indexMapper);
+                newTensor = applyIndexMapping(oldTensor, indexMapper, false);
                 if (oldTensor != newTensor) {
                     if (newData == null)
                         newData = data.clone();
@@ -263,18 +278,7 @@ public final class ApplyIndexMapping {
             return new Sum(newData, IndicesFactory.createSorted(newData[0].getIndices().getFree()));
         }
 
-        if (tensor instanceof Expression)
-            return Tensors.expression(applyIndexMapping(tensor.get(0), indexMapper),
-                    applyIndexMapping(tensor.get(1), indexMapper));
-        if (tensor instanceof Power) {
-            Tensor oldBase = tensor.get(0),
-                    newBase = applyIndexMapping(oldBase, indexMapper);
-            if (oldBase == newBase)
-                return tensor;
-            return new Power(newBase, tensor.get(1));
-        }
-
-        return tensor;
+        throw new RuntimeException();
     }
 
 

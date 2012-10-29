@@ -4,7 +4,9 @@ import cc.redberry.core.indexmapping.IndexMappingBuffer;
 import cc.redberry.core.indexmapping.IndexMappingBufferImpl;
 import cc.redberry.core.indexmapping.IndexMappings;
 import cc.redberry.core.indices.IndexType;
+import cc.redberry.core.utils.IntArrayList;
 import cc.redberry.core.utils.TensorUtils;
+import gnu.trove.set.TIntSet;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -298,5 +300,68 @@ public class ApplyIndexMappingTest {
         standarts[1] = parse("B_ba+D_ab");
         for (; i >= 0; --i)
             Assert.assertTrue(IndexMappings.createPort(targets[i], standarts[i]).take() != null);
+    }
+
+    /*
+    * Performance tests
+    */
+
+    @Test
+    public void performanceRenameDummy() {
+
+        Tensor init, temp;
+        init = parse("(a + b_m*(k^m + p^m + b_a*(t^am + v^abc*(t^m_bc + v^m_bc))))" +
+                "*(a + b_n*(k^n + p^n + b_d*(t^dn + v^def*(t^n_ef + v^n_ef))))" +
+                "*(a*(f_qwertyuioplkjhgfdsazxcvbnm^qwertyuioplkjhgfdsazxcvbnm)**2344 + b_i*(k^i + p^i + b_gxy*(t^gixy + v^gqr*(t^xyi_qr + v_qr*(f^xyi*(t_qwtu*o^qwtu)**2 + d^xyi*(t_qwtu*o^qwtu)**2 + x*((t_qwthu*o^qhwtu)**2*d^xyi + k^xyi*(t_qwtus*o^sqwtu)**2))))))");
+
+
+        long start, time = 0;
+        int indicesSize = TensorUtils.getAllIndicesNamesT(init).size();
+
+        //cold start
+        IntArrayList forbidden = new IntArrayList();
+        int[] forbiddenArray;
+        int count = 0;
+        temp = init;
+        for (int i = 0; i < 1000; ++i) {
+            for (int j = 0; j < indicesSize; ++j)
+                forbidden.add(count++);
+            forbiddenArray = forbidden.toArray();
+            start = System.currentTimeMillis();
+            temp = ApplyIndexMapping.renameDummy(temp, forbiddenArray);
+            time += (System.currentTimeMillis() - start);
+        }
+        System.out.println("1000 invocations on cold JVM: " + time + " ms");
+        Assert.assertTrue(time < 1800);
+
+        //warm up JVM
+        burnJVMonRenameDummy();
+
+        temp = init;
+        forbidden = new IntArrayList();
+        count = 0;
+        time = 0;
+        for (int i = 0; i < 1000; ++i) {
+            for (int j = 0; j < indicesSize; ++j)
+                forbidden.add(count++);
+            forbiddenArray = forbidden.toArray();
+            start = System.currentTimeMillis();
+            temp = ApplyIndexMapping.renameDummy(temp, forbiddenArray);
+            time += (System.currentTimeMillis() - start);
+        }
+        System.out.println("1000 invocations on hot JVM: " + time + " ms");
+        Assert.assertTrue(time < 900);
+    }
+
+    private static void burnJVMonRenameDummy() {
+        Tensor t;
+        t = parse("(a + b_m*(k^m + p^m + b_a*(t^am + v^abc*(t^m_bc + v^m_bc))))" +
+                "*(a + b_n*(k^n + p^n + b_d*(t^dn + v^def*(t^n_ef + v^n_ef))))" +
+                "*(a*(f_qwertyuioplkjhgfdsazxcvbnm^qwertyuioplkjhgfdsazxcvbnm)**2344 + b_i*(k^i + p^i + b_gxy*(t^gixy + v^gqr*(t^xyi_qr + v_qr*(f^xyi*(t_qwtu*o^qwtu)**2 + d^xyi*(t_qwtu*o^qwtu)**2 + x*((t_qwthu*o^qhwtu)**2*d^xyi + k^xyi*(t_qwtus*o^sqwtu)**2))))))");
+        TIntSet fobidden = TensorUtils.getAllIndicesNamesT(t);
+        for (int i = 0; i < 1000; ++i) {
+            t = ApplyIndexMapping.renameDummy(t, fobidden.toArray());
+            fobidden.addAll(TensorUtils.getAllIndicesNamesT(t));
+        }
     }
 }
