@@ -253,12 +253,12 @@ public class TensorUtils {
                 set.add(IndicesUtils.getNameWithType(ind.get(i)));
         } else if (tensor instanceof Power) {
             appendAllIndicesNamesT(tensor.get(0), set);
-        } else {
+        } else if (tensor instanceof ScalarFunction)
+            return;
+        else {
             Tensor t;
             for (int i = tensor.size() - 1; i >= 0; --i) {
                 t = tensor.get(i);
-                if (t instanceof ScalarFunction)
-                    continue;
                 appendAllIndicesNamesT(t, set);
             }
         }
