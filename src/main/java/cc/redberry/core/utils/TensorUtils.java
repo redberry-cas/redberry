@@ -33,6 +33,7 @@ import cc.redberry.core.number.Complex;
 import cc.redberry.core.number.NumberUtils;
 import cc.redberry.core.tensor.*;
 import cc.redberry.core.tensor.functions.ScalarFunction;
+import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
 
 import java.util.Arrays;
@@ -52,16 +53,16 @@ public class TensorUtils {
         return tensor instanceof Complex && NumberUtils.isZeroOrIndeterminate((Complex) tensor);
     }
 
-    public static boolean isInteger(Tensor tensor) {
-        if (!(tensor instanceof Complex))
-            return false;
-        return ((Complex) tensor).isInteger();
+    public static boolean isIndeterminate(Tensor tensor) {
+        return tensor instanceof Complex && NumberUtils.isIndeterminate((Complex) tensor);
     }
 
-    public static boolean isNatural(Tensor tensor) {
-        if (!(tensor instanceof Complex))
-            return false;
-        return ((Complex) tensor).isNatural();
+    public static boolean isInteger(Tensor tensor) {
+        return tensor instanceof Complex && ((Complex) tensor).isInteger();
+    }
+
+    public static boolean isNaturalNumber(Tensor tensor) {
+        return tensor instanceof Complex && ((Complex) tensor).isNatural();
     }
 
     public static boolean isRealPositiveNumber(Tensor tensor) {
@@ -102,29 +103,6 @@ public class TensorUtils {
         return tensor.getIndices().getFree().size() == 0;
     }
 
-    public static boolean isOne(Tensor tensor) {
-        return tensor instanceof Complex && ((Complex) tensor).isOne();
-    }
-
-    public static boolean isZero(Tensor tensor) {
-        return tensor instanceof Complex && ((Complex) tensor).isZero();
-    }
-
-    public static boolean isImageOne(Tensor tensor) {
-        return tensor instanceof Complex && tensor.equals(Complex.IMAGEONE);
-    }
-
-    public static boolean isMinusOne(Tensor tensor) {
-        return tensor instanceof Complex && tensor.equals(Complex.MINUSE_ONE);
-    }
-
-    public static boolean isIntegerOdd(Tensor tensor) {
-        return tensor instanceof Complex && NumberUtils.isIntegerOdd((Complex) tensor);
-    }
-
-    public static boolean isIntegerEven(Tensor tensor) {
-        return tensor instanceof Complex && NumberUtils.isIntegerEven((Complex) tensor);
-    }
 
     public static boolean isSymbol(Tensor t) {
         return t.getClass() == SimpleTensor.class && t.getIndices().size() == 0;
@@ -155,6 +133,34 @@ public class TensorUtils {
             if (!isSymbolic(t))
                 return false;
         return true;
+    }
+
+    public static boolean passOutDummies(Tensor tensor) {
+        return getAllDummyIndicesT(tensor).size() != 0;
+    }
+
+    public static boolean isOne(Tensor tensor) {
+        return tensor instanceof Complex && ((Complex) tensor).isOne();
+    }
+
+    public static boolean isZero(Tensor tensor) {
+        return tensor instanceof Complex && ((Complex) tensor).isZero();
+    }
+
+    public static boolean isImageOne(Tensor tensor) {
+        return tensor instanceof Complex && tensor.equals(Complex.IMAGEONE);
+    }
+
+    public static boolean isMinusOne(Tensor tensor) {
+        return tensor instanceof Complex && tensor.equals(Complex.MINUSE_ONE);
+    }
+
+    public static boolean isIntegerOdd(Tensor tensor) {
+        return tensor instanceof Complex && NumberUtils.isIntegerOdd((Complex) tensor);
+    }
+
+    public static boolean isIntegerEven(Tensor tensor) {
+        return tensor instanceof Complex && NumberUtils.isIntegerEven((Complex) tensor);
     }
 
     public static boolean equalsExactly(Tensor[] u, Tensor[] v) {
@@ -239,7 +245,7 @@ public class TensorUtils {
         return set;
     }
 
-    private static void appendAllIndicesNamesT(Tensor tensor, TIntHashSet set) {
+    public static void appendAllIndicesNamesT(Tensor tensor, TIntSet set) {
         if (tensor instanceof SimpleTensor) {
             Indices ind = tensor.getIndices();
             final int size = ind.size();
@@ -270,7 +276,7 @@ public class TensorUtils {
         IndexMappingBuffer buffer;
 
         while ((buffer = mp.take()) != null)
-            if (buffer.getSignum() == false)
+            if (!buffer.getSignum())
                 return true;
 
         return false;
@@ -279,7 +285,7 @@ public class TensorUtils {
     public static Boolean compare1(Tensor u, Tensor v) {
         Indices freeIndices = u.getIndices().getFree();
         if (!freeIndices.equalsRegardlessOrder(v.getIndices().getFree()))
-            return false;
+            return null;
         int[] free = freeIndices.getAllIndices().copy();
         IndexMappingBuffer tester = new IndexMappingBufferTester(free, false);
         IndexMappingBuffer buffer = IndexMappings.createPort(tester, u, v).take();
@@ -425,40 +431,6 @@ public class TensorUtils {
             for (Tensor t : tensor)
                 addSymbols(t, set);
     }
-
-//    public static Tensor[] getDistinct(final Tensor[] array) {
-//        final int length = array.length;
-//        final Indices indices = array[0].getIndices().getFree();
-//        final int[] hashes = new int[length];
-//        int i;
-//        for (i = 0; i < length; ++i)
-//            hashes[i] = TensorHashCalculator.hashWithIndices(array[i], indices);
-//        ArraysUtils.quickSort(hashes, array);
-//
-//        //Searching for stretches in from hashes
-//        final List<Tensor> tensors = new ArrayList<>();
-//        int begin = 0;
-//        for (i = 1; i <= length; ++i)
-//            if (i == length || hashes[i] != hashes[i - 1]) {
-//                if (i - 1 != begin)
-//                    _addDistinctToList(array, begin, i, tensors);
-//                else
-//                    tensors.add(array[begin]);
-//                begin = i;
-//            }
-//        return tensors.toArray(new Tensor[tensors.size()]);
-//    }
-//
-//    private static void _addDistinctToList(final Tensor[] array, final int from, final int to, final List<Tensor> tensors) {
-//        int j;
-//        OUTER:
-//        for (int i = from; i < to; ++i) {
-//            for (j = i + 1; j < to; ++j)
-//                if (TTest.equals(array[i], array[j]))
-//                    continue OUTER;
-//            tensors.add(array[i]);
-//        }
-//    }
 
     public static int treeDepth(Tensor tensor) {
         if (tensor.getClass() == SimpleTensor.class
