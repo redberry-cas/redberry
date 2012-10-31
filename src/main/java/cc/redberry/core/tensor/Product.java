@@ -24,13 +24,18 @@ package cc.redberry.core.tensor;
 
 import cc.redberry.core.context.OutputFormat;
 import cc.redberry.core.indices.Indices;
+import cc.redberry.core.indices.IndicesBuilder;
 import cc.redberry.core.indices.IndicesFactory;
 import cc.redberry.core.indices.IndicesUtils;
 import cc.redberry.core.math.GraphUtils;
 import cc.redberry.core.number.Complex;
+import cc.redberry.core.number.NumberUtils;
 import cc.redberry.core.utils.ArraysUtils;
 import cc.redberry.core.utils.HashFunctions;
 import cc.redberry.core.utils.SoftReferenceWrapper;
+import cc.redberry.core.utils.TensorUtils;
+import gnu.trove.set.TIntSet;
+import gnu.trove.set.hash.TIntHashSet;
 
 import java.util.Arrays;
 
@@ -64,7 +69,7 @@ public final class Product extends MultiTensor {
 
     Product(Indices indices, Complex factor, Tensor[] indexless, Tensor[] data) {
         super(indices);
-        this.factor = factor.isOne() ? Complex.ONE : factor.isMinusOne() ? Complex.MINUSE_ONE : factor;
+        this.factor = getDefaultReference(factor);
         this.indexlessData = indexless;
         this.data = data;
 
@@ -78,7 +83,7 @@ public final class Product extends MultiTensor {
 
     Product(Complex factor, Tensor[] indexlessData, Tensor[] data, ProductContent content, Indices indices) {
         super(indices);
-        this.factor = factor.isOne() ? Complex.ONE : factor.isMinusOne() ? Complex.MINUSE_ONE : factor;
+        this.factor = getDefaultReference(factor);
         this.indexlessData = indexlessData;
         this.data = data;
         this.contentReference = new SoftReferenceWrapper<>();
@@ -107,6 +112,10 @@ public final class Product extends MultiTensor {
         this.data = data;
         this.contentReference = contentReference;
         this.hash = calculateHash();
+    }
+
+    private static Complex getDefaultReference(Complex factor) {
+        return factor.isOne() ? Complex.ONE : factor.isMinusOne() ? Complex.MINUSE_ONE : factor;
     }
 
     @Override
@@ -165,6 +174,85 @@ public final class Product extends MultiTensor {
             return size;
         return size + 1;
         //return data.length - ((hash & 0x00080000) >> 19); // ;)
+    }
+
+    @Override
+    public Tensor set(int i, Tensor tensor) {
+        if (i >= size() || i < 0)
+            throw new IndexOutOfBoundsException();
+//        return super.set(i, tensor);
+        Tensor old = get(i);
+        if (old == tensor)
+            return this;
+        if (TensorUtils.equalsExactly(old, tensor))
+            return this;
+        if (tensor instanceof Complex)
+            return setComplex(i, (Complex) tensor);
+
+        int size = size(), j;
+        if (TensorUtils.passOutDummies(tensor)) {
+            TIntSet forbidden = new TIntHashSet();
+            for (j = 0; j < size; ++j)
+                if (j != i)
+                    TensorUtils.appendAllIndicesNamesT(get(j), forbidden);
+            tensor = ApplyIndexMapping.renameDummy(tensor, forbidden.toArray());
+        }
+
+        Boolean compare = TensorUtils.compare1(old, tensor);
+        if (compare == null)
+            return super.set(i, tensor);
+
+        Complex newFactor = factor;
+        if (compare) {
+            tensor = Tensors.negate(tensor);
+            newFactor = factor.negate();
+            newFactor = getDefaultReference(newFactor);
+        }
+
+        if (factor != Complex.ONE) {
+            assert i != 0;
+            --i;
+        }
+
+        if (i < indexlessData.length) {
+            Tensor[] newIndexless = indexlessData.clone();
+            newIndexless[i] = tensor;
+            return new Product(indices, newFactor, newIndexless, data, contentReference);
+        } else {
+            Tensor[] newData = data.clone();
+            newData[i - indexlessData.length] = tensor;
+            return new Product(new IndicesBuilder().append(newData).getIndices(),
+                    newFactor, indexlessData, newData);
+        }
+    }
+
+    @Override
+    public Tensor remove(int position) {
+        return setComplex(position, Complex.ONE);
+    }
+
+    private Tensor setComplex(int i, Complex complex) {
+        if (NumberUtils.isZeroOrIndeterminate(complex))
+            return complex;
+
+        if (factor != Complex.ONE) {
+            if (i == 0) {
+                complex = getDefaultReference(complex);
+                return new Product(indices, complex, indexlessData, data, contentReference);
+            }
+            complex = complex.multiply(factor);
+            complex = getDefaultReference(complex);
+            --i;
+        }
+
+        if (i < indexlessData.length) {
+            Tensor[] newIndexless = ArraysUtils.remove(indexlessData, i);
+            return new Product(indices, complex, newIndexless, data, contentReference);
+        } else {
+            Tensor[] newData = ArraysUtils.remove(data, i - indexlessData.length);
+            return new Product(new IndicesBuilder().append(newData).getIndices(),
+                    complex, indexlessData, newData);
+        }
     }
 
     public int sizeWithoutFactor() {

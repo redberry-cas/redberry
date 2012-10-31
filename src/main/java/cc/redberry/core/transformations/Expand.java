@@ -99,7 +99,7 @@ public final class Expand implements Transformation {
     }
 
     private static boolean isExpandablePower(Tensor t) {
-        return t instanceof Power && t.get(0) instanceof Sum && TensorUtils.isNatural(t.get(1));
+        return t instanceof Power && t.get(0) instanceof Sum && TensorUtils.isNaturalNumber(t.get(1));
     }
 
     private static Tensor expandProductOfSums(Tensor current, Indicator<Tensor> indicator, Transformation[] transformations) {

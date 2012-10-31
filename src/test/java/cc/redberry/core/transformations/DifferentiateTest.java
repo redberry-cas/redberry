@@ -1,6 +1,8 @@
 package cc.redberry.core.transformations;
 
 import cc.redberry.core.TAssert;
+import cc.redberry.core.context.CC;
+import cc.redberry.core.context.ContextManager;
 import cc.redberry.core.indices.IndexType;
 import cc.redberry.core.tensor.Expression;
 import cc.redberry.core.tensor.SimpleTensor;
@@ -55,6 +57,27 @@ public class DifferentiateTest {
         TAssert.assertEquals(u, "g^{nb}*x^{am}+g^{na}*x^{mb}+f^{bm}*g^{na}+f^{na}*g^{mb}+2*f^{mb}*g^{na}+2*f^{ma}*g^{nb}");
     }
 
+
+    @Test
+    public void test3a() {
+        for (int i = 0; i < 100; ++i) {
+            ContextManager.initializeNew();
+            Tensor t = parse("f^ma*(x_m^n+f^n_m)*f_n^b");
+            SimpleTensor var1 = parseSimple("f_a^a");
+            SimpleTensor var2 = parseSimple("f_mn");
+            Tensor u = differentiate(t, var1);
+            TAssert.assertEquals(u, "(x^an+f^na)*f_n^b+f^ma*f_m^b+f^ma*(x_m^b+f^b_m)");
+            Tensor v = differentiate(t, var2);
+            TAssert.assertEquals(v, "g^an*(x^mv+f^vm)*f_v^b+f^na*f^mb+f^ta*(x_t^m+f^m_t)*g^bn");
+            u = differentiate(u, var2);
+            v = differentiate(v, var1);
+            u = contract(expand(u));
+            v = contract(expand(v));
+            TAssert.assertEquals(u, v);
+            TAssert.assertEquals(u, "g^{nb}*x^{am}+g^{na}*x^{mb}+f^{bm}*g^{na}+f^{na}*g^{mb}+2*f^{mb}*g^{na}+2*f^{ma}*g^{nb}");
+        }
+    }
+
     @Test
     public void test4() {
         addSymmetry("f_mn", IndexType.LatinLower, false, 1, 0);
@@ -104,6 +127,88 @@ public class DifferentiateTest {
         Tensor v = differentiate(t, var2, var1);
         v = contract(expand(v));
         v = d.transform(R1.transform(R2.transform(v)));
+        TAssert.assertEquals(u, v);
+    }
+
+    @Test
+    public void test5a() {
+        //bad seeds
+        //1023936052033412675
+        //-9053946475308531616
+        //2531998578876800782
+        //-6889844122566212877
+        //-8268423169077194235
+        CC.resetTensorNames(1023936052033412675L);
+        addAntiSymmetry("R_mnab", 1, 0, 2, 3);
+        addSymmetry("R_mnab", 2, 3, 0, 1);
+        addSymmetry("R_mn", 1, 0);
+//        Tensor t = parse("(R^\\alpha\\gamma*R_\\rho^\\beta - R_\\rho^\\gamma*R^\\alpha\\beta)*(R^\\sigma_{\\gamma\\mu\\alpha}*R^\\rho_{\\nu\\sigma\\beta}+R^\\sigma_{\\alpha\\mu\\gamma}*R^\\rho_{\\sigma\\nu\\beta})");
+        Tensor t = parse("(R^ag*R_r^b - R_r^g*R^ab)*(R^s_{gma}*R^r_{nsb}+R^s_{amg}*R^r_{snb})");
+        Expression R1 = parseExpression("R = R^m_m");
+        Expression R2 = parseExpression("R_ab = R^m_amb");
+        t = R1.transform(t);
+        t = R2.transform(t);
+
+        SimpleTensor var1 = parseSimple("R_mxn^x");
+        SimpleTensor var2 = parseSimple("R^r_y^ty");
+
+        R1 = parseExpression("R^m_m = R");
+        R2 = parseExpression("R^m_amb = R_ab");
+        Expression d = parseExpression("d_m^m = 4");
+        Tensor u = differentiate(t, var1, var2);
+        System.out.println("u");
+        u = contract(expand(u));
+        u = d.transform(R1.transform(R2.transform(u)));
+        Tensor v = differentiate(t, var2, var1);
+        System.out.println("v");
+        v = contract(expand(v));
+        v = d.transform(R1.transform(R2.transform(v)));
+        System.out.println(u);
+        System.out.println(v);
+        TAssert.assertEquals(u, v);
+    }
+
+    @Test
+    public void test5b() {
+        //bad seeds
+        //1023936052033412675
+        //-9053946475308531616
+        //2531998578876800782
+        //-6889844122566212877
+        //-8268423169077194235
+        CC.resetTensorNames(1023936052033412675L);
+        addAntiSymmetry("R_mnab", 1, 0, 2, 3);
+        addSymmetry("R_mnab", 2, 3, 0, 1);
+        addSymmetry("R_mn", 1, 0);
+//        Tensor t = parse("(R^\\alpha\\gamma*R_\\rho^\\beta - R_\\rho^\\gamma*R^\\alpha\\beta)*(R^\\sigma_{\\gamma\\mu\\alpha}*R^\\rho_{\\nu\\sigma\\beta}+R^\\sigma_{\\alpha\\mu\\gamma}*R^\\rho_{\\sigma\\nu\\beta})");
+        //Tensor t = parse("(R^ag*R_r^b-R_r^g*R^ab)*(R^s_{gma}*R^r_{nsb}+R^s_{amg}*R^r_{snb})");
+        Tensor t = parse("R^ag*R_r^b*(R^s_{gma}*R^r_{nsb}+R^s_{amg}*R^r_{snb})");
+        Expression R1 = parseExpression("R = R^m_m");
+        Expression R2 = parseExpression("R_ab = R^m_amb");
+        t = R1.transform(t);
+        t = R2.transform(t);
+
+        SimpleTensor var1 = parseSimple("R_mxn^x");
+        SimpleTensor var2 = parseSimple("R^r_y^ty");
+
+        R1 = parseExpression("R^m_m = R");
+        R2 = parseExpression("R^m_amb = R_ab");
+        Expression d = parseExpression("d_m^m = 4");
+        Tensor v = differentiate(t, var2);
+        System.out.println("v var2: ");
+        System.out.println(v);
+        v = differentiate(v, var1);
+        System.out.println("v var1");
+        v = contract(expand(v));
+        v = d.transform(R1.transform(R2.transform(v)));
+        Tensor u = differentiate(t, var1, var2);
+        System.out.println("u");
+        u = contract(expand(u));
+        u = d.transform(R1.transform(R2.transform(u)));
+        System.out.println(u);
+        System.out.println(v);
+//        (1/4)*R**2*g_{rt}+R^{e}_{b}*R_{e}^{b}*g_{rt}+R_{rs}^{m}_{t}*R_{m}^{s}+(1/4)*R^{sng}_{g}*R_{ns}*g_{rt}+(1/2)*R*R_{rt}
+//        (1/4)*R**2*g_{rt}+R^{e}_{b}*R_{e}^{b}*g_{rt}+R^{e}_{trb}*R_{e}^{b}-(1/8)*R^{s}_{s}^{b}_{b}*R_{tr}+(1/2)*R*R_{rt}
         TAssert.assertEquals(u, v);
     }
 
@@ -171,17 +276,29 @@ public class DifferentiateTest {
 
     @Test
     public void test13() {
-        addAntiSymmetry("R_abcd", 1, 0, 2, 3);
-        addSymmetry("R_abcd", 2, 3, 0, 1);
+//        addAntiSymmetry("R_abcd", 1, 0, 2, 3);
+//        addSymmetry("R_abcd", 2, 3, 0, 1);
+        System.out.println(CC.getNameManager().getSeed());
         Tensor tensor = parse("R_mnab*R^pqnm*Sin[R_abcd*R^cdab]");
         SimpleTensor var1 = parseSimple("R_abmn");
         SimpleTensor var2 = parseSimple("R^pqmn");
         tensor = differentiate(tensor, var1);
+        System.out.println(tensor);
+        tensor = expand(tensor);
+        System.out.println(tensor);
+        tensor = contract(tensor);
+        System.out.println(tensor);
+        tensor = parseExpression("d_m^m = 4").transform(tensor);
+        System.out.println(tensor);
+        System.out.println("1st done");
         tensor = differentiate(tensor, var2);
+        System.out.println(tensor);
         tensor = parseExpression("R_mnab = 1/3*(g_mb*g_na - g_ma*g_nb)*la").transform(tensor);
         tensor = expand(tensor);
         tensor = contract(tensor);
         tensor = parseExpression("d_m^m = 4").transform(tensor);
+        tensor = expand(tensor);
         System.out.println(tensor);
+
     }
 }

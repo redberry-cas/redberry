@@ -8,14 +8,17 @@ import cc.redberry.core.tensor.*;
 import cc.redberry.core.tensor.functions.ScalarFunction;
 import cc.redberry.core.tensor.iterator.TensorLastIterator;
 import cc.redberry.core.transformations.substitutions.Substitution;
-import cc.redberry.core.utils.ArraysUtils;
 import cc.redberry.core.utils.TensorUtils;
 import gnu.trove.set.hash.TIntHashSet;
 
+import java.util.Arrays;
+
 import static cc.redberry.core.indices.IndicesUtils.*;
 import static cc.redberry.core.tensor.ApplyIndexMapping.applyIndexMapping;
+import static cc.redberry.core.tensor.ApplyIndexMapping.renameDummy;
 import static cc.redberry.core.tensor.Tensors.*;
 import static cc.redberry.core.transformations.ContractIndices.contract;
+import static cc.redberry.core.utils.ArraysUtils.addAll;
 
 /**
  * @author Dmitry Bolotin
@@ -50,11 +53,11 @@ public final class Differentiate implements Transformation {
         for (int i = 0; i < vars.length; ++i) {
             if (!forbidden.isEmpty() && vars1[i].getIndices().size() != 0) {
                 if (vars1[i].getIndices().size() != vars1[i].getIndices().getFree().size())
-                    vars1[i] = (SimpleTensor) ApplyIndexMapping.renameDummy(vars1[i], forbidden.toArray());
+                    vars1[i] = (SimpleTensor) renameDummy(vars1[i], forbidden.toArray());
                 forbidden.addAll(getIndicesNames(vars1[i].getIndices()));
             }
         }
-        tensor = ApplyIndexMapping.renameDummy(tensor, TensorUtils.getAllIndicesNamesT(vars1).toArray());
+        tensor = renameDummy(tensor, TensorUtils.getAllIndicesNamesT(vars1).toArray());
         for (SimpleTensor var : vars1)
             tensor = differentiate1(tensor, createRule(var));
         return tensor;
@@ -63,10 +66,16 @@ public final class Differentiate implements Transformation {
     public static Tensor differentiate(Tensor tensor, SimpleTensor var) {
         if (var.getIndices().size() != 0) {
             if (var.getIndices().size() != var.getIndices().getFree().size())
-                var = (SimpleTensor) ApplyIndexMapping.renameDummy(var, TensorUtils.getAllIndicesNamesT(tensor).toArray());
-            tensor = ApplyIndexMapping.renameDummy(tensor, TensorUtils.getAllIndicesNamesT(var).toArray());
+                var = (SimpleTensor) renameDummy(var, TensorUtils.getAllIndicesNamesT(tensor).toArray());
+            tensor = renameDummy(tensor, TensorUtils.getAllIndicesNamesT(var).toArray());
         }
         return differentiate1(tensor, createRule(var));
+    }
+
+    private static Tensor differentiateWithRenaming(Tensor tensor, SimpleTensorDifferentiationRule rule) {
+        SimpleTensorDifferentiationRule newRule = rule.newRuleForTensor(tensor);
+        tensor = renameDummy(tensor, newRule.getForbidden());
+        return differentiate1(tensor, newRule);
     }
 
     private static Tensor differentiate1(Tensor tensor, SimpleTensorDifferentiationRule rule) {
@@ -90,7 +99,8 @@ public final class Differentiate implements Transformation {
             return builder.build();
         }
         if (tensor instanceof ScalarFunction) {
-            return multiply(((ScalarFunction) tensor).derivative(), differentiate1(tensor.get(0), rule));
+            return multiply(((ScalarFunction) tensor).derivative(),
+                    differentiateWithRenaming(tensor.get(0), rule));
         }
         if (tensor instanceof Power) {
             //e^f*ln(g) -> g^f*(f'*ln(g)+f/g*g') ->f*g^(f-1)*g' + g^f*ln(g)*f'
@@ -100,7 +110,7 @@ public final class Differentiate implements Transformation {
                             differentiate1(tensor.get(0), rule)),
                     multiply(tensor,
                             log(tensor.get(0)),
-                            differentiate1(tensor.get(1), rule)));
+                            differentiateWithRenaming(tensor.get(1), rule)));
         }
         if (tensor instanceof Product) {
             SumBuilder result = new SumBuilder();
@@ -125,7 +135,7 @@ public final class Differentiate implements Transformation {
     }
 
     private static abstract class SimpleTensorDifferentiationRule {
-        private final SimpleTensor var;
+        protected final SimpleTensor var;
 
         protected SimpleTensorDifferentiationRule(SimpleTensor var) {
             this.var = var;
@@ -138,7 +148,11 @@ public final class Differentiate implements Transformation {
             return differentiateSimpleTensorWithoutCheck(simpleTensor);
         }
 
+        abstract SimpleTensorDifferentiationRule newRuleForTensor(Tensor tensor);
+
         abstract Tensor differentiateSimpleTensorWithoutCheck(SimpleTensor simpleTensor);
+
+        abstract int[] getForbidden();
     }
 
     private static final class SymbolicDifferentiationRule extends SimpleTensorDifferentiationRule {
@@ -150,11 +164,28 @@ public final class Differentiate implements Transformation {
         Tensor differentiateSimpleTensorWithoutCheck(SimpleTensor simpleTensor) {
             return Complex.ONE;
         }
+
+        @Override
+        SimpleTensorDifferentiationRule newRuleForTensor(Tensor tensor) {
+            return this;
+        }
+
+        @Override
+        int[] getForbidden() {
+            return new int[0];
+        }
     }
 
     private static final class SymmetricDifferentiationRule extends SimpleTensorDifferentiationRule {
         private final Tensor derivative;
         private final int[] allFreeFrom, freeVarIndices;
+
+        private SymmetricDifferentiationRule(SimpleTensor var, Tensor derivative, int[] allFreeFrom, int[] freeVarIndices) {
+            super(var);
+            this.derivative = derivative;
+            this.allFreeFrom = allFreeFrom;
+            this.freeVarIndices = freeVarIndices;
+        }
 
         SymmetricDifferentiationRule(SimpleTensor var) {
             super(var);
@@ -170,7 +201,7 @@ public final class Differentiate implements Transformation {
                 allFreeVarIndices[i] = setRawState(indexGenerator.generate(type), inverseIndexState(state));
                 allFreeArgIndices[i] = setRawState(indexGenerator.generate(type), state);
             }
-            int[] allIndices = ArraysUtils.addAll(allFreeVarIndices, allFreeArgIndices);
+            int[] allIndices = addAll(allFreeVarIndices, allFreeArgIndices);
             SimpleIndices dIndices = IndicesFactory.createSimple(null, allIndices);
             SimpleTensor symmetric = simpleTensor("@!@#@##_AS@23@@#", dIndices);
             Tensor derivative = SymmetrizeSimpleTensor.symmetrize(
@@ -180,7 +211,7 @@ public final class Differentiate implements Transformation {
             derivative = applyIndexMapping(
                     derivative,
                     allIndices,
-                    ArraysUtils.addAll(varIndices.getInverse().getAllIndices().copy(), allFreeArgIndices),
+                    addAll(varIndices.getInverse().getAllIndices().copy(), allFreeArgIndices),
                     new int[0]);
             ProductBuilder builder = new ProductBuilder(0, length);
             for (i = 0; i < length; ++i)
@@ -188,13 +219,26 @@ public final class Differentiate implements Transformation {
             derivative = new Substitution(symmetric, builder.build()).transform(derivative);
             this.derivative = derivative;
             this.freeVarIndices = var.getIndices().getFree().getInverse().getAllIndices().copy();
-            this.allFreeFrom = ArraysUtils.addAll(allFreeArgIndices, freeVarIndices);
+            Arrays.sort(allFreeArgIndices);
+            this.allFreeFrom = addAll(allFreeArgIndices, freeVarIndices);
         }
 
+        @Override
         Tensor differentiateSimpleTensorWithoutCheck(SimpleTensor simpleTensor) {
             int[] to = simpleTensor.getIndices().getAllIndices().copy();
-            to = ArraysUtils.addAll(to, freeVarIndices);
+            to = addAll(to, freeVarIndices);
             return applyIndexMapping(derivative, allFreeFrom, to, new int[0]);
+        }
+
+        @Override
+        SimpleTensorDifferentiationRule newRuleForTensor(Tensor tensor) {
+            return new SymmetricDifferentiationRule(this.var,
+                    renameDummy(derivative, TensorUtils.getAllIndicesNamesT(tensor).toArray()), allFreeFrom, freeVarIndices);
+        }
+
+        @Override
+        int[] getForbidden() {
+            return TensorUtils.getAllIndicesNamesT(derivative).toArray();
         }
     }
 }

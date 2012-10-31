@@ -103,7 +103,7 @@ public abstract class Tensor
      *
      * @return new instance of tensor
      */
-    public final Tensor set(int i, Tensor tensor) {
+    public Tensor set(int i, Tensor tensor) {
         int size = size();
         if (i >= size || i < 0)
             throw new IndexOutOfBoundsException();

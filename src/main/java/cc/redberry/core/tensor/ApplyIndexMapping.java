@@ -159,7 +159,7 @@ public final class ApplyIndexMapping {
         System.arraycopy(allForbidden, 0, forbiddenGeneratorIndices, 0, allForbidden.length);
         System.arraycopy(dummyIndices, 0, forbiddenGeneratorIndices, allForbidden.length, dummyIndices.length);
 
-        IndexGenerator generator = new IndexGenerator(forbiddenGeneratorIndices);//also sorts allForbidden array
+        IndexGenerator generator = new IndexGenerator(forbiddenGeneratorIndices);
         for (int index : dummyIndices)
             if (Arrays.binarySearch(allForbidden, index) >= 0) {
                 //if index is dummy it cannot be free, so from (which is equal to free)

@@ -44,16 +44,5 @@ public abstract class MultiTensor extends Tensor {
     //protected abstract Indices calculateIndices();
     //protected abstract int calculateHash();
     //TODO implement without builder?
-    public final Tensor remove(int position) {
-        int size = size();
-        if (position >= size || position < 0)
-            throw new IndexOutOfBoundsException();
-        TensorBuilder builder = getBuilder();
-        for (int i = 0; i < size; ++i)
-            if (i != position)
-                builder.put(get(i));
-        return builder.build();
-    }
-
-
+    public abstract Tensor remove(int position);
 }
