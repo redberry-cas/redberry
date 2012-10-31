@@ -23,8 +23,12 @@
 package cc.redberry.core;
 
 import gnu.trove.set.hash.TIntHashSet;
+import junit.framework.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.junit.internal.runners.JUnit4ClassRunner;
+import org.junit.runner.JUnitCore;
+import org.junit.runners.JUnit4;
 
 import java.util.HashSet;
 import java.util.Map;
@@ -115,10 +119,5 @@ public class BlackList {
         System.out.println("object   " + t);
     }
 
-    @Test
-    public void werq() {
-        for (Map.Entry<String, String> e : System.getenv().entrySet())
-            System.out.println(e.getKey() + " -> " + e.getValue());
-        System.out.println(System.getenv("MAPLE"));
-    }
+
 }

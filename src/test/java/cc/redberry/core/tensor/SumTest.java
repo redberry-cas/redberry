@@ -27,7 +27,6 @@ import org.junit.Assert;
 import org.junit.Test;
 
 /**
- *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
@@ -64,12 +63,19 @@ public class SumTest {
     }
 
     @Test
-    public void testHash1(){
+    public void testHash1() {
         Tensor a = Tensors.parse("f_mn + h_mn");
         Tensor b = Tensors.parse("f_nm + h_mn");
         Tensor c = Tensors.parse("f_nm + h_nm");
-        System.out.println(a.hashCode());
-        System.out.println(b.hashCode());
-        System.out.println(c.hashCode());
+        Assert.assertEquals(a.hashCode(), b.hashCode());
+        Assert.assertEquals(a.hashCode(), c.hashCode());
+    }
+
+    @Test
+    public void testRemove1() {
+        Sum t = (Sum) Tensors.parse("a+b+c");
+        Assert.assertEquals(t.remove(0).size(), 2);
+        Assert.assertEquals(t.remove(1).size(), 2);
+        Assert.assertEquals(t.remove(2).size(), 2);
     }
 }

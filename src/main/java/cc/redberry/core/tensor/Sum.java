@@ -26,11 +26,11 @@ import cc.redberry.core.context.OutputFormat;
 import cc.redberry.core.indices.Indices;
 import cc.redberry.core.utils.ArraysUtils;
 import cc.redberry.core.utils.TensorHashCalculator;
+import cc.redberry.core.utils.TensorUtils;
 
 import java.util.Arrays;
 
 /**
- *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
@@ -78,26 +78,6 @@ public final class Sum extends MultiTensor {
         }
     }
 
-//    @Override
-//    protected Indices calculateIndices() {
-//        Indices indices = data[0].getIndices().getFreeIndices();
-//
-////        int p = 0;
-////        boolean sorted = indices instanceof SortedIndices;
-////
-////        Indices current;
-////        for (int i = 1; i < data.length; ++i) {
-////            current = data[i].getIndices().getFreeIndices();
-////            if (!current.equalsRegardlessOrder(indices))
-////                throw new TensorException("Inconsistent summands: " + data[p] + " and " + data[i] + " have differrent free indices.");
-////            if (!sorted && current instanceof SortedIndices) {
-////                indices = current;
-////                p = i;
-////                sorted = true;
-////            }
-////        }
-//        return IndicesFactory.createSorted(indices);
-//    }
     @Override
     public Tensor get(int i) {
         return data[i];
@@ -111,6 +91,41 @@ public final class Sum extends MultiTensor {
     @Override
     public Tensor[] getRange(int from, int to) {
         return Arrays.copyOfRange(data, from, to);
+    }
+
+    @Override
+    public Tensor set(int i, Tensor tensor) {
+//        return super.set(i, tensor);
+        if (i >= data.length || i < 0)
+            throw new IndexOutOfBoundsException();
+
+        Tensor old = data[i];
+        if (old == tensor)
+            return this;
+        if (TensorUtils.equalsExactly(old, tensor))
+            return this;
+        if (TensorUtils.isIndeterminate(tensor))
+            return tensor;
+        if (TensorUtils.isZero(tensor))
+            return remove(i);
+        Tensor[] newData = data.clone();
+        newData[i] = tensor;
+        if (TensorUtils.equals(old, tensor))
+            return new Sum(newData, indices);
+        return Tensors.sum(newData);
+    }
+
+    @Override
+    public Tensor remove(int i) {
+        if (i >= data.length || i < 0)
+            throw new IndexOutOfBoundsException();
+        if (data.length == 2)
+            return data[1 - i];
+        Tensor[] newData = new Tensor[data.length - 1];
+        System.arraycopy(data, 0, newData, 0, i);
+        if (i < data.length - 1)
+            System.arraycopy(data, i + 1, newData, i, data.length - i - 1);
+        return new Sum(newData, indices);
     }
 
     @Override
