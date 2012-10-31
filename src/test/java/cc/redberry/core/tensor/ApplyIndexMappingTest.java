@@ -1,5 +1,6 @@
 package cc.redberry.core.tensor;
 
+import cc.redberry.core.*;
 import cc.redberry.core.indexmapping.IndexMappingBuffer;
 import cc.redberry.core.indexmapping.IndexMappingBufferImpl;
 import cc.redberry.core.indexmapping.IndexMappings;
@@ -123,7 +124,8 @@ public class ApplyIndexMappingTest {
         Tensor target = parse("(A_mn*B^mn_ab+C_ab)*C^dc");
         target = ApplyIndexMapping.applyIndexMapping(target, imb, usedIndices);
         Tensor standard = parse("(A_{ab}*B^{ab}_{wx}+C_{wx})*C^{zy}");
-        Assert.assertTrue(TensorUtils.equalsExactly(target, standard));
+        Assert.assertTrue(TensorUtils.equals(target, standard));
+        TAssert.assertIndicesConsistency(target);
     }
 
     @Test

@@ -96,7 +96,7 @@ public final class Differentiate implements Transformation {
         return differentiate1(tensor, newRule, expandAndContarct);
     }
 
-    private static final Tensor expandAndContract(Tensor tensor) {
+    private static Tensor expandAndContract(Tensor tensor) {
         return ContractIndices.contract(expand(tensor, ContractIndices.ContractIndices));
     }
 
@@ -129,7 +129,7 @@ public final class Differentiate implements Transformation {
         }
         if (tensor instanceof ScalarFunction) {
             Tensor temp = multiply(((ScalarFunction) tensor).derivative(),
-                    differentiateWithRenaming(tensor.get(0), rule, expandAndContarct));
+                                   differentiateWithRenaming(tensor.get(0), rule, expandAndContarct));
             if (expandAndContarct)
                 return expandAndContract(temp);
             return temp;
@@ -138,11 +138,11 @@ public final class Differentiate implements Transformation {
             //e^f*ln(g) -> g^f*(f'*ln(g)+f/g*g') ->f*g^(f-1)*g' + g^f*ln(g)*f'
             Tensor temp = sum(
                     multiply(tensor.get(1),
-                            pow(tensor.get(0), sum(tensor.get(1), Complex.MINUSE_ONE)),
-                            differentiate1(tensor.get(0), rule, expandAndContarct)),
+                             pow(tensor.get(0), sum(tensor.get(1), Complex.MINUSE_ONE)),
+                             differentiate1(tensor.get(0), rule, expandAndContarct)),
                     multiply(tensor,
-                            log(tensor.get(0)),
-                            differentiateWithRenaming(tensor.get(1), rule, expandAndContarct)));
+                             log(tensor.get(0)),
+                             differentiateWithRenaming(tensor.get(1), rule, expandAndContarct)));
             if (expandAndContarct)
                 return expandAndContract(temp);
             return temp;
@@ -152,10 +152,11 @@ public final class Differentiate implements Transformation {
             Tensor temp;
             for (int i = tensor.size() - 1; i >= 0; --i) {
                 temp = tensor.set(i, differentiate1(tensor.get(i), rule, expandAndContarct));
+                if (rule.var.getIndices().size() != 0)
+                    temp = ContractIndices.contract(temp);
                 if (expandAndContarct)
                     temp = expandAndContract(temp);
                 result.put(temp);
-
             }
             return result.build();
         }
@@ -270,7 +271,7 @@ public final class Differentiate implements Transformation {
         @Override
         SimpleTensorDifferentiationRule newRuleForTensor(Tensor tensor) {
             return new SymmetricDifferentiationRule(this.var,
-                    renameDummy(derivative, TensorUtils.getAllIndicesNamesT(tensor).toArray()), allFreeFrom, freeVarIndices);
+                                                    renameDummy(derivative, TensorUtils.getAllIndicesNamesT(tensor).toArray()), allFreeFrom, freeVarIndices);
         }
 
         @Override

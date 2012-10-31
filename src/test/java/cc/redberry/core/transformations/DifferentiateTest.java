@@ -94,6 +94,7 @@ public class DifferentiateTest {
 
     @Test
     public void test5() {
+        CC.resetTensorNames(1023936052033412675L);
         addSymmetry("R_\\mu\\nu\\alpha\\beta", IndexType.GreekLower, true, 1, 0, 2, 3);
         addSymmetry("R_\\mu\\nu\\alpha\\beta", IndexType.GreekLower, false, 2, 3, 0, 1);
         addSymmetry("R_\\mu\\nu", IndexType.GreekLower, false, 1, 0);
@@ -123,10 +124,10 @@ public class DifferentiateTest {
     public void test5a() {
         //bad seeds
         long[] badSeeds = {1023936052033412675L,
-                -9053946475308531616L,
-                2531998578876800782L,
-                -6889844122566212877L,
-                -8268423169077194235L};
+                           -9053946475308531616L,
+                           2531998578876800782L,
+                           -6889844122566212877L,
+                           -8268423169077194235L};
         for (long seed : badSeeds) {
             CC.resetTensorNames(seed);
             addAntiSymmetry("R_mnab", 1, 0, 2, 3);
@@ -161,10 +162,10 @@ public class DifferentiateTest {
     public void test5b() {
         //bad seeds
         long[] badSeeds = {1023936052033412675L,
-                -9053946475308531616L,
-                2531998578876800782L,
-                -6889844122566212877L,
-                -8268423169077194235L};
+                           -9053946475308531616L,
+                           2531998578876800782L,
+                           -6889844122566212877L,
+                           -8268423169077194235L};
         for (long seed : badSeeds) {
             CC.resetTensorNames(seed);
             addAntiSymmetry("R_mnab", 1, 0, 2, 3);
