@@ -342,6 +342,7 @@ public class ParserTest {
         TAssert.assertEquals(t, Tensors.parse(t.toString()));
     }
 
+    @Ignore
     @Test
     public void testConflictingIndices1() {
         Tensors.parse("(A_i^i*A_m^n+A_k^k*A_m^n)*(A_i^i*A_d^c+A_k^k*A_d^c)");

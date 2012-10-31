@@ -933,9 +933,11 @@ public class SubstitutionsTest {
         t = ContractIndices.contract(t);
         t = s.transform(t);
         t = parseExpression("d_m^m = 4").transform(t);
-        t = Together.together(t);
-        TAssert.assertEquals(t, "(Cos[m**2]*(8*Cos[m**2]*m**2*Sin[m**2]+4)*m**4+8*Cos[m**2]+4*(-2*Cos[m**2]+2*m**2*Sin[m**2])-8*m**2*Sin[m**2])*m**(-4)*Cos[m**2]**(-2)");
+        t = expand(t);
+        TAssert.assertEquals(t, "4*Cos[m**2]**(-1)+8*Sin[m**2]*m**2");
     }
+
+    //TODO tests for Product
 
     @Test
     public void testPower13() {
@@ -952,8 +954,6 @@ public class SubstitutionsTest {
         TAssert.assertEquals(s.transform(t), "k_n");
     }
 
-    //TODO tests for Product
-
     @Test
     public void testScalarFunction1() {
         Expression s = parseExpression("x = ArcSin[F_ab*F^ab]");
@@ -964,7 +964,7 @@ public class SubstitutionsTest {
     @Test
     public void testScalarFunction2() {
         Tensor t = parse("Sin[f]*(Sin[f]+Sin[g]*(Sin[k]+Sin[f]))*(Sin[d]+Sin[h])");
-         t = parse("Sin[f]*(Sin[g]+Sin[k])");
+        t = parse("Sin[f]*(Sin[g]+Sin[k])");
 
         Expression f = parseExpression("f = ArcSin[f_m^m+f1_a^a]");
         Expression g = parseExpression("g = ArcSin[g_m^m+g1_b^b]");
@@ -972,7 +972,7 @@ public class SubstitutionsTest {
         Expression h = parseExpression("h = ArcSin[h_m^m+h1_d^d]");
         Expression k = parseExpression("k = ArcSin[k_m^m+k1_e^e]");
         Expression[] es = new Expression[]{f, g, d, h, k};
-        Substitution s  = new Substitution(es);
+        Substitution s = new Substitution(es);
         t = s.transform(t);
         TAssert.assertIndicesConsistency(t);
     }
