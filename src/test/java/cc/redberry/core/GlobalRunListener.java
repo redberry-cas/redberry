@@ -39,15 +39,10 @@ public class GlobalRunListener extends RunListener {
     @Override
     public void testStarted(Description description) throws Exception {
         ContextManager.initializeNew();
-     }
-
-    @Override
-    public void testFailure(Failure failure) throws Exception {
-        System.out.println(CC.getNameManager().getSeed());
     }
 
     @Override
-    public void testFinished(Description description) throws Exception {
-        System.out.println(CC.getNameManager().getSeed());
+    public void testFailure(Failure failure) throws Exception {
+        System.out.println("Test failed with name manager seed: " + CC.getNameManager().getSeed());
     }
 }

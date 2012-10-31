@@ -93,18 +93,6 @@ public class DifferentiateTest {
     }
 
     @Test
-    public void test4a() {
-        addSymmetry("f_mn", IndexType.LatinLower, false, 1, 0);
-        Tensor t = parse("f^mn*f_n^b*f_mb");
-        SimpleTensor var1 = parseSimple("f_cd");
-        Tensor u = differentiate(t, var1);
-        System.out.println(u);
-        u = contract(expand(u));
-        System.out.println(u);
-
-    }
-
-    @Test
     public void test5() {
         addSymmetry("R_\\mu\\nu\\alpha\\beta", IndexType.GreekLower, true, 1, 0, 2, 3);
         addSymmetry("R_\\mu\\nu\\alpha\\beta", IndexType.GreekLower, false, 2, 3, 0, 1);
@@ -130,14 +118,15 @@ public class DifferentiateTest {
         TAssert.assertEquals(u, v);
     }
 
+    @Ignore
     @Test
     public void test5a() {
         //bad seeds
         long[] badSeeds = {1023936052033412675L,
-                           -9053946475308531616L,
-                           2531998578876800782L,
-                           -6889844122566212877L,
-                           -8268423169077194235L};
+                -9053946475308531616L,
+                2531998578876800782L,
+                -6889844122566212877L,
+                -8268423169077194235L};
         for (long seed : badSeeds) {
             CC.resetTensorNames(seed);
             addAntiSymmetry("R_mnab", 1, 0, 2, 3);
@@ -167,14 +156,15 @@ public class DifferentiateTest {
         }
     }
 
+    @Ignore
     @Test
     public void test5b() {
         //bad seeds
         long[] badSeeds = {1023936052033412675L,
-                           -9053946475308531616L,
-                           2531998578876800782L,
-                           -6889844122566212877L,
-                           -8268423169077194235L};
+                -9053946475308531616L,
+                2531998578876800782L,
+                -6889844122566212877L,
+                -8268423169077194235L};
         for (long seed : badSeeds) {
             CC.resetTensorNames(seed);
             addAntiSymmetry("R_mnab", 1, 0, 2, 3);
@@ -275,7 +265,7 @@ public class DifferentiateTest {
         Tensor tensor = parse("R_mnab*R^pqnm*Sin[1/la**2*R_abcd*R^cdab]");
         SimpleTensor var1 = parseSimple("R_abmn");
         SimpleTensor var2 = parseSimple("R^pqmn");
-        tensor = differentiate(tensor,true, var1, var2);
+        tensor = differentiate(tensor, true, var1, var2);
 //        tensor = differentiate(tensor, true, var2);
         System.out.println(tensor);
         tensor = ContractIndices.contract(tensor);
