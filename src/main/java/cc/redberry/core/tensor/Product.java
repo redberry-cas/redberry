@@ -190,7 +190,7 @@ public final class Product extends MultiTensor {
 
         int size = size(), j;
         if (TensorUtils.passOutDummies(tensor)) {
-            TIntSet forbidden = new TIntHashSet();
+            TIntHashSet forbidden = new TIntHashSet();
             for (j = 0; j < size; ++j)
                 if (j != i)
                     TensorUtils.appendAllIndicesNamesT(get(j), forbidden);

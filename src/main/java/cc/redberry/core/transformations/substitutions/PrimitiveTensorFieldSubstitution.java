@@ -22,7 +22,7 @@ class PrimitiveTensorFieldSubstitution extends PrimitiveSubstitution {
     }
 
     @Override
-    Tensor newTo_(Tensor currentNode, int[] forbiddenIndices) {
+    Tensor newTo_(Tensor currentNode, SubstitutionIterator iterator) {
         TensorField currentField = (TensorField) currentNode;
         TensorField from = (TensorField) this.from;
         IndexMappingBuffer buffer = IndexMappings.simpleTensorsPort(from, currentField).take();
@@ -55,7 +55,7 @@ class PrimitiveTensorFieldSubstitution extends PrimitiveSubstitution {
                 argTo.toArray(new Tensor[argTo.size()]),
                 false).transform(newTo);
         if (!TensorUtils.isSymbolic(newTo))
-            newTo = ApplyIndexMapping.applyIndexMapping(newTo, buffer, forbiddenIndices);
+            newTo = ApplyIndexMapping.applyIndexMapping(newTo, buffer, iterator.getForbidden());
         else if (buffer.getSignum())
             newTo = Tensors.negate(newTo);
         return newTo;

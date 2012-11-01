@@ -25,14 +25,14 @@ import static cc.redberry.core.utils.ArraysUtils.addAll;
 public final class Differentiate implements Transformation {
 
     private final SimpleTensor[] vars;
-    private final boolean expandAndContract;
+    private final Transformation[] expandAndContract;
 
     public Differentiate(SimpleTensor... vars) {
         this.vars = vars;
-        this.expandAndContract = false;
+        this.expandAndContract = new Transformation[0];
     }
 
-    public Differentiate(boolean expandAndContract, SimpleTensor... vars) {
+    public Differentiate(Transformation[] expandAndContract, SimpleTensor... vars) {
         this.vars = vars;
         this.expandAndContract = expandAndContract;
     }
@@ -46,7 +46,7 @@ public final class Differentiate implements Transformation {
         if (var.getIndices().size() != 0 && order > 1)
             throw new IllegalArgumentException();
         for (; order > 0; --order)
-            tensor = differentiate(tensor, false, var);
+            tensor = differentiate(tensor, new Transformation[0], var);
         return tensor;
     }
 
@@ -54,11 +54,11 @@ public final class Differentiate implements Transformation {
         if (vars.length == 0)
             return tensor;
         if (vars.length == 1)
-            return differentiate(tensor, false, vars[0]);
-        return differentiate(tensor, false, vars);
+            return differentiate(tensor, new Transformation[0], vars[0]);
+        return differentiate(tensor, new Transformation[0], vars);
     }
 
-    public static Tensor differentiate(Tensor tensor, boolean expandAndContract, SimpleTensor... vars) {
+    public static Tensor differentiate(Tensor tensor, Transformation[] expandAndContract, SimpleTensor... vars) {
         if (vars.length == 0)
             return tensor;
         if (vars.length == 1)
@@ -81,7 +81,7 @@ public final class Differentiate implements Transformation {
         return tensor;
     }
 
-    private static Tensor differentiate(Tensor tensor, boolean expandAndContract, SimpleTensor var) {
+    private static Tensor differentiate(Tensor tensor, Transformation[] expandAndContract, SimpleTensor var) {
         if (var.getIndices().size() != 0) {
             if (var.getIndices().size() != var.getIndices().getFree().size())
                 var = (SimpleTensor) renameDummy(var, TensorUtils.getAllIndicesNamesT(tensor).toArray());
@@ -90,22 +90,16 @@ public final class Differentiate implements Transformation {
         return differentiate1(tensor, createRule(var), expandAndContract);
     }
 
-    private static Tensor differentiateWithRenaming(Tensor tensor, SimpleTensorDifferentiationRule rule, boolean expandAndContarct) {
+    private static Tensor differentiateWithRenaming(Tensor tensor, SimpleTensorDifferentiationRule rule, Transformation[] expandAndContarct) {
         SimpleTensorDifferentiationRule newRule = rule.newRuleForTensor(tensor);
         tensor = renameDummy(tensor, newRule.getForbidden());
         return differentiate1(tensor, newRule, expandAndContarct);
     }
 
-    private static Tensor expandAndContract(Tensor tensor) {
-        return ContractIndices.contract(expand(tensor, ContractIndices.ContractIndices));
-    }
-
-    private static Tensor differentiate1(Tensor tensor, SimpleTensorDifferentiationRule rule, boolean expandAndContarct) {
+    private static Tensor differentiate1(Tensor tensor, SimpleTensorDifferentiationRule rule, Transformation[] transformations) {
         if (tensor.getClass() == SimpleTensor.class) {
             Tensor temp = rule.differentiateSimpleTensor((SimpleTensor) tensor);
-            if (expandAndContarct)
-                return expandAndContract(temp);
-            return temp;
+            return applyTransformations(temp, transformations);
         }
         if (tensor.getClass() == TensorField.class) {
             TensorLastIterator iterator = new TensorLastIterator(tensor);
@@ -120,42 +114,38 @@ public final class Differentiate implements Transformation {
             SumBuilder builder = new SumBuilder();
             Tensor temp;
             for (Tensor t : tensor) {
-                temp = differentiate1(t, rule, expandAndContarct);
-                if (expandAndContarct)
-                    temp = expandAndContract(temp);
+                temp = differentiate1(t, rule, transformations);
+                temp = applyTransformations(temp, transformations);
                 builder.put(temp);
             }
             return builder.build();
         }
         if (tensor instanceof ScalarFunction) {
             Tensor temp = multiply(((ScalarFunction) tensor).derivative(),
-                                   differentiateWithRenaming(tensor.get(0), rule, expandAndContarct));
-            if (expandAndContarct)
-                return expandAndContract(temp);
+                    differentiateWithRenaming(tensor.get(0), rule, transformations));
+            temp = applyTransformations(temp, transformations);
             return temp;
         }
         if (tensor instanceof Power) {
             //e^f*ln(g) -> g^f*(f'*ln(g)+f/g*g') ->f*g^(f-1)*g' + g^f*ln(g)*f'
             Tensor temp = sum(
                     multiply(tensor.get(1),
-                             pow(tensor.get(0), sum(tensor.get(1), Complex.MINUSE_ONE)),
-                             differentiate1(tensor.get(0), rule, expandAndContarct)),
+                            pow(tensor.get(0), sum(tensor.get(1), Complex.MINUSE_ONE)),
+                            differentiate1(tensor.get(0), rule, transformations)),
                     multiply(tensor,
-                             log(tensor.get(0)),
-                             differentiateWithRenaming(tensor.get(1), rule, expandAndContarct)));
-            if (expandAndContarct)
-                return expandAndContract(temp);
+                            log(tensor.get(0)),
+                            differentiateWithRenaming(tensor.get(1), rule, transformations)));
+            temp = applyTransformations(temp, transformations);
             return temp;
         }
         if (tensor instanceof Product) {
             SumBuilder result = new SumBuilder();
             Tensor temp;
             for (int i = tensor.size() - 1; i >= 0; --i) {
-                temp = tensor.set(i, differentiate1(tensor.get(i), rule, expandAndContarct));
+                temp = tensor.set(i, differentiate1(tensor.get(i), rule, transformations));
                 if (rule.var.getIndices().size() != 0)
                     temp = ContractIndices.contract(temp);
-                if (expandAndContarct)
-                    temp = expandAndContract(temp);
+                temp = applyTransformations(temp, transformations);
                 result.put(temp);
             }
             return result.build();
@@ -163,6 +153,12 @@ public final class Differentiate implements Transformation {
         if (tensor instanceof Complex)
             return Complex.ZERO;
         throw new UnsupportedOperationException();
+    }
+
+    private static Tensor applyTransformations(Tensor tensor, Transformation[] transformations) {
+        for (Transformation transformation : transformations)
+            tensor = transformation.transform(tensor);
+        return tensor;
     }
 
     private static SimpleTensorDifferentiationRule createRule(SimpleTensor var) {
@@ -271,7 +267,7 @@ public final class Differentiate implements Transformation {
         @Override
         SimpleTensorDifferentiationRule newRuleForTensor(Tensor tensor) {
             return new SymmetricDifferentiationRule(this.var,
-                                                    renameDummy(derivative, TensorUtils.getAllIndicesNamesT(tensor).toArray()), allFreeFrom, freeVarIndices);
+                    renameDummy(derivative, TensorUtils.getAllIndicesNamesT(tensor).toArray()), allFreeFrom, freeVarIndices);
         }
 
         @Override

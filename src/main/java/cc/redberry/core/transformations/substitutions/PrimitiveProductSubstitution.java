@@ -28,7 +28,7 @@ class PrimitiveProductSubstitution extends PrimitiveSubstitution {
     }
 
     @Override
-    Tensor newTo_(Tensor currentNode, int[] forbiddenIndices) {
+    Tensor newTo_(Tensor currentNode, SubstitutionIterator iterator) {
         TIntHashSet forbidden = null;
         while (currentNode instanceof Product) {
             Product cp = (Product) currentNode;
@@ -67,7 +67,7 @@ class PrimitiveProductSubstitution extends PrimitiveSubstitution {
             else {
                 if (forbidden == null) {
                     //TODO review
-                    forbidden = new TIntHashSet(forbiddenIndices);
+                    forbidden = new TIntHashSet(iterator.getForbidden());
                     int pivot = 0;
                     for (i = 0; i < currentIndexless.length; ++i) {
                         if (pivot < indexlessBijection.length && i == indexlessBijection[pivot])

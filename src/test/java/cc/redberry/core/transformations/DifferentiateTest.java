@@ -11,6 +11,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import static cc.redberry.core.tensor.Tensors.*;
+import static cc.redberry.core.transformations.ContractIndices.ContractIndices;
 import static cc.redberry.core.transformations.ContractIndices.contract;
 import static cc.redberry.core.transformations.Differentiate.differentiate;
 import static cc.redberry.core.transformations.Expand.expand;
@@ -124,10 +125,10 @@ public class DifferentiateTest {
     public void test5a() {
         //bad seeds
         long[] badSeeds = {1023936052033412675L,
-                           -9053946475308531616L,
-                           2531998578876800782L,
-                           -6889844122566212877L,
-                           -8268423169077194235L};
+                -9053946475308531616L,
+                2531998578876800782L,
+                -6889844122566212877L,
+                -8268423169077194235L};
         for (long seed : badSeeds) {
             CC.resetTensorNames(seed);
             addAntiSymmetry("R_mnab", 1, 0, 2, 3);
@@ -162,10 +163,10 @@ public class DifferentiateTest {
     public void test5b() {
         //bad seeds
         long[] badSeeds = {1023936052033412675L,
-                           -9053946475308531616L,
-                           2531998578876800782L,
-                           -6889844122566212877L,
-                           -8268423169077194235L};
+                -9053946475308531616L,
+                2531998578876800782L,
+                -6889844122566212877L,
+                -8268423169077194235L};
         for (long seed : badSeeds) {
             CC.resetTensorNames(seed);
             addAntiSymmetry("R_mnab", 1, 0, 2, 3);
@@ -266,16 +267,13 @@ public class DifferentiateTest {
         Tensor tensor = parse("R_mnab*R^pqnm*Sin[1/la**2*R_abcd*R^cdab]");
         SimpleTensor var1 = parseSimple("R_abmn");
         SimpleTensor var2 = parseSimple("R^pqmn");
-        tensor = differentiate(tensor, true, var1, var2);
+        tensor = differentiate(tensor, new Transformation[]{ExpandAll.EXPAND_ALL, ContractIndices}, var1, var2);
 //        tensor = differentiate(tensor, true, var2);
-        System.out.println(tensor);
-        tensor = ContractIndices.contract(tensor);
         tensor = parseExpression("R_mnab = 1/3*(g_mb*g_na - g_ma*g_nb)*la").transform(tensor);
-        tensor = expand(tensor);
+        tensor = ExpandAll.expandAll(tensor);
         tensor = contract(tensor);
         tensor = parseExpression("d_m^m = 4").transform(tensor);
         tensor = expand(tensor);
         System.out.println(tensor);
-
     }
 }

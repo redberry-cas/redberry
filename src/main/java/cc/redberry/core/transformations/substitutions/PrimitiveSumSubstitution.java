@@ -17,7 +17,7 @@ class PrimitiveSumSubstitution extends PrimitiveSubstitution {
     }
 
     @Override
-    Tensor newTo_(Tensor currentNode, int[] forbiddenIndices) {
+    Tensor newTo_(Tensor currentNode, SubstitutionIterator iterator) {
         BijectionContainer bc = new SumBijectionPort(from, currentNode).take();
         if (bc == null)
             return currentNode;
@@ -27,7 +27,7 @@ class PrimitiveSumSubstitution extends PrimitiveSubstitution {
         if (toIsSymbolic)
             newTo = buffer.getSignum() ? Tensors.negate(to) : to;
         else
-            newTo = ApplyIndexMapping.applyIndexMapping(to, buffer, forbiddenIndices);
+            newTo = ApplyIndexMapping.applyIndexMapping(to, buffer, iterator.getForbidden());
 
         SumBuilder builder = new SumBuilder();
         int[] bijection = bc.bijection;

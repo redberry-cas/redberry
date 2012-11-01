@@ -17,11 +17,11 @@ abstract class PrimitiveSubstitution {
         this.toIsSymbolic = TensorUtils.isSymbolic(to);
     }
 
-    Tensor newTo(Tensor currentNode, int[] forbiddenIndices) {
+    Tensor newTo(Tensor currentNode, SubstitutionIterator iterator) {
         if (currentNode.getClass() != from.getClass())
             return currentNode;
-        return newTo_(currentNode, forbiddenIndices);
+        return newTo_(currentNode, iterator);
     }
 
-    abstract Tensor newTo_(Tensor currentNode, int[] forbiddenIndices);
+    abstract Tensor newTo_(Tensor currentNode, SubstitutionIterator iterator);
 }

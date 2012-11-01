@@ -60,4 +60,13 @@ public class ExpandAllTest {
         t = expandAll(t, ContractIndices.ContractIndices, parseExpression("d_i^i = 4"));
         TAssert.assertEquals(t, "Sin[8/3]");
     }
+
+    @Test
+    public void test7() {
+        Tensor t = parse("Sin[1/la**2*R_abcd*R^abcd]");
+        t = parseExpression("R_abcd = 1/3*(g_ac*g_bd - g_bc*g_ad)").transform(t);
+        t = expandAll(t, ContractIndices.ContractIndices, parseExpression("d_i^i = 4"));
+        System.out.println(t);
+        TAssert.assertEquals(t, "Sin[1/la**2*8/3]");
+    }
 }

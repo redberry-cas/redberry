@@ -205,11 +205,13 @@ public final class ExpandUtils {
         ProductBuilder denominators = new ProductBuilder();
         Tensor temp = product;
         Tensor t;
+        Complex exponent;
         for (int i = product.size() - 1; i >= 0; --i) {
             t = product.get(i);
             if (isNegativeIntegerPower(t)) {
-                assert ((Complex) t.get(1)).isMinusOne();
-                denominators.put(t.get(0));
+                assert t.get(0) instanceof Sum ? ((Complex) t.get(1)).isMinusOne() : true;
+                exponent = (Complex) t.get(1);
+                denominators.put(Tensors.pow(t.get(0), exponent.abs()));
                 if (temp instanceof Product)
                     temp = ((Product) temp).remove(i);
                 else

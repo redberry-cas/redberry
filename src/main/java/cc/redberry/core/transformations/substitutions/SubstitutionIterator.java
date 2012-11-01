@@ -42,7 +42,6 @@ import java.util.Arrays;
 public final class SubstitutionIterator implements TreeIterator {
     private static final TIntSet EMPTY_INT_SET = TCollections.unmodifiableSet(new TIntHashSet(0));
     private final TreeTraverseIterator<ForbiddenContainer> innerIterator;
-    //private ForbiddenContainer fc = null;
 
     public SubstitutionIterator(Tensor tensor) {
         this.innerIterator = new TreeTraverseIterator<>(tensor, new FCPayloadFactory());
@@ -265,7 +264,7 @@ public final class SubstitutionIterator implements TreeIterator {
 
                 if (usedArrays[iIndex].bitCount() == 0) {
                     if (parentRemoved == null)
-                        parentRemoved = new TIntHashSet();
+                        parentRemoved = new TIntHashSet(removed.size());
                     parentRemoved.add(index);
                 }
             }

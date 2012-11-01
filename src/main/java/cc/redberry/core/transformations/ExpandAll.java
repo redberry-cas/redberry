@@ -41,7 +41,7 @@ public final class ExpandAll extends ExpandAbstract {
         NumDen numDen = getNumDen(product);
         Tensor denominator = numDen.denominator;
 
-        assert !isPositiveIntegerPower(denominator);
+//        assert !isPositiveIntegerPower(denominator);
         if (denominator instanceof Product)
             denominator = expandProductOfSums((Product) numDen.denominator, transformations);
         boolean denExpanded = denominator != numDen.denominator;

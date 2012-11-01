@@ -269,9 +269,10 @@ public class TensorUtils {
         return set;
     }
 
-    public static void appendAllIndicesNamesT(Tensor tensor, TIntSet set) {
+    public static void appendAllIndicesNamesT(Tensor tensor, TIntHashSet set) {
         if (tensor instanceof SimpleTensor) {
             Indices ind = tensor.getIndices();
+            set.ensureCapacity(ind.size());
             final int size = ind.size();
             for (int i = 0; i < size; ++i)
                 set.add(IndicesUtils.getNameWithType(ind.get(i)));
