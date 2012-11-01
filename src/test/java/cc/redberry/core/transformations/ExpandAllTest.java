@@ -19,6 +19,7 @@ public class ExpandAllTest {
     public void test1() {
         Tensor t = parse("1/(a+b)");
         Tensor a = expandAll(t);
+        System.out.println(a);
         Assert.assertTrue(a == t);
     }
 

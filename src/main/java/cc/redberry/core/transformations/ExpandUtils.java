@@ -8,6 +8,8 @@ import gnu.trove.set.hash.TIntHashSet;
 
 import java.util.concurrent.atomic.AtomicLong;
 
+import static cc.redberry.core.utils.TensorUtils.isNegativeIntegerPower;
+
 /**
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
@@ -130,16 +132,8 @@ public final class ExpandUtils {
         return expandBuilder.build();
     }
 
-    static boolean isIntegerPower(Tensor t) {
+    public static boolean isExpandablePower(Tensor t) {
         return t instanceof Power && t.get(0) instanceof Sum && TensorUtils.isInteger(t.get(1));
-    }
-
-    static boolean isPositiveIntegerPower(Tensor t) {
-        return t instanceof Power && t.get(0) instanceof Sum && TensorUtils.isNaturalNumber(t.get(1));
-    }
-
-    static boolean isNegativeIntegerPower(Tensor t) {
-        return t instanceof Power && t.get(0) instanceof Sum && TensorUtils.isNegativeIntegerNumber(t.get(1));
     }
 
     static boolean sumContainsNonIndexless(Tensor t) {

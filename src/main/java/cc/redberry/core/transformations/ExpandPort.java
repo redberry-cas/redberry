@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static cc.redberry.core.transformations.ExpandUtils.isPositiveIntegerPower;
+import static cc.redberry.core.transformations.ExpandUtils.isExpandablePower;
 
 /**
  * @author Dmitry Bolotin
@@ -34,7 +34,7 @@ public final class ExpandPort {
             return new ProductPort(tensor);
         if (tensor instanceof Sum)
             return new SumPort(tensor);
-        if (isPositiveIntegerPower(tensor))
+        if (isExpandablePower(tensor))
             return new PowerPort(tensor);
         else
             return new OutputPortUnsafe.Singleton<>(tensor);
@@ -120,7 +120,7 @@ public final class ExpandPort {
                         theLargestSumSize = m.size();
                     }
                     sumOrPowerPorts.add(new SumPort(m));
-                } else if (isPositiveIntegerPower(m)) {
+                } else if (isExpandablePower(m)) {
                     if (BigInteger.valueOf(m.get(0).size()).pow(((Complex) m.get(1)).getReal().intValue()).compareTo(BigInteger.valueOf(theLargestSumSize)) > 0) {
                         theLargestSumPosition = sumOrPowerPorts.size();
                         theLargestSumSize = m.size();

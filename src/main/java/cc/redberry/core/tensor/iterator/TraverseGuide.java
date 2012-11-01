@@ -70,6 +70,7 @@ public interface TraverseGuide {
                 return TraversePermission.Enter;
         }
     };
+
     public static final TraverseGuide EXCEPT_FIELDS = new TraverseGuide() {
 
         @Override

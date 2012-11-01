@@ -167,6 +167,26 @@ public class TensorUtils {
         return tensor instanceof Complex && NumberUtils.isIntegerEven((Complex) tensor);
     }
 
+    /**
+     * Returns true, if specified tensor is a^(N), where N - a natural number
+     *
+     * @param t tensor
+     * @return true, if specified tensor is a^(N), where N - a natural number
+     */
+    public static boolean isPositiveIntegerPower(Tensor t) {
+        return t instanceof Power && TensorUtils.isNaturalNumber(t.get(1));
+    }
+
+    /**
+     * Returns true, if specified tensor is a^(-N), where N - a natural number
+     *
+     * @param t tensor
+     * @return true, if specified tensor is a^(-N), where N - a natural number
+     */
+    public static boolean isNegativeIntegerPower(Tensor t) {
+        return t instanceof Power && TensorUtils.isNegativeIntegerNumber(t.get(1));
+    }
+
     public static boolean equalsExactly(Tensor[] u, Tensor[] v) {
         if (u.length != v.length)
             return false;

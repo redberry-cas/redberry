@@ -379,7 +379,20 @@ public class ExpandTest {
     public void test36() {
         Tensor t1 = expand(parse("(A_abcd+B_abcd)*(A^ab + F^ab*(A_e^e+B_e^e)**2)"));
         System.out.println(t1);
+        //todo add assert
 //        Tensor t2 = expandUsingPort(t1);
 //        TAssert.assertEquals(t1, t2);
+    }
+
+    @Test
+    public void test37() {
+        Tensor t = parse("Sin[(a+b)*(c+d)]");
+        TAssert.assertTrue(t == expand(t));
+    }
+
+    @Test
+    public void test38() {
+        Tensor t = parse("1/(a+b)**2 + Sin[(a+b)*(c+d)]");
+        TAssert.assertTrue(t == expand(t));
     }
 }
