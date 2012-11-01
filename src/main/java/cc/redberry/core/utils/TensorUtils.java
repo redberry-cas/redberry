@@ -65,6 +65,10 @@ public class TensorUtils {
         return tensor instanceof Complex && ((Complex) tensor).isNatural();
     }
 
+    public static boolean isNegativeIntegerNumber(Tensor tensor) {
+        return tensor instanceof Complex && ((Complex) tensor).isNegativeInteger();
+    }
+
     public static boolean isRealPositiveNumber(Tensor tensor) {
         if (tensor instanceof Complex) {
             Complex complex = (Complex) tensor;

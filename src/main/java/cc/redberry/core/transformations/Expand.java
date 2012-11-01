@@ -23,7 +23,9 @@
 package cc.redberry.core.transformations;
 
 import cc.redberry.core.number.Complex;
-import cc.redberry.core.tensor.*;
+import cc.redberry.core.tensor.Product;
+import cc.redberry.core.tensor.Sum;
+import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.tensor.iterator.TraverseGuide;
 import cc.redberry.core.transformations.substitutions.SubstitutionIterator;
 import cc.redberry.core.utils.TensorUtils;
@@ -36,7 +38,6 @@ import static cc.redberry.core.transformations.ExpandUtils.*;
  */
 public final class Expand implements Transformation {
     public static final Expand Expand = new Expand();
-    public static final Expand ExpandAll = new Expand();
 
     private final Transformation[] transformations;
     private final TraverseGuide traverseGuide;
@@ -56,7 +57,7 @@ public final class Expand implements Transformation {
 
     @Override
     public Tensor transform(Tensor tensor) {
-        return expand(tensor, transformations);
+        return expand(tensor, traverseGuide, transformations);
     }
 
     public static Tensor expand(Tensor tensor) {
@@ -84,63 +85,5 @@ public final class Expand implements Transformation {
 
         }
         return iterator.result();
-    }
-
-    static Tensor expandProductOfSums(Product product, Transformation[] transformations) {
-        Tensor indexless = product.getIndexlessSubProduct(),
-                data = product.getDataSubProduct();
-        boolean expandIndexless = false, expandData = false;
-        if (indexless instanceof Sum && ExpandUtils.sumContainsNonIndexless(indexless)) {
-            //data is not 1 at this point
-            expandIndexless = true;
-            expandData = true;
-        }
-        if (indexless instanceof Product) {
-            for (Tensor t : indexless) {
-                if (t instanceof Sum) {
-                    if (ExpandUtils.sumContainsNonIndexless(t)) {
-                        //even if data is 1 it will be recreated
-                        expandData = true;
-                        expandIndexless = true;
-                        break;
-                    } else
-                        expandIndexless = true;
-                }
-            }
-        }
-        if (!expandData) {
-            if (data instanceof Sum)
-                expandData = true;
-            if (data instanceof Product) {
-                for (Tensor t : data)
-                    if (t instanceof Sum) {
-                        expandData = true;
-                        break;
-                    }
-            }
-        }
-
-        if (!expandData && !expandIndexless)
-            return product;
-
-        if (!expandData) {
-            TensorBuilder expandBuilder = ExpandBuilders.createExpandBuilderIndexless(transformations);
-            expandBuilder.put(indexless);
-            return Tensors.multiply(expandBuilder.build(), data);
-        }
-
-        if (!expandIndexless) {
-            TensorBuilder expandBuilder = ExpandBuilders.createExpandBuilderData(transformations);
-            expandBuilder.put(data);
-            Tensor newData = expandBuilder.build();
-            if (newData instanceof Sum)
-                return Tensors.multiplySumElementsOnScalarFactorAndExpandScalars((Sum) newData, indexless);
-            else
-                return ExpandUtils.expandIndexlessSubproduct.transform(Tensors.multiply(indexless, data));
-        }
-
-        TensorBuilder expandBuilder = ExpandBuilders.createTotalBuilder(transformations);
-        expandBuilder.put(product);
-        return expandBuilder.build();
     }
 }

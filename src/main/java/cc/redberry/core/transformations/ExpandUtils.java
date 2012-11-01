@@ -1,6 +1,7 @@
 package cc.redberry.core.transformations;
 
 import cc.redberry.concurrent.OutputPort;
+import cc.redberry.core.number.Complex;
 import cc.redberry.core.tensor.*;
 import cc.redberry.core.utils.TensorUtils;
 import gnu.trove.set.hash.TIntHashSet;
@@ -71,9 +72,74 @@ public final class ExpandUtils {
         return sum.build();
     }
 
+    static Tensor expandProductOfSums(Product product, Transformation[] transformations) {
+        Tensor indexless = product.getIndexlessSubProduct(),
+                data = product.getDataSubProduct();
+        boolean expandIndexless = false, expandData = false;
+        if (indexless instanceof Sum && ExpandUtils.sumContainsNonIndexless(indexless)) {
+            //data is not 1 at this point
+            expandIndexless = true;
+            expandData = true;
+        }
+        if (indexless instanceof Product) {
+            for (Tensor t : indexless) {
+                if (t instanceof Sum) {
+                    if (ExpandUtils.sumContainsNonIndexless(t)) {
+                        //even if data is 1 it will be recreated
+                        expandData = true;
+                        expandIndexless = true;
+                        break;
+                    } else
+                        expandIndexless = true;
+                }
+            }
+        }
+        if (!expandData) {
+            if (data instanceof Sum)
+                expandData = true;
+            if (data instanceof Product) {
+                for (Tensor t : data)
+                    if (t instanceof Sum) {
+                        expandData = true;
+                        break;
+                    }
+            }
+        }
 
-    public static boolean isPositiveIntegerPower(Tensor t) {
+        if (!expandData && !expandIndexless)
+            return product;
+
+        if (!expandData) {
+            TensorBuilder expandBuilder = ExpandBuilders.createExpandBuilderIndexless(transformations);
+            expandBuilder.put(indexless);
+            return Tensors.multiply(expandBuilder.build(), data);
+        }
+
+        if (!expandIndexless) {
+            TensorBuilder expandBuilder = ExpandBuilders.createExpandBuilderData(transformations);
+            expandBuilder.put(data);
+            Tensor newData = expandBuilder.build();
+            if (newData instanceof Sum)
+                return Tensors.multiplySumElementsOnScalarFactorAndExpandScalars((Sum) newData, indexless);
+            else
+                return ExpandUtils.expandIndexlessSubproduct.transform(Tensors.multiply(indexless, newData));
+        }
+
+        TensorBuilder expandBuilder = ExpandBuilders.createTotalBuilder(transformations);
+        expandBuilder.put(product);
+        return expandBuilder.build();
+    }
+
+    static boolean isIntegerPower(Tensor t) {
+        return t instanceof Power && t.get(0) instanceof Sum && TensorUtils.isInteger(t.get(1));
+    }
+
+    static boolean isPositiveIntegerPower(Tensor t) {
         return t instanceof Power && t.get(0) instanceof Sum && TensorUtils.isNaturalNumber(t.get(1));
+    }
+
+    static boolean isNegativeIntegerPower(Tensor t) {
+        return t instanceof Power && t.get(0) instanceof Sum && TensorUtils.isNegativeIntegerNumber(t.get(1));
     }
 
     static boolean sumContainsNonIndexless(Tensor t) {
@@ -127,8 +193,35 @@ public final class ExpandUtils {
                         break;
                     }
             if (needExpand)
-                return Tensors.multiply(Expand.expandProductOfSums((Product) indexless, new Transformation[0]), p.getDataSubProduct());
+                return Tensors.multiply(expandProductOfSums((Product) indexless, new Transformation[0]), p.getDataSubProduct());
             return t;
         }
     };
+
+    static final class NumDen {
+        final Tensor numerator, denominator;
+
+        NumDen(Tensor numerator, Tensor denominator) {
+            this.numerator = numerator;
+            this.denominator = denominator;
+        }
+    }
+
+    static NumDen getNumDen(Product product) {
+        ProductBuilder denominators = new ProductBuilder();
+        Tensor temp = product;
+        Tensor t;
+        for (int i = product.size() - 1; i >= 0; --i) {
+            t = product.get(i);
+            if (isNegativeIntegerPower(t)) {
+                assert ((Complex) t.get(1)).isMinusOne();
+                denominators.put(t.get(0));
+                if (temp instanceof Product)
+                    temp = ((Product) temp).remove(i);
+                else
+                    temp = Complex.ONE;
+            }
+        }
+        return new NumDen(temp, denominators.build());
+    }
 }

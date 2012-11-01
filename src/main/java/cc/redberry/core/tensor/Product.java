@@ -176,18 +176,10 @@ public final class Product extends MultiTensor {
         //return data.length - ((hash & 0x00080000) >> 19); // ;)
     }
 
-    public int indexlessSize(){
-        int size = indexlessData.length;
-        if (factor == Complex.ONE)
-            return size;
-        return size + 1;
-    }
-
     @Override
     public Tensor set(int i, Tensor tensor) {
         if (i >= size() || i < 0)
             throw new IndexOutOfBoundsException();
-//        return super.set(i, tensor);
         Tensor old = get(i);
         if (old == tensor)
             return this;

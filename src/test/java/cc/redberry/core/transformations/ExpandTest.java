@@ -49,7 +49,6 @@ public class ExpandTest {
     public void test0() {
         Tensor t = parse("a*c");
         Tensor actual = Expand.expand(t);
-        System.out.println(actual);
         Tensor expected = Tensors.parse("a*c");
         Assert.assertTrue(TensorUtils.equalsExactly(actual, expected));
     }
@@ -58,7 +57,6 @@ public class ExpandTest {
     public void test1() {
         Tensor t = parse("(a+b)*c+a*c");
         Tensor actual = Expand.expand(t);
-        System.out.println(actual);
         Tensor expected = Tensors.parse("2*a*c+b*c");
         Assert.assertTrue(TensorUtils.equalsExactly(actual, expected));
     }
@@ -73,10 +71,8 @@ public class ExpandTest {
 
     @Test
     public void test3() {
-
         Tensor t = parse("(a*p_i+b*p_i)*c-a*c*p_i");
         Tensor actual = Expand.expand(t);
-        System.out.println(actual);
         Tensor expected = Tensors.parse("b*c*p_i");
         Assert.assertTrue(TensorUtils.equalsExactly(actual, expected));
     }

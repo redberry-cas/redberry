@@ -23,15 +23,10 @@
 package cc.redberry.core;
 
 import gnu.trove.set.hash.TIntHashSet;
-import junit.framework.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.junit.internal.runners.JUnit4ClassRunner;
-import org.junit.runner.JUnitCore;
-import org.junit.runners.JUnit4;
 
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Random;
 
 /**
@@ -53,8 +48,8 @@ public class BlackList {
     }
 
     @Test
-    public void etwer(){
-        System.out.println(-7 %2);
+    public void etwer() {
+         System.out.println((-8 & 0x7FFFFFFF));
     }
 
     @Ignore
