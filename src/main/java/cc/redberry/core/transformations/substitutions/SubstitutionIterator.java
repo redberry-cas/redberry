@@ -48,58 +48,23 @@ public final class SubstitutionIterator implements TreeIterator {
         this.innerIterator = new TreeTraverseIterator<>(tensor, new FCPayloadFactory());
     }
 
+    public SubstitutionIterator(Tensor tensor, TraverseGuide traverseGuide) {
+        this.innerIterator = new TreeTraverseIterator<>(tensor, traverseGuide, new FCPayloadFactory());
+    }
+
     @Override
     public Tensor next() {
         TraverseState nextState;
 
-        while ((nextState = innerIterator.next()) == TraverseState.Entering) { //"Diving"
-            /*tensor = innerIterator.current();
-            if (fc == null || fc instanceof OpaqueFC) {
-                if (tensor instanceof Product)
-                    fc = new TopProductFC(fc, tensor);
-            } else {
-                if (tensor instanceof Sum)
-                    fc = new SumFC(fc, tensor);
-                else if (tensor instanceof Product)
-                    fc = new ProductFC(fc, tensor);
-                else if (tensor instanceof Power)
-                    fc = new TransparentFC(fc);
-                else if (tensor instanceof TensorField)
-                    fc = new OpaqueFC(fc);
-                else //Next state will be leaving
-                    isSimpleTensor = true;*/
-            //}
-        }
-
-
+        while ((nextState = innerIterator.next()) == TraverseState.Entering) ;
         if (nextState == null)
             return null;
 
-
-        //assert nextState == Leaving
-        /*if (fc != null)
-
-        {
-            if (!isSimpleTensor || (fc instanceof OpaqueFC && innerIterator.current() instanceof TensorField)) {
-                fc = fc.getParent();
-            }
-        } */
-
-//        if (!isSimpleTensor &&
-//                (!waitingForProduct ||
-//                        (innerIterator.current() instanceof TensorField && fc != null))) {
-//            fc = fc.getParent();
-//        }
-
-        /*ForbiddenContainer f = fc;
-
-  do {
-    System.out.println(((AbstractFC) f).currentBranch + " : " +
-            f.getClass().getSimpleName() + " : " +
-            ((AbstractFC) f).tensor);
-  } while ((f = f.getParent()) != null);*/
-
         return innerIterator.current();
+    }
+
+    public void unsafeSet(Tensor tensor) {
+        innerIterator.set(tensor);
     }
 
     @Override
@@ -107,8 +72,12 @@ public final class SubstitutionIterator implements TreeIterator {
         Tensor oldTensor = innerIterator.current();
         if (oldTensor == tensor)
             return;
+        if (TensorUtils.isZeroOrIndeterminate(tensor) || TensorUtils.isSymbolic(tensor)) {
+            innerIterator.set(tensor);
+            return;
+        }
 
-        if (!tensor.getIndices().getFree().equalsRegardlessOrder(tensor.getIndices().getFree()))
+        if (!tensor.getIndices().getFree().equalsRegardlessOrder(oldTensor.getIndices().getFree()))
             throw new RuntimeException("Substitution with different free indices.");
 
         StackPosition<ForbiddenContainer> previous = innerIterator.currentStackPosition().previous();

@@ -36,7 +36,7 @@ import org.junit.Test;
 
 import static cc.redberry.core.tensor.Tensors.parse;
 import static cc.redberry.core.transformations.Expand.expand;
-import static cc.redberry.core.transformations.Expand.expandUsingPort;
+import static cc.redberry.core.transformations.ExpandPort.expandUsingPort;
 
 /**
  * @author Dmitry Bolotin
@@ -142,6 +142,13 @@ public class ExpandTest {
             Tensor expected = parse("2*b_{i}^{i}*a_{a}^{a}+a_{i}^{i}*a_{a}^{a}+b_{i}^{i}*b_{a}^{a}");
             Assert.assertTrue(TensorUtils.equals(actual, expected));
         }
+    }
+
+    @Test
+    public void test11a() {
+        Tensor actual = parse("(a_i^i+b_i^i)**2");
+        actual = Expand.expand(actual);
+        System.out.println(actual);
     }
 
     @Test
@@ -286,8 +293,6 @@ public class ExpandTest {
             Tensor expected = Expand.expand(t), actual = expandUsingPort(t);
             assertAllBracketsExpanded(expected);
             assertAllBracketsExpanded(actual);
-            System.out.println(actual);
-            System.out.println(expected);
             TAssert.assertEquals(expected, actual);
         }
     }
@@ -365,5 +370,13 @@ public class ExpandTest {
         Tensor t1 = expand(parse("a_a^a*F_mn+(b_m^m-a_m^m)*F_mn"));
         Tensor t2 = expandUsingPort(t1);
         TAssert.assertEquals(t1, t2);
+    }
+
+    @Test
+    public void test36() {
+        Tensor t1 = expand(parse("(A_abcd+B_abcd)*(A^ab + F^ab*(A_e^e+B_e^e)**2)"));
+        System.out.println(t1);
+//        Tensor t2 = expandUsingPort(t1);
+//        TAssert.assertEquals(t1, t2);
     }
 }

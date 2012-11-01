@@ -618,6 +618,10 @@ public final class Tensors {
         return multiply(Complex.MINUSE_ONE, tensor);
     }
 
+    public static Tensor reciprocal(Tensor tensor) {
+        return pow(tensor, Complex.MINUSE_ONE);
+    }
+
     //TODO discuss with Stas (move multiplySumElementsOnFactor and multiplySumElementsOnFactorAndExpandScalars to other class)
     public static Tensor multiplySumElementsOnFactor(Sum sum, Tensor factor) {
         if (TensorUtils.isZero(factor))

@@ -26,6 +26,44 @@ import static cc.redberry.core.indices.IndicesUtils.getIndicesNames;
  */
 public final class ApplyIndexMapping {
 
+    public static Tensor renameDummy(Tensor tensor, int[] forbiddenNames, TIntHashSet added) {
+        if (forbiddenNames.length == 0)
+            return tensor;
+        if (tensor instanceof Complex || tensor instanceof ScalarFunction)
+            return tensor;
+
+        TIntHashSet allIndicesNames = TensorUtils.getAllDummyIndicesT(tensor);
+        //no indices in tensor
+        if (allIndicesNames.isEmpty())
+            return tensor;
+
+        allIndicesNames.ensureCapacity(forbiddenNames.length);
+
+        IntArrayList fromL = null;
+        for (int forbidden : forbiddenNames) {
+            if (!allIndicesNames.add(forbidden)) {
+                if (fromL == null)
+                    fromL = new IntArrayList();
+                fromL.add(forbidden);
+            }
+        }
+
+        if (fromL == null)
+            return tensor;
+
+        allIndicesNames.addAll(getIndicesNames(tensor.getIndices().getFree()));
+        IndexGenerator generator = new IndexGenerator(allIndicesNames.toArray());
+        int[] from = fromL.toArray(), to = new int[fromL.size()];
+        Arrays.sort(from);
+        added.ensureCapacity(from.length);
+        int i;
+        for (i = from.length - 1; i >= 0; --i)
+            added.add(to[i] = generator.generate(IndicesUtils.getType(from[i])));
+
+
+        return applyIndexMapping(tensor, new IndexMapper(from, to), false);
+    }
+
     public static Tensor renameDummy(Tensor tensor, int[] forbiddenNames) {
         if (forbiddenNames.length == 0)
             return tensor;

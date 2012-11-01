@@ -579,7 +579,7 @@ public class SubstitutionsTest {
     @Test
     public void testField15() {
 
-        //Riman without diff states
+        //Riemann without diff states
         Tensor target = parse("Rf[g_mn]");
         target = Tensors.parseExpression("Rf[g_ab]=g^ab*Rf_ab[g_mn]").transform(target);
         target = Tensors.parseExpression("Rf_{mn}[g^mn]=Rf^{a}_{man}[g_pq]").transform(target);
@@ -588,11 +588,11 @@ public class SubstitutionsTest {
 
         target = contract(target);
 
-        //Riman with diff states
+        //Riemann with diff states
         Tensor target1 = parse("g_{mn}*R^{mn}");
-        target1 = Tensors.parseExpression("R_{mn}=g^ab*R_{bman}").transform(target);
-        target1 = Tensors.parseExpression("R^a_bmn=p_m*G^a_bn+p_n*G^a_bm+G^a_gm*G^g_bn-G^a_gn*G^g_bm").transform(target);
-        target1 = Tensors.parseExpression("G_gmn=(1/2)*(p_m*g_gn+p_n*g_gm-p_g*g_mn)").transform(target);
+        target1 = Tensors.parseExpression("R_{mn}=g^ab*R_{bman}").transform(target1);
+        target1 = Tensors.parseExpression("R^a_bmn=p_m*G^a_bn+p_n*G^a_bm+G^a_gm*G^g_bn-G^a_gn*G^g_bm").transform(target1);
+        target1 = Tensors.parseExpression("G_gmn=(1/2)*(p_m*g_gn+p_n*g_gm-p_g*g_mn)").transform(target1);
 
         target1 = contract(target1);
 
