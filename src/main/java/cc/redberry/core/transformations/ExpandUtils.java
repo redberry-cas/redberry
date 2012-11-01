@@ -76,7 +76,7 @@ public final class ExpandUtils {
         return t instanceof Power && t.get(0) instanceof Sum && TensorUtils.isNaturalNumber(t.get(1));
     }
 
-    public static boolean sumContainsNonIndexless(Tensor t) {
+    static boolean sumContainsNonIndexless(Tensor t) {
         if (!(t instanceof Sum))
             return false;
         for (Tensor s : t)
@@ -110,4 +110,25 @@ public final class ExpandUtils {
 
         return temp;
     }
+
+    public static final Transformation expandIndexlessSubproduct = new Transformation() {
+        @Override
+        public Tensor transform(Tensor t) {
+            if (!(t instanceof Product))
+                return t;
+            Product p = (Product) t;
+            Tensor indexless = p.getIndexlessSubProduct();
+
+            boolean needExpand = false;
+            if (indexless instanceof Product)
+                for (Tensor i : indexless)
+                    if (i instanceof Sum) {
+                        needExpand = true;
+                        break;
+                    }
+            if (needExpand)
+                return Tensors.multiply(Expand.expandProductOfSums((Product) indexless, new Transformation[0]), p.getDataSubProduct());
+            return t;
+        }
+    };
 }

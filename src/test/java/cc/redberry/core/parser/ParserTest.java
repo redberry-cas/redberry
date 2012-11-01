@@ -368,4 +368,9 @@ public class ParserTest {
     public void testII1() {
         parse("A_mn*B^mn*A_mn*B^mn");
     }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testBacketsCons1() {
+        parse("(1/2*(a+b)");
+    }
 }

@@ -23,16 +23,11 @@
 package cc.redberry.core.transformations;
 
 import cc.redberry.core.number.Complex;
-import cc.redberry.core.tensor.Product;
-import cc.redberry.core.tensor.Sum;
-import cc.redberry.core.tensor.Tensor;
+import cc.redberry.core.tensor.*;
 import cc.redberry.core.tensor.iterator.TraverseGuide;
 import cc.redberry.core.transformations.substitutions.SubstitutionIterator;
 import cc.redberry.core.utils.TensorUtils;
 
-import java.util.ArrayList;
-
-import static cc.redberry.core.tensor.Tensors.*;
 import static cc.redberry.core.transformations.ExpandUtils.*;
 
 /**
@@ -41,15 +36,22 @@ import static cc.redberry.core.transformations.ExpandUtils.*;
  */
 public final class Expand implements Transformation {
     public static final Expand Expand = new Expand();
+    public static final Expand ExpandAll = new Expand();
 
     private final Transformation[] transformations;
+    private final TraverseGuide traverseGuide;
 
-    public Expand() {
-        this.transformations = new Transformation[0];
+    private Expand() {
+        this(new Transformation[0], TraverseGuide.EXCEPT_FUNCTIONS_AND_FIELDS);
     }
 
     public Expand(Transformation[] transformations) {
+        this(transformations, TraverseGuide.EXCEPT_FUNCTIONS_AND_FIELDS);
+    }
+
+    public Expand(Transformation[] transformations, TraverseGuide traverseGuide) {
         this.transformations = transformations;
+        this.traverseGuide = traverseGuide;
     }
 
     @Override
@@ -62,11 +64,15 @@ public final class Expand implements Transformation {
     }
 
     public static Tensor expand(Tensor tensor, Transformation... transformations) {
-        SubstitutionIterator iterator = new SubstitutionIterator(tensor, TraverseGuide.EXCEPT_FUNCTIONS_AND_FIELDS);
+        return expand(tensor, TraverseGuide.EXCEPT_FUNCTIONS_AND_FIELDS, transformations);
+    }
+
+    public static Tensor expand(Tensor tensor, TraverseGuide traverseGuide, Transformation... transformations) {
+        SubstitutionIterator iterator = new SubstitutionIterator(tensor, traverseGuide);
         Tensor current;
         while ((current = iterator.next()) != null) {
             if (current instanceof Product)
-                iterator.unsafeSet(expandProductOfSums(current, transformations));
+                iterator.unsafeSet(expandProductOfSums((Product) current, transformations));
             else if (isPositiveIntegerPower(current)) {
                 Sum sum = (Sum) current.get(0);
                 int exponent = ((Complex) current.get(1)).getReal().intValue();
@@ -80,78 +86,61 @@ public final class Expand implements Transformation {
         return iterator.result();
     }
 
-    private static Tensor expandProductOfSums(Tensor current, Transformation[] transformations) {
-
-        // a*b | a_m*b_v | (a+b*f) | (a_i+(c+2)*b_i)
-        //1: a*b | (a+b*f)  => result1 = a**2*b+b**2*a*f    Tensors.multiplyAndExpand(nonSum, Sum)
-        //2: a_m*b_v | (a_i+(c+2)*b_i)   => result2 = a_m*b_v*a_i+(c+2)*a_m*b_v*b_i
-        //3: result1 * result2                              Tensors.multiplyAndExpand(scalarSum, nonScalarSum)
-        // (a_m^m**2*b+b**2*a*a_m^m) * (a_m^m*a_m*b_v*a_i+a_m^m**2*B_avi+(c+2)*a_m*b_v*b_i) => (.....)*a_m*b_v*a_i +(....)*B_avi + ( .....  )*a_m*b_v*b_i
-
-        ArrayList<Tensor> indexlessNonSums = new ArrayList<>();
-        ArrayList<Tensor> nonSums = new ArrayList<>();
-
-        Sum indexlessSum = null;
-        Sum sum = null;
-
-        int i;
-        Tensor t, temp;
-        boolean expand = false;
-        for (i = current.size() - 1; i >= 0; --i) {
-            t = current.get(i);
-            if (t.getIndices().size() == 0 && !sumContainsNonIndexless(t))
-                if (t instanceof Sum)
-                    if (indexlessSum == null)
-                        indexlessSum = (Sum) t;
-                    else {
-                        temp = expandPairOfSums((Sum) t, indexlessSum, transformations);
-                        expand = true;
-                        if (temp instanceof Sum)
-                            indexlessSum = (Sum) temp;
-                        else {
-                            indexlessNonSums.add(temp);
-                            indexlessSum = null;
-                        }
-                    }
-                else
-                    indexlessNonSums.add(t);
-            else if (t instanceof Sum)
-                if (sum == null)
-                    sum = (Sum) t;
-                else {
-                    temp = expandPairOfSums((Sum) t, sum, transformations);
-                    temp = expand(temp, transformations);
-                    expand = true;
-                    if (temp instanceof Sum)
-                        sum = (Sum) temp;
-                    else {
-                        nonSums.add(temp);
-                        sum = null;
-                    }
+    static Tensor expandProductOfSums(Product product, Transformation[] transformations) {
+        Tensor indexless = product.getIndexlessSubProduct(),
+                data = product.getDataSubProduct();
+        boolean expandIndexless = false, expandData = false;
+        if (indexless instanceof Sum && ExpandUtils.sumContainsNonIndexless(indexless)) {
+            //data is not 1 at this point
+            expandIndexless = true;
+            expandData = true;
+        }
+        if (indexless instanceof Product) {
+            for (Tensor t : indexless) {
+                if (t instanceof Sum) {
+                    if (ExpandUtils.sumContainsNonIndexless(t)) {
+                        //even if data is 1 it will be recreated
+                        expandData = true;
+                        expandIndexless = true;
+                        break;
+                    } else
+                        expandIndexless = true;
                 }
-            else
-                nonSums.add(t);
+            }
+        }
+        if (!expandData) {
+            if (data instanceof Sum)
+                expandData = true;
+            if (data instanceof Product) {
+                for (Tensor t : data)
+                    if (t instanceof Sum) {
+                        expandData = true;
+                        break;
+                    }
+            }
         }
 
-        if (!expand && sum == null && (indexlessSum == null || indexlessNonSums.isEmpty()))
-            return current;
+        if (!expandData && !expandIndexless)
+            return product;
 
+        if (!expandData) {
+            TensorBuilder expandBuilder = ExpandBuilders.createExpandBuilderIndexless(transformations);
+            expandBuilder.put(indexless);
+            return Tensors.multiply(expandBuilder.build(), data);
+        }
 
-        Tensor indexless = multiply(indexlessNonSums.toArray(new Tensor[indexlessNonSums.size()]));
-        if (indexlessSum != null)
-            indexless = multiplySumElementsOnFactor(indexlessSum, indexless);
+        if (!expandIndexless) {
+            TensorBuilder expandBuilder = ExpandBuilders.createExpandBuilderData(transformations);
+            expandBuilder.put(data);
+            Tensor newData = expandBuilder.build();
+            if (newData instanceof Sum)
+                return Tensors.multiplySumElementsOnScalarFactorAndExpandScalars((Sum) newData, indexless);
+            else
+                return ExpandUtils.expandIndexlessSubproduct.transform(Tensors.multiply(indexless, data));
+        }
 
-        Tensor main = multiply(nonSums.toArray(new Tensor[nonSums.size()]));
-        if (sum != null)
-            main = multiplySumElementsOnFactor(sum, main);
-
-        if (main instanceof Sum)
-            main = multiplySumElementsOnFactorAndExpandScalars((Sum) main, indexless);
-        else
-            main = multiply(indexless, main);
-
-        return main;
+        TensorBuilder expandBuilder = ExpandBuilders.createTotalBuilder(transformations);
+        expandBuilder.put(product);
+        return expandBuilder.build();
     }
-
-
 }

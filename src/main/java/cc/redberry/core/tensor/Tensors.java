@@ -31,7 +31,7 @@ import cc.redberry.core.indices.*;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.parser.ParseNodeTransformer;
 import cc.redberry.core.tensor.functions.*;
-import cc.redberry.core.transformations.Expand;
+import cc.redberry.core.transformations.ExpandUtils;
 import cc.redberry.core.utils.TensorUtils;
 import gnu.trove.set.hash.TIntHashSet;
 
@@ -650,29 +650,16 @@ public final class Tensors {
         return new Sum(newSumData, IndicesFactory.createSorted(newSumData[0].getIndices().getFree()));
     }
 
-    public static Tensor multiplySumElementsOnFactorAndExpandScalars(Sum sum, Tensor factor) {
+    public static Tensor multiplySumElementsOnScalarFactorAndExpandScalars(Sum sum, Tensor factor) {
         if (TensorUtils.isZero(factor))
             return Complex.ZERO;
         if (TensorUtils.isOne(factor))
             return sum;
+        if (factor.getIndices().size() != 0)
+            throw new IllegalArgumentException();
         final Tensor[] newSumData = new Tensor[sum.size()];
         for (int i = newSumData.length - 1; i >= 0; --i)
-            newSumData[i] = Expand.expand(multiply(factor, sum.get(i)));
+            newSumData[i] = ExpandUtils.expandIndexlessSubproduct.transform(multiply(factor, sum.get(i)));
         return new Sum(newSumData, IndicesFactory.createSorted(newSumData[0].getIndices().getFree()));
-    }
-
-    //TODO discuss with Stas (move setIndicesToSimpleTensor and setIndicesToField to other class, may be into SimpelTensor class) ??
-    public static TensorField setIndicesToField(TensorField field, SimpleIndices newIndices) {
-        NameDescriptor descriptor = CC.getNameDescriptor(field.name);
-        if (!descriptor.getIndicesTypeStructure().isStructureOf(newIndices))
-            throw new IllegalArgumentException("Specified indices are not indices of specified tensor.");
-        return new TensorField(field.name, newIndices, field.args, field.argIndices);
-    }
-
-    public static SimpleTensor setIndicesToSimpleTensor(SimpleTensor simpleTensor, SimpleIndices newIndices) {
-        NameDescriptor descriptor = CC.getNameDescriptor(simpleTensor.name);
-        if (!descriptor.getIndicesTypeStructure().isStructureOf(newIndices))
-            throw new IllegalArgumentException("Specified indices are not indices of specified tensor.");
-        return new SimpleTensor(simpleTensor.name, UnsafeIndicesFactory.createOfTensor(descriptor.getSymmetries(), newIndices));
     }
 }

@@ -238,7 +238,14 @@ public class ExpandTest {
     @Test
     public void test21() {
         Tensor tensor = parse("(1/2*(a+b)*f_mn+g_mn)*((a+b)*(a+b)*3*g_ij+(a+b)*h_ij)");
+        System.out.println(Expand.expand(tensor));
         assertAllBracketsExpanded(Expand.expand(tensor));
+    }
+
+    @Test
+    public void test21a() {
+        Tensor tensor = parse("2*(a+b)");
+        TAssert.assertEquals(Expand.expand(tensor), "2*a+2*b");
     }
 
     @Test
