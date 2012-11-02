@@ -30,6 +30,7 @@ import cc.redberry.core.tensor.Expression;
 import cc.redberry.core.tensor.ProductBuilder;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.tensor.Tensors;
+import cc.redberry.core.transformations.expand.Expand;
 import cc.redberry.core.utils.TensorUtils;
 import org.junit.Ignore;
 import org.junit.Test;

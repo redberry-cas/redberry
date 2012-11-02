@@ -27,6 +27,8 @@ import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.utils.IntArray;
 import cc.redberry.core.utils.IntArrayList;
 
+import java.util.Collection;
+
 /**
  * This class provides functionality to construct unordered {@code Indices}
  * object by combining other {@code Indices} objects. For example, if we have a
@@ -35,10 +37,9 @@ import cc.redberry.core.utils.IntArrayList;
  * {@code IndicesBuilder}. As the result this class returns
  * {@code SortedIndices} instance.
  *
- * @see Indices
- *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @see Indices
  */
 public final class IndicesBuilder {
 
@@ -60,7 +61,6 @@ public final class IndicesBuilder {
      * Appends index representation of specified {@code int}.
      *
      * @param index index to be appended
-     *
      * @return a reference to this object
      */
     public IndicesBuilder append(int index) {
@@ -72,7 +72,6 @@ public final class IndicesBuilder {
      * Appends indices representation of specified {@code int[]}.
      *
      * @param indices indices to be appended
-     *
      * @return a reference to this object
      */
     public IndicesBuilder append(int[] indices) {
@@ -84,7 +83,6 @@ public final class IndicesBuilder {
      * Appends indices representation of specified {@code IntArray}.
      *
      * @param indices indices to be appended
-     *
      * @return a reference to this object
      */
     public IndicesBuilder append(IntArray indices) {
@@ -96,7 +94,6 @@ public final class IndicesBuilder {
      * Appends indices representation of specified {@code IntArrayList}.
      *
      * @param indices indices to be appended
-     *
      * @return a reference to this object
      */
     public IndicesBuilder append(IntArrayList indices) {
@@ -108,7 +105,6 @@ public final class IndicesBuilder {
      * Appends specified {@code Indices}.
      *
      * @param indices indices to be appended
-     *
      * @return a reference to this object
      */
     public IndicesBuilder append(Indices indices) {
@@ -119,7 +115,6 @@ public final class IndicesBuilder {
      * Appends specified {@code IndicesBuilder}.
      *
      * @param ib IndicesBuilder
-     *
      * @return a reference to this object
      */
     public IndicesBuilder append(IndicesBuilder ib) {
@@ -130,7 +125,6 @@ public final class IndicesBuilder {
      * Appends indices of specified {@code Tensor}.
      *
      * @param tensor a tensor
-     *
      * @return a reference to this object
      */
     public IndicesBuilder append(Tensor tensor) {
@@ -140,12 +134,23 @@ public final class IndicesBuilder {
     /**
      * Appends consequentially indices of {@code tensors} in specified array.
      *
-     * @param tensors an array of tensors
-     *
+     * @param tensors a collection of tensors
      * @return a reference to this object
      */
-    public IndicesBuilder append(Tensor... tensor) {
-        for (Tensor t : tensor)
+    public IndicesBuilder append(Collection<? extends Tensor> tensors) {
+        for (Tensor t : tensors)
+            append(t);
+        return this;
+    }
+
+    /**
+     * Appends consequentially indices of {@code tensors} in specified array.
+     *
+     * @param tensors an array of tensors
+     * @return a reference to this object
+     */
+    public IndicesBuilder append(Tensor... tensors) {
+        for (Tensor t : tensors)
             append(t);
         return this;
     }
@@ -164,7 +169,7 @@ public final class IndicesBuilder {
      * {@code IndicesBuilder}.
      *
      * @return integer array, representing indices, constructed in this
-     * {@code IndicesBuilder}
+     *         {@code IndicesBuilder}
      */
     public int[] toArray() {
         return data.toArray();

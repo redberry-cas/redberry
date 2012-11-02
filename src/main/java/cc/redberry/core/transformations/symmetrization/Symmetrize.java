@@ -20,7 +20,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
-package cc.redberry.core.transformations;
+package cc.redberry.core.transformations.symmetrization;
 
 import cc.redberry.core.combinatorics.Permutation;
 import cc.redberry.core.combinatorics.symmetries.Symmetries;
@@ -31,6 +31,7 @@ import cc.redberry.core.number.Rational;
 import cc.redberry.core.tensor.ApplyIndexMapping;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.tensor.Tensors;
+import cc.redberry.core.transformations.Transformation;
 import cc.redberry.core.utils.TensorUtils;
 
 import java.util.ArrayList;

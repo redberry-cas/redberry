@@ -1,6 +1,7 @@
-package cc.redberry.core.transformations;
+package cc.redberry.core.transformations.expand;
 
 import cc.redberry.core.tensor.*;
+import cc.redberry.core.transformations.Transformation;
 import cc.redberry.core.utils.ArraysUtils;
 
 /**

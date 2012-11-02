@@ -14,20 +14,20 @@ import java.util.Iterator;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-class PowersContainer implements Iterable<Tensor> {
+public class PowersContainer implements Iterable<Tensor> {
     private boolean sign;
-    private final TIntObjectHashMap<ArrayList<PowerNode>> symbolicPowers;
+    private final TIntObjectHashMap<ArrayList<PowerNode>> powers;
 
     public PowersContainer() {
-        this.symbolicPowers = new TIntObjectHashMap<>();
+        this.powers = new TIntObjectHashMap<>();
     }
 
     public PowersContainer(int initialCapacity) {
-        this.symbolicPowers = new TIntObjectHashMap<>(initialCapacity);
+        this.powers = new TIntObjectHashMap<>(initialCapacity);
     }
 
-    private PowersContainer(TIntObjectHashMap<ArrayList<PowerNode>> symbolicPowers, boolean sign) {
-        this.symbolicPowers = symbolicPowers;
+    private PowersContainer(TIntObjectHashMap<ArrayList<PowerNode>> powers, boolean sign) {
+        this.powers = powers;
         this.sign = sign;
     }
 
@@ -36,10 +36,14 @@ class PowersContainer implements Iterable<Tensor> {
     }
 
     public boolean isEmpty() {
-        return symbolicPowers.isEmpty();
+        return powers.isEmpty();
     }
 
-    public void putSymbolic(Tensor tensor) {
+    public int size(){
+        return powers.size();
+    }
+
+    public void put(Tensor tensor) {
         Tensor base, exponent;
         if (tensor instanceof Power) {
             //case x^y
@@ -52,9 +56,9 @@ class PowersContainer implements Iterable<Tensor> {
         }
 
         int hash = base.hashCode();
-        ArrayList<PowerNode> nodes = symbolicPowers.get(hash);
+        ArrayList<PowerNode> nodes = powers.get(hash);
         if (nodes == null)
-            symbolicPowers.put(hash, nodes = new ArrayList<>());
+            powers.put(hash, nodes = new ArrayList<>());
         for (PowerNode node : nodes) {
             Boolean compare = TensorUtils.compare1(node.base, base);
             if (compare == null)
@@ -103,13 +107,13 @@ class PowersContainer implements Iterable<Tensor> {
                 }
             }
         }
-        //no similar symbolicPowers were found
+        //no similar powers were found
         nodes.add(new PowerNode(base, exponent));
     }
 
     public void putNew(Tensor base, Tensor exponent) {
         ArrayList<PowerNode> newNodes = new ArrayList<>();
-        ArrayList<PowerNode> nodes = symbolicPowers.putIfAbsent(base.hashCode(), newNodes);
+        ArrayList<PowerNode> nodes = powers.putIfAbsent(base.hashCode(), newNodes);
         if (nodes != null) {
             nodes.add(new PowerNode(base, exponent));
         } else {
@@ -123,7 +127,7 @@ class PowersContainer implements Iterable<Tensor> {
     }
 
     private class It implements Iterator<Tensor> {
-        private final Iterator<ArrayList<PowerNode>> lists = symbolicPowers.valueCollection().iterator();
+        private final Iterator<ArrayList<PowerNode>> lists = powers.valueCollection().iterator();
         @SuppressWarnings("unchecked")
         private Iterator<PowerNode> nodes = EmptyIterator.INSTANCE;
 
@@ -149,7 +153,7 @@ class PowersContainer implements Iterable<Tensor> {
     }
 
     public PowersContainer clone() {
-        TIntObjectHashMap<ArrayList<PowerNode>> newPowers = new TIntObjectHashMap<>(symbolicPowers);
+        TIntObjectHashMap<ArrayList<PowerNode>> newPowers = new TIntObjectHashMap<>(powers);
         newPowers.transformValues(copyPowers);
         return new PowersContainer(newPowers, sign);
     }

@@ -1,4 +1,4 @@
-package cc.redberry.core.transformations;
+package cc.redberry.core.transformations.symmetrization;
 
 import cc.redberry.core.TAssert;
 import cc.redberry.core.combinatorics.Symmetry;
@@ -13,7 +13,7 @@ import static cc.redberry.core.combinatorics.symmetries.SymmetriesFactory.create
 import static cc.redberry.core.indices.IndexType.LatinLower;
 import static cc.redberry.core.tensor.Tensors.addSymmetry;
 import static cc.redberry.core.tensor.Tensors.parseSimple;
-import static cc.redberry.core.transformations.SymmetrizeSimpleTensor.symmetrize;
+import static cc.redberry.core.transformations.symmetrization.SymmetrizeSimpleTensor.symmetrize;
 
 /**
  * @author Dmitry Bolotin

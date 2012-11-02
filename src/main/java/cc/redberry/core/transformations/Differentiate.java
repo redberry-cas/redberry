@@ -8,6 +8,7 @@ import cc.redberry.core.tensor.*;
 import cc.redberry.core.tensor.functions.ScalarFunction;
 import cc.redberry.core.tensor.iterator.TensorLastIterator;
 import cc.redberry.core.transformations.substitutions.Substitution;
+import cc.redberry.core.transformations.symmetrization.SymmetrizeSimpleTensor;
 import cc.redberry.core.utils.TensorUtils;
 import gnu.trove.set.hash.TIntHashSet;
 
@@ -15,7 +16,7 @@ import static cc.redberry.core.indices.IndicesUtils.*;
 import static cc.redberry.core.tensor.ApplyIndexMapping.applyIndexMapping;
 import static cc.redberry.core.tensor.ApplyIndexMapping.renameDummy;
 import static cc.redberry.core.tensor.Tensors.*;
-import static cc.redberry.core.transformations.Expand.expand;
+import static cc.redberry.core.transformations.expand.Expand.expand;
 import static cc.redberry.core.utils.ArraysUtils.addAll;
 
 /**

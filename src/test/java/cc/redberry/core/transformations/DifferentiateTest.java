@@ -7,6 +7,9 @@ import cc.redberry.core.indices.IndexType;
 import cc.redberry.core.tensor.Expression;
 import cc.redberry.core.tensor.SimpleTensor;
 import cc.redberry.core.tensor.Tensor;
+import cc.redberry.core.transformations.expand.Expand;
+import cc.redberry.core.transformations.expand.ExpandAll;
+import cc.redberry.core.transformations.fractions.Together;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -14,7 +17,7 @@ import static cc.redberry.core.tensor.Tensors.*;
 import static cc.redberry.core.transformations.ContractIndices.ContractIndices;
 import static cc.redberry.core.transformations.ContractIndices.contract;
 import static cc.redberry.core.transformations.Differentiate.differentiate;
-import static cc.redberry.core.transformations.Expand.expand;
+import static cc.redberry.core.transformations.expand.Expand.expand;
 
 /**
  * @author Dmitry Bolotin

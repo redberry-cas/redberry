@@ -1,14 +1,14 @@
-package cc.redberry.core.transformations;
+package cc.redberry.core.transformations.expand;
 
 import cc.redberry.core.TAssert;
 import cc.redberry.core.tensor.Tensor;
+import cc.redberry.core.transformations.ContractIndices;
 import junit.framework.Assert;
 import org.junit.Test;
 
 import static cc.redberry.core.tensor.Tensors.parse;
 import static cc.redberry.core.tensor.Tensors.parseExpression;
-import static cc.redberry.core.transformations.ExpandAll.expandAll;
-import static cc.redberry.core.transformations.ExpandTest.assertAllBracketsExpanded;
+import static cc.redberry.core.transformations.expand.ExpandAll.expandAll;
 
 /**
  * @author Dmitry Bolotin
@@ -40,7 +40,7 @@ public class ExpandAllTest {
     @Test
     public void test4() {
         Tensor actual = expandAll(parse("((a+b)*(c+a)-a)*f_mn*(f^mn+r^mn)-((a-b)*(c-a)+a)*r_ab*(f^ab+r^ab)"));
-        assertAllBracketsExpanded(actual);
+        ExpandTest.assertAllBracketsExpanded(actual);
         Tensor expected = parse("(2*c*b+2*Power[a, 2]+-2*a)*r_{ab}*f^{ab}+(-1*b*a+c*b+-1*c*a+Power[a, 2]+-1*a)*r^{ab}*r_{ab}+(b*a+c*b+c*a+Power[a, 2]+-1*a)*f^{mn}*f_{mn}");
         TAssert.assertEquals(actual, expected);
     }

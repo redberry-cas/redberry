@@ -20,17 +20,21 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
-package cc.redberry.core.transformations;
+package cc.redberry.core.transformations.fractions;
 
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.tensor.*;
 import cc.redberry.core.tensor.iterator.TensorLastIterator;
+import cc.redberry.core.transformations.Transformation;
 import cc.redberry.core.utils.THashMap;
 import cc.redberry.core.utils.TensorUtils;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
+import static cc.redberry.core.transformations.CollectScalarFactors.collectScalarFactors;
+import static cc.redberry.core.transformations.CollectScalarFactors.collectScalarFactorsInProduct;
 
 /**
  * Puts terms in a sum over a common denominator.
@@ -58,7 +62,7 @@ public final class Together implements Transformation {
             if (c instanceof Sum)
                 iterator.set(togetherSum(c));
             if (c instanceof Product)
-                iterator.set(togetherProduct((Product) c));
+                iterator.set(collectScalarFactorsInProduct((Product) c));
         }
         return iterator.result();
     }
@@ -123,19 +127,14 @@ public final class Together implements Transformation {
         }
         SumBuilder numeratorSumBuilder = new SumBuilder();
         for (List<Tensor> term : numeratorTerms)
-            numeratorSumBuilder.put(togetherProduct1(Tensors.multiplyAndRenameConflictingDummies(term.toArray(new Tensor[term.size()]))));//TODO ?rename conflicts
+            numeratorSumBuilder.put(collectScalarFactors(Tensors.multiplyAndRenameConflictingDummies(term.toArray(new Tensor[term.size()]))));//TODO ?rename conflicts
         //TODO improve performance
         Tensor[] resultProduct = new Tensor[1 + base.denominators.size()];
         resultProduct[0] = numeratorSumBuilder.build();
         i = 0;
         for (Map.Entry<Tensor, Complex> baseEntry : base.denominators.entrySet())
             resultProduct[++i] = Tensors.pow(baseEntry.getKey(), baseEntry.getValue().negate());
-        return togetherProduct1(Tensors.multiplyAndRenameConflictingDummies(resultProduct));
-//        ProductBuilder resultBuilder = new ProductBuilder();
-//        resultBuilder.put(numeratorSumBuilder.build());
-//        for (Map.Entry<Tensor, Complex> baseEntry : base.denominators.entrySet())
-//            resultBuilder.put(Tensors.pow(baseEntry.getKey(), baseEntry.getValue().negate()));
-//        return togetherProduct1(resultBuilder.build());
+        return Tensors.multiplyAndRenameConflictingDummies(resultProduct);
     }
 
     private static class SplitStruct {
@@ -174,47 +173,6 @@ public final class Together implements Transformation {
             return new SplitStruct(map, temp);
         }
         return new SplitStruct(map, tensor);
-    }
-
-    private static Tensor togetherProduct1(Tensor t) {
-        if (t instanceof Product)
-            return togetherProduct((Product) t);
-        return t;
-    }
-
-    private static Tensor togetherProduct(Product t) {
-        //TODO add quick check
-        THashMap<Tensor, SumBuilder> map = new THashMap<>();
-        Tensor a, p;
-        SumBuilder temp;
-        Tensor[] scalars = t.getAllScalars();
-        for (Tensor m : scalars) {
-            if (m instanceof Power) {
-                a = m.get(0);
-                p = m.get(1);
-
-            } else {
-                a = m;
-                p = Complex.ONE;
-            }
-            temp = map.get(a);
-            if (temp == null) {
-                temp = new SumBuilder();
-                temp.put(p);
-                map.put(a, temp);
-            } else
-                temp.put(p);
-        }
-        if (map.size() == scalars.length)
-            return t;
-        ProductBuilder pb = new ProductBuilder();
-        Tensor nonScalar = t.getContent().getNonScalar();
-        if (nonScalar != null)
-            pb.put(nonScalar);
-        for (Map.Entry<Tensor, SumBuilder> entry : map.entrySet())
-            pb.put(Tensors.pow(entry.getKey(), entry.getValue().build()));
-
-        return pb.build();
     }
 
     private static boolean checkPower(Tensor power) {
