@@ -53,7 +53,7 @@ public final class Sum extends MultiTensor {
         this.hash = Arrays.hashCode(data);
     }
 
-    public Sum(Indices indices, Tensor[] data, int hash) {
+    Sum(Indices indices, Tensor[] data, int hash) {
         super(indices);
         this.data = data;
         this.hash = hash;

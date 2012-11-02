@@ -72,6 +72,15 @@ public class SumTest {
     }
 
     @Test
+    public void testHash2() {
+        Tensor a = Tensors.parse("a_mn + b_mn - c_m*d_n");
+        Tensor b = Tensors.parse("-(a_mn - b_mn - c_m*d_n)");
+//        Tensor c = Tensors.parse("f_nm + h_nm");
+        Assert.assertEquals(a.hashCode(), b.hashCode());
+//        Assert.assertEquals(a.hashCode(), c.hashCode());
+    }
+
+    @Test
     public void testRemove1() {
         Sum t = (Sum) Tensors.parse("a+b+c");
         Assert.assertEquals(t.remove(0).size(), 2);

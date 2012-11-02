@@ -292,7 +292,9 @@ public final class ApplyIndexMapping {
                 newIndexless = indexless;
 
             if (newData == null)
-                return new Product(product.indices, product.factor, newIndexless, data, product.contentReference, product.hash);
+                // we can pass the hash code, since we did not changed the order of
+                // indexless data, and its hash cannot been changed by the renaming of dummies
+                return new Product(product.indices, product.factor, newIndexless, data, product.contentReference);
 
             return new Product(new IndicesBuilder().append(newData).getIndices(), product.factor, newIndexless, newData);
         }
