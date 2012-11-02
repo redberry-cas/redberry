@@ -369,7 +369,7 @@ public class ParserTest {
         parse("A_mn*B^mn*A_mn*B^mn");
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expected = BracketsError.class)
     public void testBacketsCons1() {
         parse("(1/2*(a+b)");
     }
