@@ -109,13 +109,25 @@
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-checkstyle-plugin</artifactId>
-                <version>2.9.1</version>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>2.2</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>test-jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
+            <!--<plugin>-->
+            <!--<groupId>org.apache.maven.plugins</groupId>-->
+            <!--<artifactId>maven-checkstyle-plugin</artifactId>-->
+            <!--<version>2.9.1</version>-->
+            <!--</plugin>-->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>2.11</version>
+                <version>2.12</version>
                 <configuration>
                     <properties>
                         <property>
@@ -123,13 +135,7 @@
                             <!-- Resets the context before running each test -->
                             <value>cc.redberry.core.GlobalRunListener</value>
                         </property>
-                        <property>
-                            <!-- It works??? -->
-                            <name>forkedProcessTimeoutInSeconds</name>
-                            <value>5</value>
-                        </property>
                     </properties>
-
                     <skipTests>true</skipTests>
                 </configuration>
             </plugin>

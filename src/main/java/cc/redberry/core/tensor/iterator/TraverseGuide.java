@@ -27,7 +27,6 @@ import cc.redberry.core.tensor.TensorField;
 import cc.redberry.core.tensor.functions.ScalarFunction;
 
 /**
- *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
@@ -43,13 +42,12 @@ public interface TraverseGuide {
      * @param parent        current cursor position tensor
      * @param indexInParent position of the current cursor in position tensor
      * @param tensor        current cursor
-     *
      * @return TraversePermission
-     *
      * @see TraversePermission
      * @see TreeTraverseIterator
      */
     TraversePermission getPermission(Tensor tensor, Tensor parent, int indexInParent);
+
     /**
      * Traverse guide, which always return {@link TraversePermission#Enter}.
      */
@@ -67,6 +65,17 @@ public interface TraverseGuide {
             if (tensor instanceof ScalarFunction)
                 return TraversePermission.DontShow;
             else if (tensor instanceof TensorField)
+                return TraversePermission.ShowButNotEnter;
+            else
+                return TraversePermission.Enter;
+        }
+    };
+
+    public static final TraverseGuide EXCEPT_FIELDS = new TraverseGuide() {
+
+        @Override
+        public TraversePermission getPermission(Tensor tensor, Tensor parent, int indexInParent) {
+            if (tensor instanceof TensorField)
                 return TraversePermission.ShowButNotEnter;
             else
                 return TraversePermission.Enter;

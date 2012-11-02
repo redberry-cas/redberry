@@ -25,21 +25,22 @@ package cc.redberry.core.tensor;
 import java.util.Iterator;
 
 /**
- *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public class BasicTensorIterator implements Iterator<Tensor> {
+public final class BasicTensorIterator implements Iterator<Tensor> {
     private final Tensor tensor;
     private int position = -1;
+    private final int size;
 
     public BasicTensorIterator(Tensor tensor) {
         this.tensor = tensor;
+        this.size = tensor.size();
     }
 
     @Override
     public boolean hasNext() {
-        return position < tensor.size() - 1;
+        return position < size - 1;
     }
 
     @Override

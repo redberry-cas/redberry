@@ -32,6 +32,7 @@ import cc.redberry.core.number.Complex;
 import cc.redberry.core.tensor.*;
 import cc.redberry.core.transformations.ContractIndices;
 import cc.redberry.core.transformations.Expand;
+import cc.redberry.core.transformations.Together;
 import cc.redberry.core.transformations.Transformation;
 import cc.redberry.core.utils.TensorUtils;
 import junit.framework.Assert;
@@ -512,7 +513,7 @@ public class SubstitutionsTest {
         target = expand(target);
         target = contract(target);
 
-        Tensor expected = parse(target.toString(OutputFormat.RedberryConsole));
+        Tensor expected = parse(target.toString(OutputFormat.Redberry));
         assertTrue(TensorUtils.equalsExactly(target, expected));
     }
 
@@ -578,7 +579,7 @@ public class SubstitutionsTest {
     @Test
     public void testField15() {
 
-        //Riman without diff states
+        //Riemann without diff states
         Tensor target = parse("Rf[g_mn]");
         target = Tensors.parseExpression("Rf[g_ab]=g^ab*Rf_ab[g_mn]").transform(target);
         target = Tensors.parseExpression("Rf_{mn}[g^mn]=Rf^{a}_{man}[g_pq]").transform(target);
@@ -587,11 +588,11 @@ public class SubstitutionsTest {
 
         target = contract(target);
 
-        //Riman with diff states
+        //Riemann with diff states
         Tensor target1 = parse("g_{mn}*R^{mn}");
-        target1 = Tensors.parseExpression("R_{mn}=g^ab*R_{bman}").transform(target);
-        target1 = Tensors.parseExpression("R^a_bmn=p_m*G^a_bn+p_n*G^a_bm+G^a_gm*G^g_bn-G^a_gn*G^g_bm").transform(target);
-        target1 = Tensors.parseExpression("G_gmn=(1/2)*(p_m*g_gn+p_n*g_gm-p_g*g_mn)").transform(target);
+        target1 = Tensors.parseExpression("R_{mn}=g^ab*R_{bman}").transform(target1);
+        target1 = Tensors.parseExpression("R^a_bmn=p_m*G^a_bn+p_n*G^a_bm+G^a_gm*G^g_bn-G^a_gn*G^g_bm").transform(target1);
+        target1 = Tensors.parseExpression("G_gmn=(1/2)*(p_m*g_gn+p_n*g_gm-p_g*g_mn)").transform(target1);
 
         target1 = contract(target1);
 
@@ -749,6 +750,14 @@ public class SubstitutionsTest {
         Tensor t = parse("f[y,x]");
         t = s.transform(t);
         TAssert.assertEquals(t, "y**x");
+    }
+
+    @Test
+    public void testField30() {
+        Expression s = parseExpression("f[x,y, x+z]=x+y+z");
+        Tensor t = parse("f[a,b,c]");
+        t = s.transform(t);
+        TAssert.assertEquals(t, "f[a,b,c]");
     }
     //TODO additional tests with specified field arguments indices
 
@@ -916,6 +925,21 @@ public class SubstitutionsTest {
     }
 
     @Test
+    public void testProduct15() {
+        Tensor t = parse("(8*Sin[f^{i}*f_{i}]+4*((f^{m}+a^{m}*f^{a}*f_{a})*f_{m})**(-1)*Cos[f^{i}*f_{i}]**(-2)*Cos[f^{i}*f_{i}])*f^{l}*f_{l}-4*((f^{m}+a^{m}*f^{a}*f_{a})*f_{m})**(-2)*Cos[f^{i}*f_{i}]**(-2)*Sin[f^{i}*f_{i}]*f^{l}*(f_{l}+a_{l}*f_{a}*f^{a}+f_{m}*(2*a^{m}*f_{l}+d^{m}_{l}))-((f^{m}+a^{m}*f^{a}*f_{a})*f_{m})**(-2)*Cos[f^{i}*f_{i}]**(-1)*(2*d^{l}_{l}+4*a^{a}*f_{a}+2*a^{m}*f_{m}*d^{l}_{l})+2*((f^{m}+a^{m}*f^{a}*f_{a})*f_{m})**(-3)*Cos[f^{i}*f_{i}]**(-1)*(f_{l}+a_{l}*f_{a}*f^{a}+f_{m}*(2*a^{m}*f_{l}+d^{m}_{l}))*(f^{l}+a^{l}*f_{a}*f^{a}+f_{m}*(2*a^{m}*f^{l}+g^{ml}))+2*((f^{m}+a^{m}*f^{a}*f_{a})*f_{m})**(-1)*Cos[f^{i}*f_{i}]**(-2)*Sin[f^{i}*f_{i}]*d^{l}_{l}");
+        Expression s = parseExpression("f_m*f^m = m**2");
+        t = s.transform(t);
+        t = parseExpression("a_j = 0").transform(t);
+        t = ContractIndices.contract(t);
+        t = s.transform(t);
+        t = parseExpression("d_m^m = 4").transform(t);
+        t = expand(t);
+        TAssert.assertEquals(t, "4*Cos[m**2]**(-1)+8*Sin[m**2]*m**2");
+    }
+
+    //TODO tests for Product
+
+    @Test
     public void testPower13() {
         Expression s = parseExpression("d*Sin[a - b]*f_mn = k_mn");
         Tensor t = parse("d*Sin[b - a]*f_mn ");
@@ -930,5 +954,56 @@ public class SubstitutionsTest {
         TAssert.assertEquals(s.transform(t), "k_n");
     }
 
-    //TODO tests for Product
+    @Test
+    public void testScalarFunction1() {
+        Expression s = parseExpression("x = ArcSin[F_ab*F^ab]");
+        Tensor t = parse("(F_ab*F^ab + 1)*Sin[x]");
+        TAssert.assertIndicesConsistency(s.transform(t));
+    }
+
+    @Test
+    public void testScalarFunction2() {
+        Tensor t = parse("Sin[f]*(Sin[f]+Sin[g]*(Sin[k]+Sin[f]))*(Sin[d]+Sin[h])");
+        t = parse("Sin[f]*(Sin[g]+Sin[k])");
+
+        Expression f = parseExpression("f = ArcSin[f_m^m+f1_a^a]");
+        Expression g = parseExpression("g = ArcSin[g_m^m+g1_b^b]");
+        Expression d = parseExpression("d = ArcSin[d_m^m+d1_c^c]");
+        Expression h = parseExpression("h = ArcSin[h_m^m+h1_d^d]");
+        Expression k = parseExpression("k = ArcSin[k_m^m+k1_e^e]");
+        Expression[] es = new Expression[]{f, g, d, h, k};
+        Substitution s = new Substitution(es);
+        t = s.transform(t);
+        TAssert.assertIndicesConsistency(t);
+    }
+
+    @Test
+    public void testScalarFunction3() {
+        Tensor t = parse("f*g*k*(f+g*(k+f))*(d+h*(d+f)*(k*(g+k)+f))+(f+g*(k+f))*(d+h*(d+f)*(k*(g+k)+f))");
+        Expression f = parseExpression("f = Sin[f]");
+        Expression g = parseExpression("g = Sin[g]");
+        Expression d = parseExpression("d = Sin[d]");
+        Expression h = parseExpression("h = Sin[h]");
+        Expression k = parseExpression("k = Sin[k]");
+        Expression[] es = {f, g, d, h, k};
+        t = new Substitution(es).transform(t);
+
+        f = parseExpression("f = ArcSin[f_m^m+f1_a^a]");
+        g = parseExpression("g = ArcSin[g_m^m+g1_b^b]");
+        d = parseExpression("d = ArcSin[d_m^m+d1_c^c]");
+        h = parseExpression("h = ArcSin[h_m^m+h1_d^d]");
+        k = parseExpression("k = ArcSin[k_m^m+k1_e^e]");
+        es = new Expression[]{f, g, d, h, k};
+        IntPermutationsGenerator generator = new IntPermutationsGenerator(es.length);
+        int[] permutation;
+        Expression[] temp;
+        while (generator.hasNext()) {
+            permutation = generator.next();
+            temp = Combinatorics.shuffle(es, permutation);
+            for (Expression e : temp)
+                t = e.transform(t);
+            TAssert.assertIndicesConsistency(t);
+        }
+    }
+
 }

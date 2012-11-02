@@ -42,6 +42,8 @@ public class ParserBrackets implements NodeParser {
                 if (c == ')')
                     level--;
             }
+            if(level != 0)
+                throw new BracketsError();
             return parser.parse(expression.substring(1, expression.length() - 1));
         } else
             return null;

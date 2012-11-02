@@ -28,7 +28,6 @@ import cc.redberry.core.math.frobenius.FrobeniusSolver;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.number.Rational;
 import cc.redberry.core.tensor.*;
-import cc.redberry.core.transformations.ApplyIndexMapping;
 import cc.redberry.core.transformations.SymmetrizeUpperLowerIndices;
 import cc.redberry.core.utils.IntArray;
 

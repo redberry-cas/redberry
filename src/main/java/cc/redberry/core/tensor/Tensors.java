@@ -31,8 +31,7 @@ import cc.redberry.core.indices.*;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.parser.ParseNodeTransformer;
 import cc.redberry.core.tensor.functions.*;
-import cc.redberry.core.transformations.ApplyIndexMapping;
-import cc.redberry.core.transformations.Expand;
+import cc.redberry.core.transformations.ExpandUtils;
 import cc.redberry.core.utils.TensorUtils;
 import gnu.trove.set.hash.TIntHashSet;
 
@@ -161,7 +160,7 @@ public final class Tensors {
         ArrayList<Tensor> toResolve = new ArrayList<>();
         int position = -1;
         for (Tensor f : factors) {
-            if (f instanceof Sum || f instanceof Power) {
+            if (f instanceof Sum || f instanceof Power || f instanceof ScalarFunction) {
                 toResolve.add(f);
                 forbidden.addAll(f.getIndices().getFree().getAllIndices().copy());
             } else {
@@ -173,7 +172,7 @@ public final class Tensors {
         Tensor factor, newFactor;
         for (int i = toResolve.size() - 1; i >= 0; --i) {
             factor = toResolve.get(i);
-            newFactor = ApplyIndexMapping.renameDummyFromClonedSource(factor, forbidden.toArray());
+            newFactor = ApplyIndexMapping.renameDummy(factor, forbidden.toArray());
             forbidden.addAll(TensorUtils.getAllIndicesNamesT(newFactor));
             result[++position] = newFactor;
         }
@@ -555,18 +554,56 @@ public final class Tensors {
         return (Expression) t;
     }
 
-    public static void addSymmetry(String tensor, IndexType type, boolean sign, int... symmetry) {
-        parseSimple(tensor).getIndices().getSymmetries().add(type.getType(), new Symmetry(symmetry, sign));
+    public static void addSymmetry(String tensor, IndexType type, boolean sign, int... permutation) {
+        parseSimple(tensor).getIndices().getSymmetries().add(type.getType(), new Symmetry(permutation, sign));
     }
 
-    public static void addSymmetry(SimpleTensor tensor, IndexType type, boolean sign, int... symmetry) {
-        tensor.getIndices().getSymmetries().add(type.getType(), new Symmetry(symmetry, sign));
+    public static void addSymmetry(SimpleTensor tensor, IndexType type, boolean sign, int... permutation) {
+        tensor.getIndices().getSymmetries().add(type.getType(), new Symmetry(permutation, sign));
+    }
+
+    public static void addSymmetry(String tensor, IndexType type, int... permutation) {
+        addSymmetry(tensor, type, false, permutation);
+    }
+
+    public static void addSymmetry(SimpleTensor tensor, IndexType type, int... permutation) {
+        addSymmetry(tensor, type, false, permutation);
+    }
+
+    public static void addAntiSymmetry(String tensor, IndexType type, int... permutation) {
+        addSymmetry(tensor, type, true, permutation);
+    }
+
+    public static void addAntiSymmetry(SimpleTensor tensor, IndexType type, int... permutation) {
+        addSymmetry(tensor, type, true, permutation);
+    }
+
+    public static void addSymmetry(String tensor, int... permutation) {
+        parseSimple(tensor).getIndices().getSymmetries().addSymmetry(permutation);
+    }
+
+    public static void addSymmetry(SimpleTensor tensor, int... permutation) {
+        tensor.getIndices().getSymmetries().addSymmetry(permutation);
+    }
+
+    public static void addAntiSymmetry(String tensor, int... permutation) {
+        parseSimple(tensor).getIndices().getSymmetries().addAntiSymmetry(permutation);
+    }
+
+    public static void addAntiSymmetry(SimpleTensor tensor, int... permutation) {
+        tensor.getIndices().getSymmetries().addAntiSymmetry(permutation);
     }
 
     public static void setSymmetric(SimpleTensor tensor, IndexType type) {
         int dimension = tensor.getIndices().size(type);
         addSymmetry(tensor, type, false, Combinatorics.createCycle(dimension));
         addSymmetry(tensor, type, false, Combinatorics.createTransposition(dimension));
+    }
+
+    public static void setSymmetric(SimpleTensor tensor) {
+        int dimension = tensor.getIndices().size();
+        addSymmetry(tensor, Combinatorics.createCycle(dimension));
+        addSymmetry(tensor, Combinatorics.createTransposition(dimension));
     }
 
     /**
@@ -579,6 +616,10 @@ public final class Tensors {
         if (tensor instanceof Complex)
             return ((Complex) tensor).negate();
         return multiply(Complex.MINUSE_ONE, tensor);
+    }
+
+    public static Tensor reciprocal(Tensor tensor) {
+        return pow(tensor, Complex.MINUSE_ONE);
     }
 
     //TODO discuss with Stas (move multiplySumElementsOnFactor and multiplySumElementsOnFactorAndExpandScalars to other class)
@@ -609,29 +650,16 @@ public final class Tensors {
         return new Sum(newSumData, IndicesFactory.createSorted(newSumData[0].getIndices().getFree()));
     }
 
-    public static Tensor multiplySumElementsOnFactorAndExpandScalars(Sum sum, Tensor factor) {
+    public static Tensor multiplySumElementsOnScalarFactorAndExpandScalars(Sum sum, Tensor factor) {
         if (TensorUtils.isZero(factor))
             return Complex.ZERO;
         if (TensorUtils.isOne(factor))
             return sum;
+        if (factor.getIndices().size() != 0)
+            throw new IllegalArgumentException();
         final Tensor[] newSumData = new Tensor[sum.size()];
         for (int i = newSumData.length - 1; i >= 0; --i)
-            newSumData[i] = Expand.expand(multiply(factor, sum.get(i)));
+            newSumData[i] = ExpandUtils.expandIndexlessSubproduct.transform(multiply(factor, sum.get(i)));
         return new Sum(newSumData, IndicesFactory.createSorted(newSumData[0].getIndices().getFree()));
-    }
-
-    //TODO discuss with Stas (move setIndicesToSimpleTensor and setIndicesToField to other class, may be into SimpelTensor class) ??
-    public static TensorField setIndicesToField(TensorField field, SimpleIndices newIndices) {
-        NameDescriptor descriptor = CC.getNameDescriptor(field.name);
-        if (!descriptor.getIndicesTypeStructure().isStructureOf(newIndices))
-            throw new IllegalArgumentException("Specified indices are not indices of specified tensor.");
-        return new TensorField(field.name, newIndices, field.args, field.argIndices);
-    }
-
-    public static SimpleTensor setIndicesToSimpleTensor(SimpleTensor simpleTensor, SimpleIndices newIndices) {
-        NameDescriptor descriptor = CC.getNameDescriptor(simpleTensor.name);
-        if (!descriptor.getIndicesTypeStructure().isStructureOf(newIndices))
-            throw new IllegalArgumentException("Specified indices are not indices of specified tensor.");
-        return new SimpleTensor(simpleTensor.name, UnsafeIndicesFactory.createOfTensor(descriptor.getSymmetries(), newIndices));
     }
 }

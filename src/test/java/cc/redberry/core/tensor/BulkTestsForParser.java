@@ -354,4 +354,13 @@ public class BulkTestsForParser {
                 simpleTensorCount(c, counter);
         }
     }
+
+    @Test
+    public void test12() {
+        for (int i = 0; i < 100; ++i) {
+            CC.resetTensorNames();
+            Tensor t = Tensors.parse("(A^ab - A^ba)*K_ajp*K^jcpm = F^bcm");
+            TAssert.assertEquals(t, Tensors.parse(t.toString()));
+        }
+    }
 }

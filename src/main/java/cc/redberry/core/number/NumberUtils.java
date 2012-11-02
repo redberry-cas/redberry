@@ -38,6 +38,10 @@ public class NumberUtils {
         return complex.isZero() || complex.isInfinite() || complex.isNaN();
     }
 
+    public static boolean isIndeterminate(Complex complex) {
+        return complex.isInfinite() || complex.isNaN();
+    }
+
     /**
      * Checks that an object is not null.
      *

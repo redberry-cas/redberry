@@ -30,6 +30,11 @@ public class DefaultBuilder implements TensorBuilder {
     private final TensorFactory factory;
     private final List<Tensor> list;
 
+    public DefaultBuilder(TensorFactory factory) {
+        this.factory = factory;
+        this.list = new ArrayList<>();
+    }
+
     public DefaultBuilder(TensorFactory factory, int capacity) {
         this.factory = factory;
         this.list = new ArrayList<>(capacity);

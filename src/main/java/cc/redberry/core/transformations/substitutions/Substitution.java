@@ -170,7 +170,7 @@ public final class Substitution implements Transformation {
                 continue;
             Tensor old = current;
             for (PrimitiveSubstitution nodeSubstitution : primitiveSubstitutions) {
-                current = nodeSubstitution.newTo(old, iterator.getForbidden());
+                current = nodeSubstitution.newTo(old, iterator);
                 if (current != old && !applyIfModified)
                     break;
                 old = current;

@@ -22,13 +22,9 @@
  */
 package cc.redberry.core.tensor;
 
-import cc.redberry.core.transformations.ApplyIndexMapping;
 import cc.redberry.core.utils.TensorUtils;
 
-import java.util.Set;
-
 /**
- *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
@@ -41,11 +37,7 @@ final class FactorNode {
     FactorNode(Tensor factor, TensorBuilder builder) {
         this.factor = factor;
         this.builder = builder;
-        Set<Integer> factorIndices = TensorUtils.getAllIndicesNames(factor);
-        factorForbiddenIndices = new int[factorIndices.size()];
-        int i = -1;
-        for (Integer ii : factorIndices)
-            factorForbiddenIndices[++i] = ii;
+        factorForbiddenIndices = TensorUtils.getAllIndicesNamesT(factor).toArray();
     }
 
     private FactorNode(Tensor factor, TensorBuilder builder, int[] factorForbiddenIndices) {

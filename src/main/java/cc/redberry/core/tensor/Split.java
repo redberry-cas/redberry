@@ -121,7 +121,7 @@ public class Split {
                 else if (product.size() == 2)//case 2*a
                     factor = product.get(1);
                 else//case 2*a*b => factor = a*b
-                    factor = new Product(Complex.ONE, product.indexlessData, product.data, product.contentReference.get(), product.indices);
+                    factor = new Product(Complex.ONE, product.indexlessData, product.data, product.contentReference.getReferent(), product.indices);
             } else {
                 complex = Complex.ONE;
                 factor = tensor;
@@ -148,7 +148,7 @@ public class Split {
                 if (product.data.length == 1)
                     factor = product.data[0];
                 else
-                    factor = new Product(Complex.ONE, new Tensor[0], product.data, product.contentReference.get(), product.indices);
+                    factor = new Product(Complex.ONE, new Tensor[0], product.data, product.contentReference.getReferent(), product.indices);
             } else {
                 summand = Complex.ONE;
                 factor = tensor;

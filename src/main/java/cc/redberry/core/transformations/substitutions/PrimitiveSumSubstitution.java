@@ -1,11 +1,10 @@
 package cc.redberry.core.transformations.substitutions;
 
 import cc.redberry.core.indexmapping.IndexMappingBuffer;
+import cc.redberry.core.tensor.ApplyIndexMapping;
 import cc.redberry.core.tensor.SumBuilder;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.tensor.Tensors;
-import cc.redberry.core.transformations.ApplyIndexMapping;
-
 import java.util.Arrays;
 
 /**
@@ -18,7 +17,7 @@ class PrimitiveSumSubstitution extends PrimitiveSubstitution {
     }
 
     @Override
-    Tensor newTo_(Tensor currentNode, int[] forbiddenIndices) {
+    Tensor newTo_(Tensor currentNode, SubstitutionIterator iterator) {
         BijectionContainer bc = new SumBijectionPort(from, currentNode).take();
         if (bc == null)
             return currentNode;
@@ -28,7 +27,7 @@ class PrimitiveSumSubstitution extends PrimitiveSubstitution {
         if (toIsSymbolic)
             newTo = buffer.getSignum() ? Tensors.negate(to) : to;
         else
-            newTo = ApplyIndexMapping.applyIndexMapping(to, buffer, forbiddenIndices);
+            newTo = ApplyIndexMapping.applyIndexMapping(to, buffer, iterator.getForbidden());
 
         SumBuilder builder = new SumBuilder();
         int[] bijection = bc.bijection;

@@ -80,7 +80,7 @@ public final class IndexConverterExtender implements IndexSymbolConverter {
         if (num == 0)
             return innerConverter.getSymbol(code, mode);
         else
-            return innerConverter.getSymbol(code % (innerConverter.maxSymbolsCount() + 1), mode) + "_" + (num < 9 ? num : "{" + num + "}");
+            return innerConverter.getSymbol(code % (innerConverter.maxSymbolsCount() + 1), mode) + "_" + ("{" + num + "}");
     }
 
     @Override

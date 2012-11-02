@@ -105,4 +105,16 @@ public class SymmetrizeTest {
         Tensor t = Tensors.parse("A_a*B^c");
         assertEquals(symmetrize.transform(t), "(1/2)*(A_a*B^c+B_a*A^c)");
     }
+
+    @Test
+    public void testAll5(){
+        Symmetries symmetries = SymmetriesFactory.createFullSymmetries(3);
+        Symmetrize symmetrize = new Symmetrize(
+                ParserIndices.parse("_abc"),
+                symmetries.getBasisSymmetries().toArray(new Symmetry[0]),
+                true);
+        Tensor t = Tensors.parse("T_abc");
+        System.out.println(t = symmetrize.transform(t));
+        System.out.println(Tensors.parseExpression("T_abc = A_a*B_b*C_c").transform(t));
+    }
 }

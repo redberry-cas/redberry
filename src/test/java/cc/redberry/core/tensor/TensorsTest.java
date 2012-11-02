@@ -25,10 +25,7 @@ package cc.redberry.core.tensor;
 import cc.redberry.core.TAssert;
 import cc.redberry.core.indices.IndexType;
 import cc.redberry.core.number.Complex;
-import cc.redberry.core.transformations.ContractIndices;
-import cc.redberry.core.transformations.Expand;
-import cc.redberry.core.transformations.Together;
-import cc.redberry.core.transformations.Transformation;
+import cc.redberry.core.transformations.*;
 import cc.redberry.core.utils.TensorUtils;
 import org.junit.Assert;
 import org.junit.Ignore;
@@ -54,7 +51,7 @@ public class TensorsTest {
     public void testRenameConflicts2() {
         Tensor tensor = parse("(A_ijk^ij+B_ijk^ij)*(K_ij^ij+T)");
         Tensor result = Expand.expand(tensor);
-        Tensor expected = parse("(T+K_{ij}^{ij})*B_{abk}^{ab}+(T+K_{ij}^{ij})*A_{abk}^{ab}");
+        Tensor expected = parse("T*B_{abk}^{ab}+K_{ij}^{ij}*B_{abk}^{ab}+T*A_{abk}^{ab}+K_{ij}^{ij}*A_{abk}^{ab}");
         junit.framework.Assert.assertTrue(TensorUtils.equals(result, expected));
     }
 
@@ -297,7 +294,7 @@ public class TensorsTest {
         Tensor M2 = Tensors.parse("M2 = -(1/2)*M_ij*M^ij");
         M2 = ((Expression) M).transform(M2);
         //expand squared matrix element and contract indices
-        M2 = Expand.expand(M2, ContractIndices.ContractIndices);
+        M2 = ExpandAll.expandAll(M2, ContractIndices.ContractIndices);
         M2 = Tensors.parseExpression("d_i^i = 4").transform(M2);
 
         //substituting mass shell and Mandelstam definitions 

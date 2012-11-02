@@ -27,6 +27,7 @@ import cc.redberry.core.context.CC;
 import cc.redberry.core.indices.IndexType;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.tensor.random.TRandom;
+import cc.redberry.core.transformations.ContractIndices;
 import cc.redberry.core.utils.TensorUtils;
 import org.junit.Assert;
 import org.junit.Test;
@@ -138,6 +139,7 @@ public class ProductTest {
         Tensor t1 = Tensors.parse("A_a^a*A_b^b*A_c^c_m^n+A_d^e*A_e^d*A_f^f_m^n");
         System.out.println(t1);
         Tensor t2 = Tensors.parse("A_a^a*A_b^b*A_c^c^m_n+A_d^e*A_e^d*A_f^f^m_n");
+        System.out.println(Tensors.multiplyAndRenameConflictingDummies(t1, t2));
         TAssert.assertIndicesConsistency(Tensors.multiplyAndRenameConflictingDummies(t1, t2));
     }
 
@@ -315,5 +317,109 @@ public class ProductTest {
         Product p1 = (Product) Tensors.parse("c1*k_{b}*k^{c}");
         Product p2 = (Product) Tensors.parse("(c0-c0*a**(-1))*k_{i}*k^{i}*k_{b}*k^{c}");
         TAssert.assertEquals(p1.getContent().getNonScalar(), p2.getContent().getNonScalar());
+    }
+
+    @Test
+    public void testSet1() {
+        Tensor t = parse("2*a*b*g_mn*t^mn*f_ab");
+        TAssert.assertTrue(t.set(0, parse("2")) == t);
+        TAssert.assertEquals(t.set(0, parse("3")), parse("3*a*b*g_mn*t^mn*f_ab"));
+        TAssert.assertEquals(t.set(0, parse("0")), parse("0"));
+
+        int i;
+        for (Tensor m : t) {
+            i = indexOf(m, t);
+            TAssert.assertTrue(t.set(i, m) == t);
+        }
+
+        for (Tensor m : t) {
+            i = indexOf(m, t);
+            TAssert.assertTrue(t.set(i, parse(m.toString())) == t);
+        }
+
+        Tensor nn = Tensors.negate(t);
+        for (Tensor m : t) {
+            i = indexOf(m, t);
+            m = Tensors.negate(m);
+            TAssert.assertEquals(t.set(i, m), nn);
+        }
+
+        nn = Tensors.multiply(Complex.TWO, t);
+        for (Tensor m : t) {
+            i = indexOf(m, t);
+            m = Tensors.multiply(Complex.TWO, m);
+            TAssert.assertEquals(t.set(i, m), nn);
+        }
+
+        i = indexOf(parse("a"), t);
+        TAssert.assertEquals(t.set(i, Complex.TWO), parse("4*b*g_mn*t^mn*f_ab"));
+        TAssert.assertEquals(t.set(i, Complex.ZERO), parse("0"));
+        i = indexOf(parse("b"), t);
+        TAssert.assertEquals(t.set(i, Complex.TWO), parse("4*a*g_mn*t^mn*f_ab"));
+        i = indexOf(parse("g_mn"), t);
+        TAssert.assertEquals(t.set(i, Complex.TWO), parse("4*a*b*t^mn*f_ab"));
+        i = indexOf(parse("t^mn"), t);
+        TAssert.assertEquals(t.set(i, Complex.TWO), parse("4*a*b*g_mn*f_ab"));
+        i = indexOf(parse("f_ab"), t);
+        TAssert.assertEquals(t.set(i, Complex.TWO), parse("4*a*b*g_mn*t^mn"));
+    }
+
+    @Test
+    public void testSet2() {
+        Tensor t = parse("a*b*g_mn*t^mn*f_ab");
+        TAssert.assertEquals(t.set(0, parse("0")), parse("0"));
+
+        int i;
+        for (Tensor m : t) {
+            i = indexOf(m, t);
+            TAssert.assertTrue(t.set(i, m) == t);
+        }
+
+        for (Tensor m : t) {
+            i = indexOf(m, t);
+            TAssert.assertTrue(t.set(i, parse(m.toString())) == t);
+        }
+
+        Tensor nn = Tensors.negate(t);
+        for (Tensor m : t) {
+            i = indexOf(m, t);
+            m = Tensors.negate(m);
+            TAssert.assertEquals(t.set(i, m), nn);
+        }
+
+        nn = Tensors.multiply(Complex.TWO, t);
+        for (Tensor m : t) {
+            i = indexOf(m, t);
+            m = Tensors.multiply(Complex.TWO, m);
+            TAssert.assertEquals(t.set(i, m), nn);
+        }
+
+        i = indexOf(parse("a"), t);
+        TAssert.assertEquals(t.set(i, Complex.TWO), parse("2*b*g_mn*t^mn*f_ab"));
+        TAssert.assertEquals(t.set(i, Complex.ZERO), parse("0"));
+        i = indexOf(parse("b"), t);
+        TAssert.assertEquals(t.set(i, Complex.TWO), parse("2*a*g_mn*t^mn*f_ab"));
+        i = indexOf(parse("g_mn"), t);
+        TAssert.assertEquals(t.set(i, Complex.TWO), parse("2*a*b*t^mn*f_ab"));
+        i = indexOf(parse("t^mn"), t);
+        TAssert.assertEquals(t.set(i, Complex.TWO), parse("2*a*b*g_mn*f_ab"));
+        i = indexOf(parse("f_ab"), t);
+        TAssert.assertEquals(t.set(i, Complex.TWO), parse("2*a*b*g_mn*t^mn"));
+    }
+
+    @Test
+    public void testSet3() {
+        Tensor tensor = parse("f^{ta}*(f^{v}_{t}+x_{t}^{v})*f_{v}^{b}");
+        Tensor t;
+        int index = indexOf(parse("f^{v}_{t}+x_{t}^{v}"), tensor);
+        t = tensor.set(index, parse("g^vm*d_t^n"));
+        TAssert.assertEquals(ContractIndices.contract(t), "f^{na}*f^{mb}");
+    }
+
+    private static int indexOf(Tensor t, Tensor product) {
+        for (int i = 0; i < product.size(); ++i)
+            if (TensorUtils.equals(t, product.get(i)))
+                return i;
+        throw new RuntimeException();
     }
 }

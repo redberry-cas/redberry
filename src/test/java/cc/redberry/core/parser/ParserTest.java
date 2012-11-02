@@ -342,6 +342,7 @@ public class ParserTest {
         TAssert.assertEquals(t, Tensors.parse(t.toString()));
     }
 
+    @Ignore
     @Test
     public void testConflictingIndices1() {
         Tensors.parse("(A_i^i*A_m^n+A_k^k*A_m^n)*(A_i^i*A_d^c+A_k^k*A_d^c)");
@@ -353,6 +354,11 @@ public class ParserTest {
     }
 
     @Test
+    public void testSubscripted2() {
+        Assert.assertTrue(Tensors.parse("F_{a_{1}b_{1}}").getIndices().size() == 2);
+    }
+
+    @Test
     public void blankBrace1() {
         Assert.assertTrue(Tensors.parseSimple("F{}_{BA_{21}C\\mu\\nu}").getName()
                 == Tensors.parseSimple("F_{BA_{21}C\\mu\\nu}").getName());
@@ -361,5 +367,10 @@ public class ParserTest {
     @Test(expected = InconsistentIndicesException.class)
     public void testII1() {
         parse("A_mn*B^mn*A_mn*B^mn");
+    }
+
+    @Test(expected = BracketsError.class)
+    public void testBacketsCons1() {
+        parse("(1/2*(a+b)");
     }
 }

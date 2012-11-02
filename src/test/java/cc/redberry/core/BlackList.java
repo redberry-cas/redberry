@@ -27,7 +27,6 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Random;
 
 /**
@@ -49,8 +48,8 @@ public class BlackList {
     }
 
     @Test
-    public void etwer(){
-        System.out.println(-7 %2);
+    public void etwer() {
+         System.out.println((-8 & 0x7FFFFFFF));
     }
 
     @Ignore
@@ -115,10 +114,5 @@ public class BlackList {
         System.out.println("object   " + t);
     }
 
-    @Test
-    public void werq() {
-        for (Map.Entry<String, String> e : System.getenv().entrySet())
-            System.out.println(e.getKey() + " -> " + e.getValue());
-        System.out.println(System.getenv("MAPLE"));
-    }
+
 }

@@ -28,6 +28,7 @@ import cc.redberry.core.combinatorics.symmetries.SymmetriesFactory;
 import cc.redberry.core.indices.IndicesUtils;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.number.Rational;
+import cc.redberry.core.tensor.ApplyIndexMapping;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.tensor.Tensors;
 import cc.redberry.core.utils.TensorUtils;
@@ -36,11 +37,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
 //TODO include antisymmetries
+@Deprecated
 public final class Symmetrize implements Transformation {
 
     private final int[] freeIndices;
@@ -76,9 +77,9 @@ public final class Symmetrize implements Transformation {
         if (!IndicesUtils.equalsRegardlessOrder(tensor.getIndices().getFree(), freeIndicesNames))
             throw new IllegalArgumentException("Specified indices are not equal (regardless order) to the free indices of specified tensor .");
 
-        if (symmetries.dimension() == 0)
+        if (symmetries.dimension() <= 1)
             return tensor;
-        Symmetries tensorSymmetries = TensorUtils.getIndicesSymmetries(freeIndicesNames, tensor);
+        Symmetries tensorSymmetries = TensorUtils.findIndicesSymmetries(freeIndicesNames, tensor);
         List<Tensor> generatedTensors = new ArrayList<>();
         List<Permutation> generatedPermutations = new ArrayList<>();
 

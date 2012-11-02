@@ -1,33 +1,13 @@
-/*
- * Redberry: symbolic tensor computations.
- *
- * Copyright (c) 2010-2012:
- *   Stanislav Poslavsky   <stvlpos@mail.ru>
- *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
- *
- * This file is part of Redberry.
- *
- * Redberry is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * Redberry is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
- */
-package cc.redberry.core.transformations;
+package cc.redberry.core.tensor;
 
+import cc.redberry.core.*;
 import cc.redberry.core.indexmapping.IndexMappingBuffer;
 import cc.redberry.core.indexmapping.IndexMappingBufferImpl;
 import cc.redberry.core.indexmapping.IndexMappings;
 import cc.redberry.core.indices.IndexType;
-import cc.redberry.core.tensor.Tensor;
+import cc.redberry.core.utils.IntArrayList;
 import cc.redberry.core.utils.TensorUtils;
+import gnu.trove.set.TIntSet;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -39,11 +19,11 @@ import static cc.redberry.core.tensor.Tensors.addSymmetry;
 import static cc.redberry.core.tensor.Tensors.parse;
 
 /**
- *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
 public class ApplyIndexMappingTest {
+
 
     @Test
     public void testSimple1() {
@@ -70,6 +50,7 @@ public class ApplyIndexMappingTest {
         Tensor standard = parse("g^mn");
         Assert.assertTrue(TensorUtils.equalsExactly(target, standard));
     }
+
     @Test
     public void testSimple3() {
         Tensor from = parse("A_mnpqrs");
@@ -135,6 +116,7 @@ public class ApplyIndexMappingTest {
 
     @Test
     public void testSum5() {
+        //todo fix after Dima review of new ApplyIndexMappingConcept
         Tensor from = parse("A_abcd");
         Tensor to = parse("A_wxyz");
         IndexMappingBuffer imb = IndexMappings.getFirst(from, to);
@@ -142,7 +124,8 @@ public class ApplyIndexMappingTest {
         Tensor target = parse("(A_mn*B^mn_ab+C_ab)*C^dc");
         target = ApplyIndexMapping.applyIndexMapping(target, imb, usedIndices);
         Tensor standard = parse("(A_{ab}*B^{ab}_{wx}+C_{wx})*C^{zy}");
-        Assert.assertTrue(TensorUtils.equalsExactly(target, standard));
+        Assert.assertTrue(TensorUtils.equals(target, standard));
+        TAssert.assertIndicesConsistency(target);
     }
 
     @Test
@@ -319,5 +302,68 @@ public class ApplyIndexMappingTest {
         standarts[1] = parse("B_ba+D_ab");
         for (; i >= 0; --i)
             Assert.assertTrue(IndexMappings.createPort(targets[i], standarts[i]).take() != null);
+    }
+
+    /*
+    * Performance tests
+    */
+
+    @Test
+    public void performanceRenameDummy() {
+
+        Tensor init, temp;
+        init = parse("(a + b_m*(k^m + p^m + b_a*(t^am + v^abc*(t^m_bc + v^m_bc))))" +
+                "*(a + b_n*(k^n + p^n + b_d*(t^dn + v^def*(t^n_ef + v^n_ef))))" +
+                "*(a*(f_qwertyuioplkjhgfdsazxcvbnm^qwertyuioplkjhgfdsazxcvbnm)**2344 + b_i*(k^i + p^i + b_gxy*(t^gixy + v^gqr*(t^xyi_qr + v_qr*(f^xyi*(t_qwtu*o^qwtu)**2 + d^xyi*(t_qwtu*o^qwtu)**2 + x*((t_qwthu*o^qhwtu)**2*d^xyi + k^xyi*(t_qwtus*o^sqwtu)**2))))))");
+
+
+        long start, time = 0;
+        int indicesSize = TensorUtils.getAllIndicesNamesT(init).size();
+
+        //cold start
+        IntArrayList forbidden = new IntArrayList();
+        int[] forbiddenArray;
+        int count = 0;
+        temp = init;
+        for (int i = 0; i < 1000; ++i) {
+            for (int j = 0; j < indicesSize; ++j)
+                forbidden.add(count++);
+            forbiddenArray = forbidden.toArray();
+            start = System.currentTimeMillis();
+            temp = ApplyIndexMapping.renameDummy(temp, forbiddenArray);
+            time += (System.currentTimeMillis() - start);
+        }
+        System.out.println("1000 invocations on cold JVM: " + time + " ms");
+        Assert.assertTrue(time < 1800);
+
+        //warm up JVM
+        burnJVMonRenameDummy();
+
+        temp = init;
+        forbidden = new IntArrayList();
+        count = 0;
+        time = 0;
+        for (int i = 0; i < 1000; ++i) {
+            for (int j = 0; j < indicesSize; ++j)
+                forbidden.add(count++);
+            forbiddenArray = forbidden.toArray();
+            start = System.currentTimeMillis();
+            temp = ApplyIndexMapping.renameDummy(temp, forbiddenArray);
+            time += (System.currentTimeMillis() - start);
+        }
+        System.out.println("1000 invocations on hot JVM: " + time + " ms");
+        Assert.assertTrue(time < 900);
+    }
+
+    private static void burnJVMonRenameDummy() {
+        Tensor t;
+        t = parse("(a + b_m*(k^m + p^m + b_a*(t^am + v^abc*(t^m_bc + v^m_bc))))" +
+                "*(a + b_n*(k^n + p^n + b_d*(t^dn + v^def*(t^n_ef + v^n_ef))))" +
+                "*(a*(f_qwertyuioplkjhgfdsazxcvbnm^qwertyuioplkjhgfdsazxcvbnm)**2344 + b_i*(k^i + p^i + b_gxy*(t^gixy + v^gqr*(t^xyi_qr + v_qr*(f^xyi*(t_qwtu*o^qwtu)**2 + d^xyi*(t_qwtu*o^qwtu)**2 + x*((t_qwthu*o^qhwtu)**2*d^xyi + k^xyi*(t_qwtus*o^sqwtu)**2))))))");
+        TIntSet fobidden = TensorUtils.getAllIndicesNamesT(t);
+        for (int i = 0; i < 1000; ++i) {
+            t = ApplyIndexMapping.renameDummy(t, fobidden.toArray());
+            fobidden.addAll(TensorUtils.getAllIndicesNamesT(t));
+        }
     }
 }

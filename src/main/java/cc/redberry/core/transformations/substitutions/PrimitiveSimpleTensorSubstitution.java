@@ -2,9 +2,9 @@ package cc.redberry.core.transformations.substitutions;
 
 import cc.redberry.core.indexmapping.IndexMappingBuffer;
 import cc.redberry.core.indexmapping.IndexMappings;
+import cc.redberry.core.tensor.ApplyIndexMapping;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.tensor.Tensors;
-import cc.redberry.core.transformations.ApplyIndexMapping;
 
 /**
  * @author Dmitry Bolotin
@@ -16,7 +16,7 @@ class PrimitiveSimpleTensorSubstitution extends PrimitiveSubstitution {
     }
 
     @Override
-    Tensor newTo_(Tensor currentNode, int[] forbiddenIndices) {
+    Tensor newTo_(Tensor currentNode, SubstitutionIterator iterator) {
         IndexMappingBuffer buffer =
                 IndexMappings.getFirst(from, currentNode);
         if (buffer == null)
@@ -25,7 +25,7 @@ class PrimitiveSimpleTensorSubstitution extends PrimitiveSubstitution {
         if (toIsSymbolic)
             newTo = buffer.getSignum() ? Tensors.negate(to) : to;
         else
-            newTo = ApplyIndexMapping.applyIndexMapping(to, buffer, forbiddenIndices);
+            newTo = ApplyIndexMapping.applyIndexMapping(to, buffer, iterator.getForbidden());
 
         return newTo;
     }

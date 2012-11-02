@@ -23,10 +23,8 @@
 
 package cc.redberry.core.transformations.substitutions;
 
-import cc.redberry.core.tensor.Product;
-import cc.redberry.core.tensor.Sum;
-import cc.redberry.core.tensor.Tensor;
-import cc.redberry.core.tensor.TensorField;
+import cc.redberry.core.tensor.*;
+import cc.redberry.core.tensor.functions.ScalarFunction;
 import cc.redberry.core.tensor.iterator.*;
 import cc.redberry.core.utils.ByteBackedBitArray;
 import cc.redberry.core.utils.TensorUtils;
@@ -44,64 +42,28 @@ import java.util.Arrays;
 public final class SubstitutionIterator implements TreeIterator {
     private static final TIntSet EMPTY_INT_SET = TCollections.unmodifiableSet(new TIntHashSet(0));
     private final TreeTraverseIterator<ForbiddenContainer> innerIterator;
-    //private ForbiddenContainer fc = null;
 
     public SubstitutionIterator(Tensor tensor) {
         this.innerIterator = new TreeTraverseIterator<>(tensor, new FCPayloadFactory());
+    }
+
+    public SubstitutionIterator(Tensor tensor, TraverseGuide traverseGuide) {
+        this.innerIterator = new TreeTraverseIterator<>(tensor, traverseGuide, new FCPayloadFactory());
     }
 
     @Override
     public Tensor next() {
         TraverseState nextState;
 
-        while ((nextState = innerIterator.next()) == TraverseState.Entering) { //"Diving"
-            /*tensor = innerIterator.current();
-            if (fc == null || fc instanceof OpaqueFC) {
-                if (tensor instanceof Product)
-                    fc = new TopProductFC(fc, tensor);
-            } else {
-                if (tensor instanceof Sum)
-                    fc = new SumFC(fc, tensor);
-                else if (tensor instanceof Product)
-                    fc = new ProductFC(fc, tensor);
-                else if (tensor instanceof Power)
-                    fc = new TransparentFC(fc);
-                else if (tensor instanceof TensorField)
-                    fc = new OpaqueFC(fc);
-                else //Next state will be leaving
-                    isSimpleTensor = true;*/
-            //}
-        }
-
-
+        while ((nextState = innerIterator.next()) == TraverseState.Entering) ;
         if (nextState == null)
             return null;
 
-
-        //assert nextState == Leaving
-        /*if (fc != null)
-
-        {
-            if (!isSimpleTensor || (fc instanceof OpaqueFC && innerIterator.current() instanceof TensorField)) {
-                fc = fc.getParent();
-            }
-        } */
-
-//        if (!isSimpleTensor &&
-//                (!waitingForProduct ||
-//                        (innerIterator.current() instanceof TensorField && fc != null))) {
-//            fc = fc.getParent();
-//        }
-
-        /*ForbiddenContainer f = fc;
-
-  do {
-    System.out.println(((AbstractFC) f).currentBranch + " : " +
-            f.getClass().getSimpleName() + " : " +
-            ((AbstractFC) f).tensor);
-  } while ((f = f.getParent()) != null);*/
-
         return innerIterator.current();
+    }
+
+    public void unsafeSet(Tensor tensor) {
+        innerIterator.set(tensor);
     }
 
     @Override
@@ -109,8 +71,12 @@ public final class SubstitutionIterator implements TreeIterator {
         Tensor oldTensor = innerIterator.current();
         if (oldTensor == tensor)
             return;
+        if (TensorUtils.isZeroOrIndeterminate(tensor) || TensorUtils.isSymbolic(tensor)) {
+            innerIterator.set(tensor);
+            return;
+        }
 
-        if (!tensor.getIndices().getFree().equalsRegardlessOrder(tensor.getIndices().getFree()))
+        if (!tensor.getIndices().getFree().equalsRegardlessOrder(oldTensor.getIndices().getFree()))
             throw new RuntimeException("Substitution with different free indices.");
 
         StackPosition<ForbiddenContainer> previous = innerIterator.currentStackPosition().previous();
@@ -189,6 +155,8 @@ public final class SubstitutionIterator implements TreeIterator {
                 return new SumFC(stackPosition);
             if (tensor instanceof TensorField)
                 return EMPTY_CONTAINER;
+            if (tensor instanceof ScalarFunction)
+                return scalarFunctionContainer;
             return new TransparentFC(parent);
         }
     }
@@ -296,7 +264,7 @@ public final class SubstitutionIterator implements TreeIterator {
 
                 if (usedArrays[iIndex].bitCount() == 0) {
                     if (parentRemoved == null)
-                        parentRemoved = new TIntHashSet();
+                        parentRemoved = new TIntHashSet(removed.size());
                     parentRemoved.add(index);
                 }
             }
@@ -375,6 +343,30 @@ public final class SubstitutionIterator implements TreeIterator {
         }
     }
 
+    private static final ForbiddenContainer scalarFunctionContainer = new ForbiddenContainer() {
+        @Override
+        public TIntSet getForbidden() {
+            return EMPTY_INT_SET;
+        }
+
+        @Override
+        public void submit(TIntSet removed, TIntSet added) {
+        }
+
+        @Override
+        public Tensor onLeaving(StackPosition<ForbiddenContainer> stackPosition) {
+            if (!stackPosition.isModified())
+                return null;
+            StackPosition<ForbiddenContainer> prev = stackPosition.previous();
+            if (prev == null)
+                return null;
+            Tensor tensor = stackPosition.getTensor();
+            tensor = ApplyIndexMapping.renameDummy(tensor, prev.getPayload().getForbidden().toArray());
+            prev.getPayload().submit(EMPTY_INT_SET, TensorUtils.getAllIndicesNamesT(tensor));
+            return tensor;
+        }
+    };
+
     private static final ForbiddenContainer EMPTY_CONTAINER = new ForbiddenContainer() {
         @Override
         public TIntSet getForbidden() {
@@ -390,4 +382,5 @@ public final class SubstitutionIterator implements TreeIterator {
             return null;
         }
     };
+
 }
