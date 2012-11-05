@@ -279,4 +279,45 @@ public class DifferentiateTest {
         tensor = expand(tensor);
         System.out.println(tensor);
     }
+
+    @Test
+    public void test14() {
+        addAntiSymmetry("R_abcd", 1, 0, 2, 3);
+        addSymmetry("R_abcd", 2, 3, 0, 1);
+        Tensor t = parse("R_abcd*R^abcd");
+        t = differentiate(t, new Transformation[]{ExpandAll.EXPAND_ALL, ContractIndices}, parseSimple("R_mnpq"));
+        TAssert.assertEquals(t, "2*R^mnpq");
+    }
+
+    @Test
+    public void test15() {
+        addAntiSymmetry("R_abcd", 1, 0, 2, 3);
+        addSymmetry("R_abcd", 2, 3, 0, 1);
+        addSymmetry("R_ab", 1, 0);
+
+        Tensor tensor = parse("(R^sa_s^g*R^e_re^b - R^s_rs^g*R^ea_e^b)*(R^s_{gma}*R^r_{nsb}+R^s_{amg}*R^r_{snb})");
+        SimpleTensor var1 = parseSimple("R_mxn^x");
+        SimpleTensor var2 = parseSimple("R^r_y^ty");
+
+        Transformation[] trs = new Transformation[]{
+                parseExpression("d_i^i = 4"),
+                parseExpression("R_mn^a_a = 0"),
+                parseExpression("R^a_man = R_mn"),
+                parseExpression("R^a_a = R"),
+                RemoveDueToSymmetry.INSANCE
+        };
+        Tensor t1 = differentiate(tensor, var2, var1);
+        t1 = contract(expand(t1));
+        for (Transformation tr : trs)
+            t1 = tr.transform(t1);
+        Tensor t2 = differentiate(tensor,
+                new Transformation[]{Expand.EXPAND, ContractIndices},
+                var2, var1);
+        t2 = contract(expand(t2));
+        for (Transformation tr : trs)
+            t2 = tr.transform(t2);
+
+        TAssert.assertEquals(t1, t2);
+    }
+
 }

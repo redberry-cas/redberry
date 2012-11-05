@@ -25,9 +25,11 @@ package cc.redberry.core.tensor;
 import cc.redberry.core.TAssert;
 import cc.redberry.core.indices.IndexType;
 import cc.redberry.core.number.Complex;
-import cc.redberry.core.transformations.*;
+import cc.redberry.core.transformations.ContractIndices;
+import cc.redberry.core.transformations.Transformation;
 import cc.redberry.core.transformations.expand.Expand;
 import cc.redberry.core.transformations.expand.ExpandAll;
+import cc.redberry.core.transformations.expand.ExpandNumerator;
 import cc.redberry.core.transformations.fractions.Together;
 import cc.redberry.core.utils.TensorUtils;
 import org.junit.Assert;
@@ -307,7 +309,7 @@ public class TensorsTest {
 
         //some simplifications
         M2 = Together.together(M2);
-        M2 = Expand.expand(M2);
+        M2 = ExpandNumerator.expandNumerator(M2);
 
         //final cross section
         Tensor cs = ((Expression) M2).transform(Tensors.parse("1/(64*pi**2*s)*M2"));
