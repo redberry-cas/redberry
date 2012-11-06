@@ -24,7 +24,11 @@ package cc.redberry.core.indices;
 
 import cc.redberry.core.context.ContextSettings;
 import cc.redberry.core.context.IndexSymbolConverter;
-import cc.redberry.core.context.defaults.*;
+import cc.redberry.core.context.defaults.IndexConverterExtender;
+import cc.redberry.core.context.defaults.IndexWithStrokeWrapper;
+import cc.redberry.core.context.defaults.LatinSymbolDownCaseConverter;
+
+import static cc.redberry.core.context.defaults.IndexConverterExtender.*;
 
 /**
  * This {@code enum} is a container of the information on all available index
@@ -36,14 +40,30 @@ import cc.redberry.core.context.defaults.*;
  * @author Stanislav Poslavsky
  */
 public enum IndexType {
-    LatinUpper(new IndexConverterExtender(LatinSymbolUpperCaseConverter.INSTANCE)),
-    LatinLower(new IndexConverterExtender(LatinSymbolDownCaseConverter.INSTANCE)),
-    GreekUpper(new IndexConverterExtender(GreekLaTeXUpperCaseConverter.INSTANCE)),
-    GreekLower(new IndexConverterExtender(GreekLaTeXDownCaseConverter.INSTANCE));
+    LatinLower(LatinLowerEx),
+    LatinUpper(LatinUpperEx),
+    GreekLower(GreekLowerEx),
+    GreekUpper(GreekUpperEx),
+    LatinLower1(new IndexWithStrokeWrapper(LatinLowerEx, (byte) 1)),
+    LatinUpper1(new IndexWithStrokeWrapper(LatinUpperEx, (byte) 1)),
+    GreekLower1(new IndexWithStrokeWrapper(GreekLowerEx, (byte) 1)),
+    GreekUpper1(new IndexWithStrokeWrapper(GreekUpperEx, (byte) 1));
+
+    private static IndexSymbolConverter LatinLowerExtender
+            = new IndexConverterExtender(LatinSymbolDownCaseConverter.INSTANCE);
+
+
     /**
      * Total number of available index types
      */
-    public static final int TYPES_COUNT = 4;//redundant
+    public static final byte TYPES_COUNT = 8;//redundant
+
+    /**
+     * Total number of alphabets is 4: latin lower,
+     * latin upper, greek lower, greek upper
+     */
+    public static final byte ALPHABETS_COUNT = 4;//redundant
+
     private final IndexSymbolConverter converter;
 
     private IndexType(IndexSymbolConverter converter) {
@@ -69,6 +89,13 @@ public enum IndexType {
         return converter.getType();
     }
 
+    public static byte[] getBytes() {
+        byte[] bytes = new byte[TYPES_COUNT];
+        for (byte i = 0; i < TYPES_COUNT; ++i)
+            bytes[i] = i;
+        return bytes;
+    }
+
     public static IndexType getType(byte type) {
         for (IndexType indexType : IndexType.values())
             if (indexType.getType() == type)
@@ -82,9 +109,5 @@ public enum IndexType {
         for (IndexType type : values())
             converters[++i] = type.getSymbolConverter();
         return converters;
-    }
-
-    public static boolean isLatin(IndexType type) {
-        return type == LatinLower || type == LatinUpper;
     }
 }

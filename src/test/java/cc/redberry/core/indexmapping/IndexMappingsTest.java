@@ -420,4 +420,14 @@ public class IndexMappingsTest {
         Assert.assertTrue(!first.getSignum());
         Assert.assertTrue(mapping.take() == null);
     }
+
+    @Test
+    public void test14() {
+        Tensor[] from = new Tensor[]{parse("f_a"), parse("f_b")};
+        Tensor[] to = new Tensor[]{parse("f_a"), parse("f^a")};
+        MappingsPort mapping = IndexMappings.createBijectiveProductPort(from, to);
+        IndexMappingBuffer first = mapping.take();
+        IndexMappingBuffer b = IndexMappingTestUtils.parse("+;_a->_a;_b->^a");
+        Assert.assertEquals(first, b);
+    }
 }

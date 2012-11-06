@@ -22,10 +22,13 @@
  */
 package cc.redberry.core.parser;
 
-import cc.redberry.core.context.Context;
+import cc.redberry.core.context.CC;
 import cc.redberry.core.indices.IndicesFactory;
 import cc.redberry.core.indices.SimpleIndices;
 import cc.redberry.core.utils.IntArrayList;
+
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * @author Dmitry Bolotin
@@ -37,107 +40,54 @@ public class ParserIndices {
     }
 
     public static int[] parse(String expression) {
-        IntArrayList indicesList = new IntArrayList();
-        boolean indexMode = false;
-        int indexState = 0;
+        if (expression.isEmpty())
+            return new int[0];
+
+        IntArrayList indices = new IntArrayList();
         int level = 0;
-        StringBuilder indicesString = null;
-        for (char c : expression.toCharArray()) {
-            if (c == '{') {
-                level++;
+        int state = 0;
+        final char[] expressionChars = expression.toCharArray();
+        char c;
+        int beginIndex = 0, endIndex = 0;
+        for (; endIndex < expressionChars.length; ++endIndex) {
+            c = expressionChars[endIndex];
+            if (c == '{')
+                ++level;
+            else if (c == '}')
+                --level;
+            else if (c == '_' && level == 0) {
+                if (endIndex != 0)
+                    parse(expression.substring(beginIndex + 1, endIndex), indices, state);
+                state = 0;
+                beginIndex = endIndex;
+            } else if (c == '^') {
+                if (level != 0)
+                    throw new BracketsError();
+                if (endIndex != 0)
+                    parse(expression.substring(beginIndex + 1, endIndex), indices, state);
+                state = 0x80000000;
+                beginIndex = endIndex;
             }
-            if (c == '}') {
-                level--;
-            }
-            if (c == '^') {
-                assert level == 0;
-                if (indexMode)
-                    parseIndices(indicesList, indicesString, indexState);
-                indexMode = true;
-                indexState = 1;
-                indicesString = new StringBuilder();
-                continue;
-            }
-            if (c == '_' && level == 0) {
-                if (indexMode)
-                    parseIndices(indicesList, indicesString, indexState);
-                indexMode = true;
-                indexState = 0;
-                indicesString = new StringBuilder();
-                continue;
-            }
-            indicesString.append(c);
         }
         if (level != 0)
             throw new BracketsError();
-        if (indexMode)
-            parseIndices(indicesList, indicesString, indexState);
-        return indicesList.toArray();
+        if (beginIndex != endIndex)
+            parse(expression.substring(beginIndex + 1, endIndex), indices, state);
+        return indices.toArray();
     }
 
-    /**
-     * Parse string representation and put result indices in indices
-     *
-     * @param indices       integer array list of parsed indices
-     * @param indicesString string representation of indices
-     * @param state         index state (upper or lower)
-     * @throws BracketsError if brackets are inconsistent (e.g. (a+(b)))) )
-     */
-    static void parseIndices(IntArrayList indices, StringBuilder indicesString, int state) {
-        char c;
-        boolean toBuffer = false;
-        StringBuilder indexBuffer = new StringBuilder();
-        boolean openBracket = false;
-        for (int i = 0; i < indicesString.length(); ++i) {
-            c = indicesString.charAt(i);
-            if (c == '{') {
-                if (i != 0 && indicesString.charAt(i - 1) == '_') {
-                    indexBuffer.append(c);
-                    openBracket = true;
-                    continue;
-                } else continue;
-            }
-            if (c == '}') {
-                if (openBracket) {
-                    openBracket = false;
-                    indexBuffer.append(c);
-                    if (indexBuffer.length() != 0) {
-                        indices.add(Context.get().getIndexConverterManager().getCode(indexBuffer.toString()) | state << 31);
-                        indexBuffer = new StringBuilder();
-                    }
-                    continue;
-                } else continue;
-            }
+    public static final Pattern pattern = Pattern.compile("((?>(?>[a-zA-Z])|(?>\\\\[a-zA-A]*))(?>_(?>(?>[0-9])|(?>[\\{][0-9\\s]*[\\}])))?[']*)");
 
-            if (c == '_') {
-                indexBuffer.append(c);
-                toBuffer = true;
-                continue;
-            }
-            if (c == '\\') {
-                if (indexBuffer.length() != 0) {
-                    indices.add(Context.get().getIndexConverterManager().getCode(indexBuffer.toString()) | state << 31);
-                    indexBuffer = new StringBuilder();
-                }
-                indexBuffer.append(c);
-                toBuffer = true;
-                continue;
-            }
-            if (c == ' ') {
-                if (indexBuffer.length() != 0) {
-                    indices.add(Context.get().getIndexConverterManager().getCode(indexBuffer.toString()) | state << 31);
-                    indexBuffer = new StringBuilder();
-                }
-                continue;
-            }
-
-            if (toBuffer || (i < indicesString.length() - 1 && indicesString.charAt(i + 1) == '_')) {
-                indexBuffer.append(c);
-                continue;
-            }
-            indices.add(Context.get().getIndexConverterManager().getCode(String.valueOf(c)) | state << 31);
+    static void parse(String expression, IntArrayList indices, int state) {
+        Matcher matcher = pattern.matcher(expression);
+        String singleIndex;
+        while (matcher.find()) {
+            singleIndex = matcher.group();
+            indices.add(CC.getIndexConverterManager().getCode(singleIndex) | state);
         }
-        if (indexBuffer.length() != 0)
-            indices.add(Context.get().getIndexConverterManager().getCode(indexBuffer.toString()) | state << 31);
+        String remainder = matcher.replaceAll("");
+        remainder = remainder.replaceAll("[\\{\\}\\s]*", "");
+        if (remainder.length() != 0)
+            throw new ParserException();
     }
 }

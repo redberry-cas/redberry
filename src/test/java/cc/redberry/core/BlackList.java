@@ -26,8 +26,11 @@ import gnu.trove.set.hash.TIntHashSet;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import java.math.MathContext;
 import java.util.HashSet;
 import java.util.Random;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * @author Dmitry Bolotin
@@ -49,7 +52,7 @@ public class BlackList {
 
     @Test
     public void etwer() {
-         System.out.println((-8 & 0x7FFFFFFF));
+        System.out.println((-8 & 0x7FFFFFFF));
     }
 
     @Ignore
@@ -114,5 +117,20 @@ public class BlackList {
         System.out.println("object   " + t);
     }
 
+//    private static final Pattern pattern = Pattern.compile(
+//                    "\\([\\s]*\"([a-zA-Z0-9=\\s\\*\\\\:+\\/\\-\\.\\,\\\\_\\^\\}\\{\\]\\[\\)\\(\"\n\"]*)\"\\)[\\s]*" +
+//                    "(\\;|\\,|[\\)]*[\\;]*|\\.)");
+
+    @Test
+    public void test12131() {
+        String p = "((?>(?>[a-zA-Z])|(?>\\\\[a-zA-A]*))(?>_(?>(?>[0-9])|(?>[\\{][0-9\\s]*[\\}])))?[']*)";
+        Pattern pattern = Pattern.compile(p);
+        Matcher matcher = pattern.matcher("{x {\\gamma_2}} {{a}b''c}{ e_{9 2}'' d\\alpha}\\beta");
+        while (matcher.find()){
+            String group = matcher.group();
+            System.out.println(group);
+            System.out.println();
+        }
+    }
 
 }

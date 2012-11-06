@@ -27,6 +27,15 @@ import cc.redberry.core.context.IndexSymbolConverter;
 import cc.redberry.core.context.OutputFormat;
 
 public final class IndexConverterExtender implements IndexSymbolConverter {
+    public static final IndexConverterExtender LatinLowerEx
+            = new IndexConverterExtender(LatinSymbolDownCaseConverter.INSTANCE);
+    public static final IndexConverterExtender LatinUpperEx
+            = new IndexConverterExtender(LatinSymbolUpperCaseConverter.INSTANCE);
+    public static final IndexConverterExtender GreekLowerEx
+            = new IndexConverterExtender(GreekLaTeXDownCaseConverter.INSTANCE);
+    public static final IndexConverterExtender GreekUpperEx
+            = new IndexConverterExtender(GreekLaTeXUpperCaseConverter.INSTANCE);
+
     private final IndexSymbolConverter innerConverter;
 
     public IndexConverterExtender(IndexSymbolConverter innerConverter) {

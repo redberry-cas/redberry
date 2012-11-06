@@ -22,9 +22,7 @@
  */
 package cc.redberry.core.parser;
 
-import cc.redberry.core.indices.IndicesFactory;
 import cc.redberry.core.indices.SimpleIndices;
-import cc.redberry.core.utils.IntArrayList;
 
 /**
  * @author Dmitry Bolotin
@@ -38,53 +36,20 @@ public class ParserSimpleTensor implements NodeParser {
 
     @Override
     public ParseNodeSimpleTensor parseNode(String expression, Parser parser) {
-        IntArrayList indicesList = new IntArrayList();
-        boolean indexMode = false;
-        int indexState = 0;
-        StringBuilder nameBuilder = new StringBuilder();
-        StringBuilder indicesString = null;
-        int level = 0;
-        for (char c : expression.toCharArray()) {
-            if (c == '{') {
-                level++;
-                if (!indexMode)
-                    continue;
-            }
-            if (c == '}') {
-                level--;
-                if (!indexMode)
-                    continue;
-            }
-            if (c == '^') {
-                assert level == 0;
-                if (indexMode)
-                    ParserIndices.parseIndices(indicesList, indicesString, indexState);
-                indexMode = true;
-                indexState = 1;
-                indicesString = new StringBuilder();
-                continue;
-            }
-            if (c == '_' && level == 0) {
-                if (indexMode)
-                    ParserIndices.parseIndices(indicesList, indicesString, indexState);
-                indexMode = true;
-                indexState = 0;
-                indicesString = new StringBuilder();
-                continue;
-            }
-            if (!indexMode)
-                nameBuilder.append(c);
-            else
-                indicesString.append(c);
-        }
-        if (level != 0)
-            throw new BracketsError();
-        if (indexMode)
-            ParserIndices.parseIndices(indicesList, indicesString, indexState);
-        SimpleIndices indices = IndicesFactory.createSimple(null, indicesList.toArray());
-        String name = nameBuilder.toString();
+        expression = expression.replaceAll("\\{[\\s]*\\}", "");
+        int indicesBegin = expression.indexOf('_'), i = expression.indexOf('^');
+        if (indicesBegin < 0 && i >= 0)
+            indicesBegin = i;
+        if (indicesBegin >= 0 && i >= 0)
+            indicesBegin = Math.min(indicesBegin, i);
+        if (indicesBegin < 0)
+            indicesBegin = expression.length();
+
+        String name = expression.substring(0, indicesBegin);
         if (name.isEmpty())
             throw new ParserException("Simple tensor with empty name.");
+
+        SimpleIndices indices = ParserIndices.parseSimple(expression.substring(indicesBegin));
         return new ParseNodeSimpleTensor(indices, name);
     }
 

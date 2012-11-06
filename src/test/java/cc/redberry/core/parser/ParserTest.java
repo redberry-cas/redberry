@@ -24,9 +24,7 @@ package cc.redberry.core.parser;
 
 import cc.redberry.core.TAssert;
 import cc.redberry.core.context.CC;
-import cc.redberry.core.indices.InconsistentIndicesException;
-import cc.redberry.core.indices.IndicesFactory;
-import cc.redberry.core.indices.SimpleIndices;
+import cc.redberry.core.indices.*;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.tensor.*;
 import cc.redberry.core.utils.TensorUtils;
@@ -225,6 +223,7 @@ public class ParserTest {
     @Test(expected = RuntimeException.class)
     public void testSim1() {
         Tensor t = Tensors.parse("1^3");
+        System.out.println(t);
         Tensor e = Tensors.parse("x");
         Assert.assertTrue(TensorUtils.equalsExactly(e, t));
     }
@@ -372,5 +371,19 @@ public class ParserTest {
     @Test(expected = BracketsError.class)
     public void testBacketsCons1() {
         parse("(1/2*(a+b)");
+    }
+
+    @Test
+    public void testStrokeIndices1() {
+        Tensor t = parse("T_{a'}");
+        Assert.assertTrue(IndicesUtils.getType(t.getIndices().get(0))
+                == IndexType.LatinLower1.getType());
+    }
+
+    @Test
+    public void testStrokeIndices2() {
+        Tensor t = parse("T_{\\alpha'}");
+        Assert.assertTrue(IndicesUtils.getType(t.getIndices().get(0))
+                == IndexType.GreekLower1.getType());
     }
 }
