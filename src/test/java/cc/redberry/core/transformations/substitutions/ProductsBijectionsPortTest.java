@@ -22,6 +22,7 @@
  */
 package cc.redberry.core.transformations.substitutions;
 
+import cc.redberry.core.TAssert;
 import cc.redberry.core.context.CC;
 import cc.redberry.core.indices.IndexType;
 import cc.redberry.core.tensor.*;
@@ -33,6 +34,8 @@ import java.util.Arrays;
 
 import static cc.redberry.core.TAssert._;
 import static cc.redberry.core.TAssert.assertTrue;
+import static cc.redberry.core.tensor.Tensors.parse;
+import static cc.redberry.core.tensor.Tensors.parseExpression;
 
 /**
  * @author Dmitry Bolotin
@@ -171,6 +174,18 @@ public class ProductsBijectionsPortTest {
         while (port.take() != null)
             count++;
         Assert.assertEquals(2, count);
+    }
+
+    @Test
+    public void test6(){
+        Product target = (Product) parse("pv_A[p2_m]*V^A_{B m}*e^m[k2_m]*D^B_C[k1_m+p1_m]*V^C_{D n}*e^n[k1_m]*v^D[p1_m]");
+        Product from = (Product) parse("pv_A[p2_m]*v^D[p1_m]");
+        ProductsBijectionsPort port = new ProductsBijectionsPort(from.getContent(), target.getContent());
+        int count = 0;
+        while (port.take() != null)
+            count++;
+        Assert.assertEquals(1, count);
+
     }
 //    @Test
 //    public void test31() {

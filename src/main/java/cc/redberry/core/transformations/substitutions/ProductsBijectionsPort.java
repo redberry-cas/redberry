@@ -195,7 +195,7 @@ public final class ProductsBijectionsPort implements OutputPortUnsafe<int[]> {
                             continue MAIN;
                         }
 
-                        assert fromTensorIndex != -1;
+//                        assert fromTensorIndex != -1;
 
                         if (targetTensorIndex == -1) { //Not contracted index of target (but from is contracted with some tensor)
                             if (!currentInfo.nextAndResetRightChain()) {
@@ -274,16 +274,16 @@ public final class ProductsBijectionsPort implements OutputPortUnsafe<int[]> {
                         //Corresponding contraction in target tensor
                         long targetIndexContraction = targetContractions[seedTargetIndex][diffIdsPermutation[stretch.from]];
 
+                        final int fromTensorIndex = getToTensorIndex(fromIndexContraction); //Index of contracting tensor in from array
+                        if (fromTensorIndex == -1) //Not contracted index of from
+                            continue;
+
                         if (getToIndexId(fromIndexContraction) != getToIndexId(targetIndexContraction)) { //Contracts with different index id
                             closed = true;
                             return;
                         }
 
-                        final int fromTensorIndex = getToTensorIndex(fromIndexContraction); //Index of contracting tensor in from array
-                        if (fromTensorIndex == -1) //Not contracted index of from
-                            continue;
-
-                        final int targetTensorIndex = getToTensorIndex(targetIndexContraction); //Index of contracting tensor in target array
+                       final int targetTensorIndex = getToTensorIndex(targetIndexContraction); //Index of contracting tensor in target array
                         if (targetTensorIndex == -1) {//Not contracted index of target (but from is contracted with some tensor),
                             // so this bijection is impossible
                             closed = true;

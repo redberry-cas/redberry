@@ -936,6 +936,22 @@ public class SubstitutionsTest {
         TAssert.assertEquals(t, "4*Cos[m**2]**(-1)+8*Sin[m**2]*m**2");
     }
 
+    @Test
+    public void testProduct16() {
+        Tensor t = parse("vp_A[p1_m]*v^A[p2_m]");
+        Expression e = parseExpression("vp_A[p1_m]*v_B[p2_m] = vp_A[p2_m]*v_B[p1_m]");
+        t = e.transform(t);
+        TAssert.assertEquals(t, "vp_A[p2_m]*v^A[p1_m]");
+    }
+
+    @Test
+    public void testProduct17() {
+        Tensor t = parse("pv_A[p2_m]*V^A_{B m}*e^m[k2_m]*D^B_C[k1_m+p1_m]*V^C_{D n}*e^n[k1_m]*v^D[p1_m]");
+        Expression e = parseExpression("pv_A[p2_m]*v_B[p1_m] = pv_A[p1_m]*v_B[p2_m]");
+        t = e.transform(t);
+        TAssert.assertEquals(t, "pv_A[p1_m]*V^A_{B m}*e^m[k2_m]*D^B_C[k1_m+p1_m]*V^C_{D n}*e^n[k1_m]*v^D[p2_m]");
+    }
+
     //TODO tests for Product
 
     @Test
