@@ -123,8 +123,23 @@ public abstract class SimpleIndicesAbstract extends AbstractIndices implements S
             if (y)
                 dataList.add(data[i]);
         }
-        //FAIL!
+        //todo review
         return UnsafeIndicesFactory.createIsolatedUnsafeWithoutSort(null, dataList.toArray());
+    }
+
+    @Override
+    public Indices getOfType(IndexType type) {
+        int type_ = type.getType() << 24;
+        int i = 0;
+        for (; i < data.length && (data[i] & 0x7F000000) != type_; ++i) ;
+        int start = i;
+        for (; i < data.length && (data[i] & 0x7F000000) == type_; ++i) ;
+        int[] newData;
+        if (start == 0 && i == data.length)
+            newData = data;
+        else
+            newData = Arrays.copyOfRange(data, start, i);
+        return UnsafeIndicesFactory.createIsolatedUnsafeWithoutSort(null, newData);
     }
 
     @Override
