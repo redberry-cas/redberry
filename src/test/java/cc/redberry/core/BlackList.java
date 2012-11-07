@@ -125,7 +125,7 @@ public class BlackList {
     public void test12131() {
         String p = "((?>(?>[a-zA-Z])|(?>\\\\[a-zA-A]*))(?>_(?>(?>[0-9])|(?>[\\{][0-9\\s]*[\\}])))?[']*)";
         Pattern pattern = Pattern.compile(p);
-        Matcher matcher = pattern.matcher("{x {\\gamma_2}} {{a}b''c}{ e_{9 2}'' d\\alpha}\\beta");
+        Matcher matcher = pattern.matcher("{x {\\gamma_2}} {{a}df''xc}{ e_{9 2}'' d\\alpha}\\beta");
         while (matcher.find()){
             String group = matcher.group();
             System.out.println(group);

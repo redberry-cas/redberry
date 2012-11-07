@@ -952,6 +952,23 @@ public class SubstitutionsTest {
         TAssert.assertEquals(t, "pv_A[p1_m]*V^A_{B m}*e^m[k2_m]*D^B_C[k1_m+p1_m]*V^C_{D n}*e^n[k1_m]*v^D[p2_m]");
     }
 
+
+    @Test
+    public void testProduct18() {
+        Tensor t = parse(" x_i'*y^k' ");
+        Expression e = parseExpression("x_i'*y^k' = A_i'^k'");
+        t = e.transform(t);
+        TAssert.assertEquals(t, "A_i'^k'");
+    }
+
+    @Test
+    public void testProduct19() {
+        Tensor t = parse(" x_i'*y^k' ");
+        Expression e = parseExpression("x^i'*y^k' = A^i'k'");
+        t = e.transform(t);
+        TAssert.assertEquals(t, "x_i'*y^k'");
+    }
+
     //TODO tests for Product
 
     @Test
