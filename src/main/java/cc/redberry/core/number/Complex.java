@@ -42,34 +42,54 @@ public class Complex extends Tensor
 
     public static final Complex ComplexNaN =
             new Complex(Numeric.NaN, Numeric.NaN);
+
     public static final Complex REAL_POSITIVE_INFINITY =
             new Complex(Numeric.POSITIVE_INFINITY, Numeric.ZERO);
+
     public static final Complex REAL_NEGATIVE_INFINITY =
             new Complex(Numeric.NEGATIVE_INFINITY, Numeric.ZERO);
+
     public static final Complex IMAGINARY_POSITIVE_INFINITY =
             new Complex(Numeric.ZERO, Numeric.POSITIVE_INFINITY);
+
     public static final Complex IMAGINARY_NEGATIVE_INFINITY =
             new Complex(Numeric.ZERO, Numeric.NEGATIVE_INFINITY);
+
     public static final Complex COMPLEX_NEGATIVE_INFINITY =
             new Complex(Numeric.NEGATIVE_INFINITY, Numeric.NEGATIVE_INFINITY);
+
     public static final Complex COMPLEX_POSITIVE_INFINITY =
             new Complex(Numeric.POSITIVE_INFINITY, Numeric.POSITIVE_INFINITY);
+
     public static final Complex COMPLEX_INFINITY = COMPLEX_POSITIVE_INFINITY;
+
     public static final Complex ZERO =
             new Complex(Rational.ZERO, Rational.ZERO);
+
     public static final Complex ONE =
             new Complex(Rational.ONE, Rational.ZERO);
-    public static final int HASHCODE_OF_ONE = ONE.hashCode();
+
+    public static final Complex ONE_HALF =
+            new Complex(Rational.ONE_HALF, Rational.ZERO);
+
     public static final Complex TWO =
             new Complex(Rational.TWO, Rational.ZERO);
-    public static final Complex MINUSE_ONE =
+
+    public static final Complex FOUR =
+            new Complex(Rational.FOUR, Rational.ZERO);
+
+    public static final Complex MINUS_ONE =
             new Complex(Rational.MINUS_ONE, Rational.ZERO);
-    public static final Complex MINUSE_ONE_HALF =
+
+    public static final Complex MINUS_ONE_HALF =
             new Complex(Rational.MINUSE_ONE_HALF, Rational.ZERO);
-    public static final Complex MINUSE_TWO =
-            new Complex(Rational.MINUSE_TWO, Rational.ZERO);
-    public static final Complex IMAGEONE =
+
+    public static final Complex MINUS_TWO =
+            new Complex(Rational.MINUS_TWO, Rational.ZERO);
+
+    public static final Complex IMAGE_ONE =
             new Complex(Rational.ZERO, Rational.ONE);
+
     private final Real real;
     private final Real imaginary;
 

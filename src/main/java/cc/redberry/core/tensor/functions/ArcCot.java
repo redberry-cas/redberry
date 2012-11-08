@@ -43,7 +43,7 @@ public class ArcCot extends ScalarFunction {
     @Override
     public Tensor derivative() {
         return Tensors.multiply(Tensors.pow(
-                Tensors.sum(Complex.ONE, Tensors.pow(argument, Complex.TWO)), Complex.MINUSE_ONE), Complex.MINUSE_ONE);
+                Tensors.sum(Complex.ONE, Tensors.pow(argument, Complex.TWO)), Complex.MINUS_ONE), Complex.MINUS_ONE);
     }
 
     @Override

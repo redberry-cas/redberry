@@ -53,9 +53,13 @@ public final class Rational extends Real implements Serializable {
      */
     public static final Rational TWO = new Rational(2);
     /**
+     * A fraction representing "4 / 1".
+     */
+    public static final Rational FOUR = new Rational(4);
+    /**
      * A fraction representing "-2 / 1".
      */
-    public static final Rational MINUSE_TWO = new Rational(-2);
+    public static final Rational MINUS_TWO = new Rational(-2);
     /**
      * A fraction representing "1".
      */
@@ -104,10 +108,6 @@ public final class Rational extends Real implements Serializable {
      * A fraction representing "2/5".
      */
     public static final Rational TWO_FIFTHS = new Rational(2, 5);
-    /**
-     * A fraction representing "2/4".
-     */
-    public static final Rational TWO_QUARTERS = new Rational(2, 4);
     /**
      * A fraction representing "2/3".
      */

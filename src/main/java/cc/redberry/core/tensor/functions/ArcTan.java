@@ -43,7 +43,7 @@ public class ArcTan extends ScalarFunction {
     @Override
     public Tensor derivative() {
         return Tensors.pow(
-                Tensors.sum(Complex.ONE, Tensors.pow(argument, Complex.TWO)), Complex.MINUSE_ONE);
+                Tensors.sum(Complex.ONE, Tensors.pow(argument, Complex.TWO)), Complex.MINUS_ONE);
     }
 
     @Override

@@ -49,6 +49,10 @@ public final class TensorField extends SimpleTensor {
         this.argIndices = field.argIndices;
     }
 
+    public Tensor[] getArguments() {
+        return args.clone();
+    }
+
     public SimpleIndices[] getArgIndices() {
         return argIndices.clone();
     }

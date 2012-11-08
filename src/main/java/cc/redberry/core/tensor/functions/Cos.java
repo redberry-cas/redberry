@@ -42,7 +42,7 @@ public final class Cos extends ScalarFunction {
 
     @Override
     public Tensor derivative() {
-        return Tensors.multiply(Complex.MINUSE_ONE, new Sin(argument));
+        return Tensors.multiply(Complex.MINUS_ONE, new Sin(argument));
     }
 
     @Override

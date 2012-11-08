@@ -33,7 +33,6 @@ import cc.redberry.core.number.Complex;
 import cc.redberry.core.number.NumberUtils;
 import cc.redberry.core.tensor.*;
 import cc.redberry.core.tensor.functions.ScalarFunction;
-import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
 
 import java.util.Arrays;
@@ -152,11 +151,11 @@ public class TensorUtils {
     }
 
     public static boolean isImageOne(Tensor tensor) {
-        return tensor instanceof Complex && tensor.equals(Complex.IMAGEONE);
+        return tensor instanceof Complex && tensor.equals(Complex.IMAGE_ONE);
     }
 
     public static boolean isMinusOne(Tensor tensor) {
-        return tensor instanceof Complex && tensor.equals(Complex.MINUSE_ONE);
+        return tensor instanceof Complex && tensor.equals(Complex.MINUS_ONE);
     }
 
     public static boolean isIntegerOdd(Tensor tensor) {

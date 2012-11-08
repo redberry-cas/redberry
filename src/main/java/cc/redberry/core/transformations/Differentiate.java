@@ -131,7 +131,7 @@ public final class Differentiate implements Transformation {
             //e^f*ln(g) -> g^f*(f'*ln(g)+f/g*g') ->f*g^(f-1)*g' + g^f*ln(g)*f'
             Tensor temp = sum(
                     multiply(tensor.get(1),
-                            pow(tensor.get(0), sum(tensor.get(1), Complex.MINUSE_ONE)),
+                            pow(tensor.get(0), sum(tensor.get(1), Complex.MINUS_ONE)),
                             differentiate1(tensor.get(0), rule, transformations)),
                     multiply(tensor,
                             log(tensor.get(0)),

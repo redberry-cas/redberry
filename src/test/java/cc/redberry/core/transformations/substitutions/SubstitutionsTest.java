@@ -31,8 +31,8 @@ import cc.redberry.core.indices.IndexType;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.tensor.*;
 import cc.redberry.core.transformations.ContractIndices;
-import cc.redberry.core.transformations.expand.Expand;
 import cc.redberry.core.transformations.Transformation;
+import cc.redberry.core.transformations.expand.Expand;
 import cc.redberry.core.utils.TensorUtils;
 import junit.framework.Assert;
 import org.junit.Ignore;
@@ -966,6 +966,15 @@ public class SubstitutionsTest {
         Tensor t = parse(" x_i'*y^k' ");
         Expression e = parseExpression("x^i'*y^k' = A^i'k'");
         t = e.transform(t);
+        TAssert.assertEquals(t, "x_i'*y^k'");
+    }
+
+    @Test
+    public void testProduct20() {
+        Tensor t = parse("e^m[k1_m]*e^n[k1_m]*G^{a'}_{b'm}*G^{b'}_{c'n}");
+        Expression e = parseExpression("e^m[k1_m]*e^n[k1_m]*G^{a'}_{b'm}*G^{b'}_{c'n} = d^{a'}_{c'}*e_m[k1_m]*e^m[k1_m]");
+        t = e.transform(t);
+        System.out.println(t);
         TAssert.assertEquals(t, "x_i'*y^k'");
     }
 

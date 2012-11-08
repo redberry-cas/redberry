@@ -42,7 +42,7 @@ public final class Log extends ScalarFunction {
 
     @Override
     public Tensor derivative() {
-        return Tensors.pow(argument, Complex.MINUSE_ONE);
+        return Tensors.pow(argument, Complex.MINUS_ONE);
     }
 
     @Override

@@ -34,7 +34,6 @@ import cc.redberry.core.utils.ArraysUtils;
 import cc.redberry.core.utils.HashFunctions;
 import cc.redberry.core.utils.SoftReferenceWrapper;
 import cc.redberry.core.utils.TensorUtils;
-import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
 
 import java.util.Arrays;
@@ -115,7 +114,7 @@ public final class Product extends MultiTensor {
     }
 
     private static Complex getDefaultReference(Complex factor) {
-        return factor.isOne() ? Complex.ONE : factor.isMinusOne() ? Complex.MINUSE_ONE : factor;
+        return factor.isOne() ? Complex.ONE : factor.isMinusOne() ? Complex.MINUS_ONE : factor;
     }
 
     @Override
@@ -274,7 +273,7 @@ public final class Product extends MultiTensor {
 
     private int calculateHash() {
         int result;
-        if (factor == Complex.ONE || factor == Complex.MINUSE_ONE)
+        if (factor == Complex.ONE || factor == Complex.MINUS_ONE)
             result = 0;
         else
             result = factor.hashCode();
@@ -283,7 +282,7 @@ public final class Product extends MultiTensor {
             result = result * 31 + t.hashCode();
         for (Tensor t : data)
             result = result * 17 + t.hashCode();
-        if (factor == Complex.MINUSE_ONE && size() == 2)
+        if (factor == Complex.MINUS_ONE && size() == 2)
             return result;
         return result - 79 * getContent().getContractionStructure().hashCode();
     }

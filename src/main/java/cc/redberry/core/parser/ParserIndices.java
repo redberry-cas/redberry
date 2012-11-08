@@ -34,7 +34,7 @@ import java.util.regex.Pattern;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public class ParserIndices {
+public final class ParserIndices {
     public static SimpleIndices parseSimple(String expression) {
         return IndicesFactory.createSimple(null, parse(expression));
     }

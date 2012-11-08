@@ -428,6 +428,14 @@ public class ContractIndicesTest {
         assertTrue(TensorUtils.equals(t, expected));
     }
 
+    @Test
+    public void testField1() {
+        Tensor t = parse("g^{mn}*F_m[x]");
+        t = contract(t);
+        Tensor expected = parse("F^n[x]");
+        assertTrue(TensorUtils.equals(t, expected));
+    }
+
     @Ignore
     @Test(timeout = 3000L)
     public void performanceTest1() {
