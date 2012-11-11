@@ -43,7 +43,7 @@ public class GeneralIndicesInsertion implements ParseNodeTransformer {
     }
 
     private void ensureMappedRulesInitialized() {
-        if (mappedRules == null)
+        if (mappedRules != null)
             return;
         mappedRules = new HashMap<>();
         for (InsertionRule rule : initialRules.values())
@@ -53,6 +53,7 @@ public class GeneralIndicesInsertion implements ParseNodeTransformer {
 
     @Override
     public ParseNode transform(ParseNode node) {
+        ensureMappedRulesInitialized();
         int[] forbidden = ParseUtils.getAllIndicesT(node).toArray();
         IndexGenerator generator = new IndexGenerator(forbidden);
 
@@ -245,7 +246,7 @@ public class GeneralIndicesInsertion implements ParseNodeTransformer {
                     ByteBackedBitArray originalStates = originalStructure.getStates(type);
                     if (originalStates != null) {
                         outerIndices.upper[type.getType()] = originalStates.bitCount();
-                        outerIndices.lower[type.getType()] = originalStates.size() - outerIndices.lower[type.getType()];
+                        outerIndices.lower[type.getType()] = originalStates.size() - outerIndices.upper[type.getType()];
                     } else {
                         outerIndices.upper[type.getType()] = outerIndices.lower[type.getType()]
                                 = originalStructure.typeCount(type.getType()) / 2;
