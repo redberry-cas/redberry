@@ -31,11 +31,11 @@ import java.util.Map;
 import static cc.redberry.core.indices.IndicesUtils.*;
 
 /**
- * 
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
 public final class IndexGenerator {
+    //TODO change to TByteMap
     protected Map<Byte, IntGenerator> generators = new HashMap<>();
 
     public IndexGenerator() {
@@ -77,7 +77,17 @@ public final class IndexGenerator {
         return intGen.contains(getNameWithoutType(index));
     }
 
-    public void add(int index) {
+    public void mergeFrom(IndexGenerator other) {
+        for (Map.Entry<Byte, IntGenerator> entry : other.generators.entrySet()) {
+            IntGenerator thisGenerator = generators.get(entry.getKey());
+            if (thisGenerator == null)
+                generators.put(entry.getKey(), entry.getValue().clone());
+            else
+                thisGenerator.mergeFrom(entry.getValue());
+        }
+    }
+
+    /*public void add(int index) {
         byte type = getType(index);
         IntGenerator intGen;
         if ((intGen = generators.get(type)) == null) {
@@ -85,7 +95,7 @@ public final class IndexGenerator {
             return;
         }
         intGen.add(getNameWithoutType(index));
-    }
+    }*/
 
     public int generate(byte type) {
         IntGenerator ig = generators.get(type);
@@ -93,6 +103,7 @@ public final class IndexGenerator {
             generators.put(type, ig = new IntGenerator());
         return setType(type, ig.getNext());
     }
+
 
     @Override
     public IndexGenerator clone() {

@@ -4,14 +4,21 @@ import cc.redberry.core.context.CC;
 import cc.redberry.core.context.IndicesTypeStructureAndName;
 import cc.redberry.core.context.NameDescriptor;
 import cc.redberry.core.indexgenerator.IndexGenerator;
-import cc.redberry.core.indices.*;
+import cc.redberry.core.indices.IndexType;
+import cc.redberry.core.indices.IndicesFactory;
+import cc.redberry.core.indices.IndicesTypeStructure;
+import cc.redberry.core.indices.SimpleIndices;
 import cc.redberry.core.parser.ParseNode;
 import cc.redberry.core.parser.ParseNodeSimpleTensor;
 import cc.redberry.core.parser.ParseNodeTransformer;
+import cc.redberry.core.parser.ParseUtils;
 import cc.redberry.core.tensor.SimpleTensor;
+import cc.redberry.core.utils.ArraysUtils;
 import cc.redberry.core.utils.ByteBackedBitArray;
 
 import java.util.*;
+
+import static cc.redberry.core.indices.IndexType.TYPES_COUNT;
 
 public class GeneralIndicesInsertion implements ParseNodeTransformer {
     private final Map<IndicesTypeStructureAndName, InsertionRule> initialRules = new HashMap<>();
@@ -46,7 +53,30 @@ public class GeneralIndicesInsertion implements ParseNodeTransformer {
 
     @Override
     public ParseNode transform(ParseNode node) {
-        return null;
+        int[] forbidden = ParseUtils.getAllIndicesT(node).toArray();
+        IndexGenerator generator = new IndexGenerator(forbidden);
+
+        IITransformer transformer = createTransformer(node);
+
+        if (transformer == null)
+            return node;
+
+        OuterIndices outerIndices = transformer.getOuterIndices();
+        int[][] upper = new int[TYPES_COUNT][],
+                lower = new int[TYPES_COUNT][];
+
+        int j;
+        for (byte i = 0; i < TYPES_COUNT; ++i) {
+            upper[i] = new int[outerIndices.upper[i]];
+            for (j = 0; j < upper[i].length; ++j)
+                upper[i][j] = 0x80000000 | generator.generate(i);
+
+            lower[i] = new int[outerIndices.lower[i]];
+            for (j = 0; j < lower[i].length; ++j)
+                lower[i][j] = generator.generate(i);
+        }
+        transformer.apply(generator, upper, lower);
+        return node;
     }
 
     private static class InsertionRule {
@@ -82,8 +112,65 @@ public class GeneralIndicesInsertion implements ParseNodeTransformer {
     }
 
     private static class OuterIndices {
-        final int[] upper = new int[IndexType.TYPES_COUNT],
-                lower = new int[IndexType.TYPES_COUNT];
+        final int[] upper, lower;
+
+        OuterIndices() {
+            upper = new int[TYPES_COUNT];
+            lower = new int[TYPES_COUNT];
+        }
+
+        private OuterIndices(int[] upper, int[] lower) {
+            this.upper = upper;
+            this.lower = lower;
+        }
+
+        public void cumulativeAggregate(OuterIndices other) {
+            for (int i = 0; i < TYPES_COUNT; ++i) {
+                if (upper[i] == other.upper[i] &&
+                        lower[i] == other.lower[i])
+                    continue;
+                if (other.upper[i] == 0 && other.lower[i] == 0)
+                    continue;
+
+                if (upper[i] == 0 && lower[i] == 0) {
+                    upper[i] = other.upper[i];
+                    lower[i] = other.lower[i];
+                    continue;
+                }
+
+                throw new IllegalArgumentException("Inconsistent omitted indices exception.");
+            }
+        }
+
+        public void cumulativeAdd(OuterIndices other) {
+            //uuuu        xxxx
+            //    xxxxll      yyyyy
+
+            //uuuu     llllxx
+            //    llll        yyyyy
+
+            //cV * cV = ll
+            //cV * V = 0
+            //V * cV = ul
+            //V * M = uul
+            //M * V = u
+            //cV * M = l
+            //V * cV * V =
+            //V * V * M = uuul
+
+            for (int i = 0; i < TYPES_COUNT; ++i) {
+                int dif = other.upper[i] - lower[i];
+                lower[i] = other.lower[i];
+                if (dif < 0)
+                    lower[i] -= dif;
+                else
+                    upper[i] += dif;
+            }
+        }
+
+        public OuterIndices clone() {
+            return new OuterIndices(upper.clone(), lower.clone());
+        }
     }
 
     //TODO into fields and scalar functions
@@ -91,6 +178,7 @@ public class GeneralIndicesInsertion implements ParseNodeTransformer {
         IITransformer t;
         switch (node.tensorType) {
             case TensorField:
+
             case SimpleTensor:
                 InsertionRule rule = mappedRules.get(((ParseNodeSimpleTensor) node).getIndicesTypeStructureAndName());
                 if (rule != null)
@@ -102,7 +190,7 @@ public class GeneralIndicesInsertion implements ParseNodeTransformer {
             case Product:
                 List<IITransformer> transformersList = new ArrayList<>();
                 for (ParseNode _node : node.content)
-                    if ((t = createTransformer(_node, indicator)) != null)
+                    if ((t = createTransformer(_node)) != null)
                         transformersList.add(t);
                 if (transformersList.isEmpty())
                     return null;
@@ -110,19 +198,24 @@ public class GeneralIndicesInsertion implements ParseNodeTransformer {
                     return transformersList.get(0);
                 return new ProductTransformer(transformersList.toArray(new IITransformer[transformersList.size()]));
             case Expression:
+
             case Sum:
                 IITransformer[] transformersArray = new IITransformer[node.content.length];
                 int i;
-                boolean notNull = false;
-                for (i = 0; i < transformersArray.length; ++i)
-                    if ((transformersArray[i] = createTransformer(node.content[i], indicator)) != null)
-                        notNull = true;
-                if (!notNull)
+                OuterIndices outerIndices = null, currentOI;
+                for (i = 0; i < transformersArray.length; ++i) {
+                    transformersArray[i] = createTransformer(node.content[i]);
+                    if (transformersArray[i] != null) {
+                        currentOI = transformersArray[i].getOuterIndices();
+                        if (outerIndices != null)
+                            outerIndices.cumulativeAggregate(currentOI);
+                        else
+                            outerIndices = currentOI.clone();
+                    }
+                }
+                if (outerIndices == null)
                     return null;
-                else if (transformersArray.length == 1)
-                    return transformersArray[0];
-                return null;
-
+                return new SumTransformer(transformersArray, outerIndices, node);
             default:
                 return null;
         }
@@ -132,7 +225,7 @@ public class GeneralIndicesInsertion implements ParseNodeTransformer {
 
         OuterIndices getOuterIndices();
 
-        void apply(IGWrapper generator, int[] upper, int[] lower);
+        void apply(IndexGenerator generator, int[][] upper, int[][] lower);
     }
 
     private static class SimpleTransformer implements IITransformer {
@@ -168,17 +261,11 @@ public class GeneralIndicesInsertion implements ParseNodeTransformer {
         }
 
         @Override
-        public void apply(IGWrapper generator, int[] upper, int[] lower) {
+        public void apply(IndexGenerator generator, int[][] upper, int[][] lower) {
             SimpleIndices oldIndices = node.indices;
-            int[] _newIndices = new int[oldIndices.size() + 2 * upper.length];
-            int i;
-            for (i = 0; i < oldIndices.size(); ++i)
-                _newIndices[i] = indexMapper.map(oldIndices.get(i));
-            System.arraycopy(upper, 0, _newIndices, oldIndices.size(), upper.length);
-            System.arraycopy(lower, 0, _newIndices, oldIndices.size() + upper.length, lower.length);
-            for (i = 0; i < upper.length; ++i)
-                _newIndices[i + oldIndices.size()] |= 0x80000000;
-            node.indices = IndicesFactory.createSimple(null, _newIndices);
+            int[] result = ArraysUtils.addAll(oldIndices.getAllIndices().copy(), ArraysUtils.addAll(upper),
+                    ArraysUtils.addAll(lower));
+            node.indices = IndicesFactory.createSimple(null, result);
         }
     }
 
@@ -192,77 +279,109 @@ public class GeneralIndicesInsertion implements ParseNodeTransformer {
     }
 
     private static class SumTransformer extends MIITransformer {
+        private final OuterIndices outerIndices;
+        private final ParseNode parseNode;
 
-        public SumTransformer(IITransformer[] transformers) {
+        private SumTransformer(IITransformer[] transformers, OuterIndices outerIndices, ParseNode parseNode) {
             super(transformers);
+            this.outerIndices = outerIndices;
+            this.parseNode = parseNode;
         }
 
         @Override
-        public void apply(IGWrapper generator, int[] upper, int[] lower) {
-            IGWrapper generatorTemp = null;
-            IGWrapper generatorClone;
+        public OuterIndices getOuterIndices() {
+            return outerIndices;
+        }
+
+        @Override
+        public void apply(IndexGenerator generator, int[][] upper, int[][] lower) {
+            IndexGenerator generatorTemp = null;
+            IndexGenerator generatorClone;
             for (int i = 0; i < transformers.length - 1; ++i) {
-                transformers[i].apply(indexMapper, generatorClone = generator.clone(), upper, lower);
+                transformers[i].apply(generatorClone = generator.clone(), upper, lower);
                 if (generatorTemp == null)
                     generatorTemp = generatorClone;
                 else
-                    generatorTemp.merge(generatorClone);
+                    generatorTemp.mergeFrom(generatorClone);
             }
-            transformers[transformers.length - 1].apply(indexMapper, generator, upper, lower);
+            transformers[transformers.length - 1].apply(generator, upper, lower);
             if (generatorTemp != null)
-                generator.merge(generatorTemp);
+                generator.mergeFrom(generatorTemp);
+        }
+    }
+
+    private final static class TransformersIndicesRange {
+        final int from[], count[];
+
+        public TransformersIndicesRange(int[] from, int[] count) {
+            this.from = from;
+            this.count = count;
         }
     }
 
     private static class ProductTransformer extends MIITransformer {
+        private final OuterIndices outerIndices;
 
         public ProductTransformer(IITransformer[] transformers) {
             super(transformers);
+            OuterIndices oi = null;
+            for (IITransformer transformer : transformers) {
+                if (oi == null)
+                    oi = transformer.getOuterIndices().clone();
+                else
+                    oi.cumulativeAdd(transformer.getOuterIndices());
+            }
+            this.outerIndices = oi;
         }
 
         @Override
-        public void apply(IGWrapper generator, int[] upper, int[] lower) {
-            int i, j;
-            int[] tempUpper = upper.clone(),
-                    tempLower = new int[upper.length];
-            for (i = 0; i < transformers.length - 1; ++i) {
-                for (j = 0; j < upper.length; ++j)
-                    tempLower[j] = generator.next(IndicesUtils.getType(lower[j]));
-                transformers[i].apply(indexMapper, generator, tempUpper, tempLower);
-                System.arraycopy(tempLower, 0, tempUpper, 0, tempUpper.length);
-            }
-            transformers[i].apply(indexMapper, generator, tempUpper, lower);
-        }
-    }
-
-    private static class IGWrapper {
-        private IndexGenerator generator;
-        private int generated;
-
-        public IGWrapper(IndexGenerator generator) {
-            this.generator = generator;
-        }
-
-        public IGWrapper(IndexGenerator generator, int generated) {
-            this.generator = generator;
-            this.generated = generated;
-        }
-
-        public int next(byte type) {
-            ++generated;
-            return generator.generate(type);
-        }
-
-        public void merge(IGWrapper wrapper) {
-            if (wrapper.generated > this.generated) {
-                this.generated = wrapper.generated;
-                this.generator = wrapper.generator;
-            }
+        public OuterIndices getOuterIndices() {
+            return outerIndices;
         }
 
         @Override
-        public IGWrapper clone() {
-            return new IGWrapper(generator.clone(), generated);
+        public void apply(IndexGenerator generator, int[][] upper, int[][] lower) {
+            int i;
+            byte j;
+            int[] totalCountUpper = new int[TYPES_COUNT],
+                    totalCountLower = new int[TYPES_COUNT];
+            OuterIndices oi;
+            TransformersIndicesRange[] upperRanges = new TransformersIndicesRange[transformers.length],
+                    lowerRanges = new TransformersIndicesRange[transformers.length];
+
+            for (i = 0; i < transformers.length; ++i) {
+                oi = transformers[i].getOuterIndices();
+                upperRanges[i] = new TransformersIndicesRange(totalCountUpper.clone(), oi.upper.clone());
+                lowerRanges[i] = new TransformersIndicesRange(totalCountLower.clone(), oi.lower.clone());
+                for (j = 0; j < TYPES_COUNT; ++j) {
+                    totalCountUpper[j] += oi.upper[j];
+                    totalCountLower[j] += oi.lower[j];
+                }
+            }
+
+            int[][] totalUppers = new int[TYPES_COUNT][], totalLowers = new int[TYPES_COUNT][];
+            for (j = 0; j < TYPES_COUNT; ++j) {
+                totalUppers[j] = new int[totalCountUpper[j]];
+                totalLowers[j] = new int[totalCountLower[j]];
+                System.arraycopy(upper[j], 0, totalUppers[j], 0, upper[j].length);
+                System.arraycopy(lower[j], 0, totalLowers[j],
+                        totalCountLower[j] - lower[j].length, lower[j].length);
+                if (totalCountLower[j] - lower[j].length != totalCountUpper[j] - upper[j].length)
+                    throw new IllegalArgumentException("PIZDEC!");
+                for (i = 0; i < totalCountUpper[j] - upper[j].length; ++i) {
+                    totalLowers[j][i] = generator.generate(j);
+                    totalUppers[j][i + upper[j].length] = totalLowers[j][i] | 0x80000000;
+                }
+            }
+
+            for (i = 0; i < transformers.length; ++i) {
+                int[][] cUpper = new int[TYPES_COUNT][], cLower = new int[TYPES_COUNT][];
+                for (j = 0; j < TYPES_COUNT; ++j) {
+                    cUpper[j] = Arrays.copyOfRange(totalUppers[j], upperRanges[i].from[j], upperRanges[i].from[j] + upperRanges[i].count[j]);
+                    cLower[j] = Arrays.copyOfRange(totalLowers[j], lowerRanges[i].from[j], lowerRanges[i].from[j] + lowerRanges[i].count[j]);
+                }
+                transformers[i].apply(generator, cUpper, cLower);
+            }
         }
     }
 }
