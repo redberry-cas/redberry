@@ -167,6 +167,8 @@ public final class ByteBackedBitArray implements BitArray {
 
     @Override
     public ByteBackedBitArray clone() {
+        if (size == 0)
+            return EMPTY;
         return new ByteBackedBitArray(Arrays.copyOf(data, data.length), size);
     }
 
