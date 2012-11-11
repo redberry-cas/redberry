@@ -24,6 +24,7 @@ package cc.redberry.core.context;
 
 import cc.redberry.core.indices.IndexType;
 import cc.redberry.core.indices.IndicesTypeStructure;
+import cc.redberry.core.parser.ParserException;
 import cc.redberry.core.utils.ArraysUtils;
 import cc.redberry.core.utils.IntArrayList;
 import org.apache.commons.math3.random.RandomGenerator;
@@ -101,12 +102,24 @@ public final class NameManager {
         if (its.size() != 2)
             return new NameDescriptorImpl(sname, indicesTypeStructures, id);
         for (byte b = 0; b < IndexType.TYPES_COUNT; ++b)
-            if (its.typeCount(b) == 2)
-                if (sname.equals(kroneckerAndMetricNames[0]) || sname.equals(kroneckerAndMetricNames[1])) {
-                    NameDescriptor descriptor = new NameDescriptorForMetricAndKronecker(kroneckerAndMetricNames, b, id);
-                    descriptor.getSymmetries().add(b, false, 1, 0);
-                    return descriptor;
+            if (its.typeCount(b) == 2) {
+                if (CC.isMetric(b)) {
+                    if (sname.equals(kroneckerAndMetricNames[0]) || sname.equals(kroneckerAndMetricNames[1])) {
+                        NameDescriptor descriptor = new NameDescriptorForMetricAndKronecker(kroneckerAndMetricNames, b, id);
+                        descriptor.getSymmetries().add(b, false, 1, 0);
+                        return descriptor;
+                    }
+                } else {
+                    if (sname.equals(kroneckerAndMetricNames[1]))
+                        throw new ParserException("Metric is not specified for non metric index type.");
+                    if (sname.equals(kroneckerAndMetricNames[0])) {
+                        if (its.getTypeData(b).states.get(0) != true || its.getTypeData(b).states.get(1) != false)
+                            throw new ParserException("Illegal Kroneckers indices states.");
+                        NameDescriptor descriptor = new NameDescriptorForMetricAndKronecker(kroneckerAndMetricNames, b, id);
+                        return descriptor;
+                    }
                 }
+            }
         return new NameDescriptorImpl(sname, indicesTypeStructures, id);
     }
 

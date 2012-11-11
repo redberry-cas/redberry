@@ -388,9 +388,20 @@ public class ParserTest {
                 == IndexType.GreekLower1.getType());
     }
 
+    @Ignore
     @Test(expected = RuntimeException.class)
     public void testFieldND() {
         SimpleTensor field = parseSimple("f[x]");
         SimpleTensor nonField = parseSimple("f");
+    }
+
+    @Test(expected = ParserException.class)
+    public void testKronecker1() {
+        parse("d_a'^b'");
+    }
+
+    @Test(expected = ParserException.class)
+    public void testMetric1() {
+        parse("g_a'b'");
     }
 }

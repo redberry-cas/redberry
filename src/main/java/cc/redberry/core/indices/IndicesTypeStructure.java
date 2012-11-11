@@ -22,6 +22,9 @@
  */
 package cc.redberry.core.indices;
 
+import cc.redberry.core.context.CC;
+import cc.redberry.core.utils.ByteBackedBitArray;
+
 import java.util.Arrays;
 
 /**
@@ -32,41 +35,101 @@ public final class IndicesTypeStructure {
 
     public static final IndicesTypeStructure EMPTY = new IndicesTypeStructure((byte) 0, 0);
     private final int[] typesCounts = new int[IndexType.TYPES_COUNT];
+    private final ByteBackedBitArray[] states = new ByteBackedBitArray[IndexType.TYPES_COUNT];
     private final int size;
 
-    public IndicesTypeStructure(byte type, int count) {
+    public IndicesTypeStructure(byte type, int count, boolean... states) {
         typesCounts[type] = count;
         size = count;
+        for (int i = 0; i < IndexType.TYPES_COUNT; ++i)
+            if (!CC.isMetric((byte) i))
+                this.states[i] = i == type ? new ByteBackedBitArray(states) : ByteBackedBitArray.EMPTY;
     }
+
+    public IndicesTypeStructure(byte type, int count) {
+        if (!CC.isMetric(type))
+            throw new IllegalArgumentException("No states information provided for non metric type.");
+        typesCounts[type] = count;
+        size = count;
+        for (int i = 0; i < IndexType.TYPES_COUNT; ++i)
+            if (!CC.isMetric((byte) i))
+                states[i] = ByteBackedBitArray.EMPTY;
+    }
+
 
     public IndicesTypeStructure(IndexType type, int count) {
         this(type.getType(), count);
     }
 
     public IndicesTypeStructure(final byte[] types, int[] count) {
+        for (int i = 0; i < types.length; ++i)
+            if (count[i] != 0 && !CC.isMetric(types[i]))
+                throw new IllegalArgumentException("No states information provided for non metric type.");
+
         int size = 0;
         for (int i = 0; i < types.length; ++i) {
             typesCounts[types[i]] = count[i];
             size += count[i];
         }
         this.size = size;
+        for (int i = 0; i < IndexType.TYPES_COUNT; ++i)
+            if (!CC.isMetric((byte) i))
+                states[i] = ByteBackedBitArray.EMPTY;
     }
 
     public IndicesTypeStructure(SimpleIndices indices) {
         size = indices.size();
-        for (int i = 0; i < size; ++i)
+        int i;
+        for (i = 0; i < size; ++i)
             ++typesCounts[IndicesUtils.getType(indices.get(i))];
+        int[] pointers = new int[IndexType.TYPES_COUNT];
+        for (i = 0; i < IndexType.TYPES_COUNT; ++i)
+            if (!CC.isMetric((byte) i))
+                states[i] = createBBBA(typesCounts[i]);
+            else
+                pointers[i] = -1;
+        byte type;
+        for (i = 0; i < size; ++i) {
+            type = IndicesUtils.getType(indices.get(i));
+            if (pointers[type] != -1) {
+                if (IndicesUtils.getState(indices.get(i)))
+                    states[type].set(pointers[type]);
+                ++pointers[type];
+            }
+        }
     }
 
     /**
-     *
      * @param indices sorted by type array of indices
      */
     IndicesTypeStructure(int[] indices) {
         size = indices.length;
-        for (int i = 0; i < size; ++i)
+        int i;
+        for (i = 0; i < size; ++i)
             ++typesCounts[IndicesUtils.getType(indices[i])];
+        int[] pointers = new int[IndexType.TYPES_COUNT];
+        for (i = 0; i < IndexType.TYPES_COUNT; ++i)
+            if (!CC.isMetric((byte) i))
+                states[i] = createBBBA(typesCounts[i]);
+            else
+                pointers[i] = -1;
+        byte type;
+        for (i = 0; i < size; ++i) {
+            type = IndicesUtils.getType(indices[i]);
+            if (pointers[type] != -1) {
+                if (IndicesUtils.getState(indices[i]))
+                    states[type].set(pointers[type]);
+                ++pointers[type];
+            }
+        }
     }
+
+    private static ByteBackedBitArray createBBBA(int size) {
+        if (size == 0)
+            return ByteBackedBitArray.EMPTY;
+        return new ByteBackedBitArray(size);
+    }
+
 
     public int size() {
         return size;
@@ -79,19 +142,20 @@ public final class IndicesTypeStructure {
         if (getClass() != obj.getClass())
             return false;
         final IndicesTypeStructure other = (IndicesTypeStructure) obj;
-        return Arrays.equals(this.typesCounts, other.typesCounts);
+        return Arrays.equals(this.typesCounts, other.typesCounts)
+                && Arrays.deepEquals(this.states, other.states);
     }
 
     @Override
     public int hashCode() {
-        return 469 + Arrays.hashCode(this.typesCounts);
+        return 469 + Arrays.hashCode(this.typesCounts) + Arrays.hashCode(states);
     }
 
     public TypeData getTypeData(byte type) {
         int from = 0;
         for (int i = 0; i < type; ++i)
             from += typesCounts[i];
-        return new TypeData(from, typesCounts[type]);
+        return new TypeData(from, typesCounts[type], states[type]);
     }
 
     public int typeCount(byte type) {
@@ -101,17 +165,31 @@ public final class IndicesTypeStructure {
     public boolean isStructureOf(SimpleIndices indices) {
         if (size != indices.size())
             return false;
-        return Arrays.equals(typesCounts, indices.getIndicesTypeStructure().typesCounts);
+        return equals(indices.getIndicesTypeStructure());
+    }
+
+    @Override
+    public String toString() {
+        return "IndicesTypeStructure{" +
+                "typesCounts=" + typesCounts +
+                ", states=" + (states == null ? null : Arrays.asList(states)) +
+                ", size=" + size +
+                '}';
     }
 
     public static class TypeData {
 
         public final int from;
         public final int length;
+        public final ByteBackedBitArray states;
 
-        public TypeData(int from, int length) {
+        public TypeData(int from, int length, ByteBackedBitArray states) {
             this.from = from;
             this.length = length;
+            if (states != null)
+                this.states = states.clone();
+            else
+                this.states = null;
         }
     }
 }
