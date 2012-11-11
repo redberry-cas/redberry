@@ -155,8 +155,8 @@ public class DifferentiateTest {
             Tensor v = differentiate(t, var2, var1);
             v = contract(expand(v));
             v = d.transform(R1.transform(R2.transform(v)));
-            u = RemoveDueToSymmetry.INSANCE.transform(u);
-            v = RemoveDueToSymmetry.INSANCE.transform(v);
+            u = RemoveDueToSymmetry.INSTANCE.transform(u);
+            v = RemoveDueToSymmetry.INSTANCE.transform(v);
             TAssert.assertEquals(u, v);
         }
     }
@@ -194,8 +194,8 @@ public class DifferentiateTest {
             Tensor u = differentiate(t, var1, var2);
             u = contract(expand(u));
             u = d.transform(R1.transform(R2.transform(u)));
-            u = RemoveDueToSymmetry.INSANCE.transform(u);
-            v = RemoveDueToSymmetry.INSANCE.transform(v);
+            u = RemoveDueToSymmetry.INSTANCE.transform(u);
+            v = RemoveDueToSymmetry.INSTANCE.transform(v);
             TAssert.assertEquals(u, v);
         }
     }
@@ -304,7 +304,7 @@ public class DifferentiateTest {
                 parseExpression("R_mn^a_a = 0"),
                 parseExpression("R^a_man = R_mn"),
                 parseExpression("R^a_a = R"),
-                RemoveDueToSymmetry.INSANCE
+                RemoveDueToSymmetry.INSTANCE
         };
         Tensor t1 = differentiate(tensor, var2, var1);
         t1 = contract(expand(t1));
