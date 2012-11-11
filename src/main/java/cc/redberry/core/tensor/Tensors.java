@@ -31,7 +31,7 @@ import cc.redberry.core.indices.*;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.parser.ParseNodeTransformer;
 import cc.redberry.core.tensor.functions.*;
-import cc.redberry.core.transformations.ExpandUtils;
+import cc.redberry.core.transformations.expand.ExpandUtils;
 import cc.redberry.core.utils.TensorUtils;
 import gnu.trove.set.hash.TIntHashSet;
 
@@ -615,11 +615,11 @@ public final class Tensors {
     public static Tensor negate(Tensor tensor) {
         if (tensor instanceof Complex)
             return ((Complex) tensor).negate();
-        return multiply(Complex.MINUSE_ONE, tensor);
+        return multiply(Complex.MINUS_ONE, tensor);
     }
 
     public static Tensor reciprocal(Tensor tensor) {
-        return pow(tensor, Complex.MINUSE_ONE);
+        return pow(tensor, Complex.MINUS_ONE);
     }
 
     //TODO discuss with Stas (move multiplySumElementsOnFactor and multiplySumElementsOnFactorAndExpandScalars to other class)

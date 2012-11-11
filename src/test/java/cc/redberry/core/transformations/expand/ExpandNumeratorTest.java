@@ -1,11 +1,11 @@
-package cc.redberry.core.transformations;
+package cc.redberry.core.transformations.expand;
 
 import cc.redberry.core.TAssert;
 import cc.redberry.core.tensor.Tensor;
 import org.junit.Test;
 
 import static cc.redberry.core.tensor.Tensors.parse;
-import static cc.redberry.core.transformations.ExpandNumerator.expandNumerator;
+import static cc.redberry.core.transformations.expand.ExpandNumerator.expandNumerator;
 
 /**
  * @author Dmitry Bolotin

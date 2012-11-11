@@ -24,9 +24,7 @@ package cc.redberry.core.parser;
 
 import cc.redberry.core.TAssert;
 import cc.redberry.core.context.CC;
-import cc.redberry.core.indices.InconsistentIndicesException;
-import cc.redberry.core.indices.IndicesFactory;
-import cc.redberry.core.indices.SimpleIndices;
+import cc.redberry.core.indices.*;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.tensor.*;
 import cc.redberry.core.utils.TensorUtils;
@@ -35,6 +33,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import static cc.redberry.core.tensor.Tensors.parse;
+import static cc.redberry.core.tensor.Tensors.parseSimple;
 
 /**
  * @author Dmitry Bolotin
@@ -54,12 +53,12 @@ public class ParserTest {
         ParseNode expected = new ParseNode(TensorType.Sum,
                 new ParseNodeTensorField(IndicesFactory.EMPTY_SIMPLE_INDICES, "f", new ParseNode[]{new ParseNodeSimpleTensor(ParserIndices.parseSimple("_\\mu"), "a")}, new SimpleIndices[]{IndicesFactory.EMPTY_SIMPLE_INDICES}),
                 new ParseNode(TensorType.Product,
-                        new ParseNodeNumber(Complex.MINUSE_ONE),
+                        new ParseNodeNumber(Complex.MINUS_ONE),
                         new ParseNodeTensorField(IndicesFactory.EMPTY_SIMPLE_INDICES, "f",
                                 new ParseNode[]{new ParseNode(TensorType.Product,
                                         new ParseNodeSimpleTensor(ParserIndices.parseSimple("_\\mu"), "b"),
                                         new ParseNode(TensorType.Power, new ParseNode(TensorType.Product, new ParseNodeSimpleTensor(IndicesFactory.EMPTY_SIMPLE_INDICES, "c"), new ParseNodeSimpleTensor(IndicesFactory.EMPTY_SIMPLE_INDICES, "g")),
-                                                new ParseNodeNumber(Complex.MINUSE_ONE)),
+                                                new ParseNodeNumber(Complex.MINUS_ONE)),
                                         new ParseNodeTensorField(IndicesFactory.EMPTY_SIMPLE_INDICES, "g",
                                                 new ParseNode[]{new ParseNodeSimpleTensor(IndicesFactory.EMPTY_SIMPLE_INDICES, "x"),
                                                         new ParseNodeSimpleTensor(IndicesFactory.EMPTY_SIMPLE_INDICES, "y")},
@@ -81,7 +80,7 @@ public class ParserTest {
         ParseNode expected = new ParseNode(TensorType.Sum,
                 new ParseNodeSimpleTensor(IndicesFactory.EMPTY_SIMPLE_INDICES, "a"),
                 new ParseNode(TensorType.Product,
-                        new ParseNodeNumber(Complex.MINUSE_ONE),
+                        new ParseNodeNumber(Complex.MINUS_ONE),
                         new ParseNodeSimpleTensor(IndicesFactory.EMPTY_SIMPLE_INDICES, "b")));
         Assert.assertEquals(expected, node);
     }
@@ -100,7 +99,7 @@ public class ParserTest {
                 new ParseNodeSimpleTensor(IndicesFactory.EMPTY_SIMPLE_INDICES, "a"),
                 new ParseNode(TensorType.Power,
                         new ParseNodeSimpleTensor(IndicesFactory.EMPTY_SIMPLE_INDICES, "b"),
-                        new ParseNodeNumber(Complex.MINUSE_ONE)));
+                        new ParseNodeNumber(Complex.MINUS_ONE)));
         Assert.assertEquals(expectedNode, node);
         Assert.assertTrue(tensor instanceof Product);
         Assert.assertTrue(tensor.getIndices().size() == 0);
@@ -225,6 +224,7 @@ public class ParserTest {
     @Test(expected = RuntimeException.class)
     public void testSim1() {
         Tensor t = Tensors.parse("1^3");
+        System.out.println(t);
         Tensor e = Tensors.parse("x");
         Assert.assertTrue(TensorUtils.equalsExactly(e, t));
     }
@@ -372,5 +372,36 @@ public class ParserTest {
     @Test(expected = BracketsError.class)
     public void testBacketsCons1() {
         parse("(1/2*(a+b)");
+    }
+
+    @Test
+    public void testStrokeIndices1() {
+        Tensor t = parse("T_{a'}");
+        Assert.assertTrue(IndicesUtils.getType(t.getIndices().get(0))
+                == IndexType.LatinLower1.getType());
+    }
+
+    @Test
+    public void testStrokeIndices2() {
+        Tensor t = parse("T_{\\alpha'}");
+        Assert.assertTrue(IndicesUtils.getType(t.getIndices().get(0))
+                == IndexType.GreekLower1.getType());
+    }
+
+    @Ignore
+    @Test(expected = RuntimeException.class)
+    public void testFieldND() {
+        SimpleTensor field = parseSimple("f[x]");
+        SimpleTensor nonField = parseSimple("f");
+    }
+
+    @Test(expected = ParserException.class)
+    public void testKronecker1() {
+        parse("d_a'^b'");
+    }
+
+    @Test(expected = ParserException.class)
+    public void testMetric1() {
+        parse("g_a'b'");
     }
 }

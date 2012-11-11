@@ -35,7 +35,6 @@ import static cc.redberry.core.number.NumberUtils.isZeroOrIndeterminate;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-//TODO refactor in future
 public final class ProductBuilder implements TensorBuilder {
 
     private Complex factor = Complex.ONE;
@@ -173,7 +172,7 @@ public final class ProductBuilder implements TensorBuilder {
             return;
 
         if (TensorUtils.isSymbolic(tensor)) {
-            symbolicPowers.putSymbolic(tensor);
+            symbolicPowers.put(tensor);
         } else if (tensor.getIndices().size() == 0)
             indexLess.add(tensor);
         else

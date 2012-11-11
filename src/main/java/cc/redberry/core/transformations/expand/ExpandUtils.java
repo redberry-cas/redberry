@@ -1,14 +1,12 @@
-package cc.redberry.core.transformations;
+package cc.redberry.core.transformations.expand;
 
 import cc.redberry.concurrent.OutputPort;
-import cc.redberry.core.number.Complex;
 import cc.redberry.core.tensor.*;
+import cc.redberry.core.transformations.Transformation;
 import cc.redberry.core.utils.TensorUtils;
 import gnu.trove.set.hash.TIntHashSet;
 
 import java.util.concurrent.atomic.AtomicLong;
-
-import static cc.redberry.core.utils.TensorUtils.isNegativeIntegerPower;
 
 /**
  * @author Dmitry Bolotin
@@ -191,33 +189,4 @@ public final class ExpandUtils {
             return t;
         }
     };
-
-    static final class NumDen {
-        final Tensor numerator, denominator;
-
-        NumDen(Tensor numerator, Tensor denominator) {
-            this.numerator = numerator;
-            this.denominator = denominator;
-        }
-    }
-
-    static NumDen getNumDen(Product product) {
-        ProductBuilder denominators = new ProductBuilder();
-        Tensor temp = product;
-        Tensor t;
-        Complex exponent;
-        for (int i = product.size() - 1; i >= 0; --i) {
-            t = product.get(i);
-            if (isNegativeIntegerPower(t)) {
-                assert t.get(0) instanceof Sum ? ((Complex) t.get(1)).isMinusOne() : true;
-                exponent = (Complex) t.get(1);
-                denominators.put(Tensors.pow(t.get(0), exponent.abs()));
-                if (temp instanceof Product)
-                    temp = ((Product) temp).remove(i);
-                else
-                    temp = Complex.ONE;
-            }
-        }
-        return new NumDen(temp, denominators.build());
-    }
 }

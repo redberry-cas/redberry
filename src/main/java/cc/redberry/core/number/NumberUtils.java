@@ -29,17 +29,9 @@ import java.math.BigInteger;
 /**
  * @author Stanislav Poslavsky
  */
-public class NumberUtils {
+public final class NumberUtils {
 
     private NumberUtils() {
-    }
-
-    public static boolean isZeroOrIndeterminate(Complex complex) {
-        return complex.isZero() || complex.isInfinite() || complex.isNaN();
-    }
-
-    public static boolean isIndeterminate(Complex complex) {
-        return complex.isInfinite() || complex.isNaN();
     }
 
     /**
@@ -121,5 +113,17 @@ public class NumberUtils {
         if (complex.isInteger())
             return complex.getReal().intValue() % 2 == 0;
         return false;
+    }
+
+    public static boolean isZeroOrIndeterminate(Complex complex) {
+        return complex.isZero() || complex.isInfinite() || complex.isNaN();
+    }
+
+    public static boolean isIndeterminate(Complex complex) {
+        return complex.isInfinite() || complex.isNaN();
+    }
+
+    public static boolean isRealNegative(Complex complex) {
+        return complex.isReal() && complex.getReal().signum() < 0;
     }
 }

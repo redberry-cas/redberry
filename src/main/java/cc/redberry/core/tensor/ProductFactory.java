@@ -118,7 +118,7 @@ public final class ProductFactory implements TensorFactory {
             for (i = indexlessContainer.list.size() - 1; i >= 0; --i) {
                 tensor = indexlessContainer.list.get(i);
                 if (TensorUtils.isSymbolic(tensor)) {
-                    powersContainer.putSymbolic(tensor);
+                    powersContainer.put(tensor);
                 } else
                     indexlessArray.add(tensor);
             }

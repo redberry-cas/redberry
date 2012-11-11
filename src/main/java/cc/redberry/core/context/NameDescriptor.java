@@ -35,7 +35,7 @@ import java.util.Arrays;
  */
 public abstract class NameDescriptor {
 
-    //first element is simple tensor indexTypeStructure, other apperars for tensor fields
+    //first element is simple tensor indexTypeStructure, other appears for tensor fields
     final IndicesTypeStructure[] indexTypeStructures;
     private final int id;
     private final IndicesSymmetries symmetries;

@@ -35,7 +35,7 @@ import cc.redberry.core.utils.TensorUtils;
  */
 public final class RemoveDueToSymmetry implements Transformation {
 
-    public static final RemoveDueToSymmetry INSANCE = new RemoveDueToSymmetry();
+    public static final RemoveDueToSymmetry INSTANCE = new RemoveDueToSymmetry();
 
     private RemoveDueToSymmetry() {
     }

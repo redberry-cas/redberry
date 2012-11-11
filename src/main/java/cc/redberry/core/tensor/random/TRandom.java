@@ -44,6 +44,7 @@ public final class TRandom {
 
     protected final BitsStreamGenerator random;
     protected long seed;
+    protected final static byte TYPES_COUNT = 4;
     protected final static byte[] TYPES = {0, 1, 2, 3};
     protected static final int[] ALPHABETS_SIZES = new int[4];
 
@@ -151,8 +152,8 @@ public final class TRandom {
 
     private void generateDescriptors() {
         for (int i = 0; i < namespace.length; ++i) {
-            int[] typesCount = new int[IndexType.TYPES_COUNT];
-            for (int j = 0; j < IndexType.TYPES_COUNT; ++j)
+            int[] typesCount = new int[TYPES_COUNT];
+            for (int j = 0; j < TYPES_COUNT; ++j)
                 typesCount[j] = minIndices[j] + nextInt(maxIndices[j] - minIndices[j]);
             IndicesTypeStructure typeStructure = new IndicesTypeStructure(TYPES, typesCount);
             NameDescriptor nameDescriptor = CC.getNameManager().mapNameDescriptor(nextName(), typeStructure);
@@ -188,7 +189,7 @@ public final class TRandom {
             return;
         IndicesTypeStructure typeStructure = descriptor.getIndicesTypeStructure();
         int i;
-        for (byte type = 0; type < IndexType.TYPES_COUNT; ++type) {
+        for (byte type = 0; type < TYPES_COUNT; ++type) {
             IndicesTypeStructure.TypeData typeData = typeStructure.getTypeData(type);
             if (typeData == null)
                 continue;

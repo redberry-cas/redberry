@@ -8,6 +8,7 @@ import cc.redberry.core.tensor.*;
 import cc.redberry.core.tensor.functions.ScalarFunction;
 import cc.redberry.core.tensor.iterator.TensorLastIterator;
 import cc.redberry.core.transformations.substitutions.Substitution;
+import cc.redberry.core.transformations.symmetrization.SymmetrizeSimpleTensor;
 import cc.redberry.core.utils.TensorUtils;
 import gnu.trove.set.hash.TIntHashSet;
 
@@ -15,7 +16,7 @@ import static cc.redberry.core.indices.IndicesUtils.*;
 import static cc.redberry.core.tensor.ApplyIndexMapping.applyIndexMapping;
 import static cc.redberry.core.tensor.ApplyIndexMapping.renameDummy;
 import static cc.redberry.core.tensor.Tensors.*;
-import static cc.redberry.core.transformations.Expand.expand;
+import static cc.redberry.core.transformations.expand.Expand.expand;
 import static cc.redberry.core.utils.ArraysUtils.addAll;
 
 /**
@@ -130,7 +131,7 @@ public final class Differentiate implements Transformation {
             //e^f*ln(g) -> g^f*(f'*ln(g)+f/g*g') ->f*g^(f-1)*g' + g^f*ln(g)*f'
             Tensor temp = sum(
                     multiply(tensor.get(1),
-                            pow(tensor.get(0), sum(tensor.get(1), Complex.MINUSE_ONE)),
+                            pow(tensor.get(0), sum(tensor.get(1), Complex.MINUS_ONE)),
                             differentiate1(tensor.get(0), rule, transformations)),
                     multiply(tensor,
                             log(tensor.get(0)),

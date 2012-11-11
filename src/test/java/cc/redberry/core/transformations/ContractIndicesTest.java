@@ -30,6 +30,7 @@ import cc.redberry.core.tensor.Expression;
 import cc.redberry.core.tensor.ProductBuilder;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.tensor.Tensors;
+import cc.redberry.core.transformations.expand.Expand;
 import cc.redberry.core.utils.TensorUtils;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -424,6 +425,14 @@ public class ContractIndicesTest {
         Tensor t = parse("g^{\\alpha \\beta}*g_{\\beta \\alpha}");
         t = contract(t);
         Tensor expected = parse("d^{\\alpha}_{\\alpha}");
+        assertTrue(TensorUtils.equals(t, expected));
+    }
+
+    @Test
+    public void testField1() {
+        Tensor t = parse("g^{mn}*F_m[x]");
+        t = contract(t);
+        Tensor expected = parse("F^n[x]");
         assertTrue(TensorUtils.equals(t, expected));
     }
 

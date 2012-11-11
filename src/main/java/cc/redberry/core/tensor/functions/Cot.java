@@ -42,7 +42,7 @@ public final class Cot extends ScalarFunction {
 
     @Override
     public Tensor derivative() {
-        return Tensors.pow(new Sin(argument), Complex.MINUSE_TWO);
+        return Tensors.pow(new Sin(argument), Complex.MINUS_TWO);
     }
 
     @Override

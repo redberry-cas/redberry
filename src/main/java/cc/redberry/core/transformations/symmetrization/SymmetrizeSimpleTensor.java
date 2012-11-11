@@ -1,4 +1,4 @@
-package cc.redberry.core.transformations;
+package cc.redberry.core.transformations.symmetrization;
 
 import cc.redberry.core.combinatorics.Permutation;
 import cc.redberry.core.combinatorics.Symmetry;
@@ -7,6 +7,7 @@ import cc.redberry.core.math.MathUtils;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.number.Rational;
 import cc.redberry.core.tensor.*;
+import cc.redberry.core.transformations.Transformation;
 
 import java.util.Arrays;
 

@@ -134,7 +134,7 @@ public class TensorUtilsTest {
         Tensors.addSymmetry("F_\\mu\\nu\\alpha\\beta", IndexType.GreekLower, true, 1, 0, 2, 3);
         Tensors.addSymmetry("R_\\mu\\nu", IndexType.GreekLower, false, 1, 0);
         Tensor t = parse("1/15*R_{\\delta }^{\\rho }*R_{\\rho }^{\\delta }+-23/60*R^{\\gamma \\mu }*F_{\\gamma \\mu }^{\\rho_5 }_{\\rho_5 }+1/12*F^{\\alpha }_{\\nu }^{\\rho_5 }_{\\zeta }*F_{\\alpha }^{\\nu \\zeta }_{\\rho_5 }+1/2*W^{\\alpha }_{\\rho_5 }*W^{\\rho_5 }_{\\alpha }+1/30*Power[R, 2]+1/6*R*W^{\\beta }_{\\beta }");
-        t = RemoveDueToSymmetry.INSANCE.transform(t);
+        t = RemoveDueToSymmetry.INSTANCE.transform(t);
         Tensor e = parse("1/15*R_{\\delta }^{\\rho }*R_{\\rho }^{\\delta }+1/12*F^{\\alpha }_{\\nu }^{\\rho_5 }_{\\zeta }*F_{\\alpha }^{\\nu \\zeta }_{\\rho_5 }+1/2*W^{\\alpha }_{\\rho_5 }*W^{\\rho_5 }_{\\alpha }+1/30*Power[R, 2]+1/6*R*W^{\\beta }_{\\beta }");
         Assert.assertTrue(TensorUtils.equals(t, e));
     }

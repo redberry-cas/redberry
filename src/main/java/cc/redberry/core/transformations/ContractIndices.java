@@ -30,7 +30,6 @@ import cc.redberry.core.tensor.functions.ScalarFunction;
 import java.util.*;
 
 /**
- *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
@@ -301,7 +300,10 @@ public final class ContractIndices implements Transformation {
             SimpleIndices newIndices = oldIndices.applyIndexMapping(im);
             if (oldIndices == newIndices)
                 return t;
-            return Tensors.simpleTensor(t.getName(), newIndices);
+            if (t.getClass() == SimpleTensor.class)
+                return Tensors.simpleTensor(t.getName(), newIndices);
+            TensorField ff = (TensorField) t;
+            return Tensors.field(ff.getName(), newIndices, ff.getArgIndices(), ff.getArguments());
         }
 
         boolean apply(MetricWrapper mK) {

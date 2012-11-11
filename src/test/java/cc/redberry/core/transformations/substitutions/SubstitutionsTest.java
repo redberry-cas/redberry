@@ -31,9 +31,8 @@ import cc.redberry.core.indices.IndexType;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.tensor.*;
 import cc.redberry.core.transformations.ContractIndices;
-import cc.redberry.core.transformations.Expand;
-import cc.redberry.core.transformations.Together;
 import cc.redberry.core.transformations.Transformation;
+import cc.redberry.core.transformations.expand.Expand;
 import cc.redberry.core.utils.TensorUtils;
 import junit.framework.Assert;
 import org.junit.Ignore;
@@ -935,6 +934,47 @@ public class SubstitutionsTest {
         t = parseExpression("d_m^m = 4").transform(t);
         t = expand(t);
         TAssert.assertEquals(t, "4*Cos[m**2]**(-1)+8*Sin[m**2]*m**2");
+    }
+
+    @Test
+    public void testProduct16() {
+        Tensor t = parse("vp_A[p1_m]*v^A[p2_m]");
+        Expression e = parseExpression("vp_A[p1_m]*v_B[p2_m] = vp_A[p2_m]*v_B[p1_m]");
+        t = e.transform(t);
+        TAssert.assertEquals(t, "vp_A[p2_m]*v^A[p1_m]");
+    }
+
+    @Test
+    public void testProduct17() {
+        Tensor t = parse("pv_A[p2_m]*V^A_{B m}*e^m[k2_m]*D^B_C[k1_m+p1_m]*V^C_{D n}*e^n[k1_m]*v^D[p1_m]");
+        Expression e = parseExpression("pv_A[p2_m]*v_B[p1_m] = pv_A[p1_m]*v_B[p2_m]");
+        t = e.transform(t);
+        TAssert.assertEquals(t, "pv_A[p1_m]*V^A_{B m}*e^m[k2_m]*D^B_C[k1_m+p1_m]*V^C_{D n}*e^n[k1_m]*v^D[p2_m]");
+    }
+
+
+    @Test
+    public void testProduct18() {
+        Tensor t = parse(" x_i'*y^k' ");
+        Expression e = parseExpression("x_i'*y^k' = A_i'^k'");
+        t = e.transform(t);
+        TAssert.assertEquals(t, "A_i'^k'");
+    }
+
+    @Test
+    public void testProduct19() {
+        Tensor t = parse(" x_i'*y^k' ");
+        Expression e = parseExpression("x^i'*y^k' = A^i'k'");
+        t = e.transform(t);
+        TAssert.assertEquals(t, "x_i'*y^k'");
+    }
+
+    @Test
+    public void testProduct20() {
+        Tensor t = parse("e^m[k1_m]*e^n[k1_m]*G^{a'}_{b'm}*G^{b'}_{c'n}");
+        Expression e = parseExpression("e^m[k1_m]*e^n[k1_m]*G^{a'}_{b'm}*G^{b'}_{c'n} = d^{a'}_{c'}*e_m[k1_m]*e^m[k1_m]");
+        t = e.transform(t);
+        TAssert.assertEquals(t, "e^{m}[k1_{m}]*e_{m}[k1_{m}]*d^{a'}_{c'}");
     }
 
     //TODO tests for Product

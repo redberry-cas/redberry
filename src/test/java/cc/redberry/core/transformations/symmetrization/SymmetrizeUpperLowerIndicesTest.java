@@ -20,7 +20,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
-package cc.redberry.core.transformations;
+package cc.redberry.core.transformations.symmetrization;
 
 import cc.redberry.core.TAssert;
 import cc.redberry.core.tensor.Tensor;

@@ -20,7 +20,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
-package cc.redberry.core.transformations;
+package cc.redberry.core.transformations.expand;
 
 import cc.redberry.core.TAssert;
 import cc.redberry.core.context.CC;
@@ -30,13 +30,15 @@ import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.tensor.Tensors;
 import cc.redberry.core.tensor.iterator.TraverseState;
 import cc.redberry.core.tensor.iterator.TreeTraverseIterator;
+import cc.redberry.core.transformations.ContractIndices;
+import cc.redberry.core.transformations.fractions.Together;
 import cc.redberry.core.utils.TensorUtils;
 import org.junit.Assert;
 import org.junit.Test;
 
 import static cc.redberry.core.tensor.Tensors.parse;
-import static cc.redberry.core.transformations.Expand.expand;
-import static cc.redberry.core.transformations.ExpandPort.expandUsingPort;
+import static cc.redberry.core.transformations.expand.Expand.expand;
+import static cc.redberry.core.transformations.expand.ExpandPort.expandUsingPort;
 
 /**
  * @author Dmitry Bolotin

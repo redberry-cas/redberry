@@ -70,12 +70,22 @@ class EmptyIndices implements Indices {
     }
 
     /**
-     * Returns {@code EmptySimpleIndices} instance
+     * Returns {@code EmptyIndices} instance
      *
-     * @return {@code EmptySimpleIndices} instance
+     * @return {@code EmptyIndices} instance
      */
     @Override
     public Indices getFree() {
+        return this;
+    }
+
+    /**
+     * Returns {@code EmptyIndices} instance
+     *
+     * @return {@code EmptyIndices} instance
+     */
+    @Override
+    public Indices getOfType(IndexType type) {
         return this;
     }
 

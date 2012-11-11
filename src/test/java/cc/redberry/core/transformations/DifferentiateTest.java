@@ -7,6 +7,9 @@ import cc.redberry.core.indices.IndexType;
 import cc.redberry.core.tensor.Expression;
 import cc.redberry.core.tensor.SimpleTensor;
 import cc.redberry.core.tensor.Tensor;
+import cc.redberry.core.transformations.expand.Expand;
+import cc.redberry.core.transformations.expand.ExpandAll;
+import cc.redberry.core.transformations.fractions.Together;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -14,7 +17,7 @@ import static cc.redberry.core.tensor.Tensors.*;
 import static cc.redberry.core.transformations.ContractIndices.ContractIndices;
 import static cc.redberry.core.transformations.ContractIndices.contract;
 import static cc.redberry.core.transformations.Differentiate.differentiate;
-import static cc.redberry.core.transformations.Expand.expand;
+import static cc.redberry.core.transformations.expand.Expand.expand;
 
 /**
  * @author Dmitry Bolotin
@@ -152,8 +155,8 @@ public class DifferentiateTest {
             Tensor v = differentiate(t, var2, var1);
             v = contract(expand(v));
             v = d.transform(R1.transform(R2.transform(v)));
-            u = RemoveDueToSymmetry.INSANCE.transform(u);
-            v = RemoveDueToSymmetry.INSANCE.transform(v);
+            u = RemoveDueToSymmetry.INSTANCE.transform(u);
+            v = RemoveDueToSymmetry.INSTANCE.transform(v);
             TAssert.assertEquals(u, v);
         }
     }
@@ -191,8 +194,8 @@ public class DifferentiateTest {
             Tensor u = differentiate(t, var1, var2);
             u = contract(expand(u));
             u = d.transform(R1.transform(R2.transform(u)));
-            u = RemoveDueToSymmetry.INSANCE.transform(u);
-            v = RemoveDueToSymmetry.INSANCE.transform(v);
+            u = RemoveDueToSymmetry.INSTANCE.transform(u);
+            v = RemoveDueToSymmetry.INSTANCE.transform(v);
             TAssert.assertEquals(u, v);
         }
     }
@@ -276,4 +279,45 @@ public class DifferentiateTest {
         tensor = expand(tensor);
         System.out.println(tensor);
     }
+
+    @Test
+    public void test14() {
+        addAntiSymmetry("R_abcd", 1, 0, 2, 3);
+        addSymmetry("R_abcd", 2, 3, 0, 1);
+        Tensor t = parse("R_abcd*R^abcd");
+        t = differentiate(t, new Transformation[]{ExpandAll.EXPAND_ALL, ContractIndices}, parseSimple("R_mnpq"));
+        TAssert.assertEquals(t, "2*R^mnpq");
+    }
+
+    @Test
+    public void test15() {
+        addAntiSymmetry("R_abcd", 1, 0, 2, 3);
+        addSymmetry("R_abcd", 2, 3, 0, 1);
+        addSymmetry("R_ab", 1, 0);
+
+        Tensor tensor = parse("(R^sa_s^g*R^e_re^b - R^s_rs^g*R^ea_e^b)*(R^s_{gma}*R^r_{nsb}+R^s_{amg}*R^r_{snb})");
+        SimpleTensor var1 = parseSimple("R_mxn^x");
+        SimpleTensor var2 = parseSimple("R^r_y^ty");
+
+        Transformation[] trs = new Transformation[]{
+                parseExpression("d_i^i = 4"),
+                parseExpression("R_mn^a_a = 0"),
+                parseExpression("R^a_man = R_mn"),
+                parseExpression("R^a_a = R"),
+                RemoveDueToSymmetry.INSTANCE
+        };
+        Tensor t1 = differentiate(tensor, var2, var1);
+        t1 = contract(expand(t1));
+        for (Transformation tr : trs)
+            t1 = tr.transform(t1);
+        Tensor t2 = differentiate(tensor,
+                new Transformation[]{Expand.EXPAND, ContractIndices},
+                var2, var1);
+        t2 = contract(expand(t2));
+        for (Transformation tr : trs)
+            t2 = tr.transform(t2);
+
+        TAssert.assertEquals(t1, t2);
+    }
+
 }

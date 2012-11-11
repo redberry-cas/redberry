@@ -1,4 +1,4 @@
-package cc.redberry.core.transformations;
+package cc.redberry.core.transformations.expand;
 
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.tensor.Product;
@@ -8,11 +8,11 @@ import cc.redberry.core.tensor.TensorField;
 import cc.redberry.core.tensor.functions.ScalarFunction;
 import cc.redberry.core.tensor.iterator.TraverseGuide;
 import cc.redberry.core.tensor.iterator.TraversePermission;
+import cc.redberry.core.transformations.Transformation;
 import cc.redberry.core.transformations.substitutions.SubstitutionIterator;
 import cc.redberry.core.utils.TensorUtils;
 
 import static cc.redberry.core.tensor.Tensors.reciprocal;
-import static cc.redberry.core.transformations.ExpandUtils.*;
 import static cc.redberry.core.utils.TensorUtils.isNegativeIntegerPower;
 
 /**
@@ -56,7 +56,7 @@ abstract class ExpandAbstract implements Transformation {
         while ((current = iterator.next()) != null) {
             if (current instanceof Product)
                 iterator.unsafeSet(expandProduct((Product) current, transformations));
-            else if (isExpandablePower(current)) {
+            else if (ExpandUtils.isExpandablePower(current)) {
                 Sum sum = (Sum) current.get(0);
                 int exponent = ((Complex) current.get(1)).intValue();
                 if (exponent == -1)
@@ -66,9 +66,9 @@ abstract class ExpandAbstract implements Transformation {
                 exponent = Math.abs(exponent);
                 Tensor temp;
                 if (symbolic)
-                    temp = expandSymbolicPower(sum, exponent, transformations);
+                    temp = ExpandUtils.expandSymbolicPower(sum, exponent, transformations);
                 else
-                    temp = expandPower(sum, exponent, iterator.getForbidden(), transformations);
+                    temp = ExpandUtils.expandPower(sum, exponent, iterator.getForbidden(), transformations);
                 if (reciprocal)
                     temp = reciprocal(temp);
                 if (symbolic)

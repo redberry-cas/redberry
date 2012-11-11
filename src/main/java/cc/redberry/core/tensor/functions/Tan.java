@@ -42,7 +42,7 @@ public final class Tan extends ScalarFunction {
 
     @Override
     public Tensor derivative() {
-        return Tensors.pow(new Cos(argument), Complex.MINUSE_TWO);
+        return Tensors.pow(new Cos(argument), Complex.MINUS_TWO);
     }
 
     @Override

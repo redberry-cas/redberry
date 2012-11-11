@@ -28,6 +28,7 @@ import cc.redberry.core.context.CC;
 import cc.redberry.core.parser.ParserIndices;
 import cc.redberry.core.tensor.SimpleTensor;
 import cc.redberry.core.tensor.random.TRandom;
+import cc.redberry.core.utils.IntArrayList;
 import junit.framework.Assert;
 import org.apache.commons.math3.random.Well19937c;
 import org.junit.Test;
@@ -206,6 +207,58 @@ public class IndicesTest {
                 }
             }
             Assert.assertEquals(indices, builder.getIndices());
+        }
+    }
+
+    @Test
+    public void testGetOfTypeSimpleIndices() {
+        TRandom tRandom = new TRandom(100,
+                1000,
+                new int[]{0, 0, 0, 0},
+                new int[]{10, 10, 10, 10},
+                false, new Well19937c());
+        IndicesTypeStructure typeStructure;
+        Indices indices;
+        for (int i = 0; i < 1000; ++i) {
+            typeStructure = tRandom.nextNameDescriptor().getIndicesTypeStructure();
+            indices = IndicesFactory.createSimple(null, tRandom.nextIndices(typeStructure));
+            IndexType indexType;
+            int sizeOfType;
+            for (byte type = 0; type < IndexType.TYPES_COUNT; ++type) {
+                indexType = IndexType.getType(type);
+                Indices ofType = indices.getOfType(indexType);
+                IntArrayList sb = new IntArrayList();
+                sizeOfType = indices.size(indexType);
+                for (int k = 0; k < sizeOfType; ++k)
+                    sb.add(indices.get(indexType, k));
+                Assert.assertEquals(ofType, IndicesFactory.createSimple(null, sb.toArray()));
+            }
+        }
+    }
+
+    @Test
+    public void testGetOfTypeSortedIndices() {
+        TRandom tRandom = new TRandom(100,
+                1000,
+                new int[]{0, 0, 0, 0},
+                new int[]{10, 10, 10, 10},
+                false, new Well19937c());
+        IndicesTypeStructure typeStructure;
+        Indices indices;
+        for (int i = 0; i < 1000; ++i) {
+            typeStructure = tRandom.nextNameDescriptor().getIndicesTypeStructure();
+            indices = IndicesFactory.createSorted(tRandom.nextIndices(typeStructure));
+            IndexType indexType;
+            int sizeOfType;
+            for (byte type = 0; type < IndexType.TYPES_COUNT; ++type) {
+                indexType = IndexType.getType(type);
+                Indices ofType = indices.getOfType(indexType);
+                IntArrayList sb = new IntArrayList();
+                sizeOfType = indices.size(indexType);
+                for (int k = 0; k < sizeOfType; ++k)
+                    sb.add(indices.get(indexType, k));
+                Assert.assertEquals(ofType, IndicesFactory.createSorted(sb.toArray()));
+            }
         }
     }
 

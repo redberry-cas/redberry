@@ -422,4 +422,10 @@ public class ProductTest {
                 return i;
         throw new RuntimeException();
     }
+
+    @Test
+    public void testRemove1() {
+        Product tensor = (Product) parse("a*b");
+        Assert.assertTrue(tensor.remove(0) instanceof SimpleTensor);
+    }
 }

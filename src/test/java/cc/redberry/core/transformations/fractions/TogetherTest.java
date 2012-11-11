@@ -20,13 +20,14 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
-package cc.redberry.core.transformations;
+package cc.redberry.core.transformations.fractions;
 
 import cc.redberry.core.TAssert;
 import cc.redberry.core.context.CC;
 import cc.redberry.core.context.OutputFormat;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.tensor.Tensors;
+import cc.redberry.core.transformations.expand.Expand;
 import org.junit.Test;
 
 /**

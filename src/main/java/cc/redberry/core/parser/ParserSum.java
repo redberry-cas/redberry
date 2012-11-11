@@ -49,11 +49,11 @@ public class ParserSum extends ParserOperator {
         ParseNode[] content;
         if (node.tensorType == TensorType.Product) {
             content = new ParseNode[1 + node.content.length];
-            content[0] = new ParseNodeNumber(Complex.MINUSE_ONE);
+            content[0] = new ParseNodeNumber(Complex.MINUS_ONE);
             System.arraycopy(node.content, 0, content, 1, node.content.length);
         } else
             content = new ParseNode[]{
-                new ParseNodeNumber(Complex.MINUSE_ONE),
+                new ParseNodeNumber(Complex.MINUS_ONE),
                 node
             };
         return new ParseNode(TensorType.Product, content);

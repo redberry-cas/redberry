@@ -133,6 +133,33 @@ final class SortedIndices extends AbstractIndices {
     }
 
     @Override
+    public Indices getOfType(IndexType type) {
+        int type_ = type.getType();
+
+        int lowerPositionU = Arrays.binarySearch(data, 0, firstLower, (type_ << 24) | 0x80000000);
+        if (lowerPositionU < 0) lowerPositionU = ~lowerPositionU;
+        int upperPositionU = Arrays.binarySearch(data, lowerPositionU, firstLower, ((type_ + 1) << 24) | 0x80000000);
+        if (upperPositionU < 0) upperPositionU = ~upperPositionU;
+        int sizeU = upperPositionU - lowerPositionU;
+
+        int lowerPositionL = Arrays.binarySearch(data, firstLower, data.length, type_ << 24);
+        if (lowerPositionL < 0) lowerPositionL = ~lowerPositionL;
+        int upperPositionL = Arrays.binarySearch(data, lowerPositionL, data.length, (type_ + 1) << 24);
+        if (upperPositionL < 0) upperPositionL = ~upperPositionL;
+        int sizeL = upperPositionL - lowerPositionL;
+
+        if (sizeU + sizeL == data.length)
+            return this;
+        else if (sizeU + sizeL == 0)
+            return IndicesFactory.EMPTY_INDICES;
+
+        int[] indices = new int[sizeU + sizeL];
+        System.arraycopy(data, lowerPositionU, indices, 0, sizeU);
+        System.arraycopy(data, lowerPositionL, indices, sizeU, sizeL);
+        return new SortedIndices(indices, sizeU);
+    }
+
+    @Override
     int[] getSortedData() {
         return data;
     }

@@ -1,4 +1,4 @@
-package cc.redberry.core.transformations;
+package cc.redberry.core.transformations.expand;
 
 import cc.redberry.core.tensor.Product;
 import cc.redberry.core.tensor.Tensor;
@@ -7,9 +7,9 @@ import cc.redberry.core.tensor.Tensors;
 import cc.redberry.core.tensor.functions.ScalarFunction;
 import cc.redberry.core.tensor.iterator.TraverseGuide;
 import cc.redberry.core.tensor.iterator.TraversePermission;
+import cc.redberry.core.transformations.fractions.NumeratorDenominator;
+import cc.redberry.core.transformations.Transformation;
 
-import static cc.redberry.core.transformations.ExpandUtils.NumDen;
-import static cc.redberry.core.transformations.ExpandUtils.getNumDen;
 import static cc.redberry.core.utils.TensorUtils.isPositiveIntegerPower;
 
 /**
@@ -53,7 +53,7 @@ public final class ExpandDenominator extends ExpandAbstract {
 
     @Override
     protected Tensor expandProduct(Product product, Transformation[] transformations) {
-        NumDen numDen = getNumDen(product);
+        NumeratorDenominator numDen = NumeratorDenominator.getNumeratorAndDenominator(product, NumeratorDenominator.integerDenominatorIndicator);
         Tensor denominator = numDen.denominator;
         if (denominator instanceof Product)
             denominator = ExpandUtils.expandProductOfSums((Product) numDen.denominator, transformations);

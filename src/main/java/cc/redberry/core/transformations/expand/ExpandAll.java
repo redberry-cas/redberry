@@ -1,13 +1,13 @@
-package cc.redberry.core.transformations;
+package cc.redberry.core.transformations.expand;
 
 import cc.redberry.core.tensor.Product;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.tensor.Tensors;
 import cc.redberry.core.tensor.iterator.TraverseGuide;
+import cc.redberry.core.transformations.fractions.NumeratorDenominator;
+import cc.redberry.core.transformations.Transformation;
 
 import static cc.redberry.core.tensor.Tensors.reciprocal;
-import static cc.redberry.core.transformations.ExpandUtils.*;
-import static cc.redberry.core.utils.TensorUtils.isPositiveIntegerPower;
 
 /**
  * @author Dmitry Bolotin
@@ -38,19 +38,19 @@ public final class ExpandAll extends ExpandAbstract {
 
     @Override
     protected Tensor expandProduct(Product product, Transformation[] transformations) {
-        NumDen numDen = getNumDen(product);
+        NumeratorDenominator numDen = NumeratorDenominator.getNumeratorAndDenominator(product, NumeratorDenominator.integerDenominatorIndicator);
         Tensor denominator = numDen.denominator;
 
 //        assert !isPositiveIntegerPower(denominator);
         if (denominator instanceof Product)
-            denominator = expandProductOfSums((Product) numDen.denominator, transformations);
+            denominator = ExpandUtils.expandProductOfSums((Product) numDen.denominator, transformations);
         boolean denExpanded = denominator != numDen.denominator;
         denominator = reciprocal(denominator);
 
         Tensor numerator = numDen.numerator;
         Tensor res = Tensors.multiply(denominator, numerator), temp = res;
         if (res instanceof Product)
-            res = expandProductOfSums((Product) temp, transformations);
+            res = ExpandUtils.expandProductOfSums((Product) temp, transformations);
         if (denExpanded || res != temp)
             return res;
         return product;

@@ -66,6 +66,16 @@ final class EmptySimpleIndices extends EmptyIndices implements SimpleIndices {
     }
 
     /**
+     * Returns {@code EmptySimpleIndices} instance
+     *
+     * @return {@code EmptySimpleIndices} instance
+     */
+    @Override
+    public SimpleIndices getOfType(IndexType type) {
+        return this;
+    }
+
+    /**
      * Doing nothing
      */
     @Override

@@ -145,6 +145,16 @@ public interface Indices {
     Indices getInverse();
 
     /**
+     * Returns indices of the specified type, which are contained
+     * in this indices object.
+     *
+     * @param type the type of indices
+     * @return indices of the specified type, which are contained
+     *         in this indices object.
+     */
+    Indices getOfType(IndexType type);
+
+    /**
      * Returns true if this indices are equals to specified indices, without
      * regard for order. Only we interesting in this method, is equality of the
      * sets of indices. So, e.g. for _{ab}^c and ^c_{ba} this method will return

@@ -42,7 +42,7 @@ public class ArcCos extends ScalarFunction {
 
     @Override
     public Tensor derivative() {
-        return Tensors.multiply(Tensors.pow(Tensors.sum(Complex.ONE, Tensors.pow(argument, Complex.TWO)), Complex.MINUSE_ONE_HALF), Complex.MINUSE_ONE);
+        return Tensors.multiply(Tensors.pow(Tensors.sum(Complex.ONE, Tensors.pow(argument, Complex.TWO)), Complex.MINUS_ONE_HALF), Complex.MINUS_ONE);
     }
 
     @Override
