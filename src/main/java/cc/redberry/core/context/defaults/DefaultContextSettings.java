@@ -40,7 +40,7 @@ public class DefaultContextSettings {
         defaultSettings.addMetricIndexType(IndexType.LatinLower);
         defaultSettings.addMetricIndexType(IndexType.GreekLower);
         defaultSettings.addMetricIndexType(IndexType.LatinUpper);
-        //defaultSettings.addMetricIndexType(IndexType.GreekUpper);
+        defaultSettings.addMetricIndexType(IndexType.GreekUpper);
 
         //Reading seed from property if exists
         if (System.getProperty("redberry.nmseed") != null)

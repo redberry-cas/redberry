@@ -974,8 +974,7 @@ public class SubstitutionsTest {
         Tensor t = parse("e^m[k1_m]*e^n[k1_m]*G^{a'}_{b'm}*G^{b'}_{c'n}");
         Expression e = parseExpression("e^m[k1_m]*e^n[k1_m]*G^{a'}_{b'm}*G^{b'}_{c'n} = d^{a'}_{c'}*e_m[k1_m]*e^m[k1_m]");
         t = e.transform(t);
-        System.out.println(t);
-        TAssert.assertEquals(t, "x_i'*y^k'");
+        TAssert.assertEquals(t, "e^{m}[k1_{m}]*e_{m}[k1_{m}]*d^{a'}_{c'}");
     }
 
     //TODO tests for Product

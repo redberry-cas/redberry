@@ -29,7 +29,6 @@ import cc.redberry.core.indices.SimpleIndices;
 import java.util.Arrays;
 
 /**
- *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
@@ -46,18 +45,22 @@ final class NameDescriptorForMetricAndKronecker extends NameDescriptor {
 
     private static IndicesTypeStructure[] createIndicesTypeStructures(byte type) {
         IndicesTypeStructure[] structures = new IndicesTypeStructure[1];
-        structures[0] = new IndicesTypeStructure(type, 2);
+        if (!CC.isMetric(type))
+            structures[0] = new IndicesTypeStructure(type, 2, true, false);
+        else
+            structures[0] = new IndicesTypeStructure(type, 2);
         return structures;
     }
-   
+
     /**
      * first for kronecker, second for metric
-     * @return 
+     *
+     * @return
      */
     @Override
     IndicesTypeStructureAndName[] getKeys() {
         return new IndicesTypeStructureAndName[]{new IndicesTypeStructureAndName(names[0], indexTypeStructures),
-                                                 new IndicesTypeStructureAndName(names[1], indexTypeStructures)};
+                new IndicesTypeStructureAndName(names[1], indexTypeStructures)};
     }
 
     @Override

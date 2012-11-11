@@ -25,12 +25,19 @@ package cc.redberry.core.utils;
 import java.util.Arrays;
 
 /**
- *
  * @author Dmitry Bolotin
  */
 public final class ByteBackedBitArray implements BitArray {
+    public static final ByteBackedBitArray EMPTY = new ByteBackedBitArray(0);
     private byte[] data;
     private int size;
+
+    public ByteBackedBitArray(boolean... bits) {
+        this.size = bits.length;
+        this.data = new byte[(size + 7) >> 3];
+        for (int i = 0; i < size; ++i)
+            if (bits[i]) set(i);
+    }
 
     public ByteBackedBitArray(int size) {
         this.size = size;
@@ -170,9 +177,7 @@ public final class ByteBackedBitArray implements BitArray {
         if (getClass() != obj.getClass())
             return false;
         final ByteBackedBitArray other = (ByteBackedBitArray) obj;
-        if (!Arrays.equals(this.data, other.data))
-            return false;
-        return this.size == other.size;
+        return this.size == other.size && Arrays.equals(this.data, other.data);
     }
 
     @Override
@@ -204,7 +209,7 @@ public final class ByteBackedBitArray implements BitArray {
 
         if ((result = Integer.numberOfTrailingZeros(data[pointer++] >>> firstShift)) != 32)
             return position + result;
-        while (pointer < data.length && (result = Integer.numberOfTrailingZeros(data[pointer++])) == 32);
+        while (pointer < data.length && (result = Integer.numberOfTrailingZeros(data[pointer++])) == 32) ;
         if (result == 32)
             return -1;
         return (pointer - 1) * 8 + result;
