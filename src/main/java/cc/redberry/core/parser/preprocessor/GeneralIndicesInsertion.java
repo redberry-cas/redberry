@@ -4,10 +4,7 @@ import cc.redberry.core.context.CC;
 import cc.redberry.core.context.IndicesTypeStructureAndName;
 import cc.redberry.core.context.NameDescriptor;
 import cc.redberry.core.indexgenerator.IndexGenerator;
-import cc.redberry.core.indices.IndexType;
-import cc.redberry.core.indices.IndicesFactory;
-import cc.redberry.core.indices.IndicesTypeStructure;
-import cc.redberry.core.indices.SimpleIndices;
+import cc.redberry.core.indices.*;
 import cc.redberry.core.parser.*;
 import cc.redberry.core.tensor.SimpleTensor;
 import cc.redberry.core.utils.ArraysUtils;
@@ -21,18 +18,29 @@ public class GeneralIndicesInsertion implements ParseNodeTransformer {
     private final Map<IndicesTypeStructureAndName, InsertionRule> initialRules = new HashMap<>();
     private Map<IndicesTypeStructureAndName, InsertionRule> mappedRules;
 
+    public GeneralIndicesInsertion() {
+    }
+
     public void addInsertionRule(SimpleTensor tensor, IndexType omittedIndexType) {
-        mappedRules = null;
         NameDescriptor nd = CC.getNameDescriptor(tensor.getName());
         IndicesTypeStructureAndName originalStructureAndName = NameDescriptor.extractKey(nd);
         if (tensor.getIndices().size(omittedIndexType) == 0)
             throw new IllegalArgumentException("No indices of specified type in tensor.");
         IndicesTypeStructure structure = tensor.getIndices().getIndicesTypeStructure();
         if (CC.isMetric(omittedIndexType.getType())) {
-            if ((structure.getTypeData(omittedIndexType.getType()).length % 2) == 1)
-                throw new IllegalArgumentException();
-            //TODO ONLY M^i_j not (M_j^i or M^ijk_l)
+            int omittedIndicesCount = structure.getTypeData(omittedIndexType.getType()).length;
+            if ((omittedIndicesCount % 2) == 1)
+                throw new IllegalArgumentException("The number of omitted indices for metric types should be even.");
+            omittedIndicesCount /= 2;
+            SimpleIndices omittedIndices = tensor.getIndices().getOfType(omittedIndexType);
+            for (int i = 0, size = omittedIndices.size(); i < size; ++i) {
+                if (i < omittedIndicesCount && !IndicesUtils.getState(omittedIndices.get(i)))
+                    throw new IllegalArgumentException("Inconsistent states signature for metric type.");
+                if (i >= omittedIndicesCount && IndicesUtils.getState(omittedIndices.get(i)))
+                    throw new IllegalArgumentException("Inconsistent states signature for metric type.");
+            }
         }
+        mappedRules = null;
         InsertionRule rule = initialRules.get(originalStructureAndName);
         if (rule == null)
             initialRules.put(originalStructureAndName, rule = new InsertionRule(originalStructureAndName));

@@ -25,21 +25,22 @@ package cc.redberry.core.parser;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.transformations.Transformation;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
- *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
 public final class ParseManager {
 
+    public List<ParseNodeTransformer> defaultParserPreprocessors = new ArrayList<>();
+    public List<Transformation> defaultTensorPreprocessors = new ArrayList<>();
+
     private final Parser parser;
 
     public ParseManager(Parser parser) {
         this.parser = parser;
-    }
-
-    public Tensor parse(String expression) {
-        return parser.parse(expression).toTensor();
     }
 
     public Tensor parse(String expression, Transformation[] tensorPreprocessors, ParseNodeTransformer[] nodesPreprocessors) {
@@ -54,5 +55,11 @@ public final class ParseManager {
 
     public Tensor parse(String expression, ParseNodeTransformer... nodesPreprocessors) {
         return parse(expression, new Transformation[0], nodesPreprocessors);
+    }
+
+    public Tensor parse(String expression) {
+        return parse(expression,
+                defaultTensorPreprocessors.toArray(new Transformation[defaultTensorPreprocessors.size()]),
+                defaultParserPreprocessors.toArray(new ParseNodeTransformer[defaultParserPreprocessors.size()]));
     }
 }
