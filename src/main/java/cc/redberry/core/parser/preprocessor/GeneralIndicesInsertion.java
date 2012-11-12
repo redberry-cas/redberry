@@ -14,13 +14,32 @@ import java.util.*;
 
 import static cc.redberry.core.indices.IndexType.TYPES_COUNT;
 
+/**
+ * ParseNodeTransformer facilitating input of matrices and vectors with omitted indices.
+ *
+ * <p>It is useful in situations where one is faced with the need to input many huge matrix expressions, and manual
+ * indices insertion becomes a complex task.</p>
+ */
 public class GeneralIndicesInsertion implements ParseNodeTransformer {
     private final Map<IndicesTypeStructureAndName, InsertionRule> initialRules = new HashMap<>();
     private Map<IndicesTypeStructureAndName, InsertionRule> mappedRules;
 
+    /**
+     * Creates blank GeneralIndicesInsertion transformer.
+     */
     public GeneralIndicesInsertion() {
     }
 
+    /**
+     * Adds new insertion rule to this transformer.
+     *
+     * <p>After rule is added you can omit indices of specified type in specified simple tensors, when this transformer
+     * is passed to {@link cc.redberry.core.tensor.Tensors#parse(String, cc.redberry.core.parser.ParseNodeTransformer...)}
+     * method or somehow added to default parse nodes preprocessor.</p>
+     *
+     * @param tensor           simple tensor
+     * @param omittedIndexType type of indices that may be omitted
+     */
     public void addInsertionRule(SimpleTensor tensor, IndexType omittedIndexType) {
         NameDescriptor nd = CC.getNameDescriptor(tensor.getName());
         IndicesTypeStructureAndName originalStructureAndName = NameDescriptor.extractKey(nd);
@@ -63,7 +82,10 @@ public class GeneralIndicesInsertion implements ParseNodeTransformer {
         int[] forbidden = ParseUtils.getAllIndicesT(node).toArray();
         IndexGenerator generator = new IndexGenerator(forbidden);
 
-        IITransformer transformer = createTransformer(node);
+        ParseNode wrapped = new ParseNode(TensorType.Dummy, node);
+        IITransformer transformer = createTransformer(wrapped);
+        node = wrapped.content[0];
+        node.parent = null;
 
         if (transformer == null)
             return node;
@@ -200,6 +222,39 @@ public class GeneralIndicesInsertion implements ParseNodeTransformer {
         IITransformer t;
         switch (node.tensorType) {
             case TensorField:
+                if (((ParseNodeTensorField) node).name.equalsIgnoreCase("tr")) {
+                    Set<IndexType> types;
+                    int i;
+                    if (node.content.length == 1)
+                        types = EnumSet.allOf(IndexType.class);
+                    else {
+                        types = new HashSet<>();
+                        ParseNode pn;
+                        IndexType type;
+
+                        for (i = 1; i < node.content.length; ++i) {
+                            if ((pn = node.content[i]).tensorType != TensorType.SimpleTensor)
+                                throw new IllegalArgumentException("Error in trace indices list.");
+                            if ((type = IndexType.fromShortString(((ParseNodeSimpleTensor) pn).name)) == null)
+                                throw new IllegalArgumentException("Error in trace indices list.");
+                            types.add(type);
+                        }
+                    }
+
+                    ParseNode nested = node.content[0];
+                    ParseNode parent = node.parent;
+                    for (i = 0; i < parent.content.length; ++i) {
+                        if (parent.content[i] == node) {
+                            parent.content[i] = nested;
+                            nested.parent = parent;
+                            break;
+                        }
+                    }
+                    assert i != parent.content.length;
+
+                    IITransformer innerTransformer = createTransformer(nested);
+                    return new TraceTransformer(innerTransformer, types);
+                }
             case SimpleTensor:
                 InsertionRule rule = mappedRules.get(((ParseNodeSimpleTensor) node).getIndicesTypeStructureAndName());
                 if (rule != null)
@@ -207,7 +262,6 @@ public class GeneralIndicesInsertion implements ParseNodeTransformer {
                             rule);
                 else
                     return null;
-
             case Product:
                 List<IITransformer> transformersList = new ArrayList<>();
                 for (ParseNode _node : node.content)
@@ -249,6 +303,8 @@ public class GeneralIndicesInsertion implements ParseNodeTransformer {
                 if (outerIndices == null)
                     return null;
                 return new SumTransformer(transformersArray, outerIndices, node);
+            case Dummy:
+                return createTransformer(node.content[0]);
             default:
                 return null;
         }
@@ -402,6 +458,50 @@ public class GeneralIndicesInsertion implements ParseNodeTransformer {
         public TransformersIndicesRange(int[] from, int[] count) {
             this.from = from;
             this.count = count;
+        }
+    }
+
+    private static class TraceTransformer implements IITransformer {
+        private final OuterIndices outerIndices;
+        private final IITransformer innerTransformer;
+        private final Set<IndexType> typesToContract;
+
+        private TraceTransformer(IITransformer innerTransformer, Set<IndexType> typesToContract) {
+            this.innerTransformer = innerTransformer;
+            this.typesToContract = new HashSet<>(typesToContract);
+            outerIndices = innerTransformer.getOuterIndices().clone();
+            for (IndexType type : typesToContract) {
+                if (outerIndices.upper[type.getType()] != outerIndices.lower[type.getType()])
+                    throw new IllegalArgumentException("Illegal trace usage.");
+                if (outerIndices.upper[type.getType()] == 0)
+                    this.typesToContract.remove(type);
+                outerIndices.upper[type.getType()] = outerIndices.lower[type.getType()] = 0;
+            }
+        }
+
+        @Override
+        public OuterIndices getOuterIndices() {
+            return outerIndices;
+        }
+
+        @Override
+        public void apply(IndexGenerator generator, int[][] upper, int[][] lower) {
+            OuterIndices innerIndices = innerTransformer.getOuterIndices();
+            int[][] preparedUpper = upper.clone(), preparedLower = lower.clone();
+            int i, generated;
+            int[] l, u;
+            for (IndexType type : typesToContract) {
+                l = new int[innerIndices.lower[type.getType()]];
+                u = new int[innerIndices.lower[type.getType()]];
+                for (i = 0; i < l.length; ++i) {
+                    generated = generator.generate(type.getType());
+                    l[i] = generated;
+                    u[i] = 0x80000000 | generated;
+                }
+                preparedLower[type.getType()] = l;
+                preparedUpper[type.getType()] = u;
+            }
+            innerTransformer.apply(generator, preparedUpper, preparedLower);
         }
     }
 

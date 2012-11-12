@@ -37,8 +37,7 @@ public class GeneralIndicesInsertionTest {
         gii.addInsertionRule(parseSimple("K^A'_B'"), IndexType.LatinUpper1);
         gii.addInsertionRule(parseSimple("V^a'"), IndexType.LatinLower1);
         gii.addInsertionRule(parseSimple("cV_b'"), IndexType.LatinLower1);
-        //Tensor t = Tensors.parse("cV*(S*S+M*N)*V+K", gii);
-        Tensor t = parse("K*S=S*S+K+3", gii);
+        Tensor t = parse("Tr[S*S*S*Y^y+S*Y^y+K*R^y,l'] + K*Y^y", gii);
         System.out.println(t);
     }
 }
