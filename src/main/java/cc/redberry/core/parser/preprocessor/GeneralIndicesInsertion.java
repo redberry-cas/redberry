@@ -8,10 +8,7 @@ import cc.redberry.core.indices.IndexType;
 import cc.redberry.core.indices.IndicesFactory;
 import cc.redberry.core.indices.IndicesTypeStructure;
 import cc.redberry.core.indices.SimpleIndices;
-import cc.redberry.core.parser.ParseNode;
-import cc.redberry.core.parser.ParseNodeSimpleTensor;
-import cc.redberry.core.parser.ParseNodeTransformer;
-import cc.redberry.core.parser.ParseUtils;
+import cc.redberry.core.parser.*;
 import cc.redberry.core.tensor.SimpleTensor;
 import cc.redberry.core.utils.ArraysUtils;
 import cc.redberry.core.utils.ByteBackedBitArray;
@@ -114,34 +111,39 @@ public class GeneralIndicesInsertion implements ParseNodeTransformer {
     }
 
     private static class OuterIndices {
+        public static final OuterIndices EMPTY = new OuterIndices();
         final int[] upper, lower;
+        final boolean[] initialized;
 
         OuterIndices() {
             upper = new int[TYPES_COUNT];
             lower = new int[TYPES_COUNT];
+            initialized = new boolean[TYPES_COUNT];
         }
 
-        private OuterIndices(int[] upper, int[] lower) {
+        private OuterIndices(int[] upper, int[] lower, boolean[] initialized) {
             this.upper = upper;
             this.lower = lower;
+            this.initialized = initialized;
+        }
+
+        public void init() {
+            for (int i = 0; i < TYPES_COUNT; ++i)
+                initialized[i] = (upper[i] != 0 || lower[i] != 0);
         }
 
         public void cumulativeAggregate(OuterIndices other) {
-            for (int i = 0; i < TYPES_COUNT; ++i) {
-                if (upper[i] == other.upper[i] &&
-                        lower[i] == other.lower[i])
-                    continue;
-                if (other.upper[i] == 0 && other.lower[i] == 0)
-                    continue;
-
-                if (upper[i] == 0 && lower[i] == 0) {
-                    upper[i] = other.upper[i];
-                    lower[i] = other.lower[i];
-                    continue;
-                }
-
-                throw new IllegalArgumentException("Inconsistent omitted indices exception.");
-            }
+            for (int i = 0; i < TYPES_COUNT; ++i)
+                if (other.initialized[i])
+                    if (initialized[i]) {
+                        if (upper[i] != other.upper[i] ||
+                                lower[i] != other.lower[i])
+                            throw new IllegalArgumentException("Inconsistent omitted indices exception.");
+                    } else {
+                        upper[i] = other.upper[i];
+                        lower[i] = other.lower[i];
+                        initialized[i] = true;
+                    }
         }
 
         public void cumulativeAdd(OuterIndices other) {
@@ -161,6 +163,7 @@ public class GeneralIndicesInsertion implements ParseNodeTransformer {
             //V * V * M = uuul
 
             for (int i = 0; i < TYPES_COUNT; ++i) {
+                initialized[i] |= other.initialized[i];
                 int dif = other.upper[i] - lower[i];
                 lower[i] = other.lower[i];
                 if (dif < 0)
@@ -170,8 +173,17 @@ public class GeneralIndicesInsertion implements ParseNodeTransformer {
             }
         }
 
+        @Override
+        public boolean equals(Object o) {
+            OuterIndices that = (OuterIndices) o;
+
+            if (!Arrays.equals(initialized, that.initialized)) return false;
+            if (!Arrays.equals(lower, that.lower)) return false;
+            return Arrays.equals(upper, that.upper);
+        }
+
         public OuterIndices clone() {
-            return new OuterIndices(upper.clone(), lower.clone());
+            return new OuterIndices(upper.clone(), lower.clone(), initialized.clone());
         }
     }
 
@@ -233,15 +245,14 @@ public class GeneralIndicesInsertion implements ParseNodeTransformer {
     private static class SimpleTransformer implements IITransformer {
 
         private final ParseNodeSimpleTensor node;
-        private final InsertionRule insertionRule;
+        //private final InsertionRule insertionRule;
         private final OuterIndices outerIndices = new OuterIndices();
 
         public SimpleTransformer(ParseNodeSimpleTensor node, InsertionRule insertionRule) {
             this.node = node;
-            this.insertionRule = insertionRule;
+            //this.insertionRule = insertionRule;
             IndicesTypeStructure originalStructure = insertionRule.originalStructureAndName.getStructure()[0];
             IndicesTypeStructure currentStructure = node.getIndicesTypeStructureAndName().getStructure()[0];
-            int i;
             for (IndexType type : insertionRule.indicesAllowedToOmit)
                 if (currentStructure.getStates(type).size() == 0) {
                     ByteBackedBitArray originalStates = originalStructure.getStates(type);
@@ -255,6 +266,7 @@ public class GeneralIndicesInsertion implements ParseNodeTransformer {
                 } else if (currentStructure.typeCount(type.getType()) !=
                         originalStructure.typeCount(type.getType()))
                     throw new IllegalArgumentException();
+            outerIndices.init();
         }
 
         @Override
@@ -299,16 +311,69 @@ public class GeneralIndicesInsertion implements ParseNodeTransformer {
         public void apply(IndexGenerator generator, int[][] upper, int[][] lower) {
             IndexGenerator generatorTemp = null;
             IndexGenerator generatorClone;
-            for (int i = 0; i < transformers.length - 1; ++i) {
-                transformers[i].apply(generatorClone = generator.clone(), upper, lower);
-                if (generatorTemp == null)
-                    generatorTemp = generatorClone;
-                else
-                    generatorTemp.mergeFrom(generatorClone);
+            int[][] preparedUpper = new int[TYPES_COUNT][], preparedLower = new int[TYPES_COUNT][];
+            OuterIndices oi;
+            byte j;
+            for (int i = 0; i < transformers.length; ++i) {
+                if (transformers[i] == null)
+                    oi = OuterIndices.EMPTY;
+                else {
+                    oi = transformers[i].getOuterIndices();
+
+                    if (oi.equals(outerIndices)) {
+                        System.arraycopy(upper, 0, preparedUpper, 0, TYPES_COUNT);
+                        System.arraycopy(lower, 0, preparedLower, 0, TYPES_COUNT);
+                    } else {
+                        for (j = 0; j < TYPES_COUNT; ++j)
+                            if (oi.initialized[j]) {
+                                preparedUpper[j] = upper[j];
+                                preparedLower[j] = lower[j];
+                            } else {
+                                preparedUpper[j] = new int[0];
+                                preparedLower[j] = new int[0];
+                            }
+                    }
+
+                    if (i != transformers.length - 1) {
+                        transformers[i].apply(generatorClone = generator.clone(), preparedUpper, preparedLower);
+                        if (generatorTemp == null)
+                            generatorTemp = generatorClone;
+                        else
+                            generatorTemp.mergeFrom(generatorClone);
+                    } else {
+                        if (generatorTemp == null)
+                            transformers[i].apply(generator, preparedUpper, preparedLower);
+                        else {
+                            transformers[i].apply(generatorTemp, preparedUpper, preparedLower);
+                            generator.mergeFrom(generatorTemp);
+                        }
+                    }
+                }
+                parseNode.content[i] = addDeltas(oi, parseNode.content[i], outerIndices,
+                        upper, lower);
             }
-            transformers[transformers.length - 1].apply(generator, upper, lower);
             if (generatorTemp != null)
                 generator.mergeFrom(generatorTemp);
+        }
+
+        private ParseNode addDeltas(OuterIndices inserted, ParseNode node, OuterIndices expected,
+                                    int[][] upper, int[][] lower) {
+            List<ParseNode> multipliers = new ArrayList<>();
+            for (byte i = 0; i < TYPES_COUNT; ++i) {
+                if (!inserted.initialized[i] && expected.initialized[i]) {
+                    if (expected.lower[i] == 0 && expected.upper[i] == 0)
+                        continue;
+                    if (expected.lower[i] != 1 || expected.upper[i] != 1)
+                        throw new IllegalArgumentException("Deltas insertion is only supported for one upper and " +
+                                "one lower omitted indices.");
+                    multipliers.add(new ParseNodeSimpleTensor(IndicesFactory.createSimple(null, upper[i][0], lower[i][0]),
+                            CC.current().getKroneckerName()));
+                }
+            }
+            if (multipliers.isEmpty())
+                return node;
+            multipliers.add(node);
+            return new ParseNode(TensorType.Product, multipliers.toArray(new ParseNode[multipliers.size()]));
         }
     }
 
