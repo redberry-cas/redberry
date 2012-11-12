@@ -48,7 +48,8 @@ public class GeneralIndicesInsertion implements ParseNodeTransformer {
         mappedRules = new HashMap<>();
         for (InsertionRule rule : initialRules.values())
             for (IndicesTypeStructureAndName key : rule.getKeys())
-                mappedRules.put(key, rule);
+                if (mappedRules.put(key, rule) != null)
+                    throw new RuntimeException("Conflicting insertion rules.");
     }
 
     @Override
