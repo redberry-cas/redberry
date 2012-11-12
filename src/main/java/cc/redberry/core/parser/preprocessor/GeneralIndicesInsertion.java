@@ -9,6 +9,7 @@ import cc.redberry.core.parser.*;
 import cc.redberry.core.tensor.SimpleTensor;
 import cc.redberry.core.utils.ArraysUtils;
 import cc.redberry.core.utils.ByteBackedBitArray;
+import cc.redberry.core.utils.IntArrayList;
 
 import java.util.*;
 
@@ -82,6 +83,8 @@ public class GeneralIndicesInsertion implements ParseNodeTransformer {
         int[] forbidden = ParseUtils.getAllIndicesT(node).toArray();
         IndexGenerator generator = new IndexGenerator(forbidden);
 
+        transformInsideFieldsAndScalarFunctions(node);
+
         ParseNode wrapped = new ParseNode(TensorType.Dummy, node);
         IITransformer transformer = createTransformer(wrapped);
         node = wrapped.content[0];
@@ -106,6 +109,35 @@ public class GeneralIndicesInsertion implements ParseNodeTransformer {
         }
         transformer.apply(generator, upper, lower);
         return node;
+    }
+
+    private void transformInsideFieldsAndScalarFunctions(ParseNode pn) {
+        if (pn.tensorType == TensorType.TensorField) {
+            ParseNodeTensorField pntf = (ParseNodeTensorField) pn;
+            if (!pntf.name.equalsIgnoreCase("tr"))
+                for (int i = 0; i < pn.content.length; ++i) {
+                    SimpleIndices oldArgIndices = pntf.argumentsIndices[i];
+                    ParseNode newArgNode = transform(pntf.content[i]);
+                    pntf.content[i] = newArgNode;
+                    newArgNode.parent = pntf;
+                    IntArrayList newArgIndices = new IntArrayList(oldArgIndices.getAllIndices().copy());
+                    Indices newIndices = newArgNode.getIndices();
+                    for (byte j = 0; j < TYPES_COUNT; ++j) {
+                        if (oldArgIndices.size(IndexType.getType(j)) < newIndices.size(IndexType.getType(j))) {
+                            if (oldArgIndices.size(IndexType.getType(j)) != 0)
+                                throw new IllegalArgumentException("Error in field arg indices.");
+                            newArgIndices.addAll(newIndices.getOfType(IndexType.getType(j)).getAllIndices());
+                        }
+                    }
+                    pntf.argumentsIndices[i] = IndicesFactory.createSimple(null, newArgIndices.toArray());
+                }
+        }
+        if (pn.tensorType == TensorType.Power || pn.tensorType == TensorType.ScalarFunction) {
+            for (int i = 0; i < pn.content.length; ++i)
+                pn.content[i] = transform(pn.content[i]);
+        }
+        for (int i = 0; i < pn.content.length; ++i)
+            transformInsideFieldsAndScalarFunctions(pn.content[i]);
     }
 
     private static class InsertionRule {

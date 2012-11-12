@@ -40,4 +40,15 @@ public class GeneralIndicesInsertionTest {
         Tensor t = parse("Tr[S*S*S*Y^y+S*Y^y+K*R^y,l'] + K*Y^y", gii);
         System.out.println(t);
     }
+
+    @Test
+    public void test3() {
+        GeneralIndicesInsertion gii = new GeneralIndicesInsertion();
+        gii.addInsertionRule(parseSimple("S^a'_b'"), IndexType.LatinLower1);
+        gii.addInsertionRule(parseSimple("K^A'_B'"), IndexType.LatinUpper1);
+        gii.addInsertionRule(parseSimple("V^a'"), IndexType.LatinLower1);
+        gii.addInsertionRule(parseSimple("cV_b'"), IndexType.LatinLower1);
+        Tensor t = parse("Sin[Tr[S*S*S+S+K]]+K", gii);
+        System.out.println(t);
+    }
 }
