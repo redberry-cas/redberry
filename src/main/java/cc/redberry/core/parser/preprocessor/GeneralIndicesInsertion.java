@@ -192,7 +192,6 @@ public class GeneralIndicesInsertion implements ParseNodeTransformer {
         IITransformer t;
         switch (node.tensorType) {
             case TensorField:
-
             case SimpleTensor:
                 InsertionRule rule = mappedRules.get(((ParseNodeSimpleTensor) node).getIndicesTypeStructureAndName());
                 if (rule != null)
@@ -212,7 +211,19 @@ public class GeneralIndicesInsertion implements ParseNodeTransformer {
                     return transformersList.get(0);
                 return new ProductTransformer(transformersList.toArray(new IITransformer[transformersList.size()]));
             case Expression:
-
+                IITransformer lhsTransformer = createTransformer(node.content[0]),
+                        rhsTransformer = createTransformer(node.content[1]);
+                if (lhsTransformer == null && rhsTransformer == null)
+                    return null;
+                OuterIndices lhsOuterIndices = lhsTransformer == null ? OuterIndices.EMPTY :
+                        lhsTransformer.getOuterIndices(),
+                        rhsOuterIndices = rhsTransformer == null ? OuterIndices.EMPTY :
+                                rhsTransformer.getOuterIndices();
+                for (int i = 0; i < TYPES_COUNT; ++i)
+                    if (rhsOuterIndices.initialized[i] && !lhsOuterIndices.initialized[i])
+                        throw new IllegalArgumentException("Inconsistent matrix expression.");
+                return new SumTransformer(new IITransformer[]{lhsTransformer, rhsTransformer},
+                        lhsOuterIndices, node);
             case Sum:
                 IITransformer[] transformersArray = new IITransformer[node.content.length];
                 int i;
