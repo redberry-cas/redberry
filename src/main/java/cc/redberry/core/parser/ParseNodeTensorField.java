@@ -49,8 +49,11 @@ public class ParseNodeTensorField extends ParseNodeSimpleTensor {
     public IndicesTypeStructureAndName getIndicesTypeStructureAndName() {
         IndicesTypeStructure[] typeStructures = new IndicesTypeStructure[1 + argumentsIndices.length];
         typeStructures[0] = new IndicesTypeStructure(indices);
-        for (int i = 0; i < argumentsIndices.length; ++i)
+        for (int i = 0; i < argumentsIndices.length; ++i) {
+            if (argumentsIndices[i] == null)
+                argumentsIndices[i] = IndicesFactory.createSimple(null, content[i].getIndices().getFree());
             typeStructures[i + 1] = new IndicesTypeStructure(argumentsIndices[i]);
+        }
         return new IndicesTypeStructureAndName(name, typeStructures);
     }
 

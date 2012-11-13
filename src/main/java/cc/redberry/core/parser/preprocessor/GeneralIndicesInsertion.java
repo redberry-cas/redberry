@@ -17,7 +17,7 @@ import static cc.redberry.core.indices.IndexType.TYPES_COUNT;
 
 /**
  * ParseNodeTransformer facilitating input of matrices and vectors with omitted indices.
- *
+ * <p/>
  * <p>It is useful in situations where one is faced with the need to input many huge matrix expressions, and manual
  * indices insertion becomes a complex task.</p>
  */
@@ -33,7 +33,7 @@ public class GeneralIndicesInsertion implements ParseNodeTransformer {
 
     /**
      * Adds new insertion rule to this transformer.
-     *
+     * <p/>
      * <p>After rule is added you can omit indices of specified type in specified simple tensors, when this transformer
      * is passed to {@link cc.redberry.core.tensor.Tensors#parse(String, cc.redberry.core.parser.ParseNodeTransformer...)}
      * method or somehow added to default parse nodes preprocessor.</p>
@@ -116,20 +116,23 @@ public class GeneralIndicesInsertion implements ParseNodeTransformer {
             ParseNodeTensorField pntf = (ParseNodeTensorField) pn;
             if (!pntf.name.equalsIgnoreCase("tr"))
                 for (int i = 0; i < pn.content.length; ++i) {
-                    SimpleIndices oldArgIndices = pntf.argumentsIndices[i];
                     ParseNode newArgNode = transform(pntf.content[i]);
                     pntf.content[i] = newArgNode;
                     newArgNode.parent = pntf;
-                    IntArrayList newArgIndices = new IntArrayList(oldArgIndices.getAllIndices().copy());
-                    Indices newIndices = newArgNode.getIndices();
-                    for (byte j = 0; j < TYPES_COUNT; ++j) {
-                        if (oldArgIndices.size(IndexType.getType(j)) < newIndices.size(IndexType.getType(j))) {
-                            if (oldArgIndices.size(IndexType.getType(j)) != 0)
-                                throw new IllegalArgumentException("Error in field arg indices.");
-                            newArgIndices.addAll(newIndices.getOfType(IndexType.getType(j)).getAllIndices());
+
+                    SimpleIndices oldArgIndices = pntf.argumentsIndices[i];
+                    if (oldArgIndices != null) {
+                        IntArrayList newArgIndices = new IntArrayList(oldArgIndices.getAllIndices().copy());
+                        Indices newIndices = newArgNode.getIndices();
+                        for (byte j = 0; j < TYPES_COUNT; ++j) {
+                            if (oldArgIndices.size(IndexType.getType(j)) < newIndices.size(IndexType.getType(j))) {
+                                if (oldArgIndices.size(IndexType.getType(j)) != 0)
+                                    throw new IllegalArgumentException("Error in field arg indices.");
+                                newArgIndices.addAll(newIndices.getOfType(IndexType.getType(j)).getAllIndices());
+                            }
                         }
+                        pntf.argumentsIndices[i] = IndicesFactory.createSimple(null, newArgIndices.toArray());
                     }
-                    pntf.argumentsIndices[i] = IndicesFactory.createSimple(null, newArgIndices.toArray());
                 }
         }
         if (pn.tensorType == TensorType.Power || pn.tensorType == TensorType.ScalarFunction) {
@@ -285,6 +288,8 @@ public class GeneralIndicesInsertion implements ParseNodeTransformer {
                     assert i != parent.content.length;
 
                     IITransformer innerTransformer = createTransformer(nested);
+                    if (innerTransformer == null)
+                        return null;
                     return new TraceTransformer(innerTransformer, types);
                 }
             case SimpleTensor:
@@ -314,7 +319,8 @@ public class GeneralIndicesInsertion implements ParseNodeTransformer {
                         rhsOuterIndices = rhsTransformer == null ? OuterIndices.EMPTY :
                                 rhsTransformer.getOuterIndices();
                 for (int i = 0; i < TYPES_COUNT; ++i)
-                    if (rhsOuterIndices.initialized[i] && !lhsOuterIndices.initialized[i])
+                    if ((rhsOuterIndices.upper[i] != 0
+                            || rhsOuterIndices.lower[i] != 0) && !lhsOuterIndices.initialized[i])
                         throw new IllegalArgumentException("Inconsistent matrix expression.");
                 return new SumTransformer(new IITransformer[]{lhsTransformer, rhsTransformer},
                         lhsOuterIndices, node);
