@@ -24,17 +24,17 @@ package cc.redberry.core.indices;
 
 import cc.redberry.core.context.ContextSettings;
 import cc.redberry.core.context.IndexSymbolConverter;
-import cc.redberry.core.context.defaults.IndexConverterExtender;
 import cc.redberry.core.context.defaults.IndexWithStrokeWrapper;
-import cc.redberry.core.context.defaults.LatinSymbolDownCaseConverter;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import static cc.redberry.core.context.defaults.IndexConverterExtender.*;
 
 /**
- * This {@code enum} is a container of the information on all available index
- * types and appropriate converters. This {@code enum} is scanning at the
- * initialization of {@link ContextSettings} and all the values are putting in
- * the Context as default indices types.
+ * This {@code enum} is a container of the information on all available index types and appropriate converters. This
+ * {@code enum} is scanning at the initialization of {@link ContextSettings} and all the values are putting in the
+ * Context as default indices types.
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
@@ -48,10 +48,19 @@ public enum IndexType {
     LatinUpper1(new IndexWithStrokeWrapper(LatinUpperEx, (byte) 1)),
     GreekLower1(new IndexWithStrokeWrapper(GreekLowerEx, (byte) 1)),
     GreekUpper1(new IndexWithStrokeWrapper(GreekUpperEx, (byte) 1));
+    private final static Map<String, IndexType> commonNames;
 
-    private static IndexSymbolConverter LatinLowerExtender
-            = new IndexConverterExtender(LatinSymbolDownCaseConverter.INSTANCE);
-
+    static {
+        commonNames = new HashMap<>();
+        commonNames.put("l", LatinLower);
+        commonNames.put("L", LatinUpper);
+        commonNames.put("l'", LatinLower1);
+        commonNames.put("L'", LatinUpper1);
+        commonNames.put("g", GreekLower);
+        commonNames.put("G", GreekUpper);
+        commonNames.put("g'", GreekLower1);
+        commonNames.put("G'", GreekUpper1);
+    }
 
     /**
      * Total number of available index types
@@ -59,12 +68,15 @@ public enum IndexType {
     public static final byte TYPES_COUNT = 8;//redundant
 
     /**
-     * Total number of alphabets is 4: latin lower,
-     * latin upper, greek lower, greek upper
+     * Total number of alphabets is 4: latin lower, latin upper, greek lower, greek upper
      */
     public static final byte ALPHABETS_COUNT = 4;//redundant
 
     private final IndexSymbolConverter converter;
+
+    public static IndexType fromShortString(String string) {
+        return commonNames.get(string);
+    }
 
     private IndexType(IndexSymbolConverter converter) {
         this.converter = converter;

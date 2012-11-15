@@ -42,6 +42,14 @@ public class IndicesTypeStructureAndName {
         this.structure = structure;
     }
 
+    public String getName() {
+        return name;
+    }
+
+    public IndicesTypeStructure[] getStructure() {
+        return structure;
+    }
+
     @Override
     public boolean equals(Object obj) {
         if (obj == null)

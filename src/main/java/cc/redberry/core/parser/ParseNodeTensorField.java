@@ -22,13 +22,14 @@
  */
 package cc.redberry.core.parser;
 
+import cc.redberry.core.context.IndicesTypeStructureAndName;
 import cc.redberry.core.indices.IndicesFactory;
+import cc.redberry.core.indices.IndicesTypeStructure;
 import cc.redberry.core.indices.SimpleIndices;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.tensor.Tensors;
 
 /**
- *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
@@ -42,6 +43,18 @@ public class ParseNodeTensorField extends ParseNodeSimpleTensor {
                                 SimpleIndices[] argumentsIndices) {
         super(indices, name, TensorType.TensorField, content);
         this.argumentsIndices = argumentsIndices;
+    }
+
+    @Override
+    public IndicesTypeStructureAndName getIndicesTypeStructureAndName() {
+        IndicesTypeStructure[] typeStructures = new IndicesTypeStructure[1 + argumentsIndices.length];
+        typeStructures[0] = new IndicesTypeStructure(indices);
+        for (int i = 0; i < argumentsIndices.length; ++i) {
+            if (argumentsIndices[i] == null)
+                argumentsIndices[i] = IndicesFactory.createSimple(null, content[i].getIndices().getFree());
+            typeStructures[i + 1] = new IndicesTypeStructure(argumentsIndices[i]);
+        }
+        return new IndicesTypeStructureAndName(name, typeStructures);
     }
 
     @Override

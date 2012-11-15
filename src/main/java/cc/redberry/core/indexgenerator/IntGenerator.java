@@ -25,17 +25,16 @@ package cc.redberry.core.indexgenerator;
 import java.util.Arrays;
 
 /**
- *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
 public final class IntGenerator {
-
+    private static final int[] EMPTY_ARRAY = {-1};
     private int[] engagedData;
     private int counter, match;
 
     public IntGenerator() {
-        this(new int[]{-1});
+        this(EMPTY_ARRAY);
     }
 
     public IntGenerator(int[] engagedData, int counter, int match) {
@@ -63,7 +62,16 @@ public final class IntGenerator {
             engagedData[i] = Integer.MAX_VALUE;
     }
 
-    private void ensureCapacity(int minCapacity) {
+    public void mergeFrom(IntGenerator intGenerator) {
+        if (intGenerator.engagedData != engagedData)
+            throw new IllegalArgumentException();
+        if (intGenerator.counter > this.counter) {
+            this.counter = intGenerator.counter;
+            this.match = intGenerator.match;
+        }
+    }
+
+    /*private void ensureCapacity(int minCapacity) {
         int oldCapacity = engagedData.length;
         if (minCapacity > oldCapacity) {
             int newCapacity = (oldCapacity * 3) / 2 + 1;
@@ -85,7 +93,7 @@ public final class IntGenerator {
             ensureCapacity(engagedData.length + 1);
         System.arraycopy(engagedData, pointer, engagedData, pointer + 1, engagedData.length - pointer - 1);
         engagedData[pointer] = index;
-    }
+    }*/
 
     public int getNext() {
         counter++;
@@ -104,11 +112,11 @@ public final class IntGenerator {
 
     @Override
     public IntGenerator clone() {
-        //OLD VARIANT:
+        //OLD VARIANT [NEW NEW VARIANT]:
         //engagedData not cloning due to absence ability to adding indices,
         //so it never can be changed
-        //return new IntGenerator(engagedData, counter, match);
+        return new IntGenerator(engagedData, counter, match);
         //NEW VARIANT:
-        return new IntGenerator(engagedData.clone(), counter, match);
+        //return new IntGenerator(engagedData.clone(), counter, match);
     }
 }
