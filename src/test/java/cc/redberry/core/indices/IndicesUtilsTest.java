@@ -23,19 +23,16 @@
 package cc.redberry.core.indices;
 
 import cc.redberry.core.context.OutputFormat;
+import cc.redberry.core.parser.ParserIndices;
 import org.junit.Test;
 
 import static org.junit.Assert.assertTrue;
 
 /**
- *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
 public class IndicesUtilsTest {
-
-    public IndicesUtilsTest() {
-    }
 
     @Test
     public void parse() {
@@ -47,5 +44,12 @@ public class IndicesUtilsTest {
 
         int index2 = IndicesUtils.parseIndex("_a");
         assertTrue("_{a}".equals(IndicesUtils.toString(index2, OutputFormat.LaTeX)));
+    }
+
+    @Test
+    public void test1() {
+        Indices u = ParserIndices.parseSimple("_abed");
+        Indices v = ParserIndices.parseSimple("^ed");
+        System.out.println(IndicesFactory.createSimple(null, IndicesUtils.getIntersections(u, v)));
     }
 }
