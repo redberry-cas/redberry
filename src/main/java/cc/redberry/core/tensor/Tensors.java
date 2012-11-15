@@ -621,45 +621,4 @@ public final class Tensors {
     public static Tensor reciprocal(Tensor tensor) {
         return pow(tensor, Complex.MINUS_ONE);
     }
-
-    //TODO discuss with Stas (move multiplySumElementsOnFactor and multiplySumElementsOnFactorAndExpandScalars to other class)
-    public static Tensor multiplySumElementsOnFactor(Sum sum, Tensor factor) {
-        if (TensorUtils.isZero(factor))
-            return Complex.ZERO;
-        if (TensorUtils.isOne(factor))
-            return sum;
-        final Tensor[] newSumData = new Tensor[sum.size()];
-        for (int i = newSumData.length - 1; i >= 0; --i)
-            newSumData[i] = multiply(factor, sum.get(i));
-        return new Sum(newSumData, IndicesFactory.createSorted(newSumData[0].getIndices().getFree()));
-    }
-
-    public static Tensor multiplySumElementsOnFactors(Sum sum, Tensor[] factors) {
-        if (sum.size() != factors.length)
-            throw new IllegalArgumentException();
-        final Tensor[] newSumData = new Tensor[sum.size()];
-        for (int i = newSumData.length - 1; i >= 0; --i)
-            newSumData[i] = multiply(factors[i], sum.get(i));
-        return new Sum(newSumData, IndicesFactory.createSorted(newSumData[0].getIndices().getFree()));
-    }
-
-    public static Tensor multiplySumElementsOnFactors(Sum sum, OutputPortUnsafe<Tensor> factorsProvider) {
-        final Tensor[] newSumData = new Tensor[sum.size()];
-        for (int i = newSumData.length - 1; i >= 0; --i)
-            newSumData[i] = multiply(factorsProvider.take(), sum.get(i));
-        return new Sum(newSumData, IndicesFactory.createSorted(newSumData[0].getIndices().getFree()));
-    }
-
-    public static Tensor multiplySumElementsOnScalarFactorAndExpandScalars(Sum sum, Tensor factor) {
-        if (TensorUtils.isZero(factor))
-            return Complex.ZERO;
-        if (TensorUtils.isOne(factor))
-            return sum;
-        if (factor.getIndices().size() != 0)
-            throw new IllegalArgumentException();
-        final Tensor[] newSumData = new Tensor[sum.size()];
-        for (int i = newSumData.length - 1; i >= 0; --i)
-            newSumData[i] = ExpandUtils.expandIndexlessSubproduct.transform(multiply(factor, sum.get(i)));
-        return new Sum(newSumData, IndicesFactory.createSorted(newSumData[0].getIndices().getFree()));
-    }
 }

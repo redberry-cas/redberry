@@ -5,6 +5,7 @@ import cc.redberry.core.tensor.ScalarsBackedProductBuilder;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.tensor.iterator.TensorLastIterator;
 import cc.redberry.core.tensor.iterator.TraverseGuide;
+import cc.redberry.core.utils.TensorUtils;
 
 /**
  * @author Dmitry Bolotin
@@ -42,6 +43,8 @@ public class CollectScalarFactors implements Transformation {
     }
 
     public static Tensor collectScalarFactorsInProduct(Product product) {
+        if (TensorUtils.isSymbolic(product))
+            return product;
         ScalarsBackedProductBuilder builder = new ScalarsBackedProductBuilder(product.size(), 1, product.getIndices().getFree().size());
         builder.put(product);
         return builder.build();
