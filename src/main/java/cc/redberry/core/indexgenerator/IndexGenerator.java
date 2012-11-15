@@ -22,6 +22,7 @@
  */
 package cc.redberry.core.indexgenerator;
 
+import cc.redberry.core.indices.IndexType;
 import cc.redberry.core.indices.Indices;
 
 import java.util.Arrays;
@@ -96,6 +97,9 @@ public final class IndexGenerator {
         }
         intGen.add(getNameWithoutType(index));
     }*/
+    public int generate(IndexType type) {
+        return generate(type.getType());
+    }
 
     public int generate(byte type) {
         IntGenerator ig = generators.get(type);

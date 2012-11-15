@@ -82,6 +82,16 @@ public class GeneralIndicesInsertionTest {
         TAssert.assertEquals(parse("f[x] = 1 + c"), "f^{a'}_{b'}^{A'}_{B'}[x] = (c+1)*d^{a'}_{b'}*d^{A'}_{B'}");
     }
 
+
+    @Test
+    public void test6() {
+        GeneralIndicesInsertion indicesInsertion = new GeneralIndicesInsertion();
+        CC.current().getParseManager().defaultParserPreprocessors.add(indicesInsertion);
+        indicesInsertion.addInsertionRule(parseSimple("A_a^a'_b'"), IndexType.LatinLower1);
+
+        TAssert.assertEquals(parse("Tr[A_a*A_b] = g_ab"), "A_{a}^{a'}_{b'}*A_{b}^{b'}_{a'} = g_{ab}");
+    }
+
     @Test
     public void test13() {
         GeneralIndicesInsertion gii = new GeneralIndicesInsertion();

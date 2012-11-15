@@ -69,7 +69,7 @@ public final class SymmetrizeSimpleTensor implements Transformation {
             }
 
             if (!factor.isOne())
-                temp = multiplySumElementsOnFactor((Sum) temp, factor.reciprocal());
+                temp = FastTensors.multiplySumElementsOnFactor((Sum) temp, factor.reciprocal());
             return multiply(new Complex(new Rational(1, temp.size())), temp);
         }
         return temp;

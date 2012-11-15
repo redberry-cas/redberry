@@ -27,6 +27,7 @@ import cc.redberry.core.context.CC;
 import cc.redberry.core.context.Context;
 import cc.redberry.core.context.OutputFormat;
 import cc.redberry.core.math.MathUtils;
+import cc.redberry.core.utils.IntArrayList;
 
 import java.util.Arrays;
 
@@ -493,5 +494,70 @@ public final class IndicesUtils {
         Arrays.sort(temp1);
         Arrays.sort(temp2);
         return Arrays.equals(temp1, temp2);
+    }
+
+    /**
+     * Returns true if at least one free index of {@code u} is contracted
+     * with some free index of {@code v}.
+     *
+     * @param u indices
+     * @param v indices
+     * @return true if at least one free index of {@code u} is contracted
+     *         with some free index of {@code v}
+     */
+    public static boolean haveIntersections(Indices u, Indices v) {
+        //todo can be improved
+        Indices uFree = u.getFree(),
+                vFree = v.getFree();
+        //micro optimization
+        if (uFree.size() > vFree.size()) {
+            Indices temp = uFree;
+            uFree = vFree;
+            vFree = temp;
+        }
+        for (int i = 0; i < uFree.size(); ++i)
+            for (int j = 0; j < vFree.size(); ++j)
+                if (vFree.get(j) == inverseIndexState(uFree.get(i)))
+                    return true;
+        return false;
+    }
+
+    /**
+     * Returns an array of contracted indices between specified free indices.
+     *
+     * @param freeIndices1 free indices
+     * @param freeIndices2 free indices
+     * @return an array of contracted indices
+     */
+    public static int[] getIntersections(int[] freeIndices1, int[] freeIndices2) {
+
+        //micro optimization
+        if (freeIndices1.length > freeIndices2.length) {
+            int[] temp = freeIndices1;
+            freeIndices1 = freeIndices2;
+            freeIndices2 = temp;
+        }
+        IntArrayList contracted = new IntArrayList();
+        for (int i = 0; i < freeIndices1.length; ++i)
+            for (int j = 0; j < freeIndices2.length; ++j)
+                if (freeIndices2[j] == inverseIndexState(freeIndices1[i]))
+                    contracted.add(getNameWithType(freeIndices2[i]));
+        return contracted.toArray();
+    }
+
+    /**
+     * Returns an array of contracted indices between specified indices.
+     *
+     * @param u indices
+     * @param v indices
+     * @return an array of contracted indices
+     */
+    public static int[] getIntersections(Indices u, Indices v) {
+        if (u.size() == 0 || v.size() == 0)
+            return new int[0];
+        Indices freeU = u.getFree(), freeV = v.getFree();
+        if (freeU.size() == 0 || freeV.size() == 0)
+            return new int[0];
+        return getIntersections(((AbstractIndices) freeU).data, ((AbstractIndices) freeV).data);
     }
 }

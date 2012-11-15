@@ -48,6 +48,19 @@ public class TensorUtils {
     private TensorUtils() {
     }
 
+    /**
+     * Returns true if at least one free index of {@code u} is contracted
+     * with some free index of {@code v}.
+     *
+     * @param u tensor
+     * @param v tensor
+     * @return true if at least one free index of {@code u} is contracted
+     *         with some free index of {@code v}
+     */
+    public static boolean haveIndicesIntersections(Tensor u, Tensor v) {
+        return IndicesUtils.haveIntersections(u.getIndices(), v.getIndices());
+    }
+
     public static boolean isZeroOrIndeterminate(Tensor tensor) {
         return tensor instanceof Complex && NumberUtils.isZeroOrIndeterminate((Complex) tensor);
     }
@@ -386,8 +399,11 @@ public class TensorUtils {
         for (i = 0; i < dimension; ++i) {
             int fromIndex = indicesNames[i];
             IndexMappingBufferRecord record = indexMappingBuffer.getMap().get(fromIndex);
-            if (record == null)
-                throw new IllegalArgumentException("Index " + IndicesUtils.toString(fromIndex) + " does not contains in specified IndexMappingBuffer.");
+            if (record == null) {
+                return new Symmetry(dimension);
+                //todo discuss with Dima
+                //throw new IllegalArgumentException("Index " + IndicesUtils.toString(fromIndex) + " does not contains in specified IndexMappingBuffer.");
+            }
             int newPosition = -1;
             //TODO refactor with sort and binary search
             for (int j = 0; j < dimension; ++j)
@@ -395,8 +411,11 @@ public class TensorUtils {
                     newPosition = j;
                     break;
                 }
-            if (newPosition < 0)
-                throw new IllegalArgumentException("Index " + IndicesUtils.toString(record.getIndexName()) + " does not contains in specified indices array.");
+            if (newPosition < 0) {
+                return new Symmetry(dimension);
+                //todo discuss with Dima
+                //throw new IllegalArgumentException("Index " + IndicesUtils.toString(record.getIndexName()) + " does not contains in specified indices array.");
+            }
             permutation[i] = newPosition;
         }
         for (i = 0; i < dimension; ++i)
