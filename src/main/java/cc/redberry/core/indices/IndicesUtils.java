@@ -541,7 +541,7 @@ public final class IndicesUtils {
         for (int i = 0; i < freeIndices1.length; ++i)
             for (int j = 0; j < freeIndices2.length; ++j)
                 if (freeIndices2[j] == inverseIndexState(freeIndices1[i]))
-                    contracted.add(getNameWithType(freeIndices2[i]));
+                    contracted.add(getNameWithType(freeIndices2[j]));
         return contracted.toArray();
     }
 

@@ -39,6 +39,8 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
+import static cc.redberry.core.tensor.Tensors.*;
+
 /**
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
@@ -485,6 +487,53 @@ public class TensorUtils {
                 depth = temp;
         }
         return depth;
+    }
+
+    public static Tensor det(Tensor[][] matrix) {
+        checkMatrix(matrix);
+        return det1(matrix);
+    }
+
+    private static void checkMatrix(Tensor[][] tensors) {
+        int cc = tensors.length;
+        for (Tensor[] tt : tensors)
+            if (tt.length != cc)
+                throw new IllegalArgumentException("Non square matrix");
+    }
+
+    private static Tensor det1(Tensor[][] matrix) {
+        if (matrix.length == 1)
+            return matrix[0][0];
+
+        Tensor sum = Complex.ZERO;
+        Tensor temp;
+        for (int i = 0; i < matrix.length; ++i) {
+            temp = multiply(matrix[0][i], det(deleteFromMatrix(matrix, 0, i)));
+            if (i % 2 == 1)
+                temp = negate(temp);
+            sum = sum(sum, temp);
+        }
+        return sum;
+    }
+
+    private static Tensor[][] deleteFromMatrix(final Tensor[][] matrix, int row, int column) {
+        if (matrix.length == 1)
+            return new Tensor[0][0];
+        Tensor[][] newMatrix = new Tensor[matrix.length - 1][];
+        int cRow = 0, cColumn, j;
+        for (int i = 0; i < matrix.length; ++i) {
+            if (i == row)
+                continue;
+            newMatrix[cRow] = new Tensor[matrix.length - 1];
+            cColumn = 0;
+            for (j = 0; j < matrix.length; ++j) {
+                if (j == column)
+                    continue;
+                newMatrix[cRow][cColumn++] = matrix[i][j];
+            }
+            ++cRow;
+        }
+        return newMatrix;
     }
 
 }

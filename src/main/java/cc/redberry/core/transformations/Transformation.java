@@ -25,10 +25,16 @@ package cc.redberry.core.transformations;
 import cc.redberry.core.tensor.Tensor;
 
 /**
- *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
 public interface Transformation {
+    public static final Transformation INDENTITY = new Transformation() {
+        @Override
+        public Tensor transform(Tensor t) {
+            return t;
+        }
+    };
+
     Tensor transform(Tensor t);
 }
