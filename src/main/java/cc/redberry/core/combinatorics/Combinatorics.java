@@ -26,7 +26,6 @@ import java.lang.reflect.Array;
 import java.util.Arrays;
 
 /**
- *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
@@ -75,6 +74,14 @@ public final class Combinatorics {
         return new int[dimension];
     }
 
+    /**
+     * Creates transposition in one-line notation
+     *
+     * @param dimension dimension of the resulting permutation, e.g. the array length
+     * @param position1 first position
+     * @param position2 second position
+     * @return transposition
+     */
     public static int[] createTransposition(int dimension, int position1, int position2) {
         if (dimension < 0)
             throw new IllegalArgumentException("Dimension is negative.");
@@ -118,7 +125,7 @@ public final class Combinatorics {
             throw new IllegalArgumentException();
         Class<?> type = array.getClass().getComponentType();
         @SuppressWarnings("unchecked") // OK, because array is of type T
-        T[] newArray = (T[]) Array.newInstance(type, array.length);
+                T[] newArray = (T[]) Array.newInstance(type, array.length);
         for (int i = 0; i < permutation.length; ++i)
             newArray[i] = array[permutation[i]];
         return newArray;

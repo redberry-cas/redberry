@@ -519,12 +519,11 @@ public class TensorUtils {
     private static Tensor[][] deleteFromMatrix(final Tensor[][] matrix, int row, int column) {
         if (matrix.length == 1)
             return new Tensor[0][0];
-        Tensor[][] newMatrix = new Tensor[matrix.length - 1][];
+        Tensor[][] newMatrix = new Tensor[matrix.length - 1][matrix.length - 1];
         int cRow = 0, cColumn, j;
         for (int i = 0; i < matrix.length; ++i) {
             if (i == row)
                 continue;
-            newMatrix[cRow] = new Tensor[matrix.length - 1];
             cColumn = 0;
             for (j = 0; j < matrix.length; ++j) {
                 if (j == column)

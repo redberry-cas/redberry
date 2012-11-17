@@ -22,7 +22,6 @@
  */
 package cc.redberry.core.tensor;
 
-import cc.redberry.concurrent.OutputPortUnsafe;
 import cc.redberry.core.combinatorics.Combinatorics;
 import cc.redberry.core.combinatorics.Symmetry;
 import cc.redberry.core.context.CC;
@@ -31,7 +30,6 @@ import cc.redberry.core.indices.*;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.parser.ParseNodeTransformer;
 import cc.redberry.core.tensor.functions.*;
-import cc.redberry.core.transformations.expand.ExpandUtils;
 import cc.redberry.core.utils.TensorUtils;
 import gnu.trove.set.hash.TIntHashSet;
 
@@ -598,6 +596,10 @@ public final class Tensors {
         int dimension = tensor.getIndices().size(type);
         addSymmetry(tensor, type, false, Combinatorics.createCycle(dimension));
         addSymmetry(tensor, type, false, Combinatorics.createTransposition(dimension));
+    }
+
+    public static void setSymmetric(String tensor) {
+        setSymmetric(parseSimple(tensor));
     }
 
     public static void setSymmetric(SimpleTensor tensor) {

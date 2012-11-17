@@ -222,4 +222,16 @@ public class TensorUtilsTest {
         };
         TAssert.assertEquals(det(matrix), "a*(e*i-f*h)-b*(d*i-f*g)+c*(d*h-e*g)");
     }
+
+
+    @Test
+    public void testDet3() {
+        Tensor[][] matrix = {
+                {parse("a"), parse("b"), parse("c"),parse("x")},
+                {parse("d"), parse("e"), parse("f"),parse("y")},
+                {parse("g"), parse("h"), parse("i"),parse("z")},
+                {parse("p"), parse("q"), parse("r"),parse("s")}
+        };
+        TAssert.assertEquals(det(matrix), "(e*(s*i-z*r)-f*(-q*z+s*h)+y*(-q*i+h*r))*a-(f*(g*q-p*h)-e*(-p*i+g*r)+d*(-q*i+h*r))*x-(d*(s*i-z*r)-f*(-p*z+s*g)+(-p*i+g*r)*y)*b+c*(y*(g*q-p*h)-e*(-p*z+s*g)+(-q*z+s*h)*d)");
+    }
 }
