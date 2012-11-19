@@ -45,90 +45,10 @@ import static cc.redberry.core.transformations.expand.Expand.expand;
 import static cc.redberry.core.transformations.factor.JasFactor.*;
 
 public class JasFactorTest extends TestCase {
-    @Test
-    public void test0() {
-        Tensor t = Tensors.parse("x*y+a*s+x");
-        TAssert.assertEquals(tensor2Tensor(t), t);
-    }
-
-    @Test
-    public void test1() {
-        for (int i = 0; i < 20; ++i) {
-            CC.resetTensorNames();
-            Tensor t = parse("2304*m**2*N*m**8 - 1152*s*N*m**8 + 288*m**6*N*s**2 - 1536*m**8*N*t + 480*m**6*N*s*t - 48*m**4*N*s**2*t + 352*m**6*N*t**2 - 56*m**4*N*s*t**2 + 2*m**2*N*s**2*t**2 - 32*m**4*N*t**3 + 2*m**2*N*s*t**3 + m**2*N*t**4");
-            TAssert.assertEquals(t, expand(factor(t)));
-        }
-    }
-
-    @Test
-    public void test2() {
-        for (int i = 0; i < 20; ++i) {
-            CC.resetTensorNames();
-            Tensor t = parse("2304*m**2*N*m**8 - 1152*s*N*m**8 + 288*m**6*N*s**2 - 1536*m**8*N*t + 480*m**6*N*s*t - 48*m**4*N*s**2*t + 352*m**6*N*t**2 - 56*m**4*N*s*t**2 + 2*m**2*N*s**2*t**2 - 32*m**4*N*t**3 + 2*m**2*N*s*t**3 + m**2*N*t**4 + 1");
-            TAssert.assertEquals(t, expand(factor(t)));
-        }
-    }
-
-    @Test
-    public void test3() {
-        Tensor t = parse("-(1/4)*e**4*m**2*s**3+(3/8)*e**4*m**4*s**2+(1/8)*s*e**4*m**4*t+(1/16)*e**4*t**2*m**4+(1/16)*e**4*m**8-(1/4)*e**4*m**2*t*s**2+(1/16)*e**4*t**2*s**2+(1/16)*e**4*s**4+(1/8)*e**4*t*s**3-(1/4)*s*e**4*m**6");
-        TAssert.assertEquals(factor(t), "(1/16)*e**4*(t**2*s**2-4*m**2*s**3+6*m**4*s**2+2*t*s**3-4*s*m**6-4*t*m**2*s**2+2*s*t*m**4+m**8+m**4*t**2+s**4)");
-    }
-
-    @Test
-    public void test4() {
-        Tensor t = parse("(x + y + z + 56*x + i)**10");
-        Tensor t1 = parse("362033331456891249*((1/57)*z+(1/57)*y+(1/57)*i+x)**10");
-        Tensor exp = expand(t);
-        TAssert.assertTrue(TensorUtils.equals(factor(exp), t) || TensorUtils.equals(factor(exp), t1));
-    }
-
-    @Test
-    public void test5() {
-
-        Tensor t, exp;
-        t = parse("(x - y + z)**2*(a+b)**3");
-        exp = expand(t);
-        TAssert.assertEquals(factor(exp), t);
-
-        t = parse("(x - y + a)**2*(a+b)**3");
-        exp = expand(t);
-        TAssert.assertEquals(factor(exp), t);
-
-        t = parse("(x - y + a)**2*(a+b)**3*(x + b)");
-        exp = expand(t);
-        TAssert.assertEquals(factor(exp), t);
-
-        t = parse("(x - y - a)**2*(a - b)**3*(x - b)");
-        exp = expand(t);
-        TAssert.assertEquals(factor(exp), t);
-
-        t = parse("(x - y - a)**2*(a - b)**3*(x - b)**2");
-        exp = expand(t);
-        TAssert.assertEquals(factor(exp), t);
-
-        t = parse("(x - y - a)**2*(a - b)**3*(x - b)**2*(p + q)");
-        exp = expand(t);
-        TAssert.assertEquals(factor(exp), t);
-
-        t = parse("(x**12 - y**2 - a)**2*(a - b**3)**3*(x**5 - b**9)**2*(p + q)");
-        exp = expand(t);
-        TAssert.assertEquals(factor(exp), t);
-    }
 
 
-    @Test
-    public void test1r() {
-        Tensor t = randomFactorableProduct();
-        Tensor expand = expand(t);
-        System.out.println(t);
-//        System.out.println(expand.toString(OutputFormat.WolframMathematica));
-        System.out.println(expand);
-        Tensor factor = factor(expand);
 
-        System.out.println(factor);
-        TAssert.assertEquals(expand(factor), expand);
-    }
+
 
     @Test
     public void test2r() {
@@ -141,32 +61,7 @@ public class JasFactorTest extends TestCase {
         TAssert.assertEquals(expand(factor), expand);
     }
 
-    public static Tensor randomSum() {
-        SimpleTensor[] simpleTensors = {parseSimple("a"), parseSimple("b"), parseSimple("c"),
-                parseSimple("d"), parseSimple("e")};
-        Random random = new Random();
-        int sumSize = 1 + random.nextInt(5);
-        SumBuilder sb = new SumBuilder();
-        int productSize;
-        for (int i = 0; i < sumSize; ++i) {
-            productSize = 1 + random.nextInt(5);
-            ProductBuilder pb = new ProductBuilder();
-            pb.put(new Complex(random.nextInt(100)));
-            for (int j = 0; j < productSize; ++j)
-                pb.put(simpleTensors[random.nextInt(simpleTensors.length)]);
-            sb.put(pb.build());
-        }
-        return sb.build();
-    }
 
-    public static Tensor randomFactorableProduct() {
-        Random random = new Random();
-        int productSize = 4;
-        ProductBuilder pb = new ProductBuilder();
-        for (int i = 0; i < productSize; ++i)
-            pb.put(randomSum());
-        return pb.build();
-    }
 
     public static Tensor tensor2Tensor(Tensor t) {
         TIntObjectMap<Var> vars = getVars(t);

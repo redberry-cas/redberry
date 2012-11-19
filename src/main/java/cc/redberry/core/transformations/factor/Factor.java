@@ -58,7 +58,7 @@ public class Factor implements Transformation {
         while ((c = iterator.next()) != null) {
             if (!(c instanceof Sum))
                 continue;
-            iterator1 = new TensorLastIterator(tensor);
+            iterator1 = new TensorLastIterator(c);
             boolean needTogether = false;
             while ((t = iterator1.next()) != null) {
                 if (t.getIndices().size() != 0 || t instanceof ScalarFunction)

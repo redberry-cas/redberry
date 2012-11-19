@@ -68,12 +68,13 @@ class JasFactor {
         FactorAbstract<BigRational> jasFactor = FactorFactory.getImplementation(BigRational.ONE);
 
         SortedMap<GenPolynomial<BigRational>, Long> map = jasFactor.factors(poly);
+        if (!jasFactor.isFactorization(poly, map))
+            return t;
 
         List<Tensor> toMultiply = new ArrayList<>(map.size());
         for (SortedMap.Entry<GenPolynomial<BigRational>, Long> entry : map.entrySet())
             toMultiply.add(Tensors.pow(poly2Tensor(entry.getKey(), varsArray),
                     new Complex(entry.getValue())));
-
         return Tensors.multiply(toMultiply.toArray(new Tensor[toMultiply.size()]));
     }
 

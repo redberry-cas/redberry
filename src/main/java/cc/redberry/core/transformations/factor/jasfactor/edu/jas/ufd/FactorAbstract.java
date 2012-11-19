@@ -261,6 +261,18 @@ public abstract class FactorAbstract<C extends GcdRingElem<C>> implements Factor
         return new ArrayList<>(baseFactors(P).keySet());
     }
 
+    /**
+     * GenPolynomial is factorization.
+     * @param P GenPolynomial.
+     * @param F = [p_1 -&gt; e_1, ..., p_k -&gt; e_k].
+     * @return true if P = prod_{i=1,...,k} p_i**e_i , else false.
+     */
+    public boolean isFactorization(GenPolynomial<C> P, SortedMap<GenPolynomial<C>, Long> F) {
+        return sengine.isFactorization(P, F);
+        // test irreducible
+    }
+
+
 
     /**
      * Univariate GenPolynomial factorization.

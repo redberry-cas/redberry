@@ -26,6 +26,7 @@ import cc.redberry.core.number.Complex;
 import cc.redberry.core.tensor.*;
 import cc.redberry.core.tensor.iterator.TensorLastIterator;
 import cc.redberry.core.transformations.Transformation;
+import cc.redberry.core.transformations.factor.Factor;
 import cc.redberry.core.utils.THashMap;
 import cc.redberry.core.utils.TensorUtils;
 
@@ -149,6 +150,7 @@ public final class Together implements Transformation {
     }
 
     private static SplitStruct splitFraction(Tensor tensor) {
+        tensor = Factor.factor(tensor);
         THashMap<Tensor, Complex> map = new THashMap<>();
         if (checkPower(tensor)) {
             map.put(tensor.get(0), ((Complex) tensor.get(1)).negate());

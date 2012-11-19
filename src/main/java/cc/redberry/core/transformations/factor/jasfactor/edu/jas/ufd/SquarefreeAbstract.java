@@ -29,11 +29,9 @@ package cc.redberry.core.transformations.factor.jasfactor.edu.jas.ufd;
 
 import cc.redberry.core.transformations.factor.jasfactor.edu.jas.poly.GenPolynomial;
 import cc.redberry.core.transformations.factor.jasfactor.edu.jas.structure.GcdRingElem;
+import cc.redberry.core.transformations.factor.jasfactor.edu.jas.structure.Power;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.SortedMap;
-import java.util.TreeMap;
+import java.util.*;
 
 
 /**
@@ -195,6 +193,41 @@ public abstract class SquarefreeAbstract<C extends GcdRingElem<C>> implements Sq
         }
         return f;
     }
+
+    /**
+     * GenPolynomial is (squarefree) factorization.
+     *
+     * @param P GenPolynomial.
+     * @param F = [p_1 -&gt; e_1, ..., p_k -&gt; e_k].
+     * @return true if P = prod_{i=1,...,k} p_i**e_i, else false.
+     */
+    public boolean isFactorization(GenPolynomial<C> P, SortedMap<GenPolynomial<C>, Long> F) {
+        if (P == null || F == null) {
+            throw new IllegalArgumentException("P and F may not be null");
+        }
+        if (P.isZERO() && F.size() == 0) {
+            return true;
+        }
+        GenPolynomial<C> t = P.ring.getONE();
+        for (Map.Entry<GenPolynomial<C>, Long> me : F.entrySet()) {
+            GenPolynomial<C> f = me.getKey();
+            Long E = me.getValue(); // F.get(f);
+            long e = E.longValue();
+            GenPolynomial<C> g = Power.positivePower(f, e);
+            t = t.multiply(g);
+        }
+        boolean f = P.equals(t) || P.equals(t.negate());
+        if (!f) {
+            P = P.monic();
+            t = t.monic();
+            f = P.equals(t) || P.equals(t.negate());
+            if (f) {
+                return f;
+            }
+        }
+        return f;
+    }
+
 
     /**
      * Coefficients squarefree factorization.
