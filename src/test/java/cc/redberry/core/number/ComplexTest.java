@@ -62,6 +62,15 @@ public class ComplexTest {
     }
 
     @Test
+    public void testNegativeIntegerExponentiation() {
+        Complex c = NumberParser.COMPLEX_PARSER.parse("5+I");
+        Complex e = c.pow(-1);
+        Complex expected = NumberParser.COMPLEX_PARSER.parse("5/26-I/26");
+        Assert.assertEquals(e, expected);
+    }
+
+
+    @Test
     public void testNumericDoubleExponentiation() {
         Complex c = NumberParser.COMPLEX_PARSER.parse("1+I");
         Complex e = c.pow(1.56);

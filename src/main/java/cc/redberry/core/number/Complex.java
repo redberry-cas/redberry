@@ -37,7 +37,7 @@ import java.math.BigInteger;
 /**
  * @author Stanislav Poslavsky
  */
-public class Complex extends Tensor
+public final class Complex extends Tensor
         implements Number<Complex>,
         Serializable {
 
@@ -715,7 +715,7 @@ public class Complex extends Tensor
     @Override
     public Complex pow(BigInteger exponent) {
         if (exponent.compareTo(BigInteger.ZERO) < 0)
-            throw new IllegalArgumentException(); //TODO change...
+            return reciprocal().pow(exponent.negate());
 
         Complex result = Complex.ONE;
         Complex k2p = this;
@@ -733,7 +733,7 @@ public class Complex extends Tensor
     @Override
     public Complex pow(long exponent) {
         if (exponent < 0)
-            throw new IllegalArgumentException(); //TODO change...
+            return reciprocal().pow(-exponent);
 
         Complex result = Complex.ONE;
         Complex k2p = this;
@@ -751,7 +751,7 @@ public class Complex extends Tensor
     @Override
     public Complex pow(int exponent) {
         if (exponent < 0)
-            throw new IllegalArgumentException(); //TODO change...
+            return reciprocal().pow(-exponent);
 
         Complex result = Complex.ONE;
         Complex k2p = this;
