@@ -11,9 +11,7 @@ import org.junit.Test;
 
 import static cc.redberry.core.combinatorics.symmetries.SymmetriesFactory.createFullSymmetries;
 import static cc.redberry.core.indices.IndexType.LatinLower;
-import static cc.redberry.core.tensor.Tensors.addSymmetry;
-import static cc.redberry.core.tensor.Tensors.parse;
-import static cc.redberry.core.tensor.Tensors.parseSimple;
+import static cc.redberry.core.tensor.Tensors.*;
 import static cc.redberry.core.transformations.symmetrization.SymmetrizeSimpleTensor.symmetrize;
 
 /**
@@ -47,12 +45,15 @@ public class SymmetrizeSimpleTensorTest {
 
     @Test
     public void test3() {
-        SimpleTensor t = parseSimple("T_abcd");
-        addSymmetry(t, LatinLower, false, new int[]{1, 0, 2, 3});
+        for (int i = 0; i < 100; ++i) {
+            CC.resetTensorNames();
+            SimpleTensor t = parseSimple("T_abcd");
+            addSymmetry(t, LatinLower, false, new int[]{1, 0, 2, 3});
 
-        Tensor r = symmetrize(t, new int[]{0, 1, 2, 3}, SymmetriesFactory.createFullSymmetries(4));
-        TAssert.assertEquals(r,
-                "(1/12)*(T_{adbc}+T_{acdb}+T_{abcd}+T_{bcda}+T_{bcad}+T_{bdac}+T_{acbd}+T_{bdca}+T_{cdab}+T_{adcb}+T_{cdba}+T_{abdc})");
+            Tensor r = symmetrize(t, new int[]{0, 1, 2, 3}, SymmetriesFactory.createFullSymmetries(4));
+            TAssert.assertEquals(r,
+                    "(1/12)*(T_{adbc}+T_{acdb}+T_{abcd}+T_{bcda}+T_{bcad}+T_{bdac}+T_{acbd}+T_{bdca}+T_{cdab}+T_{adcb}+T_{cdba}+T_{abdc})");
+        }
     }
 
     @Test
@@ -65,8 +66,8 @@ public class SymmetrizeSimpleTensorTest {
         Tensor e = parse("(1/12)*(T_{adbc}+T_{acdb}+T_{abcd}+T_{bcda}+T_{bcad}+T_{bdac}+T_{acbd}+T_{bdca}+T_{cdab}+T_{adcb}+T_{cdba}+T_{abdc})");
         System.out.println(r);
         System.out.println(e);
-//        TAssert.assertEquals(r,
-//                "(1/12)*(T_{adbc}+T_{acdb}+T_{abcd}+T_{bcda}+T_{bcad}+T_{bdac}+T_{acbd}+T_{bdca}+T_{cdab}+T_{adcb}+T_{cdba}+T_{abdc})");
+        TAssert.assertEquals(r,
+                "(1/12)*(T_{adbc}+T_{acdb}+T_{abcd}+T_{bcda}+T_{bcad}+T_{bdac}+T_{acbd}+T_{bdca}+T_{cdab}+T_{adcb}+T_{cdba}+T_{abdc})");
     }
 
 

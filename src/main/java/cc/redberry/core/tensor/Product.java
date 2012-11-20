@@ -561,12 +561,9 @@ public final class Product extends MultiTensor {
     /**
      * Function to pack data to intermediate 64-bit record.
      *
-     * @param tensorIndex  index of tensor in the data array (before second
-     *                     sorting)
-     * @param stretchIndex stretch index of this tensor (sequence number of
-     *                     tensors hash in array)
-     * @param id           id of index in tensor indices list (could be !=0 only
-     *                     for simple tensors)
+     * @param tensorIndex  index of tensor in the data array (before second sorting)
+     * @param stretchIndex stretch index of this tensor (sequence number of tensors hash in array)
+     * @param id           id of index in tensor indices list (could be !=0 only for simple tensors)
      * @return packed record (long)
      */
     private static long packToLong(final int tensorIndex, final short stretchIndex, final short id) {
