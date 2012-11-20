@@ -23,11 +23,14 @@
 package cc.redberry.core.utils;
 
 import cc.redberry.core.indices.IndexType;
+import cc.redberry.core.tensor.SimpleTensor;
 import cc.redberry.core.tensor.Tensor;
 import org.junit.Test;
 
+import static cc.redberry.core.indices.IndexType.LatinLower;
 import static cc.redberry.core.tensor.Tensors.addSymmetry;
 import static cc.redberry.core.tensor.Tensors.parse;
+import static cc.redberry.core.tensor.Tensors.parseSimple;
 import static cc.redberry.core.utils.TensorHashCalculator.hashWithIndices;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -51,6 +54,20 @@ public class TensorHashCalculatorTest {
                 == hashWithIndices(parse("T^jipq*T_pqsr")));
         assertFalse(hashWithIndices(parse("T^ijpq*T_pqrs"))
                 == hashWithIndices(parse("T^jpiq*T_pqsr")));
+    }
+
+    @Test
+    public void test2() {
+        Tensor a = parse("g_ab*g_cd");
+        Tensor b = parse("g_ad*g_cb");
+        System.out.println(hashWithIndices(a));
+        System.out.println(hashWithIndices(b));
+        SimpleTensor t = parseSimple("T_abcd");
+        addSymmetry(t, LatinLower, false, new int[]{1, 0, 2, 3});
+        a = parse("T_{bdca}");
+        b = parse("T_{cdab}");
+        System.out.println(hashWithIndices(a));
+        System.out.println(hashWithIndices(b, a.getIndices()));
     }
 
     //    @Test
