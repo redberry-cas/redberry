@@ -22,6 +22,8 @@
  */
 package cc.redberry.core.number;
 
+import org.apache.commons.math3.util.ArithmeticUtils;
+
 import java.math.BigInteger;
 
 /**
@@ -38,8 +40,6 @@ public final class Exponentiation {
         if (base.isNumeric() || power.isNumeric()) { // Bease or power are numeric
             return new Numeric(Math.pow(base.getNumericValue().doubleValue(), power.getNumericValue().doubleValue()));
         }
-
-        //TODO some more ONE, ZERO etc. tests
 
         //<-- Power and Base are rational
 
@@ -94,7 +94,7 @@ public final class Exponentiation {
 
             //Testing
             testValue = new BigInteger(result);
-            cValue = testValue.pow(power.intValue()).compareTo(base); // TODO it is not working [ power.intValue() ] !!!!!!!!!!!!!!!!!!
+            cValue = ArithmeticUtils.pow(testValue, power).compareTo(base);
             if (cValue == 0)
                 return testValue;
             if (cValue > 0)
@@ -106,7 +106,6 @@ public final class Exponentiation {
 
     public static Complex exponentiateIfPossible(Complex base, Complex power) {
         //Partially copied from PowerFactory
-
         if (base.isInfinite())
             if (power.isZero())
                 return Complex.ComplexNaN;
@@ -134,6 +133,8 @@ public final class Exponentiation {
         if (base.isNumeric() || power.isNumeric())
             return base.powNumeric(power);
 
+        // <-- base and power are rational
+
         if (power.isReal()) {
             Rational pp = (Rational) power.getReal();
 
@@ -144,28 +145,52 @@ public final class Exponentiation {
                 return new Complex(value);
             }
 
-            if (pp.isInteger()) {
-
-                boolean sign = pp.getNumerator().signum() > 0;
-                BigInteger exponent = pp.getNumerator().abs();
-
-                Complex result = Complex.ONE;
-
-                //base ~ k2
-                while (exponent.signum() != 0) {
-                    if (exponent.testBit(0))
-                        result = result.multiply(base);
-                    base = base.multiply(base);
-                    exponent = exponent.shiftRight(1);
-                }
-
-                if (sign)
-                    return result;
-                else
-                    return result.reciprocal();
+            if (pp.isInteger())
+                return base.pow(pp.getNumerator());
+            else {
+                Complex root = findIntegerRoot(base, pp.getDenominator());
+                if (root == null)
+                    return null;
+                return root.pow(pp.getNumerator());
             }
         }
 
+        return null;
+    }
+
+    public static Complex findIntegerRoot(Complex base, BigInteger power) {
+        BigInteger rDenominator = ((Rational) base.getReal()).getDenominator();
+        BigInteger iDenominator = ((Rational) base.getImaginary()).getDenominator();
+
+        BigInteger lcm = rDenominator.gcd(iDenominator);
+        lcm = rDenominator.divide(lcm);
+        lcm = lcm.multiply(iDenominator);
+
+        BigInteger lcmRoot = findIntegerRoot(lcm, power);
+
+        if (lcm == null)
+            return null;
+
+        base = base.multiply(lcm);
+
+        Complex numericValue = base.pow(1.0 / power.doubleValue());
+        double real = numericValue.getReal().doubleValue();
+        double imaginary = numericValue.getImaginary().doubleValue();
+
+        int ceilReal = (int) Math.ceil(real),
+                floorReal = (int) Math.floor(real),
+                ceilImaginary = (int) Math.ceil(imaginary),
+                floorImaginary = (int) Math.floor(imaginary);
+
+        Complex candidate;
+        if ((candidate = new Complex(ceilReal, ceilImaginary)).pow(power).equals(base))
+            return candidate.divide(lcmRoot);
+        if ((candidate = new Complex(floorReal, ceilImaginary)).pow(power).equals(base))
+            return candidate.divide(lcmRoot);
+        if ((candidate = new Complex(ceilReal, floorImaginary)).pow(power).equals(base))
+            return candidate.divide(lcmRoot);
+        if ((candidate = new Complex(floorReal, floorImaginary)).pow(power).equals(base))
+            return candidate.divide(lcmRoot);
         return null;
     }
 }
