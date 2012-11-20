@@ -22,7 +22,6 @@
  */
 package cc.redberry.core.tensor;
 
-import cc.redberry.concurrent.OutputPortUnsafe;
 import cc.redberry.core.combinatorics.Combinatorics;
 import cc.redberry.core.combinatorics.Symmetry;
 import cc.redberry.core.context.CC;
@@ -31,7 +30,6 @@ import cc.redberry.core.indices.*;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.parser.ParseNodeTransformer;
 import cc.redberry.core.tensor.functions.*;
-import cc.redberry.core.transformations.expand.ExpandUtils;
 import cc.redberry.core.utils.TensorUtils;
 import gnu.trove.set.hash.TIntHashSet;
 
@@ -600,6 +598,10 @@ public final class Tensors {
         addSymmetry(tensor, type, false, Combinatorics.createTransposition(dimension));
     }
 
+    public static void setSymmetric(String tensor) {
+        setSymmetric(parseSimple(tensor));
+    }
+
     public static void setSymmetric(SimpleTensor tensor) {
         int dimension = tensor.getIndices().size();
         addSymmetry(tensor, Combinatorics.createCycle(dimension));
@@ -620,46 +622,5 @@ public final class Tensors {
 
     public static Tensor reciprocal(Tensor tensor) {
         return pow(tensor, Complex.MINUS_ONE);
-    }
-
-    //TODO discuss with Stas (move multiplySumElementsOnFactor and multiplySumElementsOnFactorAndExpandScalars to other class)
-    public static Tensor multiplySumElementsOnFactor(Sum sum, Tensor factor) {
-        if (TensorUtils.isZero(factor))
-            return Complex.ZERO;
-        if (TensorUtils.isOne(factor))
-            return sum;
-        final Tensor[] newSumData = new Tensor[sum.size()];
-        for (int i = newSumData.length - 1; i >= 0; --i)
-            newSumData[i] = multiply(factor, sum.get(i));
-        return new Sum(newSumData, IndicesFactory.createSorted(newSumData[0].getIndices().getFree()));
-    }
-
-    public static Tensor multiplySumElementsOnFactors(Sum sum, Tensor[] factors) {
-        if (sum.size() != factors.length)
-            throw new IllegalArgumentException();
-        final Tensor[] newSumData = new Tensor[sum.size()];
-        for (int i = newSumData.length - 1; i >= 0; --i)
-            newSumData[i] = multiply(factors[i], sum.get(i));
-        return new Sum(newSumData, IndicesFactory.createSorted(newSumData[0].getIndices().getFree()));
-    }
-
-    public static Tensor multiplySumElementsOnFactors(Sum sum, OutputPortUnsafe<Tensor> factorsProvider) {
-        final Tensor[] newSumData = new Tensor[sum.size()];
-        for (int i = newSumData.length - 1; i >= 0; --i)
-            newSumData[i] = multiply(factorsProvider.take(), sum.get(i));
-        return new Sum(newSumData, IndicesFactory.createSorted(newSumData[0].getIndices().getFree()));
-    }
-
-    public static Tensor multiplySumElementsOnScalarFactorAndExpandScalars(Sum sum, Tensor factor) {
-        if (TensorUtils.isZero(factor))
-            return Complex.ZERO;
-        if (TensorUtils.isOne(factor))
-            return sum;
-        if (factor.getIndices().size() != 0)
-            throw new IllegalArgumentException();
-        final Tensor[] newSumData = new Tensor[sum.size()];
-        for (int i = newSumData.length - 1; i >= 0; --i)
-            newSumData[i] = ExpandUtils.expandIndexlessSubproduct.transform(multiply(factor, sum.get(i)));
-        return new Sum(newSumData, IndicesFactory.createSorted(newSumData[0].getIndices().getFree()));
     }
 }

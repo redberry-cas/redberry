@@ -28,14 +28,10 @@ import org.junit.Test;
 import static org.junit.Assert.assertTrue;
 
 /**
- *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
 public class IndicesUtilsTest {
-
-    public IndicesUtilsTest() {
-    }
 
     @Test
     public void parse() {

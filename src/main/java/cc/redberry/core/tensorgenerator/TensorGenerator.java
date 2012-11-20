@@ -116,7 +116,7 @@ public class TensorGenerator {
             if (symmetricForm || !(term instanceof Sum))
                 term = Tensors.multiply(coefficientsGenerator.take(), term, term instanceof Sum ? new Complex(new Rational(1, term.size())) : Complex.ONE);
             else
-                term = Tensors.multiplySumElementsOnFactors((Sum) term, coefficientsGenerator);
+                term = FastTensors.multiplySumElementsOnFactors((Sum) term, coefficientsGenerator);
             result.put(term);
         }
     }

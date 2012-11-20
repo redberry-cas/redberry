@@ -61,6 +61,9 @@ public interface SimpleIndices extends Indices {
     SimpleIndices getFree();
 
     @Override
+    SimpleIndices getOfType(IndexType type);
+
+    @Override
     SimpleIndices applyIndexMapping(IndexMapping im);
 
     /**

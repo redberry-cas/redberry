@@ -26,7 +26,6 @@ import gnu.trove.set.hash.TIntHashSet;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import java.math.MathContext;
 import java.util.HashSet;
 import java.util.Random;
 import java.util.regex.Matcher;
@@ -126,11 +125,23 @@ public class BlackList {
         String p = "((?>(?>[a-zA-Z])|(?>\\\\[a-zA-A]*))(?>_(?>(?>[0-9])|(?>[\\{][0-9\\s]*[\\}])))?[']*)";
         Pattern pattern = Pattern.compile(p);
         Matcher matcher = pattern.matcher("{x {\\gamma_2}} {{a}df''xc}{ e_{9 2}'' d\\alpha}\\beta");
-        while (matcher.find()){
+        while (matcher.find()) {
             String group = matcher.group();
             System.out.println(group);
             System.out.println();
         }
+    }
+
+
+    @Test
+    public void test121() {
+        int t = 0;
+        foo(++t, ++t);
+    }
+
+    private static void foo(int i, int j) {
+        System.out.println(i);
+        System.out.println(j);
     }
 
 }

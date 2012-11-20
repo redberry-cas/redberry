@@ -23,7 +23,6 @@
 package cc.redberry.core.parser;
 
 /**
- *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
@@ -40,5 +39,6 @@ public enum TensorType {
     Expression,
     Power,
     Number,
-    ScalarFunction
+    ScalarFunction,
+    Dummy
 }

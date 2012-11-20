@@ -77,6 +77,36 @@ public final class IndicesTypeStructure {
                 states[i] = ByteBackedBitArray.EMPTY;
     }
 
+    public IndicesTypeStructure(int[] allCount, ByteBackedBitArray[] allStates) {
+        if (allCount.length != IndexType.TYPES_COUNT || allStates.length != IndexType.TYPES_COUNT)
+            throw new IllegalArgumentException();
+        int i, size = 0;
+        for (i = 0; i < IndexType.TYPES_COUNT; ++i) {
+            if ((allStates[i] != null && CC.isMetric((byte) i)) ||
+                    (allStates[i] == null && !CC.isMetric((byte) i)))
+                throw new IllegalArgumentException();
+            this.states[i] = allStates[i] == null ? null : allStates[i].clone();
+            size += allCount[i];
+        }
+        System.arraycopy(allCount, 0, this.typesCounts, 0, allCount.length);
+        this.size = size;
+    }
+
+    public ByteBackedBitArray[] getStates() {
+        ByteBackedBitArray[] statesCopy = new ByteBackedBitArray[states.length];
+        for (int i = 0; i < states.length; ++i)
+            statesCopy[i] = states[i] == null ? null : states[i].clone();
+        return statesCopy;
+    }
+
+    public ByteBackedBitArray getStates(IndexType type) {
+        return states[type.getType()].clone();
+    }
+
+    public int[] getTypesCounts() {
+        return typesCounts.clone();
+    }
+
     public IndicesTypeStructure(SimpleIndices indices) {
         size = indices.size();
         int i;
@@ -129,7 +159,6 @@ public final class IndicesTypeStructure {
             return ByteBackedBitArray.EMPTY;
         return new ByteBackedBitArray(size);
     }
-
 
     public int size() {
         return size;

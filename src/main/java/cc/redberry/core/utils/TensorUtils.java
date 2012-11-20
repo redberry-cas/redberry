@@ -39,6 +39,8 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
+import static cc.redberry.core.tensor.Tensors.*;
+
 /**
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
@@ -46,6 +48,19 @@ import java.util.Set;
 public class TensorUtils {
 
     private TensorUtils() {
+    }
+
+    /**
+     * Returns true if at least one free index of {@code u} is contracted
+     * with some free index of {@code v}.
+     *
+     * @param u tensor
+     * @param v tensor
+     * @return true if at least one free index of {@code u} is contracted
+     *         with some free index of {@code v}
+     */
+    public static boolean haveIndicesIntersections(Tensor u, Tensor v) {
+        return IndicesUtils.haveIntersections(u.getIndices(), v.getIndices());
     }
 
     public static boolean isZeroOrIndeterminate(Tensor tensor) {
@@ -386,8 +401,11 @@ public class TensorUtils {
         for (i = 0; i < dimension; ++i) {
             int fromIndex = indicesNames[i];
             IndexMappingBufferRecord record = indexMappingBuffer.getMap().get(fromIndex);
-            if (record == null)
-                throw new IllegalArgumentException("Index " + IndicesUtils.toString(fromIndex) + " does not contains in specified IndexMappingBuffer.");
+            if (record == null) {
+                return new Symmetry(dimension);
+                //todo discuss with Dima
+                //throw new IllegalArgumentException("Index " + IndicesUtils.toString(fromIndex) + " does not contains in specified IndexMappingBuffer.");
+            }
             int newPosition = -1;
             //TODO refactor with sort and binary search
             for (int j = 0; j < dimension; ++j)
@@ -395,8 +413,11 @@ public class TensorUtils {
                     newPosition = j;
                     break;
                 }
-            if (newPosition < 0)
-                throw new IllegalArgumentException("Index " + IndicesUtils.toString(record.getIndexName()) + " does not contains in specified indices array.");
+            if (newPosition < 0) {
+                return new Symmetry(dimension);
+                //todo discuss with Dima
+                //throw new IllegalArgumentException("Index " + IndicesUtils.toString(record.getIndexName()) + " does not contains in specified indices array.");
+            }
             permutation[i] = newPosition;
         }
         for (i = 0; i < dimension; ++i)
@@ -466,6 +487,52 @@ public class TensorUtils {
                 depth = temp;
         }
         return depth;
+    }
+
+    public static Tensor det(Tensor[][] matrix) {
+        checkMatrix(matrix);
+        return det1(matrix);
+    }
+
+    private static void checkMatrix(Tensor[][] tensors) {
+        int cc = tensors.length;
+        for (Tensor[] tt : tensors)
+            if (tt.length != cc)
+                throw new IllegalArgumentException("Non square matrix");
+    }
+
+    private static Tensor det1(Tensor[][] matrix) {
+        if (matrix.length == 1)
+            return matrix[0][0];
+
+        Tensor sum = Complex.ZERO;
+        Tensor temp;
+        for (int i = 0; i < matrix.length; ++i) {
+            temp = multiply(matrix[0][i], det(deleteFromMatrix(matrix, 0, i)));
+            if (i % 2 == 1)
+                temp = negate(temp);
+            sum = sum(sum, temp);
+        }
+        return sum;
+    }
+
+    private static Tensor[][] deleteFromMatrix(final Tensor[][] matrix, int row, int column) {
+        if (matrix.length == 1)
+            return new Tensor[0][0];
+        Tensor[][] newMatrix = new Tensor[matrix.length - 1][matrix.length - 1];
+        int cRow = 0, cColumn, j;
+        for (int i = 0; i < matrix.length; ++i) {
+            if (i == row)
+                continue;
+            cColumn = 0;
+            for (j = 0; j < matrix.length; ++j) {
+                if (j == column)
+                    continue;
+                newMatrix[cRow][cColumn++] = matrix[i][j];
+            }
+            ++cRow;
+        }
+        return newMatrix;
     }
 
 }
