@@ -114,6 +114,10 @@ public final class Complex extends Tensor
         }
     }
 
+    public Complex(org.apache.commons.math3.complex.Complex complex) {
+        this(complex.getReal(), complex.getImaginary());
+    }
+
     public Complex(int real, int imaginary) {
         this(new Rational(real), new Rational(imaginary));
     }

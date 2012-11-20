@@ -30,7 +30,6 @@ import cc.redberry.core.tensor.Tensors;
 import cc.redberry.core.utils.TensorUtils;
 
 /**
- *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
