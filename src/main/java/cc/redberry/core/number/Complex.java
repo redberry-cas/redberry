@@ -29,6 +29,7 @@ import cc.redberry.core.tensor.*;
 import org.apache.commons.math3.Field;
 import org.apache.commons.math3.exception.NullArgumentException;
 import org.apache.commons.math3.fraction.BigFraction;
+import org.apache.commons.math3.util.FastMath;
 
 import java.io.Serializable;
 import java.math.BigInteger;
@@ -350,14 +351,11 @@ public class Complex extends Tensor
     }
 
     /**
-     * Return the conjugate of this complex number. The conjugate of {@code a + bi}
-     * is {@code a - bi}. <br/>
-     * {@link #ComplexNaN} is returned if either the real or imaginary part of this
-     * Complex number equals {@code Double.NaN}. <br/> If the imaginary part is
-     * infinite, and the real part is not
-     * {@code NaN}, the returned value has infinite imaginary part of the
-     * opposite sign, e.g. the conjugate of
-     * {@code 1 + POSITIVE_INFINITY i} is {@code 1 - NEGATIVE_INFINITY i}.
+     * Return the conjugate of this complex number. The conjugate of {@code a + bi} is {@code a - bi}. <br/> {@link
+     * #ComplexNaN} is returned if either the real or imaginary part of this Complex number equals {@code Double.NaN}.
+     * <br/> If the imaginary part is infinite, and the real part is not {@code NaN}, the returned value has infinite
+     * imaginary part of the opposite sign, e.g. the conjugate of {@code 1 + POSITIVE_INFINITY i} is {@code 1 -
+     * NEGATIVE_INFINITY i}.
      *
      * @return the conjugate of this Complex object.
      */
@@ -366,16 +364,14 @@ public class Complex extends Tensor
     }
 
     /**
-     * Returns a {@code Complex} whose value is
-     * {@code (this + addend)}. Uses the definitional formula
+     * Returns a {@code Complex} whose value is {@code (this + addend)}. Uses the definitional formula
      * <pre>
      * <code>
      *   (a + bi) + (c + di) = (a+c) + (b+d)i
      * </code>
      * </pre> <br/> If either {@code this} or {@code addend} has a {@code NaN}
-     * value in either part, {@link #ComplexNaN} is returned; otherwise {@code Infinite}
-     * and {@code NaN} values are returned in the parts of the result according
-     * to the rules for {@link java.lang.Double} arithmetic.
+     * value in either part, {@link #ComplexNaN} is returned; otherwise {@code Infinite} and {@code NaN} values are
+     * returned in the parts of the result according to the rules for {@link java.lang.Double} arithmetic.
      *
      * @param a value to be added to this {@code Complex}.
      * @return {@code this + addend}.
@@ -388,8 +384,7 @@ public class Complex extends Tensor
     }
 
     /**
-     * Returns a {@code Complex} whose value is
-     * {@code (this / divisor)}. Implements the definitional formula
+     * Returns a {@code Complex} whose value is {@code (this / divisor)}. Implements the definitional formula
      * <pre>
      * <code>
      *    a + bi          ac + bd + (bc - ad)i
@@ -397,22 +392,15 @@ public class Complex extends Tensor
      *    c + di         c<sup>2</sup> + d<sup>2</sup>
      * </code>
      * </pre> but uses <a href="http://doi.acm.org/10.1145/1039813.1039814">
-     * prescaling of operands</a> to limit the effects of overflows and
-     * underflows in the computation. <br/>
-     * {@code Infinite} and {@code NaN} values are handled according to the
-     * following rules, applied in the order presented: <ul> <li>If either {@code this}
-     * or {@code divisor} has a {@code NaN} value in either part, {@link #ComplexNaN}
-     * is returned. </li> <li>If {@code divisor} equals {@link #ZERO}, {@link #ComplexNaN}
-     * is returned. </li> <li>If {@code this} and {@code divisor} are both
-     * infinite,
-     * {@link #ComplexNaN} is returned. </li> <li>If {@code this} is finite (i.e., has
-     * no {@code Infinite} or
-     * {@code NaN} parts) and {@code divisor} is infinite (one or both parts
-     * infinite), {@link #ZERO} is returned. </li> <li>If {@code this} is
-     * infinite and {@code divisor} is finite,
-     * {@code NaN} values are returned in the parts of the result if the
-     * {@link java.lang.Double} rules applied to the definitional formula force {@code NaN}
-     * results. </li> </ul>
+     * prescaling of operands</a> to limit the effects of overflows and underflows in the computation. <br/> {@code
+     * Infinite} and {@code NaN} values are handled according to the following rules, applied in the order presented:
+     * <ul> <li>If either {@code this} or {@code divisor} has a {@code NaN} value in either part, {@link #ComplexNaN} is
+     * returned. </li> <li>If {@code divisor} equals {@link #ZERO}, {@link #ComplexNaN} is returned. </li> <li>If {@code
+     * this} and {@code divisor} are both infinite, {@link #ComplexNaN} is returned. </li> <li>If {@code this} is finite
+     * (i.e., has no {@code Infinite} or {@code NaN} parts) and {@code divisor} is infinite (one or both parts
+     * infinite), {@link #ZERO} is returned. </li> <li>If {@code this} is infinite and {@code divisor} is finite, {@code
+     * NaN} values are returned in the parts of the result if the {@link java.lang.Double} rules applied to the
+     * definitional formula force {@code NaN} results. </li> </ul>
      *
      * @param divisor Value by which this {@code Complex} is to be divided.
      * @return {@code this / divisor}.
@@ -457,20 +445,17 @@ public class Complex extends Tensor
     }
 
     /**
-     * Returns a {@code Complex} whose value is {@code this * factor}.
-     * Implements preliminary checks for {@code NaN} and infinity followed by
-     * the definitional formula:
+     * Returns a {@code Complex} whose value is {@code this * factor}. Implements preliminary checks for {@code NaN} and
+     * infinity followed by the definitional formula:
      * <pre>
      * <code>
      *   (a + bi)(c + di) = (ac - bd) + (ad + bc)i
      * </code>
      * </pre> Returns {@link #ComplexNaN} if either {@code this} or {@code factor} has
-     * one or more {@code NaN} parts. <br/> Returns {@link #COMPLEX_INFINITY} if neither {@code this}
-     * nor {@code factor} has one or more {@code NaN} parts and if either {@code this}
-     * or {@code factor} has one or more infinite parts (same result is returned
-     * regardless of the sign of the components). <br/> Returns finite values in
-     * components of the result per the definitional formula in all remaining
-     * cases.
+     * one or more {@code NaN} parts. <br/> Returns {@link #COMPLEX_INFINITY} if neither {@code this} nor {@code factor}
+     * has one or more {@code NaN} parts and if either {@code this} or {@code factor} has one or more infinite parts
+     * (same result is returned regardless of the sign of the components). <br/> Returns finite values in components of
+     * the result per the definitional formula in all remaining cases.
      *
      * @param factor value to be multiplied by this {@code Complex}.
      * @return {@code this * factor}.
@@ -546,6 +531,36 @@ public class Complex extends Tensor
 
         return new Complex(new Rational(nR, dR));
     }
+
+    public double absNumeric() {
+        if (isNaN())
+            return Double.NaN;
+
+        if (isInfinite())
+            return Double.POSITIVE_INFINITY;
+
+        final double real = this.real.doubleValue();
+        final double imaginary = this.imaginary.doubleValue();
+
+        return absNumeric(real, imaginary);
+    }
+
+    public static double absNumeric(final double real, final double imaginary) {
+        if (FastMath.abs(real) < FastMath.abs(imaginary)) {
+            if (imaginary == 0.0) {
+                return FastMath.abs(real);
+            }
+            double q = real / imaginary;
+            return FastMath.abs(imaginary) * FastMath.sqrt(1 + q * q);
+        } else {
+            if (real == 0.0) {
+                return FastMath.abs(imaginary);
+            }
+            double q = imaginary / real;
+            return FastMath.abs(real) * FastMath.sqrt(1 + q * q);
+        }
+    }
+
 
     @Override
     public Complex add(BigFraction fraction) {
@@ -674,28 +689,99 @@ public class Complex extends Tensor
         return real.equals(other.real) && imaginary.equals(other.imaginary);
     }
 
+    /**
+     * Returns na
+     *
+     * @return
+     */
+    public Complex logNumeric() {
+        if (isNaN()) {
+            return ComplexNaN;
+        }
+
+        final double real = this.real.doubleValue();
+        final double imaginary = this.imaginary.doubleValue();
+
+        return new Complex(FastMath.log(absNumeric(real, imaginary)),
+                FastMath.atan2(imaginary, real));
+    }
+
+
     @Override
     public Complex pow(double exponent) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return this.logNumeric().multiply(exponent).expNumeric();
     }
 
     @Override
     public Complex pow(BigInteger exponent) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        if (exponent.compareTo(BigInteger.ZERO) < 0)
+            throw new IllegalArgumentException(); //TODO change...
+
+        Complex result = Complex.ONE;
+        Complex k2p = this;
+        while (!BigInteger.ZERO.equals(exponent)) {
+            if (exponent.testBit(0))
+                result = result.multiply(k2p);
+
+            k2p = k2p.multiply(k2p);
+            exponent = exponent.shiftRight(1);
+        }
+
+        return result;
     }
 
     @Override
     public Complex pow(long exponent) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        if (exponent < 0)
+            throw new IllegalArgumentException(); //TODO change...
+
+        Complex result = Complex.ONE;
+        Complex k2p = this;
+        while (exponent != 0) {
+            if ((exponent & 0x1) != 0)
+                result = result.multiply(k2p);
+
+            k2p = k2p.multiply(k2p);
+            exponent = exponent >> 1;
+        }
+
+        return result;
     }
 
     @Override
     public Complex pow(int exponent) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        if (exponent < 0)
+            throw new IllegalArgumentException(); //TODO change...
+
+        Complex result = Complex.ONE;
+        Complex k2p = this;
+        while (exponent != 0) {
+            if ((exponent & 0x1) != 0)
+                result = result.multiply(k2p);
+
+            k2p = k2p.multiply(k2p);
+            exponent = exponent >> 1;
+        }
+
+        return result;
     }
 
+    public Complex expNumeric() {
+        if (isNaN()) {
+            return ComplexNaN;
+        }
+
+        final double real = this.real.doubleValue();
+        final double imaginary = this.imaginary.doubleValue();
+
+        double expReal = FastMath.exp(real);
+        return new Complex(expReal * FastMath.cos(imaginary),
+                expReal * FastMath.sin(imaginary));
+    }
+
+
     public Complex powNumeric(Complex exponent) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return this.logNumeric().multiply(exponent).expNumeric();
     }
 
     @Override

@@ -94,7 +94,6 @@ public final class Exponentiation {
 
             //Testing
             testValue = new BigInteger(result);
-            //cValue = testValue.pow(power.intValue()).compareTo(base);
             cValue = ArithmeticUtils.pow(testValue, power).compareTo(base);
             if (cValue == 0)
                 return testValue;
