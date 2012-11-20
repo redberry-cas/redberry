@@ -22,6 +22,8 @@
  */
 package cc.redberry.core.number;
 
+import org.apache.commons.math3.util.ArithmeticUtils;
+
 import java.math.BigInteger;
 
 /**
@@ -38,8 +40,6 @@ public final class Exponentiation {
         if (base.isNumeric() || power.isNumeric()) { // Bease or power are numeric
             return new Numeric(Math.pow(base.getNumericValue().doubleValue(), power.getNumericValue().doubleValue()));
         }
-
-        //TODO some more ONE, ZERO etc. tests
 
         //<-- Power and Base are rational
 
@@ -94,7 +94,8 @@ public final class Exponentiation {
 
             //Testing
             testValue = new BigInteger(result);
-            cValue = testValue.pow(power.intValue()).compareTo(base); // TODO it is not working [ power.intValue() ] !!!!!!!!!!!!!!!!!!
+            //cValue = testValue.pow(power.intValue()).compareTo(base);
+            cValue = ArithmeticUtils.pow(testValue, power).compareTo(base);
             if (cValue == 0)
                 return testValue;
             if (cValue > 0)
@@ -106,7 +107,6 @@ public final class Exponentiation {
 
     public static Complex exponentiateIfPossible(Complex base, Complex power) {
         //Partially copied from PowerFactory
-
         if (base.isInfinite())
             if (power.isZero())
                 return Complex.ComplexNaN;
@@ -133,6 +133,8 @@ public final class Exponentiation {
 
         if (base.isNumeric() || power.isNumeric())
             return base.powNumeric(power);
+
+        // <-- base and power are rational
 
         if (power.isReal()) {
             Rational pp = (Rational) power.getReal();
