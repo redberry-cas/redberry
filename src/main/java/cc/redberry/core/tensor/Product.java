@@ -233,8 +233,15 @@ public final class Product extends MultiTensor {
         if (NumberUtils.isZeroOrIndeterminate(complex))
             return complex;
 
+
         if (factor != Complex.ONE) {
             if (i == 0) {
+                if (complex.isOne()) {
+                    if (data.length == 1 && indexlessData.length == 0)
+                        return data[0];
+                    if (data.length == 0 && indexlessData.length == 1)
+                        return indexlessData[0];
+                }
                 complex = getDefaultReference(complex);
                 return new Product(indices, complex, indexlessData, data, contentReference);
             }
@@ -242,6 +249,18 @@ public final class Product extends MultiTensor {
             complex = getDefaultReference(complex);
             --i;
         }
+
+        if (complex.isOne()) {
+            if (data.length == 2 && indexlessData.length == 0)
+                return data[1 - i];
+            if (data.length == 0 && indexlessData.length == 2)
+                return indexlessData[1 - i];
+            if (data.length == 1 && indexlessData.length == 1)
+                return i == 0 ? data[0] : indexlessData[0];
+        }
+        if ((data.length == 1 && indexlessData.length == 0) || (data.length == 0 && indexlessData.length == 1))
+            return complex;
+
 
         if (i < indexlessData.length) {
             Tensor[] newIndexless = ArraysUtils.remove(indexlessData, i);
