@@ -23,6 +23,7 @@
 package cc.redberry.core.tensor.functions;
 
 import cc.redberry.core.number.Complex;
+import cc.redberry.core.number.ComplexUtils;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.tensor.TensorBuilder;
 import cc.redberry.core.tensor.TensorFactory;
@@ -77,6 +78,8 @@ public class ArcCos extends ScalarFunction {
                 return arg.get(0);
             if (TensorUtils.isZero(arg))
                 return Tensors.parse("pi/2");
+            if (TensorUtils.isNumeric(arg))
+                return ComplexUtils.arccos((Complex) arg);
             return new ArcCos(arg);
         }
     }

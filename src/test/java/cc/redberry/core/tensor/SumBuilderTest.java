@@ -50,6 +50,7 @@ public class SumBuilderTest {
         isb.put(parse("Sin[-c]"));
 
         Tensor expected = Tensors.parse("8*a*b+d");
+        System.out.println(isb.build());
         Assert.assertTrue(TensorUtils.equalsExactly(expected, isb.build()));
     }
 

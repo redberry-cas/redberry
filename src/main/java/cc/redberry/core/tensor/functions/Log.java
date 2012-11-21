@@ -23,6 +23,7 @@
 package cc.redberry.core.tensor.functions;
 
 import cc.redberry.core.number.Complex;
+import cc.redberry.core.number.ComplexUtils;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.tensor.TensorBuilder;
 import cc.redberry.core.tensor.TensorFactory;
@@ -78,6 +79,8 @@ public final class Log extends ScalarFunction {
                 return arg.get(0);
             if (TensorUtils.isOne(arg))
                 return Complex.ZERO;
+            if (TensorUtils.isNumeric(arg))
+                return ComplexUtils.log((Complex) arg);
             return new Log(arg);
         }
     }

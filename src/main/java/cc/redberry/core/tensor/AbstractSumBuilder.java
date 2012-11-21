@@ -25,10 +25,14 @@ package cc.redberry.core.tensor;
 import cc.redberry.core.indices.Indices;
 import cc.redberry.core.indices.IndicesFactory;
 import cc.redberry.core.number.Complex;
+import cc.redberry.core.number.NumberUtils;
+import cc.redberry.core.transformations.ToNumeric;
 import cc.redberry.core.utils.TensorHashCalculator;
 import cc.redberry.core.utils.TensorUtils;
 
 import java.util.*;
+
+import static cc.redberry.core.transformations.ToNumeric.toNumeric;
 
 /**
  * @author Dmitry Bolotin
@@ -62,18 +66,29 @@ public abstract class AbstractSumBuilder implements TensorBuilder {
             return complex;
 
         List<Tensor> sum = new ArrayList<>();
-        if (!complex.isZero())
-            sum.add(complex);
 
+        final boolean isNumeric = complex.isNumeric();
         for (Map.Entry<Integer, List<FactorNode>> entry : summands.entrySet())
             for (FactorNode node : entry.getValue()) {
-                Tensor summand = Tensors.multiply(node.build(), node.factor);
-                if (!TensorUtils.isZero(summand))
-                    sum.add(summand);
+                if (isNumeric) {
+                    Tensor summand = Tensors.multiply(toNumeric(node.build()), toNumeric(node.factor));
+                    if (summand instanceof Complex)
+                        complex = complex.add((Complex) summand);
+                    else
+                        sum.add(summand);
+                } else {
+                    Tensor summand = Tensors.multiply(node.build(), node.factor);
+                    if (!TensorUtils.isZero(summand))
+                        sum.add(summand);
+                }
             }
 
         if (sum.isEmpty())
             return complex;
+
+        if (!complex.isZero())
+            sum.add(complex);
+
         if (sum.size() == 1)
             return sum.get(0);
 
@@ -84,6 +99,10 @@ public abstract class AbstractSumBuilder implements TensorBuilder {
 
     @Override
     public void put(Tensor tensor) {
+        if (complex.isNaN())
+            return;
+        if (complex.isNumeric())
+            tensor = toNumeric(tensor);
         if (TensorUtils.isZero(tensor))
             return;
         if (indices == null) {
@@ -145,8 +164,8 @@ public abstract class AbstractSumBuilder implements TensorBuilder {
 //        return buffer.getSignum();
     }
 
-    @Override
-    public String toString() {
-        return build().toString();
-    }
+//    @Override
+//    public String toString() {
+//        return clone().build().toString();
+//    }
 }

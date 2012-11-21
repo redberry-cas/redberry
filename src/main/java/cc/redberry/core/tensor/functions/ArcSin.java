@@ -23,6 +23,7 @@
 package cc.redberry.core.tensor.functions;
 
 import cc.redberry.core.number.Complex;
+import cc.redberry.core.number.ComplexUtils;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.tensor.TensorBuilder;
 import cc.redberry.core.tensor.TensorFactory;
@@ -30,7 +31,6 @@ import cc.redberry.core.tensor.Tensors;
 import cc.redberry.core.utils.TensorUtils;
 
 /**
- *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
@@ -78,6 +78,8 @@ public class ArcSin extends ScalarFunction {
                 return arg.get(0);
             if (TensorUtils.isZero(arg))
                 return Complex.ZERO;
+            if (TensorUtils.isNumeric(arg))
+                return ComplexUtils.arcsin((Complex) arg);
             return new ArcSin(arg);
         }
     }
