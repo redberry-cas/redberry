@@ -24,12 +24,13 @@ package cc.redberry.core.parser;
 
 import cc.redberry.core.indices.Indices;
 import cc.redberry.core.indices.IndicesUtils;
+import gnu.trove.set.TIntSet;
+import gnu.trove.set.hash.TIntHashSet;
 
 import java.util.HashSet;
 import java.util.Set;
 
 /**
- *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
@@ -53,5 +54,22 @@ public class ParseUtils {
             for (ParseNode pn : node.content)
                 if (!(pn instanceof ParseNodeScalarFunction))
                     getAllIndices1(pn, set);
+    }
+
+    public static TIntSet getAllIndicesT(ParseNode node) {
+        TIntSet set = new TIntHashSet();
+        getAllIndicesT1(node, set);
+        return set;
+    }
+
+    private static void getAllIndicesT1(ParseNode node, TIntSet set) {
+        if (node instanceof ParseNodeSimpleTensor) {
+            Indices indices = node.getIndices();
+            for (int i = indices.size() - 1; i >= 0; --i)
+                set.add(IndicesUtils.getNameWithType(indices.get(i)));
+        } else
+            for (ParseNode pn : node.content)
+                if (!(pn instanceof ParseNodeScalarFunction))
+                    getAllIndicesT1(pn, set);
     }
 }

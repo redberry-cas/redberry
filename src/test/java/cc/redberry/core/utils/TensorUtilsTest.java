@@ -22,6 +22,7 @@
  */
 package cc.redberry.core.utils;
 
+import cc.redberry.core.TAssert;
 import cc.redberry.core.combinatorics.Symmetry;
 import cc.redberry.core.combinatorics.symmetries.Symmetries;
 import cc.redberry.core.combinatorics.symmetries.SymmetriesFactory;
@@ -34,6 +35,7 @@ import junit.framework.Assert;
 import org.junit.Test;
 
 import static cc.redberry.core.tensor.Tensors.parse;
+import static cc.redberry.core.utils.TensorUtils.det;
 import static cc.redberry.core.utils.TensorUtils.treeDepth;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -200,5 +202,36 @@ public class TensorUtilsTest {
         Assert.assertEquals(treeDepth(t), 6);
         t = parse("Sin[(f+g*Sin[h])*(a+b*c**(a+b))+x]");
         Assert.assertEquals(treeDepth(t), 7);
+    }
+
+    @Test
+    public void testDet1() {
+        Tensor[][] matrix = {
+                {parse("a"), parse("b")},
+                {parse("c"), parse("d")}
+        };
+        TAssert.assertEquals(det(matrix), "a*d-c*b");
+    }
+
+    @Test
+    public void testDet2() {
+        Tensor[][] matrix = {
+                {parse("a"), parse("b"), parse("c")},
+                {parse("d"), parse("e"), parse("f")},
+                {parse("g"), parse("h"), parse("i")}
+        };
+        TAssert.assertEquals(det(matrix), "a*(e*i-f*h)-b*(d*i-f*g)+c*(d*h-e*g)");
+    }
+
+
+    @Test
+    public void testDet3() {
+        Tensor[][] matrix = {
+                {parse("a"), parse("b"), parse("c"),parse("x")},
+                {parse("d"), parse("e"), parse("f"),parse("y")},
+                {parse("g"), parse("h"), parse("i"),parse("z")},
+                {parse("p"), parse("q"), parse("r"),parse("s")}
+        };
+        TAssert.assertEquals(det(matrix), "(e*(s*i-z*r)-f*(-q*z+s*h)+y*(-q*i+h*r))*a-(f*(g*q-p*h)-e*(-p*i+g*r)+d*(-q*i+h*r))*x-(d*(s*i-z*r)-f*(-p*z+s*g)+(-p*i+g*r)*y)*b+c*(y*(g*q-p*h)-e*(-p*z+s*g)+(-q*z+s*h)*d)");
     }
 }

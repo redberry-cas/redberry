@@ -34,7 +34,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
@@ -57,6 +56,12 @@ public final class SimpleIndicesBuilder {
             return this;
         data.addAll(((SimpleIndicesAbstract) indices).data);
         symmetries.add(indices.getSymmetries().getInnerSymmetries());
+        return this;
+    }
+
+    public SimpleIndicesBuilder append(int... indices) {
+        data.addAll(indices);
+        symmetries.add(SymmetriesFactory.createSymmetries(indices.length));
         return this;
     }
 

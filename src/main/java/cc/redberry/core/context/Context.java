@@ -120,7 +120,6 @@ public final class Context {
      * Returns true if metric is defined for specified index type.
      *
      * @param type index type
-     *
      * @return true if metric is defined for specified index type
      */
     public boolean isMetric(byte type) {
@@ -128,8 +127,14 @@ public final class Context {
     }
 
     public SimpleTensor createKronecker(int index1, int index2) {
-        if (IndicesUtils.getType(index1) != IndicesUtils.getType(index2) || IndicesUtils.getRawStateInt(index1) == IndicesUtils.getRawStateInt(index2))
+        byte type;
+        if ((type = IndicesUtils.getType(index1)) != IndicesUtils.getType(index2) || IndicesUtils.getRawStateInt(index1) == IndicesUtils.getRawStateInt(index2))
             throw new IllegalArgumentException("This is not kronecker indices!");
+        if (!isMetric(type) && IndicesUtils.getState(index2)) {
+            int t = index1;
+            index1 = index2;
+            index2 = t;
+        }
         SimpleIndices indices = IndicesFactory.createSimple(null, index1, index2);
         NameDescriptor nd = nameManager.mapNameDescriptor(nameManager.getKroneckerName(), new IndicesTypeStructure(indices));
         int name = nd.getId();

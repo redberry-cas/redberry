@@ -29,7 +29,6 @@ import cc.redberry.core.indices.SimpleIndices;
 import java.util.Arrays;
 
 /**
- *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
@@ -43,7 +42,7 @@ public abstract class NameDescriptor {
     NameDescriptor(IndicesTypeStructure[] indexTypeStructures, int id) {
         if (indexTypeStructures.length == 0)
             throw new IllegalArgumentException();
-        this.id=id;
+        this.id = id;
         this.indexTypeStructures = indexTypeStructures;
         this.symmetries = IndicesSymmetries.create(indexTypeStructures[0]);
     }
@@ -75,5 +74,9 @@ public abstract class NameDescriptor {
     @Override
     public String toString() {
         return getName(null) + ":" + Arrays.toString(indexTypeStructures);
+    }
+
+    public static IndicesTypeStructureAndName extractKey(NameDescriptor nd) {
+        return nd.getKeys()[0];
     }
 }

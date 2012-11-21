@@ -93,9 +93,7 @@ public final class IntArray {
 
     @Override
     public int hashCode() {
-        int hash = 7;
-        hash = 71 * hash + Arrays.hashCode(this.innerArray);
-        return hash;
+        return 497 + Arrays.hashCode(this.innerArray);
     }
 
     @Override
