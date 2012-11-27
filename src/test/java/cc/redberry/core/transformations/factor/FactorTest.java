@@ -122,7 +122,7 @@ public class FactorTest {
 
     @Test
     public void test7(){
-        Tensor t = parse("(1/2)*m*t**4-4*m**3*t**3+8*m**5*t**2");
+        Tensor t = expand(parse("2*((1/2)*m*t**4-4*m**3*t**3+8*m**5*t**2)"));
         System.out.println(factor(t));
     }
 
