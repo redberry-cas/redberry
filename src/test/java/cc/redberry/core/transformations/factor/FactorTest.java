@@ -24,6 +24,7 @@ package cc.redberry.core.transformations.factor;
 
 import cc.redberry.core.TAssert;
 import cc.redberry.core.context.CC;
+import cc.redberry.core.context.OutputFormat;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.tensor.*;
 import cc.redberry.core.utils.TensorUtils;
@@ -32,11 +33,10 @@ import org.junit.Test;
 
 import java.util.Random;
 
-import static cc.redberry.core.tensor.Tensors.parse;
-import static cc.redberry.core.tensor.Tensors.parseSimple;
-import static cc.redberry.core.tensor.Tensors.pow;
+import static cc.redberry.core.tensor.Tensors.*;
 import static cc.redberry.core.transformations.expand.Expand.expand;
 import static cc.redberry.core.transformations.factor.Factor.factor;
+import static cc.redberry.core.transformations.factor.Factor.factorOut;
 
 /**
  * @author Dmitry Bolotin
@@ -121,12 +121,6 @@ public class FactorTest {
     }
 
     @Test
-    public void test7(){
-        Tensor t = expand(parse("2*((1/2)*m*t**4-4*m**3*t**3+8*m**5*t**2)"));
-        System.out.println(factor(t));
-    }
-
-    @Test
     public void test6ra() {
         Random random = new Random();
         long seed = random.nextLong();
@@ -141,6 +135,14 @@ public class FactorTest {
         System.out.println(factor);
         System.out.println(expand);
         TAssert.assertEquals(expand(factor), expand);
+    }
+
+    @Test
+    public void test7() {
+        Tensor t = expand(parse("2*((1/2)*m*t**4-4*m**3*t**3+8*m**5*t**2)"));
+        System.out.println(factor(t));
+        t = expand(parse("((1/2)*m*t**4-4*m**3*t**3+8*m**5*t**2)"));
+        System.out.println(factor(t));
     }
 
 
@@ -168,4 +170,80 @@ public class FactorTest {
             pb.put(pow(randomSum(random), 1 + random.nextInt(3)));
         return pb.build();
     }
+
+    @Test
+    public void test8() {
+        for (int i = 0; i < 1000; ++i) {
+            CC.resetTensorNames();
+            Tensor t = parse("a*b*c + a*b*d");
+            TAssert.assertEquals(factorOut(t), "a*b*(c+d)");
+        }
+    }
+
+
+    @Test
+    public void test9() {
+        for (int i = 0; i < 1000; ++i) {
+            CC.resetTensorNames();
+            Tensor t = parse("a*b*c + a*b*d");
+            TAssert.assertEquals(factorOut(t), "a*b*(c+d)");
+        }
+    }
+
+    @Test
+    public void test10() {
+        for (int i = 0; i < 1000; ++i) {
+            CC.resetTensorNames();
+            Tensor t = parse("a**2*b*c + a*b**2*d*e + a*b");
+            TAssert.assertEquals(factorOut(t), "a*b*(a*c + d*b*e + 1)");
+        }
+    }
+
+
+    @Test
+    public void test11() {
+        for (int i = 0; i < 1000; ++i) {
+            CC.resetTensorNames();
+            Tensor t = parse("a**(-2)*b**(-1)*c + a**(-1)*b**(-2)*d*e + 1/(a*b)");
+            TAssert.assertEquals(factorOut(t), "1/(a*b)*(1/a*c + d/b*e + 1)");
+        }
+    }
+
+    @Test
+    public void test12() {
+        for (int i = 0; i < 1000; ++i) {
+            CC.resetTensorNames();
+            Tensor t = parse("a**(-2)*b**(-1)*c + a**(-1)*b**(-2)*d*e + a*b");
+            TAssert.assertEquals(factorOut(t), t);
+        }
+    }
+
+    @Test
+    public void test13() {
+        for (int i = 0; i < 1000; ++i) {
+            CC.resetTensorNames();
+            Tensor t = parse("(a-b)**2*c + (b-a)**3*d");
+            TAssert.assertEquals(factorOut(t), "(a-b)**2*(c - d*(a-b))");
+        }
+    }
+
+    @Test
+    public void test14() {
+        for (int i = 0; i < 1000; ++i) {
+            CC.resetTensorNames();
+            Tensor t = parse("(a-b)**2*c + (b-a)**3*d + (b-a)*d");
+            TAssert.assertEquals(factorOut(t), "(a-b)*(c*(a-b) - d*(a-b)**2 - d)");
+        }
+    }
+
+    @Test
+    public void test15() {
+        Tensor t = parse("L*(-7*s**3*m**4-216*s**2*m**6+128*m**10-96-3*m**4*s-240*m**8*s)");
+        System.out.println(t.toString(OutputFormat.WolframMathematica));
+//        t = parseExpression("m = 1").transform(t);
+        System.out.println(JasFactor.factor(t));
+//        System.out.println(factor(t));
+//            TAssert.assertEquals(factorOut(t), "(a-b)*(c*(a-b) - d*(a-b)**2 - d)");
+    }
+//     -4*m**10-s*m**8+1+(1/32)*(-48*m**4+1-40*s*m**2-3*s**2)*s*m**4
 }

@@ -27,6 +27,7 @@ import cc.redberry.core.context.CC;
 import cc.redberry.core.context.OutputFormat;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.tensor.*;
+import cc.redberry.core.transformations.factor.jasfactor.edu.jas.arith.BigInteger;
 import cc.redberry.core.transformations.factor.jasfactor.edu.jas.arith.BigRational;
 import cc.redberry.core.transformations.factor.jasfactor.edu.jas.poly.GenPolynomial;
 import cc.redberry.core.transformations.factor.jasfactor.edu.jas.poly.GenPolynomialRing;
@@ -63,49 +64,8 @@ public class JasFactorTest extends TestCase {
 
 
 
-    public static Tensor tensor2Tensor(Tensor t) {
-        TIntObjectMap<Var> vars = getVars(t);
-        Var[] varsArray = vars.values(new Var[vars.size()]);
-        Arrays.sort(varsArray);
-        char polyName = 'a';
-        String[] forFactoryNames = new String[varsArray.length];
-        //int position = 0;
-        for (int i = 0; i < varsArray.length; ++i)
-            varsArray[i].polyName =
-                    forFactoryNames[varsArray[i].position = i]
-                            = String.valueOf((char) ('a' + i));
 
-        GenPolynomialRing<BigRational> factory =
-                new GenPolynomialRing<>(BigRational.ONE, forFactoryNames);
 
-        GenPolynomial<BigRational> poly = tensor2Poly(t, factory, vars);
-        return poly2Tensor(poly, varsArray);
-    }
-
-    @Test
-    public void test6() {
-        Tensor u = expand(parse("(x**2-1)*(y-1)**2*(z+a-b)**3"));
-        Tensor v = expand(parse("(x-1)*(y-1)*(z+a-b)**2"));
-        System.out.println(Arrays.toString(reduceGCD(u, v)));
-    }
-
-    public static GenPolynomial<BigRational> tensor2Poly1(Tensor t) {
-        TIntObjectMap<Var> vars = getVars(t);
-        Var[] varsArray = vars.values(new Var[vars.size()]);
-        Arrays.sort(varsArray);
-        char polyName = 'a';
-        String[] forFactoryNames = new String[varsArray.length];
-        //int position = 0;
-        for (int i = 0; i < varsArray.length; ++i)
-            varsArray[i].polyName =
-                    forFactoryNames[varsArray[i].position = i]
-                            = String.valueOf((char) ('a' + i));
-
-        GenPolynomialRing<BigRational> factory =
-                new GenPolynomialRing<>(BigRational.ONE, forFactoryNames);
-
-        return tensor2Poly(t, factory, vars);
-    }
 
 //
 //
