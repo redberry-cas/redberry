@@ -535,4 +535,15 @@ public class TensorUtils {
         return newMatrix;
     }
 
+    public static boolean containsFractions(Tensor tensor) {
+        if (tensor instanceof SimpleTensor)
+            return false;
+        if (tensor instanceof Power)
+            return isNegativeIntegerNumber(tensor.get(1));
+        for (Tensor t : tensor) {
+            if (containsFractions(t))
+                return true;
+        }
+        return false;
+    }
 }

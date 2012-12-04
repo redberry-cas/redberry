@@ -172,7 +172,7 @@ public class FactorTest {
     }
 
     @Test
-    public void test8() {
+    public void testFactorOut8() {
         for (int i = 0; i < 1000; ++i) {
             CC.resetTensorNames();
             Tensor t = parse("a*b*c + a*b*d");
@@ -182,7 +182,7 @@ public class FactorTest {
 
 
     @Test
-    public void test9() {
+    public void testFactorOut9() {
         for (int i = 0; i < 1000; ++i) {
             CC.resetTensorNames();
             Tensor t = parse("a*b*c + a*b*d");
@@ -191,7 +191,7 @@ public class FactorTest {
     }
 
     @Test
-    public void test10() {
+    public void testFactorOut10() {
         for (int i = 0; i < 1000; ++i) {
             CC.resetTensorNames();
             Tensor t = parse("a**2*b*c + a*b**2*d*e + a*b");
@@ -201,7 +201,7 @@ public class FactorTest {
 
 
     @Test
-    public void test11() {
+    public void testFactorOut11() {
         for (int i = 0; i < 1000; ++i) {
             CC.resetTensorNames();
             Tensor t = parse("a**(-2)*b**(-1)*c + a**(-1)*b**(-2)*d*e + 1/(a*b)");
@@ -210,7 +210,7 @@ public class FactorTest {
     }
 
     @Test
-    public void test12() {
+    public void testFactorOut12() {
         for (int i = 0; i < 1000; ++i) {
             CC.resetTensorNames();
             Tensor t = parse("a**(-2)*b**(-1)*c + a**(-1)*b**(-2)*d*e + a*b");
@@ -219,7 +219,7 @@ public class FactorTest {
     }
 
     @Test
-    public void test13() {
+    public void testFactorOut13() {
         for (int i = 0; i < 1000; ++i) {
             CC.resetTensorNames();
             Tensor t = parse("(a-b)**2*c + (b-a)**3*d");
@@ -228,11 +228,30 @@ public class FactorTest {
     }
 
     @Test
-    public void test14() {
+    public void testFactorOut14() {
         for (int i = 0; i < 1000; ++i) {
             CC.resetTensorNames();
             Tensor t = parse("(a-b)**2*c + (b-a)**3*d + (b-a)*d");
             TAssert.assertEquals(factorOut(t), "(a-b)*(c*(a-b) - d*(a-b)**2 - d)");
+        }
+    }
+
+
+    @Test
+    public void testFactorOut15() {
+        for (int i = 0; i < 1000; ++i) {
+            CC.resetTensorNames();
+            Tensor t = parse("(a-b)**2*c + a-b");
+            TAssert.assertEquals(factorOut(t), "(a-b)*(c*(a-b) + 1)");
+        }
+    }
+
+    @Test
+    public void testFactorOut16() {
+        for (int i = 0; i < 1000; ++i) {
+            CC.resetTensorNames();
+            Tensor t = parse("(a-b)**3*c + a**2 - 2*a*b + b**2");
+            TAssert.assertEquals(factorOut(t), "(a-b)**2*(c*(a-b) + 1)");
         }
     }
 
