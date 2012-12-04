@@ -33,8 +33,9 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import static cc.redberry.core.indices.IndicesUtils.setRawState;
+
 /**
- *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
@@ -103,22 +104,51 @@ public final class IndexMappingBufferImpl implements IndexMappingBuffer {
         return new IndexMappingBufferImpl(newMap, signum);
     }
 
+    //    @Override
+//    public String toString() {
+//        StringBuilder sb = new StringBuilder();
+//        sb.append(signum ? '-' : '+');
+//        if (map.isEmpty())
+//            return sb.append(":empty buffer").toString();
+//        for (Map.Entry<Integer, IndexMappingBufferRecord> entry : map.entrySet()) {
+//            sb.append(Context.get().getIndexConverterManager().getSymbol(entry.getKey(), OutputFormat.UTF8));
+//            sb.append("->");
+//            sb.append(Context.get().getIndexConverterManager().getSymbol(entry.getValue().getIndexName(), OutputFormat.UTF8));
+//            sb.append(":");
+//            for (int i = 2; i >= 0; --i)
+//                sb.append(entry.getValue().getStatesBit(i) ? 1 : 0);
+//            sb.append(",");
+//        }
+//        sb.deleteCharAt(sb.length() - 1);
+//        return sb.toString();
+//    }
     @Override
     public String toString() {
+        return toString(CC.getDefaultOutputFormat());
+    }
+
+    private static String toStringIndex(int index, OutputFormat mode) {
+        return (IndicesUtils.getState(index) ? "^" : "_") + Context.get().getIndexConverterManager().getSymbol(index, mode);
+    }
+
+    public String toString(OutputFormat format) {
         StringBuilder sb = new StringBuilder();
-        sb.append(signum ? '-' : '+');
+        sb.append(signum ? '-' : '+').append('{');
         if (map.isEmpty())
-            return sb.append(":empty buffer").toString();
+            return sb.append('}').toString();
+        String from, to;
         for (Map.Entry<Integer, IndexMappingBufferRecord> entry : map.entrySet()) {
-            sb.append(Context.get().getIndexConverterManager().getSymbol(entry.getKey(), OutputFormat.UTF8));
-            sb.append("->");
-            sb.append(Context.get().getIndexConverterManager().getSymbol(entry.getValue().getIndexName(), OutputFormat.UTF8));
-            sb.append(":");
-            for (int i = 2; i >= 0; --i)
-                sb.append(entry.getValue().getStatesBit(i) ? 1 : 0);
-            sb.append(",");
+            if (entry.getValue().isContracted()) {
+                from = toStringIndex(entry.getKey(), format).substring(1);
+                to = toStringIndex(entry.getValue().getIndexName(), format).substring(1);
+                sb.append(',');
+            } else {
+                from = toStringIndex(setRawState(entry.getValue().getFromState(), entry.getKey()), format);
+                to = toStringIndex(setRawState(entry.getValue().getToState(), entry.getValue().getIndexName()), format);
+            }
+            sb.append(from).append(" -> ").append(to).append(", ");
         }
-        sb.deleteCharAt(sb.length() - 1);
+        sb.deleteCharAt(sb.length() - 1).deleteCharAt(sb.length() - 1).append('}');
         return sb.toString();
     }
 //    public String toStringWithStates() {
@@ -190,6 +220,7 @@ public final class IndexMappingBufferImpl implements IndexMappingBuffer {
 //        }
 //        return true;
     }
+
     private static Comparator<Map.Entry<Integer, IndexMappingBufferRecord>> entryComparator = new Comparator<Map.Entry<Integer, IndexMappingBufferRecord>>() {
 
         @Override

@@ -592,14 +592,28 @@ public final class Tensors {
         tensor.getIndices().getSymmetries().addAntiSymmetry(permutation);
     }
 
+    public static void setAntiSymmetric(SimpleTensor tensor, IndexType type) {
+        int dimension = tensor.getIndices().size(type);
+        addSymmetry(tensor, type, true, Combinatorics.createTransposition(dimension));
+        if (dimension > 2)
+            addSymmetry(tensor, type, dimension % 2 == 0 ? true : false, Combinatorics.createCycle(dimension));
+    }
+
+    public static void setAntiSymmetric(SimpleTensor tensor) {
+        int dimension = tensor.getIndices().size();
+        tensor.getIndices().getSymmetries().addAntiSymmetry(Combinatorics.createTransposition(dimension));
+        if (dimension > 2)
+            tensor.getIndices().getSymmetries().add(dimension % 2 == 0 ? true : false, Combinatorics.createCycle(dimension));
+    }
+
+    public static void setAntiSymmetric(String tensor) {
+        setAntiSymmetric(parseSimple(tensor));
+    }
+
     public static void setSymmetric(SimpleTensor tensor, IndexType type) {
         int dimension = tensor.getIndices().size(type);
         addSymmetry(tensor, type, false, Combinatorics.createCycle(dimension));
         addSymmetry(tensor, type, false, Combinatorics.createTransposition(dimension));
-    }
-
-    public static void setSymmetric(String tensor) {
-        setSymmetric(parseSimple(tensor));
     }
 
     public static void setSymmetric(SimpleTensor tensor) {
@@ -607,6 +621,11 @@ public final class Tensors {
         addSymmetry(tensor, Combinatorics.createCycle(dimension));
         addSymmetry(tensor, Combinatorics.createTransposition(dimension));
     }
+
+    public static void setSymmetric(String tensor) {
+        setSymmetric(parseSimple(tensor));
+    }
+
 
     /**
      * Multiplies a tensor by minus one.

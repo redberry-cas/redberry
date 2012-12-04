@@ -24,12 +24,15 @@ package cc.redberry.core.tensor;
 
 import cc.redberry.core.indices.IndicesBuilder;
 import cc.redberry.core.number.Complex;
+import cc.redberry.core.transformations.ToNumeric;
 import cc.redberry.core.utils.TensorUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import static cc.redberry.core.number.NumberUtils.isZeroOrIndeterminate;
+import static cc.redberry.core.transformations.ToNumeric.toNumeric;
 
 /**
  * @author Dmitry Bolotin
@@ -91,13 +94,13 @@ public final class ProductBuilder implements TensorBuilder {
     public Tensor build() {
         if (isZeroOrIndeterminate(factor))
             return factor;
+        final boolean isNumeric = factor.isNumeric();
         for (Tensor t : symbolicPowers) {
             assert !(t instanceof Product);
 
-//            if (t instanceof Product)
-//                for (Tensor m : t)
-//                    indexLess.add(m);
-//            else
+            if (isNumeric)
+                t = toNumeric(t);
+
             if (t instanceof Complex) {
                 factor = factor.multiply((Complex) t);
                 if (isZeroOrIndeterminate(factor))
@@ -105,13 +108,28 @@ public final class ProductBuilder implements TensorBuilder {
             } else
                 indexLess.add(t);
         }
-
         if (symbolicPowers.isSign())
             factor = factor.negate();
 
-        //Only factor factor
+        //Only factor
         if (indexLess.isEmpty() && elements.isEmpty())
             return factor;
+
+        if (isNumeric) {
+            ArrayList<Tensor> nonNumbers = new ArrayList<>();
+            for (Tensor t : elements) {
+                t = toNumeric(t);
+                if (t instanceof Complex)
+                    factor = factor.multiply((Complex) t);
+                else
+                    nonNumbers.add(t);
+            }
+            //Only factor
+            if (indexLess.isEmpty() && nonNumbers.isEmpty())
+                return factor;
+            elements.clear();
+            elements.addAll(nonNumbers);
+        }
 
         // 1 * (something)
         if (factor.isOne()) {
@@ -148,6 +166,8 @@ public final class ProductBuilder implements TensorBuilder {
 
     @Override
     public void put(Tensor tensor) {
+        if (factor.isNumeric())
+            tensor = toNumeric(tensor);
         if (tensor instanceof Complex) {
             factor = factor.multiply((Complex) tensor);
             return;

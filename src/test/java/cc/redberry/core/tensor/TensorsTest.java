@@ -26,6 +26,7 @@ import cc.redberry.core.TAssert;
 import cc.redberry.core.indices.IndexType;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.transformations.ContractIndices;
+import cc.redberry.core.transformations.ToNumeric;
 import cc.redberry.core.transformations.Transformation;
 import cc.redberry.core.transformations.expand.Expand;
 import cc.redberry.core.transformations.expand.ExpandAll;
@@ -138,11 +139,12 @@ public class TensorsTest {
         Tensor t = parse("d^{\\alpha}_{\\sigma}*g^{\\beta\\gamma}*R^{\\sigma}_{\\alpha\\beta\\gamma}+g^{\\alpha\\gamma}*d^{\\beta}_{\\sigma}*R^{\\sigma}_{\\alpha\\beta\\gamma}+g^{\\alpha\\beta}*d^{\\gamma}_{\\sigma}*R^{\\sigma}_{\\alpha\\beta\\gamma}");
         TAssert.assertEquals(t, parse("g^{\\beta\\gamma}*d^{\\alpha}_{\\sigma}*R^{\\sigma}_{\\alpha\\beta\\gamma}"));
     }
-      @Test
-      public void testSum5(){
-          Tensor t = parse("(a-2*b)*c**2/(a-b) + (-a+2*b)*c**(2)/(b-a)");
-          TAssert.assertEquals(t, "2*(a-2*b)*c**2/(a-b)");
-      }
+
+    @Test
+    public void testSum5() {
+        Tensor t = parse("(a-2*b)*c**2/(a-b) + (-a+2*b)*c**(2)/(b-a)");
+        TAssert.assertEquals(t, "2*(a-2*b)*c**2/(a-b)");
+    }
 //    @Test
 //    public void riemannInvariants3() {
 //        SimpleTensor r = parseSimple("R_abcd");
@@ -318,5 +320,37 @@ public class TensorsTest {
         Tensor expected = Tensors.parse("1/16*(-s+m**2-t)**(-2)*(s-m**2)**(-2)*s**(-1)*m**4*pi**(-2)*t**2*e**4-1/4*(-s+m**2-t)**(-2)*(s-m**2)**(-2)*m**6*pi**(-2)*e**4+1/16*(-s+m**2-t)**(-2)*(s-m**2)**(-2)*s*pi**(-2)*t**2*e**4+1/8*(-s+m**2-t)**(-2)*(s-m**2)**(-2)*m**4*pi**(-2)*t*e**4+1/16*(-s+m**2-t)**(-2)*(s-m**2)**(-2)*s**(-1)*m**8*pi**(-2)*e**4-1/4*(-s+m**2-t)**(-2)*(s-m**2)**(-2)*s*m**2*pi**(-2)*t*e**4+1/16*(-s+m**2-t)**(-2)*(s-m**2)**(-2)*s**3*pi**(-2)*e**4+3/8*(-s+m**2-t)**(-2)*(s-m**2)**(-2)*s*m**4*pi**(-2)*e**4+1/8*(-s+m**2-t)**(-2)*(s-m**2)**(-2)*s**2*pi**(-2)*t*e**4-1/4*(-s+m**2-t)**(-2)*(s-m**2)**(-2)*s**2*m**2*pi**(-2)*e**4");
         TAssert.assertEquals(cs, expected);
     }
+
+    @Test
+    public void testNumeric1() {
+        Tensor t = parse("Sin[2+2.*I]**(1/4)");
+        Assert.assertEquals(t, parse("1.383071748953358-I*0.1441880530973721"));
+    }
+
+
+    @Test
+    public void testNumeric2() {
+        Assert.assertEquals(parse("Log[1/(8.)]"),
+                parse("-2.0794415416798357"));
+        Assert.assertEquals(parse("2**(1/2.)"),
+                parse("1.414213562373095"));
+
+        Tensor t;
+        t = parse("2**(1/2) + Log[1/(8.)]");
+        Assert.assertEquals(parse("-0.6652279793067408"), t);
+        t = parse("ArcSin[2**(1/2) + Log[1/(8.)]]");
+        Assert.assertEquals(parse("-0.7277991166956443"), t);
+
+        t = parse("ArcSin[2**(1/2*I) + Log[1/(8.)]]");
+        Assert.assertEquals(parse("-1.1183085143204718+I*0.714552027492919"), t);
+
+        t = parse("ArcSin[2**(1/2*I) + Log[1/(8.)]]+1/Log[2-I]*ArcSin[8 - 3*I]**91");
+        Assert.assertEquals(parse("1.5709073238312817E44+I*2.9972835730115714E44"), t);
+
+        t = parse("ArcTan[2**(1/2*I) + Log[1/(8.)]]+1/ArcCot[2-I]*(8 - 3*I)**91 + ArcSin[3]**(1/23 + I)");
+        Assert.assertEquals(parse("-1.0825384369552736E84-I*1.4034892133454258E85"), t);
+        System.out.println(parse("0*a"));
+    }
+
 
 }

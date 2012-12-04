@@ -72,4 +72,10 @@ public class ExponentiationTest extends TestCase {
                 Exponentiation.exponentiateIfPossible(NumberParser.REAL_PARSER.parse("27/343"),
                         NumberParser.REAL_PARSER.parse("0.5")));
     }
+
+    @Test
+    public void testIntegerRootOfComplex() {
+        Complex base = NumberParser.COMPLEX_PARSER.parse("256/129140163+256/129140163*I");
+        Assert.assertEquals(Exponentiation.findIntegerRoot(base, BigInteger.valueOf(17)), NumberParser.COMPLEX_PARSER.parse("1/3+1/3*I"));
+    }
 }

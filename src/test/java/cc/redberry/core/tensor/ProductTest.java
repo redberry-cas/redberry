@@ -425,7 +425,39 @@ public class ProductTest {
 
     @Test
     public void testRemove1() {
-        Product tensor = (Product) parse("a*b");
-        Assert.assertTrue(tensor.remove(0) instanceof SimpleTensor);
+        Tensor r;
+        Tensor[] tensors = {parse("a*b"), parse("2*a"), parse("2*g_mn"), parse("a*g_mn"), parse("f_mn*g^mn")};
+        for (Tensor t : tensors)
+            for (int i = 0; i < 2; ++i) {
+                r = ((Product) t).remove(i);
+                TAssert.assertTrue(r instanceof SimpleTensor || r instanceof Complex);
+                TAssert.assertEqualsExactly(r, t.get(1 - i));
+            }
     }
+
+    @Test
+    public void testRemove2() {
+        Tensor r;
+        Tensor[] tensors = {parse("2*a*b"), parse("2*a*g_mn"), parse("3*g_mn*f^mn")};
+        for (Tensor t : tensors)
+            for (int i = 0; i < 3; ++i) {
+                r = ((Product) t).remove(i);
+                if (i == 0)
+                    TAssert.assertEqualsExactly(r, ((Product) t).getSubProductWithoutFactor());
+                TAssert.assertTrue(r instanceof Product);
+            }
+    }
+
+    @Test
+    public void testRemove4() {
+        Tensor r;
+        Tensor[] tensors = {parse("2*a*b"), parse("2*a*g_mn"), parse("2*g_mn*f^mn")};
+        for (Tensor t : tensors)
+            for (int i = 1; i < 3; ++i) {
+                r = t.set(i, parse("1/2"));
+                TAssert.assertTrue(r instanceof SimpleTensor || r instanceof Complex);
+                TAssert.assertEqualsExactly(r, t.get(3 - i));
+            }
+    }
+
 }

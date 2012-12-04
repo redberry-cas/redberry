@@ -33,7 +33,6 @@ import cc.redberry.core.tensor.functions.ScalarFunction;
 import java.util.Arrays;
 
 /**
- *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
@@ -51,7 +50,7 @@ public final class TensorHashCalculator {
             for (int i = 0; i < si.size(); ++i)
                 if ((pos = Arrays.binarySearch(indices, si.get(i))) >= 0)
                     hash += (HashFunctions.JenkinWang32shift(sInds[i])
-                            * HashFunctions.JenkinWang32shift(pos) * 7);
+                            ^ (HashFunctions.JenkinWang32shift(pos) * 37));
             return HashFunctions.JenkinWang32shift(hash);
         }
         if (tensor instanceof ScalarFunction)

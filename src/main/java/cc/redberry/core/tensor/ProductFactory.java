@@ -27,6 +27,8 @@ import cc.redberry.core.indices.Indices;
 import cc.redberry.core.indices.IndicesBuilder;
 import cc.redberry.core.indices.IndicesFactory;
 import cc.redberry.core.number.Complex;
+import cc.redberry.core.number.NumberUtils;
+import cc.redberry.core.transformations.ToNumeric;
 import cc.redberry.core.utils.TensorUtils;
 
 import java.util.ArrayList;
@@ -34,6 +36,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import static cc.redberry.core.number.NumberUtils.isZeroOrIndeterminate;
+import static cc.redberry.core.transformations.ToNumeric.toNumeric;
 
 /**
  * @author Dmitry Bolotin
@@ -48,7 +51,6 @@ public final class ProductFactory implements TensorFactory {
 
     @Override
     public Tensor create(final Tensor... tensors) {
-//        return new DefaultFactory(new ProductBuilder()).create(tensors);
         if (tensors.length == 0)
             return Complex.ONE;
         else if (tensors.length == 1)
@@ -58,15 +60,12 @@ public final class ProductFactory implements TensorFactory {
 
         IndexlessWrapper indexlessContainer = new IndexlessWrapper();
         DataWrapper dataContainer = new DataWrapper();
-        int i;
-        Tensor current;
         Product p;
-        for (i = tensors.length - 1; i >= 0; --i) {
-            current = tensors[i];
+        for (Tensor current : tensors) {
             if (current instanceof Complex)
                 factor = factor.multiply((Complex) current);
             else if (current instanceof Product) {
-                p = (Product) tensors[i];
+                p = (Product) current;
                 indexlessContainer.add(p.indexlessData);
                 dataContainer.add(p.data, p.contentReference.getReferent(), p.indices);
                 factor = factor.multiply(p.factor);
@@ -78,10 +77,38 @@ public final class ProductFactory implements TensorFactory {
                 return factor;
         }
 
-        if (isZeroOrIndeterminate(factor))
+        if(NumberUtils.isZeroOrIndeterminate(factor))
             return factor;
 
+        if (factor.isNumeric()) {
+            List<Tensor> newTensors = new ArrayList<>();
+            factor = Complex.ONE;
+            for (Tensor current : tensors) {
+                current = toNumeric(current);
+                if (current instanceof Complex)
+                    factor = factor.multiply((Complex) current);
+                else newTensors.add(current);
+            }
+            if (newTensors.isEmpty())
+                return factor;
+            indexlessContainer = new IndexlessWrapper();
+            dataContainer = new DataWrapper();
+            for (Tensor current : newTensors) {
+                if (current instanceof Product) {
+                    p = (Product) current;
+                    indexlessContainer.add(p.indexlessData);
+                    dataContainer.add(p.data, p.contentReference.getReferent(), p.indices);
+                    factor = factor.multiply(p.factor);
+                } else if (current.getIndices().size() == 0)
+                    indexlessContainer.add(current);
+                else
+                    dataContainer.add(current);
+            }
+        }
+
+
         //Processing data with indices
+        int i;
         ProductContent content;
         Indices indices;
         Tensor[] data = dataContainer.list.toArray(new Tensor[dataContainer.list.size()]);
