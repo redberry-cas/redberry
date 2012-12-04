@@ -134,4 +134,14 @@ public class TogetherTest {
         TAssert.assertIndicesConsistency(t);
         CC.setDefaultOutputFormat(OutputFormat.LaTeX);
     }
+
+    @Test
+    public void test10() {
+        Tensor t = Tensors.parse("1/(a*b)+1/c");
+        t = Together.together(t);
+        System.out.println(t);
+//        t = Expand.expand(t);
+//        TAssert.assertIndicesConsistency(t);
+//        CC.setDefaultOutputFormat(OutputFormat.LaTeX);
+    }
 }

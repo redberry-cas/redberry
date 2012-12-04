@@ -67,6 +67,7 @@ public class Factor implements Transformation {
             while ((t = iterator1.next()) != null) {
                 if (t.getIndices().size() != 0 || t instanceof ScalarFunction)
                     continue out;
+
                 if (t instanceof Power) {
                     if (!(t.get(1) instanceof Complex))
                         continue out;
@@ -77,8 +78,22 @@ public class Factor implements Transformation {
                         needTogether = true;
                 }
 
-                if (t instanceof Sum && !needTogether)
-                    iterator1.set(factorOut(t));
+                if (t instanceof Sum && !needTogether) {
+                    iterator1.set(c = factorOut(t));
+                    if (c != t)
+                        for (Tensor cc : c) {
+                            if (cc instanceof Power) {
+                                if (!(cc.get(1) instanceof Complex))
+                                    continue out;
+                                e = (Complex) cc.get(1);
+                                if (!e.isReal() || e.isNumeric())
+                                    continue out;
+                                if (e.getReal().signum() < 0)
+                                    needTogether = true;
+                            }
+
+                        }
+                }
             }
 
             c = iterator1.result();
@@ -88,7 +103,7 @@ public class Factor implements Transformation {
                     continue;
 
                 if (needTogether) {
-                    c = Together.together(c);
+                    c = Together.together(c, true);
                     if (c instanceof Product) {
                         for (int i = c.size() - 1; i >= 0; --i) {
                             if (c.get(i) instanceof Sum)
@@ -104,6 +119,7 @@ public class Factor implements Transformation {
         }
         return iterator.result();
     }
+
 
     static Tensor factorOut(Tensor tensor) {
         TensorLastIterator iterator = new TensorLastIterator(tensor);
@@ -132,15 +148,16 @@ public class Factor implements Transformation {
                 && TensorUtils.isInteger(tensor.get(1));
     }
 
-    private static Tensor factorOut1(Tensor tensor) {
+    static Tensor factorOut1(Tensor tensor) {
+        Tensor temp = tensor;
         /*
          * S1:
          * (a+b)*c + a*d + b*d -> (a+b)*c + (a+b)*d
          */
-        int i, j = tensor.size();
+        int i, j = temp.size();
         IntArrayList nonProductOfSumsPositions = new IntArrayList();
         for (i = 0; i < j; ++i)
-            if (!isProductOfSums(tensor.get(i)))
+            if (!isProductOfSums(temp.get(i)))
                 nonProductOfSumsPositions.add(i);
 //        if (nonProductOfSumsPositions.size() == tensor.size())
 //            //when tensor = a*d + b*d + ... (no sums in products)
@@ -153,34 +170,34 @@ public class Factor implements Transformation {
          */
         final Term[] terms;
         Int pivotPosition = new Int();
-        if (nonProductOfSumsPositions.isEmpty() || nonProductOfSumsPositions.size() == tensor.size()) {
+        if (nonProductOfSumsPositions.isEmpty() || nonProductOfSumsPositions.size() == temp.size()) {
             //if nonProductOfSumsPositions.isEmpty(), then tensor already of form (a+b)*c + (a+b)*d
             //or if no any sum in terms, then tensor has form a*c + b*c
-            terms = sum2SplitArray((Sum) tensor, pivotPosition);
+            terms = sum2SplitArray((Sum) temp, pivotPosition);
         } else {//if no, we need to rebuild tensor
             SumBuilder sb = new SumBuilder();
             for (i = nonProductOfSumsPositions.size() - 1; i >= 0; --i) {
-                assert tensor instanceof Sum;
-                sb.put(tensor.get(nonProductOfSumsPositions.get(i)));
-                tensor = ((Sum) tensor).remove(nonProductOfSumsPositions.get(i));
+                assert temp instanceof Sum;
+                sb.put(temp.get(nonProductOfSumsPositions.get(i)));
+                temp = ((Sum) temp).remove(nonProductOfSumsPositions.get(i));
             }
             Tensor withoutSumsTerm = JasFactor.factor(sb.build());
             if (isProductOfSums(withoutSumsTerm)) {
-                tensor = Tensors.sum(tensor, withoutSumsTerm);
-                if (!(tensor instanceof Sum))
+                temp = Tensors.sum(temp, withoutSumsTerm);
+                if (!(temp instanceof Sum))
                     //case when e.g. (a+b)*c - a*c - b*c = (a+b)*c - (a+b)*c = 0
-                    return tensor;
-                terms = sum2SplitArray((Sum) tensor, pivotPosition);
+                    return temp;
+                terms = sum2SplitArray((Sum) temp, pivotPosition);
             } else {
                 //case when tensor of form (a+b)*c + a + b
-                if (!(tensor instanceof Sum))
-                    terms = new Term[]{tensor2term(tensor), tensor2term(withoutSumsTerm)};
+                if (!(temp instanceof Sum))
+                    terms = new Term[]{tensor2term(temp), tensor2term(withoutSumsTerm)};
                 else {
-                    terms = new Term[tensor.size() + 1];
-                    System.arraycopy(sum2SplitArray((Sum) tensor, pivotPosition), 0, terms, 0, tensor.size());
-                    terms[tensor.size()] = tensor2term(withoutSumsTerm);//new Term(new FactorNode[]{createNode(withoutSumsTerm)});
+                    terms = new Term[temp.size() + 1];
+                    System.arraycopy(sum2SplitArray((Sum) temp, pivotPosition), 0, terms, 0, temp.size());
+                    terms[temp.size()] = tensor2term(withoutSumsTerm);//new Term(new FactorNode[]{createNode(withoutSumsTerm)});
                 }
-                pivotPosition.value = pivotPosition.value > terms[terms.length - 1].factors.length
+                pivotPosition.value = terms[pivotPosition.value].factors.length > terms[terms.length - 1].factors.length
                         ? terms[terms.length - 1].factors.length : pivotPosition.value;
             }
         }
@@ -353,10 +370,11 @@ public class Factor implements Transformation {
 
         Tensor toTensor() {
             BigInteger exponent = this.exponent;
-            if (minExponent != null && minExponent.value != null)
+            if (minExponent != null && minExponent.value != null) {
                 exponent = exponent.subtract(minExponent.value);
-            if (diffSigns && minExponent.value.testBit(0))
-                return Tensors.negate(Tensors.pow(tensor, new Complex(exponent)));
+                if (diffSigns && minExponent.value.testBit(0))
+                    return Tensors.negate(Tensors.pow(tensor, new Complex(exponent)));
+            }
             return Tensors.pow(tensor, new Complex(exponent));
         }
 

@@ -51,16 +51,16 @@ public class JasFactorTest extends TestCase {
 
 
 
-    @Test
-    public void test2r() {
-        Tensor t = parse("8568300000*e*(5546*Power[b, 2]*c+4550*a*b*Power[c, 2]*d*f*Power[e, 3]+497*e*d*Power[b, 2]*c*f+3968*a*d+3895*a*b*Power[e, 2]+1187*Power[c, 2])*(2149*Power[a, 2]*Power[b, 2]*c*f*Power[d, 2]+7970*a*b*c*Power[d, 2]*Power[e, 3]+6103*Power[b, 2]*c+6165*c*f+8012*a*Power[c, 3]*Power[d, 2]*Power[e, 4]+6418*Power[b, 4]*c*f*Power[e, 4]+1156*a*Power[d, 2]*Power[e, 2]+778*b*e*Power[c, 2]*d*Power[f, 3])*Power[b, 2]*Power[d, 2]*(8882*Power[a, 2]*d*f*Power[e, 2]+210*Power[a, 2]*e*Power[b, 2]*Power[d, 3]+7313*d)");
-        Tensor expand = expand(t);
-        System.out.println(t.toString(OutputFormat.WolframMathematica));
-//        System.out.println(expand.toString(OutputFormat.WolframMathematica));
-        Tensor factor = factor(expand);
-        System.out.println(factor);
-        TAssert.assertEquals(expand(factor), expand);
-    }
+//    @Test
+//    public void test2r() {
+//        Tensor t = parse("8568300000*e*(5546*Power[b, 2]*c+4550*a*b*Power[c, 2]*d*f*Power[e, 3]+497*e*d*Power[b, 2]*c*f+3968*a*d+3895*a*b*Power[e, 2]+1187*Power[c, 2])*(2149*Power[a, 2]*Power[b, 2]*c*f*Power[d, 2]+7970*a*b*c*Power[d, 2]*Power[e, 3]+6103*Power[b, 2]*c+6165*c*f+8012*a*Power[c, 3]*Power[d, 2]*Power[e, 4]+6418*Power[b, 4]*c*f*Power[e, 4]+1156*a*Power[d, 2]*Power[e, 2]+778*b*e*Power[c, 2]*d*Power[f, 3])*Power[b, 2]*Power[d, 2]*(8882*Power[a, 2]*d*f*Power[e, 2]+210*Power[a, 2]*e*Power[b, 2]*Power[d, 3]+7313*d)");
+//        Tensor expand = expand(t);
+//        System.out.println(t.toString(OutputFormat.WolframMathematica));
+////        System.out.println(expand.toString(OutputFormat.WolframMathematica));
+//        Tensor factor = factor(expand);
+//        System.out.println(factor);
+//        TAssert.assertEquals(expand(factor), expand);
+//    }
 
 
 

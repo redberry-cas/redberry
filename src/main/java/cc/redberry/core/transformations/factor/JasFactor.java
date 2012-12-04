@@ -49,7 +49,8 @@ class JasFactor {
     public static final char START_CHAR = 'a';
 
     public static Tensor factor(Tensor t) {
-         TIntObjectMap<Var> vars = getVars(t);
+//        System.out.println(t);
+        TIntObjectMap<Var> vars = getVars(t);
         Var[] varsArray = vars.values(new Var[vars.size()]);
         Arrays.sort(varsArray);
         String[] forFactoryNames = new String[varsArray.length];

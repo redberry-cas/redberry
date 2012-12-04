@@ -29,6 +29,7 @@ import cc.redberry.core.number.Complex;
 import cc.redberry.core.tensor.*;
 import cc.redberry.core.utils.TensorUtils;
 import junit.framework.TestCase;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.Random;
@@ -37,6 +38,7 @@ import static cc.redberry.core.tensor.Tensors.*;
 import static cc.redberry.core.transformations.expand.Expand.expand;
 import static cc.redberry.core.transformations.factor.Factor.factor;
 import static cc.redberry.core.transformations.factor.Factor.factorOut;
+import static cc.redberry.core.transformations.factor.Factor.factorOut1;
 
 /**
  * @author Dmitry Bolotin
@@ -255,6 +257,30 @@ public class FactorTest {
         }
     }
 
+    @Test
+    public void testFactorOut17() {
+        Tensor t = parse("(a+a*b)**(-2) + a");
+        TAssert.assertEquals(factorOut(t), "(1+b)**(-2)*a**(-2) + a");
+    }
+
+    @Test
+    public void test18() {
+        Tensor t = parse("(a+a*b)**(-2) + a");
+        System.out.println(factor(t));
+        TAssert.assertEquals(factor(t), "(1 + a**3 + 2*a**3*b + a**3*b**2)/(a**2*(1 + b)**2)");
+
+    }
+
+    @Test
+    public void test17() {
+        Tensor t = parse("(a+a*b)**(-1) + 1/a");
+        System.out.println(factor(t));
+        TAssert.assertEquals(factor(t), "(1 + a**3 + 2*a**3*b + a**3*b**2)/(a**2*(1 + b)**2)");
+
+    }
+
+
+    @Ignore
     @Test
     public void test15() {
         Tensor t = parse("L*(-7*s**3*m**4-216*s**2*m**6+128*m**10-96-3*m**4*s-240*m**8*s)");

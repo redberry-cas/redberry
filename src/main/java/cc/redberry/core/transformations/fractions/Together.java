@@ -46,29 +46,37 @@ import static cc.redberry.core.transformations.CollectScalarFactors.collectScala
 //TODO review after logical completion of tensors standard form strategy 
 public final class Together implements Transformation {
 
-    public static final Together INSTANCE = new Together();
+    public static final Together TOGETHER = new Together(false);
+    public static final Together TOGETHER_FACTOR = new Together(true);
 
-    private Together() {
+    private final boolean doFactor;
+
+    private Together(boolean doFactor) {
+        this.doFactor = doFactor;
     }
 
     @Override
     public Tensor transform(Tensor t) {
-        return together(t);
+        return together(t, doFactor);
     }
 
     public static Tensor together(Tensor t) {
+        return together(t, false);
+    }
+
+    public static Tensor together(Tensor t, boolean doFactor) {
         TensorLastIterator iterator = new TensorLastIterator(t);
         Tensor c;
         while ((c = iterator.next()) != null) {
             if (c instanceof Sum)
-                iterator.set(togetherSum(c));
+                iterator.set(togetherSum(c, doFactor));
             if (c instanceof Product)
                 iterator.set(collectScalarFactorsInProduct((Product) c));
         }
         return iterator.result();
     }
 
-    private static Tensor togetherSum(Tensor t) {
+    private static Tensor togetherSum(Tensor t, boolean doFactor) {
         boolean performTogether = false;
         for (Tensor s : t)
             if (s instanceof Product) {
@@ -84,7 +92,7 @@ public final class Together implements Transformation {
         if (!performTogether)
             return t;
 
-        SplitStruct base = splitFraction(t.get(0)), temp;
+        SplitStruct base = splitFraction(t.get(0), doFactor), temp;
         @SuppressWarnings("unchecked") List<Tensor> numeratorTerms[] = new List[t.size()];
         numeratorTerms[0] = new ArrayList<>();
         numeratorTerms[0].add(base.numerator);
@@ -93,7 +101,7 @@ public final class Together implements Transformation {
         int i, j;
         for (i = 1; i < t.size(); ++i) {
             s = t.get(i);
-            temp = splitFraction(s);
+            temp = splitFraction(s, doFactor);
 
             List<Tensor> newNumeratorTerm = new ArrayList<>();
             newNumeratorTerm.add(temp.numerator);
@@ -149,25 +157,28 @@ public final class Together implements Transformation {
         }
     }
 
-    private static SplitStruct splitFraction(Tensor tensor) {
-        tensor = Factor.factor(tensor);
+    private static SplitStruct splitFraction(Tensor tensor, boolean doFactor) {
+        if (doFactor) {
+            System.out.println(tensor);
+            tensor = Factor.factor(tensor);
+            System.out.println(tensor);
+        }
         THashMap<Tensor, Complex> map = new THashMap<>();
         if (checkPower(tensor)) {
             map.put(tensor.get(0), ((Complex) tensor.get(1)).negate());
             return new SplitStruct(map, Complex.ONE);
         }
         if (tensor instanceof Product) {
-            Product product = (Product) tensor;
+            Tensor product = tensor;
             Tensor temp = null, m;
             for (int i = tensor.size() - 1; i >= 0; --i) {
+                assert temp != product;
                 m = tensor.get(i);
                 if (checkPower(m)) {
                     map.put(m.get(0), ((Complex) m.get(1)).negate());
-                    temp = product.remove(i);
-                    if (temp instanceof Product)
-                        product = (Product) temp;
-                    else
-                        product = null;//prevent error in remove (NPE will be thrown)
+                    if (product instanceof Product)
+                        temp = ((Product) product).remove(i);
+                    else temp = Complex.ONE;
                 }
             }
             if (temp == null)
