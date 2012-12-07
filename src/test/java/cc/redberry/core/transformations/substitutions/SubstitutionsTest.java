@@ -977,6 +977,14 @@ public class SubstitutionsTest {
         TAssert.assertEquals(t, "e^{m}[k1_{m}]*e_{m}[k1_{m}]*d^{a'}_{c'}");
     }
 
+    @Test
+    public void testProduct21() {
+        Tensor t = parse("G_{a}^{a'}_{b'}*G_b^{b'}_{c'}");
+        Expression e = parseExpression("G_{a}^{a'}_{c'}*G_{b}^{c'}_{b'} = G_{b}^{a'}_{c'}*G_{a}^{c'}_{b'}");
+        t = e.transform(t);
+        System.out.println(t);
+    }
+
     //TODO tests for Product
 
     @Test
