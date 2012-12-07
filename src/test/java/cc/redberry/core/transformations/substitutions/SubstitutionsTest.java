@@ -845,10 +845,25 @@ public class SubstitutionsTest {
     }
 
     @Test
+    public void testProduct3a() {
+        Tensor target = parse("a*b*c*n_i*n^i");
+        target = parseExpression("n_i*n^i = 1").transform(target);
+        target = parseExpression("b*c = 1/a").transform(target);
+        Assert.assertTrue(TensorUtils.isOne(target));
+    }
+
+    @Test
     public void testProduct4() {
         Tensor target = parse("g_ab*g_cd+2*e_a^\\alpha*e_{b \\alpha}*e_c^\\beta*e_{d \\beta}");
         target = parseExpression("e_a^\\alpha*e_{b \\alpha} = -g_ab").transform(target);
         TAssert.assertEquals(target, "3*g_ab*g_cd");
+    }
+
+    @Test
+    public void testProduct4a() {
+        Tensor target = parse("g_ab*g_cd+4*e_a^\\alpha*e_{b \\alpha}*e_c^\\beta*e_{d \\beta}");
+        target = parseExpression("2*e_a^\\alpha*e_{b \\alpha} = -g_ab").transform(target);
+        TAssert.assertEquals(target, "2*g_ab*g_cd");
     }
 
     @Test
@@ -913,6 +928,15 @@ public class SubstitutionsTest {
             target = parseExpression("Sin[-a+b*c]**a*b = c").transform(target);
             TAssert.assertTrue(old == target);
         }
+    }
+
+    @Test
+    public void testProduct12a() {
+        Tensor target = parse("Sin[a-b*c]**a*b*c*d");
+        Tensor old = target;
+        target = parseExpression("Sin[-a+b*c]**a*b = c").transform(target);
+        System.out.println(target);
+        TAssert.assertTrue(old == target);
     }
 
     @Test
@@ -982,7 +1006,6 @@ public class SubstitutionsTest {
         Tensor t = parse("G_{a}^{a'}_{b'}*G_b^{b'}_{c'}");
         Expression e = parseExpression("G_{a}^{a'}_{c'}*G_{b}^{c'}_{b'} = G_{b}^{a'}_{c'}*G_{a}^{c'}_{b'}");
         t = e.transform(t);
-        System.out.println(t);
     }
 
     //TODO tests for Product

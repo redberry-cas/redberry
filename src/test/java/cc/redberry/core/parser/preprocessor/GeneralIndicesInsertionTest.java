@@ -113,15 +113,48 @@ public class GeneralIndicesInsertionTest {
 
         TAssert.assertEquals(parse("Tr[A_a*A_b] = g_ab"), "A_{a}^{a'}_{b'}*A_{b}^{b'}_{a'} = g_{ab}");
     }
+//
+//    @Test
+//    public void test7() {
+//        GeneralIndicesInsertion gii = new GeneralIndicesInsertion();
+//        gii.addInsertionRule(parseSimple("S^a'_b'"), IndexType.LatinLower1);
+//        gii.addInsertionRule(parseSimple("K^A'_B'"), IndexType.LatinUpper1);
+//        gii.addInsertionRule(parseSimple("V^a'"), IndexType.LatinLower1);
+//        gii.addInsertionRule(parseSimple("cV_b'"), IndexType.LatinLower1);
+//        Tensor t = parse("Sin[Tr[S*S*S+S+K]]+K", gii);
+//        System.out.println(t);
+//    }
 
     @Test
-    public void test13() {
+    public void test8() {
         GeneralIndicesInsertion gii = new GeneralIndicesInsertion();
-        gii.addInsertionRule(parseSimple("S^a'_b'"), IndexType.LatinLower1);
-        gii.addInsertionRule(parseSimple("K^A'_B'"), IndexType.LatinUpper1);
-        gii.addInsertionRule(parseSimple("V^a'"), IndexType.LatinLower1);
-        gii.addInsertionRule(parseSimple("cV_b'"), IndexType.LatinLower1);
-        Tensor t = parse("Sin[Tr[S*S*S+S+K]]+K", gii);
-        System.out.println(t);
+        CC.current().getParseManager().defaultParserPreprocessors.add(gii);
+        gii.addInsertionRule(parseSimple("G_m^a'_b'"), IndexType.LatinLower1);
+        gii.addInsertionRule(parseSimple("pv_a'[p2_m]"), IndexType.LatinLower1);
+        gii.addInsertionRule(parseSimple("v^a'[p2_m]"), IndexType.LatinLower1);
+        TAssert.assertEquals(parse("v[p2_m]*pv[p2_m] = m + p2^m*G_m"),
+                "v^a'[p2_m]*pv_b'[p2_m] = m*d^a'_b' + p2^m*G^a'_{b' m}");
+    }
+
+    @Test
+    public void test8a() {
+        GeneralIndicesInsertion gii = new GeneralIndicesInsertion();
+        CC.current().getParseManager().defaultParserPreprocessors.add(gii);
+        gii.addInsertionRule(parseSimple("G^a'_b'"), IndexType.LatinLower1);
+        gii.addInsertionRule(parseSimple(" pv_a' "), IndexType.LatinLower1);
+        gii.addInsertionRule(parseSimple(" v^a' "), IndexType.LatinLower1);
+        TAssert.assertEquals(parse("v*pv = G"),
+                "pv_b'*v^a' = G^a'_b'");
+    }
+
+    @Test
+    public void test9() {
+        GeneralIndicesInsertion gii = new GeneralIndicesInsertion();
+        CC.current().getParseManager().defaultParserPreprocessors.add(gii);
+        gii.addInsertionRule(parseSimple("G^a'_b'"), IndexType.LatinLower1);
+        gii.addInsertionRule(parseSimple(" pv_a' "), IndexType.LatinLower1);
+        gii.addInsertionRule(parseSimple(" v^a' "), IndexType.LatinLower1);
+        TAssert.assertEquals(parse("pv*v = G"),
+                "pv_a'*v^a' = G^a'_a'");
     }
 }
