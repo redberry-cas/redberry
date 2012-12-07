@@ -369,7 +369,7 @@ public abstract class FactorAbstract<C extends GcdRingElem<C>> implements Factor
         if (pfac.nvar == 1) {
             return baseFactors(P);
         }
-        SortedMap<GenPolynomial<C>, Long> factors = new TreeMap<>(pfac.getComparator());
+        SortedMap<GenPolynomial<C>, Long> factors = new TreeMap<GenPolynomial<C>, Long>(pfac.getComparator());
         if (P.isZERO()) {
             return factors;
         }
@@ -395,7 +395,7 @@ public abstract class FactorAbstract<C extends GcdRingElem<C>> implements Factor
         }
         SortedMap<GenPolynomial<C>, Long> facs = sengine.squarefreeFactors(P);
         if (facs == null || facs.size() == 0) {
-            facs = new TreeMap<>();
+            facs = new TreeMap<GenPolynomial<C>, Long>();
             facs.put(P, 1L);
             throw new RuntimeException("this should not happen, facs is empty: " + facs);
         }
@@ -415,6 +415,7 @@ public abstract class FactorAbstract<C extends GcdRingElem<C>> implements Factor
                 factors.put(h, dd);
             }
         }
+        //System.out.println("factors = " + factors);
         return factors;
     }
 

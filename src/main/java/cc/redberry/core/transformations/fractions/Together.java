@@ -158,11 +158,9 @@ public final class Together implements Transformation {
     }
 
     private static SplitStruct splitFraction(Tensor tensor, boolean doFactor) {
-        if (doFactor) {
-            System.out.println(tensor);
+        if (doFactor)
             tensor = Factor.factor(tensor);
-            System.out.println(tensor);
-        }
+
         THashMap<Tensor, Complex> map = new THashMap<>();
         if (checkPower(tensor)) {
             map.put(tensor.get(0), ((Complex) tensor.get(1)).negate());
@@ -172,13 +170,15 @@ public final class Together implements Transformation {
             Tensor product = tensor;
             Tensor temp = null, m;
             for (int i = tensor.size() - 1; i >= 0; --i) {
-                assert temp != product;
                 m = tensor.get(i);
                 if (checkPower(m)) {
                     map.put(m.get(0), ((Complex) m.get(1)).negate());
                     if (product instanceof Product)
-                        temp = ((Product) product).remove(i);
-                    else temp = Complex.ONE;
+                        temp = product = ((Product) product).remove(i);
+                    else {
+                        assert i == 0;
+                        temp = Complex.ONE;
+                    }
                 }
             }
             if (temp == null)

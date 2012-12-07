@@ -242,4 +242,35 @@ class JasFactor {
             return -Long.compare(o.maxPower, this.maxPower);
         }
     }
+
+    static GenPolynomial<BigInteger> tensor2Poly(Tensor t) {
+        TIntObjectMap<Var> vars = getVars(t);
+        Var[] varsArray = vars.values(new Var[vars.size()]);
+        Arrays.sort(varsArray);
+        String[] forFactoryNames = new String[varsArray.length];
+        for (int i = 0; i < varsArray.length; ++i)
+            varsArray[i].polyName =
+                    forFactoryNames[varsArray[i].position = i]
+                            = String.valueOf((char) (START_CHAR + i));
+        GenPolynomialRing<BigInteger> factory =
+                new GenPolynomialRing<>(BigInteger.ONE, forFactoryNames);
+
+        GenPolynomial<BigInteger> poly;
+        java.math.BigInteger gcd, lcm;
+        if (containsRationals(t)) {
+            GenPolynomialRing<BigRational> ratFactory =
+                    new GenPolynomialRing<>(BigRational.ONE, forFactoryNames);
+
+            GenPolynomial<BigRational> polyRat = tensor2Poly(t, ratFactory, vars, RationalConverter);
+            Object[] factors = PolyUtil.integerFromRationalCoefficientsFactor(factory, polyRat);
+            gcd = (java.math.BigInteger) factors[0];
+            lcm = (java.math.BigInteger) factors[1];
+            poly = (GenPolynomial<BigInteger>) factors[2];
+        } else {
+            gcd = java.math.BigInteger.ONE;
+            lcm = java.math.BigInteger.ONE;
+            poly = tensor2Poly(t, factory, vars, IntegerConverter);
+        }
+        return poly;
+    }
 }

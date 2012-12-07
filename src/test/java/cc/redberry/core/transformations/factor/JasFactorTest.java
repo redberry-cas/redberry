@@ -29,8 +29,13 @@ import cc.redberry.core.number.Complex;
 import cc.redberry.core.tensor.*;
 import cc.redberry.core.transformations.factor.jasfactor.edu.jas.arith.BigInteger;
 import cc.redberry.core.transformations.factor.jasfactor.edu.jas.arith.BigRational;
+import cc.redberry.core.transformations.factor.jasfactor.edu.jas.poly.ExpVector;
 import cc.redberry.core.transformations.factor.jasfactor.edu.jas.poly.GenPolynomial;
 import cc.redberry.core.transformations.factor.jasfactor.edu.jas.poly.GenPolynomialRing;
+import cc.redberry.core.transformations.factor.jasfactor.edu.jas.poly.PolyUtil;
+import cc.redberry.core.transformations.factor.jasfactor.edu.jas.structure.RingElem;
+import cc.redberry.core.transformations.factor.jasfactor.edu.jas.ufd.FactorAbstract;
+import cc.redberry.core.transformations.factor.jasfactor.edu.jas.ufd.FactorFactory;
 import cc.redberry.core.utils.TensorUtils;
 
 import gnu.trove.map.TIntObjectMap;
@@ -39,6 +44,7 @@ import org.junit.Test;
 
 import java.util.Arrays;
 import java.util.Random;
+import java.util.SortedMap;
 
 import static cc.redberry.core.tensor.Tensors.parse;
 import static cc.redberry.core.tensor.Tensors.parseSimple;
@@ -48,7 +54,39 @@ import static cc.redberry.core.transformations.factor.JasFactor.*;
 public class JasFactorTest extends TestCase {
 
 
+    @Test
+    public void test1() {
+        Tensor t = parse("-64*m**6 - 32*m**4*s - 8*m**2*s**2 - s**3");
+        t = parse("(4*m**2 + s)*(16*m**4+4*m**2*s+s**2)");
+        t = expand(t);
 
+        System.out.println(JasFactor.factor(t));
+    }
+
+    @Test
+    public void test2() {
+
+        String[] vars = {"a", "b"};
+
+
+        GenPolynomialRing<BigInteger> fPolyFactory = new GenPolynomialRing<BigInteger>(BigInteger.ONE, vars);
+
+        String pol;
+        pol = "64 a^6 + 32 a^4 * b + 8 a^2 * b^2 + b^3";
+        pol = "64*a**6 + 32*a**4 * b + 8*a**2 * b**2 + b**3";
+
+
+        GenPolynomial<BigInteger> polynomial = tensor2Poly(parse(pol));
+        System.out.println(polynomial);
+
+        FactorAbstract<BigInteger> factorAbstract = FactorFactory.getImplementation(BigInteger.ONE);
+        SortedMap<GenPolynomial<BigInteger>, Long> map = factorAbstract.factors(polynomial);
+        for (SortedMap.Entry<GenPolynomial<BigInteger>, Long> mm : map.entrySet()) {
+            System.out.println(mm.getKey() + "  " + mm.getValue());
+        }
+
+
+    }
 
 
 //    @Test
@@ -61,10 +99,6 @@ public class JasFactorTest extends TestCase {
 //        System.out.println(factor);
 //        TAssert.assertEquals(expand(factor), expand);
 //    }
-
-
-
-
 
 
 //

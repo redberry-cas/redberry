@@ -266,17 +266,13 @@ public class FactorTest {
     @Test
     public void test18() {
         Tensor t = parse("(a+a*b)**(-2) + a");
-        System.out.println(factor(t));
         TAssert.assertEquals(factor(t), "(1 + a**3 + 2*a**3*b + a**3*b**2)/(a**2*(1 + b)**2)");
-
     }
 
     @Test
     public void test17() {
         Tensor t = parse("(a+a*b)**(-1) + 1/a");
-        System.out.println(factor(t));
-        TAssert.assertEquals(factor(t), "(1 + a**3 + 2*a**3*b + a**3*b**2)/(a**2*(1 + b)**2)");
-
+        TAssert.assertEquals(factor(t), "(2+b)/(a*(1 + b))");
     }
 
 

@@ -30,7 +30,7 @@ import cc.redberry.core.utils.Indicator;
 /**
  * An iterator for tensors that allows the programmer to traverse the tensor
  * tree structure, modify the tensor during iteration, and obtain information
- * about iterator's current position in the tensor. A {@code TensorTreeIterator}
+ * about iterator current position in the tensor. A {@code TensorTreeIterator}
  * has current element, so all methods are defined in terms of the cursor
  * position. *<p>Example: <blockquote><pre>
  *      Tensor tensor = Tensors.parse("Cos[a+b+Sin[x]]");

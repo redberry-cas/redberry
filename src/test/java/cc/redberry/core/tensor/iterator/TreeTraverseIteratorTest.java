@@ -446,6 +446,16 @@ public class TreeTraverseIteratorTest {
     }
 
     @Test
+    public void test12() {
+        Tensor tensor = Tensors.parse("a + Sin[x - y]");
+        TreeTraverseIterator iterator = new TreeTraverseIterator(tensor);
+        while (iterator.next() != null)
+            if (TensorUtils.equalsExactly(iterator.current(), "a"))
+                iterator.set(Tensors.parse("b"));
+        Assert.assertTrue(TensorUtils.equalsExactly(iterator.result(), "b"));
+    }
+
+    @Test
     public void testDepth1() {
         Tensor tensor = Tensors.parse("a+b+d*g*(m+f)");
         TreeTraverseIterator iterator = new TreeTraverseIterator(tensor);

@@ -96,6 +96,11 @@ public final class SubstitutionIterator implements TreeIterator {
         innerIterator.set(tensor);
     }
 
+    public void safeSet(Tensor tensor) {
+        if (innerIterator.current() != tensor)
+            set(ApplyIndexMapping.renameDummy(tensor, getForbidden()));
+    }
+
     public boolean isCurrentModified() {
         return innerIterator.currentStackPosition().isModified();
     }

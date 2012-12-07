@@ -139,9 +139,6 @@ public class TogetherTest {
     public void test10() {
         Tensor t = Tensors.parse("1/(a*b)+1/c");
         t = Together.together(t);
-        System.out.println(t);
-//        t = Expand.expand(t);
-//        TAssert.assertIndicesConsistency(t);
-//        CC.setDefaultOutputFormat(OutputFormat.LaTeX);
+        TAssert.assertEquals(t, "(a*b+c)/(a*b*c)");
     }
 }

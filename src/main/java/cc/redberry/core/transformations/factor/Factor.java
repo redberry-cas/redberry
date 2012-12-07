@@ -78,26 +78,17 @@ public class Factor implements Transformation {
                         needTogether = true;
                 }
 
-                if (t instanceof Sum && !needTogether) {
-                    iterator1.set(c = factorOut(t));
-                    if (c != t)
-                        for (Tensor cc : c) {
-                            if (cc instanceof Power) {
-                                if (!(cc.get(1) instanceof Complex))
-                                    continue out;
-                                e = (Complex) cc.get(1);
-                                if (!e.isReal() || e.isNumeric())
-                                    continue out;
-                                if (e.getReal().signum() < 0)
-                                    needTogether = true;
-                            }
+                if (t instanceof Product)
+                    for (Tensor tt : t)
+                        if (tt instanceof Power && TensorUtils.isNegativeIntegerNumber(tt.get(1)))
+                            needTogether = true;
 
-                        }
-                }
+
+                if (t instanceof Sum)
+                    iterator1.set(factorOut(t));
             }
 
-            c = iterator1.result();
-            iterator1 = new TensorFirstIterator(c);
+            iterator1 = new TensorFirstIterator(iterator1.result());
             while ((c = iterator1.next()) != null) {
                 if (!(c instanceof Sum))
                     continue;
@@ -181,7 +172,7 @@ public class Factor implements Transformation {
                 sb.put(temp.get(nonProductOfSumsPositions.get(i)));
                 temp = ((Sum) temp).remove(nonProductOfSumsPositions.get(i));
             }
-            Tensor withoutSumsTerm = JasFactor.factor(sb.build());
+            Tensor withoutSumsTerm = factor(sb.build());
             if (isProductOfSums(withoutSumsTerm)) {
                 temp = Tensors.sum(temp, withoutSumsTerm);
                 if (!(temp instanceof Sum))
@@ -198,7 +189,7 @@ public class Factor implements Transformation {
                     terms[temp.size()] = tensor2term(withoutSumsTerm);//new Term(new FactorNode[]{createNode(withoutSumsTerm)});
                 }
                 pivotPosition.value = terms[pivotPosition.value].factors.length > terms[terms.length - 1].factors.length
-                        ? terms[terms.length - 1].factors.length : pivotPosition.value;
+                        ? terms.length - 1 : pivotPosition.value;
             }
         }
         //do stuff

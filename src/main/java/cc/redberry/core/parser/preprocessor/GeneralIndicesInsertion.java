@@ -613,7 +613,7 @@ public class GeneralIndicesInsertion implements ParseNodeTransformer {
                 System.arraycopy(lower[j], 0, totalLowers[j],
                         totalCountLower[j] - lower[j].length, lower[j].length);
                 if (totalCountLower[j] - lower[j].length != totalCountUpper[j] - upper[j].length)
-                    throw new IllegalArgumentException("PIZDEC!");
+                    throw new IllegalArgumentException();
                 for (i = 0; i < totalCountUpper[j] - upper[j].length; ++i) {
                     totalLowers[j][i] = generator.generate(j);
                     totalUppers[j][i + upper[j].length] = totalLowers[j][i] | 0x80000000;
