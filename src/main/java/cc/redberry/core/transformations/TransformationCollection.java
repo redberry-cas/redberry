@@ -24,7 +24,10 @@ package cc.redberry.core.transformations;
 
 import cc.redberry.core.tensor.Tensor;
 
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * @author Dmitry Bolotin
@@ -43,5 +46,9 @@ public final class TransformationCollection implements Transformation {
         for (Transformation tr : transformations)
             t = tr.transform(t);
         return t;
+    }
+
+    public List<Transformation> getTransformations() {
+        return Collections.unmodifiableList(Arrays.asList(transformations));
     }
 }

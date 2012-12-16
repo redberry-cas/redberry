@@ -16,7 +16,6 @@ import static cc.redberry.core.indices.IndicesUtils.*;
 import static cc.redberry.core.tensor.ApplyIndexMapping.applyIndexMapping;
 import static cc.redberry.core.tensor.ApplyIndexMapping.renameDummy;
 import static cc.redberry.core.tensor.Tensors.*;
-import static cc.redberry.core.transformations.expand.Expand.expand;
 import static cc.redberry.core.utils.ArraysUtils.addAll;
 
 /**
@@ -31,6 +30,11 @@ public final class Differentiate implements Transformation {
     public Differentiate(SimpleTensor... vars) {
         this.vars = vars;
         this.expandAndContract = new Transformation[0];
+    }
+
+    public Differentiate(Transformation expandAndContract, SimpleTensor... vars) {
+        this.vars = vars;
+        this.expandAndContract = new Transformation[]{expandAndContract};
     }
 
     public Differentiate(Transformation[] expandAndContract, SimpleTensor... vars) {
