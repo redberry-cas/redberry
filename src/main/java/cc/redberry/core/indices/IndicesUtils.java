@@ -207,6 +207,19 @@ public final class IndicesUtils {
     }
 
     /**
+     * Changes index type to specified, represented by byte.
+     * <p/>
+     * <br/>Expression used by this method is: <b><code>(0x80FFFFFF & index) | ((0x7F & type) << 24)</code></b>
+     *
+     * @param type  IndexType
+     * @param index index to change type in
+     * @return index with new type
+     */
+    public static int setType(IndexType type, int index) {
+        return setType(type.getType(), index);
+    }
+
+    /**
      * Changes index state to specified state of the form 0b1(0)000000.....
      * <p/>
      * <br/>Expression used by this method is: <b><code>rawState | index</code></b>
