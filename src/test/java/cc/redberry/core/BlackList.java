@@ -51,7 +51,7 @@ public class BlackList {
 
     @Test
     public void etwer() {
-        System.out.println((-8 & 0x7FFFFFFF));
+        System.out.println(1 % 2);
     }
 
     @Ignore
