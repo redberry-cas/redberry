@@ -177,6 +177,10 @@ public final class Tensors {
         return result;
     }
 
+    public static Tensor divide(Tensor a, Tensor b) {
+        return multiply(a, reciprocal(b));
+    }
+
     /**
      * Returns result of summation of several tensors. Common result is an
      * object of class Sum, but for some input arguments result could have
