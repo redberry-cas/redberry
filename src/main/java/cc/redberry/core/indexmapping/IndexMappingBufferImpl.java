@@ -48,6 +48,11 @@ public final class IndexMappingBufferImpl implements IndexMappingBuffer {
         this.map = new HashMap<>();
     }
 
+    public IndexMappingBufferImpl(boolean signum) {
+        this.map = new HashMap<>();
+        this.signum = signum;
+    }
+
     private IndexMappingBufferImpl(Map<Integer, IndexMappingBufferRecord> map, boolean signum) {
         this.map = map;
         this.signum = signum;
@@ -97,6 +102,19 @@ public final class IndexMappingBufferImpl implements IndexMappingBuffer {
     }
 
     @Override
+    public FromToHolder export() {
+        final int size = map.size();
+        int[] from = new int[size],
+                to = new int[size];
+        int i = 0;
+        for (Map.Entry<Integer, IndexMappingBufferRecord> entry : map.entrySet()) {
+            from[i] = entry.getKey();
+            to[i++] = entry.getValue().getIndexName();
+        }
+        return new FromToHolder(from, to, signum);
+    }
+
+    @Override
     public IndexMappingBufferImpl clone() {
         Map<Integer, IndexMappingBufferRecord> newMap = new HashMap<>();
         for (Map.Entry<Integer, IndexMappingBufferRecord> entry : map.entrySet())
@@ -105,23 +123,23 @@ public final class IndexMappingBufferImpl implements IndexMappingBuffer {
     }
 
     //    @Override
-//    public String toString() {
-//        StringBuilder sb = new StringBuilder();
-//        sb.append(signum ? '-' : '+');
-//        if (map.isEmpty())
-//            return sb.append(":empty buffer").toString();
-//        for (Map.Entry<Integer, IndexMappingBufferRecord> entry : map.entrySet()) {
-//            sb.append(Context.get().getIndexConverterManager().getSymbol(entry.getKey(), OutputFormat.UTF8));
-//            sb.append("->");
-//            sb.append(Context.get().getIndexConverterManager().getSymbol(entry.getValue().getIndexName(), OutputFormat.UTF8));
-//            sb.append(":");
-//            for (int i = 2; i >= 0; --i)
-//                sb.append(entry.getValue().getStatesBit(i) ? 1 : 0);
-//            sb.append(",");
-//        }
-//        sb.deleteCharAt(sb.length() - 1);
-//        return sb.toString();
-//    }
+    //    public String toString() {
+    //        StringBuilder sb = new StringBuilder();
+    //        sb.append(signum ? '-' : '+');
+    //        if (map.isEmpty())
+    //            return sb.append(":empty buffer").toString();
+    //        for (Map.Entry<Integer, IndexMappingBufferRecord> entry : map.entrySet()) {
+    //            sb.append(Context.get().getIndexConverterManager().getSymbol(entry.getKey(), OutputFormat.UTF8));
+    //            sb.append("->");
+    //            sb.append(Context.get().getIndexConverterManager().getSymbol(entry.getValue().getIndexName(), OutputFormat.UTF8));
+    //            sb.append(":");
+    //            for (int i = 2; i >= 0; --i)
+    //                sb.append(entry.getValue().getStatesBit(i) ? 1 : 0);
+    //            sb.append(",");
+    //        }
+    //        sb.deleteCharAt(sb.length() - 1);
+    //        return sb.toString();
+    //    }
     @Override
     public String toString() {
         return toString(CC.getDefaultOutputFormat());
@@ -151,42 +169,42 @@ public final class IndexMappingBufferImpl implements IndexMappingBuffer {
         sb.deleteCharAt(sb.length() - 1).deleteCharAt(sb.length() - 1).append('}');
         return sb.toString();
     }
-//    public String toStringWithStates() {
-//        StringBuilder sb = new StringBuilder();
-//        sb.append(signum ? '-' : '+');
-//        if (map.isEmpty())
-//            return sb.append(":empty buffer").toString();
-//        Map<Integer,Integer> map = getMap();
-//        int from,to;
-//        for (Map.Entry<Integer, Integer> entry : map.entrySet()) {
-//            from=entry.getKey();
-//            to = entry.getValue();
-//            if((from & 0x80000000) == 0x80000000){
-//                sb.append("^");
-//            }else
-//                sb.append("_");
-//            sb.append(Context.get().getIndexConverterManager().getSymbol(from & 0x7FFFFFFF , OutputFormat.UTF8));
-//            sb.append("->");
-//              if((to & 0x80000000) == 0x80000000){
-//                sb.append("^");
-//            }else
-//                sb.append("_");
-//            sb.append(Context.get().getIndexConverterManager().getSymbol(to & 0x7FFFFFFF, OutputFormat.UTF8));
-//            sb.append(",");
-//        }
-//        sb.deleteCharAt(sb.length() - 1);
-//        return sb.toString();
-//    }
-//    @Override
-//    public IndexMappingImpl toMapping() {
-//        int[] from = new int[map.size()], to = new int[map.size()];
-//        int i = 0;
-//        for (Map.Entry<Integer, IndexMappingBufferRecord> entry : map.entrySet()) {
-//            from[i] = entry.getKey().intValue();
-//            to[i++] = entry.getValue().getIndexName();
-//        }
-//        return new IndexMappingImpl(new int[0], from, to);
-//    }
+    //    public String toStringWithStates() {
+    //        StringBuilder sb = new StringBuilder();
+    //        sb.append(signum ? '-' : '+');
+    //        if (map.isEmpty())
+    //            return sb.append(":empty buffer").toString();
+    //        Map<Integer,Integer> map = getMap();
+    //        int from,to;
+    //        for (Map.Entry<Integer, Integer> entry : map.entrySet()) {
+    //            from=entry.getKey();
+    //            to = entry.getValue();
+    //            if((from & 0x80000000) == 0x80000000){
+    //                sb.append("^");
+    //            }else
+    //                sb.append("_");
+    //            sb.append(Context.get().getIndexConverterManager().getSymbol(from & 0x7FFFFFFF , OutputFormat.UTF8));
+    //            sb.append("->");
+    //              if((to & 0x80000000) == 0x80000000){
+    //                sb.append("^");
+    //            }else
+    //                sb.append("_");
+    //            sb.append(Context.get().getIndexConverterManager().getSymbol(to & 0x7FFFFFFF, OutputFormat.UTF8));
+    //            sb.append(",");
+    //        }
+    //        sb.deleteCharAt(sb.length() - 1);
+    //        return sb.toString();
+    //    }
+    //    @Override
+    //    public IndexMappingImpl toMapping() {
+    //        int[] from = new int[map.size()], to = new int[map.size()];
+    //        int i = 0;
+    //        for (Map.Entry<Integer, IndexMappingBufferRecord> entry : map.entrySet()) {
+    //            from[i] = entry.getKey().intValue();
+    //            to[i++] = entry.getValue().getIndexName();
+    //        }
+    //        return new IndexMappingImpl(new int[0], from, to);
+    //    }
 
     @Override
     public boolean equals(Object obj) {
@@ -205,20 +223,20 @@ public final class IndexMappingBufferImpl implements IndexMappingBuffer {
             return false;
         return map.equals(other.map);
 
-//       
-//        
-//        Map.Entry<Integer, IndexMappingBufferRecord>[] first = map.entrySet().toArray(new Map.Entry[map.size()]);
-//        Map.Entry<Integer, IndexMappingBufferRecord>[] second = other.map.entrySet().toArray(new Map.Entry[map.size()]);
-//
-//        Arrays.sort(first, entryComparator);
-//        Arrays.sort(second, entryComparator);
-//        for (int i = 0; i < first.length; ++i) {
-//            if (!first[i].getKey().equals(second[i].getKey()))
-//                return false;
-//            if (!first[i].getValue().equals(second[i].getValue()))
-//                return false;
-//        }
-//        return true;
+        //
+        //
+        //        Map.Entry<Integer, IndexMappingBufferRecord>[] first = map.entrySet().toArray(new Map.Entry[map.size()]);
+        //        Map.Entry<Integer, IndexMappingBufferRecord>[] second = other.map.entrySet().toArray(new Map.Entry[map.size()]);
+        //
+        //        Arrays.sort(first, entryComparator);
+        //        Arrays.sort(second, entryComparator);
+        //        for (int i = 0; i < first.length; ++i) {
+        //            if (!first[i].getKey().equals(second[i].getKey()))
+        //                return false;
+        //            if (!first[i].getValue().equals(second[i].getValue()))
+        //                return false;
+        //        }
+        //        return true;
     }
 
     private static Comparator<Map.Entry<Integer, IndexMappingBufferRecord>> entryComparator = new Comparator<Map.Entry<Integer, IndexMappingBufferRecord>>() {

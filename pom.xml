@@ -136,7 +136,7 @@
                             <value>cc.redberry.core.GlobalRunListener</value>
                         </property>
                     </properties>
-                    <skipTests>true</skipTests>
+                    <!-- <skipTests>true</skipTests> -->
                 </configuration>
             </plugin>
             <plugin>
