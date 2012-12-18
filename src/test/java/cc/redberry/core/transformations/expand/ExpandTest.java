@@ -37,6 +37,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import static cc.redberry.core.tensor.Tensors.parse;
+import static cc.redberry.core.transformations.expand.Expand.EXPAND;
 import static cc.redberry.core.transformations.expand.Expand.expand;
 import static cc.redberry.core.transformations.expand.ExpandPort.expandUsingPort;
 
@@ -396,5 +397,12 @@ public class ExpandTest {
     public void test38() {
         Tensor t = parse("1/(a+b)**2 + Sin[(a+b)*(c+d)]");
         TAssert.assertTrue(t == expand(t));
+    }
+
+    @Test
+    public void test39() {
+        Tensor t = parse("(-4*I)*f_mn*s_pq*(f^na - t^na + u^an)");
+        System.out.println(expand(t));
+//        TAssert.assertTrue(t == expand(t));
     }
 }

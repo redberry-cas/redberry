@@ -23,10 +23,14 @@
 package cc.redberry.core.tensor;
 
 import cc.redberry.core.TAssert;
+import cc.redberry.core.context.CC;
+import cc.redberry.core.context.ContextManager;
 import cc.redberry.core.context.OutputFormat;
+import cc.redberry.core.indexmapping.IndexMappings;
 import cc.redberry.core.indices.IndexType;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.transformations.ContractIndices;
+import cc.redberry.core.transformations.RemoveDueToSymmetry;
 import cc.redberry.core.transformations.ToNumeric;
 import cc.redberry.core.transformations.Transformation;
 import cc.redberry.core.transformations.expand.Expand;
@@ -349,8 +353,34 @@ public class TensorsTest {
 
         t = parse("ArcTan[2**(1/2*I) + Log[1/(8.)]]+1/ArcCot[2-I]*(8 - 3*I)**91 + ArcSin[3]**(1/23 + I)");
         Assert.assertEquals(parse("-1.0825384369552736E84-I*1.4034892133454258E85"), t);
-        System.out.println(parse("0*a"));
     }
 
+
+    @Test
+    public void test4() {
+        CC.resetTensorNames(8170410325559983904L);
+        setAntiSymmetric("e_abcd");
+        Tensor[] tensors = {
+                parse("e_{e}^{d}_{gf}*(4*g_{ac}*d_{d}^{f}-4*d_{a}^{f}*g_{dc}+4*g_{ad}*d^{f}_{c})"),
+                parse("e_{e}^{d}_{gf}*(4*g_{ac}*d_{d}^{f}+4*d_{a}^{f}*g_{cd}-4*g_{ad}*d_{c}^{f})")
+        };
+
+        SumBuilder sb1 = new SumBuilder(), sb2 = new SumBuilder();
+        for (Tensor t : tensors) {
+            sb1.put(t);
+            t = Expand.expand(t);
+            sb2.put(t);
+        }
+        Tensor a = sb1.build(), b = sb2.build();
+
+        a = Expand.expand(a, ContractIndices.ContractIndices);
+        a = ContractIndices.contract(a);
+
+        b = ContractIndices.contract(b);
+
+        a = RemoveDueToSymmetry.INSTANCE.transform(a);
+        b = RemoveDueToSymmetry.INSTANCE.transform(b);
+        TAssert.assertEquals(a, b);
+    }
 
 }

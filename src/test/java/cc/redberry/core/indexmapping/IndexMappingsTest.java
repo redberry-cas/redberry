@@ -27,6 +27,8 @@ import cc.redberry.core.indices.IndexType;
 import cc.redberry.core.indices.IndicesUtils;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.tensor.Tensors;
+import cc.redberry.core.transformations.ContractIndices;
+import cc.redberry.core.transformations.expand.Expand;
 import cc.redberry.core.utils.TensorHashCalculator;
 import cc.redberry.core.utils.TensorUtils;
 import org.junit.Assert;
@@ -36,8 +38,7 @@ import org.junit.Test;
 import java.util.Arrays;
 import java.util.Set;
 
-import static cc.redberry.core.tensor.Tensors.addSymmetry;
-import static cc.redberry.core.tensor.Tensors.parse;
+import static cc.redberry.core.tensor.Tensors.*;
 
 public class IndexMappingsTest {
 
@@ -430,4 +431,49 @@ public class IndexMappingsTest {
         IndexMappingBuffer b = IndexMappingTestUtils.parse("+;_a->_a;_b->^a");
         Assert.assertEquals(first, b);
     }
+
+    @Test
+    public void test15() {
+        CC.resetTensorNames(8170410325559983904L);
+
+        Tensor from = parse("e^{d}_{f}*(4*g_{ac}*d_{d}^{f} - 4*d_{a}^{f}*g_{dc} + 4*g_{ad}*d^{f}_{c})"),
+                 to = parse("e^{d}_{f}*(4*g_{ac}*d_{d}^{f} + 4*d_{a}^{f}*g_{cd} - 4*g_{ad}*d_{c}^{f})");
+        Assert.assertFalse(TensorUtils.equals(from, to));
+    }
+
+
+    @Test
+    public void test15a() {
+        CC.resetTensorNames(8170410325559983904L);
+
+        Tensor from = parse("e^{d}_{f}*(4*g_{ac}*d_{d}^{f} - 4*d_{a}^{f}*g_{dc} + 4*g_{ad}*d^{f}_{c})"),
+                to = parse("e^{d}_{f}*(4*g_{ac}*d_{d}^{f} + 4*d_{a}^{f}*g_{cd} - 4*g_{ad}*d_{c}^{f})");
+
+        System.out.println(from);
+        System.out.println(to);
+
+//        from = parse("e_{e}^{d}_{gf}*(- 4*d_{a}^{f}*g_{dc} + 4*g_{ad}*d^{f}_{c})");
+//                to = parse("e_{e}^{d}_{gf}*(+ 4*d_{a}^{f}*g_{cd} - 4*g_{ad}*d_{c}^{f})");
+
+
+//        Tensor t = Tensors.sum(Expand.expand(from), negate(Expand.expand(to)));
+//        t = ContractIndices.contract(t);
+//        System.out.println(t);
+
+
+//        from = parse("4*g_{ac}*d_{d}^{f} - 4*d_{a}^{f}*g_{dc} + 4*g_{ad}*d^{f}_{c}");
+//        to = parse("4*g_{ac}*d_{d}^{f} + 4*d_{a}^{f}*g_{cd} - 4*g_{ad}*d_{c}^{f}");
+
+//        from = parse("f_mn*T^mn");
+//          to = parse("f_mn*T^nm");
+
+        IndexMappingBuffer buffer;
+        MappingsPort port = IndexMappings.createPort(from, to);
+        while ((buffer = port.take()) != null)
+            System.out.println(buffer);
+
+
+        Assert.assertFalse(TensorUtils.equals(from, to));
+    }
+
 }
