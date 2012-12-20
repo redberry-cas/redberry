@@ -46,7 +46,7 @@ import static cc.redberry.core.transformations.CollectScalarFactors.collectScala
 //TODO review after logical completion of tensors standard form strategy 
 public final class Together implements Transformation {
 
-    public static final Together TOGETHER = new Together(false);
+    public static final Together INSTANCE = new Together(false);
     public static final Together TOGETHER_FACTOR = new Together(true);
 
     private final boolean doFactor;

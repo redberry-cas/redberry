@@ -30,6 +30,7 @@ import cc.redberry.core.indices.*;
 import cc.redberry.core.parser.*;
 import cc.redberry.core.tensor.SimpleTensor;
 import cc.redberry.core.utils.ArraysUtils;
+import cc.redberry.core.utils.BitArray;
 import cc.redberry.core.utils.ByteBackedBitArray;
 import cc.redberry.core.utils.IntArrayList;
 
@@ -64,21 +65,28 @@ public class GeneralIndicesInsertion implements ParseNodeTransformer {
      * @param omittedIndexType type of indices that may be omitted
      */
     public void addInsertionRule(SimpleTensor tensor, IndexType omittedIndexType) {
-        NameDescriptor nd = CC.getNameDescriptor(tensor.getName());
+        addInsertionRule(CC.getNameDescriptor(tensor.getName()), omittedIndexType);
+    }
+
+    public void addInsertionRule(NameDescriptor nd, IndexType omittedIndexType) {
         IndicesTypeStructureAndName originalStructureAndName = NameDescriptor.extractKey(nd);
-        if (tensor.getIndices().size(omittedIndexType) == 0)
+        IndicesTypeStructure structure = nd.getIndicesTypeStructure();
+
+        if (structure.getTypeData(omittedIndexType.getType()).length == 0)
             throw new IllegalArgumentException("No indices of specified type in tensor.");
-        IndicesTypeStructure structure = tensor.getIndices().getIndicesTypeStructure();
+
         if (CC.isMetric(omittedIndexType.getType())) {
             int omittedIndicesCount = structure.getTypeData(omittedIndexType.getType()).length;
             if ((omittedIndicesCount % 2) == 1)
                 throw new IllegalArgumentException("The number of omitted indices for metric types should be even.");
             omittedIndicesCount /= 2;
-            SimpleIndices omittedIndices = tensor.getIndices().getOfType(omittedIndexType);
+
+            BitArray omittedIndices = structure.getTypeData(omittedIndexType.getType()).states;
+
             for (int i = 0, size = omittedIndices.size(); i < size; ++i) {
-                if (i < omittedIndicesCount && !IndicesUtils.getState(omittedIndices.get(i)))
+                if (i < omittedIndicesCount && !omittedIndices.get(i))
                     throw new IllegalArgumentException("Inconsistent states signature for metric type.");
-                if (i >= omittedIndicesCount && IndicesUtils.getState(omittedIndices.get(i)))
+                if (i >= omittedIndicesCount && omittedIndices.get(i))
                     throw new IllegalArgumentException("Inconsistent states signature for metric type.");
             }
         }
