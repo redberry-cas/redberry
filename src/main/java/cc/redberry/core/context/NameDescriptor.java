@@ -64,6 +64,7 @@ public abstract class NameDescriptor {
     }
 
     public IndicesTypeStructure[] getIndicesTypeStructures() {
+        //todo clone()
         return indexTypeStructures;
     }
 
