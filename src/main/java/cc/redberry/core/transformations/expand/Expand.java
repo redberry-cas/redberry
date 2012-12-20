@@ -38,7 +38,7 @@ public final class Expand extends ExpandAbstract {
         super();
     }
 
-    public Expand(Transformation[] transformations) {
+    public Expand(Transformation... transformations) {
         super(transformations);
     }
 

@@ -36,7 +36,7 @@
         <version>7</version>
     </parent>
 
-    <name>redberry</name>
+    <name>redberry-core</name>
     <url>http://redberry.cc/</url>
 
     <description>
