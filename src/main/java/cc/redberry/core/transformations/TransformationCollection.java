@@ -41,6 +41,10 @@ public final class TransformationCollection implements Transformation {
         this.transformations = transformations.toArray(new Transformation[transformations.size()]);
     }
 
+    public TransformationCollection(Transformation... transformations) {
+        this.transformations = transformations.clone();
+    }
+
     @Override
     public Tensor transform(Tensor t) {
         for (Transformation tr : transformations)

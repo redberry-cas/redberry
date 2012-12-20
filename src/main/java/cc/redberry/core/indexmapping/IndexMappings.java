@@ -76,7 +76,7 @@ public final class IndexMappings {
     }
 
     public static boolean testMapping(Tensor from, Tensor to, IndexMappingBuffer buffer) {
-        return createPort(IndexMappingBufferTester.create(buffer), from, to).take() != null;
+        return createPort(new IndexMappingBufferTester(buffer), from, to).take() != null;
     }
 
     private static Tensor extractNonComplexFactor(Tensor t) {

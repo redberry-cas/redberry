@@ -24,7 +24,6 @@ package cc.redberry.core.indexmapping;
 
 import cc.redberry.core.indices.IndicesUtils;
 import cc.redberry.core.tensor.Tensor;
-import cc.redberry.core.utils.ArraysUtils;
 
 import java.util.Arrays;
 import java.util.Map;
@@ -47,49 +46,57 @@ public final class IndexMappingBufferTester implements IndexMappingBuffer {
         innerBuffer = new IndexMappingBufferImpl();
     }
 
-    public IndexMappingBufferTester(int[] from, int[] to, boolean signum) {
-        if (from.length != to.length)
-            throw new IllegalArgumentException();
-        from = IndicesUtils.getIndicesNames(from);
-        to = IndicesUtils.getIndicesNames(to);
-        this.from = from;
-        this.to = to;
-        this.signum = signum;
-        //Here we can use unstable sort method
-        ArraysUtils.quickSort(this.from, this.to);
-        innerBuffer = new IndexMappingBufferImpl();
+    public IndexMappingBufferTester(FromToHolder holder) {
+        this.from = holder.from;
+        this.to = holder.to;
+        this.signum = holder.signum;
+        this.innerBuffer = new IndexMappingBufferImpl();
     }
 
-    private IndexMappingBufferTester(IndexMappingBufferImpl buffer) {
-        Map<Integer, IndexMappingBufferRecord> map = buffer.map;
-        final int size = map.size();
-        from = new int[size];
-        to = new int[size];
-        signum = buffer.getSignum();
-        int i = 0;
-        for (Map.Entry<Integer, IndexMappingBufferRecord> entry : map.entrySet()) {
-            from[i] = entry.getKey();
-            to[i++] = entry.getValue().getIndexName();
-        }
-        ArraysUtils.quickSort(this.from, this.to);
-        innerBuffer = new IndexMappingBufferImpl();
+    //public IndexMappingBufferTester(int[] from, int[] to, boolean signum) {
+    //    if (from.length != to.length)
+    //        throw new IllegalArgumentException();
+    //    from = IndicesUtils.getIndicesNames(from);
+    //    to = IndicesUtils.getIndicesNames(to);
+    //    this.from = from;
+    //    this.to = to;
+    //    this.signum = signum;
+    //    //Here we can use unstable sort method
+    //    ArraysUtils.quickSort(this.from, this.to);
+    //    innerBuffer = new IndexMappingBufferImpl();
+    //}
+
+    public IndexMappingBufferTester(IndexMappingBuffer buffer) {
+        this(buffer.export());
+        //Map<Integer, IndexMappingBufferRecord> map = buffer.map;
+        //final int size = map.size();
+        //from = new int[size];
+        //to = new int[size];
+        //signum = buffer.getSignum();
+        //int i = 0;
+        //for (Map.Entry<Integer, IndexMappingBufferRecord> entry : map.entrySet()) {
+        //    from[i] = entry.getKey();
+        //    to[i++] = entry.getValue().getIndexName();
+        //}
+        //ArraysUtils.quickSort(this.from, this.to);
+        //innerBuffer = new IndexMappingBufferImpl();
     }
 
-    private IndexMappingBufferTester(IndexMappingBufferTester buffer) {
-        int innerBufferSize = buffer.innerBuffer.map.size();
-        from = new int[buffer.from.length + innerBufferSize];
-        to = new int[buffer.from.length + innerBufferSize];
-        signum = buffer.getSignum();
-        System.arraycopy(buffer.from, 0, from, 0, buffer.from.length);
-        System.arraycopy(buffer.to, 0, to, 0, buffer.to.length);
-        int i = buffer.from.length;
-        for (Map.Entry<Integer, IndexMappingBufferRecord> entry : buffer.innerBuffer.map.entrySet()) {
-            from[i] = entry.getKey();
-            to[i++] = entry.getValue().getIndexName();
-        }
-        ArraysUtils.quickSort(this.from, this.to);
-        innerBuffer = new IndexMappingBufferImpl();
-    }
+    //private IndexMappingBufferTester(IndexMappingBufferTester buffer) {
+    //    int innerBufferSize = buffer.innerBuffer.map.size();
+    //    from = new int[buffer.from.length + innerBufferSize];
+    //    to = new int[buffer.from.length + innerBufferSize];
+    //    signum = buffer.getSignum();
+    //    System.arraycopy(buffer.from, 0, from, 0, buffer.from.length);
+    //    System.arraycopy(buffer.to, 0, to, 0, buffer.to.length);
+    //    int i = buffer.from.length;
+    //    for (Map.Entry<Integer, IndexMappingBufferRecord> entry : buffer.innerBuffer.map.entrySet()) {
+    //        from[i] = entry.getKey();
+    //        to[i++] = entry.getValue().getIndexName();
+    //    }
+    //    ArraysUtils.quickSort(this.from, this.to);
+    //    innerBuffer = new IndexMappingBufferImpl();
+    //}
 
     private IndexMappingBufferTester(IndexMappingBufferImpl innerBuffer, int[] from, int[] to, boolean signum) {
         this.innerBuffer = innerBuffer;
@@ -98,13 +105,14 @@ public final class IndexMappingBufferTester implements IndexMappingBuffer {
         this.signum = signum;
     }
 
-    public static IndexMappingBufferTester create(IndexMappingBuffer buffer) {
-        if (buffer instanceof IndexMappingBufferTester)
-            return new IndexMappingBufferTester((IndexMappingBufferTester) buffer);
-        if (buffer instanceof IndexMappingBufferImpl)
-            return new IndexMappingBufferTester((IndexMappingBufferImpl) buffer);
-        throw new RuntimeException("Unknown IndexMappingBufferType");
-    }
+    //public static IndexMappingBufferTester create(IndexMappingBuffer buffer) {
+    //    /*if (buffer instanceof IndexMappingBufferTester)
+    //        return new IndexMappingBufferTester((IndexMappingBufferTester) buffer);
+    //    if (buffer instanceof IndexMappingBufferImpl)
+    //        return new IndexMappingBufferTester((IndexMappingBufferImpl) buffer);
+    //    throw new RuntimeException("Unknown IndexMappingBufferType");*/
+    //    return new IndexMappingBufferTester(buffer.export());
+    //}
 
     public static boolean test(IndexMappingBufferTester tester, Tensor from, Tensor to) {
         tester.reset();
@@ -156,6 +164,22 @@ public final class IndexMappingBufferTester implements IndexMappingBuffer {
     @Override
     public Map<Integer, IndexMappingBufferRecord> getMap() {
         return innerBuffer.getMap();
+    }
+
+    @Override
+    public FromToHolder export() {
+        final Map<Integer, IndexMappingBufferRecord> map = innerBuffer.map;
+        final int size = from.length + map.size();
+        int[] from1 = new int[size],
+                to1 = new int[size];
+        System.arraycopy(from, 0, from1, 0, from.length);
+        System.arraycopy(to, 0, to1, 0, from.length);
+        int i = from.length;
+        for (Map.Entry<Integer, IndexMappingBufferRecord> entry : map.entrySet()) {
+            from1[i] = entry.getKey();
+            to1[i++] = entry.getValue().getIndexName();
+        }
+        return new FromToHolder(from1, to1, getSignum());
     }
 
     public void reset() {

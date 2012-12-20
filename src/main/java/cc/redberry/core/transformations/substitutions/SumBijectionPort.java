@@ -175,7 +175,7 @@ public final class SumBijectionPort implements OutputPortUnsafe<BijectionContain
         }
 
         public boolean test(IndexMappingBuffer buffer) {
-            IndexMappingBufferTester tester = IndexMappingBufferTester.create(buffer);
+            IndexMappingBufferTester tester = new IndexMappingBufferTester(buffer);
             for (int i = 1; i < from.length; ++i)
                 if (!IndexMappingBufferTester.test(tester, from[i], to[currentPermutation[i]]))
                     return false;
@@ -225,7 +225,7 @@ public final class SumBijectionPort implements OutputPortUnsafe<BijectionContain
 
         @Override
         public int[] _nextMapping(IndexMappingBuffer buffer) {
-            if (!IndexMappingBufferTester.test(IndexMappingBufferTester.create(buffer), from, to))
+            if (!IndexMappingBufferTester.test(new IndexMappingBufferTester(buffer), from, to))
                 return null;
             return fromPointer;
         }

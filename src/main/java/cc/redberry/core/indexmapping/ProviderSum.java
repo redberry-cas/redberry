@@ -29,7 +29,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
@@ -49,12 +48,12 @@ final class ProviderSum implements IndexMappingProvider {
     };
     private final IndexMappingProvider mainProvider;
     private final Tester[] testers;
-    private final SignumHolder holder;
+    private final InputCache cache;
 
     private ProviderSum(IndexMappingProvider opu, Tensor from, Tensor to) {
-        
+
         //Search for main source
-        int i,begin =0;
+        int i, begin = 0;
         final int size = from.size();
         int mainStretchCoord = -1;
         int mainStretchIndex = -1;
@@ -65,8 +64,8 @@ final class ProviderSum implements IndexMappingProvider {
                 //if (i - 1 != begin) {
                 //Here is main stretches iteration code
                 testersList.add(i - begin == 1
-                                ? new SinglePairTester(from.get(begin), to.get(begin))
-                                : new StretchPairTester(from.getRange(begin, i), to.getRange(begin, i)));
+                        ? new SinglePairTester(from.get(begin), to.get(begin))
+                        : new StretchPairTester(from.getRange(begin, i), to.getRange(begin, i)));
                 if (mainStretchLength > i - begin) {
                     mainStretchCoord = begin;
                     mainStretchLength = i - begin;
@@ -77,18 +76,18 @@ final class ProviderSum implements IndexMappingProvider {
                 begin = i;
             }
 
-        holder = new SignumHolder(opu);
+        cache = new InputCache(opu);
         if (mainStretchLength == 1) {
-            this.mainProvider = IndexMappings.createPort(holder, from.get(mainStretchCoord),
-                                                         to.get(mainStretchCoord));
+            this.mainProvider = IndexMappings.createPort(cache, from.get(mainStretchCoord),
+                    to.get(mainStretchCoord));
             testersList.remove(mainStretchIndex);
         } else {
             final Tensor[] preFrom = from.getRange(mainStretchCoord,
-                                                   mainStretchCoord + mainStretchLength);
+                    mainStretchCoord + mainStretchLength);
             final Tensor[] preTo = to.getRange(mainStretchCoord,
-                                               mainStretchCoord + mainStretchLength);
+                    mainStretchCoord + mainStretchLength);
 
-            this.mainProvider = new StretchPairSource(holder, preFrom, preTo);
+            this.mainProvider = new StretchPairSource(cache, preFrom, preTo);
 
             testersList.set(mainStretchIndex, (StretchPairSource) this.mainProvider);
         }
@@ -108,25 +107,26 @@ final class ProviderSum implements IndexMappingProvider {
             if (buffer == null)
                 return null;
             buffer.removeContracted();
-            if (holder.signum)
-                buffer.addSignum(true);
-            final IndexMappingBufferTester tester = IndexMappingBufferTester.create(buffer);
+            //buffer.addSignum(cache.lastReturned.signum);
+
+            final IndexMappingBufferTester tester =
+                    new IndexMappingBufferTester(buffer.export().mergeWith(cache.lastReturned));
+
             for (Tester t : testers)
                 if (!t.test(tester))
                     continue OUTER;
-            if (holder.signum)
-                buffer.addSignum(true);
+
+            //buffer.addSignum(cache.lastReturned.signum);
             return buffer;
         }
     }
 
-    //TODO review signum holder pattern
-    private static class SignumHolder implements IndexMappingProvider {
+    private static class InputCache implements IndexMappingProvider {
 
         private final IndexMappingProvider provider;
-        boolean signum;
+        FromToHolder lastReturned;
 
-        public SignumHolder(IndexMappingProvider provider) {
+        public InputCache(IndexMappingProvider provider) {
             this.provider = provider;
         }
 
@@ -140,7 +140,7 @@ final class ProviderSum implements IndexMappingProvider {
             IndexMappingBuffer buffer = provider.take();
             if (buffer == null)
                 return null;
-            signum = buffer.getSignum();
+            lastReturned = buffer.export();
             return buffer;
         }
     }
@@ -200,7 +200,7 @@ final class ProviderSum implements IndexMappingProvider {
     private static class StretchPairTester implements Tester {
 
         private final Tensor[] from, to;
-//        private final PriorityPermutationGenerator permutationGenerator;
+        //        private final PriorityPermutationGenerator permutationGenerator;
         private final int length;
 
         public StretchPairTester(final Tensor[] from, final Tensor[] to) {
@@ -208,7 +208,7 @@ final class ProviderSum implements IndexMappingProvider {
             this.to = to;
             this.length = from.length;
 
-//            this.permutationGenerator = new PriorityPermutationGenerator(from.length);
+            //            this.permutationGenerator = new PriorityPermutationGenerator(from.length);
         }
 
         @Override
@@ -226,19 +226,19 @@ final class ProviderSum implements IndexMappingProvider {
                 return false;
             }
             return true;
-//            int[] permutation;
-//            final PriorityPermutationGenerator generator = permutationGenerator;
-//            generator.reset();
-//            int i;
-//            OUTER:
-//            while ((permutation = generator.next()) != null)
-//                for (i = 0; i < from.length; ++i) {
-//                    if (!IndexMappingBufferTester.test(tester, from[i], to[permutation[i]]))
-//                        continue OUTER;
-//                    generator.nice();
-//                    return true;
-//                }
-//            return false;
+            //            int[] permutation;
+            //            final PriorityPermutationGenerator generator = permutationGenerator;
+            //            generator.reset();
+            //            int i;
+            //            OUTER:
+            //            while ((permutation = generator.next()) != null)
+            //                for (i = 0; i < from.length; ++i) {
+            //                    if (!IndexMappingBufferTester.test(tester, from[i], to[permutation[i]]))
+            //                        continue OUTER;
+            //                    generator.nice();
+            //                    return true;
+            //                }
+            //            return false;
         }
     }
 
@@ -256,11 +256,11 @@ final class ProviderSum implements IndexMappingProvider {
             return IndexMappingBufferTester.test(tester, from, to);
         }
     }
-//    private static boolean test(final Tensor from, final Tensor to, final IndexMappingBufferTester tester) {
-//        tester.reset();
-//        final IndexMappingProvider provider =
-//                IndexMappings.createPort(IndexMappingProvider.Util.singleton(tester), from, to, tester.allowDiffStates());
-//        provider.tick();
-//        return provider.take() != null;
-//    }
+    //    private static boolean test(final Tensor from, final Tensor to, final IndexMappingBufferTester tester) {
+    //        tester.reset();
+    //        final IndexMappingProvider provider =
+    //                IndexMappings.createPort(IndexMappingProvider.Util.singleton(tester), from, to, tester.allowDiffStates());
+    //        provider.tick();
+    //        return provider.take() != null;
+    //    }
 }

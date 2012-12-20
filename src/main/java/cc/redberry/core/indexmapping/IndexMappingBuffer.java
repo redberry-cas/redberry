@@ -25,7 +25,6 @@ package cc.redberry.core.indexmapping;
 import java.util.Map;
 
 /**
- *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
@@ -40,6 +39,8 @@ public interface IndexMappingBuffer {
     boolean isEmpty();
 
     boolean getSignum();
+
+    FromToHolder export();
 
     //TODO hashMap for ints
     Map<Integer, IndexMappingBufferRecord> getMap();
