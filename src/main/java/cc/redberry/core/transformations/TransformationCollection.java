@@ -55,4 +55,16 @@ public final class TransformationCollection implements Transformation {
     public List<Transformation> getTransformations() {
         return Collections.unmodifiableList(Arrays.asList(transformations));
     }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; ; ++i) {
+            sb.append(transformations[i]);
+            if (i == transformations.length - 1)
+                break;
+            sb.append("\n");
+        }
+        return sb.toString();
+    }
 }
