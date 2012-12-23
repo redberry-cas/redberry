@@ -92,7 +92,7 @@ public class GraphUtils {
 
         int currentComponent = -1;
         int m1 = 0;
-        Deque<BreakfastPointer> stack = new ArrayDeque<>();
+        Deque<BreadthFirstPointer> stack = new ArrayDeque<>();
         do {
             ++currentComponent;
             components[m1] = currentComponent;
@@ -103,12 +103,12 @@ public class GraphUtils {
                 continue;
 
             //Pushing seed vertex to stack
-            stack.push(new BreakfastPointer(m1, fromIndex[m1]));
+            stack.push(new BreadthFirstPointer(m1, fromIndex[m1]));
 
 
             //Main algorithm (simple depth-first search)
             while (!stack.isEmpty()) {
-                BreakfastPointer pointer = stack.peek();
+                BreadthFirstPointer pointer = stack.peek();
                 
                 if (pointer.edgePointer >= from.length || from[pointer.edgePointer++] != pointer.vertex) {
                     //There are no more edges from this vertex => delete it from stack and continue
@@ -130,7 +130,7 @@ public class GraphUtils {
                 
                 if (fromIndex[pointsTo] != -1)
                     //No edges from this vertex
-                    stack.push(new BreakfastPointer(pointsTo, fromIndex[pointsTo]));
+                    stack.push(new BreadthFirstPointer(pointsTo, fromIndex[pointsTo]));
             }
         } while ((m1 = firstM1(components)) != vertexes);
 
@@ -149,11 +149,11 @@ public class GraphUtils {
         return -1;
     }
     
-    private static final class BreakfastPointer {
+    private static final class BreadthFirstPointer {
         final int vertex;
         int edgePointer;
         
-        public BreakfastPointer(int node, int edgePointer) {
+        public BreadthFirstPointer(int node, int edgePointer) {
             this.vertex = node;
             this.edgePointer = edgePointer;
         }
