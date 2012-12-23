@@ -22,10 +22,13 @@
  */
 package cc.redberry.core;
 
+import cc.redberry.core.tensor.Product;
+import cc.redberry.core.tensor.Tensors;
 import gnu.trove.set.hash.TIntHashSet;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Random;
 import java.util.regex.Matcher;
@@ -37,21 +40,10 @@ import java.util.regex.Pattern;
  */
 public class BlackList {
 
-    public enum Name {
-
-        E1("a"), E2("b");
-        final String name;
-
-        Name(String name) {
-            this.name = name;
-        }
-
-        public static final Name[] values = values();
-    }
-
     @Test
     public void etwer() {
-        System.out.println(1 % 2);
+        Product p = (Product) Tensors.parse("g_m^a*f_ab");
+        System.out.println(Arrays.toString(p.getContent().getFullContractionsStructure().components));
     }
 
     @Ignore
