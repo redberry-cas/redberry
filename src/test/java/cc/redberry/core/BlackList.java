@@ -40,11 +40,22 @@ import java.util.regex.Pattern;
  */
 public class BlackList {
 
-    @Test
-    public void etwer() {
-        Product p = (Product) Tensors.parse("g_m^a*f_ab");
-        System.out.println(Arrays.toString(p.getContent().getFullContractionsStructure().components));
-    }
+//    @Test
+//    public void etwer() {
+//        Integer[] aa = {1, 2, 3};
+//        int[] bb = {4, 2, 1};
+//        aaa(aa);
+//        bbb(bb);
+//    }
+//
+//    private static void aaa(int[] xxx) {
+//        System.out.println("as");
+//    }
+//
+//    private static void bbb(Integer[] xxx) {
+//        System.out.println("sa");
+//    }
+
 
     @Ignore
     @Test

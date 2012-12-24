@@ -26,7 +26,7 @@ import cc.redberry.concurrent.OutputPortUnsafe;
 import cc.redberry.core.combinatorics.Combinatorics;
 import cc.redberry.core.combinatorics.DistinctCombinationsPort;
 import cc.redberry.core.combinatorics.IntCombinatoricGenerator;
-import cc.redberry.core.math.GraphUtils;
+import cc.redberry.core.graph.GraphUtils;
 import cc.redberry.core.tensor.FullContractionsStructure;
 import cc.redberry.core.tensor.ProductContent;
 import cc.redberry.core.tensor.Tensor;

@@ -24,7 +24,7 @@ package cc.redberry.core.tensor;
 
 import cc.redberry.core.indices.Indices;
 import cc.redberry.core.indices.IndicesUtils;
-import cc.redberry.core.math.GraphUtils;
+import cc.redberry.core.graph.GraphUtils;
 import cc.redberry.core.utils.ArraysUtils;
 
 import java.util.Arrays;

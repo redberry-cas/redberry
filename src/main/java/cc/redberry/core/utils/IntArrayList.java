@@ -124,7 +124,7 @@ public final class IntArrayList {
     }
 
     /**
-     * Return last element leaving in it in stack.
+     * Return last element leaving it in stack.
      *
      * @return
      */
