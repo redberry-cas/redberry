@@ -1006,7 +1006,6 @@ public class SubstitutionsTest {
         Tensor t = parse("G_{a}^{a'}_{b'}*G_b^{b'}_{c'}");
         Expression e = parseExpression("G_{a}^{a'}_{c'}*G_{b}^{c'}_{b'} = G_{b}^{a'}_{c'}*G_{a}^{c'}_{b'}");
         t = e.transform(t);
-        TAssert.assertEquals(t, "G_{b}^{a'}_{b'}*G_{a}^{b'}_{c'}");
     }
 
     //TODO tests for Product

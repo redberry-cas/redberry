@@ -26,6 +26,8 @@ import gnu.trove.set.hash.TIntHashSet;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Random;
 import java.util.regex.Matcher;
@@ -144,4 +146,66 @@ public class BlackList {
         System.out.println(j);
     }
 
+//    @Test
+//    public void test() {
+////        burnJvm();
+//        long start;
+//        int[] a;
+//        for (int i = 0; i < 1; ++i) {
+//            a = randomArray();
+//            start = System.currentTimeMillis();
+//            Arrays.sort(a);
+//            System.out.println(Arrays.toString(a));
+//            System.out.println(System.currentTimeMillis() - start);
+//        }
+//    }
+
+    @Test
+    public void test() {
+//        burnJvm();
+        long start;
+        Comparator<int[]> comparator = new Comparator<int[]>() {
+            @Override
+            public int compare(int[] o1, int[] o2) {
+                return Integer.compare(o1[2], o2[2]);
+            }
+        };
+        int[][] a;
+        for (int i = 0; i < 100; ++i) {
+            a = randomArray1();
+            start = System.currentTimeMillis();
+            Arrays.sort(a, comparator);
+            System.out.println(System.currentTimeMillis() - start);
+        }
+    }
+
+    public static void burnJvm() {
+        int[] a = null;
+        int t = 0;
+        for (int i = 0; i < 11000; ++i) {
+            a = randomArray(1000000);
+            Arrays.sort(a);
+            int s = 0;
+            for (int j = 0; j < 1000000; ++j)
+                s += a[j];
+            t += s;
+        }
+        t = ~t;
+    }
+
+    public static int[][] randomArray1() {
+        int[][] a = new int[1000000][];
+        for (int i = 0; i < 1000000; ++i) {
+            a[i] = randomArray(3);
+        }
+        return a;
+    }
+
+    public static int[] randomArray(int size) {
+        int[] a = new int[size];
+        Random random = new Random();
+        for (int i = 0; i < size; ++i)
+            a[i] = random.nextInt(11);
+        return a;
+    }
 }
