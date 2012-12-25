@@ -25,6 +25,10 @@ package cc.redberry.core.context;
 import cc.redberry.core.indices.IndicesTypeStructure;
 import cc.redberry.core.indices.SimpleIndices;
 
+/**
+ * @author Dmitry Bolotin
+ * @author Stanislav Poslavsky
+ */
 final class NameDescriptorImpl extends NameDescriptor {
 
     private final String name;
