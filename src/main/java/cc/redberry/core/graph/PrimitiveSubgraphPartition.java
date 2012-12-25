@@ -94,7 +94,7 @@ public final class PrimitiveSubgraphPartition {
             return new PrimitiveSubgraph(GraphType.Cycle, new int[]{pivot});
         }
 
-        int leftPivot, rightPivot, lastLeftPivot = Integer.MIN_VALUE, lastRightPivot = Integer.MIN_VALUE;
+        int leftPivot, rightPivot, lastLeftPivot = NOT_INITIALIZED, lastRightPivot = NOT_INITIALIZED;
 
         while (left != DUMMY || right != DUMMY) {
 
@@ -107,37 +107,50 @@ public final class PrimitiveSubgraphPartition {
             assert leftPivot < 0 || !used.get(leftPivot);
             assert rightPivot < 0 || !used.get(rightPivot);
 
+            //Left end detection
             if (leftPivot == NO_LINKS || leftPivot == -1)
                 leftPivot = DUMMY_PIVOT;
 
+            //Right end detection
             if (rightPivot == NO_LINKS || rightPivot == -1)
                 rightPivot = DUMMY_PIVOT;
 
-            if (leftPivot != DUMMY_PIVOT && leftPivot == lastRightPivot) {
-                if (rightPivot != lastLeftPivot) {
-                    int askk = 0;
-                }
+            //Odd cycle detection
+            if (leftPivot >= 0 && leftPivot == lastRightPivot) {
+                //Closing odd nodes number cycle
+                assert rightPivot == lastLeftPivot;
                 return new PrimitiveSubgraph(GraphType.Cycle, deque2array(positions));
             }
 
+            //Adding left pivot before cycle detection (if cycle, not to add closing node twice)
             if (leftPivot >= 0)
                 positions.addFirst(leftPivot);
 
+            //Even cycle detection
             if (leftPivot >= 0 && leftPivot == rightPivot) {
                 left = getLinks(leftPivot);
+
+                // Checking next (cycle closing) node
                 if (left[0] == BRANCHING || left[1] == BRANCHING)
                     return processGraph(pivot);
+
                 return new PrimitiveSubgraph(GraphType.Cycle, deque2array(positions));
             }
 
+            //Adding right pivot
             if (rightPivot >= 0)
                 positions.addLast(rightPivot);
 
+            //Needed in odd cycle detection
             lastLeftPivot = leftPivot;
+            //Redundant (needed for assertion)
             lastRightPivot = rightPivot;
+
+            //Next layer (breadth-first traversal)
             left = getLinks(leftPivot);
             right = getLinks(rightPivot);
         }
+
         return new PrimitiveSubgraph(GraphType.Line, deque2array(positions));
     }
 

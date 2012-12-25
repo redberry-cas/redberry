@@ -28,8 +28,8 @@ import cc.redberry.core.indices.IndexType;
 import cc.redberry.core.tensor.Product;
 import cc.redberry.core.tensor.ProductBuilder;
 import cc.redberry.core.tensor.Tensor;
-import cc.redberry.core.tensor.Tensors;
 import cc.redberry.core.tensor.random.TRandom;
+import cc.redberry.core.utils.IntArrayList;
 import cc.redberry.core.utils.TensorUtils;
 import org.junit.Assert;
 import org.junit.Test;
@@ -37,7 +37,6 @@ import org.junit.Test;
 import java.util.Arrays;
 
 import static cc.redberry.core.graph.PrimitiveSubgraphPartition.calculatePartition;
-import static cc.redberry.core.tensor.Tensors.addSymmetry;
 import static cc.redberry.core.tensor.Tensors.parse;
 
 /**
@@ -45,40 +44,42 @@ import static cc.redberry.core.tensor.Tensors.parse;
  * @author Stanislav Poslavsky
  */
 public class PrimitiveSubgraphPartitionTest {
-
-    @Test
-    public void test1() {
-
-//        CC.resetTensorNames(-760323547556625542L);
-        for (int i = 0; i < 1000; ++i) {
-            CC.resetTensorNames();
-//            System.out.println(CC.getNameManager().getSeed());
-            Tensor t = parse("A^m_n*B^nk_b*G^b_c*X^i_jk*Y^j_i*2");
-//            System.out.println(t);
-            PrimitiveSubgraph[] ss = calculatePartition((Product) t, IndexType.LatinLower);
-            for (PrimitiveSubgraph ps : ss) {
-                System.out.println(ps);
-            }
-
-        }
-    }
-
     @Test
     public void test2() {
         TRandom random = new TRandom(
                 5, 20,
                 new int[]{1, 0, 0, 0},
-                new int[]{3, 0, 0, 0}, false, -7201529248298620939L);
-        System.out.println(random.getSeed());
+                new int[]{3, 0, 0, 0}, false);
 
-        for (int i = 0; i < 1000; ++i) {
-            Product product = (Product) ((Product) random.nextProduct(10)).getDataSubProduct();
+        for (int i = 0; i < 300; ++i) {
+            Product product = (Product) ((Product) random.nextProduct(20)).getDataSubProduct();
             PrimitiveSubgraph[] ss = calculatePartition(product, IndexType.LatinLower);
-            ProductBuilder pb = new ProductBuilder();
-            for (PrimitiveSubgraph ps : ss)
-                pb.put(extract(product, ps.getPartition()));
-            TAssert.assertEquals(pb.build(), product);
+            Tensor component;
+            IntArrayList used = new IntArrayList();
+            int k;
+            for (PrimitiveSubgraph ps : ss) {
+                component = extract(product, ps.getPartition());
+                if (component instanceof Product) {
+                    PrimitiveSubgraph[] ss1 = calculatePartition((Product) component,
+                            IndexType.LatinLower);
+                    Assert.assertEquals(1, ss1.length);
+                    Assert.assertEquals(component.size(),
+                            ss1[0].getPartition().length);
+                    assertSequence(ss1[0].getPartition());
+                    Assert.assertEquals(ps.getGraphType(), ss1[0].getGraphType());
+                }
+                used.addAll(ps.getPartition());
+            }
+
+            Assert.assertEquals(product.size(), used.size());
+            assertSequence(used.toArray());
         }
+    }
+
+    private static void assertSequence(int[] array) {
+        Arrays.sort(array);
+        for (int i = 0; i < array.length; ++i)
+            Assert.assertEquals(i, array[i]);
     }
 
     @Test
