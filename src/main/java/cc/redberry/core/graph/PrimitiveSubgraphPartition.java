@@ -113,7 +113,7 @@ public final class PrimitiveSubgraphPartition {
             if (rightPivot == NO_LINKS || rightPivot == -1)
                 rightPivot = DUMMY_PIVOT;
 
-            if (leftPivot == lastRightPivot) {
+            if (leftPivot != DUMMY_PIVOT && leftPivot == lastRightPivot) {
                 if (rightPivot != lastLeftPivot) {
                     int askk = 0;
                 }
