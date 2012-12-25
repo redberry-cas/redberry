@@ -20,7 +20,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
-package cc.redberry.core.math;
+package cc.redberry.core.graph;
 
 import cc.redberry.core.utils.ArraysUtils;
 
@@ -80,7 +80,7 @@ public class GraphUtils {
 
         //Creating index for fast search in from array
         int[] fromIndex = new int[vertexes];
-        Arrays.fill(fromIndex, -1); //-1 in fromIndex means absance of edges for certain vertex
+        Arrays.fill(fromIndex, -1); //-1 in fromIndex means absence of edges for certain vertex
         int lastVertex = -1;
         for (i = 0; i < from.length; ++i)
             if (lastVertex != from[i])
@@ -120,7 +120,7 @@ public class GraphUtils {
                 int pointsTo = to[pointer.edgePointer - 1];
                 
                 if (components[pointsTo] == currentComponent)
-                    //We've been here erlier, continue
+                    //We've been here earlier, continue
                     continue;
                 
                 assert components[pointsTo] == -1;

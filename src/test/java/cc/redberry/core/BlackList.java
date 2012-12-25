@@ -22,6 +22,8 @@
  */
 package cc.redberry.core;
 
+import cc.redberry.core.tensor.Product;
+import cc.redberry.core.tensor.Tensors;
 import gnu.trove.set.hash.TIntHashSet;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -39,22 +41,22 @@ import java.util.regex.Pattern;
  */
 public class BlackList {
 
-    public enum Name {
+//    @Test
+//    public void etwer() {
+//        Integer[] aa = {1, 2, 3};
+//        int[] bb = {4, 2, 1};
+//        aaa(aa);
+//        bbb(bb);
+//    }
+//
+//    private static void aaa(int[] xxx) {
+//        System.out.println("as");
+//    }
+//
+//    private static void bbb(Integer[] xxx) {
+//        System.out.println("sa");
+//    }
 
-        E1("a"), E2("b");
-        final String name;
-
-        Name(String name) {
-            this.name = name;
-        }
-
-        public static final Name[] values = values();
-    }
-
-    @Test
-    public void etwer() {
-        System.out.println(1 % 2);
-    }
 
     @Ignore
     @Test
