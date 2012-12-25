@@ -4,7 +4,7 @@
  * Copyright (c) 2000-2012:
  *    Heinz Kredel   <kredel@rz.uni-mannheim.de>
  *
- * This file is part of Java Algeba System (JAS).
+ * This file is part of Java Algebra System (JAS).
  *
  * JAS is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
