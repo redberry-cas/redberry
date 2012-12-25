@@ -65,6 +65,9 @@ public final class PrimitiveSubgraphPartition {
         return partition.clone();
     }
 
+    public static PrimitiveSubgraph[] calculatePartition(Product p, IndexType type) {
+        return new PrimitiveSubgraphPartition(p, type).partition;
+    }
 
     private PrimitiveSubgraph[] calculatePartition() {
         List<PrimitiveSubgraph> subgraphs = new ArrayList<>();
@@ -91,7 +94,7 @@ public final class PrimitiveSubgraphPartition {
             return new PrimitiveSubgraph(GraphType.Cycle, new int[]{pivot});
         }
 
-        int leftPivot, rightPivot;
+        int leftPivot, rightPivot, lastLeftPivot = Integer.MIN_VALUE, lastRightPivot = Integer.MIN_VALUE;
 
         while (left != DUMMY || right != DUMMY) {
 
@@ -110,6 +113,13 @@ public final class PrimitiveSubgraphPartition {
             if (rightPivot == NO_LINKS || rightPivot == -1)
                 rightPivot = DUMMY_PIVOT;
 
+            if (leftPivot == lastRightPivot) {
+                if (rightPivot != lastLeftPivot) {
+                    int askk = 0;
+                }
+                return new PrimitiveSubgraph(GraphType.Cycle, deque2array(positions));
+            }
+
             if (leftPivot >= 0)
                 positions.addFirst(leftPivot);
 
@@ -123,6 +133,8 @@ public final class PrimitiveSubgraphPartition {
             if (rightPivot >= 0)
                 positions.addLast(rightPivot);
 
+            lastLeftPivot = leftPivot;
+            lastRightPivot = rightPivot;
             left = getLinks(leftPivot);
             right = getLinks(rightPivot);
         }
