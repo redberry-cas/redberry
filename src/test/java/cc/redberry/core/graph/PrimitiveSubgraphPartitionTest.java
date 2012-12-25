@@ -92,13 +92,10 @@ public class PrimitiveSubgraphPartitionTest {
                 -7201529248298620939L);
 
         Product product = (Product) parse("H_{gf}*J_{a}*I^{j}_{h}*I^{dc}*I^{i}_{j}*I^{e}_{d}*A_{i}^{h}*E^{g}*E^{f}*E_{e}*J_{cb}");
-        System.out.println(product);
         PrimitiveSubgraph[] ss = calculatePartition(product, IndexType.LatinLower);
         ProductBuilder pb = new ProductBuilder();
-        for (PrimitiveSubgraph ps : ss) {
-            System.out.println(ps + "  " + Arrays.toString(extractArray(product, ps.getPartition())));
+        for (PrimitiveSubgraph ps : ss)
             pb.put(extract(product, ps.getPartition()));
-        }
         TAssert.assertEquals(pb.build(), product);
 
     }
