@@ -83,7 +83,8 @@ class JasFactor {
 
         SortedMap<GenPolynomial<BigInteger>, Long> map = jasFactor.factors(poly);
 
-        //assert jasFactor.isFactorization(poly, map);
+        if (!jasFactor.isFactorization(poly, map))
+            return t;
 
         List<Tensor> toMultiply = new ArrayList<>(map.size());
         for (SortedMap.Entry<GenPolynomial<BigInteger>, Long> entry : map.entrySet())

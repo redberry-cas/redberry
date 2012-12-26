@@ -36,7 +36,9 @@ import cc.redberry.core.utils.SoftReferenceWrapper;
 import cc.redberry.core.utils.TensorUtils;
 import gnu.trove.set.hash.TIntHashSet;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * @author Dmitry Bolotin
@@ -270,6 +272,30 @@ public final class Product extends MultiTensor {
             return new Product(new IndicesBuilder().append(newData).getIndices(),
                     complex, indexlessData, newData);
         }
+    }
+
+    @Override
+    protected Complex getNeutral() {
+        return Complex.ONE;
+    }
+
+    @Override
+    protected Tensor select1(int[] positions) {
+        int add = factor == Complex.ONE ? 0 : 1;
+        Complex newFactor = Complex.ONE;
+        List<Tensor> newIndexless = new ArrayList<>(), newData = new ArrayList<>();
+        for (int position : positions) {
+            position -= add;
+            if (position == -1)
+                newFactor = factor;
+            else if (position < indexlessData.length)
+                newIndexless.add(indexlessData[position]);
+            else
+                newData.add(data[position - indexlessData.length]);
+        }
+        return new Product(new IndicesBuilder().append(newData).getIndices(), newFactor,
+                newIndexless.toArray(new Tensor[newIndexless.size()]),
+                newData.toArray(new Tensor[newData.size()]));
     }
 
     public int sizeWithoutFactor() {

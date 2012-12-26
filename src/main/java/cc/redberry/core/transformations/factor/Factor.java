@@ -53,62 +53,155 @@ public class Factor implements Transformation {
         return factor(t);
     }
 
-    public static Tensor factor(Tensor tensor) {
+    public static Tensor factorSymbolicTerms(Tensor tensor) {
         TensorFirstIterator iterator = new TensorFirstIterator(tensor);
-        TreeIterator iterator1;
-        Tensor c, t;
-        Complex e;
-        out:
+        Tensor c;
         while ((c = iterator.next()) != null) {
             if (!(c instanceof Sum))
                 continue;
-            iterator1 = new TensorLastIterator(c);
-            boolean needTogether = false;
-            while ((t = iterator1.next()) != null) {
-                if (t.getIndices().size() != 0 || t instanceof ScalarFunction)
-                    continue out;
-
-                if (t instanceof Power) {
-                    if (!(t.get(1) instanceof Complex))
-                        continue out;
-                    e = (Complex) t.get(1);
-                    if (!e.isReal() || e.isNumeric())
-                        continue out;
-                    if (e.getReal().signum() < 0)
-                        needTogether = true;
-                }
-
-                if (t instanceof Product)
-                    for (Tensor tt : t)
-                        if (tt instanceof Power && TensorUtils.isNegativeIntegerNumber(tt.get(1)))
-                            needTogether = true;
-
-
-                if (t instanceof Sum)
-                    iterator1.set(factorOut(t));
-            }
-
-            iterator1 = new TensorFirstIterator(iterator1.result());
-            while ((c = iterator1.next()) != null) {
-                if (!(c instanceof Sum))
-                    continue;
-
-                if (needTogether) {
-                    c = Together.together(c, true);
-                    if (c instanceof Product) {
-                        for (int i = c.size() - 1; i >= 0; --i) {
-                            if (c.get(i) instanceof Sum)
-                                c = c.set(i, JasFactor.factor(c.get(i)));
-                        }
-                        iterator1.set(c);
-                    }
-                } else {
-                    iterator1.set(JasFactor.factor(c));
+            Tensor remainder = c, temp;
+            IntArrayList symbolicPositions = new IntArrayList();
+            for (int i = c.size() - 1; i >= 0; --i) {
+                temp = c.get(i);
+                if (isSymbolic(temp)) {
+                    symbolicPositions.add(i);
+                    if (remainder instanceof Sum)
+                        remainder = ((Sum) remainder).remove(i);
+                    else remainder = Complex.ZERO;
                 }
             }
-            iterator.set(iterator1.result());
+            Tensor symbolicPart = ((Sum) c).select(symbolicPositions.toArray());
+            symbolicPart = factorSymbolicTerm(symbolicPart);
+            if (remainder instanceof Sum) {
+                SumBuilder sb = new SumBuilder(remainder.size());
+                for (Tensor tt : remainder)
+                    sb.put(factorSymbolicTerms(tt));
+                remainder = sb.build();
+            } else
+                remainder = factorSymbolicTerms(remainder);
+            iterator.set(Tensors.sum(symbolicPart, remainder));
         }
         return iterator.result();
+    }
+
+    private static Tensor factorSymbolicTerm(Tensor sum) {
+        TreeIterator iterator = new TensorLastIterator(sum);
+        Tensor c;
+        while ((c = iterator.next()) != null)
+            if (c instanceof Sum)
+                iterator.set(factorOut(c));
+
+        iterator = new TensorFirstIterator(iterator.result());
+        while ((c = iterator.next()) != null) {
+            if (!(c instanceof Sum))
+                continue;
+            if (needTogether(c)) {
+                c = Together.together(c, true);
+                if (c instanceof Product) {
+                    for (int i = c.size() - 1; i >= 0; --i) {
+                        if (c.get(i) instanceof Sum)
+                            c = c.set(i, JasFactor.factor(c.get(i)));
+                    }
+                    iterator.set(c);
+                }
+            } else
+                iterator.set(JasFactor.factor(c));
+        }
+        return iterator.result();
+    }
+
+    private static boolean needTogether(Tensor t) {
+        if (t instanceof Power) {
+            if (needTogether(t.get(0)))
+                return true;
+            return ((Complex) t.get(1)).getReal().signum() < 0;
+        }
+        if (t instanceof SimpleTensor)
+            return false;
+        for (Tensor tt : t)
+            if (needTogether(tt))
+                return true;
+        return false;
+    }
+
+    private static boolean isSymbolic(Tensor t) {
+        if (t.getIndices().size() != 0 || t instanceof ScalarFunction)
+            return false;
+        if (t instanceof SimpleTensor)
+            return t.size() == 0;//not a field
+        if (t instanceof Power) {
+            if (!isSymbolic(t.get(0)))
+                return false;
+            if (!(t.get(1) instanceof Complex))
+                return false;
+            Complex e = (Complex) t.get(1);
+            if (!e.isReal() || e.isNumeric())
+                return false;
+            return true;
+        }
+        for (Tensor tt : t)
+            if (!isSymbolic(tt))
+                return false;
+        return true;
+    }
+
+    public static Tensor factor(Tensor tensor) {
+        return factorSymbolicTerms(tensor);
+//        TensorFirstIterator iterator = new TensorFirstIterator(tensor);
+//        TreeIterator iterator1;
+//        Tensor c, t;
+//        Complex e;
+//        out:
+//        while ((c = iterator.next()) != null) {
+//            if (!(c instanceof Sum))
+//                continue;
+//            iterator1 = new TensorLastIterator(c);
+//            boolean needTogether = false;
+//            while ((t = iterator1.next()) != null) {
+//                if (t.getIndices().size() != 0 || t instanceof ScalarFunction)
+//                    continue out;
+//
+//                if (t instanceof Power) {
+//                    if (!(t.get(1) instanceof Complex))
+//                        continue out;
+//                    e = (Complex) t.get(1);
+//                    if (!e.isReal() || e.isNumeric())
+//                        continue out;
+//                    if (e.getReal().signum() < 0)
+//                        needTogether = true;
+//                }
+//
+//                if (t instanceof Product)
+//                    for (Tensor tt : t)
+//                        if (tt instanceof Power && TensorUtils.isNegativeIntegerNumber(tt.get(1)))
+//                            needTogether = true;
+//
+//
+//                if (t instanceof Sum)
+//                    iterator1.set(factorOut(t));
+//            }
+//
+//            iterator1 = new TensorFirstIterator(iterator1.result());
+//            while ((c = iterator1.next()) != null) {
+//                if (!(c instanceof Sum))
+//                    continue;
+//
+//                if (needTogether) {
+//                    c = Together.together(c, true);
+//                    if (c instanceof Product) {
+//                        for (int i = c.size() - 1; i >= 0; --i) {
+//                            if (c.get(i) instanceof Sum)
+//                                c = c.set(i, JasFactor.factor(c.get(i)));
+//                        }
+//                        iterator1.set(c);
+//                    }
+//                } else {
+//                    iterator1.set(JasFactor.factor(c));
+//                }
+//            }
+//            iterator.set(iterator1.result());
+//        }
+//        return iterator.result();
     }
 
 
