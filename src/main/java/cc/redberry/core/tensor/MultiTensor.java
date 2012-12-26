@@ -23,6 +23,9 @@
 package cc.redberry.core.tensor;
 
 import cc.redberry.core.indices.Indices;
+import cc.redberry.core.number.Complex;
+
+import java.util.Arrays;
 
 /**
  * @author Dmitry Bolotin
@@ -41,8 +44,27 @@ public abstract class MultiTensor extends Tensor {
         return indices;
     }
 
-    //protected abstract Indices calculateIndices();
-    //protected abstract int calculateHash();
-    //TODO implement without builder?
     public abstract Tensor remove(int position);
+
+    public Tensor select(int[] positions) {
+        if (positions.length == 0)
+            return getNeutral();
+        if (positions.length == 1)
+            return get(positions[0]);
+
+        final int[] p = positions.clone();
+        Arrays.sort(p);
+        for (int i = 1; i < p.length; ++i)
+            if (p[i - 1] == p[i])
+                throw new IllegalArgumentException("Several similar positions.");
+
+        if (positions.length == size())
+            return this;
+
+        return select1(p);
+    }
+
+    protected abstract Complex getNeutral();
+
+    protected abstract Tensor select1(int[] positions);
 }
