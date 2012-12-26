@@ -35,8 +35,6 @@ import cc.redberry.core.tensor.Tensor;
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
- * @link #UTF8} and {
- * @link #LaTeX}. Examples of using, you can find in see also section.
  * @see Tensor#toString(OutputFormat)
  * @see Indices#toString(OutputFormat)
  * @see Tensor#toString()

@@ -9,7 +9,7 @@
  *
  * Redberry is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * Redberry is distributed in the hope that it will be useful,
@@ -52,8 +52,8 @@ public final class PrimitiveSubgraphPartition {
     private final PrimitiveSubgraph[] partition;
     private final LongBackedBitArray used;
 
-    public PrimitiveSubgraphPartition(Product product, IndexType type) {
-        this.pc = product.getContent();
+    public PrimitiveSubgraphPartition(ProductContent productContent, IndexType type) {
+        this.pc = productContent;
         this.fcs = pc.getFullContractionsStructure();
         this.size = pc.size();
         this.type = type;
@@ -66,6 +66,10 @@ public final class PrimitiveSubgraphPartition {
     }
 
     public static PrimitiveSubgraph[] calculatePartition(Product p, IndexType type) {
+        return new PrimitiveSubgraphPartition(p.getContent(), type).partition;
+    }
+
+    public static PrimitiveSubgraph[] calculatePartition(ProductContent p, IndexType type) {
         return new PrimitiveSubgraphPartition(p, type).partition;
     }
 

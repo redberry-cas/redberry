@@ -44,7 +44,7 @@ public final class FrobeniusSolver implements OutputPortUnsafe<int[]> {
             if (equations[i].length != length && !assertEq(equations[i]))
                 throw new IllegalArgumentException();
 
-        //processsing initial solution: filling -1s.
+        //processing initial solution: filling -1s.
         int[] initialSolution = new int[length - 1];
         int zeroCoefficientsCount = 0;
         OUT:
