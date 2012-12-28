@@ -98,11 +98,19 @@ public class Factor implements Transformation {
             if (needTogether(c)) {
                 c = Together.together(c, true);
                 if (c instanceof Product) {
+                    TensorBuilder pb = null;
                     for (int i = c.size() - 1; i >= 0; --i) {
-                        if (c.get(i) instanceof Sum)
-                            c = c.set(i, JasFactor.factor(c.get(i)));
+                        if (c.get(i) instanceof Sum) {
+                            if (pb == null) {
+                                pb = c.getBuilder();
+                                for (int j = c.size() - 1; j > i; --j)
+                                    pb.put(c.get(j));
+                            }
+                            pb.put(JasFactor.factor(c.get(i)));
+                        } else if (pb != null)
+                            pb.put(c.get(i));
                     }
-                    iterator.set(c);
+                    iterator.set(pb == null ? c : pb.build());
                 }
             } else
                 iterator.set(JasFactor.factor(c));

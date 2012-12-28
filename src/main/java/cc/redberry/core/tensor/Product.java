@@ -177,6 +177,10 @@ public final class Product extends MultiTensor {
         //return data.length - ((hash & 0x00080000) >> 19); // ;)
     }
 
+    public int sizeWithoutFactor() {
+        return data.length + indexlessData.length;
+    }
+
     @Override
     public Tensor set(int i, Tensor tensor) {
         if (i >= size() || i < 0)
@@ -296,10 +300,6 @@ public final class Product extends MultiTensor {
         return new Product(new IndicesBuilder().append(newData).getIndices(), newFactor,
                 newIndexless.toArray(new Tensor[newIndexless.size()]),
                 newData.toArray(new Tensor[newData.size()]));
-    }
-
-    public int sizeWithoutFactor() {
-        return data.length + indexlessData.length;
     }
 
     public Tensor getWithoutFactor(int i) {
