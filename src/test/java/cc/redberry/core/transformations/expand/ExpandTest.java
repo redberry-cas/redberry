@@ -401,8 +401,25 @@ public class ExpandTest {
 
     @Test
     public void test39() {
-        Tensor t = parse("(-4*I)*f_mn*s_pq*(f^na - t^na + u^an)");
-        System.out.println(expand(t));
-//        TAssert.assertTrue(t == expand(t));
+        Tensor t;
+
+        t = parse("(a+b)*g_mn");
+        Assert.assertTrue(t == expand(t));
+        t = parse("(a+b)*g_mn*f^ab");
+        Assert.assertTrue(t == expand(t));
+        t = parse("(a+b*c)*g_mn*f^ab");
+        Assert.assertTrue(t == expand(t));
+        t = parse("a+b*c");
+        Assert.assertTrue(t == expand(t));
+        t = parse("a_i^i+b*c");
+        Assert.assertTrue(t == expand(t));
+        t = parse("a_ij+b*c_ij");
+        Assert.assertTrue(t == expand(t));
+        t = parse("a_ij+(b+a)*c_ij");
+        Assert.assertTrue(t == expand(t));
+        t = parse("(c+d)*a_ij+(b+a)*c_ij");
+        Assert.assertTrue(t == expand(t));
+        t = parse("(c+d_f^f)*a_ij+(b+a)*c_ij");
+        Assert.assertTrue(t != expand(t));
     }
 }

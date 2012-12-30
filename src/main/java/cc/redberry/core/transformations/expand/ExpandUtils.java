@@ -339,7 +339,7 @@ public final class ExpandUtils {
                         break;
                     }
             if (needExpand)
-                return Tensors.multiply(expandProductOfSums1((Product) indexless, new Transformation[0], false), p.getDataSubProduct());
+                return Tensors.multiply(expandProductOfSums1(indexless, new Transformation[0], false), p.getDataSubProduct());
             return t;
         }
     };

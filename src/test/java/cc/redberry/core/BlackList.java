@@ -22,12 +22,14 @@
  */
 package cc.redberry.core;
 
+import cc.redberry.core.math.MathUtils;
 import cc.redberry.core.tensor.Product;
 import cc.redberry.core.tensor.Tensors;
 import gnu.trove.set.hash.TIntHashSet;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -41,13 +43,31 @@ import java.util.regex.Pattern;
  */
 public class BlackList {
 
-//    @Test
-//    public void etwer() {
-//        Integer[] aa = {1, 2, 3};
-//        int[] bb = {4, 2, 1};
-//        aaa(aa);
-//        bbb(bb);
-//    }
+    @Test
+    public void etwer() {
+        int[] array = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13};
+        int[] p = {1, 2, 4, 5, 6, 9, 10, 12};
+
+        int size = p.length, pointer = 0, s = array.length;
+
+        int[] r = new int[array.length - p.length];
+
+        pointer = 0;
+        int i = -1;
+        for (int j = 0; j < s; ++j) {
+            if (pointer < size - 1 && j > p[pointer])
+                ++pointer;
+            if (j == p[pointer]) continue;
+            else r[++i] = array[j];
+        }
+        System.out.println(Arrays.toString(r));
+    }
+
+    private static void swap(int x[], int a, int b) {
+        int t = x[a];
+        x[a] = x[b];
+        x[b] = t;
+    }
 //
 //    private static void aaa(int[] xxx) {
 //        System.out.println("as");

@@ -181,6 +181,10 @@ public final class Product extends MultiTensor {
         return data.length + indexlessData.length;
     }
 
+    public int sizeOfIndexlessPart() {
+        return indexlessData.length + (factor == Complex.ONE ? 0 : 1);
+    }
+
     @Override
     public Tensor set(int i, Tensor tensor) {
         if (i >= size() || i < 0)

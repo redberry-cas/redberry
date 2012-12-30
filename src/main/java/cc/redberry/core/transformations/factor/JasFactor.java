@@ -219,7 +219,7 @@ class JasFactor {
             return;
         } else if (tensor.getClass() == Complex.class) {
             if (((Complex) tensor).isNumeric() || !((Complex) tensor).isReal())
-                throw new IllegalArgumentException("Illegal coefficients.");
+                throw new IllegalArgumentException("Illegal coefficient: " + tensor);
             return;
         }
         throw new IllegalArgumentException();
