@@ -158,7 +158,7 @@ public final class Tensors {
         ArrayList<Tensor> toResolve = new ArrayList<>();
         int position = -1;
         for (Tensor f : factors) {
-            if (f instanceof Sum || f instanceof Power || f instanceof ScalarFunction) {
+            if (f instanceof Sum || f.getIndices().getFree().size() == 0) {
                 toResolve.add(f);
                 forbidden.addAll(f.getIndices().getFree().getAllIndices().copy());
             } else {
