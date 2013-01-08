@@ -28,6 +28,10 @@ import cc.redberry.core.tensor.SimpleTensor;
 import cc.redberry.core.tensor.Tensors;
 import cc.redberry.core.utils.LongBackedBitArray;
 
+/**
+ * @author Dmitry Bolotin
+ * @author Stanislav Poslavsky
+ */
 public final class Context {
 
     private final NameManager nameManager;

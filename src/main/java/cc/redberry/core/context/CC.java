@@ -36,11 +36,11 @@ public final class CC {
     }
 
     /**
-     * Returns true if metric is defined for specified index type in current
+     * Returns {@code true} if metric is defined for specified index type in current
      * context.
      *
      * @param type index type
-     * @return true if metric is defined for specified index type in current
+     * @return {@code true} if metric is defined for specified index type in current
      *         context
      */
     public static boolean isMetric(byte type) {
