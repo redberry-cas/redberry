@@ -22,9 +22,13 @@
  */
 package cc.redberry.core.combinatorics;
 
+import cc.redberry.core.TAssert;
+import junit.framework.Assert;
 import org.junit.Test;
 
 import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  *
@@ -34,13 +38,30 @@ import java.util.Arrays;
 public class IntCombinationsGeneratorTest {
     @Test
     public void test0() {
+        Set<int[]> expected = new HashSet<>();
+        expected.add(new int[]{0,1,2});
+        expected.add(new int[]{0,1,3});
+        expected.add(new int[]{0,1,4});
+        expected.add(new int[]{0,2,3});
+        expected.add(new int[]{0,2,4});
+        expected.add(new int[]{0,3,4});
+        expected.add(new int[]{1,2,3});
+        expected.add(new int[]{1,2,4});
+        expected.add(new int[]{1,3,4});
+        expected.add(new int[]{2,3,4});
+
+        Set<int[]> actual = new HashSet<>();
         for (int[] combination : new IntCombinationsGenerator(5, 3))
-            System.out.println(Arrays.toString(combination));
+            actual.add(combination.clone());
+
+        TAssert.assertEquals(actual,expected);
     }
 
     @Test
     public void test1() {
-        for (int[] combination : new IntCombinationsGenerator(1, 1))
-            System.out.println(Arrays.toString(combination));
+        IntCombinationsGenerator gen = new IntCombinationsGenerator(1, 1);
+        Assert.assertTrue(gen.hasNext());
+        Assert.assertTrue(Arrays.equals(new int[]{0}, gen.next()));
+        Assert.assertTrue(!gen.hasNext());
     }
 }

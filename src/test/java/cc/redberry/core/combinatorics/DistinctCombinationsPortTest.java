@@ -22,12 +22,15 @@
  */
 package cc.redberry.core.combinatorics;
 
+import cc.redberry.core.TAssert;
+import junit.framework.Assert;
 import org.junit.Test;
 
 import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
- *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
@@ -39,9 +42,7 @@ public class DistinctCombinationsPortTest {
         int[] a3 = {1};
         int[][] aa = {a1, a2, a3};
         DistinctCombinationsPort dcp = new DistinctCombinationsPort(aa);
-        int[] c;
-        while ((c = dcp.take()) != null)
-            System.out.println(Arrays.toString(c));
+        Assert.assertEquals(dcp.take(), null);
     }
 
     @Test
@@ -52,8 +53,18 @@ public class DistinctCombinationsPortTest {
         int[][] aa = {a1, a2, a3};
         DistinctCombinationsPort dcp = new DistinctCombinationsPort(aa);
         int[] c;
+        Set<int[]> expected = new HashSet<>();
+        expected.add(new int[]{1, 2, 3});
+        expected.add(new int[]{1, 2, 4});
+        expected.add(new int[]{1, 2, 5});
+        expected.add(new int[]{1, 4, 3});
+        expected.add(new int[]{1, 4, 5});
+        expected.add(new int[]{2, 4, 3});
+        expected.add(new int[]{2, 4, 5});
+        Set<int[]> actual = new HashSet<>();
         while ((c = dcp.take()) != null)
-            System.out.println(Arrays.toString(c));
+            actual.add(c.clone());
+        TAssert.assertEquals(actual, expected);
     }
 
     @Test
@@ -64,19 +75,26 @@ public class DistinctCombinationsPortTest {
         int[][] aa = {a1, a2, a3};
         DistinctCombinationsPort dcp = new DistinctCombinationsPort(aa);
         int[] c;
+        Set<int[]> actual = new HashSet<>();
         while ((c = dcp.take()) != null)
-            System.out.println(Arrays.toString(c));
+            actual.add(c.clone());
+
+        int[] arr = {1, 2, 3};
+        Set<int[]> expected = new HashSet<>();
+        for (int[] a : Combinatorics.createIntGenerator(3, 3))
+            expected.add(Combinatorics.shuffle(arr, a));
+
+        TAssert.assertEquals(actual, expected);
     }
 
     @Test
     public void test4() {
         int[] a1 = {1};
         int[] a2 = {3};
-        int[] a3 = {1,2};
+        int[] a3 = {1, 2};
         int[][] aa = {a1, a2, a3};
         DistinctCombinationsPort dcp = new DistinctCombinationsPort(aa);
-        int[] c;
-        while ((c = dcp.take()) != null)
-            System.out.println(Arrays.toString(c));
+        Assert.assertTrue(Arrays.equals(new int[]{1, 3, 2}, dcp.take()));
+        Assert.assertTrue(dcp.take() == null);
     }
 }

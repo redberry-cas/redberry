@@ -39,37 +39,37 @@ public class ParseUtils {
     private ParseUtils() {
     }
 
-    public static Set<Integer> getAllIndices(ParseNode node) {
+    public static Set<Integer> getAllIndices(ParseToken node) {
         Set<Integer> s = new HashSet<>();
         getAllIndices1(node, s);
         return s;
     }
 
-    private static void getAllIndices1(ParseNode node, Set<Integer> set) {
-        if (node instanceof ParseNodeSimpleTensor) {
+    private static void getAllIndices1(ParseToken node, Set<Integer> set) {
+        if (node instanceof ParseTokenSimpleTensor) {
             Indices indices = node.getIndices();
             for (int i = indices.size() - 1; i >= 0; --i)
                 set.add(IndicesUtils.getNameWithType(indices.get(i)));
         } else
-            for (ParseNode pn : node.content)
-                if (!(pn instanceof ParseNodeScalarFunction))
+            for (ParseToken pn : node.content)
+                if (!(pn instanceof ParseTokenScalarFunction))
                     getAllIndices1(pn, set);
     }
 
-    public static TIntSet getAllIndicesT(ParseNode node) {
+    public static TIntSet getAllIndicesT(ParseToken node) {
         TIntSet set = new TIntHashSet();
         getAllIndicesT1(node, set);
         return set;
     }
 
-    private static void getAllIndicesT1(ParseNode node, TIntSet set) {
-        if (node instanceof ParseNodeSimpleTensor) {
+    private static void getAllIndicesT1(ParseToken node, TIntSet set) {
+        if (node instanceof ParseTokenSimpleTensor) {
             Indices indices = node.getIndices();
             for (int i = indices.size() - 1; i >= 0; --i)
                 set.add(IndicesUtils.getNameWithType(indices.get(i)));
         } else
-            for (ParseNode pn : node.content)
-                if (!(pn instanceof ParseNodeScalarFunction))
+            for (ParseToken pn : node.content)
+                if (!(pn instanceof ParseTokenScalarFunction))
                     getAllIndicesT1(pn, set);
     }
 }

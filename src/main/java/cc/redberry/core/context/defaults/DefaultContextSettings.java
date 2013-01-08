@@ -27,11 +27,12 @@ import cc.redberry.core.context.OutputFormat;
 import cc.redberry.core.indices.IndexType;
 
 /**
- *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public class DefaultContextSettings {
+public final class DefaultContextSettings {
+    private DefaultContextSettings() {
+    }
 
     public static ContextSettings create() {
         ContextSettings defaultSettings = new ContextSettings(OutputFormat.Redberry, "d");

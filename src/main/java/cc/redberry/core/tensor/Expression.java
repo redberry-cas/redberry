@@ -25,7 +25,7 @@ package cc.redberry.core.tensor;
 import cc.redberry.core.context.OutputFormat;
 import cc.redberry.core.indices.Indices;
 import cc.redberry.core.transformations.Transformation;
-import cc.redberry.core.transformations.substitutions.Substitution;
+import cc.redberry.core.transformations.substitutions.SubstitutionTransformation;
 import cc.redberry.core.utils.TensorUtils;
 
 /**
@@ -87,7 +87,7 @@ public class Expression extends Tensor implements Transformation {
 
     @Override
     public Tensor transform(Tensor t) {
-        return new Substitution(this).transform(t);
+        return new SubstitutionTransformation(this).transform(t);
     }
 
     public boolean isIdentity() {

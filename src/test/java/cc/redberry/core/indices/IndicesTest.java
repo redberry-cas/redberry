@@ -27,7 +27,7 @@ import cc.redberry.core.combinatorics.Symmetry;
 import cc.redberry.core.context.CC;
 import cc.redberry.core.parser.ParserIndices;
 import cc.redberry.core.tensor.SimpleTensor;
-import cc.redberry.core.tensor.random.TRandom;
+import cc.redberry.core.tensor.random.RandomTensor;
 import cc.redberry.core.utils.IntArrayList;
 import junit.framework.Assert;
 import org.apache.commons.math3.random.Well19937c;
@@ -152,7 +152,7 @@ public class IndicesTest {
 
     @Test
     public void testGetByTypeSimpleIndices() {
-        TRandom tRandom = new TRandom(100,
+        RandomTensor randomTensor = new RandomTensor(100,
                 1000,
                 new int[]{0, 0, 0, 0},
                 new int[]{10, 10, 10, 10},
@@ -162,8 +162,8 @@ public class IndicesTest {
         SimpleIndicesBuilder builder;
         for (int i = 0; i < 1000; ++i) {
             builder = new SimpleIndicesBuilder();
-            typeStructure = tRandom.nextNameDescriptor().getIndicesTypeStructure();
-            indices = IndicesFactory.createSimple(null, tRandom.nextIndices(typeStructure));
+            typeStructure = randomTensor.nextNameDescriptor().getIndicesTypeStructure();
+            indices = IndicesFactory.createSimple(null, randomTensor.nextIndices(typeStructure));
             int typeCount;
             for (int k = 0; k < IndexType.TYPES_COUNT; ++k) {
                 typeCount = typeStructure.typeCount((byte) k);
@@ -182,7 +182,7 @@ public class IndicesTest {
 
     @Test
     public void testGetByTypeSortedIndices() {
-        TRandom tRandom = new TRandom(100,
+        RandomTensor randomTensor = new RandomTensor(100,
                 1000,
                 new int[]{0, 0, 0, 0},
                 new int[]{10, 10, 10, 10},
@@ -192,8 +192,8 @@ public class IndicesTest {
         IndicesBuilder builder;
         for (int i = 0; i < 1000; ++i) {
             builder = new IndicesBuilder();
-            typeStructure = tRandom.nextNameDescriptor().getIndicesTypeStructure();
-            indices = IndicesFactory.createSorted(tRandom.nextIndices(typeStructure));
+            typeStructure = randomTensor.nextNameDescriptor().getIndicesTypeStructure();
+            indices = IndicesFactory.createSorted(randomTensor.nextIndices(typeStructure));
             int typeCount;
             for (int k = 0; k < IndexType.TYPES_COUNT; ++k) {
                 typeCount = typeStructure.typeCount((byte) k);
@@ -212,7 +212,7 @@ public class IndicesTest {
 
     @Test
     public void testGetOfTypeSimpleIndices() {
-        TRandom tRandom = new TRandom(100,
+        RandomTensor randomTensor = new RandomTensor(100,
                 1000,
                 new int[]{0, 0, 0, 0},
                 new int[]{10, 10, 10, 10},
@@ -220,8 +220,8 @@ public class IndicesTest {
         IndicesTypeStructure typeStructure;
         Indices indices;
         for (int i = 0; i < 1000; ++i) {
-            typeStructure = tRandom.nextNameDescriptor().getIndicesTypeStructure();
-            indices = IndicesFactory.createSimple(null, tRandom.nextIndices(typeStructure));
+            typeStructure = randomTensor.nextNameDescriptor().getIndicesTypeStructure();
+            indices = IndicesFactory.createSimple(null, randomTensor.nextIndices(typeStructure));
             IndexType indexType;
             int sizeOfType;
             for (byte type = 0; type < IndexType.TYPES_COUNT; ++type) {
@@ -238,7 +238,7 @@ public class IndicesTest {
 
     @Test
     public void testGetOfTypeSortedIndices() {
-        TRandom tRandom = new TRandom(100,
+        RandomTensor randomTensor = new RandomTensor(100,
                 1000,
                 new int[]{0, 0, 0, 0},
                 new int[]{10, 10, 10, 10},
@@ -246,8 +246,8 @@ public class IndicesTest {
         IndicesTypeStructure typeStructure;
         Indices indices;
         for (int i = 0; i < 1000; ++i) {
-            typeStructure = tRandom.nextNameDescriptor().getIndicesTypeStructure();
-            indices = IndicesFactory.createSorted(tRandom.nextIndices(typeStructure));
+            typeStructure = randomTensor.nextNameDescriptor().getIndicesTypeStructure();
+            indices = IndicesFactory.createSorted(randomTensor.nextIndices(typeStructure));
             IndexType indexType;
             int sizeOfType;
             for (byte type = 0; type < IndexType.TYPES_COUNT; ++type) {

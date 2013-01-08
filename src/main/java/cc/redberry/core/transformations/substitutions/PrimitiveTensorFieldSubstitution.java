@@ -72,13 +72,13 @@ class PrimitiveTensorFieldSubstitution extends PrimitiveSubstitution {
         }
 
         Tensor newTo = to;
-        newTo = new Substitution(
+        newTo = new SubstitutionTransformation(
                 argFrom.toArray(new Tensor[argFrom.size()]),
                 argTo.toArray(new Tensor[argTo.size()]),
                 false).transform(newTo);
         if (!TensorUtils.isSymbolic(newTo))
             newTo = ApplyIndexMapping.applyIndexMapping(newTo, buffer, iterator.getForbidden());
-        else if (buffer.getSignum())
+        else if (buffer.getSign())
             newTo = Tensors.negate(newTo);
         return newTo;
     }

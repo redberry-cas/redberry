@@ -42,25 +42,25 @@ import static cc.redberry.core.indices.IndicesUtils.setRawState;
 public final class IndexMappingBufferImpl implements IndexMappingBuffer {
 
     protected final Map<Integer, IndexMappingBufferRecord> map;
-    protected boolean signum = false;
+    protected boolean sign = false;
 
     public IndexMappingBufferImpl() {
         this.map = new HashMap<>();
     }
 
-    public IndexMappingBufferImpl(boolean signum) {
+    public IndexMappingBufferImpl(boolean sign) {
         this.map = new HashMap<>();
-        this.signum = signum;
+        this.sign = sign;
     }
 
-    private IndexMappingBufferImpl(Map<Integer, IndexMappingBufferRecord> map, boolean signum) {
+    private IndexMappingBufferImpl(Map<Integer, IndexMappingBufferRecord> map, boolean sign) {
         this.map = map;
-        this.signum = signum;
+        this.sign = sign;
     }
 
     @Override
-    public void addSignum(boolean signum) {
-        this.signum ^= signum;
+    public void addSign(boolean sign) {
+        this.sign ^= sign;
     }
 
     @Override
@@ -87,8 +87,8 @@ public final class IndexMappingBufferImpl implements IndexMappingBuffer {
     }
 
     @Override
-    public boolean getSignum() {
-        return signum;
+    public boolean getSign() {
+        return sign;
     }
 
     @Override
@@ -111,7 +111,7 @@ public final class IndexMappingBufferImpl implements IndexMappingBuffer {
             from[i] = entry.getKey();
             to[i++] = entry.getValue().getIndexName();
         }
-        return new FromToHolder(from, to, signum);
+        return new FromToHolder(from, to, sign);
     }
 
     @Override
@@ -119,13 +119,13 @@ public final class IndexMappingBufferImpl implements IndexMappingBuffer {
         Map<Integer, IndexMappingBufferRecord> newMap = new HashMap<>();
         for (Map.Entry<Integer, IndexMappingBufferRecord> entry : map.entrySet())
             newMap.put(entry.getKey(), entry.getValue().clone());
-        return new IndexMappingBufferImpl(newMap, signum);
+        return new IndexMappingBufferImpl(newMap, sign);
     }
 
     //    @Override
     //    public String toString() {
     //        StringBuilder sb = new StringBuilder();
-    //        sb.append(signum ? '-' : '+');
+    //        sb.append(sign ? '-' : '+');
     //        if (map.isEmpty())
     //            return sb.append(":empty buffer").toString();
     //        for (Map.Entry<Integer, IndexMappingBufferRecord> entry : map.entrySet()) {
@@ -151,7 +151,7 @@ public final class IndexMappingBufferImpl implements IndexMappingBuffer {
 
     public String toString(OutputFormat format) {
         StringBuilder sb = new StringBuilder();
-        sb.append(signum ? '-' : '+').append('{');
+        sb.append(sign ? '-' : '+').append('{');
         if (map.isEmpty())
             return sb.append('}').toString();
         String from, to;
@@ -171,7 +171,7 @@ public final class IndexMappingBufferImpl implements IndexMappingBuffer {
     }
     //    public String toStringWithStates() {
     //        StringBuilder sb = new StringBuilder();
-    //        sb.append(signum ? '-' : '+');
+    //        sb.append(sign ? '-' : '+');
     //        if (map.isEmpty())
     //            return sb.append(":empty buffer").toString();
     //        Map<Integer,Integer> map = getMap();
@@ -215,7 +215,7 @@ public final class IndexMappingBufferImpl implements IndexMappingBuffer {
         if (getClass() != obj.getClass())
             return false;
         final IndexMappingBufferImpl other = (IndexMappingBufferImpl) obj;
-        if (signum != other.signum)
+        if (sign != other.sign)
             return false;
         if (map.size() != other.map.size())
             return false;
@@ -252,7 +252,7 @@ public final class IndexMappingBufferImpl implements IndexMappingBuffer {
         int hash = 7;
         for (Map.Entry<Integer, IndexMappingBufferRecord> entry : map.entrySet())
             hash = hash * 31 + entry.hashCode();
-        hash = 79 * hash + (this.signum ? 1 : 0);
+        hash = 79 * hash + (this.sign ? 1 : 0);
         return hash;
     }
 }

@@ -47,7 +47,7 @@ public final class NumberUtils {
     }
 
     public static Numeric createNumeric(double d) {
-        //FUTURE investigate performance
+        //todo review performance profit
         if (d == 0)
             return Numeric.ZERO;
         else if (d == 1)

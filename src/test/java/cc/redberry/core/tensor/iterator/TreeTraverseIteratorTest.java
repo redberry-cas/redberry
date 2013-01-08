@@ -452,7 +452,7 @@ public class TreeTraverseIteratorTest {
         while (iterator.next() != null)
             if (TensorUtils.equalsExactly(iterator.current(), "a"))
                 iterator.set(Tensors.parse("b"));
-        Assert.assertTrue(TensorUtils.equalsExactly(iterator.result(), "b"));
+        Assert.assertTrue(TensorUtils.equalsExactly(iterator.result(), "b + Sin[x - y]"));
     }
 
     @Test

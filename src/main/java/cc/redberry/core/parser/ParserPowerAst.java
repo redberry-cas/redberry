@@ -24,14 +24,14 @@ package cc.redberry.core.parser;
 
 import java.util.Arrays;
 
-public class ParserPowerAst implements NodeParser {
+public class ParserPowerAst implements TokenParser {
     public static final ParserPowerAst INSTANCE = new ParserPowerAst();
 
     private ParserPowerAst() {
     }
 
     @Override
-    public ParseNode parseNode(String expression, Parser parser) {
+    public ParseToken parseNode(String expression, Parser parser) {
         char[] expressionChars = expression.toCharArray();
         int level = 0;
         char c;
@@ -56,14 +56,14 @@ public class ParserPowerAst implements NodeParser {
         if (argString == null)
             return null;
 
-        ParseNode arg = parser.parse(argString);
+        ParseToken arg = parser.parse(argString);
         if (arg == null)
             return null;
 
-        ParseNode power = parser.parse(powerString);
+        ParseToken power = parser.parse(powerString);
         if (power == null)
             return null;
-        return new ParseNode(TensorType.Power, arg, power);
+        return new ParseToken(TokenType.Power, arg, power);
     }
 
     @Override

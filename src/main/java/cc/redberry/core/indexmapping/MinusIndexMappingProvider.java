@@ -34,7 +34,7 @@ public class MinusIndexMappingProvider extends IndexMappingProviderAbstract {
             return null;
         IndexMappingBuffer buf = currentBuffer;
         currentBuffer = null;
-        buf.addSignum(true);
+        buf.addSign(true);
         return buf;
     }
 }

@@ -22,6 +22,7 @@
  */
 package cc.redberry.core.context;
 
+import cc.redberry.core.indices.IndexType;
 import org.junit.Test;
 
 /**
@@ -29,8 +30,13 @@ import org.junit.Test;
  * @author Stanislav Poslavsky
  */
 public class IndexConverterManagerTest {
-    @Test
-    public void test(){
-        CC.getIndexConverterManager().getCode("A_{21}");
+
+    @Test(expected = IllegalArgumentException.class)
+    public void test() {
+        new IndexConverterManager(new IndexSymbolConverter[]{
+                IndexType.LatinLower.getSymbolConverter(),
+                IndexType.Matrix1.getSymbolConverter(),
+                IndexType.LatinLower.getSymbolConverter(),
+                IndexType.LatinUpper.getSymbolConverter()});
     }
 }

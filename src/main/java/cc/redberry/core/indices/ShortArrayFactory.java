@@ -29,7 +29,7 @@ package cc.redberry.core.indices;
  */
 final class ShortArrayFactory {
     private static final int SIZE = 128;
-    private static final short[][] zerofilledShorts = new short[SIZE][];
+    private static final short[][] FILLED_WITH_ZEROS = new short[SIZE][];
 
     private ShortArrayFactory() {
     }
@@ -37,6 +37,6 @@ final class ShortArrayFactory {
     static short[] getZeroFilledShortArray(final int length) {
         if (length >= SIZE)
             return new short[length];
-        return zerofilledShorts[length] == null ? zerofilledShorts[length] = new short[length] : zerofilledShorts[length];
+        return FILLED_WITH_ZEROS[length] == null ? FILLED_WITH_ZEROS[length] = new short[length] : FILLED_WITH_ZEROS[length];
     }
 }

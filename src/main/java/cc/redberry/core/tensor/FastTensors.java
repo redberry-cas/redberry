@@ -34,7 +34,9 @@ import static cc.redberry.core.tensor.Tensors.multiply;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public class FastTensors {
+public final class FastTensors {
+    private FastTensors() {
+    }
 
     public static Tensor multiplySumElementsOnFactor(Sum sum, Tensor factor) {
         if (TensorUtils.isZero(factor))

@@ -32,17 +32,17 @@ public interface IndexMappingBuffer {
 
     boolean tryMap(int from, int to);
 
-    void addSignum(boolean signum);
+    void addSign(boolean sign);
 
     void removeContracted();
 
     boolean isEmpty();
 
-    boolean getSignum();
+    boolean getSign();
 
     FromToHolder export();
 
-    //TODO hashMap for ints
+    //TODO TIntObjectHashMap
     Map<Integer, IndexMappingBufferRecord> getMap();
 
     IndexMappingBuffer clone();

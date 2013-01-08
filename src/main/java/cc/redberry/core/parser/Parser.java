@@ -41,18 +41,18 @@ public class Parser {
                     ParserFunctions.INSTANCE,
                     ParserExpression.INSTANCE,
                     ParserPowerAst.INSTANCE);
-    private final NodeParser[] nodeParsers;
+    private final TokenParser[] tokenParsers;
 
-    public Parser(NodeParser... nodeParsers) {
-        this.nodeParsers = nodeParsers;
-        Arrays.sort(nodeParsers, NodeParserComparator.INSTANCE);
+    public Parser(TokenParser... tokenParsers) {
+        this.tokenParsers = tokenParsers;
+        Arrays.sort(tokenParsers, NodeParserComparator.INSTANCE);
     }
 
-    public ParseNode parse(String expression) {
+    public ParseToken parse(String expression) {
         if (expression.isEmpty())
             throw new IllegalArgumentException("Empty expression.");
-        for (NodeParser nodeParser : nodeParsers) {
-            ParseNode node = nodeParser.parseNode(expression.trim(), this);
+        for (TokenParser tokenParser : tokenParsers) {
+            ParseToken node = tokenParser.parseNode(expression.trim(), this);
             if (node != null)
                 return node;
         }

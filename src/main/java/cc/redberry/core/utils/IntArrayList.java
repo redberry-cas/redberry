@@ -25,7 +25,8 @@ package cc.redberry.core.utils;
 import java.util.Arrays;
 
 /**
- * @author stas
+ * @author Dmitry Bolotin
+ * @author Stanislav Poslavsky
  */
 public final class IntArrayList {
 

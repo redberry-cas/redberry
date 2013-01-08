@@ -191,7 +191,7 @@ class PrimitiveProductSubstitution extends PrimitiveSubstitution {
         if (buffer == null)
             return null;
 
-        boolean sign = buffer.getSignum();
+        boolean sign = buffer.getSign();
         buffer = null;
 
         Tensor[] currentData;
@@ -223,7 +223,7 @@ class PrimitiveProductSubstitution extends PrimitiveSubstitution {
         if (buffer == null)
             return null;
 
-        buffer.addSignum(sign);
+        buffer.addSign(sign);
         Arrays.sort(indexlessBijection);
         Arrays.sort(dataBijection);
 
@@ -253,7 +253,7 @@ class PrimitiveProductSubstitution extends PrimitiveSubstitution {
 
         Tensor newTo;
         if (toIsSymbolic)
-            newTo = buffer.getSignum() ? Tensors.negate(to) : to;
+            newTo = buffer.getSign() ? Tensors.negate(to) : to;
         else {
             TIntHashSet remainderIndices = new TIntHashSet(forbidden);
             remainderIndices.addAll(getAllIndicesNamesT(indexlessRemainder));

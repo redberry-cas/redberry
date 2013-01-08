@@ -40,23 +40,23 @@ public class ParserSum extends ParserOperator {
     }
 
     @Override
-    protected ParseNode compile(List<ParseNode> nodes) {
-        return new ParseNode(TensorType.Sum, nodes.toArray(new ParseNode[nodes.size()]));
+    protected ParseToken compile(List<ParseToken> nodes) {
+        return new ParseToken(TokenType.Sum, nodes.toArray(new ParseToken[nodes.size()]));
     }
 
     @Override
-    protected ParseNode inverseOperation(ParseNode node) {
-        ParseNode[] content;
-        if (node.tensorType == TensorType.Product) {
-            content = new ParseNode[1 + node.content.length];
-            content[0] = new ParseNodeNumber(Complex.MINUS_ONE);
+    protected ParseToken inverseOperation(ParseToken node) {
+        ParseToken[] content;
+        if (node.tokenType == TokenType.Product) {
+            content = new ParseToken[1 + node.content.length];
+            content[0] = new ParseTokenNumber(Complex.MINUS_ONE);
             System.arraycopy(node.content, 0, content, 1, node.content.length);
         } else
-            content = new ParseNode[]{
-                new ParseNodeNumber(Complex.MINUS_ONE),
+            content = new ParseToken[]{
+                new ParseTokenNumber(Complex.MINUS_ONE),
                 node
             };
-        return new ParseNode(TensorType.Product, content);
+        return new ParseToken(TokenType.Product, content);
     }
 
     @Override

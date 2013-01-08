@@ -22,33 +22,20 @@
  */
 package cc.redberry.core.transformations.factor;
 
-import cc.redberry.core.TAssert;
-import cc.redberry.core.context.CC;
-import cc.redberry.core.context.OutputFormat;
-import cc.redberry.core.number.Complex;
 import cc.redberry.core.tensor.*;
 import cc.redberry.core.transformations.factor.jasfactor.edu.jas.arith.BigInteger;
-import cc.redberry.core.transformations.factor.jasfactor.edu.jas.arith.BigRational;
-import cc.redberry.core.transformations.factor.jasfactor.edu.jas.poly.ExpVector;
 import cc.redberry.core.transformations.factor.jasfactor.edu.jas.poly.GenPolynomial;
 import cc.redberry.core.transformations.factor.jasfactor.edu.jas.poly.GenPolynomialRing;
-import cc.redberry.core.transformations.factor.jasfactor.edu.jas.poly.PolyUtil;
-import cc.redberry.core.transformations.factor.jasfactor.edu.jas.structure.RingElem;
 import cc.redberry.core.transformations.factor.jasfactor.edu.jas.ufd.FactorAbstract;
 import cc.redberry.core.transformations.factor.jasfactor.edu.jas.ufd.FactorFactory;
-import cc.redberry.core.utils.TensorUtils;
 
-import gnu.trove.map.TIntObjectMap;
 import junit.framework.TestCase;
 import org.junit.Test;
 
-import java.util.Arrays;
-import java.util.Random;
 import java.util.SortedMap;
 
 import static cc.redberry.core.tensor.Tensors.parse;
-import static cc.redberry.core.tensor.Tensors.parseSimple;
-import static cc.redberry.core.transformations.expand.Expand.expand;
+import static cc.redberry.core.transformations.expand.ExpandTransformation.expand;
 import static cc.redberry.core.transformations.factor.JasFactor.*;
 
 public class JasFactorTest extends TestCase {

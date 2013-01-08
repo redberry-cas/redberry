@@ -30,21 +30,21 @@ import cc.redberry.core.number.parser.NumberParser;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public class ParserNumber implements NodeParser {
+public class ParserNumber implements TokenParser {
     public static final ParserNumber INSTANCE = new ParserNumber();
 
     private ParserNumber() {
     }
 
     @Override
-    public ParseNode parseNode(String expression, cc.redberry.core.parser.Parser parser) {
+    public ParseToken parseNode(String expression, cc.redberry.core.parser.Parser parser) {
         Complex value;
         try {
             value = NumberParser.COMPLEX_PARSER.parse(expression);
         } catch (NumberFormatException e) {
             return null;
         }
-        return new ParseNodeNumber(value);
+        return new ParseTokenNumber(value);
     }
 
     @Override

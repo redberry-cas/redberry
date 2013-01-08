@@ -22,43 +22,48 @@
  */
 package cc.redberry.core.combinatorics;
 
+import cc.redberry.core.utils.IntArrayList;
+import junit.framework.Assert;
 import org.junit.Test;
 
 import java.util.Arrays;
 
 /**
- *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
 public class IntCombinationPermutationGeneratorTest {
     @Test
     public void test1() {
-        for (int[] cp : new IntCombinationPermutationGenerator(1, 1))
-            System.out.println(Arrays.toString(cp));
+        IntCombinationPermutationGenerator gen = new IntCombinationPermutationGenerator(1, 1);
+        Assert.assertTrue(gen.hasNext());
+        Assert.assertTrue(Arrays.equals(new int[]{0}, gen.next()));
+        Assert.assertTrue(!gen.hasNext());
     }
 
     @Test
     public void test2() {
-        for (int[] cp : Combinatorics.createIntGenerator(0, 0))
-            System.out.println(Arrays.toString(cp));
+        IntCombinationPermutationGenerator gen = new IntCombinationPermutationGenerator(0, 0);
+        Assert.assertTrue(gen.hasNext());
+        Assert.assertTrue(gen.next().length == 0);
+        Assert.assertTrue(!gen.hasNext());
     }
 
     @Test
     public void test3() {
-        for (int[] cp : new IntCombinationPermutationGenerator(5, 1))
-            System.out.println(Arrays.toString(cp));
-    }
-
-    @Test
-    public void test4() {
-        for (int[] cp : new IntPermutationsGenerator(1))
-            System.out.println(Arrays.toString(cp));
+        IntArrayList a = new IntArrayList();
+        for (int[] cp : new IntCombinationPermutationGenerator(5, 1)) {
+            Assert.assertTrue(cp.length == 1);
+            a.add(cp[0]);
+        }
+        Assert.assertTrue(Arrays.equals(new int[]{0, 1, 2, 3, 4}, a.toArray()));
     }
 
     @Test
     public void test5() {
-        for (int[] cp : new IntCombinationPermutationGenerator(3, 0))
-            System.out.println(Arrays.toString(cp));
+        IntCombinationPermutationGenerator gen = new IntCombinationPermutationGenerator(3, 0);
+        Assert.assertTrue(gen.hasNext());
+        Assert.assertTrue(gen.next().length == 0);
+        Assert.assertTrue(!gen.hasNext());
     }
 }

@@ -1276,7 +1276,7 @@ public final class ArraysUtils {
             throw new ArrayIndexOutOfBoundsException(toIndex);
     }
 
-    public static <T> String toString(T[] a, StringFormat<T> format) {
+    public static <T> String toString(T[] a, ToStringConverter<T> format) {
         if (a == null)
             return "null";
         int iMax = a.length - 1;
@@ -1293,7 +1293,7 @@ public final class ArraysUtils {
         }
     }
 
-    public static String toString(int[] a, StringFormat<Integer> format) {
+    public static String toString(int[] a, ToStringConverter<Integer> format) {
         if (a == null)
             return "null";
         int iMax = a.length - 1;

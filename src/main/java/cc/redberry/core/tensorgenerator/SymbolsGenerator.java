@@ -26,7 +26,7 @@ import cc.redberry.concurrent.OutputPortUnsafe;
 import cc.redberry.core.tensor.SimpleTensor;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.tensor.Tensors;
-import cc.redberry.core.tensor.iterator.TensorLastIterator;
+import cc.redberry.core.tensor.iterator.FromChildToParentIterator;
 import cc.redberry.core.utils.TensorUtils;
 
 import java.util.Arrays;
@@ -49,9 +49,9 @@ public final class SymbolsGenerator implements OutputPortUnsafe<Tensor> {
         this.name = name;
 
         Set<String> set = new HashSet<>();
-        TensorLastIterator iterator;
+        FromChildToParentIterator iterator;
         for (Tensor f : forbiddenTensors) {
-            iterator = new TensorLastIterator(f);
+            iterator = new FromChildToParentIterator(f);
             Tensor c;
             while ((c = iterator.next()) != null)
                 if (TensorUtils.isSymbol(c))

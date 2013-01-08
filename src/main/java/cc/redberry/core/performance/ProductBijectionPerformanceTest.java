@@ -25,7 +25,7 @@ package cc.redberry.core.performance;
 import cc.redberry.core.context.CC;
 import cc.redberry.core.tensor.Product;
 import cc.redberry.core.tensor.Tensor;
-import cc.redberry.core.tensor.random.TRandom;
+import cc.redberry.core.tensor.random.RandomTensor;
 import cc.redberry.core.transformations.substitutions.ProductsBijectionsPort;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
@@ -38,7 +38,7 @@ public class ProductBijectionPerformanceTest {
     public static void main(String[] args) {
         int badCounter = 0;
 //        CC.resetTensorNames(-3912578993076521674L);
-        TRandom rp = new TRandom(
+        RandomTensor rp = new RandomTensor(
                 4,
                 10,
                 new int[]{4, 0, 0, 0},

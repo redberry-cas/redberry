@@ -107,7 +107,7 @@ final class ProviderSum implements IndexMappingProvider {
             if (buffer == null)
                 return null;
             buffer.removeContracted();
-            //buffer.addSignum(cache.lastReturned.signum);
+            //buffer.addSignum(cache.lastReturned.sign);
 
             final IndexMappingBufferTester tester =
                     new IndexMappingBufferTester(buffer.export().mergeWith(cache.lastReturned));
@@ -116,7 +116,7 @@ final class ProviderSum implements IndexMappingProvider {
                 if (!t.test(tester))
                     continue OUTER;
 
-            //buffer.addSignum(cache.lastReturned.signum);
+            //buffer.addSignum(cache.lastReturned.sign);
             return buffer;
         }
     }

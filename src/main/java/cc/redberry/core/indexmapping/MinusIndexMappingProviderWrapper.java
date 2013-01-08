@@ -39,7 +39,7 @@ class MinusIndexMappingProviderWrapper implements IndexMappingProvider {
         IndexMappingBuffer currentBuffer = provider.take();
         if (currentBuffer == null)
             return null;
-        currentBuffer.addSignum(true);
+        currentBuffer.addSign(true);
         return currentBuffer;
     }
 

@@ -43,12 +43,12 @@ import java.util.Set;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public final class IndicesInsertion implements ParseNodeTransformer {
+public final class IndicesInsertion implements ParseTokenTransformer {
 
     private final int[] upper, lower;
-    private final Indicator<ParseNodeSimpleTensor> indicator;
+    private final Indicator<ParseTokenSimpleTensor> indicator;
 
-    public IndicesInsertion(SimpleIndices upper, SimpleIndices lower, Indicator<ParseNodeSimpleTensor> indicator) {
+    public IndicesInsertion(SimpleIndices upper, SimpleIndices lower, Indicator<ParseTokenSimpleTensor> indicator) {
         checkIndices(upper, lower);
         int[] upperArray = new int[upper.size()];
         for (int i = upper.size() - 1; i >= 0; --i)
@@ -74,7 +74,7 @@ public final class IndicesInsertion implements ParseNodeTransformer {
     }
 
     @Override
-    public ParseNode transform(ParseNode node) {
+    public ParseToken transform(ParseToken node) {
         final int[] freeIndices = node.getIndices().getFree().getAllIndices().copy();
         int i;
         for (i = 0; i < freeIndices.length; ++i)
@@ -139,20 +139,20 @@ public final class IndicesInsertion implements ParseNodeTransformer {
         }
     }
 
-    private static IITransformer createTransformer(ParseNode node, Indicator<ParseNodeSimpleTensor> indicator) {
+    private static IITransformer createTransformer(ParseToken node, Indicator<ParseTokenSimpleTensor> indicator) {
         IITransformer t;
-        switch (node.tensorType) {
+        switch (node.tokenType) {
             case TensorField:
             case SimpleTensor:
-                if (indicator.is((ParseNodeSimpleTensor) node))
-                    return new SimpleTransformer((ParseNodeSimpleTensor) node);
+                if (indicator.is((ParseTokenSimpleTensor) node))
+                    return new SimpleTransformer((ParseTokenSimpleTensor) node);
                 else
                     return null;
             case Product:
             case Expression:
             case Sum:
                 List<IITransformer> transformers = new ArrayList<>();
-                for (ParseNode _node : node.content)
+                for (ParseToken _node : node.content)
                     if ((t = createTransformer(_node, indicator)) != null)
                         transformers.add(t);
                 if (transformers.isEmpty())
@@ -160,7 +160,7 @@ public final class IndicesInsertion implements ParseNodeTransformer {
                 else if (transformers.size() == 1)
                     return transformers.get(0);
                 else
-                    if (node.tensorType == TensorType.Product)
+                    if (node.tokenType == TokenType.Product)
                         return new ProductTransformer(transformers.toArray(new IITransformer[transformers.size()]));
                     else
                         return new SumTransformer(transformers.toArray(new IITransformer[transformers.size()]));
@@ -176,9 +176,9 @@ public final class IndicesInsertion implements ParseNodeTransformer {
 
     private static class SimpleTransformer implements IITransformer {
 
-        private final ParseNodeSimpleTensor node;
+        private final ParseTokenSimpleTensor node;
 
-        public SimpleTransformer(ParseNodeSimpleTensor node) {
+        public SimpleTransformer(ParseTokenSimpleTensor node) {
             this.node = node;
         }
 

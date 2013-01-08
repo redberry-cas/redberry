@@ -28,7 +28,6 @@ import cc.redberry.core.indices.IndicesBuilder;
 import cc.redberry.core.indices.IndicesFactory;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.number.NumberUtils;
-import cc.redberry.core.transformations.ToNumeric;
 import cc.redberry.core.utils.TensorUtils;
 
 import java.util.ArrayList;
@@ -36,7 +35,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import static cc.redberry.core.number.NumberUtils.isZeroOrIndeterminate;
-import static cc.redberry.core.transformations.ToNumeric.toNumeric;
+import static cc.redberry.core.transformations.ToNumericTransformation.toNumeric;
 
 /**
  * @author Dmitry Bolotin

@@ -27,7 +27,7 @@ package cc.redberry.core.combinatorics;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public class UnsafeCombinatorics {
+public final class UnsafeCombinatorics {
 
     private UnsafeCombinatorics() {
     }

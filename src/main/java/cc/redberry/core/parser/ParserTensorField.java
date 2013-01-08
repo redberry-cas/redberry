@@ -33,7 +33,7 @@ import java.util.List;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public class ParserTensorField implements NodeParser {
+public class ParserTensorField implements TokenParser {
 
     public static final ParserTensorField INSTANCE = new ParserTensorField();
 
@@ -67,23 +67,23 @@ public class ParserTensorField implements NodeParser {
     }
 
     @Override
-    public ParseNode parseNode(String expression, Parser parser) {
+    public ParseToken parseNode(String expression, Parser parser) {
         if (!expression.contains("["))
             return null;
         if (!canParse(expression))
             return null;
 
         String tensorPart = expression.substring(0, expression.indexOf('['));
-        ParseNodeSimpleTensor simpleTensorNode = ParserSimpleTensor.INSTANCE.parseNode(tensorPart, parser);
+        ParseTokenSimpleTensor simpleTensorNode = ParserSimpleTensor.INSTANCE.parseNode(tensorPart, parser);
 
         String argString = expression.substring(expression.indexOf("[") + 1, expression.length() - 1);
 
-        List<ParseNode> arguments = new ArrayList<>();
+        List<ParseToken> arguments = new ArrayList<>();
         List<Indices> indices = new ArrayList<>();
 
         int beginIndex = 0, level = 0;
         char[] argsChars = argString.toCharArray();
-        ParseNode a;
+        ParseToken a;
         SimpleIndices aIndices;
         for (int i = 0; i < argsChars.length; ++i) {
             char c = argsChars[i];
@@ -109,10 +109,10 @@ public class ParserTensorField implements NodeParser {
             if (c == ']')
                 --level;
         }
-        return new ParseNodeTensorField(
+        return new ParseTokenTensorField(
                 simpleTensorNode.indices,
                 simpleTensorNode.name,
-                arguments.toArray(new ParseNode[arguments.size()]),
+                arguments.toArray(new ParseToken[arguments.size()]),
                 indices.toArray(new SimpleIndices[indices.size()]));
     }
 }

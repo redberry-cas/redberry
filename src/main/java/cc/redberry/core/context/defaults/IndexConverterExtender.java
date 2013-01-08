@@ -28,11 +28,11 @@ import cc.redberry.core.context.OutputFormat;
 
 public final class IndexConverterExtender implements IndexSymbolConverter {
     public static final IndexConverterExtender LatinLowerEx
-            = new IndexConverterExtender(LatinSymbolDownCaseConverter.INSTANCE);
+            = new IndexConverterExtender(LatinLowerCaseConverter.INSTANCE);
     public static final IndexConverterExtender LatinUpperEx
-            = new IndexConverterExtender(LatinSymbolUpperCaseConverter.INSTANCE);
+            = new IndexConverterExtender(LatinUpperCaseConverter.INSTANCE);
     public static final IndexConverterExtender GreekLowerEx
-            = new IndexConverterExtender(GreekLaTeXDownCaseConverter.INSTANCE);
+            = new IndexConverterExtender(GreekLaTeXLowerCaseConverter.INSTANCE);
     public static final IndexConverterExtender GreekUpperEx
             = new IndexConverterExtender(GreekLaTeXUpperCaseConverter.INSTANCE);
 
@@ -80,16 +80,16 @@ public final class IndexConverterExtender implements IndexSymbolConverter {
         } catch (NumberFormatException e) {
             throw new IndexConverterException();
         }
-        return (num) * (1 + innerConverter.maxSymbolsCount()) + innerConverter.getCode(split[0]);
+        return (num) * (1 + innerConverter.maxNumberOfSymbols()) + innerConverter.getCode(split[0]);
     }
 
     @Override
     public String getSymbol(int code, OutputFormat mode) throws IndexConverterException {
-        int num = code / (innerConverter.maxSymbolsCount() + 1);
+        int num = code / (innerConverter.maxNumberOfSymbols() + 1);
         if (num == 0)
             return innerConverter.getSymbol(code, mode);
         else
-            return innerConverter.getSymbol(code % (innerConverter.maxSymbolsCount() + 1), mode) + "_" + ("{" + num + "}");
+            return innerConverter.getSymbol(code % (innerConverter.maxNumberOfSymbols() + 1), mode) + "_" + ("{" + num + "}");
     }
 
     @Override
@@ -98,7 +98,7 @@ public final class IndexConverterExtender implements IndexSymbolConverter {
     }
 
     @Override
-    public int maxSymbolsCount() {
-        return 10 * (innerConverter.maxSymbolsCount() + 1) - 1;
+    public int maxNumberOfSymbols() {
+        return 10 * (innerConverter.maxNumberOfSymbols() + 1) - 1;
     }
 }

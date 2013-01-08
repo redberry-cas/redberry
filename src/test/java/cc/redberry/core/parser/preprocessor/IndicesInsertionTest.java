@@ -24,7 +24,7 @@ package cc.redberry.core.parser.preprocessor;
 
 import cc.redberry.core.context.CC;
 import cc.redberry.core.indices.Indices;
-import cc.redberry.core.parser.ParseNodeSimpleTensor;
+import cc.redberry.core.parser.ParseTokenSimpleTensor;
 import cc.redberry.core.parser.ParserIndices;
 import cc.redberry.core.tensor.Expression;
 import cc.redberry.core.tensor.Tensor;
@@ -43,7 +43,7 @@ import static cc.redberry.core.TAssert.*;
  */
 public class IndicesInsertionTest {
 
-    private static class NamesIndicator implements Indicator<ParseNodeSimpleTensor> {
+    private static class NamesIndicator implements Indicator<ParseTokenSimpleTensor> {
 
         private final String[] names;
 
@@ -52,7 +52,7 @@ public class IndicesInsertionTest {
         }
 
         @Override
-        public boolean is(ParseNodeSimpleTensor object) {
+        public boolean is(ParseTokenSimpleTensor object) {
             for (String s : names)
                 if (s.equals(object.name))
                     return true;
@@ -163,10 +163,10 @@ public class IndicesInsertionTest {
         Tensors.parse(expression);
 
         final String[] matrices = new String[]{"KINV", "HATK", "HATW", "HATS", "NABLAS", "HATN", "HATF", "NABLAF", "HATM", "DELTA", "Flat", "FF", "WR", "SR", "SSR", "FR", "RR"};
-        Indicator<ParseNodeSimpleTensor> matricesIndicator = new Indicator<ParseNodeSimpleTensor>() {
+        Indicator<ParseTokenSimpleTensor> matricesIndicator = new Indicator<ParseTokenSimpleTensor>() {
 
             @Override
-            public boolean is(ParseNodeSimpleTensor object) {
+            public boolean is(ParseTokenSimpleTensor object) {
                 String name = object.name;
                 for (String matrix : matrices)
                     if (name.equals(matrix))
@@ -185,10 +185,10 @@ public class IndicesInsertionTest {
     @Test
     public void test12() {
         final String[] matrices = new String[]{"KINV", "HATK", "HATW", "HATS", "NABLAS", "HATN", "HATF", "NABLAF", "HATM", "DELTA", "Flat", "FF", "WR", "SR", "SSR", "FR", "RR"};
-        Indicator<ParseNodeSimpleTensor> matricesIndicator = new Indicator<ParseNodeSimpleTensor>() {
+        Indicator<ParseTokenSimpleTensor> matricesIndicator = new Indicator<ParseTokenSimpleTensor>() {
 
             @Override
-            public boolean is(ParseNodeSimpleTensor object) {
+            public boolean is(ParseTokenSimpleTensor object) {
                 String name = object.name;
                 for (String matrix : matrices)
                     if (name.equals(matrix))

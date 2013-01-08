@@ -22,7 +22,7 @@
  */
 package cc.redberry.core.parser;
 
-public class ParserBrackets implements NodeParser {
+public class ParserBrackets implements TokenParser {
     public static final ParserBrackets INSTANCE = new ParserBrackets();
 
     private ParserBrackets() {
@@ -30,7 +30,7 @@ public class ParserBrackets implements NodeParser {
     private final static int parserID = Integer.MAX_VALUE;
 
     @Override
-    public ParseNode parseNode(String expression, Parser parser) {
+    public ParseToken parseNode(String expression, Parser parser) {
         if (expression.charAt(0) == '(' && expression.charAt(expression.length() - 1) == ')') {
             char[] expressionChars = expression.toCharArray();
             int level = 0;

@@ -28,7 +28,7 @@ import cc.redberry.core.indices.IndexType;
 import cc.redberry.core.tensor.Product;
 import cc.redberry.core.tensor.ProductBuilder;
 import cc.redberry.core.tensor.Tensor;
-import cc.redberry.core.tensor.random.TRandom;
+import cc.redberry.core.tensor.random.RandomTensor;
 import cc.redberry.core.utils.IntArrayList;
 import cc.redberry.core.utils.TensorUtils;
 import org.junit.Assert;
@@ -46,7 +46,7 @@ import static cc.redberry.core.tensor.Tensors.parse;
 public class PrimitiveSubgraphPartitionTest {
     @Test
     public void test2() {
-        TRandom random = new TRandom(
+        RandomTensor random = new RandomTensor(
                 5, 20,
                 new int[]{1, 0, 0, 0},
                 new int[]{3, 0, 0, 0}, false);
@@ -85,7 +85,7 @@ public class PrimitiveSubgraphPartitionTest {
     @Test
     public void test2a() {
         CC.resetTensorNames(-6981255382429807323L);
-        TRandom random = new TRandom(
+        RandomTensor random = new RandomTensor(
                 5, 20,
                 new int[]{1, 0, 0, 0},
                 new int[]{3, 0, 0, 0}, false,

@@ -27,7 +27,7 @@ package cc.redberry.core.parser;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public class ParserFunctions implements NodeParser {
+public class ParserFunctions implements TokenParser {
 
     public static final ParserFunctions INSTANCE = new ParserFunctions();
     private static final String[] functions = {"Sin", "Cos", "Tan", "Log", "Exp", "Cot", "ArcSin", "ArcCos", "ArcTan", "ArcCot"};
@@ -41,7 +41,7 @@ public class ParserFunctions implements NodeParser {
     }
 
     @Override
-    public ParseNode parseNode(String expression, Parser parser) {
+    public ParseToken parseNode(String expression, Parser parser) {
         if (!expression.contains("[") || expression.lastIndexOf(']') != expression.length() - 1)
             return null;
         String temp = null, function = null;
@@ -74,6 +74,6 @@ public class ParserFunctions implements NodeParser {
                 throw new ParserException("Sin, Cos, Tan and others scalar functions take only one argument.");
         }
         String argument = expression.substring(temp.length() + 1, expression.length() - 1);
-        return new ParseNodeScalarFunction(temp, new ParseNode[]{parser.parse(argument)});
+        return new ParseTokenScalarFunction(temp, new ParseToken[]{parser.parse(argument)});
     }
 }

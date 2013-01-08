@@ -26,8 +26,8 @@ import cc.redberry.core.TAssert;
 import cc.redberry.core.context.CC;
 import cc.redberry.core.indices.IndexType;
 import cc.redberry.core.number.Complex;
-import cc.redberry.core.tensor.random.TRandom;
-import cc.redberry.core.transformations.ContractIndices;
+import cc.redberry.core.tensor.random.RandomTensor;
+import cc.redberry.core.transformations.EliminateMetricsTransformation;
 import cc.redberry.core.utils.TensorUtils;
 import org.junit.Assert;
 import org.junit.Test;
@@ -130,16 +130,16 @@ public class ProductTest {
     public void testRenameConflicts2() {
         Tensor t1 = Tensors.parse("(p_a+d_a)");
         Tensor t2 = Tensors.parse("(a_i+b_a^a_i)");
-        System.out.println(Tensors.multiplyAndRenameConflictingDummies(t1, t2));
+//        System.out.println(Tensors.multiplyAndRenameConflictingDummies(t1, t2));
         TAssert.assertIndicesConsistency(Tensors.multiplyAndRenameConflictingDummies(t1, t2));
     }
 
     @Test
     public void testRenameConflicts3() {
         Tensor t1 = Tensors.parse("A_a^a*A_b^b*A_c^c_m^n+A_d^e*A_e^d*A_f^f_m^n");
-        System.out.println(t1);
+//        System.out.println(t1);
         Tensor t2 = Tensors.parse("A_a^a*A_b^b*A_c^c^m_n+A_d^e*A_e^d*A_f^f^m_n");
-        System.out.println(Tensors.multiplyAndRenameConflictingDummies(t1, t2));
+//        System.out.println(Tensors.multiplyAndRenameConflictingDummies(t1, t2));
         TAssert.assertIndicesConsistency(Tensors.multiplyAndRenameConflictingDummies(t1, t2));
     }
 
@@ -230,11 +230,11 @@ public class ProductTest {
 
     @Test
     public void testGetRange9() {
-        TRandom random;
+        RandomTensor random;
         int minProductSize, from, to;
         for (int count = 0; count < 1000; ++count) {
             CC.resetTensorNames();
-            random = new TRandom(1, 100, new int[]{0, 0, 0, 0}, new int[]{2, 0, 0, 0}, true);
+            random = new RandomTensor(1, 100, new int[]{0, 0, 0, 0}, new int[]{2, 0, 0, 0}, true);
             minProductSize = 2 + random.nextInt(200);
             Tensor tensor = random.nextProduct(minProductSize);
             if (!(tensor instanceof Product))
@@ -413,7 +413,7 @@ public class ProductTest {
         Tensor t;
         int index = indexOf(parse("f^{v}_{t}+x_{t}^{v}"), tensor);
         t = tensor.set(index, parse("g^vm*d_t^n"));
-        TAssert.assertEquals(ContractIndices.contract(t), "f^{na}*f^{mb}");
+        TAssert.assertEquals(EliminateMetricsTransformation.contract(t), "f^{na}*f^{mb}");
     }
 
     private static int indexOf(Tensor t, Tensor product) {

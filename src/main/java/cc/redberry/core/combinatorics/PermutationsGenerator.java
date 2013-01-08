@@ -39,8 +39,8 @@ public class PermutationsGenerator<T extends Permutation> implements Iterator<T>
      *
      * @param length length of combinatorics
      */
-    public PermutationsGenerator(int size) {
-        this.generator = new IntPermutationsGenerator(size);
+    public PermutationsGenerator(int length) {
+        this.generator = new IntPermutationsGenerator(length);
     }
 
     /**

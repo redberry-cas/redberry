@@ -63,8 +63,8 @@ public abstract class Tensor
      * <p>Returns iterator over sub-tensors of current tensor (eg. summnads of
      * sum, multipliers of product, etc..).</p> <p>For iteration through whole
      * tensor tree use: {@link cc.redberry.core.tensor.iterator.TreeTraverseIterator}
-     * or {@link cc.redberry.core.tensor.iterator.TensorFirstIterator} and
-     * {@link cc.redberry.core.tensor.iterator.TensorLastIterator}.</p>
+     * or {@link cc.redberry.core.tensor.iterator.FromParentToChildIterator} and
+     * {@link cc.redberry.core.tensor.iterator.FromChildToParentIterator}.</p>
      *
      * @return iterator over sub-tensors
      */
@@ -94,8 +94,8 @@ public abstract class Tensor
      * <p>Returns new tensor instance with i-th sub-tensor replaced by provided
      * tensor. <p>Better tools for tensors manipulations are tree iterators.
      * See:
-     * {@link cc.redberry.core.tensor.iterator.TensorFirstIterator},
-     * {@link cc.redberry.core.tensor.iterator.TensorLastIterator} and
+     * {@link cc.redberry.core.tensor.iterator.FromParentToChildIterator},
+     * {@link cc.redberry.core.tensor.iterator.FromChildToParentIterator} and
      * {@link cc.redberry.core.tensor.iterator.TreeTraverseIterator}.</p> </p>
      *
      * @param i      index of sub-tensor to be replaced

@@ -43,25 +43,25 @@ public class ParserTest {
 
     @Test
     public void test1() {
-        ParseNode node = Parser.DEFAULT.parse("2*a_\\mu-b_\\mu/(c*x)*x[x,y]");
+        ParseToken node = Parser.DEFAULT.parse("2*a_\\mu-b_\\mu/(c*x)*x[x,y]");
         Assert.assertTrue(node.getIndices().equalsRegardlessOrder(ParserIndices.parseSimple("_\\mu")));
     }
 
     @Test
     public void test2() {
-        ParseNode node = Parser.DEFAULT.parse("f[a_\\mu] - f[b_\\mu/ (c * g) * g[x, y]]");
-        ParseNode expected = new ParseNode(TensorType.Sum,
-                new ParseNodeTensorField(IndicesFactory.EMPTY_SIMPLE_INDICES, "f", new ParseNode[]{new ParseNodeSimpleTensor(ParserIndices.parseSimple("_\\mu"), "a")}, new SimpleIndices[]{IndicesFactory.EMPTY_SIMPLE_INDICES}),
-                new ParseNode(TensorType.Product,
-                        new ParseNodeNumber(Complex.MINUS_ONE),
-                        new ParseNodeTensorField(IndicesFactory.EMPTY_SIMPLE_INDICES, "f",
-                                new ParseNode[]{new ParseNode(TensorType.Product,
-                                        new ParseNodeSimpleTensor(ParserIndices.parseSimple("_\\mu"), "b"),
-                                        new ParseNode(TensorType.Power, new ParseNode(TensorType.Product, new ParseNodeSimpleTensor(IndicesFactory.EMPTY_SIMPLE_INDICES, "c"), new ParseNodeSimpleTensor(IndicesFactory.EMPTY_SIMPLE_INDICES, "g")),
-                                                new ParseNodeNumber(Complex.MINUS_ONE)),
-                                        new ParseNodeTensorField(IndicesFactory.EMPTY_SIMPLE_INDICES, "g",
-                                                new ParseNode[]{new ParseNodeSimpleTensor(IndicesFactory.EMPTY_SIMPLE_INDICES, "x"),
-                                                        new ParseNodeSimpleTensor(IndicesFactory.EMPTY_SIMPLE_INDICES, "y")},
+        ParseToken node = Parser.DEFAULT.parse("f[a_\\mu] - f[b_\\mu/ (c * g) * g[x, y]]");
+        ParseToken expected = new ParseToken(TokenType.Sum,
+                new ParseTokenTensorField(IndicesFactory.EMPTY_SIMPLE_INDICES, "f", new ParseToken[]{new ParseTokenSimpleTensor(ParserIndices.parseSimple("_\\mu"), "a")}, new SimpleIndices[]{IndicesFactory.EMPTY_SIMPLE_INDICES}),
+                new ParseToken(TokenType.Product,
+                        new ParseTokenNumber(Complex.MINUS_ONE),
+                        new ParseTokenTensorField(IndicesFactory.EMPTY_SIMPLE_INDICES, "f",
+                                new ParseToken[]{new ParseToken(TokenType.Product,
+                                        new ParseTokenSimpleTensor(ParserIndices.parseSimple("_\\mu"), "b"),
+                                        new ParseToken(TokenType.Power, new ParseToken(TokenType.Product, new ParseTokenSimpleTensor(IndicesFactory.EMPTY_SIMPLE_INDICES, "c"), new ParseTokenSimpleTensor(IndicesFactory.EMPTY_SIMPLE_INDICES, "g")),
+                                                new ParseTokenNumber(Complex.MINUS_ONE)),
+                                        new ParseTokenTensorField(IndicesFactory.EMPTY_SIMPLE_INDICES, "g",
+                                                new ParseToken[]{new ParseTokenSimpleTensor(IndicesFactory.EMPTY_SIMPLE_INDICES, "x"),
+                                                        new ParseTokenSimpleTensor(IndicesFactory.EMPTY_SIMPLE_INDICES, "y")},
                                                 new SimpleIndices[]{IndicesFactory.EMPTY_SIMPLE_INDICES, IndicesFactory.EMPTY_SIMPLE_INDICES}))},
                                 new SimpleIndices[]{IndicesFactory.EMPTY_SIMPLE_INDICES})));
         Assert.assertEquals(expected, node);
@@ -70,36 +70,36 @@ public class ParserTest {
 
     @Test
     public void test3() {
-        ParseNode node = Parser.DEFAULT.parse("f[b_\\mu/(c*g)*g[x,y]]");
+        ParseToken node = Parser.DEFAULT.parse("f[b_\\mu/(c*g)*g[x,y]]");
         Assert.assertTrue(node.getIndices().equalsRegardlessOrder(ParserIndices.parseSimple("")));
     }
 
     @Test
     public void test4() {
-        ParseNode node = Parser.DEFAULT.parse("a-b");
-        ParseNode expected = new ParseNode(TensorType.Sum,
-                new ParseNodeSimpleTensor(IndicesFactory.EMPTY_SIMPLE_INDICES, "a"),
-                new ParseNode(TensorType.Product,
-                        new ParseNodeNumber(Complex.MINUS_ONE),
-                        new ParseNodeSimpleTensor(IndicesFactory.EMPTY_SIMPLE_INDICES, "b")));
+        ParseToken node = Parser.DEFAULT.parse("a-b");
+        ParseToken expected = new ParseToken(TokenType.Sum,
+                new ParseTokenSimpleTensor(IndicesFactory.EMPTY_SIMPLE_INDICES, "a"),
+                new ParseToken(TokenType.Product,
+                        new ParseTokenNumber(Complex.MINUS_ONE),
+                        new ParseTokenSimpleTensor(IndicesFactory.EMPTY_SIMPLE_INDICES, "b")));
         Assert.assertEquals(expected, node);
     }
 
     @Test
     public void testReallySimpleTensor() {
-        ParseNode node = Parser.DEFAULT.parse("S^k*(c_k*Power[a,1]/a-b_k)");
+        ParseToken node = Parser.DEFAULT.parse("S^k*(c_k*Power[a,1]/a-b_k)");
         Assert.assertTrue(node.getIndices().equalsRegardlessOrder(ParserIndices.parseSimple("^k_k")));
     }
 
     @Test
     public void testProductPowers() {
-        ParseNode node = Parser.DEFAULT.parse("a/b");
+        ParseToken node = Parser.DEFAULT.parse("a/b");
         Tensor tensor = node.toTensor();
-        ParseNode expectedNode = new ParseNode(TensorType.Product,
-                new ParseNodeSimpleTensor(IndicesFactory.EMPTY_SIMPLE_INDICES, "a"),
-                new ParseNode(TensorType.Power,
-                        new ParseNodeSimpleTensor(IndicesFactory.EMPTY_SIMPLE_INDICES, "b"),
-                        new ParseNodeNumber(Complex.MINUS_ONE)));
+        ParseToken expectedNode = new ParseToken(TokenType.Product,
+                new ParseTokenSimpleTensor(IndicesFactory.EMPTY_SIMPLE_INDICES, "a"),
+                new ParseToken(TokenType.Power,
+                        new ParseTokenSimpleTensor(IndicesFactory.EMPTY_SIMPLE_INDICES, "b"),
+                        new ParseTokenNumber(Complex.MINUS_ONE)));
         Assert.assertEquals(expectedNode, node);
         Assert.assertTrue(tensor instanceof Product);
         Assert.assertTrue(tensor.getIndices().size() == 0);
@@ -110,7 +110,7 @@ public class ParserTest {
 
     @Test
     public void testProductPowers0() {
-        ParseNode node = Parser.DEFAULT.parse("1/0*a");
+        ParseToken node = Parser.DEFAULT.parse("1/0*a");
         System.out.println(node);
     }
 
@@ -268,7 +268,7 @@ public class ParserTest {
 
     @Test
     public void testIndices1() {
-        ParseNode node = Parser.DEFAULT.parse("f_a*f^a*j_nm^n");
+        ParseToken node = Parser.DEFAULT.parse("f_a*f^a*j_nm^n");
         Assert.assertTrue(node.getIndices().equalsRegardlessOrder(ParserIndices.parseSimple("_a^a_nm^n")));
     }
 
@@ -378,14 +378,14 @@ public class ParserTest {
     public void testStrokeIndices1() {
         Tensor t = parse("T_{a'}");
         Assert.assertTrue(IndicesUtils.getType(t.getIndices().get(0))
-                == IndexType.LatinLower1.getType());
+                == IndexType.Matrix1.getType());
     }
 
     @Test
     public void testStrokeIndices2() {
         Tensor t = parse("T_{\\alpha'}");
         Assert.assertTrue(IndicesUtils.getType(t.getIndices().get(0))
-                == IndexType.GreekLower1.getType());
+                == IndexType.Matrix3.getType());
     }
 
     @Ignore

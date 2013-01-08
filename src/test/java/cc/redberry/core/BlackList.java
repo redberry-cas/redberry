@@ -45,22 +45,28 @@ public class BlackList {
 
     @Test
     public void etwer() {
-        int[] array = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13};
-        int[] p = {1, 2, 4, 5, 6, 9, 10, 12};
+//        int[] array = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13};
+//        int[] p = {1, 2, 4, 5, 6, 9, 10, 12};
+//
+//
+//        int size = p.length, pointer = 0, s = array.length;
+//
+//        int[] r = new int[array.length - p.length];
+//
+//        pointer = 0;
+//        int i = -1;
+//        for (int j = 0; j < s; ++j) {
+//            if (pointer < size - 1 && j > p[pointer])
+//                ++pointer;
+//            if (j == p[pointer]) continue;
+//            else r[++i] = array[j];
+//        }
+//        System.out.println(Arrays.toString(r));
 
-        int size = p.length, pointer = 0, s = array.length;
-
-        int[] r = new int[array.length - p.length];
-
-        pointer = 0;
-        int i = -1;
-        for (int j = 0; j < s; ++j) {
-            if (pointer < size - 1 && j > p[pointer])
-                ++pointer;
-            if (j == p[pointer]) continue;
-            else r[++i] = array[j];
-        }
-        System.out.println(Arrays.toString(r));
+        int[] a = {1,2};
+        int[] b = {1,2};
+        System.out.println(a.hashCode());
+        System.out.println(b.hashCode());
     }
 
     private static void swap(int x[], int a, int b) {

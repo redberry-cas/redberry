@@ -131,7 +131,7 @@ public final class ApplyIndexMapping {
             if (tensor.getIndices().getFree().size() != 0)
                 throw new IllegalArgumentException("From indices are not equal to free indices of tensor.");
             Tensor t = renameDummy(tensor, forbidden);
-            if (buffer.getSignum())
+            if (buffer.getSign())
                 return Tensors.negate(t);
             return t;
         }
@@ -156,7 +156,7 @@ public final class ApplyIndexMapping {
             throw new IllegalArgumentException("From indices are not equal to free indices of tensor.");
 
         Tensor result = applyIndexMappingFromPreparedSource(tensor, from, to, forbidden);
-        if (buffer.getSignum())
+        if (buffer.getSign())
             return Tensors.negate(result);
         else
             return result;

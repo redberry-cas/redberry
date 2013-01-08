@@ -28,14 +28,14 @@ import cc.redberry.core.indices.SimpleIndices;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public class ParserSimpleTensor implements NodeParser {
+public class ParserSimpleTensor implements TokenParser {
     public static final ParserSimpleTensor INSTANCE = new ParserSimpleTensor();
 
     private ParserSimpleTensor() {
     }
 
     @Override
-    public ParseNodeSimpleTensor parseNode(String expression, Parser parser) {
+    public ParseTokenSimpleTensor parseNode(String expression, Parser parser) {
         expression = expression.replaceAll("\\{[\\s]*\\}", "");
         int indicesBegin = expression.indexOf('_'), i = expression.indexOf('^');
         if (indicesBegin < 0 && i >= 0)
@@ -50,7 +50,7 @@ public class ParserSimpleTensor implements NodeParser {
             throw new ParserException("Simple tensor with empty name.");
 
         SimpleIndices indices = ParserIndices.parseSimple(expression.substring(indicesBegin));
-        return new ParseNodeSimpleTensor(indices, name);
+        return new ParseTokenSimpleTensor(indices, name);
     }
 
     @Override

@@ -210,7 +210,8 @@ public final class NameManager {
         }
     }
 
-    public boolean containtsNameId(int nameId) {
+    /*
+    public boolean containsNameId(int nameId) {
         if (nameId < 0)
             return false;
         writeLock.lock();
@@ -219,7 +220,7 @@ public final class NameManager {
         } finally {
             writeLock.unlock();
         }
-    }
+    }*/
 
     public long getSeed() {
         return seed;

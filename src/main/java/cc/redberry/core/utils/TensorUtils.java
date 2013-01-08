@@ -319,7 +319,7 @@ public class TensorUtils {
         IndexMappingBuffer buffer;
 
         while ((buffer = mp.take()) != null)
-            if (!buffer.getSignum())
+            if (!buffer.getSign())
                 return true;
 
         return false;
@@ -334,7 +334,7 @@ public class TensorUtils {
         IndexMappingBuffer buffer = IndexMappings.createPort(tester, u, v).take();
         if (buffer == null)
             return null;
-        return buffer.getSignum();
+        return buffer.getSign();
     }
 
     public static void assertIndicesConsistency(Tensor t) {
@@ -392,7 +392,7 @@ public class TensorUtils {
         MappingsPort mp = IndexMappings.createPort(bufferTester, t, t);
         IndexMappingBuffer buffer;
         while ((buffer = mp.take()) != null)
-            if (buffer.getSignum())
+            if (buffer.getSign())
                 return true;
         return false;
     }
@@ -427,7 +427,7 @@ public class TensorUtils {
         for (i = 0; i < dimension; ++i)
             if (permutation[i] == -1)
                 permutation[i] = i;
-        return new Symmetry(permutation, indexMappingBuffer.getSignum());
+        return new Symmetry(permutation, indexMappingBuffer.getSign());
     }
 
     public static Symmetry getSymmetryFromMapping(final int[] indices, IndexMappingBuffer indexMappingBuffer) {

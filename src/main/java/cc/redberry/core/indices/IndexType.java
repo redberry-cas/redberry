@@ -24,7 +24,7 @@ package cc.redberry.core.indices;
 
 import cc.redberry.core.context.ContextSettings;
 import cc.redberry.core.context.IndexSymbolConverter;
-import cc.redberry.core.context.defaults.IndexWithStrokeWrapper;
+import cc.redberry.core.context.defaults.IndexWithStrokeConverter;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -44,22 +44,23 @@ public enum IndexType {
     LatinUpper(LatinUpperEx),
     GreekLower(GreekLowerEx),
     GreekUpper(GreekUpperEx),
-    LatinLower1(new IndexWithStrokeWrapper(LatinLowerEx, (byte) 1)),
-    LatinUpper1(new IndexWithStrokeWrapper(LatinUpperEx, (byte) 1)),
-    GreekLower1(new IndexWithStrokeWrapper(GreekLowerEx, (byte) 1)),
-    GreekUpper1(new IndexWithStrokeWrapper(GreekUpperEx, (byte) 1));
+    Matrix1(new IndexWithStrokeConverter(LatinLowerEx, (byte) 1)),
+    Matrix2(new IndexWithStrokeConverter(LatinUpperEx, (byte) 1)),
+    Matrix3(new IndexWithStrokeConverter(GreekLowerEx, (byte) 1)),
+    Matrix4(new IndexWithStrokeConverter(GreekUpperEx, (byte) 1));
+
     private final static Map<String, IndexType> commonNames;
 
     static {
         commonNames = new HashMap<>();
         commonNames.put("l", LatinLower);
         commonNames.put("L", LatinUpper);
-        commonNames.put("l'", LatinLower1);
-        commonNames.put("L'", LatinUpper1);
+        commonNames.put("l'", Matrix1);
+        commonNames.put("L'", Matrix2);
         commonNames.put("g", GreekLower);
         commonNames.put("G", GreekUpper);
-        commonNames.put("g'", GreekLower1);
-        commonNames.put("G'", GreekUpper1);
+        commonNames.put("g'", Matrix3);
+        commonNames.put("G'", Matrix4);
     }
 
     /**

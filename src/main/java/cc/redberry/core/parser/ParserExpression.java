@@ -27,7 +27,7 @@ package cc.redberry.core.parser;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public class ParserExpression implements NodeParser {
+public class ParserExpression implements TokenParser {
 
     public static final ParserExpression INSTANCE = new ParserExpression();
 
@@ -35,15 +35,15 @@ public class ParserExpression implements NodeParser {
     }
 
     @Override
-    public ParseNode parseNode(String expression, Parser parser) {
+    public ParseToken parseNode(String expression, Parser parser) {
         if (!expression.contains("="))
             return null;
         if (expression.indexOf('=') != expression.lastIndexOf('='))
             throw new ParserException("Several '=' symbols.");
         String[] parts = expression.split("=");
-        ParseNode left = parser.parse(parts[0]);
-        ParseNode right = parser.parse(parts[1]);
-        return new ParseNode(TensorType.Expression, left, right);
+        ParseToken left = parser.parse(parts[0]);
+        ParseToken right = parser.parse(parts[1]);
+        return new ParseToken(TokenType.Expression, left, right);
     }
 
     @Override

@@ -24,19 +24,15 @@ package cc.redberry.core.tensor;
 
 import cc.redberry.core.TAssert;
 import cc.redberry.core.context.CC;
-import cc.redberry.core.context.ContextManager;
-import cc.redberry.core.context.OutputFormat;
-import cc.redberry.core.indexmapping.IndexMappings;
 import cc.redberry.core.indices.IndexType;
 import cc.redberry.core.number.Complex;
-import cc.redberry.core.transformations.ContractIndices;
-import cc.redberry.core.transformations.RemoveDueToSymmetry;
-import cc.redberry.core.transformations.ToNumeric;
+import cc.redberry.core.transformations.EliminateFromSymmetriesTransformation;
+import cc.redberry.core.transformations.EliminateMetricsTransformation;
 import cc.redberry.core.transformations.Transformation;
-import cc.redberry.core.transformations.expand.Expand;
-import cc.redberry.core.transformations.expand.ExpandAll;
-import cc.redberry.core.transformations.expand.ExpandNumerator;
-import cc.redberry.core.transformations.fractions.Together;
+import cc.redberry.core.transformations.expand.ExpandAllTransformation;
+import cc.redberry.core.transformations.expand.ExpandNumeratorTransformation;
+import cc.redberry.core.transformations.expand.ExpandTransformation;
+import cc.redberry.core.transformations.fractions.TogetherTransformation;
 import cc.redberry.core.utils.TensorUtils;
 import org.junit.Assert;
 import org.junit.Ignore;
@@ -53,7 +49,7 @@ public class TensorsTest {
     @Test
     public void testRenameConflicts1() {
         Tensor tensor = parse("(A_ijk^ij+B_ijk^ij)*K_ij^ij");
-        Tensor result = Expand.expand(tensor);
+        Tensor result = ExpandTransformation.expand(tensor);
         Tensor expected = parse("K_{ij}^{ij}*A_{abk}^{ab}+K_{ij}^{ij}*B_{abk}^{ab}");
         junit.framework.Assert.assertTrue(TensorUtils.equals(result, expected));
     }
@@ -61,7 +57,7 @@ public class TensorsTest {
     @Test
     public void testRenameConflicts2() {
         Tensor tensor = parse("(A_ijk^ij+B_ijk^ij)*(K_ij^ij+T)");
-        Tensor result = Expand.expand(tensor);
+        Tensor result = ExpandTransformation.expand(tensor);
         Tensor expected = parse("T*B_{abk}^{ab}+K_{ij}^{ij}*B_{abk}^{ab}+T*A_{abk}^{ab}+K_{ij}^{ij}*A_{abk}^{ab}");
         junit.framework.Assert.assertTrue(TensorUtils.equals(result, expected));
     }
@@ -69,7 +65,7 @@ public class TensorsTest {
     @Test
     public void testRenameConflicts3() {
         Tensor tensor = parse("(A_ijk^ij+B_ijk^ij)*(K_ij^ijk+T^k)*a_ij");
-        Tensor result = Expand.expand(tensor);
+        Tensor result = ExpandTransformation.expand(tensor);
         Tensor expected = parse("T^{k}*A_{abk}^{ab}*a_{ij}+T^{k}*B_{abk}^{ab}*a_{ij}+K_{cd}^{cdk}*A_{abk}^{ab}*a_{ij}+B_{abk}^{ab}*K_{cd}^{cdk}*a_{ij}");
         junit.framework.Assert.assertTrue(TensorUtils.equals(result, expected));
     }
@@ -77,7 +73,7 @@ public class TensorsTest {
     @Test
     public void testRenameConflicts4() {
         Tensor tensor = parse("(A_ij^ijt+B_ijk^ijt*(H_ij^ijk+L_ij^ijk))*(K_ij^ijp+T^p)*a_ijpt");
-        Tensor result = Expand.expand(tensor);
+        Tensor result = ExpandTransformation.expand(tensor);
         Tensor expected = parse("K_{ab}^{abp}*H_{cd}^{cdk}*B_{efk}^{eft}*a_{ijpt}+K_{ab}^{abp}*A_{ef}^{eft}*a_{ijpt}+K_{ab}^{abp}*L_{cd}^{cdk}*B_{efk}^{eft}*a_{ijpt}+T^{p}*L_{cd}^{cdk}*B_{efk}^{eft}*a_{ijpt}+A_{ef}^{eft}*T^{p}*a_{ijpt}+H_{cd}^{cdk}*T^{p}*B_{efk}^{eft}*a_{ijpt}");
         junit.framework.Assert.assertTrue(TensorUtils.equals(result, expected));
     }
@@ -86,7 +82,7 @@ public class TensorsTest {
     public void testRenameConflicts5() {
         Tensor[] tensors = new Tensor[]{parse("A_ij^ijk+B^k"), parse("B_ik^i+N_jk^jl*L_l")};
         Tensor result = multiplyAndRenameConflictingDummies(tensors);
-        result = Expand.expand(result);
+        result = ExpandTransformation.expand(result);
         Tensor expected = parse("B^{k}*N_{bk}^{bl}*L_{l}+A_{ij}^{ijk}*B_{ak}^{a}+A_{ij}^{ijk}*N_{bk}^{bl}*L_{l}+B^{k}*B_{ak}^{a}");
         junit.framework.Assert.assertTrue(TensorUtils.equals(result, expected));
     }
@@ -95,7 +91,7 @@ public class TensorsTest {
     public void testRenameConflicts6() {
         Tensor[] tensors = new Tensor[]{parse("A_ij^ijk"), parse("(B_ik^i+Y_k)"), parse("(C_ijk^ijkl+O^l)")};
         Tensor result = multiplyAndRenameConflictingDummies(tensors);
-        result = Expand.expand(result);
+        result = ExpandTransformation.expand(result);
         Tensor expected = parse("Y_{k}*A_{ij}^{ijk}*C_{abc}^{abcl}+A_{ij}^{ijk}*B_{dk}^{d}*C_{abc}^{abcl}+Y_{k}*A_{ij}^{ijk}*O^{l}+A_{ij}^{ijk}*B_{dk}^{d}*O^{l}");
         junit.framework.Assert.assertTrue(TensorUtils.equals(result, expected));
     }
@@ -227,20 +223,20 @@ public class TensorsTest {
         Assert.assertTrue(TensorUtils.equalsExactly(temp, wolframResult));
 
         temp = target;
-        temp = pT.transform(s.transform(Expand.expand(temp)));
+        temp = pT.transform(s.transform(ExpandTransformation.expand(temp)));
         Assert.assertTrue(TensorUtils.equalsExactly(temp, wolframResult));
 
         temp = target;
-        temp = pT.transform(Expand.expand(s.transform(temp)));
+        temp = pT.transform(ExpandTransformation.expand(s.transform(temp)));
         Assert.assertTrue(TensorUtils.equalsExactly(temp, wolframResult));
 
         temp = target;
-        temp = s.transform(Expand.expand(pT.transform(temp)));
+        temp = s.transform(ExpandTransformation.expand(pT.transform(temp)));
         Assert.assertTrue(TensorUtils.equalsExactly(temp, wolframResult));
 
         temp = pow(target, 2);
-        temp = s.transform(pT.transform(Expand.expand(temp)));
-        Assert.assertTrue(TensorUtils.equalsExactly(temp, Expand.expand(pow(wolframResult, 2))));//135424*Power[M, 32]+1600*Power[M, 40]-29440*Power[M, 36]
+        temp = s.transform(pT.transform(ExpandTransformation.expand(temp)));
+        Assert.assertTrue(TensorUtils.equalsExactly(temp, ExpandTransformation.expand(pow(wolframResult, 2))));//135424*Power[M, 32]+1600*Power[M, 40]-29440*Power[M, 36]
     }
 
     @Ignore
@@ -252,7 +248,7 @@ public class TensorsTest {
         t = e1.transform(t);
         t = e2.transform(t);
         Expression kronecker = (Expression) Tensors.parse("d_\\mu^\\mu=4");
-        t = Expand.expand(t, new Transformation[]{ContractIndices.ContractIndices, kronecker});
+        t = ExpandTransformation.expand(t, new Transformation[]{EliminateMetricsTransformation.ELIMINATE_METRICS, kronecker});
         System.out.println(t);
     }
 
@@ -279,9 +275,9 @@ public class TensorsTest {
         M = V1.transform(M);
         M = V2.transform(M);
         //to common denominator
-        M = Together.together(M);
+        M = TogetherTransformation.together(M);
         //expand transformation
-        M = Expand.expand(M);
+        M = ExpandTransformation.expand(M);
 
         //defining mass shell and Mandelstam variables
         Expression[] mandelstam = new Expression[]{
@@ -306,7 +302,7 @@ public class TensorsTest {
         Tensor M2 = Tensors.parse("M2 = -(1/2)*M_ij*M^ij");
         M2 = ((Expression) M).transform(M2);
         //expand squared matrix element and contract indices
-        M2 = ExpandAll.expandAll(M2, ContractIndices.ContractIndices);
+        M2 = ExpandAllTransformation.expandAll(M2, EliminateMetricsTransformation.ELIMINATE_METRICS);
         M2 = Tensors.parseExpression("d_i^i = 4").transform(M2);
 
         //substituting mass shell and Mandelstam definitions 
@@ -315,12 +311,12 @@ public class TensorsTest {
         M2 = Tensors.parseExpression("u=2*m**2-s-t").transform(M2);
 
         //some simplifications
-        M2 = Together.together(M2);
-        M2 = ExpandNumerator.expandNumerator(M2);
+        M2 = TogetherTransformation.together(M2);
+        M2 = ExpandNumeratorTransformation.expandNumerator(M2);
 
         //final cross section
         Tensor cs = ((Expression) M2).transform(Tensors.parse("1/(64*pi**2*s)*M2"));
-        cs = Expand.expand(cs);
+        cs = ExpandTransformation.expand(cs);
         Tensor expected = Tensors.parse("1/16*(-s+m**2-t)**(-2)*(s-m**2)**(-2)*s**(-1)*m**4*pi**(-2)*t**2*e**4-1/4*(-s+m**2-t)**(-2)*(s-m**2)**(-2)*m**6*pi**(-2)*e**4+1/16*(-s+m**2-t)**(-2)*(s-m**2)**(-2)*s*pi**(-2)*t**2*e**4+1/8*(-s+m**2-t)**(-2)*(s-m**2)**(-2)*m**4*pi**(-2)*t*e**4+1/16*(-s+m**2-t)**(-2)*(s-m**2)**(-2)*s**(-1)*m**8*pi**(-2)*e**4-1/4*(-s+m**2-t)**(-2)*(s-m**2)**(-2)*s*m**2*pi**(-2)*t*e**4+1/16*(-s+m**2-t)**(-2)*(s-m**2)**(-2)*s**3*pi**(-2)*e**4+3/8*(-s+m**2-t)**(-2)*(s-m**2)**(-2)*s*m**4*pi**(-2)*e**4+1/8*(-s+m**2-t)**(-2)*(s-m**2)**(-2)*s**2*pi**(-2)*t*e**4-1/4*(-s+m**2-t)**(-2)*(s-m**2)**(-2)*s**2*m**2*pi**(-2)*e**4");
         TAssert.assertEquals(cs, expected);
     }
@@ -368,18 +364,18 @@ public class TensorsTest {
         SumBuilder sb1 = new SumBuilder(), sb2 = new SumBuilder();
         for (Tensor t : tensors) {
             sb1.put(t);
-            t = Expand.expand(t);
+            t = ExpandTransformation.expand(t);
             sb2.put(t);
         }
         Tensor a = sb1.build(), b = sb2.build();
 
-        a = Expand.expand(a, ContractIndices.ContractIndices);
-        a = ContractIndices.contract(a);
+        a = ExpandTransformation.expand(a, EliminateMetricsTransformation.ELIMINATE_METRICS);
+        a = EliminateMetricsTransformation.contract(a);
 
-        b = ContractIndices.contract(b);
+        b = EliminateMetricsTransformation.contract(b);
 
-        a = RemoveDueToSymmetry.INSTANCE.transform(a);
-        b = RemoveDueToSymmetry.INSTANCE.transform(b);
+        a = EliminateFromSymmetriesTransformation.ELIMINATE_FROM_SYMMETRIES.transform(a);
+        b = EliminateFromSymmetriesTransformation.ELIMINATE_FROM_SYMMETRIES.transform(b);
         TAssert.assertEquals(a, b);
     }
 

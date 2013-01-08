@@ -36,7 +36,7 @@ import java.util.Iterator;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public class PowersContainer implements Iterable<Tensor> {
+public final class PowersContainer implements Iterable<Tensor> {
     private boolean sign;
     private final TIntObjectHashMap<ArrayList<PowerNode>> powers;
 

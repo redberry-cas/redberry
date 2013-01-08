@@ -131,6 +131,17 @@ public final class Combinatorics {
         return newArray;
     }
 
+    public static int[] shuffle(int[] array, final int[] permutation) {
+        if (array.length != permutation.length)
+            throw new IllegalArgumentException();
+        if (!testPermutationCorrectness(permutation))
+            throw new IllegalArgumentException();
+        int[] newArray = new int[array.length];
+        for (int i = 0; i < permutation.length; ++i)
+            newArray[i] = array[permutation[i]];
+        return newArray;
+    }
+
     public static boolean testPermutationCorrectness(int[] permutation) {
         int[] _permutation = new int[permutation.length];
         System.arraycopy(permutation, 0, _permutation, 0, permutation.length);

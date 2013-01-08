@@ -49,18 +49,18 @@ public final class IndexMappingBufferTester implements IndexMappingBuffer {
     public IndexMappingBufferTester(FromToHolder holder) {
         this.from = holder.from;
         this.to = holder.to;
-        this.signum = holder.signum;
+        this.signum = holder.sign;
         this.innerBuffer = new IndexMappingBufferImpl();
     }
 
-    //public IndexMappingBufferTester(int[] from, int[] to, boolean signum) {
+    //public IndexMappingBufferTester(int[] from, int[] to, boolean sign) {
     //    if (from.length != to.length)
     //        throw new IllegalArgumentException();
     //    from = IndicesUtils.getIndicesNames(from);
     //    to = IndicesUtils.getIndicesNames(to);
     //    this.from = from;
     //    this.to = to;
-    //    this.signum = signum;
+    //    this.sign = sign;
     //    //Here we can use unstable sort method
     //    ArraysUtils.quickSort(this.from, this.to);
     //    innerBuffer = new IndexMappingBufferImpl();
@@ -72,7 +72,7 @@ public final class IndexMappingBufferTester implements IndexMappingBuffer {
         //final int size = map.size();
         //from = new int[size];
         //to = new int[size];
-        //signum = buffer.getSignum();
+        //sign = buffer.getSignum();
         //int i = 0;
         //for (Map.Entry<Integer, IndexMappingBufferRecord> entry : map.entrySet()) {
         //    from[i] = entry.getKey();
@@ -86,7 +86,7 @@ public final class IndexMappingBufferTester implements IndexMappingBuffer {
     //    int innerBufferSize = buffer.innerBuffer.map.size();
     //    from = new int[buffer.from.length + innerBufferSize];
     //    to = new int[buffer.from.length + innerBufferSize];
-    //    signum = buffer.getSignum();
+    //    sign = buffer.getSignum();
     //    System.arraycopy(buffer.from, 0, from, 0, buffer.from.length);
     //    System.arraycopy(buffer.to, 0, to, 0, buffer.to.length);
     //    int i = buffer.from.length;
@@ -121,7 +121,7 @@ public final class IndexMappingBufferTester implements IndexMappingBuffer {
         provider.tick();
         IndexMappingBuffer buffer;
         while ((buffer = provider.take()) != null)
-            if (!buffer.getSignum())
+            if (!buffer.getSign())
                 return true;
         return false;
     }
@@ -137,13 +137,13 @@ public final class IndexMappingBufferTester implements IndexMappingBuffer {
     }
 
     @Override
-    public void addSignum(boolean signum) {
-        innerBuffer.addSignum(signum);
+    public void addSign(boolean sign) {
+        innerBuffer.addSign(sign);
     }
 
     @Override
-    public boolean getSignum() {
-        return signum ^ innerBuffer.signum;
+    public boolean getSign() {
+        return signum ^ innerBuffer.sign;
     }
 
     @Override
@@ -179,7 +179,7 @@ public final class IndexMappingBufferTester implements IndexMappingBuffer {
             from1[i] = entry.getKey();
             to1[i++] = entry.getValue().getIndexName();
         }
-        return new FromToHolder(from1, to1, getSignum());
+        return new FromToHolder(from1, to1, getSign());
     }
 
     public void reset() {

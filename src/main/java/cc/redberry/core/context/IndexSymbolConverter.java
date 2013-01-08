@@ -22,8 +22,6 @@
  */
 package cc.redberry.core.context;
 
-import cc.redberry.core.context.defaults.LatinSymbolDownCaseConverter;
-
 public interface IndexSymbolConverter {
     /**
      * @param symbol index string representation
@@ -55,12 +53,12 @@ public interface IndexSymbolConverter {
 
     /**
      * Returns the number of symbols, supported by this converter. For example
-     * {@link LatinSymbolDownCaseConverter} supports 26 symbols (Latin alphabet
+     * {@link cc.redberry.core.context.defaults.LatinLowerCaseConverter} supports 26 symbols (Latin alphabet
      * size).
      *
      * @return the number of symbols, supported by this converter
      */
-    int maxSymbolsCount();
+    int maxNumberOfSymbols();
 
     /**
      * Returns type of indices, which this converter process. The type value is

@@ -36,7 +36,7 @@ public class PlusMinusIndexMappingProvider extends IndexMappingProviderAbstract 
         IndexMappingBuffer buf = currentBuffer;
         if (state) {
             currentBuffer = null;
-            buf.addSignum(true);
+            buf.addSign(true);
         } else {
             buf = buf.clone();
             state = true;

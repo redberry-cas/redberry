@@ -45,18 +45,18 @@ import java.util.Arrays;
  */
 public class Symmetry extends Permutation {
 
-    private final boolean signum;
+    private final boolean sign;
 
     /**
      * Constructs symmetry, specified by {@code permutation} integer array in
-     * <i>one-line</i> notation and {@code signum} - property of permutation. If {@code signum == false},
+     * <i>one-line</i> notation and {@code sign} - property of permutation. If {@code sign == false},
      * it means that this permutation does not change object, when acting on it.
-     * If {@code signum == true}, it means that permutation changes sign of
+     * If {@code sign == true}, it means that permutation changes sign of
      * object, when acting on it, i.e. this is antisymmetry.
      *
      * @param permutation <i>one-line</i> notated integer array, representing a
      *                    permutation.
-     * @param signum      property of permutation. {@code false} means that
+     * @param sign      property of permutation. {@code false} means that
      * permutation does not change object, when acting on it and {@code true}
      * means that permutation changes sign of object, when acting on it, i.e.
      * this is antisymmetry.
@@ -64,9 +64,9 @@ public class Symmetry extends Permutation {
      * @throws IllegalArgumentException if array is inconsistent with
      *                                  <i>one-line</i> notation
      */
-    public Symmetry(int[] permutation, boolean signum) {
+    public Symmetry(int[] permutation, boolean sign) {
         super(permutation);
-        this.signum = signum;
+        this.sign = sign;
     }
 
     /**
@@ -77,12 +77,12 @@ public class Symmetry extends Permutation {
      */
     public Symmetry(int dimension) {
         super(dimension);
-        this.signum = false;
+        this.sign = false;
     }
 
-    protected Symmetry(int[] permutation, boolean signum, boolean notClone) {
+    protected Symmetry(int[] permutation, boolean sign, boolean notClone) {
         super(permutation, notClone);
-        this.signum = signum;
+        this.sign = sign;
     }
 
     /**
@@ -102,14 +102,14 @@ public class Symmetry extends Permutation {
      * @return true if this is antisymmetry and false if not
      */
     public boolean isAntiSymmetry() {
-        return signum;
+        return sign;
     }
 
     /**
      * Returns a composition of this symmetry (A) and specified (B), i.e. A*B.
      * The result symmetry represents the compositions of combinatorics and
-     * multiplying {@code signums} (the result {@code signum} will be
-     * {@code this.signum ^ element.signum}).
+     * multiplying {@code signums} (the result {@code sign} will be
+     * {@code this.sign ^ element.sign}).
      *
      * @param element is a right multiplicand symmetry
      *
@@ -121,19 +121,19 @@ public class Symmetry extends Permutation {
     @Override
     public Symmetry composition(Permutation element) {
         Symmetry s = (Symmetry) element;
-        return new Symmetry(compositionArray(element), signum ^ s.signum, true);
+        return new Symmetry(compositionArray(element), sign ^ s.sign, true);
     }
 
     /**
      * Returns symmetry representing inverse permutation and similar
-     * {@code signum}.
+     * {@code sign}.
      *
      * @return symmetry representing inverse permutation and similar
-     * {@code signum}
+     * {@code sign}
      */
     @Override
     public Symmetry inverse() {
-        return new Symmetry(calculateInverse(), signum);
+        return new Symmetry(calculateInverse(), sign);
     }
 
     /**
@@ -146,25 +146,25 @@ public class Symmetry extends Permutation {
         if (getClass() != obj.getClass())
             return false;
         final Symmetry other = (Symmetry) obj;
-        if (this.signum != other.signum)
+        if (this.sign != other.sign)
             return false;
         return Arrays.equals(permutation, other.permutation);
     }
 
     @Override
     public int hashCode() {
-        return super.hashCode() + (this.signum ? 1 : 0);
+        return super.hashCode() + (this.sign ? 1 : 0);
     }
 
     /**
      * Returns the string representation of this symmetry in form
-     * {@code permutation : signum}.
+     * {@code permutation : sign}.
      *
      * @see Permutation#toString()
      * @return the string representation of this symmetry
      */
     @Override
     public String toString() {
-        return super.toString() + "(" + (signum ? "-" : "+") + ")";
+        return super.toString() + "(" + (sign ? "-" : "+") + ")";
     }
 }

@@ -28,7 +28,7 @@ import cc.redberry.core.context.CC;
 import cc.redberry.core.context.NameDescriptor;
 import cc.redberry.core.indices.*;
 import cc.redberry.core.number.Complex;
-import cc.redberry.core.parser.ParseNodeTransformer;
+import cc.redberry.core.parser.ParseTokenTransformer;
 import cc.redberry.core.tensor.functions.*;
 import cc.redberry.core.utils.TensorUtils;
 import gnu.trove.set.hash.TIntHashSet;
@@ -152,7 +152,7 @@ public final class Tensors {
     }
 
     public static Tensor[] resolveDummy(Tensor[] factors) {
-        //TODO preserve ordering
+        //TODO preserve ordering    //?
         Tensor[] result = new Tensor[factors.length];
         TIntHashSet forbidden = new TIntHashSet();
         ArrayList<Tensor> toResolve = new ArrayList<>();
@@ -526,7 +526,7 @@ public final class Tensors {
         return r;
     }
 
-    public static Tensor parse(String expression, ParseNodeTransformer... preprocessors) {
+    public static Tensor parse(String expression, ParseTokenTransformer... preprocessors) {
         return CC.current().getParseManager().parse(expression, preprocessors);
     }
 

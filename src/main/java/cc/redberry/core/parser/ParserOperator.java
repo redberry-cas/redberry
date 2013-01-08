@@ -29,7 +29,7 @@ import java.util.List;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-abstract class ParserOperator implements NodeParser {
+abstract class ParserOperator implements TokenParser {
 
     private char operatorSymbol;
     private char operatorInverseSymbol;
@@ -66,7 +66,7 @@ abstract class ParserOperator implements NodeParser {
     }
 
     @Override
-    public ParseNode parseNode(String expression, Parser parser) {
+    public ParseToken parseNode(String expression, Parser parser) {
         if (!canParse(expression))
             return null;
         expression = expression.replace("--", "+");
@@ -75,7 +75,7 @@ abstract class ParserOperator implements NodeParser {
         expression = expression.replace("-+", "-");
         char[] expressionChars = expression.toCharArray();
         StringBuffer buffer = new StringBuffer();
-        List<ParseNode> nodes = new ArrayList<>();
+        List<ParseToken> nodes = new ArrayList<>();
         int level = 0, indicesLevel = 0;
         Mode mode = Mode.Direct;
 
@@ -114,7 +114,7 @@ abstract class ParserOperator implements NodeParser {
         return compile(nodes);
     }
 
-    private void modeParser(String expression, Mode mode, Parser parser, List<ParseNode> nodes) {
+    private void modeParser(String expression, Mode mode, Parser parser, List<ParseToken> nodes) {
         if (mode == Mode.Direct) {
             nodes.add(parser.parse(expression));
             return;
@@ -129,7 +129,7 @@ abstract class ParserOperator implements NodeParser {
         return true;
     }
 
-    protected abstract ParseNode compile(List<ParseNode> nodes);
+    protected abstract ParseToken compile(List<ParseToken> nodes);
 
-    protected abstract ParseNode inverseOperation(ParseNode tensor);
+    protected abstract ParseToken inverseOperation(ParseToken tensor);
 }

@@ -68,7 +68,6 @@ public class ApplyIndexMappingTest {
 
         Tensor target = parse("g_ab");
         target = ApplyIndexMapping.applyIndexMapping(target, imb, new int[0]);
-        System.out.println(target);
         Tensor standard = parse("g^mn");
         Assert.assertTrue(TensorUtils.equalsExactly(target, standard));
     }
@@ -199,8 +198,8 @@ public class ApplyIndexMappingTest {
 
         target = ApplyIndexMapping.applyIndexMapping(target, imb, usedIndices);
         Tensor standard = parse("A_{wfexhk}*B^{xhk}_{z}*A^{z}_{sql}*B^{sql}_{yg}");
-        System.out.println(target);
-        //Assert.assertTrue(TensorUtils.equalsExactly(target, standard));
+//        System.out.println(target);
+//        //Assert.assertTrue(TensorUtils.equalsExactly(target, standard));
         Assert.assertTrue(TensorUtils.equalsExactly(target, standard));
     }
 

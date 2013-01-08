@@ -47,7 +47,7 @@ class PrimitiveSumSubstitution extends PrimitiveSubstitution {
         IndexMappingBuffer buffer = bc.buffer;
         Tensor newTo;
         if (toIsSymbolic)
-            newTo = buffer.getSignum() ? Tensors.negate(to) : to;
+            newTo = buffer.getSign() ? Tensors.negate(to) : to;
         else
             newTo = ApplyIndexMapping.applyIndexMapping(to, buffer, iterator.getForbidden());
 

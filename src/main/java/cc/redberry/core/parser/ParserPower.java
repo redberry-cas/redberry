@@ -27,7 +27,7 @@ package cc.redberry.core.parser;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public class ParserPower implements NodeParser {
+public class ParserPower implements TokenParser {
 
     public static final ParserPower INSTANCE = new ParserPower();
     private static final String power = "Power";
@@ -42,7 +42,7 @@ public class ParserPower implements NodeParser {
     }
 
     @Override
-    public ParseNode parseNode(String expression, Parser parser) {
+    public ParseToken parseNode(String expression, Parser parser) {
         if (expression.length() <= minLength)
             return null;
         if (!(power + '[').equals(expression.substring(0, power.length() + 1))
@@ -64,8 +64,8 @@ public class ParserPower implements NodeParser {
                 comma = i;
             }
         }
-        ParseNode arg = parser.parse(expression.substring(power.length() + 1, comma));
-        ParseNode power = parser.parse(expression.substring(comma + 1, expression.length() - 1));
-        return new ParseNode(TensorType.Power, arg, power);
+        ParseToken arg = parser.parse(expression.substring(power.length() + 1, comma));
+        ParseToken power = parser.parse(expression.substring(comma + 1, expression.length() - 1));
+        return new ParseToken(TokenType.Power, arg, power);
     }
 }

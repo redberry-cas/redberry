@@ -40,7 +40,7 @@ public class ProviderFunctions {
 
             byte state = 0;
             while ((buffer = mp.take()) != null) {
-                state |= (byte) (buffer.getSignum() ? 0x10 : 0x01);
+                state |= (byte) (buffer.getSign() ? 0x10 : 0x01);
                 if (state == 0x11)
                     break;
             }

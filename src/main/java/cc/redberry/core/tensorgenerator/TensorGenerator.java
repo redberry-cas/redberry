@@ -28,7 +28,7 @@ import cc.redberry.core.math.frobenius.FrobeniusSolver;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.number.Rational;
 import cc.redberry.core.tensor.*;
-import cc.redberry.core.transformations.symmetrization.SymmetrizeUpperLowerIndices;
+import cc.redberry.core.transformations.symmetrization.SymmetrizeUpperLowerIndicesTransformation;
 import cc.redberry.core.utils.IntArray;
 
 import java.util.ArrayList;
@@ -112,7 +112,7 @@ public class TensorGenerator {
                 }
 
             //creating term & processing combinatorics            
-            Tensor term = SymmetrizeUpperLowerIndices.symmetrizeUpperLowerIndices(Tensors.multiplyAndRenameConflictingDummies(tCombination.toArray(new Tensor[tCombination.size()])));
+            Tensor term = SymmetrizeUpperLowerIndicesTransformation.symmetrizeUpperLowerIndices(Tensors.multiplyAndRenameConflictingDummies(tCombination.toArray(new Tensor[tCombination.size()])));
             if (symmetricForm || !(term instanceof Sum))
                 term = Tensors.multiply(coefficientsGenerator.take(), term, term instanceof Sum ? new Complex(new Rational(1, term.size())) : Complex.ONE);
             else

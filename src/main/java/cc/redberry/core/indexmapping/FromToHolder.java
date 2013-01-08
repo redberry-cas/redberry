@@ -26,13 +26,13 @@ import cc.redberry.core.utils.ArraysUtils;
 
 public final class FromToHolder {
     final int[] from, to;
-    final boolean signum;
+    final boolean sign;
 
-    FromToHolder(int[] from, int[] to, boolean signum) {
+    FromToHolder(int[] from, int[] to, boolean sign) {
         ArraysUtils.quickSort(from, to);
         this.from = from;
         this.to = to;
-        this.signum = signum;
+        this.sign = sign;
     }
 
     public FromToHolder mergeWith(FromToHolder other) {
@@ -81,6 +81,6 @@ public final class FromToHolder {
             System.arraycopy(aTo, aPointer, resultTo, counter, aTo.length - aPointer);
             System.arraycopy(aFrom, aPointer, resultFrom, counter, aFrom.length - aPointer);
         }
-        return new FromToHolder(resultFrom, resultTo, signum ^ other.signum);
+        return new FromToHolder(resultFrom, resultTo, sign ^ other.sign);
     }
 }

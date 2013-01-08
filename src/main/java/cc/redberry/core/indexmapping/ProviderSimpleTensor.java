@@ -88,7 +88,7 @@ final class ProviderSimpleTensor extends IndexMappingProviderAbstractFT<SimpleTe
                 for (int i = 0; i < size; ++i)
                     if (!tempBuffer.tryMap(fromIndices.get(s.newIndexOf(i)), toIndices.get(i)))
                         continue OUT;
-                tempBuffer.addSignum(s.isAntiSymmetry());
+                tempBuffer.addSign(s.isAntiSymmetry());
                 return tempBuffer;
             }
             symmetryIterator = null;

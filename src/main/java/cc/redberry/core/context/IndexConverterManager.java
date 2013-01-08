@@ -23,6 +23,7 @@
 package cc.redberry.core.context;
 
 import cc.redberry.core.indices.IndexType;
+import gnu.trove.set.hash.TByteHashSet;
 
 /**
  * @author Dmitry Bolotin
@@ -33,7 +34,12 @@ public final class IndexConverterManager {
     private final IndexSymbolConverter[] converters;
 
     public IndexConverterManager(IndexSymbolConverter[] converters) {
-        //Asserted different types
+        TByteHashSet types = new TByteHashSet(converters.length);
+        for (IndexSymbolConverter converter : converters) {
+            if (types.contains(converter.getType()))
+                throw new IllegalArgumentException("Several converters for same type.");
+            types.add(converter.getType());
+        }
         this.converters = converters;
     }
 

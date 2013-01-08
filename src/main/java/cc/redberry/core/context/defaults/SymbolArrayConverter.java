@@ -73,7 +73,7 @@ public abstract class SymbolArrayConverter implements IndexSymbolConverter {
     }
 
     @Override
-    public int maxSymbolsCount() {
+    public int maxNumberOfSymbols() {
         return symbols.length - 1;
     }
 }

@@ -38,13 +38,13 @@ public class ParserProduct extends ParserOperator {
     }
 
     @Override
-    protected ParseNode compile(List<ParseNode> nodes) {
-        return new ParseNode(TensorType.Product, nodes.toArray(new ParseNode[nodes.size()]));
+    protected ParseToken compile(List<ParseToken> nodes) {
+        return new ParseToken(TokenType.Product, nodes.toArray(new ParseToken[nodes.size()]));
     }
 
     @Override
-    protected ParseNode inverseOperation(ParseNode node) {
-        return new ParseNode(TensorType.Power, node, new ParseNodeNumber(Complex.MINUS_ONE));
+    protected ParseToken inverseOperation(ParseToken node) {
+        return new ParseToken(TokenType.Power, node, new ParseTokenNumber(Complex.MINUS_ONE));
     }
 
     @Override
