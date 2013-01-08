@@ -23,7 +23,7 @@
 package cc.redberry.core.transformations.substitutions;
 
 import cc.redberry.concurrent.OutputPortUnsafe;
-import cc.redberry.core.combinatorics.DistinctCombinationsPort;
+import cc.redberry.core.combinatorics.IntDistinctTuplesPort;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.utils.IntArrayList;
 
@@ -34,7 +34,7 @@ import cc.redberry.core.utils.IntArrayList;
 final class IndexlessBijectionsPort implements OutputPortUnsafe<int[]> {
 
     private boolean finished = false;
-    private final DistinctCombinationsPort combinationsPort;
+    private final IntDistinctTuplesPort combinationsPort;
 
     public IndexlessBijectionsPort(final Tensor[] from, final Tensor[] to) {
         if (from.length > to.length) {
@@ -69,7 +69,7 @@ final class IndexlessBijectionsPort implements OutputPortUnsafe<int[]> {
         int[][] r = new int[from.length][];
         for (i = 0; i < from.length; ++i)
             r[i] = hashReflections[i].toArray();
-        combinationsPort = new DistinctCombinationsPort(r);
+        combinationsPort = new IntDistinctTuplesPort(r);
     }
 
     @Override

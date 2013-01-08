@@ -24,8 +24,8 @@ package cc.redberry.core.transformations.substitutions;
 
 import cc.redberry.concurrent.OutputPortUnsafe;
 import cc.redberry.core.combinatorics.Combinatorics;
-import cc.redberry.core.combinatorics.DistinctCombinationsPort;
-import cc.redberry.core.combinatorics.IntCombinatoricGenerator;
+import cc.redberry.core.combinatorics.IntCombinatorialGenerator;
+import cc.redberry.core.combinatorics.IntDistinctTuplesPort;
 import cc.redberry.core.graph.GraphUtils;
 import cc.redberry.core.tensor.FullContractionsStructure;
 import cc.redberry.core.tensor.ProductContent;
@@ -360,7 +360,7 @@ public final class ProductsBijectionsPort implements OutputPortUnsafe<int[]> {
         /**
          * Generator
          */
-        final IntCombinatoricGenerator generator;
+        final IntCombinatorialGenerator generator;
 
         public PermutationInfo(PermutationInfo previous, long[] fromContractions, long[] targetContractions) {
             this.previous = previous;
@@ -404,7 +404,7 @@ public final class ProductsBijectionsPort implements OutputPortUnsafe<int[]> {
 
     private final class SeedPlanter {
 
-        final DistinctCombinationsPort combinationsPort;
+        final IntDistinctTuplesPort combinationsPort;
 
         public SeedPlanter() {
             int[][] hits = new int[seeds.length][];
@@ -418,7 +418,7 @@ public final class ProductsBijectionsPort implements OutputPortUnsafe<int[]> {
                         hitList.add(i);
                 hits[seedIndex] = hitList.toArray();
             }
-            combinationsPort = new DistinctCombinationsPort(hits);
+            combinationsPort = new IntDistinctTuplesPort(hits);
         }
 
         public int[] next() {

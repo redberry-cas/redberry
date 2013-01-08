@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2012:
+ * Copyright (c) 2010-2013:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -22,21 +22,33 @@
  */
 package cc.redberry.core.combinatorics;
 
+import cc.redberry.concurrent.OutputPortUnsafe;
+
 /**
+ * This interface if common for all combinatorial iterators.
+ *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  * @since 1.0
  */
-public final class UnsafeCombinatorics {
+public interface IntCombinatorialPort extends OutputPortUnsafe<int[]> {
+    /**
+     * Resets the iteration
+     */
+    void reset();
 
-    private UnsafeCombinatorics() {
-    }
+    /**
+     * Returns the reference on the current iteration element.
+     *
+     * @return the reference on the current iteration element
+     */
+    int[] getReference();
 
-    public static Permutation createUnsafe(int[] permutation) {
-        return new Permutation(permutation, true);
-    }
-
-    public static Symmetry createUnsafe(int[] permutation, boolean sign) {
-        return new Symmetry(permutation, sign, true);
-    }
+    /**
+     * Calculates and returns the next combination or null, if no more combinations exist.
+     *
+     * @return the next combination or null, if no more combinations exist
+     */
+    @Override
+    int[] take();
 }

@@ -32,37 +32,36 @@ import java.util.Arrays;
 import static org.junit.Assert.assertTrue;
 
 /**
- *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public class PriorityPermutationGeneratorTest {
-    public PriorityPermutationGeneratorTest() {
+public class IntPriorityPermutationsGeneratorTest {
+    public IntPriorityPermutationsGeneratorTest() {
     }
 
     @Test
     public void test1() {
-        PriorityPermutationGenerator generator = new PriorityPermutationGenerator(3);
+        IntPriorityPermutationsGenerator generator = new IntPriorityPermutationsGenerator(3);
         int[] p;
-        while ((p = generator.next()) != null)
+        while ((p = generator.take()) != null)
             System.out.println(Arrays.toString(p));
         generator.reset();
-        while ((p = generator.next()) != null)
+        while ((p = generator.take()) != null)
             System.out.println(Arrays.toString(p));
     }
 
     @Test
     public void test2() {
-        PriorityPermutationGenerator generator = new PriorityPermutationGenerator(3);
+        IntPriorityPermutationsGenerator generator = new IntPriorityPermutationsGenerator(3);
         int[] p;
-        while ((p = generator.next()) != null) {
+        while ((p = generator.take()) != null) {
             if (p[0] == 1)
                 generator.nice();
             System.out.println(Arrays.toString(p));
         }
         System.out.println("Acc");
         generator.reset();
-        while ((p = generator.next()) != null) {
+        while ((p = generator.take()) != null) {
             if (p[1] == 2)
                 generator.nice();
             System.out.println(Arrays.toString(p));
@@ -70,7 +69,7 @@ public class PriorityPermutationGeneratorTest {
 
         System.out.println("Acc");
         generator.reset();
-        while ((p = generator.next()) != null) {
+        while ((p = generator.take()) != null) {
             if (p[0] == 0)
                 generator.nice();
             System.out.println(Arrays.toString(p));
@@ -78,7 +77,7 @@ public class PriorityPermutationGeneratorTest {
 
         System.out.println("Acc");
         generator.reset();
-        while ((p = generator.next()) != null)
+        while ((p = generator.take()) != null)
             System.out.println(Arrays.toString(p));
         if (true) {
             int is = Integer.MAX_VALUE;
@@ -97,29 +96,29 @@ public class PriorityPermutationGeneratorTest {
             int[][] permutations = new int[pCount][];
             for (int i = 0; i < pCount; ++i)
                 OUTER:
-                while (true) {
-                    permutations[i] = rd.nextPermutation(dimm, dimm);
-                    for (int j = 0; j < i; ++j)
-                        if (Arrays.equals(permutations[i], permutations[j]))
-                            continue OUTER;
-                    break;
-                }
-            PriorityPermutationGenerator generator = new PriorityPermutationGenerator(dimm);
+                        while (true) {
+                            permutations[i] = rd.nextPermutation(dimm, dimm);
+                            for (int j = 0; j < i; ++j)
+                                if (Arrays.equals(permutations[i], permutations[j]))
+                                    continue OUTER;
+                            break;
+                        }
+            IntPriorityPermutationsGenerator generator = new IntPriorityPermutationsGenerator(dimm);
             //adding priorities
             for (int i = 0; i < pCount; ++i)
                 for (int j = 0; j <= pCount - i; ++j) {
                     addPriority(generator, permutations[i]);
                     generator.reset();
                 }
-            
+
             for (int i = 0; i < pCount; ++i)
-                assertTrue(Arrays.equals(permutations[i], generator.next()));
+                assertTrue(Arrays.equals(permutations[i], generator.take()));
         }
     }
 
-    private void addPriority(PriorityPermutationGenerator generator, int[] permutation) {
+    private void addPriority(IntPriorityPermutationsGenerator generator, int[] permutation) {
         int[] p;
-        while ((p = generator.next()) != null)
+        while ((p = generator.take()) != null)
             if (Arrays.equals(p, permutation)) {
                 generator.nice();
                 return;

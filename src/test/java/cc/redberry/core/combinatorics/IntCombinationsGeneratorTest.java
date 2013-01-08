@@ -31,7 +31,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
@@ -39,22 +38,22 @@ public class IntCombinationsGeneratorTest {
     @Test
     public void test0() {
         Set<int[]> expected = new HashSet<>();
-        expected.add(new int[]{0,1,2});
-        expected.add(new int[]{0,1,3});
-        expected.add(new int[]{0,1,4});
-        expected.add(new int[]{0,2,3});
-        expected.add(new int[]{0,2,4});
-        expected.add(new int[]{0,3,4});
-        expected.add(new int[]{1,2,3});
-        expected.add(new int[]{1,2,4});
-        expected.add(new int[]{1,3,4});
-        expected.add(new int[]{2,3,4});
+        expected.add(new int[]{0, 1, 2});
+        expected.add(new int[]{0, 1, 3});
+        expected.add(new int[]{0, 1, 4});
+        expected.add(new int[]{0, 2, 3});
+        expected.add(new int[]{0, 2, 4});
+        expected.add(new int[]{0, 3, 4});
+        expected.add(new int[]{1, 2, 3});
+        expected.add(new int[]{1, 2, 4});
+        expected.add(new int[]{1, 3, 4});
+        expected.add(new int[]{2, 3, 4});
 
         Set<int[]> actual = new HashSet<>();
         for (int[] combination : new IntCombinationsGenerator(5, 3))
             actual.add(combination.clone());
 
-        TAssert.assertEquals(actual,expected);
+        TAssert.assertEquals(actual, expected);
     }
 
     @Test

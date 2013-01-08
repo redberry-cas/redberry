@@ -25,51 +25,44 @@ package cc.redberry.core.combinatorics;
 import java.util.Iterator;
 
 /**
+ * This class is a simple wrapper of {@link IntPermutationsGenerator}. It returns the objects of
+ * type {@code Permutation} instead of integer arrays.
+ * <p/>
  *
+ * @param <T> {@code Permutation} subtype
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @since 1.0
  */
 public class PermutationsGenerator<T extends Permutation> implements Iterator<T> {
 
     private IntPermutationsGenerator generator;
 
     /**
-     * Construct iterator over combinatorics with specified dimension. Start
-     * permutation is identity permutation.
+     * Construct iterator over all permutations with specified dimension starting with identity.
      *
-     * @param length length of combinatorics
+     * @param dimension dimension of permutations
      */
-    public PermutationsGenerator(int length) {
-        this.generator = new IntPermutationsGenerator(length);
+    public PermutationsGenerator(int dimension) {
+        this.generator = new IntPermutationsGenerator(dimension);
     }
 
     /**
-     * Construct iterator over combinatorics with specified permutation at
-     * start. In this way, iterator will not iterate over all possible
-     * combinatorics, but only from start permutation up to last permutation,
-     * witch is [length-1,length-2,....1,0]. The specified permutation is coping
-     * in constructor, so it is not destroying during iteration, in contract
-     * with
-     * {@link IntPermutationsGenerator#IntPermutationsGenerator(int[])}.
+     * Construct iterator over permutations with specified permutation at
+     * the start. If starting permutation is not identity, the iterator will not
+     * iterate over all possible combinatorics, but only from starting permutation up to the
+     * last permutation, which is [size-1,size-2,....1,0]. <b>Note:</b> parameter {@code permutation} is
+     * not coping in constructor and will change during iteration.
      *
-     *
-     * @param permutation start permutation of iterator.
-     *
+     * @param permutation starting permutation
      * @throws IllegalArgumentException if permutation is inconsistent with
-     *                                  <i>single-line</i> notation
+     *                                  <i>one-line</i> notation
      */
     public PermutationsGenerator(Permutation permutation) {
         int[] array = permutation.getPermutation().copy();
         this.generator = new IntPermutationsGenerator(array);
     }
 
-    /**
-     * Returns {@code true} if the iteration has more elements. (In other words,
-     * returns {@code true} if {@link #next} would return an element rather than
-     * throwing an exception.)
-     *
-     * @return {@code true} if the iteration has more elements
-     */
     @Override
     public boolean hasNext() {
         return generator.hasNext();
@@ -88,15 +81,17 @@ public class PermutationsGenerator<T extends Permutation> implements Iterator<T>
         return (T) new Symmetry(generator.permutation.clone(), false);
     }
 
+    /**
+     * @throws UnsupportedOperationException always
+     */
     @Override
     public void remove() {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
-    public int getDimension() {
-        return generator.getDimension();
-    }
-
+    /**
+     * Resets the iteration
+     */
     public void reset() {
         generator.reset();
     }

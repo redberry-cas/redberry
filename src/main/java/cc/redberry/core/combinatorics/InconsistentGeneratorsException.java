@@ -23,12 +23,9 @@
 package cc.redberry.core.combinatorics;
 
 /**
- * {@code InconsistentGeneratorsException} is exception witch must been thrown
- * when some code invoked with inconsistent combinatorics (and inheritors of
- * {@code Permutation}) or combinatorics providers.
- *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @since 1.0
  */
 public class InconsistentGeneratorsException extends RuntimeException {
     public InconsistentGeneratorsException(String message) {

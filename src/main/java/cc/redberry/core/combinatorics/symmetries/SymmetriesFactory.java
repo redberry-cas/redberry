@@ -26,15 +26,33 @@ import cc.redberry.core.combinatorics.Combinatorics;
 import cc.redberry.core.combinatorics.Symmetry;
 
 /**
+ * This class provides static factory methods to create {@link Symmetries} objects.
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @see Symmetries
  */
-public class SymmetriesFactory {
+public final class SymmetriesFactory {
 
+    /**
+     * Empty symmetries with zero dimension.
+     */
     private final static Symmetries EmptySymmetries0 = new EmptySymmetries(0);
+    /**
+     * Empty symmetries with dimension 1.
+     */
     private final static Symmetries EmptySymmetries1 = new EmptySymmetries(1);
 
+    private SymmetriesFactory() {
+    }
+
+    /**
+     * Creates empty {@link Symmetries} object (i.e. contained only identity symmetry)
+     * with specified dimension.
+     *
+     * @param dimension dimension of symmetries
+     * @return {@code Symmetries} object
+     */
     public static Symmetries createSymmetries(int dimension) {
         if (dimension < 0)
             throw new IllegalArgumentException();
@@ -45,6 +63,15 @@ public class SymmetriesFactory {
         return new SymmetriesImpl(dimension);
     }
 
+    /**
+     * Creates {@link Symmetries} object with specified dimension, which contains one transposition and one cycle.
+     * Other words, it represents a full symmetric group with specified dimension, so, for example, all
+     * permutations of specified dimension can be obtained via its
+     * {@link cc.redberry.core.combinatorics.symmetries.Symmetries#iterator()}  method.
+     *
+     * @param dimension dimension
+     * @return {@code Symmetries} object with one transposition and one cycle
+     */
     public static Symmetries createFullSymmetries(int dimension) {
         if (dimension < 0)
             throw new IllegalArgumentException();
@@ -55,6 +82,17 @@ public class SymmetriesFactory {
         return new FullSymmetries(dimension);
     }
 
+    /**
+     * Returns a symmetry object, which represents a Cartesian product of two symmetric groups
+     * with dimensions {@code upperCount} and {@code lowerCount} respectively. This object contains symmetries
+     * of dimension {@code upperCount + lowerCount} and contains one transposition and one cycle of the first
+     * block of {@code upperCount} elements, and one transposition and one cycle of the second
+     * block of {@code lowerCount} elements
+     *
+     * @param upperCount dimension of the first subgroup
+     * @param lowerCount dimension of the second subgroup
+     * @return {@code Symmetries} object which represents a Cartesian product of two symmetric groups
+     */
     public static Symmetries createFullSymmetries(int upperCount, int lowerCount) {
         if (upperCount < 0 || upperCount < 0)
             throw new IllegalArgumentException();
@@ -62,7 +100,7 @@ public class SymmetriesFactory {
             return SymmetriesFactory.createSymmetries(upperCount + lowerCount);
 
         SymmetriesImpl symmetries = new SymmetriesImpl(upperCount + lowerCount);
-        
+
         //TODO refactor
         //transposition
         int i;

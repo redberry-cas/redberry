@@ -34,14 +34,14 @@ import java.util.Set;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public class DistinctCombinationsPortTest {
+public class IntDistinctTuplesPortTest {
     @Test
     public void test1() {
         int[] a1 = {1, 1};
         int[] a2 = {1, 1};
         int[] a3 = {1};
         int[][] aa = {a1, a2, a3};
-        DistinctCombinationsPort dcp = new DistinctCombinationsPort(aa);
+        IntDistinctTuplesPort dcp = new IntDistinctTuplesPort(aa);
         Assert.assertEquals(dcp.take(), null);
     }
 
@@ -51,7 +51,7 @@ public class DistinctCombinationsPortTest {
         int[] a2 = {2, 4};
         int[] a3 = {3, 4, 5};
         int[][] aa = {a1, a2, a3};
-        DistinctCombinationsPort dcp = new DistinctCombinationsPort(aa);
+        IntDistinctTuplesPort dcp = new IntDistinctTuplesPort(aa);
         int[] c;
         Set<int[]> expected = new HashSet<>();
         expected.add(new int[]{1, 2, 3});
@@ -73,7 +73,7 @@ public class DistinctCombinationsPortTest {
         int[] a2 = {1, 2, 3};
         int[] a3 = {1, 2, 3};
         int[][] aa = {a1, a2, a3};
-        DistinctCombinationsPort dcp = new DistinctCombinationsPort(aa);
+        IntDistinctTuplesPort dcp = new IntDistinctTuplesPort(aa);
         int[] c;
         Set<int[]> actual = new HashSet<>();
         while ((c = dcp.take()) != null)
@@ -93,8 +93,18 @@ public class DistinctCombinationsPortTest {
         int[] a2 = {3};
         int[] a3 = {1, 2};
         int[][] aa = {a1, a2, a3};
-        DistinctCombinationsPort dcp = new DistinctCombinationsPort(aa);
+        IntDistinctTuplesPort dcp = new IntDistinctTuplesPort(aa);
         Assert.assertTrue(Arrays.equals(new int[]{1, 3, 2}, dcp.take()));
         Assert.assertTrue(dcp.take() == null);
+    }
+
+    @Test
+    public void test5() {
+        int[] a1 = {1, 2, 3};
+        int[] a2 = {2, 3};
+        IntDistinctTuplesPort dcp = new IntDistinctTuplesPort(a1, a2);
+        int[] tuple;
+        while ((tuple = dcp.take()) != null)
+            System.out.println(Arrays.toString(tuple));
     }
 }

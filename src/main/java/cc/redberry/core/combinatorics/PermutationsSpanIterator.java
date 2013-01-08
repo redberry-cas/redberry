@@ -28,23 +28,17 @@ import java.util.List;
 import java.util.TreeSet;
 
 /**
- * This class provides generating all compositions of given set of combinatorics.
- * So, if we have some set of combinatorics S={p1,p2,...,pN}, this class can iterate
- * over all possible compositions in all possible orders of combinatorics p1,p2,....
- * In this way, we iterating over combinations
- * <var>p<sub>i<sub>1</sub></sub><sup>n<sub>1</sub><sup></var>
- * <var>p<sub>i<sub>2</sub></sub><sup>n<sub>2</sub><sup></var>....
- * <var>p<sub>i<sub>N</sub></sub><sup>n<sub>N</sub><sup></var>
- * throughout all possible combinations of
- * {<var>i<sub>1</sub></var>,<var>i<sub>2</sub></var>,...<var>i<sub>N</sub></var>}
- * and {<var>n<sub>1</sub></var>,<var>n<sub>2</sub></var>,...<var>n<sub>N</sub></var>},
- * where each i index runs 0...N and each n index runs 0...&#8734;, until the
- * result is unique. Algorithm, witch provides such iterating, uses {@link TreeSet}
- * for store generated combinatorics.
+ * This class allows to iterate over all compositions of a given set of permutations.
+ * More formally, for a given set of permutations S={p<sub>1</sub>,p<sub>2</sub>,...,p<sub>N</sub>},
+ * it will iterate over all possible different compositions
+ * p<sub>i1</sub>*p<sub>i2</sub>...*p<sub>iN</sub>*p<sub>iN+1</sub>...*p<sub>iM</sub>. Mathematically say,
+ * this class allows to enumerate all elements of the subgroup of a symmetric group, which is defined by
+ * a generating set.
  *
- * @param <T> some inheritor of Permutation, e.g. {@code Permutation} or {@code Symmetry}
+ * @param <T> {@code Permutation} type
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @since 1.0
  */
 public final class PermutationsSpanIterator<T extends Permutation> implements Iterator<T> {
     private TreeSet<T> set = null;

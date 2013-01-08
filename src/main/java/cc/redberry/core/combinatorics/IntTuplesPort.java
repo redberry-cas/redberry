@@ -22,33 +22,40 @@
  */
 package cc.redberry.core.combinatorics;
 
-import cc.redberry.concurrent.OutputPortUnsafe;
-
 import java.util.Arrays;
 
 /**
- * Generates combinations of integers {a_1,a_2,...,a_N}, where
- * <code>0&#60;=a_i&#60;=upperBounds[i]</code>. <br>For example, for
- * <code>uppersBounds = {2, 3, 2}</code> all combinations are
- * <code>
- * <br>[0, 0, 0]
- * <br>[0, 0, 1]
- * <br>[0, 1, 0]
- * <br>[0, 1, 1]
- * <br>[0, 2, 0]
- * <br>[0, 2, 1]
- * <br>[1, 0, 0]
- * <br>[1, 0, 1]
- * <br>[1, 1, 0]
- * <br>[1, 1, 1]
- * <br>[1, 2, 0]
- * <br>[1, 2, 1]
- * </code>
+ * This class allows to iterate over all N-tuples (not necessary to be distinct), which can be
+ * chosen from {@code N} arrays of integers of the form
+ * <i>array</i><sub>i</sub> = [0, 1, 2, ..., K<sub>i</sub>].
+ * <br></br>For example, if a set of arrays length is {K<sub>i</sub>} = [2,3,2],
+ * then the following tuples will be produced
+ * <code><pre>
+ * [0, 0, 0]
+ * [0, 0, 1]
+ * [0, 1, 0]
+ * [0, 1, 1]
+ * [0, 2, 0]
+ * [0, 2, 1]
+ * [1, 0, 0]
+ * [1, 0, 1]
+ * [1, 1, 0]
+ * [1, 1, 1]
+ * [1, 2, 0]
+ * [1, 2, 1]
+ * </pre></code>
+ * <p/>
+ * <p>This class is implemented via output port pattern and the calculation of the next
+ * tuple occurs only on the invocation of {@link #take()}.
+ * <b>Note:</b> method {@link #take()} returns the same reference on each invocation.
+ * So, if it is needed not only to obtain the information from {@link #take()}, but also save the result,
+ * it is necessary to clone the returned array.</p>
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @since 1.0
  */
-public final class IntTuplesPort implements OutputPortUnsafe<int[]> {
+public final class IntTuplesPort implements IntCombinatorialPort {
 
     private final int[] upperBounds;
     private int[] current;
@@ -88,8 +95,16 @@ public final class IntTuplesPort implements OutputPortUnsafe<int[]> {
         return current;
     }
 
+    /**
+     * Resets the iteration
+     */
     public void reset() {
         Arrays.fill(current, 0);
         current[upperBounds.length - 1] = -1;
+    }
+
+    @Override
+    public int[] getReference() {
+        return current;
     }
 }

@@ -26,46 +26,46 @@ import cc.redberry.core.combinatorics.InconsistentGeneratorsException;
 import cc.redberry.core.combinatorics.PermutationsSpanIterator;
 import cc.redberry.core.combinatorics.Symmetry;
 
+import java.util.Iterator;
 import java.util.List;
 
 /**
- * This interface is a representation of a set of symmetries, taking into
+ * <p>This interface is a representation of a set of symmetries, which takes into
  * account possible compositions of symmetries in this set. More formally, set
- * contain no element s, which can be expressed as s=s1*s2*s3*...*sN, where
+ * contains no element s, which can be expressed as s=s1*s2*s3*...*sN, where
  * {s1,s2,s3,...,sN} are elements of this set. So, this interface models the
- * mathematical <i>basis of symmetries</i>. It also contains an identity
+ * mathematical <i>basis of subgroup of symmetric group</i>. It contains the identity
  * symmetry by default.
- *
- * <p>All the symmetries, keeping by this set must be consistent. First of all
- * it means, that all symmetries should have similar dimension (see
- * {@link Symmetry#dimension()}). Next, if we denote symmetry as pair
- * <i>(permutation, sign)</i>, there is no any symmetry <i>(p,s)</i> and subset
- * of symmetries {<i>(p1,s1)</i>,<i>(p2,s2)</i>,...,<<i>(pN,sN)</i>}, such that
- * <i>p = p1*p2*p3*...*pN</i>, but <i>s != s1*s2*s3*...*sN</i>. Method
- * {@link #add(cc.redberry.core.combinatorics.Symmetry)} throws
- * {@link InconsistentGeneratorsException} if its argument is inconsistent with
- * already added to this set symmetries.
- *
- * <p>Iterator returned by this set iterate over basis symmetries (which are
- * contains in this set) and all possible symmetries, which can be obtained by
- * composing the basis symmetries, i.e. it works as
- * {@link PermutationsSpanIterator}. To extract only the basis symmetries,
- * special method {@link #getBasisSymmetries() } introduced. This method returns
- * an unmodifiable list of basis symmetries.
- *
- * @see Symmetry
- * @see PermutationsSpanIterator
- * @see InconsistentGeneratorsException
+ * </p>
+ * <p/>
+ * <p>All symmetries, keeping by this set must be consistent. It means, that all
+ * of them must have similar dimension (see {@link #dimension()});
+ * next, if we denote symmetry as pair <i>(permutation, sign)</i>, there is no
+ * any symmetry <i>(p,s)</i> and subset of symmetries {<i>(p1,s1)</i>,<i>(p2,s2)</i>,...,<<i>(pN,sN)</i>},
+ * such that <i>p = p1*p2*p3*...*pN</i>, but <i>s != s1*s2*s3*...*sN</i>. Method
+ * {@link #add(cc.redberry.core.combinatorics.Symmetry)} throws {@link InconsistentGeneratorsException}
+ * if its argument is inconsistent with existing symmetries in set.
+ * </p>
+ * <p/>
+ * <p>Iterator returned by this set iterates over all possible compositions
+ * of symmetries from set, i.e. it works as {@link PermutationsSpanIterator}.
+ * To extract only the basis symmetries, a special method {@link #getBasisSymmetries() }
+ * introduced. This method returns an unmodifiable list of basis symmetries.</p>
+ * <p/>
+ * <p>Objects of this type can be created via static factory methods
+ * in {@link SymmetriesFactory}.</p>
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @see SymmetriesFactory
+ * @see Symmetry
+ * @see PermutationsSpanIterator
+ * @see InconsistentGeneratorsException
  */
 public interface Symmetries extends Iterable<Symmetry> {
 
     /**
-     * Returns the dimension of the symmetries contained in this set. Other
-     * words, returns {@link Symmetry#dimension()} (since all symmetries in set
-     * have similar dimension).
+     * Returns the dimension of the symmetries, which contained in this set.
      *
      * @return dimension of the symmetries contained in this set
      */
@@ -81,30 +81,36 @@ public interface Symmetries extends Iterable<Symmetry> {
     boolean isEmpty();
 
     /**
-     * Adds the specified symmetry to this set if it is not already present.
-     * More detailed, adds if and only if there is no any subset of symmetries
+     * Adds the specified symmetry to this set if it cannot be expressed as combination of
+     * existing symmetries from this set.
+     * <p>More detailed, adds if and only if there is no any subset of symmetries
      * {s1,s2,s3,...,sN} in this set, such that specified symmetry is equal to
-     * the composition s1*s2*s2*...*sN.
-     *
-     * If specified symmetry is not consistent with other set symmetries in the
+     * the composition s1*s2*s2*...*sN.</p>
+     * <p>If specified symmetry is not consistent with others from this set, in the
      * sense described in the class description, this method throws
-     * {@link InconsistentGeneratorsException}.
-     *
+     * {@link InconsistentGeneratorsException}.</p>
      *
      * @param symmetry {@code Symmetry} to be added to this set
-     *
-     * @throws InconsistentGeneratorsException if the specified symmetry is
-     *                                         inconsistent with other set
-     *                                         symmetries in the sense described
-     *                                         in the class description
+     * @return {@code true} if symmetry was added (i.e. it cannot
+     *         be expressed through existing symmetries in the set),
+     *         and {@code false} otherwise
+     * @throws InconsistentGeneratorsException
+     *          if the specified symmetry is
+     *          inconsistent with other symmetries from this set
      */
     boolean add(Symmetry symmetry)
             throws InconsistentGeneratorsException;
 
+    /**
+     * Adds specified symmetry to this set without any checks.
+     *
+     * @param symmetry symmetry
+     * @return {@code true}
+     */
     boolean addUnsafe(Symmetry symmetry);
 
     /**
-     * This method returns an unmodifiable list of basis symmetries, containing
+     * This method returns an unmodifiable list of basis symmetries, which contained
      * in this set.
      *
      * @return unmodifiable list of basis symmetries
@@ -117,4 +123,15 @@ public interface Symmetries extends Iterable<Symmetry> {
      * @return a deep clone of this set
      */
     Symmetries clone();
+
+    /**
+     * Returns the iterator over the all possible symmetries,
+     * which can be obtained by combination symmetries from this set. I.e. over
+     * all elements in the corresponding subgroup of symmetric group.
+     *
+     * @return iterator over the all symmetries, which can be obtained by
+     *         combination symmetries from this set
+     */
+    @Override
+    Iterator<Symmetry> iterator();
 }

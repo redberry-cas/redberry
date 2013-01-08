@@ -25,13 +25,29 @@ package cc.redberry.core.combinatorics;
 import java.util.Iterator;
 
 /**
+ * Parent interface for combinatoric iterators
+ *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @since 1.0
  */
-public interface IntCombinatoricGenerator
-        extends Iterable<int[]>, Iterator<int[]> {
+public abstract class IntCombinatorialGenerator
+        implements Iterable<int[]>, Iterator<int[]> {
+    /**
+     * Resets the iteration
+     */
+    public abstract void reset();
 
-    void reset();
+    /**
+     * Returns the reference on the current iteration element.
+     *
+     * @return the reference on the current iteration element
+     */
 
-    int[] getReference();
+    public abstract int[] getReference();
+
+    @Override
+    public Iterator<int[]> iterator() {
+        return this;
+    }
 }

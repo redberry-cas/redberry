@@ -26,7 +26,8 @@ import cc.redberry.core.utils.IntArray;
 import junit.framework.Assert;
 import org.junit.Test;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * @author Dmitry Bolotin

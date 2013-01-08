@@ -25,21 +25,15 @@ package cc.redberry.core.combinatorics;
 import cc.redberry.core.utils.IntArray;
 
 import java.util.Arrays;
-import java.util.TreeMap;
 
 /**
- * This class is a representation of mathematical permutation. Fore information
- * about math combinatorics and it properties see (<a
- * href="http://en.wikipedia.org/wiki/Permutation">http://en.wikipedia.org/wiki/Permutation</a>).
- * For keeping permutation it uses <i>one-line</i> notation. Instances of this
- * class are immutable. {@link Comparable} implementation is necessary for using
- * {@link TreeMap} of combinatorics in {@link PermutationsSpanIterator}
- *
- * @see Comparable
- * @see PermutationsSpanIterator
+ * This class is a representation of mathematical permutation.
+ * The permutation is stored in the <i>one-line</i> notation. The objects of this
+ * class are immutable.
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @since 1.0
  */
 public class Permutation implements Comparable<Permutation> {
 
@@ -62,7 +56,6 @@ public class Permutation implements Comparable<Permutation> {
      *
      * @param permutation <i>single-line</i> notated integer array, representing
      *                    a permutation.
-     *
      * @throws IllegalArgumentException if array is inconsistent with
      *                                  <i>one-line</i> notation
      */
@@ -72,7 +65,6 @@ public class Permutation implements Comparable<Permutation> {
         this.permutation = permutation.clone();
     }
 
-   
 
     protected Permutation(int[] permutation, boolean notClone) {
         this.permutation = permutation;
@@ -102,9 +94,7 @@ public class Permutation implements Comparable<Permutation> {
      * returns A*B.
      *
      * @param element is a right multiplicand permutation
-     *
      * @return composition of element and this combinatorics
-     *
      * @throws IllegalArgumentException if element has different dimension than
      *                                  this one
      */
@@ -113,9 +103,7 @@ public class Permutation implements Comparable<Permutation> {
     }
 
     /**
-     *
      * @param array array to permute
-     *
      * @return permuted array copy
      */
     public int[] permute(int[] array) {
@@ -142,7 +130,6 @@ public class Permutation implements Comparable<Permutation> {
      * Returns new index of specified index, i.e. permutation[index]
      *
      * @param index old index
-     *
      * @return new index of specified index, i.e. permutation[index]
      */
     public int newIndexOf(int index) {
@@ -162,9 +149,9 @@ public class Permutation implements Comparable<Permutation> {
      * Due to immutability of {@code Permuatation} this method returns simple
      * wrapper of integer array, representing one-line notated permutation.
      *
-     * @see IntArray
      * @return IntArray representing integer array - one-line notated
      *         permutation
+     * @see IntArray
      */
     public IntArray getPermutation() {
         return new IntArray(permutation);
@@ -184,9 +171,8 @@ public class Permutation implements Comparable<Permutation> {
      * permutation and false in the other case.
      *
      * @param obj object to be compared with this
-     *
      * @return true if {@code obj} has the same class and represents the same
-     * permutation and false in the other case
+     *         permutation and false in the other case
      */
     @Override
     public boolean equals(Object obj) {
@@ -228,10 +214,8 @@ public class Permutation implements Comparable<Permutation> {
      * {@code i1 == i2} returns 0 (combinatorics are equals).
      *
      * @param t permutation to compare
-     *
      * @return 1 if this one is "greater" -1 if t is "greater", 0 if this and t
      *         equals.
-     *
      * @throws IllegalArgumentException if dimensions of this and t are not '
      *                                  equals
      */

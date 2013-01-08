@@ -26,7 +26,6 @@ import org.junit.Assert;
 import org.junit.Test;
 
 /**
- *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */

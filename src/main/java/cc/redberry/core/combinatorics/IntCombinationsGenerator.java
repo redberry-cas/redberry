@@ -22,14 +22,26 @@
  */
 package cc.redberry.core.combinatorics;
 
-import java.util.Iterator;
-
 /**
+ * This class represents an iterator over all unordered combinations (i.e. [0,1] and [1,0] are
+ * considered as same) of {@code k} numbers, which can be chosen from the set of
+ * {@code n} numbers, numbered in the order 0,1,2,...,{@code n}. The total number of such combinations is a
+ * binomial coefficient {@code n!/(k!(n-k)!)}.
+ * <p/>
+ * <p>The iterator is implemented such that each next combination will be calculated only on
+ * the invocation of method {@link #next()}.</p>
+ * <br></br><b>Note:</b> method {@link #next()} returns the same reference on each invocation.
+ * So, if it is needed not only to obtain the information from {@link #next()}, but also save the result,
+ * it is necessary to clone the returned array.</p>
+ * <p/>
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @since 1.0
  */
-public final class IntCombinationsGenerator implements IntCombinatoricGenerator {
+public final class IntCombinationsGenerator
+        extends IntCombinatorialGenerator
+        implements IntCombinatorialPort {
     final int[] combination;
     private final int n, k;
     private boolean onFirst = true;
@@ -41,6 +53,11 @@ public final class IntCombinationsGenerator implements IntCombinatoricGenerator 
         this.k = k;
         this.combination = new int[k];
         reset();
+    }
+
+    @Override
+    public int[] take() {
+        return hasNext() ? next() : null;
     }
 
     @Override
@@ -78,22 +95,12 @@ public final class IntCombinationsGenerator implements IntCombinatoricGenerator 
         return combination;
     }
 
+    /**
+     * @throws UnsupportedOperationException always
+     */
     @Override
     public void remove() {
         throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public Iterator<int[]> iterator() {
-        return this;
-    }
-
-    public int getK() {
-        return k;
-    }
-
-    public int getN() {
-        return n;
     }
 
     @Override

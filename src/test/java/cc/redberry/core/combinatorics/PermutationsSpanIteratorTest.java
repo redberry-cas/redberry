@@ -33,7 +33,6 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertTrue;
 
 /**
- *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
@@ -174,7 +173,7 @@ public class PermutationsSpanIteratorTest {
         //This testing checks that transposition generates only identity permutation
         Permutation a = new Symmetry(new int[]{1, 0, 2}, false);
         PermutationsSpanIterator<Permutation> iterator = new PermutationsSpanIterator<>(Collections.singletonList(a));
-        List<Permutation> result  = new ArrayList<>();
+        List<Permutation> result = new ArrayList<>();
         while (iterator.hasNext())
             result.add(iterator.next());
         Permutation[] standart = new Permutation[2];

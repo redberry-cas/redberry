@@ -22,63 +22,53 @@
  */
 package cc.redberry.core.combinatorics;
 
-import java.util.Arrays;
-import java.util.Iterator;
-
 /**
- * This class represents iterator over all possible combinatorics of specified
- * dimension. Permutation receiving by {@code next()} represents integer array -
- * permutation in one-line notation. Number of all combinatorics with dimension
+ * This class represents iterator over all possible permutations of specified
+ * dimension written in one-line notation.Number of all permutations of dimension
  * D is D!.
- *
- * <p>Example <blockquote><pre>
+ * <p/>
+ * <p>Example
+ * <code><pre>
  *      IntPermutationsGenerator ig = new IntPermutationsGenerator(3);
  *      while (ig.hasNext())
  *          System.out.println(Arrays.toString(ig.next()))
- * </pre></blockquote> <p>The result will be <blockquote><pre>
+ * </pre></code>
+ * The result will be
+ * <code><pre>
  *      [0, 1, 2]
  *      [0, 2, 1]
  *      [1, 0, 2]
  *      [1, 2, 0]
  *      [2, 0, 1]
  *      [2, 1, 0]
- * </pre></blockquote>
- *
- * <p>This class provides opportunities to iterate both in straight and forward
- * direction.
- *
- * <p><b>NOTE:</b> Caring about performance, this class does not create a
- * <i>new</i> instance of integer array on each iteration, but permutes elements
- * in private array and returns result. So, on each iteration it returns
- * reference on the same array. The bellow code will illustrates this note <blockquote><pre>
- *      IntPermutationsGenerator ig = new IntPermutationsGenerator(3);
- *      List<int[]> list = new ArrayList<>();
- *      while (ig.hasNext())
- *          list.add(ig.next());
- * </pre></blockquote> <p>{@code List} will contains equal arrays [2,1,0]! If
- * you want store combinatorics you must copy data on each iteration, using
- * {@link Arrays#copyOf(int[], int) }.
- *
- * <p><b>NOTE:</b> if dimension is rather big (on typical machines 13),
- * iterating can get a lot of time, due to huge number of combinations.
+ * </pre></code>
+ * It is also possible to iterate in the opposite direction via {@link #previous()} method.
+ * <p/>
+ * <p>The iterator is implemented such that each next combination will be calculated only on
+ * the invocation of method {@link #next()}.</p>
+ * <br></br><b>Note:</b> method {@link #next()} returns the same reference on each invocation.
+ * So, if it is needed not only to obtain the information from {@link #next()}, but also save the result,
+ * it is necessary to clone the returned array.</p>
+ * <p/>
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @since 1.0
  */
-public final class IntPermutationsGenerator implements IntCombinatoricGenerator {
+public final class IntPermutationsGenerator
+        extends IntCombinatorialGenerator
+        implements IntCombinatorialPort {
 
     final int[] permutation;
     private boolean onFirst = true;
     private final int size;
 
     /**
-     * Construct iterator over combinatorics with specified dimension. Start
-     * permutation is identity permutation.
+     * Construct iterator over all permutations with specified dimension starting with identity.
      *
-     * @param dimension dimension of combinatorics
+     * @param dimension dimension of permutations
      */
     public IntPermutationsGenerator(int dimension) {
-        checkSize(dimension);
         permutation = new int[dimension];
         for (int i = 0; i < dimension; ++i)
             permutation[i] = i;
@@ -86,17 +76,15 @@ public final class IntPermutationsGenerator implements IntCombinatoricGenerator 
     }
 
     /**
-     * Construct iterator over combinatorics with specified permutation at
-     * start. In this way, iterator will not iterate over all possible
-     * combinatorics, but only from start permutation up to last permutation,
-     * witch is [size-1,size-2,....1,0]. NOTE: parameter {@code permutation} is
-     * not coping in constructor, so it will changing during iteration, as it
-     * was says in class documentation.
+     * Construct iterator over permutations with specified permutation at
+     * the start. If starting permutation is not identity, the iterator will not
+     * iterate over all possible combinatorics, but only from starting permutation up to the
+     * last permutation, which is [size-1,size-2,....1,0]. <b>Note:</b> parameter {@code permutation} is
+     * not coping in constructor and will change during iteration.
      *
-     * @param permutation start permutation of iterator.
-     *
+     * @param permutation starting permutation
      * @throws IllegalArgumentException if permutation is inconsistent with
-     *                                  <i>single-line</i> notation
+     *                                  <i>one-line</i> notation
      */
     public IntPermutationsGenerator(int[] permutation) {
         this.permutation = permutation;
@@ -109,21 +97,13 @@ public final class IntPermutationsGenerator implements IntCombinatoricGenerator 
                 if (permutation[i] == permutation[j])
                     throw new IllegalArgumentException("Wrong permutation input: to elemets have the same image");
         }
-        checkSize(size);
     }
 
-    private void checkSize(int size) {
-//        if (size >= 11)
-//            System.out.println("Initializing PermutationsGenerator with size = " + size + ". Iteration may take a while.");
+    @Override
+    public int[] take() {
+        return hasNext() ? next() : null;
     }
 
-    /**
-     * Returns {@code true} if the iteration has more elements, iterating in
-     * straight order. (In other words, returns {@code true} if {@link #next}
-     * would return an element rather than throwing an exception.)
-     *
-     * @return {@code true} if the iteration has more elements
-     */
     @Override
     public boolean hasNext() {
         return !isLast() || onFirst;
@@ -131,7 +111,7 @@ public final class IntPermutationsGenerator implements IntCombinatoricGenerator 
 
     /**
      * Returns {@code true} if the iteration has more elements, iterating in
-     * back order. (In other words, returns {@code true} if {@link #next} would
+     * back order. (In other words, returns {@code true} if {@link #previous()} would
      * return an element rather than throwing an exception.)
      *
      * @return {@code true} if the iteration has more elements
@@ -238,9 +218,6 @@ public final class IntPermutationsGenerator implements IntCombinatoricGenerator 
         return permutation;
     }
 
-    /**
-     * Resets iterator.
-     */
     @Override
     public void reset() {
         onFirst = true;
@@ -249,37 +226,20 @@ public final class IntPermutationsGenerator implements IntCombinatoricGenerator 
     }
 
     /**
-     * Throws new UnsupportedOperationException("Not supported yet.").
-     *
-     * @throws UnsupportedOperation("Not
-     *                                                                                                                                                           supported
-     *                                                                                                                                                           yet.");
+     * @throws UnsupportedOperationException always
      */
     @Override
     public void remove() {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
-//    /**
-//     * Returns current permutation
-//     * @return current permutation
-//     */
-//    public int[] getPermutation() {
-//        return permutation;
-//    }
-//
     /**
-     * Returns dimension of generating combinatorics.
+     * Returns dimension specified in the constructor
      *
-     * @return dimension of generating combinatorics
+     * @return dimension specified in the constructor
      */
     public int getDimension() {
         return size;
-    }
-
-    @Override
-    public Iterator<int[]> iterator() {
-        return this;
     }
 
     @Override
