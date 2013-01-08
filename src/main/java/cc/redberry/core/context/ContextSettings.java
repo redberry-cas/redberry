@@ -28,12 +28,16 @@ import cc.redberry.core.parser.Parser;
 import java.util.EnumSet;
 
 /**
+ * A simple container of context-sensitive raw Redberry information (like string name of metrics etc.),
+ * which then used in the constructor of {@link Context} class.
+ *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @see Context
+ * @since 1.0
  */
 public class ContextSettings {
     //bindings
-
     private OutputFormat defaultOutputFormat;
     private String kronecker = "d";
     private String metricName = "g";
@@ -43,6 +47,12 @@ public class ContextSettings {
     private IndexConverterManager converterManager = IndexConverterManager.DEFAULT;
     private Parser parser = Parser.DEFAULT;
 
+    /**
+     * Creates context settings with specified default output format and Kronecker delta name.
+     *
+     * @param defaultOutputFormat output format
+     * @param kronecker           string name of Kronecker tensor
+     */
     public ContextSettings(OutputFormat defaultOutputFormat, String kronecker) {
         this.defaultOutputFormat = defaultOutputFormat;
         this.kronecker = kronecker;
@@ -52,28 +62,58 @@ public class ContextSettings {
         return merticTypes;
     }
 
+    /**
+     * Set specified index type to be non metric.
+     *
+     * @param type index type
+     */
     public void removeMetricIndexType(IndexType type) {
         merticTypes.remove(type);
     }
 
+    /**
+     * Set specified index type to be a metric type.
+     *
+     * @param type index type
+     */
     public void addMetricIndexType(IndexType type) {
         merticTypes.add(type);
     }
 
+    /**
+     * Returns the default output format
+     *
+     * @return the default output format
+     */
     public OutputFormat getDefaultOutputFormat() {
         return defaultOutputFormat;
     }
 
+    /**
+     * Sets the default output format.
+     *
+     * @param defaultOutputFormat output format
+     */
     public void setDefaultOutputFormat(OutputFormat defaultOutputFormat) {
         if (defaultOutputFormat == null)
             throw new NullPointerException();
         this.defaultOutputFormat = defaultOutputFormat;
     }
 
+    /**
+     * Returns string representation of Kronecker tensor name.
+     *
+     * @return string representation of Kronecker tensor name
+     */
     public String getKronecker() {
         return kronecker;
     }
 
+    /**
+     * Sets string representation of Kronecker tensor name.
+     *
+     * @return string representation of Kronecker tensor name
+     */
     public void setKronecker(String kronecker) {
         if (kronecker == null)
             throw new NullPointerException();
@@ -82,10 +122,20 @@ public class ContextSettings {
         this.kronecker = kronecker;
     }
 
+    /**
+     * Returns string representation of metric tensor name.
+     *
+     * @return string representation of metric tensor name
+     */
     public String getMetricName() {
         return metricName;
     }
 
+    /**
+     * Sets string representation of metric tensor name.
+     *
+     * @return string representation of metric tensor name
+     */
     public void setMetricName(String metricName) {
         if (metricName == null)
             throw new NullPointerException();
@@ -94,26 +144,50 @@ public class ContextSettings {
         this.metricName = metricName;
     }
 
+    /**
+     * Returns seed of name manager
+     *
+     * @return seed of name manager
+     */
     public Long getNameManagerSeed() {
         return nameManagerSeed;
     }
 
+    /**
+     * Sets seed of name manager
+     */
     public void setNameManagerSeed(Long nameManagerSeed) {
         this.nameManagerSeed = nameManagerSeed;
     }
 
+    /**
+     * Returns index converter manager
+     *
+     * @return index converter manager
+     */
     public IndexConverterManager getConverterManager() {
         return converterManager;
     }
 
+    /**
+     * Sets index converter manager
+     */
     public void setConverterManager(IndexConverterManager converterManager) {
         this.converterManager = converterManager;
     }
 
+    /**
+     * Sets parser
+     */
     public void setParser(Parser parser) {
         this.parser = parser;
     }
 
+    /**
+     * Returns parser
+     *
+     * @return parser
+     */
     public Parser getParser() {
         return parser;
     }

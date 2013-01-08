@@ -26,7 +26,12 @@ import cc.redberry.core.context.IndexConverterException;
 import cc.redberry.core.context.IndexSymbolConverter;
 import cc.redberry.core.context.OutputFormat;
 
-public abstract class SymbolArrayConverter implements IndexSymbolConverter {
+/**
+ * @author Dmitry Bolotin
+ * @author Stanislav Poslavsky
+ * @since 1.0
+ */
+abstract class SymbolArrayConverter implements IndexSymbolConverter {
 
     private final String[] symbols;
     private final String[] utf;

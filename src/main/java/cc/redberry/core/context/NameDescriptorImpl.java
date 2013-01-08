@@ -28,6 +28,7 @@ import cc.redberry.core.indices.SimpleIndices;
 /**
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @since 1.1
  */
 final class NameDescriptorImpl extends NameDescriptor {
 

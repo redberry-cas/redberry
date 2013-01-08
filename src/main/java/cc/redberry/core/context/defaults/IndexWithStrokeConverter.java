@@ -28,14 +28,23 @@ import cc.redberry.core.context.OutputFormat;
 import cc.redberry.core.indices.IndexType;
 
 /**
+ * {@link IndexSymbolConverter} for letters with strokes (e.g. \\alpha' or A'').
+ *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @since 1.1
  */
 public final class IndexWithStrokeConverter implements IndexSymbolConverter {
     private final IndexSymbolConverter converter;
     private final byte numberOfStrokes;
     private final String strokesString;
 
+    /**
+     * Creates  {@link IndexSymbolConverter} for subscripted symbols from specified converter.
+     *
+     * @param converter       converter to be extended with symbols with strokes
+     * @param numberOfStrokes number of strokes to be appended after symbol
+     */
     public IndexWithStrokeConverter(IndexSymbolConverter converter, byte numberOfStrokes) {
         if (numberOfStrokes + converter.getType() > Byte.MAX_VALUE)
             throw new IllegalArgumentException("Too much strokes.");

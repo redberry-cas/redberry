@@ -29,24 +29,29 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 
 /**
- * This class implements context management logic.<br> There are two modes of
- * action: <ul> <li><b>Global</b> <i>[threadLocalMode=false]</i> - one global
- * context is used by all framework. It is useful in common cases (groovy
- * script, program solving one problem, ...). This mode is default.</li>
- * <li><b>ThreadLocal</b> <i>[threadLocalMode=true]</i> - each thread has it's
- * context. In this case you can set it explicitly using
- * <code>setCurrentContext</code> method. This mode is useful in cases where
- * several contexts needs (GUI, web application, ...). This mode is not
- * finished, so use it carefully, because interface could change in future
- * releases.</li> </ul>
+ * This class implements context management logic.
+ * It holds current thread-local context of Redberry session. It is possible
+ * to set context explicitly using {@link #setCurrentContext(Context)} method.
+ * Each thread is linked to its own context. All child threads created via {@code ExecutorService}
+ * from {@link #getExecutorService()} have same context.
+ *
+ * @author Dmitriy Bolotin
+ * @author Stanislav Poslavsky
+ * @since 1.0
  */
 public final class ContextManager {
+    /**
+     * Thread-local container for current context
+     */
     private final static ThreadLocal<ContextContainer> threadLocalContainer = new ThreadLocal<ContextContainer>() {
         @Override
         protected ContextContainer initialValue() {
             return new ContextContainer();
         }
     };
+    /**
+     * Thread-local {@code ExecutorService}
+     */
     private static final ThreadLocal<ExecutorService> executorService = new ThreadLocal<ExecutorService>() {
         @Override
         protected ExecutorService initialValue() {
@@ -57,26 +62,57 @@ public final class ContextManager {
     private ContextManager() {
     }
 
+    /**
+     * Returns the current context of Redberry session.
+     *
+     * @return the current context of Redberry session.
+     */
     public static Context getCurrentContext() {
         return threadLocalContainer.get().context;
     }
 
+    /**
+     * This method initializes and sets current session context by the default
+     * value defined in {@link DefaultContextFactory}. After this step, all the
+     * tensors that exist in the thread will be broken.
+     *
+     * @return created context
+     */
     public static Context initializeNew() {
         Context context = DefaultContextFactory.INSTANCE.createContext();
         threadLocalContainer.get().context = context;
         return context;
     }
 
+    /**
+     * This method initializes and sets current session context from
+     * the specified {@code context settings}. After this step, all the
+     * tensors that exist in the thread will be broken.
+     *
+     * @return created context
+     */
     public static Context initializeNew(ContextSettings contextSettings) {
         Context context = new Context(contextSettings);
         threadLocalContainer.get().context = context;
         return context;
     }
 
+    /**
+     * Sets current thread-local context to the specified one. After this step, all the
+     * tensors that exist in the thread will be broken.
+     *
+     * @param context context
+     */
     public static void setCurrentContext(Context context) {
         threadLocalContainer.get().context = context;
     }
 
+    /**
+     * Returns thread-local {@code ExecutorService} with fixed context. All threads linked
+     * to this {@code ExecutorService} will have same context.
+     *
+     * @return thread-local {@code ExecutorService} with fixed context
+     */
     public static ExecutorService getExecutorService() {
         return executorService.get();
     }

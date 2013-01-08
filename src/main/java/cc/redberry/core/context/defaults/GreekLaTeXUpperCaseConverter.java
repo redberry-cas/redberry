@@ -22,6 +22,13 @@
  */
 package cc.redberry.core.context.defaults;
 
+/**
+ * {@link cc.redberry.core.context.IndexSymbolConverter} for Greek upper case letters.
+ *
+ * @author Dmitry Bolotin
+ * @author Stanislav Poslavsky
+ * @since 1.0
+ */
 public final class GreekLaTeXUpperCaseConverter extends SymbolArrayConverter {
     private static final String[] symbols = new String[11];
     private static final String[] utf = new String[11];
@@ -88,14 +95,23 @@ public final class GreekLaTeXUpperCaseConverter extends SymbolArrayConverter {
             }
         }*/
 
+    /**
+     * Singleton instance.
+     */
     public static final GreekLaTeXUpperCaseConverter INSTANCE = new GreekLaTeXUpperCaseConverter();
 
     private GreekLaTeXUpperCaseConverter() {
         super(symbols, utf);
     }
 
-    private static final byte TYPE = 3;
+    /**
+     * Index type = 3
+     */
+    public static final byte TYPE = 3;
 
+    /**
+     * @return 3
+     */
     @Override
     public byte getType() {
         return TYPE;

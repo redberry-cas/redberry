@@ -31,6 +31,7 @@ import java.util.Arrays;
 /**
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @since 1.1
  */
 final class NameDescriptorForMetricAndKronecker extends NameDescriptor {
 

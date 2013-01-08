@@ -29,17 +29,46 @@ import cc.redberry.core.tensor.Tensors;
 import cc.redberry.core.utils.LongBackedBitArray;
 
 /**
+ * <p>Redberry context. This class collects Redberry session defaults and context-sensitive under the hood information.
+ * It has a single unique thread-local instance during each Redberry session. Hence, all variables
+ * keeping by the context (like e.g. namespace) have unique instances during session and cannot be
+ * changed externally. In order to create a new session of Redberry with a particular context, an instance
+ * of this class should be set as a current context via {@link ContextManager#setCurrentContext(Context)}.</p>
+ *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @see NameManager
+ * @see IndexConverterManager
+ * @see ParseManager
+ * @see OutputFormat
+ * @see ContextManager
+ * @see ContextSettings
+ * @since 1.0
  */
 public final class Context {
-
+    /**
+     * NameManager has a sense of namespace
+     */
     private final NameManager nameManager;
+    /**
+     * Defaults output format can be changed during the session
+     */
     private OutputFormat defaultOutputFormat;
+
     private final IndexConverterManager converterManager;
     private final ParseManager parseManager;
+    /**
+     * Holds information about metric types.
+     * This is a reflection (byte) type => (bit) isMetric
+     */
     private final LongBackedBitArray metricTypes = new LongBackedBitArray(128);
 
+    /**
+     * Creates context from the settings
+     *
+     * @param contextSettings settings
+     * @see ContextSettings
+     */
     public Context(ContextSettings contextSettings) {
         this.parseManager = new ParseManager(contextSettings.getParser());
         this.converterManager = contextSettings.getConverterManager();
@@ -52,70 +81,148 @@ public final class Context {
     }
 
     /**
-     * This method resets all tensor names.
-     * <p/>
-     * <br/><b>Any tensor created before this method call becomes invalid, and
-     * must not be used!</b> <br/><br/>Mainly this method used in unit tests, so
+     * This method resets all tensor names in the namespace.
+     * Any tensor created before this method call becomes invalid, and
+     * must not be used! This method is using mainly in unit tests, so
      * avoid using this method in your code.
      */
     public synchronized void resetTensorNames() {
         nameManager.reset();
     }
 
+    /**
+     * This method resets all tensor names in the namespace and sets a
+     * specified seed to the {@link NameManager}.
+     * Any tensor created before this method call becomes invalid, and
+     * must not be used! This method is using mainly in unit tests, so
+     * avoid using this method in your code.
+     */
     public synchronized void resetTensorNames(long seed) {
         nameManager.reset(seed);
     }
 
+    /**
+     * Sets the default output format. After this step, all expressions
+     * will be printed according to the specified output format.
+     *
+     * @param defaultOutputFormat output format
+     */
     public void setDefaultOutputFormat(OutputFormat defaultOutputFormat) {
         this.defaultOutputFormat = defaultOutputFormat;
     }
 
+    /**
+     * Returns current default output format.
+     *
+     * @return current default output format
+     */
     public OutputFormat getDefaultOutputFormat() {
         return defaultOutputFormat;
     }
 
+    /**
+     * Returns index converter manager of current session.
+     *
+     * @return index converter manager of current session
+     */
     public IndexConverterManager getIndexConverterManager() {
         return converterManager;
     }
 
+    /**
+     * Returns the name manager manager (namespace) of current session.
+     *
+     * @return the name manager manager (namespace) of current session.
+     */
     public NameManager getNameManager() {
         return nameManager;
     }
 
+    /**
+     * Returns {@code NameDescriptor} corresponding to the specified {@code int} nameId.
+     *
+     * @param nameId integer name of tensor
+     * @return corresponding  {@code NameDescriptor}
+     */
     public NameDescriptor getNameDescriptor(int nameId) {
         return nameManager.getNameDescriptor(nameId);
     }
 
+    /**
+     * Returns string representation of Kronecker delta name
+     *
+     * @return string representation of Kronecker delta name
+     */
     public String getKroneckerName() {
         return nameManager.getKroneckerName();
     }
 
+    /**
+     * Returns string representation of metric tensor name
+     *
+     * @return string representation of metric tensor name
+     */
     public String getMetricName() {
         return nameManager.getMetricName();
     }
 
+    /**
+     * Sets the default metric tensor name. After this step, metric tensor
+     * will be printed with the specified string name.
+     *
+     * @param name string representation of metric tensor name
+     */
     public void setMetricName(String name) {
         nameManager.setMetricName(name);
     }
 
+    /**
+     * Sets the default Kronecker tensor name. After this step, Kronecker tensor
+     * will be printed with the specified string name.
+     *
+     * @param name string representation of Kronecker tensor name
+     */
     public void setKroneckerName(String name) {
         nameManager.setKroneckerName(name);
     }
 
+    /**
+     * Returns {@code true} if specified tensor is Kronecker tensor
+     *
+     * @param t tensor
+     * @return {@code true} if specified tensor is Kronecker tensor
+     */
     public boolean isKronecker(SimpleTensor t) {
         return nameManager.isKroneckerOrMetric(t.getName())
                 && !IndicesUtils.haveEqualStates(t.getIndices().get(0), t.getIndices().get(1));
     }
 
+    /**
+     * Returns {@code true} if specified tensor is metric tensor
+     *
+     * @param t tensor
+     * @return {@code true} if specified tensor is metric tensor
+     */
     public boolean isMetric(SimpleTensor t) {
         return nameManager.isKroneckerOrMetric(t.getName())
                 && IndicesUtils.haveEqualStates(t.getIndices().get(0), t.getIndices().get(1));
     }
 
-    public boolean isKroneckerOrMetric(SimpleTensor s) {
-        return nameManager.isKroneckerOrMetric(s.getName());
+    /**
+     * Returns {@code true} if specified tensor is metric or Kronecker tensor
+     *
+     * @param t tensor
+     * @return {@code true} if specified tensor is metric or Kronecker tensor
+     */
+    public boolean isKroneckerOrMetric(SimpleTensor t) {
+        return nameManager.isKroneckerOrMetric(t.getName());
     }
 
+    /**
+     * Returns parse manager of current session
+     *
+     * @return parse manager of current session
+     */
     public ParseManager getParseManager() {
         return parseManager;
     }
@@ -130,6 +237,15 @@ public final class Context {
         return metricTypes.get(type);
     }
 
+    /**
+     * Returns Kronecker tensor with specified upper and lower indices.
+     *
+     * @param index1 first index
+     * @param index2 second index
+     * @return Kronecker tensor with specified upper and lower indices
+     * @throws IllegalArgumentException if indices have same states
+     * @throws IllegalArgumentException if indices have different types
+     */
     public SimpleTensor createKronecker(int index1, int index2) {
         byte type;
         if ((type = IndicesUtils.getType(index1)) != IndicesUtils.getType(index2) || IndicesUtils.getRawStateInt(index1) == IndicesUtils.getRawStateInt(index2))
@@ -145,6 +261,16 @@ public final class Context {
         return Tensors.simpleTensor(name, indices);
     }
 
+    /**
+     * Returns metric tensor with specified indices.
+     *
+     * @param index1 first index
+     * @param index2 second index
+     * @return metric tensor with specified indices
+     * @throws IllegalArgumentException if indices have different states
+     * @throws IllegalArgumentException if indices have different types
+     * @throws IllegalArgumentException if indices have non metric types
+     */
     public SimpleTensor createMetric(int index1, int index2) {
         byte type;
         if ((type = IndicesUtils.getType(index1)) != IndicesUtils.getType(index2)
@@ -157,12 +283,28 @@ public final class Context {
         return Tensors.simpleTensor(name, indices);
     }
 
+    /**
+     * Returns metric tensor if specified indices have same states and
+     * Kronecker tensor if specified indices have different states.
+     *
+     * @param index1 first index
+     * @param index2 second index
+     * @return metric tensor if specified indices have same states and
+     *         Kronecker tensor if specified indices have different states
+     * @throws IllegalArgumentException if indices have different types
+     * @throws IllegalArgumentException if indices have same states and non metric types
+     */
     public SimpleTensor createMetricOrKronecker(int index1, int index2) {
         if (IndicesUtils.getRawStateInt(index1) == IndicesUtils.getRawStateInt(index2))
             return createMetric(index1, index2);
         return createKronecker(index1, index2);
     }
 
+    /**
+     * Returns the current context of Redberry session.
+     *
+     * @return the current context of Redberry session.
+     */
     public static Context get() {
         return ContextManager.getCurrentContext();
     }

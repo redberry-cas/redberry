@@ -26,8 +26,21 @@ import cc.redberry.core.context.IndexConverterException;
 import cc.redberry.core.context.IndexSymbolConverter;
 import cc.redberry.core.context.OutputFormat;
 
+/**
+ * {@link IndexSymbolConverter} for latin lower case letters.
+ *
+ * @author Dmitry Bolotin
+ * @author Stanislav Poslavsky
+ * @since 1.0
+ */
 public final class LatinLowerCaseConverter implements IndexSymbolConverter {
-    private static final byte TYPE = 0;
+    /**
+     * Index type = 0
+     */
+    public static final byte TYPE = 0;
+    /**
+     * Singleton instance
+     */
     public static final LatinLowerCaseConverter INSTANCE = new LatinLowerCaseConverter();
 
     private LatinLowerCaseConverter() {
@@ -56,6 +69,9 @@ public final class LatinLowerCaseConverter implements IndexSymbolConverter {
         return Character.toString((char) number);
     }
 
+    /**
+     * @return 0
+     */
     @Override
     public byte getType() {
         return TYPE;

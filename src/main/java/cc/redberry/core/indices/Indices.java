@@ -28,9 +28,8 @@ import cc.redberry.core.utils.IntArray;
 
 /**
  * This interface states common tensor indices functionality. For specification
- * and more information see methods summary and implementations. Indices objects
- * are considered to be immutable, so there is no way to change the indices
- * object. <p>For individual index structure (bit masks in the int
+ * and more information see methods summary and implementations. Objects of this type
+ * are considered to be immutable. <p>For individual index structure (bit masks in the int
  * representation) see <link>IndicesUtils</link>.</p>
  *
  * @author Dmitry Bolotin

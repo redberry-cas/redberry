@@ -25,7 +25,17 @@ package cc.redberry.core.context.defaults;
 import cc.redberry.core.context.Context;
 import cc.redberry.core.context.ContextFactory;
 
-public class DefaultContextFactory implements ContextFactory {
+/**
+ * Context factory, which creates context with default settings (see {@link DefaultContextSettings}).
+ *
+ * @author Dmitry Bolotin
+ * @author Stanislav Poslavsky
+ * @since 1.0
+ */
+public final class DefaultContextFactory implements ContextFactory {
+    /**
+     * Singleton instance
+     */
     public static final DefaultContextFactory INSTANCE = new DefaultContextFactory();
 
     private DefaultContextFactory() {

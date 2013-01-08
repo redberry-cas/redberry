@@ -22,32 +22,47 @@
  */
 package cc.redberry.core.context;
 
+/**
+ * Interface, which states common functionality of string-integer converter for indices
+ * of the same particular type.
+ *
+ * @author Dmitry Bolotin
+ * @author Stanislav Poslavsky
+ * @since 1.0
+ */
 public interface IndexSymbolConverter {
     /**
+     * Returns true if this converter can convert index string to integer
+     * representation
+     *
      * @param symbol index string representation
      * @return true, if this converter can convert index string to integer
-     * representation
+     *         representation
      */
     boolean applicableToSymbol(String symbol);
 
     /**
+     * Returns string representation from specified integer representation of single
+     * index in the specified {@code outputFormat}.
      *
-     * @param code index integer representation
-     * @param mode to string mode
+     * @param code         index integer representation
+     * @param outputFormat output format
      * @return string representation of specified integer index, according to
-     * the specified to string mode.
+     *         the specified output format
      * @throws IndexConverterException if code does not corresponds to this
-     * converter.
+     *                                 converter
      * @see OutputFormat
      */
-    String getSymbol(int code, OutputFormat mode) throws IndexConverterException;
+    String getSymbol(int code, OutputFormat outputFormat) throws IndexConverterException;
 
     /**
+     * Returns integer representation from specified string representation of single
+     * index.
      *
      * @param symbol index string representation
      * @return index integer representation
      * @throws IndexConverterException if converter does not applicable to
-     * specified symbol
+     *                                 specified symbol
      */
     int getCode(String symbol) throws IndexConverterException;
 
@@ -61,7 +76,7 @@ public interface IndexSymbolConverter {
     int maxNumberOfSymbols();
 
     /**
-     * Returns type of indices, which this converter process. The type value is
+     * Returns the type of indices, which this converter processes. The type value is
      * unique for each converter.
      *
      * @return type of indices, which this converter process

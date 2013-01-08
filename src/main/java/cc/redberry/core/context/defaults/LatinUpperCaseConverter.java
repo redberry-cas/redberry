@@ -26,8 +26,21 @@ import cc.redberry.core.context.IndexConverterException;
 import cc.redberry.core.context.IndexSymbolConverter;
 import cc.redberry.core.context.OutputFormat;
 
+/**
+ * {@link IndexSymbolConverter} for latin upper case letters.
+ *
+ * @author Dmitry Bolotin
+ * @author Stanislav Poslavsky
+ * @since 1.0
+ */
 public final class LatinUpperCaseConverter implements IndexSymbolConverter {
-    private static final byte TYPE = 1;
+    /**
+     * Index type = 1
+     */
+    public static final byte TYPE = 1;
+    /**
+     * Singleton instance
+     */
     public static final LatinUpperCaseConverter INSTANCE = new LatinUpperCaseConverter();
 
     private LatinUpperCaseConverter() {
@@ -56,6 +69,9 @@ public final class LatinUpperCaseConverter implements IndexSymbolConverter {
         return Character.toString((char) number);
     }
 
+    /**
+     * @return 1
+     */
     @Override
     public byte getType() {
         return TYPE;

@@ -28,24 +28,42 @@ import java.util.Arrays;
 import java.util.Objects;
 
 /**
+ * Container for structure of indices (see {@link IndicesTypeStructure}) of tensor and its string name.
+ * Two simple tensors are considered to have different mathematical nature if and only if their
+ * {@code IndicesTypeStructureAndName} are not equal.
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @since 1.1
  */
 public class IndicesTypeStructureAndName {
 
     private String name;
     private IndicesTypeStructure[] structure;
 
+    /**
+     * @param name      name of tensor
+     * @param structure structure of tensor indices
+     */
     public IndicesTypeStructureAndName(String name, IndicesTypeStructure[] structure) {
         this.name = name;
         this.structure = structure;
     }
 
+    /**
+     * Returns name of tensor.
+     *
+     * @return name of tensor
+     */
     public String getName() {
         return name;
     }
 
+    /**
+     * Returns structure of tensor indices.
+     *
+     * @return structure of tensor indices
+     */
     public IndicesTypeStructure[] getStructure() {
         return structure;
     }

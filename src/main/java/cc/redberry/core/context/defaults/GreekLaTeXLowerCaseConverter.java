@@ -22,6 +22,13 @@
  */
 package cc.redberry.core.context.defaults;
 
+/**
+ * {@link cc.redberry.core.context.IndexSymbolConverter} for Greek lower case letters.
+ *
+ * @author Dmitry Bolotin
+ * @author Stanislav Poslavsky
+ * @since 1.0
+ */
 public final class GreekLaTeXLowerCaseConverter extends SymbolArrayConverter {
     private static final String[] symbols = new String[23];
     private static final String[] utf = new String[23];
@@ -63,15 +70,24 @@ public final class GreekLaTeXLowerCaseConverter extends SymbolArrayConverter {
             utf[i] = Character.toString(greekLetter);
         }
     }
-    
+
+    /**
+     * Singleton instance.
+     */
     public static final GreekLaTeXLowerCaseConverter INSTANCE = new GreekLaTeXLowerCaseConverter();
 
     private GreekLaTeXLowerCaseConverter() {
         super(symbols, utf);
     }
 
-    private static final byte TYPE = 2;
+    /**
+     * Index type = 2
+     */
+    public static final byte TYPE = 2;
 
+    /**
+     * @return 2
+     */
     @Override
     public byte getType() {
         return TYPE;

@@ -36,8 +36,15 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
+ * The namespace of Redberry. Its responsibility is to generate unique name descriptors
+ * ({@link NameDescriptor}) and integer identifiers for simple tensors and fields from raw data. These
+ * identifiers are same for tensors with same mathematical nature. They are generated randomly in
+ * order to obtain the normal distribution through Redberry session. The instance of this class is unique
+ * for each session of Redberry and can be obtained vei {@link CC#getNameManager()}.
+ *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @since 1.0
  */
 public final class NameManager {
 
@@ -61,23 +68,51 @@ public final class NameManager {
         kroneckerAndMetricNames[1] = metric;
     }
 
+    /**
+     * Returns {@code true} if specified identifier is identifier of metric or Kronecker tensor
+     *
+     * @param name unique simple tensor identifier
+     * @return {@code true} if specified identifier is identifier of metric or Kronecker tensor
+     */
     public boolean isKroneckerOrMetric(int name) {
         return ArraysUtils.binarySearch(kroneckerAndMetricIds, name) >= 0;
     }
 
+    /**
+     * Returns string representation of Kronecker delta name
+     *
+     * @return string representation of Kronecker delta name
+     */
     public String getKroneckerName() {
         return kroneckerAndMetricNames[0];
     }
 
+    /**
+     * Returns string representation of metric tensor name
+     *
+     * @return string representation of metric tensor name
+     */
     public String getMetricName() {
         return kroneckerAndMetricNames[1];
     }
 
+    /**
+     * Sets the default Kronecker tensor name. After this step, Kronecker tensor
+     * will be printed with the specified string name.
+     *
+     * @param name string representation of Kronecker tensor name
+     */
     public void setKroneckerName(String name) {
         kroneckerAndMetricNames[0] = name;
         rebuild();
     }
 
+    /**
+     * Sets the default metric tensor name. After this step, metric tensor
+     * will be printed with the specified string name.
+     *
+     * @param name string representation of metric tensor name
+     */
     public void setMetricName(String name) {
         kroneckerAndMetricNames[1] = name;
         rebuild();
@@ -123,6 +158,15 @@ public final class NameManager {
         return new NameDescriptorImpl(sname, indicesTypeStructures, id);
     }
 
+    /**
+     * This method returns the existing name descriptor of simple tensor from the raw data if it contains in the
+     * namespace or constructs and puts to namespace new instance of name descriptor otherwise.
+     *
+     * @param sname                 string name of tensor
+     * @param indicesTypeStructures structure of tensor indices (first element in array) and structure of indices
+     *                              of arguments (in case of tensor field)
+     * @return name descriptor corresponding to the specified information of tensor
+     */
     public NameDescriptor mapNameDescriptor(String sname, IndicesTypeStructure... indicesTypeStructures) {
         IndicesTypeStructureAndName key = new IndicesTypeStructureAndName(sname, indicesTypeStructures);
         boolean rLocked = true;
@@ -201,6 +245,12 @@ public final class NameManager {
         return name;
     }
 
+    /**
+     * Returns the name descriptor of the specified unique identifier of simple tensor.
+     *
+     * @param nameId unique identifier of simple tensor
+     * @return name descriptor of the specified unique identifier of simple tensor
+     */
     public NameDescriptor getNameDescriptor(int nameId) {
         readLock.lock();
         try {
@@ -222,6 +272,11 @@ public final class NameManager {
         }
     }*/
 
+    /**
+     * Returns the seed of the random generator used in name manager.
+     *
+     * @return seed of the random generator
+     */
     public long getSeed() {
         return seed;
     }

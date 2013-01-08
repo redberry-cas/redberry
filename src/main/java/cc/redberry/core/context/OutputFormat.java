@@ -26,58 +26,36 @@ import cc.redberry.core.indices.Indices;
 import cc.redberry.core.tensor.Tensor;
 
 /**
- * This
- * <code>enum</code> specifies common modes of string representation of objects.
- * For using this
- * <code>enum</code> class must specifies method
- * <code>toString(OutputFormat mode)</code>. For the defaults, we provides two
- * modes {
+ * This {@code enum} defines common formats of string representation of expressions in Redberry.
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  * @see Tensor#toString(OutputFormat)
  * @see Indices#toString(OutputFormat)
  * @see Tensor#toString()
+ * @since 1.0
  */
 public enum OutputFormat {
 
     /**
-     * This mode supports LaTeX code generating via
-     * <code>toString(OutputFormat mode)</code>. If you use this mode for
-     * outputting expression, the result will be a LaTeX code, representing
-     * expression, using common LaTeX functions.
-     *
-     * @see Tensor#toString(OutputFormat)
-     * @see Indices#toString(OutputFormat)
+     * This format specifies expressions to be outputted in the LaTeX notation. The produces strings
+     * can be simply putted in some LaTeX math environments and compiled via LaTeX compiler.
      */
     LaTeX,
     /**
-     * This mode specifies the simplest free output format. For, example Greek
-     * letters will be represent directly &alpha &beta, and so on.
-     * <p/>
-     * <p>NOTE: some systems does not supports direct Greek printing, so instead
-     * of '&alpha' you will see '?' </p>
-     *
-     * @see Tensor#toString(OutputFormat)
-     * @see Indices#toString(OutputFormat)
+     * This format specifies greek letters to be printed as is (if stdout supports utf-8 characters).
+     * In other aspects it is similar to {@link OutputFormat#Redberry}
      */
     UTF8,
     /**
-     * This mode specifies such output format, that can be parsed again, by
-     * directly call in parser, i.e.
-     * {@code CC.parser(t.toString(OutputFormat.Redberry))}. Most of all it
-     * touches tensor fields, functions and derivatives. Greek indices converted
-     * to string with this mode will look like "\alpha" (as LaTeX mode)
+     * This format specifies expressions to be outputted in the Redberry input notation. The produces strings
+     * can be parsed in Redberry.
      */
     Redberry,
-    /**
-     * This mode specifies such output format, that can be parsed again, by
-     * copying string from output and pasting in parser method argument. Most of
-     * all it touches tensor fields, functions and derivatives. In opposite to
-     * {@link #Redberry}, Greek indices converted to string with this mode will
-     * look like "\\alpha".
-     */
     @Deprecated
     RedberryConsole,
+    /**
+     * This format specifies expressions to be outputted in the Wolfram Mathematica input notation.
+     */
     WolframMathematica
 }

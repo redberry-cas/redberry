@@ -26,18 +26,42 @@ import cc.redberry.core.context.IndexConverterException;
 import cc.redberry.core.context.IndexSymbolConverter;
 import cc.redberry.core.context.OutputFormat;
 
+/**
+ * {@link IndexSymbolConverter} for subscripted letters (e.g. \\alpha_{2} or A_{4}).
+ *
+ * @author Dmitry Bolotin
+ * @author Stanislav Poslavsky
+ * @since 1.0
+ */
 public final class IndexConverterExtender implements IndexSymbolConverter {
+    /**
+     * {@link IndexSymbolConverter} for subscripted latin lower case letters.
+     */
     public static final IndexConverterExtender LatinLowerEx
             = new IndexConverterExtender(LatinLowerCaseConverter.INSTANCE);
+    /**
+     * {@link IndexSymbolConverter} for subscripted latin upper case letters.
+     */
     public static final IndexConverterExtender LatinUpperEx
             = new IndexConverterExtender(LatinUpperCaseConverter.INSTANCE);
+    /**
+     * {@link IndexSymbolConverter} for subscripted Greek lower case letters.
+     */
     public static final IndexConverterExtender GreekLowerEx
             = new IndexConverterExtender(GreekLaTeXLowerCaseConverter.INSTANCE);
+    /**
+     * {@link IndexSymbolConverter} for subscripted Greek upper case letters.
+     */
     public static final IndexConverterExtender GreekUpperEx
             = new IndexConverterExtender(GreekLaTeXUpperCaseConverter.INSTANCE);
 
     private final IndexSymbolConverter innerConverter;
 
+    /**
+     * Creates  {@link IndexSymbolConverter} for subscripted symbols from specified converter.
+     *
+     * @param innerConverter converter to be extended with subscripted symbols
+     */
     public IndexConverterExtender(IndexSymbolConverter innerConverter) {
         this.innerConverter = innerConverter;
     }
