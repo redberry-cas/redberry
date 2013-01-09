@@ -31,8 +31,11 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
+ * Utility methods to work with AST.
+ *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @since 1.0
  */
 public class ParseUtils {
 

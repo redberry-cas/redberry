@@ -27,7 +27,6 @@ import cc.redberry.core.number.Complex;
 import java.math.BigInteger;
 
 /**
- *
  * @author Stanislav Poslavsky
  */
 public class ComplexToken implements TokenParser<Complex> {

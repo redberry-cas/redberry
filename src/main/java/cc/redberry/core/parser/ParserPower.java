@@ -23,12 +23,16 @@
 package cc.redberry.core.parser;
 
 /**
+ * Parser for powers if form Power[a, b].
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @since 1.0
  */
 public class ParserPower implements TokenParser {
-
+    /**
+     * Singleton instance.
+     */
     public static final ParserPower INSTANCE = new ParserPower();
     private static final String power = "Power";
     private static final int minLength = power.length() + 2;
@@ -42,7 +46,7 @@ public class ParserPower implements TokenParser {
     }
 
     @Override
-    public ParseToken parseNode(String expression, Parser parser) {
+    public ParseToken parseToken(String expression, Parser parser) {
         if (expression.length() <= minLength)
             return null;
         if (!(power + '[').equals(expression.substring(0, power.length() + 1))

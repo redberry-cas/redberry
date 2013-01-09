@@ -25,11 +25,10 @@ package cc.redberry.core.parser;
 import java.util.Comparator;
 
 /**
- *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public final class NodeParserComparator implements Comparator<TokenParser> {
+final class NodeParserComparator implements Comparator<TokenParser> {
     public static final NodeParserComparator INSTANCE = new NodeParserComparator();
 
     private NodeParserComparator() {

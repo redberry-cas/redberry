@@ -32,10 +32,7 @@ import static cc.redberry.core.number.NumberUtils.checkNotNull;
 import static cc.redberry.core.number.NumberUtils.createNumeric;
 
 /**
- * The {@code Numeric} class extends class
- * {@link cc.redberry.core.number.Number} and gives numeric representation of
- * Redberry numbers. It is simply wraps a value of the primitive type
- * {@code double} in an object (like java {@link Double}).
+ * Implementation of floating point numbers based on Java {@code double}.
  * <p/>
  * <p>This class implements all mathematical operations declared in
  * {@link cc.redberry.core.number.Number} as operations with doubles. So all
@@ -47,7 +44,6 @@ import static cc.redberry.core.number.NumberUtils.createNumeric;
  * @author Stanislav Poslavsky
  * @see Number
  * @see Double
- * @see RationalNumber
  */
 public final class Numeric extends Real implements Serializable {
 
@@ -140,7 +136,6 @@ public final class Numeric extends Real implements Serializable {
      *
      * @param value the value, which double representation to be represented by
      *              the {@code Double}.
-     *
      * @throws NullArgumentException if value is {@code null}.
      */
     public Numeric(final Number value) {
@@ -209,7 +204,6 @@ public final class Numeric extends Real implements Serializable {
 
     /**
      * @return similar to {@link Double}
-     *
      * @see Double#hashCode()
      */
     @Override
@@ -220,7 +214,6 @@ public final class Numeric extends Real implements Serializable {
 
     /**
      * @return {@code Double.isInfinite(value)}
-     *
      * @see Double#isInfinite(double)
      */
     @Override
@@ -230,7 +223,6 @@ public final class Numeric extends Real implements Serializable {
 
     /**
      * @return {@code Double.isNaN(value)}
-     *
      * @see Double#isNaN(double)
      */
     @Override
@@ -444,5 +436,5 @@ public final class Numeric extends Real implements Serializable {
     public boolean isNatural() {
         return false;
     }
-    
+
 }

@@ -20,20 +20,12 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
-package cc.redberry.core.parser;
 
 /**
+ * AST transformers.
+ *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  * @since 1.0
  */
-public class ParserException extends RuntimeException {
-
-    public ParserException(String message) {
-        super(message);
-    }
-
-    public ParserException() {
-    }
-
-}
+package cc.redberry.core.parser.preprocessor;

@@ -25,17 +25,23 @@ package cc.redberry.core.parser;
 import cc.redberry.core.indices.SimpleIndices;
 
 /**
+ * Parser for simple tensors.
+ *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @since 1.0
  */
 public class ParserSimpleTensor implements TokenParser {
+    /**
+     * Singleton instance.
+     */
     public static final ParserSimpleTensor INSTANCE = new ParserSimpleTensor();
 
     private ParserSimpleTensor() {
     }
 
     @Override
-    public ParseTokenSimpleTensor parseNode(String expression, Parser parser) {
+    public ParseTokenSimpleTensor parseToken(String expression, Parser parser) {
         expression = expression.replaceAll("\\{[\\s]*\\}", "");
         int indicesBegin = expression.indexOf('_'), i = expression.indexOf('^');
         if (indicesBegin < 0 && i >= 0)

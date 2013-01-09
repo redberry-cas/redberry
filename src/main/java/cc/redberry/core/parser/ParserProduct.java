@@ -27,10 +27,16 @@ import cc.redberry.core.number.Complex;
 import java.util.List;
 
 /**
+ * Parser of mathematical product.
+ *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @since 1.0
  */
 public class ParserProduct extends ParserOperator {
+    /**
+     * Singleton instance.
+     */
     public static final ParserProduct INSTANCE = new ParserProduct();
 
     private ParserProduct() {

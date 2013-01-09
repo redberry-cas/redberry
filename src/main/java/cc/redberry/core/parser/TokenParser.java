@@ -23,13 +23,23 @@
 package cc.redberry.core.parser;
 
 /**
+ * Parser for tokens of a particular type.
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @since 1.0
  */
 public interface TokenParser {
 
-    ParseToken parseNode(String expression, Parser parser);
+    /**
+     * Parses the specified string expression and returns the corresponding AST node or {@code null},
+     * string can not be parsed by this parser.
+     *
+     * @param expression string expression
+     * @param parser     recursion
+     * @return AST node
+     */
+    ParseToken parseToken(String expression, Parser parser);
 
     /**
      * The higher the priority, the earlier runs.

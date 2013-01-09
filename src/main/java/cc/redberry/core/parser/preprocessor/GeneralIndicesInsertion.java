@@ -39,10 +39,14 @@ import java.util.*;
 import static cc.redberry.core.indices.IndexType.TYPES_COUNT;
 
 /**
- * ParseNodeTransformer facilitating input of matrices and vectors with omitted indices.
- * <p/>
- * <p>It is useful in situations where one is faced with the need to input many huge matrix expressions, and manual
- * indices insertion becomes a complex task.</p>
+ * AST transformer, which inserts additional indices to specified tensors according to
+ * the rules of matrix multiplication.
+ * It is useful in situations where one is faced with the need to input many huge matrix expressions, and manual
+ * indices insertion becomes a complex task.
+ *
+ * @author Dmitriy Bolotin
+ * @author Stanislav Poslavsky
+ * @since 1.1
  */
 public class GeneralIndicesInsertion implements ParseTokenTransformer {
     private final Map<NameAndStructureOfIndices, InsertionRule> initialRules = new HashMap<>();
@@ -500,7 +504,7 @@ public class GeneralIndicesInsertion implements ParseTokenTransformer {
         }
 
         private ParseToken addDeltas(OuterIndices inserted, ParseToken node, OuterIndices expected,
-                                    int[][] upper, int[][] lower) {
+                                     int[][] upper, int[][] lower) {
             List<ParseToken> multipliers = new ArrayList<>();
             for (byte i = 0; i < TYPES_COUNT; ++i) {
                 if (!inserted.initialized[i] && expected.initialized[i]) {

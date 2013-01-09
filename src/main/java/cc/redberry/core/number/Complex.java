@@ -35,6 +35,8 @@ import java.io.Serializable;
 import java.math.BigInteger;
 
 /**
+ * Implementation of complex numbers.
+ *
  * @author Stanislav Poslavsky
  */
 public final class Complex extends Tensor

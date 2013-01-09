@@ -20,20 +20,10 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
-package cc.redberry.core.parser;
 
 /**
- * @author Dmitry Bolotin
- * @author Stanislav Poslavsky
- * @since 1.0
+ * Implementation of numbers in Redberry. The implementation includes real numbers ({@link Real}):
+ * big rational ({@link Rational}), floating point ({@link Numeric}) and complex numbers ({@link Complex}) over
+ * the reals. The implementation of big rational numbers is based on the Apache Commons Math {@link org.apache.commons.math3.fraction.BigFraction}.
  */
-public class ParserException extends RuntimeException {
-
-    public ParserException(String message) {
-        super(message);
-    }
-
-    public ParserException() {
-    }
-
-}
+package cc.redberry.core.number;

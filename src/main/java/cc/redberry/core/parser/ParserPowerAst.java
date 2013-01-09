@@ -24,14 +24,24 @@ package cc.redberry.core.parser;
 
 import java.util.Arrays;
 
+/**
+ * Parser for powers of form a**b.
+ *
+ * @author Dmitry Bolotin
+ * @author Stanislav Poslavsky
+ * @since 1.0
+ */
 public class ParserPowerAst implements TokenParser {
+    /**
+     * Singleton instance.
+     */
     public static final ParserPowerAst INSTANCE = new ParserPowerAst();
 
     private ParserPowerAst() {
     }
 
     @Override
-    public ParseToken parseNode(String expression, Parser parser) {
+    public ParseToken parseToken(String expression, Parser parser) {
         char[] expressionChars = expression.toCharArray();
         int level = 0;
         char c;

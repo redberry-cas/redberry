@@ -27,12 +27,16 @@ import cc.redberry.core.number.Complex;
 import java.util.List;
 
 /**
+ * Parser for mathematical sums.
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @since 1.0
  */
 public class ParserSum extends ParserOperator {
-
+    /**
+     * Singleton instance.
+     */
     public static final ParserSum INSTANCE = new ParserSum();
 
     private ParserSum() {
@@ -53,8 +57,8 @@ public class ParserSum extends ParserOperator {
             System.arraycopy(node.content, 0, content, 1, node.content.length);
         } else
             content = new ParseToken[]{
-                new ParseTokenNumber(Complex.MINUS_ONE),
-                node
+                    new ParseTokenNumber(Complex.MINUS_ONE),
+                    node
             };
         return new ParseToken(TokenType.Product, content);
     }

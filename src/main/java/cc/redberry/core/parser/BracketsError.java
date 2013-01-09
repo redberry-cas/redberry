@@ -22,6 +22,11 @@
  */
 package cc.redberry.core.parser;
 
+/**
+ * @author Dmitry Bolotin
+ * @author Stanislav Poslavsky
+ * @since 1.0
+ */
 public class BracketsError extends ParserException {
     public BracketsError(String message) {
         super("Unbalanced brackets in " + message);

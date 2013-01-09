@@ -26,7 +26,6 @@ import cc.redberry.core.number.Complex;
 import org.junit.Test;
 
 /**
- *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */

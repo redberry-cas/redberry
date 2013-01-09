@@ -23,19 +23,23 @@
 package cc.redberry.core.parser;
 
 /**
+ * Parser for Redberry {@link cc.redberry.core.tensor.Expression}.
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @since 1.0
  */
 public class ParserExpression implements TokenParser {
-
+    /**
+     * Singleton instance.
+     */
     public static final ParserExpression INSTANCE = new ParserExpression();
 
     private ParserExpression() {
     }
 
     @Override
-    public ParseToken parseNode(String expression, Parser parser) {
+    public ParseToken parseToken(String expression, Parser parser) {
         if (!expression.contains("="))
             return null;
         if (expression.indexOf('=') != expression.lastIndexOf('='))

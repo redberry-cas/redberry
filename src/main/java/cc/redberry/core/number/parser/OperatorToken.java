@@ -23,7 +23,6 @@
 package cc.redberry.core.number.parser;
 
 /**
- *
  * @author Stanislav Poslavsky
  */
 public abstract class OperatorToken<T extends cc.redberry.core.number.Number<T>>

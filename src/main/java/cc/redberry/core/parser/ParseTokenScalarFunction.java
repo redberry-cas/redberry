@@ -30,14 +30,23 @@ import cc.redberry.core.tensor.Tensors;
 import java.util.Objects;
 
 /**
+ * AST node for scalar functions.
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @since 1.0
  */
 public final class ParseTokenScalarFunction extends ParseToken {
 
+    /**
+     * Function string name.
+     */
     public String function;
 
+    /**
+     * @param function function string name
+     * @param content  child nodes
+     */
     public ParseTokenScalarFunction(String function, ParseToken[] content) {
         super(TokenType.ScalarFunction, content);
         if (content.length != 1)

@@ -29,12 +29,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * Parser for tensor fields.
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @since 1.0
  */
 public class ParserTensorField implements TokenParser {
-
+    /**
+     * Singleton instance.
+     */
     public static final ParserTensorField INSTANCE = new ParserTensorField();
 
     private ParserTensorField() {
@@ -67,14 +71,14 @@ public class ParserTensorField implements TokenParser {
     }
 
     @Override
-    public ParseToken parseNode(String expression, Parser parser) {
+    public ParseToken parseToken(String expression, Parser parser) {
         if (!expression.contains("["))
             return null;
         if (!canParse(expression))
             return null;
 
         String tensorPart = expression.substring(0, expression.indexOf('['));
-        ParseTokenSimpleTensor simpleTensorNode = ParserSimpleTensor.INSTANCE.parseNode(tensorPart, parser);
+        ParseTokenSimpleTensor simpleTensorNode = ParserSimpleTensor.INSTANCE.parseToken(tensorPart, parser);
 
         String argString = expression.substring(expression.indexOf("[") + 1, expression.length() - 1);
 

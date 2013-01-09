@@ -25,11 +25,16 @@ package cc.redberry.core.parser;
 import java.util.Arrays;
 
 /**
+ * Parser of mathematical expressions.
+ *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @since 1.0
  */
 public class Parser {
-
+    /**
+     * Default parser.
+     */
     public static final Parser DEFAULT =
             new Parser(ParserBrackets.INSTANCE,
                     ParserSum.INSTANCE,
@@ -43,16 +48,27 @@ public class Parser {
                     ParserPowerAst.INSTANCE);
     private final TokenParser[] tokenParsers;
 
+    /**
+     * Constructs Parser from a given parsers of AST nodes.
+     *
+     * @param tokenParsers
+     */
     public Parser(TokenParser... tokenParsers) {
         this.tokenParsers = tokenParsers;
         Arrays.sort(tokenParsers, NodeParserComparator.INSTANCE);
     }
 
+    /**
+     * Parse string expression into AST.
+     *
+     * @param expression string expression
+     * @return AST
+     */
     public ParseToken parse(String expression) {
         if (expression.isEmpty())
             throw new IllegalArgumentException("Empty expression.");
         for (TokenParser tokenParser : tokenParsers) {
-            ParseToken node = tokenParser.parseNode(expression.trim(), this);
+            ParseToken node = tokenParser.parseToken(expression.trim(), this);
             if (node != null)
                 return node;
         }

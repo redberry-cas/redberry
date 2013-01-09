@@ -23,10 +23,18 @@
 package cc.redberry.core.parser;
 
 /**
+ * AST transformer.
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @since 1.0
  */
 public interface ParseTokenTransformer {
+    /**
+     * Transforms specified AST node.
+     *
+     * @param node AST node.
+     * @return transformed AST node
+     */
     ParseToken transform(ParseToken node);
 }

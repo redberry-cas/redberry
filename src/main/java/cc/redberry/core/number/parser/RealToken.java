@@ -29,7 +29,6 @@ import cc.redberry.core.number.Real;
 import java.math.BigInteger;
 
 /**
- *
  * @author Stanislav Poslavsky
  */
 public class RealToken implements TokenParser<Real> {

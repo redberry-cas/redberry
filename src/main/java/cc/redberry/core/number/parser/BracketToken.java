@@ -23,7 +23,6 @@
 package cc.redberry.core.number.parser;
 
 /**
- *
  * @author Stanislav Poslavsky
  */
 public class BracketToken<T extends cc.redberry.core.number.Number<T>>

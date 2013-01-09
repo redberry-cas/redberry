@@ -28,6 +28,7 @@ import java.util.List;
 /**
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @since 1.0
  */
 abstract class ParserOperator implements TokenParser {
 
@@ -66,7 +67,7 @@ abstract class ParserOperator implements TokenParser {
     }
 
     @Override
-    public ParseToken parseNode(String expression, Parser parser) {
+    public ParseToken parseToken(String expression, Parser parser) {
         if (!canParse(expression))
             return null;
         expression = expression.replace("--", "+");

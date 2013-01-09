@@ -20,20 +20,14 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
-package cc.redberry.core.parser;
 
 /**
+ * Parser of mathematical expressions. The implementation is based on the recursive algorithm and
+ * builds the intermediate abstract syntax tree object ({@link ParseToken}). Then it can be converted
+ * to tensor via {@link cc.redberry.core.parser.ParseToken#toTensor()}.
+ *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  * @since 1.0
  */
-public class ParserException extends RuntimeException {
-
-    public ParserException(String message) {
-        super(message);
-    }
-
-    public ParserException() {
-    }
-
-}
+package cc.redberry.core.parser;

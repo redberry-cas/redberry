@@ -21,8 +21,8 @@
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
 package cc.redberry.core.number.parser;
+
 /**
- *
  * @author Stanislav Poslavsky
  */
 public class BracketsError extends RuntimeException {

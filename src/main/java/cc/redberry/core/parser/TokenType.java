@@ -23,12 +23,15 @@
 package cc.redberry.core.parser;
 
 /**
+ * AST nodes types.
+ *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @since 1.0
  */
 public enum TokenType {
     /*
-     * Enum values are equal to string representations of corresponfing classes:
+     * Enum values are equal to string representations of corresponding classes:
      * (TensorType.Power <-> Power and so on)
      */
 

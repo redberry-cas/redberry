@@ -24,20 +24,28 @@ package cc.redberry.core.parser;
 
 import cc.redberry.core.context.NameAndStructureOfIndices;
 import cc.redberry.core.indices.Indices;
-import cc.redberry.core.indices.StructureOfIndices;
 import cc.redberry.core.indices.SimpleIndices;
+import cc.redberry.core.indices.StructureOfIndices;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.tensor.Tensors;
 
 import java.util.Objects;
 
 /**
+ * AST node for simple tensor.
+ *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @since 1.0
  */
 public class ParseTokenSimpleTensor extends ParseToken {
-
+    /**
+     * Indices of simple tensor.
+     */
     public SimpleIndices indices;
+    /**
+     * String name of simple tensor.
+     */
     public String name;
 
     protected ParseTokenSimpleTensor(SimpleIndices indices, String name, TokenType type, ParseToken[] content) {
@@ -46,12 +54,19 @@ public class ParseTokenSimpleTensor extends ParseToken {
         this.name = name;
     }
 
+    /**
+     * @param indices indices of simple tensor
+     * @param name    string name of simple tensor
+     */
     public ParseTokenSimpleTensor(SimpleIndices indices, String name) {
         super(TokenType.SimpleTensor);
         this.indices = indices;
         this.name = name;
     }
 
+    /**
+     * @return {@link NameAndStructureOfIndices}
+     */
     public NameAndStructureOfIndices getIndicesTypeStructureAndName() {
         return new NameAndStructureOfIndices(name, new StructureOfIndices[]{new StructureOfIndices(indices)});
     }

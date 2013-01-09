@@ -22,15 +22,23 @@
  */
 package cc.redberry.core.parser;
 
+/**
+ * Parses expressions of form in brackets.
+ *
+ * @author Dmitry Bolotin
+ * @author Stanislav Poslavsky
+ * @since 1.0
+ */
 public class ParserBrackets implements TokenParser {
     public static final ParserBrackets INSTANCE = new ParserBrackets();
 
     private ParserBrackets() {
     }
+
     private final static int parserID = Integer.MAX_VALUE;
 
     @Override
-    public ParseToken parseNode(String expression, Parser parser) {
+    public ParseToken parseToken(String expression, Parser parser) {
         if (expression.charAt(0) == '(' && expression.charAt(expression.length() - 1) == ')') {
             char[] expressionChars = expression.toCharArray();
             int level = 0;
@@ -42,7 +50,7 @@ public class ParserBrackets implements TokenParser {
                 if (c == ')')
                     level--;
             }
-            if(level != 0)
+            if (level != 0)
                 throw new BracketsError();
             return parser.parse(expression.substring(1, expression.length() - 1));
         } else

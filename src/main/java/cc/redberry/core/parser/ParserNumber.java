@@ -26,18 +26,23 @@ import cc.redberry.core.number.Complex;
 import cc.redberry.core.number.parser.NumberParser;
 
 /**
+ * Parser for numbers.
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @since 1.0
  */
 public class ParserNumber implements TokenParser {
+    /**
+     * Singleton instance.
+     */
     public static final ParserNumber INSTANCE = new ParserNumber();
 
     private ParserNumber() {
     }
 
     @Override
-    public ParseToken parseNode(String expression, cc.redberry.core.parser.Parser parser) {
+    public ParseToken parseToken(String expression, cc.redberry.core.parser.Parser parser) {
         Complex value;
         try {
             value = NumberParser.COMPLEX_PARSER.parse(expression);

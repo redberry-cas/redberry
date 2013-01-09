@@ -30,12 +30,16 @@ import cc.redberry.core.tensor.Tensor;
 import java.util.Objects;
 
 /**
+ * AST node for {@link Complex}.
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @since 1.0
  */
 public class ParseTokenNumber extends ParseToken {
-
+    /**
+     * Complex number.
+     */
     public Complex value;
 
     public ParseTokenNumber(Complex value) {

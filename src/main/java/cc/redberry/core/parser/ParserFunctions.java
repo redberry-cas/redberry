@@ -23,12 +23,16 @@
 package cc.redberry.core.parser;
 
 /**
+ * Parser for scalar functions.
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @since 1.0
  */
 public class ParserFunctions implements TokenParser {
-
+    /**
+     * Singleton instance.
+     */
     public static final ParserFunctions INSTANCE = new ParserFunctions();
     private static final String[] functions = {"Sin", "Cos", "Tan", "Log", "Exp", "Cot", "ArcSin", "ArcCos", "ArcTan", "ArcCot"};
 
@@ -41,7 +45,7 @@ public class ParserFunctions implements TokenParser {
     }
 
     @Override
-    public ParseToken parseNode(String expression, Parser parser) {
+    public ParseToken parseToken(String expression, Parser parser) {
         if (!expression.contains("[") || expression.lastIndexOf(']') != expression.length() - 1)
             return null;
         String temp = null, function = null;

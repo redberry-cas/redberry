@@ -24,19 +24,30 @@ package cc.redberry.core.parser;
 
 import cc.redberry.core.context.NameAndStructureOfIndices;
 import cc.redberry.core.indices.IndicesFactory;
-import cc.redberry.core.indices.StructureOfIndices;
 import cc.redberry.core.indices.SimpleIndices;
+import cc.redberry.core.indices.StructureOfIndices;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.tensor.Tensors;
 
 /**
+ * AST node for tensor field.
+ *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @since 1.0
  */
 public class ParseTokenTensorField extends ParseTokenSimpleTensor {
-
+    /**
+     * Indices of arguments.
+     */
     public SimpleIndices[] argumentsIndices;
 
+    /**
+     * @param indices          indices of field
+     * @param name             string name of field
+     * @param content          child nodes
+     * @param argumentsIndices indices of arguments.
+     */
     public ParseTokenTensorField(SimpleIndices indices,
                                  String name,
                                  ParseToken[] content,

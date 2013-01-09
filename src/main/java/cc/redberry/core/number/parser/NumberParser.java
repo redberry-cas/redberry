@@ -27,76 +27,75 @@ import cc.redberry.core.number.Rational;
 import cc.redberry.core.number.Real;
 
 /**
- *
  * @author Stanislav Poslavsky
  */
 public class NumberParser<T extends cc.redberry.core.number.Number<T>> {
 
     @SuppressWarnings("unchecked")
     private static final TokenParser<Complex>[] ComplexTokens = new TokenParser[]{
-        BracketToken.INSTANCE,
-        new OperatorToken<Complex>('+', '-') {
+            BracketToken.INSTANCE,
+            new OperatorToken<Complex>('+', '-') {
 
-            @Override
-            protected Complex neutral() {
-                return Complex.ZERO;
-            }
+                @Override
+                protected Complex neutral() {
+                    return Complex.ZERO;
+                }
 
-            @Override
-            protected Complex operation(Complex c1, Complex c2, boolean mode) {
-                if (mode)
-                    return c1.subtract(c2);
-                return c1.add(c2);
-            }
-        },
-        new OperatorToken<Complex>('*', '/') {
+                @Override
+                protected Complex operation(Complex c1, Complex c2, boolean mode) {
+                    if (mode)
+                        return c1.subtract(c2);
+                    return c1.add(c2);
+                }
+            },
+            new OperatorToken<Complex>('*', '/') {
 
-            @Override
-            protected Complex neutral() {
-                return Complex.ONE;
-            }
+                @Override
+                protected Complex neutral() {
+                    return Complex.ONE;
+                }
 
-            @Override
-            protected Complex operation(Complex c1, Complex c2, boolean mode) {
-                if (mode)
-                    return c1.divide(c2);
-                return c1.multiply(c2);
-            }
-        },
-        ComplexToken.INSTANCE
+                @Override
+                protected Complex operation(Complex c1, Complex c2, boolean mode) {
+                    if (mode)
+                        return c1.divide(c2);
+                    return c1.multiply(c2);
+                }
+            },
+            ComplexToken.INSTANCE
     };
     @SuppressWarnings("unchecked")
     private static final TokenParser<Real>[] RealTokens = new TokenParser[]{
-        BracketToken.INSTANCE,
-        new OperatorToken<Real>('+', '-') {
+            BracketToken.INSTANCE,
+            new OperatorToken<Real>('+', '-') {
 
-            @Override
-            protected Real neutral() {
-                return Rational.ZERO;
-            }
+                @Override
+                protected Real neutral() {
+                    return Rational.ZERO;
+                }
 
-            @Override
-            protected Real operation(Real c1, Real c2, boolean mode) {
-                if (mode)
-                    return c1.subtract(c2);
-                return c1.add(c2);
-            }
-        },
-        new OperatorToken<Real>('*', '/') {
+                @Override
+                protected Real operation(Real c1, Real c2, boolean mode) {
+                    if (mode)
+                        return c1.subtract(c2);
+                    return c1.add(c2);
+                }
+            },
+            new OperatorToken<Real>('*', '/') {
 
-            @Override
-            protected Real neutral() {
-                return Rational.ONE;
-            }
+                @Override
+                protected Real neutral() {
+                    return Rational.ONE;
+                }
 
-            @Override
-            protected Real operation(Real c1, Real c2, boolean mode) {
-                if (mode)
-                    return c1.divide(c2);
-                return c1.multiply(c2);
-            }
-        },
-        RealToken.INSTANCE
+                @Override
+                protected Real operation(Real c1, Real c2, boolean mode) {
+                    if (mode)
+                        return c1.divide(c2);
+                    return c1.multiply(c2);
+                }
+            },
+            RealToken.INSTANCE
     };
     public static final NumberParser<Real> REAL_PARSER = new NumberParser<>(RealTokens);
     public static final NumberParser<Complex> COMPLEX_PARSER = new NumberParser<>(ComplexTokens);

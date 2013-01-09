@@ -31,18 +31,35 @@ import java.util.List;
 /**
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @since 1.0
  */
 public final class ParseManager {
 
+    /**
+     * Default AST transformers to be applied before {@link cc.redberry.core.parser.ParseToken#toTensor()} conversion.
+     */
     public List<ParseTokenTransformer> defaultParserPreprocessors = new ArrayList<>();
+
+    /**
+     * Default transformations to be applied after {@link cc.redberry.core.parser.ParseToken#toTensor()} conversion.
+     */
     public List<Transformation> defaultTensorPreprocessors = new ArrayList<>();
 
     private final Parser parser;
 
+    /**
+     * @param parser parser
+     */
     public ParseManager(Parser parser) {
         this.parser = parser;
     }
 
+    /**
+     * @param expression          string expression
+     * @param tensorPreprocessors transformation
+     * @param nodesPreprocessors  AST transformers
+     * @return tensor
+     */
     public Tensor parse(String expression, Transformation[] tensorPreprocessors, ParseTokenTransformer[] nodesPreprocessors) {
         ParseToken node = parser.parse(expression);
         for (ParseTokenTransformer tr : nodesPreprocessors)
@@ -53,10 +70,19 @@ public final class ParseManager {
         return t;
     }
 
+    /**
+     * @param expression         string expression
+     * @param nodesPreprocessors AST transformers
+     * @return tensor
+     */
     public Tensor parse(String expression, ParseTokenTransformer... nodesPreprocessors) {
         return parse(expression, new Transformation[0], nodesPreprocessors);
     }
 
+    /**
+     * @param expression string expression
+     * @return tensor
+     */
     public Tensor parse(String expression) {
         return parse(expression,
                 defaultTensorPreprocessors.toArray(new Transformation[defaultTensorPreprocessors.size()]),

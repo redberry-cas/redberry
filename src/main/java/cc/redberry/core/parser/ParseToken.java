@@ -31,16 +31,31 @@ import cc.redberry.core.tensor.Tensors;
 import java.util.Arrays;
 
 /**
+ * Abstract syntax tree. The implementation is a simple linked tree.
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @since 1.0
  */
 public class ParseToken {
 
+    /**
+     * Node type.
+     */
     public final TokenType tokenType;
+    /**
+     * Parent node.
+     */
     public ParseToken parent;
+    /**
+     * Child nodes.
+     */
     public final ParseToken[] content;
 
+    /**
+     * @param tokenType node type
+     * @param content   child nodes
+     */
     public ParseToken(TokenType tokenType, ParseToken... content) {
         this.tokenType = tokenType;
         this.content = content;
@@ -52,6 +67,11 @@ public class ParseToken {
         this.parent = parent;
     }
 
+    /**
+     * Returns {@link Indices} of the corresponding mathematical expression.
+     *
+     * @return {@link Indices} of the corresponding mathematical expression
+     */
     public Indices getIndices() {
         switch (tokenType) {
             case Product:
@@ -86,6 +106,11 @@ public class ParseToken {
         return tensors;
     }
 
+    /**
+     * Converts this AST to tensor.
+     *
+     * @return resulting tensor
+     */
     public Tensor toTensor() {
         switch (tokenType) {
             case Sum:

@@ -39,10 +39,14 @@ import java.util.List;
 import java.util.Set;
 
 /**
+ * AST transformer, which inserts additional indices to specified tensors.
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @since 1.0
+ * @deprecated should be replaced with {@link GeneralIndicesInsertion}
  */
+@Deprecated
 public final class IndicesInsertion implements ParseTokenTransformer {
 
     private final int[] upper, lower;
@@ -159,11 +163,10 @@ public final class IndicesInsertion implements ParseTokenTransformer {
                     return null;
                 else if (transformers.size() == 1)
                     return transformers.get(0);
+                else if (node.tokenType == TokenType.Product)
+                    return new ProductTransformer(transformers.toArray(new IITransformer[transformers.size()]));
                 else
-                    if (node.tokenType == TokenType.Product)
-                        return new ProductTransformer(transformers.toArray(new IITransformer[transformers.size()]));
-                    else
-                        return new SumTransformer(transformers.toArray(new IITransformer[transformers.size()]));
+                    return new SumTransformer(transformers.toArray(new IITransformer[transformers.size()]));
             default:
                 return null;
         }
