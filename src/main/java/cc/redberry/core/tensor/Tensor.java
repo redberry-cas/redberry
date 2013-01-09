@@ -29,13 +29,14 @@ import cc.redberry.core.indices.Indices;
 import java.util.Iterator;
 
 /**
- * Abstract class which defines common tensor properties and methods. All tensors are immutable.
+ * Abstract class which defines common tensor properties and methods.
+ * All tensors are immutable. This class dos not implements {@code equals()} method, and
+ * in order to compare tensors one should use {@link cc.redberry.core.utils.TensorUtils#equals(Tensor, Tensor)}.
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  * @see cc.redberry.core.indices.Indices
- * @see cc.redberry.core.context.OutputFormat
- * @see cc.redberry.core.context.Context
+ * @see cc.redberry.core.utils.TensorUtils#equals(Tensor, Tensor)
  * @since 1.0
  */
 public abstract class Tensor
@@ -160,7 +161,7 @@ public abstract class Tensor
      *
      * @param t tensor
      * @return 0 if hashes are equals, 1 if hash code of this greater the hash code of specified
-     * tensor and -1 otherwise
+     *         tensor and -1 otherwise
      */
     @Override
     public final int compareTo(Tensor t) {

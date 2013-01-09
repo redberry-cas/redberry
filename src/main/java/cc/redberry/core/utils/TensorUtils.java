@@ -42,6 +42,8 @@ import java.util.Set;
 import static cc.redberry.core.tensor.Tensors.*;
 
 /**
+ * This class contains various useful methods related with tensors.
+ *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
