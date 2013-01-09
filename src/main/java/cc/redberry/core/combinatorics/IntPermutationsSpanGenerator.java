@@ -43,6 +43,12 @@ public final class IntPermutationsSpanGenerator
     private PermutationsSpanIterator<Permutation> innerIterator;
     private final ArrayList<Permutation> permutations;
 
+    /**
+     * Creates generator from a given array of permutations.
+     *
+     * @param permutations array of permutations in one-line notation
+     * @throws IllegalArgumentException if some array does not satisfies one-line notation
+     */
     public IntPermutationsSpanGenerator(int[]... permutations) {
         this.permutations = new ArrayList<>(permutations.length);
         for (int[] p : permutations)

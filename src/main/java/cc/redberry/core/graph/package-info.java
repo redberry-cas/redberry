@@ -21,10 +21,11 @@
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
 /**
- * Contains useful graph algorithms.
+ * Useful graph algorithms.
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @since 1.0
  */
 package cc.redberry.core.graph;
 

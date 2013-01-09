@@ -22,8 +22,8 @@
  */
 
 /**
- * This package contains the default implementations (indices integer->string and string->integer conversions) and
- * settings (context settings) for Redberry.
+ * Redberry defaults. Contains the default implementations of indices integer->string and string->integer
+ * conversions and context settings.
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky

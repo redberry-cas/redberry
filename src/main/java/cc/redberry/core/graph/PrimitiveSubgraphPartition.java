@@ -46,6 +46,7 @@ import static cc.redberry.core.tensor.FullContractionsStructure.getToTensorIndex
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @since 1.1
  */
 public final class PrimitiveSubgraphPartition {
     private final ProductContent pc;
@@ -92,6 +93,7 @@ public final class PrimitiveSubgraphPartition {
      * @param p    {@link Product} representing the graph
      * @param type type of edges to be taken into account in partition
      * @return the partition of graph, i.e. an array of all its subgraphs of types specified by {@link GraphType}
+     * @since 1.1
      */
     public static PrimitiveSubgraph[] calculatePartition(Product p, IndexType type) {
         return new PrimitiveSubgraphPartition(p.getContent(), type).partition;
@@ -104,6 +106,7 @@ public final class PrimitiveSubgraphPartition {
      *
      * @param p    {@link ProductContent} representing the graph
      * @param type type of edges to be taken into account in partition
+     * @since 1.1
      */
     public static PrimitiveSubgraph[] calculatePartition(ProductContent p, IndexType type) {
         return new PrimitiveSubgraphPartition(p, type).partition;

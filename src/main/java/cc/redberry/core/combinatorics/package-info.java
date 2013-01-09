@@ -21,7 +21,7 @@
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
 /**
- * <p>This package provides a number of useful combinatorial algorithms. It includes two main types of classes:
+ * <p>Provides a number of useful combinatorial algorithms. It includes two main types of classes:
  * classes aimed on the enumeration of a particular kinds of combinations, and classes providing facilities to
  * operate with single permutations and symmetric groups.</p>
  *

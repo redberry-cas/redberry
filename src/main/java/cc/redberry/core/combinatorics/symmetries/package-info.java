@@ -1,3 +1,4 @@
+
 /*
  * Redberry: symbolic tensor computations.
  *
@@ -20,28 +21,12 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
-package cc.redberry.core.graph;
 
 /**
- * Type of graph.
+ * Implementation of subgroup of symmetric group.
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
- * @since 1.1
+ * @since 1.0
  */
-public enum GraphType {
-    /**
-     * The graph of form A^{i<sub>1</sub>}_{i<sub>2</sub>}*B^{i<sub>2</sub>}_{i<sub>3</sub>}*...*C^{i<sub>N</sub>}_{i<sub>1</sub>},
-     * where {i<sub>j</sub>} denotes the whole set of tensor indices. Tensor of such type have no free indices.
-     */
-    Cycle,
-    /**
-     * The graph of form A^{i<sub>1</sub>}_{i<sub>2</sub>}*B^{i<sub>2</sub>}_{i<sub>3</sub>}*...*C^{i<sub>N-1</sub>}_{i<sub>N</sub>},
-     * where {i<sub>j</sub>} denotes the whole set of tensor indices.
-     */
-    Line,
-    /**
-     * Not cycle or line
-     */
-    Graph
-}
+package cc.redberry.core.combinatorics.symmetries;

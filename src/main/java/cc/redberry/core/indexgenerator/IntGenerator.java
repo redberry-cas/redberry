@@ -25,24 +25,36 @@ package cc.redberry.core.indexgenerator;
 import java.util.Arrays;
 
 /**
+ * Generates distinct integers, which does not contain in
+ * specified engaged data.
+ *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @since 1.0
  */
 public final class IntGenerator {
     private static final int[] EMPTY_ARRAY = {-1};
     private int[] engagedData;
     private int counter, match;
 
+    /**
+     * Constructs generator with no engaged data
+     */
     public IntGenerator() {
         this(EMPTY_ARRAY);
     }
 
-    public IntGenerator(int[] engagedData, int counter, int match) {
+    private IntGenerator(int[] engagedData, int counter, int match) {
         this.engagedData = engagedData;
         this.counter = counter;
         this.match = match;
     }
 
+    /**
+     * Constructs generator with specified engaged data
+     *
+     * @param engagedData engaged data
+     */
     public IntGenerator(int[] engagedData) {
         this.engagedData = engagedData;
         counter = -1;
@@ -62,6 +74,11 @@ public final class IntGenerator {
             engagedData[i] = Integer.MAX_VALUE;
     }
 
+    /**
+     * Merge data from another generator
+     *
+     * @param intGenerator integers generator
+     */
     public void mergeFrom(IntGenerator intGenerator) {
         if (intGenerator.engagedData != engagedData)
             throw new IllegalArgumentException();
@@ -78,6 +95,7 @@ public final class IntGenerator {
             if (newCapacity < minCapacity)
                 newCapacity = minCapacity;
             engagedData = Arrays.copyOf(engagedData, newCapacity);
+            //todo potentially breaks generator: if engagedData == EMPTY_ARRAY, it possibly can be filled
             Arrays.fill(engagedData, oldCapacity, newCapacity, Integer.MAX_VALUE);
         }
     }
@@ -95,6 +113,11 @@ public final class IntGenerator {
         engagedData[pointer] = index;
     }*/
 
+    /**
+     * Returns new integer.
+     *
+     * @return new integer
+     */
     public int getNext() {
         counter++;
         while (match < engagedData.length && engagedData[match] == counter) {
@@ -104,6 +127,12 @@ public final class IntGenerator {
         return counter;
     }
 
+    /**
+     * Returns true if index contains in engaged data or already was generated.
+     *
+     * @param index integer
+     * @return true if index contains in engaged data or already was generated
+     */
     public boolean contains(int index) {
         if (counter >= index)
             return true;

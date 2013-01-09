@@ -30,6 +30,7 @@ import java.util.Arrays;
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @since 1.1
  */
 public final class PrimitiveSubgraph {
     private final GraphType graphType;

@@ -31,6 +31,7 @@ import java.util.Deque;
 /**
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @since 1.0
  */
 public class GraphUtils {
     /**
@@ -54,6 +55,7 @@ public class GraphUtils {
      * @throws IllegalArgumentException if {@code _from.length() != _to.length}
      * @throws IllegalArgumentException if any element of {@code _from} or {@code _to} equal or
      *                                  greater then {@code vertices}
+     * @since 1.0
      */
     public static int[] calculateConnectedComponents(final int[] _from, final int[] _to, final int vertices) {
 
@@ -171,6 +173,7 @@ public class GraphUtils {
      * @param vertex     vertex of the graph
      * @param components the array, produced by {@link #calculateConnectedComponents(int[], int[], int)}
      * @return number of vertices belonging to the same connected component as specified {@code vertex}
+     * @since 1.0
      */
     public static int componentSize(final int vertex, final int[] components) {
         if (vertex > components.length - 1)
