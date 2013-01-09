@@ -32,6 +32,10 @@ import java.util.List;
 
 import static org.junit.Assert.assertTrue;
 
+/**
+ * @author Dmitriy Bolotin
+ * @author Stanislav Poslavsky
+ */
 public class FromParentToChildIteratorTest {
 
     public static boolean compareTwoArrays(Tensor[] target, Tensor[] expeted) {
@@ -49,7 +53,7 @@ public class FromParentToChildIteratorTest {
         Tensor t = Tensors.parse("a+b+c");
         FromParentToChildIterator tfi = new FromParentToChildIterator(t);
         Tensor[] expected = new Tensor[]{t, t.get(0), t.get(1), t.get(2)};
-        List<Tensor> target = new ArrayList< >();
+        List<Tensor> target = new ArrayList<>();
         Tensor current;
         while ((current = tfi.next()) != null)
             target.add(current);
@@ -63,7 +67,7 @@ public class FromParentToChildIteratorTest {
         Tensor[] expected = new Tensor[]{t, t.get(0),
                 t.get(0).get(0), t.get(0).get(0).get(0),
                 t.get(0).get(0).get(0), t.get(0).get(0).get(1)};
-        List<Tensor> target = new ArrayList< >();
+        List<Tensor> target = new ArrayList<>();
         Tensor current;
         while ((current = tfi.next()) != null)
             target.add(current);
@@ -79,7 +83,7 @@ public class FromParentToChildIteratorTest {
                 t.get(0).get(0).get(0).get(0), t.get(0).get(0).get(0).get(1),
                 t.get(0).get(1), t.get(0).get(1).get(0),
                 t.get(0).get(1).get(0).get(0), t.get(0).get(1).get(0).get(1)};
-        List<Tensor> target = new ArrayList< >();
+        List<Tensor> target = new ArrayList<>();
         Tensor current;
         while ((current = tfi.next()) != null)
             target.add(current);
@@ -92,9 +96,9 @@ public class FromParentToChildIteratorTest {
         Tensor tensor = Tensors.parse("sin[cos[a+b]+tan[e+l]]");
 
         FromParentToChildIterator tfi = new FromParentToChildIterator(tensor);
-        while(!TensorUtils.equalsExactly(tfi.next(), Tensors.parse("a")));
+        while (!TensorUtils.equalsExactly(tfi.next(), Tensors.parse("a"))) ;
         tfi.set(Tensors.parse("x"));
-        while(tfi.next()!= null);
+        while (tfi.next() != null) ;
 
         Tensor result = tfi.result();
         Tensor expected = Tensors.parse("sin[cos[x+b]+tan[e+l]]");
@@ -108,7 +112,7 @@ public class FromParentToChildIteratorTest {
 
         FromParentToChildIterator tfi = new FromParentToChildIterator(tensor);
         Tensor current;
-        while((current = tfi.next()) != null){
+        while ((current = tfi.next()) != null) {
             if (TensorUtils.equalsExactly(current, Tensors.parse("a")))
                 tfi.set(Tensors.parse("2"));
             else if (TensorUtils.equalsExactly(current, Tensors.parse("b")))
@@ -126,13 +130,12 @@ public class FromParentToChildIteratorTest {
         Tensor tensor = Tensors.parse("a*(a+(b+c)*3)*(a+(b+c)*2+4)*A+(B/2+D)");
         FromParentToChildIterator tfi = new FromParentToChildIterator(tensor);
         Tensor current;
-        while((current = tfi.next()) != null){
+        while ((current = tfi.next()) != null) {
             if (TensorUtils.equalsExactly(current, Tensors.parse("a")))
                 tfi.set(Tensors.parse("2"));
-            else if (TensorUtils.equalsExactly(current, Tensors.parse("b+c"))){
+            else if (TensorUtils.equalsExactly(current, Tensors.parse("b+c"))) {
                 tfi.set(Tensors.parse("4"));
-            }
-            else if (TensorUtils.equalsExactly(current, Tensors.parse("B"))){
+            } else if (TensorUtils.equalsExactly(current, Tensors.parse("B"))) {
                 tfi.set(Tensors.parse("1/5"));
             }
         }
@@ -160,7 +163,7 @@ public class FromParentToChildIteratorTest {
         Tensor tensor = Tensors.parse("A_{\\alpha}*B^{\\alpha}_{i}*(R^i+T^i)");
         FromParentToChildIterator tfi = new FromParentToChildIterator(tensor);
         Tensor current;
-        while ((current = tfi.next()) != null){
+        while ((current = tfi.next()) != null) {
             if (TensorUtils.equalsExactly(current, Tensors.parse("R^i+T^i")))
                 tfi.set(Tensors.parse("W^j*3"));
         }

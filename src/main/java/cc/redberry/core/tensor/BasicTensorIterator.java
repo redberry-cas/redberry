@@ -25,6 +25,9 @@ package cc.redberry.core.tensor;
 import java.util.Iterator;
 
 /**
+ * The implementation of {@code Iterator<Tensor>} based on {@code Tensor}
+ * {@link cc.redberry.core.tensor.Tensor#get(int)} and {@link cc.redberry.core.tensor.Tensor#size()}  methods.
+ *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
@@ -33,6 +36,11 @@ public final class BasicTensorIterator implements Iterator<Tensor> {
     private int position = -1;
     private final int size;
 
+    /**
+     * Creates iterator over tensor elements.
+     *
+     * @param tensor tensor
+     */
     public BasicTensorIterator(Tensor tensor) {
         this.tensor = tensor;
         this.size = tensor.size();

@@ -27,7 +27,7 @@ import cc.redberry.core.combinatorics.Combinatorics;
 import cc.redberry.core.combinatorics.IntCombinatorialGenerator;
 import cc.redberry.core.combinatorics.IntDistinctTuplesPort;
 import cc.redberry.core.graph.GraphUtils;
-import cc.redberry.core.tensor.FullContractionsStructure;
+import cc.redberry.core.tensor.StructureOfContractions;
 import cc.redberry.core.tensor.ProductContent;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.utils.ArraysUtils;
@@ -37,7 +37,7 @@ import cc.redberry.core.utils.stretces.StretchIteratorS;
 
 import java.util.Arrays;
 
-import static cc.redberry.core.tensor.FullContractionsStructure.*;
+import static cc.redberry.core.tensor.StructureOfContractions.*;
 
 /**
  * @author Dmitry Bolotin
@@ -49,7 +49,7 @@ public final class ProductsBijectionsPort implements OutputPortUnsafe<int[]> {
 
     private Tensor[] fromData, targetData;
     private final int[] seeds;
-    private FullContractionsStructure targetFContractions, fromFContractions;
+    private StructureOfContractions targetFContractions, fromFContractions;
     private long[][] fromContractions, targetContractions;
     private final SeedPlanter planter;
     private InnerPort innerPort;
@@ -57,8 +57,8 @@ public final class ProductsBijectionsPort implements OutputPortUnsafe<int[]> {
     public ProductsBijectionsPort(ProductContent fromContent, ProductContent targetContent) {
         //this.targetContent = targetContent;
         //this.fromContent = fromContent;
-        this.targetFContractions = targetContent.getFullContractionsStructure();
-        this.fromFContractions = fromContent.getFullContractionsStructure();
+        this.targetFContractions = targetContent.getStructureOfContractions();
+        this.fromFContractions = fromContent.getStructureOfContractions();
 
         this.fromContractions = fromFContractions.contractions;
         this.targetContractions = targetFContractions.contractions;

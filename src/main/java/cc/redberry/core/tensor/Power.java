@@ -29,8 +29,12 @@ import cc.redberry.core.number.Complex;
 import cc.redberry.core.utils.TensorUtils;
 
 /**
+ * Representation of mathematical power <i>A^B</i>.
+ *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @see PowerBuilder
+ * @see PowerFactory
  */
 public final class Power extends Tensor {
 

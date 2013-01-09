@@ -24,21 +24,18 @@ package cc.redberry.core.graph;
 
 import cc.redberry.core.indices.IndexType;
 import cc.redberry.core.indices.Indices;
-import cc.redberry.core.indices.IndicesUtils;
-import cc.redberry.core.tensor.FullContractionsStructure;
+import cc.redberry.core.tensor.StructureOfContractions;
 import cc.redberry.core.tensor.Product;
 import cc.redberry.core.tensor.ProductContent;
 import cc.redberry.core.utils.IntArrayList;
 import cc.redberry.core.utils.LongBackedBitArray;
 
-import java.awt.*;
-import java.awt.event.KeyEvent;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.List;
 
 import static cc.redberry.core.indices.IndicesUtils.*;
-import static cc.redberry.core.tensor.FullContractionsStructure.getToTensorIndex;
+import static cc.redberry.core.tensor.StructureOfContractions.getToTensorIndex;
 
 /**
  * This class gives a partition of graph on subgraphs of types specified in {@link GraphType}. Such a partition
@@ -50,7 +47,7 @@ import static cc.redberry.core.tensor.FullContractionsStructure.getToTensorIndex
  */
 public final class PrimitiveSubgraphPartition {
     private final ProductContent pc;
-    private final FullContractionsStructure fcs;
+    private final StructureOfContractions fcs;
     private final int size;
     private final IndexType type;
     private final PrimitiveSubgraph[] partition;
@@ -65,7 +62,7 @@ public final class PrimitiveSubgraphPartition {
      */
     public PrimitiveSubgraphPartition(ProductContent productContent, IndexType type) {
         this.pc = productContent;
-        this.fcs = pc.getFullContractionsStructure();
+        this.fcs = pc.getStructureOfContractions();
         this.size = pc.size();
         this.type = type;
         this.used = new LongBackedBitArray(size);

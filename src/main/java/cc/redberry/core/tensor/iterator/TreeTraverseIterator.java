@@ -63,6 +63,7 @@ import cc.redberry.core.utils.Indicator;
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @since 1.0
  */
 public final class TreeTraverseIterator<T extends Payload<T>> {
 
@@ -222,6 +223,11 @@ public final class TreeTraverseIterator<T extends Payload<T>> {
         return currentPointer.getTensor().get(0);
     }
 
+    /**
+     * Current {@link StackPosition}
+     *
+     * @return current {@link StackPosition}
+     */
     public StackPosition<T> currentStackPosition() {
         return currentPointer;
     }

@@ -32,6 +32,7 @@ import cc.redberry.core.utils.TensorUtils;
 /**
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @since 1.0
  */
 public final class Sin extends ScalarFunction {
 

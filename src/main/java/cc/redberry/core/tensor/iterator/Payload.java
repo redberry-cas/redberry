@@ -27,7 +27,14 @@ import cc.redberry.core.tensor.Tensor;
 /**
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @since 1.1
  */
 public interface Payload<T extends Payload<T>> {
+    /**
+     * Action on leaving.
+     *
+     * @param stackPosition argument
+     * @return tensor
+     */
     Tensor onLeaving(StackPosition<T> stackPosition);
 }

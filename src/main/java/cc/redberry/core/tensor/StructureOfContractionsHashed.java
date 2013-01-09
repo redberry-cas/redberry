@@ -25,18 +25,22 @@ package cc.redberry.core.tensor;
 import java.util.Arrays;
 
 /**
+ * Representation of hashed graph of product.
+ *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public final class ContractionStructure {
-
-    public static final ContractionStructure EMPTY_INSTANCE =
-            new ContractionStructure(new TensorContraction((short) -1, new long[0]));
+public final class StructureOfContractionsHashed {
+    /**
+     * Singleton for empty structure
+     */
+    public static final StructureOfContractionsHashed EMPTY_INSTANCE =
+            new StructureOfContractionsHashed(new TensorContraction((short) -1, new long[0]));
 
     private final TensorContraction freeContraction;
     private final TensorContraction[] contractions;
 
-    public ContractionStructure(final TensorContraction freeContraction, final TensorContraction... contractions) {
+    public StructureOfContractionsHashed(final TensorContraction freeContraction, final TensorContraction... contractions) {
         this.freeContraction = freeContraction;
         this.contractions = contractions;
     }
@@ -57,7 +61,7 @@ public final class ContractionStructure {
             return false;
         if (hashCode() != obj.hashCode())
             return false;
-        final ContractionStructure other = (ContractionStructure) obj;
+        final StructureOfContractionsHashed other = (StructureOfContractionsHashed) obj;
         if (!freeContraction.equals(other.freeContraction))
             return false;
         return Arrays.equals(contractions, other.contractions);

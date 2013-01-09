@@ -22,7 +22,6 @@
  */
 package cc.redberry.core.transformations.substitutions;
 
-import cc.redberry.core.TAssert;
 import cc.redberry.core.context.CC;
 import cc.redberry.core.indices.IndexType;
 import cc.redberry.core.tensor.*;
@@ -35,7 +34,6 @@ import java.util.Arrays;
 import static cc.redberry.core.TAssert._;
 import static cc.redberry.core.TAssert.assertTrue;
 import static cc.redberry.core.tensor.Tensors.parse;
-import static cc.redberry.core.tensor.Tensors.parseExpression;
 
 /**
  * @author Dmitry Bolotin
@@ -104,14 +102,14 @@ public class ProductsBijectionsPortTest {
                 if (Arrays.binarySearch(bijection, -1) >= 0) {
                     System.out.println(CC.getNameManager().getSeed());
                     System.exit(0);
-                    FullContractionsStructure fcs = from.getContent().getFullContractionsStructure();
+                    StructureOfContractions fcs = from.getContent().getStructureOfContractions();
                     for (int i = 0; i < fcs.contractions.length; ++i)
                         for (int j = 0; j < fcs.contractions[i].length; ++j) {
                             long contraction = fcs.contractions[i][j];
                             Tensor from1 = fromData[i];
-                            if (FullContractionsStructure.getToTensorIndex(contraction) == -1)
+                            if (StructureOfContractions.getToTensorIndex(contraction) == -1)
                                 continue;
-                            Tensor to1 = fromData[FullContractionsStructure.getToTensorIndex(contraction)];
+                            Tensor to1 = fromData[StructureOfContractions.getToTensorIndex(contraction)];
                             int indexFrom = j;
                             System.out.println(from1 + "\t" + to1 + "\t" + indexFrom);
                         }

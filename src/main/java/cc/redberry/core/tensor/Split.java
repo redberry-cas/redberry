@@ -29,26 +29,53 @@ import cc.redberry.core.number.Complex;
 import java.util.Arrays;
 
 /**
+ * A container for <i>indexless summand</i> (with empty indices, but not necessary symbolic) and
+ * <i>indexed factor</i> (with non empty indices) parts
+ * of product, used to collect terms with similar factors in {@code SumBuilder}.
+ *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
 //TODO review with Dima and consider usage in future Collect 
 public class Split {
 
+    /**
+     * Indexed factor
+     */
     public final Tensor factor;
+    /**
+     * Indexless summand
+     */
     public final Tensor summand;
 
+    /**
+     * Creates split from factor and summand
+     *
+     * @param factor
+     * @param summand
+     */
     public Split(Tensor factor, Tensor summand) {
         this.factor = factor;
         this.summand = summand;
     }
 
+    /**
+     * Returns a kind of sum builder.
+     *
+     * @return a kind of sum builder
+     */
     public TensorBuilder getBuilder() {
         TensorBuilder builder = new SumBuilder();
         builder.put(summand);
         return builder;
     }
 
+    /**
+     * Splits product on scalar part (with empty free indices) and indexed part
+     *
+     * @param tensor tensor
+     * @return split
+     */
     public static Split splitScalars(final Tensor tensor) {
         if (tensor.getIndices().getFree().size() == 0)//case 2*a*b*c            
             return new SplitNumbers(tensor, Complex.ONE);
@@ -109,6 +136,12 @@ public class Split {
         }
     }
 
+    /**
+     * Splits product on indexless summand and indexed factor.
+     *
+     * @param tensor tensor
+     * @return split
+     */
     public static Split splitIndexless(final Tensor tensor) {
         if (tensor.getIndices().size() == 0) {//case 2*a*b*c
             Complex complex;

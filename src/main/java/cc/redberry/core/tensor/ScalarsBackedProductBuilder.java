@@ -40,6 +40,8 @@ import static cc.redberry.core.number.NumberUtils.isZeroOrIndeterminate;
 import static cc.redberry.core.utils.TensorUtils.isScalar;
 
 /**
+ * Implementation of product builder, which puts similar scalar subproducts together.
+ *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */

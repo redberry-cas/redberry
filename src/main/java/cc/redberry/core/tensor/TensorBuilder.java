@@ -79,8 +79,7 @@ import cc.redberry.core.utils.TensorUtils;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  * @see cc.redberry.core.tensor.Tensor#getBuilder()
- * @see TensorUtils#compare(cc.redberry.core.tensor.Tensor, cc.redberry.core.tensor.Tensor) 
- * @see TensorUtils#equals(cc.redberry.core.tensor.Tensor, cc.redberry.core.tensor.Tensor) 
+ * @see TensorUtils#equals(cc.redberry.core.tensor.Tensor, cc.redberry.core.tensor.Tensor)
  * @see <a href="http://en.wikipedia.org/wiki/Builder_pattern">http://en.wikipedia.org/wiki/Builder_pattern</a>
  */
 public interface TensorBuilder {
@@ -99,6 +98,6 @@ public interface TensorBuilder {
      * @return resulting tensor
      */
     Tensor build();
-    
+
     TensorBuilder clone();
 }

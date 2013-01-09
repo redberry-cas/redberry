@@ -25,48 +25,51 @@ package cc.redberry.core.tensor;
 import java.util.Arrays;
 
 /**
+ * This class is a container of information about graph structure of product.
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
 public final class ProductContent {
-
+    /**
+     * Singleton for empty instance.
+     */
     public static final ProductContent EMPTY_INSTANCE =
-            new ProductContent(ContractionStructure.EMPTY_INSTANCE,
-                               FullContractionsStructure.EMPTY_FULL_CONTRACTIONS_STRUCTURE,
-                               new Tensor[0],
-                               null,
-                               new short[0],
-                               new Tensor[0],
-                               new int[0]);
-    private final ContractionStructure contractionStructure;
-    private final FullContractionsStructure fullContractionsStructure;
+            new ProductContent(StructureOfContractionsHashed.EMPTY_INSTANCE,
+                    StructureOfContractions.EMPTY_FULL_CONTRACTIONS_STRUCTURE,
+                    new Tensor[0],
+                    null,
+                    new short[0],
+                    new Tensor[0],
+                    new int[0]);
+    private final StructureOfContractionsHashed structureOfContractionsHashed;
+    private final StructureOfContractions structureOfContractions;
     private final Tensor[] scalars;
     private final Tensor nonScalar;
     private final short[] stretchIndices;
     private final Tensor[] data;
 
-    public ProductContent(ContractionStructure contractionStructure,
-                          FullContractionsStructure fullContractionsStructure,
-                          Tensor[] scalars, Tensor nonScalar,
-                          short[] stretchIndices,
-                          Tensor[] data) {
-        this.contractionStructure = contractionStructure;
-        this.fullContractionsStructure = fullContractionsStructure;
+    ProductContent(StructureOfContractionsHashed structureOfContractionsHashed,
+                   StructureOfContractions structureOfContractions,
+                   Tensor[] scalars, Tensor nonScalar,
+                   short[] stretchIndices,
+                   Tensor[] data) {
+        this.structureOfContractionsHashed = structureOfContractionsHashed;
+        this.structureOfContractions = structureOfContractions;
         this.scalars = scalars;
         this.nonScalar = nonScalar;
         this.stretchIndices = stretchIndices;
         this.data = data;
     }
 
-    private ProductContent(ContractionStructure contractionStructure,
-                           FullContractionsStructure fullContractionsStructure,
+    private ProductContent(StructureOfContractionsHashed structureOfContractionsHashed,
+                           StructureOfContractions structureOfContractions,
                            Tensor[] scalars, Tensor nonScalar,
                            short[] stretchIndices,
                            Tensor[] data,
                            int[] stretchHashReflection) {
-        this.contractionStructure = contractionStructure;
-        this.fullContractionsStructure = fullContractionsStructure;
+        this.structureOfContractionsHashed = structureOfContractionsHashed;
+        this.structureOfContractions = structureOfContractions;
         this.scalars = scalars;
         this.nonScalar = nonScalar;
         this.stretchIndices = stretchIndices;
@@ -74,47 +77,102 @@ public final class ProductContent {
         this.stretchHashReflection = stretchHashReflection;
     }
 
-    public ContractionStructure getContractionStructure() {
-        return contractionStructure;
+    /**
+     * Returns hashed structure of product contractions.
+     *
+     * @return hashed structure of product contractions
+     */
+    public StructureOfContractionsHashed getStructureOfContractionsHashed() {
+        return structureOfContractionsHashed;
     }
 
-    public FullContractionsStructure getFullContractionsStructure() {
-        return fullContractionsStructure;
+    /**
+     * Returns structure of product contractions.
+     *
+     * @return structure of product contractions
+     */
+    public StructureOfContractions getStructureOfContractions() {
+        return structureOfContractions;
     }
 
+    /**
+     * Returns non-scalar connected component of product.
+     *
+     * @return non-scalar connected component of product
+     */
     public Tensor getNonScalar() {
         return nonScalar;
     }
 
+    /**
+     * Return scalar subproducts of this product.
+     *
+     * @return an array of scalar subproducts of this product
+     */
     public Tensor[] getScalars() {
         return scalars.clone();
     }
 
+    /**
+     * @return ids
+     */
     public short[] getStretchIds() {
         return stretchIndices.clone();
     }
 
+    /**
+     * @param i position
+     * @return id
+     */
     public short getStretchId(int i) {
         return stretchIndices[i];
     }
 
+    /**
+     * Returns i-th element of indexed data in this product.
+     *
+     * @param i position
+     * @return i-th element of indexed data in this product
+     */
     public Tensor get(int i) {
         return data[i];
     }
 
+    /**
+     * Returns size of indexed data.
+     *
+     * @return size of indexed data
+     */
     public int size() {
         return data.length;
     }
 
+    /**
+     * Returns a range of indexed data specified by {@code from} and {@code to}.
+     *
+     * @param from from position (inclusive)
+     * @param to   to position (exclusive)
+     * @return range
+     */
     public Tensor[] getRange(int from, int to) {
         return Arrays.copyOfRange(data, from, to);
     }
 
+    /**
+     * Copy of indexed data array
+     *
+     * @return copy of indexed data array
+     */
     public Tensor[] getDataCopy() {
         return data.clone();
     }
+
     private int[] stretchHashReflection;
 
+    /**
+     * @param hashCode hashCode
+     * @return id
+     */
     public short getStretchIndexByHash(final int hashCode) {
         if (stretchHashReflection == null) {
             stretchHashReflection = new int[stretchIndices[stretchIndices.length - 1] + 1];

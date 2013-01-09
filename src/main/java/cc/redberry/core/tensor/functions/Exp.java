@@ -29,9 +29,10 @@ import cc.redberry.core.tensor.TensorFactory;
 import cc.redberry.core.utils.TensorUtils;
 
 /**
- *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @since 1.0
+ * @deprecated should be replace with power
  */
 @Deprecated
 public final class Exp extends ScalarFunction {

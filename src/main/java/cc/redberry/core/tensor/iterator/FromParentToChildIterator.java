@@ -27,6 +27,10 @@ import cc.redberry.core.tensor.Tensor;
 /**
  * Wrapper for TreeTraverseIterator. Return only
  * <code>Leaving</code> elements. Traverse into.
+ *
+ * @author Dmitriy Bolotin
+ * @author Stanislav Poslavsky
+ * @since 1.0
  */
 public final class FromParentToChildIterator extends TreeIteratorAbstract {
 
@@ -37,5 +41,5 @@ public final class FromParentToChildIterator extends TreeIteratorAbstract {
     public FromParentToChildIterator(Tensor tensor) {
         super(tensor, TraverseState.Entering);
     }
-    
+
 }

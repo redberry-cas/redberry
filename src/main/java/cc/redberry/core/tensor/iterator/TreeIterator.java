@@ -25,13 +25,39 @@ package cc.redberry.core.tensor.iterator;
 import cc.redberry.core.tensor.Tensor;
 
 /**
+ * Parent interface for tree iterators.
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @since 1.0
  */
 public interface TreeIterator {
+    /**
+     * Returns the next tensor in tree or null if iteration is finished
+     *
+     * @return the next tensor in tree or null if iteration is finished
+     */
     Tensor next();
+
+    /**
+     * Set current tensor in tree.
+     *
+     * @param tensor tensor
+     */
     void set(Tensor tensor);
+
+    /**
+     * Returns the result after iteration finished (or stopped). After this step the
+     * iterator becomes broken.
+     *
+     * @return the result after iteration finished (or stopped)
+     */
     Tensor result();
+
+    /**
+     * Returns the current depth in the tree.
+     *
+     * @return current depth in the tree
+     */
     int depth();
 }

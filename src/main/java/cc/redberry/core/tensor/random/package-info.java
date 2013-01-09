@@ -20,32 +20,12 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
-package cc.redberry.core.tensor;
-
-import cc.redberry.core.number.Complex;
 
 /**
- * Factory for sums.
+ * Implementation of random mathematical expression.
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @since 1.0
  */
-public final class SumFactory implements TensorFactory {
-
-    public static final SumFactory FACTORY = new SumFactory();
-
-    private SumFactory() {
-    }
-
-    @Override
-    public Tensor create(Tensor... tensors) {
-        if (tensors.length == 0)
-            return Complex.ZERO;
-        if (tensors.length == 1)
-            return tensors[0];
-        TensorBuilder builder = new SumBuilder(tensors.length);
-        for (Tensor t : tensors)
-            builder.put(t);
-        return builder.build();
-    }
-}
+package cc.redberry.core.tensor.random;

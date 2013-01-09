@@ -29,6 +29,8 @@ import java.util.Arrays;
 import java.util.Iterator;
 
 /**
+ * Representation of tensor field.
+ *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */

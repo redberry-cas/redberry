@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
+ * Basic builder for sums. The implementation puts terms together as described in specification.
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky

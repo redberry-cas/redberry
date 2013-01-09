@@ -25,9 +25,11 @@ package cc.redberry.core.tensor;
 import cc.redberry.core.utils.TensorUtils;
 
 /**
+ * {@link TensorBuilder} for powers. The implementation is based on {@link PowerFactory}.
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @see Power
  */
 public final class PowerBuilder implements TensorBuilder {
 

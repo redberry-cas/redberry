@@ -26,6 +26,8 @@ import cc.redberry.core.context.OutputFormat;
 import cc.redberry.core.indices.Indices;
 
 /**
+ * Technical class.
+ *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */

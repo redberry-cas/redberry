@@ -85,7 +85,7 @@ public class ProductTest {
         Product t1 = (Product) parse("R^abcd*R_abcd");
         Product t2 = (Product) parse("R^abcd*R_abdc");
 
-        Assert.assertEquals(t1.getContent().getContractionStructure(), t2.getContent().getContractionStructure());
+        Assert.assertEquals(t1.getContent().getStructureOfContractionsHashed(), t2.getContent().getStructureOfContractionsHashed());
         Assert.assertEquals(t1.hashCode(), t2.hashCode());
     }
 

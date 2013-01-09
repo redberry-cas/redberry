@@ -26,9 +26,11 @@ import cc.redberry.core.indices.IndicesFactory;
 import cc.redberry.core.utils.TensorUtils;
 
 /**
+ * Factory for expressions.
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @see Expression
  */
 public class ExpressionFactory implements TensorFactory {
 
@@ -46,5 +48,5 @@ public class ExpressionFactory implements TensorFactory {
         if (!tensors[0].getIndices().getFree().equalsRegardlessOrder(tensors[1].getIndices().getFree()) && !TensorUtils.isZero(tensors[1]))
             throw new TensorException("Inconsistent indices in expression.");
         return new Expression(IndicesFactory.create(tensors[0].getIndices().getFree()), tensors[0], tensors[1]);
-    }    
+    }
 }

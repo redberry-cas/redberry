@@ -32,6 +32,10 @@ import java.util.List;
 
 import static org.junit.Assert.assertTrue;
 
+/**
+ * @author Dmitriy Bolotin
+ * @author Stanislav Poslavsky
+ */
 public class FromChildToParentIteratorTest {
 
     @Test
@@ -39,7 +43,7 @@ public class FromChildToParentIteratorTest {
         Tensor t = Tensors.parse("a+b+c");
         FromChildToParentIterator tfi = new FromChildToParentIterator(t);
         Tensor[] expected = new Tensor[]{t, t.get(0), t.get(1), t.get(2)};
-        List<Tensor> target = new ArrayList< >();
+        List<Tensor> target = new ArrayList<>();
         Tensor current;
         while ((current = tfi.next()) != null)
             target.add(current);
@@ -52,7 +56,7 @@ public class FromChildToParentIteratorTest {
         FromChildToParentIterator tfi = new FromChildToParentIterator(t);
         Tensor[] expected = new Tensor[]{t.get(0).get(0).get(1), t.get(0).get(0).get(0),
                 t.get(0).get(0), t.get(0), t};
-        List<Tensor> target = new ArrayList< >();
+        List<Tensor> target = new ArrayList<>();
         Tensor current;
         while ((current = tfi.next()) != null)
             target.add(current);
@@ -70,7 +74,7 @@ public class FromChildToParentIteratorTest {
                 t.get(0).get(1).get(0), t.get(0).get(1),
                 t.get(0), t};
 
-        List<Tensor> target = new ArrayList< >();
+        List<Tensor> target = new ArrayList<>();
         Tensor current;
         while ((current = tfi.next()) != null)
             target.add(current);
@@ -139,7 +143,7 @@ public class FromChildToParentIteratorTest {
         Tensor tensor = Tensors.parse("cos[sin[a+b]]");
         FromChildToParentIterator tfi = new FromChildToParentIterator(tensor);
         Tensor current;
-        while((current=tfi.next()) != null)
+        while ((current = tfi.next()) != null)
             if (TensorUtils.equalsExactly(current, Tensors.parse("a+b")))
                 tfi.set(Tensors.parse("(x+y)*3"));
         Tensor result = tfi.result();

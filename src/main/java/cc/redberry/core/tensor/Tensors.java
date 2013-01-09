@@ -23,7 +23,6 @@
 package cc.redberry.core.tensor;
 
 import cc.redberry.core.combinatorics.Combinatorics;
-import cc.redberry.core.combinatorics.Symmetry;
 import cc.redberry.core.context.CC;
 import cc.redberry.core.context.NameDescriptor;
 import cc.redberry.core.indices.*;
@@ -36,41 +35,39 @@ import gnu.trove.set.hash.TIntHashSet;
 import java.util.ArrayList;
 
 /**
- * <p>Factory methods to create any tensor are collected in this class. Using
- * the methods implemented in this class is the preferred way to create a
- * tensor.</p>
+ * Factory methods to create tensors.
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
- * @see TensorFactory
- * @see TensorBuilder
  */
 public final class Tensors {
 
     private Tensors() {
     }
 
-    // ==========================  Factory Methods ============================
+    /*********************************************************************************
+     ******************************* Math operations *********************************
+     *********************************************************************************/
 
     /**
-     * Returns tensor in the integer power. Common result is an object of class
-     * Power, but for some input arguments result could have different type.
+     * Power function. Returns tensor raised to specified integer power.
      *
      * @param argument base
      * @param power    power
      * @return result of argument exponentiation
+     * @throws IllegalArgumentException if argument is not scalar
      */
     public static Tensor pow(Tensor argument, int power) {
         return pow(argument, new Complex(power));
     }
 
     /**
-     * Returns tensor in the scalar power. Common result is an object of class
-     * Power, but for some input arguments result could have different type.
+     * Power function. Returns tensor raised to specified power.
      *
      * @param argument base
      * @param power    power
      * @return result of argument exponentiation
+     * @throws IllegalArgumentException if argument or power is not scalar
      */
     public static Tensor pow(Tensor argument, Tensor power) {
         PowerBuilder pb = new PowerBuilder();
@@ -80,14 +77,14 @@ public final class Tensors {
     }
 
     /**
-     * <p>Returns result of multiplication of several tensors. Einstein notation
-     * assumed. Common result is an object of class Product, but for some input
-     * arguments result could have different type.</p> <p>If there is a chance
-     * that some factors have conflicting (same name) dummy indices use {@link #multiplyAndRenameConflictingDummies(Tensor...)}
-     * instead.</p>
+     * Returns the result of multiplication of specified tensors. Einstein notation
+     * assumed. If there is a chance that some factors have conflicting
+     * (same name) dummy indices use {@link #multiplyAndRenameConflictingDummies(Tensor...)}
+     * instead.
      *
      * @param factors array of factors to be multiplied
      * @return result of multiplication
+     * @throws InconsistentIndicesException if there is indices clash
      */
     public static Tensor multiply(final Tensor... factors) {
         //TODO add check for indices consistency
@@ -95,13 +92,12 @@ public final class Tensors {
     }
 
     /**
-     * <p>Returns result of multiplication of several tensors taking care about
-     * all conflicting dummy indices in the factors. Einstein notation assumed.
-     * Common result is an object of class Product, but for some input arguments
-     * result could have different type.</p>
+     * Returns result of multiplication of specified tensors taking care about
+     * all conflicting dummy indices in factors. Einstein notation assumed.
      *
      * @param factors array of factors to be multiplied
      * @return result of multiplication
+     * @throws InconsistentIndicesException if there is indices clash
      */
     public static Tensor multiplyAndRenameConflictingDummies(Tensor... factors) {
         return ProductFactory.FACTORY.create(resolveDummy(factors));
@@ -151,6 +147,12 @@ public final class Tensors {
 //        return p;
     }
 
+    /**
+     * Renames dummies in specified tensors, such that it becomes safe to multiply them.
+     *
+     * @param factors tensors
+     * @return the array of tensors with renamed dummy indices
+     */
     public static Tensor[] resolveDummy(Tensor[] factors) {
         //TODO preserve ordering    //?
         Tensor[] result = new Tensor[factors.length];
@@ -177,25 +179,70 @@ public final class Tensors {
         return result;
     }
 
+    /**
+     * Returns {@code a} divided by {@code b}.
+     *
+     * @param a tensor
+     * @param b scalar tensor
+     * @return {@code a} divided by {@code b}.
+     * @throws IllegalArgumentException if b is not scalar
+     */
     public static Tensor divide(Tensor a, Tensor b) {
         return multiply(a, reciprocal(b));
     }
 
     /**
-     * Returns result of summation of several tensors. Common result is an
-     * object of class Sum, but for some input arguments result could have
-     * different type.
+     * Returns the result of summation of several tensors.
      *
      * @param tensors array of summands
      * @return result of summation
+     * @throws TensorException if tensors have different free indices
      */
     public static Tensor sum(Tensor... tensors) {
         return SumFactory.FACTORY.create(tensors);
     }
 
+    /**
+     * Subtracts {@code b} from {@code a}
+     *
+     * @param a tensor
+     * @param b tensor
+     * @return {@code a} - {@code b}
+     * @throws TensorException if tensors have different free indices
+     */
     public static Tensor subtract(Tensor a, Tensor b) {
         return sum(a, negate(b));
     }
+
+
+    /**
+     * Multiplies specified tensor by minus one.
+     *
+     * @param tensor tensor to be negotiated
+     * @return tensor negate to specified one
+     */
+    public static Tensor negate(Tensor tensor) {
+        if (tensor instanceof Complex)
+            return ((Complex) tensor).negate();
+        return multiply(Complex.MINUS_ONE, tensor);
+    }
+
+    /**
+     * Returns reciprocal of the specified tensor, i.e. one divided by it.
+     *
+     * @param tensor tensor
+     * @return reciprocal of the specified tensor
+     * @throws IllegalArgumentException if specified tensor is not scalar
+     */
+    public static Tensor reciprocal(Tensor tensor) {
+        return pow(tensor, Complex.MINUS_ONE);
+    }
+
+
+    /*********************************************************************************
+     ********************************* Simple tensors ********************************
+     *********************************************************************************/
+
 
     /**
      * Returns new simple tensor with specified string name and indices.
@@ -349,10 +396,12 @@ public final class Tensors {
         return ExpressionFactory.FACTORY.create(left, right);
     }
 
+    /*********************************************************************************
+     ****************************** Scalar functions *********************************
+     *********************************************************************************/
+
     /**
-     * Creates a sinus object from scalar argument. Common result is an object
-     * of class Sin, but for some input argument result could have different
-     * type.
+     * Creates a sinus object from scalar argument.
      *
      * @param argument scalar argument of sinus
      * @return sinus of argument
@@ -362,9 +411,7 @@ public final class Tensors {
     }
 
     /**
-     * Creates a cosine object from scalar argument. Common result is an object
-     * of class Cos, but for some input argument result could have different
-     * type.
+     * Creates a cosine object from scalar argument.
      *
      * @param argument scalar argument of cosine
      * @return cosine of argument
@@ -374,9 +421,7 @@ public final class Tensors {
     }
 
     /**
-     * Creates a tangent object from scalar argument. Common result is an object
-     * of class Tan, but for some input argument result could have different
-     * type.
+     * Creates a tangent object from scalar argument
      *
      * @param argument scalar argument of tangent
      * @return tangent of argument
@@ -386,9 +431,7 @@ public final class Tensors {
     }
 
     /**
-     * Creates a cotangent object from scalar argument. Common result is an
-     * object of class Cot, but for some input argument result could have
-     * different type.
+     * Creates a cotangent object from scalar argument.
      *
      * @param argument scalar argument of cotangent
      * @return cotangent of argument
@@ -398,9 +441,7 @@ public final class Tensors {
     }
 
     /**
-     * Creates a arcsinus object from scalar argument. Common result is an
-     * object of class ArcSin, but for some input argument result could have
-     * different type.
+     * Creates a arcsinus object from scalar argument.
      *
      * @param argument scalar argument of arcsinus
      * @return arcsinus of argument
@@ -410,9 +451,7 @@ public final class Tensors {
     }
 
     /**
-     * Creates a arccosine object from scalar argument. Common result is an
-     * object of class ArcCos, but for some input argument result could have
-     * different type.
+     * Creates a arccosine object from scalar argument.
      *
      * @param argument scalar argument of arccosine
      * @return arccosine of argument
@@ -422,9 +461,7 @@ public final class Tensors {
     }
 
     /**
-     * Creates a arctangent object from scalar argument. Common result is an
-     * object of class ArcTan, but for some input argument result could have
-     * different type.
+     * Creates a arctangent object from scalar argument.
      *
      * @param argument scalar argument of arctangent
      * @return arctangent of argument
@@ -434,9 +471,7 @@ public final class Tensors {
     }
 
     /**
-     * Creates a arcotangent object from scalar argument. Common result is an
-     * object of class ArcCot, but for some input argument result could have
-     * different type.
+     * Creates a arcotangent object from scalar argument.
      *
      * @param argument scalar argument of arccotangent
      * @return arcotangent of argument
@@ -446,9 +481,7 @@ public final class Tensors {
     }
 
     /**
-     * Creates a natural logarithm object from scalar argument. Common result is
-     * an object of class Log, but for some input argument result could have
-     * different type.
+     * Creates a natural logarithm object from scalar argument.
      *
      * @param argument scalar argument of logarithm
      * @return natural logarithm of argument
@@ -458,9 +491,7 @@ public final class Tensors {
     }
 
     /**
-     * Creates a exponent object from scalar argument. Common result is an
-     * object of class Exp, but for some input argument result could have
-     * different type. See {@link #pow(Tensor, Tensor)}.
+     * Creates a exponent object from scalar argument.
      *
      * @param argument scalar argument of exponent
      * @return exponent of argument
@@ -469,55 +500,126 @@ public final class Tensors {
         return Exp.ExpFactory.FACTORY.create(argument);
     }
 
+
+    /*********************************************************************************
+     ******************************* Metric and Kronecker ****************************
+     *********************************************************************************/
+
+    /**
+     * Returns Kronecker tensor with specified upper and lower indices.
+     *
+     * @param index1 first index
+     * @param index2 second index
+     * @return Kronecker tensor with specified upper and lower indices
+     * @throws IllegalArgumentException if indices have same states
+     * @throws IllegalArgumentException if indices have different types
+     */
     public static SimpleTensor createKronecker(int index1, int index2) {
         return CC.current().createKronecker(index1, index2);
     }
 
+    /**
+     * Returns metric tensor with specified indices.
+     *
+     * @param index1 first index
+     * @param index2 second index
+     * @return metric tensor with specified indices
+     * @throws IllegalArgumentException if indices have different states
+     * @throws IllegalArgumentException if indices have different types
+     * @throws IllegalArgumentException if indices have non metric types
+     */
     public static SimpleTensor createMetric(int index1, int index2) {
         return CC.current().createMetric(index1, index2);
     }
 
+    /**
+     * Returns metric tensor if specified indices have same states and
+     * Kronecker tensor if specified indices have different states.
+     *
+     * @param index1 first index
+     * @param index2 second index
+     * @return metric tensor if specified indices have same states and
+     *         Kronecker tensor if specified indices have different states
+     * @throws IllegalArgumentException if indices have different types
+     * @throws IllegalArgumentException if indices have same states and non metric types
+     */
     public static SimpleTensor createMetricOrKronecker(int index1, int index2) {
         return CC.current().createMetricOrKronecker(index1, index2);
     }
 
+    /**
+     * Returns {@code true} if specified tensor is Kronecker tensor
+     *
+     * @param t tensor
+     * @return {@code true} if specified tensor is Kronecker tensor
+     */
     public static boolean isKronecker(Tensor t) {
         if (!(t instanceof SimpleTensor))
             return false;
         return CC.current().isKronecker((SimpleTensor) t);
     }
 
+    /**
+     * Returns {@code true} if specified tensor is metric tensor
+     *
+     * @param t tensor
+     * @return {@code true} if specified tensor is metric tensor
+     */
     public static boolean isMetric(Tensor t) {
         if (!(t instanceof SimpleTensor))
             return false;
         return CC.current().isMetric((SimpleTensor) t);
     }
 
+    /**
+     * Returns {@code true} if specified tensor is metric or Kronecker tensor
+     *
+     * @param t tensor
+     * @return {@code true} if specified tensor is metric or Kronecker tensor
+     */
     public static boolean isKroneckerOrMetric(Tensor t) {
         if (!(t instanceof SimpleTensor))
             return false;
         return CC.current().isKroneckerOrMetric((SimpleTensor) t);
     }
 
+    /**
+     * Returns {@code true} if specified tensor is metric or Kronecker tensor
+     *
+     * @param t tensor
+     * @return {@code true} if specified tensor is metric or Kronecker tensor
+     */
     public static boolean isKroneckerOrMetric(SimpleTensor t) {
         return CC.current().isKroneckerOrMetric(t);
     }
 
+
+    /*********************************************************************************
+     ********************************* Parse methods *********************************
+     *********************************************************************************/
+
+
     /**
-     * Parses a string to tensor.
+     * Converts string expression into tensor.
      *
      * @param expression string to be parsed
      * @return result of parsing
+     * @throws cc.redberry.core.parser.ParserException
+     *          if expression does not satisfy correct Redberry
+     *          input notation for tensors
      */
     public static Tensor parse(String expression) {
         return CC.current().getParseManager().parse(expression);
     }
 
     /**
-     * Parses an array of strings and returns array of parsed tensors.
+     * Converts array of string expressions into array of tensors.
      *
      * @param expressions array of strings to be parsed
      * @return array of parsed tensors
+     * @throws cc.redberry.core.parser.ParserException
+     *          if expression does not satisfy correct Redberry
+     *          input notation for tensors
      */
     public static Tensor[] parse(final String... expressions) {
         Tensor[] r = new Tensor[expressions.length];
@@ -526,15 +628,30 @@ public final class Tensors {
         return r;
     }
 
+    /**
+     * Converts string expression into tensor, additionally transforming AST according to specified
+     * AST transformers.
+     *
+     * @param expression    string to be parsed
+     * @param preprocessors AST transformers
+     * @return result of parsing
+     * @throws cc.redberry.core.parser.ParserException
+     *          if expression does not satisfy correct Redberry
+     *          input notation for tensors
+     */
     public static Tensor parse(String expression, ParseTokenTransformer... preprocessors) {
         return CC.current().getParseManager().parse(expression, preprocessors);
     }
 
     /**
-     * Parses a string to tensor and casts it to SimpleTensor.
+     * Converts a string into simple tensor.
      *
      * @param expression string to be parsed
      * @return simple tensor
+     * @throws IllegalArgumentException if expression does not represents simple tensor
+     * @throws cc.redberry.core.parser.ParserException
+     *                                  if expression does not satisfy correct Redberry
+     *                                  input notation for tensors
      */
     public static SimpleTensor parseSimple(String expression) {
         Tensor t = parse(expression);
@@ -544,10 +661,14 @@ public final class Tensors {
     }
 
     /**
-     * Parses a string to tensor and casts it to Expression.
+     * Converts a string into {@link Expression}.
      *
-     * @param expression expression to be parsed
-     * @return expression object
+     * @param expression string to be parsed
+     * @return simple tensor
+     * @throws IllegalArgumentException if string expression does not represents {@link Expression}
+     * @throws cc.redberry.core.parser.ParserException
+     *                                  if expression does not satisfy correct Redberry
+     *                                  input notation for tensors
      */
     public static Expression parseExpression(String expression) {
         Tensor t = parse(expression);
@@ -556,46 +677,191 @@ public final class Tensors {
         return (Expression) t;
     }
 
+
+    /*********************************************************************************
+     ********************************* Symmetries ************************************
+     *********************************************************************************/
+
+
+    /**
+     * Adds permutational (anti)symmetry for a particular type of indices to specified simple tensor.
+     *
+     * @param tensor      string representation of simple tensor
+     * @param permutation permutation
+     * @param sign        sign of symmetry ({@code true} means '-', {@code false} means '+')
+     * @param type        type of indices
+     * @throws IllegalArgumentException if string expression does not represents a simple tensor
+     * @throws cc.redberry.core.parser.ParserException
+     *                                  if expression does not satisfy correct Redberry
+     *                                  input notation for tensors
+     * @throws IllegalArgumentException if {@code permutation.length() != indices.size(type)}
+     * @throws cc.redberry.core.combinatorics.InconsistentGeneratorsException
+     *                                  if the specified symmetry is
+     *                                  inconsistent with already defined
+     */
     public static void addSymmetry(String tensor, IndexType type, boolean sign, int... permutation) {
-        parseSimple(tensor).getIndices().getSymmetries().add(type.getType(), new Symmetry(permutation, sign));
+        parseSimple(tensor).getIndices().getSymmetries().add(type.getType(), sign, permutation);
     }
 
+    /**
+     * Adds permutational (anti)symmetry for a particular type of indices to specified simple tensor.
+     *
+     * @param tensor      simple tensor
+     * @param permutation permutation
+     * @param sign        sign of symmetry ({@code true} means '-', {@code false} means '+')
+     * @param type        type of indices
+     * @throws IllegalArgumentException if {@code permutation.length() != indices.size(type)}
+     * @throws cc.redberry.core.combinatorics.InconsistentGeneratorsException
+     *                                  if the specified symmetry is
+     *                                  inconsistent with already defined
+     */
     public static void addSymmetry(SimpleTensor tensor, IndexType type, boolean sign, int... permutation) {
-        tensor.getIndices().getSymmetries().add(type.getType(), new Symmetry(permutation, sign));
+        tensor.getIndices().getSymmetries().add(type.getType(), sign, permutation);
     }
 
+    /**
+     * Adds permutational symmetry for a particular type of indices to specified simple tensor.
+     *
+     * @param tensor      string representation of simple tensor
+     * @param permutation permutation
+     * @param type        type of indices
+     * @throws IllegalArgumentException if string expression does not represents a simple tensor
+     * @throws cc.redberry.core.parser.ParserException
+     *                                  if expression does not satisfy correct Redberry
+     *                                  input notation for tensors
+     * @throws IllegalArgumentException if {@code permutation.length() != indices.size(type)}
+     * @throws cc.redberry.core.combinatorics.InconsistentGeneratorsException
+     *                                  if the specified symmetry is
+     *                                  inconsistent with already defined
+     */
     public static void addSymmetry(String tensor, IndexType type, int... permutation) {
         addSymmetry(tensor, type, false, permutation);
     }
 
+    /**
+     * Adds permutational symmetry for a particular type of indices to specified simple tensor.
+     *
+     * @param tensor      simple tensor
+     * @param permutation permutation
+     * @param type        type of indices
+     * @throws IllegalArgumentException if {@code permutation.length() != indices.size(type)}
+     * @throws cc.redberry.core.combinatorics.InconsistentGeneratorsException
+     *                                  if the specified symmetry is
+     *                                  inconsistent with already defined
+     */
     public static void addSymmetry(SimpleTensor tensor, IndexType type, int... permutation) {
         addSymmetry(tensor, type, false, permutation);
     }
 
+    /**
+     * Adds permutational antisymmetry for a particular type of indices to specified simple tensor.
+     *
+     * @param tensor      string representation of simple tensor
+     * @param permutation permutation
+     * @param type        type of indices
+     * @throws IllegalArgumentException if string expression does not represents a simple tensor
+     * @throws cc.redberry.core.parser.ParserException
+     *                                  if expression does not satisfy correct Redberry
+     *                                  input notation for tensors
+     * @throws IllegalArgumentException if {@code permutation.length() != indices.size(type)}
+     * @throws cc.redberry.core.combinatorics.InconsistentGeneratorsException
+     *                                  if the specified symmetry is
+     *                                  inconsistent with already defined
+     */
     public static void addAntiSymmetry(String tensor, IndexType type, int... permutation) {
         addSymmetry(tensor, type, true, permutation);
     }
 
+    /**
+     * Adds permutational antisymmetry for a particular type of indices to specified simple tensor.
+     *
+     * @param tensor      simple tensor
+     * @param permutation permutation
+     * @param type        type of indices
+     * @throws IllegalArgumentException if {@code permutation.length() != indices.size(type)}
+     * @throws cc.redberry.core.combinatorics.InconsistentGeneratorsException
+     *                                  if the specified symmetry is
+     *                                  inconsistent with already defined
+     */
     public static void addAntiSymmetry(SimpleTensor tensor, IndexType type, int... permutation) {
         addSymmetry(tensor, type, true, permutation);
     }
 
+    /**
+     * Adds permutational symmetry to specified simple tensor.
+     *
+     * @param tensor      string representation of simple tensor
+     * @param permutation permutation
+     * @throws IllegalArgumentException if string expression does not represents a simple tensor
+     * @throws cc.redberry.core.parser.ParserException
+     *                                  if expression does not satisfy correct Redberry
+     *                                  input notation for tensors
+     * @throws IllegalArgumentException if there are more then one type of indices in corresponding tensor
+     * @throws IllegalArgumentException if {@code permutation.length() != indices.size(type)}
+     * @throws cc.redberry.core.combinatorics.InconsistentGeneratorsException
+     *                                  if the specified symmetry is
+     *                                  inconsistent with already defined
+     */
     public static void addSymmetry(String tensor, int... permutation) {
         parseSimple(tensor).getIndices().getSymmetries().addSymmetry(permutation);
     }
 
+    /**
+     * Adds permutational symmetry to specified simple tensor.
+     *
+     * @param tensor      simple tensor
+     * @param permutation permutation
+     * @throws IllegalArgumentException if there are more then one type of indices in corresponding tensor
+     * @throws IllegalArgumentException if {@code permutation.length() != indices.size(type)}
+     * @throws cc.redberry.core.combinatorics.InconsistentGeneratorsException
+     *                                  if the specified symmetry is
+     *                                  inconsistent with already defined
+     */
     public static void addSymmetry(SimpleTensor tensor, int... permutation) {
         tensor.getIndices().getSymmetries().addSymmetry(permutation);
     }
 
+    /**
+     * Adds permutational antisymmetry to specified simple tensor.
+     *
+     * @param tensor      string representation of simple tensor
+     * @param permutation permutation
+     * @throws IllegalArgumentException if string expression does not represents a simple tensor
+     * @throws cc.redberry.core.parser.ParserException
+     *                                  if expression does not satisfy correct Redberry
+     *                                  input notation for tensors
+     * @throws IllegalArgumentException if there are more then one type of indices in corresponding tensor
+     * @throws IllegalArgumentException if {@code permutation.length() != indices.size(type)}
+     * @throws cc.redberry.core.combinatorics.InconsistentGeneratorsException
+     *                                  if the specified symmetry is
+     *                                  inconsistent with already defined
+     */
     public static void addAntiSymmetry(String tensor, int... permutation) {
         parseSimple(tensor).getIndices().getSymmetries().addAntiSymmetry(permutation);
     }
 
+    /**
+     * Adds permutational antisymmetry to specified simple tensor.
+     *
+     * @param tensor      simple tensor
+     * @param permutation permutation
+     * @throws IllegalArgumentException if there are more then one type of indices in corresponding tensor
+     * @throws IllegalArgumentException if {@code permutation.length() != indices.size(type)}
+     * @throws cc.redberry.core.combinatorics.InconsistentGeneratorsException
+     *                                  if the specified symmetry is
+     *                                  inconsistent with already defined
+     */
     public static void addAntiSymmetry(SimpleTensor tensor, int... permutation) {
         tensor.getIndices().getSymmetries().addAntiSymmetry(permutation);
     }
 
+    /**
+     * Adds permutational (anti)symmetries to specified tensor, such that it becomes completely antisymmetric
+     * with respect to specified type of indeices.
+     *
+     * @param tensor simple tensor
+     * @param type   type of indices
+     */
     public static void setAntiSymmetric(SimpleTensor tensor, IndexType type) {
         int dimension = tensor.getIndices().size(type);
         addSymmetry(tensor, type, true, Combinatorics.createTransposition(dimension));
@@ -603,6 +869,11 @@ public final class Tensors {
             addSymmetry(tensor, type, dimension % 2 == 0 ? true : false, Combinatorics.createCycle(dimension));
     }
 
+    /**
+     * Adds permutational (anti)symmetries to specified tensor, such that it becomes completely antisymmetric.
+     *
+     * @param tensor simple tensor
+     */
     public static void setAntiSymmetric(SimpleTensor tensor) {
         int dimension = tensor.getIndices().size();
         tensor.getIndices().getSymmetries().addAntiSymmetry(Combinatorics.createTransposition(dimension));
@@ -610,40 +881,55 @@ public final class Tensors {
             tensor.getIndices().getSymmetries().add(dimension % 2 == 0 ? true : false, Combinatorics.createCycle(dimension));
     }
 
+    /**
+     * Adds permutational (anti)symmetries to specified tensor, such that it becomes completely antisymmetric.
+     *
+     * @param tensor string representation of simple tensor
+     * @throws IllegalArgumentException if string expression does not represents a simple tensor
+     * @throws cc.redberry.core.parser.ParserException
+     *                                  if expression does not satisfy correct Redberry
+     *                                  input notation for tensors
+     */
     public static void setAntiSymmetric(String tensor) {
         setAntiSymmetric(parseSimple(tensor));
     }
 
+    /**
+     * Adds permutational symmetries to specified tensor, such that it becomes completely symmetric
+     * with respect to specified type of indeices.
+     *
+     * @param tensor simple tensor
+     * @param type   type of indices
+     */
     public static void setSymmetric(SimpleTensor tensor, IndexType type) {
         int dimension = tensor.getIndices().size(type);
         addSymmetry(tensor, type, false, Combinatorics.createCycle(dimension));
         addSymmetry(tensor, type, false, Combinatorics.createTransposition(dimension));
     }
 
+    /**
+     * Adds permutational symmetries to specified tensor, such that it becomes completely symmetric.
+     *
+     * @param tensor simple tensor
+     */
     public static void setSymmetric(SimpleTensor tensor) {
         int dimension = tensor.getIndices().size();
         addSymmetry(tensor, Combinatorics.createCycle(dimension));
         addSymmetry(tensor, Combinatorics.createTransposition(dimension));
     }
 
+    /**
+     * Adds permutational symmetries to specified tensor, such that it becomes completely symmetric.
+     *
+     * @param tensor string representation of simple tensor
+     * @throws IllegalArgumentException if string expression does not represents a simple tensor
+     * @throws cc.redberry.core.parser.ParserException
+     *                                  if expression does not satisfy correct Redberry
+     *                                  input notation for tensors
+     */
     public static void setSymmetric(String tensor) {
         setSymmetric(parseSimple(tensor));
     }
 
 
-    /**
-     * Multiplies a tensor by minus one.
-     *
-     * @param tensor tensor to be negotiated
-     * @return tensor of opposite sign
-     */
-    public static Tensor negate(Tensor tensor) {
-        if (tensor instanceof Complex)
-            return ((Complex) tensor).negate();
-        return multiply(Complex.MINUS_ONE, tensor);
-    }
-
-    public static Tensor reciprocal(Tensor tensor) {
-        return pow(tensor, Complex.MINUS_ONE);
-    }
 }

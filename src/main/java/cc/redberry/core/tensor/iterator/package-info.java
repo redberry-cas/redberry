@@ -20,25 +20,12 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
-package cc.redberry.core.tensor;
 
 /**
+ * Iterators over the expressions tree.
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @since 1.0
  */
-public class DefaultFactory implements TensorFactory{
-    private TensorBuilder builder;
-
-    public DefaultFactory(TensorBuilder builder) {
-        this.builder = builder;
-    }
-
-    @Override
-    public Tensor create(Tensor... tensors) {
-        for(Tensor t : tensors)
-            builder.put(t);
-        return builder.build();//TODO clone builder
-    }
-    
-}
+package cc.redberry.core.tensor.iterator;

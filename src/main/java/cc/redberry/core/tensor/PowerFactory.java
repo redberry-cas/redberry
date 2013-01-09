@@ -27,8 +27,12 @@ import cc.redberry.core.number.Exponentiation;
 import cc.redberry.core.utils.TensorUtils;
 
 /**
+ * {@link TensorFactory} for powers. It performs basic simplifications and reduces the
+ * resulting power to the standard form.
+ *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @see Power
  */
 public final class PowerFactory implements TensorFactory {
 

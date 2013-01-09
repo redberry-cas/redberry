@@ -26,9 +26,9 @@ import cc.redberry.core.indices.Indices;
 import cc.redberry.core.math.MathUtils;
 import cc.redberry.core.number.Complex;
 
-import java.util.Arrays;
-
 /**
+ * Parent class for sums and products.
+ *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
@@ -45,8 +45,20 @@ public abstract class MultiTensor extends Tensor {
         return indices;
     }
 
+    /**
+     * Removes tensor at the specified position and returns the result.
+     *
+     * @param position position in tensor
+     * @return result of removing
+     */
     public abstract Tensor remove(int position);
 
+    /**
+     * Removes tensors at the specified positions and returns the result.
+     *
+     * @param positions position in tensor
+     * @return result of removing
+     */
     public Tensor remove(int[] positions) {
         int[] p = MathUtils.getSortedDistinct(positions);
         Tensor temp = this;
@@ -58,6 +70,12 @@ public abstract class MultiTensor extends Tensor {
         return temp;
     }
 
+    /**
+     * Selects tensors at the specified positions and puts it together.
+     *
+     * @param positions positions in tensor
+     * @return result subtensor
+     */
     public Tensor select(int[] positions) {
         if (positions.length == 0)
             return getNeutral();

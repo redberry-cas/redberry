@@ -25,6 +25,7 @@ package cc.redberry.core.tensor.iterator;
 /**
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @since 1.1
  */
 public interface PayloadFactory<T extends Payload<T>> {
     boolean allowLazyInitialization();

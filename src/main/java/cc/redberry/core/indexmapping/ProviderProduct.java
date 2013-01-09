@@ -58,7 +58,7 @@ final class ProviderProduct implements IndexMappingProvider {
                     if (pfrom.getWithoutFactor(i).hashCode() != pto.getWithoutFactor(i).hashCode())
                         return IndexMappingProvider.Util.EMPTY_PROVIDER;
             ProductContent fromContent = pfrom.getContent(), toContent = pto.getContent();
-            if (!fromContent.getContractionStructure().equals(toContent.getContractionStructure()))
+            if (!fromContent.getStructureOfContractionsHashed().equals(toContent.getStructureOfContractionsHashed()))
                 return IndexMappingProvider.Util.EMPTY_PROVIDER;
             Tensor[] fromScalars = pfrom.getAllScalarsWithoutFactor(), toScalars = pto.getAllScalarsWithoutFactor();
             if (fromScalars.length != toScalars.length)
@@ -166,7 +166,7 @@ final class ProviderProduct implements IndexMappingProvider {
 
         begin = 0;
         for (i = 1; i <= fromContent.size(); ++i)
-            if (i == fromContent.size() || !fromContent.getContractionStructure().get(i).equals(fromContent.getContractionStructure().get(i - 1))) {
+            if (i == fromContent.size() || !fromContent.getStructureOfContractionsHashed().get(i).equals(fromContent.getStructureOfContractionsHashed().get(i - 1))) {
                 if (i - 1 != begin)
                     stretches.add(new Pair(fromContent.getRange(begin, i), toContent.getRange(begin, i)));
                 else

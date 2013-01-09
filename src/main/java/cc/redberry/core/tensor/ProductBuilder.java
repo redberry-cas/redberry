@@ -33,6 +33,9 @@ import static cc.redberry.core.number.NumberUtils.isZeroOrIndeterminate;
 import static cc.redberry.core.transformations.ToNumericTransformation.toNumeric;
 
 /**
+ * Implementation of product builder. It performs basic simplifications and reduces the
+ * resulting product to the standard form.
+ *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
@@ -43,12 +46,21 @@ public final class ProductBuilder implements TensorBuilder {
     /* hash -> list of power nodes */
     private final PowersContainer symbolicPowers;
 
+    /**
+     * Creates builder with initial capacities of indexless and indexed parts.
+     *
+     * @param initialCapacityIndexless initial capacity of indexless data
+     * @param initialCapacityData      initial capacity of indexed data
+     */
     public ProductBuilder(int initialCapacityIndexless, int initialCapacityData) {
         elements = new ArrayList<>(initialCapacityData);
         symbolicPowers = new PowersContainer(initialCapacityIndexless);
         indexLess = new ArrayList<>();
     }
 
+    /**
+     * Creates builder with default initial capacity.
+     */
     public ProductBuilder() {
         this(4, 3);
     }

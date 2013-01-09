@@ -27,6 +27,7 @@ import cc.redberry.core.tensor.Tensor;
 /**
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @since 1.1
  */
 public class DummyPayload<T extends Payload<T>> implements Payload<T> {
     @Override

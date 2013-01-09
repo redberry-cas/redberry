@@ -33,6 +33,8 @@ import java.util.*;
 import static cc.redberry.core.transformations.ToNumericTransformation.toNumeric;
 
 /**
+ * Abstract implementation of {@link TensorBuilder} for sums.
+ *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
@@ -43,10 +45,18 @@ public abstract class AbstractSumBuilder implements TensorBuilder {
     Indices indices = null;
     int[] sortedFreeIndices;
 
+    /**
+     * Creates builder with default initial capacity.
+     */
     public AbstractSumBuilder() {
         this(7);
     }
 
+    /**
+     * Creates builder with specified initial capacity.
+     *
+     * @param initialCapacity initial capacity
+     */
     public AbstractSumBuilder(int initialCapacity) {
         summands = new HashMap<>(initialCapacity);
     }

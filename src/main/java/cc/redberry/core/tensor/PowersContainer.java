@@ -33,6 +33,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 
 /**
+ *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
@@ -61,7 +62,7 @@ public final class PowersContainer implements Iterable<Tensor> {
         return powers.isEmpty();
     }
 
-    public int size(){
+    public int size() {
         return powers.size();
     }
 

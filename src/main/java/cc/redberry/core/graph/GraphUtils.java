@@ -29,6 +29,8 @@ import java.util.Arrays;
 import java.util.Deque;
 
 /**
+ * Static useful graph algorithms.
+ *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  * @since 1.0

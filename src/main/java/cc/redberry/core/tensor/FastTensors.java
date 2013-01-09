@@ -31,6 +31,8 @@ import cc.redberry.core.utils.TensorUtils;
 import static cc.redberry.core.tensor.Tensors.multiply;
 
 /**
+ * Utility rare, but fast methods with tensor modifications.
+ *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
@@ -38,6 +40,13 @@ public final class FastTensors {
     private FastTensors() {
     }
 
+    /**
+     * Multiplies each element in specified sum on some factor.
+     *
+     * @param sum    sum
+     * @param factor factor
+     * @return resulting sum
+     */
     public static Tensor multiplySumElementsOnFactor(Sum sum, Tensor factor) {
         if (TensorUtils.isZero(factor))
             return Complex.ZERO;
@@ -56,6 +65,13 @@ public final class FastTensors {
         return new Sum(newSumData, IndicesFactory.create(newSumData[0].getIndices().getFree()));
     }
 
+    /**
+     * Multiplies each element in specified sum on some factor and expands indexless parts.
+     *
+     * @param sum    sum
+     * @param factor factor
+     * @return resulting sum
+     */
     public static Tensor multiplySumElementsOnFactorAndExpand(Sum sum, Tensor factor) {
         if (TensorUtils.isZero(factor))
             return Complex.ZERO;
@@ -76,6 +92,10 @@ public final class FastTensors {
         return new Sum(newSumData, IndicesFactory.create(newSumData[0].getIndices().getFree()));
     }
 
+    /**
+     * @deprecated very unsafe method without checks
+     */
+    @Deprecated
     public static Tensor multiplySumElementsOnFactors(Sum sum, OutputPortUnsafe<Tensor> factorsProvider) {
         final Tensor[] newSumData = new Tensor[sum.size()];
         for (int i = newSumData.length - 1; i >= 0; --i)
@@ -83,6 +103,14 @@ public final class FastTensors {
         return new Sum(newSumData, IndicesFactory.create(newSumData[0].getIndices().getFree()));
     }
 
+    /**
+     * Multiplies each element in specified sum on some scalar factor and expands indexless parts.
+     *
+     * @param sum    sum
+     * @param factor scalar factor
+     * @return resulting sum
+     * @throws IllegalArgumentException if factor is not scalar
+     */
     public static Tensor multiplySumElementsOnScalarFactorAndExpandScalars(Sum sum, Tensor factor) {
         if (TensorUtils.isZero(factor))
             return Complex.ZERO;

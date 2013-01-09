@@ -32,6 +32,8 @@ import cc.redberry.core.utils.TensorUtils;
 import java.util.Arrays;
 
 /**
+ * Representation of sum.
+ *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */

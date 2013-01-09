@@ -31,7 +31,7 @@ import cc.redberry.core.utils.TensorUtils;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public class ScalarFunctionBuilder implements TensorBuilder {
+class ScalarFunctionBuilder implements TensorBuilder {
 
     private final ScalarFunctionFactory factory;
     private Tensor arg;

@@ -28,6 +28,7 @@ import cc.redberry.core.utils.Indicator;
 /**
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @since 1.1
  */
 public interface StackPosition<T extends Payload<T>> {
     /**

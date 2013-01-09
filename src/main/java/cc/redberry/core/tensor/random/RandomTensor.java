@@ -36,9 +36,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @since 1.0
  */
 public final class RandomTensor {
 
@@ -52,13 +52,13 @@ public final class RandomTensor {
         for (byte b : TYPES)
             ALPHABETS_SIZES[(int) b] = IndexType.getType(b).getSymbolConverter().maxNumberOfSymbols();
     }
+
     private final int[] minIndices, maxIndices;
     private final int diffStringNames;
     private final boolean withSymmetries;
     private NameDescriptor[] namespace;
 
     /**
-     *
      * @param minDiffNDs     min number of different tensors
      * @param maxDiffNDs     max number of different tensors
      * @param minIndices     min number of indices in each tensor.
@@ -86,7 +86,6 @@ public final class RandomTensor {
     }
 
     /**
-     *
      * @param minDiffNDs     minimum number of different tensors
      * @param maxDiffNDs     maximum number of different tensors
      * @param minIndices     minimum number of indices in each tensor.
@@ -114,7 +113,6 @@ public final class RandomTensor {
     }
 
     /**
-     *
      * @param minDiffNDs     minimum number of different tensors
      * @param maxDiffNDs     maximum number of different tensors
      * @param minIndices     minimum number of indices in each tensor.
@@ -357,7 +355,7 @@ public final class RandomTensor {
             int p1, p2;
             final int tries = nextInt(3) + 1;
             for (i = 0; i < tries; ++i) {
-                while ((p1 = nextInt(dimension)) == (p2 = nextInt(dimension)));
+                while ((p1 = nextInt(dimension)) == (p2 = nextInt(dimension))) ;
                 swap(permutation, p1, p2);
             }
         }
@@ -370,7 +368,7 @@ public final class RandomTensor {
             return;
         int p1, p2;
         for (int i = 0; i < target.length; ++i) {
-            while ((p1 = nextInt(target.length)) == (p2 = nextInt(target.length)));
+            while ((p1 = nextInt(target.length)) == (p2 = nextInt(target.length))) ;
             swap(target, p1, p2);
         }
     }

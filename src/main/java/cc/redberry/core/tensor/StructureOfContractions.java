@@ -22,35 +22,36 @@
  */
 package cc.redberry.core.tensor;
 
+import cc.redberry.core.graph.GraphUtils;
 import cc.redberry.core.indices.Indices;
 import cc.redberry.core.indices.IndicesUtils;
-import cc.redberry.core.graph.GraphUtils;
 import cc.redberry.core.utils.ArraysUtils;
 
 import java.util.Arrays;
 
 /**
+ * This class represents the structure of product contraction.
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public final class FullContractionsStructure {
+public final class StructureOfContractions {
 
-    public final static FullContractionsStructure EMPTY_FULL_CONTRACTIONS_STRUCTURE = new FullContractionsStructure(new long[0], new long[0][], new int[0], 0);
+    public final static StructureOfContractions EMPTY_FULL_CONTRACTIONS_STRUCTURE = new StructureOfContractions(new long[0], new long[0][], new int[0], 0);
     public final long[] freeContractions;
     public final long[][] contractions;
     public final int[] components;
     public final int componentCount;
 
-    private FullContractionsStructure(long[] freeContractions, long[][] contractions, int[] components, int componentCount) {
+    private StructureOfContractions(long[] freeContractions, long[][] contractions, int[] components, int componentCount) {
         this.freeContractions = freeContractions;
         this.contractions = contractions;
         this.components = components;
         this.componentCount = componentCount;
     }
 
-    FullContractionsStructure(Tensor[] data, int differentIndicesCount,
-                              Indices freeIndices) {
+    StructureOfContractions(Tensor[] data, int differentIndicesCount,
+                            Indices freeIndices) {
         //Names (names with type, see IndicesUtils.getNameWithType() ) of all indices in this multiplication
         //It will be used as index name -> index index [0,1,2,3...] mapping
         final int[] upperIndices = new int[differentIndicesCount], lowerIndices = new int[differentIndicesCount];
@@ -192,12 +193,12 @@ public final class FullContractionsStructure {
      *                    for simple tensors)
      * @param indexIndex  index of Index in Indices of tensor ( only 16 bits
      *                    used !!!!!!!!! )
-     *
      * @return packed record (long)
      */
     private static long packToLong(final int tensorIndex, final short id, final int indexIndex) {
         return (((long) tensorIndex) << 16) | (0xFFFFL & id) | (((long) indexIndex) << 48);
     }
+
     //0xFFFFFFFF00000000L == packToLong(-1, (short) 0, -1);
     private static final long dummyTensorInfo = 0xFFFFFFFFFFFF0000L;
 

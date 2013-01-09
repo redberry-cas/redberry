@@ -29,6 +29,7 @@ import cc.redberry.core.tensor.functions.ScalarFunction;
 /**
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @since 1.0
  */
 public interface TraverseGuide {
 

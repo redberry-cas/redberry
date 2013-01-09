@@ -38,6 +38,8 @@ import static cc.redberry.core.number.NumberUtils.isZeroOrIndeterminate;
 import static cc.redberry.core.transformations.ToNumericTransformation.toNumeric;
 
 /**
+ * Factory for products.
+ *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
@@ -76,7 +78,7 @@ public final class ProductFactory implements TensorFactory {
                 return factor;
         }
 
-        if(NumberUtils.isZeroOrIndeterminate(factor))
+        if (NumberUtils.isZeroOrIndeterminate(factor))
             return factor;
 
         if (factor.isNumeric()) {

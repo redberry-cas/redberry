@@ -27,9 +27,11 @@ import cc.redberry.core.indices.IndicesFactory;
 import cc.redberry.core.utils.TensorUtils;
 
 /**
+ * Builder for expressions.
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @see Expression
  */
 public class ExpressionBuilder implements TensorBuilder {
 

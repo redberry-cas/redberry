@@ -29,7 +29,7 @@ import cc.redberry.core.indices.Indices;
 import java.util.Iterator;
 
 /**
- * <p>Abstract class which defines common tensor methods and properties.</p>
+ * Abstract class which defines common tensor properties and methods. All tensors are immutable.
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
@@ -39,34 +39,26 @@ import java.util.Iterator;
  */
 public abstract class Tensor
         implements Comparable<Tensor>,
-                   Iterable<Tensor> {
+        Iterable<Tensor> {
 
     /**
-     * <p>This method was added to the Tensor interface to obligate all tensors
-     * to implement custom hash codes. This hash code should reflects only
-     * tensor structure whatever the particular indices are.</p> <p>There are
-     * other ways to calculate hash code for Tensor object (see
-     * {@link cc.redberry.core.utils.TensorHashCalculator}).</p>
+     * Hash code of this tensor.
      *
      * @return hash code of this tensor
      */
     protected abstract int hash();
 
     /**
-     * <p>Returns indices of this tensor. For more information see {@link cc.redberry.core.indices.Indices}.</p>
+     * Returns indices of this tensor.
      *
      * @return indices of this tensor
      */
     public abstract Indices getIndices();
 
     /**
-     * <p>Returns iterator over sub-tensors of current tensor (eg. summnads of
-     * sum, multipliers of product, etc..).</p> <p>For iteration through whole
-     * tensor tree use: {@link cc.redberry.core.tensor.iterator.TreeTraverseIterator}
-     * or {@link cc.redberry.core.tensor.iterator.FromParentToChildIterator} and
-     * {@link cc.redberry.core.tensor.iterator.FromChildToParentIterator}.</p>
+     * Return read-only iterator over tensor elements.
      *
-     * @return iterator over sub-tensors
+     * @return read-only iterator over tensor elements
      */
     @Override
     public Iterator<Tensor> iterator() {
@@ -74,33 +66,27 @@ public abstract class Tensor
     }
 
     /**
-     * <p>Returns i-th sub-tensor of this tensor (eg. summand of sum, argument
-     * of tensor field, etc...)</p>
+     * Returns element at i-th position.
      *
-     * @param i index of sub-tensor
-     *
-     * @return i-th subtensor
+     * @param i position
+     * @return element at i-th position
+     * @throws IndexOutOfBoundsException if {@code i < 0} or {@code i >= size()}
      */
     public abstract Tensor get(int i);
 
     /**
-     * <p>Returns count of sub-tensors of this tensor.</p>
+     * Returns the number of elements in this tensor.
      *
-     * @return count of sub-tensors
+     * @return the number of elements in this tensor
      */
     public abstract int size();
 
     /**
-     * <p>Returns new tensor instance with i-th sub-tensor replaced by provided
-     * tensor. <p>Better tools for tensors manipulations are tree iterators.
-     * See:
-     * {@link cc.redberry.core.tensor.iterator.FromParentToChildIterator},
-     * {@link cc.redberry.core.tensor.iterator.FromChildToParentIterator} and
-     * {@link cc.redberry.core.tensor.iterator.TreeTraverseIterator}.</p> </p>
+     * Returns new tensor instance with i-th sub-tensor replaced by provided
+     * tensor.
      *
      * @param i      index of sub-tensor to be replaced
      * @param tensor tensor to replace i-th sub-tensor
-     *
      * @return new instance of tensor
      */
     public Tensor set(int i, Tensor tensor) {
@@ -119,12 +105,11 @@ public abstract class Tensor
     }
 
     /**
-     * <p>Retrieves several sub-tensors from current tensor. This function is
-     * faster than sequential invocations of {@link #get(int)} method.</p>
+     * Retrieves several sub-tensors from current tensor. This function is
+     * faster than sequential invocations of {@link #get(int)} method.
      *
      * @param from index of first sub-tensor to be retrieved (inclusive)
      * @param to   next index after last sub-tensor to be retrieved (exclusive)
-     *            
      * @return array with retrieved tensors
      */
     public Tensor[] getRange(int from, final int to) {
@@ -142,21 +127,20 @@ public abstract class Tensor
     }
 
     /**
-     * <p>Returns a string representation of a tensor. See {@link cc.redberry.core.context.OutputFormat}
-     * for available modes.</p>
+     * Returns a string representation of a tensor according to the specified
+     * {@link cc.redberry.core.context.OutputFormat}.
      *
-     * @param mode printing mode (see. {@link cc.redberry.core.context.OutputFormat})
-     *
+     * @param outputFormat output format
      * @return a string representation of a tensor
      */
-    public abstract String toString(final OutputFormat mode);
+    public abstract String toString(OutputFormat outputFormat);
 
     /**
-     * <p>Returns string representation of a tensor in default (see {@link cc.redberry.core.context.CC#getDefaultOutputFormat()})
-     * mode. <p>Equivalent to:
-     * <code>this.toString(CC.getDefaultOutputFormat())</code> </p></p>
+     * Returns a string representation of a tensor according to the default
+     * {@link cc.redberry.core.context.OutputFormat} defined in
+     * {@link cc.redberry.core.context.CC#getDefaultOutputFormat()}.
      *
-     * @return string representation of a tensor in default mode
+     * @return a string representation of a tensor
      */
     @Override
     public final String toString() {
@@ -171,7 +155,11 @@ public abstract class Tensor
     }
 
     /**
-     * <p>Compares tensors by their hash code.</p>
+     * Compares tensors by their hash codes.
+     *
+     * @param t tensor
+     * @return 0 if hashes are equals, 1 if hash code of this greater the hash code of specified
+     * tensor and -1 otherwise
      */
     @Override
     public final int compareTo(Tensor t) {
