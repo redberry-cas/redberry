@@ -180,7 +180,7 @@ public final class TreeTraverseIterator<T extends Payload<T>> {
      * current cursor.
      *
      * @param indicator level relative position of element to be tested
-     * @return
+     * @return {@code true} if condition satisfies at specified level
      */
     public boolean checkLevel(Indicator<Tensor> indicator, int level)//TODO better name
     {

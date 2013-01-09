@@ -27,10 +27,16 @@ import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.tensor.iterator.FromChildToParentIterator;
 
 /**
+ * Gives the numerical value of tensor (replace all numbers with their numerical values).
+ *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @since 1.0
  */
 public class ToNumericTransformation implements Transformation {
+    /**
+     * Singleton instance
+     */
     public static final ToNumericTransformation TO_NUMERIC = new ToNumericTransformation();
 
     private ToNumericTransformation() {
@@ -41,6 +47,12 @@ public class ToNumericTransformation implements Transformation {
         return toNumeric(t);
     }
 
+    /**
+     * Gives the numerical value of tensor (replace all numbers with their numerical values)
+     *
+     * @param t tensor
+     * @return the numerical value of tensor
+     */
     public static Tensor toNumeric(Tensor t) {
         FromChildToParentIterator iterator = new FromChildToParentIterator(t);
         Tensor c;

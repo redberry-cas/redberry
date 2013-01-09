@@ -81,6 +81,7 @@ import cc.redberry.core.utils.TensorUtils;
  * @see cc.redberry.core.tensor.Tensor#getBuilder()
  * @see TensorUtils#equals(cc.redberry.core.tensor.Tensor, cc.redberry.core.tensor.Tensor)
  * @see <a href="http://en.wikipedia.org/wiki/Builder_pattern">http://en.wikipedia.org/wiki/Builder_pattern</a>
+ * @since 1.0
  */
 public interface TensorBuilder {
 

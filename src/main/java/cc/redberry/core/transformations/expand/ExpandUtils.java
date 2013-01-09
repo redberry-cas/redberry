@@ -36,8 +36,11 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
+ * Utility static methods.
+ *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @since 1.0
  */
 public final class ExpandUtils {
 
@@ -215,7 +218,7 @@ public final class ExpandUtils {
         return Tensors.multiply(indexless, data);
     }
 
-//    public static Tensor expandProductOfIndexedSums(Iterable<Tensor> tensor, Transformation[] transformations) {
+    //    public static Tensor expandProductOfIndexedSums(Iterable<Tensor> tensor, Transformation[] transformations) {
 //        return expandProductOfSums1(tensor,
 //                                            ArraysUtils.addAll(new Transformation[]{expandIndexlessSubproduct}, transformations));
 //    }
@@ -228,8 +231,8 @@ public final class ExpandUtils {
     public static Tensor expandProductOfSums1(Iterable<Tensor> tensor, Transformation[] transformations, boolean indexed) {
         Transformation[] transformations1 =
                 indexed
-                ? ArraysUtils.addAll(new Transformation[]{expandIndexlessSubproduct}, transformations)
-                : transformations;
+                        ? ArraysUtils.addAll(new Transformation[]{expandIndexlessSubproduct}, transformations)
+                        : transformations;
         int capacity = 10;
         boolean isTensor;
         if (isTensor = (tensor instanceof Tensor)) {
@@ -253,21 +256,21 @@ public final class ExpandUtils {
         if (sums.size() == 1)
             if (indexed)
                 return apply(transformations,
-                             FastTensors.multiplySumElementsOnFactorAndExpand(sums.get(0), Tensors.multiply(ns.toArray(new Tensor[ns.size()]))));
+                        FastTensors.multiplySumElementsOnFactorAndExpand(sums.get(0), Tensors.multiply(ns.toArray(new Tensor[ns.size()]))));
             else
                 return apply(transformations,
-                             FastTensors.multiplySumElementsOnFactor(sums.get(0), Tensors.multiply(ns.toArray(new Tensor[ns.size()]))));
+                        FastTensors.multiplySumElementsOnFactor(sums.get(0), Tensors.multiply(ns.toArray(new Tensor[ns.size()]))));
 
         Tensor base = sums.get(0);
-        for (int i = 1, size = sums.size();; ++i)
+        for (int i = 1, size = sums.size(); ; ++i)
             if (i == size - 1) {
                 if (base == null)
                     if (indexed)
                         return apply(transformations,
-                                     FastTensors.multiplySumElementsOnFactorAndExpand(sums.get(i), Tensors.multiply(ns.toArray(new Tensor[ns.size()]))));
+                                FastTensors.multiplySumElementsOnFactorAndExpand(sums.get(i), Tensors.multiply(ns.toArray(new Tensor[ns.size()]))));
                     else
                         return apply(transformations,
-                                     FastTensors.multiplySumElementsOnFactor(sums.get(i), Tensors.multiply(ns.toArray(new Tensor[ns.size()]))));
+                                FastTensors.multiplySumElementsOnFactor(sums.get(i), Tensors.multiply(ns.toArray(new Tensor[ns.size()]))));
 
                 return expandPairOfSums((Sum) base, sums.get(i), ns.toArray(new Tensor[ns.size()]), transformations1);
             } else {
@@ -303,7 +306,7 @@ public final class ExpandUtils {
         Tensor temp = argument;
         for (i = power - 1; i >= 1; --i)
             temp = expandPairOfSums((Sum) temp,
-                                    argument, transformations);
+                    argument, transformations);
         return temp;
     }
 
@@ -317,11 +320,12 @@ public final class ExpandUtils {
         forbidden.addAll(argIndices);
         for (i = power - 1; i >= 1; --i)
             temp = expandPairOfSums((Sum) temp,
-                                    (Sum) ApplyIndexMapping.renameDummy(argument, forbidden.toArray(), forbidden),
-                                    transformations);
+                    (Sum) ApplyIndexMapping.renameDummy(argument, forbidden.toArray(), forbidden),
+                    transformations);
 
         return temp;
     }
+
     public static final Transformation expandIndexlessSubproduct = new Transformation() {
 
         @Override
@@ -330,7 +334,7 @@ public final class ExpandUtils {
                 return t;
             Product p = (Product) t;
             Tensor indexless = p.getIndexlessSubProduct();
-            
+
             boolean needExpand = false;
             if (indexless instanceof Product)
                 for (Tensor i : indexless)

@@ -27,10 +27,16 @@ import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.tensor.iterator.FromChildToParentIterator;
 
 /**
+ * Replaces all complex numbers in tensor by their complex conjugation.
+ *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @since 1.0
  */
 public final class ComplexConjugateTransformation implements Transformation {
+    /**
+     * Singleton instance.
+     */
     public static final ComplexConjugateTransformation COMPLEX_CONJUGATE = new ComplexConjugateTransformation();
 
     private ComplexConjugateTransformation() {

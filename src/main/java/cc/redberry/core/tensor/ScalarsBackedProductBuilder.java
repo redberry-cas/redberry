@@ -44,6 +44,7 @@ import static cc.redberry.core.utils.TensorUtils.isScalar;
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @since 1.0
  */
 public class ScalarsBackedProductBuilder implements TensorBuilder {
     /* a containner of powers */

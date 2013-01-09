@@ -34,10 +34,15 @@ import cc.redberry.core.transformations.Transformation;
 import java.util.Arrays;
 
 import static cc.redberry.core.tensor.ApplyIndexMapping.applyIndexMapping;
-import static cc.redberry.core.tensor.Tensors.*;
+import static cc.redberry.core.tensor.Tensors.multiply;
+import static cc.redberry.core.tensor.Tensors.negate;
+
 /**
+ * Symmetrizes tensor according to a given symmetries.
+ *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @since 1.0
  */
 public final class SymmetrizeSimpleTensorTransformation implements Transformation {
     private final SimpleTensor tensor;

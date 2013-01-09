@@ -55,6 +55,7 @@ package cc.redberry.core.tensor;
  * cc.redberry.core.tensor.Tensor)
  * @see <a
  * href="http://en.wikipedia.org/wiki/Builder_pattern">http://en.wikipedia.org/wiki/Builder_pattern</a>
+ * @since 1.0
  */
 public interface TensorFactory {
 

@@ -33,8 +33,9 @@ import java.util.List;
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @since 1.0
  */
-public class SymbolsGeneratorWithHistory implements OutputPortUnsafe<Tensor> {
+class SymbolsGeneratorWithHistory implements OutputPortUnsafe<Tensor> {
 
     final SymbolsGenerator generator;
     final List<SimpleTensor> generated = new ArrayList<>();

@@ -30,15 +30,26 @@ import cc.redberry.core.tensor.functions.ScalarFunction;
 import java.util.*;
 
 /**
+ * Eliminates contractions with metrics and Kronecker deltas.
+ *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @since 1.0
  */
 public final class EliminateMetricsTransformation implements Transformation {
-
+    /**
+     * Singleton instance.
+     */
     public static final EliminateMetricsTransformation ELIMINATE_METRICS
             = new EliminateMetricsTransformation();
 
-    public static Tensor contract(Tensor t) {
+    /**
+     * Eliminates contractions with metrics and Kronecker deltas in specified tensor and returns the result.
+     *
+     * @param t tensor to be transformed
+     * @return transformed tensor
+     */
+    public static Tensor eliminate(Tensor t) {
         return ELIMINATE_METRICS.transform(t);
     }
 

@@ -35,6 +35,7 @@ import cc.redberry.core.utils.TensorUtils;
  * @author Stanislav Poslavsky
  * @see PowerBuilder
  * @see PowerFactory
+ * @since 1.0
  */
 public final class Power extends Tensor {
 

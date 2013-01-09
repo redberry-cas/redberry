@@ -886,7 +886,7 @@ public final class ArraysUtils {
     }
 
     /**
-     * This method is the same as {@link #quickSort(T[], int, int, java.lang.Object[]) }, but without range checking.
+     * This method is the same as {@link #quickSort(Comparable[], int, int, Object[])}, but without range checking.
      * <p/> <p><b>NOTE: this is unstable sort algorithm, so additional combinatorics of the {@code coSort} array can be
      * perfomed. Use this method only if you are sure, in what you are doing. If not - use stable sort methods like an
      * insertion sort or Tim sort.</b>

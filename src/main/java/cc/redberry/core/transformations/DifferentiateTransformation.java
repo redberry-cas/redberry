@@ -41,22 +41,26 @@ import static cc.redberry.core.tensor.Tensors.*;
 import static cc.redberry.core.utils.ArraysUtils.addAll;
 
 /**
+ * Differentiates specified tensor with respect to specified simple tensors.
+ * It temporary does not support derivatives of tensor fields.
+ *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @since 1.0
  */
 public final class DifferentiateTransformation implements Transformation {
 
     private final SimpleTensor[] vars;
     private final Transformation[] expandAndContract;
 
+    /**
+     * Creates transformations which differentiate with respect to specified simple tensors.
+     *
+     * @param vars
+     */
     public DifferentiateTransformation(SimpleTensor... vars) {
         this.vars = vars;
         this.expandAndContract = new Transformation[0];
-    }
-
-    public DifferentiateTransformation(Transformation expandAndContract, SimpleTensor... vars) {
-        this.vars = vars;
-        this.expandAndContract = new Transformation[]{expandAndContract};
     }
 
     public DifferentiateTransformation(Transformation[] expandAndContract, SimpleTensor... vars) {
@@ -69,6 +73,15 @@ public final class DifferentiateTransformation implements Transformation {
         return differentiate(t, expandAndContract, vars);
     }
 
+    /**
+     * Gives the multiple derivative of specified order of specified tensor with respect to specified simple tensor.
+     *
+     * @param tensor tensor to be differentiated
+     * @param var    simple tensor
+     * @param order  order of derivative
+     * @return derivative
+     * @throws IllegalArgumentException if both order is not one and var is not scalar.
+     */
     public static Tensor differentiate(Tensor tensor, SimpleTensor var, int order) {
         if (var.getIndices().size() != 0 && order > 1)
             throw new IllegalArgumentException();
@@ -77,6 +90,14 @@ public final class DifferentiateTransformation implements Transformation {
         return tensor;
     }
 
+    /**
+     * Gives the multiple derivative of specified tensor with respect to specified arguments.
+     *
+     * @param tensor tensor to be differentiated
+     * @param vars   arguments
+     * @return derivative
+     * @throws IllegalArgumentException if there is clash of indices
+     */
     public static Tensor differentiate(Tensor tensor, SimpleTensor... vars) {
         if (vars.length == 0)
             return tensor;
@@ -85,6 +106,15 @@ public final class DifferentiateTransformation implements Transformation {
         return differentiate(tensor, new Transformation[0], vars);
     }
 
+    /**
+     * Gives the multiple derivative of specified tensor with respect to specified arguments.
+     *
+     * @param tensor            tensor to be differentiated
+     * @param vars              arguments
+     * @param expandAndContract additional transformations to be applied after each step of differentiation
+     * @return derivative
+     * @throws IllegalArgumentException if there is clash of indices
+     */
     public static Tensor differentiate(Tensor tensor, Transformation[] expandAndContract, SimpleTensor... vars) {
         if (vars.length == 0)
             return tensor;
@@ -171,7 +201,7 @@ public final class DifferentiateTransformation implements Transformation {
             for (int i = tensor.size() - 1; i >= 0; --i) {
                 temp = tensor.set(i, differentiate1(tensor.get(i), rule, transformations));
                 if (rule.var.getIndices().size() != 0)
-                    temp = EliminateMetricsTransformation.contract(temp);
+                    temp = EliminateMetricsTransformation.eliminate(temp);
                 temp = applyTransformations(temp, transformations);
                 result.put(temp);
             }

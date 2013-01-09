@@ -26,34 +26,67 @@ import cc.redberry.core.tensor.Product;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.tensor.Tensors;
 import cc.redberry.core.tensor.iterator.TraverseGuide;
-import cc.redberry.core.transformations.fractions.NumeratorDenominator;
 import cc.redberry.core.transformations.Transformation;
+import cc.redberry.core.transformations.fractions.NumeratorDenominator;
 
 import static cc.redberry.core.tensor.Tensors.reciprocal;
 
 /**
+ * Expands out all products and integer powers in any part of expression.
+ *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @since 1.0
  */
 public final class ExpandAllTransformation extends AbstractExpandTransformation {
+    /**
+     * The default instance.
+     */
     public static final ExpandAllTransformation EXPAND_ALL = new ExpandAllTransformation();
 
     private ExpandAllTransformation() {
         super(new Transformation[0], TraverseGuide.ALL);
     }
 
+    /**
+     * Creates expand transformation with specified additional transformations to
+     * be applied after each step of expand.
+     *
+     * @param transformations transformations to be applied after each step of expand
+     */
     public ExpandAllTransformation(Transformation[] transformations) {
         super(transformations, TraverseGuide.ALL);
     }
 
+    /**
+     * Creates expand transformation with specified additional transformations to
+     * be applied after each step of expand and leaves unexpanded parts of expression specified by
+     * {@code traverseGuide}.
+     *
+     * @param transformations transformations to be applied after each step of expand
+     * @param traverseGuide   traverse guide
+     */
     public ExpandAllTransformation(Transformation[] transformations, TraverseGuide traverseGuide) {
         super(transformations, traverseGuide);
     }
 
+    /**
+     * Expands out all products and integer powers in any part of expression.
+     *
+     * @param tensor tensor to be transformed
+     * @return result
+     */
     public static Tensor expandAll(Tensor tensor) {
         return EXPAND_ALL.transform(tensor);
     }
 
+    /**
+     * Expands out all products and integer powers in any part of expression and applies specified transformations
+     * after each step of expand.
+     *
+     * @param tensor tensor to be transformed
+     * @return result
+     */
     public static Tensor expandAll(Tensor tensor, Transformation... transformations) {
         return new ExpandAllTransformation(transformations).transform(tensor);
     }

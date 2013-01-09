@@ -26,10 +26,16 @@ import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.transformations.Transformation;
 
 /**
+ * Gives the numerator of expression.
+ *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @since 1.0
  */
 public class GetNumeratorTransformation implements Transformation {
+    /**
+     * Singleton instance.
+     */
     public static final GetNumeratorTransformation GET_NUMERATOR = new GetNumeratorTransformation();
 
     private GetNumeratorTransformation() {

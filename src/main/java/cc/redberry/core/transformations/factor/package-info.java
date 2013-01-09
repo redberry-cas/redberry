@@ -20,29 +20,14 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
-package cc.redberry.core.transformations.fractions;
-
-import cc.redberry.core.tensor.Tensor;
-import cc.redberry.core.transformations.Transformation;
 
 /**
- * Gives the denominator of expression.
+ * Factors a polynomial over the integers. The implementation is based on
+ * Heinz Kredel Java Algebra System (http://krum.rz.uni-mannheim.de/jas/).
  *
- * @author Dmitry Bolotin
+ * @author Dmitriy Bolotin
+ * @author Heinz Kredel
  * @author Stanislav Poslavsky
  * @since 1.0
  */
-public class GetDenominatorTransformation implements Transformation {
-    /**
-     * Singleton instance.
-     */
-    public static final GetDenominatorTransformation GET_DENOMINATOR = new GetDenominatorTransformation();
-
-    private GetDenominatorTransformation() {
-    }
-
-    @Override
-    public Tensor transform(Tensor t) {
-        return NumeratorDenominator.getNumeratorAndDenominator(t).denominator;
-    }
-}
+package cc.redberry.core.transformations.factor;

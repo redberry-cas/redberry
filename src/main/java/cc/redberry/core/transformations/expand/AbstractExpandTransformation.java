@@ -66,6 +66,15 @@ abstract class AbstractExpandTransformation implements Transformation {
         this(transformations, DefaultExpandTraverseGuide);
     }
 
+    /**
+     * Creates expand transformation with specified additional transformations to
+     * be applied after each step of expand and leaves unexpanded parts of expression specified by
+     * {@code traverseGuide}.
+     *
+     * @param transformations transformations to be applied after each step of expand
+     * @param transformations to be applied after each step of expand
+     * @param traverseGuide   traverse guide
+     */
     protected AbstractExpandTransformation(Transformation[] transformations, TraverseGuide traverseGuide) {
         this.transformations = transformations;
         this.traverseGuide = traverseGuide;

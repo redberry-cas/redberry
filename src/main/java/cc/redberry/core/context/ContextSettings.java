@@ -112,6 +112,7 @@ public class ContextSettings {
     /**
      * Sets string representation of Kronecker tensor name.
      *
+     * @param kronecker string name of Kronecker tensor
      * @return string representation of Kronecker tensor name
      */
     public void setKronecker(String kronecker) {
@@ -133,8 +134,6 @@ public class ContextSettings {
 
     /**
      * Sets string representation of metric tensor name.
-     *
-     * @return string representation of metric tensor name
      */
     public void setMetricName(String metricName) {
         if (metricName == null)

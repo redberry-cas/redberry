@@ -31,6 +31,7 @@ import cc.redberry.core.number.Complex;
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @since 1.0
  */
 public abstract class MultiTensor extends Tensor {
 

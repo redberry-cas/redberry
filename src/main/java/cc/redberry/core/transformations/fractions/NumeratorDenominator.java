@@ -32,6 +32,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * Gives the numerator and denominator of expression.
+ *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */

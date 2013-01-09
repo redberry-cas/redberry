@@ -30,10 +30,17 @@ import cc.redberry.core.tensor.iterator.TraverseGuide;
 import cc.redberry.core.utils.TensorUtils;
 
 /**
+ * Puts together similar scalar subproducts in each product. For example, tensor A_m*A^m*A_n*A^n
+ * will be transformed to tensor (A_m*A^m)**2.
+ *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @since 1.1
  */
 public class CollectScalarFactorsTransformation implements Transformation {
+    /**
+     * Singleton default instance.
+     */
     public static final CollectScalarFactorsTransformation COLLECT_SCALAR_FACTORS
             = new CollectScalarFactorsTransformation();
     private final TraverseGuide traverseGuide;
@@ -42,6 +49,11 @@ public class CollectScalarFactorsTransformation implements Transformation {
         this.traverseGuide = TraverseGuide.ALL;
     }
 
+    /**
+     * Creates transformation for particular parts of expressions, specified by traverse guide.
+     *
+     * @param traverseGuide specifies parts of expression to apply the transformation
+     */
     public CollectScalarFactorsTransformation(TraverseGuide traverseGuide) {
         this.traverseGuide = traverseGuide;
     }
@@ -51,10 +63,25 @@ public class CollectScalarFactorsTransformation implements Transformation {
         return collectScalarFactors(t, traverseGuide);
     }
 
+    /**
+     * Puts together similar scalar subproducts in each product. For example, tensor A_m*A^m*A_n*A^n
+     * will be transformed to tensor (A_m*A^m)**2.
+     *
+     * @param tensor tensor
+     * @return the result
+     */
     public static Tensor collectScalarFactors(Tensor tensor) {
         return collectScalarFactors(tensor, TraverseGuide.ALL);
     }
 
+    /**
+     * Puts together similar scalar subproducts in each product of expression, which can
+     * be traversed with specified traverse guide.
+     *
+     * @param tensor        tensor
+     * @param traverseGuide specifies parts of expression to apply the transformation
+     * @return the result
+     */
     public static Tensor collectScalarFactors(Tensor tensor, TraverseGuide traverseGuide) {
         FromChildToParentIterator iterator = new FromChildToParentIterator(tensor, traverseGuide);
         Tensor current;
@@ -65,6 +92,13 @@ public class CollectScalarFactorsTransformation implements Transformation {
         return iterator.result();
     }
 
+    /**
+     * Puts together similar scalar subproducts in a given product. For example, tensor A_m*A^m*A_n*A^n
+     * will be transformed to tensor (A_m*A^m)**2.
+     *
+     * @param product product
+     * @return the result
+     */
     public static Tensor collectScalarFactorsInProduct(Product product) {
         if (TensorUtils.isSymbolic(product))
             return product;

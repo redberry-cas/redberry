@@ -413,7 +413,7 @@ public class ProductTest {
         Tensor t;
         int index = indexOf(parse("f^{v}_{t}+x_{t}^{v}"), tensor);
         t = tensor.set(index, parse("g^vm*d_t^n"));
-        TAssert.assertEquals(EliminateMetricsTransformation.contract(t), "f^{na}*f^{mb}");
+        TAssert.assertEquals(EliminateMetricsTransformation.eliminate(t), "f^{na}*f^{mb}");
     }
 
     private static int indexOf(Tensor t, Tensor product) {

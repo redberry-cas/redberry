@@ -29,7 +29,7 @@
  * are strictly follows a common pattern of output port, which is specified in
  * {@link cc.redberry.core.combinatorics.IntCombinatorialPort}. The calculation of the next combination occurs
  * strictly on the invocation of method {@link cc.redberry.core.combinatorics.IntCombinatorialPort#take()} and the
- * returned array is always the same reference. Some of these classes are also implements {@link java.util.Iterator} and {@link Iterable} interfaces for convenience.
+ * returned array is always the same reference. Some of these classes are also implements {@link java.util.Iterator} and {@link java.util.Iterable} interfaces for convenience.
  * <table>
  *     <tr>
  *         <td><b>List of enumeration algorithms:</b></td>

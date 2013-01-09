@@ -36,6 +36,7 @@ import java.util.Iterator;
  * @see cc.redberry.core.indices.Indices
  * @see cc.redberry.core.context.OutputFormat
  * @see cc.redberry.core.context.Context
+ * @since 1.0
  */
 public abstract class Tensor
         implements Comparable<Tensor>,

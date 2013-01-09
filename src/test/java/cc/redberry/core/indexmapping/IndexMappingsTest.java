@@ -458,7 +458,7 @@ public class IndexMappingsTest {
 
 
 //        Tensor t = Tensors.sum(Expand.expand(from), negate(Expand.expand(to)));
-//        t = ContractIndices.contract(t);
+//        t = ContractIndices.eliminate(t);
 //        System.out.println(t);
 
 

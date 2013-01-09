@@ -36,6 +36,7 @@ import cc.redberry.core.utils.TensorUtils;
  * @author Stanislav Poslavsky
  * @see ExpressionBuilder
  * @see ExpressionFactory
+ * @since 1.0
  */
 public class Expression extends Tensor implements Transformation {
 

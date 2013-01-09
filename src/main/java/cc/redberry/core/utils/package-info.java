@@ -20,23 +20,12 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
-package cc.redberry.core.tensorgenerator;
-
-import org.junit.Test;
 
 /**
+ * Redberry utils.
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @since 1.0
  */
-public class ScalarTensorGeneratorTest {
-    public ScalarTensorGeneratorTest() {
-    }
-
-    @Test
-    public void testSomeMethod() {
-        SymbolsGenerator generator = new SymbolsGenerator("c");
-        for (int i = 0; i < 10; ++i)
-            System.out.println(generator.take());
-    }
-}
+package cc.redberry.core.utils;

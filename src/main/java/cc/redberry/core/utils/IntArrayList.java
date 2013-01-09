@@ -118,7 +118,6 @@ public final class IntArrayList {
      * Alias for addAll(int) method.
      *
      * @param value
-     * @return
      */
     public void push(int value) {
         add(value);
@@ -127,7 +126,7 @@ public final class IntArrayList {
     /**
      * Return last element leaving it in stack.
      *
-     * @return
+     * @return last element leaving it in stack
      */
     public int peek() {
         return data[size - 1];
@@ -137,7 +136,7 @@ public final class IntArrayList {
      * Removes the object at the top of this stack and returns that object as
      * the value of this function.
      *
-     * @return
+     * @return pop
      */
     public int pop() {
         return data[--size];

@@ -27,8 +27,8 @@ import cc.redberry.core.combinatorics.Combinatorics;
 import cc.redberry.core.combinatorics.IntCombinatorialGenerator;
 import cc.redberry.core.combinatorics.IntDistinctTuplesPort;
 import cc.redberry.core.graph.GraphUtils;
-import cc.redberry.core.tensor.StructureOfContractions;
 import cc.redberry.core.tensor.ProductContent;
+import cc.redberry.core.tensor.StructureOfContractions;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.utils.ArraysUtils;
 import cc.redberry.core.utils.IntArrayList;
@@ -40,8 +40,11 @@ import java.util.Arrays;
 import static cc.redberry.core.tensor.StructureOfContractions.*;
 
 /**
+ * Implementation of subgraph isomorphism problem.
+ *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @since 1.0
  */
 public final class ProductsBijectionsPort implements OutputPortUnsafe<int[]> {
     //private ProductContent targetContent;
@@ -126,7 +129,7 @@ public final class ProductsBijectionsPort implements OutputPortUnsafe<int[]> {
         boolean closed = false;
         final int[] bijection;
         final int[] seeds;
-//        final List<PermutationInfo>[] permutationInfos;
+        //        final List<PermutationInfo>[] permutationInfos;
         PermutationInfo lastInfo = null, firstInfo = null;
         IntArrayList addedBijections;
         InnerPort innerPort = null;
@@ -283,7 +286,7 @@ public final class ProductsBijectionsPort implements OutputPortUnsafe<int[]> {
                             return;
                         }
 
-                       final int targetTensorIndex = getToTensorIndex(targetIndexContraction); //Index of contracting tensor in target array
+                        final int targetTensorIndex = getToTensorIndex(targetIndexContraction); //Index of contracting tensor in target array
                         if (targetTensorIndex == -1) {//Not contracted index of target (but from is contracted with some tensor),
                             // so this bijection is impossible
                             closed = true;
@@ -327,8 +330,8 @@ public final class ProductsBijectionsPort implements OutputPortUnsafe<int[]> {
                         }
 
                         previousInfo = new PermutationInfo(previousInfo,
-                                                           fromContractions_,
-                                                           targetContractions_);
+                                fromContractions_,
+                                targetContractions_);
                         if (firstInfo == null)
                             firstInfo = previousInfo;
                     }

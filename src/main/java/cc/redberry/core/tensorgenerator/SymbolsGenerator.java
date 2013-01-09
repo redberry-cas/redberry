@@ -37,6 +37,7 @@ import java.util.Set;
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @since 1.0
  */
 public final class SymbolsGenerator implements OutputPortUnsafe<Tensor> {
 

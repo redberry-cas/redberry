@@ -36,13 +36,21 @@ import cc.redberry.core.utils.TensorUtils;
 import gnu.trove.map.hash.TIntObjectHashMap;
 
 import java.math.BigInteger;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
+ * Factors a symbolic parts (without any indices) of tensor over the integers. The
+ * implementation is based on Heinz Kredel Java Algebra System (http://krum.rz.uni-mannheim.de/jas/).
+ *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @since 1.1
  */
 public class FactorTransformation implements Transformation {
+    /**
+     * Singleton instance.
+     */
     public static final FactorTransformation FACTOR = new FactorTransformation();
 
     private FactorTransformation() {
@@ -50,10 +58,10 @@ public class FactorTransformation implements Transformation {
 
     @Override
     public Tensor transform(Tensor t) {
-        return factor(t);
+        return factorSymbolicTerms(t);
     }
 
-    public static Tensor factorSymbolicTerms(Tensor tensor) {
+    private static Tensor factorSymbolicTerms(Tensor tensor) {
         FromParentToChildIterator iterator = new FromParentToChildIterator(tensor);
         Tensor c;
         while ((c = iterator.next()) != null) {
@@ -153,6 +161,13 @@ public class FactorTransformation implements Transformation {
         return true;
     }
 
+    /**
+     * Factors a symbolic parts (without any indices) of tensor over the integers. The
+     * implementation is based on Heinz Kredel Java Algebra System (http://krum.rz.uni-mannheim.de/jas/).
+     *
+     * @param tensor tensor
+     * @return result
+     */
     public static Tensor factor(Tensor tensor) {
         return factorSymbolicTerms(tensor);
 //        TensorFirstIterator iterator = new TensorFirstIterator(tensor);

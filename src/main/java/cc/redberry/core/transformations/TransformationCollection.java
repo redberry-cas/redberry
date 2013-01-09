@@ -30,17 +30,29 @@ import java.util.Collections;
 import java.util.List;
 
 /**
+ * Collection of transformation. The transformations in this collection will be applied sequentially.
+ *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
 public final class TransformationCollection implements Transformation {
     private final Transformation[] transformations;
 
+    /**
+     * Constructs transformation from a given collection of transformations.
+     *
+     * @param transformations collection of transformations
+     */
     public TransformationCollection(Collection<Transformation> transformations) {
         //todo if collection in collection
         this.transformations = transformations.toArray(new Transformation[transformations.size()]);
     }
 
+    /**
+     * Constructs transformation from a given array of transformations.
+     *
+     * @param transformations array of transformations
+     */
     public TransformationCollection(Transformation... transformations) {
         this.transformations = transformations.clone();
     }
@@ -52,6 +64,11 @@ public final class TransformationCollection implements Transformation {
         return t;
     }
 
+    /**
+     * Returns a list of transformations.
+     *
+     * @return a list of transformations
+     */
     public List<Transformation> getTransformations() {
         return Collections.unmodifiableList(Arrays.asList(transformations));
     }

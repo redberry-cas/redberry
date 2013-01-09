@@ -25,10 +25,15 @@ package cc.redberry.core.transformations;
 import cc.redberry.core.tensor.Tensor;
 
 /**
+ * Transformation of tensor.
+ *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
 public interface Transformation {
+    /**
+     * Singleton instance for identity transformation.
+     */
     public static final Transformation INDENTITY = new Transformation() {
         @Override
         public Tensor transform(Tensor t) {
@@ -36,5 +41,11 @@ public interface Transformation {
         }
     };
 
+    /**
+     * Transforms specified tensor and returns the result.
+     *
+     * @param t tensor
+     * @return transformed tensor
+     */
     Tensor transform(Tensor t);
 }

@@ -37,7 +37,7 @@ import org.junit.Test;
 
 import static cc.redberry.core.tensor.Tensors.*;
 import static cc.redberry.core.transformations.EliminateMetricsTransformation.ELIMINATE_METRICS;
-import static cc.redberry.core.transformations.EliminateMetricsTransformation.contract;
+import static cc.redberry.core.transformations.EliminateMetricsTransformation.eliminate;
 import static cc.redberry.core.transformations.DifferentiateTransformation.differentiate;
 import static cc.redberry.core.transformations.expand.ExpandTransformation.expand;
 
@@ -63,11 +63,11 @@ public class DifferentiateTransformationTest {
         Tensor t = parse("Sin[f^mn*(x_mn+x_nm)]");
         SimpleTensor var = parseSimple("x_ij");
         t = differentiate(t, var);
-        t = contract(expand(t));
+        t = eliminate(expand(t));
         TAssert.assertEquals(t, "Cos[f^mn*(x_mn+x_nm)]*f^ij+Cos[f^mn*(x_mn+x_nm)]*f^ji");
         var = parseSimple("f_i^i");
         t = differentiate(t, var);
-        t = contract(expand(t));
+        t = eliminate(expand(t));
         TAssert.assertEquals(t, "-2*Sin[(x_{nm}+x_{mn})*f^{mn}]*x^{m}_{m}*f^{ji}-2*Sin[(x_{nm}+x_{mn})*f^{mn}]*x^{m}_{m}*f^{ij}+2*Cos[(x_{nm}+x_{mn})*f^{mn}]*g^{ij}");
     }
 
@@ -77,9 +77,9 @@ public class DifferentiateTransformationTest {
         SimpleTensor var1 = parseSimple("f_a^a");
         SimpleTensor var2 = parseSimple("f_mn");
         Tensor u = differentiate(t, var1, var2);
-        u = contract(expand(u));
+        u = eliminate(expand(u));
         Tensor v = differentiate(t, var2, var1);
-        v = contract(expand(v));
+        v = eliminate(expand(v));
         TAssert.assertEquals(u, v);
         TAssert.assertEquals(u, "g^{nb}*x^{am}+g^{na}*x^{mb}+f^{bm}*g^{na}+f^{na}*g^{mb}+2*f^{mb}*g^{na}+2*f^{ma}*g^{nb}");
     }
@@ -97,8 +97,8 @@ public class DifferentiateTransformationTest {
             TAssert.assertEquals(v, "g^an*(x^mv+f^vm)*f_v^b+f^na*f^mb+f^ta*(x_t^m+f^m_t)*g^bn");
             u = differentiate(u, var2);
             v = differentiate(v, var1);
-            u = contract(expand(u));
-            v = contract(expand(v));
+            u = eliminate(expand(u));
+            v = eliminate(expand(v));
             TAssert.assertEquals(u, v);
             TAssert.assertEquals(u, "g^{nb}*x^{am}+g^{na}*x^{mb}+f^{bm}*g^{na}+f^{na}*g^{mb}+2*f^{mb}*g^{na}+2*f^{ma}*g^{nb}");
         }
@@ -111,9 +111,9 @@ public class DifferentiateTransformationTest {
         SimpleTensor var1 = parseSimple("f_a^a");
         SimpleTensor var2 = parseSimple("f_mn");
         Tensor u = differentiate(t, var1, var2);
-        u = contract(expand(u));
+        u = eliminate(expand(u));
         Tensor v = differentiate(t, var2, var1);
-        v = contract(expand(v));
+        v = eliminate(expand(v));
         TAssert.assertEquals(u, v);
         TAssert.assertEquals(u, "(1/2)*g^{bm}*x^{an}+(1/2)*g^{am}*x^{nb}+(1/2)*g^{bn}*x^{am}+(1/2)*g^{an}*x^{mb}+(3/2)*f^{na}*g^{bm}+(3/2)*f^{nb}*g^{am}+(3/2)*f^{mb}*g^{an}+(3/2)*f^{ma}*g^{bn}\n");
     }
@@ -137,10 +137,10 @@ public class DifferentiateTransformationTest {
         R2 = parseExpression("R^\\mu_\\alpha\\mu\\beta = R_\\alpha\\beta");
         Expression d = parseExpression("d_\\mu^\\mu = 4");
         Tensor u = differentiate(t, var1, var2);
-        u = contract(expand(u));
+        u = eliminate(expand(u));
         u = d.transform(R1.transform(R2.transform(u)));
         Tensor v = differentiate(t, var2, var1);
-        v = contract(expand(v));
+        v = eliminate(expand(v));
         v = d.transform(R1.transform(R2.transform(v)));
         TAssert.assertEquals(u, v);
     }
@@ -172,10 +172,10 @@ public class DifferentiateTransformationTest {
             R2 = parseExpression("R^m_amb = R_ab");
             Expression d = parseExpression("d_m^m = 4");
             Tensor u = differentiate(t, var1, var2);
-            u = contract(expand(u));
+            u = eliminate(expand(u));
             u = d.transform(R1.transform(R2.transform(u)));
             Tensor v = differentiate(t, var2, var1);
-            v = contract(expand(v));
+            v = eliminate(expand(v));
             v = d.transform(R1.transform(R2.transform(v)));
             u = EliminateFromSymmetriesTransformation.ELIMINATE_FROM_SYMMETRIES.transform(u);
             v = EliminateFromSymmetriesTransformation.ELIMINATE_FROM_SYMMETRIES.transform(v);
@@ -211,10 +211,10 @@ public class DifferentiateTransformationTest {
             Expression d = parseExpression("d_m^m = 4");
             Tensor v = differentiate(t, var2);
             v = differentiate(v, var1);
-            v = contract(expand(v));
+            v = eliminate(expand(v));
             v = d.transform(R1.transform(R2.transform(v)));
             Tensor u = differentiate(t, var1, var2);
-            u = contract(expand(u));
+            u = eliminate(expand(u));
             u = d.transform(R1.transform(R2.transform(u)));
             u = EliminateFromSymmetriesTransformation.ELIMINATE_FROM_SYMMETRIES.transform(u);
             v = EliminateFromSymmetriesTransformation.ELIMINATE_FROM_SYMMETRIES.transform(v);
@@ -277,7 +277,7 @@ public class DifferentiateTransformationTest {
         Expression s = parseExpression("f_m*f^m = m**2");
         t = s.transform(t);
         t = parseExpression("a_j = 0").transform(t);
-        t = ELIMINATE_METRICS.contract(t);
+        t = ELIMINATE_METRICS.eliminate(t);
         t = s.transform(t);
         t = parseExpression("d_m^m = 4").transform(t);
         t = TogetherTransformation.together(t);
@@ -296,7 +296,7 @@ public class DifferentiateTransformationTest {
 //        tensor = differentiate(tensor, true, var2);
         tensor = parseExpression("R_mnab = 1/3*(g_mb*g_na - g_ma*g_nb)*la").transform(tensor);
         tensor = ExpandAllTransformation.expandAll(tensor);
-        tensor = contract(tensor);
+        tensor = eliminate(tensor);
         tensor = parseExpression("d_m^m = 4").transform(tensor);
         tensor = expand(tensor);
         System.out.println(tensor);
@@ -329,13 +329,13 @@ public class DifferentiateTransformationTest {
                 EliminateFromSymmetriesTransformation.ELIMINATE_FROM_SYMMETRIES
         };
         Tensor t1 = differentiate(tensor, var2, var1);
-        t1 = contract(expand(t1));
+        t1 = eliminate(expand(t1));
         for (Transformation tr : trs)
             t1 = tr.transform(t1);
         Tensor t2 = differentiate(tensor,
                 new Transformation[]{ExpandTransformation.EXPAND, ELIMINATE_METRICS},
                 var2, var1);
-        t2 = contract(expand(t2));
+        t2 = eliminate(expand(t2));
         for (Transformation tr : trs)
             t2 = tr.transform(t2);
 

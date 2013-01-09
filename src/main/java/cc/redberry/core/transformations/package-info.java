@@ -20,29 +20,12 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
-package cc.redberry.core.transformations.fractions;
-
-import cc.redberry.core.tensor.Tensor;
-import cc.redberry.core.transformations.Transformation;
 
 /**
- * Gives the denominator of expression.
+ * Collection of mathematical transformations.
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  * @since 1.0
  */
-public class GetDenominatorTransformation implements Transformation {
-    /**
-     * Singleton instance.
-     */
-    public static final GetDenominatorTransformation GET_DENOMINATOR = new GetDenominatorTransformation();
-
-    private GetDenominatorTransformation() {
-    }
-
-    @Override
-    public Tensor transform(Tensor t) {
-        return NumeratorDenominator.getNumeratorAndDenominator(t).denominator;
-    }
-}
+package cc.redberry.core.transformations;

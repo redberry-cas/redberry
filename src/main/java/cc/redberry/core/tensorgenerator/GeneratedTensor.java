@@ -29,6 +29,7 @@ import cc.redberry.core.tensor.Tensor;
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @since 1.0
  */
 public final class GeneratedTensor {
     public final SimpleTensor[] coefficients;

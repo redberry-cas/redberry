@@ -301,7 +301,7 @@ public class TensorsTest {
         //here minus is due to complex conjugation
         Tensor M2 = Tensors.parse("M2 = -(1/2)*M_ij*M^ij");
         M2 = ((Expression) M).transform(M2);
-        //expand squared matrix element and contract indices
+        //expand squared matrix element and eliminate indices
         M2 = ExpandAllTransformation.expandAll(M2, EliminateMetricsTransformation.ELIMINATE_METRICS);
         M2 = Tensors.parseExpression("d_i^i = 4").transform(M2);
 
@@ -370,9 +370,9 @@ public class TensorsTest {
         Tensor a = sb1.build(), b = sb2.build();
 
         a = ExpandTransformation.expand(a, EliminateMetricsTransformation.ELIMINATE_METRICS);
-        a = EliminateMetricsTransformation.contract(a);
+        a = EliminateMetricsTransformation.eliminate(a);
 
-        b = EliminateMetricsTransformation.contract(b);
+        b = EliminateMetricsTransformation.eliminate(b);
 
         a = EliminateFromSymmetriesTransformation.ELIMINATE_FROM_SYMMETRIES.transform(a);
         b = EliminateFromSymmetriesTransformation.ELIMINATE_FROM_SYMMETRIES.transform(b);

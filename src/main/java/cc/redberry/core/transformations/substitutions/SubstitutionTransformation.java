@@ -27,8 +27,11 @@ import cc.redberry.core.transformations.Transformation;
 import cc.redberry.core.utils.TensorUtils;
 
 /**
+ * Substitution.
+ *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @since 1.0
  */
 public final class SubstitutionTransformation implements Transformation {
     private final PrimitiveSubstitution[] primitiveSubstitutions;

@@ -696,9 +696,9 @@ public final class Complex extends Tensor
     }
 
     /**
-     * Returns na
+     * Returns natural logarithm of this
      *
-     * @return
+     * @return natural logarithm of this
      */
     public Complex logNumeric() {
         if (isNaN()) {

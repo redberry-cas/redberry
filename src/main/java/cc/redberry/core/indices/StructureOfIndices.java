@@ -172,7 +172,6 @@ public final class StructureOfIndices {
      * Returns the structure of specified simple indices.
      *
      * @param indices simple indices
-     * @return structure of specified indices
      */
     public StructureOfIndices(SimpleIndices indices) {
         size = indices.size();

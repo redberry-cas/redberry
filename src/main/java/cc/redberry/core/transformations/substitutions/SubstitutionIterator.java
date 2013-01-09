@@ -38,6 +38,7 @@ import java.util.Arrays;
 /**
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @since 1.0
  */
 public final class SubstitutionIterator implements TreeIterator {
     private static final TIntSet EMPTY_INT_SET = TCollections.unmodifiableSet(new TIntHashSet(0));

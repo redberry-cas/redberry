@@ -20,29 +20,21 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
-package cc.redberry.core.transformations.fractions;
-
-import cc.redberry.core.tensor.Tensor;
-import cc.redberry.core.transformations.Transformation;
 
 /**
- * Gives the denominator of expression.
- *
+ * Facilities for generating tensor of the most general
+ * form with specified free indices from specified tensors.
+ * <br>Consider the example:</br>
+ * <pre><code>
+ *     Tensor[] samples = Tensors.parse("g_mn", "g^mn", "d_m^n");
+ *     Tensor t = TensorGenerator.generate("c", ParserIndices.parseSimple("_{mnab}"), false, samples);
+ *     System.out.println(t);
+ * </code></pre>
+ * This code produces
+ * <pre><code>
+ *  c1*g_mn*g_ab + c2*g_ma*g_nb + c3*g_mb*gna
+ * </code></pre>
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
- * @since 1.0
  */
-public class GetDenominatorTransformation implements Transformation {
-    /**
-     * Singleton instance.
-     */
-    public static final GetDenominatorTransformation GET_DENOMINATOR = new GetDenominatorTransformation();
-
-    private GetDenominatorTransformation() {
-    }
-
-    @Override
-    public Tensor transform(Tensor t) {
-        return NumeratorDenominator.getNumeratorAndDenominator(t).denominator;
-    }
-}
+package cc.redberry.core.tensorgenerator;

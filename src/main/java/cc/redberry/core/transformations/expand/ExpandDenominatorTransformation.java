@@ -29,16 +29,22 @@ import cc.redberry.core.tensor.Tensors;
 import cc.redberry.core.tensor.functions.ScalarFunction;
 import cc.redberry.core.tensor.iterator.TraverseGuide;
 import cc.redberry.core.tensor.iterator.TraversePermission;
-import cc.redberry.core.transformations.fractions.NumeratorDenominator;
 import cc.redberry.core.transformations.Transformation;
+import cc.redberry.core.transformations.fractions.NumeratorDenominator;
 
 import static cc.redberry.core.utils.TensorUtils.isPositiveIntegerPower;
 
 /**
+ * Expands out products and powers that appear as denominators in expressions.
+ *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @since 1.0
  */
 public final class ExpandDenominatorTransformation extends AbstractExpandTransformation {
+    /**
+     * Default traverse guide.
+     */
     public static TraverseGuide ExpandDenominatorTraverseGuide = new TraverseGuide() {
         @Override
         public TraversePermission getPermission(Tensor tensor, Tensor parent, int indexInParent) {
@@ -51,24 +57,54 @@ public final class ExpandDenominatorTransformation extends AbstractExpandTransfo
             return TraversePermission.Enter;
         }
     };
+    /**
+     * The default instance.
+     */
     public static final ExpandDenominatorTransformation EXPAND_DENOMINATOR = new ExpandDenominatorTransformation();
 
     private ExpandDenominatorTransformation() {
         super(new Transformation[0], ExpandDenominatorTraverseGuide);
     }
 
+    /**
+     * Creates expand transformation with specified additional transformations to
+     * be applied after each step of expand.
+     *
+     * @param transformations transformations to be applied after each step of expand
+     */
     public ExpandDenominatorTransformation(Transformation[] transformations) {
         super(transformations, ExpandDenominatorTraverseGuide);
     }
 
+    /**
+     * Creates expand transformation with specified additional transformations to
+     * be applied after each step of expand and leaves unexpanded parts of expression specified by
+     * {@code traverseGuide}.
+     *
+     * @param transformations transformations to be applied after each step of expand
+     * @param traverseGuide   traverse guide
+     */
     public ExpandDenominatorTransformation(Transformation[] transformations, TraverseGuide traverseGuide) {
         super(transformations, traverseGuide);
     }
 
+    /**
+     * Expands out products and powers that appear as denominators of tensor.
+     *
+     * @param tensor tensor to be transformed
+     * @return result
+     */
     public static Tensor expandDenominator(Tensor tensor) {
         return EXPAND_DENOMINATOR.transform(tensor);
     }
 
+    /**
+     * Expands out products and powers that appear as denominators of tensor and applies specified transformations
+     * after each step of expand.
+     *
+     * @param tensor tensor to be transformed
+     * @return result
+     */
     public static Tensor expandDenominator(Tensor tensor, Transformation... transformations) {
         return new ExpandDenominatorTransformation(transformations).transform(tensor);
     }

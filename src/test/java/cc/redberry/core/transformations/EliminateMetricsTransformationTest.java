@@ -400,7 +400,7 @@ public class EliminateMetricsTransformationTest {
 //    @Test
 //    public void testDerivative1() {
 //        Tensor t = parse("g_mn*D[F_ab,x_mp]*d^a_p*g^bq");
-//        t = contract(t);
+//        t = eliminate(t);
 //        Tensor expected = parse("D[F^aq,x^na]");
 //        assertTrue(TensorUtils.equals(t, expected));
 //    }
@@ -515,7 +515,7 @@ public class EliminateMetricsTransformationTest {
 //        rimanClone = Transformations.renameConflictingIndices(rimanClone);
 //        assertTrue(TensorUtils.testIndicesConsistent(rimanClone));
 //
-//        contract(rimanClone);
+//        eliminate(rimanClone);
 //        assertTrue(TensorUtils.testIndicesConsistent(rimanClone));
 //
 //        Tensor differentiate = Differentiate.create(riman,
@@ -525,7 +525,7 @@ public class EliminateMetricsTransformationTest {
 //        differentiate = Transformations.renameConflictingIndices(differentiate);
 //        differentiate = GetDerivative1.ContractIndices.transform(differentiate);
 //        assertTrue(TensorUtils.testIndicesConsistent(differentiate));
-//        differentiate = contract(differentiate);
+//        differentiate = eliminate(differentiate);
 //        assertTrue(TensorUtils.testIndicesConsistent(differentiate));
 //    }
 

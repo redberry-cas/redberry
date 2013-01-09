@@ -42,6 +42,7 @@ import static cc.redberry.core.transformations.CollectScalarFactorsTransformatio
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @since 1.0
  */
 //TODO review after logical completion of tensors standard form strategy 
 public final class TogetherTransformation implements Transformation {
@@ -60,10 +61,24 @@ public final class TogetherTransformation implements Transformation {
         return together(t, doFactor);
     }
 
+    /**
+     * Puts terms in a sum over a common denominator.
+     *
+     * @param t tensor
+     * @return result
+     */
     public static Tensor together(Tensor t) {
         return together(t, false);
     }
 
+    /**
+     * Puts terms in a sum over a common denominator and cancels factors in the result if specified.
+     *
+     * @param t        tensor
+     * @param doFactor specifies whether to cancel factors in the result
+     * @return result
+     */
+    //todo make two separate methods
     public static Tensor together(Tensor t, boolean doFactor) {
         FromChildToParentIterator iterator = new FromChildToParentIterator(t);
         Tensor c;

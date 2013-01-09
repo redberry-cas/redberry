@@ -38,6 +38,7 @@ import static cc.redberry.core.transformations.ToNumericTransformation.toNumeric
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @since 1.0
  */
 public final class ProductBuilder implements TensorBuilder {
 

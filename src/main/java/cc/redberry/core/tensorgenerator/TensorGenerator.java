@@ -36,9 +36,11 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
+ * Generates tensor of the most general form with specified free indices from specified tensors.
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @since 1.0
  */
 public class TensorGenerator {
 
@@ -125,10 +127,29 @@ public class TensorGenerator {
         return result.build();
     }
 
+    /**
+     * Generates tensor of the most general form with specified free indices from specified tensors.
+     *
+     * @param coefficientName basic coefficients names
+     * @param indices         free indices of the resulting tensor
+     * @param symmetricForm   specifies whether the resulting tensor should be symmetric
+     * @param samples         samples which used to  generate tensor of the general form
+     * @return tensor of the most general form with specified free indices from specified tensors
+     */
     public static Tensor generate(String coefficientName, Indices indices, boolean symmetricForm, Tensor... samples) {
         return new TensorGenerator(coefficientName, indices, symmetricForm, samples).result();
     }
 
+    /**
+     * Generates tensor of the most general form with specified free indices from specified tensors.
+     *
+     * @param coefficientName basic coefficients names
+     * @param indices         free indices of the resulting tensor
+     * @param symmetricForm   specifies whether the resulting tensor should be symmetric
+     * @param samples         samples which used to  generate tensor of the general form
+     * @return tensor of the most general form with specified free indices from specified tensors and list of
+     *         generated coefficients
+     */
     public static GeneratedTensor generateStructure(String coefficientName, Indices indices, boolean symmetricForm, Tensor... samples) {
         TensorGenerator generator = new TensorGenerator(coefficientName, indices, symmetricForm, samples);
         SimpleTensor[] generatedCoefficients;
@@ -139,7 +160,7 @@ public class TensorGenerator {
             generatedCoefficients = coefficientsGenerator.generated.toArray(new SimpleTensor[coefficientsGenerator.generated.size()]);
         }
         return new GeneratedTensor(generatedCoefficients,
-                                   generator.result());
+                generator.result());
     }
 
     private static final class OnePort implements OutputPortUnsafe<Tensor> {

@@ -29,6 +29,7 @@ import java.util.Arrays;
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @since 1.0
  */
 public final class StructureOfContractionsHashed {
     /**

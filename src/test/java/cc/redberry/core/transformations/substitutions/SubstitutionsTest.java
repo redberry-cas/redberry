@@ -870,7 +870,7 @@ public class SubstitutionsTest {
     public void testProduct5() {
         Tensor target = parse("k^a*k^b*p^c*p^d*e_a^\\alpha*e_{b \\alpha}*e_c^\\beta*e_{d \\beta}");
         target = parseExpression("e_a^\\alpha*e_{b \\alpha} = -g_ab").transform(target);
-        target = EliminateMetricsTransformation.contract(target);
+        target = EliminateMetricsTransformation.eliminate(target);
         TAssert.assertEquals(target, "k^a*k_a*p^b*p_b");
     }
 
@@ -953,7 +953,7 @@ public class SubstitutionsTest {
         Expression s = parseExpression("f_m*f^m = m**2");
         t = s.transform(t);
         t = parseExpression("a_j = 0").transform(t);
-        t = EliminateMetricsTransformation.contract(t);
+        t = EliminateMetricsTransformation.eliminate(t);
         t = s.transform(t);
         t = parseExpression("d_m^m = 4").transform(t);
         t = expand(t);
