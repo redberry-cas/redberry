@@ -29,27 +29,33 @@ import java.util.Arrays;
 import java.util.Deque;
 
 /**
- *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
 public class GraphUtils {
     /**
-     * Calculate connected components for the graph described by edges list.
-     * Each edge defined by corresponding elements in _from and _to
-     * arrays.<br/><br/> All vertex indices must belongs to [0 : vertexes-1]
-     * range, instead IllegalArgumentException will be thrown. The last element
-     * in resulting the resulting array is connected components count.
+     * Calculates connected components of graph from its list of edges.
+     * The list of edges is represented by array {@code _from}, which contains 'from' vertices,
+     * and array {@code _to}, which contains vertices connected with corresponding 'from'.
+     * Vertices are numbered from zero to {@code vertexes - 1}, where
+     * {@code vertexes} is the total number of vertices of graph. All elements
+     * in arrays {@code _from} and {@code _to} should be less then the total
+     * number of vertices.
+     * <p/>
+     * <br>The resulting array have length equal to the total number of vertices plus one. Two vertices A and B
+     * belongs to the same connected component if the resulting array have equal numbers at positions
+     * A and B. The last element in the resulting array is the total number of connected components.
+     * </br>
      *
-     * @param _from array of edges begins (vertex indices)
-     * @param _to array of edges ends (vertex indices)
-     * @param vertexes number of vertexes in the graph
-     * @return the last element in resulting array is connected components count
-     * @throws IllegalArgumentException
+     * @param _from    array of 'from' vertices
+     * @param _to      array of 'to' vertices
+     * @param vertices total number of vertices in graph
+     * @return array of connected components and the total number of connected components at the last position
+     * @throws IllegalArgumentException if {@code _from.length() != _to.length}
+     * @throws IllegalArgumentException if any element of {@code _from} or {@code _to} equal or
+     *                                  greater then {@code vertices}
      */
-    //FIXME bad documentation
-    public static int[] calculateConnectedComponents(final int[] _from, final int[] _to, final int vertexes) {
-        int i;
+    public static int[] calculateConnectedComponents(final int[] _from, final int[] _to, final int vertices) {
 
         //Test for parameters consistence
         if (_from.length != _to.length)
@@ -57,8 +63,8 @@ public class GraphUtils {
 
         //No edges case
         if (_from.length == 0) {
-            int[] result = new int[vertexes + 1];
-            for (i = 0; i < vertexes + 1; ++i)
+            int[] result = new int[vertices + 1];
+            for (int i = 0; i < vertices + 1; ++i)
                 result[i] = i;
             return result;
         }
@@ -75,19 +81,19 @@ public class GraphUtils {
         ArraysUtils.quickSort(from, to);
 
         //Test for parameters consistence
-        if (from[0] < 0 || from[from.length - 1] > vertexes)
+        if (from[0] < 0 || from[from.length - 1] > vertices)
             throw new IllegalArgumentException();
 
         //Creating index for fast search in from array
-        int[] fromIndex = new int[vertexes];
+        int[] fromIndex = new int[vertices];
         Arrays.fill(fromIndex, -1); //-1 in fromIndex means absence of edges for certain vertex
         int lastVertex = -1;
-        for (i = 0; i < from.length; ++i)
+        for (int i = 0; i < from.length; ++i)
             if (lastVertex != from[i])
                 fromIndex[lastVertex = from[i]] = i;
 
         //Allocation resulting array
-        final int[] components = new int[vertexes + 1];
+        final int[] components = new int[vertices + 1];
         Arrays.fill(components, -1); //There will be no -1 at the end
 
         int currentComponent = -1;
@@ -96,7 +102,7 @@ public class GraphUtils {
         do {
             ++currentComponent;
             components[m1] = currentComponent;
-            
+
             if (fromIndex[m1] == -1)
                 //There is no edges for curreent vertex,
                 //so it is connected component by it self
@@ -109,7 +115,7 @@ public class GraphUtils {
             //Main algorithm (simple depth-first search)
             while (!stack.isEmpty()) {
                 BreadthFirstPointer pointer = stack.peek();
-                
+
                 if (pointer.edgePointer >= from.length || from[pointer.edgePointer++] != pointer.vertex) {
                     //There are no more edges from this vertex => delete it from stack and continue
                     stack.pop();
@@ -118,24 +124,24 @@ public class GraphUtils {
 
                 // -1 because pointer.edgePointer++ was invoked
                 int pointsTo = to[pointer.edgePointer - 1];
-                
+
                 if (components[pointsTo] == currentComponent)
                     //We've been here earlier, continue
                     continue;
-                
+
                 assert components[pointsTo] == -1;
 
                 //Marking current vertex by current connected component index
                 components[pointsTo] = currentComponent;
-                
+
                 if (fromIndex[pointsTo] != -1)
                     //No edges from this vertex
                     stack.push(new BreadthFirstPointer(pointsTo, fromIndex[pointsTo]));
             }
-        } while ((m1 = firstM1(components)) != vertexes);
+        } while ((m1 = firstM1(components)) != vertices);
 
         //writing components count
-        components[vertexes] = currentComponent + 1;
+        components[vertices] = currentComponent + 1;
         return components;
     }
 
@@ -148,22 +154,28 @@ public class GraphUtils {
                 return i;
         return -1;
     }
-    
+
     private static final class BreadthFirstPointer {
         final int vertex;
         int edgePointer;
-        
+
         public BreadthFirstPointer(int node, int edgePointer) {
             this.vertex = node;
             this.edgePointer = edgePointer;
         }
     }
 
-    //TODO comment
-    public static int componentSize(final int vertexPosition, final int[] components) {
-        if (vertexPosition > components.length - 1)
+    /**
+     * Returns the number of vertices belonging to the same connected component as specified {@code vertex}.
+     *
+     * @param vertex     vertex of the graph
+     * @param components the array, produced by {@link #calculateConnectedComponents(int[], int[], int)}
+     * @return number of vertices belonging to the same connected component as specified {@code vertex}
+     */
+    public static int componentSize(final int vertex, final int[] components) {
+        if (vertex > components.length - 1)
             throw new IndexOutOfBoundsException();
-        int componentCount = components[vertexPosition];
+        int componentCount = components[vertex];
         int count = 0;
         for (int i = 0; i < components.length; ++i)
             if (components[i] == componentCount)

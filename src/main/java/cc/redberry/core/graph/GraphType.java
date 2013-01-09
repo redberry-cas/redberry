@@ -23,9 +23,24 @@
 package cc.redberry.core.graph;
 
 /**
+ * Type of graph.
+ *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
 public enum GraphType {
-    Cycle, Line, Graph
+    /**
+     * The graph of form A^{i<sub>1</sub>}_{i<sub>2</sub>}*B^{i<sub>2</sub>}_{i<sub>3</sub>}*...*C^{i<sub>N</sub>}_{i<sub>1</sub>},
+     * where {i<sub>j</sub>} denotes the whole set of tensor indices. Tensor of such type have no free indices.
+     */
+    Cycle,
+    /**
+     * The graph of form A^{i<sub>1</sub>}_{i<sub>2</sub>}*B^{i<sub>2</sub>}_{i<sub>3</sub>}*...*C^{i<sub>N-1</sub>}_{i<sub>N</sub>},
+     * where {i<sub>j</sub>} denotes the whole set of tensor indices.
+     */
+    Line,
+    /**
+     * Not cycle or line
+     */
+    Graph
 }

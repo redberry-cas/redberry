@@ -41,6 +41,9 @@ import static cc.redberry.core.indices.IndicesUtils.*;
 import static cc.redberry.core.tensor.FullContractionsStructure.getToTensorIndex;
 
 /**
+ * This class gives a partition of graph on subgraphs of types specified in {@link GraphType}. Such a partition
+ * takes into account the links (dummy indices) of specified {@link IndexType}.
+ *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
@@ -52,6 +55,13 @@ public final class PrimitiveSubgraphPartition {
     private final PrimitiveSubgraph[] partition;
     private final LongBackedBitArray used;
 
+    /**
+     * Creates partition of graph (or equivalently the product of indexed tensors)
+     * specified by {@link ProductContent} taking into account edges (dummy indices) of specified {@link IndexType}.
+     *
+     * @param productContent {@link ProductContent} representing the graph
+     * @param type           type of edges to be taken into account in partition
+     */
     public PrimitiveSubgraphPartition(ProductContent productContent, IndexType type) {
         this.pc = productContent;
         this.fcs = pc.getFullContractionsStructure();
@@ -61,14 +71,40 @@ public final class PrimitiveSubgraphPartition {
         this.partition = calculatePartition();
     }
 
+    /**
+     * Returns the partition of graph, i.e. an array of all its subgraphs of types specified by {@link GraphType}.
+     *
+     * @return the partition of graph, i.e. an array of all its subgraphs of types specified by {@link GraphType}
+     */
     public PrimitiveSubgraph[] getPartition() {
         return partition.clone();
     }
 
+    /**
+     * Creates partition of graph (or equivalently the product of indexed tensors)
+     * specified by {@link Product} taking into account edges (dummy indices) of specified {@link IndexType}.
+     * This method returns an array of all its subgraphs of types specified by {@link GraphType}. <b>Note</b>, that
+     * only indexed part of specified product (i.e. its {@link ProductContent}) will be taken into account. So the
+     * positions of subgraphs elements in {@link PrimitiveSubgraph} may not be equal to the positions of tensors
+     * in product (since it can e.g. have a symbolic part), but strictly corresponds to the positions of
+     * tensors in its {@link ProductContent}, i.e. in the indexed part of the product.
+     *
+     * @param p    {@link Product} representing the graph
+     * @param type type of edges to be taken into account in partition
+     * @return the partition of graph, i.e. an array of all its subgraphs of types specified by {@link GraphType}
+     */
     public static PrimitiveSubgraph[] calculatePartition(Product p, IndexType type) {
         return new PrimitiveSubgraphPartition(p.getContent(), type).partition;
     }
 
+    /**
+     * Creates partition of graph (or equivalently the product of indexed tensors)
+     * specified by {@link ProductContent} taking into account edges (dummy indices) of specified {@link IndexType}.
+     * This method returns an array of all its subgraphs of types specified by {@link GraphType}.
+     *
+     * @param p    {@link ProductContent} representing the graph
+     * @param type type of edges to be taken into account in partition
+     */
     public static PrimitiveSubgraph[] calculatePartition(ProductContent p, IndexType type) {
         return new PrimitiveSubgraphPartition(p, type).partition;
     }

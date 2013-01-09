@@ -20,20 +20,11 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
-package cc.redberry.core.context;
-
 /**
- * Factory interface for {@link Context} creation.
+ * Contains useful graph algorithms.
  *
- * @author Dmitriy Bolotin
+ * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
- * @since 1.0
  */
-public interface ContextFactory {
-    /**
-     * Returns context.
-     *
-     * @return context
-     */
-    Context createContext();
-}
+package cc.redberry.core.graph;
+
