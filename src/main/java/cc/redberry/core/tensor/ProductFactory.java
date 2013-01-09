@@ -116,7 +116,7 @@ public final class ProductFactory implements TensorFactory {
             indices = dataContainer.indices;
             if (indices == null) {
                 assert dataContainer.list.size() == 1;
-                indices = IndicesFactory.createSorted(dataContainer.list.get(0).getIndices());
+                indices = IndicesFactory.create(dataContainer.list.get(0).getIndices());
             }
         } else {
             content = null;

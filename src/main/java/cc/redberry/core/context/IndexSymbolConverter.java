@@ -28,6 +28,7 @@ package cc.redberry.core.context;
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @see cc.redberry.core.indices.IndicesUtils
  * @since 1.0
  */
 public interface IndexSymbolConverter {

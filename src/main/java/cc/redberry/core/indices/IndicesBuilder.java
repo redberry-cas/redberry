@@ -30,7 +30,7 @@ import cc.redberry.core.utils.IntArrayList;
 import java.util.Collection;
 
 /**
- * This class provides functionality to construct unordered {@code Indices}
+ * Builder of unordered indices. This class provides functionality to construct unordered {@code Indices}
  * object by combining other {@code Indices} objects. For example, if we have a
  * product {@code X_mn*Y_ab} we can construct products indices by appending
  * consequentially indices of tensor {@code X} and {@code Y} to
@@ -161,7 +161,7 @@ public final class IndicesBuilder {
      * @return resulting {@code Indices}
      */
     public Indices getIndices() {
-        return IndicesFactory.createSorted(data.toArray());
+        return IndicesFactory.create(data.toArray());
     }
 
     /**
@@ -177,7 +177,7 @@ public final class IndicesBuilder {
 
     public Indices getDistinct() {
         //TODO review performance
-        return IndicesFactory.createSorted(MathUtils.getSortedDistinct(data.toArray()));
+        return IndicesFactory.create(MathUtils.getSortedDistinct(data.toArray()));
     }
 
     @Override

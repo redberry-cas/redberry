@@ -45,6 +45,6 @@ public class ExpressionFactory implements TensorFactory {
             throw new NullPointerException();
         if (!tensors[0].getIndices().getFree().equalsRegardlessOrder(tensors[1].getIndices().getFree()) && !TensorUtils.isZero(tensors[1]))
             throw new TensorException("Inconsistent indices in expression.");
-        return new Expression(IndicesFactory.createSorted(tensors[0].getIndices().getFree()), tensors[0], tensors[1]);
+        return new Expression(IndicesFactory.create(tensors[0].getIndices().getFree()), tensors[0], tensors[1]);
     }    
 }

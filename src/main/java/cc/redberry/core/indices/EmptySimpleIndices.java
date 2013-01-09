@@ -51,7 +51,7 @@ final class EmptySimpleIndices extends EmptyIndices implements SimpleIndices {
      * @return {@code EmptySimpleIndices} instance
      */
     @Override
-    public SimpleIndices getInverse() {
+    public SimpleIndices getInverted() {
         return this;
     }
 

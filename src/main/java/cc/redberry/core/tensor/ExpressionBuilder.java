@@ -56,7 +56,7 @@ public class ExpressionBuilder implements TensorBuilder {
             throw new NullPointerException();
         else if (left == null) {
             left = tensor;
-            indices = IndicesFactory.createSorted(left.getIndices().getFree());
+            indices = IndicesFactory.create(left.getIndices().getFree());
         } else if (right == null) {
             right = tensor;
             if (!indices.equalsRegardlessOrder(right.getIndices().getFree()) && !TensorUtils.isZero(right))

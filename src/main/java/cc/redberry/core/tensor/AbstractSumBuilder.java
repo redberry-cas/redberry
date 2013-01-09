@@ -104,7 +104,7 @@ public abstract class AbstractSumBuilder implements TensorBuilder {
         if (TensorUtils.isZero(tensor))
             return;
         if (indices == null) {
-            indices = IndicesFactory.createSorted(tensor.getIndices().getFree());
+            indices = IndicesFactory.create(tensor.getIndices().getFree());
             sortedFreeIndices = indices.getAllIndices().copy();
             Arrays.sort(sortedFreeIndices);
         } else if (!indices.equalsRegardlessOrder(tensor.getIndices().getFree()))

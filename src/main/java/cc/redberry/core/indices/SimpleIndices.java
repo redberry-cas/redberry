@@ -55,7 +55,7 @@ public interface SimpleIndices extends Indices {
     void setSymmetries(IndicesSymmetries symmetries);
 
     @Override
-    SimpleIndices getInverse();
+    SimpleIndices getInverted();
 
     @Override
     SimpleIndices getFree();

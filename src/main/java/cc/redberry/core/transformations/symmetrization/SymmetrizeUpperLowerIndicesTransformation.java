@@ -62,7 +62,7 @@ public final class SymmetrizeUpperLowerIndicesTransformation implements Transfor
     }
 
     public static Tensor symmetrizeUpperLowerIndices(Tensor tensor, boolean multiplyOnSymmetryFactor) {
-        Indices indices = IndicesFactory.createSorted(tensor.getIndices().getFree());
+        Indices indices = IndicesFactory.create(tensor.getIndices().getFree());
         int[] indicesArray = indices.getAllIndices().copy();
         Symmetries symmetries = TensorUtils.getIndicesSymmetriesForIndicesWithSameStates(indicesArray, tensor);
         int lowerCount = indices.getLower().length(), upperCount = indices.getUpper().length();

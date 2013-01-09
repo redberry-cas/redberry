@@ -336,7 +336,7 @@ public final class ApplyIndexMapping {
             }
             if (newData == null)
                 return tensor;
-            return new Sum(newData, IndicesFactory.createSorted(newData[0].getIndices().getFree()));
+            return new Sum(newData, IndicesFactory.create(newData[0].getIndices().getFree()));
         }
 
         throw new RuntimeException();

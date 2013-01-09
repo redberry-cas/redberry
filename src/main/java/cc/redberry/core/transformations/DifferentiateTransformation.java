@@ -273,14 +273,14 @@ public final class DifferentiateTransformation implements Transformation {
             derivative = applyIndexMapping(
                     derivative,
                     allIndices,
-                    addAll(varIndices.getInverse().getAllIndices().copy(), allFreeArgIndices),
+                    addAll(varIndices.getInverted().getAllIndices().copy(), allFreeArgIndices),
                     new int[0]);
             ProductBuilder builder = new ProductBuilder(0, length);
             for (i = 0; i < length; ++i)
                 builder.put(createMetricOrKronecker(allFreeArgIndices[i], allFreeVarIndices[i]));
             derivative = new SubstitutionTransformation(symmetric, builder.build()).transform(derivative);
             this.derivative = derivative;
-            this.freeVarIndices = var.getIndices().getFree().getInverse().getAllIndices().copy();
+            this.freeVarIndices = var.getIndices().getFree().getInverted().getAllIndices().copy();
             this.allFreeFrom = addAll(allFreeArgIndices, freeVarIndices);
         }
 

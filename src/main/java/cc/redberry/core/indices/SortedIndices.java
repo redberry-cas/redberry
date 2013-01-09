@@ -129,7 +129,7 @@ final class SortedIndices extends AbstractIndices {
         }
         list.add(data, iUpper, firstLower - iUpper);
         list.add(data, iLower, data.length - iLower);
-        return IndicesFactory.createSorted(list.toArray());
+        return IndicesFactory.create(list.toArray());
     }
 
     @Override
@@ -165,7 +165,7 @@ final class SortedIndices extends AbstractIndices {
     }
 
     @Override
-    public Indices getInverse() {
+    public Indices getInverted() {
         int[] dataInv = new int[data.length];
         int fl = data.length - firstLower, i = 0;
         for (; i < firstLower; ++i)

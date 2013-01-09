@@ -196,11 +196,11 @@ public class BulkTestsForParser {
         while ((c = iterator.next()) != null) {
             if (c instanceof SimpleTensor) {
                 SimpleTensor st = (SimpleTensor) c;
-                iterator.set(Tensors.simpleTensor(st.getName(), st.getIndices().getInverse()));
+                iterator.set(Tensors.simpleTensor(st.getName(), st.getIndices().getInverted()));
             }
             if (c instanceof TensorField) {
                 TensorField f = (TensorField) c;
-                iterator.set(Tensors.field(f.getName(), f.getIndices().getInverse(), f.argIndices, f.args));
+                iterator.set(Tensors.field(f.getName(), f.getIndices().getInverted(), f.argIndices, f.args));
             }
         }
         return iterator.result();

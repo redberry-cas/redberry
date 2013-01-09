@@ -40,12 +40,12 @@ public class SubstitutionIteratorTest {
         CC.resetTensorNames(1423);
         Tensor tensor = Tensors.parse("A_mk*G^amn_a*(S^k_g*(D^g+Q^gz_z)+N^k_ez^ez)*E");
         SubstitutionIterator si = new SubstitutionIterator(tensor);
-        System.out.println(IndicesFactory.createSorted(TensorUtils.getAllIndicesNamesT(tensor).toArray()));
+        System.out.println(IndicesFactory.create(TensorUtils.getAllIndicesNamesT(tensor).toArray()));
         Tensor current;
         while ((current = si.next()) != null) {
             if (current.equals(Tensors.parse("E")))
                 si.set(Tensors.parse("H^l_l"));
-            System.out.println(current + " : " + IndicesFactory.createSorted(si.getForbidden()).toString() + "\n");
+            System.out.println(current + " : " + IndicesFactory.create(si.getForbidden()).toString() + "\n");
             int k = 0;
         }
 
@@ -57,13 +57,13 @@ public class SubstitutionIteratorTest {
         CC.resetTensorNames(1423);
         Tensor tensor = Tensors.parse("a*b");
         SubstitutionIterator si = new SubstitutionIterator(tensor);
-        System.out.println(IndicesFactory.createSorted(TensorUtils.getAllIndicesNamesT(tensor).toArray()));
+        System.out.println(IndicesFactory.create(TensorUtils.getAllIndicesNamesT(tensor).toArray()));
         Tensor current;
         while ((current = si.next()) != null) {
-            System.out.println(current + " : " + IndicesFactory.createSorted(si.getForbidden()).toString() + "\n");
+            System.out.println(current + " : " + IndicesFactory.create(si.getForbidden()).toString() + "\n");
             if (current.equals(Tensors.parse("a*b")))
                 si.set(Tensors.parse("H^l_l"));
-            System.out.println(current + " : " + IndicesFactory.createSorted(si.getForbidden()).toString() + "\n");
+            System.out.println(current + " : " + IndicesFactory.create(si.getForbidden()).toString() + "\n");
             int k = 0;
         }
 

@@ -29,8 +29,8 @@ import cc.redberry.core.utils.IntArray;
 /**
  * This interface states common tensor indices functionality. For specification
  * and more information see methods summary and implementations. Objects of this type
- * are considered to be immutable. <p>For individual index structure (bit masks in the int
- * representation) see <link>IndicesUtils</link>.</p>
+ * are considered to be immutable. <p>For individual index structure (bit masks in the integer
+ * representation) see {@link IndicesUtils}.</p>
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
@@ -41,28 +41,25 @@ import cc.redberry.core.utils.IntArray;
 public interface Indices {
 
     /**
-     * Return {@link IntArray} of upper case indices. Due to immutability of
-     * indices this method returns simple wrapper of generic integer array.
+     * Return immutable {@link IntArray} of upper case indices.
      *
-     * @return IntArray of upper case indices
+     * @return {@code IntArray} of upper case indices
      * @see IntArray
      */
     IntArray getUpper();
 
     /**
-     * Return {@link IntArray} of lower case indices. Due to immutability of
-     * indices this method returns simple wrapper of generic integer array.
+     * Return immutable {@link IntArray} of lower case indices.
      *
-     * @return IntArray of lower case indices
+     * @return {@code IntArray} of lower case indices
      * @see IntArray
      */
     IntArray getLower();
 
     /**
-     * Return {@link IntArray} of all indices. Due to immutability of indices
-     * this method returns simple wrapper of generic integer array.
+     * Return immutable {@link IntArray} of all indices.
      *
-     * @return IntArray of all indices
+     * @return {@code IntArray} of all indices
      */
     IntArray getAllIndices();
 
@@ -86,7 +83,7 @@ public interface Indices {
      * Returns the index at the specified position in this
      * <code>Indices</code>.
      *
-     * @param position position of the index to return
+     * @param position position of the index
      * @return the index at the specified position in this
      *         <code>Indices</code>
      * @throws IndexOutOfBoundsException - if the index is out of range (index <
@@ -114,38 +111,26 @@ public interface Indices {
 //    int[] getDummyNames();
 
     /**
-     * Returns new instance of
-     * <code>Indices</code>, witch contains only non contracted indices from
-     * this
-     * <code>Indices</code> instance. Returned Indices shall conserve relevant
-     * order of indices.
-     * <p/>
-     * <h4><a name="Indices">Example:</a></h4> If Indices are
-     * <code>_{mn}^{nop}</code>, getFree() will return
-     * <code>Indices</code> that are
-     * <code>_{n}^{op}</code>.
+     * Returns new instance of {@code Indices}, which contains only free (non contracted) indices from
+     * this {@code Indices} instance. The returned {@code Indices} object keeps the relative order
+     * of indices same as in the this {@code Indices}.
      *
-     * @return non contracted indices Indices instance
+     * @return only free indices
      */
     Indices getFree();
 
     /**
-     * Returns new instance of Indices, witch contains inverse indices, i.e. all
-     * this indices with inverse states. Result Indices have the same order with
-     * original one. Symmetries of inverse indices is same as initial indices
-     * and they are not cloning (same references).
-     * <p/>
-     * <h4><a name="Indices">Example:</a></h4> If Indices are
-     * <code>_{mn}^{nop}</code>, getInverse() will return Indices that are
-     * <code>^{mn}_{nop}</code>
+     * Returns new instance of {@code Indices}, which contains inverted indices, i.e.
+     * all upper indices becomes lower, and all lower become upper. The terms of ordering
+     * in the result are same as in the initial {@code Indices} object.
      *
-     * @return same indices but with the inverse states
+     * @return indices with inverted states
      */
-    Indices getInverse();
+    Indices getInverted();
 
     /**
      * Returns indices of the specified type, which are contained
-     * in this indices object.
+     * in this {@code Indices} object.
      *
      * @param type the type of indices
      * @return indices of the specified type, which are contained
@@ -154,54 +139,38 @@ public interface Indices {
     Indices getOfType(IndexType type);
 
     /**
-     * Returns true if this indices are equals to specified indices, without
-     * regard for order. Only we interesting in this method, is equality of the
-     * sets of indices. So, e.g. for _{ab}^c and ^c_{ba} this method will return
-     * true, but for _{ab}^c and ^c_{ak}, of course it returns false.
+     * Returns {@code true} if this {@code Indices} object contains exactly same
+     * indices as specified one, without taking into account the relative ordering of indices.
      *
-     * @param indices indices to be compared
-     * @return true if the set of specified indices equals to this one
+     * @param indices indices
+     * @return {@code true} if this {@code Indices} object contains exactly same
+     *         indices as specified one, with no respect to the relative ordering of indices.
      */
     boolean equalsRegardlessOrder(Indices indices);
 
     /**
-     * Checks for the consistence of this Indices. Package specification forbids
-     * more than one index with the same case, type and value ,i.e. _{a...a}
-     * indices
+     * Returns always {@code true} in public API methods.
      */
     void testConsistentWithException();
 
     /**
-     * This method applies specified {@code IndexMapping} to this indices and
-     * returns true if mapping changed indices and false if not.
+     * This method applies specified {@link IndexMapping} to this {@code Indices} object and
+     * returns the resulting {@code Indices} object.
      *
-     * @param mapping specified {@code IndexeMapping}
-     * @return true if mapping changed indices and false if not
+     * @param mapping specified {@code IndexMapping}
+     * @return resulting {@code Indices} object
      * @see IndexMapping
      */
     Indices applyIndexMapping(IndexMapping mapping);
 
     /**
-     * This method returns string representation of indices due to symbols print
-     * mode, specified in
-     * <code>enum</code> {@link cc.redberry.core.context.OutputFormat}. General convention for indices
-     * output is LaTeX-base code for indices, i.e. string
-     * <code>_{mn}^{a}</code> represents indices with length 3, where first
-     * <code>m</code> down, second
-     * <code>n</code> down and third
-     * <code>a</code> up.
-     * <p/>
-     * <h4><a name="Indices">Example for
-     * <code>_{&alpha &beta}^{&gamma &delta}</code>:</a></h4>
-     * <code>LaTeX</code>:
-     * <code>_{\alpha \beta}^{\gamma \delta}</code> <p><code>UTF8</code>:
-     * <code>_{&alpha &beta}^{&gamma &delta}</code>
+     * String representation of {@code Indices} object in specified output format.
      *
-     * @param mode symbols printing mode
-     * @return string representation due to mode
+     * @param outputFormat output format
+     * @return string representation of {@code Indices} object in specified output format.
      * @see cc.redberry.core.context.OutputFormat
      */
-    String toString(OutputFormat mode);
+    String toString(OutputFormat outputFormat);
 
     @Override
     boolean equals(Object other);

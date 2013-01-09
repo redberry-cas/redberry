@@ -102,7 +102,7 @@ public abstract class SimpleIndicesAbstract extends AbstractIndices implements S
     }
 
     @Override
-    public SimpleIndices getInverse() {
+    public SimpleIndices getInverted() {
         int[] dataInv = new int[data.length];
         for (int i = 0; i < data.length; ++i)
             dataInv[i] = data[i] ^ 0x80000000;

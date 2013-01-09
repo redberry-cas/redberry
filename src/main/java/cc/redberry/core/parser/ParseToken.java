@@ -60,7 +60,7 @@ public class ParseToken {
                     builder.append(node.getIndices());
                 return builder.getIndices();
             case Sum:
-                return IndicesFactory.createSorted(content[0].getIndices());
+                return IndicesFactory.create(content[0].getIndices());
             case Power:
                 return IndicesFactory.EMPTY_INDICES;
             case Expression:
