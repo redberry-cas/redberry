@@ -29,8 +29,11 @@ import java.util.Arrays;
 import java.util.Map;
 
 /**
+ * Wrapper of {@link IndexMappingBuffer} for testing mappings.
+ *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @since 1.0
  */
 public final class IndexMappingBufferTester implements IndexMappingBuffer {
 
@@ -38,14 +41,23 @@ public final class IndexMappingBufferTester implements IndexMappingBuffer {
     private final int[] from, to;
     private final boolean signum;
 
-    public IndexMappingBufferTester(int[] from, boolean signum) {
+    /**
+     * Creates tester to test identity mapping {@code from} -> {@code from}
+     *
+     * @param from array of from indices
+     * @param sign sign
+     */
+    public IndexMappingBufferTester(int[] from, boolean sign) {
         from = IndicesUtils.getIndicesNames(from);
         Arrays.sort(from);
         this.from = this.to = from;
-        this.signum = signum;
+        this.signum = sign;
         innerBuffer = new IndexMappingBufferImpl();
     }
 
+    /**
+     * Creates tester with  for specified from and to indices.
+     */
     public IndexMappingBufferTester(FromToHolder holder) {
         this.from = holder.from;
         this.to = holder.to;
@@ -66,6 +78,9 @@ public final class IndexMappingBufferTester implements IndexMappingBuffer {
     //    innerBuffer = new IndexMappingBufferImpl();
     //}
 
+    /**
+     * Creates tester of specified {@link IndexMappingBuffer}.
+     */
     public IndexMappingBufferTester(IndexMappingBuffer buffer) {
         this(buffer.export());
         //Map<Integer, IndexMappingBufferRecord> map = buffer.map;
@@ -114,6 +129,16 @@ public final class IndexMappingBufferTester implements IndexMappingBuffer {
     //    return new IndexMappingBufferTester(buffer.export());
     //}
 
+    /**
+     * Tests whether specified {@link IndexMappingBufferTester} is a real mapping of tensor {@code from}
+     * on tensor {@code to}.
+     *
+     * @param tester tester of mappings
+     * @param from   from tensor
+     * @param to     to tensor
+     * @return {@code true} if there is mapping of tensor {@code from} on tensor {@code to} equal
+     *         to specified mapping
+     */
     public static boolean test(IndexMappingBufferTester tester, Tensor from, Tensor to) {
         tester.reset();
         final IndexMappingProvider provider =
@@ -182,6 +207,9 @@ public final class IndexMappingBufferTester implements IndexMappingBuffer {
         return new FromToHolder(from1, to1, getSign());
     }
 
+    /**
+     * Resets tester
+     */
     public void reset() {
         innerBuffer = new IndexMappingBufferImpl();
     }

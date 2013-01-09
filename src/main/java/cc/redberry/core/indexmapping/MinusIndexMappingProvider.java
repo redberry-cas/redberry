@@ -22,7 +22,12 @@
  */
 package cc.redberry.core.indexmapping;
 
-public class MinusIndexMappingProvider extends IndexMappingProviderAbstract {
+/**
+ * @author Dmitry Bolotin
+ * @author Stanislav Poslavsky
+ * @since 1.0
+ */
+class MinusIndexMappingProvider extends IndexMappingProviderAbstract {
 
     public MinusIndexMappingProvider(MappingsPort opu) {
         super(opu);

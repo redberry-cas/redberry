@@ -22,7 +22,12 @@
  */
 package cc.redberry.core.indexmapping;
 
-public class PlusMinusIndexMappingProvider extends IndexMappingProviderAbstract {
+/**
+ * @author Dmitry Bolotin
+ * @author Stanislav Poslavsky
+ * @since 1.0
+ */
+class PlusMinusIndexMappingProvider extends IndexMappingProviderAbstract {
     private boolean state = false;
 
     public PlusMinusIndexMappingProvider(MappingsPort opu) {

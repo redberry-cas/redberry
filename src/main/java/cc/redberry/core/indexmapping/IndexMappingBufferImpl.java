@@ -36,18 +36,27 @@ import java.util.Map.Entry;
 import static cc.redberry.core.indices.IndicesUtils.setRawState;
 
 /**
+ * Basic implementation of {@link IndexMappingBuffer}.
+ *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @since 1.0
  */
 public final class IndexMappingBufferImpl implements IndexMappingBuffer {
 
     protected final Map<Integer, IndexMappingBufferRecord> map;
     protected boolean sign = false;
 
+    /**
+     * Constructs empty buffer.
+     */
     public IndexMappingBufferImpl() {
         this.map = new HashMap<>();
     }
 
+    /**
+     * Constructs empty buffer with specified sign.
+     */
     public IndexMappingBufferImpl(boolean sign) {
         this.map = new HashMap<>();
         this.sign = sign;
@@ -149,6 +158,12 @@ public final class IndexMappingBufferImpl implements IndexMappingBuffer {
         return (IndicesUtils.getState(index) ? "^" : "_") + Context.get().getIndexConverterManager().getSymbol(index, mode);
     }
 
+    /**
+     * String representation in specified output format.
+     *
+     * @param format output format
+     * @return string representation in specified output format
+     */
     public String toString(OutputFormat format) {
         StringBuilder sb = new StringBuilder();
         sb.append(sign ? '-' : '+').append('{');

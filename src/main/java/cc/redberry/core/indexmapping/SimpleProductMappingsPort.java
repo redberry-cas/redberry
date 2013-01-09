@@ -25,9 +25,9 @@ package cc.redberry.core.indexmapping;
 import cc.redberry.core.tensor.Tensor;
 
 /**
- *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @since 1.0
  */
 final class SimpleProductMappingsPort implements MappingsPort {
 
@@ -39,7 +39,7 @@ final class SimpleProductMappingsPort implements MappingsPort {
     }
 
     SimpleProductMappingsPort(final IndexMappingProvider opu,
-                          final Tensor[] from, final Tensor[] to) {
+                              final Tensor[] from, final Tensor[] to) {
         providers = new IndexMappingProvider[from.length];
         providers[0] = IndexMappings.createPort(opu, from[0], to[0]);
         for (int i = 1; i < from.length; ++i)
@@ -60,7 +60,7 @@ final class SimpleProductMappingsPort implements MappingsPort {
         OUTER:
         while (true) {
             boolean r;
-            while ((r = !(providers[i--].tick())) && i >= 0);
+            while ((r = !(providers[i--].tick())) && i >= 0) ;
             if (i == -1 && r)
                 return null;
             i += 2;

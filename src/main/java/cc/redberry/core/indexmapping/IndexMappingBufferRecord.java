@@ -28,8 +28,11 @@ import cc.redberry.core.indices.InconsistentIndicesException;
 import cc.redberry.core.indices.IndicesUtils;
 
 /**
+ * Technical class which holds the intermediate information about mapping entry.
+ *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @since 1.0
  */
 public final class IndexMappingBufferRecord {
 

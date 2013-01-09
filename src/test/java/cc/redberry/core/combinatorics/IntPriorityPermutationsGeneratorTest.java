@@ -39,6 +39,7 @@ public class IntPriorityPermutationsGeneratorTest {
     public IntPriorityPermutationsGeneratorTest() {
     }
 
+    @Ignore
     @Test
     public void test1() {
         IntPriorityPermutationsGenerator generator = new IntPriorityPermutationsGenerator(3);
@@ -50,6 +51,7 @@ public class IntPriorityPermutationsGeneratorTest {
             System.out.println(Arrays.toString(p));
     }
 
+    @Ignore
     @Test
     public void test2() {
         IntPriorityPermutationsGenerator generator = new IntPriorityPermutationsGenerator(3);
@@ -84,13 +86,13 @@ public class IntPriorityPermutationsGeneratorTest {
         }
     }
 
-    @Ignore
+
     @Test
     public void test3() {
         final int dimm = 6;
         final int maxPerms = 100;
         RandomDataImpl rd = new RandomDataImpl(new MersenneTwister());
-        for (int count = 0; count < 10000; ++count) {
+        for (int count = 0; count < 100; ++count) {
             //Generate combinatorics
             int pCount = rd.nextInt(1, maxPerms);
             int[][] permutations = new int[pCount][];

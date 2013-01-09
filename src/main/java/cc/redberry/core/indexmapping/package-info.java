@@ -20,23 +20,15 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
-package cc.redberry.core.indexmapping;
-
 /**
+ * Implementation of mappings of indices. Package contains data structures of
+ * mappings of indices and algorithms of their building.
+ *
+ * @see IndexMappings
+ * @see IndexMappingBuffer
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  * @since 1.0
  */
-final class DummyIndexMappingProvider extends IndexMappingProviderAbstract {
-    public DummyIndexMappingProvider(MappingsPort opu) {
-        super(opu);
-    }
-
-    @Override
-    public IndexMappingBuffer take() {
-        IndexMappingBuffer buf = currentBuffer;
-        currentBuffer = null;
-        return buf;
-    }
-}
+package cc.redberry.core.indexmapping;

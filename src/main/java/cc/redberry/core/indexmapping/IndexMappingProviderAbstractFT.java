@@ -25,9 +25,9 @@ package cc.redberry.core.indexmapping;
 import cc.redberry.core.tensor.Tensor;
 
 /**
- *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @since 1.0
  */
 abstract class IndexMappingProviderAbstractFT<T extends Tensor> extends IndexMappingProviderAbstract {
 

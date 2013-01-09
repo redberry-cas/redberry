@@ -23,9 +23,9 @@
 package cc.redberry.core.indexmapping;
 
 /**
- *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @since 1.0
  */
 final class MappingsPortRemovingContracted implements MappingsPort {
 

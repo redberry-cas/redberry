@@ -24,6 +24,14 @@ package cc.redberry.core.indexmapping;
 
 import cc.redberry.core.utils.ArraysUtils;
 
+/**
+ * Holds the array of from indices and to indices of mapping.
+ * This class is technical and not a part of public API.
+ *
+ * @author Dmitriy Bolotin
+ * @author Stanislav Poslavsky
+ * @since 1.1
+ */
 public final class FromToHolder {
     final int[] from, to;
     final boolean sign;
@@ -35,7 +43,7 @@ public final class FromToHolder {
         this.sign = sign;
     }
 
-    public FromToHolder mergeWith(FromToHolder other) {
+    FromToHolder mergeWith(FromToHolder other) {
         final int[] aFrom = this.from, aTo = this.to,
                 bFrom = other.from, bTo = other.to;
 

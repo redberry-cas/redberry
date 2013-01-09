@@ -38,6 +38,7 @@ import java.util.List;
 /**
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @since 1.0
  */
 final class ProviderProduct implements IndexMappingProvider {
 
@@ -118,7 +119,8 @@ final class ProviderProduct implements IndexMappingProvider {
         pp.tick();
         return pp.take() != null;
     }
-//    private final ProductContent from, to;
+
+    //    private final ProductContent from, to;
 //    private PermutationsProvider permutationsProvider;
     private final DummyIndexMappingProvider dummyProvider;
     private final MappingsPort op;
@@ -147,7 +149,7 @@ final class ProviderProduct implements IndexMappingProvider {
                 if (i - 1 != begin)
                     providers.add(lastOutput =
                             new PermutatorProvider(lastOutput, Arrays.copyOfRange(indexlessFrom, begin, i),
-                                                   Arrays.copyOfRange(indexlessTo, begin, i)));
+                                    Arrays.copyOfRange(indexlessTo, begin, i)));
                 begin = i;
             }
 
@@ -157,8 +159,8 @@ final class ProviderProduct implements IndexMappingProvider {
                 if (i - 1 == begin)
                     providers.add(lastOutput =
                             IndexMappings.createPort(lastOutput,
-                                                     indexlessFrom[begin],
-                                                     indexlessTo[begin]));
+                                    indexlessFrom[begin],
+                                    indexlessTo[begin]));
                 begin = i;
             }
 
@@ -170,8 +172,8 @@ final class ProviderProduct implements IndexMappingProvider {
                 else
                     providers.add(lastOutput =
                             IndexMappings.createPort(lastOutput,
-                                                     fromContent.get(begin),
-                                                     toContent.get(begin)));
+                                    fromContent.get(begin),
+                                    toContent.get(begin)));
                 begin = i;
             }
 
@@ -187,7 +189,7 @@ final class ProviderProduct implements IndexMappingProvider {
 //        else
         for (Pair p : stretches)
             providers.add(lastOutput = new PermutatorProvider(lastOutput,
-                                                              p.from, p.to));
+                    p.from, p.to));
 
         this.op = new SimpleProductMappingsPort(providers.toArray(new IndexMappingProvider[providers.size()]));
     }

@@ -25,6 +25,7 @@ package cc.redberry.core.indexmapping;
 /**
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @since 1.0
  */
 class MinusIndexMappingProviderWrapper implements IndexMappingProvider {
     private final IndexMappingProvider provider;

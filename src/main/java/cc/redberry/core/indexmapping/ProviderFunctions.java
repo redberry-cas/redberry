@@ -25,11 +25,11 @@ package cc.redberry.core.indexmapping;
 import cc.redberry.core.tensor.Tensor;
 
 /**
- *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @since 1.0
  */
-public class ProviderFunctions {
+class ProviderFunctions {
 
     static final IndexMappingProviderFactory ODD_FACTORY = new IndexMappingProviderFactory() {
 
