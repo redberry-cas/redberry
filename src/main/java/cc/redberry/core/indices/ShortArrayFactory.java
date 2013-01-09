@@ -26,6 +26,7 @@ package cc.redberry.core.indices;
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @since 1.0
  */
 final class ShortArrayFactory {
     private static final int SIZE = 128;

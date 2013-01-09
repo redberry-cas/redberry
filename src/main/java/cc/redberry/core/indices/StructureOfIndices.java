@@ -35,6 +35,7 @@ import java.util.Arrays;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  * @see cc.redberry.core.context.NameDescriptor
+ * @since 1.0
  */
 public final class StructureOfIndices {
 

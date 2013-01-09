@@ -28,6 +28,7 @@ import cc.redberry.core.tensor.TensorException;
 /**
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @since 1.0
  */
 public class InconsistentIndicesException extends TensorException {
     private final Integer index;

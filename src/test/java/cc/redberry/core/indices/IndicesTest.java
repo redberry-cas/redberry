@@ -41,6 +41,7 @@ import static org.junit.Assert.assertTrue;
 /**
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @since 1.0
  */
 public class IndicesTest {
 

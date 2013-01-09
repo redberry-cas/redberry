@@ -32,8 +32,9 @@ import java.util.Arrays;
 /**
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @since 1.0
  */
-public abstract class SimpleIndicesAbstract extends AbstractIndices implements SimpleIndices {
+abstract class SimpleIndicesAbstract extends AbstractIndices implements SimpleIndices {
 
     protected IndicesSymmetries symmetries = null;
 

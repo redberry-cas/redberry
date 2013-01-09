@@ -27,6 +27,7 @@ package cc.redberry.core.indices;
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @since 1.0
  */
 //TODO discuss with Stas. Final revision of indices types....
 public class IndicesFactory {

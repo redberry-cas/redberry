@@ -39,6 +39,7 @@ import java.util.List;
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @since 1.0
  */
 public final class SimpleIndicesBuilder {
 

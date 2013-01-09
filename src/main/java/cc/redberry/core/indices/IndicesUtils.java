@@ -100,6 +100,7 @@ import java.util.Arrays;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  * @see Indices
+ * @since 1.0
  */
 public final class IndicesUtils {
 

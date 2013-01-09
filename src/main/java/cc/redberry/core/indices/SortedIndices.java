@@ -29,17 +29,9 @@ import cc.redberry.core.utils.IntArrayList;
 import java.util.Arrays;
 
 /**
- * This class represents sorted indices, i.e. it stores indices as sorted array.
- * Some common methods can be implemented with rather fast algorithms, working
- * with sorted array. {@code SortedIndices} are using to represent, for example
- * {@code Product} indices. Really, if we consider tensor A_m*B_n, we cannot
- * prefer what index is first and what is the second (m or n). So it is useful
- * to quickSort indices array to provide fast algorithms, for example for
- * methods {@code getFree(), getUpper(), testConsistent()} and so on.
- *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
- * @see Indices
+ * @since 1.0
  */
 final class SortedIndices extends AbstractIndices {
 
@@ -51,13 +43,6 @@ final class SortedIndices extends AbstractIndices {
         this.firstLower = firstLower;
     }
 
-    /**
-     * Constructs {@code SortedIndices} instance from specified indices array
-     * and with specified symmetries. {@code data} will be sorted in
-     * constructor.
-     *
-     * @param data array of indices
-     */
     SortedIndices(int[] data) {
         super(data);
         Arrays.sort(this.data);

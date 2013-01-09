@@ -34,6 +34,7 @@ import cc.redberry.core.indexmapping.IndexMapping;
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @since 1.0
  */
 final class EmptySimpleIndices extends EmptyIndices implements SimpleIndices {
 

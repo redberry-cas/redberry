@@ -23,18 +23,9 @@
 package cc.redberry.core.indices;
 
 /**
- * This class represents ordered indices and stores indices without sorting. It
- * is the most fundamental {@code Indices} implementation. It is using to
- * represent {@link SimpleTensor} indices, and in contract with, for example,
- * production, witch indices array can be sorted, it stores indices array in
- * order, in witch they were passed in constructor.
- *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
- * @see SimpleIndices
- * @see EmptyIndices
- * @see AbstractIndices
- * @see SortedIndices
+ * @since 1.0
  */
 final class SimpleIndicesOfTensor extends SimpleIndicesAbstract {
 
@@ -46,12 +37,6 @@ final class SimpleIndicesOfTensor extends SimpleIndicesAbstract {
         super(notResort, data, symmetries);
     }
 
-    /**
-     * This method allows to set {@code Symmetries} of this {@code Indices}.
-     *
-     * @param symmetries {@code Symmetries} to be set as {@code Symmetries} of
-     * this {@code Indices}
-     */
     @Override
     public void setSymmetries(IndicesSymmetries symmetries) {
         throw new UnsupportedOperationException();

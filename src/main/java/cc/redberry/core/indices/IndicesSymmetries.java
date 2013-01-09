@@ -39,6 +39,7 @@ import java.util.Objects;
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @since 1.0
  */
 public class IndicesSymmetries implements Iterable<Symmetry> {
 

@@ -38,6 +38,7 @@ import static cc.redberry.core.context.defaults.IndexConverterExtender.*;
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @since 1.0
  */
 public enum IndexType {
     LatinLower(LatinLowerEx),

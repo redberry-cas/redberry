@@ -27,6 +27,7 @@ package cc.redberry.core.indices;
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @since 1.0
  */
 public class UnsafeIndicesFactory {
 

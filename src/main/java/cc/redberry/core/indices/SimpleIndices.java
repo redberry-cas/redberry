@@ -34,6 +34,7 @@ import cc.redberry.core.tensor.SimpleTensor;
  * @see Indices
  * @see IndicesFactory
  * @see SimpleIndicesBuilder
+ * @since 1.0
  */
 public interface SimpleIndices extends Indices {
 

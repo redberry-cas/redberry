@@ -29,6 +29,7 @@ import cc.redberry.core.utils.IntArray;
 /**
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @since 1.0
  */
 class EmptyIndices implements Indices {
 

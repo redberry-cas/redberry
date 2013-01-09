@@ -37,6 +37,7 @@ import cc.redberry.core.utils.IntArray;
  * @see IndicesBuilder
  * @see IndexMapping
  * @see IndicesUtils
+ * @since 1.0
  */
 public interface Indices {
 
