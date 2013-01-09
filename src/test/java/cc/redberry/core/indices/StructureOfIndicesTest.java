@@ -31,12 +31,12 @@ import org.junit.Test;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public class IndicesTypeStructureTest {
+public class StructureOfIndicesTest {
 
     @Test
     public void test1() {
         SimpleIndices si = ParserIndices.parseSimple("_ab'c'^d'");
-        IndicesTypeStructure st = new IndicesTypeStructure(si);
+        StructureOfIndices st = new StructureOfIndices(si);
         Assert.assertTrue(st.isStructureOf(si));
         Assert.assertFalse(st.isStructureOf(ParserIndices.parseSimple("_ab'^c'd'")));
         Assert.assertTrue(st.isStructureOf(ParserIndices.parseSimple("^a_b'c'^d'")));

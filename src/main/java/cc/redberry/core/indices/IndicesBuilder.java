@@ -159,6 +159,7 @@ public final class IndicesBuilder {
      * Returns resulting {@code Indices}.
      *
      * @return resulting {@code Indices}
+     * @throws InconsistentIndicesException if there was more then one same index (with same names, types and states)
      */
     public Indices getIndices() {
         return IndicesFactory.create(data.toArray());
@@ -175,10 +176,10 @@ public final class IndicesBuilder {
         return data.toArray();
     }
 
-    public Indices getDistinct() {
+   /* public Indices getDistinct() {
         //TODO review performance
         return IndicesFactory.create(MathUtils.getSortedDistinct(data.toArray()));
-    }
+    }*/
 
     @Override
     public String toString() {

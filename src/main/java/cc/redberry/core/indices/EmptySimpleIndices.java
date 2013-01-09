@@ -80,7 +80,7 @@ final class EmptySimpleIndices extends EmptyIndices implements SimpleIndices {
      */
     @Override
     public void setSymmetries(IndicesSymmetries symmetries) {
-        if (symmetries.getIndicesTypeStructure().size() != 0)
+        if (symmetries.getStructureOfIndices().size() != 0)
             throw new IllegalArgumentException("Symmetries dimensions are not equal to indices size.");
     }
 
@@ -138,7 +138,7 @@ final class EmptySimpleIndices extends EmptyIndices implements SimpleIndices {
     }
 
     @Override
-    public IndicesTypeStructure getIndicesTypeStructure() {
-        return IndicesTypeStructure.EMPTY;
+    public StructureOfIndices getStructureOfIndices() {
+        return StructureOfIndices.EMPTY;
     }
 }

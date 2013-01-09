@@ -23,7 +23,7 @@
 package cc.redberry.core.context;
 
 import cc.redberry.core.indices.IndexType;
-import cc.redberry.core.indices.IndicesTypeStructure;
+import cc.redberry.core.indices.StructureOfIndices;
 import cc.redberry.core.parser.ParserException;
 import cc.redberry.core.utils.ArraysUtils;
 import cc.redberry.core.utils.IntArrayList;
@@ -54,7 +54,7 @@ public final class NameManager {
     private final Lock readLock = readWriteLock.readLock();
     private final Lock writeLock = readWriteLock.writeLock();
     private final Map<Integer, NameDescriptor> fromId = new HashMap<>();
-    private final Map<IndicesTypeStructureAndName, NameDescriptor> fromStructure = new HashMap<>();
+    private final Map<NameAndStructureOfIndices, NameDescriptor> fromStructure = new HashMap<>();
     private final String[] kroneckerAndMetricNames = {"d", "g"};
     private final IntArrayList kroneckerAndMetricIds = new IntArrayList();
 
@@ -123,19 +123,19 @@ public final class NameManager {
         try {
             fromStructure.clear();
             for (NameDescriptor descriptor : fromId.values())
-                for (IndicesTypeStructureAndName itsan : descriptor.getKeys())
+                for (NameAndStructureOfIndices itsan : descriptor.getKeys())
                     fromStructure.put(itsan, descriptor);
         } finally {
             writeLock.unlock();
         }
     }
 
-    private NameDescriptor createDescriptor(final String sname, final IndicesTypeStructure[] indicesTypeStructures, int id) {
-        if (indicesTypeStructures.length != 1)
-            return new NameDescriptorImpl(sname, indicesTypeStructures, id);
-        final IndicesTypeStructure its = indicesTypeStructures[0];
+    private NameDescriptor createDescriptor(final String sname, final StructureOfIndices[] structuresOfIndices, int id) {
+        if (structuresOfIndices.length != 1)
+            return new NameDescriptorImpl(sname, structuresOfIndices, id);
+        final StructureOfIndices its = structuresOfIndices[0];
         if (its.size() != 2)
-            return new NameDescriptorImpl(sname, indicesTypeStructures, id);
+            return new NameDescriptorImpl(sname, structuresOfIndices, id);
         for (byte b = 0; b < IndexType.TYPES_COUNT; ++b)
             if (its.typeCount(b) == 2) {
                 if (CC.isMetric(b)) {
@@ -155,7 +155,7 @@ public final class NameManager {
                     }
                 }
             }
-        return new NameDescriptorImpl(sname, indicesTypeStructures, id);
+        return new NameDescriptorImpl(sname, structuresOfIndices, id);
     }
 
     /**
@@ -163,12 +163,12 @@ public final class NameManager {
      * namespace or constructs and puts to namespace new instance of name descriptor otherwise.
      *
      * @param sname                 string name of tensor
-     * @param indicesTypeStructures structure of tensor indices (first element in array) and structure of indices
+     * @param structureOfIndiceses structure of tensor indices (first element in array) and structure of indices
      *                              of arguments (in case of tensor field)
      * @return name descriptor corresponding to the specified information of tensor
      */
-    public NameDescriptor mapNameDescriptor(String sname, IndicesTypeStructure... indicesTypeStructures) {
-        IndicesTypeStructureAndName key = new IndicesTypeStructureAndName(sname, indicesTypeStructures);
+    public NameDescriptor mapNameDescriptor(String sname, StructureOfIndices... structureOfIndiceses) {
+        NameAndStructureOfIndices key = new NameAndStructureOfIndices(sname, structureOfIndiceses);
         boolean rLocked = true;
         readLock.lock();
         try {
@@ -181,13 +181,13 @@ public final class NameManager {
                     knownND = fromStructure.get(key);
                     if (knownND == null) { //Double check
                         int name = generateNewName();
-                        NameDescriptor descriptor = createDescriptor(sname, indicesTypeStructures, name);
+                        NameDescriptor descriptor = createDescriptor(sname, structureOfIndiceses, name);
                         if (descriptor instanceof NameDescriptorForMetricAndKronecker) {
                             kroneckerAndMetricIds.add(name);
                             kroneckerAndMetricIds.sort();
                         }
                         fromId.put(name, descriptor);
-                        for (IndicesTypeStructureAndName key1 : descriptor.getKeys())
+                        for (NameAndStructureOfIndices key1 : descriptor.getKeys())
                             fromStructure.put(key1, descriptor);
                         return descriptor;
                     }

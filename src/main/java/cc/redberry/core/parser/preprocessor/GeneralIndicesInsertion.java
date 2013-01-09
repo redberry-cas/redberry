@@ -23,7 +23,7 @@
 package cc.redberry.core.parser.preprocessor;
 
 import cc.redberry.core.context.CC;
-import cc.redberry.core.context.IndicesTypeStructureAndName;
+import cc.redberry.core.context.NameAndStructureOfIndices;
 import cc.redberry.core.context.NameDescriptor;
 import cc.redberry.core.indexgenerator.IndexGenerator;
 import cc.redberry.core.indices.*;
@@ -45,8 +45,8 @@ import static cc.redberry.core.indices.IndexType.TYPES_COUNT;
  * indices insertion becomes a complex task.</p>
  */
 public class GeneralIndicesInsertion implements ParseTokenTransformer {
-    private final Map<IndicesTypeStructureAndName, InsertionRule> initialRules = new HashMap<>();
-    private Map<IndicesTypeStructureAndName, InsertionRule> mappedRules;
+    private final Map<NameAndStructureOfIndices, InsertionRule> initialRules = new HashMap<>();
+    private Map<NameAndStructureOfIndices, InsertionRule> mappedRules;
 
     /**
      * Creates blank GeneralIndicesInsertion transformer.
@@ -69,8 +69,8 @@ public class GeneralIndicesInsertion implements ParseTokenTransformer {
     }
 
     public void addInsertionRule(NameDescriptor nd, IndexType omittedIndexType) {
-        IndicesTypeStructureAndName originalStructureAndName = NameDescriptor.extractKey(nd);
-        IndicesTypeStructure structure = nd.getIndicesTypeStructure();
+        NameAndStructureOfIndices originalStructureAndName = NameDescriptor.extractKey(nd);
+        StructureOfIndices structure = nd.getStructureOfIndices();
 
         if (structure.getTypeData(omittedIndexType.getType()).length == 0)
             throw new IllegalArgumentException("No indices of specified type in tensor.");
@@ -102,7 +102,7 @@ public class GeneralIndicesInsertion implements ParseTokenTransformer {
             return;
         mappedRules = new HashMap<>();
         for (InsertionRule rule : initialRules.values())
-            for (IndicesTypeStructureAndName key : rule.getKeys())
+            for (NameAndStructureOfIndices key : rule.getKeys())
                 if (mappedRules.put(key, rule) != null)
                     throw new RuntimeException("Conflicting insertion rules.");
     }
@@ -174,17 +174,17 @@ public class GeneralIndicesInsertion implements ParseTokenTransformer {
     }
 
     private static class InsertionRule {
-        final IndicesTypeStructureAndName originalStructureAndName;
+        final NameAndStructureOfIndices originalStructureAndName;
         final Set<IndexType> indicesAllowedToOmit = new HashSet<>();
 
-        private InsertionRule(IndicesTypeStructureAndName originalStructureAndName) {
+        private InsertionRule(NameAndStructureOfIndices originalStructureAndName) {
             this.originalStructureAndName = originalStructureAndName;
         }
 
-        public IndicesTypeStructureAndName[] getKeys() {
+        public NameAndStructureOfIndices[] getKeys() {
             IndexType[] toOmit = indicesAllowedToOmit.toArray(new IndexType[indicesAllowedToOmit.size()]);
             int omitted, i;
-            IndicesTypeStructureAndName[] keys = new IndicesTypeStructureAndName[(1 << toOmit.length) - 1];
+            NameAndStructureOfIndices[] keys = new NameAndStructureOfIndices[(1 << toOmit.length) - 1];
             int[] allCounts;
             ByteBackedBitArray[] states;
             for (omitted = 1; omitted <= keys.length; ++omitted) {
@@ -196,9 +196,9 @@ public class GeneralIndicesInsertion implements ParseTokenTransformer {
                         states[toOmit[i].getType()] = states[toOmit[i].getType()] == null ?
                                 null : ByteBackedBitArray.EMPTY;
                     }
-                IndicesTypeStructure[] structures = originalStructureAndName.getStructure().clone();
-                structures[0] = new IndicesTypeStructure(allCounts, states);
-                keys[omitted - 1] = new IndicesTypeStructureAndName(originalStructureAndName.getName(),
+                StructureOfIndices[] structures = originalStructureAndName.getStructure().clone();
+                structures[0] = new StructureOfIndices(allCounts, states);
+                keys[omitted - 1] = new NameAndStructureOfIndices(originalStructureAndName.getName(),
                         structures);
             }
             return keys;
@@ -394,8 +394,8 @@ public class GeneralIndicesInsertion implements ParseTokenTransformer {
         public SimpleTransformer(ParseTokenSimpleTensor node, InsertionRule insertionRule) {
             this.node = node;
             //this.insertionRule = insertionRule;
-            IndicesTypeStructure originalStructure = insertionRule.originalStructureAndName.getStructure()[0];
-            IndicesTypeStructure currentStructure = node.getIndicesTypeStructureAndName().getStructure()[0];
+            StructureOfIndices originalStructure = insertionRule.originalStructureAndName.getStructure()[0];
+            StructureOfIndices currentStructure = node.getIndicesTypeStructureAndName().getStructure()[0];
             for (IndexType type : insertionRule.indicesAllowedToOmit)
                 if (currentStructure.getStates(type).size() == 0) {
                     ByteBackedBitArray originalStates = originalStructure.getStates(type);

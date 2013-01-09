@@ -22,7 +22,7 @@
  */
 package cc.redberry.core.context;
 
-import cc.redberry.core.indices.IndicesTypeStructure;
+import cc.redberry.core.indices.StructureOfIndices;
 import cc.redberry.core.indices.SimpleIndices;
 
 /**
@@ -33,12 +33,12 @@ import cc.redberry.core.indices.SimpleIndices;
 final class NameDescriptorImpl extends NameDescriptor {
 
     private final String name;
-    private final IndicesTypeStructureAndName[] key;
+    private final NameAndStructureOfIndices[] key;
 
-    NameDescriptorImpl(String name, IndicesTypeStructure[] indexTypeStructures, int id) {
+    NameDescriptorImpl(String name, StructureOfIndices[] indexTypeStructures, int id) {
         super(indexTypeStructures, id);
         this.name = name;
-        this.key = new IndicesTypeStructureAndName[]{new IndicesTypeStructureAndName(name, indexTypeStructures)};
+        this.key = new NameAndStructureOfIndices[]{new NameAndStructureOfIndices(name, indexTypeStructures)};
     }
 
     @Override
@@ -47,7 +47,7 @@ final class NameDescriptorImpl extends NameDescriptor {
     }
 
     @Override
-    IndicesTypeStructureAndName[] getKeys() {
+    NameAndStructureOfIndices[] getKeys() {
         return key;
     }
 }

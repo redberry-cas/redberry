@@ -42,23 +42,23 @@ import java.util.Objects;
  */
 public class IndicesSymmetries implements Iterable<Symmetry> {
 
-    private final IndicesTypeStructure indicesTypeStructure;
+    private final StructureOfIndices structureOfIndices;
     private final Symmetries symmetries;
     private short[] diffIds = null;
 
-    IndicesSymmetries(IndicesTypeStructure indicesTypeStructure) {
-        this.indicesTypeStructure = indicesTypeStructure;
-        this.symmetries = SymmetriesFactory.createSymmetries(indicesTypeStructure.size());
+    IndicesSymmetries(StructureOfIndices structureOfIndices) {
+        this.structureOfIndices = structureOfIndices;
+        this.symmetries = SymmetriesFactory.createSymmetries(structureOfIndices.size());
     }
 
-    private IndicesSymmetries(IndicesTypeStructure indicesTypeStructure, Symmetries symmetries, short[] diffIds) {
-        this.indicesTypeStructure = indicesTypeStructure;
+    private IndicesSymmetries(StructureOfIndices structureOfIndices, Symmetries symmetries, short[] diffIds) {
+        this.structureOfIndices = structureOfIndices;
         this.symmetries = symmetries;
         this.diffIds = diffIds;
     }
 
-    IndicesSymmetries(IndicesTypeStructure indicesTypeStructure, Symmetries symmetries) {
-        this.indicesTypeStructure = indicesTypeStructure;
+    IndicesSymmetries(StructureOfIndices structureOfIndices, Symmetries symmetries) {
+        this.structureOfIndices = structureOfIndices;
         this.symmetries = symmetries;
     }
 
@@ -67,8 +67,8 @@ public class IndicesSymmetries implements Iterable<Symmetry> {
      *
      * @return the type structure of indices, for which this symmetries defined
      */
-    public IndicesTypeStructure getIndicesTypeStructure() {
-        return indicesTypeStructure;
+    public StructureOfIndices getStructureOfIndices() {
+        return structureOfIndices;
     }
 
     /**
@@ -250,9 +250,9 @@ public class IndicesSymmetries implements Iterable<Symmetry> {
      */
     public boolean add(boolean sign, int... permutation) {
         byte type = -1;
-        IndicesTypeStructure.TypeData typeData;
+        StructureOfIndices.TypeData typeData;
         for (int i = 0; i < IndexType.TYPES_COUNT; ++i) {
-            typeData = indicesTypeStructure.getTypeData((byte) i);
+            typeData = structureOfIndices.getTypeData((byte) i);
             if (typeData.length != 0) {
                 if (type != -1)
                     throw new IllegalArgumentException();
@@ -276,18 +276,18 @@ public class IndicesSymmetries implements Iterable<Symmetry> {
      *                                  inconsistent with already defined
      */
     public boolean add(byte type, Symmetry symmetry) {
-        IndicesTypeStructure.TypeData data = indicesTypeStructure.getTypeData(type);
+        StructureOfIndices.TypeData data = structureOfIndices.getTypeData(type);
         if (data == null)
             throw new IllegalArgumentException("No such type: " + IndexType.getType(type));
         if (data.length != symmetry.dimension())
             throw new IllegalArgumentException("Wrong symmetry length.");
-        int[] s = new int[indicesTypeStructure.size()];
+        int[] s = new int[structureOfIndices.size()];
         int i = 0;
         for (; i < data.from; ++i)
             s[i] = i;
         for (int j = 0; j < data.length; ++j, ++i)
             s[i] = symmetry.newIndexOf(j) + data.from;
-        for (; i < indicesTypeStructure.size(); ++i)
+        for (; i < structureOfIndices.size(); ++i)
             s[i] = i;
         try {
             if (symmetries.add(new Symmetry(s, symmetry.isAntiSymmetry()))) {
@@ -307,18 +307,18 @@ public class IndicesSymmetries implements Iterable<Symmetry> {
      * @return {@code true}
      */
     public boolean addUnsafe(byte type, Symmetry symmetry) {
-        IndicesTypeStructure.TypeData data = indicesTypeStructure.getTypeData(type);
+        StructureOfIndices.TypeData data = structureOfIndices.getTypeData(type);
         if (data == null)
             throw new IllegalArgumentException("No such type: " + IndexType.getType(type));
         if (data.length != symmetry.dimension())
             throw new IllegalArgumentException("Wrong symmetry length.");
-        int[] s = new int[indicesTypeStructure.size()];
+        int[] s = new int[structureOfIndices.size()];
         int i = 0;
         for (; i < data.from; ++i)
             s[i] = i;
         for (int j = 0; j < data.length; ++j, ++i)
             s[i] = symmetry.newIndexOf(j) + data.from;
-        for (; i < indicesTypeStructure.size(); ++i)
+        for (; i < structureOfIndices.size(); ++i)
             s[i] = i;
         symmetries.addUnsafe(new Symmetry(s, symmetry.isAntiSymmetry()));
         return true;
@@ -347,7 +347,7 @@ public class IndicesSymmetries implements Iterable<Symmetry> {
 
     @Override
     public IndicesSymmetries clone() {
-        return new IndicesSymmetries(indicesTypeStructure, symmetries.clone(), diffIds);
+        return new IndicesSymmetries(structureOfIndices, symmetries.clone(), diffIds);
     }
 
     @Override
@@ -392,17 +392,17 @@ public class IndicesSymmetries implements Iterable<Symmetry> {
     /**
      * Creates container of indices symmetries for a specified structure of indices.
      *
-     * @param indicesTypeStructure structure of indices
+     * @param structureOfIndices structure of indices
      * @return indices symmetries for a specified structure of indices
      */
-    public static IndicesSymmetries create(IndicesTypeStructure indicesTypeStructure) {
-        if (indicesTypeStructure.size() == 0)
+    public static IndicesSymmetries create(StructureOfIndices structureOfIndices) {
+        if (structureOfIndices.size() == 0)
             return EMPTY_SYMMETRIES;
-        return new IndicesSymmetries(indicesTypeStructure);
+        return new IndicesSymmetries(structureOfIndices);
     }
 
     static final IndicesSymmetries EMPTY_SYMMETRIES =
-            new IndicesSymmetries(new IndicesTypeStructure(EmptySimpleIndices.EMPTY_SIMPLE_INDICES_INSTANCE),
+            new IndicesSymmetries(new StructureOfIndices(EmptySimpleIndices.EMPTY_SIMPLE_INDICES_INSTANCE),
                     SymmetriesFactory.createSymmetries(0), new short[0]) {
 
                 @Override

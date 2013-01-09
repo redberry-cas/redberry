@@ -34,6 +34,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * Builder of simple indices. Constructs simple indices (correctly handling possible symmetries) by
+ * sequential append of other indices.
+ *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
@@ -42,15 +45,29 @@ public final class SimpleIndicesBuilder {
     private final IntArrayList data;
     private final List<Symmetries> symmetries;
 
+    /**
+     * Construct builder with specified initial capacity.
+     *
+     * @param initialCapacity initial capacity
+     */
     public SimpleIndicesBuilder(int initialCapacity) {
         data = new IntArrayList(initialCapacity);
         symmetries = new ArrayList<>(initialCapacity);
     }
 
+    /**
+     * Constructs empty builder.
+     */
     public SimpleIndicesBuilder() {
         this(7);
     }
 
+    /**
+     * Appends specified simple indices to this taking into account symmetries of passing indices.
+     *
+     * @param indices simple indices
+     * @return this
+     */
     public SimpleIndicesBuilder append(SimpleIndices indices) {
         if (indices.size() == 0)
             return this;
@@ -59,12 +76,26 @@ public final class SimpleIndicesBuilder {
         return this;
     }
 
+    /**
+     * Appends specified indices, represented as integer array to this. The passing indices are considered
+     * to have no any symmetries.
+     *
+     * @param indices integer array of indices
+     * @return this
+     */
     public SimpleIndicesBuilder append(int... indices) {
         data.addAll(indices);
         symmetries.add(SymmetriesFactory.createSymmetries(indices.length));
         return this;
     }
 
+    /**
+     * Appends specified indices. The passing indices are considered
+     * to have no any symmetries.
+     *
+     * @param indices indices
+     * @return this
+     */
     public SimpleIndicesBuilder appendWithoutSymmetries(Indices indices) {
         if (indices.size() == 0)
             return this;
@@ -73,6 +104,12 @@ public final class SimpleIndicesBuilder {
         return this;
     }
 
+    /**
+     * Returns resulting {@code SimpleIndices}.
+     *
+     * @return resulting {@code SimpleIndices}
+     * @throws InconsistentIndicesException if there was more then one same index (with same names, types and states)
+     */
     public SimpleIndices getIndices() {
         final int[] data = this.data.toArray();
 
@@ -115,6 +152,6 @@ public final class SimpleIndicesBuilder {
         }
 
         return IndicesFactory.createSimple(
-                new IndicesSymmetries(new IndicesTypeStructure(data), resultingSymmetries), data);
+                new IndicesSymmetries(new StructureOfIndices(data), resultingSymmetries), data);
     }
 }

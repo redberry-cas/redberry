@@ -22,9 +22,9 @@
  */
 package cc.redberry.core.parser;
 
-import cc.redberry.core.context.IndicesTypeStructureAndName;
+import cc.redberry.core.context.NameAndStructureOfIndices;
 import cc.redberry.core.indices.Indices;
-import cc.redberry.core.indices.IndicesTypeStructure;
+import cc.redberry.core.indices.StructureOfIndices;
 import cc.redberry.core.indices.SimpleIndices;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.tensor.Tensors;
@@ -52,8 +52,8 @@ public class ParseTokenSimpleTensor extends ParseToken {
         this.name = name;
     }
 
-    public IndicesTypeStructureAndName getIndicesTypeStructureAndName() {
-        return new IndicesTypeStructureAndName(name, new IndicesTypeStructure[]{new IndicesTypeStructure(indices)});
+    public NameAndStructureOfIndices getIndicesTypeStructureAndName() {
+        return new NameAndStructureOfIndices(name, new StructureOfIndices[]{new StructureOfIndices(indices)});
     }
 
     @Override

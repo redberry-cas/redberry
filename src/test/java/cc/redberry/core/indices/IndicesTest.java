@@ -157,12 +157,12 @@ public class IndicesTest {
                 new int[]{0, 0, 0, 0},
                 new int[]{10, 10, 10, 10},
                 false, new Well19937c());
-        IndicesTypeStructure typeStructure;
+        StructureOfIndices typeStructure;
         Indices indices;
         SimpleIndicesBuilder builder;
         for (int i = 0; i < 1000; ++i) {
             builder = new SimpleIndicesBuilder();
-            typeStructure = randomTensor.nextNameDescriptor().getIndicesTypeStructure();
+            typeStructure = randomTensor.nextNameDescriptor().getStructureOfIndices();
             indices = IndicesFactory.createSimple(null, randomTensor.nextIndices(typeStructure));
             int typeCount;
             for (int k = 0; k < IndexType.TYPES_COUNT; ++k) {
@@ -187,12 +187,12 @@ public class IndicesTest {
                 new int[]{0, 0, 0, 0},
                 new int[]{10, 10, 10, 10},
                 false, new Well19937c());
-        IndicesTypeStructure typeStructure;
+        StructureOfIndices typeStructure;
         Indices indices;
         IndicesBuilder builder;
         for (int i = 0; i < 1000; ++i) {
             builder = new IndicesBuilder();
-            typeStructure = randomTensor.nextNameDescriptor().getIndicesTypeStructure();
+            typeStructure = randomTensor.nextNameDescriptor().getStructureOfIndices();
             indices = IndicesFactory.create(randomTensor.nextIndices(typeStructure));
             int typeCount;
             for (int k = 0; k < IndexType.TYPES_COUNT; ++k) {
@@ -217,10 +217,10 @@ public class IndicesTest {
                 new int[]{0, 0, 0, 0},
                 new int[]{10, 10, 10, 10},
                 false, new Well19937c());
-        IndicesTypeStructure typeStructure;
+        StructureOfIndices typeStructure;
         Indices indices;
         for (int i = 0; i < 1000; ++i) {
-            typeStructure = randomTensor.nextNameDescriptor().getIndicesTypeStructure();
+            typeStructure = randomTensor.nextNameDescriptor().getStructureOfIndices();
             indices = IndicesFactory.createSimple(null, randomTensor.nextIndices(typeStructure));
             IndexType indexType;
             int sizeOfType;
@@ -243,10 +243,10 @@ public class IndicesTest {
                 new int[]{0, 0, 0, 0},
                 new int[]{10, 10, 10, 10},
                 false, new Well19937c());
-        IndicesTypeStructure typeStructure;
+        StructureOfIndices typeStructure;
         Indices indices;
         for (int i = 0; i < 1000; ++i) {
-            typeStructure = randomTensor.nextNameDescriptor().getIndicesTypeStructure();
+            typeStructure = randomTensor.nextNameDescriptor().getStructureOfIndices();
             indices = IndicesFactory.create(randomTensor.nextIndices(typeStructure));
             IndexType indexType;
             int sizeOfType;

@@ -22,9 +22,9 @@
  */
 package cc.redberry.core.parser;
 
-import cc.redberry.core.context.IndicesTypeStructureAndName;
+import cc.redberry.core.context.NameAndStructureOfIndices;
 import cc.redberry.core.indices.IndicesFactory;
-import cc.redberry.core.indices.IndicesTypeStructure;
+import cc.redberry.core.indices.StructureOfIndices;
 import cc.redberry.core.indices.SimpleIndices;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.tensor.Tensors;
@@ -46,15 +46,15 @@ public class ParseTokenTensorField extends ParseTokenSimpleTensor {
     }
 
     @Override
-    public IndicesTypeStructureAndName getIndicesTypeStructureAndName() {
-        IndicesTypeStructure[] typeStructures = new IndicesTypeStructure[1 + argumentsIndices.length];
-        typeStructures[0] = new IndicesTypeStructure(indices);
+    public NameAndStructureOfIndices getIndicesTypeStructureAndName() {
+        StructureOfIndices[] typeStructures = new StructureOfIndices[1 + argumentsIndices.length];
+        typeStructures[0] = new StructureOfIndices(indices);
         for (int i = 0; i < argumentsIndices.length; ++i) {
             if (argumentsIndices[i] == null)
                 argumentsIndices[i] = IndicesFactory.createSimple(null, content[i].getIndices().getFree());
-            typeStructures[i + 1] = new IndicesTypeStructure(argumentsIndices[i]);
+            typeStructures[i + 1] = new StructureOfIndices(argumentsIndices[i]);
         }
-        return new IndicesTypeStructureAndName(name, typeStructures);
+        return new NameAndStructureOfIndices(name, typeStructures);
     }
 
     @Override

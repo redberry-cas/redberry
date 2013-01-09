@@ -23,7 +23,7 @@
 package cc.redberry.core.context;
 
 import cc.redberry.core.indices.IndicesSymmetries;
-import cc.redberry.core.indices.IndicesTypeStructure;
+import cc.redberry.core.indices.StructureOfIndices;
 import cc.redberry.core.indices.SimpleIndices;
 
 import java.util.Arrays;
@@ -40,7 +40,7 @@ import java.util.Arrays;
  * <p>This class have no public constructor, since Redberry should be confident, that tensors with same
  * mathematical origin have same descriptors, and the work with descriptors should be carried out through
  * {@link NameManager}. The only way to receive name descriptor from raw information about
- * tensor is via {@link NameManager#mapNameDescriptor(String, cc.redberry.core.indices.IndicesTypeStructure...)}.
+ * tensor is via {@link NameManager#mapNameDescriptor(String, cc.redberry.core.indices.StructureOfIndices...)}.
  * In order to receive the descriptor from unique simple tensor identifier, one should use
  * {@link NameManager#getNameDescriptor(int)}</p>
  *
@@ -51,11 +51,11 @@ import java.util.Arrays;
 public abstract class NameDescriptor {
 
     //first element is simple tensor indexTypeStructure, other appears for tensor fields
-    final IndicesTypeStructure[] indexTypeStructures;
+    final StructureOfIndices[] indexTypeStructures;
     private final int id;
     private final IndicesSymmetries symmetries;
 
-    NameDescriptor(IndicesTypeStructure[] indexTypeStructures, int id) {
+    NameDescriptor(StructureOfIndices[] indexTypeStructures, int id) {
         if (indexTypeStructures.length == 0)
             throw new IllegalArgumentException();
         this.id = id;
@@ -95,7 +95,7 @@ public abstract class NameDescriptor {
      *
      * @return structure of indices of tensors with this name descriptor
      */
-    public IndicesTypeStructure getIndicesTypeStructure() {
+    public StructureOfIndices getStructureOfIndices() {
         return indexTypeStructures[0];
     }
 
@@ -105,12 +105,12 @@ public abstract class NameDescriptor {
      *
      * @return structure of indices of tensors and their arguments
      */
-    public IndicesTypeStructure[] getIndicesTypeStructures() {
+    public StructureOfIndices[] getStructuresOfIndices() {
         //todo clone()
         return indexTypeStructures;
     }
 
-    abstract IndicesTypeStructureAndName[] getKeys();
+    abstract NameAndStructureOfIndices[] getKeys();
 
     /**
      * Returns string name of tensor. The argument can be {@code null}.
@@ -131,7 +131,7 @@ public abstract class NameDescriptor {
      * @param nd name descriptor
      * @return structure of indices of tensors with specified name descriptor
      */
-    public static IndicesTypeStructureAndName extractKey(NameDescriptor nd) {
+    public static NameAndStructureOfIndices extractKey(NameDescriptor nd) {
         return nd.getKeys()[0];
     }
 }

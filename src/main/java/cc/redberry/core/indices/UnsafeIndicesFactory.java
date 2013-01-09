@@ -22,17 +22,37 @@
  */
 package cc.redberry.core.indices;
 
+/**
+ * Unsafe methods. Do not ever use this class.
+ *
+ * @author Dmitry Bolotin
+ * @author Stanislav Poslavsky
+ */
 public class UnsafeIndicesFactory {
 
+    /**
+     * Creates simple indices of simple tensor.
+     *
+     * @param symmetries symmetries
+     * @param indices    indices
+     * @return simple indices of simple tensor
+     */
     public static SimpleIndices createOfTensor(IndicesSymmetries symmetries, SimpleIndices indices) {
         if (indices.size() == 0)
             return IndicesFactory.EMPTY_SIMPLE_INDICES;
         return new SimpleIndicesOfTensor(((AbstractIndices) indices).data, symmetries);
     }
 
-    public static SimpleIndices createIsolatedUnsafeWithoutSort(IndicesSymmetries symmertries, int... data) {
+    /**
+     * Creates isolated simple indices.
+     *
+     * @param symmetries symmetries
+     * @param data       integer data
+     * @return isolated simple indices
+     */
+    public static SimpleIndices createIsolatedUnsafeWithoutSort(IndicesSymmetries symmetries, int... data) {
         if (data.length == 0)
             return IndicesFactory.EMPTY_SIMPLE_INDICES;
-        return new SimpleIndicesIsolated(true, data, symmertries);
+        return new SimpleIndicesIsolated(true, data, symmetries);
     }
 }

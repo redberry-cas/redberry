@@ -44,13 +44,13 @@ final class SimpleIndicesIsolated extends SimpleIndicesAbstract {
     @Override
     public IndicesSymmetries getSymmetries() {
         if (symmetries == null)
-            symmetries = new IndicesSymmetries(new IndicesTypeStructure(this));
+            symmetries = new IndicesSymmetries(new StructureOfIndices(this));
         return symmetries;
     }
 
     @Override
     public void setSymmetries(IndicesSymmetries symmetries) {
-        if (!symmetries.getIndicesTypeStructure().isStructureOf(this))
+        if (!symmetries.getStructureOfIndices().isStructureOf(this))
             throw new IllegalArgumentException("Illegal symmetries instance.");
         this.symmetries = symmetries;
     }

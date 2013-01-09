@@ -22,7 +22,7 @@
  */
 package cc.redberry.core.context;
 
-import cc.redberry.core.indices.IndicesTypeStructure;
+import cc.redberry.core.indices.StructureOfIndices;
 import cc.redberry.core.indices.IndicesUtils;
 import cc.redberry.core.indices.SimpleIndices;
 
@@ -44,12 +44,12 @@ final class NameDescriptorForMetricAndKronecker extends NameDescriptor {
         this.names = names;
     }
 
-    private static IndicesTypeStructure[] createIndicesTypeStructures(byte type) {
-        IndicesTypeStructure[] structures = new IndicesTypeStructure[1];
+    private static StructureOfIndices[] createIndicesTypeStructures(byte type) {
+        StructureOfIndices[] structures = new StructureOfIndices[1];
         if (!CC.isMetric(type))
-            structures[0] = new IndicesTypeStructure(type, 2, true, false);
+            structures[0] = new StructureOfIndices(type, 2, true, false);
         else
-            structures[0] = new IndicesTypeStructure(type, 2);
+            structures[0] = new StructureOfIndices(type, 2);
         return structures;
     }
 
@@ -59,9 +59,9 @@ final class NameDescriptorForMetricAndKronecker extends NameDescriptor {
      * @return
      */
     @Override
-    IndicesTypeStructureAndName[] getKeys() {
-        return new IndicesTypeStructureAndName[]{new IndicesTypeStructureAndName(names[0], indexTypeStructures),
-                new IndicesTypeStructureAndName(names[1], indexTypeStructures)};
+    NameAndStructureOfIndices[] getKeys() {
+        return new NameAndStructureOfIndices[]{new NameAndStructureOfIndices(names[0], indexTypeStructures),
+                new NameAndStructureOfIndices(names[1], indexTypeStructures)};
     }
 
     @Override

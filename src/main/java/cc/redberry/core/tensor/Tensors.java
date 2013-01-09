@@ -205,7 +205,7 @@ public final class Tensors {
      * @return new instance of {@link SimpleTensor} object
      */
     public static SimpleTensor simpleTensor(String name, SimpleIndices indices) {
-        NameDescriptor descriptor = CC.getNameManager().mapNameDescriptor(name, indices.getIndicesTypeStructure());
+        NameDescriptor descriptor = CC.getNameManager().mapNameDescriptor(name, indices.getStructureOfIndices());
         return new SimpleTensor(descriptor.getId(),
                 UnsafeIndicesFactory.createOfTensor(descriptor.getSymmetries(),
                         indices));
@@ -223,7 +223,7 @@ public final class Tensors {
         NameDescriptor descriptor = CC.getNameDescriptor(name);
         if (descriptor == null)
             throw new IllegalArgumentException("This name is not registered in the system.");
-        if (!descriptor.getIndicesTypeStructure().isStructureOf(indices))
+        if (!descriptor.getStructureOfIndices().isStructureOf(indices))
             throw new IllegalArgumentException("Specified indices are not indices of specified tensor.");
         return new SimpleTensor(name,
                 UnsafeIndicesFactory.createOfTensor(descriptor.getSymmetries(),
@@ -266,10 +266,10 @@ public final class Tensors {
             if (!arguments[i].getIndices().getFree().equalsRegardlessOrder(argIndices[i]))
                 throw new IllegalArgumentException("Arguments indices are inconsistent with arguments.");
 
-        IndicesTypeStructure[] structures = new IndicesTypeStructure[argIndices.length + 1];
-        structures[0] = indices.getIndicesTypeStructure();
+        StructureOfIndices[] structures = new StructureOfIndices[argIndices.length + 1];
+        structures[0] = indices.getStructureOfIndices();
         for (int i = 0; i < argIndices.length; ++i)
-            structures[i + 1] = argIndices[i].getIndicesTypeStructure();
+            structures[i + 1] = argIndices[i].getStructureOfIndices();
         NameDescriptor descriptor = CC.getNameManager().mapNameDescriptor(name, structures);
         return new TensorField(descriptor.getId(),
                 UnsafeIndicesFactory.createOfTensor(descriptor.getSymmetries(), indices),
@@ -297,12 +297,12 @@ public final class Tensors {
             throw new IllegalArgumentException("This name is not registered in the system.");
         if (!descriptor.isField())
             throw new IllegalArgumentException("Name correspods to simple tensor (not a field).");
-        if (descriptor.getIndicesTypeStructures().length - 1 != argIndices.length)
+        if (descriptor.getStructuresOfIndices().length - 1 != argIndices.length)
             throw new IllegalArgumentException("This name corresponds to field with different number of arguments.");
-        if (!descriptor.getIndicesTypeStructure().isStructureOf(indices))
+        if (!descriptor.getStructureOfIndices().isStructureOf(indices))
             throw new IllegalArgumentException("Specified indices are not indices of specified tensor.");
         for (int i = 0; i < argIndices.length; ++i) {
-            if (!descriptor.getIndicesTypeStructures()[i + 1].isStructureOf(argIndices[i]))
+            if (!descriptor.getStructuresOfIndices()[i + 1].isStructureOf(argIndices[i]))
                 throw new IllegalArgumentException("Arguments indices are inconsistent with field signature.");
             if (!arguments[i].getIndices().getFree().equalsRegardlessOrder(argIndices[i]))
                 throw new IllegalArgumentException("Arguments indices are inconsistent with arguments.");
@@ -328,7 +328,7 @@ public final class Tensors {
         NameDescriptor descriptor = CC.getNameDescriptor(name);
         if (descriptor == null)
             throw new IllegalArgumentException("This name is not registered in the system.");
-        if (!descriptor.getIndicesTypeStructure().isStructureOf(indices))
+        if (!descriptor.getStructureOfIndices().isStructureOf(indices))
             throw new IllegalArgumentException("Specified indices are not indices of specified tensor.");
         SimpleIndices[] argIndices = new SimpleIndices[arguments.length];
         for (int i = 0; i < arguments.length; ++i)

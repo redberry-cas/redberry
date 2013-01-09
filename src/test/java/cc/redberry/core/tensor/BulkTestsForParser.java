@@ -27,7 +27,7 @@ import cc.redberry.core.context.CC;
 import cc.redberry.core.context.OutputFormat;
 import cc.redberry.core.indices.IndexType;
 import cc.redberry.core.indices.IndicesFactory;
-import cc.redberry.core.indices.IndicesTypeStructure;
+import cc.redberry.core.indices.StructureOfIndices;
 import cc.redberry.core.indices.IndicesUtils;
 import cc.redberry.core.number.parser.NumberParserTest;
 import cc.redberry.core.parser.ParseTokenSimpleTensor;
@@ -229,7 +229,7 @@ public class BulkTestsForParser {
                 "Flat", "FF", "WR", "SR", "SSR", "FR", "RR", "Kn"};
 
         //F_{\\mu\\nu} type structure
-        final IndicesTypeStructure F_TYPE_STRUCTURE = new IndicesTypeStructure(IndexType.GreekLower.getType(), 2);
+        final StructureOfIndices F_TYPE_STRUCTURE = new StructureOfIndices(IndexType.GreekLower.getType(), 2);
         //matrices indicator for parse preprocessor
         final Indicator<ParseTokenSimpleTensor> matricesIndicator = new Indicator<ParseTokenSimpleTensor>() {
 
@@ -239,7 +239,7 @@ public class BulkTestsForParser {
                 for (String matrix : matrices)
                     if (name.equals(matrix))
                         return true;
-                if (name.equals("F") && object.indices.getIndicesTypeStructure().equals(F_TYPE_STRUCTURE))
+                if (name.equals("F") && object.indices.getStructureOfIndices().equals(F_TYPE_STRUCTURE))
                     return true;
                 return false;
             }

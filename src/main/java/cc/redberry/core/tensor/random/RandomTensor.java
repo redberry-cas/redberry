@@ -155,7 +155,7 @@ public final class RandomTensor {
             int[] typesCount = new int[TYPES_COUNT];
             for (int j = 0; j < TYPES_COUNT; ++j)
                 typesCount[j] = minIndices[j] + nextInt(maxIndices[j] - minIndices[j]);
-            IndicesTypeStructure typeStructure = new IndicesTypeStructure(TYPES, typesCount);
+            StructureOfIndices typeStructure = new StructureOfIndices(TYPES, typesCount);
             NameDescriptor nameDescriptor = CC.getNameManager().mapNameDescriptor(nextName(), typeStructure);
             if (withSymmetries)
                 addRandomSymmetries(nameDescriptor);
@@ -177,7 +177,7 @@ public final class RandomTensor {
         return namespace[nextInt(namespace.length)];
     }
 
-    private NameDescriptor nextNameDescriptor(IndicesTypeStructure typeStructure) {
+    private NameDescriptor nextNameDescriptor(StructureOfIndices typeStructure) {
         NameDescriptor nameDescriptor = CC.getNameManager().mapNameDescriptor(nextName(), typeStructure);
         if (withSymmetries)
             addRandomSymmetries(nameDescriptor);
@@ -187,10 +187,10 @@ public final class RandomTensor {
     private void addRandomSymmetries(NameDescriptor descriptor) {//TODO add antisymmetries
         if (!descriptor.getSymmetries().isEmpty())
             return;
-        IndicesTypeStructure typeStructure = descriptor.getIndicesTypeStructure();
+        StructureOfIndices typeStructure = descriptor.getStructureOfIndices();
         int i;
         for (byte type = 0; type < TYPES_COUNT; ++type) {
-            IndicesTypeStructure.TypeData typeData = typeStructure.getTypeData(type);
+            StructureOfIndices.TypeData typeData = typeStructure.getTypeData(type);
             if (typeData == null)
                 continue;
             if (typeData.length == 0)//redundant
@@ -203,8 +203,8 @@ public final class RandomTensor {
 
     public SimpleTensor nextSimpleTensor() {
         NameDescriptor nd = nextNameDescriptor();
-        IndicesTypeStructure indicesTypeStructure = nd.getIndicesTypeStructure();
-        int[] indices = nextIndices(indicesTypeStructure);
+        StructureOfIndices structureOfIndices = nd.getStructureOfIndices();
+        int[] indices = nextIndices(structureOfIndices);
         return Tensors.simpleTensor(nd.getId(), IndicesFactory.createSimple(nd.getSymmetries(), indices));
     }
 
@@ -212,7 +212,7 @@ public final class RandomTensor {
         if (minProductSize < 2)
             throw new IllegalArgumentException();
         indices = indices.getFree();
-        IndicesTypeStructure typeStructure = new IndicesTypeStructure(IndicesFactory.createSimple(null, indices));
+        StructureOfIndices typeStructure = new StructureOfIndices(IndicesFactory.createSimple(null, indices));
         List<NameDescriptor> descriptors = new ArrayList<>();
         int totalIndicesCounts[] = new int[TYPES.length];
         NameDescriptor nd;
@@ -220,7 +220,7 @@ public final class RandomTensor {
         for (i = 0; i < minProductSize; ++i) {
             descriptors.add(nd = nextNameDescriptor());
             for (byte b : TYPES) {
-                IndicesTypeStructure.TypeData typeData = nd.getIndicesTypeStructure().getTypeData(b);
+                StructureOfIndices.TypeData typeData = nd.getStructureOfIndices().getTypeData(b);
                 if (typeData != null)
                     totalIndicesCounts[b] += typeData.length;
             }
@@ -228,13 +228,13 @@ public final class RandomTensor {
 
         //if tensors are not not enough (product.indices.size < freeIndices.size)
         for (byte b : TYPES) {
-            IndicesTypeStructure.TypeData typeData = typeStructure.getTypeData(b);
+            StructureOfIndices.TypeData typeData = typeStructure.getTypeData(b);
             if (typeData == null)
                 continue;
             while (totalIndicesCounts[b] < typeData.length) {
                 descriptors.add(nd = nextNameDescriptor());
                 for (byte bb : TYPES) {
-                    IndicesTypeStructure.TypeData typeData1 = nd.getIndicesTypeStructure().getTypeData(bb);
+                    StructureOfIndices.TypeData typeData1 = nd.getStructureOfIndices().getTypeData(bb);
                     if (typeData1 != null)
                         totalIndicesCounts[bb] += typeData1.length;
                 }
@@ -242,11 +242,11 @@ public final class RandomTensor {
         }
         //fiting product.indices.size
         for (byte b : TYPES) {
-            IndicesTypeStructure.TypeData typeData = typeStructure.getTypeData(b);
+            StructureOfIndices.TypeData typeData = typeStructure.getTypeData(b);
             if ((totalIndicesCounts[b] - (typeData == null ? 0 : typeData.length)) % 2 != 0) {
                 int[] typeCount = new int[TYPES.length];
                 typeCount[b] = 1;
-                descriptors.add(nextNameDescriptor(new IndicesTypeStructure(TYPES, typeCount)));
+                descriptors.add(nextNameDescriptor(new StructureOfIndices(TYPES, typeCount)));
                 ++totalIndicesCounts[b];
             }
         }
@@ -258,7 +258,7 @@ public final class RandomTensor {
         IndexGenerator indexGenerator = new IndexGenerator(_freeIndices.clone());
         for (byte b : TYPES) {
             indicesSpace[b] = new int[totalIndicesCounts[b]];
-            IndicesTypeStructure.TypeData typeData = typeStructure.getTypeData(b);
+            StructureOfIndices.TypeData typeData = typeStructure.getTypeData(b);
             if (typeData == null)
                 freeIndices[b] = new int[0];
             else {
@@ -277,11 +277,11 @@ public final class RandomTensor {
         //Creating resulting product
         ProductBuilder pb = new ProductBuilder();
         for (NameDescriptor descriptor : descriptors) {
-            IndicesTypeStructure its = descriptor.getIndicesTypeStructure();
+            StructureOfIndices its = descriptor.getStructureOfIndices();
             int[] factorIndices = new int[its.size()];
             int position = 0;
             for (byte b : TYPES) {
-                IndicesTypeStructure.TypeData typeData = its.getTypeData(b);
+                StructureOfIndices.TypeData typeData = its.getTypeData(b);
                 if (typeData == null)
                     continue;
                 for (i = 0; i < typeData.length; ++i)
@@ -296,7 +296,7 @@ public final class RandomTensor {
     }
 
     public Tensor nextProduct(int minProductSize) {
-        return nextProduct(minProductSize, IndicesFactory.createSimple(null, nextIndices(nextNameDescriptor().getIndicesTypeStructure())));
+        return nextProduct(minProductSize, IndicesFactory.createSimple(null, nextIndices(nextNameDescriptor().getStructureOfIndices())));
     }
 
     public Tensor nextSum(int sumSize, int averageProductSize, Indices indices) {//TODO introduce Poisson 
@@ -306,12 +306,12 @@ public final class RandomTensor {
         return sum.build();
     }
 
-    public int[] nextIndices(IndicesTypeStructure indicesTypeStructure) {
-        int[] indices = new int[indicesTypeStructure.size()];
+    public int[] nextIndices(StructureOfIndices structureOfIndices) {
+        int[] indices = new int[structureOfIndices.size()];
         int[] typeInd;
         int p = 0;
         for (byte b : TYPES) {
-            IndicesTypeStructure.TypeData typeData = indicesTypeStructure.getTypeData(b);
+            StructureOfIndices.TypeData typeData = structureOfIndices.getTypeData(b);
             if (typeData == null)
                 continue;
             typeInd = new int[typeData.length];

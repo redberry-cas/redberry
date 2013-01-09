@@ -220,7 +220,7 @@ public abstract class SimpleIndicesAbstract extends AbstractIndices implements S
     }
 
     @Override
-    public IndicesTypeStructure getIndicesTypeStructure() {
-        return new IndicesTypeStructure(this);
+    public StructureOfIndices getStructureOfIndices() {
+        return new StructureOfIndices(this);
     }
 }
