@@ -25,9 +25,11 @@ package cc.redberry.core.utils;
 import java.util.Arrays;
 
 /**
+ * Bit array based on {@code long}.
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @since 1.0
  */
 public final class LongBackedBitArray implements BitArray {
     private final long[] data;
@@ -160,7 +162,7 @@ public final class LongBackedBitArray implements BitArray {
         int result;
         if ((result = Long.numberOfTrailingZeros(data[pointer++] >>> firstShift)) != 64)
             return position + result;
-        while (pointer < data.length && (result = Long.numberOfTrailingZeros(data[pointer++])) == 64);
+        while (pointer < data.length && (result = Long.numberOfTrailingZeros(data[pointer++])) == 64) ;
         if (result == 64)
             return -1;
         return (pointer - 1) * 64 + result;

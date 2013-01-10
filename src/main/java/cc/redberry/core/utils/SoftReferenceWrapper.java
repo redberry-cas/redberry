@@ -27,6 +27,7 @@ import java.lang.ref.SoftReference;
 /**
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @since 1.0
  */
 public class SoftReferenceWrapper<T> {
     private SoftReference<T> reference;

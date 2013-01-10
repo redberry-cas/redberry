@@ -25,11 +25,11 @@ package cc.redberry.core.utils;
 import java.util.Iterator;
 
 /**
- * This class represents empty iterator instance. It is singleton, but has 
- * protected constructor, to provide inheritance.
- * 
+ * Singleton empty iterator.
+ *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @since 1.0
  */
 public class EmptyIterator<T> implements Iterator<T> {
     /**
@@ -37,12 +37,12 @@ public class EmptyIterator<T> implements Iterator<T> {
      */
     public static final EmptyIterator INSTANCE = new EmptyIterator();
 
-    protected EmptyIterator() {
+    private EmptyIterator() {
     }
 
     /**
      * Returns false.
-     * 
+     *
      * @return false
      */
     @Override
@@ -52,7 +52,7 @@ public class EmptyIterator<T> implements Iterator<T> {
 
     /**
      * Throws {@code IllegalStateException}.
-     * 
+     *
      * @return throws {@code IllegalStateException}
      * @throws {@code IllegalStateException} always
      */
@@ -63,7 +63,7 @@ public class EmptyIterator<T> implements Iterator<T> {
 
     /**
      * Throws {@code IllegalStateException}.
-     * 
+     *
      * @throws {@code IllegalStateException} always
      */
     @Override

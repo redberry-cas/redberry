@@ -25,6 +25,8 @@ package cc.redberry.core.utils;
 import java.util.Arrays;
 
 /**
+ * Array list of primitive integers.
+ *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */

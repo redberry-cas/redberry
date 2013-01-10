@@ -113,7 +113,6 @@ public class ContextSettings {
      * Sets string representation of Kronecker tensor name.
      *
      * @param kronecker string name of Kronecker tensor
-     * @return string representation of Kronecker tensor name
      */
     public void setKronecker(String kronecker) {
         if (kronecker == null)

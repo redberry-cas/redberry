@@ -27,9 +27,12 @@ import cc.redberry.core.tensor.Tensor;
 import java.util.*;
 
 /**
+ * Hash map with tensor keys.
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @see HashMap
+ * @since 1.0
  */
 public class THashMap<K extends Tensor, V> extends AbstractMap<K, V> {
 

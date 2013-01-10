@@ -46,6 +46,7 @@ import static cc.redberry.core.tensor.Tensors.*;
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @since 1.0
  */
 public class TensorUtils {
 
@@ -64,6 +65,10 @@ public class TensorUtils {
     public static boolean haveIndicesIntersections(Tensor u, Tensor v) {
         return IndicesUtils.haveIntersections(u.getIndices(), v.getIndices());
     }
+
+    /*
+     *       isSomething()
+     */
 
     public static boolean isZeroOrIndeterminate(Tensor tensor) {
         return tensor instanceof Complex && NumberUtils.isZeroOrIndeterminate((Complex) tensor);
@@ -159,10 +164,6 @@ public class TensorUtils {
         return true;
     }
 
-    public static boolean passOutDummies(Tensor tensor) {
-        return getAllDummyIndicesT(tensor).size() != 0;
-    }
-
     public static boolean isOne(Tensor tensor) {
         return tensor instanceof Complex && ((Complex) tensor).isOne();
     }
@@ -205,6 +206,16 @@ public class TensorUtils {
      */
     public static boolean isNegativeIntegerPower(Tensor t) {
         return t instanceof Power && TensorUtils.isNegativeIntegerNumber(t.get(1));
+    }
+
+    /**
+     * Returns {@code true} if tensor contains dummy indices.
+     *
+     * @param tensor tensor
+     * @return {@code true} if tensor contains dummy indices
+     */
+    public static boolean passOutDummies(Tensor tensor) {
+        return getAllDummyIndicesT(tensor).size() != 0;
     }
 
     public static boolean equalsExactly(Tensor[] u, Tensor[] v) {
@@ -309,6 +320,13 @@ public class TensorUtils {
         }
     }
 
+    /**
+     * Returns {@code true} if tensor u mathematically (not programming) equals to tensor v.
+     *
+     * @param u tensor
+     * @param v tensor
+     * @return {@code true} if specified tensors are mathematically (not programming) equal
+     */
     public static boolean equals(Tensor u, Tensor v) {
         if (u == v)
             return true;
@@ -327,6 +345,15 @@ public class TensorUtils {
         return false;
     }
 
+    /**
+     * Returns {@code true} if tensor u mathematically (not programming) equals to tensor v,
+     * {@code false} if they they differ only in the sign and {@code null} otherwise.
+     *
+     * @param u tensor
+     * @param v tensor
+     * @return {@code true} {@code true} if tensor u mathematically (not programming) equals to tensor v,
+     *         {@code false} if they they differ only in the sign and {@code null} otherwise
+     */
     public static Boolean compare1(Tensor u, Tensor v) {
         Indices freeIndices = u.getIndices().getFree();
         if (!freeIndices.equalsRegardlessOrder(v.getIndices().getFree()))
@@ -495,6 +522,12 @@ public class TensorUtils {
         return depth;
     }
 
+    /**
+     * Gives a determinant of matrix.
+     *
+     * @param matrix matrix
+     * @return determinant
+     */
     public static Tensor det(Tensor[][] matrix) {
         checkMatrix(matrix);
         return det1(matrix);

@@ -25,9 +25,11 @@ package cc.redberry.core.utils;
 import java.util.Iterator;
 
 /**
+ * Iterator over one single element.
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @since 1.0
  */
 public final class SingleIterator<T> implements Iterator<T> {
     private T element;

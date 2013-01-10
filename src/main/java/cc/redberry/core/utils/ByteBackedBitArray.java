@@ -25,7 +25,10 @@ package cc.redberry.core.utils;
 import java.util.Arrays;
 
 /**
+ * Bit array based on {@code byte}.
+ *
  * @author Dmitry Bolotin
+ * @since 1.0
  */
 public final class ByteBackedBitArray implements BitArray {
     public static final ByteBackedBitArray EMPTY = new ByteBackedBitArray(0);

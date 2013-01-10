@@ -33,8 +33,11 @@ import cc.redberry.core.tensor.functions.ScalarFunction;
 import java.util.Arrays;
 
 /**
+ * Special hash algorithms for tensors.
+ *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @since 1.0
  */
 public final class TensorHashCalculator {
 

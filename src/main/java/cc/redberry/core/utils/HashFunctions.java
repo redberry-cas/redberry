@@ -24,7 +24,7 @@ package cc.redberry.core.utils;
 
 /**
  * Hashing algorithms. The algorithms was taken from different open sources.
- * 
+ * <p/>
  * <h3>Links:</h3>
  * <a href="http://www.concentric.net/~ttwang/tech/inthash.htm">http://www.concentric.net/~ttwang/tech/inthash.htm</a><br/>
  * <a href="http://www.burtleburtle.net/bob/hash/doobs.html">http://www.burtleburtle.net/bob/hash/doobs.html</a><br/>
@@ -34,9 +34,10 @@ package cc.redberry.core.utils;
  * <a href="http://sites.google.com/site/murmurhash/">http://sites.google.com/site/murmurhash/</a><br/>
  * <a href="http://dmy999.com/article/50/murmurhash-2-java-port">http://dmy999.com/article/50/murmurhash-2-java-port</a><br/>
  * <a href="http://en.wikipedia.org/wiki/MurmurHash">http://en.wikipedia.org/wiki/MurmurHash</a><br/>
- * 
+ *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @since 1.0
  */
 public final class HashFunctions {
     private HashFunctions() {
@@ -44,33 +45,33 @@ public final class HashFunctions {
 
     /**
      * Robert Jenkins' 96 bit Mix Function.
-     * 
+     * <p/>
      * Variable 'c' contains the input key. When the mixing is complete, variable
      * 'c' also contains the hash result. Variable 'a', and 'b' contain initialized
-     * random bits. Notice the total number of internal state is 96 bits, much 
-     * larger than the final output of 32 bits. Also notice the sequence of 
-     * subtractions rolls through variable 'a' to variable 'c' three times. Each 
+     * random bits. Notice the total number of internal state is 96 bits, much
+     * larger than the final output of 32 bits. Also notice the sequence of
+     * subtractions rolls through variable 'a' to variable 'c' three times. Each
      * row will act on one variable, mixing in information from the other two
      * variables, followed by a shift operation.
-     * 
+     * <p/>
      * <p>Subtraction is similar to multiplication in that changes in upper bits
-     * of the key do not influence lower bits of the addition. The 9 bit shift 
+     * of the key do not influence lower bits of the addition. The 9 bit shift
      * operations in Robert Jenkins' mixing algorithm shifts the key to the right
-     * 61 bits in total, and shifts the key to the left 34 bits in total. As the 
+     * 61 bits in total, and shifts the key to the left 34 bits in total. As the
      * calculation is chained, each exclusive-or doubles the number of states.
      * There are at least 2^9 different combined versions of the original key,
-     * shifted by various amounts. That is why a single bit change in the key 
+     * shifted by various amounts. That is why a single bit change in the key
      * can influence widely apart bits in the hash result.
-     * 
+     * <p/>
      * <p>The uniform distribution of the hash function can be determined from
      * the nature of the subtraction operation. Look at a single bit subtraction
-     * operation between a key, and a random bit. If the random bit is 0, then 
-     * the key remains unchanged. If the random bit is 1, then the key will be 
+     * operation between a key, and a random bit. If the random bit is 0, then
+     * the key remains unchanged. If the random bit is 1, then the key will be
      * flipped. A carry will occur in the case where both the key bit and the
      * random bit are 1. Subtracting the random bits will cause about half of
      * the key bits to be flipped. So even if the key is not uniform, subtracting
      * the random bits will result in uniform distribution.
-     * 
+     * <p/>
      * <h3>Links:</h3>
      * <a href="http://www.concentric.net/~ttwang/tech/inthash.htm">http://www.concentric.net/~ttwang/tech/inthash.htm</a><br/>
      * <a href="http://www.burtleburtle.net/bob/hash/doobs.html">http://www.burtleburtle.net/bob/hash/doobs.html</a><br/>
@@ -81,9 +82,7 @@ public final class HashFunctions {
      * @param a initialized random bits
      * @param b initialized random bits
      * @param c key to be hashed
-     * 
      * @return randomized c bits (hashed c)
-     * 
      */
     public static int mix(int a, int b, int c) {
         a = a - b;
@@ -117,15 +116,14 @@ public final class HashFunctions {
     }
 
     /**
-     * Based on an original suggestion on Robert Jenkin's part in 1997 and 
-     * Thomas Wang 2007 updates. 
-     * 
+     * Based on an original suggestion on Robert Jenkin's part in 1997 and
+     * Thomas Wang 2007 updates.
+     * <p/>
      * <h3>Links</h3>
      * <a href="http://www.concentric.net/~ttwang/tech/inthash.htm">http://www.concentric.net/~ttwang/tech/inthash.htm</a><br/>
      * <a href="http://en.wikipedia.org/wiki/Jenkins_hash_function's">http://en.wikipedia.org/wiki/Jenkins_hash_function's</a><br/>
-     * 
+     *
      * @param key key to be hashed
-     * 
      * @return hashed value
      */
     public static int JenkinWang32shift(int key) {
@@ -141,12 +139,12 @@ public final class HashFunctions {
     }
 
     /**
-     * This method uses a combination of bit shifts and integer multiplication 
+     * This method uses a combination of bit shifts and integer multiplication
      * to hash the input key.
-     * 
+     * <p/>
      * <h3>Links</h3>
      * <a href="http://www.concentric.net/~ttwang/tech/inthash.htm">http://www.concentric.net/~ttwang/tech/inthash.htm</a><br/>
-     * 
+     *
      * @param key key to be hashed
      * @return hashed key
      */
@@ -161,13 +159,13 @@ public final class HashFunctions {
     }
 
     /**
-     * Based on an original suggestion on Robert Jenkin's part in 1997 and 
-     * Thomas Wang 2007 updates. 
-     * 
+     * Based on an original suggestion on Robert Jenkin's part in 1997 and
+     * Thomas Wang 2007 updates.
+     * <p/>
      * <h3>Links</h3>
      * <a href="http://www.concentric.net/~ttwang/tech/inthash.htm">http://www.concentric.net/~ttwang/tech/inthash.htm</a><br/>
      * <a href="http://en.wikipedia.org/wiki/Jenkins_hash_function's">http://en.wikipedia.org/wiki/Jenkins_hash_function's</a><br/>
-     * 
+     *
      * @param key key to be hashed
      * @return hashed value
      */
@@ -184,10 +182,10 @@ public final class HashFunctions {
 
     /**
      * Hashing long to int.
-     * 
+     * <p/>
      * <h3>Links</h3>
      * <a href="http://www.concentric.net/~ttwang/tech/inthash.htm">http://www.concentric.net/~ttwang/tech/inthash.htm</a><br/>
-     * 
+     *
      * @param key key to be hashed
      * @return hashed value
      */
@@ -200,23 +198,24 @@ public final class HashFunctions {
         key = key ^ (key >>> 22);
         return (int) key;
     }
+
     /**
      * Fowler/Noll/Vo hash algorithms FNV_BASIS constant
-     * 
+     * <p/>
      * <h3>Links</h3>
      * <a href="http://www.isthe.com/chongo/tech/comp/fnv/#FNV-param">http://www.isthe.com/chongo/tech/comp/fnv/#FNV-param</a><br/>
      */
     public static final long FNV_BASIS = 0x811c9dc5;
     /**
      * Fowler/Noll/Vo hash algorithms FNV_PRIME constant for 32 bit hash
-     * 
+     * <p/>
      * <h3>Links</h3>
      * <a href="http://www.isthe.com/chongo/tech/comp/fnv/#FNV-param">http://www.isthe.com/chongo/tech/comp/fnv/#FNV-param</a><br/>
      */
     public static final long FNV_PRIME_32 = 16777619;//(1 << 24) + 0x193;
     /**
      * Fowler/Noll/Vo hash algorithms FNV_PRIME constant for 64 bit hash
-     * 
+     * <p/>
      * <h3>Links</h3>
      * <a href="http://www.isthe.com/chongo/tech/comp/fnv/#FNV-param">http://www.isthe.com/chongo/tech/comp/fnv/#FNV-param</a><br/>
      */
@@ -224,20 +223,20 @@ public final class HashFunctions {
 
     /**
      * Fowler-Noll-Vo 32 bit hash (FNV-1a) for bytes array.<br/>
-     * 
+     * <p/>
      * <h3>Algorithm</h3>
-     * 
+     * <p/>
      * <pre>
      * hash = offset_basis
      * for each octet_of_data to be hashed
      *    hash = hash xor octet_of_data
      *    hash = hash * FNV_prime
      * return hash</pre>
-     * 
+     *
      * <h3>Links</h3>
      * <a href="http://www.isthe.com/chongo/tech/comp/fnv/">http://www.isthe.com/chongo/tech/comp/fnv/</a><br/>
      * <a href="http://en.wikipedia.org/wiki/Fowler%E2%80%93Noll%E2%80%93Vo_hash_function">http://en.wikipedia.org/wiki/Fowler%E2%80%93Noll%E2%80%93Vo_hash_function</a><br/>
-     * 
+     *
      * @param bytes bytes array to hash
      * @return hash of the initial bytes array
      */
@@ -251,22 +250,21 @@ public final class HashFunctions {
     }
 
     /**
-     * 
      * Fowler-Noll-Vo 32 bit hash (FNV-1a) for integer key. This is big-endian version (native endianess of JVM).<br/>
-     * 
+     * <p/>
      * <h3>Algorithm</h3>
-     * 
+     * <p/>
      * <pre>
      * hash = offset_basis
      * for each octet_of_data to be hashed
      *    hash = hash xor octet_of_data
      *    hash = hash * FNV_prime
      * return hash</pre>
-     * 
+     *
      * <h3>Links</h3>
      * <a href="http://www.isthe.com/chongo/tech/comp/fnv/">http://www.isthe.com/chongo/tech/comp/fnv/</a><br/>
      * <a href="http://en.wikipedia.org/wiki/Fowler%E2%80%93Noll%E2%80%93Vo_hash_function">http://en.wikipedia.org/wiki/Fowler%E2%80%93Noll%E2%80%93Vo_hash_function</a><br/>
-     * 
+     *
      * @param c integer key to be hashed
      * @return hash 32 bit hash
      */
@@ -284,24 +282,23 @@ public final class HashFunctions {
     }
 
     /**
-     * 
      * Fowler-Noll-Vo 64 bit hash (FNV-1a) for bytes array.<br/>
-     * 
+     * <p/>
      * <h3>Algorithm</h3>
-     * 
+     * <p/>
      * <pre>
      * hash = offset_basis
      * for each octet_of_data to be hashed
      *    hash = hash xor octet_of_data
      *    hash = hash * FNV_prime
      * return hash</pre>
-     * 
+     *
      * <h3>Links</h3>
      * <a href="http://www.isthe.com/chongo/tech/comp/fnv/">http://www.isthe.com/chongo/tech/comp/fnv/</a><br/>
      * <a href="http://en.wikipedia.org/wiki/Fowler%E2%80%93Noll%E2%80%93Vo_hash_function">http://en.wikipedia.org/wiki/Fowler%E2%80%93Noll%E2%80%93Vo_hash_function</a><br/>
-     * 
+     *
      * @param bytes bytes array to hash
-     * @return hash 64 bit hash 
+     * @return hash 64 bit hash
      */
     public static long FVN64hash(byte[] bytes) {
         long hash = FNV_BASIS;
@@ -313,22 +310,21 @@ public final class HashFunctions {
     }
 
     /**
-     * 
      * Fowler-Noll-Vo 64 bit hash (FNV-1a) for long key. This is big-endian version (native endianess of JVM).<br/>
-     * 
+     * <p/>
      * <h3>Algorithm</h3>
-     * 
+     * <p/>
      * <pre>
      * hash = offset_basis
      * for each octet_of_data to be hashed
      *    hash = hash xor octet_of_data
      *    hash = hash * FNV_prime
      * return hash</pre>
-     * 
+     *
      * <h3>Links</h3>
      * <a href="http://www.isthe.com/chongo/tech/comp/fnv/">http://www.isthe.com/chongo/tech/comp/fnv/</a><br/>
      * <a href="http://en.wikipedia.org/wiki/Fowler%E2%80%93Noll%E2%80%93Vo_hash_function">http://en.wikipedia.org/wiki/Fowler%E2%80%93Noll%E2%80%93Vo_hash_function</a><br/>
-     * 
+     *
      * @param c long key to be hashed
      * @return hash 64 bit hash
      */
@@ -354,22 +350,21 @@ public final class HashFunctions {
     }
 
     /**
-     * 
      * Fowler-Noll-Vo 32 bit hash (FNV-1a) for long key. This is big-endian version (native endianess of JVM).<br/>
-     * 
+     * <p/>
      * <h3>Algorithm</h3>
-     * 
+     * <p/>
      * <pre>
      * hash = offset_basis
      * for each octet_of_data to be hashed
      *    hash = hash xor octet_of_data
      *    hash = hash * FNV_prime
      * return hash</pre>
-     * 
+     *
      * <h3>Links</h3>
      * <a href="http://www.isthe.com/chongo/tech/comp/fnv/">http://www.isthe.com/chongo/tech/comp/fnv/</a><br/>
      * <a href="http://en.wikipedia.org/wiki/Fowler%E2%80%93Noll%E2%80%93Vo_hash_function">http://en.wikipedia.org/wiki/Fowler%E2%80%93Noll%E2%80%93Vo_hash_function</a><br/>
-     * 
+     *
      * @param c long key to be hashed
      * @return hash 32 bit hash
      */
@@ -396,16 +391,15 @@ public final class HashFunctions {
 
     /**
      * MurmurHash hash function for bytes array.
-     * 
+     * <p/>
      * <h3>Links</h3>
      * <a href="http://sites.google.com/site/murmurhash/">http://sites.google.com/site/murmurhash/</a><br/>
      * <a href="http://dmy999.com/article/50/murmurhash-2-java-port">http://dmy999.com/article/50/murmurhash-2-java-port</a><br/>
      * <a href="http://en.wikipedia.org/wiki/MurmurHash">http://en.wikipedia.org/wiki/MurmurHash</a><br/>
-     * 
+     *
      * @param data bytes to be hashed
      * @param seed seed parameter
-     * 
-     * @return 32 bit hash 
+     * @return 32 bit hash
      */
     @SuppressWarnings("fallthrough")
     public static int MurmurHash2(byte[] data, int seed) {
@@ -455,16 +449,15 @@ public final class HashFunctions {
 
     /**
      * MurmurHash hash function integer.
-     *
+     * <p/>
      * <h3>Links</h3>
      * <a href="http://sites.google.com/site/murmurhash/">http://sites.google.com/site/murmurhash/</a><br/>
      * <a href="http://dmy999.com/article/50/murmurhash-2-java-port">http://dmy999.com/article/50/murmurhash-2-java-port</a><br/>
      * <a href="http://en.wikipedia.org/wiki/MurmurHash">http://en.wikipedia.org/wiki/MurmurHash</a><br/>
-     * 
-     * @param c int to be hashed
+     *
+     * @param c    int to be hashed
      * @param seed seed parameter
-     * 
-     * @return 32 bit hash 
+     * @return 32 bit hash
      */
     public static int MurmurHash2(int c, int seed) {
         // 'm' and 'r' are mixing constants generated offline.
@@ -485,15 +478,14 @@ public final class HashFunctions {
 
     /**
      * MurmurHash hash function for bytes array with default seed value equals 0x2f1a32b3.
-     * 
+     * <p/>
      * <h3>Links</h3>
      * <a href="http://sites.google.com/site/murmurhash/">http://sites.google.com/site/murmurhash/</a><br/>
      * <a href="http://dmy999.com/article/50/murmurhash-2-java-port">http://dmy999.com/article/50/murmurhash-2-java-port</a><br/>
      * <a href="http://en.wikipedia.org/wiki/MurmurHash">http://en.wikipedia.org/wiki/MurmurHash</a><br/>
-     * 
+     *
      * @param data bytes to be hashed
-     * 
-     * @return 32 bit hash 
+     * @return 32 bit hash
      */
     public static int MurmurHash2(byte[] data) {
         return MurmurHash2(data, 0x2f1a32b3);
@@ -501,15 +493,14 @@ public final class HashFunctions {
 
     /**
      * MurmurHash hash function integer with default seed value equals to 0x2f1a32b3.
-     *
+     * <p/>
      * <h3>Links</h3>
      * <a href="http://sites.google.com/site/murmurhash/">http://sites.google.com/site/murmurhash/</a><br/>
      * <a href="http://dmy999.com/article/50/murmurhash-2-java-port">http://dmy999.com/article/50/murmurhash-2-java-port</a><br/>
      * <a href="http://en.wikipedia.org/wiki/MurmurHash">http://en.wikipedia.org/wiki/MurmurHash</a><br/>
-     * 
+     *
      * @param c int to be hashed\
-     * 
-     * @return 32 bit hash 
+     * @return 32 bit hash
      */
     public static int MurmurHash2(int c) {
         return MurmurHash2(c, 0x2f1a32b3);

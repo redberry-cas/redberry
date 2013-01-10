@@ -25,11 +25,11 @@ package cc.redberry.core.utils;
 import java.util.Arrays;
 
 /**
- * Wrapper for generic array of integers. This wrapper holds inner array
- * immutability.
+ * Immutable integer array. This class is a simple wrapper of generic array of integers.
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @since 1.0
  */
 public final class IntArray {
     public static final IntArray EMPTY_ARRAY = new IntArray(new int[0]);
