@@ -25,11 +25,13 @@ package cc.redberry.core.indexmapping;
 import cc.redberry.core.tensor.Tensor;
 
 /**
+ * Factory for {@link IndexMappingProvider}. Implementations of this interface are coded inside each type-specific
+ * {@link IndexMappingProvider} class.
+ *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  * @since 1.0
  */
 interface IndexMappingProviderFactory {
-
     IndexMappingProvider create(IndexMappingProvider opu, Tensor from, Tensor to);
 }

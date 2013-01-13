@@ -27,6 +27,8 @@ import cc.redberry.core.number.NumberUtils;
 import cc.redberry.core.tensor.Tensor;
 
 /**
+ * {@link cc.redberry.core.tensor.Power}-specific mapping provider.
+ *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  * @since 1.0

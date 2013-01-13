@@ -36,8 +36,11 @@ import java.util.Collections;
 import java.util.List;
 
 /**
+ * {@link Product}-specific mapping provider.
+ *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @see SimpleProductMappingsPort
  * @since 1.0
  */
 final class ProviderProduct implements IndexMappingProvider {

@@ -25,7 +25,8 @@ package cc.redberry.core.indexmapping;
 import java.util.Map;
 
 /**
- * Intermediate representation of mapping of indices needed at the stage of creating.
+ * Intermediate representation of mapping of indices needed inside the index mapping calculation pipeline (the basic
+ * implementation idea could be found in the description of {@link IndexMappingProvider}).
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
@@ -37,10 +38,8 @@ public interface IndexMappingBuffer {
      *
      * @param from from index
      * @param to   to index
-     * @return {@code true} if new mapping entry was created and {@code false}, if it is already exist
-     * @throws IllegalArgumentException if mapping entry {@code from->to} is
-     *                                  inconsistent with mapping entries existing
-     *                                  in this mapping (clash).
+     * @return {@code true} if new mapping entry was created or {@code false} if this mapping is inconsistent with
+     *         previously added (other mapping to -> from1, where from1 != from, exists)
      */
     boolean tryMap(int from, int to);
 
@@ -71,9 +70,9 @@ public interface IndexMappingBuffer {
     boolean getSign();
 
     /**
-     * NOT PUBLIC API
+     * NOT PUBLIC A API
      *
-     * @return NOT PUBLIC API
+     * @return NOT PUBLIC A API
      */
     FromToHolder export();
 
@@ -82,7 +81,7 @@ public interface IndexMappingBuffer {
      *
      * @return the internal mapping container
      */
-    //TODO TIntObjectHashMap
+    //TODO TIntObjectHashMap ( YES issue #86 !)
     Map<Integer, IndexMappingBufferRecord> getMap();
 
     /**

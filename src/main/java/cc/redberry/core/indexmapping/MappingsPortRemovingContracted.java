@@ -23,6 +23,9 @@
 package cc.redberry.core.indexmapping;
 
 /**
+ * Wrapper class for {@link MappingsPort} that invokes a
+ * {@link cc.redberry.core.indexmapping.IndexMappingBuffer#removeContracted()} method for each output object.
+ *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  * @since 1.0

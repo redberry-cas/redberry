@@ -25,6 +25,8 @@ package cc.redberry.core.indexmapping;
 import cc.redberry.core.tensor.Tensor;
 
 /**
+ * {@link cc.redberry.core.tensor.functions.ScalarFunction}-specific mapping provider.
+ *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  * @since 1.0

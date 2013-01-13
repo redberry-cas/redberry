@@ -26,7 +26,7 @@ import cc.redberry.core.utils.ArraysUtils;
 
 /**
  * Holds the array of from indices and to indices of mapping.
- * This class is technical and not a part of public API.
+ * This class is technical and not a part of the public API.
  *
  * @author Dmitriy Bolotin
  * @author Stanislav Poslavsky

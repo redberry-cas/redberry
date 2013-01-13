@@ -31,6 +31,8 @@ import cc.redberry.core.tensor.TensorField;
 import java.util.Iterator;
 
 /**
+ * {@link SimpleTensor}-specific mapping provider.
+ *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  * @since 1.0

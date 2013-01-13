@@ -26,6 +26,8 @@ import cc.redberry.core.combinatorics.IntPermutationsGenerator;
 import cc.redberry.core.tensor.Tensor;
 
 /**
+ * Provides mappings for all possible one-to-one mappings between from and to tensor arrays.
+ *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  * @since 1.0
