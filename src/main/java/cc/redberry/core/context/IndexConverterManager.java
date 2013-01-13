@@ -26,8 +26,8 @@ import cc.redberry.core.indices.IndexType;
 import gnu.trove.set.hash.TByteHashSet;
 
 /**
- * This class is responsible for the reflection between string and
- * integer internal Redberry representations of single tensor index.
+ * This class is responsible for the mapping between strings and
+ * internal integer Redberry ids of single tensor index.
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky

@@ -28,8 +28,8 @@ import cc.redberry.core.parser.Parser;
 import java.util.EnumSet;
 
 /**
- * A simple container of context-sensitive raw Redberry information (like string name of metrics etc.),
- * which then used in the constructor of {@link Context} class.
+ * A container for context-specific Redberry information (like string name of metrics),
+ * which is then used in the construction process of {@link Context} object.
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
@@ -63,7 +63,7 @@ public class ContextSettings {
     }
 
     /**
-     * Set specified index type to be non metric.
+     * Set specified index type to be a non metric.
      *
      * @param type index type
      */

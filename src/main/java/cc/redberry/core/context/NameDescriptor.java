@@ -23,33 +23,32 @@
 package cc.redberry.core.context;
 
 import cc.redberry.core.indices.IndicesSymmetries;
-import cc.redberry.core.indices.StructureOfIndices;
 import cc.redberry.core.indices.SimpleIndices;
+import cc.redberry.core.indices.StructureOfIndices;
 
 import java.util.Arrays;
 
 /**
- * <p>This class reflects a unique mathematical nature of simple tensors and tensor fields. It holds the information
- * about string name of simple tensor, structure of its indices and arguments (in case of tensor field). Two simple
- * tensors are considered to have different mathematical nature if and only if their name descriptors
- * are not equal. Each simple tensor with unique mathematical nature have its own unique integer identifier, which
- * is hold in the name descriptor. For example, tensors A_mn and A_ij have same mathematical origin and
- * thus have similar integer identifiers and both have unique same name descriptor (same reference). In contrast,
- * for example, tensors A_mn and A_i have different mathematical origin and different integer identifiers.</p>
- * <p/>
- * <p>This class have no public constructor, since Redberry should be confident, that tensors with same
- * mathematical origin have same descriptors, and the work with descriptors should be carried out through
- * {@link NameManager}. The only way to receive name descriptor from raw information about
- * tensor is via {@link NameManager#mapNameDescriptor(String, cc.redberry.core.indices.StructureOfIndices...)}.
- * In order to receive the descriptor from unique simple tensor identifier, one should use
- * {@link NameManager#getNameDescriptor(int)}</p>
+ * Object of this class represents unique type of simple tensor or tensor fields (unique name).
+ *
+ * <p>It holds the information about string name of simple tensor, structure of its indices and arguments
+ * (in case of tensor field). Two simple tensors are considered to have different mathematical nature if and only if
+ * their name descriptors are not equal. Each simple tensor with unique mathematical nature have its own unique integer
+ * identifier, which is hold in the name descriptor. For example, tensors A_mn and A_ij have the same mathematical
+ * origin and thus have the same integer identifier and both have the same name descriptor (the same reference). In
+ * contrast, for example, tensors A_mn and A_i have different mathematical origin and different integer identifiers.</p>
+ *
+ * <p>This class have no public constructors, since Redberry takes care about its creation (see {@link NameManager}).
+ * The only way to receive name descriptor from raw information about tensor is through
+ * {@link NameManager#mapNameDescriptor(String, cc.redberry.core.indices.StructureOfIndices...)}.
+ * In order to receive the descriptor from a simple tensor object, one should use
+ * {@link cc.redberry.core.tensor.SimpleTensor#getNameDescriptor()} method.</p>
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  * @since 1.0
  */
 public abstract class NameDescriptor {
-
     //first element is simple tensor indexTypeStructure, other appears for tensor fields
     final StructureOfIndices[] indexTypeStructures;
     private final int id;
@@ -106,7 +105,7 @@ public abstract class NameDescriptor {
      * @return structure of indices of tensors and their arguments
      */
     public StructureOfIndices[] getStructuresOfIndices() {
-        //todo clone()
+        //todo clone() ?
         return indexTypeStructures;
     }
 

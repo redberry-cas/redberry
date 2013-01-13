@@ -23,7 +23,7 @@
 package cc.redberry.core.context;
 
 /**
- * Factory interface for {@link Context} creation.
+ * A factory interface for {@link Context} creation.
  *
  * @author Dmitriy Bolotin
  * @author Stanislav Poslavsky
@@ -31,7 +31,7 @@ package cc.redberry.core.context;
  */
 public interface ContextFactory {
     /**
-     * Returns context.
+     * Creates a context object.
      *
      * @return context
      */

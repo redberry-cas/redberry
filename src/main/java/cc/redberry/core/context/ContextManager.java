@@ -30,10 +30,11 @@ import java.util.concurrent.ThreadFactory;
 
 /**
  * This class implements context management logic.
- * It holds current thread-local context of Redberry session. It is possible
- * to set context explicitly using {@link #setCurrentContext(Context)} method.
+ *
+ * <p>It holds current thread-local context of Redberry session (see description for {@link Context} class).
+ * It is possible to set context explicitly using {@link #setCurrentContext(Context)} method.
  * Each thread is linked to its own context. All child threads created via {@code ExecutorService}
- * from {@link #getExecutorService()} have same context.
+ * from {@link #getExecutorService()} have same context.</p>
  *
  * @author Dmitriy Bolotin
  * @author Stanislav Poslavsky
@@ -41,7 +42,7 @@ import java.util.concurrent.ThreadFactory;
  */
 public final class ContextManager {
     /**
-     * Thread-local container for current context
+     * Thread-local container for the current context
      */
     private final static ThreadLocal<ContextContainer> threadLocalContainer = new ThreadLocal<ContextContainer>() {
         @Override
@@ -73,8 +74,8 @@ public final class ContextManager {
 
     /**
      * This method initializes and sets current session context by the default
-     * value defined in {@link DefaultContextFactory}. After this step, all the
-     * tensors that exist in the thread will be broken.
+     * value defined in {@link DefaultContextFactory}. After this step, all
+     * tensors that exist in the thread will be invalidated.
      *
      * @return created context
      */
@@ -86,8 +87,9 @@ public final class ContextManager {
 
     /**
      * This method initializes and sets current session context from
-     * the specified {@code context settings}. After this step, all the
-     * tensors that exist in the thread will be broken.
+     * the specified {@code context settings} ({@link ContextSettings}).
+     * After invocation of this method, all the tensors that exist in
+     * the current thread will be invalidated.
      *
      * @return created context
      */
@@ -99,7 +101,7 @@ public final class ContextManager {
 
     /**
      * Sets current thread-local context to the specified one. After this step, all the
-     * tensors that exist in the thread will be broken.
+     * tensors that exist in the thread will be invalidated.
      *
      * @param context context
      */
