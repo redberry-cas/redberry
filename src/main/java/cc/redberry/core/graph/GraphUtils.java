@@ -29,7 +29,7 @@ import java.util.Arrays;
 import java.util.Deque;
 
 /**
- * Static useful graph algorithms.
+ * This class implements useful graph algorithms.
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
@@ -37,18 +37,16 @@ import java.util.Deque;
  */
 public class GraphUtils {
     /**
-     * Calculates connected components of graph from its list of edges.
-     * The list of edges is represented by array {@code _from}, which contains 'from' vertices,
-     * and array {@code _to}, which contains vertices connected with corresponding 'from'.
-     * Vertices are numbered from zero to {@code vertexes - 1}, where
-     * {@code vertexes} is the total number of vertices of graph. All elements
-     * in arrays {@code _from} and {@code _to} should be less then the total
-     * number of vertices.
-     * <p/>
-     * <br>The resulting array have length equal to the total number of vertices plus one. Two vertices A and B
-     * belongs to the same connected component if the resulting array have equal numbers at positions
-     * A and B. The last element in the resulting array is the total number of connected components.
-     * </br>
+     * Calculates connected components of the graph from its list of edges.
+     * The list of edges is provided as two arrays ({@code _from}, which contains 'from' vertices
+     * indices, and array {@code _to}, which contains vertices indices connected with corresponding
+     * 'from' vertices). Vertices are indexed from zero to {@code vertexes - 1}, where
+     * {@code vertexes} is the total number of vertices of the graph. All indices
+     * in arrays {@code _from} and {@code _to} should be in the range [ 0 .. (vertices -1) ].
+     *
+     * <p>The resulting array have length equal to the total number of vertices plus one. Two vertices A and B
+     * belongs to the same connected component if the resulting array have equal values at positions
+     * A and B. The last element in the resulting array represents the total number of connected components.
      *
      * @param _from    array of 'from' vertices
      * @param _to      array of 'to' vertices
@@ -150,7 +148,7 @@ public class GraphUtils {
     }
 
     /**
-     * First "-1" in the array
+     * Finds first "-1" in the array
      */
     private static int firstM1(int[] arr) {
         for (int i = 0; i < arr.length; ++i)
@@ -170,7 +168,7 @@ public class GraphUtils {
     }
 
     /**
-     * Returns the number of vertices belonging to the same connected component as specified {@code vertex}.
+     * Returns the number of vertices belonging to the connected component containing specified {@code vertex}.
      *
      * @param vertex     vertex of the graph
      * @param components the array, produced by {@link #calculateConnectedComponents(int[], int[], int)}

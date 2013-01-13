@@ -254,7 +254,8 @@ public final class Context {
      * @param index1 first index
      * @param index2 second index
      * @return Kronecker tensor with specified upper and lower indices
-     * @throws IllegalArgumentException if indices have same states, or indices have different types
+     * @throws IllegalArgumentException if indices have same states
+     * @throws IllegalArgumentException if indices have different types
      */
     public SimpleTensor createKronecker(int index1, int index2) {
         byte type;
@@ -277,8 +278,9 @@ public final class Context {
      * @param index1 first index
      * @param index2 second index
      * @return metric tensor with specified indices
-     * @throws IllegalArgumentException if indices have different states, or indices have different types,
-     *                                  or indices are not of metric type
+     * @throws IllegalArgumentException if indices have different states
+     * @throws IllegalArgumentException if indices have different types
+     * @throws IllegalArgumentException if indices have non metric types
      */
     public SimpleTensor createMetric(int index1, int index2) {
         byte type;
@@ -300,8 +302,8 @@ public final class Context {
      * @param index2 second index
      * @return metric tensor if specified indices have same states and
      *         Kronecker tensor if specified indices have different states
-     * @throws IllegalArgumentException if indices have different types, or indices have the same states and are
-     *                                  not of metric type
+     * @throws IllegalArgumentException if indices have different types
+     * @throws IllegalArgumentException if indices have same states and non metric types
      */
     public SimpleTensor createMetricOrKronecker(int index1, int index2) {
         if (IndicesUtils.getRawStateInt(index1) == IndicesUtils.getRawStateInt(index2))
