@@ -155,28 +155,37 @@ public final class Tensors {
      * @return the array of tensors with renamed dummy indices
      */
     public static Tensor[] resolveDummy(Tensor[] factors) {
-        //TODO preserve ordering    //?
         Tensor[] result = new Tensor[factors.length];
         TIntHashSet forbidden = new TIntHashSet();
         ArrayList<Tensor> toResolve = new ArrayList<>();
-        int position = -1;
-        for (Tensor f : factors) {
-            if (f instanceof Sum || f.getIndices().getFree().size() == 0) {
+        //int position = -1;
+        int i;
+        Tensor f;
+        for (i = factors.length - 1; i >= 0; --i) {
+            if ((f = factors[i]) instanceof Sum || f.getIndices().getFree().size() == 0) {
                 toResolve.add(f);
                 forbidden.addAll(f.getIndices().getFree().getAllIndices().copy());
             } else {
                 forbidden.addAll(TensorUtils.getAllIndicesNamesT(f));
-                result[++position] = f;
+                result[i] = f;
             }
         }
 
         Tensor factor, newFactor;
-        for (int i = toResolve.size() - 1; i >= 0; --i) {
-            factor = toResolve.get(i);
-            newFactor = ApplyIndexMapping.renameDummy(factor, forbidden.toArray());
-            forbidden.addAll(TensorUtils.getAllIndicesNamesT(newFactor));
-            result[++position] = newFactor;
-        }
+        int toResolvePosition = toResolve.size();
+        for (i = factors.length - 1; i >= 0; --i)
+            if (result[i] == null) {
+                factor = toResolve.get(--toResolvePosition);
+                newFactor = ApplyIndexMapping.renameDummy(factor, forbidden.toArray());
+                forbidden.addAll(TensorUtils.getAllIndicesNamesT(newFactor));
+                result[i] = newFactor;
+            }
+//        for (int i = toResolve.size() - 1; i >= 0; --i) {
+//            factor = toResolve.get(i);
+//            newFactor = ApplyIndexMapping.renameDummy(factor, forbidden.toArray());
+//            forbidden.addAll(TensorUtils.getAllIndicesNamesT(newFactor));
+//            result[++position] = newFactor;
+//        }
         return result;
     }
 

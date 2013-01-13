@@ -43,7 +43,6 @@ public abstract class IntCombinatorialGenerator
      *
      * @return the reference on the current iteration element
      */
-
     public abstract int[] getReference();
 
     @Override

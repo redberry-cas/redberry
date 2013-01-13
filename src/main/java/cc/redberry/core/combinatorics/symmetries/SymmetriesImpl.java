@@ -53,7 +53,7 @@ final class SymmetriesImpl extends AbstractSymmetries {
         if (symmetry.dimension() != dimension)
             throw new IllegalArgumentException();
         PermutationsSpanIterator<Symmetry> it = new PermutationsSpanIterator<>(basis);
-        //BOTTLENECK review
+        //TODO BOTTLENECK review
         while (it.hasNext()) {
             Symmetry s = it.next();
             if (s.equals(symmetry))
@@ -83,7 +83,6 @@ final class SymmetriesImpl extends AbstractSymmetries {
      *         and all possible symmetries, which can be obtained by composing
      *         the basis symmetries, i.e. it works as
      *         {@code PermutationsSpanIterator}
-     *
      * @see PermutationsSpanIterator
      */
     @Override

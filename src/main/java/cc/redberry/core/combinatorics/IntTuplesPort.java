@@ -44,10 +44,10 @@ import java.util.Arrays;
  * [1, 2, 0]
  * [1, 2, 1]
  * </pre></code>
- * <p/>
+ *
  * <p>This class is implemented via output port pattern and the calculation of the next
- * tuple occurs only on the invocation of {@link #take()}.
- * <b>Note:</b> method {@link #take()} returns the same reference on each invocation.
+ * tuple occurs only on the invocation of {@link #take()}.</p>
+ * <p><b>Note:</b> method {@link #take()} returns the same reference on each invocation.
  * So, if it is needed not only to obtain the information from {@link #take()}, but also save the result,
  * it is necessary to clone the returned array.</p>
  *
