@@ -22,8 +22,8 @@
  */
 
 /**
- * Implementation of numbers in Redberry. The implementation includes real numbers ({@link Real}):
- * big rational ({@link Rational}), floating point ({@link Numeric}) and complex numbers ({@link Complex}) over
+ * Implementation of numbers in Redberry. The implementation includes real numbers ({@link cc.redberry.core.number.Real}):
+ * big rational ({@link cc.redberry.core.number.Rational}), floating point ({@link cc.redberry.core.number.Numeric}) and complex numbers ({@link cc.redberry.core.number.Complex}) over
  * the reals. The implementation of big rational numbers is based on the Apache Commons Math {@link org.apache.commons.math3.fraction.BigFraction}.
  */
 package cc.redberry.core.number;

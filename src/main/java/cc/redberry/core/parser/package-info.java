@@ -23,7 +23,7 @@
 
 /**
  * Parser of mathematical expressions. The implementation is based on the recursive algorithm and
- * builds the intermediate abstract syntax tree object ({@link ParseToken}). Then it can be converted
+ * builds the intermediate abstract syntax tree object ({@link cc.redberry.core.parser.ParseToken}). Then it can be converted
  * to tensor via {@link cc.redberry.core.parser.ParseToken#toTensor()}.
  *
  * @author Dmitry Bolotin
