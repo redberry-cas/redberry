@@ -29,48 +29,48 @@
  * are strictly follows a common pattern of output port, which is specified in
  * {@link cc.redberry.core.combinatorics.IntCombinatorialPort}. The calculation of the next combination occurs
  * strictly on the invocation of method {@link cc.redberry.core.combinatorics.IntCombinatorialPort#take()} and the
- * returned array is always the same reference. Some of these classes are also implements {@link java.util.Iterator} and {@link java.util.Iterable} interfaces for convenience.
+ * returned array is always the same reference. Some of these classes are also implements {@link java.util.Iterator} and {@link java.lang.Iterable} interfaces for convenience.
  * <table>
  *     <tr>
  *         <td><b>List of enumeration algorithms:</b></td>
  *         <td></td>
  *     </tr>
  *     <tr>
- *         <td>{@link IntPermutationsGenerator}</td>
+ *         <td>{@link cc.redberry.core.combinatorics.IntPermutationsGenerator}</td>
  *         <td>Enumerates all permutations of dimension N ( N! permutations). </td>
  *     </tr>
  *     <tr>
- *         <td>{@link IntCombinationsGenerator}</td>
+ *         <td>{@link cc.redberry.core.combinatorics.IntCombinationsGenerator}</td>
  *         <td>Enumerates all combinations of K elements chosen as N ( N!/(K!(N-K)!) combinations). </td>
  *     </tr>
  *     <tr>
- *         <td>{@link IntCombinationPermutationGenerator}</td>
+ *         <td>{@link cc.redberry.core.combinatorics.IntCombinationPermutationGenerator}</td>
  *         <td>Enumerates all combinations with permutations of K elements chosen as N ( N!/(N-K)! combinations). </td>
  *     </tr>
  *     <tr>
- *         <td>{@link IntDistinctTuplesPort}</td>
+ *         <td>{@link cc.redberry.core.combinatorics.IntDistinctTuplesPort}</td>
  *         <td>Enumerates all distinct N-tuples, which can be chosen from {@code N} sets of integers. </td>
  *     </tr>
  *     <tr>
- *         <td>{@link IntTuplesPort}</td>
+ *         <td>{@link cc.redberry.core.combinatorics.IntTuplesPort}</td>
  *         <td>Enumerates all N-tuples, which can be chosen from {@code N} sets of integers of the form
  *               <i>array</i><sub>i</sub> = [0, 1, 2, ..., K<sub>i</sub>]. </td>
  *     </tr>
  *     <tr>
- *         <td>{@link IntPriorityPermutationsGenerator}</td>
+ *         <td>{@link cc.redberry.core.combinatorics.IntPriorityPermutationsGenerator}</td>
  *         <td>Enumerates all permutations of dimension N ( N! permutations) and allows to affect on the
  *              enumeration order.</td>
  *     </tr>
  *     <tr>
- *         <td>{@link IntPermutationsSpanGenerator}</td>
+ *         <td>{@link cc.redberry.core.combinatorics.IntPermutationsSpanGenerator}</td>
  *         <td>Enumerates all permutations from the subgroup of a symmetric group, which is defined by a generating set.</td>
  *     </tr>
  * </table>
  * </p>
  *
  * <p><b><i>Permutations.</i></b> Permutations are represented in the one-line notation and implemented in
- * {@link Permutation}. Class {@link Symmetry} implements a permutational symmetry. Class
- * {@link PermutationsSpanIterator} allows to enumerate all permutations (or symmetries) from a given group, defined by
+ * {@link cc.redberry.core.combinatorics.Permutation}. Class {@link cc.redberry.core.combinatorics.Symmetry} implements a permutational symmetry. Class
+ * {@link cc.redberry.core.combinatorics.PermutationsSpanIterator} allows to enumerate all permutations (or symmetries) from a given group, defined by
  * a generating set.
  * </p>
  *

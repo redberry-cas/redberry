@@ -24,8 +24,8 @@
  * Implementation of mappings of indices. Package contains data structures of
  * mappings of indices and algorithms of their building.
  *
- * @see IndexMappings
- * @see IndexMappingBuffer
+ * @see cc.redberry.core.indexmapping.IndexMapping
+ * @see cc.redberry.core.indexmapping.IndexMappingBuffer
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
