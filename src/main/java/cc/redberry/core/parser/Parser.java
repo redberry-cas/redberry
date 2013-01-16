@@ -31,7 +31,7 @@ import java.util.Arrays;
  * @author Stanislav Poslavsky
  * @since 1.0
  */
-public class Parser {
+public final class Parser {
     /**
      * Default parser.
      */

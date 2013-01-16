@@ -88,4 +88,8 @@ public final class ParseManager {
                 defaultTensorPreprocessors.toArray(new Transformation[defaultTensorPreprocessors.size()]),
                 defaultParserPreprocessors.toArray(new ParseTokenTransformer[defaultParserPreprocessors.size()]));
     }
+
+    public Parser getParser() {
+        return parser;
+    }
 }
