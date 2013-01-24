@@ -46,10 +46,9 @@ import java.util.SortedMap;
  * @author Stanislav Poslavsky
  */
 class JasFactor {
-    public static final char START_CHAR = 'a';
+    static final char START_CHAR = 'a';
 
     public static Tensor factor(Tensor t) {
-//        System.out.println(t);
         TIntObjectMap<Var> vars = getVars(t);
         Var[] varsArray = vars.values(new Var[vars.size()]);
         Arrays.sort(varsArray);
@@ -71,6 +70,7 @@ class JasFactor {
             Object[] factors = PolyUtil.integerFromRationalCoefficientsFactor(factory, polyRat);
             gcd = (java.math.BigInteger) factors[0];
             lcm = (java.math.BigInteger) factors[1];
+            //todo if lcm == 0
             poly = (GenPolynomial<BigInteger>) factors[2];
         } else {
             gcd = java.math.BigInteger.ONE;
@@ -130,7 +130,7 @@ class JasFactor {
         } else if (tensor.getClass() == Complex.class) {
             return factory.getONE().multiply(numberConverter.convertComplex(((Complex) tensor)));
         }
-        throw new RuntimeException("ddd");
+        throw new RuntimeException();
     }
 
     private static interface NumberConverter<T extends RingElem<T>> {
