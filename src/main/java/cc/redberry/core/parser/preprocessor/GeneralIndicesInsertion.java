@@ -305,7 +305,8 @@ public class GeneralIndicesInsertion implements ParseTokenTransformer {
                             if ((pn = node.content[i]).tokenType != TokenType.SimpleTensor)
                                 throw new IllegalArgumentException("Error in trace indices list.");
                             if ((type = IndexType.fromShortString(((ParseTokenSimpleTensor) pn).name)) == null)
-                                throw new IllegalArgumentException("Error in trace indices list.");
+                                if ((type = IndexType.valueOf(((ParseTokenSimpleTensor) pn).name)) == null)
+                                    throw new IllegalArgumentException("Error in trace indices list.");
                             types.add(type);
                         }
                     }

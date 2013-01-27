@@ -156,4 +156,14 @@ public class GeneralIndicesInsertionTest {
         TAssert.assertEquals(parse("pv*v = G"),
                 "pv_a'*v^a' = G^a'_a'");
     }
+
+    @Test
+    public void test10() {
+        GeneralIndicesInsertion indicesInsertion = new GeneralIndicesInsertion();
+        CC.current().getParseManager().defaultParserPreprocessors.add(indicesInsertion);
+        indicesInsertion.addInsertionRule(parseSimple("A^a'_b'"), IndexType.Matrix1);
+        indicesInsertion.addInsertionRule(parseSimple("B^a'b'_c'd'e'"), IndexType.Matrix1);
+        TAssert.assertEquals(parse("A*B"), "A^{a'}_{f'}*B^{f'b'}_{c'd'e'}");
+    }
+
 }
