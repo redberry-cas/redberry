@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2012:
+ * Copyright (c) 2010-2013:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -27,8 +27,13 @@ import cc.redberry.core.number.Exponentiation;
 import cc.redberry.core.utils.TensorUtils;
 
 /**
+ * {@link TensorFactory} for powers. It performs basic simplifications and reduces the
+ * resulting power to the standard form.
+ *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @see Power
+ * @since 1.0
  */
 public final class PowerFactory implements TensorFactory {
 

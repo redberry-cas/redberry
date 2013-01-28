@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2012:
+ * Copyright (c) 2010-2013:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -22,6 +22,7 @@
  */
 package cc.redberry.core.utils;
 
+import cc.redberry.core.math.MathUtils;
 import cc.redberry.core.tensor.Tensor;
 
 import java.lang.reflect.Array;
@@ -209,6 +210,44 @@ public final class ArraysUtils {
             throw ase; // No, so rethrow original
         }
         return joinedArray;
+    }
+
+    public static <T> T[] remove(T[] array, int[] positions) {
+        if (array == null)
+            throw new NullPointerException();
+        int[] p = MathUtils.getSortedDistinct(positions);
+
+        int size = p.length, pointer = 0, s = array.length;
+        for (; pointer < size; ++pointer)
+            if (p[pointer] >= s)
+                throw new ArrayIndexOutOfBoundsException();
+
+        final Class<?> type = array.getClass().getComponentType();
+        @SuppressWarnings("unchecked") // OK, because array is of type T
+                T[] r = (T[]) Array.newInstance(type, array.length - p.length);
+
+        pointer = 0;
+        int i = -1;
+        for (int j = 0; j < s; ++j) {
+            if (pointer < size - 1 && j > p[pointer])
+                ++pointer;
+            if (j == p[pointer]) continue;
+            else r[++i] = array[j];
+        }
+        return r;
+    }
+
+    public static <T> T[] select(T[] array, int[] positions) {
+        if (array == null)
+            throw new NullPointerException();
+        int[] p = MathUtils.getSortedDistinct(positions);
+        final Class<?> type = array.getClass().getComponentType();
+        @SuppressWarnings("unchecked") // OK, because array is of type T
+                T[] r = (T[]) Array.newInstance(type, p.length);
+        int i = -1;
+        for (int j : p)
+            r[++i] = array[j];
+        return r;
     }
 
     public static int[] toArray(Set<Integer> set) {
@@ -847,7 +886,7 @@ public final class ArraysUtils {
     }
 
     /**
-     * This method is the same as {@link #quickSort(T[], int, int, java.lang.Object[]) }, but without range checking.
+     * This method is the same as {@link #quickSort(Comparable[], int, int, Object[])}, but without range checking.
      * <p/> <p><b>NOTE: this is unstable sort algorithm, so additional combinatorics of the {@code coSort} array can be
      * perfomed. Use this method only if you are sure, in what you are doing. If not - use stable sort methods like an
      * insertion sort or Tim sort.</b>
@@ -1237,7 +1276,7 @@ public final class ArraysUtils {
             throw new ArrayIndexOutOfBoundsException(toIndex);
     }
 
-    public static <T> String toString(T[] a, StringFormat<T> format) {
+    public static <T> String toString(T[] a, ToStringConverter<T> format) {
         if (a == null)
             return "null";
         int iMax = a.length - 1;
@@ -1254,7 +1293,7 @@ public final class ArraysUtils {
         }
     }
 
-    public static String toString(int[] a, StringFormat<Integer> format) {
+    public static String toString(int[] a, ToStringConverter<Integer> format) {
         if (a == null)
             return "null";
         int iMax = a.length - 1;

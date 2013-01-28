@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2012:
+ * Copyright (c) 2010-2013:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -25,9 +25,20 @@ package cc.redberry.core.indexmapping;
 import cc.redberry.concurrent.OutputPortUnsafe;
 
 /**
+ * This is an output port of mappings of indices of one tensor on another.
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @since 1.0
  */
-public interface MappingsPort extends OutputPortUnsafe<IndexMappingBuffer> {
+public interface MappingsPort
+        extends OutputPortUnsafe<IndexMappingBuffer> {
+
+    /**
+     * Returns the next mapping or {@code null} if no more mappings exist.
+     *
+     * @return the next mapping or {@code null} if no more mappings exist
+     */
+    @Override
+    public IndexMappingBuffer take();
 }

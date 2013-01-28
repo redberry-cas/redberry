@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2012:
+ * Copyright (c) 2010-2013:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -25,6 +25,23 @@ package cc.redberry.core.math.frobenius;
 import cc.redberry.concurrent.OutputPortUnsafe;
 
 /**
+ * Solves system of Frobenius equations.
+ * <p/>
+ * <p><b>Example:</b> This gives all solutions of the system of Frobenius
+ * equations { 12 x + 16 y + 20 z + 27 t = 123, x + 3 z = 12}:
+ * <pre><code>
+ * int[][] equations = {{12, 16, 20, 27, 123}, {1, 0, 3, 0, 12}};
+ * FrobeniusSolver solver = new FrobeniusSolver(equations);
+ * int[] solution;
+ * while ((solution = solver.take()) != null)
+ *      System.out.println(Arrays.toString(solution));
+ * </code></pre>
+ * </p>
+ * <p/>
+ * This class calculates solutions iteratively: method {@link #take()}
+ * calculates and returns the next solution or null, if no
+ * more solutions exist. So next solution will
+ * be calculated only on the invocation of {@link #take()}.
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
@@ -32,6 +49,13 @@ import cc.redberry.concurrent.OutputPortUnsafe;
 public final class FrobeniusSolver implements OutputPortUnsafe<int[]> {
     private final OutputPortUnsafe<int[]> provider;
 
+    /**
+     * Constructs solver from the given system of equations (see class documentation for example).
+     *
+     * @param equations system of Frobenius equations
+     * @throws IllegalArgumentException if {@code equations} have different lengths
+     * @throws IllegalArgumentException if some coefficient is negative
+     */
     public FrobeniusSolver(final int[]... equations) {
         if (equations.length == 0)
             throw new IllegalArgumentException();
@@ -44,7 +68,7 @@ public final class FrobeniusSolver implements OutputPortUnsafe<int[]> {
             if (equations[i].length != length && !assertEq(equations[i]))
                 throw new IllegalArgumentException();
 
-        //processsing initial solution: filling -1s.
+        //processing initial solution: filling -1s.
         int[] initialSolution = new int[length - 1];
         int zeroCoefficientsCount = 0;
         OUT:
@@ -92,6 +116,11 @@ public final class FrobeniusSolver implements OutputPortUnsafe<int[]> {
         //dummy.tick()
     }
 
+    /**
+     * Calculates and returns the next solution or {@code null} if no more solutions exist.
+     *
+     * @return the next solution or {@code null} if no more solutions exist
+     */
     @Override
     public int[] take() {
         return provider.take();

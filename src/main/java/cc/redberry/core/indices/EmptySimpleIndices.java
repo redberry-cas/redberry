@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2012:
+ * Copyright (c) 2010-2013:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -34,6 +34,7 @@ import cc.redberry.core.indexmapping.IndexMapping;
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @since 1.0
  */
 final class EmptySimpleIndices extends EmptyIndices implements SimpleIndices {
 
@@ -51,7 +52,7 @@ final class EmptySimpleIndices extends EmptyIndices implements SimpleIndices {
      * @return {@code EmptySimpleIndices} instance
      */
     @Override
-    public SimpleIndices getInverse() {
+    public SimpleIndices getInverted() {
         return this;
     }
 
@@ -80,7 +81,7 @@ final class EmptySimpleIndices extends EmptyIndices implements SimpleIndices {
      */
     @Override
     public void setSymmetries(IndicesSymmetries symmetries) {
-        if (symmetries.getIndicesTypeStructure().size() != 0)
+        if (symmetries.getStructureOfIndices().size() != 0)
             throw new IllegalArgumentException("Symmetries dimensions are not equal to indices size.");
     }
 
@@ -138,7 +139,7 @@ final class EmptySimpleIndices extends EmptyIndices implements SimpleIndices {
     }
 
     @Override
-    public IndicesTypeStructure getIndicesTypeStructure() {
-        return IndicesTypeStructure.EMPTY;
+    public StructureOfIndices getStructureOfIndices() {
+        return StructureOfIndices.EMPTY;
     }
 }

@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2012:
+ * Copyright (c) 2010-2013:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -23,6 +23,7 @@
 package cc.redberry.core.tensor.functions;
 
 import cc.redberry.core.number.Complex;
+import cc.redberry.core.number.ComplexUtils;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.tensor.TensorBuilder;
 import cc.redberry.core.tensor.TensorFactory;
@@ -33,6 +34,7 @@ import cc.redberry.core.utils.TensorUtils;
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @since 1.0
  */
 public class ArcCot extends ScalarFunction {
 
@@ -79,6 +81,8 @@ public class ArcCot extends ScalarFunction {
                 return arg.get(0);
             if (TensorUtils.isZero(arg))
                 return Tensors.parse("pi/2");
+            if (TensorUtils.isNumeric(arg))
+                return ComplexUtils.arccot((Complex) arg);
             return new ArcCot(arg);
         }
     }

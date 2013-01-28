@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2012:
+ * Copyright (c) 2010-2013:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -23,10 +23,11 @@
 package cc.redberry.core.indices;
 
 /**
- * Factory methods for indices creation are collected in this class.
+ * Factory methods for indices creation.
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @since 1.0
  */
 //TODO discuss with Stas. Final revision of indices types....
 public class IndicesFactory {
@@ -40,12 +41,27 @@ public class IndicesFactory {
      */
     public static final SimpleIndices EMPTY_SIMPLE_INDICES = EmptySimpleIndices.EMPTY_SIMPLE_INDICES_INSTANCE;
 
+    /**
+     * Creates simple indices from specified integer array and with specified symmetries.
+     *
+     * @param symmetries symmetries of indices
+     * @param data       integer array of indices
+     * @return simple indices
+     * @throws InconsistentIndicesException if array contains more then one same integer
+     */
     public static SimpleIndices createSimple(IndicesSymmetries symmetries, int... data) {
         if (data.length == 0)
             return EmptySimpleIndices.EMPTY_SIMPLE_INDICES_INSTANCE;
         return new SimpleIndicesIsolated(data.clone(), symmetries);
     }
 
+    /**
+     * Creates simple indices from specified {@link Indices} object and with specified symmetries.
+     *
+     * @param symmetries symmetries of indices
+     * @param indices    {@link Indices} object
+     * @return simple indices
+     */
     public static SimpleIndices createSimple(IndicesSymmetries symmetries, Indices indices) {
         if (indices.size() == 0)
             return EmptySimpleIndices.EMPTY_SIMPLE_INDICES_INSTANCE;
@@ -54,8 +70,15 @@ public class IndicesFactory {
         return new SimpleIndicesIsolated(indices.getAllIndices().copy(), symmetries);
     }
 
-    //Rename to just create
-    public static Indices createSorted(Indices indices) {
+    /**
+     * Creates unordered indices from specified {@code Indices} object. The resulting indices
+     * will contain exactly the same indices as specified {@code Indices} object, by may have different
+     * terms of ordering, in case when the specified indices are {@link SimpleIndices}.
+     *
+     * @param indices {@code Indices} object
+     * @return unordered indices created from specified {@code Indices} object
+     */
+    public static Indices create(Indices indices) {
         if (indices.size() == 0)
             return EMPTY_INDICES;
         if (indices instanceof SortedIndices)
@@ -63,7 +86,13 @@ public class IndicesFactory {
         return new SortedIndices(indices.getAllIndices().copy());
     }
 
-    public static Indices createSorted(int... data) {
+    /**
+     * Creates unordered indices from specified integer array of indices.
+     *
+     * @return unordered indices from specified integer array of indices
+     * @throws InconsistentIndicesException if array contains more then one same integer
+     */
+    public static Indices create(int... data) {
         if (data.length == 0)
             return EMPTY_INDICES;
         return new SortedIndices(data.clone());

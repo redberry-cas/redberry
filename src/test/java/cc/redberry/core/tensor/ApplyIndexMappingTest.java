@@ -1,6 +1,28 @@
+/*
+ * Redberry: symbolic tensor computations.
+ *
+ * Copyright (c) 2010-2013:
+ *   Stanislav Poslavsky   <stvlpos@mail.ru>
+ *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
+ *
+ * This file is part of Redberry.
+ *
+ * Redberry is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Redberry is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
+ */
 package cc.redberry.core.tensor;
 
-import cc.redberry.core.*;
+import cc.redberry.core.TAssert;
 import cc.redberry.core.indexmapping.IndexMappingBuffer;
 import cc.redberry.core.indexmapping.IndexMappingBufferImpl;
 import cc.redberry.core.indexmapping.IndexMappings;
@@ -46,7 +68,6 @@ public class ApplyIndexMappingTest {
 
         Tensor target = parse("g_ab");
         target = ApplyIndexMapping.applyIndexMapping(target, imb, new int[0]);
-        System.out.println(target);
         Tensor standard = parse("g^mn");
         Assert.assertTrue(TensorUtils.equalsExactly(target, standard));
     }
@@ -177,8 +198,8 @@ public class ApplyIndexMappingTest {
 
         target = ApplyIndexMapping.applyIndexMapping(target, imb, usedIndices);
         Tensor standard = parse("A_{wfexhk}*B^{xhk}_{z}*A^{z}_{sql}*B^{sql}_{yg}");
-        System.out.println(target);
-        //Assert.assertTrue(TensorUtils.equalsExactly(target, standard));
+//        System.out.println(target);
+//        //Assert.assertTrue(TensorUtils.equalsExactly(target, standard));
         Assert.assertTrue(TensorUtils.equalsExactly(target, standard));
     }
 
@@ -309,6 +330,7 @@ public class ApplyIndexMappingTest {
     */
 
     @Test
+    @Ignore
     public void performanceRenameDummy() {
 
         Tensor init, temp;

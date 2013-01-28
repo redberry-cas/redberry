@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2012:
+ * Copyright (c) 2010-2013:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -27,7 +27,6 @@ import cc.redberry.core.number.Complex;
 import java.math.BigInteger;
 
 /**
- *
  * @author Stanislav Poslavsky
  */
 public class ComplexToken implements TokenParser<Complex> {

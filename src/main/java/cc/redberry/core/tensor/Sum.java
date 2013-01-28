@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2012:
+ * Copyright (c) 2010-2013:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -24,6 +24,7 @@ package cc.redberry.core.tensor;
 
 import cc.redberry.core.context.OutputFormat;
 import cc.redberry.core.indices.Indices;
+import cc.redberry.core.number.Complex;
 import cc.redberry.core.utils.ArraysUtils;
 import cc.redberry.core.utils.TensorHashCalculator;
 import cc.redberry.core.utils.TensorUtils;
@@ -31,8 +32,11 @@ import cc.redberry.core.utils.TensorUtils;
 import java.util.Arrays;
 
 /**
+ * Representation of sum.
+ *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @since 1.0
  */
 public final class Sum extends MultiTensor {
 
@@ -129,6 +133,20 @@ public final class Sum extends MultiTensor {
     }
 
     @Override
+    protected Complex getNeutral() {
+        return Complex.ZERO;
+    }
+
+    @Override
+    protected Tensor select1(int[] positions) {
+        Tensor[] newData = new Tensor[positions.length];
+        int i = -1;
+        for (int position : positions)
+            newData[++i] = data[position];
+        return new Sum(newData, indices);
+    }
+
+    @Override
     public int hash() {
         return hash;
     }
@@ -147,7 +165,7 @@ public final class Sum extends MultiTensor {
     public String toString(OutputFormat mode) {
         StringBuilder sb = new StringBuilder();
         String temp;
-        for (int i = 0;; ++i) {
+        for (int i = 0; ; ++i) {
             temp = get(i).toString(mode, Sum.class);
             if ((temp.charAt(0) == '-' || temp.charAt(0) == '+') && sb.length() != 0)
                 sb.deleteCharAt(sb.length() - 1);

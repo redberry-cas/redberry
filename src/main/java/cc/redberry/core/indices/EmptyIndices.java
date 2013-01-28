@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2012:
+ * Copyright (c) 2010-2013:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -29,6 +29,7 @@ import cc.redberry.core.utils.IntArray;
 /**
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @since 1.0
  */
 class EmptyIndices implements Indices {
 
@@ -65,7 +66,7 @@ class EmptyIndices implements Indices {
      * @return {@code EmptySimpleIndices} instance
      */
     @Override
-    public Indices getInverse() {
+    public Indices getInverted() {
         return this;
     }
 

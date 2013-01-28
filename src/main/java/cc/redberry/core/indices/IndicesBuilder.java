@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2012:
+ * Copyright (c) 2010-2013:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -30,7 +30,7 @@ import cc.redberry.core.utils.IntArrayList;
 import java.util.Collection;
 
 /**
- * This class provides functionality to construct unordered {@code Indices}
+ * Builder of unordered indices. This class provides functionality to construct unordered {@code Indices}
  * object by combining other {@code Indices} objects. For example, if we have a
  * product {@code X_mn*Y_ab} we can construct products indices by appending
  * consequentially indices of tensor {@code X} and {@code Y} to
@@ -40,6 +40,7 @@ import java.util.Collection;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  * @see Indices
+ * @since 1.0
  */
 public final class IndicesBuilder {
 
@@ -159,9 +160,10 @@ public final class IndicesBuilder {
      * Returns resulting {@code Indices}.
      *
      * @return resulting {@code Indices}
+     * @throws InconsistentIndicesException if there was more then one same index (with same names, types and states)
      */
     public Indices getIndices() {
-        return IndicesFactory.createSorted(data.toArray());
+        return IndicesFactory.create(data.toArray());
     }
 
     /**
@@ -175,10 +177,10 @@ public final class IndicesBuilder {
         return data.toArray();
     }
 
-    public Indices getDistinct() {
+   /* public Indices getDistinct() {
         //TODO review performance
-        return IndicesFactory.createSorted(MathUtils.getSortedDistinct(data.toArray()));
-    }
+        return IndicesFactory.create(MathUtils.getSortedDistinct(data.toArray()));
+    }*/
 
     @Override
     public String toString() {

@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2012:
+ * Copyright (c) 2010-2013:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -25,17 +25,23 @@ package cc.redberry.core.parser;
 import cc.redberry.core.indices.SimpleIndices;
 
 /**
+ * Parser for simple tensors.
+ *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @since 1.0
  */
-public class ParserSimpleTensor implements NodeParser {
+public class ParserSimpleTensor implements TokenParser {
+    /**
+     * Singleton instance.
+     */
     public static final ParserSimpleTensor INSTANCE = new ParserSimpleTensor();
 
     private ParserSimpleTensor() {
     }
 
     @Override
-    public ParseNodeSimpleTensor parseNode(String expression, Parser parser) {
+    public ParseTokenSimpleTensor parseToken(String expression, Parser parser) {
         expression = expression.replaceAll("\\{[\\s]*\\}", "");
         int indicesBegin = expression.indexOf('_'), i = expression.indexOf('^');
         if (indicesBegin < 0 && i >= 0)
@@ -50,7 +56,7 @@ public class ParserSimpleTensor implements NodeParser {
             throw new ParserException("Simple tensor with empty name.");
 
         SimpleIndices indices = ParserIndices.parseSimple(expression.substring(indicesBegin));
-        return new ParseNodeSimpleTensor(indices, name);
+        return new ParseTokenSimpleTensor(indices, name);
     }
 
     @Override

@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2012:
+ * Copyright (c) 2010-2013:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -25,12 +25,18 @@ package cc.redberry.core.tensor;
 import cc.redberry.core.context.OutputFormat;
 import cc.redberry.core.indices.Indices;
 import cc.redberry.core.transformations.Transformation;
-import cc.redberry.core.transformations.substitutions.Substitution;
+import cc.redberry.core.transformations.substitutions.SubstitutionTransformation;
 import cc.redberry.core.utils.TensorUtils;
 
 /**
+ * Representation of mathematical expression <i>A = B</i>. {@code Expression} also implements
+ * {@link Transformation} and represents substitutions.
+ *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @see ExpressionBuilder
+ * @see ExpressionFactory
+ * @since 1.0
  */
 public class Expression extends Tensor implements Transformation {
 
@@ -87,13 +93,23 @@ public class Expression extends Tensor implements Transformation {
 
     @Override
     public Tensor transform(Tensor t) {
-        return new Substitution(this).transform(t);
+        return new SubstitutionTransformation(this).transform(t);
     }
 
+    /**
+     * Returns {@code true} if r.h.s. is equal to l.h.s.
+     *
+     * @return {@code true} if r.h.s. is equal to l.h.s.
+     */
     public boolean isIdentity() {
         return TensorUtils.equals(left, right);
     }
 
+    /**
+     * Swaps l.h.s. and r.h.s. of expression.
+     *
+     * @return swapped expression
+     */
     public Expression transpose() {
         return new Expression(indices, right, left);
     }

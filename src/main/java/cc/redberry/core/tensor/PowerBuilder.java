@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2012:
+ * Copyright (c) 2010-2013:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -25,9 +25,12 @@ package cc.redberry.core.tensor;
 import cc.redberry.core.utils.TensorUtils;
 
 /**
+ * {@link TensorBuilder} for powers. The implementation is based on {@link PowerFactory}.
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @see Power
+ * @since 1.0
  */
 public final class PowerBuilder implements TensorBuilder {
 

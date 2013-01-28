@@ -1,3 +1,25 @@
+/*
+ * Redberry: symbolic tensor computations.
+ *
+ * Copyright (c) 2010-2013:
+ *   Stanislav Poslavsky   <stvlpos@mail.ru>
+ *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
+ *
+ * This file is part of Redberry.
+ *
+ * Redberry is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Redberry is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
+ */
 package cc.redberry.core.tensor;
 
 import cc.redberry.core.indexgenerator.IndexGenerator;
@@ -21,11 +43,22 @@ import java.util.Map;
 import static cc.redberry.core.indices.IndicesUtils.getIndicesNames;
 
 /**
+ * Static methods to rename indices of tensors.
+ *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @since 1.0
  */
 public final class ApplyIndexMapping {
-
+    /**
+     * Renames dummy indices of tensor prohibiting some dummy index to be equal to one of the specified
+     * <i>forbidden</i> indices.
+     *
+     * @param tensor         tensor
+     * @param forbiddenNames forbidden indices names
+     * @param added          set which will be added by generated dummy indices
+     * @return tensor with renamed dummies
+     */
     public static Tensor renameDummy(Tensor tensor, int[] forbiddenNames, TIntHashSet added) {
         if (forbiddenNames.length == 0)
             return tensor;
@@ -64,6 +97,14 @@ public final class ApplyIndexMapping {
         return applyIndexMapping(tensor, new IndexMapper(from, to), false);
     }
 
+    /**
+     * Renames dummy indices of tensor prohibiting some dummy index to be equal to one of the specified
+     * <i>forbidden</i> indices.
+     *
+     * @param tensor         tensor
+     * @param forbiddenNames forbidden indices names
+     * @return tensor with renamed dummies
+     */
     public static Tensor renameDummy(Tensor tensor, int[] forbiddenNames) {
         if (forbiddenNames.length == 0)
             return tensor;
@@ -100,16 +141,32 @@ public final class ApplyIndexMapping {
         return applyIndexMapping(tensor, new IndexMapper(from, to), false);
     }
 
+    /**
+     * Applies specified mapping of indices to tensor.
+     *
+     * @param tensor tensor
+     * @param buffer mapping of indices
+     * @return tensor with renamed indices
+     */
     public static Tensor applyIndexMapping(Tensor tensor, IndexMappingBuffer buffer) {
         return applyIndexMapping(tensor, buffer, new int[0]);
     }
 
+    /**
+     * Applies specified mapping of indices to tensor prohibiting some dummy index to be equal to one of the specified
+     * <i>forbidden</i> indices.
+     *
+     * @param tensor    tensor
+     * @param buffer    mapping of indices
+     * @param forbidden forbidden indices
+     * @return tensor with renamed indices
+     */
     public static Tensor applyIndexMapping(Tensor tensor, IndexMappingBuffer buffer, int[] forbidden) {
         if (buffer.isEmpty()) {
             if (tensor.getIndices().getFree().size() != 0)
                 throw new IllegalArgumentException("From indices are not equal to free indices of tensor.");
             Tensor t = renameDummy(tensor, forbidden);
-            if (buffer.getSignum())
+            if (buffer.getSign())
                 return Tensors.negate(t);
             return t;
         }
@@ -134,7 +191,7 @@ public final class ApplyIndexMapping {
             throw new IllegalArgumentException("From indices are not equal to free indices of tensor.");
 
         Tensor result = applyIndexMappingFromPreparedSource(tensor, from, to, forbidden);
-        if (buffer.getSignum())
+        if (buffer.getSign())
             return Tensors.negate(result);
         else
             return result;
@@ -151,6 +208,19 @@ public final class ApplyIndexMapping {
             throw new IllegalArgumentException("From indices are not equal to free indices of tensor.");
     }
 
+    /**
+     * Applies mapping of indices defined by the {@code from} -> {@code to} arrays to tensor prohibiting some dummy index to be equal to one of the specified
+     * <i>forbidden</i> indices.
+     *
+     * @param tensor    tensor
+     * @param from      array of 'from' indices
+     * @param to        array of corresponding 'to' indices
+     * @param forbidden array of forbidden indices names
+     * @return tensor with renamed indices
+     * @throws IllegalArgumentException if {@code from.length() != to.length()}
+     * @throws IllegalArgumentException if {@code from.length() != tensor.getIndices().getFree().size()}
+     *                                  * @throws IllegalArgumentException if free indices of tensor does not contain all 'from' indices
+     */
     public static Tensor applyIndexMapping(Tensor tensor, int[] from, int[] to, int[] forbidden) {
         if (from.length == 0) {
             if (tensor.getIndices().getFree().size() != 0 || to.length != 0)
@@ -314,7 +384,7 @@ public final class ApplyIndexMapping {
             }
             if (newData == null)
                 return tensor;
-            return new Sum(newData, IndicesFactory.createSorted(newData[0].getIndices().getFree()));
+            return new Sum(newData, IndicesFactory.create(newData[0].getIndices().getFree()));
         }
 
         throw new RuntimeException();

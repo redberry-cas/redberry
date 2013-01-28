@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2012:
+ * Copyright (c) 2010-2013:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -33,9 +33,11 @@ import cc.redberry.core.tensor.functions.ScalarFunction;
 import java.util.Arrays;
 
 /**
+ * Special hash algorithms for tensors.
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @since 1.0
  */
 public final class TensorHashCalculator {
 
@@ -51,7 +53,7 @@ public final class TensorHashCalculator {
             for (int i = 0; i < si.size(); ++i)
                 if ((pos = Arrays.binarySearch(indices, si.get(i))) >= 0)
                     hash += (HashFunctions.JenkinWang32shift(sInds[i])
-                            * HashFunctions.JenkinWang32shift(pos) * 7);
+                            ^ (HashFunctions.JenkinWang32shift(pos) * 37));
             return HashFunctions.JenkinWang32shift(hash);
         }
         if (tensor instanceof ScalarFunction)

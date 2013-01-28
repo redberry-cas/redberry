@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2012:
+ * Copyright (c) 2010-2013:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -47,7 +47,7 @@ public final class NumberUtils {
     }
 
     public static Numeric createNumeric(double d) {
-        //FUTURE investigate performance
+        //todo review performance profit
         if (d == 0)
             return Numeric.ZERO;
         else if (d == 1)

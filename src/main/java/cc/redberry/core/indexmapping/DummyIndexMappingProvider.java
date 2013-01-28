@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2012:
+ * Copyright (c) 2010-2013:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -26,6 +26,7 @@ package cc.redberry.core.indexmapping;
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @since 1.0
  */
 final class DummyIndexMappingProvider extends IndexMappingProviderAbstract {
     public DummyIndexMappingProvider(MappingsPort opu) {

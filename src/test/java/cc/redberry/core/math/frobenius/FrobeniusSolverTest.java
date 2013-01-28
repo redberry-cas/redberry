@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2012:
+ * Copyright (c) 2010-2013:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -24,6 +24,8 @@ package cc.redberry.core.math.frobenius;
 
 import org.junit.Ignore;
 import org.junit.Test;
+
+import java.util.Arrays;
 
 import static cc.redberry.core.math.frobenius.FrobeniusUtils.*;
 
@@ -207,4 +209,18 @@ public class FrobeniusSolverTest {
         assertFbEquation(equations[0], solution);
         assertFbEquation(equations[1], solution);
     }
+
+    @Test
+    public void test19() {
+        int[][] equations = {{12, 16, 20, 27, 123}, {1, 0, 3, 0, 12}};
+
+        FrobeniusSolver solver = new FrobeniusSolver(equations);
+        int[] solution;
+        while ((solution = solver.take()) != null) {
+            System.out.println(Arrays.toString(solution));
+            System.out.println(solution);
+        }
+    }
+
+
 }

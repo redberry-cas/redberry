@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2012:
+ * Copyright (c) 2010-2013:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -71,5 +71,11 @@ public class ExponentiationTest extends TestCase {
         Assert.assertEquals(NumberParser.REAL_PARSER.parse("0.28056585887484736"),
                 Exponentiation.exponentiateIfPossible(NumberParser.REAL_PARSER.parse("27/343"),
                         NumberParser.REAL_PARSER.parse("0.5")));
+    }
+
+    @Test
+    public void testIntegerRootOfComplex() {
+        Complex base = NumberParser.COMPLEX_PARSER.parse("256/129140163+256/129140163*I");
+        Assert.assertEquals(Exponentiation.findIntegerRoot(base, BigInteger.valueOf(17)), NumberParser.COMPLEX_PARSER.parse("1/3+1/3*I"));
     }
 }

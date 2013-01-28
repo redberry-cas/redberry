@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2012:
+ * Copyright (c) 2010-2013:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -38,6 +38,7 @@ import java.util.Arrays;
 /**
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @since 1.0
  */
 public final class SubstitutionIterator implements TreeIterator {
     private static final TIntSet EMPTY_INT_SET = TCollections.unmodifiableSet(new TIntHashSet(0));
@@ -94,6 +95,11 @@ public final class SubstitutionIterator implements TreeIterator {
             fc.submit(removed, added);
         }
         innerIterator.set(tensor);
+    }
+
+    public void safeSet(Tensor tensor) {
+        if (innerIterator.current() != tensor)
+            set(ApplyIndexMapping.renameDummy(tensor, getForbidden()));
     }
 
     public boolean isCurrentModified() {

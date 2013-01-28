@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2012:
+ * Copyright (c) 2010-2013:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -27,9 +27,12 @@ import cc.redberry.core.indices.IndicesFactory;
 import cc.redberry.core.utils.TensorUtils;
 
 /**
+ * Builder for expressions.
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @see Expression
+ * @since 1.0
  */
 public class ExpressionBuilder implements TensorBuilder {
 
@@ -56,7 +59,7 @@ public class ExpressionBuilder implements TensorBuilder {
             throw new NullPointerException();
         else if (left == null) {
             left = tensor;
-            indices = IndicesFactory.createSorted(left.getIndices().getFree());
+            indices = IndicesFactory.create(left.getIndices().getFree());
         } else if (right == null) {
             right = tensor;
             if (!indices.equalsRegardlessOrder(right.getIndices().getFree()) && !TensorUtils.isZero(right))

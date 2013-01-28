@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2012:
+ * Copyright (c) 2010-2013:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -22,10 +22,16 @@
  */
 package cc.redberry.core;
 
+import cc.redberry.core.math.MathUtils;
+import cc.redberry.core.tensor.Product;
+import cc.redberry.core.tensor.Tensors;
 import gnu.trove.set.hash.TIntHashSet;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import java.lang.reflect.Array;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Random;
 import java.util.regex.Matcher;
@@ -37,22 +43,46 @@ import java.util.regex.Pattern;
  */
 public class BlackList {
 
-    public enum Name {
-
-        E1("a"), E2("b");
-        final String name;
-
-        Name(String name) {
-            this.name = name;
-        }
-
-        public static final Name[] values = values();
-    }
-
     @Test
     public void etwer() {
-        System.out.println((-8 & 0x7FFFFFFF));
+//        int[] array = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13};
+//        int[] p = {1, 2, 4, 5, 6, 9, 10, 12};
+//
+//
+//        int size = p.length, pointer = 0, s = array.length;
+//
+//        int[] r = new int[array.length - p.length];
+//
+//        pointer = 0;
+//        int i = -1;
+//        for (int j = 0; j < s; ++j) {
+//            if (pointer < size - 1 && j > p[pointer])
+//                ++pointer;
+//            if (j == p[pointer]) continue;
+//            else r[++i] = array[j];
+//        }
+//        System.out.println(Arrays.toString(r));
+
+        int[] a = {1,2};
+        int[] b = {1,2};
+        System.out.println(a.hashCode());
+        System.out.println(b.hashCode());
     }
+
+    private static void swap(int x[], int a, int b) {
+        int t = x[a];
+        x[a] = x[b];
+        x[b] = t;
+    }
+//
+//    private static void aaa(int[] xxx) {
+//        System.out.println("as");
+//    }
+//
+//    private static void bbb(Integer[] xxx) {
+//        System.out.println("sa");
+//    }
+
 
     @Ignore
     @Test
@@ -144,4 +174,66 @@ public class BlackList {
         System.out.println(j);
     }
 
+//    @Test
+//    public void test() {
+////        burnJvm();
+//        long start;
+//        int[] a;
+//        for (int i = 0; i < 1; ++i) {
+//            a = randomArray();
+//            start = System.currentTimeMillis();
+//            Arrays.sort(a);
+//            System.out.println(Arrays.toString(a));
+//            System.out.println(System.currentTimeMillis() - start);
+//        }
+//    }
+
+    @Test
+    public void test() {
+//        burnJvm();
+        long start;
+        Comparator<int[]> comparator = new Comparator<int[]>() {
+            @Override
+            public int compare(int[] o1, int[] o2) {
+                return Integer.compare(o1[2], o2[2]);
+            }
+        };
+        int[][] a;
+        for (int i = 0; i < 100; ++i) {
+            a = randomArray1();
+            start = System.currentTimeMillis();
+            Arrays.sort(a, comparator);
+            System.out.println(System.currentTimeMillis() - start);
+        }
+    }
+
+    public static void burnJvm() {
+        int[] a = null;
+        int t = 0;
+        for (int i = 0; i < 11000; ++i) {
+            a = randomArray(1000000);
+            Arrays.sort(a);
+            int s = 0;
+            for (int j = 0; j < 1000000; ++j)
+                s += a[j];
+            t += s;
+        }
+        t = ~t;
+    }
+
+    public static int[][] randomArray1() {
+        int[][] a = new int[1000000][];
+        for (int i = 0; i < 1000000; ++i) {
+            a[i] = randomArray(3);
+        }
+        return a;
+    }
+
+    public static int[] randomArray(int size) {
+        int[] a = new int[size];
+        Random random = new Random();
+        for (int i = 0; i < size; ++i)
+            a[i] = random.nextInt(11);
+        return a;
+    }
 }

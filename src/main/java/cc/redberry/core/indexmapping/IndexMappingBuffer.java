@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2012:
+ * Copyright (c) 2010-2013:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -25,24 +25,70 @@ package cc.redberry.core.indexmapping;
 import java.util.Map;
 
 /**
+ * Intermediate representation of mapping of indices needed at the stage of creating.
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @since 1.0
  */
 public interface IndexMappingBuffer {
-
+    /**
+     * Tries to put the mapping entry {@code from->to}
+     *
+     * @param from from index
+     * @param to   to index
+     * @return {@code true} if new mapping entry was created and {@code false}, if it is already exist
+     * @throws IllegalArgumentException if mapping entry {@code from->to} is
+     *                                  inconsistent with mapping entries existing
+     *                                  in this mapping (clash).
+     */
     boolean tryMap(int from, int to);
 
-    void addSignum(boolean signum);
+    /**
+     * Multiplies the sign of this mapping on the specified one
+     *
+     * @param sign sign ({@code true} states '-' and {@code false} states '+')
+     */
+    void addSign(boolean sign);
 
+    /**
+     * Removes entries for contracted indices (like e.g. _i->_k, ^i->^k)
+     */
     void removeContracted();
 
+    /**
+     * Returns whether this mapping is empty
+     *
+     * @return {@code true} if no entries in mapping exist
+     */
     boolean isEmpty();
 
-    boolean getSignum();
+    /**
+     * Returns sign of this mapping ({@code true} states '-' and {@code false} states '+')
+     *
+     * @return sign of this mapping ({@code true} states '-' and {@code false} states '+')
+     */
+    boolean getSign();
 
-    //TODO hashMap for ints
+    /**
+     * NOT PUBLIC API
+     *
+     * @return NOT PUBLIC API
+     */
+    FromToHolder export();
+
+    /**
+     * Returns the internal mapping container.
+     *
+     * @return the internal mapping container
+     */
+    //TODO TIntObjectHashMap
     Map<Integer, IndexMappingBufferRecord> getMap();
 
+    /**
+     * Returns a deep copy of this mapping.
+     *
+     * @return a deep copy of this mapping
+     */
     IndexMappingBuffer clone();
 }

@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2012:
+ * Copyright (c) 2010-2013:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -42,8 +42,11 @@ import java.util.Set;
 import static cc.redberry.core.tensor.Tensors.*;
 
 /**
+ * This class contains various useful methods related with tensors.
+ *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @since 1.0
  */
 public class TensorUtils {
 
@@ -63,6 +66,10 @@ public class TensorUtils {
         return IndicesUtils.haveIntersections(u.getIndices(), v.getIndices());
     }
 
+    /*
+     *       isSomething()
+     */
+
     public static boolean isZeroOrIndeterminate(Tensor tensor) {
         return tensor instanceof Complex && NumberUtils.isZeroOrIndeterminate((Complex) tensor);
     }
@@ -77,6 +84,10 @@ public class TensorUtils {
 
     public static boolean isNaturalNumber(Tensor tensor) {
         return tensor instanceof Complex && ((Complex) tensor).isNatural();
+    }
+
+    public static boolean isNumeric(Tensor tensor) {
+        return tensor instanceof Complex && ((Complex) tensor).isNumeric();
     }
 
     public static boolean isNegativeIntegerNumber(Tensor tensor) {
@@ -153,10 +164,6 @@ public class TensorUtils {
         return true;
     }
 
-    public static boolean passOutDummies(Tensor tensor) {
-        return getAllDummyIndicesT(tensor).size() != 0;
-    }
-
     public static boolean isOne(Tensor tensor) {
         return tensor instanceof Complex && ((Complex) tensor).isOne();
     }
@@ -199,6 +206,16 @@ public class TensorUtils {
      */
     public static boolean isNegativeIntegerPower(Tensor t) {
         return t instanceof Power && TensorUtils.isNegativeIntegerNumber(t.get(1));
+    }
+
+    /**
+     * Returns {@code true} if tensor contains dummy indices.
+     *
+     * @param tensor tensor
+     * @return {@code true} if tensor contains dummy indices
+     */
+    public static boolean passOutDummies(Tensor tensor) {
+        return getAllDummyIndicesT(tensor).size() != 0;
     }
 
     public static boolean equalsExactly(Tensor[] u, Tensor[] v) {
@@ -303,6 +320,13 @@ public class TensorUtils {
         }
     }
 
+    /**
+     * Returns {@code true} if tensor u mathematically (not programming) equals to tensor v.
+     *
+     * @param u tensor
+     * @param v tensor
+     * @return {@code true} if specified tensors are mathematically (not programming) equal
+     */
     public static boolean equals(Tensor u, Tensor v) {
         if (u == v)
             return true;
@@ -315,12 +339,21 @@ public class TensorUtils {
         IndexMappingBuffer buffer;
 
         while ((buffer = mp.take()) != null)
-            if (!buffer.getSignum())
+            if (!buffer.getSign())
                 return true;
 
         return false;
     }
 
+    /**
+     * Returns {@code true} if tensor u mathematically (not programming) equals to tensor v,
+     * {@code false} if they they differ only in the sign and {@code null} otherwise.
+     *
+     * @param u tensor
+     * @param v tensor
+     * @return {@code true} {@code true} if tensor u mathematically (not programming) equals to tensor v,
+     *         {@code false} if they they differ only in the sign and {@code null} otherwise
+     */
     public static Boolean compare1(Tensor u, Tensor v) {
         Indices freeIndices = u.getIndices().getFree();
         if (!freeIndices.equalsRegardlessOrder(v.getIndices().getFree()))
@@ -330,7 +363,7 @@ public class TensorUtils {
         IndexMappingBuffer buffer = IndexMappings.createPort(tester, u, v).take();
         if (buffer == null)
             return null;
-        return buffer.getSignum();
+        return buffer.getSign();
     }
 
     public static void assertIndicesConsistency(Tensor t) {
@@ -388,7 +421,7 @@ public class TensorUtils {
         MappingsPort mp = IndexMappings.createPort(bufferTester, t, t);
         IndexMappingBuffer buffer;
         while ((buffer = mp.take()) != null)
-            if (buffer.getSignum())
+            if (buffer.getSign())
                 return true;
         return false;
     }
@@ -423,7 +456,7 @@ public class TensorUtils {
         for (i = 0; i < dimension; ++i)
             if (permutation[i] == -1)
                 permutation[i] = i;
-        return new Symmetry(permutation, indexMappingBuffer.getSignum());
+        return new Symmetry(permutation, indexMappingBuffer.getSign());
     }
 
     public static Symmetry getSymmetryFromMapping(final int[] indices, IndexMappingBuffer indexMappingBuffer) {
@@ -489,6 +522,12 @@ public class TensorUtils {
         return depth;
     }
 
+    /**
+     * Gives a determinant of matrix.
+     *
+     * @param matrix matrix
+     * @return determinant
+     */
     public static Tensor det(Tensor[][] matrix) {
         checkMatrix(matrix);
         return det1(matrix);
@@ -535,4 +574,15 @@ public class TensorUtils {
         return newMatrix;
     }
 
+    public static boolean containsFractions(Tensor tensor) {
+        if (tensor instanceof SimpleTensor)
+            return false;
+        if (tensor instanceof Power)
+            return isNegativeIntegerNumber(tensor.get(1));
+        for (Tensor t : tensor) {
+            if (containsFractions(t))
+                return true;
+        }
+        return false;
+    }
 }

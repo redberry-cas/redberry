@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2012:
+ * Copyright (c) 2010-2013:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -22,7 +22,12 @@
  */
 package cc.redberry.core.indexmapping;
 
-public class PlusMinusIndexMappingProvider extends IndexMappingProviderAbstract {
+/**
+ * @author Dmitry Bolotin
+ * @author Stanislav Poslavsky
+ * @since 1.0
+ */
+class PlusMinusIndexMappingProvider extends IndexMappingProviderAbstract {
     private boolean state = false;
 
     public PlusMinusIndexMappingProvider(MappingsPort opu) {
@@ -36,7 +41,7 @@ public class PlusMinusIndexMappingProvider extends IndexMappingProviderAbstract 
         IndexMappingBuffer buf = currentBuffer;
         if (state) {
             currentBuffer = null;
-            buf.addSignum(true);
+            buf.addSign(true);
         } else {
             buf = buf.clone();
             state = true;

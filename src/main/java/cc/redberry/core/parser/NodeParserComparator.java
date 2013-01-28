@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2012:
+ * Copyright (c) 2010-2013:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -25,18 +25,17 @@ package cc.redberry.core.parser;
 import java.util.Comparator;
 
 /**
- *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public final class NodeParserComparator implements Comparator<NodeParser> {
+final class NodeParserComparator implements Comparator<TokenParser> {
     public static final NodeParserComparator INSTANCE = new NodeParserComparator();
 
     private NodeParserComparator() {
     }
 
     @Override
-    public int compare(NodeParser o1, NodeParser o2) {
+    public int compare(TokenParser o1, TokenParser o2) {
         return Integer.compare(o2.priority(), o1.priority());
     }
 }

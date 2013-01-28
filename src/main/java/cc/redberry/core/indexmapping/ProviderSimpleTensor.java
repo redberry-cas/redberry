@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2012:
+ * Copyright (c) 2010-2013:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -31,9 +31,9 @@ import cc.redberry.core.tensor.TensorField;
 import java.util.Iterator;
 
 /**
- *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @since 1.0
  */
 final class ProviderSimpleTensor extends IndexMappingProviderAbstractFT<SimpleTensor> {
 
@@ -43,7 +43,7 @@ final class ProviderSimpleTensor extends IndexMappingProviderAbstractFT<SimpleTe
         public IndexMappingProvider create(IndexMappingProvider opu, Tensor from, Tensor to) {
             if (((SimpleTensor) from).getName() != ((SimpleTensor) to).getName())
                 return IndexMappingProvider.Util.EMPTY_PROVIDER;
-            if(from.getIndices().size() == 0)
+            if (from.getIndices().size() == 0)
                 return new DummyIndexMappingProvider(opu);
             return new ProviderSimpleTensor(opu, (SimpleTensor) from, (SimpleTensor) to);
         }
@@ -88,7 +88,7 @@ final class ProviderSimpleTensor extends IndexMappingProviderAbstractFT<SimpleTe
                 for (int i = 0; i < size; ++i)
                     if (!tempBuffer.tryMap(fromIndices.get(s.newIndexOf(i)), toIndices.get(i)))
                         continue OUT;
-                tempBuffer.addSignum(s.isAntiSymmetry());
+                tempBuffer.addSign(s.isAntiSymmetry());
                 return tempBuffer;
             }
             symmetryIterator = null;

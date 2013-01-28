@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2012:
+ * Copyright (c) 2010-2013:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -27,9 +27,12 @@ import cc.redberry.core.tensor.Tensor;
 import java.util.*;
 
 /**
+ * Hash map with tensor keys.
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @see HashMap
+ * @since 1.0
  */
 public class THashMap<K extends Tensor, V> extends AbstractMap<K, V> {
 

@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2012:
+ * Copyright (c) 2010-2013:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -23,11 +23,11 @@
 package cc.redberry.core.tensor;
 
 import cc.redberry.core.context.OutputFormat;
+import cc.redberry.core.graph.GraphUtils;
 import cc.redberry.core.indices.Indices;
 import cc.redberry.core.indices.IndicesBuilder;
 import cc.redberry.core.indices.IndicesFactory;
 import cc.redberry.core.indices.IndicesUtils;
-import cc.redberry.core.math.GraphUtils;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.number.NumberUtils;
 import cc.redberry.core.utils.ArraysUtils;
@@ -36,11 +36,23 @@ import cc.redberry.core.utils.SoftReferenceWrapper;
 import cc.redberry.core.utils.TensorUtils;
 import gnu.trove.set.hash.TIntHashSet;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 /**
+ * Representation of product of mathematical expressions.
+ * <p/>
+ * <p>The implementation keeps numerical factor, indexless multipliers, and multipliers
+ * with non empty free indices separately. If there is no numeric factor in product, it is equal to 1.
+ * Bot indexless and indexed data are sorted according to {@link Tensor#compareTo(Tensor)} method.
+ * Indexed data is additionally sorted according to a special comparator based on {@link StructureOfContractions}
+ * of this product.
+ * </p>
+ *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @since 1.0
  */
 public final class Product extends MultiTensor {
 
@@ -175,6 +187,25 @@ public final class Product extends MultiTensor {
         //return data.length - ((hash & 0x00080000) >> 19); // ;)
     }
 
+    /**
+     * Returns the size of product without factor. I.e. if factor is one, then {@code sizeWithoutFactor() == size()},
+     * otherwise {@code sizeWithoutFactor() == size() - 1}.
+     *
+     * @return size of product without factor
+     */
+    public int sizeWithoutFactor() {
+        return data.length + indexlessData.length;
+    }
+
+    /**
+     * Returns the size of indexless part (including numerical factor).
+     *
+     * @return size of indexless part (including numerical factor)
+     */
+    public int sizeOfIndexlessPart() {
+        return indexlessData.length + (factor == Complex.ONE ? 0 : 1);
+    }
+
     @Override
     public Tensor set(int i, Tensor tensor) {
         if (i >= size() || i < 0)
@@ -272,10 +303,37 @@ public final class Product extends MultiTensor {
         }
     }
 
-    public int sizeWithoutFactor() {
-        return data.length + indexlessData.length;
+    @Override
+    protected Complex getNeutral() {
+        return Complex.ONE;
     }
 
+    @Override
+    protected Tensor select1(int[] positions) {
+        int add = factor == Complex.ONE ? 0 : 1;
+        Complex newFactor = Complex.ONE;
+        List<Tensor> newIndexless = new ArrayList<>(), newData = new ArrayList<>();
+        for (int position : positions) {
+            position -= add;
+            if (position == -1)
+                newFactor = factor;
+            else if (position < indexlessData.length)
+                newIndexless.add(indexlessData[position]);
+            else
+                newData.add(data[position - indexlessData.length]);
+        }
+        return new Product(new IndicesBuilder().append(newData).getIndices(), newFactor,
+                newIndexless.toArray(new Tensor[newIndexless.size()]),
+                newData.toArray(new Tensor[newData.size()]));
+    }
+
+    /**
+     * Returns element at i-th position excluding numerical factor of this product from numbering. So, if
+     * factor is one, then this method returns {@code get(i)}, otherwise is returns {@code get(i-1)}.
+     *
+     * @param i position
+     * @return element at i-th position excluding numerical factor of this product from numbering
+     */
     public Tensor getWithoutFactor(int i) {
         return i < indexlessData.length ? indexlessData[i] : data[i - indexlessData.length];
     }
@@ -286,6 +344,12 @@ public final class Product extends MultiTensor {
     //         return  null;
     ////        return i < indexlessData.length ? indexlessData[i] : data[i - indexlessData.length];
     //    }
+
+    /**
+     * Returns numerical factor of this product.
+     *
+     * @return numerical factor of this product
+     */
     public Complex getFactor() {
         return factor;
     }
@@ -303,9 +367,14 @@ public final class Product extends MultiTensor {
             result = result * 17 + t.hashCode();
         if (factor == Complex.MINUS_ONE && size() == 2)
             return result;
-        return result - 79 * getContent().getContractionStructure().hashCode();
+        return result - 79 * getContent().getStructureOfContractionsHashed().hashCode();
     }
 
+    /**
+     * Returns the product content, i.e. the information about the corresponding graph.
+     *
+     * @return product content
+     */
     public ProductContent getContent() {
         ProductContent content = contentReference.getReference().get();
         if (content == null)
@@ -313,6 +382,11 @@ public final class Product extends MultiTensor {
         return content;
     }
 
+    /**
+     * Returns a copy of indexless data.
+     *
+     * @return a copy of indexless data
+     */
     public Tensor[] getIndexless() {
         return indexlessData.clone();
     }
@@ -322,6 +396,12 @@ public final class Product extends MultiTensor {
         return new ProductBuilder(indexlessData.length, data.length);
     }
 
+    /**
+     * Returns all scalar factors in this product. For example, if this is 2*a*f_mn*G^mn*f_a*T^ab, the
+     * result will be [2,a,f_mn*G^mn].
+     *
+     * @return all scalar factors in this product
+     */
     public Tensor[] getAllScalars() {
         Tensor[] scalras = getContent().getScalars();
         if (factor == Complex.ONE) {
@@ -338,6 +418,12 @@ public final class Product extends MultiTensor {
         }
     }
 
+    /**
+     * Returns all scalar factors in this product excluding the numerical factor. For example, if
+     * this is 2*a*f_mn*G^mn*f_a*T^ab, the result will be [a,f_mn*G^mn].
+     *
+     * @return all scalar factors in this product excluding the numerical factor
+     */
     public Tensor[] getAllScalarsWithoutFactor() {
         Tensor[] scalras = getContent().getScalars();
         Tensor[] allScalars = new Tensor[indexlessData.length + scalras.length];
@@ -346,6 +432,11 @@ public final class Product extends MultiTensor {
         return allScalars;
     }
 
+    /**
+     * Returns indexless data as a product of tensors.
+     *
+     * @return indexless data as a product of tensors
+     */
     public Tensor getIndexlessSubProduct() {
         if (indexlessData.length == 0)
             return factor;
@@ -355,10 +446,22 @@ public final class Product extends MultiTensor {
             return new Product(factor, indexlessData, new Tensor[0], ProductContent.EMPTY_INSTANCE, IndicesFactory.EMPTY_INDICES);
     }
 
+    /**
+     * Returns this product but without numeric factor.
+     *
+     * @return this product but without numeric factor
+     */
     public Tensor getSubProductWithoutFactor() {
-        return Tensors.multiply(ArraysUtils.addAll(indexlessData, data));
+        if (factor == Complex.ONE)
+            return this;
+        return new Product(indices, Complex.ONE, indexlessData, data, contentReference);
     }
 
+    /**
+     * Returns the product of indexed (with non empty free indices) multipliers of this tensor.
+     *
+     * @return product of indexed (with non empty free indices) multipliers of this tensor
+     */
     public Tensor getDataSubProduct() {
         if (data.length == 0)
             return Complex.ONE;
@@ -538,11 +641,11 @@ public final class Product extends MultiTensor {
         //ArraysUtils.quickSort(contractions, 0, contractions.length, data);
 
         //Form resulting content
-        ContractionStructure contractionStructure = new ContractionStructure(freeContraction, contractions);
+        StructureOfContractionsHashed structureOfContractionsHashed = new StructureOfContractionsHashed(freeContraction, contractions);
 
         //TODO should be lazy field in ProductContent
-        FullContractionsStructure fullContractionsStructure = new FullContractionsStructure(data, differentIndicesCount, freeIndices);
-        ProductContent content = new ProductContent(contractionStructure, fullContractionsStructure, scalars, nonScalar, stretchIndices, data);
+        StructureOfContractions structureOfContractions = new StructureOfContractions(data, differentIndicesCount, freeIndices);
+        ProductContent content = new ProductContent(structureOfContractionsHashed, structureOfContractions, scalars, nonScalar, stretchIndices, data);
         contentReference.resetReferent(content);
 
         if (componentCount == 1 && nonScalar instanceof Product) {
@@ -580,12 +683,9 @@ public final class Product extends MultiTensor {
     /**
      * Function to pack data to intermediate 64-bit record.
      *
-     * @param tensorIndex  index of tensor in the data array (before second
-     *                     sorting)
-     * @param stretchIndex stretch index of this tensor (sequence number of
-     *                     tensors hash in array)
-     * @param id           id of index in tensor indices list (could be !=0 only
-     *                     for simple tensors)
+     * @param tensorIndex  index of tensor in the data array (before second sorting)
+     * @param stretchIndex stretch index of this tensor (sequence number of tensors hash in array)
+     * @param id           id of index in tensor indices list (could be !=0 only for simple tensors)
      * @return packed record (long)
      */
     private static long packToLong(final int tensorIndex, final short stretchIndex, final short id) {

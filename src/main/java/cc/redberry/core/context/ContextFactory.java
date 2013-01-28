@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2012:
+ * Copyright (c) 2010-2013:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -22,6 +22,18 @@
  */
 package cc.redberry.core.context;
 
+/**
+ * Factory interface for {@link Context} creation.
+ *
+ * @author Dmitriy Bolotin
+ * @author Stanislav Poslavsky
+ * @since 1.0
+ */
 public interface ContextFactory {
+    /**
+     * Returns context.
+     *
+     * @return context
+     */
     Context createContext();
 }

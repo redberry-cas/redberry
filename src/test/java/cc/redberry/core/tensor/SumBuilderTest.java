@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2012:
+ * Copyright (c) 2010-2013:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -50,6 +50,7 @@ public class SumBuilderTest {
         isb.put(parse("Sin[-c]"));
 
         Tensor expected = Tensors.parse("8*a*b+d");
+        System.out.println(isb.build());
         Assert.assertTrue(TensorUtils.equalsExactly(expected, isb.build()));
     }
 

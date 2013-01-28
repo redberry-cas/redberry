@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2012:
+ * Copyright (c) 2010-2013:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -26,7 +26,12 @@ import cc.redberry.core.context.IndexConverterException;
 import cc.redberry.core.context.IndexSymbolConverter;
 import cc.redberry.core.context.OutputFormat;
 
-public abstract class SymbolArrayConverter implements IndexSymbolConverter {
+/**
+ * @author Dmitry Bolotin
+ * @author Stanislav Poslavsky
+ * @since 1.0
+ */
+abstract class SymbolArrayConverter implements IndexSymbolConverter {
 
     private final String[] symbols;
     private final String[] utf;
@@ -73,7 +78,7 @@ public abstract class SymbolArrayConverter implements IndexSymbolConverter {
     }
 
     @Override
-    public int maxSymbolsCount() {
+    public int maxNumberOfSymbols() {
         return symbols.length - 1;
     }
 }

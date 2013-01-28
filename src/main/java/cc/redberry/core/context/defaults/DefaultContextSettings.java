@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2012:
+ * Copyright (c) 2010-2013:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -27,11 +27,18 @@ import cc.redberry.core.context.OutputFormat;
 import cc.redberry.core.indices.IndexType;
 
 /**
+ * The default Redberry context settings. These default are: metric tensor name - "g",
+ * Kronecker tensor name - "d", metric types - {@link IndexType#LatinLower}, {@link IndexType#LatinUpper},
+ * {@link IndexType#GreekLower}, {@link IndexType#GreekUpper}. Random seed of {@link cc.redberry.core.context.NameManager}
+ * is taken from the command line if {@code redberry.nmseed specified}, or generated randomly.
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @since 1.0
  */
-public class DefaultContextSettings {
+public final class DefaultContextSettings {
+    private DefaultContextSettings() {
+    }
 
     public static ContextSettings create() {
         ContextSettings defaultSettings = new ContextSettings(OutputFormat.Redberry, "d");

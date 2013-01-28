@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2012:
+ * Copyright (c) 2010-2013:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -25,14 +25,23 @@ package cc.redberry.core.tensor;
 import java.util.Iterator;
 
 /**
+ * The implementation of {@code Iterator<Tensor>} based on {@code Tensor}
+ * {@link cc.redberry.core.tensor.Tensor#get(int)} and {@link cc.redberry.core.tensor.Tensor#size()}  methods.
+ *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @since 1.0
  */
 public final class BasicTensorIterator implements Iterator<Tensor> {
     private final Tensor tensor;
     private int position = -1;
     private final int size;
 
+    /**
+     * Creates iterator over tensor elements.
+     *
+     * @param tensor tensor
+     */
     public BasicTensorIterator(Tensor tensor) {
         this.tensor = tensor;
         this.size = tensor.size();

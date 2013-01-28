@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2012:
+ * Copyright (c) 2010-2013:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -30,9 +30,14 @@ import cc.redberry.core.utils.TensorUtils;
 
 import java.util.*;
 
+import static cc.redberry.core.transformations.ToNumericTransformation.toNumeric;
+
 /**
+ * Abstract implementation of {@link TensorBuilder} for sums.
+ *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @since 1.0
  */
 public abstract class AbstractSumBuilder implements TensorBuilder {
 
@@ -41,10 +46,18 @@ public abstract class AbstractSumBuilder implements TensorBuilder {
     Indices indices = null;
     int[] sortedFreeIndices;
 
+    /**
+     * Creates builder with default initial capacity.
+     */
     public AbstractSumBuilder() {
         this(7);
     }
 
+    /**
+     * Creates builder with specified initial capacity.
+     *
+     * @param initialCapacity initial capacity
+     */
     public AbstractSumBuilder(int initialCapacity) {
         summands = new HashMap<>(initialCapacity);
     }
@@ -62,18 +75,29 @@ public abstract class AbstractSumBuilder implements TensorBuilder {
             return complex;
 
         List<Tensor> sum = new ArrayList<>();
-        if (!complex.isZero())
-            sum.add(complex);
 
+        final boolean isNumeric = complex.isNumeric();
         for (Map.Entry<Integer, List<FactorNode>> entry : summands.entrySet())
             for (FactorNode node : entry.getValue()) {
-                Tensor summand = Tensors.multiply(node.build(), node.factor);
-                if (!TensorUtils.isZero(summand))
-                    sum.add(summand);
+                if (isNumeric) {
+                    Tensor summand = Tensors.multiply(toNumeric(node.build()), toNumeric(node.factor));
+                    if (summand instanceof Complex)
+                        complex = complex.add((Complex) summand);
+                    else
+                        sum.add(summand);
+                } else {
+                    Tensor summand = Tensors.multiply(node.build(), node.factor);
+                    if (!TensorUtils.isZero(summand))
+                        sum.add(summand);
+                }
             }
 
         if (sum.isEmpty())
             return complex;
+
+        if (!complex.isZero())
+            sum.add(complex);
+
         if (sum.size() == 1)
             return sum.get(0);
 
@@ -84,10 +108,14 @@ public abstract class AbstractSumBuilder implements TensorBuilder {
 
     @Override
     public void put(Tensor tensor) {
+        if (complex.isNaN())
+            return;
+        if (complex.isNumeric())
+            tensor = toNumeric(tensor);
         if (TensorUtils.isZero(tensor))
             return;
         if (indices == null) {
-            indices = IndicesFactory.createSorted(tensor.getIndices().getFree());
+            indices = IndicesFactory.create(tensor.getIndices().getFree());
             sortedFreeIndices = indices.getAllIndices().copy();
             Arrays.sort(sortedFreeIndices);
         } else if (!indices.equalsRegardlessOrder(tensor.getIndices().getFree()))
@@ -145,8 +173,8 @@ public abstract class AbstractSumBuilder implements TensorBuilder {
 //        return buffer.getSignum();
     }
 
-    @Override
-    public String toString() {
-        return build().toString();
-    }
+//    @Override
+//    public String toString() {
+//        return clone().build().toString();
+//    }
 }

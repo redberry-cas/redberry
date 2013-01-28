@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2012:
+ * Copyright (c) 2010-2013:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -32,8 +32,9 @@ import java.util.Arrays;
 /**
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @since 1.0
  */
-public abstract class SimpleIndicesAbstract extends AbstractIndices implements SimpleIndices {
+abstract class SimpleIndicesAbstract extends AbstractIndices implements SimpleIndices {
 
     protected IndicesSymmetries symmetries = null;
 
@@ -102,7 +103,7 @@ public abstract class SimpleIndicesAbstract extends AbstractIndices implements S
     }
 
     @Override
-    public SimpleIndices getInverse() {
+    public SimpleIndices getInverted() {
         int[] dataInv = new int[data.length];
         for (int i = 0; i < data.length; ++i)
             dataInv[i] = data[i] ^ 0x80000000;
@@ -220,7 +221,7 @@ public abstract class SimpleIndicesAbstract extends AbstractIndices implements S
     }
 
     @Override
-    public IndicesTypeStructure getIndicesTypeStructure() {
-        return new IndicesTypeStructure(this);
+    public StructureOfIndices getStructureOfIndices() {
+        return new StructureOfIndices(this);
     }
 }

@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2012:
+ * Copyright (c) 2010-2013:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -24,14 +24,24 @@ package cc.redberry.core.parser;
 
 import java.util.Arrays;
 
-public class ParserPowerAst implements NodeParser {
+/**
+ * Parser for powers of form a**b.
+ *
+ * @author Dmitry Bolotin
+ * @author Stanislav Poslavsky
+ * @since 1.0
+ */
+public class ParserPowerAst implements TokenParser {
+    /**
+     * Singleton instance.
+     */
     public static final ParserPowerAst INSTANCE = new ParserPowerAst();
 
     private ParserPowerAst() {
     }
 
     @Override
-    public ParseNode parseNode(String expression, Parser parser) {
+    public ParseToken parseToken(String expression, Parser parser) {
         char[] expressionChars = expression.toCharArray();
         int level = 0;
         char c;
@@ -56,14 +66,14 @@ public class ParserPowerAst implements NodeParser {
         if (argString == null)
             return null;
 
-        ParseNode arg = parser.parse(argString);
+        ParseToken arg = parser.parse(argString);
         if (arg == null)
             return null;
 
-        ParseNode power = parser.parse(powerString);
+        ParseToken power = parser.parse(powerString);
         if (power == null)
             return null;
-        return new ParseNode(TensorType.Power, arg, power);
+        return new ParseToken(TokenType.Power, arg, power);
     }
 
     @Override

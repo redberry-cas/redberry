@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2012:
+ * Copyright (c) 2010-2013:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -26,10 +26,11 @@ package cc.redberry.core.indices;
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @since 1.0
  */
 final class ShortArrayFactory {
     private static final int SIZE = 128;
-    private static final short[][] zerofilledShorts = new short[SIZE][];
+    private static final short[][] FILLED_WITH_ZEROS = new short[SIZE][];
 
     private ShortArrayFactory() {
     }
@@ -37,6 +38,6 @@ final class ShortArrayFactory {
     static short[] getZeroFilledShortArray(final int length) {
         if (length >= SIZE)
             return new short[length];
-        return zerofilledShorts[length] == null ? zerofilledShorts[length] = new short[length] : zerofilledShorts[length];
+        return FILLED_WITH_ZEROS[length] == null ? FILLED_WITH_ZEROS[length] = new short[length] : FILLED_WITH_ZEROS[length];
     }
 }

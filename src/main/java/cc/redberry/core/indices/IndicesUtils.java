@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2012:
+ * Copyright (c) 2010-2013:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -100,6 +100,7 @@ import java.util.Arrays;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  * @see Indices
+ * @since 1.0
  */
 public final class IndicesUtils {
 
@@ -204,6 +205,19 @@ public final class IndicesUtils {
      */
     public static int setType(byte type, int index) {
         return (0x80FFFFFF & index) | ((0x7F & type) << 24);
+    }
+
+    /**
+     * Changes index type to specified, represented by byte.
+     * <p/>
+     * <br/>Expression used by this method is: <b><code>(0x80FFFFFF & index) | ((0x7F & type) << 24)</code></b>
+     *
+     * @param type  IndexType
+     * @param index index to change type in
+     * @return index with new type
+     */
+    public static int setType(IndexType type, int index) {
+        return setType(type.getType(), index);
     }
 
     /**

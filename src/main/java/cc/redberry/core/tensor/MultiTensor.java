@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2012:
+ * Copyright (c) 2010-2013:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -23,10 +23,15 @@
 package cc.redberry.core.tensor;
 
 import cc.redberry.core.indices.Indices;
+import cc.redberry.core.math.MathUtils;
+import cc.redberry.core.number.Complex;
 
 /**
+ * Parent class for sums and products.
+ *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @since 1.0
  */
 public abstract class MultiTensor extends Tensor {
 
@@ -41,8 +46,51 @@ public abstract class MultiTensor extends Tensor {
         return indices;
     }
 
-    //protected abstract Indices calculateIndices();
-    //protected abstract int calculateHash();
-    //TODO implement without builder?
+    /**
+     * Removes tensor at the specified position and returns the result.
+     *
+     * @param position position in tensor
+     * @return result of removing
+     */
     public abstract Tensor remove(int position);
+
+    /**
+     * Removes tensors at the specified positions and returns the result.
+     *
+     * @param positions position in tensor
+     * @return result of removing
+     */
+    public Tensor remove(int[] positions) {
+        int[] p = MathUtils.getSortedDistinct(positions);
+        Tensor temp = this;
+        for (int i = p.length - 1; i >= 0; --i) {
+            if (temp instanceof MultiTensor) {
+                temp = ((MultiTensor) temp).remove(p[i]);
+            } else temp = getNeutral();
+        }
+        return temp;
+    }
+
+    /**
+     * Selects tensors at the specified positions and puts it together.
+     *
+     * @param positions positions in tensor
+     * @return result subtensor
+     */
+    public Tensor select(int[] positions) {
+        if (positions.length == 0)
+            return getNeutral();
+        if (positions.length == 1)
+            return get(positions[0]);
+
+        final int[] p = MathUtils.getSortedDistinct(positions);
+        if (p.length == size())
+            return this;
+        return select1(p);
+    }
+
+
+    protected abstract Complex getNeutral();
+
+    protected abstract Tensor select1(int[] positions);
 }

@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2012:
+ * Copyright (c) 2010-2013:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -25,6 +25,7 @@ package cc.redberry.core.number;
 import org.apache.commons.math3.Field;
 
 /**
+ * Real numbers.
  *
  * @author Stanislav Poslavsky
  */
@@ -35,5 +36,10 @@ public abstract class Real implements Number<Real>, Comparable<Real> {
         return RealField.getInstance();
     }
 
+    /**
+     * Returns signum of this.
+     *
+     * @return signum
+     */
     public abstract int signum();
 }

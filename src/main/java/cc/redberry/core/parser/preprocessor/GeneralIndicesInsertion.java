@@ -1,13 +1,36 @@
+/*
+ * Redberry: symbolic tensor computations.
+ *
+ * Copyright (c) 2010-2013:
+ *   Stanislav Poslavsky   <stvlpos@mail.ru>
+ *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
+ *
+ * This file is part of Redberry.
+ *
+ * Redberry is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Redberry is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
+ */
 package cc.redberry.core.parser.preprocessor;
 
 import cc.redberry.core.context.CC;
-import cc.redberry.core.context.IndicesTypeStructureAndName;
+import cc.redberry.core.context.NameAndStructureOfIndices;
 import cc.redberry.core.context.NameDescriptor;
 import cc.redberry.core.indexgenerator.IndexGenerator;
 import cc.redberry.core.indices.*;
 import cc.redberry.core.parser.*;
 import cc.redberry.core.tensor.SimpleTensor;
 import cc.redberry.core.utils.ArraysUtils;
+import cc.redberry.core.utils.BitArray;
 import cc.redberry.core.utils.ByteBackedBitArray;
 import cc.redberry.core.utils.IntArrayList;
 
@@ -16,14 +39,18 @@ import java.util.*;
 import static cc.redberry.core.indices.IndexType.TYPES_COUNT;
 
 /**
- * ParseNodeTransformer facilitating input of matrices and vectors with omitted indices.
- * <p/>
- * <p>It is useful in situations where one is faced with the need to input many huge matrix expressions, and manual
- * indices insertion becomes a complex task.</p>
+ * AST transformer, which inserts additional indices to specified tensors according to
+ * the rules of matrix multiplication.
+ * It is useful in situations where one is faced with the need to input many huge matrix expressions, and manual
+ * indices insertion becomes a complex task.
+ *
+ * @author Dmitriy Bolotin
+ * @author Stanislav Poslavsky
+ * @since 1.1
  */
-public class GeneralIndicesInsertion implements ParseNodeTransformer {
-    private final Map<IndicesTypeStructureAndName, InsertionRule> initialRules = new HashMap<>();
-    private Map<IndicesTypeStructureAndName, InsertionRule> mappedRules;
+public class GeneralIndicesInsertion implements ParseTokenTransformer {
+    private final Map<NameAndStructureOfIndices, InsertionRule> initialRules = new HashMap<>();
+    private Map<NameAndStructureOfIndices, InsertionRule> mappedRules;
 
     /**
      * Creates blank GeneralIndicesInsertion transformer.
@@ -35,28 +62,35 @@ public class GeneralIndicesInsertion implements ParseNodeTransformer {
      * Adds new insertion rule to this transformer.
      * <p/>
      * <p>After rule is added you can omit indices of specified type in specified simple tensors, when this transformer
-     * is passed to {@link cc.redberry.core.tensor.Tensors#parse(String, cc.redberry.core.parser.ParseNodeTransformer...)}
+     * is passed to {@link cc.redberry.core.tensor.Tensors#parse(String, cc.redberry.core.parser.ParseTokenTransformer...)}
      * method or somehow added to default parse nodes preprocessor.</p>
      *
      * @param tensor           simple tensor
      * @param omittedIndexType type of indices that may be omitted
      */
     public void addInsertionRule(SimpleTensor tensor, IndexType omittedIndexType) {
-        NameDescriptor nd = CC.getNameDescriptor(tensor.getName());
-        IndicesTypeStructureAndName originalStructureAndName = NameDescriptor.extractKey(nd);
-        if (tensor.getIndices().size(omittedIndexType) == 0)
+        addInsertionRule(CC.getNameDescriptor(tensor.getName()), omittedIndexType);
+    }
+
+    public void addInsertionRule(NameDescriptor nd, IndexType omittedIndexType) {
+        NameAndStructureOfIndices originalStructureAndName = NameDescriptor.extractKey(nd);
+        StructureOfIndices structure = nd.getStructureOfIndices();
+
+        if (structure.getTypeData(omittedIndexType.getType()).length == 0)
             throw new IllegalArgumentException("No indices of specified type in tensor.");
-        IndicesTypeStructure structure = tensor.getIndices().getIndicesTypeStructure();
+
         if (CC.isMetric(omittedIndexType.getType())) {
             int omittedIndicesCount = structure.getTypeData(omittedIndexType.getType()).length;
             if ((omittedIndicesCount % 2) == 1)
                 throw new IllegalArgumentException("The number of omitted indices for metric types should be even.");
             omittedIndicesCount /= 2;
-            SimpleIndices omittedIndices = tensor.getIndices().getOfType(omittedIndexType);
+
+            BitArray omittedIndices = structure.getTypeData(omittedIndexType.getType()).states;
+
             for (int i = 0, size = omittedIndices.size(); i < size; ++i) {
-                if (i < omittedIndicesCount && !IndicesUtils.getState(omittedIndices.get(i)))
+                if (i < omittedIndicesCount && !omittedIndices.get(i))
                     throw new IllegalArgumentException("Inconsistent states signature for metric type.");
-                if (i >= omittedIndicesCount && IndicesUtils.getState(omittedIndices.get(i)))
+                if (i >= omittedIndicesCount && omittedIndices.get(i))
                     throw new IllegalArgumentException("Inconsistent states signature for metric type.");
             }
         }
@@ -72,20 +106,20 @@ public class GeneralIndicesInsertion implements ParseNodeTransformer {
             return;
         mappedRules = new HashMap<>();
         for (InsertionRule rule : initialRules.values())
-            for (IndicesTypeStructureAndName key : rule.getKeys())
+            for (NameAndStructureOfIndices key : rule.getKeys())
                 if (mappedRules.put(key, rule) != null)
                     throw new RuntimeException("Conflicting insertion rules.");
     }
 
     @Override
-    public ParseNode transform(ParseNode node) {
+    public ParseToken transform(ParseToken node) {
         ensureMappedRulesInitialized();
         int[] forbidden = ParseUtils.getAllIndicesT(node).toArray();
         IndexGenerator generator = new IndexGenerator(forbidden);
 
         transformInsideFieldsAndScalarFunctions(node);
 
-        ParseNode wrapped = new ParseNode(TensorType.Dummy, node);
+        ParseToken wrapped = new ParseToken(TokenType.Dummy, node);
         IITransformer transformer = createTransformer(wrapped);
         node = wrapped.content[0];
         node.parent = null;
@@ -111,12 +145,12 @@ public class GeneralIndicesInsertion implements ParseNodeTransformer {
         return node;
     }
 
-    private void transformInsideFieldsAndScalarFunctions(ParseNode pn) {
-        if (pn.tensorType == TensorType.TensorField) {
-            ParseNodeTensorField pntf = (ParseNodeTensorField) pn;
+    private void transformInsideFieldsAndScalarFunctions(ParseToken pn) {
+        if (pn.tokenType == TokenType.TensorField) {
+            ParseTokenTensorField pntf = (ParseTokenTensorField) pn;
             if (!pntf.name.equalsIgnoreCase("tr"))
                 for (int i = 0; i < pn.content.length; ++i) {
-                    ParseNode newArgNode = transform(pntf.content[i]);
+                    ParseToken newArgNode = transform(pntf.content[i]);
                     pntf.content[i] = newArgNode;
                     newArgNode.parent = pntf;
 
@@ -135,7 +169,7 @@ public class GeneralIndicesInsertion implements ParseNodeTransformer {
                     }
                 }
         }
-        if (pn.tensorType == TensorType.Power || pn.tensorType == TensorType.ScalarFunction) {
+        if (pn.tokenType == TokenType.Power || pn.tokenType == TokenType.ScalarFunction) {
             for (int i = 0; i < pn.content.length; ++i)
                 pn.content[i] = transform(pn.content[i]);
         }
@@ -144,17 +178,17 @@ public class GeneralIndicesInsertion implements ParseNodeTransformer {
     }
 
     private static class InsertionRule {
-        final IndicesTypeStructureAndName originalStructureAndName;
+        final NameAndStructureOfIndices originalStructureAndName;
         final Set<IndexType> indicesAllowedToOmit = new HashSet<>();
 
-        private InsertionRule(IndicesTypeStructureAndName originalStructureAndName) {
+        private InsertionRule(NameAndStructureOfIndices originalStructureAndName) {
             this.originalStructureAndName = originalStructureAndName;
         }
 
-        public IndicesTypeStructureAndName[] getKeys() {
+        public NameAndStructureOfIndices[] getKeys() {
             IndexType[] toOmit = indicesAllowedToOmit.toArray(new IndexType[indicesAllowedToOmit.size()]);
             int omitted, i;
-            IndicesTypeStructureAndName[] keys = new IndicesTypeStructureAndName[(1 << toOmit.length) - 1];
+            NameAndStructureOfIndices[] keys = new NameAndStructureOfIndices[(1 << toOmit.length) - 1];
             int[] allCounts;
             ByteBackedBitArray[] states;
             for (omitted = 1; omitted <= keys.length; ++omitted) {
@@ -166,9 +200,9 @@ public class GeneralIndicesInsertion implements ParseNodeTransformer {
                         states[toOmit[i].getType()] = states[toOmit[i].getType()] == null ?
                                 null : ByteBackedBitArray.EMPTY;
                     }
-                IndicesTypeStructure[] structures = originalStructureAndName.getStructure().clone();
-                structures[0] = new IndicesTypeStructure(allCounts, states);
-                keys[omitted - 1] = new IndicesTypeStructureAndName(originalStructureAndName.getName(),
+                StructureOfIndices[] structures = originalStructureAndName.getStructure().clone();
+                structures[0] = new StructureOfIndices(allCounts, states);
+                keys[omitted - 1] = new NameAndStructureOfIndices(originalStructureAndName.getName(),
                         structures);
             }
             return keys;
@@ -253,31 +287,32 @@ public class GeneralIndicesInsertion implements ParseNodeTransformer {
     }
 
     //TODO into fields and scalar functions
-    private IITransformer createTransformer(ParseNode node) {
+    private IITransformer createTransformer(ParseToken node) {
         IITransformer t;
-        switch (node.tensorType) {
+        switch (node.tokenType) {
             case TensorField:
-                if (((ParseNodeTensorField) node).name.equalsIgnoreCase("tr")) {
+                if (((ParseTokenTensorField) node).name.equalsIgnoreCase("tr")) {
                     Set<IndexType> types;
                     int i;
                     if (node.content.length == 1)
                         types = EnumSet.allOf(IndexType.class);
                     else {
                         types = new HashSet<>();
-                        ParseNode pn;
+                        ParseToken pn;
                         IndexType type;
 
                         for (i = 1; i < node.content.length; ++i) {
-                            if ((pn = node.content[i]).tensorType != TensorType.SimpleTensor)
+                            if ((pn = node.content[i]).tokenType != TokenType.SimpleTensor)
                                 throw new IllegalArgumentException("Error in trace indices list.");
-                            if ((type = IndexType.fromShortString(((ParseNodeSimpleTensor) pn).name)) == null)
-                                throw new IllegalArgumentException("Error in trace indices list.");
+                            if ((type = IndexType.fromShortString(((ParseTokenSimpleTensor) pn).name)) == null)
+                                if ((type = IndexType.valueOf(((ParseTokenSimpleTensor) pn).name)) == null)
+                                    throw new IllegalArgumentException("Error in trace indices list.");
                             types.add(type);
                         }
                     }
 
-                    ParseNode nested = node.content[0];
-                    ParseNode parent = node.parent;
+                    ParseToken nested = node.content[0];
+                    ParseToken parent = node.parent;
                     for (i = 0; i < parent.content.length; ++i) {
                         if (parent.content[i] == node) {
                             parent.content[i] = nested;
@@ -293,15 +328,15 @@ public class GeneralIndicesInsertion implements ParseNodeTransformer {
                     return new TraceTransformer(innerTransformer, types);
                 }
             case SimpleTensor:
-                InsertionRule rule = mappedRules.get(((ParseNodeSimpleTensor) node).getIndicesTypeStructureAndName());
+                InsertionRule rule = mappedRules.get(((ParseTokenSimpleTensor) node).getIndicesTypeStructureAndName());
                 if (rule != null)
-                    return new SimpleTransformer((ParseNodeSimpleTensor) node,
+                    return new SimpleTransformer((ParseTokenSimpleTensor) node,
                             rule);
                 else
                     return null;
             case Product:
                 List<IITransformer> transformersList = new ArrayList<>();
-                for (ParseNode _node : node.content)
+                for (ParseToken _node : node.content)
                     if ((t = createTransformer(_node)) != null)
                         transformersList.add(t);
                 if (transformersList.isEmpty())
@@ -357,15 +392,15 @@ public class GeneralIndicesInsertion implements ParseNodeTransformer {
 
     private static class SimpleTransformer implements IITransformer {
 
-        private final ParseNodeSimpleTensor node;
+        private final ParseTokenSimpleTensor node;
         //private final InsertionRule insertionRule;
         private final OuterIndices outerIndices = new OuterIndices();
 
-        public SimpleTransformer(ParseNodeSimpleTensor node, InsertionRule insertionRule) {
+        public SimpleTransformer(ParseTokenSimpleTensor node, InsertionRule insertionRule) {
             this.node = node;
             //this.insertionRule = insertionRule;
-            IndicesTypeStructure originalStructure = insertionRule.originalStructureAndName.getStructure()[0];
-            IndicesTypeStructure currentStructure = node.getIndicesTypeStructureAndName().getStructure()[0];
+            StructureOfIndices originalStructure = insertionRule.originalStructureAndName.getStructure()[0];
+            StructureOfIndices currentStructure = node.getIndicesTypeStructureAndName().getStructure()[0];
             for (IndexType type : insertionRule.indicesAllowedToOmit)
                 if (currentStructure.getStates(type).size() == 0) {
                     ByteBackedBitArray originalStates = originalStructure.getStates(type);
@@ -407,12 +442,12 @@ public class GeneralIndicesInsertion implements ParseNodeTransformer {
 
     private static class SumTransformer extends MIITransformer {
         private final OuterIndices outerIndices;
-        private final ParseNode parseNode;
+        private final ParseToken parseToken;
 
-        private SumTransformer(IITransformer[] transformers, OuterIndices outerIndices, ParseNode parseNode) {
+        private SumTransformer(IITransformer[] transformers, OuterIndices outerIndices, ParseToken parseToken) {
             super(transformers);
             this.outerIndices = outerIndices;
-            this.parseNode = parseNode;
+            this.parseToken = parseToken;
         }
 
         @Override
@@ -462,16 +497,16 @@ public class GeneralIndicesInsertion implements ParseNodeTransformer {
                         }
                     }
                 }
-                parseNode.content[i] = addDeltas(oi, parseNode.content[i], outerIndices,
+                parseToken.content[i] = addDeltas(oi, parseToken.content[i], outerIndices,
                         upper, lower);
             }
             if (generatorTemp != null)
                 generator.mergeFrom(generatorTemp);
         }
 
-        private ParseNode addDeltas(OuterIndices inserted, ParseNode node, OuterIndices expected,
-                                    int[][] upper, int[][] lower) {
-            List<ParseNode> multipliers = new ArrayList<>();
+        private ParseToken addDeltas(OuterIndices inserted, ParseToken node, OuterIndices expected,
+                                     int[][] upper, int[][] lower) {
+            List<ParseToken> multipliers = new ArrayList<>();
             for (byte i = 0; i < TYPES_COUNT; ++i) {
                 if (!inserted.initialized[i] && expected.initialized[i]) {
                     if (expected.lower[i] == 0 && expected.upper[i] == 0)
@@ -479,14 +514,14 @@ public class GeneralIndicesInsertion implements ParseNodeTransformer {
                     if (expected.lower[i] != 1 || expected.upper[i] != 1)
                         throw new IllegalArgumentException("Deltas insertion is only supported for one upper and " +
                                 "one lower omitted indices.");
-                    multipliers.add(new ParseNodeSimpleTensor(IndicesFactory.createSimple(null, upper[i][0], lower[i][0]),
+                    multipliers.add(new ParseTokenSimpleTensor(IndicesFactory.createSimple(null, upper[i][0], lower[i][0]),
                             CC.current().getKroneckerName()));
                 }
             }
             if (multipliers.isEmpty())
                 return node;
             multipliers.add(node);
-            return new ParseNode(TensorType.Product, multipliers.toArray(new ParseNode[multipliers.size()]));
+            return new ParseToken(TokenType.Product, multipliers.toArray(new ParseToken[multipliers.size()]));
         }
     }
 
@@ -591,7 +626,7 @@ public class GeneralIndicesInsertion implements ParseNodeTransformer {
                 System.arraycopy(lower[j], 0, totalLowers[j],
                         totalCountLower[j] - lower[j].length, lower[j].length);
                 if (totalCountLower[j] - lower[j].length != totalCountUpper[j] - upper[j].length)
-                    throw new IllegalArgumentException("PIZDEC!");
+                    throw new IllegalArgumentException();
                 for (i = 0; i < totalCountUpper[j] - upper[j].length; ++i) {
                     totalLowers[j][i] = generator.generate(j);
                     totalUppers[j][i + upper[j].length] = totalLowers[j][i] | 0x80000000;

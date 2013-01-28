@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2012:
+ * Copyright (c) 2010-2013:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -31,7 +31,7 @@ import cc.redberry.core.utils.TensorUtils;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public class ScalarFunctionBuilder implements TensorBuilder {
+class ScalarFunctionBuilder implements TensorBuilder {
 
     private final ScalarFunctionFactory factory;
     private Tensor arg;

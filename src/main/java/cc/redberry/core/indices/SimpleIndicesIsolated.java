@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2012:
+ * Copyright (c) 2010-2013:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -25,6 +25,7 @@ package cc.redberry.core.indices;
 /**
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @since 1.0
  */
 final class SimpleIndicesIsolated extends SimpleIndicesAbstract {
 
@@ -44,13 +45,13 @@ final class SimpleIndicesIsolated extends SimpleIndicesAbstract {
     @Override
     public IndicesSymmetries getSymmetries() {
         if (symmetries == null)
-            symmetries = new IndicesSymmetries(new IndicesTypeStructure(this));
+            symmetries = new IndicesSymmetries(new StructureOfIndices(this));
         return symmetries;
     }
 
     @Override
     public void setSymmetries(IndicesSymmetries symmetries) {
-        if (!symmetries.getIndicesTypeStructure().isStructureOf(this))
+        if (!symmetries.getStructureOfIndices().isStructureOf(this))
             throw new IllegalArgumentException("Illegal symmetries instance.");
         this.symmetries = symmetries;
     }

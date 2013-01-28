@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2012:
+ * Copyright (c) 2010-2013:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -26,36 +26,34 @@ import cc.redberry.core.indexmapping.IndexMapping;
 import cc.redberry.core.tensor.SimpleTensor;
 
 /**
- * <p>This interface states additional functionality of the indices of the
- * {@link SimpleTensor}. Indices of this type stores not only set of indices
- * but also their order and symmetries.</p>
- * <p>To create objects of this type use
- * {@link IndicesFactory#createSimple(IndicesSymmetries, int...)}.</p>
+ * Additional specification for indices of simple tensors (see {@link SimpleTensor}).
+ * {@code SimpleIndices} preserves the relative ordering of indices with the same type.
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  * @see Indices
  * @see IndicesFactory
+ * @see SimpleIndicesBuilder
+ * @since 1.0
  */
 public interface SimpleIndices extends Indices {
 
     /**
-     * This method returns {@link IndicesSymmetries} of this {@code Indices}.
+     * Returns {@link IndicesSymmetries} of this {@code Indices}.
      *
-     * @return {@code SymmetriesImpl} of this {@code Indices}
+     * @return symmetries of this indices
      */
     IndicesSymmetries getSymmetries();
 
     /**
-     * This method allows to set {@code SymmetriesImpl} of this {@code Indices}.
+     * Sets indices symmetries to the specified
      *
-     * @param symmetries {@link IndicesSymmetries} to be set as symmetries of
-     *                   this indices
+     * @param symmetries {@link IndicesSymmetries}
      */
     void setSymmetries(IndicesSymmetries symmetries);
 
     @Override
-    SimpleIndices getInverse();
+    SimpleIndices getInverted();
 
     @Override
     SimpleIndices getFree();
@@ -67,13 +65,18 @@ public interface SimpleIndices extends Indices {
     SimpleIndices applyIndexMapping(IndexMapping im);
 
     /**
-     * Returns result of indices comparing, using their symmetries lists.
+     * Compares simple indices taking into account possible permutations according to the symmetries.
      *
      * @param indices indices to compare with this
-     * @return <code>true</code> if indices are equals and
-     *         <code>false</code> if not.
+     * @return {@code true} if specified indices can be obtained via permutations (specified by symmetries)
+     *         of this indices.
      */
     boolean equalsWithSymmetries(SimpleIndices indices);
 
-    IndicesTypeStructure getIndicesTypeStructure();
+    /**
+     * Returns the structure of this indices.
+     *
+     * @return structure of this indices
+     */
+    StructureOfIndices getStructureOfIndices();
 }

@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2012:
+ * Copyright (c) 2010-2013:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -31,21 +31,38 @@ import java.util.List;
 /**
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @since 1.0
  */
 public final class ParseManager {
 
-    public List<ParseNodeTransformer> defaultParserPreprocessors = new ArrayList<>();
+    /**
+     * Default AST transformers to be applied before {@link cc.redberry.core.parser.ParseToken#toTensor()} conversion.
+     */
+    public List<ParseTokenTransformer> defaultParserPreprocessors = new ArrayList<>();
+
+    /**
+     * Default transformations to be applied after {@link cc.redberry.core.parser.ParseToken#toTensor()} conversion.
+     */
     public List<Transformation> defaultTensorPreprocessors = new ArrayList<>();
 
     private final Parser parser;
 
+    /**
+     * @param parser parser
+     */
     public ParseManager(Parser parser) {
         this.parser = parser;
     }
 
-    public Tensor parse(String expression, Transformation[] tensorPreprocessors, ParseNodeTransformer[] nodesPreprocessors) {
-        ParseNode node = parser.parse(expression);
-        for (ParseNodeTransformer tr : nodesPreprocessors)
+    /**
+     * @param expression          string expression
+     * @param tensorPreprocessors transformation
+     * @param nodesPreprocessors  AST transformers
+     * @return tensor
+     */
+    public Tensor parse(String expression, Transformation[] tensorPreprocessors, ParseTokenTransformer[] nodesPreprocessors) {
+        ParseToken node = parser.parse(expression);
+        for (ParseTokenTransformer tr : nodesPreprocessors)
             node = tr.transform(node);
         Tensor t = node.toTensor();
         for (Transformation tr : tensorPreprocessors)
@@ -53,13 +70,26 @@ public final class ParseManager {
         return t;
     }
 
-    public Tensor parse(String expression, ParseNodeTransformer... nodesPreprocessors) {
+    /**
+     * @param expression         string expression
+     * @param nodesPreprocessors AST transformers
+     * @return tensor
+     */
+    public Tensor parse(String expression, ParseTokenTransformer... nodesPreprocessors) {
         return parse(expression, new Transformation[0], nodesPreprocessors);
     }
 
+    /**
+     * @param expression string expression
+     * @return tensor
+     */
     public Tensor parse(String expression) {
         return parse(expression,
                 defaultTensorPreprocessors.toArray(new Transformation[defaultTensorPreprocessors.size()]),
-                defaultParserPreprocessors.toArray(new ParseNodeTransformer[defaultParserPreprocessors.size()]));
+                defaultParserPreprocessors.toArray(new ParseTokenTransformer[defaultParserPreprocessors.size()]));
+    }
+
+    public Parser getParser() {
+        return parser;
     }
 }

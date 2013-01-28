@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2012:
+ * Copyright (c) 2010-2013:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -25,11 +25,11 @@ package cc.redberry.core.indexmapping;
 import cc.redberry.core.tensor.Tensor;
 
 /**
- *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @since 1.0
  */
-public class ProviderFunctions {
+class ProviderFunctions {
 
     static final IndexMappingProviderFactory ODD_FACTORY = new IndexMappingProviderFactory() {
 
@@ -40,7 +40,7 @@ public class ProviderFunctions {
 
             byte state = 0;
             while ((buffer = mp.take()) != null) {
-                state |= (byte) (buffer.getSignum() ? 0x10 : 0x01);
+                state |= (byte) (buffer.getSign() ? 0x10 : 0x01);
                 if (state == 0x11)
                     break;
             }

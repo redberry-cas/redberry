@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2012:
+ * Copyright (c) 2010-2013:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -31,14 +31,31 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
+ * Parser for indices of tensors.
+ *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @since 1.0
  */
 public final class ParserIndices {
+    /**
+     * Parses string expression an returns indices.
+     *
+     * @param expression string representation of indices
+     * @return integer indices
+     * @throws IllegalArgumentException if string does not represent correct indices object.
+     */
     public static SimpleIndices parseSimple(String expression) {
         return IndicesFactory.createSimple(null, parse(expression));
     }
 
+    /**
+     * Parses string expression an return integer array of indices.
+     *
+     * @param expression string representation of indices
+     * @return integer array of indices
+     * @throws IllegalArgumentException if string does not represent correct indices object.
+     */
     public static int[] parse(String expression) {
         if (expression.isEmpty())
             return new int[0];
@@ -76,6 +93,9 @@ public final class ParserIndices {
         return indices.toArray();
     }
 
+    /**
+     * A bit of regex
+     */
     public static final Pattern pattern = Pattern.compile("((?>(?>[a-zA-Z])|(?>\\\\[a-zA-A]*))(?>_(?>(?>[0-9])|(?>[\\{][0-9\\s]*[\\}])))?[']*)");
 
     static void parse(String expression, IntArrayList indices, int state) {

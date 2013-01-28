@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2012:
+ * Copyright (c) 2010-2013:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -28,8 +28,11 @@ import cc.redberry.core.indices.InconsistentIndicesException;
 import cc.redberry.core.indices.IndicesUtils;
 
 /**
+ * Technical class which holds the intermediate information about mapping entry.
+ *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @since 1.0
  */
 public final class IndexMappingBufferRecord {
 
@@ -66,7 +69,6 @@ public final class IndexMappingBufferRecord {
     }
 
     /**
-     *
      * @return name with type
      */
     public int getIndexName() {
@@ -84,8 +86,19 @@ public final class IndexMappingBufferRecord {
         return states;
     }
 
-    public boolean getStatesBit(int state) {
-        return ((states >>> state) & 1) == 1;
+    public int getToState() {
+        return (states & 1) == 0 ? 0x80000000 : 0;
+    }
+
+    public int getFromState() {
+        if ((states & 4) == 0)
+            return getToState();
+        else
+            return 0x80000000 ^ getToState();
+    }
+
+    public boolean getStatesBit(int bit) {
+        return ((states >>> bit) & 1) == 1;
     }
 
     public boolean isContracted() {

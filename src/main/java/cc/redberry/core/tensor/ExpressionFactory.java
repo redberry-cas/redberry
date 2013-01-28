@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2012:
+ * Copyright (c) 2010-2013:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -26,9 +26,12 @@ import cc.redberry.core.indices.IndicesFactory;
 import cc.redberry.core.utils.TensorUtils;
 
 /**
+ * Factory for expressions.
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @see Expression
+ * @since 1.0
  */
 public class ExpressionFactory implements TensorFactory {
 
@@ -45,6 +48,6 @@ public class ExpressionFactory implements TensorFactory {
             throw new NullPointerException();
         if (!tensors[0].getIndices().getFree().equalsRegardlessOrder(tensors[1].getIndices().getFree()) && !TensorUtils.isZero(tensors[1]))
             throw new TensorException("Inconsistent indices in expression.");
-        return new Expression(IndicesFactory.createSorted(tensors[0].getIndices().getFree()), tensors[0], tensors[1]);
-    }    
+        return new Expression(IndicesFactory.create(tensors[0].getIndices().getFree()), tensors[0], tensors[1]);
+    }
 }

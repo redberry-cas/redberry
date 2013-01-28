@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2012:
+ * Copyright (c) 2010-2013:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -27,13 +27,13 @@ import cc.redberry.core.context.CC;
 import cc.redberry.core.context.OutputFormat;
 import cc.redberry.core.indices.IndexType;
 import cc.redberry.core.indices.IndicesFactory;
-import cc.redberry.core.indices.IndicesTypeStructure;
+import cc.redberry.core.indices.StructureOfIndices;
 import cc.redberry.core.indices.IndicesUtils;
 import cc.redberry.core.number.parser.NumberParserTest;
-import cc.redberry.core.parser.ParseNodeSimpleTensor;
+import cc.redberry.core.parser.ParseTokenSimpleTensor;
 import cc.redberry.core.parser.ParserTest;
 import cc.redberry.core.parser.preprocessor.IndicesInsertion;
-import cc.redberry.core.tensor.iterator.TensorLastIterator;
+import cc.redberry.core.tensor.iterator.FromChildToParentIterator;
 import cc.redberry.core.tensor.iterator.TraverseGuide;
 import cc.redberry.core.utils.Indicator;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
@@ -191,16 +191,16 @@ public class BulkTestsForParser {
     }
 
     private static Tensor inverseIndices(Tensor t) {
-        TensorLastIterator iterator = new TensorLastIterator(t, TraverseGuide.EXCEPT_FUNCTIONS_AND_FIELDS);
+        FromChildToParentIterator iterator = new FromChildToParentIterator(t, TraverseGuide.EXCEPT_FUNCTIONS_AND_FIELDS);
         Tensor c;
         while ((c = iterator.next()) != null) {
             if (c instanceof SimpleTensor) {
                 SimpleTensor st = (SimpleTensor) c;
-                iterator.set(Tensors.simpleTensor(st.getName(), st.getIndices().getInverse()));
+                iterator.set(Tensors.simpleTensor(st.getName(), st.getIndices().getInverted()));
             }
             if (c instanceof TensorField) {
                 TensorField f = (TensorField) c;
-                iterator.set(Tensors.field(f.getName(), f.getIndices().getInverse(), f.argIndices, f.args));
+                iterator.set(Tensors.field(f.getName(), f.getIndices().getInverted(), f.argIndices, f.args));
             }
         }
         return iterator.result();
@@ -229,17 +229,17 @@ public class BulkTestsForParser {
                 "Flat", "FF", "WR", "SR", "SSR", "FR", "RR", "Kn"};
 
         //F_{\\mu\\nu} type structure
-        final IndicesTypeStructure F_TYPE_STRUCTURE = new IndicesTypeStructure(IndexType.GreekLower.getType(), 2);
+        final StructureOfIndices F_TYPE_STRUCTURE = new StructureOfIndices(IndexType.GreekLower.getType(), 2);
         //matrices indicator for parse preprocessor
-        final Indicator<ParseNodeSimpleTensor> matricesIndicator = new Indicator<ParseNodeSimpleTensor>() {
+        final Indicator<ParseTokenSimpleTensor> matricesIndicator = new Indicator<ParseTokenSimpleTensor>() {
 
             @Override
-            public boolean is(ParseNodeSimpleTensor object) {
+            public boolean is(ParseTokenSimpleTensor object) {
                 String name = object.name;
                 for (String matrix : matrices)
                     if (name.equals(matrix))
                         return true;
-                if (name.equals("F") && object.indices.getIndicesTypeStructure().equals(F_TYPE_STRUCTURE))
+                if (name.equals("F") && object.indices.getStructureOfIndices().equals(F_TYPE_STRUCTURE))
                     return true;
                 return false;
             }

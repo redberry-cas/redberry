@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2012:
+ * Copyright (c) 2010-2013:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -20,9 +20,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
-package cc.redberry.core.indices;
 /**
- * 
- * Indeeeeeeeeeeeeeexes.
- *
+ * Implementation of indices of tensors.
  */
+package cc.redberry.core.indices;

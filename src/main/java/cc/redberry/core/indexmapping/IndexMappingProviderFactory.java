@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2012:
+ * Copyright (c) 2010-2013:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -25,11 +25,11 @@ package cc.redberry.core.indexmapping;
 import cc.redberry.core.tensor.Tensor;
 
 /**
- *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @since 1.0
  */
 interface IndexMappingProviderFactory {
 
-    IndexMappingProvider create(IndexMappingProvider opu, Tensor from, Tensor to );
+    IndexMappingProvider create(IndexMappingProvider opu, Tensor from, Tensor to);
 }

@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2012:
+ * Copyright (c) 2010-2013:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -30,7 +30,7 @@ import cc.redberry.core.utils.Indicator;
 /**
  * An iterator for tensors that allows the programmer to traverse the tensor
  * tree structure, modify the tensor during iteration, and obtain information
- * about iterator's current position in the tensor. A {@code TensorTreeIterator}
+ * about iterator current position in the tensor. A {@code TensorTreeIterator}
  * has current element, so all methods are defined in terms of the cursor
  * position. *<p>Example: <blockquote><pre>
  *      Tensor tensor = Tensors.parse("Cos[a+b+Sin[x]]");
@@ -63,6 +63,7 @@ import cc.redberry.core.utils.Indicator;
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @since 1.0
  */
 public final class TreeTraverseIterator<T extends Payload<T>> {
 
@@ -179,7 +180,7 @@ public final class TreeTraverseIterator<T extends Payload<T>> {
      * current cursor.
      *
      * @param indicator level relative position of element to be tested
-     * @return
+     * @return {@code true} if condition satisfies at specified level
      */
     public boolean checkLevel(Indicator<Tensor> indicator, int level)//TODO better name
     {
@@ -222,6 +223,11 @@ public final class TreeTraverseIterator<T extends Payload<T>> {
         return currentPointer.getTensor().get(0);
     }
 
+    /**
+     * Current {@link StackPosition}
+     *
+     * @return current {@link StackPosition}
+     */
     public StackPosition<T> currentStackPosition() {
         return currentPointer;
     }

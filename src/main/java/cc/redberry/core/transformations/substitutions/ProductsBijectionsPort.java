@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2012:
+ * Copyright (c) 2010-2013:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -24,11 +24,11 @@ package cc.redberry.core.transformations.substitutions;
 
 import cc.redberry.concurrent.OutputPortUnsafe;
 import cc.redberry.core.combinatorics.Combinatorics;
-import cc.redberry.core.combinatorics.DistinctCombinationsPort;
-import cc.redberry.core.combinatorics.IntCombinatoricGenerator;
-import cc.redberry.core.math.GraphUtils;
-import cc.redberry.core.tensor.FullContractionsStructure;
+import cc.redberry.core.combinatorics.IntCombinatorialGenerator;
+import cc.redberry.core.combinatorics.IntDistinctTuplesPort;
+import cc.redberry.core.graph.GraphUtils;
 import cc.redberry.core.tensor.ProductContent;
+import cc.redberry.core.tensor.StructureOfContractions;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.utils.ArraysUtils;
 import cc.redberry.core.utils.IntArrayList;
@@ -37,11 +37,14 @@ import cc.redberry.core.utils.stretces.StretchIteratorS;
 
 import java.util.Arrays;
 
-import static cc.redberry.core.tensor.FullContractionsStructure.*;
+import static cc.redberry.core.tensor.StructureOfContractions.*;
 
 /**
+ * Implementation of subgraph isomorphism problem.
+ *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @since 1.0
  */
 public final class ProductsBijectionsPort implements OutputPortUnsafe<int[]> {
     //private ProductContent targetContent;
@@ -49,7 +52,7 @@ public final class ProductsBijectionsPort implements OutputPortUnsafe<int[]> {
 
     private Tensor[] fromData, targetData;
     private final int[] seeds;
-    private FullContractionsStructure targetFContractions, fromFContractions;
+    private StructureOfContractions targetFContractions, fromFContractions;
     private long[][] fromContractions, targetContractions;
     private final SeedPlanter planter;
     private InnerPort innerPort;
@@ -57,8 +60,8 @@ public final class ProductsBijectionsPort implements OutputPortUnsafe<int[]> {
     public ProductsBijectionsPort(ProductContent fromContent, ProductContent targetContent) {
         //this.targetContent = targetContent;
         //this.fromContent = fromContent;
-        this.targetFContractions = targetContent.getFullContractionsStructure();
-        this.fromFContractions = fromContent.getFullContractionsStructure();
+        this.targetFContractions = targetContent.getStructureOfContractions();
+        this.fromFContractions = fromContent.getStructureOfContractions();
 
         this.fromContractions = fromFContractions.contractions;
         this.targetContractions = targetFContractions.contractions;
@@ -126,7 +129,7 @@ public final class ProductsBijectionsPort implements OutputPortUnsafe<int[]> {
         boolean closed = false;
         final int[] bijection;
         final int[] seeds;
-//        final List<PermutationInfo>[] permutationInfos;
+        //        final List<PermutationInfo>[] permutationInfos;
         PermutationInfo lastInfo = null, firstInfo = null;
         IntArrayList addedBijections;
         InnerPort innerPort = null;
@@ -283,7 +286,7 @@ public final class ProductsBijectionsPort implements OutputPortUnsafe<int[]> {
                             return;
                         }
 
-                       final int targetTensorIndex = getToTensorIndex(targetIndexContraction); //Index of contracting tensor in target array
+                        final int targetTensorIndex = getToTensorIndex(targetIndexContraction); //Index of contracting tensor in target array
                         if (targetTensorIndex == -1) {//Not contracted index of target (but from is contracted with some tensor),
                             // so this bijection is impossible
                             closed = true;
@@ -327,8 +330,8 @@ public final class ProductsBijectionsPort implements OutputPortUnsafe<int[]> {
                         }
 
                         previousInfo = new PermutationInfo(previousInfo,
-                                                           fromContractions_,
-                                                           targetContractions_);
+                                fromContractions_,
+                                targetContractions_);
                         if (firstInfo == null)
                             firstInfo = previousInfo;
                     }
@@ -360,7 +363,7 @@ public final class ProductsBijectionsPort implements OutputPortUnsafe<int[]> {
         /**
          * Generator
          */
-        final IntCombinatoricGenerator generator;
+        final IntCombinatorialGenerator generator;
 
         public PermutationInfo(PermutationInfo previous, long[] fromContractions, long[] targetContractions) {
             this.previous = previous;
@@ -404,7 +407,7 @@ public final class ProductsBijectionsPort implements OutputPortUnsafe<int[]> {
 
     private final class SeedPlanter {
 
-        final DistinctCombinationsPort combinationsPort;
+        final IntDistinctTuplesPort combinationsPort;
 
         public SeedPlanter() {
             int[][] hits = new int[seeds.length][];
@@ -418,7 +421,7 @@ public final class ProductsBijectionsPort implements OutputPortUnsafe<int[]> {
                         hitList.add(i);
                 hits[seedIndex] = hitList.toArray();
             }
-            combinationsPort = new DistinctCombinationsPort(hits);
+            combinationsPort = new IntDistinctTuplesPort(hits);
         }
 
         public int[] next() {

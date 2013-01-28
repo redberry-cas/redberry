@@ -1,7 +1,7 @@
 <!--
   ~ Redberry: symbolic tensor computations.
   ~
-  ~ Copyright (c) 2010-2012:
+  ~ Copyright (c) 2010-2013:
   ~   Stanislav Poslavsky   <stvlpos@mail.ru>
   ~   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
   ~
@@ -27,7 +27,7 @@
 
     <groupId>cc.redberry</groupId>
     <artifactId>core</artifactId>
-    <version>1.0.1-SNAPSHOT</version>
+    <version>1.1-RC0</version>
     <packaging>jar</packaging>
 
     <parent>
@@ -36,7 +36,7 @@
         <version>7</version>
     </parent>
 
-    <name>redberry</name>
+    <name>redberry-core</name>
     <url>http://redberry.cc/</url>
 
     <description>
@@ -87,8 +87,8 @@
 
     <scm>
         <connection>scm:hg:http://bitbucket.org/redberry/redberry</connection>
-        <tag>v1.0</tag>
-        <url>https://bitbucket.org/redberry/redberry/src</url>
+        <tag>v1.1-RC0</tag>
+        <url>https://bitbucket.org/redberry/redberry/src/?at=v1.0</url>
     </scm>
 
     <issueManagement>
@@ -136,7 +136,7 @@
                             <value>cc.redberry.core.GlobalRunListener</value>
                         </property>
                     </properties>
-                    <skipTests>false</skipTests>
+                    <!-- <skipTests>true</skipTests> -->
                 </configuration>
             </plugin>
             <plugin>

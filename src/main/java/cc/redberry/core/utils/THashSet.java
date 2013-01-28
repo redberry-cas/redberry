@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2012:
+ * Copyright (c) 2010-2013:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -27,10 +27,12 @@ import cc.redberry.core.tensor.Tensor;
 import java.util.*;
 
 /**
- * Implementation of tensors set.
- * 
+ * Hash set of tensors.
+ *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @see HashSet
+ * @since 1.0
  */
 public final class THashSet<T extends Tensor> implements Set<T> {
 
@@ -59,7 +61,7 @@ public final class THashSet<T extends Tensor> implements Set<T> {
     public boolean add(T e) {
         return set.add(new TensorWrapperWithEquals(e));
     }
-    
+
     @Override
     public boolean addAll(Collection<? extends T> c) {
         List<TensorWrapperWithEquals> wrappers = new ArrayList<>(c.size());
@@ -162,7 +164,7 @@ public final class THashSet<T extends Tensor> implements Set<T> {
     @SuppressWarnings("unchecked")
     @Override
     public <T> T[] toArray(T[] a) {
-         T[] r = a.length >= size() ? a
+        T[] r = a.length >= size() ? a
                 : (T[]) java.lang.reflect.Array.newInstance(a.getClass().getComponentType(), size());
         int i = -1;
         for (TensorWrapperWithEquals tw : set)

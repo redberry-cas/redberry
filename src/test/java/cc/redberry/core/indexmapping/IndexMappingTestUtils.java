@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2012:
+ * Copyright (c) 2010-2013:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -47,10 +47,10 @@ public class IndexMappingTestUtils {
         String[] singleMaps = str.split(";");
         switch (singleMaps[0]) {
             case "+":
-                im.addSignum(false);
+                im.addSign(false);
                 break;
             case "-":
-                im.addSignum(true);
+                im.addSign(true);
                 break;
             default:
                 throw new RuntimeException();

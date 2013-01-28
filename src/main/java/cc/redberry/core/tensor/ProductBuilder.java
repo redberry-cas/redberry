@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2012:
+ * Copyright (c) 2010-2013:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -30,10 +30,15 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 import static cc.redberry.core.number.NumberUtils.isZeroOrIndeterminate;
+import static cc.redberry.core.transformations.ToNumericTransformation.toNumeric;
 
 /**
+ * Implementation of product builder. It performs basic simplifications and reduces the
+ * resulting product to the standard form.
+ *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @since 1.0
  */
 public final class ProductBuilder implements TensorBuilder {
 
@@ -42,12 +47,21 @@ public final class ProductBuilder implements TensorBuilder {
     /* hash -> list of power nodes */
     private final PowersContainer symbolicPowers;
 
+    /**
+     * Creates builder with initial capacities of indexless and indexed parts.
+     *
+     * @param initialCapacityIndexless initial capacity of indexless data
+     * @param initialCapacityData      initial capacity of indexed data
+     */
     public ProductBuilder(int initialCapacityIndexless, int initialCapacityData) {
         elements = new ArrayList<>(initialCapacityData);
         symbolicPowers = new PowersContainer(initialCapacityIndexless);
         indexLess = new ArrayList<>();
     }
 
+    /**
+     * Creates builder with default initial capacity.
+     */
     public ProductBuilder() {
         this(4, 3);
     }
@@ -91,13 +105,13 @@ public final class ProductBuilder implements TensorBuilder {
     public Tensor build() {
         if (isZeroOrIndeterminate(factor))
             return factor;
+        final boolean isNumeric = factor.isNumeric();
         for (Tensor t : symbolicPowers) {
             assert !(t instanceof Product);
 
-//            if (t instanceof Product)
-//                for (Tensor m : t)
-//                    indexLess.add(m);
-//            else
+            if (isNumeric)
+                t = toNumeric(t);
+
             if (t instanceof Complex) {
                 factor = factor.multiply((Complex) t);
                 if (isZeroOrIndeterminate(factor))
@@ -105,13 +119,28 @@ public final class ProductBuilder implements TensorBuilder {
             } else
                 indexLess.add(t);
         }
-
         if (symbolicPowers.isSign())
             factor = factor.negate();
 
-        //Only factor factor
+        //Only factor
         if (indexLess.isEmpty() && elements.isEmpty())
             return factor;
+
+        if (isNumeric) {
+            ArrayList<Tensor> nonNumbers = new ArrayList<>();
+            for (Tensor t : elements) {
+                t = toNumeric(t);
+                if (t instanceof Complex)
+                    factor = factor.multiply((Complex) t);
+                else
+                    nonNumbers.add(t);
+            }
+            //Only factor
+            if (indexLess.isEmpty() && nonNumbers.isEmpty())
+                return factor;
+            elements.clear();
+            elements.addAll(nonNumbers);
+        }
 
         // 1 * (something)
         if (factor.isOne()) {
@@ -148,6 +177,8 @@ public final class ProductBuilder implements TensorBuilder {
 
     @Override
     public void put(Tensor tensor) {
+        if (factor.isNumeric())
+            tensor = toNumeric(tensor);
         if (tensor instanceof Complex) {
             factor = factor.multiply((Complex) tensor);
             return;

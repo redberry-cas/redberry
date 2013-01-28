@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2012:
+ * Copyright (c) 2010-2013:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -51,12 +51,11 @@ package cc.redberry.core.tensor;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  * @see cc.redberry.core.tensor.Tensor#getBuilder()
- * @see TensorUtils#compare(cc.redberry.core.tensor.Tensor,
- * cc.redberry.core.tensor.Tensor)
- * @see TensorUtils#equals(cc.redberry.core.tensor.Tensor,
+ * @see cc.redberry.core.utils.TensorUtils#equals(cc.redberry.core.tensor.Tensor,
  * cc.redberry.core.tensor.Tensor)
  * @see <a
  * href="http://en.wikipedia.org/wiki/Builder_pattern">http://en.wikipedia.org/wiki/Builder_pattern</a>
+ * @since 1.0
  */
 public interface TensorFactory {
 

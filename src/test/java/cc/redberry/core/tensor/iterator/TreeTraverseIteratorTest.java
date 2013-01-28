@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2012:
+ * Copyright (c) 2010-2013:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -443,6 +443,16 @@ public class TreeTraverseIteratorTest {
             if (TensorUtils.equalsExactly(iterator.current(), "a"))
                 iterator.set(Tensors.parse("b"));
         Assert.assertTrue(TensorUtils.equalsExactly(iterator.result(), "b"));
+    }
+
+    @Test
+    public void test12() {
+        Tensor tensor = Tensors.parse("a + Sin[x - y]");
+        TreeTraverseIterator iterator = new TreeTraverseIterator(tensor);
+        while (iterator.next() != null)
+            if (TensorUtils.equalsExactly(iterator.current(), "a"))
+                iterator.set(Tensors.parse("b"));
+        Assert.assertTrue(TensorUtils.equalsExactly(iterator.result(), "b + Sin[x - y]"));
     }
 
     @Test

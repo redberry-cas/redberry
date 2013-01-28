@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2012:
+ * Copyright (c) 2010-2013:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -29,6 +29,7 @@ import cc.redberry.core.tensor.Tensor;
 /**
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @since 1.0
  */
 class ProviderPower implements IndexMappingProviderFactory {
 
@@ -40,7 +41,7 @@ class ProviderPower implements IndexMappingProviderFactory {
     @Override
     public IndexMappingProvider create(IndexMappingProvider opu, Tensor from, Tensor to) {
         IndexMappingBuffer exponentMapping = IndexMappings.getFirst(from.get(1), to.get(1));   //todo try get first positive mapping
-        if (exponentMapping == null || exponentMapping.getSignum())
+        if (exponentMapping == null || exponentMapping.getSign())
             return IndexMappingProvider.Util.EMPTY_PROVIDER;
 
         //todo two signs are possible
@@ -48,7 +49,7 @@ class ProviderPower implements IndexMappingProviderFactory {
         if (baseMapping == null)
             return IndexMappingProvider.Util.EMPTY_PROVIDER;
 
-        if (baseMapping.getSignum() == false)
+        if (baseMapping.getSign() == false)
             return new DummyIndexMappingProvider(opu);
         if (!(from.get(1) instanceof Complex))
             return IndexMappingProvider.Util.EMPTY_PROVIDER;

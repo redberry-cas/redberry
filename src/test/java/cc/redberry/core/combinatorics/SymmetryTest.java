@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2012:
+ * Copyright (c) 2010-2013:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -28,14 +28,14 @@ import static org.junit.Assert.assertTrue;
 
 /**
  * Fore more examples look {@link PermutationTest}.
- * 
+ *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
 public class SymmetryTest {
     public SymmetryTest() {
     }
-    
+
     @Test
     public void testComposition() {
         Symmetry a = new Symmetry(new int[]{2, 3, 0, 1}, true);

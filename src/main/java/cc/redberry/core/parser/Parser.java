@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2012:
+ * Copyright (c) 2010-2013:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -25,11 +25,16 @@ package cc.redberry.core.parser;
 import java.util.Arrays;
 
 /**
+ * Parser of mathematical expressions.
+ *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @since 1.0
  */
-public class Parser {
-
+public final class Parser {
+    /**
+     * Default parser.
+     */
     public static final Parser DEFAULT =
             new Parser(ParserBrackets.INSTANCE,
                     ParserSum.INSTANCE,
@@ -41,18 +46,29 @@ public class Parser {
                     ParserFunctions.INSTANCE,
                     ParserExpression.INSTANCE,
                     ParserPowerAst.INSTANCE);
-    private final NodeParser[] nodeParsers;
+    private final TokenParser[] tokenParsers;
 
-    public Parser(NodeParser... nodeParsers) {
-        this.nodeParsers = nodeParsers;
-        Arrays.sort(nodeParsers, NodeParserComparator.INSTANCE);
+    /**
+     * Constructs Parser from a given parsers of AST nodes.
+     *
+     * @param tokenParsers
+     */
+    public Parser(TokenParser... tokenParsers) {
+        this.tokenParsers = tokenParsers;
+        Arrays.sort(tokenParsers, NodeParserComparator.INSTANCE);
     }
 
-    public ParseNode parse(String expression) {
+    /**
+     * Parse string expression into AST.
+     *
+     * @param expression string expression
+     * @return AST
+     */
+    public ParseToken parse(String expression) {
         if (expression.isEmpty())
             throw new IllegalArgumentException("Empty expression.");
-        for (NodeParser nodeParser : nodeParsers) {
-            ParseNode node = nodeParser.parseNode(expression.trim(), this);
+        for (TokenParser tokenParser : tokenParsers) {
+            ParseToken node = tokenParser.parseToken(expression.trim(), this);
             if (node != null)
                 return node;
         }

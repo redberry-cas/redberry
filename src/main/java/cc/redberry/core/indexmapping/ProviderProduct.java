@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2012:
+ * Copyright (c) 2010-2013:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -38,6 +38,7 @@ import java.util.List;
 /**
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @since 1.0
  */
 final class ProviderProduct implements IndexMappingProvider {
 
@@ -57,7 +58,7 @@ final class ProviderProduct implements IndexMappingProvider {
                     if (pfrom.getWithoutFactor(i).hashCode() != pto.getWithoutFactor(i).hashCode())
                         return IndexMappingProvider.Util.EMPTY_PROVIDER;
             ProductContent fromContent = pfrom.getContent(), toContent = pto.getContent();
-            if (!fromContent.getContractionStructure().equals(toContent.getContractionStructure()))
+            if (!fromContent.getStructureOfContractionsHashed().equals(toContent.getStructureOfContractionsHashed()))
                 return IndexMappingProvider.Util.EMPTY_PROVIDER;
             Tensor[] fromScalars = pfrom.getAllScalarsWithoutFactor(), toScalars = pto.getAllScalarsWithoutFactor();
             if (fromScalars.length != toScalars.length)
@@ -118,7 +119,8 @@ final class ProviderProduct implements IndexMappingProvider {
         pp.tick();
         return pp.take() != null;
     }
-//    private final ProductContent from, to;
+
+    //    private final ProductContent from, to;
 //    private PermutationsProvider permutationsProvider;
     private final DummyIndexMappingProvider dummyProvider;
     private final MappingsPort op;
@@ -147,7 +149,7 @@ final class ProviderProduct implements IndexMappingProvider {
                 if (i - 1 != begin)
                     providers.add(lastOutput =
                             new PermutatorProvider(lastOutput, Arrays.copyOfRange(indexlessFrom, begin, i),
-                                                   Arrays.copyOfRange(indexlessTo, begin, i)));
+                                    Arrays.copyOfRange(indexlessTo, begin, i)));
                 begin = i;
             }
 
@@ -157,21 +159,21 @@ final class ProviderProduct implements IndexMappingProvider {
                 if (i - 1 == begin)
                     providers.add(lastOutput =
                             IndexMappings.createPort(lastOutput,
-                                                     indexlessFrom[begin],
-                                                     indexlessTo[begin]));
+                                    indexlessFrom[begin],
+                                    indexlessTo[begin]));
                 begin = i;
             }
 
         begin = 0;
         for (i = 1; i <= fromContent.size(); ++i)
-            if (i == fromContent.size() || !fromContent.getContractionStructure().get(i).equals(fromContent.getContractionStructure().get(i - 1))) {
+            if (i == fromContent.size() || !fromContent.getStructureOfContractionsHashed().get(i).equals(fromContent.getStructureOfContractionsHashed().get(i - 1))) {
                 if (i - 1 != begin)
                     stretches.add(new Pair(fromContent.getRange(begin, i), toContent.getRange(begin, i)));
                 else
                     providers.add(lastOutput =
                             IndexMappings.createPort(lastOutput,
-                                                     fromContent.get(begin),
-                                                     toContent.get(begin)));
+                                    fromContent.get(begin),
+                                    toContent.get(begin)));
                 begin = i;
             }
 
@@ -187,7 +189,7 @@ final class ProviderProduct implements IndexMappingProvider {
 //        else
         for (Pair p : stretches)
             providers.add(lastOutput = new PermutatorProvider(lastOutput,
-                                                              p.from, p.to));
+                    p.from, p.to));
 
         this.op = new SimpleProductMappingsPort(providers.toArray(new IndexMappingProvider[providers.size()]));
     }

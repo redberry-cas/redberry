@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2012:
+ * Copyright (c) 2010-2013:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -26,18 +26,42 @@ import cc.redberry.core.context.IndexConverterException;
 import cc.redberry.core.context.IndexSymbolConverter;
 import cc.redberry.core.context.OutputFormat;
 
+/**
+ * {@link IndexSymbolConverter} for subscripted letters (e.g. \\alpha_{2} or A_{4}).
+ *
+ * @author Dmitry Bolotin
+ * @author Stanislav Poslavsky
+ * @since 1.0
+ */
 public final class IndexConverterExtender implements IndexSymbolConverter {
+    /**
+     * {@link IndexSymbolConverter} for subscripted latin lower case letters.
+     */
     public static final IndexConverterExtender LatinLowerEx
-            = new IndexConverterExtender(LatinSymbolDownCaseConverter.INSTANCE);
+            = new IndexConverterExtender(LatinLowerCaseConverter.INSTANCE);
+    /**
+     * {@link IndexSymbolConverter} for subscripted latin upper case letters.
+     */
     public static final IndexConverterExtender LatinUpperEx
-            = new IndexConverterExtender(LatinSymbolUpperCaseConverter.INSTANCE);
+            = new IndexConverterExtender(LatinUpperCaseConverter.INSTANCE);
+    /**
+     * {@link IndexSymbolConverter} for subscripted Greek lower case letters.
+     */
     public static final IndexConverterExtender GreekLowerEx
-            = new IndexConverterExtender(GreekLaTeXDownCaseConverter.INSTANCE);
+            = new IndexConverterExtender(GreekLaTeXLowerCaseConverter.INSTANCE);
+    /**
+     * {@link IndexSymbolConverter} for subscripted Greek upper case letters.
+     */
     public static final IndexConverterExtender GreekUpperEx
             = new IndexConverterExtender(GreekLaTeXUpperCaseConverter.INSTANCE);
 
     private final IndexSymbolConverter innerConverter;
 
+    /**
+     * Creates  {@link IndexSymbolConverter} for subscripted symbols from specified converter.
+     *
+     * @param innerConverter converter to be extended with subscripted symbols
+     */
     public IndexConverterExtender(IndexSymbolConverter innerConverter) {
         this.innerConverter = innerConverter;
     }
@@ -80,16 +104,16 @@ public final class IndexConverterExtender implements IndexSymbolConverter {
         } catch (NumberFormatException e) {
             throw new IndexConverterException();
         }
-        return (num) * (1 + innerConverter.maxSymbolsCount()) + innerConverter.getCode(split[0]);
+        return (num) * (1 + innerConverter.maxNumberOfSymbols()) + innerConverter.getCode(split[0]);
     }
 
     @Override
     public String getSymbol(int code, OutputFormat mode) throws IndexConverterException {
-        int num = code / (innerConverter.maxSymbolsCount() + 1);
+        int num = code / (innerConverter.maxNumberOfSymbols() + 1);
         if (num == 0)
             return innerConverter.getSymbol(code, mode);
         else
-            return innerConverter.getSymbol(code % (innerConverter.maxSymbolsCount() + 1), mode) + "_" + ("{" + num + "}");
+            return innerConverter.getSymbol(code % (innerConverter.maxNumberOfSymbols() + 1), mode) + "_" + ("{" + num + "}");
     }
 
     @Override
@@ -98,7 +122,7 @@ public final class IndexConverterExtender implements IndexSymbolConverter {
     }
 
     @Override
-    public int maxSymbolsCount() {
-        return 10 * (innerConverter.maxSymbolsCount() + 1) - 1;
+    public int maxNumberOfSymbols() {
+        return 10 * (innerConverter.maxNumberOfSymbols() + 1) - 1;
     }
 }

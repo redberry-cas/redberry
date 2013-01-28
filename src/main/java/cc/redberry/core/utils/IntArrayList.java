@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2012:
+ * Copyright (c) 2010-2013:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -25,7 +25,10 @@ package cc.redberry.core.utils;
 import java.util.Arrays;
 
 /**
- * @author stas
+ * Array list of primitive integers.
+ *
+ * @author Dmitry Bolotin
+ * @author Stanislav Poslavsky
  */
 public final class IntArrayList {
 
@@ -117,16 +120,15 @@ public final class IntArrayList {
      * Alias for addAll(int) method.
      *
      * @param value
-     * @return
      */
     public void push(int value) {
         add(value);
     }
 
     /**
-     * Return last element leaving in it in stack.
+     * Return last element leaving it in stack.
      *
-     * @return
+     * @return last element leaving it in stack
      */
     public int peek() {
         return data[size - 1];
@@ -136,7 +138,7 @@ public final class IntArrayList {
      * Removes the object at the top of this stack and returns that object as
      * the value of this function.
      *
-     * @return
+     * @return pop
      */
     public int pop() {
         return data[--size];
