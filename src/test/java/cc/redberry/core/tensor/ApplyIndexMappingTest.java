@@ -22,7 +22,7 @@
  */
 package cc.redberry.core.tensor;
 
-import cc.redberry.core.*;
+import cc.redberry.core.TAssert;
 import cc.redberry.core.indexmapping.IndexMappingBuffer;
 import cc.redberry.core.indexmapping.IndexMappingBufferImpl;
 import cc.redberry.core.indexmapping.IndexMappings;
@@ -330,6 +330,7 @@ public class ApplyIndexMappingTest {
     */
 
     @Test
+    @Ignore
     public void performanceRenameDummy() {
 
         Tensor init, temp;
