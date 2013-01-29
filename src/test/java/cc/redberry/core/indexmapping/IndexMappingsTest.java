@@ -36,7 +36,8 @@ import org.junit.Test;
 import java.util.Arrays;
 import java.util.Set;
 
-import static cc.redberry.core.tensor.Tensors.*;
+import static cc.redberry.core.tensor.Tensors.addSymmetry;
+import static cc.redberry.core.tensor.Tensors.parse;
 
 public class IndexMappingsTest {
 
@@ -363,7 +364,7 @@ public class IndexMappingsTest {
     @Test
     public void testProduct1() {
         Tensor from = Tensors.parse("HATK^{\\alpha \\beta \\gamma }_{\\kappa_1 \\lambda_1 }*HATK^{\\mu \\nu \\theta_1 \\iota_1 }_{\\beta \\gamma }");
-          Tensor to = Tensors.parse("HATK^{\\alpha \\theta_1 \\iota_1 }_{\\beta \\gamma }*HATK^{\\mu \\nu \\beta \\gamma }_{\\kappa_1 \\lambda_1 }");
+        Tensor to = Tensors.parse("HATK^{\\alpha \\theta_1 \\iota_1 }_{\\beta \\gamma }*HATK^{\\mu \\nu \\beta \\gamma }_{\\kappa_1 \\lambda_1 }");
         Assert.assertTrue(from.getIndices().size() - 4 == from.getIndices().getFree().size());
         Assert.assertTrue(to.getIndices().size() - 4 == to.getIndices().getFree().size());
         Assert.assertTrue(from.getIndices().getFree().size() == to.getIndices().getFree().size());
@@ -372,6 +373,7 @@ public class IndexMappingsTest {
     }
 
     @Test(timeout = 200)
+    @Ignore
     public void testPerformance3() {
         CC.resetTensorNames(-4892047359897376321L);
         Tensors.addSymmetry("R_\\mu\\nu", IndexType.GreekLower, false, new int[]{1, 0});
