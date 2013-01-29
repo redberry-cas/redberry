@@ -17,3 +17,5 @@ nb-configuration.xml$
 \.directory$
 \.idea\/
 \.idea\\
+syntax: glob
+*.jar
