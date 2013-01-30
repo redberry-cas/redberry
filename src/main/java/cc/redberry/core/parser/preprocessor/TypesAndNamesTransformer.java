@@ -22,29 +22,31 @@
  */
 package cc.redberry.core.parser.preprocessor;
 
+import cc.redberry.core.context.NameAndStructureOfIndices;
 import cc.redberry.core.indices.IndexType;
+import cc.redberry.core.indices.StructureOfIndices;
 
 /**
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
 public interface TypesAndNamesTransformer {
-    IndexType newType(IndexType oldType);
+    IndexType newType(IndexType oldType, NameAndStructureOfIndices oldDescriptor);
 
-    String newName(String oldName);
+    String newName(NameAndStructureOfIndices oldDescriptor);
 
 
     public static class Utils {
         public static TypesAndNamesTransformer changeType(final IndexType oldType, final IndexType newType) {
             return new TypesAndNamesTransformer() {
                 @Override
-                public IndexType newType(IndexType old) {
+                public IndexType newType(IndexType old, NameAndStructureOfIndices oldDescriptor) {
                     return old == oldType ? newType : old;
                 }
 
                 @Override
-                public String newName(String oldName) {
-                    return oldName;
+                public String newName(NameAndStructureOfIndices oldDescriptor) {
+                    return oldDescriptor.getName();
                 }
             };
         }

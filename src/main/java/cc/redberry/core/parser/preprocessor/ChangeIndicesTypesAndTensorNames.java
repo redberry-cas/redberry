@@ -22,6 +22,7 @@
  */
 package cc.redberry.core.parser.preprocessor;
 
+import cc.redberry.core.context.NameAndStructureOfIndices;
 import cc.redberry.core.indices.IndicesFactory;
 import cc.redberry.core.indices.IndicesUtils;
 import cc.redberry.core.indices.SimpleIndices;
@@ -45,15 +46,17 @@ public class ChangeIndicesTypesAndTensorNames implements ParseTokenTransformer {
         switch (type) {
             case SimpleTensor:
                 ParseTokenSimpleTensor st = (ParseTokenSimpleTensor) node;
-                return new ParseTokenSimpleTensor(transformIndices(st.getIndices()), transformer.newName(st.name));
+                return new ParseTokenSimpleTensor(transformIndices(st.getIndices(), st.getIndicesTypeStructureAndName()),
+                        transformer.newName(st.getIndicesTypeStructureAndName()));
             case TensorField:
                 ParseTokenTensorField tf = (ParseTokenTensorField) node;
+                ParseToken[] newContent = transformContent(tf.content);
                 SimpleIndices[] newArgsIndices = new SimpleIndices[tf.argumentsIndices.length];
                 for (int i = newArgsIndices.length - 1; i >= 0; --i)
-                    newArgsIndices[i] = transformIndices(tf.argumentsIndices[i]);
+                    newArgsIndices[i] = IndicesFactory.createSimple(null, newContent[i].getIndices());
 
-                return new ParseTokenTensorField(transformIndices(tf.getIndices()),
-                        transformer.newName(tf.name), transformContent(tf.content), newArgsIndices);
+                return new ParseTokenTensorField(transformIndices(tf.getIndices(), tf.getIndicesTypeStructureAndName()),
+                        transformer.newName(tf.getIndicesTypeStructureAndName()), newContent, newArgsIndices);
             case Number:
                 return node;
             case ScalarFunction:
@@ -70,10 +73,10 @@ public class ChangeIndicesTypesAndTensorNames implements ParseTokenTransformer {
         return newContent;
     }
 
-    private SimpleIndices transformIndices(SimpleIndices old) {
+    private SimpleIndices transformIndices(SimpleIndices old, NameAndStructureOfIndices oldDescriptor) {
         int[] newIndices = new int[old.size()];
         for (int i = old.size() - 1; i >= 0; --i)
-            newIndices[i] = IndicesUtils.setType(transformer.newType(IndicesUtils.getTypeEnum(old.get(i))), old.get(i));
+            newIndices[i] = IndicesUtils.setType(transformer.newType(IndicesUtils.getTypeEnum(old.get(i)), oldDescriptor), old.get(i));
         return IndicesFactory.createSimple(null, newIndices);
     }
 }

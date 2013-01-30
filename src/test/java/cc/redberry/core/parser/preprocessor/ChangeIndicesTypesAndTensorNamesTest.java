@@ -24,6 +24,7 @@ package cc.redberry.core.parser.preprocessor;
 
 import cc.redberry.core.TAssert;
 import cc.redberry.core.context.CC;
+import cc.redberry.core.context.NameAndStructureOfIndices;
 import cc.redberry.core.indices.IndexType;
 import cc.redberry.core.parser.ParseToken;
 import org.junit.Test;
@@ -51,13 +52,13 @@ public class ChangeIndicesTypesAndTensorNamesTest {
         ParseToken token = CC.current().getParseManager().getParser().parse(str);
         TypesAndNamesTransformer transformer = new TypesAndNamesTransformer() {
             @Override
-            public IndexType newType(IndexType oldType) {
+            public IndexType newType(IndexType oldType, NameAndStructureOfIndices old) {
                 return oldType == LatinLower ? LatinUpper : oldType;
             }
 
             @Override
-            public String newName(String oldName) {
-                return oldName.equals("f") ? "k" : oldName;
+            public String newName(NameAndStructureOfIndices old) {
+                return old.getName().equals("f") ? "k" : old.getName();
             }
         };
         token = new ChangeIndicesTypesAndTensorNames(transformer).transform(token);

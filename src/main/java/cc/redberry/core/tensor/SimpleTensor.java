@@ -118,6 +118,10 @@ public class SimpleTensor extends Tensor {
         return this.indices.equals(other.indices);
     }
 
+    public String getStringName() {
+        return CC.current().getNameDescriptor(name).getName(indices);
+    }
+
     private static final class Builder implements TensorBuilder {
 
         private final SimpleTensor tensor;
