@@ -373,6 +373,7 @@ public class IndexMappingsTest {
     }
 
     @Test(timeout = 200)
+    @Ignore
     public void testPerformance3() {
         CC.resetTensorNames(-4892047359897376321L);
         Tensors.addSymmetry("R_\\mu\\nu", IndexType.GreekLower, false, new int[]{1, 0});

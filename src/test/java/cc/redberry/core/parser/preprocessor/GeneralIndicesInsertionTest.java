@@ -148,6 +148,7 @@ public class GeneralIndicesInsertionTest {
     }
 
     @Test
+    @Ignore
     public void test9() {
         GeneralIndicesInsertion gii = new GeneralIndicesInsertion();
         CC.current().getParseManager().defaultParserPreprocessors.add(gii);
@@ -159,6 +160,7 @@ public class GeneralIndicesInsertionTest {
     }
 
     @Test
+    @Ignore
     public void test10() {
         GeneralIndicesInsertion indicesInsertion = new GeneralIndicesInsertion();
         CC.current().getParseManager().defaultParserPreprocessors.add(indicesInsertion);
