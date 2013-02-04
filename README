@@ -1,19 +1,13 @@
 =========================================
-Redberry - Symbolic Tensor Algebra System
+Redberry computer algebra system
 =========================================
 
-Redberry  is an open source Java framework providing
-core functionality of computer algebra system focused
-on working with objects with indices (tensors).
+Redberry is an open source computer algebra system designed to
+manipulate with symbolic tensorial expressions.
 
-For information about latests releases, downloads and 
-example code please visit our site:
+Complete documentation is available at
 
     http://redberry.cc/
-
-or repository:
-
-    https://bitbucket.org/redberry/redberry
 
 This program is a free software: you can redistribute it and/or
 modify it under the terms of the GNU General Public License v3 as
@@ -21,62 +15,7 @@ published by the Free Software Foundation, either version 3 of the
 License, or (at your option) any later version. Full license text 
 you can find in COPYING file.
 
-
-Requirements
-------------
-
-JDK 7 or later (http://jdk7.java.net/download.html)
-
-To build cc.redberry from source Maven 2.2 or later required
-(http://maven.apache.org/).
-
-
-Depending on Redberry using maven
----------------------------------
-
-To include latest version of Redberry in your Maven project just
-add this lines to your pom's dependency section:
-
-<dependency>
-      <groupId>cc.redberry</groupId>
-      <artifactId>core</artifactId>
-      <version>X.X.X</version>
-</dependency>
-
-Here X.X.X - Redberry version you want to use.  
-
-Building Redberry from the source
----------------------------------
-
-To build Redberry from the source code you will need Mercurial 1.9.0
-or later (http://mercurial.selenic.com/) and Maven 2.2 of later
-(http://maven.apache.org/).
-To clone latest version of Redberry repository type in this command:
-
-    hg clone https://bitbucket.org/redberry/redberry
-	
-Or you can download a package with source code from our bitbucket
-page.
-
-Use this command to build cc.redberry with all dependencies:
-
-    mvn install
-
-Or this:
-
-    mvn jar:jar
-	
-to build jar with cc.redberry only.
-
-Working with Redberry repositorie
--------------------------------------------------------
-If you want to contribute and develop Redberry, first sing up bitbucket
-and pass to Redberry page. There you will find fork link - click it and 
-follow instructions. If you will develop some feature fill free to 
-contact authors and pull your module in main repositories.
-
-
-Copyright (C) 2010-2012:
+Copyright (C) 2010-2013:
 
     Stanislav Poslavsky <stvlpos@mail.ru>
     Dmitry Bolotin <bolotin.dmitriy@gmail.com>

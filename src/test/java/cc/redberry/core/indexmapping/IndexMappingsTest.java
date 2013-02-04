@@ -373,7 +373,6 @@ public class IndexMappingsTest {
     }
 
     @Test(timeout = 200)
-    @Ignore
     public void testPerformance3() {
         CC.resetTensorNames(-4892047359897376321L);
         Tensors.addSymmetry("R_\\mu\\nu", IndexType.GreekLower, false, new int[]{1, 0});
@@ -381,16 +380,7 @@ public class IndexMappingsTest {
         Tensors.addSymmetry("R_\\mu\\nu\\alpha\\beta", IndexType.GreekLower, false, new int[]{2, 3, 0, 1});
         Tensor u = Tensors.parse("R_{\\delta }^{\\sigma }*(g^{\\gamma \\mu }*d^{\\delta }_{\\rho }*d^{\\nu }_{\\sigma }+d^{\\gamma }_{\\sigma }*g^{\\delta \\nu }*d^{\\mu }_{\\rho }+d^{\\gamma }_{\\rho }*g^{\\delta \\nu }*d^{\\mu }_{\\sigma }+g^{\\gamma \\mu }*d^{\\nu }_{\\rho }*d^{\\delta }_{\\sigma }+g^{\\gamma \\delta }*d^{\\mu }_{\\sigma }*d^{\\nu }_{\\rho }+d^{\\gamma }_{\\rho }*g^{\\delta \\mu }*d^{\\nu }_{\\sigma }+g^{\\gamma \\delta }*g^{\\mu \\nu }*g_{\\rho \\sigma }+g^{\\gamma \\nu }*d^{\\mu }_{\\rho }*d^{\\delta }_{\\sigma }+d^{\\gamma }_{\\rho }*g^{\\mu \\nu }*d^{\\delta }_{\\sigma }+g^{\\gamma \\mu }*g^{\\delta \\nu }*g_{\\rho \\sigma }+d^{\\gamma }_{\\sigma }*g^{\\delta \\mu }*d^{\\nu }_{\\rho }+g^{\\gamma \\nu }*d^{\\mu }_{\\sigma }*d^{\\delta }_{\\rho }+g^{\\gamma \\nu }*g_{\\rho \\sigma }*g^{\\delta \\mu }+d^{\\gamma }_{\\sigma }*g^{\\mu \\nu }*d^{\\delta }_{\\rho }+g^{\\gamma \\delta }*d^{\\nu }_{\\sigma }*d^{\\mu }_{\\rho })*R^{\\rho }_{\\mu \\gamma \\nu }");
         Tensor v = Tensors.parse("R_{\\mu }^{\\sigma }*(g^{\\beta \\mu }*d^{\\delta }_{\\rho }*d^{\\nu }_{\\sigma }+d^{\\beta }_{\\sigma }*g^{\\delta \\nu }*d^{\\mu }_{\\rho }+d^{\\beta }_{\\rho }*g^{\\delta \\nu }*d^{\\mu }_{\\sigma }+g^{\\beta \\mu }*d^{\\nu }_{\\rho }*d^{\\delta }_{\\sigma }+g^{\\beta \\delta }*d^{\\mu }_{\\sigma }*d^{\\nu }_{\\rho }+d^{\\beta }_{\\rho }*g^{\\delta \\mu }*d^{\\nu }_{\\sigma }+g^{\\beta \\delta }*g^{\\mu \\nu }*g_{\\rho \\sigma }+g^{\\beta \\nu }*d^{\\mu }_{\\rho }*d^{\\delta }_{\\sigma }+d^{\\beta }_{\\rho }*g^{\\mu \\nu }*d^{\\delta }_{\\sigma }+g^{\\beta \\mu }*g^{\\delta \\nu }*g_{\\rho \\sigma }+d^{\\beta }_{\\sigma }*g^{\\delta \\mu }*d^{\\nu }_{\\rho }+g^{\\beta \\nu }*d^{\\mu }_{\\sigma }*d^{\\delta }_{\\rho }+g^{\\beta \\nu }*g_{\\rho \\sigma }*g^{\\delta \\mu }+d^{\\beta }_{\\sigma }*g^{\\mu \\nu }*d^{\\delta }_{\\rho }+g^{\\beta \\delta }*d^{\\nu }_{\\sigma }*d^{\\mu }_{\\rho })*R^{\\rho }_{\\beta \\delta \\nu }");
-        for (Tensor uu : u)
-            System.out.println(uu);
-        System.out.println("as");
-        for (Tensor vv : v)
-            System.out.println(vv);
-        System.out.println(TensorHashCalculator.hashWithIndices(u));
-        System.out.println(TensorHashCalculator.hashWithIndices(v));
-        System.out.println("AS");
-        System.out.println(TensorUtils.equals(u, v));
-
+        Assert.assertTrue(TensorUtils.equals(u, v));
     }
 
     @Test
