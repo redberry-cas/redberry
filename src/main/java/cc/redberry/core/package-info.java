@@ -20,30 +20,10 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
-package cc.redberry.core;
-
-import cc.redberry.core.context.CC;
-import cc.redberry.core.context.ContextManager;
-import org.junit.runner.Description;
-import org.junit.runner.notification.Failure;
-import org.junit.runner.notification.RunListener;
-
 /**
+ * Redberry core.
+ *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public class GlobalRunListener extends RunListener {
-
-    public GlobalRunListener() {
-    }
-
-    @Override
-    public void testStarted(Description description) throws Exception {
-        ContextManager.initializeNew();
-    }
-
-    @Override
-    public void testFailure(Failure failure) throws Exception {
-        System.out.println("Test failed with name manager seed: " + CC.getNameManager().getSeed());
-    }
-}
+package cc.redberry.core;
