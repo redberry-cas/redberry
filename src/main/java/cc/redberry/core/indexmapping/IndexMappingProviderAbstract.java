@@ -23,6 +23,7 @@
 package cc.redberry.core.indexmapping;
 
 /**
+ * Implements "register" paradigm (see description of parent interface).
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky

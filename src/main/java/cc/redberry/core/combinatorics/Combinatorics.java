@@ -26,7 +26,7 @@ import java.lang.reflect.Array;
 import java.util.Arrays;
 
 /**
- * This class provides static factory and utility combinatorial methods.
+ * This class provides factory and utility methods for combinatorics infrastructure.
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
@@ -39,15 +39,15 @@ public final class Combinatorics {
 
     /**
      * <p>Returns an {@link IntCombinatorialGenerator} object, which allows to iterate over
-     * all possible unique combinations (with permutations, i.e. {0,1} and {1,0} both appears in the iteration) of
+     * all possible unique combinations with permutations (i.e. {0,1} and {1,0} both appears for {@code k=2}) of
      * {@code k} numbers, which can be chosen from the set of {@code n} numbers, numbered in the order
      * 0,1,2,...,{@code n}. The total number of such combinations will be {@code n!/(n-k)!}.</p>
-     * <p/>
+     *
      * <p>For example, for {@code k=2} and {@code n=3}, this method will produce an iterator over
      * the following arrays: [0,1], [1,0], [0,2], [2,0], [1,2], [2,1].</p>
      *
-     * @param n
-     * @param k
+     * @param n number of elements in the set
+     * @param k sample size
      * @return an iterator over all combinations (with permutations) to choose k numbers from n numbers.
      * @see IntCombinatorialGenerator
      */
@@ -169,7 +169,9 @@ public final class Combinatorics {
     }
 
     /**
-     * Returns the inverse permutation to the specified one both written in one-line notation.
+     * Returns the inverse permutation for the specified one.
+     *
+     * <p>One-line notation for permutations is used.</p>
      *
      * @param permutation permutation in one-line notation
      * @return inverse permutation to the specified one
@@ -206,7 +208,7 @@ public final class Combinatorics {
     }
 
     /**
-     * Shuffles the specified array according to the specified permutation and returns the result.
+     * Reorder the specified array according to the specified permutation and returns the result.
      * The inputting array will be cloned.
      *
      * @param array       array
@@ -215,7 +217,7 @@ public final class Combinatorics {
      * @throws IllegalArgumentException if array length not equals to permutation length
      * @throws IllegalArgumentException if permutation is not consistent with one-line notation
      */
-    public static int[] shuffle(int[] array, final int[] permutation) {
+    public static int[] reorder(int[] array, final int[] permutation) {
         if (array.length != permutation.length)
             throw new IllegalArgumentException();
         if (!testPermutationCorrectness(permutation))
@@ -234,6 +236,7 @@ public final class Combinatorics {
      *         notation for permutations and {@code false} if not
      */
     public static boolean testPermutationCorrectness(int[] permutation) {
+        //TODO cloning just for error testing?
         int[] _permutation = new int[permutation.length];
         System.arraycopy(permutation, 0, _permutation, 0, permutation.length);
         Arrays.sort(_permutation);
@@ -245,7 +248,7 @@ public final class Combinatorics {
 
     /**
      * Check that fromIndex and toIndex are in range, and throw an appropriate
-     * exception if they aren't.
+     * exception if they are not.
      */
     private static void rangeCheck(int arrayLen, int fromIndex, int toIndex) {
         if (fromIndex > toIndex)

@@ -45,6 +45,18 @@ import static cc.redberry.core.tensor.Tensors.*;
  * @author Stanislav Poslavsky
  */
 public class TensorsTest {
+    @Test
+    public void testProduct0() throws Exception {
+        Tensor product1 = parse("-1 * a");
+        Tensor product2 = parse("I * b");
+        Tensor product3 = parse("I * c");
+        Product p = (Product) multiply(product3, product1, product2);
+
+        Complex one = Complex.ONE;
+        Complex otherOne1 = Complex.MINUS_ONE.multiply(Complex.MINUS_ONE);
+        Complex otherOne = p.getFactor();
+        System.out.println(p);
+    }
 
     @Test
     public void testRenameConflicts1() {
@@ -146,62 +158,62 @@ public class TensorsTest {
         Tensor t = parse("(a-2*b)*c**2/(a-b) + (-a+2*b)*c**(2)/(b-a)");
         TAssert.assertEquals(t, "2*(a-2*b)*c**2/(a-b)");
     }
-//    @Test
-//    public void riemannInvariants3() {
-//        SimpleTensor r = parseSimple("R_abcd");
-//        addSymmetry(r, IndexType.LatinLower, false, 2, 3, 0, 1);
-//        addSymmetry(r, IndexType.LatinLower, true, 1, 0, 2, 3);
-//
-//        Tensor t = parse("R^abcd*R^efkl*R^mnop");
-//        int[] upper = ParserIndices.parseSimple("^abcdef").getAllIndices().copy();
-//        int[] lower = ParserIndices.parseSimple("_klmnop").getAllIndices().copy();
-//        IntPermutationsGenerator generator = new IntPermutationsGenerator(6);
-//        Set<Wrr> set = new HashSet<>();
-//        for (int[] permutation : generator) {
-//            IntArrayList from = new IntArrayList(upper.length * 2);
-//            IntArrayList to = new IntArrayList(upper.length * 2);
-//            for (int i = 0; i < permutation.length; ++i) {
-//                from.add(upper[i]);
-//                from.add(0x80000000 | lower[permutation[i]]);
-//                to.add(0x80000000 | lower[permutation[i]]);
-//                to.add(lower[permutation[i]]);
-//            }
-////            System.out.println(IndicesUtils.toString(from.toArray()));
-////            System.out.println(IndicesUtils.toString(to.toArray()));
-//            Product att = (Product) ApplyIndexMapping.applyIndexMapping(t, from.toArray(), to.toArray(), new int[0]);
-//            if (att.factor.isMinusOne()) {
-//                System.out.println(att + "   asasasas");
-//            }
-//            set.add(new Wrr(att));
-//        }
-//
-//        Expression[] expressions = {parseExpression("R^a_man = R_mn"), parseExpression("R^a_a = R")};
-//        System.out.println(set.size());
-//        for (Wrr wrr : set) {
-//            Tensor tt = wrr.tensor;
-//            tt = expressions[0].transform(tt);
-//            tt = expressions[1].transform(tt);
-//            System.out.println(tt);
-//        }
-//    }
-//
-//    private static class Wrr {
-//        final Tensor tensor;
-//
-//        private Wrr(Tensor tensor) {
-//            this.tensor = tensor;
-//        }
-//
-//        @Override
-//        public boolean equals(Object o) {
-//            return TensorUtils.compare1(tensor, ((Wrr) o).tensor) != null;
-//        }
-//
-//        @Override
-//        public int hashCode() {
-//            return tensor.hashCode();
-//        }
-//    }
+    //    @Test
+    //    public void riemannInvariants3() {
+    //        SimpleTensor r = parseSimple("R_abcd");
+    //        addSymmetry(r, IndexType.LatinLower, false, 2, 3, 0, 1);
+    //        addSymmetry(r, IndexType.LatinLower, true, 1, 0, 2, 3);
+    //
+    //        Tensor t = parse("R^abcd*R^efkl*R^mnop");
+    //        int[] upper = ParserIndices.parseSimple("^abcdef").getAllIndices().copy();
+    //        int[] lower = ParserIndices.parseSimple("_klmnop").getAllIndices().copy();
+    //        IntPermutationsGenerator generator = new IntPermutationsGenerator(6);
+    //        Set<Wrr> set = new HashSet<>();
+    //        for (int[] permutation : generator) {
+    //            IntArrayList from = new IntArrayList(upper.length * 2);
+    //            IntArrayList to = new IntArrayList(upper.length * 2);
+    //            for (int i = 0; i < permutation.length; ++i) {
+    //                from.add(upper[i]);
+    //                from.add(0x80000000 | lower[permutation[i]]);
+    //                to.add(0x80000000 | lower[permutation[i]]);
+    //                to.add(lower[permutation[i]]);
+    //            }
+    ////            System.out.println(IndicesUtils.toString(from.toArray()));
+    ////            System.out.println(IndicesUtils.toString(to.toArray()));
+    //            Product att = (Product) ApplyIndexMapping.applyIndexMapping(t, from.toArray(), to.toArray(), new int[0]);
+    //            if (att.factor.isMinusOne()) {
+    //                System.out.println(att + "   asasasas");
+    //            }
+    //            set.add(new Wrr(att));
+    //        }
+    //
+    //        Expression[] expressions = {parseExpression("R^a_man = R_mn"), parseExpression("R^a_a = R")};
+    //        System.out.println(set.size());
+    //        for (Wrr wrr : set) {
+    //            Tensor tt = wrr.tensor;
+    //            tt = expressions[0].transform(tt);
+    //            tt = expressions[1].transform(tt);
+    //            System.out.println(tt);
+    //        }
+    //    }
+    //
+    //    private static class Wrr {
+    //        final Tensor tensor;
+    //
+    //        private Wrr(Tensor tensor) {
+    //            this.tensor = tensor;
+    //        }
+    //
+    //        @Override
+    //        public boolean equals(Object o) {
+    //            return TensorUtils.compare1(tensor, ((Wrr) o).tensor) != null;
+    //        }
+    //
+    //        @Override
+    //        public int hashCode() {
+    //            return tensor.hashCode();
+    //        }
+    //    }
 
     private static Expression expression(String expression) {
         return (Expression) parse(expression);

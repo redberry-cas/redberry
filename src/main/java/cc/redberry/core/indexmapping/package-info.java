@@ -20,6 +20,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
+
 /**
  * Implementation of mappings of indices. Package contains data structures of
  * mappings of indices and algorithms of their building.

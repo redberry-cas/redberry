@@ -23,6 +23,8 @@
 package cc.redberry.core.indexmapping;
 
 /**
+ * Changes the sign of {@link IndexMappingBuffer} to the opposite.
+ *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  * @since 1.0

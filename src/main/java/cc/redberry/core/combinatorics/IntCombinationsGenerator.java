@@ -24,16 +24,16 @@ package cc.redberry.core.combinatorics;
 
 /**
  * This class represents an iterator over all unordered combinations (i.e. [0,1] and [1,0] are
- * considered as same) of {@code k} numbers, which can be chosen from the set of
- * {@code n} numbers, numbered in the order 0,1,2,...,{@code n}. The total number of such combinations is a
- * binomial coefficient {@code n!/(k!(n-k)!)}.
- * <p/>
+ * considered as same, so only [0,1] will apear in the sequence) of {@code k} numbers, which can be chosen from the set of
+ * {@code n} numbers (0,1,2,...,{@code n}). The total number of such combinations is a
+ * binomial coefficient {@code n!/(k!(n-k)!)}. Each returned array is sorted.
+ *
  * <p>The iterator is implemented such that each next combination will be calculated only on
  * the invocation of method {@link #next()}.</p>
- * <br></br><b>Note:</b> method {@link #next()} returns the same reference on each invocation.
+ *
+ * <p><b>Note:</b> method {@link #next()} returns the same reference on each invocation.
  * So, if it is needed not only to obtain the information from {@link #next()}, but also save the result,
  * it is necessary to clone the returned array.</p>
- * <p/>
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky

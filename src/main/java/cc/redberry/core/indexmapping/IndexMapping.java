@@ -23,8 +23,8 @@
 package cc.redberry.core.indexmapping;
 
 /**
- * This interface states the mapping functionality for
- * {@link cc.redberry.core.indices.Indices#applyIndexMapping(IndexMapping)}.
+ * This interface defines the mapping functionality for
+ * {@link cc.redberry.core.indices.Indices#applyIndexMapping(IndexMapping)} method.
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
@@ -32,7 +32,7 @@ package cc.redberry.core.indexmapping;
  */
 public interface IndexMapping {
     /**
-     * Returns the mapping of {@code from} index
+     * Maps a {@code from} index onto the other index
      *
      * @param from from index
      * @return the mapping of {@code from} index

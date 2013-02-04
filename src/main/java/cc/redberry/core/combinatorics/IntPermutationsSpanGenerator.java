@@ -26,11 +26,12 @@ import java.util.ArrayList;
 
 /**
  * This class allows to iterate over all compositions of a given set of permutations.
- * More formally, for a given set of permutations S={p<sub>1</sub>,p<sub>2</sub>,...,p<sub>N</sub>},
+ *
+ * <p>More formally, for a given set of permutations S={p<sub>1</sub>,p<sub>2</sub>,...,p<sub>N</sub>},
  * it will iterate over all possible different compositions
  * p<sub>i1</sub>*p<sub>i2</sub>...*p<sub>iN</sub>*p<sub>iN+1</sub>...*p<sub>iM</sub>. Mathematically say,
  * this class allows to enumerate all elements of the subgroup of a symmetric group, which is defined by
- * a generating set.
+ * a generating set.</p>
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky

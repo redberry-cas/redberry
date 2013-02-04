@@ -22,10 +22,12 @@
  */
 package cc.redberry.core.context;
 
-import cc.redberry.core.indices.StructureOfIndices;
 import cc.redberry.core.indices.SimpleIndices;
+import cc.redberry.core.indices.StructureOfIndices;
 
 /**
+ * Implementation of {@link NameDescriptor} for any simple tensor, except Kronecker and metric tensor.
+ *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  * @since 1.1

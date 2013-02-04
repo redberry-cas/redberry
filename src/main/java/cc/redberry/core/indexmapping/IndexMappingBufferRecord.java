@@ -28,7 +28,7 @@ import cc.redberry.core.indices.InconsistentIndicesException;
 import cc.redberry.core.indices.IndicesUtils;
 
 /**
- * Technical class which holds the intermediate information about mapping entry.
+ * Holds the intermediate information about mapping entry.
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky

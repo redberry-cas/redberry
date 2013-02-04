@@ -24,9 +24,9 @@ package cc.redberry.core.graph;
 
 import cc.redberry.core.indices.IndexType;
 import cc.redberry.core.indices.Indices;
-import cc.redberry.core.tensor.StructureOfContractions;
 import cc.redberry.core.tensor.Product;
 import cc.redberry.core.tensor.ProductContent;
+import cc.redberry.core.tensor.StructureOfContractions;
 import cc.redberry.core.utils.IntArrayList;
 import cc.redberry.core.utils.LongBackedBitArray;
 
@@ -34,12 +34,14 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.List;
 
-import static cc.redberry.core.indices.IndicesUtils.*;
+import static cc.redberry.core.indices.IndicesUtils.getStateInt;
+import static cc.redberry.core.indices.IndicesUtils.getType;
 import static cc.redberry.core.tensor.StructureOfContractions.getToTensorIndex;
 
 /**
- * This class gives a partition of graph on subgraphs of types specified in {@link GraphType}. Such a partition
- * takes into account the links (dummy indices) of specified {@link IndexType}.
+ * This class represents a partition of graph into sub-graphs of types specified in {@link GraphType}.
+ * Such a partition takes into account links (dummy indices) of single {@link IndexType} (specified as
+ * parameter).
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
@@ -70,26 +72,26 @@ public final class PrimitiveSubgraphPartition {
     }
 
     /**
-     * Returns the partition of graph, i.e. an array of all its subgraphs of types specified by {@link GraphType}.
+     * Returns the partition of graph, i.e. an array of all its sub-graphs.
      *
-     * @return the partition of graph, i.e. an array of all its subgraphs of types specified by {@link GraphType}
+     * @return the partition of graph, i.e. an array of all its sub-graphs
      */
     public PrimitiveSubgraph[] getPartition() {
         return partition.clone();
     }
 
     /**
-     * Creates partition of graph (or equivalently the product of indexed tensors)
-     * specified by {@link Product} taking into account edges (dummy indices) of specified {@link IndexType}.
-     * This method returns an array of all its subgraphs of types specified by {@link GraphType}. <b>Note</b>, that
-     * only indexed part of specified product (i.e. its {@link ProductContent}) will be taken into account. So the
-     * positions of subgraphs elements in {@link PrimitiveSubgraph} may not be equal to the positions of tensors
-     * in product (since it can e.g. have a symbolic part), but strictly corresponds to the positions of
-     * tensors in its {@link ProductContent}, i.e. in the indexed part of the product.
+     * Creates a partition of graph (or equivalently the product of indexed tensors) specified by {@link Product}
+     * taking into account edges (dummy indices) of specified {@link IndexType}. This method returns an array of all
+     * its sub-graphs of types specified by {@link GraphType}. <b>Note</b>, that only indexed part of specified product
+     * (i.e. its {@link ProductContent}) will be taken into account. So the positions of sub-graphs elements in
+     * {@link PrimitiveSubgraph} may not be equal to the positions of tensors in product (since it can e.g. have a
+     * symbolic part), but strictly corresponds to the positions of tensors in its {@link ProductContent}, i.e. in the
+     * indexed part of the product.
      *
      * @param p    {@link Product} representing the graph
      * @param type type of edges to be taken into account in partition
-     * @return the partition of graph, i.e. an array of all its subgraphs of types specified by {@link GraphType}
+     * @return the partition of graph, i.e. an array of all its sub-graphs of types specified by {@link GraphType}
      * @since 1.1
      */
     public static PrimitiveSubgraph[] calculatePartition(Product p, IndexType type) {
@@ -99,7 +101,7 @@ public final class PrimitiveSubgraphPartition {
     /**
      * Creates partition of graph (or equivalently the product of indexed tensors)
      * specified by {@link ProductContent} taking into account edges (dummy indices) of specified {@link IndexType}.
-     * This method returns an array of all its subgraphs of types specified by {@link GraphType}.
+     * This method returns an array of all its sub-graphs of types specified by {@link GraphType}.
      *
      * @param p    {@link ProductContent} representing the graph
      * @param type type of edges to be taken into account in partition

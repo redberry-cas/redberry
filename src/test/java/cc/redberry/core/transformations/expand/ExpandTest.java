@@ -37,8 +37,8 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import static cc.redberry.core.tensor.Tensors.parse;
-import static cc.redberry.core.transformations.expand.ExpandTransformation.expand;
 import static cc.redberry.core.transformations.expand.ExpandPort.expandUsingPort;
+import static cc.redberry.core.transformations.expand.ExpandTransformation.expand;
 
 /**
  * @author Dmitry Bolotin
@@ -362,7 +362,7 @@ public class ExpandTest {
         Tensor t = Tensors.parse("k_a*k_b/(k_a*k^a-m**2)+p_a*k_b/(k_a*k^a-m**2)**3");
         t = TogetherTransformation.together(t);
         TAssert.assertIndicesConsistency(t);
-        Tensor tt = Tensors.parse("(-m**2+k_{c}*k^{c})**(-3)*((-m**2+k_{d}*k^{d})**2*k_{a}*k_{b}+p_{a}*k_{b})");
+        Tensor tt = Tensors.parse("(-m**2+k_{d}*k^{d})**(-3)*((-m**2+k_{c}*k^{c})**2*k_{a}*k_{b}+p_{a}*k_{b})");
         TAssert.assertEqualsExactly(t, tt);
         tt = expand(tt);
         TAssert.assertIndicesConsistency(tt);

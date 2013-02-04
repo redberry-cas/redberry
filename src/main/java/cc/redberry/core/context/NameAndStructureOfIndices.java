@@ -28,9 +28,9 @@ import java.util.Arrays;
 import java.util.Objects;
 
 /**
- * Container for structure of indices (see {@link cc.redberry.core.indices.StructureOfIndices}) of tensor and its string name.
- * Two simple tensors are considered to have different mathematical nature if and only if their
- * {@code IndicesTypeStructureAndName} are not equal.
+ * Container for the structure of indices (see {@link cc.redberry.core.indices.StructureOfIndices}) of tensor
+ * and its string name. Two simple tensors are considered to have different mathematical nature if and only if
+ * their {@code IndicesTypeStructureAndName} are not equal.
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky

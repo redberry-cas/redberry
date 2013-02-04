@@ -24,19 +24,21 @@ package cc.redberry.core.combinatorics;
 
 /**
  * This class represents an iterator over over all possible unique
- * combinations (with permutations, i.e. {0,1} and {1,0} both will appear in the iteration) of
- * {@code k} numbers, which can be chosen from the set of {@code n} numbers, numbered in the order
- * 0,1,2,...,{@code n}. The total number of such combinations will be {@code n!/(n-k)!}.</p>
- * <p/>
- * <p>For example, for {@code k=2} and {@code n=3}, it will iterate over
- * the following arrays: [0,1], [1,0], [0,2], [2,0], [1,2], [2,1].</p>
- * <p/>
+ * combinations with permutations (i.e. {0,1} and {1,0} both will appear in the iteration) of {@code k} numbers, which
+ * can be chosen from the set of {@code n} numbers (0,1,2,...,{@code n}). The total number of such combinations will be
+ * {@code n!/(n-k)!}.
+ *
+ * <p>For example, for {@code k=2} and {@code n=3}, it will produce
+ * the following arrays sequence: [0,1], [1,0], [0,2], [2,0], [1,2],
+ * [2,1].</p>
+ *
  * <p>The iterator is implemented such that each next combination will be calculated only on
- * the invocation of method {@link #next()}.</p>
- * <br></br><b>Note:</b> method {@link #next()} returns the same reference on each invocation.
- * So, if it is needed not only to obtain the information from {@link #next()}, but also save the result,
- * it is necessary to clone the returned array.</p>
- * <p/>
+ * the invocation of method {@link #next()} (no pre-calculation of results).</p>
+ *
+ * <p><b>Note:</b> method {@link #next()} returns the same reference on each invocation.
+ * So, if it is needed not only to obtain the information from {@link #next()}, but also to save the result,
+ * it is necessary to clone the returned array!</p>
+ *
  * <p>Inner implementation of this class is simply uses the combination of {@link IntCombinationsGenerator}
  * and {@link IntPermutationsGenerator}.</p>
  *
@@ -94,11 +96,11 @@ public final class IntCombinationPermutationGenerator
     }
 
     /**
-     * @throws UnsupportedOperationException always
+     * Throws UnsupportedOperationException.
      */
     @Override
     public void remove() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        throw new UnsupportedOperationException("Not supported.");
     }
 
     @Override

@@ -66,9 +66,9 @@ public final class CC {
     }
 
     /**
-     * Returns the name manager manager (namespace) of current session.
+     * Returns the name manager (namespace) of current session.
      *
-     * @return the name manager manager (namespace) of current session.
+     * @return the name manager (namespace) of current session.
      */
     public static NameManager getNameManager() {
         return current().getNameManager();
@@ -93,8 +93,9 @@ public final class CC {
     }
 
     /**
-     * Sets the default output format. After this step, all expressions
-     * will be printed according to the specified output format.
+     * Sets the default output format.
+     *
+     * <p>After this step, all expressions will be printed according to the specified output format.</p>
      *
      * @param defaultOutputFormat output format
      */
@@ -104,9 +105,10 @@ public final class CC {
 
     /**
      * This method resets all tensor names in the namespace.
-     * Any tensor created before this method call becomes invalid, and
-     * must not be used! This method is using mainly in unit tests, so
-     * avoid using this method in your code.
+     *
+     * <p>Any tensor created before this method call becomes invalid, and
+     * must not be used! This method is mainly used in unit tests, so
+     * avoid invocations of this method in general computations.</p>
      */
     public static void resetTensorNames() {
         current().resetTensorNames();
@@ -114,10 +116,15 @@ public final class CC {
 
     /**
      * This method resets all tensor names in the namespace and sets a
-     * specified seed to the {@link NameManager}.
-     * Any tensor created before this method call becomes invalid, and
-     * must not be used! This method is using mainly in unit tests, so
-     * avoid using this method in your code.
+     * specified seed to the {@link NameManager}. If this method is invoked
+     * with constant seed before any interactions with Redberry, further
+     * behaviour of Redberry will be fully deterministic from run to run
+     * (order of summands and multipliers will be fixed, computation time
+     * will be pretty constant, hash codes will be the same).
+     *
+     * <p>Any tensor created before this method call becomes invalid, and
+     * must not be used! This method is mainly used in unit tests, so
+     * avoid invocations of this method in general computations.</p>
      */
     public static void resetTensorNames(long seed) {
         current().resetTensorNames(seed);

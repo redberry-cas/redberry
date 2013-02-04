@@ -25,8 +25,8 @@ package cc.redberry.core.graph;
 import java.util.Arrays;
 
 /**
- * Subgraph of some graph. This class is simply holds {@link GraphType} of subgraph and
- * positions of its elements in the whole graph.
+ * Sub-graph of graph. This class is simply holds {@link GraphType} of sub-graph
+ * and indices of its elements in the whole graph.
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
@@ -37,8 +37,8 @@ public final class PrimitiveSubgraph {
     private final int[] partition;
 
     /**
-     * @param graphType type of subgraph
-     * @param partition positions of subgraph elements in the whole graph
+     * @param graphType type of sub-graph
+     * @param partition positions of sub-graph elements in the whole graph
      */
     public PrimitiveSubgraph(GraphType graphType, int[] partition) {
         this.graphType = graphType;
@@ -46,18 +46,18 @@ public final class PrimitiveSubgraph {
     }
 
     /**
-     * Returns subgraph type
+     * Returns sub-graph type
      *
-     * @return subgraph type
+     * @return sub-graph type
      */
     public GraphType getGraphType() {
         return graphType;
     }
 
     /**
-     * Returns positions of subgraph elements in the whole graph.
+     * Returns positions of sub-graph elements in the whole graph.
      *
-     * @return positions of subgraph elements in the whole graph
+     * @return positions of sub-graph elements in the whole graph
      */
     public int[] getPartition() {
         return partition.clone();

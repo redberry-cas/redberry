@@ -25,6 +25,8 @@ package cc.redberry.core.indexmapping;
 import cc.redberry.core.tensor.Tensor;
 
 /**
+ * {@link IndexMappingProviderAbstract} with {@code from} and {@code to} protected fields.
+ *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  * @since 1.0

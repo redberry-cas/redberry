@@ -23,6 +23,7 @@
 package cc.redberry.core.indexmapping;
 
 /**
+ * Passes the index mapping through itself without modifications.
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky

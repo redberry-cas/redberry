@@ -23,6 +23,8 @@
 package cc.redberry.core.indexmapping;
 
 /**
+ * Provides two index mappings for each input mapping: the same as input mapping and with opposite sign.
+ *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  * @since 1.0

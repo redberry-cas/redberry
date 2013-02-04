@@ -72,18 +72,18 @@ public interface Symmetries extends Iterable<Symmetry> {
     int dimension();
 
     /**
-     * Returns <tt>true</tt> if and only if this set contains only identity
-     * symmetry and <tt>false</tt> otherwise.
+     * Returns {@code true} if and only if this set contains only identity
+     * symmetry and {@code false} otherwise.
      *
-     * @return <tt>true</tt> if and only if this set contains only identity
-     *         symmetry and <tt>false</tt> otherwise
+     * @return {@code true} if and only if this set contains only identity
+     *         symmetry and {@code false} otherwise
      */
     boolean isEmpty();
 
     /**
      * Adds the specified symmetry to this set if it cannot be expressed as combination of
      * existing symmetries from this set.
-     * <p>More detailed, adds if and only if there is no any subset of symmetries
+     * <p>In more details: adds if and only if there is no any subset of symmetries
      * {s1,s2,s3,...,sN} in this set, such that specified symmetry is equal to
      * the composition s1*s2*s2*...*sN.</p>
      * <p>If specified symmetry is not consistent with others from this set, in the

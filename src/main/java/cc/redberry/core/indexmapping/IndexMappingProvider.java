@@ -23,6 +23,21 @@
 package cc.redberry.core.indexmapping;
 
 /**
+ * Internal interface representing a index mapping provider (IMP).
+ *
+ * <p>IMP could be imagine as a processing element of a pipeline. Each such element takes a result (index mapping) of
+ * the previous element and adds its own information to this result. One input index mapping could be "transformed" by
+ * processing element (IMP) into zero, one, or several elements, which in turn, will be one-by-one processed by the next
+ * IMP.</p>
+ *
+ * <p>It has two methods {@code tick()} and {@code take()}. The {@code tick()} method tells the current IMP to take one
+ * index mapping from the previous IMP in the chin and load it into "register" inside. The {@code take()} method returns
+ * the next resulting index mapping derived from mapping stored in the mentioned above register.</p>
+ *
+ * <p>Such pattern helps to avoid very long stacks in case of very complex expressions. The average stack depth is
+ * proportional to the depth (number of nested tensors) of expression. In the naive implementation, otherwise, it
+ * would have been proportional to the number of element in the expression.</p>
+ *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  * @since 1.0

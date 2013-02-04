@@ -26,7 +26,7 @@ import cc.redberry.core.indices.Indices;
 import cc.redberry.core.tensor.Tensor;
 
 /**
- * This {@code enum} defines common formats of string representation of expressions in Redberry.
+ * This {@code enum} defines formats of string representation of expressions in Redberry.
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky

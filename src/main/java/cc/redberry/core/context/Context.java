@@ -29,11 +29,16 @@ import cc.redberry.core.tensor.Tensors;
 import cc.redberry.core.utils.LongBackedBitArray;
 
 /**
- * <p>Redberry context. This class collects Redberry session defaults and context-sensitive under the hood information.
- * It has a single unique thread-local instance during each Redberry session. Hence, all variables
- * keeping by the context (like e.g. namespace) have unique instances during session and cannot be
- * changed externally. In order to create a new session of Redberry with a particular context, an instance
- * of this class should be set as a current context via {@link ContextManager#setCurrentContext(Context)}.</p>
+ * This class represents Redberry context. It stores all Redberry session data (in some sense it stores static data).
+ *
+ * <p>Management of current Redberry context is made through {@link ContextManager} class.
+ * Context of Redberry is attached to the current thread, so that any thread created from the outside of Redebrry
+ * will hold a unique instance of {@link Context} object. In such a way tensors created in one thread can not
+ * be used in the other thread because they are in some sense "attached" to the initial thread. However, if thread is
+ * created through the executor service which is obtained from {@link ContextManager#getExecutorService()}, it will
+ * share the same context as initial thread (such threads could hold concurrent computations regarding single context,
+ * the appropriate synchronization is assumed). In order to create a new session of Redberry with a particular context,
+ * an instance of this class should be set as a current context via {@link ContextManager#setCurrentContext(Context)}.</p>
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
@@ -59,7 +64,7 @@ public final class Context {
     private final ParseManager parseManager;
     /**
      * Holds information about metric types.
-     * This is a reflection (byte) type => (bit) isMetric
+     * This is a "map" from (byte) type to (bit) isMetric
      */
     private final LongBackedBitArray metricTypes = new LongBackedBitArray(128);
 
@@ -82,9 +87,10 @@ public final class Context {
 
     /**
      * This method resets all tensor names in the namespace.
-     * Any tensor created before this method call becomes invalid, and
-     * must not be used! This method is using mainly in unit tests, so
-     * avoid using this method in your code.
+     *
+     * <p>Any tensor created before this method call becomes invalid, and
+     * must not be used! This method is mainly used in unit tests, so
+     * avoid invocations of this method in general computations.</p>
      */
     public synchronized void resetTensorNames() {
         nameManager.reset();
@@ -92,10 +98,15 @@ public final class Context {
 
     /**
      * This method resets all tensor names in the namespace and sets a
-     * specified seed to the {@link NameManager}.
-     * Any tensor created before this method call becomes invalid, and
-     * must not be used! This method is using mainly in unit tests, so
-     * avoid using this method in your code.
+     * specified seed to the {@link NameManager}. If this method is invoked
+     * with constant seed before any interactions with Redberry, further
+     * behaviour of Redberry will be fully deterministic from run to run
+     * (order of summands and multipliers will be fixed, computation time
+     * will be pretty constant, hash codes will be the same).
+     *
+     * <p>Any tensor created before this method call becomes invalid, and
+     * must not be used! This method is mainly used in unit tests, so
+     * avoid invocations of this method in general computations.</p>
      */
     public synchronized void resetTensorNames(long seed) {
         nameManager.reset(seed);
@@ -130,9 +141,9 @@ public final class Context {
     }
 
     /**
-     * Returns the name manager manager (namespace) of current session.
+     * Returns the name manager (namespace) of current session.
      *
-     * @return the name manager manager (namespace) of current session.
+     * @return the name manager (namespace) of current session.
      */
     public NameManager getNameManager() {
         return nameManager;
@@ -187,10 +198,10 @@ public final class Context {
     }
 
     /**
-     * Returns {@code true} if specified tensor is Kronecker tensor
+     * Returns {@code true} if specified tensor is a Kronecker tensor
      *
      * @param t tensor
-     * @return {@code true} if specified tensor is Kronecker tensor
+     * @return {@code true} if specified tensor is a Kronecker tensor
      */
     public boolean isKronecker(SimpleTensor t) {
         return nameManager.isKroneckerOrMetric(t.getName())
@@ -198,10 +209,10 @@ public final class Context {
     }
 
     /**
-     * Returns {@code true} if specified tensor is metric tensor
+     * Returns {@code true} if specified tensor is a metric tensor
      *
      * @param t tensor
-     * @return {@code true} if specified tensor is metric tensor
+     * @return {@code true} if specified tensor is a metric tensor
      */
     public boolean isMetric(SimpleTensor t) {
         return nameManager.isKroneckerOrMetric(t.getName())
@@ -209,10 +220,10 @@ public final class Context {
     }
 
     /**
-     * Returns {@code true} if specified tensor is metric or Kronecker tensor
+     * Returns {@code true} if specified tensor is a metric or a Kronecker tensor
      *
      * @param t tensor
-     * @return {@code true} if specified tensor is metric or Kronecker tensor
+     * @return {@code true} if specified tensor is a metric or a Kronecker tensor
      */
     public boolean isKroneckerOrMetric(SimpleTensor t) {
         return nameManager.isKroneckerOrMetric(t.getName());
@@ -228,10 +239,10 @@ public final class Context {
     }
 
     /**
-     * Returns true if metric is defined for specified index type.
+     * Returns true if metric is defined for the specified index type.
      *
      * @param type index type
-     * @return true if metric is defined for specified index type
+     * @return true if metric is defined for the specified index type
      */
     public boolean isMetric(byte type) {
         return metricTypes.get(type);
