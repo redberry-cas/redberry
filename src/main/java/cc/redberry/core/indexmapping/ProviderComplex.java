@@ -26,6 +26,8 @@ import cc.redberry.core.number.Complex;
 import cc.redberry.core.tensor.Tensor;
 
 /**
+ * {@link Complex}-specific mapping provider.
+ *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  * @since 1.0

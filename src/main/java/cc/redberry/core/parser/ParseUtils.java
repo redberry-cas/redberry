@@ -24,6 +24,11 @@ package cc.redberry.core.parser;
 
 import cc.redberry.core.indices.Indices;
 import cc.redberry.core.indices.IndicesUtils;
+import cc.redberry.core.number.Complex;
+import cc.redberry.core.tensor.SimpleTensor;
+import cc.redberry.core.tensor.Tensor;
+import cc.redberry.core.tensor.TensorField;
+import cc.redberry.core.tensor.functions.ScalarFunction;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
 
@@ -40,6 +45,32 @@ import java.util.Set;
 public class ParseUtils {
 
     private ParseUtils() {
+    }
+
+    public static ParseToken tensor2AST(Tensor tensor) {
+        if (tensor instanceof TensorField) {
+            TensorField tf = (TensorField) tensor;
+            ParseToken[] content = new ParseToken[tf.size()];
+            int i = 0;
+            for (Tensor t : tf)
+                content[i++] = tensor2AST(t);
+            return new ParseTokenTensorField(tf.getIndices(), tf.getStringName(), content, tf.getArgIndices());
+        }
+        if (tensor instanceof SimpleTensor) {
+            SimpleTensor st = (SimpleTensor) tensor;
+            return new ParseTokenSimpleTensor(st.getIndices(), st.getStringName());
+        }
+        if (tensor instanceof Complex)
+            return new ParseTokenNumber((Complex) tensor);
+
+        ParseToken[] content = new ParseToken[tensor.size()];
+        int i = 0;
+        for (Tensor t : tensor)
+            content[i++] = tensor2AST(t);
+
+        if (tensor instanceof ScalarFunction)
+            return new ParseTokenScalarFunction(tensor.getClass().getSimpleName(), content);
+        return new ParseToken(TokenType.valueOf(tensor.getClass().getSimpleName()), content);
     }
 
     public static Set<Integer> getAllIndices(ParseToken node) {

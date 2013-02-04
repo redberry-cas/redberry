@@ -41,7 +41,7 @@ public class UnsafeIndicesFactory {
     public static SimpleIndices createOfTensor(IndicesSymmetries symmetries, SimpleIndices indices) {
         if (indices.size() == 0)
             return IndicesFactory.EMPTY_SIMPLE_INDICES;
-        return new SimpleIndicesOfTensor(((AbstractIndices) indices).data, symmetries);
+        return new SimpleIndicesOfTensor(true, ((AbstractIndices) indices).data, symmetries);
     }
 
     /**
@@ -54,6 +54,6 @@ public class UnsafeIndicesFactory {
     public static SimpleIndices createIsolatedUnsafeWithoutSort(IndicesSymmetries symmetries, int... data) {
         if (data.length == 0)
             return IndicesFactory.EMPTY_SIMPLE_INDICES;
-        return new SimpleIndicesIsolated(true, data, symmetries);
+        return new SimpleIndicesIsolated(data, symmetries);
     }
 }

@@ -72,7 +72,7 @@ public class ParseTokenSimpleTensor extends ParseToken {
     }
 
     @Override
-    public Indices getIndices() {
+    public SimpleIndices getIndices() {
         return indices;
     }
 

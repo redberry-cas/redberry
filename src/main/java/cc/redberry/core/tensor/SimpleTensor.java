@@ -23,6 +23,8 @@
 package cc.redberry.core.tensor;
 
 import cc.redberry.core.context.CC;
+import cc.redberry.core.context.ContextManager;
+import cc.redberry.core.context.NameDescriptor;
 import cc.redberry.core.context.OutputFormat;
 import cc.redberry.core.indices.SimpleIndices;
 import cc.redberry.core.utils.EmptyIterator;
@@ -106,6 +108,10 @@ public class SimpleTensor extends Tensor {
         return new Factory(this);
     }
 
+    public NameDescriptor getNameDescriptor() {
+        return ContextManager.getCurrentContext().getNameDescriptor(name);
+    }
+
     @Override
     public boolean equals(Object obj) {
         if (obj == null)
@@ -116,6 +122,10 @@ public class SimpleTensor extends Tensor {
         if (this.name != other.name)
             return false;
         return this.indices.equals(other.indices);
+    }
+
+    public String getStringName() {
+        return CC.current().getNameDescriptor(name).getName(indices);
     }
 
     private static final class Builder implements TensorBuilder {

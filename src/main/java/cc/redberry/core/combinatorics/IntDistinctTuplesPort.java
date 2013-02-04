@@ -28,14 +28,14 @@ import cc.redberry.core.utils.LongBackedBitArray;
 import java.util.Arrays;
 
 /**
- * <p>This class represents an iterator (implemented in the output port pattern) over
+ * This class represents an iterator (implemented in the output port pattern) over
  * all distinct N-tuples, which can be chosen from {@code N} sets of integers. More formally,
  * for {@code N} integer arrays: <i>array</i><sub>1</sub>,
  * <i>array</i><sub>2</sub>,...,<i>array</i><sub>N</sub>, this class allows to
  * iterate over all possible integer arrays of the form [i<sub>1</sub>, i<sub>2</sub>,...,i<sub>N</sub>],
  * where all numbers numbers i<sub>j</sub> are different and i<sub>1</sub> is chosen
  * from <i>array</i><sub>1</sub>, i<sub>2</sub> is chosen from <i>array</i><sub>2</sub> and so on.</p>
- * <p/>
+ *
  * <p>Consider the example:
  * <code><pre>
  * int[] a1 = {1, 2, 3};
@@ -53,10 +53,11 @@ import java.util.Arrays;
  * [3, 2]
  * </pre></code>
  * </p>
- * <p/>
+ *
  * <p>This class is implemented via output port pattern and the calculation of the next
- * tuple occurs only on the invocation of {@link #take()}.
- * <b>Note:</b> method {@link #take()} returns the same reference on each invocation.
+ * tuple occurs only on the invocation of {@link #take()}.</p>
+ *
+ * <p><b>Note:</b> method {@link #take()} returns the same reference on each invocation.
  * So, if it is needed not only to obtain the information from {@link #take()}, but also save the result,
  * it is necessary to clone the returned array.</p>
  *

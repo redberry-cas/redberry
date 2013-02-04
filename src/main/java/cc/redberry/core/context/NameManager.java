@@ -36,11 +36,12 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
- * The namespace of Redberry. Its responsibility is to generate unique name descriptors
- * ({@link NameDescriptor}) and integer identifiers for simple tensors and fields from raw data. These
- * identifiers are same for tensors with same mathematical nature. They are generated randomly in
- * order to obtain the normal distribution through Redberry session. The instance of this class is unique
- * for each session of Redberry and can be obtained vei {@link CC#getNameManager()}.
+ * Object of this class represents a namespace of simple tensor and tensor fields in Redberry.
+ * It is responsible for generation of unique name descriptors ({@link NameDescriptor}) and integer
+ * identifiers for simple tensors and fields from raw data. These identifiers are the same for tensors
+ * with the same mathematical nature. They are generated randomly in order to obtain the uniform distribution
+ * through Redberry session. Each session of Redberry holds only one instance of this class, it can be obtained
+ * through {@link CC#getNameManager()}.
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
@@ -162,9 +163,9 @@ public final class NameManager {
      * This method returns the existing name descriptor of simple tensor from the raw data if it contains in the
      * namespace or constructs and puts to namespace new instance of name descriptor otherwise.
      *
-     * @param sname                 string name of tensor
+     * @param sname                string name of tensor
      * @param structureOfIndiceses structure of tensor indices (first element in array) and structure of indices
-     *                              of arguments (in case of tensor field)
+     *                             of arguments (in case of tensor field)
      * @return name descriptor corresponding to the specified information of tensor
      */
     public NameDescriptor mapNameDescriptor(String sname, StructureOfIndices... structureOfIndiceses) {

@@ -82,7 +82,7 @@ public class IntDistinctTuplesPortTest {
         int[] arr = {1, 2, 3};
         Set<int[]> expected = new HashSet<>();
         for (int[] a : Combinatorics.createIntGenerator(3, 3))
-            expected.add(Combinatorics.shuffle(arr, a));
+            expected.add(Combinatorics.reorder(arr, a));
 
         TAssert.assertEquals(actual, expected);
     }

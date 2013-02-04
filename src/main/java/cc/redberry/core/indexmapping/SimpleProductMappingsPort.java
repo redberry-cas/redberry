@@ -25,8 +25,11 @@ package cc.redberry.core.indexmapping;
 import cc.redberry.core.tensor.Tensor;
 
 /**
+ * Auxiliary class for calculation of indices mappings between products.
+ *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @see ProviderProduct
  * @since 1.0
  */
 final class SimpleProductMappingsPort implements MappingsPort {

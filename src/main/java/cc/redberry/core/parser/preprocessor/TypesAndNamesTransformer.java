@@ -20,36 +20,35 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
-package cc.redberry.core.context;
+package cc.redberry.core.parser.preprocessor;
 
-import cc.redberry.core.indices.SimpleIndices;
+import cc.redberry.core.context.NameAndStructureOfIndices;
+import cc.redberry.core.indices.IndexType;
 import cc.redberry.core.indices.StructureOfIndices;
 
 /**
- * Implementation of {@link NameDescriptor} for any simple tensor, except Kronecker and metric tensor.
- *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
- * @since 1.1
  */
-final class NameDescriptorImpl extends NameDescriptor {
+public interface TypesAndNamesTransformer {
+    IndexType newType(IndexType oldType, NameAndStructureOfIndices oldDescriptor);
 
-    private final String name;
-    private final NameAndStructureOfIndices[] key;
+    String newName(NameAndStructureOfIndices oldDescriptor);
 
-    NameDescriptorImpl(String name, StructureOfIndices[] indexTypeStructures, int id) {
-        super(indexTypeStructures, id);
-        this.name = name;
-        this.key = new NameAndStructureOfIndices[]{new NameAndStructureOfIndices(name, indexTypeStructures)};
-    }
 
-    @Override
-    public String getName(SimpleIndices indices) {
-        return name;
-    }
+    public static class Utils {
+        public static TypesAndNamesTransformer changeType(final IndexType oldType, final IndexType newType) {
+            return new TypesAndNamesTransformer() {
+                @Override
+                public IndexType newType(IndexType old, NameAndStructureOfIndices oldDescriptor) {
+                    return old == oldType ? newType : old;
+                }
 
-    @Override
-    NameAndStructureOfIndices[] getKeys() {
-        return key;
+                @Override
+                public String newName(NameAndStructureOfIndices oldDescriptor) {
+                    return oldDescriptor.getName();
+                }
+            };
+        }
     }
 }

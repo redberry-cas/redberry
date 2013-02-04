@@ -25,7 +25,7 @@ package cc.redberry.core.combinatorics;
 import cc.redberry.concurrent.OutputPortUnsafe;
 
 /**
- * This interface if common for all combinatorial iterators.
+ * This interface is common for all combinatorial iterators.
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
@@ -38,9 +38,9 @@ public interface IntCombinatorialPort extends OutputPortUnsafe<int[]> {
     void reset();
 
     /**
-     * Returns the reference on the current iteration element.
+     * Returns the reference to the current iteration element.
      *
-     * @return the reference on the current iteration element
+     * @return the reference to the current iteration element
      */
     int[] getReference();
 

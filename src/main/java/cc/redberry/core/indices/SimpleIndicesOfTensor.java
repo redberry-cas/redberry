@@ -33,7 +33,7 @@ final class SimpleIndicesOfTensor extends SimpleIndicesAbstract {
         super(data, symmetries);
     }
 
-    public SimpleIndicesOfTensor(boolean notResort, int[] data, IndicesSymmetries symmetries) {
+    SimpleIndicesOfTensor(boolean notResort, int[] data, IndicesSymmetries symmetries) {
         super(notResort, data, symmetries);
     }
 

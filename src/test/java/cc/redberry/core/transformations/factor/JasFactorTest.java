@@ -98,7 +98,7 @@ public class JasFactorTest extends TestCase {
 //        IntPermutationsGenerator generator = new IntPermutationsGenerator(vars.length);
 //        for (int[] prmutation : generator) {
 //
-//            final String[] vars1 = Combinatorics.shuffle(vars, prmutation);
+//            final String[] vars1 = Combinatorics.reorder(vars, prmutation);
 //            System.out.println(Arrays.toString(vars1));
 //            Thread thread = new Thread() {
 //                @Override

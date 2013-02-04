@@ -26,8 +26,7 @@ import java.util.Iterator;
 
 /**
  * This class is a simple wrapper of {@link IntPermutationsGenerator}. It returns the objects of
- * type {@code Permutation} instead of integer arrays.
- * <p/>
+ * type {@code Permutation} instead of {@code int} arrays.
  *
  * @param <T> {@code Permutation} subtype
  * @author Dmitry Bolotin

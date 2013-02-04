@@ -22,13 +22,15 @@
  */
 package cc.redberry.core.context;
 
-import cc.redberry.core.indices.StructureOfIndices;
 import cc.redberry.core.indices.IndicesUtils;
 import cc.redberry.core.indices.SimpleIndices;
+import cc.redberry.core.indices.StructureOfIndices;
 
 import java.util.Arrays;
 
 /**
+ * Specific implementation of {@link NameDescriptor} for Kronecker and metric tensors.
+ *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  * @since 1.1

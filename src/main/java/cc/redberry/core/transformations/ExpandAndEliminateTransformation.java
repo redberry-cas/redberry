@@ -20,24 +20,27 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
-package cc.redberry.core.indexmapping;
+package cc.redberry.core.transformations;
+
+import cc.redberry.core.tensor.Tensor;
+import cc.redberry.core.transformations.expand.ExpandTransformation;
 
 /**
- * Passes the index mapping through itself without modifications.
- *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
- * @since 1.0
  */
-final class DummyIndexMappingProvider extends IndexMappingProviderAbstract {
-    public DummyIndexMappingProvider(MappingsPort opu) {
-        super(opu);
+public class ExpandAndEliminateTransformation implements Transformation {
+    public static final ExpandAndEliminateTransformation EXPAND_AND_ELIMINATE = new ExpandAndEliminateTransformation();
+
+    private ExpandAndEliminateTransformation() {
     }
 
     @Override
-    public IndexMappingBuffer take() {
-        IndexMappingBuffer buf = currentBuffer;
-        currentBuffer = null;
-        return buf;
+    public Tensor transform(Tensor t) {
+        return expandAndEliminate(t);
+    }
+
+    public static Tensor expandAndEliminate(Tensor t) {
+        return EliminateMetricsTransformation.eliminate(ExpandTransformation.expand(t, EliminateMetricsTransformation.ELIMINATE_METRICS));
     }
 }

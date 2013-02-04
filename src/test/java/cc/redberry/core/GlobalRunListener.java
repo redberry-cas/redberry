@@ -29,7 +29,8 @@ import org.junit.runner.notification.Failure;
 import org.junit.runner.notification.RunListener;
 
 /**
- * @author Bolotin Dmitriy (bolotin.dmitriy@gmail.com)
+ * @author Dmitry Bolotin
+ * @author Stanislav Poslavsky
  */
 public class GlobalRunListener extends RunListener {
 

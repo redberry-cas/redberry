@@ -23,6 +23,8 @@
 package cc.redberry.core.indexmapping;
 
 /**
+ * {@link MinusIndexMappingProvider} wrapper that changes sign of output {@link IndexMappingBuffer} to opposite.
+ *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  * @since 1.0

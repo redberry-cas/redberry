@@ -27,10 +27,16 @@ import cc.redberry.core.context.OutputFormat;
 import cc.redberry.core.indices.IndexType;
 
 /**
- * The default Redberry context settings. These default are: metric tensor name - "g",
- * Kronecker tensor name - "d", metric types - {@link IndexType#LatinLower}, {@link IndexType#LatinUpper},
- * {@link IndexType#GreekLower}, {@link IndexType#GreekUpper}. Random seed of {@link cc.redberry.core.context.NameManager}
- * is taken from the command line if {@code redberry.nmseed specified}, or generated randomly.
+ * The default Redberry context settings.
+ *
+ * <p>
+ * These default are:<br/>
+ * metric tensor name = "g",<br/>
+ * Kronecker tensor name = "d",<br/>
+ * metric types are: {@link IndexType#LatinLower}, {@link IndexType#LatinUpper}, {@link IndexType#GreekLower}, {@link IndexType#GreekUpper}.</p>
+ *
+ * <p>Random seed of {@link cc.redberry.core.context.NameManager} is taken from the command line if {@code redberry.nmseed option is specified},
+ * or generated randomly.</p>
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky

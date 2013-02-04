@@ -23,7 +23,7 @@
 package cc.redberry.core.graph;
 
 /**
- * Type of graph.
+ * Some basic types of graphs that are used to interpret matrices products.
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
@@ -32,7 +32,8 @@ package cc.redberry.core.graph;
 public enum GraphType {
     /**
      * The graph of form A^{i<sub>1</sub>}_{i<sub>2</sub>}*B^{i<sub>2</sub>}_{i<sub>3</sub>}*...*C^{i<sub>N</sub>}_{i<sub>1</sub>},
-     * where {i<sub>j</sub>} denotes the whole set of tensor indices. Tensor of such type have no free indices.
+     * where {i<sub>j</sub>} denotes the whole set of tensor indices. Tensors of such structure have no free indices of considered
+     * index type.
      */
     Cycle,
     /**

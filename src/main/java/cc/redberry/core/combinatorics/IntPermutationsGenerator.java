@@ -24,9 +24,9 @@ package cc.redberry.core.combinatorics;
 
 /**
  * This class represents iterator over all possible permutations of specified
- * dimension written in one-line notation.Number of all permutations of dimension
+ * dimension written in one-line notation. Number of all permutations of dimension
  * D is D!.
- * <p/>
+ *
  * <p>Example
  * <code><pre>
  *      IntPermutationsGenerator ig = new IntPermutationsGenerator(3);
@@ -42,14 +42,14 @@ package cc.redberry.core.combinatorics;
  *      [2, 0, 1]
  *      [2, 1, 0]
  * </pre></code>
- * It is also possible to iterate in the opposite direction via {@link #previous()} method.
- * <p/>
+ * It is also possible to iterate in the opposite direction via {@link #previous()} method.</p>
+ *
  * <p>The iterator is implemented such that each next combination will be calculated only on
  * the invocation of method {@link #next()}.</p>
- * <br></br><b>Note:</b> method {@link #next()} returns the same reference on each invocation.
+ *
+ * <p><b>Note:</b> method {@link #next()} returns the same reference on each invocation.
  * So, if it is needed not only to obtain the information from {@link #next()}, but also save the result,
  * it is necessary to clone the returned array.</p>
- * <p/>
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
@@ -78,9 +78,11 @@ public final class IntPermutationsGenerator
     /**
      * Construct iterator over permutations with specified permutation at
      * the start. If starting permutation is not identity, the iterator will not
-     * iterate over all possible combinatorics, but only from starting permutation up to the
-     * last permutation, which is [size-1,size-2,....1,0]. <b>Note:</b> parameter {@code permutation} is
-     * not coping in constructor and will change during iteration.
+     * iterate over all possible permutations, but only from starting permutation up to the
+     * last permutation, which is [size-1,size-2,....1,0].
+     *
+     * <p><b>Note:</b> parameter {@code permutation} is
+     * not copied in constructor and the same instance will be used during iteration.</p>
      *
      * @param permutation starting permutation
      * @throws IllegalArgumentException if permutation is inconsistent with

@@ -20,24 +20,10 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
-package cc.redberry.core.indexmapping;
-
 /**
- * Passes the index mapping through itself without modifications.
+ * Redberry core.
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
- * @since 1.0
  */
-final class DummyIndexMappingProvider extends IndexMappingProviderAbstract {
-    public DummyIndexMappingProvider(MappingsPort opu) {
-        super(opu);
-    }
-
-    @Override
-    public IndexMappingBuffer take() {
-        IndexMappingBuffer buf = currentBuffer;
-        currentBuffer = null;
-        return buf;
-    }
-}
+package cc.redberry.core;

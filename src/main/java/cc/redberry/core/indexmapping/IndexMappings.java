@@ -32,7 +32,7 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Provides static methods for creating mappings of indices.
+ * Central public facade of this package. Provides static methods for calculation of mappings between indices.
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
