@@ -65,7 +65,7 @@ public final class PowerFactory implements TensorFactory {
             return Complex.ONE;
         if (TensorUtils.isZero(argument))
             return Complex.ZERO;
-        if (argument instanceof Product) {
+        if (argument instanceof Product && TensorUtils.isInteger(power)) {
             Tensor[] scalars = ((Product) argument).getAllScalars();
             if (scalars.length > 1) {
                 TensorBuilder pb = argument.getBuilder();//creating product builder             
