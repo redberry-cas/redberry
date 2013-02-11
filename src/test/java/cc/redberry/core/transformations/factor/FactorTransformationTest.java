@@ -26,7 +26,10 @@ import cc.redberry.core.TAssert;
 import cc.redberry.core.context.CC;
 import cc.redberry.core.context.OutputFormat;
 import cc.redberry.core.number.Complex;
-import cc.redberry.core.tensor.*;
+import cc.redberry.core.tensor.ProductBuilder;
+import cc.redberry.core.tensor.SimpleTensor;
+import cc.redberry.core.tensor.SumBuilder;
+import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.utils.TensorUtils;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -284,6 +287,13 @@ public class FactorTransformationTest {
             t = parse("(a**2+2*a*b+b**2)/(a+b)*F^i_i+(a**2+2*a*b+b**2)*(a+b)**(-1)*H^i_i");
             TAssert.assertEquals(factor(t), "(a+b)*H^{i}_{i}+(a+b)*F^{i}_{i}");
         }
+    }
+
+    @Ignore
+    @Test
+    public void test20() {
+        Tensor t = parse("a + 2*(a*b)**(1/2) + b");
+        TAssert.assertEquals(FactorTransformation.FACTOR.transform(t), t);
     }
 
 
