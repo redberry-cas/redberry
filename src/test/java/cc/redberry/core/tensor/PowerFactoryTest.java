@@ -58,4 +58,10 @@ public class PowerFactoryTest {
         Tensor actual = Tensors.parse("(28+I*96)**(1/4)");
         Assert.assertEquals(expected, actual);
     }
+
+    @Test
+    public void testPower2() {
+        Tensor a = Tensors.parse("(-a)**(1/2)");
+        Assert.assertEquals(a.toString(OutputFormat.Redberry), "(-a)**(1/2)");
+    }
 }
