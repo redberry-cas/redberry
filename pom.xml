@@ -86,7 +86,7 @@
     </developers>
 
     <scm>
-        <connection>scm:hg:http://bitbucket.org/redberry/redberry</connection>
+        <connection>scm:hg:http://bitbucket.org/redberry/redberry-core</connection>
         <!-- <tag>v1.1</tag>
         <url>https://bitbucket.org/redberry/redberry/src/?at=v1.1</url> -->
     </scm>
