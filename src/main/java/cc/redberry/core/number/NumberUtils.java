@@ -22,6 +22,8 @@
  */
 package cc.redberry.core.number;
 
+import cc.redberry.core.tensor.Power;
+import cc.redberry.core.tensor.Tensor;
 import org.apache.commons.math3.fraction.BigFraction;
 
 import java.math.BigInteger;
@@ -126,4 +128,50 @@ public final class NumberUtils {
     public static boolean isRealNegative(Complex complex) {
         return complex.isReal() && complex.getReal().signum() < 0;
     }
+
+    public static boolean isRealNumerical(Tensor tensor) {
+        if (tensor instanceof Complex && ((Complex) tensor).isReal())
+            return true;
+        for (Tensor t : tensor)
+            if (!isRealNumerical(t))
+                return false;
+        return true;
+    }
+
+//    public static Boolean getSignOfNumerical(Tensor tensor) {
+//        //todo write better code
+//        if (!isRealNumerical(tensor))
+//            return null;
+//        return getSignOfNumerical1(tensor);
+//    }
+//
+//    private static Boolean getSignOfNumerical1(Tensor tensor) {
+//        if (tensor instanceof Complex) {
+//            Complex complex = (Complex) tensor;
+//            return complex.isReal() && complex.getReal().signum() < 0;
+//        }
+//        if (tensor instanceof Power) {
+//            Tensor base = tensor.get(0),
+//                    exponent = tensor.get(1);
+//            Boolean baseSign = getSignOfNumerical1(base);
+//            if (baseSign == null)
+//                return null;
+//
+//            //base is positive
+//            if (baseSign == false)
+//                return false;
+//
+//            //base is negative
+//            if (!(exponent instanceof Complex))
+//                return null;
+//
+//            Real real = ((Complex) exponent).getReal();
+//            if (real.isNumeric())
+//                return null;
+//            Rational rational = (Rational) real;
+//            rational.ge
+//
+//            return null;
+//        }
+//    }
 }

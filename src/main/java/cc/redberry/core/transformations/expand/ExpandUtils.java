@@ -334,17 +334,19 @@ public final class ExpandUtils {
                 return t;
             Product p = (Product) t;
             Tensor indexless = p.getIndexlessSubProduct();
+            return Tensors.multiply(ExpandTransformation.expand(indexless), p.getDataSubProduct());
 
-            boolean needExpand = false;
-            if (indexless instanceof Product)
-                for (Tensor i : indexless)
-                    if (i instanceof Sum) {
-                        needExpand = true;
-                        break;
-                    }
-            if (needExpand)
-                return Tensors.multiply(expandProductOfSums1(indexless, new Transformation[0], false), p.getDataSubProduct());
-            return t;
+//            boolean needExpandSums = false, needExpandPowers = false;
+//            if (indexless instanceof Product)
+//                for (Tensor i : indexless) {
+//                    if (i instanceof Sum)
+//                        needExpandSums = true;
+//                    if (isExpandablePower(i))
+//                        needExpandPowers = true;
+//                }
+//            if (needExpandSums)
+//                return Tensors.multiply(expandProductOfSums1(indexless, new Transformation[0], false), p.getDataSubProduct());
+//            return t;
         }
     };
 }

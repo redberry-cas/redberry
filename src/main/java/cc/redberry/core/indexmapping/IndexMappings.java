@@ -127,6 +127,22 @@ public final class IndexMappings {
     }
 
     /**
+     * Returns {@code true} if there is positive mapping of tensor {@code from} on tensor {@code to}.
+     *
+     * @param from from tensor
+     * @param to   to tensor
+     * @return {@code true} if there is positivemapping of tensor {@code from} on tensor {@code to}
+     */
+    public static boolean positiveMappingExists(Tensor from, Tensor to) {
+        IndexMappingBuffer buffer;
+        MappingsPort port = createPort(from, to);
+        while ((buffer = port.take()) != null)
+            if (!buffer.getSign())
+                return true;
+        return false;
+    }
+
+    /**
      * Returns {@code true} if specified mapping is one of mappings of tensor {@code from} on tensor {@code to}.
      *
      * @param buffer mapping

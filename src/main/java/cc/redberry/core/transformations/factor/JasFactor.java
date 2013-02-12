@@ -32,7 +32,6 @@ import cc.redberry.core.transformations.factor.jasfactor.edu.jas.structure.RingE
 import cc.redberry.core.transformations.factor.jasfactor.edu.jas.ufd.FactorAbstract;
 import cc.redberry.core.transformations.factor.jasfactor.edu.jas.ufd.FactorFactory;
 import cc.redberry.core.utils.TensorUtils;
-
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 
@@ -49,6 +48,8 @@ class JasFactor {
     static final char START_CHAR = 'a';
 
     public static Tensor factor(Tensor t) {
+        if (!(t instanceof MultiTensor || t instanceof Power))
+            return t;
         TIntObjectMap<Var> vars = getVars(t);
         Var[] varsArray = vars.values(new Var[vars.size()]);
         Arrays.sort(varsArray);
@@ -209,7 +210,7 @@ class JasFactor {
             return;
         } else if (tensor.getClass() == Power.class) {
             if (!TensorUtils.isNaturalNumber(tensor.get(1)))
-                throw new IllegalArgumentException();
+                throw new IllegalArgumentException(tensor.toString());
             long pow = power * ((Complex) tensor.get(1)).longValue();
             addVars(tensor.get(0), vars, pow);
             return;

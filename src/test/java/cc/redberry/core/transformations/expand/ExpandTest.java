@@ -24,10 +24,7 @@ package cc.redberry.core.transformations.expand;
 
 import cc.redberry.core.TAssert;
 import cc.redberry.core.context.CC;
-import cc.redberry.core.tensor.Product;
-import cc.redberry.core.tensor.Sum;
-import cc.redberry.core.tensor.Tensor;
-import cc.redberry.core.tensor.Tensors;
+import cc.redberry.core.tensor.*;
 import cc.redberry.core.tensor.iterator.TraverseState;
 import cc.redberry.core.tensor.iterator.TreeTraverseIterator;
 import cc.redberry.core.transformations.EliminateMetricsTransformation;
@@ -206,7 +203,9 @@ public class ExpandTest {
             if (state != TraverseState.Leaving)
                 continue;
             Tensor current = iterator.current();
-            if (current instanceof Product) {
+            if (current instanceof Power && current.get(0) instanceof Sum)
+                Assert.assertTrue(!TensorUtils.isNaturalNumber(current.get(1)));
+            else if (current instanceof Product) {
                 int i1 = 0, i2 = 0;
                 for (Tensor t : current)
                     if (t instanceof Sum)
@@ -420,5 +419,13 @@ public class ExpandTest {
         Assert.assertTrue(t == expand(t));
         t = parse("(c+d_f^f)*a_ij+(b+a)*c_ij");
         Assert.assertTrue(t != expand(t));
+    }
+
+    @Test
+    public void test40() {
+        Tensor t = parse("((a+b)*f_mn+(c+d*(a+b))*l_mn)*(a+b)");
+        Tensor exp = expand(t);
+        TAssert.assertEquals(exp, "(a**2+2*a*b+b**2)*f_{mn}+(c*a+2*a*d*b+c*b+a**2*d+b**2*d)*l_{mn}");
+        assertAllBracketsExpanded(expand(t));
     }
 }

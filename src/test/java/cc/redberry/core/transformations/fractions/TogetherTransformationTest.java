@@ -141,4 +141,25 @@ public class TogetherTransformationTest {
         t = TogetherTransformation.together(t);
         TAssert.assertEquals(t, "(a*b+c)/(a*b*c)");
     }
+
+    @Test
+    public void test11() {
+        Tensor t = Tensors.parse("1/a**(1/2)+1/c**(1/2)");
+        t = TogetherTransformation.together(t);
+        TAssert.assertEquals(t, "c**(-1/2)*(c**(1/2)+a**(1/2))*a**(-1/2)");
+    }
+
+    @Test
+    public void test12() {
+        Tensor t = Tensors.parse("(1/a**(1/2)+1/c**(1/2))*f_mn");
+        t = TogetherTransformation.together(t);
+        TAssert.assertEquals(t, "c**(-1/2)*(c**(1/2)+a**(1/2))*a**(-1/2)*f_mn");
+    }
+
+    @Test
+    public void test13() {
+        Tensor t = Tensors.parse("(1/a**(1/2)+1/c**(1/2))*f_mn + f_mn");
+        t = TogetherTransformation.together(t);
+        TAssert.assertEquals(t, "c**(-1/2)*(c**(1/2)+a**(1/2)+a**(1/2)*c**(1/2))*a**(-1/2)*f_mn");
+    }
 }

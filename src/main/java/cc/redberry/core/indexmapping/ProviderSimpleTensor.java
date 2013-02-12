@@ -56,9 +56,10 @@ final class ProviderSimpleTensor extends IndexMappingProviderAbstractFT<SimpleTe
         public IndexMappingProvider create(IndexMappingProvider opu, Tensor from, Tensor to) {
             if (((TensorField) from).getName() != ((TensorField) to).getName())
                 return IndexMappingProvider.Util.EMPTY_PROVIDER;
-            for (int i = 0; i < from.size(); ++i)
-                if (!IndexMappings.mappingExists(from.get(i), to.get(i)))
+            for (int i = 0; i < from.size(); ++i){
+                if (!IndexMappings.positiveMappingExists(from.get(i), to.get(i)))
                     return IndexMappingProvider.Util.EMPTY_PROVIDER;
+            }
             return new ProviderSimpleTensor(opu, (SimpleTensor) from, (SimpleTensor) to);
         }
     };
