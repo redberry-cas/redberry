@@ -148,7 +148,7 @@ public class FactorTransformation implements Transformation {
         if (t instanceof Power) {
             if (!isSymbolic(t.get(0)))
                 return false;
-            if (!(t.get(1) instanceof Complex))
+            if (!TensorUtils.isInteger(t.get(1)))
                 return false;
             Complex e = (Complex) t.get(1);
             if (!e.isReal() || e.isNumeric())

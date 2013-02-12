@@ -97,6 +97,6 @@ public final class ExpandNumeratorTransformation extends AbstractExpandTransform
             numerator = ExpandUtils.expandProductOfSums((Product) numDen.numerator, transformations);
         if (numDen.numerator == numerator)
             return product;
-        return Tensors.multiply(numerator, numDen.denominator);
+        return Tensors.multiply(numerator, Tensors.reciprocal(numDen.denominator));
     }
 }

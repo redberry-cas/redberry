@@ -107,12 +107,17 @@ public final class ProductBuilder implements TensorBuilder {
             return factor;
         final boolean isNumeric = factor.isNumeric();
         for (Tensor t : symbolicPowers) {
-            assert !(t instanceof Product);
-
             if (isNumeric)
                 t = toNumeric(t);
 
-            if (t instanceof Complex) {
+            if (t instanceof Product) {
+                factor = factor.multiply(((Product) t).factor);
+                if (isZeroOrIndeterminate(factor))
+                    return factor;
+                indexLess.ensureCapacity(t.size());
+                for (Tensor multiplier : ((Product) t).indexlessData)
+                    indexLess.add(multiplier);
+            } else if (t instanceof Complex) {
                 factor = factor.multiply((Complex) t);
                 if (isZeroOrIndeterminate(factor))
                     return factor;

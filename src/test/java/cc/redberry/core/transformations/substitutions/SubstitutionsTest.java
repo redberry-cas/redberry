@@ -758,6 +758,14 @@ public class SubstitutionsTest {
         t = s.transform(t);
         TAssert.assertEquals(t, "f[a,b,c]");
     }
+
+    @Test
+    public void testField31() {
+        Expression s = parseExpression("f[1] = x");
+        Tensor t = parse("f[-1]");
+        t = s.transform(t);
+        TAssert.assertEquals(t, "f[-1]");
+    }
     //TODO additional tests with specified field arguments indices
 
     @Test

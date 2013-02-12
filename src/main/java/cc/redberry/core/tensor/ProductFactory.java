@@ -142,7 +142,7 @@ public final class ProductFactory implements TensorFactory {
             indexless = indexlessContainer.list.toArray(new Tensor[indexlessContainer.list.size()]);
         else {
             PowersContainer powersContainer = new PowersContainer(indexlessContainer.list.size());
-            List<Tensor> indexlessArray = new ArrayList<>();
+            ArrayList<Tensor> indexlessArray = new ArrayList<>();
             Tensor tensor;
             for (i = indexlessContainer.list.size() - 1; i >= 0; --i) {
                 tensor = indexlessContainer.list.get(i);
@@ -152,16 +152,20 @@ public final class ProductFactory implements TensorFactory {
                     indexlessArray.add(tensor);
             }
 
-            for (Tensor t : powersContainer) {
-                assert !(t instanceof Product);
+            for (Tensor t : powersContainer)
+                if (t instanceof Product) {
+                    factor = factor.multiply(((Product) t).factor);
+                    indexlessArray.ensureCapacity(t.size());
+                    for (Tensor multiplier : ((Product) t).indexlessData)
+                        indexlessArray.add(multiplier);
 
-                if (t instanceof Complex) {
+                } else if (t instanceof Complex) {
                     factor = factor.multiply((Complex) t);
                     if (isZeroOrIndeterminate(factor))
                         return factor;
                 } else
                     indexlessArray.add(t);
-            }
+
 
             if (powersContainer.isSign())
                 factor = factor.negate();

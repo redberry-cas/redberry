@@ -470,4 +470,12 @@ public class IndexMappingsTest {
         Assert.assertFalse(TensorUtils.equals(from, to));
     }
 
+    @Test
+    public void test16() {
+        Tensor from = parse("f[1]"), to = parse("f[-1]");
+        IndexMappingBuffer buffer = IndexMappings.getFirst(from, to);
+        System.out.println(buffer);
+        Assert.assertTrue(buffer == null);
+    }
+
 }
