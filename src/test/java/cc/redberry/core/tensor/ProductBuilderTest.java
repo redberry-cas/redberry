@@ -38,4 +38,11 @@ public class ProductBuilderTest {
         a = Tensors.parse("(a-b)/(b-a)**(1/2)");
         TAssert.assertEquals(a, "-(b-a)**(1/2)");
     }
+
+
+    @Test
+    public void testPower1() {
+        Tensor t = Tensors.parse("(a+b)**(3/2) - (a+b)*(a+b)**(1/2)");
+        TAssert.assertEquals(t, "0");
+    }
 }
