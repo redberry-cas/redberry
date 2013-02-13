@@ -65,13 +65,21 @@ public final class EliminateMetricsTransformation implements Transformation {
         //FUTURE if tensor is symbolic return tensor
         if (tensor instanceof SimpleTensor) {
             tensor = chain.apply((SimpleTensor) tensor);
-
-            //this is only in case of tensor field
-            TensorBuilder builder = tensor.getBuilder();
-            int size = tensor.size();
-            for (int i = 0; i < size; ++i)
-                builder.put(transform(tensor.get(i)));
-            return builder.build();
+            if (tensor instanceof TensorField) {
+                boolean applied = false;
+                TensorBuilder builder = tensor.getBuilder();
+                Tensor temp, current;
+                for (int i = 0, size = tensor.size(); i < size; ++i) {
+                    current = tensor.get(i);
+                    temp = transform(current);
+                    if (current != temp)
+                        applied = true;
+                    builder.put(temp);
+                }
+                if (applied)
+                    tensor = builder.build();
+            }
+            return tensor;
         } else if (tensor instanceof ScalarFunction) {
             TensorBuilder builder = tensor.getBuilder();
             for (int i = tensor.size() - 1; i >= 0; --i)
