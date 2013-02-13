@@ -1,3 +1,4 @@
+<?xml version="1.0"?>
 <!--
   ~ Redberry: symbolic tensor computations.
   ~
@@ -20,14 +21,12 @@
   ~ You should have received a copy of the GNU General Public License
   ~ along with Redberry. If not, see <http://www.gnu.org/licenses/>.
   -->
-
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>cc.redberry</groupId>
     <artifactId>core</artifactId>
-    <version>1.1.1-SNAPSHOT</version>
+    <version>1.1.1</version>
     <packaging>jar</packaging>
 
     <parent>
@@ -85,11 +84,7 @@
         </developer>
     </developers>
 
-    <scm>
-        <connection>scm:hg:http://bitbucket.org/redberry/redberry-core</connection>
-        <!-- <tag>v1.1</tag>
-        <url>https://bitbucket.org/redberry/redberry/src/?at=v1.1</url> -->
-    </scm>
+    <scm><connection>scm:hg:http://bitbucket.org/redberry/redberry-core</connection><tag>v1.1.1</tag><url>https://bitbucket.org/redberry/redberry-core/src/?at=v1.1.1</url></scm>
 
     <issueManagement>
         <system>Bitbucket</system>
