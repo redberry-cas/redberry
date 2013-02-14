@@ -88,7 +88,7 @@
 
     <issueManagement>
         <system>Bitbucket</system>
-        <url>https://bitbucket.org/redberry/redberry/issues</url>
+        <url>https://bitbucket.org/redberry/redberry-core/issues</url>
     </issueManagement>
 
     <build>
