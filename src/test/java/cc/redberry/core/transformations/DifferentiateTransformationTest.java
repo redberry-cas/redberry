@@ -36,9 +36,9 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import static cc.redberry.core.tensor.Tensors.*;
+import static cc.redberry.core.transformations.DifferentiateTransformation.differentiate;
 import static cc.redberry.core.transformations.EliminateMetricsTransformation.ELIMINATE_METRICS;
 import static cc.redberry.core.transformations.EliminateMetricsTransformation.eliminate;
-import static cc.redberry.core.transformations.DifferentiateTransformation.differentiate;
 import static cc.redberry.core.transformations.expand.ExpandTransformation.expand;
 
 /**
@@ -340,6 +340,44 @@ public class DifferentiateTransformationTest {
             t2 = tr.transform(t2);
 
         TAssert.assertEquals(t1, t2);
+    }
+
+    @Test
+    public void test16() {
+        Tensor t, d;
+        t = parse("1/x");
+        d = new DifferentiateTransformation(parseSimple("x")).transform(t);
+        TAssert.assertEquals(d, "-1/x**2");
+
+        t = parse("1/x + x");
+        d = new DifferentiateTransformation(parseSimple("x")).transform(t);
+        TAssert.assertEquals(d, "-1/x**2 + 1");
+
+        t = parse("1/x + x + 1/x**2");
+        d = new DifferentiateTransformation(parseSimple("x")).transform(t);
+        TAssert.assertEquals(d, "-1/x**2 + 1 - 2/x**3");
+
+        t = parse("1/(1 - x)");
+        d = new DifferentiateTransformation(parseSimple("x")).transform(t);
+        TAssert.assertEquals(d, "1/(1-x)**2");
+
+        t = parse("1/(1 - x)**2");
+        d = new DifferentiateTransformation(parseSimple("x")).transform(t);
+        TAssert.assertEquals(d, "-2/(x-1)**3");
+
+        t = parse("1/(1 - x)**3");
+        d = new DifferentiateTransformation(parseSimple("x")).transform(t);
+        TAssert.assertEquals(d, "3/(x-1)**4");
+
+        t = parse("x/(x - 1)");
+        d = new DifferentiateTransformation(parseSimple("x")).transform(t);
+        d = TogetherTransformation.TOGETHER_FACTOR.transform(d);
+        TAssert.assertEquals(d, "-1/(x-1)**2");
+
+        t = parse("x/(1 - x)");
+        d = new DifferentiateTransformation(parseSimple("x")).transform(t);
+        d = TogetherTransformation.TOGETHER_FACTOR.transform(d);
+        TAssert.assertEquals(d, "1/(x-1)**2");
     }
 
 }

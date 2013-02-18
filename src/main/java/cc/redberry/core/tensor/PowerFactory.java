@@ -65,13 +65,17 @@ public final class PowerFactory implements TensorFactory {
             return Complex.ONE;
         if (TensorUtils.isZero(argument))
             return Complex.ZERO;
-        if (argument instanceof Product && TensorUtils.isInteger(power)) {
-            Tensor[] scalars = ((Product) argument).getAllScalars();
-            if (scalars.length > 1) {
-                TensorBuilder pb = argument.getBuilder();//creating product builder             
-                for (Tensor t : scalars)
-                    pb.put(Tensors.pow(t, power));//TODO refactor for performance
-                return pb.build();
+        if (argument instanceof Product) {
+            if (TensorUtils.isInteger(power)
+                    //case (2*x)**(y)           //todo replace with isPositiveNumerical(argument.get(0))
+                    || (argument.size() == 2 && TensorUtils.isRealPositiveNumber(argument.get(0)))) {
+                Tensor[] scalars = ((Product) argument).getAllScalars();
+                if (scalars.length > 1) {
+                    TensorBuilder pb = argument.getBuilder();//creating product builder
+                    for (Tensor t : scalars)
+                        pb.put(Tensors.pow(t, power));//TODO refactor for performance
+                    return pb.build();
+                }
             }
         }
         if (argument instanceof Power)

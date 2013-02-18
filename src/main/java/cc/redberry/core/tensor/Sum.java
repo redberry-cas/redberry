@@ -59,6 +59,7 @@ public final class Sum extends MultiTensor {
 
     Sum(Indices indices, Tensor[] data, int hash) {
         super(indices);
+        assert data.length > 1;
         this.data = data;
         this.hash = hash;
     }

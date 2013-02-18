@@ -24,10 +24,12 @@ package cc.redberry.core.transformations.fractions;
 
 import cc.redberry.core.TAssert;
 import cc.redberry.core.context.CC;
+import cc.redberry.core.context.ContextManager;
 import cc.redberry.core.context.OutputFormat;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.tensor.Tensors;
 import cc.redberry.core.transformations.expand.ExpandTransformation;
+import cc.redberry.core.utils.TensorUtils;
 import org.junit.Test;
 
 /**
@@ -161,5 +163,22 @@ public class TogetherTransformationTest {
         Tensor t = Tensors.parse("(1/a**(1/2)+1/c**(1/2))*f_mn + f_mn");
         t = TogetherTransformation.together(t);
         TAssert.assertEquals(t, "c**(-1/2)*(c**(1/2)+a**(1/2)+a**(1/2)*c**(1/2))*a**(-1/2)*f_mn");
+    }
+
+    @Test
+    public void test14() {
+        Tensor t = Tensors.parse("(T_a^a + B_b^b)/(f_m^m + y_b^b) + (T_b^b + B_m^m)/(g_a^a + x)");
+        t = TogetherTransformation.together(t);
+        TensorUtils.assertIndicesConsistency(t);
+    }
+
+    @Test
+    public void test15() {
+        for (int i = 0; i < 50; ++i) {
+            ContextManager.initializeNew();
+            Tensor t = Tensors.parse("(1 + (g_a^a + 2)*f_b^b)/f_a^a + 2*(x_a^a + y_a^a)");
+            t = TogetherTransformation.together(t);
+            TensorUtils.assertIndicesConsistency(t);
+        }
     }
 }

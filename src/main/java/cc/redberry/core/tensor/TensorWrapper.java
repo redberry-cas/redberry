@@ -123,7 +123,7 @@ public final class TensorWrapper extends Tensor {
 
     @Override
     protected int hash() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return -1;
     }
 
     @Override
