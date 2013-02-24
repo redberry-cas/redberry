@@ -119,7 +119,8 @@ public abstract class AbstractSumBuilder implements TensorBuilder {
             sortedFreeIndices = indices.getAllIndices().copy();
             Arrays.sort(sortedFreeIndices);
         } else if (!indices.equalsRegardlessOrder(tensor.getIndices().getFree()))
-            throw new TensorException("Inconsinstent indices in sum.", tensor);//TODO improve message
+            throw new TensorException("Inconsistent indices in sum. " +
+                    "Expected: " + indices + " Actual: " + tensor.getIndices().getFree(), tensor);//TODO improve message
         if (tensor instanceof Sum) {
             for (Tensor s : tensor)
                 put(s);

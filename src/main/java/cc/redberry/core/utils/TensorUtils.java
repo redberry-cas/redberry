@@ -544,15 +544,15 @@ public class TensorUtils {
         if (matrix.length == 1)
             return matrix[0][0];
 
-        Tensor sum = Complex.ZERO;
+        SumBuilder sum = new SumBuilder();
         Tensor temp;
         for (int i = 0; i < matrix.length; ++i) {
             temp = multiply(matrix[0][i], det(deleteFromMatrix(matrix, 0, i)));
             if (i % 2 == 1)
                 temp = negate(temp);
-            sum = sum(sum, temp);
+            sum.put(temp);
         }
-        return sum;
+        return sum.build();
     }
 
     private static Tensor[][] deleteFromMatrix(final Tensor[][] matrix, int row, int column) {

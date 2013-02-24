@@ -28,6 +28,8 @@ import cc.redberry.core.number.Complex;
 import cc.redberry.core.transformations.expand.ExpandUtils;
 import cc.redberry.core.utils.TensorUtils;
 
+import java.util.ArrayList;
+
 import static cc.redberry.core.tensor.Tensors.multiply;
 
 /**
@@ -87,10 +89,7 @@ public final class FastTensors {
             return sb.build();
         }
 
-        final Tensor[] newSumData = new Tensor[sum.size()];
-        for (int i = newSumData.length - 1; i >= 0; --i)
-            newSumData[i] = ExpandUtils.expandIndexlessSubproduct.transform(multiply(factor, sum.get(i)));
-        return new Sum(newSumData, IndicesFactory.create(newSumData[0].getIndices().getFree()));
+        return multiplySumElementsOnScalarFactorAndExpandScalars1(sum, factor);
     }
 
     /**
@@ -119,9 +118,23 @@ public final class FastTensors {
             return sum;
         if (factor.getIndices().size() != 0)
             throw new IllegalArgumentException();
-        final Tensor[] newSumData = new Tensor[sum.size()];
-        for (int i = newSumData.length - 1; i >= 0; --i)
-            newSumData[i] = ExpandUtils.expandIndexlessSubproduct.transform(multiply(factor, sum.get(i)));
-        return new Sum(newSumData, IndicesFactory.create(newSumData[0].getIndices().getFree()));
+        return multiplySumElementsOnScalarFactorAndExpandScalars1(sum, factor);
+    }
+
+    private static Tensor multiplySumElementsOnScalarFactorAndExpandScalars1(Sum sum, Tensor factor) {
+        final ArrayList<Tensor> newSumData = new ArrayList<>(sum.size());
+        Tensor temp;
+        for (int i = sum.size() - 1; i >= 0; --i) {
+            temp = ExpandUtils.expandIndexlessSubproduct.transform(multiply(factor, sum.get(i)));
+            if (!TensorUtils.isZero(temp))
+                newSumData.add(temp);
+        }
+        if (newSumData.size() == 0)
+            return Complex.ZERO;
+        if (newSumData.size() == 1)
+            return newSumData.get(0);
+
+        return new Sum(newSumData.toArray(new Tensor[newSumData.size()]),
+                IndicesFactory.create(newSumData.get(0).getIndices().getFree()));
     }
 }

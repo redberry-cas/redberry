@@ -70,9 +70,9 @@ public interface IndexMappingBuffer {
     boolean getSign();
 
     /**
-     * NOT PUBLIC A API
+     * NOT PUBLIC API
      *
-     * @return NOT PUBLIC A API
+     * @return NOT PUBLIC API
      */
     FromToHolder export();
 
