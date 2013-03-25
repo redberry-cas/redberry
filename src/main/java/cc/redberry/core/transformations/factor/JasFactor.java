@@ -79,6 +79,8 @@ class JasFactor {
             poly = tensor2Poly(t, factory, vars, IntegerConverter);
         }
 
+        if(poly.isZERO())
+            return Complex.ZERO;
 
         FactorAbstract<BigInteger> jasFactor = FactorFactory.getImplementation(BigInteger.ONE);
 

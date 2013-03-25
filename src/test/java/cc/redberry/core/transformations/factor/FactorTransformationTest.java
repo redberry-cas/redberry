@@ -115,10 +115,11 @@ public class FactorTransformationTest {
     @Test
     public void test6r() {
         Random random = new Random();
-        for (int i = 0; i < 10; ++i) {
+        for (int i = 0; i < 1000; ++i) {
             CC.resetTensorNames();
             Tensor t = randomFactorableProduct(random);
             Tensor expand = expand(t);
+            System.out.println(expand);
             Tensor factor = JasFactor.factor(expand);
             TAssert.assertEquals(expand(factor), expand);
         }
@@ -151,7 +152,7 @@ public class FactorTransformationTest {
 
     private static Tensor randomSum(Random random) {
         SimpleTensor[] simpleTensors = {parseSimple("a"), parseSimple("b"),
-                parseSimple("c")};
+                parseSimple("c"),parseSimple("d")};
         int sumSize = 2 + random.nextInt(4);
         SumBuilder sb = new SumBuilder();
         int productSize;
@@ -306,6 +307,25 @@ public class FactorTransformationTest {
         System.out.println(JasFactor.factor(t));
 //        System.out.println(factor(t));
 //            TAssert.assertEquals(factorOut(t), "(a-b)*(c*(a-b) - d*(a-b)**2 - d)");
+    }
+
+    @Test
+    public void test21() {
+        TAssert.assertEquals(
+                FactorTransformation.factor(parse("2*I*a + 4*I*b")),
+                "2*I*(a + 2*b)");
+
+        TAssert.assertEquals(
+                FactorTransformation.factor(parse("2*I*a + 4*(I*b + I*c)")),
+                "2*I*(a + 2*b + 2*c)");
+
+        TAssert.assertEquals(
+                FactorTransformation.factor(parse("2*I*a + 4*(-I*b + I*c)")),
+                "2*I*(a - 2*b + 2*c)");
+
+        TAssert.assertEquals(
+                FactorTransformation.factor(parse("2*I*(I*a + I*d) + 4*I*(-I*b + I*c)")),
+                "2*(-a -d + 2*b - 2*c)");
     }
 //     -4*m**10-s*m**8+1+(1/32)*(-48*m**4+1-40*s*m**2-3*s**2)*s*m**4
 }

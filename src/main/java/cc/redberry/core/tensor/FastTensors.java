@@ -25,6 +25,7 @@ package cc.redberry.core.tensor;
 import cc.redberry.concurrent.OutputPortUnsafe;
 import cc.redberry.core.indices.IndicesFactory;
 import cc.redberry.core.number.Complex;
+import cc.redberry.core.number.NumberUtils;
 import cc.redberry.core.transformations.expand.ExpandUtils;
 import cc.redberry.core.utils.TensorUtils;
 
@@ -136,5 +137,20 @@ public final class FastTensors {
 
         return new Sum(newSumData.toArray(new Tensor[newSumData.size()]),
                 IndicesFactory.create(newSumData.get(0).getIndices().getFree()));
+    }
+
+    public static Tensor multiplySumElementsOnNumber(Sum sum, Complex number) {
+        if (NumberUtils.isZeroOrIndeterminate(number))
+            return number;
+        if (number.isOne())
+            return sum;
+        SumBuilder sb = new SumBuilder();
+        for(Tensor t :sum)
+            sb.put(multiply(t,number));
+        return sb.build();
+//        Tensor data[] = sum.toArray();
+//        for (int i = data.length - 1; i >= 0; --i)
+//            data[i] = multiply(data[i], number);
+//        return new Sum(data, sum.getIndices());
     }
 }

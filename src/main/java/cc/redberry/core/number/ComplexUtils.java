@@ -29,10 +29,10 @@ public final class ComplexUtils {
     }
 
     /**
-     * Numeric sine form complex number.
+     * Numerical sine.
      *
      * @param complex argument
-     * @return sinus
+     * @return sine
      */
     public static Complex sin(Complex complex) {
         if (complex.isReal())
@@ -42,7 +42,7 @@ public final class ComplexUtils {
 
 
     /**
-     * Numeric cosine form complex number.
+     * Numerical cosine.
      *
      * @param complex argument
      * @return cosine
@@ -55,7 +55,7 @@ public final class ComplexUtils {
 
 
     /**
-     * Numeric tangent form complex number.
+     * Numerical tangent.
      *
      * @param complex argument
      * @return tangent
@@ -68,7 +68,7 @@ public final class ComplexUtils {
 
 
     /**
-     * Numeric cotangent form complex number.
+     * Numerical cotangent.
      *
      * @param complex argument
      * @return cotangent
@@ -80,7 +80,7 @@ public final class ComplexUtils {
     }
 
     /**
-     * Numeric arcsine form complex number.
+     * Numerical arcsine.
      *
      * @param complex argument
      * @return arcsine
@@ -95,7 +95,7 @@ public final class ComplexUtils {
     }
 
     /**
-     * Numeric arccosine form complex number.
+     * Numerical arccosine.
      *
      * @param complex argument
      * @return arccosine
@@ -110,7 +110,7 @@ public final class ComplexUtils {
     }
 
     /**
-     * Numeric arctangent form complex number.
+     * Numerical arctangent.
      *
      * @param complex argument
      * @return arctangent
@@ -122,7 +122,7 @@ public final class ComplexUtils {
     }
 
     /**
-     * Numeric arccotangent form complex number.
+     * Numerical arccotangent.
      *
      * @param complex argument
      * @return arccotangent
@@ -134,7 +134,7 @@ public final class ComplexUtils {
     }
 
     /**
-     * Numeric natural logarithm form complex number.
+     * Numerical natural logarithm.
      *
      * @param complex argument
      * @return natural logarithm
@@ -150,7 +150,7 @@ public final class ComplexUtils {
 
 
     /**
-     * Numeric exponent form complex number.
+     * Numerical exponent.
      *
      * @param complex argument
      * @return exponent

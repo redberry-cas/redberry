@@ -173,7 +173,7 @@ public class TensorUtils {
     }
 
     public static boolean isImageOne(Tensor tensor) {
-        return tensor instanceof Complex && tensor.equals(Complex.IMAGE_ONE);
+        return tensor instanceof Complex && tensor.equals(Complex.IMAGINARY_UNIT);
     }
 
     public static boolean isMinusOne(Tensor tensor) {
