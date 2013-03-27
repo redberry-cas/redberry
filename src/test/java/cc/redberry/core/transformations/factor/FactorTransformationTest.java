@@ -125,6 +125,7 @@ public class FactorTransformationTest {
         }
     }
 
+    @Ignore
     @Test
     public void test6ra() {
         CC.resetTensorNames(8034173124478327448L);
