@@ -118,23 +118,33 @@ public class CollectTransformation implements Transformation {
 
                         if (baseContractions.contains(fromIndexName)
                                 && toAddContractions.contains(toIndexName)) {
-                            toAddFrom2Rename.add(toIndexName);
+                            toAddFrom2Rename.add(inverseIndexState(toIndexName));
                             toAddTo2Rename.add(fromIndexName);
                         } else if (baseContractions.contains(fromIndexName)) {
+                            if (toAddContractions.contains(fromIndexName)) {
+
+                            }
                             toAddKroneckers.add(
                                     createMetricOrKronecker(toIndex,
-                                            diffStates ? inverseIndexState(fromIndex) : fromIndex));
+                                            diffStates ? fromIndex : inverseIndexState(fromIndex)));
 
                         } else if (toAddContractions.contains(toIndexName)) {
-                            baseFrom2Rename.add(fromIndexName);
-                            baseTo2Rename.add(toIndexName);
+                            if (baseContractions.contains(toIndexName)) {
+                                toAddFrom2Rename.add(inverseIndexState(toIndex));
+                                toIndexName = generator.generate(getType(toIndexName));
+                                toIndex = setRawState(getRawStateInt(toIndex), toIndexName);
+                                toAddTo2Rename.add(inverseIndexState(toIndex));
+
+                            }
+                            baseFrom2Rename.add(fromIndex);
+                            baseTo2Rename.add(toIndex);
                             baseKroneckers.add(
                                     createMetricOrKronecker(fromIndex,
-                                            diffStates ? inverseIndexState(toIndex) : toIndex));
+                                            inverseIndexState(toIndex)));
 
                         } else {
                             int newIndex = generator.generate(getType(fromIndex));
-                            baseFrom2Rename.add(fromIndexName);
+                            baseFrom2Rename.add(fromIndex);
                             baseTo2Rename.add(newIndex);
                             baseKroneckers.add(
                                     createMetricOrKronecker(fromIndex,
@@ -144,7 +154,7 @@ public class CollectTransformation implements Transformation {
                                             getState(toIndex) ? newIndex : inverseIndexState(newIndex)));
                         }
                     }
-                    DirectIndexMapping toRenameMapping = new StateInsensitiveMapping(baseFrom2Rename.toArray(),
+                    DirectIndexMapping toRenameMapping = new StateSensitiveMapping(baseFrom2Rename.toArray(),
                             baseTo2Rename.toArray());
                     for (int i = base.factors.length - 1; i >= 0; --i)
                         base.factors[i] = applyDirectMapping(base.factors[i], toRenameMapping);
@@ -152,7 +162,7 @@ public class CollectTransformation implements Transformation {
                     for (int i = base.summands.size() - 1; i >= 0; --i)
                         base.summands.set(i, Tensors.multiply(base.summands.get(i), kroneckerChain));
 
-                    int[] toAddFree = IndicesUtils.getIndicesNames(toAdd.summands.get(0).getIndices().getFree());
+                    int[] toAddFree = toAdd.summands.get(0).getIndices().getFree().getAllIndices().copy();
                     TIntHashSet temp = new TIntHashSet(toAddFrom2Rename.toArray());
                     for (int i : toAddFree)
                         if (!temp.contains(i)) {
@@ -216,6 +226,15 @@ public class CollectTransformation implements Transformation {
             System.arraycopy(factors, 0, ms, 0, factors.length);
             return Tensors.multiply(ms);
         }
+
+        TIntHashSet getAllIndices() {
+            TIntHashSet set = TensorUtils.getAllIndicesNamesT(factors);
+            for (Tensor s : summands)
+                TensorUtils.appendAllIndicesNamesT(s, set);
+            return set;
+        }
+
+
     }
 
     private static int[] matchFactors(SimpleTensor[] a, SimpleTensor[] b) {

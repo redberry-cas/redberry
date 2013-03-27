@@ -23,6 +23,7 @@
 package cc.redberry.core.transformations.collect;
 
 import cc.redberry.core.TAssert;
+import cc.redberry.core.context.CC;
 import cc.redberry.core.tensor.SimpleTensor;
 import cc.redberry.core.tensor.Tensor;
 import org.junit.Test;
@@ -79,6 +80,47 @@ public class CollectTransformationTest {
 
         Tensor t = parse("A_mq*B_n^q + A_nq*C_m^q");
         TAssert.assertEquals(ct.transform(t), "A_iq*(d^i_m*B_n^q + d^i_n*C_m^q)");
+    }
+
+    @Test
+    public void test6() {
+        SimpleTensor[] simpleTensors = {parseSimple("A_mn")};
+        CollectTransformation ct = new CollectTransformation(simpleTensors);
+
+        Tensor t = parse("A_mq*B_n^q + A_nq*C_m^q");
+        TAssert.assertEquals(ct.transform(t), "A_iq*(d^i_m*B_n^q + d^i_n*C_m^q)");
+    }
+
+    @Test
+    public void test7() {
+        SimpleTensor[] simpleTensors = {parseSimple("A_mn")};
+        CollectTransformation ct = new CollectTransformation(simpleTensors);
+
+        Tensor t = parse("A_mq*B_n^q + A_qn*C_m^q");
+        TAssert.assertEquals(ct.transform(t), "A_iq*(d^i_m*B_n^q + d^q_n*C_m^i)");
+    }
+
+    @Test
+    public void test8() {
+        CC.resetTensorNames(8816281755326274707L);
+        SimpleTensor[] simpleTensors = {parseSimple("A_mn")};
+        CollectTransformation ct = new CollectTransformation(simpleTensors);
+
+        Tensor t = parse("A_mq*B_n^q + A^q_n*C_mq");
+        System.out.println(t);
+        TAssert.assertEquals(ct.transform(t), "A_iq*(d^i_m*B_n^q + d^q_n*C_m^i)");
+    }
+
+
+    @Test
+    public void test9() {
+        CC.resetTensorNames(4662401180622313834L);
+        SimpleTensor[] simpleTensors = {parseSimple("A_mnpq")};
+        CollectTransformation ct = new CollectTransformation(simpleTensors);
+
+        Tensor t = parse("A_mnpq*B^np_ac + A_abcd*B^ndb_nmq");
+        System.out.println(ct.transform(t));
+//        TAssert.assertEquals(ct.transform(t), "A_mnpq*(B^np_ac + A_abcd*B^ndb_nmq)");
     }
 
 }

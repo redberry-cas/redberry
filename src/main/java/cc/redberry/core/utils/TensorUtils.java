@@ -36,10 +36,12 @@ import cc.redberry.core.tensor.functions.ScalarFunction;
 import gnu.trove.set.hash.TIntHashSet;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-import static cc.redberry.core.tensor.Tensors.*;
+import static cc.redberry.core.tensor.Tensors.multiply;
+import static cc.redberry.core.tensor.Tensors.negate;
 
 /**
  * This class contains various useful methods related with tensors.
@@ -290,6 +292,13 @@ public class TensorUtils {
         TIntHashSet set = new TIntHashSet();
         appendAllIndicesNamesT(tensor, set);
         set.removeAll(IndicesUtils.getIndicesNames(tensor.getIndices().getFree()));
+        return set;
+    }
+
+    public static TIntHashSet getAllIndicesNamesT(Collection<? extends Tensor> tensors) {
+        TIntHashSet set = new TIntHashSet();
+        for (Tensor tensor : tensors)
+            appendAllIndicesNamesT(tensor, set);
         return set;
     }
 
