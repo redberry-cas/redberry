@@ -22,7 +22,6 @@
  */
 package cc.redberry.core.number;
 
-import cc.redberry.core.tensor.Power;
 import cc.redberry.core.tensor.Tensor;
 import org.apache.commons.math3.fraction.BigFraction;
 
@@ -138,7 +137,7 @@ public final class NumberUtils {
         return true;
     }
 
-//    public static Boolean getSignOfNumerical(Tensor tensor) {
+    //    public static Boolean getSignOfNumerical(Tensor tensor) {
 //        //todo write better code
 //        if (!isRealNumerical(tensor))
 //            return null;
@@ -174,4 +173,5 @@ public final class NumberUtils {
 //            return null;
 //        }
 //    }
+//
 }

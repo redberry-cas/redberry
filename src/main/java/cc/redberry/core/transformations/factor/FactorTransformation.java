@@ -256,11 +256,35 @@ public class FactorTransformation implements Transformation {
     }
 
     static Tensor factorOut1(Tensor tensor) {
-        Tensor temp = tensor;
+        /*
+         * S0: factor out imaginary numbers
+         * I*a + I*b
+         */
+
+        //check
+        Boolean factorOutImageOne = null;
+        boolean containsImageOne;
+        for (Tensor t : tensor) {
+            if (t instanceof Product)
+                containsImageOne = ((Product) t).getFactor().isImaginary();
+            else if (t instanceof Complex)
+                containsImageOne = ((Complex) t).isImaginary();
+            else containsImageOne = false;
+
+            if (factorOutImageOne == null)
+                factorOutImageOne = containsImageOne;
+            else if (factorOutImageOne != containsImageOne)
+                factorOutImageOne = false;
+        }
+
+        if(factorOutImageOne)
+            tensor = FastTensors.multiplySumElementsOnNumber((Sum)tensor, Complex.NEGATIVE_IMAGINARY_UNIT);
+
         /*
          * S1:
          * (a+b)*c + a*d + b*d -> (a+b)*c + (a+b)*d
          */
+        Tensor temp = tensor;
         int i, j = temp.size();
         IntArrayList nonProductOfSumsPositions = new IntArrayList();
         for (i = 0; i < j; ++i)
@@ -270,7 +294,7 @@ public class FactorTransformation implements Transformation {
 //            //when tensor = a*d + b*d + ... (no sums in products)
 //            return JasFactor.factor(tensor);
 
-        /*
+         /*
          * S2:
          * finding product of sums in tensor with minimal number of multipliers
          * we call this term pivot
@@ -309,7 +333,10 @@ public class FactorTransformation implements Transformation {
             }
         }
         //do stuff
-        return mergeTerms(terms, pivotPosition.value, tensor);
+        temp = mergeTerms(terms, pivotPosition.value, tensor);
+        if (factorOutImageOne)
+            temp = Tensors.multiply(Complex.IMAGINARY_UNIT, temp);
+        return temp;
     }
 
     private static Tensor mergeTerms(final Term[] terms, final int pivotPosition, final Tensor tensor) {

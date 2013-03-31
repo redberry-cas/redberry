@@ -90,8 +90,11 @@ public final class Complex extends Tensor
     public static final Complex MINUS_TWO =
             new Complex(Rational.MINUS_TWO, Rational.ZERO);
 
-    public static final Complex IMAGE_ONE =
+    public static final Complex IMAGINARY_UNIT =
             new Complex(Rational.ZERO, Rational.ONE);
+
+    public static final Complex NEGATIVE_IMAGINARY_UNIT =
+            new Complex(Rational.ZERO, Rational.MINUS_ONE);
 
     private final Real real;
     private final Real imaginary;
@@ -258,10 +261,20 @@ public final class Complex extends Tensor
         return real;
     }
 
+    /**
+     * Returns {@code true} if this number is real.
+     *
+     * @return {@code true} if this number is real
+     */
     public boolean isReal() {
         return imaginary.isZero();
     }
 
+    /**
+     * Returns {@code true} if this number has only imaginary part.
+     *
+     * @return {@code true} if this number has only imaginary part
+     */
     public boolean isImaginary() {
         return real.isZero();
     }
