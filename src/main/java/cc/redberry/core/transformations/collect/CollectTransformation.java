@@ -121,21 +121,20 @@ public class CollectTransformation implements Transformation {
                             toAddFrom2Rename.add(inverseIndexState(toIndexName));
                             toAddTo2Rename.add(fromIndexName);
                         } else if (baseContractions.contains(fromIndexName)) {
-                            if (toAddContractions.contains(fromIndexName)) {
-
-                            }
+//                            if (toAddContractions.contains(fromIndexName)) {
+//
+//                            }
                             toAddKroneckers.add(
                                     createMetricOrKronecker(toIndex,
                                             diffStates ? fromIndex : inverseIndexState(fromIndex)));
 
                         } else if (toAddContractions.contains(toIndexName)) {
-                            if (baseContractions.contains(toIndexName)) {
-                                toAddFrom2Rename.add(inverseIndexState(toIndex));
-                                toIndexName = generator.generate(getType(toIndexName));
-                                toIndex = setRawState(getRawStateInt(toIndex), toIndexName);
-                                toAddTo2Rename.add(inverseIndexState(toIndex));
-
-                            }
+//                            if (baseContractions.contains(toIndexName)) {
+//                                toAddFrom2Rename.add(inverseIndexState(toIndex));
+//                                toIndexName = generator.generate(getType(toIndexName));
+//                                toIndex = setRawState(getRawStateInt(toIndex), toIndexName);
+//                                toAddTo2Rename.add(inverseIndexState(toIndex));
+//                            }
                             baseFrom2Rename.add(fromIndex);
                             baseTo2Rename.add(toIndex);
                             baseKroneckers.add(
@@ -154,8 +153,8 @@ public class CollectTransformation implements Transformation {
                                             getState(toIndex) ? newIndex : inverseIndexState(newIndex)));
                         }
                     }
-                    DirectIndexMapping toRenameMapping = new StateSensitiveMapping(baseFrom2Rename.toArray(),
-                            baseTo2Rename.toArray());
+                    DirectIndexMapping toRenameMapping =
+                            new StateSensitiveMapping(baseFrom2Rename.toArray(), baseTo2Rename.toArray());
                     for (int i = base.factors.length - 1; i >= 0; --i)
                         base.factors[i] = applyDirectMapping(base.factors[i], toRenameMapping);
                     Tensor kroneckerChain = Tensors.multiply(baseKroneckers.toArray(new Tensor[baseKroneckers.size()]));
@@ -192,88 +191,6 @@ public class CollectTransformation implements Transformation {
         return sb.build();
     }
 
-    private static final class Split {
-        final SimpleTensor[] factors;
-        final ArrayList<Tensor> summands = new ArrayList<>();
-        final int hashCode;//real hash code (with fields args)
-
-        private Split(SimpleTensor[] factors, Tensor summand) {
-            this.factors = factors;
-            this.summands.add(summand);
-            Arrays.sort(factors);
-            int hash = 17;
-            for (SimpleTensor f : factors)
-                hash = hash * 17 + f.hashCode();
-            this.hashCode = hash;
-        }
-
-        @Override
-        public int hashCode() {
-            return hashCode;
-        }
-
-        int[] getContractedIndices() {
-            return IndicesUtils.getIntersections(
-                    new IndicesBuilder().append(factors).getIndices(),
-                    summands.get(0).getIndices()
-            );
-        }
-
-        Tensor toTensor() {
-            Tensor sum = Tensors.sum(summands.toArray(new Tensor[summands.size()]));
-            Tensor[] ms = new Tensor[factors.length + 1];
-            ms[ms.length - 1] = sum;
-            System.arraycopy(factors, 0, ms, 0, factors.length);
-            return Tensors.multiply(ms);
-        }
-
-        TIntHashSet getAllIndices() {
-            TIntHashSet set = TensorUtils.getAllIndicesNamesT(factors);
-            for (Tensor s : summands)
-                TensorUtils.appendAllIndicesNamesT(s, set);
-            return set;
-        }
-
-
-    }
-
-    private static int[] matchFactors(SimpleTensor[] a, SimpleTensor[] b) {
-        if (a.length != b.length) return null;
-        int begin = 0, j, n, length = a.length;
-
-        int[] permutation = new int[length];
-        Arrays.fill(permutation, -1);
-
-        for (int i = 1; i <= length; ++i) {
-            if (i == length || a[i].getClass() == SimpleTensor.class || a[i].hashCode() != b[i - 1].hashCode()) {
-                if (i - 1 != begin) {
-                    OUT:
-                    for (n = begin; n < i; ++n) {
-                        for (j = begin; j < i; ++j)
-                            if (permutation[j] == -1 && matchSimpleTensors(a[n], b[j])) {
-                                permutation[n] = j;
-                                continue OUT;
-                            }
-                        return null;
-                    }
-                } else {
-                    if (!matchSimpleTensors(a[i - 1], b[i - 1])) return null;
-                    else permutation[i - 1] = i - 1;
-                }
-                begin = i;
-            }
-        }
-        return permutation;
-    }
-
-    private static boolean matchSimpleTensors(SimpleTensor a, SimpleTensor b) {
-        if (a.hashCode() != b.hashCode()) return false;
-        if (a.getClass() != b.getClass()) return false;
-        if (a instanceof TensorField)
-            for (int i = a.size() - 1; i >= 0; --i)
-                if (!IndexMappings.positiveMappingExists(a.get(i), b.get(i))) return false;
-        return true;
-    }
 
     private Split split(Tensor tensor, IndexGenerator generator) {
         if (tensor instanceof SimpleTensor)
@@ -282,14 +199,13 @@ public class CollectTransformation implements Transformation {
 
         if (tensor instanceof Product) {
             //early check
-            boolean containsMatches = false;
+            boolean containsMatch = false;
             for (Tensor t : tensor)
                 if (t instanceof SimpleTensor && patternsNames.contains(((SimpleTensor) t).getName())) {
-                    containsMatches = true;
+                    containsMatch = true;
                     break;
                 }
-            if (!containsMatches)
-                return new Split(new SimpleTensor[0], tensor);
+            if (!containsMatch) return new Split(new SimpleTensor[0], tensor);
 
             ArrayList<SimpleTensor> factorsList = new ArrayList<>();
             Tensor summand = tensor;
@@ -337,6 +253,92 @@ public class CollectTransformation implements Transformation {
             return new Split(factors, summand);
         }
         return new Split(new SimpleTensor[0], tensor);
+    }
+
+    private static final class Split {
+        final SimpleTensor[] factors;
+        final ArrayList<Tensor> summands = new ArrayList<>();
+        final int hashCode;//real hash code (with fields args)
+
+        private Split(SimpleTensor[] factors, Tensor summand) {
+            this.factors = factors;
+            this.summands.add(summand);
+            Arrays.sort(factors);
+            int hash = 17;
+            for (SimpleTensor f : factors)
+                hash = hash * 17 + f.hashCode();
+            this.hashCode = hash;
+        }
+
+        @Override
+        public int hashCode() {
+            return hashCode;
+        }
+
+        int[] getContractedIndices() {
+            return IndicesUtils.getIntersections(
+                    new IndicesBuilder().append(factors).getIndices(),
+                    summands.get(0).getIndices());
+        }
+
+        Tensor toTensor() {
+            Tensor sum = Tensors.sum(summands.toArray(new Tensor[summands.size()]));
+            Tensor[] ms = new Tensor[factors.length + 1];
+            ms[ms.length - 1] = sum;
+            System.arraycopy(factors, 0, ms, 0, factors.length);
+            return Tensors.multiply(ms);
+        }
+
+        TIntHashSet getAllIndices() {
+            TIntHashSet set = TensorUtils.getAllIndicesNamesT(factors);
+            for (Tensor s : summands)
+                TensorUtils.appendAllIndicesNamesT(s, set);
+            return set;
+        }
+
+
+        void resetDummies(TIntHashSet forbidden) {
+
+        }
+
+    }
+
+    private static int[] matchFactors(SimpleTensor[] a, SimpleTensor[] b) {
+        if (a.length != b.length) return null;
+        int begin = 0, j, n, length = a.length;
+
+        int[] permutation = new int[length];
+        Arrays.fill(permutation, -1);
+
+        for (int i = 1; i <= length; ++i) {
+            if (i == length || a[i].getClass() == SimpleTensor.class || a[i].hashCode() != b[i - 1].hashCode()) {
+                if (i - 1 != begin) {
+                    OUT:
+                    for (n = begin; n < i; ++n) {
+                        for (j = begin; j < i; ++j)
+                            if (permutation[j] == -1 && matchSimpleTensors(a[n], b[j])) {
+                                permutation[n] = j;
+                                continue OUT;
+                            }
+                        return null;
+                    }
+                } else {
+                    if (!matchSimpleTensors(a[i - 1], b[i - 1])) return null;
+                    else permutation[i - 1] = i - 1;
+                }
+                begin = i;
+            }
+        }
+        return permutation;
+    }
+
+    private static boolean matchSimpleTensors(SimpleTensor a, SimpleTensor b) {
+        if (a.hashCode() != b.hashCode()) return false;
+        if (a.getClass() != b.getClass()) return false;
+        if (a instanceof TensorField)
+            for (int i = a.size() - 1; i >= 0; --i)
+                if (!IndexMappings.positiveMappingExists(a.get(i), b.get(i))) return false;
+        return true;
     }
 
     private static SimpleTensor applyDirectMapping(SimpleTensor st, DirectIndexMapping mapping) {
