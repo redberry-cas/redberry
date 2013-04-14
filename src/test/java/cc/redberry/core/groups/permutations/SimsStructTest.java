@@ -22,9 +22,15 @@
  */
 package cc.redberry.core.groups.permutations;
 
+import cc.redberry.core.combinatorics.Permutation;
+import cc.redberry.core.combinatorics.PermutationsSpanIterator;
 import cc.redberry.core.combinatorics.Symmetry;
 import cc.redberry.core.combinatorics.symmetries.Symmetries;
 import cc.redberry.core.combinatorics.symmetries.SymmetriesFactory;
+import junit.framework.Assert;
+import org.apache.commons.math3.random.RandomData;
+import org.apache.commons.math3.random.RandomDataImpl;
+import org.apache.commons.math3.random.Well1024a;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -84,5 +90,46 @@ public class SimsStructTest {
         System.out.println(coun);
 
 
+    }
+
+    @Test
+    public void testRndsdm() {
+        long all = 0;
+        long start, stop;
+        for (int i = 0; i < 100; ++i) {
+            RandomData rd = new RandomDataImpl(new Well1024a());
+            int[] perm1 = rd.nextPermutation(6, 6);
+            int[] perm2 = rd.nextPermutation(6, 6);
+            PermutationsSpanIterator iterator = new PermutationsSpanIterator(
+                    Arrays.asList(new Permutation[]{new Permutation(perm1), new Permutation(perm2)}));
+            int[] p;
+
+            int[] identity = PermutationGroup.getIdentity(6);
+            int[][] gen = {perm1, perm2};
+
+            start = System.nanoTime();
+            List<SimsStruct> lll = SimsStruct.createSGS(gen);
+            all += (System.nanoTime() - start);
+
+            int order = 0;
+            while (iterator.hasNext()) {
+                p = iterator.next().getPermutation().copy();
+                order++;
+
+                start = System.nanoTime();
+                SimsStruct.StripResult as = SimsStruct.strip(p, lll);
+                all += (System.nanoTime() - start);
+                Assert.assertTrue(Arrays.equals(as.remainderPermutation, identity));
+                Assert.assertEquals(lll.size(), as.stopPoint);
+            }
+
+            int coun = 1;
+            for (SimsStruct str : lll)
+                coun *= str.orbit.size();
+            System.out.println(order);
+            Assert.assertEquals(order, coun);
+
+        }
+        System.out.println(all);
     }
 }
