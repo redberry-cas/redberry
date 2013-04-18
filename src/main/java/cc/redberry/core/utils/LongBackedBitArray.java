@@ -178,4 +178,14 @@ public final class LongBackedBitArray implements BitArray {
                 c[i] = '0';
         return new String(c);
     }
+
+    @Override
+    public boolean isFull() {
+        for (int i = data.length - 2; i >= 0; --i)
+            if (data[i] != 0xFFFFFFFFFFFFFFFFL)
+                return false;
+        if ((size & 63) == 0)
+            return true;
+        return data[data.length - 1] ==  (0xFFFFFFFFFFFFFFFFL >>> ((data.length << 6) - size));
+    }
 }

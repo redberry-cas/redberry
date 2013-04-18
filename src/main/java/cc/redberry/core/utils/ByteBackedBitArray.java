@@ -219,4 +219,14 @@ public final class ByteBackedBitArray implements BitArray {
             return -1;
         return (pointer - 1) * 8 + result;
     }
+
+    @Override
+    public boolean isFull() {
+        for (int i = data.length - 2; i >= 0; --i)
+            if (data[i] != (byte) 0xFF)
+                return false;
+        if ((size & 7) == 0)
+            return true;
+        return data[data.length - 1] == (byte) (0xFF >>> (8 - (size & 0x7)));
+    }
 }

@@ -30,7 +30,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 /**
- *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
@@ -109,6 +108,16 @@ public class LongBackedBitArrayTest {
 
             bitArray.setAll();
             assertEquals(length, bitArray.bitCount());
+        }
+    }
+
+    @Test
+    public void testIsFull() {
+        for (int i = 0; i < 165; ++i) {
+            LongBackedBitArray arr = new LongBackedBitArray(23);
+            assertTrue(!arr.isFull());
+            arr.setAll();
+            assertTrue(arr.isFull());
         }
     }
 }
