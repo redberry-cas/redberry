@@ -87,4 +87,13 @@ public final class TensorHashCalculator {
     public static int hashWithIndices(final Tensor tensor) {
         return hashWithIndices(tensor, tensor.getIndices().getFree());
     }
+
+    public static int nontopologicalHash(final Tensor tensor) {
+        if (tensor.getClass() == SimpleTensor.class)
+            return tensor.hashCode();
+        int hashCode = tensor.getClass().hashCode();
+        for (Tensor t : tensor)
+            hashCode = 13 * hashCode + nontopologicalHash(t);
+        return hashCode;
+    }
 }

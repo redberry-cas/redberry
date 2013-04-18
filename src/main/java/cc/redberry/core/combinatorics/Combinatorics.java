@@ -194,6 +194,7 @@ public final class Combinatorics {
      * @throws IllegalArgumentException if array length not equals to permutation length
      * @throws IllegalArgumentException if permutation is not consistent with one-line notation
      */
+    //todo rename 'shuffle'
     public static <T> T[] shuffle(T[] array, final int[] permutation) {
         if (array.length != permutation.length)
             throw new IllegalArgumentException();

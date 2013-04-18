@@ -55,6 +55,20 @@ public abstract class MultiTensor extends Tensor {
     public abstract Tensor remove(int position);
 
     /**
+     * Removes the first occurrence of the specified tensor (reference) from this list, if it is present.
+     * If the tensor does not contain the element, it is unchanged.
+     * More formally, removes the element with the lowest index i such that t == get(i) (if such an element exists).
+     *
+     * @param tensor specified reference
+     * @return result of removing
+     */
+    public Tensor remove(Tensor tensor) {
+        for (int l = 0, size = size(); l < size; ++l)
+            if (get(l) == tensor) return remove(l);
+        return tensor;
+    }
+
+    /**
      * Removes tensors at the specified positions and returns the result.
      *
      * @param positions position in tensor

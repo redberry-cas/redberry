@@ -1114,26 +1114,6 @@ public final class ArraysUtils {
     }
 
     /**
-     * Sorts the specified target array of shorts into ascending numerical order and simultaneously permutes the {@code
-     * coSort} ints array in the same way then specified target array. <p/> The code was taken from the jdk6 Arrays
-     * class. <p/> The sorting algorithm is a tuned quicksort, adapted from Jon L. Bentley and M. Douglas McIlroy's
-     * "Engineering a Sort Function", Software-Practice and Experience, Vol. 23(11) P. 1249-1265 (November 1993). This
-     * algorithm offers n*log(n) performance on many data sets that cause other quicksorts to degrade to quadratic
-     * performance. <p/> <p><b>NOTE: remember this is unstable sort algorithm, so additional combinatorics of the {@code
-     * coSort} array can be perfomed. Use this method only if you are sure, in what you are doing. If not - use stable
-     * sort methods like an insertion sort or Tim sort.</b> <p/> <p><b>NOTE:</b> The method throws {@code
-     * IllegalArgumentException} if {@code target == coSort}, because in this case no sorting will be perfomed.
-     *
-     * @param target the array to be sorted
-     * @param coSort the array, which will be permuted in the same way, then the specified target array, during sorting
-     *               procedure
-     * @throws IllegalArgumentException if coSort length less then target length.
-     */
-    public static void quickSort(short[] target, int[] coSort) {
-        quickSort(target, 0, target.length, coSort);
-    }
-
-    /**
      * Sorts the specified range of the specified target array of ints into ascending numerical order and simultaneously
      * permutes the {@code coSort} ints array in the same way then specified target array. The range to be sorted
      * extends from index <tt>fromIndex</tt>, inclusive, to index <tt>toIndex</tt>, exclusive. (If
@@ -1233,6 +1213,26 @@ public final class ArraysUtils {
         if ((s = d - c) > 1)
             quickSort2(target, n - s, s, coSort);
 
+    }
+
+    /**
+     * Sorts the specified target array of shorts into ascending numerical order and simultaneously permutes the {@code
+     * coSort} ints array in the same way then specified target array. <p/> The code was taken from the jdk6 Arrays
+     * class. <p/> The sorting algorithm is a tuned quicksort, adapted from Jon L. Bentley and M. Douglas McIlroy's
+     * "Engineering a Sort Function", Software-Practice and Experience, Vol. 23(11) P. 1249-1265 (November 1993). This
+     * algorithm offers n*log(n) performance on many data sets that cause other quicksorts to degrade to quadratic
+     * performance. <p/> <p><b>NOTE: remember this is unstable sort algorithm, so additional combinatorics of the {@code
+     * coSort} array can be perfomed. Use this method only if you are sure, in what you are doing. If not - use stable
+     * sort methods like an insertion sort or Tim sort.</b> <p/> <p><b>NOTE:</b> The method throws {@code
+     * IllegalArgumentException} if {@code target == coSort}, because in this case no sorting will be perfomed.
+     *
+     * @param target the array to be sorted
+     * @param coSort the array, which will be permuted in the same way, then the specified target array, during sorting
+     *               procedure
+     * @throws IllegalArgumentException if coSort length less then target length.
+     */
+    public static void quickSort(short[] target, int[] coSort) {
+        quickSort(target, 0, target.length, coSort);
     }
 
     private static void swap(short x[], int a, int b, int[] coSort) {
