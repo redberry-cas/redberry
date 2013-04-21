@@ -144,6 +144,13 @@ public interface BitArray {
      */
     void xor(BitArray bitArray);
 
+
+    /**
+     * Inverts all bits.
+     */
+    void not();
+
+
     //todo comment
     int nextTrailingBit(int position);
 }

@@ -47,6 +47,10 @@ public final class StructureOfIndices {
     private final ByteBackedBitArray[] states = new ByteBackedBitArray[IndexType.TYPES_COUNT];
     private final int size;
 
+    private StructureOfIndices(int size) {
+        this.size = size;
+    }
+
     /**
      * Creates structure of indices, which contains indices only of specified type.
      *
@@ -284,6 +288,40 @@ public final class StructureOfIndices {
         if (size != indices.size())
             return false;
         return equals(indices.getStructureOfIndices());
+    }
+
+    /**
+     * Return the new {@code Structure of Indices } with inverted states of indices
+     *
+     * @return new {@code Structure of Indices } with inverted states of indices
+     */
+    public StructureOfIndices inverseStatesOfIndices() {
+        StructureOfIndices r = new StructureOfIndices(size);
+        System.arraycopy(typesCounts, 0, r.typesCounts, 0, typesCounts.length);
+        for (int i = r.states.length - 1; i >= 0; --i) {
+            if (states[i] == null || states[i] == ByteBackedBitArray.EMPTY) continue;
+            r.states[i] = states[i].clone();
+            r.states[i].not();
+        }
+        return r;
+    }
+
+    /**
+     * Returns the 'sum' of this and other structures
+     *
+     * @param oth other structure
+     * @return 'sum' of this and other structures
+     */
+    public StructureOfIndices append(StructureOfIndices oth) {
+        int size = this.size + oth.size;
+        StructureOfIndices r = new StructureOfIndices(size);
+        for (int i = 0; i < IndexType.TYPES_COUNT; ++i) {
+            r.typesCounts[i] = typesCounts[i] + oth.typesCounts[i];
+            if (r.states[i] == null)
+                continue;
+            r.states[i] = states[i].append(oth.states[i]);
+        }
+        return r;
     }
 
     @Override

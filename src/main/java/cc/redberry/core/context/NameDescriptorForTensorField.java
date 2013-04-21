@@ -22,34 +22,23 @@
  */
 package cc.redberry.core.context;
 
-import cc.redberry.core.indices.SimpleIndices;
 import cc.redberry.core.indices.StructureOfIndices;
 
 /**
- * Implementation of {@link NameDescriptor} for any simple tensor, except Kronecker and metric tensor.
- *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
- * @since 1.1
  */
-final class NameDescriptorImpl extends NameDescriptor {
+public abstract class NameDescriptorForTensorField extends NameDescriptor {
+    final int[] orders;
 
-    private final String name;
-    private final NameAndStructureOfIndices[] key;
-
-    NameDescriptorImpl(String name, StructureOfIndices[] indexTypeStructures, int id) {
+    NameDescriptorForTensorField(StructureOfIndices[] indexTypeStructures, int id, int[] orders) {
         super(indexTypeStructures, id);
-        this.name = name;
-        this.key = new NameAndStructureOfIndices[]{new NameAndStructureOfIndices(name, indexTypeStructures)};
+        this.orders = orders;
     }
 
-    @Override
-    public String getName(SimpleIndices indices) {
-        return name;
-    }
+    public int[] getDerivativeOrders() {return orders.clone();}
 
-    @Override
-    NameAndStructureOfIndices[] getKeys() {
-        return key;
-    }
+    public abstract boolean isDerivative();
+
+    public abstract NameDescriptorForTensorField getDerivative(int... orders);
 }

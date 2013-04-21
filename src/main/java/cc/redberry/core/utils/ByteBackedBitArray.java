@@ -139,6 +139,26 @@ public final class ByteBackedBitArray implements BitArray {
     }
 
     @Override
+    public void not() {
+        for (int i = data.length - 2; i >= 0; --i)
+            data[i] ^= (byte) 0xFF;
+        if ((size & 7) != 0)
+            data[data.length - 1] ^= (byte) (0xFF >>> (8 - (size & 0x7)));
+        else
+            data[data.length - 1] ^= (byte) 0xFF;
+    }
+
+    public ByteBackedBitArray append(ByteBackedBitArray array) {
+        int size = this.size + array.size;
+        ByteBackedBitArray r = new ByteBackedBitArray(size);
+        System.arraycopy(data, 0, r.data, 0, data.length);
+        int i = this.size;
+        for (; i < size; ++i)
+            if (array.get(i - this.size)) r.set(i);
+        return r;
+    }
+
+    @Override
     public void loadValueFrom(BitArray bitArray_) {
         ByteBackedBitArray bitArray = (ByteBackedBitArray) bitArray_;
         if (size != bitArray.size)

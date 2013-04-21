@@ -73,7 +73,7 @@ public final class LongBackedBitArray implements BitArray {
     }
 
     @Override
-    public BitArray clone() {
+    public LongBackedBitArray clone() {
         return new LongBackedBitArray(data.clone(), size);
     }
 
@@ -151,6 +151,16 @@ public final class LongBackedBitArray implements BitArray {
             throw new IllegalArgumentException();
         for (int i = 0; i < data.length; ++i)
             data[i] ^= bitArray.data[i];
+    }
+
+    @Override
+    public void not() {
+        for (int i = data.length - 2; i >= 0; --i)
+            data[i] ^= 0xFFFFFFFFFFFFFFFFL;
+        if ((size & 63) != 0)
+            data[data.length - 1] ^= (0xFFFFFFFFFFFFFFFFL >>> ((data.length << 6) - size));
+        else
+            data[data.length - 1] ^= 0xFFFFFFFFFFFFFFFFL;
     }
 
     @Override

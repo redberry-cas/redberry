@@ -133,10 +133,10 @@ public final class NameManager {
 
     private NameDescriptor createDescriptor(final String sname, final StructureOfIndices[] structuresOfIndices, int id) {
         if (structuresOfIndices.length != 1)
-            return new NameDescriptorImpl(sname, structuresOfIndices, id);
+            return new NameDescriptorForSimpleTensor(sname, structuresOfIndices, id);
         final StructureOfIndices its = structuresOfIndices[0];
         if (its.size() != 2)
-            return new NameDescriptorImpl(sname, structuresOfIndices, id);
+            return new NameDescriptorForSimpleTensor(sname, structuresOfIndices, id);
         for (byte b = 0; b < IndexType.TYPES_COUNT; ++b)
             if (its.typeCount(b) == 2) {
                 if (CC.isMetric(b)) {
@@ -156,7 +156,7 @@ public final class NameManager {
                     }
                 }
             }
-        return new NameDescriptorImpl(sname, structuresOfIndices, id);
+        return new NameDescriptorForSimpleTensor(sname, structuresOfIndices, id);
     }
 
     /**

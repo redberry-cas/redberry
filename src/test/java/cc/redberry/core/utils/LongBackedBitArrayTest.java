@@ -30,7 +30,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 /**
- *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
@@ -79,7 +78,7 @@ public class LongBackedBitArrayTest {
     @Test
     public void test3() {
         BitsStreamGenerator random = new Well19937c();
-        for (int sukatvarblyad = 0; sukatvarblyad < 10; ++sukatvarblyad) {
+        for (int sukatvarblyad = 0; sukatvarblyad < 100; ++sukatvarblyad) {
             int length;
             boolean[] array = new boolean[length = random.nextInt(100000)];
             LongBackedBitArray bitArray = new LongBackedBitArray(length);
@@ -95,6 +94,13 @@ public class LongBackedBitArrayTest {
 
             assertEquals(bitCount, bitArray.bitCount());
             assertEquals(bitCount, bitsPositions.size());
+
+            LongBackedBitArray bb1 = bitArray.clone();
+            LongBackedBitArray bb2 = bitArray.clone();
+            bb2.not();
+            bb1.xor(bb2);
+            assertEquals(bb1.bitCount(), bb1.size());
+
 
             int pointer = 0;
             for (i = 0; i < length; ++i) {
