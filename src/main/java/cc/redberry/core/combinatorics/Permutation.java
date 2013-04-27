@@ -75,7 +75,7 @@ public class Permutation implements Comparable<Permutation> {
      *
      * @return identity permutation
      */
-    public Permutation getOne() {
+    public Permutation getIdentity() {
         return new Permutation(permutation.length);
     }
 

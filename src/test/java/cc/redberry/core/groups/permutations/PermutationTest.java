@@ -20,7 +20,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
-package cc.redberry.core.combinatorics;
+package cc.redberry.core.groups.permutations;
 
 import org.junit.Test;
 
@@ -34,15 +34,14 @@ import static org.junit.Assert.assertTrue;
  * @author Stanislav Poslavsky
  */
 public class PermutationTest {
-    public PermutationTest() {
-    }
-
     @Test
     public void testComposition() {
         Permutation a = new Permutation(new int[]{2, 1, 0});
         Permutation b = new Permutation(new int[]{1, 0, 2});
+
         Permutation ba = new Permutation(new int[]{1, 2, 0});
         assertTrue(b.composition(a).equals(ba));
+
         Permutation ab = new Permutation(new int[]{2, 0, 1});
         assertTrue(a.composition(b).equals(ab));
     }

@@ -79,7 +79,7 @@ public class Symmetry extends Permutation {
      * @return identity symmetry
      */
     @Override
-    public Symmetry getOne() {
+    public Symmetry getIdentity() {
         return new Symmetry(permutation.length);
     }
 

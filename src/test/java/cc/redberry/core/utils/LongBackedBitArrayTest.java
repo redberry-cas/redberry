@@ -117,4 +117,14 @@ public class LongBackedBitArrayTest {
             assertEquals(length, bitArray.bitCount());
         }
     }
+
+    @Test
+    public void testIsFull() {
+        for (int i = 0; i < 165; ++i) {
+            LongBackedBitArray arr = new LongBackedBitArray(23);
+            assertTrue(!arr.isFull());
+            arr.setAll();
+            assertTrue(arr.isFull());
+        }
+    }
 }

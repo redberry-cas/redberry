@@ -153,4 +153,11 @@ public interface BitArray {
 
     //todo comment
     int nextTrailingBit(int position);
+
+    /**
+     * Returns whether all bits are set.
+     *
+     * @return true if all bits are set
+     */
+    boolean isFull();
 }
