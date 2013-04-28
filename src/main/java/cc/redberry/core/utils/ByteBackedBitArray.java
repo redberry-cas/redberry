@@ -140,6 +140,9 @@ public final class ByteBackedBitArray implements BitArray {
 
     @Override
     public void not() {
+        //prevent IndexOutOfBounds
+        if (size == 0) return;
+
         for (int i = data.length - 2; i >= 0; --i)
             data[i] ^= (byte) 0xFF;
         if ((size & 7) != 0)

@@ -155,6 +155,9 @@ public final class LongBackedBitArray implements BitArray {
 
     @Override
     public void not() {
+        //prevent IndexOutOfBounds
+        if (size == 0) return;
+
         for (int i = data.length - 2; i >= 0; --i)
             data[i] ^= 0xFFFFFFFFFFFFFFFFL;
         if ((size & 63) != 0)
@@ -196,6 +199,6 @@ public final class LongBackedBitArray implements BitArray {
                 return false;
         if ((size & 63) == 0)
             return true;
-        return data[data.length - 1] ==  (0xFFFFFFFFFFFFFFFFL >>> ((data.length << 6) - size));
+        return data[data.length - 1] == (0xFFFFFFFFFFFFFFFFL >>> ((data.length << 6) - size));
     }
 }

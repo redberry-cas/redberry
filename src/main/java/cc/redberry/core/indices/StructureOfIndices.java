@@ -295,11 +295,13 @@ public final class StructureOfIndices {
      *
      * @return new {@code Structure of Indices } with inverted states of indices
      */
-    public StructureOfIndices inverseStatesOfIndices() {
+    public StructureOfIndices getInverted() {
         StructureOfIndices r = new StructureOfIndices(size);
         System.arraycopy(typesCounts, 0, r.typesCounts, 0, typesCounts.length);
         for (int i = r.states.length - 1; i >= 0; --i) {
-            if (states[i] == null || states[i] == ByteBackedBitArray.EMPTY) continue;
+            if (states[i] == null) continue;
+            if (states[i] == ByteBackedBitArray.EMPTY)
+                r.states[i] = ByteBackedBitArray.EMPTY;
             r.states[i] = states[i].clone();
             r.states[i].not();
         }
@@ -326,11 +328,39 @@ public final class StructureOfIndices {
 
     @Override
     public String toString() {
-        return "IndicesTypeStructure{" +
-                "typesCounts=" + typesCounts +
-                ", states=" + (states == null ? null : Arrays.asList(states)) +
-                ", size=" + size +
-                '}';
+        StringBuilder sb = new StringBuilder();
+        sb.append('[');
+        for (int i = 0; i < IndexType.TYPES_COUNT; ++i) {
+            if (typesCounts[i] != 0) {
+                sb.append('{');
+                if (states[i] == null)
+                    for (int t = 0; ; ++t) {
+                        sb.append(IndexType.values()[i].getShortString());
+                        if (t == typesCounts[i] - 1)
+                            break;
+                        sb.append(',');
+                    }
+                else {
+                    for (int t = 0; t < typesCounts[i]; ++t) {
+                        sb.append('(');
+                        sb.append(IndexType.values()[i].getShortString());
+                        sb.append(',');
+                        sb.append(states[i].get(t) ? 1 : 0);
+                        sb.append(')');
+                        if (t == typesCounts[i] - 1)
+                            break;
+                        sb.append(',');
+                    }
+
+                }
+
+                sb.append("},");
+            }
+        }
+
+        sb.deleteCharAt(sb.length() - 1);
+        sb.append(']');
+        return sb.toString();
     }
 
     /**

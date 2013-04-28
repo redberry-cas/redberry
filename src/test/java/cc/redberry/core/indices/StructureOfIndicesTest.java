@@ -47,4 +47,11 @@ public class StructureOfIndicesTest {
         Assert.assertTrue(Tensors.parse("v_a'").hashCode() != Tensors.parse("v^a'").hashCode());
         Assert.assertTrue(Tensors.parse("v_a").hashCode() == Tensors.parse("v^a").hashCode());
     }
+
+    @Test
+    public void testInverse(){
+        SimpleIndices si = ParserIndices.parseSimple("_ab'c'^d'");
+        SimpleIndices inv = si.getInverted();
+        Assert.assertEquals(si.getStructureOfIndices().getInverted(), inv.getStructureOfIndices());
+    }
 }

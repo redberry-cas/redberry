@@ -27,6 +27,7 @@ import org.apache.commons.math3.random.Well19937c;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -95,12 +96,15 @@ public class LongBackedBitArrayTest {
             assertEquals(bitCount, bitArray.bitCount());
             assertEquals(bitCount, bitsPositions.size());
 
+            if (bitArray.size() != bitArray.bitCount())
+                assertFalse(bitArray.isFull());
+
             LongBackedBitArray bb1 = bitArray.clone();
             LongBackedBitArray bb2 = bitArray.clone();
             bb2.not();
             bb1.xor(bb2);
             assertEquals(bb1.bitCount(), bb1.size());
-
+            assertTrue(bb1.isFull());
 
             int pointer = 0;
             for (i = 0; i < length; ++i) {

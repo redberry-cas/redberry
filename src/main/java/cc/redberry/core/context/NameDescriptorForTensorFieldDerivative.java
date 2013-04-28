@@ -42,7 +42,7 @@ final class NameDescriptorForTensorFieldDerivative extends NameDescriptorForTens
         int j;
         for (int i = 0; i < orders.length; ++i) {
             for (j = 0; j < orders[i]; ++j)
-                structureOfIndices[0] = structureOfIndices[0].append(structureOfIndices[i].inverseStatesOfIndices());
+                structureOfIndices[0] = structureOfIndices[0].append(structureOfIndices[i].getInverted());
         }
         return structureOfIndices;
     }
