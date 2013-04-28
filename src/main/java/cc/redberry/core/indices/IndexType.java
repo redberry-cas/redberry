@@ -54,14 +54,8 @@ public enum IndexType {
 
     static {
         commonNames = new HashMap<>();
-        commonNames.put("l", LatinLower);
-        commonNames.put("L", LatinUpper);
-        commonNames.put("l'", Matrix1);
-        commonNames.put("L'", Matrix2);
-        commonNames.put("g", GreekLower);
-        commonNames.put("G", GreekUpper);
-        commonNames.put("g'", Matrix3);
-        commonNames.put("G'", Matrix4);
+        for (IndexType it : values())
+            commonNames.put(it.getShortString(), it);
     }
 
     /**
