@@ -105,4 +105,24 @@ public class StructureOfIndicesTest {
                 siso = ParserIndices.parseSimple("_ab'c'^d'_g'_xy_\\beta_y't'w'q'");
         siso.getStructureOfIndices().subtract(so.getStructureOfIndices());
     }
+
+    @Test
+    public void testPartition1() {
+        SimpleIndices
+                si = ParserIndices.parseSimple("_ab'c'^d'_g'"),
+                so = ParserIndices.parseSimple("_ab_\\alpha_b'c'^d'_g'"),
+                siso = ParserIndices.parseSimple("_ab'c'^d'_g'_xy_\\beta_y't'^w'_q'");
+
+        StructureOfIndices[] siso_ = {si.getStructureOfIndices(), so.getStructureOfIndices()};
+
+        int[][] map = siso.getStructureOfIndices().getPartitionMappings(siso_);
+
+        int ik = 0;
+        for (int[] ma : map) {
+            SimpleIndicesBuilder builder = new SimpleIndicesBuilder();
+            for (int i : ma)
+                builder.append(siso.get(i));
+            assertEquals(builder.getIndices().getStructureOfIndices(), siso_[ik++]);
+        }
+    }
 }

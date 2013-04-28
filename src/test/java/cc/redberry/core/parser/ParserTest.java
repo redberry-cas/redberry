@@ -466,7 +466,5 @@ public class ParserTest {
         SimpleTensor t1 = parseSimple("F~(1,2)_pqab^qDR[x_y,y_Ss]");
 
         Assert.assertTrue(t1.getNameDescriptor() == ((NameDescriptorForTensorField) t2.getNameDescriptor()).getDerivative(1, 2));
-
-
     }
 }

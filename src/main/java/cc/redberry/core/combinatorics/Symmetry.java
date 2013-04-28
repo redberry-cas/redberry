@@ -149,4 +149,9 @@ public class Symmetry extends Permutation {
     public String toString() {
         return super.toString() + "(" + (sign ? "-" : "+") + ")";
     }
+
+
+    public Symmetry convert(int[] mapping, int newDimension) {
+        return new Symmetry(Combinatorics.convertPermutation(this.permutation, mapping, newDimension), sign);
+    }
 }

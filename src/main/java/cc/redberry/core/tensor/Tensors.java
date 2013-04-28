@@ -313,7 +313,7 @@ public final class Tensors {
             StructureOfIndices[] structures = new StructureOfIndices[argIndices.length + 1];
             StructureOfIndices structureOfIndices = indices.getStructureOfIndices();
             int i, j;
-            for (i = arguments.length - 1; i >= 0; --i) {
+            for (i = argIndices.length - 1; i >= 0; --i) {
                 structures[i + 1] = argIndices[i].getStructureOfIndices();
                 for (j = orders[i]; j > 0; --j)
                     structureOfIndices = structureOfIndices.subtract(structures[i + 1]);

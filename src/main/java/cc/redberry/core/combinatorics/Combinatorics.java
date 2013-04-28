@@ -42,7 +42,7 @@ public final class Combinatorics {
      * all possible unique combinations with permutations (i.e. {0,1} and {1,0} both appears for {@code k=2}) of
      * {@code k} numbers, which can be chosen from the set of {@code n} numbers, numbered in the order
      * 0,1,2,...,{@code n}. The total number of such combinations will be {@code n!/(n-k)!}.</p>
-     *
+     * <p/>
      * <p>For example, for {@code k=2} and {@code n=3}, this method will produce an iterator over
      * the following arrays: [0,1], [1,0], [0,2], [2,0], [1,2], [2,1].</p>
      *
@@ -168,9 +168,23 @@ public final class Combinatorics {
         return cycle;
     }
 
+
+    public static int[] createBlockCycle(int blockSize, int numberOfBlocks) {
+        final int[] cycle = new int[blockSize * numberOfBlocks];
+
+        int i = blockSize * (numberOfBlocks - 1) - 1;
+        for (; i >= 0; --i) cycle[i] = i + blockSize;
+        i = blockSize * (numberOfBlocks - 1);
+        int k = 0;
+        for (; i < cycle.length; ++i)
+            cycle[i] = k++;
+
+        return cycle;
+    }
+
     /**
      * Returns the inverse permutation for the specified one.
-     *
+     * <p/>
      * <p>One-line notation for permutations is used.</p>
      *
      * @param permutation permutation in one-line notation
@@ -245,6 +259,26 @@ public final class Combinatorics {
             if (_permutation[i] != i)
                 return false;
         return true;
+    }
+
+
+    public static int[] convertPermutation(int[] permutation, int[] mapping, int newDimension) {
+        if (permutation.length != mapping.length)
+            throw new IllegalArgumentException();
+
+        int[] result = new int[newDimension];
+        for (int i = 0; i < newDimension; ++i)
+            result[i] = i;
+
+        int k;
+        for (int i = permutation.length - 1; i >= 0; --i)
+            if (mapping[i] != -1) {
+                if ((k = mapping[permutation[i]]) == -1)
+                    throw new IllegalArgumentException();
+                result[mapping[i]] = k;
+            }
+
+        return result;
     }
 
     /**

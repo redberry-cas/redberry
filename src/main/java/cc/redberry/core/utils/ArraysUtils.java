@@ -43,6 +43,13 @@ public final class ArraysUtils {
     private ArraysUtils() {
     }
 
+    public static int sum(final int[] array) {
+        int s = 0;
+        for (int i : array)
+            s += i;
+        return s;
+    }
+
     public static final Comparator<Object> HASH_COMPARATOR = new Comparator<Object>() {
 
         @Override

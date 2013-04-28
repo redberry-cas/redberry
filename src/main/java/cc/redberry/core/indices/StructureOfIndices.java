@@ -328,7 +328,7 @@ public final class StructureOfIndices {
 
     /**
      * Subtracts some structure of indices from the right side of current structure.
-     *
+     * <p/>
      * <p>This operation may fail if states of other structure differs from current.</p>
      *
      * @param other other structure
@@ -353,6 +353,35 @@ public final class StructureOfIndices {
         }
 
         return r;
+    }
+
+    public int[][] getPartitionMappings(final StructureOfIndices... partition) {
+        int c;
+        //todo check states
+        for (int i = 0; i < IndexType.TYPES_COUNT; ++i) {
+            c = 0;
+            for (StructureOfIndices str : partition)
+                c += str.typesCounts[i];
+            if (c != typesCounts[i])
+                throw new IllegalArgumentException("Not a partition.");
+        }
+
+        int[][] mappings = new int[partition.length][];
+        int i, j, k;
+
+        int[] pointers = new int[IndexType.TYPES_COUNT];
+        for (j = 0; j < IndexType.TYPES_COUNT; ++j)
+            pointers[j] = getTypeData((byte) j).from;
+
+        for (c = 0; c < partition.length; ++c) {
+            mappings[c] = new int[partition[c].size];
+            i = 0;
+            for (j = 0; j < IndexType.TYPES_COUNT; ++j)
+                for (k = partition[c].typesCounts[j] - 1; k >= 0; --k)
+                    mappings[c][i++] = pointers[j]++;
+            assert i == partition[c].size;
+        }
+        return mappings;
     }
 
     @Override

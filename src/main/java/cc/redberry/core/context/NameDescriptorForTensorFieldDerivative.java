@@ -22,8 +22,14 @@
  */
 package cc.redberry.core.context;
 
+import cc.redberry.core.combinatorics.Combinatorics;
+import cc.redberry.core.combinatorics.Symmetry;
 import cc.redberry.core.indices.SimpleIndices;
 import cc.redberry.core.indices.StructureOfIndices;
+import cc.redberry.core.utils.ArraysUtils;
+import cc.redberry.core.utils.IntArrayList;
+
+import java.util.List;
 
 /**
  * @author Dmitry Bolotin
@@ -35,7 +41,52 @@ final class NameDescriptorForTensorFieldDerivative extends NameDescriptorForTens
     NameDescriptorForTensorFieldDerivative(int id, final int[] orders, NameDescriptorForTensorFieldImpl parent) {
         super(generateStructures(parent, orders), id, orders, generateName(orders, parent));
         this.parent = parent;
+        initializeSymmetries();
     }
+
+    private void initializeSymmetries() {
+        StructureOfIndices baseStructure = structuresOfIndices[0];
+
+        StructureOfIndices[] partition = new StructureOfIndices[1 + ArraysUtils.sum(orders)];
+        partition[0] = parent.structuresOfIndices[0];
+        int i, j, k = 0;
+        for (i = 0; i < orders.length; ++i)
+            for (j = 0; j < orders[i]; ++j)
+                partition[++k] = structuresOfIndices[i + 1].getInverted();
+        int[][] mapping = baseStructure.getPartitionMappings(partition);
+
+        //adding field symmetries
+        List<Symmetry> fieldSymmetries = parent.symmetries.getInnerSymmetries().getBasisSymmetries();
+        for (k = 1; k < fieldSymmetries.size(); ++k)
+            symmetries.addUnsafe(fieldSymmetries.get(k).convert(mapping[0], baseStructure.size()));
+
+
+        //adding block symmetries
+        IntArrayList aggregator = new IntArrayList();
+        j = 1;
+        int[] cycle;
+        for (i = 0; i < orders.length; ++i) {
+            if (orders[i] >= 2) {
+                cycle = Combinatorics.createBlockCycle(structuresOfIndices[i + 1].size(), 2);
+                aggregator.addAll(mapping[j]);
+                aggregator.addAll(mapping[j + 1]);
+                symmetries.addUnsafe(
+                        new Symmetry(Combinatorics.convertPermutation(cycle, aggregator.toArray(), baseStructure.size()), false));
+
+                if (orders[i] >= 3) {
+                    for (k = 2; k < orders[i]; ++k)
+                        aggregator.addAll(mapping[j + k]);
+
+                    cycle = Combinatorics.createBlockCycle(structuresOfIndices[i + 1].size(), orders[i]);
+                    symmetries.addUnsafe(
+                            new Symmetry(Combinatorics.convertPermutation(cycle, aggregator.toArray(), baseStructure.size()), false));
+                }
+                aggregator.clear();
+            }
+            j += orders[i];
+        }
+    }
+
 
     private static String generateName(final int[] orders, NameDescriptorForTensorFieldImpl parent) {
         StringBuilder sb = new StringBuilder();
@@ -55,11 +106,11 @@ final class NameDescriptorForTensorFieldDerivative extends NameDescriptorForTens
     }
 
     private static StructureOfIndices[] generateStructures(NameDescriptorForTensorFieldImpl parent, final int[] orders) {
-        StructureOfIndices[] structureOfIndices = parent.indexTypeStructures.clone();
+        StructureOfIndices[] structureOfIndices = parent.structuresOfIndices.clone();
         int j;
         for (int i = 0; i < orders.length; ++i) {
             for (j = 0; j < orders[i]; ++j)
-                structureOfIndices[0] = structureOfIndices[0].append(structureOfIndices[i].getInverted());
+                structureOfIndices[0] = structureOfIndices[0].append(structureOfIndices[i + 1].getInverted());
         }
         return structureOfIndices;
     }
@@ -81,7 +132,7 @@ final class NameDescriptorForTensorFieldDerivative extends NameDescriptorForTens
 
     @Override
     public NameDescriptorForTensorField getDerivative(int... orders) {
-        if (orders.length != indexTypeStructures.length - 1)
+        if (orders.length != structuresOfIndices.length - 1)
             throw new IllegalArgumentException();
 
         int[] resOrder = this.orders;
