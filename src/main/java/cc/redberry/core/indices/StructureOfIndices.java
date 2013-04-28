@@ -319,10 +319,39 @@ public final class StructureOfIndices {
         StructureOfIndices r = new StructureOfIndices(size);
         for (int i = 0; i < IndexType.TYPES_COUNT; ++i) {
             r.typesCounts[i] = typesCounts[i] + oth.typesCounts[i];
-            if (r.states[i] == null)
+            if (states[i] == null)
                 continue;
             r.states[i] = states[i].append(oth.states[i]);
         }
+        return r;
+    }
+
+    /**
+     * Subtracts some structure of indices from the right side of current structure.
+     *
+     * <p>This operation may fail if states of other structure differs from current.</p>
+     *
+     * @param other other structure
+     * @return result of subtraction
+     * @throws IllegalArgumentException nonmetric states are different
+     */
+    public StructureOfIndices subtract(StructureOfIndices other) {
+        int size = this.size - other.size;
+
+        StructureOfIndices r = new StructureOfIndices(size);
+        for (int i = 0; i < IndexType.TYPES_COUNT; ++i) {
+            if ((r.typesCounts[i] = typesCounts[i] - other.typesCounts[i]) < 0)
+                throw new IllegalArgumentException("Other is larger then this.");
+
+            if (states[i] == null)
+                continue;
+
+            if (!states[i].copyOfRange(states[i].size() - other.states[i].size()).equals(other.states[i]))
+                throw new IllegalArgumentException("Nonmetric states are different");
+
+            r.states[i] = states[i].copyOfRange(0, states[i].size() - other.states[i].size());
+        }
+
         return r;
     }
 

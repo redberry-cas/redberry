@@ -151,6 +151,49 @@ public final class ByteBackedBitArray implements BitArray {
             data[data.length - 1] ^= (byte) 0xFF;
     }
 
+    //@Override
+    private ByteBackedBitArray beginCopyOfRange(int newLength) {
+        if (newLength < 0)
+            throw new IllegalArgumentException();
+        if (newLength > size)
+            return new ByteBackedBitArray(Arrays.copyOfRange(data, 0, (newLength + 7) >> 3), newLength);
+
+        byte[] newData = Arrays.copyOfRange(data, 0, (newLength + 7) >> 3);
+
+        if (newLength != 0)
+            newData[newData.length - 1] &= 0xFF >>> ((newData.length << 3) - newLength);
+
+        return new ByteBackedBitArray(newData, newLength);
+    }
+
+    public ByteBackedBitArray copyOfRange(int from) {
+        return copyOfRange(from, size);
+    }
+
+    public ByteBackedBitArray copyOfRange(int from, int to) {
+        if (from < 0 || to < from)
+            throw new IndexOutOfBoundsException();
+
+        if (from == 0)
+            return beginCopyOfRange(to);
+
+        //TODO optimize!!!!
+        ByteBackedBitArray array1 = new ByteBackedBitArray(to - from);
+
+        for (int i = to - from - 1; i >= 0; --i)
+            array1.set(i, get(i + from));
+
+        return array1;
+    }
+
+    public byte getByte(int i) {
+        return data[i];
+    }
+
+    public int getDataSize() {
+        return data.length;
+    }
+
     public ByteBackedBitArray append(ByteBackedBitArray array) {
         int size = this.size + array.size;
         ByteBackedBitArray r = new ByteBackedBitArray(size);
@@ -245,11 +288,16 @@ public final class ByteBackedBitArray implements BitArray {
 
     @Override
     public boolean isFull() {
+        if (data.length == 0)
+            return true;
+
         for (int i = data.length - 2; i >= 0; --i)
             if (data[i] != (byte) 0xFF)
                 return false;
+
         if ((size & 7) == 0)
-            return true;
+            return data[data.length - 1] == (byte) 0xFF;
+
         return data[data.length - 1] == (byte) (0xFF >>> (8 - (size & 0x7)));
     }
 }

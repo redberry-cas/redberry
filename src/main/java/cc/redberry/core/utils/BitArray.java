@@ -150,6 +150,7 @@ public interface BitArray {
      */
     void not();
 
+    //BitArray copyOfRange(int newLength);
 
     //todo comment
     int nextTrailingBit(int position);

@@ -135,6 +135,9 @@ public final class LongBackedBitArray implements BitArray {
 
     @Override
     public void setAll() {
+        if (data.length == 0)
+            return;
+
         Arrays.fill(data, 0xFFFFFFFFFFFFFFFFL);
         data[data.length - 1] &= (0xFFFFFFFFFFFFFFFFL >>> ((data.length << 6) - size));
     }
@@ -194,11 +197,21 @@ public final class LongBackedBitArray implements BitArray {
 
     @Override
     public boolean isFull() {
+        if (data.length == 0)
+            return true;
+
         for (int i = data.length - 2; i >= 0; --i)
             if (data[i] != 0xFFFFFFFFFFFFFFFFL)
                 return false;
+
         if ((size & 63) == 0)
-            return true;
+            return data[data.length - 1] == 0xFFFFFFFFFFFFFFFFL;
+
         return data[data.length - 1] == (0xFFFFFFFFFFFFFFFFL >>> ((data.length << 6) - size));
     }
+
+//    @Override
+//    public BitArray copyOfRange(int newLength) {
+//        throw new UnsupportedOperationException();
+//    }
 }

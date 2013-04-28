@@ -26,9 +26,7 @@ import org.apache.commons.math3.random.BitsStreamGenerator;
 import org.apache.commons.math3.random.Well19937c;
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  * @author Dmitry Bolotin
@@ -79,9 +77,9 @@ public class LongBackedBitArrayTest {
     @Test
     public void test3() {
         BitsStreamGenerator random = new Well19937c();
-        for (int sukatvarblyad = 0; sukatvarblyad < 100; ++sukatvarblyad) {
+        for (int sukatvarblyad = 0; sukatvarblyad < 10000; ++sukatvarblyad) {
             int length;
-            boolean[] array = new boolean[length = random.nextInt(100000)];
+            boolean[] array = new boolean[length = random.nextInt(1000)];
             LongBackedBitArray bitArray = new LongBackedBitArray(length);
 
             int i, bitCount = 0;

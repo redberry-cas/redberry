@@ -53,6 +53,7 @@ public abstract class NameDescriptor {
     final StructureOfIndices[] indexTypeStructures;
     private final int id;
     private final IndicesSymmetries symmetries;
+    NameManager nameManager = null;
 
     NameDescriptor(StructureOfIndices[] indexTypeStructures, int id) {
         if (indexTypeStructures.length == 0)
@@ -60,6 +61,13 @@ public abstract class NameDescriptor {
         this.id = id;
         this.indexTypeStructures = indexTypeStructures;
         this.symmetries = IndicesSymmetries.create(indexTypeStructures[0]);
+    }
+
+    void registerInNameManager(NameManager manager) {
+        if (nameManager != null && manager != nameManager)
+            throw new IllegalStateException("Already registered in another name manager.");
+
+        this.nameManager = manager;
     }
 
     /**

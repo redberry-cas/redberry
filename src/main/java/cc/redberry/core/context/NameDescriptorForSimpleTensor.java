@@ -32,7 +32,7 @@ import cc.redberry.core.indices.StructureOfIndices;
  * @author Stanislav Poslavsky
  * @since 1.1
  */
-class NameDescriptorForSimpleTensor extends NameDescriptor {
+final class NameDescriptorForSimpleTensor extends NameDescriptor {
 
     final String name;
     private final NameAndStructureOfIndices[] key;

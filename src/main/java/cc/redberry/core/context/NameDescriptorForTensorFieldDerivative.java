@@ -32,9 +32,26 @@ import cc.redberry.core.indices.StructureOfIndices;
 final class NameDescriptorForTensorFieldDerivative extends NameDescriptorForTensorField {
     final NameDescriptorForTensorFieldImpl parent;
 
-    public NameDescriptorForTensorFieldDerivative(int id, final int[] orders, NameDescriptorForTensorFieldImpl parent) {
-        super(generateStructures(parent, orders), id, orders);
+    NameDescriptorForTensorFieldDerivative(int id, final int[] orders, NameDescriptorForTensorFieldImpl parent) {
+        super(generateStructures(parent, orders), id, orders, generateName(orders, parent));
         this.parent = parent;
+    }
+
+    private static String generateName(final int[] orders, NameDescriptorForTensorFieldImpl parent) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(parent.name);
+        sb.append('~');
+        if (orders.length != 1)
+            sb.append('(');
+        for (int i = 0; ; ++i) {
+            sb.append(orders[i]);
+            if (i == orders.length - 1)
+                break;
+            sb.append(',');
+        }
+        if (orders.length != 1)
+            sb.append(')');
+        return sb.toString();
     }
 
     private static StructureOfIndices[] generateStructures(NameDescriptorForTensorFieldImpl parent, final int[] orders) {
@@ -54,7 +71,7 @@ final class NameDescriptorForTensorFieldDerivative extends NameDescriptorForTens
 
     @Override
     public String getName(SimpleIndices indices) {
-        return null;
+        return name;
     }
 
     @Override

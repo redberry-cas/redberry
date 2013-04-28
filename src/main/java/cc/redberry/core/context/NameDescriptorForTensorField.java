@@ -30,13 +30,17 @@ import cc.redberry.core.indices.StructureOfIndices;
  */
 public abstract class NameDescriptorForTensorField extends NameDescriptor {
     final int[] orders;
+    final String name;
 
-    NameDescriptorForTensorField(StructureOfIndices[] indexTypeStructures, int id, int[] orders) {
+    NameDescriptorForTensorField(StructureOfIndices[] indexTypeStructures, int id, int[] orders, String name) {
         super(indexTypeStructures, id);
         this.orders = orders;
+        this.name = name;
     }
 
-    public int[] getDerivativeOrders() {return orders.clone();}
+    public int[] getDerivativeOrders() {
+        return orders.clone();
+    }
 
     public abstract boolean isDerivative();
 

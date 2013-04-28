@@ -34,12 +34,10 @@ import java.util.HashMap;
  */
 final class NameDescriptorForTensorFieldImpl extends NameDescriptorForTensorField {
     final HashMap<DerivativeDescriptor, NameDescriptorForTensorFieldDerivative> derivatives = new HashMap<>();
-    final String name;
     final NameAndStructureOfIndices[] keys;
 
     public NameDescriptorForTensorFieldImpl(String name, StructureOfIndices[] indexTypeStructures, int id) {
-        super(indexTypeStructures, id, new int[indexTypeStructures.length - 1]);
-        this.name = name;
+        super(indexTypeStructures, id, new int[indexTypeStructures.length - 1], name);
         this.keys = new NameAndStructureOfIndices[]{new NameAndStructureOfIndices(name, indexTypeStructures)};
     }
 
@@ -64,11 +62,13 @@ final class NameDescriptorForTensorFieldImpl extends NameDescriptorForTensorFiel
             throw new IllegalArgumentException();
 
         boolean b = true;
-        for (int o : orders)
-            if (o != 0) {
+        for (int o : orders) {
+            if (o < 0)
+                throw new IllegalArgumentException("Negative derivative order.");
+
+            if (o != 0)
                 b = false;
-                break;
-            }
+        }
 
         if (b) return this;
 
@@ -78,22 +78,17 @@ final class NameDescriptorForTensorFieldImpl extends NameDescriptorForTensorFiel
             synchronized (this) {
                 nd = derivatives.get(derivativeDescriptor);
                 if (nd == null)
-                    derivatives.put(derivativeDescriptor, nd = createNewDerivative(orders));
+                    derivatives.put(derivativeDescriptor,
+                            nd = nameManager.createDescriptorForFieldDerivative(this, orders));
             }
         return nd;
     }
 
-    private NameDescriptorForTensorFieldDerivative createNewDerivative(int... orders) {
-
-
-        return null;//new NameDescriptorForTensorFieldDerivative(null, 1, orders, this);
-    }
-
     private static final class DerivativeDescriptor {
-        final int[] derivatives;
+        final int[] orders;
 
-        private DerivativeDescriptor(int[] derivatives) {
-            this.derivatives = derivatives;
+        private DerivativeDescriptor(int[] orders) {
+            this.orders = orders;
         }
 
         @Override
@@ -103,12 +98,12 @@ final class NameDescriptorForTensorFieldImpl extends NameDescriptorForTensorFiel
 
             DerivativeDescriptor that = (DerivativeDescriptor) o;
 
-            return Arrays.equals(derivatives, that.derivatives);
+            return Arrays.equals(orders, that.orders);
         }
 
         @Override
         public int hashCode() {
-            return Arrays.hashCode(derivatives);
+            return Arrays.hashCode(orders);
         }
     }
 }

@@ -25,6 +25,7 @@ package cc.redberry.core.tensor;
 import cc.redberry.core.combinatorics.Combinatorics;
 import cc.redberry.core.context.CC;
 import cc.redberry.core.context.NameDescriptor;
+import cc.redberry.core.context.NameDescriptorForTensorField;
 import cc.redberry.core.indices.*;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.parser.ParseTokenTransformer;
@@ -285,6 +286,54 @@ public final class Tensors {
         return new SimpleTensor(name,
                 UnsafeIndicesFactory.createOfTensor(descriptor.getSymmetries(),
                         indices));
+    }
+
+    /**
+     * Returns new tensor field derivative with specified string name, indices, arguments, derivative orders and
+     * explicit argument indices bindings.
+     *
+     * @param name       int name of the field
+     * @param indices    indices
+     * @param argIndices argument indices bindings
+     * @param arguments  arguments list
+     * @param orders     orders of derivatives
+     * @return new instance of {@link TensorField} object
+     */
+    public static TensorField fieldDerivative(String name, SimpleIndices indices, SimpleIndices[] argIndices,
+                                              Tensor[] arguments, int[] orders) {
+        if (argIndices.length != arguments.length)
+            throw new IllegalArgumentException("Argument indices array and arguments array have different length.");
+        if (arguments.length == 0)
+            throw new IllegalArgumentException("No arguments in field.");
+        for (int i = 0; i < argIndices.length; ++i)
+            if (!arguments[i].getIndices().getFree().equalsRegardlessOrder(argIndices[i]))
+                throw new IllegalArgumentException("Arguments indices are inconsistent with arguments.");
+
+        try {
+            StructureOfIndices[] structures = new StructureOfIndices[argIndices.length + 1];
+            StructureOfIndices structureOfIndices = indices.getStructureOfIndices();
+            int i, j;
+            for (i = arguments.length - 1; i >= 0; --i) {
+                structures[i + 1] = argIndices[i].getStructureOfIndices();
+                for (j = orders[i]; j > 0; --j)
+                    structureOfIndices = structureOfIndices.subtract(structures[i + 1]);
+            }
+
+            structures[0] = structureOfIndices;
+
+            NameDescriptorForTensorField fieldDescriptor =
+                    (NameDescriptorForTensorField) CC.getNameManager().mapNameDescriptor(name, structures);
+
+            NameDescriptor derivativeDescriptor = fieldDescriptor.getDerivative(orders);
+
+            return new TensorField(derivativeDescriptor.getId(),
+                    UnsafeIndicesFactory.createOfTensor(derivativeDescriptor.getSymmetries(), indices),
+                    arguments, argIndices);
+        } catch (RuntimeException re) {
+            throw new IllegalArgumentException("Inconsistent derivative orders/indices.", re);
+        }
+
+
     }
 
     /**
