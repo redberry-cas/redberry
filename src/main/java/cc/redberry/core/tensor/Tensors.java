@@ -289,18 +289,84 @@ public final class Tensors {
     }
 
     /**
+     * Creates 1-st derivative with respect to specified argument of specified tensor field with specified derivative
+     * indices
+     *
+     * @param parent            tensor field
+     * @param derivativeIndices indices of the var (inverted)
+     * @param argPosition       argument
+     * @return 1-st derivative
+     */
+    public static TensorField fieldDerivative(TensorField parent, SimpleIndices derivativeIndices, final int argPosition) {
+        return fieldDerivative(parent, derivativeIndices, argPosition, 1);
+    }
+
+    /**
+     * Creates n-th derivative with respect to specified argument of specified tensor field with specified derivative
+     * indices
+     *
+     * @param parent            tensor field
+     * @param derivativeIndices indices of the var (inverted)
+     * @param argPosition       argument
+     * @param order             order of derivative
+     * @return n-th derivative
+     */
+    public static TensorField fieldDerivative(TensorField parent, SimpleIndices derivativeIndices,
+                                              final int argPosition, final int order) {
+
+        if (!derivativeIndices.getStructureOfIndices().equals(parent.argIndices[argPosition].getInverted().getStructureOfIndices().pow(order)))
+            throw new IllegalArgumentException("Illegal derivative indices.");
+
+        int[] orders = new int[parent.size()];
+        orders[argPosition] = order;
+        NameDescriptorForTensorField fieldDescriptor = (NameDescriptorForTensorField) parent.getNameDescriptor();
+        NameDescriptor derivativeDescriptor = fieldDescriptor.getDerivative(orders);
+
+        SimpleIndices totalIndices;
+
+        if (!fieldDescriptor.isDerivative() || derivativeIndices.size() == 0 || parent.indices.size() == 0) {
+            totalIndices = new SimpleIndicesBuilder().append(parent.getIndices()).append(derivativeIndices).getIndices();
+        } else {
+            orders = fieldDescriptor.getDerivativeOrders();
+
+            SimpleIndicesBuilder ib = new SimpleIndicesBuilder();
+            StructureOfIndices[] structures = fieldDescriptor.getStructuresOfIndices();
+            int i, from;
+            SimpleIndices singleType;
+            IndexType eType;
+            for (byte type = IndexType.TYPES_COUNT - 1; type >= 0; --type) {
+                eType = IndexType.values()[type];
+                singleType = parent.getIndices().getOfType(eType);
+                from = fieldDescriptor.getParent().getStructureOfIndices().getTypeData(type).length;
+                for (i = 0; i < argPosition; ++i)
+                    from += structures[i + 1].getTypeData(type).length * orders[i];
+                for (i = 0; i < from; ++i)
+                    ib.append(singleType.get(i));
+                ib.append(derivativeIndices.getOfType(eType));
+                for (; i < singleType.size(); ++i)
+                    ib.append(singleType.get(i));
+            }
+            totalIndices = ib.getIndices();
+        }
+
+        return new TensorField(derivativeDescriptor.getId(),
+                UnsafeIndicesFactory.createOfTensor(derivativeDescriptor.getSymmetries(), totalIndices),
+                parent.args, parent.argIndices);
+    }
+
+    /**
      * Returns new tensor field derivative with specified string name, indices, arguments, derivative orders and
      * explicit argument indices bindings.
      *
-     * @param name       int name of the field
-     * @param indices    indices
+     * @param name       string name of the corresponding tensor field
+     * @param indices    total indices of resulting derivative (field indices + indices of vars)
      * @param argIndices argument indices bindings
      * @param arguments  arguments list
      * @param orders     orders of derivatives
      * @return new instance of {@link TensorField} object
      */
-    public static TensorField fieldDerivative(String name, SimpleIndices indices, SimpleIndices[] argIndices,
-                                              Tensor[] arguments, int[] orders) {
+    public static TensorField fieldDerivative(String name, SimpleIndices indices, final SimpleIndices[] argIndices,
+                                              final Tensor[] arguments, final int[] orders) {
         if (argIndices.length != arguments.length)
             throw new IllegalArgumentException("Argument indices array and arguments array have different length.");
         if (arguments.length == 0)
@@ -332,8 +398,6 @@ public final class Tensors {
         } catch (RuntimeException re) {
             throw new IllegalArgumentException("Inconsistent derivative orders/indices.", re);
         }
-
-
     }
 
     /**

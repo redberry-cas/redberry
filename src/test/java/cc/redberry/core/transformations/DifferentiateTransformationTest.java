@@ -380,4 +380,50 @@ public class DifferentiateTransformationTest {
         TAssert.assertEquals(d, "1/(x-1)**2");
     }
 
+    @Test
+    public void test17() {
+        Tensor t, d;
+        addSymmetry("x_mn", 1, 0);
+        t = parse("f[x_mn]");
+        d = new DifferentiateTransformation(parseSimple("x_ab")).transform(t);
+        d = ExpandAndEliminateTransformation.expandAndEliminate(d);
+        TAssert.assertEquals(d, "f~(1)^{ab}[x_{mn}]/2 + f~(1)^{ba}[x_{mn}]/2");
+    }
+
+    @Test
+    public void test18() {
+        Tensor t, d;
+        t = parse("f[x_mn, x_mn]");
+        d = new DifferentiateTransformation(parseSimple("x_ab")).transform(t);
+        TAssert.assertEquals(d, "f~(0,1)^{ab}[x_{mn},x_{mn}]+f~(1,0)^{ab}[x_{mn},x_{mn}]");
+    }
+
+    @Test
+    public void test19() {
+        Tensor t, d;
+        t = parse("f[x_ab, x_ab]");
+        d = new DifferentiateTransformation(parseSimple("x_ab")).transform(t);
+        TAssert.assertEquals(d, "f~(0,1)^{ab}[x_{mn},x_{mn}]+f~(1,0)^{ab}[x_{mn},x_{mn}]");
+    }
+
+    @Test
+    public void test20() {
+        Tensor t, d;
+        t = parse("f[x_ab, x_ab]");
+        d = new DifferentiateTransformation(parseSimple("x_ab")).transform(t);
+        TAssert.assertEquals(d, "f~(0,1)^{ab}[x_{mn},x_{mn}]+f~(1,0)^{ab}[x_{mn},x_{mn}]");
+    }
+
+
+    @Test
+    public void test21() {
+        Tensor t, d;
+        t = parse("x^ab*Sin[f[x_ab, x_ab]]");
+        d = new DifferentiateTransformation(parseSimple("x^ab")).transform(t);
+        d = ExpandAndEliminateTransformation.expandAndEliminate(d);
+        d = parseExpression("d_a^a = 4").transform(d);
+        Tensor e = parse("16*Sin[f[x_ab, x_ab]] + x^ab*Cos[f[x_ab, x_ab]]*(f~(0,1)_{ab}[x_{mn},x_{mn}]+f~(1,0)_{ab}[x_{mn},x_{mn}])");
+        e = ExpandAndEliminateTransformation.expandAndEliminate(e);
+        TAssert.assertEquals(d, e);
+    }
 }

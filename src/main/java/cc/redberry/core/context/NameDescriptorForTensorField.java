@@ -42,6 +42,8 @@ public abstract class NameDescriptorForTensorField extends NameDescriptor {
         return orders.clone();
     }
 
+    public abstract NameDescriptorForTensorField getParent();
+
     public abstract boolean isDerivative();
 
     public abstract NameDescriptorForTensorField getDerivative(int... orders);

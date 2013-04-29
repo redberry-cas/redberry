@@ -327,6 +327,27 @@ public final class StructureOfIndices {
     }
 
     /**
+     * Returns the 'sum' of N-copies of this
+     *
+     * @param N exponent
+     * @return 'sum' of N-copies of this
+     */
+    public StructureOfIndices pow(int N) {
+        if(N == 0) return EMPTY;
+        if(N == 1) return this;
+
+        int size = N * this.size;
+        StructureOfIndices r = new StructureOfIndices(size);
+        for (int i = 0; i < IndexType.TYPES_COUNT; ++i) {
+            r.typesCounts[i] = N*typesCounts[i];
+            if (states[i] == null)
+                continue;
+            r.states[i] = states[i].pow(N);
+        }
+        return r;
+    }
+
+    /**
      * Subtracts some structure of indices from the right side of current structure.
      * <p/>
      * <p>This operation may fail if states of other structure differs from current.</p>

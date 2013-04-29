@@ -211,6 +211,7 @@ public final class NameManager {
     }
 
     NameDescriptorForTensorFieldDerivative createDescriptorForFieldDerivative(NameDescriptorForTensorFieldImpl field, int[] orders) {
+        //todo readLock?
         writeLock.lock();
         try {
             NameDescriptorForTensorFieldDerivative result = new NameDescriptorForTensorFieldDerivative(generateNewName(), orders, field);

@@ -204,6 +204,20 @@ public final class ByteBackedBitArray implements BitArray {
         return r;
     }
 
+    public ByteBackedBitArray pow(int exponent) {
+        if(size == 0) return this;
+
+        //todo write better code!
+        ByteBackedBitArray result = new ByteBackedBitArray(0), base = this;
+        while (exponent != 0) {
+            if ((exponent & 1) == 1)
+                result = result.append(base);
+            exponent >>= 1;
+            base = base.append(base);
+        }
+        return result;
+    }
+
     @Override
     public void loadValueFrom(BitArray bitArray_) {
         ByteBackedBitArray bitArray = (ByteBackedBitArray) bitArray_;

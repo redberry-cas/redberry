@@ -22,6 +22,7 @@
  */
 package cc.redberry.core.tensor;
 
+import cc.redberry.core.context.NameDescriptorForTensorField;
 import cc.redberry.core.context.OutputFormat;
 import cc.redberry.core.indices.SimpleIndices;
 
@@ -62,6 +63,10 @@ public final class TensorField extends SimpleTensor {
 
     public SimpleIndices getArgIndices(int i) {
         return argIndices[i];
+    }
+
+    public boolean isDerivative() {
+        return ((NameDescriptorForTensorField) getNameDescriptor()).isDerivative();
     }
 
     @Override

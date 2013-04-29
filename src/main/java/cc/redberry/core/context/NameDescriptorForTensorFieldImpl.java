@@ -57,6 +57,11 @@ final class NameDescriptorForTensorFieldImpl extends NameDescriptorForTensorFiel
     }
 
     @Override
+    public NameDescriptorForTensorField getParent() {
+        return this;
+    }
+
+    @Override
     public NameDescriptorForTensorField getDerivative(int... orders) {
         if (orders.length != structuresOfIndices.length - 1)
             throw new IllegalArgumentException();

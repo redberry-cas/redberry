@@ -116,8 +116,14 @@ public class ByteBackedBitArrayTest {
         }
     }
 
+
     @Test
-    public void testCopyOfRange() throws Exception {
-        ByteBackedBitArray array = new ByteBackedBitArray();
+    public void testPow1(){
+        ByteBackedBitArray array = new ByteBackedBitArray(3);
+        array.set(1);
+        System.out.println(array.pow(0));
+        System.out.println(array.pow(1));
+        System.out.println(array.pow(2));
+        System.out.println(array.pow(3));
     }
 }

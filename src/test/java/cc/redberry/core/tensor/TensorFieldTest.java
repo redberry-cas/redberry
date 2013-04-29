@@ -59,6 +59,11 @@ public class TensorFieldTest {
         d = parseSimple("f~(2, 2)_{mn {ab} {cd}}[x_a, y_b]");
 //        System.out.println(d.getIndices().getSymmetries().getInnerSymmetries());
 
+        //D[y_n, x_m][f[x_m,y_p]] == f~(1,1)^mn[x_m, y_p]
+
+        //D[y_n, x_m][f[x_m*x^m,y_p]] == f~(1,1)^n[x_m*x^m, y_p]*2*x^m
+
+
         addSymmetry("f_mn[x_ab, y_c]", 1, 0);
         d = parseSimple("f~(2, 2)_{mn {ax by} {cd}}[x_ab, y_b]");
 //        System.out.println(d.getIndices().getSymmetries().getInnerSymmetries());

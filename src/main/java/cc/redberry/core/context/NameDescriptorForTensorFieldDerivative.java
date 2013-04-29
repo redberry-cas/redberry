@@ -44,6 +44,38 @@ final class NameDescriptorForTensorFieldDerivative extends NameDescriptorForTens
         initializeSymmetries();
     }
 
+    @Override
+    public NameDescriptorForTensorField getParent() {
+        return parent;
+    }
+
+    @Override
+    NameAndStructureOfIndices[] getKeys() {
+        return new NameAndStructureOfIndices[0];
+    }
+
+    @Override
+    public String getName(SimpleIndices indices) {
+        return name;
+    }
+
+    @Override
+    public boolean isDerivative() {
+        return true;
+    }
+
+    @Override
+    public NameDescriptorForTensorField getDerivative(int... orders) {
+        if (orders.length != structuresOfIndices.length - 1)
+            throw new IllegalArgumentException();
+
+        int[] resOrder = this.orders;
+        for (int i = orders.length - 1; i >= 0; --i)
+            resOrder[i] += orders[i];
+
+        return parent.getDerivative(resOrder);
+    }
+
     private void initializeSymmetries() {
         StructureOfIndices baseStructure = structuresOfIndices[0];
 
@@ -113,32 +145,5 @@ final class NameDescriptorForTensorFieldDerivative extends NameDescriptorForTens
                 structureOfIndices[0] = structureOfIndices[0].append(structureOfIndices[i + 1].getInverted());
         }
         return structureOfIndices;
-    }
-
-    @Override
-    NameAndStructureOfIndices[] getKeys() {
-        return new NameAndStructureOfIndices[0];
-    }
-
-    @Override
-    public String getName(SimpleIndices indices) {
-        return name;
-    }
-
-    @Override
-    public boolean isDerivative() {
-        return true;
-    }
-
-    @Override
-    public NameDescriptorForTensorField getDerivative(int... orders) {
-        if (orders.length != structuresOfIndices.length - 1)
-            throw new IllegalArgumentException();
-
-        int[] resOrder = this.orders;
-        for (int i = orders.length - 1; i >= 0; --i)
-            resOrder[i] += orders[i];
-
-        return parent.getDerivative(resOrder);
     }
 }
