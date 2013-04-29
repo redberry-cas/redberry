@@ -467,4 +467,28 @@ public class ParserTest {
 
         Assert.assertTrue(t1.getNameDescriptor() == ((NameDescriptorForTensorField) t2.getNameDescriptor()).getDerivative(1, 2));
     }
+
+    @Test
+    public void testDerivative() {
+        Tensor t;
+        t = parse("D[x][x**2]");
+        TAssert.assertEquals(t, "2*x");
+        t = parse("x*D[x, x][x**2]");
+        TAssert.assertEquals(t, "2*x");
+        t = parse("D[x, x][x**2]*x");
+        TAssert.assertEquals(t, "2*x");
+
+        t = parse("D[x, y][x**2]");
+        TAssert.assertEquals(t, "0");
+
+        t = parse("D[x, x][x**2]");
+        TAssert.assertEquals(t, "2");
+
+        t = parse("D[x, x][x**2 + (y)]*x + z");
+        TAssert.assertEquals(t, "2*x + z");
+
+        t = parse("D[x, (y)][x**2*y + (y)]*f[x] + z");
+        TAssert.assertEquals(t, "2*x*f[x] + z");
+
+    }
 }
