@@ -41,27 +41,21 @@ import static cc.redberry.core.context.defaults.IndexConverterExtender.*;
  * @since 1.0
  */
 public enum IndexType {
-    LatinLower(LatinLowerEx),
-    LatinUpper(LatinUpperEx),
-    GreekLower(GreekLowerEx),
-    GreekUpper(GreekUpperEx),
-    Matrix1(new IndexWithStrokeConverter(LatinLowerEx, (byte) 1)),
-    Matrix2(new IndexWithStrokeConverter(LatinUpperEx, (byte) 1)),
-    Matrix3(new IndexWithStrokeConverter(GreekLowerEx, (byte) 1)),
-    Matrix4(new IndexWithStrokeConverter(GreekUpperEx, (byte) 1));
+    LatinLower(LatinLowerEx, "l"),
+    LatinUpper(LatinUpperEx, "L"),
+    GreekLower(GreekLowerEx, "g"),
+    GreekUpper(GreekUpperEx, "G"),
+    Matrix1(new IndexWithStrokeConverter(LatinLowerEx, (byte) 1), "l'"),
+    Matrix2(new IndexWithStrokeConverter(LatinUpperEx, (byte) 1), "L'"),
+    Matrix3(new IndexWithStrokeConverter(GreekLowerEx, (byte) 1), "g'"),
+    Matrix4(new IndexWithStrokeConverter(GreekUpperEx, (byte) 1), "G'");
 
     private final static Map<String, IndexType> commonNames;
 
     static {
         commonNames = new HashMap<>();
-        commonNames.put("l", LatinLower);
-        commonNames.put("L", LatinUpper);
-        commonNames.put("l'", Matrix1);
-        commonNames.put("L'", Matrix2);
-        commonNames.put("g", GreekLower);
-        commonNames.put("G", GreekUpper);
-        commonNames.put("g'", Matrix3);
-        commonNames.put("G'", Matrix4);
+        for (IndexType it : values())
+            commonNames.put(it.getShortString(), it);
     }
 
     /**
@@ -75,12 +69,14 @@ public enum IndexType {
     public static final byte ALPHABETS_COUNT = 4;//redundant
 
     private final IndexSymbolConverter converter;
+    private final String shortString;
 
     public static IndexType fromShortString(String string) {
         return commonNames.get(string);
     }
 
-    private IndexType(IndexSymbolConverter converter) {
+    private IndexType(IndexSymbolConverter converter, String shortString) {
+        this.shortString = shortString;
         this.converter = converter;
     }
 
@@ -92,6 +88,15 @@ public enum IndexType {
      */
     public IndexSymbolConverter getSymbolConverter() {
         return converter;
+    }
+
+    /**
+     * Returns short form of string representation of this type
+     *
+     * @return short form of string representation of this type
+     */
+    public String getShortString() {
+        return shortString;
     }
 
     /**

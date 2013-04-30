@@ -50,16 +50,24 @@ import java.util.Arrays;
  */
 public abstract class NameDescriptor {
     //first element is simple tensor indexTypeStructure, other appears for tensor fields
-    final StructureOfIndices[] indexTypeStructures;
+    final StructureOfIndices[] structuresOfIndices;
     private final int id;
-    private final IndicesSymmetries symmetries;
+    final IndicesSymmetries symmetries;
+    NameManager nameManager = null;
 
-    NameDescriptor(StructureOfIndices[] indexTypeStructures, int id) {
-        if (indexTypeStructures.length == 0)
+    NameDescriptor(StructureOfIndices[] structuresOfIndices, int id) {
+        if (structuresOfIndices.length == 0)
             throw new IllegalArgumentException();
         this.id = id;
-        this.indexTypeStructures = indexTypeStructures;
-        this.symmetries = IndicesSymmetries.create(indexTypeStructures[0]);
+        this.structuresOfIndices = structuresOfIndices;
+        this.symmetries = IndicesSymmetries.create(structuresOfIndices[0]);
+    }
+
+    void registerInNameManager(NameManager manager) {
+        if (nameManager != null && manager != nameManager)
+            throw new IllegalStateException("Already registered in another name manager.");
+
+        this.nameManager = manager;
     }
 
     /**
@@ -86,7 +94,7 @@ public abstract class NameDescriptor {
      * @return {@code true} if this is a descriptor of tensor field
      */
     public boolean isField() {
-        return indexTypeStructures.length != 1;
+        return structuresOfIndices.length != 1;
     }
 
     /**
@@ -95,7 +103,7 @@ public abstract class NameDescriptor {
      * @return structure of indices of tensors with this name descriptor
      */
     public StructureOfIndices getStructureOfIndices() {
-        return indexTypeStructures[0];
+        return structuresOfIndices[0];
     }
 
     /**
@@ -106,7 +114,7 @@ public abstract class NameDescriptor {
      */
     public StructureOfIndices[] getStructuresOfIndices() {
         //todo clone() ?
-        return indexTypeStructures;
+        return structuresOfIndices;
     }
 
     abstract NameAndStructureOfIndices[] getKeys();
@@ -121,7 +129,7 @@ public abstract class NameDescriptor {
 
     @Override
     public String toString() {
-        return getName(null) + ":" + Arrays.toString(indexTypeStructures);
+        return getName(null) + ":" + Arrays.toString(structuresOfIndices);
     }
 
     /**

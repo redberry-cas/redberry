@@ -25,6 +25,8 @@ package cc.redberry.core.tensor;
 import junit.framework.Assert;
 import org.junit.Test;
 
+import static cc.redberry.core.tensor.Tensors.*;
+
 /**
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
@@ -33,10 +35,37 @@ public class TensorFieldTest {
 
     @Test
     public void testIterator() {
-        Tensor t = Tensors.parse("f[a,b,c]");
+        Tensor t = parse("f[a,b,c]");
         int i = 0;
         for (Tensor c : t)
             ++i;
         Assert.assertEquals(i, 3);
+    }
+
+    @Test
+    public void testDerivativeSymmetries() {
+        SimpleTensor t = parseSimple("f_mn[x_a, y_b]");
+        addSymmetry(t, 1, 0);
+
+        SimpleTensor d = parseSimple("f~(1,1)_mnab[x_a, y_b]");
+//        System.out.println(d.getIndices().getSymmetries().getInnerSymmetries());
+
+        d = parseSimple("f~(2,0)_{mn {ab}}[x_a, y_b]");
+//        System.out.println(d.getIndices().getSymmetries().getInnerSymmetries());
+
+        d = parseSimple("f~(2, 1)_{mn {ab} {c}}[x_a, y_b]");
+//        System.out.println(d.getIndices().getSymmetries().getInnerSymmetries());
+
+        d = parseSimple("f~(2, 2)_{mn {ab} {cd}}[x_a, y_b]");
+//        System.out.println(d.getIndices().getSymmetries().getInnerSymmetries());
+
+        //D[y_n, x_m][f[x_m,y_p]] == f~(1,1)^mn[x_m, y_p]
+
+        //D[y_n, x_m][f[x_m*x^m,y_p]] == f~(1,1)^n[x_m*x^m, y_p]*2*x^m
+
+
+        addSymmetry("f_mn[x_ab, y_c]", 1, 0);
+        d = parseSimple("f~(2, 2)_{mn {ax by} {cd}}[x_ab, y_b]");
+//        System.out.println(d.getIndices().getSymmetries().getInnerSymmetries());
     }
 }

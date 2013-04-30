@@ -32,12 +32,12 @@ import cc.redberry.core.indices.StructureOfIndices;
  * @author Stanislav Poslavsky
  * @since 1.1
  */
-final class NameDescriptorImpl extends NameDescriptor {
+final class NameDescriptorForSimpleTensor extends NameDescriptor {
 
-    private final String name;
+    final String name;
     private final NameAndStructureOfIndices[] key;
 
-    NameDescriptorImpl(String name, StructureOfIndices[] indexTypeStructures, int id) {
+    NameDescriptorForSimpleTensor(String name, StructureOfIndices[] indexTypeStructures, int id) {
         super(indexTypeStructures, id);
         this.name = name;
         this.key = new NameAndStructureOfIndices[]{new NameAndStructureOfIndices(name, indexTypeStructures)};

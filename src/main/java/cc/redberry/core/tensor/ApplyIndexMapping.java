@@ -35,12 +35,14 @@ import cc.redberry.core.tensor.functions.ScalarFunction;
 import cc.redberry.core.utils.ArraysUtils;
 import cc.redberry.core.utils.IntArrayList;
 import cc.redberry.core.utils.TensorUtils;
+import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
 
 import java.util.Arrays;
 import java.util.Map;
 
 import static cc.redberry.core.indices.IndicesUtils.getIndicesNames;
+import static cc.redberry.core.indices.IndicesUtils.getType;
 
 /**
  * Static methods to rename indices of tensors.
@@ -420,5 +422,148 @@ public final class ApplyIndexMapping {
                     return true;
             return false;
         }
+    }
+
+    public static Tensor renameIndicesOfFieldsArguments(Tensor tensor, TIntSet forbidden) {
+        if (tensor instanceof TensorField) {
+            TensorField field = (TensorField) tensor;
+            Tensor[] args = null;
+            SimpleIndices[] argsIndices = null;
+            Tensor arg;
+
+            //indices of arg to be renamed
+            int[] _from, _to;
+            IndexMapper mapping;
+            int j;
+            int[] _forbidden = forbidden.toArray();
+            for (int i = field.size() - 1; i >= 0; --i) {
+                arg = field.args[i];
+                IndexGenerator ig = new IndexGenerator(_forbidden);
+                _from = TensorUtils.getAllIndicesNamesT(arg).toArray();
+                Arrays.sort(_from);
+                _to = new int[_from.length];
+                for (j = _from.length - 1; j >= 0; --j) {
+                    if (forbidden.contains(_from[j]))
+                        _to[j] = ig.generate(getType(_from[j]));
+                    else _to[j] = _from[j];
+                    forbidden.add(_to[j]);
+                }
+                arg = applyIndexMapping(arg, mapping = new IndexMapper(_from, _to));
+                if (arg != field.args[i]) {
+                    if (args == null) {
+                        args = field.args.clone();
+                        argsIndices = field.argIndices.clone();
+                    }
+                    args[i] = arg;
+                    argsIndices[i] = field.argIndices[i].applyIndexMapping(mapping);
+                }
+            }
+
+
+//            //rename dummies and save newly generated forbidden indices
+//            //we need do this before renaming free since IndexGenerator must know about all forbidden indices
+//            for (int i = field.size() - 1; i >= 0; --i) {
+//                arg = field.args[i];
+//                arg = renameDummy(arg, forbidden.toArray(), forbidden);
+//                if (arg != field.args[i]) {
+//                    if (args == null)
+//                        args = field.args.clone();
+//                    args[i] = arg;
+//                }
+//            }
+//
+//            IndexGenerator ig = new IndexGenerator(forbidden.toArray());
+//            IndexMapper mapping;
+//            for (int i = field.size() - 1; i >= 0; --i) {
+//                arg = field.args[i];
+//                _from = getIndicesNames(arg.getIndices().getFree());
+//                _to = new int[_from.length];
+//                forbidden.ensureCapacity(_from.length);
+//                for (j = _from.length - 1; j >= 0; --j)                 {
+//                    //free index of arg is forbidden
+//                    if (forbidden.contains(getNameWithType(_from[j]))) {
+//                        _to[j] = ig.generate(getType(_from[j]));
+//                        forbidden.add(_to[j]);
+//                    } else _to[j] = _from[j];
+//                    forbidden.add(_from[j]);
+//                }
+//
+//                arg = applyIndexMapping(arg, mapping = new IndexMapper(_from, _to));
+//                if (arg != field.args[i]) {
+//                    if (args == null)
+//                        args = field.args.clone();
+//                    if (argsIndices == null)
+//                        argsIndices = field.argIndices.clone();
+//                    args[i] = arg;
+//                    argsIndices[i] = field.argIndices[i].applyIndexMapping(mapping);
+//                }
+//            }
+            if (args == null)
+                return tensor;
+            return Tensors.field(field.name, field.indices, argsIndices, args);
+        }
+        //further straightforward
+        if (tensor instanceof Product) {
+            Product p = (Product) tensor;
+            Tensor[] data = null, indexless = null;
+            Tensor temp;
+            int i;
+            for (i = p.data.length - 1; i >= 0; --i) {
+                temp = renameIndicesOfFieldsArguments(p.data[i], forbidden);
+                if (temp != p.data[i]) {
+                    if (data == null)
+                        data = p.data.clone();
+                    data[i] = temp;
+                }
+            }
+            for (i = p.indexlessData.length - 1; i >= 0; --i) {
+                temp = renameIndicesOfFieldsArguments(p.indexlessData[i], forbidden);
+                if (temp != p.indexlessData[i]) {
+                    if (indexless == null)
+                        indexless = p.indexlessData.clone();
+                    indexless[i] = temp;
+                }
+            }
+
+            if (data == null && indexless == null) return tensor;
+
+            if (data == null) data = p.data;//no cloning
+            if (indexless == null) indexless = p.indexlessData;//no cloning
+
+            return new Product(p.indices, p.factor, indexless, data, p.contentReference, p.hash);
+        }
+        if (tensor instanceof Sum) {
+            Sum s = (Sum) tensor;
+            Tensor temp, data[] = null;
+            for (int i = s.size() - 1; i >= 0; --i) {
+                temp = renameIndicesOfFieldsArguments(s.data[i], forbidden);
+                if (temp != s.data[i]) {
+                    if (data == null)
+                        data = s.data.clone();
+                    data[i] = temp;
+                }
+            }
+            if (data == null) return tensor;
+            return new Sum(s.indices, data, s.hash);
+        }
+
+        if (tensor instanceof Complex || tensor instanceof SimpleTensor)
+            return tensor;
+
+        if (tensor instanceof Power || tensor instanceof Expression) {
+            Tensor a = renameIndicesOfFieldsArguments(tensor.get(0), forbidden),
+                    b = renameIndicesOfFieldsArguments(tensor.get(1), forbidden);
+            if (a == tensor.get(0) && b == tensor.get(1))
+                return tensor;
+            return tensor.getFactory().create(a, b);
+        }
+
+        if (tensor instanceof ScalarFunction) {
+            Tensor arg = renameIndicesOfFieldsArguments(tensor.get(0), forbidden);
+            if (arg == tensor.get(0)) return tensor;
+            return tensor.getFactory().create(arg);
+        }
+
+        throw new RuntimeException();
     }
 }

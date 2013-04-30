@@ -144,6 +144,21 @@ public interface BitArray {
      */
     void xor(BitArray bitArray);
 
+
+    /**
+     * Inverts all bits.
+     */
+    void not();
+
+    //BitArray copyOfRange(int newLength);
+
     //todo comment
     int nextTrailingBit(int position);
+
+    /**
+     * Returns whether all bits are set.
+     *
+     * @return true if all bits are set
+     */
+    boolean isFull();
 }

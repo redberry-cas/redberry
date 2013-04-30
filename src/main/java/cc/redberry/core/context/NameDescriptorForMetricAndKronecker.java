@@ -62,8 +62,8 @@ final class NameDescriptorForMetricAndKronecker extends NameDescriptor {
      */
     @Override
     NameAndStructureOfIndices[] getKeys() {
-        return new NameAndStructureOfIndices[]{new NameAndStructureOfIndices(names[0], indexTypeStructures),
-                new NameAndStructureOfIndices(names[1], indexTypeStructures)};
+        return new NameAndStructureOfIndices[]{new NameAndStructureOfIndices(names[0], structuresOfIndices),
+                new NameAndStructureOfIndices(names[1], structuresOfIndices)};
     }
 
     @Override
@@ -73,6 +73,6 @@ final class NameDescriptorForMetricAndKronecker extends NameDescriptor {
 
     @Override
     public String toString() {
-        return names[0] + ":" + Arrays.toString(indexTypeStructures);
+        return names[0] + ":" + Arrays.toString(structuresOfIndices);
     }
 }

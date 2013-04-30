@@ -41,7 +41,7 @@ import java.util.Arrays;
 public final class Sum extends MultiTensor {
 
     final Tensor[] data;
-    private final int hash;
+    final int hash;
 
     Sum(final Tensor[] data, Indices indices) {
         super(indices);

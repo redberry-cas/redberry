@@ -60,11 +60,24 @@ class ProviderFunctions {
             }
         }
     };
+
     static final IndexMappingProviderFactory EVEN_FACTORY = new IndexMappingProviderFactory() {
 
         @Override
         public IndexMappingProvider create(IndexMappingProvider opu, Tensor from, Tensor to) {
             if (IndexMappings.createPort(from.get(0), to.get(0)).take() != null)
+                return new DummyIndexMappingProvider(opu);
+            return IndexMappingProvider.Util.EMPTY_PROVIDER;
+        }
+    };
+
+    static final IndexMappingProviderFactory FACTORY = new IndexMappingProviderFactory() {
+
+        @Override
+        public IndexMappingProvider create(IndexMappingProvider opu, Tensor from, Tensor to) {
+            IndexMappingBuffer buffer;
+            if ((buffer = IndexMappings.createPort(from.get(0), to.get(0)).take()) != null
+                    && !buffer.getSign())
                 return new DummyIndexMappingProvider(opu);
             return IndexMappingProvider.Util.EMPTY_PROVIDER;
         }

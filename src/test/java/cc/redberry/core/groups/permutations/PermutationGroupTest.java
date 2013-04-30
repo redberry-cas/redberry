@@ -22,13 +22,8 @@
  */
 package cc.redberry.core.groups.permutations;
 
+import junit.framework.Assert;
 import org.junit.Test;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
-import static cc.redberry.core.groups.permutations.PermutationGroup.*;
 
 /**
  * @author Dmitry Bolotin
@@ -37,69 +32,40 @@ import static cc.redberry.core.groups.permutations.PermutationGroup.*;
 public class PermutationGroupTest {
 
     @Test
-    public void testSchreierVector1() {
-        int[] p1 = {1, 0, 2, 3, 4};
-        int[] p2 = {0, 1, 3, 2, 4};
-        int[] p3 = {0, 3, 1, 2, 4};
-        int[] generators[] = {p1, p2, p3};
+    public void testMembership() {
+        Permutation a, b, c, d, e, generators[];
+        PermutationGroup group;
 
-        int[] schreier = calculateSchreierVector(generators, 0);
-        System.out.println(Arrays.toString(schreier));
+        a = new Permutation(1, 0, 2, 3, 4, 5, 6);
+        b = new Permutation(1, 2, 3, 4, 5, 6, 0);
+        generators = new Permutation[]{a, b};
+        group = new PermutationGroup(generators);
+        Assert.assertEquals(group.getOrder().longValue(), 5040L);
 
+        b = new Permutation(1, 2, 3, 4, 5, 6, 0);
+        a = new Permutation(1, 0, 2, 3, 4, 5, 6);
+        c = new Permutation(1, 2, 3, 5, 6, 4, 0);
+        d = new Permutation(1, 4, 3, 2, 5, 6, 0);
+        generators = new Permutation[]{a, b, c, d};
+        group = new PermutationGroup(generators);
+        Assert.assertEquals(group.getOrder().longValue(), 5040L);
 
-        System.out.println(
-                Arrays.toString(
-                        decomposeSchreierVectorSequence(generators, schreier, 0)));
+        b = new Permutation(1, 2, 3, 4, 5, 6, 0, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19);
+        a = new Permutation(1, 0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19);
+        c = new Permutation(1, 2, 3, 5, 6, 4, 0, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19);
+        d = new Permutation(1, 4, 3, 2, 5, 6, 0, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19);
+        e = new Permutation(1, 0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 19, 18);
+        generators = new Permutation[]{a, b, c, d, e};
+        group = new PermutationGroup(generators);
+        Assert.assertEquals(group.getOrder().longValue(), 10080L);
 
-
-        System.out.println(
-                Arrays.toString(
-                        decomposeSchreierVectorSequence(generators, schreier, 1)));
-
-        System.out.println(
-                Arrays.toString(
-                        decomposeSchreierVector(generators, schreier, 1)));
-
-
-        System.out.println(
-                Arrays.toString(
-                        decomposeSchreierVectorSequence(generators, schreier, 2)));
-
-
-        System.out.println(
-                Arrays.toString(
-                        decomposeSchreierVector(generators, schreier, 2)));
-
-
+        b = new Permutation(1, 2, 3, 4, 5, 6, 0, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19);
+        a = new Permutation(1, 0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19);
+        c = new Permutation(1, 2, 3, 5, 6, 4, 0, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19);
+        d = new Permutation(1, 4, 3, 2, 5, 6, 0, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19);
+        e = new Permutation(1, 0, 2, 3, 14, 5, 6, 7, 8, 9, 10, 11, 12, 13, 4, 15, 16, 17, 18, 19);
+        generators = new Permutation[]{a, b, c, d, e};
+        group = new PermutationGroup(generators);
+        Assert.assertEquals(group.getOrder().longValue(), 5040L * 8L);
     }
-
-
-    @Test
-    public void test1() {
-        int[] p1 = {1, 0, 2, 3, 4};
-        int[] p2 = {0, 1, 3, 2, 4};
-        int[] p3 = {0, 3, 1, 2, 4};
-        int[] generators[] = {p1, p2, p3};
-
-        OrbitStabilizer os = calculateOrbitStabilizer(generators, 0);
-
-        for (int[] gen : os.stabilizerGenerators)
-            System.out.println(Arrays.toString(gen));
-    }
-
-    @Test
-    public void test2() {
-        int[] p1 = {1, 0, 2, 3, 4};
-        int[] p2 = {1, 2, 3, 4, 0};
-        int[] generators[] = {p1, p2};
-
-        int[] schreier = calculateSchreierVector(generators, 2);
-        System.out.println(Arrays.toString(schreier));
-
-        OrbitStabilizer os = calculateOrbitStabilizer(generators, 2);
-
-        for (int[] gen : os.stabilizerGenerators)
-            System.out.println(Arrays.toString(gen));
-    }
-
 }

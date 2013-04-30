@@ -1,142 +1,63 @@
+/*
+ * Redberry: symbolic tensor computations.
+ *
+ * Copyright (c) 2010-2013:
+ *   Stanislav Poslavsky   <stvlpos@mail.ru>
+ *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
+ *
+ * This file is part of Redberry.
+ *
+ * Redberry is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Redberry is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
+ */
 package cc.redberry.core.groups.permutations;
 
-import cc.redberry.core.utils.IntArrayList;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import cc.redberry.core.transformations.factor.jasfactor.edu.jas.arith.BigInteger;
 
 /**
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public class PermutationGroup {
+public final class PermutationGroup {
+    /**
+     * Strong generating set
+     */
+    final SGSElement[] sgs;
 
+    public PermutationGroup(Permutation[] generators) {
+        this.sgs = SchreierSimsAlgorithm.createSGS(generators);
+    }
 
-    public static int[] calculateSchreierVector(final int[][] generators,
-                                                int point) {
-
-        final int dimension = generators[0].length;
-        int[] schreierVector = new int[dimension];
-        Arrays.fill(schreierVector, -2);
-
-        schreierVector[point] = -1;
-        IntArrayList orbit = new IntArrayList();
-        orbit.add(point);
-        int image;
-        for (int i = 0; i < orbit.size(); ++i) {
-            for (int r = 0; r < generators.length; ++r) {
-                int[] generator = generators[r];
-                image = generator[orbit.get(i)];
-                if (schreierVector[image] == -2) {
-                    orbit.add(image);
-                    schreierVector[image] = r;
-                }
-            }
+    public boolean isMember(Permutation permutation) {
+        Permutation temp = permutation;
+        int i, beta;
+        for (i = 0; i < sgs.length; ++i) {
+            beta = temp.newIndexOf(sgs[i].basePoint);
+            if (!sgs[i].belongsToOrbit(beta))
+                return false;
+            temp = temp.composition(sgs[i].getInverseTransversalOf(beta));
         }
-
-        return schreierVector;
+        return temp.isIdentity();
     }
 
-
-    public static int[] decomposeSchreierVectorSequence(final int[][] generators, int[] schreierVector, int point) {
-        IntArrayList list = new IntArrayList();
-        while (schreierVector[point] != -1) {
-            list.add(schreierVector[point]);
-            point = getInverse(generators[schreierVector[point]], point);
-        }
-        return list.toArray();
+    public BigInteger getOrder() {
+        BigInteger order = BigInteger.ONE;
+        for (SGSElement element : sgs)
+            order = order.multiply(BigInteger.valueOf(element.getOrbitSize()));
+        return order;
     }
 
-
-    public static int[] decomposeSchreierVector(final int[][] generators, int[] schreierVector, int point) {
-        int[] decompositonSequence = decomposeSchreierVectorSequence(generators, schreierVector, point);
-
-        int[] permutstion = new int[generators[0].length];
-        for (int i = 0; i < permutstion.length; ++i)
-            permutstion[i] = i;
-
-        for (int i = decompositonSequence.length - 1; i >= 0; --i)
-            composition1(permutstion, generators[decompositonSequence[i]]);
-
-        return permutstion;
-    }
-
-    public static int getInverse(int[] permutation, int point) {
-        for (int i = 0; i < permutation.length; ++i)
-            if (permutation[i] == point) return i;
-        throw new RuntimeException();
-    }
-
-    public static int[] composition(int[] left, int[] right) {
-        int[] r = new int[left.length];
-
-        for (int i = 0; i < left.length; ++i)
-            r[i] = right[left[i]];
-
-        return r;
-    }
-
-    public static void composition1(int[] left, int[] right) {
-        for (int i = 0; i < left.length; ++i)
-            left[i] = right[left[i]];
-    }
-
-    public static int[] inverse(int[] permutation) {
-        int[] result = new int[permutation.length];
-        for (int i = 0; i < permutation.length; ++i)
-            result[permutation[i]] = i;
-        return result;
-    }
-
-    public static class OrbitStabilizer {
-        final int[] schreierVector;
-        final int[][] stabilizerGenerators;
-
-        public OrbitStabilizer(int[] schreierVector, int[][] stabilizerGenerators) {
-            this.schreierVector = schreierVector;
-            this.stabilizerGenerators = stabilizerGenerators;
-        }
-    }
-
-    public static int[] getIdentity(int n) {
-        int[] result = new int[n];
-        for (int i = 0; i < n; ++i)
-            result[i] = i;
-        return result;
-    }
-
-
-    public static OrbitStabilizer calculateOrbitStabilizer(final int[][] generators,
-                                                           int point) {
-
-        final int dimension = generators[0].length;
-        int[] schreierVector = new int[dimension];
-        Arrays.fill(schreierVector, -2);
-        schreierVector[point] = -1;
-
-        List<int[]> stabilizerGenerators = new ArrayList<>();
-        int[][] transversals = new int[dimension][];
-        transversals[point] = getIdentity(dimension);
-
-        IntArrayList orbit = new IntArrayList();
-        orbit.add(point);
-        int image;
-        for (int i = 0; i < orbit.size(); ++i) {
-            for (int r = 0; r < generators.length; ++r) {
-                int[] generator = generators[r];
-                image = generator[orbit.get(i)];
-                if (schreierVector[image] == -2) {
-                    orbit.add(image);
-                    schreierVector[image] = r;
-                    transversals[image] = composition(transversals[orbit.get(i)], generator);
-                } else {
-                    stabilizerGenerators.add(composition(transversals[orbit.get(i)],
-                            composition(generator, inverse(transversals[image]))));
-                }
-            }
-        }
-
-        return new OrbitStabilizer(schreierVector, stabilizerGenerators.toArray(new int[stabilizerGenerators.size()][]));
+    public SGSElement[] getStrongGeneratingSet() {
+        return sgs;
     }
 }

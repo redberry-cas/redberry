@@ -22,31 +22,101 @@
  */
 package cc.redberry.core.transformations.substitutions;
 
+import cc.redberry.core.context.NameDescriptorForTensorField;
+import cc.redberry.core.indexgenerator.IndexGenerator;
 import cc.redberry.core.indexmapping.IndexMappingBuffer;
 import cc.redberry.core.indexmapping.IndexMappings;
 import cc.redberry.core.indices.Indices;
-import cc.redberry.core.tensor.ApplyIndexMapping;
-import cc.redberry.core.tensor.Tensor;
-import cc.redberry.core.tensor.TensorField;
-import cc.redberry.core.tensor.Tensors;
+import cc.redberry.core.indices.SimpleIndices;
+import cc.redberry.core.indices.UnsafeIndicesFactory;
+import cc.redberry.core.tensor.*;
+import cc.redberry.core.transformations.DifferentiateTransformation;
+import cc.redberry.core.utils.IntArray;
 import cc.redberry.core.utils.TensorUtils;
+import gnu.trove.set.hash.TIntHashSet;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+
+import static cc.redberry.core.indices.IndicesUtils.*;
 
 /**
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
 class PrimitiveTensorFieldSubstitution extends PrimitiveSubstitution {
+    private NameDescriptorForTensorField fromDescriptor;
+    private final IntArray orders;
+    private final HashMap<IntArray, DFromTo> derivatives = new HashMap<>();
+
     public PrimitiveTensorFieldSubstitution(Tensor from, Tensor to) {
         super(from, to);
+        this.fromDescriptor = ((TensorField) from).getNameDescriptor();
+        this.orders = new IntArray(fromDescriptor.getDerivativeOrders());
+        this.derivatives.put(this.orders, new DFromTo((TensorField) from, to));
     }
 
     @Override
     Tensor newTo_(Tensor currentNode, SubstitutionIterator iterator) {
         TensorField currentField = (TensorField) currentNode;
-        TensorField from = (TensorField) this.from;
+        NameDescriptorForTensorField currentDescriptor = currentField.getNameDescriptor();
+
+        //different tensors
+        if (currentDescriptor.getParent().getId() != fromDescriptor.getParent().getId())
+            return currentNode;
+
+        //check whether derivative orders in from less or equal to orders of current node
+        for (int i = currentNode.size() - 1; i >= 0; --i)
+            if (currentDescriptor.getDerivativeOrder(i) < fromDescriptor.getDerivativeOrder(i))
+                return currentNode;
+
+        IntArray orders = new IntArray(currentDescriptor.getDerivativeOrders());
+        DFromTo derivative = derivatives.get(orders);
+        if (derivative == null) {
+            int order, j;
+            SimpleTensor var;
+            int[] indices;
+            SimpleIndices varIndices;
+            TensorField __from = (TensorField) this.from;
+            Tensor __to = this.to;
+            IndexGenerator ig = null;
+            for (int i = orders.length() - 1; i >= 0; --i) {
+                order = orders.get(i) - this.orders.get(i);
+                while (order > 0) {
+                    var = (SimpleTensor) from.get(i);
+                    indices = new int[var.getIndices().size()];
+
+                    //lazy initialization
+                    if (indices.length != 0 && ig == null) {
+                        TIntHashSet forbidden = new TIntHashSet(iterator.getForbidden());
+                        forbidden.addAll(TensorUtils.getAllIndicesNamesT(this.from));
+                        forbidden.addAll(TensorUtils.getAllIndicesNamesT(this.to));
+                        ig = new IndexGenerator(forbidden.toArray());
+
+                    }
+
+                    for (j = indices.length - 1; j >= 0; --j)
+                        indices[j] = setRawState(getRawStateInt(var.getIndices().get(j)),
+                                ig.generate(getType(var.getIndices().get(j))));
+                    varIndices = UnsafeIndicesFactory.createIsolatedUnsafeWithoutSort(null, indices);
+                    var = Tensors.setIndices(var, varIndices);
+                    __from = Tensors.fieldDerivative(__from, varIndices.getInverted(), i);
+                    __to = new DifferentiateTransformation(var).transform(__to);
+                    --order;
+                }
+            }
+            derivative = new DFromTo(__from, __to);
+            derivatives.put(orders, derivative);
+        }
+
+        return __newTo(derivative, currentField, currentNode, iterator);
+    }
+
+    private Tensor __newTo(DFromTo fromTo, TensorField currentField,
+                           Tensor currentNode, SubstitutionIterator iterator) {
+
+        TensorField from = fromTo.from;
         IndexMappingBuffer buffer = IndexMappings.simpleTensorsPort(from, currentField).take();
         if (buffer == null)
             return currentNode;
@@ -73,7 +143,7 @@ class PrimitiveTensorFieldSubstitution extends PrimitiveSubstitution {
             argTo.add(currentNode.get(i));
         }
 
-        Tensor newTo = to;
+        Tensor newTo = fromTo.to;
         newTo = new SubstitutionTransformation(
                 argFrom.toArray(new Tensor[argFrom.size()]),
                 argTo.toArray(new Tensor[argTo.size()]),
@@ -83,5 +153,15 @@ class PrimitiveTensorFieldSubstitution extends PrimitiveSubstitution {
         else if (buffer.getSign())
             newTo = Tensors.negate(newTo);
         return newTo;
+    }
+
+    private static class DFromTo {
+        final TensorField from;
+        final Tensor to;
+
+        private DFromTo(TensorField from, Tensor to) {
+            this.from = from;
+            this.to = to;
+        }
     }
 }
