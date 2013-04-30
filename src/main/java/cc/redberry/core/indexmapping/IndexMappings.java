@@ -219,6 +219,8 @@ public final class IndexMappings {
         map.put(ArcCos.class, ProviderFunctions.EVEN_FACTORY);
         map.put(Cot.class, ProviderFunctions.EVEN_FACTORY);
         map.put(ArcCot.class, ProviderFunctions.EVEN_FACTORY);
+
+        map.put(Log.class, ProviderFunctions.FACTORY);
     }
 
     private static Set<IndexMappingBuffer> getAllMappings(MappingsPort opu) {

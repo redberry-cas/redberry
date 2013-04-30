@@ -1085,4 +1085,37 @@ public class SubstitutionsTest {
         }
     }
 
+    @Test
+    public void testFieldDerivative1() {
+        Expression s = parseExpression("f[x] = x**2");
+        Tensor t = parse("f~(1)[y]");
+        t = s.transform(t);
+        TAssert.assertEquals(t, "2*y");
+    }
+
+    @Test
+    public void testFieldDerivative2() {
+        Expression s = parseExpression("f[x] = x**10");
+        Tensor t = parse("f~(9)[y+z]");
+        t = s.transform(t);
+        TAssert.assertEquals(t, "3628800*(y+z)");
+    }
+
+    @Test
+    public void testFieldDerivative3() {
+        Expression s = parseExpression("f[x, y] = x**y");
+        Tensor t = parse("f~(2, 2)[a, b]");
+        t = s.transform(t);
+        TAssert.assertEquals(t, "a**(-2+b)*b*(-1+b)*Log[a]**2+2*a**(-2+b)+2*a**(-2+b)*Log[a]*b+2*a**(-2+b)*Log[a]*(-1+b)");
+    }
+
+    @Test
+    public void testFieldDerivative4() {
+        Expression s = parseExpression("f_ab[x_mn, y_mn] = x_am*y_nb*x^mn");
+        Tensor t = parse("f~(2, 1)^{ab}_{{mn ab} {pq}}[a_mn, b_ab]");
+        t = s.transform(t);
+        t = EliminateMetricsTransformation.eliminate(t);
+        t = parseExpression("d_a^a = 4").transform(t);
+        TAssert.assertEquals(t, "g_{mn}*g_{pq}+4*g_{mq}*g_{pn}");
+    }
 }

@@ -90,6 +90,11 @@ public final class TensorField extends SimpleTensor {
     }
 
     @Override
+    public NameDescriptorForTensorField getNameDescriptor() {
+        return (NameDescriptorForTensorField) super.getNameDescriptor();
+    }
+
+    @Override
     public String toString(OutputFormat mode) {
         //TODO add argIndices toString(REDBERRY)
         StringBuilder sb = new StringBuilder();

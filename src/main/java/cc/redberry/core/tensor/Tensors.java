@@ -319,7 +319,7 @@ public final class Tensors {
 
         int[] orders = new int[parent.size()];
         orders[argPosition] = order;
-        NameDescriptorForTensorField fieldDescriptor = (NameDescriptorForTensorField) parent.getNameDescriptor();
+        NameDescriptorForTensorField fieldDescriptor = parent.getNameDescriptor();
         NameDescriptor derivativeDescriptor = fieldDescriptor.getDerivative(orders);
 
         SimpleIndices totalIndices;
@@ -506,6 +506,40 @@ public final class Tensors {
         return new TensorField(name,
                 UnsafeIndicesFactory.createOfTensor(descriptor.getSymmetries(), indices),
                 arguments, argIndices);
+    }
+
+    /**
+     * Returns an instance of specified simple tensor with specified indices
+     *
+     * @param tensor  simple tensor
+     * @param indices indices
+     * @return instance of specified simple tensor with specified indices
+     */
+    public static SimpleTensor setIndices(SimpleTensor tensor, int[] indices) {
+        return setIndices(tensor, IndicesFactory.createSimple(null, indices));
+    }
+
+    /**
+     * Returns an instance of specified simple tensor with specified indices
+     *
+     * @param tensor  simple tensor
+     * @param indices indices
+     * @return instance of specified simple tensor with specified indices
+     */
+    public static SimpleTensor setIndices(SimpleTensor tensor, SimpleIndices indices) {
+        if (tensor.getIndices() == indices) return tensor;
+
+        NameDescriptor descriptor = tensor.getNameDescriptor();
+        if (!descriptor.getStructureOfIndices().isStructureOf(indices))
+            throw new IllegalArgumentException("Illegal structure of indices.");
+        if (descriptor.isField())
+            return new TensorField(tensor.name,
+                    UnsafeIndicesFactory.createOfTensor(descriptor.getSymmetries(), indices),
+                    ((TensorField) tensor).args, ((TensorField) tensor).argIndices);
+        else
+            return new SimpleTensor(tensor.name,
+                    UnsafeIndicesFactory.createOfTensor(descriptor.getSymmetries(),
+                            indices));
     }
 
     /**
