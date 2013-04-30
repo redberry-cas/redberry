@@ -1118,4 +1118,12 @@ public class SubstitutionsTest {
         t = parseExpression("d_a^a = 4").transform(t);
         TAssert.assertEquals(t, "g_{mn}*g_{pq}+4*g_{mq}*g_{pn}");
     }
+
+    @Test
+    public void testFieldDerivative5() {
+        Expression s = parseExpression("f~(2)[x] = x**10");
+        Tensor t = parse("f~(3)[y+z]");
+        t = s.transform(t);
+        TAssert.assertEquals(t, "10*(y+z)**9");
+    }
 }

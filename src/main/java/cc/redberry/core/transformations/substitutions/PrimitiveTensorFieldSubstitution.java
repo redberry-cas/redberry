@@ -107,7 +107,7 @@ class PrimitiveTensorFieldSubstitution extends PrimitiveSubstitution {
                 }
             }
             derivative = new DFromTo(__from, __to);
-            derivatives.put(new IntArray(__from.getNameDescriptor().getDerivativeOrders()), derivative);
+            derivatives.put(orders, derivative);
         }
 
         return __newTo(derivative, currentField, currentNode, iterator);
