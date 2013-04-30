@@ -365,7 +365,7 @@ public class SubstitutionsTest {
         Expression[] temp;
         while (generator.hasNext()) {
             permutation = generator.next();
-            temp = Combinatorics.shuffle(es, permutation);
+            temp = Combinatorics.reorder(es, permutation);
             for (Expression e : temp)
                 t = e.transform(t);
             TAssert.assertIndicesConsistency(t);
@@ -401,7 +401,7 @@ public class SubstitutionsTest {
         Expression[] temp;
         while (generator.hasNext()) {
             permutation = generator.next();
-            temp = Combinatorics.shuffle(es, permutation);
+            temp = Combinatorics.reorder(es, permutation);
             for (Expression e : temp)
                 t = e.transform(t);
             TAssert.assertIndicesConsistency(t);
@@ -1078,7 +1078,7 @@ public class SubstitutionsTest {
         Expression[] temp;
         while (generator.hasNext()) {
             permutation = generator.next();
-            temp = Combinatorics.shuffle(es, permutation);
+            temp = Combinatorics.reorder(es, permutation);
             for (Expression e : temp)
                 t = e.transform(t);
             TAssert.assertIndicesConsistency(t);
@@ -1129,8 +1129,9 @@ public class SubstitutionsTest {
 
     @Test
     public void testFieldDerivative6() {
-//        addSymmetry("x_mn", 1, 0);
-//        addSymmetry("y_mn", 1, 0);
+        //todo check what symmetries change?
+        addSymmetry("x_mn", 1, 0);
+        addSymmetry("y_mn", 1, 0);
         Expression s = parseExpression("f_ab[x_mn, y_mn] = x_am*y_nb*x^mn");
         Tensor t = parse("f~(2, 1)^{ab}_{{mn ab}}^{{mn}}[a_mn, b_ab]");
         t = s.transform(t);

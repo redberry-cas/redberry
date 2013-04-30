@@ -109,6 +109,11 @@ public final class IndexMappingBufferRecord {
         return (states & 4) == 4;
     }
 
+    public void invertStates() {
+        if (isContracted()) return;
+        states ^= 3;
+    }
+
     @Override
     public IndexMappingBufferRecord clone() {
         return new IndexMappingBufferRecord(states, toName);

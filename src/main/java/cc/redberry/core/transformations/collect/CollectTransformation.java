@@ -48,8 +48,8 @@ import java.util.Arrays;
 import java.util.Map;
 
 import static cc.redberry.core.indices.IndicesUtils.*;
-import static cc.redberry.core.tensor.Tensors.createKronecker;
-import static cc.redberry.core.tensor.Tensors.createMetricOrKronecker;
+import static cc.redberry.core.tensor.Tensors.multiply;
+import static cc.redberry.core.tensor.Tensors.sum;
 
 /**
  * @author Dmitry Bolotin
@@ -68,15 +68,23 @@ public class CollectTransformation implements Transformation {
 
     @Override
     public Tensor transform(Tensor t) {
+        SumBuilder notMatched = new SumBuilder();
         TIntObjectHashMap<ArrayList<Split>> map = new TIntObjectHashMap<>();
         OutputPortUnsafe<Tensor> port = ExpandPort.createPort(t);
         Tensor current;
         Split toAdd;
         ArrayList<Split> nodes;
-        IndexGenerator generator = new IndexGenerator(TensorUtils.getAllIndicesNamesT(t).toArray());
+        Indices indices;
+        TIntHashSet allIndices = TensorUtils.getAllIndicesNamesT(t);
         out:
         while ((current = port.take()) != null) {
-            toAdd = split(current, generator);
+            current = ApplyIndexMapping.renameDummy(current, allIndices.toArray(), allIndices);
+            toAdd = split(current, new IndexGenerator(allIndices.toArray()));
+            if (toAdd.factors.length == 0) {
+                notMatched.put(current);
+                continue;
+            }
+
             nodes = map.get(toAdd.hashCode);
             if (nodes == null) {
                 nodes = new ArrayList<>();
@@ -88,97 +96,23 @@ public class CollectTransformation implements Transformation {
             int[] match;
             for (Split base : nodes) {
                 if ((match = matchFactors(base.factors, toAdd.factors)) != null) {
-                    //main routine
-                    SimpleTensor[] toAddFactors = Combinatorics.shuffle(toAdd.factors, match);
+                    SimpleTensor[] toAddFactors = Combinatorics.reorder(toAdd.factors, match);
                     IndexMappingBuffer mapping =
-                            IndexMappings.createBijectiveProductPort(base.factors, toAddFactors).take();
-
-                    ArrayList<SimpleTensor> baseKroneckers = new ArrayList(),
-                            toAddKroneckers = new ArrayList();
-
-                    TIntHashSet baseContractions = new TIntHashSet(base.getContractedIndices()),
-                            toAddContractions = new TIntHashSet(toAdd.getContractedIndices());
-
-                    IntArrayList toAddFrom2Rename = new IntArrayList(),
-                            toAddTo2Rename = new IntArrayList(),
-                            baseFrom2Rename = new IntArrayList(),
-                            baseTo2Rename = new IntArrayList();
-
-                    int fromIndex, toIndex, fromIndexName, toIndexName, rawState;
-                    boolean diffStates;
+                            IndexMappings.createBijectiveProductPort(toAddFactors, base.factors).take();
                     for (Map.Entry<Integer, IndexMappingBufferRecord> entry : mapping.getMap().entrySet()) {
-                        if (entry.getKey() == entry.getValue().getIndexName())
-                            continue;
-                        rawState = ((entry.getValue().getStates() & 1) ^ 1) << 31;
-                        fromIndexName = entry.getKey();
-                        diffStates = entry.getValue().diffStatesInitialized();
-                        fromIndex = (diffStates ? 0x80000000 : 0) ^ (rawState | fromIndexName);
-                        toIndexName = entry.getValue().getIndexName();
-                        toIndex = rawState | toIndexName;
-
-                        if (baseContractions.contains(fromIndexName)
-                                && toAddContractions.contains(toIndexName)) {
-                            toAddFrom2Rename.add(inverseIndexState(toIndexName));
-                            toAddTo2Rename.add(fromIndexName);
-                        } else if (baseContractions.contains(fromIndexName)) {
-//                            if (toAddContractions.contains(fromIndexName)) {
-//
-//                            }
-                            toAddKroneckers.add(
-                                    createMetricOrKronecker(toIndex,
-                                            diffStates ? fromIndex : inverseIndexState(fromIndex)));
-
-                        } else if (toAddContractions.contains(toIndexName)) {
-//                            if (baseContractions.contains(toIndexName)) {
-//                                toAddFrom2Rename.add(inverseIndexState(toIndex));
-//                                toIndexName = generator.generate(getType(toIndexName));
-//                                toIndex = setRawState(getRawStateInt(toIndex), toIndexName);
-//                                toAddTo2Rename.add(inverseIndexState(toIndex));
-//                            }
-                            baseFrom2Rename.add(fromIndex);
-                            baseTo2Rename.add(toIndex);
-                            baseKroneckers.add(
-                                    createMetricOrKronecker(fromIndex,
-                                            inverseIndexState(toIndex)));
-
-                        } else {
-                            int newIndex = generator.generate(getType(fromIndex));
-                            baseFrom2Rename.add(fromIndex);
-                            baseTo2Rename.add(newIndex);
-                            baseKroneckers.add(
-                                    createMetricOrKronecker(fromIndex,
-                                            getState(fromIndex) ? newIndex : inverseIndexState(newIndex)));
-                            toAddKroneckers.add(
-                                    createMetricOrKronecker(toIndex,
-                                            getState(toIndex) ? newIndex : inverseIndexState(newIndex)));
-                        }
+                        entry.getValue().invertStates();
                     }
-                    DirectIndexMapping toRenameMapping =
-                            new StateSensitiveMapping(baseFrom2Rename.toArray(), baseTo2Rename.toArray());
-                    for (int i = base.factors.length - 1; i >= 0; --i)
-                        base.factors[i] = applyDirectMapping(base.factors[i], toRenameMapping);
-                    Tensor kroneckerChain = Tensors.multiply(baseKroneckers.toArray(new Tensor[baseKroneckers.size()]));
-                    for (int i = base.summands.size() - 1; i >= 0; --i)
-                        base.summands.set(i, Tensors.multiply(base.summands.get(i), kroneckerChain));
 
-                    int[] toAddFree = toAdd.summands.get(0).getIndices().getFree().getAllIndices().copy();
-                    TIntHashSet temp = new TIntHashSet(toAddFrom2Rename.toArray());
-                    for (int i : toAddFree)
-                        if (!temp.contains(i)) {
-                            toAddFrom2Rename.add(i);
-                            toAddTo2Rename.add(i);
-                        }
-
-                    int[] _toAddFrom = toAddFrom2Rename.toArray(), _toAddTo = toAddTo2Rename.toArray();
-                    kroneckerChain = Tensors.multiply(toAddKroneckers.toArray(new Tensor[toAddKroneckers.size()]));
-                    for (int i = toAdd.summands.size() - 1; i >= 0; --i)
-                        base.summands.add(
-                                Tensors.multiply(
-                                        ApplyIndexMapping.applyIndexMapping(toAdd.summands.get(i), _toAddFrom, _toAddTo, new int[0]),
-                                        kroneckerChain));
+                    indices = toAdd.summands.get(0).getIndices().getFree();
+                    for (int i = indices.size() - 1; i >= 0; --i) {
+                        if (!mapping.getMap().containsKey(getNameWithType(indices.get(i))))
+                            mapping.tryMap(indices.get(i), indices.get(i));
+                    }
+                    base.summands.add(ApplyIndexMapping.applyIndexMapping(toAdd.summands.get(0), mapping));
                     continue out;
                 }
             }
+
             nodes.add(toAdd);
         }
 
@@ -193,63 +127,81 @@ public class CollectTransformation implements Transformation {
 
 
     private Split split(Tensor tensor, IndexGenerator generator) {
-        if (tensor instanceof SimpleTensor)
-            if (patternsNames.contains(tensor.hashCode()))
-                return new Split(new SimpleTensor[]{(SimpleTensor) tensor}, Complex.ONE);
+        if (tensor instanceof SimpleTensor || tensor instanceof Product) {
+            SimpleTensor[] factors;
+            Tensor summand;
 
-        if (tensor instanceof Product) {
-            //early check
-            boolean containsMatch = false;
-            for (Tensor t : tensor)
-                if (t instanceof SimpleTensor && patternsNames.contains(((SimpleTensor) t).getName())) {
-                    containsMatch = true;
-                    break;
-                }
-            if (!containsMatch) return new Split(new SimpleTensor[0], tensor);
-
-            ArrayList<SimpleTensor> factorsList = new ArrayList<>();
-            Tensor summand = tensor;
-            for (Tensor t : tensor) {
-                if (t instanceof SimpleTensor && patternsNames.contains(((SimpleTensor) t).getName())) {
-                    factorsList.add((SimpleTensor) t);
-                    assert summand != Complex.ONE;
-                    if (summand instanceof Product)
-                        summand = ((Product) summand).remove(t);
-                    else summand = Complex.ONE;
-                }
-            }
-            final SimpleTensor[] factors = factorsList.toArray(new SimpleTensor[factorsList.size()]);
-
-            //now we need to uncontract dummies 
-            Indices factorIndices = new IndicesBuilder().append(factors).getIndices();
-            if (factorIndices.size() != factorIndices.getFree().size()) {
-                TIntHashSet upperIndices = new TIntHashSet(factorIndices.getUpper().length());
-
-                SimpleIndices currentFactorIndices;
-                IntArrayList from = new IntArrayList(), to = new IntArrayList();
-                ArrayList<Tensor> kroneckers = new ArrayList<>();
-                int j, index, newIndex;
-                for (int i = 0; i < factors.length; ++i) {
-                    from.clear();
-                    to.clear();
-                    currentFactorIndices = factors[i].getIndices();
-
-                    for (j = currentFactorIndices.size() - 1; j >= 0; --j) {
-                        index = currentFactorIndices.get(j);
-                        if (IndicesUtils.getState(index))
-                            upperIndices.add(index);
-                        else if (upperIndices.contains(inverseIndexState(index))) {
-                            from.add(index);
-                            to.add(newIndex = inverseIndexState(generator.generate(getType(index))));
-                            kroneckers.add(createKronecker(inverseIndexState(newIndex), index));
-                        }
+            if (tensor instanceof SimpleTensor)
+                if (patternsNames.contains(tensor.hashCode())) {
+                    factors = new SimpleTensor[1];
+                    factors[0] = (SimpleTensor) tensor;
+                    summand = Complex.ONE;
+                } else
+                    return new Split(new SimpleTensor[0], tensor);
+            else {//Product
+                //early check
+                boolean containsMatch = false;
+                for (Tensor t : tensor)
+                    if (t instanceof SimpleTensor && patternsNames.contains(((SimpleTensor) t).getName())) {
+                        containsMatch = true;
+                        break;
                     }
-                    factors[i] = applyDirectMapping(factors[i],
-                            new StateSensitiveMapping(from.toArray(), to.toArray()));
+                if (!containsMatch) return new Split(new SimpleTensor[0], tensor);
+
+                ArrayList<SimpleTensor> factorsList = new ArrayList<>();
+                summand = tensor;
+                for (Tensor t : tensor) {
+                    if (t instanceof SimpleTensor && patternsNames.contains(((SimpleTensor) t).getName())) {
+                        factorsList.add((SimpleTensor) t);
+                        assert summand != Complex.ONE;
+                        if (summand instanceof Product)
+                            summand = ((Product) summand).remove(t);
+                        else summand = Complex.ONE;
+                    }
                 }
-                kroneckers.add(summand);
-                summand = Tensors.multiply(kroneckers.toArray(new Tensor[kroneckers.size()]));
+                factors = factorsList.toArray(new SimpleTensor[factorsList.size()]);
             }
+
+            TIntHashSet freeIndices = new TIntHashSet(IndicesUtils.getIndicesNames(tensor.getIndices().getFree()));
+
+            //now we need to uncontract dummies and free
+
+            Indices factorIndices = new IndicesBuilder().append(factors).getIndices();
+            TIntHashSet dummies = new TIntHashSet(IndicesUtils.getIntersections(
+                    factorIndices.getUpper().copy(), factorIndices.getLower().copy()));
+            SimpleIndices currentFactorIndices;
+            IntArrayList from = new IntArrayList(), to = new IntArrayList();
+            ArrayList<Tensor> kroneckers = new ArrayList<>();
+            int j, index, newIndex;
+            for (int i = 0; i < factors.length; ++i) {
+                from.clear();
+                to.clear();
+                currentFactorIndices = factors[i].getIndices();
+
+                for (j = currentFactorIndices.size() - 1; j >= 0; --j) {
+                    index = currentFactorIndices.get(j);
+                    if (freeIndices.contains(getNameWithType(index))) {
+                        newIndex = setRawState(getRawStateInt(index), generator.generate(getType(index)));
+                        from.add(index);
+                        to.add(newIndex);
+                        kroneckers.add(Tensors.createKronecker(index, inverseIndexState(newIndex)));
+                    } else if (IndicesUtils.getState(index) && dummies.contains(getNameWithType(index))) {
+                        newIndex = setRawState(getRawStateInt(index), generator.generate(getType(index)));
+                        from.add(index);
+                        to.add(newIndex);
+                        kroneckers.add(Tensors.createKronecker(index, inverseIndexState(newIndex)));
+                    }
+                }
+
+                factors[i] = applyDirectMapping(factors[i],
+                        new StateSensitiveMapping(from.toArray(), to.toArray()));
+            }
+
+            factorIndices = new IndicesBuilder().append(factors).getIndices();
+
+            kroneckers.add(summand);
+            summand = Tensors.multiply(kroneckers.toArray(new Tensor[kroneckers.size()]));
+
             return new Split(factors, summand);
         }
         return new Split(new SimpleTensor[0], tensor);
@@ -275,12 +227,6 @@ public class CollectTransformation implements Transformation {
             return hashCode;
         }
 
-        int[] getContractedIndices() {
-            return IndicesUtils.getIntersections(
-                    new IndicesBuilder().append(factors).getIndices(),
-                    summands.get(0).getIndices());
-        }
-
         Tensor toTensor() {
             Tensor sum = Tensors.sum(summands.toArray(new Tensor[summands.size()]));
             Tensor[] ms = new Tensor[factors.length + 1];
@@ -289,18 +235,10 @@ public class CollectTransformation implements Transformation {
             return Tensors.multiply(ms);
         }
 
-        TIntHashSet getAllIndices() {
-            TIntHashSet set = TensorUtils.getAllIndicesNamesT(factors);
-            for (Tensor s : summands)
-                TensorUtils.appendAllIndicesNamesT(s, set);
-            return set;
+        @Override
+        public String toString() {
+            return multiply(factors) + " : " + sum(summands.toArray(new Tensor[summands.size()]));
         }
-
-
-        void resetDummies(TIntHashSet forbidden) {
-
-        }
-
     }
 
     private static int[] matchFactors(SimpleTensor[] a, SimpleTensor[] b) {
