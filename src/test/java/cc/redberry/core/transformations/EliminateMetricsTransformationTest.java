@@ -39,7 +39,6 @@ import static cc.redberry.core.tensor.Tensors.parse;
 import static org.junit.Assert.assertTrue;
 
 /**
- *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
@@ -397,7 +396,7 @@ public class EliminateMetricsTransformationTest {
         assertTrue(TensorUtils.equals(t, expected));
     }
 
-//    @Test
+    //    @Test
 //    public void testDerivative1() {
 //        Tensor t = parse("g_mn*D[F_ab,x_mp]*d^a_p*g^bq");
 //        t = eliminate(t);
@@ -569,5 +568,11 @@ public class EliminateMetricsTransformationTest {
         t = contract(t);
         t = d.transform(t);
         assertTrue(TensorUtils.equals(t, parse("1/2")));
+    }
+
+    @Test
+    public void testFieldDerivative() {
+        Tensor t = parse("d_{f}^{c}*g~3_{bn}^{f}_{m}[x_{f}]");
+        TAssert.assertEquals(contract(t), "g~3_{bn}^{c}_{m}[x_{f}]");
     }
 }

@@ -1126,4 +1126,56 @@ public class SubstitutionsTest {
         t = s.transform(t);
         TAssert.assertEquals(t, "10*(y+z)**9");
     }
+
+    @Test
+    public void testFieldDerivative6() {
+//        addSymmetry("x_mn", 1, 0);
+//        addSymmetry("y_mn", 1, 0);
+        Expression s = parseExpression("f_ab[x_mn, y_mn] = x_am*y_nb*x^mn");
+        Tensor t = parse("f~(2, 1)^{ab}_{{mn ab}}^{{mn}}[a_mn, b_ab]");
+        t = s.transform(t);
+        t = ExpandTransformation.expand(t);
+        t = EliminateMetricsTransformation.eliminate(t);
+        t = parseExpression("d_a^a = 4").transform(t);
+        System.out.println(t);
+//        TAssert.assertEquals(t, "g_{mn}*g_{pq}+4*g_{mq}*g_{pn}");
+    }
+
+
+    @Test
+    public void testFieldDerivatives7() {
+
+
+        setSymmetric("g_ab[x_m]");
+        Tensor R = parseExpression("R[x_m] = g^ab[x_m]*R_ab[x_m]");
+        Expression ricci = parseExpression("R_ab[x_m] = R^n_anb[x_n]");
+        Expression riemann = parseExpression("R^a_bmn[x_m] = G~(1)^a_bnm[x_m] - G~(1)^a_bmn[x_m] + G^a_gm[x_m]*G^g_bn[x_m] - G^a_gn[x_m]*G^g_bm[x_m]");
+        Expression connection = parseExpression("G^a_mn[x_m] = (1/2)*g^ab[x_m]*(g~(1)_bmn[x_a] + g~(1)_bnm[x_a] - g~(1)_mnb[x_a])");
+        Expression metric = parseExpression("g_mn[x_m] = g_mn + h_mn[x_m]");
+
+        riemann = (Expression) connection.transform(riemann);
+        ricci = (Expression) riemann.transform(ricci);
+        R = ricci.transform(R);
+        R = metric.transform(R);
+
+        R = ExpandTransformation.expand(R);
+        R = EliminateMetricsTransformation.eliminate(R);
+        System.out.println(R);
+
+        SumBuilder r = new SumBuilder();
+        int id = parseSimple("h_mn[x_m]").getName();
+        for (Tensor summand : R.get(1)) {
+            if (summand instanceof Product) {
+                int m = 0;
+                for (Tensor multiplier : summand)
+                    if (multiplier instanceof TensorField
+                            && ((TensorField) multiplier).getNameDescriptor().getParent().getId() == id)
+                        ++m;
+                if (m <= 2)
+                    r.put(summand);
+            }
+        }
+
+        System.out.println(r.build());
+    }
 }

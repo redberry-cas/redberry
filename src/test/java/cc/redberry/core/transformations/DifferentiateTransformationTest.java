@@ -426,4 +426,12 @@ public class DifferentiateTransformationTest {
         e = ExpandAndEliminateTransformation.expandAndEliminate(e);
         TAssert.assertEquals(d, e);
     }
+
+    @Test
+    public void test22() {
+        Tensor t = parse("g~1_{bmn}[x_{e}]");
+        Tensor r = new DifferentiateTransformation(parseSimple("x_c")).transform(t);
+        System.out.println(r);
+        TAssert.assertEquals(r, "g~2_{bm}^{c}_{n}[x_{e}]");
+    }
 }

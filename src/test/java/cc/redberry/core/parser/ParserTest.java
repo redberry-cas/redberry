@@ -489,6 +489,12 @@ public class ParserTest {
 
         t = parse("D[x, (y)][x**2*y + (y)]*f[x] + z");
         TAssert.assertEquals(t, "2*x*f[x] + z");
+    }
 
+    @Test
+    public void testMetric2() {
+        SimpleTensor a = parseSimple("g_mn");
+        SimpleTensor b = parseSimple("g_mn[x_m]");
+        Assert.assertTrue(a.getName() != b.getName() );
     }
 }

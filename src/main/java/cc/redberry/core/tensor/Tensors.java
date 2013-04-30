@@ -338,7 +338,7 @@ public final class Tensors {
                 eType = IndexType.values()[type];
                 singleType = parent.getIndices().getOfType(eType);
                 from = fieldDescriptor.getParent().getStructureOfIndices().getTypeData(type).length;
-                for (i = 0; i < argPosition; ++i)
+                for (i = 0; i <= argPosition; ++i)
                     from += structures[i + 1].getTypeData(type).length * orders[i];
                 for (i = 0; i < from; ++i)
                     ib.append(singleType.get(i));

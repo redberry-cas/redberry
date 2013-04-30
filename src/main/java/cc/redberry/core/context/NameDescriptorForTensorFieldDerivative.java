@@ -69,7 +69,7 @@ final class NameDescriptorForTensorFieldDerivative extends NameDescriptorForTens
         if (orders.length != structuresOfIndices.length - 1)
             throw new IllegalArgumentException();
 
-        int[] resOrder = this.orders;
+        int[] resOrder = this.orders.clone();
         for (int i = orders.length - 1; i >= 0; --i)
             resOrder[i] += orders[i];
 
