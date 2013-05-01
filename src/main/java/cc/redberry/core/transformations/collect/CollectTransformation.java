@@ -35,6 +35,7 @@ import cc.redberry.core.indices.IndicesUtils;
 import cc.redberry.core.indices.SimpleIndices;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.tensor.*;
+import cc.redberry.core.transformations.EliminateMetricsTransformation;
 import cc.redberry.core.transformations.Transformation;
 import cc.redberry.core.transformations.expand.ExpandPort;
 import cc.redberry.core.utils.ArraysUtils;
@@ -75,11 +76,9 @@ public class CollectTransformation implements Transformation {
         Split toAdd;
         ArrayList<Split> nodes;
         Indices indices;
-        TIntHashSet allIndices = TensorUtils.getAllIndicesNamesT(t);
         out:
         while ((current = port.take()) != null) {
-            current = ApplyIndexMapping.renameDummy(current, allIndices.toArray(), allIndices);
-            toAdd = split(current, new IndexGenerator(allIndices.toArray()));
+            toAdd = split(current);
             if (toAdd.factors.length == 0) {
                 notMatched.put(current);
                 continue;
@@ -108,7 +107,7 @@ public class CollectTransformation implements Transformation {
                         if (!mapping.getMap().containsKey(getNameWithType(indices.get(i))))
                             mapping.tryMap(indices.get(i), indices.get(i));
                     }
-                    base.summands.add(ApplyIndexMapping.applyIndexMapping(toAdd.summands.get(0), mapping));
+                    base.summands.add(ApplyIndexMapping.applyIndexMapping(toAdd.summands.get(0), mapping, base.forbidden));
                     continue out;
                 }
             }
@@ -126,7 +125,7 @@ public class CollectTransformation implements Transformation {
     }
 
 
-    private Split split(Tensor tensor, IndexGenerator generator) {
+    private Split split(Tensor tensor) {
         if (tensor instanceof SimpleTensor || tensor instanceof Product) {
             SimpleTensor[] factors;
             Tensor summand;
@@ -173,6 +172,7 @@ public class CollectTransformation implements Transformation {
             IntArrayList from = new IntArrayList(), to = new IntArrayList();
             ArrayList<Tensor> kroneckers = new ArrayList<>();
             int j, index, newIndex;
+            IndexGenerator generator = new IndexGenerator(TensorUtils.getAllIndicesNamesT(tensor).toArray());
             for (int i = 0; i < factors.length; ++i) {
                 from.clear();
                 to.clear();
@@ -197,10 +197,12 @@ public class CollectTransformation implements Transformation {
                         new StateSensitiveMapping(from.toArray(), to.toArray()));
             }
 
-            factorIndices = new IndicesBuilder().append(factors).getIndices();
+            //temp check
+            new IndicesBuilder().append(factors).getIndices();
 
             kroneckers.add(summand);
             summand = Tensors.multiply(kroneckers.toArray(new Tensor[kroneckers.size()]));
+            summand  = EliminateMetricsTransformation.eliminate(summand);
 
             return new Split(factors, summand);
         }
@@ -211,6 +213,7 @@ public class CollectTransformation implements Transformation {
         final SimpleTensor[] factors;
         final ArrayList<Tensor> summands = new ArrayList<>();
         final int hashCode;//real hash code (with fields args)
+        final int[] forbidden;
 
         private Split(SimpleTensor[] factors, Tensor summand) {
             this.factors = factors;
@@ -220,6 +223,7 @@ public class CollectTransformation implements Transformation {
             for (SimpleTensor f : factors)
                 hash = hash * 17 + f.hashCode();
             this.hashCode = hash;
+            this.forbidden = IndicesUtils.getIndicesNames(new IndicesBuilder().append(factors).getIndices());
         }
 
         @Override
