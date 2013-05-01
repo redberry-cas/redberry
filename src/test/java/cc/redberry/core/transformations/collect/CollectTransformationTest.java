@@ -199,6 +199,16 @@ public class CollectTransformationTest {
         assertCollectExpand(t, patterns);
     }
 
+    @Test
+    public void test13() {
+        SimpleTensor[] patterns;
+        Tensor t;
+        t = parse("a*f[x]*f[-x] + b*f[x]*f[-x] + x*f[x]*f[y] + y*f[y]*f[x]");
+        patterns = new SimpleTensor[]{parseSimple("f[x]")};
+        CollectTransformation collect = new CollectTransformation(patterns);
+        TAssert.assertEquals(collect.transform(t), "(y+x)*f[x]*f[y]+(a+b)*f[-x]*f[x]");
+    }
+
     private static void assertCollectExpand(Tensor t, SimpleTensor[] patterns) {
         t = ExpandTransformation.expand(t);
         t = EliminateMetricsTransformation.eliminate(t);

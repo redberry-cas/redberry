@@ -253,13 +253,13 @@ public class CollectTransformation implements Transformation {
         Arrays.fill(permutation, -1);
 
         for (int i = 1; i <= length; ++i) {
-            if (i == length || a[i].getClass() == SimpleTensor.class || a[i].hashCode() != b[i - 1].hashCode()) {
+            if (i == length || a[i].hashCode() != b[i - 1].hashCode()) {
                 if (i - 1 != begin) {
                     OUT:
                     for (n = begin; n < i; ++n) {
                         for (j = begin; j < i; ++j)
                             if (permutation[j] == -1 && matchSimpleTensors(a[n], b[j])) {
-                                permutation[n] = j;
+                                permutation[j] = n;
                                 continue OUT;
                             }
                         return null;
