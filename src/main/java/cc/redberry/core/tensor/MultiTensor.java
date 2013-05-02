@@ -73,17 +73,21 @@ public abstract class MultiTensor extends Tensor {
      *
      * @param positions position in tensor
      * @return result of removing
+     * @throws IndexOutOfBoundsException
      */
     public Tensor remove(int[] positions) {
+        int size = size();
+        for (int i : positions)
+            if (i >= size || i < 0)
+                throw new IndexOutOfBoundsException();
+
         int[] p = MathUtils.getSortedDistinct(positions);
-        Tensor temp = this;
-        for (int i = p.length - 1; i >= 0; --i) {
-            if (temp instanceof MultiTensor) {
-                temp = ((MultiTensor) temp).remove(p[i]);
-            } else temp = getNeutral();
-        }
-        return temp;
+        if (p.length == size)
+            return getNeutral();
+        return remove1(p);
     }
+
+    protected abstract Tensor remove1(int[] positions);
 
     /**
      * Selects tensors at the specified positions and puts it together.

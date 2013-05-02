@@ -23,14 +23,18 @@
 package cc.redberry.core.transformations.collect;
 
 import cc.redberry.core.TAssert;
+import cc.redberry.core.combinatorics.Combinatorics;
 import cc.redberry.core.context.CC;
-import cc.redberry.core.tensor.SimpleTensor;
-import cc.redberry.core.tensor.Tensor;
-import cc.redberry.core.tensor.Tensors;
+import cc.redberry.core.tensor.*;
+import cc.redberry.core.tensor.iterator.FromChildToParentIterator;
 import cc.redberry.core.transformations.EliminateMetricsTransformation;
 import cc.redberry.core.transformations.expand.ExpandTransformation;
+import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
+
+import java.util.Arrays;
+import java.util.Random;
 
 import static cc.redberry.core.tensor.Tensors.*;
 
@@ -214,9 +218,44 @@ public class CollectTransformationTest {
         t = EliminateMetricsTransformation.eliminate(t);
         CollectTransformation collect = new CollectTransformation(patterns);
         Tensor collected = collect.transform(t);
+        if (collected instanceof Sum)
+            for (Tensor summand : collected)
+                assertCollectedSummand(summand, patterns);
+        else assertCollectedSummand(collected, patterns);
+
         collected = ExpandTransformation.expand(collected, EliminateMetricsTransformation.ELIMINATE_METRICS);
         collected = EliminateMetricsTransformation.eliminate(collected);
         TAssert.assertEquals(collected, t);
+    }
+
+    private static void assertCollectedSummand(Tensor summand, SimpleTensor[] patterns) {
+        if (!(summand instanceof Product)) return;
+
+        for (Tensor t : summand)
+            if (t instanceof Sum) {
+                FromChildToParentIterator it = new FromChildToParentIterator(t);
+                Tensor c;
+                while ((c = it.next()) != null)
+                    if (c instanceof SimpleTensor)
+                        for (SimpleTensor p : patterns)
+                            Assert.assertFalse(((SimpleTensor) c).getName() == p.getName());
+            }
+    }
+
+    @Test
+    public void testMatch() {
+        for (int i = 0; i < 100; ++i) {
+            Random rnd = new Random();
+            CC.resetTensorNames();
+            SimpleTensor[] a = {parseSimple("f_a[-x_a-y_a]"), parseSimple("f_c[x_b]"), parseSimple("f_d[y_d]"),
+                    parseSimple("g[x]"), parseSimple("g[-f-x]"), parseSimple("g[f]")};
+            SimpleTensor[] b = a.clone();
+            Combinatorics.shuffle(b, rnd);
+            Arrays.sort(a);
+            Arrays.sort(b);
+            int[] match = CollectTransformation.matchFactors(a, b);
+            Assert.assertArrayEquals(a, Combinatorics.reorder(b, match));
+        }
     }
 
 }

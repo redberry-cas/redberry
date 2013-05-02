@@ -134,6 +134,19 @@ public final class Sum extends MultiTensor {
     }
 
     @Override
+    protected Tensor remove1(final int[] positions) {
+        Tensor[] newData = new Tensor[data.length - positions.length];
+        int pointer = 0, counter = -1;
+        for (int i = 0; i < data.length; ++i)
+            if (pointer < positions.length && i == positions[pointer]) {
+                ++pointer;
+                continue;
+            } else newData[++counter] = data[i];
+        if (newData.length == 1) return newData[0];
+        return new Sum(newData, indices);
+    }
+
+    @Override
     protected Complex getNeutral() {
         return Complex.ZERO;
     }

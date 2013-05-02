@@ -30,14 +30,14 @@ import java.util.Arrays;
 
 /**
  * Object of this class represents unique type of simple tensor or tensor fields (unique name).
- *
+ * <p/>
  * <p>It holds the information about string name of simple tensor, structure of its indices and arguments
  * (in case of tensor field). Two simple tensors are considered to have different mathematical nature if and only if
  * their name descriptors are not equal. Each simple tensor with unique mathematical nature have its own unique integer
  * identifier, which is hold in the name descriptor. For example, tensors A_mn and A_ij have the same mathematical
  * origin and thus have the same integer identifier and both have the same name descriptor (the same reference). In
  * contrast, for example, tensors A_mn and A_i have different mathematical origin and different integer identifiers.</p>
- *
+ * <p/>
  * <p>This class have no public constructors, since Redberry takes care about its creation (see {@link NameManager}).
  * The only way to receive name descriptor from raw information about tensor is through
  * {@link NameManager#mapNameDescriptor(String, cc.redberry.core.indices.StructureOfIndices...)}.
@@ -105,6 +105,16 @@ public abstract class NameDescriptor {
     public StructureOfIndices getStructureOfIndices() {
         return structuresOfIndices[0];
     }
+
+    /**
+     * Returns structure of i-th arg indices of tensors with this name descriptor
+     *
+     * @return structure of i-th arg indices indices of tensors with this name descriptor
+     */
+    public StructureOfIndices getStructureOfIndices(int arg) {
+        return structuresOfIndices[arg + 1];
+    }
+
 
     /**
      * Returns structure of indices of tensors with this name descriptor (first element in array) and

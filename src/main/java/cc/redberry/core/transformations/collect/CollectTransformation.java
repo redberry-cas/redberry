@@ -98,9 +98,13 @@ public class CollectTransformation implements Transformation {
                     SimpleTensor[] toAddFactors = Combinatorics.reorder(toAdd.factors, match);
                     IndexMappingBuffer mapping =
                             IndexMappings.createBijectiveProductPort(toAddFactors, base.factors).take();
-                    for (Map.Entry<Integer, IndexMappingBufferRecord> entry : mapping.getMap().entrySet()) {
-                        entry.getValue().invertStates();
+
+                    if(mapping == null){
+                        int qw = 0;
                     }
+
+                    for (Map.Entry<Integer, IndexMappingBufferRecord> entry : mapping.getMap().entrySet())
+                        entry.getValue().invertStates();
 
                     indices = toAdd.summands.get(0).getIndices().getFree();
                     for (int i = indices.size() - 1; i >= 0; --i) {
@@ -198,7 +202,8 @@ public class CollectTransformation implements Transformation {
             }
 
             //temp check
-            new IndicesBuilder().append(factors).getIndices();
+            factorIndices = new IndicesBuilder().append(factors).getIndices();
+            assert factorIndices.size() == factorIndices.getFree().size();
 
             kroneckers.add(summand);
             summand = Tensors.multiply(kroneckers.toArray(new Tensor[kroneckers.size()]));
@@ -245,7 +250,7 @@ public class CollectTransformation implements Transformation {
         }
     }
 
-    private static int[] matchFactors(SimpleTensor[] a, SimpleTensor[] b) {
+    static int[] matchFactors(SimpleTensor[] a, SimpleTensor[] b) {
         if (a.length != b.length) return null;
         int begin = 0, j, n, length = a.length;
 
@@ -271,7 +276,7 @@ public class CollectTransformation implements Transformation {
                 begin = i;
             }
         }
-        return permutation;
+        return Combinatorics.inverse(permutation);
     }
 
     private static boolean matchSimpleTensors(SimpleTensor a, SimpleTensor b) {
