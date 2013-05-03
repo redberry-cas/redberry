@@ -22,6 +22,7 @@
  */
 package cc.redberry.core.transformations.substitutions;
 
+import cc.redberry.core.number.Complex;
 import cc.redberry.core.tensor.*;
 import cc.redberry.core.transformations.Transformation;
 import cc.redberry.core.utils.TensorUtils;
@@ -179,8 +180,14 @@ public final class SubstitutionTransformation implements Transformation {
                 return new PrimitiveSimpleTensorSubstitution(from, to);
             return new PrimitiveTensorFieldSubstitution(from, to);
         }
-        if (from.getClass() == Product.class)
+        if (from.getClass() == Product.class) {
+            if (from.size() == 2 && from.get(0) instanceof Complex) {
+                to = Tensors.divide(to, from.get(0));
+                from = from.get(1);
+                return createPrimitiveSubstitution(from, to);
+            }
             return new PrimitiveProductSubstitution(from, to);
+        }
         if (from.getClass() == Sum.class)
             return new PrimitiveSumSubstitution(from, to);
         return new PrimitiveSimpleTensorSubstitution(from, to);

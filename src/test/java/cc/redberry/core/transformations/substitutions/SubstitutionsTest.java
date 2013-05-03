@@ -1016,6 +1016,24 @@ public class SubstitutionsTest {
         t = e.transform(t);
     }
 
+    @Test
+    public void testProduct22() {
+        Tensor t = parse("x*(x**2 + x)");
+        Expression e = parseExpression("-x = x");
+        t = e.transform(t);
+        TAssert.assertEquals(t, "-x*(x**2 - x)");
+    }
+
+
+    @Test
+    public void testProduct23() {
+        Tensor t = parse("K[-x]");
+        Expression e = parseExpression("-x = x");
+        t = e.transform(t);
+        System.out.println(t);
+        TAssert.assertEquals(t, "K[x]");
+    }
+
     //TODO tests for Product
 
     @Test
