@@ -153,6 +153,7 @@ class PrimitiveProductSubstitution extends PrimitiveSubstitution {
         Complex factor = product.getFactor();
         PContent content = new PContent(product.getIndexless(), product.getDataSubProduct());
 
+        //TODO getForbidden only if necessary!!!!!!!!!!!!!!!!!
         TIntHashSet forbidden = new TIntHashSet(iterator.getForbidden());
         SubsResult subsResult = atomicSubstitute(content, forbidden);
         if (subsResult == null)

@@ -594,4 +594,36 @@ public class TensorUtils {
         }
         return false;
     }
+
+    public static TIntHashSet getSimpleTensorsNames(Tensor t) {
+        return addSimpleTensorsNames(t, new TIntHashSet());
+    }
+
+    private static TIntHashSet addSimpleTensorsNames(Tensor t, TIntHashSet names) {
+        if (t instanceof TensorField)
+            names.add(((TensorField) t).getNameDescriptor().getParent().getId());
+        if (t instanceof SimpleTensor)
+            names.add(((SimpleTensor) t).getName());
+        for (Tensor tt : t)
+            addSimpleTensorsNames(tt, names);
+
+        return names;
+    }
+
+    public static boolean shareSimpleTensors(Tensor a, Tensor b) {
+        return testContainsNames(b, getSimpleTensorsNames(a));
+    }
+
+    private static boolean testContainsNames(Tensor t, TIntHashSet names) {
+        if (t instanceof TensorField) {
+            if (names.contains(((TensorField) t).getNameDescriptor().getParent().getId())) return true;
+        } else if (t instanceof SimpleTensor)
+            return names.contains(((SimpleTensor) t).getName());
+
+        for (Tensor tt : t)
+            if (testContainsNames(tt, names)) return true;
+
+        return false;
+    }
+
 }

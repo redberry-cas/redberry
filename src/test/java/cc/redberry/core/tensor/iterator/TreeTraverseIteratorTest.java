@@ -715,25 +715,4 @@ public class TreeTraverseIteratorTest {
             }
         }
     }
-
-    @Test//todo remove this test
-    public void testProduct23() {
-        Tensor t = parse("K[-x]");
-        TreeTraverseIterator it = new TreeTraverseIterator(t);
-        Tensor c;
-        TraverseState state;
-        while ((state = it.next()) != null) {
-            c = it.current();
-            if (state == TraverseState.Leaving && TensorUtils.equals(c, parse("x"))) {
-                it.set(parse("-x"));
-            }
-            System.out.println(state + ": " + c);
-        }
-        System.out.println(it.result());
-
-
-        TAssert.assertEquals(it.result(), "K[x]");
-    }
-
-
 }
