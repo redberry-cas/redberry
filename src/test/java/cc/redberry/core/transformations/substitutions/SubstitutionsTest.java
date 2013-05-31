@@ -1028,8 +1028,9 @@ public class SubstitutionsTest {
     @Test
     public void testProduct23() {
         Tensor t = parse("K[-x]");
-        Expression e = parseExpression("-x = x");
-        t = e.transform(t);
+        Expression e = parseExpression("x = -x");
+        Transformation tr = new SubstitutionTransformation(false, e);
+        t = tr.transform(t);
         System.out.println(t);
         TAssert.assertEquals(t, "K[x]");
     }

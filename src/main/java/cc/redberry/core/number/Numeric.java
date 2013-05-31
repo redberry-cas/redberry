@@ -26,6 +26,7 @@ import org.apache.commons.math3.exception.NullArgumentException;
 import org.apache.commons.math3.fraction.BigFraction;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.math.BigInteger;
 
 import static cc.redberry.core.number.NumberUtils.checkNotNull;
@@ -156,6 +157,11 @@ public final class Numeric extends Real implements Serializable {
     @Override
     public int intValue() {
         return (int) value;
+    }
+
+    @Override
+    public BigInteger bigIntValue() {
+        return new BigDecimal(value).toBigInteger();
     }
 
     @Override

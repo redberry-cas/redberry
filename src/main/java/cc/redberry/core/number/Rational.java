@@ -207,6 +207,11 @@ public final class Rational extends Real implements Serializable {
     }
 
     @Override
+    public BigInteger bigIntValue() {
+        return fraction.getNumerator().divide(fraction.getDenominator());
+    }
+
+    @Override
     public float floatValue() {
         return fraction.floatValue();
     }

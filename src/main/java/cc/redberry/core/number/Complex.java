@@ -359,6 +359,11 @@ public final class Complex extends Tensor
         return real.intValue();
     }
 
+    @Override
+    public BigInteger bigIntValue() {
+        return real.bigIntValue();
+    }
+
     /**
      * Returns long value of the real part.
      *
