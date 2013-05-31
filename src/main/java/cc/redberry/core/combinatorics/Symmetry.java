@@ -79,7 +79,7 @@ public class Symmetry extends Permutation {
      * @return identity symmetry
      */
     @Override
-    public Symmetry getOne() {
+    public Symmetry getIdentity() {
         return new Symmetry(permutation.length);
     }
 
@@ -148,5 +148,10 @@ public class Symmetry extends Permutation {
     @Override
     public String toString() {
         return super.toString() + "(" + (sign ? "-" : "+") + ")";
+    }
+
+
+    public Symmetry convert(int[] mapping, int newDimension) {
+        return new Symmetry(Combinatorics.convertPermutation(this.permutation, mapping, newDimension), sign);
     }
 }

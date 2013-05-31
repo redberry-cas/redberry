@@ -133,10 +133,10 @@ public final class NameManager {
 
     private NameDescriptor createDescriptor(final String sname, final StructureOfIndices[] structuresOfIndices, int id) {
         if (structuresOfIndices.length != 1)
-            return new NameDescriptorImpl(sname, structuresOfIndices, id);
+            return new NameDescriptorForTensorFieldImpl(sname, structuresOfIndices, id);
         final StructureOfIndices its = structuresOfIndices[0];
         if (its.size() != 2)
-            return new NameDescriptorImpl(sname, structuresOfIndices, id);
+            return new NameDescriptorForSimpleTensor(sname, structuresOfIndices, id);
         for (byte b = 0; b < IndexType.TYPES_COUNT; ++b)
             if (its.typeCount(b) == 2) {
                 if (CC.isMetric(b)) {
@@ -156,20 +156,27 @@ public final class NameManager {
                     }
                 }
             }
-        return new NameDescriptorImpl(sname, structuresOfIndices, id);
+        return new NameDescriptorForSimpleTensor(sname, structuresOfIndices, id);
+    }
+
+    private void registerDescriptor(NameDescriptor descriptor) {
+        fromId.put(descriptor.getId(), descriptor);
+        for (NameAndStructureOfIndices key1 : descriptor.getKeys())
+            fromStructure.put(key1, descriptor);
+        descriptor.registerInNameManager(this);
     }
 
     /**
      * This method returns the existing name descriptor of simple tensor from the raw data if it contains in the
      * namespace or constructs and puts to namespace new instance of name descriptor otherwise.
      *
-     * @param sname                string name of tensor
-     * @param structureOfIndiceses structure of tensor indices (first element in array) and structure of indices
-     *                             of arguments (in case of tensor field)
+     * @param sname              string name of tensor
+     * @param structureOfIndices structure of tensor indices (first element in array) and structure of indices
+     *                           of arguments (in case of tensor field)
      * @return name descriptor corresponding to the specified information of tensor
      */
-    public NameDescriptor mapNameDescriptor(String sname, StructureOfIndices... structureOfIndiceses) {
-        NameAndStructureOfIndices key = new NameAndStructureOfIndices(sname, structureOfIndiceses);
+    public NameDescriptor mapNameDescriptor(String sname, StructureOfIndices... structureOfIndices) {
+        NameAndStructureOfIndices key = new NameAndStructureOfIndices(sname, structureOfIndices);
         boolean rLocked = true;
         readLock.lock();
         try {
@@ -182,14 +189,12 @@ public final class NameManager {
                     knownND = fromStructure.get(key);
                     if (knownND == null) { //Double check
                         int name = generateNewName();
-                        NameDescriptor descriptor = createDescriptor(sname, structureOfIndiceses, name);
+                        NameDescriptor descriptor = createDescriptor(sname, structureOfIndices, name);
                         if (descriptor instanceof NameDescriptorForMetricAndKronecker) {
                             kroneckerAndMetricIds.add(name);
                             kroneckerAndMetricIds.sort();
                         }
-                        fromId.put(name, descriptor);
-                        for (NameAndStructureOfIndices key1 : descriptor.getKeys())
-                            fromStructure.put(key1, descriptor);
+                        registerDescriptor(descriptor);
                         return descriptor;
                     }
                     readLock.lock();
@@ -202,6 +207,18 @@ public final class NameManager {
         } finally {
             if (rLocked)
                 readLock.unlock();
+        }
+    }
+
+    NameDescriptorForTensorFieldDerivative createDescriptorForFieldDerivative(NameDescriptorForTensorFieldImpl field, int[] orders) {
+        //todo readLock?
+        writeLock.lock();
+        try {
+            NameDescriptorForTensorFieldDerivative result = new NameDescriptorForTensorFieldDerivative(generateNewName(), orders, field);
+            registerDescriptor(result);
+            return result;
+        } finally {
+            writeLock.unlock();
         }
     }
 

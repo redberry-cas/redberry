@@ -35,8 +35,7 @@ import junit.framework.Assert;
 import org.junit.Test;
 
 import static cc.redberry.core.tensor.Tensors.parse;
-import static cc.redberry.core.utils.TensorUtils.det;
-import static cc.redberry.core.utils.TensorUtils.treeDepth;
+import static cc.redberry.core.utils.TensorUtils.*;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
@@ -227,11 +226,32 @@ public class TensorUtilsTest {
     @Test
     public void testDet3() {
         Tensor[][] matrix = {
-                {parse("a"), parse("b"), parse("c"),parse("x")},
-                {parse("d"), parse("e"), parse("f"),parse("y")},
-                {parse("g"), parse("h"), parse("i"),parse("z")},
-                {parse("p"), parse("q"), parse("r"),parse("s")}
+                {parse("a"), parse("b"), parse("c"), parse("x")},
+                {parse("d"), parse("e"), parse("f"), parse("y")},
+                {parse("g"), parse("h"), parse("i"), parse("z")},
+                {parse("p"), parse("q"), parse("r"), parse("s")}
         };
         TAssert.assertEquals(det(matrix), "(e*(s*i-z*r)-f*(-q*z+s*h)+y*(-q*i+h*r))*a-(f*(g*q-p*h)-e*(-p*i+g*r)+d*(-q*i+h*r))*x-(d*(s*i-z*r)-f*(-p*z+s*g)+(-p*i+g*r)*y)*b+c*(y*(g*q-p*h)-e*(-p*z+s*g)+(-q*z+s*h)*d)");
+    }
+
+    @Test
+    public void testIntersec1() {
+        TAssert.assertTrue(shareSimpleTensors(parse("x+y"),
+                parse("x+z")));
+
+        TAssert.assertTrue(shareSimpleTensors(parse("x+y"),
+                parse("f[x]+z")));
+
+        TAssert.assertTrue(shareSimpleTensors(parse("x+e[r[h[y]]]"),
+                parse("z+f[g[y]]")));
+
+        TAssert.assertTrue(shareSimpleTensors(parse("x+t[r[f~1[t]]]"),
+                parse("z+f[g[y]]")));
+
+        TAssert.assertFalse(shareSimpleTensors(parse("x+t[r[ff~1[t]]]"),
+                parse("z+f[g[y]]")));
+
+        TAssert.assertTrue(shareSimpleTensors(parse("x"),
+                parse("-x")));
     }
 }

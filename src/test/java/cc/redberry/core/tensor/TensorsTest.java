@@ -23,9 +23,13 @@
 package cc.redberry.core.tensor;
 
 import cc.redberry.core.TAssert;
+import cc.redberry.core.combinatorics.IntPermutationsGenerator;
 import cc.redberry.core.context.CC;
 import cc.redberry.core.indices.IndexType;
+import cc.redberry.core.indices.IndicesFactory;
+import cc.redberry.core.indices.SimpleIndices;
 import cc.redberry.core.number.Complex;
+import cc.redberry.core.parser.ParserIndices;
 import cc.redberry.core.transformations.EliminateFromSymmetriesTransformation;
 import cc.redberry.core.transformations.EliminateMetricsTransformation;
 import cc.redberry.core.transformations.Transformation;
@@ -391,4 +395,108 @@ public class TensorsTest {
         TAssert.assertEquals(a, b);
     }
 
+    @Test
+    public void testFieldDerivative() {
+        TensorField f = (TensorField) parse("f[x]");
+        TensorField d = Tensors.fieldDerivative(f, IndicesFactory.EMPTY_SIMPLE_INDICES, 0);
+        Tensor e = parse("f~1[x]");
+        TAssert.assertEquals(e, d);
+
+        f = (TensorField) parse("f_mn[x_mn, y_a, x]");
+        d = Tensors.fieldDerivative(f, ParserIndices.parseSimple("^ab"), 0);
+        e = parse("f~(1,0,0)_mn^ab[x_mn, y_a, x]");
+        TAssert.assertEquals(e, d);
+
+        d = Tensors.fieldDerivative(f, ParserIndices.parseSimple("^b"), 1);
+        e = parse("f~(0,1,0)_mn^b[x_mn, y_a, x]");
+        TAssert.assertEquals(e, d);
+
+        d = Tensors.fieldDerivative(f, ParserIndices.parseSimple("^b"), 1);
+        d = Tensors.fieldDerivative(d, ParserIndices.parseSimple("^mn"), 0);
+        e = parse("f~(1,1,0)_mn^mnb[x_mn, y_a, x]");
+        TAssert.assertEquals(e, d);
+
+        d = Tensors.fieldDerivative(f, ParserIndices.parseSimple("^b"), 1);
+        d = Tensors.fieldDerivative(d, ParserIndices.parseSimple("^pq"), 0);
+        e = parse("f~(1,1,0)_mn^pqb[x_mn, y_a, x]");
+        TAssert.assertEquals(e, d);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testFieldDerivative1() {
+        TensorField f = (TensorField) parse("f_mn[x_mn, y_a, x]");
+        Tensors.fieldDerivative(f, ParserIndices.parseSimple("^b"), 2);
+    }
+
+    @Test
+    public void testFieldDerivative2() {
+        TensorField f, d;
+        Tensor e;
+        SimpleIndices[] indices;
+
+        f = (TensorField) parse("f_mn[x_mn, y_a, x]");
+        indices = new SimpleIndices[]{
+                ParserIndices.parseSimple("^pq"),
+                ParserIndices.parseSimple("^b"),
+                IndicesFactory.EMPTY_SIMPLE_INDICES};
+
+        e = parse("f~(1,1,1)_mn^pqb[x_mn, y_a, x]");
+
+        IntPermutationsGenerator gen = new IntPermutationsGenerator(3);
+        for (int[] p : gen) {
+            d = f;
+            for (int k : p)
+                d = Tensors.fieldDerivative(d, indices[k], k);
+            TAssert.assertEquals(e, d);
+        }
+
+        f = (TensorField) parse("f_mn[x_mn, y_a, x_c]");
+        indices = new SimpleIndices[]{
+                ParserIndices.parseSimple("^pq"),
+                ParserIndices.parseSimple("^b"),
+                ParserIndices.parseSimple("^c")};
+
+        e = parse("f~(1,1,1)_mn^pqbc[x_mn, y_a, x_c]");
+
+        gen = new IntPermutationsGenerator(3);
+        for (int[] p : gen) {
+            d = f;
+            for (int k : p)
+                d = Tensors.fieldDerivative(d, indices[k], k);
+            TAssert.assertEquals(e, d);
+        }
+
+        f = (TensorField) parse("f_mn[x_mn, y_a, x_c]");
+        indices = new SimpleIndices[]{
+                ParserIndices.parseSimple("^pqrs"),
+                ParserIndices.parseSimple("^bk"),
+                ParserIndices.parseSimple("^ce")};
+
+        e = parse("f~(2, 2, 2)_{mn}^{ {pq rs} bk ce}[x_mn, y_a, x_c]");
+
+        gen = new IntPermutationsGenerator(3);
+        for (int[] p : gen) {
+            d = f;
+            for (int k : p)
+                d = Tensors.fieldDerivative(d, indices[k], k, 2);
+            TAssert.assertEquals(e, d);
+        }
+
+
+        f = (TensorField) parse("f_mnF[x_mnA, y_aA, x_cA]");
+        indices = new SimpleIndices[]{
+                ParserIndices.parseSimple("^pqArsB"),
+                ParserIndices.parseSimple("^bCkD"),
+                ParserIndices.parseSimple("^cMeN")};
+
+        e = parse("f~(2, 2, 2)_{mnF}^{ {pqA rsB} bCkD cMeN}[x_mnA, y_aA, x_cA]");
+
+        gen = new IntPermutationsGenerator(3);
+        for (int[] p : gen) {
+            d = f;
+            for (int k : p)
+                d = Tensors.fieldDerivative(d, indices[k], k, 2);
+            TAssert.assertEquals(e, d);
+        }
+    }
 }

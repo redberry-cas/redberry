@@ -196,6 +196,12 @@ public final class IntArrayList {
         return indexOf(value) >= 0;
     }
 
+    public void removeAfter(int point) {
+        if (point < 0)
+            throw new IndexOutOfBoundsException();
+        size = point;
+    }
+
     public int indexOf(int value) {
         for (int i = 0; i < size; ++i)
             if (data[i] == value)

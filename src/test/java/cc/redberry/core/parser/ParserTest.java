@@ -24,6 +24,7 @@ package cc.redberry.core.parser;
 
 import cc.redberry.core.TAssert;
 import cc.redberry.core.context.CC;
+import cc.redberry.core.context.NameDescriptorForTensorField;
 import cc.redberry.core.indices.*;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.tensor.*;
@@ -403,5 +404,97 @@ public class ParserTest {
     @Test(expected = ParserException.class)
     public void testMetric1() {
         parse("g_a'b'");
+    }
+
+    @Test(expected = ParserException.class)
+    public void testFieldDerivative1() throws Exception {
+        Tensor t = parse("F~(1, 2)[x]");
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testFieldDerivative2() throws Exception {
+        Tensor t = parse("F~(1,2)[x_y,y]");
+    }
+
+    @Test
+    public void testFieldDerivative3() throws Exception {
+        SimpleTensor t1 = parseSimple("F~(1,2)_y[x_y,y]");
+        SimpleTensor t2 = parseSimple("F~(1,1)_y[x_y,y]");
+
+        Assert.assertTrue(t1.getNameDescriptor() == ((NameDescriptorForTensorField) t2.getNameDescriptor()).getDerivative(0, 1));
+    }
+
+    @Test
+    public void testFieldDerivative4() throws Exception {
+        SimpleTensor t1 = parseSimple("F~(1,2)_y[x_y,y]");
+        SimpleTensor t2 = parseSimple("F~(1,2)^w[x_s,y]");
+
+        Assert.assertTrue(t1.getNameDescriptor() == t2.getNameDescriptor());
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testFieldDerivative5() throws Exception {
+        SimpleTensor t2 = parseSimple("F~(1,2)^w'[x_s',y]");
+    }
+
+    @Test
+    public void testFieldDerivative6() throws Exception {
+        SimpleTensor t1 = parseSimple("F~(1,2)_y[x_y,y]");
+        SimpleTensor t2 = parseSimple("F[x_s,y]");
+
+        Assert.assertTrue(t1.getNameDescriptor() == ((NameDescriptorForTensorField) t2.getNameDescriptor()).getDerivative(1, 2));
+    }
+
+    @Test
+    public void testFieldDerivative7() throws Exception {
+        SimpleTensor t2 = parseSimple("F[x_s,y]");
+        SimpleTensor t1 = parseSimple("F~(1,2)_y[x_y,y]");
+
+        Assert.assertTrue(t1.getNameDescriptor() == ((NameDescriptorForTensorField) t2.getNameDescriptor()).getDerivative(1, 2));
+
+        SimpleTensor t3 = parseSimple("F~(1,2)_yz[x_y,y]");
+        SimpleTensor t4 = parseSimple("F_k[x_s,y]");
+
+        Assert.assertTrue(t3.getNameDescriptor() == ((NameDescriptorForTensorField) t4.getNameDescriptor()).getDerivative(1, 2));
+        Assert.assertTrue(t1.getNameDescriptor() != ((NameDescriptorForTensorField) t4.getNameDescriptor()).getDerivative(1, 2));
+        Assert.assertTrue(t3.getNameDescriptor() != ((NameDescriptorForTensorField) t2.getNameDescriptor()).getDerivative(1, 2));
+    }
+
+    @Test
+    public void testFieldDerivative8() throws Exception {
+        SimpleTensor t2 = parseSimple("F^er[x_s,y_Ss]");
+        SimpleTensor t1 = parseSimple("F~(1,2)_pqab^qDR[x_y,y_Ss]");
+
+        Assert.assertTrue(t1.getNameDescriptor() == ((NameDescriptorForTensorField) t2.getNameDescriptor()).getDerivative(1, 2));
+    }
+
+    @Test
+    public void testDerivative() {
+        Tensor t;
+        t = parse("D[x][x**2]");
+        TAssert.assertEquals(t, "2*x");
+        t = parse("x*D[x, x][x**2]");
+        TAssert.assertEquals(t, "2*x");
+        t = parse("D[x, x][x**2]*x");
+        TAssert.assertEquals(t, "2*x");
+
+        t = parse("D[x, y][x**2]");
+        TAssert.assertEquals(t, "0");
+
+        t = parse("D[x, x][x**2]");
+        TAssert.assertEquals(t, "2");
+
+        t = parse("D[x, x][x**2 + (y)]*x + z");
+        TAssert.assertEquals(t, "2*x + z");
+
+        t = parse("D[x, (y)][x**2*y + (y)]*f[x] + z");
+        TAssert.assertEquals(t, "2*x*f[x] + z");
+    }
+
+    @Test
+    public void testMetric2() {
+        SimpleTensor a = parseSimple("g_mn");
+        SimpleTensor b = parseSimple("g_mn[x_m]");
+        Assert.assertTrue(a.getName() != b.getName() );
     }
 }

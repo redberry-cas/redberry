@@ -22,8 +22,12 @@
  */
 package cc.redberry.core.tensor;
 
+import cc.redberry.core.context.NameDescriptorForTensorField;
 import cc.redberry.core.context.OutputFormat;
 import cc.redberry.core.indices.SimpleIndices;
+import cc.redberry.core.indices.SimpleIndicesBuilder;
+import cc.redberry.core.indices.StructureOfIndices;
+import cc.redberry.core.utils.ArraysUtils;
 
 import java.util.Arrays;
 import java.util.Iterator;
@@ -64,6 +68,10 @@ public final class TensorField extends SimpleTensor {
         return argIndices[i];
     }
 
+    public boolean isDerivative() {
+        return ((NameDescriptorForTensorField) getNameDescriptor()).isDerivative();
+    }
+
     @Override
     public Tensor get(int i) {
         return args[i];
@@ -82,6 +90,54 @@ public final class TensorField extends SimpleTensor {
     @Override
     public Tensor[] getRange(int from, int to) {
         return Arrays.copyOfRange(args, from, to);
+    }
+
+    @Override
+    public NameDescriptorForTensorField getNameDescriptor() {
+        return (NameDescriptorForTensorField) super.getNameDescriptor();
+    }
+
+    /**
+     * Calculates and returns partition of derivative indices. The resulting array organized as follows:
+     * {@code result[0]} --- contains pure field indices, {@code result[i][j]} --- are indices formed by j-th
+     * derivative with respect to i-th field argument
+     *
+     * @return partition of derivative indices
+     */
+    public SimpleIndices[][] calcIndicesPartition() {
+
+        NameDescriptorForTensorField fieldDescriptor = getNameDescriptor();
+        NameDescriptorForTensorField parent = fieldDescriptor.getParent();
+
+        int[] orders = fieldDescriptor.getDerivativeOrders();
+        int totalOrder = ArraysUtils.sum(orders) + 1;
+        StructureOfIndices[] partition = new StructureOfIndices[totalOrder];
+        partition[0] = parent.getStructureOfIndices();
+        int i, j;
+        totalOrder = 1;
+        for (i = 0; i < args.length; ++i) {
+            for (j = orders[i] - 1; j >= 0; --j)
+                partition[totalOrder++] = parent.getStructureOfIndices(i);
+        }
+
+        int[][] _mapping = fieldDescriptor.getStructureOfIndices().getPartitionMappings(partition);
+        SimpleIndices[][] iPartition = new SimpleIndices[args.length + 1][];
+
+        SimpleIndicesBuilder ib;
+        totalOrder = 0;
+        int k, l, _map[];
+        for (i = 0; i <= args.length; ++i) {
+            l = i == 0 ? 1 : orders[i - 1];
+            iPartition[i] = new SimpleIndices[l];
+            for (j = l - 1; j >= 0; --j) {
+                _map = _mapping[totalOrder++];
+                ib = new SimpleIndicesBuilder();
+                for (k = 0, l = _map.length; k < l; ++k)
+                    ib.append(indices.get(_map[k]));
+                iPartition[i][j] = ib.getIndices();
+            }
+        }
+        return iPartition;
     }
 
     @Override

@@ -41,7 +41,7 @@ import java.util.Arrays;
 public final class Sum extends MultiTensor {
 
     final Tensor[] data;
-    private final int hash;
+    final int hash;
 
     Sum(final Tensor[] data, Indices indices) {
         super(indices);
@@ -130,6 +130,19 @@ public final class Sum extends MultiTensor {
         System.arraycopy(data, 0, newData, 0, i);
         if (i < data.length - 1)
             System.arraycopy(data, i + 1, newData, i, data.length - i - 1);
+        return new Sum(newData, indices);
+    }
+
+    @Override
+    protected Tensor remove1(final int[] positions) {
+        Tensor[] newData = new Tensor[data.length - positions.length];
+        int pointer = 0, counter = -1;
+        for (int i = 0; i < data.length; ++i)
+            if (pointer < positions.length && i == positions[pointer]) {
+                ++pointer;
+                continue;
+            } else newData[++counter] = data[i];
+        if (newData.length == 1) return newData[0];
         return new Sum(newData, indices);
     }
 

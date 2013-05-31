@@ -30,14 +30,14 @@ import java.util.Arrays;
 
 /**
  * Object of this class represents unique type of simple tensor or tensor fields (unique name).
- *
+ * <p/>
  * <p>It holds the information about string name of simple tensor, structure of its indices and arguments
  * (in case of tensor field). Two simple tensors are considered to have different mathematical nature if and only if
  * their name descriptors are not equal. Each simple tensor with unique mathematical nature have its own unique integer
  * identifier, which is hold in the name descriptor. For example, tensors A_mn and A_ij have the same mathematical
  * origin and thus have the same integer identifier and both have the same name descriptor (the same reference). In
  * contrast, for example, tensors A_mn and A_i have different mathematical origin and different integer identifiers.</p>
- *
+ * <p/>
  * <p>This class have no public constructors, since Redberry takes care about its creation (see {@link NameManager}).
  * The only way to receive name descriptor from raw information about tensor is through
  * {@link NameManager#mapNameDescriptor(String, cc.redberry.core.indices.StructureOfIndices...)}.
@@ -50,16 +50,24 @@ import java.util.Arrays;
  */
 public abstract class NameDescriptor {
     //first element is simple tensor indexTypeStructure, other appears for tensor fields
-    final StructureOfIndices[] indexTypeStructures;
+    final StructureOfIndices[] structuresOfIndices;
     private final int id;
-    private final IndicesSymmetries symmetries;
+    final IndicesSymmetries symmetries;
+    NameManager nameManager = null;
 
-    NameDescriptor(StructureOfIndices[] indexTypeStructures, int id) {
-        if (indexTypeStructures.length == 0)
+    NameDescriptor(StructureOfIndices[] structuresOfIndices, int id) {
+        if (structuresOfIndices.length == 0)
             throw new IllegalArgumentException();
         this.id = id;
-        this.indexTypeStructures = indexTypeStructures;
-        this.symmetries = IndicesSymmetries.create(indexTypeStructures[0]);
+        this.structuresOfIndices = structuresOfIndices;
+        this.symmetries = IndicesSymmetries.create(structuresOfIndices[0]);
+    }
+
+    void registerInNameManager(NameManager manager) {
+        if (nameManager != null && manager != nameManager)
+            throw new IllegalStateException("Already registered in another name manager.");
+
+        this.nameManager = manager;
     }
 
     /**
@@ -86,7 +94,7 @@ public abstract class NameDescriptor {
      * @return {@code true} if this is a descriptor of tensor field
      */
     public boolean isField() {
-        return indexTypeStructures.length != 1;
+        return structuresOfIndices.length != 1;
     }
 
     /**
@@ -95,8 +103,18 @@ public abstract class NameDescriptor {
      * @return structure of indices of tensors with this name descriptor
      */
     public StructureOfIndices getStructureOfIndices() {
-        return indexTypeStructures[0];
+        return structuresOfIndices[0];
     }
+
+    /**
+     * Returns structure of i-th arg indices of tensors with this name descriptor
+     *
+     * @return structure of i-th arg indices indices of tensors with this name descriptor
+     */
+    public StructureOfIndices getStructureOfIndices(int arg) {
+        return structuresOfIndices[arg + 1];
+    }
+
 
     /**
      * Returns structure of indices of tensors with this name descriptor (first element in array) and
@@ -106,7 +124,7 @@ public abstract class NameDescriptor {
      */
     public StructureOfIndices[] getStructuresOfIndices() {
         //todo clone() ?
-        return indexTypeStructures;
+        return structuresOfIndices;
     }
 
     abstract NameAndStructureOfIndices[] getKeys();
@@ -121,7 +139,7 @@ public abstract class NameDescriptor {
 
     @Override
     public String toString() {
-        return getName(null) + ":" + Arrays.toString(indexTypeStructures);
+        return getName(null) + ":" + Arrays.toString(structuresOfIndices);
     }
 
     /**

@@ -715,5 +715,4 @@ public class TreeTraverseIteratorTest {
             }
         }
     }
-
 }

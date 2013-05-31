@@ -50,7 +50,7 @@ public class PermutationTest {
     @Test
     public void testInverse() {
         Permutation a = new Permutation(new int[]{2, 1, 0, 3});
-        assertTrue(a.composition(a.inverse()).equals(a.getOne()));
+        assertTrue(a.composition(a.inverse()).equals(a.getIdentity()));
     }
 
     @Test

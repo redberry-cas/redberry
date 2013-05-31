@@ -47,6 +47,10 @@ public final class StructureOfIndices {
     private final ByteBackedBitArray[] states = new ByteBackedBitArray[IndexType.TYPES_COUNT];
     private final int size;
 
+    private StructureOfIndices(int size) {
+        this.size = size;
+    }
+
     /**
      * Creates structure of indices, which contains indices only of specified type.
      *
@@ -286,13 +290,165 @@ public final class StructureOfIndices {
         return equals(indices.getStructureOfIndices());
     }
 
+    /**
+     * Return the new {@code Structure of Indices } with inverted states of indices
+     *
+     * @return new {@code Structure of Indices } with inverted states of indices
+     */
+    public StructureOfIndices getInverted() {
+        StructureOfIndices r = new StructureOfIndices(size);
+        System.arraycopy(typesCounts, 0, r.typesCounts, 0, typesCounts.length);
+        for (int i = r.states.length - 1; i >= 0; --i) {
+            if (states[i] == null) continue;
+            if (states[i] == ByteBackedBitArray.EMPTY)
+                r.states[i] = ByteBackedBitArray.EMPTY;
+            r.states[i] = states[i].clone();
+            r.states[i].not();
+        }
+        return r;
+    }
+
+    /**
+     * Returns the 'sum' of this and other structures
+     *
+     * @param oth other structure
+     * @return 'sum' of this and other structures
+     */
+    public StructureOfIndices append(StructureOfIndices oth) {
+        int size = this.size + oth.size;
+        StructureOfIndices r = new StructureOfIndices(size);
+        for (int i = 0; i < IndexType.TYPES_COUNT; ++i) {
+            r.typesCounts[i] = typesCounts[i] + oth.typesCounts[i];
+            if (states[i] == null)
+                continue;
+            r.states[i] = states[i].append(oth.states[i]);
+        }
+        return r;
+    }
+
+    /**
+     * Returns the 'sum' of N-copies of this
+     *
+     * @param N exponent
+     * @return 'sum' of N-copies of this
+     */
+    public StructureOfIndices pow(int N) {
+        if (N == 0) return EMPTY;
+        if (N == 1) return this;
+
+        int size = N * this.size;
+        StructureOfIndices r = new StructureOfIndices(size);
+        for (int i = 0; i < IndexType.TYPES_COUNT; ++i) {
+            r.typesCounts[i] = N * typesCounts[i];
+            if (states[i] == null)
+                continue;
+            r.states[i] = states[i].pow(N);
+        }
+        return r;
+    }
+
+    /**
+     * Subtracts some structure of indices from the right side of current structure.
+     * <p/>
+     * <p>This operation may fail if states of other structure differs from current.</p>
+     *
+     * @param other other structure
+     * @return result of subtraction
+     * @throws IllegalArgumentException nonmetric states are different
+     */
+    public StructureOfIndices subtract(StructureOfIndices other) {
+        int size = this.size - other.size;
+
+        StructureOfIndices r = new StructureOfIndices(size);
+        for (int i = 0; i < IndexType.TYPES_COUNT; ++i) {
+            if ((r.typesCounts[i] = typesCounts[i] - other.typesCounts[i]) < 0)
+                throw new IllegalArgumentException("Other is larger then this.");
+
+            if (states[i] == null)
+                continue;
+
+            if (!states[i].copyOfRange(states[i].size() - other.states[i].size()).equals(other.states[i]))
+                throw new IllegalArgumentException("Nonmetric states are different");
+
+            r.states[i] = states[i].copyOfRange(0, states[i].size() - other.states[i].size());
+        }
+
+        return r;
+    }
+
+    /**
+     * Calculates partition of this structure by the specified structures and returns the resulting map.
+     * This map organized as follows: map[i][j] represents the index of this, which matches
+     * j-th index of i-th structure in specified partition
+     *
+     * @param partition
+     * @return map which encodes partition of this structure by the specified structures
+     * @throws IllegalArgumentException if specified array does not form a partition
+     */
+    public int[][] getPartitionMappings(final StructureOfIndices... partition) {
+        int c;
+        //todo check states
+        for (int i = 0; i < IndexType.TYPES_COUNT; ++i) {
+            c = 0;
+            for (StructureOfIndices str : partition)
+                c += str.typesCounts[i];
+            if (c != typesCounts[i])
+                throw new IllegalArgumentException("Not a partition.");
+        }
+
+        int[][] mappings = new int[partition.length][];
+        int i, j, k;
+
+        int[] pointers = new int[IndexType.TYPES_COUNT];
+        for (j = 0; j < IndexType.TYPES_COUNT; ++j)
+            pointers[j] = getTypeData((byte) j).from;
+
+        for (c = 0; c < partition.length; ++c) {
+            mappings[c] = new int[partition[c].size];
+            i = 0;
+            for (j = 0; j < IndexType.TYPES_COUNT; ++j)
+                for (k = partition[c].typesCounts[j] - 1; k >= 0; --k)
+                    mappings[c][i++] = pointers[j]++;
+            assert i == partition[c].size;
+        }
+        return mappings;
+    }
+
     @Override
     public String toString() {
-        return "IndicesTypeStructure{" +
-                "typesCounts=" + typesCounts +
-                ", states=" + (states == null ? null : Arrays.asList(states)) +
-                ", size=" + size +
-                '}';
+        StringBuilder sb = new StringBuilder();
+        sb.append('[');
+        for (int i = 0; i < IndexType.TYPES_COUNT; ++i) {
+            if (typesCounts[i] != 0) {
+                sb.append('{');
+                if (states[i] == null)
+                    for (int t = 0; ; ++t) {
+                        sb.append(IndexType.values()[i].getShortString());
+                        if (t == typesCounts[i] - 1)
+                            break;
+                        sb.append(',');
+                    }
+                else {
+                    for (int t = 0; t < typesCounts[i]; ++t) {
+                        sb.append('(');
+                        sb.append(IndexType.values()[i].getShortString());
+                        sb.append(',');
+                        sb.append(states[i].get(t) ? 1 : 0);
+                        sb.append(')');
+                        if (t == typesCounts[i] - 1)
+                            break;
+                        sb.append(',');
+                    }
+
+                }
+
+                sb.append("},");
+            }
+        }
+
+        sb.deleteCharAt(sb.length() - 1);
+        sb.append(']');
+        return sb.toString();
     }
 
     /**

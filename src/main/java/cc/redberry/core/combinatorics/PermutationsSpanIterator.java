@@ -53,7 +53,7 @@ public final class PermutationsSpanIterator<T extends Permutation> implements It
         set = new TreeSet<>();
         this.upperLayer = new ArrayList<>();
         //noinspection unchecked
-        this.upperLayer.add((T) permutations.get(0).getOne());
+        this.upperLayer.add((T) permutations.get(0).getIdentity());
         this.lowerLayer = permutations;
     }
 

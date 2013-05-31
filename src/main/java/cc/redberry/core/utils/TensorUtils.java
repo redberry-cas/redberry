@@ -36,10 +36,12 @@ import cc.redberry.core.tensor.functions.ScalarFunction;
 import gnu.trove.set.hash.TIntHashSet;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-import static cc.redberry.core.tensor.Tensors.*;
+import static cc.redberry.core.tensor.Tensors.multiply;
+import static cc.redberry.core.tensor.Tensors.negate;
 
 /**
  * This class contains various useful methods related with tensors.
@@ -290,6 +292,13 @@ public class TensorUtils {
         TIntHashSet set = new TIntHashSet();
         appendAllIndicesNamesT(tensor, set);
         set.removeAll(IndicesUtils.getIndicesNames(tensor.getIndices().getFree()));
+        return set;
+    }
+
+    public static TIntHashSet getAllIndicesNamesT(Collection<? extends Tensor> tensors) {
+        TIntHashSet set = new TIntHashSet();
+        for (Tensor tensor : tensors)
+            appendAllIndicesNamesT(tensor, set);
         return set;
     }
 
@@ -585,4 +594,36 @@ public class TensorUtils {
         }
         return false;
     }
+
+    public static TIntHashSet getSimpleTensorsNames(Tensor t) {
+        return addSimpleTensorsNames(t, new TIntHashSet());
+    }
+
+    private static TIntHashSet addSimpleTensorsNames(Tensor t, TIntHashSet names) {
+        if (t instanceof TensorField)
+            names.add(((TensorField) t).getNameDescriptor().getParent().getId());
+        if (t instanceof SimpleTensor)
+            names.add(((SimpleTensor) t).getName());
+        for (Tensor tt : t)
+            addSimpleTensorsNames(tt, names);
+
+        return names;
+    }
+
+    public static boolean shareSimpleTensors(Tensor a, Tensor b) {
+        return testContainsNames(b, getSimpleTensorsNames(a));
+    }
+
+    private static boolean testContainsNames(Tensor t, TIntHashSet names) {
+        if (t instanceof TensorField) {
+            if (names.contains(((TensorField) t).getNameDescriptor().getParent().getId())) return true;
+        } else if (t instanceof SimpleTensor)
+            return names.contains(((SimpleTensor) t).getName());
+
+        for (Tensor tt : t)
+            if (testContainsNames(tt, names)) return true;
+
+        return false;
+    }
+
 }

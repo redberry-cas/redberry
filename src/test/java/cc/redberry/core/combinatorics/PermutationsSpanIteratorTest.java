@@ -178,7 +178,7 @@ public class PermutationsSpanIteratorTest {
             result.add(iterator.next());
         Permutation[] standart = new Permutation[2];
         standart[0] = a;
-        standart[1] = a.getOne();
+        standart[1] = a.getIdentity();
         Permutation[] _result = result.toArray(new Permutation[result.size()]);
         Arrays.sort(_result);
         Arrays.sort(standart);

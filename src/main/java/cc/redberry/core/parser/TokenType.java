@@ -43,5 +43,6 @@ public enum TokenType {
     Power,
     Number,
     ScalarFunction,
+    Derivative,
     Dummy
 }
