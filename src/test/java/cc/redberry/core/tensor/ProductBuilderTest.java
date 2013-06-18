@@ -25,6 +25,8 @@ package cc.redberry.core.tensor;
 import cc.redberry.core.TAssert;
 import org.junit.Test;
 
+import static cc.redberry.core.tensor.Tensors.parse;
+
 /**
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
@@ -32,17 +34,18 @@ import org.junit.Test;
 public class ProductBuilderTest {
     @Test
     public void testRationalPowers1() {
-        Tensor a = Tensors.parse("a/(-a)**(1/2)");
+        Tensor a = parse("a/(-a)**(1/2)");
         TAssert.assertEquals(a, "-(-a)**(1/2)");
 
-        a = Tensors.parse("(a-b)/(b-a)**(1/2)");
+        a = parse("(a-b)/(b-a)**(1/2)");
         TAssert.assertEquals(a, "-(b-a)**(1/2)");
     }
 
 
     @Test
     public void testPower1() {
-        Tensor t = Tensors.parse("(a+b)**(3/2) - (a+b)*(a+b)**(1/2)");
+        Tensor t = parse("(a+b)**(3/2) - (a+b)*(a+b)**(1/2)");
         TAssert.assertEquals(t, "0");
     }
+
 }

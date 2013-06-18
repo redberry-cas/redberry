@@ -333,13 +333,13 @@ public final class StructureOfIndices {
      * @return 'sum' of N-copies of this
      */
     public StructureOfIndices pow(int N) {
-        if(N == 0) return EMPTY;
-        if(N == 1) return this;
+        if (N == 0) return EMPTY;
+        if (N == 1) return this;
 
         int size = N * this.size;
         StructureOfIndices r = new StructureOfIndices(size);
         for (int i = 0; i < IndexType.TYPES_COUNT; ++i) {
-            r.typesCounts[i] = N*typesCounts[i];
+            r.typesCounts[i] = N * typesCounts[i];
             if (states[i] == null)
                 continue;
             r.states[i] = states[i].pow(N);
@@ -376,6 +376,15 @@ public final class StructureOfIndices {
         return r;
     }
 
+    /**
+     * Calculates partition of this structure by the specified structures and returns the resulting map.
+     * This map organized as follows: map[i][j] represents the index of this, which matches
+     * j-th index of i-th structure in specified partition
+     *
+     * @param partition
+     * @return map which encodes partition of this structure by the specified structures
+     * @throws IllegalArgumentException if specified array does not form a partition
+     */
     public int[][] getPartitionMappings(final StructureOfIndices... partition) {
         int c;
         //todo check states

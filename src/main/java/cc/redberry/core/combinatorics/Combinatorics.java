@@ -22,8 +22,11 @@
  */
 package cc.redberry.core.combinatorics;
 
+import cc.redberry.core.utils.ArraysUtils;
+
 import java.lang.reflect.Array;
 import java.util.Arrays;
+import java.util.Random;
 
 /**
  * This class provides factory and utility methods for combinatorics infrastructure.
@@ -278,6 +281,74 @@ public final class Combinatorics {
             }
 
         return result;
+    }
+
+    /**
+     * Creates random permutation of specified dimension
+     *
+     * @param n   dimension
+     * @param rnd random generator
+     * @return random permutation of specified dimension
+     */
+    public static int[] randomPermutation(final int n, Random rnd) {
+        int[] p = new int[n];
+        for (int i = 0; i < n; ++i)
+            p[i] = i;
+        for (int i = n; i > 1; --i)
+            ArraysUtils.swap(p, i - 1, rnd.nextInt(i));
+        return p;
+    }
+
+    /**
+     * Creates random permutation of specified dimension
+     *
+     * @param n dimension
+     * @return random permutation of specified dimension
+     */
+    public static int[] randomPermutation(final int n) {
+        return randomPermutation(n, new Random());
+    }
+
+    /**
+     * Randomly permute the specified list using the specified source of randomness.
+     *
+     * @param a   - the array to be shuffled.
+     * @param rnd - the source of randomness to use to shuffle the list.
+     */
+    public static void shuffle(int[] a, Random rnd) {
+        for (int i = a.length; i > 1; --i)
+            ArraysUtils.swap(a, i - 1, rnd.nextInt(i));
+    }
+
+
+    /**
+     * Randomly permute the specified list using the specified source of randomness.
+     *
+     * @param a - the array to be shuffled.
+     */
+    public static void shuffle(int[] a) {
+        shuffle(a, new Random());
+    }
+
+    /**
+     * Randomly permute the specified list using the specified source of randomness.
+     *
+     * @param a   - the array to be shuffled.
+     * @param rnd - the source of randomness to use to shuffle the list.
+     */
+    public static void shuffle(Object[] a, Random rnd) {
+        for (int i = a.length; i > 1; --i)
+            ArraysUtils.swap(a, i - 1, rnd.nextInt(i));
+    }
+
+
+    /**
+     * Randomly permute the specified list using the specified source of randomness.
+     *
+     * @param a - the array to be shuffled.
+     */
+    public static void shuffle(Object[] a) {
+        shuffle(a, new Random());
     }
 
     /**

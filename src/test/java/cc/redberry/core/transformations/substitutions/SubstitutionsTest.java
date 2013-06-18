@@ -1016,6 +1016,57 @@ public class SubstitutionsTest {
         t = e.transform(t);
     }
 
+    @Test
+    public void testProduct22() {
+        Tensor t = parse("x*(x**2 + x)");
+        Expression e = parseExpression("-x = x");
+        t = e.transform(t);
+        TAssert.assertEquals(t, "-x*(x**2 - x)");
+    }
+
+
+    @Test
+    public void testProduct23() {
+        Tensor t = parse("K[-x]");
+        Expression e = parseExpression("x = -x");
+        Transformation tr = new SubstitutionTransformation(e);
+        t = tr.transform(t);
+        TAssert.assertEquals(t, "K[x]");
+    }
+
+    @Test
+    public void testProduct24() {
+        Tensor t = parse("K[-x]");
+        Expression e = parseExpression("x = -x");
+        t = e.transform(t);
+        TAssert.assertEquals(t, "K[x]");
+    }
+
+
+    @Test
+    public void testProduct25() {
+        Tensor t = parse("(x*y + 1)*x*y");
+        Expression e = parseExpression("x*y = b");
+        t = e.transform(t);
+        TAssert.assertEquals(t, "(b+1)*b");
+
+        Transformation tr = new SubstitutionTransformation(e);
+        t = tr.transform(t);
+        TAssert.assertEquals(t, "(b+1)*b");
+    }
+
+
+    @Test
+    public void testProduct26() {
+        Tensor t = parse("(x*y + 1)*x*y");
+        Expression e = parseExpression("x*y = 1");
+
+        Transformation tr = new SubstitutionTransformation(new Expression[]{e}, false);
+        t = tr.transform(t);
+        TAssert.assertEquals(t, "2*x*y");
+    }
+
+
     //TODO tests for Product
 
     @Test

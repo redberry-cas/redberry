@@ -35,6 +35,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 
+import static cc.redberry.core.tensor.Tensors.multiply;
+
 /**
  * Utility static methods.
  *
@@ -172,9 +174,9 @@ public final class ExpandUtils {
 
         if (!expandIndexless) {
             Tensor newData = expandProductOfSums1(data, transformations, true);
-            if (newData instanceof Sum)
+            if (newData instanceof Sum)  //todo apply transformations?
                 return FastTensors.multiplySumElementsOnScalarFactorAndExpandScalars((Sum) newData, indexless);
-            else
+            else                         //todo apply transformations?
                 return expandIndexlessSubproduct.transform(Tensors.multiply(indexless, newData));
         }
 
@@ -213,7 +215,7 @@ public final class ExpandUtils {
             }
         }
 
-        if (data instanceof Sum)
+        if (data instanceof Sum)        //todo apply transformations?
             return FastTensors.multiplySumElementsOnScalarFactorAndExpandScalars((Sum) data, indexless);
         return Tensors.multiply(indexless, data);
     }
@@ -255,22 +257,18 @@ public final class ExpandUtils {
         }
         if (sums.size() == 1)
             if (indexed)
-                return apply(transformations,
-                        FastTensors.multiplySumElementsOnFactorAndExpand(sums.get(0), Tensors.multiply(ns.toArray(new Tensor[ns.size()]))));
+                return multiplySumElementsOnFactorAndExpand(sums.get(0), Tensors.multiply(ns.toArray(new Tensor[ns.size()])), transformations);
             else
-                return apply(transformations,
-                        FastTensors.multiplySumElementsOnFactor(sums.get(0), Tensors.multiply(ns.toArray(new Tensor[ns.size()]))));
+                return multiplySumElementsOnFactor(sums.get(0), Tensors.multiply(ns.toArray(new Tensor[ns.size()])), transformations);
 
         Tensor base = sums.get(0);
         for (int i = 1, size = sums.size(); ; ++i)
             if (i == size - 1) {
                 if (base == null)
                     if (indexed)
-                        return apply(transformations,
-                                FastTensors.multiplySumElementsOnFactorAndExpand(sums.get(i), Tensors.multiply(ns.toArray(new Tensor[ns.size()]))));
+                        return multiplySumElementsOnFactorAndExpand(sums.get(i), Tensors.multiply(ns.toArray(new Tensor[ns.size()])), transformations);
                     else
-                        return apply(transformations,
-                                FastTensors.multiplySumElementsOnFactor(sums.get(i), Tensors.multiply(ns.toArray(new Tensor[ns.size()]))));
+                        return multiplySumElementsOnFactor(sums.get(i), Tensors.multiply(ns.toArray(new Tensor[ns.size()])), transformations);
 
                 return expandPairOfSums((Sum) base, sums.get(i), ns.toArray(new Tensor[ns.size()]), transformations1);
             } else {
@@ -285,6 +283,36 @@ public final class ExpandUtils {
                     base = null;
                 }
             }
+    }
+
+    public static Tensor multiplySumElementsOnFactorAndExpand(Sum sum, Tensor factor, Transformation[] transformations) {
+        if (TensorUtils.isZero(factor))
+            return Complex.ZERO;
+        if (TensorUtils.isOne(factor))
+            return sum;
+        if (factor instanceof Sum && factor.getIndices().size() != 0)
+            throw new IllegalArgumentException();
+        if (TensorUtils.haveIndicesIntersections(sum, factor)) {
+            SumBuilder sb = new SumBuilder(sum.size());
+            for (Tensor t : sum)
+                sb.put(apply(transformations, ExpandUtils.expandIndexlessSubproduct.transform(multiply(t, factor))));
+            return sb.build();
+        } else
+            return apply(transformations, FastTensors.multiplySumElementsOnFactorAndExpand(sum, factor));
+    }
+
+    public static Tensor multiplySumElementsOnFactor(Sum sum, Tensor factor, Transformation[] transformations) {
+        if (TensorUtils.isZero(factor))
+            return Complex.ZERO;
+        if (TensorUtils.isOne(factor))
+            return sum;
+        if (TensorUtils.haveIndicesIntersections(sum, factor)) {
+            SumBuilder sb = new SumBuilder(sum.size());
+            for (Tensor t : sum)
+                sb.put(apply(transformations, multiply(t, factor)));
+            return sb.build();
+        } else
+            return apply(transformations, FastTensors.multiplySumElementsOnFactor(sum, factor));
     }
 
     public static boolean isExpandablePower(Tensor t) {

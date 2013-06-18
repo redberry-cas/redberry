@@ -22,9 +22,12 @@
  */
 package cc.redberry.core.transformations.substitutions;
 
+import cc.redberry.core.number.Complex;
 import cc.redberry.core.tensor.*;
 import cc.redberry.core.transformations.Transformation;
 import cc.redberry.core.utils.TensorUtils;
+
+import static cc.redberry.core.utils.TensorUtils.shareSimpleTensors;
 
 /**
  * Substitution.
@@ -45,16 +48,25 @@ public final class SubstitutionTransformation implements Transformation {
     /**
      * Creates a set of substitutions.
      *
+     * @param expressions     an array of the expressions
      * @param applyIfModified if false, then if some substitution was
      *                        applied to some tensor in tree, then others
      *                        will be skipped in current subtree.
-     * @param expressions     an array of the expressions
      */
-    public SubstitutionTransformation(boolean applyIfModified, Expression... expressions) {
+    public SubstitutionTransformation(Expression[] expressions, boolean applyIfModified) {
         this.applyIfModified = applyIfModified;
         primitiveSubstitutions = new PrimitiveSubstitution[expressions.length];
         for (int i = expressions.length - 1; i >= 0; --i)
             primitiveSubstitutions[i] = createPrimitiveSubstitution(expressions[i].get(0), expressions[i].get(1));
+    }
+
+    /**
+     * Creates a substitution.
+     *
+     * @param expression expression
+     */
+    public SubstitutionTransformation(Expression expression) {
+        this(expression.get(0), expression.get(1));
     }
 
     /**
@@ -63,7 +75,8 @@ public final class SubstitutionTransformation implements Transformation {
      * @param expressions an array of the expressions
      */
     public SubstitutionTransformation(Expression... expressions) {
-        this(true, expressions);
+        this(expressions, expressions.length == 1 ?
+                !shareSimpleTensors(expressions[0].get(0), expressions[0].get(1)) : false);
     }
 
     /**
@@ -96,7 +109,7 @@ public final class SubstitutionTransformation implements Transformation {
      *                                  to {@code to[i]} free indices
      */
     public SubstitutionTransformation(Tensor[] from, Tensor[] to) {
-        this(from, to, true);
+        this(from, to, from.length == 1 ? !shareSimpleTensors(from[0], to[0]) : false);
     }
 
 
@@ -109,7 +122,7 @@ public final class SubstitutionTransformation implements Transformation {
      *                                  to {@code to} free indices
      */
     public SubstitutionTransformation(Tensor from, Tensor to) {
-        this(from, to, true);
+        this(from, to, !shareSimpleTensors(from, to));
     }
 
     /**
@@ -179,8 +192,14 @@ public final class SubstitutionTransformation implements Transformation {
                 return new PrimitiveSimpleTensorSubstitution(from, to);
             return new PrimitiveTensorFieldSubstitution(from, to);
         }
-        if (from.getClass() == Product.class)
+        if (from.getClass() == Product.class) {
+            if (from.size() == 2 && from.get(0) instanceof Complex) {
+                to = Tensors.divide(to, from.get(0));
+                from = from.get(1);
+                return createPrimitiveSubstitution(from, to);
+            }
             return new PrimitiveProductSubstitution(from, to);
+        }
         if (from.getClass() == Sum.class)
             return new PrimitiveSumSubstitution(from, to);
         return new PrimitiveSimpleTensorSubstitution(from, to);
@@ -194,8 +213,8 @@ public final class SubstitutionTransformation implements Transformation {
             if (!applyIfModified && iterator.isCurrentModified())
                 continue;
             Tensor old = current;
-            for (PrimitiveSubstitution nodeSubstitution : primitiveSubstitutions) {
-                current = nodeSubstitution.newTo(old, iterator);
+            for (PrimitiveSubstitution primitiveSubstitution : primitiveSubstitutions) {
+                current = primitiveSubstitution.newTo(old, iterator);
                 if (current != old && !applyIfModified)
                     break;
                 old = current;

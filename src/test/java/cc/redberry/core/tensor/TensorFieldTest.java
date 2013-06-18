@@ -22,8 +22,11 @@
  */
 package cc.redberry.core.tensor;
 
+import cc.redberry.core.indices.SimpleIndices;
 import junit.framework.Assert;
 import org.junit.Test;
+
+import java.util.Arrays;
 
 import static cc.redberry.core.tensor.Tensors.*;
 
@@ -67,6 +70,15 @@ public class TensorFieldTest {
         addSymmetry("f_mn[x_ab, y_c]", 1, 0);
         d = parseSimple("f~(2, 2)_{mn {ax by} {cd}}[x_ab, y_b]");
 //        System.out.println(d.getIndices().getSymmetries().getInnerSymmetries());
+    }
+
+    @Test
+    public void testPartition1() {
+        TensorField f = (TensorField) parse("f~(2,3, 2)_{mn {ab cd} {x y z} {AB}}[x_ab,f_c, x_A]");
+        SimpleIndices[][] iP = f.calcIndicesPartition();
+        for(int i=0; i<iP.length; ++i){
+            System.out.println(Arrays.toString(iP[i]));
+        }
     }
 
     @Test
