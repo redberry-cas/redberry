@@ -25,7 +25,9 @@ package cc.redberry.core.transformations.expand;
 import cc.redberry.concurrent.OutputPortUnsafe;
 import cc.redberry.core.combinatorics.IntTuplesPort;
 import cc.redberry.core.number.Complex;
+import cc.redberry.core.number.NumberUtils;
 import cc.redberry.core.tensor.*;
+import cc.redberry.core.transformations.Transformation;
 import cc.redberry.core.utils.TensorUtils;
 import gnu.trove.set.hash.TIntHashSet;
 
@@ -63,11 +65,11 @@ public final class ExpandPort {
             return new OutputPortUnsafe.Singleton<>(tensor);
     }
 
-    private static interface ResetablePort extends OutputPortUnsafe<Tensor> {
+    private static interface ResettablePort extends OutputPortUnsafe<Tensor> {
         void reset();
     }
 
-    private static final class PowerPort implements ResetablePort {
+    private static final class PowerPort implements ResettablePort {
 
         private final Tensor base;
         private final int power;
@@ -125,14 +127,14 @@ public final class ExpandPort {
 
         private final ProductBuilder base;
         private ProductBuilder currentBuilder;
-        private final ResetablePort[] sumsAndPowers;
+        private final ResettablePort[] sumsAndPowers;
         private final Tensor[] currentMultipliers;
         private final Tensor tensor;
 
         public ProductPort(Tensor tensor) {
             this.tensor = tensor;
             this.base = new ProductBuilder();
-            List<ResetablePort> sumOrPowerPorts = new ArrayList<>();
+            List<ResettablePort> sumOrPowerPorts = new ArrayList<>();
             int theLargestSumPosition = 0, theLargestSumSize = 0, productSize = tensor.size();
             Tensor m;
             for (int i = 0; i < productSize; ++i) {
@@ -144,7 +146,14 @@ public final class ExpandPort {
                     }
                     sumOrPowerPorts.add(new SumPort(m));
                 } else if (ExpandUtils.isExpandablePower(m)) {
-                    if (BigInteger.valueOf(m.get(0).size()).pow(((Complex) m.get(1)).getReal().intValue()).compareTo(BigInteger.valueOf(theLargestSumSize)) > 0) {
+                    if (TensorUtils.isNegativeIntegerNumber(m.get(1))) {
+                        base.put(Tensors.reciprocal(ExpandUtils.expandPower(
+                                (Sum) m.get(0), ((Complex) m.get(1)).getReal().intValue(),
+                                TensorUtils.getAllIndicesNamesT(tensor).toArray(), new Transformation[0])));
+                        continue;
+                    }
+                    if (NumberUtils.pow(BigInteger.valueOf(m.get(0).size()),
+                            (((Complex) m.get(1)).getReal().bigIntValue())).compareTo(BigInteger.valueOf(theLargestSumSize)) > 0) {
                         theLargestSumPosition = sumOrPowerPorts.size();
                         theLargestSumSize = m.size();
                     }
@@ -152,13 +161,13 @@ public final class ExpandPort {
                 } else
                     base.put(m);
             }
-            sumsAndPowers = sumOrPowerPorts.toArray(new ResetablePort[sumOrPowerPorts.size()]);
+            sumsAndPowers = sumOrPowerPorts.toArray(new ResettablePort[sumOrPowerPorts.size()]);
 
             if (sumsAndPowers.length <= 1) {
                 currentMultipliers = new Tensor[0];
                 currentBuilder = base;
             } else {
-                ResetablePort temp = sumsAndPowers[theLargestSumPosition];
+                ResettablePort temp = sumsAndPowers[theLargestSumPosition];
                 sumsAndPowers[theLargestSumPosition] = sumsAndPowers[sumsAndPowers.length - 1];
                 sumsAndPowers[sumsAndPowers.length - 1] = temp;
                 currentMultipliers = new Tensor[sumsAndPowers.length - 2];
@@ -220,7 +229,7 @@ public final class ExpandPort {
         }
     }
 
-    private static final class SumPort implements ResetablePort {
+    private static final class SumPort implements ResettablePort {
 
         private final OutputPortUnsafe<Tensor>[] ports;
         private final Tensor tensor;

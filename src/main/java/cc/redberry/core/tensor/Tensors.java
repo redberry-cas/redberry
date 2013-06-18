@@ -25,6 +25,7 @@ package cc.redberry.core.tensor;
 import cc.redberry.core.combinatorics.Combinatorics;
 import cc.redberry.core.context.CC;
 import cc.redberry.core.context.NameDescriptor;
+import cc.redberry.core.context.NameDescriptorForTensorField;
 import cc.redberry.core.indices.*;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.parser.ParseTokenTransformer;
@@ -288,6 +289,118 @@ public final class Tensors {
     }
 
     /**
+     * Creates 1-st derivative with respect to specified argument of specified tensor field with specified derivative
+     * indices
+     *
+     * @param parent            tensor field
+     * @param derivativeIndices indices of the var (inverted)
+     * @param argPosition       argument
+     * @return 1-st derivative
+     */
+    public static TensorField fieldDerivative(TensorField parent, SimpleIndices derivativeIndices, final int argPosition) {
+        return fieldDerivative(parent, derivativeIndices, argPosition, 1);
+    }
+
+    /**
+     * Creates n-th derivative with respect to specified argument of specified tensor field with specified derivative
+     * indices
+     *
+     * @param parent            tensor field
+     * @param derivativeIndices indices of the var (inverted)
+     * @param argPosition       argument
+     * @param order             order of derivative
+     * @return n-th derivative
+     */
+    public static TensorField fieldDerivative(TensorField parent, SimpleIndices derivativeIndices,
+                                              final int argPosition, final int order) {
+
+        if (!derivativeIndices.getStructureOfIndices().equals(parent.argIndices[argPosition].getInverted().getStructureOfIndices().pow(order)))
+            throw new IllegalArgumentException("Illegal derivative indices.");
+
+        int[] orders = new int[parent.size()];
+        orders[argPosition] = order;
+        NameDescriptorForTensorField fieldDescriptor = parent.getNameDescriptor();
+        NameDescriptor derivativeDescriptor = fieldDescriptor.getDerivative(orders);
+
+        SimpleIndices totalIndices;
+
+        if (!fieldDescriptor.isDerivative() || derivativeIndices.size() == 0 || parent.indices.size() == 0) {
+            totalIndices = new SimpleIndicesBuilder().append(parent.getIndices()).append(derivativeIndices).getIndices();
+        } else {
+            orders = fieldDescriptor.getDerivativeOrders();
+
+            SimpleIndicesBuilder ib = new SimpleIndicesBuilder();
+            StructureOfIndices[] structures = fieldDescriptor.getStructuresOfIndices();
+            int i, from;
+            SimpleIndices singleType;
+            IndexType eType;
+            for (byte type = IndexType.TYPES_COUNT - 1; type >= 0; --type) {
+                eType = IndexType.values()[type];
+                singleType = parent.getIndices().getOfType(eType);
+                from = fieldDescriptor.getParent().getStructureOfIndices().getTypeData(type).length;
+                for (i = 0; i <= argPosition; ++i)
+                    from += structures[i + 1].getTypeData(type).length * orders[i];
+                for (i = 0; i < from; ++i)
+                    ib.append(singleType.get(i));
+                ib.append(derivativeIndices.getOfType(eType));
+                for (; i < singleType.size(); ++i)
+                    ib.append(singleType.get(i));
+            }
+            totalIndices = ib.getIndices();
+        }
+
+        return new TensorField(derivativeDescriptor.getId(),
+                UnsafeIndicesFactory.createOfTensor(derivativeDescriptor.getSymmetries(), totalIndices),
+                parent.args, parent.argIndices);
+    }
+
+    /**
+     * Returns new tensor field derivative with specified string name, indices, arguments, derivative orders and
+     * explicit argument indices bindings.
+     *
+     * @param name       string name of the corresponding tensor field
+     * @param indices    total indices of resulting derivative (field indices + indices of vars)
+     * @param argIndices argument indices bindings
+     * @param arguments  arguments list
+     * @param orders     orders of derivatives
+     * @return new instance of {@link TensorField} object
+     */
+    public static TensorField fieldDerivative(String name, SimpleIndices indices, final SimpleIndices[] argIndices,
+                                              final Tensor[] arguments, final int[] orders) {
+        if (argIndices.length != arguments.length)
+            throw new IllegalArgumentException("Argument indices array and arguments array have different length.");
+        if (arguments.length == 0)
+            throw new IllegalArgumentException("No arguments in field.");
+        for (int i = 0; i < argIndices.length; ++i)
+            if (!arguments[i].getIndices().getFree().equalsRegardlessOrder(argIndices[i]))
+                throw new IllegalArgumentException("Arguments indices are inconsistent with arguments.");
+
+        try {
+            StructureOfIndices[] structures = new StructureOfIndices[argIndices.length + 1];
+            StructureOfIndices structureOfIndices = indices.getStructureOfIndices();
+            int i, j;
+            for (i = argIndices.length - 1; i >= 0; --i) {
+                structures[i + 1] = argIndices[i].getStructureOfIndices();
+                for (j = orders[i]; j > 0; --j)
+                    structureOfIndices = structureOfIndices.subtract(structures[i + 1]);
+            }
+
+            structures[0] = structureOfIndices;
+
+            NameDescriptorForTensorField fieldDescriptor =
+                    (NameDescriptorForTensorField) CC.getNameManager().mapNameDescriptor(name, structures);
+
+            NameDescriptor derivativeDescriptor = fieldDescriptor.getDerivative(orders);
+
+            return new TensorField(derivativeDescriptor.getId(),
+                    UnsafeIndicesFactory.createOfTensor(derivativeDescriptor.getSymmetries(), indices),
+                    arguments, argIndices);
+        } catch (RuntimeException re) {
+            throw new IllegalArgumentException("Inconsistent derivative orders/indices.", re);
+        }
+    }
+
+    /**
      * Returns new tensor field with specified string name, indices and
      * arguments list. Free indices of arguments assumed as arguments indices
      * bindings of this field bindings.
@@ -393,6 +506,40 @@ public final class Tensors {
         return new TensorField(name,
                 UnsafeIndicesFactory.createOfTensor(descriptor.getSymmetries(), indices),
                 arguments, argIndices);
+    }
+
+    /**
+     * Returns an instance of specified simple tensor with specified indices
+     *
+     * @param tensor  simple tensor
+     * @param indices indices
+     * @return instance of specified simple tensor with specified indices
+     */
+    public static SimpleTensor setIndices(SimpleTensor tensor, int[] indices) {
+        return setIndices(tensor, IndicesFactory.createSimple(null, indices));
+    }
+
+    /**
+     * Returns an instance of specified simple tensor with specified indices
+     *
+     * @param tensor  simple tensor
+     * @param indices indices
+     * @return instance of specified simple tensor with specified indices
+     */
+    public static SimpleTensor setIndices(SimpleTensor tensor, SimpleIndices indices) {
+        if (tensor.getIndices() == indices) return tensor;
+
+        NameDescriptor descriptor = tensor.getNameDescriptor();
+        if (!descriptor.getStructureOfIndices().isStructureOf(indices))
+            throw new IllegalArgumentException("Illegal structure of indices.");
+        if (descriptor.isField())
+            return new TensorField(tensor.name,
+                    UnsafeIndicesFactory.createOfTensor(descriptor.getSymmetries(), indices),
+                    ((TensorField) tensor).args, ((TensorField) tensor).argIndices);
+        else
+            return new SimpleTensor(tensor.name,
+                    UnsafeIndicesFactory.createOfTensor(descriptor.getSymmetries(),
+                            indices));
     }
 
     /**

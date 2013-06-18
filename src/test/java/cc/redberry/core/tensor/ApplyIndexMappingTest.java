@@ -30,6 +30,7 @@ import cc.redberry.core.indices.IndexType;
 import cc.redberry.core.utils.IntArrayList;
 import cc.redberry.core.utils.TensorUtils;
 import gnu.trove.set.TIntSet;
+import gnu.trove.set.hash.TIntHashSet;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -37,8 +38,7 @@ import org.junit.Test;
 import java.util.Arrays;
 import java.util.Set;
 
-import static cc.redberry.core.tensor.Tensors.addSymmetry;
-import static cc.redberry.core.tensor.Tensors.parse;
+import static cc.redberry.core.tensor.Tensors.*;
 
 /**
  * @author Dmitry Bolotin
@@ -387,5 +387,32 @@ public class ApplyIndexMappingTest {
             t = ApplyIndexMapping.renameDummy(t, fobidden.toArray());
             fobidden.addAll(TensorUtils.getAllIndicesNamesT(t));
         }
+    }
+
+    @Test
+    public void testRenameFieldArgs() {
+        Tensor t;
+        TIntHashSet forbidden;
+
+//        t = parseSimple("f[x_a, x_a, x_c]");
+//        forbidden = new TIntHashSet();
+//        forbidden.add(0);
+//        System.out.println(ApplyIndexMapping.renameIndicesOfFieldsArguments(t, forbidden));
+//
+//        forbidden = new TIntHashSet();
+//        forbidden.add(0);
+//        t = parseSimple("f[x_b, x_a, x_c]");
+//        System.out.println(ApplyIndexMapping.renameIndicesOfFieldsArguments(t, forbidden));
+//
+//        forbidden = new TIntHashSet();
+//        forbidden.add(0);
+//        t = parse("f[x_b, x_a, x_c]*f[x_b*x^b, x_c*x^c, x_c]");
+//        System.out.println(ApplyIndexMapping.renameIndicesOfFieldsArguments(t, forbidden));
+
+        forbidden = new TIntHashSet();
+        forbidden.add(0);
+        forbidden.add(1);
+        t = parse("f[x_ab]");
+        System.out.println(ApplyIndexMapping.renameIndicesOfFieldsArguments(t, forbidden));
     }
 }

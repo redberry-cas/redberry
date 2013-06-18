@@ -84,6 +84,35 @@ public class ParseTokenTensorField extends ParseTokenSimpleTensor {
         for (int i = 0; i < arguments.length; ++i)
             if (argumentsIndices[i] == null)
                 argumentsIndices[i] = IndicesFactory.createSimple(null, arguments[i].getIndices().getFree());
-        return Tensors.field(name, indices, argumentsIndices, contentToTensors());
+
+        int i;
+        if ((i = name.indexOf('~')) >= 0) {
+            String ordersDescriptor = name.substring(i + 1);
+            String fieldName = name.substring(0, i);
+            ordersDescriptor = ordersDescriptor.replace(" ", "");
+            if (ordersDescriptor.length() == 0)
+                throw new ParserException("Error in derivative orders in \"" + name + "\"");
+
+            if (ordersDescriptor.charAt(0) == '(') {
+                if (ordersDescriptor.charAt(ordersDescriptor.length() - 1) != ')')
+                    throw new ParserException("Unbalanced brackets in derivative orders in \"" + name + "\"");
+
+                ordersDescriptor = ordersDescriptor.substring(1, ordersDescriptor.length() - 1);
+            }
+
+            String[] ordersStr = ordersDescriptor.split(",");
+            if (ordersStr.length != arguments.length)
+                throw new ParserException("Number of arguments does not match number of derivative orders in \"" + name + "\"");
+            int[] orders = new int[ordersStr.length];
+            for (i = orders.length - 1; i >= 0; --i)
+                try {
+                    orders[i] = Integer.parseInt(ordersStr[i], 10);
+                } catch (NumberFormatException nfe) {
+                    throw new ParserException("Illegal order of derivative: \"" + ordersStr[i] + "\" in \"" + name + "\"");
+                }
+
+            return Tensors.fieldDerivative(fieldName, indices, argumentsIndices, contentToTensors(), orders);
+        } else
+            return Tensors.field(name, indices, argumentsIndices, contentToTensors());
     }
 }

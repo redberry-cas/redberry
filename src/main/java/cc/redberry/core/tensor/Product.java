@@ -304,6 +304,17 @@ public final class Product extends MultiTensor {
     }
 
     @Override
+    protected Tensor remove1(int[] positions) {
+        //todo better implementation is possible
+        Tensor temp = this;
+        for (int i = positions.length - 1; i >= 0; --i)
+            if (temp instanceof Product) {
+                temp = ((Product) temp).remove(positions[i]);
+            } else temp = getNeutral();
+        return temp;
+    }
+
+    @Override
     protected Complex getNeutral() {
         return Complex.ONE;
     }

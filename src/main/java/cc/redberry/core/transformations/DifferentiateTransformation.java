@@ -24,19 +24,18 @@ package cc.redberry.core.transformations;
 
 import cc.redberry.core.indexgenerator.IndexGenerator;
 import cc.redberry.core.indices.IndicesFactory;
+import cc.redberry.core.indices.IndicesUtils;
 import cc.redberry.core.indices.SimpleIndices;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.tensor.*;
 import cc.redberry.core.tensor.functions.ScalarFunction;
-import cc.redberry.core.tensor.iterator.FromChildToParentIterator;
 import cc.redberry.core.transformations.substitutions.SubstitutionTransformation;
 import cc.redberry.core.transformations.symmetrization.SymmetrizeSimpleTensorTransformation;
 import cc.redberry.core.utils.TensorUtils;
 import gnu.trove.set.hash.TIntHashSet;
 
 import static cc.redberry.core.indices.IndicesUtils.*;
-import static cc.redberry.core.tensor.ApplyIndexMapping.applyIndexMapping;
-import static cc.redberry.core.tensor.ApplyIndexMapping.renameDummy;
+import static cc.redberry.core.tensor.ApplyIndexMapping.*;
 import static cc.redberry.core.tensor.Tensors.*;
 import static cc.redberry.core.utils.ArraysUtils.addAll;
 
@@ -121,28 +120,43 @@ public final class DifferentiateTransformation implements Transformation {
         if (vars.length == 1)
             return differentiate(tensor, expandAndContract, vars[0]);
 
-        TIntHashSet forbidden = TensorUtils.getAllIndicesNamesT(tensor);
+        boolean needRename = false;
         for (SimpleTensor var : vars)
-            forbidden.addAll(getIndicesNames(var.getIndices().getFree()));
-
-        SimpleTensor[] vars1 = vars.clone();
-        for (int i = 0; i < vars.length; ++i)
-            if (!forbidden.isEmpty() && vars1[i].getIndices().size() != 0) {
-                if (vars1[i].getIndices().size() != vars1[i].getIndices().getFree().size())
-                    vars1[i] = (SimpleTensor) renameDummy(vars1[i], forbidden.toArray());
-                forbidden.addAll(getIndicesNames(vars1[i].getIndices()));
+            if (var.getIndices().size() != 0) {
+                needRename = true;
+                break;
             }
-        tensor = renameDummy(tensor, TensorUtils.getAllIndicesNamesT(vars1).toArray());
-        for (SimpleTensor var : vars1)
+
+        SimpleTensor[] resolvedVars = vars;
+        if (needRename) {
+            TIntHashSet forbidden = TensorUtils.getAllIndicesNamesT(tensor);
+            for (SimpleTensor var : vars)
+                forbidden.addAll(getIndicesNames(var.getIndices().getFree()));
+
+            resolvedVars = vars.clone();
+            for (int i = 0; i < vars.length; ++i)
+                if (!forbidden.isEmpty() && resolvedVars[i].getIndices().size() != 0) {
+                    if (resolvedVars[i].getIndices().size() != resolvedVars[i].getIndices().getFree().size())
+                        resolvedVars[i] = (SimpleTensor) renameDummy(resolvedVars[i], forbidden.toArray());
+                    forbidden.addAll(getIndicesNames(resolvedVars[i].getIndices()));
+                }
+            tensor = renameDummy(tensor, TensorUtils.getAllIndicesNamesT(resolvedVars).toArray(), forbidden);
+            tensor = renameIndicesOfFieldsArguments(tensor, forbidden);
+        }
+
+        for (SimpleTensor var : resolvedVars)
             tensor = differentiate1(tensor, createRule(var), expandAndContract);
+
         return tensor;
     }
 
     private static Tensor differentiate(Tensor tensor, Transformation[] expandAndContract, SimpleTensor var) {
         if (var.getIndices().size() != 0) {
-            if (var.getIndices().size() != var.getIndices().getFree().size())
-                var = (SimpleTensor) renameDummy(var, TensorUtils.getAllIndicesNamesT(tensor).toArray());
-            tensor = renameDummy(tensor, TensorUtils.getAllIndicesNamesT(var).toArray());
+            TIntHashSet forbidden = TensorUtils.getAllIndicesNamesT(tensor);
+            var = (SimpleTensor) renameDummy(var, TensorUtils.getAllIndicesNamesT(tensor).toArray());
+            forbidden.addAll(IndicesUtils.getIndicesNames(var.getIndices()));
+            tensor = renameDummy(tensor, TensorUtils.getAllIndicesNamesT(var).toArray(), forbidden);
+            tensor = renameIndicesOfFieldsArguments(tensor, forbidden);
         }
         return differentiate1(tensor, createRule(var), expandAndContract);
     }
@@ -159,13 +173,21 @@ public final class DifferentiateTransformation implements Transformation {
             return applyTransformations(temp, transformations);
         }
         if (tensor.getClass() == TensorField.class) {
-            FromChildToParentIterator iterator = new FromChildToParentIterator(tensor);
-            Tensor c;
-            while ((c = iterator.next()) != null)
-                if (c.getClass() == SimpleTensor.class)
-                    if (((SimpleTensor) c).getName() == rule.var.getName())
-                        throw new UnsupportedOperationException();
-            return Complex.ZERO;
+            TensorField field = (TensorField) tensor;
+            SumBuilder result = new SumBuilder(tensor.size());
+            Tensor dArg;
+
+            for (int i = tensor.size() - 1; i >= 0; --i) {
+                dArg = differentiate1(field.get(i), rule, transformations);
+                if (TensorUtils.isZero(dArg)) continue;
+
+                result.put(
+                        multiply(dArg,
+                                fieldDerivative(field, field.getArgIndices(i).getInverted(), i))
+                );
+
+            }
+            return applyTransformations(EliminateMetricsTransformation.eliminate(result.build()), transformations);
         }
         if (tensor instanceof Sum) {
             SumBuilder builder = new SumBuilder();

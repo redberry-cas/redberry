@@ -365,7 +365,7 @@ public class SubstitutionsTest {
         Expression[] temp;
         while (generator.hasNext()) {
             permutation = generator.next();
-            temp = Combinatorics.shuffle(es, permutation);
+            temp = Combinatorics.reorder(es, permutation);
             for (Expression e : temp)
                 t = e.transform(t);
             TAssert.assertIndicesConsistency(t);
@@ -401,7 +401,7 @@ public class SubstitutionsTest {
         Expression[] temp;
         while (generator.hasNext()) {
             permutation = generator.next();
-            temp = Combinatorics.shuffle(es, permutation);
+            temp = Combinatorics.reorder(es, permutation);
             for (Expression e : temp)
                 t = e.transform(t);
             TAssert.assertIndicesConsistency(t);
@@ -1016,6 +1016,57 @@ public class SubstitutionsTest {
         t = e.transform(t);
     }
 
+    @Test
+    public void testProduct22() {
+        Tensor t = parse("x*(x**2 + x)");
+        Expression e = parseExpression("-x = x");
+        t = e.transform(t);
+        TAssert.assertEquals(t, "-x*(x**2 - x)");
+    }
+
+
+    @Test
+    public void testProduct23() {
+        Tensor t = parse("K[-x]");
+        Expression e = parseExpression("x = -x");
+        Transformation tr = new SubstitutionTransformation(e);
+        t = tr.transform(t);
+        TAssert.assertEquals(t, "K[x]");
+    }
+
+    @Test
+    public void testProduct24() {
+        Tensor t = parse("K[-x]");
+        Expression e = parseExpression("x = -x");
+        t = e.transform(t);
+        TAssert.assertEquals(t, "K[x]");
+    }
+
+
+    @Test
+    public void testProduct25() {
+        Tensor t = parse("(x*y + 1)*x*y");
+        Expression e = parseExpression("x*y = b");
+        t = e.transform(t);
+        TAssert.assertEquals(t, "(b+1)*b");
+
+        Transformation tr = new SubstitutionTransformation(e);
+        t = tr.transform(t);
+        TAssert.assertEquals(t, "(b+1)*b");
+    }
+
+
+    @Test
+    public void testProduct26() {
+        Tensor t = parse("(x*y + 1)*x*y");
+        Expression e = parseExpression("x*y = 1");
+
+        Transformation tr = new SubstitutionTransformation(new Expression[]{e}, false);
+        t = tr.transform(t);
+        TAssert.assertEquals(t, "2*x*y");
+    }
+
+
     //TODO tests for Product
 
     @Test
@@ -1078,11 +1129,105 @@ public class SubstitutionsTest {
         Expression[] temp;
         while (generator.hasNext()) {
             permutation = generator.next();
-            temp = Combinatorics.shuffle(es, permutation);
+            temp = Combinatorics.reorder(es, permutation);
             for (Expression e : temp)
                 t = e.transform(t);
             TAssert.assertIndicesConsistency(t);
         }
     }
 
+    @Test
+    public void testFieldDerivative1() {
+        Expression s = parseExpression("f[x] = x**2");
+        Tensor t = parse("f~(1)[y]");
+        t = s.transform(t);
+        TAssert.assertEquals(t, "2*y");
+    }
+
+    @Test
+    public void testFieldDerivative2() {
+        Expression s = parseExpression("f[x] = x**10");
+        Tensor t = parse("f~(9)[y+z]");
+        t = s.transform(t);
+        TAssert.assertEquals(t, "3628800*(y+z)");
+    }
+
+    @Test
+    public void testFieldDerivative3() {
+        Expression s = parseExpression("f[x, y] = x**y");
+        Tensor t = parse("f~(2, 2)[a, b]");
+        t = s.transform(t);
+        TAssert.assertEquals(t, "a**(-2+b)*b*(-1+b)*Log[a]**2+2*a**(-2+b)+2*a**(-2+b)*Log[a]*b+2*a**(-2+b)*Log[a]*(-1+b)");
+    }
+
+    @Test
+    public void testFieldDerivative4() {
+        Expression s = parseExpression("f_ab[x_mn, y_mn] = x_am*y_nb*x^mn");
+        Tensor t = parse("f~(2, 1)^{ab}_{{mn ab} {pq}}[a_mn, b_ab]");
+        t = s.transform(t);
+        t = EliminateMetricsTransformation.eliminate(t);
+        t = parseExpression("d_a^a = 4").transform(t);
+        TAssert.assertEquals(t, "g_{mn}*g_{pq}+4*g_{mq}*g_{pn}");
+    }
+
+    @Test
+    public void testFieldDerivative5() {
+        Expression s = parseExpression("f~(2)[x] = x**10");
+        Tensor t = parse("f~(3)[y+z]");
+        t = s.transform(t);
+        TAssert.assertEquals(t, "10*(y+z)**9");
+    }
+
+    @Test
+    public void testFieldDerivative6() {
+        //todo check what symmetries change?
+        addSymmetry("x_mn", 1, 0);
+        addSymmetry("y_mn", 1, 0);
+        Expression s = parseExpression("f_ab[x_mn, y_mn] = x_am*y_nb*x^mn");
+        Tensor t = parse("f~(2, 1)^{ab}_{{mn ab}}^{{mn}}[a_mn, b_ab]");
+        t = s.transform(t);
+        t = ExpandTransformation.expand(t);
+        t = EliminateMetricsTransformation.eliminate(t);
+        t = parseExpression("d_a^a = 4").transform(t);
+        System.out.println(t);
+//        TAssert.assertEquals(t, "g_{mn}*g_{pq}+4*g_{mq}*g_{pn}");
+    }
+
+
+    @Test
+    public void testFieldDerivatives7() {
+
+
+        setSymmetric("g_ab[x_m]");
+        Tensor R = parseExpression("R[x_m] = g^ab[x_m]*R_ab[x_m]");
+        Expression ricci = parseExpression("R_ab[x_m] = R^n_anb[x_n]");
+        Expression riemann = parseExpression("R^a_bmn[x_m] = G~(1)^a_bnm[x_m] - G~(1)^a_bmn[x_m] + G^a_gm[x_m]*G^g_bn[x_m] - G^a_gn[x_m]*G^g_bm[x_m]");
+        Expression connection = parseExpression("G^a_mn[x_m] = (1/2)*g^ab[x_m]*(g~(1)_bmn[x_a] + g~(1)_bnm[x_a] - g~(1)_mnb[x_a])");
+        Expression metric = parseExpression("g_mn[x_m] = g_mn + h_mn[x_m]");
+
+        riemann = (Expression) connection.transform(riemann);
+        ricci = (Expression) riemann.transform(ricci);
+        R = ricci.transform(R);
+        R = metric.transform(R);
+
+        R = ExpandTransformation.expand(R);
+        R = EliminateMetricsTransformation.eliminate(R);
+        System.out.println(R);
+
+        SumBuilder r = new SumBuilder();
+        int id = parseSimple("h_mn[x_m]").getName();
+        for (Tensor summand : R.get(1)) {
+            if (summand instanceof Product) {
+                int m = 0;
+                for (Tensor multiplier : summand)
+                    if (multiplier instanceof TensorField
+                            && ((TensorField) multiplier).getNameDescriptor().getParent().getId() == id)
+                        ++m;
+                if (m <= 2)
+                    r.put(summand);
+            }
+        }
+
+        System.out.println(r.build());
+    }
 }

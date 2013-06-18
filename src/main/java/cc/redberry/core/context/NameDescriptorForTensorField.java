@@ -20,26 +20,35 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
-package cc.redberry.core.transformations.collect;
+package cc.redberry.core.context;
 
-import cc.redberry.core.tensor.Split;
-import cc.redberry.core.tensor.SumBuilder;
-import cc.redberry.core.tensor.Tensor;
-import cc.redberry.core.transformations.Transformation;
-import gnu.trove.map.hash.TIntObjectHashMap;
-
-import java.util.List;
+import cc.redberry.core.indices.StructureOfIndices;
 
 /**
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public class CollectTr1 implements Transformation{
-    private final SumBuilder unmatched = new SumBuilder();
-    private final TIntObjectHashMap<List<Split>> matchedNodes = new TIntObjectHashMap<>();
+public abstract class NameDescriptorForTensorField extends NameDescriptor {
+    final int[] orders;
+    final String name;
 
-    @Override
-    public Tensor transform(Tensor t) {
-        return null;
+    NameDescriptorForTensorField(StructureOfIndices[] indexTypeStructures, int id, int[] orders, String name) {
+        super(indexTypeStructures, id);
+        this.orders = orders;
+        this.name = name;
     }
+
+    public int[] getDerivativeOrders() {
+        return orders.clone();
+    }
+
+    public int getDerivativeOrder(int arg) {
+        return orders[arg];
+    }
+
+    public abstract NameDescriptorForTensorField getParent();
+
+    public abstract boolean isDerivative();
+
+    public abstract NameDescriptorForTensorField getDerivative(int... orders);
 }

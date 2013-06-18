@@ -33,7 +33,8 @@ import java.math.BigInteger;
  */
 public interface Number<T>
         extends FieldElement<T> {
-  
+
+    BigInteger bigIntValue();
     int intValue();
     long longValue();
     double doubleValue();

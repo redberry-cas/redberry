@@ -22,9 +22,15 @@
  */
 package cc.redberry.core.tensor;
 
+import cc.redberry.core.TAssert;
+import cc.redberry.core.math.MathUtils;
+import cc.redberry.core.number.Complex;
 import cc.redberry.core.utils.TensorUtils;
 import org.junit.Assert;
 import org.junit.Test;
+
+import java.util.Arrays;
+import java.util.Random;
 
 /**
  * @author Dmitry Bolotin
@@ -86,5 +92,32 @@ public class SumTest {
         Assert.assertEquals(t.remove(0).size(), 2);
         Assert.assertEquals(t.remove(1).size(), 2);
         Assert.assertEquals(t.remove(2).size(), 2);
+    }
+
+    @Test
+    public void testRemove2() {
+        Sum t = (Sum) Tensors.parse("a + b + c + d + e + f + g + h + q + w + e + t + o + i");
+        int size = t.size();
+        Random rnd = new Random();
+        int l, j, positions[];
+        for (int i = 0; i < 1000; ++i) {
+            positions = new int[l = 3 * (rnd.nextInt(size) + 1)];
+            for (j = 0; j < l; ++j)
+                positions[j] = rnd.nextInt(size);
+            System.out.println(Arrays.toString(MathUtils.getSortedDistinct(positions)));
+            assertRemoveArray(t, positions);
+        }
+    }
+
+    private static void assertRemoveArray(Sum sum, int[] positions) {
+        Tensor a = sum.remove(positions);
+        Tensor b = sum;
+        positions = MathUtils.getSortedDistinct(positions);
+        for (int i = positions.length - 1; i >= 0; --i) {
+            if (b instanceof Sum)
+                b = ((Sum) b).remove(positions[i]);
+            else b = Complex.ZERO;
+        }
+        TAssert.assertEquals(a, b);
     }
 }

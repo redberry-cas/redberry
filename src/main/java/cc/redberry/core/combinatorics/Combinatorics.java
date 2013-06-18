@@ -22,8 +22,11 @@
  */
 package cc.redberry.core.combinatorics;
 
+import cc.redberry.core.utils.ArraysUtils;
+
 import java.lang.reflect.Array;
 import java.util.Arrays;
+import java.util.Random;
 
 /**
  * This class provides factory and utility methods for combinatorics infrastructure.
@@ -42,7 +45,7 @@ public final class Combinatorics {
      * all possible unique combinations with permutations (i.e. {0,1} and {1,0} both appears for {@code k=2}) of
      * {@code k} numbers, which can be chosen from the set of {@code n} numbers, numbered in the order
      * 0,1,2,...,{@code n}. The total number of such combinations will be {@code n!/(n-k)!}.</p>
-     *
+     * <p/>
      * <p>For example, for {@code k=2} and {@code n=3}, this method will produce an iterator over
      * the following arrays: [0,1], [1,0], [0,2], [2,0], [1,2], [2,1].</p>
      *
@@ -168,9 +171,23 @@ public final class Combinatorics {
         return cycle;
     }
 
+
+    public static int[] createBlockCycle(int blockSize, int numberOfBlocks) {
+        final int[] cycle = new int[blockSize * numberOfBlocks];
+
+        int i = blockSize * (numberOfBlocks - 1) - 1;
+        for (; i >= 0; --i) cycle[i] = i + blockSize;
+        i = blockSize * (numberOfBlocks - 1);
+        int k = 0;
+        for (; i < cycle.length; ++i)
+            cycle[i] = k++;
+
+        return cycle;
+    }
+
     /**
      * Returns the inverse permutation for the specified one.
-     *
+     * <p/>
      * <p>One-line notation for permutations is used.</p>
      *
      * @param permutation permutation in one-line notation
@@ -194,8 +211,7 @@ public final class Combinatorics {
      * @throws IllegalArgumentException if array length not equals to permutation length
      * @throws IllegalArgumentException if permutation is not consistent with one-line notation
      */
-    //todo rename 'shuffle'
-    public static <T> T[] shuffle(T[] array, final int[] permutation) {
+    public static <T> T[] reorder(T[] array, final int[] permutation) {
         if (array.length != permutation.length)
             throw new IllegalArgumentException();
         if (!testPermutationCorrectness(permutation))
@@ -245,6 +261,94 @@ public final class Combinatorics {
             if (_permutation[i] != i)
                 return false;
         return true;
+    }
+
+
+    public static int[] convertPermutation(int[] permutation, int[] mapping, int newDimension) {
+        if (permutation.length != mapping.length)
+            throw new IllegalArgumentException();
+
+        int[] result = new int[newDimension];
+        for (int i = 0; i < newDimension; ++i)
+            result[i] = i;
+
+        int k;
+        for (int i = permutation.length - 1; i >= 0; --i)
+            if (mapping[i] != -1) {
+                if ((k = mapping[permutation[i]]) == -1)
+                    throw new IllegalArgumentException();
+                result[mapping[i]] = k;
+            }
+
+        return result;
+    }
+
+    /**
+     * Creates random permutation of specified dimension
+     *
+     * @param n   dimension
+     * @param rnd random generator
+     * @return random permutation of specified dimension
+     */
+    public static int[] randomPermutation(final int n, Random rnd) {
+        int[] p = new int[n];
+        for (int i = 0; i < n; ++i)
+            p[i] = i;
+        for (int i = n; i > 1; --i)
+            ArraysUtils.swap(p, i - 1, rnd.nextInt(i));
+        return p;
+    }
+
+    /**
+     * Creates random permutation of specified dimension
+     *
+     * @param n dimension
+     * @return random permutation of specified dimension
+     */
+    public static int[] randomPermutation(final int n) {
+        return randomPermutation(n, new Random());
+    }
+
+    /**
+     * Randomly permute the specified list using the specified source of randomness.
+     *
+     * @param a   - the array to be shuffled.
+     * @param rnd - the source of randomness to use to shuffle the list.
+     */
+    public static void shuffle(int[] a, Random rnd) {
+        for (int i = a.length; i > 1; --i)
+            ArraysUtils.swap(a, i - 1, rnd.nextInt(i));
+    }
+
+
+    /**
+     * Randomly permute the specified list using the specified source of randomness.
+     *
+     * @param a - the array to be shuffled.
+     */
+    public static void shuffle(int[] a) {
+        shuffle(a, new Random());
+    }
+
+    /**
+     * Randomly permute the specified list using the specified source of randomness.
+     *
+     * @param a   - the array to be shuffled.
+     * @param rnd - the source of randomness to use to shuffle the list.
+     */
+    public static void shuffle(Object[] a, Random rnd) {
+        for (int i = a.length; i > 1; --i)
+            ArraysUtils.swap(a, i - 1, rnd.nextInt(i));
+    }
+
+
+    /**
+     * Randomly permute the specified list using the specified source of randomness.
+     *
+     * @param a - the array to be shuffled.
+     */
+    public static void shuffle(Object[] a) {
+        shuffle(a, new Random());
     }
 
     /**

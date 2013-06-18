@@ -23,13 +23,20 @@
 package cc.redberry.core.transformations.collect;
 
 import cc.redberry.core.TAssert;
+import cc.redberry.core.combinatorics.Combinatorics;
 import cc.redberry.core.context.CC;
-import cc.redberry.core.tensor.SimpleTensor;
-import cc.redberry.core.tensor.Tensor;
+import cc.redberry.core.tensor.*;
+import cc.redberry.core.tensor.iterator.FromChildToParentIterator;
+import cc.redberry.core.transformations.EliminateMetricsTransformation;
+import cc.redberry.core.transformations.expand.ExpandTransformation;
+import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
-import static cc.redberry.core.tensor.Tensors.parse;
-import static cc.redberry.core.tensor.Tensors.parseSimple;
+import java.util.Arrays;
+import java.util.Random;
+
+import static cc.redberry.core.tensor.Tensors.*;
 
 /**
  * @author Dmitry Bolotin
@@ -54,6 +61,7 @@ public class CollectTransformationTest {
         TAssert.assertEquals(ct.transform(t), "a*b + a*(c+d) + b*(e+r)");
     }
 
+    @Ignore
     @Test
     public void test3() {
         SimpleTensor[] simpleTensors = {parseSimple("A_m")};
@@ -114,13 +122,140 @@ public class CollectTransformationTest {
 
     @Test
     public void test9() {
-        CC.resetTensorNames(4662401180622313834L);
-        SimpleTensor[] simpleTensors = {parseSimple("A_mnpq")};
-        CollectTransformation ct = new CollectTransformation(simpleTensors);
+        SimpleTensor[] patterns;
+        Tensor t;
 
-        Tensor t = parse("A_mnpq*B^np_ac + A_abcd*B^ndb_nmq");
-        System.out.println(ct.transform(t));
-//        TAssert.assertEquals(ct.transform(t), "A_mnpq*(B^np_ac + A_abcd*B^ndb_nmq)");
+        patterns = new SimpleTensor[]{parseSimple("A_mnpq")};
+        t = parse("A_mnpq*B^np_ac + A_abcd*B^ndb_nmq");
+        assertCollectExpand(t, patterns);
+
+        t = parse("A_mnpq*B^np_ac + A_acmq ");
+        assertCollectExpand(t, patterns);
+
+        t = parse("A_mnpq*B^np_ac + A_abcd*B^ndb_nmq + A_acmq + A_amqc + A_rsmq*C^rs_ac");
+        assertCollectExpand(t, patterns);
+    }
+
+
+    @Test
+    public void test10() {
+        SimpleTensor[] patterns;
+        Tensor t;
+
+        //Riemann with diff states
+        t = parse("g_{mn}*R^{mn}");
+        t = Tensors.parseExpression("R_{mn}=g^ab*R_{bman}").transform(t);
+        t = Tensors.parseExpression("R^a_bmn=p_m*G^a_bn+p_n*G^a_bm+G^a_gm*G^g_bn-G^a_gn*G^g_bm").transform(t);
+        t = Tensors.parseExpression("G_gmn=(1/2)*(p_m*h_gn+p_n*h_gm-p_g*h_mn)").transform(t);
+
+        patterns = new SimpleTensor[]{parseSimple("h_ab")};
+        assertCollectExpand(t, patterns);
+        patterns = new SimpleTensor[]{parseSimple("p_a")};
+        assertCollectExpand(t, patterns);
+        patterns = new SimpleTensor[]{parseSimple("p_a"), parseSimple("h_ab")};
+        assertCollectExpand(t, patterns);
+    }
+
+    @Test
+    public void test11() {
+        SimpleTensor[] patterns;
+        Tensor t;
+
+        t = parse("Rf[h_mn]");
+        t = Tensors.parseExpression("Rf[g_ab]=g^ab*Rf_ab[g_mn]").transform(t);
+        t = Tensors.parseExpression("Rf_{mn}[g^mn]=Rf^{a}_{man}[g_pq]").transform(t);
+        t = Tensors.parseExpression("Rf^a_bmn[g^pq]=p_m*Gf^a_bn[g_ab]+p_n*Gf^a_bm[g_ab]+Gf^a_gm[g_ab]*Gf^g_bn[g_ab]-Gf^a_gn[g_ab]*Gf^g_bm[g_ab]").transform(t);
+        t = Tensors.parseExpression("Gf^a_mn[r^mn]=(1/2)*r^ag*(p_m*r_gn[x_a]+p_n*r_gm[x_z]-p_g*r_mn[x_z])").transform(t);
+
+        patterns = new SimpleTensor[]{parseSimple("r_ab[x_a]")};
+        assertCollectExpand(t, patterns);
+        patterns = new SimpleTensor[]{parseSimple("p_a")};
+        assertCollectExpand(t, patterns);
+        patterns = new SimpleTensor[]{parseSimple("p_a"), parseSimple("r_ab[x_a]")};
+        assertCollectExpand(t, patterns);
+    }
+
+    @Test
+    public void test12() {
+//        CC.resetTensorNames(3679148909490820491L);
+        SimpleTensor[] patterns;
+        Tensor t;
+
+        t = parse("sqrt*(g^ab*Ric_ab+(e1*g_ab*G^xp*G^yq+e2*E^x_a*E^p_b*G^yq+e3*E^x_b*E^p_a*G^yq)*T^a_xy*T^b_pq+e6*Ric_ab*Ric_cd*g^ab*g^cd+e5*Ric_ab*Ric_cd*g^ac*g^bd+Gf_a*Gf_b*g^ab)+f*g^pq*g_ab*i*h^b_q*p_p*g^cd*I*h^a_d*p_c");
+        /*Ric*/
+        t = parseExpression("Ric_ab=E^r_a*E^d_c*R^c_bdr").transform(t);
+        /*Riman*/
+        t = parseExpression("R^a_bcd=i*w^a_db*p_c-i*w^a_cb*p_d+w^a_cr*w^r_db-w^a_dr*w^r_cb").transform(t);
+        /*Torsion*/
+        t = parseExpression("T^a_bc=i*h^a_c*p_b-i*h^a_b*p_c+w^a_bd*e^d_c-w^a_cd*e^d_b").transform(t);
+        /*eTetrad*/
+        t = parseExpression("e^a_b=d^a_b+h^a_b").transform(t);
+        /*ETetrad*/
+        t = parseExpression("E^a_b=d^a_b-h^a_b+h^a_c*h^c_b").transform(t);
+        /*metricUP*/
+        t = parseExpression("G^ab=g^ab-g^ca*h^b_c-g^cb*h^a_c+g^cb*h^a_d*h^d_c+g^ca*h^b_d*h^d_c+g^cd*h^a_c*h^b_d").transform(t);
+        /*sqrt*/
+        t = parseExpression("sqrt=1+h^a_a+(1/2)*(h^s_s*h^l_l-h^s_l*h^l_s)").transform(t);
+        /*tetradGaugeFix*/
+        t = parseExpression("Gf_a=f1*h^b_a*p_b+f2*g^pq*g_ab*h^b_q*p_p+f3*h^q_q*p_a").transform(t);
+
+        patterns = new SimpleTensor[]{parseSimple("h^a_b"), parseSimple("w^a_bc")};
+        assertCollectExpand(t, patterns);
+    }
+
+    @Test
+    public void test13() {
+        SimpleTensor[] patterns;
+        Tensor t;
+        t = parse("a*f[x]*f[-x] + b*f[x]*f[-x] + x*f[x]*f[y] + y*f[y]*f[x]");
+        patterns = new SimpleTensor[]{parseSimple("f[x]")};
+        CollectTransformation collect = new CollectTransformation(patterns);
+        TAssert.assertEquals(collect.transform(t), "(y+x)*f[x]*f[y]+(a+b)*f[-x]*f[x]");
+    }
+
+    private static void assertCollectExpand(Tensor t, SimpleTensor[] patterns) {
+        t = ExpandTransformation.expand(t);
+        t = EliminateMetricsTransformation.eliminate(t);
+        CollectTransformation collect = new CollectTransformation(patterns);
+        Tensor collected = collect.transform(t);
+        if (collected instanceof Sum)
+            for (Tensor summand : collected)
+                assertCollectedSummand(summand, patterns);
+        else assertCollectedSummand(collected, patterns);
+
+        collected = ExpandTransformation.expand(collected, EliminateMetricsTransformation.ELIMINATE_METRICS);
+        collected = EliminateMetricsTransformation.eliminate(collected);
+        TAssert.assertEquals(collected, t);
+    }
+
+    private static void assertCollectedSummand(Tensor summand, SimpleTensor[] patterns) {
+        if (!(summand instanceof Product)) return;
+
+        for (Tensor t : summand)
+            if (t instanceof Sum) {
+                FromChildToParentIterator it = new FromChildToParentIterator(t);
+                Tensor c;
+                while ((c = it.next()) != null)
+                    if (c instanceof SimpleTensor)
+                        for (SimpleTensor p : patterns)
+                            Assert.assertFalse(((SimpleTensor) c).getName() == p.getName());
+            }
+    }
+
+    @Test
+    public void testMatch() {
+        for (int i = 0; i < 100; ++i) {
+            Random rnd = new Random();
+            CC.resetTensorNames();
+            SimpleTensor[] a = {parseSimple("f_a[-x_a-y_a]"), parseSimple("f_c[x_b]"), parseSimple("f_d[y_d]"),
+                    parseSimple("g[x]"), parseSimple("g[-f-x]"), parseSimple("g[f]")};
+            SimpleTensor[] b = a.clone();
+            Combinatorics.shuffle(b, rnd);
+            Arrays.sort(a);
+            Arrays.sort(b);
+            int[] match = CollectTransformation.matchFactors(a, b);
+            Assert.assertArrayEquals(a, Combinatorics.reorder(b, match));
+        }
     }
 
 }

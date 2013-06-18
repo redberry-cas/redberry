@@ -47,6 +47,36 @@ public class ParseUtils {
     private ParseUtils() {
     }
 
+    public static boolean checkBracketsConsistence(String expression) {
+        char[] expr = expression.toCharArray();
+        int[] levels = new int[3];
+        for (char c : expr) {
+            if (levels[0] < 0 || levels[1] < 0 || levels[2] < 0) return false;
+            switch (c) {
+                case '(':
+                    ++levels[0];
+                    break;
+                case ')':
+                    --levels[0];
+                    break;
+                case '[':
+                    ++levels[1];
+                    break;
+                case ']':
+                    --levels[1];
+                    break;
+                case '{':
+                    ++levels[2];
+                    break;
+                case '}':
+                    --levels[2];
+                    break;
+                default:
+            }
+        }
+        return levels[0] == 0 && levels[1] == 0 && levels[2] == 0;
+    }
+
     public static ParseToken tensor2AST(Tensor tensor) {
         if (tensor instanceof TensorField) {
             TensorField tf = (TensorField) tensor;
