@@ -68,4 +68,10 @@ public class TensorFieldTest {
         d = parseSimple("f~(2, 2)_{mn {ax by} {cd}}[x_ab, y_b]");
 //        System.out.println(d.getIndices().getSymmetries().getInnerSymmetries());
     }
+
+    @Test
+    public void testNames() {
+        Tensor t1 = parse("F[S_A'^B']"), t2 = parse("F[S^A'_B']");
+        Assert.assertEquals(((TensorField) t1).getName(), ((TensorField) t2).getName());
+    }
 }
