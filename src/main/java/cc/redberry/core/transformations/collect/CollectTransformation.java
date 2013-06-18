@@ -57,11 +57,9 @@ import static cc.redberry.core.tensor.Tensors.sum;
  * @author Stanislav Poslavsky
  */
 public class CollectTransformation implements Transformation {
-    private final SimpleTensor[] patterns;
     private final TIntHashSet patternsNames;
 
     public CollectTransformation(SimpleTensor... patterns) {
-        this.patterns = patterns;
         patternsNames = new TIntHashSet();
         for (SimpleTensor t : patterns)
             patternsNames.add(t.getName());
@@ -98,10 +96,6 @@ public class CollectTransformation implements Transformation {
                     SimpleTensor[] toAddFactors = Combinatorics.reorder(toAdd.factors, match);
                     IndexMappingBuffer mapping =
                             IndexMappings.createBijectiveProductPort(toAddFactors, base.factors).take();
-
-                    if(mapping == null){
-                        int qw = 0;
-                    }
 
                     for (Map.Entry<Integer, IndexMappingBufferRecord> entry : mapping.getMap().entrySet())
                         entry.getValue().invertStates();
@@ -202,8 +196,8 @@ public class CollectTransformation implements Transformation {
             }
 
             //temp check
-            factorIndices = new IndicesBuilder().append(factors).getIndices();
-            assert factorIndices.size() == factorIndices.getFree().size();
+//            factorIndices = new IndicesBuilder().append(factors).getIndices();
+//            assert factorIndices.size() == factorIndices.getFree().size();
 
             kroneckers.add(summand);
             summand = Tensors.multiply(kroneckers.toArray(new Tensor[kroneckers.size()]));
@@ -321,20 +315,4 @@ public class CollectTransformation implements Transformation {
             return from;
         }
     }
-
-    private static final class StateInsensitiveMapping extends DirectIndexMapping {
-        private StateInsensitiveMapping(int[] from, int[] to) {
-            super(from, to);
-        }
-
-        @Override
-        public int map(int from) {
-            int index;
-            if ((index = Arrays.binarySearch(this.from, getNameWithType(from))) >= 0)
-                return setRawState(getRawStateInt(from), to[index]);
-            return from;
-        }
-    }
-
-
 }
