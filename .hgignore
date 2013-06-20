@@ -20,3 +20,4 @@ nb-configuration.xml$
 syntax: glob
 *.jar
 re:^README~$
+*~$

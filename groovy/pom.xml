@@ -1,0 +1,250 @@
+<?xml version="1.0"?>
+<!--
+  ~ Redberry: symbolic tensor computations.
+  ~
+  ~ Copyright (c) 2010-2013:
+  ~   Stanislav Poslavsky   <stvlpos@mail.ru>
+  ~   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
+  ~
+  ~ This file is part of Redberry.
+  ~
+  ~ Redberry is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ Redberry is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with Redberry. If not, see <http://www.gnu.org/licenses/>.
+  -->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>cc.redberry</groupId>
+    <artifactId>groovy</artifactId>
+    <version>1.1.4-SNAPSHOT</version>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <!-- <gmavenVersion>1.4</gmavenVersion>
+        <gmavenProviderSelection>2.0</gmavenProviderSelection> -->
+        <groovyVersion>2.0.4</groovyVersion>
+    </properties>
+
+    <parent>
+        <groupId>org.sonatype.oss</groupId>
+        <artifactId>oss-parent</artifactId>
+        <version>7</version>
+    </parent>
+
+    <name>redberry-groovy</name>
+    <url>http://redberry.cc/</url>
+
+    <description>
+        Redberry is an open source Java framework providing capabilities
+        for manipulation with tensors. The framework contains wide spectrum of
+        algorithms required by tensor algebra. It is designed to find analytical
+        solutions of complicated mathematical and physical problems.
+    </description>
+
+    <licenses>
+        <license>
+            <name>GNU General Public License, version 3</name>
+            <url>http://www.gnu.org/licenses/gpl-3.0.html</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
+    <developers>
+        <developer>
+            <id>PoslavskySV</id>
+            <email>stvlpos@mail.ru</email>
+            <name>Poslavsky Stanislav</name>
+            <organization>IHEP</organization>
+            <organizationUrl>http://ihep.su</organizationUrl>
+            <roles>
+                <role>architect</role>
+                <role>developer</role>
+                <role>tester</role>
+            </roles>
+            <timezone>UTC+04:00</timezone>
+            <url>https://bitbucket.org/PoslavskySV</url>
+        </developer>
+        <developer>
+            <id>dbolotin</id>
+            <email>bolotin.dmitriy@gmail.com</email>
+            <name>Bolotin Dmitriy</name>
+            <organization>IBCH RAS</organization>
+            <organizationUrl>http://www.ibch.ru/</organizationUrl>
+            <roles>
+                <role>architect</role>
+                <role>developer</role>
+                <role>tester</role>
+            </roles>
+            <timezone>UTC+04:00</timezone>
+            <url>https://bitbucket.org/dbolotin</url>
+        </developer>
+    </developers>
+
+    <scm><connection>scm:hg:http://bitbucket.org/redberry/redberry-groovy</connection><url>https://bitbucket.org/redberry/redberry-groovy/src/</url></scm>
+
+    <issueManagement>
+        <system>Bitbucket</system>
+        <url>https://bitbucket.org/redberry/redberry-physics/issues</url>
+    </issueManagement>
+
+    <build>
+        <plugins>
+            <!-- <plugin>
+                <groupId>org.codehaus.gmaven</groupId>
+                <artifactId>gmaven-plugin</artifactId>
+                <version>${gmavenVersion}</version>
+                <configuration>
+                    <sourceEncoding>UTF-8</sourceEncoding>
+                    <providerSelection>${gmavenProviderSelection}</providerSelection>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>generateStubs</goal>
+                            <goal>compile</goal>
+                            <goal>generateTestStubs</goal>
+                            <goal>testCompile</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.codehaus.groovy</groupId>
+                        <artifactId>groovy-all</artifactId>
+                        <version>${groovyVersion}</version>
+                    </dependency>
+                </dependencies>
+            </plugin> -->
+            <!-- <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <version>1.5</version>
+                <executions>
+                    <execution>
+                        <id>add-source</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>add-source</goal>
+                        </goals>
+                        <configuration>
+                            <sources>
+                                <source>src/main/groovy</source>
+                            </sources>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>add-test-source</id>
+                        <phase>generate-test-sources</phase>
+                        <goals>
+                            <goal>add-test-source</goal>
+                        </goals>
+                        <configuration>
+                            <sources>
+                                <source>src/test/groovy</source>
+                            </sources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin> -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <version>1.7</version>
+                <executions>
+                    <execution>
+                        <id>groovydoc</id>
+                        <phase>site</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <target>
+                                <taskdef name="groovydoc" classname="org.codehaus.groovy.ant.Groovydoc" classpathref="maven.compile.classpath"/>
+                                <groovydoc destdir="${project.reporting.outputDirectory}/groovydoc" sourcepath="${basedir}/src/main/groovy" use="true" windowtitle="${project.name}" doctitle="${project.name}">
+                                </groovydoc>
+                            </target>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.groovy</groupId>
+                <artifactId>groovy-eclipse-compiler</artifactId>
+                <version>2.7.0-01</version>
+                <extensions>true</extensions>
+            </plugin>
+            <plugin>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>2.3.2</version>
+                <configuration>
+                    <compilerId>groovy-eclipse-compiler</compilerId>
+                </configuration>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.codehaus.groovy</groupId>
+                        <artifactId>groovy-eclipse-compiler</artifactId>
+                        <version>2.7.0-01</version>
+                    </dependency>
+                </dependencies>
+            </plugin>
+            <plugin>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <version>2.2.1</version>
+                <configuration>
+                    <descriptors>
+                        <descriptor>groovy-lib-bin.xml</descriptor>
+                        <!--<descriptor>groovy-lib-src.xml</descriptor>-->
+                        <!--<descriptor>cluster-lib-bin.xml</descriptor>-->
+                    </descriptors>
+                </configuration>
+                <!--<executions>-->
+                    <!--<execution>-->
+                        <!--<id>distrs</id>-->
+                        <!--<phase>package</phase>-->
+                        <!--<goals>-->
+                            <!--<goal>single</goal>-->
+                        <!--</goals>-->
+                    <!--</execution>-->
+                <!--</executions>-->
+            </plugin>
+        </plugins>
+    </build>
+    <dependencies>
+        <!-- <dependency>
+            <groupId>org.codehaus.groovy.maven.runtime</groupId>
+            <artifactId>gmaven-runtime-default</artifactId>
+            <version>1.0-rc-3</version>
+        </dependency> -->
+        <dependency>
+            <groupId>cc.redberry</groupId>
+            <artifactId>core</artifactId>
+            <version>1.1.4-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>cc.redberry</groupId>
+            <artifactId>physics</artifactId>
+            <version>1.1.4-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>org.codehaus.groovy</groupId>
+            <artifactId>groovy-all</artifactId>
+            <version>${groovyVersion}</version>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.8.2</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+</project>
