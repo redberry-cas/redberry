@@ -567,7 +567,7 @@ class Redberry {
 
         @Override
         Tensor transform(Tensor t) {
-            return new SubstitutionTransformation(false, * expressions).transform(t)
+            return new SubstitutionTransformation(expressions.toArray(new Expression[expressions.size()]), false).transform(t)
         }
 
         @Override
