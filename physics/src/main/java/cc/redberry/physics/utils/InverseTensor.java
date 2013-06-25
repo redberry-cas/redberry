@@ -280,7 +280,7 @@ public final class InverseTensor {
                                               boolean symmetricForm,
                                               Transformation[] transformations,
                                               String mapleBinDir,
-                                              String path) {
+                                              String path) throws IOException, InterruptedException {
         return findInverseWithMaple(toInverse, equation, samples, symmetricForm, false, transformations, mapleBinDir, path);
     }
 
@@ -338,7 +338,8 @@ public final class InverseTensor {
                                               boolean keepFreeParameters,
                                               Transformation[] transformations,
                                               String mapleBinDir,
-                                              String path) {
+                                              String path)
+            throws IOException, InterruptedException {
         //create the general form of the inverse and system of linear equations
         InverseTensor inverseTensor = new InverseTensor(toInverse, equation, samples, symmetricForm, transformations);
         final Expression[] equations = inverseTensor.equations.clone();
@@ -394,42 +395,42 @@ public final class InverseTensor {
         System.out.println();
 
         //creating file with Maple code to solve the system of equations
-        try {
-            FileOutputStream output = new FileOutputStream(path + "/equations.maple");
-            PrintStream file = new PrintStream(output);
-            file.append("with(StringTools):\n");
-            file.append("ans:=array([");
-            for (i = 0; i < inverseTensor.unknownCoefficients.length; ++i)
-                if (i == inverseTensor.unknownCoefficients.length - 1)
-                    file.append(inverseTensor.unknownCoefficients[i].toString());
-                else
-                    file.append(inverseTensor.unknownCoefficients[i] + ",");
-            file.append("]):\n");
+//        try {
+        FileOutputStream output = new FileOutputStream(path + "/equations.maple");
+        PrintStream file = new PrintStream(output);
+        file.append("with(StringTools):\n");
+        file.append("ans:=array([");
+        for (i = 0; i < inverseTensor.unknownCoefficients.length; ++i)
+            if (i == inverseTensor.unknownCoefficients.length - 1)
+                file.append(inverseTensor.unknownCoefficients[i].toString());
+            else
+                file.append(inverseTensor.unknownCoefficients[i] + ",");
+        file.append("]):\n");
 
-            file.println("eq:=array(1.." + equations.length + "):");
-            for (i = 0; i < equations.length; i++)
-                file.println("eq[" + (i + 1) + "]:=" + equations[i] + ":");
+        file.println("eq:=array(1.." + equations.length + "):");
+        for (i = 0; i < equations.length; i++)
+            file.println("eq[" + (i + 1) + "]:=" + equations[i] + ":");
 
-            file.print("Result := solve({seq(eq[i],i=1.." + equations.length + ")},[");
-            for (i = 0; i < inverseTensor.unknownCoefficients.length; ++i)
-                if (i == inverseTensor.unknownCoefficients.length - 1)
-                    file.append(inverseTensor.unknownCoefficients[i].toString());
-                else
-                    file.append(inverseTensor.unknownCoefficients[i] + ",");
-            file.append("]):\n");
-            file.append("Result:= factor(Result);\n");
-            file.println("file:=fopen(\"" + path + "/equations.mapleOut\",WRITE):");
-            file.append("if nops(Result) <> 0 then\n");
-            file.append("for k from 1 to " + inverseTensor.unknownCoefficients.length + " do\n");
-            file.append("temp1 := SubstituteAll(convert(lhs(Result[1][k]), string), \"^\", \"**\");\n");
-            file.append("temp2 := SubstituteAll(convert(rhs(Result[1][k]), string), \"^\", \"**\");\n");
-            file.append("fprintf(file,\"%s=%s\\n\",temp1,temp2);\n");
-            file.append("od:\n");
-            file.append("end if;\n");
-            file.append("fclose(file):");
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        file.print("Result := solve({seq(eq[i],i=1.." + equations.length + ")},[");
+        for (i = 0; i < inverseTensor.unknownCoefficients.length; ++i)
+            if (i == inverseTensor.unknownCoefficients.length - 1)
+                file.append(inverseTensor.unknownCoefficients[i].toString());
+            else
+                file.append(inverseTensor.unknownCoefficients[i] + ",");
+        file.append("]):\n");
+        file.append("Result:= factor(Result);\n");
+        file.println("file:=fopen(\"" + path + "/equations.mapleOut\",WRITE):");
+        file.append("if nops(Result) <> 0 then\n");
+        file.append("for k from 1 to " + inverseTensor.unknownCoefficients.length + " do\n");
+        file.append("temp1 := SubstituteAll(convert(lhs(Result[1][k]), string), \"^\", \"**\");\n");
+        file.append("temp2 := SubstituteAll(convert(rhs(Result[1][k]), string), \"^\", \"**\");\n");
+        file.append("fprintf(file,\"%s=%s\\n\",temp1,temp2);\n");
+        file.append("od:\n");
+        file.append("end if;\n");
+        file.append("fclose(file):");
+//        } catch (Exception e) {
+//            throw new RuntimeException(e);
+//        }
 
         //TODO maybe use temp file
 
@@ -451,37 +452,37 @@ public final class InverseTensor {
         }
 
         //reading the Maple output with the solution
-        try {
-            //allocating resulting coefficients array
-            Expression[] coefficientsResults = new Expression[inverseTensor.unknownCoefficients.length];
-            FileInputStream fstream = new FileInputStream(path + "/equations.mapleOut");
-            if (fstream.available() == 0)
-                return null;
-            DataInputStream in = new DataInputStream(fstream);
-            BufferedReader br = new BufferedReader(new InputStreamReader(in));
-            String strLine;
-            i = -1;
-            //reading resulting solutions from file
-            while ((strLine = br.readLine()) != null)
-                coefficientsResults[++i] = Tensors.parseExpression(strLine);
-            Tensor inverse = inverseTensor.generalInverse;
+//        try {
+        //allocating resulting coefficients array
+        Expression[] coefficientsResults = new Expression[inverseTensor.unknownCoefficients.length];
+        FileInputStream fstream = new FileInputStream(path + "/equations.mapleOut");
+        if (fstream.available() == 0)
+            return null;
+        DataInputStream in = new DataInputStream(fstream);
+        BufferedReader br = new BufferedReader(new InputStreamReader(in));
+        String strLine;
+        i = -1;
+        //reading resulting solutions from file
+        while ((strLine = br.readLine()) != null)
+            coefficientsResults[++i] = Tensors.parseExpression(strLine);
+        Tensor inverse = inverseTensor.generalInverse;
 
-            //substituting coefficients into general inverse form
-            for (Expression coef : coefficientsResults)
-                if (coef.isIdentity())//if current coefficient is free parametr
-                {
-                    if (!keepFreeParameters)
-                        inverse = Tensors.expression(coef.get(0), Complex.ZERO).transform(inverse);
-                } else
-                    inverse = (Expression) coef.transform(inverse);
+        //substituting coefficients into general inverse form
+        for (Expression coef : coefficientsResults)
+            if (coef.isIdentity())//if current coefficient is free parametr
+            {
+                if (!keepFreeParameters)
+                    inverse = Tensors.expression(coef.get(0), Complex.ZERO).transform(inverse);
+            } else
+                inverse = (Expression) coef.transform(inverse);
 
-            //substituting the renamed tensors combinations
-            for (Expression sub : scalarSubs)
-                inverse = sub.transpose().transform(inverse);
-            in.close();
-            return inverse;
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        //substituting the renamed tensors combinations
+        for (Expression sub : scalarSubs)
+            inverse = sub.transpose().transform(inverse);
+        in.close();
+        return inverse;
+//        } catch (Exception e) {
+//            throw new RuntimeException(e);
+//        }
     }
 }
