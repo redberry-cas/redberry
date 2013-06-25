@@ -1,0 +1,22 @@
+=========================================
+Redberry computer algebra system
+=========================================
+
+Redberry is an open source computer algebra system designed to
+manipulate with symbolic tensorial expressions.
+
+Complete documentation is available at
+
+    http://redberry.cc/
+
+This program is a free software: you can redistribute it and/or
+modify it under the terms of the GNU General Public License v3 as
+published by the Free Software Foundation, either version 3 of the
+License, or (at your option) any later version. Full license text 
+you can find in COPYING file.
+
+Copyright (C) 2010-2013:
+
+    Stanislav Poslavsky <stvlpos@mail.ru>
+    Dmitry Bolotin <bolotin.dmitriy@gmail.com>
+ 
