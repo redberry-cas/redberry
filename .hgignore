@@ -19,3 +19,7 @@ nb-configuration.xml$
 \.idea\\
 syntax: glob
 *.jar
+re:^README~$
+*~
+
+re:^fontconfig/
