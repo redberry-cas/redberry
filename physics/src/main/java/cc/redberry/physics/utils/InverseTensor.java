@@ -24,6 +24,7 @@
 package cc.redberry.physics.utils;
 
 import cc.redberry.core.context.CC;
+import cc.redberry.core.context.OutputFormat;
 import cc.redberry.core.indexmapping.IndexMappings;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.tensor.*;
@@ -34,6 +35,7 @@ import cc.redberry.core.tensorgenerator.TensorGenerator;
 import cc.redberry.core.transformations.CollectNonScalarsTransformation;
 import cc.redberry.core.transformations.EliminateMetricsTransformation;
 import cc.redberry.core.transformations.Transformation;
+import cc.redberry.core.transformations.TransformationCollection;
 import cc.redberry.core.transformations.expand.ExpandTransformation;
 import cc.redberry.core.transformations.substitutions.SubstitutionTransformation;
 import cc.redberry.core.utils.ArraysUtils;
@@ -273,6 +275,8 @@ public final class InverseTensor {
      * @param path            path to your temporary folder
      * @return tensor inverse to the specified tensor according to the specified
      *         equation and null if inverse does not exist
+     * @throws IOException
+     * @throws InterruptedException when Maple fails to run
      */
     public static Tensor findInverseWithMaple(Expression toInverse,
                                               Expression equation,
@@ -330,6 +334,8 @@ public final class InverseTensor {
      * @param path               path to your temporary folder
      * @return tensor inverse to the specified tensor according to the specified
      *         equation and null if inverse does not exist
+     * @throws IOException
+     * @throws InterruptedException when Maple fails to run
      */
     public static Tensor findInverseWithMaple(Expression toInverse,
                                               Expression equation,
@@ -339,6 +345,131 @@ public final class InverseTensor {
                                               Transformation[] transformations,
                                               String mapleBinDir,
                                               String path)
+            throws IOException, InterruptedException {
+        return findInverseWithExternalProgramm(MapleScriptCreator.INSTANCE, toInverse,
+                equation, samples, symmetricForm, keepFreeParameters, transformations, mapleBinDir, path);
+    }
+
+    /**
+     * This method calculates the tensor inverse to the specified tensor according
+     * to the specified equation using the Wolfram Mathematica facilities to solve the system of
+     * linear equations.  The Wolfram Mathematica code will be placed in the specified temporary
+     * directory in {@code equations.mathematica} file. The solution of the linear system,
+     * produced by Wolfram Mathematica, will be placed in the specified temporary directory in
+     * {@code equations.mathematicaOut} file.
+     * <p/>
+     * <br>The following example demonstrates the usage of this method to
+     * find out the photon propagator in Lorentz gauge:</br>
+     * <pre>
+     *      ...
+     *      //expression specifies tensor, which need to inverse
+     *      Expression toInverse = Tensors.parseExpression("D_mn = k_m*k_n-(1/a)*k_i*k^i*g_mn");
+     *      //linear equation on the unknown tensor K
+     *      Expression equation = Tensors.parseExpression("D_ab*K^ac=d_b^c");
+     *      //samples from which inverse should be formed
+     *      Tensor[] samples = {Tensors.parse("g_mn"), Tensors.parse("g^mn"), Tensors.parse("d_m^n"), Tensors.parse("k_m"), Tensors.parse("k^b")};
+     *
+     *      Tensor inverse = InverseTensor.findInverseWithmathematica(toInverse, equation, samples, false, new Transformation[0], mapleBinDir, temporaryDir);
+     *      System.out.println(inverse);
+     * </pre>
+     * <br>The above code displays the inverse of specified tensor</br>
+     * <pre>
+     *     K^ac=-a*g^ac*(k_i*k^i)**(-1)+a**2/(a-1)*k^a*k^c*(k_i*k^i)**(-2)
+     * </pre>
+     * <p/>
+     *
+     * @param toInverse         expression specifies tensor, which need to inverse
+     * @param equation          linear equation on the unknown tensor in the form
+     *                          T^{..}_{...}*Tinv^{...}_{...} = ...
+     * @param samples           samples from which inverse should be formed
+     * @param symmetricForm     specifies whether inverse tensor should be symmetric
+     * @param transformations   additional simplification rules, which can be taken
+     *                          into account when forming a system of linear equations
+     * @param mathematicaBinDir path to Mathematica bin directory (e.g. "/home/user/maple14/bin")
+     * @param path              path to your temporary folder
+     * @return tensor inverse to the specified tensor according to the specified
+     *         equation and null if inverse does not exist
+     * @throws IOException
+     * @throws InterruptedException when Mathematica fails to run
+     */
+    public static Tensor findInverseWithMathematica(Expression toInverse,
+                                                    Expression equation,
+                                                    Tensor[] samples,
+                                                    boolean symmetricForm,
+                                                    Transformation[] transformations,
+                                                    String mathematicaBinDir,
+                                                    String path) throws IOException, InterruptedException {
+        return findInverseWithMathematica(toInverse, equation, samples, symmetricForm, false, transformations, mathematicaBinDir, path);
+    }
+
+    /**
+     * This method calculates the tensor inverse to the specified tensor according
+     * to the specified equation using the Wolfram Mathematica facilities to solve the system of
+     * linear equations.  The Wolfram Mathematica code will be placed in the specified temporary
+     * directory in {@code equations.mathematica} file. The solution of the linear system,
+     * produced by Wolfram Mathematica, will be placed in the specified temporary directory in
+     * {@code equations.mathematicaOut} file.
+     * <p/>
+     * <br>The following example demonstrates the usage of this method to
+     * find out the photon propagator in Lorentz gauge:</br>
+     * <pre>
+     *      ...
+     *      //expression specifies tensor, which need to inverse
+     *      Expression toInverse = Tensors.parseExpression("D_mn = k_m*k_n-(1/a)*k_i*k^i*g_mn");
+     *      //linear equation on the unknown tensor K
+     *      Expression equation = Tensors.parseExpression("D_ab*K^ac=d_b^c");
+     *      //samples from which inverse should be formed
+     *      Tensor[] samples = {Tensors.parse("g_mn"), Tensors.parse("g^mn"), Tensors.parse("d_m^n"), Tensors.parse("k_m"), Tensors.parse("k^b")};
+     *
+     *      Tensor inverse = InverseTensor.findInverseWithmathematica(toInverse, equation, samples, false, new Transformation[0], mapleBinDir, temporaryDir);
+     *      System.out.println(inverse);
+     * </pre>
+     * <br>The above code displays the inverse of specified tensor</br>
+     * <pre>
+     *     K^ac=-a*g^ac*(k_i*k^i)**(-1)+a**2/(a-1)*k^a*k^c*(k_i*k^i)**(-2)
+     * </pre>
+     * <p/>
+     *
+     * @param toInverse          expression specifies tensor, which need to inverse
+     * @param equation           linear equation on the unknown tensor in the form
+     *                           T^{..}_{...}*Tinv^{...}_{...} = ...
+     * @param samples            samples from which inverse should be formed
+     * @param symmetricForm      specifies whether inverse tensor should be symmetric
+     * @param keepFreeParameters specifies whether the free parameters remaining from solution
+     *                           of linear system should be zeroed
+     * @param transformations    additional simplification rules, which can be taken
+     *                           into account when forming a system of linear equations
+     * @param mathematicaBinDir  path to Mathematica bin directory (e.g. "/home/user/maple14/bin")
+     * @param path               path to your temporary folder
+     * @return tensor inverse to the specified tensor according to the specified
+     *         equation and null if inverse does not exist
+     * @throws IOException
+     * @throws InterruptedException when Mathematica fails to run
+     */
+    public static Tensor findInverseWithMathematica(Expression toInverse,
+                                                    Expression equation,
+                                                    Tensor[] samples,
+                                                    boolean symmetricForm,
+                                                    boolean keepFreeParameters,
+                                                    Transformation[] transformations,
+                                                    String mathematicaBinDir,
+                                                    String path)
+            throws IOException, InterruptedException {
+        return findInverseWithExternalProgramm(MathematicaScriptCreator.INSTANCE,
+                toInverse, equation, samples, symmetricForm,
+                keepFreeParameters, transformations, mathematicaBinDir, path);
+    }
+
+
+    private static Tensor findInverseWithExternalProgramm(ExternalScriptCreator scriptCreator,
+                                                          Expression toInverse,
+                                                          Expression equation,
+                                                          Tensor[] samples,
+                                                          boolean symmetricForm,
+                                                          boolean keepFreeParameters,
+                                                          Transformation[] transformations,
+                                                          String programBinDir,
+                                                          String path)
             throws IOException, InterruptedException {
         //create the general form of the inverse and system of linear equations
         InverseTensor inverseTensor = new InverseTensor(toInverse, equation, samples, symmetricForm, transformations);
@@ -394,49 +525,11 @@ public final class InverseTensor {
         System.out.println("Inverse tensor: " + inverseTensor.generalInverse);
         System.out.println();
 
-        //creating file with Maple code to solve the system of equations
-//        try {
-        FileOutputStream output = new FileOutputStream(path + "/equations.maple");
-        PrintStream file = new PrintStream(output);
-        file.append("with(StringTools):\n");
-        file.append("ans:=array([");
-        for (i = 0; i < inverseTensor.unknownCoefficients.length; ++i)
-            if (i == inverseTensor.unknownCoefficients.length - 1)
-                file.append(inverseTensor.unknownCoefficients[i].toString());
-            else
-                file.append(inverseTensor.unknownCoefficients[i] + ",");
-        file.append("]):\n");
+        scriptCreator.createScript(equations, inverseTensor, path);
 
-        file.println("eq:=array(1.." + equations.length + "):");
-        for (i = 0; i < equations.length; i++)
-            file.println("eq[" + (i + 1) + "]:=" + equations[i] + ":");
-
-        file.print("Result := solve({seq(eq[i],i=1.." + equations.length + ")},[");
-        for (i = 0; i < inverseTensor.unknownCoefficients.length; ++i)
-            if (i == inverseTensor.unknownCoefficients.length - 1)
-                file.append(inverseTensor.unknownCoefficients[i].toString());
-            else
-                file.append(inverseTensor.unknownCoefficients[i] + ",");
-        file.append("]):\n");
-        file.append("Result:= factor(Result);\n");
-        file.println("file:=fopen(\"" + path + "/equations.mapleOut\",WRITE):");
-        file.append("if nops(Result) <> 0 then\n");
-        file.append("for k from 1 to " + inverseTensor.unknownCoefficients.length + " do\n");
-        file.append("temp1 := SubstituteAll(convert(lhs(Result[1][k]), string), \"^\", \"**\");\n");
-        file.append("temp2 := SubstituteAll(convert(rhs(Result[1][k]), string), \"^\", \"**\");\n");
-        file.append("fprintf(file,\"%s=%s\\n\",temp1,temp2);\n");
-        file.append("od:\n");
-        file.append("end if;\n");
-        file.append("fclose(file):");
-//        } catch (Exception e) {
-//            throw new RuntimeException(e);
-//        }
-
-        //TODO maybe use temp file
-
-        //running Maple
+        //running external programm
         try {
-            Process p = Runtime.getRuntime().exec(mapleBinDir + "/maple " + path + "/equations.maple");
+            Process p = Runtime.getRuntime().exec(programBinDir + "/" + scriptCreator.getScriptExecutionCommand() + " " + path + "/equations." + scriptCreator.getScriptExtension());
             BufferedReader bri = new BufferedReader(new InputStreamReader(p.getInputStream()));
             BufferedReader bre = new BufferedReader(new InputStreamReader(p.getErrorStream()));
             String line;
@@ -451,11 +544,10 @@ public final class InverseTensor {
             throw new RuntimeException(ex);
         }
 
-        //reading the Maple output with the solution
-//        try {
+        //reading the produced output with the solution
         //allocating resulting coefficients array
         Expression[] coefficientsResults = new Expression[inverseTensor.unknownCoefficients.length];
-        FileInputStream fstream = new FileInputStream(path + "/equations.mapleOut");
+        FileInputStream fstream = new FileInputStream(path + "/equations." + scriptCreator.getScriptExtension() + "Out");
         if (fstream.available() == 0)
             return null;
         DataInputStream in = new DataInputStream(fstream);
@@ -468,21 +560,147 @@ public final class InverseTensor {
         Tensor inverse = inverseTensor.generalInverse;
 
         //substituting coefficients into general inverse form
+        List<Transformation> zeroSubs = new ArrayList<>();
         for (Expression coef : coefficientsResults)
-            if (coef.isIdentity())//if current coefficient is free parametr
+            if (coef.isIdentity())//if current coefficient is free parameter
             {
-                if (!keepFreeParameters)
-                    inverse = Tensors.expression(coef.get(0), Complex.ZERO).transform(inverse);
+                zeroSubs.add(Tensors.expression(coef.get(0), Complex.ZERO));
             } else
-                inverse = (Expression) coef.transform(inverse);
+                inverse = coef.transform(inverse);
+        if (!keepFreeParameters)
+            inverse = new TransformationCollection(zeroSubs).transform(inverse);
+
 
         //substituting the renamed tensors combinations
         for (Expression sub : scalarSubs)
             inverse = sub.transpose().transform(inverse);
         in.close();
         return inverse;
-//        } catch (Exception e) {
-//            throw new RuntimeException(e);
-//        }
     }
+
+    private static interface ExternalScriptCreator {
+        void createScript(Expression[] equations, InverseTensor inverseTensor, String path) throws IOException;
+
+        String getScriptExecutionCommand();
+
+        String getScriptExtension();
+    }
+
+    private static final class MathematicaScriptCreator implements ExternalScriptCreator {
+        public static final MathematicaScriptCreator INSTANCE = new MathematicaScriptCreator();
+
+        private MathematicaScriptCreator() {
+        }
+
+        @Override
+        public void createScript(Expression[] equations, InverseTensor inverseTensor, String path) throws IOException {
+            //creating file with Mathematica code to solve the system of equations
+            FileOutputStream output = new FileOutputStream(path + "/equations.mathematica");
+            PrintStream file = new PrintStream(output);
+
+            file.append("$equations = { ");
+            int i;
+            for (i = 0; ; i++) {
+                file.append(equations[i].toString(OutputFormat.WolframMathematica).replace("=", "=="));
+                if (i == equations.length - 1)
+                    break;
+                file.append(",\n");
+            }
+            file.append(" };\n");
+
+            file.append("$coefficients = {");
+            for (i = 0; ; i++) {
+                file.append(inverseTensor.unknownCoefficients[i].toString(OutputFormat.WolframMathematica));
+                if (i == inverseTensor.unknownCoefficients.length - 1)
+                    break;
+                file.append(',');
+            }
+            file.append(" };\n");
+
+            file.append("$result = Simplify[Solve[$equations,$coefficients]][[1]];\n");
+            file.append("$found = $result[[All, 1]];\n");
+            file.append("For[$i = 1, $i <= Length[$coefficients], ++$i,If[!MemberQ[$found, $coefficients[[$i]]], $result = $result/.{$coefficients[[$i]] -> 0}; AppendTo[$result, $coefficients[[$i]] -> 0];]];\n");
+            file.append("$result = Simplify[$result];\n");
+
+//            file.append("left = Array[Function[x,Coefficient[equations[[x, 1]], #] & /@ coefficients], Length[equations]];\n");
+//            file.append("right = equations[[All, 2]];\n");
+//            file.append("result = LinearSolve[left, right]\n");
+
+            file.append("$stream = OpenWrite[\"" + path + "/equations.mathematicaOut\"];\n");
+//            file.append("For[i = 1, i <= Length[coefficients], ++i, WriteString[stream, StringReplace[ToString[coefficients[[i]] == result[[i]] // InputForm], {\"==\" -> \"=\", \"^\" -> \"**\"}] <> If[i != Length[coefficients], \"\\n\", \"\"]]];\n");
+            file.append("For[$i = 1, $i <= Length[$coefficients], ++$i, WriteString[$stream, StringReplace[ToString[$result[[$i]] // InputForm], {\"->\" -> \"=\", \"^\" -> \"**\"}] <> If[$i != Length[$coefficients], \"\\n\", \"\"]]];\n");
+            file.append("Close[$stream];");
+            output.close();
+            file.close();
+        }
+
+        @Override
+        public String getScriptExecutionCommand() {
+            return "MathematicaScript -script";
+        }
+
+        @Override
+        public String getScriptExtension() {
+            return "mathematica";
+        }
+    }
+
+
+    private static final class MapleScriptCreator implements ExternalScriptCreator {
+        public static final MapleScriptCreator INSTANCE = new MapleScriptCreator();
+
+        private MapleScriptCreator() {
+        }
+
+        @Override
+        public void createScript(Expression[] equations, InverseTensor inverseTensor, String path) throws IOException {
+            //creating file with Maple code to solve the system of equations
+            FileOutputStream output = new FileOutputStream(path + "/equations.maple");
+            PrintStream file = new PrintStream(output);
+            file.append("with(StringTools):\n");
+            file.append("ans:=array([");
+            int i;
+            for (i = 0; i < inverseTensor.unknownCoefficients.length; ++i)
+                if (i == inverseTensor.unknownCoefficients.length - 1)
+                    file.append(inverseTensor.unknownCoefficients[i].toString());
+                else
+                    file.append(inverseTensor.unknownCoefficients[i] + ",");
+            file.append("]):\n");
+
+            file.println("eq:=array(1.." + equations.length + "):");
+            for (i = 0; i < equations.length; i++)
+                file.println("eq[" + (i + 1) + "]:=" + equations[i] + ":");
+
+            file.print("Result := solve({seq(eq[i],i=1.." + equations.length + ")},[");
+            for (i = 0; i < inverseTensor.unknownCoefficients.length; ++i)
+                if (i == inverseTensor.unknownCoefficients.length - 1)
+                    file.append(inverseTensor.unknownCoefficients[i].toString());
+                else
+                    file.append(inverseTensor.unknownCoefficients[i] + ",");
+            file.append("]):\n");
+            file.append("Result:= factor(Result);\n");
+            file.println("file:=fopen(\"" + path + "/equations.mapleOut\",WRITE):");
+            file.append("if nops(Result) <> 0 then\n");
+            file.append("for k from 1 to " + inverseTensor.unknownCoefficients.length + " do\n");
+            file.append("temp1 := SubstituteAll(convert(lhs(Result[1][k]), string), \"^\", \"**\");\n");
+            file.append("temp2 := SubstituteAll(convert(rhs(Result[1][k]), string), \"^\", \"**\");\n");
+            file.append("fprintf(file,\"%s=%s\\n\",temp1,temp2);\n");
+            file.append("od:\n");
+            file.append("end if;\n");
+            file.append("fclose(file):");
+            output.close();
+            file.close();
+        }
+
+        @Override
+        public String getScriptExecutionCommand() {
+            return "maple";
+        }
+
+        @Override
+        public String getScriptExtension() {
+            return "maple";
+        }
+    }
+
 }
