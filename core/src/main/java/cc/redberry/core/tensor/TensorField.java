@@ -114,18 +114,6 @@ public final class TensorField extends SimpleTensor {
 
         int[] orders = fieldDescriptor.getDerivativeOrders();
 
-//
-//        NameDescriptorForTensorField parent = fieldDescriptor.getParent();
-//
-//        StructureOfIndices[] partition = new StructureOfIndices[ArraysUtils.sum(orders) + 1];
-//        partition[0] = parent.getStructureOfIndices();
-//        int i, j;
-//        int totalOrder = 1;
-//        for (i = 0; i < args.length; ++i) {
-//            for (j = orders[i] - 1; j >= 0; --j)
-//                partition[totalOrder++] = parent.getArgStructureOfIndices(i);
-//        }
-
         int[][] _mapping = fieldDescriptor.getIndicesPartitionMapping();
 
         SimpleIndices[][] iPartition = new SimpleIndices[args.length + 1][];
