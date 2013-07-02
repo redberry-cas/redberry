@@ -26,8 +26,6 @@ import cc.redberry.core.context.NameDescriptorForTensorField;
 import cc.redberry.core.context.OutputFormat;
 import cc.redberry.core.indices.SimpleIndices;
 import cc.redberry.core.indices.SimpleIndicesBuilder;
-import cc.redberry.core.indices.StructureOfIndices;
-import cc.redberry.core.utils.ArraysUtils;
 
 import java.util.Arrays;
 import java.util.Iterator;
@@ -114,24 +112,27 @@ public final class TensorField extends SimpleTensor {
             return ret;
         }
 
-        NameDescriptorForTensorField parent = fieldDescriptor.getParent();
-
         int[] orders = fieldDescriptor.getDerivativeOrders();
-        StructureOfIndices[] partition = new StructureOfIndices[ArraysUtils.sum(orders) + 1];
-        partition[0] = parent.getStructureOfIndices();
-        int i, j;
-        int totalOrder = 1;
-        for (i = 0; i < args.length; ++i) {
-            for (j = orders[i] - 1; j >= 0; --j)
-                partition[totalOrder++] = parent.getArgStructureOfIndices(i);
-        }
 
-        int[][] _mapping = fieldDescriptor.getStructureOfIndices().getPartitionMappings(partition);
+//
+//        NameDescriptorForTensorField parent = fieldDescriptor.getParent();
+//
+//        StructureOfIndices[] partition = new StructureOfIndices[ArraysUtils.sum(orders) + 1];
+//        partition[0] = parent.getStructureOfIndices();
+//        int i, j;
+//        int totalOrder = 1;
+//        for (i = 0; i < args.length; ++i) {
+//            for (j = orders[i] - 1; j >= 0; --j)
+//                partition[totalOrder++] = parent.getArgStructureOfIndices(i);
+//        }
+
+        int[][] _mapping = fieldDescriptor.getIndicesPartitionMapping();
+
         SimpleIndices[][] iPartition = new SimpleIndices[args.length + 1][];
 
         SimpleIndicesBuilder ib;
-        totalOrder = 0;
-        int k, l, m, _map[];
+        int totalOrder = 0;
+        int i, j, k, l, m, _map[];
         for (i = 0; i <= args.length; ++i) {
             l = i == 0 ? 1 : orders[i - 1];
             iPartition[i] = new SimpleIndices[l];

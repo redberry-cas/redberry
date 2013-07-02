@@ -23,6 +23,9 @@
 package cc.redberry.core.context;
 
 import cc.redberry.core.indices.StructureOfIndices;
+import cc.redberry.core.utils.ArraysUtils;
+
+import java.util.Arrays;
 
 /**
  * @author Dmitry Bolotin
@@ -31,6 +34,7 @@ import cc.redberry.core.indices.StructureOfIndices;
 public abstract class NameDescriptorForTensorField extends NameDescriptor {
     final int[] orders;
     final String name;
+    int[][] indicesPartitionMapping = null;
 
     NameDescriptorForTensorField(StructureOfIndices[] indexTypeStructures, int id, int[] orders, String name) {
         super(indexTypeStructures, id);
@@ -44,6 +48,37 @@ public abstract class NameDescriptorForTensorField extends NameDescriptor {
 
     public int getDerivativeOrder(int arg) {
         return orders[arg];
+    }
+
+    private void ensurePartitionInitialized() {
+        if (indicesPartitionMapping != null)
+            return;
+
+        if (!isDerivative()) {
+            int[][] ret = new int[structuresOfIndices.length][];
+            Arrays.fill(ret, 1, ret.length, new int[0]);
+            ret[0] = ArraysUtils.getSeriesFrom0(structuresOfIndices[0].size());
+            indicesPartitionMapping = ret;
+        }
+
+        NameDescriptorForTensorField parent = getParent();
+
+        StructureOfIndices[] partition = new StructureOfIndices[ArraysUtils.sum(orders) + 1];
+        partition[0] = parent.getStructureOfIndices();
+        int i, j;
+        int totalOrder = 1;
+        for (i = 0; i < structuresOfIndices.length - 1; ++i) {
+            for (j = orders[i] - 1; j >= 0; --j)
+                partition[totalOrder++] = parent.getArgStructureOfIndices(i);
+        }
+
+        indicesPartitionMapping = structuresOfIndices[0].getPartitionMappings(partition);
+
+    }
+
+    public int[][] getIndicesPartitionMapping() {
+        ensurePartitionInitialized();
+        return ArraysUtils.deepClone(indicesPartitionMapping);
     }
 
     public abstract NameDescriptorForTensorField getParent();

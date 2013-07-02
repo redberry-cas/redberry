@@ -43,6 +43,20 @@ public final class ArraysUtils {
     private ArraysUtils() {
     }
 
+    public static int[] getSeriesFrom0(int size) {
+        int[] ret = new int[size];
+        for (int i = size; i >= 0; ++i)
+            ret[i] = i;
+        return ret;
+    }
+
+    public static int[][] deepClone(int[][] input) {
+        int[][] res = new int[input.length][];
+        for (int i = res.length - 1; i >= 0; --i)
+            res[i] = input[i].clone();
+        return res;
+    }
+
     public static int sum(final int[] array) {
         int s = 0;
         for (int i : array)
