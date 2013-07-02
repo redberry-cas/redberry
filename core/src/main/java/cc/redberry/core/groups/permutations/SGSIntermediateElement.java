@@ -35,25 +35,25 @@ final class SGSIntermediateElement extends SGSElement {
     /**
      * Orbit of basePoint
      */
-    final IntArrayList orbit;
+    final IntArrayList orbitList;
 
     SGSIntermediateElement(int basePoint, ArrayList<Permutation> stabilizerGenerators, int length) {
         super(basePoint, stabilizerGenerators, new int[length]);
-        this.orbit = new IntArrayList();
-        this.orbit.add(basePoint);
+        this.orbitList = new IntArrayList();
+        this.orbitList.add(basePoint);
         reCalculateSchreierVector();
     }
 
     void reCalculateSchreierVector() {
-        orbit.removeAfter(1);
+        orbitList.removeAfter(1);
         Arrays.fill(schreierVector, -2);
         schreierVector[basePoint] = -1;
         int image, stabilizerIndex;
-        for (int i = 0; i < orbit.size(); ++i) {
+        for (int i = 0; i < orbitList.size(); ++i) {
             for (stabilizerIndex = 0; stabilizerIndex < stabilizerGenerators.size(); ++stabilizerIndex) {
-                image = stabilizerGenerators.get(stabilizerIndex).newIndexOf(orbit.get(i));
+                image = stabilizerGenerators.get(stabilizerIndex).newIndexOf(orbitList.get(i));
                 if (schreierVector[image] == -2) {
-                    orbit.add(image);
+                    orbitList.add(image);
                     schreierVector[image] = stabilizerIndex;
                 }
             }

@@ -22,8 +22,13 @@
  */
 package cc.redberry.core.groups.permutations;
 
-import junit.framework.Assert;
 import org.junit.Test;
+
+import java.util.HashSet;
+import java.util.Set;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Dmitry Bolotin
@@ -40,7 +45,8 @@ public class PermutationGroupTest {
         b = new Permutation(1, 2, 3, 4, 5, 6, 0);
         generators = new Permutation[]{a, b};
         group = new PermutationGroup(generators);
-        Assert.assertEquals(group.getOrder().longValue(), 5040L);
+        assertEquals(group.getOrder().longValue(), 5040L);
+        testIterator(group);
 
         b = new Permutation(1, 2, 3, 4, 5, 6, 0);
         a = new Permutation(1, 0, 2, 3, 4, 5, 6);
@@ -48,7 +54,8 @@ public class PermutationGroupTest {
         d = new Permutation(1, 4, 3, 2, 5, 6, 0);
         generators = new Permutation[]{a, b, c, d};
         group = new PermutationGroup(generators);
-        Assert.assertEquals(group.getOrder().longValue(), 5040L);
+        assertEquals(group.getOrder().longValue(), 5040L);
+        testIterator(group);
 
         b = new Permutation(1, 2, 3, 4, 5, 6, 0, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19);
         a = new Permutation(1, 0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19);
@@ -57,7 +64,8 @@ public class PermutationGroupTest {
         e = new Permutation(1, 0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 19, 18);
         generators = new Permutation[]{a, b, c, d, e};
         group = new PermutationGroup(generators);
-        Assert.assertEquals(group.getOrder().longValue(), 10080L);
+        assertEquals(group.getOrder().longValue(), 10080L);
+        testIterator(group);
 
         b = new Permutation(1, 2, 3, 4, 5, 6, 0, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19);
         a = new Permutation(1, 0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19);
@@ -66,6 +74,42 @@ public class PermutationGroupTest {
         e = new Permutation(1, 0, 2, 3, 14, 5, 6, 7, 8, 9, 10, 11, 12, 13, 4, 15, 16, 17, 18, 19);
         generators = new Permutation[]{a, b, c, d, e};
         group = new PermutationGroup(generators);
-        Assert.assertEquals(group.getOrder().longValue(), 5040L * 8L);
+        assertEquals(group.getOrder().longValue(), 5040L * 8L);
+        testIterator(group);
+    }
+
+    @Test
+    public void testIterator1() throws Exception {
+        PermutationGroup pg = new PermutationGroup(new Permutation(1, 0, 2), new Permutation(1, 2, 0));
+        assertEquals(6L, pg.getOrder().longValue());
+        testIterator(pg);
+
+    }
+
+    public static void testIterator(PermutationGroup pg) {
+        HashSet<Permutation> set = new HashSet<>();
+
+        for (Permutation permutation : pg)
+            set.add(permutation);
+
+        for (Permutation permutation : set)
+            assertTrue(pg.isMember(permutation));
+
+        assertEquals(pg.getOrder().longValue(), set.size());
+    }
+
+    @Test
+    public void testIdentityGroup() throws Exception {
+        PermutationGroup id = new PermutationGroup(10);
+
+        assertTrue(id.isMember(Combinatorics.createIdentity(10)));
+
+        Set<Permutation> set = new HashSet<>();
+        set.add(Combinatorics.createIdentity(10));
+
+        for (Permutation p : id)
+            assertTrue(set.remove(p));
+
+        assertTrue(set.isEmpty());
     }
 }

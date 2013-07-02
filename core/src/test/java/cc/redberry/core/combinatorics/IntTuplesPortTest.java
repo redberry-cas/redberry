@@ -48,4 +48,32 @@ public class IntTuplesPortTest {
             ++count;
         Assert.assertEquals(count, 256);
     }
+
+    @Test
+    public void testLUD() throws Exception {
+        int[][] results = {
+                {0, 0, 0},
+                {0, 0, 1},
+                {0, 1, 0},
+                {0, 1, 1},
+                {0, 2, 0},
+                {0, 2, 1},
+                {1, 0, 0},
+                {1, 0, 1},
+                {1, 1, 0},
+                {1, 1, 1},
+                {1, 2, 0},
+                {1, 2, 1}
+        };
+
+        int[] luds = {0, 2, 1, 2, 1, 2, 0, 2, 1, 2, 1, 2};
+
+        IntTuplesPort port = new IntTuplesPort(2, 3, 2);
+        int i = 0;
+        int[] r;
+        while ((r = port.take()) != null) {
+            Assert.assertArrayEquals(results[i], r);
+            Assert.assertEquals(luds[i++], port.getLastUpdateDepth());
+        }
+    }
 }

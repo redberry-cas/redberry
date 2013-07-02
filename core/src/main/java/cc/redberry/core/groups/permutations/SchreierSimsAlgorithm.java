@@ -64,7 +64,7 @@ final class SchreierSimsAlgorithm {
         }
     }
 
-    static SGSElement[] createSGS(Permutation[] generators) {
+    static SGSElement[] createSGS(Permutation... generators) {
         if (generators.length == 0)
             return new SGSElement[0];
 
@@ -128,8 +128,8 @@ final class SchreierSimsAlgorithm {
         while (i >= 0) {
             currentElement = intermediateSGSElements.get(i);
             //enumerating orbit elements
-            for (orbitIndex = 0; orbitIndex < currentElement.orbit.size(); ++orbitIndex) {
-                beta = currentElement.orbit.get(orbitIndex);
+            for (orbitIndex = 0; orbitIndex < currentElement.orbitList.size(); ++orbitIndex) {
+                beta = currentElement.orbitList.get(orbitIndex);
                 //enumerating stabilizers from current sgsElement
                 for (Permutation stabilizerGenerator : currentElement.stabilizerGenerators) {
                     if (!currentElement.getTransversalOf(beta).composition(stabilizerGenerator)

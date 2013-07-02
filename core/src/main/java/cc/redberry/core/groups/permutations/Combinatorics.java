@@ -53,11 +53,15 @@ public class Combinatorics {
 
     private static final Permutation[] cachedIdentities = new Permutation[64];
 
-    private static Permutation createIdentity(int length) {
+    public static Permutation createIdentity(int length) {
         int[] array = new int[length];
         for (int i = 0; i < length; ++i)
             array[i] = i;
         return new Permutation(true, false, array);
+    }
+
+    public static PermutationGroup createIdentityGroup(int length) {
+        return new PermutationGroup(length);
     }
 
     public static Permutation getIdentity(int length) {

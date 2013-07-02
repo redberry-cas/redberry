@@ -43,24 +43,31 @@ public class SGSElement {
      * Schreier vector
      */
     final int[] schreierVector;
+    /**
+     * Orbit
+     */
+    final int[] orbit;
 
     SGSElement(int basePoint, List<Permutation> stabilizerGenerators, int[] schreierVector) {
         this.basePoint = basePoint;
         this.stabilizerGenerators = stabilizerGenerators;
         this.schreierVector = schreierVector;
+        this.orbit = null;
     }
 
     SGSElement(SGSIntermediateElement sgsIntermediateElement) {
         this.schreierVector = sgsIntermediateElement.schreierVector;
         this.basePoint = sgsIntermediateElement.basePoint;
+        this.orbit = sgsIntermediateElement.orbitList.toArray();
         this.stabilizerGenerators = Collections.unmodifiableList(sgsIntermediateElement.stabilizerGenerators);
     }
 
     public int getOrbitSize() {
-        int orbitSize = 0;
-        for (int i : schreierVector)
-            if (i != -2) ++orbitSize;
-        return orbitSize;
+        return orbit.length;
+    }
+
+    public int getOrbitPoint(int i) {
+        return orbit[i];
     }
 
     public int getBasePoint() {
@@ -75,7 +82,7 @@ public class SGSElement {
         return schreierVector[point] != -2;
     }
 
-    Permutation getTransversalOf(int point) {
+    public Permutation getTransversalOf(int point) {
         final Permutation transversal = getInverseTransversalOf(point).inverse();
 
         assert transversal.newIndexOf(basePoint) == point;
@@ -83,7 +90,7 @@ public class SGSElement {
         return transversal;
     }
 
-    Permutation getInverseTransversalOf(int point) {
+    public Permutation getInverseTransversalOf(int point) {
         Permutation transversal = Combinatorics.getIdentity(schreierVector.length);
 
         while (schreierVector[transversal.newIndexOf(point)] != -1)
@@ -94,7 +101,7 @@ public class SGSElement {
         return transversal;
     }
 
-    ArrayList<Permutation> getBasePointStabilizerGenerators() {
+    public ArrayList<Permutation> getBasePointStabilizerGenerators() {
         ArrayList<Permutation> bStabilizers = new ArrayList<>();
         for (Permutation gen : stabilizerGenerators)
             if (gen.newIndexOf(basePoint) == basePoint)
