@@ -752,7 +752,7 @@ class Redberry {
             IndexMappingBuffer buffer = this.buffer.clone()
             buffer = buffer.clone()
             t.indices.free.each {
-                if (!buffer.map.containsKey(it))
+                if (!buffer.map.containsKey(IndicesUtils.getNameWithType(it)))
                     buffer.tryMap(it, it)
             }
 
