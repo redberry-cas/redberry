@@ -1,13 +1,13 @@
 package cc.redberry.core.utils;
 
+import org.apache.commons.math3.random.BitsStreamGenerator;
 import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.random.Well19937c;
 import org.junit.Test;
 
 import java.util.Arrays;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 public class IntBackedBitArrayTest {
     @Test
@@ -223,6 +223,80 @@ public class IntBackedBitArrayTest {
                 assertEquals("On :" + i + ", " + k, new IntBackedBitArray(Arrays.copyOfRange(arr1, offset1, offset1 + length)), ba2);
             }
         }
+    }
+
+    @Test
+    public void testNextBit() throws Exception {
+        IntBackedBitArray ba = new IntBackedBitArray(145);
+        ba.set(3);
+        ba.set(5);
+        ba.set(8);
+        ba.set(21);
+        ba.set(28);
+        ba.set(43);
+
+        assertEquals(3, ba.nextBit(1));
+        assertEquals(5, ba.nextBit(3));
+        assertEquals(43, ba.nextBit(28));
+    }
+
+    @Test
+    public void testBits1() {
+        BitsStreamGenerator random = new Well19937c();
+        for (int stb = 0; stb < 10000; ++stb) {
+            int length;
+            boolean[] array = new boolean[length = random.nextInt(200)];
+            IntBackedBitArray bitArray = new IntBackedBitArray(length);
+
+            int i, bitCount = 0, size;
+            IntArrayList bitsPositions = new IntArrayList();
+            for (i = 0; i < length; ++i)
+                if (array[i] = random.nextBoolean()) {
+                    bitCount++;
+                    bitArray.set(i);
+                    bitsPositions.add(i);
+                }
+
+            assertEquals(bitCount, bitArray.bitCount());
+            assertEquals(bitCount, bitsPositions.size());
+
+            if (bitArray.size() != bitArray.bitCount())
+                assertFalse(bitArray.isFull());
+
+            assertArrayEquals(bitsPositions.toArray(), bitArray.getBits());
+        }
+    }
+
+    @Test
+    public void testBits1Sparse() {
+        BitsStreamGenerator random = new Well19937c(123);
+        for (int stb = 0; stb < 10000; ++stb) {
+            int length;
+            boolean[] array = new boolean[length = random.nextInt(200)];
+            IntBackedBitArray bitArray = new IntBackedBitArray(length);
+
+            int i, bitCount = 0, size;
+            IntArrayList bitsPositions = new IntArrayList();
+            for (i = 0; i < length; ++i)
+                if (array[i] = (random.nextInt(5) == 0)) {
+                    bitCount++;
+                    bitArray.set(i);
+                    bitsPositions.add(i);
+                }
+
+            assertEquals(bitCount, bitArray.bitCount());
+            assertEquals(bitCount, bitsPositions.size());
+
+            if (bitArray.size() != bitArray.bitCount())
+                assertFalse(bitArray.isFull());
+
+            assertArrayEquals(bitsPositions.toArray(), bitArray.getBits());
+        }
+    }
+
+    @Test
+    public void test2() throws Exception {
+        System.out.println(Integer.numberOfTrailingZeros(0x80000000));
     }
 
     private boolean testNormal(IntBackedBitArray ba) {

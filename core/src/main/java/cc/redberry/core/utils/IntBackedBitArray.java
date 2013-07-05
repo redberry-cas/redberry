@@ -247,6 +247,57 @@ public class IntBackedBitArray {
     }
 
     /**
+     * Returns an array with positions of all "1" bits.
+     *
+     * @return array with positions of all "1" bits
+     */
+    public int[] getBits() {
+        final int[] bits = new int[bitCount()];
+        int i, j = 0;
+        if (size < 40 || size >> 2 < bits.length) { // norm ??
+            for (i = 0; i < size; ++i)
+                if (get(i))
+                    bits[j++] = i;
+        } else {
+            i = -1;
+            while ((i = nextBit(i)) != -1) {
+                if (!get(i))
+                    if (j > 0)
+                        nextBit(bits[j - 1]);
+                bits[j++] = i;
+            }
+        }
+        assert j == bits.length;
+        return bits;
+    }
+
+    /**
+     * Returns the next "1" bit from the specified position.
+     *
+     * @param position initial position
+     * @return position of the next "1" bit of -1 if all bits after position are 0
+     */
+    public int nextBit(int position) {
+        ++position;
+        int ret = position & 0x1F;
+        if (ret != 0)
+            if ((ret = Integer.numberOfTrailingZeros(data[position >>> 5] >>> ret)) != 32)
+                return position + ret;
+            else
+                position += 32;
+
+        ret = 32;
+        position = position >>> 5;
+        while (position < data.length &&
+                (ret = Integer.numberOfTrailingZeros(data[position++])) == 32) ;
+
+        if (position >= data.length && ret == 32)
+            return -1;
+        else
+            return ((position - 1) << 5) + ret;
+    }
+
+    /**
      * Returns a new bit array, containing values from the specified range
      *
      * @param from lower bound of range
