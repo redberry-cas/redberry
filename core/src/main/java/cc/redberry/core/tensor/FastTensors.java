@@ -144,9 +144,17 @@ public final class FastTensors {
             return number;
         if (number.isOne())
             return sum;
+         /*
+         * HERE WE MUST USE BUILDER!!!
+         * Counterexample:
+         * sum = (I)*(p2*e5+1)+(-I)*p2*e5-I, number = I
+         * then sum*number = 0!
+         *
+         * btw can be improved
+         */
         SumBuilder sb = new SumBuilder();
-        for(Tensor t :sum)
-            sb.put(multiply(t,number));
+        for (Tensor t : sum)
+            sb.put(multiply(t, number));
         return sb.build();
 //        Tensor data[] = sum.toArray();
 //        for (int i = data.length - 1; i >= 0; --i)
