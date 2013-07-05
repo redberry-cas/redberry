@@ -200,7 +200,34 @@ public class IntBackedBitArrayTest {
         }
     }
 
+    @Test
+    public void testCopyOfRange1() throws Exception {
+        RandomGenerator rg = new Well19937c(203);
+
+        int offset1, length;
+
+        for (int k = 0; k < 100; ++k) {
+            int size = rg.nextInt(512);
+
+            boolean[] arr1 = new boolean[size];
+            for (int i = 0; i < size; ++i)
+                arr1[i] = rg.nextBoolean();
+            IntBackedBitArray ba1 = new IntBackedBitArray(arr1), ba2;
+
+
+            for (int i = 0; i < 100; ++i) {
+                offset1 = rg.nextInt(size);
+                length = rg.nextInt(size - offset1);
+                ba2 = ba1.copyOfRange(offset1, offset1 + length);
+                assertTrue(testNormal(ba2));
+                assertEquals("On :" + i + ", " + k, new IntBackedBitArray(Arrays.copyOfRange(arr1, offset1, offset1 + length)), ba2);
+            }
+        }
+    }
+
     private boolean testNormal(IntBackedBitArray ba) {
+        if (ba.size == 0)
+            return true;
         return (ba.data[ba.data.length - 1] & (~(ba.lastElementMask()))) == 0;
     }
 

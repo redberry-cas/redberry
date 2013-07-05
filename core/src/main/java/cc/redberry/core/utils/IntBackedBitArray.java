@@ -4,6 +4,12 @@ import java.util.Arrays;
 
 import static java.lang.Math.min;
 
+/**
+ * This class represents an "array of booleans" with many fast and useful methods. Consumes ~ 8 times less memory than
+ * array of booleans for big sizes. Has slightly different semantics than java's built in {@link java.util.BitSet} and
+ * also provides addititonal functionality like {@link #loadValueFrom(IntBackedBitArray, int, int, int)} and {@link
+ * #copyOfRange(int, int)}.
+ */
 public class IntBackedBitArray {
     final int[] data;
     final int size;
@@ -13,11 +19,21 @@ public class IntBackedBitArray {
         this.size = size;
     }
 
+    /**
+     * Creates an array with specified size. Initial state of all bits is 0 (cleared).
+     *
+     * @param size
+     */
     public IntBackedBitArray(int size) {
         this.size = size;
         this.data = new int[(size + 31) >>> 5];
     }
 
+    /**
+     * Creates a bit array from array of booleans
+     *
+     * @param array boolean array
+     */
     public IntBackedBitArray(boolean[] array) {
         this(array.length);
         for (int i = 0; i < array.length; ++i)
@@ -25,6 +41,11 @@ public class IntBackedBitArray {
                 set(i);
     }
 
+    /**
+     * <a href="http://en.wikipedia.org/wiki/Augmented_assignment">Compound assignment</a> and.
+     *
+     * @param bitArray rhs of and
+     */
     public void and(IntBackedBitArray bitArray) {
         if (bitArray.size != size)
             throw new IllegalArgumentException();
@@ -33,6 +54,11 @@ public class IntBackedBitArray {
             data[i] &= bitArray.data[i];
     }
 
+    /**
+     * <a href="http://en.wikipedia.org/wiki/Augmented_assignment">Compound assignment</a> or.
+     *
+     * @param bitArray rhs of or
+     */
     public void or(IntBackedBitArray bitArray) {
         if (bitArray.size != size)
             throw new IllegalArgumentException();
@@ -41,6 +67,11 @@ public class IntBackedBitArray {
             data[i] |= bitArray.data[i];
     }
 
+    /**
+     * <a href="http://en.wikipedia.org/wiki/Augmented_assignment">Compound assignment</a> xor.
+     *
+     * @param bitArray rhs of xor
+     */
     public void xor(IntBackedBitArray bitArray) {
         if (bitArray.size != size)
             throw new IllegalArgumentException();
@@ -49,6 +80,9 @@ public class IntBackedBitArray {
             data[i] ^= bitArray.data[i];
     }
 
+    /**
+     * Inverts all bits in this bit array
+     */
     public void not() {
         for (int i = data.length - 1; i >= 0; --i)
             data[i] = ~data[i];
@@ -64,6 +98,11 @@ public class IntBackedBitArray {
         //return ~(0xFFFFFFFF << (32 - ((data.length << 5) - size)));
     }
 
+    /**
+     * Returns the number of 1 bits.
+     *
+     * @return number of 1 bits
+     */
     public int bitCount() {
         int bits = 0;
         for (int i : data)
@@ -71,10 +110,18 @@ public class IntBackedBitArray {
         return bits;
     }
 
+    /**
+     * Clears all bits of this bit array
+     */
     public void clearAll() {
         Arrays.fill(data, 0);
     }
 
+    /**
+     * Returns a clone of this bit array.
+     *
+     * @return clone of this bit array
+     */
     public IntBackedBitArray clone() {
         return new IntBackedBitArray(data.clone(), size);
     }
@@ -86,6 +133,13 @@ public class IntBackedBitArray {
     //    return new int[0];
     //}
 
+    /**
+     * Returns {@code true} if there are 1 bits in the same positions. Equivalent to {@code !this.and(other).isEmpty()
+     * }
+     *
+     * @param bitArray other bit array
+     * @return {@code true} if there are 1 bits in the same positions
+     */
     public boolean intersects(IntBackedBitArray bitArray) {
         if (bitArray.size != size)
             throw new IllegalArgumentException();
@@ -97,22 +151,49 @@ public class IntBackedBitArray {
         return false;
     }
 
+    /**
+     * Copy values from the array of the same size
+     *
+     * @param bitArray bit array to copy values from
+     */
     public void loadValueFrom(IntBackedBitArray bitArray) {
         System.arraycopy(bitArray.data, 0, data, 0, data.length);
     }
 
+    /**
+     * Returns the state of specified bit
+     *
+     * @param i index
+     * @return {@code true} if bit is set, {@code false} if bit is cleared
+     */
     public boolean get(int i) {
         return (data[i >> 5] & (1 << (i & 0x1F))) != 0;
     }
 
+    /**
+     * Sets the specified bit (sets to 1)
+     *
+     * @param i index of bit
+     */
     public void set(int i) {
         data[i >> 5] |= (1 << (i & 0x1F));
     }
 
+    /**
+     * Clears the specified bit (sets to 0)
+     *
+     * @param i index of bit
+     */
     public void clear(int i) {
         data[i >> 5] &= ~(1 << (i & 0x1F));
     }
 
+    /**
+     * Set the value of specified bit
+     *
+     * @param i     index
+     * @param value value
+     */
     public void set(int i, boolean value) {
         if (value)
             set(i);
@@ -120,6 +201,9 @@ public class IntBackedBitArray {
             clear(i);
     }
 
+    /**
+     * Sets all bits of this bit array
+     */
     public void setAll() {
         for (int i = data.length - 2; i >= 0; --i)
             data[i] = 0xFFFFFFFF;
@@ -127,10 +211,20 @@ public class IntBackedBitArray {
         data[data.length - 1] = lastElementMask();
     }
 
+    /**
+     * Returns the length of this bit array
+     *
+     * @return length of this bit array
+     */
     public int size() {
         return size;
     }
 
+    /**
+     * Returns true if all bits in this array are in the 1 state.
+     *
+     * @return true if all bits in this array are in the 1 state
+     */
     public boolean isFull() {
         for (int i = data.length - 2; i >= 0; --i)
             if (data[i] != 0xFFFFFFFF)
@@ -139,12 +233,30 @@ public class IntBackedBitArray {
         return data[data.length - 1] == lastElementMask();
     }
 
+    /**
+     * Returns true if all bits in this array are in the 0 state.
+     *
+     * @return true if all bits in this array are in the 0 state
+     */
     public boolean isEmpty() {
         for (int i = data.length - 1; i >= 0; --i)
             if (data[i] != 0)
                 return false;
 
         return true;
+    }
+
+    /**
+     * Returns a new bit array, containing values from the specified range
+     *
+     * @param from lower bound of range
+     * @param to   upper bound of range
+     * @return new bit array, containing values from the specified range
+     */
+    public IntBackedBitArray copyOfRange(int from, int to) {
+        IntBackedBitArray ba = new IntBackedBitArray(to - from);
+        ba.loadValueFrom(this, from, 0, to - from);
+        return ba;
     }
 
     /**
