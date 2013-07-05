@@ -39,7 +39,7 @@ import cc.redberry.core.transformations.factor.FactorTransformation
 import cc.redberry.core.transformations.fractions.GetDenominatorTransformation
 import cc.redberry.core.transformations.fractions.GetNumeratorTransformation
 import cc.redberry.core.transformations.fractions.TogetherTransformation
-import cc.redberry.core.utils.ByteBackedBitArray
+import cc.redberry.core.utils.BitArray
 
 /**
  * Groovy facade for Redberry transformations and utility methods.
@@ -271,14 +271,14 @@ class RedberryStatic {
             StructureOfIndices[] st = token.indicesTypeStructureAndName.structure;
 
             int[] allTypesCounts = st[0].typesCounts;
-            def ByteBackedBitArray[] allStates = st[0].states;
+            def BitArray[] allStates = st[0].states;
 
             descriptors.each { descriptor ->
                 def type = descriptor.type.type
                 if (allTypesCounts[type] != 0)
                     throw new IllegalArgumentException()
                 allTypesCounts[type] = descriptor.lower + descriptor.upper
-                allStates[type] = new ByteBackedBitArray(allTypesCounts[type])
+                allStates[type] = new BitArray(allTypesCounts[type])
                 for (int i = 0; i < descriptor.upper; ++i)
                     allStates[type].set(i)
             }

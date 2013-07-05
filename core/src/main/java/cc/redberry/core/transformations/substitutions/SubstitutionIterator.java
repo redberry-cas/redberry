@@ -26,7 +26,7 @@ package cc.redberry.core.transformations.substitutions;
 import cc.redberry.core.tensor.*;
 import cc.redberry.core.tensor.functions.ScalarFunction;
 import cc.redberry.core.tensor.iterator.*;
-import cc.redberry.core.utils.ByteBackedBitArray;
+import cc.redberry.core.utils.BitArray;
 import cc.redberry.core.utils.TensorUtils;
 import gnu.trove.TCollections;
 import gnu.trove.iterator.TIntIterator;
@@ -214,7 +214,7 @@ public final class SubstitutionIterator implements TreeIterator {
 
     private final static class SumFC extends AbstractFC {
         private int[] allDummyIndices;
-        private ByteBackedBitArray[] usedArrays; //index index in allDummyIndices is index
+        private BitArray[] usedArrays; //index index in allDummyIndices is index
 
         private SumFC(StackPosition<ForbiddenContainer> position) {
             super(position);
@@ -243,9 +243,9 @@ public final class SubstitutionIterator implements TreeIterator {
             int i;
 
             //Allocating origins arrays
-            usedArrays = new ByteBackedBitArray[allDummyIndices.length];
+            usedArrays = new BitArray[allDummyIndices.length];
             for (i = allDummyIndices.length - 1; i >= 0; --i)
-                usedArrays[i] = new ByteBackedBitArray(size);
+                usedArrays[i] = new BitArray(size);
 
             //Full-filling origins array
             for (i = size - 1; i >= 0; --i) {
