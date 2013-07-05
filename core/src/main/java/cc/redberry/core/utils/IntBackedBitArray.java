@@ -2,6 +2,8 @@ package cc.redberry.core.utils;
 
 import java.util.Arrays;
 
+import static java.lang.Math.min;
+
 public class IntBackedBitArray {
     final int[] data;
     final int size;
@@ -14,6 +16,13 @@ public class IntBackedBitArray {
     public IntBackedBitArray(int size) {
         this.size = size;
         this.data = new int[(size + 31) >>> 5];
+    }
+
+    public IntBackedBitArray(boolean[] array) {
+        this(array.length);
+        for (int i = 0; i < array.length; ++i)
+            if (array[i])
+                set(i);
     }
 
     public void and(IntBackedBitArray bitArray) {
@@ -47,8 +56,12 @@ public class IntBackedBitArray {
         data[data.length - 1] &= lastElementMask();
     }
 
-    private int lastElementMask() {
-        return ~(0xFFFFFFFF << (32 - ((data.length << 5) - size)));
+    int lastElementMask() {
+        if ((size & 0x1F) == 0)
+            return 0xFFFFFFFF;
+        else
+            return 0xFFFFFFFF >>> ((data.length << 5) - size);
+        //return ~(0xFFFFFFFF << (32 - ((data.length << 5) - size)));
     }
 
     public int bitCount() {
@@ -134,6 +147,80 @@ public class IntBackedBitArray {
         return true;
     }
 
+    /**
+     * Analog of {@link System#arraycopy(Object, int, Object, int, int)}, where src is {@code bitArray}.
+     *
+     * @param bitArray     source
+     * @param sourceOffset source offset
+     * @param thisOffset   destination offset
+     * @param length       number of bits to copy
+     */
+    public void loadValueFrom(IntBackedBitArray bitArray, int sourceOffset, int thisOffset, int length) {
+        if (bitArray == this)
+            throw new IllegalArgumentException("Can't copy from itself.");
+
+        //Forcing alignment on other (bitArray)
+        int alignmentOffset = (sourceOffset & 0x1F);
+
+        //Now in words (not in bits)
+        sourceOffset = sourceOffset >>> 5;
+
+        if (alignmentOffset != 0) {
+            int l = min(32 - alignmentOffset, length);
+            loadValueFrom(
+                    bitArray.data[sourceOffset] >>> alignmentOffset,
+                    thisOffset,
+                    l);
+
+            thisOffset += l;
+            ++sourceOffset;
+            length -= l;
+        }
+
+        //Bulk copy
+        while (length > 0) {
+            loadValueFrom(bitArray.data[sourceOffset], thisOffset, min(32, length));
+            length -= 32;
+            thisOffset += 32;
+            ++sourceOffset;
+        }
+    }
+
+    /**
+     * Load 32 bits or less from single integer
+     *
+     * @param d        integer with bits
+     * @param position offset
+     * @param length   length
+     */
+    void loadValueFrom(int d, int position, int length) {
+        if (length == 0)
+            return;
+
+        int res = position & 0x1F;
+        position = position >>> 5;
+
+        //mask for d
+        int mask = 0xFFFFFFFF >>> (32 - length);
+
+        if (res == 0) {
+            if (length == 32)
+                data[position] = d;
+            else {
+                data[position] &= ~mask;
+                data[position] |= d & mask;
+            }
+            return;
+        }
+
+        data[position] &= ~(mask << res);
+        data[position] |= (d & mask) << res;
+
+        length -= (32 - res);
+        if (length > 0)
+            loadValueFrom(d >>> (32 - res), (position + 1) << 5, length);
+    }
+
     @Override
     public String toString() {
         char[] c = new char[size];
@@ -143,5 +230,24 @@ public class IntBackedBitArray {
             else
                 c[i] = '0';
         return new String(c);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        IntBackedBitArray that = (IntBackedBitArray) o;
+
+        if (size != that.size) return false;
+
+        return Arrays.equals(data, that.data);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = Arrays.hashCode(data);
+        result = 31 * result + size;
+        return result;
     }
 }
