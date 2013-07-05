@@ -9,10 +9,10 @@ import java.util.Arrays;
 
 import static org.junit.Assert.*;
 
-public class IntBackedBitArrayTest {
+public class BitArrayTest {
     @Test
     public void test1() throws Exception {
-        IntBackedBitArray ba = new IntBackedBitArray(10);
+        BitArray ba = new BitArray(10);
 
         assertEquals("0000000000", ba.toString());
 
@@ -53,7 +53,7 @@ public class IntBackedBitArrayTest {
 
     @Test
     public void testSetValueFrom1() throws Exception {
-        IntBackedBitArray ba = new IntBackedBitArray(32);
+        BitArray ba = new BitArray(32);
         ba.set(3);
         ba.set(5);
         ba.set(8);
@@ -63,7 +63,7 @@ public class IntBackedBitArrayTest {
         int d = ba.data[0];
         String str = ba.toString();
 
-        IntBackedBitArray arr = new IntBackedBitArray(128);
+        BitArray arr = new BitArray(128);
         for (int i = 0; i < 64; ++i) {
             arr.loadValueFrom(d, i, 32);
             String expected = chars(i, '0') + str + chars(128 - i - 32, '0');
@@ -76,12 +76,12 @@ public class IntBackedBitArrayTest {
         RandomGenerator rg = new Well19937c(2031);
 
         for (int k = 0; k < 100; ++k) {
-            IntBackedBitArray ba = new IntBackedBitArray(32);
+            BitArray ba = new BitArray(32);
             ba.data[0] = rg.nextInt();
             int d = ba.data[0];
             String str = ba.toString();
 
-            IntBackedBitArray arr = new IntBackedBitArray(128);
+            BitArray arr = new BitArray(128);
             for (int i = 0; i < 64; ++i) {
                 arr.loadValueFrom(d, i, 32);
                 String expected = chars(i, ((d & 1) == 1) ? '1' : '0') + str + chars(128 - i - 32, '0');
@@ -95,7 +95,7 @@ public class IntBackedBitArrayTest {
         RandomGenerator rg = new Well19937c(2031);
 
         for (int k = 0; k < 100; ++k) {
-            IntBackedBitArray ba = new IntBackedBitArray(32);
+            BitArray ba = new BitArray(32);
             ba.data[0] = rg.nextInt();
             int d = ba.data[0];
             String str = ba.toString();
@@ -105,7 +105,7 @@ public class IntBackedBitArrayTest {
             for (int i = 0; i < size; ++i)
                 arr1[i] = rg.nextBoolean();
 
-            IntBackedBitArray arr = new IntBackedBitArray(arr1);
+            BitArray arr = new BitArray(arr1);
             String initial = arr.toString();
 
             for (int i = 0; i < size - 32; ++i) {
@@ -121,7 +121,7 @@ public class IntBackedBitArrayTest {
         RandomGenerator rg = new Well19937c(2031);
 
         for (int k = 0; k < 100; ++k) {
-            IntBackedBitArray ba = new IntBackedBitArray(32);
+            BitArray ba = new BitArray(32);
             ba.data[0] = rg.nextInt();
             int d = ba.data[0];
             String str = ba.toString().substring(0, 16);
@@ -131,7 +131,7 @@ public class IntBackedBitArrayTest {
             for (int i = 0; i < size; ++i)
                 arr1[i] = rg.nextBoolean();
 
-            IntBackedBitArray arr = new IntBackedBitArray(arr1);
+            BitArray arr = new BitArray(arr1);
             String initial = arr.toString();
 
             for (int i = 0; i < size - 32; ++i) {
@@ -147,7 +147,7 @@ public class IntBackedBitArrayTest {
         RandomGenerator rg = new Well19937c(2031);
 
         for (int k = 0; k < 100; ++k) {
-            IntBackedBitArray ba = new IntBackedBitArray(32);
+            BitArray ba = new BitArray(32);
             ba.data[0] = rg.nextInt();
             int d = ba.data[0];
             String str = ba.toString();
@@ -157,7 +157,7 @@ public class IntBackedBitArrayTest {
             for (int i = 0; i < size; ++i)
                 arr1[i] = rg.nextBoolean();
 
-            IntBackedBitArray arr = new IntBackedBitArray(arr1);
+            BitArray arr = new BitArray(arr1);
             String initial = arr.toString();
 
             for (int i = 0; i < size - 32; ++i) {
@@ -183,8 +183,8 @@ public class IntBackedBitArrayTest {
             for (int i = 0; i < size; ++i)
                 arr2[i] = rg.nextBoolean();
 
-            IntBackedBitArray ba1 = new IntBackedBitArray(arr1),
-                    ba2 = new IntBackedBitArray(arr2);
+            BitArray ba1 = new BitArray(arr1),
+                    ba2 = new BitArray(arr2);
 
 
             for (int i = 0; i < 100; ++i) {
@@ -195,7 +195,7 @@ public class IntBackedBitArrayTest {
                 ba2.loadValueFrom(ba1, offset1, offset2, length);
 
                 assertTrue(testNormal(ba2));
-                assertEquals("On :" + i + ", " + k, new IntBackedBitArray(arr2), ba2);
+                assertEquals("On :" + i + ", " + k, new BitArray(arr2), ba2);
             }
         }
     }
@@ -212,7 +212,7 @@ public class IntBackedBitArrayTest {
             boolean[] arr1 = new boolean[size];
             for (int i = 0; i < size; ++i)
                 arr1[i] = rg.nextBoolean();
-            IntBackedBitArray ba1 = new IntBackedBitArray(arr1), ba2;
+            BitArray ba1 = new BitArray(arr1), ba2;
 
 
             for (int i = 0; i < 100; ++i) {
@@ -220,14 +220,14 @@ public class IntBackedBitArrayTest {
                 length = rg.nextInt(size - offset1);
                 ba2 = ba1.copyOfRange(offset1, offset1 + length);
                 assertTrue(testNormal(ba2));
-                assertEquals("On :" + i + ", " + k, new IntBackedBitArray(Arrays.copyOfRange(arr1, offset1, offset1 + length)), ba2);
+                assertEquals("On :" + i + ", " + k, new BitArray(Arrays.copyOfRange(arr1, offset1, offset1 + length)), ba2);
             }
         }
     }
 
     @Test
     public void testNextBit() throws Exception {
-        IntBackedBitArray ba = new IntBackedBitArray(145);
+        BitArray ba = new BitArray(145);
         ba.set(3);
         ba.set(5);
         ba.set(8);
@@ -242,11 +242,11 @@ public class IntBackedBitArrayTest {
 
     @Test
     public void testBits1() {
-        BitsStreamGenerator random = new Well19937c();
+        BitsStreamGenerator random = new Well19937c(325);
         for (int stb = 0; stb < 10000; ++stb) {
             int length;
             boolean[] array = new boolean[length = random.nextInt(200)];
-            IntBackedBitArray bitArray = new IntBackedBitArray(length);
+            BitArray bitArray = new BitArray(length);
 
             int i, bitCount = 0, size;
             IntArrayList bitsPositions = new IntArrayList();
@@ -273,7 +273,7 @@ public class IntBackedBitArrayTest {
         for (int stb = 0; stb < 10000; ++stb) {
             int length;
             boolean[] array = new boolean[length = random.nextInt(200)];
-            IntBackedBitArray bitArray = new IntBackedBitArray(length);
+            BitArray bitArray = new BitArray(length);
 
             int i, bitCount = 0, size;
             IntArrayList bitsPositions = new IntArrayList();
@@ -295,11 +295,21 @@ public class IntBackedBitArrayTest {
     }
 
     @Test
-    public void test2() throws Exception {
-        System.out.println(Integer.numberOfTrailingZeros(0x80000000));
+    public void testPowAppend() throws Exception {
+        BitArray ba = new BitArray(10);
+
+        ba.set(3);
+        ba.set(5);
+        ba.set(8);
+
+        assertEquals("0001010010", ba.toString());
+
+        assertEquals("00010100100001010010000101001000010100100001010010", ba.times(5).toString());
+
+        assertEquals("00010100100001010010", ba.append(ba).toString());
     }
 
-    private boolean testNormal(IntBackedBitArray ba) {
+    private boolean testNormal(BitArray ba) {
         if (ba.size == 0)
             return true;
         return (ba.data[ba.data.length - 1] & (~(ba.lastElementMask()))) == 0;

@@ -31,7 +31,6 @@ import cc.redberry.core.parser.*;
 import cc.redberry.core.tensor.SimpleTensor;
 import cc.redberry.core.utils.ArraysUtils;
 import cc.redberry.core.utils.BitArray;
-import cc.redberry.core.utils.ByteBackedBitArray;
 import cc.redberry.core.utils.IntArrayList;
 
 import java.util.*;
@@ -39,10 +38,9 @@ import java.util.*;
 import static cc.redberry.core.indices.IndexType.TYPES_COUNT;
 
 /**
- * AST transformer, which inserts additional indices to specified tensors according to
- * the rules of matrix multiplication.
- * It is useful in situations where one is faced with the need to input many huge matrix expressions, and manual
- * indices insertion becomes a complex task.
+ * AST transformer, which inserts additional indices to specified tensors according to the rules of matrix
+ * multiplication. It is useful in situations where one is faced with the need to input many huge matrix expressions,
+ * and manual indices insertion becomes a complex task.
  *
  * @author Dmitriy Bolotin
  * @author Stanislav Poslavsky
@@ -59,11 +57,10 @@ public class GeneralIndicesInsertion implements ParseTokenTransformer {
     }
 
     /**
-     * Adds new insertion rule to this transformer.
-     * <p/>
-     * <p>After rule is added you can omit indices of specified type in specified simple tensors, when this transformer
-     * is passed to {@link cc.redberry.core.tensor.Tensors#parse(String, cc.redberry.core.parser.ParseTokenTransformer...)}
-     * method or somehow added to default parse nodes preprocessor.</p>
+     * Adds new insertion rule to this transformer. <p/> <p>After rule is added you can omit indices of specified type
+     * in specified simple tensors, when this transformer is passed to {@link cc.redberry.core.tensor.Tensors#parse(String,
+     * cc.redberry.core.parser.ParseTokenTransformer...)} method or somehow added to default parse nodes
+     * preprocessor.</p>
      *
      * @param tensor           simple tensor
      * @param omittedIndexType type of indices that may be omitted
@@ -190,7 +187,7 @@ public class GeneralIndicesInsertion implements ParseTokenTransformer {
             int omitted, i;
             NameAndStructureOfIndices[] keys = new NameAndStructureOfIndices[(1 << toOmit.length) - 1];
             int[] allCounts;
-            ByteBackedBitArray[] states;
+            BitArray[] states;
             for (omitted = 1; omitted <= keys.length; ++omitted) {
                 allCounts = originalStructureAndName.getStructure()[0].getTypesCounts();
                 states = originalStructureAndName.getStructure()[0].getStates();
@@ -198,7 +195,7 @@ public class GeneralIndicesInsertion implements ParseTokenTransformer {
                     if ((omitted & (1 << i)) != 0) {
                         allCounts[toOmit[i].getType()] = 0;
                         states[toOmit[i].getType()] = states[toOmit[i].getType()] == null ?
-                                null : ByteBackedBitArray.EMPTY;
+                                null : BitArray.EMPTY;
                     }
                 StructureOfIndices[] structures = originalStructureAndName.getStructure().clone();
                 structures[0] = new StructureOfIndices(allCounts, states);
@@ -403,7 +400,7 @@ public class GeneralIndicesInsertion implements ParseTokenTransformer {
             StructureOfIndices currentStructure = node.getIndicesTypeStructureAndName().getStructure()[0];
             for (IndexType type : insertionRule.indicesAllowedToOmit)
                 if (currentStructure.getStates(type).size() == 0) {
-                    ByteBackedBitArray originalStates = originalStructure.getStates(type);
+                    BitArray originalStates = originalStructure.getStates(type);
                     if (originalStates != null) {
                         outerIndices.upper[type.getType()] = originalStates.bitCount();
                         outerIndices.lower[type.getType()] = originalStates.size() - outerIndices.upper[type.getType()];
