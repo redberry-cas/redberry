@@ -975,7 +975,7 @@ class Redberry {
      * @see Tensors#expression(cc.redberry.core.tensor.Tensor, cc.redberry.core.tensor.Tensor)
      * @throws IllegalArgumentException if l.h.s. free indices are not matches r.h.s. free indices
      */
-    static Tensor eq(Tensor lhs, Tensor rhs) {
+    static Expression eq(Tensor lhs, Tensor rhs) {
         return expression(lhs, rhs)
     }
 

@@ -598,7 +598,7 @@ public final class InverseTensor {
             FileOutputStream output = new FileOutputStream(path + "/equations.mathematica");
             PrintStream file = new PrintStream(output);
 
-            file.append("$equations = { ");
+            file.append("$equations = {\n");
             int i;
             for (i = 0; ; i++) {
                 file.append(equations[i].toString(OutputFormat.WolframMathematica).replace("=", "=="));
@@ -606,7 +606,7 @@ public final class InverseTensor {
                     break;
                 file.append(",\n");
             }
-            file.append(" };\n");
+            file.append("\n};\n");
 
             file.append("$coefficients = {");
             for (i = 0; ; i++) {
