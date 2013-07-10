@@ -1,7 +1,31 @@
 <?xml version="1.0"?>
+<!--
+  ~ Redberry: symbolic tensor computations.
+  ~
+  ~ Copyright (c) 2010-2013:
+  ~   Stanislav Poslavsky   <stvlpos@mail.ru>
+  ~   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
+  ~
+  ~ This file is part of Redberry.
+  ~
+  ~ Redberry is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ Redberry is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with Redberry. If not, see <http://www.gnu.org/licenses/>.
+  -->
+
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
+    
     <groupId>redberry.cc</groupId>
     <artifactId>all</artifactId>
     <version>1.1.4-SNAPSHOT</version>
@@ -14,4 +38,58 @@
         <module>groovy</module>
     </modules>
 
+   <url>http://redberry.cc/</url>
+
+    <description>
+        Redberry is an open source computer algebra system designed for tensor 
+        manipulation.  It implements basic computer algebra system routines as well as 
+        complex tools for real computations in physics. 
+        
+        This is the aggregating pom for all Redberry modules.
+    </description>
+    
+    <licenses>
+        <license>
+            <name>GNU General Public License, version 3</name>
+            <url>http://www.gnu.org/licenses/gpl-3.0.html</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
+    <developers>
+        <developer>
+            <id>PoslavskySV</id>
+            <email>stvlpos@mail.ru</email>
+            <name>Poslavsky Stanislav</name>
+            <organization>IHEP</organization>
+            <organizationUrl>http://ihep.su</organizationUrl>
+            <roles>
+                <role>architect</role>
+                <role>developer</role>
+                <role>tester</role>
+            </roles>
+            <timezone>UTC+04:00</timezone>
+            <url>https://bitbucket.org/PoslavskySV</url>
+        </developer>
+        <developer>
+            <id>dbolotin</id>
+            <email>bolotin.dmitriy@gmail.com</email>
+            <name>Bolotin Dmitriy</name>
+            <organization>IBCH RAS</organization>
+            <organizationUrl>http://www.ibch.ru/</organizationUrl>
+            <roles>
+                <role>architect</role>
+                <role>developer</role>
+                <role>tester</role>
+            </roles>
+            <timezone>UTC+04:00</timezone>
+            <url>https://bitbucket.org/dbolotin</url>
+        </developer>
+    </developers>
+
+    <issueManagement>
+        <system>Bitbucket</system>
+        <url>https://bitbucket.org/redberry/redberry/issues</url>
+    </issueManagement>
+    
 </project>

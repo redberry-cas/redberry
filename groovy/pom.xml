@@ -32,7 +32,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <!-- <gmavenVersion>1.4</gmavenVersion>
         <gmavenProviderSelection>2.0</gmavenProviderSelection> -->
-        <groovyVersion>2.0.4</groovyVersion>
+        <groovyVersion>2.1.5</groovyVersion>
     </properties>
 
     <parent>
@@ -46,10 +46,13 @@
     <url>http://redberry.cc/</url>
 
     <description>
-        Redberry is an open source Java framework providing capabilities
-        for manipulation with tensors. The framework contains wide spectrum of
-        algorithms required by tensor algebra. It is designed to find analytical
-        solutions of complicated mathematical and physical problems.
+        Redberry is an open source computer algebra system designed for tensor 
+        manipulation.  It implements basic computer algebra system routines as well as 
+        complex tools for real computations in physics. 
+        
+        This is the Groovy facade for Redberry. It contains the classes and 
+        categories defining DSL features and syntax notations for common routines from 
+        redebrry-core and redberry-physics.
     </description>
 
     <licenses>
@@ -95,7 +98,7 @@
 
     <issueManagement>
         <system>Bitbucket</system>
-        <url>https://bitbucket.org/redberry/redberry-physics/issues</url>
+        <url>https://bitbucket.org/redberry/redberry/issues</url>
     </issueManagement>
 
     <build>
@@ -195,6 +198,11 @@
                         <groupId>org.codehaus.groovy</groupId>
                         <artifactId>groovy-eclipse-compiler</artifactId>
                         <version>2.7.0-01</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>org.codehaus.groovy</groupId>
+                        <artifactId>groovy-eclipse-batch</artifactId>
+                        <version>2.1.3-01</version>
                     </dependency>
                 </dependencies>
             </plugin>

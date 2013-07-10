@@ -25,6 +25,7 @@ package cc.redberry.core.parser;
 import cc.redberry.core.TAssert;
 import cc.redberry.core.context.CC;
 import cc.redberry.core.context.NameDescriptorForTensorField;
+import cc.redberry.core.context.OutputFormat;
 import cc.redberry.core.indices.*;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.tensor.*;
@@ -495,6 +496,28 @@ public class ParserTest {
     public void testMetric2() {
         SimpleTensor a = parseSimple("g_mn");
         SimpleTensor b = parseSimple("g_mn[x_m]");
-        Assert.assertTrue(a.getName() != b.getName() );
+        Assert.assertTrue(a.getName() != b.getName());
+    }
+
+    @Test
+    public void testComments1() {
+        CC.setDefaultOutputFormat(OutputFormat.Redberry);
+        String actual, expected;
+
+        actual = parse(" a + /* xyz */ b").toString();
+        expected = parse("a+b").toString();
+        Assert.assertEquals(expected, actual);
+
+        actual = parse(" a + /* xyz */ b*c").toString();
+        expected = parse("a + b*c").toString();
+        Assert.assertEquals(expected, actual);
+
+        actual = parse(" a + /* x*yz */ b*d/c").toString();
+        expected = parse("a + b*d/c").toString();
+        Assert.assertEquals(expected, actual);
+
+        actual = parse(" a + // /* x*yz */ b*d/c\n + c").toString();
+        expected = parse("a + c").toString();
+        Assert.assertEquals(expected, actual);
     }
 }

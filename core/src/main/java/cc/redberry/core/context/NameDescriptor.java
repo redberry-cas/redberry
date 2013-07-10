@@ -111,7 +111,7 @@ public abstract class NameDescriptor {
      *
      * @return structure of i-th arg indices indices of tensors with this name descriptor
      */
-    public StructureOfIndices getStructureOfIndices(int arg) {
+    public StructureOfIndices getArgStructureOfIndices(int arg) {
         return structuresOfIndices[arg + 1];
     }
 

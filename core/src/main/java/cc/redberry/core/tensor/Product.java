@@ -567,9 +567,9 @@ public final class Product extends MultiTensor {
         //(this is specification of GraphUtils.calculateConnectedComponents method)
         int[] componentSizes = new int[componentCount];
 
-        //TODO remove after Oracle fix
-        //patch for jvm bug (u4 or later) 
-        Arrays.fill(componentSizes, 0);
+        //patch for jvm bug (7u4 ~ 7u14)
+        //commented in v1.1.5
+        //Arrays.fill(componentSizes, 0);
 
         //finding each component size
         for (i = 1; i < components.length - 1; ++i)

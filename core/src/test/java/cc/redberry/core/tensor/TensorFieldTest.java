@@ -23,12 +23,14 @@
 package cc.redberry.core.tensor;
 
 import cc.redberry.core.indices.SimpleIndices;
+import cc.redberry.core.parser.ParserIndices;
 import junit.framework.Assert;
 import org.junit.Test;
 
 import java.util.Arrays;
 
-import static cc.redberry.core.tensor.Tensors.*;
+import static cc.redberry.core.tensor.Tensors.addSymmetry;
+import static cc.redberry.core.tensor.Tensors.parse;
 
 /**
  * @author Dmitry Bolotin
@@ -47,19 +49,19 @@ public class TensorFieldTest {
 
     @Test
     public void testDerivativeSymmetries() {
-        SimpleTensor t = parseSimple("f_mn[x_a, y_b]");
+        SimpleTensor t = Tensors.parseSimple("f_mn[x_a, y_b]");
         addSymmetry(t, 1, 0);
 
-        SimpleTensor d = parseSimple("f~(1,1)_mnab[x_a, y_b]");
+        SimpleTensor d = Tensors.parseSimple("f~(1,1)_mnab[x_a, y_b]");
 //        System.out.println(d.getIndices().getSymmetries().getInnerSymmetries());
 
-        d = parseSimple("f~(2,0)_{mn {ab}}[x_a, y_b]");
+        d = Tensors.parseSimple("f~(2,0)_{mn {ab}}[x_a, y_b]");
 //        System.out.println(d.getIndices().getSymmetries().getInnerSymmetries());
 
-        d = parseSimple("f~(2, 1)_{mn {ab} {c}}[x_a, y_b]");
+        d = Tensors.parseSimple("f~(2, 1)_{mn {ab} {c}}[x_a, y_b]");
 //        System.out.println(d.getIndices().getSymmetries().getInnerSymmetries());
 
-        d = parseSimple("f~(2, 2)_{mn {ab} {cd}}[x_a, y_b]");
+        d = Tensors.parseSimple("f~(2, 2)_{mn {ab} {cd}}[x_a, y_b]");
 //        System.out.println(d.getIndices().getSymmetries().getInnerSymmetries());
 
         //D[y_n, x_m][f[x_m,y_p]] == f~(1,1)^mn[x_m, y_p]
@@ -68,16 +70,19 @@ public class TensorFieldTest {
 
 
         addSymmetry("f_mn[x_ab, y_c]", 1, 0);
-        d = parseSimple("f~(2, 2)_{mn {ax by} {cd}}[x_ab, y_b]");
+        d = Tensors.parseSimple("f~(2, 2)_{mn {ax by} {cd}}[x_ab, y_b]");
 //        System.out.println(d.getIndices().getSymmetries().getInnerSymmetries());
     }
 
     @Test
     public void testPartition1() {
-        TensorField f = (TensorField) parse("f~(2,3, 2)_{mn {ab cd} {x y z} {AB}}[x_ab,f_c, x_A]");
+        TensorField f = (TensorField) parse("f~(2,3,2)_{mn {ab cd} {x y z} {AB}}[x_ab,f_c, x_A]");
         SimpleIndices[][] iP = f.calcIndicesPartition();
-        for(int i=0; i<iP.length; ++i){
-            System.out.println(Arrays.toString(iP[i]));
-        }
+        SimpleIndices[][] asserted = new SimpleIndices[][]{{ParserIndices.parseSimple("_mn")},
+                {ParserIndices.parseSimple("_ab"), ParserIndices.parseSimple("_cd")},
+                {ParserIndices.parseSimple("_x"), ParserIndices.parseSimple("_y"), ParserIndices.parseSimple("_z")},
+                {ParserIndices.parseSimple("_A"), ParserIndices.parseSimple("_B")}};
+
+        Assert.assertTrue(Arrays.deepEquals(iP, asserted));
     }
 }

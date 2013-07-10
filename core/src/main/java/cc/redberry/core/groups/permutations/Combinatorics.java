@@ -23,7 +23,6 @@
 package cc.redberry.core.groups.permutations;
 
 import cc.redberry.core.utils.BitArray;
-import cc.redberry.core.utils.LongBackedBitArray;
 
 /**
  * @author Dmitry Bolotin
@@ -35,12 +34,12 @@ public class Combinatorics {
      * Tests whether the specified array satisfies the one-line notation for permutations
      *
      * @param permutation array to be tested
-     * @return {@code true} if specified array satisfies the one-line
-     *         notation for permutations and {@code false} if not
+     * @return {@code true} if specified array satisfies the one-line notation for permutations and {@code false} if
+     *         not
      */
     public static boolean testPermutationCorrectness(int[] permutation) {
         int length = permutation.length;
-        BitArray checked = new LongBackedBitArray(length);
+        BitArray checked = new BitArray(length);
         for (int i = 0; i < length; ++i) {
             if (permutation[i] >= length || permutation[i] < 0)
                 return false;

@@ -40,10 +40,13 @@
     <url>http://redberry.cc/</url>
 
     <description>
-        Redberry is an open source Java framework providing capabilities
-        for manipulation with tensors. The framework contains wide spectrum of
-        algorithms required by tensor algebra. It is designed to find analytical
-        solutions of complicated mathematical and physical problems.
+        Redberry is an open source computer algebra system designed for tensor 
+        manipulation.  It implements basic computer algebra system routines as well as 
+        complex tools for real computations in physics. 
+        
+        This module contains the implementation of special routines needed in 
+        real physical problems. It contains tools for such problems like Feynman graphs 
+        and one-loop counterterms calculation etc.
     </description>
 
     <licenses>
@@ -89,7 +92,7 @@
 
     <issueManagement>
         <system>Bitbucket</system>
-        <url>https://bitbucket.org/redberry/redberry-physics/issues</url>
+        <url>https://bitbucket.org/redberry/redberry/issues</url>
     </issueManagement>
 
     <build>

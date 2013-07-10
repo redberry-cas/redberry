@@ -23,20 +23,16 @@
 package cc.redberry.core.combinatorics;
 
 import cc.redberry.core.utils.BitArray;
-import cc.redberry.core.utils.LongBackedBitArray;
 
 import java.util.Arrays;
 
 /**
- * This class represents an iterator (implemented in the output port pattern) over
- * all distinct N-tuples, which can be chosen from {@code N} sets of integers. More formally,
- * for {@code N} integer arrays: <i>array</i><sub>1</sub>,
- * <i>array</i><sub>2</sub>,...,<i>array</i><sub>N</sub>, this class allows to
- * iterate over all possible integer arrays of the form [i<sub>1</sub>, i<sub>2</sub>,...,i<sub>N</sub>],
- * where all numbers numbers i<sub>j</sub> are different and i<sub>1</sub> is chosen
- * from <i>array</i><sub>1</sub>, i<sub>2</sub> is chosen from <i>array</i><sub>2</sub> and so on.</p>
- *
- * <p>Consider the example:
+ * This class represents an iterator (implemented in the output port pattern) over all distinct N-tuples, which can be
+ * chosen from {@code N} sets of integers. More formally, for {@code N} integer arrays: <i>array</i><sub>1</sub>,
+ * <i>array</i><sub>2</sub>,...,<i>array</i><sub>N</sub>, this class allows to iterate over all possible integer arrays
+ * of the form [i<sub>1</sub>, i<sub>2</sub>,...,i<sub>N</sub>], where all numbers numbers i<sub>j</sub> are different
+ * and i<sub>1</sub> is chosen from <i>array</i><sub>1</sub>, i<sub>2</sub> is chosen from <i>array</i><sub>2</sub> and
+ * so on.</p> <p/> <p>Consider the example:
  * <code><pre>
  * int[] a1 = {1, 2, 3};
  * int[] a2 = {2, 3};
@@ -52,14 +48,10 @@ import java.util.Arrays;
  * [2, 3]
  * [3, 2]
  * </pre></code>
- * </p>
- *
- * <p>This class is implemented via output port pattern and the calculation of the next
- * tuple occurs only on the invocation of {@link #take()}.</p>
- *
- * <p><b>Note:</b> method {@link #take()} returns the same reference on each invocation.
- * So, if it is needed not only to obtain the information from {@link #take()}, but also save the result,
- * it is necessary to clone the returned array.</p>
+ * </p> <p/> <p>This class is implemented via output port pattern and the calculation of the next tuple occurs only on
+ * the invocation of {@link #take()}.</p> <p/> <p><b>Note:</b> method {@link #take()} returns the same reference on each
+ * invocation. So, if it is needed not only to obtain the information from {@link #take()}, but also save the result, it
+ * is necessary to clone the returned array.</p>
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
@@ -82,12 +74,12 @@ public class IntDistinctTuplesPort implements IntCombinatorialPort {
                 maxIndex = set[set.length - 1];
         }
         ++maxIndex;
-        previousMask = new LongBackedBitArray(maxIndex);
-        temp = new LongBackedBitArray(maxIndex);
+        previousMask = new BitArray(maxIndex);
+        temp = new BitArray(maxIndex);
 
         setMasks = new BitArray[sets.length];
         for (int i = 0; i < sets.length; ++i) {
-            setMasks[i] = new LongBackedBitArray(maxIndex);
+            setMasks[i] = new BitArray(maxIndex);
             for (int j : sets[i])
                 setMasks[i].set(j);
         }
@@ -103,7 +95,7 @@ public class IntDistinctTuplesPort implements IntCombinatorialPort {
             temp.loadValueFrom(setMasks[i]);
             temp.and(previousMask);
 
-            nextBit = temp.nextTrailingBit(combination[i]);
+            nextBit = temp.nextBit(combination[i] - 1);
             if (nextBit != -1) {
                 combination[i] = nextBit;
                 previousMask.clear(nextBit);
@@ -143,7 +135,7 @@ public class IntDistinctTuplesPort implements IntCombinatorialPort {
             temp.loadValueFrom(setMasks[i]);
             temp.and(previousMask);
 
-            nextBit = temp.nextTrailingBit(combination[i]);
+            nextBit = temp.nextBit(combination[i] - 1);
             if (nextBit != -1) {
                 combination[i] = nextBit;
                 previousMask.clear(nextBit);
