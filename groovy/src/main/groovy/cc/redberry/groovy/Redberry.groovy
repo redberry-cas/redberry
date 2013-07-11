@@ -301,6 +301,13 @@ class Redberry {
      */
     static int getAt(Indices indices, IndexType type, int position) { indices.get(type, position) }
 
+    static Object asType(Indices indices, Class clazz) {
+        if (clazz == int[])
+            return indices.getAllIndices().copy()
+        else
+            return DefaultGroovyMethods.asType(indices, clazz)
+    }
+
     static Indices asType(int[] indices, Class clazz) {
         if (clazz == SimpleIndices)
             return IndicesFactory.createSimple(null, indices)
