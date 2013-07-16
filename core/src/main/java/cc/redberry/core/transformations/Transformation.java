@@ -41,6 +41,17 @@ public interface Transformation {
         }
     };
 
+    public static final class Util {
+        private Util() {
+        }
+
+        public static Tensor applySequentially(Tensor tensor, final Transformation... transformations) {
+            for (Transformation tr : transformations)
+                tensor = tr.transform(tensor);
+            return tensor;
+        }
+    }
+
     /**
      * Transforms specified tensor and returns the result.
      *
