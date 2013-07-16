@@ -431,7 +431,34 @@ public class DifferentiateTransformationTest {
     public void test22() {
         Tensor t = parse("g~1_{bmn}[x_{e}]");
         Tensor r = new DifferentiateTransformation(parseSimple("x_c")).transform(t);
-        System.out.println(r);
         TAssert.assertEquals(r, "g~2_{bm}^{c}_{n}[x_{e}]");
+        TAssert.assertEquals(r, "g~2_{bm}_{n}^{c}[x_{e}]");
+    }
+
+    @Test
+    public void test23() {
+        Tensor t, d;
+        t = parse("f[x_ab*x^ab]");
+        d = new DifferentiateTransformation(parseSimple("x_ab")).transform(t);
+        TAssert.assertEquals(d, "2*f~(1)[x_{mn}*x^{mn}]*x^ab");
+    }
+
+    @Test
+    public void test24() {
+        Tensor t = parse("D[x, y][Sin[x*y]/(x**2 + y**2)]");
+        TAssert.assertEquals(t,
+                "(-2*x**2*Cos[x*y])/(x**2 + y**2)**2 - (2*y**2*Cos[x*y])/(x**2 + y**2)**2 + Cos[x*y]/(x**2 + y**2) + (8*x*y*Sin[x*y])/(x**2 + y**2)**3 - (x*y*Sin[x*y])/(x**2 + y**2)");
+
+        t = parse("D[x, y][Sin[f[x*y]]/(x**2 + y**2)]");
+        TAssert.assertEquals(t,
+                "(8*x*y*Sin[f[x*y]])/(x**2 + y**2)**3 - (2*x**2*Cos[f[x*y]]*f~1[x*y])/(x**2 + y**2)**2 - (2*y**2*Cos[f[x*y]]*f~1[x*y])/(x**2 + y**2)**2 + (Cos[f[x*y]]*f~1[x*y])/(x**2 + y**2) - (x*y*Sin[f[x*y]]*f~1[x*y]**2)/(x**2 + y**2) + (x*y*Cos[f[x*y]]*f~2[x*y])/(x**2 + y**2)");
+    }
+
+    @Test
+    public void test25() {
+        addSymmetry("x_mn", 1, 0);
+        Tensor t = parse("D[x_mn][f[x_mn*x^nm]]");
+        t = ExpandAndEliminateTransformation.EXPAND_AND_ELIMINATE.transform(t);
+        TAssert.assertEquals(t, "2*f~1[x_{ba}*x^{ab}]*x^{mn}");
     }
 }
