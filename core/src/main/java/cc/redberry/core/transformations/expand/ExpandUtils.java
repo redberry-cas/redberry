@@ -175,7 +175,7 @@ public final class ExpandUtils {
         if (!expandIndexless) {
             Tensor newData = expandProductOfSums1(data, transformations, true);
             if (newData instanceof Sum)  //todo apply transformations?
-                return FastTensors.multiplySumElementsOnScalarFactorAndExpandScalars((Sum) newData, indexless);
+                return FastTensors.multiplySumElementsOnFactorAndExpand((Sum) newData, indexless);
             else                         //todo apply transformations?
                 return expandIndexlessSubproduct.transform(Tensors.multiply(indexless, newData));
         }
@@ -216,7 +216,7 @@ public final class ExpandUtils {
         }
 
         if (data instanceof Sum)        //todo apply transformations?
-            return FastTensors.multiplySumElementsOnScalarFactorAndExpandScalars((Sum) data, indexless);
+            return FastTensors.multiplySumElementsOnFactorAndExpand((Sum) data, indexless);
         return Tensors.multiply(indexless, data);
     }
 
