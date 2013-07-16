@@ -232,6 +232,60 @@ public final class ApplyIndexMapping {
         return applyIndexMapping1(tensor, from.clone(), to.clone(), forbidden);
     }
 
+    public static Tensor applyIndexMappingAutomatically(Tensor tensor, int[] from, int[] to, int[] forbidden) {
+        if (from.length != to.length)
+            throw new IllegalArgumentException("Length of from does not match length of to.");
+
+        int i, oldFromLength = from.length, freeIndices[] = tensor.getIndices().getFree().getAllIndices().copy();
+        Arrays.sort(freeIndices);
+
+        //removing indices from {@code from} array that are not contained in free indices of tensor
+        int pointer = 0;
+        for (i = oldFromLength - 1; i >= 0; --i) {
+            if (Arrays.binarySearch(freeIndices, from[i]) >= 0) {
+                from[pointer] = from[i];
+                to[pointer] = to[i];
+                ++pointer;
+            }
+        }
+
+        //no indices to map
+        if (pointer == oldFromLength)
+            return renameDummy(tensor, forbidden);
+
+        //adding free indices that do not present in {@code from} array to it
+        ArraysUtils.quickSort(from, to);
+        IntArrayList list = new IntArrayList();
+        for (i = freeIndices.length - 1; i >= 0; --i) {
+            if (Arrays.binarySearch(from, freeIndices[i]) < 0) {
+                if (pointer < oldFromLength) {
+                    from[pointer] = to[pointer] = freeIndices[i];
+                    ++pointer;
+                } else
+                    list.add(freeIndices[i]);
+            }
+        }
+
+        int[] toAdd = list.toArray();
+        from = Arrays.copyOfRange(from, 0, pointer + toAdd.length);
+        to = Arrays.copyOfRange(to, 0, pointer + toAdd.length);
+        System.arraycopy(toAdd.length, 0, from, oldFromLength, toAdd.length);
+        System.arraycopy(toAdd.length, 0, to, oldFromLength, toAdd.length);
+        //if (toAdd.length != 0)
+        //    ArraysUtils.quickSort(from, to);
+
+        assert from.length == freeIndices.length;
+
+        int rawState;
+        for (i = from.length - 1; i >= 0; --i) {
+            rawState = IndicesUtils.getRawStateInt(from[i]);
+            from[i] ^= rawState;
+            to[i] ^= rawState;
+        }
+        ArraysUtils.quickSort(from, to);
+        return applyIndexMappingFromPreparedSource(tensor, from, to, forbidden);
+    }
+
     private static Tensor applyIndexMapping1(Tensor tensor, int[] from, int[] to, int[] forbidden) {
         if (tensor instanceof Complex || tensor instanceof ScalarFunction)
             return tensor;
