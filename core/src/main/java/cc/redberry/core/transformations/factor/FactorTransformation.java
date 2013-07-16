@@ -278,13 +278,15 @@ public class FactorTransformation implements Transformation {
         }
 
         if (factorOutImageOne)
-            tensor = FastTensors.multiplySumElementsOnNumber((Sum) tensor, Complex.NEGATIVE_IMAGINARY_UNIT);
+            tensor = FastTensors.multiplySumElementsOnFactor((Sum) tensor, Complex.NEGATIVE_IMAGINARY_UNIT);
 
         if (!(tensor instanceof Sum)) {
             if (factorOutImageOne)
                 tensor = Tensors.multiply(Complex.IMAGINARY_UNIT, tensor);
             return factorOut(tensor);
         }
+        if(factorOutImageOne)
+            tensor = FastTensors.multiplySumElementsOnFactor((Sum)tensor, Complex.NEGATIVE_IMAGINARY_UNIT);
 
         /*
          * S1:
