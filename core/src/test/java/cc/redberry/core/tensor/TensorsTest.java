@@ -24,7 +24,6 @@ package cc.redberry.core.tensor;
 
 import cc.redberry.core.TAssert;
 import cc.redberry.core.combinatorics.IntPermutationsGenerator;
-import cc.redberry.core.combinatorics.Symmetry;
 import cc.redberry.core.indices.IndicesFactory;
 import cc.redberry.core.indices.SimpleIndices;
 import cc.redberry.core.number.Complex;
@@ -324,5 +323,10 @@ public class TensorsTest {
                 new Tensor[]{parse("x_pq")},
                 new int[]{4});
         TAssert.assertNotEquals(sum, multiply(new Complex(4), tdf));
+    }
+
+    @Test(timeout = 100L)
+    public void testSetAntiSymmetric() {
+        setAntiSymmetric("f_{qwertyuioplkjhgfdsazxcvbnm}");
     }
 }
