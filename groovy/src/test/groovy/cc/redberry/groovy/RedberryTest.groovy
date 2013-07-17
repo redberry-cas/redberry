@@ -1,6 +1,10 @@
 package cc.redberry.groovy
 
+import cc.redberry.core.indexmapping.IndexMappings
 import org.junit.Test
+
+import static cc.redberry.core.tensor.Tensors.setAntiSymmetric
+import static cc.redberry.core.tensor.Tensors.setSymmetric
 
 class RedberryTest {
 
@@ -35,6 +39,25 @@ class RedberryTest {
             assert a[0..3] == ('a*b*c'.t.toArray() as List)
             assert a[0..5] == (a.toArray() as List)
             assert a[3..5] == ('F_mn*G_ab'.t.toArray() as List)
+        }
+    }
+
+    @Test
+    public void testMapping1() {
+        use(Redberry) {
+            println 'yyyy'
+            setAntiSymmetric 'f_qwertyuioplkjhgfdsazxcvbnm'
+            println 'xxxx'
+            def from = 'f_qwertyuioplkjhgfdsazxcvbnm'.t, to = 'f_qwertyuioplkjhgfdsazxcvbnm'.t
+            println IndexMappings.getFirst(from, to)
+            def mappings = from % to
+
+            println mappings.first
+//            mappings.each { println it }
+            println mappings >> from
+            println mappings.first >> from
+            println 'xui'
+            println mappings.find { it.sign }
         }
     }
 }
