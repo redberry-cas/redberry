@@ -46,9 +46,9 @@ class RedberryTest {
     public void testMapping1() {
         use(Redberry) {
             println 'yyyy'
-            setAntiSymmetric 'f_qwertyuioplkjhgfdsazxcvbnm'
+            setAntiSymmetric 'f_qwruiop'
             println 'xxxx'
-            def from = 'f_qwertyuioplkjhgfdsazxcvbnm'.t, to = 'f_qwertyuioplkjhgfdsazxcvbnm'.t
+            def from = 'f_qwruiop'.t, to = 'f_qwruiop'.t
             println IndexMappings.getFirst(from, to)
             def mappings = from % to
 
