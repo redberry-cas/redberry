@@ -86,15 +86,15 @@ public final class IndexMappingBufferRecord {
         return states;
     }
 
-    public int getToState() {
+    public int getToRawState() {
         return (states & 1) == 0 ? 0x80000000 : 0;
     }
 
-    public int getFromState() {
+    public int getFromRawState() {
         if ((states & 4) == 0)
-            return getToState();
+            return getToRawState();
         else
-            return 0x80000000 ^ getToState();
+            return 0x80000000 ^ getToRawState();
     }
 
     public boolean getStatesBit(int bit) {

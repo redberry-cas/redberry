@@ -176,8 +176,8 @@ public final class IndexMappingBufferImpl implements IndexMappingBuffer {
                 to = toStringIndex(entry.getValue().getIndexName(), format).substring(1);
                 sb.append(',');
             } else {
-                from = toStringIndex(setRawState(entry.getValue().getFromState(), entry.getKey()), format);
-                to = toStringIndex(setRawState(entry.getValue().getToState(), entry.getValue().getIndexName()), format);
+                from = toStringIndex(setRawState(entry.getValue().getFromRawState(), entry.getKey()), format);
+                to = toStringIndex(setRawState(entry.getValue().getToRawState(), entry.getValue().getIndexName()), format);
             }
             sb.append(from).append(" -> ").append(to).append(", ");
         }
