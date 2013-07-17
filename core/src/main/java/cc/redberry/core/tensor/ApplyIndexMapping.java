@@ -232,16 +232,26 @@ public final class ApplyIndexMapping {
         return applyIndexMapping1(tensor, from.clone(), to.clone(), forbidden);
     }
 
+    //todo comment
+    public static Tensor applyIndexMappingAutomatically(Tensor tensor, int[] from, int[] to) {
+        return applyIndexMappingAutomatically(tensor, from.clone(), to.clone(), new int[0]);
+    }
+
+
+    //todo comment
     public static Tensor applyIndexMappingAutomatically(Tensor tensor, int[] from, int[] to, int[] forbidden) {
         if (from.length != to.length)
             throw new IllegalArgumentException("Length of from does not match length of to.");
+        return applyIndexMappingAutomatically1(tensor, from.clone(), to.clone(), forbidden);
+    }
 
-        int i, oldFromLength = from.length, freeIndices[] = tensor.getIndices().getFree().getAllIndices().copy();
+    private static Tensor applyIndexMappingAutomatically1(Tensor tensor, int[] from, int[] to, int[] forbidden) {
+        final int[] freeIndices = tensor.getIndices().getFree().getAllIndices().copy();
         Arrays.sort(freeIndices);
 
         //removing indices from {@code from} array that are not contained in free indices of tensor
-        int pointer = 0;
-        for (i = oldFromLength - 1; i >= 0; --i) {
+        int i, pointer = 0, oldFromLength = from.length;
+        for (i = 0; i < oldFromLength; ++i) {
             if (Arrays.binarySearch(freeIndices, from[i]) >= 0) {
                 from[pointer] = from[i];
                 to[pointer] = to[i];
@@ -250,29 +260,39 @@ public final class ApplyIndexMapping {
         }
 
         //no indices to map
-        if (pointer == oldFromLength)
+        if (pointer == 0)
             return renameDummy(tensor, forbidden);
 
-        //adding free indices that do not present in {@code from} array to it
-        ArraysUtils.quickSort(from, to);
-        IntArrayList list = new IntArrayList();
-        for (i = freeIndices.length - 1; i >= 0; --i) {
-            if (Arrays.binarySearch(from, freeIndices[i]) < 0) {
-                if (pointer < oldFromLength) {
-                    from[pointer] = to[pointer] = freeIndices[i];
-                    ++pointer;
-                } else
-                    list.add(freeIndices[i]);
-            }
-        }
+        int newFromLength = pointer;
 
-        int[] toAdd = list.toArray();
-        from = Arrays.copyOfRange(from, 0, pointer + toAdd.length);
-        to = Arrays.copyOfRange(to, 0, pointer + toAdd.length);
-        System.arraycopy(toAdd.length, 0, from, oldFromLength, toAdd.length);
-        System.arraycopy(toAdd.length, 0, to, oldFromLength, toAdd.length);
-        //if (toAdd.length != 0)
-        //    ArraysUtils.quickSort(from, to);
+        //adding free indices that do not present in {@code from} array to it
+        ArraysUtils.quickSort(from, 0, pointer, to);
+        IntArrayList list = new IntArrayList();
+        for (i = 0; i < freeIndices.length; ++i)
+            if (Arrays.binarySearch(from, 0, pointer, freeIndices[i]) < 0) {
+                if (newFromLength < oldFromLength)
+                    from[newFromLength] = to[newFromLength] = freeIndices[i];
+                else
+                    list.add(freeIndices[i]);
+                ++newFromLength;
+            }
+
+        // if newFromLength < oldFromLength then list must be
+        // empty and {@code from} and {@code to} arrays
+        // will be simply truncated so subsequent
+        // {@code arraycopy(...)} will do nothing
+        // if newFromLength > oldFromLength then list is not empty
+        // and it will be appended to {@code from} and {@code to}
+        if (newFromLength < oldFromLength) {
+            from = Arrays.copyOfRange(from, 0, newFromLength);
+            to = Arrays.copyOfRange(to, 0, newFromLength);
+        } else if (newFromLength > oldFromLength) {
+            int[] toAdd = list.toArray();
+            from = Arrays.copyOfRange(from, 0, newFromLength);
+            to = Arrays.copyOfRange(to, 0, newFromLength);
+            System.arraycopy(toAdd, 0, from, oldFromLength, toAdd.length);
+            System.arraycopy(toAdd, 0, to, oldFromLength, toAdd.length);
+        }
 
         assert from.length == freeIndices.length;
 
@@ -478,6 +498,7 @@ public final class ApplyIndexMapping {
         }
     }
 
+    //todo discuss with Dima
     public static Tensor renameIndicesOfFieldsArguments(Tensor tensor, TIntSet forbidden) {
         if (tensor instanceof TensorField) {
             TensorField field = (TensorField) tensor;
