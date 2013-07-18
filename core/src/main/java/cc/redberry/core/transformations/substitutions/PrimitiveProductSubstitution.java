@@ -22,9 +22,7 @@
  */
 package cc.redberry.core.transformations.substitutions;
 
-import cc.redberry.core.indexmapping.IndexMappingBuffer;
-import cc.redberry.core.indexmapping.IndexMappingBufferImpl;
-import cc.redberry.core.indexmapping.IndexMappings;
+import cc.redberry.core.indexmapping.Mapping;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.tensor.*;
 import cc.redberry.core.utils.TensorUtils;
@@ -177,23 +175,23 @@ class PrimitiveProductSubstitution extends PrimitiveSubstitution {
     }
 
     SubsResult atomicSubstitute(PContent content, TIntHashSet forbidden) {
-        IndexMappingBuffer buffer = null;
+        Mapping mapping = null;
         int[] indexlessBijection, dataBijection;
 
         IndexlessBijectionsPort indexlessPort
                 = new IndexlessBijectionsPort(fromIndexless, content.indexless);
 
         while ((indexlessBijection = indexlessPort.take()) != null) {
-            buffer = createBijectiveProductPort(fromIndexless, extract(content.indexless, indexlessBijection)).take();
-            if (buffer != null)
+            mapping = createBijectiveProductPort(fromIndexless, extract(content.indexless, indexlessBijection)).take();
+            if (mapping != null)
                 break;
         }
 
-        if (buffer == null)
+        if (mapping == null)
             return null;
 
-        boolean sign = buffer.getSign();
-        buffer = null;
+        boolean sign = mapping.getSign();
+        mapping = null;
 
         Tensor[] currentData;
         if (content.data instanceof Product) {
@@ -201,8 +199,8 @@ class PrimitiveProductSubstitution extends PrimitiveSubstitution {
             currentData = currentContent.getDataCopy();
             ProductsBijectionsPort dataPort = new ProductsBijectionsPort(fromContent, currentContent);
             while ((dataBijection = dataPort.take()) != null) {
-                buffer = createBijectiveProductPort(fromData, extract(currentData, dataBijection)).take();
-                if (buffer != null)
+                mapping = createBijectiveProductPort(fromData, extract(currentData, dataBijection)).take();
+                if (mapping != null)
                     break;
             }
         } else {
@@ -211,20 +209,20 @@ class PrimitiveProductSubstitution extends PrimitiveSubstitution {
                     return null;
                 dataBijection = new int[0];
                 currentData = new Tensor[0];
-                buffer = new IndexMappingBufferImpl();
+                mapping = Mapping.EMPTY;
             } else {
                 if (fromContent.size() != 1)
                     return null;
                 dataBijection = new int[1];
                 currentData = new Tensor[]{content.data};
-                buffer = getFirst(fromContent.get(0), content.data);
+                mapping = getFirst(fromContent.get(0), content.data);
             }
         }
 
-        if (buffer == null)
+        if (mapping == null)
             return null;
 
-        buffer.addSign(sign);
+        mapping = mapping.addSign(sign);
         Arrays.sort(indexlessBijection);
         Arrays.sort(dataBijection);
 
@@ -254,12 +252,12 @@ class PrimitiveProductSubstitution extends PrimitiveSubstitution {
 
         Tensor newTo;
         if (toIsSymbolic)
-            newTo = buffer.getSign() ? Tensors.negate(to) : to;
+            newTo = mapping.getSign() ? Tensors.negate(to) : to;
         else {
             TIntHashSet remainderIndices = new TIntHashSet(forbidden);
             remainderIndices.addAll(getAllIndicesNamesT(indexlessRemainder));
             remainderIndices.addAll(getAllIndicesNamesT(dataRemainderT));
-            newTo = applyIndexMapping(to, buffer, remainderIndices.toArray());
+            newTo = applyIndexMapping(to, mapping, remainderIndices.toArray());
             forbidden.addAll(getAllIndicesNamesT(newTo));
         }
         return new SubsResult(newTo, remainder);

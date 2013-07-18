@@ -32,7 +32,7 @@ import java.util.Map;
  * @author Stanislav Poslavsky
  * @since 1.0
  */
-public interface IndexMappingBuffer {
+interface IndexMappingBuffer {
     /**
      * Tries to put the mapping entry {@code from->to}
      *
@@ -82,7 +82,7 @@ public interface IndexMappingBuffer {
      * @return the internal mapping container
      */
     //TODO TIntObjectHashMap ( YES issue #86 !)
-    Map<Integer, IndexMappingBufferRecord> getMap();
+//    Map<Integer, IndexMappingBufferRecord> getMap();
 
     /**
      * Returns a deep copy of this mapping.

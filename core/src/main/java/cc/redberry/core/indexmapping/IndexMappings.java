@@ -22,6 +22,9 @@
  */
 package cc.redberry.core.indexmapping;
 
+import cc.redberry.concurrent.OutputPortUnsafe;
+import cc.redberry.core.indices.Indices;
+import cc.redberry.core.indices.IndicesUtils;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.tensor.*;
 import cc.redberry.core.tensor.functions.*;
@@ -44,65 +47,52 @@ public final class IndexMappings {
     }
 
     /**
-     * Creates output port of mappings of two simple tensors and do not takes into account the arguments of fields.
-     *
-     * @param from from tensor
-     * @param to   to tensor
-     * @return port of mappings of indices
-     */
-    public static MappingsPort simpleTensorsPort(SimpleTensor from, SimpleTensor to) {
-        final IndexMappingProvider provider = ProviderSimpleTensor.FACTORY_SIMPLETENSOR.create(IndexMappingProvider.Util.singleton(new IndexMappingBufferImpl()), from, to);
-        provider.tick();
-        return new MappingsPortRemovingContracted(provider);
-    }
-
-    /**
-     * Creates output port of mappings of two products of tensors represented as arrays of multipliers, where
-     * each multiplier of {@code from} will be mapped on the multiplier of {@code to} at the same
-     * position. Such ordering can be obtained via {@link cc.redberry.core.transformations.substitutions.ProductsBijectionsPort}.
-     * In contrast to {@link #createPort(cc.redberry.core.tensor.Tensor, cc.redberry.core.tensor.Tensor)}, this method
-     * will fully handles mappings of free indices on contracted ones (like e.g. _i^j -> _k^k).
-     *
-     * @param from from tensor
-     * @param to   to tensor
-     * @return port of mappings of indices
-     */
-    public static MappingsPort createBijectiveProductPort(Tensor[] from, Tensor[] to) {
-        if (from.length != to.length)
-            throw new IllegalArgumentException("From length != to length.");
-        if (from.length == 0)
-            return IndexMappingProvider.Util.singleton(new IndexMappingBufferImpl());
-        if (from.length == 1)
-            return createPort(from[0], to[0]);
-        return new MappingsPortRemovingContracted(new SimpleProductMappingsPort(IndexMappingProvider.Util.singleton(new IndexMappingBufferImpl()), from, to));
-    }
-
-    /**
      * Creates output port of mappings of tensor {@code from} on tensor {@code to}.
      *
      * @param from from tensor
      * @param to   to tensor
      * @return output port of mappings
      */
-    public static MappingsPort createPort(Tensor from, Tensor to) {
-        return createPort(new IndexMappingBufferImpl(), from, to);
+    public static MappingsPort1 createPort(Tensor from, Tensor to) {
+        return new MappingsPort1(createPortOfBuffers(new IndexMappingBufferImpl(), from, to));
     }
 
     /**
-     * Creates output port of mappings of tensor {@code from} on tensor {@code to} with specified
-     * mappings rules defined in specified {@link IndexMappingBuffer}.
+     * Creates output port of mappings of two simple tensors and do not takes into account the arguments of fields.
      *
-     * @param buffer initial mapping rules
-     * @param from   from tensor
-     * @param to     to tensor
-     * @return output port of mapping
+     * @param from from tensor
+     * @param to   to tensor
+     * @return port of mappings of indices
      */
-    public static MappingsPort createPort(final IndexMappingBuffer buffer,
-                                          final Tensor from, final Tensor to) {
-        final IndexMappingProvider provider = createPort(IndexMappingProvider.Util.singleton(buffer), from, to);
+    public static MappingsPort1 simpleTensorsPort(SimpleTensor from, SimpleTensor to) {
+        final IndexMappingProvider provider = ProviderSimpleTensor.FACTORY_SIMPLETENSOR.create(IndexMappingProvider.Util.singleton(new IndexMappingBufferImpl()), from, to);
         provider.tick();
-        return new MappingsPortRemovingContracted(provider);
+        return new MappingsPort1(new MappingsPortRemovingContracted(provider));
     }
+
+    /**
+     * Creates output port of mappings of two products of tensors represented as arrays of multipliers, where
+     * each multiplier of {@code from} will be mapped on the multiplier of {@code to} at the same
+     * position. Such ordering can be obtained via {@link cc.redberry.core.transformations.substitutions.ProductsBijectionsPort}.
+     * In contrast to {@link #createPortOfBuffers(cc.redberry.core.tensor.Tensor, cc.redberry.core.tensor.Tensor)}, this method
+     * will fully handles mappings of free indices on contracted ones (like e.g. _i^j -> _k^k).
+     *
+     * @param from from tensor
+     * @param to   to tensor
+     * @return port of mappings of indices
+     */
+    public static MappingsPort1 createBijectiveProductPort(Tensor[] from, Tensor[] to) {
+        if (from.length != to.length)
+            throw new IllegalArgumentException("From length != to length.");
+        if (from.length == 0)
+            return new MappingsPort1(IndexMappingProvider.Util.singleton(new IndexMappingBufferImpl()));
+        if (from.length == 1)
+            return new MappingsPort1(createPortOfBuffers(from[0], to[0]));
+        return new MappingsPort1(
+                new MappingsPortRemovingContracted(
+                        new SimpleProductMappingsPort(IndexMappingProvider.Util.singleton(new IndexMappingBufferImpl()), from, to)));
+    }
+
 
     /**
      * Returns the first mapping of tensor {@code from} on tensor {@code to}.
@@ -111,9 +101,10 @@ public final class IndexMappings {
      * @param to   to tensor
      * @return mapping of indices of tensor {@code from} on tensor {@code to}
      */
-    public static IndexMappingBuffer getFirst(Tensor from, Tensor to) {
-        return createPort(from, to).take();
+    public static Mapping getFirst(Tensor from, Tensor to) {
+        return new Mapping(createPortOfBuffers(from, to).take());
     }
+
 
     /**
      * Returns {@code true} if there is mapping of tensor {@code from} on tensor {@code to}.
@@ -123,7 +114,7 @@ public final class IndexMappings {
      * @return {@code true} if there is mapping of tensor {@code from} on tensor {@code to}
      */
     public static boolean mappingExists(Tensor from, Tensor to) {
-        return getFirst(from, to) != null;
+        return getFirstBuffer(from, to) != null;
     }
 
     /**
@@ -135,23 +126,106 @@ public final class IndexMappings {
      */
     public static boolean positiveMappingExists(Tensor from, Tensor to) {
         IndexMappingBuffer buffer;
-        MappingsPort port = createPort(from, to);
+        OutputPortUnsafe<IndexMappingBuffer> port = createPortOfBuffers(from, to);
         while ((buffer = port.take()) != null)
             if (!buffer.getSign())
                 return true;
         return false;
     }
 
+
     /**
-     * Returns {@code true} if specified mapping is one of mappings of tensor {@code from} on tensor {@code to}.
+     * Returns {@code true} if tensor u mathematically (not programming) equals to tensor v.
      *
-     * @param buffer mapping
+     * @param u tensor
+     * @param v tensor
+     * @return {@code true} if specified tensors are mathematically (not programming) equal
+     */
+    public static boolean equals(Tensor u, Tensor v) {
+        if (u == v)
+            return true;
+        Indices freeIndices = u.getIndices().getFree();
+        if (!freeIndices.equalsRegardlessOrder(v.getIndices().getFree()))
+            return false;
+        int[] free = freeIndices.getAllIndices().copy();
+        IndexMappingBuffer tester = new IndexMappingBufferTester(free, false);
+        OutputPortUnsafe<IndexMappingBuffer> mp = IndexMappings.createPortOfBuffers(tester, u, v);
+        IndexMappingBuffer buffer;
+
+        while ((buffer = mp.take()) != null)
+            if (!buffer.getSign())
+                return true;
+
+        return false;
+    }
+
+    /**
+     * Returns {@code true} if tensor u mathematically (not programming) equals to tensor v,
+     * {@code false} if they they differ only in the sign and {@code null} otherwise.
+     *
+     * @param u tensor
+     * @param v tensor
+     * @return {@code true} {@code true} if tensor u mathematically (not programming) equals to tensor v,
+     *         {@code false} if they they differ only in the sign and {@code null} otherwise
+     */
+    public static Boolean compare1(Tensor u, Tensor v) {
+        Indices freeIndices = u.getIndices().getFree();
+        if (!freeIndices.equalsRegardlessOrder(v.getIndices().getFree()))
+            return null;
+        int[] free = freeIndices.getAllIndices().copy();
+        IndexMappingBuffer tester = new IndexMappingBufferTester(free, false);
+        IndexMappingBuffer buffer = IndexMappings.createPortOfBuffers(tester, u, v).take();
+        if (buffer == null)
+            return null;
+        return buffer.getSign();
+    }
+
+    public static boolean isZeroDueToSymmetry(Tensor t) {
+        int[] indices = IndicesUtils.getIndicesNames(t.getIndices().getFree());
+        IndexMappingBufferTester bufferTester = new IndexMappingBufferTester(indices, false);
+        OutputPortUnsafe<IndexMappingBuffer> mp = IndexMappings.createPortOfBuffers(bufferTester, t, t);
+        IndexMappingBuffer buffer;
+        while ((buffer = mp.take()) != null)
+            if (buffer.getSign())
+                return true;
+        return false;
+    }
+
+    /* *
+     * *
+     * * Non public methods
+     * *
+     * */
+
+    /**
+     * Creates output port of mappings of tensor {@code from} on tensor {@code to}.
+     *
+     * @param from from tensor
+     * @param to   to tensor
+     * @return output port of mappings
+     */
+    static OutputPortUnsafe<IndexMappingBuffer> createPortOfBuffers(Tensor from, Tensor to) {
+        return createPortOfBuffers(new IndexMappingBufferImpl(), from, to);
+    }
+
+    /**
+     * Creates output port of mappings of tensor {@code from} on tensor {@code to} with specified
+     * mappings rules defined in specified {@link IndexMappingBuffer}.
+     *
+     * @param buffer initial mapping rules
      * @param from   from tensor
      * @param to     to tensor
-     * @return Returns {@code true} if specified mapping is one of mappings of indices of tensor {@code from} on tensor {@code to}.
+     * @return output port of mapping
      */
-    public static boolean testMapping(Tensor from, Tensor to, IndexMappingBuffer buffer) {
-        return createPort(new IndexMappingBufferTester(buffer), from, to).take() != null;
+    static OutputPortUnsafe<IndexMappingBuffer> createPortOfBuffers(final IndexMappingBuffer buffer,
+                                                                    final Tensor from, final Tensor to) {
+        final IndexMappingProvider provider = createPort(IndexMappingProvider.Util.singleton(buffer), from, to);
+        provider.tick();
+        return new MappingsPortRemovingContracted(provider);
+    }
+
+    static IndexMappingBuffer getFirstBuffer(Tensor from, Tensor to) {
+        return createPortOfBuffers(from, to).take();
     }
 
     private static Tensor extractNonComplexFactor(Tensor t) {
@@ -223,7 +297,7 @@ public final class IndexMappings {
         map.put(Log.class, ProviderFunctions.FACTORY);
     }
 
-    private static Set<IndexMappingBuffer> getAllMappings(MappingsPort opu) {
+    private static Set<IndexMappingBuffer> getAllMappings(OutputPortUnsafe<IndexMappingBuffer> opu) {
         Set<IndexMappingBuffer> res = new HashSet<>();
         IndexMappingBuffer c;
         while ((c = opu.take()) != null)
@@ -238,7 +312,7 @@ public final class IndexMappings {
      * @param to   to tensor
      * @return a set of all possible mappings of tensor {@code from} on tensor {@code to}
      */
-    public static Set<IndexMappingBuffer> getAllMappings(Tensor from, Tensor to) {
-        return getAllMappings(IndexMappings.createPort(from, to));
+    static Set<IndexMappingBuffer> getAllMappings(Tensor from, Tensor to) {
+        return getAllMappings(IndexMappings.createPortOfBuffers(from, to));
     }
 }

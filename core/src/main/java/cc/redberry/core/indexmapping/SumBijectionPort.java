@@ -20,24 +20,21 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
-package cc.redberry.core.transformations.substitutions;
+package cc.redberry.core.indexmapping;
 
 import cc.redberry.concurrent.OutputPortUnsafe;
 import cc.redberry.core.combinatorics.IntCombinationPermutationGenerator;
-import cc.redberry.core.indexmapping.IndexMappingBuffer;
-import cc.redberry.core.indexmapping.IndexMappingBufferTester;
-import cc.redberry.core.indexmapping.IndexMappings;
-import cc.redberry.core.indexmapping.MappingsPort;
 import cc.redberry.core.tensor.Tensor;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public final class SumBijectionPort implements OutputPortUnsafe<BijectionContainer> {
+public final class SumBijectionPort implements OutputPortUnsafe<SumBijectionPort.BijectionContainer> {
 
     private List<Mapper> mappers;
     private int[] bijection;
@@ -183,17 +180,17 @@ public final class SumBijectionPort implements OutputPortUnsafe<BijectionContain
         }
     }
 
-    private static interface MapperSource extends Mapper, MappingsPort {
+    private static interface MapperSource extends Mapper, OutputPortUnsafe<IndexMappingBuffer> {
     }
 
     private static final class SinglePairSource extends AbstaractMapper
             implements MapperSource {
 
-        private final MappingsPort mappingsPort;
+        private final OutputPortUnsafe<IndexMappingBuffer> mappingsPort;
         private final int[] fromPointer;
 
         public SinglePairSource(Tensor from, Tensor to, int fromPointer) {
-            this.mappingsPort = IndexMappings.createPort(from, to);
+            this.mappingsPort = IndexMappings.createPortOfBuffers(from, to);
             this.fromPointer = new int[]{fromPointer};
         }
 
@@ -238,7 +235,7 @@ public final class SumBijectionPort implements OutputPortUnsafe<BijectionContain
     private static final class StretchPairSource extends AbstractStretchMapper
             implements MapperSource {
 
-        private MappingsPort currentSource;
+        private OutputPortUnsafe<IndexMappingBuffer> currentSource;
 
         public StretchPairSource(Tensor[] from, Tensor[] to, int fromPointer) {
             super(from, to, fromPointer);
@@ -265,7 +262,7 @@ public final class SumBijectionPort implements OutputPortUnsafe<BijectionContain
                 if (!permutationGenerator.hasNext())
                     return null;
                 currentPermutation = permutationGenerator.next();
-                currentSource = IndexMappings.createPort(from[0], to[currentPermutation[0]]);
+                currentSource = IndexMappings.createPortOfBuffers(from[0], to[currentPermutation[0]]);
             }
         }
 
@@ -301,6 +298,30 @@ public final class SumBijectionPort implements OutputPortUnsafe<BijectionContain
                     return bijection;
                 }
             }
+        }
+    }
+
+    public static final class BijectionContainer {
+
+        final IndexMappingBuffer buffer;
+        final int[] bijection;
+
+        BijectionContainer(IndexMappingBuffer buffer, int[] bijection) {
+            this.buffer = buffer;
+            this.bijection = bijection;
+        }
+
+        @Override
+        public String toString() {
+            return Arrays.toString(bijection) + "\n" + buffer.toString();
+        }
+
+        public Mapping getMapping() {
+            return new Mapping(buffer);
+        }
+
+        public int[] getBijectionReference() {
+            return bijection;
         }
     }
 }

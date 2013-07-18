@@ -337,21 +337,7 @@ public class TensorUtils {
      * @return {@code true} if specified tensors are mathematically (not programming) equal
      */
     public static boolean equals(Tensor u, Tensor v) {
-        if (u == v)
-            return true;
-        Indices freeIndices = u.getIndices().getFree();
-        if (!freeIndices.equalsRegardlessOrder(v.getIndices().getFree()))
-            return false;
-        int[] free = freeIndices.getAllIndices().copy();
-        IndexMappingBuffer tester = new IndexMappingBufferTester(free, false);
-        MappingsPort mp = IndexMappings.createPort(tester, u, v);
-        IndexMappingBuffer buffer;
-
-        while ((buffer = mp.take()) != null)
-            if (!buffer.getSign())
-                return true;
-
-        return false;
+        return IndexMappings.equals(u, v);
     }
 
     /**
@@ -364,15 +350,7 @@ public class TensorUtils {
      *         {@code false} if they they differ only in the sign and {@code null} otherwise
      */
     public static Boolean compare1(Tensor u, Tensor v) {
-        Indices freeIndices = u.getIndices().getFree();
-        if (!freeIndices.equalsRegardlessOrder(v.getIndices().getFree()))
-            return null;
-        int[] free = freeIndices.getAllIndices().copy();
-        IndexMappingBuffer tester = new IndexMappingBufferTester(free, false);
-        IndexMappingBuffer buffer = IndexMappings.createPort(tester, u, v).take();
-        if (buffer == null)
-            return null;
-        return buffer.getSign();
+        return IndexMappings.compare1(u, v);
     }
 
     public static void assertIndicesConsistency(Tensor t) {
@@ -425,17 +403,10 @@ public class TensorUtils {
     }
 
     public static boolean isZeroDueToSymmetry(Tensor t) {
-        int[] indices = IndicesUtils.getIndicesNames(t.getIndices().getFree());
-        IndexMappingBufferTester bufferTester = new IndexMappingBufferTester(indices, false);
-        MappingsPort mp = IndexMappings.createPort(bufferTester, t, t);
-        IndexMappingBuffer buffer;
-        while ((buffer = mp.take()) != null)
-            if (buffer.getSign())
-                return true;
-        return false;
+        return IndexMappings.isZeroDueToSymmetry(t);
     }
 
-    private static Symmetry getSymmetryFromMapping1(final int[] indicesNames, IndexMappingBuffer indexMappingBuffer) {
+    private static Symmetry getSymmetryFromMapping1(final int[] indicesNames, Mapping indexMappingBuffer) {
         final int dimension = indicesNames.length;
         int[] permutation = new int[dimension];
         Arrays.fill(permutation, -1);
@@ -468,14 +439,14 @@ public class TensorUtils {
         return new Symmetry(permutation, indexMappingBuffer.getSign());
     }
 
-    public static Symmetry getSymmetryFromMapping(final int[] indices, IndexMappingBuffer indexMappingBuffer) {
+    public static Symmetry getSymmetryFromMapping(final int[] indices, Mapping indexMappingBuffer) {
         return getSymmetryFromMapping1(IndicesUtils.getIndicesNames(indices), indexMappingBuffer);
     }
 
-    public static Symmetries getSymmetriesFromMappings(final int[] indices, MappingsPort mappingsPort) {
+    public static Symmetries getSymmetriesFromMappings(final int[] indices, MappingsPort1 mappingsPort) {
         Symmetries symmetries = SymmetriesFactory.createSymmetries(indices.length);
         int[] indicesNames = IndicesUtils.getIndicesNames(indices);
-        IndexMappingBuffer buffer;
+        Mapping buffer;
         while ((buffer = mappingsPort.take()) != null)
             symmetries.add(getSymmetryFromMapping1(indicesNames, buffer));
         return symmetries;

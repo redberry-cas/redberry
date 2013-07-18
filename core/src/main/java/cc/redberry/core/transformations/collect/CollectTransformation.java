@@ -26,9 +26,8 @@ import cc.redberry.concurrent.OutputPortUnsafe;
 import cc.redberry.core.combinatorics.Combinatorics;
 import cc.redberry.core.indexgenerator.IndexGenerator;
 import cc.redberry.core.indexmapping.IndexMapping;
-import cc.redberry.core.indexmapping.IndexMappingBuffer;
-import cc.redberry.core.indexmapping.IndexMappingBufferRecord;
 import cc.redberry.core.indexmapping.IndexMappings;
+import cc.redberry.core.indexmapping.Mapping;
 import cc.redberry.core.indices.Indices;
 import cc.redberry.core.indices.IndicesBuilder;
 import cc.redberry.core.indices.IndicesUtils;
@@ -46,7 +45,6 @@ import gnu.trove.set.hash.TIntHashSet;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Map;
 
 import static cc.redberry.core.indices.IndicesUtils.*;
 import static cc.redberry.core.tensor.Tensors.multiply;
@@ -94,18 +92,15 @@ public class CollectTransformation implements Transformation {
             for (Split base : nodes) {
                 if ((match = matchFactors(base.factors, toAdd.factors)) != null) {
                     SimpleTensor[] toAddFactors = Combinatorics.reorder(toAdd.factors, match);
-                    IndexMappingBuffer mapping =
+                    Mapping mapping =
                             IndexMappings.createBijectiveProductPort(toAddFactors, base.factors).take();
 
-                    for (Map.Entry<Integer, IndexMappingBufferRecord> entry : mapping.getMap().entrySet())
-                        entry.getValue().invertStates();
+                    mapping =  mapping.inverseStates();
+//                    for (Map.Entry<Integer, IndexMappingBufferRecord> entry : mapping.getMap().entrySet())
+//                        entry.getValue().invertStates();
 
-                    indices = toAdd.summands.get(0).getIndices().getFree();
-                    for (int i = indices.size() - 1; i >= 0; --i) {
-                        if (!mapping.getMap().containsKey(getNameWithType(indices.get(i))))
-                            mapping.tryMap(indices.get(i), indices.get(i));
-                    }
-                    base.summands.add(ApplyIndexMapping.applyIndexMapping(toAdd.summands.get(0), mapping, base.forbidden));
+
+                    base.summands.add(ApplyIndexMapping.applyIndexMappingAutomatically(toAdd.summands.get(0), mapping, base.forbidden));
                     continue out;
                 }
             }

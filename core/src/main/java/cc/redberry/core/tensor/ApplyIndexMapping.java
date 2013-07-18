@@ -26,6 +26,7 @@ import cc.redberry.core.indexgenerator.IndexGenerator;
 import cc.redberry.core.indexmapping.IndexMapping;
 import cc.redberry.core.indexmapping.IndexMappingBuffer;
 import cc.redberry.core.indexmapping.IndexMappingBufferRecord;
+import cc.redberry.core.indexmapping.Mapping;
 import cc.redberry.core.indices.IndicesBuilder;
 import cc.redberry.core.indices.IndicesFactory;
 import cc.redberry.core.indices.IndicesUtils;
@@ -150,7 +151,7 @@ public final class ApplyIndexMapping {
      * @param buffer mapping of indices
      * @return tensor with renamed indices
      */
-    public static Tensor applyIndexMapping(Tensor tensor, IndexMappingBuffer buffer) {
+    public static Tensor applyIndexMapping(Tensor tensor, Mapping buffer) {
         return applyIndexMapping(tensor, buffer, new int[0]);
     }
 
@@ -163,7 +164,7 @@ public final class ApplyIndexMapping {
      * @param forbidden forbidden indices
      * @return tensor with renamed indices
      */
-    public static Tensor applyIndexMapping(Tensor tensor, IndexMappingBuffer buffer, int[] forbidden) {
+    public static Tensor applyIndexMapping(Tensor tensor, Mapping buffer, int[] forbidden) {
         if (buffer.isEmpty()) {
             if (tensor.getIndices().getFree().size() != 0)
                 throw new IllegalArgumentException("From indices are not equal to free indices of tensor.");
@@ -211,7 +212,7 @@ public final class ApplyIndexMapping {
      * @return tensor with renamed indices
      * @throws IllegalArgumentException if {@code from.length != to.length}
      */
-    public static Tensor applyIndexMappingAutomatically(Tensor tensor, IndexMappingBuffer buffer) {
+    public static Tensor applyIndexMappingAutomatically(Tensor tensor, Mapping buffer) {
         return applyIndexMappingAutomatically(tensor, buffer, new int[0]);
     }
 
@@ -229,7 +230,7 @@ public final class ApplyIndexMapping {
      * @return tensor with renamed indices
      * @throws IllegalArgumentException if {@code from.length != to.length}
      */
-    public static Tensor applyIndexMappingAutomatically(Tensor tensor, IndexMappingBuffer buffer, int[] forbidden) {
+    public static Tensor applyIndexMappingAutomatically(Tensor tensor, Mapping buffer, int[] forbidden) {
         if (buffer.isEmpty())
             return renameDummy(tensor, forbidden);
 

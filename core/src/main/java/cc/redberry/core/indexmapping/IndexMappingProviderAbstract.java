@@ -22,6 +22,8 @@
  */
 package cc.redberry.core.indexmapping;
 
+import cc.redberry.concurrent.OutputPortUnsafe;
+
 /**
  * Implements "register" paradigm (see description of parent interface).
  *
@@ -32,9 +34,9 @@ package cc.redberry.core.indexmapping;
 abstract class IndexMappingProviderAbstract implements IndexMappingProvider {
 
     protected IndexMappingBuffer currentBuffer = null;
-    private final MappingsPort opu;
+    private final OutputPortUnsafe<IndexMappingBuffer> opu;
 
-    public IndexMappingProviderAbstract(MappingsPort opu) {
+    public IndexMappingProviderAbstract(OutputPortUnsafe<IndexMappingBuffer> opu) {
         this.opu = opu;
     }
 

@@ -34,7 +34,7 @@ import cc.redberry.core.indices.IndicesUtils;
  * @author Stanislav Poslavsky
  * @since 1.0
  */
-public final class IndexMappingBufferRecord {
+final class IndexMappingBufferRecord {
 
     /*
      * Mask 0b00000SUL

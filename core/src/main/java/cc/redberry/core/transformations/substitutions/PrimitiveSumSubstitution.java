@@ -22,11 +22,13 @@
  */
 package cc.redberry.core.transformations.substitutions;
 
-import cc.redberry.core.indexmapping.IndexMappingBuffer;
+import cc.redberry.core.indexmapping.Mapping;
+import cc.redberry.core.indexmapping.SumBijectionPort;
 import cc.redberry.core.tensor.ApplyIndexMapping;
 import cc.redberry.core.tensor.SumBuilder;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.tensor.Tensors;
+
 import java.util.Arrays;
 
 /**
@@ -40,19 +42,19 @@ class PrimitiveSumSubstitution extends PrimitiveSubstitution {
 
     @Override
     Tensor newTo_(Tensor currentNode, SubstitutionIterator iterator) {
-        BijectionContainer bc = new SumBijectionPort(from, currentNode).take();
+        SumBijectionPort.BijectionContainer bc = new SumBijectionPort(from, currentNode).take();
         if (bc == null)
             return currentNode;
 
-        IndexMappingBuffer buffer = bc.buffer;
+        Mapping mapping = bc.getMapping();
         Tensor newTo;
         if (toIsSymbolic)
-            newTo = buffer.getSign() ? Tensors.negate(to) : to;
+            newTo = mapping.getSign() ? Tensors.negate(to) : to;
         else
-            newTo = ApplyIndexMapping.applyIndexMapping(to, buffer, iterator.getForbidden());
+            newTo = ApplyIndexMapping.applyIndexMapping(to, mapping, iterator.getForbidden());
 
         SumBuilder builder = new SumBuilder();
-        int[] bijection = bc.bijection;
+        int[] bijection = bc.getBijectionReference();
         Arrays.sort(bijection);
         builder.put(newTo);
         for (int i = currentNode.size() - 1; i >= 0; --i)

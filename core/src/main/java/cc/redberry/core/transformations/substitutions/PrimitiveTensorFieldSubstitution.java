@@ -24,8 +24,8 @@ package cc.redberry.core.transformations.substitutions;
 
 import cc.redberry.core.context.NameDescriptorForTensorField;
 import cc.redberry.core.indexgenerator.IndexGenerator;
-import cc.redberry.core.indexmapping.IndexMappingBuffer;
 import cc.redberry.core.indexmapping.IndexMappings;
+import cc.redberry.core.indexmapping.Mapping;
 import cc.redberry.core.indices.Indices;
 import cc.redberry.core.indices.SimpleIndices;
 import cc.redberry.core.indices.UnsafeIndicesFactory;
@@ -117,8 +117,8 @@ class PrimitiveTensorFieldSubstitution extends PrimitiveSubstitution {
                            Tensor currentNode, SubstitutionIterator iterator) {
 
         TensorField from = fromTo.from;
-        IndexMappingBuffer buffer = IndexMappings.simpleTensorsPort(from, currentField).take();
-        if (buffer == null)
+        Mapping mapping = IndexMappings.simpleTensorsPort(from, currentField).take();
+        if (mapping == null)
             return currentNode;
 
         Indices[] fromIndices = from.getArgIndices(),
@@ -149,8 +149,8 @@ class PrimitiveTensorFieldSubstitution extends PrimitiveSubstitution {
                 argTo.toArray(new Tensor[argTo.size()]),
                 false).transform(newTo);
         if (!TensorUtils.isSymbolic(newTo))
-            newTo = ApplyIndexMapping.applyIndexMapping(newTo, buffer, iterator.getForbidden());
-        else if (buffer.getSign())
+            newTo = ApplyIndexMapping.applyIndexMapping(newTo, mapping, iterator.getForbidden());
+        else if (mapping.getSign())
             newTo = Tensors.negate(newTo);
         return newTo;
     }
