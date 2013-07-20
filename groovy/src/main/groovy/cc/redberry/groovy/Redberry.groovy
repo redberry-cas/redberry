@@ -24,17 +24,17 @@
 package cc.redberry.groovy
 
 import cc.redberry.core.combinatorics.IntPermutationsGenerator
-import cc.redberry.core.indexmapping.IndexMappingBuffer
-import cc.redberry.core.indexmapping.IndexMappingBufferImpl
-import cc.redberry.core.indexmapping.IndexMappings
-import cc.redberry.core.indexmapping.MappingsPort
+import cc.redberry.core.indexmapping.*
 import cc.redberry.core.indices.*
 import cc.redberry.core.number.Complex
 import cc.redberry.core.number.Numeric
 import cc.redberry.core.number.Rational
 import cc.redberry.core.number.Real
 import cc.redberry.core.parser.ParserIndices
-import cc.redberry.core.tensor.*
+import cc.redberry.core.tensor.Expression
+import cc.redberry.core.tensor.Tensor
+import cc.redberry.core.tensor.TensorBuilder
+import cc.redberry.core.tensor.Tensors
 import cc.redberry.core.tensor.iterator.FromChildToParentIterator
 import cc.redberry.core.tensor.iterator.FromParentToChildIterator
 import cc.redberry.core.tensor.iterator.TraverseGuide
@@ -726,90 +726,8 @@ class Redberry {
         return TensorUtils.equals(a, b);
     }
 
-    static MappingsPortWrapper mod(Tensor from, Tensor to) {
-        return new MappingsPortWrapper(from, to);
-    }
-
-    public static final class MappingsPortWrapper implements Transformation, Iterable<IndexMappingBufferAsTransformation> {
-        final Tensor from, to
-        final IndexMappingBufferAsTransformation first
-
-        MappingsPortWrapper(Tensor from, Tensor to) {
-            this.from = from
-            this.to = to
-            def buffer = IndexMappings.getFirst(from, to)
-            this.first = buffer == null ? null : new IndexMappingBufferAsTransformation(buffer)
-        }
-
-        @Override
-        Tensor transform(Tensor t) {
-            if (first == null)
-                throw new IllegalStateException("No mappings exist")
-            return first.transform(t)
-        }
-
-        @Override
-        Iterator<IndexMappingBuffer> iterator() {
-            return new PortIterator(IndexMappings.createPort(from, to))
-        }
-
-        private static final class PortIterator implements Iterator<IndexMappingBufferAsTransformation> {
-            final MappingsPort port;
-            IndexMappingBufferAsTransformation previous, next
-
-            PortIterator(MappingsPort port) {
-                this.port = port
-                next = takeFromPort()
-            }
-
-            private IndexMappingBufferAsTransformation takeFromPort() {
-                def buffer = port.take()
-                return buffer == null ? null : new IndexMappingBufferAsTransformation(buffer)
-            }
-
-            @Override
-            boolean hasNext() {
-                return next != null
-            }
-
-            @Override
-            IndexMappingBufferAsTransformation next() {
-                previous = next
-                next = takeFromPort()
-                println previous.sign
-                return previous
-            }
-
-            @Override
-            void remove() {
-                throw new UnsupportedOperationException("unsuported")
-            }
-        }
-    }
-
-    private static final class IndexMappingBufferAsTransformation implements Transformation {
-        @Delegate
-        final IndexMappingBuffer mappingBuffer
-
-        IndexMappingBufferAsTransformation(IndexMappingBuffer mappingBuffer) {
-            assert mappingBuffer != null
-            this.mappingBuffer = mappingBuffer
-        }
-
-        @Override
-        Tensor transform(Tensor t) {
-            return ApplyIndexMapping.applyIndexMappingAutomatically(t, mappingBuffer)
-        }
-
-        @Override
-        public java.lang.String toString() {
-            return mappingBuffer.toString()
-        }
-
-        @Override
-        IndexMappingBuffer clone() {
-            return new IndexMappingBufferAsTransformation(mappingBuffer.clone())
-        }
+    static MappingsPort mod(Tensor from, Tensor to) {
+        return IndexMappings.createPort(from, to);
     }
 
     /*

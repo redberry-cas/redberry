@@ -25,7 +25,7 @@ package cc.redberry.core.performance;
 import cc.redberry.core.context.ContextManager;
 import cc.redberry.core.indexmapping.IndexMappings;
 import cc.redberry.core.indexmapping.Mapping;
-import cc.redberry.core.indexmapping.MappingsPort1;
+import cc.redberry.core.indexmapping.MappingsPort;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.tensor.Tensors;
 
@@ -55,7 +55,7 @@ public class IndexMappingPerformance {
 
             long start = System.currentTimeMillis();
             for (int i = 0; i < 1000; ++i) {
-                MappingsPort1 mp = IndexMappings.createPort(riman1, riman2);
+                MappingsPort mp = IndexMappings.createPort(riman1, riman2);
                 Mapping buffera;
                 while ((buffera = mp.take()) != null) ;
             }

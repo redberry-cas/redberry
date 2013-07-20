@@ -53,8 +53,8 @@ public final class IndexMappings {
      * @param to   to tensor
      * @return output port of mappings
      */
-    public static MappingsPort1 createPort(Tensor from, Tensor to) {
-        return new MappingsPort1(createPortOfBuffers(new IndexMappingBufferImpl(), from, to));
+    public static MappingsPort createPort(Tensor from, Tensor to) {
+        return new MappingsPort(createPortOfBuffers(new IndexMappingBufferImpl(), from, to));
     }
 
     /**
@@ -64,10 +64,10 @@ public final class IndexMappings {
      * @param to   to tensor
      * @return port of mappings of indices
      */
-    public static MappingsPort1 simpleTensorsPort(SimpleTensor from, SimpleTensor to) {
+    public static MappingsPort simpleTensorsPort(SimpleTensor from, SimpleTensor to) {
         final IndexMappingProvider provider = ProviderSimpleTensor.FACTORY_SIMPLETENSOR.create(IndexMappingProvider.Util.singleton(new IndexMappingBufferImpl()), from, to);
         provider.tick();
-        return new MappingsPort1(new MappingsPortRemovingContracted(provider));
+        return new MappingsPort(new MappingsPortRemovingContracted(provider));
     }
 
     /**
@@ -81,14 +81,14 @@ public final class IndexMappings {
      * @param to   to tensor
      * @return port of mappings of indices
      */
-    public static MappingsPort1 createBijectiveProductPort(Tensor[] from, Tensor[] to) {
+    public static MappingsPort createBijectiveProductPort(Tensor[] from, Tensor[] to) {
         if (from.length != to.length)
             throw new IllegalArgumentException("From length != to length.");
         if (from.length == 0)
-            return new MappingsPort1(IndexMappingProvider.Util.singleton(new IndexMappingBufferImpl()));
+            return new MappingsPort(IndexMappingProvider.Util.singleton(new IndexMappingBufferImpl()));
         if (from.length == 1)
-            return new MappingsPort1(createPortOfBuffers(from[0], to[0]));
-        return new MappingsPort1(
+            return new MappingsPort(createPortOfBuffers(from[0], to[0]));
+        return new MappingsPort(
                 new MappingsPortRemovingContracted(
                         new SimpleProductMappingsPort(IndexMappingProvider.Util.singleton(new IndexMappingBufferImpl()), from, to)));
     }

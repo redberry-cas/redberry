@@ -27,7 +27,7 @@ import cc.redberry.core.combinatorics.symmetries.Symmetries;
 import cc.redberry.core.combinatorics.symmetries.SymmetriesFactory;
 import cc.redberry.core.indexmapping.IndexMappings;
 import cc.redberry.core.indexmapping.Mapping;
-import cc.redberry.core.indexmapping.MappingsPort1;
+import cc.redberry.core.indexmapping.MappingsPort;
 import cc.redberry.core.indices.Indices;
 import cc.redberry.core.indices.IndicesUtils;
 import cc.redberry.core.indices.SimpleIndices;
@@ -408,9 +408,8 @@ public class TensorUtils {
         return IndexMappings.isZeroDueToSymmetry(t);
     }
 
-    private static Symmetry getSymmetryFromMapping1(final int[] indicesNames, Mapping mapping) {
-        int[] _sortPermutation = ArraysUtils.quickSortP(indicesNames);
-        final int dimension = indicesNames.length;
+    private static Symmetry getSymmetryFromMapping1(final int[] sortedIndicesNames, final int[] _sortPermutation, Mapping mapping) {
+        final int dimension = sortedIndicesNames.length;
 
         int[] _fromIndices = mapping.getFromNames();
         int[] _toIndices = mapping.getToNames();
@@ -420,7 +419,7 @@ public class TensorUtils {
 
         int i, positionInFrom, positionInIndices;
         for (i = 0; i < dimension; ++i) {
-            int fromIndex = indicesNames[i];
+            int fromIndex = sortedIndicesNames[i];
             positionInFrom = Arrays.binarySearch(_fromIndices, fromIndex);
             if (positionInFrom < 0) {
                 return new Symmetry(dimension);
@@ -428,7 +427,7 @@ public class TensorUtils {
                 //throw new IllegalArgumentException("Index " + IndicesUtils.toString(record.getIndexName()) + " does not contains in specified indices array.");
             }
 
-            positionInIndices = Arrays.binarySearch(indicesNames, _toIndices[positionInFrom]);
+            positionInIndices = Arrays.binarySearch(sortedIndicesNames, _toIndices[positionInFrom]);
 
 
             if (positionInIndices < 0) {
@@ -446,16 +445,23 @@ public class TensorUtils {
         return new Symmetry(permutation, mapping.getSign()); //this is inverse permutation
     }
 
+    private static Symmetry getSymmetryFromMapping1(final int[] indicesNames, Mapping mapping) {
+        int[] sortedIndicesNames = indicesNames.clone();
+        int[] _sortPermutation = ArraysUtils.quickSortP(sortedIndicesNames);
+        return getSymmetryFromMapping1(sortedIndicesNames, _sortPermutation, mapping);
+    }
+
     public static Symmetry getSymmetryFromMapping(final int[] indices, Mapping mapping) {
         return getSymmetryFromMapping1(IndicesUtils.getIndicesNames(indices), mapping).inverse();
     }
 
-    public static Symmetries getSymmetriesFromMappings(final int[] indices, MappingsPort1 mappingsPort) {
+    public static Symmetries getSymmetriesFromMappings(final int[] indices, MappingsPort mappingsPort) {
         Symmetries symmetries = SymmetriesFactory.createSymmetries(indices.length);
-        int[] indicesNames = IndicesUtils.getIndicesNames(indices);
+        int[] sortedIndicesNames = IndicesUtils.getIndicesNames(indices);
+        int[] sortPermutation = ArraysUtils.quickSortP(sortedIndicesNames);
         Mapping buffer;
         while ((buffer = mappingsPort.take()) != null)
-            symmetries.add(getSymmetryFromMapping1(indicesNames, buffer));
+            symmetries.add(getSymmetryFromMapping1(sortedIndicesNames, sortPermutation, buffer));
         return symmetries;
     }
 

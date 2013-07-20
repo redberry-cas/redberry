@@ -42,22 +42,22 @@ class RedberryTest {
         }
     }
 
-    @Test
-    public void testMapping1() {
-        use(Redberry) {
-            println 'yyyy'
-            setAntiSymmetric 'f_qwruiop'
-            println 'xxxx'
-            def from = 'f_qwruiop'.t, to = 'f_qwruiop'.t
-            println IndexMappings.getFirst(from, to)
-            def mappings = from % to
-
-            println mappings.first
-//            mappings.each { println it }
-            println mappings >> from
-            println mappings.first >> from
-            println 'xui'
-            println mappings.find { it.sign }
-        }
-    }
+//    @Test
+//    public void testMapping1() {
+//        use(Redberry) {
+//            println 'yyyy'
+//            setAntiSymmetric 'f_qwruip'
+//            println 'xxxx'
+//            def from = 'f_qwruio'.t, to = 'f_qwruio'.t
+//            println IndexMappings.getFirst(from, to)
+//            def mappings = from % to
+//
+//            println mappings.first
+////            mappings.each { println it }
+//            println mappings >> from
+//            println mappings.first >> from
+//            println 'xui'
+//            println mappings.find { it.sign }
+//        }
+//    }
 }

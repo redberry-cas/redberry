@@ -1,6 +1,9 @@
 package cc.redberry.core.indexmapping;
 
 import cc.redberry.core.indices.IndicesUtils;
+import cc.redberry.core.tensor.ApplyIndexMapping;
+import cc.redberry.core.tensor.Tensor;
+import cc.redberry.core.transformations.Transformation;
 import cc.redberry.core.utils.ArraysUtils;
 import gnu.trove.iterator.TIntObjectIterator;
 import gnu.trove.map.hash.TIntObjectHashMap;
@@ -12,7 +15,7 @@ import java.util.Arrays;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public final class Mapping {
+public final class Mapping implements Transformation {
     final int[] from, to;
     final boolean sign;
 
@@ -56,6 +59,11 @@ public final class Mapping {
         this.from = from;
         this.to = to;
         this.sign = sign;
+    }
+
+    @Override
+    public Tensor transform(Tensor t) {
+        return ApplyIndexMapping.applyIndexMappingAutomatically(t, this);
     }
 
     public boolean isEmpty() {return from.length == 0;}
