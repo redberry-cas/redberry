@@ -102,10 +102,10 @@ final class IndexMappingBufferImpl implements IndexMappingBuffer {
         return sign;
     }
 
-//    @Override
-//    public TIntObjectHashMap<IndexMappingBufferRecord> getMap() {
-//        return map;
-//    }
+    @Override
+    public TIntObjectHashMap<IndexMappingBufferRecord> getMap() {
+        return map;
+    }
 
     @Override
     public boolean isEmpty() {

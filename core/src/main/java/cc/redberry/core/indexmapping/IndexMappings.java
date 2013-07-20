@@ -102,7 +102,23 @@ public final class IndexMappings {
      * @return mapping of indices of tensor {@code from} on tensor {@code to}
      */
     public static Mapping getFirst(Tensor from, Tensor to) {
-        return new Mapping(createPortOfBuffers(from, to).take());
+        IndexMappingBuffer buffer = createPortOfBuffers(from, to).take();
+        if(buffer == null) return null;
+        return new Mapping(buffer);
+    }
+
+    /**
+     * Tests whether specified mapping is a mapping from <i>{@code from}</i> tensor onto <i>{@code to}</i> tensor, i.e.
+     * this method returns {@code true} if and only if
+     *
+     * @param mapping mapping
+     * @param from    tensor <i>{@code from}</i>
+     * @param to      tensor <i>{@code to}</i>
+     * @return {@code true} if specified mapping is a mapping from <i>{@code from}</i> tensor onto
+     *         <i>{@code to}</i> tensor and {@code false} in other case.
+     */
+    public static boolean testMapping(Mapping mapping, Tensor from, Tensor to) {
+        return IndexMappingBufferTester.test(new IndexMappingBufferTester(mapping), from, to);
     }
 
 
@@ -189,6 +205,25 @@ public final class IndexMappings {
             if (buffer.getSign())
                 return true;
         return false;
+    }
+
+    /**
+     * Returns a set of all possible mappings of tensor {@code from} on tensor {@code to}.
+     *
+     * @param from from tensor
+     * @param to   to tensor
+     * @return a set of all possible mappings of tensor {@code from} on tensor {@code to}
+     */
+    public static Set<Mapping> getAllMappings(Tensor from, Tensor to) {
+        return getAllMappings(IndexMappings.createPort(from, to));
+    }
+
+    private static Set<Mapping> getAllMappings(OutputPortUnsafe<Mapping> opu) {
+        Set<Mapping> res = new HashSet<>();
+        Mapping c;
+        while ((c = opu.take()) != null)
+            res.add(c);
+        return res;
     }
 
     /* *
@@ -295,24 +330,5 @@ public final class IndexMappings {
         map.put(ArcCot.class, ProviderFunctions.EVEN_FACTORY);
 
         map.put(Log.class, ProviderFunctions.FACTORY);
-    }
-
-    private static Set<IndexMappingBuffer> getAllMappings(OutputPortUnsafe<IndexMappingBuffer> opu) {
-        Set<IndexMappingBuffer> res = new HashSet<>();
-        IndexMappingBuffer c;
-        while ((c = opu.take()) != null)
-            res.add(c);
-        return res;
-    }
-
-    /**
-     * Returns a set of all possible mappings of tensor {@code from} on tensor {@code to}.
-     *
-     * @param from from tensor
-     * @param to   to tensor
-     * @return a set of all possible mappings of tensor {@code from} on tensor {@code to}
-     */
-    static Set<IndexMappingBuffer> getAllMappings(Tensor from, Tensor to) {
-        return getAllMappings(IndexMappings.createPortOfBuffers(from, to));
     }
 }

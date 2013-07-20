@@ -24,8 +24,6 @@ package cc.redberry.core.tensor;
 
 import cc.redberry.core.indexgenerator.IndexGenerator;
 import cc.redberry.core.indexmapping.IndexMapping;
-import cc.redberry.core.indexmapping.IndexMappingBuffer;
-import cc.redberry.core.indexmapping.IndexMappingBufferRecord;
 import cc.redberry.core.indexmapping.Mapping;
 import cc.redberry.core.indices.IndicesBuilder;
 import cc.redberry.core.indices.IndicesFactory;
@@ -40,7 +38,6 @@ import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
 
 import java.util.Arrays;
-import java.util.Map;
 
 import static cc.redberry.core.indices.IndicesUtils.getIndicesNames;
 import static cc.redberry.core.indices.IndicesUtils.getType;
@@ -147,12 +144,12 @@ public final class ApplyIndexMapping {
     /**
      * Applies specified mapping of indices to tensor.
      *
-     * @param tensor tensor
-     * @param buffer mapping of indices
+     * @param tensor  tensor
+     * @param mapping mapping of indices
      * @return tensor with renamed indices
      */
-    public static Tensor applyIndexMapping(Tensor tensor, Mapping buffer) {
-        return applyIndexMapping(tensor, buffer, new int[0]);
+    public static Tensor applyIndexMapping(Tensor tensor, Mapping mapping) {
+        return applyIndexMapping(tensor, mapping, new int[0]);
     }
 
     /**
@@ -160,99 +157,55 @@ public final class ApplyIndexMapping {
      * <i>forbidden</i> indices.
      *
      * @param tensor    tensor
-     * @param buffer    mapping of indices
+     * @param mapping   mapping of indices
      * @param forbidden forbidden indices
      * @return tensor with renamed indices
      */
-    public static Tensor applyIndexMapping(Tensor tensor, Mapping buffer, int[] forbidden) {
-        if (buffer.isEmpty()) {
-            if (tensor.getIndices().getFree().size() != 0)
-                throw new IllegalArgumentException("From indices are not equal to free indices of tensor.");
-            Tensor t = renameDummy(tensor, forbidden);
-            if (buffer.getSign())
-                return Tensors.negate(t);
-            return t;
-        }
-        if (tensor instanceof Complex || tensor instanceof ScalarFunction)
-            return tensor;
-
-        Map<Integer, IndexMappingBufferRecord> map = buffer.getMap();
-        int[] from = new int[map.size()], to = new int[map.size()];
-        int count = 0;
-        IndexMappingBufferRecord record;
-        for (Map.Entry<Integer, IndexMappingBufferRecord> entry : map.entrySet()) {
-            from[count] = entry.getKey();
-            record = entry.getValue();
-            to[count++] = record.getIndexName() ^ (record.diffStatesInitialized() ? 0x80000000 : 0);
-        }
-
-        final int[] freeIndices = getIndicesNames(tensor.getIndices().getFree());
-        Arrays.sort(freeIndices);
-        int[] _from = from.clone();
-        Arrays.sort(_from);
-        if (!Arrays.equals(freeIndices, _from))
-            throw new IllegalArgumentException("From indices are not equal to free indices of tensor.");
-
-        Tensor result = applyIndexMappingFromPreparedSource(tensor, from, to, forbidden);
-        if (buffer.getSign())
-            return Tensors.negate(result);
-        else
-            return result;
+    public static Tensor applyIndexMapping(Tensor tensor, Mapping mapping, int[] forbidden) {
+        int[] freeIndicesNames = IndicesUtils.getIndicesNames(tensor.getIndices().getFree());
+        Arrays.sort(freeIndicesNames);
+        int[][] mappingData = mapping.getData();
+        int[] fromNames = mappingData[0];
+        if (!Arrays.equals(fromNames, freeIndicesNames))
+            throw new IllegalArgumentException("From indices names does not match free indices names of tensor.");
+        Tensor result = applyIndexMappingFromPreparedSource(tensor, fromNames, mappingData[2], forbidden);
+        return mapping.getSign() ? Tensors.negate(result) : result;
     }
 
     /**
-     * Applies given mapping of indices to tensor. In contrast to {@link #applyIndexMapping(Tensor, cc.redberry.core.indexmapping.IndexMappingBuffer, int[])}
+     * Applies given mapping of indices to tensor. In contrast to {@link #applyIndexMapping(Tensor, Mapping, int[])}
      * this method does not assumes that {@code from} indices matches exactly free indices of tensor:
      * if some free index of specified tensor does not present in map, then it will be mapped on itself;
      * if some index present in map, but does not present in free indices of tensor, then this mapping rule will
      * be ignored.
      *
-     * @param tensor tensor
-     * @param buffer mapping of indices
+     * @param tensor  tensor
+     * @param mapping mapping of indices
      * @return tensor with renamed indices
      * @throws IllegalArgumentException if {@code from.length != to.length}
      */
-    public static Tensor applyIndexMappingAutomatically(Tensor tensor, Mapping buffer) {
-        return applyIndexMappingAutomatically(tensor, buffer, new int[0]);
+    public static Tensor applyIndexMappingAutomatically(Tensor tensor, Mapping mapping) {
+        return applyIndexMappingAutomatically(tensor, mapping, new int[0]);
     }
 
 
     /**
-     * Applies given mapping of indices to tensor. In contrast to {@link #applyIndexMapping(Tensor, cc.redberry.core.indexmapping.IndexMappingBuffer, int[])}
+     * Applies given mapping of indices to tensor. In contrast to {@link #applyIndexMapping(Tensor, Mapping, int[])}
      * this method does not assumes that {@code from} indices matches exactly free indices of tensor:
      * if some free index of specified tensor does not present in map, then it will be mapped on itself;
      * if some index present in map, but does not present in free indices of tensor, then this mapping rule will
      * be ignored.
      *
      * @param tensor    tensor
-     * @param buffer    mapping of indices
+     * @param mapping   mapping of indices
      * @param forbidden forbidden indices names
      * @return tensor with renamed indices
      * @throws IllegalArgumentException if {@code from.length != to.length}
      */
-    public static Tensor applyIndexMappingAutomatically(Tensor tensor, Mapping buffer, int[] forbidden) {
-        if (buffer.isEmpty())
-            return renameDummy(tensor, forbidden);
-
-        if (tensor instanceof Complex || tensor instanceof ScalarFunction)
-            return tensor;
-
-
-        Map<Integer, IndexMappingBufferRecord> map = buffer.getMap();
-        int[] from = new int[map.size()], to = new int[map.size()];
-        int i = 0;
-        IndexMappingBufferRecord record;
-        for (Map.Entry<Integer, IndexMappingBufferRecord> entry : map.entrySet()) {
-            record = entry.getValue();
-            from[i] = IndicesUtils.setRawState(record.getFromRawState(), entry.getKey());
-            to[i++] = IndicesUtils.setRawState(record.getToRawState(), entry.getValue().getIndexName());
-        }
-
-        Tensor result = applyIndexMappingAutomatically(tensor, from, to, forbidden);
-        if (buffer.getSign())
-            return Tensors.negate(result);
-        else
-            return result;
+    public static Tensor applyIndexMappingAutomatically(Tensor tensor, Mapping mapping, int[] forbidden) {
+        Tensor r = applyIndexMappingAutomatically(tensor, mapping.getFrom(), mapping.getTo(), forbidden);
+        if (mapping.getSign()) return Tensors.negate(r);
+        else return r;
     }
 
     /**

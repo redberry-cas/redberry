@@ -653,6 +653,21 @@ public final class ArraysUtils {
             ArraysUtils.insertionSort(target, cosort);
     }
 
+
+    /**
+     * Sorts the specified array and returns the resulting permutation
+     *
+     * @param target int array
+     * @return sorting permutation
+     */
+    public static int[] quickSortP(int[] target) {
+        int[] permutation = new int[target.length];
+        for (int i = 1; i < target.length; ++i)
+            permutation[i] = i;
+        quickSort(target, 0, target.length, permutation);
+        return permutation;
+    }
+
     /**
      * Sorts the specified target array of ints into ascending numerical order and simultaneously permutes the {@code
      * coSort} ints array in the same way then specified target array. <p/> The code was taken from the jdk6 Arrays

@@ -20,10 +20,12 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
-package cc.redberry.core.indexmapping;
+package cc.redberry.core.transformations.substitutions;
 
 import cc.redberry.concurrent.OutputPortUnsafe;
 import cc.redberry.core.combinatorics.IntCombinationPermutationGenerator;
+import cc.redberry.core.indexmapping.IndexMappings;
+import cc.redberry.core.indexmapping.Mapping;
 import cc.redberry.core.tensor.Tensor;
 
 import java.util.ArrayList;
@@ -103,7 +105,7 @@ public final class SumBijectionPort implements OutputPortUnsafe<SumBijectionPort
         if (finished)
             return null;
         List<int[]> bijections = new ArrayList<>();
-        IndexMappingBuffer buffer;
+        Mapping buffer;
         int i, b[];
         final int mappersSize = mappers.size();
         OUT:
@@ -140,7 +142,7 @@ public final class SumBijectionPort implements OutputPortUnsafe<SumBijectionPort
 
     private static interface Mapper {
 
-        int[] nextMapping(IndexMappingBuffer buffer);
+        int[] nextMapping(Mapping buffer);
 
         void reset();
     }
@@ -148,13 +150,13 @@ public final class SumBijectionPort implements OutputPortUnsafe<SumBijectionPort
     private static abstract class AbstaractMapper implements Mapper {
 
         @Override
-        public int[] nextMapping(IndexMappingBuffer buffer) {
+        public int[] nextMapping(Mapping buffer) {
             if (buffer == null)
                 return null;
             return _nextMapping(buffer);
         }
 
-        abstract int[] _nextMapping(IndexMappingBuffer buffer);
+        abstract int[] _nextMapping(Mapping buffer);
     }
 
     private static abstract class AbstractStretchMapper extends AbstaractMapper {
@@ -171,36 +173,35 @@ public final class SumBijectionPort implements OutputPortUnsafe<SumBijectionPort
             this.permutationGenerator = new IntCombinationPermutationGenerator(to.length, from.length);
         }
 
-        public boolean test(IndexMappingBuffer buffer) {
-            IndexMappingBufferTester tester = new IndexMappingBufferTester(buffer);
+        public boolean test(Mapping buffer) {
             for (int i = 1; i < from.length; ++i)
-                if (!IndexMappingBufferTester.test(tester, from[i], to[currentPermutation[i]]))
+                if (!IndexMappings.testMapping(buffer, from[i], to[currentPermutation[i]]))
                     return false;
             return true;
         }
     }
 
-    private static interface MapperSource extends Mapper, OutputPortUnsafe<IndexMappingBuffer> {
+    private static interface MapperSource extends Mapper, OutputPortUnsafe<Mapping> {
     }
 
     private static final class SinglePairSource extends AbstaractMapper
             implements MapperSource {
 
-        private final OutputPortUnsafe<IndexMappingBuffer> mappingsPort;
+        private final OutputPortUnsafe<Mapping> mappingsPort;
         private final int[] fromPointer;
 
         public SinglePairSource(Tensor from, Tensor to, int fromPointer) {
-            this.mappingsPort = IndexMappings.createPortOfBuffers(from, to);
+            this.mappingsPort = IndexMappings.createPort(from, to);
             this.fromPointer = new int[]{fromPointer};
         }
 
         @Override
-        public int[] _nextMapping(IndexMappingBuffer buffer) {
+        public int[] _nextMapping(Mapping buffer) {
             return fromPointer;
         }
 
         @Override
-        public IndexMappingBuffer take() {
+        public Mapping take() {
             return mappingsPort.take();
         }
 
@@ -221,8 +222,8 @@ public final class SumBijectionPort implements OutputPortUnsafe<SumBijectionPort
         }
 
         @Override
-        public int[] _nextMapping(IndexMappingBuffer buffer) {
-            if (!IndexMappingBufferTester.test(new IndexMappingBufferTester(buffer), from, to))
+        public int[] _nextMapping(Mapping buffer) {
+            if (!IndexMappings.testMapping(buffer, from, to))
                 return null;
             return fromPointer;
         }
@@ -235,14 +236,14 @@ public final class SumBijectionPort implements OutputPortUnsafe<SumBijectionPort
     private static final class StretchPairSource extends AbstractStretchMapper
             implements MapperSource {
 
-        private OutputPortUnsafe<IndexMappingBuffer> currentSource;
+        private OutputPortUnsafe<Mapping> currentSource;
 
         public StretchPairSource(Tensor[] from, Tensor[] to, int fromPointer) {
             super(from, to, fromPointer);
         }
 
         @Override
-        public int[] _nextMapping(IndexMappingBuffer buffer) {
+        public int[] _nextMapping(Mapping buffer) {
             if (buffer == null)
                 return null;
             if (!test(buffer))
@@ -254,15 +255,15 @@ public final class SumBijectionPort implements OutputPortUnsafe<SumBijectionPort
         }
 
         @Override
-        public IndexMappingBuffer take() {
-            IndexMappingBuffer buf;
+        public Mapping take() {
+            Mapping buf;
             while (true) {
                 if (currentSource != null && (buf = currentSource.take()) != null)
                     return buf;
                 if (!permutationGenerator.hasNext())
                     return null;
                 currentPermutation = permutationGenerator.next();
-                currentSource = IndexMappings.createPortOfBuffers(from[0], to[currentPermutation[0]]);
+                currentSource = IndexMappings.createPort(from[0], to[currentPermutation[0]]);
             }
         }
 
@@ -285,7 +286,7 @@ public final class SumBijectionPort implements OutputPortUnsafe<SumBijectionPort
         }
 
         @Override
-        public int[] _nextMapping(IndexMappingBuffer buffer) {
+        public int[] _nextMapping(Mapping buffer) {
             while (true) {
                 if (currentPermutation == null)
                     return null;
@@ -303,25 +304,17 @@ public final class SumBijectionPort implements OutputPortUnsafe<SumBijectionPort
 
     public static final class BijectionContainer {
 
-        final IndexMappingBuffer buffer;
-        final int[] bijection;
+        public final Mapping mapping;
+        public final int[] bijection;
 
-        BijectionContainer(IndexMappingBuffer buffer, int[] bijection) {
-            this.buffer = buffer;
+        BijectionContainer(Mapping mapping, int[] bijection) {
+            this.mapping= mapping;
             this.bijection = bijection;
         }
 
         @Override
         public String toString() {
-            return Arrays.toString(bijection) + "\n" + buffer.toString();
-        }
-
-        public Mapping getMapping() {
-            return new Mapping(buffer);
-        }
-
-        public int[] getBijectionReference() {
-            return bijection;
+            return Arrays.toString(bijection) + "\n" + mapping.toString();
         }
     }
 }

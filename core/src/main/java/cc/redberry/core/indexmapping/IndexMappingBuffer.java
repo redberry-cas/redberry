@@ -22,7 +22,7 @@
  */
 package cc.redberry.core.indexmapping;
 
-import java.util.Map;
+import gnu.trove.map.hash.TIntObjectHashMap;
 
 /**
  * Intermediate representation of mapping of indices needed inside the index mapping calculation pipeline (the basic
@@ -81,8 +81,7 @@ interface IndexMappingBuffer {
      *
      * @return the internal mapping container
      */
-    //TODO TIntObjectHashMap ( YES issue #86 !)
-//    Map<Integer, IndexMappingBufferRecord> getMap();
+    TIntObjectHashMap<IndexMappingBufferRecord> getMap();
 
     /**
      * Returns a deep copy of this mapping.

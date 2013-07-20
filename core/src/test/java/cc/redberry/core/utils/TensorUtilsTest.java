@@ -23,21 +23,28 @@
 package cc.redberry.core.utils;
 
 import cc.redberry.core.TAssert;
+import cc.redberry.core.combinatorics.Combinatorics;
 import cc.redberry.core.combinatorics.Symmetry;
 import cc.redberry.core.combinatorics.symmetries.Symmetries;
 import cc.redberry.core.combinatorics.symmetries.SymmetriesFactory;
 import cc.redberry.core.context.CC;
+import cc.redberry.core.indexmapping.Mapping;
 import cc.redberry.core.indices.IndexType;
+import cc.redberry.core.tensor.SimpleTensor;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.tensor.Tensors;
 import cc.redberry.core.transformations.EliminateFromSymmetriesTransformation;
 import junit.framework.Assert;
 import org.junit.Test;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import static cc.redberry.core.tensor.Tensors.parse;
+import static cc.redberry.core.tensor.Tensors.parseSimple;
 import static cc.redberry.core.utils.TensorUtils.*;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  * @author Dmitry Bolotin
@@ -145,7 +152,8 @@ public class TensorUtilsTest {
         CC.resetTensorNames(2103403802553543528L);
         Tensor t = parse("g_{ab}*g^{rs}*g_{mn}*g^{pq}");
         //t.indices = ^{pqrs}_{abmn}
-        Symmetries s = TensorUtils.findIndicesSymmetries(t.getIndices().getAllIndices().copy(), t);
+        Symmetries actual = TensorUtils.findIndicesSymmetries(t.getIndices().getAllIndices().copy(), t);
+
         Symmetry[] symmetries = new Symmetry[]{
                 new Symmetry(new int[]{0, 1, 2, 3, 4, 5, 6, 7}, false),
                 new Symmetry(new int[]{1, 0, 2, 3, 4, 5, 6, 7}, false),
@@ -158,18 +166,79 @@ public class TensorUtilsTest {
         Symmetries expected = SymmetriesFactory.createSymmetries(8);
         for (Symmetry symmetry : symmetries)
             expected.add(symmetry);
-        int basisDimension = s.getBasisSymmetries().size();
 
+        int basisDimension = actual.getBasisSymmetries().size();
         for (Symmetry s1 : symmetries)
-            s.add(s1);
+            actual.add(s1);
 
-        Assert.assertTrue(s.getBasisSymmetries().size() == basisDimension);
+        Assert.assertTrue(actual.getBasisSymmetries().size() == basisDimension);
 
-        for (Symmetry s1 : s)
+        for (Symmetry s1 : actual)
             expected.add(s1);
 
         Assert.assertTrue(expected.getBasisSymmetries().size() == basisDimension);
     }
+
+    @Test
+    public void testSymmetries2() {
+        int[] from = {0, 1, 2, 3};
+        int[] to = {2, 3, 0, 1};
+        int[] indices = {0, 1, 2, 3};
+        Mapping mapping = new Mapping(from, to);
+        assertEquals(TensorUtils.getSymmetryFromMapping(indices, mapping), new Symmetry(to, false));
+    }
+
+    @Test
+    public void testSymmetries3() {
+        int[] from = {0, 1, 2, 3};
+        int[] to = {2, 3, 1, 0};
+        int[] indices = {0, 1, 2, 3};
+        Mapping mapping = new Mapping(from, to);
+        assertEquals(TensorUtils.getSymmetryFromMapping(indices, mapping), new Symmetry(to, false));
+    }
+
+
+    @Test
+    public void testSymmetries4() {
+        for (int i = 0; i < 30; ++i) {
+            CC.resetTensorNames();
+            assertFindSymmetries(parseSimple("R_abcd"));
+        }
+
+        for (int i = 0; i < 30; ++i) {
+            CC.resetTensorNames();
+            assertFindSymmetries(parseSimple("R_abcde"));
+        }
+    }
+
+    private static void assertFindSymmetries(SimpleTensor tensor) {
+        int dimension = tensor.getIndices().size();
+        int baseSize = 1 + (dimension / 3);
+        Symmetry[] base = new Symmetry[baseSize];
+        for (int i = 0; i < baseSize; ++i)
+            base[i] = new Symmetry(Combinatorics.randomPermutation(dimension), false);
+
+        Symmetries expectedSymmetries = SymmetriesFactory.createSymmetries(dimension);
+        for (Symmetry s : base) {
+            tensor.getIndices().getSymmetries().add((byte) 0, s);
+            expectedSymmetries.add(s);
+        }
+
+        Symmetry[] expected = toArray(expectedSymmetries);
+        Symmetry[] actual = toArray(findIndicesSymmetries(tensor.getIndices(), tensor));
+        Arrays.sort(expected);
+        Arrays.sort(actual);
+        assertArrayEquals(expected, actual);
+    }
+
+    private static Symmetry[] toArray(Symmetries symmetries) {
+        List<Symmetry> list = new ArrayList<>();
+        for (Symmetry s : symmetries) {
+            list.add(s);
+        }
+        return list.toArray(new Symmetry[list.size()]);
+    }
+
 
     @Test
     public void testEquals1() {

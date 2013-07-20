@@ -23,7 +23,6 @@
 package cc.redberry.core.transformations.substitutions;
 
 import cc.redberry.core.indexmapping.Mapping;
-import cc.redberry.core.indexmapping.SumBijectionPort;
 import cc.redberry.core.tensor.ApplyIndexMapping;
 import cc.redberry.core.tensor.SumBuilder;
 import cc.redberry.core.tensor.Tensor;
@@ -46,7 +45,7 @@ class PrimitiveSumSubstitution extends PrimitiveSubstitution {
         if (bc == null)
             return currentNode;
 
-        Mapping mapping = bc.getMapping();
+        Mapping mapping = bc.mapping;
         Tensor newTo;
         if (toIsSymbolic)
             newTo = mapping.getSign() ? Tensors.negate(to) : to;
@@ -54,7 +53,7 @@ class PrimitiveSumSubstitution extends PrimitiveSubstitution {
             newTo = ApplyIndexMapping.applyIndexMapping(to, mapping, iterator.getForbidden());
 
         SumBuilder builder = new SumBuilder();
-        int[] bijection = bc.getBijectionReference();
+        int[] bijection = bc.bijection;
         Arrays.sort(bijection);
         builder.put(newTo);
         for (int i = currentNode.size() - 1; i >= 0; --i)

@@ -25,7 +25,9 @@ package cc.redberry.core.utils;
 import cc.redberry.core.combinatorics.Symmetry;
 import cc.redberry.core.combinatorics.symmetries.Symmetries;
 import cc.redberry.core.combinatorics.symmetries.SymmetriesFactory;
-import cc.redberry.core.indexmapping.*;
+import cc.redberry.core.indexmapping.IndexMappings;
+import cc.redberry.core.indexmapping.Mapping;
+import cc.redberry.core.indexmapping.MappingsPort1;
 import cc.redberry.core.indices.Indices;
 import cc.redberry.core.indices.IndicesUtils;
 import cc.redberry.core.indices.SimpleIndices;
@@ -406,41 +408,46 @@ public class TensorUtils {
         return IndexMappings.isZeroDueToSymmetry(t);
     }
 
-    private static Symmetry getSymmetryFromMapping1(final int[] indicesNames, Mapping indexMappingBuffer) {
+    private static Symmetry getSymmetryFromMapping1(final int[] indicesNames, Mapping mapping) {
+        int[] _sortPermutation = ArraysUtils.quickSortP(indicesNames);
         final int dimension = indicesNames.length;
+
+        int[] _fromIndices = mapping.getFromNames();
+        int[] _toIndices = mapping.getToNames();
+
         int[] permutation = new int[dimension];
         Arrays.fill(permutation, -1);
-        int i;
+
+        int i, positionInFrom, positionInIndices;
         for (i = 0; i < dimension; ++i) {
             int fromIndex = indicesNames[i];
-            IndexMappingBufferRecord record = indexMappingBuffer.getMap().get(fromIndex);
-            if (record == null) {
-                return new Symmetry(dimension);
-                //todo discuss with Dima
-                //throw new IllegalArgumentException("Index " + IndicesUtils.toString(fromIndex) + " does not contains in specified IndexMappingBuffer.");
-            }
-            int newPosition = -1;
-            //TODO refactor with sort and binary search
-            for (int j = 0; j < dimension; ++j)
-                if (indicesNames[j] == record.getIndexName()) {
-                    newPosition = j;
-                    break;
-                }
-            if (newPosition < 0) {
+            positionInFrom = Arrays.binarySearch(_fromIndices, fromIndex);
+            if (positionInFrom < 0) {
                 return new Symmetry(dimension);
                 //todo discuss with Dima
                 //throw new IllegalArgumentException("Index " + IndicesUtils.toString(record.getIndexName()) + " does not contains in specified indices array.");
             }
-            permutation[i] = newPosition;
+
+            positionInIndices = Arrays.binarySearch(indicesNames, _toIndices[positionInFrom]);
+
+
+            if (positionInIndices < 0) {
+                return new Symmetry(dimension);
+                //todo discuss with Dima
+                //throw new IllegalArgumentException("Index " + IndicesUtils.toString(record.getIndexName()) + " does not contains in specified indices array.");
+            }
+
+            permutation[_sortPermutation[i]] = _sortPermutation[positionInIndices];
         }
         for (i = 0; i < dimension; ++i)
             if (permutation[i] == -1)
                 permutation[i] = i;
-        return new Symmetry(permutation, indexMappingBuffer.getSign());
+
+        return new Symmetry(permutation, mapping.getSign()); //this is inverse permutation
     }
 
-    public static Symmetry getSymmetryFromMapping(final int[] indices, Mapping indexMappingBuffer) {
-        return getSymmetryFromMapping1(IndicesUtils.getIndicesNames(indices), indexMappingBuffer);
+    public static Symmetry getSymmetryFromMapping(final int[] indices, Mapping mapping) {
+        return getSymmetryFromMapping1(IndicesUtils.getIndicesNames(indices), mapping).inverse();
     }
 
     public static Symmetries getSymmetriesFromMappings(final int[] indices, MappingsPort1 mappingsPort) {

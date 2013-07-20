@@ -23,7 +23,6 @@
 package cc.redberry.core.transformations.substitutions;
 
 import cc.redberry.core.context.CC;
-import cc.redberry.core.indexmapping.SumBijectionPort;
 import cc.redberry.core.indices.IndexType;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.tensor.Tensors;
@@ -89,6 +88,6 @@ public class SumBijectionPortTest {
         CC.resetTensorNames(2634486062579664417L);
         Tensor target = parse("f_i + R_ijk*F^kj + R_ijk*F^jk - R_kij*F^jk");
         Tensor from = parse("f_i + R_ijk*F^kj - R_kij*F^jk");
-        Assert.assertTrue(Arrays.equals(new SumBijectionPort(from, target).take().getBijectionReference(), new int[]{0, 1, 3}));
+        Assert.assertTrue(Arrays.equals(new SumBijectionPort(from, target).take().bijection, new int[]{0, 1, 3}));
     }
 }

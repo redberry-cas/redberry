@@ -66,6 +66,14 @@ final class IndexMappingBufferTester implements IndexMappingBuffer {
         this.innerBuffer = new IndexMappingBufferImpl();
     }
 
+
+    public IndexMappingBufferTester(Mapping mapping) {
+        this.from = mapping.getFromNames();
+        this.to = mapping.getToNames();
+        this.signum = mapping.getSign();
+        this.innerBuffer = new IndexMappingBufferImpl();
+    }
+
     //public IndexMappingBufferTester(int[] from, int[] to, boolean sign) {
     //    if (from.length != to.length)
     //        throw new IllegalArgumentException();
@@ -187,10 +195,10 @@ final class IndexMappingBufferTester implements IndexMappingBuffer {
         return innerBuffer.isEmpty();
     }
 
-//    @Override
-//    public Map<Integer, IndexMappingBufferRecord> getMap() {
-//        return innerBuffer.getMap();
-//    }
+    @Override
+    public TIntObjectHashMap<IndexMappingBufferRecord> getMap() {
+        return innerBuffer.getMap();
+    }
 
     @Override
     public FromToHolder export() {

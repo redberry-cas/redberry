@@ -72,6 +72,10 @@ public class TensorGeneratorTest {
     @Test
     public void test3() {
         Tensor res = Tensors.parse("d_{a}^{m}*d_{y}^{x}+g_{ay}*g^{mx}+d_{a}^{x}*d_{y}^{m}+k^{x}*k_{y}*d_{a}^{m}+k^{m}*k_{y}*d_{a}^{x}+k_{a}*k_{y}*g^{mx}+k_{a}*k^{m}*d_{y}^{x}+k^{m}*k^{x}*g_{ay}+k_{a}*k^{x}*d_{y}^{m}+k_{a}*k^{m}*k^{x}*k_{y}");
+        System.out.println( TensorGenerator.generate("",
+                ParserIndices.parseSimple("_{ay}^{mx}"),
+                false,
+                Tensors.parse("k_a", "k^b", "g_mn", "g^mn", "d_m^n")));
         assertEquals(res, TensorGenerator.generate("",
                                                    ParserIndices.parseSimple("_{ay}^{mx}"),
                                                    false,
