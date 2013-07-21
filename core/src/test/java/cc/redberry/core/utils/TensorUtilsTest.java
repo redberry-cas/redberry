@@ -195,7 +195,9 @@ public class TensorUtilsTest {
         int[] to = {2, 3, 1, 0};
         int[] indices = {0, 1, 2, 3};
         Mapping mapping = new Mapping(from, to);
-        assertEquals(TensorUtils.getSymmetryFromMapping(indices, mapping), new Symmetry(to, false));
+        assertEquals(
+                TensorUtils.getSymmetryFromMapping(indices, mapping),
+                new Symmetry(to, false));
     }
 
 

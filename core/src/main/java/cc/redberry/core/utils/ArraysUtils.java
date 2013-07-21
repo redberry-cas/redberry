@@ -400,7 +400,7 @@ public final class ArraysUtils {
      * @see Arrays#binarySearch(int[], int)
      */
     public static int binarySearch(IntArray array, int key) {
-        return Arrays.binarySearch(array.innerArray, 0, array.length(), key);
+        return Arrays.binarySearch(array.innerArray, 0, array.innerArray.length, key);
     }
 
     /**
