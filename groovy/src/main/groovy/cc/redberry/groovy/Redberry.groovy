@@ -24,7 +24,9 @@
 package cc.redberry.groovy
 
 import cc.redberry.core.combinatorics.IntPermutationsGenerator
-import cc.redberry.core.indexmapping.*
+import cc.redberry.core.indexmapping.IndexMappings
+import cc.redberry.core.indexmapping.Mapping
+import cc.redberry.core.indexmapping.MappingsPort
 import cc.redberry.core.indices.*
 import cc.redberry.core.number.Complex
 import cc.redberry.core.number.Numeric
@@ -43,6 +45,7 @@ import cc.redberry.core.transformations.TransformationCollection
 import cc.redberry.core.transformations.substitutions.SubstitutionIterator
 import cc.redberry.core.transformations.substitutions.SubstitutionTransformation
 import cc.redberry.core.utils.IntArray
+import cc.redberry.core.utils.IntArrayList
 import cc.redberry.core.utils.TensorUtils
 import org.codehaus.groovy.runtime.DefaultGroovyMethods
 
@@ -726,8 +729,74 @@ class Redberry {
         return TensorUtils.equals(a, b);
     }
 
-    static MappingsPort mod(Tensor from, Tensor to) {
-        return IndexMappings.createPort(from, to);
+    static MappingsPortWrapper mod(Tensor from, Tensor to) {
+        return new MappingsPortWrapper(from, to);
+    }
+
+    public static final class MappingsPortWrapper implements Transformation, Iterable<Mapping> {
+        private final Tensor from, to
+
+        private boolean firstCalculated = false
+        private Mapping first = null
+
+        MappingsPortWrapper(Tensor from, Tensor to) {
+            this.from = from
+            this.to = to
+        }
+
+        @Override
+        Tensor transform(Tensor t) {
+            return getFirst().transform(t)
+        }
+
+        public Mapping getFirst() {
+            if (!firstCalculated) {
+                first = IndexMappings.getFirst(from, to)
+                firstCalculated = true
+            }
+            return first
+        }
+
+        public MappingsPort getPort() {
+            return IndexMappings.createPort(from, to)
+        }
+
+        @Override
+        Iterator<Mapping> iterator() {
+            return new MappingsIterator(getPort())
+        }
+
+        @Override
+        public String toString() {
+            return getFirst().toString()
+        }
+
+        private static class MappingsIterator implements Iterator<Mapping> {
+            private final MappingsPort port
+            private Mapping previous, next
+
+            MappingsIterator(MappingsPort port) {
+                this.port = port
+                next = port.take()
+            }
+
+            @Override
+            boolean hasNext() {
+                return next != null
+            }
+
+            @Override
+            Mapping next() {
+                previous = next
+                next = port.take()
+                return previous
+            }
+
+            @Override
+            void remove() {
+                throw new UnsupportedOperationException()
+            }
+        }
     }
 
     /*
@@ -886,15 +955,19 @@ class Redberry {
      * @param string string representation of a mapping
      * @return mapping of indices
      */
-    static IndexMappingBuffer getMapping(String string) {
+    static Mapping getMapping(String string) {
         string = string.trim().substring(1, string.length() - 1).trim()
-        def mapping = new IndexMappingBufferImpl()
+        IntArrayList from = new IntArrayList(), to = new IntArrayList()
+        int fromIndex
         string.split(',').each {
             def split = it.split('->')
-            if (split.length == 2)
-                mapping.tryMap(IndicesUtils.parseIndex(split[0].trim()), IndicesUtils.parseIndex(split[1].trim()))
+            if (split.length == 2) {
+                fromIndex = IndicesUtils.parseIndex(split[0].trim())
+                from.add(IndicesUtils.getNameWithType(fromIndex))
+                to.add(IndicesUtils.getRawStateInt(fromIndex) ^ IndicesUtils.parseIndex(split[1].trim()))
+            }
         }
-        return mapping
+        return new Mapping(from.toArray(), to.toArray())
     }
 
     /*

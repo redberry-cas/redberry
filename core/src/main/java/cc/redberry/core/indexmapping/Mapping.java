@@ -129,4 +129,24 @@ public final class Mapping implements Transformation {
         result = 31 * result + (sign ? 1 : 0);
         return result;
     }
+
+    @Override
+    public String toString() {
+        int imax = fromNames.length - 1;
+        if (imax == -1)
+            return "{}";
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("{");
+        for (int i = 0; ; ++i) {
+            sb.append(IndicesUtils.toString(fromNames[i]));
+            sb.append("->");
+            sb.append(IndicesUtils.toString(toData[i]));
+            if (i == imax)
+                break;
+            sb.append(",");
+        }
+        sb.append("}");
+        return sb.toString();
+    }
 }

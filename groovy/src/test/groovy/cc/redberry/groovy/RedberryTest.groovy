@@ -23,10 +23,10 @@
 package cc.redberry.groovy
 
 import cc.redberry.core.indexmapping.IndexMappings
+import org.apache.commons.math3.util.ArithmeticUtils
 import org.junit.Test
 
 import static cc.redberry.core.tensor.Tensors.setAntiSymmetric
-import static cc.redberry.core.tensor.Tensors.setSymmetric
 
 class RedberryTest {
 
@@ -64,22 +64,19 @@ class RedberryTest {
         }
     }
 
-//    @Test
-//    public void testMapping1() {
-//        use(Redberry) {
-//            println 'yyyy'
-//            setAntiSymmetric 'f_qwruip'
-//            println 'xxxx'
-//            def from = 'f_qwruio'.t, to = 'f_qwruio'.t
-//            println IndexMappings.getFirst(from, to)
-//            def mappings = from % to
-//
-//            println mappings.first
-////            mappings.each { println it }
-//            println mappings >> from
-//            println mappings.first >> from
-//            println 'xui'
-//            println mappings.find { it.sign }
-//        }
-//    }
+    @Test
+    public void testMapping1() {
+        use(Redberry) {
+            setAntiSymmetric 'f_qwruip'
+            def from = 'f_qwruio'.t, to = 'f_qwruio'.t
+            def mappings = from % to
+            assert IndexMappings.getFirst(from, to) == mappings.first
+            assert IndexMappings.getFirst(from, to) == mappings.find { !it.sign }
+
+            def count = 0
+            mappings.each { count += it.sign ? 1 : 0 }
+            assert 2 * count == ArithmeticUtils.factorial(from.indices.size())
+        }
+    }
+
 }

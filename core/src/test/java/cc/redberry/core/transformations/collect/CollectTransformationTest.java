@@ -42,7 +42,6 @@ import static cc.redberry.core.tensor.Tensors.*;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-@Ignore
 public class CollectTransformationTest {
     @Test
     public void test1() {
