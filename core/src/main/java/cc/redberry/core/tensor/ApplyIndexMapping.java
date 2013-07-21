@@ -260,7 +260,8 @@ public final class ApplyIndexMapping {
         if (mapping.isEmpty()) {
             if (tensor.getIndices().getFree().size() != 0)
                 throw new IllegalArgumentException("From length does not match free indices size.");
-            return renameDummy(tensor, forbidden);
+            Tensor result = renameDummy(tensor, forbidden);
+            return mapping.getSign() ? Tensors.negate(result) : result;
         }
         int[] freeIndicesNames = IndicesUtils.getIndicesNames(tensor.getIndices().getFree());
         Arrays.sort(freeIndicesNames);
