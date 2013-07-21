@@ -25,6 +25,7 @@ package cc.redberry.core.transformations.symmetrization;
 import cc.redberry.core.combinatorics.IntPermutationsGenerator;
 import cc.redberry.core.combinatorics.Symmetry;
 import cc.redberry.core.combinatorics.symmetries.Symmetries;
+import cc.redberry.core.indexmapping.Mapping;
 import cc.redberry.core.indices.Indices;
 import cc.redberry.core.indices.IndicesFactory;
 import cc.redberry.core.number.Complex;
@@ -139,7 +140,7 @@ public final class SymmetrizeUpperLowerIndicesTransformation implements Transfor
             newIndices[i] = indicesArray[permutation[i]];
 
         //processing new tensor
-        return ApplyIndexMapping.applyIndexMapping(tensor, indicesArray, newIndices, new int[0]);
+        return ApplyIndexMapping.applyIndexMapping(tensor, new Mapping(indicesArray, newIndices), new int[0]);
     }
 
     static Tensor[] getAllPermutations(Tensor tensor) {

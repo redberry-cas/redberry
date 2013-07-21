@@ -68,8 +68,8 @@ final class IndexMappingBufferTester implements IndexMappingBuffer {
 
 
     public IndexMappingBufferTester(Mapping mapping) {
-        this.from = mapping.getFromNames();
-        this.to = mapping.getToNames();
+        this.from = mapping.fromNames;
+        this.to = IndicesUtils.getIndicesNames(mapping.toData);
         this.signum = mapping.getSign();
         this.innerBuffer = new IndexMappingBufferImpl();
     }

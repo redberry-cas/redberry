@@ -95,7 +95,7 @@ public class CollectTransformation implements Transformation {
                     Mapping mapping =
                             IndexMappings.createBijectiveProductPort(toAddFactors, base.factors).take();
 
-                    mapping =  mapping.inverseStates();
+//                    mapping =  mapping.inverseStates();
 //                    for (Map.Entry<Integer, IndexMappingBufferRecord> entry : mapping.getMap().entrySet())
 //                        entry.getValue().invertStates();
 

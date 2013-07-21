@@ -454,8 +454,8 @@ public class ApplyIndexMappingTest {
         Tensor t = parse("T_abcde");
 
         TAssert.assertEquals(
-                applyIndexMappingAutomatically(t, from, to),
-                ApplyIndexMapping.applyIndexMapping(t, ffrom, fto, new int[0]));
+                applyIndexMappingAutomatically(t, new Mapping(from, to)),
+                ApplyIndexMapping.applyIndexMapping(t, new Mapping(ffrom, fto), new int[0]));
     }
 
     @Test
@@ -499,9 +499,9 @@ public class ApplyIndexMappingTest {
 //                    System.out.println(Arrays.toString(__to));
                     TAssert.assertEquals(
                             applyIndexMappingAutomatically(t,
-                                    Combinatorics.reorder(_from, p), Combinatorics.reorder(_to, p)),
+                                    new Mapping(Combinatorics.reorder(_from, p), Combinatorics.reorder(_to, p))),
                             ApplyIndexMapping.applyIndexMapping(
-                                    t, freeFrom, __to, new int[0]));
+                                    t, new Mapping(freeFrom, __to), new int[0]));
                 }
             }
         }

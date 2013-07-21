@@ -137,7 +137,7 @@ class PrimitiveTensorFieldSubstitution extends PrimitiveSubstitution {
 
             assert cIndices.length == fIndices.length;
 
-            fArg = ApplyIndexMapping.applyIndexMapping(from.get(i), fIndices, cIndices, new int[0]);
+            fArg = ApplyIndexMapping.applyIndexMapping(from.get(i), new Mapping(fIndices, cIndices), new int[0]);
 
             argFrom.add(fArg);
             argTo.add(currentNode.get(i));

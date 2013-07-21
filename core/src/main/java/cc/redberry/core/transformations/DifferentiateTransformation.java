@@ -23,6 +23,7 @@
 package cc.redberry.core.transformations;
 
 import cc.redberry.core.indexgenerator.IndexGenerator;
+import cc.redberry.core.indexmapping.Mapping;
 import cc.redberry.core.indices.IndicesFactory;
 import cc.redberry.core.indices.IndicesUtils;
 import cc.redberry.core.indices.SimpleIndices;
@@ -324,8 +325,8 @@ public final class DifferentiateTransformation implements Transformation {
                     varIndices.getSymmetries().getInnerSymmetries());
             derivative = applyIndexMapping(
                     derivative,
-                    allIndices,
-                    addAll(varIndices.getInverted().getAllIndices().copy(), allFreeArgIndices),
+                    new Mapping(allIndices,
+                            addAll(varIndices.getInverted().getAllIndices().copy(), allFreeArgIndices)),
                     new int[0]);
             ProductBuilder builder = new ProductBuilder(0, length);
             for (i = 0; i < length; ++i)
@@ -340,7 +341,7 @@ public final class DifferentiateTransformation implements Transformation {
         Tensor differentiateSimpleTensorWithoutCheck(SimpleTensor simpleTensor) {
             int[] to = simpleTensor.getIndices().getAllIndices().copy();
             to = addAll(to, freeVarIndices);
-            return applyIndexMapping(derivative, allFreeFrom, to, new int[0]);
+            return applyIndexMapping(derivative, new Mapping(allFreeFrom, to), new int[0]);
         }
 
         @Override

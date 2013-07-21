@@ -43,6 +43,10 @@ public final class ArraysUtils {
     private ArraysUtils() {
     }
 
+    public static void arraycopy(IntArray source, int srcPos, int[] dest, int destPos, int length) {
+        System.arraycopy(source.innerArray, srcPos, dest, destPos, length);
+    }
+
     public static int[] getSeriesFrom0(int size) {
         int[] ret = new int[size];
         for (int i = size; i >= 0; ++i)
@@ -368,6 +372,35 @@ public final class ArraysUtils {
      */
     public static int binarySearch(IntArrayList list, int key) {
         return Arrays.binarySearch(list.data, 0, list.size, key);
+    }
+
+    /**
+     * Searches a range of
+     * the specified array of ints for the specified value using the
+     * binary search algorithm.
+     * The range must be sorted (as
+     * by the {@link cc.redberry.core.utils.IntArrayList#sort()} method)
+     * prior to making this call.  If it
+     * is not sorted, the results are undefined.  If the range contains
+     * multiple elements with the specified value, there is no guarantee which
+     * one will be found.
+     *
+     * @param array the list to be searched
+     * @param key   the value to be searched for
+     * @return index of the search key, if it is contained in the array
+     *         within the specified range;
+     *         otherwise, <tt>(-(<i>insertion point</i>) - 1)</tt>.  The
+     *         <i>insertion point</i> is defined as the point at which the
+     *         key would be inserted into the array: the index of the first
+     *         element in the range greater than the key,
+     *         or <tt>toIndex</tt> if all
+     *         elements in the range are less than the specified key.  Note
+     *         that this guarantees that the return value will be &gt;= 0 if
+     *         and only if the key is found.
+     * @see Arrays#binarySearch(int[], int)
+     */
+    public static int binarySearch(IntArray array, int key) {
+        return Arrays.binarySearch(array.innerArray, 0, array.length(), key);
     }
 
     /**

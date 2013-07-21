@@ -256,6 +256,16 @@ public class TensorUtilsTest {
 
 
     @Test
+    public void testSymmetries6() {
+        Tensor t = parse("g_ab*g^cd");
+        Symmetries actual = getIndicesSymmetriesForIndicesWithSameStates(ParserIndices.parse("_ab^cd"), t);
+        Symmetries expected = SymmetriesFactory.createSymmetries(4);
+        expected.add(new Symmetry(new int[]{1, 0, 2, 3}, false));
+        expected.add(new Symmetry(new int[]{0, 1, 3, 2}, false));
+        assertTrue(equalsSymmetries(actual, expected));
+    }
+
+    @Test
     public void testEquals1() {
         Tensor a = parse("d_{b}^{a}*d_{c}^{s}*d^{r}_{q}");
         Tensor b = parse("d^{a}_{q}*d_{c}^{s}*d_{b}^{r}");

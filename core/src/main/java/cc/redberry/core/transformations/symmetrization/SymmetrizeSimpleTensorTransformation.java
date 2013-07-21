@@ -25,6 +25,7 @@ package cc.redberry.core.transformations.symmetrization;
 import cc.redberry.core.combinatorics.Permutation;
 import cc.redberry.core.combinatorics.Symmetry;
 import cc.redberry.core.combinatorics.symmetries.Symmetries;
+import cc.redberry.core.indexmapping.Mapping;
 import cc.redberry.core.math.MathUtils;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.number.Rational;
@@ -74,7 +75,7 @@ public final class SymmetrizeSimpleTensorTransformation implements Transformatio
         SumBuilder builder = new SumBuilder();
         Tensor temp;
         for (Symmetry symmetry : symmetries) {
-            temp = applyIndexMapping(tensor, allFreeIndices, permute(allFreeIndices, symmetry), new int[0]);
+            temp = applyIndexMapping(tensor, new Mapping(allFreeIndices, permute(allFreeIndices, symmetry)), new int[0]);
             if (symmetry.isAntiSymmetry())
                 temp = negate(temp);
             builder.put(temp);

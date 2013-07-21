@@ -109,6 +109,10 @@ final class IndexMappingBufferRecord {
         return (states & 4) == 4;
     }
 
+    public int getRawDiffStateBit() {
+        return ((states & 4) << 29);
+    }
+
     public void invertStates() {
         if (isContracted()) return;
         states ^= 3;

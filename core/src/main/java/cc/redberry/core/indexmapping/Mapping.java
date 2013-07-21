@@ -27,10 +27,10 @@ import cc.redberry.core.tensor.ApplyIndexMapping;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.transformations.Transformation;
 import cc.redberry.core.utils.ArraysUtils;
+import cc.redberry.core.utils.IntArray;
 import gnu.trove.iterator.TIntObjectIterator;
 import gnu.trove.map.hash.TIntObjectHashMap;
 
-import java.lang.ref.SoftReference;
 import java.util.Arrays;
 
 /**
@@ -38,48 +38,50 @@ import java.util.Arrays;
  * @author Stanislav Poslavsky
  */
 public final class Mapping implements Transformation {
-    final int[] from, to;
+    final int[] fromNames, toData;
     final boolean sign;
 
-    public static final Mapping EMPTY = new Mapping();
+    public static final Mapping EMPTY = new Mapping(new int[0], new int[0], false, false);
 
-    Mapping() {
-        this.from = this.to = new int[0];
-        this.sign = false;
-    }
-
-    public Mapping(int[] to, int[] from) {
+    public Mapping(int[] from, int[] to) {
         this(from, to, false);
     }
 
-    public Mapping(int[] from, int[] to, boolean sign) {
-        this.from = from.clone();
-        this.to = to.clone();
-        ArraysUtils.quickSort(this.from, this.to);
+    public Mapping(final int[] from, final int[] to, final boolean sign) {
+        if (from.length != to.length)
+            throw new IllegalArgumentException("From length != to length.");
+
+        fromNames = new int[from.length];
+        toData = new int[from.length];
+        for (int i = 0; i < from.length; ++i) {
+            toData[i] = IndicesUtils.getRawStateInt(from[i]) ^ to[i];
+            fromNames[i] = 0x7FFFFFFF & from[i];
+        }
+        ArraysUtils.quickSort(fromNames, toData);
         this.sign = sign;
     }
 
     Mapping(IndexMappingBuffer buffer) {
         TIntObjectHashMap<IndexMappingBufferRecord> map = buffer.getMap();
-        this.from = new int[map.size()];
-        this.to = new int[map.size()];
+        fromNames = new int[map.size()];
+        toData = new int[map.size()];
         TIntObjectIterator<IndexMappingBufferRecord> iterator = map.iterator();
         int i = 0;
         IndexMappingBufferRecord record;
         while (iterator.hasNext()) {
             iterator.advance();
             record = iterator.value();
-            this.from[i] = record.getFromRawState() | iterator.key();
-            this.to[i] = record.getToRawState() | record.getIndexName();
+            fromNames[i] = iterator.key();
+            toData[i] = record.getRawDiffStateBit() | record.getIndexName();
             ++i;
         }
-        ArraysUtils.quickSort(this.from, this.to);
-        this.sign = buffer.getSign();
+        ArraysUtils.quickSort(fromNames, toData);
+        sign = buffer.getSign();
     }
 
-    private Mapping(int[] from, int[] to, boolean sign, boolean noSort) {
-        this.from = from;
-        this.to = to;
+    private Mapping(int[] fromNames, int[] toData, boolean sign, boolean o) {
+        this.fromNames = fromNames;
+        this.toData = toData;
         this.sign = sign;
     }
 
@@ -88,76 +90,22 @@ public final class Mapping implements Transformation {
         return ApplyIndexMapping.applyIndexMappingAutomatically(t, this);
     }
 
-    public boolean isEmpty() {return from.length == 0;}
+    public boolean isEmpty() {return fromNames.length == 0;}
 
     public boolean getSign() {return sign;}
 
     public Mapping addSign(boolean sign) {
-        return new Mapping(from, to, sign ^ this.sign, true);
+        return new Mapping(fromNames, toData, sign ^ this.sign, true);
     }
 
-    public int[] getFrom() {
-        return from;
+    public int size() {return fromNames.length;}
+
+    public IntArray getFromNames() {
+        return new IntArray(fromNames);
     }
 
-    public int[] getTo() {
-        return to;
-    }
-
-    public Mapping inverseStates() {
-        int[] _from = new int[from.length], _to = new int[from.length];
-        for (int i = 0; i < from.length; ++i) {
-            _from[i] = IndicesUtils.inverseIndexState(from[i]);
-            _to[i] = IndicesUtils.inverseIndexState(to[i]);
-        }
-        ArraysUtils.quickSort(_from, _to);
-        return new Mapping(_from, _to, sign, true);
-    }
-
-
-    /*LAZY INITIALIZATION*/
-    private SoftReference<int[][]> cachedData = null;
-
-    private SoftReference<int[][]> ensureDataInitialized() {
-        int[][] names;
-        if (cachedData == null)
-            names = null;
-        else
-            names = cachedData.get();
-
-        if (names != null)
-            return cachedData;
-
-        names = new int[3][];
-
-        int[] preparedTo = new int[from.length];
-        names[0] = new int[from.length];
-        int rawState;
-        for (int i = 0; i < from.length; ++i) {
-            rawState = IndicesUtils.getRawStateInt(from[i]);
-            names[0][i] = rawState ^ from[i];
-            preparedTo[i] = rawState ^ to[i];
-        }
-        ArraysUtils.quickSort(names[0], preparedTo);
-        names[1] = IndicesUtils.getIndicesNames(preparedTo);
-        names[2] = preparedTo;
-        return new SoftReference<>(names);
-    }
-
-    public int[] getFromNames() {
-        return (cachedData = ensureDataInitialized()).get()[0];
-    }
-
-    public int[] getToNames() {
-        return (cachedData = ensureDataInitialized()).get()[1];
-    }
-
-    public int[] getToPrepared() {
-        return (cachedData = ensureDataInitialized()).get()[2];
-    }
-
-    public int[][] getData() {
-        return (cachedData = ensureDataInitialized()).get();
+    public IntArray getToData() {
+        return new IntArray(toData);
     }
 
     @Override
@@ -168,16 +116,16 @@ public final class Mapping implements Transformation {
         Mapping mapping = (Mapping) o;
 
         if (sign != mapping.sign) return false;
-        if (!Arrays.equals(from, mapping.from)) return false;
-        if (!Arrays.equals(to, mapping.to)) return false;
+        if (!Arrays.equals(fromNames, mapping.fromNames)) return false;
+        if (!Arrays.equals(toData, mapping.toData)) return false;
 
         return true;
     }
 
     @Override
     public int hashCode() {
-        int result = Arrays.hashCode(from);
-        result = 31 * result + Arrays.hashCode(to);
+        int result = Arrays.hashCode(fromNames);
+        result = 31 * result + Arrays.hashCode(toData);
         result = 31 * result + (sign ? 1 : 0);
         return result;
     }
