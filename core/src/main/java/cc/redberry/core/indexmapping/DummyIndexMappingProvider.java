@@ -22,6 +22,8 @@
  */
 package cc.redberry.core.indexmapping;
 
+import cc.redberry.concurrent.OutputPortUnsafe;
+
 /**
  * Passes the index mapping through itself without modifications.
  *
@@ -30,7 +32,7 @@ package cc.redberry.core.indexmapping;
  * @since 1.0
  */
 final class DummyIndexMappingProvider extends IndexMappingProviderAbstract {
-    public DummyIndexMappingProvider(MappingsPort opu) {
+    public DummyIndexMappingProvider(OutputPortUnsafe<IndexMappingBuffer> opu) {
         super(opu);
     }
 

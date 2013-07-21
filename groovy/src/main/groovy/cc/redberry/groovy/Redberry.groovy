@@ -23,11 +23,9 @@
 
 package cc.redberry.groovy
 
-import cc.redberry.concurrent.OutputPortUnsafe
 import cc.redberry.core.combinatorics.IntPermutationsGenerator
-import cc.redberry.core.indexmapping.IndexMappingBuffer
-import cc.redberry.core.indexmapping.IndexMappingBufferImpl
 import cc.redberry.core.indexmapping.IndexMappings
+import cc.redberry.core.indexmapping.Mapping
 import cc.redberry.core.indexmapping.MappingsPort
 import cc.redberry.core.indices.*
 import cc.redberry.core.number.Complex
@@ -35,7 +33,10 @@ import cc.redberry.core.number.Numeric
 import cc.redberry.core.number.Rational
 import cc.redberry.core.number.Real
 import cc.redberry.core.parser.ParserIndices
-import cc.redberry.core.tensor.*
+import cc.redberry.core.tensor.Expression
+import cc.redberry.core.tensor.Tensor
+import cc.redberry.core.tensor.TensorBuilder
+import cc.redberry.core.tensor.Tensors
 import cc.redberry.core.tensor.iterator.FromChildToParentIterator
 import cc.redberry.core.tensor.iterator.FromParentToChildIterator
 import cc.redberry.core.tensor.iterator.TraverseGuide
@@ -44,6 +45,7 @@ import cc.redberry.core.transformations.TransformationCollection
 import cc.redberry.core.transformations.substitutions.SubstitutionIterator
 import cc.redberry.core.transformations.substitutions.SubstitutionTransformation
 import cc.redberry.core.utils.IntArray
+import cc.redberry.core.utils.IntArrayList
 import cc.redberry.core.utils.TensorUtils
 import org.codehaus.groovy.runtime.DefaultGroovyMethods
 
@@ -727,114 +729,75 @@ class Redberry {
         return TensorUtils.equals(a, b);
     }
 
-    /**
-     * Each mapping in mappings
-     *
-     * @param port mappings port
-     * @param closure do stuff
-     */
-    static void each(MappingsPortWrapper port, Closure<IndexMappingAsTransformation> closure) {
-        IndexMappingAsTransformation buffer;
-        while ((buffer = port.take()) != null)
-            closure.call(buffer);
+    static MappingsPortWrapper mod(Tensor from, Tensor to) {
+        return new MappingsPortWrapper(from, to);
     }
 
-    static MappingsPortWrapper mod(Tensor a, Tensor b) {
-        return new MappingsPortWrapper(IndexMappings.createPort(a, b));
-    }
+    public static final class MappingsPortWrapper implements Transformation, Iterable<Mapping> {
+        private final Tensor from, to
 
-    private static interface IndexMappingAsTransformation extends IndexMappingBuffer, Transformation {}
+        private boolean firstCalculated = false
+        private Mapping first = null
 
-    private static final class IndexMappingWrapper implements IndexMappingAsTransformation {
-        @Delegate
-        private final IndexMappingBuffer buffer;
-
-        IndexMappingWrapper(IndexMappingBuffer buffer) {
-            this.buffer = buffer
+        MappingsPortWrapper(Tensor from, Tensor to) {
+            this.from = from
+            this.to = to
         }
 
         @Override
         Tensor transform(Tensor t) {
-            //todo review
-            IndexMappingBuffer buffer = this.buffer.clone()
-            buffer = buffer.clone()
-            t.indices.free.each {
-                if (!buffer.map.containsKey(IndicesUtils.getNameWithType(it)))
-                    buffer.tryMap(it, it)
-            }
+            return getFirst().transform(t)
+        }
 
-            def toDel = []
-            buffer.map.each {
-                if (!containsIgnoringState(t.indices.free, it.key))
-                    toDel << it.key
+        public Mapping getFirst() {
+            if (!firstCalculated) {
+                first = IndexMappings.getFirst(from, to)
+                firstCalculated = true
             }
-            for (def index : toDel)
-                buffer.map.remove(index)
+            return first
+        }
 
-            return ApplyIndexMapping.applyIndexMapping(t, buffer)
+        public MappingsPort getPort() {
+            return IndexMappings.createPort(from, to)
         }
 
         @Override
-        IndexMappingBuffer clone() {
-            return new IndexMappingWrapper(buffer.clone())
-        }
-
-        @Override
-        String toString() {
-            return buffer.toString()
-        }
-    }
-
-    private static final class MappingsPortWrapper implements OutputPortUnsafe<IndexMappingAsTransformation>, IndexMappingAsTransformation {
-        @Delegate
-        IndexMappingWrapper mapping;
-        final MappingsPort innerPort;
-
-        MappingsPortWrapper(MappingsPort innerPort) {
-            this.innerPort = innerPort;
-        }
-
-        MappingsPortWrapper next() {
-            def tempBuffer = innerPort.take();
-            if (tempBuffer == null)
-                return null
-            mapping = new IndexMappingWrapper(tempBuffer);
-            return this;
-        }
-
-        IndexMappingAsTransformation take() {
-            return next()
+        Iterator<Mapping> iterator() {
+            return new MappingsIterator(getPort())
         }
 
         @Override
         public String toString() {
-            return mapping.toString();
+            return getFirst().toString()
         }
 
-        @Override
-        IndexMappingBuffer clone() {
-            throw new IllegalStateException('Clone() cannot be invoked on this class.');
+        private static class MappingsIterator implements Iterator<Mapping> {
+            private final MappingsPort port
+            private Mapping previous, next
+
+            MappingsIterator(MappingsPort port) {
+                this.port = port
+                next = port.take()
+            }
+
+            @Override
+            boolean hasNext() {
+                return next != null
+            }
+
+            @Override
+            Mapping next() {
+                previous = next
+                next = port.take()
+                return previous
+            }
+
+            @Override
+            void remove() {
+                throw new UnsupportedOperationException()
+            }
         }
     }
-
-//    /*
-//    * Apply mappings of indices. E.g. 'a -> b, _a -> ^b, ....' >> tensor
-//    */
-//
-//    /**
-//     * Applies mapping rule to tensor
-//     * @param buffer mapping of indices
-//     * @param tensor tensor
-//     * @return the result
-//     */
-//    static Tensor rightShift(IndexMappingWrapper buffer, Tensor tensor) {
-//        if (tensor.indices.free.size() > buffer.map.size())
-//            tensor.indices.free.each {
-//                if (!buffer.map.containsKey(it))
-//                    buffer.tryMap(it, it)
-//            }
-//        return ApplyIndexMapping.applyIndexMapping(tensor, buffer);
-//    }
 
     /*
      * Matrix descriptors
@@ -992,15 +955,19 @@ class Redberry {
      * @param string string representation of a mapping
      * @return mapping of indices
      */
-    static IndexMappingWrapper getMapping(String string) {
+    static Mapping getMapping(String string) {
         string = string.trim().substring(1, string.length() - 1).trim()
-        def mapping = new IndexMappingBufferImpl()
+        IntArrayList from = new IntArrayList(), to = new IntArrayList()
+        int fromIndex
         string.split(',').each {
             def split = it.split('->')
-            if (split.length == 2)
-                mapping.tryMap(IndicesUtils.parseIndex(split[0].trim()), IndicesUtils.parseIndex(split[1].trim()))
+            if (split.length == 2) {
+                fromIndex = IndicesUtils.parseIndex(split[0].trim())
+                from.add(IndicesUtils.getNameWithType(fromIndex))
+                to.add(IndicesUtils.getRawStateInt(fromIndex) ^ IndicesUtils.parseIndex(split[1].trim()))
+            }
         }
-        return new IndexMappingWrapper(mapping)
+        return new Mapping(from.toArray(), to.toArray())
     }
 
     /*

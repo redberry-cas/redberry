@@ -24,8 +24,7 @@ package cc.redberry.core.tensor;
 
 import cc.redberry.core.indexgenerator.IndexGenerator;
 import cc.redberry.core.indexmapping.IndexMapping;
-import cc.redberry.core.indexmapping.IndexMappingBuffer;
-import cc.redberry.core.indexmapping.IndexMappingBufferRecord;
+import cc.redberry.core.indexmapping.Mapping;
 import cc.redberry.core.indices.IndicesBuilder;
 import cc.redberry.core.indices.IndicesFactory;
 import cc.redberry.core.indices.IndicesUtils;
@@ -33,13 +32,13 @@ import cc.redberry.core.indices.SimpleIndices;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.tensor.functions.ScalarFunction;
 import cc.redberry.core.utils.ArraysUtils;
+import cc.redberry.core.utils.IntArray;
 import cc.redberry.core.utils.IntArrayList;
 import cc.redberry.core.utils.TensorUtils;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
 
 import java.util.Arrays;
-import java.util.Map;
 
 import static cc.redberry.core.indices.IndicesUtils.getIndicesNames;
 import static cc.redberry.core.indices.IndicesUtils.getType;
@@ -143,124 +142,148 @@ public final class ApplyIndexMapping {
         return applyIndexMapping(tensor, new IndexMapper(from, to), false);
     }
 
+    private static Tensor renameDummyWithSign(Tensor tensor, int[] forbidden, boolean sign) {
+        Tensor result = renameDummy(tensor, forbidden);
+        return sign ? Tensors.negate(result) : result;
+    }
+
+    /**
+     * Applies given mapping of indices to tensor. In contrast to {@link #applyIndexMapping(Tensor, Mapping, int[])}
+     * this method does not assumes that {@code from} indices matches exactly free indices of tensor:
+     * if some free index of specified tensor does not present in map, then it will be mapped on itself;
+     * if some index present in map, but does not present in free indices of tensor, then this mapping rule will
+     * be ignored.
+     *
+     * @param tensor  tensor
+     * @param mapping mapping of indices
+     * @return tensor with renamed indices
+     * @throws IllegalArgumentException if {@code from.length != to.length}
+     */
+    public static Tensor applyIndexMappingAutomatically(Tensor tensor, Mapping mapping) {
+        return applyIndexMappingAutomatically(tensor, mapping, new int[0]);
+    }
+
+    /**
+     * Applies given mapping of indices to tensor. In contrast to {@link #applyIndexMapping(Tensor, Mapping, int[])}
+     * this method does not assumes that {@code from} indices matches exactly free indices of tensor:
+     * if some free index of specified tensor does not present in map, then it will be mapped on itself;
+     * if some index present in map, but does not present in free indices of tensor, then this mapping rule will
+     * be ignored.
+     *
+     * @param tensor    tensor
+     * @param mapping   mapping of indices
+     * @param forbidden forbidden indices names
+     * @return tensor with renamed indices
+     * @throws IllegalArgumentException if {@code from.length != to.length}
+     */
+    public static Tensor applyIndexMappingAutomatically(Tensor tensor, Mapping mapping, int[] forbidden) {
+        if (mapping.isEmpty() || tensor.getIndices().getFree().size() == 0)
+            return renameDummyWithSign(tensor, forbidden, mapping.getSign());
+
+
+        final int[] freeIndices = IndicesUtils.getIndicesNames(tensor.getIndices().getFree());
+        Arrays.sort(freeIndices);
+
+        //removing indices from {@code from} array that are not contained in free indices of tensor
+        int[] from = mapping.getFromNames().copy(),
+                to = mapping.getToData().copy();
+
+        int i, pointer = 0, oldFromLength = from.length;
+        for (i = 0; i < oldFromLength; ++i) {
+            if (Arrays.binarySearch(freeIndices, from[i]) >= 0) {
+                from[pointer] = from[i];
+                to[pointer] = to[i];
+                ++pointer;
+            }
+        }
+
+        //no indices to map
+        if (pointer == 0)
+            return renameDummyWithSign(tensor, forbidden, mapping.getSign());
+
+        int newFromLength = pointer;
+
+        //adding free indices that do not present in {@code from} array to it
+        ArraysUtils.quickSort(from, 0, pointer, to);
+        IntArrayList list = new IntArrayList();
+        for (i = 0; i < freeIndices.length; ++i)
+            if (Arrays.binarySearch(from, 0, pointer, freeIndices[i]) < 0) {
+                if (newFromLength < oldFromLength)
+                    from[newFromLength] = to[newFromLength] = freeIndices[i];
+                else
+                    list.add(freeIndices[i]);
+                ++newFromLength;
+            }
+
+        // if newFromLength < oldFromLength then list must be
+        // empty and {@code from} and {@code to} arrays
+        // will be simply truncated so subsequent
+        // {@code arraycopy(...)} will do nothing
+        // if newFromLength > oldFromLength then list is not empty
+        // and it will be appended to {@code from} and {@code to}
+        if (newFromLength < oldFromLength) {
+            from = Arrays.copyOfRange(from, 0, newFromLength);
+            to = Arrays.copyOfRange(to, 0, newFromLength);
+        } else if (newFromLength > oldFromLength) {
+            int[] toAdd = list.toArray();
+            from = Arrays.copyOfRange(from, 0, newFromLength);
+            to = Arrays.copyOfRange(to, 0, newFromLength);
+            System.arraycopy(toAdd, 0, from, oldFromLength, toAdd.length);
+            System.arraycopy(toAdd, 0, to, oldFromLength, toAdd.length);
+        }
+
+        assert from.length == freeIndices.length;
+
+        return applyIndexMapping(tensor, new Mapping(from, to, mapping.getSign()), forbidden);
+    }
+
     /**
      * Applies specified mapping of indices to tensor.
      *
-     * @param tensor tensor
-     * @param buffer mapping of indices
+     * @param tensor  tensor
+     * @param mapping mapping of indices
      * @return tensor with renamed indices
      */
-    public static Tensor applyIndexMapping(Tensor tensor, IndexMappingBuffer buffer) {
-        return applyIndexMapping(tensor, buffer, new int[0]);
+    public static Tensor applyIndexMapping(Tensor tensor, Mapping mapping) {
+        return applyIndexMapping(tensor, mapping, new int[0]);
     }
 
     /**
-     * Applies specified mapping of indices to tensor prohibiting some dummy index to be equal to one of the specified
+     * Applies specified mapping of indices to tensor preventing some dummy index to be equal to one of the specified
      * <i>forbidden</i> indices.
      *
      * @param tensor    tensor
-     * @param buffer    mapping of indices
+     * @param mapping   mapping of indices
      * @param forbidden forbidden indices
      * @return tensor with renamed indices
      */
-    public static Tensor applyIndexMapping(Tensor tensor, IndexMappingBuffer buffer, int[] forbidden) {
-        if (buffer.isEmpty()) {
+    public static Tensor applyIndexMapping(Tensor tensor, Mapping mapping, int[] forbidden) {
+        if (mapping.isEmpty()) {
             if (tensor.getIndices().getFree().size() != 0)
-                throw new IllegalArgumentException("From indices are not equal to free indices of tensor.");
-            Tensor t = renameDummy(tensor, forbidden);
-            if (buffer.getSign())
-                return Tensors.negate(t);
-            return t;
+                throw new IllegalArgumentException("From length does not match free indices size.");
+            return renameDummyWithSign(tensor, forbidden, mapping.getSign());
         }
-        if (tensor instanceof Complex || tensor instanceof ScalarFunction)
-            return tensor;
-
-        Map<Integer, IndexMappingBufferRecord> map = buffer.getMap();
-        int[] from = new int[map.size()], to = new int[map.size()];
-        int count = 0;
-        IndexMappingBufferRecord record;
-        for (Map.Entry<Integer, IndexMappingBufferRecord> entry : map.entrySet()) {
-            from[count] = entry.getKey();
-            record = entry.getValue();
-            to[count++] = record.getIndexName() ^ (record.diffStatesInitialized() ? 0x80000000 : 0);
-        }
-
-        final int[] freeIndices = getIndicesNames(tensor.getIndices().getFree());
-        Arrays.sort(freeIndices);
-        int[] _from = from.clone();
-        Arrays.sort(_from);
-        if (!Arrays.equals(freeIndices, _from))
-            throw new IllegalArgumentException("From indices are not equal to free indices of tensor.");
-
-        Tensor result = applyIndexMappingFromPreparedSource(tensor, from, to, forbidden);
-        if (buffer.getSign())
-            return Tensors.negate(result);
-        else
-            return result;
+        int[] freeIndicesNames = IndicesUtils.getIndicesNames(tensor.getIndices().getFree());
+        Arrays.sort(freeIndicesNames);
+        if (!mapping.getFromNames().equalsToArray(freeIndicesNames))
+            throw new IllegalArgumentException("From indices names does not match free indices names of tensor.");
+        Tensor result = _applyIndexMapping(tensor, mapping, forbidden);
+        return mapping.getSign() ? Tensors.negate(result) : result;
     }
 
-    /**
-     * @param tensor
-     * @param from   sorted indices
-     */
-    private static void checkConsistent(Tensor tensor, final int[] from) {
-        int[] freeIndices = tensor.getIndices().getFree().getAllIndices().copy();
-        Arrays.sort(freeIndices);
-        if (!Arrays.equals(freeIndices, from))
-            throw new IllegalArgumentException("From indices are not equal to free indices of tensor.");
-    }
-
-    /**
-     * Applies mapping of indices defined by the {@code from} -> {@code to} arrays to tensor prohibiting some dummy index to be equal to one of the specified
-     * <i>forbidden</i> indices.
-     *
-     * @param tensor    tensor
-     * @param from      array of 'from' indices
-     * @param to        array of corresponding 'to' indices
-     * @param forbidden array of forbidden indices names
-     * @return tensor with renamed indices
-     * @throws IllegalArgumentException if {@code from.length() != to.length()}
-     * @throws IllegalArgumentException if {@code from.length() != tensor.getIndices().getFree().size()}
-     *                                  * @throws IllegalArgumentException if free indices of tensor does not contain all 'from' indices
-     */
-    public static Tensor applyIndexMapping(Tensor tensor, int[] from, int[] to, int[] forbidden) {
-        if (from.length == 0) {
-            if (tensor.getIndices().getFree().size() != 0 || to.length != 0)
-                throw new IllegalArgumentException("from legth does not match free indices size or to length.");
-            return renameDummy(tensor, forbidden);
-        }
-        return applyIndexMapping1(tensor, from.clone(), to.clone(), forbidden);
-    }
-
-    private static Tensor applyIndexMapping1(Tensor tensor, int[] from, int[] to, int[] forbidden) {
-        if (tensor instanceof Complex || tensor instanceof ScalarFunction)
-            return tensor;
-
-        ArraysUtils.quickSort(from, to);
-        checkConsistent(tensor, from);
-
-        int i, rawState;
-        for (i = from.length - 1; i >= 0; --i) {
-            rawState = IndicesUtils.getRawStateInt(from[i]);
-            from[i] ^= rawState;
-            to[i] ^= rawState;
-        }
-        ArraysUtils.quickSort(from, to);
-        return applyIndexMappingFromPreparedSource(tensor, from, to, forbidden);
-    }
-
-    private static Tensor applyIndexMappingFromPreparedSource(Tensor tensor, int[] from, int[] to, int[] forbidden) {
-
-        int[] allForbidden = new int[to.length + forbidden.length];
-        System.arraycopy(to, 0, allForbidden, 0, to.length);
-        System.arraycopy(forbidden, 0, allForbidden, to.length, forbidden.length);
+    private static Tensor _applyIndexMapping(Tensor tensor, Mapping mapping, int[] forbidden) {
+        final int mappingSize = mapping.size();
+        int[] allForbidden = new int[mappingSize + forbidden.length];
+        IntArray toData = mapping.getToData(), fromNames = mapping.getFromNames();
+        ArraysUtils.arraycopy(toData, 0, allForbidden, 0, mappingSize);
+        System.arraycopy(forbidden, 0, allForbidden, mappingSize, forbidden.length);
         int i;
         for (i = allForbidden.length - 1; i >= 0; --i)
             allForbidden[i] = IndicesUtils.getNameWithType(allForbidden[i]);
 
-        IntArrayList fromL = new IntArrayList(from.length), toL = new IntArrayList(to.length);
-        fromL.addAll(from);
-        toL.addAll(to);
+        IntArrayList fromL = new IntArrayList(mappingSize), toL = new IntArrayList(mappingSize);
+        fromL.addAll(fromNames);
+        toL.addAll(toData);
 
         Arrays.sort(allForbidden);
 
@@ -274,7 +297,7 @@ public final class ApplyIndexMapping {
             if (Arrays.binarySearch(allForbidden, index) >= 0) {
                 //if index is dummy it cannot be free, so from (which is equal to free)
                 //cannot contain it
-                //assert Arrays.binarySearch(from, index) < 0;
+                assert ArraysUtils.binarySearch(fromNames, index) < 0;
                 fromL.add(index);
                 toL.add(generator.generate(IndicesUtils.getType(index)));
             }
@@ -424,6 +447,7 @@ public final class ApplyIndexMapping {
         }
     }
 
+    //todo discuss with Dima
     public static Tensor renameIndicesOfFieldsArguments(Tensor tensor, TIntSet forbidden) {
         if (tensor instanceof TensorField) {
             TensorField field = (TensorField) tensor;
@@ -565,5 +589,12 @@ public final class ApplyIndexMapping {
         }
 
         throw new RuntimeException();
+    }
+
+    private static void checkConsistent(Tensor tensor, final int[] from) {
+        int[] freeIndices = tensor.getIndices().getFree().getAllIndices().copy();
+        Arrays.sort(freeIndices);
+        if (!Arrays.equals(freeIndices, from))
+            throw new IllegalArgumentException("From indices are not equal to free indices of tensor.");
     }
 }

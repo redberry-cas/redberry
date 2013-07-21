@@ -23,12 +23,12 @@
 
 package cc.redberry.physics.oneloopdiv;
 
-import cc.redberry.core.indexmapping.IndexMappingBuffer;
 import cc.redberry.core.indexmapping.IndexMappings;
+import cc.redberry.core.indexmapping.Mapping;
+import cc.redberry.core.tensor.ApplyIndexMapping;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.tensor.iterator.TraverseState;
 import cc.redberry.core.tensor.iterator.TreeTraverseIterator;
-import cc.redberry.core.tensor.ApplyIndexMapping;
 import cc.redberry.core.transformations.Transformation;
 
 /**
@@ -54,9 +54,9 @@ final class NaiveSubstitution implements Transformation {
             if (state != TraverseState.Leaving)
                 continue;
             current = iterator.current();
-            IndexMappingBuffer buffer = IndexMappings.getFirst(from, current);
-            if (buffer != null) {
-                Tensor newFrom = ApplyIndexMapping.applyIndexMapping(to, buffer);
+            Mapping mapping = IndexMappings.getFirst(from, current);
+            if (mapping != null) {
+                Tensor newFrom = ApplyIndexMapping.applyIndexMapping(to, mapping);
                 iterator.set(newFrom);
             }
         }

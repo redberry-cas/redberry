@@ -23,8 +23,8 @@
 package cc.redberry.core;
 
 import cc.redberry.concurrent.OutputPortUnsafe;
-import cc.redberry.core.indexmapping.IndexMappingBuffer;
 import cc.redberry.core.indexmapping.IndexMappings;
+import cc.redberry.core.indexmapping.Mapping;
 import cc.redberry.core.indices.Indices;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.tensor.Tensors;
@@ -134,12 +134,12 @@ public class TAssert {
     }
 
     public static void soutMappingsOP(Tensor from, Tensor to) {
-        final OutputPortUnsafe<IndexMappingBuffer> opu =
+        final OutputPortUnsafe<Mapping> opu =
                 IndexMappings.createPort(from, to);
-        IndexMappingBuffer buffer;
+        Mapping mapping;
         int count = 0;
-        while ((buffer = opu.take()) != null) {
-            System.out.println(buffer);
+        while ((mapping = opu.take()) != null) {
+            System.out.println(mapping);
             count++;
         }
         System.out.println("Total mappings count " + count);

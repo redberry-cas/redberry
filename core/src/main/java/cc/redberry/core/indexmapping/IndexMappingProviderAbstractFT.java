@@ -22,6 +22,7 @@
  */
 package cc.redberry.core.indexmapping;
 
+import cc.redberry.concurrent.OutputPortUnsafe;
 import cc.redberry.core.tensor.Tensor;
 
 /**
@@ -35,7 +36,7 @@ abstract class IndexMappingProviderAbstractFT<T extends Tensor> extends IndexMap
 
     protected final T from, to;
 
-    public IndexMappingProviderAbstractFT(MappingsPort opu, T from, T to) {
+    public IndexMappingProviderAbstractFT(OutputPortUnsafe<IndexMappingBuffer> opu, T from, T to) {
         super(opu);
         this.from = from;
         this.to = to;

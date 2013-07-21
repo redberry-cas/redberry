@@ -22,6 +22,7 @@
  */
 package cc.redberry.core.indexmapping;
 
+import cc.redberry.concurrent.OutputPortUnsafe;
 import cc.redberry.core.combinatorics.IntPermutationsGenerator;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.tensor.Product;
@@ -126,9 +127,9 @@ final class ProviderProduct implements IndexMappingProvider {
     //    private final ProductContent from, to;
 //    private PermutationsProvider permutationsProvider;
     private final DummyIndexMappingProvider dummyProvider;
-    private final MappingsPort op;
+    private final OutputPortUnsafe<IndexMappingBuffer> op;
 
-    private ProviderProduct(final MappingsPort opu,
+    private ProviderProduct(final OutputPortUnsafe<IndexMappingBuffer> opu,
                             final Product from, final Product to) {
         this.dummyProvider = new DummyIndexMappingProvider(opu);
 //        this.from = from;

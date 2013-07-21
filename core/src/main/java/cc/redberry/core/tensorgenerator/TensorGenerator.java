@@ -23,6 +23,7 @@
 package cc.redberry.core.tensorgenerator;
 
 import cc.redberry.concurrent.OutputPortUnsafe;
+import cc.redberry.core.indexmapping.Mapping;
 import cc.redberry.core.indices.Indices;
 import cc.redberry.core.math.frobenius.FrobeniusSolver;
 import cc.redberry.core.number.Complex;
@@ -109,7 +110,7 @@ public class TensorGenerator {
                         oldIndices[k + termUp.length()] = termLow.get(k);
                         newIndices[k + termUp.length()] = lowerArray[l++];
                     }
-                    temp = ApplyIndexMapping.applyIndexMapping(temp, oldIndices, newIndices, new int[0]);
+                    temp = ApplyIndexMapping.applyIndexMapping(temp, new Mapping(oldIndices, newIndices), new int[0]);
                     tCombination.add(temp);
                 }
 

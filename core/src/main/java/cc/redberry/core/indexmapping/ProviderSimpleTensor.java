@@ -22,6 +22,7 @@
  */
 package cc.redberry.core.indexmapping;
 
+import cc.redberry.concurrent.OutputPortUnsafe;
 import cc.redberry.core.combinatorics.Symmetry;
 import cc.redberry.core.indices.SimpleIndices;
 import cc.redberry.core.tensor.SimpleTensor;
@@ -65,7 +66,7 @@ final class ProviderSimpleTensor extends IndexMappingProviderAbstractFT<SimpleTe
     };
     private Iterator<Symmetry> symmetryIterator;
 
-    private ProviderSimpleTensor(MappingsPort opu, SimpleTensor from, SimpleTensor to) {
+    private ProviderSimpleTensor(OutputPortUnsafe<IndexMappingBuffer> opu, SimpleTensor from, SimpleTensor to) {
         super(opu, from, to);
     }
 

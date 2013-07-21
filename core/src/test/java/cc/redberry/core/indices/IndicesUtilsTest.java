@@ -36,12 +36,12 @@ public class IndicesUtilsTest {
     @Test
     public void parse() {
         int index = IndicesUtils.parseIndex("_{\\mu}");
-        assertTrue("_{\\mu}".equals(IndicesUtils.toString(index, OutputFormat.LaTeX)));
+        assertTrue("_\\mu".equals(IndicesUtils.toString(index, OutputFormat.LaTeX)));
 
         int index1 = IndicesUtils.parseIndex("_\\mu");
-        assertTrue("_{\\mu}".equals(IndicesUtils.toString(index1, OutputFormat.LaTeX)));
+        assertTrue("_\\mu".equals(IndicesUtils.toString(index1, OutputFormat.LaTeX)));
 
         int index2 = IndicesUtils.parseIndex("_a");
-        assertTrue("_{a}".equals(IndicesUtils.toString(index2, OutputFormat.LaTeX)));
+        assertTrue("_a".equals(IndicesUtils.toString(index2, OutputFormat.LaTeX)));
     }
 }

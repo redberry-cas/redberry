@@ -42,12 +42,12 @@ class ProviderPower implements IndexMappingProviderFactory {
 
     @Override
     public IndexMappingProvider create(IndexMappingProvider opu, Tensor from, Tensor to) {
-        IndexMappingBuffer exponentMapping = IndexMappings.getFirst(from.get(1), to.get(1));   //todo try get first positive mapping
+        IndexMappingBuffer exponentMapping = IndexMappings.getFirstBuffer(from.get(1), to.get(1));   //todo try get first positive mapping
         if (exponentMapping == null || exponentMapping.getSign())
             return IndexMappingProvider.Util.EMPTY_PROVIDER;
 
         //todo two signs are possible
-        IndexMappingBuffer baseMapping = IndexMappings.getFirst(from.get(0), to.get(0));
+        IndexMappingBuffer baseMapping = IndexMappings.getFirstBuffer(from.get(0), to.get(0));
         if (baseMapping == null)
             return IndexMappingProvider.Util.EMPTY_PROVIDER;
 

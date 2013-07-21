@@ -22,6 +22,7 @@
  */
 package cc.redberry.core.indexmapping;
 
+import cc.redberry.concurrent.OutputPortUnsafe;
 import cc.redberry.core.combinatorics.IntPermutationsGenerator;
 import cc.redberry.core.tensor.Tensor;
 
@@ -158,10 +159,10 @@ final class ProviderSum implements IndexMappingProvider {
 
         private final Tensor[] from, to;
         private final IntPermutationsGenerator permutationGenerator;
-        private MappingsPort currentSource = null;
+        private OutputPortUnsafe<IndexMappingBuffer> currentSource = null;
         private int[] currentPermutation;
 
-        public StretchPairSource(final MappingsPort opu,
+        public StretchPairSource(final OutputPortUnsafe<IndexMappingBuffer> opu,
                                  final Tensor[] from, final Tensor[] to) {
             super(opu);
             this.from = from;
@@ -182,7 +183,7 @@ final class ProviderSum implements IndexMappingProvider {
                     return null;
                 }
                 currentPermutation = permutationGenerator.next();
-                currentSource = IndexMappings.createPort(currentBuffer.clone(), from[0], to[currentPermutation[0]]);
+                currentSource = IndexMappings.createPortOfBuffers(currentBuffer.clone(), from[0], to[currentPermutation[0]]);
             }
         }
 
@@ -262,7 +263,7 @@ final class ProviderSum implements IndexMappingProvider {
     //    private static boolean test(final Tensor from, final Tensor to, final IndexMappingBufferTester tester) {
     //        tester.reset();
     //        final IndexMappingProvider provider =
-    //                IndexMappings.createPort(IndexMappingProvider.Util.singleton(tester), from, to, tester.allowDiffStates());
+    //                IndexMappings.createPortOfBuffers(IndexMappingProvider.Util.singleton(tester), from, to, tester.allowDiffStates());
     //        provider.tick();
     //        return provider.take() != null;
     //    }

@@ -42,7 +42,7 @@ public class IndexMappingTestUtils {
      * @return mapping
      */
     @SuppressWarnings("unchecked")
-    public static IndexMappingBufferImpl parse(String str) {
+    public static Mapping parse(String str) {
         IndexMappingBufferImpl im = new IndexMappingBufferImpl();
         String[] singleMaps = str.split(";");
         switch (singleMaps[0]) {
@@ -56,14 +56,14 @@ public class IndexMappingTestUtils {
                 throw new RuntimeException();
         }
         if (singleMaps.length == 1)
-            return im;
+            return new Mapping(im);
         for (int i = 1; i < singleMaps.length; ++i) {
             String[] parts = singleMaps[i].split("->");
             int from = parseIndex(parts[0]);
             int to = parseIndex(parts[1]);
             im.tryMap(from, to);
         }
-        return im;
+        return new Mapping(im);
     }
 
     @SuppressWarnings("unchecked")
@@ -74,7 +74,7 @@ public class IndexMappingTestUtils {
         return index;
     }
 
-    public static boolean compare(List<IndexMappingBuffer> l1, List<IndexMappingBuffer> l2) {
+    public static boolean compare(List<Mapping> l1, List<Mapping> l2) {
         Collections.sort(l1, COMPARATOR);
         Collections.sort(l2, COMPARATOR);
         int size;
@@ -86,12 +86,12 @@ public class IndexMappingTestUtils {
         return true;
     }
 
-    public static Comparator<IndexMappingBuffer> getComparator() {
+    public static Comparator<Mapping> getComparator() {
         return COMPARATOR;
     }
-    private static final Comparator<IndexMappingBuffer> COMPARATOR = new Comparator<IndexMappingBuffer>() {
+    private static final Comparator<Mapping> COMPARATOR = new Comparator<Mapping>() {
         @Override
-        public int compare(IndexMappingBuffer o1, IndexMappingBuffer o2) {
+        public int compare(Mapping o1, Mapping o2) {
             return Integer.compare(o1.hashCode(), o2.hashCode());
         }
     };

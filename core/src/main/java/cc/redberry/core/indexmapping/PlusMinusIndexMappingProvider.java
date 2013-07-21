@@ -22,6 +22,8 @@
  */
 package cc.redberry.core.indexmapping;
 
+import cc.redberry.concurrent.OutputPortUnsafe;
+
 /**
  * Provides two index mappings for each input mapping: the same as input mapping and with opposite sign.
  *
@@ -32,7 +34,7 @@ package cc.redberry.core.indexmapping;
 class PlusMinusIndexMappingProvider extends IndexMappingProviderAbstract {
     private boolean state = false;
 
-    public PlusMinusIndexMappingProvider(MappingsPort opu) {
+    public PlusMinusIndexMappingProvider(OutputPortUnsafe<IndexMappingBuffer> opu) {
         super(opu);
     }
 
