@@ -317,6 +317,11 @@ public class IndicesSymmetries implements Iterable<Symmetry> {
         }
     }
 
+    public boolean addUnsafe(boolean sign, int... permutation) {
+        if (sign) return addAntiSymmetryUnsafe(permutation);
+        else return addSymmetryUnsafe(permutation);
+    }
+
     /**
      * Adds permutational (anti)symmetry for a particular type of indices without any checks.
      *

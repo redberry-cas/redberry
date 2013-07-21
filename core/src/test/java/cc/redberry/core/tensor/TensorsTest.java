@@ -24,6 +24,7 @@ package cc.redberry.core.tensor;
 
 import cc.redberry.core.TAssert;
 import cc.redberry.core.combinatorics.IntPermutationsGenerator;
+import cc.redberry.core.combinatorics.Symmetry;
 import cc.redberry.core.indices.IndicesFactory;
 import cc.redberry.core.indices.SimpleIndices;
 import cc.redberry.core.number.Complex;
@@ -31,6 +32,8 @@ import cc.redberry.core.parser.ParserIndices;
 import cc.redberry.core.transformations.expand.ExpandTransformation;
 import cc.redberry.core.utils.TensorUtils;
 import org.junit.Test;
+
+import java.util.Iterator;
 
 import static cc.redberry.core.tensor.Tensors.*;
 
@@ -325,8 +328,26 @@ public class TensorsTest {
         TAssert.assertNotEquals(sum, multiply(new Complex(4), tdf));
     }
 
-    @Test(timeout = 100L)
-    public void testSetAntiSymmetric() {
+    @Test(timeout = 200L)
+    public void testSetSymmetric1() {
         setAntiSymmetric("f_{qwertyuioplkjhgfdsazxcvbnm}");
+    }
+
+    @Test(timeout = 200L)
+    public void testSetSymmetric2() {
+        setSymmetric("f_{qwertyuioplkjhgfdsazxcvbnm}");
+    }
+
+    @Test(timeout = 300L)
+    public void testSetSymmetric3() {
+        setSymmetric("f_{qwerty}");
+        TAssert.assertEquals(parse("f_{qwerty}"), "f_{qrtwey}");
+    }
+
+    @Test(timeout = 300L)
+    public void testSetSymmetric4() {
+        setAntiSymmetric("e_abcd");
+        Iterator<Symmetry> it = parseSimple("e_abcd").getIndices().getSymmetries().iterator();
+        while (it.hasNext()) it.next();
     }
 }
