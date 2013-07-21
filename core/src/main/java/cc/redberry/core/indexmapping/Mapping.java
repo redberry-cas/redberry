@@ -54,8 +54,8 @@ public final class Mapping implements Transformation {
         fromNames = new int[from.length];
         toData = new int[from.length];
         for (int i = 0; i < from.length; ++i) {
+            fromNames[i] = IndicesUtils.getNameWithType(from[i]);
             toData[i] = IndicesUtils.getRawStateInt(from[i]) ^ to[i];
-            fromNames[i] = 0x7FFFFFFF & from[i];
         }
         ArraysUtils.quickSort(fromNames, toData);
         this.sign = sign;

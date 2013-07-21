@@ -421,89 +421,89 @@ public class ApplyIndexMappingTest {
         t = parse("f[x_ab]");
         System.out.println(ApplyIndexMapping.renameIndicesOfFieldsArguments(t, forbidden));
     }
-
-    @Test
-    public void testApplyAutomatic1() {
-        int[] from = {0, 1, 2, 3, 4},
-                to = {12, 13, 14, 15, 16};
-        Tensor t = parse("T_abcde");
-
-        automaticTestApplyAutomatic(t, from, to, from.clone(), to.clone());
-    }
-
-    @Test
-    public void testApplyAutomatic2() {
-        int[] from = {0, 1, 2, 3, 4 /**/, 12, 13, 14},
-                to = {12, 13, 14, 15 /**/, 16, 0, 1, 2};
-
-        int[] ffrom = {0, 1, 2, 3, 4},
-                fto = {12, 13, 14, 15, 16};
-        Tensor t = parse("T_abcde");
-
-        automaticTestApplyAutomatic(t, from, to, ffrom, fto);
-    }
-
-
-    @Test
-    public void testApplyAutomatic2a() {
-        int[] from = {0, 1, 2, 4, 5, 3, 6, 7, 8, 9},
-                to = {12, 13, 14, 16, 0, 15, 1, 2, 3, 4};
-
-        int[] ffrom = {0, 1, 2, 3, 4},
-                fto = {12, 13, 14, 15, 16};
-        Tensor t = parse("T_abcde");
-
-        TAssert.assertEquals(
-                applyIndexMappingAutomatically(t, new Mapping(from, to)),
-                ApplyIndexMapping.applyIndexMapping(t, new Mapping(ffrom, fto), new int[0]));
-    }
-
-    @Test
-    public void testApplyAutomatic3() {
-        int[] from = { 0,  1,  2,  3,  /**/  4, 13, 5},
-                to = {12, 13, 14, 15, /**/   7,  0, 5};
-
-
-        int[] ffrom = {0, 1, 2, 3}, //_abcde
-                fto = {12, 13, 14, 15}; //mnopqr
-                        //   _ab                 _c
-        Tensor t = parse("(T_m^m_ab + C_n^n_ab)*F_c*(T_e^e + B_o^o*F_fg^fg)*K_d");
-
-        automaticTestApplyAutomatic(t, from, to, ffrom, fto);
-    }
-
-    private static void automaticTestApplyAutomatic(Tensor t, int[] from, int[] to, int[] freeFrom, int[] freeTo) {
-        int[] _from, _to, __to;
-        int position;
-        Iterable<int[]> combinations, gen;
-        ArraysUtils.quickSort(freeFrom, freeTo);
-        for (int i = 0; i < from.length; ++i) {
-            combinations = new IntCombinationsGenerator(from.length, i);
-            for (int[] combination : combinations) {
-                _from = ArraysUtils.remove(from, combination);
-                _to = ArraysUtils.remove(to, combination);
-                __to = freeTo.clone();
-                for (int ii : combination) {
-                    position = Arrays.binarySearch(freeFrom, from[ii]);
-                    if (position >= 0)
-                        __to[position] = freeFrom[position];
-                }
-
-                gen = new IntPermutationsGenerator(_from.length);
-                for (int[] p : gen) {
-//                    System.out.println();
-//                    System.out.println(Arrays.toString(p));
-//                    System.out.println(Arrays.toString(Combinatorics.reorder(_from, p)));
-//                    System.out.println(Arrays.toString(Combinatorics.reorder(_to, p)));
-//                    System.out.println(Arrays.toString(freeFrom));
-//                    System.out.println(Arrays.toString(__to));
-                    TAssert.assertEquals(
-                            applyIndexMappingAutomatically(t,
-                                    new Mapping(Combinatorics.reorder(_from, p), Combinatorics.reorder(_to, p))),
-                            ApplyIndexMapping.applyIndexMapping(
-                                    t, new Mapping(freeFrom, __to), new int[0]));
-                }
-            }
-        }
-    }
+//
+//    @Test
+//    public void testApplyAutomatic1() {
+//        int[] from = {0, 1, 2, 3, 4},
+//                to = {12, 13, 14, 15, 16};
+//        Tensor t = parse("T_abcde");
+//
+//        automaticTestApplyAutomatic(t, from, to, from.clone(), to.clone());
+//    }
+//
+//    @Test
+//    public void testApplyAutomatic2() {
+//        int[] from = {0, 1, 2, 3, 4 /**/, 12, 13, 14},
+//                to = {12, 13, 14, 15 /**/, 16, 0, 1, 2};
+//
+//        int[] ffrom = {0, 1, 2, 3, 4},
+//                fto = {12, 13, 14, 15, 16};
+//        Tensor t = parse("T_abcde");
+//
+//        automaticTestApplyAutomatic(t, from, to, ffrom, fto);
+//    }
+//
+//
+//    @Test
+//    public void testApplyAutomatic2a() {
+//        int[] from = {0, 1, 2, 4, 5, 3, 6, 7, 8, 9},
+//                to = {12, 13, 14, 16, 0, 15, 1, 2, 3, 4};
+//
+//        int[] ffrom = {0, 1, 2, 3, 4},
+//                fto = {12, 13, 14, 15, 16};
+//        Tensor t = parse("T_abcde");
+//
+//        TAssert.assertEquals(
+//                applyIndexMappingAutomatically(t, new Mapping(from, to)),
+//                ApplyIndexMapping.applyIndexMapping(t, new Mapping(ffrom, fto), new int[0]));
+//    }
+//
+//    @Test
+//    public void testApplyAutomatic3() {
+//        int[] from = { 0,  1,  2,  3,  /**/  4, 13, 5},
+//                to = {12, 13, 14, 15, /**/   7,  0, 5};
+//
+//
+//        int[] ffrom = {0, 1, 2, 3}, //_abcde
+//                fto = {12, 13, 14, 15}; //mnopqr
+//                        //   _ab                 _c
+//        Tensor t = parse("(T_m^m_ab + C_n^n_ab)*F_c*(T_e^e + B_o^o*F_fg^fg)*K_d");
+//
+//        automaticTestApplyAutomatic(t, from, to, ffrom, fto);
+//    }
+//
+//    private static void automaticTestApplyAutomatic(Tensor t, int[] from, int[] to, int[] freeFrom, int[] freeTo) {
+//        int[] _from, _to, __to;
+//        int position;
+//        Iterable<int[]> combinations, gen;
+//        ArraysUtils.quickSort(freeFrom, freeTo);
+//        for (int i = 0; i < from.length; ++i) {
+//            combinations = new IntCombinationsGenerator(from.length, i);
+//            for (int[] combination : combinations) {
+//                _from = ArraysUtils.remove(from, combination);
+//                _to = ArraysUtils.remove(to, combination);
+//                __to = freeTo.clone();
+//                for (int ii : combination) {
+//                    position = Arrays.binarySearch(freeFrom, from[ii]);
+//                    if (position >= 0)
+//                        __to[position] = freeFrom[position];
+//                }
+//
+//                gen = new IntPermutationsGenerator(_from.length);
+//                for (int[] p : gen) {
+////                    System.out.println();
+////                    System.out.println(Arrays.toString(p));
+////                    System.out.println(Arrays.toString(Combinatorics.reorder(_from, p)));
+////                    System.out.println(Arrays.toString(Combinatorics.reorder(_to, p)));
+////                    System.out.println(Arrays.toString(freeFrom));
+////                    System.out.println(Arrays.toString(__to));
+//                    TAssert.assertEquals(
+//                            applyIndexMappingAutomatically(t,
+//                                    new Mapping(Combinatorics.reorder(_from, p), Combinatorics.reorder(_to, p))),
+//                            ApplyIndexMapping.applyIndexMapping(
+//                                    t, new Mapping(freeFrom, __to), new int[0]));
+//                }
+//            }
+//        }
+//    }
 }

@@ -50,7 +50,7 @@ import java.util.regex.Pattern;
 public class OneLoopCountertermsTest {
     private static enum TestComplexity {Easy, Medium, High, Extremal}
 
-    private static final TestComplexity DEFAULT_COMPLEXITY = TestComplexity.Easy;
+    private static final TestComplexity DEFAULT_COMPLEXITY = TestComplexity.Medium;
 
     private static final String[]
             EasyComplexityMethods,

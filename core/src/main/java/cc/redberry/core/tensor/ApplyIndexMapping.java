@@ -296,7 +296,7 @@ public final class ApplyIndexMapping {
             if (Arrays.binarySearch(allForbidden, index) >= 0) {
                 //if index is dummy it cannot be free, so from (which is equal to free)
                 //cannot contain it
-                //assert Arrays.binarySearch(from, index) < 0;
+                assert ArraysUtils.binarySearch(fromNames, index) < 0;
                 fromL.add(index);
                 toL.add(generator.generate(IndicesUtils.getType(index)));
             }
