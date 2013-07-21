@@ -92,7 +92,8 @@ final class SymmetriesImpl extends AbstractSymmetries {
 
     @Override
     public boolean isEmpty() {
-        return false;
+//        return false;    //todo INCORRECT
+        return basis.size() == 1;
     }
 
     @Override
