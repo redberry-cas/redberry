@@ -6,10 +6,10 @@ import cc.redberry.concurrent.OutputPortUnsafe;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public class MappingsPort implements OutputPortUnsafe<Mapping> {
+public final class MappingsPort implements OutputPortUnsafe<Mapping> {
     private final OutputPortUnsafe<IndexMappingBuffer> innerPort;
 
-    public MappingsPort(OutputPortUnsafe<IndexMappingBuffer> innerPort) {
+    MappingsPort(OutputPortUnsafe<IndexMappingBuffer> innerPort) {
         this.innerPort = innerPort;
     }
 

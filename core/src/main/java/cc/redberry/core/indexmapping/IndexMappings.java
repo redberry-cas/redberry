@@ -47,7 +47,7 @@ public final class IndexMappings {
     }
 
     /**
-     * Creates output port of mappings of tensor {@code from} on tensor {@code to}.
+     * Creates output port of mappings from tensor <i>{@code from}</i> onto tensor <i>{@code to}</i>.
      *
      * @param from from tensor
      * @param to   to tensor
@@ -58,7 +58,7 @@ public final class IndexMappings {
     }
 
     /**
-     * Creates output port of mappings of two simple tensors and do not takes into account the arguments of fields.
+     * Creates output port of mappings of two simple tensors and does not take into account the arguments of fields.
      *
      * @param from from tensor
      * @param to   to tensor
@@ -103,7 +103,7 @@ public final class IndexMappings {
      */
     public static Mapping getFirst(Tensor from, Tensor to) {
         IndexMappingBuffer buffer = createPortOfBuffers(from, to).take();
-        if(buffer == null) return null;
+        if (buffer == null) return null;
         return new Mapping(buffer);
     }
 
@@ -196,6 +196,13 @@ public final class IndexMappings {
         return buffer.getSign();
     }
 
+    /**
+     * Returns {@code true} if specified tensor is zero in consequence of its symmetries: is both symmetric and
+     * asymmetric with respect to some permutation at the same time.
+     *
+     * @param t tensor
+     * @return {@code true} if specified tensor is zero in consequence of its symmetries
+     */
     public static boolean isZeroDueToSymmetry(Tensor t) {
         int[] indices = IndicesUtils.getIndicesNames(t.getIndices().getFree());
         IndexMappingBufferTester bufferTester = new IndexMappingBufferTester(indices, false);
@@ -270,6 +277,8 @@ public final class IndexMappings {
         else
             return null;
     }
+
+    /* Main routine */
 
     static IndexMappingProvider createPort(IndexMappingProvider opu, Tensor from, Tensor to) {
         if (from.hashCode() != to.hashCode())
