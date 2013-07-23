@@ -437,4 +437,10 @@ public class ExpandTest {
         TAssert.assertEquals(expected, actual);
 
     }
+
+    @Test
+    public void test41() {
+        Tensor t = parse("a*d + b*c + f");
+        TAssert.assertTrue(t == expand(t));
+    }
 }

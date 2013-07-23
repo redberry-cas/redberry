@@ -71,7 +71,6 @@ public class CollectTransformation implements Transformation {
         Tensor current;
         Split toAdd;
         ArrayList<Split> nodes;
-        Indices indices;
         out:
         while ((current = port.take()) != null) {
             toAdd = split(current);
@@ -108,13 +107,13 @@ public class CollectTransformation implements Transformation {
             nodes.add(toAdd);
         }
 
-        SumBuilder sb = new SumBuilder(map.size());
+
         for (ArrayList<Split> splits : map.valueCollection())
             for (Split split : splits)
-                sb.put(split.toTensor());
+                notMatched.put(split.toTensor());
 
 
-        return sb.build();
+        return notMatched.build();
     }
 
 

@@ -258,4 +258,12 @@ public class CollectTransformationTest {
         }
     }
 
+    @Test
+    public void testDerivatives1() {
+        Tensor t = parse("f~(1)[x] + f[x]");
+        SimpleTensor[] patterns = new SimpleTensor[]{parseSimple("f[x]")};
+        CollectTransformation collect = new CollectTransformation(patterns);
+        TAssert.assertEquals(collect.transform(t), t);
+    }
+
 }
