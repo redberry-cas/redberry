@@ -23,16 +23,19 @@
 package cc.redberry.core;
 
 import cc.redberry.concurrent.OutputPortUnsafe;
+import cc.redberry.core.combinatorics.Symmetry;
+import cc.redberry.core.combinatorics.symmetries.Symmetries;
 import cc.redberry.core.indexmapping.IndexMappings;
 import cc.redberry.core.indexmapping.Mapping;
 import cc.redberry.core.indices.Indices;
+import cc.redberry.core.tensor.SimpleTensor;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.tensor.Tensors;
 import cc.redberry.core.utils.IntArray;
 import cc.redberry.core.utils.TensorUtils;
+import org.junit.Assert;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @author Dmitry Bolotin
@@ -152,6 +155,31 @@ public class TAssert {
     public static void assertIndicesConsistency(Tensor t) {
         TensorUtils.assertIndicesConsistency(t);
     }
+
+    public static Symmetry[] toArray(Symmetries symmetries) {
+        List<Symmetry> list = new ArrayList<>();
+        for (Symmetry s : symmetries) {
+            list.add(s);
+        }
+        return list.toArray(new Symmetry[list.size()]);
+    }
+
+    public static void assertEqualsSymmetries(Symmetries a, Symmetries b) {
+        Symmetry[] _a = toArray(a), _b = toArray(b);
+        Arrays.sort(_a);
+        Arrays.sort(_b);
+        Assert.assertArrayEquals(_a, _b);
+    }
+
+    public static void assertEqualsSymmetries(SimpleTensor a, Symmetries b) {
+        assertEqualsSymmetries(a.getIndices().getSymmetries().getInnerSymmetries(), b);
+    }
+
+    public static void assertEqualsSymmetries(SimpleTensor a, SimpleTensor b) {
+        assertEqualsSymmetries(a.getIndices().getSymmetries().getInnerSymmetries(),
+                b.getIndices().getSymmetries().getInnerSymmetries());
+    }
+
 //    public static void assertOpposite(Tensor target, Tensor expected) {
 //        assertTrue(TTest.testOpposite(target, expected));
 //    }

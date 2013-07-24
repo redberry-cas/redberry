@@ -38,10 +38,7 @@ import cc.redberry.core.transformations.EliminateFromSymmetriesTransformation;
 import junit.framework.Assert;
 import org.junit.Test;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
+import static cc.redberry.core.TAssert.assertEqualsSymmetries;
 import static cc.redberry.core.tensor.Tensors.parse;
 import static cc.redberry.core.tensor.Tensors.parseSimple;
 import static cc.redberry.core.utils.TensorUtils.*;
@@ -227,23 +224,8 @@ public class TensorUtilsTest {
             expectedSymmetries.add(s);
         }
 
-        assertTrue(equalsSymmetries(expectedSymmetries,
-                findIndicesSymmetries(tensor.getIndices(), tensor)));
-    }
-
-    private static Symmetry[] toArray(Symmetries symmetries) {
-        List<Symmetry> list = new ArrayList<>();
-        for (Symmetry s : symmetries) {
-            list.add(s);
-        }
-        return list.toArray(new Symmetry[list.size()]);
-    }
-
-    private static boolean equalsSymmetries(Symmetries a, Symmetries b) {
-        Symmetry[] _a = toArray(a), _b = toArray(b);
-        Arrays.sort(_a);
-        Arrays.sort(_b);
-        return Arrays.equals(_a, _b);
+        assertEqualsSymmetries(expectedSymmetries,
+                findIndicesSymmetries(tensor.getIndices(), tensor));
     }
 
     @Test
@@ -253,7 +235,7 @@ public class TensorUtilsTest {
         Symmetries expected = SymmetriesFactory.createSymmetries(4);
         expected.add(new Symmetry(new int[]{1, 0, 2, 3}, false));
         expected.add(new Symmetry(new int[]{0, 1, 3, 2}, false));
-        assertTrue(equalsSymmetries(actual, expected));
+        assertEqualsSymmetries(actual, expected);
     }
 
 
@@ -264,7 +246,7 @@ public class TensorUtilsTest {
         Symmetries expected = SymmetriesFactory.createSymmetries(4);
         expected.add(new Symmetry(new int[]{1, 0, 2, 3}, false));
         expected.add(new Symmetry(new int[]{0, 1, 3, 2}, false));
-        assertTrue(equalsSymmetries(actual, expected));
+        assertEqualsSymmetries(actual, expected);
     }
 
     @Test

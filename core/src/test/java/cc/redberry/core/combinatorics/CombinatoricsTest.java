@@ -28,6 +28,7 @@ import org.junit.Test;
 import java.util.Arrays;
 
 import static cc.redberry.core.combinatorics.Combinatorics.convertPermutation;
+import static cc.redberry.core.combinatorics.Combinatorics.createBlockTransposition;
 
 /**
  * @author Dmitry Bolotin
@@ -63,5 +64,13 @@ public class CombinatoricsTest {
             sp.next();
         }
         Assert.assertEquals(24, i);
+    }
+
+    @Test
+    public void testBlockTransposition() {
+        Assert.assertArrayEquals(createBlockTransposition(2, 3), new int[]{2, 3, 4, 0, 1});
+        Assert.assertArrayEquals(createBlockTransposition(0, 3), new int[]{0, 1, 2});
+        Assert.assertArrayEquals(createBlockTransposition(3, 0), new int[]{0, 1, 2});
+        Assert.assertArrayEquals(createBlockTransposition(3, 3), new int[]{3, 4, 5, 0, 1, 2});
     }
 }

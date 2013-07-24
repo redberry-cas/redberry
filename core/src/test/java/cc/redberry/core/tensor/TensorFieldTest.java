@@ -22,6 +22,9 @@
  */
 package cc.redberry.core.tensor;
 
+import cc.redberry.core.combinatorics.Symmetry;
+import cc.redberry.core.combinatorics.symmetries.Symmetries;
+import cc.redberry.core.combinatorics.symmetries.SymmetriesFactory;
 import cc.redberry.core.indices.SimpleIndices;
 import cc.redberry.core.parser.ParserIndices;
 import junit.framework.Assert;
@@ -29,8 +32,8 @@ import org.junit.Test;
 
 import java.util.Arrays;
 
-import static cc.redberry.core.tensor.Tensors.addSymmetry;
-import static cc.redberry.core.tensor.Tensors.parse;
+import static cc.redberry.core.TAssert.assertEqualsSymmetries;
+import static cc.redberry.core.tensor.Tensors.*;
 
 /**
  * @author Dmitry Bolotin
@@ -48,31 +51,89 @@ public class TensorFieldTest {
     }
 
     @Test
-    public void testDerivativeSymmetries() {
-        SimpleTensor t = Tensors.parseSimple("f_mn[x_a, y_b]");
-        addSymmetry(t, 1, 0);
+    public void testDerivativeSymmetries1() {
+        SimpleTensor d;
+        Symmetry[] _expected;
 
-        SimpleTensor d = Tensors.parseSimple("f~(1,1)_mnab[x_a, y_b]");
-//        System.out.println(d.getIndices().getSymmetries().getInnerSymmetries());
+        d = Tensors.parseSimple("f~(2)_{mn ab}[x_a]");
+        _expected = new Symmetry[]{
+                new Symmetry(new int[]{0, 1, 3, 2}, false)};
+        assertEqualsSymmetries(
+                d, create(_expected));
 
-        d = Tensors.parseSimple("f~(2,0)_{mn {ab}}[x_a, y_b]");
-//        System.out.println(d.getIndices().getSymmetries().getInnerSymmetries());
+        d = Tensors.parseSimple("f~(3)_{mn abc}[x_a]");
+        _expected = new Symmetry[]{
+                new Symmetry(new int[]{0, 1, 3, 2, 4}, false),
+                new Symmetry(new int[]{0, 1, 4, 3, 2}, false)};
+        assertEqualsSymmetries(
+                d, create(_expected));
 
-        d = Tensors.parseSimple("f~(2, 1)_{mn {ab} {c}}[x_a, y_b]");
-//        System.out.println(d.getIndices().getSymmetries().getInnerSymmetries());
-
-        d = Tensors.parseSimple("f~(2, 2)_{mn {ab} {cd}}[x_a, y_b]");
-//        System.out.println(d.getIndices().getSymmetries().getInnerSymmetries());
-
-        //D[y_n, x_m][f[x_m,y_p]] == f~(1,1)^mn[x_m, y_p]
-
-        //D[y_n, x_m][f[x_m*x^m,y_p]] == f~(1,1)^n[x_m*x^m, y_p]*2*x^m
-
-
-        addSymmetry("f_mn[x_ab, y_c]", 1, 0);
-        d = Tensors.parseSimple("f~(2, 2)_{mn {ax by} {cd}}[x_ab, y_b]");
-//        System.out.println(d.getIndices().getSymmetries().getInnerSymmetries());
+        d = Tensors.parseSimple("f~(3)_{mn ab cd ef}[x_ab]");
+        _expected = new Symmetry[]{
+                new Symmetry(new int[]{0, 1, 4, 5, 2, 3, 6, 7}, false),
+                new Symmetry(new int[]{0, 1, 6, 7, 2, 3, 4, 5}, false)};
+        assertEqualsSymmetries(d, create(_expected));
     }
+
+    @Test
+    public void testDerivativeSymmetries2() {
+        SimpleTensor d;
+        Symmetry[] _expected;
+
+        addSymmetry(parseSimple("f_mn[x_a]"), 1, 0);
+
+        d = Tensors.parseSimple("f~(2)_{mn ab}[x_a]");
+        _expected = new Symmetry[]{
+                new Symmetry(new int[]{1, 0, 2, 3}, false),
+                new Symmetry(new int[]{0, 1, 3, 2}, false)};
+        assertEqualsSymmetries(
+                d, create(_expected));
+
+        d = Tensors.parseSimple("f~(3)_{mn abc}[x_a]");
+        _expected = new Symmetry[]{
+                new Symmetry(new int[]{1, 0, 2, 3, 4}, false),
+                new Symmetry(new int[]{0, 1, 3, 2, 4}, false),
+                new Symmetry(new int[]{0, 1, 4, 3, 2}, false)};
+        assertEqualsSymmetries(
+                d, create(_expected));
+
+
+        addAntiSymmetry(parseSimple("f_mn[x_ab]"), 1, 0);
+        d = Tensors.parseSimple("f~(3)_{mn ab cd ef}[x_ab]");
+        _expected = new Symmetry[]{
+                new Symmetry(new int[]{1, 0, 2, 3, 4, 5, 6, 7}, true),
+                new Symmetry(new int[]{0, 1, 4, 5, 2, 3, 6, 7}, false),
+                new Symmetry(new int[]{0, 1, 6, 7, 2, 3, 4, 5}, false)};
+        assertEqualsSymmetries(d, create(_expected));
+    }
+
+    @Test
+    public void testDerivativeSymmetries3() {
+        SimpleTensor d;
+        Symmetry[] _expected;
+
+
+        d = Tensors.parseSimple("f~(1, 1)_{mn ab}[x_a, y_b]");
+        _expected = new Symmetry[]{
+                new Symmetry(new int[]{0, 1, 3, 2}, false)};
+        assertEqualsSymmetries(
+                d, create(_expected));
+
+        d = Tensors.parseSimple("f~(1, 1)_{mn abc de}[x_abc, y_ab]");
+
+        _expected = new Symmetry[]{
+                new Symmetry(new int[]{0, 1, 4, 5, 6, 2, 3}, false)};
+        assertEqualsSymmetries(
+                d, create(_expected));
+    }
+
+    private static Symmetries create(Symmetry... symmetries) {
+        Symmetries expected = SymmetriesFactory.createSymmetries(symmetries[0].dimension());
+        for (Symmetry sym : symmetries)
+            expected.addUnsafe(sym);
+        return expected;
+    }
+
 
     @Test
     public void testPartition1() {
