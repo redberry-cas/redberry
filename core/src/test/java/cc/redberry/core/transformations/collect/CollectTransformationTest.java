@@ -28,7 +28,9 @@ import cc.redberry.core.context.CC;
 import cc.redberry.core.tensor.*;
 import cc.redberry.core.tensor.iterator.FromChildToParentIterator;
 import cc.redberry.core.transformations.EliminateMetricsTransformation;
+import cc.redberry.core.transformations.Transformation;
 import cc.redberry.core.transformations.expand.ExpandTransformation;
+import cc.redberry.core.transformations.factor.FactorTransformation;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -264,6 +266,16 @@ public class CollectTransformationTest {
         SimpleTensor[] patterns = new SimpleTensor[]{parseSimple("f[x]")};
         CollectTransformation collect = new CollectTransformation(patterns);
         TAssert.assertEquals(collect.transform(t), t);
+    }
+
+    @Test
+    public void testDerivatives2() {
+        Tensor t = parse("D[x][x*f[x, x**2] + f[x, x**2]]");
+        SimpleTensor[] patterns = {
+                parseSimple("f~(0,1)[x, y]"),
+                parseSimple("f~(1,0)[x, y]")};
+        CollectTransformation collect = new CollectTransformation(patterns, new Transformation[]{FactorTransformation.FACTOR});
+        TAssert.assertEquals(collect.transform(t), "f[x,x**2]+(x+1)*f~(1,0)[x,x**2]+2*x*(x+1)*f~(0,1)[x,x**2]");
     }
 
 }

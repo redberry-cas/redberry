@@ -110,7 +110,18 @@ class RedberryStatic {
 
         Transformation getAt(Collection args) {
             use(Redberry) {
-                return new CollectTransformation(* args.collect { (it instanceof String) ? it.t : it });
+                def _args = []
+                def _tr = []
+                args.each { t ->
+                    if (t instanceof String || t instanceof GString)
+                        t = t.t
+
+                    if (t instanceof SimpleTensor)
+                        _args << t
+                    if (t instanceof Transformation)
+                        _tr << t
+                }
+                return new CollectTransformation(_args as SimpleTensor[], _tr as Transformation[]);
             }
         }
     }

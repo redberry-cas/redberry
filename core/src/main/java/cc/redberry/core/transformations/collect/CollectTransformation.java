@@ -56,11 +56,17 @@ import static cc.redberry.core.tensor.Tensors.sum;
  */
 public class CollectTransformation implements Transformation {
     private final TIntHashSet patternsNames;
+    private final Transformation[] transformations;
 
-    public CollectTransformation(SimpleTensor... patterns) {
+    public CollectTransformation(SimpleTensor[] patterns, Transformation[] transformations) {
         patternsNames = new TIntHashSet();
         for (SimpleTensor t : patterns)
             patternsNames.add(t.getName());
+        this.transformations = transformations;
+    }
+
+    public CollectTransformation(SimpleTensor... patterns) {
+        this(patterns, new Transformation[0]);
     }
 
     @Override
@@ -110,7 +116,7 @@ public class CollectTransformation implements Transformation {
 
         for (ArrayList<Split> splits : map.valueCollection())
             for (Split split : splits)
-                notMatched.put(split.toTensor());
+                notMatched.put(split.toTensor(transformations));
 
 
         return notMatched.build();
@@ -195,7 +201,7 @@ public class CollectTransformation implements Transformation {
 
             kroneckers.add(summand);
             summand = Tensors.multiply(kroneckers.toArray(new Tensor[kroneckers.size()]));
-            summand  = EliminateMetricsTransformation.eliminate(summand);
+            summand = EliminateMetricsTransformation.eliminate(summand);
 
             return new Split(factors, summand);
         }
@@ -224,8 +230,10 @@ public class CollectTransformation implements Transformation {
             return hashCode;
         }
 
-        Tensor toTensor() {
-            Tensor sum = Tensors.sum(summands.toArray(new Tensor[summands.size()]));
+        Tensor toTensor(Transformation[] transformations) {
+            Tensor sum = Transformation.Util.applySequentially(
+                    Tensors.sum(summands.toArray(new Tensor[summands.size()])),
+                    transformations);
             Tensor[] ms = new Tensor[factors.length + 1];
             ms[ms.length - 1] = sum;
             System.arraycopy(factors, 0, ms, 0, factors.length);
