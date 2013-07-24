@@ -90,8 +90,8 @@
     <scm><connection>scm:hg:http://bitbucket.org/redberry/redberry-core</connection><url>https://bitbucket.org/redberry/redberry-core/src/</url></scm>
 
     <issueManagement>
-        <system>Bitbucket</system>
-        <url>https://bitbucket.org/redberry/redberry/issues</url>
+        <system>YouTRACK</system>
+        <url>http://dev.redberry.cc/</url>
     </issueManagement>
 
     <build>

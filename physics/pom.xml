@@ -91,8 +91,8 @@
     <scm><connection>scm:hg:http://bitbucket.org/redberry/redberry-physics</connection><url>https://bitbucket.org/redberry/redberry-physics/src/</url></scm>
 
     <issueManagement>
-        <system>Bitbucket</system>
-        <url>https://bitbucket.org/redberry/redberry/issues</url>
+        <system>YouTRACK</system>
+        <url>http://dev.redberry.cc/</url>
     </issueManagement>
 
     <build>
