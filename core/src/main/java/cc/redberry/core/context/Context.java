@@ -26,7 +26,7 @@ import cc.redberry.core.indices.*;
 import cc.redberry.core.parser.ParseManager;
 import cc.redberry.core.tensor.SimpleTensor;
 import cc.redberry.core.tensor.Tensors;
-import cc.redberry.core.utils.LongBackedBitArray;
+import cc.redberry.core.utils.BitArray;
 
 /**
  * This class represents Redberry context. It stores all Redberry session data (in some sense it stores static data).
@@ -66,7 +66,7 @@ public final class Context {
      * Holds information about metric types.
      * This is a "map" from (byte) type to (bit) isMetric
      */
-    private final LongBackedBitArray metricTypes = new LongBackedBitArray(128);
+    private final BitArray metricTypes = new BitArray(128);
 
     /**
      * Creates context from the settings

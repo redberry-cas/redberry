@@ -23,14 +23,13 @@
 package cc.redberry.core.indices;
 
 import cc.redberry.core.context.CC;
-import cc.redberry.core.utils.ByteBackedBitArray;
+import cc.redberry.core.utils.BitArray;
 
 import java.util.Arrays;
 
 /**
- * The unique identification information about indices objects. This class contains
- * information about types of indices (number of indices of each type) and about
- * states of non metric indices (if there are any).
+ * The unique identification information about indices objects. This class contains information about types of indices
+ * (number of indices of each type) and about states of non metric indices (if there are any).
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
@@ -44,7 +43,7 @@ public final class StructureOfIndices {
      */
     public static final StructureOfIndices EMPTY = new StructureOfIndices((byte) 0, 0);
     private final int[] typesCounts = new int[IndexType.TYPES_COUNT];
-    private final ByteBackedBitArray[] states = new ByteBackedBitArray[IndexType.TYPES_COUNT];
+    private final BitArray[] states = new BitArray[IndexType.TYPES_COUNT];
     private final int size;
 
     private StructureOfIndices(int size) {
@@ -63,7 +62,7 @@ public final class StructureOfIndices {
         size = count;
         for (int i = 0; i < IndexType.TYPES_COUNT; ++i)
             if (!CC.isMetric((byte) i))
-                this.states[i] = i == type ? new ByteBackedBitArray(states) : ByteBackedBitArray.EMPTY;
+                this.states[i] = i == type ? new BitArray(states) : BitArray.EMPTY;
     }
 
     /**
@@ -80,7 +79,7 @@ public final class StructureOfIndices {
         size = count;
         for (int i = 0; i < IndexType.TYPES_COUNT; ++i)
             if (!CC.isMetric((byte) i))
-                states[i] = ByteBackedBitArray.EMPTY;
+                states[i] = BitArray.EMPTY;
     }
 
 
@@ -115,7 +114,7 @@ public final class StructureOfIndices {
         this.size = size;
         for (int i = 0; i < IndexType.TYPES_COUNT; ++i)
             if (!CC.isMetric((byte) i))
-                states[i] = ByteBackedBitArray.EMPTY;
+                states[i] = BitArray.EMPTY;
     }
 
     /**
@@ -124,10 +123,10 @@ public final class StructureOfIndices {
      * @param allCount  array of sizes of indices of all types
      * @param allStates array of states of indices of all types
      * @throws IllegalArgumentException {@code allCount.length() !=  allStates.length()}
-     * @throws IllegalArgumentException if length of {@code allCount} not equal the total
-     *                                  number of available types of inddices.
+     * @throws IllegalArgumentException if length of {@code allCount} not equal the total number of available types of
+     *                                  inddices.
      */
-    public StructureOfIndices(int[] allCount, ByteBackedBitArray[] allStates) {
+    public StructureOfIndices(int[] allCount, BitArray[] allStates) {
         if (allCount.length != IndexType.TYPES_COUNT || allStates.length != IndexType.TYPES_COUNT)
             throw new IllegalArgumentException();
         int i, size = 0;
@@ -147,8 +146,8 @@ public final class StructureOfIndices {
      *
      * @return states
      */
-    public ByteBackedBitArray[] getStates() {
-        ByteBackedBitArray[] statesCopy = new ByteBackedBitArray[states.length];
+    public BitArray[] getStates() {
+        BitArray[] statesCopy = new BitArray[states.length];
         for (int i = 0; i < states.length; ++i)
             statesCopy[i] = states[i] == null ? null : states[i].clone();
         return statesCopy;
@@ -159,7 +158,7 @@ public final class StructureOfIndices {
      *
      * @return states of a specified type
      */
-    public ByteBackedBitArray getStates(IndexType type) {
+    public BitArray getStates(IndexType type) {
         return states[type.getType()].clone();
     }
 
@@ -224,10 +223,10 @@ public final class StructureOfIndices {
         }
     }
 
-    private static ByteBackedBitArray createBBBA(int size) {
+    private static BitArray createBBBA(int size) {
         if (size == 0)
-            return ByteBackedBitArray.EMPTY;
-        return new ByteBackedBitArray(size);
+            return BitArray.EMPTY;
+        return new BitArray(size);
     }
 
     /**
@@ -300,8 +299,8 @@ public final class StructureOfIndices {
         System.arraycopy(typesCounts, 0, r.typesCounts, 0, typesCounts.length);
         for (int i = r.states.length - 1; i >= 0; --i) {
             if (states[i] == null) continue;
-            if (states[i] == ByteBackedBitArray.EMPTY)
-                r.states[i] = ByteBackedBitArray.EMPTY;
+            if (states[i] == BitArray.EMPTY)
+                r.states[i] = BitArray.EMPTY;
             r.states[i] = states[i].clone();
             r.states[i].not();
         }
@@ -342,15 +341,14 @@ public final class StructureOfIndices {
             r.typesCounts[i] = N * typesCounts[i];
             if (states[i] == null)
                 continue;
-            r.states[i] = states[i].pow(N);
+            r.states[i] = states[i].times(N);
         }
         return r;
     }
 
     /**
-     * Subtracts some structure of indices from the right side of current structure.
-     * <p/>
-     * <p>This operation may fail if states of other structure differs from current.</p>
+     * Subtracts some structure of indices from the right side of current structure. <p/> <p>This operation may fail if
+     * states of other structure differs from current.</p>
      *
      * @param other other structure
      * @return result of subtraction
@@ -377,9 +375,9 @@ public final class StructureOfIndices {
     }
 
     /**
-     * Calculates partition of this structure by the specified structures and returns the resulting map.
-     * This map organized as follows: map[i][j] represents the index of this, which matches
-     * j-th index of i-th structure in specified partition
+     * Calculates partition of this structure by the specified structures and returns the resulting map. This map
+     * organized as follows: map[i][j] represents the index of this, which matches j-th index of i-th structure in
+     * specified partition
      *
      * @param partition
      * @return map which encodes partition of this structure by the specified structures
@@ -467,9 +465,9 @@ public final class StructureOfIndices {
         /**
          * Information about states of indices
          */
-        public final ByteBackedBitArray states;
+        public final BitArray states;
 
-        TypeData(int from, int length, ByteBackedBitArray states) {
+        TypeData(int from, int length, BitArray states) {
             this.from = from;
             this.length = length;
             if (states != null)

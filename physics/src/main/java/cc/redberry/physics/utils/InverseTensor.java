@@ -598,7 +598,7 @@ public final class InverseTensor {
             FileOutputStream output = new FileOutputStream(path + "/equations.mathematica");
             PrintStream file = new PrintStream(output);
 
-            file.append("$equations = { ");
+            file.append("$equations = {\n");
             int i;
             for (i = 0; ; i++) {
                 file.append(equations[i].toString(OutputFormat.WolframMathematica).replace("=", "=="));
@@ -606,7 +606,7 @@ public final class InverseTensor {
                     break;
                 file.append(",\n");
             }
-            file.append(" };\n");
+            file.append("\n};\n");
 
             file.append("$coefficients = {");
             for (i = 0; ; i++) {
@@ -671,7 +671,7 @@ public final class InverseTensor {
             for (i = 0; i < equations.length; i++)
                 file.println("eq[" + (i + 1) + "]:=" + equations[i] + ":");
 
-            file.print("Result := solve({seq(eq[i],i=1.." + equations.length + ")},[");
+            file.print("Result := solve(simplify({seq(eq[i],i=1.." + equations.length + ")}),[");
             for (i = 0; i < inverseTensor.unknownCoefficients.length; ++i)
                 if (i == inverseTensor.unknownCoefficients.length - 1)
                     file.append(inverseTensor.unknownCoefficients[i].toString());
@@ -681,9 +681,9 @@ public final class InverseTensor {
             file.append("Result:= factor(Result);\n");
             file.println("file:=fopen(\"" + path + "/equations.mapleOut\",WRITE):");
             file.append("if nops(Result) <> 0 then\n");
-            file.append("for k from 1 to " + inverseTensor.unknownCoefficients.length + " do\n");
-            file.append("temp1 := SubstituteAll(convert(lhs(Result[1][k]), string), \"^\", \"**\");\n");
-            file.append("temp2 := SubstituteAll(convert(rhs(Result[1][k]), string), \"^\", \"**\");\n");
+            file.append("for temp_var_3x66y66i3 from 1 to " + inverseTensor.unknownCoefficients.length + " do\n");
+            file.append("temp1 := SubstituteAll(convert(lhs(Result[1][temp_var_3x66y66i3]), string), \"^\", \"**\");\n");
+            file.append("temp2 := SubstituteAll(convert(rhs(Result[1][temp_var_3x66y66i3]), string), \"^\", \"**\");\n");
             file.append("fprintf(file,\"%s=%s\\n\",temp1,temp2);\n");
             file.append("od:\n");
             file.append("end if;\n");

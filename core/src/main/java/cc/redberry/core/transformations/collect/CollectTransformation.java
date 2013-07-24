@@ -26,9 +26,8 @@ import cc.redberry.concurrent.OutputPortUnsafe;
 import cc.redberry.core.combinatorics.Combinatorics;
 import cc.redberry.core.indexgenerator.IndexGenerator;
 import cc.redberry.core.indexmapping.IndexMapping;
-import cc.redberry.core.indexmapping.IndexMappingBuffer;
-import cc.redberry.core.indexmapping.IndexMappingBufferRecord;
 import cc.redberry.core.indexmapping.IndexMappings;
+import cc.redberry.core.indexmapping.Mapping;
 import cc.redberry.core.indices.Indices;
 import cc.redberry.core.indices.IndicesBuilder;
 import cc.redberry.core.indices.IndicesUtils;
@@ -46,7 +45,6 @@ import gnu.trove.set.hash.TIntHashSet;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Map;
 
 import static cc.redberry.core.indices.IndicesUtils.*;
 import static cc.redberry.core.tensor.Tensors.multiply;
@@ -58,11 +56,17 @@ import static cc.redberry.core.tensor.Tensors.sum;
  */
 public class CollectTransformation implements Transformation {
     private final TIntHashSet patternsNames;
+    private final Transformation[] transformations;
 
-    public CollectTransformation(SimpleTensor... patterns) {
+    public CollectTransformation(SimpleTensor[] patterns, Transformation[] transformations) {
         patternsNames = new TIntHashSet();
         for (SimpleTensor t : patterns)
             patternsNames.add(t.getName());
+        this.transformations = transformations;
+    }
+
+    public CollectTransformation(SimpleTensor... patterns) {
+        this(patterns, new Transformation[0]);
     }
 
     @Override
@@ -73,7 +77,6 @@ public class CollectTransformation implements Transformation {
         Tensor current;
         Split toAdd;
         ArrayList<Split> nodes;
-        Indices indices;
         out:
         while ((current = port.take()) != null) {
             toAdd = split(current);
@@ -94,18 +97,15 @@ public class CollectTransformation implements Transformation {
             for (Split base : nodes) {
                 if ((match = matchFactors(base.factors, toAdd.factors)) != null) {
                     SimpleTensor[] toAddFactors = Combinatorics.reorder(toAdd.factors, match);
-                    IndexMappingBuffer mapping =
+                    Mapping mapping =
                             IndexMappings.createBijectiveProductPort(toAddFactors, base.factors).take();
 
-                    for (Map.Entry<Integer, IndexMappingBufferRecord> entry : mapping.getMap().entrySet())
-                        entry.getValue().invertStates();
+//                    mapping =  mapping.inverseStates();
+//                    for (Map.Entry<Integer, IndexMappingBufferRecord> entry : mapping.getMap().entrySet())
+//                        entry.getValue().invertStates();
 
-                    indices = toAdd.summands.get(0).getIndices().getFree();
-                    for (int i = indices.size() - 1; i >= 0; --i) {
-                        if (!mapping.getMap().containsKey(getNameWithType(indices.get(i))))
-                            mapping.tryMap(indices.get(i), indices.get(i));
-                    }
-                    base.summands.add(ApplyIndexMapping.applyIndexMapping(toAdd.summands.get(0), mapping, base.forbidden));
+
+                    base.summands.add(ApplyIndexMapping.applyIndexMappingAutomatically(toAdd.summands.get(0), mapping, base.forbidden));
                     continue out;
                 }
             }
@@ -113,13 +113,13 @@ public class CollectTransformation implements Transformation {
             nodes.add(toAdd);
         }
 
-        SumBuilder sb = new SumBuilder(map.size());
+
         for (ArrayList<Split> splits : map.valueCollection())
             for (Split split : splits)
-                sb.put(split.toTensor());
+                notMatched.put(split.toTensor(transformations));
 
 
-        return sb.build();
+        return notMatched.build();
     }
 
 
@@ -201,7 +201,7 @@ public class CollectTransformation implements Transformation {
 
             kroneckers.add(summand);
             summand = Tensors.multiply(kroneckers.toArray(new Tensor[kroneckers.size()]));
-            summand  = EliminateMetricsTransformation.eliminate(summand);
+            summand = EliminateMetricsTransformation.eliminate(summand);
 
             return new Split(factors, summand);
         }
@@ -230,8 +230,10 @@ public class CollectTransformation implements Transformation {
             return hashCode;
         }
 
-        Tensor toTensor() {
-            Tensor sum = Tensors.sum(summands.toArray(new Tensor[summands.size()]));
+        Tensor toTensor(Transformation[] transformations) {
+            Tensor sum = Transformation.Util.applySequentially(
+                    Tensors.sum(summands.toArray(new Tensor[summands.size()])),
+                    transformations);
             Tensor[] ms = new Tensor[factors.length + 1];
             ms[ms.length - 1] = sum;
             System.arraycopy(factors, 0, ms, 0, factors.length);

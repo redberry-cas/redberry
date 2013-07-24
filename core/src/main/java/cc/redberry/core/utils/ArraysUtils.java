@@ -43,6 +43,24 @@ public final class ArraysUtils {
     private ArraysUtils() {
     }
 
+    public static void arraycopy(IntArray source, int srcPos, int[] dest, int destPos, int length) {
+        System.arraycopy(source.innerArray, srcPos, dest, destPos, length);
+    }
+
+    public static int[] getSeriesFrom0(int size) {
+        int[] ret = new int[size];
+        for (int i = size; i >= 0; ++i)
+            ret[i] = i;
+        return ret;
+    }
+
+    public static int[][] deepClone(int[][] input) {
+        int[][] res = new int[input.length][];
+        for (int i = res.length - 1; i >= 0; --i)
+            res[i] = input[i].clone();
+        return res;
+    }
+
     public static int sum(final int[] array) {
         int s = 0;
         for (int i : array)
@@ -219,10 +237,22 @@ public final class ArraysUtils {
         return joinedArray;
     }
 
+    /**
+     * Removes elements at specified {@code positions} in specified {@code array}. This method preserve
+     * the relative order of elements in specified {@code array}.
+     *
+     * @param array     array of elements
+     * @param positions positions of elements that should be removed
+     * @param <T>       generic type
+     * @return new array with removed elements at specified positions
+     * @throws ArrayIndexOutOfBoundsException if some position larger then array length
+     */
     public static <T> T[] remove(T[] array, int[] positions) {
         if (array == null)
             throw new NullPointerException();
         int[] p = MathUtils.getSortedDistinct(positions);
+        if (p.length == 0)
+            return array;
 
         int size = p.length, pointer = 0, s = array.length;
         for (; pointer < size; ++pointer)
@@ -244,6 +274,50 @@ public final class ArraysUtils {
         return r;
     }
 
+
+    /**
+     * Removes elements at specified {@code positions} in specified {@code array}. This method preserve
+     * the relative order of elements in specified {@code array}.
+     *
+     * @param array     array of elements
+     * @param positions positions of elements that should be removed
+     * @return new array with removed elements at specified positions
+     * @throws ArrayIndexOutOfBoundsException if some position larger then array length
+     */
+    public static int[] remove(int[] array, int[] positions) {
+        if (array == null)
+            throw new NullPointerException();
+        int[] p = MathUtils.getSortedDistinct(positions.clone());
+        if (p.length == 0)
+            return array;
+
+        int size = p.length, pointer = 0, s = array.length;
+        for (; pointer < size; ++pointer)
+            if (p[pointer] >= s)
+                throw new ArrayIndexOutOfBoundsException();
+
+        int[] r = new int[array.length - p.length];
+
+        pointer = 0;
+        int i = -1;
+        for (int j = 0; j < s; ++j) {
+            if (pointer < size - 1 && j > p[pointer])
+                ++pointer;
+            if (j == p[pointer]) continue;
+            else r[++i] = array[j];
+        }
+        return r;
+    }
+
+    /**
+     * Selects elements from specified {@code array} at specified {@code positions}. The resulting array preserves
+     * the relative order of elements in specified {@code array}.
+     *
+     * @param array     array of elements
+     * @param positions of elements that should be picked out
+     * @param <T>       generic type
+     * @return the array of elements that picked out from specified positions in specified array
+     */
     public static <T> T[] select(T[] array, int[] positions) {
         if (array == null)
             throw new NullPointerException();
@@ -257,6 +331,12 @@ public final class ArraysUtils {
         return r;
     }
 
+    /**
+     * Converts {@code Set<Integer>} to {@code int[]}
+     *
+     * @param set a {@link Set} of {@link Integer}
+     * @return {@code int[]}
+     */
     public static int[] toArray(Set<Integer> set) {
         int i = -1;
         int[] a = new int[set.size()];
@@ -265,8 +345,62 @@ public final class ArraysUtils {
         return a;
     }
 
+    /**
+     * Searches a range of
+     * the specified array of ints for the specified value using the
+     * binary search algorithm.
+     * The range must be sorted (as
+     * by the {@link cc.redberry.core.utils.IntArrayList#sort()} method)
+     * prior to making this call.  If it
+     * is not sorted, the results are undefined.  If the range contains
+     * multiple elements with the specified value, there is no guarantee which
+     * one will be found.
+     *
+     * @param list the list to be searched
+     * @param key  the value to be searched for
+     * @return index of the search key, if it is contained in the array
+     *         within the specified range;
+     *         otherwise, <tt>(-(<i>insertion point</i>) - 1)</tt>.  The
+     *         <i>insertion point</i> is defined as the point at which the
+     *         key would be inserted into the array: the index of the first
+     *         element in the range greater than the key,
+     *         or <tt>toIndex</tt> if all
+     *         elements in the range are less than the specified key.  Note
+     *         that this guarantees that the return value will be &gt;= 0 if
+     *         and only if the key is found.
+     * @see Arrays#binarySearch(int[], int)
+     */
     public static int binarySearch(IntArrayList list, int key) {
         return Arrays.binarySearch(list.data, 0, list.size, key);
+    }
+
+    /**
+     * Searches a range of
+     * the specified array of ints for the specified value using the
+     * binary search algorithm.
+     * The range must be sorted (as
+     * by the {@link cc.redberry.core.utils.IntArrayList#sort()} method)
+     * prior to making this call.  If it
+     * is not sorted, the results are undefined.  If the range contains
+     * multiple elements with the specified value, there is no guarantee which
+     * one will be found.
+     *
+     * @param array the list to be searched
+     * @param key   the value to be searched for
+     * @return index of the search key, if it is contained in the array
+     *         within the specified range;
+     *         otherwise, <tt>(-(<i>insertion point</i>) - 1)</tt>.  The
+     *         <i>insertion point</i> is defined as the point at which the
+     *         key would be inserted into the array: the index of the first
+     *         element in the range greater than the key,
+     *         or <tt>toIndex</tt> if all
+     *         elements in the range are less than the specified key.  Note
+     *         that this guarantees that the return value will be &gt;= 0 if
+     *         and only if the key is found.
+     * @see Arrays#binarySearch(int[], int)
+     */
+    public static int binarySearch(IntArray array, int key) {
+        return Arrays.binarySearch(array.innerArray, 0, array.innerArray.length, key);
     }
 
     /**
@@ -550,6 +684,21 @@ public final class ArraysUtils {
             ArraysUtils.timSort(target, cosort);
         else
             ArraysUtils.insertionSort(target, cosort);
+    }
+
+
+    /**
+     * Sorts the specified array and returns the resulting permutation
+     *
+     * @param target int array
+     * @return sorting permutation
+     */
+    public static int[] quickSortP(int[] target) {
+        int[] permutation = new int[target.length];
+        for (int i = 1; i < target.length; ++i)
+            permutation[i] = i;
+        quickSort(target, 0, target.length, permutation);
+        return permutation;
     }
 
     /**

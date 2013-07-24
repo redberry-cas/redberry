@@ -25,6 +25,7 @@ package cc.redberry.core.transformations.symmetrization;
 import cc.redberry.core.combinatorics.Permutation;
 import cc.redberry.core.combinatorics.symmetries.Symmetries;
 import cc.redberry.core.combinatorics.symmetries.SymmetriesFactory;
+import cc.redberry.core.indexmapping.Mapping;
 import cc.redberry.core.indices.IndicesUtils;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.number.Rational;
@@ -92,7 +93,7 @@ public final class Symmetrize implements Transformation {
                         continue OUT;
             generatedPermutations.add(permutation);
             int[] newIndicesNames = permutation.permute(freeIndicesNames);
-            generatedTensors.add(ApplyIndexMapping.applyIndexMapping(tensor, freeIndicesNames, newIndicesNames, new int[0]));
+            generatedTensors.add(ApplyIndexMapping.applyIndexMapping(tensor, new Mapping(freeIndicesNames, newIndicesNames), new int[0]));
         }
         Tensor[] summands = generatedTensors.toArray(new Tensor[generatedTensors.size()]);
         if (multiplyFactorial)

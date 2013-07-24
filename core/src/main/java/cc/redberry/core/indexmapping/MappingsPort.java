@@ -25,20 +25,20 @@ package cc.redberry.core.indexmapping;
 import cc.redberry.concurrent.OutputPortUnsafe;
 
 /**
- * This is an output port of mappings of indices of one tensor on another.
- *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
- * @since 1.0
  */
-public interface MappingsPort
-        extends OutputPortUnsafe<IndexMappingBuffer> {
+public final class MappingsPort implements OutputPortUnsafe<Mapping> {
+    private final OutputPortUnsafe<IndexMappingBuffer> innerPort;
 
-    /**
-     * Returns the next mapping or {@code null} if no more mappings exist.
-     *
-     * @return the next mapping or {@code null} if no more mappings exist
-     */
+    MappingsPort(OutputPortUnsafe<IndexMappingBuffer> innerPort) {
+        this.innerPort = innerPort;
+    }
+
     @Override
-    public IndexMappingBuffer take();
+    public Mapping take() {
+        IndexMappingBuffer temp = innerPort.take();
+        if (temp == null) return null;
+        return new Mapping(temp);
+    }
 }

@@ -188,25 +188,6 @@ public class BlackList {
 //        }
 //    }
 
-    @Test
-    public void test() {
-//        burnJvm();
-        long start;
-        Comparator<int[]> comparator = new Comparator<int[]>() {
-            @Override
-            public int compare(int[] o1, int[] o2) {
-                return Integer.compare(o1[2], o2[2]);
-            }
-        };
-        int[][] a;
-        for (int i = 0; i < 100; ++i) {
-            a = randomArray1();
-            start = System.currentTimeMillis();
-            Arrays.sort(a, comparator);
-            System.out.println(System.currentTimeMillis() - start);
-        }
-    }
-
     public static void burnJvm() {
         int[] a = null;
         int t = 0;

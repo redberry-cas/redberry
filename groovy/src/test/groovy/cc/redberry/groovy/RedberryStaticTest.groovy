@@ -114,5 +114,14 @@ class RedberryStaticTest {
         }
 
     }
+
+    @Test
+    public void testCollect2() {
+        use(Redberry) {
+            def t = 'f[x,x**2]+(x+1)*f~(1,0)[x,x**2]+2*x*(x+1)*f~(0,1)[x,x**2]'.t
+            assertTrue Collect['f~(0,1)[x, y]', 'f~(1,0)[x, y]', Factor] >> t == 'f[x,x**2]+(x+1)*f~(1,0)[x,x**2]+2*x*(x+1)*f~(0,1)[x,x**2]'.t
+        }
+
+    }
 }
 

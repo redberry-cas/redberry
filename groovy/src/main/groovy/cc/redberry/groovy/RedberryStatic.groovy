@@ -39,7 +39,7 @@ import cc.redberry.core.transformations.factor.FactorTransformation
 import cc.redberry.core.transformations.fractions.GetDenominatorTransformation
 import cc.redberry.core.transformations.fractions.GetNumeratorTransformation
 import cc.redberry.core.transformations.fractions.TogetherTransformation
-import cc.redberry.core.utils.ByteBackedBitArray
+import cc.redberry.core.utils.BitArray
 
 /**
  * Groovy facade for Redberry transformations and utility methods.
@@ -110,7 +110,18 @@ class RedberryStatic {
 
         Transformation getAt(Collection args) {
             use(Redberry) {
-                return new CollectTransformation(* args.collect { (it instanceof String) ? it.t : it });
+                def _args = []
+                def _tr = []
+                args.each { t ->
+                    if (t instanceof String || t instanceof GString)
+                        t = t.t
+
+                    if (t instanceof SimpleTensor)
+                        _args << t
+                    if (t instanceof Transformation)
+                        _tr << t
+                }
+                return new CollectTransformation(_args as SimpleTensor[], _tr as Transformation[]);
             }
         }
     }
@@ -271,14 +282,14 @@ class RedberryStatic {
             StructureOfIndices[] st = token.indicesTypeStructureAndName.structure;
 
             int[] allTypesCounts = st[0].typesCounts;
-            def ByteBackedBitArray[] allStates = st[0].states;
+            def BitArray[] allStates = st[0].states;
 
             descriptors.each { descriptor ->
                 def type = descriptor.type.type
                 if (allTypesCounts[type] != 0)
                     throw new IllegalArgumentException()
                 allTypesCounts[type] = descriptor.lower + descriptor.upper
-                allStates[type] = new ByteBackedBitArray(allTypesCounts[type])
+                allStates[type] = new BitArray(allTypesCounts[type])
                 for (int i = 0; i < descriptor.upper; ++i)
                     allStates[type].set(i)
             }

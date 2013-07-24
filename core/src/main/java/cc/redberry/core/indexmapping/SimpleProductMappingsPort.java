@@ -22,6 +22,7 @@
  */
 package cc.redberry.core.indexmapping;
 
+import cc.redberry.concurrent.OutputPortUnsafe;
 import cc.redberry.core.tensor.Tensor;
 
 /**
@@ -32,7 +33,7 @@ import cc.redberry.core.tensor.Tensor;
  * @see ProviderProduct
  * @since 1.0
  */
-final class SimpleProductMappingsPort implements MappingsPort {
+final class SimpleProductMappingsPort implements OutputPortUnsafe<IndexMappingBuffer> {
 
     private final IndexMappingProvider[] providers;
     private boolean inited = false;

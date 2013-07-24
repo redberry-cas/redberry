@@ -1073,6 +1073,7 @@ public class SubstitutionsTest {
     public void testPower13() {
         Expression s = parseExpression("d*Sin[a - b]*f_mn = k_mn");
         Tensor t = parse("d*Sin[b - a]*f_mn ");
+        System.out.println(s.transform(t));
         TAssert.assertEquals(s.transform(t), "-k_mn");
     }
 

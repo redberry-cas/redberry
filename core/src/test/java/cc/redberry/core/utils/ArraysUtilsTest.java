@@ -22,13 +22,13 @@
  */
 package cc.redberry.core.utils;
 
+import cc.redberry.core.combinatorics.Combinatorics;
 import org.junit.Assert;
 import org.junit.Test;
 
 import static org.junit.Assert.assertArrayEquals;
 
 /**
- *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
@@ -53,6 +53,16 @@ public class ArraysUtilsTest {
     public void testShort3() {
         short[] target = new short[0];
         assertArrayEquals(new int[0], ArraysUtils.quickSortP(target));
+    }
+
+    @Test
+    public void testSortPermutation1() {
+        for (int i = 0; i < 100; ++i) {
+            int[] a = Combinatorics.randomPermutation(10);
+            int[] sorted = a.clone();
+            int[] permutation = ArraysUtils.quickSortP(sorted);
+            assertArrayEquals(Combinatorics.reorder(a, permutation), sorted);
+        }
     }
 
     @Test

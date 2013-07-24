@@ -66,6 +66,10 @@ public final class Parser {
      * @return AST
      */
     public ParseToken parse(String expression) {
+        //replacing comments
+        expression = expression.replaceAll("//.*|(\"(?:\\\\[^\"]|\\\\\"|.)*?\")|(?s)/\\*.*?\\*/","");
+        //join strings
+        expression = expression.replaceAll("\n","");
         if (expression.isEmpty())
             throw new IllegalArgumentException("Empty expression.");
         for (TokenParser tokenParser : tokenParsers) {

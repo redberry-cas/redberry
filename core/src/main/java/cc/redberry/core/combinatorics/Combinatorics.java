@@ -185,6 +185,18 @@ public final class Combinatorics {
         return cycle;
     }
 
+    public static int[] createBlockTransposition(final int length1, final int length2) {
+        final int[] r = new int[length1 + length2];
+        int i = 0;
+        for (; i < length2; ++i) {
+            r[i] = length1 + i;
+        }
+        for (; i < r.length; ++i)
+            r[i] = i - length2;
+        return r;
+    }
+
+
     /**
      * Returns the inverse permutation for the specified one.
      * <p/>

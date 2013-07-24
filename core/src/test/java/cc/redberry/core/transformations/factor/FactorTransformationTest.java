@@ -153,7 +153,7 @@ public class FactorTransformationTest {
 
     private static Tensor randomSum(Random random) {
         SimpleTensor[] simpleTensors = {parseSimple("a"), parseSimple("b"),
-                parseSimple("c"),parseSimple("d")};
+                parseSimple("c"), parseSimple("d")};
         int sumSize = 2 + random.nextInt(4);
         SumBuilder sb = new SumBuilder();
         int productSize;
@@ -327,6 +327,18 @@ public class FactorTransformationTest {
         TAssert.assertEquals(
                 FactorTransformation.factor(parse("2*I*(I*a + I*d) + 4*I*(-I*b + I*c)")),
                 "2*(-a -d + 2*b - 2*c)");
+    }
+
+    @Test
+    public void test22() {
+        Tensor t = parse("I*(a+b) - I*a - I*b");
+        TAssert.assertEquals(factor(t), Complex.ZERO);
+    }
+
+    @Test
+    public void test23() {
+        Tensor t = parse("I*(a+b) - I*a - I*b + c*I");
+        TAssert.assertEquals(factor(t), parse("c*I"));
     }
 //     -4*m**10-s*m**8+1+(1/32)*(-48*m**4+1-40*s*m**2-3*s**2)*s*m**4
 }

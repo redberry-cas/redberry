@@ -22,6 +22,7 @@
  */
 package cc.redberry.core.indexmapping;
 
+import cc.redberry.concurrent.OutputPortUnsafe;
 import cc.redberry.core.tensor.Tensor;
 
 /**
@@ -37,7 +38,7 @@ class ProviderFunctions {
 
         @Override
         public IndexMappingProvider create(IndexMappingProvider opu, Tensor from, Tensor to) {
-            MappingsPort mp = IndexMappings.createPort(from.get(0), to.get(0));
+            OutputPortUnsafe<IndexMappingBuffer> mp = IndexMappings.createPortOfBuffers(from.get(0), to.get(0));
             IndexMappingBuffer buffer;
 
             byte state = 0;
@@ -65,7 +66,7 @@ class ProviderFunctions {
 
         @Override
         public IndexMappingProvider create(IndexMappingProvider opu, Tensor from, Tensor to) {
-            if (IndexMappings.createPort(from.get(0), to.get(0)).take() != null)
+            if (IndexMappings.createPortOfBuffers(from.get(0), to.get(0)).take() != null)
                 return new DummyIndexMappingProvider(opu);
             return IndexMappingProvider.Util.EMPTY_PROVIDER;
         }
@@ -76,7 +77,7 @@ class ProviderFunctions {
         @Override
         public IndexMappingProvider create(IndexMappingProvider opu, Tensor from, Tensor to) {
             IndexMappingBuffer buffer;
-            if ((buffer = IndexMappings.createPort(from.get(0), to.get(0)).take()) != null
+            if ((buffer = IndexMappings.createPortOfBuffers(from.get(0), to.get(0)).take()) != null
                     && !buffer.getSign())
                 return new DummyIndexMappingProvider(opu);
             return IndexMappingProvider.Util.EMPTY_PROVIDER;

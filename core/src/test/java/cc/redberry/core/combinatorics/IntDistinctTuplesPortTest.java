@@ -104,7 +104,14 @@ public class IntDistinctTuplesPortTest {
         int[] a2 = {2, 3};
         IntDistinctTuplesPort dcp = new IntDistinctTuplesPort(a1, a2);
         int[] tuple;
+        Set<int[]> produced = new HashSet<>();
+        Set<int[]> expected = new HashSet<>();
+        expected.add(new int[]{1, 2});
+        expected.add(new int[]{1, 3});
+        expected.add(new int[]{2, 3});
+        expected.add(new int[]{3, 2});
         while ((tuple = dcp.take()) != null)
-            System.out.println(Arrays.toString(tuple));
+            produced.add(tuple.clone());
+        TAssert.assertEquals(expected, produced);
     }
 }

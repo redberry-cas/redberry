@@ -81,6 +81,10 @@ public final class IntArray {
         return Arrays.copyOfRange(innerArray, from, to);
     }
 
+    public boolean equalsToArray(int[] array) {
+        return Arrays.equals(innerArray, array);
+    }
+
     @Override
     public boolean equals(Object obj) {
         if (obj == null) return false;

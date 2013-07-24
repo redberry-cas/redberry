@@ -22,6 +22,7 @@
  */
 package cc.redberry.core.indexmapping;
 
+import cc.redberry.concurrent.OutputPortUnsafe;
 import cc.redberry.core.combinatorics.IntPermutationsGenerator;
 import cc.redberry.core.tensor.Tensor;
 
@@ -37,7 +38,7 @@ final class PermutatorProvider extends IndexMappingProviderAbstract {
     private final Tensor[] from, to;
     private SimpleProductMappingsPort currentProvider = null;
 
-    PermutatorProvider(final MappingsPort opu,
+    PermutatorProvider(final OutputPortUnsafe<IndexMappingBuffer> opu,
                        final Tensor[] from, final Tensor[] to) {
         super(opu);
         this.from = from;

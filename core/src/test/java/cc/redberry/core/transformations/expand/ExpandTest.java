@@ -428,4 +428,19 @@ public class ExpandTest {
         TAssert.assertEquals(exp, "(a**2+2*a*b+b**2)*f_{mn}+(c*a+2*a*d*b+c*b+a**2*d+b**2*d)*l_{mn}");
         assertAllBracketsExpanded(expand(t));
     }
+
+    @Test
+    public void testExpandPortWithPower1() {
+        Tensor t = parse("1/(x+y)**2 + a*(c + d)"),
+                expected = parse("1/(x+y)**2 + a*c + a*d"),
+                actual = expandUsingPort(t);
+        TAssert.assertEquals(expected, actual);
+
+    }
+
+    @Test
+    public void test41() {
+        Tensor t = parse("a*d + b*c + f");
+        TAssert.assertTrue(t == expand(t));
+    }
 }
