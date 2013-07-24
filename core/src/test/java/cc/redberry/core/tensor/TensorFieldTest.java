@@ -107,26 +107,6 @@ public class TensorFieldTest {
         assertEqualsSymmetries(d, create(_expected));
     }
 
-    @Test
-    public void testDerivativeSymmetries3() {
-        SimpleTensor d;
-        Symmetry[] _expected;
-
-
-        d = Tensors.parseSimple("f~(1, 1)_{mn ab}[x_a, y_b]");
-        _expected = new Symmetry[]{
-                new Symmetry(new int[]{0, 1, 3, 2}, false)};
-        assertEqualsSymmetries(
-                d, create(_expected));
-
-        d = Tensors.parseSimple("f~(1, 1)_{mn abc de}[x_abc, y_ab]");
-
-        _expected = new Symmetry[]{
-                new Symmetry(new int[]{0, 1, 4, 5, 6, 2, 3}, false)};
-        assertEqualsSymmetries(
-                d, create(_expected));
-    }
-
     private static Symmetries create(Symmetry... symmetries) {
         Symmetries expected = SymmetriesFactory.createSymmetries(symmetries[0].dimension());
         for (Symmetry sym : symmetries)

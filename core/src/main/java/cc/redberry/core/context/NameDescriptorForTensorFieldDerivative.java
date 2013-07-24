@@ -116,20 +116,6 @@ final class NameDescriptorForTensorFieldDerivative extends NameDescriptorForTens
                 }
                 aggregator.clear();
             }
-            if (i != orders.length - 1 && orders[i] > 0 && orders[i + 1] > 0) {
-                //adding transpositions between slots
-                for (k = 0; k < orders[i]; ++k)
-                    aggregator.addAll(mapping[j + k]);
-                a = aggregator.size();
-                for (k = 0; k < orders[i + 1]; ++k)
-                    aggregator.addAll(mapping[j + orders[i] + k]);
-                b = aggregator.size() - a;
-
-                cycle = Combinatorics.createBlockTransposition(a, b);
-                symmetries.addUnsafe(
-                        new Symmetry(Combinatorics.convertPermutation(cycle, aggregator.toArray(), baseStructure.size()), false));
-                aggregator.clear();
-            }
             j += orders[i];
         }
     }
