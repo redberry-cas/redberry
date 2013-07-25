@@ -133,10 +133,15 @@ public final class Mapping implements Transformation {
     @Override
     public String toString() {
         int imax = fromNames.length - 1;
-        if (imax == -1)
-            return "{}";
+        if (imax == -1) {
+            if (sign)
+                return "-{}";
+            else return "{}";
+        }
 
         StringBuilder sb = new StringBuilder();
+        if (sign)
+            sb.append("-");
         sb.append("{");
         for (int i = 0; ; ++i) {
             sb.append(IndicesUtils.toString(fromNames[i]));
