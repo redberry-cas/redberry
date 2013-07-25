@@ -188,7 +188,6 @@ public class TensorGenerator {
                     } else {
                         newCoefficient = coefficientsGenerator.take();
                         coefficientsGenerator.generated.removeAll(TensorUtils.getAllSymbols(oldCoefficient));
-                        System.out.println(oldCoefficient);
                     }
                     list.add(new Tensor[]{oldCoefficient, newCoefficient});
                 }
