@@ -132,15 +132,15 @@ public final class InverseTensor {
         Product leftEq = (Product) equation.get(0);
 
         //matching toInverse l.h.s in equation
-        Tensor inverseLhs = null;
+        SimpleTensor inverseLhs = null;
         for (Tensor t : leftEq)
             if (!IndexMappings.mappingExists(t, toInverse.get(0))) {
-                inverseLhs = t;
+                inverseLhs = (SimpleTensor) t;
                 break;
             }
 
         //creating tensor of the most general form from the specified samples
-        GeneratedTensor generatedTensor = TensorGenerator.generateStructure(newCoefficientName(toInverse, equation), inverseLhs.getIndices(), symmetricForm, samples);
+        GeneratedTensor generatedTensor = TensorGenerator.generateStructure(newCoefficientName(toInverse, equation), inverseLhs.getIndices(), symmetricForm, inverseLhs.getIndices().getSymmetries().getInnerSymmetries(), samples);
         unknownCoefficients = generatedTensor.coefficients;
         //creating inverse tensor expression
         generalInverse = Tensors.expression(inverseLhs, generatedTensor.generatedTensor);

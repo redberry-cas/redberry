@@ -22,11 +22,18 @@
  */
 package cc.redberry.core.tensorgenerator;
 
+import cc.redberry.core.combinatorics.Symmetry;
+import cc.redberry.core.combinatorics.symmetries.Symmetries;
+import cc.redberry.core.combinatorics.symmetries.SymmetriesFactory;
 import cc.redberry.core.parser.ParserIndices;
 import cc.redberry.core.tensor.Sum;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.tensor.Tensors;
+import cc.redberry.core.utils.TensorUtils;
 import org.junit.Test;
+
+import java.util.Arrays;
+import java.util.HashSet;
 
 import static cc.redberry.core.TAssert.assertEquals;
 import static cc.redberry.core.TAssert.assertTrue;
@@ -167,5 +174,78 @@ public class TensorGeneratorTest {
                 ParserIndices.parseSimple("^i_j"),
                 true,
                 Tensors.parse("d^i_j", "p_\\mu*G^{\\mu i}_j")), expected);
+    }
+
+    @Test
+    public void test10() {
+
+        Symmetries symmetries = SymmetriesFactory.createSymmetries(6);
+        symmetries.add(new Symmetry(new int[]{3, 4, 5, 0, 1, 2}, false));
+
+        GeneratedTensor actual = TensorGenerator.generateStructure("c",
+                ParserIndices.parseSimple("^apb_cdq"),
+                false,
+                symmetries,
+                Tensors.parse("d^i_j", "g_ab", "g^ab", "p_a", "p^a"));
+        System.out.println(actual.generatedTensor);
+
+        System.out.println(TensorUtils.findIndicesSymmetries(ParserIndices.parseSimple("^apb_cdq"), actual.generatedTensor));
+        HashSet<String> str = new HashSet<>();
+        for (Tensor t : actual.generatedTensor) {
+            str.add(t.get(0).toString());
+        }
+
+        Tensor[] real = TensorUtils.getAllSymbols(actual.generatedTensor).toArray(new Tensor[0]);
+        Tensor[] expe = actual.coefficients;
+        Arrays.sort(real);
+        Arrays.sort(expe);
+        System.out.println("real coefs in tensor " + Arrays.toString(real));
+        System.out.println("coefs in structure   " + Arrays.toString(expe));
+    }
+
+    @Test
+    public void test10a() {
+
+        Symmetries symmetries = SymmetriesFactory.createSymmetries(4);
+        symmetries.add(new Symmetry(new int[]{3, 0, 1, 2}, false));
+
+        GeneratedTensor actual = TensorGenerator.generateStructure("c",
+                ParserIndices.parseSimple("^ab_cd"),
+                false,
+                symmetries,
+                Tensors.parse("d^i_j", "g_ab", "g^ab", "p_a", "p^a"));
+        System.out.println(actual.generatedTensor);
+
+        System.out.println(TensorUtils.findIndicesSymmetries(ParserIndices.parseSimple("^ab_cd"), actual.generatedTensor));
+
+        Tensor[] real = TensorUtils.getAllSymbols(actual.generatedTensor).toArray(new Tensor[0]);
+        Tensor[] expe = actual.coefficients;
+        Arrays.sort(real);
+        Arrays.sort(expe);
+        System.out.println("real coefs in tensor " + Arrays.toString(real));
+        System.out.println("coefs in structure   " + Arrays.toString(expe));
+    }
+
+    @Test
+    public void test11() {
+
+        Symmetries symmetries = SymmetriesFactory.createSymmetries(6);
+        symmetries.add(new Symmetry(new int[]{3, 4, 5, 0, 1, 2}, false));
+        symmetries.add(new Symmetry(new int[]{2, 1, 0, 3, 4, 5}, true));
+
+        GeneratedTensor actual = TensorGenerator.generateStructure("c",
+                ParserIndices.parseSimple("^apb_cdq"),
+                false,
+                symmetries,
+                Tensors.parse("d^i_j", "g_ab", "g^ab", "p_a", "p^a"));
+        System.out.println(actual.generatedTensor);
+
+        System.out.println(TensorUtils.findIndicesSymmetries(ParserIndices.parseSimple("^apb_cdq"), actual.generatedTensor));
+        Tensor[] real = TensorUtils.getAllSymbols(actual.generatedTensor).toArray(new Tensor[0]);
+        Tensor[] expe = actual.coefficients;
+        Arrays.sort(real);
+        Arrays.sort(expe);
+        System.out.println("real coefs in tensor " + Arrays.toString(real));
+        System.out.println("coefs in structure   " + Arrays.toString(expe));
     }
 }

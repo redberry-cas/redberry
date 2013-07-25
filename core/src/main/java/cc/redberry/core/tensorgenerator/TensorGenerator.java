@@ -24,13 +24,19 @@ package cc.redberry.core.tensorgenerator;
 
 import cc.redberry.concurrent.OutputPortUnsafe;
 import cc.redberry.core.indexmapping.Mapping;
-import cc.redberry.core.indices.Indices;
+import cc.redberry.core.indexmapping.IndexMappingBuffer;
+import cc.redberry.core.indexmapping.IndexMappings;
+import cc.redberry.core.indices.SimpleIndices;
 import cc.redberry.core.math.frobenius.FrobeniusSolver;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.number.Rational;
 import cc.redberry.core.tensor.*;
+import cc.redberry.core.transformations.expand.ExpandTransformation;
+import cc.redberry.core.transformations.symmetrization.SymmetrizeSimpleTensorTransformation;
 import cc.redberry.core.transformations.symmetrization.SymmetrizeUpperLowerIndicesTransformation;
 import cc.redberry.core.utils.IntArray;
+import cc.redberry.core.utils.TensorUtils;
+import gnu.trove.map.hash.TIntObjectHashMap;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -48,11 +54,15 @@ public class TensorGenerator {
     private final Tensor[] samples;
     private final int[] lowerArray, upperArray;
     private final OutputPortUnsafe<Tensor> coefficientsGenerator;
-    private final SumBuilder result = new SumBuilder();
     private final boolean symmetricForm;
+    private final Symmetries symmetries;
+    private final SimpleIndices indices;
+    private Tensor result;
 
-    private TensorGenerator(String coefficientName, Indices indices, boolean symmetricForm, Tensor... samples) {
+    private TensorGenerator(String coefficientName, SimpleIndices indices, boolean symmetricForm, Symmetries symmetries, Tensor... samples) {
         this.samples = samples;
+        this.symmetries = symmetries;
+        this.indices = indices;
         if (coefficientName.isEmpty())
             this.coefficientsGenerator = OnePort.INSTANCE;
         else
@@ -87,6 +97,7 @@ public class TensorGenerator {
         //processing combinations
         int u, l;
         int[] combination;
+        SumBuilder result = new SumBuilder();
         while ((combination = fbSolver.take()) != null) {
 
             List<Tensor> tCombination = new ArrayList<>();
@@ -122,10 +133,74 @@ public class TensorGenerator {
                 term = FastTensors.multiplySumElementsOnFactors((Sum) term, coefficientsGenerator);
             result.put(term);
         }
+        this.result = (symmetries == null || symmetries.isEmpty()) ? result.build() : symmetrize(result.build(), symmetries);
+    }
+
+    private Tensor symmetrize(Tensor result, Symmetries symmetries) {
+        //todo rewrite this slag
+        SimpleTensor st = Tensors.parseSimple("#$#$#A$#ASD" + indices);
+        Expression expr = Tensors.expression(st, result);
+        Tensor symmetrized = SymmetrizeSimpleTensorTransformation.symmetrize(
+                st, st.getIndices().getAllIndices().copy(), symmetries);
+        if (symmetrized instanceof Product)
+            symmetrized = Tensors.multiply(symmetrized, ((Product) symmetrized).getFactor().reciprocal());
+
+        assert symmetrized instanceof Sum;
+
+        result = ExpandTransformation.expand(expr.transform(symmetrized));
+
+
+        if (!(result instanceof Sum))
+            return result;
+
+        TIntObjectHashMap<List<Tensor[]>> coefficients = new TIntObjectHashMap<>();
+        SymbolsGeneratorWithHistory coefficientsGenerator = (SymbolsGeneratorWithHistory) this.coefficientsGenerator;
+        Tensor oldCoefficient, newCoefficient = null;
+        TensorBuilder rebuild = result.getBuilder();
+        List<Tensor[]> list;
+        for (Tensor t : result) {
+            assert t instanceof Product;
+            if (t instanceof Product) {
+                Tensor[] sc = ((Product) t).getAllScalarsWithoutFactor();
+                if (sc.length == 0)
+                    continue;
+
+                assert sc.length == 1;
+                oldCoefficient = sc[0];
+
+                list = coefficients.get(oldCoefficient.hashCode());
+                if (list == null) {
+                    list = new ArrayList<>();
+                    coefficients.put(oldCoefficient.hashCode(), list);
+                }
+
+                IndexMappingBuffer match = null;
+                for (Tensor[] transformed : list) {
+                    match = IndexMappings.getFirst(transformed[0], oldCoefficient);
+                    if (match != null) {
+                        newCoefficient = match.getSign() ? Tensors.negate(transformed[1]) : transformed[1];
+                        break;
+                    }
+                }
+                if (match == null) {
+                    if (oldCoefficient instanceof SimpleTensor) {
+                        newCoefficient = oldCoefficient;
+                    } else {
+                        newCoefficient = coefficientsGenerator.take();
+                        coefficientsGenerator.generated.removeAll(TensorUtils.getAllSymbols(oldCoefficient));
+                        System.out.println(oldCoefficient);
+                    }
+                    list.add(new Tensor[]{oldCoefficient, newCoefficient});
+                }
+
+                rebuild.put(Tensors.multiply(((Product) t).getFactor(), newCoefficient, ((Product) t).getDataSubProduct()));
+            }
+        }
+        return rebuild.build();
     }
 
     private Tensor result() {
-        return result.build();
+        return result;
     }
 
     /**
@@ -137,8 +212,8 @@ public class TensorGenerator {
      * @param samples         samples which used to  generate tensor of the general form
      * @return tensor of the most general form with specified free indices from specified tensors
      */
-    public static Tensor generate(String coefficientName, Indices indices, boolean symmetricForm, Tensor... samples) {
-        return new TensorGenerator(coefficientName, indices, symmetricForm, samples).result();
+    public static Tensor generate(String coefficientName, SimpleIndices indices, boolean symmetricForm, Tensor... samples) {
+        return new TensorGenerator(coefficientName, indices, symmetricForm, null, samples).result();
     }
 
     /**
@@ -151,17 +226,22 @@ public class TensorGenerator {
      * @return tensor of the most general form with specified free indices from specified tensors and list of
      *         generated coefficients
      */
-    public static GeneratedTensor generateStructure(String coefficientName, Indices indices, boolean symmetricForm, Tensor... samples) {
-        TensorGenerator generator = new TensorGenerator(coefficientName, indices, symmetricForm, samples);
-        SimpleTensor[] generatedCoefficients;
-        if (coefficientName.isEmpty())
-            generatedCoefficients = new SimpleTensor[0];
-        else {
-            SymbolsGeneratorWithHistory coefficientsGenerator = (SymbolsGeneratorWithHistory) generator.coefficientsGenerator;
-            generatedCoefficients = coefficientsGenerator.generated.toArray(new SimpleTensor[coefficientsGenerator.generated.size()]);
-        }
+    public static GeneratedTensor generateStructure(String coefficientName, SimpleIndices indices, boolean symmetricForm, Tensor... samples) {
+        return generateStructure(coefficientName, indices, symmetricForm, null, samples);
+    }
+
+    //todo comments
+    public static GeneratedTensor generateStructure(String coefficientName, SimpleIndices indices, boolean symmetricForm, Symmetries symmetries, Tensor... samples) {
+        TensorGenerator generator = new TensorGenerator(coefficientName, indices, symmetricForm, symmetries, samples);
+        SimpleTensor[] generatedCoefficients = TensorUtils.getAllSymbols(generator.result()).toArray(new SimpleTensor[0]);
         return new GeneratedTensor(generatedCoefficients,
                 generator.result());
+    }
+
+
+    //todo comment
+    public static Tensor generate(String coefficientName, SimpleIndices indices, boolean symmetricForm, Symmetries symmetries, Tensor... samples) {
+        return new TensorGenerator(coefficientName, indices, symmetricForm, symmetries, samples).result();
     }
 
     private static final class OnePort implements OutputPortUnsafe<Tensor> {
