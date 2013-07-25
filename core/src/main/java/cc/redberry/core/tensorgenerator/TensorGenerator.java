@@ -23,9 +23,9 @@
 package cc.redberry.core.tensorgenerator;
 
 import cc.redberry.concurrent.OutputPortUnsafe;
-import cc.redberry.core.indexmapping.Mapping;
-import cc.redberry.core.indexmapping.IndexMappingBuffer;
+import cc.redberry.core.combinatorics.symmetries.Symmetries;
 import cc.redberry.core.indexmapping.IndexMappings;
+import cc.redberry.core.indexmapping.Mapping;
 import cc.redberry.core.indices.SimpleIndices;
 import cc.redberry.core.math.frobenius.FrobeniusSolver;
 import cc.redberry.core.number.Complex;
@@ -174,7 +174,7 @@ public class TensorGenerator {
                     coefficients.put(oldCoefficient.hashCode(), list);
                 }
 
-                IndexMappingBuffer match = null;
+                Mapping match = null;
                 for (Tensor[] transformed : list) {
                     match = IndexMappings.getFirst(transformed[0], oldCoefficient);
                     if (match != null) {
