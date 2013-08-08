@@ -31,10 +31,6 @@ import cc.redberry.core.indexmapping.Mapping;
 import cc.redberry.core.indices.*;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.tensor.*;
-import cc.redberry.core.tensor.functions.ScalarFunction;
-import cc.redberry.core.tensor.iterator.FromChildToParentIterator;
-import cc.redberry.core.tensor.iterator.TraverseGuide;
-import cc.redberry.core.tensor.iterator.TraversePermission;
 import cc.redberry.core.transformations.EliminateMetricsTransformation;
 import cc.redberry.core.transformations.Transformation;
 import cc.redberry.core.transformations.expand.ExpandPort;
@@ -45,7 +41,6 @@ import cc.redberry.core.utils.TensorUtils;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.set.hash.TIntHashSet;
 
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -127,52 +122,6 @@ public class CollectTransformation implements Transformation {
         return notMatched.build();
     }
 
-    public static final TraverseGuide GUIDE = new TraverseGuide() {
-
-        @Override
-        public TraversePermission getPermission(Tensor tensor, Tensor parent, int indexInParent) {
-            if (tensor instanceof ScalarFunction)
-                return TraversePermission.DontShow;
-            else if (tensor instanceof TensorField)
-                return TraversePermission.DontShow;
-            else if (parent instanceof Power && indexInParent == 1)
-                return TraversePermission.DontShow;
-            else if (tensor instanceof Power && !TensorUtils.isPositiveNaturalNumber(tensor.get(1)))
-                return TraversePermission.DontShow;
-            else
-                return TraversePermission.Enter;
-        }
-    };
-
-    private Tensor preExpandIndexedPowers(Tensor t) {
-        FromChildToParentIterator iterator = new FromChildToParentIterator(t, GUIDE);
-        Tensor c, base;
-        BigInteger exponent;
-        boolean match;
-        while ((c = iterator.next()) != null) {
-            if (c instanceof Power) {
-                assert TensorUtils.isPositiveNaturalNumber(c.get(1));
-                if (!(c.get(0) instanceof Product))
-                    continue;
-                base = c.get(0);
-                match = false;
-                for (Tensor b : base)
-                    if (match(b))
-                        match = true;
-                if (!match) continue;
-
-                ArrayList<Tensor> expand = new ArrayList<>();
-                for (Tensor b : base) {
-
-                }
-
-                exponent = ((Complex) c.get(1)).getReal().bigIntValue();
-            }
-        }
-        return t;
-    }
-
-
     private boolean match(Tensor t) {
         if (t instanceof SimpleTensor)
             return patternsNames.contains(t.hashCode());
@@ -182,8 +131,8 @@ public class CollectTransformation implements Transformation {
     }
 
     private Split split(Tensor tensor) {
-        Tensor[] factors = null;
-        Tensor summand = null;
+        Tensor[] factors;
+        Tensor summand;
 
         if (tensor instanceof SimpleTensor || TensorUtils.isPositiveIntegerPowerOfSimpleTensor(tensor))
             if (match(tensor)) {
