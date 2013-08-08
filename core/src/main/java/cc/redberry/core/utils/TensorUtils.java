@@ -94,8 +94,12 @@ public class TensorUtils {
         return tensor instanceof Complex && ((Complex) tensor).isNumeric();
     }
 
-    public static boolean isNegativeIntegerNumber(Tensor tensor) {
-        return tensor instanceof Complex && ((Complex) tensor).isNegativeInteger();
+    public static boolean isNegativeNaturalNumber(Tensor tensor) {
+        return tensor instanceof Complex && ((Complex) tensor).isNegativeNatural();
+    }
+
+    public static boolean isPositiveNaturalNumber(Tensor tensor){
+        return tensor instanceof Complex && ((Complex) tensor).isPositiveNatural();
     }
 
     public static boolean isRealPositiveNumber(Tensor tensor) {
@@ -199,7 +203,32 @@ public class TensorUtils {
      * @return true, if specified tensor is a^(N), where N - a natural number
      */
     public static boolean isPositiveIntegerPower(Tensor t) {
-        return t instanceof Power && TensorUtils.isNaturalNumber(t.get(1));
+        return t instanceof Power && isPositiveNaturalNumber(t.get(1));
+    }
+
+
+    /**
+     * Returns true, if specified tensor is {@code a^(N)}, where {@code N} - a natural number and {@code a} - is a
+     * simple tensor
+     *
+     * @param t tensor
+     * @return true, if specified tensor is {@code a^(N)}, where {@code N} - a natural number and {@code a} - is a
+     * simple tensor
+     */
+    public static boolean isPositiveIntegerPowerOfSimpleTensor(Tensor t) {
+        return isPositiveIntegerPower(t) && t.get(0) instanceof SimpleTensor;
+    }
+
+    /**
+     * Returns true, if specified tensor is {@code a^(N)}, where {@code N} - a natural number and {@code a} - is a
+     * product of tensors
+     *
+     * @param t tensor
+     * @return true, if specified tensor is {@code a^(N)}, where {@code N} - a natural number and {@code a} - is a
+     * product of tensors
+     */
+    public static boolean isPositiveIntegerPowerOfProduct(Tensor t) {
+        return isPositiveIntegerPower(t) && t.get(0) instanceof Product;
     }
 
     /**
@@ -209,7 +238,7 @@ public class TensorUtils {
      * @return true, if specified tensor is a^(-N), where N - a natural number
      */
     public static boolean isNegativeIntegerPower(Tensor t) {
-        return t instanceof Power && TensorUtils.isNegativeIntegerNumber(t.get(1));
+        return t instanceof Power && TensorUtils.isNegativeNaturalNumber(t.get(1));
     }
 
     /**
@@ -570,7 +599,7 @@ public class TensorUtils {
         if (tensor instanceof SimpleTensor)
             return false;
         if (tensor instanceof Power)
-            return isNegativeIntegerNumber(tensor.get(1));
+            return isNegativeNaturalNumber(tensor.get(1));
         for (Tensor t : tensor) {
             if (containsFractions(t))
                 return true;

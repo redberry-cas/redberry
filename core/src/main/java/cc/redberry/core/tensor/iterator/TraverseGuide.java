@@ -22,9 +22,11 @@
  */
 package cc.redberry.core.tensor.iterator;
 
+import cc.redberry.core.tensor.Power;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.tensor.TensorField;
 import cc.redberry.core.tensor.functions.ScalarFunction;
+import cc.redberry.core.utils.TensorUtils;
 
 /**
  * @author Dmitry Bolotin

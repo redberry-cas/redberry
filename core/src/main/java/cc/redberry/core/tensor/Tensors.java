@@ -29,8 +29,10 @@ import cc.redberry.core.context.NameDescriptor;
 import cc.redberry.core.context.NameDescriptorForTensorField;
 import cc.redberry.core.indices.*;
 import cc.redberry.core.number.Complex;
+import cc.redberry.core.number.Rational;
 import cc.redberry.core.parser.ParseTokenTransformer;
 import cc.redberry.core.tensor.functions.*;
+import cc.redberry.core.transformations.factor.jasfactor.edu.jas.arith.BigInteger;
 import cc.redberry.core.utils.TensorUtils;
 import gnu.trove.set.hash.TIntHashSet;
 
@@ -61,6 +63,18 @@ public final class Tensors {
      * @throws IllegalArgumentException if argument is not scalar
      */
     public static Tensor pow(Tensor argument, int power) {
+        return pow(argument, new Complex(power));
+    }
+
+    /**
+     * Power function. Returns tensor raised to specified integer power.
+     *
+     * @param argument base
+     * @param power    power
+     * @return result of argument exponentiation
+     * @throws IllegalArgumentException if argument is not scalar
+     */
+    public static Tensor pow(Tensor argument, java.math.BigInteger power) {
         return pow(argument, new Complex(power));
     }
 
