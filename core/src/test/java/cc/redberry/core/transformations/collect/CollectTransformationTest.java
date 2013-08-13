@@ -278,4 +278,48 @@ public class CollectTransformationTest {
         TAssert.assertEquals(collect.transform(t), "f[x,x**2]+(x+1)*f~(1,0)[x,x**2]+2*x*(x+1)*f~(0,1)[x,x**2]");
     }
 
+    @Test
+    public void testPower1() {
+        Tensor t = parse("x**2 + x**2*a");
+        SimpleTensor[] pattern = {parseSimple("x")};
+        CollectTransformation tr = new CollectTransformation(pattern);
+        TAssert.assertEquals(tr.transform(t), "x**2*(1+a)");
+    }
+
+    @Test
+    public void testPower2() {
+        Tensor t = parse("y**3*x**2*b*c + y**3*x**2*a**2");
+        SimpleTensor[] pattern = {parseSimple("x"), parseSimple("y")};
+        CollectTransformation tr = new CollectTransformation(pattern);
+        TAssert.assertEquals(tr.transform(t), "y**3*x**2*(b*c+a**2)");
+    }
+
+
+    @Test
+    public void testPower3() {
+        Tensor t = parse("(A_m*A^m*c)**2 + A_m*A^m*A_i*A^i");
+        SimpleTensor[] pattern = {parseSimple("A_m")};
+        CollectTransformation tr = new CollectTransformation(pattern);
+        TAssert.assertEquals(EliminateMetricsTransformation.eliminate(tr.transform(t)), "A_m*A^m*A_i*A^i*(c**2 + 1)");
+    }
+
+    @Test
+    public void testPower4() {
+        Tensor t = parse("x**2*y**3*(a + b + c) + x*y*(c + d) + x*(a+b) + y*(c+e) + r");
+        SimpleTensor[] pattern = {parseSimple("x"), parseSimple("y")};
+        CollectTransformation tr = new CollectTransformation(pattern);
+        TAssert.assertEquals(tr.transform(ExpandTransformation.expand(t)), t);
+    }
+
+    @Test
+    public void testPower5() {
+        Tensor t = parse("x_m*y_n*x_a*(a^a + b^a + c^a) + x_m*y_n*(c + d) + x_m*(a_n+b_n) + y_n*(c_m+e_m) + r_mn");
+        SimpleTensor[] pattern = {parseSimple("x_m"), parseSimple("y_m")};
+        CollectTransformation tr = new CollectTransformation(pattern);
+        Tensor e = EliminateMetricsTransformation.eliminate(tr.transform(ExpandTransformation.expand(t)));
+        e = ExpandTransformation.expand(e);
+        e = EliminateMetricsTransformation.eliminate(e);
+        TAssert.assertEquals(e, ExpandTransformation.expand(t));
+    }
+
 }
