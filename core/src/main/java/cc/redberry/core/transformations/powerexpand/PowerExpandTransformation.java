@@ -32,8 +32,11 @@ import cc.redberry.core.utils.Indicator;
 import static cc.redberry.core.transformations.powerexpand.PowerExpandUtils.*;
 
 /**
+ * Expands all powers of products and powers with respect to specified variables.
+ *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @since 1.1.5
  */
 public final class PowerExpandTransformation implements Transformation {
     public static final PowerExpandTransformation POWER_EXPAND_TRANSFORMATION = new PowerExpandTransformation();
@@ -43,10 +46,22 @@ public final class PowerExpandTransformation implements Transformation {
         this(Indicator.TRUE_INDICATOR);
     }
 
+    /**
+     * Creates PowerExpand transformation that expands all powers of products expanding powers matching specified
+     * indicator.
+     *
+     * @param toExpandIndicator pattern
+     */
     public PowerExpandTransformation(final Indicator<Tensor> toExpandIndicator) {
         this.toExpandIndicator = toExpandIndicator;
     }
 
+    /**
+     * Creates PowerExpand transformation that expands all powers of products expands only with respect to the
+     * specified simple tensors.
+     *
+     * @param vars simple tensors
+     */
     public PowerExpandTransformation(final SimpleTensor[] vars) {
         this(varsToIndicator(vars));
     }

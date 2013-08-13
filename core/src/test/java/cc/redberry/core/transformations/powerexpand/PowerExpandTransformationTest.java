@@ -82,4 +82,37 @@ public class PowerExpandTransformationTest {
         TAssert.assertEquals(arr, expected);
     }
 
+    @Test
+    public void test5(){
+        Tensor t = parse("(a**e*b*c)**d");
+        SimpleTensor[] vars = {parseSimple("a")};
+        PowerExpandTransformation pe = new PowerExpandTransformation(vars);
+        TAssert.assertEquals(pe.transform(t),"a**(e*d)*(b*c)**d");
+    }
+
+    @Test
+    public void test6(){
+        Tensor t = parse("((a**r*g)**e*b*c)**d");
+        SimpleTensor[] vars = {parseSimple("a")};
+        PowerExpandTransformation pe = new PowerExpandTransformation(vars);
+        TAssert.assertEquals(pe.transform(t),"a**(r*e*d)*(g**e*b*c)**d");
+    }
+
+    @Test
+    public void test7(){
+        Tensor t = parse("((a**r*g)**e*b*c)**d");
+        SimpleTensor[] vars = {parseSimple("a"),parseSimple("g")};
+        PowerExpandTransformation pe = new PowerExpandTransformation(vars);
+        TAssert.assertEquals(pe.transform(t),"a**(r*e*d)*g**(e*d)*(b*c)**d");
+    }
+
+
+    @Test
+    public void test8(){
+        Tensor t = parse("((a**r*g)**e*b*c)**d*(a+b) + x");
+        SimpleTensor[] vars = {parseSimple("a"),parseSimple("c")};
+        PowerExpandTransformation pe = new PowerExpandTransformation(vars);
+        TAssert.assertEquals(pe.transform(t),"a**(r*e*d)*c**d*(g**e*b)**d*(a+b) + x");
+    }
+
 }

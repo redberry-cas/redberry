@@ -49,14 +49,26 @@ import static cc.redberry.core.tensor.Tensors.multiply;
 import static cc.redberry.core.tensor.Tensors.sum;
 
 /**
+ * Collects together terms that involve the same powers of objects matching specified simple tensors or tensor fields.
+ *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @since 1.1.5
  */
 public class CollectTransformation implements Transformation {
     private final TIntHashSet patternsNames;
     private final Transformation powerExpand;
     private final Transformation[] transformations;
 
+    /**
+     * Creates Collect transformation that collects together terms that involve
+     * the same powers of objects matching specified simple tensors or tensor fields and applies specified
+     * transformations to the expression that forms the coefficient of each term obtained.
+     *
+     * @param patterns        specified simple tensors or tensor fields
+     * @param transformations transformations to be applied to the expression that forms the coefficient
+     *                        of each term obtained
+     */
     public CollectTransformation(SimpleTensor[] patterns, Transformation[] transformations) {
         patternsNames = new TIntHashSet();
         powerExpand = new PowerExpandIntoChainTransformation(patterns);
@@ -65,6 +77,12 @@ public class CollectTransformation implements Transformation {
         this.transformations = transformations;
     }
 
+    /**
+     * Creates Collect transformation that collects together terms that involve
+     * the same powers of objects matching specified simple tensors or tensor fields.
+     *
+     * @param patterns specified simple tensors or tensor fields
+     */
     public CollectTransformation(SimpleTensor... patterns) {
         this(patterns, new Transformation[0]);
     }

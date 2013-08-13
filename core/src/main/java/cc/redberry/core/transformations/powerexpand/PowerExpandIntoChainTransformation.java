@@ -32,8 +32,12 @@ import cc.redberry.core.utils.Indicator;
 import static cc.redberry.core.transformations.powerexpand.PowerExpandUtils.*;
 
 /**
+ * Expands all powers of products and powers with respect to specified variables and unwraps powers of
+ * indexed arguments into products (e.g. (A_m*A^m)**2 -> A_m*A^m*A_a*A^a).
+ *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @since 1.1.5
  */
 public final class PowerExpandIntoChainTransformation implements Transformation {
     public static final PowerExpandIntoChainTransformation POWER_EXPAND_TRANSFORMATION = new PowerExpandIntoChainTransformation();
@@ -43,10 +47,22 @@ public final class PowerExpandIntoChainTransformation implements Transformation 
         this(Indicator.TRUE_INDICATOR);
     }
 
+    /**
+     * Creates transformation that expands all powers of products and powers and
+     * unwraps powers of indexed arguments into products (e.g. (A_m*A^m)**2 -> A_m*A^m*A_a*A^a).
+     *
+     * @param toExpandIndicator applies only to powers that match this indicator
+     */
     public PowerExpandIntoChainTransformation(final Indicator<Tensor> toExpandIndicator) {
         this.toExpandIndicator = toExpandIndicator;
     }
 
+    /**
+     * Creates transformation that expands all powers of products and powers with respect to specified variables and
+     * unwraps powers of indexed arguments into products (e.g. (A_m*A^m)**2 -> A_m*A^m*A_a*A^a).
+     *
+     * @param vars patterns
+     */
     public PowerExpandIntoChainTransformation(final SimpleTensor[] vars) {
         this(Indicator.Utils.iterativeIndicator(varsToIndicator(vars)));
     }

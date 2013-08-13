@@ -302,4 +302,24 @@ public class CollectTransformationTest {
         CollectTransformation tr = new CollectTransformation(pattern);
         TAssert.assertEquals(EliminateMetricsTransformation.eliminate(tr.transform(t)), "A_m*A^m*A_i*A^i*(c**2 + 1)");
     }
+
+    @Test
+    public void testPower4() {
+        Tensor t = parse("x**2*y**3*(a + b + c) + x*y*(c + d) + x*(a+b) + y*(c+e) + r");
+        SimpleTensor[] pattern = {parseSimple("x"), parseSimple("y")};
+        CollectTransformation tr = new CollectTransformation(pattern);
+        TAssert.assertEquals(tr.transform(ExpandTransformation.expand(t)), t);
+    }
+
+    @Test
+    public void testPower5() {
+        Tensor t = parse("x_m*y_n*x_a*(a^a + b^a + c^a) + x_m*y_n*(c + d) + x_m*(a_n+b_n) + y_n*(c_m+e_m) + r_mn");
+        SimpleTensor[] pattern = {parseSimple("x_m"), parseSimple("y_m")};
+        CollectTransformation tr = new CollectTransformation(pattern);
+        Tensor e = EliminateMetricsTransformation.eliminate(tr.transform(ExpandTransformation.expand(t)));
+        e = ExpandTransformation.expand(e);
+        e = EliminateMetricsTransformation.eliminate(e);
+        TAssert.assertEquals(e, ExpandTransformation.expand(t));
+    }
+
 }

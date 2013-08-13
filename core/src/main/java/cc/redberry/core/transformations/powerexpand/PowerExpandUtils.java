@@ -62,7 +62,15 @@ public final class PowerExpandUtils {
         return new Indicator<Tensor>() {
             @Override
             public boolean is(Tensor object) {
-                return object instanceof SimpleTensor && Arrays.binarySearch(names, object.hashCode()) >= 0;
+                int toCheck;
+                if (object instanceof SimpleTensor)
+                    toCheck = object.hashCode();
+                else if (object instanceof Power) {
+                    if (!(object.get(0) instanceof SimpleTensor))
+                        return false;
+                    toCheck = object.get(0).hashCode();
+                } else return false;
+                return Arrays.binarySearch(names, toCheck) >= 0;
             }
         };
     }
@@ -96,7 +104,7 @@ public final class PowerExpandUtils {
         return factorOut.toArray(new Tensor[factorOut.size()]);
     }
 
-    public static Tensor[] powerExpandIntoChainToArray(Power power, int[] forbiddenIndices, Indicator<Tensor> indicator) {
+    static Tensor[] powerExpandIntoChainToArray(Power power, int[] forbiddenIndices, Indicator<Tensor> indicator) {
         if (!(power.get(0) instanceof Product))
             throw new IllegalArgumentException("Base should be product of tensors.");
         return powerExpandIntoChainToArray1(power, forbiddenIndices, indicator);
