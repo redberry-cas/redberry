@@ -25,8 +25,11 @@ package cc.redberry.core.indexmapping;
 import cc.redberry.concurrent.OutputPortUnsafe;
 
 /**
+ * The output port of mappings.
+ *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @see Mapping
  */
 public final class MappingsPort implements OutputPortUnsafe<Mapping> {
     private final OutputPortUnsafe<IndexMappingBuffer> innerPort;

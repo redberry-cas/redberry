@@ -123,5 +123,26 @@ class RedberryStaticTest {
         }
 
     }
+
+    @Test
+    public void testExpand3() {
+        use(Redberry) {
+            assertTrue Expand['x = y'.t, 'f = a'.t] >> 'x*(x + f)'.t == 'a*y+y**2'.t
+            assertTrue Expand >> 'x*(x + f)'.t == 'f*x+x**2'.t
+            assertTrue Expand['x = a'] >> 'x*(x + f)'.t == 'f*a+a**2'.t
+            assertTrue Expand['x = a'.t] >> 'x*(x + f)'.t == 'f*a+a**2'.t
+        }
+    }
+
+    @Test
+    public void testPowerExpand() {
+        use(Redberry) {
+            assertTrue PowerExpand >> '(a*b*c)**d'.t == 'a**d*b**d*c**d'.t
+            assertTrue PowerExpand['a'] >> '(a*b*c)**d'.t == 'a**d*(b*c)**d'.t
+            assertTrue PowerExpand['a'.t] >> '(a*b*c)**d'.t == 'a**d*(b*c)**d'.t
+            assertTrue PowerExpand['a'.t, 'b'.t] >> '(a*b*c*d)**e'.t == 'a**e*b**e*(c*d)**e'.t
+        }
+    }
+
 }
 

@@ -39,6 +39,8 @@ import cc.redberry.core.transformations.factor.FactorTransformation
 import cc.redberry.core.transformations.fractions.GetDenominatorTransformation
 import cc.redberry.core.transformations.fractions.GetNumeratorTransformation
 import cc.redberry.core.transformations.fractions.TogetherTransformation
+import cc.redberry.core.transformations.powerexpand.PowerExpandTransformation
+import cc.redberry.core.transformations.powerexpand.PowerExpandUnwrapTransformation
 import cc.redberry.core.utils.BitArray
 
 /**
@@ -48,66 +50,68 @@ import cc.redberry.core.utils.BitArray
  * @author Stanislav Poslavsky
  */
 class RedberryStatic {
-    /**
-     * Expands out products and positive integer powers.
-     * @see ExpandTransformation
-     */
-    public static final Transformation Expand = new Transformation() {
-        @Override
-        Tensor transform(Tensor t) { ExpandTransformation.expand(t) }
 
-        Transformation getAt(Transformation... transformations) { new ExpandTransformation(transformations) }
-    }
+    private static abstract class TransformationWrapper {
+        protected final Class<Transformation> transformationClass;
 
-    /**
-     * Expands out all products and integer powers in any part of expression.
-     * @see ExpandAllTransformation
-     */
-    public static final Transformation ExpandAll = new Transformation() {
-        @Override
-        Tensor transform(Tensor t) { ExpandAllTransformation.expandAll(t) }
-
-        Transformation getAt(Transformation... transformations) { new ExpandAllTransformation(transformations) }
-    }
-
-    /**
-     * Expands out products and powers that appear as denominators.
-     * @see ExpandNumeratorTransformation
-     */
-    public static final Transformation ExpandNumerator = new Transformation() {
-        @Override
-        Tensor transform(Tensor t) { ExpandNumeratorTransformation.expandNumerator(t) }
-
-        Transformation getAt(Transformation... transformations) { new ExpandNumeratorTransformation(transformations) }
-    }
-
-    /**
-     * Expands out products and powers that appear in the numerator.
-     * @see ExpandDenominatorTransformation
-     */
-    public static final Transformation ExpandDenominator = new Transformation() {
-        @Override
-        Tensor transform(Tensor t) { ExpandDenominatorTransformation.expandDenominator(t) }
-
-        Transformation getAt(Transformation... transformations) { new ExpandDenominatorTransformation(transformations) }
-    }
-
-    /**
-     * Collects terms by pattern
-     */
-    public static final StaticCollect Collect = new StaticCollect();
-
-    private final static class StaticCollect {
-        Transformation getAt(SimpleTensor var) {
-            return new CollectTransformation(var);
+        TransformationWrapper(Class<Transformation> transformationClass) {
+            this.transformationClass = transformationClass
         }
 
-        Transformation getProperty(String var) {
+        Transformation getAt(String string) {
             use(Redberry) {
-                return new CollectTransformation(var.t);
+                return transformationClass.newInstance(string.t)
             }
         }
 
+        Transformation getAt(GString string) {
+            use(Redberry) {
+                return transformationClass.newInstance(string.t)
+            }
+        }
+
+        Transformation getAt(Object object) {
+            use(Redberry) {
+                if (object instanceof String || object instanceof GString)
+                    object = object.t
+                return transformationClass.newInstance(object)
+            }
+        }
+
+        abstract Transformation getAt(Collection args);
+    }
+
+    private static final class TransformationWrapper_SimpleTensors_Or_Transformations extends
+            TransformationWrapper implements Transformation {
+
+        final Transformation instance;
+
+        TransformationWrapper_SimpleTensors_Or_Transformations(Class<Transformation> transformationClass, Transformation instance) {
+            super(transformationClass)
+            this.instance = instance
+        }
+
+        @Override
+        Tensor transform(Tensor t) {
+            return instance.transform(t)
+        }
+
+        @Override
+        Transformation getAt(Collection args) {
+            use(Redberry) {
+                return transformationClass.newInstance(* args.collect { it instanceof String ? it.t : it })
+            }
+        }
+    }
+
+    private static final class TransformationWrapper_SimpleTensors_And_Transformations extends
+            TransformationWrapper {
+
+        TransformationWrapper_SimpleTensors_And_Transformations(Class<Transformation> transformationClass) {
+            super(transformationClass)
+        }
+
+        @Override
         Transformation getAt(Collection args) {
             use(Redberry) {
                 def _args = []
@@ -121,47 +125,53 @@ class RedberryStatic {
                     if (t instanceof Transformation)
                         _tr << t
                 }
-                return new CollectTransformation(_args as SimpleTensor[], _tr as Transformation[]);
+                return transformationClass.newInstance(_args as SimpleTensor[], _tr as Transformation[]);
             }
         }
     }
 
     /**
+     * Expands out products and positive integer powers.
+     * @see ExpandTransformation
+     */
+    public static final TransformationWrapper_SimpleTensors_Or_Transformations Expand =
+        new TransformationWrapper_SimpleTensors_Or_Transformations(ExpandTransformation, ExpandTransformation.EXPAND)
+
+    /**
+     * Expands out all products and integer powers in any part of expression.
+     * @see ExpandAllTransformation
+     */
+    public static final TransformationWrapper_SimpleTensors_Or_Transformations ExpandAll =
+        new TransformationWrapper_SimpleTensors_Or_Transformations(ExpandAllTransformation, ExpandAllTransformation.EXPAND_ALL)
+
+    /**
+     * Expands out products and powers that appear as denominators.
+     * @see ExpandNumeratorTransformation
+     */
+    public static final TransformationWrapper_SimpleTensors_Or_Transformations ExpandNumerator =
+        new TransformationWrapper_SimpleTensors_Or_Transformations(ExpandNumeratorTransformation,
+                ExpandNumeratorTransformation.EXPAND_NUMERATOR)
+
+    /**
+     * Expands out products and powers that appear in the numerator.
+     * @see ExpandDenominatorTransformation
+     */
+    public static final TransformationWrapper_SimpleTensors_Or_Transformations ExpandDenominator =
+        new TransformationWrapper_SimpleTensors_Or_Transformations(ExpandDenominatorTransformation,
+                ExpandDenominatorTransformation.EXPAND_DENOMINATOR)
+
+    /**
+     * Collects terms by pattern
+     */
+    public static final TransformationWrapper Collect =
+        new TransformationWrapper_SimpleTensors_And_Transformations(CollectTransformation)
+
+    /**
      * Gives a partial derivative.
      * @see DifferentiateTransformation
      */
-    public static final StaticDifferentiate Differentiate = new StaticDifferentiate();
-
-    private final static class StaticDifferentiate {
-        Transformation getAt(SimpleTensor var) {
-            return new DifferentiateTransformation(var);
-        }
-
-        Transformation getProperty(String var) {
-            use(Redberry) {
-                return new DifferentiateTransformation(var.t);
-            }
-        }
-
-        Transformation getAt(Collection args) {
-            use(Redberry) {
-                int i;
-                def vars = []
-                def transformations = []
-                args.each { arg ->
-                    if (arg instanceof String) arg = arg.t
-
-                    if (arg instanceof SimpleTensor)
-                        vars.add(arg)
-                    else if (arg instanceof Transformation)
-                        transformations.add(arg)
-                    else
-                        throw new IllegalArgumentException();
-                }
-                return new DifferentiateTransformation(transformations as Transformation[], vars as SimpleTensor[]);
-            }
-        }
-    }
+    public static final TransformationWrapper Differentiate =
+        new TransformationWrapper_SimpleTensors_And_Transformations(DifferentiateTransformation)
 
     /**
      * Eliminates metrics and Kronecker deltas
@@ -190,10 +200,13 @@ class RedberryStatic {
     public static final Transformation Denominator = GetDenominatorTransformation.GET_DENOMINATOR
 
     /**
-     * Removes parts of expressions, which are zero because of the symmetries (symmetric and antisymmetric at the same time).
+     * Removes parts of expressions, which are zero because of the symmetries (symmetric and antisymmetric
+     * at the same time).
+     *
      * @see EliminateFromSymmetriesTransformation
      */
-    public static final Transformation EliminateFromSymmetries = EliminateFromSymmetriesTransformation.ELIMINATE_FROM_SYMMETRIES;
+    public static final Transformation EliminateFromSymmetries =
+        EliminateFromSymmetriesTransformation.ELIMINATE_FROM_SYMMETRIES;
 
     /**
      * Puts terms in a sum over a common denominator, and cancels factors in the result.
@@ -237,14 +250,34 @@ class RedberryStatic {
      */
     public static final Transformation Factor = FactorTransformation.FACTOR;
 
+    /**
+     *  Expands all powers of products and powers with respect to specified variables.
+     * @see PowerExpandTransformation
+     */
+    public static final TransformationWrapper_SimpleTensors_Or_Transformations PowerExpand =
+        new TransformationWrapper_SimpleTensors_Or_Transformations(PowerExpandTransformation,
+                PowerExpandTransformation.POWER_EXPAND_TRANSFORMATION)
+
+    /**
+     * Expands all powers of products and powers with respect to specified variables and unwraps powers of
+     * indexed arguments into products (e.g. (A_m*A^m)**2 -> A_m*A^m*A_a*A^a).
+     *
+     * @see PowerExpandUnwrapTransformation
+     */
+    public static final TransformationWrapper_SimpleTensors_Or_Transformations PowerExpandUnwrap =
+        new TransformationWrapper_SimpleTensors_Or_Transformations(PowerExpandUnwrapTransformation,
+                PowerExpandUnwrapTransformation.POWER_EXPAND_UNWRAP_TRANSFORMATION)
+
+    /***********************************************************************
+     ********************* Matrices definition *****************************
+     **********************************************************************/
+
+
     static GeneralIndicesInsertion indicesInsertion = new GeneralIndicesInsertion();
+
     static {
         CC.current().getParseManager().defaultParserPreprocessors.add(indicesInsertion);
     }
-
-    /*
-     * Matrices definition
-     */
 
     /**
      * Tells Redberry to consider specified tensors as matrices and use matrix multiplication rules

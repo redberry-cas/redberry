@@ -62,7 +62,7 @@ public final class PowerExpandTransformation implements Transformation {
      *
      * @param vars simple tensors
      */
-    public PowerExpandTransformation(final SimpleTensor[] vars) {
+    public PowerExpandTransformation(final SimpleTensor... vars) {
         this(varsToIndicator(vars));
     }
 

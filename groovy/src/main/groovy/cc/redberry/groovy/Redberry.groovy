@@ -729,17 +729,29 @@ class Redberry {
         return TensorUtils.equals(a, b);
     }
 
-    static MappingsPortWrapper mod(Tensor from, Tensor to) {
-        return new MappingsPortWrapper(from, to);
+    /**
+     * Returns the container of mappings from tensor {@code from} onto tensor {@code to}. This structure is iterable
+     * and also can be manipulated as single transformation which simply applies first possible mapping.
+     *
+     * @param from {@code from} tensor
+     * @param to {@code to} tensor
+     * @return container of mappings
+     */
+    static MappingsContainer mod(Tensor from, Tensor to) {
+        return new MappingsContainer(from, to);
     }
 
-    public static final class MappingsPortWrapper implements Transformation, Iterable<Mapping> {
+    /**
+     * This class describes the container of mappings from one tensor onto another. This structure is iterable
+     * and also can be manipulated as single transformation which simply applies first possible mapping.
+     */
+    public static final class MappingsContainer implements Transformation, Iterable<Mapping> {
         private final Tensor from, to
 
         private boolean firstCalculated = false
         private Mapping first = null
 
-        MappingsPortWrapper(Tensor from, Tensor to) {
+        MappingsContainer(Tensor from, Tensor to) {
             this.from = from
             this.to = to
         }
@@ -749,6 +761,10 @@ class Redberry {
             return getFirst().transform(t)
         }
 
+        /**
+         * Returns the first possible mapping
+         * @return first possible mapping
+         */
         public Mapping getFirst() {
             if (!firstCalculated) {
                 first = IndexMappings.getFirst(from, to)
@@ -757,6 +773,10 @@ class Redberry {
             return first
         }
 
+        /**
+         * Returns the output port of possible mappings
+         * @return port of possible mappings
+         */
         public MappingsPort getPort() {
             return IndexMappings.createPort(from, to)
         }

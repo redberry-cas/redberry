@@ -283,7 +283,7 @@ public class ApplyIndexMappingTest {
     @Test
     public void emptyMapping1() {
         Tensor target = parse("A_mn*(B_m^m+C)*U^mn");
-        target = ApplyIndexMapping.applyIndexMapping(target, Mapping.EMPTY);
+        target = ApplyIndexMapping.applyIndexMapping(target, Mapping.IDENTITY);
         Tensor standard = parse("A_mn*(B_m^m+C)*U^mn");
         Assert.assertTrue(TensorUtils.equalsExactly(target, standard));
     }

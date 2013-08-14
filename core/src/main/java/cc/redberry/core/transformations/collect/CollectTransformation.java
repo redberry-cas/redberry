@@ -34,7 +34,7 @@ import cc.redberry.core.tensor.*;
 import cc.redberry.core.transformations.EliminateMetricsTransformation;
 import cc.redberry.core.transformations.Transformation;
 import cc.redberry.core.transformations.expand.ExpandPort;
-import cc.redberry.core.transformations.powerexpand.PowerExpandIntoChainTransformation;
+import cc.redberry.core.transformations.powerexpand.PowerExpandUnwrapTransformation;
 import cc.redberry.core.utils.ArraysUtils;
 import cc.redberry.core.utils.IntArrayList;
 import cc.redberry.core.utils.TensorUtils;
@@ -71,7 +71,7 @@ public class CollectTransformation implements Transformation {
      */
     public CollectTransformation(SimpleTensor[] patterns, Transformation[] transformations) {
         patternsNames = new TIntHashSet();
-        powerExpand = new PowerExpandIntoChainTransformation(patterns);
+        powerExpand = new PowerExpandUnwrapTransformation(patterns);
         for (SimpleTensor t : patterns)
             patternsNames.add(t.getName());
         this.transformations = transformations;

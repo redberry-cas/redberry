@@ -39,11 +39,12 @@ import static cc.redberry.core.transformations.powerexpand.PowerExpandUtils.*;
  * @author Stanislav Poslavsky
  * @since 1.1.5
  */
-public final class PowerExpandIntoChainTransformation implements Transformation {
-    public static final PowerExpandIntoChainTransformation POWER_EXPAND_TRANSFORMATION = new PowerExpandIntoChainTransformation();
+public final class PowerExpandUnwrapTransformation implements Transformation {
+    public static final PowerExpandUnwrapTransformation POWER_EXPAND_UNWRAP_TRANSFORMATION =
+            new PowerExpandUnwrapTransformation();
     private final Indicator<Tensor> toExpandIndicator;
 
-    private PowerExpandIntoChainTransformation() {
+    private PowerExpandUnwrapTransformation() {
         this(Indicator.TRUE_INDICATOR);
     }
 
@@ -53,7 +54,7 @@ public final class PowerExpandIntoChainTransformation implements Transformation 
      *
      * @param toExpandIndicator applies only to powers that match this indicator
      */
-    public PowerExpandIntoChainTransformation(final Indicator<Tensor> toExpandIndicator) {
+    public PowerExpandUnwrapTransformation(final Indicator<Tensor> toExpandIndicator) {
         this.toExpandIndicator = toExpandIndicator;
     }
 
@@ -63,7 +64,7 @@ public final class PowerExpandIntoChainTransformation implements Transformation 
      *
      * @param vars patterns
      */
-    public PowerExpandIntoChainTransformation(final SimpleTensor[] vars) {
+    public PowerExpandUnwrapTransformation(final SimpleTensor[] vars) {
         this(Indicator.Utils.iterativeIndicator(varsToIndicator(vars)));
     }
 
