@@ -119,7 +119,7 @@ public class FactorTransformation implements Transformation {
                             pb.put(c.get(i));
                     }
                     iterator.set(pb == null ? c : pb.build());
-                }
+                } else iterator.set(c);
             } else
                 iterator.set(JasFactor.factor(c));
         }
