@@ -27,9 +27,11 @@ import cc.redberry.core.indices.StructureOfIndices;
 import cc.redberry.core.parser.ParserException;
 import cc.redberry.core.utils.ArraysUtils;
 import cc.redberry.core.utils.IntArrayList;
+import gnu.trove.map.hash.TIntObjectHashMap;
 import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.random.Well44497b;
 
+import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.locks.Lock;
@@ -54,7 +56,7 @@ public final class NameManager {
     private final ReentrantReadWriteLock readWriteLock = new ReentrantReadWriteLock();
     private final Lock readLock = readWriteLock.readLock();
     private final Lock writeLock = readWriteLock.writeLock();
-    private final Map<Integer, NameDescriptor> fromId = new HashMap<>();
+    private final TIntObjectHashMap<NameDescriptor> fromId = new TIntObjectHashMap<>();
     private final Map<NameAndStructureOfIndices, NameDescriptor> fromStructure = new HashMap<>();
     private final String[] kroneckerAndMetricNames = {"d", "g"};
     private final IntArrayList kroneckerAndMetricIds = new IntArrayList();
@@ -123,7 +125,7 @@ public final class NameManager {
         writeLock.lock();
         try {
             fromStructure.clear();
-            for (NameDescriptor descriptor : fromId.values())
+            for (NameDescriptor descriptor : fromId.valueCollection())
                 for (NameAndStructureOfIndices itsan : descriptor.getKeys())
                     fromStructure.put(itsan, descriptor);
         } finally {
