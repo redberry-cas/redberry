@@ -274,6 +274,42 @@ public final class ArraysUtils {
         return r;
     }
 
+    //for performance
+
+    /**
+     * Removes elements at specified {@code positions} in specified {@code array}. This method preserve
+     * the relative order of elements in specified {@code array}.
+     *
+     * @param array     array of elements
+     * @param positions positions of elements that should be removed
+     * @return new array with removed elements at specified positions
+     * @throws ArrayIndexOutOfBoundsException if some position larger then array length
+     */
+    public static Tensor[] remove(Tensor[] array, int[] positions) {
+        if (array == null)
+            throw new NullPointerException();
+        int[] p = MathUtils.getSortedDistinct(positions);
+        if (p.length == 0)
+            return array;
+
+        int size = p.length, pointer = 0, s = array.length;
+        for (; pointer < size; ++pointer)
+            if (p[pointer] >= s)
+                throw new ArrayIndexOutOfBoundsException();
+
+        final Class<?> type = array.getClass().getComponentType();
+        Tensor[] r = new Tensor[array.length - p.length];
+
+        pointer = 0;
+        int i = -1;
+        for (int j = 0; j < s; ++j) {
+            if (pointer < size - 1 && j > p[pointer])
+                ++pointer;
+            if (j == p[pointer]) continue;
+            else r[++i] = array[j];
+        }
+        return r;
+    }
 
     /**
      * Removes elements at specified {@code positions} in specified {@code array}. This method preserve

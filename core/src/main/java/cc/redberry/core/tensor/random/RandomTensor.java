@@ -378,4 +378,9 @@ public final class RandomTensor {
         a[p1] = a[p2];
         a[p2] = c;
     }
+
+    public static RandomTensor createWithDefaultValues() {
+        return new RandomTensor(5, 10, new int[]{0, 0, 0, 0}, new int[]{3, 3, 3, 3}, false);
+    }
+
 }

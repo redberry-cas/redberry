@@ -37,6 +37,7 @@ abstract class SymbolArrayConverter implements IndexSymbolConverter {
     private final String[] utf;
 
     public SymbolArrayConverter(String[] symbols, String[] utf) {
+        //todo sort
         this.symbols = symbols;
         this.utf = utf;
         if (symbols.length != utf.length)
