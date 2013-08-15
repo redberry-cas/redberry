@@ -21,7 +21,7 @@
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package cc.redberry.physics.utils;
+package cc.redberry.physics.utils.solver;
 
 import cc.redberry.core.tensor.Expression;
 import cc.redberry.core.tensor.ExpressionFactory;
@@ -300,6 +300,8 @@ public class InverseTensorTest {
         Tensor actual;
 
         actual = InverseTensor.findInverseWithMaple(toInverse, equation, samples, false, transformations, "/home/stas/maple13/bin", temporaryDir);
+        System.out.println(actual);
+        System.out.println();
 //        Assert.assertTrue(TensorUtils.equals(expected, actual));
 
     }

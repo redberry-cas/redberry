@@ -874,6 +874,26 @@ class Redberry {
      */
 
     /**
+     * Parse collection of strings to colection of tensors
+     * @param strings string representations of tensors
+     * @return collection of tensors
+     * @see Tensor
+     * @see Tensors#parse(java.lang.String)
+     *
+     * @throws cc.redberry.core.parser.ParserException
+     *          if expression does not satisfy correct Redberry
+     *          input notation for tensors
+     *
+     */
+    static Collection getT(Collection strings) {
+        return strings.collect {
+            if (it instanceof String || it instanceof GString)
+                return parse(it)
+            else return it
+        }
+    }
+
+    /**
      * Parse string to tensor
      * @param string string representation of tensor
      * @return tensor

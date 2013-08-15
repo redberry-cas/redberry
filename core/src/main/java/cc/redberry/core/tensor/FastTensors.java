@@ -23,6 +23,7 @@
 package cc.redberry.core.tensor;
 
 import cc.redberry.concurrent.OutputPortUnsafe;
+import cc.redberry.core.context.CC;
 import cc.redberry.core.indices.IndicesFactory;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.transformations.Transformation;
@@ -116,10 +117,10 @@ public final class FastTensors {
      * @deprecated very unsafe method without checks
      */
     @Deprecated
-    public static Tensor multiplySumElementsOnFactors(Sum sum, OutputPortUnsafe<Tensor> factorsProvider) {
+    public static Tensor multiplySumElementsOnFactors(Sum sum) {
         final Tensor[] newSumData = new Tensor[sum.size()];
         for (int i = newSumData.length - 1; i >= 0; --i)
-            newSumData[i] = multiply(factorsProvider.take(), sum.get(i));
+            newSumData[i] = multiply(CC.generateNewSymbol(), sum.get(i));
         return new Sum(newSumData, IndicesFactory.create(newSumData[0].getIndices().getFree()));
     }
 

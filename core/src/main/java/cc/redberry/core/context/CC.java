@@ -22,6 +22,8 @@
  */
 package cc.redberry.core.context;
 
+import cc.redberry.core.tensor.SimpleTensor;
+
 /**
  * Redberry current context. This class statically delegates common useful methods from
  * Redberry context of current session.
@@ -94,7 +96,7 @@ public final class CC {
 
     /**
      * Sets the default output format.
-     *
+     * <p/>
      * <p>After this step, all expressions will be printed according to the specified output format.</p>
      *
      * @param defaultOutputFormat output format
@@ -105,7 +107,7 @@ public final class CC {
 
     /**
      * This method resets all tensor names in the namespace.
-     *
+     * <p/>
      * <p>Any tensor created before this method call becomes invalid, and
      * must not be used! This method is mainly used in unit tests, so
      * avoid invocations of this method in general computations.</p>
@@ -121,12 +123,22 @@ public final class CC {
      * behaviour of Redberry will be fully deterministic from run to run
      * (order of summands and multipliers will be fixed, computation time
      * will be pretty constant, hash codes will be the same).
-     *
+     * <p/>
      * <p>Any tensor created before this method call becomes invalid, and
      * must not be used! This method is mainly used in unit tests, so
      * avoid invocations of this method in general computations.</p>
      */
     public static void resetTensorNames(long seed) {
         current().resetTensorNames(seed);
+    }
+
+
+    /**
+     * Generates a new symbol which never used before during current session.
+     *
+     * @return new symbol which never used before during current session
+     */
+    public static SimpleTensor generateNewSymbol() {
+        return current().generateNewSymbol();
     }
 }

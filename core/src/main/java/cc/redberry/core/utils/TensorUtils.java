@@ -35,6 +35,7 @@ import cc.redberry.core.number.Complex;
 import cc.redberry.core.number.NumberUtils;
 import cc.redberry.core.tensor.*;
 import cc.redberry.core.tensor.functions.ScalarFunction;
+import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.set.hash.TIntHashSet;
 
 import java.util.Arrays;
@@ -98,7 +99,7 @@ public class TensorUtils {
         return tensor instanceof Complex && ((Complex) tensor).isNegativeNatural();
     }
 
-    public static boolean isPositiveNaturalNumber(Tensor tensor){
+    public static boolean isPositiveNaturalNumber(Tensor tensor) {
         return tensor instanceof Complex && ((Complex) tensor).isPositiveNatural();
     }
 
@@ -213,7 +214,7 @@ public class TensorUtils {
      *
      * @param t tensor
      * @return true, if specified tensor is {@code a^(N)}, where {@code N} - a natural number and {@code a} - is a
-     * simple tensor
+     *         simple tensor
      */
     public static boolean isPositiveIntegerPowerOfSimpleTensor(Tensor t) {
         return isPositiveIntegerPower(t) && t.get(0) instanceof SimpleTensor;
@@ -225,7 +226,7 @@ public class TensorUtils {
      *
      * @param t tensor
      * @return true, if specified tensor is {@code a^(N)}, where {@code N} - a natural number and {@code a} - is a
-     * product of tensors
+     *         product of tensors
      */
     public static boolean isPositiveIntegerPowerOfProduct(Tensor t) {
         return isPositiveIntegerPower(t) && t.get(0) instanceof Product;
@@ -530,6 +531,39 @@ public class TensorUtils {
             for (Tensor t : tensor)
                 addSymbols(t, set);
     }
+
+    public static Collection<SimpleTensor> getAllDiffSimpleTensors(Tensor... tensors) {
+        TIntObjectHashMap<SimpleTensor> names = new TIntObjectHashMap<>();
+        for (Tensor tensor : tensors)
+            addAllDiffSimpleTensors(tensor, names);
+        return names.valueCollection();
+    }
+
+    private static void addAllDiffSimpleTensors(Tensor tensor, TIntObjectHashMap<SimpleTensor> names) {
+        if (tensor instanceof SimpleTensor)
+            names.put(((SimpleTensor) tensor).getName(), (SimpleTensor) tensor);
+        else
+            for (Tensor t : tensor)
+                addAllDiffSimpleTensors(t, names);
+    }
+
+
+    public static TIntHashSet getAllNamesOfSymbols(Tensor... tensors) {
+        TIntHashSet set = new TIntHashSet();
+        for (Tensor tensor : tensors)
+            addSymbolsNames(tensor, set);
+        return set;
+    }
+
+
+    private static void addSymbolsNames(Tensor tensor, TIntHashSet set) {
+        if (isSymbol(tensor)) {
+            set.add(((SimpleTensor) tensor).getName());
+        } else
+            for (Tensor t : tensor)
+                addSymbolsNames(t, set);
+    }
+
 
     public static int treeDepth(Tensor tensor) {
         if (tensor.getClass() == SimpleTensor.class

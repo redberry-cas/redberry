@@ -24,6 +24,7 @@ package cc.redberry.core.tensorgenerator;
 
 import cc.redberry.concurrent.OutputPortUnsafe;
 import cc.redberry.core.combinatorics.symmetries.Symmetries;
+import cc.redberry.core.context.CC;
 import cc.redberry.core.indexmapping.IndexMappings;
 import cc.redberry.core.indexmapping.Mapping;
 import cc.redberry.core.indices.SimpleIndices;
@@ -53,23 +54,21 @@ public class TensorGenerator {
 
     private final Tensor[] samples;
     private final int[] lowerArray, upperArray;
-    private final OutputPortUnsafe<Tensor> coefficientsGenerator;
+    private final List<SimpleTensor> coefficients = new ArrayList<>();
     private final boolean symmetricForm;
     private final Symmetries symmetries;
     private final SimpleIndices indices;
     private Tensor result;
+    private final boolean withCoefficients;
 
-    private TensorGenerator(String coefficientName, SimpleIndices indices, boolean symmetricForm, Symmetries symmetries, Tensor... samples) {
+    private TensorGenerator(boolean withCoefficients, SimpleIndices indices, boolean symmetricForm, Symmetries symmetries, Tensor... samples) {
         this.samples = samples;
         this.symmetries = symmetries;
         this.indices = indices;
-        if (coefficientName.isEmpty())
-            this.coefficientsGenerator = OnePort.INSTANCE;
-        else
-            this.coefficientsGenerator = new SymbolsGeneratorWithHistory(coefficientName);
         this.symmetricForm = symmetricForm;
         this.lowerArray = indices.getLower().copy();
         this.upperArray = indices.getUpper().copy();
+        this.withCoefficients = withCoefficients;
         Arrays.sort(lowerArray);
         Arrays.sort(upperArray);
         generate();
@@ -127,10 +126,16 @@ public class TensorGenerator {
 
             //creating term & processing combinatorics            
             Tensor term = SymmetrizeUpperLowerIndicesTransformation.symmetrizeUpperLowerIndices(Tensors.multiplyAndRenameConflictingDummies(tCombination.toArray(new Tensor[tCombination.size()])));
-            if (symmetricForm || !(term instanceof Sum))
-                term = Tensors.multiply(coefficientsGenerator.take(), term, term instanceof Sum ? new Complex(new Rational(1, term.size())) : Complex.ONE);
-            else
-                term = FastTensors.multiplySumElementsOnFactors((Sum) term, coefficientsGenerator);
+            if (symmetricForm || !(term instanceof Sum)) {
+                Tensor coefficient;
+                if (withCoefficients) {
+                    coefficient = CC.generateNewSymbol();
+                    coefficients.add((SimpleTensor) coefficient);
+                } else coefficient = Complex.ONE;
+
+                term = Tensors.multiply(coefficient, term, term instanceof Sum ? new Complex(new Rational(1, term.size())) : Complex.ONE);
+            } else if (withCoefficients)
+                term = FastTensors.multiplySumElementsOnFactors((Sum) term);
             result.put(term);
         }
         this.result = (symmetries == null || symmetries.isEmpty()) ? result.build() : symmetrize(result.build(), symmetries);
@@ -154,7 +159,6 @@ public class TensorGenerator {
             return result;
 
         TIntObjectHashMap<List<Tensor[]>> coefficients = new TIntObjectHashMap<>();
-        SymbolsGeneratorWithHistory coefficientsGenerator = (SymbolsGeneratorWithHistory) this.coefficientsGenerator;
         Tensor oldCoefficient, newCoefficient = null;
         TensorBuilder rebuild = result.getBuilder();
         List<Tensor[]> list;
@@ -186,8 +190,11 @@ public class TensorGenerator {
                     if (oldCoefficient instanceof SimpleTensor) {
                         newCoefficient = oldCoefficient;
                     } else {
-                        newCoefficient = coefficientsGenerator.take();
-                        coefficientsGenerator.generated.removeAll(TensorUtils.getAllSymbols(oldCoefficient));
+                        if (withCoefficients) {
+                            newCoefficient = CC.generateNewSymbol();
+                            this.coefficients.add((SimpleTensor) newCoefficient);
+                            this.coefficients.removeAll(TensorUtils.getAllSymbols(oldCoefficient));
+                        }
                     }
                     list.add(new Tensor[]{oldCoefficient, newCoefficient});
                 }
@@ -205,42 +212,44 @@ public class TensorGenerator {
     /**
      * Generates tensor of the most general form with specified free indices from specified tensors.
      *
-     * @param coefficientName basic coefficients names
-     * @param indices         free indices of the resulting tensor
-     * @param symmetricForm   specifies whether the resulting tensor should be symmetric
-     * @param samples         samples which used to  generate tensor of the general form
+     * @param indices       free indices of the resulting tensor
+     * @param symmetricForm specifies whether the resulting tensor should be symmetric
+     * @param samples       samples which used to  generate tensor of the general form
      * @return tensor of the most general form with specified free indices from specified tensors
      */
-    public static Tensor generate(String coefficientName, SimpleIndices indices, boolean symmetricForm, Tensor... samples) {
-        return new TensorGenerator(coefficientName, indices, symmetricForm, null, samples).result();
+    public static Tensor generate(SimpleIndices indices, boolean symmetricForm, Tensor... samples) {
+        return new TensorGenerator(true, indices, symmetricForm, null, samples).result();
     }
 
     /**
      * Generates tensor of the most general form with specified free indices from specified tensors.
      *
-     * @param coefficientName basic coefficients names
-     * @param indices         free indices of the resulting tensor
-     * @param symmetricForm   specifies whether the resulting tensor should be symmetric
-     * @param samples         samples which used to  generate tensor of the general form
-     * @return tensor of the most general form with specified free indices from specified tensors and list of
-     *         generated coefficients
+     * @param withCoefficients specifies whether each term in the result should be multiplied on arbitrary coefficient
+     * @param indices          free indices of the resulting tensor
+     * @param symmetricForm    specifies whether the resulting tensor should be symmetric
+     * @param samples          samples which used to  generate tensor of the general form
+     * @return tensor of the most general form with specified free indices from specified tensors
      */
-    public static GeneratedTensor generateStructure(String coefficientName, SimpleIndices indices, boolean symmetricForm, Tensor... samples) {
-        return generateStructure(coefficientName, indices, symmetricForm, null, samples);
+    public static Tensor generate(boolean withCoefficients, SimpleIndices indices, boolean symmetricForm, Tensor... samples) {
+        return new TensorGenerator(withCoefficients, indices, symmetricForm, null, samples).result();
+    }
+
+
+    public static GeneratedTensor generateStructure(SimpleIndices indices, boolean symmetricForm, Symmetries symmetries, Tensor... samples) {
+        return generateStructure(true, indices, symmetricForm, symmetries, samples);
     }
 
     //todo comments
-    public static GeneratedTensor generateStructure(String coefficientName, SimpleIndices indices, boolean symmetricForm, Symmetries symmetries, Tensor... samples) {
-        TensorGenerator generator = new TensorGenerator(coefficientName, indices, symmetricForm, symmetries, samples);
+    public static GeneratedTensor generateStructure(boolean withCoefficients, SimpleIndices indices, boolean symmetricForm, Symmetries symmetries, Tensor... samples) {
+        TensorGenerator generator = new TensorGenerator(withCoefficients, indices, symmetricForm, symmetries, samples);
         SimpleTensor[] generatedCoefficients = TensorUtils.getAllSymbols(generator.result()).toArray(new SimpleTensor[0]);
         return new GeneratedTensor(generatedCoefficients,
                 generator.result());
     }
 
-
     //todo comment
-    public static Tensor generate(String coefficientName, SimpleIndices indices, boolean symmetricForm, Symmetries symmetries, Tensor... samples) {
-        return new TensorGenerator(coefficientName, indices, symmetricForm, symmetries, samples).result();
+    public static Tensor generate(boolean withCoefficients, SimpleIndices indices, boolean symmetricForm, Symmetries symmetries, Tensor... samples) {
+        return new TensorGenerator(withCoefficients, indices, symmetricForm, symmetries, samples).result();
     }
 
     private static final class OnePort implements OutputPortUnsafe<Tensor> {
