@@ -20,37 +20,23 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
-package cc.redberry.core.math.frobenius;
+package cc.redberry.core.solver;
+
+import cc.redberry.core.tensor.Expression;
+import cc.redberry.core.tensor.SimpleTensor;
 
 /**
- *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-final class SingleSolutionProvider extends SolutionProviderAbstract {
-    SingleSolutionProvider(SolutionProvider provider, int position, int[] coefficient) {
-        super(provider, position, coefficient);
-    }
+public class ReducedSystem {
+    final Expression[] equations;
+    final SimpleTensor[] unknownCoefficients;
+    final Expression[] generalSolutions;
 
-    @Override
-    public int[] take() {
-        if (currentSolution == null)
-            return null;
-
-
-        int i, remainder;
-        for (i = 0; i < coefficients.length; ++i) {
-            remainder = currentRemainder[i] - coefficients[i] * currentCounter;
-            if (remainder < 0) {
-                currentCounter = 0;
-                currentSolution = null;
-                return null;
-            }
-        }
-
-        int[] solution = currentSolution.clone();
-        solution[position] += currentCounter;
-        ++currentCounter;
-        return solution;
+    public ReducedSystem(Expression[] equations, SimpleTensor[] unknownCoefficients, Expression[] generalSolutions) {
+        this.equations = equations;
+        this.unknownCoefficients = unknownCoefficients;
+        this.generalSolutions = generalSolutions;
     }
 }

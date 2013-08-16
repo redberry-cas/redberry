@@ -20,16 +20,37 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
-package cc.redberry.core.math.frobenius;
-
-import cc.redberry.concurrent.OutputPortUnsafe;
+package cc.redberry.core.solver.frobenius;
 
 /**
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-interface SolutionProvider extends OutputPortUnsafe<int[]> {
-    boolean tick();
-    int[] currentRemainders();
+final class SingleSolutionProvider extends SolutionProviderAbstract {
+    SingleSolutionProvider(SolutionProvider provider, int position, int[] coefficient) {
+        super(provider, position, coefficient);
+    }
+
+    @Override
+    public int[] take() {
+        if (currentSolution == null)
+            return null;
+
+
+        int i, remainder;
+        for (i = 0; i < coefficients.length; ++i) {
+            remainder = currentRemainder[i] - coefficients[i] * currentCounter;
+            if (remainder < 0) {
+                currentCounter = 0;
+                currentSolution = null;
+                return null;
+            }
+        }
+
+        int[] solution = currentSolution.clone();
+        solution[position] += currentCounter;
+        ++currentCounter;
+        return solution;
+    }
 }

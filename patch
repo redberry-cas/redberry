@@ -1,0 +1,881 @@
+# HG changeset patch
+# User PoslavskySV <stvlpos@mail.ru>
+# Date 1376487331 -14400
+# Branch collect_with_powers
+# Node ID 68405773edc157d9775e2eb76ef220146bbc4ca6
+# Parent  026599527c0199e4556128c92e87c6fd9d11282b
+Cleanings & docs
+
+diff -r 026599527c01 -r 68405773edc1 core/src/main/java/cc/redberry/core/indexmapping/Mapping.java
+--- a/core/src/main/java/cc/redberry/core/indexmapping/Mapping.java	Tue Aug 13 21:07:22 2013 +0400
++++ b/core/src/main/java/cc/redberry/core/indexmapping/Mapping.java	Wed Aug 14 17:35:31 2013 +0400
+@@ -34,19 +34,48 @@
+ import java.util.Arrays;
+ 
+ /**
++ * This is the main class which represents the mapping from one tensor to another.
++ * <p>
++ * {@code Mapping} implements {@code Transformation} and perform transformation by simple invocation of
++ * {@link ApplyIndexMapping#applyIndexMappingAutomatically(cc.redberry.core.tensor.Tensor, Mapping)} ))} with
++ * {@code this} as a second argument.
++ * </p>
++ * <p>
++ * The underlying data structure is a
++ * simple pair of sorted arrays {@code fromNames} and {@code toData}, such that <i>i</i>-th mapping entry is
++ * {@code fromNames[i] -> toData[i]}. The array {@code fromNames} contains from indices names. The array {@code toData}
++ * contains names of to indices where the first bit indicates whether the state of from index should be inverted.
++ * </p>
++ *
+  * @author Dmitry Bolotin
+  * @author Stanislav Poslavsky
++ * @since 1.1.5
+  */
+ public final class Mapping implements Transformation {
+     final int[] fromNames, toData;
+     final boolean sign;
++    /**
++     * Identity mapping
++     */
++    public static final Mapping IDENTITY = new Mapping(new int[0], new int[0], false, false);
+ 
+-    public static final Mapping EMPTY = new Mapping(new int[0], new int[0], false, false);
+-
++    /**
++     * Creates mapping from given {@code from} and {@code to} arrays of indices.
++     *
++     * @param from indices from
++     * @param to   indices to
++     */
+     public Mapping(int[] from, int[] to) {
+         this(from, to, false);
+     }
+ 
++    /**
++     * Creates mapping from given {@code from} and {@code to} arrays of indices.
++     *
++     * @param from indices from
++     * @param to   indices to
++     * @param sign the sign of mapping
++     */
+     public Mapping(final int[] from, final int[] to, final boolean sign) {
+         if (from.length != to.length)
+             throw new IllegalArgumentException("From length != to length.");
+@@ -90,20 +119,59 @@
+         return ApplyIndexMapping.applyIndexMappingAutomatically(t, this);
+     }
+ 
++    /**
++     * Returns {@code true} if this mapping does not contain any entries (however, it can have negative sign).
++     *
++     * @return {@code true} if this mapping does not contain any entries (however, it can have negative sign)
++     * @see #isIdentity()
++     */
+     public boolean isEmpty() {return fromNames.length == 0;}
+ 
++    /**
++     * Returns {@code true} if this mapping does not contain any entries and have positive sign.
++     *
++     * @return {@code true} if this mapping does not contain any entries and have positive sign.
++     */
++    public boolean isIdentity() {return fromNames.length == 0 && !sign;}
++
++    /**
++     * Returns the sign of this mapping
++     *
++     * @return sign of this mapping
++     */
+     public boolean getSign() {return sign;}
+ 
++    /**
++     * Returns mapping, formed from this mapping by multiplying by specified sign.
++     *
++     * @param sign false - plus, true - minus one
++     * @return a new mapping, formed from this mapping by multiplying by specified sign
++     */
+     public Mapping addSign(boolean sign) {
+         return new Mapping(fromNames, toData, sign ^ this.sign, true);
+     }
+ 
++    /**
++     * Returns the number of entries in this mapping.
++     *
++     * @return the number of entries in this mapping
++     */
+     public int size() {return fromNames.length;}
+ 
++    /**
++     * Returns the names of from indices.
++     *
++     * @return names of from indices
++     */
+     public IntArray getFromNames() {
+         return new IntArray(fromNames);
+     }
+ 
++    /**
++     * Returns the data array that represents to indices.
++     *
++     * @return data array that represents to indices.
++     */
+     public IntArray getToData() {
+         return new IntArray(toData);
+     }
+diff -r 026599527c01 -r 68405773edc1 core/src/main/java/cc/redberry/core/indexmapping/MappingsPort.java
+--- a/core/src/main/java/cc/redberry/core/indexmapping/MappingsPort.java	Tue Aug 13 21:07:22 2013 +0400
++++ b/core/src/main/java/cc/redberry/core/indexmapping/MappingsPort.java	Wed Aug 14 17:35:31 2013 +0400
+@@ -25,8 +25,11 @@
+ import cc.redberry.concurrent.OutputPortUnsafe;
+ 
+ /**
++ * The output port of mappings.
++ *
+  * @author Dmitry Bolotin
+  * @author Stanislav Poslavsky
++ * @see Mapping
+  */
+ public final class MappingsPort implements OutputPortUnsafe<Mapping> {
+     private final OutputPortUnsafe<IndexMappingBuffer> innerPort;
+diff -r 026599527c01 -r 68405773edc1 core/src/main/java/cc/redberry/core/parser/ParseTokenDerivative.java
+--- a/core/src/main/java/cc/redberry/core/parser/ParseTokenDerivative.java	Tue Aug 13 21:07:22 2013 +0400
++++ b/core/src/main/java/cc/redberry/core/parser/ParseTokenDerivative.java	Wed Aug 14 17:35:31 2013 +0400
+@@ -62,7 +62,7 @@
+                 throw new IllegalArgumentException("Derivative with respect to non simple argument: " + temp);
+             vars[i - 1] = (SimpleTensor) temp;
+         }
+-        return new DifferentiateTransformation(new Transformation[]{EliminateMetricsTransformation.ELIMINATE_METRICS},
+-                vars).transform(content[0].toTensor());
++        return new DifferentiateTransformation(vars, new Transformation[]{EliminateMetricsTransformation.ELIMINATE_METRICS}
++        ).transform(content[0].toTensor());
+     }
+ }
+diff -r 026599527c01 -r 68405773edc1 core/src/main/java/cc/redberry/core/transformations/DifferentiateTransformation.java
+--- a/core/src/main/java/cc/redberry/core/transformations/DifferentiateTransformation.java	Tue Aug 13 21:07:22 2013 +0400
++++ b/core/src/main/java/cc/redberry/core/transformations/DifferentiateTransformation.java	Wed Aug 14 17:35:31 2013 +0400
+@@ -63,7 +63,7 @@
+         this.expandAndContract = new Transformation[0];
+     }
+ 
+-    public DifferentiateTransformation(Transformation[] expandAndContract, SimpleTensor... vars) {
++    public DifferentiateTransformation(SimpleTensor[] vars, Transformation[] expandAndContract) {
+         this.vars = vars;
+         this.expandAndContract = expandAndContract;
+     }
+diff -r 026599527c01 -r 68405773edc1 core/src/main/java/cc/redberry/core/transformations/collect/CollectTransformation.java
+--- a/core/src/main/java/cc/redberry/core/transformations/collect/CollectTransformation.java	Tue Aug 13 21:07:22 2013 +0400
++++ b/core/src/main/java/cc/redberry/core/transformations/collect/CollectTransformation.java	Wed Aug 14 17:35:31 2013 +0400
+@@ -34,7 +34,7 @@
+ import cc.redberry.core.transformations.EliminateMetricsTransformation;
+ import cc.redberry.core.transformations.Transformation;
+ import cc.redberry.core.transformations.expand.ExpandPort;
+-import cc.redberry.core.transformations.powerexpand.PowerExpandIntoChainTransformation;
++import cc.redberry.core.transformations.powerexpand.PowerExpandUnwrapTransformation;
+ import cc.redberry.core.utils.ArraysUtils;
+ import cc.redberry.core.utils.IntArrayList;
+ import cc.redberry.core.utils.TensorUtils;
+@@ -71,7 +71,7 @@
+      */
+     public CollectTransformation(SimpleTensor[] patterns, Transformation[] transformations) {
+         patternsNames = new TIntHashSet();
+-        powerExpand = new PowerExpandIntoChainTransformation(patterns);
++        powerExpand = new PowerExpandUnwrapTransformation(patterns);
+         for (SimpleTensor t : patterns)
+             patternsNames.add(t.getName());
+         this.transformations = transformations;
+diff -r 026599527c01 -r 68405773edc1 core/src/main/java/cc/redberry/core/transformations/powerexpand/PowerExpandIntoChainTransformation.java
+--- a/core/src/main/java/cc/redberry/core/transformations/powerexpand/PowerExpandIntoChainTransformation.java	Tue Aug 13 21:07:22 2013 +0400
++++ /dev/null	Thu Jan 01 00:00:00 1970 +0000
+@@ -1,82 +0,0 @@
+-/*
+- * Redberry: symbolic tensor computations.
+- *
+- * Copyright (c) 2010-2013:
+- *   Stanislav Poslavsky   <stvlpos@mail.ru>
+- *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
+- *
+- * This file is part of Redberry.
+- *
+- * Redberry is free software: you can redistribute it and/or modify
+- * it under the terms of the GNU General Public License as published by
+- * the Free Software Foundation, either version 3 of the License, or
+- * (at your option) any later version.
+- *
+- * Redberry is distributed in the hope that it will be useful,
+- * but WITHOUT ANY WARRANTY; without even the implied warranty of
+- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+- * GNU General Public License for more details.
+- *
+- * You should have received a copy of the GNU General Public License
+- * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
+- */
+-package cc.redberry.core.transformations.powerexpand;
+-
+-import cc.redberry.core.tensor.SimpleTensor;
+-import cc.redberry.core.tensor.Tensor;
+-import cc.redberry.core.tensor.Tensors;
+-import cc.redberry.core.transformations.Transformation;
+-import cc.redberry.core.transformations.substitutions.SubstitutionIterator;
+-import cc.redberry.core.utils.Indicator;
+-
+-import static cc.redberry.core.transformations.powerexpand.PowerExpandUtils.*;
+-
+-/**
+- * Expands all powers of products and powers with respect to specified variables and unwraps powers of
+- * indexed arguments into products (e.g. (A_m*A^m)**2 -> A_m*A^m*A_a*A^a).
+- *
+- * @author Dmitry Bolotin
+- * @author Stanislav Poslavsky
+- * @since 1.1.5
+- */
+-public final class PowerExpandIntoChainTransformation implements Transformation {
+-    public static final PowerExpandIntoChainTransformation POWER_EXPAND_TRANSFORMATION = new PowerExpandIntoChainTransformation();
+-    private final Indicator<Tensor> toExpandIndicator;
+-
+-    private PowerExpandIntoChainTransformation() {
+-        this(Indicator.TRUE_INDICATOR);
+-    }
+-
+-    /**
+-     * Creates transformation that expands all powers of products and powers and
+-     * unwraps powers of indexed arguments into products (e.g. (A_m*A^m)**2 -> A_m*A^m*A_a*A^a).
+-     *
+-     * @param toExpandIndicator applies only to powers that match this indicator
+-     */
+-    public PowerExpandIntoChainTransformation(final Indicator<Tensor> toExpandIndicator) {
+-        this.toExpandIndicator = toExpandIndicator;
+-    }
+-
+-    /**
+-     * Creates transformation that expands all powers of products and powers with respect to specified variables and
+-     * unwraps powers of indexed arguments into products (e.g. (A_m*A^m)**2 -> A_m*A^m*A_a*A^a).
+-     *
+-     * @param vars patterns
+-     */
+-    public PowerExpandIntoChainTransformation(final SimpleTensor[] vars) {
+-        this(Indicator.Utils.iterativeIndicator(varsToIndicator(vars)));
+-    }
+-
+-    @Override
+-    public Tensor transform(Tensor t) {
+-        SubstitutionIterator iterator = new SubstitutionIterator(t);
+-        Tensor c;
+-
+-        while ((c = iterator.next()) != null)
+-            if (powerExpandApplicable(c, toExpandIndicator))
+-                iterator.set(Tensors.multiply(powerExpandIntoChainToArray1(c, iterator.getForbidden(), toExpandIndicator)));
+-
+-
+-        return iterator.result();
+-    }
+-}
+diff -r 026599527c01 -r 68405773edc1 core/src/main/java/cc/redberry/core/transformations/powerexpand/PowerExpandTransformation.java
+--- a/core/src/main/java/cc/redberry/core/transformations/powerexpand/PowerExpandTransformation.java	Tue Aug 13 21:07:22 2013 +0400
++++ b/core/src/main/java/cc/redberry/core/transformations/powerexpand/PowerExpandTransformation.java	Wed Aug 14 17:35:31 2013 +0400
+@@ -62,7 +62,7 @@
+      *
+      * @param vars simple tensors
+      */
+-    public PowerExpandTransformation(final SimpleTensor[] vars) {
++    public PowerExpandTransformation(final SimpleTensor... vars) {
+         this(varsToIndicator(vars));
+     }
+ 
+diff -r 026599527c01 -r 68405773edc1 core/src/main/java/cc/redberry/core/transformations/powerexpand/PowerExpandUnwrapTransformation.java
+--- /dev/null	Thu Jan 01 00:00:00 1970 +0000
++++ b/core/src/main/java/cc/redberry/core/transformations/powerexpand/PowerExpandUnwrapTransformation.java	Wed Aug 14 17:35:31 2013 +0400
+@@ -0,0 +1,83 @@
++/*
++ * Redberry: symbolic tensor computations.
++ *
++ * Copyright (c) 2010-2013:
++ *   Stanislav Poslavsky   <stvlpos@mail.ru>
++ *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
++ *
++ * This file is part of Redberry.
++ *
++ * Redberry is free software: you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License as published by
++ * the Free Software Foundation, either version 3 of the License, or
++ * (at your option) any later version.
++ *
++ * Redberry is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ *
++ * You should have received a copy of the GNU General Public License
++ * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
++ */
++package cc.redberry.core.transformations.powerexpand;
++
++import cc.redberry.core.tensor.SimpleTensor;
++import cc.redberry.core.tensor.Tensor;
++import cc.redberry.core.tensor.Tensors;
++import cc.redberry.core.transformations.Transformation;
++import cc.redberry.core.transformations.substitutions.SubstitutionIterator;
++import cc.redberry.core.utils.Indicator;
++
++import static cc.redberry.core.transformations.powerexpand.PowerExpandUtils.*;
++
++/**
++ * Expands all powers of products and powers with respect to specified variables and unwraps powers of
++ * indexed arguments into products (e.g. (A_m*A^m)**2 -> A_m*A^m*A_a*A^a).
++ *
++ * @author Dmitry Bolotin
++ * @author Stanislav Poslavsky
++ * @since 1.1.5
++ */
++public final class PowerExpandUnwrapTransformation implements Transformation {
++    public static final PowerExpandUnwrapTransformation POWER_EXPAND_UNWRAP_TRANSFORMATION =
++            new PowerExpandUnwrapTransformation();
++    private final Indicator<Tensor> toExpandIndicator;
++
++    private PowerExpandUnwrapTransformation() {
++        this(Indicator.TRUE_INDICATOR);
++    }
++
++    /**
++     * Creates transformation that expands all powers of products and powers and
++     * unwraps powers of indexed arguments into products (e.g. (A_m*A^m)**2 -> A_m*A^m*A_a*A^a).
++     *
++     * @param toExpandIndicator applies only to powers that match this indicator
++     */
++    public PowerExpandUnwrapTransformation(final Indicator<Tensor> toExpandIndicator) {
++        this.toExpandIndicator = toExpandIndicator;
++    }
++
++    /**
++     * Creates transformation that expands all powers of products and powers with respect to specified variables and
++     * unwraps powers of indexed arguments into products (e.g. (A_m*A^m)**2 -> A_m*A^m*A_a*A^a).
++     *
++     * @param vars patterns
++     */
++    public PowerExpandUnwrapTransformation(final SimpleTensor[] vars) {
++        this(Indicator.Utils.iterativeIndicator(varsToIndicator(vars)));
++    }
++
++    @Override
++    public Tensor transform(Tensor t) {
++        SubstitutionIterator iterator = new SubstitutionIterator(t);
++        Tensor c;
++
++        while ((c = iterator.next()) != null)
++            if (powerExpandApplicable(c, toExpandIndicator))
++                iterator.set(Tensors.multiply(powerExpandIntoChainToArray1(c, iterator.getForbidden(), toExpandIndicator)));
++
++
++        return iterator.result();
++    }
++}
+diff -r 026599527c01 -r 68405773edc1 core/src/main/java/cc/redberry/core/transformations/substitutions/PrimitiveProductSubstitution.java
+--- a/core/src/main/java/cc/redberry/core/transformations/substitutions/PrimitiveProductSubstitution.java	Tue Aug 13 21:07:22 2013 +0400
++++ b/core/src/main/java/cc/redberry/core/transformations/substitutions/PrimitiveProductSubstitution.java	Wed Aug 14 17:35:31 2013 +0400
+@@ -209,7 +209,7 @@
+                     return null;
+                 dataBijection = new int[0];
+                 currentData = new Tensor[0];
+-                mapping = Mapping.EMPTY;
++                mapping = Mapping.IDENTITY;
+             } else {
+                 if (fromContent.size() != 1)
+                     return null;
+diff -r 026599527c01 -r 68405773edc1 core/src/test/java/cc/redberry/core/tensor/ApplyIndexMappingTest.java
+--- a/core/src/test/java/cc/redberry/core/tensor/ApplyIndexMappingTest.java	Tue Aug 13 21:07:22 2013 +0400
++++ b/core/src/test/java/cc/redberry/core/tensor/ApplyIndexMappingTest.java	Wed Aug 14 17:35:31 2013 +0400
+@@ -283,7 +283,7 @@
+     @Test
+     public void emptyMapping1() {
+         Tensor target = parse("A_mn*(B_m^m+C)*U^mn");
+-        target = ApplyIndexMapping.applyIndexMapping(target, Mapping.EMPTY);
++        target = ApplyIndexMapping.applyIndexMapping(target, Mapping.IDENTITY);
+         Tensor standard = parse("A_mn*(B_m^m+C)*U^mn");
+         Assert.assertTrue(TensorUtils.equalsExactly(target, standard));
+     }
+diff -r 026599527c01 -r 68405773edc1 core/src/test/java/cc/redberry/core/transformations/powerexpand/PowerExpandIntoChainTransformationTest.java
+--- a/core/src/test/java/cc/redberry/core/transformations/powerexpand/PowerExpandIntoChainTransformationTest.java	Tue Aug 13 21:07:22 2013 +0400
++++ /dev/null	Thu Jan 01 00:00:00 1970 +0000
+@@ -1,58 +0,0 @@
+-/*
+- * Redberry: symbolic tensor computations.
+- *
+- * Copyright (c) 2010-2013:
+- *   Stanislav Poslavsky   <stvlpos@mail.ru>
+- *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
+- *
+- * This file is part of Redberry.
+- *
+- * Redberry is free software: you can redistribute it and/or modify
+- * it under the terms of the GNU General Public License as published by
+- * the Free Software Foundation, either version 3 of the License, or
+- * (at your option) any later version.
+- *
+- * Redberry is distributed in the hope that it will be useful,
+- * but WITHOUT ANY WARRANTY; without even the implied warranty of
+- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+- * GNU General Public License for more details.
+- *
+- * You should have received a copy of the GNU General Public License
+- * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
+- */
+-package cc.redberry.core.transformations.powerexpand;
+-
+-import cc.redberry.core.TAssert;
+-import cc.redberry.core.tensor.SimpleTensor;
+-import org.junit.Test;
+-
+-import static cc.redberry.core.tensor.Tensors.parse;
+-import static cc.redberry.core.tensor.Tensors.parseSimple;
+-
+-/**
+- * @author Dmitry Bolotin
+- * @author Stanislav Poslavsky
+- */
+-public class PowerExpandIntoChainTransformationTest {
+-    @Test
+-    public void test1() throws Exception {
+-        PowerExpandIntoChainTransformation pe = PowerExpandIntoChainTransformation.POWER_EXPAND_TRANSFORMATION;
+-        TAssert.assertEquals(pe.transform(parse("(a_m*b^m*c)**2")), "c**2*a_{m}*a_{a}*b^{m}*b^{a}");
+-
+-        TAssert.assertEquals(pe.transform(parse("(a_m*a^m*c)**2")), "c**2*a_{m}*a_{a}*a^{m}*a^{a}");
+-    }
+-
+-    @Test
+-    public void test2() {
+-        SimpleTensor[] vars = new SimpleTensor[]{parseSimple("A_m")};
+-        PowerExpandIntoChainTransformation pe = new PowerExpandIntoChainTransformation(vars);
+-        TAssert.assertEquals(pe.transform(parse("(A_m*A^m)**2")), "A_{m}*A_{a}*A^{m}*A^{a}");
+-    }
+-
+-    @Test
+-    public void test3() {
+-        SimpleTensor[] vars = new SimpleTensor[]{parseSimple("A_m")};
+-        PowerExpandIntoChainTransformation pe = new PowerExpandIntoChainTransformation(vars);
+-        TAssert.assertEquals(pe.transform(parse("(A_m*A^m*c)**2")), "c**2*A_{m}*A_{a}*A^{m}*A^{a}");
+-    }
+-}
+diff -r 026599527c01 -r 68405773edc1 core/src/test/java/cc/redberry/core/transformations/powerexpand/PowerExpandUnwrapTransformationTest.java
+--- /dev/null	Thu Jan 01 00:00:00 1970 +0000
++++ b/core/src/test/java/cc/redberry/core/transformations/powerexpand/PowerExpandUnwrapTransformationTest.java	Wed Aug 14 17:35:31 2013 +0400
+@@ -0,0 +1,58 @@
++/*
++ * Redberry: symbolic tensor computations.
++ *
++ * Copyright (c) 2010-2013:
++ *   Stanislav Poslavsky   <stvlpos@mail.ru>
++ *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
++ *
++ * This file is part of Redberry.
++ *
++ * Redberry is free software: you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License as published by
++ * the Free Software Foundation, either version 3 of the License, or
++ * (at your option) any later version.
++ *
++ * Redberry is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ *
++ * You should have received a copy of the GNU General Public License
++ * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
++ */
++package cc.redberry.core.transformations.powerexpand;
++
++import cc.redberry.core.TAssert;
++import cc.redberry.core.tensor.SimpleTensor;
++import org.junit.Test;
++
++import static cc.redberry.core.tensor.Tensors.parse;
++import static cc.redberry.core.tensor.Tensors.parseSimple;
++
++/**
++ * @author Dmitry Bolotin
++ * @author Stanislav Poslavsky
++ */
++public class PowerExpandUnwrapTransformationTest {
++    @Test
++    public void test1() throws Exception {
++        PowerExpandUnwrapTransformation pe = PowerExpandUnwrapTransformation.POWER_EXPAND_UNWRAP_TRANSFORMATION;
++        TAssert.assertEquals(pe.transform(parse("(a_m*b^m*c)**2")), "c**2*a_{m}*a_{a}*b^{m}*b^{a}");
++
++        TAssert.assertEquals(pe.transform(parse("(a_m*a^m*c)**2")), "c**2*a_{m}*a_{a}*a^{m}*a^{a}");
++    }
++
++    @Test
++    public void test2() {
++        SimpleTensor[] vars = new SimpleTensor[]{parseSimple("A_m")};
++        PowerExpandUnwrapTransformation pe = new PowerExpandUnwrapTransformation(vars);
++        TAssert.assertEquals(pe.transform(parse("(A_m*A^m)**2")), "A_{m}*A_{a}*A^{m}*A^{a}");
++    }
++
++    @Test
++    public void test3() {
++        SimpleTensor[] vars = new SimpleTensor[]{parseSimple("A_m")};
++        PowerExpandUnwrapTransformation pe = new PowerExpandUnwrapTransformation(vars);
++        TAssert.assertEquals(pe.transform(parse("(A_m*A^m*c)**2")), "c**2*A_{m}*A_{a}*A^{m}*A^{a}");
++    }
++}
+diff -r 026599527c01 -r 68405773edc1 groovy/src/main/groovy/cc/redberry/groovy/Redberry.groovy
+--- a/groovy/src/main/groovy/cc/redberry/groovy/Redberry.groovy	Tue Aug 13 21:07:22 2013 +0400
++++ b/groovy/src/main/groovy/cc/redberry/groovy/Redberry.groovy	Wed Aug 14 17:35:31 2013 +0400
+@@ -729,17 +729,29 @@
+         return TensorUtils.equals(a, b);
+     }
+ 
+-    static MappingsPortWrapper mod(Tensor from, Tensor to) {
+-        return new MappingsPortWrapper(from, to);
++    /**
++     * Returns the container of mappings from tensor {@code from} onto tensor {@code to}. This structure is iterable
++     * and also can be manipulated as single transformation which simply applies first possible mapping.
++     *
++     * @param from {@code from} tensor
++     * @param to {@code to} tensor
++     * @return container of mappings
++     */
++    static MappingsContainer mod(Tensor from, Tensor to) {
++        return new MappingsContainer(from, to);
+     }
+ 
+-    public static final class MappingsPortWrapper implements Transformation, Iterable<Mapping> {
++    /**
++     * This class describes the container of mappings from one tensor onto another. This structure is iterable
++     * and also can be manipulated as single transformation which simply applies first possible mapping.
++     */
++    public static final class MappingsContainer implements Transformation, Iterable<Mapping> {
+         private final Tensor from, to
+ 
+         private boolean firstCalculated = false
+         private Mapping first = null
+ 
+-        MappingsPortWrapper(Tensor from, Tensor to) {
++        MappingsContainer(Tensor from, Tensor to) {
+             this.from = from
+             this.to = to
+         }
+@@ -749,6 +761,10 @@
+             return getFirst().transform(t)
+         }
+ 
++        /**
++         * Returns the first possible mapping
++         * @return first possible mapping
++         */
+         public Mapping getFirst() {
+             if (!firstCalculated) {
+                 first = IndexMappings.getFirst(from, to)
+@@ -757,6 +773,10 @@
+             return first
+         }
+ 
++        /**
++         * Returns the output port of possible mappings
++         * @return port of possible mappings
++         */
+         public MappingsPort getPort() {
+             return IndexMappings.createPort(from, to)
+         }
+diff -r 026599527c01 -r 68405773edc1 groovy/src/main/groovy/cc/redberry/groovy/RedberryStatic.groovy
+--- a/groovy/src/main/groovy/cc/redberry/groovy/RedberryStatic.groovy	Tue Aug 13 21:07:22 2013 +0400
++++ b/groovy/src/main/groovy/cc/redberry/groovy/RedberryStatic.groovy	Wed Aug 14 17:35:31 2013 +0400
+@@ -39,6 +39,8 @@
+ import cc.redberry.core.transformations.fractions.GetDenominatorTransformation
+ import cc.redberry.core.transformations.fractions.GetNumeratorTransformation
+ import cc.redberry.core.transformations.fractions.TogetherTransformation
++import cc.redberry.core.transformations.powerexpand.PowerExpandTransformation
++import cc.redberry.core.transformations.powerexpand.PowerExpandUnwrapTransformation
+ import cc.redberry.core.utils.BitArray
+ 
+ /**
+@@ -48,66 +50,68 @@
+  * @author Stanislav Poslavsky
+  */
+ class RedberryStatic {
+-    /**
+-     * Expands out products and positive integer powers.
+-     * @see ExpandTransformation
+-     */
+-    public static final Transformation Expand = new Transformation() {
+-        @Override
+-        Tensor transform(Tensor t) { ExpandTransformation.expand(t) }
+ 
+-        Transformation getAt(Transformation... transformations) { new ExpandTransformation(transformations) }
+-    }
++    private static abstract class TransformationWrapper {
++        protected final Class<Transformation> transformationClass;
+ 
+-    /**
+-     * Expands out all products and integer powers in any part of expression.
+-     * @see ExpandAllTransformation
+-     */
+-    public static final Transformation ExpandAll = new Transformation() {
+-        @Override
+-        Tensor transform(Tensor t) { ExpandAllTransformation.expandAll(t) }
+-
+-        Transformation getAt(Transformation... transformations) { new ExpandAllTransformation(transformations) }
+-    }
+-
+-    /**
+-     * Expands out products and powers that appear as denominators.
+-     * @see ExpandNumeratorTransformation
+-     */
+-    public static final Transformation ExpandNumerator = new Transformation() {
+-        @Override
+-        Tensor transform(Tensor t) { ExpandNumeratorTransformation.expandNumerator(t) }
+-
+-        Transformation getAt(Transformation... transformations) { new ExpandNumeratorTransformation(transformations) }
+-    }
+-
+-    /**
+-     * Expands out products and powers that appear in the numerator.
+-     * @see ExpandDenominatorTransformation
+-     */
+-    public static final Transformation ExpandDenominator = new Transformation() {
+-        @Override
+-        Tensor transform(Tensor t) { ExpandDenominatorTransformation.expandDenominator(t) }
+-
+-        Transformation getAt(Transformation... transformations) { new ExpandDenominatorTransformation(transformations) }
+-    }
+-
+-    /**
+-     * Collects terms by pattern
+-     */
+-    public static final StaticCollect Collect = new StaticCollect();
+-
+-    private final static class StaticCollect {
+-        Transformation getAt(SimpleTensor var) {
+-            return new CollectTransformation(var);
++        TransformationWrapper(Class<Transformation> transformationClass) {
++            this.transformationClass = transformationClass
+         }
+ 
+-        Transformation getProperty(String var) {
++        Transformation getAt(String string) {
+             use(Redberry) {
+-                return new CollectTransformation(var.t);
++                return transformationClass.newInstance(string.t)
+             }
+         }
+ 
++        Transformation getAt(GString string) {
++            use(Redberry) {
++                return transformationClass.newInstance(string.t)
++            }
++        }
++
++        Transformation getAt(Object object) {
++            use(Redberry) {
++                if (object instanceof String || object instanceof GString)
++                    object = object.t
++                return transformationClass.newInstance(object)
++            }
++        }
++
++        abstract Transformation getAt(Collection args);
++    }
++
++    private static final class TransformationWrapper_SimpleTensors_Or_Transformations extends
++            TransformationWrapper implements Transformation {
++
++        final Transformation instance;
++
++        TransformationWrapper_SimpleTensors_Or_Transformations(Class<Transformation> transformationClass, Transformation instance) {
++            super(transformationClass)
++            this.instance = instance
++        }
++
++        @Override
++        Tensor transform(Tensor t) {
++            return instance.transform(t)
++        }
++
++        @Override
++        Transformation getAt(Collection args) {
++            use(Redberry) {
++                return transformationClass.newInstance(* args.collect { it instanceof String ? it.t : it })
++            }
++        }
++    }
++
++    private static final class TransformationWrapper_SimpleTensors_And_Transformations extends
++            TransformationWrapper {
++
++        TransformationWrapper_SimpleTensors_And_Transformations(Class<Transformation> transformationClass) {
++            super(transformationClass)
++        }
++
++        @Override
+         Transformation getAt(Collection args) {
+             use(Redberry) {
+                 def _args = []
+@@ -121,47 +125,53 @@
+                     if (t instanceof Transformation)
+                         _tr << t
+                 }
+-                return new CollectTransformation(_args as SimpleTensor[], _tr as Transformation[]);
++                return transformationClass.newInstance(_args as SimpleTensor[], _tr as Transformation[]);
+             }
+         }
+     }
+ 
+     /**
++     * Expands out products and positive integer powers.
++     * @see ExpandTransformation
++     */
++    public static final TransformationWrapper_SimpleTensors_Or_Transformations Expand =
++        new TransformationWrapper_SimpleTensors_Or_Transformations(ExpandTransformation, ExpandTransformation.EXPAND)
++
++    /**
++     * Expands out all products and integer powers in any part of expression.
++     * @see ExpandAllTransformation
++     */
++    public static final TransformationWrapper_SimpleTensors_Or_Transformations ExpandAll =
++        new TransformationWrapper_SimpleTensors_Or_Transformations(ExpandAllTransformation, ExpandAllTransformation.EXPAND_ALL)
++
++    /**
++     * Expands out products and powers that appear as denominators.
++     * @see ExpandNumeratorTransformation
++     */
++    public static final TransformationWrapper_SimpleTensors_Or_Transformations ExpandNumerator =
++        new TransformationWrapper_SimpleTensors_Or_Transformations(ExpandNumeratorTransformation,
++                ExpandNumeratorTransformation.EXPAND_NUMERATOR)
++
++    /**
++     * Expands out products and powers that appear in the numerator.
++     * @see ExpandDenominatorTransformation
++     */
++    public static final TransformationWrapper_SimpleTensors_Or_Transformations ExpandDenominator =
++        new TransformationWrapper_SimpleTensors_Or_Transformations(ExpandDenominatorTransformation,
++                ExpandDenominatorTransformation.EXPAND_DENOMINATOR)
++
++    /**
++     * Collects terms by pattern
++     */
++    public static final TransformationWrapper Collect =
++        new TransformationWrapper_SimpleTensors_And_Transformations(CollectTransformation)
++
++    /**
+      * Gives a partial derivative.
+      * @see DifferentiateTransformation
+      */
+-    public static final StaticDifferentiate Differentiate = new StaticDifferentiate();
+-
+-    private final static class StaticDifferentiate {
+-        Transformation getAt(SimpleTensor var) {
+-            return new DifferentiateTransformation(var);
+-        }
+-
+-        Transformation getProperty(String var) {
+-            use(Redberry) {
+-                return new DifferentiateTransformation(var.t);
+-            }
+-        }
+-
+-        Transformation getAt(Collection args) {
+-            use(Redberry) {
+-                int i;
+-                def vars = []
+-                def transformations = []
+-                args.each { arg ->
+-                    if (arg instanceof String) arg = arg.t
+-
+-                    if (arg instanceof SimpleTensor)
+-                        vars.add(arg)
+-                    else if (arg instanceof Transformation)
+-                        transformations.add(arg)
+-                    else
+-                        throw new IllegalArgumentException();
+-                }
+-                return new DifferentiateTransformation(transformations as Transformation[], vars as SimpleTensor[]);
+-            }
+-        }
+-    }
++    public static final TransformationWrapper Differentiate =
++        new TransformationWrapper_SimpleTensors_And_Transformations(DifferentiateTransformation)
+ 
+     /**
+      * Eliminates metrics and Kronecker deltas
+@@ -190,10 +200,13 @@
+     public static final Transformation Denominator = GetDenominatorTransformation.GET_DENOMINATOR
+ 
+     /**
+-     * Removes parts of expressions, which are zero because of the symmetries (symmetric and antisymmetric at the same time).
++     * Removes parts of expressions, which are zero because of the symmetries (symmetric and antisymmetric
++     * at the same time).
++     *
+      * @see EliminateFromSymmetriesTransformation
+      */
+-    public static final Transformation EliminateFromSymmetries = EliminateFromSymmetriesTransformation.ELIMINATE_FROM_SYMMETRIES;
++    public static final Transformation EliminateFromSymmetries =
++        EliminateFromSymmetriesTransformation.ELIMINATE_FROM_SYMMETRIES;
+ 
+     /**
+      * Puts terms in a sum over a common denominator, and cancels factors in the result.
+@@ -237,15 +250,35 @@
+      */
+     public static final Transformation Factor = FactorTransformation.FACTOR;
+ 
++    /**
++     *  Expands all powers of products and powers with respect to specified variables.
++     * @see PowerExpandTransformation
++     */
++    public static final TransformationWrapper_SimpleTensors_Or_Transformations PowerExpand =
++        new TransformationWrapper_SimpleTensors_Or_Transformations(PowerExpandTransformation,
++                PowerExpandTransformation.POWER_EXPAND_TRANSFORMATION)
++
++    /**
++     * Expands all powers of products and powers with respect to specified variables and unwraps powers of
++     * indexed arguments into products (e.g. (A_m*A^m)**2 -> A_m*A^m*A_a*A^a).
++     *
++     * @see PowerExpandUnwrapTransformation
++     */
++    public static final TransformationWrapper_SimpleTensors_Or_Transformations PowerExpandUnwrap =
++        new TransformationWrapper_SimpleTensors_Or_Transformations(PowerExpandUnwrapTransformation,
++                PowerExpandUnwrapTransformation.POWER_EXPAND_UNWRAP_TRANSFORMATION)
++
++    /***********************************************************************
++     ********************* Matrices definition *****************************
++     **********************************************************************/
++
++
+     static GeneralIndicesInsertion indicesInsertion = new GeneralIndicesInsertion();
++
+     static {
+         CC.current().getParseManager().defaultParserPreprocessors.add(indicesInsertion);
+     }
+ 
+-    /*
+-     * Matrices definition
+-     */
+-
+     /**
+      * Tells Redberry to consider specified tensors as matrices and use matrix multiplication rules
+      * @param objs input
+diff -r 026599527c01 -r 68405773edc1 groovy/src/test/groovy/cc/redberry/groovy/RedberryStaticTest.groovy
+--- a/groovy/src/test/groovy/cc/redberry/groovy/RedberryStaticTest.groovy	Tue Aug 13 21:07:22 2013 +0400
++++ b/groovy/src/test/groovy/cc/redberry/groovy/RedberryStaticTest.groovy	Wed Aug 14 17:35:31 2013 +0400
+@@ -123,5 +123,26 @@
+         }
+ 
+     }
++
++    @Test
++    public void testExpand3() {
++        use(Redberry) {
++            assertTrue Expand['x = y'.t, 'f = a'.t] >> 'x*(x + f)'.t == 'a*y+y**2'.t
++            assertTrue Expand >> 'x*(x + f)'.t == 'f*x+x**2'.t
++            assertTrue Expand['x = a'] >> 'x*(x + f)'.t == 'f*a+a**2'.t
++            assertTrue Expand['x = a'.t] >> 'x*(x + f)'.t == 'f*a+a**2'.t
++        }
++    }
++
++    @Test
++    public void testPowerExpand() {
++        use(Redberry) {
++            assertTrue PowerExpand >> '(a*b*c)**d'.t == 'a**d*b**d*c**d'.t
++            assertTrue PowerExpand['a'] >> '(a*b*c)**d'.t == 'a**d*(b*c)**d'.t
++            assertTrue PowerExpand['a'.t] >> '(a*b*c)**d'.t == 'a**d*(b*c)**d'.t
++            assertTrue PowerExpand['a'.t, 'b'.t] >> '(a*b*c*d)**e'.t == 'a**e*b**e*(c*d)**e'.t
++        }
++    }
++
+ }
+ 

@@ -20,38 +20,23 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
-package cc.redberry.core.math.frobenius;
+package cc.redberry.core.tensorgenerator;
+
+import cc.redberry.core.tensor.Tensors;
+import junit.framework.Assert;
+import org.junit.Test;
+
+import java.util.Arrays;
 
 /**
- *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-final class DummySolutionProvider implements SolutionProvider {
-    private int[] solution;
-    private int[] currentRemainder;
-
-    DummySolutionProvider(int[] solution, int[] currentRemainder) {
-        this.solution = solution;
-        this.currentRemainder = currentRemainder;
-    }
-
-    @Override
-    public boolean tick() {
-        return solution != null;
-    }
-
-    @Override
-    public int[] take() {
-        if (solution == null)
-            return null;
-        int[] ret = solution;
-        solution = null;
-        return ret;
-    }
-
-    @Override
-    public int[] currentRemainders() {
-        return currentRemainder;
+public class TensorGeneratorUtilsTest {
+    @Test
+    public void test1() throws Exception {
+//        Assert.assertEquals(TensorGeneratorUtils.allStatesCombinations(Tensors.parseSimple("f_ab")).length, 4);
+//        Assert.assertEquals(TensorGeneratorUtils.allStatesCombinations(Tensors.parseSimple("p_b")).length, 2);
+        Assert.assertEquals(TensorGeneratorUtils.allStatesCombinations(Tensors.parseSimple("g_ab")).length, 3);
     }
 }

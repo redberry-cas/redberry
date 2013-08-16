@@ -26,7 +26,7 @@ import cc.redberry.core.combinatorics.Permutation;
 import cc.redberry.core.combinatorics.Symmetry;
 import cc.redberry.core.combinatorics.symmetries.Symmetries;
 import cc.redberry.core.indexmapping.Mapping;
-import cc.redberry.core.math.MathUtils;
+import cc.redberry.core.utils.MathUtils;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.number.Rational;
 import cc.redberry.core.tensor.*;

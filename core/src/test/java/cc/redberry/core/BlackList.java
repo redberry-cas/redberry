@@ -22,7 +22,7 @@
  */
 package cc.redberry.core;
 
-import cc.redberry.core.math.MathUtils;
+import cc.redberry.core.utils.MathUtils;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.tensor.random.RandomTensor;
 import gnu.trove.set.hash.TIntHashSet;

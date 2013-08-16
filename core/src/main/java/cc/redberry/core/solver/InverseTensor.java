@@ -21,7 +21,7 @@
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package cc.redberry.physics.utils.solver;
+package cc.redberry.core.solver;
 
 import cc.redberry.core.context.CC;
 import cc.redberry.core.indexmapping.IndexMappings;
@@ -137,7 +137,8 @@ public final class InverseTensor {
             }
 
         //creating tensor of the most general form from the specified samples
-        GeneratedTensor generatedTensor = TensorGenerator.generateStructure(inverseLhs.getIndices(), symmetricForm, inverseLhs.getIndices().getSymmetries().getInnerSymmetries(), samples);
+        GeneratedTensor generatedTensor = TensorGenerator.generateStructure(true, true,
+                inverseLhs.getIndices(), symmetricForm, inverseLhs.getIndices().getSymmetries().getInnerSymmetries(), samples);
         unknownCoefficients = generatedTensor.coefficients;
         //creating inverse tensor expression
         generalInverse = Tensors.expression(inverseLhs, generatedTensor.generatedTensor);
@@ -280,12 +281,12 @@ public final class InverseTensor {
      * @throws InterruptedException when Maple fails to run
      */
     public static Expression findInverseWithMaple(Expression toInverse,
-                                              Expression equation,
-                                              Tensor[] samples,
-                                              boolean symmetricForm,
-                                              Transformation[] transformations,
-                                              String mapleBinDir,
-                                              String path) throws IOException, InterruptedException {
+                                                  Expression equation,
+                                                  Tensor[] samples,
+                                                  boolean symmetricForm,
+                                                  Transformation[] transformations,
+                                                  String mapleBinDir,
+                                                  String path) throws IOException, InterruptedException {
         return findInverseWithMaple(toInverse, equation, samples, symmetricForm, false, transformations, mapleBinDir, path);
     }
 
@@ -339,13 +340,13 @@ public final class InverseTensor {
      * @throws InterruptedException when Maple fails to run
      */
     public static Expression findInverseWithMaple(Expression toInverse,
-                                              Expression equation,
-                                              Tensor[] samples,
-                                              boolean symmetricForm,
-                                              boolean keepFreeParameters,
-                                              Transformation[] transformations,
-                                              String mapleBinDir,
-                                              String path)
+                                                  Expression equation,
+                                                  Tensor[] samples,
+                                                  boolean symmetricForm,
+                                                  boolean keepFreeParameters,
+                                                  Transformation[] transformations,
+                                                  String mapleBinDir,
+                                                  String path)
             throws IOException, InterruptedException {
         ReducedSystem reducedSystem = new InverseTensor(toInverse, equation, samples, symmetricForm, transformations).toReducedSystem();
         return ExternalSolver.solveSystemWithExternalProgram(
@@ -396,12 +397,12 @@ public final class InverseTensor {
      * @throws InterruptedException when Mathematica fails to run
      */
     public static Expression findInverseWithMathematica(Expression toInverse,
-                                                    Expression equation,
-                                                    Tensor[] samples,
-                                                    boolean symmetricForm,
-                                                    Transformation[] transformations,
-                                                    String mathematicaBinDir,
-                                                    String path) throws IOException, InterruptedException {
+                                                        Expression equation,
+                                                        Tensor[] samples,
+                                                        boolean symmetricForm,
+                                                        Transformation[] transformations,
+                                                        String mathematicaBinDir,
+                                                        String path) throws IOException, InterruptedException {
         return findInverseWithMathematica(toInverse, equation, samples, symmetricForm, false, transformations, mathematicaBinDir, path);
     }
 
@@ -450,13 +451,13 @@ public final class InverseTensor {
      * @throws InterruptedException when Mathematica fails to run
      */
     public static Expression findInverseWithMathematica(Expression toInverse,
-                                                    Expression equation,
-                                                    Tensor[] samples,
-                                                    boolean symmetricForm,
-                                                    boolean keepFreeParameters,
-                                                    Transformation[] transformations,
-                                                    String mathematicaBinDir,
-                                                    String path)
+                                                        Expression equation,
+                                                        Tensor[] samples,
+                                                        boolean symmetricForm,
+                                                        boolean keepFreeParameters,
+                                                        Transformation[] transformations,
+                                                        String mathematicaBinDir,
+                                                        String path)
             throws IOException, InterruptedException {
         ReducedSystem reducedSystem = new InverseTensor(toInverse, equation, samples, symmetricForm, transformations).toReducedSystem();
         return ExternalSolver.solveSystemWithExternalProgram(

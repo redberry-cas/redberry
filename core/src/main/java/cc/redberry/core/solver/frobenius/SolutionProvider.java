@@ -20,8 +20,16 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
+package cc.redberry.core.solver.frobenius;
+
+import cc.redberry.concurrent.OutputPortUnsafe;
 
 /**
- * Utility technical mathematical functions.
+ *
+ * @author Dmitry Bolotin
+ * @author Stanislav Poslavsky
  */
-package cc.redberry.core.math;
+interface SolutionProvider extends OutputPortUnsafe<int[]> {
+    boolean tick();
+    int[] currentRemainders();
+}

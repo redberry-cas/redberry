@@ -20,23 +20,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
-package cc.redberry.physics.utils.solver;
-
-import cc.redberry.core.tensor.Expression;
-import cc.redberry.core.tensor.SimpleTensor;
-
 /**
- * @author Dmitry Bolotin
- * @author Stanislav Poslavsky
+ * System of Frobenius equations solver.
  */
-public class ReducedSystem {
-    final Expression[] equations;
-    final SimpleTensor[] unknownCoefficients;
-    final Expression[] generalSolutions;
-
-    public ReducedSystem(Expression[] equations, SimpleTensor[] unknownCoefficients, Expression[] generalSolutions) {
-        this.equations = equations;
-        this.unknownCoefficients = unknownCoefficients;
-        this.generalSolutions = generalSolutions;
-    }
-}
+package cc.redberry.core.solver.frobenius;

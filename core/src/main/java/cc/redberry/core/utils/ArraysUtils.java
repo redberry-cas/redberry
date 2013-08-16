@@ -22,7 +22,6 @@
  */
 package cc.redberry.core.utils;
 
-import cc.redberry.core.math.MathUtils;
 import cc.redberry.core.tensor.Tensor;
 
 import java.lang.reflect.Array;

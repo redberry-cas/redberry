@@ -21,7 +21,7 @@
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package cc.redberry.physics.utils.solver;
+package cc.redberry.core.solver;
 
 import cc.redberry.core.tensor.Expression;
 import cc.redberry.core.tensor.ExpressionFactory;
@@ -236,13 +236,13 @@ public class InverseTensorTest {
 
     @Test
     public void testDirac1() throws Exception {
-        Expression toInverse = Tensors.parseExpression("K^i_j = p_\\mu*G^{\\mu i}_j - m* d^i_j");
-        Expression equation = Tensors.parseExpression("K^i_j * D^j_k = d^i_k");
+        Expression toInverse = Tensors.parseExpression("K^i'_j' = p_\\mu*G^{\\mu i'}_j' - m* d^i'_j'");
+        Expression equation = Tensors.parseExpression("K^i'_j' * D^j'_k' = d^i'_k'");
         Tensor[] samples = new Tensor[]{
-                Tensors.parse("d^i_j"),
-                Tensors.parse("p_\\mu*G^{\\mu i}_j")};
-        Transformation[] transformations = new Transformation[]{Tensors.parseExpression("p_\\mu*p_\\nu*G^{\\mu i}_j*G^{\\nu j}_k = p_\\mu*p^\\mu*d^i_k")};
-        Tensor expected = Tensors.parse("D^{j}_{k} = -m*(m**2-p_{\\mu }*p^{\\mu })**(-1)*d^{j}_{k}-(m**2-p_{\\mu }*p^{\\mu })**(-1)*G^{j}_{k}^{\\mu }*p_{\\mu }");
+                Tensors.parse("d^i'_j'"),
+                Tensors.parse("p_\\mu*G^{\\mu i'}_j'")};
+        Transformation[] transformations = new Transformation[]{Tensors.parseExpression("p_\\mu*p_\\nu*G^{\\mu i'}_j'*G^{\\nu j'}_k' = p_\\mu*p^\\mu*d^i'_k'")};
+        Tensor expected = Tensors.parse("D^{j'}_{k'} = -m*(m**2-p_{\\mu }*p^{\\mu })**(-1)*d^{j'}_{k'}-(m**2-p_{\\mu }*p^{\\mu })**(-1)*G^{j'}_{k'}^{\\mu }*p_{\\mu }");
 
         Tensor actual;
         if (mapleBinDir != null) {
@@ -257,13 +257,13 @@ public class InverseTensorTest {
 
     @Test
     public void testDirac2() throws Exception {
-        Expression toInverse = Tensors.parseExpression("K^i_j = p_\\mu*G^{\\mu i}_j - m* d^i_j");
-        Expression equation = Tensors.parseExpression("K^i_j * D^j_k = I * d^i_k");
+        Expression toInverse = Tensors.parseExpression("K^i'_j' = p_\\mu*G^{\\mu i'}_j' - m* d^i'_j'");
+        Expression equation = Tensors.parseExpression("K^i'_j' * D^j'_k' = I * d^i'_k'");
         Tensor[] samples = new Tensor[]{
-                Tensors.parse("d^i_j"),
-                Tensors.parse("p_\\mu*G^{\\mu i}_j")};
-        Transformation[] transformations = new Transformation[]{Tensors.parseExpression("p_\\mu*p_\\nu*G^{\\mu i}_j*G^{\\nu j}_k = p_\\mu*p^\\mu*d^i_k")};
-        Tensor expected = Tensors.parse("D^{j}_{k} = -I*m*(m**2-p_{\\mu }*p^{\\mu })**(-1)*d^{j}_{k}-I*(m**2-p_{\\mu }*p^{\\mu })**(-1)*G^{j}_{k}^{\\mu }*p_{\\mu }");
+                Tensors.parse("d^i'_j'"),
+                Tensors.parse("p_\\mu*G^{\\mu i'}_j'")};
+        Transformation[] transformations = new Transformation[]{Tensors.parseExpression("p_\\mu*p_\\nu*G^{\\mu i'}_j'*G^{\\nu j'}_k' = p_\\mu*p^\\mu*d^i'_k'")};
+        Tensor expected = Tensors.parse("D^{j'}_{k'} = -I*m*(m**2-p_{\\mu }*p^{\\mu })**(-1)*d^{j'}_{k'}-I*(m**2-p_{\\mu }*p^{\\mu })**(-1)*G^{j'}_{k'}^{\\mu }*p_{\\mu }");
         Tensor actual;
         if (mapleBinDir != null) {
             actual = InverseTensor.findInverseWithMaple(toInverse, equation, samples, false, transformations, mapleBinDir, temporaryDir);

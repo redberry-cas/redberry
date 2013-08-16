@@ -20,7 +20,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
-package cc.redberry.physics.utils.solver;
+package cc.redberry.core.solver;
 
 import cc.redberry.core.TAssert;
 import cc.redberry.core.context.CC;
@@ -34,8 +34,12 @@ import cc.redberry.core.transformations.factor.FactorTransformation;
 import cc.redberry.core.transformations.substitutions.SubstitutionTransformation;
 import cc.redberry.core.transformations.symmetrization.SymmetrizeUpperLowerIndicesTransformation;
 import cc.redberry.core.utils.THashMap;
+import org.junit.Assume;
+import org.junit.Before;
 import org.junit.Test;
 
+import java.io.File;
+import java.util.Arrays;
 import java.util.Map;
 
 import static cc.redberry.core.tensor.Tensors.*;
@@ -44,23 +48,66 @@ import static cc.redberry.core.tensor.Tensors.*;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public class LinearSolverTest {
+public class SolverTest {
+    public final String mapleBinDir;
+    public final String temporaryDir;
+    public final String mathematicaBinDir;
+
+    public SolverTest() {
+        String mapleBinDir;
+        mapleBinDir = System.getenv("MAPLE");
+        if (mapleBinDir == null)
+            mapleBinDir = System.getProperty("redberry.maple");
+        if (mapleBinDir != null) {
+            //check maple
+            File maple = new File(mapleBinDir + "/maple");
+            if (!maple.exists())
+                mapleBinDir = null;
+            else {
+                //todo check licence
+            }
+        }
+
+        if (mapleBinDir != null)
+            System.out.println("MAPLE directory: " + mapleBinDir);
+        this.mapleBinDir ="/home/stas/maple13/bin";// mapleBinDir;
+
+        String mathematicaBinDir = "/usr/local/bin";
+        File mathematicaScriptExecutor = new File(mathematicaBinDir + "/MathematicaScript");
+        if (!mathematicaScriptExecutor.exists())
+            mathematicaBinDir = null;
+        else {
+            //todo check licence
+            System.out.println("Mathematica script executor:" + mathematicaScriptExecutor.getAbsolutePath());
+        }
+        this.mathematicaBinDir = mathematicaBinDir;
+
+        temporaryDir = System.getProperty("java.io.tmpdir");
+    }
+
+    @Before
+    public void beforeMethod() {
+        Assume.assumeTrue(mapleBinDir != null || mathematicaBinDir != null);
+    }
+
     @Test
     public void test1() throws Exception {
-        String temporaryDir = System.getProperty("java.io.tmpdir");
-        String mapleBinDir = "/home/stas/maple13/bin";
-
         Expression[] eqs = {parseExpression("(a*g_mn + b*k_m*k_n)*iF^ma = d_n^a")};
         SimpleTensor[] vars = {parseSimple("iF_ab")};
-        ReducedSystem rd = LinearSolver.reduceToSymbolicSystem(eqs, vars, new Transformation[0]);
-        Expression[] solution = ExternalSolver.solveSystemWithMaple(rd, false, mapleBinDir, temporaryDir);
-        assertSolution(eqs, solution);
+        ReducedSystem rd = Solver.reduceToSymbolicSystem(eqs, vars, new Transformation[0]);
+        if (mapleBinDir != null) {
+            Expression[] solution = ExternalSolver.solveSystemWithMaple(rd, false, mapleBinDir, temporaryDir);
+            assertSolution(eqs, solution);
+        }
+        if (mathematicaBinDir != null) {
+            Expression[] solution = ExternalSolver.solveSystemWithMathematica(rd, false, mathematicaBinDir, "/home/stas/Projects/redberry");
+            System.out.println(Arrays.toString(solution));
+            assertSolution(eqs, solution);
+        }
     }
 
     @Test
     public void test2() throws Exception {
-        String temporaryDir = System.getProperty("java.io.tmpdir");
-        String mapleBinDir = "/home/stas/maple13/bin";
 
         Expression[] equations = {
                 Tensors.expression(parse("(d_p^a*d_q^b*d_r^c+"
@@ -74,38 +121,19 @@ public class LinearSolverTest {
 
         SimpleTensor[] vars = {parseSimple("iK^pqr_ijk")};
         Transformation[] transformations = {parseExpression("n_a*n^a = 1"), parseExpression("d_a^a = 4")};
-        ReducedSystem rd = LinearSolver.reduceToSymbolicSystem(equations, vars, transformations);
-        Expression[] solution = ExternalSolver.solveSystemWithMaple(rd, false, mapleBinDir, temporaryDir);
-        assertSolution(equations, solution, transformations);
-    }
-
-    @Test
-    public void test3() throws Exception {
-        String temporaryDir = System.getProperty("java.io.tmpdir");
-        String mathematicaBinDir = "/usr/local/bin";
-
-        Expression[] equations = {
-                Tensors.expression(parse("(d_p^a*d_q^b*d_r^c+"
-                        + "6*(-1/2+2*b**2)*g_pq*g^ab*d_r^c+"
-                        + "3*(-1+2)*n_p*n^a*d_q^b*d_r^c+"
-                        + "6*(1/2+2*b)*(n_p*n_q*g^ab*d_r^c+n^a*n^b*g_pq*d_r^c)+"
-                        + "6*(-1/4+2*b**2)*n_p*g_qr*n^a*g^bc)*iK^pqr_ijk"),
-
-                        SymmetrizeUpperLowerIndicesTransformation.symmetrizeUpperLowerIndices(parse("d_i^a*d_j^b*d_k^c"), true))
-        };
-
-        SimpleTensor[] vars = {parseSimple("iK^pqr_ijk")};
-        Transformation[] transformations = {parseExpression("n_a*n^a = 1"), parseExpression("d_a^a = 4")};
-        ReducedSystem rd = LinearSolver.reduceToSymbolicSystem(equations, vars, transformations);
-        Expression[] solution = ExternalSolver.solveSystemWithMathematica(rd, false, mathematicaBinDir, temporaryDir);
-        assertSolution(equations, solution, transformations);
+        ReducedSystem rd = Solver.reduceToSymbolicSystem(equations, vars, transformations);
+        if (mapleBinDir != null) {
+            Expression[] solution = ExternalSolver.solveSystemWithMaple(rd, false, mapleBinDir, temporaryDir);
+            assertSolution(equations, solution, transformations);
+        }
+        if (mathematicaBinDir != null) {
+            Expression[] solution = ExternalSolver.solveSystemWithMathematica(rd, false, mathematicaBinDir, temporaryDir);
+            assertSolution(equations, solution, transformations);
+        }
     }
 
     @Test
     public void test4() throws Exception {
-        String temporaryDir = System.getProperty("java.io.tmpdir");
-        String mathematicaBinDir = "/usr/local/bin";
-
         Expression toInverse =
                 Tensors.parseExpression("F_p^mn_q^rs = "
                         + "d^s_q*d^r_p*g^mn+d^m_q*d^n_p*g^rs+(-1)*d^r_p*d^n_q*g^ms+(-1)*d^s_p*d^m_q*g^rn");
@@ -116,15 +144,19 @@ public class LinearSolverTest {
 
         SimpleTensor[] vars = {parseSimple("iF^pqr_ijk")};
         Transformation[] transformations = {parseExpression("d_a^a = 4")};
-        ReducedSystem rd = LinearSolver.reduceToSymbolicSystem(equations, vars, transformations);
-        Expression[] solution = ExternalSolver.solveSystemWithMathematica(rd, false, mathematicaBinDir, temporaryDir);
-        assertSolution(equations, solution, transformations);
+        ReducedSystem rd = Solver.reduceToSymbolicSystem(equations, vars, transformations);
+        if (mathematicaBinDir != null) {
+            Expression[] solution = ExternalSolver.solveSystemWithMathematica(rd, false, mathematicaBinDir, temporaryDir);
+            assertSolution(equations, solution, transformations);
+        }
+        if (mapleBinDir != null) {
+            Expression[] solution = ExternalSolver.solveSystemWithMathematica(rd, false, mathematicaBinDir, temporaryDir);
+            assertSolution(equations, solution, transformations);
+        }
     }
 
     @Test
     public void test5() throws Exception {
-        String temporaryDir = System.getProperty("java.io.tmpdir");
-        String mathematicaBinDir = "/usr/local/bin";
 
         Expression toInverse =
                 Tensors.parseExpression("F_p^mn_q^rs = "
@@ -140,19 +172,21 @@ public class LinearSolverTest {
 
         SimpleTensor[] vars = {parseSimple("iF^pqr_ijk"), parseSimple("iiF^pqr_ijk")};
         Transformation[] transformations = {parseExpression("d_a^a = 4")};
-        ReducedSystem rd = LinearSolver.reduceToSymbolicSystem(equations, vars, transformations);
-        Expression[] solution = ExternalSolver.solveSystemWithMathematica(rd, false, mathematicaBinDir, temporaryDir);
-        TAssert.assertEquals(solution[0].get(1), solution[1].get(1));
-        assertSolution(equations, solution, transformations);
+        ReducedSystem rd = Solver.reduceToSymbolicSystem(equations, vars, transformations);
+        if (mathematicaBinDir != null) {
+            Expression[] solution = ExternalSolver.solveSystemWithMathematica(rd, false, mathematicaBinDir, temporaryDir);
+            TAssert.assertEquals(solution[0].get(1), solution[1].get(1));
+            assertSolution(equations, solution, transformations);
+        }
+        if (mapleBinDir != null) {
+            Expression[] solution = ExternalSolver.solveSystemWithMaple(rd, false, mapleBinDir, temporaryDir);
+            TAssert.assertEquals(solution[0].get(1), solution[1].get(1));
+            assertSolution(equations, solution, transformations);
+        }
     }
-
 
     @Test
     public void test6() throws Exception {
-        String temporaryDir = System.getProperty("java.io.tmpdir");
-        String mathematicaBinDir = "/usr/local/bin";
-
-
         Expression[] equations = {
                 parseExpression("x + y = 1"),
                 parseExpression("x**2 - y = -1")
@@ -161,16 +195,19 @@ public class LinearSolverTest {
         SimpleTensor[] vars = {parseSimple("x"), parseSimple("y")};
 
         Transformation[] transformations = {parseExpression("d_a^a = 4")};
-        ReducedSystem rd = LinearSolver.reduceToSymbolicSystem(equations, vars, transformations);
-        Expression[] solution = ExternalSolver.solveSystemWithMathematica(rd, false, mathematicaBinDir, temporaryDir);
-        assertSolution(equations, solution, transformations);
+        ReducedSystem rd = Solver.reduceToSymbolicSystem(equations, vars, transformations);
+        if (mathematicaBinDir != null) {
+            Expression[] solution = ExternalSolver.solveSystemWithMathematica(rd, false, mathematicaBinDir, temporaryDir);
+            assertSolution(equations, solution, transformations);
+        }
+        if (mapleBinDir != null) {
+            Expression[] solution = ExternalSolver.solveSystemWithMaple(rd, false, mapleBinDir, temporaryDir);
+            assertSolution(equations, solution, transformations);
+        }
     }
 
     @Test
     public void test7() throws Exception {
-        String temporaryDir = System.getProperty("java.io.tmpdir");
-        String mathematicaBinDir = "/usr/local/bin";
-
         Expression toInverse =
                 Tensors.parseExpression("F_p^mn_q^rs = "
                         + "d^s_q*d^r_p*g^mn+d^m_q*d^n_p*g^rs+(-1)*d^r_p*d^n_q*g^ms+(-1)*d^s_p*d^m_q*g^rn");
@@ -181,9 +218,39 @@ public class LinearSolverTest {
 
         SimpleTensor[] vars = {parseSimple("iF^pqr_ijk"), parseSimple("x")};
         Transformation[] transformations = {parseExpression("d_a^a = 4")};
-        ReducedSystem rd = LinearSolver.reduceToSymbolicSystem(equations, vars, transformations);
-        Expression[] solution = ExternalSolver.solveSystemWithMathematica(rd, false, mathematicaBinDir, temporaryDir);
-        assertSolution(equations, solution, transformations);
+        ReducedSystem rd = Solver.reduceToSymbolicSystem(equations, vars, transformations);
+        if (mathematicaBinDir != null) {
+            Expression[] solution = ExternalSolver.solveSystemWithMathematica(rd, false, mathematicaBinDir, temporaryDir);
+            assertSolution(equations, solution, transformations);
+        }
+        if (mapleBinDir != null) {
+            Expression[] solution = ExternalSolver.solveSystemWithMaple(rd, false, mapleBinDir, temporaryDir);
+            assertSolution(equations, solution, transformations);
+        }
+    }
+
+
+    @Test
+    public void test4a() throws Exception {
+        Expression toInverse =
+                Tensors.parseExpression("F_p^mn_q^rs = "
+                        + "d^s_q*d^r_p*g^mn+d^m_q*d^n_p*g^rs+(-1)*d^r_p*d^n_q*g^ms+(-1)*d^s_p*d^m_q*g^rn");
+        Expression equation = (Expression) toInverse.transform(
+                parse("F_p^mn_q^rs*iF^p_mn^a_bc=d^a_q*d_b^r*d_c^s-2/4*d^r_q*d_b^a*d_c^s"));
+
+        Expression[] equations = {equation};
+
+        SimpleTensor[] vars = {parseSimple("iF^pqr_ijk")};
+        Transformation[] transformations = {parseExpression("d_a^a = 4")};
+        ReducedSystem rd = Solver.reduceToSymbolicSystem(equations, vars, transformations);
+        if (mathematicaBinDir != null) {
+            Expression[] solution = ExternalSolver.solveSystemWithMathematica(rd, false, mathematicaBinDir, temporaryDir);
+            TAssert.assertTrue(solution.length == 0);
+        }
+        if (mapleBinDir != null) {
+            Expression[] solution = ExternalSolver.solveSystemWithMaple(rd, false, mapleBinDir, temporaryDir);
+            TAssert.assertTrue(solution.length == 0);
+        }
     }
 
     private static void assertSolution(Expression[] equations, Expression[] solutions, Transformation... transformations) {

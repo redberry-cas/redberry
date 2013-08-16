@@ -23,7 +23,7 @@
 package cc.redberry.core.tensor;
 
 import cc.redberry.core.indices.Indices;
-import cc.redberry.core.math.MathUtils;
+import cc.redberry.core.utils.MathUtils;
 import cc.redberry.core.number.Complex;
 
 /**

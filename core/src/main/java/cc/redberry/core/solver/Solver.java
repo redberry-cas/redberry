@@ -20,9 +20,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
-package cc.redberry.physics.utils.solver;
+package cc.redberry.core.solver;
 
-import cc.redberry.core.combinatorics.IntCombinationsGenerator;
 import cc.redberry.core.context.CC;
 import cc.redberry.core.indices.IndexType;
 import cc.redberry.core.indices.IndicesFactory;
@@ -31,12 +30,12 @@ import cc.redberry.core.number.Complex;
 import cc.redberry.core.tensor.*;
 import cc.redberry.core.tensorgenerator.GeneratedTensor;
 import cc.redberry.core.tensorgenerator.TensorGenerator;
+import cc.redberry.core.tensorgenerator.TensorGeneratorUtils;
 import cc.redberry.core.transformations.CollectNonScalarsTransformation;
 import cc.redberry.core.transformations.EliminateMetricsTransformation;
 import cc.redberry.core.transformations.Transformation;
 import cc.redberry.core.transformations.TransformationCollection;
 import cc.redberry.core.transformations.expand.ExpandTransformation;
-import cc.redberry.core.utils.IntArrayList;
 import cc.redberry.core.utils.TensorUtils;
 import gnu.trove.set.hash.TIntHashSet;
 
@@ -48,12 +47,17 @@ import static cc.redberry.core.indices.IndicesUtils.*;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public final class LinearSolver {
-    private LinearSolver() {
+public final class Solver {
+    private Solver() {
     }
 
     public static ReducedSystem reduceToSymbolicSystem(Expression[] equations, SimpleTensor[] vars,
                                                        Transformation[] rules) {
+        return reduceToSymbolicSystem(equations, vars, rules, new boolean[vars.length]);
+    }
+
+    public static ReducedSystem reduceToSymbolicSystem(Expression[] equations, SimpleTensor[] vars,
+                                                       Transformation[] rules, boolean[] symmetricForm) {
 
         Tensor[] zeroReduced = new Tensor[equations.length];
         for (int i = equations.length - 1; i >= 0; --i) {
@@ -63,11 +67,10 @@ public final class LinearSolver {
             zeroReduced[i] = EliminateMetricsTransformation.eliminate(zeroReduced[i]);
         }
 
-
         TIntHashSet varsNames = new TIntHashSet(vars.length);
         for (SimpleTensor var : vars)
             varsNames.add(var.getName());
-        SimpleTensor[] samples = getSamples(zeroReduced, varsNames);
+        Tensor[] samples = getSamples(zeroReduced, varsNames);
 
         final Expression[] generalSolutions = new Expression[vars.length];
         GeneratedTensor generatedTensor;
@@ -79,7 +82,8 @@ public final class LinearSolver {
                 unknownCoefficients.add(nVar);
                 generalSolutions[i] = Tensors.expression(vars[i], nVar);
             } else {
-                generatedTensor = TensorGenerator.generateStructure(vars[i].getIndices(), false, vars[i].getIndices().getSymmetries().getInnerSymmetries(), samples);
+                generatedTensor = TensorGenerator.generateStructure(true,true, vars[i].getIndices(),
+                        symmetricForm[i], vars[i].getIndices().getSymmetries().getInnerSymmetries(), samples);
 
                 unknownCoefficients.ensureCapacity(generatedTensor.coefficients.length);
                 for (SimpleTensor st : generatedTensor.coefficients)
@@ -118,9 +122,9 @@ public final class LinearSolver {
                 generalSolutions);
     }
 
-    private static SimpleTensor[] getSamples(Tensor[] zeroReduced, TIntHashSet vars) {
+    private static Tensor[] getSamples(Tensor[] zeroReduced, TIntHashSet vars) {
         Collection<SimpleTensor> content = TensorUtils.getAllDiffSimpleTensors(zeroReduced);
-        ArrayList<SimpleTensor> samples = new ArrayList<>(content.size() + 1);
+        ArrayList<Tensor> samples = new ArrayList<>(content.size() + 1);
         Set<IndexType> usedTypes = new HashSet<>();
 
         for (SimpleTensor st : content) {
@@ -133,36 +137,14 @@ public final class LinearSolver {
                 continue;
             }
 
-            SimpleIndices indices = st.getIndices();
-            //lowering all indices
-            IntArrayList metricIndices = new IntArrayList(),
-                    nonMetricIndices = new IntArrayList();
-
-            for (int i = indices.size() - 1; i >= 0; --i) {
-                if (CC.isMetric(getType(indices.get(i))))
-                    metricIndices.add(getNameWithType(indices.get(i)));
-                else
-                    nonMetricIndices.add(indices.get(i));
-                usedTypes.add(getTypeEnum(indices.get(i)));
+            SimpleIndices si = st.getIndices();
+            int[] free = new int[si.size()];
+            for (int i = si.size() - 1; i >= 0; --i) {
+                usedTypes.add(getTypeEnum(si.get(i)));
+                free[i] = createIndex(i, getType(si.get(i)), getState(si.get(i)));
             }
-
-
-            final int[] metricInds = metricIndices.toArray();
-            IntCombinationsGenerator gen;
-            int[] temp;
-            for (int i = 0; i <= metricInds.length; ++i) {
-                gen = new IntCombinationsGenerator(metricInds.length, i);
-                for (int[] combination : gen) {
-                    temp = metricInds.clone();
-                    for (int position : combination)
-                        temp[position] |= 0x80000000;//raise index
-
-                    IntArrayList _result = nonMetricIndices.clone();
-                    _result.addAll(temp);
-                    SimpleIndices result = IndicesFactory.createSimple(null, _result.toArray());
-                    samples.add(Tensors.simpleTensor(st.getName(), result));
-                }
-            }
+            st = Tensors.setIndices(st, IndicesFactory.createSimple(null, si));
+            samples.addAll(Arrays.asList(TensorGeneratorUtils.allStatesCombinations(st)));
         }
 
         for (IndexType type : usedTypes) {
@@ -174,6 +156,6 @@ public final class LinearSolver {
                 samples.add(Tensors.createMetric(0x80000000 | setType(btype, 0), 0x80000000 | setType(btype, 1)));
             }
         }
-        return samples.toArray(new SimpleTensor[samples.size()]);
+        return samples.toArray(new Tensor[samples.size()]);
     }
 }

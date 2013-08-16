@@ -20,7 +20,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
-package cc.redberry.physics.utils.solver;
+package cc.redberry.core.solver;
 
 import cc.redberry.core.context.CC;
 import cc.redberry.core.context.OutputFormat;
@@ -37,7 +37,6 @@ import cc.redberry.core.utils.THashMap;
 
 import java.io.*;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -58,9 +57,9 @@ public class ExternalSolver {
 
 
     public static Expression[] solveSystemWithMathematica(ReducedSystem reducedSystem,
-                                                    boolean keepFreeParameters,
-                                                    String mathematicaBinDir,
-                                                    String path)
+                                                          boolean keepFreeParameters,
+                                                          String mathematicaBinDir,
+                                                          String path)
             throws IOException, InterruptedException {
         return solveSystemWithExternalProgram(MathematicaScriptCreator.INSTANCE, reducedSystem, keepFreeParameters, mathematicaBinDir, path);
     }
@@ -112,20 +111,23 @@ public class ExternalSolver {
             equations[i] = (Expression) fullSub.transform(equations[i]);
 
 
-        if (scalarSubs.length != 0) {
+        /*if (scalarSubs.length != 0) {
             StringBuilder scalarsString = new StringBuilder().append('[');
             for (Expression sub : scalarSubs)
                 scalarsString.append(sub).append(", ");
             scalarsString.deleteCharAt(scalarsString.length() - 1).deleteCharAt(scalarsString.length() - 1).append(']');
-            System.out.println(scalarsString.toString());
-        }
+         System.out.println(scalarsString.toString());
+        }*/
 
-        System.out.println("Reduced solution: " + Arrays.toString(reducedSystem.generalSolutions));
-        System.out.println();
+        /*System.out.println("Reduced solution: " + Arrays.toString(reducedSystem.generalSolutions));
+        System.out.println();*/
 
         scriptCreator.createScript(equations, reducedSystem, path);
 
-        //running external programm
+        //cleaning previous output
+        new File(path + "/equations." + scriptCreator.getScriptExtension() + "Out").delete();
+
+        //running external program
         try {
             Process p = Runtime.getRuntime().exec(programBinDir + "/" + scriptCreator.getScriptExecutionCommand() + " " + path + "/equations." + scriptCreator.getScriptExtension());
             BufferedReader bri = new BufferedReader(new InputStreamReader(p.getInputStream()));
@@ -145,6 +147,10 @@ public class ExternalSolver {
         //reading the produced output with the solution
         //allocating resulting coefficients array
         Expression[] coefficientsResults = new Expression[reducedSystem.unknownCoefficients.length];
+        //no solutions
+        if (!new File(path + "/equations." + scriptCreator.getScriptExtension() + "Out").exists()) {
+            return new Expression[0];
+        }
         FileInputStream fstream = new FileInputStream(path + "/equations." + scriptCreator.getScriptExtension() + "Out");
         if (fstream.available() == 0)
             return null;
@@ -219,7 +225,9 @@ public class ExternalSolver {
             }
             file.append(" };\n");
 
-            file.append("$result = Simplify[Solve[$equations,$coefficients]][[1]];\n");
+            file.append("$result = Solve[$equations,$coefficients];\n");
+            file.append("If[Length[$result] != 0, ");
+            file.append("$result = Simplify[$result][[1]];\n");
             file.append("$found = $result[[All, 1]];\n");
             file.append("For[$i = 1, $i <= Length[$coefficients], ++$i,If[!MemberQ[$found, $coefficients[[$i]]], $result = $result/.{$coefficients[[$i]] -> 0}; AppendTo[$result, $coefficients[[$i]] -> 0];]];\n");
             file.append("$result = Simplify[$result];\n");
@@ -232,6 +240,7 @@ public class ExternalSolver {
 //            file.append("For[i = 1, i <= Length[coefficients], ++i, WriteString[stream, StringReplace[ToString[coefficients[[i]] == result[[i]] // InputForm], {\"==\" -> \"=\", \"^\" -> \"**\"}] <> If[i != Length[coefficients], \"\\n\", \"\"]]];\n");
             file.append("For[$i = 1, $i <= Length[$coefficients], ++$i, WriteString[$stream, StringReplace[ToString[$result[[$i]] // InputForm], {\"->\" -> \"=\", \"^\" -> \"**\"}] <> If[$i != Length[$coefficients], \"\\n\", \"\"]]];\n");
             file.append("Close[$stream];");
+            file.append("];");
             output.close();
             file.close();
         }
@@ -279,9 +288,9 @@ public class ExternalSolver {
                 else
                     file.append(reducedSystem.unknownCoefficients[i] + ",");
             file.append("]):\n");
+            file.append("if nops(Result) <> 0 then\n");
             file.append("Result:= factor(Result);\n");
             file.println("file:=fopen(\"" + path + "/equations.mapleOut\",WRITE):");
-            file.append("if nops(Result) <> 0 then\n");
             file.append("for temp_var_3x66y66i3 from 1 to " + reducedSystem.unknownCoefficients.length + " do\n");
             file.append("temp1 := SubstituteAll(convert(lhs(Result[1][temp_var_3x66y66i3]), string), \"^\", \"**\");\n");
             file.append("temp2 := SubstituteAll(convert(rhs(Result[1][temp_var_3x66y66i3]), string), \"^\", \"**\");\n");
