@@ -23,12 +23,19 @@
 
 package cc.redberry.groovy
 
+import cc.redberry.core.combinatorics.symmetries.Symmetries
 import cc.redberry.core.context.CC
+import cc.redberry.core.indices.SimpleIndices
 import cc.redberry.core.indices.StructureOfIndices
 import cc.redberry.core.parser.ParseTokenSimpleTensor
 import cc.redberry.core.parser.preprocessor.GeneralIndicesInsertion
+import cc.redberry.core.solver.ExternalSolver
+import cc.redberry.core.solver.ReduceEngine
+import cc.redberry.core.solver.ReducedSystem
+import cc.redberry.core.tensor.Expression
 import cc.redberry.core.tensor.SimpleTensor
 import cc.redberry.core.tensor.Tensor
+import cc.redberry.core.tensorgenerator.TensorGenerator
 import cc.redberry.core.transformations.*
 import cc.redberry.core.transformations.collect.CollectTransformation
 import cc.redberry.core.transformations.expand.ExpandAllTransformation
@@ -334,9 +341,70 @@ class RedberryStatic {
         }
     }
 
-    /*
-     * Utilities
-     */
+    /***********************************
+     ************* Solver ** ***********
+     **********************************/
+
+
+    public static Tensor GenerateTensor(SimpleIndices indices,
+                                        Collection samples,
+                                        Map options = [Symmetries: null, GenerateCoefficients: 'true', SymmetricForm: 'false', RaiseLower: 'true']) {
+        use(Redberry) {
+            Symmetries symmetries = options.get('Symmetries')
+            def symmetricForm = Boolean.valueOf(options.get('SymmetricForm'))
+            def generateCoefficients = Boolean.valueOf(options.get('GenerateCoefficients'))
+            def raiseLower = Boolean.valueOf(options.get('RaiseLower'))
+            return TensorGenerator.generate(indices, samples.t as Tensor[], symmetries, symmetricForm, generateCoefficients, raiseLower)
+        }
+    }
+
+    private static final Map ReduceDefaultOptions = Collections.unmodifiableMap(
+            [Transformations: [], SymmetricForm: [],
+                    ExternalSolver: [Solver: '', Path: '', KeepFreeParams: 'false', TmpDir: System.getProperty("java.io.tmpdir")]])
+
+    private static final Map ReduceDefaultExternalSolverOptions = Collections.unmodifiableMap(
+            [Solver: '', Path: '', KeepFreeParams: 'false', TmpDir: System.getProperty("java.io.tmpdir")])
+
+    public static Collection Reduce(Collection equations,
+                                    Collection vars,
+                                    Map options = [Transformations: [], SymmetricForm: [], ExternalSolver: [Solver: '', Path: '', KeepFreeParams: 'false', TmpDir: System.getProperty("java.io.tmpdir")]]) {
+        use(Redberry) {
+            Map allOptions = new HashMap(ReduceDefaultOptions)
+            allOptions.putAll(options)
+
+            def transformations = allOptions.get('Transformations') as Transformation[]
+            def symmetricForm = allOptions.get('SymmetricForm') as boolean[]
+            if (symmetricForm.length == 0) symmetricForm = new boolean[vars.size()]
+
+            ReducedSystem reducedSystem = ReduceEngine.reduceToSymbolicSystem(equations.t as Expression[],
+                    vars.t as SimpleTensor[], transformations, symmetricForm)
+
+            def externalSolverOptions = new HashMap(ReduceDefaultExternalSolverOptions)
+            externalSolverOptions.putAll((Map) allOptions.get('ExternalSolver'))
+
+            def keepFreeParams = Boolean.valueOf(externalSolverOptions.get('KeepFreeParams'))
+            def externalSolverPath = externalSolverOptions.get('Path')
+            def tmpDir = externalSolverOptions.get('TmpDir')
+            def externalProgram = (String) externalSolverOptions.get('Solver')
+            if (!externalProgram.isEmpty())
+                switch (externalProgram) {
+                    case 'Mathematica':
+                        return ExternalSolver.solveSystemWithMathematica(reducedSystem, keepFreeParams, externalSolverPath, tmpDir);
+                    case 'Maple':
+                        return ExternalSolver.solveSystemWithMaple(reducedSystem, keepFreeParams, externalSolverPath, tmpDir);
+                    default:
+                        throw new IllegalArgumentException('Uncknown solver:' + externalProgram)
+                }
+            def system = []
+            system.addAll(Arrays.asList(reducedSystem.generalSolutions))
+            system.addAll(Arrays.asList(reducedSystem.equations))
+            return system
+        }
+    }
+
+    /***********************************
+     ************* Utilities ***********
+     ***********************************/
 
     /**
      * Evaluates closure, and returns a time in milliseconds used

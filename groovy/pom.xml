@@ -21,7 +21,8 @@
   ~ You should have received a copy of the GNU General Public License
   ~ along with Redberry. If not, see <http://www.gnu.org/licenses/>.
   -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>cc.redberry</groupId>
@@ -46,12 +47,12 @@
     <url>http://redberry.cc/</url>
 
     <description>
-        Redberry is an open source computer algebra system designed for tensor 
-        manipulation.  It implements basic computer algebra system routines as well as 
-        complex tools for real computations in physics. 
-        
-        This is the Groovy facade for Redberry. It contains the classes and 
-        categories defining DSL features and syntax notations for common routines from 
+        Redberry is an open source computer algebra system designed for tensor
+        manipulation. It implements basic computer algebra system routines as well as
+        complex tools for real computations in physics.
+
+        This is the Groovy facade for Redberry. It contains the classes and
+        categories defining DSL features and syntax notations for common routines from
         redebrry-core and redberry-physics.
     </description>
 
@@ -94,7 +95,10 @@
         </developer>
     </developers>
 
-    <scm><connection>scm:hg:http://bitbucket.org/redberry/redberry-groovy</connection><url>https://bitbucket.org/redberry/redberry-groovy/src/</url></scm>
+    <scm>
+        <connection>scm:hg:http://bitbucket.org/redberry/redberry-groovy</connection>
+        <url>https://bitbucket.org/redberry/redberry-groovy/src/</url>
+    </scm>
 
     <issueManagement>
         <system>YouTRACK</system>
@@ -173,8 +177,11 @@
                         </goals>
                         <configuration>
                             <target>
-                                <taskdef name="groovydoc" classname="org.codehaus.groovy.ant.Groovydoc" classpathref="maven.compile.classpath"/>
-                                <groovydoc destdir="${project.reporting.outputDirectory}/groovydoc" sourcepath="${basedir}/src/main/groovy" use="true" windowtitle="${project.name}" doctitle="${project.name}">
+                                <taskdef name="groovydoc" classname="org.codehaus.groovy.ant.Groovydoc"
+                                         classpathref="maven.compile.classpath"/>
+                                <groovydoc destdir="${project.reporting.outputDirectory}/groovydoc"
+                                           sourcepath="${basedir}/src/main/groovy" use="true"
+                                           windowtitle="${project.name}" doctitle="${project.name}">
                                 </groovydoc>
                             </target>
                         </configuration>
@@ -217,13 +224,13 @@
                     </descriptors>
                 </configuration>
                 <!--<executions>-->
-                    <!--<execution>-->
-                        <!--<id>distrs</id>-->
-                        <!--<phase>package</phase>-->
-                        <!--<goals>-->
-                            <!--<goal>single</goal>-->
-                        <!--</goals>-->
-                    <!--</execution>-->
+                <!--<execution>-->
+                <!--<id>distrs</id>-->
+                <!--<phase>package</phase>-->
+                <!--<goals>-->
+                <!--<goal>single</goal>-->
+                <!--</goals>-->
+                <!--</execution>-->
                 <!--</executions>-->
             </plugin>
         </plugins>
@@ -238,6 +245,13 @@
             <groupId>cc.redberry</groupId>
             <artifactId>core</artifactId>
             <version>1.1.5-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>cc.redberry</groupId>
+            <artifactId>core</artifactId>
+            <version>1.1.5-SNAPSHOT</version>
+            <type>test-jar</type>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>cc.redberry</groupId>

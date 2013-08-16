@@ -137,8 +137,8 @@ public final class InverseTensor {
             }
 
         //creating tensor of the most general form from the specified samples
-        GeneratedTensor generatedTensor = TensorGenerator.generateStructure(true, true,
-                inverseLhs.getIndices(), symmetricForm, inverseLhs.getIndices().getSymmetries().getInnerSymmetries(), samples);
+        GeneratedTensor generatedTensor = TensorGenerator.generateStructure(inverseLhs.getIndices(), samples, inverseLhs.getIndices().getSymmetries().getInnerSymmetries(), symmetricForm, true, true
+        );
         unknownCoefficients = generatedTensor.coefficients;
         //creating inverse tensor expression
         generalInverse = Tensors.expression(inverseLhs, generatedTensor.generatedTensor);

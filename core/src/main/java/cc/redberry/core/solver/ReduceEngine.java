@@ -47,8 +47,8 @@ import static cc.redberry.core.indices.IndicesUtils.*;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public final class Solver {
-    private Solver() {
+public final class ReduceEngine {
+    private ReduceEngine() {
     }
 
     public static ReducedSystem reduceToSymbolicSystem(Expression[] equations, SimpleTensor[] vars,
@@ -82,8 +82,8 @@ public final class Solver {
                 unknownCoefficients.add(nVar);
                 generalSolutions[i] = Tensors.expression(vars[i], nVar);
             } else {
-                generatedTensor = TensorGenerator.generateStructure(true,true, vars[i].getIndices(),
-                        symmetricForm[i], vars[i].getIndices().getSymmetries().getInnerSymmetries(), samples);
+                generatedTensor = TensorGenerator.generateStructure(vars[i].getIndices(), samples, vars[i].getIndices().getSymmetries().getInnerSymmetries(), symmetricForm[i], true, true
+                );
 
                 unknownCoefficients.ensureCapacity(generatedTensor.coefficients.length);
                 for (SimpleTensor st : generatedTensor.coefficients)

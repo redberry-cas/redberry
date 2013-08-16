@@ -48,29 +48,32 @@ import static cc.redberry.core.tensor.Tensors.*;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public class SolverTest {
+public class ReduceEngineTest {
     public final String mapleBinDir;
     public final String temporaryDir;
     public final String mathematicaBinDir;
 
-    public SolverTest() {
+    public ReduceEngineTest() {
         String mapleBinDir;
-        mapleBinDir = System.getenv("MAPLE");
-        if (mapleBinDir == null)
-            mapleBinDir = System.getProperty("redberry.maple");
-        if (mapleBinDir != null) {
-            //check maple
-            File maple = new File(mapleBinDir + "/maple");
-            if (!maple.exists())
-                mapleBinDir = null;
-            else {
-                //todo check licence
+        mapleBinDir = "/home/stas/maple13/bin";// mapleBinDir;
+        if (!new File(mapleBinDir + "/maple").exists()) {
+            mapleBinDir = System.getenv("MAPLE");
+            if (mapleBinDir == null)
+                mapleBinDir = System.getProperty("redberry.maple");
+            if (mapleBinDir != null) {
+                //check maple
+                File maple = new File(mapleBinDir + "/maple");
+                if (!maple.exists())
+                    mapleBinDir = null;
+                else {
+                    //todo check licence
+                }
             }
         }
 
         if (mapleBinDir != null)
             System.out.println("MAPLE directory: " + mapleBinDir);
-        this.mapleBinDir ="/home/stas/maple13/bin";// mapleBinDir;
+        this.mapleBinDir = mapleBinDir;
 
         String mathematicaBinDir = "/usr/local/bin";
         File mathematicaScriptExecutor = new File(mathematicaBinDir + "/MathematicaScript");
@@ -81,7 +84,6 @@ public class SolverTest {
             System.out.println("Mathematica script executor:" + mathematicaScriptExecutor.getAbsolutePath());
         }
         this.mathematicaBinDir = mathematicaBinDir;
-
         temporaryDir = System.getProperty("java.io.tmpdir");
     }
 
@@ -94,13 +96,13 @@ public class SolverTest {
     public void test1() throws Exception {
         Expression[] eqs = {parseExpression("(a*g_mn + b*k_m*k_n)*iF^ma = d_n^a")};
         SimpleTensor[] vars = {parseSimple("iF_ab")};
-        ReducedSystem rd = Solver.reduceToSymbolicSystem(eqs, vars, new Transformation[0]);
+        ReducedSystem rd = ReduceEngine.reduceToSymbolicSystem(eqs, vars, new Transformation[0]);
         if (mapleBinDir != null) {
-            Expression[] solution = ExternalSolver.solveSystemWithMaple(rd, false, mapleBinDir, temporaryDir);
+            Expression[][] solution = ExternalSolver.solveSystemWithMaple(rd, false, mapleBinDir, temporaryDir);
             assertSolution(eqs, solution);
         }
         if (mathematicaBinDir != null) {
-            Expression[] solution = ExternalSolver.solveSystemWithMathematica(rd, false, mathematicaBinDir, "/home/stas/Projects/redberry");
+            Expression[][] solution = ExternalSolver.solveSystemWithMathematica(rd, false, mathematicaBinDir, "/home/stas/Projects/redberry");
             System.out.println(Arrays.toString(solution));
             assertSolution(eqs, solution);
         }
@@ -121,13 +123,13 @@ public class SolverTest {
 
         SimpleTensor[] vars = {parseSimple("iK^pqr_ijk")};
         Transformation[] transformations = {parseExpression("n_a*n^a = 1"), parseExpression("d_a^a = 4")};
-        ReducedSystem rd = Solver.reduceToSymbolicSystem(equations, vars, transformations);
+        ReducedSystem rd = ReduceEngine.reduceToSymbolicSystem(equations, vars, transformations);
         if (mapleBinDir != null) {
-            Expression[] solution = ExternalSolver.solveSystemWithMaple(rd, false, mapleBinDir, temporaryDir);
+            Expression[][] solution = ExternalSolver.solveSystemWithMaple(rd, false, mapleBinDir, temporaryDir);
             assertSolution(equations, solution, transformations);
         }
         if (mathematicaBinDir != null) {
-            Expression[] solution = ExternalSolver.solveSystemWithMathematica(rd, false, mathematicaBinDir, temporaryDir);
+            Expression[][] solution = ExternalSolver.solveSystemWithMathematica(rd, false, mathematicaBinDir, temporaryDir);
             assertSolution(equations, solution, transformations);
         }
     }
@@ -144,13 +146,13 @@ public class SolverTest {
 
         SimpleTensor[] vars = {parseSimple("iF^pqr_ijk")};
         Transformation[] transformations = {parseExpression("d_a^a = 4")};
-        ReducedSystem rd = Solver.reduceToSymbolicSystem(equations, vars, transformations);
+        ReducedSystem rd = ReduceEngine.reduceToSymbolicSystem(equations, vars, transformations);
         if (mathematicaBinDir != null) {
-            Expression[] solution = ExternalSolver.solveSystemWithMathematica(rd, false, mathematicaBinDir, temporaryDir);
+            Expression[][] solution = ExternalSolver.solveSystemWithMathematica(rd, false, mathematicaBinDir, temporaryDir);
             assertSolution(equations, solution, transformations);
         }
         if (mapleBinDir != null) {
-            Expression[] solution = ExternalSolver.solveSystemWithMathematica(rd, false, mathematicaBinDir, temporaryDir);
+            Expression[][] solution = ExternalSolver.solveSystemWithMathematica(rd, false, mathematicaBinDir, temporaryDir);
             assertSolution(equations, solution, transformations);
         }
     }
@@ -172,15 +174,15 @@ public class SolverTest {
 
         SimpleTensor[] vars = {parseSimple("iF^pqr_ijk"), parseSimple("iiF^pqr_ijk")};
         Transformation[] transformations = {parseExpression("d_a^a = 4")};
-        ReducedSystem rd = Solver.reduceToSymbolicSystem(equations, vars, transformations);
+        ReducedSystem rd = ReduceEngine.reduceToSymbolicSystem(equations, vars, transformations);
         if (mathematicaBinDir != null) {
-            Expression[] solution = ExternalSolver.solveSystemWithMathematica(rd, false, mathematicaBinDir, temporaryDir);
-            TAssert.assertEquals(solution[0].get(1), solution[1].get(1));
+            Expression[][] solution = ExternalSolver.solveSystemWithMathematica(rd, false, mathematicaBinDir, temporaryDir);
+            TAssert.assertEquals(solution[0][0].get(1), solution[0][1].get(1));
             assertSolution(equations, solution, transformations);
         }
         if (mapleBinDir != null) {
-            Expression[] solution = ExternalSolver.solveSystemWithMaple(rd, false, mapleBinDir, temporaryDir);
-            TAssert.assertEquals(solution[0].get(1), solution[1].get(1));
+            Expression[][] solution = ExternalSolver.solveSystemWithMaple(rd, false, mapleBinDir, temporaryDir);
+            TAssert.assertEquals(solution[0][0].get(1), solution[0][1].get(1));
             assertSolution(equations, solution, transformations);
         }
     }
@@ -195,15 +197,37 @@ public class SolverTest {
         SimpleTensor[] vars = {parseSimple("x"), parseSimple("y")};
 
         Transformation[] transformations = {parseExpression("d_a^a = 4")};
-        ReducedSystem rd = Solver.reduceToSymbolicSystem(equations, vars, transformations);
+        ReducedSystem rd = ReduceEngine.reduceToSymbolicSystem(equations, vars, transformations);
         if (mathematicaBinDir != null) {
-            Expression[] solution = ExternalSolver.solveSystemWithMathematica(rd, false, mathematicaBinDir, temporaryDir);
+            Expression[][] solution = ExternalSolver.solveSystemWithMathematica(rd, false, mathematicaBinDir, temporaryDir);
             assertSolution(equations, solution, transformations);
         }
         if (mapleBinDir != null) {
-            Expression[] solution = ExternalSolver.solveSystemWithMaple(rd, false, mapleBinDir, temporaryDir);
+            Expression[][] solution = ExternalSolver.solveSystemWithMaple(rd, false, mapleBinDir, temporaryDir);
             assertSolution(equations, solution, transformations);
         }
+    }
+
+
+    @Test
+    public void test6a() throws Exception {
+        Expression[] equations = {
+                parseExpression("x + y = 1"),
+                parseExpression("x**2 - y = -1")
+        };
+
+        SimpleTensor[] vars = {parseSimple("x"), parseSimple("y")};
+
+        Transformation[] transformations = {parseExpression("d_a^a = 4")};
+        ReducedSystem rd = ReduceEngine.reduceToSymbolicSystem(equations, vars, transformations);
+        if (mathematicaBinDir != null) {
+            Expression[][] solution = ExternalSolver.solveSystemWithMathematica(rd, false, mathematicaBinDir, "/home/stas/Projects/redberry");
+            assertSolution(equations, solution, transformations);
+        }
+//        if (mapleBinDir != null) {
+//            Expression[][] solution = ExternalSolver.solveSystemWithMaple(rd, false, mapleBinDir, "/home/stas/Projects/redberry");
+//            assertSolution(equations, solution, transformations);
+//        }
     }
 
     @Test
@@ -218,13 +242,13 @@ public class SolverTest {
 
         SimpleTensor[] vars = {parseSimple("iF^pqr_ijk"), parseSimple("x")};
         Transformation[] transformations = {parseExpression("d_a^a = 4")};
-        ReducedSystem rd = Solver.reduceToSymbolicSystem(equations, vars, transformations);
+        ReducedSystem rd = ReduceEngine.reduceToSymbolicSystem(equations, vars, transformations);
         if (mathematicaBinDir != null) {
-            Expression[] solution = ExternalSolver.solveSystemWithMathematica(rd, false, mathematicaBinDir, temporaryDir);
+            Expression[][] solution = ExternalSolver.solveSystemWithMathematica(rd, false, mathematicaBinDir, temporaryDir);
             assertSolution(equations, solution, transformations);
         }
         if (mapleBinDir != null) {
-            Expression[] solution = ExternalSolver.solveSystemWithMaple(rd, false, mapleBinDir, temporaryDir);
+            Expression[][] solution = ExternalSolver.solveSystemWithMaple(rd, false, mapleBinDir, temporaryDir);
             assertSolution(equations, solution, transformations);
         }
     }
@@ -242,28 +266,29 @@ public class SolverTest {
 
         SimpleTensor[] vars = {parseSimple("iF^pqr_ijk")};
         Transformation[] transformations = {parseExpression("d_a^a = 4")};
-        ReducedSystem rd = Solver.reduceToSymbolicSystem(equations, vars, transformations);
+        ReducedSystem rd = ReduceEngine.reduceToSymbolicSystem(equations, vars, transformations);
         if (mathematicaBinDir != null) {
-            Expression[] solution = ExternalSolver.solveSystemWithMathematica(rd, false, mathematicaBinDir, temporaryDir);
+            Expression[][] solution = ExternalSolver.solveSystemWithMathematica(rd, false, mathematicaBinDir, temporaryDir);
             TAssert.assertTrue(solution.length == 0);
         }
         if (mapleBinDir != null) {
-            Expression[] solution = ExternalSolver.solveSystemWithMaple(rd, false, mapleBinDir, temporaryDir);
+            Expression[][] solution = ExternalSolver.solveSystemWithMaple(rd, false, mapleBinDir, temporaryDir);
             TAssert.assertTrue(solution.length == 0);
         }
     }
 
-    private static void assertSolution(Expression[] equations, Expression[] solutions, Transformation... transformations) {
-        for (Tensor equation : equations) {
-            for (Expression solution : solutions)
-                equation = solution.transform(equation);
-            equation = ExpandTransformation.expand(equation, EliminateMetricsTransformation.ELIMINATE_METRICS);
-            equation = EliminateMetricsTransformation.eliminate(equation);
-            equation = new TransformationCollection(transformations).transform(equation);
-            equation = replaceScalars(equation);
-            equation = FactorTransformation.factor(equation);
-            TAssert.assertTrue(((Expression) equation).isIdentity());
-        }
+    private static void assertSolution(Expression[] equations, Expression[][] allsolutions, Transformation... transformations) {
+        for (Expression[] solutions : allsolutions)
+            for (Tensor equation : equations) {
+                for (Expression solution : solutions)
+                    equation = solution.transform(equation);
+                equation = ExpandTransformation.expand(equation, EliminateMetricsTransformation.ELIMINATE_METRICS);
+                equation = EliminateMetricsTransformation.eliminate(equation);
+                equation = new TransformationCollection(transformations).transform(equation);
+                equation = replaceScalars(equation);
+                equation = FactorTransformation.factor(equation);
+                TAssert.assertTrue(((Expression) equation).isIdentity());
+            }
     }
 
 

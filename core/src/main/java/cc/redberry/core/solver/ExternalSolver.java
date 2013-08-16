@@ -47,28 +47,28 @@ import java.util.Map;
 public class ExternalSolver {
 
 
-    public static Expression[] solveSystemWithMaple(ReducedSystem reducedSystem,
-                                                    boolean keepFreeParameters,
-                                                    String mapleBinDir,
-                                                    String path)
+    public static Expression[][] solveSystemWithMaple(ReducedSystem reducedSystem,
+                                                      boolean keepFreeParameters,
+                                                      String mapleBinDir,
+                                                      String path)
             throws IOException, InterruptedException {
         return solveSystemWithExternalProgram(MapleScriptCreator.INSTANCE, reducedSystem, keepFreeParameters, mapleBinDir, path);
     }
 
 
-    public static Expression[] solveSystemWithMathematica(ReducedSystem reducedSystem,
-                                                          boolean keepFreeParameters,
-                                                          String mathematicaBinDir,
-                                                          String path)
+    public static Expression[][] solveSystemWithMathematica(ReducedSystem reducedSystem,
+                                                            boolean keepFreeParameters,
+                                                            String mathematicaBinDir,
+                                                            String path)
             throws IOException, InterruptedException {
         return solveSystemWithExternalProgram(MathematicaScriptCreator.INSTANCE, reducedSystem, keepFreeParameters, mathematicaBinDir, path);
     }
 
-    public static Expression[] solveSystemWithExternalProgram(ExternalScriptCreator scriptCreator,
-                                                              ReducedSystem reducedSystem,
-                                                              boolean keepFreeParameters,
-                                                              String programBinDir,
-                                                              String path)
+    public static Expression[][] solveSystemWithExternalProgram(ExternalScriptCreator scriptCreator,
+                                                                ReducedSystem reducedSystem,
+                                                                boolean keepFreeParameters,
+                                                                String programBinDir,
+                                                                String path)
             throws IOException, InterruptedException {
         //create the general form of the inverse and system of linear equations
         final Expression[] equations = reducedSystem.equations.clone();
@@ -149,7 +149,7 @@ public class ExternalSolver {
         Expression[] coefficientsResults = new Expression[reducedSystem.unknownCoefficients.length];
         //no solutions
         if (!new File(path + "/equations." + scriptCreator.getScriptExtension() + "Out").exists()) {
-            return new Expression[0];
+            return new Expression[0][];
         }
         FileInputStream fstream = new FileInputStream(path + "/equations." + scriptCreator.getScriptExtension() + "Out");
         if (fstream.available() == 0)
@@ -158,32 +158,42 @@ public class ExternalSolver {
         BufferedReader br = new BufferedReader(new InputStreamReader(in));
         String strLine;
         i = -1;
+
+        List<Expression[]> solutions = new ArrayList<>();
         //reading resulting solutions from file
-        while ((strLine = br.readLine()) != null)
-            coefficientsResults[++i] = Tensors.parseExpression(strLine);
-        Expression[] solution = reducedSystem.generalSolutions.clone();
+        while ((strLine = br.readLine()) != null) {
+            if (strLine.equals("//solution")) {
+                //solution parser
+                Expression[] solution = reducedSystem.generalSolutions.clone();
 
-        //substituting coefficients into general inverse form
-        List<Transformation> zeroSubs = new ArrayList<>();
-        for (Expression coef : coefficientsResults)
-            if (coef.isIdentity())//if current coefficient is free parameter
-            {
-                zeroSubs.add(Tensors.expression(coef.get(0), Complex.ZERO));
-            } else {
-                for (int si = solution.length - 1; si >= 0; --si)
-                    solution[si] = (Expression) coef.transform(solution[si]);
-            }
-        if (!keepFreeParameters)
-            for (int si = solution.length - 1; si >= 0; --si)
-                solution[si] = (Expression) new TransformationCollection(zeroSubs).transform(solution[si]);
+                //substituting coefficients into general inverse form
+                List<Transformation> zeroSubs = new ArrayList<>();
+                for (Expression coef : coefficientsResults)
+                    if (coef.isIdentity())//if current coefficient is free parameter
+                    {
+                        zeroSubs.add(Tensors.expression(coef.get(0), Complex.ZERO));
+                    } else {
+                        for (int si = solution.length - 1; si >= 0; --si)
+                            solution[si] = (Expression) coef.transform(solution[si]);
+                    }
+                if (!keepFreeParameters)
+                    for (int si = solution.length - 1; si >= 0; --si)
+                        solution[si] = (Expression) new TransformationCollection(zeroSubs).transform(solution[si]);
 
 
-        //substituting the renamed tensors combinations
-        for (Expression sub : scalarSubs)
-            for (int si = solution.length - 1; si >= 0; --si)
-                solution[si] = (Expression) sub.transpose().transform(solution[si]);
+                //substituting the renamed tensors combinations
+                for (Expression sub : scalarSubs)
+                    for (int si = solution.length - 1; si >= 0; --si)
+                        solution[si] = (Expression) sub.transpose().transform(solution[si]);
+                solutions.add(solution);
+                coefficientsResults = new Expression[reducedSystem.unknownCoefficients.length];
+                i = -1;
+            } else
+                coefficientsResults[++i] = Tensors.parseExpression(strLine);
+        }
+
         in.close();
-        return solution;
+        return solutions.toArray(new Expression[solutions.size()][]);
     }
 
     public static interface ExternalScriptCreator {
@@ -227,18 +237,22 @@ public class ExternalSolver {
 
             file.append("$result = Solve[$equations,$coefficients];\n");
             file.append("If[Length[$result] != 0, ");
-            file.append("$result = Simplify[$result][[1]];\n");
-            file.append("$found = $result[[All, 1]];\n");
-            file.append("For[$i = 1, $i <= Length[$coefficients], ++$i,If[!MemberQ[$found, $coefficients[[$i]]], $result = $result/.{$coefficients[[$i]] -> 0}; AppendTo[$result, $coefficients[[$i]] -> 0];]];\n");
             file.append("$result = Simplify[$result];\n");
+            file.append("$stream = OpenWrite[\"" + path + "/equations.mathematicaOut\"];\n");
+            file.append("For[$solution = 1, $solution <= Length[$result], ++$solution, ");
+            file.append("$tempResult = $result[[$solution]];");
+            file.append("$found = $tempResult[[All, 1]];\n");
+            file.append("For[$i = 1, $i <= Length[$coefficients], ++$i,If[!MemberQ[$found, $coefficients[[$i]]], $tempResult = $tempResult/.{$coefficients[[$i]] -> 0}; AppendTo[$tempResult, $coefficients[[$i]] -> 0];]];\n");
+            file.append("$tempResult = Simplify[$tempResult];\n");
 
 //            file.append("left = Array[Function[x,Coefficient[equations[[x, 1]], #] & /@ coefficients], Length[equations]];\n");
 //            file.append("right = equations[[All, 2]];\n");
 //            file.append("result = LinearSolve[left, right]\n");
 
-            file.append("$stream = OpenWrite[\"" + path + "/equations.mathematicaOut\"];\n");
 //            file.append("For[i = 1, i <= Length[coefficients], ++i, WriteString[stream, StringReplace[ToString[coefficients[[i]] == result[[i]] // InputForm], {\"==\" -> \"=\", \"^\" -> \"**\"}] <> If[i != Length[coefficients], \"\\n\", \"\"]]];\n");
-            file.append("For[$i = 1, $i <= Length[$coefficients], ++$i, WriteString[$stream, StringReplace[ToString[$result[[$i]] // InputForm], {\"->\" -> \"=\", \"^\" -> \"**\"}] <> If[$i != Length[$coefficients], \"\\n\", \"\"]]];\n");
+            file.append("For[$i = 1, $i <= Length[$coefficients], ++$i, WriteString[$stream, StringReplace[ToString[$tempResult[[$i]] // InputForm], {\"->\" -> \"=\", \"^\" -> \"**\"}] <> If[$i != Length[$coefficients], \"\\n\", \"\"]]];\n");
+            file.append("WriteString[$stream, \"\n//solution\n\"];");
+            file.append("];");
             file.append("Close[$stream];");
             file.append("];");
             output.close();
@@ -291,10 +305,13 @@ public class ExternalSolver {
             file.append("if nops(Result) <> 0 then\n");
             file.append("Result:= factor(Result);\n");
             file.println("file:=fopen(\"" + path + "/equations.mapleOut\",WRITE):");
-            file.append("for temp_var_3x66y66i3 from 1 to " + reducedSystem.unknownCoefficients.length + " do\n");
-            file.append("temp1 := SubstituteAll(convert(lhs(Result[1][temp_var_3x66y66i3]), string), \"^\", \"**\");\n");
-            file.append("temp2 := SubstituteAll(convert(rhs(Result[1][temp_var_3x66y66i3]), string), \"^\", \"**\");\n");
+            file.append("for maple_positionInResult from 1 to nops(Result) do\n");
+            file.append("for maple_counter from 1 to " + reducedSystem.unknownCoefficients.length + " do\n");
+            file.append("temp1 := SubstituteAll(convert(lhs(Result[maple_positionInResult][maple_counter]), string), \"^\", \"**\");\n");
+            file.append("temp2 := SubstituteAll(convert(rhs(Result[maple_positionInResult][maple_counter]), string), \"^\", \"**\");\n");
             file.append("fprintf(file,\"%s=%s\\n\",temp1,temp2);\n");
+            file.append("od:\n");
+            file.append("fprintf(file,\"//solution\\n\");\n");
             file.append("od:\n");
             file.append("end if;\n");
             file.append("fclose(file):");

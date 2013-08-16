@@ -218,16 +218,17 @@ public class TensorGenerator {
     /**
      * Generates tensor of the most general form with specified free indices from specified tensors.
      *
-     * @param raiseLower       specifies whether indices of samples should be raised and lowered in the most general form
-     * @param withCoefficients specifies whether each term in the result should be multiplied on arbitrary coefficient
      * @param indices          free indices of the resulting tensor
-     * @param symmetricForm    specifies whether the resulting tensor should be symmetric
-     * @param symmetries       symmetries of the resulting tensor
      * @param samples          samples which used to  generate tensor of the general form
+     * @param symmetries       symmetries of the resulting tensor
+     * @param symmetricForm    specifies whether the resulting tensor should be symmetric
+     * @param withCoefficients specifies whether each term in the result should be multiplied on arbitrary coefficient
+     * @param raiseLower       specifies whether indices of samples should be raised and lowered in the most general form
      * @return tensor of the most general form with specified free indices from specified tensors
      */
-    public static Tensor generate(boolean raiseLower, boolean withCoefficients, SimpleIndices indices,
-                                  boolean symmetricForm, Symmetries symmetries, Tensor[] samples) {
+    public static Tensor generate(SimpleIndices indices, Tensor[] samples,
+                                  Symmetries symmetries, boolean symmetricForm,
+                                  boolean withCoefficients, boolean raiseLower) {
         return new TensorGenerator(indices, samples, symmetries, symmetricForm, withCoefficients, raiseLower).result();
     }
 
@@ -235,18 +236,18 @@ public class TensorGenerator {
     /**
      * Generates tensor of the most general form with specified free indices from specified tensors.
      *
-     * @param raiseLower       specifies whether indices of samples should be raised and lowered in the most general form
-     * @param withCoefficients specifies whether each term in the result should be multiplied on arbitrary coefficient
      * @param indices          free indices of the resulting tensor
-     * @param symmetricForm    specifies whether the resulting tensor should be symmetric
-     * @param symmetries       symmetries of the resulting tensor
      * @param samples          samples which used to  generate tensor of the general form
+     * @param symmetries       symmetries of the resulting tensor
+     * @param symmetricForm    specifies whether the resulting tensor should be symmetric
+     * @param withCoefficients specifies whether each term in the result should be multiplied on arbitrary coefficient
+     * @param raiseLower       specifies whether indices of samples should be raised and lowered in the most general form
      * @return tensor of the most general form with specified free indices from specified tensors and array of
      *         generated coefficients
      */
-    public static GeneratedTensor generateStructure(boolean raiseLower, boolean withCoefficients,
-                                                    SimpleIndices indices, boolean symmetricForm,
-                                                    Symmetries symmetries, Tensor[] samples) {
+    public static GeneratedTensor generateStructure(SimpleIndices indices, Tensor[] samples,
+                                                    Symmetries symmetries, boolean symmetricForm,
+                                                    boolean withCoefficients, boolean raiseLower) {
         TensorGenerator generator = new TensorGenerator(indices, samples, symmetries, symmetricForm, withCoefficients, raiseLower);
         SimpleTensor[] generatedCoefficients = TensorUtils.getAllSymbols(generator.result()).toArray(new SimpleTensor[0]);
         return new GeneratedTensor(generatedCoefficients,

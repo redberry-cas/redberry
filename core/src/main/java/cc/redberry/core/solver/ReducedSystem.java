@@ -39,4 +39,16 @@ public class ReducedSystem {
         this.unknownCoefficients = unknownCoefficients;
         this.generalSolutions = generalSolutions;
     }
+
+    public Expression[] getEquations() {
+        return equations.clone();
+    }
+
+    public SimpleTensor[] getUnknownCoefficients() {
+        return unknownCoefficients.clone();
+    }
+
+    public Expression[] getGeneralSolutions() {
+        return generalSolutions.clone();
+    }
 }
