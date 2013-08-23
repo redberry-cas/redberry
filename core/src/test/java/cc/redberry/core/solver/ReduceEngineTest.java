@@ -24,8 +24,12 @@ package cc.redberry.core.solver;
 
 import cc.redberry.core.TAssert;
 import cc.redberry.core.context.CC;
+import cc.redberry.core.number.Complex;
+import cc.redberry.core.parser.ParserIndices;
 import cc.redberry.core.tensor.*;
 import cc.redberry.core.tensor.iterator.FromChildToParentIterator;
+import cc.redberry.core.tensorgenerator.GeneratedTensor;
+import cc.redberry.core.tensorgenerator.TensorGenerator;
 import cc.redberry.core.transformations.EliminateMetricsTransformation;
 import cc.redberry.core.transformations.Transformation;
 import cc.redberry.core.transformations.TransformationCollection;
@@ -42,6 +46,8 @@ import java.io.File;
 import java.util.Arrays;
 import java.util.Map;
 
+import static cc.redberry.core.TAssert.assertEquals;
+import static cc.redberry.core.TAssert.assertFalse;
 import static cc.redberry.core.tensor.Tensors.*;
 
 /**
@@ -55,7 +61,7 @@ public class ReduceEngineTest {
 
     public ReduceEngineTest() {
         String mapleBinDir;
-        mapleBinDir = "/home/stas/maple13/bin";// mapleBinDir;
+        mapleBinDir = "/home/stas/maple13/bin";
         if (!new File(mapleBinDir + "/maple").exists()) {
             mapleBinDir = System.getenv("MAPLE");
             if (mapleBinDir == null)
@@ -79,10 +85,9 @@ public class ReduceEngineTest {
         File mathematicaScriptExecutor = new File(mathematicaBinDir + "/MathematicaScript");
         if (!mathematicaScriptExecutor.exists())
             mathematicaBinDir = null;
-        else {
-            //todo check licence
+        else
             System.out.println("Mathematica script executor:" + mathematicaScriptExecutor.getAbsolutePath());
-        }
+
         this.mathematicaBinDir = mathematicaBinDir;
         temporaryDir = System.getProperty("java.io.tmpdir");
     }
@@ -208,28 +213,6 @@ public class ReduceEngineTest {
         }
     }
 
-
-    @Test
-    public void test6a() throws Exception {
-        Expression[] equations = {
-                parseExpression("x + y = 1"),
-                parseExpression("x**2 - y = -1")
-        };
-
-        SimpleTensor[] vars = {parseSimple("x"), parseSimple("y")};
-
-        Transformation[] transformations = {parseExpression("d_a^a = 4")};
-        ReducedSystem rd = ReduceEngine.reduceToSymbolicSystem(equations, vars, transformations);
-        if (mathematicaBinDir != null) {
-            Expression[][] solution = ExternalSolver.solveSystemWithMathematica(rd, false, mathematicaBinDir, "/home/stas/Projects/redberry");
-            assertSolution(equations, solution, transformations);
-        }
-//        if (mapleBinDir != null) {
-//            Expression[][] solution = ExternalSolver.solveSystemWithMaple(rd, false, mapleBinDir, "/home/stas/Projects/redberry");
-//            assertSolution(equations, solution, transformations);
-//        }
-    }
-
     @Test
     public void test7() throws Exception {
         Expression toInverse =
@@ -274,6 +257,71 @@ public class ReduceEngineTest {
         if (mapleBinDir != null) {
             Expression[][] solution = ExternalSolver.solveSystemWithMaple(rd, false, mapleBinDir, temporaryDir);
             TAssert.assertTrue(solution.length == 0);
+        }
+    }
+
+    @Test
+    public void test8() throws Exception {
+        Expression[] equations = {
+                parseExpression("x + y = 1"),
+        };
+
+        SimpleTensor[] vars = {parseSimple("x"), parseSimple("y")};
+
+        Transformation[] transformations = {};
+        ReducedSystem rd = ReduceEngine.reduceToSymbolicSystem(equations, vars, transformations);
+        if (mathematicaBinDir != null) {
+            Expression[][] solution = ExternalSolver.solveSystemWithMathematica(rd, true, mathematicaBinDir, temporaryDir);
+            assertFalse(solution[0][0].get(1) instanceof Complex);
+            assertFalse(solution[0][1].get(1) instanceof Complex);
+            assertSolution(equations, solution, transformations);
+        }
+        if (mapleBinDir != null) {
+            Expression[][] solution = ExternalSolver.solveSystemWithMaple(rd, true, mapleBinDir, temporaryDir);
+            assertFalse(solution[0][0].get(1) instanceof Complex);
+            assertFalse(solution[0][1].get(1) instanceof Complex);
+            assertSolution(equations, solution, transformations);
+        }
+    }
+
+    @Test
+    public void test9() throws Exception {
+        Expression[] equations = {
+                parseExpression("F_mn + F_nm + A_mn = - A_nm"),
+                parseExpression("1/2*F_mn + F_nm + A_mn + 1/2*A_nm = 0")
+        };
+
+        SimpleTensor[] vars = {parseSimple("F_mn")};
+
+        Transformation[] transformations = {};
+        ReducedSystem rd = ReduceEngine.reduceToSymbolicSystem(equations, vars, transformations);
+        if (mathematicaBinDir != null) {
+            Expression[][] solution = ExternalSolver.solveSystemWithMathematica(rd, true, mathematicaBinDir, temporaryDir);
+            assertEquals(solution[0][0], "F_{mn} = -A_{nm}");
+        }
+        if (mapleBinDir != null) {
+            Expression[][] solution = ExternalSolver.solveSystemWithMaple(rd, true, mapleBinDir, temporaryDir);
+            assertEquals(solution[0][0], "F_{mn} = -A_{nm}");
+        }
+    }
+
+    @Test
+    public void test10() throws Exception {
+        GeneratedTensor genTensor = TensorGenerator.generateStructure(ParserIndices.parseSimple("_abc"), new Tensor[]{parse("g_mn"), parse("k_m")}, null, true, true, true);
+
+        Expression[] equations = new Expression[]{
+                parseExpression("F_mnp*F^mnp = 1"), expression(parse("F_abc"), genTensor.generatedTensor)
+        };
+        Transformation[] transformations = {parseExpression("d_m^m = dim"), parseExpression("k_m*k^m = 1")};
+        ReducedSystem rd = ReduceEngine.reduceToSymbolicSystem(equations, genTensor.coefficients, transformations);
+
+        if (mathematicaBinDir != null) {
+            Expression[][] solution = ExternalSolver.solveSystemWithMathematica(rd, true, mathematicaBinDir, temporaryDir);
+            assertSolution(equations, solution, transformations);
+        }
+        if (mapleBinDir != null) {
+            Expression[][] solution = ExternalSolver.solveSystemWithMaple(rd, true, mapleBinDir, temporaryDir);
+            assertSolution(equations, solution, transformations);
         }
     }
 

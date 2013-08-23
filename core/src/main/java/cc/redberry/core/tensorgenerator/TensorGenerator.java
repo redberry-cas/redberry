@@ -22,6 +22,7 @@
  */
 package cc.redberry.core.tensorgenerator;
 
+import cc.redberry.concurrent.OutputPortUnsafe;
 import cc.redberry.core.combinatorics.symmetries.Symmetries;
 import cc.redberry.core.context.CC;
 import cc.redberry.core.indexmapping.IndexMappings;

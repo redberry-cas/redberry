@@ -26,8 +26,11 @@ import cc.redberry.core.tensor.Expression;
 import cc.redberry.core.tensor.SimpleTensor;
 
 /**
+ * This is a simple holder for system of symbolic equations.
+ *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @since 1.1.5
  */
 public class ReducedSystem {
     final Expression[] equations;
@@ -40,14 +43,31 @@ public class ReducedSystem {
         this.generalSolutions = generalSolutions;
     }
 
+    /**
+     * Returns an underlying system of equations.
+     *
+     * @return underlying system of equations
+     */
     public Expression[] getEquations() {
         return equations.clone();
     }
 
+
+    /**
+     * Returns an unknown variables.
+     *
+     * @return an unknown variables
+     */
     public SimpleTensor[] getUnknownCoefficients() {
         return unknownCoefficients.clone();
     }
 
+
+    /**
+     * Returns the general solution of the tensorial system.
+     *
+     * @return the general solution of the tensorial system
+     */
     public Expression[] getGeneralSolutions() {
         return generalSolutions.clone();
     }

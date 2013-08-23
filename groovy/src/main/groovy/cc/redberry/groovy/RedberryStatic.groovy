@@ -23,8 +23,11 @@
 
 package cc.redberry.groovy
 
+import cc.redberry.core.combinatorics.Symmetry
 import cc.redberry.core.combinatorics.symmetries.Symmetries
+import cc.redberry.core.combinatorics.symmetries.SymmetriesFactory
 import cc.redberry.core.context.CC
+import cc.redberry.core.context.OutputFormat
 import cc.redberry.core.indices.SimpleIndices
 import cc.redberry.core.indices.StructureOfIndices
 import cc.redberry.core.parser.ParseTokenSimpleTensor
@@ -32,6 +35,7 @@ import cc.redberry.core.parser.preprocessor.GeneralIndicesInsertion
 import cc.redberry.core.solver.ExternalSolver
 import cc.redberry.core.solver.ReduceEngine
 import cc.redberry.core.solver.ReducedSystem
+import cc.redberry.core.solver.frobenius.FrobeniusSolver
 import cc.redberry.core.tensor.Expression
 import cc.redberry.core.tensor.SimpleTensor
 import cc.redberry.core.tensor.Tensor
@@ -49,6 +53,7 @@ import cc.redberry.core.transformations.fractions.TogetherTransformation
 import cc.redberry.core.transformations.powerexpand.PowerExpandTransformation
 import cc.redberry.core.transformations.powerexpand.PowerExpandUnwrapTransformation
 import cc.redberry.core.utils.BitArray
+import cc.redberry.core.utils.TensorUtils
 
 /**
  * Groovy facade for Redberry transformations and utility methods.
@@ -306,8 +311,6 @@ class RedberryStatic {
             }
         }
         bufferOfTensors.each { it -> defineMatrix(it, * bufferOfDescriptors) }
-        //int index = objs.findIndexOf { it instanceof MatrixDescriptor }
-        //objs[0..<index].each { defineMatrices(it, * (objs[index..-1])) }
     }
 
     /**
@@ -345,29 +348,77 @@ class RedberryStatic {
      ************* Solver ** ***********
      **********************************/
 
+    private static final Map GenerateTensorDefaultOptions =
+        [Symmetries: null, GeneratedParameters: { i -> "C[$i]" }, GenerateParameters: 'true', SymmetricForm: 'false', RaiseLower: 'true'];
 
+    /**
+     * Generates tensor of the most general form with specified free indices and from specified samples.
+     *
+     * @param indices free indices of the resulting tensor
+     * @param samples samples
+     * @param options options
+     * @return tensor of the most general form
+     */
     public static Tensor GenerateTensor(SimpleIndices indices,
                                         Collection samples,
-                                        Map options = [Symmetries: null, GenerateCoefficients: 'true', SymmetricForm: 'false', RaiseLower: 'true']) {
+                                        Map options = [Symmetries: null, GeneratedParameters: { i -> "C[$i]" }, GenerateParameters: 'true', SymmetricForm: 'false', RaiseLower: 'true']) {
         use(Redberry) {
-            Symmetries symmetries = options.get('Symmetries')
-            def symmetricForm = Boolean.valueOf(options.get('SymmetricForm'))
-            def generateCoefficients = Boolean.valueOf(options.get('GenerateCoefficients'))
-            def raiseLower = Boolean.valueOf(options.get('RaiseLower'))
-            return TensorGenerator.generate(indices, samples.t as Tensor[], symmetries, symmetricForm, generateCoefficients, raiseLower)
+            def allOptions = new HashMap(GenerateTensorDefaultOptions)
+            allOptions.putAll(options)
+            Symmetries symmetries = allOptions.get('Symmetries')
+            def symmetricForm = Boolean.valueOf(allOptions.get('SymmetricForm'))
+            def generateCoefficients = Boolean.valueOf(allOptions.get('GenerateParameters'))
+            def raiseLower = Boolean.valueOf(allOptions.get('RaiseLower'))
+            def struct = TensorGenerator.generateStructure(indices, samples.t as Tensor[], symmetries, symmetricForm, generateCoefficients, raiseLower)
+            def result = struct.generatedTensor
+            def generatedParameters = allOptions.get('GeneratedParameters')
+            int i = 0
+            for (def coef in struct.coefficients)
+                result = coef.eq(generatedParameters(i++).t) >> result
+            return result
+        }
+    }
+
+    /**
+     * Generates tensor of the most general form with specified free indices and from specified samples and returns
+     * tensor and its coefficients in form {@code [tensor , [coefficients]]}.
+     *
+     * @param indices free indices of the resulting tensor
+     * @param samples samples
+     * @param options options
+     * @return tensor of the most general form
+     */
+    public static Collection GenerateTensorWithCoefficients(SimpleIndices indices,
+                                                            Collection samples,
+                                                            Map options = [Symmetries: null, SymmetricForm: 'false', RaiseLower: 'true']) {
+        use(Redberry) {
+            def allOptions = new HashMap(GenerateTensorDefaultOptions)
+            allOptions.putAll(options)
+            Symmetries symmetries = allOptions.get('Symmetries')
+            def symmetricForm = Boolean.valueOf(allOptions.get('SymmetricForm'))
+            def raiseLower = Boolean.valueOf(allOptions.get('RaiseLower'))
+            def struct = TensorGenerator.generateStructure(indices, samples.t as Tensor[], symmetries, symmetricForm, true, raiseLower)
+            return [struct.generatedTensor, struct.coefficients as Collection]
         }
     }
 
     private static final Map ReduceDefaultOptions = Collections.unmodifiableMap(
-            [Transformations: [], SymmetricForm: [],
+            [Transformations: [], SymmetricForm: [], GeneratedParameters: { i -> "C[$i]" },
                     ExternalSolver: [Solver: '', Path: '', KeepFreeParams: 'false', TmpDir: System.getProperty("java.io.tmpdir")]])
 
     private static final Map ReduceDefaultExternalSolverOptions = Collections.unmodifiableMap(
-            [Solver: '', Path: '', KeepFreeParams: 'false', TmpDir: System.getProperty("java.io.tmpdir")])
+            [Solver: '', Path: '', KeepFreeParams: 'true', TmpDir: System.getProperty("java.io.tmpdir")])
 
+    /**
+     * Reduces a system of tensorial equations.
+     * @param equations equations
+     * @param vars unknown variables
+     * @param options options
+     * @return solution or reduced system
+     */
     public static Collection Reduce(Collection equations,
                                     Collection vars,
-                                    Map options = [Transformations: [], SymmetricForm: [], ExternalSolver: [Solver: '', Path: '', KeepFreeParams: 'false', TmpDir: System.getProperty("java.io.tmpdir")]]) {
+                                    Map options = [Transformations: [], SymmetricForm: [], GeneratedParameters: { i -> "C[$i]" }, ExternalSolver: [Solver: '', Path: '', KeepFreeParams: 'true', TmpDir: System.getProperty("java.io.tmpdir")]]) {
         use(Redberry) {
             Map allOptions = new HashMap(ReduceDefaultOptions)
             allOptions.putAll(options)
@@ -378,6 +429,8 @@ class RedberryStatic {
 
             ReducedSystem reducedSystem = ReduceEngine.reduceToSymbolicSystem(equations.t as Expression[],
                     vars.t as SimpleTensor[], transformations, symmetricForm)
+            if (reducedSystem == null)
+                return equations
 
             def externalSolverOptions = new HashMap(ReduceDefaultExternalSolverOptions)
             externalSolverOptions.putAll((Map) allOptions.get('ExternalSolver'))
@@ -386,26 +439,98 @@ class RedberryStatic {
             def externalSolverPath = externalSolverOptions.get('Path')
             def tmpDir = externalSolverOptions.get('TmpDir')
             def externalProgram = (String) externalSolverOptions.get('Solver')
-            if (!externalProgram.isEmpty())
+
+            def solution
+            if (!externalProgram.isEmpty()) {
                 switch (externalProgram) {
                     case 'Mathematica':
-                        return ExternalSolver.solveSystemWithMathematica(reducedSystem, keepFreeParams, externalSolverPath, tmpDir);
+                        solution = ExternalSolver.solveSystemWithMathematica(reducedSystem, keepFreeParams, externalSolverPath, tmpDir);
+                        solution = solution.collect { it as List }
+                        break;
                     case 'Maple':
-                        return ExternalSolver.solveSystemWithMaple(reducedSystem, keepFreeParams, externalSolverPath, tmpDir);
+                        solution = ExternalSolver.solveSystemWithMaple(reducedSystem, keepFreeParams, externalSolverPath, tmpDir);
+                        solution = solution.collect { it as List }
+                        break;
                     default:
                         throw new IllegalArgumentException('Uncknown solver:' + externalProgram)
                 }
-            def system = []
-            system.addAll(Arrays.asList(reducedSystem.generalSolutions))
-            system.addAll(Arrays.asList(reducedSystem.equations))
-            return system
+            } else {
+                solution = []
+                solution.addAll(Arrays.asList(reducedSystem.generalSolutions))
+                solution.addAll(Arrays.asList(reducedSystem.equations))
+            }
+
+            def _generatedParameters = (Closure) allOptions.get('GeneratedParameters')
+
+            int i = 0
+            def replacements = [:]
+
+            def tensorEach = { t ->
+                t.parentAfterChild { ten ->
+                    if (ten.class == SimpleTensor &&
+                            ten.toString(OutputFormat.Redberry) ==~ /${CC.getNameManager().DEFAULT_VAR_SYMBOL_PREFIX}\d+/) {
+                        if (!replacements.containsKey(ten.toString(OutputFormat.Redberry)))
+                            replacements.put(ten.toString(), _generatedParameters(i++))
+                    }
+                }
+            }
+
+
+            def through
+            through = { collection, closure ->
+                if (collection instanceof List)
+                    collection.each { cc -> through(cc, closure) }
+                else {
+                    assert collection instanceof Tensor
+                    closure(collection)
+                }
+            }
+
+            through(solution, tensorEach)
+
+            replacements.each { from, to -> solution = "$from = $to".t >> solution }
+            return solution
         }
+    }
+
+    /**
+     * Gives a list of solutions of the Frobenius equation.
+     *
+     * @param equations equations
+     * @param maxSolutions if specified, then gives at most {@code maxSolutions}
+     * @return a list of solutions
+     */
+    public static Collection FrobeniusSolve(Collection equations, int maxSolutions = -1) {
+        def solver = new FrobeniusSolver(equations as int[][])
+        def solutions = []
+        def solution
+        while (maxSolutions-- != 0 && (solution = solver.take()) != null)
+            solutions << solution
+        return solutions
     }
 
     /***********************************
      ************* Utilities ***********
      ***********************************/
 
+    public static Symmetry CreateSymmetry(Collection collection) {
+        if (collection[1] instanceof Boolean)
+            return new Symmetry(collection[0] as int[], collection[1])
+        return new Symmetry(collection as int[], false)
+    }
+
+    public static Symmetries CreateSymmetries(Collection collection) {
+        def s = CreateSymmetry(collection[0])
+        Symmetries symmetries = SymmetriesFactory.createSymmetries(s.dimension())
+        collection.each { symmetries.add(CreateSymmetry(it)) }
+        return symmetries
+    }
+
+    public static Symmetries FindIndicesSymmetries(SimpleIndices indices, tensor) {
+        use(Redberry) {
+            return TensorUtils.findIndicesSymmetries(indices, tensor.t)
+        }
+    }
     /**
      * Evaluates closure, and returns a time in milliseconds used
      * @param closure do stuff

@@ -604,6 +604,17 @@ class Redberry {
     }
 
     /**
+     * Applies transformation to a collection of tensors
+     * @param tensors tensors
+     * @param transformation transformation
+     * @return the result
+     * @see Transformation#transform(cc.redberry.core.tensor.Tensor)
+     */
+    static Collection rightShift(Transformation transformation, Collection tensors) {
+        return tensors.collect { rightShift(transformation, it) }
+    }
+
+    /**
      * Applies substitution to tensor
      * @param tensor tensor
      * @param transformation string representation of substitution
@@ -631,6 +642,17 @@ class Redberry {
         for (Transformation tr in transformations)
             t = tr.transform(t);
         return t;
+    }
+
+    /**
+     * Applies collection of transformations to a collection of tensors
+     * @param tensors tensors
+     * @param transformations collection of transformations
+     * @return the result
+     * @see Transformation#transform(cc.redberry.core.tensor.Tensor)
+     */
+    static Collection rightShift(Collection transformations, Collection tensors) {
+        return tensors.collect { rightShift(transformations, it) }
     }
 
     /**
@@ -874,6 +896,21 @@ class Redberry {
      */
 
     /**
+     * Parse string to tensor
+     * @param string string representation of tensor
+     * @return tensor
+     * @see Tensor
+     * @see Tensors#parse(java.lang.String)
+     * @throws cc.redberry.core.parser.ParserException
+     *          if expression does not satisfy correct Redberry
+     *          input notation for tensors
+     *
+     */
+    static Tensor getT(String string) {
+        return parse(string)
+    }
+
+    /**
      * Parse collection of strings to colection of tensors
      * @param strings string representations of tensors
      * @return collection of tensors
@@ -902,24 +939,13 @@ class Redberry {
      * @throws cc.redberry.core.parser.ParserException
      *          if expression does not satisfy correct Redberry
      *          input notation for tensors
-     *
-     */
-    static Tensor getT(String string) {
-        return parse(string)
-    }
-
-    /**
-     * Parse string to tensor
-     * @param string string representation of tensor
-     * @return tensor
-     * @see Tensor
-     * @see Tensors#parse(java.lang.String)
-     * @throws cc.redberry.core.parser.ParserException
-     *          if expression does not satisfy correct Redberry
-     *          input notation for tensors
      */
     static Tensor getT(GString string) {
         return parse(string.toString())
+    }
+
+    static Tensor getT(Tensor tensor) {
+        return tensor
     }
 
     /**

@@ -325,11 +325,22 @@ public final class NameManager {
         }
     }
 
+    public static final String DEFAULT_VAR_SYMBOL_PREFIX = "rc";
+
     private static final class StringGenerator {
         long count = 0;
 
         String nextString() {
-            return ("rc" + Long.toString(count++));
+            return (DEFAULT_VAR_SYMBOL_PREFIX + Long.toString(count++));
+        }
+    }
+
+    public int size() {
+        writeLock.lock();
+        try {
+            return fromId.size();
+        } finally {
+            writeLock.unlock();
         }
     }
     /*

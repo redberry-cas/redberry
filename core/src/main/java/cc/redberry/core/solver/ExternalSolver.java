@@ -41,12 +41,26 @@ import java.util.List;
 import java.util.Map;
 
 /**
+ * Tools for solving a symbolic system with external systems (Maple or Mathematica).
+ *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @since 1.1.5
  */
 public class ExternalSolver {
 
-
+    /**
+     * Solves a system of symbolic equations using Maplesoft Maple installation.
+     *
+     * @param reducedSystem      a system of symbolic equations
+     * @param keepFreeParameters if {@code true} then each solutions family will be in the most general form, otherwise
+     *                           some particular solution will be taken for each family of solutions
+     * @param mapleBinDir        path to Maple bin directory
+     * @param path               path to temporary directory
+     * @return solution of {@code reducedSystem}
+     * @throws IOException
+     * @throws InterruptedException
+     */
     public static Expression[][] solveSystemWithMaple(ReducedSystem reducedSystem,
                                                       boolean keepFreeParameters,
                                                       String mapleBinDir,
@@ -56,6 +70,18 @@ public class ExternalSolver {
     }
 
 
+    /**
+     * Solves a system of symbolic equations using Wolfram Mathematica installation.
+     *
+     * @param reducedSystem      a system of symbolic equations
+     * @param keepFreeParameters if {@code true} then each solutions family will be in the most general form, otherwise
+     *                           some particular solution will be taken for each family of solutions
+     * @param mathematicaBinDir  path to directory with Mathematica executables
+     * @param path               path to temporary directory
+     * @return solution of {@code reducedSystem}
+     * @throws IOException
+     * @throws InterruptedException
+     */
     public static Expression[][] solveSystemWithMathematica(ReducedSystem reducedSystem,
                                                             boolean keepFreeParameters,
                                                             String mathematicaBinDir,
@@ -64,6 +90,18 @@ public class ExternalSolver {
         return solveSystemWithExternalProgram(MathematicaScriptCreator.INSTANCE, reducedSystem, keepFreeParameters, mathematicaBinDir, path);
     }
 
+    /**
+     * Solves a system of symbolic equations using external program.
+     *
+     * @param scriptCreator      external engine
+     * @param reducedSystem      a system of symbolic equations
+     * @param keepFreeParameters if {@code true} then each solutions family will be in the most general form, otherwise
+     *                           some particular solution will be taken for each family of solutions
+     * @param path               path to temporary directory
+     * @return solution of {@code reducedSystem}
+     * @throws IOException
+     * @throws InterruptedException
+     */
     public static Expression[][] solveSystemWithExternalProgram(ExternalScriptCreator scriptCreator,
                                                                 ReducedSystem reducedSystem,
                                                                 boolean keepFreeParameters,
@@ -122,7 +160,7 @@ public class ExternalSolver {
         /*System.out.println("Reduced solution: " + Arrays.toString(reducedSystem.generalSolutions));
         System.out.println();*/
 
-        scriptCreator.createScript(equations, reducedSystem, path);
+        scriptCreator.createScript(equations, reducedSystem, path, keepFreeParameters);
 
         //cleaning previous output
         new File(path + "/equations." + scriptCreator.getScriptExtension() + "Out").delete();
@@ -169,7 +207,7 @@ public class ExternalSolver {
                 //substituting coefficients into general inverse form
                 List<Transformation> zeroSubs = new ArrayList<>();
                 for (Expression coef : coefficientsResults)
-                    if (coef.isIdentity())//if current coefficient is free parameter
+                    if (coef.isIdentity() && !keepFreeParameters)//if current coefficient is free parameter
                     {
                         zeroSubs.add(Tensors.expression(coef.get(0), Complex.ZERO));
                     } else {
@@ -192,12 +230,13 @@ public class ExternalSolver {
                 coefficientsResults[++i] = Tensors.parseExpression(strLine);
         }
 
+
         in.close();
         return solutions.toArray(new Expression[solutions.size()][]);
     }
 
     public static interface ExternalScriptCreator {
-        void createScript(Expression[] equations, ReducedSystem reducedSystem, String path) throws IOException;
+        void createScript(Expression[] equations, ReducedSystem reducedSystem, String path, boolean keepFreeParams) throws IOException;
 
         String getScriptExecutionCommand();
 
@@ -211,7 +250,7 @@ public class ExternalSolver {
         }
 
         @Override
-        public void createScript(Expression[] equations, ReducedSystem reducedSystem, String path) throws IOException {
+        public void createScript(Expression[] equations, ReducedSystem reducedSystem, String path, boolean keepFreeParams) throws IOException {
             //creating file with Mathematica code to solve the system of equations
             FileOutputStream output = new FileOutputStream(path + "/equations.mathematica");
             PrintStream file = new PrintStream(output);
@@ -242,7 +281,10 @@ public class ExternalSolver {
             file.append("For[$solution = 1, $solution <= Length[$result], ++$solution, ");
             file.append("$tempResult = $result[[$solution]];");
             file.append("$found = $tempResult[[All, 1]];\n");
-            file.append("For[$i = 1, $i <= Length[$coefficients], ++$i,If[!MemberQ[$found, $coefficients[[$i]]], $tempResult = $tempResult/.{$coefficients[[$i]] -> 0}; AppendTo[$tempResult, $coefficients[[$i]] -> 0];]];\n");
+            if (!keepFreeParams)
+                file.append("For[$i = 1, $i <= Length[$coefficients], ++$i,If[!MemberQ[$found, $coefficients[[$i]]], $tempResult = $tempResult/.{$coefficients[[$i]] -> 0}; AppendTo[$tempResult, $coefficients[[$i]] -> 0];]];\n");
+            else
+                file.append("For[$i = 1, $i <= Length[$coefficients], ++$i,If[!MemberQ[$found, $coefficients[[$i]]], AppendTo[$tempResult, $coefficients[[$i]] -> $coefficients[[$i]]];]];\n");
             file.append("$tempResult = Simplify[$tempResult];\n");
 
 //            file.append("left = Array[Function[x,Coefficient[equations[[x, 1]], #] & /@ coefficients], Length[equations]];\n");
@@ -277,7 +319,7 @@ public class ExternalSolver {
         }
 
         @Override
-        public void createScript(Expression[] equations, ReducedSystem reducedSystem, String path) throws IOException {
+        public void createScript(Expression[] equations, ReducedSystem reducedSystem, String path, boolean keepFreeParams) throws IOException {
             //creating file with Maple code to solve the system of equations
             FileOutputStream output = new FileOutputStream(path + "/equations.maple");
             PrintStream file = new PrintStream(output);
@@ -286,28 +328,30 @@ public class ExternalSolver {
             int i;
             for (i = 0; i < reducedSystem.unknownCoefficients.length; ++i)
                 if (i == reducedSystem.unknownCoefficients.length - 1)
-                    file.append(reducedSystem.unknownCoefficients[i].toString());
+                    file.append(reducedSystem.unknownCoefficients[i].toString(OutputFormat.Maple));
                 else
-                    file.append(reducedSystem.unknownCoefficients[i] + ",");
+                    file.append(reducedSystem.unknownCoefficients[i].toString(OutputFormat.Maple) + ",");
             file.append("]):\n");
 
             file.println("eq:=array(1.." + equations.length + "):");
             for (i = 0; i < equations.length; i++)
-                file.println("eq[" + (i + 1) + "]:=" + equations[i] + ":");
+                file.println("eq[" + (i + 1) + "]:=" + equations[i].toString(OutputFormat.Maple) + ":");
 
             file.print("Result := solve(simplify({seq(eq[i],i=1.." + equations.length + ")}),[");
             for (i = 0; i < reducedSystem.unknownCoefficients.length; ++i)
                 if (i == reducedSystem.unknownCoefficients.length - 1)
-                    file.append(reducedSystem.unknownCoefficients[i].toString());
+                    file.append(reducedSystem.unknownCoefficients[i].toString(OutputFormat.Maple));
                 else
-                    file.append(reducedSystem.unknownCoefficients[i] + ",");
-            file.append("]):\n");
+                    file.append(reducedSystem.unknownCoefficients[i].toString(OutputFormat.Maple) + ",");
+            file.append("],explicit=true):\n");
             file.append("if nops(Result) <> 0 then\n");
             file.append("Result:= factor(Result);\n");
             file.println("file:=fopen(\"" + path + "/equations.mapleOut\",WRITE):");
             file.append("for maple_positionInResult from 1 to nops(Result) do\n");
             file.append("for maple_counter from 1 to " + reducedSystem.unknownCoefficients.length + " do\n");
             file.append("temp1 := SubstituteAll(convert(lhs(Result[maple_positionInResult][maple_counter]), string), \"^\", \"**\");\n");
+            file.append("temp1 := SubstituteAll(convert(lhs(Result[maple_positionInResult][maple_counter]), string), \"(\", \"[\");\n");
+            file.append("temp1 := SubstituteAll(convert(lhs(Result[maple_positionInResult][maple_counter]), string), \")\", \"]\");\n");
             file.append("temp2 := SubstituteAll(convert(rhs(Result[maple_positionInResult][maple_counter]), string), \"^\", \"**\");\n");
             file.append("fprintf(file,\"%s=%s\\n\",temp1,temp2);\n");
             file.append("od:\n");

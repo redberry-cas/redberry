@@ -35,7 +35,9 @@ import cc.redberry.core.number.Complex;
 import cc.redberry.core.number.NumberUtils;
 import cc.redberry.core.tensor.*;
 import cc.redberry.core.tensor.functions.ScalarFunction;
+import cc.redberry.core.tensor.iterator.FromChildToParentIterator;
 import gnu.trove.map.hash.TIntObjectHashMap;
+import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
 
 import java.util.Arrays;
@@ -250,6 +252,27 @@ public class TensorUtils {
      */
     public static boolean passOutDummies(Tensor tensor) {
         return getAllDummyIndicesT(tensor).size() != 0;
+    }
+
+
+    /**
+     * Returns whether specified tensor contains at least one of the simple tensors from the set. The set represents a
+     * unique names of simple tensors.
+     *
+     * @param tensor     tensors
+     * @param setOfNames int set of simple tensors names
+     * @return true if tensor contains at least one of simple tensor with name that contains in the set
+     */
+    public static boolean containsSimpleTensors(Tensor tensor, TIntSet setOfNames) {
+        FromChildToParentIterator iterator = new FromChildToParentIterator(tensor);
+        Tensor current;
+        boolean contains = false;
+        while ((current = iterator.next()) != null)
+            if (current instanceof SimpleTensor && setOfNames.contains(((SimpleTensor) current).getName())) {
+                contains = true;
+                break;
+            }
+        return contains;
     }
 
     public static boolean equalsExactly(Tensor[] u, Tensor[] v) {
@@ -531,6 +554,30 @@ public class TensorUtils {
             for (Tensor t : tensor)
                 addSymbols(t, set);
     }
+
+    public static Set<SimpleTensor> getAllSymbolsAndSymbolicFields(Tensor... tensors) {
+        THashSet<SimpleTensor> set = new THashSet<>();
+        for (Tensor tensor : tensors)
+            addSymbols(tensor, set);
+        return set;
+    }
+
+
+    private static void addSymbolsAndSymbolicFields(Tensor tensor, Set<SimpleTensor> set) {
+        if (tensor instanceof SimpleTensor && tensor.getIndices().size() == 0) {
+            boolean contentSymbolicQ = true;
+            for (Tensor t : tensor)
+                if (!isSymbolic(t)) {
+                    contentSymbolicQ = false;
+                    break;
+                }
+            if (contentSymbolicQ)
+                set.add((SimpleTensor) tensor);
+        } else
+            for (Tensor t : tensor)
+                addSymbolsAndSymbolicFields(t, set);
+    }
+
 
     public static Collection<SimpleTensor> getAllDiffSimpleTensors(Tensor... tensors) {
         TIntObjectHashMap<SimpleTensor> names = new TIntObjectHashMap<>();

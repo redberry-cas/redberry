@@ -22,6 +22,7 @@
  */
 package cc.redberry.core.context;
 
+import cc.redberry.concurrent.OutputPortUnsafe;
 import cc.redberry.core.indices.*;
 import cc.redberry.core.parser.ParseManager;
 import cc.redberry.core.tensor.SimpleTensor;
@@ -319,6 +320,24 @@ public final class Context {
     public SimpleTensor generateNewSymbol() {
         NameDescriptor nameDescriptor = nameManager.generateNewSymbolDescriptor();
         return Tensors.simpleTensor(nameDescriptor.getId(), IndicesFactory.EMPTY_SIMPLE_INDICES);
+    }
+
+    /**
+     * Return output port which generates new symbol via {@link #generateNewSymbol()} at each {@code take()} invocation.
+     *
+     * @return output port which generates new symbol via {@link #generateNewSymbol()} at each {@code take()} invocation.
+     */
+    public OutputPortUnsafe<SimpleTensor> getDefaultParametersGenerator() {
+        return defaultGeneratedParameters;
+    }
+
+    private final GeneratedParameters defaultGeneratedParameters = new GeneratedParameters();
+
+    private final class GeneratedParameters implements OutputPortUnsafe<SimpleTensor> {
+        @Override
+        public SimpleTensor take() {
+            return generateNewSymbol();
+        }
     }
 
     /**

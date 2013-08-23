@@ -22,6 +22,7 @@
  */
 package cc.redberry.core.context;
 
+import cc.redberry.concurrent.OutputPortUnsafe;
 import cc.redberry.core.tensor.SimpleTensor;
 
 /**
@@ -140,5 +141,14 @@ public final class CC {
      */
     public static SimpleTensor generateNewSymbol() {
         return current().generateNewSymbol();
+    }
+
+    /**
+     * Return output port which generates new symbol via {@link #generateNewSymbol()} at each {@code take()} invocation.
+     *
+     * @return output port which generates new symbol via {@link #generateNewSymbol()} at each {@code take()} invocation.
+     */
+    public static OutputPortUnsafe<SimpleTensor> getParametersGenerator() {
+        return current().getDefaultParametersGenerator();
     }
 }

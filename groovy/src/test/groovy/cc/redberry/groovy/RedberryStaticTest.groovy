@@ -145,34 +145,67 @@ class RedberryStaticTest {
     }
 
     @Test
+    public  void testPowerExpand1(){
+        use(Redberry) {
+            assertTrue PowerExpand >> 'Sqrt[a*b]'.t == 'Sqrt[a]*Sqrt[b]'.t
+         }
+    }
+
+    @Test
     public void testGenerateTensor() {
         use(Redberry) {
             def t
             t = GenerateTensor('_abcd'.si, ['g_mn', 'g_ab'])
             assertEquals t.size(), 3
 
-            t = GenerateTensor('_abcd'.si, ['g_mn', 'g^ab'], [GenerateCoefficients: 'False'])
+            t = GenerateTensor('_abcd'.si, ['g_mn', 'g^ab'], [GenerateParameters: 'False'])
             assertEquals t, 'g_{ad}*g_{bc}+g_{ac}*g_{bd}+g_{ab}*g_{cd}'.t
 
-            t = GenerateTensor('_abcd'.si, ['g_mn'], [GenerateCoefficients: 'false'])
+            t = GenerateTensor('_abcd'.si, ['g_mn'], [GenerateParameters: 'false'])
             assertEquals t, 'g_{ad}*g_{bc}+g_{ac}*g_{bd}+g_{ab}*g_{cd}'.t
 
-            t = GenerateTensor('_abcd'.si, ['g_mn'], [GenerateCoefficients: 'false', SymmetricForm: 'true'])
+            t = GenerateTensor('_abcd'.si, ['g_mn'], [GenerateParameters: 'false', SymmetricForm: 'true'])
             assertEquals t, '(1/3)*(g_{ac}*g_{bd}+g_{ab}*g_{cd}+g_{ad}*g_{bc})'.t
 
-            t = GenerateTensor('_abcd'.si, ['g_mn'], [GenerateCoefficients: 'false', SymmetricForm: 'true',])
+            t = GenerateTensor('_abcd'.si, ['g_mn'], [GenerateParameters: 'false', SymmetricForm: 'true',])
             assertEquals t, '(1/3)*(g_{ac}*g_{bd}+g_{ab}*g_{cd}+g_{ad}*g_{bc})'.t
         }
     }
 
     @Test
-    public void testReduce() {
+    public void testGenerateTensor1() {
         use(Redberry) {
-            def s = Reduce(['x**2 + 2 = x'], ['x'], [ExternalSolver: [Solver: 'Maple', Path: '/home/stas/maple13/bin']])
-//            println s.getClass()
-            println Reduce(['F_mn + F_nm + g_mn = 2*g_mn'], ['F_mn'])
+            def t
+            t = GenerateTensor('_ab^cd'.si, ['g_mn', 'g^mn'], [RaiseLower: 'false', GenerateParameters: 'false'])
+            assertEquals t, 'g_ab*g^cd'
+            t = GenerateTensor('_ab^cd'.si, ['g_mn', 'g^mn'], [RaiseLower: false, GenerateParameters: false])
+            assertEquals t, 'g_ab*g^cd'
+            t = GenerateTensor('_ab^cd'.si, ['g_mn', 'g^mn'], [GenerateParameters: false])
+            assertEquals t, 'g_ab*g^cd + d_a^c*d_b^d + d_a^d*d_b^c'
+            t = GenerateTensor('_ab^cd'.si, ['g_mn', 'g^mn'], [GenerateParameters: false, SymmetricForm: true])
+            assertEquals t, 'g_ab*g^cd + (d_a^c*d_b^d + d_a^d*d_b^c)/2'
         }
     }
 
+    @Test
+    public void testGenerateTensor2() {
+        use(Redberry) {
+            def t
+            t = GenerateTensorWithCoefficients('_ab^cd'.si, ['g_mn', 'g^mn'], [RaiseLower: false])
+            assertEquals t[1].size(), 1
+            t = GenerateTensorWithCoefficients('_ab^cd'.si, ['g_mn', 'g^mn'])
+            assertEquals t[1].size(), 3
+            t = GenerateTensorWithCoefficients('_ab^cd'.si, ['g_mn'], [SymmetricForm: true])
+            assertEquals t[1].size(), 2
+        }
+    }
+
+    @Test
+    public void testFrobenius1() {
+        use(Redberry) {
+            def s = FrobeniusSolve([[1, 1, 1, 12]], 4)
+            assertEquals s.size(), 4
+        }
+    }
 }
 

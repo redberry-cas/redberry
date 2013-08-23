@@ -44,18 +44,51 @@ import java.util.*;
 import static cc.redberry.core.indices.IndicesUtils.*;
 
 /**
+ * This class implements an algorithm for reducing a system of tensorial equations into system of symbolic equations.
+ * The underlying algorithm simply generates tensor of the most general form for each unknown tensorial variable and
+ * then tries to build a system of equations fot its coefficients.
+ * <p/>
+ * <b>Note:</b> the implementation does not guaranties that solution (or proof of its absence) will be found.
+ * <p/>
+ *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @since 1.1.5
  */
 public final class ReduceEngine {
+    /**
+     * Maximum number of tries to reduce the system.
+     */
+    private static final int INTERATION_LIMIT = 10000;
+
     private ReduceEngine() {
     }
 
+    /**
+     * Tries to reduces a system of tensorial equations into a system of symbolic equations or return {@code null} if
+     * it fails to reduce.
+     *
+     * @param equations equations
+     * @param vars      unknown variables
+     * @param rules     additional transformations/rules to be applied or taken into account
+     * @return reduced system of symbolic equations and solutions general form
+     */
     public static ReducedSystem reduceToSymbolicSystem(Expression[] equations, SimpleTensor[] vars,
                                                        Transformation[] rules) {
         return reduceToSymbolicSystem(equations, vars, rules, new boolean[vars.length]);
     }
 
+    /**
+     * Tries to reduces a system of tensorial equations into a system of symbolic equations or return {@code null} if
+     * it fails to reduce.
+     *
+     * @param equations     equations
+     * @param vars          unknown variables
+     * @param rules         additional transformations/rules to be applied or taken into account
+     * @param symmetricForm specifies whether solutions should be putted into symmetric form (with respect to upper and
+     *                      lower indices separately)
+     * @return reduced system of symbolic equations and solutions general form
+     */
     public static ReducedSystem reduceToSymbolicSystem(Expression[] equations, SimpleTensor[] vars,
                                                        Transformation[] rules, boolean[] symmetricForm) {
 
@@ -71,6 +104,10 @@ public final class ReduceEngine {
         for (SimpleTensor var : vars)
             varsNames.add(var.getName());
         Tensor[] samples = getSamples(zeroReduced, varsNames);
+        if (samples.length == 0)
+            for (int i = 0; i < vars.length; ++i)
+                if (vars[i].getIndices().size() != 0)
+                    return null;
 
         final Expression[] generalSolutions = new Expression[vars.length];
         GeneratedTensor generatedTensor;
@@ -94,17 +131,26 @@ public final class ReduceEngine {
 
 
         ArrayList<Transformation> allRules = new ArrayList<>(Arrays.asList(rules));
-        allRules.add(EliminateMetricsTransformation.ELIMINATE_METRICS);
+        allRules.add(0, EliminateMetricsTransformation.ELIMINATE_METRICS);
         Transformation simplification = new TransformationCollection(allRules);
 
         ArrayList<Expression> reducedSystem = new ArrayList<>();
         for (Tensor equation : zeroReduced) {
-            for (Expression solution : generalSolutions)
-                equation = solution.transform(equation);
+            int count = INTERATION_LIMIT;
+            do {
+                for (Expression solution : generalSolutions)
+                    equation = solution.transform(equation);
 
-            equation = ExpandTransformation.expand(equation, simplification);
-            equation = simplification.transform(equation);
-            equation = CollectNonScalarsTransformation.collectNonScalars(equation);
+                equation = ExpandTransformation.expand(equation, simplification);
+                equation = simplification.transform(equation);
+                equation = CollectNonScalarsTransformation.collectNonScalars(equation);
+                if (!TensorUtils.containsSimpleTensors(equation, varsNames))
+                    break;
+
+            } while (count-- > 0);
+            if (count <= 0)
+                throw new RuntimeException("Maximum number of iterations exceeded: the system cannot be reduced after 10 000 iterations.");
+
 
             if (equation.getIndices().size() == 0) {
                 reducedSystem.add(Tensors.expression(equation, Complex.ZERO));

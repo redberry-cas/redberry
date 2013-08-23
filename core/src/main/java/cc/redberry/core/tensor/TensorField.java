@@ -140,13 +140,20 @@ public final class TensorField extends SimpleTensor {
         //TODO add argIndices toString(REDBERRY)
 
         StringBuilder sb = new StringBuilder();
-        sb.append('[');
+        if (mode == OutputFormat.Maple)
+            sb.append('(');
+        else sb.append('[');
+
         for (Tensor t : args) {
             sb.append(t.toString(mode));
             sb.append(',');
         }
         sb.deleteCharAt(sb.length() - 1);
-        sb.append(']');
+
+        if (mode == OutputFormat.Maple)
+            sb.append(')');
+        else sb.append(']');
+
         return super.toString(mode) + sb.toString();
     }
 

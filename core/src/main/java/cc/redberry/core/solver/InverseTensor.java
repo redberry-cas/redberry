@@ -351,7 +351,7 @@ public final class InverseTensor {
         ReducedSystem reducedSystem = new InverseTensor(toInverse, equation, samples, symmetricForm, transformations).toReducedSystem();
         return ExternalSolver.solveSystemWithExternalProgram(
                 ExternalSolver.MapleScriptCreator.INSTANCE,
-                reducedSystem, keepFreeParameters, mapleBinDir, path)[0];
+                reducedSystem, keepFreeParameters, mapleBinDir, path)[0][0];
     }
 
     /**
@@ -462,7 +462,7 @@ public final class InverseTensor {
         ReducedSystem reducedSystem = new InverseTensor(toInverse, equation, samples, symmetricForm, transformations).toReducedSystem();
         return ExternalSolver.solveSystemWithExternalProgram(
                 ExternalSolver.MathematicaScriptCreator.INSTANCE,
-                reducedSystem, keepFreeParameters, mathematicaBinDir, path)[0];
+                reducedSystem, keepFreeParameters, mathematicaBinDir, path)[0][0];
     }
 
 
