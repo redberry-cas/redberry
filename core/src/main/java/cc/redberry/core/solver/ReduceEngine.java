@@ -59,7 +59,7 @@ public final class ReduceEngine {
     /**
      * Maximum number of tries to reduce the system.
      */
-    private static final int INTERATION_LIMIT = 10000;
+    private static final int ITERATION_LIMIT = 10000;
 
     private ReduceEngine() {
     }
@@ -136,7 +136,7 @@ public final class ReduceEngine {
 
         ArrayList<Expression> reducedSystem = new ArrayList<>();
         for (Tensor equation : zeroReduced) {
-            int count = INTERATION_LIMIT;
+            int count = ITERATION_LIMIT;
             do {
                 for (Expression solution : generalSolutions)
                     equation = solution.transform(equation);

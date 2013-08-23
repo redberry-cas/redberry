@@ -86,10 +86,10 @@ class ReduceTest {
     @Before
     public void beforeMethod() {
         def system = name.methodName.split('_')
-        if (system.length > 2) {
-            if (system.equals('Maple'))
+        if (system.length >= 2) {
+            if (system[1].equals('Maple'))
                 Assume.assumeTrue(mapleBinDir != null)
-            if (system.equals('Mathematica'))
+            if (system[1].equals('Mathematica'))
                 Assume.assumeTrue(mathematicaBinDir != null)
         }
     }
