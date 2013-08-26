@@ -20,7 +20,38 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
+package cc.redberry.core.solver.frobenius;
+
 /**
- * System of Frobenius equations solver.
+ *
+ * @author Dmitry Bolotin
+ * @author Stanislav Poslavsky
  */
-package cc.redberry.core.math.frobenius;
+final class DummySolutionProvider implements SolutionProvider {
+    private int[] solution;
+    private int[] currentRemainder;
+
+    DummySolutionProvider(int[] solution, int[] currentRemainder) {
+        this.solution = solution;
+        this.currentRemainder = currentRemainder;
+    }
+
+    @Override
+    public boolean tick() {
+        return solution != null;
+    }
+
+    @Override
+    public int[] take() {
+        if (solution == null)
+            return null;
+        int[] ret = solution;
+        solution = null;
+        return ret;
+    }
+
+    @Override
+    public int[] currentRemainders() {
+        return currentRemainder;
+    }
+}

@@ -20,14 +20,14 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
-package cc.redberry.core.math.frobenius;
+package cc.redberry.core.solver.frobenius;
 
 import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.Arrays;
 
-import static cc.redberry.core.math.frobenius.FrobeniusUtils.*;
+import static cc.redberry.core.solver.frobenius.FrobeniusUtils.*;
 
 /**
  * @author Dmitry Bolotin

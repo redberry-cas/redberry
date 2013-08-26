@@ -58,7 +58,7 @@ public final class ExpandPort {
             return new ProductPort(tensor);
         if (tensor instanceof Sum)
             return new SumPort(tensor);
-        if (ExpandUtils.isExpandablePower(tensor) && !TensorUtils.isNegativeIntegerNumber(tensor.get(1)))
+        if (ExpandUtils.isExpandablePower(tensor) && !TensorUtils.isNegativeNaturalNumber(tensor.get(1)))
             return new PowerPort(tensor);
         else
             return new OutputPortUnsafe.Singleton<>(tensor);
@@ -145,7 +145,7 @@ public final class ExpandPort {
                     }
                     sumOrPowerPorts.add(new SumPort(m));
                 } else if (ExpandUtils.isExpandablePower(m)) {
-                    if (TensorUtils.isNegativeIntegerNumber(m.get(1))) {
+                    if (TensorUtils.isNegativeNaturalNumber(m.get(1))) {
 //                        base.put(Tensors.reciprocal(ExpandUtils.expandPower(
 //                                (Sum) m.get(0), ((Complex) m.get(1)).getReal().intValue(),
 //                                TensorUtils.getAllIndicesNamesT(tensor).toArray(), new Transformation[0])));

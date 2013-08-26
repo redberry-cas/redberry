@@ -20,38 +20,16 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
-package cc.redberry.core.tensorgenerator;
+package cc.redberry.core.solver.frobenius;
 
 import cc.redberry.concurrent.OutputPortUnsafe;
-import cc.redberry.core.tensor.SimpleTensor;
-import cc.redberry.core.tensor.Tensor;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
- * @since 1.0
  */
-class SymbolsGeneratorWithHistory implements OutputPortUnsafe<Tensor> {
-
-    final SymbolsGenerator generator;
-    final List<SimpleTensor> generated = new ArrayList<>();
-
-    public SymbolsGeneratorWithHistory(String name, Tensor... forbiddenTensors) {
-        generator = new SymbolsGenerator(name, forbiddenTensors);
-    }
-
-    public SymbolsGeneratorWithHistory(String name) {
-        generator = new SymbolsGenerator(name);
-    }
-
-    @Override
-    public SimpleTensor take() {
-        SimpleTensor st = generator.take();
-        generated.add(st);
-        return st;
-    }
+interface SolutionProvider extends OutputPortUnsafe<int[]> {
+    boolean tick();
+    int[] currentRemainders();
 }

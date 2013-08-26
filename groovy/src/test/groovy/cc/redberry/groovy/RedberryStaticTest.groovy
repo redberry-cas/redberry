@@ -25,12 +25,12 @@ package cc.redberry.groovy
 
 import org.junit.Test
 
+import static cc.redberry.core.TAssert.assertEquals
+import static cc.redberry.core.TAssert.assertTrue
 import static cc.redberry.core.indices.IndexType.*
 import static cc.redberry.core.tensor.Tensors.addAntiSymmetry
 import static cc.redberry.core.tensor.Tensors.addSymmetry
 import static cc.redberry.groovy.RedberryStatic.*
-import static org.junit.Assert.assertEquals
-import static org.junit.Assert.assertTrue
 
 class RedberryStaticTest {
     @Test
@@ -122,6 +122,90 @@ class RedberryStaticTest {
             assertTrue Collect['f~(0,1)[x, y]', 'f~(1,0)[x, y]', Factor] >> t == 'f[x,x**2]+(x+1)*f~(1,0)[x,x**2]+2*x*(x+1)*f~(0,1)[x,x**2]'.t
         }
 
+    }
+
+    @Test
+    public void testExpand3() {
+        use(Redberry) {
+            assertTrue Expand['x = y'.t, 'f = a'.t] >> 'x*(x + f)'.t == 'a*y+y**2'.t
+            assertTrue Expand >> 'x*(x + f)'.t == 'f*x+x**2'.t
+            assertTrue Expand['x = a'] >> 'x*(x + f)'.t == 'f*a+a**2'.t
+            assertTrue Expand['x = a'.t] >> 'x*(x + f)'.t == 'f*a+a**2'.t
+        }
+    }
+
+    @Test
+    public void testPowerExpand() {
+        use(Redberry) {
+            assertTrue PowerExpand >> '(a*b*c)**d'.t == 'a**d*b**d*c**d'.t
+            assertTrue PowerExpand['a'] >> '(a*b*c)**d'.t == 'a**d*(b*c)**d'.t
+            assertTrue PowerExpand['a'.t] >> '(a*b*c)**d'.t == 'a**d*(b*c)**d'.t
+            assertTrue PowerExpand['a'.t, 'b'.t] >> '(a*b*c*d)**e'.t == 'a**e*b**e*(c*d)**e'.t
+        }
+    }
+
+    @Test
+    public  void testPowerExpand1(){
+        use(Redberry) {
+            assertTrue PowerExpand >> 'Sqrt[a*b]'.t == 'Sqrt[a]*Sqrt[b]'.t
+         }
+    }
+
+    @Test
+    public void testGenerateTensor() {
+        use(Redberry) {
+            def t
+            t = GenerateTensor('_abcd'.si, ['g_mn', 'g_ab'])
+            assertEquals t.size(), 3
+
+            t = GenerateTensor('_abcd'.si, ['g_mn', 'g^ab'], [GenerateParameters: 'False'])
+            assertEquals t, 'g_{ad}*g_{bc}+g_{ac}*g_{bd}+g_{ab}*g_{cd}'.t
+
+            t = GenerateTensor('_abcd'.si, ['g_mn'], [GenerateParameters: 'false'])
+            assertEquals t, 'g_{ad}*g_{bc}+g_{ac}*g_{bd}+g_{ab}*g_{cd}'.t
+
+            t = GenerateTensor('_abcd'.si, ['g_mn'], [GenerateParameters: 'false', SymmetricForm: 'true'])
+            assertEquals t, '(1/3)*(g_{ac}*g_{bd}+g_{ab}*g_{cd}+g_{ad}*g_{bc})'.t
+
+            t = GenerateTensor('_abcd'.si, ['g_mn'], [GenerateParameters: 'false', SymmetricForm: 'true',])
+            assertEquals t, '(1/3)*(g_{ac}*g_{bd}+g_{ab}*g_{cd}+g_{ad}*g_{bc})'.t
+        }
+    }
+
+    @Test
+    public void testGenerateTensor1() {
+        use(Redberry) {
+            def t
+            t = GenerateTensor('_ab^cd'.si, ['g_mn', 'g^mn'], [RaiseLower: 'false', GenerateParameters: 'false'])
+            assertEquals t, 'g_ab*g^cd'
+            t = GenerateTensor('_ab^cd'.si, ['g_mn', 'g^mn'], [RaiseLower: false, GenerateParameters: false])
+            assertEquals t, 'g_ab*g^cd'
+            t = GenerateTensor('_ab^cd'.si, ['g_mn', 'g^mn'], [GenerateParameters: false])
+            assertEquals t, 'g_ab*g^cd + d_a^c*d_b^d + d_a^d*d_b^c'
+            t = GenerateTensor('_ab^cd'.si, ['g_mn', 'g^mn'], [GenerateParameters: false, SymmetricForm: true])
+            assertEquals t, 'g_ab*g^cd + (d_a^c*d_b^d + d_a^d*d_b^c)/2'
+        }
+    }
+
+    @Test
+    public void testGenerateTensor2() {
+        use(Redberry) {
+            def t
+            t = GenerateTensorWithCoefficients('_ab^cd'.si, ['g_mn', 'g^mn'], [RaiseLower: false])
+            assertEquals t[1].size(), 1
+            t = GenerateTensorWithCoefficients('_ab^cd'.si, ['g_mn', 'g^mn'])
+            assertEquals t[1].size(), 3
+            t = GenerateTensorWithCoefficients('_ab^cd'.si, ['g_mn'], [SymmetricForm: true])
+            assertEquals t[1].size(), 2
+        }
+    }
+
+    @Test
+    public void testFrobenius1() {
+        use(Redberry) {
+            def s = FrobeniusSolve([[1, 1, 1, 12]], 4)
+            assertEquals s.size(), 4
+        }
     }
 }
 

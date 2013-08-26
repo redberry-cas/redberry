@@ -23,12 +23,23 @@
 
 package cc.redberry.groovy
 
+import cc.redberry.core.combinatorics.Symmetry
+import cc.redberry.core.combinatorics.symmetries.Symmetries
+import cc.redberry.core.combinatorics.symmetries.SymmetriesFactory
 import cc.redberry.core.context.CC
+import cc.redberry.core.context.OutputFormat
+import cc.redberry.core.indices.SimpleIndices
 import cc.redberry.core.indices.StructureOfIndices
 import cc.redberry.core.parser.ParseTokenSimpleTensor
 import cc.redberry.core.parser.preprocessor.GeneralIndicesInsertion
+import cc.redberry.core.solver.ExternalSolver
+import cc.redberry.core.solver.ReduceEngine
+import cc.redberry.core.solver.ReducedSystem
+import cc.redberry.core.solver.frobenius.FrobeniusSolver
+import cc.redberry.core.tensor.Expression
 import cc.redberry.core.tensor.SimpleTensor
 import cc.redberry.core.tensor.Tensor
+import cc.redberry.core.tensorgenerator.TensorGenerator
 import cc.redberry.core.transformations.*
 import cc.redberry.core.transformations.collect.CollectTransformation
 import cc.redberry.core.transformations.expand.ExpandAllTransformation
@@ -39,7 +50,10 @@ import cc.redberry.core.transformations.factor.FactorTransformation
 import cc.redberry.core.transformations.fractions.GetDenominatorTransformation
 import cc.redberry.core.transformations.fractions.GetNumeratorTransformation
 import cc.redberry.core.transformations.fractions.TogetherTransformation
+import cc.redberry.core.transformations.powerexpand.PowerExpandTransformation
+import cc.redberry.core.transformations.powerexpand.PowerExpandUnwrapTransformation
 import cc.redberry.core.utils.BitArray
+import cc.redberry.core.utils.TensorUtils
 
 /**
  * Groovy facade for Redberry transformations and utility methods.
@@ -48,66 +62,68 @@ import cc.redberry.core.utils.BitArray
  * @author Stanislav Poslavsky
  */
 class RedberryStatic {
-    /**
-     * Expands out products and positive integer powers.
-     * @see ExpandTransformation
-     */
-    public static final Transformation Expand = new Transformation() {
-        @Override
-        Tensor transform(Tensor t) { ExpandTransformation.expand(t) }
 
-        Transformation getAt(Transformation... transformations) { new ExpandTransformation(transformations) }
-    }
+    private static abstract class TransformationWrapper {
+        protected final Class<Transformation> transformationClass;
 
-    /**
-     * Expands out all products and integer powers in any part of expression.
-     * @see ExpandAllTransformation
-     */
-    public static final Transformation ExpandAll = new Transformation() {
-        @Override
-        Tensor transform(Tensor t) { ExpandAllTransformation.expandAll(t) }
-
-        Transformation getAt(Transformation... transformations) { new ExpandAllTransformation(transformations) }
-    }
-
-    /**
-     * Expands out products and powers that appear as denominators.
-     * @see ExpandNumeratorTransformation
-     */
-    public static final Transformation ExpandNumerator = new Transformation() {
-        @Override
-        Tensor transform(Tensor t) { ExpandNumeratorTransformation.expandNumerator(t) }
-
-        Transformation getAt(Transformation... transformations) { new ExpandNumeratorTransformation(transformations) }
-    }
-
-    /**
-     * Expands out products and powers that appear in the numerator.
-     * @see ExpandDenominatorTransformation
-     */
-    public static final Transformation ExpandDenominator = new Transformation() {
-        @Override
-        Tensor transform(Tensor t) { ExpandDenominatorTransformation.expandDenominator(t) }
-
-        Transformation getAt(Transformation... transformations) { new ExpandDenominatorTransformation(transformations) }
-    }
-
-    /**
-     * Collects terms by pattern
-     */
-    public static final StaticCollect Collect = new StaticCollect();
-
-    private final static class StaticCollect {
-        Transformation getAt(SimpleTensor var) {
-            return new CollectTransformation(var);
+        TransformationWrapper(Class<Transformation> transformationClass) {
+            this.transformationClass = transformationClass
         }
 
-        Transformation getProperty(String var) {
+        Transformation getAt(String string) {
             use(Redberry) {
-                return new CollectTransformation(var.t);
+                return transformationClass.newInstance(string.t)
             }
         }
 
+        Transformation getAt(GString string) {
+            use(Redberry) {
+                return transformationClass.newInstance(string.t)
+            }
+        }
+
+        Transformation getAt(Object object) {
+            use(Redberry) {
+                if (object instanceof String || object instanceof GString)
+                    object = object.t
+                return transformationClass.newInstance(object)
+            }
+        }
+
+        abstract Transformation getAt(Collection args);
+    }
+
+    private static final class TransformationWrapper_SimpleTensors_Or_Transformations extends
+            TransformationWrapper implements Transformation {
+
+        final Transformation instance;
+
+        TransformationWrapper_SimpleTensors_Or_Transformations(Class<Transformation> transformationClass, Transformation instance) {
+            super(transformationClass)
+            this.instance = instance
+        }
+
+        @Override
+        Tensor transform(Tensor t) {
+            return instance.transform(t)
+        }
+
+        @Override
+        Transformation getAt(Collection args) {
+            use(Redberry) {
+                return transformationClass.newInstance(* args.collect { it instanceof String ? it.t : it })
+            }
+        }
+    }
+
+    private static final class TransformationWrapper_SimpleTensors_And_Transformations extends
+            TransformationWrapper {
+
+        TransformationWrapper_SimpleTensors_And_Transformations(Class<Transformation> transformationClass) {
+            super(transformationClass)
+        }
+
+        @Override
         Transformation getAt(Collection args) {
             use(Redberry) {
                 def _args = []
@@ -121,47 +137,53 @@ class RedberryStatic {
                     if (t instanceof Transformation)
                         _tr << t
                 }
-                return new CollectTransformation(_args as SimpleTensor[], _tr as Transformation[]);
+                return transformationClass.newInstance(_args as SimpleTensor[], _tr as Transformation[]);
             }
         }
     }
 
     /**
+     * Expands out products and positive integer powers.
+     * @see ExpandTransformation
+     */
+    public static final TransformationWrapper_SimpleTensors_Or_Transformations Expand =
+        new TransformationWrapper_SimpleTensors_Or_Transformations(ExpandTransformation, ExpandTransformation.EXPAND)
+
+    /**
+     * Expands out all products and integer powers in any part of expression.
+     * @see ExpandAllTransformation
+     */
+    public static final TransformationWrapper_SimpleTensors_Or_Transformations ExpandAll =
+        new TransformationWrapper_SimpleTensors_Or_Transformations(ExpandAllTransformation, ExpandAllTransformation.EXPAND_ALL)
+
+    /**
+     * Expands out products and powers that appear as denominators.
+     * @see ExpandNumeratorTransformation
+     */
+    public static final TransformationWrapper_SimpleTensors_Or_Transformations ExpandNumerator =
+        new TransformationWrapper_SimpleTensors_Or_Transformations(ExpandNumeratorTransformation,
+                ExpandNumeratorTransformation.EXPAND_NUMERATOR)
+
+    /**
+     * Expands out products and powers that appear in the numerator.
+     * @see ExpandDenominatorTransformation
+     */
+    public static final TransformationWrapper_SimpleTensors_Or_Transformations ExpandDenominator =
+        new TransformationWrapper_SimpleTensors_Or_Transformations(ExpandDenominatorTransformation,
+                ExpandDenominatorTransformation.EXPAND_DENOMINATOR)
+
+    /**
+     * Collects terms by pattern
+     */
+    public static final TransformationWrapper Collect =
+        new TransformationWrapper_SimpleTensors_And_Transformations(CollectTransformation)
+
+    /**
      * Gives a partial derivative.
      * @see DifferentiateTransformation
      */
-    public static final StaticDifferentiate Differentiate = new StaticDifferentiate();
-
-    private final static class StaticDifferentiate {
-        Transformation getAt(SimpleTensor var) {
-            return new DifferentiateTransformation(var);
-        }
-
-        Transformation getProperty(String var) {
-            use(Redberry) {
-                return new DifferentiateTransformation(var.t);
-            }
-        }
-
-        Transformation getAt(Collection args) {
-            use(Redberry) {
-                int i;
-                def vars = []
-                def transformations = []
-                args.each { arg ->
-                    if (arg instanceof String) arg = arg.t
-
-                    if (arg instanceof SimpleTensor)
-                        vars.add(arg)
-                    else if (arg instanceof Transformation)
-                        transformations.add(arg)
-                    else
-                        throw new IllegalArgumentException();
-                }
-                return new DifferentiateTransformation(transformations as Transformation[], vars as SimpleTensor[]);
-            }
-        }
-    }
+    public static final TransformationWrapper Differentiate =
+        new TransformationWrapper_SimpleTensors_And_Transformations(DifferentiateTransformation)
 
     /**
      * Eliminates metrics and Kronecker deltas
@@ -190,10 +212,13 @@ class RedberryStatic {
     public static final Transformation Denominator = GetDenominatorTransformation.GET_DENOMINATOR
 
     /**
-     * Removes parts of expressions, which are zero because of the symmetries (symmetric and antisymmetric at the same time).
+     * Removes parts of expressions, which are zero because of the symmetries (symmetric and antisymmetric
+     * at the same time).
+     *
      * @see EliminateFromSymmetriesTransformation
      */
-    public static final Transformation EliminateFromSymmetries = EliminateFromSymmetriesTransformation.ELIMINATE_FROM_SYMMETRIES;
+    public static final Transformation EliminateFromSymmetries =
+        EliminateFromSymmetriesTransformation.ELIMINATE_FROM_SYMMETRIES;
 
     /**
      * Puts terms in a sum over a common denominator, and cancels factors in the result.
@@ -237,14 +262,34 @@ class RedberryStatic {
      */
     public static final Transformation Factor = FactorTransformation.FACTOR;
 
+    /**
+     *  Expands all powers of products and powers with respect to specified variables.
+     * @see PowerExpandTransformation
+     */
+    public static final TransformationWrapper_SimpleTensors_Or_Transformations PowerExpand =
+        new TransformationWrapper_SimpleTensors_Or_Transformations(PowerExpandTransformation,
+                PowerExpandTransformation.POWER_EXPAND_TRANSFORMATION)
+
+    /**
+     * Expands all powers of products and powers with respect to specified variables and unwraps powers of
+     * indexed arguments into products (e.g. (A_m*A^m)**2 -> A_m*A^m*A_a*A^a).
+     *
+     * @see PowerExpandUnwrapTransformation
+     */
+    public static final TransformationWrapper_SimpleTensors_Or_Transformations PowerExpandUnwrap =
+        new TransformationWrapper_SimpleTensors_Or_Transformations(PowerExpandUnwrapTransformation,
+                PowerExpandUnwrapTransformation.POWER_EXPAND_UNWRAP_TRANSFORMATION)
+
+    /***********************************************************************
+     ********************* Matrices definition *****************************
+     **********************************************************************/
+
+
     static GeneralIndicesInsertion indicesInsertion = new GeneralIndicesInsertion();
+
     static {
         CC.current().getParseManager().defaultParserPreprocessors.add(indicesInsertion);
     }
-
-    /*
-     * Matrices definition
-     */
 
     /**
      * Tells Redberry to consider specified tensors as matrices and use matrix multiplication rules
@@ -266,8 +311,6 @@ class RedberryStatic {
             }
         }
         bufferOfTensors.each { it -> defineMatrix(it, * bufferOfDescriptors) }
-        //int index = objs.findIndexOf { it instanceof MatrixDescriptor }
-        //objs[0..<index].each { defineMatrices(it, * (objs[index..-1])) }
     }
 
     /**
@@ -301,10 +344,205 @@ class RedberryStatic {
         }
     }
 
-    /*
-     * Utilities
-     */
+    /***********************************
+     ************* Solver ** ***********
+     **********************************/
 
+    private static final Map GenerateTensorDefaultOptions =
+        [Symmetries: null, GeneratedParameters: { i -> "C[$i]" }, GenerateParameters: 'true', SymmetricForm: 'false', RaiseLower: 'true'];
+
+    /**
+     * Generates tensor of the most general form with specified free indices and from specified samples.
+     *
+     * @param indices free indices of the resulting tensor
+     * @param samples samples
+     * @param options options
+     * @return tensor of the most general form
+     */
+    public static Tensor GenerateTensor(SimpleIndices indices,
+                                        Collection samples,
+                                        Map options = [Symmetries: null, GeneratedParameters: { i -> "C[$i]" }, GenerateParameters: 'true', SymmetricForm: 'false', RaiseLower: 'true']) {
+        use(Redberry) {
+            def allOptions = new HashMap(GenerateTensorDefaultOptions)
+            allOptions.putAll(options)
+            Symmetries symmetries = allOptions.get('Symmetries')
+            def symmetricForm = Boolean.valueOf(allOptions.get('SymmetricForm'))
+            def generateCoefficients = Boolean.valueOf(allOptions.get('GenerateParameters'))
+            def raiseLower = Boolean.valueOf(allOptions.get('RaiseLower'))
+            def struct = TensorGenerator.generateStructure(indices, samples.t as Tensor[], symmetries, symmetricForm, generateCoefficients, raiseLower)
+            def result = struct.generatedTensor
+            def generatedParameters = allOptions.get('GeneratedParameters')
+            int i = 0
+            for (def coef in struct.coefficients)
+                result = coef.eq(generatedParameters(i++).t) >> result
+            return result
+        }
+    }
+
+    /**
+     * Generates tensor of the most general form with specified free indices and from specified samples and returns
+     * tensor and its coefficients in form {@code [tensor , [coefficients]]}.
+     *
+     * @param indices free indices of the resulting tensor
+     * @param samples samples
+     * @param options options
+     * @return tensor of the most general form
+     */
+    public static Collection GenerateTensorWithCoefficients(SimpleIndices indices,
+                                                            Collection samples,
+                                                            Map options = [Symmetries: null, SymmetricForm: 'false', RaiseLower: 'true']) {
+        use(Redberry) {
+            def allOptions = new HashMap(GenerateTensorDefaultOptions)
+            allOptions.putAll(options)
+            Symmetries symmetries = allOptions.get('Symmetries')
+            def symmetricForm = Boolean.valueOf(allOptions.get('SymmetricForm'))
+            def raiseLower = Boolean.valueOf(allOptions.get('RaiseLower'))
+            def struct = TensorGenerator.generateStructure(indices, samples.t as Tensor[], symmetries, symmetricForm, true, raiseLower)
+            return [struct.generatedTensor, struct.coefficients as Collection]
+        }
+    }
+
+    private static final Map ReduceDefaultOptions = Collections.unmodifiableMap(
+            [Transformations: [], SymmetricForm: [], GeneratedParameters: { i -> "C[$i]" },
+                    ExternalSolver: [Solver: '', Path: '', KeepFreeParams: 'false', TmpDir: System.getProperty("java.io.tmpdir")]])
+
+    private static final Map ReduceDefaultExternalSolverOptions = Collections.unmodifiableMap(
+            [Solver: '', Path: '', KeepFreeParams: 'true', TmpDir: System.getProperty("java.io.tmpdir")])
+
+    /**
+     * Reduces a system of tensorial equations.
+     * @param equations equations
+     * @param vars unknown variables
+     * @param options options
+     * @return solution or reduced system
+     */
+    public static Collection Reduce(Collection equations,
+                                    Collection vars,
+                                    Map options = [Transformations: [], SymmetricForm: [], GeneratedParameters: { i -> "C[$i]" }, ExternalSolver: [Solver: '', Path: '', KeepFreeParams: 'true', TmpDir: System.getProperty("java.io.tmpdir")]]) {
+        use(Redberry) {
+            Map allOptions = new HashMap(ReduceDefaultOptions)
+            allOptions.putAll(options)
+
+            def transformations = allOptions.get('Transformations') as Transformation[]
+            def symmetricForm = allOptions.get('SymmetricForm') as boolean[]
+            if (symmetricForm.length == 0) symmetricForm = new boolean[vars.size()]
+
+            ReducedSystem reducedSystem = ReduceEngine.reduceToSymbolicSystem(equations.t as Expression[],
+                    vars.t as SimpleTensor[], transformations, symmetricForm)
+            if (reducedSystem == null)
+                return equations
+
+            def externalSolverOptions = new HashMap(ReduceDefaultExternalSolverOptions)
+            externalSolverOptions.putAll((Map) allOptions.get('ExternalSolver'))
+
+            def keepFreeParams = Boolean.valueOf(externalSolverOptions.get('KeepFreeParams'))
+            def externalSolverPath = externalSolverOptions.get('Path')
+            def tmpDir = externalSolverOptions.get('TmpDir')
+            def externalProgram = (String) externalSolverOptions.get('Solver')
+
+            def solution
+            if (!externalProgram.isEmpty()) {
+                switch (externalProgram) {
+                    case 'Mathematica':
+                        solution = ExternalSolver.solveSystemWithMathematica(reducedSystem, keepFreeParams, externalSolverPath, tmpDir);
+                        solution = solution.collect { it as List }
+                        break;
+                    case 'Maple':
+                        solution = ExternalSolver.solveSystemWithMaple(reducedSystem, keepFreeParams, externalSolverPath, tmpDir);
+                        solution = solution.collect { it as List }
+                        break;
+                    default:
+                        throw new IllegalArgumentException('Uncknown solver:' + externalProgram)
+                }
+            } else {
+                solution = []
+                solution.addAll(Arrays.asList(reducedSystem.generalSolutions))
+                solution.addAll(Arrays.asList(reducedSystem.equations))
+            }
+
+            def _generatedParameters = (Closure) allOptions.get('GeneratedParameters')
+
+            int i = 0
+            def replacements = [:]
+
+            def tensorEach = { t ->
+                t.parentAfterChild { ten ->
+                    if (ten.class == SimpleTensor &&
+                            ten.toString(OutputFormat.Redberry) ==~ /${CC.getNameManager().DEFAULT_VAR_SYMBOL_PREFIX}\d+/) {
+                        if (!replacements.containsKey(ten.toString(OutputFormat.Redberry)))
+                            replacements.put(ten.toString(), _generatedParameters(i++))
+                    }
+                }
+            }
+
+
+            def through
+            through = { collection, closure ->
+                if (collection instanceof List)
+                    collection.each { cc -> through(cc, closure) }
+                else {
+                    assert collection instanceof Tensor
+                    closure(collection)
+                }
+            }
+
+            through(solution, tensorEach)
+
+            replacements.each { from, to -> solution = "$from = $to".t >> solution }
+            return solution
+        }
+    }
+
+    /**
+     * Gives a list of solutions of the Frobenius equation.
+     *
+     * @param equations equations
+     * @param maxSolutions if specified, then gives at most {@code maxSolutions}
+     * @return a list of solutions
+     */
+    public static Collection FrobeniusSolve(Collection equations, int maxSolutions = -1) {
+        def solver = new FrobeniusSolver(equations as int[][])
+        def solutions = []
+        def solution
+        while (maxSolutions-- != 0 && (solution = solver.take()) != null)
+            solutions << solution
+        return solutions
+    }
+
+    /***********************************
+     ************* Utilities ***********
+     ***********************************/
+
+    /**
+     * Creates a symmetry from an int array and boolean sign (optional) given in form e.g. [[1,2,0],true]
+     * (antisymmetry) or [2,3,4,1,0] (symmetry).
+     *
+     * @param collection permutation + sign (optional)
+     * @return {@link Symmetry} instance
+     */
+    public static Symmetry CreateSymmetry(Collection collection) {
+        if (collection[1] instanceof Boolean)
+            return new Symmetry(collection[0] as int[], collection[1])
+        return new Symmetry(collection as int[], false)
+    }
+
+    /**
+     * Creates an instance of {@link Symmetries} from a set of symmetries.
+     * @param collection collection of symmetries
+     * @return instance of {@link Symmetries}
+     */
+    public static Symmetries CreateSymmetries(Collection collection) {
+        def s = CreateSymmetry(collection[0])
+        Symmetries symmetries = SymmetriesFactory.createSymmetries(s.dimension())
+        collection.each { symmetries.add(CreateSymmetry(it)) }
+        return symmetries
+    }
+
+    public static Symmetries FindIndicesSymmetries(SimpleIndices indices, tensor) {
+        use(Redberry) {
+            return TensorUtils.findIndicesSymmetries(indices, tensor.t)
+        }
+    }
     /**
      * Evaluates closure, and returns a time in milliseconds used
      * @param closure do stuff

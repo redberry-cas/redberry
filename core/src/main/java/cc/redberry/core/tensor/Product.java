@@ -305,16 +305,31 @@ public final class Product extends MultiTensor {
 
     @Override
     protected Tensor remove1(int[] positions) {
-        //todo better implementation is possible
-        Tensor temp = this;
-        for (int i = positions.length - 1; i >= 0; --i)
-            if (temp instanceof Product) {
-                temp = ((Product) temp).remove(positions[i]);
-            } else temp = getNeutral();
-        return temp;
-    }
+        Complex newFactor = factor;
+        if (factor != Complex.ONE) {
+            if (positions[0] == 0) {
+                newFactor = Complex.ONE;
+                positions = Arrays.copyOfRange(positions, 1, positions.length);
+            }
+            for (int i = positions.length - 1; i >= 0; --i)
+                --positions[i];
+        }
 
-    @Override
+        int dataFrom = Arrays.binarySearch(positions, indexlessData.length - 1);
+        if (dataFrom < 0) dataFrom = ~dataFrom - 1;
+
+        final int[] indexlessPositions = Arrays.copyOfRange(positions, 0, dataFrom + 1);
+        final int[] dataPositions = Arrays.copyOfRange(positions, dataFrom + 1, positions.length);
+        for (int i = 0; i < dataPositions.length; ++i)
+            dataPositions[i] -= indexlessData.length;
+
+        Tensor[] newIndexless = ArraysUtils.remove(indexlessData, indexlessPositions);
+        Tensor[] newData = ArraysUtils.remove(data, dataPositions);
+
+        return createProduct(new IndicesBuilder().append(newData).getIndices(),
+                newFactor, newIndexless, newData);
+    }
+   @Override
     protected Complex getNeutral() {
         return Complex.ONE;
     }
@@ -337,6 +352,21 @@ public final class Product extends MultiTensor {
                 newIndexless.toArray(new Tensor[newIndexless.size()]),
                 newData.toArray(new Tensor[newData.size()]));
     }
+
+
+    private static Tensor createProduct(Indices indices, Complex factor, Tensor[] indexless, Tensor[] data) {
+        if (indexless.length == 0 && data.length == 0)
+            return factor;
+        if (factor == Complex.ONE) {
+            if (indexless.length == 0 && data.length == 1)
+                return data[0];
+            if (indexless.length == 1 && data.length == 0)
+                return indexless[0];
+        }
+        return new Product(indices, factor, indexless, data);
+    }
+
+
 
     /**
      * Returns element at i-th position excluding numerical factor of this product from numbering. So, if

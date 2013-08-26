@@ -119,7 +119,7 @@ public class FactorTransformation implements Transformation {
                             pb.put(c.get(i));
                     }
                     iterator.set(pb == null ? c : pb.build());
-                }
+                } else iterator.set(c);
             } else
                 iterator.set(JasFactor.factor(c));
         }
@@ -196,7 +196,7 @@ public class FactorTransformation implements Transformation {
 //
 //                if (t instanceof Product)
 //                    for (Tensor tt : t)
-//                        if (tt instanceof Power && TensorUtils.isNegativeIntegerNumber(tt.get(1)))
+//                        if (tt instanceof Power && TensorUtils.isNegativeNaturalNumber(tt.get(1)))
 //                            needTogether = true;
 //
 //

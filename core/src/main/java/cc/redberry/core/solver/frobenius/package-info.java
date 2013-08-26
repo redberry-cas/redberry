@@ -20,8 +20,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
-
 /**
- * Utility technical mathematical functions.
+ * System of Frobenius equations solver.
  */
-package cc.redberry.core.math;
+package cc.redberry.core.solver.frobenius;

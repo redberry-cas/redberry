@@ -22,6 +22,7 @@
  */
 package cc.redberry.core.context;
 
+import cc.redberry.concurrent.OutputPortUnsafe;
 import cc.redberry.core.indices.*;
 import cc.redberry.core.parser.ParseManager;
 import cc.redberry.core.tensor.SimpleTensor;
@@ -30,7 +31,7 @@ import cc.redberry.core.utils.BitArray;
 
 /**
  * This class represents Redberry context. It stores all Redberry session data (in some sense it stores static data).
- *
+ * <p/>
  * <p>Management of current Redberry context is made through {@link ContextManager} class.
  * Context of Redberry is attached to the current thread, so that any thread created from the outside of Redebrry
  * will hold a unique instance of {@link Context} object. In such a way tensors created in one thread can not
@@ -87,7 +88,7 @@ public final class Context {
 
     /**
      * This method resets all tensor names in the namespace.
-     *
+     * <p/>
      * <p>Any tensor created before this method call becomes invalid, and
      * must not be used! This method is mainly used in unit tests, so
      * avoid invocations of this method in general computations.</p>
@@ -103,7 +104,7 @@ public final class Context {
      * behaviour of Redberry will be fully deterministic from run to run
      * (order of summands and multipliers will be fixed, computation time
      * will be pretty constant, hash codes will be the same).
-     *
+     * <p/>
      * <p>Any tensor created before this method call becomes invalid, and
      * must not be used! This method is mainly used in unit tests, so
      * avoid invocations of this method in general computations.</p>
@@ -309,6 +310,34 @@ public final class Context {
         if (IndicesUtils.getRawStateInt(index1) == IndicesUtils.getRawStateInt(index2))
             return createMetric(index1, index2);
         return createKronecker(index1, index2);
+    }
+
+    /**
+     * Generates a new symbol which never used before during current session.
+     *
+     * @return new symbol which never used before during current session
+     */
+    public SimpleTensor generateNewSymbol() {
+        NameDescriptor nameDescriptor = nameManager.generateNewSymbolDescriptor();
+        return Tensors.simpleTensor(nameDescriptor.getId(), IndicesFactory.EMPTY_SIMPLE_INDICES);
+    }
+
+    /**
+     * Return output port which generates new symbol via {@link #generateNewSymbol()} at each {@code take()} invocation.
+     *
+     * @return output port which generates new symbol via {@link #generateNewSymbol()} at each {@code take()} invocation.
+     */
+    public OutputPortUnsafe<SimpleTensor> getDefaultParametersGenerator() {
+        return defaultGeneratedParameters;
+    }
+
+    private final GeneratedParameters defaultGeneratedParameters = new GeneratedParameters();
+
+    private final class GeneratedParameters implements OutputPortUnsafe<SimpleTensor> {
+        @Override
+        public SimpleTensor take() {
+            return generateNewSymbol();
+        }
     }
 
     /**

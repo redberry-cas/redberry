@@ -27,10 +27,12 @@ import cc.redberry.core.indices.StructureOfIndices;
 import cc.redberry.core.parser.ParserException;
 import cc.redberry.core.utils.ArraysUtils;
 import cc.redberry.core.utils.IntArrayList;
+import gnu.trove.map.hash.TIntObjectHashMap;
 import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.random.Well44497b;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -54,7 +56,13 @@ public final class NameManager {
     private final ReentrantReadWriteLock readWriteLock = new ReentrantReadWriteLock();
     private final Lock readLock = readWriteLock.readLock();
     private final Lock writeLock = readWriteLock.writeLock();
-    private final Map<Integer, NameDescriptor> fromId = new HashMap<>();
+    private final TIntObjectHashMap<NameDescriptor> fromId = new TIntObjectHashMap<>();
+    private HashSet<String> stringNames = new HashSet<>();
+    /**
+     * String generator
+     */
+    private final StringGenerator stringGenerator = new StringGenerator();
+
     private final Map<NameAndStructureOfIndices, NameDescriptor> fromStructure = new HashMap<>();
     private final String[] kroneckerAndMetricNames = {"d", "g"};
     private final IntArrayList kroneckerAndMetricIds = new IntArrayList();
@@ -123,7 +131,7 @@ public final class NameManager {
         writeLock.lock();
         try {
             fromStructure.clear();
-            for (NameDescriptor descriptor : fromId.values())
+            for (NameDescriptor descriptor : fromId.valueCollection())
                 for (NameAndStructureOfIndices itsan : descriptor.getKeys())
                     fromStructure.put(itsan, descriptor);
         } finally {
@@ -159,6 +167,7 @@ public final class NameManager {
         return new NameDescriptorForSimpleTensor(sname, structuresOfIndices, id);
     }
 
+    //USE IT ONLY INSIDE LOCK!!!
     private void registerDescriptor(NameDescriptor descriptor) {
         fromId.put(descriptor.getId(), descriptor);
         for (NameAndStructureOfIndices key1 : descriptor.getKeys())
@@ -195,6 +204,7 @@ public final class NameManager {
                             kroneckerAndMetricIds.sort();
                         }
                         registerDescriptor(descriptor);
+                        stringNames.add(sname);
                         return descriptor;
                     }
                     readLock.lock();
@@ -229,6 +239,7 @@ public final class NameManager {
         writeLock.lock();
         try {
             kroneckerAndMetricIds.clear();
+            stringNames.clear();
             fromId.clear();
             fromStructure.clear();
             random.setSeed(this.seed = random.nextLong());
@@ -244,6 +255,7 @@ public final class NameManager {
         writeLock.lock();
         try {
             kroneckerAndMetricIds.clear();
+            stringNames.clear();
             fromId.clear();
             fromStructure.clear();
             random.setSeed(this.seed = seed);
@@ -278,6 +290,59 @@ public final class NameManager {
         }
     }
 
+    /**
+     * Returns a descriptor for symbol which was not already parsed.
+     *
+     * @return a descriptor for symbol which was not already parsed
+     */
+    public NameDescriptor generateNewSymbolDescriptor() {
+        boolean rLocked = true;
+        readLock.lock();
+        try {
+            int newNameId = generateNewName();
+
+            String name;
+            do
+                name = stringGenerator.nextString();
+            while (stringNames.contains(name));
+            stringNames.add(name);
+            NameDescriptor nd = new NameDescriptorForSimpleTensor(name,
+                    new StructureOfIndices[]{StructureOfIndices.EMPTY}, newNameId);
+            readLock.unlock();
+            rLocked = false;
+            writeLock.lock();
+            try {
+                registerDescriptor(nd);
+                readLock.lock();
+                rLocked = true;
+            } finally {
+                writeLock.unlock();
+            }
+            return nd;
+        } finally {
+            if (rLocked)
+                readLock.unlock();
+        }
+    }
+
+    public static final String DEFAULT_VAR_SYMBOL_PREFIX = "rc";
+
+    private static final class StringGenerator {
+        long count = 0;
+
+        String nextString() {
+            return (DEFAULT_VAR_SYMBOL_PREFIX + Long.toString(count++));
+        }
+    }
+
+    public int size() {
+        writeLock.lock();
+        try {
+            return fromId.size();
+        } finally {
+            writeLock.unlock();
+        }
+    }
     /*
     public boolean containsNameId(int nameId) {
         if (nameId < 0)

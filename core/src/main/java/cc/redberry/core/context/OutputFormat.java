@@ -57,5 +57,9 @@ public enum OutputFormat {
     /**
      * This format specifies expressions to be outputted in the Wolfram Mathematica input notation.
      */
-    WolframMathematica
+    WolframMathematica,
+    /**
+     * This format specifies expressions to be outputted in the Maplesoft Maple input notation.
+     */
+    Maple
 }

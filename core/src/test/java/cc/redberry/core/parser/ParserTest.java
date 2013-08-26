@@ -520,4 +520,16 @@ public class ParserTest {
         expected = parse("a + c").toString();
         Assert.assertEquals(expected, actual);
     }
+
+    @Test
+    public void testGreek1() {
+        Tensor t = parse("A_{\\alpha}");
+        TAssert.assertEquals(IndicesUtils.getNameWithoutType(t.getIndices().get(0)), 0);
+    }
+
+    @Test
+    public void testGreek2() {
+        Tensor t = parse("A_{\\Xi}");
+        TAssert.assertEquals(IndicesUtils.getNameWithoutType(t.getIndices().get(0)), 4);
+    }
 }

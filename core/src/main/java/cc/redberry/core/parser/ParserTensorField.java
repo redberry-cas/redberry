@@ -24,6 +24,7 @@ package cc.redberry.core.parser;
 
 import cc.redberry.core.indices.Indices;
 import cc.redberry.core.indices.SimpleIndices;
+import cc.redberry.core.number.Complex;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -113,6 +114,15 @@ public class ParserTensorField implements TokenParser {
             if (c == ']')
                 --level;
         }
+
+        //todo fix CORE-106
+        //Sqrt[x]
+        if (simpleTensorNode.name.toLowerCase().equals("sqrt")
+                && simpleTensorNode.indices.size() == 0
+                && arguments.size() == 1
+                && arguments.get(0).getIndices().getFree().size() == 0)
+            return new ParseToken(TokenType.Power, new ParseToken[]{arguments.get(0), new ParseTokenNumber(Complex.ONE_HALF)});
+
         return new ParseTokenTensorField(
                 simpleTensorNode.indices,
                 simpleTensorNode.name,

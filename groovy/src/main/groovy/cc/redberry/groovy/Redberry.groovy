@@ -604,6 +604,17 @@ class Redberry {
     }
 
     /**
+     * Applies transformation to a collection of tensors
+     * @param tensors tensors
+     * @param transformation transformation
+     * @return the result
+     * @see Transformation#transform(cc.redberry.core.tensor.Tensor)
+     */
+    static Collection rightShift(Transformation transformation, Collection tensors) {
+        return tensors.collect { rightShift(transformation, it) }
+    }
+
+    /**
      * Applies substitution to tensor
      * @param tensor tensor
      * @param transformation string representation of substitution
@@ -631,6 +642,17 @@ class Redberry {
         for (Transformation tr in transformations)
             t = tr.transform(t);
         return t;
+    }
+
+    /**
+     * Applies collection of transformations to a collection of tensors
+     * @param tensors tensors
+     * @param transformations collection of transformations
+     * @return the result
+     * @see Transformation#transform(cc.redberry.core.tensor.Tensor)
+     */
+    static Collection rightShift(Collection transformations, Collection tensors) {
+        return tensors.collect { rightShift(transformations, it) }
     }
 
     /**
@@ -729,17 +751,29 @@ class Redberry {
         return TensorUtils.equals(a, b);
     }
 
-    static MappingsPortWrapper mod(Tensor from, Tensor to) {
-        return new MappingsPortWrapper(from, to);
+    /**
+     * Returns the container of mappings from tensor {@code from} onto tensor {@code to}. This structure is iterable
+     * and also can be manipulated as single transformation which simply applies first possible mapping.
+     *
+     * @param from {@code from} tensor
+     * @param to {@code to} tensor
+     * @return container of mappings
+     */
+    static MappingsContainer mod(Tensor from, Tensor to) {
+        return new MappingsContainer(from, to);
     }
 
-    public static final class MappingsPortWrapper implements Transformation, Iterable<Mapping> {
+    /**
+     * This class describes the container of mappings from one tensor onto another. This structure is iterable
+     * and also can be manipulated as single transformation which simply applies first possible mapping.
+     */
+    public static final class MappingsContainer implements Transformation, Iterable<Mapping> {
         private final Tensor from, to
 
         private boolean firstCalculated = false
         private Mapping first = null
 
-        MappingsPortWrapper(Tensor from, Tensor to) {
+        MappingsContainer(Tensor from, Tensor to) {
             this.from = from
             this.to = to
         }
@@ -749,6 +783,10 @@ class Redberry {
             return getFirst().transform(t)
         }
 
+        /**
+         * Returns the first possible mapping
+         * @return first possible mapping
+         */
         public Mapping getFirst() {
             if (!firstCalculated) {
                 first = IndexMappings.getFirst(from, to)
@@ -757,6 +795,10 @@ class Redberry {
             return first
         }
 
+        /**
+         * Returns the output port of possible mappings
+         * @return port of possible mappings
+         */
         public MappingsPort getPort() {
             return IndexMappings.createPort(from, to)
         }
@@ -869,6 +911,26 @@ class Redberry {
     }
 
     /**
+     * Parse collection of strings to colection of tensors
+     * @param strings string representations of tensors
+     * @return collection of tensors
+     * @see Tensor
+     * @see Tensors#parse(java.lang.String)
+     *
+     * @throws cc.redberry.core.parser.ParserException
+     *          if expression does not satisfy correct Redberry
+     *          input notation for tensors
+     *
+     */
+    static Collection getT(Collection strings) {
+        return strings.collect {
+            if (it instanceof String || it instanceof GString)
+                return parse(it)
+            else return it
+        }
+    }
+
+    /**
      * Parse string to tensor
      * @param string string representation of tensor
      * @return tensor
@@ -880,6 +942,10 @@ class Redberry {
      */
     static Tensor getT(GString string) {
         return parse(string.toString())
+    }
+
+    static Tensor getT(Tensor tensor) {
+        return tensor
     }
 
     /**

@@ -22,7 +22,6 @@
  */
 package cc.redberry.core.indices;
 
-import cc.redberry.core.math.MathUtils;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.utils.IntArray;
 import cc.redberry.core.utils.IntArrayList;

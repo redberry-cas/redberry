@@ -22,16 +22,16 @@
  */
 package cc.redberry.core;
 
-import cc.redberry.core.math.MathUtils;
-import cc.redberry.core.tensor.Product;
-import cc.redberry.core.tensor.Tensors;
+import cc.redberry.core.utils.MathUtils;
+import cc.redberry.core.tensor.Tensor;
+import cc.redberry.core.tensor.random.RandomTensor;
 import gnu.trove.set.hash.TIntHashSet;
+import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.junit.Ignore;
 import org.junit.Test;
 
 import java.lang.reflect.Array;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Random;
 import java.util.regex.Matcher;
@@ -63,8 +63,8 @@ public class BlackList {
 //        }
 //        System.out.println(Arrays.toString(r));
 
-        int[] a = {1,2};
-        int[] b = {1,2};
+        int[] a = {1, 2};
+        int[] b = {1, 2};
         System.out.println(a.hashCode());
         System.out.println(b.hashCode());
     }
@@ -216,5 +216,108 @@ public class BlackList {
         for (int i = 0; i < size; ++i)
             a[i] = random.nextInt(11);
         return a;
+    }
+
+
+    public static <T> T[] removeReflection(T[] array, int[] positions) {
+        if (array == null)
+            throw new NullPointerException();
+        int[] p = MathUtils.getSortedDistinct(positions);
+        if (p.length == 0)
+            return array;
+
+        int size = p.length, pointer = 0, s = array.length;
+        for (; pointer < size; ++pointer)
+            if (p[pointer] >= s)
+                throw new ArrayIndexOutOfBoundsException();
+
+        final Class<?> type = array.getClass().getComponentType();
+        @SuppressWarnings("unchecked") // OK, because array is of type T
+                T[] r = (T[]) Array.newInstance(type, array.length - p.length);
+
+        pointer = 0;
+        int i = -1;
+        for (int j = 0; j < s; ++j) {
+            if (pointer < size - 1 && j > p[pointer])
+                ++pointer;
+            if (j == p[pointer]) continue;
+            else r[++i] = array[j];
+        }
+        return r;
+    }
+
+    public static Tensor[] removeExact(Tensor[] array, int[] positions) {
+        if (array == null)
+            throw new NullPointerException();
+        int[] p = MathUtils.getSortedDistinct(positions);
+        if (p.length == 0)
+            return array;
+
+        int size = p.length, pointer = 0, s = array.length;
+        for (; pointer < size; ++pointer)
+            if (p[pointer] >= s)
+                throw new ArrayIndexOutOfBoundsException();
+
+        Tensor[] r = new Tensor[array.length - p.length];
+
+        pointer = 0;
+        int i = -1;
+        for (int j = 0; j < s; ++j) {
+            if (pointer < size - 1 && j > p[pointer])
+                ++pointer;
+            if (j == p[pointer]) continue;
+            else r[++i] = array[j];
+        }
+        return r;
+    }
+
+    @Test
+    public void testReflection() {
+        RandomTensor rnd = RandomTensor.createWithDefaultValues();
+        DescriptiveStatistics reflection = new DescriptiveStatistics();
+        DescriptiveStatistics exact = new DescriptiveStatistics();
+
+        long start;
+        Tensor[] result1, result2;
+        int maxLength = 500;
+
+        //burn
+        for (int ttt = 0; ttt < 15000; ++ttt) {
+            int length = 1 + rnd.nextInt(maxLength);
+            Tensor[] array = new Tensor[length];
+            for (int i = 0; i < length; ++i)
+                array[i] = rnd.nextSimpleTensor();
+            int[] tuple = new int[1 + rnd.nextInt(maxLength)];
+            start = System.nanoTime();
+            result1 = removeReflection(array, tuple.clone());
+//            reflection.addValue(System.nanoTime() - start);
+
+            start = System.nanoTime();
+            result2 = removeExact(array, tuple.clone());
+//            exact.addValue(System.nanoTime() - start);
+            TAssert.assertEquals(result1.length, result2.length);
+        }
+
+        for (int ttt = 0; ttt < 1000; ++ttt) {
+            int length = 1 + rnd.nextInt(maxLength);
+            Tensor[] array = new Tensor[length];
+            for (int i = 0; i < length; ++i)
+                array[i] = rnd.nextSimpleTensor();
+            int[] tuple = new int[1 + rnd.nextInt(maxLength)];
+            start = System.nanoTime();
+            result2 = removeExact(array, tuple.clone());
+            exact.addValue(System.nanoTime() - start);
+
+            start = System.nanoTime();
+            result1 = removeReflection(array, tuple.clone());
+            reflection.addValue(System.nanoTime() - start);
+
+
+            TAssert.assertEquals(result1.length, result2.length);
+        }
+
+        System.out.println(reflection);
+        System.out.println(exact);
+
     }
 }

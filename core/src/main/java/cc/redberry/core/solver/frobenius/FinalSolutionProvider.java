@@ -20,15 +20,15 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
-package cc.redberry.core.math.frobenius;
+package cc.redberry.core.solver.frobenius;
 
 /**
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-final class SingleSolutionProvider extends SolutionProviderAbstract {
-    SingleSolutionProvider(SolutionProvider provider, int position, int[] coefficient) {
+final class FinalSolutionProvider extends SolutionProviderAbstract {
+    public FinalSolutionProvider(SolutionProvider provider, int position, int coefficient[]) {
         super(provider, position, coefficient);
     }
 
@@ -37,20 +37,35 @@ final class SingleSolutionProvider extends SolutionProviderAbstract {
         if (currentSolution == null)
             return null;
 
+        int i = 0;
+        //non zero coefficient
+        while (i < coefficients.length && coefficients[i++] == 0);
+        --i;
 
-        int i, remainder;
-        for (i = 0; i < coefficients.length; ++i) {
-            remainder = currentRemainder[i] - coefficients[i] * currentCounter;
-            if (remainder < 0) {
-                currentCounter = 0;
+        assert i == 0 || i != coefficients.length;
+
+        if (currentRemainder[i] % coefficients[i] != 0) {
+            currentSolution = null;
+            return null;
+        }
+
+        currentCounter = currentRemainder[i] / coefficients[i];
+        for (i = 0; i < coefficients.length; ++i)
+            if (coefficients[i] == 0) {
+                if (currentRemainder[i] != 0) {
+                    currentSolution = null;
+                    return null;
+                }
+            } else if (currentRemainder[i] % coefficients[i] != 0) {
+                currentSolution = null;
+                return null;
+            } else if (currentRemainder[i] / coefficients[i] != currentCounter) {
                 currentSolution = null;
                 return null;
             }
-        }
-
         int[] solution = currentSolution.clone();
         solution[position] += currentCounter;
-        ++currentCounter;
+        currentSolution = null;
         return solution;
     }
 }

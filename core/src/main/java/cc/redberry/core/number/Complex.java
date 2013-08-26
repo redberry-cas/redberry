@@ -818,7 +818,11 @@ public final class Complex extends Tensor
         return imaginary.isZero() && real.isNatural();
     }
 
-    public boolean isNegativeInteger() {
+    public boolean isNegativeNatural() {
         return imaginary.isZero() && real.isInteger() && real.signum() < 0;
+    }
+
+    public boolean isPositiveNatural() {
+        return imaginary.isZero() && real.isInteger() && real.signum() >= 0;
     }
 }

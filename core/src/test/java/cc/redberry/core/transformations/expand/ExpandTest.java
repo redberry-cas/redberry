@@ -443,4 +443,11 @@ public class ExpandTest {
         Tensor t = parse("a*d + b*c + f");
         TAssert.assertTrue(t == expand(t));
     }
+
+    @Test
+    public void test42() {
+        Tensor t = parse("(A_m*A^m)**2");
+        TAssert.assertTrue(t == expand(t));
+        TAssert.assertTrue(t == expandUsingPort(t));
+    }
 }

@@ -20,28 +20,11 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
-package cc.redberry.core.indexmapping;
-
-import cc.redberry.concurrent.OutputPortUnsafe;
-
 /**
- * The output port of mappings.
+ * Tools for solving equations. Package contains tools for reducing tensor equations
+ * to equations with ordinary symbols and solve them with external solvers.
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
- * @see Mapping
  */
-public final class MappingsPort implements OutputPortUnsafe<Mapping> {
-    private final OutputPortUnsafe<IndexMappingBuffer> innerPort;
-
-    MappingsPort(OutputPortUnsafe<IndexMappingBuffer> innerPort) {
-        this.innerPort = innerPort;
-    }
-
-    @Override
-    public Mapping take() {
-        IndexMappingBuffer temp = innerPort.take();
-        if (temp == null) return null;
-        return new Mapping(temp);
-    }
-}
+package cc.redberry.core.solver;

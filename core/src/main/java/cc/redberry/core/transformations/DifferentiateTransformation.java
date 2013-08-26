@@ -63,7 +63,7 @@ public final class DifferentiateTransformation implements Transformation {
         this.expandAndContract = new Transformation[0];
     }
 
-    public DifferentiateTransformation(Transformation[] expandAndContract, SimpleTensor... vars) {
+    public DifferentiateTransformation(SimpleTensor[] vars, Transformation[] expandAndContract) {
         this.vars = vars;
         this.expandAndContract = expandAndContract;
     }

@@ -25,6 +25,9 @@ package cc.redberry.core.context.defaults;
 import cc.redberry.core.context.IndexConverterException;
 import cc.redberry.core.context.IndexSymbolConverter;
 import cc.redberry.core.context.OutputFormat;
+import cc.redberry.core.utils.ArraysUtils;
+
+import java.util.Arrays;
 
 /**
  * @author Dmitry Bolotin
@@ -32,6 +35,9 @@ import cc.redberry.core.context.OutputFormat;
  * @since 1.0
  */
 abstract class SymbolArrayConverter implements IndexSymbolConverter {
+
+    private final String[] sortedSymbols;
+    private final int[] coSortedCodes;
 
     private final String[] symbols;
     private final String[] utf;
@@ -41,22 +47,25 @@ abstract class SymbolArrayConverter implements IndexSymbolConverter {
         this.utf = utf;
         if (symbols.length != utf.length)
             throw new RuntimeException();
+
+        this.sortedSymbols = symbols.clone();
+        this.coSortedCodes = new int[symbols.length];
+        for (int i = 0; i < coSortedCodes.length; ++i)
+            coSortedCodes[i] = i;
+        ArraysUtils.quickSort(this.sortedSymbols, this.coSortedCodes);
     }
 
     @Override
     public boolean applicableToSymbol(String symbol) {
-        for (String s : symbols)
-            if (s.equals(symbol))
-                return true;
-        return false;
+        return Arrays.binarySearch(sortedSymbols, symbol) >= 0;
     }
 
     @Override
     public int getCode(String symbol) throws IndexConverterException {
-        for (int i = 0; i < symbols.length; ++i)
-            if (symbols[i].equals(symbol))
-                return i;
-        throw new IndexConverterException();
+        int codePosition = Arrays.binarySearch(sortedSymbols, symbol);
+        if (codePosition < 0)
+            throw new IndexConverterException();
+        return coSortedCodes[codePosition];
     }
 
     @Override
@@ -70,7 +79,7 @@ abstract class SymbolArrayConverter implements IndexSymbolConverter {
                 case UTF8:
                     return utf[code];
                 case RedberryConsole:
-                    return "\\" + symbols[code];
+                    return "\\" + sortedSymbols[code];
             }
         } catch (ArrayIndexOutOfBoundsException e) {
             throw new IndexConverterException();
@@ -79,6 +88,6 @@ abstract class SymbolArrayConverter implements IndexSymbolConverter {
 
     @Override
     public int maxNumberOfSymbols() {
-        return symbols.length - 1;
+        return sortedSymbols.length - 1;
     }
 }
