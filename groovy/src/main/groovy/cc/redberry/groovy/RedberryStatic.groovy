@@ -513,12 +513,24 @@ class RedberryStatic {
      ************* Utilities ***********
      ***********************************/
 
+    /**
+     * Creates a symmetry from an int array and boolean sign (optional) given in form e.g. [[1,2,0],true]
+     * (antisymmetry) or [2,3,4,1,0] (symmetry).
+     *
+     * @param collection permutation + sign (optional)
+     * @return {@link Symmetry} instance
+     */
     public static Symmetry CreateSymmetry(Collection collection) {
         if (collection[1] instanceof Boolean)
             return new Symmetry(collection[0] as int[], collection[1])
         return new Symmetry(collection as int[], false)
     }
 
+    /**
+     * Creates an instance of {@link Symmetries} from a set of symmetries.
+     * @param collection collection of symmetries
+     * @return instance of {@link Symmetries}
+     */
     public static Symmetries CreateSymmetries(Collection collection) {
         def s = CreateSymmetry(collection[0])
         Symmetries symmetries = SymmetriesFactory.createSymmetries(s.dimension())

@@ -67,7 +67,7 @@ public final class TensorField extends SimpleTensor {
     }
 
     public boolean isDerivative() {
-        return ((NameDescriptorForTensorField) getNameDescriptor()).isDerivative();
+        return getNameDescriptor().isDerivative();
     }
 
     @Override
@@ -140,6 +140,8 @@ public final class TensorField extends SimpleTensor {
         //TODO add argIndices toString(REDBERRY)
 
         StringBuilder sb = new StringBuilder();
+        sb.append(super.toString(mode));
+
         if (mode == OutputFormat.Maple)
             sb.append('(');
         else sb.append('[');
@@ -154,7 +156,7 @@ public final class TensorField extends SimpleTensor {
             sb.append(')');
         else sb.append(']');
 
-        return super.toString(mode) + sb.toString();
+        return sb.toString();
     }
 
     @Override

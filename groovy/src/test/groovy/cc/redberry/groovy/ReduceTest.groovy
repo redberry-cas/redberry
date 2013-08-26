@@ -22,6 +22,7 @@
  */
 package cc.redberry.groovy
 
+import cc.redberry.core.tensor.SimpleTensor
 import cc.redberry.core.utils.TensorUtils
 import org.junit.Assume
 import org.junit.Before
@@ -140,6 +141,7 @@ class ReduceTest {
                     continue
 
                 def genTensor = GenerateTensorWithCoefficients('_abc'.si, ['g_mn', 'k_m'])
+
                 def equations = ['F_mnp*F^mnp = 1', 'F_abc'.eq(genTensor[0]), 'F_abc*F^ab_d*F^cde = k^e']
                 def options = [Transformations: 'd_m^m = 1'.t & 'k_m*k^m = 1'.t, SymmetricForm: true, ExternalSolver: [Solver: externalSolver, Path: getPath(externalSolver), TmpDir: '/home/stas/Projects/redberry']]
 
@@ -147,7 +149,7 @@ class ReduceTest {
                 def result = s.collect { it[0] }
 
                 def generatedVar
-                result.each { r -> r.parentAfterChild { term -> if (TensorUtils.isSymbolic(term)) generatedVar = term; return; } }
+                result.each { r -> r.parentAfterChild { term -> if (term instanceof SimpleTensor && TensorUtils.isSymbolic(term)) generatedVar = term; return; } }
                 assertEquals result.size(), 1
 
                 result = result[0]
