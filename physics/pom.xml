@@ -87,7 +87,7 @@
         </developer>
     </developers>
 
-    <scm><connection>scm:hg:http://bitbucket.org/redberry/redberry-physics</connection><url>https://bitbucket.org/redberry/redberry-physics/src/</url></scm>
+    <scm><connection>scm:hg:http://bitbucket.org/redberry/redberry</connection><url>https://bitbucket.org/redberry/redberry/src/</url></scm>
 
     <issueManagement>
         <system>YouTRACK</system>

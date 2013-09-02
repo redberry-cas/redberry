@@ -93,7 +93,7 @@
         </developer>
     </developers>
 
-    <scm><connection>scm:hg:http://bitbucket.org/redberry/redberry-groovy</connection><url>https://bitbucket.org/redberry/redberry-groovy/src/</url></scm>
+    <scm><connection>scm:hg:http://bitbucket.org/redberry/redberry</connection><url>https://bitbucket.org/redberry/redberry/src/</url></scm>
 
     <issueManagement>
         <system>YouTRACK</system>
