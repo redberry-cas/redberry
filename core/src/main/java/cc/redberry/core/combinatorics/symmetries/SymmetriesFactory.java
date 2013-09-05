@@ -82,6 +82,29 @@ public final class SymmetriesFactory {
         return new FullSymmetries(dimension);
     }
 
+
+    /**
+     * Creates {@link Symmetries} object with specified dimension, which contains one transposition and one cycle.
+     * Other words, it represents a full symmetric group with specified dimension, so, for example, all
+     * permutations of specified dimension can be obtained via its
+     * {@link cc.redberry.core.combinatorics.symmetries.Symmetries#iterator()}  method.
+     *
+     * @param dimension dimension
+     * @return {@code Symmetries} object with one transposition and one cycle
+     */
+    public static Symmetries createFullAntiSymmetries(int dimension) {
+        if (dimension < 0)
+            throw new IllegalArgumentException();
+        if (dimension == 0)
+            return EmptySymmetries0;
+        if (dimension == 1)
+            return EmptySymmetries1;
+        Symmetries symmetries = createSymmetries(dimension);
+        symmetries.add(new Symmetry(Combinatorics.createTransposition(dimension), true));
+        symmetries.add(new Symmetry(Combinatorics.createCycle(dimension), dimension % 2 == 0 ? true : false));
+        return symmetries;
+    }
+
     /**
      * Returns a symmetry object, which represents a Cartesian product of two symmetric groups
      * with dimensions {@code upperCount} and {@code lowerCount} respectively. This object contains symmetries

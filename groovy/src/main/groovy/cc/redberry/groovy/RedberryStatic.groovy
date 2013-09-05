@@ -54,6 +54,7 @@ import cc.redberry.core.transformations.fractions.GetNumeratorTransformation
 import cc.redberry.core.transformations.fractions.TogetherTransformation
 import cc.redberry.core.transformations.powerexpand.PowerExpandTransformation
 import cc.redberry.core.transformations.powerexpand.PowerExpandUnwrapTransformation
+import cc.redberry.core.transformations.symmetrization.SymmetrizeTransformation
 import cc.redberry.core.utils.BitArray
 import cc.redberry.core.utils.TensorUtils
 
@@ -286,8 +287,6 @@ class RedberryStatic {
             allOptions.putAll(map)
             return new FactorTransformation(allOptions['FactorScalars'], allOptions['FactorizationEngine'])
         }
-
-
     }
 
     /**
@@ -307,6 +306,22 @@ class RedberryStatic {
     public static final TransformationWrapper_SimpleTensors_Or_Transformations PowerExpandUnwrap =
         new TransformationWrapper_SimpleTensors_Or_Transformations(PowerExpandUnwrapTransformation,
                 PowerExpandUnwrapTransformation.POWER_EXPAND_UNWRAP_TRANSFORMATION)
+
+    /**
+     * Gives a symmetrization of tensor with respect to specified indices under the specified symmetries.
+     */
+    public static final SymmetrizeWrapper Symmetrize = SymmetrizeWrapper.INSTANCE;
+
+    public static final class SymmetrizeWrapper {
+        public static final SymmetrizeWrapper INSTANCE = new SymmetrizeWrapper()
+
+        SymmetrizeWrapper() {
+        }
+
+        public Transformation getAt(SimpleIndices indices, Symmetries symmetries) {
+            return new SymmetrizeTransformation(indices.free.allIndices.copy(), symmetries, true)
+        }
+    }
 
     /***********************************************************************
      ********************* Matrices definition *****************************
@@ -559,7 +574,7 @@ class RedberryStatic {
      * @param collection collection of symmetries
      * @return instance of {@link Symmetries}
      */
-    public static Symmetries CreateSymmetries(Object...collection) {
+    public static Symmetries CreateSymmetries(Object... collection) {
         def s = CreateSymmetry(collection[0])
         Symmetries symmetries = SymmetriesFactory.createSymmetries(s.dimension())
         collection.each { symmetries.add(CreateSymmetry(it)) }

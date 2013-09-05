@@ -230,5 +230,13 @@ class RedberryStaticTest {
             assertEquals Factor[true] >> 'k_m*k^m*(a+b) + k_m*f^m*(a+b)'.t, '(k_m*k^m + k_m*f^m)*(a+b)'
         }
     }
+
+    @Test
+    public void testSymmetrize() {
+        use(Redberry) {
+            assertEquals Symmetrize['_ab'.si, CreateSymmetries([1, 0])] >> 'T_ab'.t, 'T_ab/2 + T_ba/2'.t
+            assertEquals Symmetrize['_ab'.si, CreateSymmetries([[1, 0], true])] >> 'T_ab'.t, 'T_ab/2 - T_ba/2'.t
+        }
+    }
 }
 
