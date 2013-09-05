@@ -336,7 +336,7 @@ public class OneLoopCountertermsTest {
 
 
         //simplified result
-        actual = FactorTransformation.factor(A);
+        actual = FactorTransformation.factor(A, false);
         actual = Tensors.parseExpression("P^\\mu_\\mu = P").transform(actual);
         expected =
                 Tensors.parse("1/24*(gamma**2+6*gamma+12)*P_\\mu\\nu*P^\\mu\\nu"
@@ -376,7 +376,7 @@ public class OneLoopCountertermsTest {
 
         //simplified result
         expected = Tensors.parse("(1/30)*(20*gamma+5*gamma**2+7)*R_{\\mu\\nu}*R^{\\mu\\nu}+(1/60)*(10*gamma+5*gamma**2+17)*R**2");
-        TAssert.assertEquals(FactorTransformation.factor(A), expected);
+        TAssert.assertEquals(FactorTransformation.factor(A, false), expected);
     }
 
     /*
@@ -452,7 +452,7 @@ public class OneLoopCountertermsTest {
         TAssert.assertEquals(actual, expected);
 
         //simplified result
-        actual = FactorTransformation.factor(A);
+        actual = FactorTransformation.factor(A, false);
         actual = Tensors.parseExpression("P^\\mu_\\mu = P").transform(actual);
 
         expected =

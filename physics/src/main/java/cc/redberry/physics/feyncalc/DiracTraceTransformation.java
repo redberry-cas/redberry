@@ -433,6 +433,7 @@ public class DiracTraceTransformation implements Transformation {
             return Complex.ZERO;
         SumBuilder sb = new SumBuilder();
         Tensor temp;
+        //todo why to multiply by Complex.TWO and after Complex.ONE_HALF???
         for (int i = 0; i < product.length - 1; ++i) {
             temp = multiply(Complex.TWO,
                     createMetricOrKronecker(product[i].getIndices().get(IndexType.LatinLower, 0),

@@ -272,6 +272,30 @@ class Redberry {
         return builder;
     }
 
+    /**
+     * Returns a list of tensor content
+     * @param tensor tensor
+     * @return a list of tensor content
+     */
+    static List<Tensor> toList(Tensor tensor) {
+        return tensor.toArray() as List
+    }
+
+    /**
+     * Tensor as array, list etc.
+     * @param tensor
+     * @param clazz
+     * @return
+     */
+    static Object asType(Tensor tensor, Class clazz) {
+        if (clazz == List)
+            return tensor.toArray() as List
+        else if (clazz == Tensor[])
+            return tensor.toArray()
+        else
+            return DefaultGroovyMethods.asType(tensor, clazz)
+    }
+
     /*
      * Indices
      */

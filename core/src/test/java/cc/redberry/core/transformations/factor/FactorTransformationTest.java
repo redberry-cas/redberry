@@ -284,11 +284,25 @@ public class FactorTransformationTest {
             CC.resetTensorNames();
             Tensor t;
             t = parse("a+b*a+(a**2+2*a*b+b**2)/(a+b)*F^i_i+(a**2+2*a*b+b**2)*(a+b)**(-1)*H^i_i");
-            TAssert.assertEquals(factor(t), "(a+b)*H^{i}_{i}+(a+b)*F^{i}_{i}+a*(1+b)");
+            TAssert.assertEquals(factor(t, false), "(a+b)*H^{i}_{i}+(a+b)*F^{i}_{i}+a*(1+b)");
+            TAssert.assertEquals(factor(t, true), "(a+b)*H^{i}_{i}+(a+b)*F^{i}_{i}+a+a*b");
 
             t = parse("(a**2+2*a*b+b**2)/(a+b)*F^i_i+(a**2+2*a*b+b**2)*(a+b)**(-1)*H^i_i");
-            TAssert.assertEquals(factor(t), "(a+b)*H^{i}_{i}+(a+b)*F^{i}_{i}");
+            TAssert.assertEquals(factor(t, false), "(a+b)*H^{i}_{i}+(a+b)*F^{i}_{i}");
+            TAssert.assertEquals(factor(t, true), "(a+b)*(H^{i}_{i}+F^{i}_{i})");
         }
+    }
+
+
+    @Test
+    public void test19a() {
+        Tensor t;
+        t = parse("a+b*a+(a**2+2*a*b+b**2)/(a+b)*F^i_i+(a**2+2*a*b+b**2)*(a+b)**(-1)*H^i_i");
+        TAssert.assertEquals(factor(t, false), "(a+b)*H^{i}_{i}+(a+b)*F^{i}_{i}+a*(1+b)");
+
+        t = parse("(a**2+2*a*b+b**2)/(a+b)*F^i_i+(a**2+2*a*b+b**2)*(a+b)**(-1)*H^i_i");
+        TAssert.assertEquals(factor(t, false), "(a+b)*H^{i}_{i}+(a+b)*F^{i}_{i}");
+
     }
 
     @Ignore

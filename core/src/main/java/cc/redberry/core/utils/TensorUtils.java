@@ -22,9 +22,11 @@
  */
 package cc.redberry.core.utils;
 
+import cc.redberry.concurrent.OutputPortUnsafe;
 import cc.redberry.core.combinatorics.Symmetry;
 import cc.redberry.core.combinatorics.symmetries.Symmetries;
 import cc.redberry.core.combinatorics.symmetries.SymmetriesFactory;
+import cc.redberry.core.context.CC;
 import cc.redberry.core.indexmapping.IndexMappings;
 import cc.redberry.core.indexmapping.Mapping;
 import cc.redberry.core.indexmapping.MappingsPort;
@@ -45,8 +47,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-import static cc.redberry.core.tensor.Tensors.multiply;
-import static cc.redberry.core.tensor.Tensors.negate;
+import static cc.redberry.core.tensor.Tensors.*;
 
 /**
  * This class contains various useful methods related with tensors.
@@ -717,6 +718,44 @@ public class TensorUtils {
             if (testContainsNames(tt, names)) return true;
 
         return false;
+    }
+
+    /**
+     * Generates a set of replacement rules for all scalar (but not symbolic) sub-tensors appearing in the specified
+     * tensor.
+     *
+     * @param tensor tensor
+     * @return set of replacement rules for all scalar (but not symbolic) sub-tensors appearing in the specified
+     *         tensor
+     */
+    public static Expression[] generateReplacementsOfScalars(Tensor tensor) {
+        return generateReplacementsOfScalars(tensor, CC.getParametersGenerator());
+    }
+
+    /**
+     * Generates a set of replacement rules for all scalar (but not symbolic) sub-tensors appearing in the specified
+     * tensor.
+     *
+     * @param tensor                tensor
+     * @param generatedCoefficients allows to control how coefficients are generated
+     * @return set of replacement rules for all scalar (but not symbolic) sub-tensors appearing in the specified
+     *         tensor
+     * @see LocalSymbolsProvider
+     */
+    public static Expression[] generateReplacementsOfScalars(Tensor tensor,
+                                                             OutputPortUnsafe<SimpleTensor> generatedCoefficients) {
+        THashSet<Tensor> scalars = new THashSet<>();
+        FromChildToParentIterator iterator = new FromChildToParentIterator(tensor);
+        Tensor c;
+        while ((c = iterator.next()) != null)
+            if (c instanceof Product)
+                scalars.addAll(Arrays.asList(((Product) c).getContent().getScalars()));
+
+        Expression[] replacements = new Expression[scalars.size()];
+        int i = -1;
+        for (Tensor scalar : scalars)
+            replacements[++i] = expression(scalar, generatedCoefficients.take());
+        return replacements;
     }
 
 }

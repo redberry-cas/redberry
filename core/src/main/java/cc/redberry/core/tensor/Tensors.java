@@ -29,10 +29,8 @@ import cc.redberry.core.context.NameDescriptor;
 import cc.redberry.core.context.NameDescriptorForTensorField;
 import cc.redberry.core.indices.*;
 import cc.redberry.core.number.Complex;
-import cc.redberry.core.number.Rational;
 import cc.redberry.core.parser.ParseTokenTransformer;
 import cc.redberry.core.tensor.functions.*;
-import cc.redberry.core.transformations.factor.jasfactor.edu.jas.arith.BigInteger;
 import cc.redberry.core.utils.TensorUtils;
 import gnu.trove.set.hash.TIntHashSet;
 
@@ -203,6 +201,18 @@ public final class Tensors {
 //            result[++position] = newFactor;
 //        }
         return result;
+    }
+
+    public static void resolveAllDummies(Tensor[] factors) {
+        TIntHashSet forbidden = new TIntHashSet();
+        int i;
+        for (i = factors.length - 1; i >= 0; --i)
+            forbidden.addAll(TensorUtils.getAllIndicesNamesT(factors[i]));
+
+        for (i = factors.length - 1; i >= 0; --i) {
+            factors[i] = ApplyIndexMapping.renameDummy(factors[i], forbidden.toArray());
+            forbidden.addAll(TensorUtils.getAllIndicesNamesT(factors[i]));
+        }
     }
 
     /**

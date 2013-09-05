@@ -23,6 +23,7 @@
 
 package cc.redberry.groovy
 
+import cc.redberry.core.transformations.factor.JasFactor
 import org.junit.Test
 
 import static cc.redberry.core.TAssert.assertEquals
@@ -145,10 +146,10 @@ class RedberryStaticTest {
     }
 
     @Test
-    public  void testPowerExpand1(){
+    public void testPowerExpand1() {
         use(Redberry) {
             assertTrue PowerExpand >> 'Sqrt[a*b]'.t == 'Sqrt[a]*Sqrt[b]'.t
-         }
+        }
     }
 
     @Test
@@ -205,6 +206,28 @@ class RedberryStaticTest {
         use(Redberry) {
             def s = FrobeniusSolve([[1, 1, 1, 12]], 4)
             assertEquals s.size(), 4
+        }
+    }
+
+    @Test
+    public void testFactor1() {
+        use(Redberry) {
+            assertEquals Factor >> 'a**2+2*a*b+b**2'.t, '(a+b)**2'
+            assertEquals Factor[[FactorScalars: false]] >> 'a**2+2*a*b+b**2'.t, '(a+b)**2'
+            assertEquals Factor[[FactorScalars: true]] >> 'a**2+2*a*b+b**2'.t, '(a+b)**2'
+            assertEquals Factor[false] >> 'a**2+2*a*b+b**2'.t, '(a+b)**2'
+            assertEquals Factor[true] >> 'a**2+2*a*b+b**2'.t, '(a+b)**2'
+            assertEquals Factor[[FactorScalars: false, FactorizationEngine: JasFactor.ENGINE]] >> 'a**2+2*a*b+b**2'.t, '(a+b)**2'
+            assertEquals Factor[[FactorScalars: true, FactorizationEngine: JasFactor.ENGINE]] >> 'a**2+2*a*b+b**2'.t, '(a+b)**2'
+            assertEquals Factor[false, JasFactor.ENGINE] >> 'a**2+2*a*b+b**2'.t, '(a+b)**2'
+            assertEquals Factor[true, JasFactor.ENGINE] >> 'a**2+2*a*b+b**2'.t, '(a+b)**2'
+
+
+            assertEquals Factor >> 'k_m*k^m*(a+b) + k_m*f^m*(a+b)'.t, '(k_m*k^m + k_m*f^m)*(a+b)'
+            assertEquals Factor[[FactorScalars: false]] >> 'k_m*k^m*(a+b) + k_m*f^m*(a+b)'.t, 'k_m*k^m*(a+b) + k_m*f^m*(a+b)'
+            assertEquals Factor[[FactorScalars: true]] >> 'k_m*k^m*(a+b) + k_m*f^m*(a+b)'.t, '(k_m*k^m + k_m*f^m)*(a+b)'
+            assertEquals Factor[false] >> 'k_m*k^m*(a+b) + k_m*f^m*(a+b)'.t, 'k_m*k^m*(a+b) + k_m*f^m*(a+b)'
+            assertEquals Factor[true] >> 'k_m*k^m*(a+b) + k_m*f^m*(a+b)'.t, '(k_m*k^m + k_m*f^m)*(a+b)'
         }
     }
 }
