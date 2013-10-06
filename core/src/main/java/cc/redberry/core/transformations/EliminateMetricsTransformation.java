@@ -25,7 +25,6 @@ package cc.redberry.core.transformations;
 import cc.redberry.core.indexmapping.IndexMapping;
 import cc.redberry.core.indices.SimpleIndices;
 import cc.redberry.core.tensor.*;
-import cc.redberry.core.tensor.functions.ScalarFunction;
 
 import java.util.*;
 
@@ -80,11 +79,6 @@ public final class EliminateMetricsTransformation implements Transformation {
                     tensor = builder.build();
             }
             return tensor;
-        } else if (tensor instanceof ScalarFunction) {
-            TensorBuilder builder = tensor.getBuilder();
-            for (int i = tensor.size() - 1; i >= 0; --i)
-                builder.put(transform(tensor.get(i)));
-            return builder.build();
         } else if (tensor instanceof Product) {
             MetricsChainImpl tempContainer = new MetricsChainImpl(chain);
             List<Tensor> nonMetrics = new ArrayList<>();
@@ -137,8 +131,12 @@ public final class EliminateMetricsTransformation implements Transformation {
             for (Tensor term : data)
                 builder.put(term);
             return builder.build();
-        } else
-            return tensor;
+        } else {
+            TensorBuilder builder = tensor.getBuilder();
+            for (int i = 0; i < tensor.size(); ++i)
+                builder.put(transform(tensor.get(i)));
+            return builder.build();
+        }
     }
 
     private static interface MetricsChain {
