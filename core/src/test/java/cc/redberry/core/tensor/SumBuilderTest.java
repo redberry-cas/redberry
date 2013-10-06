@@ -22,8 +22,11 @@
  */
 package cc.redberry.core.tensor;
 
+import cc.redberry.core.TAssert;
+import cc.redberry.core.context.CC;
 import cc.redberry.core.indexmapping.IndexMappings;
 import cc.redberry.core.indices.IndexType;
+import cc.redberry.core.transformations.EliminateMetricsTransformation;
 import cc.redberry.core.utils.TensorUtils;
 import org.junit.Assert;
 import org.junit.Test;
@@ -140,4 +143,12 @@ public class SumBuilderTest {
         Tensor expected = Tensors.parse("5*A__M");
         Assert.assertTrue(IndexMappings.mappingExists(expected, e));
     }
+
+@Test
+public void test13(){
+    CC.resetTensorNames(-5181122168523247566L);
+    Tensor t = parse("((f_p^a + d_p^a)*d_a^p*T^y_yb + T^a_ab)*(1 + f_c^c)");
+    t = EliminateMetricsTransformation.eliminate(t);
+    TAssert.assertIndicesConsistency(t);
+}
 }
