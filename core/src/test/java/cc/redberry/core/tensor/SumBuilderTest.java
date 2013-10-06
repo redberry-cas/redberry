@@ -34,7 +34,6 @@ import org.junit.Test;
 import static cc.redberry.core.tensor.Tensors.parse;
 
 /**
- *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
@@ -144,11 +143,11 @@ public class SumBuilderTest {
         Assert.assertTrue(IndexMappings.mappingExists(expected, e));
     }
 
-@Test
-public void test13(){
-    CC.resetTensorNames(-5181122168523247566L);
-    Tensor t = parse("((f_p^a + d_p^a)*d_a^p*T^y_yb + T^a_ab)*(1 + f_c^c)");
-    t = EliminateMetricsTransformation.eliminate(t);
-    TAssert.assertIndicesConsistency(t);
-}
+    @Test
+    public void test13() {
+        CC.resetTensorNames(-5181122168523247566L);
+        Tensor t = parse("((f_p^a + d_p^a)*d_a^p*T^y_yb + T^a_ab)*(1 + f_c^c)");
+        t = EliminateMetricsTransformation.eliminate(t);
+        TAssert.assertIndicesConsistency(t);
+    }
 }

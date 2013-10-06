@@ -23,6 +23,7 @@
 package cc.redberry.core.tensor;
 
 import cc.redberry.core.indexgenerator.IndexGenerator;
+import cc.redberry.core.indexgenerator.IndexGeneratorImpl;
 import cc.redberry.core.indexmapping.IndexMapping;
 import cc.redberry.core.indexmapping.Mapping;
 import cc.redberry.core.indices.IndicesBuilder;
@@ -51,6 +52,51 @@ import static cc.redberry.core.indices.IndicesUtils.getType;
  * @since 1.0
  */
 public final class ApplyIndexMapping {
+    /**
+     * Renames dummy indices of tensor prohibiting some dummy index to be equal to one of the specified
+     * <i>forbidden</i> indices.
+     *
+     * @param tensor         tensor
+     * @param forbiddenNames forbidden indices names
+     * @param generator      index generator
+     * @param added          set which will be added by generated dummy indices
+     * @return tensor with renamed dummies
+     */
+    public static Tensor renameDummy(Tensor tensor, int[] forbiddenNames, IndexGenerator generator) {
+        if (forbiddenNames.length == 0)
+            return tensor;
+        if (tensor instanceof Complex || tensor instanceof ScalarFunction)
+            return tensor;
+
+        TIntHashSet allIndicesNames = TensorUtils.getAllDummyIndicesT(tensor);
+        //no indices in tensor
+        if (allIndicesNames.isEmpty())
+            return tensor;
+
+        allIndicesNames.ensureCapacity(forbiddenNames.length);
+
+        IntArrayList fromL = null;
+        for (int forbidden : forbiddenNames) {
+            if (!allIndicesNames.add(forbidden)) {
+                if (fromL == null)
+                    fromL = new IntArrayList();
+                fromL.add(forbidden);
+            }
+        }
+
+        if (fromL == null)
+            return tensor;
+
+        allIndicesNames.addAll(getIndicesNames(tensor.getIndices().getFree()));
+        int[] from = fromL.toArray(), to = new int[fromL.size()];
+        Arrays.sort(from);
+        int i;
+        for (i = from.length - 1; i >= 0; --i)
+            to[i] = generator.generate(IndicesUtils.getType(from[i]));
+
+        return applyIndexMapping(tensor, new IndexMapper(from, to), false);
+    }
+
     /**
      * Renames dummy indices of tensor prohibiting some dummy index to be equal to one of the specified
      * <i>forbidden</i> indices.
@@ -86,7 +132,7 @@ public final class ApplyIndexMapping {
             return tensor;
 
         allIndicesNames.addAll(getIndicesNames(tensor.getIndices().getFree()));
-        IndexGenerator generator = new IndexGenerator(allIndicesNames.toArray());
+        IndexGeneratorImpl generator = new IndexGeneratorImpl(allIndicesNames.toArray());
         int[] from = fromL.toArray(), to = new int[fromL.size()];
         Arrays.sort(from);
         added.ensureCapacity(from.length);
@@ -132,7 +178,7 @@ public final class ApplyIndexMapping {
             return tensor;
 
         allIndicesNames.addAll(getIndicesNames(tensor.getIndices().getFree()));
-        IndexGenerator generator = new IndexGenerator(allIndicesNames.toArray());
+        IndexGeneratorImpl generator = new IndexGeneratorImpl(allIndicesNames.toArray());
         int[] from = fromL.toArray(), to = new int[fromL.size()];
         Arrays.sort(from);
         int i;
@@ -292,7 +338,7 @@ public final class ApplyIndexMapping {
         System.arraycopy(allForbidden, 0, forbiddenGeneratorIndices, 0, allForbidden.length);
         System.arraycopy(dummyIndices, 0, forbiddenGeneratorIndices, allForbidden.length, dummyIndices.length);
 
-        IndexGenerator generator = new IndexGenerator(forbiddenGeneratorIndices);
+        IndexGeneratorImpl generator = new IndexGeneratorImpl(forbiddenGeneratorIndices);
         for (int index : dummyIndices)
             if (Arrays.binarySearch(allForbidden, index) >= 0) {
                 //if index is dummy it cannot be free, so from (which is equal to free)
@@ -462,7 +508,7 @@ public final class ApplyIndexMapping {
             int[] _forbidden = forbidden.toArray();
             for (int i = field.size() - 1; i >= 0; --i) {
                 arg = field.args[i];
-                IndexGenerator ig = new IndexGenerator(_forbidden);
+                IndexGeneratorImpl ig = new IndexGeneratorImpl(_forbidden);
                 _from = TensorUtils.getAllIndicesNamesT(arg).toArray();
                 Arrays.sort(_from);
                 _to = new int[_from.length];
@@ -485,7 +531,7 @@ public final class ApplyIndexMapping {
 
 
 //            //rename dummies and save newly generated forbidden indices
-//            //we need do this before renaming free since IndexGenerator must know about all forbidden indices
+//            //we need do this before renaming free since IndexGeneratorImpl must know about all forbidden indices
 //            for (int i = field.size() - 1; i >= 0; --i) {
 //                arg = field.args[i];
 //                arg = renameDummy(arg, forbidden.toArray(), forbidden);
@@ -496,7 +542,7 @@ public final class ApplyIndexMapping {
 //                }
 //            }
 //
-//            IndexGenerator ig = new IndexGenerator(forbidden.toArray());
+//            IndexGeneratorImpl ig = new IndexGeneratorImpl(forbidden.toArray());
 //            IndexMapper mapping;
 //            for (int i = field.size() - 1; i >= 0; --i) {
 //                arg = field.args[i];

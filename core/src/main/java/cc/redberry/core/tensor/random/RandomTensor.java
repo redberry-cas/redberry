@@ -25,7 +25,7 @@ package cc.redberry.core.tensor.random;
 import cc.redberry.core.combinatorics.Symmetry;
 import cc.redberry.core.context.CC;
 import cc.redberry.core.context.NameDescriptor;
-import cc.redberry.core.indexgenerator.IndexGenerator;
+import cc.redberry.core.indexgenerator.IndexGeneratorImpl;
 import cc.redberry.core.indexmapping.Mapping;
 import cc.redberry.core.indices.*;
 import cc.redberry.core.number.Complex;
@@ -335,7 +335,7 @@ public final class RandomTensor {
         int[] _freeIndices = indices.getFree().getAllIndices().copy();
         int[][] freeIndices = new int[TYPES.length][];
         int[][] indicesSpace = new int[TYPES.length][];
-        IndexGenerator indexGenerator = new IndexGenerator(_freeIndices.clone());
+        IndexGeneratorImpl indexGenerator = new IndexGeneratorImpl(_freeIndices.clone());
         for (byte b : TYPES) {
             indicesSpace[b] = new int[totalIndicesCounts[b]];
             StructureOfIndices.TypeData typeData = typeStructure.getTypeData(b);

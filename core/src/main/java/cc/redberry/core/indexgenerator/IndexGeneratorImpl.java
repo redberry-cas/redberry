@@ -28,8 +28,6 @@ import gnu.trove.map.hash.TByteObjectHashMap;
 import gnu.trove.procedure.TByteObjectProcedure;
 
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
 
 import static cc.redberry.core.indices.IndicesUtils.*;
 
@@ -41,13 +39,13 @@ import static cc.redberry.core.indices.IndicesUtils.*;
  * @author Stanislav Poslavsky
  * @since 1.0
  */
-public final class IndexGenerator {
+public final class IndexGeneratorImpl implements IndexGenerator {
     protected TByteObjectHashMap<IntGenerator> generators = new TByteObjectHashMap<>();
 
     /**
      * Creates with generator without engaged data.
      */
-    public IndexGenerator() {
+    public IndexGeneratorImpl() {
     }
 
     /**
@@ -55,11 +53,11 @@ public final class IndexGenerator {
      *
      * @param indices forbidden indices
      */
-    public IndexGenerator(Indices indices) {
+    public IndexGeneratorImpl(Indices indices) {
         this(indices.getAllIndices().copy());
     }
 
-    protected IndexGenerator(TByteObjectHashMap<IntGenerator> generators) {
+    protected IndexGeneratorImpl(TByteObjectHashMap<IntGenerator> generators) {
         this.generators = generators;
     }
 
@@ -68,7 +66,7 @@ public final class IndexGenerator {
      *
      * @param indices forbidden indices
      */
-    public IndexGenerator(final int[] indices) {
+    public IndexGeneratorImpl(final int[] indices) {
         if (indices.length == 0)
             return;
         for (int i = 0; i < indices.length; ++i)
@@ -107,7 +105,7 @@ public final class IndexGenerator {
      *
      * @param other index generator
      */
-    public void mergeFrom(IndexGenerator other) {
+    public void mergeFrom(IndexGeneratorImpl other) {
         other.generators.forEachEntry(
                 new TByteObjectProcedure<IntGenerator>() {
                     @Override
@@ -156,6 +154,7 @@ public final class IndexGenerator {
      * @param type index type
      * @return new index of a particular type
      */
+    @Override
     public int generate(byte type) {
         IntGenerator ig = generators.get(type);
         if (ig == null)
@@ -165,7 +164,7 @@ public final class IndexGenerator {
 
 
     @Override
-    public IndexGenerator clone() {
+    public IndexGeneratorImpl clone() {
         final TByteObjectHashMap<IntGenerator> newMap = new TByteObjectHashMap<>(generators.size());
         generators.forEachEntry(
                 new TByteObjectProcedure<IntGenerator>() {
@@ -178,6 +177,6 @@ public final class IndexGenerator {
         );
         /*for (Map.Entry<Byte, IntGenerator> entry : generators.entrySet())
             newMap.put(entry.getKey(), entry.getValue().clone());      */
-        return new IndexGenerator(newMap);
+        return new IndexGeneratorImpl(newMap);
     }
 }

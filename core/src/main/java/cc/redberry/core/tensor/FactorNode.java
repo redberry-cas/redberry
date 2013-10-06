@@ -22,6 +22,8 @@
  */
 package cc.redberry.core.tensor;
 
+import cc.redberry.core.indexgenerator.IndexGenerator;
+import cc.redberry.core.indexgenerator.IndexGeneratorFromData;
 import cc.redberry.core.utils.TensorUtils;
 
 /**
@@ -46,9 +48,10 @@ final class FactorNode {
         this.factorForbiddenIndices = factorForbiddenIndices;
     }
 
-    void put(Tensor t) {
-        t = ApplyIndexMapping.renameDummy(t, factorForbiddenIndices);//TODO improve performance!!!!!!!
-        builder.put(t);
+    void put(Tensor factor, Tensor term) {
+        IndexGenerator ig = new IndexGeneratorFromData(TensorUtils.getAllDummyIndicesT(term).toArray());
+        factor = ApplyIndexMapping.renameDummy(factor, factorForbiddenIndices, ig);
+        builder.put(factor);
     }
 
     Tensor build() {

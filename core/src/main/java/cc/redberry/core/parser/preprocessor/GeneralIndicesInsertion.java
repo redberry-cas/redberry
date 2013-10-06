@@ -25,7 +25,7 @@ package cc.redberry.core.parser.preprocessor;
 import cc.redberry.core.context.CC;
 import cc.redberry.core.context.NameAndStructureOfIndices;
 import cc.redberry.core.context.NameDescriptor;
-import cc.redberry.core.indexgenerator.IndexGenerator;
+import cc.redberry.core.indexgenerator.IndexGeneratorImpl;
 import cc.redberry.core.indices.*;
 import cc.redberry.core.parser.*;
 import cc.redberry.core.tensor.SimpleTensor;
@@ -112,7 +112,7 @@ public class GeneralIndicesInsertion implements ParseTokenTransformer {
     public ParseToken transform(ParseToken node) {
         ensureMappedRulesInitialized();
         int[] forbidden = ParseUtils.getAllIndicesT(node).toArray();
-        IndexGenerator generator = new IndexGenerator(forbidden);
+        IndexGeneratorImpl generator = new IndexGeneratorImpl(forbidden);
 
         transformInsideFieldsAndScalarFunctions(node);
 
@@ -384,7 +384,7 @@ public class GeneralIndicesInsertion implements ParseTokenTransformer {
 
         OuterIndices getOuterIndices();
 
-        void apply(IndexGenerator generator, int[][] upper, int[][] lower);
+        void apply(IndexGeneratorImpl generator, int[][] upper, int[][] lower);
     }
 
     private static class SimpleTransformer implements IITransformer {
@@ -420,7 +420,7 @@ public class GeneralIndicesInsertion implements ParseTokenTransformer {
         }
 
         @Override
-        public void apply(IndexGenerator generator, int[][] upper, int[][] lower) {
+        public void apply(IndexGeneratorImpl generator, int[][] upper, int[][] lower) {
             SimpleIndices oldIndices = node.indices;
             int[] result = ArraysUtils.addAll(oldIndices.getAllIndices().copy(), ArraysUtils.addAll(upper),
                     ArraysUtils.addAll(lower));
@@ -453,9 +453,9 @@ public class GeneralIndicesInsertion implements ParseTokenTransformer {
         }
 
         @Override
-        public void apply(IndexGenerator generator, int[][] upper, int[][] lower) {
-            IndexGenerator generatorTemp = null;
-            IndexGenerator generatorClone;
+        public void apply(IndexGeneratorImpl generator, int[][] upper, int[][] lower) {
+            IndexGeneratorImpl generatorTemp = null;
+            IndexGeneratorImpl generatorClone;
             int[][] preparedUpper = new int[TYPES_COUNT][], preparedLower = new int[TYPES_COUNT][];
             OuterIndices oi;
             byte j;
@@ -555,7 +555,7 @@ public class GeneralIndicesInsertion implements ParseTokenTransformer {
         }
 
         @Override
-        public void apply(IndexGenerator generator, int[][] upper, int[][] lower) {
+        public void apply(IndexGeneratorImpl generator, int[][] upper, int[][] lower) {
             OuterIndices innerIndices = innerTransformer.getOuterIndices();
             int[][] preparedUpper = upper.clone(), preparedLower = lower.clone();
             int i, generated;
@@ -596,7 +596,7 @@ public class GeneralIndicesInsertion implements ParseTokenTransformer {
         }
 
         @Override
-        public void apply(IndexGenerator generator, int[][] upper, int[][] lower) {
+        public void apply(IndexGeneratorImpl generator, int[][] upper, int[][] lower) {
             int i;
             byte j;
             int[] totalCountUpper = new int[TYPES_COUNT],
