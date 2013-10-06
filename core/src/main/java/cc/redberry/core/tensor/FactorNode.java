@@ -48,10 +48,10 @@ final class FactorNode {
         this.factorForbiddenIndices = factorForbiddenIndices;
     }
 
-    void put(Tensor factor, Tensor term) {
-        IndexGenerator ig = new IndexGeneratorFromData(TensorUtils.getAllDummyIndicesT(term).toArray());
-        factor = ApplyIndexMapping.renameDummy(factor, factorForbiddenIndices, ig);
-        builder.put(factor);
+    void put(Tensor summand, Tensor factor) {
+        IndexGenerator ig = new IndexGeneratorFromData(TensorUtils.getAllDummyIndicesT(factor).toArray());
+        summand = ApplyIndexMapping.renameDummy(summand, factorForbiddenIndices, ig);
+        builder.put(summand);
     }
 
     Tensor build() {

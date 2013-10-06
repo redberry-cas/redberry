@@ -35,6 +35,9 @@ import junit.framework.Assert;
 import org.apache.commons.math3.random.Well19937c;
 import org.junit.Test;
 
+import static cc.redberry.core.tensor.Tensors.parse;
+import static cc.redberry.core.tensor.Tensors.parseExpression;
+
 /**
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
@@ -89,13 +92,13 @@ public class RandomTensorTest {
     @Test
     public void testMetric() {
         RandomTensor random = new RandomTensor(0, 0, new int[]{2, 0, 0, 0}, new int[]{3, 0, 0, 0}, true);
-        random.addTensors(Tensors.parse("g_mn"));
+        random.addTensors(parse("g_mn"));
         Assert.assertTrue(Tensors.isKroneckerOrMetric(random.nextSimpleTensor()));
         for (int i = 0; i < 10; ++i) {
             Tensor t = random.nextProduct(i + 2, ParserIndices.parseSimple("_ab"));
             t = ((Product) t).getDataSubProduct();
             t = EliminateMetricsTransformation.eliminate(t);
-            t = Tensors.parseExpression("d^n_n=1").transform(t);
+            t = parseExpression("d^n_n=1").transform(t);
             Assert.assertTrue(Tensors.isKroneckerOrMetric(t));
         }
     }
@@ -103,7 +106,7 @@ public class RandomTensorTest {
     @Test
     public void testTree1() {
         RandomTensor random = new RandomTensor(0, 0, new int[]{1, 0, 0, 0}, new int[]{3, 0, 0, 0}, true);
-        random.addTensors(Tensors.parse("f_n"), Tensors.parse("g_mn"));
+        random.addTensors(parse("f_n"), parse("g_mn"));
         for (int i = 0; i < 100; ++i) {
             Tensor r = random.nextTensorTree(RandomTensor.TensorType.Product, 5, 2, 2, ParserIndices.parseSimple("_abc"));
             TAssert.assertEquals(r.getIndices().getFree(), IndicesFactory.create(ParserIndices.parseSimple("_abc")));
@@ -117,14 +120,17 @@ public class RandomTensorTest {
         for (int i = 0; i < 300; ++i) {
             CC.resetTensorNames();
             RandomTensor random = new RandomTensor(0, 0, new int[]{1, 0, 0, 0}, new int[]{3, 0, 0, 0}, true);
-            random.addTensors(Tensors.parse("f_n"), Tensors.parse("g_mn"));
-            Tensor r = random.nextTensorTree(RandomTensor.TensorType.Product, 7, 2, 2, ParserIndices.parseSimple("_abc"));
+            random.addTensors(parse("f_n"), parse("g_mn"));
+            Tensor r = random.nextTensorTree(RandomTensor.TensorType.Product, 5, 2, 2, ParserIndices.parseSimple("_abc"));
             TAssert.assertIndicesConsistency(r);
             System.out.println(CC.getNameManager().getSeed());
+            Transformation tr = new TransformationCollection(new Transformation[]{EliminateMetricsTransformation.ELIMINATE_METRICS, parseExpression("d^{g}_{g} = f_{f}*f^{f}")});
+            r = EliminateMetricsTransformation.ELIMINATE_METRICS.transform(r);
+            TAssert.assertIndicesConsistency(r);
             System.out.println(r);
-            Transformation tr = new TransformationCollection(new Transformation[]{EliminateMetricsTransformation.ELIMINATE_METRICS, Tensors.parseExpression("d^{g}_{g} = f_{f}*f^{f}")});
-            r = tr.transform(r);
-//            System.out.println(r);
+            r = parseExpression("d^{g}_{g} = f_{f}*f^{f}").transform(r);
+            TAssert.assertIndicesConsistency(r);
+            //            System.out.println(r);
 //            try {
 //                ExpandTransformation.expand(r, EliminateMetricsTransformation.ELIMINATE_METRICS, CollectScalarFactorsTransformation.COLLECT_SCALAR_FACTORS);
 //            } catch (Exception e) {
@@ -141,5 +147,22 @@ public class RandomTensorTest {
         }
     }
 
+@Test
+public void test12123() {
+    CC.resetTensorNames(-4808885094055692037L);
+    parse("f_n");
+    parse("g_mn");
+    Tensor t = parse("(f_{c}+(d_{k}^{k}*f_{p}-f_{p})" +
+            "               *(d_{m}^{m}*f_{c}-f_{c})" +
+            "               *(9*d_{o}^{o}*f^{p}+f^{p}))" +
+            "         *(83*f_{q}*f^{q}*f_{a}+f_{a}+(d^{s}_{s}*f^{u}+f^{u})*f_{u}*f_{a})" +
+            "         *((g_{hi}+f_{h}*f_{i})" +
+            "           *d_{f}^{f}" +
+            "           *(d^{d}_{d}*d_{b}^{i}+d^{d}_{d}*f_{b}*f^{i})" +
+            "           *f^{h}-(d^{h}_{b}*f^{d}*f_{d}+f_{b}*f^{h})" +
+            "           *(f_{h}+f_{g}*f^{g}*f_{h}))");
+    Tensor t2 = parseExpression("d^g_g = f_{f}*f^{f}").transform(t);
+    TAssert.assertIndicesConsistency(t2);
+}
 
 }

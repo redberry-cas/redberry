@@ -59,7 +59,6 @@ public final class ApplyIndexMapping {
      * @param tensor         tensor
      * @param forbiddenNames forbidden indices names
      * @param generator      index generator
-     * @param added          set which will be added by generated dummy indices
      * @return tensor with renamed dummies
      */
     public static Tensor renameDummy(Tensor tensor, int[] forbiddenNames, IndexGenerator generator) {

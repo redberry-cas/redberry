@@ -418,7 +418,7 @@ public class TensorUtils {
             Indices ind = t.getIndices();
             for (int i = ind.size() - 1; i >= 0; --i)
                 if (indices.contains(ind.get(i)))
-                    throw new AssertionError();
+                    throw new AssertionError("Inconsistent index " + IndicesUtils.toString(ind.get(i)));
                 else
                     indices.add(ind.get(i));
         }
