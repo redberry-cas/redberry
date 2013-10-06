@@ -22,15 +22,20 @@
  */
 package cc.redberry.core.tensor.random;
 
+import cc.redberry.core.TAssert;
 import cc.redberry.core.context.CC;
+import cc.redberry.core.indices.IndicesFactory;
 import cc.redberry.core.parser.ParserIndices;
+import cc.redberry.core.tensor.Product;
 import cc.redberry.core.tensor.Tensor;
+import cc.redberry.core.tensor.Tensors;
+import cc.redberry.core.transformations.*;
+import cc.redberry.core.transformations.expand.ExpandTransformation;
 import junit.framework.Assert;
 import org.apache.commons.math3.random.Well19937c;
 import org.junit.Test;
 
 /**
- *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
@@ -62,12 +67,16 @@ public class RandomTensorTest {
 
     @Test
     public void testProduct1() {
-        RandomTensor random = new RandomTensor(5, 20, new int[]{2, 0, 0, 0}, new int[]{10, 0, 0, 0}, true, 76543L);
-        for (int i = 0; i < 100; ++i) {
-            Tensor t = random.nextProduct(5, ParserIndices.parseSimple("_mnab^cd"));
-            Assert.assertTrue(t.getIndices().getFree().equalsRegardlessOrder(ParserIndices.parseSimple("_mnab^cd")));
+        for (int j = 0; j < 20; ++j) {
+            CC.resetTensorNames();
+            RandomTensor random = new RandomTensor(5, 20, new int[]{2, 0, 0, 0}, new int[]{10, 0, 0, 0}, true);
+            for (int i = 0; i < 20; ++i) {
+                Tensor t = random.nextProduct(5, ParserIndices.parseSimple("_mnab^cd"));
+                Assert.assertTrue(t.getIndices().getFree().equalsRegardlessOrder(ParserIndices.parseSimple("_mnab^cd")));
+            }
         }
     }
+
 
     @Test
     public void testNullPointer() {
@@ -76,4 +85,61 @@ public class RandomTensorTest {
         random.nextSum(5, 2, ParserIndices.parseSimple("_mn"));
         random.nextSum(5, 2, ParserIndices.parseSimple("^mn"));
     }
+
+    @Test
+    public void testMetric() {
+        RandomTensor random = new RandomTensor(0, 0, new int[]{2, 0, 0, 0}, new int[]{3, 0, 0, 0}, true);
+        random.addTensors(Tensors.parse("g_mn"));
+        Assert.assertTrue(Tensors.isKroneckerOrMetric(random.nextSimpleTensor()));
+        for (int i = 0; i < 10; ++i) {
+            Tensor t = random.nextProduct(i + 2, ParserIndices.parseSimple("_ab"));
+            t = ((Product) t).getDataSubProduct();
+            t = EliminateMetricsTransformation.eliminate(t);
+            t = Tensors.parseExpression("d^n_n=1").transform(t);
+            Assert.assertTrue(Tensors.isKroneckerOrMetric(t));
+        }
+    }
+
+    @Test
+    public void testTree1() {
+        RandomTensor random = new RandomTensor(0, 0, new int[]{1, 0, 0, 0}, new int[]{3, 0, 0, 0}, true);
+        random.addTensors(Tensors.parse("f_n"), Tensors.parse("g_mn"));
+        for (int i = 0; i < 100; ++i) {
+            Tensor r = random.nextTensorTree(RandomTensor.TensorType.Product, 5, 2, 2, ParserIndices.parseSimple("_abc"));
+            TAssert.assertEquals(r.getIndices().getFree(), IndicesFactory.create(ParserIndices.parseSimple("_abc")));
+            TAssert.assertIndicesConsistency(r);
+        }
+    }
+
+    @Test
+    public void testTree2() {
+
+        for (int i = 0; i < 300; ++i) {
+            CC.resetTensorNames();
+            RandomTensor random = new RandomTensor(0, 0, new int[]{1, 0, 0, 0}, new int[]{3, 0, 0, 0}, true);
+            random.addTensors(Tensors.parse("f_n"), Tensors.parse("g_mn"));
+            Tensor r = random.nextTensorTree(RandomTensor.TensorType.Product, 7, 2, 2, ParserIndices.parseSimple("_abc"));
+            TAssert.assertIndicesConsistency(r);
+            System.out.println(CC.getNameManager().getSeed());
+            System.out.println(r);
+            Transformation tr = new TransformationCollection(new Transformation[]{EliminateMetricsTransformation.ELIMINATE_METRICS, Tensors.parseExpression("d^{g}_{g} = f_{f}*f^{f}")});
+            r = tr.transform(r);
+//            System.out.println(r);
+//            try {
+//                ExpandTransformation.expand(r, EliminateMetricsTransformation.ELIMINATE_METRICS, CollectScalarFactorsTransformation.COLLECT_SCALAR_FACTORS);
+//            } catch (Exception e) {
+//                System.out.println(r);
+//            }
+            r = ExpandTransformation.expand(r, EliminateMetricsTransformation.ELIMINATE_METRICS, CollectScalarFactorsTransformation.COLLECT_SCALAR_FACTORS);
+            r = tr.transform(r);
+
+            r = CollectScalarFactorsTransformation.collectScalarFactors(r);
+            r = CollectNonScalarsTransformation.collectNonScalars(r);
+            TAssert.assertIndicesConsistency(r);
+//            System.out.println(r);
+            TAssert.assertTrue(r instanceof Product || r.size() <= 4);
+        }
+    }
+
+
 }
