@@ -455,13 +455,6 @@ public class ExpandTest {
         TAssert.assertTrue(t == expandUsingPort(t));
     }
 
-    @Test
-    public void test43() {
-        CC.resetTensorNames(-6102230255296942693L);
-        Tensor t = parse("(x + a^a_a*x)*(x + a^b_b)*(x + a^c_c)");
-        t = ExpandTransformation.expand(t, parseExpression("x=a_a^a"));
-    }
-
     @Test(timeout = 1000)
     public void test44() {
         Tensor t = parse("(-2050*(f^{q}+57*f_{n}*f^{n}*f^{q})*f_{q}*(f_{a}-33*f_{j}*f^{j}*f_{a})-96*(25*f_{l}*f^{l}*f_{j}*f^{j}-75*f_{l}*f^{l})*f_{a})*(67*f_{v}*f^{v}*(-81*f_{f}*f^{f}*f_{b}+30*f_{b})+5734*f_{f}*f^{f}*(-67*f_{e}*f^{e}*f_{h}*f^{h}*f_{b}-48*f_{b}))*(4032*f^{d}*f_{d}*f_{c}+33440*f_{g}*f^{g}*f^{k}*f_{c}*(f_{k}+f_{d}*f^{d}*f_{k}))");
