@@ -49,6 +49,11 @@ class EmptyIndices implements Indices {
         throw new IndexOutOfBoundsException();
     }
 
+    @Override
+    public int[] toArray() {
+        return new int[0];
+    }
+
     /**
      * Always throws {@code IndexOutOfBoundsException} because size is zero.
      *

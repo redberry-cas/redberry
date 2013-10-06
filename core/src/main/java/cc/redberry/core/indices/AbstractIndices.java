@@ -62,6 +62,11 @@ abstract class AbstractIndices implements Indices {
     }
 
     @Override
+    public final int[] toArray() {
+        return data.clone();
+    }
+
+    @Override
     public final IntArray getUpper() {
         WeakReference<UpperLowerIndices> wul = upperLower;
         UpperLowerIndices ul = wul.get();
