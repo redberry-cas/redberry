@@ -1229,22 +1229,4 @@ public class SubstitutionsTest {
 
         TAssert.assertIndicesConsistency(r.build());
     }
-
-    @Test
-    public void testSimple25() {
-        CC.resetTensorNames(-4808885094055692037L);
-        parse("f_n");
-        parse("g_mn");
-        Tensor t = parse("(f_{c}+(d_{k}^{k}*f_{p}-f_{p})" +
-                "               *(d_{m}^{m}*f_{c}-f_{c})" +
-                "               *(9*d_{o}^{o}*f^{p}+f^{p}))" +
-                "         *(83*f_{q}*f^{q}*f_{a}+f_{a}+(d^{s}_{s}*f^{u}+f^{u})*f_{u}*f_{a})" +
-                "         *((g_{hi}+f_{h}*f_{i})" +
-                "           *d_{f}^{f}" +
-                "           *(d^{d}_{d}*d_{b}^{i}+d^{d}_{d}*f_{b}*f^{i})*f^{h}-(d^{h}_{b}*f^{d}*f_{d}+f_{b}*f^{h})" +
-                "                                                              *(f_{h}+f_{g}*f^{g}*f_{h}))");
-        TAssert.assertIndicesConsistency(t);
-        Tensor t2 = parseExpression("d^a_a = f^a_a").transform(t);
-        TAssert.assertIndicesConsistency(t2);
-    }
 }
