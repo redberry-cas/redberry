@@ -144,9 +144,9 @@ public abstract class AbstractSumBuilder implements TensorBuilder {
             for (FactorNode node : factorNodes)
                 if ((b = compareFactors(split.factor, node.factor)) != null) {
                     if (b)
-                        node.put(Tensors.negate(split.summand));
+                        node.put(Tensors.negate(split.summand), split.factor);
                     else
-                        node.put(split.summand);
+                        node.put(split.summand, split.factor);
                     break;
                 }
             if (b == null)

@@ -22,7 +22,7 @@
  */
 package cc.redberry.core.parser.preprocessor;
 
-import cc.redberry.core.indexgenerator.IndexGenerator;
+import cc.redberry.core.indexgenerator.IndexGeneratorImpl;
 import cc.redberry.core.indexmapping.IndexMapping;
 import cc.redberry.core.indices.IndicesFactory;
 import cc.redberry.core.indices.IndicesUtils;
@@ -105,7 +105,7 @@ public final class IndicesInsertion implements ParseTokenTransformer {
         System.arraycopy(upperLower, 0, forbidden, dummyIndices.size(), upperLower.length);
 
 
-        IndexGenerator generator = new IndexGenerator(forbidden);
+        IndexGeneratorImpl generator = new IndexGeneratorImpl(forbidden);
         IntArrayList from = new IntArrayList(), to = new IntArrayList();
         int fromIndex;
         for (i = upperLower.length - 1; i >= 0; --i) {
@@ -255,14 +255,14 @@ public final class IndicesInsertion implements ParseTokenTransformer {
 
     private static class IGWrapper {
 
-        private IndexGenerator generator;
+        private IndexGeneratorImpl generator;
         private int generated;
 
-        public IGWrapper(IndexGenerator generator) {
+        public IGWrapper(IndexGeneratorImpl generator) {
             this.generator = generator;
         }
 
-        public IGWrapper(IndexGenerator generator, int generated) {
+        public IGWrapper(IndexGeneratorImpl generator, int generated) {
             this.generator = generator;
             this.generated = generated;
         }

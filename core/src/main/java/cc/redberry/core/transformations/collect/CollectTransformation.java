@@ -24,7 +24,7 @@ package cc.redberry.core.transformations.collect;
 
 import cc.redberry.concurrent.OutputPortUnsafe;
 import cc.redberry.core.combinatorics.Combinatorics;
-import cc.redberry.core.indexgenerator.IndexGenerator;
+import cc.redberry.core.indexgenerator.IndexGeneratorImpl;
 import cc.redberry.core.indexmapping.IndexMapping;
 import cc.redberry.core.indexmapping.IndexMappings;
 import cc.redberry.core.indexmapping.Mapping;
@@ -201,7 +201,7 @@ public class CollectTransformation implements Transformation {
         IntArrayList from = new IntArrayList(), to = new IntArrayList();
         ArrayList<Tensor> kroneckers = new ArrayList<>();
         int j, index, newIndex;
-        IndexGenerator generator = new IndexGenerator(TensorUtils.getAllIndicesNamesT(tensor).toArray());
+        IndexGeneratorImpl generator = new IndexGeneratorImpl(TensorUtils.getAllIndicesNamesT(tensor).toArray());
         for (int i = 0; i < factors.length; ++i) {
             from.clear();
             to.clear();

@@ -22,7 +22,7 @@
  */
 package cc.redberry.core.transformations;
 
-import cc.redberry.core.indexgenerator.IndexGenerator;
+import cc.redberry.core.indexgenerator.IndexGeneratorImpl;
 import cc.redberry.core.indexmapping.Mapping;
 import cc.redberry.core.indices.IndicesFactory;
 import cc.redberry.core.indices.IndicesUtils;
@@ -309,7 +309,7 @@ public final class DifferentiateTransformation implements Transformation {
             int[] allFreeArgIndices = new int[varIndices.size()];
             byte type;
             int state, i = 0, length = allFreeArgIndices.length;
-            IndexGenerator indexGenerator = new IndexGenerator(varIndices);
+            IndexGeneratorImpl indexGenerator = new IndexGeneratorImpl(varIndices);
             for (; i < length; ++i) {
                 type = getType(varIndices.get(i));
                 state = getRawStateInt(varIndices.get(i));

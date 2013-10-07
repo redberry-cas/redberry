@@ -1212,7 +1212,6 @@ public class SubstitutionsTest {
 
         R = ExpandTransformation.expand(R);
         R = EliminateMetricsTransformation.eliminate(R);
-        System.out.println(R);
 
         SumBuilder r = new SumBuilder();
         int id = parseSimple("h_mn[x_m]").getName();
