@@ -132,10 +132,18 @@ public final class EliminateMetricsTransformation implements Transformation {
                 builder.put(term);
             return builder.build();
         } else {
-            TensorBuilder builder = tensor.getBuilder();
-            for (int i = 0; i < tensor.size(); ++i)
-                builder.put(transform(tensor.get(i)));
-            return builder.build();
+            Tensor[] rebuild = new Tensor[tensor.size()];
+            Tensor temp;
+            boolean modified = false;
+            for (int i = tensor.size() - 1; i >= 0; --i) {
+                temp = transform(tensor.get(i));
+                if (temp != tensor.get(i))
+                    modified = true;
+                rebuild[i] = temp;
+            }
+            if (!modified)
+                return tensor;
+            return tensor.getFactory().create(rebuild);
         }
     }
 
