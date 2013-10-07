@@ -1295,13 +1295,22 @@ public class SubstitutionsTest {
     }
 
     @Test
-    public void testSimple28a() {
+    public void testSimple29() {
         CC.resetTensorNames(4821775724761539743L);
-        Tensor r = parse("F_abd*(d_{k}^{k}*f_{g}^{g}*f_{c}+(-d^{j}_{j}*d_{e}^{e}+f_{e}^{e})*f_{c}*f_{h}^{h}*f_{g}^{g})");
         Tensor e = parse("F_abd*(f_{k}^{k}*f_{g}^{g}*f_{c}+(-f^{j}_{j}*f_{e}^{e}+f_{e}^{e})*f_{c}*f_{h}^{h}*f_{g}^{g})");
-        TAssert.assertIndicesConsistency(r);
+        Tensor r = parse("F_abd*(d_{k}^{k}*f_{g}^{g}*f_{c}+(-d^{j}_{j}*d_{e}^{e}+f_{e}^{e})*f_{c}*f_{h}^{h}*f_{g}^{g})");
         r = parseExpression("d^{g}_{g} = f_{a}^{a}").transform(r);
         TAssert.assertIndicesConsistency(r);
         TAssert.assertEquals(r, e);
+    }
+
+    @Test
+    public void test30() {
+        CC.resetTensorNames(-4443309447200231241L);
+        Tensor r = parse("F_b*" +
+                "(f_{g}^{g}*d_{k}^{k}*f_{c}+(f_{e}^{e}-f_{e}^{e}*d^{j}_{j})*f_{g}^{g}*(d_{h}^{h}*f_{c}+f_{h}^{h}*f_{c}))");
+        r = parseExpression("d^{g}_{g} = f_{a}^{a}").transform(r);
+        System.out.println(r);
+        TAssert.assertIndicesConsistency(r);
     }
 }
