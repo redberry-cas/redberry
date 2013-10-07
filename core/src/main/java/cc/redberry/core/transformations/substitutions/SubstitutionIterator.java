@@ -292,8 +292,8 @@ public final class SubstitutionIterator implements TreeIterator {
 
                 //If this index was already somewhere in the sum,
                 //we don't have to propagate it to position
-                if (usedArrays[iIndex].bitCount() >= 0)
-                    iterator.remove();
+//                if (usedArrays[iIndex].bitCount() >= 0)
+//                    iterator.remove();
 
                 //Marking this index as added to current summand
                 usedArrays[iIndex].set(position.currentIndex());
