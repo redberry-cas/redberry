@@ -1229,4 +1229,51 @@ public class SubstitutionsTest {
 
         TAssert.assertIndicesConsistency(r.build());
     }
+
+    @Test
+    public void testSimple25() {
+        //CORE-128
+        CC.resetTensorNames(-4808885094055692037L);
+        parse("f_n");
+        parse("g_mn");
+        Tensor t = parse("(f_{c}+d_{o}^{o}*d_{k}^{k}*(d_{m}^{m}*f_{c}+f_{c}))" +
+                "         *(f_{a}+d^{s}_{s}*f_{a})" +
+                "         *F^{bdfghi}");
+        TAssert.assertIndicesConsistency(t);
+        Tensor t2 = parseExpression("d^a_a = f^a_a").transform(t);
+        TAssert.assertIndicesConsistency(t2);
+    }
+
+    @Ignore
+    @Test
+    public void testSimple25a() {
+        //CORE-128
+        for (int i = 0; i < 1000; ++i) {
+            CC.resetTensorNames();
+            parse("f_n");
+            parse("g_mn");
+            Tensor t = parse("(f_{c}+d_{o}^{o}_{k}^{k}*f^{p}_{p}*(d_{m}^{m}*f_{c}+f_{c}))" +
+                    "         *(f_{a}+d^{s}_{s}*f_{a})" +
+                    "         *F^{bdfghi}");
+            TAssert.assertIndicesConsistency(t);
+            Tensor t2 = parseExpression("d^a_a = f^a_a").transform(t);
+            TAssert.assertIndicesConsistency(t2);
+        }
+    }
+
+    @Test
+    public void testSimple26() {
+        CC.resetTensorNames(-4808885094055692037L);
+        parse("f_n");
+        parse("g_mn");
+        Tensor t = parse("(f_{c}+(d_{k}^{k}*f_{p}-f_{p})*(d_{m}^{m}*f_{c}-f_{c})*(9*d_{o}^{o}*f^{p}+f^{p}))" +
+                "         *(f_{a}+(d^{s}_{s}*f^{u}+f^{u})*f_{ua})" +
+                "         *F^{bdfghi}_{bdfghi}");
+        TAssert.assertIndicesConsistency(t);
+        Tensor t2 = parseExpression("d^a_a = x").transform(t);
+        TAssert.assertIndicesConsistency(t2);
+        t2 = parseExpression("x = f^a_a").transform(t);
+        TAssert.assertIndicesConsistency(t2);
+        TAssert.assertIndicesConsistency(expand(t2));
+    }
 }
