@@ -162,10 +162,10 @@ public final class DifferentiateTransformation implements Transformation {
         return differentiate1(tensor, createRule(var), expandAndContract);
     }
 
-    private static Tensor differentiateWithRenaming(Tensor tensor, SimpleTensorDifferentiationRule rule, Transformation[] expandAndContarct) {
+    private static Tensor differentiateWithRenaming(Tensor tensor, SimpleTensorDifferentiationRule rule, Transformation[] expandAndEliminate) {
         SimpleTensorDifferentiationRule newRule = rule.newRuleForTensor(tensor);
         tensor = renameDummy(tensor, newRule.getForbidden());
-        return differentiate1(tensor, newRule, expandAndContarct);
+        return differentiate1(tensor, newRule, expandAndEliminate);
     }
 
     private static Tensor differentiate1(Tensor tensor, SimpleTensorDifferentiationRule rule, Transformation[] transformations) {

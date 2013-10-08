@@ -25,6 +25,7 @@ package cc.redberry.core.tensor;
 import cc.redberry.core.indexgenerator.IndexGenerator;
 import cc.redberry.core.indexgenerator.IndexGeneratorFromData;
 import cc.redberry.core.utils.TensorUtils;
+import gnu.trove.set.hash.TIntHashSet;
 
 /**
  * @author Dmitry Bolotin
@@ -49,7 +50,13 @@ final class FactorNode {
     }
 
     void put(Tensor summand, Tensor factor) {
-        IndexGenerator ig = new IndexGeneratorFromData(TensorUtils.getAllDummyIndicesT(factor).toArray());
+        // CORE-126 ??
+        //todo review after closing CORE-126
+        TIntHashSet allowed = TensorUtils.getAllDummyIndicesT(factor);
+        allowed.removeAll(factorForbiddenIndices);
+        IndexGenerator ig = new IndexGeneratorFromData(allowed.toArray());
+        //old variant
+        //IndexGenerator ig = new IndexGeneratorFromData(TensorUtils.getAllDummyIndicesT(factor).toArray());
         summand = ApplyIndexMapping.renameDummy(summand, factorForbiddenIndices, ig);
         builder.put(summand);
     }

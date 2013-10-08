@@ -122,7 +122,7 @@ public class RandomTensorTest {
             RandomTensor random = new RandomTensor(0, 0, new int[]{1, 0, 0, 0}, new int[]{3, 0, 0, 0}, true);
             random.addTensors(parse("f_n"), parse("g_mn"));
             Tensor r = random.nextTensorTree(RandomTensor.TensorType.Product, 5, 2, 2, ParserIndices.parseSimple("_abc"));
-            System.out.println(r);
+//            System.out.println(r);
             TAssert.assertIndicesConsistency(r);
             Transformation tr = new TransformationCollection(new Transformation[]{EliminateMetricsTransformation.ELIMINATE_METRICS, parseExpression("d^{g}_{g} = f_{f}*f^{f}")});
             r = EliminateMetricsTransformation.ELIMINATE_METRICS.transform(r);
