@@ -88,7 +88,15 @@ public class SimpleTensor extends Tensor {
     public String toString(OutputFormat mode) {
         StringBuilder sb = new StringBuilder();
         sb.append(CC.getNameDescriptor(name).getName(indices));
+        if (indices.size() == 0)
+            return sb.toString();
+
+        boolean external = mode == OutputFormat.WolframMathematica || mode == OutputFormat.Maple;
+        if (external)
+            sb.append("[");
         sb.append(indices.toString(mode));
+        if (external)
+            sb.append("]");
         return sb.toString();
     }
 
