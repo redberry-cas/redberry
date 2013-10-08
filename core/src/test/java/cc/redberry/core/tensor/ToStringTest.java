@@ -42,10 +42,8 @@ public class ToStringTest {
 
     @Test
     public void test2() {
-        Tensor t = parse("T_{\\mu\\nu} * F_a^b * a**2");
-        System.out.println(t.toString(OutputFormat.WolframMathematica));
-        System.out.println(t.toString(OutputFormat.Maple));
-//        Assert.assertEquals(t.toString(OutputFormat.WolframMathematica), "T[-\\[Mu],-\\[Nu]]");
-//        Assert.assertEquals(t.toString(OutputFormat.Maple), "T[mu,nu]");
+        Tensor t = parse("T_{\\mu_{1} \\nu_{2}} ");
+        Assert.assertEquals(t.toString(OutputFormat.WolframMathematica), "T[-Subscript[\\[Mu], 1],-Subscript[\\[Nu], 2]]");
+        Assert.assertEquals(t.toString(OutputFormat.Maple), "T[mu_1,nu_2]");
     }
 }
