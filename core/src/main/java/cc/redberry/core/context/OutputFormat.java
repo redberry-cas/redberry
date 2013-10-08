@@ -41,25 +41,39 @@ public enum OutputFormat {
      * This format specifies expressions to be outputted in the LaTeX notation. The produces strings
      * can be simply putted in some LaTeX math environments and compiled via LaTeX compiler.
      */
-    LaTeX,
+    LaTeX("^", "_"),
     /**
      * This format specifies greek letters to be printed as is (if stdout supports utf-8 characters).
      * In other aspects it is similar to {@link OutputFormat#Redberry}
      */
-    UTF8,
+    UTF8("^", "_"),
     /**
      * This format specifies expressions to be outputted in the Redberry input notation. The produces strings
      * can be parsed in Redberry.
      */
-    Redberry,
+    Redberry("^", "_"),
     @Deprecated
-    RedberryConsole,
+    RedberryConsole("^", "_"),
     /**
      * This format specifies expressions to be outputted in the Wolfram Mathematica input notation.
      */
-    WolframMathematica,
+    WolframMathematica("", "-"),
     /**
      * This format specifies expressions to be outputted in the Maplesoft Maple input notation.
      */
-    Maple
+    Maple("~", "");
+
+    /**
+     * Prefix, which specifies upper index (e.g. '^' in LaTeX)
+     */
+    public final String upperIndexPrefix;
+    /**
+     * Prefix, which specifies lower index (e.g. '_' in LaTeX)
+     */
+    public final String lowerIndexPrefix;
+
+    private OutputFormat(String upperIndexPrefix, String lowerIndexPrefix) {
+        this.upperIndexPrefix = upperIndexPrefix;
+        this.lowerIndexPrefix = lowerIndexPrefix;
+    }
 }

@@ -25,6 +25,7 @@ package cc.redberry.core.indices;
 import cc.redberry.core.combinatorics.IntPermutationsGenerator;
 import cc.redberry.core.combinatorics.Symmetry;
 import cc.redberry.core.context.CC;
+import cc.redberry.core.context.OutputFormat;
 import cc.redberry.core.parser.ParserIndices;
 import cc.redberry.core.tensor.SimpleTensor;
 import cc.redberry.core.tensor.random.RandomTensor;
@@ -297,5 +298,13 @@ public class IndicesTest {
             short[] expected = {0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0};
             Assert.assertTrue(Arrays.equals(diffIds, expected));
         }
+    }
+
+    @Test
+    public void testToString1() {
+        Indices indices = ParserIndices.parseSimple("_{\\alpha \\beta a}^{\\gamma cd \\Gamma}");
+        Assert.assertEquals(indices.toString(), "_{a}^{cd}_{\\alpha\\beta}^{\\gamma\\Gamma}");
+        Assert.assertEquals(indices.toString(OutputFormat.WolframMathematica), "-a,c,d,-\\[Alpha],-\\[Beta],\\[Gamma],\\[CapitalGamma]");
+        Assert.assertEquals(indices.toString(OutputFormat.Maple), "a,~c,~d,alpha,beta,~gamma,~Gamma");
     }
 }
