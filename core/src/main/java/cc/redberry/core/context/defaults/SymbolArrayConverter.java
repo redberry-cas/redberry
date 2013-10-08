@@ -69,24 +69,6 @@ abstract class SymbolArrayConverter implements IndexSymbolConverter {
     }
 
     @Override
-    public String getSymbol(int code, OutputFormat mode) throws IndexConverterException {
-        try {
-            switch (mode) {
-                default:
-                case Redberry:
-                case LaTeX:
-                    return symbols[code];
-                case UTF8:
-                    return utf[code];
-                case RedberryConsole:
-                    return "\\" + sortedSymbols[code];
-            }
-        } catch (ArrayIndexOutOfBoundsException e) {
-            throw new IndexConverterException();
-        }
-    }
-
-    @Override
     public int maxNumberOfSymbols() {
         return sortedSymbols.length - 1;
     }

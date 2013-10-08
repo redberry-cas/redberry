@@ -29,6 +29,8 @@ import cc.redberry.core.utils.IntArray;
 import java.lang.ref.WeakReference;
 import java.util.Arrays;
 
+import static cc.redberry.core.context.OutputFormat.*;
+
 /**
  * Basic abstract {@link Indices} implementation. Indices are stored as final
  * integer array.
@@ -129,30 +131,57 @@ abstract class AbstractIndices implements Indices {
     }
 
     @Override
-    public final String toString(OutputFormat mode) {
+    public final String toString(OutputFormat format) {
         if (data.length == 0)
             return "";
-        boolean latex = mode == OutputFormat.LaTeX;
         StringBuilder sb = new StringBuilder();
-        int stateMode = (data[0] >>> 31);
-        int currentState = stateMode;
-        if (stateMode == 0)
-            sb.append(latex ? "_{" : "_{");
-        else
-            sb.append(latex ? "^{" : "^{");
-        for (int i = 0; i < data.length; i++) {
-            stateMode = data[i] >>> 31;
-            if (currentState != stateMode) {
-                if (currentState == 0)
-                    sb.append(latex ? "}{}^{" : "}^{");
-                if (currentState == 1)
-                    sb.append(latex ? "}{}_{" : "}_{");
-                currentState = stateMode;
+        int currentState;
+
+        if (format == WolframMathematica || format == Maple) {
+            for (int i = 0; ; i++) {
+                currentState = data[i] >>> 31;
+                if (currentState == 1) sb.append(format.upperIndexPrefix);
+                else sb.append(format.lowerIndexPrefix);
+                sb.append(Context.get().getIndexConverterManager().getSymbol(data[i], format));
+                if (i == data.length - 1)
+                    break;
+                sb.append(",");
             }
-            sb.append(Context.get().getIndexConverterManager().getSymbol(data[i], mode));
+        } else {
+            String latexBrackets = format == LaTeX ? "{}" : "";
+
+            currentState = (data[0] >>> 31);
+            if (currentState == 0)
+                sb.append(format.lowerIndexPrefix).append("{");
+            else
+                sb.append(format.upperIndexPrefix).append("{");
+
+            int lastState = currentState;
+            for (int i = 0; i < data.length; i++) {
+                currentState = data[i] >>> 31;
+                if (lastState != currentState) {
+                    if (lastState == 0)
+                        sb.append("}").append(latexBrackets).append(format.upperIndexPrefix).append("{");
+                    if (lastState == 1)
+                        sb.append("}").append(latexBrackets).append(format.lowerIndexPrefix).append("{");
+                    lastState = currentState;
+                }
+                sb.append(Context.get().getIndexConverterManager().getSymbol(data[i], format));
+            }
+            sb.append("}");
         }
-        sb.append("}");
+
         return sb.toString();
+    }
+
+    private static String beginingSeparator(OutputFormat format) {
+        switch (format) {
+            case WolframMathematica:
+            case Maple:
+                return "-";
+            default:
+                return "_";
+        }
     }
 
     @Override
