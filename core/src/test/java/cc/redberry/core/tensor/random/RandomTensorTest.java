@@ -117,7 +117,7 @@ public class RandomTensorTest {
     @Test
     public void testTree2() {
 
-        for (int i = 0; i < 30000; ++i) {
+        for (int i = 0; i < 3000; ++i) {
             CC.resetTensorNames();
             RandomTensor random = new RandomTensor(0, 0, new int[]{1, 0, 0, 0}, new int[]{3, 0, 0, 0}, true);
             random.addTensors(parse("f_n"), parse("g_mn"));

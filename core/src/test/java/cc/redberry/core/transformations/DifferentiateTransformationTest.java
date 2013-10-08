@@ -292,20 +292,6 @@ public class DifferentiateTransformationTest {
     }
 
     @Test
-    public void test12b() {
-        Tensor t = parse("1/(f_m*(f^m+a^m*f_i*f^i)*Cos[f_i*f^i])");
-        t = differentiate(t, parseSimple("f_l"), parseSimple("f^l"));
-        Expression s = parseExpression("f_m*f^m = m**2");
-        t = s.transform(t);
-        t = parseExpression("a_j = 0").transform(t);
-        t = ELIMINATE_METRICS.eliminate(t);
-        t = s.transform(t);
-        t = parseExpression("d_m^m = 4").transform(t);
-        t = TogetherTransformation.together(t);
-        TAssert.assertEquals(t, "(m**4*(8*Sin[m**2]**2+4*Cos[m**2]**2)+(-8*m**2*Sin[m**2]+8*Cos[m**2])*Cos[m**2]+4*(2*m**2*Sin[m**2]-2*Cos[m**2])*Cos[m**2])*Cos[m**2]**(-3)*m**(-4)");
-    }
-
-    @Test
     public void test13() {
         addAntiSymmetry("R_abcd", 1, 0, 2, 3);
         addSymmetry("R_abcd", 2, 3, 0, 1);
