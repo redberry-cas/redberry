@@ -68,6 +68,14 @@ public final class RandomTensor {
     }
 
     /**
+     * Creates random with default values. Same as
+     * {@code new RandomTensor(2, 5, new int[]{0, 0, 0, 0}, new int[]{4, 0, 0, 0}, true)}
+     */
+    public RandomTensor() {
+        this(2, 5, new int[]{0, 0, 0, 0}, new int[]{4, 0, 0, 0}, true);
+    }
+
+    /**
      * @param minDiffNDs     min number of different tensors
      * @param maxDiffNDs     max number of different tensors
      * @param minIndices     min number of indices in each tensor.
@@ -143,6 +151,10 @@ public final class RandomTensor {
         this(minDiffNDs, maxDiffNDs, minIndices, maxIndices, withSymmetries, new Well19937c());
     }
 
+    public void clearNamespace() {
+        namespace.clear();
+    }
+
     public void reset() {
         random.setSeed(seed = random.nextLong());
         generateDescriptors();
@@ -186,7 +198,7 @@ public final class RandomTensor {
             return new String(new char[]{(char) (0x40 + second), (char) (0x41 + first)});
     }
 
-    public void addTensors(Tensor... tensors) {
+    public void addToNamespace(Tensor... tensors) {
         for (SimpleTensor st : TensorUtils.getAllDiffSimpleTensors(tensors))
             namespace.add(st.getNameDescriptor());
     }

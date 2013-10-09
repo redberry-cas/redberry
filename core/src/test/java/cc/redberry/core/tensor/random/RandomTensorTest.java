@@ -92,7 +92,7 @@ public class RandomTensorTest {
     @Test
     public void testMetric() {
         RandomTensor random = new RandomTensor(0, 0, new int[]{2, 0, 0, 0}, new int[]{3, 0, 0, 0}, true);
-        random.addTensors(parse("g_mn"));
+        random.addToNamespace(parse("g_mn"));
         Assert.assertTrue(Tensors.isKroneckerOrMetric(random.nextSimpleTensor()));
         for (int i = 0; i < 10; ++i) {
             Tensor t = random.nextProduct(i + 2, ParserIndices.parseSimple("_ab"));
@@ -106,7 +106,7 @@ public class RandomTensorTest {
     @Test
     public void testTree1() {
         RandomTensor random = new RandomTensor(0, 0, new int[]{1, 0, 0, 0}, new int[]{3, 0, 0, 0}, true);
-        random.addTensors(parse("f_n"), parse("g_mn"));
+        random.addToNamespace(parse("f_n"), parse("g_mn"));
         for (int i = 0; i < 100; ++i) {
             Tensor r = random.nextTensorTree(RandomTensor.TensorType.Product, 5, 2, 2, ParserIndices.parseSimple("_abc"));
             TAssert.assertEquals(r.getIndices().getFree(), IndicesFactory.create(ParserIndices.parseSimple("_abc")));
@@ -116,13 +116,11 @@ public class RandomTensorTest {
 
     @Test
     public void testTree2() {
-
-        for (int i = 0; i < 3000; ++i) {
+        for (int i = 0; i < 1000; ++i) {
             CC.resetTensorNames();
             RandomTensor random = new RandomTensor(0, 0, new int[]{1, 0, 0, 0}, new int[]{3, 0, 0, 0}, true);
-            random.addTensors(parse("f_n"), parse("g_mn"));
+            random.addToNamespace(parse("f_n"), parse("g_mn"));
             Tensor r = random.nextTensorTree(RandomTensor.TensorType.Product, 5, 2, 2, ParserIndices.parseSimple("_abc"));
-//            System.out.println(r);
             TAssert.assertIndicesConsistency(r);
             Transformation tr = new TransformationCollection(new Transformation[]{EliminateMetricsTransformation.ELIMINATE_METRICS, parseExpression("d^{g}_{g} = f_{f}*f^{f}")});
             r = EliminateMetricsTransformation.ELIMINATE_METRICS.transform(r);
