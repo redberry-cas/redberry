@@ -36,8 +36,8 @@ public final class OneLoopUtils {
     }
 
     private static Expression[] antiDeSitterBackground = {
-            Tensors.parseExpression("R_{\\mu\\nu\\alpha\\beta} = (1/3)*(g_{\\mu\\beta}*g_{\\nu\\alpha}-g_{\\mu\\alpha}*g_{\\nu\\beta})*La"),
-            Tensors.parseExpression("R_{\\mu\\nu} = -g_{\\mu\\nu}*La")
+            Tensors.parseExpression("R_{lmab} = (1/3)*(g_{lb}*g_{ma}-g_{la}*g_{mb})*La"),
+            Tensors.parseExpression("R_{lm} = -g_{lm}*La")
     };
 
     /**
@@ -45,8 +45,8 @@ public final class OneLoopUtils {
      * with the cosmological constant denoted as {@code La}. In other words
      * it returns the following two substitutions:
      * <pre>
-     *     Tensors.parseExpression("R_{\\mu\\nu\\alpha\\beta} = (1/3)*(g_{\\mu\\beta}*g_{\\nu\\alpha}-g_{\\mu\\alpha}*g_{\\nu\\beta})*La");
-     *     Tensors.parseExpression("R_{\\mu\\nu} = -g_{\\mu\\nu}*La");
+     *     Tensors.parseExpression("R_{lmab} = (1/3)*(g_{lb}*g_{ma}-g_{la}*g_{mb})*La");
+     *     Tensors.parseExpression("R_{lm} = -g_{lm}*La");
      * </pre>
      *
      * @return the definition of the anti de Sitter background, with the
