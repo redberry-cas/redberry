@@ -58,15 +58,15 @@ import java.util.Arrays;
  * (see references in <a href ="package-summary.html">package info</a>) and
  * satisfy the following conditions:
  * <ul>
- * <li>L.h.s of input expressions should have only Greek lowercase indices</li>
+ * <li>L.h.s of input expressions should have only Latin lowercase indices</li>
  * <li>Each l.h.s tensor should have string name defind by the following rules:
- * tensor KINV - "KINV", tensor K - "K", tensor S - "S", tensor W - "W",
+ * tensor iK - "iK", tensor K - "K", tensor S - "S", tensor W - "W",
  * tensor N - "N", tensor F - "F". </li>
  * <li>The first {@code (L - k)} indices of each l.h.s. of expression are specified
  * to be 'covariant' indices, i.e. indices which are contracted with derivatives in
  * operator expansion. The rest {@code 2n} indices are the 'matrix' indices, i.e.
  * indices which are contracted with fields in the Lagrangian.</li>
- * <li>Each of the input tensors, except {@code F} and {@code KINV} must be
+ * <li>Each of the input tensors, except {@code F} and {@code iK} must be
  * symmetric on their 'covariant' indices.</li>
  * <li>The Riemann and Ricci tensors identified as {@code R_{\mu\nu\alpha\beta}} and
  * {@code R_{\mu\nu}} respectively.</li>
@@ -78,7 +78,7 @@ import java.util.Arrays;
  * is a full support of {@code L = 2} and {@code L = 4} theories with no odd on
  * the number of derivatives terms in the operator, so input tensors {@code S^{...}_{...}}
  * and {@code N^{...}_{...}} should be always zero. Also, input tensors should
- * have only Greek lowercase indices.
+ * have only Latin lowercase indices.
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
@@ -87,14 +87,14 @@ import java.util.Arrays;
  */
 public final class OneLoopInput {
 
-    //[KINV,K,S,W,N,M]
+    //[iK,K,S,W,N,M]
     private final Expression[] inputValues;
     private final int operatorOrder, matrixIndicesCount;
     private final Expression[][] hatQuantities;
     private final Expression[] kn;
     private final Expression L;
     private static final int HAT_QUANTITIES_GENERAL_COUNT = 5;//K,S,W,N,M
-    private static final int INPUT_VALUES_GENERAL_COUNT = 6;//KINV,K,S,W,N,M
+    private static final int INPUT_VALUES_GENERAL_COUNT = 6;//iK,K,S,W,N,M
     private final int actualInput, actualHatQuantities;
     private final Transformation[] riemannBackground;
     private final Expression F;
@@ -109,9 +109,9 @@ public final class OneLoopInput {
      *                      Lagrangian, i.e. the integer value of {@code L}.
      *                      Currently supported second and fourth order
      *                      operators.
-     * @param KINV          inverse of {@code Kn} tensor. The input
+     * @param iK          inverse of {@code Kn} tensor. The input
      *                      expression should be in the form
-     *                      {@code KINV^{...}_{...} = ...}.
+     *                      {@code iK^{...}_{...} = ...}.
      * @param K             tensor {@code K} in the form {@code K^{...}_{...} = ....}.
      * @param S             tensor {@code S}. Since odd terms in operator expansion
      *                      is not supported yet, this tensor should be zeroed, so
@@ -133,10 +133,10 @@ public final class OneLoopInput {
      *                                  from the specified
      * @throws IllegalArgumentException if indices number of some of the input tensors
      *                                  does not corresponds to the actual {@code operatorOrder}
-     * @throws IllegalArgumentException if indices of l.h.s. of input expressions contains non Greek lowercase indices.
+     * @throws IllegalArgumentException if indices of l.h.s. of input expressions contains non Latin lowercase indices.
      */
-    public OneLoopInput(int operatorOrder, Expression KINV, Expression K, Expression S, Expression W, Expression N, Expression M, Expression F) {
-        this(operatorOrder, KINV, K, S, W, N, M, F, new Transformation[0]);
+    public OneLoopInput(int operatorOrder, Expression iK, Expression K, Expression S, Expression W, Expression N, Expression M, Expression F) {
+        this(operatorOrder, iK, K, S, W, N, M, F, new Transformation[0]);
     }
 
     //TODO add references on the paper and Redberry site
@@ -154,9 +154,9 @@ public final class OneLoopInput {
      *                          Lagrangian, i.e. the integer value of {@code L}.
      *                          Currently supported second and fourth order
      *                          operators.
-     * @param KINV              inverse tensors to tensor {@code Kn}. The input
+     * @param iK              inverse tensors to tensor {@code Kn}. The input
      *                          expression should be in the form
-     *                          {@code KINV^{...}_{...} = ...}.
+     *                          {@code iK^{...}_{...} = ...}.
      * @param K                 tensor {@code K} in the form {@code K^{...}_{...} = ....}.
      * @param S                 tensor {@code S}. Since odd terms in operator expansion
      *                          is not supported yet, this tensor should be zeroed, so
@@ -180,11 +180,11 @@ public final class OneLoopInput {
      *                                  from the specified
      * @throws IllegalArgumentException if indices number of some of the input tensors
      *                                  does not corresponds to the actual {@code operatorOrder}
-     * @throws IllegalArgumentException if indices of l.h.s. of input expressions contains non Greek lowercase indices.
+     * @throws IllegalArgumentException if indices of l.h.s. of input expressions contains non Latin lowercase indices.
      * @see cc.redberry.physics.oneloopdiv.OneLoopUtils#antiDeSitterBackground()
      */
     public OneLoopInput(int operatorOrder,
-                        Expression KINV,
+                        Expression iK,
                         Expression K, Expression S, Expression W, Expression N, Expression M,
                         Expression F,
                         Transformation[] riemannBackground) {
@@ -197,7 +197,7 @@ public final class OneLoopInput {
 
         inputValues = new Expression[INPUT_VALUES_GENERAL_COUNT];
 
-        inputValues[0] = KINV;
+        inputValues[0] = iK;
         inputValues[1] = K;
         inputValues[2] = S;
         inputValues[3] = W;
@@ -265,7 +265,7 @@ public final class OneLoopInput {
                 sb = new StringBuilder();
                 sb.append(getStringHatQuantitieName(i)).
                         append(IndicesUtils.toString(Arrays.copyOfRange(covariantIndices, j, covariantIndices.length - i), OutputFormat.Redberry)).
-                        append("=KINV*").
+                        append("=iK*").
                         append(getStringInputName(1 + i)).
                         append(covariantIndicesString);
                 for (k = 0; k < j; ++k)
@@ -319,7 +319,7 @@ public final class OneLoopInput {
         sb = new StringBuilder();
         sb.append("HATF").
                 append(covariantIndicesString).
-                append("=KINV*F").
+                append("=iK*F").
                 append(covariantIndicesString);
         Tensor HATF = (Expression) Tensors.parse(sb.toString(), insertion);
 
@@ -331,7 +331,7 @@ public final class OneLoopInput {
     private String getStringInputName(int i) {
         switch (i) {
             case 0:
-                return "KINV";
+                return "iK";
             case 1:
                 return "K";
             case 2:
@@ -380,7 +380,7 @@ public final class OneLoopInput {
         SimpleIndices indices = (SimpleIndices) inputValues[1].get(0).getIndices();
         StructureOfIndices structureOfIndices = indices.getStructureOfIndices();
         if (structureOfIndices.getTypeData(IndexType.LatinLower.getType()).length != structureOfIndices.size())
-            throw new IllegalArgumentException("Only Greek lower indices are legal.");
+            throw new IllegalArgumentException("Only Latin lower indices are legal.");
 
         int matrixIndicesCount = indices.size() - operatorOrder;
         if (matrixIndicesCount % 2 != 0)
@@ -392,17 +392,17 @@ public final class OneLoopInput {
         for (i = 1; i < actualInput; ++i) {
             structureOfIndices = ((SimpleIndices) inputValues[i].get(0).getIndices()).getStructureOfIndices();
             if (structureOfIndices.getTypeData(IndexType.LatinLower.getType()).length != structureOfIndices.size())
-                throw new IllegalArgumentException("Only Greek lower indices are legal.");
+                throw new IllegalArgumentException("Only Latin lower indices are legal.");
             if (structureOfIndices.size() + i - 1 != operatorOrder + matrixIndicesCount)
                 throw new IllegalArgumentException();
         }
     }
 
     /**
-     * Return i-th input expression from the [KINV, K, S, W, N, M] array.
+     * Return i-th input expression from the [iK, K, S, W, N, M] array.
      *
-     * @param i position of the input expression in the array [KINV, K, S, W, N, M]
-     * @return i-th expression from the [KINV, K, S, W, N, M] array
+     * @param i position of the input expression in the array [iK, K, S, W, N, M]
+     * @return i-th expression from the [iK, K, S, W, N, M] array
      */
     public Expression getInputParameter(int i) {
         return inputValues[i];

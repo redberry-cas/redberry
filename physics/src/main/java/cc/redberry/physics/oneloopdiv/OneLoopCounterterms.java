@@ -52,7 +52,7 @@ import cc.redberry.core.utils.Indicator;
  *      Tensors.addSymmetry("P_lm", IndexType.LatinLower, false, 1, 0);
  *
  *      //input expressions
- *      Expression KINV = Tensors.parseExpression("KINV_a^b=d_a^b+ga*n_a*n^b");
+ *      Expression iK = Tensors.parseExpression("iK_a^b=d_a^b+ga*n_a*n^b");
  *      Expression K = Tensors.parseExpression("K^{lm}_a^{b}=g^{lm}*d_{a}^{b}-ga/(2*(1+ga))*(g^{lb}*d_a^m+g^{mb}*d_a^l)");
  *      Expression S = Tensors.parseExpression("S^p^l_m=0");
  *      Expression W = Tensors.parseExpression("W^{a}_{b}=P^{a}_{b}+ga/(2*(1+ga))*R^a_b");
@@ -60,7 +60,7 @@ import cc.redberry.core.utils.Indicator;
  *      Expression F = Tensors.parseExpression("F_lmab=R_lmab");
  *
  *      //tensors M and N are null, since operator order is 2
- *      OneLoopInput input = new OneLoopInput(2, KINV, K, S, W, null, null, F);
+ *      OneLoopInput input = new OneLoopInput(2, iK, K, S, W, null, null, F);
  *
  *      //performing the main calculation
  *      OneLoopCounterterms action = OneLoopCounterterms.calculateOneLoopCounterterms(input);
@@ -461,7 +461,7 @@ public final class OneLoopCounterterms {
 
         //matrices names
         final String[] matrices = new String[]{
-                "KINV", "HATK", "HATW", "HATS", "NABLAS",
+                "iK", "HATK", "HATW", "HATS", "NABLAS",
                 "HATN", "HATF", "NABLAF", "HATM", "DELTA",
                 "Flat", "FF", "WR", "SR", "SSR", "FR", "RR", "Kn"};
 

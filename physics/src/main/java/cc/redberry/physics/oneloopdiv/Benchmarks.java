@@ -193,7 +193,7 @@ public final class Benchmarks {
         CC.setDefaultOutputFormat(OutputFormat.RedberryConsole);
         Tensors.addSymmetry("P_lm", IndexType.LatinLower, false, 1, 0);
 
-        Expression KINV = Tensors.parseExpression("KINV_a^b=d_a^b+c*n_a*n^b");
+        Expression iK = Tensors.parseExpression("iK_a^b=d_a^b+c*n_a*n^b");
         Expression K = Tensors.parseExpression("K^{lm}_a^{b}=g^{lm}*d_{a}^{b}-k/2*(g^{lb}*d_a^m+g^{mb}*d_a^l)");
         Expression S = Tensors.parseExpression("S^p^l_m=0");
         Expression W = Tensors.parseExpression("W^{a}_{b}=P^{a}_{b}+(k/2)*R^a_b");
@@ -202,12 +202,12 @@ public final class Benchmarks {
 
         Expression lambda = Tensors.parseExpression("k=gamma/(1+gamma)");
         Expression gamma = Tensors.parseExpression("c=gamma");
-        KINV = (Expression) gamma.transform(lambda.transform(KINV));
+        iK = (Expression) gamma.transform(lambda.transform(iK));
         K = (Expression) gamma.transform(lambda.transform(K));
         S = (Expression) gamma.transform(lambda.transform(S));
         W = (Expression) gamma.transform(lambda.transform(W));
 
-        OneLoopInput input = new OneLoopInput(2, KINV, K, S, W, null, null, F);
+        OneLoopInput input = new OneLoopInput(2, iK, K, S, W, null, null, F);
 
         OneLoopCounterterms action = OneLoopCounterterms.calculateOneLoopCounterterms(input);
     }
@@ -220,7 +220,7 @@ public final class Benchmarks {
         CC.setDefaultOutputFormat(OutputFormat.RedberryConsole);
         Tensors.addSymmetry("P_lm", IndexType.LatinLower, false, 1, 0);
 
-        Expression KINV = Tensors.parseExpression("KINV_a^b=d_a^b+(2*c+Power[c,2])*n_a*n^b");
+        Expression iK = Tensors.parseExpression("iK_a^b=d_a^b+(2*c+Power[c,2])*n_a*n^b");
         Expression K = Tensors.parseExpression("K^{lmcd}_a^{b}="
                 + "d_a^b*1/3*(g^{lm}*g^{cd}+ g^{lc}*g^{md}+ g^{ld}*g^{mc})"
                 + "+1/12*(-2*k+Power[k,2])*("
@@ -265,13 +265,13 @@ public final class Benchmarks {
 
         Expression lambda = Tensors.parseExpression("k=gamma/(1+gamma)");
         Expression gamma = Tensors.parseExpression("c=gamma");
-        KINV = (Expression) gamma.transform(lambda.transform(KINV));
+        iK = (Expression) gamma.transform(lambda.transform(iK));
         K = (Expression) gamma.transform(lambda.transform(K));
         S = (Expression) gamma.transform(lambda.transform(S));
         W = (Expression) gamma.transform(lambda.transform(W));
         M = (Expression) gamma.transform(lambda.transform(M));
 
-        OneLoopInput input = new OneLoopInput(4, KINV, K, S, W, N, M, F);
+        OneLoopInput input = new OneLoopInput(4, iK, K, S, W, N, M, F);
         OneLoopCounterterms action = OneLoopCounterterms.calculateOneLoopCounterterms(input);
     }
 
@@ -289,7 +289,7 @@ public final class Benchmarks {
         CC.setDefaultOutputFormat(OutputFormat.RedberryConsole);
         Tensors.addSymmetry("P_lm", IndexType.LatinLower, false, 1, 0);
 
-        Expression KINV = Tensors.parseExpression("KINV_a^b=d_a^b+gamma*n_a*n^b");
+        Expression iK = Tensors.parseExpression("iK_a^b=d_a^b+gamma*n_a*n^b");
         Expression K = Tensors.parseExpression("K^{lm}_a^{b}=d_a^b*g^lm-1/2*beta*(d_a^l*g^mb+d_a^m*g^lb)");
         Expression S = Tensors.parseExpression("S^p^l_m=0");
         Expression W = Tensors.parseExpression("W^{a}_{b}=(1+beta/2)*R^a_b");
@@ -297,12 +297,12 @@ public final class Benchmarks {
 
 
         Expression beta = Tensors.parseExpression("beta=gamma/(1+gamma)");
-        KINV = (Expression) beta.transform(KINV);
+        iK = (Expression) beta.transform(iK);
         K = (Expression) beta.transform(K);
         S = (Expression) beta.transform(S);
         W = (Expression) beta.transform(W);
 
-        OneLoopInput input = new OneLoopInput(2, KINV, K, S, W, null, null, F);
+        OneLoopInput input = new OneLoopInput(2, iK, K, S, W, null, null, F);
 
         OneLoopCounterterms action = OneLoopCounterterms.calculateOneLoopCounterterms(input);
     }
@@ -323,7 +323,7 @@ public final class Benchmarks {
         Tensors.addAntiSymmetry("R_lmab", 1, 0, 2, 3);
         Tensors.addSymmetry("R_lmab", 2, 3, 0, 1);
 
-        Expression KINV = Tensors.parseExpression("KINV_ab^cd = "
+        Expression iK = Tensors.parseExpression("iK_ab^cd = "
                 + "(d_a^c*d_b^d+d_b^c*d_a^d)/2+"
                 + "la/2*("
                 + "d_a^c*n_b*n^d"
@@ -365,7 +365,7 @@ public final class Benchmarks {
         Expression F = Tensors.parseExpression("F_lm^kd_pr = "
                 + "R^k_plm*d^d_r+R^d_rlm*d^k_p");
 
-        OneLoopInput input = new OneLoopInput(2, KINV, K, S, W, null, null, F);
+        OneLoopInput input = new OneLoopInput(2, iK, K, S, W, null, null, F);
 
         OneLoopCounterterms action = OneLoopCounterterms.calculateOneLoopCounterterms(input);
     }
@@ -378,13 +378,13 @@ public final class Benchmarks {
         //TIME = 6.1 s
         CC.setDefaultOutputFormat(OutputFormat.RedberryConsole);
 
-        Expression KINV = Tensors.parseExpression("KINV_a^b=d_a^b");
+        Expression iK = Tensors.parseExpression("iK_a^b=d_a^b");
         Expression K = Tensors.parseExpression("K^lm_a^b=d_a^b*g^{lm}");
         Expression S = Tensors.parseExpression("S^lab=0");
         Expression W = Tensors.parseExpression("W_a^b=W_a^b");
         Expression F = Tensors.parseExpression("F_lmab=F_lmab");
 
-        OneLoopInput input = new OneLoopInput(2, KINV, K, S, W, null, null, F);
+        OneLoopInput input = new OneLoopInput(2, iK, K, S, W, null, null, F);
 
         OneLoopCounterterms action = OneLoopCounterterms.calculateOneLoopCounterterms(input);
     }
@@ -399,14 +399,14 @@ public final class Benchmarks {
         CC.setDefaultOutputFormat(OutputFormat.RedberryConsole);
 
         //Phys. Rep. 119 ( 1985) 1-74 
-        Expression KINV = Tensors.parseExpression("KINV_a^b=d_a^b");
+        Expression iK = Tensors.parseExpression("iK_a^b=d_a^b");
         Expression K = Tensors.parseExpression("K^lm_a^b=d_a^b*g^{lm}");
         Expression S = Tensors.parseExpression("S^lab=0");
         //here P^... from BV equal to W^...
         Expression W = Tensors.parseExpression("W_a^b=W_a^b-1/6*R*d_a^b");
         Expression F = Tensors.parseExpression("F_lmab=F_lmab");
 
-        OneLoopInput input = new OneLoopInput(2, KINV, K, S, W, null, null, F);
+        OneLoopInput input = new OneLoopInput(2, iK, K, S, W, null, null, F);
 
         OneLoopCounterterms action = OneLoopCounterterms.calculateOneLoopCounterterms(input);
     }
@@ -420,7 +420,7 @@ public final class Benchmarks {
         CC.setDefaultOutputFormat(OutputFormat.RedberryConsole);
         Tensors.addSymmetry("P_lm", IndexType.LatinLower, false, 1, 0);
 
-        Expression KINV = Tensors.parseExpression("KINV_a^b=d_a^b");
+        Expression iK = Tensors.parseExpression("iK_a^b=d_a^b");
         Expression K = Tensors.parseExpression("K^{lmcd}_a^{b}="
                 + "d_a^b*1/3*(g^{lm}*g^{cd}+ g^{lc}*g^{md}+ g^{ld}*g^{mc})");
         Expression S = Tensors.parseExpression("S^lmpab=0");
@@ -429,7 +429,7 @@ public final class Benchmarks {
         Expression M = Tensors.parseExpression("M_a^b = 0*M_a^b");
         Expression F = Tensors.parseExpression("F_lmab=F_lmab");
 
-        OneLoopInput input = new OneLoopInput(4, KINV, K, S, W, N, M, F);
+        OneLoopInput input = new OneLoopInput(4, iK, K, S, W, N, M, F);
         OneLoopCounterterms action = OneLoopCounterterms.calculateOneLoopCounterterms(input);
     }
 
@@ -440,8 +440,8 @@ public final class Benchmarks {
     public static void testSpin3Ghosts() {
         //TIME = 990 s
         CC.setDefaultOutputFormat(OutputFormat.RedberryConsole);
-        Expression KINV = Tensors.parseExpression(
-                "KINV^{ab}_{lm} = P^{ab}_{lm}-1/4*c*g_{lm}*g^{ab}+"
+        Expression iK = Tensors.parseExpression(
+                "iK^{ab}_{lm} = P^{ab}_{lm}-1/4*c*g_{lm}*g^{ab}+"
                         + "(1/4)*b*(n_{l}*n^{a}*d^{b}_{m}+n_{l}*n^{b}*d^{a}_{m}+n_{m}*n^{a}*d^{b}_{l}+n_{m}*n^{b}*d^{a}_{l})+"
                         + "c*(n_{l}*n_{m}*g^{ab}+n^{a}*n^{b}*g_{lm})"
                         + "-c*b*n_{l}*n_{m}*n^{a}*n^{b}");
@@ -453,7 +453,7 @@ public final class Benchmarks {
                         + "(1/4)*(g^{ab}*d^{l}_{c}*d^{m}_{d}+g^{ab}*d^{l}_{d}*d^{m}_{c})+(1/8)*g^{lm}*g_{cd}*g^{ab})");
         Expression P = Tensors.parseExpression(
                 "P^{ab}_{lm} = (1/2)*(d^{a}_{l}*d^{b}_{m}+d^{a}_{m}*d^{b}_{l})-(1/4)*g_{lm}*g^{ab}");
-        KINV = (Expression) P.transform(KINV);
+        iK = (Expression) P.transform(iK);
         K = (Expression) P.transform(K);
 
         Expression consts[] = {
@@ -461,7 +461,7 @@ public final class Benchmarks {
                 Tensors.parseExpression("b=-(1+2*beta)/(1+beta)")
         };
         for (Expression cons : consts) {
-            KINV = (Expression) cons.transform(KINV);
+            iK = (Expression) cons.transform(iK);
             K = (Expression) cons.transform(K);
         }
 
@@ -473,7 +473,7 @@ public final class Benchmarks {
         Transformation[] tr = new Transformation[ds.length + 1];
         System.arraycopy(ds, 0, tr, 0, ds.length);
         tr[tr.length - 1] = FactorTransformation.FACTOR;
-        OneLoopInput input = new OneLoopInput(2, KINV, K, S, W, null, null, F, tr);
+        OneLoopInput input = new OneLoopInput(2, iK, K, S, W, null, null, F, tr);
 
         OneLoopCounterterms action = OneLoopCounterterms.calculateOneLoopCounterterms(input);
     }
@@ -496,7 +496,7 @@ public final class Benchmarks {
         Tensors.addSymmetry("R_lmab", IndexType.LatinLower, false, new int[]{2, 3, 0, 1});
 
 
-        Expression KINV = Tensors.parseExpression("KINV_ab^cd = "
+        Expression iK = Tensors.parseExpression("iK_ab^cd = "
                 + "(d_a^c*d_b^d+d_b^c*d_a^d)/2-"
                 + "la/2*("
                 + "d_a^c*n_b*n^d"
@@ -542,7 +542,7 @@ public final class Benchmarks {
         Expression F = Tensors.parseExpression("F_lm^kd_pr = "
                 + "R^k_plm*d^d_r+R^d_rlm*d^k_p");
 
-        OneLoopInput input = new OneLoopInput(2, KINV, K, S, W, null, null, F);
+        OneLoopInput input = new OneLoopInput(2, iK, K, S, W, null, null, F);
 
         OneLoopCounterterms action = OneLoopCounterterms.calculateOneLoopCounterterms(input);
     }
