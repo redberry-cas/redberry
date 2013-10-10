@@ -205,9 +205,9 @@ public final class OneLoopInput {
         inputValues[5] = M;
 
         checkConsistency();
-        Tensors.addSymmetry("R_\\mu\\nu", IndexType.GreekLower, false, new int[]{1, 0});
-        Tensors.addSymmetry("R_\\mu\\nu\\alpha\\beta", IndexType.GreekLower, true, new int[]{0, 1, 3, 2});
-        Tensors.addSymmetry("R_\\mu\\nu\\alpha\\beta", IndexType.GreekLower, false, new int[]{2, 3, 0, 1});
+        Tensors.addSymmetry("R_lm", IndexType.LatinLower, false, new int[]{1, 0});
+        Tensors.addSymmetry("R_lmab", IndexType.LatinLower, true, new int[]{0, 1, 3, 2});
+        Tensors.addSymmetry("R_lmab", IndexType.LatinLower, false, new int[]{2, 3, 0, 1});
 
 
         this.L = Tensors.expression(Tensors.parse("L"), new Complex(operatorOrder));
@@ -218,17 +218,17 @@ public final class OneLoopInput {
         int[] covariantIndices = new int[operatorOrder];
         int i, j, k;
         for (i = 0; i < operatorOrder; ++i)
-            covariantIndices[i] = IndicesUtils.createIndex(i, IndexType.GreekLower, true);
+            covariantIndices[i] = IndicesUtils.createIndex(i, IndexType.LatinLower, true);
 
         int[] upper = new int[matrixIndicesCount / 2], lower = upper.clone();
         for (; i < operatorOrder + matrixIndicesCount / 2; ++i) {
-            upper[i - operatorOrder] = IndicesUtils.createIndex(i, IndexType.GreekLower, true);
-            lower[i - operatorOrder] = IndicesUtils.createIndex(i + matrixIndicesCount / 2, IndexType.GreekLower, false);
+            upper[i - operatorOrder] = IndicesUtils.createIndex(i, IndexType.LatinLower, true);
+            lower[i - operatorOrder] = IndicesUtils.createIndex(i + matrixIndicesCount / 2, IndexType.LatinLower, false);
         }
 
         Indicator<ParseTokenSimpleTensor> indicator = new Indicator<ParseTokenSimpleTensor>() {
 
-            private final StructureOfIndices F_TYPES = new StructureOfIndices(IndexType.GreekLower, 2);
+            private final StructureOfIndices F_TYPES = new StructureOfIndices(IndexType.LatinLower, 2);
 
             @Override
             public boolean is(ParseTokenSimpleTensor object) {
@@ -256,7 +256,7 @@ public final class OneLoopInput {
         StringBuilder sb;
         Tensor temp;
         String covariantIndicesString;
-        Transformation n2 = new SqrSubs(Tensors.parseSimple("n_\\mu")), n2Transformer = new Transformer(TraverseState.Leaving, new Transformation[]{n2});
+        Transformation n2 = new SqrSubs(Tensors.parseSimple("n_l")), n2Transformer = new Transformer(TraverseState.Leaving, new Transformation[]{n2});
         Transformation[] transformations = ArraysUtils.addAll(new Transformation[]{EliminateMetricsTransformation.ELIMINATE_METRICS, n2Transformer}, riemannBackground);
         for (i = 0; i < actualHatQuantities; ++i) {
             hatQuantities[i] = new Expression[operatorOrder + 1 - i];
@@ -312,7 +312,7 @@ public final class OneLoopInput {
         symmetry[1] = 0;
         for (i = 2; i < symmetry.length; ++i)
             symmetry[i] = i;
-        Tensors.addSymmetry((SimpleTensor) F.get(0), IndexType.GreekLower, true, symmetry);
+        Tensors.addSymmetry((SimpleTensor) F.get(0), IndexType.LatinLower, true, symmetry);
         this.F = F;
 
         covariantIndicesString = IndicesUtils.toString(Arrays.copyOfRange(covariantIndices, 0, 2), OutputFormat.Redberry);
@@ -379,7 +379,7 @@ public final class OneLoopInput {
 
         SimpleIndices indices = (SimpleIndices) inputValues[1].get(0).getIndices();
         StructureOfIndices structureOfIndices = indices.getStructureOfIndices();
-        if (structureOfIndices.getTypeData(IndexType.GreekLower.getType()).length != structureOfIndices.size())
+        if (structureOfIndices.getTypeData(IndexType.LatinLower.getType()).length != structureOfIndices.size())
             throw new IllegalArgumentException("Only Greek lower indices are legal.");
 
         int matrixIndicesCount = indices.size() - operatorOrder;
@@ -391,7 +391,7 @@ public final class OneLoopInput {
 
         for (i = 1; i < actualInput; ++i) {
             structureOfIndices = ((SimpleIndices) inputValues[i].get(0).getIndices()).getStructureOfIndices();
-            if (structureOfIndices.getTypeData(IndexType.GreekLower.getType()).length != structureOfIndices.size())
+            if (structureOfIndices.getTypeData(IndexType.LatinLower.getType()).length != structureOfIndices.size())
                 throw new IllegalArgumentException("Only Greek lower indices are legal.");
             if (structureOfIndices.size() + i - 1 != operatorOrder + matrixIndicesCount)
                 throw new IllegalArgumentException();
@@ -451,7 +451,7 @@ public final class OneLoopInput {
         Expression[] nablaS = new Expression[getHatQuantities(1).length];
         StringBuilder sb;
         for (int i = 0; i < nablaS.length; ++i) {
-            sb = new StringBuilder().append("NABLAS_{\\mu_{9}}").append(getHatQuantities(1)[i].get(0).getIndices().toString(OutputFormat.Redberry)).append("=0");
+            sb = new StringBuilder().append("NABLAS_{l_{9}}").append(getHatQuantities(1)[i].get(0).getIndices().toString(OutputFormat.Redberry)).append("=0");
             nablaS[i] = (Expression) Tensors.parse(sb.toString());
         }
         return nablaS;

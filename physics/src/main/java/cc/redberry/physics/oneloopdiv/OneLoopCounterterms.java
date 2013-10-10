@@ -49,15 +49,15 @@ import cc.redberry.core.utils.Indicator;
  * of vector field: </p>
  * <pre>
  *      //setting symmetries to tensor P
- *      Tensors.addSymmetry("P_\\mu\\nu", IndexType.GreekLower, false, 1, 0);
+ *      Tensors.addSymmetry("P_lm", IndexType.LatinLower, false, 1, 0);
  *
  *      //input expressions
- *      Expression KINV = Tensors.parseExpression("KINV_\\alpha^\\beta=d_\\alpha^\\beta+ga*n_\\alpha*n^\\beta");
- *      Expression K = Tensors.parseExpression("K^{\\mu\\nu}_\\alpha^{\\beta}=g^{\\mu\\nu}*d_{\\alpha}^{\\beta}-ga/(2*(1+ga))*(g^{\\mu\\beta}*d_\\alpha^\\nu+g^{\\nu\\beta}*d_\\alpha^\\mu)");
- *      Expression S = Tensors.parseExpression("S^\\rho^\\mu_\\nu=0");
- *      Expression W = Tensors.parseExpression("W^{\\alpha}_{\\beta}=P^{\\alpha}_{\\beta}+ga/(2*(1+ga))*R^\\alpha_\\beta");
+ *      Expression KINV = Tensors.parseExpression("KINV_a^b=d_a^b+ga*n_a*n^b");
+ *      Expression K = Tensors.parseExpression("K^{lm}_a^{b}=g^{lm}*d_{a}^{b}-ga/(2*(1+ga))*(g^{lb}*d_a^m+g^{mb}*d_a^l)");
+ *      Expression S = Tensors.parseExpression("S^p^l_m=0");
+ *      Expression W = Tensors.parseExpression("W^{a}_{b}=P^{a}_{b}+ga/(2*(1+ga))*R^a_b");
  *      //F is equal to Riemann for vector field
- *      Expression F = Tensors.parseExpression("F_\\mu\\nu\\alpha\\beta=R_\\mu\\nu\\alpha\\beta");
+ *      Expression F = Tensors.parseExpression("F_lmab=R_lmab");
  *
  *      //tensors M and N are null, since operator order is 2
  *      OneLoopInput input = new OneLoopInput(2, KINV, K, S, W, null, null, F);
@@ -87,264 +87,264 @@ public final class OneLoopCounterterms {
 
     private static final String Flat_ =
             "Flat="
-                    + "(1/4)*HATS*HATS*HATS*HATS-HATW*HATS*HATS+(1/2)*HATW*HATW+HATS*HATN-HATM+(L-2)*NABLAS_\\mu*HATW^\\mu"
-                    + "-L*NABLAS_\\mu*HATW*HATK^\\mu+(1/3)*((L-1)*NABLAS_\\mu^\\mu*HATS*HATS-L*NABLAS_\\mu*HATK^\\mu*HATS*HATS"
-                    + "-(L-1)*NABLAS_\\mu*HATS*HATS^\\mu+L*NABLAS_\\mu*HATS*HATS*HATK^\\mu)-(1/2)*NABLAS_\\mu*NABLAS_\\nu*DELTA^{\\mu\\nu}"
-                    + "-(1/4)*(L-1)*(L-2)*NABLAS_\\mu*NABLAS_\\nu^{\\mu\\nu}+(1/2)*L*(L-1)*(1/2)*(NABLAS_\\mu*NABLAS_{\\nu }^{\\nu}"
-                    + "+NABLAS_{\\nu }*NABLAS_{\\mu }^{\\nu})*HATK^\\mu";
+                    + "(1/4)*HATS*HATS*HATS*HATS-HATW*HATS*HATS+(1/2)*HATW*HATW+HATS*HATN-HATM+(L-2)*NABLAS_l*HATW^l"
+                    + "-L*NABLAS_l*HATW*HATK^l+(1/3)*((L-1)*NABLAS_l^l*HATS*HATS-L*NABLAS_l*HATK^l*HATS*HATS"
+                    + "-(L-1)*NABLAS_l*HATS*HATS^l+L*NABLAS_l*HATS*HATS*HATK^l)-(1/2)*NABLAS_l*NABLAS_m*DELTA^{lm}"
+                    + "-(1/4)*(L-1)*(L-2)*NABLAS_l*NABLAS_m^{lm}+(1/2)*L*(L-1)*(1/2)*(NABLAS_l*NABLAS_{m }^{m}"
+                    + "+NABLAS_{m }*NABLAS_{l }^{m})*HATK^l";
     private static final String WR_ =
             "WR="
-                    + "-(1/2)*Power[L,2]*HATW*HATF_{\\mu\\nu}*Kn^\\mu*HATK^\\nu"
-                    + "+(1/3)*L*HATW*HATK^\\alpha*DELTA^{\\mu\\nu}*n_\\sigma*R^\\sigma_{\\mu\\alpha\\nu}"
-                    + "+(1/3)*Power[L,2]*(L-1)*HATW*HATK^{\\mu\\nu}*HATK^\\alpha*n_\\sigma*R^\\sigma_{\\mu\\alpha\\nu}"
-                    + "-(1/6)*(L-2)*(L-3)*HATW^{\\mu\\nu}*R_{\\mu\\nu}";
-    private static final String SR_ = "SR=-(1/6)*Power[L,2]*(L-1)*HATS*NABLAF_{\\mu\\alpha\\nu}*Kn^{\\mu\\nu}*HATK^\\alpha"
-            + "+(2/3)*L*HATS*NABLAF_{\\mu\\nu\\alpha}*Kn^\\alpha*DELTA^{\\mu\\nu}"
-            + "-(1/12)*(L-1)*(L-2)*(L-3)*HATS^{\\alpha\\mu\\nu}*NABLAR_{\\alpha\\mu\\nu}"
-            + "-(1/12)*Power[L,2]*(L-1)*(L-2)*HATS*HATK^{\\mu\\nu\\alpha}*HATK^\\beta*n_\\sigma*NABLAR_\\alpha^\\sigma_{\\mu\\beta\\nu}"
-            + "+L*(L-1)*HATS*HATK^{\\mu\\nu}*DELTA^{\\alpha\\beta}*n_\\sigma*((5/12)*NABLAR_\\alpha^\\sigma_{\\nu\\beta\\mu}"
-            + "-(1/12)*NABLAR_{\\mu}^\\sigma_{\\alpha\\nu\\beta})"
-            + "-(1/2)*L*HATS*HATK^\\beta*DELTA^{\\mu\\nu\\alpha}*n_\\sigma*NABLAR_{\\alpha}^{\\sigma}_{\\mu\\beta\\nu}";
-    private static final String SSR_ = "SSR=-(1/2)*L*(L-1)*HATS*HATS^\\mu*HATF_{\\mu\\nu}*HATK^{\\nu}+(1/2)*Power[L,2]*HATS*HATS*HATF_{\\mu\\nu}*Kn^{\\mu}*HATK^\\nu"
-            + "+(1/12)*(L-1)*(L-2)*HATS*HATS^{\\mu\\nu}*R_{\\mu\\nu}+(1/3)*L*(L-1)*HATS*HATS^\\mu*HATK^\\nu*R_{\\mu\\nu}"
-            + "+(1/6)*HATS*HATS*DELTA^{\\mu\\nu}*R_{\\mu\\nu}-(1/6)*L*(L-1)*(L-2)*HATS*HATS^{\\mu\\nu}*HATK^\\alpha*n_\\sigma*R^\\sigma_{\\mu\\alpha\\nu}"
-            + "+(1/3)*(L-1)*HATS*HATS^\\alpha*DELTA^{\\mu\\nu}*n_\\sigma*R^\\sigma_{\\mu\\alpha\\nu}"
-            + "-(1/3)*Power[L,2]*(L-1)*HATS*HATS*HATK^{\\mu\\nu}*HATK^\\alpha*n_\\sigma*R^\\sigma_{\\mu\\alpha\\nu}"
-            + "-(1/3)*L*HATS*HATS*HATK^\\alpha*DELTA^{\\mu\\nu}*n_\\sigma*R^\\sigma_{\\mu\\alpha\\nu}";
+                    + "-(1/2)*Power[L,2]*HATW*HATF_{lm}*Kn^l*HATK^m"
+                    + "+(1/3)*L*HATW*HATK^a*DELTA^{lm}*n_q*R^q_{lam}"
+                    + "+(1/3)*Power[L,2]*(L-1)*HATW*HATK^{lm}*HATK^a*n_q*R^q_{lam}"
+                    + "-(1/6)*(L-2)*(L-3)*HATW^{lm}*R_{lm}";
+    private static final String SR_ = "SR=-(1/6)*Power[L,2]*(L-1)*HATS*NABLAF_{lam}*Kn^{lm}*HATK^a"
+            + "+(2/3)*L*HATS*NABLAF_{lma}*Kn^a*DELTA^{lm}"
+            + "-(1/12)*(L-1)*(L-2)*(L-3)*HATS^{alm}*NABLAR_{alm}"
+            + "-(1/12)*Power[L,2]*(L-1)*(L-2)*HATS*HATK^{lma}*HATK^b*n_q*NABLAR_a^q_{lbm}"
+            + "+L*(L-1)*HATS*HATK^{lm}*DELTA^{ab}*n_q*((5/12)*NABLAR_a^q_{mbl}"
+            + "-(1/12)*NABLAR_{l}^q_{amb})"
+            + "-(1/2)*L*HATS*HATK^b*DELTA^{lma}*n_q*NABLAR_{a}^{q}_{lbm}";
+    private static final String SSR_ = "SSR=-(1/2)*L*(L-1)*HATS*HATS^l*HATF_{lm}*HATK^{m}+(1/2)*Power[L,2]*HATS*HATS*HATF_{lm}*Kn^{l}*HATK^m"
+            + "+(1/12)*(L-1)*(L-2)*HATS*HATS^{lm}*R_{lm}+(1/3)*L*(L-1)*HATS*HATS^l*HATK^m*R_{lm}"
+            + "+(1/6)*HATS*HATS*DELTA^{lm}*R_{lm}-(1/6)*L*(L-1)*(L-2)*HATS*HATS^{lm}*HATK^a*n_q*R^q_{lam}"
+            + "+(1/3)*(L-1)*HATS*HATS^a*DELTA^{lm}*n_q*R^q_{lam}"
+            + "-(1/3)*Power[L,2]*(L-1)*HATS*HATS*HATK^{lm}*HATK^a*n_q*R^q_{lam}"
+            + "-(1/3)*L*HATS*HATS*HATK^a*DELTA^{lm}*n_q*R^q_{lam}";
     //    public static final String FF_ =
 //            "FF="
-//            + "-(1/24)*L*L*(L-1)*(L-1)*HATK^{\\mu\\nu}*F_{\\mu\\alpha}*HATK^{\\alpha\\beta}*F_{\\nu\\beta}"
-//            + "+(1/24)*L*L*HATK^\\mu*F_{\\beta\\nu}*DELTA^{\\alpha\\beta}*HATK^\\nu*F_{\\alpha\\mu}"
-//            + "+(5/24)*L*L*HATK^\\mu*F_{\\beta\\mu}*DELTA^{\\alpha\\beta}*HATK^\\nu*F_{\\alpha\\nu}"
-//            + "-(1/48)*L*L*(L-1)*HATK^\\mu*F_{\\beta\\nu}*DELTA^\\nu*HATK^{\\alpha\\beta}*F_{\\alpha\\mu}"
-//            + "-(1/48)*L*L*(L-1)*HATK^\\mu*F_{\\beta\\mu}*DELTA^\\nu*HATK^{\\alpha\\beta}*F_{\\alpha\\nu}";
+//            + "-(1/24)*L*L*(L-1)*(L-1)*HATK^{lm}*F_{la}*HATK^{ab}*F_{mb}"
+//            + "+(1/24)*L*L*HATK^l*F_{bm}*DELTA^{ab}*HATK^m*F_{al}"
+//            + "+(5/24)*L*L*HATK^l*F_{bl}*DELTA^{ab}*HATK^m*F_{am}"
+//            + "-(1/48)*L*L*(L-1)*HATK^l*F_{bm}*DELTA^m*HATK^{ab}*F_{al}"
+//            + "-(1/48)*L*L*(L-1)*HATK^l*F_{bl}*DELTA^m*HATK^{ab}*F_{am}";
     private static final String FF_ =
             "FF="
-                    + "-(1/24)*L*L*(L-1)*(L-1)*HATK^{\\mu\\nu}*F_{\\mu\\alpha}*HATK^{\\alpha\\beta}*F_{\\nu\\beta}"
-                    + "+(1/24)*L*L*HATK^\\mu*F_{\\beta\\nu}*DELTA^{\\alpha\\beta}*HATK^\\nu*F_{\\alpha\\mu}"
-                    + "-(5/24)*L*L*HATK^\\mu*F_{\\beta\\mu}*DELTA^{\\alpha\\beta}*HATK^\\nu*F_{\\alpha\\nu}"
-                    + "-(1/48)*L*L*(L-1)*HATK^\\mu*F_{\\beta\\nu}*DELTA^\\nu*HATK^{\\alpha\\beta}*F_{\\alpha\\mu}"
-                    + "-(1/48)*L*L*(L-1)*HATK^\\mu*F_{\\beta\\mu}*DELTA^\\nu*HATK^{\\alpha\\beta}*F_{\\alpha\\nu}";
+                    + "-(1/24)*L*L*(L-1)*(L-1)*HATK^{lm}*F_{la}*HATK^{ab}*F_{mb}"
+                    + "+(1/24)*L*L*HATK^l*F_{bm}*DELTA^{ab}*HATK^m*F_{al}"
+                    + "-(5/24)*L*L*HATK^l*F_{bl}*DELTA^{ab}*HATK^m*F_{am}"
+                    + "-(1/48)*L*L*(L-1)*HATK^l*F_{bm}*DELTA^m*HATK^{ab}*F_{al}"
+                    + "-(1/48)*L*L*(L-1)*HATK^l*F_{bl}*DELTA^m*HATK^{ab}*F_{am}";
     private static final String FR_ =
             "FR="
-                    + "(1/40)*Power[L,2]*(L-1)*(L-2)*DELTA^\\mu*HATK^\\nu*HATK^{\\alpha\\beta\\gamma}*F_{\\mu\\alpha}*n_\\sigma*R^\\sigma_{\\gamma\\beta\\nu}"
-                    + "-Power[L,2]*(L-1)*(L-2)*DELTA^\\nu*HATK^{\\alpha\\beta\\gamma}*HATK^\\mu*n_\\sigma*((1/60)*R^\\sigma_{\\beta\\gamma\\mu}*F_{\\alpha\\nu}"
-                    + "+(1/12)*R^\\sigma_{\\beta\\gamma\\nu}*F_{\\alpha\\mu})"
-                    + "+Power[L,2]*Power[(L-1),2]*DELTA^\\alpha*HATK^{\\beta\\gamma}*HATK^{\\mu\\nu}*n_\\sigma*((1/60)*R^\\sigma_{\\beta\\mu\\gamma}*F_{\\alpha\\nu}"
-                    + "+(1/20)*R^\\sigma_{\\alpha\\mu\\gamma}*F_{\\nu\\beta}+(1/15)*R^\\sigma_{\\gamma\\mu\\alpha}*F_{\\nu\\beta}"
-                    + "+(1/60)*R^\\sigma_{\\mu\\nu\\gamma}*F_{\\alpha\\beta})+Power[L,2]*(L-1)*DELTA^{\\alpha\\beta}*HATK^{\\gamma\\delta}*HATK^{\\mu}"
-                    + "*n_\\sigma*((4/15)*R^\\sigma_{\\delta\\beta\\gamma}*F_{\\alpha\\mu}-(1/30)*R^\\sigma_{\\beta\\delta\\alpha}*F_{\\gamma\\mu}"
-                    + "-(1/15)*R^\\sigma_{\\alpha\\gamma\\mu}*F_{\\beta\\delta}-(1/30)*R^\\sigma_{\\gamma\\alpha\\mu}*F_{\\beta\\delta})"
-                    + "+Power[L,2]*(L-1)*DELTA^{\\alpha\\beta}*HATK^\\gamma*HATK^{\\mu\\nu}*n_\\sigma*((7/60)*R^\\sigma_{\\alpha\\beta\\mu}*F_{\\gamma\\nu}"
-                    + "-(11/60)*R^\\sigma_{\\beta\\mu\\gamma}*F_{\\alpha\\nu}+(1/5)*R^\\sigma_{\\mu\\alpha\\gamma}*F_{\\beta\\nu}"
-                    + "+(1/60)*R^\\sigma_{\\mu\\alpha\\nu}*F_{\\gamma\\beta})"
-                    + "+Power[L,2]*DELTA^{\\mu\\alpha\\beta}*HATK^\\gamma*HATK^\\nu*n_\\sigma"
-                    + "*((7/20)*R^\\sigma_{\\alpha\\gamma\\beta}*F_{\\nu\\mu}+(1/10)*R^\\sigma_{\\alpha\\beta\\nu}*F_{\\gamma\\mu})";
+                    + "(1/40)*Power[L,2]*(L-1)*(L-2)*DELTA^l*HATK^m*HATK^{abc}*F_{la}*n_q*R^q_{cbm}"
+                    + "-Power[L,2]*(L-1)*(L-2)*DELTA^m*HATK^{abc}*HATK^l*n_q*((1/60)*R^q_{bcl}*F_{am}"
+                    + "+(1/12)*R^q_{bcm}*F_{al})"
+                    + "+Power[L,2]*Power[(L-1),2]*DELTA^a*HATK^{bc}*HATK^{lm}*n_q*((1/60)*R^q_{blc}*F_{am}"
+                    + "+(1/20)*R^q_{alc}*F_{mb}+(1/15)*R^q_{cla}*F_{mb}"
+                    + "+(1/60)*R^q_{lmc}*F_{ab})+Power[L,2]*(L-1)*DELTA^{ab}*HATK^{cd}*HATK^{l}"
+                    + "*n_q*((4/15)*R^q_{dbc}*F_{al}-(1/30)*R^q_{bda}*F_{cl}"
+                    + "-(1/15)*R^q_{acl}*F_{bd}-(1/30)*R^q_{cal}*F_{bd})"
+                    + "+Power[L,2]*(L-1)*DELTA^{ab}*HATK^c*HATK^{lm}*n_q*((7/60)*R^q_{abl}*F_{cm}"
+                    + "-(11/60)*R^q_{blc}*F_{am}+(1/5)*R^q_{lac}*F_{bm}"
+                    + "+(1/60)*R^q_{lam}*F_{cb})"
+                    + "+Power[L,2]*DELTA^{lab}*HATK^c*HATK^m*n_q"
+                    + "*((7/20)*R^q_{acb}*F_{ml}+(1/10)*R^q_{abm}*F_{cl})";
     //    public static final String RR_ =
 //            "RR="
-//          + "+Power[L,2]*(L-1)*HATK^\\delta*DELTA^{\\alpha\\beta\\gamma}*HATK^{\\mu\\nu}*n_\\sigma*n_\\rho*"
-//            + "((-1/10)*R^\\rho_{\\mu\\gamma\\nu}*R^\\sigma_{\\alpha\\delta\\beta}+(1/15)*R^\\rho_{\\delta\\alpha\\nu}*R^\\sigma_{\\beta\\mu\\gamma}+(1/60)*R^\\rho_{\\beta\\delta\\nu}*R^\\sigma_{\\gamma\\mu\\alpha})"
+//          + "+Power[L,2]*(L-1)*HATK^d*DELTA^{abc}*HATK^{lm}*n_q*n_p*"
+//            + "((-1/10)*R^p_{lcm}*R^q_{adb}+(1/15)*R^p_{dam}*R^q_{blc}+(1/60)*R^p_{bdm}*R^q_{cla})"
 //           
 //            ;
     private static final String RR_ =
             "RR="
-                    + "(1/10)*Power[L,2]*HATK^\\delta*DELTA^{\\mu\\nu\\alpha\\beta}*HATK^\\gamma*n_\\sigma*n_\\rho*R^\\sigma_{\\alpha\\beta\\gamma}*R^\\rho_{\\mu\\nu\\delta}"
-                    + "+Power[L,2]*Power[(L-1),2]*(L-2)*HATK^{\\beta\\gamma\\delta}*DELTA^\\alpha*HATK^{\\mu\\nu}*n_\\sigma*n_\\rho*"
-                    + "((2/45)*R^\\rho_{\\alpha\\delta\\nu}*R^\\sigma_{\\beta\\mu\\gamma}-(1/120)*R^\\rho_{\\delta\\alpha\\nu}*R^\\sigma_{\\beta\\mu\\gamma})"
-                    + "+Power[L,2]*(L-1)*HATK^\\delta*DELTA^{\\alpha\\beta\\gamma}*HATK^{\\mu\\nu}*n_\\sigma*n_\\rho*"
-                    + "((-1/10)*R^\\rho_{\\mu\\gamma\\nu}*R^\\sigma_{\\alpha\\delta\\beta}+(1/15)*R^\\rho_{\\delta\\alpha\\nu}*R^\\sigma_{\\beta\\mu\\gamma}+(1/60)*R^\\rho_{\\beta\\delta\\nu}*R^\\sigma_{\\gamma\\mu\\alpha})"
-                    + "+Power[L,2]*Power[(L-1),2]*HATK^{\\gamma\\delta}*DELTA^{\\alpha\\beta}*HATK^{\\mu\\nu}*n_\\sigma*n_\\rho*"
-                    + "(-(1/20)*R^\\rho_{\\mu\\beta\\nu}*R^\\sigma_{\\delta\\alpha\\gamma}+(1/180)*R^\\rho_{\\alpha\\nu\\beta}*R^\\sigma_{\\gamma\\delta\\mu}-(7/360)*R^\\rho_{\\mu\\gamma\\nu}*R^\\sigma_{\\alpha\\delta\\beta}-(1/240)*R^\\rho_{\\delta\\beta\\nu}*R^\\sigma_{\\gamma\\alpha\\mu}-(1/120)*R^\\rho_{\\beta\\gamma\\nu}*R^\\sigma_{\\alpha\\delta\\mu}-(1/30)*R^\\rho_{\\delta\\beta\\nu}*R^\\sigma_{\\alpha\\gamma\\mu})"
-                    + "+Power[L,2]*(L-1)*(L-2)*HATK^\\delta*DELTA^{\\mu\\nu}*HATK^{\\alpha\\beta\\gamma}*n_\\sigma*n_\\rho*"
-                    + "((-1/30)*R^\\rho_{\\gamma\\nu\\beta}*R^\\sigma_{\\alpha\\delta\\mu}-(1/180)*R^\\rho_{\\mu\\gamma\\nu}*R^\\sigma_{\\alpha\\beta\\delta}+(1/180)*R^\\rho_{\\mu\\gamma\\delta}*R^\\sigma_{\\alpha\\beta\\nu})"
-                    + "+Power[L,2]*Power[(L-1),2]*(L-2)*HATK^{\\mu\\nu}*DELTA^{\\delta}*HATK^{\\alpha\\beta\\gamma}*n_\\sigma*n_\\rho*"
-                    + "((1/45)*R^\\rho_{\\mu\\gamma\\nu}*R^\\sigma_{\\alpha\\beta\\delta}-(1/80)*R^\\rho_{\\beta\\nu\\gamma}*R^\\sigma_{\\mu\\alpha\\delta}+(1/90)*R^\\rho_{\\beta\\nu\\gamma}*R^\\sigma_{\\delta\\alpha\\mu})"
-                    + "+Power[L,2]*(L-1)*HATK^{\\mu\\nu}*DELTA^{\\alpha\\beta\\gamma}*HATK^\\delta*n_\\sigma*n_\\rho*"
-                    + "((7/120)*R^\\rho_{\\beta\\gamma\\nu}*R^\\sigma_{\\mu\\alpha\\delta}-(3/40)*R^\\rho_{\\beta\\gamma\\delta}*R^\\sigma_{\\mu\\alpha\\nu}+(1/120)*R^\\rho_{\\delta\\gamma\\nu}*R^\\sigma_{\\alpha\\beta\\mu})"
-                    + "+Power[L,2]*(L-1)*(L-2)*HATK^{\\alpha\\beta\\gamma}*DELTA^{\\mu\\nu}*HATK^\\delta*n_\\sigma*n_\\rho*"
-                    + "(-(1/24)*R^\\rho_{\\mu\\gamma\\nu}*R^\\sigma_{\\alpha\\beta\\delta}-(1/180)*R^\\rho_{\\nu\\gamma\\delta}*R^\\sigma_{\\alpha\\beta\\mu}-(1/360)*R^\\rho_{\\delta\\gamma\\nu}*R^\\sigma_{\\alpha\\beta\\mu})"
-                    + "-(1/120)*Power[L,2]*(L-1)*(L-2)*(L-3)*HATK^{\\mu\\nu\\alpha\\beta}*DELTA^{\\delta}*HATK^\\gamma*n_\\sigma*n_\\rho*R^\\rho_{\\alpha\\beta\\gamma}*R^\\sigma_{\\mu\\nu\\delta}"
-                    + "-(1/80)*Power[L,2]*Power[(L-1),2]*(L-2)*(L-3)*HATK^{\\alpha\\beta\\gamma\\delta}*HATK^{\\mu\\nu}*n_\\sigma*n_\\rho*R^\\rho_{\\beta\\gamma\\mu}*R^\\sigma_{\\alpha\\delta\\nu}"
-                    + "+Power[L,2]*HATK^\\mu*DELTA^{\\alpha\\beta\\gamma}*HATK^\\nu*n_\\rho*(-(1/8)*R_{\\beta\\gamma}*R^\\rho_{\\nu\\alpha\\mu}+(3/20)*R_{\\beta\\gamma}*R^\\rho_{\\mu\\alpha\\nu}+(3/40)*R_{\\alpha\\mu}*R^\\rho_{\\beta\\gamma\\nu}+(1/40)*R^\\sigma_{\\beta\\gamma\\mu}*R^\\rho_{\\nu\\alpha\\sigma}-(3/20)*R^\\sigma_{\\alpha\\beta\\mu}*R^\\rho_{\\gamma\\nu\\sigma}+(1/10)*R^\\sigma_{\\alpha\\beta\\nu}*R^\\rho_{\\gamma\\mu\\sigma})"
-                    + "+Power[L,2]*(L-1)*HATK^\\gamma*DELTA^{\\alpha\\beta}*HATK^{\\mu\\nu}*n_\\rho*"
-                    + "((1/20)*R_{\\alpha\\nu}*R^\\rho_{\\gamma\\beta\\mu}+(1/20)*R_{\\alpha\\gamma}*R^\\rho_{\\mu\\beta\\nu}+(1/10)*R_{\\alpha\\beta}*R^\\rho_{\\mu\\gamma\\nu}+(1/20)*R^\\sigma_{\\alpha\\nu\\gamma}*R^\\rho_{\\sigma\\beta\\mu}-(1/60)*R^\\sigma_{\\mu\\alpha\\nu}*R^\\rho_{\\beta\\sigma\\gamma}+(1/10)*R^\\sigma_{\\alpha\\beta\\gamma}*R^\\rho_{\\mu\\sigma\\nu}-(1/12)*R^\\sigma_{\\alpha\\beta\\nu}*R^\\rho_{\\mu\\sigma\\gamma})"
-                    + "+Power[L,2]*Power[(L-1),2]*HATK^{\\alpha\\beta}*DELTA^{\\gamma}*HATK^{\\mu\\nu}*n_\\rho*"
-                    + "((1/60)*R_{\\alpha\\mu}*R^\\rho_{\\beta\\nu\\gamma}-(1/20)*R_{\\alpha\\mu}*R^\\rho_{\\gamma\\nu\\beta}+(1/120)*R_{\\alpha\\beta}*R^\\rho_{\\mu\\nu\\gamma}+(3/40)*R_{\\alpha\\gamma}*R^\\rho_{\\nu\\beta\\mu}+(1/20)*R^\\sigma_{\\gamma\\mu\\alpha}*R^\\rho_{\\nu\\sigma\\beta}+(1/120)*R^\\sigma_{\\alpha\\mu\\gamma}*R^\\rho_{\\beta\\nu\\sigma}-(1/40)*R^\\sigma_{\\alpha\\mu\\gamma}*R^\\rho_{\\sigma\\nu\\beta}+(1/40)*R^\\sigma_{\\alpha\\mu\\beta}*R^\\rho_{\\sigma\\nu\\gamma}-(1/20)*R^\\sigma_{\\alpha\\mu\\beta}*R^\\rho_{\\gamma\\nu\\sigma}-(1/40)*R^\\sigma_{\\mu\\beta\\nu}*R^\\rho_{\\gamma\\sigma\\alpha})"
-                    + "+Power[L,2]*(L-1)*HATK^{\\alpha\\beta}*DELTA^{\\mu\\nu}*HATK^{\\gamma}*n_\\rho*"
-                    + "((1/20)*R^\\sigma_{\\mu\\nu\\beta}*R^\\rho_{\\gamma\\sigma\\alpha}-(7/60)*R^\\sigma_{\\beta\\mu\\alpha}*R^\\rho_{\\gamma\\nu\\sigma}+(1/20)*R^\\sigma_{\\beta\\mu\\alpha}*R^\\rho_{\\sigma\\nu\\gamma}+(1/10)*R^\\sigma_{\\mu\\beta\\gamma}*R^\\rho_{\\nu\\alpha\\sigma}+(1/60)*R^\\sigma_{\\beta\\mu\\gamma}*R^\\rho_{\\alpha\\nu\\sigma}+(7/120)*R_{\\alpha\\beta}*R^\\rho_{\\nu\\gamma\\mu}+(11/60)*R_{\\beta\\mu}*R^\\rho_{\\nu\\alpha\\gamma})"
-                    + "+Power[L,2]*(L-1)*(L-2)*HATK^{\\alpha\\beta\\gamma}*DELTA^{\\mu}*HATK^{\\nu}*n_\\rho*"
-                    + "((7/240)*R_{\\alpha\\beta}*R^\\rho_{\\gamma\\mu\\nu}+(7/240)*R_{\\alpha\\nu}*R^\\rho_{\\beta\\gamma\\mu}-(1/60)*R_{\\alpha\\mu}*R^\\rho_{\\beta\\gamma\\nu}-(1/24)*R^\\sigma_{\\alpha\\beta\\nu}*R^\\rho_{\\sigma\\gamma\\mu}+(1/15)*R^\\sigma_{\\alpha\\beta\\nu}*R^\\rho_{\\mu\\gamma\\sigma}+(1/40)*R^\\sigma_{\\alpha\\beta\\mu}*R^\\rho_{\\sigma\\gamma\\nu}+(1/40)*R_{\\beta\\gamma}*R^\\rho_{\\nu\\mu\\alpha}+(1/48)*R^\\sigma_{\\beta\\gamma\\mu}*R^\\rho_{\\nu\\alpha\\sigma})"
-                    + "+Power[L,2]*Power[(L-1),2]*(L-2)*HATK^{\\alpha\\beta\\gamma}*HATK^{\\mu\\nu}*n_\\rho*"
-                    + "((-7/240)*R_{\\alpha\\mu}*R^\\rho_{\\beta\\gamma\\nu}+(1/240)*R_{\\beta\\gamma}*R^\\rho_{\\mu\\alpha\\nu}-(1/40)*R^\\sigma_{\\alpha\\mu\\beta}*R^\\rho_{\\nu\\gamma\\sigma})"
-                    + "+L*(L-1)*(L-2)*(L-3)*HATK^{\\mu\\nu\\alpha\\beta}*"
-                    + "((1/180)*R_{\\mu\\nu}*R_{\\alpha\\beta}+(7/720)*R^\\sigma_{\\alpha\\beta\\rho}*R^\\rho_{\\mu\\nu\\sigma})";
+                    + "(1/10)*Power[L,2]*HATK^d*DELTA^{lmab}*HATK^c*n_q*n_p*R^q_{abc}*R^p_{lmd}"
+                    + "+Power[L,2]*Power[(L-1),2]*(L-2)*HATK^{bcd}*DELTA^a*HATK^{lm}*n_q*n_p*"
+                    + "((2/45)*R^p_{adm}*R^q_{blc}-(1/120)*R^p_{dam}*R^q_{blc})"
+                    + "+Power[L,2]*(L-1)*HATK^d*DELTA^{abc}*HATK^{lm}*n_q*n_p*"
+                    + "((-1/10)*R^p_{lcm}*R^q_{adb}+(1/15)*R^p_{dam}*R^q_{blc}+(1/60)*R^p_{bdm}*R^q_{cla})"
+                    + "+Power[L,2]*Power[(L-1),2]*HATK^{cd}*DELTA^{ab}*HATK^{lm}*n_q*n_p*"
+                    + "(-(1/20)*R^p_{lbm}*R^q_{dac}+(1/180)*R^p_{amb}*R^q_{cdl}-(7/360)*R^p_{lcm}*R^q_{adb}-(1/240)*R^p_{dbm}*R^q_{cal}-(1/120)*R^p_{bcm}*R^q_{adl}-(1/30)*R^p_{dbm}*R^q_{acl})"
+                    + "+Power[L,2]*(L-1)*(L-2)*HATK^d*DELTA^{lm}*HATK^{abc}*n_q*n_p*"
+                    + "((-1/30)*R^p_{cmb}*R^q_{adl}-(1/180)*R^p_{lcm}*R^q_{abd}+(1/180)*R^p_{lcd}*R^q_{abm})"
+                    + "+Power[L,2]*Power[(L-1),2]*(L-2)*HATK^{lm}*DELTA^{d}*HATK^{abc}*n_q*n_p*"
+                    + "((1/45)*R^p_{lcm}*R^q_{abd}-(1/80)*R^p_{bmc}*R^q_{lad}+(1/90)*R^p_{bmc}*R^q_{dal})"
+                    + "+Power[L,2]*(L-1)*HATK^{lm}*DELTA^{abc}*HATK^d*n_q*n_p*"
+                    + "((7/120)*R^p_{bcm}*R^q_{lad}-(3/40)*R^p_{bcd}*R^q_{lam}+(1/120)*R^p_{dcm}*R^q_{abl})"
+                    + "+Power[L,2]*(L-1)*(L-2)*HATK^{abc}*DELTA^{lm}*HATK^d*n_q*n_p*"
+                    + "(-(1/24)*R^p_{lcm}*R^q_{abd}-(1/180)*R^p_{mcd}*R^q_{abl}-(1/360)*R^p_{dcm}*R^q_{abl})"
+                    + "-(1/120)*Power[L,2]*(L-1)*(L-2)*(L-3)*HATK^{lmab}*DELTA^{d}*HATK^c*n_q*n_p*R^p_{abc}*R^q_{lmd}"
+                    + "-(1/80)*Power[L,2]*Power[(L-1),2]*(L-2)*(L-3)*HATK^{abcd}*HATK^{lm}*n_q*n_p*R^p_{bcl}*R^q_{adm}"
+                    + "+Power[L,2]*HATK^l*DELTA^{abc}*HATK^m*n_p*(-(1/8)*R_{bc}*R^p_{mal}+(3/20)*R_{bc}*R^p_{lam}+(3/40)*R_{al}*R^p_{bcm}+(1/40)*R^q_{bcl}*R^p_{maq}-(3/20)*R^q_{abl}*R^p_{cmq}+(1/10)*R^q_{abm}*R^p_{clq})"
+                    + "+Power[L,2]*(L-1)*HATK^c*DELTA^{ab}*HATK^{lm}*n_p*"
+                    + "((1/20)*R_{am}*R^p_{cbl}+(1/20)*R_{ac}*R^p_{lbm}+(1/10)*R_{ab}*R^p_{lcm}+(1/20)*R^q_{amc}*R^p_{qbl}-(1/60)*R^q_{lam}*R^p_{bqc}+(1/10)*R^q_{abc}*R^p_{lqm}-(1/12)*R^q_{abm}*R^p_{lqc})"
+                    + "+Power[L,2]*Power[(L-1),2]*HATK^{ab}*DELTA^{c}*HATK^{lm}*n_p*"
+                    + "((1/60)*R_{al}*R^p_{bmc}-(1/20)*R_{al}*R^p_{cmb}+(1/120)*R_{ab}*R^p_{lmc}+(3/40)*R_{ac}*R^p_{mbl}+(1/20)*R^q_{cla}*R^p_{mqb}+(1/120)*R^q_{alc}*R^p_{bmq}-(1/40)*R^q_{alc}*R^p_{qmb}+(1/40)*R^q_{alb}*R^p_{qmc}-(1/20)*R^q_{alb}*R^p_{cmq}-(1/40)*R^q_{lbm}*R^p_{cqa})"
+                    + "+Power[L,2]*(L-1)*HATK^{ab}*DELTA^{lm}*HATK^{c}*n_p*"
+                    + "((1/20)*R^q_{lmb}*R^p_{cqa}-(7/60)*R^q_{bla}*R^p_{cmq}+(1/20)*R^q_{bla}*R^p_{qmc}+(1/10)*R^q_{lbc}*R^p_{maq}+(1/60)*R^q_{blc}*R^p_{amq}+(7/120)*R_{ab}*R^p_{mcl}+(11/60)*R_{bl}*R^p_{mac})"
+                    + "+Power[L,2]*(L-1)*(L-2)*HATK^{abc}*DELTA^{l}*HATK^{m}*n_p*"
+                    + "((7/240)*R_{ab}*R^p_{clm}+(7/240)*R_{am}*R^p_{bcl}-(1/60)*R_{al}*R^p_{bcm}-(1/24)*R^q_{abm}*R^p_{qcl}+(1/15)*R^q_{abm}*R^p_{lcq}+(1/40)*R^q_{abl}*R^p_{qcm}+(1/40)*R_{bc}*R^p_{mla}+(1/48)*R^q_{bcl}*R^p_{maq})"
+                    + "+Power[L,2]*Power[(L-1),2]*(L-2)*HATK^{abc}*HATK^{lm}*n_p*"
+                    + "((-7/240)*R_{al}*R^p_{bcm}+(1/240)*R_{bc}*R^p_{lam}-(1/40)*R^q_{alb}*R^p_{mcq})"
+                    + "+L*(L-1)*(L-2)*(L-3)*HATK^{lmab}*"
+                    + "((1/180)*R_{lm}*R_{ab}+(7/720)*R^q_{abp}*R^p_{lmq})";
     //    public static final String RR_ =
 //            "RR="
-//            + "(1/10)*Power[L,2]*HATK^\\delta*DELTA^{\\mu\\nu\\alpha\\beta}*HATK^\\gamma*n_\\sigma*n_\\rho*R^\\sigma_{\\alpha\\beta\\gamma}*R^\\rho_{\\mu\\nu\\delta}"
+//            + "(1/10)*Power[L,2]*HATK^d*DELTA^{lmab}*HATK^c*n_q*n_p*R^q_{abc}*R^p_{lmd}"
 //            /*
 //             * (L-2)
-//             */ + "+Power[L,2]*Power[(L-1),2]*(L-2)*HATK^{\\beta\\gamma\\delta}*DELTA^\\alpha*HATK^{\\mu\\nu}*n_\\sigma*n_\\rho*"
-//            + "((2/45)*R^\\rho_{\\alpha\\delta\\nu}*R^\\sigma_{\\beta\\mu\\gamma}-(1/120)*R^\\rho_{\\delta\\alpha\\nu}*R^\\sigma_{\\beta\\mu\\gamma})"
-//            + "+Power[L,2]*(L-1)*HATK^\\delta*DELTA^{\\alpha\\beta\\gamma}*HATK^{\\mu\\nu}*n_\\sigma*n_\\rho*"
-//            + "((-1/10)*R^\\rho_{\\mu\\gamma\\nu}*R^\\sigma_{\\alpha\\delta\\beta}+(1/15)*R^\\rho_{\\delta\\alpha\\nu}*R^\\sigma_{\\beta\\mu\\gamma}+(1/60)*R^\\rho_{\\beta\\delta\\nu}*R^\\sigma_{\\gamma\\mu\\alpha})"
-//            + "+Power[L,2]*Power[(L-1),2]*HATK^{\\gamma\\delta}*DELTA^{\\alpha\\beta}*HATK^{\\mu\\nu}*n_\\sigma*n_\\rho*"
-//            + "(-(1/20)*R^\\rho_{\\mu\\beta\\nu}*R^\\sigma_{\\delta\\alpha\\gamma}+(1/180)*R^\\rho_{\\alpha\\nu\\beta}*R^\\sigma_{\\gamma\\delta\\mu}-(7/360)*R^\\rho_{\\mu\\gamma\\nu}*R^\\sigma_{\\alpha\\delta\\beta}-(1/240)*R^\\rho_{\\delta\\beta\\nu}*R^\\sigma_{\\gamma\\alpha\\mu}-(1/120)*R^\\rho_{\\beta\\gamma\\nu}*R^\\sigma_{\\alpha\\delta\\mu}-(1/30)*R^\\rho_{\\delta\\beta\\nu}*R^\\sigma_{\\alpha\\gamma\\mu})"
+//             */ + "+Power[L,2]*Power[(L-1),2]*(L-2)*HATK^{bcd}*DELTA^a*HATK^{lm}*n_q*n_p*"
+//            + "((2/45)*R^p_{adm}*R^q_{blc}-(1/120)*R^p_{dam}*R^q_{blc})"
+//            + "+Power[L,2]*(L-1)*HATK^d*DELTA^{abc}*HATK^{lm}*n_q*n_p*"
+//            + "((-1/10)*R^p_{lcm}*R^q_{adb}+(1/15)*R^p_{dam}*R^q_{blc}+(1/60)*R^p_{bdm}*R^q_{cla})"
+//            + "+Power[L,2]*Power[(L-1),2]*HATK^{cd}*DELTA^{ab}*HATK^{lm}*n_q*n_p*"
+//            + "(-(1/20)*R^p_{lbm}*R^q_{dac}+(1/180)*R^p_{amb}*R^q_{cdl}-(7/360)*R^p_{lcm}*R^q_{adb}-(1/240)*R^p_{dbm}*R^q_{cal}-(1/120)*R^p_{bcm}*R^q_{adl}-(1/30)*R^p_{dbm}*R^q_{acl})"
 //            /*
 //             * (L-2)
-//             */ + "+Power[L,2]*(L-1)*(L-2)*HATK^\\delta*DELTA^{\\mu\\nu}*HATK^{\\alpha\\beta\\gamma}*n_\\sigma*n_\\rho*"
-//            + "((-1/30)*R^\\rho_{\\gamma\\nu\\beta}*R^\\sigma_{\\alpha\\delta\\mu}-(1/180)*R^\\rho_{\\mu\\gamma\\nu}*R^\\sigma_{\\alpha\\beta\\delta}+(1/180)*R^\\rho_{\\mu\\gamma\\delta}*R^\\sigma_{\\alpha\\beta\\nu})"
+//             */ + "+Power[L,2]*(L-1)*(L-2)*HATK^d*DELTA^{lm}*HATK^{abc}*n_q*n_p*"
+//            + "((-1/30)*R^p_{cmb}*R^q_{adl}-(1/180)*R^p_{lcm}*R^q_{abd}+(1/180)*R^p_{lcd}*R^q_{abm})"
 //            /*
 //             * (L-2)
-//             */ + "+Power[L,2]*Power[(L-1),2]*(L-2)*HATK^{\\mu\\nu}*DELTA^{\\delta}*HATK^{\\alpha\\beta\\gamma}*n_\\sigma*n_\\rho*"
-//            + "((1/45)*R^\\rho_{\\mu\\gamma\\nu}*R^\\sigma_{\\alpha\\beta\\delta}-(1/80)*R^\\rho_{\\beta\\nu\\gamma}*R^\\sigma_{\\mu\\alpha\\delta}+(1/90)*R^\\rho_{\\beta\\nu\\gamma}*R^\\sigma_{\\delta\\alpha\\mu})"
-//            + "+Power[L,2]*(L-1)*HATK^{\\mu\\nu}*DELTA^{\\alpha\\beta\\gamma}*HATK^\\delta*n_\\sigma*n_\\rho*"
-//            + "((7/120)*R^\\rho_{\\beta\\gamma\\nu}*R^\\sigma_{\\mu\\alpha\\delta}-(3/40)*R^\\rho_{\\beta\\gamma\\delta}*R^\\sigma_{\\mu\\alpha\\nu}+(1/120)*R^\\rho_{\\delta\\gamma\\nu}*R^\\sigma_{\\alpha\\beta\\mu})"
+//             */ + "+Power[L,2]*Power[(L-1),2]*(L-2)*HATK^{lm}*DELTA^{d}*HATK^{abc}*n_q*n_p*"
+//            + "((1/45)*R^p_{lcm}*R^q_{abd}-(1/80)*R^p_{bmc}*R^q_{lad}+(1/90)*R^p_{bmc}*R^q_{dal})"
+//            + "+Power[L,2]*(L-1)*HATK^{lm}*DELTA^{abc}*HATK^d*n_q*n_p*"
+//            + "((7/120)*R^p_{bcm}*R^q_{lad}-(3/40)*R^p_{bcd}*R^q_{lam}+(1/120)*R^p_{dcm}*R^q_{abl})"
 //            /*
 //             * (L-2)
-//             */ + "+Power[L,2]*(L-1)*(L-2)*HATK^{\\alpha\\beta\\gamma}*DELTA^{\\mu\\nu}*HATK^\\delta*n_\\sigma*n_\\rho*"
-//            + "(-(1/24)*R^\\rho_{\\mu\\gamma\\nu}*R^\\sigma_{\\alpha\\beta\\delta}-(1/180)*R^\\rho_{\\nu\\gamma\\delta}*R^\\sigma_{\\alpha\\beta\\mu}-(1/360)*R^\\rho_{\\delta\\gamma\\nu}*R^\\sigma_{\\alpha\\beta\\mu})"
+//             */ + "+Power[L,2]*(L-1)*(L-2)*HATK^{abc}*DELTA^{lm}*HATK^d*n_q*n_p*"
+//            + "(-(1/24)*R^p_{lcm}*R^q_{abd}-(1/180)*R^p_{mcd}*R^q_{abl}-(1/360)*R^p_{dcm}*R^q_{abl})"
 //            /*
 //             * (L-2)
 //             *//*
 //             * kv reduce
-//             */ + "-(1/120)*Power[L,2]*(L-1)*(L-2)*(L-3)*HATK^\\delta*DELTA^{\\gamma}*HATK^{\\mu\\nu\\alpha\\beta}*n_\\sigma*n_\\rho*R^\\rho_{\\alpha\\beta\\gamma}*R^\\sigma_{\\mu\\nu\\delta}"
-//            ///*(L-2)*//*kv paper*/    + "-(1/120)*Power[L,2]*(L-1)*(L-2)*(L-3)*HATK^{\\mu\\nu\\alpha\\beta}*DELTA^{\\delta}*HATK^\\gamma*n_\\sigma*n_\\rho*R^\\rho_{\\alpha\\beta\\gamma}*R^\\sigma_{\\mu\\nu\\delta}"
+//             */ + "-(1/120)*Power[L,2]*(L-1)*(L-2)*(L-3)*HATK^d*DELTA^{c}*HATK^{lmab}*n_q*n_p*R^p_{abc}*R^q_{lmd}"
+//            ///*(L-2)*//*kv paper*/    + "-(1/120)*Power[L,2]*(L-1)*(L-2)*(L-3)*HATK^{lmab}*DELTA^{d}*HATK^c*n_q*n_p*R^p_{abc}*R^q_{lmd}"
 //
 //            /*
 //             * (L-2)
 //             *//*
 //             * kv reduce
-//             */ + "-(1/80)*Power[L,2]*Power[(L-1),2]*(L-2)*(L-3)*HATK^{\\alpha\\beta\\gamma\\delta}*HATK^{\\mu\\nu}*n_\\sigma*n_\\rho*R^\\rho_{\\gamma\\beta\\mu}*R^\\sigma_{\\alpha\\delta\\nu}"
-//            ///*(L-2)*//*kv paper*/    + "-(1/80)*Power[L,2]*Power[(L-1),2]*(L-2)*(L-3)*HATK^{\\alpha\\beta\\gamma\\delta}*HATK^{\\mu\\nu}*n_\\sigma*n_\\rho*R^\\rho_{\\beta\\gamma\\mu}*R^\\sigma_{\\alpha\\delta\\nu}"
+//             */ + "-(1/80)*Power[L,2]*Power[(L-1),2]*(L-2)*(L-3)*HATK^{abcd}*HATK^{lm}*n_q*n_p*R^p_{cbl}*R^q_{adm}"
+//            ///*(L-2)*//*kv paper*/    + "-(1/80)*Power[L,2]*Power[(L-1),2]*(L-2)*(L-3)*HATK^{abcd}*HATK^{lm}*n_q*n_p*R^p_{bcl}*R^q_{adm}"
 //
-//            + "+Power[L,2]*HATK^\\mu*DELTA^{\\alpha\\beta\\gamma}*HATK^\\nu*n_\\rho*(-(1/8)*R_{\\beta\\gamma}*R^\\rho_{\\nu\\alpha\\mu}+(3/20)*R_{\\beta\\gamma}*R^\\rho_{\\mu\\alpha\\nu}+(3/40)*R_{\\alpha\\mu}*R^\\rho_{\\beta\\gamma\\nu}+(1/40)*R^\\sigma_{\\beta\\gamma\\mu}*R^\\rho_{\\nu\\alpha\\sigma}-(3/20)*R^\\sigma_{\\alpha\\beta\\mu}*R^\\rho_{\\gamma\\nu\\sigma}+(1/10)*R^\\sigma_{\\alpha\\beta\\nu}*R^\\rho_{\\gamma\\mu\\sigma})"
-//            + "+Power[L,2]*(L-1)*HATK^\\gamma*DELTA^{\\alpha\\beta}*HATK^{\\mu\\nu}*n_\\rho*"
-//            + "((1/20)*R_{\\alpha\\nu}*R^\\rho_{\\gamma\\beta\\mu}+(1/20)*R_{\\alpha\\gamma}*R^\\rho_{\\mu\\beta\\nu}+(1/10)*R_{\\alpha\\beta}*R^\\rho_{\\mu\\gamma\\nu}+(1/20)*R^\\sigma_{\\alpha\\nu\\gamma}*R^\\rho_{\\sigma\\beta\\mu}-(1/60)*R^\\sigma_{\\mu\\alpha\\nu}*R^\\rho_{\\beta\\sigma\\gamma}+(1/10)*R^\\sigma_{\\alpha\\beta\\gamma}*R^\\rho_{\\mu\\sigma\\nu}-(1/12)*R^\\sigma_{\\alpha\\beta\\nu}*R^\\rho_{\\mu\\sigma\\gamma})"
-//            + "+Power[L,2]*Power[(L-1),2]*HATK^{\\alpha\\beta}*DELTA^{\\gamma}*HATK^{\\mu\\nu}*n_\\rho*"
-//            + "((1/60)*R_{\\alpha\\mu}*R^\\rho_{\\beta\\nu\\gamma}-(1/20)*R_{\\alpha\\mu}*R^\\rho_{\\gamma\\nu\\beta}+(1/120)*R_{\\alpha\\beta}*R^\\rho_{\\mu\\nu\\gamma}+(3/40)*R_{\\alpha\\gamma}*R^\\rho_{\\nu\\beta\\mu}+(1/20)*R^\\sigma_{\\gamma\\mu\\alpha}*R^\\rho_{\\nu\\sigma\\beta}+(1/120)*R^\\sigma_{\\alpha\\mu\\gamma}*R^\\rho_{\\beta\\nu\\sigma}-(1/40)*R^\\sigma_{\\alpha\\mu\\gamma}*R^\\rho_{\\sigma\\nu\\beta}+(1/40)*R^\\sigma_{\\alpha\\mu\\beta}*R^\\rho_{\\sigma\\nu\\gamma}-(1/20)*R^\\sigma_{\\alpha\\mu\\beta}*R^\\rho_{\\gamma\\nu\\sigma}-(1/40)*R^\\sigma_{\\mu\\beta\\nu}*R^\\rho_{\\gamma\\sigma\\alpha})"
-//            + "+Power[L,2]*(L-1)*HATK^{\\alpha\\beta}*DELTA^{\\mu\\nu}*HATK^{\\gamma}*n_\\rho*"
-//            + "((1/20)*R^\\sigma_{\\mu\\nu\\beta}*R^\\rho_{\\gamma\\sigma\\alpha}-(7/60)*R^\\sigma_{\\beta\\mu\\alpha}*R^\\rho_{\\gamma\\nu\\sigma}+(1/20)*R^\\sigma_{\\beta\\mu\\alpha}*R^\\rho_{\\sigma\\nu\\gamma}+(1/10)*R^\\sigma_{\\mu\\beta\\gamma}*R^\\rho_{\\nu\\alpha\\sigma}+(1/60)*R^\\sigma_{\\beta\\mu\\gamma}*R^\\rho_{\\alpha\\nu\\sigma}+(7/120)*R_{\\alpha\\beta}*R^\\rho_{\\nu\\gamma\\mu}+(11/60)*R_{\\beta\\mu}*R^\\rho_{\\nu\\alpha\\gamma})"
+//            + "+Power[L,2]*HATK^l*DELTA^{abc}*HATK^m*n_p*(-(1/8)*R_{bc}*R^p_{mal}+(3/20)*R_{bc}*R^p_{lam}+(3/40)*R_{al}*R^p_{bcm}+(1/40)*R^q_{bcl}*R^p_{maq}-(3/20)*R^q_{abl}*R^p_{cmq}+(1/10)*R^q_{abm}*R^p_{clq})"
+//            + "+Power[L,2]*(L-1)*HATK^c*DELTA^{ab}*HATK^{lm}*n_p*"
+//            + "((1/20)*R_{am}*R^p_{cbl}+(1/20)*R_{ac}*R^p_{lbm}+(1/10)*R_{ab}*R^p_{lcm}+(1/20)*R^q_{amc}*R^p_{qbl}-(1/60)*R^q_{lam}*R^p_{bqc}+(1/10)*R^q_{abc}*R^p_{lqm}-(1/12)*R^q_{abm}*R^p_{lqc})"
+//            + "+Power[L,2]*Power[(L-1),2]*HATK^{ab}*DELTA^{c}*HATK^{lm}*n_p*"
+//            + "((1/60)*R_{al}*R^p_{bmc}-(1/20)*R_{al}*R^p_{cmb}+(1/120)*R_{ab}*R^p_{lmc}+(3/40)*R_{ac}*R^p_{mbl}+(1/20)*R^q_{cla}*R^p_{mqb}+(1/120)*R^q_{alc}*R^p_{bmq}-(1/40)*R^q_{alc}*R^p_{qmb}+(1/40)*R^q_{alb}*R^p_{qmc}-(1/20)*R^q_{alb}*R^p_{cmq}-(1/40)*R^q_{lbm}*R^p_{cqa})"
+//            + "+Power[L,2]*(L-1)*HATK^{ab}*DELTA^{lm}*HATK^{c}*n_p*"
+//            + "((1/20)*R^q_{lmb}*R^p_{cqa}-(7/60)*R^q_{bla}*R^p_{cmq}+(1/20)*R^q_{bla}*R^p_{qmc}+(1/10)*R^q_{lbc}*R^p_{maq}+(1/60)*R^q_{blc}*R^p_{amq}+(7/120)*R_{ab}*R^p_{mcl}+(11/60)*R_{bl}*R^p_{mac})"
 //            /*
 //             * (L-2)
-//             */ + "+Power[L,2]*(L-1)*(L-2)*HATK^{\\alpha\\beta\\gamma}*DELTA^{\\mu}*HATK^{\\nu}*n_\\rho*"
-//            + "((7/240)*R_{\\alpha\\beta}*R^\\rho_{\\gamma\\mu\\nu}+(7/240)*R_{\\alpha\\nu}*R^\\rho_{\\beta\\gamma\\mu}-(1/60)*R_{\\alpha\\mu}*R^\\rho_{\\beta\\gamma\\nu}-(1/24)*R^\\sigma_{\\alpha\\beta\\nu}*R^\\rho_{\\sigma\\gamma\\mu}+(1/15)*R^\\sigma_{\\alpha\\beta\\nu}*R^\\rho_{\\mu\\gamma\\sigma}+(1/40)*R^\\sigma_{\\alpha\\beta\\mu}*R^\\rho_{\\sigma\\gamma\\nu}+(1/40)*R_{\\beta\\gamma}*R^\\rho_{\\nu\\mu\\alpha}+(1/48)*R^\\sigma_{\\beta\\gamma\\mu}*R^\\rho_{\\nu\\alpha\\sigma})"
+//             */ + "+Power[L,2]*(L-1)*(L-2)*HATK^{abc}*DELTA^{l}*HATK^{m}*n_p*"
+//            + "((7/240)*R_{ab}*R^p_{clm}+(7/240)*R_{am}*R^p_{bcl}-(1/60)*R_{al}*R^p_{bcm}-(1/24)*R^q_{abm}*R^p_{qcl}+(1/15)*R^q_{abm}*R^p_{lcq}+(1/40)*R^q_{abl}*R^p_{qcm}+(1/40)*R_{bc}*R^p_{mla}+(1/48)*R^q_{bcl}*R^p_{maq})"
 //            /*
 //             * (L-2)
 //             *//*
 //             * kv reduce
-//             */ + "+Power[L,2]*Power[(L-1),2]*(L-2)*HATK^{\\mu\\nu}*HATK^{\\alpha\\beta\\gamma}*n_\\rho*"
-//            ///*(L-2)*//*kv paper*/   + "+Power[L,2]*Power[(L-1),2]*(L-2)*HATK^{\\alpha\\beta\\gamma}*HATK^{\\mu\\nu}*n_\\rho*"
-//            + "((-7/240)*R_{\\alpha\\mu}*R^\\rho_{\\beta\\gamma\\nu}+(1/240)*R_{\\beta\\gamma}*R^\\rho_{\\mu\\alpha\\nu}-(1/40)*R^\\sigma_{\\alpha\\mu\\beta}*R^\\rho_{\\nu\\gamma\\sigma})"
+//             */ + "+Power[L,2]*Power[(L-1),2]*(L-2)*HATK^{lm}*HATK^{abc}*n_p*"
+//            ///*(L-2)*//*kv paper*/   + "+Power[L,2]*Power[(L-1),2]*(L-2)*HATK^{abc}*HATK^{lm}*n_p*"
+//            + "((-7/240)*R_{al}*R^p_{bcm}+(1/240)*R_{bc}*R^p_{lam}-(1/40)*R^q_{alb}*R^p_{mcq})"
 //            /*
 //             * (L-2)
-//             */ + "+L*(L-1)*(L-2)*(L-3)*HATK^{\\mu\\nu\\alpha\\beta}*"
-//            + "((1/180)*R_{\\mu\\nu}*R_{\\alpha\\beta}+(7/720)*R^\\sigma_{\\alpha\\beta\\rho}*R^\\rho_{\\mu\\nu\\sigma})";
+//             */ + "+L*(L-1)*(L-2)*(L-3)*HATK^{lmab}*"
+//            + "((1/180)*R_{lm}*R_{ab}+(7/720)*R^q_{abp}*R^p_{lmq})";
     //From KV
-    //public static final String RR_ = "RR=L**2/10 *(R^{\\sigma}_{\\alpha \\beta \\gamma }*R^{\\rho}_{\\mu \\nu \\delta } *n_{\\sigma}*n_{\\rho})*HATK^{\\delta  }*DELTA^{\\mu \\nu \\alpha \\beta  }*HATK^{\\gamma  } + L**2*(L-1)**2*(L-2)*n_{\\sigma}*n_{\\rho} *(2/45*R^{\\rho}_{\\alpha \\delta \\nu }*R^{\\sigma}_{\\beta \\mu \\gamma }-1/120*R^{\\rho}_{\\delta \\alpha \\nu }*R^{\\sigma}_{\\beta \\mu \\gamma }) *HATK^{\\beta \\gamma \\delta  }*DELTA^{\\alpha  }*HATK^{\\mu \\nu  } + L**2*(L-1)*n_{\\rho}*n_{\\sigma} *(-1/10*R^{\\sigma}_{\\mu \\gamma \\nu }*R^{\\rho}_{\\alpha \\delta \\beta }+1/15*R^{\\sigma}_{\\delta \\alpha \\nu }*R^{\\rho}_{\\beta \\mu \\gamma } +1/60*R^{\\sigma}_{\\beta \\delta \\nu }*R^{\\rho}_{\\gamma \\mu \\alpha }) *HATK^{\\delta  }*DELTA^{\\alpha \\beta \\gamma  }*HATK^{\\mu \\nu  } + L**2*(L-1)**2*n_{\\sigma}*n_{\\rho} *(-1/20*R^{\\rho}_{\\mu \\beta \\nu }*R^{\\sigma}_{\\delta \\alpha \\gamma }+1/180*R^{\\rho}_{\\alpha \\nu \\beta }*R^{\\sigma}_{\\gamma \\delta \\mu } -7/360*R^{\\rho}_{\\mu \\gamma \\nu }*R^{\\sigma}_{\\alpha \\delta \\beta }-1/240*R^{\\rho}_{\\delta \\beta \\nu }*R^{\\sigma}_{\\gamma \\alpha \\mu } -1/120*R^{\\rho}_{\\beta \\gamma \\nu }*R^{\\sigma}_{\\alpha \\delta \\mu }-1/30*R^{\\rho}_{\\delta \\beta \\nu }*R^{\\sigma}_{\\alpha \\gamma \\mu }) *HATK^{\\gamma \\delta  }*DELTA^{\\alpha \\beta  }*HATK^{\\mu \\nu  } + L**2*(L-1)*(L-2)*n_{\\sigma}*n_{\\rho} *(-1/30*R^{\\sigma}_{\\gamma \\nu \\beta }*R^{\\rho}_{\\alpha \\delta \\mu }-1/180*R^{\\sigma}_{\\mu \\gamma \\nu }*R^{\\rho}_{\\alpha \\beta \\delta } +1/180*R^{\\sigma}_{\\mu \\gamma \\delta }*R^{\\rho}_{\\alpha \\beta \\nu }) *HATK^{\\delta  }*DELTA^{\\mu \\nu  }*HATK^{\\alpha \\beta \\gamma  } + L**2*(L-1)**2*(L-2)*n_{\\sigma}*n_{\\rho} *(1/45*R^{\\rho}_{\\mu \\gamma \\nu }*R^{\\sigma}_{\\alpha \\beta \\delta }-1/80*R^{\\rho}_{\\beta \\nu \\gamma }*R^{\\sigma}_{\\mu \\alpha \\delta } +1/90*R^{\\rho}_{\\beta \\nu \\gamma }*R^{\\sigma}_{\\delta \\alpha \\mu }) *HATK^{\\mu \\nu  }*DELTA^{\\delta  }*HATK^{\\alpha \\beta \\gamma  } + L**2*(L-1)*n_{\\sigma}*n_{\\rho} *(7/120*R^{\\rho}_{\\beta \\gamma \\nu }*R^{\\sigma}_{\\mu \\alpha \\delta }-3/40*R^{\\rho}_{\\beta \\gamma \\delta }*R^{\\sigma}_{\\mu \\alpha \\nu } +1/120*R^{\\rho}_{\\delta \\gamma \\nu }*R^{\\sigma}_{\\alpha \\beta \\mu }) *HATK^{\\mu \\nu  }*DELTA^{\\alpha \\beta \\gamma  }*HATK^{\\delta  } + L**2*(L-1)*(L-2)*n_{\\sigma}*n_{\\rho} *(-1/24*R^{\\rho}_{\\mu \\gamma \\nu }*R^{\\sigma}_{\\alpha \\beta \\delta }-1/180*R^{\\rho}_{\\nu \\gamma \\delta }*R^{\\sigma}_{\\alpha \\beta \\mu } -1/360*R^{\\rho}_{\\delta \\gamma \\nu }*R^{\\sigma}_{\\alpha \\beta \\mu }) *HATK^{\\alpha \\beta \\gamma  }*DELTA^{\\mu \\nu  }*HATK^{\\delta  } - L**2*(L-1)*(L-2)*(L-3)*(n_{\\sigma}*n_{\\rho} *R^{\\sigma}_{\\alpha \\beta \\gamma }*R^{\\rho}_{\\mu \\nu \\delta }) *HATK^{\\delta  }*DELTA^{\\gamma  }*HATK^{\\mu \\nu \\alpha \\beta  } /120 - L**2*(L-1)**2*(L-2)*(L-3)*(n_{\\sigma}*n_{\\rho} *R^{\\rho}_{\\gamma \\beta \\mu }*R^{\\sigma}_{\\alpha \\delta \\nu }) *HATK^{\\alpha \\beta \\gamma \\delta  }*HATK^{\\mu \\nu  } /80 + L**2*n_{\\rho} *(-1/8*R_{\\beta \\gamma}*R^{\\rho}_{\\nu \\alpha \\mu }+3/20*R_{\\beta \\gamma}*R^{\\rho}_{\\mu \\alpha \\nu } +3/40*R_{\\alpha \\mu}*R^{\\rho}_{\\beta \\gamma \\nu }+1/40*R^{\\sigma}_{\\beta \\gamma \\mu }*R^{\\rho}_{\\nu \\alpha \\sigma } -3/20*R^{\\sigma}_{\\alpha \\beta \\mu }*R^{\\rho}_{\\gamma \\nu \\sigma }+1/10*R^{\\sigma}_{\\alpha \\beta \\nu }*R^{\\rho}_{\\gamma \\mu \\sigma }) *HATK^{\\mu  }*DELTA^{\\alpha \\beta \\gamma  }*HATK^{\\nu  } + L**2*(L-1)*n_{\\rho} *(1/20*R_{\\alpha \\nu}*R^{\\rho}_{\\gamma \\beta \\mu } +1/20*R_{\\alpha \\gamma}*R^{\\rho}_{\\mu \\beta \\nu }+1/10*R_{\\alpha \\beta}*R^{\\rho}_{\\mu \\gamma \\nu } +1/20*R^{\\sigma}_{\\alpha \\nu \\gamma }*R^{\\rho}_{\\sigma \\beta \\mu }-1/60*R^{\\sigma}_{\\mu \\alpha \\nu }*R^{\\rho}_{\\beta \\sigma \\gamma } +1/10*R^{\\sigma}_{\\alpha \\beta \\gamma }*R^{\\rho}_{\\mu \\sigma \\nu }-1/12*R^{\\sigma}_{\\alpha \\beta \\nu }*R^{\\rho}_{\\mu \\sigma \\gamma }) *HATK^{\\gamma  }*DELTA^{\\alpha \\beta  }*HATK^{\\mu \\nu  } + L**2*(L-1)**2*n_{\\rho} *(1/60*R_{\\alpha \\mu}*R^{\\rho}_{\\beta \\nu \\gamma }-1/20*R_{\\alpha \\mu}*R^{\\rho}_{\\gamma \\nu \\beta } +1/120*R_{\\alpha \\beta}*R^{\\rho}_{\\mu \\nu \\gamma }+3/40*R_{\\alpha \\gamma}*R^{\\rho}_{\\nu \\beta \\mu } +1/20*R^{\\sigma}_{\\gamma \\mu \\alpha }*R^{\\rho}_{\\nu \\sigma \\beta }+1/120*R^{\\sigma}_{\\alpha \\mu \\gamma }*R^{\\rho}_{\\beta \\nu \\sigma } -1/40*R^{\\sigma}_{\\alpha \\mu \\gamma }*R^{\\rho}_{\\sigma \\nu \\beta }+1/40*R^{\\sigma}_{\\alpha \\mu \\beta }*R^{\\rho}_{\\sigma \\nu \\gamma } -1/20*R^{\\sigma}_{\\alpha \\mu \\beta }*R^{\\rho}_{\\gamma \\nu \\sigma }-1/40*R^{\\sigma}_{\\mu \\beta \\nu }*R^{\\rho}_{\\gamma \\sigma \\alpha }) *HATK^{\\alpha \\beta  }*DELTA^{\\gamma  }*HATK^{\\mu \\nu  } + L**2*(L-1)*n_{\\rho} *(1/20*R^{\\sigma}_{\\mu \\nu \\beta }*R^{\\rho}_{\\gamma \\sigma \\alpha }-7/60*R^{\\sigma}_{\\beta \\mu \\alpha }*R^{\\rho}_{\\gamma \\nu \\sigma } +1/20*R^{\\sigma}_{\\beta \\mu \\alpha }*R^{\\rho}_{\\sigma \\nu \\gamma }+1/10*R^{\\sigma}_{\\mu \\beta \\gamma }*R^{\\rho}_{\\nu \\alpha \\sigma } +1/60*R^{\\sigma}_{\\beta \\mu \\gamma }*R^{\\rho}_{\\alpha \\nu \\sigma }+7/120*R_{\\alpha \\beta}*R^{\\rho}_{\\nu \\gamma \\mu } +11/60*R_{\\beta \\mu}*R^{\\rho}_{\\nu \\alpha \\gamma }) *HATK^{\\alpha \\beta  }*DELTA^{\\mu \\nu  }*HATK^{\\gamma  } + L**2*(L-1)*(L-2)*n_{\\rho} *(7/240*R_{\\alpha \\beta}*R^{\\rho}_{\\gamma \\mu \\nu }+7/240*R_{\\alpha \\nu}*R^{\\rho}_{\\beta \\gamma \\mu } -1/60*R_{\\alpha \\mu}*R^{\\rho}_{\\beta \\gamma \\nu }-1/24*R^{\\sigma}_{\\alpha \\beta \\nu }*R^{\\rho}_{\\sigma \\gamma \\mu } +1/15*R^{\\sigma}_{\\alpha \\beta \\nu }*R^{\\rho}_{\\mu \\gamma \\sigma }+1/40*R^{\\sigma}_{\\alpha \\beta \\mu }*R^{\\rho}_{\\sigma \\gamma \\nu } +1/40*R_{\\beta \\gamma}*R^{\\rho}_{\\nu \\mu \\alpha }+1/48*R^{\\sigma}_{\\beta \\gamma \\mu }*R^{\\rho}_{\\nu \\alpha \\sigma }) *HATK^{\\alpha \\beta \\gamma  }*DELTA^{\\mu  }*HATK^{\\nu  } + L**2*(L-1)**2*(L-2) *n_{\\rho}*(-7/240*R^{\\rho}_{\\beta \\gamma \\nu }*R_{\\mu \\alpha}+1/240*R^{\\rho}_{\\mu \\alpha \\nu }*R_{\\beta \\gamma} -1/40*R^{\\rho}_{\\nu \\gamma \\sigma }*R^{\\sigma}_{\\alpha \\mu \\beta }) *HATK^{\\mu \\nu  }*HATK^{\\alpha \\beta \\gamma  } + L*(L-1)*(L-2)*(L-3) *(1/180*R_{\\mu \\nu}*R_{\\alpha \\beta}+7/720*R^{\\sigma}_{\\alpha \\beta \\rho }*R^{\\rho}_{\\mu \\nu \\sigma }) *HATK^{\\mu \\nu \\alpha \\beta  }";
-    private static final String DELTA_1_ = "DELTA^\\mu=-L*HATK^\\mu";
-    private static final String DELTA_2_ = "DELTA^{\\mu\\nu}=-(1/2)*L*(L-1)*HATK^{\\mu\\nu}+Power[L,2]*(1/2)*(HATK^{\\mu }*HATK^{\\nu }+HATK^{\\nu }*HATK^{\\mu })";
+    //public static final String RR_ = "RR=L**2/10 *(R^{q}_{a b c }*R^{p}_{l m d } *n_{q}*n_{p})*HATK^{d  }*DELTA^{l m a b  }*HATK^{c  } + L**2*(L-1)**2*(L-2)*n_{q}*n_{p} *(2/45*R^{p}_{a d m }*R^{q}_{b l c }-1/120*R^{p}_{d a m }*R^{q}_{b l c }) *HATK^{b c d  }*DELTA^{a  }*HATK^{l m  } + L**2*(L-1)*n_{p}*n_{q} *(-1/10*R^{q}_{l c m }*R^{p}_{a d b }+1/15*R^{q}_{d a m }*R^{p}_{b l c } +1/60*R^{q}_{b d m }*R^{p}_{c l a }) *HATK^{d  }*DELTA^{a b c  }*HATK^{l m  } + L**2*(L-1)**2*n_{q}*n_{p} *(-1/20*R^{p}_{l b m }*R^{q}_{d a c }+1/180*R^{p}_{a m b }*R^{q}_{c d l } -7/360*R^{p}_{l c m }*R^{q}_{a d b }-1/240*R^{p}_{d b m }*R^{q}_{c a l } -1/120*R^{p}_{b c m }*R^{q}_{a d l }-1/30*R^{p}_{d b m }*R^{q}_{a c l }) *HATK^{c d  }*DELTA^{a b  }*HATK^{l m  } + L**2*(L-1)*(L-2)*n_{q}*n_{p} *(-1/30*R^{q}_{c m b }*R^{p}_{a d l }-1/180*R^{q}_{l c m }*R^{p}_{a b d } +1/180*R^{q}_{l c d }*R^{p}_{a b m }) *HATK^{d  }*DELTA^{l m  }*HATK^{a b c  } + L**2*(L-1)**2*(L-2)*n_{q}*n_{p} *(1/45*R^{p}_{l c m }*R^{q}_{a b d }-1/80*R^{p}_{b m c }*R^{q}_{l a d } +1/90*R^{p}_{b m c }*R^{q}_{d a l }) *HATK^{l m  }*DELTA^{d  }*HATK^{a b c  } + L**2*(L-1)*n_{q}*n_{p} *(7/120*R^{p}_{b c m }*R^{q}_{l a d }-3/40*R^{p}_{b c d }*R^{q}_{l a m } +1/120*R^{p}_{d c m }*R^{q}_{a b l }) *HATK^{l m  }*DELTA^{a b c  }*HATK^{d  } + L**2*(L-1)*(L-2)*n_{q}*n_{p} *(-1/24*R^{p}_{l c m }*R^{q}_{a b d }-1/180*R^{p}_{m c d }*R^{q}_{a b l } -1/360*R^{p}_{d c m }*R^{q}_{a b l }) *HATK^{a b c  }*DELTA^{l m  }*HATK^{d  } - L**2*(L-1)*(L-2)*(L-3)*(n_{q}*n_{p} *R^{q}_{a b c }*R^{p}_{l m d }) *HATK^{d  }*DELTA^{c  }*HATK^{l m a b  } /120 - L**2*(L-1)**2*(L-2)*(L-3)*(n_{q}*n_{p} *R^{p}_{c b l }*R^{q}_{a d m }) *HATK^{a b c d  }*HATK^{l m  } /80 + L**2*n_{p} *(-1/8*R_{b c}*R^{p}_{m a l }+3/20*R_{b c}*R^{p}_{l a m } +3/40*R_{a l}*R^{p}_{b c m }+1/40*R^{q}_{b c l }*R^{p}_{m a q } -3/20*R^{q}_{a b l }*R^{p}_{c m q }+1/10*R^{q}_{a b m }*R^{p}_{c l q }) *HATK^{l  }*DELTA^{a b c  }*HATK^{m  } + L**2*(L-1)*n_{p} *(1/20*R_{a m}*R^{p}_{c b l } +1/20*R_{a c}*R^{p}_{l b m }+1/10*R_{a b}*R^{p}_{l c m } +1/20*R^{q}_{a m c }*R^{p}_{q b l }-1/60*R^{q}_{l a m }*R^{p}_{b q c } +1/10*R^{q}_{a b c }*R^{p}_{l q m }-1/12*R^{q}_{a b m }*R^{p}_{l q c }) *HATK^{c  }*DELTA^{a b  }*HATK^{l m  } + L**2*(L-1)**2*n_{p} *(1/60*R_{a l}*R^{p}_{b m c }-1/20*R_{a l}*R^{p}_{c m b } +1/120*R_{a b}*R^{p}_{l m c }+3/40*R_{a c}*R^{p}_{m b l } +1/20*R^{q}_{c l a }*R^{p}_{m q b }+1/120*R^{q}_{a l c }*R^{p}_{b m q } -1/40*R^{q}_{a l c }*R^{p}_{q m b }+1/40*R^{q}_{a l b }*R^{p}_{q m c } -1/20*R^{q}_{a l b }*R^{p}_{c m q }-1/40*R^{q}_{l b m }*R^{p}_{c q a }) *HATK^{a b  }*DELTA^{c  }*HATK^{l m  } + L**2*(L-1)*n_{p} *(1/20*R^{q}_{l m b }*R^{p}_{c q a }-7/60*R^{q}_{b l a }*R^{p}_{c m q } +1/20*R^{q}_{b l a }*R^{p}_{q m c }+1/10*R^{q}_{l b c }*R^{p}_{m a q } +1/60*R^{q}_{b l c }*R^{p}_{a m q }+7/120*R_{a b}*R^{p}_{m c l } +11/60*R_{b l}*R^{p}_{m a c }) *HATK^{a b  }*DELTA^{l m  }*HATK^{c  } + L**2*(L-1)*(L-2)*n_{p} *(7/240*R_{a b}*R^{p}_{c l m }+7/240*R_{a m}*R^{p}_{b c l } -1/60*R_{a l}*R^{p}_{b c m }-1/24*R^{q}_{a b m }*R^{p}_{q c l } +1/15*R^{q}_{a b m }*R^{p}_{l c q }+1/40*R^{q}_{a b l }*R^{p}_{q c m } +1/40*R_{b c}*R^{p}_{m l a }+1/48*R^{q}_{b c l }*R^{p}_{m a q }) *HATK^{a b c  }*DELTA^{l  }*HATK^{m  } + L**2*(L-1)**2*(L-2) *n_{p}*(-7/240*R^{p}_{b c m }*R_{l a}+1/240*R^{p}_{l a m }*R_{b c} -1/40*R^{p}_{m c q }*R^{q}_{a l b }) *HATK^{l m  }*HATK^{a b c  } + L*(L-1)*(L-2)*(L-3) *(1/180*R_{l m}*R_{a b}+7/720*R^{q}_{a b p }*R^{p}_{l m q }) *HATK^{l m a b  }";
+    private static final String DELTA_1_ = "DELTA^l=-L*HATK^l";
+    private static final String DELTA_2_ = "DELTA^{lm}=-(1/2)*L*(L-1)*HATK^{lm}+Power[L,2]*(1/2)*(HATK^{l }*HATK^{m }+HATK^{m }*HATK^{l })";
     private static final String DELTA_3_ =
-            "DELTA^{\\mu\\nu\\alpha}="
-                    + "-(1/6)*L*(L-1)*(L-2)*HATK^{\\mu\\nu\\alpha}"
+            "DELTA^{lma}="
+                    + "-(1/6)*L*(L-1)*(L-2)*HATK^{lma}"
                     + "+(1/2)*Power[L,2]*(L-1)*(1/3)*("
-                    + "HATK^{\\mu \\nu }*HATK^{\\alpha }+"
-                    + "HATK^{\\alpha \\nu }*HATK^{\\mu }+"
-                    + "HATK^{\\mu \\alpha }*HATK^{\\nu })"
+                    + "HATK^{l m }*HATK^{a }+"
+                    + "HATK^{a m }*HATK^{l }+"
+                    + "HATK^{l a }*HATK^{m })"
                     + "+1/2*Power[L,2]*(L-1)*(1/3)*("
-                    + "HATK^{\\alpha }*HATK^{\\mu \\nu }+"
-                    + "HATK^{\\mu }*HATK^{\\alpha \\nu }+"
-                    + "HATK^{\\nu }*HATK^{\\alpha \\mu })"
+                    + "HATK^{a }*HATK^{l m }+"
+                    + "HATK^{l }*HATK^{a m }+"
+                    + "HATK^{m }*HATK^{a l })"
                     + "-Power[L,3]*(1/6)*("
-                    + "HATK^{\\mu }*HATK^{\\nu }*HATK^{\\alpha }+"
-                    + "HATK^{\\mu }*HATK^{\\alpha }*HATK^{\\nu }+"
-                    + "HATK^{\\nu }*HATK^{\\alpha }*HATK^{\\mu }+"
-                    + "HATK^{\\nu }*HATK^{\\mu }*HATK^{\\alpha }+"
-                    + "HATK^{\\alpha }*HATK^{\\mu }*HATK^{\\nu }+"
-                    + "HATK^{\\alpha }*HATK^{\\nu }*HATK^{\\mu })";
+                    + "HATK^{l }*HATK^{m }*HATK^{a }+"
+                    + "HATK^{l }*HATK^{a }*HATK^{m }+"
+                    + "HATK^{m }*HATK^{a }*HATK^{l }+"
+                    + "HATK^{m }*HATK^{l }*HATK^{a }+"
+                    + "HATK^{a }*HATK^{l }*HATK^{m }+"
+                    + "HATK^{a }*HATK^{m }*HATK^{l })";
     private static final String DELTA_4_ =
-            "DELTA^{\\mu\\nu\\alpha\\beta}="
-                    + "-(1/24)*L*(L-1)*(L-2)*(L-3)*HATK^{\\mu\\nu\\alpha\\beta}"
+            "DELTA^{lmab}="
+                    + "-(1/24)*L*(L-1)*(L-2)*(L-3)*HATK^{lmab}"
                     + "+(1/6)*Power[L,2]*(L-1)*(L-2)*(1/4)*("
-                    + "HATK^{\\mu \\nu \\alpha }*HATK^{\\beta }+"
-                    + "HATK^{\\mu \\nu \\beta }*HATK^{\\alpha }+"
-                    + "HATK^{\\beta \\mu \\alpha }*HATK^{\\nu }+"
-                    + "HATK^{\\nu \\beta \\alpha }*HATK^{\\mu })"
+                    + "HATK^{l m a }*HATK^{b }+"
+                    + "HATK^{l m b }*HATK^{a }+"
+                    + "HATK^{b l a }*HATK^{m }+"
+                    + "HATK^{m b a }*HATK^{l })"
                     + "+(1/6)*Power[L,2]*(L-1)*(L-2)*(1/4)*("
-                    + "HATK^{\\beta }*HATK^{\\mu \\nu \\alpha }+"
-                    + "HATK^{\\alpha }*HATK^{\\mu \\nu \\beta }+"
-                    + "HATK^{\\mu }*HATK^{\\beta \\nu \\alpha }+"
-                    + "HATK^{\\nu }*HATK^{\\beta \\mu \\alpha })"
+                    + "HATK^{b }*HATK^{l m a }+"
+                    + "HATK^{a }*HATK^{l m b }+"
+                    + "HATK^{l }*HATK^{b m a }+"
+                    + "HATK^{m }*HATK^{b l a })"
                     + "+(1/4)*Power[L,2]*Power[(L-1),2]*(1/6)*("
-                    + "HATK^{\\mu\\nu}*HATK^{\\alpha\\beta}+"
-                    + "HATK^{\\mu\\beta}*HATK^{\\alpha\\nu}+"
-                    + "HATK^{\\mu\\alpha}*HATK^{\\nu\\beta}+"
-                    + "HATK^{\\alpha\\nu}*HATK^{\\mu\\beta}+"
-                    + "HATK^{\\beta\\nu}*HATK^{\\alpha\\mu}+"
-                    + "HATK^{\\alpha\\beta}*HATK^{\\mu\\nu})"
+                    + "HATK^{lm}*HATK^{ab}+"
+                    + "HATK^{lb}*HATK^{am}+"
+                    + "HATK^{la}*HATK^{mb}+"
+                    + "HATK^{am}*HATK^{lb}+"
+                    + "HATK^{bm}*HATK^{al}+"
+                    + "HATK^{ab}*HATK^{lm})"
                     + "-(1/2)*Power[L,3]*(L-1)*(1/12)*("
-                    + "HATK^{\\mu\\nu}*HATK^\\alpha*HATK^\\beta+"
-                    + "HATK^{\\mu\\nu}*HATK^\\beta*HATK^\\alpha+"
-                    + "HATK^{\\mu\\beta}*HATK^\\alpha*HATK^\\nu+"
-                    + "HATK^{\\mu\\beta}*HATK^\\nu*HATK^\\alpha+"
-                    + "HATK^{\\mu\\alpha}*HATK^\\nu*HATK^\\beta+"
-                    + "HATK^{\\mu\\alpha}*HATK^\\beta*HATK^\\nu+"
-                    + "HATK^{\\nu\\alpha}*HATK^\\mu*HATK^\\beta+"
-                    + "HATK^{\\nu\\alpha}*HATK^\\beta*HATK^\\mu+"
-                    + "HATK^{\\nu\\beta}*HATK^\\alpha*HATK^\\mu+"
-                    + "HATK^{\\nu\\beta}*HATK^\\mu*HATK^\\alpha+"
-                    + "HATK^{\\alpha\\beta}*HATK^\\mu*HATK^\\nu+"
-                    + "HATK^{\\alpha\\beta}*HATK^\\nu*HATK^\\mu)"
+                    + "HATK^{lm}*HATK^a*HATK^b+"
+                    + "HATK^{lm}*HATK^b*HATK^a+"
+                    + "HATK^{lb}*HATK^a*HATK^m+"
+                    + "HATK^{lb}*HATK^m*HATK^a+"
+                    + "HATK^{la}*HATK^m*HATK^b+"
+                    + "HATK^{la}*HATK^b*HATK^m+"
+                    + "HATK^{ma}*HATK^l*HATK^b+"
+                    + "HATK^{ma}*HATK^b*HATK^l+"
+                    + "HATK^{mb}*HATK^a*HATK^l+"
+                    + "HATK^{mb}*HATK^l*HATK^a+"
+                    + "HATK^{ab}*HATK^l*HATK^m+"
+                    + "HATK^{ab}*HATK^m*HATK^l)"
                     + "-(1/2)*Power[L,3]*(L-1)*(1/12)*("
-                    + "HATK^\\alpha*HATK^{\\mu\\nu}*HATK^\\beta+"
-                    + "HATK^\\beta*HATK^{\\mu\\nu}*HATK^\\alpha+"
-                    + "HATK^\\alpha*HATK^{\\mu\\beta}*HATK^\\nu+"
-                    + "HATK^\\nu*HATK^{\\mu\\beta}*HATK^\\alpha+"
-                    + "HATK^\\nu*HATK^{\\mu\\alpha}*HATK^\\beta+"
-                    + "HATK^\\beta*HATK^{\\mu\\alpha}*HATK^\\nu+"
-                    + "HATK^\\mu*HATK^{\\nu\\alpha}*HATK^\\beta+"
-                    + "HATK^\\beta*HATK^{\\nu\\alpha}*HATK^\\mu+"
-                    + "HATK^\\alpha*HATK^{\\nu\\beta}*HATK^\\mu+"
-                    + "HATK^\\mu*HATK^{\\nu\\beta}*HATK^\\alpha+"
-                    + "HATK^\\mu*HATK^{\\alpha\\beta}*HATK^\\nu+"
-                    + "HATK^\\nu*HATK^{\\alpha\\beta}*HATK^\\mu)"
+                    + "HATK^a*HATK^{lm}*HATK^b+"
+                    + "HATK^b*HATK^{lm}*HATK^a+"
+                    + "HATK^a*HATK^{lb}*HATK^m+"
+                    + "HATK^m*HATK^{lb}*HATK^a+"
+                    + "HATK^m*HATK^{la}*HATK^b+"
+                    + "HATK^b*HATK^{la}*HATK^m+"
+                    + "HATK^l*HATK^{ma}*HATK^b+"
+                    + "HATK^b*HATK^{ma}*HATK^l+"
+                    + "HATK^a*HATK^{mb}*HATK^l+"
+                    + "HATK^l*HATK^{mb}*HATK^a+"
+                    + "HATK^l*HATK^{ab}*HATK^m+"
+                    + "HATK^m*HATK^{ab}*HATK^l)"
                     + "-(1/2)*Power[L,3]*(L-1)*(1/12)*("
-                    + "HATK^\\alpha*HATK^\\beta*HATK^{\\mu\\nu}+"
-                    + "HATK^\\beta*HATK^\\alpha*HATK^{\\mu\\nu}+"
-                    + "HATK^\\alpha*HATK^\\nu*HATK^{\\mu\\beta}+"
-                    + "HATK^\\nu*HATK^\\alpha*HATK^{\\mu\\beta}+"
-                    + "HATK^\\nu*HATK^\\beta*HATK^{\\mu\\alpha}+"
-                    + "HATK^\\beta*HATK^\\nu*HATK^{\\mu\\alpha}+"
-                    + "HATK^\\mu*HATK^\\beta*HATK^{\\nu\\alpha}+"
-                    + "HATK^\\beta*HATK^\\mu*HATK^{\\nu\\alpha}+"
-                    + "HATK^\\alpha*HATK^\\mu*HATK^{\\nu\\beta}+"
-                    + "HATK^\\mu*HATK^\\alpha*HATK^{\\nu\\beta}+"
-                    + "HATK^\\mu*HATK^\\nu*HATK^{\\alpha\\beta}+"
-                    + "HATK^\\nu*HATK^\\mu*HATK^{\\alpha\\beta})"
+                    + "HATK^a*HATK^b*HATK^{lm}+"
+                    + "HATK^b*HATK^a*HATK^{lm}+"
+                    + "HATK^a*HATK^m*HATK^{lb}+"
+                    + "HATK^m*HATK^a*HATK^{lb}+"
+                    + "HATK^m*HATK^b*HATK^{la}+"
+                    + "HATK^b*HATK^m*HATK^{la}+"
+                    + "HATK^l*HATK^b*HATK^{ma}+"
+                    + "HATK^b*HATK^l*HATK^{ma}+"
+                    + "HATK^a*HATK^l*HATK^{mb}+"
+                    + "HATK^l*HATK^a*HATK^{mb}+"
+                    + "HATK^l*HATK^m*HATK^{ab}+"
+                    + "HATK^m*HATK^l*HATK^{ab})"
                     + "+(1/24)*Power[L,4]*("
-                    + "HATK^{\\mu}*HATK^{\\nu}*HATK^{\\alpha}*HATK^{\\beta}+"
-                    + "HATK^{\\nu}*HATK^{\\mu}*HATK^{\\alpha}*HATK^{\\beta}+"
-                    + "HATK^{\\beta}*HATK^{\\nu}*HATK^{\\alpha}*HATK^{\\mu}+"
-                    + "HATK^{\\nu}*HATK^{\\beta}*HATK^{\\alpha}*HATK^{\\mu}+"
-                    + "HATK^{\\beta}*HATK^{\\mu}*HATK^{\\alpha}*HATK^{\\nu}+"
-                    + "HATK^{\\mu}*HATK^{\\beta}*HATK^{\\alpha}*HATK^{\\nu}+"
-                    + "HATK^{\\mu}*HATK^{\\nu}*HATK^{\\beta}*HATK^{\\alpha}+"
-                    + "HATK^{\\nu}*HATK^{\\mu}*HATK^{\\beta}*HATK^{\\alpha}+"
-                    + "HATK^{\\alpha}*HATK^{\\nu}*HATK^{\\beta}*HATK^{\\mu}+"
-                    + "HATK^{\\nu}*HATK^{\\alpha}*HATK^{\\beta}*HATK^{\\mu}+"
-                    + "HATK^{\\alpha}*HATK^{\\mu}*HATK^{\\beta}*HATK^{\\nu}+"
-                    + "HATK^{\\mu}*HATK^{\\alpha}*HATK^{\\beta}*HATK^{\\nu}+"
-                    + "HATK^{\\beta}*HATK^{\\nu}*HATK^{\\mu}*HATK^{\\alpha}+"
-                    + "HATK^{\\nu}*HATK^{\\beta}*HATK^{\\mu}*HATK^{\\alpha}+"
-                    + "HATK^{\\alpha}*HATK^{\\nu}*HATK^{\\mu}*HATK^{\\beta}+"
-                    + "HATK^{\\nu}*HATK^{\\alpha}*HATK^{\\mu}*HATK^{\\beta}+"
-                    + "HATK^{\\alpha}*HATK^{\\beta}*HATK^{\\mu}*HATK^{\\nu}+"
-                    + "HATK^{\\beta}*HATK^{\\alpha}*HATK^{\\mu}*HATK^{\\nu}+"
-                    + "HATK^{\\beta}*HATK^{\\mu}*HATK^{\\nu}*HATK^{\\alpha}+"
-                    + "HATK^{\\mu}*HATK^{\\beta}*HATK^{\\nu}*HATK^{\\alpha}+"
-                    + "HATK^{\\alpha}*HATK^{\\mu}*HATK^{\\nu}*HATK^{\\beta}+"
-                    + "HATK^{\\mu}*HATK^{\\alpha}*HATK^{\\nu}*HATK^{\\beta}+"
-                    + "HATK^{\\alpha}*HATK^{\\beta}*HATK^{\\nu}*HATK^{\\mu}+"
-                    + "HATK^{\\beta}*HATK^{\\alpha}*HATK^{\\nu}*HATK^{\\mu})";
+                    + "HATK^{l}*HATK^{m}*HATK^{a}*HATK^{b}+"
+                    + "HATK^{m}*HATK^{l}*HATK^{a}*HATK^{b}+"
+                    + "HATK^{b}*HATK^{m}*HATK^{a}*HATK^{l}+"
+                    + "HATK^{m}*HATK^{b}*HATK^{a}*HATK^{l}+"
+                    + "HATK^{b}*HATK^{l}*HATK^{a}*HATK^{m}+"
+                    + "HATK^{l}*HATK^{b}*HATK^{a}*HATK^{m}+"
+                    + "HATK^{l}*HATK^{m}*HATK^{b}*HATK^{a}+"
+                    + "HATK^{m}*HATK^{l}*HATK^{b}*HATK^{a}+"
+                    + "HATK^{a}*HATK^{m}*HATK^{b}*HATK^{l}+"
+                    + "HATK^{m}*HATK^{a}*HATK^{b}*HATK^{l}+"
+                    + "HATK^{a}*HATK^{l}*HATK^{b}*HATK^{m}+"
+                    + "HATK^{l}*HATK^{a}*HATK^{b}*HATK^{m}+"
+                    + "HATK^{b}*HATK^{m}*HATK^{l}*HATK^{a}+"
+                    + "HATK^{m}*HATK^{b}*HATK^{l}*HATK^{a}+"
+                    + "HATK^{a}*HATK^{m}*HATK^{l}*HATK^{b}+"
+                    + "HATK^{m}*HATK^{a}*HATK^{l}*HATK^{b}+"
+                    + "HATK^{a}*HATK^{b}*HATK^{l}*HATK^{m}+"
+                    + "HATK^{b}*HATK^{a}*HATK^{l}*HATK^{m}+"
+                    + "HATK^{b}*HATK^{l}*HATK^{m}*HATK^{a}+"
+                    + "HATK^{l}*HATK^{b}*HATK^{m}*HATK^{a}+"
+                    + "HATK^{a}*HATK^{l}*HATK^{m}*HATK^{b}+"
+                    + "HATK^{l}*HATK^{a}*HATK^{m}*HATK^{b}+"
+                    + "HATK^{a}*HATK^{b}*HATK^{m}*HATK^{l}+"
+                    + "HATK^{b}*HATK^{a}*HATK^{m}*HATK^{l})";
     private static final String ACTION_ = "counterterms = Flat + WR + SR + SSR + FF + FR + RR";
     private final Expression Flat, WR, SR, SSR, FF, FR, RR, DELTA_1, DELTA_2, DELTA_3, DELTA_4, ACTION;
 
@@ -465,8 +465,8 @@ public final class OneLoopCounterterms {
                 "HATN", "HATF", "NABLAF", "HATM", "DELTA",
                 "Flat", "FF", "WR", "SR", "SSR", "FR", "RR", "Kn"};
 
-        //F_{\\mu\\nu} type structure
-        final StructureOfIndices F_TYPE_STRUCTURE = new StructureOfIndices(IndexType.GreekLower.getType(), 2);
+        //F_{lm} type structure
+        final StructureOfIndices F_TYPE_STRUCTURE = new StructureOfIndices(IndexType.LatinLower.getType(), 2);
         //matrices indicator for parse preprocessor
         final Indicator<ParseTokenSimpleTensor> matricesIndicator = new Indicator<ParseTokenSimpleTensor>() {
 
@@ -487,8 +487,8 @@ public final class OneLoopCounterterms {
         //indices to insert
         int upper[] = new int[matrixIndicesCount / 2], lower[] = upper.clone();
         for (i = 0; i < matrixIndicesCount / 2; ++i) {
-            upper[i] = IndicesUtils.createIndex(130 + i, IndexType.GreekLower, true);//30 
-            lower[i] = IndicesUtils.createIndex(130 + i + matrixIndicesCount / 2, IndexType.GreekLower, false);
+            upper[i] = IndicesUtils.createIndex(130 + i, IndexType.LatinLower, true);//30 
+            lower[i] = IndicesUtils.createIndex(130 + i + matrixIndicesCount / 2, IndexType.LatinLower, false);
         }
 
         Expression Flat, WR, SR, SSR, FF, FR, RR, DELTA_1, DELTA_2, DELTA_3, DELTA_4, ACTION;
@@ -528,17 +528,17 @@ public final class OneLoopCounterterms {
         //Calculations        
         Expression[] riemansSubstitutions = new Expression[]{
                 FSubstitution,
-                Tensors.parseExpression("R_{\\mu \\nu}^{\\mu}_{\\alpha} = R_{\\nu\\alpha}"),
-                Tensors.parseExpression("R_{\\mu\\nu}^{\\alpha}_{\\alpha}=0"),
-                Tensors.parseExpression("F_{\\mu}^{\\mu}^{\\alpha}_{\\beta}=0"),
-                Tensors.parseExpression("R_{\\mu\\nu\\alpha\\beta}*R^{\\mu\\alpha\\nu\\beta}=(1/2)*R_{\\mu\\nu\\alpha\\beta}*R^{\\mu\\nu\\alpha\\beta}"),
-                Tensors.parseExpression("R_{\\mu\\nu\\alpha\\beta}*R^{\\mu\\nu\\alpha\\beta}=4*R_{\\mu\\nu}*R^{\\mu\\nu}-R*R"),
-                Tensors.parseExpression("R_{\\mu}^{\\mu}= R")
+                Tensors.parseExpression("R_{l m}^{l}_{a} = R_{ma}"),
+                Tensors.parseExpression("R_{lm}^{a}_{a}=0"),
+                Tensors.parseExpression("F_{l}^{l}^{a}_{b}=0"),
+                Tensors.parseExpression("R_{lmab}*R^{lamb}=(1/2)*R_{lmab}*R^{lmab}"),
+                Tensors.parseExpression("R_{lmab}*R^{lmab}=4*R_{lm}*R^{lm}-R*R"),
+                Tensors.parseExpression("R_{l}^{l}= R")
         };
 
 
-        Expression kronecker = (Expression) Tensors.parse("d_{\\mu}^{\\mu}=4");
-        Transformation n2 = new SqrSubs(Tensors.parseSimple("n_\\mu")), n2Transformer = new Transformer(TraverseState.Leaving, new Transformation[]{n2});
+        Expression kronecker = (Expression) Tensors.parse("d_{l}^{l}=4");
+        Transformation n2 = new SqrSubs(Tensors.parseSimple("n_l")), n2Transformer = new Transformer(TraverseState.Leaving, new Transformation[]{n2});
         Transformation[] common = new Transformation[]{EliminateMetricsTransformation.ELIMINATE_METRICS, n2Transformer, kronecker};
         Transformation[] all = ArraysUtils.addAll(common, riemansSubstitutions);
         Tensor temp;
@@ -564,10 +564,10 @@ public final class OneLoopCounterterms {
         Expression[] calculatedCombinations;
         //DELTA_3 //todo for particular values of L some combinations can be neglected
         combinations = new Tensor[]{
-                Tensors.parse("HATK^{\\mu\\nu\\alpha}", deltaIndicesInsertion),
-                Tensors.parse("HATK^{\\mu\\nu}*HATK^{\\alpha}", deltaIndicesInsertion),
-                Tensors.parse("HATK^{\\alpha}*HATK^{\\mu\\nu}", deltaIndicesInsertion),
-                Tensors.parse("HATK^{\\mu}*HATK^{\\nu}*HATK^{\\alpha}", deltaIndicesInsertion)
+                Tensors.parse("HATK^{lma}", deltaIndicesInsertion),
+                Tensors.parse("HATK^{lm}*HATK^{a}", deltaIndicesInsertion),
+                Tensors.parse("HATK^{a}*HATK^{lm}", deltaIndicesInsertion),
+                Tensors.parse("HATK^{l}*HATK^{m}*HATK^{a}", deltaIndicesInsertion)
         };
         calculatedCombinations = new Expression[combinations.length];
         System.out.println("Delta3:");
@@ -596,14 +596,14 @@ public final class OneLoopCounterterms {
         deltaExpressions[2] = (Expression) temp;
         //DELTA_4  //todo for different L values some combinations can be neglected
         combinations = new Tensor[]{
-                Tensors.parse("HATK^{\\mu\\nu\\alpha\\beta}", deltaIndicesInsertion),
-                Tensors.parse("HATK^{\\mu\\nu\\alpha}*HATK^{\\beta}", deltaIndicesInsertion),
-                Tensors.parse("HATK^{\\beta}*HATK^{\\mu\\nu\\alpha }", deltaIndicesInsertion),
-                Tensors.parse("HATK^{\\alpha\\beta}*HATK^{\\mu\\nu}", deltaIndicesInsertion),
-                Tensors.parse("HATK^{\\mu}*HATK^{\\nu}*HATK^{\\alpha\\beta}", deltaIndicesInsertion),
-                Tensors.parse("HATK^{\\mu}*HATK^{\\alpha\\beta}*HATK^{\\nu}", deltaIndicesInsertion),
-                Tensors.parse("HATK^{\\alpha\\beta}*HATK^{\\mu}*HATK^{\\nu}", deltaIndicesInsertion),
-                Tensors.parse("HATK^{\\beta}*HATK^{\\alpha}*HATK^{\\mu}*HATK^{\\nu}", deltaIndicesInsertion)};
+                Tensors.parse("HATK^{lmab}", deltaIndicesInsertion),
+                Tensors.parse("HATK^{lma}*HATK^{b}", deltaIndicesInsertion),
+                Tensors.parse("HATK^{b}*HATK^{lma }", deltaIndicesInsertion),
+                Tensors.parse("HATK^{ab}*HATK^{lm}", deltaIndicesInsertion),
+                Tensors.parse("HATK^{l}*HATK^{m}*HATK^{ab}", deltaIndicesInsertion),
+                Tensors.parse("HATK^{l}*HATK^{ab}*HATK^{m}", deltaIndicesInsertion),
+                Tensors.parse("HATK^{ab}*HATK^{l}*HATK^{m}", deltaIndicesInsertion),
+                Tensors.parse("HATK^{b}*HATK^{a}*HATK^{l}*HATK^{m}", deltaIndicesInsertion)};
         calculatedCombinations = new Expression[combinations.length];
         System.out.println("Delta4:");
         for (i = 0; i < combinations.length; ++i) {
@@ -673,7 +673,7 @@ public final class OneLoopCounterterms {
             //todo remove this line after fixing Redberry #42
 //            temp = ExpandTransformation.expand(temp);
 
-            temp = new Averaging(Tensors.parseSimple("n_\\mu")).transform(temp);
+            temp = new Averaging(Tensors.parseSimple("n_l")).transform(temp);
 
             temp = ExpandTransformation.expand(temp, all);
             for (Transformation tr : all)
