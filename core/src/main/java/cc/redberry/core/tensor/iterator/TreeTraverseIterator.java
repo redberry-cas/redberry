@@ -317,6 +317,11 @@ public final class TreeTraverseIterator<T extends Payload<T>> {
             return payload;
         }
 
+        @Override
+        public boolean isPayloadInitialized() {
+            return payload != null;
+        }
+
         void setModified() {
             isModified = true;
             if (previous != null)

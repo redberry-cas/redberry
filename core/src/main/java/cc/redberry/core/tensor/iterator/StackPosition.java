@@ -83,6 +83,13 @@ public interface StackPosition<T extends Payload<T>> {
     T getPayload();
 
     /**
+     * Returns true if lazy payload creation was triggered
+     *
+     * @return true if lazy payload creation was triggered
+     */
+    boolean isPayloadInitialized();
+
+    /**
      * Returns depth in the tree, relatively to the current cursor position.
      *
      * @return depth in the tree relatively to the current cursor position
