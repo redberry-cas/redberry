@@ -50,8 +50,6 @@ final class FactorNode {
     }
 
     void put(Tensor summand, Tensor factor) {
-        // CORE-126 ??
-        //todo review after closing CORE-126
         TIntHashSet allowed = TensorUtils.getAllDummyIndicesT(factor);
         allowed.removeAll(factorForbiddenIndices);
         IndexGenerator ig = new IndexGeneratorFromData(allowed.toArray());
