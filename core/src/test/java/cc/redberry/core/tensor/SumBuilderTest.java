@@ -33,6 +33,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import static cc.redberry.core.tensor.Tensors.parse;
+import static cc.redberry.core.tensor.Tensors.parseExpression;
 
 /**
  * @author Dmitry Bolotin
@@ -182,7 +183,6 @@ public class SumBuilderTest {
                 it.set(parse("f_{a}^{a}"));
         }
         r = it.result();
-        System.out.println(r);
         TAssert.assertIndicesConsistency(r);
         TAssert.assertEquals(r, "(f^{j}_{j}+2)*f_{c}*F_{b}*f_{k}^{k}*f_{g}^{g}");
     }
@@ -190,6 +190,21 @@ public class SumBuilderTest {
     @Test
     public void test16() {
         Tensor r = parse("f_{g}^{g}*f^{a}_{a}*f_{c}+(1 + f^{a}_{a})*f_{g}^{g}*f_{h}^{h}*f_{c}");
+        TAssert.assertIndicesConsistency(r);
+    }
+
+    @Test
+    public void test17() {
+        Tensor r = parse("(A_r*B^rg + C_b*D^bg)*2 + (A_a*B^ag + C_a*D^ag)*(S^br_br + 1)");
+        TAssert.assertIndicesConsistency(r);
+    }
+
+    @Test
+    public void test18() {
+        CC.resetTensorNames(-4473598700807087040L);
+        Tensor r = parse("(A_a*B^ag + X_a*D^ag)*(S^br_br + 1) + (A_r*B^rg + C_b*D^bg)*2");
+        TAssert.assertIndicesConsistency(r);
+        r = parseExpression("X_a = C_a").transform(r);
         TAssert.assertIndicesConsistency(r);
     }
 }

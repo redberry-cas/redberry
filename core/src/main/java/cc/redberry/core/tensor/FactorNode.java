@@ -38,9 +38,9 @@ final class FactorNode {
     int[] factorForbiddenIndices;
 
     FactorNode(Tensor factor, TensorBuilder builder) {
-        this.factor = factor;
+        this.factor = ApplyIndexMapping.optimizeDummies(factor);
         this.builder = builder;
-        factorForbiddenIndices = TensorUtils.getAllIndicesNamesT(factor).toArray();
+        factorForbiddenIndices = TensorUtils.getAllIndicesNamesT(this.factor).toArray();
     }
 
     private FactorNode(Tensor factor, TensorBuilder builder, int[] factorForbiddenIndices) {

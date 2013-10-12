@@ -172,7 +172,7 @@ public class Split {
                     summand = product.indexlessData[0];
                 else if (product.factor.isMinusOne() && product.indexlessData.length == 1 && product.indexlessData[0] instanceof Sum) {
                     Sum s = (Sum) product.indexlessData[0];
-                    Tensor sumData[] = s.data.clone();
+                    Tensor[] sumData = s.data.clone();
                     for (int i = sumData.length - 1; i >= 0; --i)
                         sumData[i] = Tensors.negate(sumData[i]);
                     summand = new Sum(s.indices, sumData, s.hashCode());
