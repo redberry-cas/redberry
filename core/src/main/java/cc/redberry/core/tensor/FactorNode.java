@@ -22,7 +22,10 @@
  */
 package cc.redberry.core.tensor;
 
+import cc.redberry.core.indexgenerator.IndexGenerator;
+import cc.redberry.core.indexgenerator.IndexGeneratorFromData;
 import cc.redberry.core.utils.TensorUtils;
+import gnu.trove.set.hash.TIntHashSet;
 
 /**
  * @author Dmitry Bolotin
@@ -35,9 +38,9 @@ final class FactorNode {
     int[] factorForbiddenIndices;
 
     FactorNode(Tensor factor, TensorBuilder builder) {
-        this.factor = factor;
+        this.factor = ApplyIndexMapping.optimizeDummies(factor);
         this.builder = builder;
-        factorForbiddenIndices = TensorUtils.getAllIndicesNamesT(factor).toArray();
+        factorForbiddenIndices = TensorUtils.getAllIndicesNamesT(this.factor).toArray();
     }
 
     private FactorNode(Tensor factor, TensorBuilder builder, int[] factorForbiddenIndices) {
@@ -46,9 +49,14 @@ final class FactorNode {
         this.factorForbiddenIndices = factorForbiddenIndices;
     }
 
-    void put(Tensor t) {
-        t = ApplyIndexMapping.renameDummy(t, factorForbiddenIndices);//TODO improve performance!!!!!!!
-        builder.put(t);
+    void put(Tensor summand, Tensor factor) {
+        TIntHashSet allowed = TensorUtils.getAllDummyIndicesT(factor);
+        allowed.removeAll(factorForbiddenIndices);
+        IndexGenerator ig = new IndexGeneratorFromData(allowed.toArray());
+        //old variant
+        //IndexGenerator ig = new IndexGeneratorFromData(TensorUtils.getAllDummyIndicesT(factor).toArray());
+        summand = ApplyIndexMapping.renameDummy(summand, factorForbiddenIndices, ig);
+        builder.put(summand);
     }
 
     Tensor build() {

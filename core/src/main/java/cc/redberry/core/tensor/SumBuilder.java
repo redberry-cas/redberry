@@ -24,10 +24,9 @@ package cc.redberry.core.tensor;
 
 import cc.redberry.core.indices.Indices;
 import cc.redberry.core.number.Complex;
+import gnu.trove.map.hash.TIntObjectHashMap;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Basic builder for sums. The implementation puts terms together as described in specification.
@@ -45,7 +44,7 @@ public final class SumBuilder extends AbstractSumBuilder {
     public SumBuilder() {
     }
 
-    SumBuilder(Map<Integer, List<FactorNode>> summands, Complex complex, Indices indices, int[] sortedFreeIndices) {
+    SumBuilder(TIntObjectHashMap<List<FactorNode>> summands, Complex complex, Indices indices, int[] sortedFreeIndices) {
         super(summands, complex, indices, sortedFreeIndices);
     }
 
@@ -56,12 +55,10 @@ public final class SumBuilder extends AbstractSumBuilder {
 
     @Override
     public TensorBuilder clone() {
-        Map<Integer, List<FactorNode>> summands = new HashMap<>(this.summands);
-        for (Map.Entry<Integer, List<FactorNode>> entry : summands.entrySet()) {
-            List<FactorNode> fns = entry.getValue();
-            for (int i = fns.size() - 1; i >= 0; --i)
-                fns.set(i, fns.get(i).clone());
-        }
+        TIntObjectHashMap<List<FactorNode>> summands = new TIntObjectHashMap<>(this.summands);
+        for (List<FactorNode> vals : summands.valueCollection())
+            for (int i = vals.size() - 1; i >= 0; --i)
+                vals.set(i, vals.get(i).clone());
         return new SumBuilder(summands, complex, indices, sortedFreeIndices.clone());
     }
 }

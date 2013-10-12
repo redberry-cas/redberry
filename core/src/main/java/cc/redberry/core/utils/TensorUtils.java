@@ -30,6 +30,7 @@ import cc.redberry.core.context.CC;
 import cc.redberry.core.indexmapping.IndexMappings;
 import cc.redberry.core.indexmapping.Mapping;
 import cc.redberry.core.indexmapping.MappingsPort;
+import cc.redberry.core.indices.InconsistentIndicesException;
 import cc.redberry.core.indices.Indices;
 import cc.redberry.core.indices.IndicesUtils;
 import cc.redberry.core.indices.SimpleIndices;
@@ -365,6 +366,7 @@ public class TensorUtils {
         return set;
     }
 
+    //todo review (include indices of functions?)
     public static void appendAllIndicesNamesT(Tensor tensor, TIntHashSet set) {
         if (tensor instanceof SimpleTensor) {
             Indices ind = tensor.getIndices();
@@ -418,7 +420,7 @@ public class TensorUtils {
             Indices ind = t.getIndices();
             for (int i = ind.size() - 1; i >= 0; --i)
                 if (indices.contains(ind.get(i)))
-                    throw new AssertionError();
+                    throw new AssertionError(new InconsistentIndicesException(ind.get(i)));
                 else
                     indices.add(ind.get(i));
         }

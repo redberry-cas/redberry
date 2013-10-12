@@ -285,6 +285,13 @@ public class DifferentiateTransformationTest {
     }
 
     @Test
+    public void test12a() {
+        Tensor t = parse("1/(f_m*(f^m+a^m*f_i*f^i)*Cos[f_i*f^i])");
+        t = differentiate(t, parseSimple("f_l"));
+        TAssert.assertIndicesConsistency(t);
+    }
+
+    @Test
     public void test13() {
         addAntiSymmetry("R_abcd", 1, 0, 2, 3);
         addSymmetry("R_abcd", 2, 3, 0, 1);

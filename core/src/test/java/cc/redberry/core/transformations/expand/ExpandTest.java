@@ -27,13 +27,17 @@ import cc.redberry.core.context.CC;
 import cc.redberry.core.tensor.*;
 import cc.redberry.core.tensor.iterator.TraverseState;
 import cc.redberry.core.tensor.iterator.TreeTraverseIterator;
+import cc.redberry.core.transformations.CollectScalarFactorsTransformation;
 import cc.redberry.core.transformations.EliminateMetricsTransformation;
+import cc.redberry.core.transformations.Transformation;
+import cc.redberry.core.transformations.TransformationCollection;
 import cc.redberry.core.transformations.fractions.TogetherTransformation;
 import cc.redberry.core.utils.TensorUtils;
 import org.junit.Assert;
 import org.junit.Test;
 
 import static cc.redberry.core.tensor.Tensors.parse;
+import static cc.redberry.core.tensor.Tensors.parseExpression;
 import static cc.redberry.core.transformations.expand.ExpandPort.expandUsingPort;
 import static cc.redberry.core.transformations.expand.ExpandTransformation.expand;
 
@@ -449,5 +453,12 @@ public class ExpandTest {
         Tensor t = parse("(A_m*A^m)**2");
         TAssert.assertTrue(t == expand(t));
         TAssert.assertTrue(t == expandUsingPort(t));
+    }
+
+    @Test(timeout = 1000)
+    public void test44() {
+        Tensor t = parse("(-2050*(f^{q}+57*f_{n}*f^{n}*f^{q})*f_{q}*(f_{a}-33*f_{j}*f^{j}*f_{a})-96*(25*f_{l}*f^{l}*f_{j}*f^{j}-75*f_{l}*f^{l})*f_{a})*(67*f_{v}*f^{v}*(-81*f_{f}*f^{f}*f_{b}+30*f_{b})+5734*f_{f}*f^{f}*(-67*f_{e}*f^{e}*f_{h}*f^{h}*f_{b}-48*f_{b}))*(4032*f^{d}*f_{d}*f_{c}+33440*f_{g}*f^{g}*f^{k}*f_{c}*(f_{k}+f_{d}*f^{d}*f_{k}))");
+        t = ExpandTransformation.expand(t, EliminateMetricsTransformation.ELIMINATE_METRICS, CollectScalarFactorsTransformation.COLLECT_SCALAR_FACTORS);
+        t = EliminateMetricsTransformation.eliminate(t);
     }
 }

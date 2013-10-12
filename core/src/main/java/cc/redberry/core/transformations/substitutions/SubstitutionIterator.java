@@ -206,6 +206,7 @@ public final class SubstitutionIterator implements TreeIterator {
         @Override
         public void submit(TIntSet removed, TIntSet added) {
             insureInitialized();
+            assert !(new TIntHashSet(added).removeAll(removed));
             forbidden.addAll(added);
             forbidden.removeAll(removed);
             position.previous().getPayload().submit(removed, added);
@@ -247,7 +248,7 @@ public final class SubstitutionIterator implements TreeIterator {
             for (i = allDummyIndices.length - 1; i >= 0; --i)
                 usedArrays[i] = new BitArray(size);
 
-            //Full-filling origins array
+            //Fulfilling origins array
             for (i = size - 1; i >= 0; --i) {
                 dummy = TensorUtils.getAllDummyIndicesT(tensor.get(i));
                 TIntIterator iterator = dummy.iterator();
@@ -292,8 +293,8 @@ public final class SubstitutionIterator implements TreeIterator {
 
                 //If this index was already somewhere in the sum,
                 //we don't have to propagate it to position
-//                if (usedArrays[iIndex].bitCount() >= 0)
-//                    iterator.remove();
+                if (!usedArrays[iIndex].isEmpty())
+                    iterator.remove();
 
                 //Marking this index as added to current summand
                 usedArrays[iIndex].set(position.currentIndex());
@@ -326,6 +327,7 @@ public final class SubstitutionIterator implements TreeIterator {
         @Override
         public void submit(TIntSet removed, TIntSet added) {
             insureInitialized();
+            assert !(new TIntHashSet(added).removeAll(removed));
             forbidden.addAll(added);
             forbidden.removeAll(removed);
         }
