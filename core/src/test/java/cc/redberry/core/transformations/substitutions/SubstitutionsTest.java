@@ -1239,6 +1239,7 @@ public class SubstitutionsTest {
                 "         *F^{bdfghi}");
         TAssert.assertIndicesConsistency(t);
         Tensor t2 = parseExpression("d^a_a = f^a_a").transform(t);
+        System.out.println(t2);
         TAssert.assertIndicesConsistency(t2);
     }
 
