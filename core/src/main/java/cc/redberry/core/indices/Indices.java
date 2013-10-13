@@ -111,12 +111,12 @@ public interface Indices {
      */
     int get(IndexType type, int position);
 
-//    /**
-//     * Returns sorted array of dummy indices names.
-//     *
-//     * @return sorted array of dummy indices names
-//     */
-//    int[] getDummyNames();
+    /**
+     * Returns sorted array of dummy indices names.
+     *
+     * @return sorted array of dummy indices names
+     */
+    int[] getNamesOfDummies();
 
     /**
      * Returns new instance of {@code Indices}, which contains only free (non contracted) indices from

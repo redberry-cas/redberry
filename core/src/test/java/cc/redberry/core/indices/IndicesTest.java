@@ -30,8 +30,9 @@ import cc.redberry.core.parser.ParserIndices;
 import cc.redberry.core.tensor.SimpleTensor;
 import cc.redberry.core.tensor.random.RandomTensor;
 import cc.redberry.core.utils.IntArrayList;
-import junit.framework.Assert;
+import gnu.trove.set.hash.TIntHashSet;
 import org.apache.commons.math3.random.Well19937c;
+import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.Arrays;
@@ -306,5 +307,47 @@ public class IndicesTest {
         Assert.assertEquals(indices.toString(), "_{a}^{cd}_{\\alpha\\beta}^{\\gamma\\Gamma}");
         Assert.assertEquals(indices.toString(OutputFormat.WolframMathematica), "-a,c,d,-\\[Alpha],-\\[Beta],\\[Gamma],\\[CapitalGamma]");
         Assert.assertEquals(indices.toString(OutputFormat.Maple), "a,~c,~d,alpha,beta,~gamma,~Gamma");
+    }
+
+    @Test
+    public void testDummiesOfSorted() {
+        RandomTensor randomTensor = new RandomTensor(100,
+                1000,
+                new int[]{0, 0, 0, 0},
+                new int[]{10, 10, 10, 10},
+                false, new Well19937c());
+        StructureOfIndices typeStructure;
+        Indices indices;
+        for (int i = 0; i < 1000; ++i) {
+            typeStructure = randomTensor.nextNameDescriptor().getStructureOfIndices();
+            indices = IndicesFactory.create(randomTensor.nextIndices(typeStructure));
+            TIntHashSet dummies = new TIntHashSet(IndicesUtils.getIndicesNames(indices));
+            dummies.removeAll(IndicesUtils.getIndicesNames(indices.getFree()));
+            int[] _dummies = dummies.toArray();
+            Arrays.sort(_dummies);
+            Assert.assertArrayEquals(_dummies, indices.getNamesOfDummies());
+        }
+    }
+
+    @Test
+    public void testDummiesOfSimple() {
+        RandomTensor randomTensor = new RandomTensor(100,
+                1000,
+                new int[]{0, 0, 0, 0},
+                new int[]{10, 10, 10, 10},
+                false, new Well19937c());
+        StructureOfIndices typeStructure;
+        Indices indices;
+        for (int i = 0; i < 1000; ++i) {
+            typeStructure = randomTensor.nextNameDescriptor().getStructureOfIndices();
+            indices = IndicesFactory.createSimple(null, randomTensor.nextIndices(typeStructure));
+            TIntHashSet dummies = new TIntHashSet(IndicesUtils.getIndicesNames(indices));
+            dummies.removeAll(IndicesUtils.getIndicesNames(indices.getFree()));
+            int[] _dummies = dummies.toArray();
+            Arrays.sort(_dummies);
+            int[] __dummies = indices.getNamesOfDummies();
+            Arrays.sort(__dummies);
+            Assert.assertArrayEquals(_dummies, __dummies);
+        }
     }
 }

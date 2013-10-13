@@ -116,9 +116,9 @@ public abstract class Tensor
      */
     public Tensor[] getRange(int from, final int to) {
         int size = size();
-        if (from < 0 || from > to || to >= size)
+        if (from < 0 || from > to || to > size)
             throw new IndexOutOfBoundsException();
-        Tensor[] range = new Tensor[from - to];
+        Tensor[] range = new Tensor[to - from];
         for (size = 0; from < to; ++size, ++from)
             range[size] = get(from);
         return range;

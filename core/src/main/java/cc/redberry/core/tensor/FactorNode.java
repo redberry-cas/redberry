@@ -52,10 +52,9 @@ final class FactorNode {
     void put(Tensor summand, Tensor factor) {
         TIntHashSet allowed = TensorUtils.getAllDummyIndicesT(factor);
         allowed.removeAll(factorForbiddenIndices);
-        IndexGenerator ig = new IndexGeneratorFromData(allowed.toArray());
         //old variant
         //IndexGenerator ig = new IndexGeneratorFromData(TensorUtils.getAllDummyIndicesT(factor).toArray());
-        summand = ApplyIndexMapping.renameDummy(summand, factorForbiddenIndices, ig);
+        summand = ApplyIndexMapping.renameDummy(summand, factorForbiddenIndices, allowed.toArray());
         builder.put(summand);
     }
 

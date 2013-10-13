@@ -37,7 +37,7 @@ import static cc.redberry.core.indices.IndicesUtils.*;
 public final class IndexGeneratorFromData implements IndexGenerator {
     private final TByteObjectHashMap<IntProvider> generators = new TByteObjectHashMap<>();
 
-    public IndexGeneratorFromData(final int[] allowedIndices) {
+    public IndexGeneratorFromData(int[] allowedIndices) {
         if (allowedIndices.length > 0) {
             Arrays.sort(allowedIndices);
             byte type = getType(allowedIndices[0]);

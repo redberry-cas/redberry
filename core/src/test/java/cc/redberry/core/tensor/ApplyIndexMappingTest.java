@@ -42,8 +42,7 @@ import org.junit.Test;
 import java.util.Arrays;
 import java.util.Set;
 
-import static cc.redberry.core.tensor.ApplyIndexMapping.applyIndexMappingAutomatically;
-import static cc.redberry.core.tensor.ApplyIndexMapping.optimizeDummies;
+import static cc.redberry.core.tensor.ApplyIndexMapping.*;
 import static cc.redberry.core.tensor.Tensors.addSymmetry;
 import static cc.redberry.core.tensor.Tensors.parse;
 
@@ -533,5 +532,24 @@ public class ApplyIndexMappingTest {
     public void testOptimize2() {
         Tensor t = optimizeDummies(parse("a*c_a*r^a + x*(b_b^b + f_r*f^r)"));
         Assert.assertEquals(1, TensorUtils.getAllDummyIndicesT(t).size());
+    }
+
+    @Test
+    public void testOptimize3() {
+        Tensor t = optimizeDummies(parse("a*c_a*r^a = x*(b_b^b + f_r*f^r)"));
+        Assert.assertEquals(1, TensorUtils.getAllDummyIndicesT(t).size());
+    }
+
+    @Test
+    public void testApplyAndRenameDummies1() {
+        Tensor t;
+        t = applyIndexMappingAndRenameAllDummies(parse("f_e*f^e"), Mapping.IDENTITY, new int[]{0});
+        TAssert.assertEqualsExactly(t, "f_a*f^a");
+
+        t = applyIndexMappingAndRenameAllDummies(parse("f_e*f^e"), Mapping.IDENTITY, new int[]{1});
+        TAssert.assertEqualsExactly(t, "f_b*f^b");
+
+        t = applyIndexMappingAndRenameAllDummies(parse("f_b*f^b"), Mapping.IDENTITY, new int[]{1});
+        TAssert.assertEqualsExactly(t, "f_b*f^b");
     }
 }

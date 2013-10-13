@@ -346,8 +346,16 @@ public class TensorUtils {
     }
 
     public static TIntHashSet getAllDummyIndicesT(Tensor tensor) {
+        return getAllDummyIndicesT(false, tensor);
+    }
+
+    public static TIntHashSet getAllDummyIndicesIncludingScalarFunctionsT(Tensor tensor) {
+        return getAllDummyIndicesT(true, tensor);
+    }
+
+    private static TIntHashSet getAllDummyIndicesT(boolean includeScalarFunctions, Tensor tensor) {
         TIntHashSet set = new TIntHashSet();
-        appendAllIndicesNamesT(tensor, set);
+        appendAllIndicesNamesT(tensor, set, includeScalarFunctions);
         set.removeAll(IndicesUtils.getIndicesNames(tensor.getIndices().getFree()));
         return set;
     }
@@ -362,12 +370,20 @@ public class TensorUtils {
     public static TIntHashSet getAllIndicesNamesT(Tensor... tensors) {
         TIntHashSet set = new TIntHashSet();
         for (Tensor tensor : tensors)
-            appendAllIndicesNamesT(tensor, set);
+            appendAllIndicesNamesT(tensor, set, false);
         return set;
     }
 
-    //todo review (include indices of functions?)
+
     public static void appendAllIndicesNamesT(Tensor tensor, TIntHashSet set) {
+        appendAllIndicesNamesT(tensor, set, false);
+    }
+
+    public static void appendAllIndicesNamesIncludingScalarFunctionsT(Tensor tensor, TIntHashSet set) {
+        appendAllIndicesNamesT(tensor, set, true);
+    }
+
+    private static void appendAllIndicesNamesT(Tensor tensor, TIntHashSet set, boolean includeScalarFunctions) {
         if (tensor instanceof SimpleTensor) {
             Indices ind = tensor.getIndices();
             set.ensureCapacity(ind.size());
@@ -376,7 +392,7 @@ public class TensorUtils {
                 set.add(IndicesUtils.getNameWithType(ind.get(i)));
         } else if (tensor instanceof Power) {
             appendAllIndicesNamesT(tensor.get(0), set);
-        } else if (tensor instanceof ScalarFunction)
+        } else if (tensor instanceof ScalarFunction && !includeScalarFunctions)
             return;
         else {
             Tensor t;

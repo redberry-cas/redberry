@@ -23,6 +23,8 @@
 package cc.redberry.core.transformations.substitutions;
 
 import cc.redberry.core.indexmapping.Mapping;
+import cc.redberry.core.indices.IndicesBuilder;
+import cc.redberry.core.indices.IndicesUtils;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.tensor.*;
 import cc.redberry.core.utils.TensorUtils;
@@ -35,6 +37,7 @@ import java.util.List;
 import static cc.redberry.core.indexmapping.IndexMappings.createBijectiveProductPort;
 import static cc.redberry.core.indexmapping.IndexMappings.getFirst;
 import static cc.redberry.core.tensor.ApplyIndexMapping.applyIndexMapping;
+import static cc.redberry.core.tensor.ApplyIndexMapping.applyIndexMappingAndRenameAllDummies;
 import static cc.redberry.core.utils.TensorUtils.getAllIndicesNamesT;
 
 /**
@@ -152,8 +155,8 @@ class PrimitiveProductSubstitution extends PrimitiveSubstitution {
         PContent content = new PContent(product.getIndexless(), product.getDataSubProduct());
 
         //TODO getForbidden only if necessary!!!!!!!!!!!!!!!!!
-        TIntHashSet forbidden = new TIntHashSet(iterator.getForbidden());
-        SubsResult subsResult = atomicSubstitute(content, forbidden);
+        ForbiddenContainer forbidden = new ForbiddenContainer();
+        SubsResult subsResult = atomicSubstitute(content, forbidden, iterator);
         if (subsResult == null)
             return currentNode;
 
@@ -164,7 +167,7 @@ class PrimitiveProductSubstitution extends PrimitiveSubstitution {
             factor = factor.divide(fromFactor);
             newTos.add(subsResult.newTo);
             content = subsResult.remainder;
-            subsResult = atomicSubstitute(content, forbidden);
+            subsResult = atomicSubstitute(content, forbidden, iterator);
         }
         Tensor[] result = new Tensor[newTos.size() + content.indexless.length + 2];
         System.arraycopy(newTos.toArray(new Tensor[newTos.size()]), 0, result, 0, newTos.size());
@@ -174,7 +177,7 @@ class PrimitiveProductSubstitution extends PrimitiveSubstitution {
         return Tensors.multiply(result);
     }
 
-    SubsResult atomicSubstitute(PContent content, TIntHashSet forbidden) {
+    SubsResult atomicSubstitute(PContent content, ForbiddenContainer forbidden, SubstitutionIterator iterator) {
         Mapping mapping = null;
         int[] indexlessBijection, dataBijection;
 
@@ -254,13 +257,34 @@ class PrimitiveProductSubstitution extends PrimitiveSubstitution {
         if (toIsSymbolic)
             newTo = mapping.getSign() ? Tensors.negate(to) : to;
         else {
-            TIntHashSet remainderIndices = new TIntHashSet(forbidden);
-            remainderIndices.addAll(getAllIndicesNamesT(indexlessRemainder));
-            remainderIndices.addAll(getAllIndicesNamesT(dataRemainderT));
-            newTo = applyIndexMapping(to, mapping, remainderIndices.toArray());
-            forbidden.addAll(getAllIndicesNamesT(newTo));
+            if (possiblyAddsDummies) {
+                if (forbidden.forbidden == null)
+                    forbidden.forbidden = new TIntHashSet(iterator.getForbidden());
+
+                TIntHashSet remainderIndices = new TIntHashSet(forbidden.forbidden);
+                remainderIndices.addAll(getAllIndicesNamesT(indexlessRemainder));
+                remainderIndices.addAll(getAllIndicesNamesT(dataRemainderT));
+                newTo = applyIndexMapping(to, mapping, remainderIndices.toArray());
+                forbidden.forbidden.addAll(getAllIndicesNamesT(newTo));
+            } else {
+                TIntHashSet allowed = new TIntHashSet();
+                for (int index : indexlessBijection)
+                    allowed.addAll(TensorUtils.getAllDummyIndicesT(content.indexless[index]));
+                IndicesBuilder ib = new IndicesBuilder();
+                for (int index : dataBijection) {
+                    allowed.addAll(TensorUtils.getAllDummyIndicesT(currentData[index]));
+                    ib.append(currentData[index]);
+                }
+                allowed.addAll(ib.getIndices().getNamesOfDummies());
+                allowed.removeAll(IndicesUtils.getIndicesNames(mapping.getToData()));
+                newTo = applyIndexMappingAndRenameAllDummies(to, mapping, allowed.toArray());
+            }
         }
         return new SubsResult(newTo, remainder);
+    }
+
+    private static final class ForbiddenContainer {
+        TIntHashSet forbidden = null;
     }
 
     private static Tensor[] extract(final Tensor[] source, final int[] positions) {

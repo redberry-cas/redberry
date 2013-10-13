@@ -69,10 +69,15 @@ public final class SubstitutionIterator implements TreeIterator {
 
     @Override
     public void set(Tensor tensor) {
+        set(tensor, true);
+    }
+
+    public void set(Tensor tensor, boolean supposeIndicesAreAdded) {
         Tensor oldTensor = innerIterator.current();
         if (oldTensor == tensor)
             return;
-        if (TensorUtils.isZeroOrIndeterminate(tensor) || TensorUtils.isSymbolic(tensor)) {
+
+        if (TensorUtils.isZeroOrIndeterminate(tensor)) {
             innerIterator.set(tensor);
             return;
         }
@@ -80,20 +85,27 @@ public final class SubstitutionIterator implements TreeIterator {
         if (!tensor.getIndices().getFree().equalsRegardlessOrder(oldTensor.getIndices().getFree()))
             throw new RuntimeException("Substitution with different free indices.");
 
-        StackPosition<ForbiddenContainer> previous = innerIterator.currentStackPosition().previous();
-        if (previous != null) {
-            ForbiddenContainer fc = previous.getPayload();
-            TIntHashSet oldDummyIndices = TensorUtils.getAllDummyIndicesT(oldTensor);
-            TIntHashSet newDummyIndices = TensorUtils.getAllDummyIndicesT(tensor);
+        if (supposeIndicesAreAdded) {
+            StackPosition<ForbiddenContainer> previous = innerIterator.currentStackPosition().previous();
+            if (previous != null) {
 
-            TIntHashSet removed = new TIntHashSet(oldDummyIndices),
-                    added = new TIntHashSet(newDummyIndices);
+                TIntHashSet oldDummyIndices = TensorUtils.getAllDummyIndicesT(oldTensor);
+                TIntHashSet newDummyIndices = TensorUtils.getAllDummyIndicesT(tensor);
 
-            removed.removeAll(newDummyIndices);
-            added.removeAll(oldDummyIndices);
+                TIntHashSet added = new TIntHashSet(newDummyIndices);
+                added.removeAll(oldDummyIndices);
 
-            fc.submit(removed, added);
+                if (!added.isEmpty() || previous.isPayloadInitialized()) {
+                    ForbiddenContainer fc = previous.getPayload();
+
+                    TIntHashSet removed = new TIntHashSet(oldDummyIndices);
+                    removed.removeAll(newDummyIndices);
+
+                    fc.submit(removed, added);
+                }
+            }
         }
+
         innerIterator.set(tensor);
     }
 

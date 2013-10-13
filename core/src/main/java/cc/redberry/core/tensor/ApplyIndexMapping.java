@@ -22,7 +22,7 @@
  */
 package cc.redberry.core.tensor;
 
-import cc.redberry.core.indexgenerator.IndexGenerator;
+import cc.redberry.core.indexgenerator.IndexGeneratorFromData;
 import cc.redberry.core.indexgenerator.IndexGeneratorImpl;
 import cc.redberry.core.indexmapping.IndexMapping;
 import cc.redberry.core.indexmapping.Mapping;
@@ -58,12 +58,12 @@ public final class ApplyIndexMapping {
      * Renames dummy indices of tensor prohibiting some dummy index to be equal to one of the specified
      * <i>forbidden</i> indices.
      *
-     * @param tensor         tensor
-     * @param forbiddenNames forbidden indices names
-     * @param generator      index generator
+     * @param tensor              tensor
+     * @param forbiddenNames      forbidden indices names
+     * @param allowedDummiesNames array of allowed dummies names
      * @return tensor with renamed dummies
      */
-    public static Tensor renameDummy(Tensor tensor, int[] forbiddenNames, IndexGenerator generator) {
+    public static Tensor renameDummy(Tensor tensor, int[] forbiddenNames, int[] allowedDummiesNames) {
         if (forbiddenNames.length == 0)
             return tensor;
         if (tensor instanceof Complex || tensor instanceof ScalarFunction)
@@ -92,6 +92,7 @@ public final class ApplyIndexMapping {
         int[] from = fromL.toArray(), to = new int[fromL.size()];
         Arrays.sort(from);
         int i;
+        IndexGeneratorFromData generator = new IndexGeneratorFromData(allowedDummiesNames);
         for (i = from.length - 1; i >= 0; --i)
             to[i] = generator.generate(IndicesUtils.getType(from[i]));
 
@@ -199,8 +200,8 @@ public final class ApplyIndexMapping {
         if (t instanceof SimpleTensor || t instanceof ScalarFunction)
             return t;
 
-        if (t instanceof Sum) {
-            Tensor[] oldData = ((Sum) t).data,
+        if (t instanceof Sum || t instanceof Expression) {
+            Tensor[] oldData = t instanceof Sum ? ((Sum) t).data : t.toArray(),
                     newData = null;
             Tensor c;
             TIntHashSet dummies[] = new TIntHashSet[t.size()];
@@ -257,7 +258,7 @@ public final class ApplyIndexMapping {
             if (newData == null)
                 return t;
 
-            return new Sum(newData, t.getIndices());
+            return t instanceof Sum ? new Sum(newData, t.getIndices()) : new Expression(t.getIndices(), newData[0], newData[1]);
         }
 
         return __unsafe_mapping_apply__(t, new Transformation() {
@@ -441,6 +442,31 @@ public final class ApplyIndexMapping {
             return tensor;
 
         return applyIndexMapping(tensor, indexMapper, indexMapper.contract(getIndicesNames(tensor.getIndices().getFree())));
+    }
+
+    public static Tensor applyIndexMappingAndRenameAllDummies(Tensor tensor, Mapping mapping, int[] allowedDummies) {
+        int[] freeIndicesNames = IndicesUtils.getIndicesNames(tensor.getIndices().getFree());
+        Arrays.sort(freeIndicesNames);
+        if (!mapping.getFromNames().equalsToArray(freeIndicesNames))
+            throw new IllegalArgumentException("From indices names does not match free indices names of tensor.");
+
+        final int[] dummies = TensorUtils.getAllDummyIndicesT(tensor).toArray();
+        int[] from = new int[mapping.size() + dummies.length];
+        int[] to = new int[mapping.size() + dummies.length];
+        ArraysUtils.arraycopy(mapping.getFromNames(), 0, from, 0, mapping.size());
+        ArraysUtils.arraycopy(mapping.getToData(), 0, to, 0, mapping.size());
+        System.arraycopy(dummies, 0, from, mapping.size(), dummies.length);
+
+        IndexGeneratorFromData generator = new IndexGeneratorFromData(allowedDummies);
+        for (int i = mapping.size() + dummies.length - 1, mappingSize = mapping.size(); i >= mappingSize; --i)
+            to[i] = generator.generate(IndicesUtils.getType(from[i]));
+
+        ArraysUtils.quickSort(from, to);
+        tensor = applyIndexMapping(tensor, new IndexMapper(from, to));
+        if (mapping.getSign())
+            tensor = Tensors.negate(tensor);
+
+        return tensor;
     }
 
     private static Tensor applyIndexMapping(Tensor tensor, final IndexMapper indexMapper, boolean contractIndices) {
