@@ -86,6 +86,16 @@ class EmptyIndices implements Indices {
     }
 
     /**
+     * Returns empty array
+     *
+     * @return empty array
+     */
+    @Override
+    public int[] getNamesOfDummies() {
+        return new int[0];
+    }
+
+    /**
      * Returns {@code EmptyIndices} instance
      *
      * @return {@code EmptyIndices} instance

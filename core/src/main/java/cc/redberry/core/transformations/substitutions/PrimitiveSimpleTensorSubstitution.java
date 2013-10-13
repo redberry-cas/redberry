@@ -24,9 +24,7 @@ package cc.redberry.core.transformations.substitutions;
 
 import cc.redberry.core.indexmapping.IndexMappings;
 import cc.redberry.core.indexmapping.Mapping;
-import cc.redberry.core.tensor.ApplyIndexMapping;
 import cc.redberry.core.tensor.Tensor;
-import cc.redberry.core.tensor.Tensors;
 
 /**
  * @author Dmitry Bolotin
@@ -43,12 +41,6 @@ class PrimitiveSimpleTensorSubstitution extends PrimitiveSubstitution {
                 IndexMappings.getFirst(from, currentNode);
         if (mapping == null)
             return currentNode;
-        Tensor newTo;
-        if (toIsSymbolic)
-            newTo = mapping.getSign() ? Tensors.negate(to) : to;
-        else
-            newTo = ApplyIndexMapping.applyIndexMapping(to, mapping, iterator.getForbidden());
-
-        return newTo;
+        return applyIndexMappingToTo(currentNode, to, mapping, iterator);
     }
 }

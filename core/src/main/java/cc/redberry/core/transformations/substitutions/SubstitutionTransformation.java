@@ -209,17 +209,22 @@ public final class SubstitutionTransformation implements Transformation {
     public Tensor transform(Tensor t) {
         SubstitutionIterator iterator = new SubstitutionIterator(t);
         Tensor current;
+        boolean supposeIndicesAreAdded;
         while ((current = iterator.next()) != null) {
             if (!applyIfModified && iterator.isCurrentModified())
                 continue;
             Tensor old = current;
+            supposeIndicesAreAdded = false;
             for (PrimitiveSubstitution primitiveSubstitution : primitiveSubstitutions) {
                 current = primitiveSubstitution.newTo(old, iterator);
-                if (current != old && !applyIfModified)
-                    break;
+                if (current != old) {
+                    supposeIndicesAreAdded |= primitiveSubstitution.possiblyAddsDummies;
+                    if (!applyIfModified)
+                        break;
+                }
                 old = current;
             }
-            iterator.set(current);
+            iterator.set(current, supposeIndicesAreAdded);
         }
         return iterator.result();
     }

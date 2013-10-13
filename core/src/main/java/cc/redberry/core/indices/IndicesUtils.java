@@ -26,6 +26,7 @@ import cc.redberry.core.combinatorics.Permutation;
 import cc.redberry.core.context.CC;
 import cc.redberry.core.context.Context;
 import cc.redberry.core.context.OutputFormat;
+import cc.redberry.core.utils.IntArray;
 import cc.redberry.core.utils.MathUtils;
 import cc.redberry.core.utils.IntArrayList;
 
@@ -436,6 +437,19 @@ public final class IndicesUtils {
         int a[] = new int[indices.length];
         for (int i = a.length - 1; i >= 0; --i)
             a[i] = getNameWithType(indices[i]);
+        return a;
+    }
+
+    /**
+     * Returns an array of indices names (with types)
+     *
+     * @param indices
+     * @return array of indices names (with types)
+     */
+    public static int[] getIndicesNames(IntArray indices) {
+        int a[] = new int[indices.length()];
+        for (int i = a.length - 1; i >= 0; --i)
+            a[i] = getNameWithType(indices.get(i));
         return a;
     }
 

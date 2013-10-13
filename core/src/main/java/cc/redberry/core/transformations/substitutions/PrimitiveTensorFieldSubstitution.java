@@ -148,11 +148,7 @@ class PrimitiveTensorFieldSubstitution extends PrimitiveSubstitution {
                 argFrom.toArray(new Tensor[argFrom.size()]),
                 argTo.toArray(new Tensor[argTo.size()]),
                 false).transform(newTo);
-        if (!TensorUtils.isSymbolic(newTo))
-            newTo = ApplyIndexMapping.applyIndexMapping(newTo, mapping, iterator.getForbidden());
-        else if (mapping.getSign())
-            newTo = Tensors.negate(newTo);
-        return newTo;
+        return applyIndexMappingToTo(currentNode, newTo, mapping, iterator);
     }
 
     private static class DFromTo {

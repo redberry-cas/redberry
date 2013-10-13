@@ -118,6 +118,24 @@ final class SortedIndices extends AbstractIndices {
     }
 
     @Override
+    public int[] getNamesOfDummies() {
+        IntArrayList list = new IntArrayList();
+        int u, l;
+        int iLower = firstLower, iUpper = 0;
+        for (; iUpper < firstLower && iLower < data.length; ++iLower, ++iUpper) {
+            u = data[iUpper] & 0x7FFFFFFF; //taking name with type
+            l = data[iLower];
+            if (u < l)
+                --iLower;
+            else if (l < u)
+                --iUpper;
+            else
+                list.add(l);
+        }
+        return list.toArray();
+    }
+
+    @Override
     public Indices getOfType(IndexType type) {
         int type_ = type.getType();
 
