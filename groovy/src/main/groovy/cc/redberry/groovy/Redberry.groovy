@@ -314,6 +314,36 @@ class Redberry {
     static int getAt(Indices indices, int position) { indices.get(position) }
 
     /**
+     * Returns sub indices of specified range
+     *
+     * @param indices indices
+     * @param range range
+     * @return sub indices of specified range
+     * @throws IndexOutOfBoundsException
+     */
+    static Indices getAt(Indices indices, IntRange range) {
+        int[] sub = new int[range.size()]
+        for (int i = 0; i < range.size(); ++i)
+            sub[i] = indices.get(i + range.from);
+        return IndicesFactory.create(sub)
+    }
+
+    /**
+     * Returns sub indices of specified range
+     *
+     * @param indices indices
+     * @param range range
+     * @return sub indices of specified range
+     * @throws IndexOutOfBoundsException
+     */
+    static SimpleIndices getAt(SimpleIndices indices, IntRange range) {
+        int[] sub = new int[range.size()]
+        for (int i = 0; i < range.size(); ++i)
+            sub[i] = indices.get(i + range.from);
+        return IndicesFactory.createSimple(null, sub)
+    }
+
+    /**
      * Returns the index of the specified type at the
      * specified position in indices
      *

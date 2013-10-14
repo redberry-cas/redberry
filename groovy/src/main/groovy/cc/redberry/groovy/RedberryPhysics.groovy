@@ -78,10 +78,27 @@ public class RedberryPhysics {
             return new DiracTraceTransformation(gamma);
         }
 
+
         Transformation getAt(Collection args) {
             use(Redberry) {
                 args = args.collect { if (it instanceof String) it.t else it }
                 return new DiracTraceTransformation(* args);
+            }
+        }
+
+        private static final Map defaultArgs = [Gamma: 'G_a', Gamma5: 'G5', LeviCivita: 'e_abcd']
+
+        Transformation getAt(Map args) {
+            use(Redberry) {
+
+                args = new HashMap(args)
+                args.entrySet().each { it.value = it.value.toString() }
+
+                Map newArgs = new HashMap(defaultArgs)
+                newArgs.putAll(args)
+                newArgs.entrySet().each { it.value = it.value.t }
+
+                return new DiracTraceTransformation(newArgs['Gamma'], newArgs['Gamma5'], newArgs['LeviCivita']);
             }
         }
     }
@@ -92,6 +109,10 @@ public class RedberryPhysics {
      */
     public static final GUnitaryTrace UnitaryTrace = new GUnitaryTrace();
 
+
+    private static final Map unitaryDefaultParameters = [
+            Matrix: 'T_A', f: 'f_ABC', d: 'd_ABC', N: 'N']
+
     private static final class GUnitaryTrace {
 
         Transformation getAt(Collection args) {
@@ -100,6 +121,20 @@ public class RedberryPhysics {
                 return new UnitaryTraceTransformation(* args);
             }
         }
+
+        Transformation getAt(Map args) {
+            use(Redberry) {
+                args = new HashMap(args)
+                args.entrySet().each { it.value = it.value.toString() }
+
+                Map newArgs = new HashMap(unitaryDefaultParameters)
+                newArgs.putAll(args)
+                newArgs.entrySet().each { it.value = it.value.t }
+
+                return new UnitaryTraceTransformation(newArgs['Matrix'], newArgs['f'], newArgs['d'], newArgs['N']);
+            }
+        }
+
     }
 
     /**
@@ -114,6 +149,19 @@ public class RedberryPhysics {
             use(Redberry) {
                 args = args.collect { if (it instanceof String) it.t else it }
                 return new UnitarySimplifyTransformation(* args);
+            }
+        }
+
+        Transformation getAt(Map args) {
+            use(Redberry) {
+                args = new HashMap(args)
+                args.entrySet().each { it.value = it.value.toString() }
+
+                Map newArgs = new HashMap(unitaryDefaultParameters)
+                newArgs.putAll(args)
+                newArgs.entrySet().each { it.value = it.value.t }
+
+                return new UnitarySimplifyTransformation(newArgs['Matrix'], newArgs['f'], newArgs['d'], newArgs['N']);
             }
         }
     }
