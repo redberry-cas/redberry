@@ -69,10 +69,15 @@ public final class SubstitutionIterator implements TreeIterator {
 
     @Override
     public void set(Tensor tensor) {
+        set(tensor, true);
+    }
+
+    public void set(Tensor tensor, boolean supposeIndicesAreAdded) {
         Tensor oldTensor = innerIterator.current();
         if (oldTensor == tensor)
             return;
-        if (TensorUtils.isZeroOrIndeterminate(tensor) || TensorUtils.isSymbolic(tensor)) {
+
+        if (TensorUtils.isZeroOrIndeterminate(tensor)) {
             innerIterator.set(tensor);
             return;
         }
@@ -80,20 +85,27 @@ public final class SubstitutionIterator implements TreeIterator {
         if (!tensor.getIndices().getFree().equalsRegardlessOrder(oldTensor.getIndices().getFree()))
             throw new RuntimeException("Substitution with different free indices.");
 
-        StackPosition<ForbiddenContainer> previous = innerIterator.currentStackPosition().previous();
-        if (previous != null) {
-            ForbiddenContainer fc = previous.getPayload();
-            TIntHashSet oldDummyIndices = TensorUtils.getAllDummyIndicesT(oldTensor);
-            TIntHashSet newDummyIndices = TensorUtils.getAllDummyIndicesT(tensor);
+        if (supposeIndicesAreAdded) {
+            StackPosition<ForbiddenContainer> previous = innerIterator.currentStackPosition().previous();
+            if (previous != null) {
 
-            TIntHashSet removed = new TIntHashSet(oldDummyIndices),
-                    added = new TIntHashSet(newDummyIndices);
+                TIntHashSet oldDummyIndices = TensorUtils.getAllDummyIndicesT(oldTensor);
+                TIntHashSet newDummyIndices = TensorUtils.getAllDummyIndicesT(tensor);
 
-            removed.removeAll(newDummyIndices);
-            added.removeAll(oldDummyIndices);
+                TIntHashSet added = new TIntHashSet(newDummyIndices);
+                added.removeAll(oldDummyIndices);
 
-            fc.submit(removed, added);
+                if (!added.isEmpty() || previous.isPayloadInitialized()) {
+                    ForbiddenContainer fc = previous.getPayload();
+
+                    TIntHashSet removed = new TIntHashSet(oldDummyIndices);
+                    removed.removeAll(newDummyIndices);
+
+                    fc.submit(removed, added);
+                }
+            }
         }
+
         innerIterator.set(tensor);
     }
 
@@ -206,6 +218,7 @@ public final class SubstitutionIterator implements TreeIterator {
         @Override
         public void submit(TIntSet removed, TIntSet added) {
             insureInitialized();
+            assert !(new TIntHashSet(added).removeAll(removed));
             forbidden.addAll(added);
             forbidden.removeAll(removed);
             position.previous().getPayload().submit(removed, added);
@@ -247,7 +260,7 @@ public final class SubstitutionIterator implements TreeIterator {
             for (i = allDummyIndices.length - 1; i >= 0; --i)
                 usedArrays[i] = new BitArray(size);
 
-            //Full-filling origins array
+            //Fulfilling origins array
             for (i = size - 1; i >= 0; --i) {
                 dummy = TensorUtils.getAllDummyIndicesT(tensor.get(i));
                 TIntIterator iterator = dummy.iterator();
@@ -292,7 +305,7 @@ public final class SubstitutionIterator implements TreeIterator {
 
                 //If this index was already somewhere in the sum,
                 //we don't have to propagate it to position
-                if (usedArrays[iIndex].bitCount() >= 0)
+                if (!usedArrays[iIndex].isEmpty())
                     iterator.remove();
 
                 //Marking this index as added to current summand
@@ -326,6 +339,7 @@ public final class SubstitutionIterator implements TreeIterator {
         @Override
         public void submit(TIntSet removed, TIntSet added) {
             insureInitialized();
+            assert !(new TIntHashSet(added).removeAll(removed));
             forbidden.addAll(added);
             forbidden.removeAll(removed);
         }

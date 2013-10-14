@@ -22,6 +22,9 @@
  */
 package cc.redberry.core.context.defaults;
 
+import cc.redberry.core.context.IndexConverterException;
+import cc.redberry.core.context.OutputFormat;
+
 /**
  * {@link cc.redberry.core.context.IndexSymbolConverter} for Greek lower case letters.
  *
@@ -92,4 +95,22 @@ public final class GreekLaTeXLowerCaseConverter extends SymbolArrayConverter {
     public byte getType() {
         return TYPE;
     }
+
+    @Override
+    public String getSymbol(int code, OutputFormat mode) throws IndexConverterException {
+        String symbol;
+        try {
+            if (mode == OutputFormat.UTF8)
+                return utf[code];
+            symbol = symbols[code];
+        } catch (ArrayIndexOutOfBoundsException e) {
+            throw new IndexConverterException();
+        }
+        if (mode == OutputFormat.WolframMathematica)
+            symbol = "\\[" + Character.toUpperCase(symbol.charAt(1)) + symbol.substring(2) + "]";
+        if (mode == OutputFormat.Maple)
+            symbol = symbol.substring(1);
+        return symbol;
+    }
+
 }

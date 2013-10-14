@@ -213,4 +213,29 @@ public class TensorGeneratorTest {
         Arrays.sort(expe);
         Assert.assertArrayEquals(real, expe);
     }
+
+    @Test
+    public void test12() {
+        GeneratedTensor actual = TensorGenerator.generateStructure(
+                ParserIndices.parseSimple("_abcd"),
+                Tensors.parse("R^a_bad", "R_abcd"),
+                null, false, true, true);
+
+        System.out.println(actual.generatedTensor);
+        System.out.println(Arrays.toString(actual.coefficients));
+    }
+
+    @Test
+    public void test13() {
+        Tensors.addSymmetry("R_abcd", 1, 0, 2, 3);
+        Tensors.addSymmetry("R_abcd", 2, 3, 0, 1);
+        GeneratedTensor actual = TensorGenerator.generateStructure(
+                ParserIndices.parseSimple("_abcd"),
+                Tensors.parse("R^a_bad", "R_abcd"),
+                null, false, true, true);
+
+
+        System.out.println(Tensors.parseExpression("R^a_bad = R_bd").transform(actual.generatedTensor));
+        System.out.println(Arrays.toString(actual.coefficients));
+    }
 }

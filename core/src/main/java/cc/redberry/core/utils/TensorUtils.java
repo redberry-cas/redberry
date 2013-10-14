@@ -22,12 +22,15 @@
  */
 package cc.redberry.core.utils;
 
+import cc.redberry.concurrent.OutputPortUnsafe;
 import cc.redberry.core.combinatorics.Symmetry;
 import cc.redberry.core.combinatorics.symmetries.Symmetries;
 import cc.redberry.core.combinatorics.symmetries.SymmetriesFactory;
+import cc.redberry.core.context.CC;
 import cc.redberry.core.indexmapping.IndexMappings;
 import cc.redberry.core.indexmapping.Mapping;
 import cc.redberry.core.indexmapping.MappingsPort;
+import cc.redberry.core.indices.InconsistentIndicesException;
 import cc.redberry.core.indices.Indices;
 import cc.redberry.core.indices.IndicesUtils;
 import cc.redberry.core.indices.SimpleIndices;
@@ -45,8 +48,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-import static cc.redberry.core.tensor.Tensors.multiply;
-import static cc.redberry.core.tensor.Tensors.negate;
+import static cc.redberry.core.tensor.Tensors.*;
 
 /**
  * This class contains various useful methods related with tensors.
@@ -344,8 +346,16 @@ public class TensorUtils {
     }
 
     public static TIntHashSet getAllDummyIndicesT(Tensor tensor) {
+        return getAllDummyIndicesT(false, tensor);
+    }
+
+    public static TIntHashSet getAllDummyIndicesIncludingScalarFunctionsT(Tensor tensor) {
+        return getAllDummyIndicesT(true, tensor);
+    }
+
+    private static TIntHashSet getAllDummyIndicesT(boolean includeScalarFunctions, Tensor tensor) {
         TIntHashSet set = new TIntHashSet();
-        appendAllIndicesNamesT(tensor, set);
+        appendAllIndicesNamesT(tensor, set, includeScalarFunctions);
         set.removeAll(IndicesUtils.getIndicesNames(tensor.getIndices().getFree()));
         return set;
     }
@@ -360,11 +370,20 @@ public class TensorUtils {
     public static TIntHashSet getAllIndicesNamesT(Tensor... tensors) {
         TIntHashSet set = new TIntHashSet();
         for (Tensor tensor : tensors)
-            appendAllIndicesNamesT(tensor, set);
+            appendAllIndicesNamesT(tensor, set, false);
         return set;
     }
 
+
     public static void appendAllIndicesNamesT(Tensor tensor, TIntHashSet set) {
+        appendAllIndicesNamesT(tensor, set, false);
+    }
+
+    public static void appendAllIndicesNamesIncludingScalarFunctionsT(Tensor tensor, TIntHashSet set) {
+        appendAllIndicesNamesT(tensor, set, true);
+    }
+
+    private static void appendAllIndicesNamesT(Tensor tensor, TIntHashSet set, boolean includeScalarFunctions) {
         if (tensor instanceof SimpleTensor) {
             Indices ind = tensor.getIndices();
             set.ensureCapacity(ind.size());
@@ -373,7 +392,7 @@ public class TensorUtils {
                 set.add(IndicesUtils.getNameWithType(ind.get(i)));
         } else if (tensor instanceof Power) {
             appendAllIndicesNamesT(tensor.get(0), set);
-        } else if (tensor instanceof ScalarFunction)
+        } else if (tensor instanceof ScalarFunction && !includeScalarFunctions)
             return;
         else {
             Tensor t;
@@ -417,7 +436,7 @@ public class TensorUtils {
             Indices ind = t.getIndices();
             for (int i = ind.size() - 1; i >= 0; --i)
                 if (indices.contains(ind.get(i)))
-                    throw new AssertionError();
+                    throw new AssertionError(new InconsistentIndicesException(ind.get(i)));
                 else
                     indices.add(ind.get(i));
         }
@@ -717,6 +736,44 @@ public class TensorUtils {
             if (testContainsNames(tt, names)) return true;
 
         return false;
+    }
+
+    /**
+     * Generates a set of replacement rules for all scalar (but not symbolic) sub-tensors appearing in the specified
+     * tensor.
+     *
+     * @param tensor tensor
+     * @return set of replacement rules for all scalar (but not symbolic) sub-tensors appearing in the specified
+     *         tensor
+     */
+    public static Expression[] generateReplacementsOfScalars(Tensor tensor) {
+        return generateReplacementsOfScalars(tensor, CC.getParametersGenerator());
+    }
+
+    /**
+     * Generates a set of replacement rules for all scalar (but not symbolic) sub-tensors appearing in the specified
+     * tensor.
+     *
+     * @param tensor                tensor
+     * @param generatedCoefficients allows to control how coefficients are generated
+     * @return set of replacement rules for all scalar (but not symbolic) sub-tensors appearing in the specified
+     *         tensor
+     * @see LocalSymbolsProvider
+     */
+    public static Expression[] generateReplacementsOfScalars(Tensor tensor,
+                                                             OutputPortUnsafe<SimpleTensor> generatedCoefficients) {
+        THashSet<Tensor> scalars = new THashSet<>();
+        FromChildToParentIterator iterator = new FromChildToParentIterator(tensor);
+        Tensor c;
+        while ((c = iterator.next()) != null)
+            if (c instanceof Product)
+                scalars.addAll(Arrays.asList(((Product) c).getContent().getScalars()));
+
+        Expression[] replacements = new Expression[scalars.size()];
+        int i = -1;
+        for (Tensor scalar : scalars)
+            replacements[++i] = expression(scalar, generatedCoefficients.take());
+        return replacements;
     }
 
 }

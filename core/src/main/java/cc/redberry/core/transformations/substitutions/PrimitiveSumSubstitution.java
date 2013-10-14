@@ -46,11 +46,7 @@ class PrimitiveSumSubstitution extends PrimitiveSubstitution {
             return currentNode;
 
         Mapping mapping = bc.mapping;
-        Tensor newTo;
-        if (toIsSymbolic)
-            newTo = mapping.getSign() ? Tensors.negate(to) : to;
-        else
-            newTo = ApplyIndexMapping.applyIndexMapping(to, mapping, iterator.getForbidden());
+        Tensor newTo = applyIndexMappingToTo(currentNode, to, mapping, iterator);
 
         SumBuilder builder = new SumBuilder();
         int[] bijection = bc.bijection;

@@ -22,7 +22,6 @@
  */
 package cc.redberry.core.tensorgenerator;
 
-import cc.redberry.concurrent.OutputPortUnsafe;
 import cc.redberry.core.combinatorics.symmetries.Symmetries;
 import cc.redberry.core.context.CC;
 import cc.redberry.core.indexmapping.IndexMappings;
@@ -126,12 +125,14 @@ public class TensorGenerator {
                         oldIndices[k + termUp.length()] = termLow.get(k);
                         newIndices[k + termUp.length()] = lowerArray[l++];
                     }
-                    temp = ApplyIndexMapping.applyIndexMapping(temp, new Mapping(oldIndices, newIndices), new int[0]);
+                    temp = ApplyIndexMapping.applyIndexMapping(temp, new Mapping(oldIndices, newIndices), indices.getAllIndices().copy());
                     tCombination.add(temp);
                 }
 
-            //creating term & processing combinatorics            
-            Tensor term = SymmetrizeUpperLowerIndicesTransformation.symmetrizeUpperLowerIndices(Tensors.multiplyAndRenameConflictingDummies(tCombination.toArray(new Tensor[tCombination.size()])));
+            //creating term & processing combinatorics
+            Tensor[] prodArray = tCombination.toArray(new Tensor[tCombination.size()]);
+            Tensors.resolveAllDummies(prodArray);
+            Tensor term = SymmetrizeUpperLowerIndicesTransformation.symmetrizeUpperLowerIndices(Tensors.multiplyAndRenameConflictingDummies(prodArray));
             if (symmetricForm || !(term instanceof Sum)) {
                 Tensor coefficient;
                 if (withCoefficients) {

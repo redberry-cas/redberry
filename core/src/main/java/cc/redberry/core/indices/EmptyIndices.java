@@ -49,6 +49,11 @@ class EmptyIndices implements Indices {
         throw new IndexOutOfBoundsException();
     }
 
+    @Override
+    public int[] toArray() {
+        return new int[0];
+    }
+
     /**
      * Always throws {@code IndexOutOfBoundsException} because size is zero.
      *
@@ -78,6 +83,16 @@ class EmptyIndices implements Indices {
     @Override
     public Indices getFree() {
         return this;
+    }
+
+    /**
+     * Returns empty array
+     *
+     * @return empty array
+     */
+    @Override
+    public int[] getNamesOfDummies() {
+        return new int[0];
     }
 
     /**

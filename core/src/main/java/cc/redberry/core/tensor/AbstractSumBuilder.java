@@ -27,8 +27,11 @@ import cc.redberry.core.indices.IndicesFactory;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.utils.TensorHashCalculator;
 import cc.redberry.core.utils.TensorUtils;
+import gnu.trove.map.hash.TIntObjectHashMap;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import static cc.redberry.core.transformations.ToNumericTransformation.toNumeric;
 
@@ -41,7 +44,7 @@ import static cc.redberry.core.transformations.ToNumericTransformation.toNumeric
  */
 public abstract class AbstractSumBuilder implements TensorBuilder {
 
-    final Map<Integer, List<FactorNode>> summands;
+    final TIntObjectHashMap<List<FactorNode>> summands;
     Complex complex = Complex.ZERO;
     Indices indices = null;
     int[] sortedFreeIndices;
@@ -59,10 +62,10 @@ public abstract class AbstractSumBuilder implements TensorBuilder {
      * @param initialCapacity initial capacity
      */
     public AbstractSumBuilder(int initialCapacity) {
-        summands = new HashMap<>(initialCapacity);
+        summands = new TIntObjectHashMap<>(initialCapacity);
     }
 
-    AbstractSumBuilder(Map<Integer, List<FactorNode>> summands, Complex complex, Indices indices, int[] sortedFreeIndices) {
+    AbstractSumBuilder(TIntObjectHashMap<List<FactorNode>> summands, Complex complex, Indices indices, int[] sortedFreeIndices) {
         this.summands = summands;
         this.complex = complex;
         this.indices = indices;
@@ -77,8 +80,8 @@ public abstract class AbstractSumBuilder implements TensorBuilder {
         List<Tensor> sum = new ArrayList<>();
 
         final boolean isNumeric = complex.isNumeric();
-        for (Map.Entry<Integer, List<FactorNode>> entry : summands.entrySet())
-            for (FactorNode node : entry.getValue()) {
+        for (List<FactorNode> nodes : summands.valueCollection())
+            for (FactorNode node : nodes) {
                 if (isNumeric) {
                     Tensor summand = Tensors.multiply(toNumeric(node.build()), toNumeric(node.factor));
                     if (summand instanceof Complex)
@@ -144,9 +147,9 @@ public abstract class AbstractSumBuilder implements TensorBuilder {
             for (FactorNode node : factorNodes)
                 if ((b = compareFactors(split.factor, node.factor)) != null) {
                     if (b)
-                        node.put(Tensors.negate(split.summand));
+                        node.put(Tensors.negate(split.summand), split.factor);
                     else
-                        node.put(split.summand);
+                        node.put(split.summand, split.factor);
                     break;
                 }
             if (b == null)

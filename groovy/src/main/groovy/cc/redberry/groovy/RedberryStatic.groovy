@@ -47,11 +47,14 @@ import cc.redberry.core.transformations.expand.ExpandDenominatorTransformation
 import cc.redberry.core.transformations.expand.ExpandNumeratorTransformation
 import cc.redberry.core.transformations.expand.ExpandTransformation
 import cc.redberry.core.transformations.factor.FactorTransformation
+import cc.redberry.core.transformations.factor.FactorizationEngine
+import cc.redberry.core.transformations.factor.JasFactor
 import cc.redberry.core.transformations.fractions.GetDenominatorTransformation
 import cc.redberry.core.transformations.fractions.GetNumeratorTransformation
 import cc.redberry.core.transformations.fractions.TogetherTransformation
 import cc.redberry.core.transformations.powerexpand.PowerExpandTransformation
 import cc.redberry.core.transformations.powerexpand.PowerExpandUnwrapTransformation
+import cc.redberry.core.transformations.symmetrization.SymmetrizeTransformation
 import cc.redberry.core.utils.BitArray
 import cc.redberry.core.utils.TensorUtils
 
@@ -260,7 +263,31 @@ class RedberryStatic {
      * Factors a polynomial over the integers.
      * @see FactorTransformation
      */
-    public static final Transformation Factor = FactorTransformation.FACTOR;
+    public static final FactorWrapper Factor = FactorWrapper.INSTANCE;
+
+    public static final class FactorWrapper implements Transformation {
+        public static final FactorWrapper INSTANCE = new FactorWrapper()
+
+        private FactorWrapper() {
+        }
+
+        @Override
+        public Tensor transform(Tensor t) {
+            return FactorTransformation.factor(t)
+        }
+
+        private static final def defaultOptions = [FactorScalars: true, FactorizationEngine: JasFactor.ENGINE]
+
+        public Transformation getAt(boolean factorScalars, FactorizationEngine factorizationEngine = JasFactor.ENGINE) {
+            return new FactorTransformation(factorScalars, factorizationEngine)
+        }
+
+        public Transformation getAt(Map map = [FactorScalars: true, FactorizationEngine: JasFactor.ENGINE]) {
+            def allOptions = new HashMap(defaultOptions)
+            allOptions.putAll(map)
+            return new FactorTransformation(allOptions['FactorScalars'], allOptions['FactorizationEngine'])
+        }
+    }
 
     /**
      *  Expands all powers of products and powers with respect to specified variables.
@@ -279,6 +306,22 @@ class RedberryStatic {
     public static final TransformationWrapper_SimpleTensors_Or_Transformations PowerExpandUnwrap =
         new TransformationWrapper_SimpleTensors_Or_Transformations(PowerExpandUnwrapTransformation,
                 PowerExpandUnwrapTransformation.POWER_EXPAND_UNWRAP_TRANSFORMATION)
+
+    /**
+     * Gives a symmetrization of tensor with respect to specified indices under the specified symmetries.
+     */
+    public static final SymmetrizeWrapper Symmetrize = SymmetrizeWrapper.INSTANCE;
+
+    public static final class SymmetrizeWrapper {
+        public static final SymmetrizeWrapper INSTANCE = new SymmetrizeWrapper()
+
+        SymmetrizeWrapper() {
+        }
+
+        public Transformation getAt(SimpleIndices indices, Symmetries symmetries) {
+            return new SymmetrizeTransformation(indices.free.allIndices.copy(), symmetries, true)
+        }
+    }
 
     /***********************************************************************
      ********************* Matrices definition *****************************
@@ -531,7 +574,7 @@ class RedberryStatic {
      * @param collection collection of symmetries
      * @return instance of {@link Symmetries}
      */
-    public static Symmetries CreateSymmetries(Collection collection) {
+    public static Symmetries CreateSymmetries(Object... collection) {
         def s = CreateSymmetry(collection[0])
         Symmetries symmetries = SymmetriesFactory.createSymmetries(s.dimension())
         collection.each { symmetries.add(CreateSymmetry(it)) }

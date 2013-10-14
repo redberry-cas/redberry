@@ -129,6 +129,19 @@ abstract class SimpleIndicesAbstract extends AbstractIndices implements SimpleIn
     }
 
     @Override
+    public int[] getNamesOfDummies() {
+        IntArrayList dataList = new IntArrayList();
+        for (int i = 0; i < data.length; i++)
+            for (int j = i + 1; j < data.length; ++j) {
+                if ((data[i] ^ data[j]) == 0x80000000) {
+                    dataList.add(data[i] & 0x7FFFFFFF);
+                    break;
+                }
+            }
+        return dataList.toArray();
+    }
+
+    @Override
     public SimpleIndices getOfType(IndexType type) {
         int type_ = type.getType() << 24;
         int i = 0;

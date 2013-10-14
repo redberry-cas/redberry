@@ -167,6 +167,17 @@ public class Permutation implements Comparable<Permutation> {
     }
 
     /**
+     * Returns true if this permutation is identity
+     *
+     * @return true if this permutation is identity
+     */
+    public boolean isIdentity() {
+        for (int i = 0; i < permutation.length; ++i)
+            if (permutation[i] != i) return false;
+        return true;
+    }
+
+    /**
      * Returns true if {@code obj} has the same class and represents the same
      * permutation and false in the other case.
      *

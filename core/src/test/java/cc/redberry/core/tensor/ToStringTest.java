@@ -20,22 +20,30 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
-package cc.redberry.core.indexgenerator;
+package cc.redberry.core.tensor;
 
-import cc.redberry.core.indices.IndexType;
+import cc.redberry.core.context.OutputFormat;
+import junit.framework.Assert;
+import org.junit.Test;
+
+import static cc.redberry.core.tensor.Tensors.parse;
 
 /**
- * Generates distinct indices of particular types,
- *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public interface IndexGenerator {
-    /**
-     * Generates new index of a particular type.
-     *
-     * @param type index type
-     * @return new index of a particular type
-     */
-    int generate(byte type);
+public class ToStringTest {
+    @Test
+    public void test1() {
+        Tensor t = parse("T_{\\mu\\nu}");
+        Assert.assertEquals(t.toString(OutputFormat.WolframMathematica), "T[-\\[Mu],-\\[Nu]]");
+        Assert.assertEquals(t.toString(OutputFormat.Maple), "T[mu,nu]");
+    }
+
+    @Test
+    public void test2() {
+        Tensor t = parse("T_{\\mu_{1} \\nu_{2}} ");
+        Assert.assertEquals(t.toString(OutputFormat.WolframMathematica), "T[-Subscript[\\[Mu], 1],-Subscript[\\[Nu], 2]]");
+        Assert.assertEquals(t.toString(OutputFormat.Maple), "T[mu_1,nu_2]");
+    }
 }

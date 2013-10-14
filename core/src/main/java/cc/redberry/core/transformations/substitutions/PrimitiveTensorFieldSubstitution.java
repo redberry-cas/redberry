@@ -23,7 +23,7 @@
 package cc.redberry.core.transformations.substitutions;
 
 import cc.redberry.core.context.NameDescriptorForTensorField;
-import cc.redberry.core.indexgenerator.IndexGenerator;
+import cc.redberry.core.indexgenerator.IndexGeneratorImpl;
 import cc.redberry.core.indexmapping.IndexMappings;
 import cc.redberry.core.indexmapping.Mapping;
 import cc.redberry.core.indices.Indices;
@@ -80,7 +80,7 @@ class PrimitiveTensorFieldSubstitution extends PrimitiveSubstitution {
             SimpleIndices varIndices;
             TensorField __from = (TensorField) this.from;
             Tensor __to = this.to;
-            IndexGenerator ig = null;
+            IndexGeneratorImpl ig = null;
             for (int i = orders.length() - 1; i >= 0; --i) {
                 order = orders.get(i) - this.orders.get(i);
                 while (order > 0) {
@@ -92,7 +92,7 @@ class PrimitiveTensorFieldSubstitution extends PrimitiveSubstitution {
                         TIntHashSet forbidden = new TIntHashSet(iterator.getForbidden());
                         forbidden.addAll(TensorUtils.getAllIndicesNamesT(this.from));
                         forbidden.addAll(TensorUtils.getAllIndicesNamesT(this.to));
-                        ig = new IndexGenerator(forbidden.toArray());
+                        ig = new IndexGeneratorImpl(forbidden.toArray());
 
                     }
 
@@ -148,11 +148,7 @@ class PrimitiveTensorFieldSubstitution extends PrimitiveSubstitution {
                 argFrom.toArray(new Tensor[argFrom.size()]),
                 argTo.toArray(new Tensor[argTo.size()]),
                 false).transform(newTo);
-        if (!TensorUtils.isSymbolic(newTo))
-            newTo = ApplyIndexMapping.applyIndexMapping(newTo, mapping, iterator.getForbidden());
-        else if (mapping.getSign())
-            newTo = Tensors.negate(newTo);
-        return newTo;
+        return applyIndexMappingToTo(currentNode, newTo, mapping, iterator);
     }
 
     private static class DFromTo {

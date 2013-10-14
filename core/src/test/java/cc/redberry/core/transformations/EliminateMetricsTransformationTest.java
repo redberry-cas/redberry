@@ -24,7 +24,7 @@ package cc.redberry.core.transformations;
 
 import cc.redberry.core.TAssert;
 import cc.redberry.core.context.CC;
-import cc.redberry.core.indexgenerator.IndexGenerator;
+import cc.redberry.core.indexgenerator.IndexGeneratorImpl;
 import cc.redberry.core.indices.IndicesUtils;
 import cc.redberry.core.tensor.Expression;
 import cc.redberry.core.tensor.ProductBuilder;
@@ -456,7 +456,7 @@ public class EliminateMetricsTransformationTest {
 
     private static Tensor generateContractedMetricSequence(int length) {
         ProductBuilder builder = new ProductBuilder();
-        IndexGenerator generator = new IndexGenerator();
+        IndexGeneratorImpl generator = new IndexGeneratorImpl();
         byte type = 0;
         int a = generator.generate(type), b = generator.generate(type);
         for (int i = 0; i < length; ++i) {
@@ -469,7 +469,7 @@ public class EliminateMetricsTransformationTest {
 
     private static Tensor generateNotContractedMetricSequence(int length) {
         ProductBuilder builder = new ProductBuilder();
-        IndexGenerator generator = new IndexGenerator();
+        IndexGeneratorImpl generator = new IndexGeneratorImpl();
         byte type = 0;
         for (int i = 0; i < length; ++i)
             builder.put(Tensors.createMetric(generator.generate(type), generator.generate(type)));

@@ -20,22 +20,24 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
-package cc.redberry.core.indexgenerator;
+package cc.redberry.core.transformations.factor;
 
-import cc.redberry.core.indices.IndexType;
+import cc.redberry.core.tensor.Tensor;
 
 /**
- * Generates distinct indices of particular types,
+ * Abstract factorization engine.
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public interface IndexGenerator {
+public interface FactorizationEngine {
+
     /**
-     * Generates new index of a particular type.
+     * Factors a multivariate symbolic polynomial.
      *
-     * @param type index type
-     * @return new index of a particular type
+     * @param tensor symbolic (without any indexes) polynomial or rational expression
+     * @return factorization
+     * @throws RuntimeException if specified tensor is not symbolic (without any indexes) expression
      */
-    int generate(byte type);
+    Tensor factor(Tensor tensor);
 }

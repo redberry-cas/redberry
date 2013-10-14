@@ -65,6 +65,13 @@ public interface Indices {
     IntArray getAllIndices();
 
     /**
+     * Returns a copy of inner array of indices.
+     *
+     * @return a copy of inner array of indices
+     */
+    int[] toArray();
+
+    /**
      * Returns the number of indices
      *
      * @return number of indices
@@ -104,12 +111,12 @@ public interface Indices {
      */
     int get(IndexType type, int position);
 
-//    /**
-//     * Returns sorted array of dummy indices names.
-//     *
-//     * @return sorted array of dummy indices names
-//     */
-//    int[] getDummyNames();
+    /**
+     * Returns sorted array of dummy indices names.
+     *
+     * @return sorted array of dummy indices names
+     */
+    int[] getNamesOfDummies();
 
     /**
      * Returns new instance of {@code Indices}, which contains only free (non contracted) indices from

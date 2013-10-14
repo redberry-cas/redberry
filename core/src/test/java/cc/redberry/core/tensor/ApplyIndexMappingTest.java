@@ -29,6 +29,7 @@ import cc.redberry.core.combinatorics.IntPermutationsGenerator;
 import cc.redberry.core.indexmapping.IndexMappings;
 import cc.redberry.core.indexmapping.Mapping;
 import cc.redberry.core.indices.IndexType;
+import cc.redberry.core.parser.ParserIndices;
 import cc.redberry.core.utils.ArraysUtils;
 import cc.redberry.core.utils.IntArrayList;
 import cc.redberry.core.utils.TensorUtils;
@@ -41,7 +42,7 @@ import org.junit.Test;
 import java.util.Arrays;
 import java.util.Set;
 
-import static cc.redberry.core.tensor.ApplyIndexMapping.applyIndexMappingAutomatically;
+import static cc.redberry.core.tensor.ApplyIndexMapping.*;
 import static cc.redberry.core.tensor.Tensors.addSymmetry;
 import static cc.redberry.core.tensor.Tensors.parse;
 
@@ -89,6 +90,17 @@ public class ApplyIndexMappingTest {
 
         Tensor standard = parse("A_a^a_b^b_c^c");
         Assert.assertTrue(TensorUtils.equalsExactly(target, standard));
+    }
+
+    @Test
+    public void testSimple4() {
+        Tensor from = parse("A_abcd");
+        int[] _from = ParserIndices.parseSimple("_abcd").toArray();
+        int[] _to = ParserIndices.parseSimple("_e^efg").toArray();
+        int[] _forbidden = ParserIndices.parseSimple("_ea").toArray();
+        Mapping imb = new Mapping(_from, _to);
+        System.out.println(ApplyIndexMapping.applyIndexMapping(from, imb, _forbidden));
+        //todo bug???
     }
 
     @Test
@@ -498,12 +510,6 @@ public class ApplyIndexMappingTest {
 
                 gen = new IntPermutationsGenerator(_from.length);
                 for (int[] p : gen) {
-//                    System.out.println();
-//                    System.out.println(Arrays.toString(p));
-//                    System.out.println(Arrays.toString(Combinatorics.reorder(_from, p)));
-//                    System.out.println(Arrays.toString(Combinatorics.reorder(_to, p)));
-//                    System.out.println(Arrays.toString(freeFrom));
-//                    System.out.println(Arrays.toString(__to));
                     TAssert.assertEquals(
                             applyIndexMappingAutomatically(t,
                                     new Mapping(Combinatorics.reorder(_from, p), Combinatorics.reorder(_to, p))),
@@ -512,5 +518,38 @@ public class ApplyIndexMappingTest {
                 }
             }
         }
+    }
+
+
+    @Test
+    public void testOptimize1() {
+        Tensor t = optimizeDummies(parse("a_a^a + b_b^b"));
+        Assert.assertEquals(1, TensorUtils.getAllDummyIndicesT(t).size());
+    }
+
+
+    @Test
+    public void testOptimize2() {
+        Tensor t = optimizeDummies(parse("a*c_a*r^a + x*(b_b^b + f_r*f^r)"));
+        Assert.assertEquals(1, TensorUtils.getAllDummyIndicesT(t).size());
+    }
+
+    @Test
+    public void testOptimize3() {
+        Tensor t = optimizeDummies(parse("a*c_a*r^a = x*(b_b^b + f_r*f^r)"));
+        Assert.assertEquals(1, TensorUtils.getAllDummyIndicesT(t).size());
+    }
+
+    @Test
+    public void testApplyAndRenameDummies1() {
+        Tensor t;
+        t = applyIndexMappingAndRenameAllDummies(parse("f_e*f^e"), Mapping.IDENTITY, new int[]{0});
+        TAssert.assertEqualsExactly(t, "f_a*f^a");
+
+        t = applyIndexMappingAndRenameAllDummies(parse("f_e*f^e"), Mapping.IDENTITY, new int[]{1});
+        TAssert.assertEqualsExactly(t, "f_b*f^b");
+
+        t = applyIndexMappingAndRenameAllDummies(parse("f_b*f^b"), Mapping.IDENTITY, new int[]{1});
+        TAssert.assertEqualsExactly(t, "f_b*f^b");
     }
 }

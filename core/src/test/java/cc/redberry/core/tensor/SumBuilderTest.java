@@ -22,16 +22,20 @@
  */
 package cc.redberry.core.tensor;
 
+import cc.redberry.core.TAssert;
+import cc.redberry.core.context.CC;
 import cc.redberry.core.indexmapping.IndexMappings;
 import cc.redberry.core.indices.IndexType;
+import cc.redberry.core.tensor.iterator.FromChildToParentIterator;
+import cc.redberry.core.transformations.EliminateMetricsTransformation;
 import cc.redberry.core.utils.TensorUtils;
 import org.junit.Assert;
 import org.junit.Test;
 
 import static cc.redberry.core.tensor.Tensors.parse;
+import static cc.redberry.core.tensor.Tensors.parseExpression;
 
 /**
- *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
@@ -139,5 +143,68 @@ public class SumBuilderTest {
         Tensor e = Tensors.parse("2*(A_M+A_M)+A_M");
         Tensor expected = Tensors.parse("5*A__M");
         Assert.assertTrue(IndexMappings.mappingExists(expected, e));
+    }
+
+    @Test
+    public void test13() {
+        CC.resetTensorNames(-5181122168523247566L);
+        Tensor t = parse("((f_p^a + d_p^a)*d_a^p*T^y_yb + T^a_ab)*(1 + f_c^c)");
+        t = EliminateMetricsTransformation.eliminate(t);
+        TAssert.assertIndicesConsistency(t);
+    }
+
+    @Test
+    public void test14() {
+        CC.resetTensorNames(-4602990689951758559L);
+        Tensor r = parse("F_b*(f_{g}^{g}*d^{k}_{k}*f_{c}+(1 + d^{j}_{j})*f_{g}^{g}*f_{h}^{h}*f_{c})");
+        FromChildToParentIterator it = new FromChildToParentIterator(r);
+        Tensor c;
+        while ((c = it.next()) != null) {
+            if (TensorUtils.equalsExactly(c, parse("d^{k}_{k}")))
+                it.set(parse("f_{k}^{k}"));
+            if (TensorUtils.equalsExactly(c, parse("d^{j}_{j}")))
+                it.set(parse("f_{j}^{j}"));
+        }
+        r = it.result();
+        TAssert.assertIndicesConsistency(r);
+        TAssert.assertEquals(r, "(f^{j}_{j}+2)*f_{c}*F_{b}*f_{k}^{k}*f_{g}^{g}");
+    }
+
+    @Test
+    public void test15() {
+        CC.resetTensorNames(-4602990689951758559L);
+        Tensor r = parse("F_b*(f_{g}^{g}*d^{k}_{k}*f_{c}+(1 + d^{j}_{j})*f_{g}^{g}*f_{h}^{h}*f_{c})");
+        FromChildToParentIterator it = new FromChildToParentIterator(r);
+        Tensor c;
+        while ((c = it.next()) != null) {
+            if (TensorUtils.equalsExactly(c, parse("d^{k}_{k}")))
+                it.set(parse("f_{a}^{a}"));
+            if (TensorUtils.equalsExactly(c, parse("d^{j}_{j}")))
+                it.set(parse("f_{a}^{a}"));
+        }
+        r = it.result();
+        TAssert.assertIndicesConsistency(r);
+        TAssert.assertEquals(r, "(f^{j}_{j}+2)*f_{c}*F_{b}*f_{k}^{k}*f_{g}^{g}");
+    }
+
+    @Test
+    public void test16() {
+        Tensor r = parse("f_{g}^{g}*f^{a}_{a}*f_{c}+(1 + f^{a}_{a})*f_{g}^{g}*f_{h}^{h}*f_{c}");
+        TAssert.assertIndicesConsistency(r);
+    }
+
+    @Test
+    public void test17() {
+        Tensor r = parse("(A_r*B^rg + C_b*D^bg)*2 + (A_a*B^ag + C_a*D^ag)*(S^br_br + 1)");
+        TAssert.assertIndicesConsistency(r);
+    }
+
+    @Test
+    public void test18() {
+        CC.resetTensorNames(-4473598700807087040L);
+        Tensor r = parse("(A_a*B^ag + X_a*D^ag)*(S^br_br + 1) + (A_r*B^rg + C_b*D^bg)*2");
+        TAssert.assertIndicesConsistency(r);
+        r = parseExpression("X_a = C_a").transform(r);
+        TAssert.assertIndicesConsistency(r);
     }
 }
