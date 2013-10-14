@@ -20,12 +20,13 @@
   ~
   ~ You should have received a copy of the GNU General Public License
   ~ along with Redberry. If not, see <http://www.gnu.org/licenses/>.
-  --><project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  -->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>cc.redberry</groupId>
     <artifactId>physics</artifactId>
-    <version>1.1.6-SNAPSHOT</version>
+    <version>1.1.6-RC1</version>
     <packaging>jar</packaging>
 
     <parent>
@@ -87,7 +88,7 @@
         </developer>
     </developers>
 
-    <scm><connection>scm:hg:http://bitbucket.org/redberry/redberry</connection><url>https://bitbucket.org/redberry/redberry/src/</url></scm>
+    <scm><connection>scm:hg:http://bitbucket.org/redberry/redberry-physics</connection><tag>v1.1.6-RC1</tag><url>https://bitbucket.org/redberry/redberry-physics/src/?at=v1.1.6-RC1</url></scm>
 
     <issueManagement>
         <system>YouTRACK</system>
@@ -145,12 +146,12 @@
         <dependency>
             <groupId>cc.redberry</groupId>
             <artifactId>core</artifactId>
-            <version>1.1.6-SNAPSHOT</version>
+            <version>1.1.6-RC1</version>
         </dependency>
         <dependency>
             <groupId>cc.redberry</groupId>
             <artifactId>core</artifactId>
-            <version>1.1.6-SNAPSHOT</version>
+            <version>1.1.6-RC1</version>
             <type>test-jar</type>
             <scope>test</scope>
         </dependency>
