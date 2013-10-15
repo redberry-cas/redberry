@@ -24,6 +24,7 @@ package cc.redberry.core.context;
 
 import cc.redberry.core.indices.SimpleIndices;
 import cc.redberry.core.indices.StructureOfIndices;
+import cc.redberry.core.tensor.SimpleTensor;
 
 /**
  * Implementation of {@link NameDescriptor} for any simple tensor, except Kronecker and metric tensor.
@@ -32,10 +33,14 @@ import cc.redberry.core.indices.StructureOfIndices;
  * @author Stanislav Poslavsky
  * @since 1.1
  */
-final class NameDescriptorForSimpleTensor extends NameDescriptor {
+public final class NameDescriptorForSimpleTensor extends NameDescriptor {
 
     final String name;
     private final NameAndStructureOfIndices[] key;
+    /*
+     * A cached instance for use in case of pure symbol.
+     */
+    private SimpleTensor cachedSymbol = null;
 
     NameDescriptorForSimpleTensor(String name, StructureOfIndices[] indexTypeStructures, int id) {
         super(indexTypeStructures, id);
@@ -51,5 +56,15 @@ final class NameDescriptorForSimpleTensor extends NameDescriptor {
     @Override
     NameAndStructureOfIndices[] getKeys() {
         return key;
+    }
+
+    public void setCachedInstance(SimpleTensor symbol) {
+        if (cachedSymbol != null)
+            throw new IllegalStateException("Symbol is already created.");
+        cachedSymbol = symbol;
+    }
+
+    public SimpleTensor getCachedSymbol() {
+        return cachedSymbol;
     }
 }

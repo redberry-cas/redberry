@@ -26,6 +26,7 @@ import cc.redberry.core.combinatorics.Combinatorics;
 import cc.redberry.core.combinatorics.Symmetry;
 import cc.redberry.core.context.CC;
 import cc.redberry.core.context.NameDescriptor;
+import cc.redberry.core.context.NameDescriptorForSimpleTensor;
 import cc.redberry.core.context.NameDescriptorForTensorField;
 import cc.redberry.core.indices.*;
 import cc.redberry.core.number.Complex;
@@ -289,6 +290,17 @@ public final class Tensors {
      */
     public static SimpleTensor simpleTensor(String name, SimpleIndices indices) {
         NameDescriptor descriptor = CC.getNameManager().mapNameDescriptor(name, indices.getStructureOfIndices());
+        if (indices.size() == 0) {
+            assert indices == IndicesFactory.EMPTY_SIMPLE_INDICES;
+
+            NameDescriptorForSimpleTensor nst = (NameDescriptorForSimpleTensor) descriptor;
+            if (nst.getCachedSymbol() == null) {
+                SimpleTensor st;
+                nst.setCachedInstance(st = new SimpleTensor(descriptor.getId(), indices));
+                return st;
+            } else
+                return nst.getCachedSymbol();
+        }
         return new SimpleTensor(descriptor.getId(),
                 UnsafeIndicesFactory.createOfTensor(descriptor.getSymmetries(),
                         indices));
@@ -308,6 +320,19 @@ public final class Tensors {
             throw new IllegalArgumentException("This name is not registered in the system.");
         if (!descriptor.getStructureOfIndices().isStructureOf(indices))
             throw new IllegalArgumentException("Specified indices are not indices of specified tensor.");
+
+        if (indices.size() == 0) {
+            assert indices == IndicesFactory.EMPTY_SIMPLE_INDICES;
+
+            NameDescriptorForSimpleTensor nst = (NameDescriptorForSimpleTensor) descriptor;
+            if (nst.getCachedSymbol() == null) {
+                SimpleTensor st;
+                nst.setCachedInstance(st = new SimpleTensor(descriptor.getId(), indices));
+                return st;
+            } else
+                return nst.getCachedSymbol();
+        }
+
         return new SimpleTensor(name,
                 UnsafeIndicesFactory.createOfTensor(descriptor.getSymmetries(),
                         indices));
@@ -557,6 +582,10 @@ public final class Tensors {
         NameDescriptor descriptor = tensor.getNameDescriptor();
         if (!descriptor.getStructureOfIndices().isStructureOf(indices))
             throw new IllegalArgumentException("Illegal structure of indices.");
+
+        if (indices.size() == 0)
+            return tensor;
+
         if (descriptor.isField())
             return new TensorField(tensor.name,
                     UnsafeIndicesFactory.createOfTensor(descriptor.getSymmetries(), indices),
