@@ -104,15 +104,17 @@ public final class NumberUtils {
         return n.compareTo(root.pow(2)) == 0;
     }
 
+    public static BigInteger TWO_BIG_INT = new BigInteger("2");
+
     public static boolean isIntegerOdd(Complex complex) {
         if (complex.isInteger())
-            return complex.getReal().abs().intValue() % 2 == 1;
+            return !complex.getReal().bigIntValue().mod(TWO_BIG_INT).equals(BigInteger.ZERO);
         return false;
     }
 
     public static boolean isIntegerEven(Complex complex) {
         if (complex.isInteger())
-            return complex.getReal().intValue() % 2 == 0;
+            return complex.getReal().bigIntValue().mod(TWO_BIG_INT).equals(BigInteger.ZERO);
         return false;
     }
 

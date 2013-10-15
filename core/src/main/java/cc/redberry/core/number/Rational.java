@@ -112,6 +112,13 @@ public final class Rational extends Real implements Serializable {
      * A fraction representing "2/3".
      */
     public static final Rational TWO_THIRDS = new Rational(2, 3);
+
+    public static final BigFraction BIG_FRACTION_MAX_DOUBLE = new BigFraction(Double.MAX_VALUE);
+    public static final BigFraction BIG_FRACTION_MIN_DOUBLE = new BigFraction(-Double.MAX_VALUE);
+    public static final BigFraction BIG_FRACTION_MAX_INTEGER = new BigFraction(Integer.MAX_VALUE);
+    public static final BigFraction BIG_FRACTION_MIN_INTEGER = new BigFraction(Integer.MIN_VALUE);
+    public static final BigFraction BIG_FRACTION_MAX_LONG = new BigFraction(Long.MAX_VALUE);
+    public static final BigFraction BIG_FRACTION_MIN_LONG = new BigFraction(Long.MIN_VALUE);
     /**
      * Serializable version identifier.
      */
@@ -198,11 +205,17 @@ public final class Rational extends Real implements Serializable {
 
     @Override
     public long longValue() {
+        if (fraction.compareTo(BIG_FRACTION_MAX_LONG) > 0
+                || fraction.compareTo(BIG_FRACTION_MIN_LONG) < 0)
+            throw new RuntimeException("Long overflow.");
         return fraction.longValue();
     }
 
     @Override
     public int intValue() {
+        if (fraction.compareTo(BIG_FRACTION_MAX_INTEGER) > 0
+                || fraction.compareTo(BIG_FRACTION_MIN_INTEGER) < 0)
+            throw new RuntimeException("Integer overflow.");
         return fraction.intValue();
     }
 
@@ -218,6 +231,9 @@ public final class Rational extends Real implements Serializable {
 
     @Override
     public double doubleValue() {
+        if (fraction.compareTo(BIG_FRACTION_MAX_DOUBLE) > 0
+                || fraction.compareTo(BIG_FRACTION_MIN_DOUBLE) < 0)
+            throw new RuntimeException("Double overflow.");
         return fraction.doubleValue();
     }
 
