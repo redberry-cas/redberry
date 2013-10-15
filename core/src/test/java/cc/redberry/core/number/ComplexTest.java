@@ -78,4 +78,59 @@ public class ComplexTest {
                 "1.61562*I");
         Assert.assertEquals(0.0, e.subtract(expected).absNumeric(), 1E-5);
     }
+
+    @Test(expected = RuntimeException.class)
+    public void testIntegerOverflow1() {
+        Real r = NumberParser.REAL_PARSER.parse("999999999999999999999999999999999999999999999999999999999999999999999999999");
+        r.intValue();
+    }
+
+    @Test(expected = RuntimeException.class)
+    public void testIntegerOverflow2() {
+        Real r = NumberParser.REAL_PARSER.parse("2147483648");
+        r.intValue();
+    }
+
+    @Test
+    public void testIntegerOverflow3() {
+        Real r = NumberParser.REAL_PARSER.parse(Integer.toString(Integer.MAX_VALUE));
+        r.intValue();
+    }
+
+    @Test(expected = RuntimeException.class)
+    public void testLongOverflow1() {
+        Real r = NumberParser.REAL_PARSER.parse("999999999999999999999999999999999999999999999999999999999999999999999999999");
+        r.longValue();
+    }
+
+    @Test(expected = RuntimeException.class)
+    public void testLongOverflow2() {
+        Real r = NumberParser.REAL_PARSER.parse("9223372036854775808");
+        r.longValue();
+    }
+
+    @Test
+    public void testLongOverflow3() {
+        Real r = NumberParser.REAL_PARSER.parse(Long.toString(Long.MAX_VALUE));
+        r.longValue();
+    }
+
+    @Test(expected = RuntimeException.class)
+    public void testDoubleOverflow1() {
+        StringBuilder sb = new StringBuilder().append("");
+        for (int i = 0; i < 310; ++i)
+            sb.append("9");
+        sb.append("/1");
+        Real r = NumberParser.REAL_PARSER.parse(sb.toString());
+        r.doubleValue();
+    }
+
+    @Test
+    public void testDoubleOverflow2() {
+        StringBuilder sb = new StringBuilder().append("");
+        for (int i = 0; i < 307; ++i)
+            sb.append("9");
+        Real r = NumberParser.REAL_PARSER.parse(sb.toString());
+        r.doubleValue();
+    }
 }
