@@ -322,4 +322,12 @@ public class CollectTransformationTest {
         TAssert.assertEquals(e, ExpandTransformation.expand(t));
     }
 
+    @Test
+    public void testExpression1() {
+        Tensor t = parse("f*a + f*b = d*a + d*b");
+        SimpleTensor[] pattern = {parseSimple("f"), parseSimple("d")};
+        CollectTransformation tr = new CollectTransformation(pattern);
+        TAssert.assertEquals(tr.transform(t), "f*(a+b) = d*(a+b)");
+    }
+
 }

@@ -89,6 +89,13 @@ public class CollectTransformation implements Transformation {
 
     @Override
     public Tensor transform(Tensor t) {
+        if (t instanceof Expression)
+            return Transformation.Util.applyToEachChild(t, this);
+        else
+            return transform1(t);
+    }
+
+    private Tensor transform1(Tensor t) {
         SumBuilder notMatched = new SumBuilder();
         TIntObjectHashMap<ArrayList<Split>> map = new TIntObjectHashMap<>();
         OutputPortUnsafe<Tensor> port = ExpandPort.createPort(t);
