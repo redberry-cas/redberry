@@ -22,6 +22,7 @@
  */
 package cc.redberry.core.tensorgenerator;
 
+import cc.redberry.core.TAssert;
 import cc.redberry.core.combinatorics.Symmetry;
 import cc.redberry.core.combinatorics.symmetries.Symmetries;
 import cc.redberry.core.combinatorics.symmetries.SymmetriesFactory;
@@ -43,7 +44,6 @@ import static cc.redberry.core.TAssert.assertTrue;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-//@Ignore
 public class TensorGeneratorTest {
 
     public TensorGeneratorTest() {
@@ -216,17 +216,38 @@ public class TensorGeneratorTest {
 
     @Test
     public void test12() {
-        GeneratedTensor actual = TensorGenerator.generateStructure(
+        GeneratedTensor gen1 = TensorGenerator.generateStructure(
                 ParserIndices.parseSimple("_abcd"),
                 Tensors.parse("R^a_bad", "R_abcd"),
                 null, false, true, true);
 
-        System.out.println(actual.generatedTensor);
-        System.out.println(Arrays.toString(actual.coefficients));
+
+        GeneratedTensor gen2 = TensorGenerator.generateStructure(
+                ParserIndices.parseSimple("_abcd"),
+                new Tensor[]{Tensors.parse("R^bcad")},
+                null, false, true, true);
+
+        Assert.assertTrue(gen2.coefficients.length < gen1.coefficients.length);
     }
 
     @Test
     public void test13() {
+        Tensor gen1 = TensorGenerator.generateStructure(
+                ParserIndices.parseSimple("_abcd"),
+                new Tensor[]{Tensors.parse("R^a_cad")},
+                null, false, false, true).generatedTensor;
+        gen1 = Tensors.parseExpression("R^a_bac = R_bc").transform(gen1);
+
+        Tensor gen2 = TensorGenerator.generateStructure(
+                ParserIndices.parseSimple("_abcd"),
+                new Tensor[]{Tensors.parse("R_ab")},
+                null, false, false, true).generatedTensor;
+
+        TAssert.assertEquals(gen1, gen2);
+    }
+
+    @Test
+    public void test14() {
         Tensors.addSymmetry("R_abcd", 1, 0, 2, 3);
         Tensors.addSymmetry("R_abcd", 2, 3, 0, 1);
         GeneratedTensor actual = TensorGenerator.generateStructure(

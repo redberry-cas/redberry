@@ -26,7 +26,9 @@ import cc.redberry.core.combinatorics.symmetries.Symmetries;
 import cc.redberry.core.context.CC;
 import cc.redberry.core.indexmapping.IndexMappings;
 import cc.redberry.core.indexmapping.Mapping;
+import cc.redberry.core.indices.IndicesFactory;
 import cc.redberry.core.indices.SimpleIndices;
+import cc.redberry.core.indices.StructureOfIndices;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.number.Rational;
 import cc.redberry.core.solver.frobenius.FrobeniusSolver;
@@ -259,9 +261,12 @@ public class TensorGenerator {
 
     private static class Wrapper {
         private final Tensor tensor;
+        private final StructureOfIndices freeIndices;
 
         private Wrapper(Tensor tensor) {
             this.tensor = tensor;
+            this.freeIndices = new StructureOfIndices(
+                    IndicesFactory.createSimple(null, tensor.getIndices().getFree()));
         }
 
         @Override
@@ -271,8 +276,8 @@ public class TensorGenerator {
 
             Wrapper wrapper = (Wrapper) o;
 
-            return IndexMappings.mappingExists(tensor, wrapper.tensor)
-                    || IndexMappings.mappingExists(wrapper.tensor, tensor);
+            return freeIndices.equals(wrapper.freeIndices) &&
+                    IndexMappings.anyMappingExists(tensor, wrapper.tensor);
         }
 
         @Override

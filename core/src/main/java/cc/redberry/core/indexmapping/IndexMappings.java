@@ -123,6 +123,17 @@ public final class IndexMappings {
 
 
     /**
+     * Returns {@code true} if there is mapping from {@code a} on tensor {@code b} or vice versa.
+     *
+     * @param a tensor
+     * @param b tensor
+     * @return {@code true} if there is mapping from {@code a} on tensor {@code b} or vice versa
+     */
+    public static boolean anyMappingExists(Tensor a, Tensor b) {
+        return mappingExists(a, b) || mappingExists(b, a);
+    }
+
+    /**
      * Returns {@code true} if there is mapping of tensor {@code from} on tensor {@code to}.
      *
      * @param from from tensor
