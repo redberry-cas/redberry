@@ -31,7 +31,7 @@ import cc.redberry.core.number.Complex;
 import cc.redberry.core.tensor.*;
 import cc.redberry.core.tensor.functions.ScalarFunction;
 import cc.redberry.core.transformations.substitutions.SubstitutionTransformation;
-import cc.redberry.core.transformations.symmetrization.SymmetrizeSimpleTensorTransformation;
+import cc.redberry.core.transformations.symmetrization.SymmetrizeTransformation;
 import cc.redberry.core.utils.TensorUtils;
 import gnu.trove.set.hash.TIntHashSet;
 
@@ -319,10 +319,9 @@ public final class DifferentiateTransformation implements Transformation {
             int[] allIndices = addAll(allFreeVarIndices, allFreeArgIndices);
             SimpleIndices dIndices = IndicesFactory.createSimple(null, allIndices);
             SimpleTensor symmetric = simpleTensor("@!@#@##_AS@23@@#", dIndices);
-            Tensor derivative = SymmetrizeSimpleTensorTransformation.symmetrize(
-                    symmetric,
-                    allFreeVarIndices,
-                    varIndices.getSymmetries().getInnerSymmetries());
+            Tensor derivative = new SymmetrizeTransformation(allFreeVarIndices,
+                    varIndices.getSymmetries().getInnerSymmetries(), true).transform(symmetric);
+
             derivative = applyIndexMapping(
                     derivative,
                     new Mapping(allIndices,

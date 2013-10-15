@@ -34,7 +34,7 @@ import cc.redberry.core.number.Rational;
 import cc.redberry.core.solver.frobenius.FrobeniusSolver;
 import cc.redberry.core.tensor.*;
 import cc.redberry.core.transformations.expand.ExpandTransformation;
-import cc.redberry.core.transformations.symmetrization.SymmetrizeSimpleTensorTransformation;
+import cc.redberry.core.transformations.symmetrization.SymmetrizeTransformation;
 import cc.redberry.core.transformations.symmetrization.SymmetrizeUpperLowerIndicesTransformation;
 import cc.redberry.core.utils.IntArray;
 import cc.redberry.core.utils.TensorUtils;
@@ -152,17 +152,8 @@ public class TensorGenerator {
 
     private Tensor symmetrize(Tensor result, Symmetries symmetries) {
         //todo rewrite this slag
-        SimpleTensor st = Tensors.parseSimple("#$#$#A$#ASD" + indices);
-        Expression expr = Tensors.expression(st, result);
-        Tensor symmetrized = SymmetrizeSimpleTensorTransformation.symmetrize(
-                st, st.getIndices().getAllIndices().copy(), symmetries);
-        if (symmetrized instanceof Product)
-            symmetrized = Tensors.multiply(symmetrized, ((Product) symmetrized).getFactor().reciprocal());
-
-        assert symmetrized instanceof Sum;
-
-        result = ExpandTransformation.expand(expr.transform(symmetrized));
-
+        result  = new SymmetrizeTransformation(indices.getAllIndices().copy(), symmetries, true).transform(result);
+        result = ExpandTransformation.expand(result );
 
         if (!(result instanceof Sum))
             return result;
