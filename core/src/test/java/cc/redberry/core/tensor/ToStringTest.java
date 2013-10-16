@@ -46,4 +46,10 @@ public class ToStringTest {
         Assert.assertEquals(t.toString(OutputFormat.WolframMathematica), "T[-Subscript[\\[Mu], 1],-Subscript[\\[Nu], 2]]");
         Assert.assertEquals(t.toString(OutputFormat.Maple), "T[mu_1,nu_2]");
     }
+
+    @Test
+    public void test3() {
+        Tensor t = parse("T_{\\mu_{1} \\nu_{2}}^abc_d");
+        Assert.assertEquals(t.toString(OutputFormat.Cadabra), "T_{a b c d \\mu_{1} \\nu_{2}}");
+    }
 }
