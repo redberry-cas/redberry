@@ -190,7 +190,6 @@ public final class Benchmarks {
      * non-minimal gauge.
      */
     public static void testVectorField() {
-        CC.setDefaultOutputFormat(OutputFormat.RedberryConsole);
         Tensors.addSymmetry("P_lm", IndexType.LatinLower, false, 1, 0);
 
         Expression iK = Tensors.parseExpression("iK_a^b=d_a^b+c*n_a*n^b");
@@ -217,7 +216,6 @@ public final class Benchmarks {
      * in the non-minimal gauge.
      */
     public static void testSquaredVectorField() {
-        CC.setDefaultOutputFormat(OutputFormat.RedberryConsole);
         Tensors.addSymmetry("P_lm", IndexType.LatinLower, false, 1, 0);
 
         Expression iK = Tensors.parseExpression("iK_a^b=d_a^b+(2*c+Power[c,2])*n_a*n^b");
@@ -286,7 +284,6 @@ public final class Benchmarks {
      * </pre>
      */
     public static void testGravityGhosts() {
-        CC.setDefaultOutputFormat(OutputFormat.RedberryConsole);
         Tensors.addSymmetry("P_lm", IndexType.LatinLower, false, 1, 0);
 
         Expression iK = Tensors.parseExpression("iK_a^b=d_a^b+gamma*n_a*n^b");
@@ -318,7 +315,6 @@ public final class Benchmarks {
      * </pre>
      */
     public static void testLambdaGaugeGravity() {
-        CC.setDefaultOutputFormat(OutputFormat.RedberryConsole);
         Tensors.addSymmetry("R_lm", 1, 0);
         Tensors.addAntiSymmetry("R_lmab", 1, 0, 2, 3);
         Tensors.addSymmetry("R_lmab", 2, 3, 0, 1);
@@ -376,7 +372,6 @@ public final class Benchmarks {
      */
     public static void testMinimalSecondOrderOperator() {
         //TIME = 6.1 s
-        CC.setDefaultOutputFormat(OutputFormat.RedberryConsole);
 
         Expression iK = Tensors.parseExpression("iK_a^b=d_a^b");
         Expression K = Tensors.parseExpression("K^lm_a^b=d_a^b*g^{lm}");
@@ -396,7 +391,6 @@ public final class Benchmarks {
      */
     public static void testMinimalSecondOrderOperatorBarvinskyVilkovisky() {
         //TIME = 4.5 s
-        CC.setDefaultOutputFormat(OutputFormat.RedberryConsole);
 
         //Phys. Rep. 119 ( 1985) 1-74 
         Expression iK = Tensors.parseExpression("iK_a^b=d_a^b");
@@ -417,7 +411,6 @@ public final class Benchmarks {
      */
     public static void testMinimalFourthOrderOperator() {
         //TIME = 6.2 s
-        CC.setDefaultOutputFormat(OutputFormat.RedberryConsole);
         Tensors.addSymmetry("P_lm", IndexType.LatinLower, false, 1, 0);
 
         Expression iK = Tensors.parseExpression("iK_a^b=d_a^b");
@@ -439,7 +432,6 @@ public final class Benchmarks {
      */
     public static void testSpin3Ghosts() {
         //TIME = 990 s
-        CC.setDefaultOutputFormat(OutputFormat.RedberryConsole);
         Expression iK = Tensors.parseExpression(
                 "iK^{ab}_{lm} = P^{ab}_{lm}-1/4*c*g_{lm}*g^{ab}+"
                         + "(1/4)*b*(n_{l}*n^{a}*d^{b}_{m}+n_{l}*n^{b}*d^{a}_{m}+n_{m}*n^{a}*d^{b}_{l}+n_{m}*n^{b}*d^{a}_{l})+"
@@ -490,7 +482,6 @@ public final class Benchmarks {
      */
     public static void testNonMinimalGaugeGravity() {
         //FIXME works more than hour
-        CC.setDefaultOutputFormat(OutputFormat.RedberryConsole);
         Tensors.addSymmetry("R_lm", IndexType.LatinLower, false, new int[]{1, 0});
         Tensors.addSymmetry("R_lmab", IndexType.LatinLower, true, new int[]{0, 1, 3, 2});
         Tensors.addSymmetry("R_lmab", IndexType.LatinLower, false, new int[]{2, 3, 0, 1});
