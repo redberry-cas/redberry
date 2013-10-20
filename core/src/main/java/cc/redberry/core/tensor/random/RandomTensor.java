@@ -72,7 +72,7 @@ public final class RandomTensor {
      * {@code new RandomTensor(2, 5, new int[]{0, 0, 0, 0}, new int[]{4, 0, 0, 0}, true)}
      */
     public RandomTensor() {
-        this(2, 5, new int[]{0, 0, 0, 0}, new int[]{4, 0, 0, 0}, true);
+        this(2, 5, new int[]{0, 0, 0, 0}, new int[]{4, 4, 4, 4}, true);
     }
 
     /**
@@ -199,6 +199,7 @@ public final class RandomTensor {
     }
 
     public void addToNamespace(Tensor... tensors) {
+        //todo check if contains
         for (SimpleTensor st : TensorUtils.getAllDiffSimpleTensors(tensors))
             namespace.add(st.getNameDescriptor());
     }

@@ -192,7 +192,7 @@ abstract class AbstractIndices implements Indices {
             String latexBrackets = format == LaTeX ? "{}" : "";
 
             currentState = (data[0] >>> 31);
-            sb.append(format.lowerIndexPrefix).append('{');
+            sb.append(format.getPrefixFromIntState(currentState)).append('{');
 
             int lastState = currentState;
             for (int i = 0; i < data.length; i++) {
@@ -207,16 +207,6 @@ abstract class AbstractIndices implements Indices {
         }
 
         return sb.toString();
-    }
-
-    private static String beginingSeparator(OutputFormat format) {
-        switch (format) {
-            case WolframMathematica:
-            case Maple:
-                return "-";
-            default:
-                return "_";
-        }
     }
 
     @Override

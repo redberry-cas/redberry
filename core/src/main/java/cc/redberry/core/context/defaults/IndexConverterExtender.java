@@ -117,7 +117,7 @@ public final class IndexConverterExtender implements IndexSymbolConverter {
             if (mode == OutputFormat.WolframMathematica)
                 return "Subscript[" + symbol + ", " + subscript + "]";
             if (mode == OutputFormat.Maple)
-                return symbol + "_" + subscript;
+                return symbol + subscript;
             return symbol + "_" + ("{" + subscript + "}");
         }
     }

@@ -44,12 +44,20 @@ public class ToStringTest {
     public void test2() {
         Tensor t = parse("T_{\\mu_{1} \\nu_{2}} ");
         Assert.assertEquals(t.toString(OutputFormat.WolframMathematica), "T[-Subscript[\\[Mu], 1],-Subscript[\\[Nu], 2]]");
-        Assert.assertEquals(t.toString(OutputFormat.Maple), "T[mu_1,nu_2]");
+        Assert.assertEquals(t.toString(OutputFormat.Maple), "T[mu1,nu2]");
     }
 
     @Test
     public void test3() {
         Tensor t = parse("T_{\\mu_{1} \\nu_{2}}^abc_d");
         Assert.assertEquals(t.toString(OutputFormat.Cadabra), "T_{a b c d \\mu_{1} \\nu_{2}}");
+    }
+
+    @Test
+    public void test4() {
+        Tensor t = parse("T^{\\mu\\nu}");
+        Assert.assertEquals(t.toString(OutputFormat.WolframMathematica), "T[\\[Mu],\\[Nu]]");
+        Assert.assertEquals(t.toString(OutputFormat.Maple), "T[~mu,~nu]");
+        Assert.assertEquals(t.toString(OutputFormat.Redberry), "T^{\\mu\\nu}");
     }
 }
