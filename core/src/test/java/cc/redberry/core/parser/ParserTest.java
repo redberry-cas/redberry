@@ -532,4 +532,10 @@ public class ParserTest {
         Tensor t = parse("A_{\\Xi}");
         TAssert.assertEquals(IndicesUtils.getNameWithoutType(t.getIndices().get(0)), 4);
     }
+
+    @Test
+    public void testPreprocessing1() {
+        parse(" x:= y");
+        TAssert.assertEquals(parse("x**2"), "y**2");
+    }
 }
