@@ -190,24 +190,23 @@ public final class Benchmarks {
      * non-minimal gauge.
      */
     public static void testVectorField() {
-        CC.setDefaultOutputFormat(OutputFormat.RedberryConsole);
-        Tensors.addSymmetry("P_\\mu\\nu", IndexType.GreekLower, false, 1, 0);
+        Tensors.addSymmetry("P_lm", IndexType.LatinLower, false, 1, 0);
 
-        Expression KINV = Tensors.parseExpression("KINV_\\alpha^\\beta=d_\\alpha^\\beta+\\gamma*n_\\alpha*n^\\beta");
-        Expression K = Tensors.parseExpression("K^{\\mu\\nu}_\\alpha^{\\beta}=g^{\\mu\\nu}*d_{\\alpha}^{\\beta}-\\lambda/2*(g^{\\mu\\beta}*d_\\alpha^\\nu+g^{\\nu\\beta}*d_\\alpha^\\mu)");
-        Expression S = Tensors.parseExpression("S^\\rho^\\mu_\\nu=0");
-        Expression W = Tensors.parseExpression("W^{\\alpha}_{\\beta}=P^{\\alpha}_{\\beta}+(\\lambda/2)*R^\\alpha_\\beta");
-        Expression F = Tensors.parseExpression("F_\\mu\\nu\\alpha\\beta=R_\\mu\\nu\\alpha\\beta");
+        Expression iK = Tensors.parseExpression("iK_a^b=d_a^b+c*n_a*n^b");
+        Expression K = Tensors.parseExpression("K^{lm}_a^{b}=g^{lm}*d_{a}^{b}-k/2*(g^{lb}*d_a^m+g^{mb}*d_a^l)");
+        Expression S = Tensors.parseExpression("S^p^l_m=0");
+        Expression W = Tensors.parseExpression("W^{a}_{b}=P^{a}_{b}+(k/2)*R^a_b");
+        Expression F = Tensors.parseExpression("F_lmab=R_lmab");
 
 
-        Expression lambda = Tensors.parseExpression("\\lambda=gamma/(1+gamma)");
-        Expression gamma = Tensors.parseExpression("\\gamma=gamma");
-        KINV = (Expression) gamma.transform(lambda.transform(KINV));
+        Expression lambda = Tensors.parseExpression("k=gamma/(1+gamma)");
+        Expression gamma = Tensors.parseExpression("c=gamma");
+        iK = (Expression) gamma.transform(lambda.transform(iK));
         K = (Expression) gamma.transform(lambda.transform(K));
         S = (Expression) gamma.transform(lambda.transform(S));
         W = (Expression) gamma.transform(lambda.transform(W));
 
-        OneLoopInput input = new OneLoopInput(2, KINV, K, S, W, null, null, F);
+        OneLoopInput input = new OneLoopInput(2, iK, K, S, W, null, null, F);
 
         OneLoopCounterterms action = OneLoopCounterterms.calculateOneLoopCounterterms(input);
     }
@@ -217,61 +216,60 @@ public final class Benchmarks {
      * in the non-minimal gauge.
      */
     public static void testSquaredVectorField() {
-        CC.setDefaultOutputFormat(OutputFormat.RedberryConsole);
-        Tensors.addSymmetry("P_\\mu\\nu", IndexType.GreekLower, false, 1, 0);
+        Tensors.addSymmetry("P_lm", IndexType.LatinLower, false, 1, 0);
 
-        Expression KINV = Tensors.parseExpression("KINV_\\alpha^\\beta=d_\\alpha^\\beta+(2*\\gamma+Power[\\gamma,2])*n_\\alpha*n^\\beta");
-        Expression K = Tensors.parseExpression("K^{\\mu\\nu\\gamma\\delta}_\\alpha^{\\beta}="
-                + "d_\\alpha^\\beta*1/3*(g^{\\mu\\nu}*g^{\\gamma\\delta}+ g^{\\mu\\gamma}*g^{\\nu\\delta}+ g^{\\mu\\delta}*g^{\\nu\\gamma})"
-                + "+1/12*(-2*\\lambda+Power[\\lambda,2])*("
-                + "g^{\\mu\\nu}*d_\\alpha^\\gamma*g^{\\beta\\delta}"
-                + "+g^{\\mu\\nu}*d_\\alpha^\\delta*g^{\\beta\\gamma}"
-                + "+g^{\\mu\\gamma}*d_\\alpha^\\nu*g^{\\beta\\delta}"
-                + "+g^{\\mu\\gamma}*d_\\alpha^\\delta*g^{\\beta\\nu}"
-                + "+g^{\\mu\\delta}*d_\\alpha^\\nu*g^{\\beta\\gamma}"
-                + "+g^{\\mu\\delta}*d_\\alpha^\\gamma*g^{\\beta\\nu}"
-                + "+g^{\\nu\\gamma}*d_\\alpha^\\mu*g^{\\beta\\delta}"
-                + "+g^{\\nu\\gamma}*d_\\alpha^\\delta*g^{\\beta\\mu}"
-                + "+g^{\\nu\\delta}*d_\\alpha^\\mu*g^{\\beta\\gamma}"
-                + "+g^{\\nu\\delta}*d_\\alpha^\\gamma*g^{\\beta\\mu}"
-                + "+g^{\\gamma\\delta}*d_\\alpha^\\mu*g^{\\beta\\nu}"
-                + "+g^{\\gamma\\delta}*d_\\alpha^\\nu*g^{\\beta\\mu})");
-        Expression S = Tensors.parseExpression("S^\\mu\\nu\\rho\\alpha\\beta=0");
-        //W^{\\mu \\nu }_{\\alpha }^{\\beta } = d^{\\nu }_{\\alpha }*R^{\\beta \\mu }+d^{\\mu }_{\\alpha }*R^{\\beta \\nu }+g^{\\mu \\beta }*R_{\\alpha }^{\\nu }+2*P_{\\alpha }^{\\beta }*g^{\\mu \\nu }+-2/3*d_{\\alpha }^{\\beta }*R^{\\mu \\nu }
-        Expression W = Tensors.parseExpression("W^{\\mu\\nu}_\\alpha^\\beta="
-                + "2*P_{\\alpha}^{\\beta}*g^{\\mu\\nu}-2/3*R^\\mu\\nu*d_\\alpha^\\beta"
-                + "-\\lambda/2*P_\\alpha^\\mu*g^\\nu\\beta"
-                + "-\\lambda/2*P_\\alpha^\\nu*g^\\mu\\beta"
-                + "-\\lambda/2*P^\\beta\\mu*d^\\nu_\\alpha"
-                + "-\\lambda/2*P^\\beta\\nu*d^\\mu_\\alpha"
-                + "+1/6*(\\lambda-2*Power[\\lambda,2])*("
-                + "R_\\alpha^\\mu*g^\\nu\\beta"
-                + "+R_\\alpha^\\nu*g^\\mu\\beta"
-                + "+R^\\beta\\mu*d^\\nu_\\alpha"
-                + "+R^\\beta\\nu*d^\\mu_\\alpha)"
-                + "+1/6*(2*\\lambda-Power[\\lambda,2])*"
-                + "(R_\\alpha^\\mu\\beta\\nu+R_\\alpha^\\nu\\beta\\mu)"
-                + "+1/2*(2*\\lambda-Power[\\lambda,2])*g^\\mu\\nu*R_\\alpha^\\beta");
-        Expression N = Tensors.parseExpression("N^\\rho\\alpha\\beta=0");
-        Expression M = Tensors.parseExpression("M_\\alpha^\\beta = "
-                + "P_\\alpha\\mu*P^\\mu\\beta-1/2*R_\\mu\\nu\\gamma\\alpha*R^\\mu\\nu\\gamma\\beta"
-                + "+\\lambda/2*P_\\alpha\\mu*R^\\mu\\beta"
-                + "+\\lambda/2*P_\\mu\\nu*R^\\mu_\\alpha^\\nu\\beta"
-                + "+1/6*(\\lambda-2*Power[\\lambda,2])*R_\\alpha\\mu*R^\\mu\\beta"
-                + "+1/12*(4*\\lambda+7*Power[\\lambda,2])*R_\\mu\\alpha\\nu^\\beta*R^\\mu\\nu"
-                + "+1/4*(2*\\lambda-Power[\\lambda,2])*R_\\alpha\\mu\\nu\\gamma*R^\\gamma\\mu\\nu\\beta");
-        Expression F = Tensors.parseExpression("F_\\mu\\nu\\alpha\\beta=R_\\mu\\nu\\alpha\\beta");
+        Expression iK = Tensors.parseExpression("iK_a^b=d_a^b+(2*c+Power[c,2])*n_a*n^b");
+        Expression K = Tensors.parseExpression("K^{lmcd}_a^{b}="
+                + "d_a^b*1/3*(g^{lm}*g^{cd}+ g^{lc}*g^{md}+ g^{ld}*g^{mc})"
+                + "+1/12*(-2*k+Power[k,2])*("
+                + "g^{lm}*d_a^c*g^{bd}"
+                + "+g^{lm}*d_a^d*g^{bc}"
+                + "+g^{lc}*d_a^m*g^{bd}"
+                + "+g^{lc}*d_a^d*g^{bm}"
+                + "+g^{ld}*d_a^m*g^{bc}"
+                + "+g^{ld}*d_a^c*g^{bm}"
+                + "+g^{mc}*d_a^l*g^{bd}"
+                + "+g^{mc}*d_a^d*g^{bl}"
+                + "+g^{md}*d_a^l*g^{bc}"
+                + "+g^{md}*d_a^c*g^{bl}"
+                + "+g^{cd}*d_a^l*g^{bm}"
+                + "+g^{cd}*d_a^m*g^{bl})");
+        Expression S = Tensors.parseExpression("S^lmpab=0");
+        //W^{l m }_{a }^{b } = d^{m }_{a }*R^{b l }+d^{l }_{a }*R^{b m }+g^{l b }*R_{a }^{m }+2*P_{a }^{b }*g^{l m }+-2/3*d_{a }^{b }*R^{l m }
+        Expression W = Tensors.parseExpression("W^{lm}_a^b="
+                + "2*P_{a}^{b}*g^{lm}-2/3*R^lm*d_a^b"
+                + "-k/2*P_a^l*g^mb"
+                + "-k/2*P_a^m*g^lb"
+                + "-k/2*P^bl*d^m_a"
+                + "-k/2*P^bm*d^l_a"
+                + "+1/6*(k-2*Power[k,2])*("
+                + "R_a^l*g^mb"
+                + "+R_a^m*g^lb"
+                + "+R^bl*d^m_a"
+                + "+R^bm*d^l_a)"
+                + "+1/6*(2*k-Power[k,2])*"
+                + "(R_a^lbm+R_a^mbl)"
+                + "+1/2*(2*k-Power[k,2])*g^lm*R_a^b");
+        Expression N = Tensors.parseExpression("N^pab=0");
+        Expression M = Tensors.parseExpression("M_a^b = "
+                + "P_al*P^lb-1/2*R_lmca*R^lmcb"
+                + "+k/2*P_al*R^lb"
+                + "+k/2*P_lm*R^l_a^mb"
+                + "+1/6*(k-2*Power[k,2])*R_al*R^lb"
+                + "+1/12*(4*k+7*Power[k,2])*R_lam^b*R^lm"
+                + "+1/4*(2*k-Power[k,2])*R_almc*R^clmb");
+        Expression F = Tensors.parseExpression("F_lmab=R_lmab");
 
 
-        Expression lambda = Tensors.parseExpression("\\lambda=gamma/(1+gamma)");
-        Expression gamma = Tensors.parseExpression("\\gamma=gamma");
-        KINV = (Expression) gamma.transform(lambda.transform(KINV));
+        Expression lambda = Tensors.parseExpression("k=gamma/(1+gamma)");
+        Expression gamma = Tensors.parseExpression("c=gamma");
+        iK = (Expression) gamma.transform(lambda.transform(iK));
         K = (Expression) gamma.transform(lambda.transform(K));
         S = (Expression) gamma.transform(lambda.transform(S));
         W = (Expression) gamma.transform(lambda.transform(W));
         M = (Expression) gamma.transform(lambda.transform(M));
 
-        OneLoopInput input = new OneLoopInput(4, KINV, K, S, W, N, M, F);
+        OneLoopInput input = new OneLoopInput(4, iK, K, S, W, N, M, F);
         OneLoopCounterterms action = OneLoopCounterterms.calculateOneLoopCounterterms(input);
     }
 
@@ -286,23 +284,22 @@ public final class Benchmarks {
      * </pre>
      */
     public static void testGravityGhosts() {
-        CC.setDefaultOutputFormat(OutputFormat.RedberryConsole);
-        Tensors.addSymmetry("P_\\mu\\nu", IndexType.GreekLower, false, 1, 0);
+        Tensors.addSymmetry("P_lm", IndexType.LatinLower, false, 1, 0);
 
-        Expression KINV = Tensors.parseExpression("KINV_\\alpha^\\beta=d_\\alpha^\\beta+gamma*n_\\alpha*n^\\beta");
-        Expression K = Tensors.parseExpression("K^{\\mu\\nu}_\\alpha^{\\beta}=d_\\alpha^\\beta*g^\\mu\\nu-1/2*beta*(d_\\alpha^\\mu*g^\\nu\\beta+d_\\alpha^\\nu*g^\\mu\\beta)");
-        Expression S = Tensors.parseExpression("S^\\rho^\\mu_\\nu=0");
-        Expression W = Tensors.parseExpression("W^{\\alpha}_{\\beta}=(1+beta/2)*R^\\alpha_\\beta");
-        Expression F = Tensors.parseExpression("F_\\mu\\nu\\alpha\\beta=R_\\mu\\nu\\alpha\\beta");
+        Expression iK = Tensors.parseExpression("iK_a^b=d_a^b+gamma*n_a*n^b");
+        Expression K = Tensors.parseExpression("K^{lm}_a^{b}=d_a^b*g^lm-1/2*beta*(d_a^l*g^mb+d_a^m*g^lb)");
+        Expression S = Tensors.parseExpression("S^p^l_m=0");
+        Expression W = Tensors.parseExpression("W^{a}_{b}=(1+beta/2)*R^a_b");
+        Expression F = Tensors.parseExpression("F_lmab=R_lmab");
 
 
         Expression beta = Tensors.parseExpression("beta=gamma/(1+gamma)");
-        KINV = (Expression) beta.transform(KINV);
+        iK = (Expression) beta.transform(iK);
         K = (Expression) beta.transform(K);
         S = (Expression) beta.transform(S);
         W = (Expression) beta.transform(W);
 
-        OneLoopInput input = new OneLoopInput(2, KINV, K, S, W, null, null, F);
+        OneLoopInput input = new OneLoopInput(2, iK, K, S, W, null, null, F);
 
         OneLoopCounterterms action = OneLoopCounterterms.calculateOneLoopCounterterms(input);
     }
@@ -318,54 +315,53 @@ public final class Benchmarks {
      * </pre>
      */
     public static void testLambdaGaugeGravity() {
-        CC.setDefaultOutputFormat(OutputFormat.RedberryConsole);
-        Tensors.addSymmetry("R_\\mu\\nu", 1, 0);
-        Tensors.addAntiSymmetry("R_\\mu\\nu\\alpha\\beta", 1, 0, 2, 3);
-        Tensors.addSymmetry("R_\\mu\\nu\\alpha\\beta", 2, 3, 0, 1);
+        Tensors.addSymmetry("R_lm", 1, 0);
+        Tensors.addAntiSymmetry("R_lmab", 1, 0, 2, 3);
+        Tensors.addSymmetry("R_lmab", 2, 3, 0, 1);
 
-        Expression KINV = Tensors.parseExpression("KINV_\\alpha\\beta^\\gamma\\delta = "
-                + "(d_\\alpha^\\gamma*d_\\beta^\\delta+d_\\beta^\\gamma*d_\\alpha^\\delta)/2+"
+        Expression iK = Tensors.parseExpression("iK_ab^cd = "
+                + "(d_a^c*d_b^d+d_b^c*d_a^d)/2+"
                 + "la/2*("
-                + "d_\\alpha^\\gamma*n_\\beta*n^\\delta"
-                + "+d_\\alpha^\\delta*n_\\beta*n^\\gamma"
-                + "+d_\\beta^\\gamma*n_\\alpha*n^\\delta"
-                + "+d_\\beta^\\delta*n_\\alpha*n^\\gamma)"
-                + "-la*g^\\gamma\\delta*n_\\alpha*n_\\beta");
-        Expression K = Tensors.parseExpression("K^\\mu\\nu_\\alpha\\beta^\\gamma\\delta = "
-                + "g^\\mu\\nu*(d_\\alpha^\\gamma*d_\\beta^\\delta+d_\\beta^\\gamma*d_\\alpha^\\delta)/2"
+                + "d_a^c*n_b*n^d"
+                + "+d_a^d*n_b*n^c"
+                + "+d_b^c*n_a*n^d"
+                + "+d_b^d*n_a*n^c)"
+                + "-la*g^cd*n_a*n_b");
+        Expression K = Tensors.parseExpression("K^lm_ab^cd = "
+                + "g^lm*(d_a^c*d_b^d+d_b^c*d_a^d)/2"
                 + "-la/(4*(1+la))*("
-                + "d_\\alpha^\\gamma*d_\\beta^\\mu*g^\\delta\\nu"
-                + "+d_\\alpha^\\gamma*d_\\beta^\\nu*g^\\delta\\mu"
-                + "+d_\\alpha^\\delta*d_\\beta^\\mu*g^\\gamma\\nu"
-                + "+d_\\alpha^\\delta*d_\\beta^\\nu*g^\\gamma\\mu"
-                + "+d_\\beta^\\gamma*d_\\alpha^\\mu*g^\\delta\\nu"
-                + "+d_\\beta^\\gamma*d_\\alpha^\\nu*g^\\delta\\mu"
-                + "+d_\\beta^\\delta*d_\\alpha^\\mu*g^\\gamma\\nu"
-                + "+d_\\beta^\\delta*d_\\alpha^\\nu*g^\\gamma\\mu)"
-                + "+la/(2*(1+la))*g^\\gamma\\delta*(d_\\alpha^\\mu*d_\\beta^\\nu+d_\\alpha^\\nu*d_\\beta^\\mu)");
-        Expression S = Tensors.parseExpression("S^\\rho_{\\alpha\\beta}^{\\gamma\\delta}=0");
-        Expression W = Tensors.parseExpression("W_{\\alpha\\beta}^{\\gamma\\delta}=P_\\alpha\\beta^\\gamma\\delta"
-                + "-la/(2*(1+la))*(R_\\alpha^\\gamma_\\beta^\\delta+R_\\alpha^\\delta_\\beta^\\gamma)"
+                + "d_a^c*d_b^l*g^dm"
+                + "+d_a^c*d_b^m*g^dl"
+                + "+d_a^d*d_b^l*g^cm"
+                + "+d_a^d*d_b^m*g^cl"
+                + "+d_b^c*d_a^l*g^dm"
+                + "+d_b^c*d_a^m*g^dl"
+                + "+d_b^d*d_a^l*g^cm"
+                + "+d_b^d*d_a^m*g^cl)"
+                + "+la/(2*(1+la))*g^cd*(d_a^l*d_b^m+d_a^m*d_b^l)");
+        Expression S = Tensors.parseExpression("S^p_{ab}^{cd}=0");
+        Expression W = Tensors.parseExpression("W_{ab}^{cd}=P_ab^cd"
+                + "-la/(2*(1+la))*(R_a^c_b^d+R_a^d_b^c)"
                 + "+la/(4*(1+la))*("
-                + "d_\\alpha^\\gamma*R_\\beta^\\delta"
-                + "+d_\\alpha^\\delta*R_\\beta^\\gamma"
-                + "+d_\\beta^\\gamma*R_\\alpha^\\delta"
-                + "+d_\\beta^\\delta*R_\\alpha^\\gamma)");
-        Expression P = Tensors.parseExpression("P_\\gamma\\delta^\\mu\\nu = "
-                + "R_\\gamma^\\mu_\\delta^\\nu+R_\\gamma^\\nu_\\delta^\\mu"
+                + "d_a^c*R_b^d"
+                + "+d_a^d*R_b^c"
+                + "+d_b^c*R_a^d"
+                + "+d_b^d*R_a^c)");
+        Expression P = Tensors.parseExpression("P_cd^lm = "
+                + "R_c^l_d^m+R_c^m_d^l"
                 + "+1/2*("
-                + "d_\\gamma^\\mu*R_\\delta^\\nu"
-                + "+d_\\gamma^\\nu*R_\\delta^\\mu"
-                + "+d_\\delta^\\mu*R_\\gamma^\\nu"
-                + "+d_\\delta^\\nu*R_\\gamma^\\mu)"
-                + "-g^\\mu\\nu*R_\\gamma\\delta"
-                + "-R^\\mu\\nu*g_\\gamma\\delta"
-                + "+(-d_\\gamma^\\mu*d_\\delta^\\nu-d_\\gamma^\\nu*d_\\delta^\\mu+g^\\mu\\nu*g_\\gamma\\delta)*R/2");
+                + "d_c^l*R_d^m"
+                + "+d_c^m*R_d^l"
+                + "+d_d^l*R_c^m"
+                + "+d_d^m*R_c^l)"
+                + "-g^lm*R_cd"
+                + "-R^lm*g_cd"
+                + "+(-d_c^l*d_d^m-d_c^m*d_d^l+g^lm*g_cd)*R/2");
         W = (Expression) P.transform(W);
-        Expression F = Tensors.parseExpression("F_\\mu\\nu^\\lambda\\delta_\\rho\\tau = "
-                + "R^\\lambda_\\rho\\mu\\nu*d^\\delta_\\tau+R^\\delta_\\tau\\mu\\nu*d^\\lambda_\\rho");
+        Expression F = Tensors.parseExpression("F_lm^kd_pr = "
+                + "R^k_plm*d^d_r+R^d_rlm*d^k_p");
 
-        OneLoopInput input = new OneLoopInput(2, KINV, K, S, W, null, null, F);
+        OneLoopInput input = new OneLoopInput(2, iK, K, S, W, null, null, F);
 
         OneLoopCounterterms action = OneLoopCounterterms.calculateOneLoopCounterterms(input);
     }
@@ -376,15 +372,14 @@ public final class Benchmarks {
      */
     public static void testMinimalSecondOrderOperator() {
         //TIME = 6.1 s
-        CC.setDefaultOutputFormat(OutputFormat.RedberryConsole);
 
-        Expression KINV = Tensors.parseExpression("KINV_\\alpha^\\beta=d_\\alpha^\\beta");
-        Expression K = Tensors.parseExpression("K^\\mu\\nu_\\alpha^\\beta=d_\\alpha^\\beta*g^{\\mu\\nu}");
-        Expression S = Tensors.parseExpression("S^\\mu\\alpha\\beta=0");
-        Expression W = Tensors.parseExpression("W_\\alpha^\\beta=W_\\alpha^\\beta");
-        Expression F = Tensors.parseExpression("F_\\mu\\nu\\alpha\\beta=F_\\mu\\nu\\alpha\\beta");
+        Expression iK = Tensors.parseExpression("iK_a^b=d_a^b");
+        Expression K = Tensors.parseExpression("K^lm_a^b=d_a^b*g^{lm}");
+        Expression S = Tensors.parseExpression("S^lab=0");
+        Expression W = Tensors.parseExpression("W_a^b=W_a^b");
+        Expression F = Tensors.parseExpression("F_lmab=F_lmab");
 
-        OneLoopInput input = new OneLoopInput(2, KINV, K, S, W, null, null, F);
+        OneLoopInput input = new OneLoopInput(2, iK, K, S, W, null, null, F);
 
         OneLoopCounterterms action = OneLoopCounterterms.calculateOneLoopCounterterms(input);
     }
@@ -396,17 +391,16 @@ public final class Benchmarks {
      */
     public static void testMinimalSecondOrderOperatorBarvinskyVilkovisky() {
         //TIME = 4.5 s
-        CC.setDefaultOutputFormat(OutputFormat.RedberryConsole);
 
         //Phys. Rep. 119 ( 1985) 1-74 
-        Expression KINV = Tensors.parseExpression("KINV_\\alpha^\\beta=d_\\alpha^\\beta");
-        Expression K = Tensors.parseExpression("K^\\mu\\nu_\\alpha^\\beta=d_\\alpha^\\beta*g^{\\mu\\nu}");
-        Expression S = Tensors.parseExpression("S^\\mu\\alpha\\beta=0");
+        Expression iK = Tensors.parseExpression("iK_a^b=d_a^b");
+        Expression K = Tensors.parseExpression("K^lm_a^b=d_a^b*g^{lm}");
+        Expression S = Tensors.parseExpression("S^lab=0");
         //here P^... from BV equal to W^...
-        Expression W = Tensors.parseExpression("W_\\alpha^\\beta=W_\\alpha^\\beta-1/6*R*d_\\alpha^\\beta");
-        Expression F = Tensors.parseExpression("F_\\mu\\nu\\alpha\\beta=F_\\mu\\nu\\alpha\\beta");
+        Expression W = Tensors.parseExpression("W_a^b=W_a^b-1/6*R*d_a^b");
+        Expression F = Tensors.parseExpression("F_lmab=F_lmab");
 
-        OneLoopInput input = new OneLoopInput(2, KINV, K, S, W, null, null, F);
+        OneLoopInput input = new OneLoopInput(2, iK, K, S, W, null, null, F);
 
         OneLoopCounterterms action = OneLoopCounterterms.calculateOneLoopCounterterms(input);
     }
@@ -417,19 +411,18 @@ public final class Benchmarks {
      */
     public static void testMinimalFourthOrderOperator() {
         //TIME = 6.2 s
-        CC.setDefaultOutputFormat(OutputFormat.RedberryConsole);
-        Tensors.addSymmetry("P_\\mu\\nu", IndexType.GreekLower, false, 1, 0);
+        Tensors.addSymmetry("P_lm", IndexType.LatinLower, false, 1, 0);
 
-        Expression KINV = Tensors.parseExpression("KINV_\\alpha^\\beta=d_\\alpha^\\beta");
-        Expression K = Tensors.parseExpression("K^{\\mu\\nu\\gamma\\delta}_\\alpha^{\\beta}="
-                + "d_\\alpha^\\beta*1/3*(g^{\\mu\\nu}*g^{\\gamma\\delta}+ g^{\\mu\\gamma}*g^{\\nu\\delta}+ g^{\\mu\\delta}*g^{\\nu\\gamma})");
-        Expression S = Tensors.parseExpression("S^\\mu\\nu\\rho\\alpha\\beta=0");
-        Expression W = Tensors.parseExpression("W^{\\mu\\nu}_\\alpha^\\beta=0*W^{\\mu\\nu}_\\alpha^\\beta");
-        Expression N = Tensors.parseExpression("N^\\rho\\alpha\\beta=0*N^\\rho\\alpha\\beta");
-        Expression M = Tensors.parseExpression("M_\\alpha^\\beta = 0*M_\\alpha^\\beta");
-        Expression F = Tensors.parseExpression("F_\\mu\\nu\\alpha\\beta=F_\\mu\\nu\\alpha\\beta");
+        Expression iK = Tensors.parseExpression("iK_a^b=d_a^b");
+        Expression K = Tensors.parseExpression("K^{lmcd}_a^{b}="
+                + "d_a^b*1/3*(g^{lm}*g^{cd}+ g^{lc}*g^{md}+ g^{ld}*g^{mc})");
+        Expression S = Tensors.parseExpression("S^lmpab=0");
+        Expression W = Tensors.parseExpression("W^{lm}_a^b=0*W^{lm}_a^b");
+        Expression N = Tensors.parseExpression("N^pab=0*N^pab");
+        Expression M = Tensors.parseExpression("M_a^b = 0*M_a^b");
+        Expression F = Tensors.parseExpression("F_lmab=F_lmab");
 
-        OneLoopInput input = new OneLoopInput(4, KINV, K, S, W, N, M, F);
+        OneLoopInput input = new OneLoopInput(4, iK, K, S, W, N, M, F);
         OneLoopCounterterms action = OneLoopCounterterms.calculateOneLoopCounterterms(input);
     }
 
@@ -439,21 +432,20 @@ public final class Benchmarks {
      */
     public static void testSpin3Ghosts() {
         //TIME = 990 s
-        CC.setDefaultOutputFormat(OutputFormat.RedberryConsole);
-        Expression KINV = Tensors.parseExpression(
-                "KINV^{\\alpha\\beta}_{\\mu\\nu} = P^{\\alpha\\beta}_{\\mu\\nu}-1/4*c*g_{\\mu\\nu}*g^{\\alpha\\beta}+"
-                        + "(1/4)*b*(n_{\\mu}*n^{\\alpha}*d^{\\beta}_{\\nu}+n_{\\mu}*n^{\\beta}*d^{\\alpha}_{\\nu}+n_{\\nu}*n^{\\alpha}*d^{\\beta}_{\\mu}+n_{\\nu}*n^{\\beta}*d^{\\alpha}_{\\mu})+"
-                        + "c*(n_{\\mu}*n_{\\nu}*g^{\\alpha\\beta}+n^{\\alpha}*n^{\\beta}*g_{\\mu\\nu})"
-                        + "-c*b*n_{\\mu}*n_{\\nu}*n^{\\alpha}*n^{\\beta}");
+        Expression iK = Tensors.parseExpression(
+                "iK^{ab}_{lm} = P^{ab}_{lm}-1/4*c*g_{lm}*g^{ab}+"
+                        + "(1/4)*b*(n_{l}*n^{a}*d^{b}_{m}+n_{l}*n^{b}*d^{a}_{m}+n_{m}*n^{a}*d^{b}_{l}+n_{m}*n^{b}*d^{a}_{l})+"
+                        + "c*(n_{l}*n_{m}*g^{ab}+n^{a}*n^{b}*g_{lm})"
+                        + "-c*b*n_{l}*n_{m}*n^{a}*n^{b}");
         Expression K = Tensors.parseExpression(
-                "K^{\\mu\\nu}^{\\alpha\\beta}_{\\gamma\\delta} = g^{\\mu\\nu}*P^{\\alpha\\beta}_{\\gamma\\delta}+"
-                        + "(1+2*beta)*((1/4)*(d^{\\mu}_{\\gamma}*g^{\\alpha \\nu}*d^{\\beta}_{\\delta} + d^{\\mu}_{\\delta}*g^{\\alpha \\nu}*d^{\\beta}_{\\gamma}+d^{\\mu}_{\\gamma}*g^{\\beta \\nu}*d^{\\alpha}_{\\delta}+ d^{\\mu}_{\\delta}*g^{\\beta \\nu}*d^{\\alpha}_{\\gamma})+"
-                        + "(1/4)*(d^{\\nu}_{\\gamma}*g^{\\alpha \\mu}*d^{\\beta}_{\\delta} + d^{\\nu}_{\\delta}*g^{\\alpha \\mu}*d^{\\beta}_{\\gamma}+d^{\\nu}_{\\gamma}*g^{\\beta \\mu}*d^{\\alpha}_{\\delta}+ d^{\\nu}_{\\delta}*g^{\\beta \\mu}*d^{\\alpha}_{\\gamma}) -"
-                        + "(1/4)*(g_{\\gamma\\delta}*g^{\\mu \\alpha}*g^{\\nu \\beta}+g_{\\gamma\\delta}*g^{\\mu \\beta}*g^{\\nu \\alpha})-"
-                        + "(1/4)*(g^{\\alpha\\beta}*d^{\\mu}_{\\gamma}*d^{\\nu}_{\\delta}+g^{\\alpha\\beta}*d^{\\mu}_{\\delta}*d^{\\nu}_{\\gamma})+(1/8)*g^{\\mu\\nu}*g_{\\gamma\\delta}*g^{\\alpha\\beta})");
+                "K^{lm}^{ab}_{cd} = g^{lm}*P^{ab}_{cd}+"
+                        + "(1+2*beta)*((1/4)*(d^{l}_{c}*g^{a m}*d^{b}_{d} + d^{l}_{d}*g^{a m}*d^{b}_{c}+d^{l}_{c}*g^{b m}*d^{a}_{d}+ d^{l}_{d}*g^{b m}*d^{a}_{c})+"
+                        + "(1/4)*(d^{m}_{c}*g^{a l}*d^{b}_{d} + d^{m}_{d}*g^{a l}*d^{b}_{c}+d^{m}_{c}*g^{b l}*d^{a}_{d}+ d^{m}_{d}*g^{b l}*d^{a}_{c}) -"
+                        + "(1/4)*(g_{cd}*g^{l a}*g^{m b}+g_{cd}*g^{l b}*g^{m a})-"
+                        + "(1/4)*(g^{ab}*d^{l}_{c}*d^{m}_{d}+g^{ab}*d^{l}_{d}*d^{m}_{c})+(1/8)*g^{lm}*g_{cd}*g^{ab})");
         Expression P = Tensors.parseExpression(
-                "P^{\\alpha\\beta}_{\\mu\\nu} = (1/2)*(d^{\\alpha}_{\\mu}*d^{\\beta}_{\\nu}+d^{\\alpha}_{\\nu}*d^{\\beta}_{\\mu})-(1/4)*g_{\\mu\\nu}*g^{\\alpha\\beta}");
-        KINV = (Expression) P.transform(KINV);
+                "P^{ab}_{lm} = (1/2)*(d^{a}_{l}*d^{b}_{m}+d^{a}_{m}*d^{b}_{l})-(1/4)*g_{lm}*g^{ab}");
+        iK = (Expression) P.transform(iK);
         K = (Expression) P.transform(K);
 
         Expression consts[] = {
@@ -461,19 +453,19 @@ public final class Benchmarks {
                 Tensors.parseExpression("b=-(1+2*beta)/(1+beta)")
         };
         for (Expression cons : consts) {
-            KINV = (Expression) cons.transform(KINV);
+            iK = (Expression) cons.transform(iK);
             K = (Expression) cons.transform(K);
         }
 
-        Expression S = (Expression) Tensors.parse("S^\\rho^{\\alpha\\beta}_{\\mu\\nu}=0");
-        Expression W = (Expression) Tensors.parse("W^{\\alpha\\beta}_{\\mu\\nu}=0");
-        Expression F = Tensors.parseExpression("F_\\mu\\nu\\alpha\\beta\\gamma\\delta=0");
+        Expression S = (Expression) Tensors.parse("S^p^{ab}_{lm}=0");
+        Expression W = (Expression) Tensors.parse("W^{ab}_{lm}=0");
+        Expression F = Tensors.parseExpression("F_lmabcd=0");
 
         Transformation[] ds = OneLoopUtils.antiDeSitterBackground();
         Transformation[] tr = new Transformation[ds.length + 1];
         System.arraycopy(ds, 0, tr, 0, ds.length);
         tr[tr.length - 1] = FactorTransformation.FACTOR;
-        OneLoopInput input = new OneLoopInput(2, KINV, K, S, W, null, null, F, tr);
+        OneLoopInput input = new OneLoopInput(2, iK, K, S, W, null, null, F, tr);
 
         OneLoopCounterterms action = OneLoopCounterterms.calculateOneLoopCounterterms(input);
     }
@@ -490,59 +482,58 @@ public final class Benchmarks {
      */
     public static void testNonMinimalGaugeGravity() {
         //FIXME works more than hour
-        CC.setDefaultOutputFormat(OutputFormat.RedberryConsole);
-        Tensors.addSymmetry("R_\\mu\\nu", IndexType.GreekLower, false, new int[]{1, 0});
-        Tensors.addSymmetry("R_\\mu\\nu\\alpha\\beta", IndexType.GreekLower, true, new int[]{0, 1, 3, 2});
-        Tensors.addSymmetry("R_\\mu\\nu\\alpha\\beta", IndexType.GreekLower, false, new int[]{2, 3, 0, 1});
+        Tensors.addSymmetry("R_lm", IndexType.LatinLower, false, new int[]{1, 0});
+        Tensors.addSymmetry("R_lmab", IndexType.LatinLower, true, new int[]{0, 1, 3, 2});
+        Tensors.addSymmetry("R_lmab", IndexType.LatinLower, false, new int[]{2, 3, 0, 1});
 
 
-        Expression KINV = Tensors.parseExpression("KINV_\\alpha\\beta^\\gamma\\delta = "
-                + "(d_\\alpha^\\gamma*d_\\beta^\\delta+d_\\beta^\\gamma*d_\\alpha^\\delta)/2-"
+        Expression iK = Tensors.parseExpression("iK_ab^cd = "
+                + "(d_a^c*d_b^d+d_b^c*d_a^d)/2-"
                 + "la/2*("
-                + "d_\\alpha^\\gamma*n_\\beta*n^\\delta"
-                + "+d_\\alpha^\\delta*n_\\beta*n^\\gamma"
-                + "+d_\\beta^\\gamma*n_\\alpha*n^\\delta"
-                + "+d_\\beta^\\delta*n_\\alpha*n^\\gamma)"
-                + "-ga*(g_\\alpha\\beta*n^\\gamma*n^\\delta+g^\\gamma\\delta*n_\\alpha*n_\\beta)"
-                + "-1/2*g_\\alpha\\beta*g^\\gamma\\delta"
-                + "+2*ga*(ga*la-2*ga+2*la)*n_\\alpha*n_\\beta*n^\\gamma*n^\\delta");
-        Expression K = Tensors.parseExpression("K^\\mu\\nu_\\alpha\\beta^\\gamma\\delta = "
-                + "g^\\mu\\nu*(d_\\alpha^\\gamma*d_\\beta^\\delta+d_\\beta^\\gamma*d_\\alpha^\\delta)/2"
+                + "d_a^c*n_b*n^d"
+                + "+d_a^d*n_b*n^c"
+                + "+d_b^c*n_a*n^d"
+                + "+d_b^d*n_a*n^c)"
+                + "-ga*(g_ab*n^c*n^d+g^cd*n_a*n_b)"
+                + "-1/2*g_ab*g^cd"
+                + "+2*ga*(ga*la-2*ga+2*la)*n_a*n_b*n^c*n^d");
+        Expression K = Tensors.parseExpression("K^lm_ab^cd = "
+                + "g^lm*(d_a^c*d_b^d+d_b^c*d_a^d)/2"
                 + "-la/(4*(1+la))*("
-                + "d_\\alpha^\\gamma*d_\\beta^\\mu*g^\\delta\\nu"
-                + "+d_\\alpha^\\gamma*d_\\beta^\\nu*g^\\delta\\mu"
-                + "+d_\\alpha^\\delta*d_\\beta^\\mu*g^\\gamma\\nu"
-                + "+d_\\alpha^\\delta*d_\\beta^\\nu*g^\\gamma\\mu"
-                + "+d_\\beta^\\gamma*d_\\alpha^\\mu*g^\\delta\\nu"
-                + "+d_\\beta^\\gamma*d_\\alpha^\\nu*g^\\delta\\mu"
-                + "+d_\\beta^\\delta*d_\\alpha^\\mu*g^\\gamma\\nu"
-                + "+d_\\beta^\\delta*d_\\alpha^\\nu*g^\\gamma\\mu)"
-                + "+(la-be)/(2*(1+la))*(g^\\gamma\\delta*(d_\\alpha^\\mu*d_\\beta^\\nu+d_\\alpha^\\nu*d_\\beta^\\mu)+g_\\alpha\\beta*(g^\\gamma\\mu*g^\\delta\\nu+g^\\gamma\\nu*g^\\delta\\mu))"
-                + "+g^\\mu\\nu*g_\\alpha\\beta*g^\\gamma\\delta*(-1+(1+be)**2/(2*(1+la)))");
+                + "d_a^c*d_b^l*g^dm"
+                + "+d_a^c*d_b^m*g^dl"
+                + "+d_a^d*d_b^l*g^cm"
+                + "+d_a^d*d_b^m*g^cl"
+                + "+d_b^c*d_a^l*g^dm"
+                + "+d_b^c*d_a^m*g^dl"
+                + "+d_b^d*d_a^l*g^cm"
+                + "+d_b^d*d_a^m*g^cl)"
+                + "+(la-be)/(2*(1+la))*(g^cd*(d_a^l*d_b^m+d_a^m*d_b^l)+g_ab*(g^cl*g^dm+g^cm*g^dl))"
+                + "+g^lm*g_ab*g^cd*(-1+(1+be)**2/(2*(1+la)))");
         K = (Expression) Tensors.parseExpression("be = ga/(1+ga)").transform(K);
-        Expression S = Tensors.parseExpression("S^\\rho_{\\alpha\\beta}^{\\gamma\\delta}=0");
-        Expression W = Tensors.parseExpression("W_{\\alpha\\beta}^{\\gamma\\delta}=P_\\alpha\\beta^\\gamma\\delta"
-                + "-la/(2*(1+la))*(R_\\alpha^\\gamma_\\beta^\\delta+R_\\alpha^\\delta_\\beta^\\gamma)"
+        Expression S = Tensors.parseExpression("S^p_{ab}^{cd}=0");
+        Expression W = Tensors.parseExpression("W_{ab}^{cd}=P_ab^cd"
+                + "-la/(2*(1+la))*(R_a^c_b^d+R_a^d_b^c)"
                 + "+la/(4*(1+la))*("
-                + "d_\\alpha^\\gamma*R_\\beta^\\delta"
-                + "+d_\\alpha^\\delta*R_\\beta^\\gamma"
-                + "+d_\\beta^\\gamma*R_\\alpha^\\delta"
-                + "+d_\\beta^\\delta*R_\\alpha^\\gamma)");
-        Expression P = Tensors.parseExpression("P_\\alpha\\beta^\\mu\\nu ="
-                + "1/4*(d_\\alpha^\\gamma*d_\\beta^\\delta+d_\\alpha^\\delta*d_\\beta^\\gamma-g_\\alpha\\beta*g^\\gamma\\delta)"
-                + "*(R_\\gamma^\\mu_\\delta^\\nu+R_\\gamma^\\nu_\\delta^\\mu-g^\\mu\\nu*R_\\gamma\\delta-g_\\gamma\\delta*R^\\mu\\nu"
-                + "+1/2*(d^\\mu_\\gamma*R^\\nu_\\delta+d^\\nu_\\gamma*R_\\delta^\\mu+d^\\mu_\\delta*R^\\nu_\\gamma+d^\\nu_\\delta*R^\\mu_\\gamma)"
-                + "-1/2*(d^\\mu_\\gamma*d^\\nu_\\delta+d^\\nu_\\gamma*d^\\mu_\\delta)*(R-2*LA)+1/2*g_\\gamma\\delta*g^\\mu\\nu*R)");
+                + "d_a^c*R_b^d"
+                + "+d_a^d*R_b^c"
+                + "+d_b^c*R_a^d"
+                + "+d_b^d*R_a^c)");
+        Expression P = Tensors.parseExpression("P_ab^lm ="
+                + "1/4*(d_a^c*d_b^d+d_a^d*d_b^c-g_ab*g^cd)"
+                + "*(R_c^l_d^m+R_c^m_d^l-g^lm*R_cd-g_cd*R^lm"
+                + "+1/2*(d^l_c*R^m_d+d^m_c*R_d^l+d^l_d*R^m_c+d^m_d*R^l_c)"
+                + "-1/2*(d^l_c*d^m_d+d^m_c*d^l_d)*(R-2*LA)+1/2*g_cd*g^lm*R)");
         P = (Expression) ExpandTransformation.expand(P,
                 EliminateMetricsTransformation.ELIMINATE_METRICS,
-                Tensors.parseExpression("R_{\\mu \\nu}^{\\mu}_{\\alpha} = R_{\\nu\\alpha}"),
-                Tensors.parseExpression("R_{\\mu\\nu}^{\\alpha}_{\\alpha}=0"),
-                Tensors.parseExpression("R_{\\mu}^{\\mu}= R"));
+                Tensors.parseExpression("R_{l m}^{l}_{a} = R_{ma}"),
+                Tensors.parseExpression("R_{lm}^{a}_{a}=0"),
+                Tensors.parseExpression("R_{l}^{l}= R"));
         W = (Expression) P.transform(W);
-        Expression F = Tensors.parseExpression("F_\\mu\\nu^\\lambda\\delta_\\rho\\tau = "
-                + "R^\\lambda_\\rho\\mu\\nu*d^\\delta_\\tau+R^\\delta_\\tau\\mu\\nu*d^\\lambda_\\rho");
+        Expression F = Tensors.parseExpression("F_lm^kd_pr = "
+                + "R^k_plm*d^d_r+R^d_rlm*d^k_p");
 
-        OneLoopInput input = new OneLoopInput(2, KINV, K, S, W, null, null, F);
+        OneLoopInput input = new OneLoopInput(2, iK, K, S, W, null, null, F);
 
         OneLoopCounterterms action = OneLoopCounterterms.calculateOneLoopCounterterms(input);
     }

@@ -23,3 +23,8 @@ re:^README~$
 *~
 
 re:^fontconfig/
+
+syntax: regexp
+
+^pomPrep.xsl$
+^release

@@ -27,6 +27,7 @@ import cc.redberry.core.graph.GraphType;
 import cc.redberry.core.graph.PrimitiveSubgraph;
 import cc.redberry.core.graph.PrimitiveSubgraphPartition;
 import cc.redberry.core.indexmapping.IndexMapping;
+import cc.redberry.core.indexmapping.Mapping;
 import cc.redberry.core.indices.IndexType;
 import cc.redberry.core.indices.Indices;
 import cc.redberry.core.tensor.*;
@@ -163,7 +164,8 @@ public final class InverseOrderOfMatricesTransformation implements Transformatio
     }
 
     private static Tensor setIndices(Tensor t, Indices from, Indices to) {
-        return ApplyIndexMapping.applyIndexMapping(t, from.getAllIndices().copy(), to.getAllIndices().copy(), new int[0]);
+        return ApplyIndexMapping.applyIndexMapping(t,
+                new Mapping(from.getAllIndices().copy(), to.getAllIndices().copy()), new int[0]);
     }
 
     private static final Indices renameOfType(Indices indices, Indices fromSubIndices, Indices toSubIndices) {

@@ -28,7 +28,9 @@ import cc.redberry.core.context.CC;
 import cc.redberry.core.tensor.*;
 import cc.redberry.core.tensor.iterator.FromChildToParentIterator;
 import cc.redberry.core.transformations.EliminateMetricsTransformation;
+import cc.redberry.core.transformations.Transformation;
 import cc.redberry.core.transformations.expand.ExpandTransformation;
+import cc.redberry.core.transformations.factor.FactorTransformation;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -256,6 +258,76 @@ public class CollectTransformationTest {
             int[] match = CollectTransformation.matchFactors(a, b);
             Assert.assertArrayEquals(a, Combinatorics.reorder(b, match));
         }
+    }
+
+    @Test
+    public void testDerivatives1() {
+        Tensor t = parse("f~(1)[x] + f[x]");
+        SimpleTensor[] patterns = new SimpleTensor[]{parseSimple("f[x]")};
+        CollectTransformation collect = new CollectTransformation(patterns);
+        TAssert.assertEquals(collect.transform(t), t);
+    }
+
+    @Test
+    public void testDerivatives2() {
+        Tensor t = parse("D[x][x*f[x, x**2] + f[x, x**2]]");
+        SimpleTensor[] patterns = {
+                parseSimple("f~(0,1)[x, y]"),
+                parseSimple("f~(1,0)[x, y]")};
+        CollectTransformation collect = new CollectTransformation(patterns, new Transformation[]{FactorTransformation.FACTOR});
+        TAssert.assertEquals(collect.transform(t), "f[x,x**2]+(x+1)*f~(1,0)[x,x**2]+2*x*(x+1)*f~(0,1)[x,x**2]");
+    }
+
+    @Test
+    public void testPower1() {
+        Tensor t = parse("x**2 + x**2*a");
+        SimpleTensor[] pattern = {parseSimple("x")};
+        CollectTransformation tr = new CollectTransformation(pattern);
+        TAssert.assertEquals(tr.transform(t), "x**2*(1+a)");
+    }
+
+    @Test
+    public void testPower2() {
+        Tensor t = parse("y**3*x**2*b*c + y**3*x**2*a**2");
+        SimpleTensor[] pattern = {parseSimple("x"), parseSimple("y")};
+        CollectTransformation tr = new CollectTransformation(pattern);
+        TAssert.assertEquals(tr.transform(t), "y**3*x**2*(b*c+a**2)");
+    }
+
+
+    @Test
+    public void testPower3() {
+        Tensor t = parse("(A_m*A^m*c)**2 + A_m*A^m*A_i*A^i");
+        SimpleTensor[] pattern = {parseSimple("A_m")};
+        CollectTransformation tr = new CollectTransformation(pattern);
+        TAssert.assertEquals(EliminateMetricsTransformation.eliminate(tr.transform(t)), "A_m*A^m*A_i*A^i*(c**2 + 1)");
+    }
+
+    @Test
+    public void testPower4() {
+        Tensor t = parse("x**2*y**3*(a + b + c) + x*y*(c + d) + x*(a+b) + y*(c+e) + r");
+        SimpleTensor[] pattern = {parseSimple("x"), parseSimple("y")};
+        CollectTransformation tr = new CollectTransformation(pattern);
+        TAssert.assertEquals(tr.transform(ExpandTransformation.expand(t)), t);
+    }
+
+    @Test
+    public void testPower5() {
+        Tensor t = parse("x_m*y_n*x_a*(a^a + b^a + c^a) + x_m*y_n*(c + d) + x_m*(a_n+b_n) + y_n*(c_m+e_m) + r_mn");
+        SimpleTensor[] pattern = {parseSimple("x_m"), parseSimple("y_m")};
+        CollectTransformation tr = new CollectTransformation(pattern);
+        Tensor e = EliminateMetricsTransformation.eliminate(tr.transform(ExpandTransformation.expand(t)));
+        e = ExpandTransformation.expand(e);
+        e = EliminateMetricsTransformation.eliminate(e);
+        TAssert.assertEquals(e, ExpandTransformation.expand(t));
+    }
+
+    @Test
+    public void testExpression1() {
+        Tensor t = parse("f*a + f*b = d*a + d*b");
+        SimpleTensor[] pattern = {parseSimple("f"), parseSimple("d")};
+        CollectTransformation tr = new CollectTransformation(pattern);
+        TAssert.assertEquals(tr.transform(t), "f*(a+b) = d*(a+b)");
     }
 
 }

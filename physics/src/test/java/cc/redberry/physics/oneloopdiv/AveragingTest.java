@@ -59,7 +59,6 @@ public class AveragingTest {
 
     @Test
     public void test4_0() {
-        CC.setDefaultOutputFormat(OutputFormat.RedberryConsole);
         for (int i = 0; i < 100; ++i) {
             CC.resetTensorNames();
             Tensor t = Tensors.parse("n^\\mu*n_\\mu*n_\\alpha*n^\\alpha*n_\\nu*n^\\nu");

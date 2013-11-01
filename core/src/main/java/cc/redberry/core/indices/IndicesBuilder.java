@@ -22,7 +22,6 @@
  */
 package cc.redberry.core.indices;
 
-import cc.redberry.core.math.MathUtils;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.utils.IntArray;
 import cc.redberry.core.utils.IntArrayList;
@@ -59,7 +58,7 @@ public final class IndicesBuilder {
     }
 
     /**
-     * Appends index representation of specified {@code int}.
+     * Appends index to this
      *
      * @param index index to be appended
      * @return a reference to this object
@@ -70,7 +69,7 @@ public final class IndicesBuilder {
     }
 
     /**
-     * Appends indices representation of specified {@code int[]}.
+     * Sequentially appends all indices from specified array
      *
      * @param indices indices to be appended
      * @return a reference to this object
@@ -81,7 +80,19 @@ public final class IndicesBuilder {
     }
 
     /**
-     * Appends indices representation of specified {@code IntArray}.
+     * Sequentially appends all indices from specified array.
+     *
+     * @param indices indices to be appended
+     * @return a reference to this object
+     */
+    public IndicesBuilder append(int[][] indices) {
+        for (int[] ii : indices)
+            data.addAll(ii);
+        return this;
+    }
+
+    /**
+     * Sequentially appends all indices from specified array
      *
      * @param indices indices to be appended
      * @return a reference to this object

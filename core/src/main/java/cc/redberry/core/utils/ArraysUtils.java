@@ -22,7 +22,6 @@
  */
 package cc.redberry.core.utils;
 
-import cc.redberry.core.math.MathUtils;
 import cc.redberry.core.tensor.Tensor;
 
 import java.lang.reflect.Array;
@@ -41,6 +40,10 @@ import java.util.Set;
 public final class ArraysUtils {
 
     private ArraysUtils() {
+    }
+
+    public static void arraycopy(IntArray source, int srcPos, int[] dest, int destPos, int length) {
+        System.arraycopy(source.innerArray, srcPos, dest, destPos, length);
     }
 
     public static int[] getSeriesFrom0(int size) {
@@ -233,10 +236,22 @@ public final class ArraysUtils {
         return joinedArray;
     }
 
+    /**
+     * Removes elements at specified {@code positions} in specified {@code array}. This method preserve
+     * the relative order of elements in specified {@code array}.
+     *
+     * @param array     array of elements
+     * @param positions positions of elements that should be removed
+     * @param <T>       generic type
+     * @return new array with removed elements at specified positions
+     * @throws ArrayIndexOutOfBoundsException if some position larger then array length
+     */
     public static <T> T[] remove(T[] array, int[] positions) {
         if (array == null)
             throw new NullPointerException();
         int[] p = MathUtils.getSortedDistinct(positions);
+        if (p.length == 0)
+            return array;
 
         int size = p.length, pointer = 0, s = array.length;
         for (; pointer < size; ++pointer)
@@ -258,6 +273,86 @@ public final class ArraysUtils {
         return r;
     }
 
+    //for performance
+
+    /**
+     * Removes elements at specified {@code positions} in specified {@code array}. This method preserve
+     * the relative order of elements in specified {@code array}.
+     *
+     * @param array     array of elements
+     * @param positions positions of elements that should be removed
+     * @return new array with removed elements at specified positions
+     * @throws ArrayIndexOutOfBoundsException if some position larger then array length
+     */
+    public static Tensor[] remove(Tensor[] array, int[] positions) {
+        if (array == null)
+            throw new NullPointerException();
+        int[] p = MathUtils.getSortedDistinct(positions);
+        if (p.length == 0)
+            return array;
+
+        int size = p.length, pointer = 0, s = array.length;
+        for (; pointer < size; ++pointer)
+            if (p[pointer] >= s)
+                throw new ArrayIndexOutOfBoundsException();
+
+        final Class<?> type = array.getClass().getComponentType();
+        Tensor[] r = new Tensor[array.length - p.length];
+
+        pointer = 0;
+        int i = -1;
+        for (int j = 0; j < s; ++j) {
+            if (pointer < size - 1 && j > p[pointer])
+                ++pointer;
+            if (j == p[pointer]) continue;
+            else r[++i] = array[j];
+        }
+        return r;
+    }
+
+    /**
+     * Removes elements at specified {@code positions} in specified {@code array}. This method preserve
+     * the relative order of elements in specified {@code array}.
+     *
+     * @param array     array of elements
+     * @param positions positions of elements that should be removed
+     * @return new array with removed elements at specified positions
+     * @throws ArrayIndexOutOfBoundsException if some position larger then array length
+     */
+    public static int[] remove(int[] array, int[] positions) {
+        if (array == null)
+            throw new NullPointerException();
+        int[] p = MathUtils.getSortedDistinct(positions.clone());
+        if (p.length == 0)
+            return array;
+
+        int size = p.length, pointer = 0, s = array.length;
+        for (; pointer < size; ++pointer)
+            if (p[pointer] >= s)
+                throw new ArrayIndexOutOfBoundsException();
+
+        int[] r = new int[array.length - p.length];
+
+        pointer = 0;
+        int i = -1;
+        for (int j = 0; j < s; ++j) {
+            if (pointer < size - 1 && j > p[pointer])
+                ++pointer;
+            if (j == p[pointer]) continue;
+            else r[++i] = array[j];
+        }
+        return r;
+    }
+
+    /**
+     * Selects elements from specified {@code array} at specified {@code positions}. The resulting array preserves
+     * the relative order of elements in specified {@code array}.
+     *
+     * @param array     array of elements
+     * @param positions of elements that should be picked out
+     * @param <T>       generic type
+     * @return the array of elements that picked out from specified positions in specified array
+     */
     public static <T> T[] select(T[] array, int[] positions) {
         if (array == null)
             throw new NullPointerException();
@@ -271,6 +366,12 @@ public final class ArraysUtils {
         return r;
     }
 
+    /**
+     * Converts {@code Set<Integer>} to {@code int[]}
+     *
+     * @param set a {@link Set} of {@link Integer}
+     * @return {@code int[]}
+     */
     public static int[] toArray(Set<Integer> set) {
         int i = -1;
         int[] a = new int[set.size()];
@@ -279,8 +380,62 @@ public final class ArraysUtils {
         return a;
     }
 
+    /**
+     * Searches a range of
+     * the specified array of ints for the specified value using the
+     * binary search algorithm.
+     * The range must be sorted (as
+     * by the {@link cc.redberry.core.utils.IntArrayList#sort()} method)
+     * prior to making this call.  If it
+     * is not sorted, the results are undefined.  If the range contains
+     * multiple elements with the specified value, there is no guarantee which
+     * one will be found.
+     *
+     * @param list the list to be searched
+     * @param key  the value to be searched for
+     * @return index of the search key, if it is contained in the array
+     *         within the specified range;
+     *         otherwise, <tt>(-(<i>insertion point</i>) - 1)</tt>.  The
+     *         <i>insertion point</i> is defined as the point at which the
+     *         key would be inserted into the array: the index of the first
+     *         element in the range greater than the key,
+     *         or <tt>toIndex</tt> if all
+     *         elements in the range are less than the specified key.  Note
+     *         that this guarantees that the return value will be &gt;= 0 if
+     *         and only if the key is found.
+     * @see Arrays#binarySearch(int[], int)
+     */
     public static int binarySearch(IntArrayList list, int key) {
         return Arrays.binarySearch(list.data, 0, list.size, key);
+    }
+
+    /**
+     * Searches a range of
+     * the specified array of ints for the specified value using the
+     * binary search algorithm.
+     * The range must be sorted (as
+     * by the {@link cc.redberry.core.utils.IntArrayList#sort()} method)
+     * prior to making this call.  If it
+     * is not sorted, the results are undefined.  If the range contains
+     * multiple elements with the specified value, there is no guarantee which
+     * one will be found.
+     *
+     * @param array the list to be searched
+     * @param key   the value to be searched for
+     * @return index of the search key, if it is contained in the array
+     *         within the specified range;
+     *         otherwise, <tt>(-(<i>insertion point</i>) - 1)</tt>.  The
+     *         <i>insertion point</i> is defined as the point at which the
+     *         key would be inserted into the array: the index of the first
+     *         element in the range greater than the key,
+     *         or <tt>toIndex</tt> if all
+     *         elements in the range are less than the specified key.  Note
+     *         that this guarantees that the return value will be &gt;= 0 if
+     *         and only if the key is found.
+     * @see Arrays#binarySearch(int[], int)
+     */
+    public static int binarySearch(IntArray array, int key) {
+        return Arrays.binarySearch(array.innerArray, 0, array.innerArray.length, key);
     }
 
     /**
@@ -564,6 +719,21 @@ public final class ArraysUtils {
             ArraysUtils.timSort(target, cosort);
         else
             ArraysUtils.insertionSort(target, cosort);
+    }
+
+
+    /**
+     * Sorts the specified array and returns the resulting permutation
+     *
+     * @param target int array
+     * @return sorting permutation
+     */
+    public static int[] quickSortP(int[] target) {
+        int[] permutation = new int[target.length];
+        for (int i = 1; i < target.length; ++i)
+            permutation[i] = i;
+        quickSort(target, 0, target.length, permutation);
+        return permutation;
     }
 
     /**
@@ -981,6 +1151,144 @@ public final class ArraysUtils {
         swap(coSort, a, b);
     }
 
+
+    private static void vecswap(Object[] x, int a, int b, int n, Object[] coSort) {
+        for (int i = 0; i < n; i++, a++, b++)
+            swap(x, a, b, coSort);
+    }
+
+
+    /**
+     * Sorts the specified target array of objects into ascending order, according to the natural ordering of its
+     * elements and simultaneously permutes the {@code coSort} objects array in the same way then specified target
+     * array. <p/> The code was taken from the jdk6 Arrays class. <p/> The sorting algorithm is a tuned quicksort,
+     * adapted from Jon L. Bentley and M. Douglas McIlroy's "Engineering a Sort Function", Software-Practice and
+     * Experience, Vol. 23(11) P. 1249-1265 (November 1993). This algorithm offers n*log(n) performance on many data
+     * sets that cause other quicksorts to degrade to quadratic performance. <p/> <p><b>NOTE: this is unstable sort
+     * algorithm, so additional combinatorics of the {@code coSort} array can be perfomed. Use this method only if you
+     * are sure, in what you are doing. If not - use stable sort methods like an insertion sort or Tim sort.</b>
+     *
+     * @param target the array to be sorted
+     * @param coSort the array, which will be permuted in the same way, then the specified target array, during sorting
+     *               procedure
+     * @throws IllegalArgumentException if <tt>fromIndex &gt; toIndex</tt>
+     * @throws IllegalArgumentException if coSort length less then target length.
+     * @throws IllegalArgumentException if target == coSort (as references).
+     */
+    public static <T extends Comparable<T>> void quickSort(T[] target, int[] coSort) {
+        quickSort(target, 0, target.length, coSort);
+    }
+
+    /**
+     * Sorts the specified target array of objects into ascending order, according to the natural ordering of its
+     * elements and simultaneously permutes the {@code coSort} objects array in the same way then specified target
+     * array. The range to be sorted extends from index <tt>fromIndex</tt>, inclusive, to index <tt>toIndex</tt>,
+     * exclusive. (If <tt>fromIndex==toIndex</tt>, the range to be sorted is empty.)<p> <p/> The code was taken from the
+     * jdk6 Arrays class. <p/> The sorting algorithm is a tuned quicksort, adapted from Jon L. Bentley and M. Douglas
+     * McIlroy's "Engineering a Sort Function", Software-Practice and Experience, Vol. 23(11) P. 1249-1265 (November
+     * 1993). This algorithm offers n*log(n) performance on many data sets that cause other quicksorts to degrade to
+     * quadratic performance. <p/> <p><b>NOTE: this is unstable sort algorithm, so additional combinatorics of the
+     * {@code coSort} array can be perfomed. Use this method only if you are sure, in what you are doing. If not - use
+     * stable sort methods like an insertion sort or Tim sort.</b>
+     *
+     * @param target    the array to be sorted
+     * @param fromIndex the index of the first element (inclusive) to be sorted
+     * @param toIndex   the index of the last element (exclusive) to be sorted
+     * @param coSort    the array, which will be permuted in the same way, then the specified target array, during
+     *                  sorting procedure
+     * @throws IllegalArgumentException       if <tt>fromIndex &gt; toIndex</tt>
+     * @throws ArrayIndexOutOfBoundsException if <tt>fromIndex &lt; 0</tt> or <tt>toIndex &gt; target.length</tt> or
+     *                                        <tt>toIndex &gt; coSort.length</tt>
+     * @throws IllegalArgumentException       if target == coSort (as references).
+     */
+    public static <T extends Comparable<T>> void quickSort(T[] target, int fromIndex, int toIndex, int[] coSort) {
+        rangeCheck(target.length, fromIndex, toIndex);
+        rangeCheck(coSort.length, fromIndex, toIndex);
+        quickSort1(target, fromIndex, toIndex - fromIndex, coSort);
+    }
+
+    /**
+     * This method is the same as {@link #quickSort(Comparable[], int, int, Object[])}, but without range checking.
+     * <p/> <p><b>NOTE: this is unstable sort algorithm, so additional combinatorics of the {@code coSort} array can be
+     * perfomed. Use this method only if you are sure, in what you are doing. If not - use stable sort methods like an
+     * insertion sort or Tim sort.</b>
+     *
+     * @param target    the array to be sorted
+     * @param fromIndex the index of the first element (inclusive) to be sorted
+     * @param length    the length of the sorting subarray.
+     * @param coSort    the array, which will be permuted in the same way, then the specified target array, during
+     *                  sorting procedure
+     * @throws IllegalArgumentException if target == coSort (as references).
+     */
+    public static <T extends Comparable<T>> void quickSort1(T[] target, int fromIndex, int length, int[] coSort) {
+        // Insertion quickSort on smallest arrays
+        if (length < 7) {
+            for (int i = fromIndex; i < length + fromIndex; i++)
+                for (int j = i; j > fromIndex && target[j - 1].compareTo(target[j]) > 0; j--)
+                    swap(target, j, j - 1, coSort);
+            return;
+        }
+
+        // Choose a partition element, v
+        int m = fromIndex + (length >> 1);       // Small arrays, middle element
+        if (length > 7) {
+            int l = fromIndex;
+            int n = fromIndex + length - 1;
+            if (length > 40) {        // Big arrays, pseudomedian of 9
+                int s = length / 8;
+                l = med3(target, l, l + s, l + 2 * s);
+                m = med3(target, m - s, m, m + s);
+                n = med3(target, n - 2 * s, n - s, n);
+            }
+            m = med3(target, l, m, n); // Mid-size, med of 3
+        }
+        T v = target[m];
+
+        // Establish Invariant: v* (<v)* (>v)* v*
+        int a = fromIndex, b = a, c = fromIndex + length - 1, d = c;
+        while (true) {
+            while (b <= c && target[b].compareTo(v) <= 0) {
+                if (target[b] == v)
+                    swap(target, a++, b, coSort);
+                b++;
+            }
+            while (c >= b && target[c].compareTo(v) >= 0) {
+                if (target[c] == v)
+                    swap(target, c, d--, coSort);
+                c--;
+            }
+            if (b > c)
+                break;
+            swap(target, b++, c--, coSort);
+        }
+
+        // Swap partition elements back to middle
+        int s, n = fromIndex + length;
+        s = Math.min(a - fromIndex, b - a);
+        vecswap(target, fromIndex, b - s, s, coSort);
+        s = Math.min(d - c, n - d - 1);
+        vecswap(target, b, n - s, s, coSort);
+
+        // Recursively quickSort non-partition-elements
+        if ((s = b - a) > 1)
+            quickSort1(target, fromIndex, s, coSort);
+        if ((s = d - c) > 1)
+            quickSort1(target, n - s, s, coSort);
+
+    }
+
+    private static void swap(Object[] x, int a, int b, int[] coSort) {
+        swap(x, a, b);
+        swap(coSort, a, b);
+    }
+
+
+    private static void vecswap(Object[] x, int a, int b, int n, int[] coSort) {
+        for (int i = 0; i < n; i++, a++, b++)
+            swap(x, a, b, coSort);
+    }
+
+
     /**
      * Swaps x[a] with x[b].
      */
@@ -994,11 +1302,6 @@ public final class ArraysUtils {
         return (x[a].compareTo(x[b]) < 0
                 ? (x[b].compareTo(x[c]) < 0 ? b : x[a].compareTo(x[c]) < 0 ? c : a)
                 : (x[b].compareTo(x[c]) > 0 ? b : x[a].compareTo(x[c]) > 0 ? c : a));
-    }
-
-    private static void vecswap(Object[] x, int a, int b, int n, Object[] coSort) {
-        for (int i = 0; i < n; i++, a++, b++)
-            swap(x, a, b, coSort);
     }
 
     /**

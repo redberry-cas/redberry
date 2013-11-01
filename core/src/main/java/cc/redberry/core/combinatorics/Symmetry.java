@@ -121,6 +121,17 @@ public class Symmetry extends Permutation {
         return new Symmetry(calculateInverse(), sign);
     }
 
+
+    /**
+     * Returns true if this symmetry is identity
+     *
+     * @return true if this symmetryis identity
+     */
+    @Override
+    public boolean isIdentity() {
+        return super.isIdentity() && !sign;
+    }
+
     @Override
     public boolean equals(Object obj) {
         if (obj == null)

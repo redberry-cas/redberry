@@ -32,6 +32,7 @@ import cc.redberry.core.tensor.iterator.TreeIterator;
 import cc.redberry.core.transformations.Transformation;
 import cc.redberry.core.transformations.fractions.TogetherTransformation;
 import cc.redberry.core.utils.IntArrayList;
+import cc.redberry.core.utils.LocalSymbolsProvider;
 import cc.redberry.core.utils.TensorUtils;
 import gnu.trove.map.hash.TIntObjectHashMap;
 
@@ -40,7 +41,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Factors a symbolic parts (without any indices) of tensor over the integers. The
+ * Factors over the integers all scalar sub-tensors appearing at the top level of expression tree. The default
  * implementation is based on Heinz Kredel Java Algebra System (http://krum.rz.uni-mannheim.de/jas/).
  *
  * @author Dmitry Bolotin
@@ -51,17 +52,73 @@ public class FactorTransformation implements Transformation {
     /**
      * Singleton instance.
      */
-    public static final FactorTransformation FACTOR = new FactorTransformation();
+    public static final FactorTransformation FACTOR = new FactorTransformation(true, JasFactor.ENGINE);
+    private final boolean factorScalars;
+    private final FactorizationEngine factorizationEngine;
 
-    private FactorTransformation() {
+    /**
+     * @param factorScalars       specifies whether scalar but not symbolic (i.e. scalar indexed expressions) should be
+     *                            factorized on a par with symbolic (i.e. without any indices) expressions
+     * @param factorizationEngine custom factorization engine
+     */
+    public FactorTransformation(boolean factorScalars, FactorizationEngine factorizationEngine) {
+        this.factorScalars = factorScalars;
+        this.factorizationEngine = factorizationEngine;
     }
+
 
     @Override
     public Tensor transform(Tensor t) {
-        return factorSymbolicTerms(t);
+        return factor(t, factorScalars, factorizationEngine);
     }
 
-    private static Tensor factorSymbolicTerms(Tensor tensor) {
+
+    /**
+     * Factors scalar parts of tensor over the integers.
+     *
+     * @param tensor              tensor
+     * @param factorScalars       if false, then only symbolic (without any indices) sub-tensors will be factorized
+     * @param factorizationEngine factorization engine
+     * @return
+     */
+    public static Tensor factor(Tensor tensor, boolean factorScalars, FactorizationEngine factorizationEngine) {
+        if (factorScalars) {
+            Expression[] replacementsOfScalars = TensorUtils.generateReplacementsOfScalars(tensor,
+                    new LocalSymbolsProvider(tensor, "sclr"));
+            for (Expression e : replacementsOfScalars)
+                tensor = e.transform(tensor);
+            tensor = factorSymbolicTerms(tensor, factorizationEngine);
+            for (Expression e : replacementsOfScalars)
+                tensor = e.transpose().transform(tensor);
+            return tensor;
+        } else
+            return factorSymbolicTerms(tensor, factorizationEngine);
+    }
+
+    /**
+     * Factors scalar parts of tensor over the integers. The
+     * implementation is based on Heinz Kredel Java Algebra System (http://krum.rz.uni-mannheim.de/jas/).
+     *
+     * @param tensor        tensor
+     * @param factorScalars if false, then only symbolic (without any indices) sub-tensors will be factorized
+     * @return
+     */
+    public static Tensor factor(Tensor tensor, boolean factorScalars) {
+        return factor(tensor, factorScalars, JasFactor.ENGINE);
+    }
+
+    /**
+     * Factors scalar of tensor over the integers. The
+     * implementation is based on Heinz Kredel Java Algebra System (http://krum.rz.uni-mannheim.de/jas/).
+     *
+     * @param tensor tensor
+     * @return result
+     */
+    public static Tensor factor(Tensor tensor) {
+        return factor(tensor, true, JasFactor.ENGINE);
+    }
+
+    private static Tensor factorSymbolicTerms(Tensor tensor, FactorizationEngine factorizationEngine) {
         FromParentToChildIterator iterator = new FromParentToChildIterator(tensor);
         Tensor c;
         while ((c = iterator.next()) != null) {
@@ -79,25 +136,25 @@ public class FactorTransformation implements Transformation {
                 }
             }
             Tensor symbolicPart = ((Sum) c).select(symbolicPositions.toArray());
-            symbolicPart = factorSymbolicTerm(symbolicPart);
+            symbolicPart = factorSymbolicTerm(symbolicPart, factorizationEngine);
             if (remainder instanceof Sum) {
                 SumBuilder sb = new SumBuilder(remainder.size());
                 for (Tensor tt : remainder)
-                    sb.put(factorSymbolicTerms(tt));
+                    sb.put(factorSymbolicTerms(tt, factorizationEngine));
                 remainder = sb.build();
             } else
-                remainder = factorSymbolicTerms(remainder);
+                remainder = factorSymbolicTerms(remainder, factorizationEngine);
             iterator.set(Tensors.sum(symbolicPart, remainder));
         }
         return iterator.result();
     }
 
-    private static Tensor factorSymbolicTerm(Tensor sum) {
+    private static Tensor factorSymbolicTerm(Tensor sum, FactorizationEngine factorizationEngine) {
         TreeIterator iterator = new FromChildToParentIterator(sum);
         Tensor c;
         while ((c = iterator.next()) != null)
             if (c instanceof Sum)
-                iterator.set(factorOut(c));
+                iterator.set(factorOut(c, factorizationEngine));
 
         iterator = new FromParentToChildIterator(iterator.result());
         while ((c = iterator.next()) != null) {
@@ -114,14 +171,14 @@ public class FactorTransformation implements Transformation {
                                 for (int j = c.size() - 1; j > i; --j)
                                     pb.put(c.get(j));
                             }
-                            pb.put(JasFactor.factor(c.get(i)));
+                            pb.put(factorizationEngine.factor(c.get(i)));
                         } else if (pb != null)
                             pb.put(c.get(i));
                     }
                     iterator.set(pb == null ? c : pb.build());
-                }
+                } else iterator.set(c);
             } else
-                iterator.set(JasFactor.factor(c));
+                iterator.set(factorizationEngine.factor(c));
         }
         return iterator.result();
     }
@@ -161,79 +218,16 @@ public class FactorTransformation implements Transformation {
         return true;
     }
 
-    /**
-     * Factors a symbolic parts (without any indices) of tensor over the integers. The
-     * implementation is based on Heinz Kredel Java Algebra System (http://krum.rz.uni-mannheim.de/jas/).
-     *
-     * @param tensor tensor
-     * @return result
-     */
-    public static Tensor factor(Tensor tensor) {
-        return factorSymbolicTerms(tensor);
-//        TensorFirstIterator iterator = new TensorFirstIterator(tensor);
-//        TreeIterator iterator1;
-//        Tensor c, t;
-//        Complex e;
-//        out:
-//        while ((c = iterator.next()) != null) {
-//            if (!(c instanceof Sum))
-//                continue;
-//            iterator1 = new TensorLastIterator(c);
-//            boolean needTogether = false;
-//            while ((t = iterator1.next()) != null) {
-//                if (t.getIndices().size() != 0 || t instanceof ScalarFunction)
-//                    continue out;
-//
-//                if (t instanceof Power) {
-//                    if (!(t.get(1) instanceof Complex))
-//                        continue out;
-//                    e = (Complex) t.get(1);
-//                    if (!e.isReal() || e.isNumeric())
-//                        continue out;
-//                    if (e.getReal().signum() < 0)
-//                        needTogether = true;
-//                }
-//
-//                if (t instanceof Product)
-//                    for (Tensor tt : t)
-//                        if (tt instanceof Power && TensorUtils.isNegativeIntegerNumber(tt.get(1)))
-//                            needTogether = true;
-//
-//
-//                if (t instanceof Sum)
-//                    iterator1.set(factorOut(t));
-//            }
-//
-//            iterator1 = new TensorFirstIterator(iterator1.result());
-//            while ((c = iterator1.next()) != null) {
-//                if (!(c instanceof Sum))
-//                    continue;
-//
-//                if (needTogether) {
-//                    c = Together.together(c, true);
-//                    if (c instanceof Product) {
-//                        for (int i = c.size() - 1; i >= 0; --i) {
-//                            if (c.get(i) instanceof Sum)
-//                                c = c.set(i, JasFactor.factor(c.get(i)));
-//                        }
-//                        iterator1.set(c);
-//                    }
-//                } else {
-//                    iterator1.set(JasFactor.factor(c));
-//                }
-//            }
-//            iterator.set(iterator1.result());
-//        }
-//        return iterator.result();
+    static Tensor factorOut(Tensor tensor) {
+        return factorOut(tensor, JasFactor.ENGINE);
     }
 
-
-    static Tensor factorOut(Tensor tensor) {
+    static Tensor factorOut(Tensor tensor, FactorizationEngine factorizationEngine) {
         FromChildToParentIterator iterator = new FromChildToParentIterator(tensor);
         Tensor c;
         while ((c = iterator.next()) != null)
             if (c instanceof Sum)
-                iterator.set(factorOut1(c));
+                iterator.set(factorOut1(c, factorizationEngine));
         return iterator.result();
     }
 
@@ -255,7 +249,7 @@ public class FactorTransformation implements Transformation {
                 && TensorUtils.isInteger(tensor.get(1));
     }
 
-    static Tensor factorOut1(Tensor tensor) {
+    static Tensor factorOut1(Tensor tensor, FactorizationEngine factorizationEngine) {
         /*
          * S0: factor out imaginary numbers
          * I*a + I*b
@@ -278,12 +272,12 @@ public class FactorTransformation implements Transformation {
         }
 
         if (factorOutImageOne)
-            tensor = FastTensors.multiplySumElementsOnNumber((Sum) tensor, Complex.NEGATIVE_IMAGINARY_UNIT);
+            tensor = FastTensors.multiplySumElementsOnFactor((Sum) tensor, Complex.NEGATIVE_IMAGINARY_UNIT);
 
         if (!(tensor instanceof Sum)) {
             if (factorOutImageOne)
                 tensor = Tensors.multiply(Complex.IMAGINARY_UNIT, tensor);
-            return factorOut(tensor);
+            return factorOut(tensor, factorizationEngine);
         }
 
         /*
@@ -318,7 +312,7 @@ public class FactorTransformation implements Transformation {
                 sb.put(temp.get(nonProductOfSumsPositions.get(i)));
                 temp = ((Sum) temp).remove(nonProductOfSumsPositions.get(i));
             }
-            Tensor withoutSumsTerm = factor(sb.build());
+            Tensor withoutSumsTerm = factorSymbolicTerms(sb.build(), factorizationEngine);
             if (isProductOfSums(withoutSumsTerm)) {
                 temp = Tensors.sum(temp, withoutSumsTerm);
                 if (!(temp instanceof Sum))

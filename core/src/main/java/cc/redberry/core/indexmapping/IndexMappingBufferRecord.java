@@ -34,7 +34,7 @@ import cc.redberry.core.indices.IndicesUtils;
  * @author Stanislav Poslavsky
  * @since 1.0
  */
-public final class IndexMappingBufferRecord {
+final class IndexMappingBufferRecord {
 
     /*
      * Mask 0b00000SUL
@@ -86,15 +86,15 @@ public final class IndexMappingBufferRecord {
         return states;
     }
 
-    public int getToState() {
+    public int getToRawState() {
         return (states & 1) == 0 ? 0x80000000 : 0;
     }
 
-    public int getFromState() {
+    public int getFromRawState() {
         if ((states & 4) == 0)
-            return getToState();
+            return getToRawState();
         else
-            return 0x80000000 ^ getToState();
+            return 0x80000000 ^ getToRawState();
     }
 
     public boolean getStatesBit(int bit) {
@@ -107,6 +107,10 @@ public final class IndexMappingBufferRecord {
 
     public boolean diffStatesInitialized() {
         return (states & 4) == 4;
+    }
+
+    public int getRawDiffStateBit() {
+        return ((states & 4) << 29);
     }
 
     public void invertStates() {

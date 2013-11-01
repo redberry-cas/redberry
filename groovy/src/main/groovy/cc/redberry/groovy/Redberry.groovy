@@ -23,11 +23,9 @@
 
 package cc.redberry.groovy
 
-import cc.redberry.concurrent.OutputPortUnsafe
 import cc.redberry.core.combinatorics.IntPermutationsGenerator
-import cc.redberry.core.indexmapping.IndexMappingBuffer
-import cc.redberry.core.indexmapping.IndexMappingBufferImpl
 import cc.redberry.core.indexmapping.IndexMappings
+import cc.redberry.core.indexmapping.Mapping
 import cc.redberry.core.indexmapping.MappingsPort
 import cc.redberry.core.indices.*
 import cc.redberry.core.number.Complex
@@ -35,7 +33,10 @@ import cc.redberry.core.number.Numeric
 import cc.redberry.core.number.Rational
 import cc.redberry.core.number.Real
 import cc.redberry.core.parser.ParserIndices
-import cc.redberry.core.tensor.*
+import cc.redberry.core.tensor.Expression
+import cc.redberry.core.tensor.Tensor
+import cc.redberry.core.tensor.TensorBuilder
+import cc.redberry.core.tensor.Tensors
 import cc.redberry.core.tensor.iterator.FromChildToParentIterator
 import cc.redberry.core.tensor.iterator.FromParentToChildIterator
 import cc.redberry.core.tensor.iterator.TraverseGuide
@@ -44,6 +45,7 @@ import cc.redberry.core.transformations.TransformationCollection
 import cc.redberry.core.transformations.substitutions.SubstitutionIterator
 import cc.redberry.core.transformations.substitutions.SubstitutionTransformation
 import cc.redberry.core.utils.IntArray
+import cc.redberry.core.utils.IntArrayList
 import cc.redberry.core.utils.TensorUtils
 import org.codehaus.groovy.runtime.DefaultGroovyMethods
 
@@ -270,6 +272,30 @@ class Redberry {
         return builder;
     }
 
+    /**
+     * Returns a list of tensor content
+     * @param tensor tensor
+     * @return a list of tensor content
+     */
+    static List<Tensor> toList(Tensor tensor) {
+        return tensor.toArray() as List
+    }
+
+    /**
+     * Tensor as array, list etc.
+     * @param tensor
+     * @param clazz
+     * @return
+     */
+    static Object asType(Tensor tensor, Class clazz) {
+        if (clazz == List)
+            return tensor.toArray() as List
+        else if (clazz == Tensor[])
+            return tensor.toArray()
+        else
+            return DefaultGroovyMethods.asType(tensor, clazz)
+    }
+
     /*
      * Indices
      */
@@ -288,6 +314,36 @@ class Redberry {
     static int getAt(Indices indices, int position) { indices.get(position) }
 
     /**
+     * Returns sub indices of specified range
+     *
+     * @param indices indices
+     * @param range range
+     * @return sub indices of specified range
+     * @throws IndexOutOfBoundsException
+     */
+    static Indices getAt(Indices indices, IntRange range) {
+        int[] sub = new int[range.size()]
+        for (int i = 0; i < range.size(); ++i)
+            sub[i] = indices.get(i + range.from);
+        return IndicesFactory.create(sub)
+    }
+
+    /**
+     * Returns sub indices of specified range
+     *
+     * @param indices indices
+     * @param range range
+     * @return sub indices of specified range
+     * @throws IndexOutOfBoundsException
+     */
+    static SimpleIndices getAt(SimpleIndices indices, IntRange range) {
+        int[] sub = new int[range.size()]
+        for (int i = 0; i < range.size(); ++i)
+            sub[i] = indices.get(i + range.from);
+        return IndicesFactory.createSimple(null, sub)
+    }
+
+    /**
      * Returns the index of the specified type at the
      * specified position in indices
      *
@@ -300,6 +356,13 @@ class Redberry {
      * @see Indices#get(cc.redberry.core.indices.IndexType, int)
      */
     static int getAt(Indices indices, IndexType type, int position) { indices.get(type, position) }
+
+    static Object asType(Indices indices, Class clazz) {
+        if (clazz == int[])
+            return indices.getAllIndices().copy()
+        else
+            return DefaultGroovyMethods.asType(indices, clazz)
+    }
 
     static Indices asType(int[] indices, Class clazz) {
         if (clazz == SimpleIndices)
@@ -595,6 +658,17 @@ class Redberry {
     }
 
     /**
+     * Applies transformation to a collection of tensors
+     * @param tensors tensors
+     * @param transformation transformation
+     * @return the result
+     * @see Transformation#transform(cc.redberry.core.tensor.Tensor)
+     */
+    static Collection rightShift(Transformation transformation, Collection tensors) {
+        return tensors.collect { rightShift(transformation, it) }
+    }
+
+    /**
      * Applies substitution to tensor
      * @param tensor tensor
      * @param transformation string representation of substitution
@@ -622,6 +696,17 @@ class Redberry {
         for (Transformation tr in transformations)
             t = tr.transform(t);
         return t;
+    }
+
+    /**
+     * Applies collection of transformations to a collection of tensors
+     * @param tensors tensors
+     * @param transformations collection of transformations
+     * @return the result
+     * @see Transformation#transform(cc.redberry.core.tensor.Tensor)
+     */
+    static Collection rightShift(Collection transformations, Collection tensors) {
+        return tensors.collect { rightShift(transformations, it) }
     }
 
     /**
@@ -721,113 +806,94 @@ class Redberry {
     }
 
     /**
-     * Each mapping in mappings
+     * Returns the container of mappings from tensor {@code from} onto tensor {@code to}. This structure is iterable
+     * and also can be manipulated as single transformation which simply applies first possible mapping.
      *
-     * @param port mappings port
-     * @param closure do stuff
+     * @param from {@code from} tensor
+     * @param to {@code to} tensor
+     * @return container of mappings
      */
-    static void each(MappingsPortWrapper port, Closure<IndexMappingAsTransformation> closure) {
-        IndexMappingAsTransformation buffer;
-        while ((buffer = port.take()) != null)
-            closure.call(buffer);
+    static MappingsContainer mod(Tensor from, Tensor to) {
+        return new MappingsContainer(from, to);
     }
 
-    static MappingsPortWrapper mod(Tensor a, Tensor b) {
-        return new MappingsPortWrapper(IndexMappings.createPort(a, b));
-    }
+    /**
+     * This class describes the container of mappings from one tensor onto another. This structure is iterable
+     * and also can be manipulated as single transformation which simply applies first possible mapping.
+     */
+    public static final class MappingsContainer implements Transformation, Iterable<Mapping> {
+        private final Tensor from, to
 
-    private static interface IndexMappingAsTransformation extends IndexMappingBuffer, Transformation {}
+        private boolean firstCalculated = false
+        private Mapping first = null
 
-    private static final class IndexMappingWrapper implements IndexMappingAsTransformation {
-        @Delegate
-        private final IndexMappingBuffer buffer;
-
-        IndexMappingWrapper(IndexMappingBuffer buffer) {
-            this.buffer = buffer
+        MappingsContainer(Tensor from, Tensor to) {
+            this.from = from
+            this.to = to
         }
 
         @Override
         Tensor transform(Tensor t) {
-            //todo review
-            IndexMappingBuffer buffer = this.buffer.clone()
-            buffer = buffer.clone()
-            t.indices.free.each {
-                if (!buffer.map.containsKey(IndicesUtils.getNameWithType(it)))
-                    buffer.tryMap(it, it)
-            }
+            return getFirst().transform(t)
+        }
 
-            def toDel = []
-            buffer.map.each {
-                if (!containsIgnoringState(t.indices.free, it.key))
-                    toDel << it.key
+        /**
+         * Returns the first possible mapping
+         * @return first possible mapping
+         */
+        public Mapping getFirst() {
+            if (!firstCalculated) {
+                first = IndexMappings.getFirst(from, to)
+                firstCalculated = true
             }
-            for (def index : toDel)
-                buffer.map.remove(index)
+            return first
+        }
 
-            return ApplyIndexMapping.applyIndexMapping(t, buffer)
+        /**
+         * Returns the output port of possible mappings
+         * @return port of possible mappings
+         */
+        public MappingsPort getPort() {
+            return IndexMappings.createPort(from, to)
         }
 
         @Override
-        IndexMappingBuffer clone() {
-            return new IndexMappingWrapper(buffer.clone())
-        }
-
-        @Override
-        String toString() {
-            return buffer.toString()
-        }
-    }
-
-    private static final class MappingsPortWrapper implements OutputPortUnsafe<IndexMappingAsTransformation>, IndexMappingAsTransformation {
-        @Delegate
-        IndexMappingWrapper mapping;
-        final MappingsPort innerPort;
-
-        MappingsPortWrapper(MappingsPort innerPort) {
-            this.innerPort = innerPort;
-        }
-
-        MappingsPortWrapper next() {
-            def tempBuffer = innerPort.take();
-            if (tempBuffer == null)
-                return null
-            mapping = new IndexMappingWrapper(tempBuffer);
-            return this;
-        }
-
-        IndexMappingAsTransformation take() {
-            return next()
+        Iterator<Mapping> iterator() {
+            return new MappingsIterator(getPort())
         }
 
         @Override
         public String toString() {
-            return mapping.toString();
+            return getFirst().toString()
         }
 
-        @Override
-        IndexMappingBuffer clone() {
-            throw new IllegalStateException('Clone() cannot be invoked on this class.');
+        private static class MappingsIterator implements Iterator<Mapping> {
+            private final MappingsPort port
+            private Mapping previous, next
+
+            MappingsIterator(MappingsPort port) {
+                this.port = port
+                next = port.take()
+            }
+
+            @Override
+            boolean hasNext() {
+                return next != null
+            }
+
+            @Override
+            Mapping next() {
+                previous = next
+                next = port.take()
+                return previous
+            }
+
+            @Override
+            void remove() {
+                throw new UnsupportedOperationException()
+            }
         }
     }
-
-//    /*
-//    * Apply mappings of indices. E.g. 'a -> b, _a -> ^b, ....' >> tensor
-//    */
-//
-//    /**
-//     * Applies mapping rule to tensor
-//     * @param buffer mapping of indices
-//     * @param tensor tensor
-//     * @return the result
-//     */
-//    static Tensor rightShift(IndexMappingWrapper buffer, Tensor tensor) {
-//        if (tensor.indices.free.size() > buffer.map.size())
-//            tensor.indices.free.each {
-//                if (!buffer.map.containsKey(it))
-//                    buffer.tryMap(it, it)
-//            }
-//        return ApplyIndexMapping.applyIndexMapping(tensor, buffer);
-//    }
 
     /*
      * Matrix descriptors
@@ -899,6 +965,26 @@ class Redberry {
     }
 
     /**
+     * Parse collection of strings to colection of tensors
+     * @param strings string representations of tensors
+     * @return collection of tensors
+     * @see Tensor
+     * @see Tensors#parse(java.lang.String)
+     *
+     * @throws cc.redberry.core.parser.ParserException
+     *          if expression does not satisfy correct Redberry
+     *          input notation for tensors
+     *
+     */
+    static Collection getT(Collection strings) {
+        return strings.collect {
+            if (it instanceof String || it instanceof GString)
+                return parse(it)
+            else return it
+        }
+    }
+
+    /**
      * Parse string to tensor
      * @param string string representation of tensor
      * @return tensor
@@ -910,6 +996,10 @@ class Redberry {
      */
     static Tensor getT(GString string) {
         return parse(string.toString())
+    }
+
+    static Tensor getT(Tensor tensor) {
+        return tensor
     }
 
     /**
@@ -985,15 +1075,19 @@ class Redberry {
      * @param string string representation of a mapping
      * @return mapping of indices
      */
-    static IndexMappingWrapper getMapping(String string) {
+    static Mapping getMapping(String string) {
         string = string.trim().substring(1, string.length() - 1).trim()
-        def mapping = new IndexMappingBufferImpl()
+        IntArrayList from = new IntArrayList(), to = new IntArrayList()
+        int fromIndex
         string.split(',').each {
             def split = it.split('->')
-            if (split.length == 2)
-                mapping.tryMap(IndicesUtils.parseIndex(split[0].trim()), IndicesUtils.parseIndex(split[1].trim()))
+            if (split.length == 2) {
+                fromIndex = IndicesUtils.parseIndex(split[0].trim())
+                from.add(IndicesUtils.getNameWithType(fromIndex))
+                to.add(IndicesUtils.getRawStateInt(fromIndex) ^ IndicesUtils.parseIndex(split[1].trim()))
+            }
         }
-        return new IndexMappingWrapper(mapping)
+        return new Mapping(from.toArray(), to.toArray())
     }
 
     /*

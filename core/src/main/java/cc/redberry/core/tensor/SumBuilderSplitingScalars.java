@@ -24,20 +24,18 @@ package cc.redberry.core.tensor;
 
 import cc.redberry.core.indices.Indices;
 import cc.redberry.core.number.Complex;
+import gnu.trove.map.hash.TIntObjectHashMap;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
- *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  * @since 1.0
  */
 public final class SumBuilderSplitingScalars extends AbstractSumBuilder {
 
-    SumBuilderSplitingScalars(Map<Integer, List<FactorNode>> summands, Complex complex, Indices indices, int[] sortedFreeIndices) {
+    SumBuilderSplitingScalars(TIntObjectHashMap<List<FactorNode>> summands, Complex complex, Indices indices, int[] sortedFreeIndices) {
         super(summands, complex, indices, sortedFreeIndices);
     }
 
@@ -55,12 +53,10 @@ public final class SumBuilderSplitingScalars extends AbstractSumBuilder {
 
     @Override
     public TensorBuilder clone() {
-        Map<Integer, List<FactorNode>> summands = new HashMap<>(this.summands);
-        for (Map.Entry<Integer, List<FactorNode>> entry : summands.entrySet()) {
-            List<FactorNode> fns = entry.getValue();
-            for (int i = fns.size() - 1; i >= 0; --i)
-                fns.set(i, fns.get(i).clone());
-        }
+        TIntObjectHashMap<List<FactorNode>> summands = new TIntObjectHashMap<>(this.summands);
+        for (List<FactorNode> vals : summands.valueCollection())
+            for (int i = vals.size() - 1; i >= 0; --i)
+                vals.set(i, vals.get(i).clone());
         return new SumBuilderSplitingScalars(summands, complex, indices, sortedFreeIndices.clone());
     }
 }

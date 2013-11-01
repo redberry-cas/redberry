@@ -29,9 +29,8 @@ import cc.redberry.core.combinatorics.symmetries.Symmetries;
 import cc.redberry.core.combinatorics.symmetries.SymmetriesFactory;
 import cc.redberry.core.context.CC;
 import cc.redberry.core.context.NameAndStructureOfIndices;
-import cc.redberry.core.context.OutputFormat;
-import cc.redberry.core.indexmapping.IndexMappingBuffer;
 import cc.redberry.core.indexmapping.IndexMappings;
+import cc.redberry.core.indexmapping.Mapping;
 import cc.redberry.core.indexmapping.MappingsPort;
 import cc.redberry.core.indices.IndexType;
 import cc.redberry.core.indices.IndicesFactory;
@@ -203,13 +202,13 @@ public class LeviCivitaSimplifyTransformation implements Transformation {
 
             //symmetries of product, which is contracted with Levi-Civita
             MappingsPort port = IndexMappings.createPort(temp, temp);
-            IndexMappingBuffer buffer;
+            Mapping mapping;
             Symmetry sym;
 
             //check for two symmetric indices of product contracted with two antisymmetric indices of eps
-            while ((buffer = port.take()) != null) {
+            while ((mapping = port.take()) != null) {
                 //symmetry of product indices
-                sym = TensorUtils.getSymmetryFromMapping(indices, buffer);
+                sym = TensorUtils.getSymmetryFromMapping(indices, mapping);
                 //if symmetry mixes indices of product, which are not contracted with eps
                 if (!checkNonPermutingPositions(sym, nonPermutableArray))
                     continue;

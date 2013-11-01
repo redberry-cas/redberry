@@ -23,9 +23,10 @@
 package cc.redberry.core.tensor;
 
 import cc.redberry.concurrent.OutputPortUnsafe;
+import cc.redberry.core.context.CC;
 import cc.redberry.core.indices.IndicesFactory;
 import cc.redberry.core.number.Complex;
-import cc.redberry.core.number.NumberUtils;
+import cc.redberry.core.transformations.Transformation;
 import cc.redberry.core.transformations.expand.ExpandUtils;
 import cc.redberry.core.utils.TensorUtils;
 
@@ -52,105 +53,90 @@ public final class FastTensors {
      * @return resulting sum
      */
     public static Tensor multiplySumElementsOnFactor(Sum sum, Tensor factor) {
-        if (TensorUtils.isZero(factor))
-            return Complex.ZERO;
-        if (TensorUtils.isOne(factor))
-            return sum;
-        if (TensorUtils.haveIndicesIntersections(sum, factor)) {
-            SumBuilder sb = new SumBuilder(sum.size());
-            for (Tensor t : sum)
-                sb.put(multiply(t, factor));
-            return sb.build();
-        }
-
-        final Tensor[] newSumData = new Tensor[sum.size()];
-        for (int i = newSumData.length - 1; i >= 0; --i)
-            newSumData[i] = multiply(factor, sum.get(i));
-        return new Sum(newSumData, IndicesFactory.create(newSumData[0].getIndices().getFree()));
+        return multiplySumElementsOnFactor(sum, factor, new Transformation[0]);
     }
 
     /**
-     * Multiplies each element in specified sum on some factor and expands indexless parts.
+     * Multiplies each element in specified sum on some factor (not a sum) and expands indexless parts.
      *
      * @param sum    sum
      * @param factor factor
      * @return resulting sum
+     * @throws IllegalArgumentException if factor is sum
      */
     public static Tensor multiplySumElementsOnFactorAndExpand(Sum sum, Tensor factor) {
-        if (TensorUtils.isZero(factor))
-            return Complex.ZERO;
-        if (TensorUtils.isOne(factor))
-            return sum;
         if (factor instanceof Sum && factor.getIndices().size() != 0)
             throw new IllegalArgumentException();
-        if (TensorUtils.haveIndicesIntersections(sum, factor)) {
-            SumBuilder sb = new SumBuilder(sum.size());
-            for (Tensor t : sum)
-                sb.put(ExpandUtils.expandIndexlessSubproduct.transform(multiply(t, factor)));
-            return sb.build();
-        }
-
-        return multiplySumElementsOnScalarFactorAndExpandScalars1(sum, factor);
+        return multiplySumElementsOnFactor(sum, factor, new Transformation[]{ExpandUtils.expandIndexlessSubproduct});
     }
 
-    /**
-     * @deprecated very unsafe method without checks
-     */
-    @Deprecated
-    public static Tensor multiplySumElementsOnFactors(Sum sum, OutputPortUnsafe<Tensor> factorsProvider) {
-        final Tensor[] newSumData = new Tensor[sum.size()];
-        for (int i = newSumData.length - 1; i >= 0; --i)
-            newSumData[i] = multiply(factorsProvider.take(), sum.get(i));
-        return new Sum(newSumData, IndicesFactory.create(newSumData[0].getIndices().getFree()));
-    }
-
-    /**
-     * Multiplies each element in specified sum on some scalar factor and expands indexless parts.
-     *
-     * @param sum    sum
-     * @param factor scalar factor
-     * @return resulting sum
-     * @throws IllegalArgumentException if factor is not scalar
-     */
-    public static Tensor multiplySumElementsOnScalarFactorAndExpandScalars(Sum sum, Tensor factor) {
+    private static Tensor multiplySumElementsOnFactor(Sum sum, Tensor factor, Transformation[] transformations) {
         if (TensorUtils.isZero(factor))
             return Complex.ZERO;
         if (TensorUtils.isOne(factor))
             return sum;
-        if (factor.getIndices().size() != 0)
-            throw new IllegalArgumentException();
-        return multiplySumElementsOnScalarFactorAndExpandScalars1(sum, factor);
+        if (TensorUtils.haveIndicesIntersections(sum, factor))
+            return multiplyWithBuilder(sum, factor, transformations);
+        else
+            return multiplyWithFactory(sum, factor, transformations);
     }
 
-    private static Tensor multiplySumElementsOnScalarFactorAndExpandScalars1(Sum sum, Tensor factor) {
+    private static Tensor multiplyWithBuilder(Sum sum, Tensor factor, Transformation... transformations) {
+        SumBuilder sb = new SumBuilder(sum.size());
+        for (Tensor t : sum)
+            sb.put(Transformation.Util.applySequentially(multiply(t, factor), transformations));
+        return sb.build();
+    }
+
+    private static Tensor multiplyWithFactory(Sum sum, Tensor factor, Transformation... transformations) {
         final ArrayList<Tensor> newSumData = new ArrayList<>(sum.size());
         Tensor temp;
+        boolean reduced = false;
         for (int i = sum.size() - 1; i >= 0; --i) {
-            temp = ExpandUtils.expandIndexlessSubproduct.transform(multiply(factor, sum.get(i)));
-            if (!TensorUtils.isZero(temp))
+            temp = Transformation.Util.applySequentially(multiply(factor, sum.get(i)), transformations);
+            if (!TensorUtils.isZero(temp)) {
                 newSumData.add(temp);
+                if (!reduced && isReduced(sum.get(i), factor, temp))
+                    reduced = true;
+            }
         }
         if (newSumData.size() == 0)
             return Complex.ZERO;
         if (newSumData.size() == 1)
             return newSumData.get(0);
 
-        return new Sum(newSumData.toArray(new Tensor[newSumData.size()]),
+        final Tensor[] data = newSumData.toArray(new Tensor[newSumData.size()]);
+        if (reduced)
+            return SumFactory.FACTORY.create(data);
+        return new Sum(data,
                 IndicesFactory.create(newSumData.get(0).getIndices().getFree()));
     }
 
-    public static Tensor multiplySumElementsOnNumber(Sum sum, Complex number) {
-        if (NumberUtils.isZeroOrIndeterminate(number))
-            return number;
-        if (number.isOne())
-            return sum;
-        SumBuilder sb = new SumBuilder();
-        for(Tensor t :sum)
-            sb.put(multiply(t,number));
-        return sb.build();
-//        Tensor data[] = sum.toArray();
-//        for (int i = data.length - 1; i >= 0; --i)
-//            data[i] = multiply(data[i], number);
-//        return new Sum(data, sum.getIndices());
+
+    /**
+     * @deprecated very unsafe method without checks
+     */
+    @Deprecated
+    public static Tensor multiplySumElementsOnFactors(Sum sum) {
+        final Tensor[] newSumData = new Tensor[sum.size()];
+        for (int i = newSumData.length - 1; i >= 0; --i)
+            newSumData[i] = multiply(CC.generateNewSymbol(), sum.get(i));
+        return new Sum(newSumData, IndicesFactory.create(newSumData[0].getIndices().getFree()));
     }
+
+    /**
+     * Checks whether the resulting tensor was reduced to simplified form after multiply
+     *
+     * @param initial initial sum element
+     * @param factor  factor
+     * @param result  resulting product
+     * @return whether the resulting tensor was reduced to simplified form after multiply
+     */
+    private static boolean isReduced(Tensor initial, Tensor factor, Tensor result) {
+        if (initial instanceof Product && !(result instanceof Product))
+            return true;
+        return false;
+    }
+
 }
+

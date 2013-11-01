@@ -805,7 +805,7 @@ public class SubstitutionsTest {
 
     @Test
     public void testSum3() {
-        for (int i = 0; i < 1000; ++i) {
+        for (int i = 0; i < 100; ++i) {
             CC.resetTensorNames();
             addSymmetry("R_mnp", IndexType.LatinLower, true, 2, 1, 0);
             Tensor target = parse("f_i + R_ijk*F^jk + R_ijk*F^kj - R_kij*F^jk");
@@ -820,6 +820,14 @@ public class SubstitutionsTest {
         Tensor target = parse("f_i + R_ijk*F^kj + R_ijk*F^jk - R_kij*F^jk");
         target = parseExpression("f_i + R_ijk*F^kj - R_kij*F^jk = - R_ikj*F^jk ").transform(target);
         TAssert.assertEquals(target, "-F^{jk}*R_{ikj}+F^{jk}*R_{ijk}");
+    }
+
+    @Test
+    public void testSum4() {
+        CC.resetTensorNames(2634486062579664417L);
+        Tensor target = parse("A_abc + A_bca + A_cab + A_acb + A_bac + A_cba");
+        target = parseExpression("A_abc + A_bca + A_cab = F_abc").transform(target);
+        TAssert.assertEquals(target, "F_{abc}+F_{bac}");
     }
 
     //TODO tests for Sum
@@ -1073,6 +1081,7 @@ public class SubstitutionsTest {
     public void testPower13() {
         Expression s = parseExpression("d*Sin[a - b]*f_mn = k_mn");
         Tensor t = parse("d*Sin[b - a]*f_mn ");
+        System.out.println(s.transform(t));
         TAssert.assertEquals(s.transform(t), "-k_mn");
     }
 
@@ -1189,8 +1198,7 @@ public class SubstitutionsTest {
         t = ExpandTransformation.expand(t);
         t = EliminateMetricsTransformation.eliminate(t);
         t = parseExpression("d_a^a = 4").transform(t);
-        System.out.println(t);
-//        TAssert.assertEquals(t, "g_{mn}*g_{pq}+4*g_{mq}*g_{pn}");
+        TAssert.assertEquals(t, "32");
     }
 
 
@@ -1212,7 +1220,6 @@ public class SubstitutionsTest {
 
         R = ExpandTransformation.expand(R);
         R = EliminateMetricsTransformation.eliminate(R);
-        System.out.println(R);
 
         SumBuilder r = new SumBuilder();
         int id = parseSimple("h_mn[x_m]").getName();
@@ -1228,6 +1235,102 @@ public class SubstitutionsTest {
             }
         }
 
-        System.out.println(r.build());
+        TAssert.assertIndicesConsistency(r.build());
+    }
+
+    @Test
+    public void testSimple25() {
+        //CORE-128
+        CC.resetTensorNames(-4808885094055692037L);
+        Tensor t = parse("(f_{c}+d_{o}^{o}*d_{k}^{k}*(d_{m}^{m}*f_{c}+f_{c}))" +
+                "         *(f_{a}+d^{s}_{s}*f_{a})" +
+                "         *F^{bdfghi}");
+        TAssert.assertIndicesConsistency(t);
+        Tensor t2 = parseExpression("d^a_a = f^a_a").transform(t);
+        System.out.println(t2);
+        TAssert.assertIndicesConsistency(t2);
+    }
+
+    @Ignore
+    @Test
+    public void testSimple25a() {
+        //CORE-128
+        for (int i = 0; i < 1000; ++i) {
+            CC.resetTensorNames();
+            parse("f_n");
+            parse("g_mn");
+            Tensor t = parse("(f_{c}+d_{o}^{o}_{k}^{k}*f^{p}_{p}*(d_{m}^{m}*f_{c}+f_{c}))" +
+                    "         *(f_{a}+d^{s}_{s}*f_{a})" +
+                    "         *F^{bdfghi}");
+            TAssert.assertIndicesConsistency(t);
+            Tensor t2 = parseExpression("d^a_a = f^a_a").transform(t);
+            TAssert.assertIndicesConsistency(t2);
+        }
+    }
+
+    @Test
+    public void testSimple26() {
+        CC.resetTensorNames(-4808885094055692037L);
+        parse("f_n");
+        parse("g_mn");
+        Tensor t = parse("(f_{c}+(d_{k}^{k}*f_{p}-f_{p})*(d_{m}^{m}*f_{c}-f_{c})*(9*d_{o}^{o}*f^{p}+f^{p}))" +
+                "         *(f_{a}+(d^{s}_{s}*f^{u}+f^{u})*f_{ua})" +
+                "         *F^{bdfghi}_{bdfghi}");
+        TAssert.assertIndicesConsistency(t);
+        Tensor t2 = parseExpression("d^a_a = x").transform(t);
+        TAssert.assertIndicesConsistency(t2);
+        t2 = parseExpression("x = f^a_a").transform(t);
+        TAssert.assertIndicesConsistency(t2);
+        TAssert.assertIndicesConsistency(expand(t2));
+    }
+
+    @Test
+    public void testSimple27() {
+        //CORE-128 CORE-127
+        CC.resetTensorNames(3795791024008453976L);
+        Tensor r = parse("-68*(-260*(f_{o}*d_{r}^{r}+10*f^{q}*f_{q}*f_{o})*f^{o}*(-75*f^{p}*f_{p}*f^{d}-94*f^{d})+37*(-29*f^{d}+f^{d}*d_{p}^{p}*d_{q}^{q})*f^{l}*f_{l}*f^{s}*(-6*f_{s}+f_{s}*d_{n}^{n}))*(58*(-11*f_{a}*f_{d}+g_{ad})*f_{x}*f^{x}+(76*f^{t}*f_{t}*f_{a}+70*f_{a}*d_{u}^{u})*(10*f_{d}*f_{z}-51*d_{v}^{v}*g_{dz})*(6*f^{z}-45*f^{z}*d^{y}_{y}))*(-82*(-71*f_{b}*f_{e_{1}}+g_{be_{1}})*(65*f^{e_{1}}+f^{e_{1}}*d_{c_{1}}^{c_{1}})+2*f^{d_{1}}*f^{e_{1}}*(g_{d_{1}e_{1}}+d^{c_{1}}_{c_{1}}*g_{e_{1}d_{1}})*(f_{b}+f^{a_{1}}*f_{a_{1}}*f_{b}))*(-792*f_{e}*f^{e}*f_{c}*d_{k}^{k}+22*(60*f^{e}*f_{e}-87*d_{e}^{e}*d^{j}_{j})*f^{g}*f_{g}*(-31*f_{c}*d_{h}^{h}+f_{i}*f^{i}*f_{c}))");
+        r = parseExpression("d^{g}_{g} = f_{a}*f^{a}").transform(r);
+        TAssert.assertIndicesConsistency(r);
+    }
+
+    @Test
+    public void testSimple28() {
+        //CORE-128 CORE-127
+        for (int i = 0; i < 1000; ++i) {
+            CC.resetTensorNames();
+            Tensor r = parse("((-d_{v}^{v}*g_{dz}+f_{d}*f_{z})*(d_{u}^{u}*f_{a}+f_{m}^{m}*f_{a})*(-d^{y}_{y}*f^{z}+f^{z})+(f_{a}*f_{d}+g_{ad})*f_{m}^{m})*((-f_{l}^{l}*f^{d}+f^{d})*(d_{r}^{r}*f_{o}+f_{f}^{f}*f_{o})*f^{o}+f_{f}^{f}*(d_{p}^{p}*d_{q}^{q}*f^{d}+f^{d})*f^{s}*(d_{n}^{n}*f_{s}+f_{s}))*((f_{b}*f_{e_{1}}+g_{be_{1}})*(d_{c_{1}}^{c_{1}}*f^{e_{1}}+f^{e_{1}})+(f_{t}^{t}*f_{b}+f_{b})*(d^{c_{1}}_{c_{1}}*g_{e_{1}d_{1}}+g_{d_{1}e_{1}})*f^{d_{1}}*f^{e_{1}})*(f_{g}^{g}*d_{k}^{k}*f_{c}+(f_{e}^{e}-d_{e}^{e}*d^{j}_{j})*f_{g}^{g}*(d_{h}^{h}*f_{c}+f_{h}^{h}*f_{c}))");
+            r = parseExpression("d^{g}_{g} = f_{a}^{a}").transform(r);
+            TAssert.assertIndicesConsistency(r);
+        }
+    }
+
+    @Test
+    public void testSimple29() {
+        //CORE-128
+        CC.resetTensorNames(4821775724761539743L);
+        Tensor e = parse("F_abd*(f_{k}^{k}*f_{g}^{g}*f_{c}+(-f^{j}_{j}*f_{e}^{e}+f_{e}^{e})*f_{c}*f_{h}^{h}*f_{g}^{g})");
+        Tensor r = parse("F_abd*(d_{k}^{k}*f_{g}^{g}*f_{c}+(-d^{j}_{j}*d_{e}^{e}+f_{e}^{e})*f_{c}*f_{h}^{h}*f_{g}^{g})");
+        r = parseExpression("d^{g}_{g} = f_{a}^{a}").transform(r);
+        TAssert.assertIndicesConsistency(r);
+        TAssert.assertEquals(r, e);
+    }
+
+    @Test
+    public void test30() {
+        //linked with CORE-127
+        CC.resetTensorNames(-4443309447200231241L);
+        Tensor r = parse("F_b*" +
+                "(f_{g}^{g}*d_{k}^{k}*f_{c}+(f_{e}^{e}-f_{e}^{e}*d^{j}_{j})*f_{g}^{g}*(d_{h}^{h}*f_{c}+f_{h}^{h}*f_{c}))");
+        r = parseExpression("d^{g}_{g} = f_{a}^{a}").transform(r);
+        TAssert.assertIndicesConsistency(r);
+    }
+
+    @Test
+    public void test31() {
+        //linked with CORE-127
+        CC.resetTensorNames(-4602990689951758559L);
+        Tensor r = parse("F_b*(f_{g}^{g}*d_{k}^{k}*f_{c}+(1 + d^{j}_{j})*f_{g}^{g}*f_{h}^{h}*f_{c})");
+        r = parseExpression("d^{g}_{g} = f_{a}^{a}").transform(r);
+        TAssert.assertIndicesConsistency(r);
     }
 }

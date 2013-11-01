@@ -26,14 +26,14 @@
 
     <groupId>cc.redberry</groupId>
     <artifactId>physics</artifactId>
-    <version>1.1.4-SNAPSHOT</version>
+    <version>1.1.6-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <parent>
         <groupId>org.sonatype.oss</groupId>
         <artifactId>oss-parent</artifactId>
         <version>7</version>
-        <relativePath></relativePath>
+        <relativePath/>
     </parent>
 
     <name>redberry-physics</name>
@@ -91,8 +91,8 @@
     <scm><connection>scm:hg:http://bitbucket.org/redberry/redberry-physics</connection><url>https://bitbucket.org/redberry/redberry-physics/src/</url></scm>
 
     <issueManagement>
-        <system>Bitbucket</system>
-        <url>https://bitbucket.org/redberry/redberry/issues</url>
+        <system>YouTRACK</system>
+        <url>http://dev.redberry.cc/</url>
     </issueManagement>
 
     <build>
@@ -146,12 +146,12 @@
         <dependency>
             <groupId>cc.redberry</groupId>
             <artifactId>core</artifactId>
-            <version>1.1.4-SNAPSHOT</version>
+            <version>1.1.6-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>cc.redberry</groupId>
             <artifactId>core</artifactId>
-            <version>1.1.4-SNAPSHOT</version>
+            <version>1.1.6-SNAPSHOT</version>
             <type>test-jar</type>
             <scope>test</scope>
         </dependency>

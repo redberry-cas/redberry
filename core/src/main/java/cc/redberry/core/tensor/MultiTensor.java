@@ -23,7 +23,7 @@
 package cc.redberry.core.tensor;
 
 import cc.redberry.core.indices.Indices;
-import cc.redberry.core.math.MathUtils;
+import cc.redberry.core.utils.MathUtils;
 import cc.redberry.core.number.Complex;
 
 /**
@@ -76,12 +76,14 @@ public abstract class MultiTensor extends Tensor {
      * @throws IndexOutOfBoundsException
      */
     public Tensor remove(int[] positions) {
+        if(positions.length == 0)
+            return this;
         int size = size();
         for (int i : positions)
             if (i >= size || i < 0)
                 throw new IndexOutOfBoundsException();
 
-        int[] p = MathUtils.getSortedDistinct(positions);
+        int[] p = MathUtils.getSortedDistinct(positions.clone());
         if (p.length == size)
             return getNeutral();
         return remove1(p);
@@ -101,7 +103,7 @@ public abstract class MultiTensor extends Tensor {
         if (positions.length == 1)
             return get(positions[0]);
 
-        final int[] p = MathUtils.getSortedDistinct(positions);
+        final int[] p = MathUtils.getSortedDistinct(positions.clone());
         if (p.length == size())
             return this;
         return select1(p);

@@ -22,10 +22,15 @@
  */
 package cc.redberry.core.utils;
 
+import cc.redberry.concurrent.OutputPortUnsafe;
 import cc.redberry.core.combinatorics.Symmetry;
 import cc.redberry.core.combinatorics.symmetries.Symmetries;
 import cc.redberry.core.combinatorics.symmetries.SymmetriesFactory;
-import cc.redberry.core.indexmapping.*;
+import cc.redberry.core.context.CC;
+import cc.redberry.core.indexmapping.IndexMappings;
+import cc.redberry.core.indexmapping.Mapping;
+import cc.redberry.core.indexmapping.MappingsPort;
+import cc.redberry.core.indices.InconsistentIndicesException;
 import cc.redberry.core.indices.Indices;
 import cc.redberry.core.indices.IndicesUtils;
 import cc.redberry.core.indices.SimpleIndices;
@@ -33,6 +38,9 @@ import cc.redberry.core.number.Complex;
 import cc.redberry.core.number.NumberUtils;
 import cc.redberry.core.tensor.*;
 import cc.redberry.core.tensor.functions.ScalarFunction;
+import cc.redberry.core.tensor.iterator.FromChildToParentIterator;
+import gnu.trove.map.hash.TIntObjectHashMap;
+import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
 
 import java.util.Arrays;
@@ -40,8 +48,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-import static cc.redberry.core.tensor.Tensors.multiply;
-import static cc.redberry.core.tensor.Tensors.negate;
+import static cc.redberry.core.tensor.Tensors.*;
 
 /**
  * This class contains various useful methods related with tensors.
@@ -92,8 +99,12 @@ public class TensorUtils {
         return tensor instanceof Complex && ((Complex) tensor).isNumeric();
     }
 
-    public static boolean isNegativeIntegerNumber(Tensor tensor) {
-        return tensor instanceof Complex && ((Complex) tensor).isNegativeInteger();
+    public static boolean isNegativeNaturalNumber(Tensor tensor) {
+        return tensor instanceof Complex && ((Complex) tensor).isNegativeNatural();
+    }
+
+    public static boolean isPositiveNaturalNumber(Tensor tensor) {
+        return tensor instanceof Complex && ((Complex) tensor).isPositiveNatural();
     }
 
     public static boolean isRealPositiveNumber(Tensor tensor) {
@@ -197,7 +208,32 @@ public class TensorUtils {
      * @return true, if specified tensor is a^(N), where N - a natural number
      */
     public static boolean isPositiveIntegerPower(Tensor t) {
-        return t instanceof Power && TensorUtils.isNaturalNumber(t.get(1));
+        return t instanceof Power && isPositiveNaturalNumber(t.get(1));
+    }
+
+
+    /**
+     * Returns true, if specified tensor is {@code a^(N)}, where {@code N} - a natural number and {@code a} - is a
+     * simple tensor
+     *
+     * @param t tensor
+     * @return true, if specified tensor is {@code a^(N)}, where {@code N} - a natural number and {@code a} - is a
+     *         simple tensor
+     */
+    public static boolean isPositiveIntegerPowerOfSimpleTensor(Tensor t) {
+        return isPositiveIntegerPower(t) && t.get(0) instanceof SimpleTensor;
+    }
+
+    /**
+     * Returns true, if specified tensor is {@code a^(N)}, where {@code N} - a natural number and {@code a} - is a
+     * product of tensors
+     *
+     * @param t tensor
+     * @return true, if specified tensor is {@code a^(N)}, where {@code N} - a natural number and {@code a} - is a
+     *         product of tensors
+     */
+    public static boolean isPositiveIntegerPowerOfProduct(Tensor t) {
+        return isPositiveIntegerPower(t) && t.get(0) instanceof Product;
     }
 
     /**
@@ -207,7 +243,7 @@ public class TensorUtils {
      * @return true, if specified tensor is a^(-N), where N - a natural number
      */
     public static boolean isNegativeIntegerPower(Tensor t) {
-        return t instanceof Power && TensorUtils.isNegativeIntegerNumber(t.get(1));
+        return t instanceof Power && TensorUtils.isNegativeNaturalNumber(t.get(1));
     }
 
     /**
@@ -218,6 +254,27 @@ public class TensorUtils {
      */
     public static boolean passOutDummies(Tensor tensor) {
         return getAllDummyIndicesT(tensor).size() != 0;
+    }
+
+
+    /**
+     * Returns whether specified tensor contains at least one of the simple tensors from the set. The set represents a
+     * unique names of simple tensors.
+     *
+     * @param tensor     tensors
+     * @param setOfNames int set of simple tensors names
+     * @return true if tensor contains at least one of simple tensor with name that contains in the set
+     */
+    public static boolean containsSimpleTensors(Tensor tensor, TIntSet setOfNames) {
+        FromChildToParentIterator iterator = new FromChildToParentIterator(tensor);
+        Tensor current;
+        boolean contains = false;
+        while ((current = iterator.next()) != null)
+            if (current instanceof SimpleTensor && setOfNames.contains(((SimpleTensor) current).getName())) {
+                contains = true;
+                break;
+            }
+        return contains;
     }
 
     public static boolean equalsExactly(Tensor[] u, Tensor[] v) {
@@ -289,8 +346,16 @@ public class TensorUtils {
     }
 
     public static TIntHashSet getAllDummyIndicesT(Tensor tensor) {
+        return getAllDummyIndicesT(false, tensor);
+    }
+
+    public static TIntHashSet getAllDummyIndicesIncludingScalarFunctionsT(Tensor tensor) {
+        return getAllDummyIndicesT(true, tensor);
+    }
+
+    private static TIntHashSet getAllDummyIndicesT(boolean includeScalarFunctions, Tensor tensor) {
         TIntHashSet set = new TIntHashSet();
-        appendAllIndicesNamesT(tensor, set);
+        appendAllIndicesNamesT(tensor, set, includeScalarFunctions);
         set.removeAll(IndicesUtils.getIndicesNames(tensor.getIndices().getFree()));
         return set;
     }
@@ -305,11 +370,20 @@ public class TensorUtils {
     public static TIntHashSet getAllIndicesNamesT(Tensor... tensors) {
         TIntHashSet set = new TIntHashSet();
         for (Tensor tensor : tensors)
-            appendAllIndicesNamesT(tensor, set);
+            appendAllIndicesNamesT(tensor, set, false);
         return set;
     }
 
+
     public static void appendAllIndicesNamesT(Tensor tensor, TIntHashSet set) {
+        appendAllIndicesNamesT(tensor, set, false);
+    }
+
+    public static void appendAllIndicesNamesIncludingScalarFunctionsT(Tensor tensor, TIntHashSet set) {
+        appendAllIndicesNamesT(tensor, set, true);
+    }
+
+    private static void appendAllIndicesNamesT(Tensor tensor, TIntHashSet set, boolean includeScalarFunctions) {
         if (tensor instanceof SimpleTensor) {
             Indices ind = tensor.getIndices();
             set.ensureCapacity(ind.size());
@@ -318,7 +392,7 @@ public class TensorUtils {
                 set.add(IndicesUtils.getNameWithType(ind.get(i)));
         } else if (tensor instanceof Power) {
             appendAllIndicesNamesT(tensor.get(0), set);
-        } else if (tensor instanceof ScalarFunction)
+        } else if (tensor instanceof ScalarFunction && !includeScalarFunctions)
             return;
         else {
             Tensor t;
@@ -337,21 +411,7 @@ public class TensorUtils {
      * @return {@code true} if specified tensors are mathematically (not programming) equal
      */
     public static boolean equals(Tensor u, Tensor v) {
-        if (u == v)
-            return true;
-        Indices freeIndices = u.getIndices().getFree();
-        if (!freeIndices.equalsRegardlessOrder(v.getIndices().getFree()))
-            return false;
-        int[] free = freeIndices.getAllIndices().copy();
-        IndexMappingBuffer tester = new IndexMappingBufferTester(free, false);
-        MappingsPort mp = IndexMappings.createPort(tester, u, v);
-        IndexMappingBuffer buffer;
-
-        while ((buffer = mp.take()) != null)
-            if (!buffer.getSign())
-                return true;
-
-        return false;
+        return IndexMappings.equals(u, v);
     }
 
     /**
@@ -364,15 +424,7 @@ public class TensorUtils {
      *         {@code false} if they they differ only in the sign and {@code null} otherwise
      */
     public static Boolean compare1(Tensor u, Tensor v) {
-        Indices freeIndices = u.getIndices().getFree();
-        if (!freeIndices.equalsRegardlessOrder(v.getIndices().getFree()))
-            return null;
-        int[] free = freeIndices.getAllIndices().copy();
-        IndexMappingBuffer tester = new IndexMappingBufferTester(free, false);
-        IndexMappingBuffer buffer = IndexMappings.createPort(tester, u, v).take();
-        if (buffer == null)
-            return null;
-        return buffer.getSign();
+        return IndexMappings.compare1(u, v);
     }
 
     public static void assertIndicesConsistency(Tensor t) {
@@ -384,7 +436,7 @@ public class TensorUtils {
             Indices ind = t.getIndices();
             for (int i = ind.size() - 1; i >= 0; --i)
                 if (indices.contains(ind.get(i)))
-                    throw new AssertionError();
+                    throw new AssertionError(new InconsistentIndicesException(ind.get(i)));
                 else
                     indices.add(ind.get(i));
         }
@@ -424,60 +476,63 @@ public class TensorUtils {
         }
     }
 
+    /**
+     * Returns {@code true} if specified tensor is zero in consequence of its symmetries: is both symmetric and
+     * asymmetric with respect to some permutation at the same time.
+     *
+     * @param t tensor
+     * @return {@code true} if specified tensor is zero in consequence of its symmetries
+     */
     public static boolean isZeroDueToSymmetry(Tensor t) {
-        int[] indices = IndicesUtils.getIndicesNames(t.getIndices().getFree());
-        IndexMappingBufferTester bufferTester = new IndexMappingBufferTester(indices, false);
-        MappingsPort mp = IndexMappings.createPort(bufferTester, t, t);
-        IndexMappingBuffer buffer;
-        while ((buffer = mp.take()) != null)
-            if (buffer.getSign())
-                return true;
-        return false;
+        return IndexMappings.isZeroDueToSymmetry(t);
     }
 
-    private static Symmetry getSymmetryFromMapping1(final int[] indicesNames, IndexMappingBuffer indexMappingBuffer) {
-        final int dimension = indicesNames.length;
+    private static Symmetry getSymmetryFromMapping1(final int[] sortedIndicesNames, final int[] _sortPermutation, Mapping mapping) {
+        final int dimension = sortedIndicesNames.length;
+
+        IntArray _fromIndices = mapping.getFromNames();
+        IntArray _toIndices = mapping.getToData();
+
         int[] permutation = new int[dimension];
         Arrays.fill(permutation, -1);
-        int i;
+
+        int i, fromIndex, positionInFrom, positionInIndices;
         for (i = 0; i < dimension; ++i) {
-            int fromIndex = indicesNames[i];
-            IndexMappingBufferRecord record = indexMappingBuffer.getMap().get(fromIndex);
-            if (record == null) {
+            fromIndex = sortedIndicesNames[i];
+            positionInFrom = ArraysUtils.binarySearch(_fromIndices, fromIndex);
+            if (positionInFrom < 0)
+                continue;
+
+            positionInIndices = Arrays.binarySearch(sortedIndicesNames,
+                    IndicesUtils.getNameWithType(_toIndices.get(positionInFrom)));
+
+            if (positionInIndices < 0)
+//                 throw new IllegalArgumentException();
+//                todo review
                 return new Symmetry(dimension);
-                //todo discuss with Dima
-                //throw new IllegalArgumentException("Index " + IndicesUtils.toString(fromIndex) + " does not contains in specified IndexMappingBuffer.");
-            }
-            int newPosition = -1;
-            //TODO refactor with sort and binary search
-            for (int j = 0; j < dimension; ++j)
-                if (indicesNames[j] == record.getIndexName()) {
-                    newPosition = j;
-                    break;
-                }
-            if (newPosition < 0) {
-                return new Symmetry(dimension);
-                //todo discuss with Dima
-                //throw new IllegalArgumentException("Index " + IndicesUtils.toString(record.getIndexName()) + " does not contains in specified indices array.");
-            }
-            permutation[i] = newPosition;
+
+            permutation[_sortPermutation[i]] = _sortPermutation[positionInIndices];
         }
         for (i = 0; i < dimension; ++i)
             if (permutation[i] == -1)
                 permutation[i] = i;
-        return new Symmetry(permutation, indexMappingBuffer.getSign());
+
+        return new Symmetry(permutation, mapping.getSign()); //this is inverse permutation
     }
 
-    public static Symmetry getSymmetryFromMapping(final int[] indices, IndexMappingBuffer indexMappingBuffer) {
-        return getSymmetryFromMapping1(IndicesUtils.getIndicesNames(indices), indexMappingBuffer);
+    public static Symmetry getSymmetryFromMapping(final int[] indices, Mapping mapping) {
+        int[] sortedIndicesNames = IndicesUtils.getIndicesNames(indices);
+        int[] _sortPermutation = ArraysUtils.quickSortP(sortedIndicesNames);
+        return getSymmetryFromMapping1(sortedIndicesNames, _sortPermutation, mapping);
     }
 
     public static Symmetries getSymmetriesFromMappings(final int[] indices, MappingsPort mappingsPort) {
         Symmetries symmetries = SymmetriesFactory.createSymmetries(indices.length);
-        int[] indicesNames = IndicesUtils.getIndicesNames(indices);
-        IndexMappingBuffer buffer;
+        int[] sortedIndicesNames = IndicesUtils.getIndicesNames(indices);
+        int[] sortPermutation = ArraysUtils.quickSortP(sortedIndicesNames);
+        Mapping buffer;
         while ((buffer = mappingsPort.take()) != null)
-            symmetries.add(getSymmetryFromMapping1(indicesNames, buffer));
+            symmetries.add(getSymmetryFromMapping1(sortedIndicesNames, sortPermutation, buffer));
         return symmetries;
     }
 
@@ -518,6 +573,63 @@ public class TensorUtils {
             for (Tensor t : tensor)
                 addSymbols(t, set);
     }
+
+    public static Set<SimpleTensor> getAllSymbolsAndSymbolicFields(Tensor... tensors) {
+        THashSet<SimpleTensor> set = new THashSet<>();
+        for (Tensor tensor : tensors)
+            addSymbols(tensor, set);
+        return set;
+    }
+
+
+    private static void addSymbolsAndSymbolicFields(Tensor tensor, Set<SimpleTensor> set) {
+        if (tensor instanceof SimpleTensor && tensor.getIndices().size() == 0) {
+            boolean contentSymbolicQ = true;
+            for (Tensor t : tensor)
+                if (!isSymbolic(t)) {
+                    contentSymbolicQ = false;
+                    break;
+                }
+            if (contentSymbolicQ)
+                set.add((SimpleTensor) tensor);
+        } else
+            for (Tensor t : tensor)
+                addSymbolsAndSymbolicFields(t, set);
+    }
+
+
+    public static Collection<SimpleTensor> getAllDiffSimpleTensors(Tensor... tensors) {
+        TIntObjectHashMap<SimpleTensor> names = new TIntObjectHashMap<>();
+        for (Tensor tensor : tensors)
+            addAllDiffSimpleTensors(tensor, names);
+        return names.valueCollection();
+    }
+
+    private static void addAllDiffSimpleTensors(Tensor tensor, TIntObjectHashMap<SimpleTensor> names) {
+        if (tensor instanceof SimpleTensor)
+            names.put(((SimpleTensor) tensor).getName(), (SimpleTensor) tensor);
+        else
+            for (Tensor t : tensor)
+                addAllDiffSimpleTensors(t, names);
+    }
+
+
+    public static TIntHashSet getAllNamesOfSymbols(Tensor... tensors) {
+        TIntHashSet set = new TIntHashSet();
+        for (Tensor tensor : tensors)
+            addSymbolsNames(tensor, set);
+        return set;
+    }
+
+
+    private static void addSymbolsNames(Tensor tensor, TIntHashSet set) {
+        if (isSymbol(tensor)) {
+            set.add(((SimpleTensor) tensor).getName());
+        } else
+            for (Tensor t : tensor)
+                addSymbolsNames(t, set);
+    }
+
 
     public static int treeDepth(Tensor tensor) {
         if (tensor.getClass() == SimpleTensor.class
@@ -587,7 +699,7 @@ public class TensorUtils {
         if (tensor instanceof SimpleTensor)
             return false;
         if (tensor instanceof Power)
-            return isNegativeIntegerNumber(tensor.get(1));
+            return isNegativeNaturalNumber(tensor.get(1));
         for (Tensor t : tensor) {
             if (containsFractions(t))
                 return true;
@@ -624,6 +736,44 @@ public class TensorUtils {
             if (testContainsNames(tt, names)) return true;
 
         return false;
+    }
+
+    /**
+     * Generates a set of replacement rules for all scalar (but not symbolic) sub-tensors appearing in the specified
+     * tensor.
+     *
+     * @param tensor tensor
+     * @return set of replacement rules for all scalar (but not symbolic) sub-tensors appearing in the specified
+     *         tensor
+     */
+    public static Expression[] generateReplacementsOfScalars(Tensor tensor) {
+        return generateReplacementsOfScalars(tensor, CC.getParametersGenerator());
+    }
+
+    /**
+     * Generates a set of replacement rules for all scalar (but not symbolic) sub-tensors appearing in the specified
+     * tensor.
+     *
+     * @param tensor                tensor
+     * @param generatedCoefficients allows to control how coefficients are generated
+     * @return set of replacement rules for all scalar (but not symbolic) sub-tensors appearing in the specified
+     *         tensor
+     * @see LocalSymbolsProvider
+     */
+    public static Expression[] generateReplacementsOfScalars(Tensor tensor,
+                                                             OutputPortUnsafe<SimpleTensor> generatedCoefficients) {
+        THashSet<Tensor> scalars = new THashSet<>();
+        FromChildToParentIterator iterator = new FromChildToParentIterator(tensor);
+        Tensor c;
+        while ((c = iterator.next()) != null)
+            if (c instanceof Product)
+                scalars.addAll(Arrays.asList(((Product) c).getContent().getScalars()));
+
+        Expression[] replacements = new Expression[scalars.size()];
+        int i = -1;
+        for (Tensor scalar : scalars)
+            replacements[++i] = expression(scalar, generatedCoefficients.take());
+        return replacements;
     }
 
 }

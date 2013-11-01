@@ -96,9 +96,10 @@ final class NameDescriptorForTensorFieldDerivative extends NameDescriptorForTens
         //adding block symmetries
         IntArrayList aggregator = new IntArrayList();
         j = 1;
-        int[] cycle;
+        int a, b, cycle[];
         for (i = 0; i < orders.length; ++i) {
             if (orders[i] >= 2) {
+                //adding symmetries for indices from each slot
                 cycle = Combinatorics.createBlockCycle(structuresOfIndices[i + 1].size(), 2);
                 aggregator.addAll(mapping[j]);
                 aggregator.addAll(mapping[j + 1]);
@@ -118,7 +119,6 @@ final class NameDescriptorForTensorFieldDerivative extends NameDescriptorForTens
             j += orders[i];
         }
     }
-
 
     private static String generateName(final int[] orders, NameDescriptorForTensorFieldImpl parent) {
         StringBuilder sb = new StringBuilder();

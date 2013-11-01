@@ -23,6 +23,7 @@
 package cc.redberry.core.transformations;
 
 import cc.redberry.core.tensor.Tensor;
+import cc.redberry.core.tensor.TensorBuilder;
 
 /**
  * Transformation of tensor.
@@ -40,6 +41,44 @@ public interface Transformation {
             return t;
         }
     };
+
+    public static final class Util {
+        private Util() {
+        }
+
+        public static Tensor applySequentially(Tensor tensor, final Transformation... transformations) {
+            for (Transformation tr : transformations)
+                tensor = tr.transform(tensor);
+            return tensor;
+        }
+
+        /**
+         * Applies transformation to all first descendants (but not to the tensor itself)
+         *
+         * @param tensor
+         * @param transformation
+         * @return
+         */
+        public static Tensor applyToEachChild(Tensor tensor, final Transformation transformation) {
+            TensorBuilder builder = null;
+            Tensor c, oc;
+            for (int i = 0, size = tensor.size(); i < size; ++i) {
+                c = transformation.transform(oc = tensor.get(i));
+                if (builder != null || c != oc) {
+                    if (builder == null) {
+                        builder = tensor.getBuilder();
+                        for (int j = 0; j < i; ++j)
+                            builder.put(tensor.get(j));
+                    }
+                    builder.put(c);
+                }
+            }
+            if (builder == null)
+                return tensor;
+            return builder.build();
+        }
+
+    }
 
     /**
      * Transforms specified tensor and returns the result.

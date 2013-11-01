@@ -22,21 +22,28 @@
  */
 package cc.redberry.core.tensorgenerator;
 
+import cc.redberry.core.TAssert;
+import cc.redberry.core.combinatorics.Symmetry;
+import cc.redberry.core.combinatorics.symmetries.Symmetries;
+import cc.redberry.core.combinatorics.symmetries.SymmetriesFactory;
 import cc.redberry.core.parser.ParserIndices;
 import cc.redberry.core.tensor.Sum;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.tensor.Tensors;
+import cc.redberry.core.utils.TensorUtils;
+import org.junit.Assert;
 import org.junit.Test;
+
+import java.util.Arrays;
+import java.util.HashSet;
 
 import static cc.redberry.core.TAssert.assertEquals;
 import static cc.redberry.core.TAssert.assertTrue;
 
 /**
- *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-//@Ignore
 public class TensorGeneratorTest {
 
     public TensorGeneratorTest() {
@@ -45,64 +52,50 @@ public class TensorGeneratorTest {
     @Test
     public void test0() {
         Tensor res = Tensors.parse("g_{ab}*g_{mn}+g_{bm}*g_{na}+g_{am}*g_{nb}");
-        assertEquals(TensorGenerator.generate("",
-                                              ParserIndices.parseSimple("_{mnab}"),
-                                              false,
-                                              Tensors.parse("g_mn", "g^mn", "d_m^n")), res);
+        assertEquals(TensorGenerator.generate(ParserIndices.parseSimple("_{mnab}"), Tensors.parse("g_mn", "g^mn", "d_m^n"), null, false, false, true
+        ), res);
     }
 
     @Test
     public void test1() {
         Tensor res = Tensors.parse("d_{m}^{a}*d_{n}^{b}+d_{m}^{b}*d_{n}^{a}+g_{mn}*g^{ab}");
-        assertEquals(res, TensorGenerator.generate("",
-                                                   ParserIndices.parseSimple("_{mn}^{ab}"),
-                                                   false,
-                                                   Tensors.parse("g_mn", "g^mn", "d_m^n")));
+        assertEquals(res, TensorGenerator.generate(ParserIndices.parseSimple("_{mn}^{ab}"), Tensors.parse("g_mn", "g^mn", "d_m^n"), null, false, false, true
+        ));
     }
 
     @Test
     public void test2() {
         Tensor res = Tensors.parse("d_{m}^{a}*d_{n}^{b}+d_{m}^{b}*d_{n}^{a}");
-        assertEquals(TensorGenerator.generate("",
-                                              ParserIndices.parseSimple("_{mn}^{ab}"),
-                                              false,
-                                              Tensors.parse("d_m^n")), res);
+        assertEquals(TensorGenerator.generate(ParserIndices.parseSimple("_{mn}^{ab}"), new Tensor[]{Tensors.parse("d_m^n")}, null, false, false, false
+        ), res);
     }
 
     @Test
     public void test3() {
         Tensor res = Tensors.parse("d_{a}^{m}*d_{y}^{x}+g_{ay}*g^{mx}+d_{a}^{x}*d_{y}^{m}+k^{x}*k_{y}*d_{a}^{m}+k^{m}*k_{y}*d_{a}^{x}+k_{a}*k_{y}*g^{mx}+k_{a}*k^{m}*d_{y}^{x}+k^{m}*k^{x}*g_{ay}+k_{a}*k^{x}*d_{y}^{m}+k_{a}*k^{m}*k^{x}*k_{y}");
-        assertEquals(res, TensorGenerator.generate("",
-                                                   ParserIndices.parseSimple("_{ay}^{mx}"),
-                                                   false,
-                                                   Tensors.parse("k_a", "k^b", "g_mn", "g^mn", "d_m^n")));
+        assertEquals(res, TensorGenerator.generate(ParserIndices.parseSimple("_{ay}^{mx}"), Tensors.parse("k_a", "k^b", "g_mn", "g^mn", "d_m^n"), null, false, false, true
+        ));
     }
 
     @Test
     public void test4() {
-        Sum t = (Sum) TensorGenerator.generate("",
-                                               ParserIndices.parseSimple("_{abmn}^{pqrs}"),
-                                               false,
-                                               Tensors.parse("g_mn", "g^mn"));
+        Sum t = (Sum) TensorGenerator.generate(ParserIndices.parseSimple("_{abmn}^{pqrs}"), Tensors.parse("g_mn", "g^mn"), null, false, false, false
+        );
         assertTrue(t.size() == 9);
     }
 
     @Test
     public void test5() {
-        Sum t = (Sum) TensorGenerator.generate("",
-                                               ParserIndices.parseSimple("_{abc}^{pqr}"),
-                                               false,
-                                               Tensors.parse("g_mn", "g^mn", "d_m^n", "k_a", "k^b"));
+        Sum t = (Sum) TensorGenerator.generate(ParserIndices.parseSimple("_{abc}^{pqr}"), Tensors.parse("g_mn", "g^mn", "d_m^n", "k_a", "k^b"), null, false, false, true
+        );
         assertTrue(t.size() == 76);
     }
 
     @Test
     public void test6() {
         Tensor res = Tensors.parse("1/6*(d_{a}^{p}*d_{b}^{q}*d_{c}^{r}+d_{a}^{q}*d_{b}^{p}*d_{c}^{r}+d_{a}^{q}*d_{b}^{r}*d_{c}^{p}+d_{b}^{p}*d_{c}^{q}*d_{a}^{r}+d_{b}^{q}*d_{c}^{p}*d_{a}^{r}+d_{a}^{p}*d_{b}^{r}*d_{c}^{q})");
-        Tensor t = TensorGenerator.generate("",
-                                            ParserIndices.parseSimple("_{abc}^{pqr}"),
-                                            true,
-                                            Tensors.parse("d_m^n"));
+        Tensor t = TensorGenerator.generate(ParserIndices.parseSimple("_{abc}^{pqr}"), new Tensor[]{Tensors.parse("d_m^n")}, null, true, false, false
+        );
 
         assertEquals(res, t);
     }
@@ -122,7 +115,7 @@ public class TensorGeneratorTest {
 //                                                   Tensors.parse("g_mn", "g^mn", "d_m^n")));
 //    }
 
-//    @Ignore
+    //    @Ignore
 //    @Test
 //    public void symTest1() {
 //        Symmetries symmetries = SymmetriesFactory.createFullSymmetries(3, 3);
@@ -144,10 +137,8 @@ public class TensorGeneratorTest {
     @Test
     public void test7() {
         Tensor res = Tensors.parse("1/2*(d_{m}^{a}*d_{n}^{b}+d_{m}^{b}*d_{n}^{a})");
-        assertEquals(TensorGenerator.generate("",
-                                              ParserIndices.parseSimple("_{mn}^{ab}"),
-                                              true,
-                                              Tensors.parse("d_m^n")), res);
+        assertEquals(TensorGenerator.generate(ParserIndices.parseSimple("_{mn}^{ab}"), new Tensor[]{Tensors.parse("d_m^n")}, null, true, false, false
+        ), res);
     }
 
     @Test
@@ -155,18 +146,117 @@ public class TensorGeneratorTest {
         Tensor expected = Tensors.parse("1/3*(g_mn*g_ab+g_ma*g_nb+g_mb*g_na)+"
                 + "1/6*(g_ab*k_n*k_m+g_mn*k_a*k_b+g_am*k_n*k_b+g_an*k_b*k_m+g_nb*k_a*k_m+g_mb*k_n*k_a)+"
                 + "k_a*k_b*k_m*k_n");
-        assertEquals(TensorGenerator.generate("",
-                                              ParserIndices.parseSimple("_{mnab}"),
-                                              true,
-                                              Tensors.parse("g_mn", "k_a")), expected);
+        assertEquals(TensorGenerator.generate(ParserIndices.parseSimple("_{mnab}"), Tensors.parse("g_mn", "k_a"), null, true, false, false
+        ), expected);
     }
 
     @Test
     public void test9() {
         Tensor expected = Tensors.parse("p_\\mu*G^{\\mu i}_j+d^i_j");
-        assertEquals(TensorGenerator.generate("",
-                ParserIndices.parseSimple("^i_j"),
-                true,
-                Tensors.parse("d^i_j", "p_\\mu*G^{\\mu i}_j")), expected);
+        assertEquals(TensorGenerator.generate(ParserIndices.parseSimple("^i_j"), Tensors.parse("d^i_j", "p_\\mu*G^{\\mu i}_j"), null, true, false, false
+        ), expected);
+    }
+
+    @Test
+    public void test10() {
+
+        Symmetries symmetries = SymmetriesFactory.createSymmetries(6);
+        symmetries.add(new Symmetry(new int[]{3, 4, 5, 0, 1, 2}, false));
+
+        GeneratedTensor actual = TensorGenerator.generateStructure(ParserIndices.parseSimple("^apb_cdq"), Tensors.parse("d^i_j", "g_ab", "g^ab", "p_a", "p^a"), symmetries, false, true, true
+        );
+
+        HashSet<String> str = new HashSet<>();
+        for (Tensor t : actual.generatedTensor) {
+            str.add(t.get(0).toString());
+        }
+
+        Tensor[] real = TensorUtils.getAllSymbols(actual.generatedTensor).toArray(new Tensor[0]);
+        Tensor[] expe = actual.coefficients;
+        Arrays.sort(real);
+        Arrays.sort(expe);
+        Assert.assertArrayEquals(real, expe);
+    }
+
+    @Test
+    public void test10a() {
+
+        Symmetries symmetries = SymmetriesFactory.createSymmetries(4);
+        symmetries.add(new Symmetry(new int[]{3, 0, 1, 2}, false));
+
+        GeneratedTensor actual = TensorGenerator.generateStructure(
+                ParserIndices.parseSimple("^ab_cd"), Tensors.parse("d^i_j", "g_ab", "g^ab", "p_a", "p^a"), symmetries, false, true, true
+        );
+
+        Tensor[] real = TensorUtils.getAllSymbols(actual.generatedTensor).toArray(new Tensor[0]);
+        Tensor[] expe = actual.coefficients;
+        Arrays.sort(real);
+        Arrays.sort(expe);
+        Assert.assertArrayEquals(real, expe);
+    }
+
+    @Test
+    public void test11() {
+
+        Symmetries symmetries = SymmetriesFactory.createSymmetries(6);
+        symmetries.add(new Symmetry(new int[]{3, 4, 5, 0, 1, 2}, false));
+        symmetries.add(new Symmetry(new int[]{2, 1, 0, 3, 4, 5}, true));
+
+        GeneratedTensor actual = TensorGenerator.generateStructure(
+                ParserIndices.parseSimple("^apb_cdq"), Tensors.parse("d^i_j", "g_ab", "g^ab", "p_a", "p^a"), symmetries, false, true, true
+        );
+
+        System.out.println(TensorUtils.findIndicesSymmetries(ParserIndices.parseSimple("^apb_cdq"), actual.generatedTensor));
+        Tensor[] real = TensorUtils.getAllSymbols(actual.generatedTensor).toArray(new Tensor[0]);
+        Tensor[] expe = actual.coefficients;
+        Arrays.sort(real);
+        Arrays.sort(expe);
+        Assert.assertArrayEquals(real, expe);
+    }
+
+    @Test
+    public void test12() {
+        GeneratedTensor gen1 = TensorGenerator.generateStructure(
+                ParserIndices.parseSimple("_abcd"),
+                Tensors.parse("R^a_bad", "R_abcd"),
+                null, false, true, true);
+
+
+        GeneratedTensor gen2 = TensorGenerator.generateStructure(
+                ParserIndices.parseSimple("_abcd"),
+                new Tensor[]{Tensors.parse("R^bcad")},
+                null, false, true, true);
+
+        Assert.assertTrue(gen2.coefficients.length < gen1.coefficients.length);
+    }
+
+    @Test
+    public void test13() {
+        Tensor gen1 = TensorGenerator.generateStructure(
+                ParserIndices.parseSimple("_abcd"),
+                new Tensor[]{Tensors.parse("R^a_cad")},
+                null, false, false, true).generatedTensor;
+        gen1 = Tensors.parseExpression("R^a_bac = R_bc").transform(gen1);
+
+        Tensor gen2 = TensorGenerator.generateStructure(
+                ParserIndices.parseSimple("_abcd"),
+                new Tensor[]{Tensors.parse("R_ab")},
+                null, false, false, true).generatedTensor;
+
+        TAssert.assertEquals(gen1, gen2);
+    }
+
+    @Test
+    public void test14() {
+        Tensors.addSymmetry("R_abcd", 1, 0, 2, 3);
+        Tensors.addSymmetry("R_abcd", 2, 3, 0, 1);
+        GeneratedTensor actual = TensorGenerator.generateStructure(
+                ParserIndices.parseSimple("_abcd"),
+                Tensors.parse("R^a_bad", "R_abcd"),
+                null, false, true, true);
+
+
+        System.out.println(Tensors.parseExpression("R^a_bad = R_bd").transform(actual.generatedTensor));
+        System.out.println(Arrays.toString(actual.coefficients));
     }
 }

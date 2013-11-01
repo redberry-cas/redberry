@@ -192,6 +192,16 @@ public class DiracTraceTransformation implements Transformation {
             } else if (current instanceof Product) {
                 if (current.getIndices().getFree().size(matrixType) != 0)
                     continue;
+                //fast check
+                boolean needTrace = false;
+                for (Tensor t : current)
+                    if (isGammaOrGamma5(t)) {
+                        needTrace = true;
+                        break;
+                    }
+                if (!needTrace)
+                    continue;
+
                 //selecting unitary matrices from product
                 //extracting trace combinations from product
                 Product product = (Product) current;
@@ -320,8 +330,9 @@ public class DiracTraceTransformation implements Transformation {
                         } else
                             traces.put(traceWith5(product.select(positions), numberOfGammas));
                     }
-
                 }
+                if (positionsOfMatrices.isEmpty())
+                    continue out;
 
                 //final simplifications
                 traces.put(product.remove(positionsOfMatrices.toArray()));
@@ -422,6 +433,7 @@ public class DiracTraceTransformation implements Transformation {
             return Complex.ZERO;
         SumBuilder sb = new SumBuilder();
         Tensor temp;
+        //todo why to multiply by Complex.TWO and after Complex.ONE_HALF???
         for (int i = 0; i < product.length - 1; ++i) {
             temp = multiply(Complex.TWO,
                     createMetricOrKronecker(product[i].getIndices().get(IndexType.LatinLower, 0),

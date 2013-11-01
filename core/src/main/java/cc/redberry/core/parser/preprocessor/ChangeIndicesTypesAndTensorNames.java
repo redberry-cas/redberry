@@ -61,6 +61,10 @@ public class ChangeIndicesTypesAndTensorNames implements ParseTokenTransformer {
                 return node;
             case ScalarFunction:
                 return new ParseTokenScalarFunction(((ParseTokenScalarFunction) node).function, transformContent(node.content));
+            case PreprocessingExpression:
+            case Expression:
+                ParseToken[] nContent = transformContent(node.content);
+                return new ParseTokenExpression(node.tokenType == TokenType.PreprocessingExpression, nContent[0], nContent[1]);
             default:
                 return new ParseToken(node.tokenType, transformContent(node.content));
         }

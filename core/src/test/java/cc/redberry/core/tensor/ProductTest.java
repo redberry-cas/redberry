@@ -23,6 +23,7 @@
 package cc.redberry.core.tensor;
 
 import cc.redberry.core.TAssert;
+import cc.redberry.core.combinatorics.IntCombinationsGenerator;
 import cc.redberry.core.context.CC;
 import cc.redberry.core.indices.IndexType;
 import cc.redberry.core.number.Complex;
@@ -458,6 +459,45 @@ public class ProductTest {
                 TAssert.assertTrue(r instanceof SimpleTensor || r instanceof Complex);
                 TAssert.assertEqualsExactly(r, t.get(3 - i));
             }
+    }
+
+
+    @Test
+    public void testRemove5() {
+        RandomTensor rnd = new RandomTensor(5, 10, new int[]{0, 0, 0, 0}, new int[]{3, 3, 3, 3}, false, 1L);
+        Product pr = (Product) rnd.nextProduct(8);
+        int size = pr.size();
+        IntCombinationsGenerator gen;
+        for (int r = 0; r < size; ++r) {
+            gen = new IntCombinationsGenerator(size, r);
+            for (int[] set : gen) {
+                TAssert.assertEquals(Tensors.multiply(pr.remove(set), pr.select(set)), pr);
+            }
+        }
+    }
+
+    @Test
+    public void testRemove6() {
+        Product pr = (Product) parse("a*b*c*G^g_d*G_gz*G^dz*G_ae*J^e_b");
+        int size = pr.size();
+        IntCombinationsGenerator gen;
+        for (int r = 0; r < size; ++r) {
+            gen = new IntCombinationsGenerator(size, r);
+            for (int[] set : gen)
+                TAssert.assertEquals(Tensors.multiply(pr.remove(set), pr.select(set)), pr);
+        }
+    }
+
+    @Test
+    public void testRemove7() {
+        Product pr = (Product) parse("12*a*b*c*G^g_d*G_gz*G^dz*G_ae*J^e_b");
+        int size = pr.size();
+        IntCombinationsGenerator gen;
+        for (int r = 0; r < size; ++r) {
+            gen = new IntCombinationsGenerator(size, r);
+            for (int[] set : gen)
+                TAssert.assertEquals(Tensors.multiply(pr.remove(set), pr.select(set)), pr);
+        }
     }
 
 }

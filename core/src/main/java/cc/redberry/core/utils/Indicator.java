@@ -97,5 +97,25 @@ public interface Indicator<E> {
             };
         }
 
+        /**
+         * Gives a new indicator which returns true if specified condition is satisfied on object itself or at least one of its elements.
+         *
+         * @param indicator condition
+         * @param <T>       some type
+         * @return a new indicator which returns true if specified condition is satisfied on object itself or at least one of its elements.
+         */
+        public static <T extends Iterable<T>> Indicator<T> iterativeIndicator(final Indicator<T> indicator) {
+            return new Indicator<T>() {
+
+                @Override
+                public boolean is(T object) {
+                    if (indicator.is(object)) return true;
+                    for (T t : object)
+                        if (indicator.is(t)) return true;
+                    return false;
+                }
+            };
+        }
+
     }
 }

@@ -23,7 +23,7 @@
 package cc.redberry.core.tensor;
 
 import cc.redberry.core.TAssert;
-import cc.redberry.core.math.MathUtils;
+import cc.redberry.core.utils.MathUtils;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.utils.TensorUtils;
 import org.junit.Assert;

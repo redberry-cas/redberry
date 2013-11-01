@@ -83,8 +83,6 @@ public class ParseToken {
                 return IndicesFactory.create(content[0].getIndices());
             case Power:
                 return IndicesFactory.EMPTY_INDICES;
-            case Expression:
-                return content[0].getIndices().getFree();
         }
         throw new ParserException("Unknown tensor type: " + tokenType);
     }
@@ -120,9 +118,6 @@ public class ParseToken {
                 return Tensors.pow(content[0].toTensor(), content[1].toTensor());
             case Product:
                 return Tensors.multiplyAndRenameConflictingDummies(contentToTensors());
-            case Expression:
-                assert content.length == 2;
-                return Tensors.expression(content[0].toTensor(), content[1].toTensor());
         }
         throw new ParserException("Unknown tensor type: " + tokenType);
     }

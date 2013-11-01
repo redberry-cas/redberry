@@ -46,7 +46,7 @@ public class SumBijectionPortTest {
         System.out.println(from);
         System.out.println(to);
         SumBijectionPort port = new SumBijectionPort(from, to);
-        BijectionContainer bc;
+        SumBijectionPort.BijectionContainer bc;
         while ((bc = port.take()) != null)
             System.out.println(bc);
     }
@@ -59,7 +59,7 @@ public class SumBijectionPortTest {
         System.out.println(from);
         System.out.println(to);
         SumBijectionPort port = new SumBijectionPort(from, to);
-        BijectionContainer bc;
+        SumBijectionPort.BijectionContainer bc;
         while ((bc = port.take()) != null)
             System.out.println(bc);
     }
@@ -71,7 +71,7 @@ public class SumBijectionPortTest {
         System.out.println(from);
         System.out.println(to);
         SumBijectionPort port = new SumBijectionPort(from, to);
-        BijectionContainer bc;
+        SumBijectionPort.BijectionContainer bc;
         while ((bc = port.take()) != null)
             System.out.println(bc);
     }

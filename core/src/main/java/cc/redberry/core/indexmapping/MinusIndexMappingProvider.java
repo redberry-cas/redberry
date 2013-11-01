@@ -22,6 +22,8 @@
  */
 package cc.redberry.core.indexmapping;
 
+import cc.redberry.concurrent.OutputPortUnsafe;
+
 /**
  * Changes the sign of {@link IndexMappingBuffer} to the opposite.
  *
@@ -31,7 +33,7 @@ package cc.redberry.core.indexmapping;
  */
 class MinusIndexMappingProvider extends IndexMappingProviderAbstract {
 
-    public MinusIndexMappingProvider(MappingsPort opu) {
+    public MinusIndexMappingProvider(OutputPortUnsafe<IndexMappingBuffer> opu) {
         super(opu);
     }
 

@@ -241,13 +241,15 @@ public class DifferentiateTransformationTest {
         Tensor t = parse("R_abcd");
         SimpleTensor var1 = parseSimple("R_mnpq");
         Tensor u = differentiate(t, var1);
-        TAssert.assertEquals(u, "(1/8)*(-d_{a}^{m}*d_{c}^{q}*d_{d}^{p}*d_{b}^{n}-d_{a}^{n}*d_{d}^{q}*d_{c}^{p}*d_{b}^{m}-d_{a}^{q}*d_{d}^{n}*d_{b}^{p}*d_{c}^{m}+d_{c}^{q}*d_{a}^{n}*d_{d}^{p}*d_{b}^{m}+d_{c}^{n}*d_{a}^{q}*d_{b}^{p}*d_{d}^{m}+d_{b}^{q}*d_{a}^{p}*d_{d}^{n}*d_{c}^{m}+d_{a}^{m}*d_{d}^{q}*d_{c}^{p}*d_{b}^{n}-d_{b}^{q}*d_{a}^{p}*d_{c}^{n}*d_{d}^{m})");
+        Tensor expected = parse("(1/8)*(-d_{a}^{m}*d_{c}^{q}*d_{d}^{p}*d_{b}^{n}-d_{a}^{n}*d_{d}^{q}*d_{c}^{p}*d_{b}^{m}-d_{a}^{q}*d_{d}^{n}*d_{b}^{p}*d_{c}^{m}+d_{c}^{q}*d_{a}^{n}*d_{d}^{p}*d_{b}^{m}+d_{c}^{n}*d_{a}^{q}*d_{b}^{p}*d_{d}^{m}+d_{b}^{q}*d_{a}^{p}*d_{d}^{n}*d_{c}^{m}+d_{a}^{m}*d_{d}^{q}*d_{c}^{p}*d_{b}^{n}-d_{b}^{q}*d_{a}^{p}*d_{c}^{n}*d_{d}^{m})");
+        expected = ExpandTransformation.expand(expected);
+        TAssert.assertEquals(u, expected);
     }
 
     @Test
     public void test8() {
         Tensor u = differentiate(parse("g_ab"), parseSimple("g^mn"));
-        TAssert.assertEquals(u, "1/2*(g_am*g_bn+g_bm*g_an)");
+        TAssert.assertEquals(u, "1/2*g_am*g_bn+1/2*g_bm*g_an");
     }
 
     @Ignore
@@ -267,7 +269,7 @@ public class DifferentiateTransformationTest {
     public void test10() {
         setSymmetric(parseSimple("g_abc"), IndexType.LatinLower);
         Tensor u = differentiate(parse("g_abc"), parseSimple("g^mnp"));
-        TAssert.assertEquals(u, "(1/6)*(g_{am}*g_{cn}*g_{bp}+g_{ap}*g_{cm}*g_{bn}+g_{am}*g_{cp}*g_{bn}+g_{an}*g_{cm}*g_{bp}+g_{ap}*g_{bm}*g_{cn}+g_{an}*g_{bm}*g_{cp})");
+        TAssert.assertEquals(u, ExpandTransformation.expand(parse("(1/6)*(g_{am}*g_{cn}*g_{bp}+g_{ap}*g_{cm}*g_{bn}+g_{am}*g_{cp}*g_{bn}+g_{an}*g_{cm}*g_{bp}+g_{ap}*g_{bm}*g_{cn}+g_{an}*g_{bm}*g_{cp})")));
     }
 
     @Test
@@ -282,6 +284,13 @@ public class DifferentiateTransformationTest {
         t = parseExpression("d_m^m = 4").transform(t);
         t = TogetherTransformation.together(t);
         TAssert.assertEquals(t, "(m**4*(8*Sin[m**2]**2+4*Cos[m**2]**2)+(-8*m**2*Sin[m**2]+8*Cos[m**2])*Cos[m**2]+4*(2*m**2*Sin[m**2]-2*Cos[m**2])*Cos[m**2])*Cos[m**2]**(-3)*m**(-4)");
+    }
+
+    @Test
+    public void test12a() {
+        Tensor t = parse("1/(f_m*(f^m+a^m*f_i*f^i)*Cos[f_i*f^i])");
+        t = differentiate(t, parseSimple("f_l"));
+        TAssert.assertIndicesConsistency(t);
     }
 
     @Test
@@ -431,7 +440,34 @@ public class DifferentiateTransformationTest {
     public void test22() {
         Tensor t = parse("g~1_{bmn}[x_{e}]");
         Tensor r = new DifferentiateTransformation(parseSimple("x_c")).transform(t);
-        System.out.println(r);
         TAssert.assertEquals(r, "g~2_{bm}^{c}_{n}[x_{e}]");
+        TAssert.assertEquals(r, "g~2_{bm}_{n}^{c}[x_{e}]");
+    }
+
+    @Test
+    public void test23() {
+        Tensor t, d;
+        t = parse("f[x_ab*x^ab]");
+        d = new DifferentiateTransformation(parseSimple("x_ab")).transform(t);
+        TAssert.assertEquals(d, "2*f~(1)[x_{mn}*x^{mn}]*x^ab");
+    }
+
+    @Test
+    public void test24() {
+        Tensor t = parse("D[x, y][Sin[x*y]/(x**2 + y**2)]");
+        TAssert.assertEquals(t,
+                "(-2*x**2*Cos[x*y])/(x**2 + y**2)**2 - (2*y**2*Cos[x*y])/(x**2 + y**2)**2 + Cos[x*y]/(x**2 + y**2) + (8*x*y*Sin[x*y])/(x**2 + y**2)**3 - (x*y*Sin[x*y])/(x**2 + y**2)");
+
+        t = parse("D[x, y][Sin[f[x*y]]/(x**2 + y**2)]");
+        TAssert.assertEquals(t,
+                "(8*x*y*Sin[f[x*y]])/(x**2 + y**2)**3 - (2*x**2*Cos[f[x*y]]*f~1[x*y])/(x**2 + y**2)**2 - (2*y**2*Cos[f[x*y]]*f~1[x*y])/(x**2 + y**2)**2 + (Cos[f[x*y]]*f~1[x*y])/(x**2 + y**2) - (x*y*Sin[f[x*y]]*f~1[x*y]**2)/(x**2 + y**2) + (x*y*Cos[f[x*y]]*f~2[x*y])/(x**2 + y**2)");
+    }
+
+    @Test
+    public void test25() {
+        addSymmetry("x_mn", 1, 0);
+        Tensor t = parse("D[x_mn][f[x_mn*x^nm]]");
+        t = ExpandAndEliminateTransformation.EXPAND_AND_ELIMINATE.transform(t);
+        TAssert.assertEquals(t, "2*f~1[x_{ba}*x^{ab}]*x^{mn}");
     }
 }

@@ -154,6 +154,10 @@ public class IndicesSymmetries implements Iterable<Symmetry> {
         return add(false, permutation);
     }
 
+    public boolean addSymmetryUnsafe(int... permutation) {
+        return add(false, permutation, true);
+    }
+
     /**
      * Adds permutational antisymmetry.
      *
@@ -168,6 +172,10 @@ public class IndicesSymmetries implements Iterable<Symmetry> {
      */
     public boolean addAntiSymmetry(int... permutation) {
         return add(true, permutation);
+    }
+
+    public boolean addAntiSymmetryUnsafe(int... permutation) {
+        return add(true, permutation, true);
     }
 
     /**
@@ -250,6 +258,10 @@ public class IndicesSymmetries implements Iterable<Symmetry> {
      *                                  inconsistent with already defined
      */
     public boolean add(boolean sign, int... permutation) {
+        return add(sign, permutation, false);
+    }
+
+    public boolean add(boolean sign, int[] permutation, boolean unsafe) {
         byte type = -1;
         StructureOfIndices.TypeData typeData;
         for (int i = 0; i < IndexType.TYPES_COUNT; ++i) {
@@ -262,8 +274,12 @@ public class IndicesSymmetries implements Iterable<Symmetry> {
                 type = (byte) i;
             }
         }
-        return add(type, new Symmetry(permutation, sign));
+        if (unsafe)
+            return addUnsafe(type, new Symmetry(permutation, sign));
+        else
+            return add(type, new Symmetry(permutation, sign));
     }
+
 
     /**
      * Adds permutational (anti)symmetry.
@@ -299,6 +315,11 @@ public class IndicesSymmetries implements Iterable<Symmetry> {
         } catch (InconsistentGeneratorsException exception) {
             throw new InconsistentGeneratorsException("Adding inconsistent symmetry to tensor indices symmetries.");
         }
+    }
+
+    public boolean addUnsafe(boolean sign, int... permutation) {
+        if (sign) return addAntiSymmetryUnsafe(permutation);
+        else return addSymmetryUnsafe(permutation);
     }
 
     /**

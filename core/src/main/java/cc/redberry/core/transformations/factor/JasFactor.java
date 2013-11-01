@@ -44,10 +44,17 @@ import java.util.SortedMap;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-class JasFactor {
+public class JasFactor {
+    public static final FactorizationEngine ENGINE = new FactorizationEngine() {
+        @Override
+        public Tensor factor(Tensor tensor) {
+            return JasFactor.factor(tensor);
+        }
+    };
+
     static final char START_CHAR = 'a';
 
-    public static Tensor factor(Tensor t) {
+    static Tensor factor(Tensor t) {
         if (!(t instanceof MultiTensor || t instanceof Power))
             return t;
         TIntObjectMap<Var> vars = getVars(t);
@@ -79,7 +86,7 @@ class JasFactor {
             poly = tensor2Poly(t, factory, vars, IntegerConverter);
         }
 
-        if(poly.isZERO())
+        if (poly.isZERO())
             return Complex.ZERO;
 
         FactorAbstract<BigInteger> jasFactor = FactorFactory.getImplementation(BigInteger.ONE);
@@ -267,12 +274,8 @@ class JasFactor {
 
             GenPolynomial<BigRational> polyRat = tensor2Poly(t, ratFactory, vars, RationalConverter);
             Object[] factors = PolyUtil.integerFromRationalCoefficientsFactor(factory, polyRat);
-            gcd = (java.math.BigInteger) factors[0];
-            lcm = (java.math.BigInteger) factors[1];
             poly = (GenPolynomial<BigInteger>) factors[2];
         } else {
-            gcd = java.math.BigInteger.ONE;
-            lcm = java.math.BigInteger.ONE;
             poly = tensor2Poly(t, factory, vars, IntegerConverter);
         }
         return poly;

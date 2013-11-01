@@ -26,7 +26,7 @@
 
     <groupId>cc.redberry</groupId>
     <artifactId>groovy</artifactId>
-    <version>1.1.4-SNAPSHOT</version>
+    <version>1.1.6-SNAPSHOT</version>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -39,19 +39,19 @@
         <groupId>org.sonatype.oss</groupId>
         <artifactId>oss-parent</artifactId>
         <version>7</version>
-        <relativePath></relativePath>
+        <relativePath/>
     </parent>
 
     <name>redberry-groovy</name>
     <url>http://redberry.cc/</url>
 
     <description>
-        Redberry is an open source computer algebra system designed for tensor 
-        manipulation.  It implements basic computer algebra system routines as well as 
-        complex tools for real computations in physics. 
-        
-        This is the Groovy facade for Redberry. It contains the classes and 
-        categories defining DSL features and syntax notations for common routines from 
+        Redberry is an open source computer algebra system designed for tensor
+        manipulation. It implements basic computer algebra system routines as well as
+        complex tools for real computations in physics.
+
+        This is the Groovy facade for Redberry. It contains the classes and
+        categories defining DSL features and syntax notations for common routines from
         redebrry-core and redberry-physics.
     </description>
 
@@ -97,8 +97,8 @@
     <scm><connection>scm:hg:http://bitbucket.org/redberry/redberry-groovy</connection><url>https://bitbucket.org/redberry/redberry-groovy/src/</url></scm>
 
     <issueManagement>
-        <system>Bitbucket</system>
-        <url>https://bitbucket.org/redberry/redberry/issues</url>
+        <system>YouTRACK</system>
+        <url>http://dev.redberry.cc/</url>
     </issueManagement>
 
     <build>
@@ -217,13 +217,13 @@
                     </descriptors>
                 </configuration>
                 <!--<executions>-->
-                    <!--<execution>-->
-                        <!--<id>distrs</id>-->
-                        <!--<phase>package</phase>-->
-                        <!--<goals>-->
-                            <!--<goal>single</goal>-->
-                        <!--</goals>-->
-                    <!--</execution>-->
+                <!--<execution>-->
+                <!--<id>distrs</id>-->
+                <!--<phase>package</phase>-->
+                <!--<goals>-->
+                <!--<goal>single</goal>-->
+                <!--</goals>-->
+                <!--</execution>-->
                 <!--</executions>-->
             </plugin>
         </plugins>
@@ -237,12 +237,19 @@
         <dependency>
             <groupId>cc.redberry</groupId>
             <artifactId>core</artifactId>
-            <version>1.1.4-SNAPSHOT</version>
+            <version>1.1.6-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>cc.redberry</groupId>
+            <artifactId>core</artifactId>
+            <version>1.1.6-SNAPSHOT</version>
+            <type>test-jar</type>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>cc.redberry</groupId>
             <artifactId>physics</artifactId>
-            <version>1.1.4-SNAPSHOT</version>
+            <version>1.1.6-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.codehaus.groovy</groupId>

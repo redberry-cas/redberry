@@ -24,9 +24,10 @@ package cc.redberry.core.indexmapping;
 
 import cc.redberry.core.indices.IndicesUtils;
 import cc.redberry.core.tensor.Tensor;
+import gnu.trove.iterator.TIntObjectIterator;
+import gnu.trove.map.hash.TIntObjectHashMap;
 
 import java.util.Arrays;
-import java.util.Map;
 
 /**
  * Wrapper of {@link IndexMappingBuffer} for testing mappings.
@@ -35,7 +36,7 @@ import java.util.Map;
  * @author Stanislav Poslavsky
  * @since 1.0
  */
-public final class IndexMappingBufferTester implements IndexMappingBuffer {
+final class IndexMappingBufferTester implements IndexMappingBuffer {
 
     private IndexMappingBufferImpl innerBuffer;
     private final int[] from, to;
@@ -62,6 +63,14 @@ public final class IndexMappingBufferTester implements IndexMappingBuffer {
         this.from = holder.from;
         this.to = holder.to;
         this.signum = holder.sign;
+        this.innerBuffer = new IndexMappingBufferImpl();
+    }
+
+
+    public IndexMappingBufferTester(Mapping mapping) {
+        this.from = mapping.fromNames;
+        this.to = IndicesUtils.getIndicesNames(mapping.toData);
+        this.signum = mapping.getSign();
         this.innerBuffer = new IndexMappingBufferImpl();
     }
 
@@ -187,22 +196,24 @@ public final class IndexMappingBufferTester implements IndexMappingBuffer {
     }
 
     @Override
-    public Map<Integer, IndexMappingBufferRecord> getMap() {
+    public TIntObjectHashMap<IndexMappingBufferRecord> getMap() {
         return innerBuffer.getMap();
     }
 
     @Override
     public FromToHolder export() {
-        final Map<Integer, IndexMappingBufferRecord> map = innerBuffer.map;
+        final TIntObjectHashMap<IndexMappingBufferRecord> map = innerBuffer.map;
         final int size = from.length + map.size();
         int[] from1 = new int[size],
                 to1 = new int[size];
         System.arraycopy(from, 0, from1, 0, from.length);
         System.arraycopy(to, 0, to1, 0, from.length);
         int i = from.length;
-        for (Map.Entry<Integer, IndexMappingBufferRecord> entry : map.entrySet()) {
-            from1[i] = entry.getKey();
-            to1[i++] = entry.getValue().getIndexName();
+        TIntObjectIterator<IndexMappingBufferRecord> iterator = map.iterator();
+        while (iterator.hasNext()) {
+            iterator.advance();
+            from1[i] = iterator.key();
+            to1[i++] = iterator.value().getIndexName();
         }
         return new FromToHolder(from1, to1, getSign());
     }

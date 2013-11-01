@@ -109,11 +109,17 @@ public final class IndexConverterExtender implements IndexSymbolConverter {
 
     @Override
     public String getSymbol(int code, OutputFormat mode) throws IndexConverterException {
-        int num = code / (innerConverter.maxNumberOfSymbols() + 1);
-        if (num == 0)
+        int subscript = code / (innerConverter.maxNumberOfSymbols() + 1);
+        if (subscript == 0)
             return innerConverter.getSymbol(code, mode);
-        else
-            return innerConverter.getSymbol(code % (innerConverter.maxNumberOfSymbols() + 1), mode) + "_" + ("{" + num + "}");
+        else {
+            String symbol = innerConverter.getSymbol(code % (innerConverter.maxNumberOfSymbols() + 1), mode);
+            if (mode == OutputFormat.WolframMathematica)
+                return "Subscript[" + symbol + ", " + subscript + "]";
+            if (mode == OutputFormat.Maple)
+                return symbol + subscript;
+            return symbol + "_" + ("{" + subscript + "}");
+        }
     }
 
     @Override

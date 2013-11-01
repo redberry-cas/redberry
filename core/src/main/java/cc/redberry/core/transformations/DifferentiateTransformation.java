@@ -22,7 +22,8 @@
  */
 package cc.redberry.core.transformations;
 
-import cc.redberry.core.indexgenerator.IndexGenerator;
+import cc.redberry.core.indexgenerator.IndexGeneratorImpl;
+import cc.redberry.core.indexmapping.Mapping;
 import cc.redberry.core.indices.IndicesFactory;
 import cc.redberry.core.indices.IndicesUtils;
 import cc.redberry.core.indices.SimpleIndices;
@@ -30,7 +31,7 @@ import cc.redberry.core.number.Complex;
 import cc.redberry.core.tensor.*;
 import cc.redberry.core.tensor.functions.ScalarFunction;
 import cc.redberry.core.transformations.substitutions.SubstitutionTransformation;
-import cc.redberry.core.transformations.symmetrization.SymmetrizeSimpleTensorTransformation;
+import cc.redberry.core.transformations.symmetrization.SymmetrizeTransformation;
 import cc.redberry.core.utils.TensorUtils;
 import gnu.trove.set.hash.TIntHashSet;
 
@@ -62,7 +63,7 @@ public final class DifferentiateTransformation implements Transformation {
         this.expandAndContract = new Transformation[0];
     }
 
-    public DifferentiateTransformation(Transformation[] expandAndContract, SimpleTensor... vars) {
+    public DifferentiateTransformation(SimpleTensor[] vars, Transformation[] expandAndContract) {
         this.vars = vars;
         this.expandAndContract = expandAndContract;
     }
@@ -161,10 +162,10 @@ public final class DifferentiateTransformation implements Transformation {
         return differentiate1(tensor, createRule(var), expandAndContract);
     }
 
-    private static Tensor differentiateWithRenaming(Tensor tensor, SimpleTensorDifferentiationRule rule, Transformation[] expandAndContarct) {
+    private static Tensor differentiateWithRenaming(Tensor tensor, SimpleTensorDifferentiationRule rule, Transformation[] expandAndEliminate) {
         SimpleTensorDifferentiationRule newRule = rule.newRuleForTensor(tensor);
         tensor = renameDummy(tensor, newRule.getForbidden());
-        return differentiate1(tensor, newRule, expandAndContarct);
+        return differentiate1(tensor, newRule, expandAndEliminate);
     }
 
     private static Tensor differentiate1(Tensor tensor, SimpleTensorDifferentiationRule rule, Transformation[] transformations) {
@@ -208,10 +209,10 @@ public final class DifferentiateTransformation implements Transformation {
         if (tensor instanceof Power) {
             //e^f*ln(g) -> g^f*(f'*ln(g)+f/g*g') ->f*g^(f-1)*g' + g^f*ln(g)*f'
             Tensor temp = sum(
-                    multiply(tensor.get(1),
+                    multiplyAndRenameConflictingDummies(tensor.get(1),
                             pow(tensor.get(0), sum(tensor.get(1), Complex.MINUS_ONE)),
                             differentiate1(tensor.get(0), rule, transformations)),
-                    multiply(tensor,
+                    multiplyAndRenameConflictingDummies(tensor,
                             log(tensor.get(0)),
                             differentiateWithRenaming(tensor.get(1), rule, transformations)));
             temp = applyTransformations(temp, transformations);
@@ -308,7 +309,7 @@ public final class DifferentiateTransformation implements Transformation {
             int[] allFreeArgIndices = new int[varIndices.size()];
             byte type;
             int state, i = 0, length = allFreeArgIndices.length;
-            IndexGenerator indexGenerator = new IndexGenerator(varIndices);
+            IndexGeneratorImpl indexGenerator = new IndexGeneratorImpl(varIndices);
             for (; i < length; ++i) {
                 type = getType(varIndices.get(i));
                 state = getRawStateInt(varIndices.get(i));
@@ -318,14 +319,13 @@ public final class DifferentiateTransformation implements Transformation {
             int[] allIndices = addAll(allFreeVarIndices, allFreeArgIndices);
             SimpleIndices dIndices = IndicesFactory.createSimple(null, allIndices);
             SimpleTensor symmetric = simpleTensor("@!@#@##_AS@23@@#", dIndices);
-            Tensor derivative = SymmetrizeSimpleTensorTransformation.symmetrize(
-                    symmetric,
-                    allFreeVarIndices,
-                    varIndices.getSymmetries().getInnerSymmetries());
+            Tensor derivative = new SymmetrizeTransformation(allFreeVarIndices,
+                    varIndices.getSymmetries().getInnerSymmetries(), true).transform(symmetric);
+
             derivative = applyIndexMapping(
                     derivative,
-                    allIndices,
-                    addAll(varIndices.getInverted().getAllIndices().copy(), allFreeArgIndices),
+                    new Mapping(allIndices,
+                            addAll(varIndices.getInverted().getAllIndices().copy(), allFreeArgIndices)),
                     new int[0]);
             ProductBuilder builder = new ProductBuilder(0, length);
             for (i = 0; i < length; ++i)
@@ -340,7 +340,7 @@ public final class DifferentiateTransformation implements Transformation {
         Tensor differentiateSimpleTensorWithoutCheck(SimpleTensor simpleTensor) {
             int[] to = simpleTensor.getIndices().getAllIndices().copy();
             to = addAll(to, freeVarIndices);
-            return applyIndexMapping(derivative, allFreeFrom, to, new int[0]);
+            return applyIndexMapping(derivative, new Mapping(allFreeFrom, to), new int[0]);
         }
 
         @Override

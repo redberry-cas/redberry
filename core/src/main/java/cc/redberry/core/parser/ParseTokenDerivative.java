@@ -62,7 +62,7 @@ public class ParseTokenDerivative extends ParseToken {
                 throw new IllegalArgumentException("Derivative with respect to non simple argument: " + temp);
             vars[i - 1] = (SimpleTensor) temp;
         }
-        return new DifferentiateTransformation(new Transformation[]{EliminateMetricsTransformation.ELIMINATE_METRICS},
-                vars).transform(content[0].toTensor());
+        return new DifferentiateTransformation(vars, new Transformation[]{EliminateMetricsTransformation.ELIMINATE_METRICS}
+        ).transform(content[0].toTensor());
     }
 }

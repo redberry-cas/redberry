@@ -23,8 +23,10 @@
 package cc.redberry.core.tensor;
 
 import cc.redberry.core.combinatorics.Combinatorics;
+import cc.redberry.core.combinatorics.Symmetry;
 import cc.redberry.core.context.CC;
 import cc.redberry.core.context.NameDescriptor;
+import cc.redberry.core.context.NameDescriptorForSimpleTensor;
 import cc.redberry.core.context.NameDescriptorForTensorField;
 import cc.redberry.core.indices.*;
 import cc.redberry.core.number.Complex;
@@ -60,6 +62,18 @@ public final class Tensors {
      * @throws IllegalArgumentException if argument is not scalar
      */
     public static Tensor pow(Tensor argument, int power) {
+        return pow(argument, new Complex(power));
+    }
+
+    /**
+     * Power function. Returns tensor raised to specified integer power.
+     *
+     * @param argument base
+     * @param power    power
+     * @return result of argument exponentiation
+     * @throws IllegalArgumentException if argument is not scalar
+     */
+    public static Tensor pow(Tensor argument, java.math.BigInteger power) {
         return pow(argument, new Complex(power));
     }
 
@@ -190,6 +204,18 @@ public final class Tensors {
         return result;
     }
 
+    public static void resolveAllDummies(Tensor[] factors) {
+        TIntHashSet forbidden = new TIntHashSet();
+        int i;
+        for (i = factors.length - 1; i >= 0; --i)
+            forbidden.addAll(TensorUtils.getAllIndicesNamesT(factors[i]));
+
+        for (i = factors.length - 1; i >= 0; --i) {
+            factors[i] = ApplyIndexMapping.renameDummy(factors[i], forbidden.toArray());
+            forbidden.addAll(TensorUtils.getAllIndicesNamesT(factors[i]));
+        }
+    }
+
     /**
      * Returns {@code a} divided by {@code b}.
      *
@@ -264,6 +290,17 @@ public final class Tensors {
      */
     public static SimpleTensor simpleTensor(String name, SimpleIndices indices) {
         NameDescriptor descriptor = CC.getNameManager().mapNameDescriptor(name, indices.getStructureOfIndices());
+        if (indices.size() == 0) {
+            assert indices == IndicesFactory.EMPTY_SIMPLE_INDICES;
+
+            NameDescriptorForSimpleTensor nst = (NameDescriptorForSimpleTensor) descriptor;
+            if (nst.getCachedSymbol() == null) {
+                SimpleTensor st;
+                nst.setCachedInstance(st = new SimpleTensor(descriptor.getId(), indices));
+                return st;
+            } else
+                return nst.getCachedSymbol();
+        }
         return new SimpleTensor(descriptor.getId(),
                 UnsafeIndicesFactory.createOfTensor(descriptor.getSymmetries(),
                         indices));
@@ -283,6 +320,19 @@ public final class Tensors {
             throw new IllegalArgumentException("This name is not registered in the system.");
         if (!descriptor.getStructureOfIndices().isStructureOf(indices))
             throw new IllegalArgumentException("Specified indices are not indices of specified tensor.");
+
+        if (indices.size() == 0) {
+            assert indices == IndicesFactory.EMPTY_SIMPLE_INDICES;
+
+            NameDescriptorForSimpleTensor nst = (NameDescriptorForSimpleTensor) descriptor;
+            if (nst.getCachedSymbol() == null) {
+                SimpleTensor st;
+                nst.setCachedInstance(st = new SimpleTensor(descriptor.getId(), indices));
+                return st;
+            } else
+                return nst.getCachedSymbol();
+        }
+
         return new SimpleTensor(name,
                 UnsafeIndicesFactory.createOfTensor(descriptor.getSymmetries(),
                         indices));
@@ -532,6 +582,10 @@ public final class Tensors {
         NameDescriptor descriptor = tensor.getNameDescriptor();
         if (!descriptor.getStructureOfIndices().isStructureOf(indices))
             throw new IllegalArgumentException("Illegal structure of indices.");
+
+        if (indices.size() == 0)
+            return tensor;
+
         if (descriptor.isField())
             return new TensorField(tensor.name,
                     UnsafeIndicesFactory.createOfTensor(descriptor.getSymmetries(), indices),
@@ -1021,9 +1075,13 @@ public final class Tensors {
      */
     public static void setAntiSymmetric(SimpleTensor tensor, IndexType type) {
         int dimension = tensor.getIndices().size(type);
+        boolean symmetriesAreEmpty = tensor.getIndices().getSymmetries().isEmpty();
         addSymmetry(tensor, type, true, Combinatorics.createTransposition(dimension));
         if (dimension > 2)
-            addSymmetry(tensor, type, dimension % 2 == 0 ? true : false, Combinatorics.createCycle(dimension));
+            if (symmetriesAreEmpty)
+                tensor.getIndices().getSymmetries().addUnsafe(type.getType(), new Symmetry(Combinatorics.createCycle(dimension), dimension % 2 == 0 ? true : false));
+            else
+                tensor.getIndices().getSymmetries().add(type.getType(), new Symmetry(Combinatorics.createCycle(dimension), dimension % 2 == 0 ? true : false));
     }
 
     /**
@@ -1033,9 +1091,14 @@ public final class Tensors {
      */
     public static void setAntiSymmetric(SimpleTensor tensor) {
         int dimension = tensor.getIndices().size();
+        boolean symmetriesAreEmpty = tensor.getIndices().getSymmetries().isEmpty();
         tensor.getIndices().getSymmetries().addAntiSymmetry(Combinatorics.createTransposition(dimension));
-        if (dimension > 2)
-            tensor.getIndices().getSymmetries().add(dimension % 2 == 0 ? true : false, Combinatorics.createCycle(dimension));
+        if (dimension > 2) {
+            if (symmetriesAreEmpty)
+                tensor.getIndices().getSymmetries().addUnsafe(dimension % 2 == 0 ? true : false, Combinatorics.createCycle(dimension));
+            else
+                tensor.getIndices().getSymmetries().add(dimension % 2 == 0 ? true : false, Combinatorics.createCycle(dimension));
+        }
     }
 
     /**
@@ -1060,8 +1123,12 @@ public final class Tensors {
      */
     public static void setSymmetric(SimpleTensor tensor, IndexType type) {
         int dimension = tensor.getIndices().size(type);
-        addSymmetry(tensor, type, false, Combinatorics.createCycle(dimension));
-        addSymmetry(tensor, type, false, Combinatorics.createTransposition(dimension));
+        boolean symmetriesAreEmpty = tensor.getIndices().getSymmetries().isEmpty();
+        tensor.getIndices().getSymmetries().addSymmetry(type, Combinatorics.createCycle(dimension));
+        if (symmetriesAreEmpty)
+            tensor.getIndices().getSymmetries().addUnsafe(type.getType(), new Symmetry(Combinatorics.createTransposition(dimension), false));
+        else
+            tensor.getIndices().getSymmetries().addSymmetry(type, Combinatorics.createTransposition(dimension));
     }
 
     /**
@@ -1071,8 +1138,12 @@ public final class Tensors {
      */
     public static void setSymmetric(SimpleTensor tensor) {
         int dimension = tensor.getIndices().size();
-        addSymmetry(tensor, Combinatorics.createCycle(dimension));
-        addSymmetry(tensor, Combinatorics.createTransposition(dimension));
+        boolean symmetriesAreEmpty = tensor.getIndices().getSymmetries().isEmpty();
+        tensor.getIndices().getSymmetries().addSymmetry(Combinatorics.createCycle(dimension));
+        if (symmetriesAreEmpty)
+            tensor.getIndices().getSymmetries().addSymmetryUnsafe(Combinatorics.createTransposition(dimension));
+        else
+            tensor.getIndices().getSymmetries().addSymmetry(Combinatorics.createTransposition(dimension));
     }
 
     /**

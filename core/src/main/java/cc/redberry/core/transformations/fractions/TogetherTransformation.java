@@ -174,7 +174,7 @@ public final class TogetherTransformation implements Transformation {
 
     private static SplitStruct splitFraction(Tensor tensor, boolean doFactor) {
         if (doFactor)
-            tensor = FactorTransformation.factor(tensor);
+            tensor = FactorTransformation.factor(tensor, false);
 
         THashMap<Tensor, Complex> map = new THashMap<>();
         if (checkPower(tensor)) {
