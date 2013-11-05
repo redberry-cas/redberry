@@ -59,10 +59,6 @@ public class Combinatorics {
         return new Permutation(true, false, array);
     }
 
-    public static PermutationGroup createIdentityGroup(int length) {
-        return new PermutationGroup(length);
-    }
-
     public static Permutation getIdentity(int length) {
         if (cachedIdentities.length >= length)
             return createIdentity(length);

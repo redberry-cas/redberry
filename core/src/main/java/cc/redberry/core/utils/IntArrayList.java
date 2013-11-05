@@ -22,6 +22,7 @@
  */
 package cc.redberry.core.utils;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 
 /**
@@ -200,6 +201,16 @@ public final class IntArrayList {
         if (point < 0)
             throw new IndexOutOfBoundsException();
         size = point;
+    }
+
+    public int remove(int index) {
+        int oldValue = data[index];
+        int numMoved = size - index - 1;
+        if (numMoved > 0)
+            System.arraycopy(data, index + 1, data, index,
+                    numMoved);
+        --size;
+        return oldValue;
     }
 
     public int indexOf(int value) {

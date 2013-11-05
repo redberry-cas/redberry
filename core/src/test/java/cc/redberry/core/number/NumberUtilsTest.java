@@ -22,20 +22,40 @@
  */
 package cc.redberry.core.number;
 
+import org.junit.Assert;
 import org.junit.Test;
 
 import java.math.BigInteger;
 
 /**
- *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
 public class NumberUtilsTest {
 
     @Test
-    public void root() {
-        BigInteger five = new BigInteger("9");
-        System.out.println(NumberUtils.sqrt(five));
+    public void test1() {
+        BigInteger nine = new BigInteger("9");
+        Assert.assertEquals(BigInteger.valueOf(3), NumberUtils.sqrt(nine));
     }
+
+//    @Test
+//    public void root() {
+
+//        for (int i = 0; i < 1000; ++i) {
+//            NumberUtils.factorial(1000);
+//        }
+//
+//        long start = System.currentTimeMillis();
+//        NumberUtils.factorial(100000);
+//        System.out.println(System.currentTimeMillis() - start);
+//        start = System.currentTimeMillis();
+//        NumberUtils.factorial(100000);
+//        System.out.println(System.currentTimeMillis() - start);
+//        start = System.currentTimeMillis();
+//        NumberUtils.factorial(100000);
+//        System.out.println(System.currentTimeMillis() - start);
+//
+//        System.out.println(NumberUtils.factorial(1000));
+//    }
 }

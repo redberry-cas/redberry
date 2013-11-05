@@ -22,113 +22,119 @@
  */
 package cc.redberry.core.groups.permutations;
 
-import cc.redberry.core.combinatorics.IntTuplesPort;
-import cc.redberry.core.transformations.factor.jasfactor.edu.jas.arith.BigInteger;
-
-import java.util.Collections;
-import java.util.Iterator;
+import java.math.BigInteger;
 
 /**
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public final class PermutationGroup implements Iterable<Permutation> {
-    /**
-     * Strong generating set
-     */
-    final SGSElement[] sgs;
-    /**
-     * Dimension of permutation group
-     */
-    final int length;
+public interface PermutationGroup
+        extends Iterable<Permutation> {
 
     /**
-     * Creates identity permutation group
+     * Returns whether the specified permutation is member of this group
      *
-     * @param length
+     * @param permutation permutation
+     * @return true if specified permutation is member of this group
      */
-    public PermutationGroup(int length) {
-        this.sgs = new SGSElement[0];
-        this.length = length;
-    }
+    boolean isMember(Permutation permutation);
 
-    public PermutationGroup(Permutation... generators) {
-        if (generators.length == 0)
-            throw new IllegalArgumentException();
-        this.length = generators[0].length();
-        this.sgs = SchreierSimsAlgorithm.createSGS(generators);
-    }
+    /**
+     * Returns the number of permutations in this group
+     *
+     * @return number of permutations in this group
+     */
+    BigInteger order();
 
-    public boolean isMember(Permutation permutation) {
-        if (permutation.length() != length)
-            throw new IllegalArgumentException();
+    /**
+     * Return the dimension of group (length of each permutation)
+     *
+     * @return dimension of group (length of each permutation)
+     */
+    //todo rename
+    int dimension();
 
-        Permutation temp = permutation;
-        int i, beta;
-        for (i = 0; i < sgs.length; ++i) {
-            beta = temp.newIndexOf(sgs[i].basePoint);
-            if (!sgs[i].belongsToOrbit(beta))
-                return false;
-            temp = temp.composition(sgs[i].getInverseTransversalOf(beta));
-        }
-        return temp.isIdentity();
-    }
+    /**
+     * Returns the orbit of specified point
+     *
+     * @param point point
+     * @return orbit of specified point
+     */
+    int[] orbit(int point);
 
-    public BigInteger getOrder() {
-        BigInteger order = BigInteger.ONE;
-        for (SGSElement element : sgs)
-            order = order.multiply(BigInteger.valueOf(element.getOrbitSize()));
-        return order;
-    }
+    /**
+     * Returns the orbit of specified set of points
+     *
+     * @param point set of points
+     * @return orbit of specified point
+     */
+    int[] orbit(int[] point);
 
-    @Override
-    public Iterator<Permutation> iterator() {
-        if (sgs.length == 0)
-            return Collections.singletonList(Combinatorics.createIdentity(length)).iterator();
+    /**
+     * Returns a set of all orbits
+     *
+     * @return set of all orbits
+     */
+    int[][] orbits();
 
-        return new PermutationsIterator(sgs);
-    }
+    /**
+     * Returns true if this group is transitive.
+     *
+     * @return true if this group is transitive
+     */
+    boolean isTransitive();
 
-    private static final class PermutationsIterator implements Iterator<Permutation> {
-        final IntTuplesPort tuplePort;
-        final SGSElement[] sgs;
-        final Permutation[] partialProducts;
+    /**
+     * Returns a setwise stabilizer of specified set of points.
+     *
+     * @param set set of points
+     * @return setwise stabilizer of specified set of points.
+     */
+    PermutationGroup setwiseStabilizer(int[] set);
 
-        private PermutationsIterator(SGSElement[] sgs) {
-            this.sgs = sgs;
-            this.partialProducts = new Permutation[sgs.length];
+    /**
+     * Returns a pointwise stabilizer of specified set of points.
+     *
+     * @param set set of points
+     * @return pointwise stabilizer of specified set of points.
+     */
+    PermutationGroup pointwiseStabilizer(int[] set);
 
-            //Creating tuple port
-            int[] dims = new int[sgs.length];
-            for (int i = sgs.length - 1; i >= 0; --i)
-                dims[i] = sgs[i].getOrbitSize();
-            tuplePort = new IntTuplesPort(dims);
-        }
+    /**
+     * Returns a subgroup that maps two specified sets of points into each other.
+     *
+     * @param a set of points
+     * @param b set of points
+     * @return subgroup that maps two specified sets of points into each other.
+     */
+    PermutationGroup setwiseMapping(int[] a, int[] b);
 
-        @Override
-        public boolean hasNext() {
-            int[] orbitPointers = tuplePort.take();
-            if (orbitPointers == null)
-                return false;
+    /**
+     * Returns a subgroup that maps two specified sets of points into each other such that <i>i</i>-th point of
+     * {@code a} maps onto <i>i</i>-th point of {@code b}.
+     *
+     * @param a set of points
+     * @param b set of points
+     * @return subgroup that maps pointwise two specified sets of points into each other.
+     */
+    PermutationGroup pointwiseMapping(int[] a, int[] b);
 
-            for (int i = tuplePort.getLastUpdateDepth(); i < orbitPointers.length; ++i)
-                if (i == 0)
-                    partialProducts[0] = sgs[0].getTransversalOf(sgs[0].getOrbitPoint(orbitPointers[0]));
-                else
-                    partialProducts[i] = sgs[i].getTransversalOf(sgs[i].getOrbitPoint(orbitPointers[i])).composition(
-                            partialProducts[i - 1]);
+    /**
+     * Returns true if specified group is a subgroup of this group
+     *
+     * @param group permutation group
+     * @return true if specified group is a subgroup of this group
+     */
+    boolean isSubgroup(PermutationGroup group);
 
-            return true;
-        }
 
-        @Override
-        public Permutation next() {
-            return partialProducts[partialProducts.length - 1];
-        }
-
-        @Override
-        public void remove() {
-            throw new UnsupportedOperationException();
-        }
-    }
+    /**
+     * Returns a set of right coset representatives of a given subgroup in this group. The number of such
+     * representatives is {@code this.order() / subgroup.order() } (according to Lagrange theorem).
+     *
+     * @param subgroup a subgroup of this group
+     * @return set of right coset representatives
+     * @throws IllegalArgumentException if specified {@code subgroup} is not a subgroup of this
+     */
+    Permutation[] rightCosetRepresentatives(PermutationGroup subgroup);
 }

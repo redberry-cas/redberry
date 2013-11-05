@@ -149,6 +149,15 @@ public final class NumberUtils {
         return result;
     }
 
+    public static BigInteger factorial(int n) {
+        BigInteger result = BigInteger.ONE;
+        while (n != 0) {
+            result = result.multiply(BigInteger.valueOf(n));
+            --n;
+        }
+        return result;
+    }
+
     //    public static Boolean getSignOfNumerical(Tensor tensor) {
 //        //todo write better code
 //        if (!isRealNumerical(tensor))
