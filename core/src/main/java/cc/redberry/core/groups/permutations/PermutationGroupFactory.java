@@ -31,7 +31,12 @@ public final class PermutationGroupFactory {
     }
 
     public static PermutationGroup createPermutationGroup(Permutation... generators) {
+        if (generators.length == 0)
+            throw new IllegalArgumentException("Now generators specified.");
         //todo Alt and Sym checks
-        return new PermutationGroupImpl(BSGSFactory.createBSGS(generators));
+        BSGS BSGS = BSGSAlgorithms.createBSGS(generators);
+        if (BSGS.BSGSList.isEmpty())
+            return new EmptyPermutationGroup(generators[0].length());
+        return new PermutationGroupImpl(BSGS);
     }
 }

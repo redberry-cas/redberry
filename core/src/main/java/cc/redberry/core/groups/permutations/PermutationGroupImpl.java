@@ -109,6 +109,6 @@ public final class PermutationGroupImpl implements PermutationGroup {
 
     @Override
     public Iterator<Permutation> iterator() {
-        return null;
+        return _BSGS.iterator();
     }
 }

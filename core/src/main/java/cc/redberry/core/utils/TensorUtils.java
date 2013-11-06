@@ -517,7 +517,7 @@ public class TensorUtils {
             if (permutation[i] == -1)
                 permutation[i] = i;
 
-        return new Symmetry(permutation, mapping.getSign()); //this is inverse permutation
+        return new Symmetry(mapping.getSign(), permutation); //this is inverse permutation
     }
 
     public static Symmetry getSymmetryFromMapping(final int[] indices, Mapping mapping) {

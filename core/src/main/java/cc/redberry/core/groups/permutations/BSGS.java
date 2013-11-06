@@ -22,8 +22,11 @@
  */
 package cc.redberry.core.groups.permutations;
 
+import cc.redberry.core.combinatorics.IntTuplesPort;
+
 import java.math.BigInteger;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -31,9 +34,9 @@ import java.util.List;
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
- * @see BSGSFactory
+ * @see BSGSAlgorithms
  */
-public final class BSGS {
+public final class BSGS implements Iterable<Permutation> {
     public static final BSGS EMPTY = new BSGS(Collections.EMPTY_LIST);
 
     final List<BSGSElement> BSGSList;
@@ -41,7 +44,7 @@ public final class BSGS {
 
     BSGS(List<BSGSElement> BSGSList) {
         this.BSGSList = Collections.unmodifiableList(BSGSList);
-        this.base = BSGSFactory.getBaseAsArray(BSGSList);
+        this.base = BSGSAlgorithms.getBaseAsArray(BSGSList);
     }
 
     /**
@@ -69,7 +72,7 @@ public final class BSGS {
      * @return true if specified permutation is member of group represented by this _BSGS
      */
     public boolean isMember(Permutation permutation) {
-        BSGSFactory.StripContainer container = BSGSFactory.strip(BSGSList, permutation);
+        BSGSAlgorithms.StripContainer container = BSGSAlgorithms.strip(BSGSList, permutation);
         return container.terminationLevel == BSGSList.size() && container.remainder.isIdentity();
     }
 
@@ -83,5 +86,48 @@ public final class BSGS {
         for (BSGSElement element : BSGSList)
             order = order.multiply(BigInteger.valueOf(element.orbitSize()));
         return order;
+    }
+
+    @Override
+    public Iterator<Permutation> iterator() {
+        return new PermIterator();
+    }
+
+    /**
+     * An iterator over all permutations in group
+     */
+    private class PermIterator implements Iterator<Permutation> {
+        private final IntTuplesPort tuplesPort;
+        int[] tuple;
+
+        private PermIterator() {
+            final int[] orbitSizes = new int[BSGSList.size()];
+            for (int i = 0; i < orbitSizes.length; ++i)
+                orbitSizes[i] = BSGSList.get(i).orbitSize();
+            tuplesPort = new IntTuplesPort(orbitSizes);
+            tuple = tuplesPort.take();
+        }
+
+        @Override
+        public boolean hasNext() {
+            return tuple != null;
+        }
+
+        @Override
+        public Permutation next() {
+            Permutation p = BSGSList.get(0).getInverseTransversalOf(BSGSList.get(0).getOrbitPoint(tuple[0]));
+            BSGSElement e;
+            for (int i = 1, size = BSGSList.size(); i < size; ++i) {
+                e = BSGSList.get(i);
+                p = p.composition(e.getInverseTransversalOf(e.getOrbitPoint(tuple[i])));
+            }
+            tuple = tuplesPort.take();
+            return p;
+        }
+
+        @Override
+        public void remove() {
+            throw new UnsupportedOperationException("Illegal operation.");
+        }
     }
 }

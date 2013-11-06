@@ -22,37 +22,32 @@
  */
 package cc.redberry.core.groups.permutations;
 
-import cc.redberry.core.number.NumberUtils;
+import cc.redberry.core.utils.SingleIterator;
 
 import java.math.BigInteger;
 import java.util.Iterator;
-
-import static cc.redberry.core.groups.permutations.PermutationsUtils.checkSizeWithException;
 
 /**
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public final class SymmetricGroup implements PermutationGroup {
+public class EmptyPermutationGroup implements PermutationGroup {
     final int length;
-    final int[] orbit;
+    final Permutation identity;
 
-    public SymmetricGroup(final int length) {
+    EmptyPermutationGroup(int length) {
         this.length = length;
-        orbit = new int[length];
-        for (int i = 0; i < length; ++i)
-            orbit[i] = i;
+        this.identity = Combinatorics.createIdentity(length);
     }
 
     @Override
     public boolean isMember(Permutation permutation) {
-        checkSizeWithException(permutation, length);
-        return permutation.isSign();
+        return permutation.isIdentity();
     }
 
     @Override
     public BigInteger order() {
-        return NumberUtils.factorial(length);
+        return BigInteger.ONE;
     }
 
     @Override
@@ -62,32 +57,35 @@ public final class SymmetricGroup implements PermutationGroup {
 
     @Override
     public int[] orbit(int point) {
-        return orbit;
+        return new int[]{point};
     }
 
     @Override
     public int[] orbit(int[] point) {
-        return orbit;
+        return point.clone();
     }
 
     @Override
     public int[][] orbits() {
-        return new int[][]{orbit};
+        int[][] orbits = new int[length][];
+        for (int i = 0; i < length; ++i)
+            orbits[i] = new int[]{i};
+        return orbits;
     }
 
     @Override
     public boolean isTransitive() {
-        return true;
+        return false;
     }
 
     @Override
     public PermutationGroup setwiseStabilizer(int[] set) {
-        throw new UnsupportedOperationException();
+        return this;
     }
 
     @Override
     public PermutationGroup pointwiseStabilizer(int[] set) {
-        throw new UnsupportedOperationException();
+        return this;
     }
 
     @Override
@@ -102,7 +100,9 @@ public final class SymmetricGroup implements PermutationGroup {
 
     @Override
     public boolean isSubgroup(PermutationGroup group) {
-        throw new UnsupportedOperationException();
+        if (group.dimension() != length)
+            throw new IllegalArgumentException("Different lengths.");
+        return group.order().equals(BigInteger.ONE);
     }
 
     @Override
@@ -112,6 +112,6 @@ public final class SymmetricGroup implements PermutationGroup {
 
     @Override
     public Iterator<Permutation> iterator() {
-        throw new UnsupportedOperationException();
+        return new SingleIterator<Permutation>(identity);
     }
 }

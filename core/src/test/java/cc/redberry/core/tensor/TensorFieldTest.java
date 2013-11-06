@@ -57,21 +57,21 @@ public class TensorFieldTest {
 
         d = Tensors.parseSimple("f~(2)_{mn ab}[x_a]");
         _expected = new Symmetry[]{
-                new Symmetry(new int[]{0, 1, 3, 2}, false)};
+                new Symmetry(false, new int[]{0, 1, 3, 2})};
         assertEqualsSymmetries(
                 d, create(_expected));
 
         d = Tensors.parseSimple("f~(3)_{mn abc}[x_a]");
         _expected = new Symmetry[]{
-                new Symmetry(new int[]{0, 1, 3, 2, 4}, false),
-                new Symmetry(new int[]{0, 1, 4, 3, 2}, false)};
+                new Symmetry(false, new int[]{0, 1, 3, 2, 4}),
+                new Symmetry(false, new int[]{0, 1, 4, 3, 2})};
         assertEqualsSymmetries(
                 d, create(_expected));
 
         d = Tensors.parseSimple("f~(3)_{mn ab cd ef}[x_ab]");
         _expected = new Symmetry[]{
-                new Symmetry(new int[]{0, 1, 4, 5, 2, 3, 6, 7}, false),
-                new Symmetry(new int[]{0, 1, 6, 7, 2, 3, 4, 5}, false)};
+                new Symmetry(false, new int[]{0, 1, 4, 5, 2, 3, 6, 7}),
+                new Symmetry(false, new int[]{0, 1, 6, 7, 2, 3, 4, 5})};
         assertEqualsSymmetries(d, create(_expected));
     }
 
@@ -84,16 +84,16 @@ public class TensorFieldTest {
 
         d = Tensors.parseSimple("f~(2)_{mn ab}[x_a]");
         _expected = new Symmetry[]{
-                new Symmetry(new int[]{1, 0, 2, 3}, false),
-                new Symmetry(new int[]{0, 1, 3, 2}, false)};
+                new Symmetry(false, new int[]{1, 0, 2, 3}),
+                new Symmetry(false, new int[]{0, 1, 3, 2})};
         assertEqualsSymmetries(
                 d, create(_expected));
 
         d = Tensors.parseSimple("f~(3)_{mn abc}[x_a]");
         _expected = new Symmetry[]{
-                new Symmetry(new int[]{1, 0, 2, 3, 4}, false),
-                new Symmetry(new int[]{0, 1, 3, 2, 4}, false),
-                new Symmetry(new int[]{0, 1, 4, 3, 2}, false)};
+                new Symmetry(false, new int[]{1, 0, 2, 3, 4}),
+                new Symmetry(false, new int[]{0, 1, 3, 2, 4}),
+                new Symmetry(false, new int[]{0, 1, 4, 3, 2})};
         assertEqualsSymmetries(
                 d, create(_expected));
 
@@ -101,9 +101,9 @@ public class TensorFieldTest {
         addAntiSymmetry(parseSimple("f_mn[x_ab]"), 1, 0);
         d = Tensors.parseSimple("f~(3)_{mn ab cd ef}[x_ab]");
         _expected = new Symmetry[]{
-                new Symmetry(new int[]{1, 0, 2, 3, 4, 5, 6, 7}, true),
-                new Symmetry(new int[]{0, 1, 4, 5, 2, 3, 6, 7}, false),
-                new Symmetry(new int[]{0, 1, 6, 7, 2, 3, 4, 5}, false)};
+                new Symmetry(true, new int[]{1, 0, 2, 3, 4, 5, 6, 7}),
+                new Symmetry(false, new int[]{0, 1, 4, 5, 2, 3, 6, 7}),
+                new Symmetry(false, new int[]{0, 1, 6, 7, 2, 3, 4, 5})};
         assertEqualsSymmetries(d, create(_expected));
     }
 

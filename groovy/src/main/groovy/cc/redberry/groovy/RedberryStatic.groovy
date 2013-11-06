@@ -566,7 +566,7 @@ class RedberryStatic {
     public static Symmetry CreateSymmetry(Collection collection) {
         if (collection[1] instanceof Boolean)
             return new Symmetry(collection[0] as int[], collection[1])
-        return new Symmetry(collection as int[], false)
+        return new Symmetry(false, collection as int[])
     }
 
     /**

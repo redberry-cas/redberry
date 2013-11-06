@@ -38,9 +38,9 @@ public class SymmetryTest {
 
     @Test
     public void testComposition() {
-        Symmetry a = new Symmetry(new int[]{2, 3, 0, 1}, true);
-        Symmetry b = new Symmetry(new int[]{0, 1, 3, 2}, true);
-        Symmetry c = new Symmetry(new int[]{3, 2, 0, 1}, false);
+        Symmetry a = new Symmetry(true, new int[]{2, 3, 0, 1});
+        Symmetry b = new Symmetry(true, new int[]{0, 1, 3, 2});
+        Symmetry c = new Symmetry(false, new int[]{3, 2, 0, 1});
         assertTrue(a.composition(b).equals(c));
     }
 }

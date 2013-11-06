@@ -100,8 +100,8 @@ public final class SymmetriesFactory {
         if (dimension == 1)
             return EmptySymmetries1;
         Symmetries symmetries = createSymmetries(dimension);
-        symmetries.add(new Symmetry(Combinatorics.createTransposition(dimension), true));
-        symmetries.add(new Symmetry(Combinatorics.createCycle(dimension), dimension % 2 == 0 ? true : false));
+        symmetries.add(new Symmetry(true, Combinatorics.createTransposition(dimension)));
+        symmetries.add(new Symmetry(dimension % 2 == 0 ? true : false, Combinatorics.createCycle(dimension)));
         return symmetries;
     }
 
@@ -131,7 +131,7 @@ public final class SymmetriesFactory {
             int[] upperTransposition = Combinatorics.createIdentity(upperCount + lowerCount);
             upperTransposition[0] = 1;
             upperTransposition[1] = 0;
-            Symmetry upperTranspositionSymmetry = new Symmetry(upperTransposition, false);
+            Symmetry upperTranspositionSymmetry = new Symmetry(false, upperTransposition);
             symmetries.addUnsafe(upperTranspositionSymmetry);
         }
 
@@ -139,7 +139,7 @@ public final class SymmetriesFactory {
             int[] lowerTransposition = Combinatorics.createIdentity(upperCount + lowerCount);
             lowerTransposition[upperCount] = 1 + upperCount;
             lowerTransposition[upperCount + 1] = upperCount;
-            Symmetry lowerTranspositionSymmetry = new Symmetry(lowerTransposition, false);
+            Symmetry lowerTranspositionSymmetry = new Symmetry(false, lowerTransposition);
             symmetries.addUnsafe(lowerTranspositionSymmetry);
         }
 
@@ -151,7 +151,7 @@ public final class SymmetriesFactory {
                 upperCycle[i] = i - 1;
             for (; i < upperCount + lowerCount; ++i)
                 upperCycle[i] = i;
-            Symmetry upperCycleSymmetry = new Symmetry(upperCycle, false);
+            Symmetry upperCycleSymmetry = new Symmetry(false, upperCycle);
             symmetries.addUnsafe(upperCycleSymmetry);
         }
         if (lowerCount > 2) {
@@ -162,7 +162,7 @@ public final class SymmetriesFactory {
             ++i;
             for (; i < upperCount + lowerCount; ++i)
                 lowerCycle[i] = i - 1;
-            Symmetry lowerCycleSymmetry = new Symmetry(lowerCycle, false);
+            Symmetry lowerCycleSymmetry = new Symmetry(false, lowerCycle);
             symmetries.addUnsafe(lowerCycleSymmetry);
         }
 

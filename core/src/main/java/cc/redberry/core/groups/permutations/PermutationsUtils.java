@@ -26,9 +26,9 @@ package cc.redberry.core.groups.permutations;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public class PermutationGroupUtils {
+public class PermutationsUtils {
 
-    private PermutationGroupUtils() {
+    private PermutationsUtils() {
     }
 
     /**

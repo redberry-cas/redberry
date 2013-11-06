@@ -22,6 +22,7 @@
  */
 package cc.redberry.core.combinatorics;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -84,9 +85,9 @@ public class PermutationsSpanIteratorTest {
         //with dimension = 3
 
         //Sycle permutation
-        Symmetry a = new Symmetry(new int[]{2, 0, 1}, false);
+        Symmetry a = new Symmetry(false, new int[]{2, 0, 1});
         //Transposition witch is antysimmetry
-        Symmetry b = new Symmetry(new int[]{1, 0, 2}, true);
+        Symmetry b = new Symmetry(true, new int[]{1, 0, 2});
         List<Symmetry> symmetries = new ArrayList<>();
         symmetries.add(a);
         symmetries.add(b);
@@ -103,13 +104,13 @@ public class PermutationsSpanIteratorTest {
         //Levi-Civita combinatorics
         Symmetry[] l = new Symmetry[6];
         //Cycles
-        l[0] = new Symmetry(new int[]{0, 1, 2}, false);
-        l[1] = new Symmetry(new int[]{2, 0, 1}, false);
-        l[2] = new Symmetry(new int[]{1, 2, 0}, false);
+        l[0] = new Symmetry(false, new int[]{0, 1, 2});
+        l[1] = new Symmetry(false, new int[]{2, 0, 1});
+        l[2] = new Symmetry(false, new int[]{1, 2, 0});
         //Transpositions
-        l[3] = new Symmetry(new int[]{1, 0, 2}, true);
-        l[4] = new Symmetry(new int[]{0, 2, 1}, true);
-        l[5] = new Symmetry(new int[]{2, 1, 0}, true);
+        l[3] = new Symmetry(true, new int[]{1, 0, 2});
+        l[4] = new Symmetry(true, new int[]{0, 2, 1});
+        l[5] = new Symmetry(true, new int[]{2, 1, 0});
 
         Arrays.sort(arr);
         Arrays.sort(l);
@@ -123,9 +124,9 @@ public class PermutationsSpanIteratorTest {
         //R_{abcd}=-R_{abdc}=-R_{bacd} and R_{abcd}=R_{cdab}
         System.out.println("Generating all symmetries of Rieman tensor using generators:\n"
                 + "R_{abcd}=-R_{abdc}=-R_{bacd} and R_{abcd}=R_{cdab}");
-        Symmetry a = new Symmetry(new int[]{0, 1, 3, 2}, true);
-        Symmetry b = new Symmetry(new int[]{2, 3, 0, 1}, false);
-        Symmetry c = new Symmetry(new int[]{1, 0, 2, 3}, true);
+        Symmetry a = new Symmetry(true, new int[]{0, 1, 3, 2});
+        Symmetry b = new Symmetry(false, new int[]{2, 3, 0, 1});
+        Symmetry c = new Symmetry(true, new int[]{1, 0, 2, 3});
         List<Symmetry> symmetries = new ArrayList<>();
         symmetries.add(a);
         symmetries.add(b);
@@ -144,7 +145,7 @@ public class PermutationsSpanIteratorTest {
     public void testInconsistentGenerators1() {
         //This is inconsistent symmetry: there is N such that a^N = 1 with 
         //signum = true, but identity permutation can not change sign
-        Symmetry a = new Symmetry(new int[]{2, 1, 3, 0}, true);
+        Symmetry a = new Symmetry(true, new int[]{2, 1, 3, 0});
         PermutationsSpanIterator<Symmetry> iterator = new PermutationsSpanIterator<>(Collections.singletonList(a));
         //iterating will throw exception
         while (iterator.hasNext())
@@ -154,11 +155,11 @@ public class PermutationsSpanIteratorTest {
     @Test(expected = InconsistentGeneratorsException.class)
     public void testInconsistentGenerators2() {
         //This is consistent symmetry
-        Symmetry a = new Symmetry(new int[]{2, 1, 3, 0}, false);
+        Symmetry a = new Symmetry(false, new int[]{2, 1, 3, 0});
         //This is consistent symmetry to, but it is insonsistent with a: there 
         //is some way to multiply a*b*a.... = {0,2,3,1} :false and other way, that 
         // gives a*b*b*... = {0,2,3,1} : true
-        Symmetry b = new Symmetry(new int[]{2, 3, 0, 1}, true);
+        Symmetry b = new Symmetry(true, new int[]{2, 3, 0, 1});
         //add will throw exception
         List<Symmetry> list = new ArrayList<>();
         list.add(a);
@@ -171,7 +172,7 @@ public class PermutationsSpanIteratorTest {
     @Test
     public void testTransposition() {
         //This testing checks that transposition generates only identity permutation
-        Permutation a = new Symmetry(new int[]{1, 0, 2}, false);
+        Permutation a = new Symmetry(false, new int[]{1, 0, 2});
         PermutationsSpanIterator<Permutation> iterator = new PermutationsSpanIterator<>(Collections.singletonList(a));
         List<Permutation> result = new ArrayList<>();
         while (iterator.hasNext())
@@ -184,4 +185,60 @@ public class PermutationsSpanIteratorTest {
         Arrays.sort(standart);
         assertArrayEquals(standart, _result);
     }
+
+    @Test
+    public void testInfLoop() {
+        List<Symmetry> permutations = new ArrayList<>();
+        for (int tt = 0; tt < 10000; ++tt) {
+            permutations.clear();
+            for (int i = 0; i < 4; ++i) {
+                Symmetry p = null;
+                try {
+                    p = new Symmetry(i % 2 == 0 ? true : false, Combinatorics.randomPermutation(7));
+                } catch (Exception e) {
+                }
+                if (p != null)
+                    permutations.add(p);
+            }
+
+            if (permutations.isEmpty())
+                continue;
+
+            try {
+                System.out.println("\n\n\n");
+                for (Symmetry p : permutations) {
+                    String s = p.toString();
+                    s = s.substring(1, s.length() - 4);
+                    s = "permutations.add ( new Symmetry(" + p.isAntiSymmetry() + ", " + s + "));";
+                    System.out.println(s);
+                }
+                PermutationsSpanIterator<Symmetry> bf = new PermutationsSpanIterator(new ArrayList<>(permutations));
+                while (bf.hasNext())
+                    bf.next();
+            } catch (Exception ex) {
+                continue;
+            }
+        }
+    }
+
+    @Test
+    public void testInfLoop1() {
+        List<Permutation> permutations = new ArrayList<>();
+        permutations.add(new Permutation(1, 5, 4, 6, 3, 0, 2));
+        permutations.add(new Permutation(5, 3, 2, 6, 0, 4, 1));
+        permutations.add(new Permutation(0, 4, 2, 3, 5, 1, 6));
+        PermutationsSpanIterator<Permutation> bf = new PermutationsSpanIterator(new ArrayList<>(permutations));
+        int i = 0, c = 0;
+        //7! = 5040
+        while (bf.hasNext()) {
+            bf.next();
+            System.out.println(++i);
+//            if (i == 100) {
+//                System.out.println(c++);
+//                i = 0;
+//            }
+        }
+        System.out.println("ok");
+    }
+
 }

@@ -22,6 +22,7 @@
  */
 package cc.redberry.core.groups.permutations;
 
+import java.math.BigInteger;
 import java.util.Arrays;
 
 /**
@@ -38,11 +39,11 @@ public final class Permutation implements Comparable<Permutation> {
      *
      * @param sign        sign of permutation ({@code true} means minus)
      * @param permutation permutation in one-line notation
-     * @throws IllegalArgumentException if permutation array is inconsistent
+     * @throws IllegalArgumentException if permutation is inconsistent
      */
     public Permutation(boolean sign, int... permutation) {
-        if (!Combinatorics.testPermutationCorrectness(permutation))
-            throw new IllegalArgumentException();
+        if (!Combinatorics.testPermutationCorrectness(permutation, sign))
+            throw new IllegalArgumentException("Inconsistent permutation.");
         this.permutation = permutation.clone();
         this.sign = sign;
     }
@@ -57,10 +58,12 @@ public final class Permutation implements Comparable<Permutation> {
         this(false, permutation);
     }
 
-    //unsafe constructor
+    //no check for one-line notation => unsafe constructor
     Permutation(boolean unsafe, boolean sign, int... permutation) {
         this.permutation = permutation;
         this.sign = sign;
+        if (sign && Combinatorics.orderIsOdd(permutation))
+            throw new InconsistentGeneratorsException();
     }
 
     /**
@@ -91,12 +94,16 @@ public final class Permutation implements Comparable<Permutation> {
      * @throws IllegalArgumentException if {@code other.length != this.length}
      */
     public Permutation composition(final Permutation other) {
-        if (permutation.length != other.permutation.length)
-            throw new IllegalArgumentException();
-        final int[] result = new int[permutation.length];
-        for (int i = permutation.length - 1; i >= 0; --i)
-            result[i] = other.permutation[permutation[i]];
-        return new Permutation(true, sign ^ other.sign, result);
+        try {
+            if (permutation.length != other.permutation.length)
+                throw new IllegalArgumentException();
+            final int[] result = new int[permutation.length];
+            for (int i = permutation.length - 1; i >= 0; --i)
+                result[i] = other.permutation[permutation[i]];
+            return new Permutation(true, sign ^ other.sign, result);
+        } catch (InconsistentGeneratorsException ex) {
+            throw new InconsistentGeneratorsException(this + " and " + other);
+        }
     }
 
 
@@ -109,7 +116,7 @@ public final class Permutation implements Comparable<Permutation> {
      * @throws IllegalArgumentException if {@code other.length != this.length}
      */
     public Permutation compositionWithInverse(final Permutation other) {
-        //todo improve!!!
+        //todo improve?
         return composition(other.inverse());
     }
 
@@ -157,8 +164,47 @@ public final class Permutation implements Comparable<Permutation> {
         return Combinatorics.getIdentity(permutation.length);
     }
 
+
+    /**
+     * Calculates the order of this permutation. Since the maximum order g(n) of permutation in symmetric group
+     * S(n) is about log(g(n)) <= sqrt(n log(n))* (1 + log log(n) / (2 log(n))) [1], then g(n) can be very big (e.g.
+     * for n = 1000, g(n) ~1e25). The algorithm decomposes permutation into product of cycles and returns l.c.m. of their sizes.
+     *
+     * @return order of this permutation
+     * @see Combinatorics#order(int[])
+     */
+    public BigInteger order() {
+        return Combinatorics.order(permutation);
+    }
+
+    /**
+     * Returns true if order of this permutation is odd and false otherwise.
+     *
+     * @return true if order of this permutation is odd and false otherwise
+     */
+    public boolean orderIsOdd() {
+        return Combinatorics.orderIsOdd(permutation);
+    }
+
     public int length() {
         return permutation.length;
+    }
+
+    /**
+     * Returns this raised to the specified exponent.
+     *
+     * @param exponent exponent
+     * @return this raised to the specified exponent
+     */
+    public Permutation pow(int exponent) {
+        Permutation base = this, result = getIdentity();
+        while (exponent != 0) {
+            if (exponent % 2 == 1)
+                result = result.composition(base);
+            base = base.composition(base);
+            exponent = exponent >> 1;
+        }
+        return result;
     }
 
     @Override

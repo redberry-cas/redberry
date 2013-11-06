@@ -29,7 +29,7 @@ import static java.lang.Math.min;
 /**
  * This class represents an "array of booleans" with many fast and useful methods. Consumes ~ 8 times less memory than
  * array of booleans for big sizes. Has slightly different semantics than java's built in {@link java.util.BitSet} and
- * also provides addititonal functionality like {@link #loadValueFrom(BitArray, int, int, int)} and {@link
+ * also provides additional functionality like {@link #loadValueFrom(BitArray, int, int, int)} and {@link
  * #copyOfRange(int, int)}.
  */
 public class BitArray {
@@ -324,6 +324,35 @@ public class BitArray {
             return -1;
         else
             return ((position - 1) << 5) + ret;
+    }
+
+    /**
+     * Returns the next "0" bit from the specified position (inclusively).
+     *
+     * @param position initial position
+     * @return position of the next "0" bit of -1 if all bits after position are 0
+     */
+    public int nextZeroBit(int position) {
+        //todo review
+        int ret = position & 0x1F;
+        if (ret != 0)
+            if ((ret = Integer.numberOfTrailingZeros((~data[position >>> 5]) >>> ret)) != 32) {
+                int r = position + ret;
+                return r >= size() ? -1 : r;
+            } else
+                position += 32;
+
+        ret = 32;
+        position = position >>> 5;
+        while (position < data.length &&
+                (ret = Integer.numberOfTrailingZeros(~data[position++])) == 32) ;
+
+        if (position >= data.length && ret == 32)
+            return -1;
+        else {
+            int r = ((position - 1) << 5) + ret;
+            return r >= size() ? -1 : r;
+        }
     }
 
     /**

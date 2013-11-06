@@ -22,12 +22,14 @@
  */
 package cc.redberry.core.groups.permutations;
 
+import cc.redberry.core.utils.ArraysUtils;
 import org.junit.Test;
 
+import java.math.BigInteger;
 import java.util.Arrays;
+import java.util.Random;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  * @author Dmitry Bolotin
@@ -86,4 +88,94 @@ public class PermutationTest {
     public void testConstructorException3() {
         new Permutation(new int[]{0, 1, 1});
     }
+
+    @Test
+    public void testOrder1() {
+        Permutation p = new Permutation(1, 0);
+        assertEquals(2, p.order().intValue());
+    }
+
+    @Test
+    public void testOrder2() {
+        Permutation p = new Permutation(2, 0, 1);
+        assertEquals(3, p.order().intValue());
+    }
+
+    @Test
+    public void testOrder3() {
+        Permutation p = new Permutation(2, 0, 1);
+        assertEquals(3, p.order().intValue());
+        assertEquals(3, bruteForceOrder(p));
+        assertTrue(p.pow(3).isIdentity());
+    }
+
+    @Test
+    public void testOrder4() {
+        for (int i = 0; i < 1000; ++i) {
+            Permutation p = new Permutation(randomPermutation(30));
+            assertEquals(bruteForceOrder(p), p.order().intValue());
+            assertTrue(p.pow(p.order().intValue()).isIdentity());
+        }
+    }
+
+    @Test(timeout = 15000)
+    public void testOrder5() {
+        BigInteger veryBigNumber = BigInteger.valueOf(Integer.MAX_VALUE).pow(3);
+        int n = 1000000;
+        Permutation p = new Permutation(randomPermutation(n));
+        while (p.order().compareTo(veryBigNumber) < 0) {
+            p = new Permutation(randomPermutation(n));
+        }
+    }
+
+    @Test
+    public void testOrderParity1() {
+        Permutation p = new Permutation(15, 10, 1, 22, 14, 9, 19, 7, 2, 16, 25, 28, 4, 23, 18, 29, 26, 12, 21, 3, 6, 13, 8, 17, 20, 11, 0, 5, 24, 27);
+        assertFalse(Combinatorics.orderIsOdd(p.permutation));
+    }
+
+    @Test
+    public void testOrderParity2() {
+        for (int i = 0; i < 10000; ++i) {
+            Permutation p = new Permutation(randomPermutation(100));
+            assertEquals(p.order().testBit(0), Combinatorics.orderIsOdd(p.permutation));
+        }
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testInconsistentSign1() {
+        new Permutation(true, 0, 1);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testInconsistentSign2() {
+        new Permutation(true, 3, 4, 0, 1, 2);
+    }
+
+    private static int bruteForceOrder(Permutation p) {
+        Permutation t = p;
+        for (int i = 1; i < Integer.MAX_VALUE; ++i) {
+            if (t.isIdentity())
+                return i;
+            t = t.composition(p);
+        }
+        return -1;
+    }
+
+    public static int[] randomPermutation(final int n) {
+        Random rnd = new Random();
+        int[] p = new int[n];
+        for (int i = 0; i < n; ++i)
+            p[i] = i;
+        for (int i = n; i > 1; --i)
+            ArraysUtils.swap(p, i - 1, rnd.nextInt(i));
+        for (int i = n; i > 1; --i)
+            ArraysUtils.swap(p, i - 1, rnd.nextInt(i));
+        for (int i = n; i > 1; --i)
+            ArraysUtils.swap(p, i - 1, rnd.nextInt(i));
+        for (int i = n; i > 1; --i)
+            ArraysUtils.swap(p, i - 1, rnd.nextInt(i));
+        return p;
+    }
+
 }

@@ -33,7 +33,7 @@ import java.util.*;
  * @author Stanislav Poslavsky
  * @see BSGSCandidateElement
  */
-public class BSGSFactory {
+public class BSGSAlgorithms {
 
     /**
      * The result of {@link #strip(java.util.List, Permutation)}
@@ -282,7 +282,8 @@ public class BSGSFactory {
                     if (generator.newIndexOf(point) != point) {
                         //this point is not fixed by current generator
                         //let's add this point to base
-                        BSGSCandidate.add(new BSGSCandidateElement(point, BSGSCandidate.get(BSGSCandidate.size() - 1).getStabilizersOfThisBasePoint(),
+                        BSGSCandidate.add(new BSGSCandidateElement(point,
+                                BSGSCandidate.get(BSGSCandidate.size() - 1).getStabilizersOfThisBasePoint(),
                                 new int[length]));
                     }
             }
@@ -468,6 +469,30 @@ public class BSGSFactory {
         for (int i = 1; i < generators.length; ++i)
             if (generators[i - 1].length() != generators[i].length())
                 return false;
+        return true;
+    }
+
+    /**
+     * Compares two permutations and throws exception if they have same arrays, but different signs
+     *
+     * @param a
+     * @param b
+     * @return true if a equals b, false otherwise
+     * @throws InconsistentGeneratorsException
+     *          if permutations have same arrays, but different signs
+     */
+    private static boolean equalsWithException(Permutation a, Permutation b) {
+        boolean compare = Arrays.equals(a.permutation, b.permutation);
+        if (compare && (a.sign != b.sign))
+            throw new InconsistentGeneratorsException(a + " and " + b);
+        return compare;
+    }
+
+    private static boolean isIdentityWithException(Permutation p) {
+        for (int i = p.permutation.length - 1; i >= 0; --i)
+            if (p.permutation[i] != i) return false;
+        if (p.sign)
+            new InconsistentGeneratorsException(p.toString());
         return true;
     }
 }

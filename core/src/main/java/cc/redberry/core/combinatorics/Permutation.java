@@ -59,7 +59,7 @@ public class Permutation implements Comparable<Permutation> {
      * @throws IllegalArgumentException if array is inconsistent with
      *                                  <i>one-line</i> notation
      */
-    public Permutation(int[] permutation) {
+    public Permutation(int... permutation) {
         if (!Combinatorics.testPermutationCorrectness(permutation))
             throw new IllegalArgumentException("Wrong permutation input: input array is not consistent with one-line notation");
         this.permutation = permutation.clone();
@@ -116,7 +116,7 @@ public class Permutation implements Comparable<Permutation> {
     }
 
     public Symmetry asSymmetry() {
-        return new Symmetry(permutation, false);
+        return new Symmetry(false, permutation);
     }
 
     protected int[] calculateInverse() {

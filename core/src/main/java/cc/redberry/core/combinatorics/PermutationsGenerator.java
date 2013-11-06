@@ -77,7 +77,7 @@ public class PermutationsGenerator<T extends Permutation> implements Iterator<T>
     public T next() {
         generator.next();
         //noinspection unchecked
-        return (T) new Symmetry(generator.permutation.clone(), false);
+        return (T) new Symmetry(false, generator.permutation.clone());
     }
 
     /**

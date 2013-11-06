@@ -146,4 +146,14 @@ public class BSGSElement {
         return orbitList.size();
     }
 
+    /**
+     * Returns <i>i-th</i> point in orbit.
+     *
+     * @param i position in orbit
+     * @return <i>i-th</i> point in orbit
+     */
+    public int getOrbitPoint(int i) {
+        return orbitList.get(i);
+    }
+
 }

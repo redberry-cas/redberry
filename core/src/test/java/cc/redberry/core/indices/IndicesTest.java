@@ -280,13 +280,13 @@ public class IndicesTest {
     @Test
     public void testDiffIds2() {
         Symmetry[] symmetries = new Symmetry[]{
-                new Symmetry(new int[]{1, 0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11}, false),
-                new Symmetry(new int[]{0, 2, 1, 3, 4, 5, 6, 7, 8, 9, 10, 11}, false),
-                new Symmetry(new int[]{0, 1, 3, 2, 4, 5, 6, 7, 8, 9, 10, 11}, false),
-                new Symmetry(new int[]{0, 1, 2, 4, 3, 5, 6, 7, 8, 9, 10, 11}, false),
-                new Symmetry(new int[]{0, 1, 2, 3, 5, 4, 6, 7, 8, 9, 10, 11}, false),
-                new Symmetry(new int[]{0, 1, 2, 3, 4, 6, 7, 11, 10, 9, 8, 5}, false),
-                new Symmetry(new int[]{0, 1, 2, 3, 4, 5, 6, 7, 8, 11, 10, 9}, false)
+                new Symmetry(false, new int[]{1, 0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11}),
+                new Symmetry(false, new int[]{0, 2, 1, 3, 4, 5, 6, 7, 8, 9, 10, 11}),
+                new Symmetry(false, new int[]{0, 1, 3, 2, 4, 5, 6, 7, 8, 9, 10, 11}),
+                new Symmetry(false, new int[]{0, 1, 2, 4, 3, 5, 6, 7, 8, 9, 10, 11}),
+                new Symmetry(false, new int[]{0, 1, 2, 3, 5, 4, 6, 7, 8, 9, 10, 11}),
+                new Symmetry(false, new int[]{0, 1, 2, 3, 4, 6, 7, 11, 10, 9, 8, 5}),
+                new Symmetry(false, new int[]{0, 1, 2, 3, 4, 5, 6, 7, 8, 11, 10, 9})
         };
         IntPermutationsGenerator gen = new IntPermutationsGenerator(symmetries.length);
         int[] p;
