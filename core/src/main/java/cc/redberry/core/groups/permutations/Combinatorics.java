@@ -85,10 +85,10 @@ public class Combinatorics {
         //lcm
         BigInteger lcm = BigInteger.ONE, temp;
 
-        int start, pointer, currentSize;
+        int start, pointer, currentSize, counter = 0;
         //while not all points are seen
         //loop over cycles
-        while (!used.isFull()) {
+        while (counter < permutation.length) {
             //get first point that was not already traversed
             start = pointer = used.nextZeroBit(0);
             currentSize = 0;
@@ -100,6 +100,7 @@ public class Combinatorics {
                 pointer = permutation[pointer];
                 ++currentSize;
             } while (pointer != start);
+            counter += currentSize;
             temp = BigInteger.valueOf(currentSize);
             //calculate l.c.m.
             lcm = (lcm.divide(lcm.gcd(temp))).multiply(temp);
@@ -113,7 +114,7 @@ public class Combinatorics {
      * @param permutation permutation
      * @return true if order of specified permutation is odd and false otherwise
      */
-    public static boolean orderIsOdd(int[] permutation) {
+    public static boolean orderIsOdd(final int[] permutation) {
         //we shall decompose this permutation into product of cycles and calculate l.c.m. of their sizes
 
         //to mark viewed points
@@ -121,10 +122,10 @@ public class Combinatorics {
         //sizes of cycles
         IntArrayList sizes = new IntArrayList();
 
-        int start, pointer, currentSize;
+        int start, pointer, currentSize, counter = 0;
         //while not all points are seen
         //loop over cycles
-        while (!used.isFull()) {
+        while (counter < permutation.length) {
             //get first point that was not already traversed
             start = pointer = used.nextZeroBit(0);
             currentSize = 0;
@@ -137,6 +138,7 @@ public class Combinatorics {
                 ++currentSize;
             } while (pointer != start);
             sizes.add(currentSize);
+            counter += currentSize;
         }
 
         //only one cycle
@@ -155,7 +157,7 @@ public class Combinatorics {
 
         boolean evenNumerator = false;
         boolean oddDenominator = true;
-        for (int i = 0; i < sizes.size(); ++i) {
+        for (int i = 0, size = sizes.size(); i < size; ++i) {
             if (sizes.get(i) % 2 == 0) {
                 if (evenNumerator) {
                     oddDenominator = false;
@@ -182,16 +184,13 @@ public class Combinatorics {
 
         int den = 0, exponent, num = extractPowerOf2(sizes.get(0));
 
-        for (int i = 1; i < sizes.size(); ++i) {
+        for (int i = 1, size = sizes.size(); i < size; ++i) {
             exponent = extractPowerOf2(sizes.get(i));
             den = Math.min(den + exponent, num); //<- trick
             num += exponent;
         }
 
-        if (num <= den)
-            return true;
-
-        return false;
+        return num <= den;
     }
 
     private static int extractPowerOf2(int n) {

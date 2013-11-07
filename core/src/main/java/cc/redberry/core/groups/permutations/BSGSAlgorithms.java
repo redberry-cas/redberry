@@ -294,16 +294,16 @@ public class BSGSAlgorithms {
      * Applies Schreier-Sims algorithm for _BSGS candidate and complete it if necessary, so, as a result the specified
      * _BSGS candidate is guarantied to be _BSGS. The algorithm described as SCHREIERSIMS in Sec. 4.4.1 of <b>[Holt05]</b>.
      *
-     * @param BSGS _BSGS candidate
+     * @param BSGSCandidate _BSGS candidate
      */
-    public static void SchreierSimsAlgorithm(ArrayList<BSGSCandidateElement> BSGS) {
-        final int length = BSGS.get(0).stabilizerGenerators.get(0).length();
+    public static void SchreierSimsAlgorithm(ArrayList<BSGSCandidateElement> BSGSCandidate) {
+        final int length = BSGSCandidate.get(0).stabilizerGenerators.get(0).length();
         //main loop
         BSGSCandidateElement currentElement;
-        int index = BSGS.size() - 1;
+        int index = BSGSCandidate.size() - 1;
         elements:
         while (index >= 0) {
-            currentElement = BSGS.get(index);
+            currentElement = BSGSCandidate.get(index);
 
             //we need to test that H^i_{beta_i} = H^{(i+1)}
             //for this purpose we shall test that each generator of H^i_{beta_i} belongs to H^{(i+1)}
@@ -337,11 +337,11 @@ public class BSGSAlgorithms {
                         // we can use STRIP since main condition H^i_{beta_i} = H^{(i+1)} is already verified for
                         // all larger values of index (i.e. if we take a part of _BSGS starting from index, then it is
                         // real a _BSGS for a subgroup fixing all points before index)
-                        StripContainer strip = strip(BSGS, SchreierGenerator);
+                        StripContainer strip = strip(BSGSCandidate, SchreierGenerator);
 
                         //this signals, whether we shall add new generator to our _BSGS (not necessary a new point)
                         boolean toAddNewGenerator = false;
-                        if (strip.terminationLevel < BSGS.size()) {
+                        if (strip.terminationLevel < BSGSCandidate.size()) {
                             // strip terminated earlier then complete:
                             // this means, that corresponding SchreierGenerator extends an orbit of
                             // _BSGS[terminationLevel] element, i.e. there is a permutation (actually it is remainder)
@@ -357,7 +357,9 @@ public class BSGSAlgorithms {
                             for (int i = 0; i < length; ++i)
                                 if (strip.remainder.newIndexOf(i) != i) {
                                     // adding this point to _BSGS (with empty stabilizers set, since it is a last point)
-                                    BSGS.add(new BSGSCandidateElement(i, new ArrayList<Permutation>(), new int[length]));
+                                    BSGSCandidate.add(new BSGSCandidateElement(i, new ArrayList<Permutation>(), new int[length]));
+                                    //here we can proceed, but we break
+                                    break;
                                 }
                         }
 
@@ -367,9 +369,9 @@ public class BSGSAlgorithms {
 
                             for (int i = index + 1; i <= strip.terminationLevel; ++i) {
                                 //add new generator
-                                BSGS.get(i).stabilizerGenerators.add(strip.remainder);
+                                BSGSCandidate.get(i).stabilizerGenerators.add(strip.remainder);
                                 //recalculate content
-                                BSGS.get(i).recalculateOrbitAndSchreierVector();
+                                BSGSCandidate.get(i).recalculateOrbitAndSchreierVector();
                             }
 
                             //revert
