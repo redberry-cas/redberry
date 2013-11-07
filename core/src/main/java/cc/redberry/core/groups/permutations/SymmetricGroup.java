@@ -26,6 +26,7 @@ import cc.redberry.core.number.NumberUtils;
 
 import java.math.BigInteger;
 import java.util.Iterator;
+import java.util.List;
 
 import static cc.redberry.core.groups.permutations.PermutationsUtils.checkSizeWithException;
 
@@ -42,6 +43,11 @@ public final class SymmetricGroup implements PermutationGroup {
         orbit = new int[length];
         for (int i = 0; i < length; ++i)
             orbit[i] = i;
+    }
+
+    @Override
+    public List<Permutation> generators() {
+        throw new UnsupportedOperationException();
     }
 
     @Override

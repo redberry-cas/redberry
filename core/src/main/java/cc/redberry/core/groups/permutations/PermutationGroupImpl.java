@@ -23,7 +23,9 @@
 package cc.redberry.core.groups.permutations;
 
 import java.math.BigInteger;
+import java.util.Collections;
 import java.util.Iterator;
+import java.util.List;
 
 /**
  * @author Dmitry Bolotin
@@ -38,8 +40,13 @@ public final class PermutationGroupImpl implements PermutationGroup {
         length = BSGS.BSGSList.get(0).stabilizerGenerators.get(0).length();
     }
 
-    public BSGS get_BSGS() {
+    public BSGS getBSGS() {
         return _BSGS;
+    }
+
+    @Override
+    public List<Permutation> generators() {
+        return _BSGS.BSGSList.get(0).stabilizerGenerators;
     }
 
     @Override

@@ -195,6 +195,18 @@ public class PermutationGroupTest {
     }
 
     @Test
+    public void testBSGS1() {
+        Permutation a, b, c, d, e, generators[];
+        PermutationGroup group;
+        a = new Permutation(1, 0, 2, 3, 4, 5, 6);
+        b = new Permutation(2, 1, 3, 4, 5, 6, 0);
+        generators = new Permutation[]{a, b};
+        group = PermutationGroupFactory.createPermutationGroup(generators);
+        System.out.println(
+                Arrays.toString(((PermutationGroupImpl) group).getBSGS().getBaseArray()));
+    }
+
+    @Test
     public void testMembership() {
         Permutation a, b, c, d, e, generators[];
         PermutationGroup group;

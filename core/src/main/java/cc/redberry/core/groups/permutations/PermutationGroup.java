@@ -23,6 +23,7 @@
 package cc.redberry.core.groups.permutations;
 
 import java.math.BigInteger;
+import java.util.List;
 
 /**
  * @author Dmitry Bolotin
@@ -45,6 +46,13 @@ public interface PermutationGroup
      * @return number of permutations in this group
      */
     BigInteger order();
+
+    /**
+     * Returns an unmodifiable list of group generators.
+     *
+     * @return unmodifiable list of group generators
+     */
+    List<Permutation> generators();
 
     /**
      * Return the dimension of group (length of each permutation)

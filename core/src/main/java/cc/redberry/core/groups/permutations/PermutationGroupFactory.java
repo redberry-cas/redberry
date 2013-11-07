@@ -22,12 +22,18 @@
  */
 package cc.redberry.core.groups.permutations;
 
+import java.util.Collection;
+
 /**
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
 public final class PermutationGroupFactory {
     private PermutationGroupFactory() {
+    }
+
+    public static PermutationGroup createPermutationGroup(Collection<Permutation> generators) {
+        return createPermutationGroup(generators.toArray(new Permutation[generators.size()]));
     }
 
     public static PermutationGroup createPermutationGroup(Permutation... generators) {

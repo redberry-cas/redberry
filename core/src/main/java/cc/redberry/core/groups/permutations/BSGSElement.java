@@ -25,8 +25,6 @@ package cc.redberry.core.groups.permutations;
 import cc.redberry.core.utils.IntArrayList;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -109,9 +107,9 @@ public class BSGSElement {
     }
 
     /**
-     * Returns an immutable representation of this _BSGS element
+     * Returns an immutable representation of this BSGS element
      *
-     * @return immutable representation of this _BSGS element
+     * @return immutable representation of this BSGS element
      */
     public BSGSElement asBSGSElement() {
         return this;
@@ -128,9 +126,9 @@ public class BSGSElement {
     }
 
     /**
-     * Returns a mutable copy of this _BSGS element.
+     * Returns a mutable copy of this BSGS element.
      *
-     * @return a mutable copy of this _BSGS element
+     * @return a mutable copy of this BSGS element
      */
     public BSGSCandidateElement asBSGSCandidateElement() {
         return new BSGSCandidateElement(basePoint,

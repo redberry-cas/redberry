@@ -48,9 +48,9 @@ public final class BSGS implements Iterable<Permutation> {
     }
 
     /**
-     * Returns unmodifiable list of _BSGS elements
+     * Returns unmodifiable list of BSGS elements
      *
-     * @return unmodifiable list of _BSGS elements
+     * @return unmodifiable list of BSGS elements
      */
     public List<BSGSElement> getBSGSList() {
         return BSGSList;
@@ -66,10 +66,10 @@ public final class BSGS implements Iterable<Permutation> {
     }
 
     /**
-     * Returns whether the specified permutation is member of group represented by this _BSGS
+     * Returns whether the specified permutation is member of group represented by this BSGS
      *
      * @param permutation permutation
-     * @return true if specified permutation is member of group represented by this _BSGS
+     * @return true if specified permutation is member of group represented by this BSGS
      */
     public boolean isMember(Permutation permutation) {
         BSGSAlgorithms.StripContainer container = BSGSAlgorithms.strip(BSGSList, permutation);
@@ -77,9 +77,9 @@ public final class BSGS implements Iterable<Permutation> {
     }
 
     /**
-     * Returns the number of permutations in group represented by this _BSGS
+     * Returns the number of permutations in group represented by this BSGS
      *
-     * @return number of permutations in group represented by this _BSGS
+     * @return number of permutations in group represented by this BSGS
      */
     public BigInteger order() {
         BigInteger order = BigInteger.ONE;

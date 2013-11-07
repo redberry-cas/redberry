@@ -46,6 +46,7 @@ public final class BSGSCandidateElement extends BSGSElement {
      */
     BSGSCandidateElement(int basePoint, List<Permutation> stabilizerGenerators, int[] schreierVector) {
         super(basePoint, stabilizerGenerators, schreierVector, new IntArrayList());
+        assert stabilizerGenerators instanceof ArrayList;
         //creating list of orbit points
         orbitList.add(basePoint);
         recalculateOrbitAndSchreierVector();
@@ -106,7 +107,7 @@ public final class BSGSCandidateElement extends BSGSElement {
      */
     @Override
     public BSGSElement asBSGSElement() {
-        return new BSGSElement(basePoint, new ArrayList<>(stabilizerGenerators), SchreierVector, orbitList.clone());
+        return new BSGSElement(basePoint, Collections.unmodifiableList(stabilizerGenerators), SchreierVector, orbitList.clone());
     }
 
     @Override

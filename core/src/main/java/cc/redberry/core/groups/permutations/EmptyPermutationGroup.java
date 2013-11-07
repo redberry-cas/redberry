@@ -25,7 +25,9 @@ package cc.redberry.core.groups.permutations;
 import cc.redberry.core.utils.SingleIterator;
 
 import java.math.BigInteger;
+import java.util.Collections;
 import java.util.Iterator;
+import java.util.List;
 
 /**
  * @author Dmitry Bolotin
@@ -38,6 +40,11 @@ public class EmptyPermutationGroup implements PermutationGroup {
     EmptyPermutationGroup(int length) {
         this.length = length;
         this.identity = Combinatorics.createIdentity(length);
+    }
+
+    @Override
+    public List<Permutation> generators() {
+        return Collections.singletonList(identity);
     }
 
     @Override

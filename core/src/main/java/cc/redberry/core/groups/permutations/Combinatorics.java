@@ -22,20 +22,20 @@
  */
 package cc.redberry.core.groups.permutations;
 
-import cc.redberry.core.number.NumberUtils;
 import cc.redberry.core.utils.ArraysUtils;
 import cc.redberry.core.utils.BitArray;
 import cc.redberry.core.utils.IntArrayList;
-import org.apache.commons.math3.util.ArithmeticUtils;
 
 import java.math.BigInteger;
+import java.util.BitSet;
+import java.util.Collection;
 import java.util.Random;
 
 /**
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public class Combinatorics {
+public final class Combinatorics {
 
     /**
      * Tests whether the specified array satisfies the one-line notation for permutations
@@ -203,6 +203,42 @@ public class Combinatorics {
     }
 
 
+    /**
+     * Returns a size of specified point orbit
+     *
+     * @param generators a list of group generators
+     * @param point      point
+     * @return size of point orbit
+     */
+    public static int getOrbitSize(Collection<Permutation> generators, int point) {
+        if (generators.isEmpty())
+            return 1;
+        //orbit as list
+        IntArrayList orbitList = new IntArrayList();
+        orbitList.add(point);
+        //seen points
+        BitSet seen = new BitSet(generators.iterator().next().length());
+
+        int imageOfPoint;
+        //main loop over all points in orbit
+        for (int orbitIndex = 0; orbitIndex < orbitList.size(); ++orbitIndex) {
+            //loop over all generators of a group
+            for (Permutation generator : generators) {
+                //image of point under permutation
+                imageOfPoint = generator.newIndexOf(orbitList.get(orbitIndex));
+                //testing whether current permutation maps orbit point into orbit or not
+                if (!seen.get(imageOfPoint)) {
+                    //adding new point to orbit
+                    orbitList.add(imageOfPoint);
+                    //filling Schreier vector
+                    seen.set(imageOfPoint);
+                }
+            }
+        }
+        return orbitList.size();
+    }
+
+
     private static final Permutation[] cachedIdentities = new Permutation[64];
 
     public static Permutation createIdentity(int length) {
@@ -213,7 +249,7 @@ public class Combinatorics {
     }
 
     public static Permutation getIdentity(int length) {
-        if (cachedIdentities.length >= length)
+        if (cachedIdentities.length < length)
             return createIdentity(length);
         if (cachedIdentities[length] == null)
             synchronized (cachedIdentities) {
