@@ -25,6 +25,8 @@ package cc.redberry.core.groups.permutations;
 import cc.redberry.core.utils.ArraysUtils;
 import cc.redberry.core.utils.BitArray;
 import cc.redberry.core.utils.IntArrayList;
+import org.apache.commons.math3.random.RandomGenerator;
+import org.apache.commons.math3.random.Well19937a;
 
 import java.math.BigInteger;
 import java.util.BitSet;
@@ -259,6 +261,16 @@ public final class Combinatorics {
         return cachedIdentities[length];
     }
 
+    /**
+     * Creates random permutation of specified dimension
+     *
+     * @param n    dimension
+     * @param seed random seed
+     * @return random permutation of specified dimension
+     */
+    public static int[] randomPermutation(final int n, long seed) {
+        return randomPermutation(n, new Well19937a(seed));
+    }
 
     /**
      * Creates random permutation of specified dimension
@@ -267,7 +279,7 @@ public final class Combinatorics {
      * @param rnd random generator
      * @return random permutation of specified dimension
      */
-    public static int[] randomPermutation(final int n, Random rnd) {
+    public static int[] randomPermutation(final int n, RandomGenerator rnd) {
         int[] p = new int[n];
         for (int i = 0; i < n; ++i)
             p[i] = i;
@@ -285,6 +297,6 @@ public final class Combinatorics {
      * @return random permutation of specified dimension
      */
     public static int[] randomPermutation(final int n) {
-        return randomPermutation(n, new Random());
+        return randomPermutation(n, new Well19937a());
     }
 }

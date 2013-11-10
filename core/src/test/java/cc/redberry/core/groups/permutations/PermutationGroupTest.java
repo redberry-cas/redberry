@@ -23,6 +23,8 @@
 package cc.redberry.core.groups.permutations;
 
 import cc.redberry.core.number.NumberUtils;
+import org.apache.commons.math3.random.RandomGenerator;
+import org.apache.commons.math3.random.Well1024a;
 import org.junit.Test;
 
 import java.util.*;
@@ -51,6 +53,22 @@ public class PermutationGroupTest {
         c = new Permutation(1, 3, 2, 5, 0, 4);
         assertTrue(pg.isMember(b));
         assertTrue(pg.isMember(c));
+    }
+
+    @Test
+    public void test2() {
+        Permutation b, c;
+
+        b = new Permutation(1, 0, 2, 3, 4, 5);
+        c = new Permutation(2, 3, 4, 5, 0, 1);
+
+        System.out.println(c.composition(c));
+        System.out.println(c.composition(c).composition(c));
+
+        PermutationGroup pg = PermutationGroupFactory.createPermutationGroup(b, c);
+        assertEquals(NumberUtils.factorial(6), pg.order());
+
+
     }
 
     @Test
@@ -146,7 +164,7 @@ public class PermutationGroupTest {
 
     @Test
     public void testInconsistentGenerators1() {
-        Random random = new Random();
+        RandomGenerator random = new Well1024a();
         List<Permutation> permutations = new ArrayList<>();
 
         //long start = System.currentTimeMillis();

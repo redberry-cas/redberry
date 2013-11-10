@@ -24,10 +24,12 @@ package cc.redberry.core.groups.permutations;
 
 import cc.redberry.core.utils.IntArrayList;
 import org.apache.commons.math3.random.RandomGenerator;
-import org.apache.commons.math3.random.Well19937a;
 import org.apache.commons.math3.util.FastMath;
 
+import java.math.BigInteger;
 import java.util.*;
+
+import static cc.redberry.core.groups.permutations.RandomPermutation.*;
 
 /**
  * Factory methods to create base and strong generating set.
@@ -156,7 +158,7 @@ public class BSGSAlgorithms {
         IntArrayList base = new IntArrayList(knownBase.clone());
 
         //we try to find such a point that is not fixed at least by one of the generators
-        for (int i = base.size(); i >= 0; --i) {
+        for (int i = base.size() - 1; i >= 0; --i) {
             for (Permutation permutation : generators)
                 if (permutation.newIndexOf(i) != i)
                     continue;
@@ -302,6 +304,8 @@ public class BSGSAlgorithms {
      * @param BSGSCandidate BSGS candidate
      */
     public static void SchreierSimsAlgorithm(ArrayList<BSGSCandidateElement> BSGSCandidate) {
+        if (BSGSCandidate.isEmpty())
+            return;
         final int length = BSGSCandidate.get(0).stabilizerGenerators.get(0).length();
         //main loop
         BSGSCandidateElement currentElement;
@@ -460,7 +464,7 @@ public class BSGSAlgorithms {
                 // (note, that it can fix all old base points, but not necessary)
 
                 //we do not know the index, so we shall add it to all elements (c'est la vie)
-                for (int i = 2; i <= strip.terminationLevel; ++i) {
+                for (int i = 1; i <= strip.terminationLevel; ++i) {
                     //add new generator
                     BSGSCandidate.get(i).stabilizerGenerators.add(strip.remainder);
                     //recalculate content
@@ -475,6 +479,85 @@ public class BSGSAlgorithms {
                 ++sifted;
             }
         }
+    }
+
+    /**
+     * Applies random Schreier-Sims algorithm for BSGS candidate if resulting group order is known
+     * and complete it if necessary, so, as a result the specified BSGS candidate is guarantied to be BSGS.
+     * {@link #SchreierSimsAlgorithm(java.util.ArrayList)} on the result.
+     * The algorithm described as RANDOMSCHREIER in Sec. 4.4.5 of <b>[Holt05]</b>.
+     *
+     * @param BSGSCandidate   BSGS candidate
+     * @param groupOrder      order of a group
+     * @param randomGenerator random generator
+     */
+    public static void RandomSchreierSimsAlgorithmForKnownOrder(ArrayList<BSGSCandidateElement> BSGSCandidate,
+                                                                BigInteger groupOrder, RandomGenerator randomGenerator) {
+        final int length = BSGSCandidate.get(0).stabilizerGenerators.get(0).length();
+
+        //source of randomness
+        List<Permutation> source = BSGSCandidate.get(0).stabilizerGenerators;
+        randomness(source, DEFAULT_RANDOMNESS_EXTEND_TO_SIZE, DEFAULT_NUMBER_OF_RANDOM_REFINEMENTS, randomGenerator);
+        source = new ArrayList<>(source);
+        //recalculate BSGSCandidate
+        for (BSGSCandidateElement element : BSGSCandidate)
+            element.recalculateOrbitAndSchreierVector();
+        makeUseOfAllGenerators(BSGSCandidate);
+
+        //main loop
+        Permutation randomElement;
+        elements:
+        while (!groupOrder.equals(getOrder(BSGSCandidate))) {
+            //random element
+            randomElement = random(source, randomGenerator);
+
+            //let's try to represent it via our BSGS candidate
+            StripContainer strip = strip(BSGSCandidate, randomElement);
+
+            //this signals, whether we shall add new generator to our BSGS (not necessary a new point)
+            boolean toAddNewGenerator = false;
+            if (strip.terminationLevel < BSGSCandidate.size()) {
+                // strip terminated earlier then complete:
+                // this means, that corresponding randomElement extends an orbit of
+                // BSGS[terminationLevel] element, i.e. there is a permutation (actually it is remainder)
+                // that acts on base point of BSGS[terminationLevel] and maps it out of its orbit.
+                // =>so we shall add a new generator at terminationLevel and recalculate its orbit
+                toAddNewGenerator = true;
+            } else if (!strip.remainder.isIdentity()) {
+                //in this case, nontrivial remainder fixes all base points
+                toAddNewGenerator = true;
+                //so, we need also to extend our base with a new point
+
+                //let's find some point that is not fixed by remainder
+                for (int i = 0; i < length; ++i)
+                    if (strip.remainder.newIndexOf(i) != i) {
+                        // adding this point to BSGS (with empty stabilizers set, since it is a last point)
+                        BSGSCandidate.add(new BSGSCandidateElement(i, new ArrayList<Permutation>(), new int[length]));
+                        //here we can proceed, but we break
+                        break;
+                    }
+            }
+
+            if (toAddNewGenerator) {
+                // we need to add a new generator
+                // (note, that it can fix all old base points, but not necessary)
+
+                //we do not know the index, so we shall add it to all elements (c'est la vie)
+                for (int i = 1; i <= strip.terminationLevel; ++i) {
+                    //add new generator
+                    BSGSCandidate.get(i).stabilizerGenerators.add(strip.remainder);
+                    //recalculate content
+                    BSGSCandidate.get(i).recalculateOrbitAndSchreierVector();
+                }
+            }
+        }
+    }
+
+    static final BigInteger getOrder(List<? extends BSGSElement> BSGSList) {
+        BigInteger order = BigInteger.ONE;
+        for (BSGSElement element : BSGSList)
+            order = order.multiply(BigInteger.valueOf(element.orbitSize()));
+        return order;
     }
 
     /**
@@ -527,140 +610,55 @@ public class BSGSAlgorithms {
     }
 
 
-    //------------------------------ RANDOM --------------------------------------------//
-
     /**
-     * Default size of random source list of generators
-     */
-    public static final int DEFAULT_RANDOMNESS_EXTEND_TO_SIZE = 10;
-    /**
-     * Default size of random refinements
-     */
-    public static final int DEFAULT_NUMBER_OF_RANDOM_REFINEMENTS = 20;
-
-    /**
-     * Brings randomness to a list of generators: the source list will be extended and filled by an equivalent set
-     * of generators generated randomly; commonly it should be used in a combination with
-     * {@link #random(java.util.List, long)} to produce almost uniform distributed permutations in a group defined
-     * by corresponding set of generators. This method is a variant of PREINTIALIZE described
-     * in Sec. 3.2.2 in [Holt05].
+     * Returns true if specified BSGS candidate is a real BSGS. Method uses a restricted version of Schreier-Sims
+     * algorithm.
      *
-     * @param generators a list of generators
-     * @see #randomness(java.util.List, int, int, long)
+     * @param BSGSCandidate BSGS candidate
+     * @return true if specified BSGS candidate is a real BSGS
      */
+    public static boolean isBSGS(List<? extends BSGSElement> BSGSCandidate) {
+        if (BSGSCandidate.isEmpty())
+            return true;
+        //main loop
+        BSGSElement currentElement;
+        int index = BSGSCandidate.size() - 1;
+        while (index >= 0) {
+            currentElement = BSGSCandidate.get(index);
+            //testing that H^i_{beta_i} = H^{(i+1)}
 
-    public static void randomness(List<Permutation> generators) {
-        randomness(generators, DEFAULT_RANDOMNESS_EXTEND_TO_SIZE,
-                DEFAULT_NUMBER_OF_RANDOM_REFINEMENTS, System.currentTimeMillis());
-    }
 
-    /**
-     * Brings randomness to a list of generators: the source list will be extended and filled by an equivalent set
-     * of generators generated randomly; commonly it should be used in a combination with
-     * {@link #random(java.util.List, long)} to produce almost uniform distributed permutations in a group defined
-     * by corresponding set of generators. This method is a variant of PREINTIALIZE described
-     * in Sec. 3.2.2 in [Holt05].
-     *
-     * @param generators          a list of generators
-     * @param extendToSize        extend specified list to this size with additional (equivalent) random elements
-     * @param numberOfRefinements number of invocations of random procedure to refine the randomness
-     * @param seed                random seed
-     */
-    public static void randomness(List<Permutation> generators, int extendToSize, int numberOfRefinements, long seed) {
-        randomness(generators, extendToSize, numberOfRefinements, new Well19937a(seed));
-    }
+            // enumerating all generators of H^i_{beta_i} (see ORBITSTABILIZER)
+            //    enumerating all betas, i.e. current orbit elements
+            for (int indexInOrbit = 0, sizeOfOrbit = currentElement.orbitList.size();
+                 indexInOrbit < sizeOfOrbit; ++indexInOrbit) {
+                //current point in orbit
+                int beta = currentElement.orbitList.get(indexInOrbit);
+                //obtain u_{beta} - element that maps beta_i onto beta
+                Permutation transversalOfBeta = currentElement.getTransversalOf(beta);
 
-    /**
-     * Brings randomness to a list of generators: the source list will be extended and filled by an equivalent set
-     * of generators generated randomly; commonly it should be used in a combination with
-     * {@link #random(java.util.List, long)} to produce almost uniform distributed permutations in a group defined
-     * by corresponding set of generators. This method is a variant of PREINTIALIZE described
-     * in Sec. 3.2.2 in [Holt05].
-     *
-     * @param generators          a list of generators
-     * @param extendToSize        extend specified list to this size with additional (equivalent) random elements
-     * @param numberOfRefinements number of invocations of random procedure to refine the randomness
-     * @param random              random generator
-     */
-    public static void randomness(List<Permutation> generators, int extendToSize, int numberOfRefinements, RandomGenerator random) {
-        if (generators.size() < 2 && extendToSize < 2)
-            throw new IllegalArgumentException("List should extended by at least one element.");
+                //enumerating through all generators of current element
+                for (Permutation stabilizer : currentElement.stabilizerGenerators) {
+                    //obtain u_{beta^x} - element that maps beta_i onto beta^x
+                    Permutation transversalOfBetaX =
+                            currentElement.getTransversalOf(stabilizer.newIndexOf(beta));
 
-        if (generators.size() < extendToSize) {
-            int delta = extendToSize - generators.size() + 1;
-            int i = 0;
-            while (--delta >= 0)
-                generators.add(generators.get(i++));
+                    //so, let's construct nontrivial u_{beta}*x*u_{beta^x}^{(-1)}
+                    if (!transversalOfBeta.composition(stabilizer).equals(transversalOfBetaX)) {
+                        //this is a nontrivial generator of H^i_{beta_i}
+                        Permutation SchreierGenerator = transversalOfBeta.composition(stabilizer)
+                                .composition(transversalOfBetaX.inverse());
+                        // in order to test whether this generator contained in H^(i+1), let's apply STRIP
+                        StripContainer strip = strip(BSGSCandidate, SchreierGenerator);
+                        //if STRIP gives a nontrivial result, then this is not a BSGS
+                        if (strip.terminationLevel < BSGSCandidate.size() || !strip.remainder.isIdentity())
+                            return false;
+                    }
+                }
+            }
+            --index;
         }
-        //hold identity for use in PRRANDOM
-        if (!generators.get(generators.size() - 1).isIdentity())
-            generators.add(generators.get(0).getIdentity());
-        while (--numberOfRefinements >= 0)
-            random(generators, random);
-    }
-
-    /**
-     * Produces almost uniformly distributed elements of a group specified by specified generators (only if method
-     * {@link #randomness(java.util.List, int, int, long)} was invoked with specified generators); and brings additional
-     * randomness in the specified list. See algorithm PRRANDOM in Sec. 3.2.2 in [Holt05].
-     *
-     * @param generators generators (method {@link #randomness(java.util.List, int, int, long)} should be invoked before)
-     * @return random element of a group
-     */
-    public static Permutation random(List<Permutation> generators) {
-        return random(generators, System.currentTimeMillis());
-    }
-
-
-    /**
-     * Produces almost uniformly distributed elements of a group specified by specified generators (only if method
-     * {@link #randomness(java.util.List, int, int, long)} was invoked with specified generators); and brings additional
-     * randomness in the specified list. See algorithm PRRANDOM in Sec. 3.2.2 in [Holt05].
-     *
-     * @param generators generators (method {@link #randomness(java.util.List, int, int, long)} should be invoked before)
-     * @param seed       random seed
-     * @return random element of a group
-     */
-    public static Permutation random(List<Permutation> generators, long seed) {
-        return random(generators, new Well19937a(seed));
-    }
-
-
-    /**
-     * Produces almost uniformly distributed elements of a group specified by specified generators (only if method
-     * {@link #randomness(java.util.List, int, int, long)} was invoked with specified generators); and brings additional
-     * randomness in the specified list. See algorithm PRRANDOM in Sec. 3.2.2 in [Holt05].
-     *
-     * @param generators generators (method {@link #randomness(java.util.List, int, int, long)} should be invoked before)
-     * @param random     random generator
-     * @return random element of a group
-     */
-    public static Permutation random(List<Permutation> generators, RandomGenerator random) {
-        if (generators.size() < 3)
-            throw new IllegalArgumentException("List size should be >= 3");
-
-        int generatorsSize = generators.size() - 1;
-        //do not take last element
-        int s = random.nextInt(generatorsSize);
-        int t;
-        do {
-            t = random.nextInt(generatorsSize);
-        } while (t == s);
-
-        Permutation ps = generators.get(s), pt = generators.get(t), x0 = generators.get(generatorsSize);
-        if (random.nextBoolean())
-            pt = pt.inverse();
-
-
-        if (random.nextBoolean()) {
-            generators.set(s, ps = ps.composition(pt));
-            generators.set(generatorsSize, x0 = x0.composition(ps));
-        } else {
-            generators.set(s, ps = pt.composition(ps));
-            generators.set(generatorsSize, x0 = ps.composition(x0));
-        }
-
-        return x0;
+        return true;
     }
 
     //------------------------------ FACTORIES --------------------------------------------//
@@ -711,7 +709,7 @@ public class BSGSAlgorithms {
      * @param BSGS BSGS
      * @return base represented as array
      */
-    public static int[] getBaseAsArray(final List<BSGSElement> BSGS) {
+    public static int[] getBaseAsArray(final List<? extends BSGSElement> BSGS) {
         int[] base = new int[BSGS.size()];
         for (int i = 0, size = BSGS.size(); i < size; ++i)
             base[i] = BSGS.get(i).basePoint;
@@ -766,30 +764,6 @@ public class BSGSAlgorithms {
         for (int i = 1; i < generators.length; ++i)
             if (generators[i - 1].length() != generators[i].length())
                 return false;
-        return true;
-    }
-
-    /**
-     * Compares two permutations and throws exception if they have same arrays, but different signs
-     *
-     * @param a
-     * @param b
-     * @return true if a equals b, false otherwise
-     * @throws InconsistentGeneratorsException
-     *          if permutations have same arrays, but different signs
-     */
-    private static boolean equalsWithException(Permutation a, Permutation b) {
-        boolean compare = Arrays.equals(a.permutation, b.permutation);
-        if (compare && (a.sign != b.sign))
-            throw new InconsistentGeneratorsException(a + " and " + b);
-        return compare;
-    }
-
-    private static boolean isIdentityWithException(Permutation p) {
-        for (int i = p.permutation.length - 1; i >= 0; --i)
-            if (p.permutation[i] != i) return false;
-        if (p.sign)
-            new InconsistentGeneratorsException(p.toString());
         return true;
     }
 }
