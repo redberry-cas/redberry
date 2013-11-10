@@ -31,6 +31,7 @@ import org.junit.Test;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
@@ -73,6 +74,47 @@ public class BSGSAlgorithmsTest {
             //check!
             assertTrue(isBSGS(bsgs));
         }
+    }
+
+    @Test
+    public void testRemoveRedundant0a() {
+        for (int i = 0; i < 1000; ++i) {
+            List<Permutation> generators = new ArrayList<>();
+            generators.add(new Permutation(Combinatorics.randomPermutation(5)));
+            generators.add(new Permutation(Combinatorics.randomPermutation(5)));
+            ArrayList<BSGSCandidateElement> bsgs;
+            //create BSGS
+            bsgs = (ArrayList) createRawBSGSCandidate(generators.toArray(new Permutation[0]));
+            SchreierSimsAlgorithm(bsgs);
+            //remove redundant
+            removeRedundantGenerators(bsgs);
+            //check!
+            assertTrue(isBSGS(bsgs));
+        }
+
+    }
+
+    @Test
+    public void testRemoveRedundant0b() {
+        List<Permutation> generators = new ArrayList<>();
+        generators.add(new Permutation(0, 2, 1, 3, 4));
+        generators.add(new Permutation(3, 2, 4, 0, 1));
+
+
+        ArrayList<BSGSCandidateElement> bsgs
+                = (ArrayList) createRawBSGSCandidate(generators.toArray(new Permutation[0]));
+
+        SchreierSimsAlgorithm(bsgs);
+        System.out.println("Base: " + Arrays.toString(getBaseAsArray(bsgs)));
+        System.out.println("Order: " + getOrder(bsgs));
+        System.out.println("Number of strong generators: " + numOfGenerators(bsgs));
+
+        //remove redundant
+        removeRedundantGenerators(bsgs);
+        System.out.println("New number of strong generators: " + numOfGenerators(bsgs));
+
+        //check!
+        assertTrue(isBSGS(bsgs));
     }
 
     @Test

@@ -214,7 +214,7 @@ public final class Combinatorics {
      */
     public static int getOrbitSize(Collection<Permutation> generators, int point) {
         if (generators.isEmpty())
-            return 1;
+            return 1;//throw new IllegalArgumentException("Empty generators.");
         //orbit as list
         IntArrayList orbitList = new IntArrayList();
         orbitList.add(point);

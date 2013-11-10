@@ -575,7 +575,7 @@ public class BSGSAlgorithms {
             //iterator over stabilizer generators
             ListIterator<Permutation> iterator = element.stabilizerGenerators.listIterator();
             //temp list of stabilizer with removed redundant elements
-            List<Permutation> newStabilizers = null;
+            ArrayList<Permutation> tempStabilizers = null;
             boolean removed = false;
             //current stabilizer element
             Permutation current;
@@ -585,22 +585,23 @@ public class BSGSAlgorithms {
                 // then it cannot be removed; note that second condition is necessary,
                 // while first is redundant (but rids from obviously unnecessary checks)!
                 if (current.newIndexOf(element.basePoint) == element.basePoint
-                        && BSGSCandidate.get(i + 1).stabilizerGenerators.contains(element))
+                        /*&& BSGSCandidate.get(i + 1).stabilizerGenerators.contains(element)*/)
                     continue;
                 //<-so generator does not fix base point and do not belongs to next element
                 //let's check whether it is redundant
-                if (newStabilizers == null) {
+                if (tempStabilizers == null) {
                     //make a copy of current stabilizers
-                    newStabilizers = new ArrayList<>(element.stabilizerGenerators);
-                } else
-                    newStabilizers = new ArrayList<>(newStabilizers);
-
-                newStabilizers.remove(current);
+                    tempStabilizers = new ArrayList<>(element.stabilizerGenerators);
+                }
+                tempStabilizers.remove(current);
 
                 //if new stabilizers produces same orbit => then current generator is redundant
-                if (Combinatorics.getOrbitSize(newStabilizers, element.basePoint) == element.orbitSize()) {
+                if (Combinatorics.getOrbitSize(tempStabilizers, element.basePoint) == element.orbitSize()) {
                     iterator.remove();
                     removed = true;
+                } else {
+                    //if not, we need revert
+                    tempStabilizers.add(current);
                 }
             }
             //if something was removed, then we need to recalculate Schreier vector
