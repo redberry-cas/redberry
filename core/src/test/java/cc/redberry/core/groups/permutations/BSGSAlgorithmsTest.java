@@ -53,6 +53,7 @@ public class BSGSAlgorithmsTest {
         long seed = currentTimeMillis();
         int n = 20;
         int COUNT = 1000;
+        DescriptiveStatistics removed = new DescriptiveStatistics();
         RandomGenerator randomGenerator = new Well1024a(seed);
         List<Permutation> source = new ArrayList<>();
         for (int i = 0; i < 10; ++i)
@@ -69,11 +70,15 @@ public class BSGSAlgorithmsTest {
             //create BSGS
             bsgs = (ArrayList) createRawBSGSCandidate(generators.toArray(new Permutation[0]));
             SchreierSimsAlgorithm(bsgs);
+            long in = numOfGenerators(bsgs);
             //remove redundant
             removeRedundantGenerators(bsgs);
+            removed.addValue(in - numOfGenerators(bsgs));
             //check!
             assertTrue(isBSGS(bsgs));
         }
+        System.out.println("Removed strong generators statistics:");
+        System.out.println(removed);
     }
 
     @Test
@@ -100,18 +105,16 @@ public class BSGSAlgorithmsTest {
         generators.add(new Permutation(0, 2, 1, 3, 4));
         generators.add(new Permutation(3, 2, 4, 0, 1));
 
+        PermutationGroup pg = PermutationGroupFactory.createPermutationGroup(generators);
 
         ArrayList<BSGSCandidateElement> bsgs
                 = (ArrayList) createRawBSGSCandidate(generators.toArray(new Permutation[0]));
 
         SchreierSimsAlgorithm(bsgs);
-        System.out.println("Base: " + Arrays.toString(getBaseAsArray(bsgs)));
-        System.out.println("Order: " + getOrder(bsgs));
-        System.out.println("Number of strong generators: " + numOfGenerators(bsgs));
-
+        long rem = numOfGenerators(bsgs);
         //remove redundant
         removeRedundantGenerators(bsgs);
-        System.out.println("New number of strong generators: " + numOfGenerators(bsgs));
+        System.out.println("Removed: " + (rem - numOfGenerators(bsgs)));
 
         //check!
         assertTrue(isBSGS(bsgs));

@@ -585,7 +585,7 @@ public class BSGSAlgorithms {
                 // then it cannot be removed; note that second condition is necessary,
                 // while first is redundant (but rids from obviously unnecessary checks)!
                 if (current.newIndexOf(element.basePoint) == element.basePoint
-                        /*&& BSGSCandidate.get(i + 1).stabilizerGenerators.contains(element)*/)
+                        && BSGSCandidate.get(i + 1).stabilizerGenerators.contains(element))
                     continue;
                 //<-so generator does not fix base point and do not belongs to next element
                 //let's check whether it is redundant

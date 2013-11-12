@@ -219,8 +219,8 @@ public final class Combinatorics {
         IntArrayList orbitList = new IntArrayList();
         orbitList.add(point);
         //seen points
-        BitSet seen = new BitSet(generators.iterator().next().length());
-
+        BitArray seen = new BitArray(generators.iterator().next().length());
+        seen.set(point);
         int imageOfPoint;
         //main loop over all points in orbit
         for (int orbitIndex = 0; orbitIndex < orbitList.size(); ++orbitIndex) {
