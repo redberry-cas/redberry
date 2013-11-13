@@ -307,7 +307,6 @@ public class BitArray {
      * @return position of the next "1" bit of -1 if all bits after position are 0
      */
     public int nextBit(int position) {
-        ++position;
         int ret = position & 0x1F;
         if (ret != 0)
             if ((ret = Integer.numberOfTrailingZeros(data[position >>> 5] >>> ret)) != 32)

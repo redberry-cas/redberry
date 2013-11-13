@@ -111,7 +111,9 @@ public final class Combinatorics {
     }
 
     /**
-     * Returns true if order of specified permutation is odd and false otherwise.
+     * Returns true if order of specified permutation is odd and false otherwise. This algorithm is very fast since
+     * it does not compute order of element, but calculates just its parity without use of any "hard" computations
+     * with g.c.d./l.c.m./BigInteger arithmetics etc.
      *
      * @param permutation permutation
      * @return true if order of specified permutation is odd and false otherwise
@@ -204,20 +206,19 @@ public final class Combinatorics {
         return r;
     }
 
-
     /**
-     * Returns a size of specified point orbit
+     * Returns an orbit of specified point
      *
      * @param generators a list of group generators
      * @param point      point
-     * @return size of point orbit
+     * @return orbit of specified point
      */
-    public static int getOrbitSize(Collection<Permutation> generators, int point) {
-        if (generators.isEmpty())
-            return 1;//throw new IllegalArgumentException("Empty generators.");
+    public static IntArrayList getOrbitList(Collection<Permutation> generators, int point) {
         //orbit as list
         IntArrayList orbitList = new IntArrayList();
         orbitList.add(point);
+        if (generators.isEmpty())
+            return orbitList;//throw new IllegalArgumentException("Empty generators.");
         //seen points
         BitArray seen = new BitArray(generators.iterator().next().length());
         seen.set(point);
@@ -237,7 +238,19 @@ public final class Combinatorics {
                 }
             }
         }
-        return orbitList.size();
+        return orbitList;
+    }
+
+
+    /**
+     * Returns a size of specified point orbit
+     *
+     * @param generators a list of group generators
+     * @param point      point
+     * @return size of point orbit
+     */
+    public static int getOrbitSize(Collection<Permutation> generators, int point) {
+        return getOrbitList(generators, point).size();
     }
 
 

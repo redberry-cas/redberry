@@ -77,6 +77,19 @@ public final class Permutation implements Comparable<Permutation> {
     }
 
     /**
+     * Return the new position of specified element under inverse this permutation
+     *
+     * @param i position of element in set
+     * @return i-th number in one-line notation
+     */
+    public int newIndexOfUnderInverse(int i) {
+        for (int j = permutation.length - 1; j >= 0; --j)
+            if (permutation[j] == i)
+                return j;
+        throw new IndexOutOfBoundsException();
+    }
+
+    /**
      * Returns the sign of this permutation.
      *
      * @return sign of this permutation

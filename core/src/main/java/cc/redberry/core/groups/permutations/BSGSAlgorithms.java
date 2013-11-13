@@ -22,6 +22,7 @@
  */
 package cc.redberry.core.groups.permutations;
 
+import cc.redberry.core.utils.BitArray;
 import cc.redberry.core.utils.IntArrayList;
 import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.util.FastMath;
@@ -660,6 +661,109 @@ public class BSGSAlgorithms {
             --index;
         }
         return true;
+    }
+
+    /**
+     * Returns the number of elements in specified strong generating set. Since expected maximum number of generators
+     * in BSGS is about n*(n-1)/2, then, in order to avoid integer overflow, we use long, since for
+     * n ~ Integer.MAX_VALUE the corresponding number of elements an be up to ~ Long.MAX_VALUE / 2.
+     *
+     * @param BSGS strong generating set
+     * @return number of elements in specified strong generating set
+     */
+    public static long numberOfStrongGenerators(List<? extends BSGSElement> BSGS) {
+        long num = 0;
+        for (BSGSElement el : BSGS)
+            num += el.stabilizerGenerators.size();
+        return num;
+    }
+
+    /**
+     * Swaps <i>i-th</i> and <i>(i+1)-th</i> points of specified BSGS. The details on the implementation can be
+     * found in Sec. 4.4.7 of <b>[Holt05]</b> (see BASESWAP algorithm).
+     *
+     * @param BSGS BSGS
+     * @param i    index of first serial points to swap
+     */
+    public static void swapAdjacentBasePoints(ArrayList<BSGSCandidateElement> BSGS, int i) {
+        if (i > BSGS.size() - 2)
+            throw new IndexOutOfBoundsException();
+
+        ArrayList<Permutation> newStabilizers;
+
+        if (i == BSGS.size() - 2)
+            newStabilizers = (ArrayList) BSGS.get(i + 1).stabilizerGenerators;
+        else {
+
+            //i-th and (i+1)-th base points
+            int ithBeta = BSGS.get(i).basePoint, jthBeta = BSGS.get(i + 1).basePoint;
+
+            //computing size of orbit of beta_{i+1} under G^(i)
+            int d = Combinatorics.getOrbitSize(BSGS.get(i).stabilizerGenerators, BSGS.get(i + 1).basePoint);
+            //as we know |H| = s |G^(i+2)|, where s
+            int s = (BSGS.get(i).orbitSize() / d) * BSGS.get(i + 1).orbitSize();
+
+            //new stabilizers of G^(i+1)'
+            //these stabilizers should fix beta_1, beta_2, ..., beta_(i-1), beta_(i+1)
+            newStabilizers = new ArrayList<>(BSGS.get(i + 2).stabilizerGenerators);
+
+            BitArray ithOrbitPositions = new BitArray(BSGS.get(0).stabilizerGenerators.get(0).length());
+
+            //lets mark all points that we can use for transversals
+            for (int t = 0, size = BSGS.get(i).orbitSize(); t < size; ++t)
+                ithOrbitPositions.set(BSGS.get(i).orbitList.get(t));
+            //unset bet_{i} and beta_{i+1}
+            ithOrbitPositions.set(i, false);
+            ithOrbitPositions.set(i + 1, false);
+
+            //main loop
+            main:
+            while (Combinatorics.getOrbitSize(newStabilizers, ithBeta) != s) {
+                int totalOrbitPointCount = ithOrbitPositions.bitCount();
+                while (totalOrbitPointCount >= 0) {
+                    int nextBasePoint = ithOrbitPositions.nextBit(0);
+                    //marking point as seen
+                    ithOrbitPositions.set(nextBasePoint, false);
+                    --totalOrbitPointCount;
+                    //transversal
+                    Permutation transversal = BSGS.get(i).getTransversalOf(nextBasePoint);
+                    int newIndexUnderInverse = transversal.newIndexOfUnderInverse(nextBasePoint);
+                    //check whether beta_{i+1}^(inverse tranversal) belongs to orbit of G^{i+1}
+                    if (!BSGS.get(i + 1).belongsToOrbit(newIndexUnderInverse)) {
+                        //then this transversal is bad and we can skip the orbit of this point under new stabilizers
+
+                        //todo: this probably can be improved
+                        IntArrayList toRemove = Combinatorics.getOrbitList(newStabilizers, nextBasePoint);
+                        for (int t = 0, size = toRemove.size(); t < size; ++t)
+                            ithOrbitPositions.set(toRemove.get(t), false);
+                    } else {
+                        //<-ok this transversal is good
+                        //we need an element in G^(4) that beta_{i+1}^element = beta_{i+1}^{inverse transversal}
+                        //so that beta_{i+1} is fixed under product of element * transversal
+                        Permutation newStabilizer =
+                                BSGS.get(i + 1).getTransversalOf(newIndexUnderInverse).composition(transversal);
+                        //if this element was not yet seen
+                        if (ithOrbitPositions.get(newStabilizer.newIndexOf(ithBeta))) {
+                            newStabilizers.add(newStabilizer);
+                            //todo: this probably can be improved
+                            IntArrayList toRemove = Combinatorics.getOrbitList(newStabilizers, ithBeta);
+                            for (int t = 0, size = toRemove.size(); t < size; ++t)
+                                ithOrbitPositions.set(toRemove.get(t), false);
+                            continue main;
+                        }
+                    }
+                }
+            }
+
+        }
+
+        //swap base points (orbits and and Schreier vectors will be recalculated in constructors)
+        BSGSCandidateElement ith = new BSGSCandidateElement(BSGS.get(i + 1).basePoint,
+                BSGS.get(i).stabilizerGenerators, BSGS.get(i).SchreierVector);
+        BSGSCandidateElement jth = new BSGSCandidateElement(BSGS.get(i).basePoint,
+                newStabilizers, BSGS.get(i + 1).SchreierVector);
+        BSGS.set(i, ith);
+        BSGS.set(i + 1, jth);
     }
 
     //------------------------------ FACTORIES --------------------------------------------//
