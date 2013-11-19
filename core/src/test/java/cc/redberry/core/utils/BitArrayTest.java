@@ -259,8 +259,9 @@ public class BitArrayTest {
         ba.set(43);
 
         assertEquals(3, ba.nextBit(1));
-        assertEquals(5, ba.nextBit(3));
-        assertEquals(43, ba.nextBit(28));
+        assertEquals(3, ba.nextBit(3));
+        assertEquals(5, ba.nextBit(4));
+        assertEquals(28, ba.nextBit(28));
     }
 
     @Test

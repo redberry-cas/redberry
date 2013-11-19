@@ -119,13 +119,10 @@ public final class Combinatorics {
      * @return true if order of specified permutation is odd and false otherwise
      */
     public static boolean orderIsOdd(final int[] permutation) {
-        //we shall decompose this permutation into product of cycles and calculate l.c.m. of their sizes
+        //decompose this permutation into product of cycles and calculate parity of l.c.m. of their sizes
 
         //to mark viewed points
         BitArray used = new BitArray(permutation.length);
-        //sizes of cycles
-        IntArrayList sizes = new IntArrayList();
-
         int start, pointer, currentSize, counter = 0;
         //while not all points are seen
         //loop over cycles
@@ -141,69 +138,13 @@ public final class Combinatorics {
                 pointer = permutation[pointer];
                 ++currentSize;
             } while (pointer != start);
-            sizes.add(currentSize);
+            if (currentSize % 2 == 0)
+                return false;
             counter += currentSize;
         }
 
-        //only one cycle
-        if (sizes.size() == 1)
-            return sizes.get(0) % 2 == 1;
-
-        //so we need to determine, whether lcm(sizes) if odd or even
-        //using the formula:
-        //lcm(a1,a2,...,aN) = (a1*a2*...*aN) / gcd( a2*a3*...*aN, a1*a3*...*aN, a1*a2*...*aN-1)
-
-        //first test: if a1*a2*...*aN is odd, then the result is odd
-        //if we now know that the numerator is even
-        //lets test whether gcd(...) is odd or even
-        //gcd is guarantied to be odd if at least one argument is odd (otherwise gcd is even)
-        //this can be only if all sizes are odd or all sizes are odd except one
-
-        boolean evenNumerator = false;
-        boolean oddDenominator = true;
-        for (int i = 0, size = sizes.size(); i < size; ++i) {
-            if (sizes.get(i) % 2 == 0) {
-                if (evenNumerator) {
-                    oddDenominator = false;
-                    break;
-                }
-                evenNumerator = true;
-            }
-
-        }
-        if (!evenNumerator)
-            return true;
-
-        //<- so numerator is even
-        if (oddDenominator) {
-            //if denominator is odd
-            return false;
-        }
-
-        //<- both numerator and denominator are even
-        // then numerator    = 2^num * some_odd_number
-        //      denominator  = 2^den * some_odd_number
-        // if (num > den) then result is even, otherwise - odd
-        //let's compute num and den
-
-        int den = 0, exponent, num = extractPowerOf2(sizes.get(0));
-
-        for (int i = 1, size = sizes.size(); i < size; ++i) {
-            exponent = extractPowerOf2(sizes.get(i));
-            den = Math.min(den + exponent, num); //<- trick
-            num += exponent;
-        }
-
-        return num <= den;
-    }
-
-    private static int extractPowerOf2(int n) {
-        int r = 0;
-        while (n % 2 == 0) {
-            ++r;
-            n = n / 2;
-        }
-        return r;
+        //all sizes are odd
+        return true;
     }
 
     /**

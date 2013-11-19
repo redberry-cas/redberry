@@ -289,10 +289,10 @@ public class BitArray {
                     bits[j++] = i;
         } else {
             i = -1;
-            while ((i = nextBit(i)) != -1) {
+            while ((i = nextBit(i + 1)) != -1) {
                 if (!get(i))
                     if (j > 0)
-                        nextBit(bits[j - 1]);
+                        nextBit(bits[j - 1] + 1);
                 bits[j++] = i;
             }
         }

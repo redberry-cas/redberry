@@ -44,6 +44,13 @@ public final class IntArrayList {
         data = new int[initialCapacity];
     }
 
+
+    public IntArrayList(IntArrayList list) {
+        this.data = list.data.clone();
+        size = list.size;
+    }
+
+
     public IntArrayList(int[] data) {
         this.data = data;
         size = data.length;
@@ -212,6 +219,48 @@ public final class IntArrayList {
         --size;
         return oldValue;
     }
+
+    public boolean removeElement(int element) {
+        int i = indexOf(element);
+        if (i < 0) return false;
+        remove(i);
+        return true;
+    }
+
+    public boolean removeAll(IntArrayList c) {
+        return removeAll(c, 0, c.size);
+    }
+
+    public boolean removeAll(IntArrayList c, final int cbegin, final int cend) {
+        return removeAll(c.data, cbegin, cend);
+    }
+
+    public boolean removeAll(int[] c) {
+        return removeAll(c, 0, c.length);
+    }
+
+    public boolean removeAll(int[] c, final int cbegin, final int cend) {
+        int r = 0, w = 0;
+        boolean modified = false;
+        for (; r < size; r++) {
+            modified = false;
+            for (int i = cbegin; i < cend; ++i)
+                if (c[i] == data[r]) {
+                    modified = true;
+                    break;
+                }
+            if (!modified)
+                data[w++] = data[r];
+        }
+
+        if (w != size) {
+            size = w;
+            modified = true;
+        }
+
+        return modified;
+    }
+
 
     public int indexOf(int value) {
         for (int i = 0; i < size; ++i)

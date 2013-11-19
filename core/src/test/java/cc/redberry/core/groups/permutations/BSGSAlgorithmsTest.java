@@ -210,6 +210,55 @@ public class BSGSAlgorithmsTest {
         }
     }
 
+    @Test
+    public void testBaseSwap1() {
+        long seed = currentTimeMillis();
+        int n = 20;
+        int COUNT = 1000;
+        RandomGenerator randomGenerator = new Well1024a(seed);
+        List<Permutation> source = new ArrayList<>();
+        for (int i = 0; i < 10; ++i)
+            source.add(new Permutation(Combinatorics.randomPermutation(n, randomGenerator)));
+        randomness(source, 10, 50, randomGenerator);
+
+        ArrayList<BSGSCandidateElement> bsgs1, bsgs2;
+        List<Permutation> generators = new ArrayList<>();
+        for (int tt = 0; tt < COUNT; ++tt) {
+            System.out.println(tt);
+            generators.clear();
+            for (int i = 0; i < 1 + randomGenerator.nextInt(7); ++i)
+                generators.add(random(source, randomGenerator));
+
+            bsgs1 = (ArrayList) createRawBSGSCandidate(generators.toArray(new Permutation[0]));
+            SchreierSimsAlgorithm(bsgs1);
+            for (int i = 0; i < bsgs1.size() - 1; ++i) {
+                bsgs2 = BSGSAlgorithms.clone(bsgs1);
+                swapAdjacentBasePoints(bsgs2, i);
+                assertTrue(isBSGS(bsgs2));
+            }
+        }
+    }
+
+    @Test
+    public void testBaseSwap1a() {
+        List<Permutation> generators = new ArrayList<>();
+        generators.add(new Permutation(0, 2, 1, 3, 4));
+        generators.add(new Permutation(3, 2, 4, 0, 1));
+        ArrayList<BSGSCandidateElement> bsgs
+                = (ArrayList) createRawBSGSCandidate(generators.toArray(new Permutation[0]));
+        SchreierSimsAlgorithm(bsgs);
+        System.out.println("BASE: " + Arrays.toString(BSGSAlgorithms.getBaseAsArray(bsgs)));
+        ArrayList<BSGSCandidateElement> bsgs1;
+
+        for (int i = 0; i < bsgs.size() - 1; ++i) {
+            System.out.println(i);
+            bsgs1 = BSGSAlgorithms.clone(bsgs);
+            swapAdjacentBasePoints(bsgs1, i);
+            System.out.println("NEW BASE: " + Arrays.toString(BSGSAlgorithms.getBaseAsArray(bsgs1)));
+            assertTrue(isBSGS(bsgs1));
+        }
+    }
+
     private static void burnJvm(long seed) {
         int n = 20;
         int COUNT = 1000;

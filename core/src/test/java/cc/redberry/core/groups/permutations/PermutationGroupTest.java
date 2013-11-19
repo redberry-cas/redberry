@@ -62,13 +62,8 @@ public class PermutationGroupTest {
         b = new Permutation(1, 0, 2, 3, 4, 5);
         c = new Permutation(2, 3, 4, 5, 0, 1);
 
-        System.out.println(c.composition(c));
-        System.out.println(c.composition(c).composition(c));
-
         PermutationGroup pg = PermutationGroupFactory.createPermutationGroup(b, c);
-        assertEquals(NumberUtils.factorial(6), pg.order());
-
-
+        assertEquals(24, pg.order().intValue());
     }
 
     @Test

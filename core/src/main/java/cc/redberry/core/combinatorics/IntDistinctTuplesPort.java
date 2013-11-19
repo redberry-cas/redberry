@@ -95,7 +95,7 @@ public class IntDistinctTuplesPort implements IntCombinatorialPort {
             temp.loadValueFrom(setMasks[i]);
             temp.and(previousMask);
 
-            nextBit = temp.nextBit(combination[i] - 1);
+            nextBit = temp.nextBit(combination[i]);
             if (nextBit != -1) {
                 combination[i] = nextBit;
                 previousMask.clear(nextBit);
@@ -135,7 +135,7 @@ public class IntDistinctTuplesPort implements IntCombinatorialPort {
             temp.loadValueFrom(setMasks[i]);
             temp.and(previousMask);
 
-            nextBit = temp.nextBit(combination[i] - 1);
+            nextBit = temp.nextBit(combination[i]);
             if (nextBit != -1) {
                 combination[i] = nextBit;
                 previousMask.clear(nextBit);

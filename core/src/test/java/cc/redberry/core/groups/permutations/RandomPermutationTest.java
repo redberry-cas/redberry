@@ -29,6 +29,7 @@ import gnu.trove.set.hash.TLongHashSet;
 import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.random.Well1024a;
 import org.apache.commons.math3.util.ArithmeticUtils;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -44,6 +45,7 @@ import static cc.redberry.core.groups.permutations.RandomPermutation.*;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
+@Ignore
 public class RandomPermutationTest {
 
 
@@ -165,6 +167,7 @@ public class RandomPermutationTest {
         }
     }
 
+    @Ignore
     @Test
     public void combFind() {
         long seed = currentTimeMillis();
