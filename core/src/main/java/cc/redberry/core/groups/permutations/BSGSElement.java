@@ -154,4 +154,14 @@ public class BSGSElement {
         return orbitList.get(i);
     }
 
+    /**
+     * Returns a degree of permutations. More specifically, it returns
+     * {@code stabilizerGenerators.get(0).length();}
+     *
+     * @return degree of permutations
+     */
+    public int groupDegree() {
+        return stabilizerGenerators.get(0).length();
+    }
+
 }

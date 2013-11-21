@@ -205,7 +205,7 @@ public final class Combinatorics {
     }
 
     public static Permutation getIdentity(int length) {
-        if (cachedIdentities.length < length)
+        if (cachedIdentities.length <= length)
             return createIdentity(length);
         if (cachedIdentities[length] == null)
             synchronized (cachedIdentities) {

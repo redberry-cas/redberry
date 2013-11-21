@@ -214,7 +214,7 @@ public class BitArray {
     }
 
     /**
-     * Set the value of specified bit
+     * Sets the value of specified bit to specified value
      *
      * @param i     index
      * @param value value
@@ -224,6 +224,28 @@ public class BitArray {
             set(i);
         else
             clear(i);
+    }
+
+    /**
+     * Sets values at specified positions to specified value
+     *
+     * @param positions positions
+     * @param value     value
+     */
+    public void setAll(int[] positions, boolean value) {
+        for (int i : positions)
+            set(i, value);
+    }
+
+    /**
+     * Sets values at specified positions to specified value
+     *
+     * @param positions positions
+     * @param value     value
+     */
+    public void setAll(IntArrayList positions, boolean value) {
+        for (int i = positions.size() - 1; i >= 0; --i)
+            set(positions.get(i), value);
     }
 
     /**

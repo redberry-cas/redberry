@@ -226,6 +226,7 @@ public class BSGSAlgorithms {
         if (BSGSCandidate.isEmpty())
             return Collections.EMPTY_LIST;
         SchreierSimsAlgorithm((ArrayList) BSGSCandidate);
+        removeRedundantBasePoints((ArrayList) BSGSCandidate);
         return asBSGSList(BSGSCandidate);
     }
 
@@ -257,6 +258,7 @@ public class BSGSAlgorithms {
         if (BSGSCandidate.isEmpty())
             return Collections.EMPTY_LIST;
         SchreierSimsAlgorithm((ArrayList) BSGSCandidate);
+        removeRedundantBasePoints((ArrayList) BSGSCandidate);
         return asBSGSList(BSGSCandidate);
     }
 
@@ -611,6 +613,19 @@ public class BSGSAlgorithms {
         }
     }
 
+    /**
+     * Removes redundant base points in from specified BSGS (straightforwardly, i.e. without any additional base changes).
+     *
+     * @param BSGS BSGS
+     */
+    public static void removeRedundantBasePoints(ArrayList<BSGSCandidateElement> BSGS) {
+        for (int i = BSGS.size() - 1; i >= 0; --i)
+            if (BSGS.get(i).stabilizerGenerators.isEmpty())
+                BSGS.remove(i);
+            else  //we can break since this guaranties that all other points are not redundant
+                break;
+
+    }
 
     /**
      * Returns true if specified BSGS candidate is a real BSGS. Method uses a restricted version of Schreier-Sims
@@ -707,26 +722,30 @@ public class BSGSAlgorithms {
         else
             newStabilizers = new ArrayList<>(BSGS.get(i + 2).stabilizerGenerators);
 
-        IntArrayList allowedPoints = new IntArrayList(BSGS.get(i).orbitList);
-        allowedPoints.removeElement(ithBeta);
-        allowedPoints.removeElement(jthBeta);
+        //allowed points
+        BitArray allowedPoints = new BitArray(BSGS.get(0).groupDegree());
+        allowedPoints.setAll(BSGS.get(i).orbitList, true);
+        allowedPoints.set(ithBeta, false);
+        allowedPoints.set(jthBeta, false);
+
+        //we shall store the orbit of ithBeta under new stabilizers in BSGSCandidateElement
+        BSGSCandidateElement newOrbitStabilizer =
+                new BSGSCandidateElement(ithBeta, newStabilizers, new int[BSGS.get(0).groupDegree()]);
 
         //main loop
         main:
-        while (Combinatorics.getOrbitSize(newStabilizers, ithBeta) != s) {
+        while (newOrbitStabilizer.orbitSize() != s) {
             //this loop is redundant but helps to avoid unnecessary calculations of orbits in the main loop condition
-            int nextBasePoint;
-            for (int k = 0; k < allowedPoints.size(); ++k) {
-                nextBasePoint = allowedPoints.get(k);
+            int nextBasePoint = -1;
+            while ((nextBasePoint = allowedPoints.nextBit(++nextBasePoint)) != -1) {
                 //transversal
                 Permutation transversal = BSGS.get(i).getTransversalOf(nextBasePoint);
                 int newIndexUnderInverse = transversal.newIndexOfUnderInverse(jthBeta);
                 //check whether beta_{i+1}^(inverse transversal) belongs to orbit of G^{i+1}
                 if (!BSGS.get(i + 1).belongsToOrbit(newIndexUnderInverse)) {
                     //then this transversal is bad and we can skip the orbit of this point under new stabilizers
-
                     IntArrayList toRemove = Combinatorics.getOrbitList(newStabilizers, nextBasePoint);
-                    allowedPoints.removeAll(toRemove);
+                    allowedPoints.setAll(toRemove, false);
                 } else {
                     //<-ok this transversal is good
                     //we need an element in G^(4) that beta_{i+1}^element = beta_{i+1}^{inverse transversal}
@@ -734,16 +753,19 @@ public class BSGSAlgorithms {
                     Permutation newStabilizer =
                             BSGS.get(i + 1).getTransversalOf(newIndexUnderInverse).composition(transversal);
                     //if this element was not yet seen
-                    if (!Combinatorics.getOrbitList(newStabilizers, ithBeta).contains(newStabilizer.newIndexOf(ithBeta))) {
+                    if (!newOrbitStabilizer.belongsToOrbit(newStabilizer.newIndexOf(ithBeta))) {
+                        //newOrbitStabilizer have same reference!
                         newStabilizers.add(newStabilizer);
+                        newOrbitStabilizer.recalculateOrbitAndSchreierVector();
+
                         IntArrayList toRemove = Combinatorics.getOrbitList(newStabilizers, nextBasePoint);
-                        allowedPoints.removeAll(toRemove);
+                        allowedPoints.setAll(toRemove, false);
+
                         continue main;
                     }
                 }
             }
         }
-
 
         //swap base points (orbits and and Schreier vectors will be recalculated in constructors)
         BSGSCandidateElement ith = new BSGSCandidateElement(BSGS.get(i + 1).basePoint,
@@ -752,6 +774,60 @@ public class BSGSAlgorithms {
                 newStabilizers, BSGS.get(i + 1).SchreierVector);
         BSGS.set(i, ith);
         BSGS.set(i + 1, jth);
+    }
+
+
+    /**
+     * Changes the base of specified BSGS to specified new base using a simple algorithm with transpositions; the
+     * algorithm guaranties that if initial base is [b1, b2, b3, ..., bk] and specified base is [a1, a2, a3, ..., al],
+     * then the resulting base will look like  [a1, a2, a3, ...., al, b4, b7, ..., b19], where the b-elements at the
+     * end of new base are some redundant base points from initial base.
+     *
+     * @param BSGS    BSGS
+     * @param newBase new base
+     */
+    public static void rebaseWithTranspositions(ArrayList<BSGSCandidateElement> BSGS, int[] newBase) {
+        //first, lets proceed by swapping
+        for (int i = 0; i < newBase.length && i < BSGS.size(); ++i) {
+            int newBasePoint = newBase[i];
+            if (BSGS.get(i).basePoint != newBasePoint) {
+                //lets find orbit that contains new base point
+                int insertionPosition = i + 1;
+                insertion_points:
+                for (; insertionPosition < BSGS.size(); ++insertionPosition) {
+                    for (Permutation permutation : BSGS.get(insertionPosition).stabilizerGenerators)
+                        if (permutation.newIndexOf(newBasePoint) != newBasePoint)
+                            continue insertion_points;
+                    break;
+                }
+                if (insertionPosition == BSGS.size()) {
+                    //<- no element that fixes new base point
+                    BSGS.add(new BSGSCandidateElement(newBasePoint, new ArrayList<Permutation>(),
+                            new int[BSGS.get(0).groupDegree()]));
+                } else if (BSGS.get(insertionPosition).basePoint != newBasePoint) {
+                    //<- we've found an element (call it pivot) that stabilizes all
+                    // points before pivot and also a new base point
+                    // we can insert a new base point before pivot, and still pivot will fix all points before pivot
+
+                    //stabilizers of new base point inserted are same to stabilizers of pivot
+                    BSGS.add(insertionPosition,
+                            new BSGSCandidateElement(newBasePoint,
+                                    new ArrayList<>(BSGS.get(insertionPosition).stabilizerGenerators),
+                                    new int[BSGS.get(0).groupDegree()]));
+                }
+                //then just swap
+                //note, that if insertionPosition <= i then no any swap needed
+                while (insertionPosition > i)
+                    swapAdjacentBasePoints(BSGS, --insertionPosition);
+
+            }
+        }
+        for (int i = BSGS.size() - 1; i >= 0; --i) {
+            if (BSGS.get(i).stabilizerGenerators.isEmpty())
+                BSGS.remove(i);
+            else
+                break;
+        }
     }
 
     //------------------------------ FACTORIES --------------------------------------------//
@@ -776,7 +852,7 @@ public class BSGSAlgorithms {
      * @param BSGS BSGS
      * @return mutable copy of BSGS
      */
-    public static List<BSGSCandidateElement> asBSGSCandidatesList(List<BSGSElement> BSGS) {
+    public static ArrayList<BSGSCandidateElement> asBSGSCandidatesList(List<BSGSElement> BSGS) {
         ArrayList<BSGSCandidateElement> BSGSCandidates = new ArrayList<>(BSGS.size());
         for (BSGSElement element : BSGS)
             BSGSCandidates.add(element.asBSGSCandidateElement());

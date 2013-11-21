@@ -22,25 +22,28 @@
  */
 package cc.redberry.core.groups.permutations;
 
+import cc.redberry.core.groups.permutations.gap.GapPrimitiveGroupsReader;
+import cc.redberry.core.number.NumberUtils;
+import cc.redberry.core.utils.Timing;
 import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.random.Well1024a;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.apache.commons.math3.util.FastMath;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
+import static cc.redberry.core.TAssert.assertEquals;
 import static cc.redberry.core.TAssert.assertTrue;
 import static cc.redberry.core.groups.permutations.BSGSAlgorithms.*;
-import static cc.redberry.core.groups.permutations.RandomPermutation.DEFAULT_RANDOMNESS_EXTEND_TO_SIZE;
 import static cc.redberry.core.groups.permutations.RandomPermutation.random;
 import static cc.redberry.core.groups.permutations.RandomPermutation.randomness;
+import static cc.redberry.core.utils.Timing.TimingJob;
+import static cc.redberry.core.utils.Timing.timing;
 import static java.lang.System.currentTimeMillis;
+import static java.lang.System.in;
+import static org.junit.Assert.assertArrayEquals;
 
 /**
  * @author Dmitry Bolotin
@@ -211,10 +214,25 @@ public class BSGSAlgorithmsTest {
     }
 
     @Test
+    public void testSchreierSims1() {
+        Permutation a = new Permutation(1, 2, 3, 4, 5, 6, 0, 7),
+                b = new Permutation(0, 2, 4, 6, 1, 3, 5, 7),
+                c = new Permutation(7, 6, 3, 2, 5, 4, 1, 0);
+
+        ArrayList<BSGSCandidateElement> bsgs = (ArrayList) createRawBSGSCandidate(a, b, c);
+        SchreierSimsAlgorithm(bsgs);
+        removeRedundantBasePoints(bsgs);
+        assertEquals(3, bsgs.size());
+        assertTrue(isBSGS(bsgs));
+    }
+
+//////////////////////////////////////////// BASE CHANGE ////////////////////////////////////////////////////////////
+
+    @Test
     public void testBaseSwap1() {
         long seed = currentTimeMillis();
-        int n = 20;
-        int COUNT = 1000;
+        int n = 15;
+        int COUNT = 10;
         RandomGenerator randomGenerator = new Well1024a(seed);
         List<Permutation> source = new ArrayList<>();
         for (int i = 0; i < 10; ++i)
@@ -235,6 +253,19 @@ public class BSGSAlgorithmsTest {
                 bsgs2 = BSGSAlgorithms.clone(bsgs1);
                 swapAdjacentBasePoints(bsgs2, i);
                 assertTrue(isBSGS(bsgs2));
+                int[] p = Combinatorics.randomPermutation(n, randomGenerator);
+                for (int pp : p) {
+                    if (pp > bsgs2.size() - 2)
+                        continue;
+                    swapAdjacentBasePoints(bsgs2, pp);
+                    assertTrue(isBSGS(bsgs2));
+                }
+                for (int pp : p) {
+                    if (pp > bsgs2.size() - 2)
+                        continue;
+                    swapAdjacentBasePoints(bsgs2, pp);
+                    assertTrue(isBSGS(bsgs2));
+                }
             }
         }
     }
@@ -247,46 +278,238 @@ public class BSGSAlgorithmsTest {
         ArrayList<BSGSCandidateElement> bsgs
                 = (ArrayList) createRawBSGSCandidate(generators.toArray(new Permutation[0]));
         SchreierSimsAlgorithm(bsgs);
-        System.out.println("BASE: " + Arrays.toString(BSGSAlgorithms.getBaseAsArray(bsgs)));
         ArrayList<BSGSCandidateElement> bsgs1;
 
         for (int i = 0; i < bsgs.size() - 1; ++i) {
             System.out.println(i);
             bsgs1 = BSGSAlgorithms.clone(bsgs);
             swapAdjacentBasePoints(bsgs1, i);
-            System.out.println("NEW BASE: " + Arrays.toString(BSGSAlgorithms.getBaseAsArray(bsgs1)));
             assertTrue(isBSGS(bsgs1));
         }
     }
 
-    private static void burnJvm(long seed) {
-        int n = 20;
-        int COUNT = 1000;
-        RandomGenerator randomGenerator = new Well1024a(seed);
-        List<Permutation> source = new ArrayList<>();
-        for (int i = 0; i < 10; ++i)
-            source.add(new Permutation(Combinatorics.randomPermutation(n, randomGenerator)));
-        randomness(source, 10, 50, randomGenerator);
+    @Test
+    public void testBaseSwap2() {
+        Permutation a = new Permutation(4, 8, 7, 1, 6, 5, 0, 9, 3, 2),
+                b = new Permutation(7, 4, 1, 8, 5, 2, 9, 0, 6, 3);
+        ArrayList<BSGSCandidateElement> bsgs = (ArrayList) createRawBSGSCandidate(a, b);
+        SchreierSimsAlgorithm(bsgs);
+        assertEquals(getOrder(bsgs).intValue(), 120);
 
-        ArrayList<BSGSCandidateElement> bsgs;
-        for (int tt = 0; tt < COUNT; ++tt) {
+        //0,1,2
+        int[] oldBase = {0, 1, 2};
+        assertArrayEquals(oldBase, getBaseAsArray(bsgs));
+        //1,2,0
+        int[] newBase = {1, 2, 0};
 
-            List<Permutation> generators = new ArrayList<>();
-            for (int i = 0; i < 6; ++i)
-                generators.add(random(source, randomGenerator));
-
-            SchreierSimsAlgorithm(bsgs = (ArrayList) createRawBSGSCandidate(generators.toArray(new Permutation[0])));
-            RandomSchreierSimsAlgorithm((ArrayList) createRawBSGSCandidate(generators.toArray(new Permutation[0])), 0.99, randomGenerator);
-            RandomSchreierSimsAlgorithmForKnownOrder(bsgs, getOrder(bsgs), randomGenerator);
-        }
-        System.out.println("JVM warmed up.");
+        //1,0,2
+        swapAdjacentBasePoints(bsgs, 0);
+        //1,2,0
+        swapAdjacentBasePoints(bsgs, 1);
+        assertArrayEquals(newBase, getBaseAsArray(bsgs));
     }
 
-    private static void assertSameGroups(PermutationGroup p1, PermutationGroup p2) {
-        for (Permutation a : p1.generators())
-            assertTrue(p2.isMember(a));
-        for (Permutation a : p2.generators())
-            assertTrue(p1.isMember(a));
+    @Test
+    public void testBaseSwap3() {
+        Permutation a = new Permutation(4, 8, 7, 1, 6, 5, 0, 9, 3, 2),
+                b = new Permutation(7, 4, 1, 8, 5, 2, 9, 0, 6, 3);
+        int degree = a.length();
+        ArrayList<BSGSCandidateElement> bsgs = (ArrayList) createRawBSGSCandidate(a, b);
+        SchreierSimsAlgorithm(bsgs);
+        assertEquals(getOrder(bsgs).intValue(), 120);
+
+        //0,1,2
+        int[] oldBase = {0, 1, 2};
+        assertArrayEquals(oldBase, getBaseAsArray(bsgs));
+        bsgs.add(new BSGSCandidateElement(2, new ArrayList<Permutation>(), new int[degree]));
+        assertTrue(isBSGS(bsgs));
+        swapAdjacentBasePoints(bsgs, 2);
+        assertTrue(isBSGS(bsgs));
+        assertEquals(0, bsgs.get(3).stabilizerGenerators.size());
+    }
+
+//    @Test
+//    public void testRebaseWithTranspositions1() {
+//        Permutation a = new Permutation(4, 8, 7, 1, 6, 5, 0, 9, 3, 2),
+//                b = new Permutation(7, 4, 1, 8, 5, 2, 9, 0, 6, 3);
+//        int degree = a.length();
+//
+//        ArrayList<BSGSCandidateElement> bsgs = (ArrayList) createRawBSGSCandidate(a, b);
+//        SchreierSimsAlgorithm(bsgs);
+//        assertEquals(getOrder(bsgs).intValue(), 120);
+//
+//        //0,1,2
+//        int[] oldBase = {0, 1, 2};
+//        assertArrayEquals(oldBase, getBaseAsArray(bsgs));
+//        //1,2,0
+//        int[] newBase = {1, 2, 0};
+//
+//
+//        int i = 0;
+//        int newBasePoint = newBase[i];// =  1;
+//        int j = 0;
+//        out:
+//        for (; j < bsgs.size(); ++j) {
+//            for (Permutation p : bsgs.get(j).stabilizerGenerators)
+//                if (p.newIndexOf(newBasePoint) != newBasePoint)
+//                    continue out;
+//            break;
+//        }
+//        //add new redundant point
+//        assertEquals(2, j);
+//        bsgs.add(j, new BSGSCandidateElement(newBasePoint, new ArrayList<Permutation>(), new int[degree]));
+//        --j;
+//        //base now: 0,1,2,1
+//        while (j > i)
+//            swapAdjacentBasePoints(bsgs, --j);
+//        //base now: 1,0,1,2
+//
+//        assertArrayEquals(getBaseAsArray(bsgs), new int[]{1, 0, 1, 2});
+//        assertTrue(isBSGS(bsgs));
+//
+//        i = 1;
+//        newBasePoint = newBase[i];// = 2;
+//        j = 0;
+//        out:
+//        for (; j < bsgs.size(); ++j) {
+//            for (Permutation p : bsgs.get(j).stabilizerGenerators)
+//                if (p.newIndexOf(newBasePoint) != newBasePoint)
+//                    continue out;
+//            break;
+//        }
+//        --j;
+//
+//        assertEquals(2, j);
+//    }
+
+    @Test
+    public void testRebaseWithTranspositions2() {
+
+        PermutationGroup pg = GapPrimitiveGroupsReader.readGroupFromGap("/home/stas/gap4r6/prim/grps/gps1.g", 6);
+        final ArrayList<BSGSCandidateElement> bsgs = pg.getBSGS().getBSGSCandidateList();
+        final int[] newBase = {1, 2, 0};
+
+
+        timing(
+                new TimingJob() {
+                    @Override
+                    public Object doJob() {
+                        BSGSAlgorithms.rebaseWithTranspositions(bsgs, newBase);
+                        return null;
+                    }
+                });
+
+
+        assertTrue(isBSGS(bsgs));
+        assertArrayEquals(newBase, getBaseAsArray(bsgs));
+    }
+
+    @Test
+    public void testRebaseWithTranspositions3() {
+        PermutationGroup[] pgs = GapPrimitiveGroupsReader.readGroupsFromGap("/home/stas/gap4r6/prim/grps/gps1.g");
+
+        for (int i = 0; i < pgs.length; ++i) {
+            final ArrayList<BSGSCandidateElement> bsgs = pgs[i].getBSGS().getBSGSCandidateList();
+            timing(
+                    new TimingJob() {
+                        @Override
+                        public Object doJob() {
+                            for (int i = 0; i < 50; ++i) {
+                                int[] oldBase = getBaseAsArray(bsgs);
+                                int[] newBase = new Permutation(Combinatorics.randomPermutation(oldBase.length)).permute(oldBase);
+                                BSGSAlgorithms.rebaseWithTranspositions(bsgs, newBase);
+                                assertTrue(isBSGS(bsgs));
+                                final int[] _newBase = getBaseAsArray(bsgs);
+                                for (int r = 0; r < _newBase.length; ++r)
+                                    assertEquals(newBase[r], _newBase[r]);
+                            }
+                            return null;
+                        }
+                    });
+        }
+    }
+
+    @Test
+    public void testRebaseWithTranspositions3a() {
+        Permutation a = new Permutation(6, 7, 8, 9, 10, 0, 11, 12, 13, 14, 1, 15, 16, 17, 2, 18, 19, 3, 20, 4, 5),
+                b = new Permutation(0, 13, 6, 20, 10, 8, 11, 1, 4, 3, 15, 12, 18, 17, 9, 5, 14, 19, 2, 7, 16),
+                c = new Permutation(0, 9, 12, 10, 17, 5, 6, 14, 16, 1, 3, 11, 2, 19, 7, 15, 8, 4, 18, 13, 20);
+        PermutationGroup pg = PermutationGroupFactory.createPermutationGroup(a, b, c);
+
+        final ArrayList<BSGSCandidateElement> bsgs = pg.getBSGS().getBSGSCandidateList();
+        final int[] newBase = {3, 4, 0, 1, 2};
+        timing(
+                new TimingJob() {
+                    @Override
+                    public Object doJob() {
+                        BSGSAlgorithms.rebaseWithTranspositions(bsgs, newBase);
+                        return null;
+                    }
+                });
+
+
+        assertTrue(isBSGS(bsgs));
+        assertTrue(getBaseAsArray(bsgs).length < newBase.length);
+    }
+
+    @Test
+    public void testRebaseWithTranspositions3b() {
+        Permutation gen0 = new Permutation(0, 5, 10, 15, 20, 1, 6, 11, 16, 21, 2, 7, 12, 17, 22, 3, 8, 13, 18, 23, 4, 9, 14, 19, 24);
+        Permutation gen1 = new Permutation(5, 6, 8, 9, 7, 10, 11, 13, 14, 12, 15, 16, 18, 19, 17, 20, 21, 23, 24, 22, 0, 1, 3, 4, 2);
+        Permutation gen2 = new Permutation(1, 2, 3, 4, 0, 6, 7, 8, 9, 5, 16, 17, 18, 19, 15, 21, 22, 23, 24, 20, 11, 12, 13, 14, 10);
+        PermutationGroup pg = PermutationGroupFactory.createPermutationGroup(gen0, gen1, gen2);
+
+        final ArrayList<BSGSCandidateElement> bsgs = pg.getBSGS().getBSGSCandidateList();
+        int[] oldBase = {0, 1, 2, 3, 4, 5, 7, 8, 9, 10};
+        final int[] newBase = {0, 1, 7, 5, 10, 8, 3, 9, 2, 4};
+
+        timing(
+                new TimingJob() {
+                    @Override
+                    public Object doJob() {
+                        BSGSAlgorithms.rebaseWithTranspositions(bsgs, newBase);
+                        return null;
+                    }
+                });
+
+
+        assertTrue(isBSGS(bsgs));
+        int[] _newBase = getBaseAsArray(bsgs);//[0, 1, 7, 5, 10]
+
+        for (int i = 0; i < _newBase.length; ++i)
+            assertEquals(_newBase[i], newBase[i]);
+    }
+
+
+    @Test
+    public void testRebaseWithTranspositions3c() {
+        //PermutationGroup pg = GapPrimitiveGroupsReader.readGroupFromGap("/home/stas/gap4r6/prim/grps/gps1.g", 41);
+
+        Permutation gen0 = new Permutation(5, 6, 8, 9, 7, 10, 11, 13, 14, 12, 15, 16, 18, 19, 17, 20, 21, 23, 24, 22, 0, 1, 3, 4, 2);
+        Permutation gen1 = new Permutation(1, 2, 3, 4, 0, 6, 7, 8, 9, 5, 16, 17, 18, 19, 15, 21, 22, 23, 24, 20, 11, 12, 13, 14, 10);
+        Permutation gen2 = new Permutation(0, 5, 10, 20, 15, 1, 6, 11, 21, 16, 2, 7, 12, 22, 17, 3, 8, 13, 23, 18, 4, 9, 14, 24, 19);
+        PermutationGroup pg = PermutationGroupFactory.createPermutationGroup(gen0, gen1, gen2);
+
+        final ArrayList<BSGSCandidateElement> bsgs = pg.getBSGS().getBSGSCandidateList();
+        int[] oldBase = {1, 0, 2, 3, 5, 10};
+        final int[] newBase = {2, 3, 10, 0, 5, 1};
+
+        timing(
+                new TimingJob() {
+                    @Override
+                    public Object doJob() {
+                        BSGSAlgorithms.rebaseWithTranspositions(bsgs, newBase);
+                        return null;
+                    }
+                });
+
+        int[] _newBase = getBaseAsArray(bsgs);//[0, 1, 7, 5, 10]
+        System.out.println(Arrays.toString(_newBase));
+
+        assertTrue(isBSGS(bsgs));
+
+        for (int i = 0; i < _newBase.length; ++i)
+            assertEquals(_newBase[i], newBase[i]);
     }
 
     //---------------------------Performance tests------------------------------------//
@@ -434,4 +657,53 @@ public class BSGSAlgorithmsTest {
         }
     }
 
+    private static void burnJvm(long seed) {
+        int n = 20;
+        int COUNT = 1000;
+        RandomGenerator randomGenerator = new Well1024a(seed);
+        List<Permutation> source = new ArrayList<>();
+        for (int i = 0; i < 10; ++i)
+            source.add(new Permutation(Combinatorics.randomPermutation(n, randomGenerator)));
+        randomness(source, 10, 50, randomGenerator);
+
+        ArrayList<BSGSCandidateElement> bsgs;
+        for (int tt = 0; tt < COUNT; ++tt) {
+
+            List<Permutation> generators = new ArrayList<>();
+            for (int i = 0; i < 6; ++i)
+                generators.add(random(source, randomGenerator));
+
+            SchreierSimsAlgorithm(bsgs = (ArrayList) createRawBSGSCandidate(generators.toArray(new Permutation[0])));
+            RandomSchreierSimsAlgorithm((ArrayList) createRawBSGSCandidate(generators.toArray(new Permutation[0])), 0.99, randomGenerator);
+            RandomSchreierSimsAlgorithmForKnownOrder(bsgs, getOrder(bsgs), randomGenerator);
+        }
+        System.out.println("JVM warmed up.");
+    }
+
+
+    private static void assertSameGroups(PermutationGroup p1, PermutationGroup p2) {
+        assertTrue(p1.order().equals(p2.order()));
+        for (Permutation a : p1.generators())
+            assertTrue(p2.isMember(a));
+        for (Permutation a : p2.generators())
+            assertTrue(p1.isMember(a));
+    }
+
+    private static void soutGenerators(List<Permutation> generators) {
+        for (int i = 0; i < generators.size(); ++i) {
+            String str = generators.get(i).toString();
+            str = str.substring(2, str.length() - 1);
+            System.out.println("Permutation gen" + i + " = new Permutation(" + str + ");");
+        }
+        System.out.print("\nPermutationGroup pg = PermutationGroupFactory.createPermutationGroup(");
+        for (int i = 0; ; ++i) {
+            System.out.print("gen" + i);
+            if (i == generators.size() - 1) {
+                System.out.print(");");
+                break;
+            }
+            System.out.print(",");
+        }
+        System.out.println();
+    }
 }

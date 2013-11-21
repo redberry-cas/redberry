@@ -60,7 +60,7 @@ public final class PermutationGroupImpl implements PermutationGroup {
     }
 
     @Override
-    public int dimension() {
+    public int degree() {
         return length;
     }
 

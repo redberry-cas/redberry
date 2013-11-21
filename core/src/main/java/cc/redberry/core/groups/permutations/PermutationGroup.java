@@ -55,12 +55,18 @@ public interface PermutationGroup
     List<Permutation> generators();
 
     /**
-     * Return the dimension of group (length of each permutation)
+     * Return the degree of group (length of each permutation)
      *
-     * @return dimension of group (length of each permutation)
+     * @return degree of group (length of each permutation)
      */
-    //todo rename
-    int dimension();
+    int degree();
+
+    /**
+     * Returns base and strong generating set of this group.
+     *
+     * @return base and strong generating set of this grou
+     */
+    BSGS getBSGS();
 
     /**
      * Returns the orbit of specified point

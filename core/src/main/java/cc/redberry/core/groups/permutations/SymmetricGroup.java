@@ -46,6 +46,11 @@ public final class SymmetricGroup implements PermutationGroup {
     }
 
     @Override
+    public BSGS getBSGS() {
+        return null;
+    }
+
+    @Override
     public List<Permutation> generators() {
         throw new UnsupportedOperationException();
     }
@@ -62,7 +67,7 @@ public final class SymmetricGroup implements PermutationGroup {
     }
 
     @Override
-    public int dimension() {
+    public int degree() {
         return length;
     }
 

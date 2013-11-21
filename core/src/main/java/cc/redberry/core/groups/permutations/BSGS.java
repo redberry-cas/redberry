@@ -25,6 +25,7 @@ package cc.redberry.core.groups.permutations;
 import cc.redberry.core.combinatorics.IntTuplesPort;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -54,6 +55,15 @@ public final class BSGS implements Iterable<Permutation> {
      */
     public List<BSGSElement> getBSGSList() {
         return BSGSList;
+    }
+
+    /**
+     * Returns unmodifiable list of BSGS elements
+     *
+     * @return unmodifiable list of BSGS elements
+     */
+    public ArrayList<BSGSCandidateElement> getBSGSCandidateList() {
+        return BSGSAlgorithms.asBSGSCandidatesList(BSGSList);
     }
 
     /**

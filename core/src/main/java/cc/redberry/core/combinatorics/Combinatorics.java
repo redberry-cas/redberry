@@ -162,7 +162,7 @@ public final class Combinatorics {
      */
     public static int[] createCycle(int dimension) {
         if (dimension < 0)
-            throw new IllegalArgumentException("Negative dimension");
+            throw new IllegalArgumentException("Negative degree");
 
         int[] cycle = new int[dimension];
         for (int i = 0; i < dimension - 1; ++i)

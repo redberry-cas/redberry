@@ -43,6 +43,11 @@ public class EmptyPermutationGroup implements PermutationGroup {
     }
 
     @Override
+    public BSGS getBSGS() {
+        return BSGS.EMPTY;
+    }
+
+    @Override
     public List<Permutation> generators() {
         return Collections.singletonList(identity);
     }
@@ -58,7 +63,7 @@ public class EmptyPermutationGroup implements PermutationGroup {
     }
 
     @Override
-    public int dimension() {
+    public int degree() {
         return length;
     }
 
@@ -107,7 +112,7 @@ public class EmptyPermutationGroup implements PermutationGroup {
 
     @Override
     public boolean isSubgroup(PermutationGroup group) {
-        if (group.dimension() != length)
+        if (group.degree() != length)
             throw new IllegalArgumentException("Different lengths.");
         return group.order().equals(BigInteger.ONE);
     }
