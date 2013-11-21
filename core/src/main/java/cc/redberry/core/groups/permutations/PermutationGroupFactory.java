@@ -22,6 +22,7 @@
  */
 package cc.redberry.core.groups.permutations;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
@@ -33,17 +34,17 @@ public final class PermutationGroupFactory {
     private PermutationGroupFactory() {
     }
 
-    public static PermutationGroup createPermutationGroup(Collection<Permutation> generators) {
-        return createPermutationGroup(generators.toArray(new Permutation[generators.size()]));
+    public static PermutationGroup createPermutationGroup(Permutation... generators) {
+        return createPermutationGroup(Arrays.asList(generators));
     }
 
-    public static PermutationGroup createPermutationGroup(Permutation... generators) {
-        if (generators.length == 0)
+    public static PermutationGroup createPermutationGroup(List<Permutation> generators) {
+        if (generators.isEmpty())
             throw new IllegalArgumentException("Now generators specified.");
         //todo Alt and Sym checks
         List<BSGSElement> BSGSList = BSGSAlgorithms.createBSGSList(generators);
         if (BSGSList.isEmpty())
-            return new EmptyPermutationGroup(generators[0].length());
+            return new EmptyPermutationGroup(generators.get(0).length());
         return new PermutationGroupImpl(new BSGS(BSGSList));
     }
 }

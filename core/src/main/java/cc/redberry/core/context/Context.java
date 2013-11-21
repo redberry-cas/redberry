@@ -28,6 +28,8 @@ import cc.redberry.core.parser.ParseManager;
 import cc.redberry.core.tensor.SimpleTensor;
 import cc.redberry.core.tensor.Tensors;
 import cc.redberry.core.utils.BitArray;
+import org.apache.commons.math3.random.RandomGenerator;
+import org.apache.commons.math3.random.Well44497b;
 
 /**
  * This class represents Redberry context. It stores all Redberry session data (in some sense it stores static data).
@@ -78,12 +80,12 @@ public final class Context {
     public Context(ContextSettings contextSettings) {
         this.parseManager = new ParseManager(contextSettings.getParser());
         this.converterManager = contextSettings.getConverterManager();
-        nameManager = new NameManager(contextSettings.getNameManagerSeed(), contextSettings.getKronecker(), contextSettings.getMetricName());
-
-        defaultOutputFormat = contextSettings.getDefaultOutputFormat();
+        this.nameManager = new NameManager(contextSettings.getNameManagerSeed(),
+                contextSettings.getKronecker(), contextSettings.getMetricName());
+        this.defaultOutputFormat = contextSettings.getDefaultOutputFormat();
 
         for (IndexType type : contextSettings.getMetricTypes())
-            metricTypes.set(type.getType());
+            this.metricTypes.set(type.getType());
     }
 
     /**
@@ -338,6 +340,15 @@ public final class Context {
         public SimpleTensor take() {
             return generateNewSymbol();
         }
+    }
+
+    /**
+     * Returns random generator used by Redberry in current session.
+     *
+     * @return random generator used by Redberry in current session
+     */
+    public RandomGenerator getRandomGenerator() {
+        return nameManager.getRandomGenerator();
     }
 
     /**

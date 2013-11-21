@@ -22,6 +22,7 @@
  */
 package cc.redberry.core.groups.permutations;
 
+import cc.redberry.core.context.CC;
 import cc.redberry.core.utils.BitArray;
 import cc.redberry.core.utils.IntArrayList;
 import org.apache.commons.math3.random.RandomGenerator;
@@ -98,11 +99,23 @@ public class BSGSAlgorithms {
      * @throws IllegalArgumentException if not all permutations have same length
      */
     public static List<BSGSCandidateElement> createRawBSGSCandidate(final Permutation... generators) {
-        if (generators.length == 0)
+        return createRawBSGSCandidate(Arrays.asList(generators));
+    }
+
+    /**
+     * Creates a raw BSGS candidate represented as list. This method simply takes all distinct points that can be
+     * mapped onto another points under any of generators.
+     *
+     * @param generators group generators
+     * @return raw BSGS candidate
+     * @throws IllegalArgumentException if not all permutations have same length
+     */
+    public static List<BSGSCandidateElement> createRawBSGSCandidate(final List<Permutation> generators) {
+        if (generators.isEmpty())
             return Collections.EMPTY_LIST;
         checkGenerators(generators);
 
-        final int length = generators[0].length();
+        final int length = generators.get(0).length();
 
         //first let's find a "proto-base" - a set of points that cannot be fixed by any of specified generators
         //and a "proto-BSGS" corresponding to this base
@@ -111,11 +124,12 @@ public class BSGSAlgorithms {
         int firstBasePoint = -1;
 
         //we try to find such a point that is not fixed at least by one of the generators
+        out:
         for (Permutation permutation : generators)
             for (int i = 0; i < length; ++i)
                 if (permutation.newIndexOf(i) != i) {
                     firstBasePoint = i;
-                    break;
+                    break out;
                 }
 
         if (firstBasePoint == -1) {
@@ -130,7 +144,7 @@ public class BSGSAlgorithms {
         // corresponding G^(i) is G^(0) = G, so its stabilizer generators (stabilizes zero points)
         // are just generators of group
         ArrayList<BSGSCandidateElement> BSGS = new ArrayList<>();
-        BSGS.add(new BSGSCandidateElement(firstBasePoint, new ArrayList<>(Arrays.asList(generators)), new int[length]));
+        BSGS.add(new BSGSCandidateElement(firstBasePoint, new ArrayList<>(generators), new int[length]));
 
         //make use all unused generators
         makeUseOfAllGenerators(BSGS);
@@ -147,22 +161,23 @@ public class BSGSAlgorithms {
      * @return raw BSGS candidate
      * @throws IllegalArgumentException if not all permutations have same length
      */
-    public static List<BSGSCandidateElement> createRawBSGSCandidate(final int[] knownBase, final Permutation... generators) {
-        if (generators.length == 0)
+    public static List<BSGSCandidateElement> createRawBSGSCandidate(final int[] knownBase, final List<Permutation> generators) {
+        if (generators.isEmpty())
             return Collections.EMPTY_LIST;
         checkGenerators(generators);
 
-        final int length = generators[0].length();
+        final int length = generators.get(0).length();
 
         // first, lets remove unnecessary base points, i.e. such points, that are fixed by all generators
 
         IntArrayList base = new IntArrayList(knownBase.clone());
 
         //we try to find such a point that is not fixed at least by one of the generators
+        out:
         for (int i = base.size() - 1; i >= 0; --i) {
             for (Permutation permutation : generators)
                 if (permutation.newIndexOf(i) != i)
-                    continue;
+                    continue out;
             base.remove(i);
         }
 
@@ -178,7 +193,7 @@ public class BSGSAlgorithms {
             if (i == 0) {
                 // corresponding G^(i) is G^(0) = G, so its stabilizer generators (stabilizes zero points)
                 // are just generators of group
-                BSGS.add(new BSGSCandidateElement(base.get(i), new ArrayList<>(Arrays.asList(generators)), new int[length]));
+                BSGS.add(new BSGSCandidateElement(base.get(i), new ArrayList<>(generators), new int[length]));
                 continue;
             }
             //lets find generators that fixes all points before current point
@@ -221,7 +236,7 @@ public class BSGSAlgorithms {
      * @throws IllegalArgumentException if not all permutations have same length
      * @see #SchreierSimsAlgorithm(java.util.ArrayList)
      */
-    public static List<BSGSElement> createBSGSList(final Permutation... generators) {
+    public static List<BSGSElement> createBSGSList(final List<Permutation> generators) {
         List<BSGSCandidateElement> BSGSCandidate = createRawBSGSCandidate(generators);
         if (BSGSCandidate.isEmpty())
             return Collections.EMPTY_LIST;
@@ -253,7 +268,7 @@ public class BSGSAlgorithms {
      * @throws IllegalArgumentException if not all permutations have same length
      * @see #SchreierSimsAlgorithm(java.util.ArrayList)
      */
-    public static List<BSGSElement> createBSGSList(final int[] knownBase, final Permutation... generators) {
+    public static List<BSGSElement> createBSGSList(final int[] knownBase, final List<Permutation> generators) {
         List<BSGSCandidateElement> BSGSCandidate = createRawBSGSCandidate(knownBase, generators);
         if (BSGSCandidate.isEmpty())
             return Collections.EMPTY_LIST;
@@ -893,6 +908,34 @@ public class BSGSAlgorithms {
             swapAdjacentBasePoints(BSGS, --insertionPosition);
     }
 
+    /**
+     * Changes the base of specified BSGS to specified new base by construction of a new BSGS with known base using
+     * randomized Schreier-Sims algorithm {@link #RandomSchreierSimsAlgorithmForKnownOrder(java.util.ArrayList, java.math.BigInteger, org.apache.commons.math3.random.RandomGenerator)};
+     * the algorithm guaranties that if initial base is [b1, b2, b3, ..., bk] and specified base is [a1, a2, a3, ..., al],
+     * then the resulting base will look like  [a1, a2, a3, ...., al, x, y, ..., z] with no any redundant base
+     * points at the end (redundant point is point which corresponding stabilizer generators are empty) but with some
+     * additional points introduced if specified new base was not anought.
+     *
+     * @param BSGS    BSGS
+     * @param newBase new base
+     */
+    public static void rebaseFromScratch(ArrayList<BSGSCandidateElement> BSGS, int[] newBase) {
+        List<BSGSCandidateElement> newBSGS = createRawBSGSCandidate(newBase, BSGS.get(0).stabilizerGenerators);
+        if (newBSGS.isEmpty())
+            return; //new base is fixed by all group generators; nothing to do
+        BigInteger order = getOrder(BSGS);
+        RandomSchreierSimsAlgorithmForKnownOrder((ArrayList) newBSGS, order, CC.getRandomGenerator());
+        int i = 0;
+        for (; i < newBSGS.size() && i < BSGS.size(); ++i)
+            BSGS.set(i, newBSGS.get(i));
+        if (i < newBSGS.size())
+            for (; i < newBSGS.size(); ++i)
+                BSGS.add(newBSGS.get(i));
+        if (i < BSGS.size())
+            for (int j = BSGS.size() - 1; j >= i; --j)
+                BSGS.remove(j);
+    }
+
     //------------------------------ FACTORIES --------------------------------------------//
 
     /**
@@ -902,7 +945,7 @@ public class BSGSAlgorithms {
      * @param generators
      * @return BSGS container
      */
-    public static BSGS createBSGS(final Permutation... generators) {
+    public static BSGS createBSGS(final List<Permutation> generators) {
         List<BSGSElement> BSGSList = createBSGSList(generators);
         if (BSGSList.isEmpty())
             return BSGS.EMPTY;
@@ -987,14 +1030,35 @@ public class BSGSAlgorithms {
     }
 
     /**
+     * Checks whether all permutations have same size and throws exception if not all permutations have same size.
+     *
+     * @param generators permutations
+     * @throws IllegalArgumentException if not all permutations have same length
+     */
+    public static void checkGenerators(final List<Permutation> generators) {
+        if (!checkGeneratorsBoolean(generators))
+            throw new IllegalArgumentException("Generators of different sizes.");
+    }
+
+    /**
      * Checks whether all permutations have same size and returns the result.
      *
      * @param generators permutations
      * @return true if all permutations have same length, false otherwise
      */
     public static boolean checkGeneratorsBoolean(final Permutation... generators) {
-        for (int i = 1; i < generators.length; ++i)
-            if (generators[i - 1].length() != generators[i].length())
+        return checkGeneratorsBoolean(Arrays.asList(generators));
+    }
+
+    /**
+     * Checks whether all permutations have same size and returns the result.
+     *
+     * @param generators permutations
+     * @return true if all permutations have same length, false otherwise
+     */
+    public static boolean checkGeneratorsBoolean(final List<Permutation> generators) {
+        for (int i = 1, size = generators.size(); i < size; ++i)
+            if (generators.get(i - 1).length() != generators.get(i).length())
                 return false;
         return true;
     }

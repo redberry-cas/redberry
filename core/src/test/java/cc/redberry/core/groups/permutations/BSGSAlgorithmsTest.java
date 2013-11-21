@@ -557,6 +557,32 @@ public class BSGSAlgorithmsTest {
             assertEquals(newBase[r], _newBase[r]);
 
     }
+
+    @Test
+    public void rebaseFromScratch1() {
+        PermutationGroup[] pgs = GapPrimitiveGroupsReader.readGroupsFromGap("/home/stas/gap4r6/prim/grps/gps1.g");
+
+        for (int i = 0; i < pgs.length; ++i) {
+            final ArrayList<BSGSCandidateElement> bsgs = pgs[i].getBSGS().getBSGSCandidateList();
+            timing(
+                    new TimingJob() {
+                        @Override
+                        public Object doJob() {
+                            for (int i = 0; i < 50; ++i) {
+                                int[] oldBase = getBaseAsArray(bsgs);
+                                int[] newBase = new Permutation(Combinatorics.randomPermutation(oldBase.length)).permute(oldBase);
+                                rebaseFromScratch(bsgs, newBase);
+                                assertTrue(isBSGS(bsgs));
+                                final int[] _newBase = getBaseAsArray(bsgs);
+                                for (int r = 0; r < _newBase.length && r < newBase.length; ++r)
+                                    assertEquals(newBase[r], _newBase[r]);
+                            }
+                            return null;
+                        }
+                    });
+        }
+    }
+
     //---------------------------Performance tests------------------------------------//
 
     @Test
