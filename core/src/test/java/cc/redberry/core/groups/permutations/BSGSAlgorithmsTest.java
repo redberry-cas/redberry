@@ -420,7 +420,7 @@ public class BSGSAlgorithmsTest {
                                 BSGSAlgorithms.rebaseWithTranspositions(bsgs, newBase);
                                 assertTrue(isBSGS(bsgs));
                                 final int[] _newBase = getBaseAsArray(bsgs);
-                                for (int r = 0; r < _newBase.length; ++r)
+                                for (int r = 0; r < _newBase.length && r < newBase.length; ++r)
                                     assertEquals(newBase[r], _newBase[r]);
                             }
                             return null;
@@ -512,6 +512,51 @@ public class BSGSAlgorithmsTest {
             assertEquals(_newBase[i], newBase[i]);
     }
 
+    @Test
+    public void rebaseWithConjugationAndTranspositions1() {
+        PermutationGroup[] pgs = GapPrimitiveGroupsReader.readGroupsFromGap("/home/stas/gap4r6/prim/grps/gps1.g");
+
+        for (int i = 0; i < pgs.length; ++i) {
+            final ArrayList<BSGSCandidateElement> bsgs = pgs[i].getBSGS().getBSGSCandidateList();
+            timing(
+                    new TimingJob() {
+                        @Override
+                        public Object doJob() {
+                            for (int i = 0; i < 50; ++i) {
+                                int[] oldBase = getBaseAsArray(bsgs);
+                                int[] newBase = new Permutation(Combinatorics.randomPermutation(oldBase.length)).permute(oldBase);
+                                rebaseWithConjugationAndTranspositions(bsgs, newBase);
+                                assertTrue(isBSGS(bsgs));
+                                final int[] _newBase = getBaseAsArray(bsgs);
+                                for (int r = 0; r < _newBase.length && r < newBase.length; ++r)
+                                    assertEquals(newBase[r], _newBase[r]);
+                            }
+                            return null;
+                        }
+                    });
+        }
+    }
+
+    @Test
+    public void rebaseWithConjugationAndTranspositions1a() {
+        //PermutationGroup pg = GapPrimitiveGroupsReader.readGroupFromGap("/home/stas/gap4r6/prim/grps/gps1.g", 1);
+        Permutation gen0 = new Permutation(1, 2, 3, 4, 5, 6, 0, 7);
+        Permutation gen1 = new Permutation(0, 2, 4, 6, 1, 3, 5, 7);
+        Permutation gen2 = new Permutation(7, 6, 3, 2, 5, 4, 1, 0);
+        PermutationGroup pg = PermutationGroupFactory.createPermutationGroup(gen0, gen1, gen2);
+
+        final ArrayList<BSGSCandidateElement> bsgs = pg.getBSGS().getBSGSCandidateList();
+        int[] oldBase = {0, 1, 2};
+        int[] newBase = {2, 0, 1};
+
+        rebaseWithConjugationAndTranspositions(bsgs, newBase);
+
+        assertTrue(isBSGS(bsgs));
+        final int[] _newBase = getBaseAsArray(bsgs);
+        for (int r = 0; r < _newBase.length && r < newBase.length; ++r)
+            assertEquals(newBase[r], _newBase[r]);
+
+    }
     //---------------------------Performance tests------------------------------------//
 
     @Test

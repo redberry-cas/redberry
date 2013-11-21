@@ -780,54 +780,117 @@ public class BSGSAlgorithms {
     /**
      * Changes the base of specified BSGS to specified new base using a simple algorithm with transpositions; the
      * algorithm guaranties that if initial base is [b1, b2, b3, ..., bk] and specified base is [a1, a2, a3, ..., al],
-     * then the resulting base will look like  [a1, a2, a3, ...., al, b4, b7, ..., b19], where the b-elements at the
-     * end of new base are some redundant base points from initial base.
+     * then the resulting base will look like  [a1, a2, a3, ...., al, b4, b7, ..., b19] with no any redundant base
+     * points at the end (redundant point is point which corresponding stabilizer generators are empty) - this
+     * achieves by invocation of {@link #removeRedundantBasePoints(java.util.ArrayList)} at the end of procedure.
      *
      * @param BSGS    BSGS
      * @param newBase new base
      */
     public static void rebaseWithTranspositions(ArrayList<BSGSCandidateElement> BSGS, int[] newBase) {
-        //first, lets proceed by swapping
         for (int i = 0; i < newBase.length && i < BSGS.size(); ++i) {
             int newBasePoint = newBase[i];
-            if (BSGS.get(i).basePoint != newBasePoint) {
-                //lets find orbit that contains new base point
-                int insertionPosition = i + 1;
-                insertion_points:
-                for (; insertionPosition < BSGS.size(); ++insertionPosition) {
-                    for (Permutation permutation : BSGS.get(insertionPosition).stabilizerGenerators)
-                        if (permutation.newIndexOf(newBasePoint) != newBasePoint)
-                            continue insertion_points;
-                    break;
-                }
-                if (insertionPosition == BSGS.size()) {
-                    //<- no element that fixes new base point
-                    BSGS.add(new BSGSCandidateElement(newBasePoint, new ArrayList<Permutation>(),
-                            new int[BSGS.get(0).groupDegree()]));
-                } else if (BSGS.get(insertionPosition).basePoint != newBasePoint) {
-                    //<- we've found an element (call it pivot) that stabilizes all
-                    // points before pivot and also a new base point
-                    // we can insert a new base point before pivot, and still pivot will fix all points before pivot
+            if (BSGS.get(i).basePoint != newBasePoint)
+                changeBasePointWithTranspositions(BSGS, i, newBasePoint);
+        }
+        removeRedundantBasePoints(BSGS);
+    }
 
-                    //stabilizers of new base point inserted are same to stabilizers of pivot
-                    BSGS.add(insertionPosition,
-                            new BSGSCandidateElement(newBasePoint,
-                                    new ArrayList<>(BSGS.get(insertionPosition).stabilizerGenerators),
-                                    new int[BSGS.get(0).groupDegree()]));
-                }
-                //then just swap
-                //note, that if insertionPosition <= i then no any swap needed
-                while (insertionPosition > i)
-                    swapAdjacentBasePoints(BSGS, --insertionPosition);
+    /**
+     * Changes the base of specified BSGS to specified new base using an algorithm with conjugations and transpositions;
+     * the algorithm guaranties that if initial base is [b1, b2, b3, ..., bk] and specified base is [a1, a2, a3, ..., al],
+     * then the resulting base will look like  [a1, a2, a3, ...., al, b4, b7, ..., b19] with no any redundant base
+     * points at the end (redundant point is point which corresponding stabilizer generators are empty) - this
+     * achieves by invocation of {@link #removeRedundantBasePoints(java.util.ArrayList)} at the end of procedure.
+     *
+     * @param BSGS    BSGS
+     * @param newBase new base
+     */
+    public static void rebaseWithConjugationAndTranspositions(ArrayList<BSGSCandidateElement> BSGS, int[] newBase) {
+        final int degree = BSGS.get(0).groupDegree();
+        //conjugating permutation
+        Permutation conjugation = Combinatorics.createIdentity(degree);
 
+        //first, lets proceed by swapping
+        for (int i = 0; i < newBase.length && i < BSGS.size(); ++i) {
+            //new base point image under conjugation
+            int newBasePoint = conjugation.newIndexOfUnderInverse(newBase[i]);
+            //early check
+            if (BSGS.get(i).basePoint == newBasePoint)
+                continue;
+            //check, whether new base point belongs to current orbit, i.e. there is some permutation in G
+            //that maps current point onto new point
+            if (BSGS.get(i).belongsToOrbit(newBasePoint)) {
+                //we can simply conjugate this base element
+                Permutation transversal = BSGS.get(i).getTransversalOf(newBasePoint);
+                conjugation = transversal.composition(conjugation);
+                continue;
+            }
+
+            //<- else, if new base point does not belong to current orbit we'll proceed as usual
+            changeBasePointWithTranspositions(BSGS, i, newBasePoint);
+
+        }
+        //conjugating base and strong generating set
+        if (!conjugation.isIdentity()) {
+            //inverse conjugation
+            Permutation iconjugation = conjugation.inverse();
+            ListIterator<BSGSCandidateElement> elementsIterator = BSGS.listIterator();
+            while (elementsIterator.hasNext()) {
+                BSGSCandidateElement element = elementsIterator.next();
+                //conjugating stabilizers
+                ArrayList<Permutation> newStabilizers = new ArrayList<>(element.stabilizerGenerators.size());
+                for (Permutation oldStabilizer : element.stabilizerGenerators)
+                    newStabilizers.add(iconjugation.composition((oldStabilizer.composition(conjugation))));
+
+                //conjugating base point
+                int newBasePoint = conjugation.newIndexOf(element.basePoint);
+                elementsIterator.set(
+                        new BSGSCandidateElement(newBasePoint, newStabilizers, new int[degree]));
             }
         }
-        for (int i = BSGS.size() - 1; i >= 0; --i) {
-            if (BSGS.get(i).stabilizerGenerators.isEmpty())
-                BSGS.remove(i);
-            else
-                break;
+        removeRedundantBasePoints(BSGS);
+    }
+
+    /**
+     * Changes <i>i-th</i> base point with a new value, by insertion redundant point and swapping.
+     *
+     * @param BSGS                 BSGS
+     * @param oldBasePointPosition position of base point to change
+     * @param newBasePoint         new base point
+     */
+    private static void changeBasePointWithTranspositions(
+            ArrayList<BSGSCandidateElement> BSGS, int oldBasePointPosition, int newBasePoint) {
+        assert BSGS.get(oldBasePointPosition).basePoint != newBasePoint;
+        final int degree = BSGS.get(0).groupDegree();
+        int insertionPosition = oldBasePointPosition + 1;
+        insertion_points:
+        for (; insertionPosition < BSGS.size(); ++insertionPosition) {
+            for (Permutation permutation : BSGS.get(insertionPosition).stabilizerGenerators)
+                if (permutation.newIndexOf(newBasePoint) != newBasePoint)
+                    continue insertion_points;
+            break;
         }
+
+        if (insertionPosition == BSGS.size()) {
+            //<- no element that fixes new base point
+            BSGS.add(new BSGSCandidateElement(newBasePoint, new ArrayList<Permutation>(),
+                    new int[degree]));
+        } else if (BSGS.get(insertionPosition).basePoint != newBasePoint) {
+            //<- we've found an element (call it pivot) that stabilizes all
+            // points before pivot and also a new base point
+            // we can insert a new base point before pivot, and still pivot will fix all points before pivot
+
+            //stabilizers of new base point inserted are same to stabilizers of pivot
+            BSGS.add(insertionPosition,
+                    new BSGSCandidateElement(newBasePoint,
+                            new ArrayList<>(BSGS.get(insertionPosition).stabilizerGenerators),
+                            new int[degree]));
+        }
+        //then just swap
+        //note, that if insertionPosition <= i then no any swap needed
+        while (insertionPosition > oldBasePointPosition)
+            swapAdjacentBasePoints(BSGS, --insertionPosition);
     }
 
     //------------------------------ FACTORIES --------------------------------------------//
