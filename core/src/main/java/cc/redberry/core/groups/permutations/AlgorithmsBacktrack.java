@@ -69,7 +69,7 @@ public final class AlgorithmsBacktrack {
             this.size = bsgs.size();
             this.tuples = new IntTuplesPort(orbitSizes);
             this.word = new Permutation[bsgs.size()];
-            this.baseComparator = new BaseComparator(AlgorithmsBase.getBaseAsArray(bsgs));
+            this.baseComparator = new InducedOrderingOfSet(AlgorithmsBase.getBaseAsArray(bsgs));
             this.sortedOrbits = new int[bsgs.size()][];
             this.cachedSortedOrbits = new int[bsgs.size()][];
             for (int i = bsgs.size() - 1; i >= 0; --i) {
@@ -125,12 +125,12 @@ public final class AlgorithmsBacktrack {
         }
     }
 
-    public static class InducedPermutationsComparator implements Comparator<Permutation> {
-        final BaseComparator baseComparator;
+    public static class InducedOrderingOfPermutations implements Comparator<Permutation> {
+        final InducedOrderingOfSet inducedOrderingOfSet;
         final int[] base;
 
-        public InducedPermutationsComparator(final int[] base) {
-            this.baseComparator = new BaseComparator(base);
+        public InducedOrderingOfPermutations(final int[] base) {
+            this.inducedOrderingOfSet = new InducedOrderingOfSet(base);
             this.base = base;
         }
 
@@ -140,18 +140,18 @@ public final class AlgorithmsBacktrack {
                 throw new IllegalArgumentException("Not same degree.");
             int compare;
             for (int i : base)
-                if ((compare = baseComparator.compare(a.newIndexOf(i), b.newIndexOf(i))) != 0)
+                if ((compare = inducedOrderingOfSet.compare(a.newIndexOf(i), b.newIndexOf(i))) != 0)
                     return compare;
             return 0;
         }
     }
 
 
-    public static class BaseComparator implements IntComparator {
+    public static class InducedOrderingOfSet implements IntComparator {
         private int[] base;
         private int[] positions;
 
-        public BaseComparator(final int[] base) {
+        public InducedOrderingOfSet(final int[] base) {
             this.base = base.clone();
             this.positions = new int[base.length];
             for (int i = 1; i < base.length; ++i)

@@ -24,9 +24,6 @@ package cc.redberry.core.groups.permutations;
 
 import cc.redberry.core.groups.permutations.gap.GapPrimitiveGroupsReader;
 import cc.redberry.core.utils.ArraysUtils;
-import cc.redberry.core.utils.Timing;
-import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
-import org.junit.Assert;
 import org.junit.Test;
 
 import java.math.BigInteger;
@@ -37,8 +34,6 @@ import java.util.List;
 import static cc.redberry.core.TAssert.assertEquals;
 import static cc.redberry.core.TAssert.assertTrue;
 import static cc.redberry.core.groups.permutations.AlgorithmsBacktrack.BacktrackIterator;
-import static cc.redberry.core.groups.permutations.AlgorithmsBacktrack.BaseComparator;
-import static cc.redberry.core.groups.permutations.AlgorithmsBacktrack.InducedPermutationsComparator;
 import static cc.redberry.core.groups.permutations.AlgorithmsBase.*;
 import static cc.redberry.core.utils.Timing.timing;
 import static org.junit.Assert.assertArrayEquals;
@@ -51,7 +46,7 @@ public class AlgorithmsBacktrackTest {
     @Test
     public void testBaseComparator1() {
         int[] base = {0, 2, 1};
-        BaseComparator comparator = new BaseComparator(base);
+        AlgorithmsBacktrack.InducedOrderingOfSet comparator = new AlgorithmsBacktrack.InducedOrderingOfSet(base);
         int[] array = {1, 0, 2};
         ArraysUtils.quickSort(array, comparator);
         assertArrayEquals(base, array);
@@ -60,7 +55,7 @@ public class AlgorithmsBacktrackTest {
     @Test
     public void testBaseComparator2() {
         int[] base = {0, 2, 1};
-        BaseComparator comparator = new BaseComparator(base);
+        AlgorithmsBacktrack.InducedOrderingOfSet comparator = new AlgorithmsBacktrack.InducedOrderingOfSet(base);
         int[] array = {5, 1, 0, 2};
         ArraysUtils.quickSort(array, comparator);
         int[] expected = {0, 2, 1, 5};
@@ -77,7 +72,7 @@ public class AlgorithmsBacktrackTest {
 
 
         BacktrackIterator iterator = new BacktrackIterator(bsgs);
-        InducedPermutationsComparator comparator = new InducedPermutationsComparator(getBaseAsArray(bsgs));
+        AlgorithmsBacktrack.InducedOrderingOfPermutations comparator = new AlgorithmsBacktrack.InducedOrderingOfPermutations(getBaseAsArray(bsgs));
 
         Permutation previous = null, current;
         int i = 0;
@@ -106,7 +101,7 @@ public class AlgorithmsBacktrackTest {
 
 
         BacktrackIterator iterator = new BacktrackIterator(bsgs);
-        InducedPermutationsComparator comparator = new InducedPermutationsComparator(getBaseAsArray(bsgs));
+        AlgorithmsBacktrack.InducedOrderingOfPermutations comparator = new AlgorithmsBacktrack.InducedOrderingOfPermutations(getBaseAsArray(bsgs));
 
         System.out.println(Arrays.toString(getBaseAsArray(bsgs)));
         System.out.println();
@@ -144,7 +139,7 @@ public class AlgorithmsBacktrackTest {
 
 
                 BacktrackIterator iterator = new BacktrackIterator(bsgs);
-                InducedPermutationsComparator comparator = new InducedPermutationsComparator(getBaseAsArray(bsgs));
+                AlgorithmsBacktrack.InducedOrderingOfPermutations comparator = new AlgorithmsBacktrack.InducedOrderingOfPermutations(getBaseAsArray(bsgs));
 
                 Permutation previous = null, current;
                 int count = 0;
