@@ -23,10 +23,12 @@
 package cc.redberry.core.utils;
 
 import cc.redberry.core.combinatorics.Combinatorics;
+import cc.redberry.core.context.CC;
 import org.junit.Assert;
 import org.junit.Test;
 
 import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Dmitry Bolotin
@@ -79,5 +81,24 @@ public class ArraysUtilsTest {
         Integer[] to = {3, 1, 1};
         int[] bijection = {1, 0, 2};
         Assert.assertArrayEquals(bijection, ArraysUtils.bijection(from, to));
+    }
+
+    @Test
+    public void testQuickSortComparator1() {
+        IntComparator comparator = new IntComparator() {
+            @Override
+            public int compare(int a, int b) {
+                return Integer.compare(b, a);
+            }
+        };
+        int[] array = new int[1000];
+        for (int t = 0; t < 100; ++t) {
+            for (int i = 0; i < array.length; ++i)
+                array[i] = CC.getRandomGenerator().nextInt(10000);
+
+            ArraysUtils.quickSort(array, comparator);
+            for (int i = 1; i < array.length; ++i)
+                assertTrue(array[i - 1] >= array[i]);
+        }
     }
 }

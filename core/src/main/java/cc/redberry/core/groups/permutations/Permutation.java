@@ -42,6 +42,14 @@ public interface Permutation extends Comparable<Permutation> {
     public int newIndexOf(int i);
 
     /**
+     * Returns the image of specified set under this permutation.
+     *
+     * @param set set
+     * @return image of specified set under this permutation
+     */
+    public int[] imageOf(int[] set);
+
+    /**
      * Return the new position of specified element under inverse this permutation
      *
      * @param i position of element in set

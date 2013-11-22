@@ -1587,6 +1587,137 @@ public final class ArraysUtils {
                 : (x[b] > x[c] ? b : x[a] > x[c] ? c : a));
     }
 
+    ////////////////////////////////////// COMPARATOR /////////////////////////////////////////////////////
+
+
+    /**
+     * Sorts the specified target array of ints into ascending numerical order and simultaneously permutes the {@code
+     * coSort} Objects array in the same way then specified target array. <p/> The code was taken from the jdk6 Arrays
+     * class. <p/> The sorting algorithm is a tuned quicksort, adapted from Jon L. Bentley and M. Douglas McIlroy's
+     * "Engineering a Sort Function", Software-Practice and Experience, Vol. 23(11) P. 1249-1265 (November 1993). This
+     * algorithm offers n*log(n) performance on many data sets that cause other quicksorts to degrade to quadratic
+     * performance. <p/> <p/> <p><b>NOTE: this is unstable sort algorithm, so additional combinatorics of the {@code
+     * coSort} array can be perfomed. Use this method only if you are sure, in what you are doing. If not - use stable
+     * sort methods like an insertion sort or Tim sort.</b>
+     *
+     * @param target     the array to be sorted
+     * @param comparator custom comparator
+     * @throws IllegalArgumentException if coSort length less then target length.
+     */
+    public static void quickSort(int[] target, IntComparator comparator) {
+        quickSort1(target, 0, target.length, comparator);
+    }
+
+
+    /**
+     * Sorts the specified range of the specified target array of ints into ascending numerical order and simultaneously
+     * permutes the {@code coSort} Objects array in the same way then specified target array. The range to be sorted
+     * extends from index <tt>fromIndex</tt>, inclusive, to index <tt>toIndex</tt>, exclusive. (If
+     * <tt>fromIndex==toIndex</tt>, the range to be sorted is empty.)<p> <p/> The code was taken from the jdk6 Arrays
+     * class. <p/> The sorting algorithm is a tuned quicksort, adapted from Jon L. Bentley and M. Douglas McIlroy's
+     * "Engineering a Sort Function", Software-Practice and Experience, Vol. 23(11) P. 1249-1265 (November 1993). This
+     * algorithm offers n*log(n) performance on many data sets that cause other quicksorts to degrade to quadratic
+     * performance. <p/> <p/> <p><b>NOTE: this is unstable sort algorithm, so additional combinatorics of the {@code
+     * coSort} array can be perfomed. Use this method only if you are sure, in what you are doing. If not - use stable
+     * sort methods like an insertion sort or Tim sort.</b>
+     *
+     * @param target     the array to be sorted
+     * @param fromIndex  the index of the first element (inclusive) to be sorted
+     * @param toIndex    the index of the last element (exclusive) to be sorted
+     * @param comparator comparator
+     * @throws IllegalArgumentException       if <tt>fromIndex &gt; toIndex</tt>
+     * @throws ArrayIndexOutOfBoundsException if <tt>fromIndex &lt; 0</tt> or <tt>toIndex &gt; target.length</tt> or
+     *                                        <tt>toIndex &gt; coSort.length</tt>
+     */
+    public static void quickSort(int[] target, int fromIndex, int toIndex, IntComparator comparator) {
+        rangeCheck(target.length, fromIndex, toIndex);
+        quickSort1(target, fromIndex, toIndex - fromIndex, comparator);
+    }
+
+    /**
+     * This method is the same as {@link #quickSort(int[], int, int, Object[])  ) }, but without range checking. <p/>
+     * <p><b>NOTE: this is unstable sort algorithm, so additional combinatorics of the {@code coSort} array can be
+     * perfomed. Use this method only if you are sure, in what you are doing. If not - use stable sort methods like an
+     * insertion sort or Tim sort.</b>
+     *
+     * @param target     the array to be sorted
+     * @param fromIndex  the index of the first element (inclusive) to be sorted
+     * @param length     the length of the sorting subarray.
+     * @param comparator comparator
+     */
+    public static void quickSort1(int target[], int fromIndex, int length, IntComparator comparator) {
+        // Insertion quickSort on smallest arrays
+        if (length < 7) {
+            for (int i = fromIndex; i < length + fromIndex; i++)
+                for (int j = i; j > fromIndex && comparator.compare(target[j - 1], target[j]) > 0; j--)
+                    swap(target, j, j - 1);
+            return;
+        }
+
+        // Choose a partition element, v
+        int m = fromIndex + (length >> 1);       // Small arrays, middle element
+        if (length > 7) {
+            int l = fromIndex;
+            int n = fromIndex + length - 1;
+            if (length > 40) {        // Big arrays, pseudomedian of 9
+                int s = length / 8;
+                l = med3(target, l, l + s, l + 2 * s, comparator);
+                m = med3(target, m - s, m, m + s, comparator);
+                n = med3(target, n - 2 * s, n - s, n, comparator);
+            }
+            m = med3(target, l, m, n, comparator); // Mid-size, med of 3
+        }
+        int v = target[m];
+
+        // Establish Invariant: v* (<v)* (>v)* v*
+        int a = fromIndex, b = a, c = fromIndex + length - 1, d = c;
+        while (true) {
+            while (b <= c && comparator.compare(target[b], v) <= 0) {
+                if (comparator.compare(target[b], v) == 0)
+                    swap(target, a++, b);
+                b++;
+            }
+            while (c >= b && comparator.compare(target[c], v) >= 0) {
+                if (comparator.compare(target[c], v) == 0)
+                    swap(target, c, d--);
+                c--;
+            }
+            if (b > c)
+                break;
+            swap(target, b++, c--);
+        }
+
+        // Swap partition elements back to middle
+        int s, n = fromIndex + length;
+        s = Math.min(a - fromIndex, b - a);
+        vecswap(target, fromIndex, b - s, s);
+        s = Math.min(d - c, n - d - 1);
+        vecswap(target, b, n - s, s);
+
+        // Recursively quickSort non-partition-elements
+        if ((s = b - a) > 1)
+            quickSort1(target, fromIndex, s, comparator);
+        if ((s = d - c) > 1)
+            quickSort1(target, n - s, s, comparator);
+    }
+
+    /**
+     * Returns the index of the median of the three indexed integers.
+     */
+    private static int med3(int x[], int a, int b, int c, IntComparator comparator) {
+        return (comparator.compare(x[a], x[b]) < 0
+                ? (comparator.compare(x[b], x[c]) < 0 ? b : comparator.compare(x[a], x[c]) < 0 ? c : a)
+                : (comparator.compare(x[b], x[c]) > 0 ? b : comparator.compare(x[a], x[c]) > 0 ? c : a));
+    }
+
+    private static void vecswap(int x[], int a, int b, int n) {
+        for (int i = 0; i < n; i++, a++, b++)
+            swap(x, a, b);
+    }
+
+
+    ////////////////////////////////////// UTILS ///////////////////////////////////////////////////////////
+
     /**
      * Check that fromIndex and toIndex are in range, and throw an appropriate exception if they aren't.
      */

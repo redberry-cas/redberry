@@ -25,6 +25,8 @@ package cc.redberry.core.combinatorics;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.util.Arrays;
+
 /**
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
@@ -74,6 +76,15 @@ public class IntTuplesPortTest {
         while ((r = port.take()) != null) {
             Assert.assertArrayEquals(results[i], r);
             Assert.assertEquals(luds[i++], port.getLastUpdateDepth());
+        }
+    }
+
+    @Test
+    public void test3() {
+        IntTuplesPort port = new IntTuplesPort(3, 2, 2);
+        int[] c;
+        while ((c = port.take()) != null) {
+            System.out.println(Arrays.toString(c));
         }
     }
 }

@@ -780,7 +780,7 @@ public class AlgorithmsBaseTest {
             assertTrue(p1.isMember(a));
     }
 
-    private static void soutGenerators(List<Permutation> generators) {
+    static void soutGenerators(List<Permutation> generators) {
         for (int i = 0; i < generators.size(); ++i) {
             String str = generators.get(i).toString();
             str = str.substring(2, str.length() - 1);

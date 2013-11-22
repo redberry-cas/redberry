@@ -109,6 +109,16 @@ public class PermutationOneLine implements Permutation {
     }
 
     @Override
+    public int[] imageOf(int[] set) {
+        if (isIdentity)
+            return set.clone();
+        int[] result = new int[set.length];
+        for (int i = 0; i < set.length; ++i)
+            result[i] = permutation[set[i]];
+        return result;
+    }
+
+    @Override
     public int newIndexOfUnderInverse(int i) {
         for (int j = permutation.length - 1; j >= 0; --j)
             if (permutation[j] == i)
