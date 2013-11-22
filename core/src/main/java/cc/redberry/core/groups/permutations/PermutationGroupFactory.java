@@ -23,7 +23,6 @@
 package cc.redberry.core.groups.permutations;
 
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 
 /**
@@ -42,9 +41,9 @@ public final class PermutationGroupFactory {
         if (generators.isEmpty())
             throw new IllegalArgumentException("Now generators specified.");
         //todo Alt and Sym checks
-        List<BSGSElement> BSGSList = BSGSAlgorithms.createBSGSList(generators);
+        List<BSGSElement> BSGSList = AlgorithmsBase.createBSGSList(generators);
         if (BSGSList.isEmpty())
-            return new EmptyPermutationGroup(generators.get(0).length());
-        return new PermutationGroupImpl(new BSGS(BSGSList));
+            return new EmptyPermutationGroup(generators.get(0).degree());
+        return new PermutationGroupImpl(new BaseAndStrongGeneratingSet(BSGSList));
     }
 }

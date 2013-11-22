@@ -23,7 +23,6 @@
 package cc.redberry.core.groups.permutations;
 
 import java.math.BigInteger;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -32,15 +31,15 @@ import java.util.List;
  * @author Stanislav Poslavsky
  */
 public final class PermutationGroupImpl implements PermutationGroup {
-    final BSGS _BSGS;
+    final BaseAndStrongGeneratingSet _BSGS;
     final int length;
 
-    PermutationGroupImpl(BSGS BSGS) {
+    PermutationGroupImpl(BaseAndStrongGeneratingSet BSGS) {
         _BSGS = BSGS;
-        length = BSGS.BSGSList.get(0).stabilizerGenerators.get(0).length();
+        length = BSGS.BSGSList.get(0).stabilizerGenerators.get(0).degree();
     }
 
-    public BSGS getBSGS() {
+    public BaseAndStrongGeneratingSet getBSGS() {
         return _BSGS;
     }
 

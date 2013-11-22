@@ -35,17 +35,17 @@ import java.util.List;
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
- * @see BSGSAlgorithms
+ * @see AlgorithmsBase
  */
-public final class BSGS implements Iterable<Permutation> {
-    public static final BSGS EMPTY = new BSGS(Collections.EMPTY_LIST);
+public final class BaseAndStrongGeneratingSet implements Iterable<Permutation> {
+    public static final BaseAndStrongGeneratingSet EMPTY = new BaseAndStrongGeneratingSet(Collections.EMPTY_LIST);
 
     final List<BSGSElement> BSGSList;
     final int[] base;
 
-    BSGS(List<BSGSElement> BSGSList) {
+    BaseAndStrongGeneratingSet(List<BSGSElement> BSGSList) {
         this.BSGSList = Collections.unmodifiableList(BSGSList);
-        this.base = BSGSAlgorithms.getBaseAsArray(BSGSList);
+        this.base = AlgorithmsBase.getBaseAsArray(BSGSList);
     }
 
     /**
@@ -63,7 +63,7 @@ public final class BSGS implements Iterable<Permutation> {
      * @return unmodifiable list of BSGS elements
      */
     public ArrayList<BSGSCandidateElement> getBSGSCandidateList() {
-        return BSGSAlgorithms.asBSGSCandidatesList(BSGSList);
+        return AlgorithmsBase.asBSGSCandidatesList(BSGSList);
     }
 
     /**
@@ -82,7 +82,7 @@ public final class BSGS implements Iterable<Permutation> {
      * @return true if specified permutation is member of group represented by this BSGS
      */
     public boolean isMember(Permutation permutation) {
-        BSGSAlgorithms.StripContainer container = BSGSAlgorithms.strip(BSGSList, permutation);
+        AlgorithmsBase.StripContainer container = AlgorithmsBase.strip(BSGSList, permutation);
         return container.terminationLevel == BSGSList.size() && container.remainder.isIdentity();
     }
 

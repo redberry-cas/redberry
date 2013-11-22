@@ -25,6 +25,7 @@ package cc.redberry.core.groups.permutations.gap;
 import cc.redberry.core.groups.permutations.Permutation;
 import cc.redberry.core.groups.permutations.PermutationGroup;
 import cc.redberry.core.groups.permutations.PermutationGroupFactory;
+import cc.redberry.core.groups.permutations.PermutationOneLine;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -144,7 +145,7 @@ public class GapPrimitiveGroupsReader {
             }
 //            System.out.println(Arrays.toString(permutation));
 
-            perms.add(new Permutation(permutation));
+            perms.add(new PermutationOneLine(permutation));
         }
         return perms.toArray(new Permutation[perms.size()]);
     }

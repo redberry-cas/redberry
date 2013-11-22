@@ -30,8 +30,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static cc.redberry.core.TAssert.assertEquals;
-import static cc.redberry.core.groups.permutations.BSGSAlgorithms.SchreierSimsAlgorithm;
-import static cc.redberry.core.groups.permutations.BSGSAlgorithms.createRawBSGSCandidate;
+import static cc.redberry.core.groups.permutations.AlgorithmsBase.SchreierSimsAlgorithm;
+import static cc.redberry.core.groups.permutations.AlgorithmsBase.createRawBSGSCandidate;
 import static cc.redberry.core.groups.permutations.RandomPermutation.random;
 import static cc.redberry.core.groups.permutations.RandomPermutation.randomness;
 import static java.lang.System.currentTimeMillis;
@@ -40,7 +40,7 @@ import static java.lang.System.currentTimeMillis;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public class CombinatoricsTest {
+public class PermutationsTest {
 
     @Test
     public void testOrbitSize1() {
@@ -50,7 +50,7 @@ public class CombinatoricsTest {
         RandomGenerator randomGenerator = new Well1024a(seed);
         List<Permutation> source = new ArrayList<>();
         for (int i = 0; i < 10; ++i)
-            source.add(new Permutation(Combinatorics.randomPermutation(n, randomGenerator)));
+            source.add(new PermutationOneLine(Permutations.randomPermutation(n, randomGenerator)));
         randomness(source, 10, 50, randomGenerator);
 
         ArrayList<BSGSCandidateElement> bsgs;
@@ -64,7 +64,7 @@ public class CombinatoricsTest {
             bsgs = (ArrayList) createRawBSGSCandidate(generators.toArray(new Permutation[0]));
             SchreierSimsAlgorithm(bsgs);
             for (BSGSCandidateElement element : bsgs)
-                assertEquals(Combinatorics.getOrbitSize(element.stabilizerGenerators, element.basePoint), element.orbitSize());
+                assertEquals(Permutations.getOrbitSize(element.stabilizerGenerators, element.basePoint), element.orbitSize());
         }
 
     }

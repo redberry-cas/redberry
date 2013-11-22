@@ -66,7 +66,7 @@ public interface PermutationGroup
      *
      * @return base and strong generating set of this grou
      */
-    BSGS getBSGS();
+    BaseAndStrongGeneratingSet getBSGS();
 
     /**
      * Returns the orbit of specified point

@@ -20,36 +20,45 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
-package cc.redberry.core.groups.permutations;
+package cc.redberry.core.groups.permutations.backtrack;
+
+import cc.redberry.core.groups.permutations.BSGSCandidateElement;
+import cc.redberry.core.groups.permutations.Permutation;
+
+import java.util.ArrayList;
+import java.util.Iterator;
 
 /**
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public class PermutationsUtils {
-
-    private PermutationsUtils() {
+public final class BacktrackAlgorithms {
+    private BacktrackAlgorithms() {
     }
 
-    /**
-     * Throws exception if p.length() != size.
-     *
-     * @param p    permutation
-     * @param size size
-     */
-    public static void checkSizeWithException(Permutation p, int size) {
-        if (p.length() != size)
-            throw new IllegalArgumentException("Different size of permutation.");
+    public static Iterator<Permutation> groupElementsIterator(ArrayList<BSGSCandidateElement> BSGS) {
+        return null;
     }
 
-    /**
-     * Throws exception if a != size.
-     *
-     * @param a
-     * @param size size
-     */
-    public static void checkSizeWithException(int a, int size) {
-        if (a != size)
-            throw new IllegalArgumentException("Different size of permutation.");
+    private static class IntComparator {
+        final int[] base;
+
+        private IntComparator(int[] base) {
+            this.base = base;
+        }
+
+        private int indexOf(int a) {
+            for (int i = 0; i < base.length; ++i)
+                if (a == base[i])
+                    return i;
+            return -1;
+        }
+
+        public int compare(int a, int b) {
+            if (a == b)
+                return 0;
+            return Integer.compare(indexOf(a), indexOf(b));
+        }
     }
+
 }

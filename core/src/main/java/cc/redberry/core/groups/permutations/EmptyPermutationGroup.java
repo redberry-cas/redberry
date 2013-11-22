@@ -39,12 +39,12 @@ public class EmptyPermutationGroup implements PermutationGroup {
 
     EmptyPermutationGroup(int length) {
         this.length = length;
-        this.identity = Combinatorics.createIdentity(length);
+        this.identity = Permutations.getIdentityOneLine(length);
     }
 
     @Override
-    public BSGS getBSGS() {
-        return BSGS.EMPTY;
+    public BaseAndStrongGeneratingSet getBSGS() {
+        return BaseAndStrongGeneratingSet.EMPTY;
     }
 
     @Override

@@ -99,7 +99,7 @@ public class BSGSElement {
     public Permutation getInverseTransversalOf(int point) {
         if (SchreierVector[point] == -2)
             throw new IllegalArgumentException("Specified point does not belong to orbit of this base element.");
-        Permutation temp = Combinatorics.getIdentity(SchreierVector.length);
+        Permutation temp = Permutations.getIdentityOneLine(SchreierVector.length);
         while (SchreierVector[temp.newIndexOf(point)] != -1)
             temp = temp.compositionWithInverse(
                     stabilizerGenerators.get(SchreierVector[temp.newIndexOf(point)]));
@@ -161,7 +161,7 @@ public class BSGSElement {
      * @return degree of permutations
      */
     public int groupDegree() {
-        return stabilizerGenerators.get(0).length();
+        return stabilizerGenerators.get(0).degree();
     }
 
 }

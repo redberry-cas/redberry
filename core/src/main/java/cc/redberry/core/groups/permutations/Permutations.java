@@ -22,6 +22,7 @@
  */
 package cc.redberry.core.groups.permutations;
 
+import cc.redberry.core.context.CC;
 import cc.redberry.core.utils.ArraysUtils;
 import cc.redberry.core.utils.BitArray;
 import cc.redberry.core.utils.IntArrayList;
@@ -29,15 +30,26 @@ import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.random.Well19937a;
 
 import java.math.BigInteger;
-import java.util.BitSet;
 import java.util.Collection;
-import java.util.Random;
 
 /**
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public final class Combinatorics {
+public final class Permutations {
+
+    /**
+     * Returns true if specified permutation, written in one-line notation, is identity
+     *
+     * @param permutation permutation in one-line notation
+     * @return true if specified permutation is identity
+     */
+    public static boolean isIdentity(final int[] permutation) {
+        for (int i = 0; i < permutation.length; ++i)
+            if (i != permutation[i])
+                return false;
+        return true;
+    }
 
     /**
      * Tests whether the specified array satisfies the one-line notation for permutations
@@ -48,7 +60,7 @@ public final class Combinatorics {
      *         that its order is even
      */
     public static boolean testPermutationCorrectness(int[] permutation, boolean sign) {
-        return testPermutationCorrectness(permutation) && (sign ? !orderIsOdd(permutation) : true);
+        return testPermutationCorrectness(permutation) && (sign ? !orderOfPermutationIsOdd(permutation) : true);
     }
 
     /**
@@ -79,7 +91,7 @@ public final class Combinatorics {
      * @param permutation
      * @return order of specified permutation
      */
-    public static BigInteger order(int[] permutation) {
+    public static BigInteger orderOfPermutation(int[] permutation) {
         //we shall decompose this permutation into product of cycles and calculate l.c.m. of their sizes
 
         //to mark viewed points
@@ -118,7 +130,7 @@ public final class Combinatorics {
      * @param permutation permutation
      * @return true if order of specified permutation is odd and false otherwise
      */
-    public static boolean orderIsOdd(final int[] permutation) {
+    public static boolean orderOfPermutationIsOdd(final int[] permutation) {
         //decompose this permutation into product of cycles and calculate parity of l.c.m. of their sizes
 
         //to mark viewed points
@@ -161,7 +173,7 @@ public final class Combinatorics {
         if (generators.isEmpty())
             return orbitList;//throw new IllegalArgumentException("Empty generators.");
         //seen points
-        BitArray seen = new BitArray(generators.iterator().next().length());
+        BitArray seen = new BitArray(generators.iterator().next().degree());
         seen.set(point);
         int imageOfPoint;
         //main loop over all points in orbit
@@ -195,24 +207,28 @@ public final class Combinatorics {
     }
 
 
-    private static final Permutation[] cachedIdentities = new Permutation[64];
+    private static final int[][] cachedIdentities = new int[64][];
 
-    public static Permutation createIdentity(int length) {
+    private static int[] createIdentityPermutationArray(int length) {
         int[] array = new int[length];
         for (int i = 0; i < length; ++i)
             array[i] = i;
-        return new Permutation(true, false, array);
+        return array;
     }
 
-    public static Permutation getIdentity(int length) {
+    public static int[] getIdentityPermutationArray(int length) {
         if (cachedIdentities.length <= length)
-            return createIdentity(length);
+            return createIdentityPermutationArray(length);
         if (cachedIdentities[length] == null)
             synchronized (cachedIdentities) {
                 if (cachedIdentities[length] == null)
-                    cachedIdentities[length] = createIdentity(length);
+                    cachedIdentities[length] = createIdentityPermutationArray(length);
             }
         return cachedIdentities[length];
+    }
+
+    public static PermutationOneLine getIdentityOneLine(int degree) {
+        return new PermutationOneLine(getIdentityPermutationArray(degree));
     }
 
     /**
@@ -251,6 +267,28 @@ public final class Combinatorics {
      * @return random permutation of specified dimension
      */
     public static int[] randomPermutation(final int n) {
-        return randomPermutation(n, new Well19937a());
+        return randomPermutation(n, CC.getRandomGenerator());
+    }
+
+    /**
+     * Throws exception if p.length() != size.
+     *
+     * @param p    permutation
+     * @param size size
+     */
+    public static void checkSizeWithException(Permutation p, int size) {
+        if (p.degree() != size)
+            throw new IllegalArgumentException("Different size of permutation.");
+    }
+
+    /**
+     * Throws exception if a != size.
+     *
+     * @param a
+     * @param size size
+     */
+    public static void checkSizeWithException(int a, int size) {
+        if (a != size)
+            throw new IllegalArgumentException("Different size of permutation.");
     }
 }

@@ -28,7 +28,7 @@ import java.math.BigInteger;
 import java.util.Iterator;
 import java.util.List;
 
-import static cc.redberry.core.groups.permutations.PermutationsUtils.checkSizeWithException;
+import static cc.redberry.core.groups.permutations.Permutations.checkSizeWithException;
 
 /**
  * @author Dmitry Bolotin
@@ -46,7 +46,7 @@ public final class SymmetricGroup implements PermutationGroup {
     }
 
     @Override
-    public BSGS getBSGS() {
+    public BaseAndStrongGeneratingSet getBSGS() {
         return null;
     }
 
@@ -58,7 +58,7 @@ public final class SymmetricGroup implements PermutationGroup {
     @Override
     public boolean isMember(Permutation permutation) {
         checkSizeWithException(permutation, length);
-        return permutation.isSign();
+        return permutation.antisymmetry();
     }
 
     @Override

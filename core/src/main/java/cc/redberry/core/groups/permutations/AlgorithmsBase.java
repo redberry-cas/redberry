@@ -34,13 +34,12 @@ import java.util.*;
 import static cc.redberry.core.groups.permutations.RandomPermutation.*;
 
 /**
- * Factory methods to create base and strong generating set.
+ * Basic algorithms for constructing base and strong generating set.
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
- * @see BSGSCandidateElement
  */
-public class BSGSAlgorithms {
+public class AlgorithmsBase {
 
     //------------------------------ ALGORITHMS --------------------------------------------//
 
@@ -115,7 +114,7 @@ public class BSGSAlgorithms {
             return Collections.EMPTY_LIST;
         checkGenerators(generators);
 
-        final int length = generators.get(0).length();
+        final int length = generators.get(0).degree();
 
         //first let's find a "proto-base" - a set of points that cannot be fixed by any of specified generators
         //and a "proto-BSGS" corresponding to this base
@@ -166,7 +165,7 @@ public class BSGSAlgorithms {
             return Collections.EMPTY_LIST;
         checkGenerators(generators);
 
-        final int length = generators.get(0).length();
+        final int length = generators.get(0).degree();
 
         // first, lets remove unnecessary base points, i.e. such points, that are fixed by all generators
 
@@ -288,7 +287,7 @@ public class BSGSAlgorithms {
         List<Permutation> generators = BSGSCandidate.get(0).stabilizerGenerators;
         if (generators.isEmpty())
             return;
-        final int length = generators.get(0).length();
+        final int length = generators.get(0).degree();
         //iterate over all generators find each one that fixes all base points
         for (Permutation generator : generators) {
             boolean fixesBase = true;
@@ -324,7 +323,7 @@ public class BSGSAlgorithms {
     public static void SchreierSimsAlgorithm(ArrayList<BSGSCandidateElement> BSGSCandidate) {
         if (BSGSCandidate.isEmpty())
             return;
-        final int length = BSGSCandidate.get(0).stabilizerGenerators.get(0).length();
+        final int length = BSGSCandidate.get(0).stabilizerGenerators.get(0).degree();
         //main loop
         BSGSCandidateElement currentElement;
         int index = BSGSCandidate.size() - 1;
@@ -427,7 +426,7 @@ public class BSGSAlgorithms {
         if (confidenceLevel > 1 || confidenceLevel < 0)
             throw new IllegalArgumentException("Confidence level must be between 0 and 1.");
 
-        final int length = BSGSCandidate.get(0).stabilizerGenerators.get(0).length();
+        final int length = BSGSCandidate.get(0).stabilizerGenerators.get(0).degree();
 
         //source of randomness
         List<Permutation> source = BSGSCandidate.get(0).stabilizerGenerators;
@@ -511,7 +510,7 @@ public class BSGSAlgorithms {
      */
     public static void RandomSchreierSimsAlgorithmForKnownOrder(ArrayList<BSGSCandidateElement> BSGSCandidate,
                                                                 BigInteger groupOrder, RandomGenerator randomGenerator) {
-        final int length = BSGSCandidate.get(0).stabilizerGenerators.get(0).length();
+        final int length = BSGSCandidate.get(0).stabilizerGenerators.get(0).degree();
 
         //source of randomness
         List<Permutation> source = BSGSCandidate.get(0).stabilizerGenerators;
@@ -614,7 +613,7 @@ public class BSGSAlgorithms {
                 tempStabilizers.remove(current);
 
                 //if new stabilizers produces same orbit => then current generator is redundant
-                if (Combinatorics.getOrbitSize(tempStabilizers, element.basePoint) == element.orbitSize()) {
+                if (Permutations.getOrbitSize(tempStabilizers, element.basePoint) == element.orbitSize()) {
                     iterator.remove();
                     removed = true;
                 } else {
@@ -726,7 +725,7 @@ public class BSGSAlgorithms {
         int ithBeta = BSGS.get(i).basePoint, jthBeta = BSGS.get(i + 1).basePoint;
 
         //computing size of orbit of beta_{i+1} under G^(i)
-        int d = Combinatorics.getOrbitSize(BSGS.get(i).stabilizerGenerators, BSGS.get(i + 1).basePoint);
+        int d = Permutations.getOrbitSize(BSGS.get(i).stabilizerGenerators, BSGS.get(i + 1).basePoint);
         //as we know |H| = s |G^(i+2)|, where s
         int s = (int) ((((long) BSGS.get(i).orbitSize()) * BSGS.get(i + 1).orbitSize()) / ((long) d));//avoid integer overflow
 
@@ -759,7 +758,7 @@ public class BSGSAlgorithms {
                 //check whether beta_{i+1}^(inverse transversal) belongs to orbit of G^{i+1}
                 if (!BSGS.get(i + 1).belongsToOrbit(newIndexUnderInverse)) {
                     //then this transversal is bad and we can skip the orbit of this point under new stabilizers
-                    IntArrayList toRemove = Combinatorics.getOrbitList(newStabilizers, nextBasePoint);
+                    IntArrayList toRemove = Permutations.getOrbitList(newStabilizers, nextBasePoint);
                     allowedPoints.setAll(toRemove, false);
                 } else {
                     //<-ok this transversal is good
@@ -773,7 +772,7 @@ public class BSGSAlgorithms {
                         newStabilizers.add(newStabilizer);
                         newOrbitStabilizer.recalculateOrbitAndSchreierVector();
 
-                        IntArrayList toRemove = Combinatorics.getOrbitList(newStabilizers, nextBasePoint);
+                        IntArrayList toRemove = Permutations.getOrbitList(newStabilizers, nextBasePoint);
                         allowedPoints.setAll(toRemove, false);
 
                         continue main;
@@ -824,7 +823,7 @@ public class BSGSAlgorithms {
     public static void rebaseWithConjugationAndTranspositions(ArrayList<BSGSCandidateElement> BSGS, int[] newBase) {
         final int degree = BSGS.get(0).groupDegree();
         //conjugating permutation
-        Permutation conjugation = Combinatorics.createIdentity(degree);
+        Permutation conjugation = BSGS.get(0).stabilizerGenerators.get(0).getIdentity();
 
         //first, lets proceed by swapping
         for (int i = 0; i < newBase.length && i < BSGS.size(); ++i) {
@@ -945,11 +944,11 @@ public class BSGSAlgorithms {
      * @param generators
      * @return BSGS container
      */
-    public static BSGS createBSGS(final List<Permutation> generators) {
+    public static BaseAndStrongGeneratingSet createBSGS(final List<Permutation> generators) {
         List<BSGSElement> BSGSList = createBSGSList(generators);
         if (BSGSList.isEmpty())
-            return BSGS.EMPTY;
-        return new BSGS(BSGSList);
+            return BaseAndStrongGeneratingSet.EMPTY;
+        return new BaseAndStrongGeneratingSet(BSGSList);
     }
 
     /**
@@ -1058,7 +1057,7 @@ public class BSGSAlgorithms {
      */
     public static boolean checkGeneratorsBoolean(final List<Permutation> generators) {
         for (int i = 1, size = generators.size(); i < size; ++i)
-            if (generators.get(i - 1).length() != generators.get(i).length())
+            if (generators.get(i - 1).degree() != generators.get(i).degree())
                 return false;
         return true;
     }
