@@ -24,11 +24,13 @@ package cc.redberry.core.groups.permutations;
 
 import cc.redberry.core.groups.permutations.gap.GapPrimitiveGroupsReader;
 import cc.redberry.core.utils.ArraysUtils;
+import cc.redberry.core.utils.IntComparator;
 import org.junit.Test;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 
 import static cc.redberry.core.TAssert.assertEquals;
@@ -60,6 +62,16 @@ public class AlgorithmsBacktrackTest {
         ArraysUtils.quickSort(array, comparator);
         int[] expected = {0, 2, 1, 5};
         assertArrayEquals(expected, array);
+    }
+
+
+    @Test
+    public void testBaseComparator3() {
+        int[] base = {6, 7, 1};
+        AlgorithmsBacktrack.InducedOrderingOfSet comparator = new AlgorithmsBacktrack.InducedOrderingOfSet(base);
+        int[] array = {5, 1, 0, 2, 7, 8, 9, 10, 6};
+        ArraysUtils.quickSort(array, comparator);
+        assertSetIsSorted(comparator, array);
     }
 
     @Test
@@ -100,23 +112,16 @@ public class AlgorithmsBacktrackTest {
         List<BSGSElement> bsgs = AlgorithmsBase.createBSGS(generators).getBSGSList();
 
 
+        PermutationLessThenTestComparator comparator = new PermutationLessThenTestComparator(getBaseAsArray(bsgs));
         BacktrackIterator iterator = new BacktrackIterator(bsgs);
-        AlgorithmsBacktrack.InducedOrderingOfPermutations comparator = new AlgorithmsBacktrack.InducedOrderingOfPermutations(getBaseAsArray(bsgs));
 
-        System.out.println(Arrays.toString(getBaseAsArray(bsgs)));
-        System.out.println();
         Permutation previous = null, current;
         int i = 0;
+
         while (iterator.hasNext()) {
-            if(i == 18){
-                int as = 0;
-            }
             current = iterator.next();
-            System.out.println("permute: " + current);
             if (i != 0) {
-                System.out.println("compare: " + comparator.compare(previous, current));
                 assertTrue(comparator.compare(previous, current) <= 0);
-                assertTrue(comparator.compare(current, previous) >= 0);
             }
             previous = current;
             ++i;
@@ -134,32 +139,159 @@ public class AlgorithmsBacktrackTest {
             if (pgs[i].order().compareTo(BigInteger.valueOf(10000)) > 0)
                 continue;
             ++s;
-            try {
-                List<BSGSElement> bsgs = pgs[i].getBSGS().getBSGSList();
+            List<BSGSElement> bsgs = pgs[i].getBSGS().getBSGSList();
 
 
-                BacktrackIterator iterator = new BacktrackIterator(bsgs);
-                AlgorithmsBacktrack.InducedOrderingOfPermutations comparator = new AlgorithmsBacktrack.InducedOrderingOfPermutations(getBaseAsArray(bsgs));
+            BacktrackIterator iterator = new BacktrackIterator(bsgs);
+            PermutationLessThenTestComparator comparator = new PermutationLessThenTestComparator(getBaseAsArray(bsgs));
 
-                Permutation previous = null, current;
-                int count = 0;
-                while (iterator.hasNext()) {
-                    current = iterator.next();
-                    if (count != 0) {
-                        assertTrue(comparator.compare(previous, current) <= 0);
-                        assertTrue(comparator.compare(current, previous) >= 0);
-                    }
-                    previous = current;
-                    ++count;
+            Permutation previous = null, current;
+            int count = 0;
+            while (iterator.hasNext()) {
+                current = iterator.next();
+                if (count != 0) {
+                    assertTrue(comparator.compare(previous, current) <= 0);
                 }
-                assertEquals(getOrder(bsgs).intValue(), count);
-            } catch (AssertionError err) {
-                if (pgs[i].order().intValue() == 60)
-                    AlgorithmsBaseTest.soutGenerators(pgs[i].generators());
-                System.out.println(pgs[i].order());
-//                System.out.println(pgs[i].generators());
+                previous = current;
+                ++count;
+            }
+            assertEquals(getOrder(bsgs).intValue(), count);
+        }
+    }
+
+
+    @Test
+    public void testPrintElements2() {
+        Permutation a0 = new PermutationOneLine(0, 1, 2, 3, 4, 5);
+        Permutation a1 = new PermutationOneLine(0, 1, 2, 3, 5, 4);
+        Permutation a2 = new PermutationOneLine(0, 3, 2, 1, 4, 5);
+        Permutation a3 = new PermutationOneLine(0, 3, 2, 1, 5, 4);
+        Permutation a4 = new PermutationOneLine(1, 0, 3, 2, 4, 5);
+        Permutation a5 = new PermutationOneLine(1, 0, 3, 2, 5, 4);
+        Permutation a6 = new PermutationOneLine(1, 2, 3, 0, 4, 5);
+        Permutation a7 = new PermutationOneLine(1, 2, 3, 0, 5, 4);
+        Permutation a8 = new PermutationOneLine(2, 1, 0, 3, 4, 5);
+        Permutation a9 = new PermutationOneLine(2, 1, 0, 3, 5, 4);
+        Permutation a10 = new PermutationOneLine(2, 3, 0, 1, 4, 5);
+        Permutation a11 = new PermutationOneLine(2, 3, 0, 1, 5, 4);
+        Permutation a12 = new PermutationOneLine(3, 0, 1, 2, 4, 5);
+        Permutation a13 = new PermutationOneLine(3, 0, 1, 2, 5, 4);
+        Permutation a14 = new PermutationOneLine(3, 2, 1, 0, 4, 5);
+        Permutation a15 = new PermutationOneLine(3, 2, 1, 0, 5, 4);
+        final Permutation[] expected = {a0, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15};
+
+        Permutation gen0 = new PermutationOneLine(1, 2, 3, 0, 4, 5);
+        Permutation gen1 = new PermutationOneLine(0, 3, 2, 1, 4, 5);
+        Permutation gen2 = new PermutationOneLine(0, 1, 2, 3, 5, 4);
+        ArrayList<Permutation> generators = new ArrayList<>();
+        generators.add(gen0);
+        generators.add(gen1);
+        generators.add(gen2);
+
+        List<BSGSElement> bsgs = AlgorithmsBase.createBSGSList(new int[]{0, 1, 4}, generators);
+
+        //PRINTELEMENTS
+        final int[] i = {0};
+        printElements(bsgs, new PFunction() {
+            @Override
+            public void dosmth(Permutation p) {
+                assertEquals(expected[i[0]++], p);
+            }
+        });
+
+        //ITERATOR
+        BacktrackIterator iterator = new BacktrackIterator(bsgs);
+        int ii = 0;
+        while (iterator.hasNext()) {
+            assertEquals(expected[ii++], iterator.next());
+        }
+    }
+
+    public static interface PFunction {
+        void dosmth(Permutation p);
+    }
+
+    /**
+     * Algorithm PRINTELEMENTS(G) described in Sec. 4.6.1 of [Holt05]
+     *
+     * @param bsgs BSGS
+     */
+    private static void printElements(List<BSGSElement> bsgs, final PFunction function) {
+        IntComparator comparator = new AlgorithmsBacktrack.InducedOrderingOfSet(getBaseAsArray(bsgs));
+
+        int k = bsgs.size();
+        int[] c = new int[k];
+        int[][] orbits = new int[k][];
+        Permutation[] word = new Permutation[k];
+
+        int l = 0;
+        c[l] = 0;
+        orbits[l] = bsgs.get(l).orbitList.toArray();
+        ArraysUtils.quickSort(orbits[l], comparator);
+        word[l] = bsgs.get(0).stabilizerGenerators.get(0).getIdentity();
+
+        while (true) {
+
+            while (l < k - 1) {
+                ++l;
+                orbits[l] = word[l - 1].imageOf(bsgs.get(l).orbitList.toArray());
+                ArraysUtils.quickSort(orbits[l], comparator);
+                assertSetIsSorted(comparator, orbits[l]);
+                c[l] = 0;
+                word[l] = bsgs.get(l).getTransversalOf(
+                        word[l - 1].newIndexOfUnderInverse(orbits[l][c[l]])
+                );
+                word[l] = word[l].composition(word[l - 1]);
+            }
+
+            function.dosmth(word[l]);
+
+            while (l >= 0 && c[l] == bsgs.get(l).orbitList.size() - 1)
+                --l;
+
+            if (l == -1)
+                return;
+
+            ++c[l];
+            if (l == 0) {
+                word[l] = bsgs.get(l).getTransversalOf(orbits[l][c[l]]);
+            } else {
+                word[l] = bsgs.get(l).getTransversalOf(
+                        word[l - 1].newIndexOfUnderInverse(orbits[l][c[l]])
+                );
+                word[l] = word[l].composition(word[l - 1]);
             }
         }
-        System.out.println(s);
+    }
+
+    private static void assertSetIsSorted(IntComparator comparator, int[] set) {
+        if (set.length < 2)
+            return;
+        for (int i = 1; i < set.length; ++i)
+            assertTrue(comparator.compare(set[i - 1], set[i]) <= 0);
+    }
+
+    private static final class PermutationLessThenTestComparator implements Comparator<Permutation> {
+        final int[] base, sortedBase;
+        final IntComparator baseComparator;
+
+        public PermutationLessThenTestComparator(int[] base) {
+            this.base = base;
+            this.sortedBase = base.clone();
+            Arrays.sort(sortedBase);
+            this.baseComparator = new AlgorithmsBacktrack.InducedOrderingOfSet(base);
+        }
+
+        @Override
+        public int compare(Permutation a, Permutation b) {
+
+            int compare;
+            for (int i = 0; i < base.length; ++i) {
+                if (Arrays.binarySearch(sortedBase, a.newIndexOf(base[i])) < 0) return 0;
+                if ((compare = baseComparator.compare(a.newIndexOf(base[i]), b.newIndexOf(base[i]))) != 0)
+                    return compare;
+            }
+            return 0;
+        }
     }
 }

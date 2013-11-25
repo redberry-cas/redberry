@@ -41,6 +41,12 @@ public final class AlgorithmsBacktrack {
     private AlgorithmsBacktrack() {
     }
 
+    /**
+     * An iterator over group elements, that scans group in increasing order of base images; to be precise: if base
+     * B = [b1, b2, b3,..,bn], then element g <i>which maps all base points into themselves</i>
+     * (g(b) ∈ B for each b ∈ B) is guaranteed to precedes (≺) an element h, which base image succeeds (≻) the base
+     * image of g according to ordering specified by {@link InducedOrderingOfSet}.
+     */
     public static class BacktrackIterator implements Iterator<Permutation> {
         final List<BSGSElement> bsgs;
         //tuples generator
@@ -63,19 +69,26 @@ public final class AlgorithmsBacktrack {
 
         public BacktrackIterator(List<BSGSElement> bsgs) {
             this.bsgs = bsgs;
+            this.size = bsgs.size();
+            //sizes of orbits, i.e. number of transversals for each base point
             final int[] orbitSizes = new int[bsgs.size()];
             for (int i = 0; i < orbitSizes.length; ++i)
                 orbitSizes[i] = bsgs.get(i).orbitSize();
-            this.size = bsgs.size();
+            //initializing tuples generator
             this.tuples = new IntTuplesPort(orbitSizes);
-            this.word = new Permutation[bsgs.size()];
+            //comparator of points in Ω(n)
             this.baseComparator = new InducedOrderingOfSet(AlgorithmsBase.getBaseAsArray(bsgs));
+            //permutation word
+            this.word = new Permutation[bsgs.size()];
             this.sortedOrbits = new int[bsgs.size()][];
+            //cached sorted orbits of base points
             this.cachedSortedOrbits = new int[bsgs.size()][];
             for (int i = bsgs.size() - 1; i >= 0; --i) {
                 this.cachedSortedOrbits[i] = bsgs.get(i).orbitList.toArray();
                 ArraysUtils.quickSort(this.cachedSortedOrbits[i], this.baseComparator);
             }
+            this.sortedOrbits[0] = cachedSortedOrbits[0];
+            //first iteration
             _next();
         }
 
@@ -96,17 +109,25 @@ public final class AlgorithmsBacktrack {
             if (tuple == null)
                 return;
 
-            int start = lastUpdatedIndex = tuples.getLastUpdateDepth();
+            lastUpdatedIndex = tuples.getLastUpdateDepth();
 
-            if (lastUpdatedIndex == 0) {
-                sortedOrbits[0] = cachedSortedOrbits[0];
+            if (lastUpdatedIndex == 0)
                 word[0] = bsgs.get(0).getTransversalOf(sortedOrbits[0][tuple[0]]);
-                ++start;
-            }
+            else
+                word[lastUpdatedIndex] =
+                        bsgs.get(lastUpdatedIndex).getTransversalOf(
+                                word[lastUpdatedIndex - 1].newIndexOfUnderInverse(sortedOrbits[lastUpdatedIndex][tuple[lastUpdatedIndex]])
+                        ).composition(word[lastUpdatedIndex - 1]);
 
-            for (int i = start; i < size; ++i) {
-                calculateSortedOrbit(i);//todo this only for i + 1
-                word[i] = bsgs.get(i).getTransversalOf(word[i - 1].newIndexOfUnderInverse(sortedOrbits[i][tuple[i]])).composition(word[i - 1]);
+
+            for (int i = lastUpdatedIndex + 1; i < size; ++i) {
+                assert tuple[i] == 0;
+                //recalculate sorted orbit after adding a new element in word
+                calculateSortedOrbit(i);
+                word[i] =
+                        bsgs.get(i).getTransversalOf(
+                                word[i - 1].newIndexOfUnderInverse(sortedOrbits[i][0])
+                        ).composition(word[i - 1]);
             }
         }
 
@@ -125,6 +146,9 @@ public final class AlgorithmsBacktrack {
         }
     }
 
+    /**
+     * An ordering of permutations induced by an ordering on Ω(n) (see {@link InducedOrderingOfSet}).
+     */
     public static class InducedOrderingOfPermutations implements Comparator<Permutation> {
         final InducedOrderingOfSet inducedOrderingOfSet;
         final int[] base;
@@ -147,6 +171,10 @@ public final class AlgorithmsBacktrack {
     }
 
 
+    /**
+     * An ordering of points Ω(n) induced by a base B: if b<sub>i</sub>, b<sub>j</sub> ∈ B then
+     * b<sub>i</sub> ≺ b<sub>j</sub> if and only if i < j, and b ≺ a for any b ∈ B and a ∉ B .
+     */
     public static class InducedOrderingOfSet implements IntComparator {
         private int[] base;
         private int[] positions;

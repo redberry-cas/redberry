@@ -22,6 +22,8 @@
  */
 package cc.redberry.core.groups.permutations;
 
+import cc.redberry.core.combinatorics.Combinatorics;
+import cc.redberry.core.context.CC;
 import cc.redberry.core.utils.ArraysUtils;
 import org.junit.Test;
 
@@ -150,6 +152,17 @@ public class PermutationOneLineTest {
     @Test(expected = IllegalArgumentException.class)
     public void testInconsistentSign2() {
         new PermutationOneLine(true, 3, 4, 0, 1, 2);
+    }
+
+    @Test
+    public void testNewIndexOfUnderInverse1() {
+        int n = 100;
+        for (int i = 0; i < 1000; ++i) {
+            Permutation p = new PermutationOneLine(Permutations.randomPermutation(n, CC.getRandomGenerator()));
+            Permutation inv = p.inverse();
+            for (int j = 0; j < n; ++j)
+                assertEquals(inv.newIndexOf(j), p.newIndexOfUnderInverse(j));
+        }
     }
 
     private static int bruteForceOrder(Permutation p) {
