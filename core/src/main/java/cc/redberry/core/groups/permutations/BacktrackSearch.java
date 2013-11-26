@@ -60,7 +60,7 @@ import java.util.List;
  * @see BacktrackSearchTestFunction
  */
 public class BacktrackSearch implements OutputPortUnsafe<Permutation> {
-    final List<BSGSElement> bsgs;
+    final List<? extends BSGSElement> bsgs;
     //tuple[i] - current transversal of i-th base point
     final int[] tuple;
     //orbit images; sortedOrbits[i] - is an i-th orbit image under permutation word
@@ -75,7 +75,7 @@ public class BacktrackSearch implements OutputPortUnsafe<Permutation> {
     final int size;
     //comparator
     final IntComparator ordering;
-    //sorted orbit of first base point
+    //sorted orbits
     final int[][] cachedSortedOrbits;
 
     //test condition
@@ -83,7 +83,14 @@ public class BacktrackSearch implements OutputPortUnsafe<Permutation> {
     //permutation property
     Indicator<Permutation> property;
 
-    public BacktrackSearch(List<BSGSElement> bsgs,
+    /**
+     * Creates an iterator over group elements that satisfy specified property.
+     *
+     * @param bsgs     base and strong generating set
+     * @param test     test function that applies at each level of search tree
+     * @param property property of permutations
+     */
+    public BacktrackSearch(List<? extends BSGSElement> bsgs,
                            BacktrackSearchTestFunction test,
                            Indicator<Permutation> property) {
         if (bsgs.size() == 0)
@@ -109,6 +116,11 @@ public class BacktrackSearch implements OutputPortUnsafe<Permutation> {
         this.property = property;
     }
 
+    /**
+     * Creates an iterator over group elements.
+     *
+     * @param bsgs base and strong generating set
+     */
     public BacktrackSearch(List<BSGSElement> bsgs) {
         this(bsgs, BacktrackSearchTestFunction.TRUE, Indicator.TRUE_INDICATOR);
     }
@@ -231,9 +243,9 @@ public class BacktrackSearch implements OutputPortUnsafe<Permutation> {
     }
 
     private void calculateSortedOrbit(int level) {
-        if (word[level - 1].isIdentity()) {
+        if (word[level - 1].isIdentity())
             sortedOrbits[level] = cachedSortedOrbits[level];
-        } else {
+        else {
             sortedOrbits[level] = word[level - 1].imageOf(bsgs.get(level).orbitList.toArray());
             ArraysUtils.quickSort(sortedOrbits[level], ordering);
         }

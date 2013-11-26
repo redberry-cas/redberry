@@ -82,4 +82,26 @@ public class InducedOrdering implements IntComparator {
             return 0;
         return Integer.compare(pa, pb);
     }
+
+    /**
+     * Returns the ≺-greatest point under this ordering.
+     *
+     * @param a point
+     * @param b point
+     * @return ≺-greatest point under this ordering
+     */
+    public int max(int a, int b) {
+        return compare(a, b) >= 0 ? a : b;
+    }
+
+    /**
+     * Returns the ≺-least point under this ordering.
+     *
+     * @param a point
+     * @param b point
+     * @return ≺-greatest point under this ordering
+     */
+    public int min(int a, int b) {
+        return compare(a, b) >= 0 ? b : a;
+    }
 }

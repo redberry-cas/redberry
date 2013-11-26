@@ -873,7 +873,7 @@ public class AlgorithmsBase {
      * @param oldBasePointPosition position of base point to change
      * @param newBasePoint         new base point
      */
-    private static void changeBasePointWithTranspositions(
+    static void changeBasePointWithTranspositions(
             ArrayList<BSGSCandidateElement> BSGS, int oldBasePointPosition, int newBasePoint) {
         assert BSGS.get(oldBasePointPosition).basePoint != newBasePoint;
         final int degree = BSGS.get(0).groupDegree();
@@ -935,6 +935,11 @@ public class AlgorithmsBase {
                 BSGS.remove(j);
     }
 
+    public static void rebase(ArrayList<BSGSCandidateElement> BSGS, int[] newBase) {
+        //todo write code!!!
+        rebaseWithConjugationAndTranspositions(BSGS, newBase);
+    }
+
     //------------------------------ FACTORIES --------------------------------------------//
 
     /**
@@ -957,7 +962,7 @@ public class AlgorithmsBase {
      * @param BSGS BSGS
      * @return mutable copy of BSGS
      */
-    public static ArrayList<BSGSCandidateElement> asBSGSCandidatesList(List<BSGSElement> BSGS) {
+    public static ArrayList<BSGSCandidateElement> asBSGSCandidatesList(List<? extends BSGSElement> BSGS) {
         ArrayList<BSGSCandidateElement> BSGSCandidates = new ArrayList<>(BSGS.size());
         for (BSGSElement element : BSGS)
             BSGSCandidates.add(element.asBSGSCandidateElement());
