@@ -42,7 +42,7 @@ import static cc.redberry.core.groups.permutations.AlgorithmsBase.getOrder;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public class BacktrackIteratorTest {
+public class BacktrackSearchTest {
 
     @Test
     public void testAll1() throws Exception {
@@ -53,13 +53,12 @@ public class BacktrackIteratorTest {
         List<BSGSElement> bsgs = AlgorithmsBase.createBSGS(generators).getBSGSList();
 
 
-        BacktrackIterator iterator = new BacktrackIterator(bsgs);
+        BacktrackSearch search = new BacktrackSearch(bsgs);
         InducedOrderingOfPermutations comparator = new InducedOrderingOfPermutations(getBaseAsArray(bsgs));
 
         Permutation previous = null, current;
         int i = 0;
-        while (iterator.hasNext()) {
-            current = iterator.next();
+        while ((current = search.take()) != null) {
             if (i != 0) {
                 assertTrue(comparator.compare(previous, current) < 0);
                 assertTrue(comparator.compare(current, previous) > 0);
@@ -83,13 +82,12 @@ public class BacktrackIteratorTest {
 
 
         PermutationLessThenTestComparator comparator = new PermutationLessThenTestComparator(getBaseAsArray(bsgs));
-        BacktrackIterator iterator = new BacktrackIterator(bsgs);
+        BacktrackSearch search = new BacktrackSearch(bsgs);
 
         Permutation previous = null, current;
         int i = 0;
 
-        while (iterator.hasNext()) {
-            current = iterator.next();
+        while ((current = search.take()) != null) {
             if (i != 0) {
                 assertTrue(comparator.compare(previous, current) <= 0);
             }
@@ -99,39 +97,8 @@ public class BacktrackIteratorTest {
         assertEquals(getOrder(bsgs).intValue(), i);
     }
 
-
     @Test
-    public void testAllPrimitive() throws Exception {
-        PermutationGroup[] pgs = GapPrimitiveGroupsReader.readGroupsFromGap("/home/stas/gap4r6/prim/grps/gps1.g");
-
-        int s = 0;
-        for (int i = 0; i < pgs.length; ++i) {
-            if (pgs[i].order().compareTo(BigInteger.valueOf(10000)) > 0)
-                continue;
-            ++s;
-            List<BSGSElement> bsgs = pgs[i].getBSGS().getBSGSList();
-
-
-            BacktrackIterator iterator = new BacktrackIterator(bsgs);
-            PermutationLessThenTestComparator comparator = new PermutationLessThenTestComparator(getBaseAsArray(bsgs));
-
-            Permutation previous = null, current;
-            int count = 0;
-            while (iterator.hasNext()) {
-                current = iterator.next();
-                if (count != 0) {
-                    assertTrue(comparator.compare(previous, current) <= 0);
-                }
-                previous = current;
-                ++count;
-            }
-            assertEquals(getOrder(bsgs).intValue(), count);
-        }
-    }
-
-
-    @Test
-    public void testPrintElements2() {
+    public void testAll3() {
         //an example from Sec. 4.6.1 in [Holt05]
         Permutation a0 = new PermutationOneLine(0, 1, 2, 3, 4, 5);
         Permutation a1 = new PermutationOneLine(0, 1, 2, 3, 5, 4);
@@ -171,12 +138,88 @@ public class BacktrackIteratorTest {
         });
 
         //ITERATOR
-        BacktrackIterator iterator = new BacktrackIterator(bsgs);
+        int count = 0;
+        BacktrackSearch search = new BacktrackSearch(bsgs);
+        Permutation current;
         int ii = 0;
-        while (iterator.hasNext()) {
-            assertEquals(expected[ii++], iterator.next());
+        while ((current = search.take()) != null) {
+            assertEquals(expected[ii++], current);
         }
+        assertEquals(expected.length, ii);
     }
+
+
+    @Test
+    public void testAllPrimitive() throws Exception {
+        PermutationGroup[] pgs = GapPrimitiveGroupsReader.readGroupsFromGap("/home/stas/gap4r6/prim/grps/gps1.g");
+
+        int scanned = 0;
+        for (int i = 0; i < pgs.length; ++i) {
+            if (pgs[i].order().compareTo(BigInteger.valueOf(100000)) > 0)
+                continue;
+            ++scanned;
+            List<BSGSElement> bsgs = pgs[i].getBSGS().getBSGSList();
+
+
+            BacktrackSearch search = new BacktrackSearch(bsgs);
+            PermutationLessThenTestComparator comparator = new PermutationLessThenTestComparator(getBaseAsArray(bsgs));
+
+            Permutation previous = null, current;
+            int count = 0;
+            while ((current = search.take()) != null) {
+                if (count != 0) {
+                    assertTrue(comparator.compare(previous, current) <= 0);
+                }
+                previous = current;
+                ++count;
+            }
+            assertEquals(getOrder(bsgs).intValue(), count);
+        }
+        System.out.println("Total number of primitive groups scanned: " + scanned);
+    }
+
+    @Test
+    public void testPrune1() {
+        //an example from Sec. 4.6.2 in [Holt05]
+        //find all permutations that satisfies the following conditions:
+        //g(0) = 0 or 2, g(1) = 1
+
+        Permutation a0 = new PermutationOneLine(0, 1, 2, 3, 4, 5);
+        Permutation a1 = new PermutationOneLine(0, 1, 2, 3, 5, 4);
+        Permutation a2 = new PermutationOneLine(2, 1, 0, 3, 4, 5);
+        Permutation a3 = new PermutationOneLine(2, 1, 0, 3, 5, 4);
+        final Permutation[] expected = {a0, a1, a2, a3};
+
+        Permutation gen0 = new PermutationOneLine(1, 2, 3, 0, 4, 5);
+        Permutation gen1 = new PermutationOneLine(0, 3, 2, 1, 4, 5);
+        Permutation gen2 = new PermutationOneLine(0, 1, 2, 3, 5, 4);
+        ArrayList<Permutation> generators = new ArrayList<>();
+        generators.add(gen0);
+        generators.add(gen1);
+        generators.add(gen2);
+
+        List<BSGSElement> bsgs = AlgorithmsBase.createBSGSList(new int[]{0, 1, 4}, generators);
+
+        Permutation current;
+        //ITERATOR
+        BacktrackSearch search = new BacktrackSearch(bsgs);
+        search.setTestFunction(new BacktrackSearchTestFunction() {
+            @Override
+            public boolean test(Permutation permutation, int level) {
+                if (level == 0)
+                    return permutation.newIndexOf(0) == 0 || permutation.newIndexOf(0) == 2;
+                if (level == 1)
+                    return permutation.newIndexOf(1) == 1;
+                return true;
+            }
+        });
+        int ii = 0;
+        while ((current = search.take()) != null) {
+            assertEquals(expected[ii++], current);
+        }
+        assertEquals(expected.length, ii);
+    }
+
 
     public static interface PFunction {
         void dosmth(Permutation p);
