@@ -35,44 +35,14 @@ import java.util.List;
 
 import static cc.redberry.core.TAssert.assertEquals;
 import static cc.redberry.core.TAssert.assertTrue;
-import static cc.redberry.core.groups.permutations.AlgorithmsBacktrack.BacktrackIterator;
-import static cc.redberry.core.groups.permutations.AlgorithmsBase.*;
-import static cc.redberry.core.utils.Timing.timing;
-import static org.junit.Assert.assertArrayEquals;
+import static cc.redberry.core.groups.permutations.AlgorithmsBase.getBaseAsArray;
+import static cc.redberry.core.groups.permutations.AlgorithmsBase.getOrder;
 
 /**
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public class AlgorithmsBacktrackTest {
-    @Test
-    public void testBaseComparator1() {
-        int[] base = {0, 2, 1};
-        AlgorithmsBacktrack.InducedOrderingOfSet comparator = new AlgorithmsBacktrack.InducedOrderingOfSet(base);
-        int[] array = {1, 0, 2};
-        ArraysUtils.quickSort(array, comparator);
-        assertArrayEquals(base, array);
-    }
-
-    @Test
-    public void testBaseComparator2() {
-        int[] base = {0, 2, 1};
-        AlgorithmsBacktrack.InducedOrderingOfSet comparator = new AlgorithmsBacktrack.InducedOrderingOfSet(base);
-        int[] array = {5, 1, 0, 2};
-        ArraysUtils.quickSort(array, comparator);
-        int[] expected = {0, 2, 1, 5};
-        assertArrayEquals(expected, array);
-    }
-
-
-    @Test
-    public void testBaseComparator3() {
-        int[] base = {6, 7, 1};
-        AlgorithmsBacktrack.InducedOrderingOfSet comparator = new AlgorithmsBacktrack.InducedOrderingOfSet(base);
-        int[] array = {5, 1, 0, 2, 7, 8, 9, 10, 6};
-        ArraysUtils.quickSort(array, comparator);
-        assertSetIsSorted(comparator, array);
-    }
+public class BacktrackIteratorTest {
 
     @Test
     public void testAll1() throws Exception {
@@ -84,7 +54,7 @@ public class AlgorithmsBacktrackTest {
 
 
         BacktrackIterator iterator = new BacktrackIterator(bsgs);
-        AlgorithmsBacktrack.InducedOrderingOfPermutations comparator = new AlgorithmsBacktrack.InducedOrderingOfPermutations(getBaseAsArray(bsgs));
+        InducedOrderingOfPermutations comparator = new InducedOrderingOfPermutations(getBaseAsArray(bsgs));
 
         Permutation previous = null, current;
         int i = 0;
@@ -162,6 +132,7 @@ public class AlgorithmsBacktrackTest {
 
     @Test
     public void testPrintElements2() {
+        //an example from Sec. 4.6.1 in [Holt05]
         Permutation a0 = new PermutationOneLine(0, 1, 2, 3, 4, 5);
         Permutation a1 = new PermutationOneLine(0, 1, 2, 3, 5, 4);
         Permutation a2 = new PermutationOneLine(0, 3, 2, 1, 4, 5);
@@ -214,10 +185,11 @@ public class AlgorithmsBacktrackTest {
     /**
      * Algorithm PRINTELEMENTS(G) described in Sec. 4.6.1 of [Holt05]
      *
-     * @param bsgs BSGS
+     * @param bsgs     BSGS
+     * @param function some function that will be executes on each element
      */
-    private static void printElements(List<BSGSElement> bsgs, final PFunction function) {
-        IntComparator comparator = new AlgorithmsBacktrack.InducedOrderingOfSet(getBaseAsArray(bsgs));
+    public static void printElements(List<BSGSElement> bsgs, final PFunction function) {
+        IntComparator comparator = new InducedOrdering(getBaseAsArray(bsgs));
 
         int k = bsgs.size();
         int[] c = new int[k];
@@ -236,7 +208,7 @@ public class AlgorithmsBacktrackTest {
                 ++l;
                 orbits[l] = word[l - 1].imageOf(bsgs.get(l).orbitList.toArray());
                 ArraysUtils.quickSort(orbits[l], comparator);
-                assertSetIsSorted(comparator, orbits[l]);
+                InducedOrderingTest.assertSetIsSorted(comparator, orbits[l]);
                 c[l] = 0;
                 word[l] = bsgs.get(l).getTransversalOf(
                         word[l - 1].newIndexOfUnderInverse(orbits[l][c[l]])
@@ -264,14 +236,11 @@ public class AlgorithmsBacktrackTest {
         }
     }
 
-    private static void assertSetIsSorted(IntComparator comparator, int[] set) {
-        if (set.length < 2)
-            return;
-        for (int i = 1; i < set.length; ++i)
-            assertTrue(comparator.compare(set[i - 1], set[i]) <= 0);
-    }
 
-    private static final class PermutationLessThenTestComparator implements Comparator<Permutation> {
+    /**
+     * Use only for tests
+     */
+    public static final class PermutationLessThenTestComparator implements Comparator<Permutation> {
         final int[] base, sortedBase;
         final IntComparator baseComparator;
 
@@ -279,7 +248,7 @@ public class AlgorithmsBacktrackTest {
             this.base = base;
             this.sortedBase = base.clone();
             Arrays.sort(sortedBase);
-            this.baseComparator = new AlgorithmsBacktrack.InducedOrderingOfSet(base);
+            this.baseComparator = new InducedOrdering(base);
         }
 
         @Override
