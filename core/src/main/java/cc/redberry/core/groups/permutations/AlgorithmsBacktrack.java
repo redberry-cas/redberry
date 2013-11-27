@@ -43,56 +43,77 @@ public final class AlgorithmsBacktrack {
                                       ArrayList<BSGSCandidateElement> subgroup,
                                       BacktrackSearchTestFunction testFunction,
                                       Indicator<Permutation> property) {
-        //the algorithm SUBGROUPSEARCH described in Sec. 4.6.3 in [Holt05]
+        if (bsgs.size() == 0 || bsgs.get(0).stabilizerGenerators.isEmpty())
+            throw new IllegalArgumentException("Empty group.");
+
+        /* The algorithm SUBGROUPSEARCH described in Sec. 4.6.3 in [Holt05] */
 
         //<= initialization
-        final int degree = bsgs.get(0).groupDegree();
 
+        final int degree = bsgs.get(0).groupDegree();
         final int[] base = AlgorithmsBase.getBaseAsArray(bsgs);
         final int size = bsgs.size();
 
+        //induced ordering of base points
+        final InducedOrdering ordering = new InducedOrdering(base);
+
         //we'll start from the end
         int level = size - 1;
-        int subgroupLevel = level;
-
-        //tuple[i] - current transversal of i-th base point
-        final int[] tuple = new int[size];//initialized with zeros
-
-        //rebase to base of basic group
-        AlgorithmsBase.rebase(subgroup, base);
-        //in the case when rebase removed redundant base points
-        if (subgroup.size() < size)
-            for (int i = subgroup.size(); i < size; ++i)
-                subgroup.add(new BSGSCandidateElement(base[i], new ArrayList<Permutation>(), new int[degree]));
-
-        ArrayList<BSGSCandidateElement> subgroup_rebase = AlgorithmsBase.clone(subgroup);
-
-        final InducedOrdering ordering = new InducedOrdering(base);
+        //current tree branch
+        final Permutation[] word = new Permutation[size];
+        final Permutation identity = bsgs.get(0).stabilizerGenerators.get(0).getIdentity();
 
         //cached sorted orbits of base points
         final int[][] cachedSortedOrbits = new int[size][];
-        for (int i = bsgs.size() - 1; i >= 0; --i) {
+        //sorted orbits images under word[l-1] (as used in general search)
+        // at each level l, the sortedOrbit[l] is a sorted orbit of g(β_l) under the stabilizer
+        // G_[g(β_1), g(β_2), ..., g(β_l-1)]
+        final int[][] sortedOrbits = new int[size][];
+        //initializing sorted orbits and word
+        for (int i = 0; i < size; ++i) {
             cachedSortedOrbits[i] = bsgs.get(i).orbitList.toArray();
             ArraysUtils.quickSort(cachedSortedOrbits[i], ordering);
+            sortedOrbits[i] = cachedSortedOrbits[i];
+            word[i] = identity;   //initializing with identity
         }
 
-        final int[][] sortedOrbits = new int[size][];
-        sortedOrbits[level] = cachedSortedOrbits[level];
+        //tuple[i] - current transversal of i-th base point
+        final int[] tuple = new int[size];//initialized with zeros
+        //rebase to base of basic group
+        rebaseWithRedundancy(subgroup, base, degree);
 
-        //sorted orbits of subgroup we search for with respect to base g(B(l)) generated at each tree level
+        int subgroupLevel = level;
+
+        //<= data structure to test condition (i) in PROPOSITION 4.7
+        // subgroup_rebase used to provide quick access to subgroup stabilizers of partial base images
+        // i.e. at each level l and vertex V this BSGS is organized as follows: for each i ∈ 0...l i-th base point is
+        // equal to new index of i-th base point in the initial base under word[l] obtained at vertex V
+        // we'll use this information to test condition (i) in PROPOSITION 4.7
+        ArrayList<BSGSCandidateElement> subgroup_rebase = AlgorithmsBase.clone(subgroup);
+        // sorted orbits of subgroup_rebase needed to choose the minimal elements (we can have several minimal elements)
+        // in each orbit
         final int[][] sortedSubgroupOrbits = new int[size][];
         sortedSubgroupOrbits[level] = subgroup_rebase.get(level).orbitList.toArray();
         ArraysUtils.quickSort(sortedSubgroupOrbits[level], ordering);
+        //todo remove beta_f to avoid identities
 
 
-        //max images to test (ii) from PROPOSITION 4.7
+        //<= data structure to test condition (ii) in PROPOSITION 4.7
+        // this used to test that g(β_j) ≺ g(β_l) for all j < l such that β_l ∈ j-th basic orbit of subgroup
+        // (PROOF: according to (ii) g(β_j) -- ≺-least in g(j-th Δ_K) => if g(β_l) ∈ g(j-th Δ_K) (<=> β_l ∈ j-th Δ_K)
+        //  then g(β_j) ≺ g(β_l) )
+        // maxImages[l] - is the ≺-greatest element of the set defined by { word[l](β_j) | β_l ∈ j-th Δ_K }
         final int[] maxImages = new int[size];//initialized with zeros
-        //this need to test COROLLARY 4.8
-        final int[] pivots = new int[size];
-        pivots[level] = sortedOrbits[level][bsgs.get(level).orbitSize() - subgroup.get(level).orbitSize() + 2];
-
-        //current tree branch
-        final Permutation[] word = new Permutation[size];
+        maxImages[level] = ordering.minElement();//element smaller then all points
+        // this used to test COROLLARY 4.8: if g -- ≺-least in Kg, then according to (ii) g(β_l) -- ≺-least in
+        // g(l-th Δ_K) = { hg(β_l) |  h ∈ l-1 stabilizer of K w.r.t. to B}, but hg = g * (g^{-1} h g) and (g^{-1} h g)
+        // ∈ stabilizer of [g(β_1), g(β_2), ..., g(β_l-1)] in G (recall g = word[l] - fixes partial base image), so
+        // g(l-th Δ_K) lies in orbit of β_l under the stabilizer of [g(β_1), g(β_2), ..., g(β_l-1)] in G. Then this
+        // orbit (orbit of β_l in G_[g(β_1), g(β_2), ..., g(β_l-1)]) contains at least |g(l-th Δ_K)|-1 points that
+        // greater then g(β_l).
+        // the above enables us to choose a point in this orbit that must be greater then g(β_l)
+        final int[] maxRepresentative = new int[size];
+        maxRepresentative[level] = maxRepresentative(sortedOrbits[level], subgroup.get(level).orbitSize(), ordering);
 
         //<= initialized
 
@@ -105,29 +126,25 @@ public final class AlgorithmsBacktrack {
             // in order to find ≺-least element in KgK, we'll try to prune tree using PROPOSITION 4.7 and COROLLARY 4.8
             // (note that if g is ≺-least element in KgK then it is guaranteed to be ≺-least element both in gK and Kg)
 
-            //at each level we test our basic image to satisfy a double coset minimality
+            //at each level we test our basic image to satisfy required conditions for a double coset minimality
             for (image = word[level].newIndexOf(base[level]);
                  level < size - 1
+                         //avoid getting identity
+                         && image != base[level]
                          // check PROPOSITION 4.7 (i)
-                         //≺-least elements of subgroup orbits with respect to base g(B(l))
-                         && subgroup_rebase.get(level).belongsToOrbit(image) //this is rather assertion then check
-                         && isMinimal(sortedSubgroupOrbits[level], image, ordering)
+                         //≺-least element of subgroup orbits with respect to base g(B(l))
+                         && isMinimalInOrbit(sortedSubgroupOrbits[level], image, ordering)
                          // modified PROPOSITION 4.7 (ii)
                          && ordering.compare(image, maxImages[level]) > 0
                          // COROLLARY 4.8
-                         && ordering.compare(image, pivots[level]) < 0
+                         && ordering.compare(image, maxRepresentative[level]) < 0
                          //test
                          && testFunction.test(word[level], level)
                     ; ) {
                 //<= entering next level
 
                 //rebase for next iteration
-                AlgorithmsBase.changeBasePointWithTranspositions(subgroup_rebase, level, image);
-                //remove redundant base point
-                if (subgroup_rebase.size() > base.length) {
-                    assert subgroup_rebase.get(base.length).stabilizerGenerators.isEmpty();
-                    subgroup_rebase.remove(base.length);
-                }
+                replaceBasePointWithRedundancy(subgroup_rebase, level, image);
 
                 ++level;
                 //recalculate subgroup sorted orbit
@@ -152,7 +169,7 @@ public final class AlgorithmsBacktrack {
                     }
                 }
                 maxImages[level] = max;
-                pivots[level] = sortedOrbits[level][bsgs.get(level).orbitSize() - subgroup.get(level).orbitSize() + 2];
+                maxRepresentative[level] = maxRepresentative(sortedOrbits[level], subgroup.get(level).orbitSize(), ordering);
 
                 //reset tuple and calculate next permutation
                 tuple[level] = 0;
@@ -166,22 +183,24 @@ public final class AlgorithmsBacktrack {
             //we need to test whether it belongs to subgroup
             if (level == size - 1
                     // check PROPOSITION 4.7 (i)
+                    //avoid getting identity
+                    && image != base[level]
                     //≺-least elements of subgroup orbits with respect to base g(B(l))
-                    && subgroup_rebase.get(level).belongsToOrbit(image) //this is rather assertion then check
-                    && isMinimal(sortedSubgroupOrbits[level], image, ordering)
+                    && isMinimalInOrbit(sortedSubgroupOrbits[level], image, ordering)
                     // modified PROPOSITION 4.7 (ii)
                     && ordering.compare(image, maxImages[level]) > 0
                     // COROLLARY 4.8
-                    && ordering.compare(image, pivots[level]) < 0
+                    && ordering.compare(image, maxRepresentative[level]) < 0
                     //test
                     && testFunction.test(word[level], level)
                     //property
                     && property.is(word[level])) {
 
-                //<= here we can extend our subgroup with new generator
+                //<= here we obtained next permutation in group that is a new generator in the subgroup we search for
                 //extend group with a new generator
                 subgroup.get(0).stabilizerGenerators.add(word[level]);
-                AlgorithmsBase.SchreierSimsAlgorithm(subgroup);
+//                recalculate
+//                AlgorithmsBase.SchreierSimsAlgorithm(subgroup);
 
                 //rebase back to old base
                 subgroup_rebase = AlgorithmsBase.clone(subgroup);
@@ -206,21 +225,53 @@ public final class AlgorithmsBacktrack {
                 ArraysUtils.quickSort(sortedSubgroupOrbits[subgroupLevel], ordering);
 
                 //<= recalculate data needed to test (ii) from PROPOSITION 4.7
-                maxImages[level] = 0;
-                pivots[level] = sortedOrbits[level][bsgs.get(level).orbitSize() - subgroup.get(level).orbitSize() + 2];
+                maxImages[level] = -1;
+                maxRepresentative[level] = maxRepresentative(sortedOrbits[level], subgroup.get(level).orbitSize(), ordering);
+            }
 
-                ++tuple[level];
+            ++tuple[level];
+            if (level == 0)
+                word[0] = bsgs.get(0).getTransversalOf(sortedOrbits[0][tuple[0]]);
+            else
                 word[level] =
                         bsgs.get(level).getTransversalOf(
                                 word[level - 1].newIndexOfUnderInverse(sortedOrbits[level][tuple[level]])
                         ).composition(word[level - 1]);
-            }
-
         }
 
     }
 
-    private static boolean isMinimal(final int[] sortedOrbit, final int point, final IntComparator ordering) {
+    private static int maxRepresentative(final int[] sortedOrbit, final int subgroupOrbitSize,
+                                         final InducedOrdering ordering) {
+        int temp = sortedOrbit.length - subgroupOrbitSize + 1;
+        if (temp >= sortedOrbit.length)
+            return ordering.maxElement();
+        return sortedOrbit[temp];
+    }
+
+    private static void rebaseWithRedundancy(final ArrayList<BSGSCandidateElement> group,
+                                             final int[] base, final int degree) {
+        AlgorithmsBase.rebase(group, base);
+        if (group.size() < base.length)
+            for (int i = group.size(); i < base.length; ++i)
+                group.add(new BSGSCandidateElement(base[i], new ArrayList<Permutation>(), new int[degree]));
+    }
+
+    private static void replaceBasePointWithRedundancy(final ArrayList<BSGSCandidateElement> group,
+                                                       final int index, final int newPoint) {
+        if (group.get(index).basePoint == newPoint)
+            return;
+        int oldSize = group.size();
+        AlgorithmsBase.changeBasePointWithTranspositions(group, index, newPoint);
+        //keep bsgs with a fixed size
+        assert group.size() >= oldSize;
+        if (group.size() != oldSize) {
+            assert group.get(oldSize).stabilizerGenerators.isEmpty();
+            group.remove(oldSize);
+        }
+    }
+
+    private static boolean isMinimalInOrbit(final int[] sortedOrbit, final int point, final IntComparator ordering) {
         int compare;
         for (int i = 0; i < sortedOrbit.length; ++i) {
             compare = ordering.compare(sortedOrbit[i], point);

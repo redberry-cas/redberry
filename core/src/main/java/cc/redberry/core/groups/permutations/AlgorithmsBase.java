@@ -847,6 +847,7 @@ public class AlgorithmsBase {
         }
         //conjugating base and strong generating set
         if (!conjugation.isIdentity()) {
+            //TODO: here we need to conjugate only from index of first changed point!!!!
             //inverse conjugation
             Permutation iconjugation = conjugation.inverse();
             ListIterator<BSGSCandidateElement> elementsIterator = BSGS.listIterator();

@@ -121,7 +121,7 @@ public class BacktrackSearch implements OutputPortUnsafe<Permutation> {
      *
      * @param bsgs base and strong generating set
      */
-    public BacktrackSearch(List<BSGSElement> bsgs) {
+    public BacktrackSearch(List<? extends BSGSElement> bsgs) {
         this(bsgs, BacktrackSearchTestFunction.TRUE, Indicator.TRUE_INDICATOR);
     }
 

@@ -36,8 +36,10 @@ import java.util.Arrays;
  * @author Stanislav Poslavsky
  */
 public class InducedOrdering implements IntComparator {
-    private int[] sortedBase;
-    private int[] positions;
+    private final int[] sortedBase;
+    private final int[] positions;
+    private final int[] base;
+
 
     /**
      * Construct an ordering induced by specified base
@@ -45,6 +47,7 @@ public class InducedOrdering implements IntComparator {
      * @param base base permutation group
      */
     public InducedOrdering(final int[] base) {
+        this.base = base;
         this.sortedBase = base.clone();
         this.positions = new int[base.length];
         for (int i = 1; i < base.length; ++i)
@@ -77,6 +80,10 @@ public class InducedOrdering implements IntComparator {
 
     @Override
     public int compare(int a, int b) {
+        if (a == b) return 0;
+        if (a < 0) return a < b ? -1 : 1;
+        if (b < 0) return b < a ? 1 : -1;
+
         int pa = positionOf(a), pb = positionOf(b);
         if (pa == Integer.MAX_VALUE && pb == Integer.MAX_VALUE)//not base points
             return 0;
@@ -103,5 +110,36 @@ public class InducedOrdering implements IntComparator {
      */
     public int min(int a, int b) {
         return compare(a, b) >= 0 ? b : a;
+    }
+
+    /**
+     * Returns the max element representative under this ordering, i.e. the element that larger then all points
+     *
+     * @return max element representative under this ordering, i.e. the element that larger then all points
+     */
+    public int maxElement() {
+        int pivot = 0;
+        for (int i = 0; i < sortedBase.length; ++i) {
+            if (pivot != sortedBase[i])
+                return pivot;
+            ++pivot;
+        }
+        return base[base.length - 1];
+    }
+
+    /**
+     * Returns the min element representative under this ordering, i.e. the element that less then any point. Returns
+     * -1 in this implementation.
+     *
+     * @return max element representative under this ordering, i.e. the element that larger then all points
+     */
+    public int minElement() {
+        int pivot = 0;
+        for (int i = 0; i < sortedBase.length; ++i) {
+            if (pivot != sortedBase[i])
+                return pivot;
+            ++pivot;
+        }
+        return base[base.length - 1];
     }
 }
