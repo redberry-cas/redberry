@@ -78,5 +78,4 @@ class RedberryTest {
             assert 2 * count == ArithmeticUtils.factorial(from.indices.size())
         }
     }
-
 }

@@ -36,58 +36,43 @@ import java.util.Arrays;
  * @author Stanislav Poslavsky
  */
 public class InducedOrdering implements IntComparator {
-    private final int[] sortedBase;
     private final int[] positions;
-    private final int[] base;
-
+    private final int degree;
 
     /**
      * Construct an ordering induced by specified base
      *
      * @param base base permutation group
      */
-    public InducedOrdering(final int[] base) {
-        this.base = base;
-        this.sortedBase = base.clone();
-        this.positions = new int[base.length];
-        for (int i = 1; i < base.length; ++i)
-            positions[i] = i;
-        ArraysUtils.quickSort(this.sortedBase, positions);
-    }
+    public InducedOrdering(final int[] base, final int degree) {
+        this.positions = new int[degree + 2];
+        this.degree = degree;
 
-    /**
-     * Return a reference to sorted array of base points
-     *
-     * @return a reference to sorted array of base points
-     */
-    public int[] getSortedBaseReference() {
-        return sortedBase;
+        Arrays.fill(positions, -1);
+        for (int i = 0; i < base.length; ++i)
+            this.positions[1 + base[i]] = i;
+        int next = base.length;
+        for (int i = 1; i < degree + 1; ++i)
+            if (positions[i] == -1)
+                positions[i] = next++;
+
+        positions[0] = Integer.MIN_VALUE;
+        positions[degree + 1] = Integer.MAX_VALUE;
     }
 
     /**
      * Returns a position of specified point in base or {@code Integer.MAX_VALUE} if specified point is not a base point.
-     * Method complexity is log(k), where k is length of base.
      *
      * @param a some point
      * @return position of specified point in base or {@code Integer.MAX_VALUE} if specified point is not a base point
      */
     public int positionOf(int a) {
-        int p = Arrays.binarySearch(sortedBase, a);
-        if (p < 0)
-            return Integer.MAX_VALUE;
-        return positions[p];
+        return positions[a + 1];
     }
 
     @Override
     public int compare(int a, int b) {
-        if (a == b) return 0;
-        if (a < 0) return a < b ? -1 : 1;
-        if (b < 0) return b < a ? 1 : -1;
-
-        int pa = positionOf(a), pb = positionOf(b);
-        if (pa == Integer.MAX_VALUE && pb == Integer.MAX_VALUE)//not base points
-            return 0;
-        return Integer.compare(pa, pb);
+        return Integer.compare(positions[a + 1], positions[b + 1]);
     }
 
     /**
@@ -118,13 +103,7 @@ public class InducedOrdering implements IntComparator {
      * @return max element representative under this ordering, i.e. the element that larger then all points
      */
     public int maxElement() {
-        int pivot = 0;
-        for (int i = 0; i < sortedBase.length; ++i) {
-            if (pivot != sortedBase[i])
-                return pivot;
-            ++pivot;
-        }
-        return base[base.length - 1];
+        return degree;
     }
 
     /**
@@ -134,12 +113,6 @@ public class InducedOrdering implements IntComparator {
      * @return max element representative under this ordering, i.e. the element that larger then all points
      */
     public int minElement() {
-        int pivot = 0;
-        for (int i = 0; i < sortedBase.length; ++i) {
-            if (pivot != sortedBase[i])
-                return pivot;
-            ++pivot;
-        }
-        return base[base.length - 1];
+        return -1;
     }
 }

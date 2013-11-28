@@ -22,6 +22,7 @@
  */
 package cc.redberry.core.groups.permutations;
 
+import cc.redberry.core.context.CC;
 import cc.redberry.core.groups.permutations.gap.GapPrimitiveGroupsReader;
 import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.random.Well1024a;
@@ -223,6 +224,24 @@ public class AlgorithmsBaseTest {
         assertTrue(isBSGS(bsgs));
     }
 
+    @Test
+    public void testSchreierSims2() {
+        PermutationOneLine a = new PermutationOneLine(0, 1, 2, 3, 4, 5),
+                b = new PermutationOneLine(0, 3, 2, 1, 4, 5),
+                c = new PermutationOneLine(2, 1, 0, 3, 4, 5);
+        ArrayList<BSGSCandidateElement> bsgs = (ArrayList) createRawBSGSCandidate(a, b, c);
+        SchreierSimsAlgorithm(bsgs);
+        int order = getOrder(bsgs).intValue();
+
+        int _order_ = 0;
+        BruteForcePermutationIterator it = new BruteForcePermutationIterator(Arrays.asList(a, b, c));
+        while (it.hasNext()) {
+            ++_order_;
+            it.next();
+        }
+        assertEquals(_order_, order);
+    }
+
 //////////////////////////////////////////// BASE CHANGE ////////////////////////////////////////////////////////////
 
     @Test
@@ -323,6 +342,59 @@ public class AlgorithmsBaseTest {
         swapAdjacentBasePoints(bsgs, 2);
         assertTrue(isBSGS(bsgs));
         assertEquals(0, bsgs.get(3).stabilizerGenerators.size());
+    }
+
+    @Test
+    public void testBaseSwap4_redundant_points() {
+        Permutation a = new PermutationOneLine(4, 8, 7, 1, 6, 5, 0, 9, 3, 2),
+                b = new PermutationOneLine(7, 4, 1, 8, 5, 2, 9, 0, 6, 3);
+        int degree = a.degree();
+        ArrayList<BSGSCandidateElement> bsgs = (ArrayList) createRawBSGSCandidate(a, b);
+        SchreierSimsAlgorithm(bsgs);
+        assertEquals(getOrder(bsgs).intValue(), 120);
+        //real base: 0,1,2
+        int[] oldBase = {0, 1, 2};
+
+        //add redundant point 5
+        bsgs.add(new BSGSCandidateElement(5, new ArrayList<Permutation>(), new int[degree]));
+        assertTrue(isBSGS(bsgs));
+        SchreierSimsAlgorithm(bsgs);
+        assertTrue(isBSGS(bsgs));
+        assertArrayEquals(new int[]{0, 1, 2, 5}, getBaseAsArray(bsgs));
+
+        //add redundant point 3
+        bsgs.add(new BSGSCandidateElement(3, new ArrayList<Permutation>(), new int[degree]));
+        assertTrue(isBSGS(bsgs));
+        SchreierSimsAlgorithm(bsgs);
+        assertTrue(isBSGS(bsgs));
+        assertArrayEquals(new int[]{0, 1, 2, 5, 3}, getBaseAsArray(bsgs));
+
+        //add redundant point 6
+        bsgs.add(new BSGSCandidateElement(6, new ArrayList<Permutation>(), new int[degree]));
+        assertTrue(isBSGS(bsgs));
+        SchreierSimsAlgorithm(bsgs);
+        assertTrue(isBSGS(bsgs));
+        assertArrayEquals(new int[]{0, 1, 2, 5, 3, 6}, getBaseAsArray(bsgs));
+
+        //swap redundant points
+        swapAdjacentBasePoints(bsgs, 3);
+        assertTrue(isBSGS(bsgs));
+
+        for (int i = bsgs.size() - 2; i >= 0; --i) {
+            ArrayList<BSGSCandidateElement> copy = AlgorithmsBase.clone(bsgs);
+            swapAdjacentBasePoints(copy, i);
+            assertTrue(isBSGS(copy));
+        }
+
+        for (int i = bsgs.size() - 2; i >= 0; --i) {
+            swapAdjacentBasePoints(bsgs, i);
+            assertTrue(isBSGS(bsgs));
+        }
+
+        for (int i = 0; i <= 100; ++i) {
+            swapAdjacentBasePoints(bsgs, CC.getRandomGenerator().nextInt(bsgs.size() - 2));
+            assertTrue(isBSGS(bsgs));
+        }
     }
 
 //    @Test

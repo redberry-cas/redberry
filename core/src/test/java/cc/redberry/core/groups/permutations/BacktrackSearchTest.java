@@ -24,6 +24,7 @@ package cc.redberry.core.groups.permutations;
 
 import cc.redberry.core.groups.permutations.gap.GapPrimitiveGroupsReader;
 import cc.redberry.core.utils.ArraysUtils;
+import cc.redberry.core.utils.Indicator;
 import cc.redberry.core.utils.IntComparator;
 import org.junit.Test;
 
@@ -54,7 +55,7 @@ public class BacktrackSearchTest {
 
 
         BacktrackSearch search = new BacktrackSearch(bsgs);
-        InducedOrderingOfPermutations comparator = new InducedOrderingOfPermutations(getBaseAsArray(bsgs));
+        InducedOrderingOfPermutations comparator = new InducedOrderingOfPermutations(getBaseAsArray(bsgs), 5);
 
         Permutation previous = null, current;
         int i = 0;
@@ -81,7 +82,7 @@ public class BacktrackSearchTest {
         List<BSGSElement> bsgs = AlgorithmsBase.createBSGS(generators).getBSGSList();
 
 
-        PermutationLessThenTestComparator comparator = new PermutationLessThenTestComparator(getBaseAsArray(bsgs));
+        PermutationLessThenTestComparator comparator = new PermutationLessThenTestComparator(getBaseAsArray(bsgs), bsgs.get(0).groupDegree());
         BacktrackSearch search = new BacktrackSearch(bsgs);
 
         Permutation previous = null, current;
@@ -162,7 +163,7 @@ public class BacktrackSearchTest {
 
 
             BacktrackSearch search = new BacktrackSearch(bsgs);
-            PermutationLessThenTestComparator comparator = new PermutationLessThenTestComparator(getBaseAsArray(bsgs));
+            PermutationLessThenTestComparator comparator = new PermutationLessThenTestComparator(getBaseAsArray(bsgs), bsgs.get(0).groupDegree());
 
             Permutation previous = null, current;
             int count = 0;
@@ -220,6 +221,46 @@ public class BacktrackSearchTest {
         assertEquals(expected.length, ii);
     }
 
+    @Test
+    public void testPrune2() {
+        //no any pruning, just property test
+
+        Permutation a0 = new PermutationOneLine(0, 1, 2, 3, 4, 5);
+        Permutation a1 = new PermutationOneLine(0, 3, 2, 1, 4, 5);
+        Permutation a2 = new PermutationOneLine(1, 0, 3, 2, 4, 5);
+        Permutation a3 = new PermutationOneLine(1, 2, 3, 0, 4, 5);
+        Permutation a4 = new PermutationOneLine(2, 1, 0, 3, 4, 5);
+        Permutation a5 = new PermutationOneLine(2, 3, 0, 1, 4, 5);
+        Permutation a6 = new PermutationOneLine(3, 0, 1, 2, 4, 5);
+        Permutation a7 = new PermutationOneLine(3, 2, 1, 0, 4, 5);
+        final Permutation[] expected = {a0, a1, a2, a3, a4, a5, a6, a7};
+
+        Permutation gen0 = new PermutationOneLine(1, 2, 3, 0, 4, 5);
+        Permutation gen1 = new PermutationOneLine(0, 3, 2, 1, 4, 5);
+        Permutation gen2 = new PermutationOneLine(0, 1, 2, 3, 5, 4);
+        ArrayList<Permutation> generators = new ArrayList<>();
+        generators.add(gen0);
+        generators.add(gen1);
+        generators.add(gen2);
+
+        List<BSGSElement> bsgs = AlgorithmsBase.createBSGSList(new int[]{0, 1, 4}, generators);
+
+        Permutation current;
+        //ITERATOR
+        BacktrackSearch search = new BacktrackSearch(bsgs);
+        search.setProperty(new Indicator<Permutation>() {
+            @Override
+            public boolean is(Permutation p) {
+                return p.newIndexOf(5) == 5;
+            }
+        });
+        int ii = 0;
+        while ((current = search.take()) != null) {
+            assertEquals(expected[ii++], current);
+        }
+        assertEquals(expected.length, ii);
+    }
+
 
     public static interface PFunction {
         void dosmth(Permutation p);
@@ -232,7 +273,7 @@ public class BacktrackSearchTest {
      * @param function some function that will be executes on each element
      */
     public static void printElements(List<BSGSElement> bsgs, final PFunction function) {
-        IntComparator comparator = new InducedOrdering(getBaseAsArray(bsgs));
+        IntComparator comparator = new InducedOrdering(getBaseAsArray(bsgs), bsgs.get(0).groupDegree());
 
         int k = bsgs.size();
         int[] c = new int[k];
@@ -287,11 +328,11 @@ public class BacktrackSearchTest {
         final int[] base, sortedBase;
         final IntComparator baseComparator;
 
-        public PermutationLessThenTestComparator(int[] base) {
+        public PermutationLessThenTestComparator(int[] base, int degree) {
             this.base = base;
             this.sortedBase = base.clone();
             Arrays.sort(sortedBase);
-            this.baseComparator = new InducedOrdering(base);
+            this.baseComparator = new InducedOrdering(base, degree);
         }
 
         @Override
