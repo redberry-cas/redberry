@@ -240,7 +240,7 @@ public class AlgorithmsBase {
         if (BSGSCandidate.isEmpty())
             return Collections.EMPTY_LIST;
         SchreierSimsAlgorithm((ArrayList) BSGSCandidate);
-        removeRedundantBasePoints((ArrayList) BSGSCandidate);
+        removeRedundantBaseRemnant((ArrayList) BSGSCandidate);
         return asBSGSList(BSGSCandidate);
     }
 
@@ -272,7 +272,7 @@ public class AlgorithmsBase {
         if (BSGSCandidate.isEmpty())
             return Collections.EMPTY_LIST;
         SchreierSimsAlgorithm((ArrayList) BSGSCandidate);
-        removeRedundantBasePoints((ArrayList) BSGSCandidate);
+        removeRedundantBaseRemnant((ArrayList) BSGSCandidate);
         return asBSGSList(BSGSCandidate);
     }
 
@@ -632,7 +632,7 @@ public class AlgorithmsBase {
      *
      * @param BSGS BSGS
      */
-    public static void removeRedundantBasePoints(ArrayList<BSGSCandidateElement> BSGS) {
+    public static void removeRedundantBaseRemnant(ArrayList<BSGSCandidateElement> BSGS) {
         for (int i = BSGS.size() - 1; i >= 0; --i)
             if (BSGS.get(i).stabilizerGenerators.isEmpty())
                 BSGS.remove(i);
@@ -796,7 +796,7 @@ public class AlgorithmsBase {
      * algorithm guaranties that if initial base is [b1, b2, b3, ..., bk] and specified base is [a1, a2, a3, ..., al],
      * then the resulting base will look like  [a1, a2, a3, ...., al, b4, b7, ..., b19] with no any redundant base
      * points at the end (redundant point is point which corresponding stabilizer generators are empty) - this
-     * achieves by invocation of {@link #removeRedundantBasePoints(java.util.ArrayList)} at the end of procedure.
+     * achieves by invocation of {@link #removeRedundantBaseRemnant(java.util.ArrayList)} at the end of procedure.
      *
      * @param BSGS    BSGS
      * @param newBase new base
@@ -807,7 +807,7 @@ public class AlgorithmsBase {
             if (BSGS.get(i).basePoint != newBasePoint)
                 changeBasePointWithTranspositions(BSGS, i, newBasePoint);
         }
-        removeRedundantBasePoints(BSGS);
+        removeRedundantBaseRemnant(BSGS);
     }
 
     /**
@@ -815,7 +815,7 @@ public class AlgorithmsBase {
      * the algorithm guaranties that if initial base is [b1, b2, b3, ..., bk] and specified base is [a1, a2, a3, ..., al],
      * then the resulting base will look like  [a1, a2, a3, ...., al, b4, b7, ..., b19] with no any redundant base
      * points at the end (redundant point is point which corresponding stabilizer generators are empty) - this
-     * achieves by invocation of {@link #removeRedundantBasePoints(java.util.ArrayList)} at the end of procedure.
+     * achieves by invocation of {@link #removeRedundantBaseRemnant(java.util.ArrayList)} at the end of procedure.
      *
      * @param BSGS    BSGS
      * @param newBase new base
@@ -864,7 +864,7 @@ public class AlgorithmsBase {
                         new BSGSCandidateElement(newBasePoint, newStabilizers, new int[degree]));
             }
         }
-        removeRedundantBasePoints(BSGS);
+        removeRedundantBaseRemnant(BSGS);
     }
 
     /**

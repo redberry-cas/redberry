@@ -26,6 +26,7 @@ import cc.redberry.core.combinatorics.Combinatorics;
 import cc.redberry.core.context.CC;
 import cc.redberry.core.groups.permutations.gap.GapPrimitiveGroupsReader;
 import cc.redberry.core.utils.Indicator;
+import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -33,7 +34,6 @@ import java.math.BigInteger;
 import java.util.*;
 
 import static cc.redberry.core.TAssert.assertEquals;
-import static cc.redberry.core.TAssert.assertTrue;
 import static cc.redberry.core.groups.permutations.AlgorithmsBase.getBaseAsArray;
 import static cc.redberry.core.groups.permutations.AlgorithmsBase.getOrder;
 import static cc.redberry.core.groups.permutations.PermutationsTestUtils.RawSetwiseStabilizerCriteria;
@@ -121,7 +121,7 @@ public class AlgorithmsBacktrackTest {
         int[] base;
         System.out.println("Subgroup BSGS complete: " + AlgorithmsBase.isBSGS(subgroup));
         System.out.println("Subgroup base: " + Arrays.toString(AlgorithmsBase.getBaseAsArray(subgroup)));
-        AlgorithmsBase.removeRedundantBasePoints(subgroup);
+        AlgorithmsBase.removeRedundantBaseRemnant(subgroup);
         System.out.println("Subgroup real base: " + Arrays.toString(base = AlgorithmsBase.getBaseAsArray(subgroup)));
         System.out.println("Subgroup generators: " + subgroup.get(0).stabilizerGenerators);
 
@@ -157,6 +157,7 @@ public class AlgorithmsBacktrackTest {
     public void testSetwiseStabilizer1_raw() throws Exception {
         PermutationGroup[] pgs = GapPrimitiveGroupsReader.readGroupsFromGap("/home/stas/gap4r6/prim/grps/gps1.g");
 
+        DescriptiveStatistics statistics = new DescriptiveStatistics();
         int scanned = 0;
         for (int i = 0; i < pgs.length; ++i) {
             if (pgs[i].order().compareTo(BigInteger.valueOf(100000)) > 0)
@@ -164,8 +165,7 @@ public class AlgorithmsBacktrackTest {
 
             ++scanned;
 
-            List<BSGSElement> bsgs = pgs[i].getBSGS().getBSGSList();
-            int degree = bsgs.get(0).groupDegree();
+            int degree = pgs[i].degree();
 
             int setl;
             if (degree == 4)
@@ -186,78 +186,50 @@ public class AlgorithmsBacktrackTest {
             int[] set = Combinatorics.getRandomSortedDistinctArray(0, degree,
                     setl,
                     CC.getRandomGenerator());
-//            System.out.println("Stabilizing set " + Arrays.toString(set));
-
-            RawSetwiseStabilizerCriteria rw = new RawSetwiseStabilizerCriteria(set, getBaseAsArray(bsgs));
-
-            //empty initial subgroup
-            ArrayList<BSGSCandidateElement> subgroup = new ArrayList<>();
-            subgroup.add(new BSGSCandidateElement(0, new ArrayList<Permutation>(), new int[degree]));
-            subgroup.get(0).stabilizerGenerators.add(Permutations.getIdentityOneLine(degree));
-
-            AlgorithmsBacktrack.subgroupSearch(bsgs, subgroup, rw, rw);
-
-
-            int[] base;
-//            System.out.println("Subgroup BSGS complete: " + AlgorithmsBase.isBSGS(subgroup));
-//            System.out.println("Subgroup base: " + Arrays.toString(AlgorithmsBase.getBaseAsArray(subgroup)));
-            AlgorithmsBase.removeRedundantBasePoints(subgroup);
-//            System.out.println("Subgroup real base: " + Arrays.toString(base = AlgorithmsBase.getBaseAsArray(subgroup)));
-//            System.out.println("Subgroup generators: " + subgroup.get(0).stabilizerGenerators);
-
-            AlgorithmsBase.SchreierSimsAlgorithm(subgroup);
-//            System.out.println("Subgroup order: " + AlgorithmsBase.getOrder(subgroup) + " (order of group = " + getOrder(bsgs) + ")");
-//            System.out.println("\n\n");
-
-            //brute-force find stabilizer elements
-            ArrayList<Permutation> expected = new ArrayList<>(getOrder(subgroup).intValue());
-            Iterator<Permutation> allIterator = new BaseAndStrongGeneratingSet.PermIterator(bsgs);
-            Permutation c;
-            while (allIterator.hasNext()) {
-                c = allIterator.next();
-                if (rw.is(c))
-                    expected.add(c);
-            }
-
-            ArrayList<Permutation> actual = new ArrayList<>(getOrder(subgroup).intValue());
-            allIterator = new BaseAndStrongGeneratingSet.PermIterator(subgroup);
-            while (allIterator.hasNext()) {
-                c = allIterator.next();
-                actual.add(c);
-            }
-
-            Comparator<Permutation> comparator = new InducedOrderingOfPermutations(getBaseAsArray(bsgs), degree);
-            Collections.sort(expected, comparator);
-            Collections.sort(actual, comparator);
-            try {
-                assertEquals(expected, actual);
-            } catch (AssertionError e) {
-                System.out.println("\n\n\n/////////////////////////////");
-                System.out.println("Generators");
-                AlgorithmsBaseTest.soutGenerators(bsgs.get(0).stabilizerGenerators);
-                System.out.println("set: " + Arrays.toString(set));
-                System.out.println("/////////////////////////////\n\n\n");
-            }
+            PermutationGroup stabilizer = testSearchStabilizerRaw(pgs[i], set);
+            statistics.addValue(stabilizer.order().intValue());
         }
         System.out.println("Total number of primitive groups scanned: " + scanned);
-
+        System.out.println("Statistic of stabilizer orders: ");
+        System.out.println(statistics);
     }
 
     @Test
     public void testSetwiseStabilizer1a_raw() throws Exception {
-
         Permutation gen0 = new PermutationOneLine(4, 8, 7, 1, 6, 5, 0, 9, 3, 2);
         Permutation gen1 = new PermutationOneLine(7, 4, 1, 8, 5, 2, 9, 0, 6, 3);
         PermutationGroup pg = PermutationGroupFactory.createPermutationGroup(gen0, gen1);
-
-        System.out.println(Arrays.toString(pg.getBSGS().getBaseArray()));
 
         int[] set = {4, 9};
 
         testSearchStabilizerRaw(pg, set);
     }
 
-    public static void testSearchStabilizerRaw(PermutationGroup pg, int[] set) {
+    @Test
+    public void testSetwiseStabilizer1b_raw() throws Exception {
+        Permutation gen0 = new PermutationOneLine(1, 2, 0, 4, 5, 3, 7, 8, 6, 9);
+        Permutation gen1 = new PermutationOneLine(0, 1, 2, 6, 7, 8, 3, 4, 5, 9);
+        Permutation gen2 = new PermutationOneLine(0, 5, 7, 8, 1, 3, 4, 6, 2, 9);
+        Permutation gen3 = new PermutationOneLine(9, 1, 2, 6, 5, 4, 3, 8, 7, 0);
+
+        PermutationGroup pg = PermutationGroupFactory.createPermutationGroup(gen0, gen1, gen2, gen3);
+        int[] set = {0, 3};
+
+        testSearchStabilizerRaw(pg, set);
+    }
+
+    @Test
+    public void testSetwiseStabilizer1c_raw() throws Exception {
+        Permutation gen0 = new PermutationOneLine(4, 3, 9, 1, 0, 5, 10, 7, 8, 2, 6);
+        Permutation gen1 = new PermutationOneLine(0, 1, 10, 6, 2, 7, 8, 9, 3, 5, 4);
+
+        PermutationGroup pg = PermutationGroupFactory.createPermutationGroup(gen0, gen1);
+        int[] set = {3, 7};
+
+        testSearchStabilizerRaw(pg, set);
+    }
+
+    public static PermutationGroup testSearchStabilizerRaw(PermutationGroup pg, int[] set) {
         List<BSGSElement> bsgs = pg.getBSGS().getBSGSList();
         int degree = pg.degree();
         int[] base = getBaseAsArray(bsgs);
@@ -290,52 +262,11 @@ public class AlgorithmsBacktrackTest {
         Collections.sort(actual);
 
         assertEquals(expected, actual);
+
+        return new PermutationGroupImpl(new BaseAndStrongGeneratingSet(AlgorithmsBase.asBSGSList(subgroup)));
     }
 
-//    /////////////////////////////
-//    Generators
-//    Permutation gen0 = new PermutationOneLine(4, 8, 7, 1, 6, 5, 0, 9, 3, 2);
-//    Permutation gen1 = new PermutationOneLine(7, 4, 1, 8, 5, 2, 9, 0, 6, 3);
-//
-//    PermutationGroup pg = PermutationGroupFactory.createPermutationGroup(gen0,gen1);
-//    set: [4, 9]
-///////////////////////////////
-//
-//
-//
-//
-//
-//
-///////////////////////////////
-//    Generators
-//    Permutation gen0 = new PermutationOneLine(1, 2, 0, 4, 5, 3, 7, 8, 6, 9);
-//    Permutation gen1 = new PermutationOneLine(0, 1, 2, 6, 7, 8, 3, 4, 5, 9);
-//    Permutation gen2 = new PermutationOneLine(0, 5, 7, 8, 1, 3, 4, 6, 2, 9);
-//    Permutation gen3 = new PermutationOneLine(9, 1, 2, 6, 5, 4, 3, 8, 7, 0);
-//
-//    PermutationGroup pg = PermutationGroupFactory.createPermutationGroup(gen0,gen1,gen2,gen3);
-//    set: [0, 3]
-///////////////////////////////
-//
-//
-//
-//
-//
-//
-///////////////////////////////
-//    Generators
-//    Permutation gen0 = new PermutationOneLine(4, 3, 9, 1, 0, 5, 10, 7, 8, 2, 6);
-//    Permutation gen1 = new PermutationOneLine(0, 1, 10, 6, 2, 7, 8, 9, 3, 5, 4);
-//
-//    PermutationGroup pg = PermutationGroupFactory.createPermutationGroup(gen0,gen1);
-//    set: [3, 7]
-///////////////////////////////
-//
-//
-//
-//
-//
-//
+
 ///////////////////////////////
 //    Generators
 //    Permutation gen0 = new PermutationOneLine(6, 7, 8, 9, 10, 0, 11, 12, 13, 14, 1, 15, 16, 17, 2, 18, 19, 3, 20, 4, 5);

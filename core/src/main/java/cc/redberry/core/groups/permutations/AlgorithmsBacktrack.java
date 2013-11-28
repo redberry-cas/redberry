@@ -89,12 +89,12 @@ public final class AlgorithmsBacktrack {
         // i.e. at each level l and vertex V this BSGS is organized as follows: for each i ∈ 0...l i-th base point is
         // equal to new index of i-th base point in the initial base under word[l] obtained at vertex V
         // we'll use this information to test condition (i) in PROPOSITION 4.7
-        ArrayList<BSGSCandidateElement> subgroup_rebase = AlgorithmsBase.clone(subgroup);
+//        ArrayList<BSGSCandidateElement> subgroup_rebase = AlgorithmsBase.clone(subgroup);
         // sorted orbits of subgroup_rebase needed to choose the minimal elements (we can have several minimal elements)
         // in each orbit
-        final int[][] sortedSubgroupOrbits = new int[size][];
-        sortedSubgroupOrbits[level] = subgroup_rebase.get(level).orbitList.toArray();
-        ArraysUtils.quickSort(sortedSubgroupOrbits[level], ordering);
+//        final int[][] sortedSubgroupOrbits = new int[size][];
+//        sortedSubgroupOrbits[level] = subgroup_rebase.get(level).orbitList.toArray();
+//        ArraysUtils.quickSort(sortedSubgroupOrbits[level], ordering);
         //todo remove beta_f to avoid identities
 
 
@@ -127,29 +127,18 @@ public final class AlgorithmsBacktrack {
             // (note that if g is ≺-least element in KgK then it is guaranteed to be ≺-least element both in gK and Kg)
 
             //at each level we test our basic image to satisfy required conditions for a double coset minimality
-            for (image = word[level].newIndexOf(base[level]);
-                 level < size - 1
-                         //avoid getting identity
-//                         && image != base[level]
-                         // check PROPOSITION 4.7 (i)
-                         //≺-least element of subgroup orbits with respect to base g(B(l))
-//                         && isMinimalInOrbit(sortedSubgroupOrbits[level], image, ordering)
-                         // modified PROPOSITION 4.7 (ii)
-                         && ordering.compare(image, maxImages[level]) > 0
-                         // COROLLARY 4.8
-//                         && ordering.compare(image, maxRepresentative[level]) < 0
-                         //test
-                         && testFunction.test(word[level], level)
-                    ; ) {
+            image = word[level].newIndexOf(base[level]);
+            while (level < size - 1
+                    // modified PROPOSITION 4.7 (ii)
+                    && ordering.compare(image, maxImages[level]) > 0
+                    // COROLLARY 4.8
+                    && ordering.compare(image, maxRepresentative[level]) < 0
+                    //test
+                    && testFunction.test(word[level], level)) {
                 //<= entering next level
 
-                //rebase for next iteration
-//                replaceBasePointWithRedundancy(subgroup_rebase, level, image);
-
                 ++level;
-                //recalculate subgroup sorted orbit
-                sortedSubgroupOrbits[level] = subgroup_rebase.get(level).orbitList.toArray();
-                ArraysUtils.quickSort(sortedSubgroupOrbits[level], ordering);
+
                 //recalculate sorted orbit
                 if (word[level - 1].isIdentity())
                     sortedOrbits[level] = cachedSortedOrbits[level];
@@ -175,20 +164,16 @@ public final class AlgorithmsBacktrack {
                                 word[level - 1].newIndexOfUnderInverse(sortedOrbits[level][tuple[level]])
                         ).composition(word[level - 1]);
 
+                image = word[level].newIndexOf(base[level]);
             }
 
             //<= here we obtained next permutation in group
             //we need to test whether it belongs to subgroup
             if (level == size - 1
-                    // check PROPOSITION 4.7 (i)
-                    //avoid getting identity
-//                    && image != base[level]
-                    //≺-least elements of subgroup orbits with respect to base g(B(l))
-//                    && isMinimalInOrbit(sortedSubgroupOrbits[level], image, ordering)
                     // modified PROPOSITION 4.7 (ii)
                     && ordering.compare(image, maxImages[level]) > 0
                     // COROLLARY 4.8
-//                    && ordering.compare(image, maxRepresentative[level]) < 0
+                    && ordering.compare(image, maxRepresentative[level]) < 0
                     //test
                     && testFunction.test(word[level], level)
                     //property
@@ -200,14 +185,6 @@ public final class AlgorithmsBacktrack {
                 subgroup.get(0).recalculateOrbitAndSchreierVector();
                 //recalculate subgroup
                 AlgorithmsBase.SchreierSimsAlgorithm(subgroup);
-
-//                //rebase back to old base
-//                subgroup_rebase = AlgorithmsBase.clone(subgroup);
-//                //recalculate sorted subgroup orbits
-//                for (int i = bsgs.size() - 1; i >= 0; --i) {
-//                    sortedSubgroupOrbits[i] = subgroup_rebase.get(i).orbitList.toArray();
-//                    ArraysUtils.quickSort(sortedSubgroupOrbits[i], ordering);
-//                }
 
                 //reset
                 level = subgroupLevel;
@@ -223,14 +200,12 @@ public final class AlgorithmsBacktrack {
             if (level < subgroupLevel) {
                 subgroupLevel = level;
                 tuple[level] = 0;
-//                sortedSubgroupOrbits[subgroupLevel] = subgroup_rebase.get(subgroupLevel).orbitList.toArray();
-//                ArraysUtils.quickSort(sortedSubgroupOrbits[subgroupLevel], ordering);
-
                 //<= recalculate data needed to test (ii) from PROPOSITION 4.7
                 maxImages[level] = ordering.minElement();
                 maxRepresentative[level] = maxRepresentative(sortedOrbits[level], subgroup.get(level).orbitSize(), ordering);
             }
 
+            //<= next vertex at current level
             ++tuple[level];
             if (level == 0)
                 word[0] = bsgs.get(0).getTransversalOf(sortedOrbits[0][tuple[0]]);
@@ -243,15 +218,10 @@ public final class AlgorithmsBacktrack {
 
     }
 
-    private static void recalculateOrbitsAndStabilizers(ArrayList<BSGSCandidateElement> subgroup) {
-//                     subgroup.get(0).
-    }
-
     private static int maxRepresentative(final int[] sortedOrbit, final int subgroupOrbitSize,
                                          final InducedOrdering ordering) {
         if (subgroupOrbitSize <= 1)
             return ordering.maxElement();
-
         return sortedOrbit[sortedOrbit.length - subgroupOrbitSize + 1];
     }
 

@@ -219,7 +219,7 @@ public class AlgorithmsBaseTest {
 
         ArrayList<BSGSCandidateElement> bsgs = (ArrayList) createRawBSGSCandidate(a, b, c);
         SchreierSimsAlgorithm(bsgs);
-        removeRedundantBasePoints(bsgs);
+        removeRedundantBaseRemnant(bsgs);
         assertEquals(3, bsgs.size());
         assertTrue(isBSGS(bsgs));
     }
