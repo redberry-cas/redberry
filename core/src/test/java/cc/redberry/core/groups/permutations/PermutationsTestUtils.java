@@ -24,7 +24,11 @@ package cc.redberry.core.groups.permutations;
 
 import cc.redberry.core.utils.Indicator;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
+
+import static cc.redberry.core.groups.permutations.AlgorithmsBase.getBaseAsArray;
 
 /**
  * @author Dmitry Bolotin
@@ -61,5 +65,20 @@ public class PermutationsTestUtils {
             return true;
 
         }
+    }
+
+    public static PermutationGroup calculateRawSetwiseStabilizer(PermutationGroup pg, int[] set) {
+        List<BSGSElement> bsgs = pg.getBSGS().getBSGSList();
+        int degree = pg.degree();
+        int[] base = getBaseAsArray(bsgs);
+        RawSetwiseStabilizerCriteria rw = new RawSetwiseStabilizerCriteria(set, base);
+
+        //empty initial subgroup
+        ArrayList<BSGSCandidateElement> subgroup = new ArrayList<>();
+        subgroup.add(new BSGSCandidateElement(0, new ArrayList<Permutation>(), new int[degree]));
+        subgroup.get(0).stabilizerGenerators.add(Permutations.getIdentityOneLine(degree));
+
+        AlgorithmsBacktrack.subgroupSearch(bsgs, subgroup, rw, rw);
+        return new PermutationGroupImpl(new BaseAndStrongGeneratingSet(AlgorithmsBase.asBSGSList(subgroup)));
     }
 }

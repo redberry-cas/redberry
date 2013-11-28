@@ -24,7 +24,7 @@ package cc.redberry.core.groups.permutations;
 
 import cc.redberry.core.utils.ArraysUtils;
 import cc.redberry.core.utils.Indicator;
-import cc.redberry.core.utils.IntComparator;
+import cc.redberry.core.utils.IntArrayList;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,12 +39,17 @@ public final class AlgorithmsBacktrack {
     private AlgorithmsBacktrack() {
     }
 
+    public static long[] ____VISITED_NODES___ = {0};
+
     public static void subgroupSearch(List<? extends BSGSElement> bsgs,
                                       ArrayList<BSGSCandidateElement> subgroup,
                                       BacktrackSearchTestFunction testFunction,
                                       Indicator<Permutation> property) {
         if (bsgs.size() == 0 || bsgs.get(0).stabilizerGenerators.isEmpty())
             throw new IllegalArgumentException("Empty group.");
+
+        ____VISITED_NODES___[0] = 0;//just for performance debugging
+
 
         /* The algorithm SUBGROUPSEARCH described in Sec. 4.6.3 in [Holt05] */
 
@@ -89,12 +94,7 @@ public final class AlgorithmsBacktrack {
         // i.e. at each level l and vertex V this BSGS is organized as follows: for each i ∈ 0...l i-th base point is
         // equal to new index of i-th base point in the initial base under word[l] obtained at vertex V
         // we'll use this information to test condition (i) in PROPOSITION 4.7
-//        ArrayList<BSGSCandidateElement> subgroup_rebase = AlgorithmsBase.clone(subgroup);
-        // sorted orbits of subgroup_rebase needed to choose the minimal elements (we can have several minimal elements)
-        // in each orbit
-//        final int[][] sortedSubgroupOrbits = new int[size][];
-//        sortedSubgroupOrbits[level] = subgroup_rebase.get(level).orbitList.toArray();
-//        ArraysUtils.quickSort(sortedSubgroupOrbits[level], ordering);
+        ArrayList<BSGSCandidateElement> subgroup_rebase = AlgorithmsBase.clone(subgroup);
         //todo remove beta_f to avoid identities
 
 
@@ -128,7 +128,11 @@ public final class AlgorithmsBacktrack {
 
             //at each level we test our basic image to satisfy required conditions for a double coset minimality
             image = word[level].newIndexOf(base[level]);
+            replaceBasePointWithRedundancy(subgroup_rebase, level, image);
             while (level < size - 1
+                    // check PROPOSITION 4.7 (i)
+                    //≺-least element of subgroup orbits with respect to base g(B(l))
+                    && isMinimalInOrbit(subgroup_rebase.get(level).orbitList, image, ordering)
                     // modified PROPOSITION 4.7 (ii)
                     && ordering.compare(image, maxImages[level]) > 0
                     // COROLLARY 4.8
@@ -136,7 +140,6 @@ public final class AlgorithmsBacktrack {
                     //test
                     && testFunction.test(word[level], level)) {
                 //<= entering next level
-
                 ++level;
 
                 //recalculate sorted orbit
@@ -164,12 +167,18 @@ public final class AlgorithmsBacktrack {
                                 word[level - 1].newIndexOfUnderInverse(sortedOrbits[level][tuple[level]])
                         ).composition(word[level - 1]);
 
+
                 image = word[level].newIndexOf(base[level]);
+                replaceBasePointWithRedundancy(subgroup_rebase, level, image);
             }
 
+            ++____VISITED_NODES___[0];
             //<= here we obtained next permutation in group
             //we need to test whether it belongs to subgroup
             if (level == size - 1
+                    // check PROPOSITION 4.7 (i)
+                    //≺-least element of subgroup orbits with respect to base g(B(l))
+                    && isMinimalInOrbit(subgroup_rebase.get(level).orbitList, image, ordering)
                     // modified PROPOSITION 4.7 (ii)
                     && ordering.compare(image, maxImages[level]) > 0
                     // COROLLARY 4.8
@@ -185,6 +194,9 @@ public final class AlgorithmsBacktrack {
                 subgroup.get(0).recalculateOrbitAndSchreierVector();
                 //recalculate subgroup
                 AlgorithmsBase.SchreierSimsAlgorithm(subgroup);
+
+                //dump subgroup_rebase
+                subgroup_rebase = AlgorithmsBase.clone(subgroup);
 
                 //reset
                 level = subgroupLevel;
@@ -233,6 +245,18 @@ public final class AlgorithmsBacktrack {
                 group.add(new BSGSCandidateElement(base[i], new ArrayList<Permutation>(), new int[degree]));
     }
 
+    private static boolean isMinimalInOrbit(IntArrayList orbit, int point, InducedOrdering ordering) {
+        boolean isin = false;
+        int compare;
+        for (int i = orbit.size() - 1; i >= 0; --i) {
+            if ((compare = ordering.compare(orbit.get(i), point)) < 0)
+                return false;
+            if (compare == 0)
+                isin = true;
+        }
+        return isin;
+    }
+
     private static void replaceBasePointWithRedundancy(final ArrayList<BSGSCandidateElement> group,
                                                        final int index, final int newPoint) {
         if (group.get(index).basePoint == newPoint)
@@ -241,23 +265,13 @@ public final class AlgorithmsBacktrack {
         AlgorithmsBase.changeBasePointWithTranspositions(group, index, newPoint);
         //keep bsgs with a fixed size
         assert group.size() >= oldSize;
-        if (group.size() != oldSize) {
-            assert group.get(oldSize).stabilizerGenerators.isEmpty();
-            group.remove(oldSize);
+
+        //remove redundant points for performance
+        while (group.size() > oldSize) {
+            if (group.get(group.size() - 1).stabilizerGenerators.isEmpty())
+                group.remove(group.size() - 1);
+            else break;
         }
     }
-
-    private static boolean isMinimalInOrbit(final int[] sortedOrbit, final int point, final IntComparator ordering) {
-        int compare;
-        for (int i = 0; i < sortedOrbit.length; ++i) {
-            compare = ordering.compare(sortedOrbit[i], point);
-            if (compare < 0)
-                return false;
-            if (compare == 0)
-                return true;
-        }
-        throw new RuntimeException("This should never happen.");
-    }
-
 
 }
