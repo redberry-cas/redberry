@@ -23,6 +23,8 @@
 package cc.redberry.core.combinatorics;
 
 import cc.redberry.core.utils.ArraysUtils;
+import cc.redberry.core.utils.MathUtils;
+import org.apache.commons.math3.random.RandomGenerator;
 
 import java.lang.reflect.Array;
 import java.util.Arrays;
@@ -309,6 +311,38 @@ public final class Combinatorics {
         for (int i = n; i > 1; --i)
             ArraysUtils.swap(p, i - 1, rnd.nextInt(i));
         return p;
+    }
+
+    public static int[] getRandomSortedDistinctArray(final int minValue, final int maxvalue, int length, RandomGenerator generator) {
+        if (maxvalue - minValue < length)
+            throw new IllegalArgumentException("This is not possible.");
+        if (length == 0)
+            return new int[0];
+        if (length == 1)
+            return new int[]{minValue + generator.nextInt(maxvalue - minValue)};
+        if (length == 2) {
+            int a = minValue + generator.nextInt(maxvalue - minValue);
+            int b;
+            while ((b = minValue + generator.nextInt(maxvalue - minValue)) == a) ;
+            return new int[]{a, b};
+        }
+
+        int[] res = new int[length + (int) (0.7 * ((double) length))];
+        for (int i = 0; i < res.length; ++i)
+            res[i] = minValue + generator.nextInt(maxvalue - minValue);
+        res = MathUtils.getSortedDistinct(res);
+        if (res.length == length)
+            return res;
+        if (res.length > length)
+            return Arrays.copyOf(res, length);
+
+        while (res.length != length) {
+            int next;
+            while ((Arrays.binarySearch(res, next = minValue + generator.nextInt(maxvalue - minValue))) >= 0) ;
+            res = ArraysUtils.addAll(res, next);
+        }
+
+        return res;
     }
 
     /**

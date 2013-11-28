@@ -100,17 +100,19 @@ public final class BaseAndStrongGeneratingSet implements Iterable<Permutation> {
 
     @Override
     public Iterator<Permutation> iterator() {
-        return new PermIterator();
+        return new PermIterator(BSGSList);
     }
 
     /**
      * An iterator over all permutations in group
      */
-    private class PermIterator implements Iterator<Permutation> {
+    public static class PermIterator implements Iterator<Permutation> {
         private final IntTuplesPort tuplesPort;
+        private final List<? extends BSGSElement> BSGSList;
         int[] tuple;
 
-        private PermIterator() {
+        public PermIterator(final List<? extends BSGSElement> BSGSList) {
+            this.BSGSList = BSGSList;
             final int[] orbitSizes = new int[BSGSList.size()];
             for (int i = 0; i < orbitSizes.length; ++i)
                 orbitSizes[i] = BSGSList.get(i).orbitSize();

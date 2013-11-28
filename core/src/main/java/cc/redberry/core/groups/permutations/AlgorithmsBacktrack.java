@@ -137,7 +137,7 @@ public final class AlgorithmsBacktrack {
                          // modified PROPOSITION 4.7 (ii)
                          && ordering.compare(image, maxImages[level]) > 0
                          // COROLLARY 4.8
-                         && ordering.compare(image, maxRepresentative[level]) < 0
+//                         && ordering.compare(image, maxRepresentative[level]) < 0
                          //test
                          && testFunction.test(word[level], level)
                     ; ) {
@@ -188,7 +188,7 @@ public final class AlgorithmsBacktrack {
                     // modified PROPOSITION 4.7 (ii)
                     && ordering.compare(image, maxImages[level]) > 0
                     // COROLLARY 4.8
-                    && ordering.compare(image, maxRepresentative[level]) < 0
+//                    && ordering.compare(image, maxRepresentative[level]) < 0
                     //test
                     && testFunction.test(word[level], level)
                     //property
