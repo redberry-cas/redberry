@@ -191,7 +191,7 @@ public class AlgorithmsBacktrackTest {
         }
         System.out.println("Total number of primitive groups scanned: " + scanned);
         System.out.println("Statistic of stabilizer orders: ");
-        System.out.println(statistics);
+         System.out.println(statistics);
     }
 
     @Test
