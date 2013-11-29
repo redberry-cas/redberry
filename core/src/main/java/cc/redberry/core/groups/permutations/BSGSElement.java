@@ -160,7 +160,7 @@ public class BSGSElement {
      *
      * @return degree of permutations
      */
-    public int groupDegree() {
+    public int degree() {
         return stabilizerGenerators.get(0).degree();
     }
 

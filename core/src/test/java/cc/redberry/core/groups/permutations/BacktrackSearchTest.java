@@ -80,7 +80,7 @@ public class BacktrackSearchTest {
         List<BSGSElement> bsgs = AlgorithmsBase.createBSGS(generators).getBSGSList();
 
 
-        PermutationLessThenTestComparator comparator = new PermutationLessThenTestComparator(getBaseAsArray(bsgs), bsgs.get(0).groupDegree());
+        PermutationLessThenTestComparator comparator = new PermutationLessThenTestComparator(getBaseAsArray(bsgs), bsgs.get(0).degree());
         BacktrackSearch search = new BacktrackSearch(bsgs);
 
         Permutation previous = null, current;
@@ -161,7 +161,7 @@ public class BacktrackSearchTest {
 
 
             BacktrackSearch search = new BacktrackSearch(bsgs);
-            PermutationLessThenTestComparator comparator = new PermutationLessThenTestComparator(getBaseAsArray(bsgs), bsgs.get(0).groupDegree());
+            PermutationLessThenTestComparator comparator = new PermutationLessThenTestComparator(getBaseAsArray(bsgs), bsgs.get(0).degree());
 
             Permutation previous = null, current;
             int count = 0;
@@ -271,7 +271,7 @@ public class BacktrackSearchTest {
      * @param function some function that will be executes on each element
      */
     public static void printElements(List<BSGSElement> bsgs, final PFunction function) {
-        IntComparator comparator = new InducedOrdering(getBaseAsArray(bsgs), bsgs.get(0).groupDegree());
+        IntComparator comparator = new InducedOrdering(getBaseAsArray(bsgs), bsgs.get(0).degree());
 
         int k = bsgs.size();
         int[] c = new int[k];

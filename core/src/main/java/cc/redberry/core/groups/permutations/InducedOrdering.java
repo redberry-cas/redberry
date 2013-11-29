@@ -23,7 +23,6 @@
 package cc.redberry.core.groups.permutations;
 
 
-import cc.redberry.core.utils.ArraysUtils;
 import cc.redberry.core.utils.IntComparator;
 
 import java.util.Arrays;

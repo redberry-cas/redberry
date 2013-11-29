@@ -199,6 +199,7 @@ public class AlgorithmsBacktrackTest {
     @Test
     public void testSetwiseStabilizer2_raw_visited_nodes_stat() throws Exception {
         PermutationGroup[] pgs = GapPrimitiveGroupsReader.readGroupsFromGap("/home/stas/gap4r6/prim/grps/gps1.g");
+        System.out.println("Read groups from GAP.");
 
         DescriptiveStatistics orders = new DescriptiveStatistics();
         DescriptiveStatistics visited = new DescriptiveStatistics();
@@ -228,10 +229,6 @@ public class AlgorithmsBacktrackTest {
             int[] set = Combinatorics.getRandomSortedDistinctArray(0, degree,
                     setl,
                     CC.getRandomGenerator());
-//            set = pgs[i].getBSGS().getBaseArray();
-            set = new int[degree];
-            for (int g = 1; g < degree; ++g)
-                set[g] = g;
 
             PermutationGroup stabilizer = testSearchStabilizerRaw(pgs[i], set);
             System.out.println("Group order: " + pgs[i].order() + "  Visited: " + AlgorithmsBacktrack.____VISITED_NODES___[0] + "  Stabilizer order: " + stabilizer.order());
@@ -342,31 +339,5 @@ public class AlgorithmsBacktrackTest {
         assertEquals(expected, actual);
         return new PermutationGroupImpl(new BaseAndStrongGeneratingSet(AlgorithmsBase.asBSGSList(subgroup)));
     }
-
-
-///////////////////////////////
-//    Generators
-//    Permutation gen0 = new PermutationOneLine(6, 7, 8, 9, 10, 0, 11, 12, 13, 14, 1, 15, 16, 17, 2, 18, 19, 3, 20, 4, 5);
-//    Permutation gen1 = new PermutationOneLine(0, 2, 1, 4, 5, 3, 7, 6, 9, 10, 8, 11, 16, 17, 15, 13, 14, 12, 20, 18, 19);
-//
-//    PermutationGroup pg = PermutationGroupFactory.createPermutationGroup(gen0,gen1);
-//    set: [0, 1, 2, 3, 4, 8]
-///////////////////////////////
-//
-//
-//
-//
-//
-//
-///////////////////////////////
-//    Generators
-//    Permutation gen0 = new PermutationOneLine(0, 3, 4, 5, 6, 7, 8, 9, 10, 1, 2, 11, 19, 20, 12, 21, 13, 14, 22, 23, 15, 16, 24, 17, 25, 26, 18);
-//    Permutation gen1 = new PermutationOneLine(11, 1, 18, 3, 22, 26, 9, 25, 7, 5, 24, 12, 13, 14, 0, 2, 15, 16, 17, 4, 19, 20, 21, 6, 8, 10, 23);
-//    Permutation gen2 = new PermutationOneLine(0, 1, 2, 3, 4, 5, 6, 9, 10, 7, 8, 11, 12, 14, 13, 16, 15, 17, 18, 20, 19, 21, 22, 23, 24, 26, 25);
-//
-//    PermutationGroup pg = PermutationGroupFactory.createPermutationGroup(gen0,gen1,gen2);
-//    set: [5, 7, 10, 11, 14, 16, 17, 19]
-///////////////////////////////
-
 
 }

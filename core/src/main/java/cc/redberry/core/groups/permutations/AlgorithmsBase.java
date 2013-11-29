@@ -628,7 +628,7 @@ public class AlgorithmsBase {
     }
 
     /**
-     * Removes redundant base points in from specified BSGS (straightforwardly, i.e. without any additional base changes).
+     * Removes redundant base points in specified BSGS (straightforwardly, i.e. without any additional base changes).
      *
      * @param BSGS BSGS
      */
@@ -737,14 +737,14 @@ public class AlgorithmsBase {
             newStabilizers = new ArrayList<>(BSGS.get(i + 2).stabilizerGenerators);
 
         //allowed points
-        BitArray allowedPoints = new BitArray(BSGS.get(0).groupDegree());
+        BitArray allowedPoints = new BitArray(BSGS.get(0).degree());
         allowedPoints.setAll(BSGS.get(i).orbitList, true);
         allowedPoints.set(ithBeta, false);
         allowedPoints.set(jthBeta, false);
 
         //we shall store the orbit of ithBeta under new stabilizers in BSGSCandidateElement
         BSGSCandidateElement newOrbitStabilizer =
-                new BSGSCandidateElement(ithBeta, newStabilizers, new int[BSGS.get(0).groupDegree()]);
+                new BSGSCandidateElement(ithBeta, newStabilizers, new int[BSGS.get(0).degree()]);
 
         //main loop
         main:
@@ -792,7 +792,7 @@ public class AlgorithmsBase {
 
 
     /**
-     * Changes the base of specified BSGS to specified new base using a simple algorithm with transpositions; the
+     * Changes base of specified BSGS to specified new base using a simple algorithm with transpositions; the
      * algorithm guaranties that if initial base is [b1, b2, b3, ..., bk] and specified base is [a1, a2, a3, ..., al],
      * then the resulting base will look like  [a1, a2, a3, ...., al, b4, b7, ..., b19] with no any redundant base
      * points at the end (redundant point is point which corresponding stabilizer generators are empty) - this
@@ -811,7 +811,7 @@ public class AlgorithmsBase {
     }
 
     /**
-     * Changes the base of specified BSGS to specified new base using an algorithm with conjugations and transpositions;
+     * Changes base of specified BSGS to specified new base using an algorithm with conjugations and transpositions;
      * the algorithm guaranties that if initial base is [b1, b2, b3, ..., bk] and specified base is [a1, a2, a3, ..., al],
      * then the resulting base will look like  [a1, a2, a3, ...., al, b4, b7, ..., b19] with no any redundant base
      * points at the end (redundant point is point which corresponding stabilizer generators are empty) - this
@@ -821,10 +821,11 @@ public class AlgorithmsBase {
      * @param newBase new base
      */
     public static void rebaseWithConjugationAndTranspositions(ArrayList<BSGSCandidateElement> BSGS, int[] newBase) {
-        final int degree = BSGS.get(0).groupDegree();
+        final int degree = BSGS.get(0).degree();
         //conjugating permutation
         Permutation conjugation = BSGS.get(0).stabilizerGenerators.get(0).getIdentity();
 
+        int positionOfFirstChanged = -1;
         //first, lets proceed by swapping
         for (int i = 0; i < newBase.length && i < BSGS.size(); ++i) {
             //new base point image under conjugation
@@ -832,6 +833,10 @@ public class AlgorithmsBase {
             //early check
             if (BSGS.get(i).basePoint == newBasePoint)
                 continue;
+
+            if (positionOfFirstChanged == -1)
+                positionOfFirstChanged = i;
+
             //check, whether new base point belongs to current orbit, i.e. there is some permutation in G
             //that maps current point onto new point
             if (BSGS.get(i).belongsToOrbit(newBasePoint)) {
@@ -843,20 +848,24 @@ public class AlgorithmsBase {
 
             //<- else, if new base point does not belong to current orbit we'll proceed as usual
             changeBasePointWithTranspositions(BSGS, i, newBasePoint);
-
         }
+
+        //removing redundant now for performance
+        removeRedundantBaseRemnant(BSGS);
+        if (BSGS.size() <= positionOfFirstChanged)
+            return;
+
         //conjugating base and strong generating set
         if (!conjugation.isIdentity()) {
-            //TODO: here we need to conjugate only from index of first changed point!!!!
             //inverse conjugation
-            Permutation iconjugation = conjugation.inverse();
-            ListIterator<BSGSCandidateElement> elementsIterator = BSGS.listIterator();
+            Permutation inverse = conjugation.inverse();
+            ListIterator<BSGSCandidateElement> elementsIterator = BSGS.listIterator(positionOfFirstChanged);
             while (elementsIterator.hasNext()) {
                 BSGSCandidateElement element = elementsIterator.next();
                 //conjugating stabilizers
                 ArrayList<Permutation> newStabilizers = new ArrayList<>(element.stabilizerGenerators.size());
                 for (Permutation oldStabilizer : element.stabilizerGenerators)
-                    newStabilizers.add(iconjugation.composition((oldStabilizer.composition(conjugation))));
+                    newStabilizers.add(inverse.composition((oldStabilizer.composition(conjugation))));
 
                 //conjugating base point
                 int newBasePoint = conjugation.newIndexOf(element.basePoint);
@@ -877,7 +886,7 @@ public class AlgorithmsBase {
     static void changeBasePointWithTranspositions(
             ArrayList<BSGSCandidateElement> BSGS, int oldBasePointPosition, int newBasePoint) {
         assert BSGS.get(oldBasePointPosition).basePoint != newBasePoint;
-        final int degree = BSGS.get(0).groupDegree();
+        final int degree = BSGS.get(0).degree();
         int insertionPosition = oldBasePointPosition + 1;
         insertion_points:
         for (; insertionPosition < BSGS.size(); ++insertionPosition) {
@@ -909,7 +918,7 @@ public class AlgorithmsBase {
     }
 
     /**
-     * Changes the base of specified BSGS to specified new base by construction of a new BSGS with known base using
+     * Changes base of specified BSGS to specified new base by construction of a new BSGS with known base using
      * randomized Schreier-Sims algorithm {@link #RandomSchreierSimsAlgorithmForKnownOrder(java.util.ArrayList, java.math.BigInteger, org.apache.commons.math3.random.RandomGenerator)};
      * the algorithm guaranties that if initial base is [b1, b2, b3, ..., bk] and specified base is [a1, a2, a3, ..., al],
      * then the resulting base will look like  [a1, a2, a3, ...., al, x, y, ..., z] with no any redundant base
@@ -936,8 +945,18 @@ public class AlgorithmsBase {
                 BSGS.remove(j);
     }
 
+    /**
+     * Changes base of specified BSGS to the specified base. The algorithm heuristically choose the algorithm of base
+     * change.
+     *
+     * @param BSGS    BSGS
+     * @param newBase new base
+     * @see #rebaseWithTranspositions(java.util.ArrayList, int[])
+     * @see #rebaseWithConjugationAndTranspositions(java.util.ArrayList, int[])
+     * @see #rebaseFromScratch(java.util.ArrayList, int[])
+     */
     public static void rebase(ArrayList<BSGSCandidateElement> BSGS, int[] newBase) {
-        //todo write code!!!
+        //todo implement some heuristic code!!!
         rebaseWithConjugationAndTranspositions(BSGS, newBase);
     }
 

@@ -605,7 +605,8 @@ public class AlgorithmsBaseTest {
                         public Object doJob() {
                             for (int i = 0; i < 50; ++i) {
                                 int[] oldBase = getBaseAsArray(bsgs);
-                                int[] newBase = new PermutationOneLine(Permutations.randomPermutation(oldBase.length)).permute(oldBase);
+                                int[] newBase = new PermutationOneLine(
+                                        Permutations.randomPermutation(oldBase.length)).permute(oldBase);
                                 rebaseWithConjugationAndTranspositions(bsgs, newBase);
                                 assertTrue(isBSGS(bsgs));
                                 final int[] _newBase = getBaseAsArray(bsgs);
