@@ -304,6 +304,29 @@ public class AlgorithmsBacktrackTest {
         testSearchStabilizerRaw(pg, set);
     }
 
+
+    @Test
+    public void testCosetRepresentatives1() {
+        Permutation gen0 = new PermutationOneLine(4, 3, 9, 1, 0, 5, 10, 7, 8, 2, 6);
+        Permutation gen1 = new PermutationOneLine(0, 1, 10, 6, 2, 7, 8, 9, 3, 5, 4);
+
+        PermutationGroup pg = PermutationGroupFactory.createPermutationGroup(gen0, gen1);
+        int[] set = {3, 7};
+
+        PermutationGroup stabilizer = testSearchStabilizerRaw(pg, set);
+        System.out.println(pg.order());
+        System.out.println(stabilizer.order());
+
+        Permutation[] coset = AlgorithmsBacktrack.cosetRepresentatives(
+                pg.getBSGS().getBSGSCandidateList(), stabilizer.getBSGS().getBSGSCandidateList());
+
+        System.out.println(Arrays.toString(coset));
+        int index = notNullSize(coset);
+        System.out.println(index);
+        for (int i = 0; i < index; ++i)
+            System.out.println(stabilizer.isMember(coset[i]));
+    }
+
     public static PermutationGroup testSearchStabilizerRaw(PermutationGroup pg, int[] set) {
         List<BSGSElement> bsgs = pg.getBSGS().getBSGSList();
         int degree = pg.degree();
@@ -340,4 +363,12 @@ public class AlgorithmsBacktrackTest {
         return new PermutationGroupImpl(new BaseAndStrongGeneratingSet(AlgorithmsBase.asBSGSList(subgroup)));
     }
 
+
+    private static int notNullSize(Object[] array) {
+        int s = 0;
+        for (Object o : array)
+            if (o != null)
+                ++s;
+        return s;
+    }
 }

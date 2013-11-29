@@ -48,17 +48,17 @@ public final class AlgorithmsBacktrack {
      * then it will be extended to the subgroup which we search for. Implementation issues can be found in Sec. 4.6.3
      * in [Holt05].
      *
-     * @param bsgs         base and strong generating set of group
+     * @param group        base and strong generating set of group
      * @param subgroup     initial base and strong generating set of subgroup for which we perform search
      * @param testFunction test function that applies at each level of search tree
      * @param property     property of subgroup elements
      * @see BacktrackSearch
      */
-    public static void subgroupSearch(final List<? extends BSGSElement> bsgs,
+    public static void subgroupSearch(final List<? extends BSGSElement> group,
                                       final ArrayList<BSGSCandidateElement> subgroup,
                                       final BacktrackSearchTestFunction testFunction,
                                       final Indicator<Permutation> property) {
-        if (bsgs.size() == 0 || bsgs.get(0).stabilizerGenerators.isEmpty())
+        if (group.size() == 0 || group.get(0).stabilizerGenerators.isEmpty())
             throw new IllegalArgumentException("Empty group.");
 
         ____VISITED_NODES___[0] = 0;//just for performance debugging
@@ -68,9 +68,9 @@ public final class AlgorithmsBacktrack {
 
         //<= initialization
 
-        final int degree = bsgs.get(0).degree();
-        final int[] base = AlgorithmsBase.getBaseAsArray(bsgs);
-        final int size = bsgs.size();
+        final int degree = group.get(0).degree();
+        final int[] base = AlgorithmsBase.getBaseAsArray(group);
+        final int size = group.size();
 
         if (subgroup.isEmpty())//if subgroup was empty
             subgroup.add(new BSGSCandidateElement(base[0], new ArrayList<Permutation>(), new int[degree]));
@@ -82,7 +82,7 @@ public final class AlgorithmsBacktrack {
         int level = size - 1;
         //current tree branch
         final Permutation[] word = new Permutation[size];
-        final Permutation identity = bsgs.get(0).stabilizerGenerators.get(0).getIdentity();
+        final Permutation identity = group.get(0).stabilizerGenerators.get(0).getIdentity();
 
         //cached sorted orbits of base points
         final int[][] cachedSortedOrbits = new int[size][];
@@ -92,7 +92,7 @@ public final class AlgorithmsBacktrack {
         final int[][] sortedOrbits = new int[size][];
         //initializing sorted orbits and word
         for (int i = 0; i < size; ++i) {
-            cachedSortedOrbits[i] = bsgs.get(i).orbitList.toArray();
+            cachedSortedOrbits[i] = group.get(i).orbitList.toArray();
             ArraysUtils.quickSort(cachedSortedOrbits[i], ordering);
             sortedOrbits[i] = cachedSortedOrbits[i];
             word[i] = identity;   //initializing with identity
@@ -169,7 +169,7 @@ public final class AlgorithmsBacktrack {
                 if (word[level - 1].isIdentity())
                     sortedOrbits[level] = cachedSortedOrbits[level];
                 else {
-                    sortedOrbits[level] = word[level - 1].imageOf(bsgs.get(level).orbitList.toArray());
+                    sortedOrbits[level] = word[level - 1].imageOf(group.get(level).orbitList.toArray());
                     ArraysUtils.quickSort(sortedOrbits[level], ordering);
                 }
 
@@ -186,7 +186,7 @@ public final class AlgorithmsBacktrack {
                 //reset tuple and calculate next permutation
                 tuple[level] = 0;
                 word[level] =
-                        bsgs.get(level).getTransversalOf(
+                        group.get(level).getTransversalOf(
                                 word[level - 1].newIndexOfUnderInverse(sortedOrbits[level][tuple[level]])
                         ).composition(word[level - 1]);
 
@@ -232,7 +232,7 @@ public final class AlgorithmsBacktrack {
             }
 
             //<= now we need to go down the tree
-            while (level >= 0 && tuple[level] == bsgs.get(level).orbitList.size() - 1)
+            while (level >= 0 && tuple[level] == group.get(level).orbitList.size() - 1)
                 --level;
 
             if (level == -1)
@@ -250,14 +250,148 @@ public final class AlgorithmsBacktrack {
             //<= next vertex at current level
             ++tuple[level];
             if (level == 0)
-                word[0] = bsgs.get(0).getTransversalOf(sortedOrbits[0][tuple[0]]);
+                word[0] = group.get(0).getTransversalOf(sortedOrbits[0][tuple[0]]);
             else
                 word[level] =
-                        bsgs.get(level).getTransversalOf(
+                        group.get(level).getTransversalOf(
                                 word[level - 1].newIndexOfUnderInverse(sortedOrbits[level][tuple[level]])
                         ).composition(word[level - 1]);
         }
 
+    }
+
+    public static Permutation[] cosetRepresentatives(ArrayList<? extends BSGSElement> group,
+                                                     ArrayList<? extends BSGSElement> subgroup) {
+
+        if (group.size() == 0 || group.get(0).stabilizerGenerators.isEmpty())
+            throw new IllegalArgumentException("Empty group.");
+
+        ____VISITED_NODES___[0] = 0;//just for performance debugging
+
+        ArrayList<BSGSCandidateElement> _subgroup = AlgorithmsBase.asBSGSCandidatesList(subgroup);
+        final Permutation[] coset = new Permutation[ 1+
+                AlgorithmsBase.getOrder(group).divide(AlgorithmsBase.getOrder(subgroup)).intValue()];
+        int cosetCounter = 0;
+
+        //<= initialization
+
+        final int degree = group.get(0).degree();
+        final int[] base = AlgorithmsBase.getBaseAsArray(group);
+        final int size = group.size();
+
+        //induced ordering of base points
+        final InducedOrdering ordering = new InducedOrdering(base, degree);
+
+        //we'll start from the end
+        int level = size - 1;
+        //current tree branch
+        final Permutation[] word = new Permutation[size];
+        final Permutation identity = group.get(0).stabilizerGenerators.get(0).getIdentity();
+
+        //cached sorted orbits of base points
+        final int[][] cachedSortedOrbits = new int[size][];
+        //Sorted orbits images under word[l-1] (as used in general search):
+        // at each level l, sortedOrbit[l] is a sorted orbit of g(β_l) under the stabilizer
+        // G_[g(β_1), g(β_2), ..., g(β_l-1)].
+        final int[][] sortedOrbits = new int[size][];
+        //initializing sorted orbits and word
+        for (int i = 0; i < size; ++i) {
+            cachedSortedOrbits[i] = group.get(i).orbitList.toArray();
+            ArraysUtils.quickSort(cachedSortedOrbits[i], ordering);
+            sortedOrbits[i] = cachedSortedOrbits[i];
+            word[i] = identity;   //initializing with identity
+        }
+
+        //tuple[l] - current transversal of l-th base point, i.e. position of vertex at level l in search tree
+        final int[] tuple = new int[size];//initialized with zeros!
+        //rebase to base of basic group
+        rebaseWithRedundancy(_subgroup, base, degree);
+
+        //subgroupLevel is a level in a search tree at each we are looking for subgroup representatives.
+        int subgroupLevel = level;
+
+        //<= data structure to test condition (i) in PROPOSITION 4.7
+        ArrayList<BSGSCandidateElement> subgroup_rebase = AlgorithmsBase.clone(_subgroup);
+        //todo remove beta_f to avoid identities (and how?)
+
+        //<= initialized
+
+        int image;
+        while (true) {
+            //at each level we test our basic image to satisfy required conditions for a coset minimality
+            image = word[level].newIndexOf(base[level]);
+            replaceBasePointWithRedundancy(subgroup_rebase, level, image);
+            while (level < size - 1
+                    // check PROPOSITION 4.7 (i)
+                    //≺-least element of subgroup orbits with respect to base g(B(l))
+                    && isMinimalInOrbit(subgroup_rebase.get(level).orbitList, image, ordering)) {
+                //<= entering next level
+                ++level;
+
+                //recalculate sorted orbit
+                if (word[level - 1].isIdentity())
+                    sortedOrbits[level] = cachedSortedOrbits[level];
+                else {
+                    sortedOrbits[level] = word[level - 1].imageOf(group.get(level).orbitList.toArray());
+                    ArraysUtils.quickSort(sortedOrbits[level], ordering);
+                }
+
+                //reset tuple and calculate next permutation
+                tuple[level] = 0;
+                word[level] =
+                        group.get(level).getTransversalOf(
+                                word[level - 1].newIndexOfUnderInverse(sortedOrbits[level][tuple[level]])
+                        ).composition(word[level - 1]);
+
+
+                image = word[level].newIndexOf(base[level]);
+                //calculating the orbit of g(β_l) under stabilizer of [g(β_1), g(β_1),...g(β_l-1)] which will be used in
+                //the next iteration cycle (the line with "isMinimalInOrbit(subgroup_rebase.get(level).orbitList, image, ordering)")
+                replaceBasePointWithRedundancy(subgroup_rebase, level, image);
+            }
+
+            ++____VISITED_NODES___[0];
+            //<= here we obtained next permutation in group
+            //we need to test whether it is minimal in a coset
+            if (level == size - 1
+                    // check PROPOSITION 4.7 (i)
+                    //≺-least element of subgroup orbits with respect to base g(B(l))
+                    && isMinimalInOrbit(subgroup_rebase.get(level).orbitList, image, ordering)) {
+
+                //<= here we obtained next coset representative
+
+                //dump subgroup_rebase
+                subgroup_rebase = AlgorithmsBase.clone(_subgroup);
+
+                //<= we've new coset representative
+                coset[cosetCounter++] = word[level];
+
+//                level = subgroupLevel;
+            }
+
+            //<= now we need to go down the tree
+            while (level >= 0 && tuple[level] == group.get(level).orbitList.size() - 1)
+                --level;
+
+            if (level == -1)
+                return coset; //all elements scanned
+
+//            if (level < subgroupLevel) {
+//                //setup new subgroupLevel
+//                subgroupLevel = level;
+//                tuple[level] = 0;
+//            }
+
+            //<= next vertex at current level
+            ++tuple[level];
+            if (level == 0)
+                word[0] = group.get(0).getTransversalOf(sortedOrbits[0][tuple[0]]);
+            else
+                word[level] =
+                        group.get(level).getTransversalOf(
+                                word[level - 1].newIndexOfUnderInverse(sortedOrbits[level][tuple[level]])
+                        ).composition(word[level - 1]);
+        }
     }
 
     /**
@@ -371,5 +505,4 @@ public final class AlgorithmsBacktrack {
             else break;
         }
     }
-
 }
