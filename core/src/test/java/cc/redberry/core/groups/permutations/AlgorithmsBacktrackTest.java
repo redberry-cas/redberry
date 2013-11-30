@@ -27,6 +27,7 @@ import cc.redberry.core.context.CC;
 import cc.redberry.core.groups.permutations.gap.GapPrimitiveGroupsReader;
 import cc.redberry.core.number.NumberUtils;
 import cc.redberry.core.utils.Indicator;
+import cc.redberry.core.utils.Timing;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.junit.Assert;
 import org.junit.Test;
@@ -36,6 +37,7 @@ import java.util.*;
 
 import static cc.redberry.core.TAssert.assertEquals;
 import static cc.redberry.core.TAssert.assertTrue;
+import static cc.redberry.core.TAssert.soutMappingsOP;
 import static cc.redberry.core.groups.permutations.AlgorithmsBase.getBaseAsArray;
 import static cc.redberry.core.groups.permutations.AlgorithmsBase.getOrder;
 import static cc.redberry.core.groups.permutations.PermutationsTestUtils.*;
@@ -370,25 +372,33 @@ public class AlgorithmsBacktrackTest {
                 assertHaveNoIntersections(cosets[j], cosets[i]);
 
             Permutation rep = null;
-            for (Permutation p : cosets[i])
+            for (Permutation p : cosets[i]) {
                 if (rep == null)
                     rep = AlgorithmsBacktrack.leftTransversalOf(p, pg.getBSGS().BSGSList, stabilizer.getBSGS().BSGSList);
                 else
                     assertTrue(
                             pordering.compare(rep, AlgorithmsBacktrack.leftTransversalOf(p, pg.getBSGS().BSGSList, stabilizer.getBSGS().BSGSList)) == 0);
-
+            }
         }
     }
 
     @Test
     public void testLeftCosetRepresentative2() {
-        PermutationGroup pg = GapPrimitiveGroupsReader.readGroupFromGap("/home/stas/gap4r6/prim/grps/gps1.g", 298);
-        ArrayList<BSGSElement> symmetric = AlgorithmsBase.createSymmetricGroupBSGS(pg.degree());
+        final PermutationGroup pg = GapPrimitiveGroupsReader.readGroupFromGap("/home/stas/gap4r6/prim/grps/gps1.g", 298);
+        final ArrayList<BSGSElement> symmetric = AlgorithmsBase.createSymmetricGroupBSGS(pg.degree());
+        System.out.println("Index: " + getOrder(symmetric).divide(pg.order()));
         System.out.println("constructed");
-        for (int r = 0; r < 10; ++r) {
-            Permutation rp = new PermutationOneLine(Permutations.randomPermutation(pg.degree(),
-                    CC.getRandomGenerator()));
-            System.out.println(AlgorithmsBacktrack.leftTransversalOf(rp, symmetric, pg.getBSGS().BSGSList));
+        for (int r = 0; r < 100; ++r) {
+            Timing.timing(
+                    new Timing.TimingJob() {
+                        @Override
+                        public Object doJob() {
+                            Permutation rp = new PermutationOneLine(Permutations.randomPermutation(pg.degree(),
+                                    CC.getRandomGenerator()));
+                            rp = AlgorithmsBacktrack.leftTransversalOf(rp, symmetric, pg.getBSGS().BSGSList);
+                            return rp;
+                        }
+                    }, true);
         }
 
     }

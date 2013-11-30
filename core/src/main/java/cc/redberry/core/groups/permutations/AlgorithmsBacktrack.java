@@ -393,6 +393,14 @@ public final class AlgorithmsBacktrack {
         }
     }
 
+    /**
+     * Returns coset representative of specified element; the returned representative will be minimal in its coset.
+     *
+     * @param element  group element
+     * @param group    group
+     * @param subgroup subgroup
+     * @return coset representative of specified group element
+     */
     public static Permutation leftTransversalOf(final Permutation element,
                                                 final List<? extends BSGSElement> group,
                                                 final List<? extends BSGSElement> subgroup) {
@@ -411,41 +419,20 @@ public final class AlgorithmsBacktrack {
         InducedOrdering ordering = new InducedOrdering(base, degree);
         Permutation transversal = element;
         final int[] minimalImage = new int[base.length];
-        int level = 0, image;
-
-        //<= carry out first iteration cycle (need no backtracking)
-
-        //let's find element in K that minimizes element(β_0)
-        image = transversal.newIndexOf(base[level]);
-        //orbit of transversal(β_0)
-        replaceBasePointWithRedundancy(_subgroup, level, image);//this need for search
-        minimalImage[level] = ordering.min(_subgroup.get(level).orbitList);
-        //search minimaizer in K
-        transversal = transversal.composition(_subgroup.get(level).getTransversalOf(minimalImage[level]));
-
-        //reset first base point of K to transversal(β_0), which is minimal in its orbit
-        replaceBasePointWithRedundancy(_subgroup, level, minimalImage[level]);
 
         //<= main loop
-        for (level = 1; level < group.size(); ++level) {
+        int image;
+        for (int level = 0; level < group.size(); ++level) {
 
             image = transversal.newIndexOf(base[level]);
             minimalImage[level] = ordering.min(Permutations.getOrbitList(_subgroup.get(level).stabilizerGenerators, image));
-            replaceBasePointWithRedundancy(_subgroup, level, minimalImage[level]);
+            //find element that maps image to minimalImage[level]
+            //the following two lines can be done with the use of backtrack search
+            replaceBasePointWithRedundancy(_subgroup, level, image);
+            transversal = transversal.composition(_subgroup.get(level).getTransversalOf(minimalImage[level]));
 
-            final int level_ = level, image_ = image;
-            //search minimaizer in K
-            transversal = transversal.composition(
-                    new BacktrackSearch(
-                            _subgroup,
-                            new BacktrackSearchTestFunction() {
-                                @Override
-                                public boolean test(Permutation p, int l) {
-                                    if (l > level_)
-                                        return true;
-                                    return p.newIndexOf(_subgroup.get(l).basePoint) == minimalImage[l];
-                                }
-                            }, Indicator.TRUE_INDICATOR).take());
+            //element found: rebase
+            replaceBasePointWithRedundancy(_subgroup, level, minimalImage[level]);
         }
         return transversal;
     }
