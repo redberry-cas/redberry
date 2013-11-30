@@ -24,6 +24,8 @@ package cc.redberry.core.groups.permutations;
 
 import cc.redberry.core.context.CC;
 import cc.redberry.core.groups.permutations.gap.GapPrimitiveGroupsReader;
+import cc.redberry.core.number.NumberUtils;
+import cc.redberry.core.utils.IntArrayList;
 import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.random.Well1024a;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
@@ -48,6 +50,42 @@ import static org.junit.Assert.assertArrayEquals;
  * @author Stanislav Poslavsky
  */
 public class AlgorithmsBaseTest {
+
+    @Test
+    public void testCreateSymmetric1() throws Exception {
+        for (int cc = 2; cc < 10; ++cc) {
+            int degree = cc;
+            List<BSGSElement> bsgs = AlgorithmsBase.createSymmetricGroupBSGS(degree);
+            for (BSGSElement element : bsgs) {
+                for (int i = 0; i < element.orbitSize(); ++i) {
+                    assertEquals(element.orbitList.get(i),
+                            element.getTransversalOf(element.orbitList.get(i)).newIndexOf(element.basePoint)
+                    );
+                }
+            }
+            assertTrue(isBSGS(bsgs));
+            assertEquals(NumberUtils.factorial(degree), getOrder(bsgs));
+        }
+    }
+
+    @Test
+    public void testCreateSymmetric2() throws Exception {
+        int[] degrees = {101, 107, 109, 110, 113, 120, 121, 127, 130};
+
+        for (int degree : degrees) {
+            List<BSGSElement> bsgs = AlgorithmsBase.createSymmetricGroupBSGS(degree);
+
+            for (BSGSElement element : bsgs) {
+                for (int i = 0; i < element.orbitSize(); ++i) {
+                    assertEquals(element.orbitList.get(i),
+                            element.getTransversalOf(element.orbitList.get(i)).newIndexOf(element.basePoint)
+                    );
+                }
+            }
+            assertTrue(isBSGS(bsgs));
+            assertEquals(NumberUtils.factorial(degree), getOrder(bsgs));
+        }
+    }
 
     @Test
     public void testRemoveRedundant0() {

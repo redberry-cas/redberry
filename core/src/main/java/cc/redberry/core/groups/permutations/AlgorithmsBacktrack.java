@@ -162,6 +162,9 @@ public final class AlgorithmsBacktrack {
                     && ordering.compare(image, maxRepresentative[level]) < 0
                     //test
                     && testFunction.test(word[level], level)) {
+                //TODO remove following assertion
+                assert assertPartialBaseImage(level, word, base, subgroup_rebase);
+
                 //<= entering next level
                 ++level;
 
@@ -260,8 +263,8 @@ public final class AlgorithmsBacktrack {
 
     }
 
-    public static Permutation[] cosetRepresentatives(ArrayList<? extends BSGSElement> group,
-                                                     ArrayList<? extends BSGSElement> subgroup) {
+    public static Permutation[] leftCosetRepresentatives(ArrayList<? extends BSGSElement> group,
+                                                         ArrayList<? extends BSGSElement> subgroup) {
 
         if (group.size() == 0 || group.get(0).stabilizerGenerators.isEmpty())
             throw new IllegalArgumentException("Empty group.");
@@ -269,7 +272,7 @@ public final class AlgorithmsBacktrack {
         ____VISITED_NODES___[0] = 0;//just for performance debugging
 
         ArrayList<BSGSCandidateElement> _subgroup = AlgorithmsBase.asBSGSCandidatesList(subgroup);
-        final Permutation[] coset = new Permutation[ 1+
+        final Permutation[] coset = new Permutation[
                 AlgorithmsBase.getOrder(group).divide(AlgorithmsBase.getOrder(subgroup)).intValue()];
         int cosetCounter = 0;
 
@@ -307,12 +310,8 @@ public final class AlgorithmsBacktrack {
         //rebase to base of basic group
         rebaseWithRedundancy(_subgroup, base, degree);
 
-        //subgroupLevel is a level in a search tree at each we are looking for subgroup representatives.
-        int subgroupLevel = level;
-
         //<= data structure to test condition (i) in PROPOSITION 4.7
         ArrayList<BSGSCandidateElement> subgroup_rebase = AlgorithmsBase.clone(_subgroup);
-        //todo remove beta_f to avoid identities (and how?)
 
         //<= initialized
 
@@ -325,6 +324,9 @@ public final class AlgorithmsBacktrack {
                     // check PROPOSITION 4.7 (i)
                     //≺-least element of subgroup orbits with respect to base g(B(l))
                     && isMinimalInOrbit(subgroup_rebase.get(level).orbitList, image, ordering)) {
+                //TODO remove following assertion
+                assert assertPartialBaseImage(level, word, base, subgroup_rebase);
+
                 //<= entering next level
                 ++level;
 
@@ -360,13 +362,7 @@ public final class AlgorithmsBacktrack {
 
                 //<= here we obtained next coset representative
 
-                //dump subgroup_rebase
-                subgroup_rebase = AlgorithmsBase.clone(_subgroup);
-
-                //<= we've new coset representative
                 coset[cosetCounter++] = word[level];
-
-//                level = subgroupLevel;
             }
 
             //<= now we need to go down the tree
@@ -375,12 +371,6 @@ public final class AlgorithmsBacktrack {
 
             if (level == -1)
                 return coset; //all elements scanned
-
-//            if (level < subgroupLevel) {
-//                //setup new subgroupLevel
-//                subgroupLevel = level;
-//                tuple[level] = 0;
-//            }
 
             //<= next vertex at current level
             ++tuple[level];
@@ -439,7 +429,8 @@ public final class AlgorithmsBacktrack {
         boolean belongsToOrbit = false;
         int compare;
         for (int i = orbit.size() - 1; i >= 0; --i) {
-            if ((compare = ordering.compare(orbit.get(i), point)) < 0)
+            compare = ordering.compare(orbit.get(i), point);
+            if (compare < 0)
                 return false;
             if (compare == 0)
                 belongsToOrbit = true;
@@ -504,5 +495,14 @@ public final class AlgorithmsBacktrack {
                 group.remove(group.size() - 1);
             else break;
         }
+    }
+
+    private static boolean assertPartialBaseImage(final int level, final Permutation[] word,
+                                                  final int[] base,
+                                                  final ArrayList<? extends BSGSElement> subgroup_rebase) {
+        for (int i = 0; i <= level; ++i)
+            if (subgroup_rebase.get(i).basePoint != word[i].newIndexOf(base[i]))
+                return false;
+        return true;
     }
 }

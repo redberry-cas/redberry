@@ -963,6 +963,134 @@ public class AlgorithmsBase {
     //------------------------------ FACTORIES --------------------------------------------//
 
     /**
+     * This value is an upper bound of degrees, which we consider as "small".
+     */
+    public static final int SMALL_DEGREE_THRESHOLD = 100;
+    /**
+     * Cached BSGS structures for symmetric groups.
+     */
+    private static final ArrayList<BSGSElement>[] CACHED_SYMMETRIC_GROUPS = new ArrayList[SMALL_DEGREE_THRESHOLD];
+
+    /**
+     * Creates base and strong generating set of symmetric group of specified degree. Symmetric group of degree
+     * smaller then {@link #SMALL_DEGREE_THRESHOLD} will provide zero-time access to all transversals in
+     * each stabilizer; group with larger degree will provide <i>log(size of orbit)</i> access. Additionally, small degree
+     * group with fixed degree will be constructed once (at the first invocation of this method with specified
+     * degree) and then cached, so second invocation of this method with same degree will return same reference.
+     *
+     * @param degree group degree
+     * @return base and strong generating set of symmetric group
+     */
+    public static ArrayList<BSGSElement> createSymmetricGroupBSGS(final int degree) {
+        if (degree == 0)
+            throw new IllegalArgumentException("Degree = 0.");
+
+        /* For symmetric group we can construct BSGS explicitly without call of Schreier-Sims algorithm */
+
+        //For small degree groups we'll construct all BSGS elements with a "quick" access to all transversals, i.e.
+        // each stabilizer in chain will contain all required transversals. This involves to store
+        // (degree^2 - 1)/2 stabilizers
+        if (degree <= SMALL_DEGREE_THRESHOLD) {
+            ArrayList<BSGSElement> bsgs = CACHED_SYMMETRIC_GROUPS[degree - 1];
+            if (bsgs == null) {
+                bsgs = createSymmetricGroupBSGSForSmallDegree(degree);
+                CACHED_SYMMETRIC_GROUPS[degree - 1] = bsgs;
+            }
+            return bsgs;
+        }
+
+        //For groups with large degree we'll construct all BSGS elements with a log(degree) access to all transversals
+        return createSymmetricGroupBSGSForLargeDegree(degree);
+    }
+
+    static ArrayList<BSGSElement> createSymmetricGroupBSGSForSmallDegree(final int degree) {
+        //For small groups we'll construct all BSGS elements with a "quick" access to all transversals, i.e.
+        // each stabilizer in chain will contain all required transversals. This involves to store
+        // (degree - 1)*degree/2 stabilizers
+
+        ArrayList<BSGSElement> bsgs = new ArrayList<>(degree - 1);
+        for (int i = 0; i < degree - 1; ++i) {
+
+            //calculating orbit of i-th base point
+            IntArrayList orbit = new IntArrayList(degree - i);
+            int j = i;
+            for (; j < degree; ++j)
+                orbit.add(j);
+
+            //calculating stabilizers
+            final Permutation[] stabilizers = new Permutation[degree - i];
+            int[] SchreierVector = new int[degree];
+            Arrays.fill(SchreierVector, -2);
+            int image, k, l, permutation[];
+            for (j = 0; j < stabilizers.length; ++j) {
+                //for each element in orbit
+                image = i + j;
+                permutation = new int[degree];
+                //all points before base point are fixed
+                for (k = 0; k < i; ++k)
+                    permutation[k] = k;
+                //the rest of permutation should map i to i + j; we'll do this using cycles
+                l = 0;
+                for (; l < degree - image; ++k, ++l)
+                    permutation[k] = image + l;
+                l = 0;
+                for (; k < degree; ++k)
+                    permutation[k] = i + (l++);
+
+                stabilizers[j] = new PermutationOneLine(permutation);
+                SchreierVector[i + j] = j;
+            }
+            SchreierVector[i] = -1;
+
+            BSGSElement element = new BSGSElement(i, Arrays.asList(stabilizers), SchreierVector, orbit);
+            bsgs.add(element);
+        }
+        return bsgs;
+    }
+
+    static ArrayList<BSGSElement> createSymmetricGroupBSGSForLargeDegree(final int degree) {
+        //For groups with large degree we'll construct all BSGS elements with a log(degree) access to all transversals
+
+        ArrayList<BSGSElement> bsgs = new ArrayList<>(degree - 1);
+        for (int i = 0; i < degree - 1; ++i) {
+
+            //calculating orbit of i-th base point
+            IntArrayList orbit = new IntArrayList(degree - i);
+            int j = i;
+            for (; j < degree; ++j)
+                orbit.add(j);
+
+            //calculating stabilizers
+            final ArrayList<Permutation> stabilizers = new ArrayList<>((int) (FastMath.log(degree - i) / FastMath.log(2)));
+            int image, k, l, permutation[];
+
+            //provide log(size of orbit) access
+            for (j = degree - i - 1; j > 0; j /= 2) {
+                image = i + j;
+                permutation = new int[degree];
+                //all points before base point are fixed
+                for (k = 0; k < i; ++k)
+                    permutation[k] = k;
+                //the rest of permutation should map i to i + j; we'll do this using cycles
+                l = 0;
+                for (; l < degree - image; ++k, ++l)
+                    permutation[k] = image + l;
+                l = 0;
+                for (; k < degree; ++k)
+                    permutation[k] = i + (l++);
+
+                stabilizers.add(new PermutationOneLine(permutation));
+            }
+
+            //Collections.reverse(stabilizers);
+
+            BSGSElement element = new BSGSCandidateElement(i, stabilizers, new int[degree]).asBSGSElement();
+            bsgs.add(element);
+        }
+        return bsgs;
+    }
+
+    /**
      * Creates immutable container of base and strong generating set. This method is simply returns
      * {@code new BSGS(createBSGSList(generators))}.
      *

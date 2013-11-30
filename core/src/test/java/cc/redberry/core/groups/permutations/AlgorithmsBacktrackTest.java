@@ -36,8 +36,7 @@ import java.util.*;
 import static cc.redberry.core.TAssert.assertEquals;
 import static cc.redberry.core.groups.permutations.AlgorithmsBase.getBaseAsArray;
 import static cc.redberry.core.groups.permutations.AlgorithmsBase.getOrder;
-import static cc.redberry.core.groups.permutations.PermutationsTestUtils.calculateRawSetwiseStabilizer;
-import static cc.redberry.core.groups.permutations.PermutationsTestUtils.RawSetwiseStabilizerCriteria;
+import static cc.redberry.core.groups.permutations.PermutationsTestUtils.*;
 
 /**
  * @author Dmitry Bolotin
@@ -245,6 +244,8 @@ public class AlgorithmsBacktrackTest {
     @Test
     public void testSetwiseStabilizer3_raw_all_set() throws Exception {
         PermutationGroup[] pgs = GapPrimitiveGroupsReader.readGroupsFromGap("/home/stas/gap4r6/prim/grps/gps1.g");
+        System.out.println("Read groups from GAP.");
+
 
         DescriptiveStatistics visited = new DescriptiveStatistics();
         int scanned = 0;
@@ -306,7 +307,7 @@ public class AlgorithmsBacktrackTest {
 
 
     @Test
-    public void testCosetRepresentatives1() {
+    public void testLeftCosetRepresentatives1() {
         Permutation gen0 = new PermutationOneLine(4, 3, 9, 1, 0, 5, 10, 7, 8, 2, 6);
         Permutation gen1 = new PermutationOneLine(0, 1, 10, 6, 2, 7, 8, 9, 3, 5, 4);
 
@@ -314,17 +315,57 @@ public class AlgorithmsBacktrackTest {
         int[] set = {3, 7};
 
         PermutationGroup stabilizer = testSearchStabilizerRaw(pg, set);
-        System.out.println(pg.order());
-        System.out.println(stabilizer.order());
 
-        Permutation[] coset = AlgorithmsBacktrack.cosetRepresentatives(
+        Permutation[] coset_reps = AlgorithmsBacktrack.leftCosetRepresentatives(
                 pg.getBSGS().getBSGSCandidateList(), stabilizer.getBSGS().getBSGSCandidateList());
+        assertHaveNoNullElements(coset_reps);
 
-        System.out.println(Arrays.toString(coset));
-        int index = notNullSize(coset);
-        System.out.println(index);
-        for (int i = 0; i < index; ++i)
-            System.out.println(stabilizer.isMember(coset[i]));
+        Permutation[] subgroup_elements = new Permutation[stabilizer.order().intValue()];
+        int i = 0;
+        for (Permutation p : stabilizer)
+            subgroup_elements[i++] = p;
+
+        Permutation[][] cosets = new Permutation[coset_reps.length][];
+        for (i = 0; i < coset_reps.length; ++i) {
+            cosets[i] = new Permutation[subgroup_elements.length];
+            int j = 0;
+            for (Permutation e : subgroup_elements)
+                cosets[i][j++] = coset_reps[i].composition(e);
+
+            for (j = 0; j < i; ++j)
+                assertHaveNoIntersections(cosets[j], cosets[i]);
+        }
+    }
+
+    @Test
+    public void testLeftCosetRepresentatives2() {
+        Permutation gen0 = new PermutationOneLine(4, 3, 9, 1, 0, 5, 10, 7, 8, 2, 6);
+        Permutation gen1 = new PermutationOneLine(0, 1, 10, 6, 2, 7, 8, 9, 3, 5, 4);
+
+        PermutationGroup pg = PermutationGroupFactory.createPermutationGroup(gen0, gen1);
+        int[] set = {3, 7};
+
+        PermutationGroup stabilizer = testSearchStabilizerRaw(pg, set);
+
+        Permutation[] coset_reps = AlgorithmsBacktrack.leftCosetRepresentatives(
+                pg.getBSGS().getBSGSCandidateList(), stabilizer.getBSGS().getBSGSCandidateList());
+        assertHaveNoNullElements(coset_reps);
+
+        Permutation[] subgroup_elements = new Permutation[stabilizer.order().intValue()];
+        int i = 0;
+        for (Permutation p : stabilizer)
+            subgroup_elements[i++] = p;
+
+        Permutation[][] cosets = new Permutation[coset_reps.length][];
+        for (i = 0; i < coset_reps.length; ++i) {
+            cosets[i] = new Permutation[subgroup_elements.length];
+            int j = 0;
+            for (Permutation e : subgroup_elements)
+                cosets[i][j++] = coset_reps[i].composition(e);
+
+            for (j = 0; j < i; ++j)
+                assertHaveNoIntersections(cosets[j], cosets[i]);
+        }
     }
 
     public static PermutationGroup testSearchStabilizerRaw(PermutationGroup pg, int[] set) {

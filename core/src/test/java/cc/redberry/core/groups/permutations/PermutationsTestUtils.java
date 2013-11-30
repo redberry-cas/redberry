@@ -22,13 +22,21 @@
  */
 package cc.redberry.core.groups.permutations;
 
+import cc.redberry.core.TAssert;
+import cc.redberry.core.combinatorics.IntCombinationsGenerator;
+import cc.redberry.core.combinatorics.IntPermutationsGenerator;
+import cc.redberry.core.number.NumberUtils;
+import cc.redberry.core.utils.ArraysUtils;
 import cc.redberry.core.utils.Indicator;
+import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import static cc.redberry.core.TAssert.assertTrue;
 import static cc.redberry.core.groups.permutations.AlgorithmsBase.getBaseAsArray;
+import static cc.redberry.core.number.NumberUtils.factorial;
 
 /**
  * @author Dmitry Bolotin
@@ -67,6 +75,13 @@ public class PermutationsTestUtils {
         }
     }
 
+    /**
+     * Calculates setwise stabilizer (brute-force algorithm).
+     *
+     * @param pg
+     * @param set
+     * @return
+     */
     public static PermutationGroup calculateRawSetwiseStabilizer(PermutationGroup pg, int[] set) {
         List<BSGSElement> bsgs = pg.getBSGS().getBSGSList();
         int degree = pg.degree();
@@ -81,4 +96,168 @@ public class PermutationsTestUtils {
         AlgorithmsBacktrack.subgroupSearch(bsgs, subgroup, rw, rw);
         return new PermutationGroupImpl(new BaseAndStrongGeneratingSet(AlgorithmsBase.asBSGSList(subgroup)));
     }
+
+    public static void assertHaveNoIntersections(Permutation[] a, Permutation[] b) {
+        if (a.length == 0 || b.length == 0)
+            return;
+        Arrays.sort(a);
+        Arrays.sort(b);
+
+        if (b.length < a.length) {
+            Permutation[] c = b;
+            b = a;
+            a = c;
+        }
+
+        int j = 0;
+        for (int i = 0; i < b.length; ++i) {
+            while (j < a.length - 1 && b[i].compareTo(a[j]) > 0)
+                ++j;
+            if (b[i].compareTo(a[j]) == 0)
+                throw new AssertionError(a[j] + " and " + b[i] + "  are equal.");
+        }
+    }
+
+    public static void assertHaveNoNullElements(final Object[] array) {
+        for (int i = 0; i < array.length; ++i)
+            if (array[i] == null)
+                throw new AssertionError("Null element at " + i + " position.");
+    }
+
+    @Test
+    public void testHaveNoIntersections1() {
+        Permutation[] a = new Permutation[24];
+        IntPermutationsGenerator gen = new IntPermutationsGenerator(4);
+        int i = 0;
+        for (int[] p : gen)
+            a[i++] = new PermutationOneLine(ArraysUtils.addAll(p, 4, 5, 6, 7));
+
+        gen = new IntPermutationsGenerator(4);
+        Permutation[] b = new Permutation[12];
+        i = 0;
+        for (int[] p : gen) {
+            if (i >= 8 && i < 20)
+                b[i - 8] = new PermutationOneLine(ArraysUtils.addAll(p, 4, 5, 6, 7));
+            ++i;
+        }
+        try {
+            assertHaveNoIntersections(a, b);
+            assertTrue(false);
+        } catch (AssertionError e) {
+            assertTrue(true);
+        }
+        try {
+            assertHaveNoIntersections(b, a);
+            assertTrue(false);
+        } catch (AssertionError e) {
+            assertTrue(true);
+        }
+    }
+
+    @Test
+    public void testHaveNoIntersections2() {
+
+        int degree = 4;
+        int total = NumberUtils.factorial(degree).intValue();
+
+        IntPermutationsGenerator gen = new IntPermutationsGenerator(degree);
+        Permutation[] all = new Permutation[total];
+
+        int i = 0;
+        for (int[] p : gen)
+            all[i++] = new PermutationOneLine(p);
+
+        IntCombinationsGenerator combGen;
+        Permutation[] a, b;
+        for (int k = 0; k < total; ++k) {
+            if (factorial(total).divide(factorial(total - k).multiply(factorial(k))).intValue() > 50000)
+                continue;
+            combGen = new IntCombinationsGenerator(total, k);
+            for (int[] comb : combGen) {
+                a = new Permutation[k];
+                b = new Permutation[total - k];
+                int p = 0, q = 0;
+                boolean selected;
+                for (i = 0; i < total; ++i) {
+                    selected = false;
+                    for (int f : comb)
+                        if (i == f) {
+                            selected = true;
+                            break;
+                        }
+                    if (selected)
+                        a[p++] = all[i];
+                    else
+                        b[q++] = all[i];
+                }
+                assertHaveNoIntersections(a, b);
+                assertHaveNoIntersections(b, a);
+            }
+        }
+    }
+
+    @Test
+    public void testHaveNoIntersections3() {
+
+        int degree = 4;
+        int total = NumberUtils.factorial(degree).intValue();
+
+        IntPermutationsGenerator gen = new IntPermutationsGenerator(degree);
+        Permutation[] all = new Permutation[total];
+
+        int i = 0;
+        for (int[] p : gen)
+            all[i++] = new PermutationOneLine(p);
+
+        IntCombinationsGenerator combGen;
+        Permutation[] a, b;
+        for (int k = 1; k < total; ++k) {
+            if (factorial(total).divide(factorial(total - k).multiply(factorial(k))).intValue() > 50000)
+                continue;
+            combGen = new IntCombinationsGenerator(total, k);
+            for (int[] comb : combGen) {
+                a = new Permutation[k];
+                b = new Permutation[total - k + 1];
+                int p = 0, q = 0;
+                boolean selected, taken = false;
+                for (i = 0; i < total; ++i) {
+                    selected = false;
+                    for (int f : comb)
+                        if (i == f) {
+                            selected = true;
+                            break;
+                        }
+                    if (!taken && selected) {
+                        taken = true;
+                        b[q++] = all[i];
+                    }
+
+                    if (selected)
+                        a[p++] = all[i];
+                    else
+                        b[q++] = all[i];
+                }
+                try {
+                    assertHaveNoIntersections(a, b);
+                    throw new RuntimeException();
+                } catch (AssertionError e) {
+                }
+                try {
+                    assertHaveNoIntersections(b, a);
+                    Arrays.toString(a);
+                    Arrays.toString(b);
+                    throw new RuntimeException();
+                } catch (AssertionError e) {
+                }
+            }
+        }
+    }
+
+//    @Test
+//    public void testName() throws Exception {
+//        for (int i = 0; i < 24; ++i) {
+//            if (factorial(24).divide(factorial(24 - i).multiply(factorial(i))).intValue() < 50000)
+//                System.out.println(i + "   " + factorial(24).divide(factorial(24 - i).multiply(factorial(i))));
+//        }
+//    }
 }

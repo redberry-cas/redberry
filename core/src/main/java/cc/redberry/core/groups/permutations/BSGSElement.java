@@ -89,6 +89,8 @@ public class BSGSElement {
         return transversal;
     }
 
+    public static int[] ATTTA = {0};
+
     /**
      * Calculates the inverse transversal corresponding to the specified point (u<sub>&beta;</sub>), i.e. the element
      * u<sub>&beta;</sub><sup>(-1)</sup> such that &beta;<sub>i</sub><sup>u<sub>&beta;</sub></sup> =  &beta;.
@@ -100,9 +102,12 @@ public class BSGSElement {
         if (SchreierVector[point] == -2)
             throw new IllegalArgumentException("Specified point does not belong to orbit of this base element.");
         Permutation temp = Permutations.getIdentityOneLine(SchreierVector.length);
-        while (SchreierVector[temp.newIndexOf(point)] != -1)
+        ATTTA[0] = 0;
+        while (SchreierVector[temp.newIndexOf(point)] != -1) {
+            ATTTA[0]++;
             temp = temp.compositionWithInverse(
                     stabilizerGenerators.get(SchreierVector[temp.newIndexOf(point)]));
+        }
         return temp;
     }
 
