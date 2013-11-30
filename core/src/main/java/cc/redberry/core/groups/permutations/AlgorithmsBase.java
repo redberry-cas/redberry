@@ -987,9 +987,7 @@ public class AlgorithmsBase {
 
         /* For symmetric group we can construct BSGS explicitly without call of Schreier-Sims algorithm */
 
-        //For small degree groups we'll construct all BSGS elements with a "quick" access to all transversals, i.e.
-        // each stabilizer in chain will contain all required transversals. This involves to store
-        // (degree^2 - 1)/2 stabilizers
+        //For small degree groups we'll construct all BSGS elements with a "quick" access to all transversals
         if (degree <= SMALL_DEGREE_THRESHOLD) {
             ArrayList<BSGSElement> bsgs = CACHED_SYMMETRIC_GROUPS[degree - 1];
             if (bsgs == null) {

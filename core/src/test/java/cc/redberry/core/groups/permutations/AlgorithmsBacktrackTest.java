@@ -25,6 +25,7 @@ package cc.redberry.core.groups.permutations;
 import cc.redberry.core.combinatorics.Combinatorics;
 import cc.redberry.core.context.CC;
 import cc.redberry.core.groups.permutations.gap.GapPrimitiveGroupsReader;
+import cc.redberry.core.number.NumberUtils;
 import cc.redberry.core.utils.Indicator;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.junit.Assert;
@@ -34,6 +35,7 @@ import java.math.BigInteger;
 import java.util.*;
 
 import static cc.redberry.core.TAssert.assertEquals;
+import static cc.redberry.core.TAssert.assertTrue;
 import static cc.redberry.core.groups.permutations.AlgorithmsBase.getBaseAsArray;
 import static cc.redberry.core.groups.permutations.AlgorithmsBase.getOrder;
 import static cc.redberry.core.groups.permutations.PermutationsTestUtils.*;
@@ -246,7 +248,6 @@ public class AlgorithmsBacktrackTest {
         PermutationGroup[] pgs = GapPrimitiveGroupsReader.readGroupsFromGap("/home/stas/gap4r6/prim/grps/gps1.g");
         System.out.println("Read groups from GAP.");
 
-
         DescriptiveStatistics visited = new DescriptiveStatistics();
         int scanned = 0;
         for (int i = 0; i < pgs.length; ++i) {
@@ -338,6 +339,61 @@ public class AlgorithmsBacktrackTest {
     }
 
     @Test
+    public void testLeftCosetRepresentative1() {
+        Permutation gen0 = new PermutationOneLine(4, 3, 9, 1, 0, 5, 10, 7, 8, 2, 6);
+        Permutation gen1 = new PermutationOneLine(0, 1, 10, 6, 2, 7, 8, 9, 3, 5, 4);
+
+        PermutationGroup pg = PermutationGroupFactory.createPermutationGroup(gen0, gen1);
+        int[] base = pg.getBSGS().getBaseArray();
+        InducedOrderingOfPermutations pordering = new InducedOrderingOfPermutations(base, pg.degree());
+        int[] set = {3, 7};
+
+        PermutationGroup stabilizer = testSearchStabilizerRaw(pg, set);
+
+        Permutation[] coset_reps = AlgorithmsBacktrack.leftCosetRepresentatives(
+                pg.getBSGS().getBSGSCandidateList(), stabilizer.getBSGS().getBSGSCandidateList());
+        assertHaveNoNullElements(coset_reps);
+
+        Permutation[] subgroup_elements = new Permutation[stabilizer.order().intValue()];
+        int i = 0;
+        for (Permutation p : stabilizer)
+            subgroup_elements[i++] = p;
+
+        Permutation[][] cosets = new Permutation[coset_reps.length][];
+        for (i = 0; i < coset_reps.length; ++i) {
+            cosets[i] = new Permutation[subgroup_elements.length];
+            int j = 0;
+            for (Permutation e : subgroup_elements)
+                cosets[i][j++] = coset_reps[i].composition(e);
+
+            for (j = 0; j < i; ++j)
+                assertHaveNoIntersections(cosets[j], cosets[i]);
+
+            Permutation rep = null;
+            for (Permutation p : cosets[i])
+                if (rep == null)
+                    rep = AlgorithmsBacktrack.leftTransversalOf(p, pg.getBSGS().BSGSList, stabilizer.getBSGS().BSGSList);
+                else
+                    assertTrue(
+                            pordering.compare(rep, AlgorithmsBacktrack.leftTransversalOf(p, pg.getBSGS().BSGSList, stabilizer.getBSGS().BSGSList)) == 0);
+
+        }
+    }
+
+    @Test
+    public void testLeftCosetRepresentative2() {
+        PermutationGroup pg = GapPrimitiveGroupsReader.readGroupFromGap("/home/stas/gap4r6/prim/grps/gps1.g", 298);
+        ArrayList<BSGSElement> symmetric = AlgorithmsBase.createSymmetricGroupBSGS(pg.degree());
+        System.out.println("constructed");
+        for (int r = 0; r < 10; ++r) {
+            Permutation rp = new PermutationOneLine(Permutations.randomPermutation(pg.degree(),
+                    CC.getRandomGenerator()));
+            System.out.println(AlgorithmsBacktrack.leftTransversalOf(rp, symmetric, pg.getBSGS().BSGSList));
+        }
+
+    }
+
+    @Test
     public void testLeftCosetRepresentatives2() {
         Permutation gen0 = new PermutationOneLine(4, 3, 9, 1, 0, 5, 10, 7, 8, 2, 6);
         Permutation gen1 = new PermutationOneLine(0, 1, 10, 6, 2, 7, 8, 9, 3, 5, 4);
@@ -366,6 +422,43 @@ public class AlgorithmsBacktrackTest {
             for (j = 0; j < i; ++j)
                 assertHaveNoIntersections(cosets[j], cosets[i]);
         }
+    }
+
+    @Test
+    public void testLeftCosetRepresentatives3() {
+        PermutationGroup[] pgs = GapPrimitiveGroupsReader.readGroupsFromGap("/home/stas/gap4r6/prim/grps/gps1.g");
+        System.out.println("Read groups from GAP.");
+
+        DescriptiveStatistics visited = new DescriptiveStatistics();
+        int scanned = 0;
+        for (int i = 0; i < pgs.length && pgs[i].degree() < 110; ++i) {
+
+            int degree = pgs[i].degree();
+            BigInteger index = NumberUtils.factorial(degree).divide(pgs[i].order());
+
+            if (index.compareTo(BigInteger.valueOf(1_000_001)) > 0)
+                continue;
+
+            ++scanned;
+
+            ArrayList<BSGSElement> symmetricGroup = AlgorithmsBase.createSymmetricGroupBSGS(degree);
+            Permutation[] transversals = AlgorithmsBacktrack.leftCosetRepresentatives(symmetricGroup, pgs[i].getBSGS().BSGSList);
+
+
+            assertEquals(index.intValue(), transversals.length);
+            assertHaveNoNullElements(transversals);
+
+            System.out.println(
+                    "Group order: " + getOrder(symmetricGroup) +
+                            "  Subgroup order: " + getOrder(pgs[i].getBSGS().BSGSList) +
+                            "  Subgroup index: " + transversals.length +
+                            "  Visited: " + AlgorithmsBacktrack.____VISITED_NODES___[0]);
+
+            visited.addValue((((double) AlgorithmsBacktrack.____VISITED_NODES___[0]) / pgs[i].order().doubleValue()) * 100.0);
+        }
+        System.out.println("Total number of primitive groups scanned: " + scanned);
+        System.out.println("Statistic of percent of visited nodes: ");
+        System.out.println(visited);
     }
 
     public static PermutationGroup testSearchStabilizerRaw(PermutationGroup pg, int[] set) {
@@ -404,12 +497,4 @@ public class AlgorithmsBacktrackTest {
         return new PermutationGroupImpl(new BaseAndStrongGeneratingSet(AlgorithmsBase.asBSGSList(subgroup)));
     }
 
-
-    private static int notNullSize(Object[] array) {
-        int s = 0;
-        for (Object o : array)
-            if (o != null)
-                ++s;
-        return s;
-    }
 }

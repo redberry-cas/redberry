@@ -23,6 +23,7 @@
 package cc.redberry.core.groups.permutations;
 
 
+import cc.redberry.core.utils.IntArrayList;
 import cc.redberry.core.utils.IntComparator;
 
 import java.util.Arrays;
@@ -90,7 +91,7 @@ public class InducedOrdering implements IntComparator {
      *
      * @param a point
      * @param b point
-     * @return ≺-greatest point under this ordering
+     * @return ≺-least point under this ordering
      */
     public int min(int a, int b) {
         return compare(a, b) >= 0 ? b : a;
@@ -113,5 +114,65 @@ public class InducedOrdering implements IntComparator {
      */
     public int minElement() {
         return -1;
+    }
+
+    /**
+     * Returns the ≺-least point under this ordering in specified array.
+     *
+     * @param array array
+     * @return ≺-least point under this ordering
+     */
+    public int min(final int[] array) {
+        if (array.length == 0)
+            throw new IllegalArgumentException();
+        int min = array[0];
+        for (int i = 1; i < array.length; ++i)
+            min = min(min, array[i]);
+        return min;
+    }
+
+    /**
+     * Returns the ≺-least point under this ordering in specified array.
+     *
+     * @param array array
+     * @return ≺-least point under this ordering
+     */
+    public int min(final IntArrayList array) {
+        if (array.size() == 0)
+            throw new IllegalArgumentException();
+        int min = array.get(array.size() - 1);
+        for (int i = array.size() - 2; i >= 0; --i)
+            min = min(min, array.get(i));
+        return min;
+    }
+
+    /**
+     * Returns the ≺-greatest point under this ordering in specified array.
+     *
+     * @param array array
+     * @return ≺-greatest point under this ordering
+     */
+    public int max(final int[] array) {
+        if (array.length == 0)
+            throw new IllegalArgumentException();
+        int max = array[0];
+        for (int i = 1; i < array.length; ++i)
+            max = max(max, array[i]);
+        return max;
+    }
+
+    /**
+     * Returns the ≺-greatest point under this ordering in specified array.
+     *
+     * @param array array
+     * @return ≺-greatest point under this ordering
+     */
+    public int max(final IntArrayList array) {
+        if (array.size() == 0)
+            throw new IllegalArgumentException();
+        int max = array.get(array.size() - 1);
+        for (int i = array.size() - 2; i >= 0; --i)
+            max = max(max, array.get(i));
+        return max;
     }
 }

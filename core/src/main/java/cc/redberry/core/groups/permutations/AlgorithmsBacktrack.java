@@ -263,8 +263,17 @@ public final class AlgorithmsBacktrack {
 
     }
 
-    public static Permutation[] leftCosetRepresentatives(ArrayList<? extends BSGSElement> group,
-                                                         ArrayList<? extends BSGSElement> subgroup) {
+    /**
+     * Calculates left coset (gK) representatives of specified subgroup in specified group; each returned transversal
+     * is ≺-least in its coset. The implementation is based on a general backtrack search and prunes tree using a
+     * minimality test. For details see the first method described in 4.6.7 in [Holt05].
+     *
+     * @param group    group
+     * @param subgroup subgroup of specified group
+     * @return left coset representatives
+     */
+    public static Permutation[] leftCosetRepresentatives(final List<? extends BSGSElement> group,
+                                                         final List<? extends BSGSElement> subgroup) {
 
         if (group.size() == 0 || group.get(0).stabilizerGenerators.isEmpty())
             throw new IllegalArgumentException("Empty group.");
@@ -382,6 +391,63 @@ public final class AlgorithmsBacktrack {
                                 word[level - 1].newIndexOfUnderInverse(sortedOrbits[level][tuple[level]])
                         ).composition(word[level - 1]);
         }
+    }
+
+    public static Permutation leftTransversalOf(final Permutation element,
+                                                final List<? extends BSGSElement> group,
+                                                final List<? extends BSGSElement> subgroup) {
+        if (group.size() == 0 || subgroup.size() == 0)
+            throw new IllegalArgumentException("Empty group.");
+
+        final int degree = group.get(0).degree();
+        final ArrayList<BSGSCandidateElement> _subgroup = AlgorithmsBase.asBSGSCandidatesList(subgroup);
+        final int[] base = AlgorithmsBase.getBaseAsArray(group);
+        rebaseWithRedundancy(_subgroup, base, degree);
+
+        //<= We need to find element g which is minimal in coset g*K
+        //Element g is minimal in its coset if and only if for all l, g(β_l) is minimal in orbit if g(β_l) under
+        // subgroup stabilizer of [g(β_1), g(β_2), ..., g(β_l)]
+
+        InducedOrdering ordering = new InducedOrdering(base, degree);
+        Permutation transversal = element;
+        final int[] minimalImage = new int[base.length];
+        int level = 0, image;
+
+        //<= carry out first iteration cycle (need no backtracking)
+
+        //let's find element in K that minimizes element(β_0)
+        image = transversal.newIndexOf(base[level]);
+        //orbit of transversal(β_0)
+        replaceBasePointWithRedundancy(_subgroup, level, image);//this need for search
+        minimalImage[level] = ordering.min(_subgroup.get(level).orbitList);
+        //search minimaizer in K
+        transversal = transversal.composition(_subgroup.get(level).getTransversalOf(minimalImage[level]));
+
+        //reset first base point of K to transversal(β_0), which is minimal in its orbit
+        replaceBasePointWithRedundancy(_subgroup, level, minimalImage[level]);
+
+        //<= main loop
+        for (level = 1; level < group.size(); ++level) {
+
+            image = transversal.newIndexOf(base[level]);
+            minimalImage[level] = ordering.min(Permutations.getOrbitList(_subgroup.get(level).stabilizerGenerators, image));
+            replaceBasePointWithRedundancy(_subgroup, level, minimalImage[level]);
+
+            final int level_ = level, image_ = image;
+            //search minimaizer in K
+            transversal = transversal.composition(
+                    new BacktrackSearch(
+                            _subgroup,
+                            new BacktrackSearchTestFunction() {
+                                @Override
+                                public boolean test(Permutation p, int l) {
+                                    if (l > level_)
+                                        return true;
+                                    return p.newIndexOf(_subgroup.get(l).basePoint) == minimalImage[l];
+                                }
+                            }, Indicator.TRUE_INDICATOR).take());
+        }
+        return transversal;
     }
 
     /**
