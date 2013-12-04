@@ -50,6 +50,7 @@ public class ExpandDenominatorTransformationTest {
     @Test
     public void test3() {
         Tensor a = expandDenominator(parse("(a+b)**2/(c+d)**2"));
+        System.out.println(a);
         Tensor e = parse("(a+b)**2/(c**2+2*c*d+d**2)");
         TAssert.assertEquals(a, e);
     }
@@ -80,6 +81,20 @@ public class ExpandDenominatorTransformationTest {
         Tensor a = expandDenominator(parse("f*(x+(a+b)**2)/((c+d)**2*k*i)"));
         Tensor e = parse("f*(x+(a+b)**2)/(k*c**2*i+2*k*c*d*i+k*d**2*i)");
         TAssert.assertEquals(a, e);
+    }
+
+    @Test
+    public void test8() {
+        Tensor a = expandDenominator(parse("1/((a+b)*c)"));
+        Tensor e = parse("1/(a*c + b*c)");
+        TAssert.assertEquals(a, e);
+    }
+
+    @Test
+    public void test9() {
+    Tensor a = expandDenominator(parse("1/(k_i*(a^i+b^i))**2"));
+    Tensor e = parse("1/(k_i*a^i+k_i*b^i)**2");
+    TAssert.assertEquals(a, e);
     }
     //todo more tests
 }

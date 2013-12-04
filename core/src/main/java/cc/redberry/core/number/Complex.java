@@ -261,6 +261,14 @@ public final class Complex extends Tensor
         return real;
     }
 
+    public Complex getImaginaryPart() {
+        return new Complex(imaginary.getField().getZero(), imaginary);
+    }
+
+    public Complex getRealPart() {
+        return new Complex(real);
+    }
+
     /**
      * Returns {@code true} if this number is real.
      *
