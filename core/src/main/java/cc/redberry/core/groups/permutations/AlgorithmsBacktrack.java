@@ -28,7 +28,6 @@ import cc.redberry.core.utils.IntArrayList;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.ListIterator;
 
 /**
  * Basic algorithms for backtrack search in permutation groups.
@@ -48,16 +47,16 @@ public final class AlgorithmsBacktrack {
      * then it will be extended to the subgroup which we search for. Implementation issues can be found in Sec. 4.6.3
      * in [Holt05].
      *
-     * @param group        base and strong generating set of group
-     * @param subgroup     initial base and strong generating set of subgroup for which we perform search
-     * @param testFunction test function that applies at each level of search tree
-     * @param property     property of subgroup elements
+     * @param group    base and strong generating set of group
+     * @param subgroup initial base and strong generating set of subgroup for which we perform search
+     * @param payload  test function that applies at each level of search tree
+     * @param property property of subgroup elements
      * @see BacktrackSearch
      */
-    public static void subgroupSearch(final List<? extends BSGSElement> group,
-                                      final ArrayList<BSGSCandidateElement> subgroup,
-                                      final BacktrackSearchTestFunction testFunction,
-                                      final Indicator<Permutation> property) {
+    public static void subgroupSearchWithPayload(final List<? extends BSGSElement> group,
+                                                 final ArrayList<BSGSCandidateElement> subgroup,
+                                                 final BacktrackSearchPayload payload,
+                                                 final Indicator<Permutation> property) {
         if (group.size() == 0 || group.get(0).stabilizerGenerators.isEmpty())
             throw new IllegalArgumentException("Empty group.");
 
@@ -72,8 +71,12 @@ public final class AlgorithmsBacktrack {
         final int[] base = AlgorithmsBase.getBaseAsArray(group);
         final int size = group.size();
 
-        if (subgroup.isEmpty())//if subgroup was empty
+        final Permutation identity = group.get(0).stabilizerGenerators.get(0).getIdentity();
+
+        if (subgroup.isEmpty()) {//if subgroup was empty
             subgroup.add(new BSGSCandidateElement(base[0], new ArrayList<Permutation>(), new int[degree]));
+            subgroup.get(0).stabilizerGenerators.add(identity);
+        }
 
         //induced ordering of base points
         final InducedOrdering ordering = new InducedOrdering(base, degree);
@@ -82,7 +85,6 @@ public final class AlgorithmsBacktrack {
         int level = size - 1;
         //current tree branch
         final Permutation[] word = new Permutation[size];
-        final Permutation identity = group.get(0).stabilizerGenerators.get(0).getIdentity();
 
         //cached sorted orbits of base points
         final int[][] cachedSortedOrbits = new int[size][];
@@ -97,6 +99,9 @@ public final class AlgorithmsBacktrack {
             sortedOrbits[i] = cachedSortedOrbits[i];
             word[i] = identity;   //initializing with identity
         }
+
+        //pass reference to payload
+        payload.setWordReference(word);
 
         //tuple[l] - current transversal of l-th base point, i.e. position of vertex at level l in search tree
         final int[] tuple = new int[size];//initialized with zeros!
@@ -161,7 +166,10 @@ public final class AlgorithmsBacktrack {
                     // COROLLARY 4.8
                     && ordering.compare(image, maxRepresentative[level]) < 0
                     //test
-                    && testFunction.test(word[level], level)) {
+                    && payload.test(word[level], level)) {
+
+                payload.beforeLevelIncrement(level);
+
                 //TODO remove following assertion
                 assert assertPartialBaseImage(level, word, base, subgroup_rebase);
 
@@ -199,6 +207,8 @@ public final class AlgorithmsBacktrack {
                 //the next iteration cycle (the line with "isMinimalInOrbit(subgroup_rebase.get(level).orbitList, image, ordering)")
                 replaceBasePointWithRedundancy(subgroup_rebase, level, image);
 
+                payload.afterLevelIncrement(level);
+
                 //NOTE: I suppose there is a mistake at line 12 in SUBGROUPSEARCH in [Holt05], since we cannot
                 // calculate minimal orbit representative R[l+1] before we have calculated next u_l (in line 16). In
                 // order to fix it, we calculate this representatives after we've found next u_l.
@@ -216,7 +226,7 @@ public final class AlgorithmsBacktrack {
                     // COROLLARY 4.8
                     && ordering.compare(image, maxRepresentative[level]) < 0
                     //test
-                    && testFunction.test(word[level], level)
+                    && payload.test(word[level], level)
                     //property
                     && property.is(word[level])) {
 
@@ -261,6 +271,25 @@ public final class AlgorithmsBacktrack {
                         ).composition(word[level - 1]);
         }
 
+    }
+
+    /**
+     * The algorithm performs subgroup search in specified group. If a nonempty initial {@code subgroup} was provided,
+     * then it will be extended to the subgroup which we search for. Implementation issues can be found in Sec. 4.6.3
+     * in [Holt05].
+     *
+     * @param group        base and strong generating set of group
+     * @param subgroup     initial base and strong generating set of subgroup for which we perform search
+     * @param testFunction test function that applies at each level of search tree
+     * @param property     property of subgroup elements
+     * @see BacktrackSearch
+     */
+    public static void subgroupSearch(final List<? extends BSGSElement> group,
+                                      final ArrayList<BSGSCandidateElement> subgroup,
+                                      final BacktrackSearchTestFunction testFunction,
+                                      final Indicator<Permutation> property) {
+        subgroupSearchWithPayload(group, subgroup,
+                BacktrackSearchPayload.createDefaultPayload(testFunction), property);
     }
 
     /**
@@ -435,6 +464,252 @@ public final class AlgorithmsBacktrack {
             replaceBasePointWithRedundancy(_subgroup, level, minimalImage[level]);
         }
         return transversal;
+    }
+
+    public static void intersection(final List<? extends BSGSElement> subgroup,
+                                    final List<? extends BSGSElement> subgroup2,
+                                    final ArrayList<BSGSCandidateElement> intersection) {
+        //todo implement special cases
+
+        if (AlgorithmsBase.getOrder(subgroup2).compareTo(AlgorithmsBase.getOrder(subgroup)) < 0) {
+            intersection(subgroup2, subgroup, intersection);
+            return;
+        }
+
+        final Permutation identity = subgroup.get(0).stabilizerGenerators.get(0).getIdentity();
+        final Permutation[] intersectionWord = new Permutation[subgroup.size()];
+        for (int i = 0; i < intersectionWord.length; ++i)
+            intersectionWord[i] = identity;
+
+        BacktrackSearchPayload payload = new BacktrackSearchPayload() {
+            @Override
+            public void beforeLevelIncrement(int level) {
+                int image = wordReference[level].newIndexOf(subgroup.get(level).basePoint);
+
+                if (level == 0)
+                    intersectionWord[level] = subgroup2.get(level).getTransversalOf(image);
+                else
+                    intersectionWord[level] = subgroup2.get(level).getTransversalOf(
+                            intersectionWord[level - 1].newIndexOfUnderInverse(image)).composition(intersectionWord[level - 1]);
+            }
+
+            @Override
+            public void afterLevelIncrement(int level) {
+            }
+
+            @Override
+            public boolean test(Permutation permutation, int level) {
+                return (level == 0 ||
+                        subgroup2.get(level).belongsToOrbit(
+                                intersectionWord[level - 1].newIndexOfUnderInverse(
+                                        wordReference[level].newIndexOf(
+                                                subgroup.get(level).basePoint))));
+            }
+        };
+
+        subgroupSearchWithPayload(subgroup, intersection, payload, Indicator.TRUE_INDICATOR);
+//
+//        if (subgroup.size() == 0 || subgroup.get(0).stabilizerGenerators.isEmpty())
+//            throw new IllegalArgumentException("Empty group.");
+//
+//        ____VISITED_NODES___[0] = 0;//just for performance debugging
+//
+//
+//        /* The algorithm SUBGROUPSEARCH described in Sec. 4.6.3 in [Holt05] */
+//
+//        //<= initialization
+//
+//        final int degree = subgroup.get(0).degree();
+//        final int[] base = AlgorithmsBase.getBaseAsArray(subgroup);
+//        final int size = subgroup.size();
+//
+//        final Permutation identity = subgroup.get(0).stabilizerGenerators.get(0).getIdentity();
+//
+//        if (intersection.isEmpty()) {//if subgroup was empty
+//            intersection.add(new BSGSCandidateElement(base[0], new ArrayList<Permutation>(), new int[degree]));
+//            intersection.get(0).stabilizerGenerators.add(identity);
+//        }
+//
+//        //induced ordering of base points
+//        final InducedOrdering ordering = new InducedOrdering(base, degree);
+//
+//        //we'll start from the end
+//        int level = size - 1;
+//        //current tree branch
+//        final Permutation[] word = new Permutation[size];
+//        final Permutation[] intersectionWord = new Permutation[size];
+//
+//
+//        //cached sorted orbits of base points
+//        final int[][] cachedSortedOrbits = new int[size][];
+//        //Sorted orbits images under word[l-1] (as used in general search):
+//        // at each level l, sortedOrbit[l] is a sorted orbit of g(β_l) under the stabilizer
+//        // G_[g(β_1), g(β_2), ..., g(β_l-1)].
+//        final int[][] sortedOrbits = new int[size][];
+//        //initializing sorted orbits and word
+//        for (int i = 0; i < size; ++i) {
+//            cachedSortedOrbits[i] = subgroup.get(i).orbitList.toArray();
+//            ArraysUtils.quickSort(cachedSortedOrbits[i], ordering);
+//            sortedOrbits[i] = cachedSortedOrbits[i];
+//            word[i] = intersectionWord[i] = identity;   //initializing with identity
+//        }
+//
+//        //tuple[l] - current transversal of l-th base point, i.e. position of vertex at level l in search tree
+//        final int[] tuple = new int[size];//initialized with zeros!
+//        //rebase to base of basic group
+//        rebaseWithRedundancy(intersection, base, degree);
+//
+//        //subgroupLevel is a level in a search tree at each we are looking for subgroup representatives.
+//        //For each vertex at current subgroupLevel we need to find only one subgroup representative,
+//        // if we've found a new subgroup representative at level > subgroupLevel, then we can skip all the rest elements
+//        // in this tree branch by setting level = subgroupLevel.
+//        int subgroupLevel = level;
+//
+//        //<= data structure to test condition (i) in PROPOSITION 4.7
+//        ArrayList<BSGSCandidateElement> intersection_rebase = AlgorithmsBase.clone(intersection);
+//        //todo remove beta_f to avoid identities (and how?)
+//
+//        //<= data structure to test condition (ii) in PROPOSITION 4.7
+//        final int[] maxImages = new int[size];//initialized with zeros
+//        maxImages[level] = ordering.minElement();//element smaller then all points
+//        //This used to test COROLLARY 4.8: if g -- ≺-least in Kg, then according to (ii) g(β_l) -- ≺-least in
+//        final int[] maxRepresentative = new int[size];
+//        maxRepresentative[level] = maxRepresentative(sortedOrbits[level], intersection.get(level).orbitSize(), ordering);
+//
+//        //<= initialized
+//
+//        int image;
+//        while (true) {
+//            //at each level we test our basic image to satisfy required conditions for a double coset minimality
+//
+//            image = word[level].newIndexOf(base[level]);
+//            //Calculating the orbit of g(β_l) under stabilizer of [g(β_1), g(β_1),...g(β_l-1)] which will be used in
+//            // the first iteration (the line with "isMinimalInOrbit(subgroup_rebase.get(level).orbitList, image,
+//            // ordering)").
+//            replaceBasePointWithRedundancy(intersection_rebase, level, image);
+//            while (level < size - 1
+//                    // check PROPOSITION 4.7 (i)
+//                    //≺-least element of subgroup orbits with respect to base g(B(l))
+//                    && isMinimalInOrbit(intersection_rebase.get(level).orbitList, image, ordering)
+//                    // modified PROPOSITION 4.7 (ii)
+//                    && ordering.compare(image, maxImages[level]) > 0
+//                    // COROLLARY 4.8
+//                    && ordering.compare(image, maxRepresentative[level]) < 0
+//                    //test
+//                    && (level == 0 || subgroup2.get(level).belongsToOrbit(intersectionWord[level - 1].newIndexOfUnderInverse(image)))) {
+//
+//                if (level == 0)
+//                    intersectionWord[level] = subgroup2.get(level).getTransversalOf(image);
+//                else
+//                    intersectionWord[level] = subgroup2.get(level).getTransversalOf(
+//                            intersectionWord[level - 1].newIndexOfUnderInverse(image)).composition(intersectionWord[level - 1]);
+//
+//                //TODO remove following assertion
+//                assert assertPartialBaseImage(level, word, base, intersection_rebase);
+//
+//                //<= entering next level
+//                ++level;
+//
+//                //recalculate sorted orbit
+//                if (word[level - 1].isIdentity())
+//                    sortedOrbits[level] = cachedSortedOrbits[level];
+//                else {
+//                    sortedOrbits[level] = word[level - 1].imageOf(subgroup.get(level).orbitList.toArray());
+//                    ArraysUtils.quickSort(sortedOrbits[level], ordering);
+//                }
+//
+//                //<= recalculate data needed to test (ii) from PROPOSITION 4.7
+//                //try to find those orbits that contain current image
+//                int max = ordering.minElement();
+//                for (int j = 0; j < level; ++j)
+//                    if (intersection.get(j).belongsToOrbit(base[level]))
+//                        max = ordering.max(max, word[j].newIndexOf(base[j]));
+//
+//                maxImages[level] = max;
+//                maxRepresentative[level] = maxRepresentative(sortedOrbits[level], intersection.get(level).orbitSize(), ordering);
+//
+//                //reset tuple and calculate next permutation
+//                tuple[level] = 0;
+//                word[level] =
+//                        subgroup.get(level).getTransversalOf(
+//                                word[level - 1].newIndexOfUnderInverse(sortedOrbits[level][tuple[level]])
+//                        ).composition(word[level - 1]);
+//
+//
+//                image = word[level].newIndexOf(base[level]);
+//
+//                //calculating the orbit of g(β_l) under stabilizer of [g(β_1), g(β_1),...g(β_l-1)] which will be used in
+//                //the next iteration cycle (the line with "isMinimalInOrbit(subgroup_rebase.get(level).orbitList, image, ordering)")
+//                replaceBasePointWithRedundancy(intersection_rebase, level, image);
+//
+//                //NOTE: I suppose there is a mistake at line 12 in SUBGROUPSEARCH in [Holt05], since we cannot
+//                // calculate minimal orbit representative R[l+1] before we have calculated next u_l (in line 16). In
+//                // order to fix it, we calculate this representatives after we've found next u_l.
+//            }
+//
+//            ++____VISITED_NODES___[0];
+//            //<= here we obtained next permutation in group
+//            //we need to test whether it belongs to subgroup
+//            if (level == size - 1
+//                    // check PROPOSITION 4.7 (i)
+//                    //≺-least element of subgroup orbits with respect to base g(B(l))
+//                    && isMinimalInOrbit(intersection_rebase.get(level).orbitList, image, ordering)
+//                    // modified PROPOSITION 4.7 (ii)
+//                    && ordering.compare(image, maxImages[level]) > 0
+//                    // COROLLARY 4.8
+//                    && ordering.compare(image, maxRepresentative[level]) < 0
+//                    //test
+//                    && subgroup2.get(level).belongsToOrbit(intersectionWord[level - 1].newIndexOfUnderInverse(image))) {
+//
+//                //<= here we obtained next permutation in group that is a new generator in the subgroup we search for
+//                //extend group with a new generator
+//                intersection.get(0).stabilizerGenerators.add(word[level]);
+//                intersection.get(0).recalculateOrbitAndSchreierVector();
+//                //recalculate subgroup
+//                AlgorithmsBase.SchreierSimsAlgorithm(intersection);
+//
+//                //dump subgroup_rebase
+//                intersection_rebase = AlgorithmsBase.clone(intersection);
+//
+//                //<= we've found new subgroup generator and we can skip all other elements in current branch:
+//                level = subgroupLevel;
+//            }
+//
+//            //<= now we need to go down the tree
+//            while (level >= 0 && tuple[level] == subgroup.get(level).orbitList.size() - 1)
+//                --level;
+//
+//            if (level == -1)
+//                return; //all elements scanned
+//
+//            if (level < subgroupLevel) {
+//                //setup new subgroupLevel
+//                subgroupLevel = level;
+//                tuple[level] = 0;
+//                //<= recalculate data needed to test (ii) from PROPOSITION 4.7
+//                maxImages[level] = ordering.minElement();
+//                maxRepresentative[level] = maxRepresentative(sortedOrbits[level], intersection.get(level).orbitSize(), ordering);
+//            }
+//
+//            //<= next vertex at current level
+//            ++tuple[level];
+//
+//            if (level == 0)
+//                word[0] = subgroup.get(0).getTransversalOf(sortedOrbits[0][tuple[0]]);
+//            else
+//                word[level] =
+//                        subgroup.get(level).getTransversalOf(
+//                                word[level - 1].newIndexOfUnderInverse(sortedOrbits[level][tuple[level]])
+//                        ).composition(word[level - 1]);
+//
+//        }
+
+    }
+
+    public static void normalizer(List<? extends BSGSElement> group,
+                                  ArrayList<BSGSCandidateElement> normalizer,
+                                  List<? extends Permutation> set) {
+
     }
 
     /**

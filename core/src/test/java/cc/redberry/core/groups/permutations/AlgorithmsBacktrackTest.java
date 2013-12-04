@@ -471,6 +471,21 @@ public class AlgorithmsBacktrackTest {
         System.out.println(visited);
     }
 
+    @Test
+    public void testIntersection1() {
+        Permutation gen0 = new PermutationOneLine(4, 3, 9, 1, 0, 5, 10, 7, 8, 2, 6);
+        Permutation gen1 = new PermutationOneLine(0, 1, 10, 6, 2, 7, 8, 9, 3, 5, 4);
+
+        List<BSGSElement> pg = PermutationGroupFactory.createPermutationGroup(gen0, gen1).getBSGS().BSGSList;
+        System.out.println(getOrder(pg));
+        List<BSGSElement> sym = AlgorithmsBase.createSymmetricGroupBSGS(gen0.degree());
+        ArrayList<BSGSCandidateElement> intersection = new ArrayList<>();
+
+        AlgorithmsBacktrack.intersection(pg, sym, intersection);
+        System.out.println(intersection.get(0).stabilizerGenerators);
+        System.out.println(getOrder(intersection));
+    }
+
     public static PermutationGroup testSearchStabilizerRaw(PermutationGroup pg, int[] set) {
         List<BSGSElement> bsgs = pg.getBSGS().getBSGSList();
         int degree = pg.degree();
