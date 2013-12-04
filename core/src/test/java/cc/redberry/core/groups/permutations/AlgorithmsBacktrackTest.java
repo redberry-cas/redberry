@@ -308,6 +308,17 @@ public class AlgorithmsBacktrackTest {
         testSearchStabilizerRaw(pg, set);
     }
 
+    @Test
+    public void testSetwiseStabilizer1d_raw() {
+        PermutationGroup group = GapPrimitiveGroupsReader.readGroupFromGap("/home/stas/gap4r6/prim/grps/gps1.g", 34);
+        ArrayList<BSGSCandidateElement> bsgs = group.getBSGSCandidate();
+        AlgorithmsBase.rebase(bsgs, new int[]{2, 3});
+
+        int[] set = {2, 3};
+        PermutationGroup pg = testSearchStabilizerRaw(bsgs, set);
+        System.out.println(pg);
+    }
+
 
     @Test
     public void testLeftCosetRepresentatives1() {
@@ -487,8 +498,11 @@ public class AlgorithmsBacktrackTest {
     }
 
     public static PermutationGroup testSearchStabilizerRaw(PermutationGroup pg, int[] set) {
-        List<BSGSElement> bsgs = pg.getBSGS();
-        int degree = pg.degree();
+        return testSearchStabilizerRaw(pg.getBSGS(), set);
+    }
+
+    public static PermutationGroup testSearchStabilizerRaw(List<? extends BSGSElement> bsgs, int[] set) {
+        int degree = bsgs.get(0).degree();
         int[] base = getBaseAsArray(bsgs);
         RawSetwiseStabilizerCriteria rw = new RawSetwiseStabilizerCriteria(set, base);
 

@@ -326,11 +326,11 @@ public final class AlgorithmsBacktrack {
      * @see BacktrackSearch
      */
     public static void subgroupSearch(final List<? extends BSGSElement> group,
-                               final ArrayList<BSGSCandidateElement> subgroup,
-                               final BacktrackSearchTestFunction testFunction,
-                               final Indicator<Permutation> property,
-                               final int[] base,
-                               final InducedOrdering ordering) {
+                                      final ArrayList<BSGSCandidateElement> subgroup,
+                                      final BacktrackSearchTestFunction testFunction,
+                                      final Indicator<Permutation> property,
+                                      final int[] base,
+                                      final InducedOrdering ordering) {
         subgroupSearchWithPayload(group, subgroup,
                 BacktrackSearchPayload.createDefaultPayload(testFunction), property, base, ordering);
     }
@@ -346,6 +346,26 @@ public final class AlgorithmsBacktrack {
      */
     public static Permutation[] leftCosetRepresentatives(final List<? extends BSGSElement> group,
                                                          final List<? extends BSGSElement> subgroup) {
+        final int[] base = AlgorithmsBase.getBaseAsArray(group);
+        final InducedOrdering ordering = new InducedOrdering(base, group.get(0).degree());
+        return leftCosetRepresentatives(group, subgroup, base, ordering);
+    }
+
+    /**
+     * Calculates left coset (gK) representatives of specified subgroup in specified group; each returned transversal
+     * is ≺-least in its coset. The implementation is based on a general backtrack search and prunes tree using a
+     * minimality test. For details see the first method described in 4.6.7 in [Holt05].
+     *
+     * @param group    group
+     * @param subgroup subgroup of specified group
+     * @param base     precomputed base
+     * @param ordering precomputed ordering
+     * @return left coset representatives
+     */
+    public static Permutation[] leftCosetRepresentatives(final List<? extends BSGSElement> group,
+                                                         final List<? extends BSGSElement> subgroup,
+                                                         final int[] base,
+                                                         final InducedOrdering ordering) {
 
         if (group.size() == 0 || group.get(0).stabilizerGenerators.isEmpty())
             throw new IllegalArgumentException("Empty group.");
@@ -360,11 +380,7 @@ public final class AlgorithmsBacktrack {
         //<= initialization
 
         final int degree = group.get(0).degree();
-        final int[] base = AlgorithmsBase.getBaseAsArray(group);
         final int size = group.size();
-
-        //induced ordering of base points
-        final InducedOrdering ordering = new InducedOrdering(base, degree);
 
         //we'll start from the end
         int level = size - 1;
@@ -476,19 +492,38 @@ public final class AlgorithmsBacktrack {
     public static Permutation leftTransversalOf(final Permutation element,
                                                 final List<? extends BSGSElement> group,
                                                 final List<? extends BSGSElement> subgroup) {
+        final int[] base = AlgorithmsBase.getBaseAsArray(group);
+        final InducedOrdering ordering = new InducedOrdering(base, group.get(0).degree());
+        return leftTransversalOf(element, group, subgroup, base, ordering);
+    }
+
+    /**
+     * Returns coset representative of specified element; the returned representative will be minimal in its coset.
+     *
+     * @param element  group element
+     * @param group    group
+     * @param subgroup subgroup
+     * @param base     precomputed base
+     * @param ordering precomputed ordering
+     * @return coset representative of specified group element
+     */
+    public static Permutation leftTransversalOf(final Permutation element,
+                                                final List<? extends BSGSElement> group,
+                                                final List<? extends BSGSElement> subgroup,
+                                                final int[] base,
+                                                final InducedOrdering ordering) {
+
         if (group.size() == 0 || subgroup.size() == 0)
             throw new IllegalArgumentException("Empty group.");
 
         final int degree = group.get(0).degree();
         final ArrayList<BSGSCandidateElement> _subgroup = AlgorithmsBase.asBSGSCandidatesList(subgroup);
-        final int[] base = AlgorithmsBase.getBaseAsArray(group);
         rebaseWithRedundancy(_subgroup, base, degree);
 
         //<= We need to find element g which is minimal in coset g*K
         //Element g is minimal in its coset if and only if for all l, g(β_l) is minimal in orbit if g(β_l) under
         // subgroup stabilizer of [g(β_1), g(β_2), ..., g(β_l)]
 
-        InducedOrdering ordering = new InducedOrdering(base, degree);
         Permutation transversal = element;
         final int[] minimalImage = new int[base.length];
 
@@ -510,6 +545,13 @@ public final class AlgorithmsBacktrack {
     }
 
 
+    /**
+     * Calculates intersection of given subgroups using {@link #subgroupSearch(java.util.List, java.util.ArrayList, BacktrackSearchTestFunction, cc.redberry.core.utils.Indicator)}.
+     *
+     * @param subgroup1    permutation group
+     * @param subgroup2    permutation group
+     * @param intersection initial intersection of given groups
+     */
     public static void intersection(final List<? extends BSGSElement> subgroup1,
                                     final List<? extends BSGSElement> subgroup2,
                                     final ArrayList<BSGSCandidateElement> intersection) {

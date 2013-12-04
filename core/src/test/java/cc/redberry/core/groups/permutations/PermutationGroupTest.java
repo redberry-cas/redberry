@@ -379,7 +379,10 @@ public class PermutationGroupTest {
     @Test
     public void testSetwiseStabilizer1() {
         PermutationGroup group = GapPrimitiveGroupsReader.readGroupFromGap("/home/stas/gap4r6/prim/grps/gps1.g", 34);
-        System.out.println(group.setwiseStabilizer(2, 3));
+        System.out.println(group.order());
+        PermutationGroup stab = group.setwiseStabilizer(5, 3);
+        System.out.println(stab.order());
+        System.out.println(group.order().divide(stab.order()));
 
     }
 

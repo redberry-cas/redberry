@@ -978,6 +978,32 @@ public class AlgorithmsBase {
 
     //------------------------------ FACTORIES --------------------------------------------//
 
+    public static ArrayList<? extends BSGSElement> union(ArrayList<? extends BSGSElement> bsgs1,
+                                                         ArrayList<? extends BSGSElement> bsgs2) {
+        if (bsgs2.isEmpty())
+            return bsgs1;
+        if (bsgs1.isEmpty())
+            return bsgs2;
+
+        int[] base1 = getBaseAsArray(bsgs1),
+                base2 = getBaseAsArray(bsgs2);
+        int[] base = MathUtils.intSetUnion(base1, base2);
+        ArrayList<Permutation> generators = new ArrayList<>();
+        generators.addAll(bsgs1.get(0).stabilizerGenerators);
+        generators.addAll(bsgs1.get(0).stabilizerGenerators);
+
+        ArrayList<BSGSCandidateElement> bsgs = (ArrayList) createRawBSGSCandidate(base, generators);
+
+        SchreierSimsAlgorithm(bsgs);
+        return bsgs;
+    }
+
+    /**
+     * Creates an empty BSGS structure with single zero base point and one identity stabilizer.
+     *
+     * @param degree group degree
+     * @return empty BSGS structure with single zero base point and one identity stabilizer
+     */
     public static ArrayList<BSGSElement> createEmptyBSGS(int degree) {
         ArrayList<BSGSElement> bsgs = new ArrayList<>();
         ArrayList<Permutation> gens = new ArrayList<>();
@@ -1163,17 +1189,6 @@ public class AlgorithmsBase {
         for (int i = 0, size = BSGS.size(); i < size; ++i)
             base[i] = BSGS.get(i).basePoint;
         return base;
-    }
-
-    /**
-     * Makes BSGS immutable
-     *
-     * @param BSGS BSGS
-     */
-    public static void makeImmutable(final List<BSGSElement> BSGS) {
-        ListIterator<BSGSElement> iterator = BSGS.listIterator();
-        while (iterator.hasNext())
-            iterator.set(iterator.next().asBSGSElement());
     }
 
     /**

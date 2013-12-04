@@ -689,6 +689,25 @@ public class AlgorithmsBaseTest {
     }
 
     @Test
+    public void rebaseWithConjugationAndTranspositions1b() {
+        PermutationGroup pg = GapPrimitiveGroupsReader.readGroupFromGap("/home/stas/gap4r6/prim/grps/gps1.g", 34);
+//        Permutation gen0 = new PermutationOneLine(6, 7, 8, 9, 10, 0, 11, 12, 13, 14, 1, 15, 16, 17, 2, 18, 19, 3, 20, 4, 5, 21);
+//        Permutation gen1 = new PermutationOneLine(0, 13, 6, 20, 10, 8, 11, 1, 4, 3, 15, 12, 18, 17, 9, 5, 14, 19, 2, 7, 16, 21);
+//        Permutation gen2 = new PermutationOneLine(0, 9, 12, 10, 17, 5, 6, 14, 16, 1, 3, 11, 2, 19, 7, 15, 8, 4, 18, 13, 20, 21);
+//        Permutation gen3 = new PermutationOneLine(21, 9, 13, 16, 4, 5, 6, 14, 10, 1, 8, 11, 19, 2, 7, 15, 3, 17, 20, 12, 18, 0);
+//
+//        PermutationGroup pg = PermutationGroupFactory.createPermutationGroup(gen0, gen1, gen2, gen3);
+
+        ArrayList<BSGSCandidateElement> bsgs = pg.getBSGSCandidate();
+        assertTrue(isBSGS(bsgs));
+
+        int[] newBase = {2, 3};
+        rebaseWithConjugationAndTranspositions(bsgs,newBase);
+
+        assertTrue(isBSGS(bsgs));
+    }
+
+    @Test
     public void rebaseFromScratch1() {
         PermutationGroup[] pgs = GapPrimitiveGroupsReader.readGroupsFromGap("/home/stas/gap4r6/prim/grps/gps1.g");
 
