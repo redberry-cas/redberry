@@ -25,7 +25,6 @@ package cc.redberry.core.groups.permutations;
 import cc.redberry.core.context.CC;
 import cc.redberry.core.groups.permutations.gap.GapPrimitiveGroupsReader;
 import cc.redberry.core.number.NumberUtils;
-import cc.redberry.core.utils.IntArrayList;
 import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.random.Well1024a;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
@@ -64,7 +63,7 @@ public class AlgorithmsBaseTest {
                 }
             }
             assertTrue(isBSGS(bsgs));
-            assertEquals(NumberUtils.factorial(degree), getOrder(bsgs));
+            assertEquals(NumberUtils.factorial(degree), calculateOrder(bsgs));
         }
     }
 
@@ -83,7 +82,7 @@ public class AlgorithmsBaseTest {
                 }
             }
             assertTrue(isBSGS(bsgs));
-            assertEquals(NumberUtils.factorial(degree), getOrder(bsgs));
+            assertEquals(NumberUtils.factorial(degree), calculateOrder(bsgs));
         }
     }
 
@@ -205,8 +204,8 @@ public class AlgorithmsBaseTest {
             SchreierSimsAlgorithm(BSGSCandidateCopy);
 
             assertSameGroups(
-                    new PermutationGroupImpl(new BaseAndStrongGeneratingSet(AlgorithmsBase.asBSGSList(BSGSCandidate))),
-                    new PermutationGroupImpl(new BaseAndStrongGeneratingSet(AlgorithmsBase.asBSGSList(BSGSCandidateCopy))));
+                    new PermutationGroup(AlgorithmsBase.asBSGSList(BSGSCandidate)),
+                    new PermutationGroup(AlgorithmsBase.asBSGSList(BSGSCandidateCopy)));
         }
         System.out.println(removed);
     }
@@ -241,7 +240,7 @@ public class AlgorithmsBaseTest {
             bsgs2 = AlgorithmsBase.clone(bsgs1);
 
             SchreierSimsAlgorithm(bsgs1);
-            BigInteger order = getOrder(bsgs1);
+            BigInteger order = calculateOrder(bsgs1);
 
             RandomSchreierSimsAlgorithmForKnownOrder(bsgs2, order, randomGenerator);
             removeRedundantGenerators(bsgs2);
@@ -269,7 +268,7 @@ public class AlgorithmsBaseTest {
                 c = new PermutationOneLine(2, 1, 0, 3, 4, 5);
         ArrayList<BSGSCandidateElement> bsgs = (ArrayList) createRawBSGSCandidate(a, b, c);
         SchreierSimsAlgorithm(bsgs);
-        int order = getOrder(bsgs).intValue();
+        int order = calculateOrder(bsgs).intValue();
 
         int _order_ = 0;
         BruteForcePermutationIterator it = new BruteForcePermutationIterator(Arrays.asList(a, b, c));
@@ -348,7 +347,7 @@ public class AlgorithmsBaseTest {
                 b = new PermutationOneLine(7, 4, 1, 8, 5, 2, 9, 0, 6, 3);
         ArrayList<BSGSCandidateElement> bsgs = (ArrayList) createRawBSGSCandidate(a, b);
         SchreierSimsAlgorithm(bsgs);
-        assertEquals(getOrder(bsgs).intValue(), 120);
+        assertEquals(calculateOrder(bsgs).intValue(), 120);
 
         //0,1,2
         int[] oldBase = {0, 1, 2};
@@ -370,7 +369,7 @@ public class AlgorithmsBaseTest {
         int degree = a.degree();
         ArrayList<BSGSCandidateElement> bsgs = (ArrayList) createRawBSGSCandidate(a, b);
         SchreierSimsAlgorithm(bsgs);
-        assertEquals(getOrder(bsgs).intValue(), 120);
+        assertEquals(calculateOrder(bsgs).intValue(), 120);
 
         //0,1,2
         int[] oldBase = {0, 1, 2};
@@ -389,7 +388,7 @@ public class AlgorithmsBaseTest {
         int degree = a.degree();
         ArrayList<BSGSCandidateElement> bsgs = (ArrayList) createRawBSGSCandidate(a, b);
         SchreierSimsAlgorithm(bsgs);
-        assertEquals(getOrder(bsgs).intValue(), 120);
+        assertEquals(calculateOrder(bsgs).intValue(), 120);
         //real base: 0,1,2
         int[] oldBase = {0, 1, 2};
 
@@ -443,7 +442,7 @@ public class AlgorithmsBaseTest {
 //
 //        ArrayList<BSGSCandidateElement> bsgs = (ArrayList) createRawBSGSCandidate(a, b);
 //        SchreierSimsAlgorithm(bsgs);
-//        assertEquals(getOrder(bsgs).intValue(), 120);
+//        assertEquals(order(bsgs).intValue(), 120);
 //
 //        //0,1,2
 //        int[] oldBase = {0, 1, 2};
@@ -493,7 +492,7 @@ public class AlgorithmsBaseTest {
     public void testRebaseWithTranspositions2() {
 
         PermutationGroup pg = GapPrimitiveGroupsReader.readGroupFromGap("/home/stas/gap4r6/prim/grps/gps1.g", 6);
-        final ArrayList<BSGSCandidateElement> bsgs = pg.getBSGS().getBSGSCandidateList();
+        final ArrayList<BSGSCandidateElement> bsgs = pg.getBSGSCandidate();
         final int[] newBase = {1, 2, 0};
 
 
@@ -516,7 +515,7 @@ public class AlgorithmsBaseTest {
         PermutationGroup[] pgs = GapPrimitiveGroupsReader.readGroupsFromGap("/home/stas/gap4r6/prim/grps/gps1.g");
         DescriptiveStatistics timings = new DescriptiveStatistics();
         for (int i = 0; i < pgs.length; ++i) {
-            final ArrayList<BSGSCandidateElement> bsgs = pgs[i].getBSGS().getBSGSCandidateList();
+            final ArrayList<BSGSCandidateElement> bsgs = pgs[i].getBSGSCandidate();
             Object[] r = timing(
                     new TimingJob() {
                         @Override
@@ -554,7 +553,7 @@ public class AlgorithmsBaseTest {
                 c = new PermutationOneLine(0, 9, 12, 10, 17, 5, 6, 14, 16, 1, 3, 11, 2, 19, 7, 15, 8, 4, 18, 13, 20);
         PermutationGroup pg = PermutationGroupFactory.createPermutationGroup(a, b, c);
 
-        final ArrayList<BSGSCandidateElement> bsgs = pg.getBSGS().getBSGSCandidateList();
+        final ArrayList<BSGSCandidateElement> bsgs = pg.getBSGSCandidate();
         final int[] newBase = {3, 4, 0, 1, 2};
         timing(
                 new TimingJob() {
@@ -577,7 +576,7 @@ public class AlgorithmsBaseTest {
         Permutation gen2 = new PermutationOneLine(1, 2, 3, 4, 0, 6, 7, 8, 9, 5, 16, 17, 18, 19, 15, 21, 22, 23, 24, 20, 11, 12, 13, 14, 10);
         PermutationGroup pg = PermutationGroupFactory.createPermutationGroup(gen0, gen1, gen2);
 
-        final ArrayList<BSGSCandidateElement> bsgs = pg.getBSGS().getBSGSCandidateList();
+        final ArrayList<BSGSCandidateElement> bsgs = pg.getBSGSCandidate();
         int[] oldBase = {0, 1, 2, 3, 4, 5, 7, 8, 9, 10};
         final int[] newBase = {0, 1, 7, 5, 10, 8, 3, 9, 2, 4};
 
@@ -608,7 +607,7 @@ public class AlgorithmsBaseTest {
         Permutation gen2 = new PermutationOneLine(0, 5, 10, 20, 15, 1, 6, 11, 21, 16, 2, 7, 12, 22, 17, 3, 8, 13, 23, 18, 4, 9, 14, 24, 19);
         PermutationGroup pg = PermutationGroupFactory.createPermutationGroup(gen0, gen1, gen2);
 
-        final ArrayList<BSGSCandidateElement> bsgs = pg.getBSGS().getBSGSCandidateList();
+        final ArrayList<BSGSCandidateElement> bsgs = pg.getBSGSCandidate();
         int[] oldBase = {1, 0, 2, 3, 5, 10};
         final int[] newBase = {2, 3, 10, 0, 5, 1};
 
@@ -636,7 +635,7 @@ public class AlgorithmsBaseTest {
 
         DescriptiveStatistics timings = new DescriptiveStatistics();
         for (int i = 0; i < pgs.length; ++i) {
-            final ArrayList<BSGSCandidateElement> bsgs = pgs[i].getBSGS().getBSGSCandidateList();
+            final ArrayList<BSGSCandidateElement> bsgs = pgs[i].getBSGSCandidate();
             Object[] r = timing(
                     new TimingJob() {
                         @Override
@@ -676,7 +675,7 @@ public class AlgorithmsBaseTest {
         Permutation gen2 = new PermutationOneLine(7, 6, 3, 2, 5, 4, 1, 0);
         PermutationGroup pg = PermutationGroupFactory.createPermutationGroup(gen0, gen1, gen2);
 
-        final ArrayList<BSGSCandidateElement> bsgs = pg.getBSGS().getBSGSCandidateList();
+        final ArrayList<BSGSCandidateElement> bsgs = pg.getBSGSCandidate();
         int[] oldBase = {0, 1, 2};
         int[] newBase = {2, 0, 1};
 
@@ -694,7 +693,7 @@ public class AlgorithmsBaseTest {
         PermutationGroup[] pgs = GapPrimitiveGroupsReader.readGroupsFromGap("/home/stas/gap4r6/prim/grps/gps1.g");
 
         for (int i = 0; i < pgs.length; ++i) {
-            final ArrayList<BSGSCandidateElement> bsgs = pgs[i].getBSGS().getBSGSCandidateList();
+            final ArrayList<BSGSCandidateElement> bsgs = pgs[i].getBSGSCandidate();
             timing(
                     new TimingJob() {
                         @Override
@@ -752,7 +751,7 @@ public class AlgorithmsBaseTest {
             start = currentTimeMillis();
             SchreierSimsAlgorithm(BSGSCandidate1);
             statSchreierSims.addValue(currentTimeMillis() - start);
-            BigInteger order = getOrder(BSGSCandidate1);
+            BigInteger order = calculateOrder(BSGSCandidate1);
 
             //----------------------Random Schreier-Sims------------------------------------//
             start = currentTimeMillis();
@@ -771,12 +770,12 @@ public class AlgorithmsBaseTest {
 
             //------------------------------assertions-------------------------------------//
             assertSameGroups(
-                    new PermutationGroupImpl(new BaseAndStrongGeneratingSet(AlgorithmsBase.asBSGSList(BSGSCandidate1))),
-                    new PermutationGroupImpl(new BaseAndStrongGeneratingSet(AlgorithmsBase.asBSGSList(BSGSCandidate2))));
+                    new PermutationGroup(AlgorithmsBase.asBSGSList(BSGSCandidate1)),
+                    new PermutationGroup(AlgorithmsBase.asBSGSList(BSGSCandidate2)));
 
             assertSameGroups(
-                    new PermutationGroupImpl(new BaseAndStrongGeneratingSet(AlgorithmsBase.asBSGSList(BSGSCandidate1))),
-                    new PermutationGroupImpl(new BaseAndStrongGeneratingSet(AlgorithmsBase.asBSGSList(BSGSCandidate3))));
+                    new PermutationGroup(AlgorithmsBase.asBSGSList(BSGSCandidate1)),
+                    new PermutationGroup(AlgorithmsBase.asBSGSList(BSGSCandidate3)));
         }
 
         System.out.println("Schreier-sims:");
@@ -823,7 +822,7 @@ public class AlgorithmsBaseTest {
             start = currentTimeMillis();
             SchreierSimsAlgorithm(BSGSCandidate1);
             System.out.println("Schreier-Sims :" + (currentTimeMillis() - start));
-            BigInteger order = getOrder(BSGSCandidate1);
+            BigInteger order = calculateOrder(BSGSCandidate1);
 
             //----------------------Random Schreier-Sims------------------------------------//
             System.out.println("Random Screier-Sims CL: " + (int) (-FastMath.log(2, 1 - confidenceLevel)));
@@ -850,12 +849,12 @@ public class AlgorithmsBaseTest {
 
             //------------------------------assertions-------------------------------------//
             assertSameGroups(
-                    new PermutationGroupImpl(new BaseAndStrongGeneratingSet(AlgorithmsBase.asBSGSList(BSGSCandidate1))),
-                    new PermutationGroupImpl(new BaseAndStrongGeneratingSet(AlgorithmsBase.asBSGSList(BSGSCandidate2))));
+                    new PermutationGroup(AlgorithmsBase.asBSGSList(BSGSCandidate1)),
+                    new PermutationGroup(AlgorithmsBase.asBSGSList(BSGSCandidate2)));
 
             assertSameGroups(
-                    new PermutationGroupImpl(new BaseAndStrongGeneratingSet(AlgorithmsBase.asBSGSList(BSGSCandidate1))),
-                    new PermutationGroupImpl(new BaseAndStrongGeneratingSet(AlgorithmsBase.asBSGSList(BSGSCandidate3))));
+                    new PermutationGroup(AlgorithmsBase.asBSGSList(BSGSCandidate1)),
+                    new PermutationGroup(AlgorithmsBase.asBSGSList(BSGSCandidate3)));
         }
     }
 
@@ -877,7 +876,7 @@ public class AlgorithmsBaseTest {
 
             SchreierSimsAlgorithm(bsgs = (ArrayList) createRawBSGSCandidate(generators.toArray(new Permutation[0])));
             RandomSchreierSimsAlgorithm((ArrayList) createRawBSGSCandidate(generators.toArray(new Permutation[0])), 0.99, randomGenerator);
-            RandomSchreierSimsAlgorithmForKnownOrder(bsgs, getOrder(bsgs), randomGenerator);
+            RandomSchreierSimsAlgorithmForKnownOrder(bsgs, calculateOrder(bsgs), randomGenerator);
         }
         System.out.println("JVM warmed up.");
     }
@@ -886,9 +885,9 @@ public class AlgorithmsBaseTest {
     private static void assertSameGroups(PermutationGroup p1, PermutationGroup p2) {
         assertTrue(p1.order().equals(p2.order()));
         for (Permutation a : p1.generators())
-            assertTrue(p2.isMember(a));
+            assertTrue(p2.membershipTest(a));
         for (Permutation a : p2.generators())
-            assertTrue(p1.isMember(a));
+            assertTrue(p1.membershipTest(a));
     }
 
     static void soutGenerators(List<Permutation> generators) {

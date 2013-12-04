@@ -32,6 +32,7 @@ import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import static cc.redberry.core.TAssert.assertTrue;
@@ -83,7 +84,7 @@ public class PermutationsTestUtils {
      * @return
      */
     public static PermutationGroup calculateRawSetwiseStabilizer(PermutationGroup pg, int[] set) {
-        List<BSGSElement> bsgs = pg.getBSGS().getBSGSList();
+        List<BSGSElement> bsgs = pg.getBSGS();
         int degree = pg.degree();
         int[] base = getBaseAsArray(bsgs);
         RawSetwiseStabilizerCriteria rw = new RawSetwiseStabilizerCriteria(set, base);
@@ -94,7 +95,8 @@ public class PermutationsTestUtils {
         subgroup.get(0).stabilizerGenerators.add(Permutations.getIdentityOneLine(degree));
 
         AlgorithmsBacktrack.subgroupSearch(bsgs, subgroup, rw, rw);
-        return new PermutationGroupImpl(new BaseAndStrongGeneratingSet(AlgorithmsBase.asBSGSList(subgroup)));
+        return new PermutationGroup(
+                Collections.unmodifiableList(AlgorithmsBase.asBSGSList(subgroup)));
     }
 
     public static void assertHaveNoIntersections(Permutation[] a, Permutation[] b) {

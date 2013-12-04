@@ -23,8 +23,10 @@
 package cc.redberry.core.groups.permutations;
 
 import cc.redberry.core.context.CC;
+import cc.redberry.core.utils.ArraysUtils;
 import cc.redberry.core.utils.BitArray;
 import cc.redberry.core.utils.IntArrayList;
+import cc.redberry.core.utils.MathUtils;
 import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.util.FastMath;
 
@@ -87,6 +89,20 @@ public class AlgorithmsBase {
             permutation = permutation.composition(BSGS.get(i).getInverseTransversalOf(beta));
         }
         return new StripContainer(BSGS.size(), permutation);
+    }
+
+    /**
+     * Returns whether specified permutation belongs to permutation group defined by specified base and strong
+     * generating set.
+     *
+     * @param BSGS        base and strong generating set
+     * @param permutation permutation
+     * @return true if specified permutation belongs to permutation group defined by specified base and strong
+     *         generating set
+     */
+    public static boolean membershipTest(final List<? extends BSGSElement> BSGS, Permutation permutation) {
+        StripContainer sc = strip(BSGS, permutation);
+        return sc.terminationLevel == BSGS.size() && sc.remainder.isIdentity();
     }
 
     /**
@@ -524,7 +540,7 @@ public class AlgorithmsBase {
         //main loop
         Permutation randomElement;
         elements:
-        while (!groupOrder.equals(getOrder(BSGSCandidate))) {
+        while (!groupOrder.equals(calculateOrder(BSGSCandidate))) {
             //random element
             randomElement = random(source, randomGenerator);
 
@@ -570,7 +586,7 @@ public class AlgorithmsBase {
         }
     }
 
-    static final BigInteger getOrder(List<? extends BSGSElement> BSGSList) {
+    static final BigInteger calculateOrder(List<? extends BSGSElement> BSGSList) {
         BigInteger order = BigInteger.ONE;
         for (BSGSElement element : BSGSList)
             order = order.multiply(BigInteger.valueOf(element.orbitSize()));
@@ -932,7 +948,7 @@ public class AlgorithmsBase {
         List<BSGSCandidateElement> newBSGS = createRawBSGSCandidate(newBase, BSGS.get(0).stabilizerGenerators);
         if (newBSGS.isEmpty())
             return; //new base is fixed by all group generators; nothing to do
-        BigInteger order = getOrder(BSGS);
+        BigInteger order = calculateOrder(BSGS);
         RandomSchreierSimsAlgorithmForKnownOrder((ArrayList) newBSGS, order, CC.getRandomGenerator());
         int i = 0;
         for (; i < newBSGS.size() && i < BSGS.size(); ++i)
@@ -956,11 +972,19 @@ public class AlgorithmsBase {
      * @see #rebaseFromScratch(java.util.ArrayList, int[])
      */
     public static void rebase(ArrayList<BSGSCandidateElement> BSGS, int[] newBase) {
-        //todo implement some heuristic code!!!
+        //trying to make newBase as same as possible to the initial base
         rebaseWithConjugationAndTranspositions(BSGS, newBase);
     }
 
     //------------------------------ FACTORIES --------------------------------------------//
+
+    public static ArrayList<BSGSElement> createEmptyBSGS(int degree) {
+        ArrayList<BSGSElement> bsgs = new ArrayList<>();
+        ArrayList<Permutation> gens = new ArrayList<>();
+        gens.add(Permutations.getIdentityOneLine(degree));
+        bsgs.add(new BSGSCandidateElement(0, gens, new int[degree]).asBSGSElement());
+        return bsgs;
+    }
 
     /**
      * This value is an upper bound of degrees, which we consider as "small".

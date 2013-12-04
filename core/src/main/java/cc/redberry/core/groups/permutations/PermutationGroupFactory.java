@@ -23,6 +23,7 @@
 package cc.redberry.core.groups.permutations;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -43,7 +44,8 @@ public final class PermutationGroupFactory {
         //todo Alt and Sym checks
         List<BSGSElement> BSGSList = AlgorithmsBase.createBSGSList(generators);
         if (BSGSList.isEmpty())
-            return new EmptyPermutationGroup(generators.get(0).degree());
-        return new PermutationGroupImpl(new BaseAndStrongGeneratingSet(BSGSList));
+            throw new IllegalArgumentException();
+        return new PermutationGroup(Collections.unmodifiableList(BSGSList));
     }
+
 }

@@ -22,13 +22,17 @@
  */
 package cc.redberry.core.groups.permutations;
 
+import cc.redberry.core.context.CC;
+import cc.redberry.core.groups.permutations.gap.GapPrimitiveGroupsReader;
 import cc.redberry.core.number.NumberUtils;
 import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.random.Well1024a;
 import org.junit.Test;
 
+import java.math.BigInteger;
 import java.util.*;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -47,12 +51,12 @@ public class PermutationGroupTest {
         PermutationGroup pg = PermutationGroupFactory.createPermutationGroup(b, c);
         assertEquals(NumberUtils.factorial(6), pg.order());
 
-        assertTrue(pg.isMember(b));
-        assertTrue(pg.isMember(c));
+        assertTrue(pg.membershipTest(b));
+        assertTrue(pg.membershipTest(c));
         b = new PermutationOneLine(1, 0, 2, 5, 4, 3);
         c = new PermutationOneLine(1, 3, 2, 5, 0, 4);
-        assertTrue(pg.isMember(b));
-        assertTrue(pg.isMember(c));
+        assertTrue(pg.membershipTest(b));
+        assertTrue(pg.membershipTest(c));
     }
 
     @Test
@@ -216,7 +220,7 @@ public class PermutationGroupTest {
         generators = new Permutation[]{a, b};
         group = PermutationGroupFactory.createPermutationGroup(generators);
         System.out.println(
-                Arrays.toString(((PermutationGroupImpl) group).getBSGS().getBaseArray()));
+                Arrays.toString(group.getBase()));
     }
 
     @Test
@@ -268,7 +272,7 @@ public class PermutationGroupTest {
             set.add(permutation);
 
         for (Permutation permutation : set)
-            assertTrue(pg.isMember(permutation));
+            assertTrue(pg.membershipTest(permutation));
 
         assertEquals(pg.order().longValue(), set.size());
     }
@@ -277,7 +281,7 @@ public class PermutationGroupTest {
     public void testIdentityGroup() throws Exception {
         PermutationGroup id = PermutationGroupFactory.createPermutationGroup(Permutations.getIdentityOneLine(10));
 
-        assertTrue(id.isMember(Permutations.getIdentityOneLine(10)));
+        assertTrue(id.membershipTest(Permutations.getIdentityOneLine(10)));
 
         Set<Permutation> set = new HashSet<>();
         set.add(Permutations.getIdentityOneLine(10));
@@ -286,5 +290,103 @@ public class PermutationGroupTest {
             assertTrue(set.remove(p));
 
         assertTrue(set.isEmpty());
+    }
+
+    @Test
+    public void testOrbit1() {
+        Permutation a, b, c, d, e, generators[];
+        PermutationGroup group;
+        a = new PermutationOneLine(1, 0, 2, 3, 4, 5, 6, 7);
+        b = new PermutationOneLine(2, 1, 3, 4, 5, 6, 0, 7);
+        generators = new Permutation[]{a, b};
+        group = PermutationGroupFactory.createPermutationGroup(generators);
+
+        int[] o = group.orbit(7, 0);
+        Arrays.sort(o);
+        assertArrayEquals(new int[]{0, 1, 2, 3, 4, 5, 6, 7}, o);
+
+        o = group.orbit(7);
+        assertArrayEquals(new int[]{7}, o);
+
+        o = group.orbit(2, 0, 6);
+        Arrays.sort(o);
+        assertArrayEquals(new int[]{0, 1, 2, 3, 4, 5, 6}, o);
+    }
+
+    @Test
+    public void testPointwiseStabilizer1() {
+        PermutationGroup group = GapPrimitiveGroupsReader.readGroupFromGap("/home/stas/gap4r6/prim/grps/gps1.g", 27);
+        List<BSGSElement> bsgs = group.getBSGS();
+        int[] base = group.getBase();
+        for (int i = 1; i < base.length; ++i) {
+            int[] points = Arrays.copyOfRange(base, 0, i);
+            PermutationGroup stab = group.pointwiseStabilizer(points);
+
+            List<BSGSElement> stabBsgs = bsgs.subList(i, bsgs.size());
+
+            assertEquals(AlgorithmsBase.calculateOrder(stabBsgs), stab.order());
+            for (Permutation p : stabBsgs.get(0).stabilizerGenerators)
+                assertTrue(stab.membershipTest(p));
+        }
+    }
+
+    @Test
+    public void testPointwiseStabilizer2() {
+        final PermutationGroup[] groups = GapPrimitiveGroupsReader.readGroupsFromGap("/home/stas/gap4r6/prim/grps/gps1.g");
+        for (int C = 0; C < groups.length; C += 2) {
+            PermutationGroup group = groups[C];
+            BigInteger order = group.order();
+            for (int i = 0; i < group.degree(); ++i) {
+                int orbSize = group.orbit(i).length;
+                PermutationGroup stab = group.pointwiseStabilizer(i);
+                assertEquals(order.divide(BigInteger.valueOf(orbSize)), stab.order());
+                List<Permutation> gens = stab.generators();
+                for (Permutation p : gens)
+                    assertEquals(p.newIndexOf(i), i);
+            }
+        }
+    }
+
+    @Test
+    public void testPointwiseStabilizer3() {
+        PermutationGroup[] groups = GapPrimitiveGroupsReader.readGroupsFromGap("/home/stas/gap4r6/prim/grps/gps1.g");
+        for (int C = 0; C < groups.length; C += 2) {
+            PermutationGroup group = groups[C];
+            if (group.degree() < 11)
+                continue;
+            for (int aa = 0; aa < 10; ++aa) {
+                int[] set = new int[5];
+                Arrays.fill(set, -1);
+                int step = group.degree() / set.length;
+                int j = 0;
+                for (int i = 0; i < group.degree() && j < set.length; i += 1 + CC.getRandomGenerator().nextInt(step), ++j)
+                    set[j] = i;
+                j = set.length - 1;
+                while (set[j] == -1) {
+                    --j;
+                }
+                set = Arrays.copyOf(set, j);
+                if (set.length == 0)
+                    continue;
+
+
+                PermutationGroup stab = group.pointwiseStabilizer(set);
+                assertTrue(stab.equals(pointWiseStabilizerBruteForce(group, set)));
+            }
+        }
+    }
+
+    @Test
+    public void testSetwiseStabilizer1() {
+        PermutationGroup group = GapPrimitiveGroupsReader.readGroupFromGap("/home/stas/gap4r6/prim/grps/gps1.g", 34);
+        System.out.println(group.setwiseStabilizer(2, 3));
+
+    }
+
+    private static PermutationGroup pointWiseStabilizerBruteForce(PermutationGroup pg, int[] points) {
+        PermutationGroup stab = pg;
+        for (int i : points)
+            stab = stab.pointwiseStabilizer(i);
+        return stab;
     }
 }

@@ -39,7 +39,7 @@ import static cc.redberry.core.TAssert.assertEquals;
 import static cc.redberry.core.TAssert.assertTrue;
 import static cc.redberry.core.TAssert.soutMappingsOP;
 import static cc.redberry.core.groups.permutations.AlgorithmsBase.getBaseAsArray;
-import static cc.redberry.core.groups.permutations.AlgorithmsBase.getOrder;
+import static cc.redberry.core.groups.permutations.AlgorithmsBase.calculateOrder;
 import static cc.redberry.core.groups.permutations.PermutationsTestUtils.*;
 
 /**
@@ -143,7 +143,7 @@ public class AlgorithmsBacktrackTest {
         Arrays.sort(expected, permutationComparator);
 
         AlgorithmsBase.SchreierSimsAlgorithm(subgroup);
-        System.out.println("Subgroup order: " + AlgorithmsBase.getOrder(subgroup));
+        System.out.println("Subgroup order: " + AlgorithmsBase.calculateOrder(subgroup));
 
         Permutation[] actual = new Permutation[expected.length];
         BacktrackSearch search = new BacktrackSearch(subgroup);
@@ -320,7 +320,7 @@ public class AlgorithmsBacktrackTest {
         PermutationGroup stabilizer = testSearchStabilizerRaw(pg, set);
 
         Permutation[] coset_reps = AlgorithmsBacktrack.leftCosetRepresentatives(
-                pg.getBSGS().getBSGSCandidateList(), stabilizer.getBSGS().getBSGSCandidateList());
+                pg.getBSGSCandidate(), stabilizer.getBSGSCandidate());
         assertHaveNoNullElements(coset_reps);
 
         Permutation[] subgroup_elements = new Permutation[stabilizer.order().intValue()];
@@ -346,14 +346,14 @@ public class AlgorithmsBacktrackTest {
         Permutation gen1 = new PermutationOneLine(0, 1, 10, 6, 2, 7, 8, 9, 3, 5, 4);
 
         PermutationGroup pg = PermutationGroupFactory.createPermutationGroup(gen0, gen1);
-        int[] base = pg.getBSGS().getBaseArray();
+        int[] base = pg.getBase();
         InducedOrderingOfPermutations pordering = new InducedOrderingOfPermutations(base, pg.degree());
         int[] set = {3, 7};
 
         PermutationGroup stabilizer = testSearchStabilizerRaw(pg, set);
 
         Permutation[] coset_reps = AlgorithmsBacktrack.leftCosetRepresentatives(
-                pg.getBSGS().getBSGSCandidateList(), stabilizer.getBSGS().getBSGSCandidateList());
+                pg.getBSGS(), stabilizer.getBSGS());
         assertHaveNoNullElements(coset_reps);
 
         Permutation[] subgroup_elements = new Permutation[stabilizer.order().intValue()];
@@ -374,10 +374,10 @@ public class AlgorithmsBacktrackTest {
             Permutation rep = null;
             for (Permutation p : cosets[i]) {
                 if (rep == null)
-                    rep = AlgorithmsBacktrack.leftTransversalOf(p, pg.getBSGS().BSGSList, stabilizer.getBSGS().BSGSList);
+                    rep = AlgorithmsBacktrack.leftTransversalOf(p, pg.getBSGS(), stabilizer.getBSGS());
                 else
                     assertTrue(
-                            pordering.compare(rep, AlgorithmsBacktrack.leftTransversalOf(p, pg.getBSGS().BSGSList, stabilizer.getBSGS().BSGSList)) == 0);
+                            pordering.compare(rep, AlgorithmsBacktrack.leftTransversalOf(p, pg.getBSGS(), stabilizer.getBSGS())) == 0);
             }
         }
     }
@@ -386,7 +386,7 @@ public class AlgorithmsBacktrackTest {
     public void testLeftCosetRepresentative2() {
         final PermutationGroup pg = GapPrimitiveGroupsReader.readGroupFromGap("/home/stas/gap4r6/prim/grps/gps1.g", 298);
         final ArrayList<BSGSElement> symmetric = AlgorithmsBase.createSymmetricGroupBSGS(pg.degree());
-        System.out.println("Index: " + getOrder(symmetric).divide(pg.order()));
+        System.out.println("Index: " + calculateOrder(symmetric).divide(pg.order()));
         System.out.println("constructed");
         for (int r = 0; r < 100; ++r) {
             Timing.timing(
@@ -395,7 +395,7 @@ public class AlgorithmsBacktrackTest {
                         public Object doJob() {
                             Permutation rp = new PermutationOneLine(Permutations.randomPermutation(pg.degree(),
                                     CC.getRandomGenerator()));
-                            rp = AlgorithmsBacktrack.leftTransversalOf(rp, symmetric, pg.getBSGS().BSGSList);
+                            rp = AlgorithmsBacktrack.leftTransversalOf(rp, symmetric, pg.getBSGS());
                             return rp;
                         }
                     }, true);
@@ -414,7 +414,7 @@ public class AlgorithmsBacktrackTest {
         PermutationGroup stabilizer = testSearchStabilizerRaw(pg, set);
 
         Permutation[] coset_reps = AlgorithmsBacktrack.leftCosetRepresentatives(
-                pg.getBSGS().getBSGSCandidateList(), stabilizer.getBSGS().getBSGSCandidateList());
+                pg.getBSGS(), stabilizer.getBSGS());
         assertHaveNoNullElements(coset_reps);
 
         Permutation[] subgroup_elements = new Permutation[stabilizer.order().intValue()];
@@ -452,15 +452,15 @@ public class AlgorithmsBacktrackTest {
             ++scanned;
 
             ArrayList<BSGSElement> symmetricGroup = AlgorithmsBase.createSymmetricGroupBSGS(degree);
-            Permutation[] transversals = AlgorithmsBacktrack.leftCosetRepresentatives(symmetricGroup, pgs[i].getBSGS().BSGSList);
+            Permutation[] transversals = AlgorithmsBacktrack.leftCosetRepresentatives(symmetricGroup, pgs[i].getBSGS());
 
 
             assertEquals(index.intValue(), transversals.length);
             assertHaveNoNullElements(transversals);
 
             System.out.println(
-                    "Group order: " + getOrder(symmetricGroup) +
-                            "  Subgroup order: " + getOrder(pgs[i].getBSGS().BSGSList) +
+                    "Group order: " + calculateOrder(symmetricGroup) +
+                            "  Subgroup order: " + calculateOrder(pgs[i].getBSGS()) +
                             "  Subgroup index: " + transversals.length +
                             "  Visited: " + AlgorithmsBacktrack.____VISITED_NODES___[0]);
 
@@ -476,18 +476,18 @@ public class AlgorithmsBacktrackTest {
         Permutation gen0 = new PermutationOneLine(4, 3, 9, 1, 0, 5, 10, 7, 8, 2, 6);
         Permutation gen1 = new PermutationOneLine(0, 1, 10, 6, 2, 7, 8, 9, 3, 5, 4);
 
-        List<BSGSElement> pg = PermutationGroupFactory.createPermutationGroup(gen0, gen1).getBSGS().BSGSList;
-        System.out.println(getOrder(pg));
+        List<BSGSElement> pg = PermutationGroupFactory.createPermutationGroup(gen0, gen1).getBSGS();
+        System.out.println(calculateOrder(pg));
         List<BSGSElement> sym = AlgorithmsBase.createSymmetricGroupBSGS(gen0.degree());
         ArrayList<BSGSCandidateElement> intersection = new ArrayList<>();
 
         AlgorithmsBacktrack.intersection(pg, sym, intersection);
         System.out.println(intersection.get(0).stabilizerGenerators);
-        System.out.println(getOrder(intersection));
+        System.out.println(calculateOrder(intersection));
     }
 
     public static PermutationGroup testSearchStabilizerRaw(PermutationGroup pg, int[] set) {
-        List<BSGSElement> bsgs = pg.getBSGS().getBSGSList();
+        List<BSGSElement> bsgs = pg.getBSGS();
         int degree = pg.degree();
         int[] base = getBaseAsArray(bsgs);
         RawSetwiseStabilizerCriteria rw = new RawSetwiseStabilizerCriteria(set, base);
@@ -499,7 +499,7 @@ public class AlgorithmsBacktrackTest {
 
         AlgorithmsBacktrack.subgroupSearch(bsgs, subgroup, rw, rw);
 
-        ArrayList<Permutation> expected = new ArrayList<>(getOrder(subgroup).intValue());
+        ArrayList<Permutation> expected = new ArrayList<>(calculateOrder(subgroup).intValue());
         Iterator<Permutation> allIterator = new BaseAndStrongGeneratingSet.PermIterator(bsgs);
         Permutation c;
         while (allIterator.hasNext()) {
@@ -508,7 +508,7 @@ public class AlgorithmsBacktrackTest {
                 expected.add(c);
         }
 
-        ArrayList<Permutation> actual = new ArrayList<>(getOrder(subgroup).intValue());
+        ArrayList<Permutation> actual = new ArrayList<>(calculateOrder(subgroup).intValue());
         allIterator = new BaseAndStrongGeneratingSet.PermIterator(subgroup);
         while (allIterator.hasNext()) {
             c = allIterator.next();
@@ -519,7 +519,7 @@ public class AlgorithmsBacktrackTest {
         Collections.sort(actual);
 
         assertEquals(expected, actual);
-        return new PermutationGroupImpl(new BaseAndStrongGeneratingSet(AlgorithmsBase.asBSGSList(subgroup)));
+        return new PermutationGroup(AlgorithmsBase.asBSGSList(subgroup));
     }
 
 }

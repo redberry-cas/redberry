@@ -34,7 +34,7 @@ import java.util.*;
 import static cc.redberry.core.TAssert.assertEquals;
 import static cc.redberry.core.TAssert.assertTrue;
 import static cc.redberry.core.groups.permutations.AlgorithmsBase.getBaseAsArray;
-import static cc.redberry.core.groups.permutations.AlgorithmsBase.getOrder;
+import static cc.redberry.core.groups.permutations.AlgorithmsBase.calculateOrder;
 import static cc.redberry.core.groups.permutations.PermutationsTestUtils.RawSetwiseStabilizerCriteria;
 
 /**
@@ -65,7 +65,7 @@ public class BacktrackSearchTest {
             previous = current;
             ++i;
         }
-        assertEquals(getOrder(bsgs).intValue(), i);
+        assertEquals(calculateOrder(bsgs).intValue(), i);
     }
 
     @Test
@@ -93,7 +93,7 @@ public class BacktrackSearchTest {
             previous = current;
             ++i;
         }
-        assertEquals(getOrder(bsgs).intValue(), i);
+        assertEquals(calculateOrder(bsgs).intValue(), i);
     }
 
     @Test
@@ -157,7 +157,7 @@ public class BacktrackSearchTest {
             if (pgs[i].order().compareTo(BigInteger.valueOf(100000)) > 0)
                 continue;
             ++scanned;
-            List<BSGSElement> bsgs = pgs[i].getBSGS().getBSGSList();
+            List<BSGSElement> bsgs = pgs[i].getBSGS();
 
 
             BacktrackSearch search = new BacktrackSearch(bsgs);
@@ -172,7 +172,7 @@ public class BacktrackSearchTest {
                 previous = current;
                 ++count;
             }
-            assertEquals(getOrder(bsgs).intValue(), count);
+            assertEquals(calculateOrder(bsgs).intValue(), count);
         }
         System.out.println("Total number of primitive groups scanned: " + scanned);
     }
@@ -351,9 +351,9 @@ public class BacktrackSearchTest {
     }
 
     public static void testBruteForceSearchStabilizer(PermutationGroup pg, int[] set) {
-        List<BSGSElement> bsgs = pg.getBSGS().getBSGSList();
+        List<BSGSElement> bsgs = pg.getBSGS();
         int[] base = getBaseAsArray(bsgs);
-        int order = getOrder(bsgs).intValue();
+        int order = calculateOrder(bsgs).intValue();
         RawSetwiseStabilizerCriteria rw = new RawSetwiseStabilizerCriteria(set, base);
 
         //empty initial subgroup

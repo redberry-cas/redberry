@@ -22,15 +22,61 @@
  */
 package cc.redberry.core.groups.permutations;
 
+import cc.redberry.core.utils.ArraysUtils;
+import cc.redberry.core.utils.Indicator;
+import cc.redberry.core.utils.MathUtils;
+import gnu.trove.set.hash.TIntHashSet;
+
 import java.math.BigInteger;
-import java.util.List;
+import java.util.*;
+
+import static cc.redberry.core.groups.permutations.AlgorithmsBase.*;
 
 /**
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public interface PermutationGroup
-        extends Iterable<Permutation> {
+public final class PermutationGroup
+        implements Iterable<Permutation> {
+
+    /**
+     * Base and strong generating set
+     */
+    private final List<BSGSElement> bsgs;
+    /**
+     * Saved base
+     */
+    private final int[] base;
+    /**
+     * Group degree
+     */
+    private final int degree;
+    /**
+     * Group order
+     */
+    private final BigInteger order;
+    /**
+     * Points accessory in orbits
+     */
+    private final int[] positionsInOrbits;
+    /**
+     * Group orbits
+     */
+    private final int[][] orbits;
+    /**
+     * Ordering induced by base
+     */
+    private final InducedOrdering ordering;
+
+    PermutationGroup(List<BSGSElement> bsgs) {
+        this.bsgs = bsgs;
+        this.base = getBaseAsArray(bsgs);
+        this.degree = bsgs.get(0).degree();
+        this.order = calculateOrder(bsgs);
+        this.positionsInOrbits = new int[degree];
+        this.orbits = Permutations.orbits(bsgs.get(0).stabilizerGenerators, this.positionsInOrbits);
+        this.ordering = new InducedOrdering(base, degree);
+    }
 
     /**
      * Returns whether the specified permutation is member of this group
@@ -38,35 +84,85 @@ public interface PermutationGroup
      * @param permutation permutation
      * @return true if specified permutation is member of this group
      */
-    boolean isMember(Permutation permutation);
+    public boolean membershipTest(Permutation permutation) {
+        return AlgorithmsBase.membershipTest(bsgs, permutation);
+    }
+
+    /**
+     * Returns whether all specified permutations are members of this group
+     *
+     * @param permutations permutations
+     * @return true if all specified permutations are members of this group
+     */
+    public boolean membershipTest(Collection<Permutation> permutations) {
+        for (Permutation p : permutations)
+            if (!membershipTest(p))
+                return false;
+        return true;
+    }
 
     /**
      * Returns the number of permutations in this group
      *
      * @return number of permutations in this group
      */
-    BigInteger order();
+    public BigInteger order() {
+        return order;
+    }
 
     /**
      * Returns an unmodifiable list of group generators.
      *
      * @return unmodifiable list of group generators
      */
-    List<Permutation> generators();
+    public List<Permutation> generators() {
+        return bsgs.get(0).stabilizerGenerators;
+    }
 
     /**
      * Return the degree of group (length of each permutation)
      *
      * @return degree of group (length of each permutation)
      */
-    int degree();
+    public int degree() {
+        return degree;
+    }
 
     /**
      * Returns base and strong generating set of this group.
      *
      * @return base and strong generating set of this grou
      */
-    BaseAndStrongGeneratingSet getBSGS();
+    public List<BSGSElement> getBSGS() {
+        return bsgs;
+    }
+
+    /**
+     * Returns a mutable copy of base and strong generating set.
+     *
+     * @return a mutable copy of base and strong generating set
+     */
+    public ArrayList<BSGSCandidateElement> getBSGSCandidate() {
+        return asBSGSCandidatesList(bsgs);
+    }
+
+    /**
+     * Returns base of this group.
+     *
+     * @return base of this group
+     */
+    public int[] getBase() {
+        return base.clone();
+    }
+
+    /**
+     * Returns an ordering on Ω(n) induced by a base of this group
+     *
+     * @return ordering on Ω(n) induced by a base of this group
+     */
+    public InducedOrdering ordering() {
+        return ordering;
+    }
 
     /**
      * Returns the orbit of specified point
@@ -74,64 +170,148 @@ public interface PermutationGroup
      * @param point point
      * @return orbit of specified point
      */
-    int[] orbit(int point);
+    int[] orbit(int point) {
+        return orbits[positionsInOrbits[point]].clone();
+    }
 
     /**
      * Returns the orbit of specified set of points
      *
-     * @param point set of points
+     * @param points set of points
      * @return orbit of specified point
      */
-    int[] orbit(int[] point);
+    public int[] orbit(int... points) {
+        TIntHashSet orbitsIndexesSet = new TIntHashSet();
+        for (int i : points)
+            orbitsIndexesSet.add(positionsInOrbits[i]);
+
+        int[] orbitsIndexes = orbitsIndexesSet.toArray();
+        int orbitSize = 0;
+        for (int i : orbitsIndexes)
+            orbitSize += this.orbits[i].length;
+
+        int[] orbit = new int[orbitSize];
+        orbitSize = 0;
+        for (int i : orbitsIndexes) {
+            System.arraycopy(this.orbits[i], 0, orbit, orbitSize, this.orbits[i].length);
+            orbitSize += this.orbits[i].length;
+        }
+
+        return orbit;
+    }
 
     /**
      * Returns a set of all orbits
      *
      * @return set of all orbits
      */
-    int[][] orbits();
+    public int[][] orbits() {
+        int[][] r = new int[orbits.length][];
+        for (int i = 0; i < orbits.length; ++i)
+            r[i] = orbits[i].clone();
+        return r;
+    }
 
     /**
      * Returns true if this group is transitive.
      *
      * @return true if this group is transitive
      */
-    boolean isTransitive();
+    public boolean isTransitive() {
+        return orbits().length == 1;
+    }
 
     /**
-     * Returns a setwise stabilizer of specified set of points.
-     *
-     * @param set set of points
-     * @return setwise stabilizer of specified set of points.
-     */
-    PermutationGroup setwiseStabilizer(int[] set);
-
-    /**
-     * Returns a pointwise stabilizer of specified set of points.
+     * Calculates a pointwise stabilizer of specified set of points.
      *
      * @param set set of points
      * @return pointwise stabilizer of specified set of points.
      */
-    PermutationGroup pointwiseStabilizer(int[] set);
+    public PermutationGroup pointwiseStabilizer(int... set) {
+        if (set.length == 0)
+            return this;
+        set = MathUtils.getSortedDistinct(set.clone());
+        ArraysUtils.quickSort(set, ordering);
+
+        ArrayList<BSGSCandidateElement> bsgs = getBSGSCandidate();
+        AlgorithmsBase.rebase(bsgs, set);
+
+        if (bsgs.size() <= set.length)
+            return new PermutationGroup(createEmptyBSGS(degree));
+
+        return new PermutationGroup(
+                Collections.unmodifiableList(
+                        asBSGSList(bsgs.subList(set.length, bsgs.size()))));
+    }
 
     /**
-     * Returns a subgroup that maps two specified sets of points into each other.
+     * Calculates a setwise stabilizer of specified set of points.
      *
-     * @param a set of points
-     * @param b set of points
-     * @return subgroup that maps two specified sets of points into each other.
+     * @param set set of points
+     * @return setwise stabilizer of specified set of points.
      */
-    PermutationGroup setwiseMapping(int[] a, int[] b);
+    public PermutationGroup setwiseStabilizer(int... set) {
+        if (set.length == 0)
+            return this;
+        set = MathUtils.getSortedDistinct(set.clone());
+        //let's rebase such that the initial segment of base is equal to set
+        //so at each level l < set.length we test that g(β_l) ∈ set, and if l >= set.length, then g(β_l) !∈ set
+        ArraysUtils.quickSort(set, ordering);
+        ArrayList<BSGSCandidateElement> bsgs = getBSGSCandidate();
+        AlgorithmsBase.rebase(bsgs, set);
+
+        //sorting set according to natural ordering
+        Arrays.sort(set);
+
+        //we need to ensure that no any base point β_i with i >= set.length belongs to set (such points are redundant)
+        for (int i = bsgs.size() - 1; i >= set.length; --i)
+            if (Arrays.binarySearch(set, bsgs.get(i).basePoint) >= 0)
+                bsgs.remove(i);
+
+        //lets take the initial subgroup equal to pointwise stabilizer
+        ArrayList<BSGSCandidateElement> stabilizer
+                = new ArrayList<>(bsgs.subList(set.length, bsgs.size()));
+
+        //run subgroup search
+        int[] newBase = getBaseAsArray(bsgs);
+        SetwiseStabilizerSearchTest swTest = new SetwiseStabilizerSearchTest(newBase, set);
+        AlgorithmsBacktrack.subgroupSearch(bsgs, stabilizer,
+                swTest, swTest, newBase, new InducedOrdering(newBase, degree));
+
+        return new PermutationGroup(Collections.unmodifiableList(asBSGSList(stabilizer)));
+    }
 
     /**
-     * Returns a subgroup that maps two specified sets of points into each other such that <i>i</i>-th point of
-     * {@code a} maps onto <i>i</i>-th point of {@code b}.
-     *
-     * @param a set of points
-     * @param b set of points
-     * @return subgroup that maps pointwise two specified sets of points into each other.
+     * TEST function for backtrack search to find setwise stabilizer.
      */
-    PermutationGroup pointwiseMapping(int[] a, int[] b);
+    private static class SetwiseStabilizerSearchTest
+            implements BacktrackSearchTestFunction, Indicator<Permutation> {
+        //prepared base: the initial segment of base is equal to set
+        final int[] base;
+        //prepared set: set is sorted
+        final int[] set;
+
+        SetwiseStabilizerSearchTest(int[] base, int[] set) {
+            this.base = base;
+            this.set = set;
+        }
+
+        @Override
+        public boolean test(Permutation permutation, int level) {
+            if (level < set.length)
+                return Arrays.binarySearch(set, permutation.newIndexOf(base[level])) >= 0;
+            else
+                return Arrays.binarySearch(set, permutation.newIndexOf(base[level])) < 0;
+        }
+
+        @Override
+        public boolean is(Permutation p) {
+            for (int s : set)
+                if (Arrays.binarySearch(set, p.newIndexOf(s)) < 0)
+                    return false;
+            return true;
+        }
+    }
 
     /**
      * Returns true if specified group is a subgroup of this group
@@ -139,7 +319,9 @@ public interface PermutationGroup
      * @param group permutation group
      * @return true if specified group is a subgroup of this group
      */
-    boolean isSubgroup(PermutationGroup group);
+    public boolean isSubgroup(PermutationGroup group) {
+        return membershipTest(group.generators());
+    }
 
 
     /**
@@ -150,5 +332,47 @@ public interface PermutationGroup
      * @return set of right coset representatives
      * @throws IllegalArgumentException if specified {@code subgroup} is not a subgroup of this
      */
-    Permutation[] rightCosetRepresentatives(PermutationGroup subgroup);
+    public Permutation[] leftCosetRepresentatives(PermutationGroup subgroup) {
+        return null;
+    }
+
+    @Override
+    public Iterator<Permutation> iterator() {
+        return null;
+    }
+
+    /**
+     * Returns whether specified group is equal to this group.
+     *
+     * @param oth permutation group
+     * @return true if specified group has sam order and all its generators are contained in this group
+     * @throws IllegalArgumentException {@code oth.degree != this.degree()}
+     */
+    public boolean equals(PermutationGroup oth) {
+        if (degree != oth.degree)
+            throw new IllegalArgumentException("Not same degrees.");
+
+        if (!order.equals(oth.order))
+            return false;
+        if (orbits.length != oth.orbits.length)
+            return false;
+
+        if (generators().size() < oth.generators().size())
+            return oth.membershipTest(generators());
+        else
+            return membershipTest(oth.generators());
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("PermutationGroup( ");
+        List<Permutation> gens = generators();
+        for (int i = 0; ; ++i) {
+            sb.append(gens.get(i));
+            if (i == gens.size() - 1)
+                return sb.append(" )").toString();
+            sb.append(", ");
+        }
+    }
 }

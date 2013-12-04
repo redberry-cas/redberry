@@ -30,7 +30,10 @@ import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.random.Well19937a;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 
 /**
  * @author Dmitry Bolotin
@@ -204,6 +207,49 @@ public final class Permutations {
      */
     public static int getOrbitSize(Collection<Permutation> generators, int point) {
         return getOrbitList(generators, point).size();
+    }
+
+    public static int[][] orbits(List<Permutation> generators, final int[] positionsInOrbit) {
+        if (generators.isEmpty())
+            return new int[0][0];//throw new IllegalArgumentException("Empty generators.");
+
+        ArrayList<int[]> orbits = new ArrayList<>();
+        Arrays.fill(positionsInOrbit, -1);
+        int seenCount = 0, orbitsIndex = 0;
+        while (seenCount < positionsInOrbit.length) {
+            //orbit as list
+            IntArrayList orbitList = new IntArrayList();
+            int point = -1;
+            //first not seen point
+            for (int i = 0; i < positionsInOrbit.length; ++i)
+                if (positionsInOrbit[i] == -1) {
+                    point = i;
+                    break;
+                }
+            assert point != -1;
+            orbitList.add(point);
+            ++seenCount;
+            positionsInOrbit[point] = orbitsIndex;
+            int imageOfPoint;
+            //main loop over all points in orbit
+            for (int orbitIndex = 0; orbitIndex < orbitList.size(); ++orbitIndex) {
+                //loop over all generators of a group
+                for (Permutation generator : generators) {
+                    //image of point under permutation
+                    imageOfPoint = generator.newIndexOf(orbitList.get(orbitIndex));
+                    //testing whether current permutation maps orbit point into orbit or not
+                    if (positionsInOrbit[imageOfPoint] == -1) {
+                        ++seenCount;
+                        positionsInOrbit[imageOfPoint] = orbitsIndex;
+                        //adding new point to orbit
+                        orbitList.add(imageOfPoint);
+                    }
+                }
+            }
+            orbits.add(orbitList.toArray());
+            ++orbitsIndex;
+        }
+        return orbits.toArray(new int[orbits.size()][]);
     }
 
 
