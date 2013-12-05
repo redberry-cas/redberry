@@ -143,7 +143,7 @@ public class AlgorithmsBaseTest {
         generators.add(new PermutationOneLine(0, 2, 1, 3, 4));
         generators.add(new PermutationOneLine(3, 2, 4, 0, 1));
 
-        PermutationGroup pg = PermutationGroupFactory.createPermutationGroup(generators);
+        PermutationGroup pg = PermutationGroupFactory.create(generators);
 
         ArrayList<BSGSCandidateElement> bsgs
                 = (ArrayList) createRawBSGSCandidate(generators.toArray(new Permutation[0]));
@@ -551,7 +551,7 @@ public class AlgorithmsBaseTest {
         Permutation a = new PermutationOneLine(6, 7, 8, 9, 10, 0, 11, 12, 13, 14, 1, 15, 16, 17, 2, 18, 19, 3, 20, 4, 5),
                 b = new PermutationOneLine(0, 13, 6, 20, 10, 8, 11, 1, 4, 3, 15, 12, 18, 17, 9, 5, 14, 19, 2, 7, 16),
                 c = new PermutationOneLine(0, 9, 12, 10, 17, 5, 6, 14, 16, 1, 3, 11, 2, 19, 7, 15, 8, 4, 18, 13, 20);
-        PermutationGroup pg = PermutationGroupFactory.createPermutationGroup(a, b, c);
+        PermutationGroup pg = PermutationGroupFactory.create(a, b, c);
 
         final ArrayList<BSGSCandidateElement> bsgs = pg.getBSGSCandidate();
         final int[] newBase = {3, 4, 0, 1, 2};
@@ -574,7 +574,7 @@ public class AlgorithmsBaseTest {
         Permutation gen0 = new PermutationOneLine(0, 5, 10, 15, 20, 1, 6, 11, 16, 21, 2, 7, 12, 17, 22, 3, 8, 13, 18, 23, 4, 9, 14, 19, 24);
         Permutation gen1 = new PermutationOneLine(5, 6, 8, 9, 7, 10, 11, 13, 14, 12, 15, 16, 18, 19, 17, 20, 21, 23, 24, 22, 0, 1, 3, 4, 2);
         Permutation gen2 = new PermutationOneLine(1, 2, 3, 4, 0, 6, 7, 8, 9, 5, 16, 17, 18, 19, 15, 21, 22, 23, 24, 20, 11, 12, 13, 14, 10);
-        PermutationGroup pg = PermutationGroupFactory.createPermutationGroup(gen0, gen1, gen2);
+        PermutationGroup pg = PermutationGroupFactory.create(gen0, gen1, gen2);
 
         final ArrayList<BSGSCandidateElement> bsgs = pg.getBSGSCandidate();
         int[] oldBase = {0, 1, 2, 3, 4, 5, 7, 8, 9, 10};
@@ -605,7 +605,7 @@ public class AlgorithmsBaseTest {
         Permutation gen0 = new PermutationOneLine(5, 6, 8, 9, 7, 10, 11, 13, 14, 12, 15, 16, 18, 19, 17, 20, 21, 23, 24, 22, 0, 1, 3, 4, 2);
         Permutation gen1 = new PermutationOneLine(1, 2, 3, 4, 0, 6, 7, 8, 9, 5, 16, 17, 18, 19, 15, 21, 22, 23, 24, 20, 11, 12, 13, 14, 10);
         Permutation gen2 = new PermutationOneLine(0, 5, 10, 20, 15, 1, 6, 11, 21, 16, 2, 7, 12, 22, 17, 3, 8, 13, 23, 18, 4, 9, 14, 24, 19);
-        PermutationGroup pg = PermutationGroupFactory.createPermutationGroup(gen0, gen1, gen2);
+        PermutationGroup pg = PermutationGroupFactory.create(gen0, gen1, gen2);
 
         final ArrayList<BSGSCandidateElement> bsgs = pg.getBSGSCandidate();
         int[] oldBase = {1, 0, 2, 3, 5, 10};
@@ -673,7 +673,7 @@ public class AlgorithmsBaseTest {
         Permutation gen0 = new PermutationOneLine(1, 2, 3, 4, 5, 6, 0, 7);
         Permutation gen1 = new PermutationOneLine(0, 2, 4, 6, 1, 3, 5, 7);
         Permutation gen2 = new PermutationOneLine(7, 6, 3, 2, 5, 4, 1, 0);
-        PermutationGroup pg = PermutationGroupFactory.createPermutationGroup(gen0, gen1, gen2);
+        PermutationGroup pg = PermutationGroupFactory.create(gen0, gen1, gen2);
 
         final ArrayList<BSGSCandidateElement> bsgs = pg.getBSGSCandidate();
         int[] oldBase = {0, 1, 2};
@@ -696,7 +696,7 @@ public class AlgorithmsBaseTest {
 //        Permutation gen2 = new PermutationOneLine(0, 9, 12, 10, 17, 5, 6, 14, 16, 1, 3, 11, 2, 19, 7, 15, 8, 4, 18, 13, 20, 21);
 //        Permutation gen3 = new PermutationOneLine(21, 9, 13, 16, 4, 5, 6, 14, 10, 1, 8, 11, 19, 2, 7, 15, 3, 17, 20, 12, 18, 0);
 //
-//        PermutationGroup pg = PermutationGroupFactory.createPermutationGroup(gen0, gen1, gen2, gen3);
+//        PermutationGroup pg = PermutationGroupFactory.create(gen0, gen1, gen2, gen3);
 
         ArrayList<BSGSCandidateElement> bsgs = pg.getBSGSCandidate();
         assertTrue(isBSGS(bsgs));
@@ -915,7 +915,7 @@ public class AlgorithmsBaseTest {
             str = str.substring(2, str.length() - 1);
             System.out.println("Permutation gen" + i + " = new PermutationOneLine(" + str + ");");
         }
-        System.out.print("\nPermutationGroup pg = PermutationGroupFactory.createPermutationGroup(");
+        System.out.print("\nPermutationGroup pg = PermutationGroupFactory.create(");
         for (int i = 0; ; ++i) {
             System.out.print("gen" + i);
             if (i == generators.size() - 1) {

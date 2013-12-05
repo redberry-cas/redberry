@@ -99,7 +99,7 @@ public class GapPrimitiveGroupsReader {
             Permutation[][] generators = readGeneratorsFromGap(fileName);
             PermutationGroup[] groups = new PermutationGroup[generators.length];
             for (int i = 0; i < generators.length; ++i)
-                groups[i] = PermutationGroupFactory.createPermutationGroup(generators[i]);
+                groups[i] = PermutationGroupFactory.create(generators[i]);
             return groups;
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -110,7 +110,7 @@ public class GapPrimitiveGroupsReader {
     public static PermutationGroup readGroupFromGap(String fileName, int groupNumber) {
         try {
             Permutation[][] generators = readGeneratorsFromGap(fileName);
-            return PermutationGroupFactory.createPermutationGroup(generators[groupNumber]);
+            return PermutationGroupFactory.create(generators[groupNumber]);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

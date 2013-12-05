@@ -40,6 +40,39 @@ import java.util.List;
  * @author Stanislav Poslavsky
  */
 public final class Permutations {
+    /**
+     * Calculates parity of specified permutation
+     *
+     * @param permutation permutation
+     * @return parity
+     */
+    public static int parity(int[] permutation) {
+        //we shall decompose this permutation into product of cycles and calculate l.c.m. of their sizes
+
+        //to mark viewed points
+        BitArray used = new BitArray(permutation.length);
+        //lcm
+        int start, pointer, currentSize, counter = 0;
+        int numOfTranspositions = 0;
+        //while not all points are seen
+        //loop over cycles
+        while (counter < permutation.length) {
+            //get first point that was not already traversed
+            start = pointer = used.nextZeroBit(0);
+            currentSize = 0;
+            //processing current cycle
+            //loop over current cycle
+            do {
+                assert !used.get(pointer);
+                used.set(pointer);
+                pointer = permutation[pointer];
+                ++currentSize;
+            } while (pointer != start);
+            counter += currentSize;
+            numOfTranspositions += currentSize - 1;
+        }
+        return numOfTranspositions % 2;
+    }
 
     /**
      * Returns true if specified permutation, written in one-line notation, is identity

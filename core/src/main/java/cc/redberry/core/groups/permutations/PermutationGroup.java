@@ -23,8 +23,11 @@
 package cc.redberry.core.groups.permutations;
 
 import cc.redberry.concurrent.OutputPortUnsafe;
+import cc.redberry.core.combinatorics.IntTuplesPort;
+import cc.redberry.core.number.NumberUtils;
 import cc.redberry.core.utils.ArraysUtils;
 import cc.redberry.core.utils.Indicator;
+import cc.redberry.core.utils.IntArrayList;
 import cc.redberry.core.utils.MathUtils;
 import gnu.trove.set.hash.TIntHashSet;
 
@@ -32,6 +35,7 @@ import java.math.BigInteger;
 import java.util.*;
 
 import static cc.redberry.core.groups.permutations.AlgorithmsBase.*;
+import static cc.redberry.core.number.NumberUtils.factorial;
 
 /**
  * @author Dmitry Bolotin
@@ -90,8 +94,9 @@ public final class PermutationGroup
 
     /**
      * Returns whether all specified permutations are members of this group
+     * <p/>
+     * //     * @param permutations permutations
      *
-     * @param permutations permutations
      * @return true if all specified permutations are members of this group
      */
     public boolean membershipTest(Collection<Permutation> permutations) {
@@ -230,6 +235,50 @@ public final class PermutationGroup
         return order.compareTo(BigInteger.ONE) == 0;
     }
 
+    private Boolean isSymmetric = null;
+
+    /**
+     * Returns whether this group is symmetric group
+     *
+     * @return true is this group is full symmetric group S(n)
+     */
+    public boolean isSymmetric() {
+        if (isSymmetric == null)
+            isSymmetric = order.compareTo(factorial(degree)) == 0;
+        return isSymmetric.booleanValue();
+    }
+
+    private Boolean isAlternating = null;
+
+    /**
+     * Returns whether this group is symmetric group
+     *
+     * @return true is this group is full symmetric group S(n)
+     */
+    public boolean isAlternating() {
+        if (isAlternating == null) {
+            isAlternating = factorial(degree).divide(BigInteger.valueOf(2)).equals(order);
+            if (isAlternating) {
+                List<Permutation> generators = generators();
+                for (Permutation p : generators)
+                    if (p.parity() == 1) {
+                        isAlternating = false;
+                        break;
+                    }
+            }
+        }
+        return isAlternating.booleanValue();
+    }
+
+    /**
+     * Returns whether this group is regular (i.e. it is transitive and order == degree).
+     *
+     * @return true is this group is transitive and its order equals to degree
+     */
+    public boolean isRegular() {
+        return isTransitive() && order.compareTo(BigInteger.valueOf(degree)) == 0;
+    }
+
     /**
      * Calculates a pointwise stabilizer of specified set of points.
      *
@@ -348,6 +397,7 @@ public final class PermutationGroup
      */
     public Permutation[] leftCosetRepresentatives(PermutationGroup subgroup) {
         checkDegree(subgroup.degree());
+        //todo implement special cases for Alt and Sym
         return AlgorithmsBacktrack.leftCosetRepresentatives(bsgs, subgroup.getBSGS(), base, ordering);
     }
 
@@ -371,6 +421,8 @@ public final class PermutationGroup
      * @throws IllegalArgumentException if {@code group.degree() != this.degree() }
      */
     public PermutationGroup union(PermutationGroup group) {
+        checkDegree(group.degree);
+
         if (isTrivial())
             return group;
         if (group.isTrivial())
@@ -382,8 +434,8 @@ public final class PermutationGroup
             return group;
 
         int[] base = MathUtils.intSetUnion(this.base.clone(), group.base.clone());
-        ArrayList<Permutation> generators = new ArrayList<>();
-        generators.addAll(generators());
+        //new generators
+        ArrayList<Permutation> generators = new ArrayList<>(generators());
         generators.addAll(group.generators());
         ArrayList<BSGSCandidateElement> bsgs = (ArrayList) createRawBSGSCandidate(base, generators);
         SchreierSimsAlgorithm(bsgs);
@@ -404,9 +456,60 @@ public final class PermutationGroup
         return new PermutationGroup(Collections.unmodifiableList(asBSGSList(intersection)));
     }
 
+    /**
+     * Returns direct product of this group and specified group. This product is organized as follows:
+     * the initial segment of each permutation is equal to permutation taken from this, while the rest is taken from
+     * specified permutation.
+     *
+     * @param group another group
+     * @return direct product this × other
+     */
+    public PermutationGroup directProduct(PermutationGroup group) {
+        return new PermutationGroup(
+                Collections.unmodifiableList(AlgorithmsBase.directProduct(bsgs, group.bsgs)));
+    }
+
     @Override
     public Iterator<Permutation> iterator() {
-        return new OutputPortUnsafe.PortIterator<>(new BacktrackSearch(bsgs));
+        return new PermIterator(); //new OutputPortUnsafe.PortIterator<>(new BacktrackSearch(bsgs));
+    }
+
+    /**
+     * An iterator over all permutations in group
+     */
+    public class PermIterator implements Iterator<Permutation> {
+        private final IntTuplesPort tuplesPort;
+        int[] tuple;
+
+        public PermIterator() {
+            final int[] orbitSizes = new int[base.length];
+            for (int i = 0; i < orbitSizes.length; ++i)
+                orbitSizes[i] = bsgs.get(i).orbitSize();
+            tuplesPort = new IntTuplesPort(orbitSizes);
+            tuple = tuplesPort.take();
+        }
+
+        @Override
+        public boolean hasNext() {
+            return tuple != null;
+        }
+
+        @Override
+        public Permutation next() {
+            Permutation p = bsgs.get(0).getInverseTransversalOf(bsgs.get(0).getOrbitPoint(tuple[0]));
+            BSGSElement e;
+            for (int i = 1, size = bsgs.size(); i < size; ++i) {
+                e = bsgs.get(i);
+                p = p.composition(e.getInverseTransversalOf(e.getOrbitPoint(tuple[i])));
+            }
+            tuple = tuplesPort.take();
+            return p;
+        }
+
+        @Override
+        public void remove() {
+            throw new UnsupportedOperationException("Illegal operation.");
+        }
     }
 
     /**

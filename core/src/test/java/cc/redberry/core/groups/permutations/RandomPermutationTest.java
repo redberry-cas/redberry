@@ -189,7 +189,7 @@ public class RandomPermutationTest {
             for (int i = 0; i < 3; ++i)
                 generators.add(random(init, seed));
 
-            long bound = PermutationGroupFactory.createPermutationGroup(generators).order().longValue();
+            long bound = PermutationGroupFactory.create(generators).order().longValue();
             primes = primes(bound);
             long old = comb;
             comb = Math.min(comb, numberOfDivisors(primes));
@@ -220,7 +220,7 @@ public class RandomPermutationTest {
             for (int i = 0; i < 2; ++i)
                 generators.add(random(allgenerators, seed));
 
-            PermutationGroup pg = PermutationGroupFactory.createPermutationGroup(generators);
+            PermutationGroup pg = PermutationGroupFactory.create(generators);
             long order = pg.order().longValue();
             if (order > 10_000_000_000L)
                 continue;

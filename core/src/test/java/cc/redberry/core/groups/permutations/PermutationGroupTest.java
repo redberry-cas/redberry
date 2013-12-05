@@ -32,9 +32,7 @@ import org.junit.Test;
 import java.math.BigInteger;
 import java.util.*;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  * @author Dmitry Bolotin
@@ -48,7 +46,7 @@ public class PermutationGroupTest {
         b = new PermutationOneLine(1, 0, 2, 3, 4, 5);
         c = new PermutationOneLine(1, 2, 3, 4, 5, 0);
 
-        PermutationGroup pg = PermutationGroupFactory.createPermutationGroup(b, c);
+        PermutationGroup pg = PermutationGroupFactory.create(b, c);
         assertEquals(NumberUtils.factorial(6), pg.order());
 
         assertTrue(pg.membershipTest(b));
@@ -66,7 +64,7 @@ public class PermutationGroupTest {
         b = new PermutationOneLine(1, 0, 2, 3, 4, 5);
         c = new PermutationOneLine(2, 3, 4, 5, 0, 1);
 
-        PermutationGroup pg = PermutationGroupFactory.createPermutationGroup(b, c);
+        PermutationGroup pg = PermutationGroupFactory.create(b, c);
         assertEquals(24, pg.order().intValue());
     }
 
@@ -77,7 +75,7 @@ public class PermutationGroupTest {
         b = new PermutationOneLine(1, 0, 2, 3, 4, 5);
         c = new PermutationOneLine(1, 2, 3, 4, 5, 0);
 
-        PermutationGroup pg = PermutationGroupFactory.createPermutationGroup(b, c);
+        PermutationGroup pg = PermutationGroupFactory.create(b, c);
         int order = pg.order().intValue();
         Set<Permutation> allPermutations = new HashSet<>();
         for (Permutation p : pg)
@@ -92,7 +90,7 @@ public class PermutationGroupTest {
         b = new PermutationOneLine(1, 4, 2, 3, 0, 5);
         c = new PermutationOneLine(1, 0, 4, 3, 5, 2);
 
-        PermutationGroup pg = PermutationGroupFactory.createPermutationGroup(b, c);
+        PermutationGroup pg = PermutationGroupFactory.create(b, c);
         int order = pg.order().intValue();
 
         HashSet<Permutation> allPermutations1 = new HashSet<>();
@@ -114,7 +112,7 @@ public class PermutationGroupTest {
         b = new PermutationOneLine(1, 4, 2, 3, 0, 5);
         c = new PermutationOneLine(true, 2, 0, 4, 5, 3, 1);
 
-        PermutationGroup pg = PermutationGroupFactory.createPermutationGroup(b, c);
+        PermutationGroup pg = PermutationGroupFactory.create(b, c);
         int order = pg.order().intValue();
 
         HashSet<Permutation> allPermutations1 = new HashSet<>();
@@ -136,7 +134,7 @@ public class PermutationGroupTest {
         b = new PermutationOneLine(true, 1, 0, 2);
         c = new PermutationOneLine(true, 0, 2, 1);
 
-        PermutationGroup pg = PermutationGroupFactory.createPermutationGroup(b, c);
+        PermutationGroup pg = PermutationGroupFactory.create(b, c);
         int order = pg.order().intValue();
 
         HashSet<Permutation> allPermutations1 = new HashSet<>();
@@ -158,7 +156,7 @@ public class PermutationGroupTest {
         b = new PermutationOneLine(true, 1, 0, 2);
         c = new PermutationOneLine(0, 2, 1);
 
-        PermutationGroup pg = PermutationGroupFactory.createPermutationGroup(b, c);
+        PermutationGroup pg = PermutationGroupFactory.create(b, c);
     }
 
     @Test
@@ -198,7 +196,7 @@ public class PermutationGroupTest {
             ++inconsistentGeneratorsCount;
 
             try {
-                PermutationGroupFactory.createPermutationGroup(permutations.toArray(new Permutation[0]));
+                PermutationGroupFactory.create(permutations.toArray(new Permutation[0]));
             } catch (InconsistentGeneratorsException e) {
                 continue;
             }
@@ -218,7 +216,7 @@ public class PermutationGroupTest {
         a = new PermutationOneLine(1, 0, 2, 3, 4, 5, 6);
         b = new PermutationOneLine(2, 1, 3, 4, 5, 6, 0);
         generators = new Permutation[]{a, b};
-        group = PermutationGroupFactory.createPermutationGroup(generators);
+        group = PermutationGroupFactory.create(generators);
         System.out.println(
                 Arrays.toString(group.getBase()));
     }
@@ -231,7 +229,7 @@ public class PermutationGroupTest {
         a = new PermutationOneLine(1, 0, 2, 3, 4, 5, 6);
         b = new PermutationOneLine(1, 2, 3, 4, 5, 6, 0);
         generators = new Permutation[]{a, b};
-        group = PermutationGroupFactory.createPermutationGroup(generators);
+        group = PermutationGroupFactory.create(generators);
         assertEquals(group.order().longValue(), 5040L);
         assertGroupIterator(group);
 
@@ -240,7 +238,7 @@ public class PermutationGroupTest {
         c = new PermutationOneLine(1, 2, 3, 5, 6, 4, 0);
         d = new PermutationOneLine(1, 4, 3, 2, 5, 6, 0);
         generators = new Permutation[]{a, b, c, d};
-        group = PermutationGroupFactory.createPermutationGroup(generators);
+        group = PermutationGroupFactory.create(generators);
         assertEquals(group.order().longValue(), 5040L);
         assertGroupIterator(group);
 
@@ -250,7 +248,7 @@ public class PermutationGroupTest {
         d = new PermutationOneLine(1, 4, 3, 2, 5, 6, 0, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19);
         e = new PermutationOneLine(1, 0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 19, 18);
         generators = new Permutation[]{a, b, c, d, e};
-        group = PermutationGroupFactory.createPermutationGroup(generators);
+        group = PermutationGroupFactory.create(generators);
         assertEquals(group.order().longValue(), 10080L);
         assertGroupIterator(group);
 
@@ -260,7 +258,7 @@ public class PermutationGroupTest {
         d = new PermutationOneLine(1, 4, 3, 2, 5, 6, 0, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19);
         e = new PermutationOneLine(1, 0, 2, 3, 14, 5, 6, 7, 8, 9, 10, 11, 12, 13, 4, 15, 16, 17, 18, 19);
         generators = new Permutation[]{a, b, c, d, e};
-        group = PermutationGroupFactory.createPermutationGroup(generators);
+        group = PermutationGroupFactory.create(generators);
         assertEquals(group.order().longValue(), 5040L * 8L);
         assertGroupIterator(group);
     }
@@ -279,7 +277,7 @@ public class PermutationGroupTest {
 
     @Test
     public void testIdentityGroup() throws Exception {
-        PermutationGroup id = PermutationGroupFactory.createPermutationGroup(Permutations.getIdentityOneLine(10));
+        PermutationGroup id = PermutationGroupFactory.create(Permutations.getIdentityOneLine(10));
 
         assertTrue(id.membershipTest(Permutations.getIdentityOneLine(10)));
 
@@ -299,7 +297,7 @@ public class PermutationGroupTest {
         a = new PermutationOneLine(1, 0, 2, 3, 4, 5, 6, 7);
         b = new PermutationOneLine(2, 1, 3, 4, 5, 6, 0, 7);
         generators = new Permutation[]{a, b};
-        group = PermutationGroupFactory.createPermutationGroup(generators);
+        group = PermutationGroupFactory.create(generators);
 
         int[] o = group.orbit(7, 0);
         Arrays.sort(o);
@@ -384,6 +382,68 @@ public class PermutationGroupTest {
         System.out.println(stab.order());
         System.out.println(group.order().divide(stab.order()));
 
+    }
+
+    @Test
+    public void testAlt1() {
+        //n = 5
+        PermutationOneLine a1 = new PermutationOneLine(new int[]{1, 2, 0, 3, 4, 5, 6});
+        PermutationOneLine a2 = new PermutationOneLine(new int[]{1, 2, 3, 4, 5, 6, 0});
+        PermutationGroup pg = PermutationGroupFactory.create(a1, a2);
+        assertTrue(pg.isAlternating());
+    }
+
+    @Test
+    public void testAlt2() {
+        //n = 5
+        PermutationOneLine a1 = new PermutationOneLine(new int[]{1, 2, 0, 3, 4, 5});
+        PermutationOneLine a2 = new PermutationOneLine(new int[]{0, 2, 3, 4, 5, 1});
+        PermutationGroup pg = PermutationGroupFactory.create(a1, a2);
+        assertTrue(pg.isAlternating());
+    }
+
+    @Test
+    public void testAlt3() {
+        PermutationGroup alt = PermutationGroupFactory.alternatingGroup(30);
+        PermutationGroup sym = PermutationGroupFactory.symmetricGroup(30);
+        assertTrue(alt.isAlternating());
+        assertTrue(!sym.isAlternating());
+        assertTrue(sym.isTransitive());
+        assertTrue(sym.isSymmetric());
+        assertTrue(sym.isSubgroup(alt));
+        Permutation[] tr = sym.leftCosetRepresentatives(alt);
+        assertEquals(2, tr.length);
+        Arrays.sort(tr);
+        assertTrue(tr[0].isIdentity());
+        assertTrue(tr[1].parity() == 1);
+    }
+
+    @Test
+    public void testDirectProduct1() {
+        PermutationGroup alt = PermutationGroupFactory.alternatingGroup(3);
+        PermutationGroup sym = PermutationGroupFactory.symmetricGroup(4);
+        PermutationGroup pr = alt.directProduct(sym);
+        assertTrue(AlgorithmsBase.isBSGS(pr.getBSGS()));
+        assertEquals(pr.order(), alt.order().multiply(sym.order()));
+        pr = sym.directProduct(alt);
+        assertTrue(AlgorithmsBase.isBSGS(pr.getBSGS()));
+        assertEquals(pr.order(), alt.order().multiply(sym.order()));
+        assertFalse(pr.isTransitive());
+        assertTrue(pr.orbits().length == 2);
+    }
+
+    @Test
+    public void testDirectProduct2() {
+        PermutationGroup alt = PermutationGroupFactory.alternatingGroup(13);
+        PermutationGroup altStab = alt.setwiseStabilizer(2, 3, 4);
+        PermutationGroup sym = PermutationGroupFactory.symmetricGroup(14);
+        PermutationGroup symStab = sym.setwiseStabilizer(5, 6, 1);
+        PermutationGroup prStab = altStab.directProduct(symStab);
+
+        PermutationGroup pr = alt.directProduct(sym);
+        PermutationGroup prStab1 = pr.setwiseStabilizer(2, 3, 4, 18, 19, 14);
+
+        assertTrue(prStab1.equals(prStab));
     }
 
     private static PermutationGroup pointWiseStabilizerBruteForce(PermutationGroup pg, int[] points) {

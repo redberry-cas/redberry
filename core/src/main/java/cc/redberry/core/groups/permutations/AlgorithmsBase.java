@@ -23,6 +23,7 @@
 package cc.redberry.core.groups.permutations;
 
 import cc.redberry.core.context.CC;
+import cc.redberry.core.number.NumberUtils;
 import cc.redberry.core.utils.ArraysUtils;
 import cc.redberry.core.utils.BitArray;
 import cc.redberry.core.utils.IntArrayList;
@@ -978,6 +979,60 @@ public class AlgorithmsBase {
 
     //------------------------------ FACTORIES --------------------------------------------//
 
+
+    /**
+     * Returns direct product of two groups given by their BSGS. This product is organized as follows:
+     * the initial segment of each permutation is equal to permutation taken from first group, while the rest is taken
+     * from the second.
+     *
+     * @param bsgs1 BSGS of first group
+     * @param bsgs1 BSGS of second group
+     * @return direct product first group × second group
+     */
+    public static ArrayList<BSGSElement> directProduct(List<? extends BSGSElement> bsgs1, List<? extends BSGSElement> bsgs2) {
+        int degree1 = bsgs1.get(0).degree(), degree2 = bsgs2.get(0).degree();
+        int deg = degree1 + degree2;
+
+        //adjust bsgs of group
+        ArrayList<BSGSElement> groupBsgsExtended = new ArrayList<>(bsgs2.size());
+        for (BSGSElement element : bsgs2) {
+            ArrayList<Permutation> stabilizers = new ArrayList<>(element.stabilizerGenerators.size());
+            for (Permutation p : element.stabilizerGenerators)
+                stabilizers.add(p.extendBefore(deg));
+
+            int[] SchreierVector = new int[deg];
+            Arrays.fill(SchreierVector, 0, degree1, -2);
+            System.arraycopy(element.SchreierVector, 0, SchreierVector, degree1, degree2);
+            IntArrayList orbit = new IntArrayList(element.orbitList.size());
+            for (int i = element.orbitList.size() - 1; i >= 0; --i)
+                orbit.add(element.orbitList.get(i) + degree1);
+            groupBsgsExtended.add(new BSGSElement(element.basePoint + degree1, stabilizers, SchreierVector, orbit));
+        }
+
+        ArrayList<BSGSElement> bsgs = new ArrayList<>(bsgs1.size() + bsgs2.size());
+        //adjust bsgs of this
+        for (BSGSElement element : bsgs1) {
+            ArrayList<Permutation> stabilizers = new ArrayList<>(element.stabilizerGenerators.size());
+            for (Permutation p : element.stabilizerGenerators)
+                stabilizers.add(p.extendAfter(deg));
+            stabilizers.addAll(groupBsgsExtended.get(0).stabilizerGenerators);
+            int[] SchreierVector = new int[deg];
+            System.arraycopy(element.SchreierVector, 0, SchreierVector, 0, degree1);
+            Arrays.fill(SchreierVector, degree1, deg, -2);
+            bsgs.add(new BSGSElement(element.basePoint, stabilizers, SchreierVector, element.orbitList));
+        }
+        bsgs.addAll(groupBsgsExtended);
+
+        return bsgs;
+    }
+
+    /**
+     * Calculates a union of specified groups.
+     *
+     * @param bsgs1 base and strong generating set of first group
+     * @param bsgs2 base and strong generating set of second group
+     * @return base and strong generating set of the union
+     */
     public static ArrayList<? extends BSGSElement> union(ArrayList<? extends BSGSElement> bsgs1,
                                                          ArrayList<? extends BSGSElement> bsgs2) {
         if (bsgs2.isEmpty())
@@ -1020,6 +1075,71 @@ public class AlgorithmsBase {
      * Cached BSGS structures for symmetric groups.
      */
     private static final ArrayList<BSGSElement>[] CACHED_SYMMETRIC_GROUPS = new ArrayList[SMALL_DEGREE_THRESHOLD];
+    /**
+     * Cached BSGS structures for alternating groups.
+     */
+    private static final ArrayList<BSGSElement>[] CACHED_ALTERNATING_GROUPS = new ArrayList[SMALL_DEGREE_THRESHOLD];
+
+    /**
+     * Creates base and strong generating set of alternating group of specified degree. Alternating groups of degree
+     * smaller then {@link #SMALL_DEGREE_THRESHOLD} will be cached.
+     *
+     * @param degree group degree
+     * @return base and strong generating set of alternating group
+     */
+    public static ArrayList<BSGSElement> createAlternatingGroupBSGS(final int degree) {
+        if (degree == 0)
+            throw new IllegalArgumentException("Degree = 0.");
+
+        //For small degree groups we'll use cached groups
+        if (degree <= SMALL_DEGREE_THRESHOLD) {
+            ArrayList<BSGSElement> bsgs = CACHED_ALTERNATING_GROUPS[degree - 1];
+            if (bsgs == null) {
+                bsgs = createAlternatingGroupBSGSFromScratch(degree);
+                CACHED_ALTERNATING_GROUPS[degree - 1] = bsgs;
+            }
+            return bsgs;
+        }
+
+        //For groups with large degree we'll construct all BSGS elements with a log(degree) access to all transversals
+        return createAlternatingGroupBSGSFromScratch(degree);
+    }
+
+    static ArrayList<BSGSElement> createAlternatingGroupBSGSFromScratch(final int degree) {
+        if (degree < 3)
+            return createEmptyBSGS(degree);
+
+        // Alt(n) generated by two elements:
+        // if degree is odd: p1 = (012) and (0,1,2,...,degree) (in cycle notation)
+        // if degree is even: p1 = (012) and (1,2,...,degree) (in cycle notation)
+
+        ArrayList<Permutation> generators = new ArrayList<>();
+        int[] perm = new int[degree];
+        for (int i = 3; i < degree; ++i)
+            perm[i] = i;
+        perm[0] = 1;
+        perm[1] = 2;
+        perm[2] = 0;
+        generators.add(new PermutationOneLine(perm));
+
+        if (degree >= 3) {
+            perm = new int[degree];
+            if (degree % 2 == 0) {
+                for (int i = 1; i < degree - 1; ++i)
+                    perm[i] = i + 1;
+                perm[degree - 1] = 1;
+            } else {
+                for (int i = 0; i < degree - 1; ++i)
+                    perm[i] = i + 1;
+                perm[degree - 1] = 0;
+            }
+            generators.add(new PermutationOneLine(perm));
+        }
+        ArrayList<BSGSCandidateElement> bsgs = (ArrayList) createRawBSGSCandidate(generators);
+        BigInteger order = NumberUtils.factorial(degree).divide(BigInteger.valueOf(2));
+        RandomSchreierSimsAlgorithmForKnownOrder(bsgs, order, CC.getRandomGenerator());
+        return asBSGSList(bsgs);
+    }
 
     /**
      * Creates base and strong generating set of symmetric group of specified degree. Symmetric group of degree
@@ -1139,20 +1259,6 @@ public class AlgorithmsBase {
     }
 
     /**
-     * Creates immutable container of base and strong generating set. This method is simply returns
-     * {@code new BSGS(createBSGSList(generators))}.
-     *
-     * @param generators
-     * @return BSGS container
-     */
-    public static BaseAndStrongGeneratingSet createBSGS(final List<Permutation> generators) {
-        List<BSGSElement> BSGSList = createBSGSList(generators);
-        if (BSGSList.isEmpty())
-            return BaseAndStrongGeneratingSet.EMPTY;
-        return new BaseAndStrongGeneratingSet(BSGSList);
-    }
-
-    /**
      * Makes a mutable copy of BSGS.
      *
      * @param BSGS BSGS
@@ -1171,9 +1277,9 @@ public class AlgorithmsBase {
      * @param BSGSCandidate BSGS
      * @return immutable copy of BSGS
      */
-    public static List<BSGSElement> asBSGSList(List<BSGSCandidateElement> BSGSCandidate) {
+    public static ArrayList<BSGSElement> asBSGSList(List<? extends BSGSElement> BSGSCandidate) {
         ArrayList<BSGSElement> BSGS = new ArrayList<>(BSGSCandidate.size());
-        for (BSGSCandidateElement element : BSGSCandidate)
+        for (BSGSElement element : BSGSCandidate)
             BSGS.add(element.asBSGSElement());
         return BSGS;
     }

@@ -163,6 +163,25 @@ public class PermutationsTest {
         System.out.println("Number of orbits:\n " + stat_orbits);
     }
 
+    @Test
+    public void testParity() {
+        int[] p = {0, 1, 2, 3};
+        assertEquals(0, Permutations.parity(p));
+        p = new int[]{1, 0, 2, 3};
+        assertEquals(1, Permutations.parity(p));
+        p = new int[]{1, 0, 3, 2};
+        assertEquals(0, Permutations.parity(p));
+        p = new int[]{3, 2, 0, 1};
+        assertEquals(1, Permutations.parity(p));
+    }
+
+    @Test
+    public void testName() throws Exception {
+        System.out.println(-1 ^ 0);
+        System.out.println(-1 ^ 1);
+        System.out.println(-1 ^ -1);
+    }
+
     private static void assertOrbits(int[][] orbits, int[] positions, int degree, List<Permutation> generators) {
         for (int i = 0; i < degree; ++i) {
             int[] expected = Permutations.getOrbitList(generators, i).toArray();

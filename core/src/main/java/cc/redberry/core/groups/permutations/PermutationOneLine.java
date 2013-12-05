@@ -86,9 +86,9 @@ public class PermutationOneLine implements Permutation {
 
     //!no check for one-line notation => unsafe constructor
     private PermutationOneLine(boolean isIdentity, boolean antisymmetry, int[] permutation) {
+        this.isIdentity = isIdentity;
         this.permutation = permutation;
         this.antisymmetry = antisymmetry;
-        this.isIdentity = isIdentity;
         if (antisymmetry && Permutations.orderOfPermutationIsOdd(permutation))
             throw new InconsistentGeneratorsException();
     }
@@ -99,8 +99,6 @@ public class PermutationOneLine implements Permutation {
         this.permutation = permutation;
         this.antisymmetry = antisymmetry;
         this.isIdentity = isIdentity;
-        if (antisymmetry && Permutations.orderOfPermutationIsOdd(permutation))
-            throw new InconsistentGeneratorsException();
     }
 
     @Override
@@ -148,6 +146,7 @@ public class PermutationOneLine implements Permutation {
                 result[i] = other.newIndexOf(permutation[i]);
                 resultIsIdentity &= result[i] == i;
             }
+
             return new PermutationOneLine(resultIsIdentity, antisymmetry ^ other.antisymmetry(), result);
         } catch (InconsistentGeneratorsException ex) {
             throw new InconsistentGeneratorsException(this + " and " + other);
@@ -174,6 +173,7 @@ public class PermutationOneLine implements Permutation {
         final int[] inv = new int[permutation.length];
         for (int i = permutation.length - 1; i >= 0; --i)
             inv[permutation[i]] = i;
+
         return new PermutationOneLine(false, antisymmetry, inv, true);
     }
 
@@ -249,6 +249,42 @@ public class PermutationOneLine implements Permutation {
     }
 
     @Override
+    public int parity() {
+        return Permutations.parity(permutation);
+    }
+
+    @Override
+    public PermutationOneLine extendAfter(final int newDegree) {
+        if (newDegree < permutation.length)
+            throw new IllegalArgumentException("New degree is smaller then this degree.");
+        if (newDegree == permutation.length)
+            return this;
+        int[] p = new int[newDegree];
+        System.arraycopy(permutation, 0, p, 0, permutation.length);
+        for (int i = permutation.length; i < newDegree; ++i)
+            p[i] = i;
+        return new PermutationOneLine(p);
+//        return new PermutationOneLine(isIdentity, antisymmetry, p, true);
+    }
+
+    @Override
+    public PermutationOneLine extendBefore(final int newDegree) {
+        if (newDegree < permutation.length)
+            throw new IllegalArgumentException("New degree is smaller then this degree.");
+        if (newDegree == permutation.length)
+            return this;
+        int[] p = new int[newDegree];
+        int i = 1;
+        for (; i < newDegree - permutation.length; ++i)
+            p[i] = i;
+        int k = i;
+        for (; i < newDegree; ++i)
+            p[i] = permutation[i - k] + k;
+        return new PermutationOneLine(p);
+//        return new PermutationOneLine(isIdentity, antisymmetry, p, true);
+    }
+
+    @Override
     public int hashCode() {
         int result = Arrays.hashCode(permutation);
         result = 31 * result + (antisymmetry ? 1 : 0);
@@ -265,20 +301,7 @@ public class PermutationOneLine implements Permutation {
         return (antisymmetry ? "-" : "+") + Arrays.toString(permutation);
     }
 
-    /**
-     * Compares this permutation with other. The algorithm sequentially compares
-     * integers {@code i1} and {@code i2} in arrays, representing this
-     * permutation and other permutation relatively. If on some step {@code i1 > i2}
-     * returns 1, if one some step {@code i2 > i1 } returns -1, and if on all
-     * steps
-     * {@code i1 == i2} returns 0 (combinatorics are equals).
-     *
-     * @param t permutation to compare
-     * @return 1 if this one is "greater" -1 if t is "greater", 0 if this and t
-     *         equals.
-     * @throws IllegalArgumentException if dimensions of this and t are not '
-     *                                  equals
-     */
+
     @Override
     public int compareTo(Permutation t) {
         if (t.degree() != permutation.length)

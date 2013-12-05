@@ -152,4 +152,29 @@ public interface Permutation extends Comparable<Permutation> {
      * @return this raised to the specified exponent
      */
     public Permutation pow(int exponent);
+
+    /**
+     * Returns parity of this permutations.
+     *
+     * @return parity of this permutations
+     */
+    public int parity();
+
+    /**
+     * Extends this permutation to specified degree, by inserting identity action in the initial segment of this
+     * permutation.
+     *
+     * @param newDegree new degree
+     * @return equivalent permutation with specified degree
+     */
+    public Permutation extendBefore(int newDegree);
+
+    /**
+     * Extends this permutation to specified degree, by inserting identity action at the end of this permutation (if
+     * written in one-line notation).
+     *
+     * @param newDegree new degree
+     * @return equivalent permutation with specified degree
+     */
+    public Permutation extendAfter(int newDegree);
 }

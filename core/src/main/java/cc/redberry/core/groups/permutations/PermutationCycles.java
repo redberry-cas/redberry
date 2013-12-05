@@ -108,4 +108,19 @@ public class PermutationCycles implements Permutation {
     public int compareTo(Permutation o) {
         return 0;
     }
+
+    @Override
+    public int parity() {
+        return 0;
+    }
+
+    @Override
+    public Permutation extendBefore(int newDegree) {
+        return null;
+    }
+
+    @Override
+    public Permutation extendAfter(int newDegree) {
+        return null;
+    }
 }
