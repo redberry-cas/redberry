@@ -548,52 +548,65 @@ public final class AlgorithmsBacktrack {
     /**
      * Calculates intersection of given subgroups using {@link #subgroupSearch(java.util.List, java.util.ArrayList, BacktrackSearchTestFunction, cc.redberry.core.utils.Indicator)}.
      *
-     * @param subgroup1    permutation group
-     * @param subgroup2    permutation group
+     * @param group1       permutation group
+     * @param group2       permutation group
      * @param intersection initial intersection of given groups
      */
-    public static void intersection(final List<? extends BSGSElement> subgroup1,
-                                    final List<? extends BSGSElement> subgroup2,
+    public static void intersection(final List<? extends BSGSElement> group1,
+                                    final List<? extends BSGSElement> group2,
                                     final ArrayList<BSGSCandidateElement> intersection) {
         //todo implement special cases
 
-        if (AlgorithmsBase.calculateOrder(subgroup2).compareTo(AlgorithmsBase.calculateOrder(subgroup1)) < 0) {
-            intersection(subgroup2, subgroup1, intersection);
+        if (AlgorithmsBase.calculateOrder(group2).compareTo(AlgorithmsBase.calculateOrder(group1)) < 0) {
+            intersection(group2, group1, intersection);
             return;
         }
 
-        final Permutation identity = subgroup1.get(0).stabilizerGenerators.get(0).getIdentity();
-        final Permutation[] intersectionWord = new Permutation[subgroup1.size()];
+        final ArrayList<BSGSCandidateElement> smaller = AlgorithmsBase.asBSGSCandidatesList(group1);
+        rebaseWithRedundancy(smaller, AlgorithmsBase.getBaseAsArray(group2), group2.get(0).degree());
+
+        final ArrayList<BSGSCandidateElement> larger = AlgorithmsBase.asBSGSCandidatesList(group2);
+        rebaseWithRedundancy(larger, AlgorithmsBase.getBaseAsArray(smaller), group2.get(0).degree());
+
+        assert smaller.size() == larger.size();
+
+        final Permutation identity = smaller.get(0).stabilizerGenerators.get(0).getIdentity();
+        final Permutation[] intersectionWord = new Permutation[smaller.size()];
         for (int i = 0; i < intersectionWord.length; ++i)
             intersectionWord[i] = identity;
 
         BacktrackSearchPayload payload = new BacktrackSearchPayload() {
             @Override
             public void beforeLevelIncrement(int level) {
-                int image = wordReference[level].newIndexOf(subgroup1.get(level).basePoint);
+                int image = wordReference[level].newIndexOf(smaller.get(level).basePoint);
 
                 if (level == 0)
-                    intersectionWord[level] = subgroup2.get(level).getTransversalOf(image);
+                    intersectionWord[level] = larger.get(level).getTransversalOf(image);
                 else
-                    intersectionWord[level] = subgroup2.get(level).getTransversalOf(
+                    intersectionWord[level] = larger.get(level).getTransversalOf(
                             intersectionWord[level - 1].newIndexOfUnderInverse(image)).composition(intersectionWord[level - 1]);
             }
 
             @Override
             public void afterLevelIncrement(int level) {
+
             }
 
             @Override
             public boolean test(Permutation permutation, int level) {
-                return (level == 0 ||
-                        subgroup2.get(level).belongsToOrbit(
-                                intersectionWord[level - 1].newIndexOfUnderInverse(
-                                        wordReference[level].newIndexOf(
-                                                subgroup1.get(level).basePoint))));
+                if (level == 0)
+                    return larger.get(level).belongsToOrbit(
+                            wordReference[level].newIndexOf(smaller.get(level).basePoint));
+                else
+                    return larger.get(level).belongsToOrbit(
+                            intersectionWord[level - 1].newIndexOfUnderInverse(
+                                    wordReference[level].newIndexOf(
+                                            smaller.get(level).basePoint)));
             }
+
         };
 
-        subgroupSearchWithPayload(subgroup1, intersection, payload, Indicator.TRUE_INDICATOR);
+        subgroupSearchWithPayload(smaller, intersection, payload, Indicator.TRUE_INDICATOR);
     }
 
     /**

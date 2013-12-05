@@ -192,7 +192,7 @@ public class AlgorithmsBase {
         out:
         for (int i = base.size() - 1; i >= 0; --i) {
             for (Permutation permutation : generators)
-                if (permutation.newIndexOf(i) != i)
+                if (permutation.newIndexOf(base.get(i)) != base.get(i))
                     continue out;
             base.remove(i);
         }

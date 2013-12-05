@@ -433,17 +433,52 @@ public class PermutationGroupTest {
     }
 
     @Test
+    public void testIntersection1() {
+        PermutationGroup alt = PermutationGroupFactory.alternatingGroup(15);
+
+        PermutationGroup sw1 = alt.setwiseStabilizer(1, 2, 3, 4, 5, 6);
+        PermutationGroup sw2 = alt.setwiseStabilizer(4, 5, 6, 7, 8, 9, 10);
+        PermutationGroup intr = sw1.intersection(sw2);
+        PermutationGroup sw3 = alt.setwiseStabilizer(4, 5, 6);
+        assertTrue(sw3.isSubgroup(intr));
+    }
+
+    @Test
     public void testDirectProduct2() {
+        //Alt(13)
         PermutationGroup alt = PermutationGroupFactory.alternatingGroup(13);
+        //setwise stabilizer in Alt(13)
         PermutationGroup altStab = alt.setwiseStabilizer(2, 3, 4);
+        assertTrue(alt.isSubgroup(altStab));
+        //Sym(14)
         PermutationGroup sym = PermutationGroupFactory.symmetricGroup(14);
+        //setwise stabilizer in Sym(14)
         PermutationGroup symStab = sym.setwiseStabilizer(5, 6, 1);
+        assertTrue(sym.isSubgroup(symStab));
+        //direct product of stabilizers
         PermutationGroup prStab = altStab.directProduct(symStab);
-
+        //direct product Alt(13)×Sym(14)
         PermutationGroup pr = alt.directProduct(sym);
+        //setwise stabilizer in product
         PermutationGroup prStab1 = pr.setwiseStabilizer(2, 3, 4, 18, 19, 14);
-
         assertTrue(prStab1.equals(prStab));
+        assertFalse(prStab.isTransitive());
+        //another setwise stabilizer
+        PermutationGroup prStab2 = pr.setwiseStabilizer(23, 14, 4, 1, 6);
+        //their intersection
+        PermutationGroup intersection = prStab1.intersection(prStab2);
+        //another larger setwise stabilizer
+        PermutationGroup prStab3 = pr.setwiseStabilizer(4, 14);
+        assertTrue(prStab3.isSubgroup(intersection));
+        //pointwise stabilizer
+        PermutationGroup prStab4 = pr.pointwiseStabilizer(1, 2, 3, 4, 21, 22, 23);
+        //union of subgroups
+        PermutationGroup union = prStab1.union(prStab4);
+        assertTrue(union.isSubgroup(prStab1));
+        assertTrue(union.isSubgroup(prStab4));
+        //left coset representatives of union in pr
+        Permutation[] cosets = pr.leftCosetRepresentatives(union);
+        assertEquals(pr.order().divide(union.order()), BigInteger.valueOf(cosets.length));
     }
 
     private static PermutationGroup pointWiseStabilizerBruteForce(PermutationGroup pg, int[] points) {
