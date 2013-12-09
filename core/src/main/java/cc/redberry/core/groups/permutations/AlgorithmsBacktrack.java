@@ -575,7 +575,7 @@ public final class AlgorithmsBacktrack {
         for (int i = 0; i < intersectionWord.length; ++i)
             intersectionWord[i] = identity;
 
-        BacktrackSearchPayload payload = new BacktrackSearchPayload() {
+        final BacktrackSearchPayload payload = new BacktrackSearchPayload() {
             @Override
             public void beforeLevelIncrement(int level) {
                 int image = wordReference[level].newIndexOf(smaller.get(level).basePoint);
@@ -632,7 +632,7 @@ public final class AlgorithmsBacktrack {
      * @param base   new base
      * @param degree group degree
      */
-    private static void rebaseWithRedundancy(final ArrayList<BSGSCandidateElement> group,
+    static void rebaseWithRedundancy(final ArrayList<BSGSCandidateElement> group,
                                              final int[] base, final int degree) {
         AlgorithmsBase.rebase(group, base);
         if (group.size() < base.length)

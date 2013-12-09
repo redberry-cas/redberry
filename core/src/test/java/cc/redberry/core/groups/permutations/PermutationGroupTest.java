@@ -22,11 +22,14 @@
  */
 package cc.redberry.core.groups.permutations;
 
+import cc.redberry.core.combinatorics.Combinatorics;
 import cc.redberry.core.context.CC;
 import cc.redberry.core.groups.permutations.gap.GapPrimitiveGroupsReader;
 import cc.redberry.core.number.NumberUtils;
+import gnu.trove.map.hash.TIntIntHashMap;
 import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.random.Well1024a;
+import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.junit.Test;
 
 import java.math.BigInteger;
@@ -479,6 +482,57 @@ public class PermutationGroupTest {
         //left coset representatives of union in pr
         Permutation[] cosets = pr.leftCosetRepresentatives(union);
         assertEquals(pr.order().divide(union.order()), BigInteger.valueOf(cosets.length));
+    }
+
+    @Test
+    public void testMapping1() {
+
+        final int degree = 15,
+                minFixed = degree - 7;
+
+        System.out.println("Max possible mappings: "
+                + NumberUtils.factorial(degree - minFixed).divide(BigInteger.valueOf(2)));
+
+        DescriptiveStatistics stat = new DescriptiveStatistics();
+        PermutationGroup pg = PermutationGroupFactory.alternatingGroup(degree);
+
+        for (int C = 0; C < 100; ++C) {
+            int[] from = Permutations.randomPermutation(degree);
+            int[] to = Permutations.randomPermutation(degree);
+            final int cut = minFixed + CC.getRandomGenerator().nextInt(degree - minFixed);
+
+            from = Arrays.copyOf(from, cut);
+            to = Arrays.copyOf(to, cut);
+
+            BacktrackSearch search = pg.mapping(from, to);
+            Permutation p;
+            int counter = 0;
+            while ((p = search.take()) != null) {
+                for (int i = 0; i < cut; ++i)
+                    assertEquals(to[i], p.newIndexOf(from[i]));
+                ++counter;
+            }
+            counter = counter < 0 ? ~counter : counter;
+            stat.addValue(counter);
+        }
+        System.out.println("Statistics of mapping elements: \n" + stat);
+    }
+
+    @Test
+    public void testMapping1a() {
+        CC.resetTensorNames(-1242939475613841754L);
+        final int degree = 15;
+        final PermutationGroup pg = PermutationGroupFactory.alternatingGroup(degree);
+        //4, 1, 14, 13, 12, 10, 11, 3, 8, 9, 6, 5, 0, 7, 2
+        int[] from = {1, 12, 11, 7, 3, 8, 0, 13, 10, 6, 2, 14, 9, 5};
+        int[] to = {1, 0, 5, 3, 13, 8, 4, 7, 6, 11, 12, 2, 9, 10};
+
+        BacktrackSearch search = pg.mapping(from, to);
+
+        Permutation p;
+        while ((p = search.take()) != null)
+            for (int i = 0; i < from.length; ++i)
+                assertEquals(to[i], p.newIndexOf(from[i]));
     }
 
     private static PermutationGroup pointWiseStabilizerBruteForce(PermutationGroup pg, int[] points) {

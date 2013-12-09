@@ -22,9 +22,7 @@
  */
 package cc.redberry.core.groups.permutations;
 
-import cc.redberry.concurrent.OutputPortUnsafe;
 import cc.redberry.core.combinatorics.IntTuplesPort;
-import cc.redberry.core.number.NumberUtils;
 import cc.redberry.core.utils.ArraysUtils;
 import cc.redberry.core.utils.Indicator;
 import cc.redberry.core.utils.IntArrayList;
@@ -467,6 +465,52 @@ public final class PermutationGroup
     public PermutationGroup directProduct(PermutationGroup group) {
         return new PermutationGroup(
                 Collections.unmodifiableList(AlgorithmsBase.directProduct(bsgs, group.bsgs)));
+    }
+
+    /**
+     * Returns an output port of permutations that preserves specified mapping between points. To be precise: for each
+     * permutation <i>p</i> returned by {@link cc.redberry.core.groups.permutations.BacktrackSearch#take()} and for
+     * all <i>i</i> ∈ {@code {0..from.length}}, it is guaranteed to be {@code p.newIndexOf(from[i]) == to[i]}.
+     *
+     * @param from from
+     * @param to   to
+     * @return output port of permutations that preserves specified mapping between points
+     * @throws IllegalArgumentException if {@code from.length != to.length}
+     */
+    public BacktrackSearch mapping(final int[] from, final int[] to) {
+        if (from.length != to.length)
+            throw new IllegalArgumentException("Length of from is not equal to length of to.");
+
+        final int[] _from_ = from.clone(), _to_ = to.clone();
+        //make rebase as simple as possible
+        ArraysUtils.quickSort(_from_, _to_, ordering);
+        ArrayList<BSGSCandidateElement> bsgs = getBSGSCandidate();
+        AlgorithmsBacktrack.rebaseWithRedundancy(bsgs, _from_, degree);
+
+        SearchForMapping mapping = new SearchForMapping(_from_, _to_);
+        return new BacktrackSearch(bsgs, mapping, mapping);
+    }
+
+    private static final class SearchForMapping
+            implements BacktrackSearchTestFunction, Indicator<Permutation> {
+        final int[] from, to;
+
+        private SearchForMapping(int[] from, int[] to) {
+            this.from = from;
+            this.to = to;
+        }
+
+        @Override
+        public boolean test(Permutation permutation, int level) {
+            if (level < from.length)
+                return permutation.newIndexOf(from[level]) == to[level];
+            return true;
+        }
+
+        @Override
+        public boolean is(Permutation object) {
+            return true;
+        }
     }
 
     @Override
