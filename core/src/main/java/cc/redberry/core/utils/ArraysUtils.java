@@ -39,6 +39,14 @@ import java.util.Set;
  */
 public final class ArraysUtils {
 
+    public static final Comparator<Object> HASH_COMPARATOR = new Comparator<Object>() {
+
+        @Override
+        public int compare(Object o1, Object o2) {
+            return Integer.compare(o1.hashCode(), o2.hashCode());
+        }
+    };
+
     private ArraysUtils() {
     }
 
@@ -66,14 +74,6 @@ public final class ArraysUtils {
             s += i;
         return s;
     }
-
-    public static final Comparator<Object> HASH_COMPARATOR = new Comparator<Object>() {
-
-        @Override
-        public int compare(Object o1, Object o2) {
-            return Integer.compare(o1.hashCode(), o2.hashCode());
-        }
-    };
 
     /**
      * This method is similar to {@link #bijection(Comparable[], Comparable[])}  }, but uses specified {@code
@@ -168,7 +168,6 @@ public final class ArraysUtils {
         }
         return r;
     }
-
 
     public static Tensor[] remove(Tensor[] array, int i) {
         Tensor[] r = new Tensor[array.length - 1];
@@ -521,14 +520,14 @@ public final class ArraysUtils {
 
     /**
      * Sorts the specified array of ints into ascending order using insertion sort algorithm and simultaneously permutes
-     * the {@code coSort} ints array in the same way then specified target array. This sort guarantee O(n^2) performance
+     * the {@code coSort} ints array in the same way as the target array. This sort guarantee O(n^2) performance
      * in the worst case and O(n) in the best case (nearly sorted input). <p/> <p> This sort is the best choice for
      * small arrays with elements number < 100. <p/> <p>This sort is guaranteed to be <i>stable</i>: equal elements will
      * not be reordered as a result of the sort; <i>adaptive</i>: performance adapts to the initial order of elements
      * and <i>in-place</i>: requires constant amount of additional space.
      *
      * @param target the array to be sorted
-     * @param coSort the array, which will be permuted in the same way, then the specified target array, during sorting
+     * @param coSort the array which will be permuted in the same way as the target array during sorting
      *               procedure
      * @throws IllegalArgumentException if coSort length less then target length.
      */
@@ -538,7 +537,7 @@ public final class ArraysUtils {
 
     /**
      * Sorts the specified array of ints into ascending order using insertion sort algorithm and simultaneously permutes
-     * the {@code coSort} ints array in the same way then specified target array. This sort guarantee O(n^2) performance
+     * the {@code coSort} ints array in the same way as the target array. This sort guarantee O(n^2) performance
      * in the worst case and O(n) in the best case (nearly sorted input). The range to be sorted extends from index
      * <tt>fromIndex</tt>, inclusive, to index <tt>toIndex</tt>, exclusive. (If <tt>fromIndex==toIndex</tt>, the range
      * to be sorted is empty.) <p/> <p> This sort is the best choice for small arrays with elements number < 100. <p/>
@@ -549,7 +548,7 @@ public final class ArraysUtils {
      * @param target    the array to be sorted
      * @param fromIndex the index of the first element (inclusive) to be sorted
      * @param toIndex   the index of the last element (exclusive) to be sorted
-     * @param coSort    the array, which will be permuted in the same way, then the specified target array, during
+     * @param coSort    the array which will be permuted in the same way as the target array, during
      *                  sorting procedure
      * @throws IllegalArgumentException       if <tt>fromIndex &gt; toIndex</tt>
      * @throws ArrayIndexOutOfBoundsException if <tt>fromIndex &lt; 0</tt> or <tt>toIndex &gt; target.length</tt> or
@@ -574,14 +573,14 @@ public final class ArraysUtils {
 
     /**
      * Sorts the specified array of ints into ascending order using insertion sort algorithm and simultaneously permutes
-     * the {@code coSort} longs array in the same way then specified target array. This sort guarantee O(n^2)
+     * the {@code coSort} longs array in the same way as the specified target array. This sort guarantee O(n^2)
      * performance in the worst case and O(n) in the best case (nearly sorted input). <p/> <p> This sort is the best
      * choice for small arrays with elements number < 100. <p/> <p>This sort is guaranteed to be <i>stable</i>: equal
      * elements will not be reordered as a result of the sort; <i>adaptive</i>: performance adapts to the initial order
      * of elements and <i>in-place</i>: requires constant amount of additional space.
      *
      * @param target the array to be sorted
-     * @param coSort the array, which will be permuted in the same way, then the specified target array, during sorting
+     * @param coSort the array which will be permuted in the same way as the target array during sorting
      *               procedure
      * @throws IllegalArgumentException if coSort length less then target length.
      */
@@ -591,7 +590,7 @@ public final class ArraysUtils {
 
     /**
      * Sorts the specified array of ints into ascending order using insertion sort algorithm and simultaneously permutes
-     * the {@code coSort} ints array in the same way then specified target array. This sort guarantee O(n^2) performance
+     * the {@code coSort} ints array in the same way as the target array. This sort guarantee O(n^2) performance
      * in the worst case and O(n) in the best case (nearly sorted input). The range to be sorted extends from index
      * <tt>fromIndex</tt>, inclusive, to index <tt>toIndex</tt>, exclusive. (If <tt>fromIndex==toIndex</tt>, the range
      * to be sorted is empty.) <p/> <p> This sort is the best choice for small arrays with elements number < 100. <p/>
@@ -602,7 +601,7 @@ public final class ArraysUtils {
      * @param target    the array to be sorted
      * @param fromIndex the index of the first element (inclusive) to be sorted
      * @param toIndex   the index of the last element (exclusive) to be sorted
-     * @param coSort    the array, which will be permuted in the same way, then the specified target array, during
+     * @param coSort    the array which will be permuted in the same way as the specified target array, during
      *                  sorting procedure
      * @throws IllegalArgumentException       if <tt>fromIndex &gt; toIndex</tt>
      * @throws ArrayIndexOutOfBoundsException if <tt>fromIndex &lt; 0</tt> or <tt>toIndex &gt; target.length</tt> or
@@ -636,7 +635,7 @@ public final class ArraysUtils {
      * amount of additional space.
      *
      * @param target the array to be sorted
-     * @param coSort the array, which will be permuted in the same way, then the specified target array, during sorting
+     * @param coSort the array which will be permuted in the same way as the target array during sorting
      *               procedure
      * @throws IllegalArgumentException if coSort length less then target length.
      */
@@ -657,7 +656,7 @@ public final class ArraysUtils {
      * @param target    the array to be sorted
      * @param fromIndex the index of the first element (inclusive) to be sorted
      * @param toIndex   the index of the last element (exclusive) to be sorted
-     * @param coSort    the array, which will be permuted in the same way, then the specified target array, during
+     * @param coSort    the array which will be permuted in the same way as the target array, during
      *                  sorting procedure
      * @throws IllegalArgumentException       if <tt>fromIndex &gt; toIndex</tt>
      * @throws ArrayIndexOutOfBoundsException if <tt>fromIndex &lt; 0</tt> or <tt>toIndex &gt; target.length</tt> or
@@ -681,14 +680,14 @@ public final class ArraysUtils {
 
     /**
      * Sorts the specified array of ints into ascending order using TimSort algorithm and simultaneously permutes the
-     * {@code coSort} ints array in the same way then specified target array. <p/> <p> NOTE: using of this method is
+     * {@code coSort} ints array in the same way as the target array. <p/> <p> NOTE: using of this method is
      * very good for large arrays with more then 100 elements, in other case using of insertion sort is highly
      * recommended. <p/> <p>This sort is guaranteed to be <i>stable</i>: equal elements will not be reordered as a
      * result of the sort. <p/> <p> The code was taken from {@link Arrays#sort(java.lang.Object[]) } and adapted for
      * integers. For more information look there.
      *
      * @param target the array to be sorted
-     * @param coSort the array, which will be permuted in the same way, then the specified target array, during sorting
+     * @param coSort the array which will be permuted in the same way as the target array during sorting
      *               procedure
      * @throws ClassCastException if the array contains elements that are not <i>mutually comparable</i> (for example,
      *                            strings and integers)
@@ -700,12 +699,12 @@ public final class ArraysUtils {
 
     /**
      * Sorts the specified array of ints into ascending order using stable sort algorithm and simultaneously permutes
-     * the {@code coSort} ints array in the same way then specified target array. If length of specified array is less
+     * the {@code coSort} ints array in the same way as the target array. If length of specified array is less
      * than 100 - insertion sort algorithm performed, otherwise - TimSort. <p/> <p>This sort is guaranteed to be
      * <i>stable</i>: equal elements will not be reordered as a result of the sort.
      *
      * @param target the array to be sorted
-     * @param cosort the array, which will be permuted in the same way, then the specified target array, during sorting
+     * @param cosort the array which will be permuted in the same way as the target array during sorting
      *               procedure
      * @throws ClassCastException       if the array contains elements that are not <i>mutually comparable</i> (for
      *                                  example, strings and integers)
@@ -720,7 +719,6 @@ public final class ArraysUtils {
         else
             ArraysUtils.insertionSort(target, cosort);
     }
-
 
     /**
      * Sorts the specified array and returns the resulting permutation
@@ -738,7 +736,7 @@ public final class ArraysUtils {
 
     /**
      * Sorts the specified target array of ints into ascending numerical order and simultaneously permutes the {@code
-     * coSort} ints array in the same way then specified target array. <p/> The code was taken from the jdk6 Arrays
+     * coSort} ints array in the same way as the target array. <p/> The code was taken from the jdk6 Arrays
      * class. <p/> The sorting algorithm is a tuned quicksort, adapted from Jon L. Bentley and M. Douglas McIlroy's
      * "Engineering a Sort Function", Software-Practice and Experience, Vol. 23(11) P. 1249-1265 (November 1993). This
      * algorithm offers n*log(n) performance on many data sets that cause other quicksorts to degrade to quadratic
@@ -748,7 +746,7 @@ public final class ArraysUtils {
      * IllegalArgumentException} if {@code target == coSort}, because in this case no sorting will be perfomed.
      *
      * @param target the array to be sorted
-     * @param coSort the array, which will be permuted in the same way, then the specified target array, during sorting
+     * @param coSort the array which will be permuted in the same way as the target array during sorting
      *               procedure
      * @throws IllegalArgumentException if coSort length less then target length.
      * @throws IllegalArgumentException if target == coSort (as references).
@@ -759,7 +757,7 @@ public final class ArraysUtils {
 
     /**
      * Sorts the specified range of the specified target array of ints into ascending numerical order and simultaneously
-     * permutes the {@code coSort} ints array in the same way then specified target array. The range to be sorted
+     * permutes the {@code coSort} ints array in the same way as the target array. The range to be sorted
      * extends from index <tt>fromIndex</tt>, inclusive, to index <tt>toIndex</tt>, exclusive. (If
      * <tt>fromIndex==toIndex</tt>, the range to be sorted is empty.)<p> <p/> The code was taken from the jdk6 Arrays
      * class. <p/> The sorting algorithm is a tuned quicksort, adapted from Jon L. Bentley and M. Douglas McIlroy's
@@ -773,7 +771,7 @@ public final class ArraysUtils {
      * @param target    the array to be sorted
      * @param fromIndex the index of the first element (inclusive) to be sorted
      * @param toIndex   the index of the last element (exclusive) to be sorted
-     * @param coSort    the array, which will be permuted in the same way, then the specified target array, during
+     * @param coSort    the array which will be permuted in the same way as the target array, during
      *                  sorting procedure
      * @throws IllegalArgumentException       if <tt>fromIndex &gt; toIndex</tt>
      * @throws ArrayIndexOutOfBoundsException if <tt>fromIndex &lt; 0</tt> or <tt>toIndex &gt; target.length</tt> or
@@ -796,7 +794,7 @@ public final class ArraysUtils {
      * @param target    the array to be sorted
      * @param fromIndex the index of the first element (inclusive) to be sorted
      * @param length    the length of the sorting subarray.
-     * @param coSort    the array, which will be permuted in the same way, then the specified target array, during
+     * @param coSort    the array which will be permuted in the same way as the target array, during
      *                  sorting procedure
      * @throws IllegalArgumentException if target == coSort (as references).
      */
@@ -893,7 +891,7 @@ public final class ArraysUtils {
 
     /**
      * Sorts the specified target array of ints into ascending numerical order and simultaneously permutes the {@code
-     * coSort} longs array in the same way then specified target array. <p/> The code was taken from the jdk6 Arrays
+     * coSort} longs array in the same way as the target array. <p/> The code was taken from the jdk6 Arrays
      * class. <p/> The sorting algorithm is a tuned quicksort, adapted from Jon L. Bentley and M. Douglas McIlroy's
      * "Engineering a Sort Function", Software-Practice and Experience, Vol. 23(11) P. 1249-1265 (November 1993). This
      * algorithm offers n*log(n) performance on many data sets that cause other quicksorts to degrade to quadratic
@@ -902,7 +900,7 @@ public final class ArraysUtils {
      * sort methods like an insertion sort or Tim sort.</b>
      *
      * @param target the array to be sorted
-     * @param coSort the array, which will be permuted in the same way, then the specified target array, during sorting
+     * @param coSort the array which will be permuted in the same way as the target array during sorting
      *               procedure
      * @throws IllegalArgumentException if coSort length less then target length.
      */
@@ -912,7 +910,7 @@ public final class ArraysUtils {
 
     /**
      * Sorts the specified range of the specified target array of ints into ascending numerical order and simultaneously
-     * permutes the {@code coSort} longs array in the same way then specified target array. The range to be sorted
+     * permutes the {@code coSort} longs array in the same way as the target array. The range to be sorted
      * extends from index <tt>fromIndex</tt>, inclusive, to index <tt>toIndex</tt>, exclusive. (If
      * <tt>fromIndex==toIndex</tt>, the range to be sorted is empty.)<p> <p/> The code was taken from the jdk6 Arrays
      * class. <p/> The sorting algorithm is a tuned quicksort, adapted from Jon L. Bentley and M. Douglas McIlroy's
@@ -925,7 +923,7 @@ public final class ArraysUtils {
      * @param target    the array to be sorted
      * @param fromIndex the index of the first element (inclusive) to be sorted
      * @param toIndex   the index of the last element (exclusive) to be sorted
-     * @param coSort    the array, which will be permuted in the same way, then the specified target array, during
+     * @param coSort    the array which will be permuted in the same way as the target array, during
      *                  sorting procedure
      * @throws IllegalArgumentException       if <tt>fromIndex &gt; toIndex</tt>
      * @throws ArrayIndexOutOfBoundsException if <tt>fromIndex &lt; 0</tt> or <tt>toIndex &gt; target.length</tt> or
@@ -946,7 +944,7 @@ public final class ArraysUtils {
      * @param target    the array to be sorted
      * @param fromIndex the index of the first element (inclusive) to be sorted
      * @param length    the length of the sorting subarray.
-     * @param coSort    the array, which will be permuted in the same way, then the specified target array, during
+     * @param coSort    the array which will be permuted in the same way as the target array, during
      *                  sorting procedure
      */
     public static void quickSort1(int target[], int fromIndex, int length, long[] coSort) {
@@ -1036,7 +1034,7 @@ public final class ArraysUtils {
      * are sure, in what you are doing. If not - use stable sort methods like an insertion sort or Tim sort.</b>
      *
      * @param target the array to be sorted
-     * @param coSort the array, which will be permuted in the same way, then the specified target array, during sorting
+     * @param coSort the array which will be permuted in the same way as the target array during sorting
      *               procedure
      * @throws IllegalArgumentException if <tt>fromIndex &gt; toIndex</tt>
      * @throws IllegalArgumentException if coSort length less then target length.
@@ -1061,7 +1059,7 @@ public final class ArraysUtils {
      * @param target    the array to be sorted
      * @param fromIndex the index of the first element (inclusive) to be sorted
      * @param toIndex   the index of the last element (exclusive) to be sorted
-     * @param coSort    the array, which will be permuted in the same way, then the specified target array, during
+     * @param coSort    the array which will be permuted in the same way as the target array, during
      *                  sorting procedure
      * @throws IllegalArgumentException       if <tt>fromIndex &gt; toIndex</tt>
      * @throws ArrayIndexOutOfBoundsException if <tt>fromIndex &lt; 0</tt> or <tt>toIndex &gt; target.length</tt> or
@@ -1085,7 +1083,7 @@ public final class ArraysUtils {
      * @param target    the array to be sorted
      * @param fromIndex the index of the first element (inclusive) to be sorted
      * @param length    the length of the sorting subarray.
-     * @param coSort    the array, which will be permuted in the same way, then the specified target array, during
+     * @param coSort    the array which will be permuted in the same way as the target array, during
      *                  sorting procedure
      * @throws IllegalArgumentException if target == coSort (as references).
      */
@@ -1151,12 +1149,10 @@ public final class ArraysUtils {
         swap(coSort, a, b);
     }
 
-
     private static void vecswap(Object[] x, int a, int b, int n, Object[] coSort) {
         for (int i = 0; i < n; i++, a++, b++)
             swap(x, a, b, coSort);
     }
-
 
     /**
      * Sorts the specified target array of objects into ascending order, according to the natural ordering of its
@@ -1169,7 +1165,7 @@ public final class ArraysUtils {
      * are sure, in what you are doing. If not - use stable sort methods like an insertion sort or Tim sort.</b>
      *
      * @param target the array to be sorted
-     * @param coSort the array, which will be permuted in the same way, then the specified target array, during sorting
+     * @param coSort the array which will be permuted in the same way as the target array during sorting
      *               procedure
      * @throws IllegalArgumentException if <tt>fromIndex &gt; toIndex</tt>
      * @throws IllegalArgumentException if coSort length less then target length.
@@ -1194,7 +1190,7 @@ public final class ArraysUtils {
      * @param target    the array to be sorted
      * @param fromIndex the index of the first element (inclusive) to be sorted
      * @param toIndex   the index of the last element (exclusive) to be sorted
-     * @param coSort    the array, which will be permuted in the same way, then the specified target array, during
+     * @param coSort    the array which will be permuted in the same way as the target array, during
      *                  sorting procedure
      * @throws IllegalArgumentException       if <tt>fromIndex &gt; toIndex</tt>
      * @throws ArrayIndexOutOfBoundsException if <tt>fromIndex &lt; 0</tt> or <tt>toIndex &gt; target.length</tt> or
@@ -1216,7 +1212,7 @@ public final class ArraysUtils {
      * @param target    the array to be sorted
      * @param fromIndex the index of the first element (inclusive) to be sorted
      * @param length    the length of the sorting subarray.
-     * @param coSort    the array, which will be permuted in the same way, then the specified target array, during
+     * @param coSort    the array which will be permuted in the same way as the target array, during
      *                  sorting procedure
      * @throws IllegalArgumentException if target == coSort (as references).
      */
@@ -1282,12 +1278,10 @@ public final class ArraysUtils {
         swap(coSort, a, b);
     }
 
-
     private static void vecswap(Object[] x, int a, int b, int n, int[] coSort) {
         for (int i = 0; i < n; i++, a++, b++)
             swap(x, a, b, coSort);
     }
-
 
     /**
      * Swaps x[a] with x[b].
@@ -1306,7 +1300,7 @@ public final class ArraysUtils {
 
     /**
      * Sorts the specified target array of ints into ascending numerical order and simultaneously permutes the {@code
-     * coSort} Objects array in the same way then specified target array. <p/> The code was taken from the jdk6 Arrays
+     * coSort} Objects array in the same way as the target array. <p/> The code was taken from the jdk6 Arrays
      * class. <p/> The sorting algorithm is a tuned quicksort, adapted from Jon L. Bentley and M. Douglas McIlroy's
      * "Engineering a Sort Function", Software-Practice and Experience, Vol. 23(11) P. 1249-1265 (November 1993). This
      * algorithm offers n*log(n) performance on many data sets that cause other quicksorts to degrade to quadratic
@@ -1315,7 +1309,7 @@ public final class ArraysUtils {
      * sort methods like an insertion sort or Tim sort.</b>
      *
      * @param target the array to be sorted
-     * @param coSort the array, which will be permuted in the same way, then the specified target array, during sorting
+     * @param coSort the array which will be permuted in the same way as the target array during sorting
      *               procedure
      * @throws IllegalArgumentException if coSort length less then target length.
      */
@@ -1325,7 +1319,7 @@ public final class ArraysUtils {
 
     /**
      * Sorts the specified range of the specified target array of ints into ascending numerical order and simultaneously
-     * permutes the {@code coSort} Objects array in the same way then specified target array. The range to be sorted
+     * permutes the {@code coSort} Objects array in the same way as the target array. The range to be sorted
      * extends from index <tt>fromIndex</tt>, inclusive, to index <tt>toIndex</tt>, exclusive. (If
      * <tt>fromIndex==toIndex</tt>, the range to be sorted is empty.)<p> <p/> The code was taken from the jdk6 Arrays
      * class. <p/> The sorting algorithm is a tuned quicksort, adapted from Jon L. Bentley and M. Douglas McIlroy's
@@ -1338,7 +1332,7 @@ public final class ArraysUtils {
      * @param target    the array to be sorted
      * @param fromIndex the index of the first element (inclusive) to be sorted
      * @param toIndex   the index of the last element (exclusive) to be sorted
-     * @param coSort    the array, which will be permuted in the same way, then the specified target array, during
+     * @param coSort    the array which will be permuted in the same way as the target array, during
      *                  sorting procedure
      * @throws IllegalArgumentException       if <tt>fromIndex &gt; toIndex</tt>
      * @throws ArrayIndexOutOfBoundsException if <tt>fromIndex &lt; 0</tt> or <tt>toIndex &gt; target.length</tt> or
@@ -1359,7 +1353,7 @@ public final class ArraysUtils {
      * @param target    the array to be sorted
      * @param fromIndex the index of the first element (inclusive) to be sorted
      * @param length    the length of the sorting subarray.
-     * @param coSort    the array, which will be permuted in the same way, then the specified target array, during
+     * @param coSort    the array which will be permuted in the same way as the target array, during
      *                  sorting procedure
      */
     public static void quickSort1(int target[], int fromIndex, int length, Object[] coSort) {
@@ -1439,7 +1433,7 @@ public final class ArraysUtils {
 
     /**
      * Sorts the specified range of the specified target array of ints into ascending numerical order and simultaneously
-     * permutes the {@code coSort} ints array in the same way then specified target array. The range to be sorted
+     * permutes the {@code coSort} ints array in the same way as the target array. The range to be sorted
      * extends from index <tt>fromIndex</tt>, inclusive, to index <tt>toIndex</tt>, exclusive. (If
      * <tt>fromIndex==toIndex</tt>, the range to be sorted is empty.)<p> <p/> The code was taken from the jdk6 Arrays
      * class. <p/> The sorting algorithm is a tuned quicksort, adapted from Jon L. Bentley and M. Douglas McIlroy's
@@ -1453,7 +1447,7 @@ public final class ArraysUtils {
      * @param target    the array to be sorted
      * @param fromIndex the index of the first element (inclusive) to be sorted
      * @param toIndex   the index of the last element (exclusive) to be sorted
-     * @param coSort    the array, which will be permuted in the same way, then the specified target array, during
+     * @param coSort    the array which will be permuted in the same way as the target array, during
      *                  sorting procedure
      * @throws IllegalArgumentException       if <tt>fromIndex &gt; toIndex</tt>
      * @throws ArrayIndexOutOfBoundsException if <tt>fromIndex &lt; 0</tt> or <tt>toIndex &gt; target.length</tt> or
@@ -1475,7 +1469,7 @@ public final class ArraysUtils {
      * @param target    the array to be sorted
      * @param fromIndex the index of the first element (inclusive) to be sorted
      * @param length    the length of the sorting subarray.
-     * @param coSort    the array, which will be permuted in the same way, then the specified target array, during
+     * @param coSort    the array which will be permuted in the same way as the target array, during
      *                  sorting procedure
      */
     public static void quickSort1(short target[], int fromIndex, int length, int[] coSort) {
@@ -1541,7 +1535,7 @@ public final class ArraysUtils {
 
     /**
      * Sorts the specified target array of shorts into ascending numerical order and simultaneously permutes the {@code
-     * coSort} ints array in the same way then specified target array. <p/> The code was taken from the jdk6 Arrays
+     * coSort} ints array in the same way as the target array. <p/> The code was taken from the jdk6 Arrays
      * class. <p/> The sorting algorithm is a tuned quicksort, adapted from Jon L. Bentley and M. Douglas McIlroy's
      * "Engineering a Sort Function", Software-Practice and Experience, Vol. 23(11) P. 1249-1265 (November 1993). This
      * algorithm offers n*log(n) performance on many data sets that cause other quicksorts to degrade to quadratic
@@ -1551,7 +1545,7 @@ public final class ArraysUtils {
      * IllegalArgumentException} if {@code target == coSort}, because in this case no sorting will be perfomed.
      *
      * @param target the array to be sorted
-     * @param coSort the array, which will be permuted in the same way, then the specified target array, during sorting
+     * @param coSort the array which will be permuted in the same way as the target array during sorting
      *               procedure
      * @throws IllegalArgumentException if coSort length less then target length.
      */
@@ -1589,7 +1583,6 @@ public final class ArraysUtils {
 
     ////////////////////////////////////// COMPARATOR /////////////////////////////////////////////////////
 
-
     /**
      * Sorts the specified range of the specified target array of ints into order specified by {@link IntComparator}
      * using quicksort.
@@ -1601,7 +1594,6 @@ public final class ArraysUtils {
     public static void quickSort(int[] target, IntComparator comparator) {
         quickSort1(target, 0, target.length, comparator);
     }
-
 
     /**
      * Sorts the specified range of the specified target array of ints into order specified by {@link IntComparator}
@@ -1688,10 +1680,9 @@ public final class ArraysUtils {
 
     /////////////////////////////// QUICK SORT INTCOMPARATOR COSORT ////////////////////////////////////////
 
-
     /**
      * Sorts the specified target array of ints according to {@link IntComparator} and simultaneously permutes the {@code
-     * coSort} Objects array in the same way then specified target array. <p/> The code was taken from the jdk6 Arrays
+     * coSort} Objects array in the same way as the target array. <p/> The code was taken from the jdk6 Arrays
      * class. <p/> The sorting algorithm is a tuned quicksort, adapted from Jon L. Bentley and M. Douglas McIlroy's
      * "Engineering a Sort Function", Software-Practice and Experience, Vol. 23(11) P. 1249-1265 (November 1993). This
      * algorithm offers n*log(n) performance on many data sets that cause other quicksorts to degrade to quadratic
@@ -1707,10 +1698,9 @@ public final class ArraysUtils {
         quickSort1(target, 0, target.length, cosort, comparator);
     }
 
-
     /**
      * Sorts the specified range of the specified target array of ints according to {@link IntComparator} and simultaneously
-     * permutes the {@code coSort} Objects array in the same way then specified target array. The range to be sorted
+     * permutes the {@code coSort} Objects array in the same way as the target array. The range to be sorted
      * extends from index <tt>fromIndex</tt>, inclusive, to index <tt>toIndex</tt>, exclusive. (If
      * <tt>fromIndex==toIndex</tt>, the range to be sorted is empty.)<p> <p/> The code was taken from the jdk6 Arrays
      * class. <p/> The sorting algorithm is a tuned quicksort, adapted from Jon L. Bentley and M. Douglas McIlroy's
