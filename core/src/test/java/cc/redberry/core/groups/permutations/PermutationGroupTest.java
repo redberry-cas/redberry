@@ -535,6 +535,68 @@ public class PermutationGroupTest {
                 assertEquals(to[i], p.newIndexOf(from[i]));
     }
 
+
+    @Test
+    public void testMappingPerformance1() {
+        PermutationGroup[] allSimple = GapPrimitiveGroupsReader.readGroupsFromGap("/home/stas/gap4r6/prim/grps/gps1.g");
+
+        //burn JVM
+        for (int i = 0; i < allSimple.length; ++i) {
+            PermutationGroup pg = allSimple[i];
+            int degree = pg.degree();
+
+            for (int C = 0; C < 100; ++C) {
+                int[] from = Permutations.randomPermutation(degree);
+                int[] to = Permutations.randomPermutation(degree);
+                final int cut = 1 + CC.getRandomGenerator().nextInt(degree - 1);
+
+                from = Arrays.copyOf(from, cut);
+                to = Arrays.copyOf(to, cut);
+
+                Permutation p = pg.mapping(from, to).take();
+                if (p != null) {
+                    for (int j = 0; j < cut; ++j)
+                        assertEquals(to[j], p.newIndexOf(from[j]));
+                }
+            }
+        }
+
+        DescriptiveStatistics timeStat = new DescriptiveStatistics();
+        DescriptiveStatistics notNullStat = new DescriptiveStatistics();
+        DescriptiveStatistics mixed = new DescriptiveStatistics();
+
+        for (int i = 0; i < allSimple.length; ++i) {
+            PermutationGroup pg = allSimple[i];
+            int degree = pg.degree();
+
+            long start, elapsed = 0;
+            int notNull = 0;
+            for (int C = 0; C < 100; ++C) {
+                int[] from = Permutations.randomPermutation(degree);
+                int[] to = Permutations.randomPermutation(degree);
+                final int cut = 1 + CC.getRandomGenerator().nextInt(degree - 1);
+
+                from = Arrays.copyOf(from, cut);
+                to = Arrays.copyOf(to, cut);
+
+                start = System.currentTimeMillis();
+                Permutation p = pg.mapping(from, to).take();
+                elapsed += System.currentTimeMillis() - start;
+                if (p != null) {
+                    ++notNull;
+                    for (int j = 0; j < cut; ++j)
+                        assertEquals(to[j], p.newIndexOf(from[j]));
+                }
+            }
+            mixed.addValue(elapsed / notNull);
+            timeStat.addValue(elapsed);
+            notNullStat.addValue(notNull);
+        }
+        System.out.println("Time " + timeStat);
+        System.out.println("Not null " + notNullStat);
+    }
+
+
     private static PermutationGroup pointWiseStabilizerBruteForce(PermutationGroup pg, int[] points) {
         PermutationGroup stab = pg;
         for (int i : points)
