@@ -263,11 +263,6 @@ public class BlackList {
     }
 
     @Test
-    public void testProperty1() throws Exception {
-        System.out.println(System.getProperty("agent.name"));
-    }
-
-    @Test
     public void test121() {
         int t = 0;
         foo(++t, ++t);

@@ -48,6 +48,10 @@ import static cc.redberry.core.utils.TensorUtils.*;
  * @author Stanislav Poslavsky
  */
 public class TensorUtilsTest {
+    @Test
+    public void testProperty1() throws Exception {
+        System.out.println(System.getProperty("agent.name"));
+    }
 
     @Test
     public void test1() {
