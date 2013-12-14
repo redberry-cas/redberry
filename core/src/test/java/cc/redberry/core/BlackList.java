@@ -22,9 +22,9 @@
  */
 package cc.redberry.core;
 
-import cc.redberry.core.utils.MathUtils;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.tensor.random.RandomTensor;
+import cc.redberry.core.utils.MathUtils;
 import gnu.trove.set.hash.TIntHashSet;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.junit.Ignore;
@@ -42,6 +42,111 @@ import java.util.regex.Pattern;
  * @author Stanislav Poslavsky
  */
 public class BlackList {
+
+    private static void swap(int x[], int a, int b) {
+        int t = x[a];
+        x[a] = x[b];
+        x[b] = t;
+    }
+
+    private static void foo(int i, int j) {
+        System.out.println(i);
+        System.out.println(j);
+    }
+//
+//    private static void aaa(int[] xxx) {
+//        System.out.println("as");
+//    }
+//
+//    private static void bbb(Integer[] xxx) {
+//        System.out.println("sa");
+//    }
+
+    public static void burnJvm() {
+        int[] a = null;
+        int t = 0;
+        for (int i = 0; i < 11000; ++i) {
+            a = randomArray(1000000);
+            Arrays.sort(a);
+            int s = 0;
+            for (int j = 0; j < 1000000; ++j)
+                s += a[j];
+            t += s;
+        }
+        t = ~t;
+    }
+
+    public static int[][] randomArray1() {
+        int[][] a = new int[1000000][];
+        for (int i = 0; i < 1000000; ++i) {
+            a[i] = randomArray(3);
+        }
+        return a;
+    }
+
+//    private static final Pattern pattern = Pattern.compile(
+//                    "\\([\\s]*\"([a-zA-Z0-9=\\s\\*\\\\:+\\/\\-\\.\\,\\\\_\\^\\}\\{\\]\\[\\)\\(\"\n\"]*)\"\\)[\\s]*" +
+//                    "(\\;|\\,|[\\)]*[\\;]*|\\.)");
+
+    public static int[] randomArray(int size) {
+        int[] a = new int[size];
+        Random random = new Random();
+        for (int i = 0; i < size; ++i)
+            a[i] = random.nextInt(11);
+        return a;
+    }
+
+    public static <T> T[] removeReflection(T[] array, int[] positions) {
+        if (array == null)
+            throw new NullPointerException();
+        int[] p = MathUtils.getSortedDistinct(positions);
+        if (p.length == 0)
+            return array;
+
+        int size = p.length, pointer = 0, s = array.length;
+        for (; pointer < size; ++pointer)
+            if (p[pointer] >= s)
+                throw new ArrayIndexOutOfBoundsException();
+
+        final Class<?> type = array.getClass().getComponentType();
+        @SuppressWarnings("unchecked") // OK, because array is of type T
+                T[] r = (T[]) Array.newInstance(type, array.length - p.length);
+
+        pointer = 0;
+        int i = -1;
+        for (int j = 0; j < s; ++j) {
+            if (pointer < size - 1 && j > p[pointer])
+                ++pointer;
+            if (j == p[pointer]) continue;
+            else r[++i] = array[j];
+        }
+        return r;
+    }
+
+    public static Tensor[] removeExact(Tensor[] array, int[] positions) {
+        if (array == null)
+            throw new NullPointerException();
+        int[] p = MathUtils.getSortedDistinct(positions);
+        if (p.length == 0)
+            return array;
+
+        int size = p.length, pointer = 0, s = array.length;
+        for (; pointer < size; ++pointer)
+            if (p[pointer] >= s)
+                throw new ArrayIndexOutOfBoundsException();
+
+        Tensor[] r = new Tensor[array.length - p.length];
+
+        pointer = 0;
+        int i = -1;
+        for (int j = 0; j < s; ++j) {
+            if (pointer < size - 1 && j > p[pointer])
+                ++pointer;
+            if (j == p[pointer]) continue;
+            else r[++i] = array[j];
+        }
+        return r;
+    }
 
     @Test
     public void etwer() {
@@ -69,20 +174,19 @@ public class BlackList {
         System.out.println(b.hashCode());
     }
 
-    private static void swap(int x[], int a, int b) {
-        int t = x[a];
-        x[a] = x[b];
-        x[b] = t;
-    }
-//
-//    private static void aaa(int[] xxx) {
-//        System.out.println("as");
+//    @Test
+//    public void test() {
+////        burnJvm();
+//        long start;
+//        int[] a;
+//        for (int i = 0; i < 1; ++i) {
+//            a = randomArray();
+//            start = System.currentTimeMillis();
+//            Arrays.sort(a);
+//            System.out.println(Arrays.toString(a));
+//            System.out.println(System.currentTimeMillis() - start);
+//        }
 //    }
-//
-//    private static void bbb(Integer[] xxx) {
-//        System.out.println("sa");
-//    }
-
 
     @Ignore
     @Test
@@ -146,10 +250,6 @@ public class BlackList {
         System.out.println("object   " + t);
     }
 
-//    private static final Pattern pattern = Pattern.compile(
-//                    "\\([\\s]*\"([a-zA-Z0-9=\\s\\*\\\\:+\\/\\-\\.\\,\\\\_\\^\\}\\{\\]\\[\\)\\(\"\n\"]*)\"\\)[\\s]*" +
-//                    "(\\;|\\,|[\\)]*[\\;]*|\\.)");
-
     @Test
     public void test12131() {
         String p = "((?>(?>[a-zA-Z])|(?>\\\\[a-zA-A]*))(?>_(?>(?>[0-9])|(?>[\\{][0-9\\s]*[\\}])))?[']*)";
@@ -162,113 +262,15 @@ public class BlackList {
         }
     }
 
+    @Test
+    public void testProperty1() throws Exception {
+        System.out.println(System.getProperty("agent.name"));
+    }
 
     @Test
     public void test121() {
         int t = 0;
         foo(++t, ++t);
-    }
-
-    private static void foo(int i, int j) {
-        System.out.println(i);
-        System.out.println(j);
-    }
-
-//    @Test
-//    public void test() {
-////        burnJvm();
-//        long start;
-//        int[] a;
-//        for (int i = 0; i < 1; ++i) {
-//            a = randomArray();
-//            start = System.currentTimeMillis();
-//            Arrays.sort(a);
-//            System.out.println(Arrays.toString(a));
-//            System.out.println(System.currentTimeMillis() - start);
-//        }
-//    }
-
-    public static void burnJvm() {
-        int[] a = null;
-        int t = 0;
-        for (int i = 0; i < 11000; ++i) {
-            a = randomArray(1000000);
-            Arrays.sort(a);
-            int s = 0;
-            for (int j = 0; j < 1000000; ++j)
-                s += a[j];
-            t += s;
-        }
-        t = ~t;
-    }
-
-    public static int[][] randomArray1() {
-        int[][] a = new int[1000000][];
-        for (int i = 0; i < 1000000; ++i) {
-            a[i] = randomArray(3);
-        }
-        return a;
-    }
-
-    public static int[] randomArray(int size) {
-        int[] a = new int[size];
-        Random random = new Random();
-        for (int i = 0; i < size; ++i)
-            a[i] = random.nextInt(11);
-        return a;
-    }
-
-
-    public static <T> T[] removeReflection(T[] array, int[] positions) {
-        if (array == null)
-            throw new NullPointerException();
-        int[] p = MathUtils.getSortedDistinct(positions);
-        if (p.length == 0)
-            return array;
-
-        int size = p.length, pointer = 0, s = array.length;
-        for (; pointer < size; ++pointer)
-            if (p[pointer] >= s)
-                throw new ArrayIndexOutOfBoundsException();
-
-        final Class<?> type = array.getClass().getComponentType();
-        @SuppressWarnings("unchecked") // OK, because array is of type T
-                T[] r = (T[]) Array.newInstance(type, array.length - p.length);
-
-        pointer = 0;
-        int i = -1;
-        for (int j = 0; j < s; ++j) {
-            if (pointer < size - 1 && j > p[pointer])
-                ++pointer;
-            if (j == p[pointer]) continue;
-            else r[++i] = array[j];
-        }
-        return r;
-    }
-
-    public static Tensor[] removeExact(Tensor[] array, int[] positions) {
-        if (array == null)
-            throw new NullPointerException();
-        int[] p = MathUtils.getSortedDistinct(positions);
-        if (p.length == 0)
-            return array;
-
-        int size = p.length, pointer = 0, s = array.length;
-        for (; pointer < size; ++pointer)
-            if (p[pointer] >= s)
-                throw new ArrayIndexOutOfBoundsException();
-
-        Tensor[] r = new Tensor[array.length - p.length];
-
-        pointer = 0;
-        int i = -1;
-        for (int j = 0; j < s; ++j) {
-            if (pointer < size - 1 && j > p[pointer])
-                ++pointer;
-            if (j == p[pointer]) continue;
-            else r[++i] = array[j];
-        }
-        return r;
     }
 
     @Test

@@ -31,6 +31,9 @@ import cc.redberry.core.utils.EmptyIterator;
 
 import java.util.Iterator;
 
+import static cc.redberry.core.tensor.Tensors.isKronecker;
+import static cc.redberry.core.tensor.Tensors.isKroneckerOrMetric;
+
 /**
  * Implementation of simple tensor.
  *
@@ -86,17 +89,30 @@ public class SimpleTensor extends Tensor {
 
     @Override
     public String toString(OutputFormat mode) {
+        //Initializing StringBuilder
         StringBuilder sb = new StringBuilder();
-        sb.append(CC.getNameDescriptor(name).getName(indices));
+
+        //Adding tensor name
+        if (mode == OutputFormat.Maple && isKroneckerOrMetric(this)) {
+            if (isKronecker(this))
+                sb.append("KroneckerDelta");
+            else
+                sb.append("g_");
+        } else
+            sb.append(CC.getNameDescriptor(name).getName(indices));
+
+        //If there are no indices return builder content
         if (indices.size() == 0)
             return sb.toString();
 
+        //Writing indices
         boolean external = mode == OutputFormat.WolframMathematica || mode == OutputFormat.Maple;
         if (external)
             sb.append("[");
         sb.append(indices.toString(mode));
         if (external)
             sb.append("]");
+
         return sb.toString();
     }
 
