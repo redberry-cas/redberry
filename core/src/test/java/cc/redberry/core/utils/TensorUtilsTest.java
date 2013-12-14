@@ -48,9 +48,28 @@ import static cc.redberry.core.utils.TensorUtils.*;
  * @author Stanislav Poslavsky
  */
 public class TensorUtilsTest {
+    private static void assertFindSymmetries(SimpleTensor tensor) {
+        int dimension = tensor.getIndices().size();
+        int baseSize = 1 + (dimension / 3);
+        Symmetry[] base = new Symmetry[baseSize];
+        for (int i = 0; i < baseSize; ++i)
+            base[i] = new Symmetry(Combinatorics.randomPermutation(dimension), false);
+
+        Symmetries expectedSymmetries = SymmetriesFactory.createSymmetries(dimension);
+        for (Symmetry s : base) {
+            tensor.getIndices().getSymmetries().add((byte) 0, s);
+            expectedSymmetries.add(s);
+        }
+
+        assertEqualsSymmetries(expectedSymmetries,
+                findIndicesSymmetries(tensor.getIndices(), tensor));
+    }
+
     @Test
     public void testProperty1() throws Exception {
-        System.out.println(System.getProperty("agent.name"));
+        for (String name : System.getProperties().stringPropertyNames())
+            System.out.println(name + " = " + System.getProperty(name));
+
     }
 
     @Test
@@ -200,7 +219,6 @@ public class TensorUtilsTest {
                         new Symmetry(to, false)));
     }
 
-
     @Test
     public void testSymmetries4() {
         for (int i = 0; i < 30; ++i) {
@@ -214,23 +232,6 @@ public class TensorUtilsTest {
         }
     }
 
-    private static void assertFindSymmetries(SimpleTensor tensor) {
-        int dimension = tensor.getIndices().size();
-        int baseSize = 1 + (dimension / 3);
-        Symmetry[] base = new Symmetry[baseSize];
-        for (int i = 0; i < baseSize; ++i)
-            base[i] = new Symmetry(Combinatorics.randomPermutation(dimension), false);
-
-        Symmetries expectedSymmetries = SymmetriesFactory.createSymmetries(dimension);
-        for (Symmetry s : base) {
-            tensor.getIndices().getSymmetries().add((byte) 0, s);
-            expectedSymmetries.add(s);
-        }
-
-        assertEqualsSymmetries(expectedSymmetries,
-                findIndicesSymmetries(tensor.getIndices(), tensor));
-    }
-
     @Test
     public void testSymmetries5() {
         Tensor t = parse("d_a^b*d_c^d");
@@ -240,7 +241,6 @@ public class TensorUtilsTest {
         expected.add(new Symmetry(new int[]{0, 1, 3, 2}, false));
         assertEqualsSymmetries(actual, expected);
     }
-
 
     @Test
     public void testSymmetries6() {
@@ -302,7 +302,6 @@ public class TensorUtilsTest {
         };
         TAssert.assertEquals(det(matrix), "a*(e*i-f*h)-b*(d*i-f*g)+c*(d*h-e*g)");
     }
-
 
     @Test
     public void testDet3() {
