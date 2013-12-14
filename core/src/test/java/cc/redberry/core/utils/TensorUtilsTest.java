@@ -69,7 +69,9 @@ public class TensorUtilsTest {
     public void testProperty1() throws Exception {
         for (String name : System.getProperties().stringPropertyNames())
             System.out.println(name + " = " + System.getProperty(name));
-
+        System.out.println(System.getProperty("test1"));
+        System.out.println(System.getProperty("system.test1"));
+        System.out.println(System.getProperty("env.test1"));
     }
 
     @Test
