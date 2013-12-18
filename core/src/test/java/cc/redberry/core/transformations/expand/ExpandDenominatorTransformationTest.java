@@ -89,12 +89,5 @@ public class ExpandDenominatorTransformationTest {
         Tensor e = parse("1/(a*c + b*c)");
         TAssert.assertEquals(a, e);
     }
-
-    @Test
-    public void test9() {
-    Tensor a = expandDenominator(parse("1/(k_i*(a^i+b^i))**2"));
-    Tensor e = parse("1/(k_i*a^i+k_i*b^i)**2");
-    TAssert.assertEquals(a, e);
-    }
     //todo more tests
 }
