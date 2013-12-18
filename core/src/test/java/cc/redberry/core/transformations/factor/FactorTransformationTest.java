@@ -360,5 +360,12 @@ public class FactorTransformationTest {
         Tensor t = parse("a**(-1)*b-(b*rc3+a)**(-1)*b-(b*rc3+a)**(-1)*b**2*a**(-1)*rc3");
         TAssert.assertEquals(factor(t), "0");
     }
+
+    @Test
+    public void test25() {
+        Tensor t = parse("I*a + f");
+        TAssert.assertEquals(factor(t), "I*a + f");
+    }
+
 //     -4*m**10-s*m**8+1+(1/32)*(-48*m**4+1-40*s*m**2-3*s**2)*s*m**4
 }
