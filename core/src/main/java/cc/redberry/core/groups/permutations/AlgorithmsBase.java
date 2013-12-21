@@ -99,7 +99,7 @@ public class AlgorithmsBase {
      * @param BSGS        base and strong generating set
      * @param permutation permutation
      * @return true if specified permutation belongs to permutation group defined by specified base and strong
-     *         generating set
+     * generating set
      */
     public static boolean membershipTest(final List<? extends BSGSElement> BSGS, Permutation permutation) {
         StripContainer sc = strip(BSGS, permutation);
@@ -247,9 +247,8 @@ public class AlgorithmsBase {
      *
      * @param generators a set of group generators
      * @return BSGS represented as array of its element
-     * @throws InconsistentGeneratorsException
-     *                                  if permutations are inconsistent
-     * @throws IllegalArgumentException if not all permutations have same length
+     * @throws InconsistentGeneratorsException if permutations are inconsistent
+     * @throws IllegalArgumentException        if not all permutations have same length
      * @see #SchreierSimsAlgorithm(java.util.ArrayList)
      */
     public static List<BSGSElement> createBSGSList(final List<Permutation> generators) {
@@ -279,9 +278,8 @@ public class AlgorithmsBase {
      * @param generators a set of group generators
      * @param knownBase  proposed base points
      * @return BSGS represented as array of its element
-     * @throws InconsistentGeneratorsException
-     *                                  if permutations are inconsistent
-     * @throws IllegalArgumentException if not all permutations have same length
+     * @throws InconsistentGeneratorsException if permutations are inconsistent
+     * @throws IllegalArgumentException        if not all permutations have same length
      * @see #SchreierSimsAlgorithm(java.util.ArrayList)
      */
     public static List<BSGSElement> createBSGSList(final int[] knownBase, final List<Permutation> generators) {
@@ -587,7 +585,13 @@ public class AlgorithmsBase {
         }
     }
 
-    static final BigInteger calculateOrder(List<? extends BSGSElement> BSGSList) {
+    /**
+     * Calculate order of permutation group represented by specified BSGS.
+     *
+     * @param BSGSList BSGS
+     * @return order of permutation group represented by specified BSGS
+     */
+    public static final BigInteger calculateOrder(List<? extends BSGSElement> BSGSList) {
         BigInteger order = BigInteger.ONE;
         for (BSGSElement element : BSGSList)
             order = order.multiply(BigInteger.valueOf(element.orbitSize()));
@@ -1332,7 +1336,7 @@ public class AlgorithmsBase {
      */
     public static void checkGenerators(final List<Permutation> generators) {
         if (!checkGeneratorsBoolean(generators))
-            throw new IllegalArgumentException("Generators of different sizes.");
+            throw new IllegalArgumentException("Generators of different degrees.");
     }
 
     /**

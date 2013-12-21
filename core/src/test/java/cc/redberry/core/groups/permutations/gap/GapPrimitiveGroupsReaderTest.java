@@ -25,6 +25,12 @@ package cc.redberry.core.groups.permutations.gap;
 import cc.redberry.core.groups.permutations.PermutationGroup;
 import org.junit.Test;
 
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.PrintStream;
+import java.util.Arrays;
+
 /**
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
@@ -38,5 +44,39 @@ public class GapPrimitiveGroupsReaderTest {
         for (PermutationGroup group : groups) {
             System.out.println(group.degree() + "   " + group.order());
         }
+    }
+
+    @Test
+    public void testGAP() throws Exception {
+        ProcessBuilder processBuilder = new ProcessBuilder("gap", "-b", "-q");
+        Process process = processBuilder.start();
+
+
+        PrintStream ps = new PrintStream(process.getOutputStream());
+        InputStream is = process.getInputStream();
+        InputStreamReader isr = new InputStreamReader(is);
+
+
+        ps.println("12/3;");
+        ps.flush();
+
+        char[] charBuffer = new char[1024];
+        int n;
+        do {
+            n = isr.read(charBuffer);
+        } while (n == 0);
+
+        System.out.println(String.valueOf(charBuffer, 0, n));
+        ps.println("15/3;");
+        ps.flush();
+
+        do {
+            n = isr.read(charBuffer);
+        } while (n == 0);
+
+        System.out.println(String.valueOf(charBuffer, 0, n));
+
+        ps.close();
+        process.waitFor();
     }
 }
