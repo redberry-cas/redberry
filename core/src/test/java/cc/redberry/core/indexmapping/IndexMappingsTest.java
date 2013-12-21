@@ -23,6 +23,7 @@
 package cc.redberry.core.indexmapping;
 
 import cc.redberry.concurrent.OutputPortUnsafe;
+import cc.redberry.core.combinatorics.Combinatorics;
 import cc.redberry.core.context.CC;
 import cc.redberry.core.indices.IndexType;
 import cc.redberry.core.indices.IndicesUtils;
@@ -38,6 +39,7 @@ import java.util.Arrays;
 import java.util.Set;
 
 import static cc.redberry.core.tensor.Tensors.addSymmetry;
+import static cc.redberry.core.tensor.Tensors.multiply;
 import static cc.redberry.core.tensor.Tensors.parse;
 
 public class IndexMappingsTest {
@@ -479,4 +481,25 @@ public class IndexMappingsTest {
         Assert.assertTrue(buffer == null);
     }
 
+    @Test
+    public void test17() {
+        int n = 15, n2 = n * 2, c = 0;
+        Tensor[] tensors = new Tensor[n2];
+        for (char i = 'a'; c < n; ++i, ++c) {
+            tensors[c * 2] = parse("f_" + i);
+            tensors[c * 2 + 1] = parse("f^" + i);
+        }
+
+        Tensor source = multiply(tensors);
+        System.out.println(source);
+        for (int i = 0; i < 100; ++i) {
+            int[] perm = Combinatorics.randomPermutation(n2);
+            Tensor[] tar = new Tensor[n2];
+            for (int j = 0; j < n2; ++j)
+                tar[j] = tensors[perm[j]];
+            Tensor temp = multiply(tar);
+            System.out.println(temp);
+            System.out.println(IndexMappings.getFirst(source, temp));
+        }
+    }
 }
