@@ -329,7 +329,8 @@ public final class Product extends MultiTensor {
         return createProduct(new IndicesBuilder().append(newData).getIndices(),
                 newFactor, newIndexless, newData);
     }
-   @Override
+
+    @Override
     protected Complex getNeutral() {
         return Complex.ONE;
     }
@@ -365,7 +366,6 @@ public final class Product extends MultiTensor {
         }
         return new Product(indices, factor, indexless, data);
     }
-
 
 
     /**
@@ -671,7 +671,7 @@ public final class Product extends MultiTensor {
         Arrays.sort(inds);
         ScaffoldWrapper[] wrappers = new ScaffoldWrapper[contractions.length];
         for (i = 0; i < contractions.length; ++i)
-            wrappers[i] = new ScaffoldWrapper(inds, data[i], contractions[i]);
+            wrappers[i] = new ScaffoldWrapper(inds, components[i + 1], data[i], contractions[i]);
 
         ArraysUtils.quickSort(wrappers, data);
 
@@ -777,14 +777,16 @@ public final class Product extends MultiTensor {
     private static class ScaffoldWrapper implements Comparable<ScaffoldWrapper> {
 
         final int[] inds;
+        final int component;
         final Tensor t;
         final TensorContraction tc;
         final int hashWithIndices;
 
-        private ScaffoldWrapper(int[] inds, Tensor t, TensorContraction tc) {
+        private ScaffoldWrapper(int[] inds, int component, Tensor t, TensorContraction tc) {
             this.inds = inds;
             this.t = t;
             this.tc = tc;
+            this.component = component;
             hashWithIndices = hc(t, inds);
         }
 
@@ -793,7 +795,11 @@ public final class Product extends MultiTensor {
             int r = tc.compareTo(o.tc);
             if (r != 0)
                 return r;
-            return Integer.compare(hashWithIndices, o.hashWithIndices);
+
+            if ((r = Integer.compare(hashWithIndices, o.hashWithIndices)) != 0)
+                return r;
+
+            return Integer.compare(component, o.component);
         }
     }
 
