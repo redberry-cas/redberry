@@ -481,7 +481,7 @@ public class IndexMappingsTest {
         Assert.assertTrue(buffer == null);
     }
 
-    @Test
+    @Test(timeout = 1000)
     public void test17() {
         int n = 15, n2 = n * 2, c = 0;
         Tensor[] tensors = new Tensor[n2];
@@ -491,15 +491,13 @@ public class IndexMappingsTest {
         }
 
         Tensor source = multiply(tensors);
-        System.out.println(source);
         for (int i = 0; i < 100; ++i) {
             int[] perm = Combinatorics.randomPermutation(n2);
             Tensor[] tar = new Tensor[n2];
             for (int j = 0; j < n2; ++j)
                 tar[j] = tensors[perm[j]];
             Tensor temp = multiply(tar);
-            System.out.println(temp);
-            System.out.println(IndexMappings.getFirst(source, temp));
+            Assert.assertTrue(IndexMappings.getFirst(source, temp) != null);
         }
     }
 }
