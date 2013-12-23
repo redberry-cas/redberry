@@ -371,8 +371,7 @@ public class AlgorithmsBase {
                     //so, let's construct nontrivial u_{beta}*x*u_{beta^x}^{(-1)}
                     if (!transversalOfBeta.composition(stabilizer).equals(transversalOfBetaX)) {
                         //this is a nontrivial generator of H^i_{beta_i}
-                        Permutation SchreierGenerator = transversalOfBeta.composition(stabilizer)
-                                .composition(transversalOfBetaX.inverse());
+                        Permutation SchreierGenerator = transversalOfBeta.composition(stabilizer, transversalOfBetaX.inverse());
 
                         // in order to test whether this generator contained in H^(i+1), let's apply STRIP
                         // we can use STRIP since main condition H^i_{beta_i} = H^{(i+1)} is already verified for
@@ -698,8 +697,7 @@ public class AlgorithmsBase {
                     //so, let's construct nontrivial u_{beta}*x*u_{beta^x}^{(-1)}
                     if (!transversalOfBeta.composition(stabilizer).equals(transversalOfBetaX)) {
                         //this is a nontrivial generator of H^i_{beta_i}
-                        Permutation SchreierGenerator = transversalOfBeta.composition(stabilizer)
-                                .composition(transversalOfBetaX.inverse());
+                        Permutation SchreierGenerator = transversalOfBeta.composition(stabilizer, transversalOfBetaX.inverse());
                         // in order to test whether this generator contained in H^(i+1), let's apply STRIP
                         StripContainer strip = strip(BSGSCandidate, SchreierGenerator);
                         //if STRIP gives a nontrivial result, then this is not a BSGS
@@ -886,7 +884,7 @@ public class AlgorithmsBase {
                 //conjugating stabilizers
                 ArrayList<Permutation> newStabilizers = new ArrayList<>(element.stabilizerGenerators.size());
                 for (Permutation oldStabilizer : element.stabilizerGenerators)
-                    newStabilizers.add(inverse.composition((oldStabilizer.composition(conjugation))));
+                    newStabilizers.add(inverse.composition(oldStabilizer, conjugation));
 
                 //conjugating base point
                 int newBasePoint = conjugation.newIndexOf(element.basePoint);

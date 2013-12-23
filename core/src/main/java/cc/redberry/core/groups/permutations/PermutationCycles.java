@@ -60,6 +60,11 @@ public class PermutationCycles implements Permutation {
     }
 
     @Override
+    public Permutation composition(Permutation a, Permutation b) {
+        return null;
+    }
+
+    @Override
     public PermutationCycles compositionWithInverse(Permutation other) {
         return null;
     }

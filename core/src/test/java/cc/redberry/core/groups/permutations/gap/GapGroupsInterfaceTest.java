@@ -79,7 +79,7 @@ public class GapGroupsInterfaceTest {
         Permutation[] g = gap.primitiveGenerators(99, 2);
         System.out.println(Arrays.toString(g));
         ArrayList<BSGSCandidateElement> bsgs = (ArrayList) AlgorithmsBase.createRawBSGSCandidate(g);
-        AlgorithmsBase.RandomSchreierSimsAlgorithm(bsgs, 0.999, CC.getRandomGenerator());
+        AlgorithmsBase.RandomSchreierSimsAlgorithm(bsgs, 0.9999, CC.getRandomGenerator());
         System.out.println("random");
         AlgorithmsBase.SchreierSimsAlgorithm(bsgs);
         System.out.println("Schreier-Sims");

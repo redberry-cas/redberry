@@ -139,17 +139,44 @@ public class PermutationOneLine implements Permutation {
         if (other.isIdentity())
             return this;
 
-        try {
-            final int[] result = new int[permutation.length];
-            boolean resultIsIdentity = true;
-            for (int i = permutation.length - 1; i >= 0; --i) {
-                result[i] = other.newIndexOf(permutation[i]);
-                resultIsIdentity &= result[i] == i;
-            }
+        final int[] result = new int[permutation.length];
+        boolean resultIsIdentity = true;
+        for (int i = permutation.length - 1; i >= 0; --i) {
+            result[i] = other.newIndexOf(permutation[i]);
+            resultIsIdentity &= result[i] == i;
+        }
 
+        try {
             return new PermutationOneLine(resultIsIdentity, antisymmetry ^ other.antisymmetry(), result);
         } catch (InconsistentGeneratorsException ex) {
             throw new InconsistentGeneratorsException(this + " and " + other);
+        }
+    }
+
+    @Override
+    public Permutation composition(Permutation a, Permutation b) {
+        if (permutation.length != a.degree() || permutation.length != b.degree())
+            throw new IllegalArgumentException();
+
+        if (this.isIdentity)
+            return a.composition(b);
+        if (a.isIdentity())
+            return composition(b);
+        if (b.isIdentity())
+            return composition(a);
+
+        final int[] result = new int[permutation.length];
+        boolean resultIsIdentity = true;
+        for (int i = permutation.length - 1; i >= 0; --i) {
+            result[i] = b.newIndexOf(a.newIndexOf(permutation[i]));
+            resultIsIdentity &= result[i] == i;
+        }
+
+        try {
+            return new PermutationOneLine(resultIsIdentity,
+                    antisymmetry ^ a.antisymmetry() ^ b.antisymmetry(), result);
+        } catch (InconsistentGeneratorsException ex) {
+            throw new InconsistentGeneratorsException(this + " and " + a + " and " + b);
         }
     }
 

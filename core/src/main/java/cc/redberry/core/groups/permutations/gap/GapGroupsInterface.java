@@ -40,7 +40,6 @@ import java.util.concurrent.TimeUnit;
  * @author Stanislav Poslavsky
  */
 public class GapGroupsInterface {
-    private static final int LINE_WIDTH = 65_536_100;
     private final Process gapProcess;
     private final Thread readThread;
     private final PrintStream gapCmd;

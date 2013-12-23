@@ -70,13 +70,24 @@ public interface Permutation extends Comparable<Permutation> {
      *
      * @param other other permutation
      * @return the result of  {@code this * other}
-     * @throws IllegalArgumentException if {@code other.degree() != this.degree()}
-     * @throws InconsistentGeneratorsException
-     *                                  if the result of composition is inconsistent symmetry (antisymmetry with odd
-     *                                  permutation parity)
+     * @throws IllegalArgumentException        if {@code other.degree() != this.degree()}
+     * @throws InconsistentGeneratorsException if the result of composition is inconsistent symmetry (antisymmetry with odd
+     *                                         permutation parity)
      */
-    public Permutation composition(final Permutation other);
+    public Permutation composition(Permutation other);
 
+    /**
+     * Returns the result of  {@code this * a * b}. Applying the resulting permutation is equivalent to applying
+     * {@code b} after {@code a} after {@code this}.
+     *
+     * @param a other permutation
+     * @param b other permutation
+     * @return the result of  {@code this * a * b}
+     * @throws IllegalArgumentException        if {@code a.degree() != this.degree() || b.degree() != this.degree()}
+     * @throws InconsistentGeneratorsException if the result of composition is inconsistent symmetry (antisymmetry with odd
+     *                                         permutation parity)
+     */
+    public Permutation composition(Permutation a, Permutation b);
 
     /**
      * Returns the result of  {@code this * other.inverse()}. Applying the resulting permutation is equivalent
@@ -84,12 +95,11 @@ public interface Permutation extends Comparable<Permutation> {
      *
      * @param other other permutation
      * @return the result of  {@code this * other.inverse()}
-     * @throws IllegalArgumentException if {@code other.degree() != this.degree()}
-     * @throws InconsistentGeneratorsException
-     *                                  if the result of composition is inconsistent symmetry (antisymmetry with odd
-     *                                  permutation parity)
+     * @throws IllegalArgumentException        if {@code other.degree() != this.degree()}
+     * @throws InconsistentGeneratorsException if the result of composition is inconsistent symmetry (antisymmetry with odd
+     *                                         permutation parity)
      */
-    public Permutation compositionWithInverse(final Permutation other);
+    public Permutation compositionWithInverse(Permutation other);
 
     /**
      * Returns the inverse permutation of this.
