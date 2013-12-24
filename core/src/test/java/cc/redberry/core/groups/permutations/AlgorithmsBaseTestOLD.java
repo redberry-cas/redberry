@@ -48,76 +48,9 @@ import static org.junit.Assert.assertArrayEquals;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public class AlgorithmsBaseTest {
+public class AlgorithmsBaseTestOLD {
 
-    @Test
-    public void testCreateSymmetric1() throws Exception {
-        for (int cc = 2; cc < 10; ++cc) {
-            int degree = cc;
-            List<BSGSElement> bsgs = AlgorithmsBase.createSymmetricGroupBSGS(degree);
-            for (BSGSElement element : bsgs) {
-                for (int i = 0; i < element.orbitSize(); ++i) {
-                    assertEquals(element.orbitList.get(i),
-                            element.getTransversalOf(element.orbitList.get(i)).newIndexOf(element.basePoint)
-                    );
-                }
-            }
-            assertTrue(isBSGS(bsgs));
-            assertEquals(NumberUtils.factorial(degree), calculateOrder(bsgs));
-        }
-    }
 
-    @Test
-    public void testCreateSymmetric2() throws Exception {
-        int[] degrees = {101, 107, 109, 110, 113, 120, 121, 127, 130};
-
-        for (int degree : degrees) {
-            List<BSGSElement> bsgs = AlgorithmsBase.createSymmetricGroupBSGS(degree);
-
-            for (BSGSElement element : bsgs) {
-                for (int i = 0; i < element.orbitSize(); ++i) {
-                    assertEquals(element.orbitList.get(i),
-                            element.getTransversalOf(element.orbitList.get(i)).newIndexOf(element.basePoint)
-                    );
-                }
-            }
-            assertTrue(isBSGS(bsgs));
-            assertEquals(NumberUtils.factorial(degree), calculateOrder(bsgs));
-        }
-    }
-
-    @Test
-    public void testRemoveRedundant0() {
-        long seed = currentTimeMillis();
-        int n = 20;
-        int COUNT = 1000;
-        DescriptiveStatistics removed = new DescriptiveStatistics();
-        RandomGenerator randomGenerator = new Well1024a(seed);
-        List<Permutation> source = new ArrayList<>();
-        for (int i = 0; i < 10; ++i)
-            source.add(new PermutationOneLine(Permutations.randomPermutation(n, randomGenerator)));
-        randomness(source, 10, 50, randomGenerator);
-
-        ArrayList<BSGSCandidateElement> bsgs;
-        List<Permutation> generators = new ArrayList<>();
-        for (int tt = 0; tt < COUNT; ++tt) {
-            generators.clear();
-            for (int i = 0; i < 1 + randomGenerator.nextInt(7); ++i)
-                generators.add(random(source, randomGenerator));
-
-            //create BSGS
-            bsgs = (ArrayList) createRawBSGSCandidate(generators.toArray(new Permutation[0]));
-            SchreierSimsAlgorithm(bsgs);
-            long in = numOfGenerators(bsgs);
-            //remove redundant
-            removeRedundantGenerators(bsgs);
-            removed.addValue(in - numOfGenerators(bsgs));
-            //check!
-            assertTrue(isBSGS(bsgs));
-        }
-        System.out.println("Removed strong generators statistics:");
-        System.out.println(removed);
-    }
 
     @Test
     public void testRemoveRedundant0a() {

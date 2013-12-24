@@ -23,6 +23,7 @@
 package cc.redberry.core.groups.permutations;
 
 import cc.redberry.core.combinatorics.IntTuplesPort;
+import cc.redberry.core.context.CC;
 import cc.redberry.core.number.NumberUtils;
 import gnu.trove.set.TLongSet;
 import gnu.trove.set.hash.TLongHashSet;
@@ -183,7 +184,7 @@ public class RandomPermutationTest {
             init.clear();
             for (int i = 0; i < 2; ++i)
                 init.add(new PermutationOneLine(Permutations.randomPermutation(n, randomGenerator)));
-            randomness(init, 20, 50, seed);
+            randomness(init, 20, 50, CC.getRandomGenerator());
 
             generators.clear();
             for (int i = 0; i < 3; ++i)
@@ -215,7 +216,7 @@ public class RandomPermutationTest {
         TLongSet orders = new TLongHashSet();
         List<Permutation> generators = new ArrayList<>();
         while (orders.size() < 6) {
-            randomness(allgenerators, 20, 50, seed);
+            randomness(allgenerators, 20, 50, CC.getRandomGenerator());
             generators.clear();
             for (int i = 0; i < 2; ++i)
                 generators.add(random(allgenerators, seed));

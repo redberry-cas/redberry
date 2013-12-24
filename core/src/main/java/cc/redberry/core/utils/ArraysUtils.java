@@ -203,7 +203,7 @@ public final class ArraysUtils {
      * @param array1 the first array whose elements are added to the new array, may be {@code null}
      * @param array2 the second array whose elements are added to the new array, may be {@code null}
      * @return The new array, {@code null} if both arrays are {@code null}. The type of the new array is the type of the
-     *         first array, unless the first array is null, in which case the type is the same as the second array.
+     * first array, unless the first array is null, in which case the type is the same as the second array.
      * @throws IllegalArgumentException if the array types are incompatible
      * @since 2.1
      */
@@ -393,15 +393,15 @@ public final class ArraysUtils {
      * @param list the list to be searched
      * @param key  the value to be searched for
      * @return index of the search key, if it is contained in the array
-     *         within the specified range;
-     *         otherwise, <tt>(-(<i>insertion point</i>) - 1)</tt>.  The
-     *         <i>insertion point</i> is defined as the point at which the
-     *         key would be inserted into the array: the index of the first
-     *         element in the range greater than the key,
-     *         or <tt>toIndex</tt> if all
-     *         elements in the range are less than the specified key.  Note
-     *         that this guarantees that the return value will be &gt;= 0 if
-     *         and only if the key is found.
+     * within the specified range;
+     * otherwise, <tt>(-(<i>insertion point</i>) - 1)</tt>.  The
+     * <i>insertion point</i> is defined as the point at which the
+     * key would be inserted into the array: the index of the first
+     * element in the range greater than the key,
+     * or <tt>toIndex</tt> if all
+     * elements in the range are less than the specified key.  Note
+     * that this guarantees that the return value will be &gt;= 0 if
+     * and only if the key is found.
      * @see Arrays#binarySearch(int[], int)
      */
     public static int binarySearch(IntArrayList list, int key) {
@@ -422,15 +422,15 @@ public final class ArraysUtils {
      * @param array the list to be searched
      * @param key   the value to be searched for
      * @return index of the search key, if it is contained in the array
-     *         within the specified range;
-     *         otherwise, <tt>(-(<i>insertion point</i>) - 1)</tt>.  The
-     *         <i>insertion point</i> is defined as the point at which the
-     *         key would be inserted into the array: the index of the first
-     *         element in the range greater than the key,
-     *         or <tt>toIndex</tt> if all
-     *         elements in the range are less than the specified key.  Note
-     *         that this guarantees that the return value will be &gt;= 0 if
-     *         and only if the key is found.
+     * within the specified range;
+     * otherwise, <tt>(-(<i>insertion point</i>) - 1)</tt>.  The
+     * <i>insertion point</i> is defined as the point at which the
+     * key would be inserted into the array: the index of the first
+     * element in the range greater than the key,
+     * or <tt>toIndex</tt> if all
+     * elements in the range are less than the specified key.  Note
+     * that this guarantees that the return value will be &gt;= 0 if
+     * and only if the key is found.
      * @see Arrays#binarySearch(int[], int)
      */
     public static int binarySearch(IntArray array, int key) {
@@ -445,9 +445,9 @@ public final class ArraysUtils {
      * @param a   the array to be searched
      * @param key the value to be searched for
      * @return index of the search key, if it is contained in the array; otherwise, <tt><i>insertion point</i></tt>. The
-     *         <i>insertion point</i> is defined as the point at which the key would be inserted into the array: the
-     *         index of the first element greater than the key, or <tt>a.length</tt> if all elements in the array are
-     *         less than the specified key.
+     * <i>insertion point</i> is defined as the point at which the key would be inserted into the array: the
+     * index of the first element greater than the key, or <tt>a.length</tt> if all elements in the array are
+     * less than the specified key.
      */
     public static int binarySearch1(int[] a, int key) {
         return binarySearch1(a, 0, a.length, key);
@@ -463,9 +463,9 @@ public final class ArraysUtils {
      * @param fromIndex the index of the first element (inclusive) to be searched
      * @param toIndex   the index of the last element (exclusive) to be searched
      * @return index of the search key, if it is contained in the array; otherwise, <tt><i>insertion point</i></tt>. The
-     *         <i>insertion point</i> is defined as the point at which the key would be inserted into the array: the
-     *         index of the first element greater than the key, or <tt>toIndex</tt> if all elements in the array are
-     *         less than the specified key.
+     * <i>insertion point</i> is defined as the point at which the key would be inserted into the array: the
+     * index of the first element greater than the key, or <tt>toIndex</tt> if all elements in the array are
+     * less than the specified key.
      */
     public static int binarySearch1(int[] a, int fromIndex, int toIndex,
                                     int key) {

@@ -20,7 +20,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
-package cc.redberry.core.groups.permutations.gap;
+package cc.redberry.core.groups.permutations;
 
 import cc.redberry.core.context.CC;
 import cc.redberry.core.groups.permutations.*;

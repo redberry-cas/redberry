@@ -20,7 +20,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
-package cc.redberry.core.groups.permutations.gap;
+package cc.redberry.core.groups.permutations;
 
 import cc.redberry.core.context.CC;
 import cc.redberry.core.groups.permutations.Permutation;
@@ -39,7 +39,7 @@ import java.util.concurrent.TimeUnit;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public class GapGroupsInterface {
+public final class GapGroupsInterface {
     private final Process gapProcess;
     private final Thread readThread;
     private final PrintStream gapCmd;
@@ -54,9 +54,8 @@ public class GapGroupsInterface {
         this.readThread.setDaemon(true);
         this.readThread.start();
         //reset GAP seed
-//        evaluate("Reset(GlobalMersenneTwister, " + CC.getNameManager().getSeed() + ");");
+        evaluate("Reset(GlobalMersenneTwister, " + CC.getNameManager().getSeed() + ");");
     }
-
 
     public String evaluate(String command) {
         gapCmd.println(stringToGapCommand(command) + "Print(\"\\nEOF\");");
@@ -205,7 +204,6 @@ public class GapGroupsInterface {
                 while ((line = reader.readLine()) != null) {
                     line = line.replace("gap>", "");
                     line = line.trim();
-//                    System.out.println(line);
                     if (line.equals("EOF")) {
                         try {
                             buffer.put(builder.toString());

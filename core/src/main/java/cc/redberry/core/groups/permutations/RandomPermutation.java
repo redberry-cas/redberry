@@ -22,6 +22,7 @@
  */
 package cc.redberry.core.groups.permutations;
 
+import cc.redberry.core.context.CC;
 import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.random.Well19937a;
 
@@ -54,28 +55,12 @@ public final class RandomPermutation {
      * in Sec. 3.2.2 in [Holt05].
      *
      * @param generators a list of generators
-     * @see #randomness(java.util.List, int, int, long)
+     * @see #random(java.util.List, org.apache.commons.math3.random.RandomGenerator)
      */
 
     public static void randomness(List<Permutation> generators) {
         randomness(generators, DEFAULT_RANDOMNESS_EXTEND_TO_SIZE,
-                DEFAULT_NUMBER_OF_RANDOM_REFINEMENTS, System.currentTimeMillis());
-    }
-
-    /**
-     * Brings randomness to a list of generators: the source list will be extended and filled by an equivalent set
-     * of generators generated randomly; commonly it should be used in a combination with
-     * {@link #random(java.util.List, long)} to produce almost uniform distributed permutations in a group defined
-     * by corresponding set of generators. This method is a variant of PREINTIALIZE described
-     * in Sec. 3.2.2 in [Holt05].
-     *
-     * @param generators          a list of generators
-     * @param extendToSize        extend specified list to this size with additional (equivalent) random elements
-     * @param numberOfRefinements number of invocations of random procedure to refine the randomness
-     * @param seed                random seed
-     */
-    public static void randomness(List<Permutation> generators, int extendToSize, int numberOfRefinements, long seed) {
-        randomness(generators, extendToSize, numberOfRefinements, new Well19937a(seed));
+                DEFAULT_NUMBER_OF_RANDOM_REFINEMENTS, CC.getRandomGenerator());
     }
 
     /**
@@ -110,10 +95,10 @@ public final class RandomPermutation {
 
     /**
      * Produces almost uniformly distributed elements of a group specified by specified generators (only if method
-     * {@link #randomness(java.util.List, int, int, long)} was invoked with specified generators); and brings additional
+     * {@link #randomness(java.util.List, int, int, org.apache.commons.math3.random.RandomGenerator)} was invoked with specified generators); and brings additional
      * randomness in the specified list. See algorithm PRRANDOM in Sec. 3.2.2 in [Holt05].
      *
-     * @param generators generators (method {@link #randomness(java.util.List, int, int, long)} should be invoked before)
+     * @param generators generators (method {@link #randomness(java.util.List, int, int, org.apache.commons.math3.random.RandomGenerator)} should be invoked before)
      * @return random element of a group
      */
     public static Permutation random(List<Permutation> generators) {
@@ -123,10 +108,10 @@ public final class RandomPermutation {
 
     /**
      * Produces almost uniformly distributed elements of a group specified by specified generators (only if method
-     * {@link #randomness(java.util.List, int, int, long)} was invoked with specified generators); and brings additional
+     * {@link #randomness(java.util.List, int, int, org.apache.commons.math3.random.RandomGenerator)} was invoked with specified generators); and brings additional
      * randomness in the specified list. See algorithm PRRANDOM in Sec. 3.2.2 in [Holt05].
      *
-     * @param generators generators (method {@link #randomness(java.util.List, int, int, long)} should be invoked before)
+     * @param generators generators (method {@link #randomness(java.util.List, int, int, org.apache.commons.math3.random.RandomGenerator)} should be invoked before)
      * @param seed       random seed
      * @return random element of a group
      */
@@ -137,10 +122,10 @@ public final class RandomPermutation {
 
     /**
      * Produces almost uniformly distributed elements of a group specified by specified generators (only if method
-     * {@link #randomness(java.util.List, int, int, long)} was invoked with specified generators); and brings additional
+     * {@link #randomness(java.util.List, int, int, org.apache.commons.math3.random.RandomGenerator)} was invoked with specified generators); and brings additional
      * randomness in the specified list. See algorithm PRRANDOM in Sec. 3.2.2 in [Holt05].
      *
-     * @param generators generators (method {@link #randomness(java.util.List, int, int, long)} should be invoked before)
+     * @param generators generators (method {@link #randomness(java.util.List, int, int, org.apache.commons.math3.random.RandomGenerator)} should be invoked before)
      * @param random     random generator
      * @return random element of a group
      */

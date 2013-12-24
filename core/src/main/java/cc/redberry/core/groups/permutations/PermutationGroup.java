@@ -184,6 +184,8 @@ public final class PermutationGroup
      * @return orbit of specified point
      */
     public int[] orbit(int... points) {
+        if (points.length == 0)
+            throw new IllegalArgumentException("No points specified.");
         TIntHashSet orbitsIndexesSet = new TIntHashSet();
         for (int i : points)
             orbitsIndexesSet.add(positionsInOrbits[i]);
