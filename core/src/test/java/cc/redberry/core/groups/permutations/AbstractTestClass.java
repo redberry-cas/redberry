@@ -36,6 +36,7 @@ import java.util.concurrent.TimeUnit;
  * @author Stanislav Poslavsky
  */
 public class AbstractTestClass {
+
     @Rule
     public TestName name = new TestName();
 
@@ -45,6 +46,8 @@ public class AbstractTestClass {
 
     @Before
     public void beforeMethod() {
+        if (name.getMethodName().toLowerCase().contains("performancetest"))
+            Assume.assumeTrue(doTestPerformance());
         if (name.getMethodName().toLowerCase().contains("withgap"))
             Assume.assumeTrue(getGapInterface() != null);
     }
@@ -77,5 +80,13 @@ public class AbstractTestClass {
         else
             System.out.println("[Redberry] no GAP found on the system.");
         return gapStaticInstance;
+    }
+
+    private static Boolean testPerformance;
+
+    private static boolean doTestPerformance() {
+        if (testPerformance == null)
+            testPerformance = Boolean.valueOf(System.getProperty("testPerformance"));
+        return testPerformance.booleanValue();
     }
 }

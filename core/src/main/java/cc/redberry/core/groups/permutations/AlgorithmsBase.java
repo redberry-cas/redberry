@@ -947,7 +947,7 @@ public class AlgorithmsBase {
      */
     public static void rebaseFromScratch(ArrayList<BSGSCandidateElement> BSGS, int[] newBase) {
         List<BSGSCandidateElement> newBSGS = createRawBSGSCandidate(newBase, BSGS.get(0).stabilizerGenerators);
-        if (newBSGS.isEmpty())
+        if (newBSGS.isEmpty())//todo add new base points here!!!!
             return; //new base is fixed by all group generators; nothing to do
         BigInteger order = calculateOrder(BSGS);
         RandomSchreierSimsAlgorithmForKnownOrder((ArrayList) newBSGS, order, CC.getRandomGenerator());
@@ -1275,29 +1275,23 @@ public class AlgorithmsBase {
                 orbit.add(j);
 
             //calculating stabilizers
-            final Permutation[] stabilizers = new Permutation[degree - i];
+            final Permutation[] stabilizers = new Permutation[degree - i - 1];
+
+
             int[] SchreierVector = new int[degree];
             Arrays.fill(SchreierVector, -2);
-            int image, k, l, permutation[];
-            for (j = 0; j < stabilizers.length; ++j) {
-                //for each element in orbit
-                image = i + j;
-                permutation = new int[degree];
-                //all points before base point are fixed
-                for (k = 0; k < i; ++k)
-                    permutation[k] = k;
-                //the rest of permutation should map i to i + j; we'll do this using cycles
-                l = 0;
-                for (; l < degree - image; ++k, ++l)
-                    permutation[k] = image + l;
-                l = 0;
-                for (; k < degree; ++k)
-                    permutation[k] = i + (l++);
-
-                stabilizers[j] = new PermutationOneLine(permutation);
-                SchreierVector[i + j] = j;
-            }
             SchreierVector[i] = -1;
+
+            int c = 0, permutation[], k;
+            for (j = i + 1; j < degree; ++j) {
+                permutation = new int[degree];
+                for (k = 1; k < degree; ++k)
+                    permutation[k] = k;
+                permutation[j] = i;
+                permutation[i] = j;
+                stabilizers[c] = new PermutationOneLine(permutation);
+                SchreierVector[j] = c++;
+            }
 
             BSGSElement element = new BSGSElement(i, Arrays.asList(stabilizers), SchreierVector, orbit);
             bsgs.add(element);
@@ -1319,11 +1313,20 @@ public class AlgorithmsBase {
 
             //calculating stabilizers
             final ArrayList<Permutation> stabilizers = new ArrayList<>((int) (FastMath.log(degree - i) / FastMath.log(2)));
-            int image, k, l, permutation[];
 
+            //first stabilizer is transposition
+            int[] permutation = new int[degree];
+            for (j = 1; j < degree; ++j)
+                permutation[j] = j;
+            permutation[i] = i + 1;
+            permutation[i + 1] = i;
+            stabilizers.add(new PermutationOneLine(permutation));
+
+            int image, k, l;
             //provide log(size of orbit) access
-            for (j = degree - i - 1; j > 0; j /= 2) {
-                image = i + j;
+            for (j = degree - i - 2; j > 0; j /= 2) {
+                //for each element in orbit
+                image = i + j + 2;
                 permutation = new int[degree];
                 //all points before base point are fixed
                 for (k = 0; k < i; ++k)

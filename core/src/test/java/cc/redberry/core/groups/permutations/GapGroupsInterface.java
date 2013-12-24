@@ -146,7 +146,7 @@ public final class GapGroupsInterface {
     }
 
     public Permutation[] primitiveGenerators(int degree, int nr) {
-        return evaluateToGenerators("PrimitiveGroup(" + degree + "," + nr + ");");
+        return evaluateToGenerators("PrimitiveGroup(" + degree + "," + (nr + 1) + ");");
     }
 
     private int local = 0;
@@ -159,7 +159,11 @@ public final class GapGroupsInterface {
 
     public PermutationGroup primitiveGroup(int degree, int nr) {
         String g = nextVar();
-        evaluate(g + ":= PrimitiveGroup(" + degree + "," + nr + ");");
+        evaluate(g + ":= PrimitiveGroup(" + degree + "," + (nr + 1) + ");");
+        if (evaluateToBoolean("IsNaturalSymmetricGroup( " + g + ");"))
+            return PermutationGroupFactory.symmetricGroup(degree);
+        if (evaluateToBoolean("IsNaturalAlternatingGroup( " + g + ");"))
+            return PermutationGroupFactory.alternatingGroup(degree);
         return evaluateToPermutationGroup(g);
     }
 
@@ -204,6 +208,8 @@ public final class GapGroupsInterface {
                 while ((line = reader.readLine()) != null) {
                     line = line.replace("gap>", "");
                     line = line.trim();
+                    if (!line.isEmpty() && line.charAt(line.length() - 1) == '\\')
+                        line = line.substring(0, line.length() - 1);
                     if (line.equals("EOF")) {
                         try {
                             buffer.put(builder.toString());

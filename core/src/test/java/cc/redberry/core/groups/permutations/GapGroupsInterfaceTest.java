@@ -24,6 +24,8 @@ package cc.redberry.core.groups.permutations;
 
 import cc.redberry.core.context.CC;
 import cc.redberry.core.groups.permutations.*;
+import org.junit.Assume;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -33,7 +35,11 @@ import java.util.Arrays;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public class GapGroupsInterfaceTest {
+public class GapGroupsInterfaceTest extends AbstractTestClass {
+    @Before
+    public void beforeMethod() {
+        Assume.assumeTrue(getGapInterface() != null);
+    }
 
     @Test
     public void test1() throws Exception {
@@ -88,5 +94,11 @@ public class GapGroupsInterfaceTest {
         System.out.println(AlgorithmsBase.calculateOrder(bsgs));
 //        System.out.println(pg.isRegular());
         gap.close();
+    }
+
+    @Test
+    public void testEvaluateToBigInteger1_WithGap() throws Exception {
+        GapGroupsInterface gap = getGapInterface();
+        gap.evaluateToBigInteger("Order(PrimitiveGroup(58,1));");
     }
 }
