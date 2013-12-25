@@ -52,7 +52,7 @@ public class GapGroupsInterfaceTest extends AbstractTestClass {
 
     @Test
     public void test2() throws Exception {
-        GapGroupsInterface gap = new GapGroupsInterface("gap");
+        GapGroupsInterface gap = getGapInterface();
         System.out.println(gap.evaluate("12/3;"));
     }
 
