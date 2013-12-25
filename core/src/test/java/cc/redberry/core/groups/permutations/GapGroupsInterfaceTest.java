@@ -44,13 +44,9 @@ public class GapGroupsInterfaceTest extends AbstractTestClass {
 
     @Test
     public void test1() throws Exception {
-        GapGroupsInterface gap = new GapGroupsInterface("gap");
+        GapGroupsInterface gap = getGapInterface();
         String r = gap.evaluate("GeneratorsOfGroup(PrimitiveGroup(14, 1));");
-        System.out.println(r);
         r = gap.evaluate("GeneratorsOfGroup(PrimitiveGroup(17, 1));");
-        System.out.println(r);
-        System.out.println(gap.nrPrimitiveGroups(127));
-
         gap.primitiveGenerators(12, 1);
         gap.close();
     }
@@ -64,36 +60,9 @@ public class GapGroupsInterfaceTest extends AbstractTestClass {
 
     @Test
     public void test3() throws Exception {
-        GapGroupsInterface gap = new GapGroupsInterface("gap");
-
+        GapGroupsInterface gap = getGapInterface();
         PermutationGroup g = gap.primitiveGroup(99, 1);
         gap.evaluate("g:= PrimitiveGroup(12, 1);");
-        System.out.println(gap.evaluate("IsTransitive(g);"));
-        System.out.println(g.degree());
-        System.out.println(g.order());
-        System.out.println(g.isAlternating());
-        System.out.println(g.isRegular());
-        System.out.println(g.isSymmetric());
-        System.out.println(g.isTransitive());
-
-        gap.close();
-    }
-
-    @Test
-    public void test4() throws Exception {
-        GapGroupsInterface gap = new GapGroupsInterface("gap");
-
-        Permutation[] g = gap.primitiveGenerators(99, 2);
-        System.out.println(Arrays.toString(g));
-        ArrayList<BSGSCandidateElement> bsgs = (ArrayList) AlgorithmsBase.createRawBSGSCandidate(g);
-        AlgorithmsBase.RandomSchreierSimsAlgorithm(bsgs, 0.9999, CC.getRandomGenerator());
-        System.out.println("random");
-        AlgorithmsBase.SchreierSimsAlgorithm(bsgs);
-        System.out.println("Schreier-Sims");
-
-//        PermutationGroup pg = PermutationGroupFactory.create(g);
-        System.out.println(AlgorithmsBase.calculateOrder(bsgs));
-//        System.out.println(pg.isRegular());
         gap.close();
     }
 
@@ -108,8 +77,6 @@ public class GapGroupsInterfaceTest extends AbstractTestClass {
         GapGroupsInterface gap = getGapInterface();
         gap.evaluate("g:= PrimitiveGroup(12,1);");
         gap.evaluate("v:= SetwiseStabilizer(g, OnPoints, [1,2,3]);");
-        System.out.println(gap.evaluate("v.setstab;"));
-        System.out.println(gap.evaluateToPermutationGroup("v.setstab;"));
     }
 
     @Test
