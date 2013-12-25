@@ -48,14 +48,12 @@ public class GapGroupsInterfaceTest extends AbstractTestClass {
         String r = gap.evaluate("GeneratorsOfGroup(PrimitiveGroup(14, 1));");
         r = gap.evaluate("GeneratorsOfGroup(PrimitiveGroup(17, 1));");
         gap.primitiveGenerators(12, 1);
-        gap.close();
     }
 
     @Test
     public void test2() throws Exception {
         GapGroupsInterface gap = new GapGroupsInterface("gap");
         System.out.println(gap.evaluate("12/3;"));
-        gap.close();
     }
 
     @Test
@@ -63,7 +61,6 @@ public class GapGroupsInterfaceTest extends AbstractTestClass {
         GapGroupsInterface gap = getGapInterface();
         PermutationGroup g = gap.primitiveGroup(99, 1);
         gap.evaluate("g:= PrimitiveGroup(12, 1);");
-        gap.close();
     }
 
     @Test
