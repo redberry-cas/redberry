@@ -115,7 +115,6 @@ public class AlgorithmsBaseTest extends AbstractTestClass {
         for (int degree : degrees) {
             List<BSGSElement> bsgs = createSymmetricGroupBSGS(degree);
             for (int i = 1; i < bsgs.size(); i += 1 + 9 / Math.log(2 + i / 9)) {
-                System.out.println(i);
                 List<BSGSElement> sub_bsgs = bsgs.subList(i, bsgs.size());
                 assertEquals(NumberUtils.factorial(degree - i), calculateOrder(sub_bsgs));
                 assertTrue(isBSGS(sub_bsgs));

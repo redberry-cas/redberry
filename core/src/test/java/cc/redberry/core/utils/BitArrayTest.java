@@ -337,7 +337,7 @@ public class BitArrayTest {
     public void testNextZeroBit1() {
         Random r = new Random();
         for (int i = 0; i < 1000; ++i) {
-            BitArray bb = randomBitArray(r.nextInt(1000));
+            BitArray bb = randomBitArray(1 + r.nextInt(1000));
             for (int j = 0; j < bb.size(); ++j)
                 assertEquals(nextZeroBit(bb, j), bb.nextZeroBit(j));
         }
