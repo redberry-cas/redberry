@@ -44,7 +44,7 @@ public final class PermutationGroupFactory {
         //todo Alt and Sym checks
         List<BSGSElement> BSGSList = AlgorithmsBase.createBSGSList(generators);
         if (BSGSList.isEmpty())
-            throw new IllegalArgumentException();
+            return new PermutationGroup(AlgorithmsBase.createEmptyBSGS(generators.get(0).degree()));
         return new PermutationGroup(Collections.unmodifiableList(BSGSList));
     }
 

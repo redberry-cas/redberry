@@ -27,6 +27,7 @@ import cc.redberry.core.number.NumberUtils;
 import cc.redberry.core.utils.Timing;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.math.BigInteger;
@@ -76,9 +77,22 @@ public class AlgorithmsBaseTest extends AbstractTestClass {
         }
     }
 
+
     @Test
-    public void testCreateSymmetricGroup3_large_degree() throws Exception {
-        int[] degrees = {101, 107, 109, 110, 113, 120, 121, 127, 130};
+    public void testCreateSymmetricGroup3_small_degree() throws Exception {
+        for (int degree = 2; degree < 15; ++degree) {
+            List<BSGSElement> bsgs = createSymmetricGroupBSGS(degree);
+            for (int i = 0; i < bsgs.size(); ++i) {
+                List<BSGSElement> sub_bsgs = bsgs.subList(i, bsgs.size());
+                assertEquals(NumberUtils.factorial(degree - i), calculateOrder(sub_bsgs));
+                assertTrue(isBSGS(sub_bsgs));
+            }
+        }
+    }
+
+    @Test
+    public void testCreateSymmetricGroup4_large_degree() throws Exception {
+        int[] degrees = {107, 109, 110, 112};
         for (int degree : degrees) {
             List<BSGSElement> bsgs = createSymmetricGroupBSGS(degree);
 
@@ -91,11 +105,27 @@ public class AlgorithmsBaseTest extends AbstractTestClass {
             }
             assertTrue(isBSGS(bsgs));
             assertEquals(NumberUtils.factorial(degree), calculateOrder(bsgs));
+            System.out.println(degree);
         }
     }
 
     @Test
-    public void testCreateSymmetricGroup4_large_degree() throws Exception {
+    public void testCreateSymmetricGroup5_large_degree() throws Exception {
+        int[] degrees = {AlgorithmsBase.SMALL_DEGREE_THRESHOLD + 11, AlgorithmsBase.SMALL_DEGREE_THRESHOLD + 12};
+        for (int degree : degrees) {
+            List<BSGSElement> bsgs = createSymmetricGroupBSGS(degree);
+            for (int i = 1; i < bsgs.size(); i += 1 + 9 / Math.log(2 + i / 9)) {
+                System.out.println(i);
+                List<BSGSElement> sub_bsgs = bsgs.subList(i, bsgs.size());
+                assertEquals(NumberUtils.factorial(degree - i), calculateOrder(sub_bsgs));
+                assertTrue(isBSGS(sub_bsgs));
+            }
+        }
+    }
+
+    @Ignore
+    @Test
+    public void testCreateSymmetricGroup6_large_degree() throws Exception {
         int degree = 130;
         PermutationGroup pg = PermutationGroupFactory.create(createSymmetricGroupBSGS(degree).get(0).stabilizerGenerators);
         assertEquals(NumberUtils.factorial(degree), pg.order());

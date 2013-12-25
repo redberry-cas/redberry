@@ -1324,9 +1324,9 @@ public class AlgorithmsBase {
 
             int image, k, l;
             //provide log(size of orbit) access
-            for (j = degree - i - 2; j > 0; j /= 2) {
+            for (j = degree - i - 1; j > 0; j /= 2) {
                 //for each element in orbit
-                image = i + j + 2;
+                image = i + j;
                 permutation = new int[degree];
                 //all points before base point are fixed
                 for (k = 0; k < i; ++k)

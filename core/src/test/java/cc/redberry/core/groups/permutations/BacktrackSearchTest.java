@@ -148,7 +148,7 @@ public class BacktrackSearchTest extends AbstractTestClass {
 
 
     @Test
-    public void testAllPrimitive() throws Exception {
+    public void testAllPrimitive_WithGap() throws Exception {
         GapGroupsInterface gap = getGapInterface();
         int scanned = 0;
         for (int degree = 4; degree < 50; ++degree) {

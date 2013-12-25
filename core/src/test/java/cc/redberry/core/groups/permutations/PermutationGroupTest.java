@@ -393,7 +393,7 @@ public class PermutationGroupTest extends AbstractTestClass {
     }
 
     @Test
-    public void testSetwiseStabilasizer1() {
+    public void testSetwiseStabilasizer1_WithGap() {
         PermutationGroup group = getGapInterface().primitiveGroup(12, 0);
 
         PermutationGroup stab = group.setwiseStabilizer(0, 1, 2);
