@@ -22,7 +22,6 @@
  */
 package cc.redberry.core.groups.permutations;
 
-import cc.redberry.core.groups.permutations.gap.GapPrimitiveGroupsReader;
 import cc.redberry.core.utils.ArraysUtils;
 import cc.redberry.core.utils.Indicator;
 import cc.redberry.core.utils.IntComparator;
@@ -41,7 +40,7 @@ import static cc.redberry.core.groups.permutations.PermutationsTestUtils.RawSetw
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public class BacktrackSearchTest {
+public class BacktrackSearchTest extends AbstractTestClass {
 
     @Test
     public void testAll1() throws Exception {
@@ -150,29 +149,39 @@ public class BacktrackSearchTest {
 
     @Test
     public void testAllPrimitive() throws Exception {
-        PermutationGroup[] pgs = GapPrimitiveGroupsReader.readGroupsFromGap("/home/stas/gap4r6/prim/grps/gps1.g");
-
+        GapGroupsInterface gap = getGapInterface();
         int scanned = 0;
-        for (int i = 0; i < pgs.length; ++i) {
-            if (pgs[i].order().compareTo(BigInteger.valueOf(100000)) > 0)
-                continue;
-            ++scanned;
-            List<BSGSElement> bsgs = pgs[i].getBSGS();
+        for (int degree = 4; degree < 50; ++degree) {
+            int nrPrimitiveGroups = gap.nrPrimitiveGroups(degree);
+            //System.out.println("DEGREE: " + degree);
+            for (int i = 0; i < nrPrimitiveGroups; ++i) {
+                gap.evaluate("g:= PrimitiveGroup( " + degree + ", " + (i + 1) + ");");
+                if ((gap.evaluateToBoolean("IsNaturalSymmetricGroup(g);") ||
+                        gap.evaluateToBoolean("IsNaturalAlternatingGroup(g);")) && degree > 7)
+                    continue;
+
+                PermutationGroup pg = gap.primitiveGroup(degree, i);
+                if (pg.order().compareTo(BigInteger.valueOf(100000)) > 0)
+                    continue;
+
+                ++scanned;
+                List<BSGSElement> bsgs = pg.getBSGS();
 
 
-            BacktrackSearch search = new BacktrackSearch(bsgs);
-            PermutationLessThenTestComparator comparator = new PermutationLessThenTestComparator(getBaseAsArray(bsgs), bsgs.get(0).degree());
+                BacktrackSearch search = new BacktrackSearch(bsgs);
+                PermutationLessThenTestComparator comparator = new PermutationLessThenTestComparator(getBaseAsArray(bsgs), bsgs.get(0).degree());
 
-            Permutation previous = null, current;
-            int count = 0;
-            while ((current = search.take()) != null) {
-                if (count != 0) {
-                    assertTrue(comparator.compare(previous, current) <= 0);
+                Permutation previous = null, current;
+                int count = 0;
+                while ((current = search.take()) != null) {
+                    if (count != 0) {
+                        assertTrue(comparator.compare(previous, current) <= 0);
+                    }
+                    previous = current;
+                    ++count;
                 }
-                previous = current;
-                ++count;
+                assertEquals(calculateOrder(bsgs).intValue(), count);
             }
-            assertEquals(calculateOrder(bsgs).intValue(), count);
         }
         System.out.println("Total number of primitive groups scanned: " + scanned);
     }

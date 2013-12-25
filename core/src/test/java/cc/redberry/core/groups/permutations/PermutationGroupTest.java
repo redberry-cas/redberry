@@ -22,11 +22,8 @@
  */
 package cc.redberry.core.groups.permutations;
 
-import cc.redberry.core.combinatorics.Combinatorics;
 import cc.redberry.core.context.CC;
-import cc.redberry.core.groups.permutations.gap.GapPrimitiveGroupsReader;
 import cc.redberry.core.number.NumberUtils;
-import gnu.trove.map.hash.TIntIntHashMap;
 import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.random.Well1024a;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
@@ -315,8 +312,8 @@ public class PermutationGroupTest extends AbstractTestClass {
     }
 
     @Test
-    public void testPointwiseStabilizer1() {
-        PermutationGroup group = GapPrimitiveGroupsReader.readGroupFromGap("/home/stas/gap4r6/prim/grps/gps1.g", 27);
+    public void testPointwiseStabilizer1_WithGap() {
+        PermutationGroup group = getGapInterface().primitiveGroup(23, 1);
         List<BSGSElement> bsgs = group.getBSGS();
         int[] base = group.getBase();
         for (int i = 1; i < base.length; ++i) {
@@ -332,61 +329,68 @@ public class PermutationGroupTest extends AbstractTestClass {
     }
 
     @Test
-    public void testPointwiseStabilizer2() {
-        final PermutationGroup[] groups = GapPrimitiveGroupsReader.readGroupsFromGap("/home/stas/gap4r6/prim/grps/gps1.g");
-        for (int C = 0; C < groups.length; C += 2) {
-            PermutationGroup group = groups[C];
-            BigInteger order = group.order();
-            for (int i = 0; i < group.degree(); ++i) {
-                int orbSize = group.orbit(i).length;
-                PermutationGroup stab = group.pointwiseStabilizer(i);
-                assertEquals(order.divide(BigInteger.valueOf(orbSize)), stab.order());
-                List<Permutation> gens = stab.generators();
-                for (Permutation p : gens)
-                    assertEquals(p.newIndexOf(i), i);
-            }
-        }
-    }
-
-    @Test
-    public void testPointwiseStabilizer3() {
-        PermutationGroup[] groups = GapPrimitiveGroupsReader.readGroupsFromGap("/home/stas/gap4r6/prim/grps/gps1.g");
-        for (int C = 0; C < groups.length; C += 2) {
-            PermutationGroup group = groups[C];
-            if (group.degree() < 11)
-                continue;
-            for (int aa = 0; aa < 10; ++aa) {
-                int[] set = new int[5];
-                Arrays.fill(set, -1);
-                int step = group.degree() / set.length;
-                int j = 0;
-                for (int i = 0; i < group.degree() && j < set.length; i += 1 + CC.getRandomGenerator().nextInt(step), ++j)
-                    set[j] = i;
-                j = set.length - 1;
-                while (set[j] == -1) {
-                    --j;
-                }
-                set = Arrays.copyOf(set, j);
-                if (set.length == 0)
+    public void testPointwiseStabilizer2_WithGap() {
+        GapGroupsInterface gap = getGapInterface();
+        for (int degree = 4; degree < 50; ++degree) {
+            int nrPrimitiveGroups = gap.nrPrimitiveGroups(degree);
+            //System.out.println("DEGREE: " + degree);
+            for (int i = 0; i < nrPrimitiveGroups; ++i) {
+                gap.evaluate("g:= PrimitiveGroup( " + degree + ", " + (i + 1) + ");");
+                if ((gap.evaluateToBoolean("IsNaturalSymmetricGroup(g);") ||
+                        gap.evaluateToBoolean("IsNaturalAlternatingGroup(g);")) && degree > 7)
                     continue;
 
-
-                PermutationGroup stab = group.pointwiseStabilizer(set);
-                assertTrue(stab.equals(pointWiseStabilizerBruteForce(group, set)));
+                PermutationGroup group = gap.primitiveGroup(degree, i);
+                BigInteger order = group.order();
+                for (int j = 0; j < group.degree(); ++j) {
+                    int orbSize = group.orbit(j).length;
+                    PermutationGroup stab = group.pointwiseStabilizer(j);
+                    assertEquals(order.divide(BigInteger.valueOf(orbSize)), stab.order());
+                    List<Permutation> gens = stab.generators();
+                    for (Permutation p : gens)
+                        assertEquals(p.newIndexOf(j), j);
+                }
             }
         }
     }
 
     @Test
-    public void testSetwiseStabilizer1() {
-        PermutationGroup group = GapPrimitiveGroupsReader.readGroupFromGap("/home/stas/gap4r6/prim/grps/gps1.g", 34);
-        System.out.println(group.order());
-        PermutationGroup stab = group.setwiseStabilizer(5, 3);
-        System.out.println(stab.order());
-        System.out.println(group.order().divide(stab.order()));
+    public void testPointwiseStabilizer3_WithGap() {
+        GapGroupsInterface gap = getGapInterface();
+        for (int degree = 4; degree < 50; ++degree) {
+            int nrPrimitiveGroups = gap.nrPrimitiveGroups(degree);
+            //System.out.println("DEGREE: " + degree);
+            for (int i = 0; i < nrPrimitiveGroups; ++i) {
+                gap.evaluate("g:= PrimitiveGroup( " + degree + ", " + (i + 1) + ");");
+                if ((gap.evaluateToBoolean("IsNaturalSymmetricGroup(g);") ||
+                        gap.evaluateToBoolean("IsNaturalAlternatingGroup(g);")) && degree > 7)
+                    continue;
 
+                PermutationGroup group = gap.primitiveGroup(degree, i);
+                if (group.degree() < 11)
+                    continue;
+                for (int aa = 0; aa < 10; ++aa) {
+                    int[] set = new int[5];
+                    Arrays.fill(set, -1);
+                    int step = group.degree() / set.length;
+                    int j = 0;
+                    for (int ii = 0; ii < group.degree() && j < set.length; ii += 1 + CC.getRandomGenerator().nextInt(step), ++j)
+                        set[j] = ii;
+                    j = set.length - 1;
+                    while (set[j] == -1) {
+                        --j;
+                    }
+                    set = Arrays.copyOf(set, j);
+                    if (set.length == 0)
+                        continue;
+
+
+                    PermutationGroup stab = group.pointwiseStabilizer(set);
+                    assertTrue(stab.equals(pointWiseStabilizerBruteForce(group, set)));
+                }
+            }
+        }
     }
-
 
     @Test
     public void testSetwiseStabilasizer1() {
@@ -548,26 +552,32 @@ public class PermutationGroupTest extends AbstractTestClass {
 
 
     @Test
-    public void testMappingPerformance1() {
-        PermutationGroup[] allSimple = GapPrimitiveGroupsReader.readGroupsFromGap("/home/stas/gap4r6/prim/grps/gps1.g");
+    public void testMappingPerformance1_WithGap_PerformanceTest() {
+        GapGroupsInterface gap = getGapInterface();
+        for (int degree = 4; degree < 50; ++degree) {
+            int nrPrimitiveGroups = gap.nrPrimitiveGroups(degree);
+            //System.out.println("DEGREE: " + degree);
+            for (int i = 0; i < nrPrimitiveGroups; ++i) {
+                gap.evaluate("g:= PrimitiveGroup( " + degree + ", " + (i + 1) + ");");
+                if ((gap.evaluateToBoolean("IsNaturalSymmetricGroup(g);") ||
+                        gap.evaluateToBoolean("IsNaturalAlternatingGroup(g);")) && degree > 7)
+                    continue;
 
-        //burn JVM
-        for (int i = 0; i < allSimple.length; ++i) {
-            PermutationGroup pg = allSimple[i];
-            int degree = pg.degree();
+                PermutationGroup pg = gap.primitiveGroup(degree, i);
 
-            for (int C = 0; C < 100; ++C) {
-                int[] from = Permutations.randomPermutation(degree);
-                int[] to = Permutations.randomPermutation(degree);
-                final int cut = 1 + CC.getRandomGenerator().nextInt(degree - 1);
+                for (int C = 0; C < 100; ++C) {
+                    int[] from = Permutations.randomPermutation(degree);
+                    int[] to = Permutations.randomPermutation(degree);
+                    final int cut = 1 + CC.getRandomGenerator().nextInt(degree - 1);
 
-                from = Arrays.copyOf(from, cut);
-                to = Arrays.copyOf(to, cut);
+                    from = Arrays.copyOf(from, cut);
+                    to = Arrays.copyOf(to, cut);
 
-                Permutation p = pg.mapping(from, to).take();
-                if (p != null) {
-                    for (int j = 0; j < cut; ++j)
-                        assertEquals(to[j], p.newIndexOf(from[j]));
+                    Permutation p = pg.mapping(from, to).take();
+                    if (p != null) {
+                        for (int j = 0; j < cut; ++j)
+                            assertEquals(to[j], p.newIndexOf(from[j]));
+                    }
                 }
             }
         }
@@ -576,32 +586,42 @@ public class PermutationGroupTest extends AbstractTestClass {
         DescriptiveStatistics notNullStat = new DescriptiveStatistics();
         DescriptiveStatistics mixed = new DescriptiveStatistics();
 
-        for (int i = 0; i < allSimple.length; ++i) {
-            PermutationGroup pg = allSimple[i];
-            int degree = pg.degree();
+        for (int degree = 4; degree < 50; ++degree) {
+            int nrPrimitiveGroups = gap.nrPrimitiveGroups(degree);
+            //System.out.println("DEGREE: " + degree);
+            for (int i = 0; i < nrPrimitiveGroups; ++i) {
+                gap.evaluate("g:= PrimitiveGroup( " + degree + ", " + (i + 1) + ");");
+                if ((gap.evaluateToBoolean("IsNaturalSymmetricGroup(g);") ||
+                        gap.evaluateToBoolean("IsNaturalAlternatingGroup(g);")) && degree > 7)
+                    continue;
 
-            long start, elapsed = 0;
-            int notNull = 0;
-            for (int C = 0; C < 100; ++C) {
-                int[] from = Permutations.randomPermutation(degree);
-                int[] to = Permutations.randomPermutation(degree);
-                final int cut = 1 + CC.getRandomGenerator().nextInt(degree - 1);
+                PermutationGroup pg = gap.primitiveGroup(degree, i);
 
-                from = Arrays.copyOf(from, cut);
-                to = Arrays.copyOf(to, cut);
 
-                start = System.currentTimeMillis();
-                Permutation p = pg.mapping(from, to).take();
-                elapsed += System.currentTimeMillis() - start;
-                if (p != null) {
-                    ++notNull;
-                    for (int j = 0; j < cut; ++j)
-                        assertEquals(to[j], p.newIndexOf(from[j]));
+                long start, elapsed = 0;
+                int notNull = 0;
+                for (int C = 0; C < 100; ++C) {
+                    int[] from = Permutations.randomPermutation(degree);
+                    int[] to = Permutations.randomPermutation(degree);
+                    final int cut = 1 + CC.getRandomGenerator().nextInt(degree - 1);
+
+                    from = Arrays.copyOf(from, cut);
+                    to = Arrays.copyOf(to, cut);
+
+                    start = System.currentTimeMillis();
+                    Permutation p = pg.mapping(from, to).take();
+                    elapsed += System.currentTimeMillis() - start;
+                    if (p != null) {
+                        ++notNull;
+                        for (int j = 0; j < cut; ++j)
+                            assertEquals(to[j], p.newIndexOf(from[j]));
+                    }
                 }
+                if (notNull != 0)
+                    mixed.addValue(elapsed / notNull);
+                timeStat.addValue(elapsed);
+                notNullStat.addValue(notNull);
             }
-            mixed.addValue(elapsed / notNull);
-            timeStat.addValue(elapsed);
-            notNullStat.addValue(notNull);
         }
         System.out.println("Time " + timeStat);
         System.out.println("Not null " + notNullStat);
