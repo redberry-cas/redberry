@@ -35,6 +35,11 @@ import java.math.BigInteger;
 public class PermutationCycles implements Permutation {
 
     @Override
+    public int[] oneLine() {
+        return new int[0];
+    }
+
+    @Override
     public int[] imageOf(int[] set) {
         return new int[0];
     }

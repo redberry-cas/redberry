@@ -871,6 +871,4 @@ public class AlgorithmsBaseTest extends AbstractTestClass {
         }
         System.out.println(stat);
     }
-
-
 }

@@ -32,6 +32,8 @@ import java.io.*;
 import java.math.BigInteger;
 import java.nio.charset.Charset;
 import java.nio.charset.CharsetDecoder;
+import java.util.Iterator;
+import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
@@ -85,6 +87,21 @@ public final class GapGroupsInterface {
             throw new RuntimeException(e);
         }
 
+    }
+
+    public String evaluateRedberryGroup(String var, List<Permutation> generators) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(var.trim()).append(":= Group(");
+
+        for (Iterator<Permutation> it = generators.iterator(); ; ) {
+            Permutation p = it.next();
+            sb.append("PermList(").append(convertToGapList(p.oneLine())).append(")");
+            if (!it.hasNext())
+                break;
+            sb.append(", ");
+        }
+        sb.append(");");
+        return evaluate(sb.toString());
     }
 
     public PermutationGroup evaluateToPermutationGroup(String command) {
@@ -174,6 +191,16 @@ public final class GapGroupsInterface {
             readThread.join();
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    public static String convertToGapList(int[] array) {
+        StringBuilder sb = new StringBuilder().append("[");
+        for (int i = 0; ; ++i) {
+            sb.append(array[i] + 1);
+            if (i == array.length - 1)
+                return sb.append("]").toString();
+            sb.append(", ");
         }
     }
 

@@ -85,15 +85,11 @@ public class PermutationsTestUtils {
      */
     public static PermutationGroup calculateRawSetwiseStabilizer(PermutationGroup pg, int[] set) {
         List<BSGSElement> bsgs = pg.getBSGS();
-        int degree = pg.degree();
         int[] base = getBaseAsArray(bsgs);
         RawSetwiseStabilizerCriteria rw = new RawSetwiseStabilizerCriteria(set, base);
 
         //empty initial subgroup
         ArrayList<BSGSCandidateElement> subgroup = new ArrayList<>();
-        subgroup.add(new BSGSCandidateElement(0, new ArrayList<Permutation>(), new int[degree]));
-        subgroup.get(0).stabilizerGenerators.add(Permutations.getIdentityOneLine(degree));
-
         AlgorithmsBacktrack.subgroupSearch(bsgs, subgroup, rw, rw);
         return new PermutationGroup(
                 Collections.unmodifiableList(AlgorithmsBase.asBSGSList(subgroup)));

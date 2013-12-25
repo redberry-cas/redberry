@@ -102,6 +102,11 @@ public class PermutationOneLine implements Permutation {
     }
 
     @Override
+    public int[] oneLine() {
+        return permutation.clone();
+    }
+
+    @Override
     public int newIndexOf(int i) {
         return permutation[i];
     }

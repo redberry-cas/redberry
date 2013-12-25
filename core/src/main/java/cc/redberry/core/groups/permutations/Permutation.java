@@ -34,6 +34,13 @@ import java.util.Arrays;
  */
 public interface Permutation extends Comparable<Permutation> {
     /**
+     * Returns array representing this permutation in one-line notation.
+     *
+     * @return
+     */
+    int[] oneLine();
+
+    /**
      * Return the new position of specified element under this permutation
      *
      * @param i element

@@ -24,6 +24,7 @@ package cc.redberry.core.groups.permutations;
 
 import cc.redberry.core.context.CC;
 import cc.redberry.core.groups.permutations.*;
+import org.junit.Assert;
 import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Test;
@@ -100,5 +101,22 @@ public class GapGroupsInterfaceTest extends AbstractTestClass {
     public void testEvaluateToBigInteger1_WithGap() throws Exception {
         GapGroupsInterface gap = getGapInterface();
         gap.evaluateToBigInteger("Order(PrimitiveGroup(58,1));");
+    }
+
+    @Test
+    public void testSetwiseStabilizer1() {
+        GapGroupsInterface gap = getGapInterface();
+        gap.evaluate("g:= PrimitiveGroup(12,1);");
+        gap.evaluate("v:= SetwiseStabilizer(g, OnPoints, [1,2,3]);");
+        System.out.println(gap.evaluate("v.setstab;"));
+        System.out.println(gap.evaluateToPermutationGroup("v.setstab;"));
+    }
+
+    @Test
+    public void testEvaluateRedberryGroup() {
+        GapGroupsInterface gap = getGapInterface();
+        PermutationGroup g = gap.primitiveGroup(12, 0);
+        gap.evaluateRedberryGroup("g", g.generators());
+        Assert.assertEquals(g.order(), gap.evaluateToBigInteger("Order(g)"));
     }
 }

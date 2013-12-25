@@ -44,19 +44,16 @@ import static cc.redberry.core.groups.permutations.PermutationsTestUtils.*;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public class AlgorithmsBacktrackTest {
+public class AlgorithmsBacktrackTest extends AbstractTestClass {
 
     @Test
-    public void test1() throws Exception {
-
-        Permutation gen0 = new PermutationOneLine(1, 2, 3, 0, 4, 5);
-        Permutation gen1 = new PermutationOneLine(0, 3, 2, 1, 4, 5);
-        Permutation gen2 = new PermutationOneLine(0, 1, 2, 3, 5, 4);
-        ArrayList<Permutation> generators = new ArrayList<>();
-        generators.add(gen0);
-        generators.add(gen1);
-        generators.add(gen2);
-
+    public void test1() {
+        //no any pruning, just property test
+        Permutation
+                a = new PermutationOneLine(1, 2, 3, 0, 4, 5),
+                b = new PermutationOneLine(0, 3, 2, 1, 4, 5),
+                c = new PermutationOneLine(0, 1, 2, 3, 5, 4);
+        ArrayList<Permutation> generators = new ArrayList<>(Arrays.asList(a, b, c));
         List<BSGSElement> bsgs = AlgorithmsBase.createBSGSList(new int[]{0, 1, 4}, generators);
 
         final int point = 5;
@@ -66,41 +63,25 @@ public class AlgorithmsBacktrackTest {
                 return p.newIndexOf(point) == point;
             }
         };
-        BacktrackSearchTestFunction test = new BacktrackSearchTestFunction() {
-            @Override
-            public boolean test(Permutation permutation, int level) {
-//                if (level == 0)
-//                    return permutation.newIndexOf(point ) == point ;
-                return true;
-            }
-        };
 
         ArrayList<BSGSCandidateElement> subgroup = new ArrayList<>();
-        subgroup.add(new BSGSCandidateElement(0, new ArrayList<Permutation>(), new int[gen0.degree()]));
-        subgroup.get(0).stabilizerGenerators.add(gen0.getIdentity());
+        AlgorithmsBacktrack.subgroupSearch(bsgs, subgroup, BacktrackSearchTestFunction.TRUE, stabilizer);
 
-        AlgorithmsBacktrack.subgroupSearch(bsgs, subgroup, test, stabilizer);
-
-        System.out.println("Is BSGS: " + AlgorithmsBase.isBSGS(subgroup));
-        AlgorithmsBase.SchreierSimsAlgorithm(subgroup);
+        assertTrue(isBSGS(subgroup));
         BacktrackSearch all = new BacktrackSearch(subgroup);
         Permutation current;
-        while ((current = all.take()) != null) {
-            System.out.println(current);
-        }
+        while ((current = all.take()) != null)
+            assertEquals(point, current.newIndexOf(point));
     }
 
     @Test
     public void test2() throws Exception {
         //no any pruning, just property test
-
-        Permutation gen0 = new PermutationOneLine(1, 2, 3, 0, 4, 5);
-        Permutation gen1 = new PermutationOneLine(0, 3, 2, 1, 4, 5);
-        Permutation gen2 = new PermutationOneLine(0, 1, 2, 3, 5, 4);
-        ArrayList<Permutation> generators = new ArrayList<>();
-        generators.add(gen0);
-        generators.add(gen1);
-        generators.add(gen2);
+        Permutation
+                a = new PermutationOneLine(1, 2, 3, 0, 4, 5),
+                b = new PermutationOneLine(0, 3, 2, 1, 4, 5),
+                c = new PermutationOneLine(0, 1, 2, 3, 5, 4);
+        ArrayList<Permutation> generators = new ArrayList<>(Arrays.asList(a, b, c));
 
         List<BSGSElement> bsgs = AlgorithmsBase.createBSGSList(new int[]{0, 1, 4}, generators);
 
@@ -111,21 +92,17 @@ public class AlgorithmsBacktrackTest {
                 return p.newIndexOf(point) == point;
             }
         };
-        BacktrackSearchTestFunction test = BacktrackSearchTestFunction.TRUE;
 
         //empty initial subgroup
         ArrayList<BSGSCandidateElement> subgroup = new ArrayList<>();
-        subgroup.add(new BSGSCandidateElement(0, new ArrayList<Permutation>(), new int[gen0.degree()]));
-        subgroup.get(0).stabilizerGenerators.add(gen0.getIdentity());
 
-        AlgorithmsBacktrack.subgroupSearch(bsgs, subgroup, test, stabilizer);
+        AlgorithmsBacktrack.subgroupSearch(bsgs, subgroup, BacktrackSearchTestFunction.TRUE, stabilizer);
 
         int[] base;
-        System.out.println("Subgroup BSGS complete: " + AlgorithmsBase.isBSGS(subgroup));
-        System.out.println("Subgroup base: " + Arrays.toString(AlgorithmsBase.getBaseAsArray(subgroup)));
-        AlgorithmsBase.removeRedundantBaseRemnant(subgroup);
-        System.out.println("Subgroup real base: " + Arrays.toString(base = AlgorithmsBase.getBaseAsArray(subgroup)));
-        System.out.println("Subgroup generators: " + subgroup.get(0).stabilizerGenerators);
+        assertTrue(isBSGS(subgroup));
+        removeRedundantBaseRemnant(subgroup);
+        assertTrue(isBSGS(subgroup));
+        base = AlgorithmsBase.getBaseAsArray(subgroup);
 
         Permutation a0 = new PermutationOneLine(0, 1, 2, 3, 4, 5);
         Permutation a1 = new PermutationOneLine(0, 3, 2, 1, 4, 5);
@@ -137,59 +114,118 @@ public class AlgorithmsBacktrackTest {
         Permutation a7 = new PermutationOneLine(3, 2, 1, 0, 4, 5);
         final Permutation[] expected = {a0, a1, a2, a3, a4, a5, a6, a7};
 
-        Comparator<Permutation> permutationComparator = new InducedOrderingOfPermutations(base, gen0.degree());
+        Comparator<Permutation> permutationComparator = new InducedOrderingOfPermutations(base, a.degree());
         Arrays.sort(expected, permutationComparator);
 
-        AlgorithmsBase.SchreierSimsAlgorithm(subgroup);
-        System.out.println("Subgroup order: " + AlgorithmsBase.calculateOrder(subgroup));
+        assertEquals(BigInteger.valueOf(8), calculateOrder(subgroup));
 
         Permutation[] actual = new Permutation[expected.length];
         BacktrackSearch search = new BacktrackSearch(subgroup);
         Permutation current;
         int ii = 0;
-        while ((current = search.take()) != null) {
+        while ((current = search.take()) != null)
             actual[ii++] = current;
-        }
+
         assertEquals(expected.length, ii);
         Arrays.sort(actual, permutationComparator);
         Assert.assertArrayEquals(expected, actual);
     }
 
     @Test
-    public void testSetwiseStabilizer1_raw() throws Exception {
-        PermutationGroup[] pgs = GapPrimitiveGroupsReader.readGroupsFromGap("/home/stas/gap4r6/prim/grps/gps1.g");
+    public void testSetwiseStabilizer1_raw_WithGap() throws Exception {
+        GapGroupsInterface gap = getGapInterface();
+        for (int degree = 4; degree < 50; ++degree) {
+            int nrPrimitiveGroups = gap.nrPrimitiveGroups(degree);
+            //System.out.println("DEGREE: " + degree);
+            for (int i = 0; i < nrPrimitiveGroups; ++i) {
+
+                gap.evaluate("g:= PrimitiveGroup( " + degree + ", " + (i + 1) + ");");
+                if ((gap.evaluateToBoolean("IsNaturalSymmetricGroup(g);") ||
+                        gap.evaluateToBoolean("IsNaturalAlternatingGroup(g);")) && degree > 15)
+                    continue;
+                //System.out.println("  " + i);
+                List<BSGSElement> group = createBSGSList(Arrays.asList(gap.primitiveGenerators(degree, i)));
+                int nl = 1 + CC.getRandomGenerator().nextInt(degree / 4);
+                int[] set = Combinatorics.getRandomSortedDistinctArray(0, degree, nl, CC.getRandomGenerator());
+                //System.out.println(Arrays.toString(set));
+                RawSetwiseStabilizerCriteria criteria = new RawSetwiseStabilizerCriteria(set, getBaseAsArray(group));
+
+                ArrayList<BSGSCandidateElement> stabilizer = new ArrayList<>();
+                AlgorithmsBacktrack.subgroupSearch(group, stabilizer, criteria, criteria);
+                assertTrue(isBSGS(stabilizer));
+
+
+                //not works because of the bug in genss
+                //gap.evaluateRedberryGroup("rg", stabilizer.get(0).stabilizerGenerators);
+                //gap.evaluate("swrec:= SetwiseStabilizer(g, OnPoints, " + GapGroupsInterface.convertToGapList(set) + ");");
+                //assertTrue(gap.evaluateToBoolean("rg = swrec.setstab;"));
+
+                int order = calculateOrder(stabilizer).intValue();
+                if (order < 100_000 && order > 1) {
+                    int[] c_set = set.clone();
+                    Arrays.sort(c_set);
+                    BacktrackSearch it = new BacktrackSearch(stabilizer, BacktrackSearchTestFunction.TRUE, Indicator.TRUE_INDICATOR);
+                    Permutation c;
+                    while ((c = it.take()) != null) {
+                        for (int point : set)
+                            assertTrue(Arrays.binarySearch(c_set, c.newIndexOf(point)) >= 0);
+                    }
+                }
+
+                if (set.length == 1) {
+                    gap.evaluateRedberryGroup("rg", stabilizer.get(0).stabilizerGenerators);
+                    gap.evaluate("stab:= Stabilizer(g, " + (set[0] + 1) + ");");
+                    assertTrue(gap.evaluateToBoolean("rg = stab;"));
+                }
+            }
+        }
+    }
+
+    @Test
+    public void testSetwiseStabilizer2_raw_WithGap_PerformanceTest() throws Exception {
 
         DescriptiveStatistics statistics = new DescriptiveStatistics();
         int scanned = 0;
-        for (int i = 0; i < pgs.length; ++i) {
-            if (pgs[i].order().compareTo(BigInteger.valueOf(100000)) > 0)
-                continue;
 
-            ++scanned;
+        GapGroupsInterface gap = getGapInterface();
+        for (int degree = 4; degree < 50; ++degree) {
+            int nrPrimitiveGroups = gap.nrPrimitiveGroups(degree);
+            //System.out.println("DEGREE: " + degree);
+            for (int i = 0; i < nrPrimitiveGroups; ++i) {
 
-            int degree = pgs[i].degree();
+                gap.evaluate("g:= PrimitiveGroup( " + degree + ", " + (i + 1) + ");");
+                if ((gap.evaluateToBoolean("IsNaturalSymmetricGroup(g);") ||
+                        gap.evaluateToBoolean("IsNaturalAlternatingGroup(g);")) && degree > 15)
+                    continue;
 
-            int setl;
-            if (degree == 4)
-                setl = 2;
-            else if (degree == 5)
-                setl = CC.getRandomGenerator().nextBoolean() ? 2 : 3;
-            else if (degree < 10)
-                setl = degree / 2 - 1;
-            else if (degree < 30)
-                setl = degree / 3 - 1;
-            else if (degree < 60)
-                setl = degree / 4 - 1;
-            else if (degree < 100)
-                setl = degree / 6 - 1;
-            else
-                setl = degree / 10 - 1;
+                PermutationGroup g = gap.primitiveGroup(degree, i);
+                if (g.order().compareTo(BigInteger.valueOf(1_000_000)) > 0)
+                    continue;
 
-            int[] set = Combinatorics.getRandomSortedDistinctArray(0, degree,
-                    setl,
-                    CC.getRandomGenerator());
-            PermutationGroup stabilizer = testSearchStabilizerRaw(pgs[i], set);
-            statistics.addValue(stabilizer.order().intValue());
+                ++scanned;
+
+                int setl;
+                if (degree == 4)
+                    setl = 2;
+                else if (degree == 5)
+                    setl = CC.getRandomGenerator().nextBoolean() ? 2 : 3;
+                else if (degree < 10)
+                    setl = degree / 2 - 1;
+                else if (degree < 30)
+                    setl = degree / 3 - 1;
+                else if (degree < 60)
+                    setl = degree / 4 - 1;
+                else if (degree < 100)
+                    setl = degree / 6 - 1;
+                else
+                    setl = degree / 10 - 1;
+
+                int[] set = Combinatorics.getRandomSortedDistinctArray(0, degree,
+                        setl,
+                        CC.getRandomGenerator());
+                PermutationGroup stabilizer = testSearchStabilizerRaw(g, set);
+                statistics.addValue(stabilizer.order().intValue());
+            }
         }
         System.out.println("Total number of primitive groups scanned: " + scanned);
         System.out.println("Statistic of stabilizer orders: ");
@@ -198,43 +234,54 @@ public class AlgorithmsBacktrackTest {
 
 
     @Test
-    public void testSetwiseStabilizer2_raw_visited_nodes_stat() throws Exception {
-        PermutationGroup[] pgs = GapPrimitiveGroupsReader.readGroupsFromGap("/home/stas/gap4r6/prim/grps/gps1.g");
-        System.out.println("Read groups from GAP.");
-
+    public void testSetwiseStabilizer2_raw_visited_nodes_stat_WithGap_PerformanceTest() throws Exception {
         DescriptiveStatistics orders = new DescriptiveStatistics();
         DescriptiveStatistics visited = new DescriptiveStatistics();
+        GapGroupsInterface gap = getGapInterface();
         int scanned = 0;
-        for (int i = 0; i < pgs.length; ++i) {
-            if (pgs[i].order().compareTo(BigInteger.valueOf(100000)) > 0)
-                continue;
+        for (int degree = 4; degree < 50; ++degree) {
+            int nrPrimitiveGroups = gap.nrPrimitiveGroups(degree);
+            //System.out.println("DEGREE: " + degree);
+            for (int i = 0; i < nrPrimitiveGroups; ++i) {
 
-            ++scanned;
+                gap.evaluate("g:= PrimitiveGroup( " + degree + ", " + (i + 1) + ");");
+                if ((gap.evaluateToBoolean("IsNaturalSymmetricGroup(g);") ||
+                        gap.evaluateToBoolean("IsNaturalAlternatingGroup(g);")) && degree > 7)
+                    continue;
 
-            int degree = pgs[i].degree();
+                PermutationGroup g = gap.primitiveGroup(degree, i);
+                if (g.order().compareTo(BigInteger.valueOf(1_000_000)) > 0)
+                    continue;
 
-            int setl;
-            if (degree == 4)
-                setl = 2;
-            else if (degree == 5)
-                setl = CC.getRandomGenerator().nextBoolean() ? 2 : 3;
-            else if (degree < 10)
-                setl = degree / 2 - 1;
-            else if (degree < 60)
-                setl = degree / 5 - 1;
-            else if (degree < 100)
-                setl = degree / 7 - 1;
-            else
-                setl = degree / 15 - 1;
+                //System.out.println("  " + i);
 
-            int[] set = Combinatorics.getRandomSortedDistinctArray(0, degree,
-                    setl,
-                    CC.getRandomGenerator());
+                ++scanned;
 
-            PermutationGroup stabilizer = testSearchStabilizerRaw(pgs[i], set);
-            System.out.println("Group order: " + pgs[i].order() + "  Visited: " + AlgorithmsBacktrack.____VISITED_NODES___[0] + "  Stabilizer order: " + stabilizer.order());
-            visited.addValue((((double) AlgorithmsBacktrack.____VISITED_NODES___[0]) / pgs[i].order().doubleValue()) * 100.0);
-            orders.addValue(stabilizer.order().intValue());
+                int setl;
+                if (degree == 4)
+                    setl = 2;
+                else if (degree == 5)
+                    setl = CC.getRandomGenerator().nextBoolean() ? 2 : 3;
+                else if (degree < 10)
+                    setl = degree / 2 - 1;
+                else if (degree < 60)
+                    setl = degree / 5 - 1;
+                else if (degree < 100)
+                    setl = degree / 7 - 1;
+                else
+                    setl = degree / 15 - 1;
+                if (setl == 0)
+                    setl = 1;
+                int[] set = Combinatorics.getRandomSortedDistinctArray(0, degree,
+                        setl,
+                        CC.getRandomGenerator());
+
+                PermutationGroup stabilizer = testSearchStabilizerRaw(g, set);
+
+                //System.out.println("Group order: " + g.order() + "  Visited: " + AlgorithmsBacktrack.____VISITED_NODES___[0] + "  Stabilizer order: " + stabilizer.order());
+                visited.addValue((((double) AlgorithmsBacktrack.____VISITED_NODES___[0]) / g.order().doubleValue()) * 100.0);
+                orders.addValue(stabilizer.order().intValue());
+            }
         }
         System.out.println("Total number of primitive groups scanned: " + scanned);
         System.out.println("Statistic of stabilizer orders: ");
@@ -244,27 +291,33 @@ public class AlgorithmsBacktrackTest {
     }
 
     @Test
-    public void testSetwiseStabilizer3_raw_all_set() throws Exception {
-        PermutationGroup[] pgs = GapPrimitiveGroupsReader.readGroupsFromGap("/home/stas/gap4r6/prim/grps/gps1.g");
-        System.out.println("Read groups from GAP.");
-
+    public void testSetwiseStabilizer3_raw_all_set_WithGap() throws Exception {
         DescriptiveStatistics visited = new DescriptiveStatistics();
         int scanned = 0;
-        for (int i = 0; i < pgs.length; ++i) {
-            ++scanned;
+        GapGroupsInterface gap = getGapInterface();
+        for (int degree = 4; degree < 50; ++degree) {
+            int nrPrimitiveGroups = gap.nrPrimitiveGroups(degree);
+            //System.out.println("DEGREE: " + degree);
+            for (int i = 0; i < nrPrimitiveGroups; ++i) {
+                ++scanned;
+                gap.evaluate("g:= PrimitiveGroup( " + degree + ", " + (i + 1) + ");");
+                if ((gap.evaluateToBoolean("IsNaturalSymmetricGroup(g);") ||
+                        gap.evaluateToBoolean("IsNaturalAlternatingGroup(g);")) && degree > 7)
+                    continue;
 
-            int degree = pgs[i].degree();
+                PermutationGroup g = gap.primitiveGroup(degree, i);
 
-            int[] set = new int[degree];
-            for (int g = 1; g < degree; ++g)
-                set[g] = g;
+                int[] set = new int[degree];
+                for (int s = 1; s < degree; ++s)
+                    set[s] = s;
 
-            PermutationGroup stabilizer = calculateRawSetwiseStabilizer(pgs[i], set);
-            assertEquals(pgs[i].order(), stabilizer.order());
+                PermutationGroup stabilizer = calculateRawSetwiseStabilizer(g, set);
+                assertEquals(g.order(), stabilizer.order());
 
-            System.out.println("Group order: " + pgs[i].order() + "  Visited: " + AlgorithmsBacktrack.____VISITED_NODES___[0]);
+                //System.out.println("Group order: " + g.order() + "  Visited: " + AlgorithmsBacktrack.____VISITED_NODES___[0]);
 
-            visited.addValue((((double) AlgorithmsBacktrack.____VISITED_NODES___[0]) / pgs[i].order().doubleValue()) * 100.0);
+                visited.addValue((((double) AlgorithmsBacktrack.____VISITED_NODES___[0]) / g.order().doubleValue()) * 100.0);
+            }
         }
         System.out.println("Total number of primitive groups scanned: " + scanned);
         System.out.println("Statistic of percent of visited nodes: ");
@@ -305,18 +358,6 @@ public class AlgorithmsBacktrackTest {
 
         testSearchStabilizerRaw(pg, set);
     }
-
-    @Test
-    public void testSetwiseStabilizer1d_raw() {
-        PermutationGroup group = GapPrimitiveGroupsReader.readGroupFromGap("/home/stas/gap4r6/prim/grps/gps1.g", 34);
-        ArrayList<BSGSCandidateElement> bsgs = group.getBSGSCandidate();
-        AlgorithmsBase.rebase(bsgs, new int[]{2, 3});
-
-        int[] set = {2, 3};
-        PermutationGroup pg = testSearchStabilizerRaw(bsgs, set);
-        System.out.println(pg);
-    }
-
 
     @Test
     public void testLeftCosetRepresentatives1() {
@@ -391,26 +432,6 @@ public class AlgorithmsBacktrackTest {
         }
     }
 
-    @Test
-    public void testLeftCosetRepresentative2() {
-        final PermutationGroup pg = GapPrimitiveGroupsReader.readGroupFromGap("/home/stas/gap4r6/prim/grps/gps1.g", 298);
-        final ArrayList<BSGSElement> symmetric = AlgorithmsBase.createSymmetricGroupBSGS(pg.degree());
-        System.out.println("Index: " + calculateOrder(symmetric).divide(pg.order()));
-        System.out.println("constructed");
-        for (int r = 0; r < 100; ++r) {
-            Timing.timing(
-                    new Timing.TimingJob() {
-                        @Override
-                        public Object doJob() {
-                            Permutation rp = new PermutationOneLine(Permutations.randomPermutation(pg.degree(),
-                                    CC.getRandomGenerator()));
-                            rp = AlgorithmsBacktrack.leftTransversalOf(rp, symmetric, pg.getBSGS());
-                            return rp;
-                        }
-                    }, true);
-        }
-
-    }
 
     @Test
     public void testLeftCosetRepresentatives2() {
@@ -444,36 +465,45 @@ public class AlgorithmsBacktrackTest {
     }
 
     @Test
-    public void testLeftCosetRepresentatives3() {
-        PermutationGroup[] pgs = GapPrimitiveGroupsReader.readGroupsFromGap("/home/stas/gap4r6/prim/grps/gps1.g");
-        System.out.println("Read groups from GAP.");
-
+    public void testLeftCosetRepresentatives3_WithGap() {
         DescriptiveStatistics visited = new DescriptiveStatistics();
         int scanned = 0;
-        for (int i = 0; i < pgs.length && pgs[i].degree() < 110; ++i) {
+        GapGroupsInterface gap = getGapInterface();
+        for (int degree = 4; degree < 50; ++degree) {
+            int nrPrimitiveGroups = gap.nrPrimitiveGroups(degree);
+            //System.out.println("DEGREE: " + degree);
+            for (int i = 0; i < nrPrimitiveGroups; ++i) {
+                ++scanned;
+                gap.evaluate("g:= PrimitiveGroup( " + degree + ", " + (i + 1) + ");");
+                if ((gap.evaluateToBoolean("IsNaturalSymmetricGroup(g);") ||
+                        gap.evaluateToBoolean("IsNaturalAlternatingGroup(g);")) && degree > 7)
+                    continue;
 
-            int degree = pgs[i].degree();
-            BigInteger index = NumberUtils.factorial(degree).divide(pgs[i].order());
+                PermutationGroup g = gap.primitiveGroup(degree, i);
 
-            if (index.compareTo(BigInteger.valueOf(1_000_001)) > 0)
-                continue;
+                BigInteger index = NumberUtils.factorial(degree).divide(g.order());
 
-            ++scanned;
+                if (index.compareTo(BigInteger.valueOf(1_000_001)) > 0)
+                    continue;
 
-            ArrayList<BSGSElement> symmetricGroup = AlgorithmsBase.createSymmetricGroupBSGS(degree);
-            Permutation[] transversals = AlgorithmsBacktrack.leftCosetRepresentatives(symmetricGroup, pgs[i].getBSGS());
+                ++scanned;
+
+                ArrayList<BSGSElement> symmetricGroup = AlgorithmsBase.createSymmetricGroupBSGS(degree);
+                Permutation[] transversals = AlgorithmsBacktrack.leftCosetRepresentatives(symmetricGroup, g.getBSGS());
 
 
-            assertEquals(index.intValue(), transversals.length);
-            assertHaveNoNullElements(transversals);
+                assertEquals(index.intValue(), transversals.length);
+                assertHaveNoNullElements(transversals);
+             /*
+                System.out.println(
+                        "Group order: " + calculateOrder(symmetricGroup) +
+                                "  Subgroup order: " + calculateOrder(g.getBSGS()) +
+                                "  Subgroup index: " + transversals.length +
+                                "  Visited: " + AlgorithmsBacktrack.____VISITED_NODES___[0]);
 
-            System.out.println(
-                    "Group order: " + calculateOrder(symmetricGroup) +
-                            "  Subgroup order: " + calculateOrder(pgs[i].getBSGS()) +
-                            "  Subgroup index: " + transversals.length +
-                            "  Visited: " + AlgorithmsBacktrack.____VISITED_NODES___[0]);
-
-            visited.addValue((((double) AlgorithmsBacktrack.____VISITED_NODES___[0]) / pgs[i].order().doubleValue()) * 100.0);
+               */
+                visited.addValue((((double) AlgorithmsBacktrack.____VISITED_NODES___[0]) / g.order().doubleValue()) * 100.0);
+            }
         }
         System.out.println("Total number of primitive groups scanned: " + scanned);
         System.out.println("Statistic of percent of visited nodes: ");

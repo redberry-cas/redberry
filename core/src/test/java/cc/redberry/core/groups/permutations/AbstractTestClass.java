@@ -56,6 +56,8 @@ public class AbstractTestClass {
 
     private static boolean gapStaticInstanceInitialized = false;
 
+    private static int[] GAP_REQUIRED_VERSION = {4, 6, 5};
+
     private static GapGroupsInterface getStaticInstance() {
         if (gapStaticInstanceInitialized)
             return gapStaticInstance;
@@ -75,10 +77,26 @@ public class AbstractTestClass {
             }
         }
         gapStaticInstance = gapInterface;
-        if (gapInterface != null)
+        if (gapInterface != null) {
+            //check GAP version
+            String gapVersion = gapStaticInstance.evaluate("VERSION;").replace("\"","");
+
+            String[] vv = gapVersion.split("\\.");
+            for (int i = 0; i < GAP_REQUIRED_VERSION.length; ++i)
+                if (Integer.valueOf(vv[i]) < GAP_REQUIRED_VERSION[i]) {
+                    System.out.println("Required GAP version is 4.6.5. Upgrade your GAP.");
+                    gapStaticInstance.close();
+                    return gapStaticInstance = null;
+                } else if (Integer.valueOf(vv[i]) > GAP_REQUIRED_VERSION[i])
+                    break;
+            if (gapStaticInstance.evaluate("LoadPackage(\"genss\");").equals("fail")) {
+                System.out.println("[GAP] Could not load package genss. Check its dependencies (packages orb and io should be compiled).");
+                return gapStaticInstance = null;
+            }
             System.out.println("[Redberry] GAP system started.");
-        else
+        } else
             System.out.println("[Redberry] no GAP found on the system.");
+
         return gapStaticInstance;
     }
 

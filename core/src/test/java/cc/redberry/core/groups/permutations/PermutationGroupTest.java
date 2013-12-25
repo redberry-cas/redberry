@@ -41,7 +41,7 @@ import static org.junit.Assert.*;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public class PermutationGroupTest {
+public class PermutationGroupTest extends AbstractTestClass {
     @Test
     public void test1() {
         Permutation b, c;
@@ -382,6 +382,17 @@ public class PermutationGroupTest {
         PermutationGroup group = GapPrimitiveGroupsReader.readGroupFromGap("/home/stas/gap4r6/prim/grps/gps1.g", 34);
         System.out.println(group.order());
         PermutationGroup stab = group.setwiseStabilizer(5, 3);
+        System.out.println(stab.order());
+        System.out.println(group.order().divide(stab.order()));
+
+    }
+
+
+    @Test
+    public void testSetwiseStabilasizer1() {
+        PermutationGroup group = getGapInterface().primitiveGroup(12, 0);
+
+        PermutationGroup stab = group.setwiseStabilizer(0, 1, 2);
         System.out.println(stab.order());
         System.out.println(group.order().divide(stab.order()));
 
