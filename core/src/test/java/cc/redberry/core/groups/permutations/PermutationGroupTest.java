@@ -400,7 +400,7 @@ public class PermutationGroupTest extends AbstractTestClass {
         PermutationGroup stab = group.setwiseStabilizer(0, 1, 2);
         System.out.println(stab.order());
         System.out.println(group.order().divide(stab.order()));
-        assertTrue(group.isSubgroup(stab));
+        assertTrue(group.containsSubgroup(stab));
 
     }
 
@@ -430,7 +430,7 @@ public class PermutationGroupTest extends AbstractTestClass {
         assertTrue(!sym.isAlternating());
         assertTrue(sym.isTransitive());
         assertTrue(sym.isSymmetric());
-        assertTrue(sym.isSubgroup(alt));
+        assertTrue(sym.containsSubgroup(alt));
         Permutation[] tr = sym.leftCosetRepresentatives(alt);
         assertEquals(2, tr.length);
         Arrays.sort(tr);
@@ -460,7 +460,7 @@ public class PermutationGroupTest extends AbstractTestClass {
         PermutationGroup sw2 = alt.setwiseStabilizer(4, 5, 6, 7, 8, 9, 10);
         PermutationGroup intr = sw1.intersection(sw2);
         PermutationGroup sw3 = alt.setwiseStabilizer(4, 5, 6);
-        assertTrue(sw3.isSubgroup(intr));
+        assertTrue(sw3.containsSubgroup(intr));
     }
 
     @Test
@@ -469,12 +469,12 @@ public class PermutationGroupTest extends AbstractTestClass {
         PermutationGroup alt = PermutationGroupFactory.alternatingGroup(13);
         //setwise stabilizer in Alt(13)
         PermutationGroup altStab = alt.setwiseStabilizer(2, 3, 4);
-        assertTrue(alt.isSubgroup(altStab));
+        assertTrue(alt.containsSubgroup(altStab));
         //Sym(14)
         PermutationGroup sym = PermutationGroupFactory.symmetricGroup(14);
         //setwise stabilizer in Sym(14)
         PermutationGroup symStab = sym.setwiseStabilizer(5, 6, 1);
-        assertTrue(sym.isSubgroup(symStab));
+        assertTrue(sym.containsSubgroup(symStab));
         //direct product of stabilizers
         PermutationGroup prStab = altStab.directProduct(symStab);
         //direct product Alt(13)×Sym(14)
@@ -489,13 +489,13 @@ public class PermutationGroupTest extends AbstractTestClass {
         PermutationGroup intersection = prStab1.intersection(prStab2);
         //another larger setwise stabilizer
         PermutationGroup prStab3 = pr.setwiseStabilizer(4, 14);
-        assertTrue(prStab3.isSubgroup(intersection));
+        assertTrue(prStab3.containsSubgroup(intersection));
         //pointwise stabilizer
         PermutationGroup prStab4 = pr.pointwiseStabilizer(1, 2, 3, 4, 21, 22, 23);
         //union of subgroups
         PermutationGroup union = prStab1.union(prStab4);
-        assertTrue(union.isSubgroup(prStab1));
-        assertTrue(union.isSubgroup(prStab4));
+        assertTrue(union.containsSubgroup(prStab1));
+        assertTrue(union.containsSubgroup(prStab4));
         //left coset representatives of union in pr
         Permutation[] cosets = pr.leftCosetRepresentatives(union);
         assertEquals(pr.order().divide(union.order()), BigInteger.valueOf(cosets.length));
@@ -656,6 +656,29 @@ public class PermutationGroupTest extends AbstractTestClass {
 
         PermutationGroup nc = pg1.normalClosure(pg2);
         assertTrue(nc.equals(pg2));
+    }
+
+    @Test
+    public void testDerivedSubgroup1_WithGap() {
+        GapGroupsInterface gap = getGapInterface();
+        for (int degree = 4; degree < 50; ++degree) {
+            int nrPrimitiveGroups = gap.nrPrimitiveGroups(degree);
+            for (int i = 0; i < nrPrimitiveGroups; ++i) {
+                gap.evaluate("g:= PrimitiveGroup( " + degree + ", " + (i + 1) + ");");
+                PermutationGroup group = gap.primitiveGroup(degree, i);
+                PermutationGroup d = group.derivedSubgroup();
+                gap.evaluateRedberryGroup("rc", d.generators());
+                gap.evaluate("gc:= CommutatorSubgroup(g, g);");
+                assertTrue(gap.evaluateToBoolean("gc = rc;"));
+            }
+        }
+    }
+
+    @Test
+    public void testDerivedSubgroup2() {
+        PermutationGroup alt = PermutationGroupFactory.alternatingGroup(4);
+        assertEquals(BigInteger.valueOf(4), alt.derivedSubgroup().order());
+
     }
 
     private static PermutationGroup pointWiseStabilizerBruteForce(PermutationGroup pg, int[] points) {

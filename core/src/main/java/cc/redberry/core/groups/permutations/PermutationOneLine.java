@@ -128,6 +128,11 @@ public class PermutationOneLine implements Permutation {
     }
 
     @Override
+    public Permutation commutator(Permutation p) {
+        return inverse().composition(p.inverse(), this, p);
+    }
+
+    @Override
     public Permutation composition(final Permutation other) {
         if (permutation.length != other.degree())
             throw new IllegalArgumentException();
@@ -175,6 +180,35 @@ public class PermutationOneLine implements Permutation {
                     antisymmetry ^ a.antisymmetry() ^ b.antisymmetry(), result);
         } catch (InconsistentGeneratorsException ex) {
             throw new InconsistentGeneratorsException(this + " and " + a + " and " + b);
+        }
+    }
+
+    @Override
+    public Permutation composition(Permutation a, Permutation b, Permutation c) {
+        if (permutation.length != a.degree() || permutation.length != b.degree())
+            throw new IllegalArgumentException();
+
+        if (this.isIdentity)
+            return a.composition(b, c);
+        if (a.isIdentity())
+            return composition(b, c);
+        if (b.isIdentity())
+            return composition(a, c);
+        if (c.isIdentity())
+            return composition(b, c);
+
+        final int[] result = new int[permutation.length];
+        boolean resultIsIdentity = true;
+        for (int i = permutation.length - 1; i >= 0; --i) {
+            result[i] = c.newIndexOf(b.newIndexOf(a.newIndexOf(permutation[i])));
+            resultIsIdentity &= result[i] == i;
+        }
+
+        try {
+            return new PermutationOneLine(resultIsIdentity,
+                    antisymmetry ^ a.antisymmetry() ^ b.antisymmetry() ^ c.antisymmetry(), result);
+        } catch (InconsistentGeneratorsException ex) {
+            throw new InconsistentGeneratorsException(this + " and " + a + " and " + b + " and " + c);
         }
     }
 

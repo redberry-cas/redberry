@@ -27,7 +27,6 @@ import cc.redberry.core.context.CC;
 import cc.redberry.core.utils.ArraysUtils;
 import cc.redberry.core.utils.Indicator;
 import cc.redberry.core.utils.MathUtils;
-import com.sun.jmx.remote.internal.ArrayQueue;
 import gnu.trove.set.hash.TIntHashSet;
 
 import java.math.BigInteger;
@@ -277,10 +276,10 @@ public final class PermutationGroup
         if (subgroup.isTrivial())
             return subgroup;
 
-        if (isAlternating() && !order().equals(BigInteger.valueOf(4)))
+        if (isAlternating() && degree > 4)
             return this;
 
-        if (isSymmetric() && !order().equals(BigInteger.valueOf(4))) {
+        if (isSymmetric() && degree != 4) {
             //in this case the only nontrivial normal subgroup is Alt(degree)
             //check that all generators of subgroups are even:
             for (Permutation p : subgroup.generators)
@@ -329,6 +328,40 @@ public final class PermutationGroup
         if (globalAdded)
             AlgorithmsBase.SchreierSimsAlgorithm(closure);
         return new PermutationGroup(asBSGSList(closure), true);
+    }
+
+    /**
+     * Returns a commutator of this and specified group.
+     *
+     * @param group permutation group
+     * @return commutator of this and specified group
+     */
+    public PermutationGroup commutator(PermutationGroup group) {
+        //commutator is normal closure of set [generators, group.generators] in <generators,group.generators>.
+        ArrayList<Permutation> commutator = new ArrayList<>();
+        Permutation c;
+        for (Permutation a : generators)
+            for (Permutation b : group.generators) {
+                c = a.commutator(b);
+                if (!c.isIdentity())
+                    commutator.add(c);
+            }
+        if (commutator.isEmpty())
+            return new PermutationGroup(createEmptyBSGS(degree), true);
+        return union(group).normalClosure(new PermutationGroup(commutator));
+    }
+
+    /**
+     * Returns a derived subgroup, i.e. commutator subgroup of this with itself.
+     *
+     * @return derived subgroup, i.e. commutator subgroup of this with itself
+     */
+    public PermutationGroup derivedSubgroup() {
+        if (isSymmetric())
+            return PermutationGroupFactory.alternatingGroup(degree);
+        if (isAlternating() && degree > 4)
+            return this;
+        return commutator(this);
     }
 
     /**
@@ -508,7 +541,7 @@ public final class PermutationGroup
      * @return true if specified group is a subgroup of this group
      * @throws IllegalArgumentException if {@code subgroup.degree() != this.degree() }
      */
-    public boolean isSubgroup(PermutationGroup subgroup) {
+    public boolean containsSubgroup(PermutationGroup subgroup) {
         if (subgroup.order().compareTo(order()) > 0)
             return false;
         return membershipTest(subgroup.generators());
@@ -551,14 +584,16 @@ public final class PermutationGroup
     public PermutationGroup union(PermutationGroup group) {
         checkDegree(group.degree);
 
+        if (this == group)
+            return this;
         if (isTrivial())
             return group;
         if (group.isTrivial())
             return this;
 
-        if (isSubgroup(group))
+        if (containsSubgroup(group))
             return this;
-        if (group.isSubgroup(this))
+        if (group.containsSubgroup(this))
             return group;
 
         int[] base = MathUtils.intSetUnion(getBase(), group.getBase());

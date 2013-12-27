@@ -57,6 +57,14 @@ public interface Permutation extends Comparable<Permutation> {
     public Permutation conjugate(Permutation p);
 
     /**
+     * Returns a commutator of this and specified permutation, i.e. this^-1 * p^-1 * this * p.
+     *
+     * @param p permutation
+     * @return a commutator of this and specified permutation, i.e. this^-1 * p^-1 * this * p
+     */
+    public Permutation commutator(Permutation p);
+
+    /**
      * Returns the image of specified set under this permutation.
      *
      * @param set set
@@ -103,6 +111,20 @@ public interface Permutation extends Comparable<Permutation> {
      *                                         permutation parity)
      */
     public Permutation composition(Permutation a, Permutation b);
+
+    /**
+     * Returns the result of  {@code this * a * b * c}. Applying the resulting permutation is equivalent to applying
+     * {@code c} after {@code b} after {@code a} after {@code this}.
+     *
+     * @param a other permutation
+     * @param b other permutation
+     * @param c other permutation
+     * @return the result of  {@code this * a * b * c}
+     * @throws IllegalArgumentException        if {@code a.degree() != this.degree() || b.degree() != this.degree() || c.degree() != this.degree()}
+     * @throws InconsistentGeneratorsException if the result of composition is inconsistent symmetry (antisymmetry with odd
+     *                                         permutation parity)
+     */
+    public Permutation composition(Permutation a, Permutation b, Permutation c);
 
     /**
      * Returns the result of  {@code this * other.inverse()}. Applying the resulting permutation is equivalent
