@@ -175,6 +175,16 @@ public class PermutationsTest {
         assertEquals(1, Permutations.parity(p));
     }
 
+    @Test
+    public void testConvert() {
+        for (int i = 0; i < 1000; ++i) {
+            int degree = 1 + CC.getRandomGenerator().nextInt(100);
+            int[] p = Permutations.randomPermutation(degree);
+            int[][] cycles = Permutations.convertOneLineToCycles(p);
+            Assert.assertArrayEquals(p, Permutations.convertCyclesToOneLine(degree, cycles));
+        }
+    }
+
     private static void assertOrbits(int[][] orbits, int[] positions, int degree, List<Permutation> generators) {
         for (int i = 0; i < degree; ++i) {
             int[] expected = Permutations.getOrbitList(generators, i).toArray();

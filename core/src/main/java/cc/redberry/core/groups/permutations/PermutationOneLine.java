@@ -31,31 +31,19 @@ import java.util.Arrays;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  * @see Permutation
- * @see PermutationCycles
  */
 public class PermutationOneLine implements Permutation {
     final int[] permutation;
     final boolean isIdentity;
     final boolean antisymmetry;
 
-    /**
-     * Converts given permutation to one-line notation
-     *
-     * @param permutation permutation
-     */
-    public PermutationOneLine(Permutation permutation) {
-        if (permutation instanceof PermutationOneLine) {
-            PermutationOneLine p = ((PermutationOneLine) permutation);
-            this.permutation = p.permutation;
-            this.isIdentity = p.isIdentity;
-            this.antisymmetry = p.antisymmetry;
-        } else {
-            this.permutation = new int[permutation.degree()];
-            for (int i = this.permutation.length - 1; i >= 0; --i)
-                this.permutation[i] = permutation.newIndexOf(i);
-            this.antisymmetry = permutation.antisymmetry();
-            this.isIdentity = permutation.isIdentity();
-        }
+
+    public PermutationOneLine(boolean antisymmetry, int degree, int[][] cycles) {
+        this(antisymmetry, Permutations.convertCyclesToOneLine(degree, cycles));
+    }
+
+    public PermutationOneLine(int degree, int[][] cycles) {
+        this(Permutations.convertCyclesToOneLine(degree, cycles));
     }
 
     /**
@@ -102,6 +90,11 @@ public class PermutationOneLine implements Permutation {
     }
 
     @Override
+    public boolean antisymmetry() {
+        return antisymmetry;
+    }
+
+    @Override
     public int[] oneLine() {
         return permutation.clone();
     }
@@ -130,8 +123,8 @@ public class PermutationOneLine implements Permutation {
     }
 
     @Override
-    public boolean antisymmetry() {
-        return antisymmetry;
+    public Permutation conjugate(Permutation p) {
+        return inverse().composition(p, this);
     }
 
     @Override

@@ -157,6 +157,7 @@ public class PermutationGroupTest extends AbstractTestClass {
         c = new PermutationOneLine(0, 2, 1);
 
         PermutationGroup pg = PermutationGroupFactory.create(b, c);
+        pg.order();
     }
 
     @Test
@@ -196,7 +197,7 @@ public class PermutationGroupTest extends AbstractTestClass {
             ++inconsistentGeneratorsCount;
 
             try {
-                PermutationGroupFactory.create(permutations.toArray(new Permutation[0]));
+                PermutationGroupFactory.create(permutations.toArray(new Permutation[0])).order();
             } catch (InconsistentGeneratorsException e) {
                 continue;
             }
@@ -628,6 +629,34 @@ public class PermutationGroupTest extends AbstractTestClass {
         System.out.println("Not null " + notNullStat);
     }
 
+    @Test
+    public void testNormalClosure1() throws Exception {
+        PermutationGroup s3 = PermutationGroupFactory.symmetricGroup(3);
+        PermutationGroup a3 = PermutationGroupFactory.alternatingGroup(3);
+        assertTrue(s3.normalClosure(a3).equals(a3));
+    }
+
+    @Test
+    public void testNormalClosure2() throws Exception {
+        PermutationGroup s3 = PermutationGroupFactory.symmetricGroup(3);
+        PermutationGroup a3 = PermutationGroupFactory.alternatingGroup(3);
+        assertTrue(s3.normalClosure(a3).equals(a3));
+    }
+
+    @Test
+    public void testNormalClosure() {
+        int[][] a = {{1, 2}};
+        int[][] b = {{1, 2, 3, 4, 5, 6, 7}};
+        int[][] c = {{1, 2, 3}};
+        int[][] d = {{3, 4, 5, 6, 7}};
+        PermutationGroup pg1 = PermutationGroupFactory.create(
+                new PermutationOneLine(8, a), new PermutationOneLine(8, b));
+        PermutationGroup pg2 = PermutationGroupFactory.create(
+                new PermutationOneLine(8, c), new PermutationOneLine(8, d));
+
+        PermutationGroup nc = pg1.normalClosure(pg2);
+        assertTrue(nc.equals(pg2));
+    }
 
     private static PermutationGroup pointWiseStabilizerBruteForce(PermutationGroup pg, int[] points) {
         PermutationGroup stab = pg;

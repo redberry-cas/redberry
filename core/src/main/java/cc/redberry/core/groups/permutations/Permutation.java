@@ -49,6 +49,14 @@ public interface Permutation extends Comparable<Permutation> {
     public int newIndexOf(int i);
 
     /**
+     * Returns specified element conjugated by this, i.e. this^-1 * p * this
+     *
+     * @param p permutation
+     * @return specified element conjugated by this, i.e. this^-1 * p * this
+     */
+    public Permutation conjugate(Permutation p);
+
+    /**
      * Returns the image of specified set under this permutation.
      *
      * @param set set

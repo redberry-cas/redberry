@@ -108,7 +108,7 @@ final class BruteForcePermutationIterator implements Iterator<PermutationOneLine
     }
 
     private PermutationOneLine tryPair(PermutationOneLine p0, PermutationOneLine p1) {
-        PermutationOneLine composition = new PermutationOneLine(p0.composition(p1));
+        PermutationOneLine composition = (PermutationOneLine) p0.composition(p1);
         PermutationOneLine setComposition = set.ceiling(composition);
         if (setComposition != null && JUST_PERMUTATION_COMPARATOR.compare(setComposition, composition) == 0)
             if (setComposition.equals(composition))

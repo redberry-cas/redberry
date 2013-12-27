@@ -23,9 +23,11 @@
 package cc.redberry.core.groups.permutations;
 
 import cc.redberry.core.combinatorics.IntTuplesPort;
+import cc.redberry.core.context.CC;
 import cc.redberry.core.utils.ArraysUtils;
 import cc.redberry.core.utils.Indicator;
 import cc.redberry.core.utils.MathUtils;
+import com.sun.jmx.remote.internal.ArrayQueue;
 import gnu.trove.set.hash.TIntHashSet;
 
 import java.math.BigInteger;
@@ -262,6 +264,71 @@ public final class PermutationGroup
     public InducedOrdering ordering() {
         ensureBSGSIsInitialized();
         return ordering;
+    }
+
+    /**
+     * Calculates normal closure of specified subgroup. The algorithm follows NORMALCLOSURE (randomized version)
+     * described in Sec. 3.3.2 in [Holt05].
+     *
+     * @param subgroup subgroup of this
+     * @return normal closure
+     */
+    public PermutationGroup normalClosure(PermutationGroup subgroup) {
+        if (subgroup.isTrivial())
+            return subgroup;
+
+        if (isAlternating() && !order().equals(BigInteger.valueOf(4)))
+            return this;
+
+        if (isSymmetric() && !order().equals(BigInteger.valueOf(4))) {
+            //in this case the only nontrivial normal subgroup is Alt(degree)
+            //check that all generators of subgroups are even:
+            for (Permutation p : subgroup.generators)
+                if (p.parity() == 1)
+                    return this; //subgroup contains even permutations
+            return PermutationGroupFactory.alternatingGroup(degree);
+        }
+        //resulting BSGS
+        ArrayList<BSGSCandidateElement> closure = subgroup.getBSGSCandidate();
+        //random source of this
+        ArrayList<Permutation> randomSource = new ArrayList<>(generators());
+        RandomPermutation.randomness(randomSource, 10, 20, CC.getRandomGenerator());
+
+        double CL = 1 - 1E-6;
+        boolean completed = false, added, globalAdded = false;
+        while (!completed) {
+            //random source of closure
+            ArrayList<Permutation> closureSource = new ArrayList<>(closure.get(0).stabilizerGenerators);
+            RandomPermutation.randomness(closureSource, 10, 10, CC.getRandomGenerator());
+
+            added = false;
+            for (int i = 0; i < 10; ++i) {
+                //adding some random conjugation
+                Permutation c = RandomPermutation.random(randomSource).conjugate(
+                        RandomPermutation.random(closureSource));
+
+                if (!AlgorithmsBase.membershipTest(closure, c)) {
+                    closure.get(0).stabilizerGenerators.add(c);
+                    added = true;
+                    globalAdded = true;
+                }
+            }
+            //We use random version of Schreier-Sims; although constructed BSGS is not guaranteed to be a real BSGS,
+            // if some element belongs to closure, the the result of membership test will be guaranteed true (nos such
+            // guarantee in the case of false).
+            if (added)
+                AlgorithmsBase.RandomSchreierSimsAlgorithm(closure, CL, CC.getRandomGenerator());
+            //testing closure
+            completed = true;
+            for (Permutation generator : generators)
+                for (Permutation cGenerator : closure.get(0).stabilizerGenerators)
+                    if (!AlgorithmsBase.membershipTest(closure, generator.conjugate(cGenerator)))
+                        completed = false;
+        }
+        //check BSGS
+        if (globalAdded)
+            AlgorithmsBase.SchreierSimsAlgorithm(closure);
+        return new PermutationGroup(asBSGSList(closure), true);
     }
 
     /**

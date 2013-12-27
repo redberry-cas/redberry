@@ -93,7 +93,7 @@ public final class Permutations {
      *
      * @param permutation array to be tested
      * @return {@code true} if specified array satisfies the one-line notation for permutations and if sign is true
-     *         that its order is even
+     * that its order is even
      */
     public static boolean testPermutationCorrectness(int[] permutation, boolean sign) {
         return testPermutationCorrectness(permutation) && (sign ? !orderOfPermutationIsOdd(permutation) : true);
@@ -104,7 +104,7 @@ public final class Permutations {
      *
      * @param permutation array to be tested
      * @return {@code true} if specified array satisfies the one-line notation for permutations and {@code false} if
-     *         not
+     * not
      */
     public static boolean testPermutationCorrectness(int[] permutation) {
         int length = permutation.length;
@@ -348,6 +348,59 @@ public final class Permutations {
     public static int[] randomPermutation(final int n) {
         return randomPermutation(n, CC.getRandomGenerator());
     }
+
+    /**
+     * Converts cycles to one-line notation.
+     *
+     * @param degree degree of permutation
+     * @param cycles disjoint cycles
+     * @return permutation written in one-line notation
+     */
+    public static int[] convertCyclesToOneLine(final int degree, final int[][] cycles) {
+        final int[] permutation = new int[degree];
+        for (int i = 1; i < degree; ++i)
+            permutation[i] = i;
+        for (int[] cycle : cycles) {
+            if (cycle.length == 0)
+                continue;
+            if (cycle.length == 1)
+                throw new IllegalArgumentException("Illegal use of cycle notation: " + Arrays.toString(cycle));
+            for (int k = 0, s = cycle.length - 1; k < s; ++k)
+                permutation[cycle[k]] = cycle[k + 1];
+            permutation[cycle[cycle.length - 1]] = cycle[0];
+        }
+        return permutation;
+    }
+
+    /**
+     * Converts permutation written in one-line notation to disjoint cycles notation.
+     *
+     * @param permutation permutation written in one-line notation
+     * @return permutation written in disjoint cycles notation
+     */
+    public static int[][] convertOneLineToCycles(final int[] permutation) {
+        ArrayList<int[]> cycles = new ArrayList<>();
+        BitArray seen = new BitArray(permutation.length);
+        int counter = 0;
+        while (counter < permutation.length) {
+            int start = seen.nextZeroBit(0);
+            if (permutation[start] == start) {
+                ++counter;
+                seen.set(start);
+                continue;
+            }
+            IntArrayList cycle = new IntArrayList();
+            while (!seen.get(start)) {
+                seen.set(start);
+                ++counter;
+                cycle.add(start);
+                start = permutation[start];
+            }
+            cycles.add(cycle.toArray());
+        }
+        return cycles.toArray(new int[cycles.size()][]);
+    }
+
 
     /**
      * Throws exception if p.length() != size.
