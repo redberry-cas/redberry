@@ -541,7 +541,7 @@ public class AlgorithmsBacktrackTest extends AbstractTestClass {
         AlgorithmsBacktrack.subgroupSearch(bsgs, subgroup, rw, rw);
 
         ArrayList<Permutation> expected = new ArrayList<>(calculateOrder(subgroup).intValue());
-        Iterator<Permutation> allIterator = new PermutationGroup(asBSGSList(bsgs)).iterator();
+        Iterator<Permutation> allIterator = new PermutationGroup(asBSGSList(bsgs), true).iterator();
         Permutation c;
         while (allIterator.hasNext()) {
             c = allIterator.next();
@@ -550,7 +550,7 @@ public class AlgorithmsBacktrackTest extends AbstractTestClass {
         }
 
         ArrayList<Permutation> actual = new ArrayList<>(calculateOrder(subgroup).intValue());
-        allIterator = new PermutationGroup(asBSGSList(subgroup)).iterator();
+        allIterator = new PermutationGroup(asBSGSList(subgroup), true).iterator();
         while (allIterator.hasNext()) {
             c = allIterator.next();
             actual.add(c);
@@ -560,7 +560,7 @@ public class AlgorithmsBacktrackTest extends AbstractTestClass {
         Collections.sort(actual);
 
         assertEquals(expected, actual);
-        return new PermutationGroup(AlgorithmsBase.asBSGSList(subgroup));
+        return new PermutationGroup(AlgorithmsBase.asBSGSList(subgroup), true);
     }
 
 }

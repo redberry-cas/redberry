@@ -393,12 +393,13 @@ public class PermutationGroupTest extends AbstractTestClass {
     }
 
     @Test
-    public void testSetwiseStabilasizer1_WithGap() {
+    public void testSetwiseStabilizer1_WithGap() {
         PermutationGroup group = getGapInterface().primitiveGroup(12, 0);
 
         PermutationGroup stab = group.setwiseStabilizer(0, 1, 2);
         System.out.println(stab.order());
         System.out.println(group.order().divide(stab.order()));
+        assertTrue(group.isSubgroup(stab));
 
     }
 

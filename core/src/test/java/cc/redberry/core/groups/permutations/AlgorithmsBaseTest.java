@@ -270,8 +270,8 @@ public class AlgorithmsBaseTest extends AbstractTestClass {
             SchreierSimsAlgorithm(BSGSCandidate);
             SchreierSimsAlgorithm(BSGSCandidateCopy);
 
-            Assert.assertTrue(new PermutationGroup(AlgorithmsBase.asBSGSList(BSGSCandidate)).equals(
-                    new PermutationGroup(AlgorithmsBase.asBSGSList(BSGSCandidateCopy))));
+            Assert.assertTrue(new PermutationGroup(AlgorithmsBase.asBSGSList(BSGSCandidate), true).equals(
+                    new PermutationGroup(AlgorithmsBase.asBSGSList(BSGSCandidateCopy), true)));
         }
         System.out.println("Removed strong generators statistics:");
         System.out.println(removed);

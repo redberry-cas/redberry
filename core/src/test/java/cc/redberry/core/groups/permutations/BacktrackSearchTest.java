@@ -370,7 +370,7 @@ public class BacktrackSearchTest extends AbstractTestClass {
 
 
         ArrayList<Permutation> expected = new ArrayList<>(order);
-        Iterator<Permutation> allIterator = new PermutationGroup(bsgs).iterator();
+        Iterator<Permutation> allIterator = new PermutationGroup(bsgs, true).iterator();
         Permutation c;
         while (allIterator.hasNext()) {
             c = allIterator.next();

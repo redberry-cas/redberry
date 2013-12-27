@@ -91,8 +91,7 @@ public class PermutationsTestUtils {
         //empty initial subgroup
         ArrayList<BSGSCandidateElement> subgroup = new ArrayList<>();
         AlgorithmsBacktrack.subgroupSearch(bsgs, subgroup, rw, rw);
-        return new PermutationGroup(
-                Collections.unmodifiableList(AlgorithmsBase.asBSGSList(subgroup)));
+        return new PermutationGroup(AlgorithmsBase.asBSGSList(subgroup), true);
     }
 
     public static void assertHaveNoIntersections(Permutation[] a, Permutation[] b) {

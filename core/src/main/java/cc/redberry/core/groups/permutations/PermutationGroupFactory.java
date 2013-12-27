@@ -41,27 +41,14 @@ public final class PermutationGroupFactory {
     public static PermutationGroup create(List<Permutation> generators) {
         if (generators.isEmpty())
             throw new IllegalArgumentException("Now generators specified.");
-        //todo Alt and Sym checks
-        List<BSGSElement> BSGSList = AlgorithmsBase.createBSGSList(generators);
-        if (BSGSList.isEmpty())
-            return new PermutationGroup(AlgorithmsBase.createEmptyBSGS(generators.get(0).degree()));
-        return new PermutationGroup(Collections.unmodifiableList(BSGSList));
-    }
-
-    public static PermutationGroup createFromBSGS(List<BSGSElement> bsgs) {
-        if (bsgs.isEmpty())
-            throw new IllegalArgumentException("Now generators specified.");
-
-        //todo Alt and Sym checks
-
-        return new PermutationGroup(Collections.unmodifiableList(bsgs));
+        return new PermutationGroup(generators);
     }
 
     public static PermutationGroup symmetricGroup(int degree) {
-        return new PermutationGroup(AlgorithmsBase.createSymmetricGroupBSGS(degree));
+        return new PermutationGroup(AlgorithmsBase.createSymmetricGroupBSGS(degree), true);
     }
 
     public static PermutationGroup alternatingGroup(int degree) {
-        return new PermutationGroup(AlgorithmsBase.createAlternatingGroupBSGS(degree));
+        return new PermutationGroup(AlgorithmsBase.createAlternatingGroupBSGS(degree), true);
     }
 }
