@@ -26,6 +26,7 @@ import cc.redberry.core.combinatorics.IntTuplesPort;
 import cc.redberry.core.context.CC;
 import cc.redberry.core.utils.ArraysUtils;
 import cc.redberry.core.utils.Indicator;
+import cc.redberry.core.utils.IntComparator;
 import cc.redberry.core.utils.MathUtils;
 import gnu.trove.set.hash.TIntHashSet;
 import org.apache.commons.math3.primes.Primes;
@@ -77,6 +78,13 @@ public final class PermutationGroup
      * Ordering induced by base
      */
     private InducedOrdering ordering = null;
+
+    /**
+     * @param generators
+     */
+    public PermutationGroup(Permutation... generators) {
+        this(Arrays.asList(generators));
+    }
 
     /**
      * @param generators
@@ -813,6 +821,101 @@ public final class PermutationGroup
         public void remove() {
             throw new UnsupportedOperationException("Illegal operation.");
         }
+    }
+
+    public PermutationGroup centralizerOf(final PermutationGroup subgroup) {
+        IntComparator comparator = new IntComparator() {
+            @Override
+            public int compare(int a, int b) {
+                if (subgroup.positionsInOrbits[a] == subgroup.positionsInOrbits[b])
+                    return 0;
+                return -Integer.compare(
+                        subgroup.orbits[subgroup.positionsInOrbits[a]].length,
+                        subgroup.orbits[subgroup.positionsInOrbits[b]].length);
+            }
+        };
+        int[] base = getBase();
+        ArraysUtils.quickSort(base, comparator);
+
+        final ArrayList<BSGSCandidateElement> group_bsgs = getBSGSCandidate();
+        AlgorithmsBase.rebase(group_bsgs, base);
+
+        final ArrayList<BSGSCandidateElement> subgroup_bsgs = subgroup.getBSGSCandidate();
+        AlgorithmsBacktrack.rebaseWithRedundancy(subgroup_bsgs, base, degree);
+
+        final Permutation[] mappings = new Permutation[base.length - 1];
+        for (int i = 1; i < base.length; ++i) {
+            if (subgroup.positionsInOrbits[base[i]] != subgroup.positionsInOrbits[base[i - 1]])
+                continue;
+
+            if (subgroup_bsgs.get(i - 1).belongsToOrbit(base[i]))
+                mappings[i - 1] = subgroup_bsgs.get(i - 1).getTransversalOf(base[i]);
+            else
+                mappings[i - 1] = subgroup.mapping(new int[]{base[i - 1]}, new int[]{base[i]}).take();
+        }
+
+        CentralizerSearchTest centralizerSearch = new CentralizerSearchTest(group_bsgs, subgroup_bsgs,
+                subgroup.orbits, subgroup.positionsInOrbits, base, mappings);
+
+        ArrayList<BSGSCandidateElement> centralizer;
+        if (subgroup.generators().size() == 1)
+            centralizer = AlgorithmsBase.clone(subgroup_bsgs);
+        else
+            centralizer = new ArrayList<>();
+        AlgorithmsBacktrack.subgroupSearch(group_bsgs, centralizer, centralizerSearch, centralizerSearch);
+        return new PermutationGroup(asBSGSList(centralizer), true);
+    }
+
+    private static class CentralizerSearchTest
+            implements BacktrackSearchTestFunction, Indicator<Permutation> {
+        final List<? extends BSGSElement> group_bsgs, subgroup_bsgs;
+        final int[][] subgroup_orbits;
+        final int[] subgroup_positionsInOrbits;
+        final Permutation[] mappings;
+        final int[] group_base;
+
+        private CentralizerSearchTest(List<? extends BSGSElement> group_bsgs,
+                                      List<? extends BSGSElement> subgroup_bsgs,
+                                      int[][] subgroup_orbits,
+                                      int[] subgroup_positionsInOrbits,
+                                      int[] group_base,
+                                      Permutation[] mappings) {
+            this.group_bsgs = group_bsgs;
+            this.subgroup_bsgs = subgroup_bsgs;
+            this.subgroup_orbits = subgroup_orbits;
+            this.subgroup_positionsInOrbits = subgroup_positionsInOrbits;
+            this.group_base = group_base;
+            this.mappings = mappings;
+        }
+
+
+        @Override
+        public boolean test(Permutation permutation, int level) {
+            if (level == 0)
+                return true;
+            //find previous base point that lies in same orbit of subgroup
+            if (subgroup_positionsInOrbits[group_base[level - 1]] !=
+                    subgroup_positionsInOrbits[group_base[level]])
+                return true;
+            Permutation mapping = mappings[level - 1];
+            int expected = mapping.newIndexOf(permutation.newIndexOf(group_base[level - 1]));
+            return permutation.newIndexOf(group_base[level]) == expected;
+        }
+
+        @Override
+        public boolean is(Permutation permutation) {
+            if (permutation.isIdentity())
+                return false;
+            for (Permutation p : subgroup_bsgs.get(0).stabilizerGenerators)
+                if (!p.commutator(permutation).isIdentity())
+                    return false;
+            return true;
+        }
+    }
+
+    private Permutation someMapping(int from, int to) {
+        assert positionsInOrbits[from] == positionsInOrbits[to];
+        return null;
     }
 
     /**

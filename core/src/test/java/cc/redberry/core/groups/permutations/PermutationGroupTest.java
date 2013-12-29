@@ -22,8 +22,11 @@
  */
 package cc.redberry.core.groups.permutations;
 
+import cc.redberry.core.combinatorics.Combinatorics;
 import cc.redberry.core.context.CC;
 import cc.redberry.core.number.NumberUtils;
+import cc.redberry.core.utils.ArraysUtils;
+import cc.redberry.core.utils.IntComparator;
 import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.random.Well1024a;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
@@ -731,6 +734,62 @@ public class PermutationGroupTest extends AbstractTestClass {
                 assertEquals(gap.evaluateToBoolean("IsNaturalAlternatingGroup(g);"), p.isAlternating());
             }
         }
+    }
+
+    @Test
+    public void testSortOrbitsLengths1() throws Exception {
+        final int[] orbits = {
+                0,
+                1, 1,
+                2, 2, 2,
+                3, 3, 3, 3,
+                4, 4, 4, 4, 4,
+                5, 5, 5, 5, 5, 5,
+                6, 6, 6, 6, 6, 6, 6,
+                7, 7, 7, 7, 7, 7, 7, 7
+        };
+        Permutations.shuffle(orbits);
+        final int[] sizes = {1, 2, 4, 5, 6, 7, 8, 9};
+        IntComparator comparator = new IntComparator() {
+            @Override
+            public int compare(int a, int b) {
+                if (orbits[a] == orbits[b])
+                    return 0;
+                return -Integer.compare(sizes[orbits[a]], sizes[orbits[b]]);
+            }
+        };
+        int[] arr = new int[orbits.length];
+        for (int i = 1; i < arr.length; ++i)
+            arr[i] = i;
+        ArraysUtils.quickSort(arr, comparator);
+        for (int i = 1; i < arr.length; ++i)
+            assertTrue(sizes[orbits[arr[i]]] <= sizes[orbits[arr[i - 1]]]);
+    }
+
+    @Test
+    public void testCentralizer1() throws Exception {
+        PermutationGroup s4 = PermutationGroupFactory.symmetricGroup(4);
+
+        PermutationGroup s2 = new PermutationGroup(new PermutationOneLine(1, 0, 2, 3));
+        PermutationGroup v4 = s4.centralizerOf(s2);
+        PermutationGroup expected = new PermutationGroup(
+                new PermutationOneLine(1, 0, 2, 3),
+                new PermutationOneLine(0, 1, 3, 2)
+        );
+        assertTrue(expected.equals(v4));
+    }
+
+    @Test
+    public void testCentralizer2() throws Exception {
+        PermutationGroup s4 = PermutationGroupFactory.symmetricGroup(10);
+
+        PermutationGroup s2 = new PermutationGroup(
+                new PermutationOneLine(1, 0, 2, 3, 4, 5, 6, 7, 8, 9),
+                new PermutationOneLine(8, 6, 2, 4, 3, 5, 0, 7, 1, 9)
+                );
+        PermutationGroup v4 = s4.centralizerOf(s2);
+        System.out.println(v4);
+        System.out.println(v4.order());
     }
 
     private static PermutationGroup pointWiseStabilizerBruteForce(PermutationGroup pg, int[] points) {

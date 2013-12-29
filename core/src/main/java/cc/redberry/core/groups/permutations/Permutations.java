@@ -430,6 +430,27 @@ public final class Permutations {
         return sizes.toArray();
     }
 
+    /**
+     * Randomly permutes the specified list.
+     *
+     * @param a - the array to be shuffled.
+     */
+    public static void shuffle(int[] a) {
+        shuffle(a, CC.getRandomGenerator());
+    }
+
+
+    /**
+     * Randomly permute the specified list using the specified source of randomness.
+     *
+     * @param a   - the array to be shuffled.
+     * @param rnd - the source of randomness to use to shuffle the list.
+     */
+    public static void shuffle(int[] a, RandomGenerator rnd) {
+        for (int i = a.length; i > 1; --i)
+            ArraysUtils.swap(a, i - 1, rnd.nextInt(i));
+    }
+
 
     /**
      * Throws exception if p.length() != size.

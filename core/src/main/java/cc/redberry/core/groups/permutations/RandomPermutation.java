@@ -50,7 +50,7 @@ public final class RandomPermutation {
     /**
      * Brings randomness to a list of generators: the source list will be extended and filled by an equivalent set
      * of generators generated randomly; commonly it should be used in a combination with
-     * {@link #random(java.util.List, long)} to produce almost uniform distributed permutations in a group defined
+     * {@link #random(java.util.List, org.apache.commons.math3.random.RandomGenerator)} to produce almost uniform distributed permutations in a group defined
      * by corresponding set of generators. This method is a variant of PREINTIALIZE described
      * in Sec. 3.2.2 in [Holt05].
      *
@@ -66,7 +66,7 @@ public final class RandomPermutation {
     /**
      * Brings randomness to a list of generators: the source list will be extended and filled by an equivalent set
      * of generators generated randomly; commonly it should be used in a combination with
-     * {@link #random(java.util.List, long)} to produce almost uniform distributed permutations in a group defined
+     * {@link #random(java.util.List, org.apache.commons.math3.random.RandomGenerator)} to produce almost uniform distributed permutations in a group defined
      * by corresponding set of generators. This method is a variant of PREINTIALIZE described
      * in Sec. 3.2.2 in [Holt05].
      *
