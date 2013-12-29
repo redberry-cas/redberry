@@ -28,6 +28,8 @@ import cc.redberry.core.utils.ArraysUtils;
 import cc.redberry.core.utils.Indicator;
 import cc.redberry.core.utils.MathUtils;
 import gnu.trove.set.hash.TIntHashSet;
+import org.apache.commons.math3.primes.Primes;
+import org.apache.commons.math3.util.FastMath;
 
 import java.math.BigInteger;
 import java.util.*;
@@ -190,18 +192,18 @@ public final class PermutationGroup
     }
 
     /**
-     * Returns true if this group is transitive.
+     * Returns true if this group is transitive and false otherwise.
      *
-     * @return true if this group is transitive
+     * @return true if this group is transitive and false otherwise
      */
     public boolean isTransitive() {
         return orbits().length == 1;
     }
 
     /**
-     * Returns true if this group is trivial.
+     * Returns true if this group is trivial and false otherwise.
      *
-     * @return true if this group is trivial
+     * @return true if this group is trivial and false otherwise
      */
     public boolean isTrivial() {
         boolean trivial = true;
@@ -212,6 +214,49 @@ public final class PermutationGroup
             }
         return trivial;
     }
+
+    Boolean isAbelian = null;
+
+    /**
+     * Returns true if this group is abelian and false otherwise.
+     *
+     * @return true if this group is abelian and false otherwise.
+     */
+    public boolean isAbelian() {
+        if (isAbelian != null)
+            return isAbelian.booleanValue();
+
+        isAbelian = true;
+        List<Permutation> generators = generators();
+        final int size = generators.size();
+        out:
+        for (int i = 0; i < size; ++i)
+            for (int j = i + 1; j < size; ++j)
+                if (!generators.get(i).commutator(generators.get(j)).isIdentity()) {
+                    isAbelian = false;
+                    break out;
+                }
+
+        return isAbelian.booleanValue();
+    }
+
+    List<Permutation> randomSource = null;
+
+    /**
+     * Returns a random source of permutations in this group.
+     *
+     * @return a random source of permutations in this group
+     * @see cc.redberry.core.groups.permutations.RandomPermutation#random(java.util.List, org.apache.commons.math3.random.RandomGenerator)
+     */
+    public List<Permutation> randomSource() {
+        if (randomSource == null) {
+            ArrayList<Permutation> randomSource = new ArrayList<>(generators());
+            RandomPermutation.randomness(randomSource, 10, 20, CC.getRandomGenerator());
+            return this.randomSource = randomSource;
+        }
+        return randomSource;
+    }
+
 
     ////////////////////// METHODS THAT USE BSGS /////////////////////////
 
@@ -266,105 +311,6 @@ public final class PermutationGroup
     }
 
     /**
-     * Calculates normal closure of specified subgroup. The algorithm follows NORMALCLOSURE (randomized version)
-     * described in Sec. 3.3.2 in [Holt05].
-     *
-     * @param subgroup subgroup of this
-     * @return normal closure
-     */
-    public PermutationGroup normalClosure(PermutationGroup subgroup) {
-        if (subgroup.isTrivial())
-            return subgroup;
-
-        if (isAlternating() && degree > 4)
-            return this;
-
-        if (isSymmetric() && degree != 4) {
-            //in this case the only nontrivial normal subgroup is Alt(degree)
-            //check that all generators of subgroups are even:
-            for (Permutation p : subgroup.generators)
-                if (p.parity() == 1)
-                    return this; //subgroup contains even permutations
-            return PermutationGroupFactory.alternatingGroup(degree);
-        }
-        //resulting BSGS
-        ArrayList<BSGSCandidateElement> closure = subgroup.getBSGSCandidate();
-        //random source of this
-        ArrayList<Permutation> randomSource = new ArrayList<>(generators());
-        RandomPermutation.randomness(randomSource, 10, 20, CC.getRandomGenerator());
-
-        double CL = 1 - 1E-6;
-        boolean completed = false, added, globalAdded = false;
-        while (!completed) {
-            //random source of closure
-            ArrayList<Permutation> closureSource = new ArrayList<>(closure.get(0).stabilizerGenerators);
-            RandomPermutation.randomness(closureSource, 10, 10, CC.getRandomGenerator());
-
-            added = false;
-            for (int i = 0; i < 10; ++i) {
-                //adding some random conjugation
-                Permutation c = RandomPermutation.random(randomSource).conjugate(
-                        RandomPermutation.random(closureSource));
-
-                if (!AlgorithmsBase.membershipTest(closure, c)) {
-                    closure.get(0).stabilizerGenerators.add(c);
-                    added = true;
-                    globalAdded = true;
-                }
-            }
-            //We use random version of Schreier-Sims; although constructed BSGS is not guaranteed to be a real BSGS,
-            // if some element belongs to closure, the the result of membership test will be guaranteed true (nos such
-            // guarantee in the case of false).
-            if (added)
-                AlgorithmsBase.RandomSchreierSimsAlgorithm(closure, CL, CC.getRandomGenerator());
-            //testing closure
-            completed = true;
-            for (Permutation generator : generators)
-                for (Permutation cGenerator : closure.get(0).stabilizerGenerators)
-                    if (!AlgorithmsBase.membershipTest(closure, generator.conjugate(cGenerator)))
-                        completed = false;
-        }
-        //check BSGS
-        if (globalAdded)
-            AlgorithmsBase.SchreierSimsAlgorithm(closure);
-        return new PermutationGroup(asBSGSList(closure), true);
-    }
-
-    /**
-     * Returns a commutator of this and specified group.
-     *
-     * @param group permutation group
-     * @return commutator of this and specified group
-     */
-    public PermutationGroup commutator(PermutationGroup group) {
-        //commutator is normal closure of set [generators, group.generators] in <generators,group.generators>.
-        ArrayList<Permutation> commutator = new ArrayList<>();
-        Permutation c;
-        for (Permutation a : generators)
-            for (Permutation b : group.generators) {
-                c = a.commutator(b);
-                if (!c.isIdentity())
-                    commutator.add(c);
-            }
-        if (commutator.isEmpty())
-            return new PermutationGroup(createEmptyBSGS(degree), true);
-        return union(group).normalClosure(new PermutationGroup(commutator));
-    }
-
-    /**
-     * Returns a derived subgroup, i.e. commutator subgroup of this with itself.
-     *
-     * @return derived subgroup, i.e. commutator subgroup of this with itself
-     */
-    public PermutationGroup derivedSubgroup() {
-        if (isSymmetric())
-            return PermutationGroupFactory.alternatingGroup(degree);
-        if (isAlternating() && degree > 4)
-            return this;
-        return commutator(this);
-    }
-
-    /**
      * Returns whether the specified permutation is member of this group
      *
      * @param permutation permutation
@@ -402,34 +348,78 @@ public final class PermutationGroup
     /**
      * Returns whether this group is symmetric group
      *
-     * @return true is this group is full symmetric group S(degree)
+     * @return true is this group is full symmetric group and false otherwise.
      */
     public boolean isSymmetric() {
-        if (isSymmetric == null)
-            isSymmetric = order().equals(factorial(degree));
-        return isSymmetric.booleanValue();
+        if (isSymmetric != null)
+            return isSymmetric;
+
+        if (isTrivial() || !isTransitive())
+            return isSymmetric = false;
+        if (degree > 2 && generators().size() == 1)
+            return isSymmetric = false;
+
+        isSymmetric = isSymOrAlt(DEFAULT_CONFIDENCE_LEVEL);
+        if (isSymmetric) {
+            boolean containsOdd = false;
+            for (Permutation p : generators())
+                if (p.parity() == 1) {
+                    containsOdd = true;
+                    break;
+                }
+            return isSymmetric = containsOdd;
+        } else
+            return isSymmetric = order().equals(factorial(degree));
     }
 
     private Boolean isAlternating = null;
 
     /**
-     * Returns whether this group is symmetric group
+     * Returns whether this group is alternating group
      *
-     * @return true is this group is full symmetric group S(n)
+     * @return true is this group is alternating group Alt(degree) and false otherwise
      */
     public boolean isAlternating() {
-        if (isAlternating == null) {
+        if (isAlternating != null)
+            return isAlternating;
+
+        if (isTrivial() || !isTransitive())
+            return isAlternating = false;
+
+        isAlternating = isSymOrAlt(DEFAULT_CONFIDENCE_LEVEL);
+        if (!isAlternating)
             isAlternating = order().equals(factorial(degree).divide(BigInteger.valueOf(2)));
-            if (isAlternating) { //redundant check?
-                List<Permutation> generators = generators();
-                for (Permutation p : generators)
-                    if (p.parity() == 1) {
-                        isAlternating = false;
-                        break;
-                    }
-            }
+
+        if (isAlternating) {
+            List<Permutation> generators = generators();
+            for (Permutation p : generators)
+                if (p.parity() == 1)
+                    return isAlternating = false;
         }
-        return isAlternating.booleanValue();
+
+        return isAlternating;
+    }
+
+    private static double DEFAULT_CONFIDENCE_LEVEL = 1 - 1E-6;
+
+    /**
+     * Tests whether this is Sym or Alt (for degree > 8) using random, see Sec. 4.2 in [Holt05].
+     *
+     * @param CL confidence level
+     */
+    private boolean isSymOrAlt(double CL) {
+        if (degree < 8)
+            return false;
+        double c = degree <= 16 ? 0.34 : 0.57;
+        int num = (int) (-FastMath.log(1 - CL) * FastMath.log(2, degree) / c);
+        List<Permutation> randomSource = randomSource();
+        for (int i = 0; i < num; ++i) {
+            int[] lengths = RandomPermutation.random(randomSource).lengthsOfCycles();
+            for (int length : lengths)
+                if (length > degree / 2 && length < degree - 2 && Primes.isPrime(length))
+                    return true;
+        }
+        return false;
     }
 
     /**
@@ -461,6 +451,106 @@ public final class PermutationGroup
             return new PermutationGroup(createEmptyBSGS(degree), true);
 
         return new PermutationGroup(asBSGSList(bsgs.subList(set.length, bsgs.size())), true);
+    }
+
+    /**
+     * Calculates normal closure of specified subgroup. The algorithm follows NORMALCLOSURE (randomized version)
+     * described in Sec. 3.3.2 in [Holt05].
+     *
+     * @param subgroup subgroup of this
+     * @return normal closure
+     */
+    public PermutationGroup normalClosureOf(PermutationGroup subgroup) {
+        if (subgroup.isTrivial())
+            return subgroup;
+
+        if (isAlternating() && degree > 4)
+            return this;
+
+        if (isSymmetric() && degree != 4) {
+            //in this case the only nontrivial normal subgroup is Alt(degree)
+            //check that all generators of subgroups are even:
+            for (Permutation p : subgroup.generators)
+                if (p.parity() == 1)
+                    return this; //subgroup contains odd permutations
+            return PermutationGroupFactory.alternatingGroup(degree);
+        }
+        //resulting BSGS
+        ArrayList<BSGSCandidateElement> closure = subgroup.getBSGSCandidate();
+        //random source of this
+        List<Permutation> randomSource = randomSource();
+
+        double CL = 1 - 1E-6;
+        boolean completed = false, added, globalAdded = false;
+        while (!completed) {
+            //random source of closure
+            ArrayList<Permutation> closureSource = new ArrayList<>(closure.get(0).stabilizerGenerators);
+            RandomPermutation.randomness(closureSource, 10, 10, CC.getRandomGenerator());
+
+            added = false;
+            for (int i = 0; i < 10; ++i) {
+                //adding some random conjugation
+                Permutation c = RandomPermutation.random(randomSource).conjugate(
+                        RandomPermutation.random(closureSource));
+
+                if (!AlgorithmsBase.membershipTest(closure, c)) {
+                    closure.get(0).stabilizerGenerators.add(c);
+                    added = true;
+                    globalAdded = true;
+                }
+            }
+            //We use random version of Schreier-Sims; although constructed BSGS is not guaranteed to be a real BSGS,
+            // if some element belongs to closure, the the result of membership test will be guaranteed true (nos such
+            // guarantee in the case of false).
+            if (added)
+                AlgorithmsBase.RandomSchreierSimsAlgorithm(closure, CL, CC.getRandomGenerator());
+            //testing closure
+            completed = true;
+            for (Permutation generator : generators)
+                for (Permutation cGenerator : closure.get(0).stabilizerGenerators)
+                    if (!AlgorithmsBase.membershipTest(closure, generator.conjugate(cGenerator))) {
+                        completed = false;
+                        break;
+                    }
+        }
+        //check BSGS
+        if (globalAdded)
+            AlgorithmsBase.SchreierSimsAlgorithm(closure);
+        return new PermutationGroup(asBSGSList(closure), true);
+    }
+
+    /**
+     * Returns a commutator of this and specified group.
+     *
+     * @param group permutation group
+     * @return commutator of this and specified group
+     */
+    public PermutationGroup commutator(PermutationGroup group) {
+        //commutator is normal closure of set [generators, group.generators] in <generators,group.generators>.
+        ArrayList<Permutation> commutator = new ArrayList<>();
+        Permutation c;
+        for (Permutation a : generators)
+            for (Permutation b : group.generators) {
+                c = a.commutator(b);
+                if (!c.isIdentity())
+                    commutator.add(c);
+            }
+        if (commutator.isEmpty())
+            return new PermutationGroup(createEmptyBSGS(degree), true);
+        return union(group).normalClosureOf(new PermutationGroup(commutator));
+    }
+
+    /**
+     * Returns a derived subgroup, i.e. commutator subgroup of this with itself.
+     *
+     * @return derived subgroup, i.e. commutator subgroup of this with itself
+     */
+    public PermutationGroup derivedSubgroup() {
+        if (isSymmetric())
+            return PermutationGroupFactory.alternatingGroup(degree);
+        if (isAlternating() && degree > 4)
+            return this;
+        return commutator(this);
     }
 
     /**

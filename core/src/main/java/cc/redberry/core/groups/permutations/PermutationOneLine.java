@@ -322,8 +322,7 @@ public class PermutationOneLine implements Permutation {
         System.arraycopy(permutation, 0, p, 0, permutation.length);
         for (int i = permutation.length; i < newDegree; ++i)
             p[i] = i;
-        return new PermutationOneLine(p);
-//        return new PermutationOneLine(isIdentity, antisymmetry, p, true);
+        return new PermutationOneLine(isIdentity, antisymmetry, p, true);
     }
 
     @Override
@@ -339,8 +338,12 @@ public class PermutationOneLine implements Permutation {
         int k = i;
         for (; i < newDegree; ++i)
             p[i] = permutation[i - k] + k;
-        return new PermutationOneLine(p);
-//        return new PermutationOneLine(isIdentity, antisymmetry, p, true);
+        return new PermutationOneLine(isIdentity, antisymmetry, p, true);
+    }
+
+    @Override
+    public int[] lengthsOfCycles() {
+        return Permutations.sizesOfCycles(permutation);
     }
 
     @Override

@@ -633,14 +633,14 @@ public class PermutationGroupTest extends AbstractTestClass {
     public void testNormalClosure1() throws Exception {
         PermutationGroup s3 = PermutationGroupFactory.symmetricGroup(3);
         PermutationGroup a3 = PermutationGroupFactory.alternatingGroup(3);
-        assertTrue(s3.normalClosure(a3).equals(a3));
+        assertTrue(s3.normalClosureOf(a3).equals(a3));
     }
 
     @Test
     public void testNormalClosure2() throws Exception {
         PermutationGroup s3 = PermutationGroupFactory.symmetricGroup(3);
         PermutationGroup a3 = PermutationGroupFactory.alternatingGroup(3);
-        assertTrue(s3.normalClosure(a3).equals(a3));
+        assertTrue(s3.normalClosureOf(a3).equals(a3));
     }
 
     @Test
@@ -654,9 +654,22 @@ public class PermutationGroupTest extends AbstractTestClass {
         PermutationGroup pg2 = PermutationGroupFactory.create(
                 new PermutationOneLine(8, c), new PermutationOneLine(8, d));
 
-        PermutationGroup nc = pg1.normalClosure(pg2);
+        PermutationGroup nc = pg1.normalClosureOf(pg2);
         assertTrue(nc.equals(pg2));
     }
+
+    @Test
+    public void testNormalClosure1_WithGap() {
+        GapGroupsInterface gap = getGapInterface();
+        int degree = 157, i = 6, j = 8;
+        System.out.println(gap.nrPrimitiveGroups(degree));
+        PermutationGroup gr = gap.primitiveGroup(degree, i);
+        PermutationGroup sg = gap.primitiveGroup(degree, j);
+        System.out.println(gr.order());
+        System.out.println(sg.order());
+        System.out.println(gr.normalClosureOf(sg).order());
+    }
+
 
     @Test
     public void testDerivedSubgroup1_WithGap() {
@@ -678,7 +691,46 @@ public class PermutationGroupTest extends AbstractTestClass {
     public void testDerivedSubgroup2() {
         PermutationGroup alt = PermutationGroupFactory.alternatingGroup(4);
         assertEquals(BigInteger.valueOf(4), alt.derivedSubgroup().order());
+    }
 
+    @Test
+    public void testDerivedSubgroup3() {
+        PermutationGroup s4 = PermutationGroupFactory.symmetricGroup(4);
+        PermutationGroup a4 = s4.derivedSubgroup();
+        assertTrue(a4.isAlternating());
+        //Klein4
+        PermutationGroup v4 = a4.derivedSubgroup();
+        int[][] a = {{0, 1}, {2, 3}};
+        int[][] b = {{0, 2}, {1, 3}};
+        int[][] c = {{0, 3}, {1, 2}};
+        PermutationGroup expected = PermutationGroupFactory.create(new PermutationOneLine(4, a),
+                new PermutationOneLine(4, b), new PermutationOneLine(4, c));
+        assertTrue(expected.equals(v4));
+    }
+
+    @Test
+    public void testIsSymOrAlt1() {
+        for (int degree = 3; degree < 100; ++degree) {
+            PermutationGroup p = PermutationGroupFactory.symmetricGroup(degree);
+            assertTrue(p.isSymmetric());
+            assertFalse(p.isAlternating());
+            p = PermutationGroupFactory.alternatingGroup(degree);
+            assertTrue(p.isAlternating());
+            assertFalse(p.isSymmetric());
+        }
+    }
+
+    @Test
+    public void testIsSymOrAlt2_WithGap() {
+        GapGroupsInterface gap = getGapInterface();
+        for (int degree = 3; degree < 150; ++degree) {
+            for (int i = 0; i < gap.nrPrimitiveGroups(degree); ++i) {
+                gap.evaluate("g:= PrimitiveGroup( " + degree + ", " + (i + 1) + ");");
+                PermutationGroup p = gap.primitiveGroup(degree, i);
+                assertEquals(gap.evaluateToBoolean("IsNaturalSymmetricGroup(g);"), p.isSymmetric());
+                assertEquals(gap.evaluateToBoolean("IsNaturalAlternatingGroup(g);"), p.isAlternating());
+            }
+        }
     }
 
     private static PermutationGroup pointWiseStabilizerBruteForce(PermutationGroup pg, int[] points) {

@@ -224,4 +224,13 @@ public interface Permutation extends Comparable<Permutation> {
      * @return equivalent permutation with specified degree
      */
     public Permutation extendAfter(int newDegree);
+
+    /**
+     * Returns lengths of cycles in disjoint cycle notation.
+     *
+     * @return lengths of cycles in disjoint cycle notation
+     */
+    int[] lengthsOfCycles();
+
+
 }

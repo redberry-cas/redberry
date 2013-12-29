@@ -102,23 +102,8 @@ public final class RandomPermutation {
      * @return random element of a group
      */
     public static Permutation random(List<Permutation> generators) {
-        return random(generators, System.currentTimeMillis());
+        return random(generators, CC.getRandomGenerator());
     }
-
-
-    /**
-     * Produces almost uniformly distributed elements of a group specified by specified generators (only if method
-     * {@link #randomness(java.util.List, int, int, org.apache.commons.math3.random.RandomGenerator)} was invoked with specified generators); and brings additional
-     * randomness in the specified list. See algorithm PRRANDOM in Sec. 3.2.2 in [Holt05].
-     *
-     * @param generators generators (method {@link #randomness(java.util.List, int, int, org.apache.commons.math3.random.RandomGenerator)} should be invoked before)
-     * @param seed       random seed
-     * @return random element of a group
-     */
-    public static Permutation random(List<Permutation> generators, long seed) {
-        return random(generators, new Well19937a(seed));
-    }
-
 
     /**
      * Produces almost uniformly distributed elements of a group specified by specified generators (only if method

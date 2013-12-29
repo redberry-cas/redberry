@@ -633,7 +633,7 @@ public final class AlgorithmsBacktrack {
      * @param degree group degree
      */
     static void rebaseWithRedundancy(final ArrayList<BSGSCandidateElement> group,
-                                             final int[] base, final int degree) {
+                                     final int[] base, final int degree) {
         AlgorithmsBase.rebase(group, base);
         if (group.size() < base.length)
             for (int i = group.size(); i < base.length; ++i)
@@ -648,7 +648,7 @@ public final class AlgorithmsBacktrack {
      * @param point    point
      * @param ordering ordering
      * @return true if specified point belongs to specified orbit and is minimal according to
-     *         specified ordering
+     * specified ordering
      */
     private static boolean isMinimalInOrbit(IntArrayList orbit, int point, InducedOrdering ordering) {
         boolean belongsToOrbit = false;

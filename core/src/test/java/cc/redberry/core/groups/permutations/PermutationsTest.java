@@ -185,6 +185,22 @@ public class PermutationsTest {
         }
     }
 
+    @Test
+    public void testSizesOfCycles1() {
+        for (int i = 0; i < 1000; ++i) {
+            int degree = 1 + CC.getRandomGenerator().nextInt(100);
+            int[] p = Permutations.randomPermutation(degree);
+            int[][] cycles = Permutations.convertOneLineToCycles(p);
+            int[] sizes = new int[cycles.length];
+            for (int j = 0; j < sizes.length; ++j)
+                sizes[j] = cycles[j].length;
+            int[] sizes1 = Permutations.sizesOfCycles(p);
+            Arrays.sort(sizes);
+            Arrays.sort(sizes1);
+            Assert.assertArrayEquals(sizes, sizes1);
+        }
+    }
+
     private static void assertOrbits(int[][] orbits, int[] positions, int degree, List<Permutation> generators) {
         for (int i = 0; i < degree; ++i) {
             int[] expected = Permutations.getOrbitList(generators, i).toArray();

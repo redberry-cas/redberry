@@ -401,6 +401,35 @@ public final class Permutations {
         return cycles.toArray(new int[cycles.size()][]);
     }
 
+    /**
+     * Returns an array of cycles lengths.
+     *
+     * @param permutation permutation written in one-line notation
+     * @return an array of cycles lengths
+     */
+    public static int[] sizesOfCycles(final int[] permutation) {
+        IntArrayList sizes = new IntArrayList();
+        BitArray seen = new BitArray(permutation.length);
+        int counter = 0;
+        while (counter < permutation.length) {
+            int start = seen.nextZeroBit(0);
+            if (permutation[start] == start) {
+                ++counter;
+                seen.set(start);
+                continue;
+            }
+            int size = 0;
+            while (!seen.get(start)) {
+                seen.set(start);
+                ++counter;
+                ++size;
+                start = permutation[start];
+            }
+            sizes.add(size);
+        }
+        return sizes.toArray();
+    }
+
 
     /**
      * Throws exception if p.length() != size.

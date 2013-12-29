@@ -188,7 +188,7 @@ public class RandomPermutationTest {
 
             generators.clear();
             for (int i = 0; i < 3; ++i)
-                generators.add(random(init, seed));
+                generators.add(random(init));
 
             long bound = PermutationGroupFactory.create(generators).order().longValue();
             primes = primes(bound);
@@ -219,7 +219,7 @@ public class RandomPermutationTest {
             randomness(allgenerators, 20, 50, CC.getRandomGenerator());
             generators.clear();
             for (int i = 0; i < 2; ++i)
-                generators.add(random(allgenerators, seed));
+                generators.add(random(allgenerators));
 
             PermutationGroup pg = PermutationGroupFactory.create(generators);
             long order = pg.order().longValue();
