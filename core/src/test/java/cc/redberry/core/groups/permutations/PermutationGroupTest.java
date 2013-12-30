@@ -781,15 +781,34 @@ public class PermutationGroupTest extends AbstractTestClass {
 
     @Test
     public void testCentralizer2() throws Exception {
-        PermutationGroup s4 = PermutationGroupFactory.symmetricGroup(10);
+        PermutationGroup a8 = PermutationGroupFactory.alternatingGroup(8);
+        int[][] p1 = {{0, 1, 2}, {3, 4, 5}};
+        PermutationGroup c = a8.centralizerOf(new PermutationOneLine(a8.degree(), p1));
+        int[][] p2 = {{3, 4, 5}};
+        int[][] p3 = {{0, 3}, {1, 4}, {2, 5}, {6, 7}};
+        PermutationGroup expected = new PermutationGroup(
+                new PermutationOneLine(a8.degree(), p1),
+                new PermutationOneLine(a8.degree(), p2),
+                new PermutationOneLine(a8.degree(), p3));
+        assertTrue(expected.equals(c));
+        assertTrue(c.center().equals(
+                new PermutationGroup(new PermutationOneLine(a8.degree(), p1))));
+        int[][] p4 = {{0, 2, 1}, {3, 4, 5}};
+        assertTrue(c.derivedSubgroup().equals(
+                new PermutationGroup(new PermutationOneLine(a8.degree(), p4))));
+    }
 
-        PermutationGroup s2 = new PermutationGroup(
-                new PermutationOneLine(1, 0, 2, 3, 4, 5, 6, 7, 8, 9),
-                new PermutationOneLine(8, 6, 2, 4, 3, 5, 0, 7, 1, 9)
-                );
-        PermutationGroup v4 = s4.centralizerOf(s2);
-        System.out.println(v4);
-        System.out.println(v4.order());
+    @Test
+    public void testCenter_WithGap() {
+        GapGroupsInterface gap = getGapInterface();
+        for (int degree = 3; degree < 50; ++degree) {
+            for (int i = 0; i < gap.nrPrimitiveGroups(degree); ++i) {
+                gap.evaluate("g:= PrimitiveGroup( " + degree + ", " + (i + 1) + ");");
+                PermutationGroup p = gap.primitiveGroup(degree, i);
+                PermutationGroup center = p.center();
+                assertEquals(gap.evaluateToBigInteger("Order(Centre(g));"), center.order());
+            }
+        }
     }
 
     private static PermutationGroup pointWiseStabilizerBruteForce(PermutationGroup pg, int[] points) {

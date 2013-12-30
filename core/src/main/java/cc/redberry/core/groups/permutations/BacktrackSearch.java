@@ -59,7 +59,7 @@ import java.util.List;
  * @author Stanislav Poslavsky
  * @see BacktrackSearchTestFunction
  */
-public class BacktrackSearch implements OutputPortUnsafe<Permutation> {
+public final class BacktrackSearch implements OutputPortUnsafe<Permutation> {
     final List<? extends BSGSElement> bsgs;
     //tuple[i] - current transversal of i-th base point
     final int[] tuple;
