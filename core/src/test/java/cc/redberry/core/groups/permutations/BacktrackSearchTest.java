@@ -331,7 +331,7 @@ public class BacktrackSearchTest extends AbstractTestClass {
     public void testSearchStabilizer1() throws Exception {
         Permutation gen0 = new PermutationOneLine(4, 8, 7, 1, 6, 5, 0, 9, 3, 2);
         Permutation gen1 = new PermutationOneLine(7, 4, 1, 8, 5, 2, 9, 0, 6, 3);
-        PermutationGroup pg = PermutationGroupFactory.create(gen0, gen1);
+        PermutationGroup pg = new PermutationGroup(gen0, gen1);
         int[] set = {4, 9};
         testBruteForceSearchStabilizer(pg, set);
     }
@@ -343,7 +343,7 @@ public class BacktrackSearchTest extends AbstractTestClass {
         Permutation gen2 = new PermutationOneLine(0, 5, 7, 8, 1, 3, 4, 6, 2, 9);
         Permutation gen3 = new PermutationOneLine(9, 1, 2, 6, 5, 4, 3, 8, 7, 0);
 
-        PermutationGroup pg = PermutationGroupFactory.create(gen0, gen1, gen2, gen3);
+        PermutationGroup pg = new PermutationGroup(gen0, gen1, gen2, gen3);
         int[] set = {0, 3};
         testBruteForceSearchStabilizer(pg, set);
     }
@@ -354,7 +354,7 @@ public class BacktrackSearchTest extends AbstractTestClass {
         Permutation gen1 = new PermutationOneLine(11, 1, 18, 3, 22, 26, 9, 25, 7, 5, 24, 12, 13, 14, 0, 2, 15, 16, 17, 4, 19, 20, 21, 6, 8, 10, 23);
         Permutation gen2 = new PermutationOneLine(0, 1, 2, 3, 4, 5, 6, 9, 10, 7, 8, 11, 12, 14, 13, 16, 15, 17, 18, 20, 19, 21, 22, 23, 24, 26, 25);
 
-        PermutationGroup pg = PermutationGroupFactory.create(gen0, gen1, gen2);
+        PermutationGroup pg = new PermutationGroup(gen0, gen1, gen2);
         int[] set = {5, 7, 10, 11, 14, 16, 17, 19};
         testBruteForceSearchStabilizer(pg, set);
     }

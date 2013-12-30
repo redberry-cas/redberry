@@ -36,15 +36,20 @@ import java.util.Collection;
 import java.util.List;
 
 /**
+ * Static methods to operate with permutations.
+ *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
 public final class Permutations {
+    private Permutations() {
+    }
+
     /**
      * Calculates parity of specified permutation
      *
      * @param permutation permutation
-     * @return parity
+     * @return parity of permutation
      */
     public static int parity(int[] permutation) {
         //we shall decompose this permutation into product of cycles and calculate l.c.m. of their sizes
@@ -75,10 +80,10 @@ public final class Permutations {
     }
 
     /**
-     * Returns true if specified permutation, written in one-line notation, is identity
+     * Returns true if specified permutation, written in one-line notation, is identity and false otherwise.
      *
      * @param permutation permutation in one-line notation
-     * @return true if specified permutation is identity
+     * @return true if specified permutation is identity and false otherwise
      */
     public static boolean isIdentity(final int[] permutation) {
         for (int i = 0; i < permutation.length; ++i)
@@ -190,7 +195,6 @@ public final class Permutations {
                 return false;
             counter += currentSize;
         }
-
         //all sizes are odd
         return true;
     }
@@ -242,6 +246,14 @@ public final class Permutations {
         return getOrbitList(generators, point).size();
     }
 
+    /**
+     * Calculates orbits of specified generators.
+     *
+     * @param generators       permutations
+     * @param positionsInOrbit an array that will be filled with the indexes in the resulting orbits, such that
+     *                         for any point orbits[positionsInOrbit[point]] - is orbit of this point.
+     * @return orbits
+     */
     public static int[][] orbits(List<Permutation> generators, final int[] positionsInOrbit) {
         if (generators.isEmpty())
             return new int[0][0];//throw new IllegalArgumentException("Empty generators.");
@@ -295,7 +307,7 @@ public final class Permutations {
         return array;
     }
 
-    public static int[] getIdentityPermutationArray(int length) {
+    static int[] getIdentityPermutationArray(int length) {
         if (cachedIdentities.length <= length)
             return createIdentityPermutationArray(length);
         if (cachedIdentities[length] == null)
@@ -308,17 +320,6 @@ public final class Permutations {
 
     public static PermutationOneLine getIdentityOneLine(int degree) {
         return new PermutationOneLine(getIdentityPermutationArray(degree));
-    }
-
-    /**
-     * Creates random permutation of specified dimension
-     *
-     * @param n    dimension
-     * @param seed random seed
-     * @return random permutation of specified dimension
-     */
-    public static int[] randomPermutation(final int n, long seed) {
-        return randomPermutation(n, new Well19937a(seed));
     }
 
     /**
@@ -407,7 +408,7 @@ public final class Permutations {
      * @param permutation permutation written in one-line notation
      * @return an array of cycles lengths
      */
-    public static int[] sizesOfCycles(final int[] permutation) {
+    public static int[] lengthsOfCycles(final int[] permutation) {
         IntArrayList sizes = new IntArrayList();
         BitArray seen = new BitArray(permutation.length);
         int counter = 0;
@@ -431,7 +432,7 @@ public final class Permutations {
     }
 
     /**
-     * Randomly permutes the specified list.
+     * Randomly permutes the specified array.
      *
      * @param a - the array to be shuffled.
      */

@@ -22,7 +22,6 @@
  */
 package cc.redberry.core.groups.permutations;
 
-import cc.redberry.core.combinatorics.Combinatorics;
 import cc.redberry.core.context.CC;
 import cc.redberry.core.utils.ArraysUtils;
 import org.junit.Test;

@@ -24,7 +24,6 @@ package cc.redberry.core.groups.permutations;
 
 import cc.redberry.core.context.CC;
 import cc.redberry.core.utils.ArraysUtils;
-import cc.redberry.core.utils.IntArrayList;
 import cc.redberry.core.utils.Timing;
 import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.random.Well1024a;
@@ -194,7 +193,7 @@ public class PermutationsTest {
             int[] sizes = new int[cycles.length];
             for (int j = 0; j < sizes.length; ++j)
                 sizes[j] = cycles[j].length;
-            int[] sizes1 = Permutations.sizesOfCycles(p);
+            int[] sizes1 = Permutations.lengthsOfCycles(p);
             Arrays.sort(sizes);
             Arrays.sort(sizes1);
             Assert.assertArrayEquals(sizes, sizes1);

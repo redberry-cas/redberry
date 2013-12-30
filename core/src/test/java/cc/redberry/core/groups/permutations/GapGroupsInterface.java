@@ -23,15 +23,9 @@
 package cc.redberry.core.groups.permutations;
 
 import cc.redberry.core.context.CC;
-import cc.redberry.core.groups.permutations.Permutation;
-import cc.redberry.core.groups.permutations.PermutationGroup;
-import cc.redberry.core.groups.permutations.PermutationGroupFactory;
-import cc.redberry.core.groups.permutations.PermutationOneLine;
 
 import java.io.*;
 import java.math.BigInteger;
-import java.nio.charset.Charset;
-import java.nio.charset.CharsetDecoder;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -105,7 +99,7 @@ public final class GapGroupsInterface {
     }
 
     public PermutationGroup evaluateToPermutationGroup(String command) {
-        return PermutationGroupFactory.create(evaluateToGenerators(stringToGapCommand(command)));
+        return new PermutationGroup(evaluateToGenerators(stringToGapCommand(command)));
     }
 
     public boolean evaluateToBoolean(String command) {
@@ -178,9 +172,9 @@ public final class GapGroupsInterface {
         String g = nextVar();
         evaluate(g + ":= PrimitiveGroup(" + degree + "," + (nr + 1) + ");");
         if (evaluateToBoolean("IsNaturalSymmetricGroup( " + g + ");"))
-            return PermutationGroupFactory.symmetricGroup(degree);
+            return PermutationGroup.symmetricGroup(degree);
         if (evaluateToBoolean("IsNaturalAlternatingGroup( " + g + ");"))
-            return PermutationGroupFactory.alternatingGroup(degree);
+            return PermutationGroup.alternatingGroup(degree);
         return evaluateToPermutationGroup(g);
     }
 

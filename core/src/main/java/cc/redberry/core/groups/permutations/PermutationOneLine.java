@@ -22,11 +22,14 @@
  */
 package cc.redberry.core.groups.permutations;
 
+import java.lang.reflect.Array;
 import java.math.BigInteger;
 import java.util.Arrays;
 
 /**
- * Implementation of {@link Permutation} based on one-line notation.
+ * The implementation of {@link Permutation} based on one-line notation. This class holds an array that
+ * represents permutation in one-line notation thereby providing O(1) complexity for {@code imageOf(int)} and O(degree)
+ * complexity for composition.
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
@@ -37,11 +40,26 @@ public class PermutationOneLine implements Permutation {
     final boolean isIdentity;
     final boolean antisymmetry;
 
-
+    /**
+     * Creates permutation with antisymmetry from given array of disjoint cycles and boolean value of
+     * antisymmetry ({@code true} means antisymmetry)
+     *
+     * @param antisymmetry antisymmetry (true - antisymmetry, false - symmetry)
+     * @param degree       degree of permutation
+     * @param cycles       disjoint cycles
+     * @throws IllegalArgumentException if permutation is inconsistent
+     */
     public PermutationOneLine(boolean antisymmetry, int degree, int[][] cycles) {
         this(antisymmetry, Permutations.convertCyclesToOneLine(degree, cycles));
     }
 
+    /**
+     * Creates permutation from a given array of disjoint cycles.
+     *
+     * @param degree degree of permutation
+     * @param cycles disjoint cycles
+     * @throws IllegalArgumentException if permutation is inconsistent
+     */
     public PermutationOneLine(int degree, int[][] cycles) {
         this(Permutations.convertCyclesToOneLine(degree, cycles));
     }
@@ -100,7 +118,17 @@ public class PermutationOneLine implements Permutation {
     }
 
     @Override
+    public int[][] cycles() {
+        return Permutations.convertOneLineToCycles(permutation);
+    }
+
+    @Override
     public int newIndexOf(int i) {
+        return permutation[i];
+    }
+
+    @Override
+    public int imageOf(int i) {
         return permutation[i];
     }
 
@@ -108,9 +136,30 @@ public class PermutationOneLine implements Permutation {
     public int[] imageOf(int[] set) {
         if (isIdentity)
             return set.clone();
-        int[] result = new int[set.length];
+        final int[] result = new int[set.length];
         for (int i = 0; i < set.length; ++i)
             result[i] = permutation[set[i]];
+        return result;
+    }
+
+    @Override
+    public int[] permute(int[] array) {
+        if (isIdentity)
+            return array.clone();
+        final int[] result = new int[array.length];
+        for (int i = 0; i < array.length; ++i)
+            result[i] = array[permutation[i]];
+        return result;
+    }
+
+    @Override
+    public <T> T[] permute(T[] array) {
+        if (isIdentity)
+            return array.clone();
+        @SuppressWarnings("unchecked")
+        final T[] result = (T[]) Array.newInstance(array.getClass().getComponentType(), array.length - 1);
+        for (int i = 0; i < array.length; ++i)
+            result[i] = array[permutation[i]];
         return result;
     }
 
@@ -243,18 +292,6 @@ public class PermutationOneLine implements Permutation {
     }
 
     @Override
-    public int[] permute(int[] array) {
-        if (isIdentity)
-            return array.clone();
-        if (array.length != permutation.length)
-            throw new IllegalArgumentException();
-        final int[] perm = new int[array.length];
-        for (int i = permutation.length - 1; i >= 0; --i)
-            perm[i] = array[permutation[i]];
-        return perm;
-    }
-
-    @Override
     public Permutation getIdentity() {
         if (isIdentity)
             return this;
@@ -343,7 +380,7 @@ public class PermutationOneLine implements Permutation {
 
     @Override
     public int[] lengthsOfCycles() {
-        return Permutations.sizesOfCycles(permutation);
+        return Permutations.lengthsOfCycles(permutation);
     }
 
     @Override

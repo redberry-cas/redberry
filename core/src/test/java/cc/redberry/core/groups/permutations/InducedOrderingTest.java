@@ -22,14 +22,11 @@
  */
 package cc.redberry.core.groups.permutations;
 
-import cc.redberry.core.combinatorics.Combinatorics;
 import cc.redberry.core.context.CC;
 import cc.redberry.core.utils.ArraysUtils;
 import cc.redberry.core.utils.IntComparator;
 import cc.redberry.core.utils.MathUtils;
 import org.junit.Test;
-
-import java.util.Arrays;
 
 import static cc.redberry.core.TAssert.assertTrue;
 import static org.junit.Assert.assertArrayEquals;

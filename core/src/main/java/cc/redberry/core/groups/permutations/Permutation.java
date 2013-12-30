@@ -26,7 +26,7 @@ import java.math.BigInteger;
 import java.util.Arrays;
 
 /**
- * Interface representing permutation.
+ * Interface describing a single permutation.
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
@@ -34,56 +34,97 @@ import java.util.Arrays;
  */
 public interface Permutation extends Comparable<Permutation> {
     /**
-     * Returns array representing this permutation in one-line notation.
+     * Returns array that represents this permutation in one-line notation.
      *
-     * @return
+     * @return array that represents this permutation in one-line notation
      */
     int[] oneLine();
 
     /**
-     * Return the new position of specified element under this permutation
+     * Returns an array of disjoint cycles that represent this permutation.
      *
-     * @param i element
-     * @return new position of specified element under this permutation
+     * @return array of disjoint cycles that represent this permutation
+     */
+    int[][] cycles();
+
+    /**
+     * Returns image of specified point under the action of this permutation.
+     *
+     * @param i point
+     * @return image of specified point under the action of this permutation
+     * @throws java.lang.IndexOutOfBoundsException if {@code i < 0 || i > degree()}
      */
     public int newIndexOf(int i);
 
     /**
-     * Returns specified element conjugated by this, i.e. this^-1 * p * this
+     * Returns image of specified point under the action of this permutation. This method is absolutely same as
+     * {@link #newIndexOf(int)} without any difference.
      *
-     * @param p permutation
-     * @return specified element conjugated by this, i.e. this^-1 * p * this
+     * @param i point
+     * @return image of specified point under the action of this permutation
+     * @throws java.lang.IndexOutOfBoundsException if {@code i < 0 || i > degree()}
      */
-    public Permutation conjugate(Permutation p);
+    public int imageOf(int i);
 
     /**
-     * Returns a commutator of this and specified permutation, i.e. this^-1 * p^-1 * this * p.
-     *
-     * @param p permutation
-     * @return a commutator of this and specified permutation, i.e. this^-1 * p^-1 * this * p
-     */
-    public Permutation commutator(Permutation p);
-
-    /**
-     * Returns the image of specified set under this permutation.
+     * Returns image of specified set of points under the action of this permutation.
      *
      * @param set set
      * @return image of specified set under this permutation
+     * @throws java.lang.IndexOutOfBoundsException if some point is negative or greater then {@link #degree()}
      */
     public int[] imageOf(int[] set);
 
     /**
-     * Return the new position of specified element under inverse this permutation
+     * Permutes array and returns the result.
      *
-     * @param i position of element in set
-     * @return new position of specified element under inverse this permutation
+     * @param array array
+     * @return permuted array
+     */
+    public int[] permute(int[] array);
+
+    /**
+     * Permutes array and returns the result.
+     *
+     * @param array array
+     * @return permuted array
+     */
+    public <T> T[] permute(T[] array);
+
+    /**
+     * Returns conjugation of specified element by this permutation, i.e. this^-1 * p * this
+     *
+     * @param p permutation
+     * @return conjugation of specified element by this permutation, i.e. this^-1 * p * this
+     * @throws IllegalArgumentException        if {@code other.degree() != this.degree()}
+     * @throws InconsistentGeneratorsException if the result of composition is inconsistent symmetry (antisymmetry with odd
+     *                                         parity of permutation)
+     */
+    public Permutation conjugate(Permutation p);
+
+    /**
+     * Returns commutator of this and specified permutation, i.e. this^-1 * p^-1 * this * p.
+     *
+     * @param p permutation
+     * @return commutator of this and specified permutation, i.e. this^-1 * p^-1 * this * p
+     * @throws IllegalArgumentException        if {@code other.degree() != this.degree()}
+     * @throws InconsistentGeneratorsException if the result of composition is inconsistent symmetry (antisymmetry with odd
+     *                                         parity of permutation)
+     */
+    public Permutation commutator(Permutation p);
+
+    /**
+     * Returns image of specified point under the action of inverse of this permutation.
+     *
+     * @param i point
+     * @return image of specified point under the action of inverse of this permutation
      */
     public int newIndexOfUnderInverse(int i);
 
     /**
-     * Returns true if this permutation represents antisymmetry and false otherwise.
+     * Returns true if this permutation is antisymmetry and false otherwise.
      *
-     * @return true if this permutation represents antisymmetry and false otherwise
+     * @return true if this permutation is antisymmetry and false otherwise
      */
     public boolean antisymmetry();
 
@@ -95,7 +136,7 @@ public interface Permutation extends Comparable<Permutation> {
      * @return the result of  {@code this * other}
      * @throws IllegalArgumentException        if {@code other.degree() != this.degree()}
      * @throws InconsistentGeneratorsException if the result of composition is inconsistent symmetry (antisymmetry with odd
-     *                                         permutation parity)
+     *                                         parity of permutation)
      */
     public Permutation composition(Permutation other);
 
@@ -160,16 +201,6 @@ public interface Permutation extends Comparable<Permutation> {
     public Permutation getIdentity();
 
     /**
-     * Returns the image of specified array under this permutation
-     *
-     * @param array specified array
-     * @return image of specified array under this permutation
-     * @throws IllegalArgumentException if this.degree() != array.length
-     */
-    public int[] permute(int[] array);
-
-
-    /**
      * Calculates and returns the order of this permutation.
      *
      * @return order of this permutation
@@ -185,7 +216,7 @@ public interface Permutation extends Comparable<Permutation> {
     public boolean orderIsOdd();
 
     /**
-     * Returns the degree of this permutation, or, in other words, the number of elements in set on which this
+     * Returns the degree of this permutation; in other words, the number of elements in set on which this
      * permutation acts (the length of permutation written in one-line notation).
      *
      * @return degree of this permutation
@@ -231,6 +262,4 @@ public interface Permutation extends Comparable<Permutation> {
      * @return lengths of cycles in disjoint cycle notation
      */
     int[] lengthsOfCycles();
-
-
 }
