@@ -33,14 +33,14 @@ import java.util.List;
 /**
  * An iterator (organized as output port {@link OutputPortUnsafe}) over group elements, that scans group in increasing
  * order of base images; to be precise: if base B = [b1, b2, b3,..,bn], then element g <i>which maps all base points
- * into themselves</i> (g(b) ∈ B for each b ∈ B) is guaranteed to precedes (≺) an element h, which base image succeeds
+ * into themselves</i> (g(b) &isin; B for each b &isin; B) is guaranteed to precedes (<b>&lt;</b>) an element h, which base image succeeds
  * (≻) the base image of g according to ordering specified by {@link InducedOrdering}.
  * <p/>
  * <b>Pruning the tree:</b>
  * <br>The iteration is organized as a depth-first search in the search tree of specified permutation group. This search
  * tree is organized as follows: each vertex <i>V</i> on a particular level <i>l</i> specifies some partial base image
  * <i>B(l)</i>, this means that all permutations produced during iteration over child nodes of vertex <i>V</i> have
- * same partial base images (for all g and <i>i ∈ 0..l</i>, g(B(i)) is fixed). If we want to iterate over elements that
+ * same partial base images (for all g and <i>i &isin; 0..l</i>, g(B(i)) is fixed). If we want to iterate over elements that
  * satisfy some property <i>P</i> for which we have a test function that guarantees false answer using the knowledge
  * of partial base image, we can rule out (prune tree) all element under the level <i>l</i>. The property <i>P</i> and
  * the corresponding test function can be changed via {@link #setTestFunction(BacktrackSearchTestFunction)}  and
@@ -57,7 +57,8 @@ import java.util.List;
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
- * @see BacktrackSearchTestFunction
+ * @see cc.redberry.core.groups.permutations.BacktrackSearchTestFunction
+ * @since 1.1.6
  */
 public final class BacktrackSearch implements OutputPortUnsafe<Permutation> {
     final List<? extends BSGSElement> bsgs;
@@ -164,9 +165,9 @@ public final class BacktrackSearch implements OutputPortUnsafe<Permutation> {
     }
 
     /**
-     * Returns the ordering on Ω(n) induced by a base.
+     * Returns the ordering on &Omega;(n) induced by a base.
      *
-     * @return ordering on Ω(n) induced by a base
+     * @return ordering on &Omega;(n) induced by a base
      * @see InducedOrdering
      */
     public IntComparator getInducedOrdering() {

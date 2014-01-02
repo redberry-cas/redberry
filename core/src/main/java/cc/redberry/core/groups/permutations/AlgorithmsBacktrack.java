@@ -30,10 +30,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Basic algorithms for backtrack search in permutation groups.
+ * Algorithms for backtrack search in permutation groups.
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @see cc.redberry.core.groups.permutations.AlgorithmsBase
+ * @since 1.1.6
  */
 public final class AlgorithmsBacktrack {
     private AlgorithmsBacktrack() {
@@ -353,7 +355,7 @@ public final class AlgorithmsBacktrack {
 
     /**
      * Calculates left coset (gK) representatives of specified subgroup in specified group; each returned transversal
-     * is ≺-least in its coset. The implementation is based on a general backtrack search and prunes tree using a
+     * is <b>&lt;</b>-least in its coset. The implementation is based on a general backtrack search and prunes tree using a
      * minimality test. For details see the first method described in 4.6.7 in [Holt05].
      *
      * @param group    group

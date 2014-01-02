@@ -30,11 +30,12 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * Candidate to be a BSGS element - a mutable version of {@link BSGSElement}.
+ * A mutable version of {@link BSGSElement}.
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
- * @see BSGSElement
+ * @see cc.redberry.core.groups.permutations.BSGSElement
+ * @since 1.1.6
  */
 public final class BSGSCandidateElement extends BSGSElement {
     /**

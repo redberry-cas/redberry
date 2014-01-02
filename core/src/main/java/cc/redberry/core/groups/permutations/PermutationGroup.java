@@ -44,7 +44,49 @@ import static cc.redberry.core.number.NumberUtils.factorial;
  * method summary). The instances of this class are immutable. The iterator returned by this class's {@code iterator()}
  * method iterates over all elements of this group.
  * <p>
- * <b><big>Implementation and complexity.</big></b>
+ * <b><big>Example</big></b>
+ * </p>
+ * <p>
+ * The following example gives a good idea of the usage of {@code PermutationGroup}
+ * <br>
+ * <pre style="background:#f1f1f1;color:#000"><span style="color:#406040">  //permutations in disjoint cycles notation</span>
+ * <span style="color:#a08000">Permutation</span> gen0 <span style="color:#2060a0">=</span> <span style="color:#2060a0">new</span> <span style="color:#a08000">PermutationOneLine</span>(<span style="color:#0080a0">13</span>, <span style="color:#2060a0">new</span> <span style="color:#a08000">int</span>[][]{{<span style="color:#0080a0">0</span>, <span style="color:#0080a0">9</span>, <span style="color:#0080a0">3</span>}, {<span style="color:#0080a0">5</span>, <span style="color:#0080a0">8</span>, <span style="color:#0080a0">6</span>}, {<span style="color:#0080a0">7</span>, <span style="color:#0080a0">11</span>, <span style="color:#0080a0">12</span>}});
+ * <span style="color:#a08000">Permutation</span> gen1 <span style="color:#2060a0">=</span> <span style="color:#2060a0">new</span> <span style="color:#a08000">PermutationOneLine</span>(<span style="color:#0080a0">13</span>, <span style="color:#2060a0">new</span> <span style="color:#a08000">int</span>[][]{{<span style="color:#0080a0">0</span>, <span style="color:#0080a0">2</span>, <span style="color:#0080a0">1</span>}, {<span style="color:#0080a0">3</span>, <span style="color:#0080a0">8</span>, <span style="color:#0080a0">4</span>}, {<span style="color:#0080a0">6</span>, <span style="color:#0080a0">7</span>, <span style="color:#0080a0">11</span>}, {<span style="color:#0080a0">9</span>, <span style="color:#0080a0">12</span>, <span style="color:#0080a0">10</span>}});
+ * <span style="color:#406040">//construct permutation group of degree 13</span>
+ * <span style="color:#a08000">PermutationGroup</span> pg <span style="color:#2060a0">=</span> <span style="color:#2060a0">new</span> <span style="color:#a08000">PermutationGroup</span>(gen0, gen1);
+ * <span style="color:#406040">//this group is transitive</span>
+ * <span style="color:#2060a0">assert</span> pg<span style="color:#2060a0">.</span>isTransitive();
+ * <span style="color:#406040">//its order = 5616</span>
+ * <span style="color:#a08000">System</span><span style="color:#2060a0">.</span>out<span style="color:#2060a0">.</span>println(pg<span style="color:#2060a0">.</span>order());
+ * <span style="color:#406040">//create alternating group Alt(13)</span>
+ * <span style="color:#a08000">PermutationGroup</span> alt13 <span style="color:#2060a0">=</span> <span style="color:#a08000">PermutationGroup</span><span style="color:#2060a0">.</span>alternatingGroup(<span style="color:#0080a0">13</span>);
+ * <span style="color:#406040">//its order = 3113510400</span>
+ * <span style="color:#a08000">System</span><span style="color:#2060a0">.</span>out<span style="color:#2060a0">.</span>println(alt13<span style="color:#2060a0">.</span>order());
+ * <span style="color:#2060a0">assert</span> alt13<span style="color:#2060a0">.</span>containsSubgroup(pg);
+ * <span style="color:#406040">//direct product of two groups</span>
+ * <span style="color:#a08000">PermutationGroup</span> pp <span style="color:#2060a0">=</span> pg<span style="color:#2060a0">.</span>directProduct(<span style="color:#a08000">PermutationGroup</span><span style="color:#2060a0">.</span>symmetricGroup(<span style="color:#0080a0">8</span>));
+ * <span style="color:#406040">//setwise stabilizer</span>
+ * <span style="color:#a08000">PermutationGroup</span> sw <span style="color:#2060a0">=</span> pp<span style="color:#2060a0">.</span>setwiseStabilizer(<span style="color:#0080a0">1</span>, <span style="color:#0080a0">2</span>, <span style="color:#0080a0">3</span>, <span style="color:#0080a0">9</span>, <span style="color:#0080a0">10</span>, <span style="color:#0080a0">11</span>, <span style="color:#0080a0">12</span>, <span style="color:#0080a0">13</span>, <span style="color:#0080a0">14</span>, <span style="color:#0080a0">15</span>, <span style="color:#0080a0">16</span>, <span style="color:#0080a0">17</span>, <span style="color:#0080a0">18</span>);
+ * <span style="color:#2060a0">assert</span> pp<span style="color:#2060a0">.</span>containsSubgroup(sw);
+ * <span style="color:#406040">//its order = 17280</span>
+ * <span style="color:#a08000">System</span><span style="color:#2060a0">.</span>out<span style="color:#2060a0">.</span>println(sw<span style="color:#2060a0">.</span>order());
+ * <span style="color:#406040">//center of this stabilizer</span>
+ * <span style="color:#a08000">PermutationGroup</span> center <span style="color:#2060a0">=</span> sw<span style="color:#2060a0">.</span>center();
+ * <span style="color:#406040">//it is abelian group</span>
+ * <span style="color:#2060a0">assert</span> center<span style="color:#2060a0">.</span>isAbelian();
+ * <span style="color:#406040">//generators of center</span>
+ * <span style="color:#a08000">System</span><span style="color:#2060a0">.</span>out<span style="color:#2060a0">.</span>println(center<span style="color:#2060a0">.</span>generators());
+ * <span style="color:#406040">//[+{}, +{{19, 20}}, +{{2, 10}, {3, 9}, {6, 8}, {11, 12}}]</span>
+ * <span style="color:#406040">//orbits of center</span>
+ * <span style="color:#a08000">int</span>[][] orbits <span style="color:#2060a0">=</span> center<span style="color:#2060a0">.</span>orbits();
+ * <span style="color:#2060a0">for</span> (<span style="color:#a08000">int</span>[] orbit <span style="color:#2060a0">:</span> orbits)
+ * <span style="color:#2060a0">if</span> (orbit<span style="color:#2060a0">.</span>length <span style="color:#2060a0">!=</span> <span style="color:#0080a0">1</span>)
+ * <span style="color:#a08000">System</span><span style="color:#2060a0">.</span>out<span style="color:#2060a0">.</span>print(<span style="color:#a08000">Arrays</span><span style="color:#2060a0">.</span>toString(orbit));
+ * <span style="color:#406040">//[2, 10], [3, 9], [6, 8], [11, 12], [19, 20]</span>
+ * </pre>
+ * </p>
+ * <p>
+ * <b><big>Implementation and complexity</big></b>
  * </p>
  * <p>
  * The implementation is based on <i>base and strong generating set</i> (BSGS), which is constructed using Schreier-Sims
@@ -68,6 +110,7 @@ import static cc.redberry.core.number.NumberUtils.factorial;
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @see cc.redberry.core.groups.permutations
  * @see cc.redberry.core.groups.permutations.AlgorithmsBase
  * @see cc.redberry.core.groups.permutations.AlgorithmsBacktrack
  * @see cc.redberry.core.groups.permutations.BacktrackSearch
@@ -410,9 +453,9 @@ public final class PermutationGroup
     }
 
     /**
-     * Returns an ordering on Ω(degree) induced by a base of this group.
+     * Returns an ordering on &Omega;(degree) induced by a base of this group.
      *
-     * @return ordering on Ω(degree) induced by a base of this group
+     * @return ordering on &Omega;(degree) induced by a base of this group
      */
     public InducedOrdering ordering() {
         ensureBSGSIsInitialized();
@@ -750,6 +793,15 @@ public final class PermutationGroup
      * @throws IllegalArgumentException if {@code subgroup.degree() != this.degree() }
      */
     public boolean containsSubgroup(PermutationGroup subgroup) {
+        checkDegree(subgroup.degree);
+        if (isSymmetric())
+            return true;
+        if (isAlternating()) {
+            for (Permutation p : subgroup.generators())
+                if (p.parity() == 1)
+                    return false;
+            return true;
+        }
         if (subgroup.order().compareTo(order()) > 0)
             return false;
         return membershipTest(subgroup.generators());
@@ -874,7 +926,7 @@ public final class PermutationGroup
     /**
      * Returns an output port of permutations that preserves specified mapping between points. To be precise: for each
      * permutation <i>p</i> returned by {@link cc.redberry.core.groups.permutations.BacktrackSearch#take()} and for
-     * all <i>i</i> ∈ {@code {0..from.length}}, it is guaranteed to be {@code p.newIndexOf(from[i]) == to[i]}.
+     * all <i>i</i> &isin; {@code {0..from.length}}, it is guaranteed to be {@code p.newIndexOf(from[i]) == to[i]}.
      *
      * @param from from
      * @param to   to
@@ -1101,7 +1153,7 @@ public final class PermutationGroup
     }
 
     /**
-     * Returns true if specified group is equals to this group, i.e. it is isomotphic and acts same on the Ω(degree).
+     * Returns true if specified group is equals to this group, i.e. it is isomorphic and acts same on the &Omega;(degree).
      *
      * @param oth permutation group
      * @return true if specified group has the same order and all its generators are contained in this group

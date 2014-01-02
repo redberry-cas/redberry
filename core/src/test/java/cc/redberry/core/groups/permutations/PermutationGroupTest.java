@@ -808,6 +808,44 @@ public class PermutationGroupTest extends AbstractTestClass {
         }
     }
 
+    @Test
+    public void testExample1() throws Exception {
+        //permutations in disjoint cycles notation
+        Permutation gen0 = new PermutationOneLine(13, new int[][]{{0, 9, 3}, {5, 8, 6}, {7, 11, 12}});
+        Permutation gen1 = new PermutationOneLine(13, new int[][]{{0, 2, 1}, {3, 8, 4}, {6, 7, 11}, {9, 12, 10}});
+        //construct permutation group of degree 13
+        PermutationGroup pg = new PermutationGroup(gen0, gen1);
+        //this group is transitive
+        assert pg.isTransitive();
+        //its order = 5616
+        System.out.println(pg.order());
+        //create alternating group Alt(13)
+        PermutationGroup alt13 = PermutationGroup.alternatingGroup(13);
+        //its order = 3113510400
+        System.out.println(alt13.order());
+        assert alt13.containsSubgroup(pg);
+        //direct product of two groups
+        PermutationGroup pp = pg.directProduct(PermutationGroup.symmetricGroup(8));
+        //setwise stabilizer
+        PermutationGroup sw = pp.setwiseStabilizer(1, 2, 3, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18);
+        assert pp.containsSubgroup(sw);
+        //its order = 17280
+        System.out.println(sw.order());
+        //center of this stabilizer
+        PermutationGroup center = sw.center();
+        //it is abelian group
+        assert center.isAbelian();
+        //generators of center
+        System.out.println(center.generators());
+        //[+{}, +{{19, 20}}, +{{2, 10}, {3, 9}, {6, 8}, {11, 12}}]
+        //orbits of center
+        int[][] orbits = center.orbits();
+        for (int[] orbit : orbits)
+            if (orbit.length != 1)
+                System.out.print(Arrays.toString(orbit));
+        //[2, 10], [3, 9], [6, 8], [11, 12], [19, 20]
+    }
+
     private static PermutationGroup pointWiseStabilizerBruteForce(PermutationGroup pg, int[] points) {
         PermutationGroup stab = pg;
         for (int i : points)

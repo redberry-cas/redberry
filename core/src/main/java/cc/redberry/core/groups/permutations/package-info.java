@@ -22,19 +22,16 @@
  */
 
 /**
- * Implementation of permutation group based on base and strong generating set using Schreier-Sims algorithm.
+ * Implementation of permutations and permutation groups.
  *
  * <p>
- *     The majority of algorithms used in this package can be found in
+ *     <b>Literature:</b>
  *     <br></br>
  *     <br>
- *         &nbsp;&nbsp;&nbsp;&nbsp; <b>[Holt05]</b> Derek F. Holt, Bettina Eick, Eamonn A. O'Brien, <i>Handbook Of Computational Group Theory</i>,Chapman and Hall/CRC, 2005
+ *         &nbsp;&nbsp;&nbsp;&nbsp; <b>[Holt05]</b> Derek F. Holt, Bettina Eick, Eamonn A. O'Brien, <i>Handbook Of Computational Group Theory</i>, Chapman and Hall/CRC, 2005
  *     </br>
  * </p>
  *
- * <p>
- *                            todo...
- * </p>
  * @see cc.redberry.core.groups.permutations.PermutationGroup
  */
 package cc.redberry.core.groups.permutations;

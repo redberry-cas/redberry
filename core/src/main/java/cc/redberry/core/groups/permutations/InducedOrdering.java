@@ -29,11 +29,12 @@ import cc.redberry.core.utils.IntComparator;
 import java.util.Arrays;
 
 /**
- * An ordering of points Ω(n) induced by a base B: if b<sub>i</sub>, b<sub>j</sub> ∈ B then
- * b<sub>i</sub> ≺ b<sub>j</sub> if and only if i < j, and b ≺ a for any b ∈ B and a ∉ B .
+ * An ordering of points &Omega;(n) induced by a base B: if b<sub>i</sub>, b<sub>j</sub> &isin; B then
+ * b<sub>i</sub> <b>&lt;</b> b<sub>j</sub> if and only if i < j, and b <b>&lt;</b> a for any b &isin; B and a ∉ B .
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @since 1.1.6
  */
 public class InducedOrdering implements IntComparator {
     private final int[] positions;
@@ -76,22 +77,22 @@ public class InducedOrdering implements IntComparator {
     }
 
     /**
-     * Returns the ≺-greatest point under this ordering.
+     * Returns the <b>&lt;</b>-greatest point under this ordering.
      *
      * @param a point
      * @param b point
-     * @return ≺-greatest point under this ordering
+     * @return <b>&lt;</b>-greatest point under this ordering
      */
     public int max(int a, int b) {
         return compare(a, b) >= 0 ? a : b;
     }
 
     /**
-     * Returns the ≺-least point under this ordering.
+     * Returns the <b>&lt;</b>-least point under this ordering.
      *
      * @param a point
      * @param b point
-     * @return ≺-least point under this ordering
+     * @return <b>&lt;</b>-least point under this ordering
      */
     public int min(int a, int b) {
         return compare(a, b) >= 0 ? b : a;
@@ -117,10 +118,10 @@ public class InducedOrdering implements IntComparator {
     }
 
     /**
-     * Returns the ≺-least point under this ordering in specified array.
+     * Returns the <b>&lt;</b>-least point under this ordering in specified array.
      *
      * @param array array
-     * @return ≺-least point under this ordering
+     * @return <b>&lt;</b>-least point under this ordering
      */
     public int min(final int[] array) {
         if (array.length == 0)
@@ -132,10 +133,10 @@ public class InducedOrdering implements IntComparator {
     }
 
     /**
-     * Returns the ≺-least point under this ordering in specified array.
+     * Returns the <b>&lt;</b>-least point under this ordering in specified array.
      *
      * @param array array
-     * @return ≺-least point under this ordering
+     * @return <b>&lt;</b>-least point under this ordering
      */
     public int min(final IntArrayList array) {
         if (array.size() == 0)
@@ -147,10 +148,10 @@ public class InducedOrdering implements IntComparator {
     }
 
     /**
-     * Returns the ≺-greatest point under this ordering in specified array.
+     * Returns the <b>&lt;</b>-greatest point under this ordering in specified array.
      *
      * @param array array
-     * @return ≺-greatest point under this ordering
+     * @return <b>&lt;</b>-greatest point under this ordering
      */
     public int max(final int[] array) {
         if (array.length == 0)
@@ -162,10 +163,10 @@ public class InducedOrdering implements IntComparator {
     }
 
     /**
-     * Returns the ≺-greatest point under this ordering in specified array.
+     * Returns the <b>&lt;</b>-greatest point under this ordering in specified array.
      *
      * @param array array
-     * @return ≺-greatest point under this ordering
+     * @return <b>&lt;</b>-greatest point under this ordering
      */
     public int max(final IntArrayList array) {
         if (array.size() == 0)

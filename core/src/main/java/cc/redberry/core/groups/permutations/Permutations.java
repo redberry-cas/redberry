@@ -40,6 +40,7 @@ import java.util.List;
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @since 1.1.6
  */
 public final class Permutations {
     private Permutations() {

@@ -28,7 +28,7 @@ package cc.redberry.core.groups.permutations;
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
- * @see BacktrackSearch
+ * @see cc.redberry.core.groups.permutations.BacktrackSearch
  */
 public interface BacktrackSearchTestFunction {
     /**

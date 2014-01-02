@@ -33,7 +33,8 @@ import java.util.Arrays;
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
- * @see Permutation
+ * @see cc.redberry.core.groups.permutations.Permutation
+ * @since 1.0
  */
 public class PermutationOneLine implements Permutation {
     final int[] permutation;
@@ -397,7 +398,13 @@ public class PermutationOneLine implements Permutation {
      */
     @Override
     public String toString() {
+//        return toStringCycles();
         return (antisymmetry ? "-" : "+") + Arrays.toString(permutation);
+    }
+
+    public String toStringCycles() {
+        String cycles = Arrays.deepToString(cycles()).replace("[", "{").replace("]", "}");
+        return (antisymmetry ? "-" : "+") + cycles;
     }
 
 

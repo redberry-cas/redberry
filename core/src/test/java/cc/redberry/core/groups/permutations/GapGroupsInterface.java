@@ -32,6 +32,8 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 /**
+ * An interface to GAP system (http://www.gap-system.org/).
+ *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
@@ -41,7 +43,13 @@ public final class GapGroupsInterface {
     private final PrintStream gapCmd;
     private final GapOutputReader gapReader;
 
-    GapGroupsInterface(String gapExecutable) throws IOException {
+    /**
+     * Creates GAP instance using absolute path to GAP executable.
+     *
+     * @param gapExecutable
+     * @throws IOException
+     */
+    public GapGroupsInterface(String gapExecutable) throws IOException {
         ProcessBuilder pb = new ProcessBuilder(gapExecutable, "-b");
         pb.redirectErrorStream(true);
         this.gapProcess = pb.start();

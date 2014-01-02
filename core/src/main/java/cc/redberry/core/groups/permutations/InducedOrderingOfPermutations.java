@@ -25,18 +25,19 @@ package cc.redberry.core.groups.permutations;
 import java.util.Comparator;
 
 /**
- * An ordering of permutations induced by an ordering on Ω(n) (see {@link InducedOrdering}).
+ * An ordering of permutations induced by an ordering on &Omega;(n) (see {@link InducedOrdering}).
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
- * @see InducedOrdering
+ * @see cc.redberry.core.groups.permutations.InducedOrdering
+ * @since 1.1.6
  */
 public class InducedOrderingOfPermutations implements Comparator<Permutation> {
     final InducedOrdering inducedOrdering;
     final int[] base;
 
     /**
-     * Creates ordering of permutations induced by ordering on Ω(n) induced by a base of permutation group.
+     * Creates ordering of permutations induced by ordering on &Omega;(n) induced by a base of permutation group.
      *
      * @param base base of permutation group
      */
@@ -46,9 +47,9 @@ public class InducedOrderingOfPermutations implements Comparator<Permutation> {
     }
 
     /**
-     * Returns an ordering on Ω(n)
+     * Returns an ordering on &Omega;(n)
      *
-     * @return ordering on Ω(n)
+     * @return ordering on &Omega;(n)
      */
     public InducedOrdering getInducedOrdering() {
         return inducedOrdering;

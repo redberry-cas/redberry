@@ -31,6 +31,7 @@ import java.util.Arrays;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  * @see PermutationOneLine
+ * @since 1.0
  */
 public interface Permutation extends Comparable<Permutation> {
     /**

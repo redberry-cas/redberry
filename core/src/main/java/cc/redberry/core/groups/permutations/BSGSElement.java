@@ -28,7 +28,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * This class holds <i>i-th</i> base point (&beta;<sub>i</sub>), generators of G<sup>(i)</sup>, where
+ * This class holds <i>i-th</i> base point (&beta;<sub>i</sub>), generators of
  * G<sup>(i)</sup> = G<sub>&beta;<sub>1</sub>&beta;<sub>2</sub>...&beta;<sub>i-1</sub></sub> -
  * stabilizer of all base points from <i>0-th</i> to <i>(i-1)-th</i> as described in Sec. 4.4.1 in <b>[Holt05]</b>.
  * <p/>
@@ -39,6 +39,7 @@ import java.util.List;
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @since 1.1.6
  */
 public class BSGSElement {
     /**
@@ -74,7 +75,7 @@ public class BSGSElement {
     }
 
     /**
-     * Calculates the transversal corresponding to the specified point (u<sub>&beta;</sub>), i.e. the element
+     * Calculates the transversal of specified point (u<sub>&beta;</sub>), i.e. the element
      * u<sub>&beta;</sub> such that &beta;<sub>i</sub><sup>u<sub>&beta;</sub></sup> =  &beta;.
      *
      * @param point point

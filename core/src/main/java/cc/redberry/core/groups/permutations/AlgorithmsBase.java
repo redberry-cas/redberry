@@ -35,13 +35,15 @@ import java.util.*;
 import static cc.redberry.core.groups.permutations.RandomPermutation.*;
 
 /**
- * Basic algorithms for constructing base and strong generating set.
+ * Algorithms for constructing base and strong generating set (BSGS).
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @since 1.1.6
  */
-public class AlgorithmsBase {
-
+public final class AlgorithmsBase {
+    private AlgorithmsBase() {
+    }
     //------------------------------ ALGORITHMS --------------------------------------------//
 
     /**
@@ -97,7 +99,7 @@ public class AlgorithmsBase {
      * @param BSGS        base and strong generating set
      * @param permutation permutation
      * @return true if specified permutation belongs to permutation group defined by specified base and strong
-     * generating set
+     * generating set and false otherwise
      */
     public static boolean membershipTest(final List<? extends BSGSElement> BSGS, Permutation permutation) {
         StripContainer sc = strip(BSGS, permutation);
@@ -106,7 +108,9 @@ public class AlgorithmsBase {
 
     /**
      * Creates a raw BSGS candidate represented as list. This method simply takes all distinct points that can be
-     * mapped onto another points under any of generators.
+     * mapped onto another points under any of generators and adjoins these points to a base. If generating set is
+     * empty, or it fixes all points, then this method returns {@code Collections.EMPTY_LIST}, otherwise it returns an
+     * {@code ArrayList} which can be further used in Schreier-Sims algorithm.
      *
      * @param generators group generators
      * @return raw BSGS candidate
@@ -118,7 +122,9 @@ public class AlgorithmsBase {
 
     /**
      * Creates a raw BSGS candidate represented as list. This method simply takes all distinct points that can be
-     * mapped onto another points under any of generators.
+     * mapped onto another points under any of generators and adjoins these points to a base. If generating set is
+     * empty, or it fixes all points, then this method returns {@code Collections.EMPTY_LIST}, otherwise it returns an
+     * {@code ArrayList} which can be further used in Schreier-Sims algorithm.
      *
      * @param generators group generators
      * @return raw BSGS candidate
@@ -168,7 +174,9 @@ public class AlgorithmsBase {
     /**
      * Creates a raw BSGS candidate represented as list. This method simply adds to {@code knownBase} all distinct
      * points that can be mapped onto another points under any of generators. Those points in {@code knownBase} that are
-     * fixed by all generators will not be taken into account.
+     * fixed by all generators will not be taken into account.  If generating set is empty, or it fixes all points,
+     * then this method returns {@code Collections.EMPTY_LIST}, otherwise it returns an {@code ArrayList} which can be
+     * further used in Schreier-Sims algorithm.
      *
      * @param knownBase  some proposed base points
      * @param generators group generators
@@ -230,7 +238,6 @@ public class AlgorithmsBase {
 
     /**
      * Creates BSGS using Schreier-Sims algorithm.
-     * <p/>
      * <p>
      * The underlying code organized as follows:
      * <pre><code>
@@ -239,14 +246,15 @@ public class AlgorithmsBase {
      *    return Collections.EMPTY_LIST;
      * SchreierSimsAlgorithm((ArrayList) BSGSCandidate);
      * return asBSGSList(BSGSCandidate);
-     * </code>
-     * </pre>
+     * </code></pre>
      * </p>
      *
      * @param generators a set of group generators
      * @return BSGS represented as array of its element
-     * @throws InconsistentGeneratorsException if permutations are inconsistent
-     * @throws IllegalArgumentException        if not all permutations have same length
+     * @throws cc.redberry.core.groups.permutations.InconsistentGeneratorsException if algorithm detects that specified
+     *                                                                              generators are inconsistent (due to antisymmetries)
+     * @throws IllegalArgumentException                                             if not all permutations have same length
+     * @see #createRawBSGSCandidate(java.util.List)
      * @see #SchreierSimsAlgorithm(java.util.ArrayList)
      */
     public static List<BSGSElement> createBSGSList(final List<Permutation> generators) {
@@ -260,7 +268,6 @@ public class AlgorithmsBase {
 
     /**
      * Creates BSGS using Schreier-Sims algorithm. Specified base will be extended if necessary.
-     * <p/>
      * <p>
      * The underlying code organized as follows:
      * <pre><code>
@@ -269,15 +276,16 @@ public class AlgorithmsBase {
      *    return Collections.EMPTY_LIST;
      * SchreierSimsAlgorithm((ArrayList) BSGSCandidate);
      * return asBSGSList(BSGSCandidate);
-     * </code>
-     * </pre>
+     * </code></pre>
      * </p>
      *
      * @param generators a set of group generators
      * @param knownBase  proposed base points
      * @return BSGS represented as array of its element
-     * @throws InconsistentGeneratorsException if permutations are inconsistent
-     * @throws IllegalArgumentException        if not all permutations have same length
+     * @throws cc.redberry.core.groups.permutations.InconsistentGeneratorsException if algorithm detects that specified
+     *                                                                              generators are inconsistent (due to antisymmetries)
+     * @throws IllegalArgumentException                                             if not all permutations have same length
+     * @see #createRawBSGSCandidate(int[], java.util.List)
      * @see #SchreierSimsAlgorithm(java.util.ArrayList)
      */
     public static List<BSGSElement> createBSGSList(final int[] knownBase, final List<Permutation> generators) {
@@ -293,7 +301,7 @@ public class AlgorithmsBase {
      * If some of generators fixes all base points, then, this method will find a new point that is not fixed by this
      * generator and add this point to specified BSGS candidate.
      *
-     * @param BSGSCandidate a BSGS candidate
+     * @param BSGSCandidate BSGS candidate
      */
     public static void makeUseOfAllGenerators(List<BSGSCandidateElement> BSGSCandidate) {
         //all group generators
@@ -328,10 +336,12 @@ public class AlgorithmsBase {
     }
 
     /**
-     * Applies Schreier-Sims algorithm for BSGS candidate and complete it if necessary, so, as a result the specified
-     * BSGS candidate is guarantied to be BSGS. The algorithm described as SCHREIERSIMS in Sec. 4.4.1 of <b>[Holt05]</b>.
+     * Applies Schreier-Sims algorithm to specified BSGS candidate and complete it if necessary; as result, specified
+     * BSGS candidate will be guaranteed BSGS. The algorithm described as SCHREIERSIMS in Sec. 4.4.1 of <b>[Holt05]</b>.
      *
      * @param BSGSCandidate BSGS candidate
+     * @throws cc.redberry.core.groups.permutations.InconsistentGeneratorsException if algorithm detects that specified
+     *                                                                              generators are inconsistent (due to antisymmetries)
      */
     public static void SchreierSimsAlgorithm(ArrayList<BSGSCandidateElement> BSGSCandidate) {
         if (BSGSCandidate.isEmpty())
@@ -424,14 +434,15 @@ public class AlgorithmsBase {
     }
 
     /**
-     * Applies random Schreier-Sims algorithm for BSGS candidate. Algorithm ddo not complete candidate if necessary,
-     * so, in order to verify that specified BSGS candidate became a BSGS one should apply
-     * {@link #SchreierSimsAlgorithm(java.util.ArrayList)} on the result.
-     * The algorithm described as RANDOMSCHREIER in Sec. 4.4.5 of <b>[Holt05]</b>.
+     * Applies randomized version of Schreier-Sims algorithm to specified BSGS candidate and complete it if necessary.
+     * The probability that after applying this algorithm the BSGS candidate will be guaranteed BSGS is equal to
+     * specified confidence level. The algorithm described as RANDOMSCHREIER in Sec. 4.4.5 of <b>[Holt05]</b>.
      *
      * @param BSGSCandidate   BSGS candidate
      * @param confidenceLevel confidence level (0 < confidence level < 1)
      * @param randomGenerator random generator
+     * @throws cc.redberry.core.groups.permutations.InconsistentGeneratorsException if algorithm detects that specified
+     *                                                                              generators are inconsistent (due to antisymmetries)
      */
     public static void RandomSchreierSimsAlgorithm(ArrayList<BSGSCandidateElement> BSGSCandidate,
                                                    double confidenceLevel, RandomGenerator randomGenerator) {
@@ -511,14 +522,17 @@ public class AlgorithmsBase {
     }
 
     /**
-     * Applies random Schreier-Sims algorithm for BSGS candidate if resulting group order is known
-     * and complete it if necessary, so, as a result the specified BSGS candidate is guarantied to be BSGS.
-     * {@link #SchreierSimsAlgorithm(java.util.ArrayList)} on the result.
-     * The algorithm described as RANDOMSCHREIER in Sec. 4.4.5 of <b>[Holt05]</b>.
+     * Applies randomized version of Schreier-Sims algorithm to specified BSGS until the group order calculated
+     * using this candidate is not equals to order specified; as result, specified BSGS candidate will be guarantied
+     * BSGS. If specified order greater then the order of permutation group generated by specified BSGS candidate,
+     * then the algorithm will fall in infinite loop.
      *
      * @param BSGSCandidate   BSGS candidate
      * @param groupOrder      order of a group
      * @param randomGenerator random generator
+     * @throws cc.redberry.core.groups.permutations.InconsistentGeneratorsException if algorithm detects that specified
+     *                                                                              generators are inconsistent (due to antisymmetries)
+     * @see #RandomSchreierSimsAlgorithm(java.util.ArrayList, double, org.apache.commons.math3.random.RandomGenerator)
      */
     public static void RandomSchreierSimsAlgorithmForKnownOrder(ArrayList<BSGSCandidateElement> BSGSCandidate,
                                                                 BigInteger groupOrder, RandomGenerator randomGenerator) {
@@ -583,7 +597,7 @@ public class AlgorithmsBase {
     }
 
     /**
-     * Calculate order of permutation group represented by specified BSGS.
+     * Calculates order of permutation group represented by specified BSGS.
      *
      * @param BSGSList BSGS
      * @return order of permutation group represented by specified BSGS
@@ -597,7 +611,7 @@ public class AlgorithmsBase {
 
     /**
      * Removes redundant elements from BSGS candidate (actually removes those elements which are easy to determine
-     * that they are redundant in this BSGS candidate). For more info see REMOVEGENS in Sec. 4.4.4 in [Holt05]
+     * that they are redundant in this BSGS candidate). For details see REMOVEGENS in Sec. 4.4.4 in [Holt05]
      *
      * @param BSGSCandidate BSGS candidate
      */
@@ -646,7 +660,7 @@ public class AlgorithmsBase {
     }
 
     /**
-     * Removes redundant base points in specified BSGS (straightforwardly, i.e. without any additional base changes).
+     * Removes redundant base points from the ending of specified BSGS.
      *
      * @param BSGS BSGS
      */
@@ -664,7 +678,7 @@ public class AlgorithmsBase {
      * algorithm.
      *
      * @param BSGSCandidate BSGS candidate
-     * @return true if specified BSGS candidate is a real BSGS
+     * @return true if specified BSGS candidate is a real BSGS and false otherwise
      */
     public static boolean isBSGS(List<? extends BSGSElement> BSGSCandidate) {
         if (BSGSCandidate.isEmpty())
@@ -710,14 +724,15 @@ public class AlgorithmsBase {
     }
 
     /**
-     * Returns the number of elements in specified strong generating set. Since expected maximum number of generators
-     * in BSGS is about n*(n-1)/2, then, in order to avoid integer overflow, we use long, since for
-     * n ~ Integer.MAX_VALUE the corresponding number of elements an be up to ~ Long.MAX_VALUE / 2.
+     * Returns the number of elements in specified strong generating set.
      *
      * @param BSGS strong generating set
      * @return number of elements in specified strong generating set
      */
     public static long numberOfStrongGenerators(List<? extends BSGSElement> BSGS) {
+        /* Since expected maximum number of generators
+           in BSGS is about n*(n-1)/2, then, in order to avoid integer overflow, we use long, since for
+           n ~ Integer.MAX_VALUE the corresponding number of elements an be up to ~ Long.MAX_VALUE / 2. */
         long num = 0;
         for (BSGSElement el : BSGS)
             num += el.stabilizerGenerators.size();
@@ -725,7 +740,7 @@ public class AlgorithmsBase {
     }
 
     /**
-     * Swaps <i>i-th</i> and <i>(i+1)-th</i> points of specified BSGS. The details on the implementation can be
+     * Swaps <i>i-th</i> and <i>(i+1)-th</i> points of specified BSGS. The details of the implementation can be
      * found in Sec. 4.4.7 of <b>[Holt05]</b> (see BASESWAP algorithm).
      *
      * @param BSGS BSGS
@@ -781,6 +796,7 @@ public class AlgorithmsBase {
                     //<-ok this transversal is good
                     //we need an element in G^(4) that beta_{i+1}^element = beta_{i+1}^{inverse transversal}
                     //so that beta_{i+1} is fixed under product of element * transversal
+                    //todo unnecessary composition can be carried out!
                     Permutation newStabilizer =
                             BSGS.get(i + 1).getTransversalOf(newIndexUnderInverse).composition(transversal);
                     //if this element was not yet seen
@@ -809,7 +825,7 @@ public class AlgorithmsBase {
 
 
     /**
-     * Changes base of specified BSGS to specified new base using a simple algorithm with transpositions; the
+     * Changes the base of specified BSGS to specified new base using an algorithm with transpositions. The
      * algorithm guaranties that if initial base is [b1, b2, b3, ..., bk] and specified base is [a1, a2, a3, ..., al],
      * then the resulting base will look like  [a1, a2, a3, ...., al, b4, b7, ..., b19] with no any redundant base
      * points at the end (redundant point is point which corresponding stabilizer generators are empty) - this
@@ -828,8 +844,8 @@ public class AlgorithmsBase {
     }
 
     /**
-     * Changes base of specified BSGS to specified new base using an algorithm with conjugations and transpositions;
-     * the algorithm guaranties that if initial base is [b1, b2, b3, ..., bk] and specified base is [a1, a2, a3, ..., al],
+     * Changes base of specified BSGS to specified new base using an algorithm with conjugations and transpositions.
+     * The algorithm guaranties that if initial base is [b1, b2, b3, ..., bk] and specified base is [a1, a2, a3, ..., al],
      * then the resulting base will look like  [a1, a2, a3, ...., al, b4, b7, ..., b19] with no any redundant base
      * points at the end (redundant point is point which corresponding stabilizer generators are empty) - this
      * achieves by invocation of {@link #removeRedundantBaseRemnant(java.util.ArrayList)} at the end of procedure.
@@ -936,8 +952,8 @@ public class AlgorithmsBase {
 
     /**
      * Changes base of specified BSGS to specified new base by construction of a new BSGS with known base using
-     * randomized Schreier-Sims algorithm {@link #RandomSchreierSimsAlgorithmForKnownOrder(java.util.ArrayList, java.math.BigInteger, org.apache.commons.math3.random.RandomGenerator)};
-     * the algorithm guaranties that if initial base is [b1, b2, b3, ..., bk] and specified base is [a1, a2, a3, ..., al],
+     * randomized Schreier-Sims algorithm {@link #RandomSchreierSimsAlgorithmForKnownOrder(java.util.ArrayList, java.math.BigInteger, org.apache.commons.math3.random.RandomGenerator)}.
+     * The algorithm guaranties that if initial base is [b1, b2, b3, ..., bk] and specified base is [a1, a2, a3, ..., al],
      * then the resulting base will look like  [a1, a2, a3, ...., al, x, y, ..., z] with no any redundant base
      * points at the end (redundant point is point which corresponding stabilizer generators are empty) but with some
      * additional points introduced if specified new base was not anought.
@@ -973,7 +989,6 @@ public class AlgorithmsBase {
      * @see #rebaseFromScratch(java.util.ArrayList, int[])
      */
     public static void rebase(ArrayList<BSGSCandidateElement> BSGS, int[] newBase) {
-        //trying to make newBase as same as possible to the initial base
         rebaseWithConjugationAndTranspositions(BSGS, newBase);
     }
 
