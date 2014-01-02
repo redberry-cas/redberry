@@ -39,11 +39,39 @@ import static cc.redberry.core.groups.permutations.AlgorithmsBase.*;
 import static cc.redberry.core.number.NumberUtils.factorial;
 
 /**
- * Permutation group. Base and strong generating set of this permutation group will be initialized on demand (lazy
- * initialization).
+ * Implementation of permutation group. This class provides a number of methods for work wih permutation groups,
+ * including membership testing, coset enumeration, searching for centralizers, stabilizers, etc (for details see
+ * method summary). The instances of this class are immutable. The iterator returned by this class's {@code iterator()}
+ * method iterates over all elements of this group.
+ * <p>
+ * <b><big>Implementation and complexity.</big></b>
+ * </p>
+ * <p>
+ * The implementation is based on <i>base and strong generating set</i> (BSGS), which is constructed using Schreier-Sims
+ * algorithm ({@link cc.redberry.core.groups.permutations.AlgorithmsBase#SchreierSimsAlgorithm(java.util.ArrayList)}).
+ * Schreier-Sims algorithm has O(n^6 +k*n^2) complexity (where n is a degree of group), which can be crucial for
+ * groups with large bases.  Since not all methods require BSGS, the BSGS structure of {@code PermutationGroup} is
+ * <i>lazy initialized</i>, i.e. its initialization occurs on the first invocation of method that uses BSGS.
+ * </p>
+ * <p>
+ * <b>Structural calculations.</b> Generally, all structural calculations have polynomial time complexity. The polynomial-time operations include:
+ * calculation of orbits (do not require BSGS); membership testing; calculation of order, base and
+ * strong generating set, pointwise stabilizers, union and direct product of groups; tests for
+ * commutativity, transitivity, Alt(n) and Sym(n) testing; calculation of normal closure and derived subgroup.
+ * </p>
+ * <p>
+ * <b>Backtrack search.</b> On the other hand, the algorithms that use backtrack search methods have exponential complexity in the
+ * worst case, which also hardly depends on the input. This algorithms include: calculation of setwise stabilizers,
+ * intersections of groups, coset representatives, centralizers. The exception is the calculation of center of group
+ * which is always polynomial.
+ * </p>
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @see cc.redberry.core.groups.permutations.AlgorithmsBase
+ * @see cc.redberry.core.groups.permutations.AlgorithmsBacktrack
+ * @see cc.redberry.core.groups.permutations.BacktrackSearch
+ * @since 1.1.6
  */
 public final class PermutationGroup
         implements Iterable<Permutation> {
@@ -93,7 +121,7 @@ public final class PermutationGroup
     }
 
     /**
-     * Creates permutation group from a given generating set.
+     * Creates permutation group with a given generating set.
      *
      * @param generators generating set
      */
@@ -126,20 +154,22 @@ public final class PermutationGroup
     }
 
     /**
-     * Creates symmetric group of specified degree.
+     * Creates symmetric group of specified degree. BSGS structure of symmetric group will be constructed in O(n^2) time.
      *
      * @param degree degree
      * @return symmetric group of specified degree
+     * @see cc.redberry.core.groups.permutations.AlgorithmsBase#createSymmetricGroupBSGS(int)
      */
     public static PermutationGroup symmetricGroup(int degree) {
         return new PermutationGroup(createSymmetricGroupBSGS(degree), true);
     }
 
     /**
-     * Creates alternating group of specified degree.
+     * Creates alternating group of specified degree. BSGS structure of alternating group will be constructed in O(n^2) time.
      *
      * @param degree degree
      * @return alternating group of specified degree
+     * @see cc.redberry.core.groups.permutations.AlgorithmsBase#createAlternatingGroupBSGS(int)
      */
     public static PermutationGroup alternatingGroup(int degree) {
         return new PermutationGroup(createAlternatingGroupBSGS(degree), true);
@@ -183,7 +213,7 @@ public final class PermutationGroup
     }
 
     /**
-     * Returns the orbit of specified point
+     * Returns the orbit of specified point.
      *
      * @param point point
      * @return orbit of specified point
@@ -221,9 +251,9 @@ public final class PermutationGroup
     }
 
     /**
-     * Returns a set of all orbits.
+     * Returns an array of all orbits.
      *
-     * @return set of all orbits
+     * @return an array of all orbits
      */
     public int[][] orbits() {
         int[][] r = new int[orbits.length][];
@@ -284,10 +314,9 @@ public final class PermutationGroup
         out:
         for (int i = 0; i < size; ++i)
             for (int j = i + 1; j < size; ++j)
-                if (!generators.get(i).commutator(generators.get(j)).isIdentity()) {
-                    isAbelian = false;
-                    break out;
-                }
+                if (!generators.get(i).commutator(generators.get(j)).isIdentity())
+                    return isAbelian = false;
+
 
         return isAbelian.booleanValue();
     }
@@ -371,9 +400,9 @@ public final class PermutationGroup
     }
 
     /**
-     * Returns the number of permutations in this group.
+     * Returns the order of this group, i.e. the number of permutations in this group.
      *
-     * @return number of permutations in this group
+     * @return the order of this group
      */
     public BigInteger order() {
         ensureBSGSIsInitialized();
@@ -391,20 +420,21 @@ public final class PermutationGroup
     }
 
     /**
-     * Returns whether the specified permutation is member of this group
+     * Returns true if specified permutation is member of this group and false otherwise.
      *
      * @param permutation permutation
-     * @return true if specified permutation is member of this group and false otherwise
+     * @return /true if specified permutation is member of this group and false otherwise
      */
     public boolean membershipTest(Permutation permutation) {
         return AlgorithmsBase.membershipTest(getBSGS(), permutation);
     }
 
     /**
-     * Returns whether all specified permutations are members of this group.
+     * Returns true if all specified permutations are members of this group and false otherwise.
      *
      * @param permutations permutations
      * @return true if all specified permutations are members of this group and false otherwise
+     * @see #membershipTest(Permutation)
      */
     public boolean membershipTest(Collection<Permutation> permutations) {
         for (Permutation p : permutations)
@@ -425,9 +455,9 @@ public final class PermutationGroup
     private Boolean isSymmetric = null;
 
     /**
-     * Returns whether this group is symmetric group.
+     * Returns true if this group is natural symmetric group and false otherwise.
      *
-     * @return true is this group is natural symmetric group and false otherwise.
+     * @return true is this group is natural symmetric group and false otherwise
      */
     public boolean isSymmetric() {
         if (isSymmetric != null)
@@ -454,7 +484,7 @@ public final class PermutationGroup
     private Boolean isAlternating = null;
 
     /**
-     * Returns whether this group is alternating group.
+     * Returns true is this group is natural alternating group Alt(degree) and false otherwise.
      *
      * @return true is this group is natural alternating group Alt(degree) and false otherwise
      */
@@ -502,9 +532,9 @@ public final class PermutationGroup
     }
 
     /**
-     * Returns whether this group is regular (i.e. it is transitive and order == degree).
+     * Returns true if this group regular (transitive and its order equals to degree) and false otherwise,
      *
-     * @return true is this group is transitive and its order equals to degree
+     * @return true if this group regular and false otherwise
      */
     public boolean isRegular() {
         return isTransitive() && order().compareTo(BigInteger.valueOf(degree)) == 0;
@@ -532,14 +562,18 @@ public final class PermutationGroup
         return new PermutationGroup(asBSGSList(bsgs.subList(set.length, bsgs.size())), true);
     }
 
+    private static final double NORMAL_CLOSURE_CONFIDENCE_LEVEL = 1 - 1E-6;
+
     /**
      * Calculates normal closure of specified subgroup. The algorithm follows NORMALCLOSURE (randomized version)
      * described in Sec. 3.3.2 in [Holt05].
      *
      * @param subgroup subgroup of this
      * @return normal closure
+     * @throws IllegalArgumentException if {@code subgroup.degree() != this.degree() }
      */
     public PermutationGroup normalClosureOf(PermutationGroup subgroup) {
+        checkDegree(subgroup.degree);
         if (subgroup.isTrivial())
             return subgroup;
 
@@ -559,7 +593,6 @@ public final class PermutationGroup
         //random source of this
         List<Permutation> randomSource = randomSource();
 
-        double CL = 1 - 1E-6;
         boolean completed = false, added, globalAdded = false;
         while (!completed) {
             //random source of closure
@@ -582,7 +615,7 @@ public final class PermutationGroup
             // if some element belongs to closure, the the result of membership test will be guaranteed true (nos such
             // guarantee in the case of false).
             if (added)
-                AlgorithmsBase.RandomSchreierSimsAlgorithm(closure, CL, CC.getRandomGenerator());
+                AlgorithmsBase.RandomSchreierSimsAlgorithm(closure, NORMAL_CLOSURE_CONFIDENCE_LEVEL, CC.getRandomGenerator());
             //testing closure
             completed = true;
             for (Permutation generator : generators)
@@ -603,8 +636,10 @@ public final class PermutationGroup
      *
      * @param group permutation group
      * @return commutator of this and specified group
+     * @throws IllegalArgumentException if {@code group.degree() != this.degree() }
      */
     public PermutationGroup commutator(PermutationGroup group) {
+        checkDegree(group.degree);
         //commutator is normal closure of set [generators, group.generators] in <generators,group.generators>.
         ArrayList<Permutation> commutator = new ArrayList<>();
         Permutation c;
@@ -736,7 +771,8 @@ public final class PermutationGroup
     }
 
     /**
-     * Returns coset representative of specified element; the returned representative will be minimal in its coset.
+     * Returns coset representative of specified element; the returned representative will be minimal in its coset
+     * under the ordering returned by {@code ordering()}.
      *
      * @param subgroup a subgroup of this group
      * @param element  some element of this group
@@ -809,6 +845,7 @@ public final class PermutationGroup
      * @return direct product this × other
      */
     public PermutationGroup directProduct(PermutationGroup group) {
+        //todo consider all cases
         return new PermutationGroup(AlgorithmsBase.directProduct(getBSGS(), group.getBSGS()), true);
     }
 
@@ -883,6 +920,11 @@ public final class PermutationGroup
         }
     }
 
+    /**
+     * Returns an iterator over all elements in this group.
+     *
+     * @return iterator over all elements in this group
+     */
     @Override
     public Iterator<Permutation> iterator() {
         ensureBSGSIsInitialized();
@@ -892,7 +934,7 @@ public final class PermutationGroup
     /**
      * An iterator over all permutations in group
      */
-    public class PermIterator implements Iterator<Permutation> {
+    private final class PermIterator implements Iterator<Permutation> {
         private final IntTuplesPort tuplesPort;
         int[] tuple;
 
@@ -942,8 +984,10 @@ public final class PermutationGroup
      *
      * @param subgroup a subgroup of this
      * @return centralizer of specified subgroup
+     * @throws IllegalArgumentException if {@code subgroup.degree() != this.degree() }
      */
     public PermutationGroup centralizerOf(final PermutationGroup subgroup) {
+        checkDegree(subgroup.degree);
         if (subgroup.isAbelian() && subgroup.isTransitive())
             return subgroup;
         //todo special case for Sym(n)
@@ -1057,10 +1101,10 @@ public final class PermutationGroup
     }
 
     /**
-     * Returns whether specified group is equal to this group.
+     * Returns true if specified group is equals to this group, i.e. it is isomotphic and acts same on the Ω(degree).
      *
      * @param oth permutation group
-     * @return true if specified group has sam order and all its generators are contained in this group
+     * @return true if specified group has the same order and all its generators are contained in this group
      * @throws IllegalArgumentException {@code oth.degree != this.degree()}
      */
     public boolean equals(PermutationGroup oth) {
