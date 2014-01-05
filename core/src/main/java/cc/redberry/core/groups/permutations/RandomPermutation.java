@@ -29,6 +29,27 @@ import org.apache.commons.math3.random.Well19937a;
 import java.util.List;
 
 /**
+ * Algorithms for generating uniform distributed random elements of permutation group.
+ * <p><b>Example:</b><p>
+ * In the following example we use a two generators, which generates a group of order 5616 and choose 5616 random
+ * elements of this group with uniform distribution
+ * <pre style="background:#f1f1f1;color:#000"><span style="color:#406040"> //primitive permutation group with 5616 elements</span>
+ * <span style="color:#a08000">Permutation</span> perm1 <span style="color:#2060a0">=</span> <span style="color:#2060a0">new</span> <span style="color:#a08000">PermutationOneLine</span>(<span style="color:#0080a0">9</span>, <span style="color:#0080a0">1</span>, <span style="color:#0080a0">2</span>, <span style="color:#0080a0">0</span>, <span style="color:#0080a0">4</span>, <span style="color:#0080a0">8</span>, <span style="color:#0080a0">5</span>, <span style="color:#0080a0">11</span>, <span style="color:#0080a0">6</span>, <span style="color:#0080a0">3</span>, <span style="color:#0080a0">10</span>, <span style="color:#0080a0">12</span>, <span style="color:#0080a0">7</span>);
+ * <span style="color:#a08000">Permutation</span> perm2 <span style="color:#2060a0">=</span> <span style="color:#2060a0">new</span> <span style="color:#a08000">PermutationOneLine</span>(<span style="color:#0080a0">2</span>, <span style="color:#0080a0">0</span>, <span style="color:#0080a0">1</span>, <span style="color:#0080a0">8</span>, <span style="color:#0080a0">3</span>, <span style="color:#0080a0">5</span>, <span style="color:#0080a0">7</span>, <span style="color:#0080a0">11</span>, <span style="color:#0080a0">4</span>, <span style="color:#0080a0">12</span>, <span style="color:#0080a0">9</span>, <span style="color:#0080a0">6</span>, <span style="color:#0080a0">10</span>);
+ * <span style="color:#a08000">ArrayList&lt;<span style="color:#a08000">Permutation</span>></span> generators <span style="color:#2060a0">=</span> <span style="color:#2060a0">new</span> <span style="color:#a08000">ArrayList&lt;></span>(<span style="color:#a08000">Arrays</span><span style="color:#2060a0">.</span>asList(perm1, perm2));
+ * <span style="color:#406040">//we'll use a list of generators as a source of randomness</span>
+ * <span style="color:#406040">//this brings some randomization in generators list</span>
+ * <span style="color:#a08000">RandomPermutation</span><span style="color:#2060a0">.</span>randomness(generators);
+ * <span style="color:#a08000">Set&lt;<span style="color:#a08000">Permutation</span>></span> set <span style="color:#2060a0">=</span> <span style="color:#2060a0">new</span> <span style="color:#a08000">HashSet&lt;></span>();
+ * <span style="color:#a08000">int</span> k <span style="color:#2060a0">=</span> <span style="color:#0080a0">5616</span>; <span style="color:#406040">//equal to order of group</span>
+ * <span style="color:#406040">//choosing 5616 random elements</span>
+ * <span style="color:#2060a0">for</span> (; k <span style="color:#2060a0">></span> <span style="color:#0080a0">0</span>; <span style="color:#2060a0">--</span>k)
+ *     set<span style="color:#2060a0">.</span>add(<span style="color:#a08000">RandomPermutation</span><span style="color:#2060a0">.</span>random(generators));
+ * <span style="color:#406040">//uniform</span>
+ * <span style="color:#a08000">System</span><span style="color:#2060a0">.</span>out<span style="color:#2060a0">.</span>println(set<span style="color:#2060a0">.</span>size());<span style="color:#406040">//~3500</span>
+ * </pre>
+ * </p>
+ *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  * @since 1.1.6
@@ -52,7 +73,7 @@ public final class RandomPermutation {
      * Brings randomness to a list of generators: the source list will be extended and filled by an equivalent set
      * of generators generated randomly; commonly it should be used in a combination with
      * {@link #random(java.util.List, org.apache.commons.math3.random.RandomGenerator)} to produce almost uniform distributed permutations in a group defined
-     * by corresponding set of generators. This method is a variant of PREINTIALIZE described
+     * by corresponding set of generators. This method is a variant of PREINITIALIZE described
      * in Sec. 3.2.2 in [Holt05].
      *
      * @param generators a list of generators
@@ -68,7 +89,7 @@ public final class RandomPermutation {
      * Brings randomness to a list of generators: the source list will be extended and filled by an equivalent set
      * of generators generated randomly; commonly it should be used in a combination with
      * {@link #random(java.util.List, org.apache.commons.math3.random.RandomGenerator)} to produce almost uniform distributed permutations in a group defined
-     * by corresponding set of generators. This method is a variant of PREINTIALIZE described
+     * by corresponding set of generators. This method is a variant of PREINITIALIZE described
      * in Sec. 3.2.2 in [Holt05].
      *
      * @param generators          a list of generators

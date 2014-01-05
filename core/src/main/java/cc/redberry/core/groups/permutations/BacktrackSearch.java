@@ -32,9 +32,10 @@ import java.util.List;
 
 /**
  * An iterator (organized as output port {@link OutputPortUnsafe}) over group elements, that scans group in increasing
- * order of base images; to be precise: if base B = [b1, b2, b3,..,bn], then element g <i>which maps all base points
- * into themselves</i> (g(b) &isin; B for each b &isin; B) is guaranteed to precedes (<b>&lt;</b>) an element h, which base image succeeds
- * (≻) the base image of g according to ordering specified by {@link InducedOrdering}.
+ * order permutations according to the ordering induced by a base (in increasing order of base images). To be precise:
+ * if base B = [b1, b2, b3,..,bn], then element g <i>which maps all base points into themselves</i> (g(b) &isin; B
+ * for each b &isin; B) is guaranteed to precedes (<b>&lt;</b>) an element h, which base image succeeds
+ * (>) the base image of g according to ordering specified by {@link InducedOrdering}.
  * <p/>
  * <b>Pruning the tree:</b>
  * <br>The iteration is organized as a depth-first search in the search tree of specified permutation group. This search

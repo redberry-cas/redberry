@@ -263,4 +263,18 @@ public interface Permutation extends Comparable<Permutation> {
      * @return lengths of cycles in disjoint cycle notation
      */
     int[] lengthsOfCycles();
+
+    /**
+     * Returns a string representation of this permutation in one-line notation.
+     *
+     * @return a string representation of this permutation in one-line notation
+     */
+    String toStringOneLine();
+
+    /**
+     * Returns a string representation of this permutation in disjoint cycles notation.
+     *
+     * @return a string representation of this permutation in disjoint cycles notation
+     */
+    String toStringCycles();
 }

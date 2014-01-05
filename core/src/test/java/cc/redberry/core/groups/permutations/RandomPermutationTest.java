@@ -33,9 +33,7 @@ import org.apache.commons.math3.util.ArithmeticUtils;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 import static cc.redberry.core.TAssert.assertTrue;
 import static java.lang.System.currentTimeMillis;
@@ -66,7 +64,7 @@ public class RandomPermutationTest {
             for (int i = 0; i < COUNT; ++i) {
                 temp = random(source);
                 for (int k = 0; k < n; ++k) {
-                    if (((PermutationOneLine)temp).permutation[k] == k)
+                    if (((PermutationOneLine) temp).permutation[k] == k)
                         ++histo[k];
                 }
             }
@@ -97,7 +95,7 @@ public class RandomPermutationTest {
             for (int i = 0; i < COUNT; ++i) {
                 temp = random(source);
                 for (int k = 0; k < n; ++k) {
-                    if (((PermutationOneLine)temp).permutation[k] == k)
+                    if (((PermutationOneLine) temp).permutation[k] == k)
                         ++histo[k];
                 }
             }
@@ -279,5 +277,23 @@ public class RandomPermutationTest {
 
             System.out.println();
         }
+    }
+
+    @Test
+    public void testExample1() {
+//primitive permutation group with 5616 elements
+Permutation perm1 = new PermutationOneLine(9, 1, 2, 0, 4, 8, 5, 11, 6, 3, 10, 12, 7);
+Permutation perm2 = new PermutationOneLine(2, 0, 1, 8, 3, 5, 7, 11, 4, 12, 9, 6, 10);
+ArrayList<Permutation> generators = new ArrayList<>(Arrays.asList(perm1, perm2));
+//we'll use a list of generators as a source of randomness
+//this brings some randomization in generators list
+RandomPermutation.randomness(generators);
+Set<Permutation> set = new HashSet<>();
+int k = 5616;
+//choosing 5616 random elements
+for (; k > 0; --k)
+    set.add(RandomPermutation.random(generators));
+//uniform
+System.out.println(set.size());//~3500
     }
 }

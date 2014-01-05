@@ -35,10 +35,40 @@ import java.util.*;
 import static cc.redberry.core.groups.permutations.RandomPermutation.*;
 
 /**
- * Algorithms for constructing base and strong generating set (BSGS).
+ * Algorithms for constructing, modifying and manipulating base and strong generating set (BSGS) of permutation group
+ * including Schreier-Sims algorithm and its randomized versions, algorithms for changing base of BSGS, algorithms for
+ * creating BSGS of symmetric and alternating groups and many other utility methods.
+ * <p><b>BSGS data structure</b>
+ * The data structure used for representing BSGS is an array list of
+ * BSGS elements (see {@link cc.redberry.core.groups.permutations.BSGSElement}); <i>i-th</i> item in this list
+ * contains <i>i-th</i> point of base and <i>i-th</i> basic stabilizer in stabilizers chain (pointwise stabilizer of all
+ * points before <i>i-th</i> point, exclusive), represented by its generators.
+ * </p>
+ * <p> The BSGS structure appears in two forms:
+ * <i>mutable</i> --- {@code ArrayList<BSGSCandidateElement>} (see
+ * {@link cc.redberry.core.groups.permutations.BSGSCandidateElement}) and <i>immutable</i> --- {@code List<BSGSElement>}
+ * (unmodifiable). The first form is used as a candidate BSGS of permutation group, while the second everywhere
+ * considered as a valid BSGS. For illustration, consider the following code:
+ * <pre style="background:#f1f1f1;color:#000"> 1:  <span style="color:#a08000">Permutation</span> perm1 <span style="color:#2060a0">=</span> <span style="color:#2060a0">new</span> <span style="color:#a08000">PermutationOneLine</span>(<span style="color:#0080a0">1</span>, <span style="color:#0080a0">2</span>, <span style="color:#0080a0">3</span>, <span style="color:#0080a0">4</span>, <span style="color:#0080a0">0</span>);
+ * 2:  <span style="color:#a08000">Permutation</span> perm2 <span style="color:#2060a0">=</span> <span style="color:#2060a0">new</span> <span style="color:#a08000">PermutationOneLine</span>(<span style="color:#0080a0">1</span>, <span style="color:#0080a0">3</span>, <span style="color:#0080a0">0</span>, <span style="color:#0080a0">4</span>, <span style="color:#0080a0">2</span>);
+ * 3:  <span style="color:#406040">//create a candidate BSGS</span>
+ * 4:  <span style="color:#a08000">ArrayList&lt;<span style="color:#a08000">BSGSCandidateElement</span>></span> candidate <span style="color:#2060a0">=</span> (<span style="color:#a08000">ArrayList</span>) <span style="color:#a08000">AlgorithmsBase</span><span style="color:#2060a0">.</span>createRawBSGSCandidate(perm1, perm2);
+ * 5:  <span style="color:#406040">//apply randomized Schreier-Sims algorithm to candidate BSGS (add missing base points and basic stabilizers)</span>
+ * 6:  <span style="color:#a08000">AlgorithmsBase</span><span style="color:#2060a0">.</span>RandomSchreierSimsAlgorithm(candidate, <span style="color:#0080a0">0.9999</span>, <span style="color:#2060a0">new</span> <span style="color:#a08000">Well1024a</span>());
+ * 7:  <span style="color:#406040">//if our random Schreier-Sims was not enough</span>
+ * 8:  <span style="color:#2060a0">if</span> (<span style="color:#2060a0">!</span><span style="color:#a08000">AlgorithmsBase</span><span style="color:#2060a0">.</span>isBSGS(candidate))
+ * 9:  <span style="color:#a08000">    AlgorithmsBase</span><span style="color:#2060a0">.</span>SchreierSimsAlgorithm(candidate);
+ * 10: <span style="color:#a08000">List&lt;<span style="color:#a08000">BSGSElement</span>></span> bsgs <span style="color:#2060a0">=</span> <span style="color:#a08000">AlgorithmsBase</span><span style="color:#2060a0">.</span>asBSGSList(candidate);
+ * </pre>
+ * In this example we construct a very raw candidate BSGS in the line 4 and then apply randomized Schreier-Sims
+ * algorithm which modifies it. Still after, there is a very small ~0.01% probability that this candidate is not a real
+ * BSGS; we check this in the line 8 and apply deterministic algorithm if necessary. After all, we can convert
+ * candidate BSGS to a list with immutable elements in line 10.
+ * </p>
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @see cc.redberry.core.groups.permutations.AlgorithmsBacktrack
  * @since 1.1.6
  */
 public final class AlgorithmsBase {

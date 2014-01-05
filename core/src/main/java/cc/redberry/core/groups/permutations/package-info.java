@@ -22,16 +22,43 @@
  */
 
 /**
- * Implementation of permutations and permutation groups.
- *
+ * This package provides implementation of permutations and permutation groups.
+ * <p><big><b>Permutations</b></big></p>
  * <p>
- *     <b>Literature:</b>
- *     <br></br>
- *     <br>
- *         &nbsp;&nbsp;&nbsp;&nbsp; <b>[Holt05]</b> Derek F. Holt, Bettina Eick, Eamonn A. O'Brien, <i>Handbook Of Computational Group Theory</i>, Chapman and Hall/CRC, 2005
- *     </br>
+ * The interface {@link cc.redberry.core.groups.permutations.Permutation} describes a wide functionality of a single
+ * permutation; it has only one implementation ---  {@link cc.redberry.core.groups.permutations.PermutationOneLine}
+ * which provides the most balanced proportion between performance and memory usage.
+ * <p><b>Symmetries and antisymmetries</b>
+ * In many physical applications, permutations arise as symmetries of some mathematical structures. For example,
+ * consider a function of 3 variables with the following property: f(x,y,z) == f(z,x,y). This symmetry can be put in
+ * one-to-one correspondence with a permutation [2,0,1] acting on a set [x,y,z]. Generally, it is accepted to consider a more
+ * general properties --- antisymmetries, which can additionally change the sigh of the function from the above example,
+ * e.g. f(x,y,z) == -f(z,y,x). In order to take into account antisymmetries, each {@code Permutation} may have additional property ---
+ * antisymmetry, which can have two values: +1 or -1. According to the sense of antisymmetry, this property simply
+ * multiplies under the composition of permutations.
+ * </p>
+ * <p><big><b>Permutation groups</b></big></p>
+ * <p>
+ * Permutation groups are described in the {@link cc.redberry.core.groups.permutations.PermutationGroup} class. This
+ * class provides a wide range of standard methods including membership testing, coset enumeration, searching for
+ * centralizers, stabilizers, etc. The implementation is based on a <i>base and strong generating set (BSGS)</i>
+ * (see <b>[Holt05]</b>). The description of BSGS data structure as well as algorithms for constructing, modifying and
+ * manipulating with BSGS are placed in {@link cc.redberry.core.groups.permutations.AlgorithmsBase} class. Algorithms
+ * for searching subgroups in permutation groups using backtracking are placed in
+ * {@link cc.redberry.core.groups.permutations.AlgorithmsBacktrack} class.
+ * </p>
+ * <p>
+ * <b><big>Literature:</big></b>
+ * <br></br>
+ * <br>
+ * &nbsp;&nbsp;&nbsp;&nbsp; <b>[Holt05]</b> Derek F. Holt, Bettina Eick, Eamonn A. O'Brien, <i>Handbook Of Computational Group Theory</i>, Chapman and Hall/CRC, 2005
+ * </br>
  * </p>
  *
+ * @see cc.redberry.core.groups.permutations.Permutation
+ * @see cc.redberry.core.groups.permutations.PermutationOneLine
  * @see cc.redberry.core.groups.permutations.PermutationGroup
+ * @see cc.redberry.core.groups.permutations.AlgorithmsBase
+ * @see cc.redberry.core.groups.permutations.AlgorithmsBacktrack
  */
 package cc.redberry.core.groups.permutations;

@@ -30,7 +30,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Algorithms for backtrack search in permutation groups.
+ * Algorithms which uses backtrack search in permutation groups including searching for subgroups, setwise stabilizers,
+ * coset representatives, intersections of subgroups, centralizers etc.
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
@@ -41,8 +42,8 @@ public final class AlgorithmsBacktrack {
     private AlgorithmsBacktrack() {
     }
 
-    //TODO: remove after all tests
-    public static long[] ____VISITED_NODES___ = {0};
+    //TODO: remove after all performance tests
+    static long[] ____VISITED_NODES___ = {0};
 
     /**
      * The algorithm performs subgroup search in specified group. If a nonempty initial {@code subgroup} was provided,
@@ -338,8 +339,8 @@ public final class AlgorithmsBacktrack {
     }
 
     /**
-     * Calculates left coset (gK) representatives of specified subgroup in specified group; each returned transversal
-     * is ≺-least in its coset. The implementation is based on a general backtrack search and prunes tree using a
+     * Calculates left coset (gK) representatives of specified subgroup in specified group; each  transversal
+     * is <b>&lt;</b>-least in its coset. The implementation is based on a general backtrack search and prunes tree using
      * minimality test. For details see the first method described in 4.6.7 in [Holt05].
      *
      * @param group    group
@@ -355,7 +356,7 @@ public final class AlgorithmsBacktrack {
 
     /**
      * Calculates left coset (gK) representatives of specified subgroup in specified group; each returned transversal
-     * is <b>&lt;</b>-least in its coset. The implementation is based on a general backtrack search and prunes tree using a
+     * is <b>&lt;</b>-least in its coset. The implementation is based on a general backtrack search and prunes tree using
      * minimality test. For details see the first method described in 4.6.7 in [Holt05].
      *
      * @param group    group

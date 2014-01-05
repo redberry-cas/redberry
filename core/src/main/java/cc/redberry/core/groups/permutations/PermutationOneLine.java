@@ -27,28 +27,50 @@ import java.math.BigInteger;
 import java.util.Arrays;
 
 /**
- * The implementation of {@link Permutation} based on one-line notation. This class holds an array that
+ * The implementation of {@link Permutation} based on the one-line notation. The instances of this class are immutable.
+ * <p><b>Construction</b>
+ * To construct a single permutation one can use either disjoint cycles notation either one-line notation (in both cases
+ * the numeration of points starts from 0):
+ * <br>
+ * <pre style="background:#f1f1f1;color:#000"><span style="color:#406040"> //same permutation</span>
+ * <span style="color:#406040">//in one-line notation</span>
+ * <span style="color:#a08000">Permutation</span> a <span style="color:#2060a0">=</span> <span style="color:#2060a0">new</span> <span style="color:#a08000">PermutationOneLine</span>(<span style="color:#0080a0">1</span>, <span style="color:#0080a0">3</span>, <span style="color:#0080a0">4</span>, <span style="color:#0080a0">0</span>, <span style="color:#0080a0">2</span>);
+ * <span style="color:#406040">//in disjoint cycles notation</span>
+ * <span style="color:#a08000">Permutation</span> b <span style="color:#2060a0">=</span> <span style="color:#2060a0">new</span> <span style="color:#a08000">PermutationOneLine</span>(<span style="color:#0080a0">5</span>, <span style="color:#2060a0">new</span> <span style="color:#a08000">int</span>[][]{{<span style="color:#0080a0">2</span>, <span style="color:#0080a0">4</span>}, {<span style="color:#0080a0">3</span>, <span style="color:#0080a0">0</span>, <span style="color:#0080a0">1</span>}});
+ * <span style="color:#2060a0">assert</span> a<span style="color:#2060a0">.</span>equals(b);
+ * </pre>
+ * In the case of antisymmetry, an {@code IllegalArgumentException} can be thrown, since if the {@link #order()} of
+ * permutation is odd, then it cannot represent a valid antisymmetry. For example, both
+ * <span style="background:#f1f1f1;color:#000"><span style="color:#2060a0">new</span> <span style="color:#a08000">PermutationOneLine</span>(true, <span style="color:#0080a0">0</span>, <span style="color:#0080a0">1</span>, <span style="color:#0080a0">3</span>, <span style="color:#0080a0">4</span>, <span style="color:#0080a0">2</span>)</span>
+ * or
+ * <span style="background:#f1f1f1;color:#000"><span style="color:#2060a0">new</span> <span style="color:#a08000">PermutationOneLine</span>(true, <span style="color:#0080a0">5</span>, <span style="color:#2060a0">new</span> <span style="color:#a08000">int</span>[][]{{<span style="color:#0080a0">2</span>, <span style="color:#0080a0">3</span>, <span style="color:#0080a0">4</span>}})</span>
+ * will throw exception.
+ * </p>
+ * <p><b>Implementation</b>
+ * The implementation is based on the one-line notation; this class holds an array that
  * represents permutation in one-line notation thereby providing O(1) complexity for {@code imageOf(int)} and O(degree)
  * complexity for composition.
+ * </p>
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  * @see cc.redberry.core.groups.permutations.Permutation
  * @since 1.0
  */
-public class PermutationOneLine implements Permutation {
+public final class PermutationOneLine implements Permutation {
     final int[] permutation;
     final boolean isIdentity;
     final boolean antisymmetry;
 
     /**
-     * Creates permutation with antisymmetry from given array of disjoint cycles and boolean value of
+     * Creates permutation with antisymmetry property from given array of disjoint cycles and boolean value of
      * antisymmetry ({@code true} means antisymmetry)
      *
      * @param antisymmetry antisymmetry (true - antisymmetry, false - symmetry)
      * @param degree       degree of permutation
      * @param cycles       disjoint cycles
-     * @throws IllegalArgumentException if permutation is inconsistent
+     * @throws IllegalArgumentException if permutation is inconsistent with disjoint cycles notation
+     * @throws IllegalArgumentException if antisymmetry is true and permutation order is odd
      */
     public PermutationOneLine(boolean antisymmetry, int degree, int[][] cycles) {
         this(antisymmetry, Permutations.convertCyclesToOneLine(degree, cycles));
@@ -59,19 +81,20 @@ public class PermutationOneLine implements Permutation {
      *
      * @param degree degree of permutation
      * @param cycles disjoint cycles
-     * @throws IllegalArgumentException if permutation is inconsistent
+     * @throws IllegalArgumentException if permutation is inconsistent with disjoint cycles notation
      */
     public PermutationOneLine(int degree, int[][] cycles) {
         this(Permutations.convertCyclesToOneLine(degree, cycles));
     }
 
     /**
-     * Creates permutation with antisymmetry from given array in one-line notation and boolean value of
+     * Creates permutation with antisymmetry property from given array in one-line notation and boolean value of
      * antisymmetry ({@code true} means antisymmetry)
      *
      * @param antisymmetry antisymmetry (true - antisymmetry, false - symmetry)
      * @param permutation  permutation in one-line notation
-     * @throws IllegalArgumentException if permutation is inconsistent
+     * @throws IllegalArgumentException if permutation is inconsistent with one-line notation
+     * @throws IllegalArgumentException if antisymmetry is true and permutation order is odd
      */
     public PermutationOneLine(boolean antisymmetry, int... permutation) {
         if (!Permutations.testPermutationCorrectness(permutation, antisymmetry))
@@ -85,7 +108,7 @@ public class PermutationOneLine implements Permutation {
      * Creates permutation from given array in one-line notation
      *
      * @param permutation permutation in one-line notation
-     * @throws IllegalArgumentException if permutation array is inconsistent
+     * @throws IllegalArgumentException if permutation array is inconsistent with one-line notation
      */
     public PermutationOneLine(int... permutation) {
         this(false, permutation);
@@ -391,17 +414,17 @@ public class PermutationOneLine implements Permutation {
         return result;
     }
 
-    /**
-     * Returns the string representation of this permutation in one-line notation.
-     *
-     * @return the string representation of this permutation in one-line  notation
-     */
     @Override
     public String toString() {
-//        return toStringCycles();
+        return toStringCycles();
+    }
+
+    @Override
+    public String toStringOneLine() {
         return (antisymmetry ? "-" : "+") + Arrays.toString(permutation);
     }
 
+    @Override
     public String toStringCycles() {
         String cycles = Arrays.deepToString(cycles()).replace("[", "{").replace("]", "}");
         return (antisymmetry ? "-" : "+") + cycles;

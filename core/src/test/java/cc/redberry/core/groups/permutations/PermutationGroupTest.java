@@ -810,28 +810,31 @@ public class PermutationGroupTest extends AbstractTestClass {
 
     @Test
     public void testExample1() throws Exception {
-        //permutations in disjoint cycles notation
-        Permutation gen0 = new PermutationOneLine(13, new int[][]{{0, 9, 3}, {5, 8, 6}, {7, 11, 12}});
-        Permutation gen1 = new PermutationOneLine(13, new int[][]{{0, 2, 1}, {3, 8, 4}, {6, 7, 11}, {9, 12, 10}});
-        //construct permutation group of degree 13
-        PermutationGroup pg = new PermutationGroup(gen0, gen1);
+        //Construct permutation group of degree 13 with two generators written in one-line notation
+        PermutationGroup pg = new PermutationGroup(
+                new PermutationOneLine(9, 1, 2, 0, 4, 8, 5, 11, 6, 3, 10, 12, 7),
+                new PermutationOneLine(2, 0, 1, 8, 3, 5, 7, 11, 4, 12, 9, 6, 10));
         //this group is transitive
         assert pg.isTransitive();
         //its order = 5616
         System.out.println(pg.order());
-        //create alternating group Alt(13)
+
+        //Create alternating group Alt(13)
         PermutationGroup alt13 = PermutationGroup.alternatingGroup(13);
         //its order = 3113510400
         System.out.println(alt13.order());
         assert alt13.containsSubgroup(pg);
-        //direct product of two groups
+
+        //Direct product of two groups
         PermutationGroup pp = pg.directProduct(PermutationGroup.symmetricGroup(8));
-        //setwise stabilizer
+
+        //Setwise stabilizer
         PermutationGroup sw = pp.setwiseStabilizer(1, 2, 3, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18);
         assert pp.containsSubgroup(sw);
         //its order = 17280
         System.out.println(sw.order());
-        //center of this stabilizer
+
+        //Center of this stabilizer
         PermutationGroup center = sw.center();
         //it is abelian group
         assert center.isAbelian();
@@ -844,6 +847,29 @@ public class PermutationGroupTest extends AbstractTestClass {
             if (orbit.length != 1)
                 System.out.print(Arrays.toString(orbit));
         //[2, 10], [3, 9], [6, 8], [11, 12], [19, 20]
+    }
+
+    @Test
+    public void testExample2() {
+        PermutationGroup group = PermutationGroup.symmetricGroup(4);
+        PermutationGroup subgroup = new PermutationGroup(
+                new PermutationOneLine(1, 0, 2, 3),
+                new PermutationOneLine(0, 1, 3, 2));
+        Permutation[] cosetRepresentatives = group.leftCosetRepresentatives(subgroup);
+        assert cosetRepresentatives.length == group.order().divide(subgroup.order()).intValue();
+        System.out.println(Arrays.toString(cosetRepresentatives));
+    }
+
+    @Test
+    public void testExample3() {
+        Permutation perm1 = new PermutationOneLine(8, new int[][]{{1, 2, 3}});
+        Permutation perm2 = new PermutationOneLine(8, new int[][]{{3, 4, 5, 6, 7}});
+        PermutationGroup pg = new PermutationGroup(perm1, perm2);
+
+        BacktrackSearch mappings = pg.mapping(new int[]{7, 2, 1, 3}, new int[]{5, 3, 6, 1});
+        Permutation perm;
+        while ((perm = mappings.take()) != null)
+            System.out.println(perm);
     }
 
     private static PermutationGroup pointWiseStabilizerBruteForce(PermutationGroup pg, int[] points) {

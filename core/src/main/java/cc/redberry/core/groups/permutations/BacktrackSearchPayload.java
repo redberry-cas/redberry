@@ -22,9 +22,6 @@
  */
 package cc.redberry.core.groups.permutations;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky

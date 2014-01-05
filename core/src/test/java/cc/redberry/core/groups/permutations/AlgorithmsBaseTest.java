@@ -25,6 +25,7 @@ package cc.redberry.core.groups.permutations;
 import cc.redberry.core.context.CC;
 import cc.redberry.core.number.NumberUtils;
 import cc.redberry.core.utils.Timing;
+import org.apache.commons.math3.random.Well1024a;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.junit.Assert;
 import org.junit.Ignore;
@@ -897,5 +898,19 @@ public class AlgorithmsBaseTest extends AbstractTestClass {
             }
         }
         System.out.println(stat);
+    }
+
+    @Test
+    public void testExample1() {
+Permutation perm1 = new PermutationOneLine(1, 2, 3, 4, 0);
+Permutation perm2 = new PermutationOneLine(1, 3, 0, 4, 2);
+//create a candidate BSGS
+ArrayList<BSGSCandidateElement> candidate = (ArrayList) AlgorithmsBase.createRawBSGSCandidate(perm1, perm2);
+//apply randomized Schreier-Sims algorithm to candidate BSGS (add missing base points and basic stabilizers)
+AlgorithmsBase.RandomSchreierSimsAlgorithm(candidate, 0.9999, new Well1024a());
+//if our random Schreier-Sims was not enough
+if (!AlgorithmsBase.isBSGS(candidate))
+    AlgorithmsBase.SchreierSimsAlgorithm(candidate);
+List<BSGSElement> bsgs = AlgorithmsBase.asBSGSList(candidate);
     }
 }

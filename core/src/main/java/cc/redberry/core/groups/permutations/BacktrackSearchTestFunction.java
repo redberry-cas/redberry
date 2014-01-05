@@ -23,7 +23,7 @@
 package cc.redberry.core.groups.permutations;
 
 /**
- * Test function which can be applied at each level of search tree; if if is not applicable at some level then it
+ * Test function which can be applied at each level of search tree; if it is not applicable at some level then it
  * must return true. See Sec. 4.6.2 in [Holt05] for details.
  *
  * @author Dmitry Bolotin
