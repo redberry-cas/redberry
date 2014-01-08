@@ -165,4 +165,8 @@ public class BSGSElement {
         return stabilizerGenerators.get(0).degree();
     }
 
+    @Override
+    public String toString() {
+        return new StringBuilder().append("[").append(basePoint).append(", ").append(stabilizerGenerators).append("]").toString();
+    }
 }

@@ -482,9 +482,8 @@ public final class AlgorithmsBase {
         final int length = BSGSCandidate.get(0).stabilizerGenerators.get(0).degree();
 
         //source of randomness
-        List<Permutation> source = BSGSCandidate.get(0).stabilizerGenerators;
+        List<Permutation> source = new ArrayList<>(BSGSCandidate.get(0).stabilizerGenerators);
         randomness(source, DEFAULT_RANDOMNESS_EXTEND_TO_SIZE, DEFAULT_NUMBER_OF_RANDOM_REFINEMENTS, randomGenerator);
-        source = new ArrayList<>(source);
         //recalculate BSGSCandidate
         for (BSGSCandidateElement element : BSGSCandidate)
             element.recalculateOrbitAndSchreierVector();
@@ -569,9 +568,8 @@ public final class AlgorithmsBase {
         final int length = BSGSCandidate.get(0).stabilizerGenerators.get(0).degree();
 
         //source of randomness
-        List<Permutation> source = BSGSCandidate.get(0).stabilizerGenerators;
+        List<Permutation> source = new ArrayList<>(BSGSCandidate.get(0).stabilizerGenerators);
         randomness(source, DEFAULT_RANDOMNESS_EXTEND_TO_SIZE, DEFAULT_NUMBER_OF_RANDOM_REFINEMENTS, randomGenerator);
-        source = new ArrayList<>(source);
         //recalculate BSGSCandidate
         for (BSGSCandidateElement element : BSGSCandidate)
             element.recalculateOrbitAndSchreierVector();
@@ -633,15 +631,20 @@ public final class AlgorithmsBase {
      * @return order of permutation group represented by specified BSGS
      */
     public static final BigInteger calculateOrder(List<? extends BSGSElement> BSGSList) {
+        return calculateOrder(BSGSList, 0);
+    }
+
+    static final BigInteger calculateOrder(List<? extends BSGSElement> BSGSList, int from) {
         BigInteger order = BigInteger.ONE;
-        for (BSGSElement element : BSGSList)
-            order = order.multiply(BigInteger.valueOf(element.orbitSize()));
+        final int size = BSGSList.size();
+        for (int i = from; i < size; ++i)
+            order = order.multiply(BigInteger.valueOf(BSGSList.get(i).orbitSize()));
         return order;
     }
 
+
     /**
-     * Removes redundant elements from BSGS candidate (actually removes those elements which are easy to determine
-     * that they are redundant in this BSGS candidate). For details see REMOVEGENS in Sec. 4.4.4 in [Holt05]
+     * Removes redundant elements from BSGS candidate. The algorithm have O(degree^5) complexity in the worst case.
      *
      * @param BSGSCandidate BSGS candidate
      */
@@ -649,6 +652,9 @@ public final class AlgorithmsBase {
         if (BSGSCandidate.size() == 1)
             return;
 
+        /* REMOVEGENS in Sec. 4.4.4 in [Holt05] IS WRONG!!! */
+
+        //the following is correct
         for (int i = BSGSCandidate.size() - 2; i > 0; --i) {
             BSGSCandidateElement element = BSGSCandidate.get(i);
             //iterator over stabilizer generators
@@ -658,8 +664,14 @@ public final class AlgorithmsBase {
             boolean removed = false;
             //current stabilizer element
             Permutation current;
+            out:
             while (iterator.hasNext()) {
                 current = iterator.next();
+                if (current.isIdentity()) {
+                    iterator.remove();
+                    removed = true;
+                    continue;
+                }
                 // if current belongs to next stabilizers, i.e. it fixes beta_i & belongs to next BSGS element,
                 // then it cannot be removed; note that second condition is necessary,
                 // while first is redundant (but rids from obviously unnecessary checks)!
@@ -674,8 +686,23 @@ public final class AlgorithmsBase {
                 }
                 tempStabilizers.remove(current);
 
-                //if new stabilizers produces same orbit => then current generator is redundant
+                //if new stabilizers generate same group => then current generator is redundant
                 if (Permutations.getOrbitSize(tempStabilizers, element.basePoint) == element.orbitSize()) {
+                    //<!!! we must ensure that next stabilizer in chain is a subgroup of temp !!! >//
+                    int[] subBase = getBaseAsArray(BSGSCandidate, i);
+                    List<BSGSCandidateElement> _subBSGS = createRawBSGSCandidate(subBase, tempStabilizers);
+                    if (_subBSGS.isEmpty()) {
+                        assert calculateOrder(BSGSCandidate, i).intValue() != 1;
+                        continue;
+                    }
+                    ArrayList<BSGSCandidateElement> subBSGS = (ArrayList) _subBSGS;
+                    SchreierSimsAlgorithm(subBSGS);
+                    if (!calculateOrder(BSGSCandidate, i).equals(calculateOrder(subBSGS)))
+                        continue out;
+                    for (Permutation stabGen : BSGSCandidate.get(i + 1).stabilizerGenerators)
+                        if (!membershipTest(subBSGS, stabGen))
+                            continue out;
+
                     iterator.remove();
                     removed = true;
                 } else {
@@ -749,6 +776,52 @@ public final class AlgorithmsBase {
                 }
             }
             --index;
+        }
+        return true;
+    }
+
+    /**
+     * Returns true if specified BSGS candidate is a real BSGS with specified confidence level. Method uses a restricted
+     * version of randomized Schreier-Sims algorithm.
+     *
+     * @param BSGSCandidate   BSGS candidate
+     * @param confidenceLevel confidence level (0 < confidence level < 1)
+     * @param randomGenerator random generator
+     * @return true if specified BSGS candidate is a real BSGS and false otherwise
+     */
+    public static boolean isBSGS(List<? extends BSGSElement> BSGSCandidate, double confidenceLevel, RandomGenerator randomGenerator) {
+        if (confidenceLevel > 1 || confidenceLevel < 0)
+            throw new IllegalArgumentException("Confidence level must be between 0 and 1.");
+
+        //source of randomness
+        List<Permutation> source = new ArrayList<>(BSGSCandidate.get(0).stabilizerGenerators);
+        randomness(source, DEFAULT_RANDOMNESS_EXTEND_TO_SIZE, DEFAULT_NUMBER_OF_RANDOM_REFINEMENTS, randomGenerator);
+        source = new ArrayList<>(source);
+
+        //counts the random elements sifted without change to BSGS
+        int sifted = 0;
+        int CL = (int) (-FastMath.log(2, 1 - confidenceLevel));
+        assert CL > 0;
+
+        //main loop
+        Permutation randomElement;
+        elements:
+        while (sifted < CL) {
+            //random element
+            randomElement = random(source, randomGenerator);
+
+            //let's try to represent it via our BSGS candidate
+            StripContainer strip = strip(BSGSCandidate, randomElement);
+
+            //this signals, whether we shall add new generator to our BSGS (not necessary a new point)
+            boolean toAddNewGenerator = false;
+            if (strip.terminationLevel < BSGSCandidate.size() || !strip.remainder.isIdentity()) {
+                return false;
+            }
+            //our random element is already in BSGS
+            //this increases the probability that our candidate is a real BSGS!
+            ++sifted;
+
         }
         return true;
     }
@@ -1428,8 +1501,12 @@ public final class AlgorithmsBase {
      * @return base represented as array
      */
     public static int[] getBaseAsArray(final List<? extends BSGSElement> BSGS) {
+        return getBaseAsArray(BSGS, 0);
+    }
+
+    static int[] getBaseAsArray(final List<? extends BSGSElement> BSGS, int from) {
         int[] base = new int[BSGS.size()];
-        for (int i = 0, size = BSGS.size(); i < size; ++i)
+        for (int i = from, size = BSGS.size(); i < size; ++i)
             base[i] = BSGS.get(i).basePoint;
         return base;
     }

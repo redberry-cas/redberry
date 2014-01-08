@@ -37,6 +37,7 @@ import java.util.*;
 import static cc.redberry.core.TAssert.assertEquals;
 import static cc.redberry.core.TAssert.assertTrue;
 import static cc.redberry.core.groups.permutations.AlgorithmsBase.*;
+import static cc.redberry.core.groups.permutations.AlgorithmsBase.createRawBSGSCandidate;
 import static cc.redberry.core.groups.permutations.RandomPermutation.random;
 import static cc.redberry.core.groups.permutations.RandomPermutation.randomness;
 import static cc.redberry.core.utils.Timing.timing;
@@ -91,8 +92,26 @@ public class AlgorithmsBaseTest extends AbstractTestClass {
         }
     }
 
+
     @Test
     public void testCreateSymmetricGroup4_large_degree() throws Exception {
+        int[] degrees = {107, 109, 110, 112};
+        for (int degree : degrees) {
+            List<BSGSElement> bsgs = createSymmetricGroupBSGS(degree);
+            for (BSGSElement element : bsgs) {
+                for (int i = 0; i < element.orbitSize(); ++i) {
+                    assertEquals(element.orbitList.get(i),
+                            element.getTransversalOf(element.orbitList.get(i)).newIndexOf(element.basePoint)
+                    );
+                }
+            }
+            assertTrue(isBSGS(bsgs, 1 - 1E-9, CC.getRandomGenerator()));
+            assertEquals(NumberUtils.factorial(degree), calculateOrder(bsgs));
+        }
+    }
+
+    @Test
+    public void testCreateSymmetricGroup4_large_degree_longtest() throws Exception {
         int[] degrees = {107, 109, 110, 112};
         for (int degree : degrees) {
             List<BSGSElement> bsgs = createSymmetricGroupBSGS(degree);
@@ -112,6 +131,20 @@ public class AlgorithmsBaseTest extends AbstractTestClass {
 
     @Test
     public void testCreateSymmetricGroup5_large_degree() throws Exception {
+        int[] degrees = {AlgorithmsBase.SMALL_DEGREE_THRESHOLD + 11, AlgorithmsBase.SMALL_DEGREE_THRESHOLD + 12};
+        for (int degree : degrees) {
+            List<BSGSElement> bsgs = createSymmetricGroupBSGS(degree);
+            int ii[] = {30, 50, 71, 92, 100};
+            for (int i : ii) {
+                List<BSGSElement> sub_bsgs = bsgs.subList(i, bsgs.size());
+                assertEquals(NumberUtils.factorial(degree - i), calculateOrder(sub_bsgs));
+                assertTrue(isBSGS(sub_bsgs));
+            }
+        }
+    }
+
+    @Test
+    public void testCreateSymmetricGroup5_large_degree_longtest() throws Exception {
         int[] degrees = {AlgorithmsBase.SMALL_DEGREE_THRESHOLD + 11, AlgorithmsBase.SMALL_DEGREE_THRESHOLD + 12};
         for (int degree : degrees) {
             List<BSGSElement> bsgs = createSymmetricGroupBSGS(degree);
@@ -156,8 +189,24 @@ public class AlgorithmsBaseTest extends AbstractTestClass {
         }
     }
 
+
     @Test
     public void testCreateAlternatingGroup2_large_degree() throws Exception {
+        int[] degrees = {127, 128};
+        for (int degree : degrees) {
+            List<BSGSElement> bsgs = AlgorithmsBase.createAlternatingGroupBSGS(degree);
+
+            for (BSGSElement element : bsgs)
+                for (int i = 0; i < element.orbitSize(); ++i)
+                    assertEquals(element.orbitList.get(i),
+                            element.getTransversalOf(element.orbitList.get(i)).newIndexOf(element.basePoint));
+            assertTrue(isBSGS(bsgs, 1 - 1E-9, CC.getRandomGenerator()));
+            assertEquals(NumberUtils.factorial(degree).divide(BigInteger.valueOf(2)), calculateOrder(bsgs));
+        }
+    }
+
+    @Test
+    public void testCreateAlternatingGroup2_large_degree_longtest() throws Exception {
         int[] degrees = {127, 128};
         for (int degree : degrees) {
             List<BSGSElement> bsgs = AlgorithmsBase.createAlternatingGroupBSGS(degree);
@@ -174,7 +223,7 @@ public class AlgorithmsBaseTest extends AbstractTestClass {
 ////////////////////////////////////////// TEST REMOVE REDUNDANT GENERATORS  ///////////////////////////////////////////
 
     @Test
-    public void testRemoveRedundant0() {
+    public void testRemoveRedundant0_longtest() {
         int degree = 20;
         int COUNT = 500;
         DescriptiveStatistics removed = new DescriptiveStatistics();
@@ -277,6 +326,28 @@ public class AlgorithmsBaseTest extends AbstractTestClass {
         System.out.println(removed);
     }
 
+    @Test
+    public void testRemoveRedundant4() {
+        int[][] a = {{0, 4}, {1, 3}, {2, 9}, {6, 10}}, b = {{2, 10, 4}, {3, 6, 8}, {5, 7, 9}};
+        PermutationGroup pg = new PermutationGroup(new PermutationOneLine(11, a),
+                new PermutationOneLine(11, b));
+        ArrayList<BSGSCandidateElement> bsgs = pg.getBSGSCandidate();
+
+        for (int i = 0; i < bsgs.size() - 1; ++i) {
+            PermutationGroup g = new PermutationGroup(bsgs.get(i).stabilizerGenerators);
+            for (Permutation p : bsgs.get(i + 1).stabilizerGenerators)
+                assertTrue(g.membershipTest(p));
+        }
+
+        removeRedundantGenerators(bsgs);
+
+        for (int i = 0; i < bsgs.size() - 1; ++i) {
+            PermutationGroup g = new PermutationGroup(bsgs.get(i).stabilizerGenerators);
+            for (Permutation p : bsgs.get(i + 1).stabilizerGenerators)
+                assertTrue(g.membershipTest(p));
+        }
+    }
+
 ///////////////////////////////////////////// TEST SCHREIER SIMS ///////////////////////////////////////////////////////
 
 
@@ -333,9 +404,36 @@ public class AlgorithmsBaseTest extends AbstractTestClass {
         System.out.println(redberry_stat);
     }
 
-
     @Test
     public void testRandomSchreierSim_WithGap() {
+        double CL = 0.999;
+        int trueBsgs = 0, total = 0;
+        GapGroupsInterface gap = getGapInterface();
+        for (int degree = 2; degree < 70; ++degree) {
+            int nrPrimitiveGroups = gap.nrPrimitiveGroups(degree);
+            for (int i = 0; i < nrPrimitiveGroups; ++i) {
+                gap.evaluate("g:= PrimitiveGroup( " + degree + ", " + (i + 1) + ");");
+                if ((gap.evaluateToBoolean("IsNaturalSymmetricGroup(g);") ||
+                        gap.evaluateToBoolean("IsNaturalAlternatingGroup(g);")) && degree > 15)
+                    continue;
+
+                Permutation[] generators = gap.primitiveGenerators(degree, i);
+                ArrayList<BSGSCandidateElement> bsgs = (ArrayList) createRawBSGSCandidate(generators);
+                RandomSchreierSimsAlgorithm(bsgs, CL, CC.getRandomGenerator());
+
+                if (isBSGS(bsgs, 1 - 1E-9, CC.getRandomGenerator()))
+                    ++trueBsgs;
+
+                ++total;
+            }
+        }
+        System.out.println("Total number of groups: " + total + ". BSGS constructed for " + trueBsgs);
+
+        Assert.assertTrue((double) trueBsgs >= CL * 0.9 * (double) total);
+    }
+
+    @Test
+    public void testRandomSchreierSim_WithGap_longtest() {
         double CL = 0.999;
         int trueBsgs = 0, total = 0;
         GapGroupsInterface gap = getGapInterface();
@@ -364,6 +462,30 @@ public class AlgorithmsBaseTest extends AbstractTestClass {
 
     @Test
     public void testRandomSchreierSimsWithOrder_WithGap() {
+        GapGroupsInterface gap = getGapInterface();
+        for (int degree = 2; degree < 70; ++degree) {
+            int nrPrimitiveGroups = gap.nrPrimitiveGroups(degree);
+            for (int i = 0; i < nrPrimitiveGroups; ++i) {
+                gap.evaluate("g:= PrimitiveGroup( " + degree + ", " + (i + 1) + ");");
+                if ((gap.evaluateToBoolean("IsNaturalSymmetricGroup(g);") ||
+                        gap.evaluateToBoolean("IsNaturalAlternatingGroup(g);")) && degree > 15)
+                    continue;
+
+                BigInteger order = gap.evaluateToBigInteger("Order(g);");
+
+                Permutation[] generators = gap.primitiveGenerators(degree, i);
+                ArrayList<BSGSCandidateElement> bsgs = (ArrayList) createRawBSGSCandidate(generators);
+                RandomSchreierSimsAlgorithmForKnownOrder(bsgs, order, CC.getRandomGenerator());
+
+                assertTrue(isBSGS(bsgs, 1 - 1E-9, CC.getRandomGenerator()));
+                assertEquals(order, calculateOrder(bsgs));
+            }
+        }
+    }
+
+
+    @Test
+    public void testRandomSchreierSimsWithOrder_WithGap_longtest() {
         GapGroupsInterface gap = getGapInterface();
         for (int degree = 2; degree < 100; ++degree) {
             int nrPrimitiveGroups = gap.nrPrimitiveGroups(degree);
@@ -420,7 +542,7 @@ public class AlgorithmsBaseTest extends AbstractTestClass {
 ////////////////////////////////////////////// TEST BASE CHANGE ////////////////////////////////////////////////////////
 
     @Test
-    public void testSwapAdjacentBasePoints1() {
+    public void testSwapAdjacentBasePoints1_longtest() {
         int degree = 15;
         int COUNT = 10;
         List<Permutation> source = new ArrayList<>();
@@ -469,15 +591,86 @@ public class AlgorithmsBaseTest extends AbstractTestClass {
         ArrayList<BSGSCandidateElement> bsgs1;
 
         for (int i = 0; i < bsgs.size() - 1; ++i) {
-            System.out.println(i);
             bsgs1 = AlgorithmsBase.clone(bsgs);
             swapAdjacentBasePoints(bsgs1, i);
             assertTrue(isBSGS(bsgs1));
         }
     }
 
+
+    @Test
+    public void testSwapAdjacentBasePoints2a() {
+        int[][] a = {{0, 4}, {1, 3}, {2, 9}, {6, 10}}, b = {{2, 10, 4}, {3, 6, 8}, {5, 7, 9}};
+        PermutationGroup pg = new PermutationGroup(new PermutationOneLine(11, a),
+                new PermutationOneLine(11, b));
+        ArrayList<BSGSCandidateElement> bsgs = pg.getBSGSCandidate();
+        removeRedundantGenerators(bsgs);
+        assertTrue(isBSGS(bsgs));
+
+        swapAdjacentBasePoints(bsgs, 2);
+        assertTrue(isBSGS(bsgs));
+        removeRedundantGenerators(bsgs);
+        assertTrue(isBSGS(bsgs));
+
+        swapAdjacentBasePoints(bsgs, 0);
+        assertTrue(isBSGS(bsgs));
+        removeRedundantGenerators(bsgs);
+        assertTrue(isBSGS(bsgs));
+
+        swapAdjacentBasePoints(bsgs, 0);
+        assertTrue(isBSGS(bsgs));
+        removeRedundantGenerators(bsgs);
+        assertTrue(isBSGS(bsgs));
+
+        swapAdjacentBasePoints(bsgs, 1);
+        assertTrue(isBSGS(bsgs));
+        removeRedundantGenerators(bsgs);
+        assertTrue(isBSGS(bsgs));
+
+        swapAdjacentBasePoints(bsgs, 2);
+        assertTrue(isBSGS(bsgs));
+        removeRedundantGenerators(bsgs);
+        assertTrue(isBSGS(bsgs));
+    }
+
     @Test
     public void testSwapAdjacentBasePoints2_WithGap() {
+        GapGroupsInterface gap = getGapInterface();
+        for (int degree = 2; degree < 50; ++degree) {
+            int nrPrimitiveGroups = gap.nrPrimitiveGroups(degree);
+            for (int i = 0; i < nrPrimitiveGroups; ++i) {
+                gap.evaluate("g:= PrimitiveGroup( " + degree + ", " + (i + 1) + ");");
+                if ((gap.evaluateToBoolean("IsNaturalSymmetricGroup(g);") ||
+                        gap.evaluateToBoolean("IsNaturalAlternatingGroup(g);")) && degree > 15)
+                    continue;
+                Permutation[] generators = gap.evaluateToGenerators("g");
+
+                ArrayList<BSGSCandidateElement> bsgs1 = (ArrayList) createRawBSGSCandidate(generators);
+                SchreierSimsAlgorithm(bsgs1);
+                removeRedundantGenerators(bsgs1);
+                System.out.println("  " + i);
+                for (int j = 0; j < bsgs1.size() - 1; j += 2) {
+                    ArrayList<BSGSCandidateElement> bsgs2 = bsgs1;
+                    swapAdjacentBasePoints(bsgs2, j);
+                    removeRedundantBaseRemnant(bsgs2);
+                    removeRedundantGenerators(bsgs2);
+                    assertTrue(isBSGS(bsgs2, 1 - 1E-9, CC.getRandomGenerator()));
+                    int[] p = Permutations.randomPermutation(degree, CC.getRandomGenerator());
+                    for (int pp : p) {
+                        if (pp > bsgs2.size() - 2)
+                            continue;
+                        swapAdjacentBasePoints(bsgs2, pp);
+                        removeRedundantBaseRemnant(bsgs2);
+                        removeRedundantGenerators(bsgs2);
+                        assertTrue(isBSGS(bsgs2, 1 - 1E-9, CC.getRandomGenerator()));
+                    }
+                }
+            }
+        }
+    }
+
+    @Test
+    public void testSwapAdjacentBasePoints2_WithGap_longtest() {
         GapGroupsInterface gap = getGapInterface();
         for (int degree = 2; degree < 20; ++degree) {
             int nrPrimitiveGroups = gap.nrPrimitiveGroups(degree);
@@ -630,6 +823,30 @@ public class AlgorithmsBaseTest extends AbstractTestClass {
                         gap.evaluateToBoolean("IsNaturalAlternatingGroup(g);")) && degree > 15)
                     continue;
                 ArrayList<BSGSCandidateElement> bsgs = gap.primitiveGroup(degree, i).getBSGSCandidate();
+                for (int j = 0; j < 5; ++j) {
+                    int[] oldBase = getBaseAsArray(bsgs);
+                    int[] newBase = new PermutationOneLine(Permutations.randomPermutation(oldBase.length)).permute(oldBase);
+                    AlgorithmsBase.rebaseWithTranspositions(bsgs, newBase);
+                    assertTrue(isBSGS(bsgs, 1 - 1E-9, CC.getRandomGenerator()));
+                    final int[] _newBase = getBaseAsArray(bsgs);
+                    for (int r = 0; r < _newBase.length && r < newBase.length; ++r)
+                        assertEquals(newBase[r], _newBase[r]);
+                }
+            }
+        }
+    }
+
+    @Test
+    public void testRebaseWithTranspositions2_WithGap_longtest() {
+        GapGroupsInterface gap = getGapInterface();
+        for (int degree = 2; degree < 55; ++degree) {
+            int nrPrimitiveGroups = gap.nrPrimitiveGroups(degree);
+            for (int i = 0; i < nrPrimitiveGroups; ++i) {
+                gap.evaluate("g:= PrimitiveGroup( " + degree + ", " + (i + 1) + ");");
+                if ((gap.evaluateToBoolean("IsNaturalSymmetricGroup(g);") ||
+                        gap.evaluateToBoolean("IsNaturalAlternatingGroup(g);")) && degree > 15)
+                    continue;
+                ArrayList<BSGSCandidateElement> bsgs = gap.primitiveGroup(degree, i).getBSGSCandidate();
                 for (int j = 0; j < 50; ++j) {
                     int[] oldBase = getBaseAsArray(bsgs);
                     int[] newBase = new PermutationOneLine(Permutations.randomPermutation(oldBase.length)).permute(oldBase);
@@ -751,6 +968,33 @@ public class AlgorithmsBaseTest extends AbstractTestClass {
 
                 final ArrayList<BSGSCandidateElement> bsgs = gap.primitiveGroup(degree, i).getBSGSCandidate();
 
+                for (int j = 0; j < 5; ++j) {
+                    int[] oldBase = getBaseAsArray(bsgs);
+                    int[] newBase = new PermutationOneLine(
+                            Permutations.randomPermutation(oldBase.length)).permute(oldBase);
+                    rebaseWithConjugationAndTranspositions(bsgs, newBase);
+                    assertTrue(isBSGS(bsgs, 1 - 1E-9, CC.getRandomGenerator()));
+                    final int[] _newBase = getBaseAsArray(bsgs);
+                    for (int r = 0; r < _newBase.length && r < newBase.length; ++r)
+                        assertEquals(newBase[r], _newBase[r]);
+                }
+            }
+        }
+    }
+
+    @Test
+    public void testRebaseWithConjugationAndTranspositions1_WithGap_longtest() {
+        GapGroupsInterface gap = getGapInterface();
+        for (int degree = 2; degree < 55; ++degree) {
+            int nrPrimitiveGroups = gap.nrPrimitiveGroups(degree);
+            for (int i = 0; i < nrPrimitiveGroups; ++i) {
+                gap.evaluate("g:= PrimitiveGroup( " + degree + ", " + (i + 1) + ");");
+                if ((gap.evaluateToBoolean("IsNaturalSymmetricGroup(g);") ||
+                        gap.evaluateToBoolean("IsNaturalAlternatingGroup(g);")) && degree > 15)
+                    continue;
+
+                final ArrayList<BSGSCandidateElement> bsgs = gap.primitiveGroup(degree, i).getBSGSCandidate();
+
                 for (int j = 0; j < 50; ++j) {
                     int[] oldBase = getBaseAsArray(bsgs);
                     int[] newBase = new PermutationOneLine(
@@ -852,6 +1096,32 @@ public class AlgorithmsBaseTest extends AbstractTestClass {
 
                 final ArrayList<BSGSCandidateElement> bsgs = gap.primitiveGroup(degree, i).getBSGSCandidate();
 
+                for (int j = 0; j < 5; ++j) {
+                    int[] oldBase = getBaseAsArray(bsgs);
+                    int[] newBase = new PermutationOneLine(Permutations.randomPermutation(oldBase.length)).permute(oldBase);
+                    rebaseFromScratch(bsgs, newBase);
+                    assertTrue(isBSGS(bsgs));
+                    final int[] _newBase = getBaseAsArray(bsgs);
+                    for (int r = 0; r < _newBase.length && r < newBase.length; ++r)
+                        assertEquals(newBase[r], _newBase[r]);
+                }
+            }
+        }
+    }
+
+    @Test
+    public void testRebaseFromScratch1_WithGap_longtest() {
+        GapGroupsInterface gap = getGapInterface();
+        for (int degree = 30; degree < 45; ++degree) {
+            int nrPrimitiveGroups = gap.nrPrimitiveGroups(degree);
+            for (int i = 0; i < nrPrimitiveGroups; ++i) {
+                gap.evaluate("g:= PrimitiveGroup( " + degree + ", " + (i + 1) + ");");
+                if ((gap.evaluateToBoolean("IsNaturalSymmetricGroup(g);") ||
+                        gap.evaluateToBoolean("IsNaturalAlternatingGroup(g);")) && degree > 15)
+                    continue;
+
+                final ArrayList<BSGSCandidateElement> bsgs = gap.primitiveGroup(degree, i).getBSGSCandidate();
+
                 for (int j = 0; j < 50; ++j) {
                     int[] oldBase = getBaseAsArray(bsgs);
                     int[] newBase = new PermutationOneLine(Permutations.randomPermutation(oldBase.length)).permute(oldBase);
@@ -902,15 +1172,15 @@ public class AlgorithmsBaseTest extends AbstractTestClass {
 
     @Test
     public void testExample1() {
-Permutation perm1 = new PermutationOneLine(1, 2, 3, 4, 0);
-Permutation perm2 = new PermutationOneLine(1, 3, 0, 4, 2);
+        Permutation perm1 = new PermutationOneLine(1, 2, 3, 4, 0);
+        Permutation perm2 = new PermutationOneLine(1, 3, 0, 4, 2);
 //create a candidate BSGS
-ArrayList<BSGSCandidateElement> candidate = (ArrayList) AlgorithmsBase.createRawBSGSCandidate(perm1, perm2);
+        ArrayList<BSGSCandidateElement> candidate = (ArrayList) AlgorithmsBase.createRawBSGSCandidate(perm1, perm2);
 //apply randomized Schreier-Sims algorithm to candidate BSGS (add missing base points and basic stabilizers)
-AlgorithmsBase.RandomSchreierSimsAlgorithm(candidate, 0.9999, new Well1024a());
+        AlgorithmsBase.RandomSchreierSimsAlgorithm(candidate, 0.9999, new Well1024a());
 //if our random Schreier-Sims was not enough
-if (!AlgorithmsBase.isBSGS(candidate))
-    AlgorithmsBase.SchreierSimsAlgorithm(candidate);
-List<BSGSElement> bsgs = AlgorithmsBase.asBSGSList(candidate);
+        if (!AlgorithmsBase.isBSGS(candidate))
+            AlgorithmsBase.SchreierSimsAlgorithm(candidate);
+        List<BSGSElement> bsgs = AlgorithmsBase.asBSGSList(candidate);
     }
 }

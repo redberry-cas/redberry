@@ -723,6 +723,19 @@ public class PermutationGroupTest extends AbstractTestClass {
     @Test
     public void testIsSymOrAlt2_WithGap() {
         GapGroupsInterface gap = getGapInterface();
+        for (int degree = 3; degree < 150; degree += 2) {
+            for (int i = 0; i < gap.nrPrimitiveGroups(degree); i += 2) {
+                gap.evaluate("g:= PrimitiveGroup( " + degree + ", " + (i + 1) + ");");
+                PermutationGroup p = gap.primitiveGroup(degree, i);
+                assertEquals(gap.evaluateToBoolean("IsNaturalSymmetricGroup(g);"), p.isSymmetric());
+                assertEquals(gap.evaluateToBoolean("IsNaturalAlternatingGroup(g);"), p.isAlternating());
+            }
+        }
+    }
+
+    @Test
+    public void testIsSymOrAlt2_WithGap_longtest() {
+        GapGroupsInterface gap = getGapInterface();
         for (int degree = 3; degree < 150; ++degree) {
             for (int i = 0; i < gap.nrPrimitiveGroups(degree); ++i) {
                 gap.evaluate("g:= PrimitiveGroup( " + degree + ", " + (i + 1) + ");");

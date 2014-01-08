@@ -130,7 +130,7 @@ public class AlgorithmsBacktrackTest extends AbstractTestClass {
     }
 
     @Test
-    public void testSetwiseStabilizer1_raw_WithGap() throws Exception {
+    public void testSetwiseStabilizer1_raw_WithGap_longtest() throws Exception {
         GapGroupsInterface gap = getGapInterface();
         for (int degree = 4; degree < 50; ++degree) {
             int nrPrimitiveGroups = gap.nrPrimitiveGroups(degree);

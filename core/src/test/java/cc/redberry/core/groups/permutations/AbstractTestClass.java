@@ -50,6 +50,8 @@ public class AbstractTestClass {
             Assume.assumeTrue(doTestPerformance());
         if (name.getMethodName().toLowerCase().contains("withgap"))
             Assume.assumeTrue(getGapInterface() != null);
+        if (name.getMethodName().toLowerCase().contains("longtest"))
+            Assume.assumeTrue(doLongTest());
     }
 
     private static GapGroupsInterface gapStaticInstance = null;
@@ -79,7 +81,7 @@ public class AbstractTestClass {
         gapStaticInstance = gapInterface;
         if (gapInterface != null) {
             //check GAP version
-            String gapVersion = gapStaticInstance.evaluate("VERSION;").replace("\"","");
+            String gapVersion = gapStaticInstance.evaluate("VERSION;").replace("\"", "");
 
             String[] vv = gapVersion.split("\\.");
             for (int i = 0; i < GAP_REQUIRED_VERSION.length; ++i)
@@ -107,4 +109,12 @@ public class AbstractTestClass {
             testPerformance = Boolean.valueOf(System.getProperty("testPerformance"));
         return testPerformance.booleanValue();
     }
+
+    private boolean doLongTest() {
+        if (doLongTest != null)
+            return doLongTest.booleanValue();
+        return doLongTest = Boolean.valueOf(System.getProperty("longTest"));
+    }
+
+    private static Boolean doLongTest = null;
 }
