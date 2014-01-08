@@ -270,7 +270,7 @@ public class AlgorithmsBaseTest extends AbstractTestClass {
         long rem = numberOfStrongGenerators(bsgs);
         //remove redundant
         removeRedundantGenerators(bsgs);
-        Assert.assertEquals(1, rem - numberOfStrongGenerators(bsgs));
+        Assert.assertEquals(0, rem - numberOfStrongGenerators(bsgs));
         assertTrue(isBSGS(bsgs));
     }
 

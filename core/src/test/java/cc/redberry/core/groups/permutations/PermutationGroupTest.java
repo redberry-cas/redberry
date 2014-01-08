@@ -671,9 +671,24 @@ public class PermutationGroupTest extends AbstractTestClass {
         System.out.println(gr.normalClosureOf(sg).order());
     }
 
-
     @Test
     public void testDerivedSubgroup1_WithGap() {
+        GapGroupsInterface gap = getGapInterface();
+        for (int degree = 4; degree < 50; degree += 5) {
+            int nrPrimitiveGroups = gap.nrPrimitiveGroups(degree);
+            for (int i = 0; i < nrPrimitiveGroups; ++i) {
+                gap.evaluate("g:= PrimitiveGroup( " + degree + ", " + (i + 1) + ");");
+                PermutationGroup group = gap.primitiveGroup(degree, i);
+                PermutationGroup d = group.derivedSubgroup();
+                gap.evaluateRedberryGroup("rc", d.generators());
+                gap.evaluate("gc:= CommutatorSubgroup(g, g);");
+                assertTrue(gap.evaluateToBoolean("gc = rc;"));
+            }
+        }
+    }
+
+    @Test
+    public void testDerivedSubgroup1_WithGap_longtes() {
         GapGroupsInterface gap = getGapInterface();
         for (int degree = 4; degree < 50; ++degree) {
             int nrPrimitiveGroups = gap.nrPrimitiveGroups(degree);
@@ -723,7 +738,7 @@ public class PermutationGroupTest extends AbstractTestClass {
     @Test
     public void testIsSymOrAlt2_WithGap() {
         GapGroupsInterface gap = getGapInterface();
-        for (int degree = 3; degree < 150; degree += 2) {
+        for (int degree = 3; degree < 150; degree += 5) {
             for (int i = 0; i < gap.nrPrimitiveGroups(degree); i += 2) {
                 gap.evaluate("g:= PrimitiveGroup( " + degree + ", " + (i + 1) + ");");
                 PermutationGroup p = gap.primitiveGroup(degree, i);
