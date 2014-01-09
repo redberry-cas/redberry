@@ -62,8 +62,12 @@ public final class IndicesSymmetries
     }
 
     public PermutationGroup getPermutationGroup() {
-        if (permutationGroup == null)
-            permutationGroup = new PermutationGroup(generators);
+        if (permutationGroup == null) {
+            if (generators.isEmpty())
+                permutationGroup = PermutationGroup.trivialGroup(structureOfIndices.size());
+            else
+                permutationGroup = new PermutationGroup(generators);
+        }
         return permutationGroup;
     }
 

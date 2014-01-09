@@ -218,6 +218,16 @@ public final class PermutationGroup
     }
 
     /**
+     * Creates trivial group of specified degree.
+     *
+     * @param degree degree
+     * @return trivial group of specified degree
+     */
+    public static PermutationGroup trivialGroup(int degree) {
+        return new PermutationGroup(Permutations.createIdentityPermutation(degree));
+    }
+
+    /**
      * Initializes lazy fields
      */
     private void ensureBSGSIsInitialized() {
