@@ -188,7 +188,7 @@ public final class IndicesSymmetries
     }
 
     public final boolean isTrivial() {
-        return generators.isEmpty() || permutationGroup.isTrivial();
+        return generators.isEmpty() || getPermutationGroup().isTrivial();
     }
 
     @Override
