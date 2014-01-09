@@ -22,11 +22,6 @@
  */
 package cc.redberry.core.indices;
 
-import cc.redberry.core.combinatorics.Combinatorics;
-import cc.redberry.core.combinatorics.Symmetry;
-import cc.redberry.core.combinatorics.UnsafeCombinatorics;
-import cc.redberry.core.combinatorics.symmetries.Symmetries;
-import cc.redberry.core.combinatorics.symmetries.SymmetriesFactory;
 import cc.redberry.core.groups.permutations.Permutation;
 import cc.redberry.core.groups.permutations.PermutationOneLine;
 import cc.redberry.core.groups.permutations.Permutations;
@@ -124,10 +119,10 @@ public final class SimpleIndicesBuilder {
         for (j = 0; j < data.length; ++j)
             types[j] = data[j] & 0x7F000000;
 
-        int[] cosort = Combinatorics.createIdentity(data.length);
+        int[] cosort = Permutations.createIdentityArray(data.length);
         //only stable sort
         ArraysUtils.stableSort(types, cosort);
-        int[] cosortInv = Combinatorics.inverse(cosort);
+        int[] cosortInv = Permutations.inverse(cosort);
 
         //Allocating resulting symmetries object
         //it already contains identity symmetry
@@ -152,8 +147,8 @@ public final class SimpleIndicesBuilder {
             position += holder.length;
         }
 
-        return IndicesFactory.createSimple(IndicesSymmetries.create(new StructureOfIndices(data),
-                resultingSymmetries), data);
+        return IndicesFactory.createSimple(
+                IndicesSymmetries.create(new StructureOfIndices(data), resultingSymmetries), data);
     }
 
     private static final class SymmetriesHolder {

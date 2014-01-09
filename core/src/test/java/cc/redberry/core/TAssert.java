@@ -162,12 +162,16 @@ public class TAssert {
         TensorUtils.assertIndicesConsistency(t);
     }
 
-    public static void assertEqualsSymmetries(List<Permutation> a, List<Permutation> b) {
-        Assert.assertTrue(new PermutationGroup(a).equals(new PermutationGroup(b)));
+    public static void assertEquals(PermutationGroup a, PermutationGroup b) {
+        Assert.assertTrue(a.equals(b));
     }
 
-    public static void assertEqualsSymmetries(SimpleTensor a, List<Permutation> b) {
-        Assert.assertTrue(a.getIndices().getSymmetries().getPermutationGroup().equals(new PermutationGroup(b)));
+    public static void assertEqualsSymmetries(PermutationGroup a, PermutationGroup b) {
+        Assert.assertTrue(a.equals(b));
+    }
+
+    public static void assertEqualsSymmetries(SimpleTensor a, PermutationGroup b) {
+        Assert.assertTrue(a.getIndices().getSymmetries().getPermutationGroup().equals(b));
     }
 
     public static void assertEqualsSymmetries(SimpleTensor a, SimpleTensor b) {

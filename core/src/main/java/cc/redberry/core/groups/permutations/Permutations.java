@@ -27,7 +27,6 @@ import cc.redberry.core.utils.ArraysUtils;
 import cc.redberry.core.utils.BitArray;
 import cc.redberry.core.utils.IntArrayList;
 import org.apache.commons.math3.random.RandomGenerator;
-import org.apache.commons.math3.random.Well19937a;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -434,7 +433,7 @@ public final class Permutations {
 
     private static final Permutation[] cachedIdentities = new Permutation[128];
 
-    public static int[] createIdentityPermutationArray(int length) {
+    public static int[] createIdentityArray(int length) {
         int[] array = new int[length];
         for (int i = 0; i < length; ++i)
             array[i] = i;
@@ -444,10 +443,10 @@ public final class Permutations {
     public static Permutation createIdentityPermutation(int degree) {
         if (degree < cachedIdentities.length) {
             if (cachedIdentities[degree] == null)
-                cachedIdentities[degree] = new PermutationOneLine(createIdentityPermutationArray(degree));
+                cachedIdentities[degree] = new PermutationOneLine(createIdentityArray(degree));
             return cachedIdentities[degree];
         }
-        return new PermutationOneLine(createIdentityPermutationArray(degree));
+        return new PermutationOneLine(createIdentityArray(degree));
     }
 
     /**
@@ -534,6 +533,20 @@ public final class Permutations {
         return r;
     }
 
+    /**
+     * Returns the inverse permutation for the specified one.
+     * <p/>
+     * <p>One-line notation for permutations is used.</p>
+     *
+     * @param permutation permutation in one-line notation
+     * @return inverse permutation to the specified one
+     */
+    public static int[] inverse(int[] permutation) {
+        int[] inverse = new int[permutation.length];
+        for (int i = 0; i < permutation.length; ++i)
+            inverse[permutation[i]] = i;
+        return inverse;
+    }
 
     /**
      * Throws exception if p.length() != size.

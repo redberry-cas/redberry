@@ -22,8 +22,12 @@
  */
 package cc.redberry.core.indices;
 
+import cc.redberry.core.TAssert;
 import cc.redberry.core.combinatorics.Symmetry;
 import cc.redberry.core.combinatorics.symmetries.Symmetries;
+import cc.redberry.core.groups.permutations.Permutation;
+import cc.redberry.core.groups.permutations.PermutationGroup;
+import cc.redberry.core.groups.permutations.PermutationOneLine;
 import cc.redberry.core.parser.ParserIndices;
 import cc.redberry.core.tensor.SimpleTensor;
 import org.junit.Test;
@@ -43,11 +47,6 @@ import static org.junit.Assert.assertTrue;
  */
 public class SimpleIndicesBuilderTest {
 
-    private static void unsafeAssertEquals(Symmetries s1, Symmetries s2) {
-        List basis1 = s1.getBasisSymmetries(),
-                basis2 = s2.getBasisSymmetries();
-        assertTrue(basis1.containsAll(basis2) && basis2.containsAll(basis1));
-    }
 
     @Test
     public void test1() {
@@ -65,8 +64,8 @@ public class SimpleIndicesBuilderTest {
         expected.getSymmetries().add(IndexType.LatinLower, true, 1, 0, 2, 3);
 
         assertEquals(expected, indices);
-        unsafeAssertEquals(indices.getSymmetries().getInnerSymmetries(),
-                           expected.getSymmetries().getInnerSymmetries());
+        TAssert.assertEquals(indices.getSymmetries().getPermutationGroup(),
+                expected.getSymmetries().getPermutationGroup());
     }
 
     @Test
@@ -84,8 +83,8 @@ public class SimpleIndicesBuilderTest {
         expected.getSymmetries().add(IndexType.LatinLower, true, 1, 0, 2, 3);
 
         assertEquals(expected, indices);
-        unsafeAssertEquals(indices.getSymmetries().getInnerSymmetries(),
-                           expected.getSymmetries().getInnerSymmetries());
+        TAssert.assertEquals(indices.getSymmetries().getPermutationGroup(),
+                expected.getSymmetries().getPermutationGroup());
     }
 
     @Test
@@ -101,15 +100,12 @@ public class SimpleIndicesBuilderTest {
         assertTrue(ibs.getIndices().equals(expectedIndices));
 
         //Expected
-        Symmetry s1 = new Symmetry(false, new int[]{0, 1, 2, 3});
-        Symmetry s2 = new Symmetry(false, new int[]{1, 0, 2, 3});
-        Symmetry s3 = new Symmetry(false, new int[]{0, 1, 3, 2});
-        Symmetry[] expected = {s1, s2, s3};
+        Permutation s1 = new PermutationOneLine(false, new int[]{0, 1, 2, 3});
+        Permutation s2 = new PermutationOneLine(false, new int[]{1, 0, 2, 3});
+        Permutation s3 = new PermutationOneLine(false, new int[]{0, 1, 3, 2});
+        Permutation[] expected = {s1, s2, s3};
 
-        Symmetry[] actual = ibs.getIndices().getSymmetries().getInnerSymmetries().getBasisSymmetries().toArray(new Symmetry[3]);
-        Arrays.sort(actual);
-        Arrays.sort(expected);
-        assertTrue(Arrays.equals(actual, expected));
+        TAssert.assertEquals(ibs.getIndices().getSymmetries().getPermutationGroup(), new PermutationGroup(expected));
     }
 
     @Test
@@ -130,15 +126,12 @@ public class SimpleIndicesBuilderTest {
         assertTrue(ibs.getIndices().equals(expectedIndices));
 
         //Expected
-        Symmetry s1 = new Symmetry(false, new int[]{0, 1, 2, 3, 4, 5, 6, 7});
-        Symmetry s2 = new Symmetry(false, new int[]{0, 1, 3, 2, 4, 5, 6, 7});
-        Symmetry s3 = new Symmetry(false, new int[]{0, 1, 2, 3, 5, 4, 6, 7});
-        Symmetry[] expected = {s1, s2, s3};
+        Permutation s1 = new PermutationOneLine(false, new int[]{0, 1, 2, 3, 4, 5, 6, 7});
+        Permutation s2 = new PermutationOneLine(false, new int[]{0, 1, 3, 2, 4, 5, 6, 7});
+        Permutation s3 = new PermutationOneLine(false, new int[]{0, 1, 2, 3, 5, 4, 6, 7});
+        Permutation[] expected = {s1, s2, s3};
 
-        Symmetry[] actual = ibs.getIndices().getSymmetries().getInnerSymmetries().getBasisSymmetries().toArray(new Symmetry[3]);
-        Arrays.sort(actual);
-        Arrays.sort(expected);
-        assertTrue(Arrays.equals(actual, expected));
+        TAssert.assertEquals(ibs.getIndices().getSymmetries().getPermutationGroup(), new PermutationGroup(expected));
     }
 
     @Test
@@ -160,14 +153,11 @@ public class SimpleIndicesBuilderTest {
         assertTrue(ibs.getIndices().equals(expectedIndices));
 
         //Expected
-        Symmetry s1 = new Symmetry(false, new int[]{0, 1, 2, 3, 4, 5, 6, 7});
-        Symmetry s2 = new Symmetry(false, new int[]{1, 0, 2, 3, 4, 5, 6, 7});
-        Symmetry s3 = new Symmetry(false, new int[]{0, 1, 3, 2, 4, 5, 6, 7});
-        Symmetry[] expected = {s1, s2, s3};
+        Permutation s1 = new PermutationOneLine(false, new int[]{0, 1, 2, 3, 4, 5, 6, 7});
+        Permutation s2 = new PermutationOneLine(false, new int[]{1, 0, 2, 3, 4, 5, 6, 7});
+        Permutation s3 = new PermutationOneLine(false, new int[]{0, 1, 3, 2, 4, 5, 6, 7});
+        Permutation[] expected = {s1, s2, s3};
 
-        Symmetry[] actual = ibs.getIndices().getSymmetries().getInnerSymmetries().getBasisSymmetries().toArray(new Symmetry[3]);
-        Arrays.sort(actual);
-        Arrays.sort(expected);
-        assertTrue(Arrays.equals(actual, expected));
+        TAssert.assertEquals(ibs.getIndices().getSymmetries().getPermutationGroup(), new PermutationGroup(expected));
     }
 }

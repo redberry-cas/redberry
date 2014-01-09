@@ -29,6 +29,7 @@ import cc.redberry.core.combinatorics.symmetries.Symmetries;
 import cc.redberry.core.combinatorics.symmetries.SymmetriesFactory;
 import cc.redberry.core.context.CC;
 import cc.redberry.core.groups.permutations.Permutation;
+import cc.redberry.core.groups.permutations.PermutationGroup;
 import cc.redberry.core.groups.permutations.PermutationOneLine;
 import cc.redberry.core.groups.permutations.Permutations;
 import cc.redberry.core.indexmapping.Mapping;
@@ -170,7 +171,7 @@ public class TensorUtilsTest {
         for (Permutation symmetry : symmetries)
             expected.add(symmetry);
 
-        assertEqualsSymmetries(actual, expected);
+        assertEqualsSymmetries(new PermutationGroup(actual), new PermutationGroup(expected));
     }
 
     @Test
@@ -219,8 +220,8 @@ public class TensorUtilsTest {
             expectedSymmetries.add(s);
         }
 
-        assertEqualsSymmetries(expectedSymmetries,
-                findIndicesSymmetries(tensor.getIndices(), tensor));
+        assertEqualsSymmetries(new PermutationGroup(expectedSymmetries),
+                new PermutationGroup(findIndicesSymmetries(tensor.getIndices(), tensor)));
     }
 
     @Test
@@ -230,7 +231,7 @@ public class TensorUtilsTest {
         List<Permutation> expected = new ArrayList<>();
         expected.add(new PermutationOneLine(new int[]{1, 0, 2, 3}));
         expected.add(new PermutationOneLine(new int[]{0, 1, 3, 2}));
-        assertEqualsSymmetries(actual, expected);
+        assertEqualsSymmetries(new PermutationGroup(actual), new PermutationGroup(expected));
     }
 
     @Test
@@ -240,7 +241,7 @@ public class TensorUtilsTest {
         List<Permutation> expected =  new ArrayList<>();
         expected.add(new PermutationOneLine(false, new int[]{1, 0, 2, 3}));
         expected.add(new PermutationOneLine(false, new int[]{0, 1, 3, 2}));
-        assertEqualsSymmetries(actual, expected);
+        assertEqualsSymmetries(new PermutationGroup(actual), new PermutationGroup(expected));
     }
 
     @Test
