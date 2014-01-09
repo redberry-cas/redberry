@@ -23,7 +23,7 @@
 package cc.redberry.core.indexmapping;
 
 import cc.redberry.concurrent.OutputPortUnsafe;
-import cc.redberry.core.combinatorics.Symmetry;
+import cc.redberry.core.groups.permutations.Permutation;
 import cc.redberry.core.indices.SimpleIndices;
 import cc.redberry.core.tensor.SimpleTensor;
 import cc.redberry.core.tensor.Tensor;
@@ -57,14 +57,14 @@ final class ProviderSimpleTensor extends IndexMappingProviderAbstractFT<SimpleTe
         public IndexMappingProvider create(IndexMappingProvider opu, Tensor from, Tensor to) {
             if (((TensorField) from).getName() != ((TensorField) to).getName())
                 return IndexMappingProvider.Util.EMPTY_PROVIDER;
-            for (int i = 0; i < from.size(); ++i){
+            for (int i = 0; i < from.size(); ++i) {
                 if (!IndexMappings.positiveMappingExists(from.get(i), to.get(i)))
                     return IndexMappingProvider.Util.EMPTY_PROVIDER;
             }
             return new ProviderSimpleTensor(opu, (SimpleTensor) from, (SimpleTensor) to);
         }
     };
-    private Iterator<Symmetry> symmetryIterator;
+    private Iterator<Permutation> symmetryIterator;
 
     private ProviderSimpleTensor(OutputPortUnsafe<IndexMappingBuffer> opu, SimpleTensor from, SimpleTensor to) {
         super(opu, from, to);
@@ -87,19 +87,19 @@ final class ProviderSimpleTensor extends IndexMappingProviderAbstractFT<SimpleTe
         if (symmetryIterator != null) {
             OUT:
             while (symmetryIterator.hasNext()) {
-                Symmetry s = symmetryIterator.next();
+                Permutation s = symmetryIterator.next();
                 IndexMappingBuffer tempBuffer = currentBuffer.clone();
                 for (int i = 0; i < size; ++i)
                     if (!tempBuffer.tryMap(fromIndices.get(s.newIndexOf(i)), toIndices.get(i)))
                         continue OUT;
-                tempBuffer.addSign(s.isAntiSymmetry());
+                tempBuffer.addSign(s.antisymmetry());
                 return tempBuffer;
             }
             symmetryIterator = null;
             currentBuffer = null;
             return null;
         }
-        if (fromIndices.getSymmetries().isEmpty()) {
+        if (fromIndices.getSymmetries().isTrivial()) {
             IndexMappingBuffer tempBuffer = currentBuffer;
             for (int i = 0; i < size; ++i)
                 if (!tempBuffer.tryMap(fromIndices.get(i), toIndices.get(i))) {

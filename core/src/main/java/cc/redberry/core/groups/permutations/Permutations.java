@@ -298,31 +298,6 @@ public final class Permutations {
         return orbits.toArray(new int[orbits.size()][]);
     }
 
-
-    private static final int[][] cachedIdentities = new int[64][];
-
-    private static int[] createIdentityPermutationArray(int length) {
-        int[] array = new int[length];
-        for (int i = 0; i < length; ++i)
-            array[i] = i;
-        return array;
-    }
-
-    static int[] getIdentityPermutationArray(int length) {
-        if (cachedIdentities.length <= length)
-            return createIdentityPermutationArray(length);
-        if (cachedIdentities[length] == null)
-            synchronized (cachedIdentities) {
-                if (cachedIdentities[length] == null)
-                    cachedIdentities[length] = createIdentityPermutationArray(length);
-            }
-        return cachedIdentities[length];
-    }
-
-    public static PermutationOneLine getIdentityOneLine(int degree) {
-        return new PermutationOneLine(getIdentityPermutationArray(degree));
-    }
-
     /**
      * Creates random permutation of specified dimension
      *
@@ -451,6 +426,112 @@ public final class Permutations {
     public static void shuffle(int[] a, RandomGenerator rnd) {
         for (int i = a.length; i > 1; --i)
             ArraysUtils.swap(a, i - 1, rnd.nextInt(i));
+    }
+
+    /**
+     * **************************************** FACTORIES **************************************************
+     */
+
+    private static final Permutation[] cachedIdentities = new Permutation[128];
+
+    public static int[] createIdentityPermutationArray(int length) {
+        int[] array = new int[length];
+        for (int i = 0; i < length; ++i)
+            array[i] = i;
+        return array;
+    }
+
+    public static Permutation createIdentityPermutation(int degree) {
+        if (degree < cachedIdentities.length) {
+            if (cachedIdentities[degree] == null)
+                cachedIdentities[degree] = new PermutationOneLine(createIdentityPermutationArray(degree));
+            return cachedIdentities[degree];
+        }
+        return new PermutationOneLine(createIdentityPermutationArray(degree));
+    }
+
+    /**
+     * Creates transposition of first two elements written in one-line notation
+     * with specified dimension, i.e. an array of form [1,0,2,3,4,...,{@code dimension - 1}].
+     *
+     * @param dimension dimension of the resulting permutation, e.g. the array length
+     * @return transposition permutation in one-line notation
+     */
+    public static int[] createTransposition(int dimension) {
+        if (dimension < 0)
+            throw new IllegalArgumentException("Dimension is negative.");
+        if (dimension > 1)
+            return createTransposition(dimension, 0, 1);
+        return new int[dimension];
+    }
+
+    /**
+     * Creates transposition in one-line notation
+     *
+     * @param dimension dimension of the resulting permutation, e.g. the array length
+     * @param position1 first position
+     * @param position2 second position
+     * @return transposition
+     */
+    public static int[] createTransposition(int dimension, int position1, int position2) {
+        if (dimension < 0)
+            throw new IllegalArgumentException("Dimension is negative.");
+        if (position1 < 0 || position2 < 0)
+            throw new IllegalArgumentException("Negative index.");
+        if (position1 >= dimension || position2 >= dimension)
+            throw new IndexOutOfBoundsException();
+
+        int[] transposition = new int[dimension];
+        int i = 1;
+        for (; i < dimension; ++i)
+            transposition[i] = i;
+        i = transposition[position1];
+        transposition[position1] = transposition[position2];
+        transposition[position2] = i;
+        return transposition;
+    }
+
+    /**
+     * Creates cycle permutation written in one-line notation,
+     * i.e. an array of form [{@code dimension-1},0,1, ...,{@code dimension-2}].
+     *
+     * @param dimension dimension of the resulting permutation, e.g. the array length
+     * @return cycle permutation in one-line notation
+     */
+    public static int[] createCycle(int dimension) {
+        if (dimension < 0)
+            throw new IllegalArgumentException("Negative degree");
+
+        int[] cycle = new int[dimension];
+        for (int i = 0; i < dimension - 1; ++i)
+            cycle[i + 1] = i;
+        cycle[0] = dimension - 1;
+        return cycle;
+    }
+
+
+    public static int[] createBlockCycle(int blockSize, int numberOfBlocks) {
+        final int[] cycle = new int[blockSize * numberOfBlocks];
+
+        int i = blockSize * (numberOfBlocks - 1) - 1;
+        for (; i >= 0; --i) cycle[i] = i + blockSize;
+        i = blockSize * (numberOfBlocks - 1);
+        int k = 0;
+        for (; i < cycle.length; ++i)
+            cycle[i] = k++;
+
+        return cycle;
+    }
+
+    public static int[] createBlockTransposition(final int length1, final int length2) {
+        final int[] r = new int[length1 + length2];
+        int i = 0;
+        for (; i < length2; ++i) {
+            r[i] = length1 + i;
+        }
+        for (; i < r.length; ++i)
+            r[i] = i - length2;
+        return r;
     }
 
 

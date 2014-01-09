@@ -28,6 +28,8 @@ import cc.redberry.core.context.CC;
 import cc.redberry.core.context.NameDescriptor;
 import cc.redberry.core.context.NameDescriptorForSimpleTensor;
 import cc.redberry.core.context.NameDescriptorForTensorField;
+import cc.redberry.core.groups.permutations.PermutationOneLine;
+import cc.redberry.core.groups.permutations.Permutations;
 import cc.redberry.core.indices.*;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.parser.ParseTokenTransformer;
@@ -1075,13 +1077,13 @@ public final class Tensors {
      */
     public static void setAntiSymmetric(SimpleTensor tensor, IndexType type) {
         int dimension = tensor.getIndices().size(type);
-        boolean symmetriesAreEmpty = tensor.getIndices().getSymmetries().isEmpty();
+        boolean symmetriesAreEmpty = tensor.getIndices().getSymmetries().isTrivial();
         addSymmetry(tensor, type, true, Combinatorics.createTransposition(dimension));
         if (dimension > 2)
             if (symmetriesAreEmpty)
-                tensor.getIndices().getSymmetries().addUnsafe(type.getType(), new Symmetry(dimension % 2 == 0 ? true : false, Combinatorics.createCycle(dimension)));
+                tensor.getIndices().getSymmetries().add(type.getType(), new PermutationOneLine(dimension % 2 == 0 ? true : false, Permutations.createCycle(dimension)));
             else
-                tensor.getIndices().getSymmetries().add(type.getType(), new Symmetry(dimension % 2 == 0 ? true : false, Combinatorics.createCycle(dimension)));
+                tensor.getIndices().getSymmetries().add(type.getType(), new PermutationOneLine(dimension % 2 == 0 ? true : false, Permutations.createCycle(dimension)));
     }
 
     /**
@@ -1091,13 +1093,13 @@ public final class Tensors {
      */
     public static void setAntiSymmetric(SimpleTensor tensor) {
         int dimension = tensor.getIndices().size();
-        boolean symmetriesAreEmpty = tensor.getIndices().getSymmetries().isEmpty();
+        boolean symmetriesAreEmpty = tensor.getIndices().getSymmetries().isTrivial();
         tensor.getIndices().getSymmetries().addAntiSymmetry(Combinatorics.createTransposition(dimension));
         if (dimension > 2) {
             if (symmetriesAreEmpty)
-                tensor.getIndices().getSymmetries().addUnsafe(dimension % 2 == 0 ? true : false, Combinatorics.createCycle(dimension));
+                tensor.getIndices().getSymmetries().add(dimension % 2 == 0 ? true : false, Permutations.createCycle(dimension));
             else
-                tensor.getIndices().getSymmetries().add(dimension % 2 == 0 ? true : false, Combinatorics.createCycle(dimension));
+                tensor.getIndices().getSymmetries().add(dimension % 2 == 0 ? true : false, Permutations.createCycle(dimension));
         }
     }
 
@@ -1123,12 +1125,12 @@ public final class Tensors {
      */
     public static void setSymmetric(SimpleTensor tensor, IndexType type) {
         int dimension = tensor.getIndices().size(type);
-        boolean symmetriesAreEmpty = tensor.getIndices().getSymmetries().isEmpty();
+        boolean symmetriesAreEmpty = tensor.getIndices().getSymmetries().isTrivial();
         tensor.getIndices().getSymmetries().addSymmetry(type, Combinatorics.createCycle(dimension));
         if (symmetriesAreEmpty)
-            tensor.getIndices().getSymmetries().addUnsafe(type.getType(), new Symmetry(false, Combinatorics.createTransposition(dimension)));
+            tensor.getIndices().getSymmetries().add(type.getType(), new PermutationOneLine(false, Permutations.createTransposition(dimension)));
         else
-            tensor.getIndices().getSymmetries().addSymmetry(type, Combinatorics.createTransposition(dimension));
+            tensor.getIndices().getSymmetries().addSymmetry(type, Permutations.createTransposition(dimension));
     }
 
     /**
@@ -1138,12 +1140,12 @@ public final class Tensors {
      */
     public static void setSymmetric(SimpleTensor tensor) {
         int dimension = tensor.getIndices().size();
-        boolean symmetriesAreEmpty = tensor.getIndices().getSymmetries().isEmpty();
+        boolean symmetriesAreEmpty = tensor.getIndices().getSymmetries().isTrivial();
         tensor.getIndices().getSymmetries().addSymmetry(Combinatorics.createCycle(dimension));
         if (symmetriesAreEmpty)
-            tensor.getIndices().getSymmetries().addSymmetryUnsafe(Combinatorics.createTransposition(dimension));
+            tensor.getIndices().getSymmetries().addSymmetry(Permutations.createTransposition(dimension));
         else
-            tensor.getIndices().getSymmetries().addSymmetry(Combinatorics.createTransposition(dimension));
+            tensor.getIndices().getSymmetries().addSymmetry(Permutations.createTransposition(dimension));
     }
 
     /**

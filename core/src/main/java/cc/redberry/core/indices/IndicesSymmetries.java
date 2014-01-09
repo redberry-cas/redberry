@@ -22,17 +22,12 @@
  */
 package cc.redberry.core.indices;
 
-import cc.redberry.core.combinatorics.InconsistentGeneratorsException;
-import cc.redberry.core.combinatorics.Symmetry;
 import cc.redberry.core.combinatorics.symmetries.Symmetries;
-import cc.redberry.core.combinatorics.symmetries.SymmetriesFactory;
-import cc.redberry.core.utils.ArraysUtils;
-import cc.redberry.core.utils.IntArrayList;
+import cc.redberry.core.groups.permutations.Permutation;
+import cc.redberry.core.groups.permutations.PermutationGroup;
+import cc.redberry.core.groups.permutations.PermutationOneLine;
 
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * Representation of permutational symmetries of indices of simple tensors.
@@ -41,35 +36,56 @@ import java.util.Objects;
  * @author Stanislav Poslavsky
  * @since 1.0
  */
-public class IndicesSymmetries implements Iterable<Symmetry> {
+public final class IndicesSymmetries
+        implements Iterable<Permutation> {
+
+    static final IndicesSymmetries EMPTY_INDICES_SYMMETRIES
+            = new IndicesSymmetries(StructureOfIndices.EMPTY, Collections.EMPTY_LIST, null);
 
     private final StructureOfIndices structureOfIndices;
-    private final Symmetries symmetries;
-    private short[] diffIds = null;
+    private final List<Permutation> generators;
+    private PermutationGroup permutationGroup;
 
-    IndicesSymmetries(StructureOfIndices structureOfIndices) {
+    private IndicesSymmetries(StructureOfIndices structureOfIndices) {
         this.structureOfIndices = structureOfIndices;
-        this.symmetries = SymmetriesFactory.createSymmetries(structureOfIndices.size());
+        this.generators = new ArrayList<>();
     }
 
-    private IndicesSymmetries(StructureOfIndices structureOfIndices, Symmetries symmetries, short[] diffIds) {
-        this.structureOfIndices = structureOfIndices;
-        this.symmetries = symmetries;
-        this.diffIds = diffIds;
-    }
-
-    IndicesSymmetries(StructureOfIndices structureOfIndices, Symmetries symmetries) {
-        this.structureOfIndices = structureOfIndices;
-        this.symmetries = symmetries;
-    }
-
-    /**
-     * Returns the type structure of indices, for which this symmetries defined.
-     *
-     * @return the type structure of indices, for which this symmetries defined
+    /*
+     * For clone()
      */
+    private IndicesSymmetries(StructureOfIndices structureOfIndices,
+                              List<Permutation> generators, PermutationGroup permutationGroup) {
+        this.structureOfIndices = structureOfIndices;
+        this.generators = generators;
+        this.permutationGroup = permutationGroup;
+    }
+
+    public PermutationGroup getPermutationGroup() {
+        if (permutationGroup == null)
+            permutationGroup = new PermutationGroup(generators);
+        return permutationGroup;
+    }
+
+    public static IndicesSymmetries create(StructureOfIndices structureOfIndices) {
+        if (structureOfIndices.size() == 0)
+            return EMPTY_INDICES_SYMMETRIES;
+        return new IndicesSymmetries(structureOfIndices);
+    }
+
+    public static IndicesSymmetries create(StructureOfIndices structureOfIndices,
+                                           List<Permutation> generators) {
+        if (structureOfIndices.size() == 0)
+            return EMPTY_INDICES_SYMMETRIES;
+        return new IndicesSymmetries(structureOfIndices, new ArrayList<>(generators), null);
+    }
+
     public StructureOfIndices getStructureOfIndices() {
         return structureOfIndices;
+    }
+
+    public List<Permutation> getGenerators() {
+        return Collections.unmodifiableList(generators);
     }
 
     /**
@@ -78,190 +94,53 @@ public class IndicesSymmetries implements Iterable<Symmetry> {
      * @return the reference on the internal representation of symmetries
      */
     public Symmetries getInnerSymmetries() {
-        return symmetries;
-    }
-
-    /**
-     * Returns the basis.
-     *
-     * @return the basis
-     * @see cc.redberry.core.combinatorics.symmetries.Symmetries#getBasisSymmetries()
-     */
-    public List<Symmetry> getBasis() {
-        return symmetries.getBasisSymmetries();
+        return null;
     }
 
     @Override
-    public Iterator<Symmetry> iterator() {
-        return symmetries.iterator();
+    public Iterator<Permutation> iterator() {
+        return getPermutationGroup().iterator();
     }
 
-    /**
-     * See {@link cc.redberry.core.indices.Indices#getDiffIds()}
-     *
-     * @return {@code diffIds} for indices as specified in {@link cc.redberry.core.indices.Indices#getDiffIds()}
-     */
-    public short[] getDiffIds() {
-        //TODO synchronize
-        if (diffIds == null) {
-            List<Symmetry> list = symmetries.getBasisSymmetries();
-            diffIds = new short[symmetries.dimension()];
-            Arrays.fill(diffIds, (short) -1);
-            short number = 0;
-            IntArrayList removed = new IntArrayList(2);
-            int i0, i1;
-            for (Symmetry symmetry : list)
-                for (i0 = diffIds.length - 1; i0 >= 0; --i0)
-                    if ((i1 = symmetry.newIndexOf(i0)) != i0)
-                        if (diffIds[i0] == -1 && diffIds[i1] == -1)
-                            diffIds[i0] = diffIds[i1] = number++;
-                        else if (diffIds[i0] == -1)
-                            diffIds[i0] = diffIds[i1];
-                        else if (diffIds[i1] == -1)
-                            diffIds[i1] = diffIds[i0];
-                        else if (diffIds[i1] != diffIds[i0]) {
-                            int n = diffIds[i1];
-                            for (int k = 0; k < diffIds.length; ++k)
-                                if (diffIds[k] == n)
-                                    diffIds[k] = diffIds[i0];
-                            removed.add(n);
-                        }
-            for (i1 = 0; i1 < diffIds.length; ++i1)
-                if (diffIds[i1] == -1)
-                    diffIds[i1] = number++;
+    private short[] positionsInOrbits = null;
 
-            removed.sort();
-            for (i0 = diffIds.length - 1; i0 >= 0; --i0) {
-                diffIds[i0] += ArraysUtils.binarySearch(removed, diffIds[i0]) + 1;
+    public short[] getDiffIds() {
+        if (positionsInOrbits == null) {
+            final int[] positionsInOrbitsInt = getPermutationGroup().getPositionsInOrbits();
+            positionsInOrbits = new short[positionsInOrbitsInt.length];
+            for (int i = 0; i < positionsInOrbitsInt.length; ++i) {
+                assert positionsInOrbitsInt[i] < Short.MAX_VALUE;
+                positionsInOrbits[i] = (short) positionsInOrbitsInt[i];
             }
         }
-        return diffIds;
+        return positionsInOrbits;
     }
 
-    /**
-     * Adds permutational symmetry.
-     *
-     * @param permutation permutation
-     * @return {@code true} if it is a new symmetry of indices and {@code false} if it follows from
-     *         already defined symmetries.
-     * @throws IllegalArgumentException if there are more then one type of indices in corresponding indices
-     * @throws IllegalArgumentException if {@code permutation.length() != indices.size()}
-     * @throws InconsistentGeneratorsException
-     *                                  if the specified symmetry is
-     *                                  inconsistent with already defined
-     */
     public boolean addSymmetry(int... permutation) {
         return add(false, permutation);
     }
 
-    public boolean addSymmetryUnsafe(int... permutation) {
-        return add(false, permutation, true);
-    }
-
-    /**
-     * Adds permutational antisymmetry.
-     *
-     * @param permutation permutation
-     * @return {@code true} if it is a new symmetry of indices and {@code false} if it follows from
-     *         already defined symmetries.
-     * @throws IllegalArgumentException if there are more then one type of indices in corresponding indices
-     * @throws IllegalArgumentException if {@code permutation.length() != indices.size()}
-     * @throws InconsistentGeneratorsException
-     *                                  if the specified symmetry is
-     *                                  inconsistent with already defined
-     */
     public boolean addAntiSymmetry(int... permutation) {
         return add(true, permutation);
     }
 
-    public boolean addAntiSymmetryUnsafe(int... permutation) {
-        return add(true, permutation, true);
-    }
-
-    /**
-     * Adds permutational symmetry for a particular type of indices.
-     *
-     * @param permutation permutation
-     * @param type        type of indices
-     * @return {@code true} if it is a new symmetry of indices and {@code false} if it follows from
-     *         already defined symmetries.
-     * @throws IllegalArgumentException if {@code permutation.length() != indices.size(type)}
-     * @throws InconsistentGeneratorsException
-     *                                  if the specified symmetry is
-     *                                  inconsistent with already defined
-     */
     public boolean addSymmetry(IndexType type, int... permutation) {
         return add(type, false, permutation);
     }
 
-    /**
-     * Adds permutational antisymmetry for a particular type of indices.
-     *
-     * @param permutation permutation
-     * @param type        type of indices
-     * @return {@code true} if it is a new symmetry of indices and {@code false} if it follows from
-     *         already defined symmetries.
-     * @throws IllegalArgumentException if {@code permutation.length() != indices.size(type)}
-     * @throws InconsistentGeneratorsException
-     *                                  if the specified symmetry is
-     *                                  inconsistent with already defined
-     */
     public boolean addAntiSymmetry(IndexType type, int... permutation) {
         return add(type, true, permutation);
     }
 
-    /**
-     * Adds permutational (anti)symmetry for a particular type of indices.
-     *
-     * @param permutation permutation
-     * @param sign        sign of symmetry ({@code true} means '-', {@code false} means '+')
-     * @param type        type of indices
-     * @return {@code true} if it is a new symmetry of indices and {@code false} if it follows from
-     *         already defined symmetries.
-     * @throws IllegalArgumentException if {@code permutation.length() != indices.size(type)}
-     * @throws InconsistentGeneratorsException
-     *                                  if the specified symmetry is
-     *                                  inconsistent with already defined
-     */
     public boolean add(IndexType type, boolean sign, int... permutation) {
-        return add(type.getType(), new Symmetry(sign, permutation));
+        return add(type.getType(), new PermutationOneLine(sign, permutation));
     }
 
-    /**
-     * Adds permutational (anti)symmetry for a particular type of indices.
-     *
-     * @param permutation permutation
-     * @param sign        sign of symmetry ({@code true} means '-', {@code false} means '+')
-     * @param type        type of indices
-     * @return {@code true} if it is a new symmetry of indices and {@code false} if it follows from
-     *         already defined symmetries.
-     * @throws IllegalArgumentException if {@code permutation.length() != indices.size(type)}
-     * @throws InconsistentGeneratorsException
-     *                                  if the specified symmetry is
-     *                                  inconsistent with already defined
-     */
     public boolean add(byte type, boolean sign, int... permutation) {
-        return add(type, new Symmetry(sign, permutation));
+        return add(type, new PermutationOneLine(sign, permutation));
     }
 
-    /**
-     * Adds permutational (anti)symmetry.
-     *
-     * @param permutation permutation
-     * @param sign        sign of symmetry ({@code true} means '-', {@code false} means '+')
-     * @return {@code true} if it is a new symmetry of indices and {@code false} if it follows from
-     *         already defined symmetries.
-     * @throws IllegalArgumentException if there are more then one type of indices in corresponding indices
-     * @throws IllegalArgumentException if {@code permutation.length() != indices.size(type)}
-     * @throws InconsistentGeneratorsException
-     *                                  if the specified symmetry is
-     *                                  inconsistent with already defined
-     */
-    public boolean add(boolean sign, int... permutation) {
-        return add(sign, permutation, false);
-    }
-
-    public boolean add(boolean sign, int[] permutation, boolean unsafe) {
+    public boolean add(boolean sign, int[] permutation) {
         byte type = -1;
         StructureOfIndices.TypeData typeData;
         for (int i = 0; i < IndexType.TYPES_COUNT; ++i) {
@@ -274,29 +153,15 @@ public class IndicesSymmetries implements Iterable<Symmetry> {
                 type = (byte) i;
             }
         }
-        if (unsafe)
-            return addUnsafe(type, new Symmetry(sign, permutation));
-        else
-            return add(type, new Symmetry(sign, permutation));
+        return add(type, new PermutationOneLine(sign, permutation));
     }
 
 
-    /**
-     * Adds permutational (anti)symmetry.
-     *
-     * @param symmetry symmetry
-     * @return {@code true} if it is a new symmetry of indices and {@code false} if it follows from
-     *         already defined symmetries.
-     * @throws IllegalArgumentException if {@code symmetry.dimension() != indices.size(type)}
-     * @throws InconsistentGeneratorsException
-     *                                  if the specified symmetry is
-     *                                  inconsistent with already defined
-     */
-    public boolean add(byte type, Symmetry symmetry) {
+    public boolean add(byte type, Permutation symmetry) {
         StructureOfIndices.TypeData data = structureOfIndices.getTypeData(type);
         if (data == null)
             throw new IllegalArgumentException("No such type: " + IndexType.getType(type));
-        if (data.length != symmetry.dimension())
+        if (data.length != symmetry.degree())
             throw new IllegalArgumentException("Wrong symmetry length.");
         int[] s = new int[structureOfIndices.size()];
         int i = 0;
@@ -306,130 +171,31 @@ public class IndicesSymmetries implements Iterable<Symmetry> {
             s[i] = symmetry.newIndexOf(j) + data.from;
         for (; i < structureOfIndices.size(); ++i)
             s[i] = i;
-        try {
-            if (symmetries.add(new Symmetry(symmetry.isAntiSymmetry(), s))) {
-                diffIds = null;
-                return true;
-            }
-            return false;
-        } catch (InconsistentGeneratorsException exception) {
-            throw new InconsistentGeneratorsException("Adding inconsistent symmetry to tensor indices symmetries.");
-        }
+        return generators.add(new PermutationOneLine(symmetry.antisymmetry(), s));
     }
 
-    public boolean addUnsafe(boolean sign, int... permutation) {
-        if (sign) return addAntiSymmetryUnsafe(permutation);
-        else return addSymmetryUnsafe(permutation);
+
+    public boolean add(Permutation symmetry) {
+        return generators.add(symmetry);
     }
 
-    /**
-     * Adds permutational (anti)symmetry for a particular type of indices without any checks.
-     *
-     * @param symmetry symmetry
-     * @return {@code true}
-     */
-    public boolean addUnsafe(byte type, Symmetry symmetry) {
-        StructureOfIndices.TypeData data = structureOfIndices.getTypeData(type);
-        if (data == null)
-            throw new IllegalArgumentException("No such type: " + IndexType.getType(type));
-        if (data.length != symmetry.dimension())
-            throw new IllegalArgumentException("Wrong symmetry length.");
-        int[] s = new int[structureOfIndices.size()];
-        int i = 0;
-        for (; i < data.from; ++i)
-            s[i] = i;
-        for (int j = 0; j < data.length; ++j, ++i)
-            s[i] = symmetry.newIndexOf(j) + data.from;
-        for (; i < structureOfIndices.size(); ++i)
-            s[i] = i;
-        symmetries.addUnsafe(new Symmetry(symmetry.isAntiSymmetry(), s));
-        return true;
+    public boolean addAll(Collection<Permutation> symmetry) {
+        return generators.addAll(symmetry);
     }
 
-    /**
-     * Adds permutational (anti)symmetry of indices without any checks.
-     *
-     * @param symmetry symmetry
-     * @return {@code true}
-     */
-    public boolean addUnsafe(Symmetry symmetry) {
-        return this.symmetries.addUnsafe(symmetry);
-    }
-
-    /**
-     * Returns <tt>true</tt> if and only if this set contains only identity
-     * symmetry and <tt>false</tt> otherwise.
-     *
-     * @return <tt>true</tt> if and only if this set contains only identity
-     *         symmetry and <tt>false</tt> otherwise
-     */
-    public final boolean isEmpty() {
-        return symmetries.isEmpty();
+    public final boolean isTrivial() {
+        return generators.isEmpty() || permutationGroup.isTrivial();
     }
 
     @Override
     public IndicesSymmetries clone() {
-        return new IndicesSymmetries(structureOfIndices, symmetries.clone(), diffIds);
+        if (structureOfIndices.size() == 0)
+            return EMPTY_INDICES_SYMMETRIES;
+        return new IndicesSymmetries(structureOfIndices, new ArrayList<>(generators), permutationGroup);
     }
 
     @Override
     public String toString() {
-        return symmetries.toString();
+        return generators.toString();
     }
-
-    //    @Override
-//    public boolean equals(Object obj) {
-//        if (obj == null)
-//            return false;
-//        if (getClass() != obj.getClass())
-//            return false;
-//        final IndicesSymmetries other = (IndicesSymmetries) obj;
-//        if (!this.indicesTypeStructure.equals(other.indicesTypeStructure))
-//            return false;
-//        if (!Objects.equals(this.symmetries, other.symmetries))
-//            return false;
-//        if (!Arrays.equals(this.diffIds, other.diffIds))
-//            return false;
-//        return true;
-//    }
-    @Override
-    public int hashCode() {
-        return 301 + Objects.hashCode(this.symmetries);
-    }
-
-    /*
-     * private static void checkConsistent(IndicesTypeStructure
-     * indicesTypeStructure, SymmetriesImpl symmetries) { List<Symmetry> list =
-     * symmetries.getBasisSymmetries(); for (Symmetry s : list)
-     * checkConsistent(indicesTypeStructure, s); }
-     *
-     * private static void checkConsistent(IndicesTypeStructure
-     * indicesTypeStructure, Symmetry symmetry) { for (int i = 0; i <
-     * symmetry.dimension(); ++i) if (indicesTypeStructure.data[i] !=
-     * indicesTypeStructure.data[symmetry.newIndexOf(i)]) throw new
-     * IllegalArgumentException("Inconsistent symmetry: permutes indices with
-     * different types."); }
-     */
-
-    /**
-     * Creates container of indices symmetries for a specified structure of indices.
-     *
-     * @param structureOfIndices structure of indices
-     * @return indices symmetries for a specified structure of indices
-     */
-    public static IndicesSymmetries create(StructureOfIndices structureOfIndices) {
-        if (structureOfIndices.size() == 0)
-            return EMPTY_SYMMETRIES;
-        return new IndicesSymmetries(structureOfIndices);
-    }
-
-    static final IndicesSymmetries EMPTY_SYMMETRIES =
-            new IndicesSymmetries(new StructureOfIndices(EmptySimpleIndices.EMPTY_SIMPLE_INDICES_INSTANCE),
-                    SymmetriesFactory.createSymmetries(0), new short[0]) {
-
-                @Override
-                public IndicesSymmetries clone() {
-                    return this;
-                }
-            };
 }

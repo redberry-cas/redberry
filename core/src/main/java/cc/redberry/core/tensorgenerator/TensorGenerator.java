@@ -152,7 +152,7 @@ public class TensorGenerator {
 
     private Tensor symmetrize(Tensor result, Symmetries symmetries) {
         //todo rewrite this slag
-        result  = new SymmetrizeTransformation(indices.getAllIndices().copy(), symmetries, true).transform(result);
+        result  = result;//new SymmetrizeTransformation(indices.getAllIndices().copy(), symmetries, true).transform(result);
         result = ExpandTransformation.expand(result );
 
         if (!(result instanceof Sum))

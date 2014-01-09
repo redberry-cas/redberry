@@ -281,12 +281,12 @@ public class PermutationGroupTest extends AbstractTestClass {
 
     @Test
     public void testIdentityGroup() throws Exception {
-        PermutationGroup id = new PermutationGroup(Permutations.getIdentityOneLine(10));
+        PermutationGroup id = new PermutationGroup(Permutations.createIdentityPermutation(10));
 
-        assertTrue(id.membershipTest(Permutations.getIdentityOneLine(10)));
+        assertTrue(id.membershipTest(Permutations.createIdentityPermutation(10)));
 
         Set<Permutation> set = new HashSet<>();
-        set.add(Permutations.getIdentityOneLine(10));
+        set.add(Permutations.createIdentityPermutation(10));
 
         for (Permutation p : id)
             assertTrue(set.remove(p));

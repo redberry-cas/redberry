@@ -92,7 +92,7 @@ final class EmptySimpleIndices extends EmptyIndices implements SimpleIndices {
      */
     @Override
     public IndicesSymmetries getSymmetries() {
-        return IndicesSymmetries.EMPTY_SYMMETRIES;
+        return IndicesSymmetries.EMPTY_INDICES_SYMMETRIES;
     }
 
     /**

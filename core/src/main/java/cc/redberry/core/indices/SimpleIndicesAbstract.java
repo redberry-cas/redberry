@@ -23,6 +23,7 @@
 package cc.redberry.core.indices;
 
 import cc.redberry.core.combinatorics.Symmetry;
+import cc.redberry.core.groups.permutations.Permutation;
 import cc.redberry.core.indexmapping.IndexMapping;
 import cc.redberry.core.utils.ArraysUtils;
 import cc.redberry.core.utils.IntArrayList;
@@ -218,8 +219,8 @@ abstract class SimpleIndicesAbstract extends AbstractIndices implements SimpleIn
         SimpleIndicesOfTensor _indices = (SimpleIndicesOfTensor) indices;
         boolean sign1;
         out:
-        for (Symmetry s1 : symmetries) {
-            sign1 = s1.isAntiSymmetry();
+        for (Permutation s1 : symmetries) {
+            sign1 = s1.antisymmetry();
             for (int i = 0; i < data.length; ++i)
                 if (data[s1.newIndexOf(i)] != (_indices).data[i])
                     continue out;

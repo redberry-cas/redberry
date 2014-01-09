@@ -24,11 +24,14 @@ package cc.redberry.core.transformations.symmetrization;
 
 import cc.redberry.core.combinatorics.Symmetry;
 import cc.redberry.core.combinatorics.symmetries.Symmetries;
+import cc.redberry.core.groups.permutations.Permutation;
 import cc.redberry.core.indexmapping.Mapping;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.number.Rational;
 import cc.redberry.core.tensor.*;
 import cc.redberry.core.transformations.Transformation;
+
+import java.util.List;
 
 /**
  * Gives a symmetrization of tensor with respect to specified indices under the specified symmetries.
@@ -39,7 +42,7 @@ import cc.redberry.core.transformations.Transformation;
  */
 public final class SymmetrizeTransformation implements Transformation {
     private final int[] indices;
-    private final Symmetries symmetries;
+    private final List<Permutation>  symmetries;
     private final boolean multiplyBySymmetryFactor;
 
     /**
@@ -48,7 +51,7 @@ public final class SymmetrizeTransformation implements Transformation {
      * @param multiplyBySymmetryFactor specifies whether the resulting expression should be divided by the
      *                                 number of symmetries (the order of the corresponding symmetric group)
      */
-    public SymmetrizeTransformation(int[] indices, Symmetries symmetries, boolean multiplyBySymmetryFactor) {
+    public SymmetrizeTransformation(int[] indices, List<Permutation> symmetries, boolean multiplyBySymmetryFactor) {
         this.indices = indices;
         this.symmetries = symmetries;
         this.multiplyBySymmetryFactor = multiplyBySymmetryFactor;
@@ -58,17 +61,17 @@ public final class SymmetrizeTransformation implements Transformation {
     public Tensor transform(Tensor t) {
         if (!multiplyBySymmetryFactor) {
             SumBuilder sb = new SumBuilder();
-            for (Symmetry symmetry : symmetries)
+            for (Permutation symmetry : symmetries)
                 sb.put(ApplyIndexMapping.applyIndexMappingAutomatically(t,
-                        new Mapping(indices, symmetry.permute(indices), symmetry.isAntiSymmetry())));
+                        new Mapping(indices, symmetry.permute(indices), symmetry.antisymmetry())));
 
             return sb.build();
         } else {
             long length = 0;
             SumBuilder sb = new SumBuilder();
-            for (Symmetry symmetry : symmetries) {
+            for (Permutation symmetry : symmetries) {
                 sb.put(ApplyIndexMapping.applyIndexMappingAutomatically(t,
-                        new Mapping(indices, symmetry.permute(indices), symmetry.isAntiSymmetry())));
+                        new Mapping(indices, symmetry.permute(indices), symmetry.antisymmetry())));
                 ++length;
             }
             t = sb.build();

@@ -25,6 +25,7 @@ package cc.redberry.core.transformations.symmetrization;
 import cc.redberry.core.combinatorics.IntPermutationsGenerator;
 import cc.redberry.core.combinatorics.Symmetry;
 import cc.redberry.core.combinatorics.symmetries.Symmetries;
+import cc.redberry.core.groups.permutations.Permutation;
 import cc.redberry.core.indexmapping.Mapping;
 import cc.redberry.core.indices.Indices;
 import cc.redberry.core.indices.IndicesFactory;
@@ -66,7 +67,7 @@ public final class SymmetrizeUpperLowerIndicesTransformation implements Transfor
     public static Tensor symmetrizeUpperLowerIndices(Tensor tensor, boolean multiplyOnSymmetryFactor) {
         Indices indices = IndicesFactory.create(tensor.getIndices().getFree());
         int[] indicesArray = indices.getAllIndices().copy();
-        Symmetries symmetries = TensorUtils.getIndicesSymmetriesForIndicesWithSameStates(indicesArray, tensor);
+        List<Permutation> symmetries = TensorUtils.getIndicesSymmetriesForIndicesWithSameStates(indicesArray, tensor);
         int lowerCount = indices.getLower().length(), upperCount = indices.getUpper().length();
 
         IntPermutationsGenerator lowIndicesPermutationsGenerator,
@@ -117,7 +118,7 @@ public final class SymmetrizeUpperLowerIndicesTransformation implements Transfor
                                   int[] upperPermutation,
                                   int[] lowerPermutation,
                                   List<int[]> generatedPermutations,
-                                  Symmetries symmetries) {
+                                  List<Permutation> symmetries) {
         //creating resulting permutation upper indices are first,
         //because initial indices are sorted
         int[] permutation = new int[upperPermutation.length + lowerPermutation.length];
@@ -129,7 +130,7 @@ public final class SymmetrizeUpperLowerIndicesTransformation implements Transfor
         //generated combinatorics exists throw any possible combination of symmetries
 
         for (int[] p : generatedPermutations)
-            for (Symmetry symmetry : symmetries)
+            for (Permutation symmetry : symmetries)
                 if (Arrays.equals(permutation, symmetry.permute(p)))
                     return null;
         generatedPermutations.add(permutation);

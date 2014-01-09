@@ -45,7 +45,7 @@ final class SimpleIndicesIsolated extends SimpleIndicesAbstract {
     @Override
     public IndicesSymmetries getSymmetries() {
         if (symmetries == null)
-            symmetries = new IndicesSymmetries(new StructureOfIndices(this));
+            symmetries = IndicesSymmetries.create(new StructureOfIndices(this));
         return symmetries;
     }
 

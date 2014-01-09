@@ -319,7 +319,7 @@ public final class PermutationOneLine implements Permutation {
     public Permutation getIdentity() {
         if (isIdentity)
             return this;
-        return new PermutationOneLine(true, false, Permutations.getIdentityPermutationArray(permutation.length), true);
+        return Permutations.createIdentityPermutation(degree());
     }
 
     @Override

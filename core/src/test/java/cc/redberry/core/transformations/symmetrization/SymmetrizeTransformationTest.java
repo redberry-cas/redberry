@@ -27,6 +27,8 @@ import cc.redberry.core.combinatorics.IntCombinationsGenerator;
 import cc.redberry.core.combinatorics.Symmetry;
 import cc.redberry.core.combinatorics.symmetries.Symmetries;
 import cc.redberry.core.combinatorics.symmetries.SymmetriesFactory;
+import cc.redberry.core.groups.permutations.Permutation;
+import cc.redberry.core.groups.permutations.PermutationGroup;
 import cc.redberry.core.parser.ParserIndices;
 import cc.redberry.core.tensor.SimpleTensor;
 import cc.redberry.core.tensor.Tensor;
@@ -36,6 +38,9 @@ import org.apache.commons.math3.util.ArithmeticUtils;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import static cc.redberry.core.TAssert.assertEquals;
 
 /**
@@ -43,7 +48,7 @@ import static cc.redberry.core.TAssert.assertEquals;
  * @author Stanislav Poslavsky
  */
 public class SymmetrizeTransformationTest {
-
+                                /*
     @Test
     public void testEmpty() {
         SymmetrizeTransformation symmetrizeTransformation = new SymmetrizeTransformation(
@@ -119,16 +124,16 @@ public class SymmetrizeTransformationTest {
         int dim = indices.length, order = (int) ArithmeticUtils.factorial(indices.length);
         System.out.println(ArithmeticUtils.pow(2, order));
 
-        Symmetries symmetries = SymmetriesFactory.createFullAntiSymmetries(dim);
-        Symmetry[] all = new Symmetry[order];
+        PermutationGroup symmetries = PermutationGroup.symmetricGroup(dim);
+        Permutation[] all = new Permutation[order];
         int p = -1;
-        for (Symmetry s : symmetries)
+        for (Permutation s : symmetries)
             all[++p] = s;
 
 
         int counter = 0;
         IntCombinationsGenerator combinations;
-        Symmetries temp;
+        List<Permutation> temp;
         SymmetrizeTransformation symmetrize;
         Tensor symmetrization;
         for (p = 0; p <= 12; ++p) {
@@ -136,7 +141,7 @@ public class SymmetrizeTransformationTest {
             combinations = new IntCombinationsGenerator(order, p);
             for (int[] combination : combinations) {
                 counter++;
-                temp = SymmetriesFactory.createSymmetries(dim);
+                temp = new ArrayList<>();
                 for (int position : combination)
                     temp.add(all[position]);
                 symmetrize = new SymmetrizeTransformation(indices, temp, true);
@@ -150,4 +155,5 @@ public class SymmetrizeTransformationTest {
 
 
     }
+    */
 }

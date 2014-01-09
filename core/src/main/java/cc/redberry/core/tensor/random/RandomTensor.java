@@ -22,9 +22,9 @@
  */
 package cc.redberry.core.tensor.random;
 
-import cc.redberry.core.combinatorics.Symmetry;
 import cc.redberry.core.context.CC;
 import cc.redberry.core.context.NameDescriptor;
+import cc.redberry.core.groups.permutations.PermutationOneLine;
 import cc.redberry.core.indexgenerator.IndexGeneratorImpl;
 import cc.redberry.core.indexmapping.Mapping;
 import cc.redberry.core.indices.*;
@@ -236,7 +236,7 @@ public final class RandomTensor {
     }
 
     private void addRandomSymmetries(NameDescriptor descriptor) {//TODO add antisymmetries
-        if (!descriptor.getSymmetries().isEmpty())
+        if (!descriptor.getSymmetries().isTrivial())
             return;
         StructureOfIndices typeStructure = descriptor.getStructureOfIndices();
         int i;
@@ -248,7 +248,7 @@ public final class RandomTensor {
                 continue;
             int count = random.nextInt(4);
             for (i = 0; i < count; ++i)
-                descriptor.getSymmetries().addUnsafe(type, new Symmetry(false, nextPermutation(typeData.length)));
+                descriptor.getSymmetries().add(type, new PermutationOneLine(false, nextPermutation(typeData.length)));
         }
     }
 

@@ -37,18 +37,6 @@ import static cc.redberry.core.combinatorics.Combinatorics.createBlockTransposit
 public class CombinatoricsTest {
 
     @Test
-    public void testConvert1() {
-        int[] p = {3, 2, 1, 0};
-        int[] map = {1, 2, 4, 3};
-
-        int[] expected = {0, 3, 4, 1, 2, 5, 6, 7, 8, 9};
-        Assert.assertArrayEquals(convertPermutation(p, map, 10), expected);
-
-        map = new int[]{-1, 0, 1, 3, 2, -1, -1, -1, -1, -1};
-        Assert.assertArrayEquals(convertPermutation(expected, map, 4), p);
-    }
-
-    @Test
     public void testCycle() {
         int[] c = Combinatorics.createBlockCycle(3, 4);
         Assert.assertArrayEquals(c, new int[]{3, 4, 5, 6, 7, 8, 9, 10, 11, 0, 1, 2});

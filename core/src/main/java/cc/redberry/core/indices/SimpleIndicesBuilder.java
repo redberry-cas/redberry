@@ -27,10 +27,14 @@ import cc.redberry.core.combinatorics.Symmetry;
 import cc.redberry.core.combinatorics.UnsafeCombinatorics;
 import cc.redberry.core.combinatorics.symmetries.Symmetries;
 import cc.redberry.core.combinatorics.symmetries.SymmetriesFactory;
+import cc.redberry.core.groups.permutations.Permutation;
+import cc.redberry.core.groups.permutations.PermutationOneLine;
+import cc.redberry.core.groups.permutations.Permutations;
 import cc.redberry.core.utils.ArraysUtils;
 import cc.redberry.core.utils.IntArrayList;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -44,7 +48,7 @@ import java.util.List;
 public final class SimpleIndicesBuilder {
 
     private final IntArrayList data;
-    private final List<Symmetries> symmetries;
+    private final List<SymmetriesHolder> symmetries;
 
     /**
      * Construct builder with specified initial capacity.
@@ -73,7 +77,7 @@ public final class SimpleIndicesBuilder {
         if (indices.size() == 0)
             return this;
         data.addAll(((SimpleIndicesAbstract) indices).data);
-        symmetries.add(indices.getSymmetries().getInnerSymmetries());
+        symmetries.add(new SymmetriesHolder(indices.size(), indices.getSymmetries().getGenerators()));
         return this;
     }
 
@@ -86,7 +90,7 @@ public final class SimpleIndicesBuilder {
      */
     public SimpleIndicesBuilder append(int... indices) {
         data.addAll(indices);
-        symmetries.add(SymmetriesFactory.createSymmetries(indices.length));
+        symmetries.add(new SymmetriesHolder(indices.length, Collections.EMPTY_LIST));
         return this;
     }
 
@@ -101,7 +105,7 @@ public final class SimpleIndicesBuilder {
         if (indices.size() == 0)
             return this;
         data.addAll(((AbstractIndices) indices).data);
-        symmetries.add(SymmetriesFactory.createSymmetries(indices.size()));
+        symmetries.add(new SymmetriesHolder(indices.size(), Collections.EMPTY_LIST));
         return this;
     }
 
@@ -127,32 +131,38 @@ public final class SimpleIndicesBuilder {
 
         //Allocating resulting symmetries object
         //it already contains identity symmetry
-        Symmetries resultingSymmetries =
-                SymmetriesFactory.createSymmetries(data.length);
+        List<Permutation> resultingSymmetries = new ArrayList<>();
 
         int[] c;
-        int position = 0, k;
+        int position = 0;
 
         //rescaling symmetries to the actual length and positions corresponding
         //to the sorted indices
-        for (Symmetries ss : this.symmetries) {
-            final List<Symmetry> basis = ss.getBasisSymmetries();
-            //iterating from 1 because zero'th element is always identity symmetry 
-            for (k = 1; k < basis.size(); ++k) {
+        for (SymmetriesHolder holder : this.symmetries) {
+            for (Permutation s : holder.generators) {
                 c = new int[data.length];
-                Symmetry s = basis.get(k);
                 for (j = 0; j < data.length; ++j)
-                    if (cosort[j] < position || cosort[j] >= position + s.dimension())
+                    if (cosort[j] < position || cosort[j] >= position + s.degree())
                         c[j] = j;
                     else
                         c[j] = cosortInv[s.newIndexOf(cosort[j] - position) + position];
-                resultingSymmetries.addUnsafe(UnsafeCombinatorics.createUnsafe(c, s.isAntiSymmetry()));
+                resultingSymmetries.add(new PermutationOneLine(s.antisymmetry(), c));
             }
             //increasing position in the total symmetry array
-            position += ss.dimension();
+            position += holder.length;
         }
 
-        return IndicesFactory.createSimple(
-                new IndicesSymmetries(new StructureOfIndices(data), resultingSymmetries), data);
+        return IndicesFactory.createSimple(IndicesSymmetries.create(new StructureOfIndices(data),
+                resultingSymmetries), data);
+    }
+
+    private static final class SymmetriesHolder {
+        final int length;
+        final List<Permutation> generators;
+
+        private SymmetriesHolder(int length, List<Permutation> generators) {
+            this.length = length;
+            this.generators = generators;
+        }
     }
 }

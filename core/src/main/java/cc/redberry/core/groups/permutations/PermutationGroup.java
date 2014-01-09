@@ -237,6 +237,16 @@ public final class PermutationGroup
     ////////////////////// METHODS THAT NOT USE BSGS /////////////////////////
 
     /**
+     * Returns positions of points in array of orbits, i.e. for each point {@code orbits()[getPositionsInOrbits()[point]]} -
+     * is its orbit.
+     *
+     * @return positions of points in array of orbits
+     */
+    public int[] getPositionsInOrbits() {
+        return positionsInOrbits.clone();
+    }
+
+    /**
      * Returns an unmodifiable list of group generators.
      *
      * @return unmodifiable list of group generators

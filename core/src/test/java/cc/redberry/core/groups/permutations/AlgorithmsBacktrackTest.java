@@ -535,7 +535,7 @@ public class AlgorithmsBacktrackTest extends AbstractTestClass {
         //empty initial subgroup
         ArrayList<BSGSCandidateElement> subgroup = new ArrayList<>();
         subgroup.add(new BSGSCandidateElement(0, new ArrayList<Permutation>(), new int[degree]));
-        subgroup.get(0).stabilizerGenerators.add(Permutations.getIdentityOneLine(degree));
+        subgroup.get(0).stabilizerGenerators.add(Permutations.createIdentityPermutation(degree));
 
         AlgorithmsBacktrack.subgroupSearch(bsgs, subgroup, rw, rw);
 

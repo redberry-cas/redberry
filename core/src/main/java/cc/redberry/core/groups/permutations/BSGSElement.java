@@ -100,7 +100,7 @@ public class BSGSElement {
     public Permutation getInverseTransversalOf(int point) {
         if (SchreierVector[point] == -2)
             throw new IllegalArgumentException("Specified point does not belong to orbit of this base element.");
-        Permutation temp = Permutations.getIdentityOneLine(SchreierVector.length);
+        Permutation temp = Permutations.createIdentityPermutation(SchreierVector.length);
         while (SchreierVector[temp.newIndexOf(point)] != -1)
             temp = temp.compositionWithInverse(
                     stabilizerGenerators.get(SchreierVector[temp.newIndexOf(point)]));

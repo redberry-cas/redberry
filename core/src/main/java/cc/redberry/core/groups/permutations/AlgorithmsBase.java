@@ -1180,7 +1180,7 @@ public final class AlgorithmsBase {
     public static ArrayList<BSGSElement> createEmptyBSGS(int degree) {
         ArrayList<BSGSElement> bsgs = new ArrayList<>();
         ArrayList<Permutation> gens = new ArrayList<>();
-        gens.add(Permutations.getIdentityOneLine(degree));
+        gens.add(Permutations.createIdentityPermutation(degree));
         bsgs.add(new BSGSCandidateElement(0, gens, new int[degree]).asBSGSElement());
         return bsgs;
     }
