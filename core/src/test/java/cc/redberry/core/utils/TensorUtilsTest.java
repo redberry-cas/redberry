@@ -180,7 +180,7 @@ public class TensorUtilsTest {
         int[] to = {2, 3, 0, 1};
         int[] indices = {0, 1, 2, 3};
         Mapping mapping = new Mapping(from, to);
-        assertTrue(TensorUtils.getSymmetryFromMapping(indices, mapping).equals(new Symmetry(false, to)));
+        assertTrue(TensorUtils.getSymmetryFromMapping(indices, mapping).equals(new PermutationOneLine(false, to)));
     }
 
     @Test
@@ -191,7 +191,7 @@ public class TensorUtilsTest {
         Mapping mapping = new Mapping(from, to);
         assertTrue(
                 TensorUtils.getSymmetryFromMapping(indices, mapping).equals(
-                        new Symmetry(false, to)));
+                        new PermutationOneLine(false, to)));
     }
 
     @Test
