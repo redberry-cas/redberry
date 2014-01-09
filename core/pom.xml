@@ -87,7 +87,7 @@
         </developer>
     </developers>
 
-    <scm><connection>scm:hg:http://bitbucket.org/redberry/redberry-core</connection><url>https://bitbucket.org/redberry/redberry-core/src/</url></scm>
+    <scm><connection>scm:hg:http://bitbucket.org/redberry/redberry</connection><url>https://bitbucket.org/redberry/redberry/src/</url></scm>
 
     <issueManagement>
         <system>YouTRACK</system>
@@ -171,7 +171,7 @@
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-math3</artifactId>
-            <version>3.0</version>
+            <version>3.2</version>
         </dependency>
 
         <dependency>

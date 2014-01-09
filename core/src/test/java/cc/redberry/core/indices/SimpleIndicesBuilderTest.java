@@ -101,9 +101,9 @@ public class SimpleIndicesBuilderTest {
         assertTrue(ibs.getIndices().equals(expectedIndices));
 
         //Expected
-        Symmetry s1 = new Symmetry(new int[]{0, 1, 2, 3}, false);
-        Symmetry s2 = new Symmetry(new int[]{1, 0, 2, 3}, false);
-        Symmetry s3 = new Symmetry(new int[]{0, 1, 3, 2}, false);
+        Symmetry s1 = new Symmetry(false, new int[]{0, 1, 2, 3});
+        Symmetry s2 = new Symmetry(false, new int[]{1, 0, 2, 3});
+        Symmetry s3 = new Symmetry(false, new int[]{0, 1, 3, 2});
         Symmetry[] expected = {s1, s2, s3};
 
         Symmetry[] actual = ibs.getIndices().getSymmetries().getInnerSymmetries().getBasisSymmetries().toArray(new Symmetry[3]);
@@ -130,9 +130,9 @@ public class SimpleIndicesBuilderTest {
         assertTrue(ibs.getIndices().equals(expectedIndices));
 
         //Expected
-        Symmetry s1 = new Symmetry(new int[]{0, 1, 2, 3, 4, 5, 6, 7}, false);
-        Symmetry s2 = new Symmetry(new int[]{0, 1, 3, 2, 4, 5, 6, 7}, false);
-        Symmetry s3 = new Symmetry(new int[]{0, 1, 2, 3, 5, 4, 6, 7}, false);
+        Symmetry s1 = new Symmetry(false, new int[]{0, 1, 2, 3, 4, 5, 6, 7});
+        Symmetry s2 = new Symmetry(false, new int[]{0, 1, 3, 2, 4, 5, 6, 7});
+        Symmetry s3 = new Symmetry(false, new int[]{0, 1, 2, 3, 5, 4, 6, 7});
         Symmetry[] expected = {s1, s2, s3};
 
         Symmetry[] actual = ibs.getIndices().getSymmetries().getInnerSymmetries().getBasisSymmetries().toArray(new Symmetry[3]);
@@ -160,9 +160,9 @@ public class SimpleIndicesBuilderTest {
         assertTrue(ibs.getIndices().equals(expectedIndices));
 
         //Expected
-        Symmetry s1 = new Symmetry(new int[]{0, 1, 2, 3, 4, 5, 6, 7}, false);
-        Symmetry s2 = new Symmetry(new int[]{1, 0, 2, 3, 4, 5, 6, 7}, false);
-        Symmetry s3 = new Symmetry(new int[]{0, 1, 3, 2, 4, 5, 6, 7}, false);
+        Symmetry s1 = new Symmetry(false, new int[]{0, 1, 2, 3, 4, 5, 6, 7});
+        Symmetry s2 = new Symmetry(false, new int[]{1, 0, 2, 3, 4, 5, 6, 7});
+        Symmetry s3 = new Symmetry(false, new int[]{0, 1, 3, 2, 4, 5, 6, 7});
         Symmetry[] expected = {s1, s2, s3};
 
         Symmetry[] actual = ibs.getIndices().getSymmetries().getInnerSymmetries().getBasisSymmetries().toArray(new Symmetry[3]);

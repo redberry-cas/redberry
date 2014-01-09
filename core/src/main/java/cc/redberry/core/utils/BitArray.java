@@ -29,7 +29,7 @@ import static java.lang.Math.min;
 /**
  * This class represents an "array of booleans" with many fast and useful methods. Consumes ~ 8 times less memory than
  * array of booleans for big sizes. Has slightly different semantics than java's built in {@link java.util.BitSet} and
- * also provides addititonal functionality like {@link #loadValueFrom(BitArray, int, int, int)} and {@link
+ * also provides additional functionality like {@link #loadValueFrom(BitArray, int, int, int)} and {@link
  * #copyOfRange(int, int)}.
  */
 public class BitArray {
@@ -214,7 +214,7 @@ public class BitArray {
     }
 
     /**
-     * Set the value of specified bit
+     * Sets the value of specified bit to specified value
      *
      * @param i     index
      * @param value value
@@ -224,6 +224,28 @@ public class BitArray {
             set(i);
         else
             clear(i);
+    }
+
+    /**
+     * Sets values at specified positions to specified value
+     *
+     * @param positions positions
+     * @param value     value
+     */
+    public void setAll(int[] positions, boolean value) {
+        for (int i : positions)
+            set(i, value);
+    }
+
+    /**
+     * Sets values at specified positions to specified value
+     *
+     * @param positions positions
+     * @param value     value
+     */
+    public void setAll(IntArrayList positions, boolean value) {
+        for (int i = positions.size() - 1; i >= 0; --i)
+            set(positions.get(i), value);
     }
 
     /**
@@ -289,10 +311,10 @@ public class BitArray {
                     bits[j++] = i;
         } else {
             i = -1;
-            while ((i = nextBit(i)) != -1) {
+            while ((i = nextBit(i + 1)) != -1) {
                 if (!get(i))
                     if (j > 0)
-                        nextBit(bits[j - 1]);
+                        nextBit(bits[j - 1] + 1);
                 bits[j++] = i;
             }
         }
@@ -307,7 +329,6 @@ public class BitArray {
      * @return position of the next "1" bit of -1 if all bits after position are 0
      */
     public int nextBit(int position) {
-        ++position;
         int ret = position & 0x1F;
         if (ret != 0)
             if ((ret = Integer.numberOfTrailingZeros(data[position >>> 5] >>> ret)) != 32)
@@ -324,6 +345,35 @@ public class BitArray {
             return -1;
         else
             return ((position - 1) << 5) + ret;
+    }
+
+    /**
+     * Returns the next "0" bit from the specified position (inclusively).
+     *
+     * @param position initial position
+     * @return position of the next "0" bit of -1 if all bits after position are 0
+     */
+    public int nextZeroBit(int position) {
+        //todo review
+        int ret = position & 0x1F;
+        if (ret != 0)
+            if ((ret = Integer.numberOfTrailingZeros((~data[position >>> 5]) >>> ret)) != 32) {
+                int r = position + ret;
+                return r >= size() ? -1 : r;
+            } else
+                position += 32;
+
+        ret = 32;
+        position = position >>> 5;
+        while (position < data.length &&
+                (ret = Integer.numberOfTrailingZeros(~data[position++])) == 32) ;
+
+        if (position >= data.length && ret == 32)
+            return -1;
+        else {
+            int r = ((position - 1) << 5) + ret;
+            return r >= size() ? -1 : r;
+        }
     }
 
     /**

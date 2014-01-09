@@ -28,6 +28,7 @@ import org.apache.commons.math3.random.Well19937c;
 import org.junit.Test;
 
 import java.util.Arrays;
+import java.util.Random;
 
 import static org.junit.Assert.*;
 
@@ -258,8 +259,9 @@ public class BitArrayTest {
         ba.set(43);
 
         assertEquals(3, ba.nextBit(1));
-        assertEquals(5, ba.nextBit(3));
-        assertEquals(43, ba.nextBit(28));
+        assertEquals(3, ba.nextBit(3));
+        assertEquals(5, ba.nextBit(4));
+        assertEquals(28, ba.nextBit(28));
     }
 
     @Test
@@ -329,6 +331,47 @@ public class BitArrayTest {
         assertEquals("00010100100001010010000101001000010100100001010010", ba.times(5).toString());
 
         assertEquals("00010100100001010010", ba.append(ba).toString());
+    }
+
+    @Test
+    public void testNextZeroBit1() {
+        Random r = new Random();
+        for (int i = 0; i < 1000; ++i) {
+            BitArray bb = randomBitArray(1 + r.nextInt(1000));
+            for (int j = 0; j < bb.size(); ++j)
+                assertEquals(nextZeroBit(bb, j), bb.nextZeroBit(j));
+        }
+    }
+
+    @Test
+    public void testNextZeroBit1a() {
+        BitArray bb = new BitArray(5);
+        bb.set(0);
+        bb.set(1);
+        bb.set(3);
+        bb.set(4);
+//        System.out.println(bb.nextZeroBit(0));
+//        System.out.println(bb.nextZeroBit(1));
+//        System.out.println(bb.nextZeroBit(2));
+//        System.out.println(bb.nextZeroBit(3));
+        System.out.println(bb.nextZeroBit(4));
+    }
+
+    private static int nextZeroBit(BitArray array, int position) {
+        int i;
+        for (i = position; i < array.size(); ++i) {
+            if (!array.get(i))
+                return i;
+        }
+        return -1;
+    }
+
+    private static BitArray randomBitArray(int size) {
+        BitArray b = new BitArray(size);
+        Random r = new Random();
+        for (int i = (int) (r.nextInt(size) * 0.7); i >= 0; --i)
+            b.set(r.nextInt(size));
+        return b;
     }
 
     private boolean testNormal(BitArray ba) {

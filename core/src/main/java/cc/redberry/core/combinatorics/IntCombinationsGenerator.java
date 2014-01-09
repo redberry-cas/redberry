@@ -24,7 +24,7 @@ package cc.redberry.core.combinatorics;
 
 /**
  * This class represents an iterator over all unordered combinations (i.e. [0,1] and [1,0] are
- * considered as same, so only [0,1] will apear in the sequence) of {@code k} numbers, which can be chosen from the set of
+ * considered as same, so only [0,1] will appear in the sequence) of {@code k} numbers, which can be chosen from the set of
  * {@code n} numbers (0,1,2,...,{@code n}). The total number of such combinations is a
  * binomial coefficient {@code n!/(k!(n-k)!)}. Each returned array is sorted.
  *

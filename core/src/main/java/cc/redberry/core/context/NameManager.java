@@ -363,4 +363,8 @@ public final class NameManager {
     public long getSeed() {
         return seed;
     }
+
+    public RandomGenerator getRandomGenerator() {
+        return random;
+    }
 }

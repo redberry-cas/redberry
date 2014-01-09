@@ -48,22 +48,6 @@ import static cc.redberry.core.utils.TensorUtils.*;
  * @author Stanislav Poslavsky
  */
 public class TensorUtilsTest {
-    private static void assertFindSymmetries(SimpleTensor tensor) {
-        int dimension = tensor.getIndices().size();
-        int baseSize = 1 + (dimension / 3);
-        Symmetry[] base = new Symmetry[baseSize];
-        for (int i = 0; i < baseSize; ++i)
-            base[i] = new Symmetry(Combinatorics.randomPermutation(dimension), false);
-
-        Symmetries expectedSymmetries = SymmetriesFactory.createSymmetries(dimension);
-        for (Symmetry s : base) {
-            tensor.getIndices().getSymmetries().add((byte) 0, s);
-            expectedSymmetries.add(s);
-        }
-
-        assertEqualsSymmetries(expectedSymmetries,
-                findIndicesSymmetries(tensor.getIndices(), tensor));
-    }
 
     @Test
     public void test1() {
@@ -168,14 +152,14 @@ public class TensorUtilsTest {
         Symmetries actual = TensorUtils.findIndicesSymmetries(t.getIndices().getAllIndices().copy(), t);
 
         Symmetry[] symmetries = new Symmetry[]{
-                new Symmetry(new int[]{0, 1, 2, 3, 4, 5, 6, 7}, false),
-                new Symmetry(new int[]{1, 0, 2, 3, 4, 5, 6, 7}, false),
-                new Symmetry(new int[]{0, 1, 2, 3, 4, 5, 7, 6}, false),
-                new Symmetry(new int[]{0, 1, 3, 2, 4, 5, 6, 7}, false),
-                new Symmetry(new int[]{0, 1, 2, 3, 5, 4, 6, 7}, false),
-                new Symmetry(new int[]{6, 7, 2, 3, 4, 5, 0, 1}, false),
-                new Symmetry(new int[]{0, 1, 6, 7, 4, 5, 2, 3}, false),
-                new Symmetry(new int[]{0, 1, 4, 5, 2, 3, 6, 7}, false)};
+                new Symmetry(false, new int[]{0, 1, 2, 3, 4, 5, 6, 7}),
+                new Symmetry(false, new int[]{1, 0, 2, 3, 4, 5, 6, 7}),
+                new Symmetry(false, new int[]{0, 1, 2, 3, 4, 5, 7, 6}),
+                new Symmetry(false, new int[]{0, 1, 3, 2, 4, 5, 6, 7}),
+                new Symmetry(false, new int[]{0, 1, 2, 3, 5, 4, 6, 7}),
+                new Symmetry(false, new int[]{6, 7, 2, 3, 4, 5, 0, 1}),
+                new Symmetry(false, new int[]{0, 1, 6, 7, 4, 5, 2, 3}),
+                new Symmetry(false, new int[]{0, 1, 4, 5, 2, 3, 6, 7})};
         Symmetries expected = SymmetriesFactory.createSymmetries(8);
         for (Symmetry symmetry : symmetries)
             expected.add(symmetry);
@@ -198,7 +182,7 @@ public class TensorUtilsTest {
         int[] to = {2, 3, 0, 1};
         int[] indices = {0, 1, 2, 3};
         Mapping mapping = new Mapping(from, to);
-        assertTrue(TensorUtils.getSymmetryFromMapping(indices, mapping).equals(new Symmetry(to, false)));
+        assertTrue(TensorUtils.getSymmetryFromMapping(indices, mapping).equals(new Symmetry(false, to)));
     }
 
     @Test
@@ -209,7 +193,7 @@ public class TensorUtilsTest {
         Mapping mapping = new Mapping(from, to);
         assertTrue(
                 TensorUtils.getSymmetryFromMapping(indices, mapping).equals(
-                        new Symmetry(to, false)));
+                        new Symmetry(false, to)));
     }
 
     @Test
@@ -225,13 +209,30 @@ public class TensorUtilsTest {
         }
     }
 
+    private static void assertFindSymmetries(SimpleTensor tensor) {
+        int dimension = tensor.getIndices().size();
+        int baseSize = 1 + (dimension / 3);
+        Symmetry[] base = new Symmetry[baseSize];
+        for (int i = 0; i < baseSize; ++i)
+            base[i] = new Symmetry(false, Combinatorics.randomPermutation(dimension));
+
+        Symmetries expectedSymmetries = SymmetriesFactory.createSymmetries(dimension);
+        for (Symmetry s : base) {
+            tensor.getIndices().getSymmetries().add((byte) 0, s);
+            expectedSymmetries.add(s);
+        }
+
+        assertEqualsSymmetries(expectedSymmetries,
+                findIndicesSymmetries(tensor.getIndices(), tensor));
+    }
+
     @Test
     public void testSymmetries5() {
         Tensor t = parse("d_a^b*d_c^d");
         Symmetries actual = getIndicesSymmetriesForIndicesWithSameStates(ParserIndices.parse("_ab^cd"), t);
         Symmetries expected = SymmetriesFactory.createSymmetries(4);
-        expected.add(new Symmetry(new int[]{1, 0, 2, 3}, false));
-        expected.add(new Symmetry(new int[]{0, 1, 3, 2}, false));
+        expected.add(new Symmetry(false, new int[]{1, 0, 2, 3}));
+        expected.add(new Symmetry(false, new int[]{0, 1, 3, 2}));
         assertEqualsSymmetries(actual, expected);
     }
 
@@ -240,8 +241,8 @@ public class TensorUtilsTest {
         Tensor t = parse("g_ab*g^cd");
         Symmetries actual = getIndicesSymmetriesForIndicesWithSameStates(ParserIndices.parse("_ab^cd"), t);
         Symmetries expected = SymmetriesFactory.createSymmetries(4);
-        expected.add(new Symmetry(new int[]{1, 0, 2, 3}, false));
-        expected.add(new Symmetry(new int[]{0, 1, 3, 2}, false));
+        expected.add(new Symmetry(false, new int[]{1, 0, 2, 3}));
+        expected.add(new Symmetry(false, new int[]{0, 1, 3, 2}));
         assertEqualsSymmetries(actual, expected);
     }
 

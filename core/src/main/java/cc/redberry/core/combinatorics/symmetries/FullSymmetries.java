@@ -42,8 +42,8 @@ class FullSymmetries extends DummySymmetries {
         super(dimension, Collections.unmodifiableList(
                 Arrays.asList(
                 new Symmetry(dimension),
-                new Symmetry(Combinatorics.createTransposition(dimension), false),
-                new Symmetry(Combinatorics.createCycle(dimension), false))));
+                new Symmetry(false, Combinatorics.createTransposition(dimension)),
+                new Symmetry(false, Combinatorics.createCycle(dimension)))));
     }
 
     @Override

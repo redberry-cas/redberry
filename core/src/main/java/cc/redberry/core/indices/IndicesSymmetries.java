@@ -224,7 +224,7 @@ public class IndicesSymmetries implements Iterable<Symmetry> {
      *                                  inconsistent with already defined
      */
     public boolean add(IndexType type, boolean sign, int... permutation) {
-        return add(type.getType(), new Symmetry(permutation, sign));
+        return add(type.getType(), new Symmetry(sign, permutation));
     }
 
     /**
@@ -241,7 +241,7 @@ public class IndicesSymmetries implements Iterable<Symmetry> {
      *                                  inconsistent with already defined
      */
     public boolean add(byte type, boolean sign, int... permutation) {
-        return add(type, new Symmetry(permutation, sign));
+        return add(type, new Symmetry(sign, permutation));
     }
 
     /**
@@ -275,9 +275,9 @@ public class IndicesSymmetries implements Iterable<Symmetry> {
             }
         }
         if (unsafe)
-            return addUnsafe(type, new Symmetry(permutation, sign));
+            return addUnsafe(type, new Symmetry(sign, permutation));
         else
-            return add(type, new Symmetry(permutation, sign));
+            return add(type, new Symmetry(sign, permutation));
     }
 
 
@@ -307,7 +307,7 @@ public class IndicesSymmetries implements Iterable<Symmetry> {
         for (; i < structureOfIndices.size(); ++i)
             s[i] = i;
         try {
-            if (symmetries.add(new Symmetry(s, symmetry.isAntiSymmetry()))) {
+            if (symmetries.add(new Symmetry(symmetry.isAntiSymmetry(), s))) {
                 diffIds = null;
                 return true;
             }
@@ -342,7 +342,7 @@ public class IndicesSymmetries implements Iterable<Symmetry> {
             s[i] = symmetry.newIndexOf(j) + data.from;
         for (; i < structureOfIndices.size(); ++i)
             s[i] = i;
-        symmetries.addUnsafe(new Symmetry(s, symmetry.isAntiSymmetry()));
+        symmetries.addUnsafe(new Symmetry(symmetry.isAntiSymmetry(), s));
         return true;
     }
 

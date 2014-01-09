@@ -46,13 +46,14 @@ public class Symmetry extends Permutation {
      * <i>single-line</i> notation and boolean sign ({@code true} corresponds to -1
      * and {@code false} to +1).
      *
+     *
+     * @param sign        {@code true} corresponds to -1 and {@code false} to +1
      * @param permutation <i>single-line</i> notated integer array, representing
      *                    a permutation.
-     * @param sign        {@code true} corresponds to -1 and {@code false} to +1
      * @throws IllegalArgumentException if array is inconsistent with
      *                                  <i>one-line</i> notation
      */
-    public Symmetry(int[] permutation, boolean sign) {
+    public Symmetry(boolean sign, int... permutation) {
         super(permutation);
         this.sign = sign;
     }
@@ -118,7 +119,7 @@ public class Symmetry extends Permutation {
      */
     @Override
     public Symmetry inverse() {
-        return new Symmetry(calculateInverse(), sign);
+        return new Symmetry(sign, calculateInverse());
     }
 
 
@@ -163,6 +164,6 @@ public class Symmetry extends Permutation {
 
 
     public Symmetry convert(int[] mapping, int newDimension) {
-        return new Symmetry(Combinatorics.convertPermutation(this.permutation, mapping, newDimension), sign);
+        return new Symmetry(sign, Combinatorics.convertPermutation(this.permutation, mapping, newDimension));
     }
 }

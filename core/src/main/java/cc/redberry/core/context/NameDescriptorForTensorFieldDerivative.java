@@ -104,7 +104,7 @@ final class NameDescriptorForTensorFieldDerivative extends NameDescriptorForTens
                 aggregator.addAll(mapping[j]);
                 aggregator.addAll(mapping[j + 1]);
                 symmetries.addUnsafe(
-                        new Symmetry(Combinatorics.convertPermutation(cycle, aggregator.toArray(), baseStructure.size()), false));
+                        new Symmetry(false, Combinatorics.convertPermutation(cycle, aggregator.toArray(), baseStructure.size())));
 
                 if (orders[i] >= 3) {
                     for (k = 2; k < orders[i]; ++k)
@@ -112,7 +112,7 @@ final class NameDescriptorForTensorFieldDerivative extends NameDescriptorForTens
 
                     cycle = Combinatorics.createBlockCycle(structuresOfIndices[i + 1].size(), orders[i]);
                     symmetries.addUnsafe(
-                            new Symmetry(Combinatorics.convertPermutation(cycle, aggregator.toArray(), baseStructure.size()), false));
+                            new Symmetry(false, Combinatorics.convertPermutation(cycle, aggregator.toArray(), baseStructure.size())));
                 }
                 aggregator.clear();
             }

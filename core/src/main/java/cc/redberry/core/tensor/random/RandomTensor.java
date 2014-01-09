@@ -248,7 +248,7 @@ public final class RandomTensor {
                 continue;
             int count = random.nextInt(4);
             for (i = 0; i < count; ++i)
-                descriptor.getSymmetries().addUnsafe(type, new Symmetry(nextPermutation(typeData.length), false));
+                descriptor.getSymmetries().addUnsafe(type, new Symmetry(false, nextPermutation(typeData.length)));
         }
     }
 

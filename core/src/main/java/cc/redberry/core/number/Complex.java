@@ -770,7 +770,7 @@ public final class Complex extends Tensor
         Complex result = Complex.ONE;
         Complex k2p = this;
         while (exponent != 0) {
-            if ((exponent & 0x1) != 0)
+            if (exponent != 0)
                 result = result.multiply(k2p);
 
             k2p = k2p.multiply(k2p);

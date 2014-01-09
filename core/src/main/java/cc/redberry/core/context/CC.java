@@ -24,6 +24,7 @@ package cc.redberry.core.context;
 
 import cc.redberry.concurrent.OutputPortUnsafe;
 import cc.redberry.core.tensor.SimpleTensor;
+import org.apache.commons.math3.random.RandomGenerator;
 
 /**
  * Redberry current context. This class statically delegates common useful methods from
@@ -150,5 +151,14 @@ public final class CC {
      */
     public static OutputPortUnsafe<SimpleTensor> getParametersGenerator() {
         return current().getDefaultParametersGenerator();
+    }
+
+    /**
+     * Returns random generator used by Redberry in current session.
+     *
+     * @return random generator used by Redberry in current session
+     */
+    public static RandomGenerator getRandomGenerator() {
+        return current().getRandomGenerator();
     }
 }

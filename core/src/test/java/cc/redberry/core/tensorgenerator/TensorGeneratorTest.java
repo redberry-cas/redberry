@@ -161,7 +161,7 @@ public class TensorGeneratorTest {
     public void test10() {
 
         Symmetries symmetries = SymmetriesFactory.createSymmetries(6);
-        symmetries.add(new Symmetry(new int[]{3, 4, 5, 0, 1, 2}, false));
+        symmetries.add(new Symmetry(false, new int[]{3, 4, 5, 0, 1, 2}));
 
         GeneratedTensor actual = TensorGenerator.generateStructure(ParserIndices.parseSimple("^apb_cdq"), Tensors.parse("d^i_j", "g_ab", "g^ab", "p_a", "p^a"), symmetries, false, true, true
         );
@@ -182,7 +182,7 @@ public class TensorGeneratorTest {
     public void test10a() {
 
         Symmetries symmetries = SymmetriesFactory.createSymmetries(4);
-        symmetries.add(new Symmetry(new int[]{3, 0, 1, 2}, false));
+        symmetries.add(new Symmetry(false, new int[]{3, 0, 1, 2}));
 
         GeneratedTensor actual = TensorGenerator.generateStructure(
                 ParserIndices.parseSimple("^ab_cd"), Tensors.parse("d^i_j", "g_ab", "g^ab", "p_a", "p^a"), symmetries, false, true, true
@@ -199,8 +199,8 @@ public class TensorGeneratorTest {
     public void test11() {
 
         Symmetries symmetries = SymmetriesFactory.createSymmetries(6);
-        symmetries.add(new Symmetry(new int[]{3, 4, 5, 0, 1, 2}, false));
-        symmetries.add(new Symmetry(new int[]{2, 1, 0, 3, 4, 5}, true));
+        symmetries.add(new Symmetry(false, new int[]{3, 4, 5, 0, 1, 2}));
+        symmetries.add(new Symmetry(true, new int[]{2, 1, 0, 3, 4, 5}));
 
         GeneratedTensor actual = TensorGenerator.generateStructure(
                 ParserIndices.parseSimple("^apb_cdq"), Tensors.parse("d^i_j", "g_ab", "g^ab", "p_a", "p^a"), symmetries, false, true, true

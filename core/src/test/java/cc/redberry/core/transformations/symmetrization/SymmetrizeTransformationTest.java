@@ -56,7 +56,7 @@ public class SymmetrizeTransformationTest {
     @Test
     public void testIdentity() {
         Symmetries symmetries = SymmetriesFactory.createSymmetries(4);
-        symmetries.add(new Symmetry(new int[]{1, 0, 2, 3}, false));
+        symmetries.add(new Symmetry(false, new int[]{1, 0, 2, 3}));
         SymmetrizeTransformation symmetrizeTransformation = new SymmetrizeTransformation(
                 ParserIndices.parse("_abmn"), symmetries, true);
         Tensor t = Tensors.parse("g_mn*g_ab");

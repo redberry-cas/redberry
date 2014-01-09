@@ -312,11 +312,11 @@ public class LeviCivitaSimplifyTransformation implements Transformation {
             return symmetries;
         symmetries = new HashMap<>();
         Symmetries ss = SymmetriesFactory.createSymmetries(indicesSize);
-        ss.addUnsafe(new Symmetry(Combinatorics.createTransposition(indicesSize, 0, 1), true));
+        ss.addUnsafe(new Symmetry(true, Combinatorics.createTransposition(indicesSize, 0, 1)));
         if (indicesSize % 2 == 0)
-            ss.addUnsafe(new Symmetry(Combinatorics.createCycle(indicesSize), true));
+            ss.addUnsafe(new Symmetry(true, Combinatorics.createCycle(indicesSize)));
         else
-            ss.addUnsafe(new Symmetry(Combinatorics.createCycle(indicesSize), false));
+            ss.addUnsafe(new Symmetry(false, Combinatorics.createCycle(indicesSize)));
         for (Symmetry symmetry : ss)
             symmetries.put(symmetry.getPermutation(), symmetry.isAntiSymmetry());
         cachedLeviCivitaSymmetries.put(indicesSize, symmetries);

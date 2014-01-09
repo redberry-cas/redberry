@@ -72,14 +72,14 @@ final class TraceUtils {
                                   final Tensor dimension) {
 
         if (dimension instanceof Complex && !TensorUtils.isNaturalNumber(dimension))
-            throw new IllegalArgumentException("Non natural dimension.");
+            throw new IllegalArgumentException("Non natural degree.");
 
         if (unitaryMatrix.getIndices().size() != 3)
             throw new IllegalArgumentException("Not a unitary matrix: " + unitaryMatrix);
         IndexType[] types = TraceUtils.extractTypesFromMatrix(unitaryMatrix);
         IndexType metricType = types[0];
         if (!TensorUtils.isScalar(dimension))
-            throw new IllegalArgumentException("Non scalar dimension.");
+            throw new IllegalArgumentException("Non scalar degree.");
         if (structureConstant.getName() == symmetricConstant.getName())
             throw new IllegalArgumentException("Structure and symmetric constants have same names.");
         SimpleTensor[] ss = {structureConstant, symmetricConstant};

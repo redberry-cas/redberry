@@ -128,7 +128,7 @@ public class TAssert {
         org.junit.Assert.assertEquals(expected, actual);
     }
 
-    public static void assertEquals(Object actual, Object expected) {
+    public static void assertEquals(Object expected, Object actual) {
         org.junit.Assert.assertEquals(expected, actual);
     }
 

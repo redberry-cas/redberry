@@ -1079,9 +1079,9 @@ public final class Tensors {
         addSymmetry(tensor, type, true, Combinatorics.createTransposition(dimension));
         if (dimension > 2)
             if (symmetriesAreEmpty)
-                tensor.getIndices().getSymmetries().addUnsafe(type.getType(), new Symmetry(Combinatorics.createCycle(dimension), dimension % 2 == 0 ? true : false));
+                tensor.getIndices().getSymmetries().addUnsafe(type.getType(), new Symmetry(dimension % 2 == 0 ? true : false, Combinatorics.createCycle(dimension)));
             else
-                tensor.getIndices().getSymmetries().add(type.getType(), new Symmetry(Combinatorics.createCycle(dimension), dimension % 2 == 0 ? true : false));
+                tensor.getIndices().getSymmetries().add(type.getType(), new Symmetry(dimension % 2 == 0 ? true : false, Combinatorics.createCycle(dimension)));
     }
 
     /**
@@ -1126,7 +1126,7 @@ public final class Tensors {
         boolean symmetriesAreEmpty = tensor.getIndices().getSymmetries().isEmpty();
         tensor.getIndices().getSymmetries().addSymmetry(type, Combinatorics.createCycle(dimension));
         if (symmetriesAreEmpty)
-            tensor.getIndices().getSymmetries().addUnsafe(type.getType(), new Symmetry(Combinatorics.createTransposition(dimension), false));
+            tensor.getIndices().getSymmetries().addUnsafe(type.getType(), new Symmetry(false, Combinatorics.createTransposition(dimension)));
         else
             tensor.getIndices().getSymmetries().addSymmetry(type, Combinatorics.createTransposition(dimension));
     }
