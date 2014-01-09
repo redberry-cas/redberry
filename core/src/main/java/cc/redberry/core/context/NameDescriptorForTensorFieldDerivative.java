@@ -89,15 +89,14 @@ final class NameDescriptorForTensorFieldDerivative extends NameDescriptorForTens
         int[][] mapping = baseStructure.getPartitionMappings(partition);
 
         //adding field symmetries
-        List<Permutation> fieldSymmetries = parent.symmetries.getGenerators();
-        for (k = 1; k < fieldSymmetries.size(); ++k)
-            symmetries.add(convertPermutation(fieldSymmetries.get(k), mapping[0], baseStructure.size()));
+        for (Permutation p : parent.symmetries.getGenerators())
+            symmetries.add(convertPermutation(p, mapping[0], baseStructure.size()));
 
 
-        //adding block symmetries
+        //adding block symmetries of derivatives
         IntArrayList aggregator = new IntArrayList();
         j = 1;
-        int a, b, cycle[];
+        int cycle[];
         for (i = 0; i < orders.length; ++i) {
             if (orders[i] >= 2) {
                 //adding symmetries for indices from each slot
