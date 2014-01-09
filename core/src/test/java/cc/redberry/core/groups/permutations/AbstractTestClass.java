@@ -110,11 +110,11 @@ public class AbstractTestClass {
         return testPerformance.booleanValue();
     }
 
+    private static Boolean doLongTest = null;
+
     private boolean doLongTest() {
         if (doLongTest != null)
             return doLongTest.booleanValue();
         return doLongTest = Boolean.valueOf(System.getProperty("longTest"));
     }
-
-    private static Boolean doLongTest = null;
 }

@@ -282,15 +282,28 @@ public class AlgorithmsBaseTest extends AbstractTestClass {
 
     @Test
     public void testRemoveRedundant2() {
-        final int COUNT = 50;//100;
+        final int COUNT = 10;//50;//100;
         testRemoveRedundant(COUNT, true, false);
     }
 
     @Test
     public void testRemoveRedundant3() {
+        final int COUNT = 10;//50;//100;
+        testRemoveRedundant(COUNT, true, true);
+    }
+
+    @Test
+    public void testRemoveRedundant2_longtest() {
+        final int COUNT = 50;//100;
+        testRemoveRedundant(COUNT, true, false);
+    }
+
+    @Test
+    public void testRemoveRedundant3_longtest() {
         final int COUNT = 50;//100;
         testRemoveRedundant(COUNT, true, true);
     }
+
 
     private static void testRemoveRedundant(int COUNT, boolean applySchreierSims, boolean bringRandomness) {
         DescriptiveStatistics removed = new DescriptiveStatistics();
@@ -648,7 +661,6 @@ public class AlgorithmsBaseTest extends AbstractTestClass {
                 ArrayList<BSGSCandidateElement> bsgs1 = (ArrayList) createRawBSGSCandidate(generators);
                 SchreierSimsAlgorithm(bsgs1);
                 removeRedundantGenerators(bsgs1);
-                System.out.println("  " + i);
                 for (int j = 0; j < bsgs1.size() - 1; j += 2) {
                     ArrayList<BSGSCandidateElement> bsgs2 = bsgs1;
                     swapAdjacentBasePoints(bsgs2, j);
