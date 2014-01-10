@@ -24,6 +24,7 @@ package cc.redberry.core.transformations.symmetrization;
 
 import cc.redberry.core.groups.permutations.Permutation;
 import cc.redberry.core.groups.permutations.PermutationGroup;
+import cc.redberry.core.groups.permutations.PermutationOneLine;
 import cc.redberry.core.indexmapping.Mapping;
 import cc.redberry.core.indices.*;
 import cc.redberry.core.number.Complex;
@@ -38,6 +39,8 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
+import static cc.redberry.core.indices.IndicesUtils.getNameWithType;
+
 /**
  * Gives a symmetrization of tensor with respect to specified indices under the specified symmetries.
  *
@@ -48,12 +51,15 @@ import java.util.List;
 public final class SymmetrizeTransformation implements Transformation {
     private final SimpleIndices indices;
     private final int[] indicesArray;
+    private final int[] sortedIndicesNames;
     private final boolean multiplyBySymmetryFactor;
     private final PermutationGroup indicesGroup;
 
     public SymmetrizeTransformation(SimpleIndices indices, boolean multiplyBySymmetryFactor) {
         this.indices = indices;
         this.indicesArray = indices.toArray();
+        this.sortedIndicesNames = IndicesUtils.getIndicesNames(indices);
+        Arrays.sort(this.sortedIndicesNames);
         this.indicesGroup = indices.getSymmetries().getPermutationGroup();
         this.multiplyBySymmetryFactor = multiplyBySymmetryFactor;
     }
@@ -65,7 +71,7 @@ public final class SymmetrizeTransformation implements Transformation {
         if (t.getIndices().size() == 0)
             return t;
 
-        if (!t.getIndices().containsSubIndices(indices))
+        if (!containsSubIndices(t.getIndices(), indices))
             throw new IllegalArgumentException("Indices of specified tensor do not contain " +
                     "indices that should be symmetrized.");
 
@@ -74,7 +80,7 @@ public final class SymmetrizeTransformation implements Transformation {
         //for a simple tensors we can compute coset representatives directly:
         if (t instanceof SimpleTensor) {
             PermutationGroup t_group =
-                    ((SimpleTensor) t).getIndices().getSymmetriesOf(indices).getPermutationGroup();
+                    conjugatedSymmetriesOfSubIndices(((SimpleTensor) t).getIndices());
             PermutationGroup union = t_group.union(indicesGroup);
             Permutation[] reps = union.leftCosetRepresentatives(t_group);
             cosetRepresentatives = new ArrayIterator<>(reps);
@@ -114,30 +120,32 @@ public final class SymmetrizeTransformation implements Transformation {
             return sb.build();
     }
 
-    private static boolean containsSubIndices(SimpleIndices indices, SimpleIndices subIndices) {
+    private static boolean containsSubIndices(Indices indices, Indices subIndices) {
         int[] indicesArray = IndicesUtils.getIndicesNames(indices);
         Arrays.sort(indicesArray);
         for (int i = 0, size = subIndices.size(); i < size; ++i)
-            if (Arrays.binarySearch(indicesArray, IndicesUtils.getNameWithType(subIndices.get(i))) < 0)
+            if (Arrays.binarySearch(indicesArray, getNameWithType(subIndices.get(i))) < 0)
                 return false;
         return true;
     }
 
-    private static IndicesSymmetries getSymmetriesOf(SimpleIndices indices, SimpleIndices subIndices) {
-        //positions of indices in this that should be stabilized
-        int[] points = new int[indices.size() - subIndices.size()];
-        int pointer = 0, index;
-        for (int s = 0; s < subIndices.size(); ++s) {
-            index = IndicesUtils.getNameWithType(subIndices.get(s));
-            while (IndicesUtils.getNameWithType(indices.get(pointer)) != index)
-                points[pointer++] = pointer;
-            if (pointer == indices.size())
-                throw new IllegalArgumentException(
-                        "Specified subindices " + subIndices + "are not subindices of " + indices + ".");
-            ++pointer;
-        }
+    private PermutationGroup conjugatedSymmetriesOfSubIndices(SimpleIndices allIndices) {
+        //positions of indices in allIndices that should be stabilized
+        int[] stabilizedPoints = new int[allIndices.size() - indices.size()];
+        int[] nonStabilizedPoints = new int[indices.size()];
+        int[] mapping = new int[indices.size()];
+        int sPointer = 0, nPointer = 0, index;
+        for (int s = 0; s < allIndices.size(); ++s)
+            if ((index = Arrays.binarySearch(sortedIndicesNames, getNameWithType(allIndices.get(s)))) < 0) {
+                stabilizedPoints[sPointer] = s;
+                mapping[sPointer++] = index;
+            } else
+                nonStabilizedPoints[nPointer++] = s;
 
-        return IndicesSymmetries.create(new StructureOfIndices(subIndices),
-                indices.getSymmetries().getPermutationGroup().pointwiseStabilizerRestricted(points));
+        PermutationGroup result = allIndices.getSymmetries().getPermutationGroup().
+                pointwiseStabilizerRestricted(stabilizedPoints);
+        result = result.conjugate(new PermutationOneLine(mapping));
+
+        return result;
     }
 }
