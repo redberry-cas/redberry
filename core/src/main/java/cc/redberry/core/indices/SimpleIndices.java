@@ -45,19 +45,19 @@ public interface SimpleIndices extends Indices {
      */
     IndicesSymmetries getSymmetries();
 
-    /**
-     * Returns {@link IndicesSymmetries} of specified "subindices", i.e. {@code IndicesSymmetries} which contain
-     * permutations that fix all indices (pointwise) in {@code this} expect specified indices.
-     *
-     * @param subindices indices in this
-     * @return symmetries of specified indices in this
-     * @throws java.lang.IllegalArgumentException if specified {@code subindices} are not a real "subindices" of this.
-     *                                            To be precise: the exception thrown if for any <i>i</i> {@code this} does not
-     *                                            contain {@code subindices.get(i)}; the exception also thrown if for
-     *                                            some <i>i, j, i < j</i> and <i>m, n, m > n</i>
-     *                                            {@code subindices.get(i) == this.get(m) && subindices.get(j) == this.get(n)}
-     */
-    IndicesSymmetries getSymmetriesOf(SimpleIndices subindices);
+//    /**
+//     * Returns {@link IndicesSymmetries} of specified "subindices", i.e. {@code IndicesSymmetries} which contain
+//     * permutations that fix all indices (pointwise) in {@code this} expect specified indices.
+//     *
+//     * @param subIndices indices in this
+//     * @return symmetries of specified indices in this
+//     * @throws java.lang.IllegalArgumentException if specified {@code subindices} are not a real "subindices" of this.
+//     *                                            To be precise: the exception thrown if for any <i>i</i> {@code this} does not
+//     *                                            contain {@code subindices.get(i)}; the exception also thrown if for
+//     *                                            some <i>i, j, i < j</i> and <i>m, n, m > n</i>
+//     *                                            {@code subindices.get(i) == this.get(m) && subindices.get(j) == this.get(n)}
+//     */
+//    IndicesSymmetries getSymmetriesOf(SimpleIndices subIndices);
 
     /**
      * Sets indices symmetries to the specified

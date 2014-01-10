@@ -161,6 +161,24 @@ public interface Indices {
      */
     void testConsistentWithException();
 
+//    /**
+//     * Returns true if this indices contains specified subindices, i.e. {@code this} contains each index of specified
+//     * {@code subIndices} and indices in {@code subindices} appear in the same order as in {@code this}.
+//     *
+//     * @param subIndices subindices
+//     * @return true if this indices contains specified subindices
+//     */
+//    boolean containsSubIndices(Indices subIndices);
+//
+//    /**
+//     * Returns true if this indices contains specified subindices case insensitive.
+//     *
+//     * @param subIndices subindices
+//     * @return true if this indices contains specified subindices case insensitive
+//     * @see #containsSubIndices(Indices)
+//     */
+//    boolean containsSubIndicesCaseInsensitive(Indices subIndices);
+
     /**
      * This method applies specified {@link IndexMapping} to this {@code Indices} object and
      * returns the resulting {@code Indices} object.

@@ -239,22 +239,5 @@ abstract class SimpleIndicesAbstract extends AbstractIndices implements SimpleIn
         return new StructureOfIndices(this);
     }
 
-    @Override
-    public IndicesSymmetries getSymmetriesOf(SimpleIndices subindices) {
-        //positions of indices in this that should be stabilized
-        int[] points = new int[size() - subindices.size()];
-        int pointer = 0, index;
-        for (int s = 0; s < subindices.size(); ++s) {
-            index = subindices.get(s);
-            while (get(pointer) != index)
-                points[pointer++] = pointer;
-            if (pointer == size())
-                throw new IllegalArgumentException(
-                        "Specified subindices " + subindices + "are not subindices of this " + this + ".");
-            ++pointer;
-        }
 
-        return IndicesSymmetries.create(new StructureOfIndices(subindices),
-                getSymmetries().getPermutationGroup().pointwiseStabilizerRestricted(points));
-    }
 }

@@ -23,14 +23,19 @@
 package cc.redberry.core.transformations.symmetrization;
 
 import cc.redberry.core.groups.permutations.Permutation;
+import cc.redberry.core.groups.permutations.PermutationGroup;
 import cc.redberry.core.indexmapping.Mapping;
-import cc.redberry.core.indices.Indices;
-import cc.redberry.core.indices.SimpleIndices;
+import cc.redberry.core.indices.*;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.number.Rational;
 import cc.redberry.core.tensor.*;
 import cc.redberry.core.transformations.Transformation;
+import cc.redberry.core.utils.ArrayIterator;
+import cc.redberry.core.utils.TensorUtils;
 
+import java.math.BigInteger;
+import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -42,38 +47,97 @@ import java.util.List;
  */
 public final class SymmetrizeTransformation implements Transformation {
     private final SimpleIndices indices;
+    private final int[] indicesArray;
     private final boolean multiplyBySymmetryFactor;
+    private final PermutationGroup indicesGroup;
 
     public SymmetrizeTransformation(SimpleIndices indices, boolean multiplyBySymmetryFactor) {
         this.indices = indices;
+        this.indicesArray = indices.toArray();
+        this.indicesGroup = indices.getSymmetries().getPermutationGroup();
         this.multiplyBySymmetryFactor = multiplyBySymmetryFactor;
     }
 
+    private static final BigInteger SMALL_ORDER_MAX_VALUE = BigInteger.valueOf(1_000);
+
     @Override
     public Tensor transform(Tensor t) {
-        if(t instanceof SimpleTensor){
+        if (t.getIndices().size() == 0)
+            return t;
 
-        }
+        if (!t.getIndices().containsSubIndices(indices))
+            throw new IllegalArgumentException("Indices of specified tensor do not contain " +
+                    "indices that should be symmetrized.");
 
-        if (!multiplyBySymmetryFactor) {
-            SumBuilder sb = new SumBuilder();
-            for (Permutation symmetry : symmetries)
-                sb.put(ApplyIndexMapping.applyIndexMappingAutomatically(t,
-                        new Mapping(indices, symmetry.permute(indices), symmetry.antisymmetry())));
-
-            return sb.build();
+        Iterator<Permutation> cosetRepresentatives;
+        BigInteger factor;
+        //for a simple tensors we can compute coset representatives directly:
+        if (t instanceof SimpleTensor) {
+            PermutationGroup t_group =
+                    ((SimpleTensor) t).getIndices().getSymmetriesOf(indices).getPermutationGroup();
+            PermutationGroup union = t_group.union(indicesGroup);
+            Permutation[] reps = union.leftCosetRepresentatives(t_group);
+            cosetRepresentatives = new ArrayIterator<>(reps);
+            factor = BigInteger.valueOf(reps.length);
         } else {
-            long length = 0;
-            SumBuilder sb = new SumBuilder();
-            for (Permutation symmetry : symmetries) {
-                sb.put(ApplyIndexMapping.applyIndexMappingAutomatically(t,
-                        new Mapping(indices, symmetry.permute(indices), symmetry.antisymmetry())));
-                ++length;
+            //in case of multitensor, we do not know its group of symmetries
+            //if the resulting symmetries are small, then we'll just apply all of them
+            if (indicesGroup.order().compareTo(SMALL_ORDER_MAX_VALUE) < 0) {
+                cosetRepresentatives = indicesGroup.iterator();
+                factor = indicesGroup.order();
+            } else {
+                //otherwise we might will be more lucky if compute it group of symmetries and then compute coset reps.
+                PermutationGroup t_group = new PermutationGroup(
+                        TensorUtils.findIndicesSymmetries(indices, t));
+                PermutationGroup union = t_group.union(indicesGroup);
+                Permutation[] reps = union.leftCosetRepresentatives(t_group);
+                cosetRepresentatives = new ArrayIterator<>(reps);
+                factor = BigInteger.valueOf(reps.length);
             }
-            t = sb.build();
-            if (t instanceof Sum)
-                return FastTensors.multiplySumElementsOnFactor((Sum) t, new Complex(new Rational(1L, length)));
-            return Tensors.multiply(new Complex(new Rational(1L, length)), t);
         }
+
+        SumBuilder sb = new SumBuilder();
+        for (Permutation permutation; cosetRepresentatives.hasNext(); ) {
+            permutation = cosetRepresentatives.next();
+            sb.put(ApplyIndexMapping.applyIndexMappingAutomatically(t,
+                    new Mapping(indicesArray, permutation.permute(indicesArray), permutation.antisymmetry())));
+        }
+
+        t = sb.build();
+
+        if (multiplyBySymmetryFactor) {
+            Complex frac = new Complex(new Rational(BigInteger.ONE, factor));
+            if (t instanceof Sum)
+                return FastTensors.multiplySumElementsOnFactor((Sum) t, frac);
+            return Tensors.multiply(frac, t);
+        } else
+            return sb.build();
+    }
+
+    private static boolean containsSubIndices(SimpleIndices indices, SimpleIndices subIndices) {
+        int[] indicesArray = IndicesUtils.getIndicesNames(indices);
+        Arrays.sort(indicesArray);
+        for (int i = 0, size = subIndices.size(); i < size; ++i)
+            if (Arrays.binarySearch(indicesArray, IndicesUtils.getNameWithType(subIndices.get(i))) < 0)
+                return false;
+        return true;
+    }
+
+    private static IndicesSymmetries getSymmetriesOf(SimpleIndices indices, SimpleIndices subIndices) {
+        //positions of indices in this that should be stabilized
+        int[] points = new int[indices.size() - subIndices.size()];
+        int pointer = 0, index;
+        for (int s = 0; s < subIndices.size(); ++s) {
+            index = IndicesUtils.getNameWithType(subIndices.get(s));
+            while (IndicesUtils.getNameWithType(indices.get(pointer)) != index)
+                points[pointer++] = pointer;
+            if (pointer == indices.size())
+                throw new IllegalArgumentException(
+                        "Specified subindices " + subIndices + "are not subindices of " + indices + ".");
+            ++pointer;
+        }
+
+        return IndicesSymmetries.create(new StructureOfIndices(subIndices),
+                indices.getSymmetries().getPermutationGroup().pointwiseStabilizerRestricted(points));
     }
 }
