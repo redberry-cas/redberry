@@ -1251,13 +1251,44 @@ public final class PermutationGroup
     }
 
     /**
+     * Returns the conjugate permutation group of {@code this} with the specified permutation (this ^ permutation).
+     *
+     * @param permutation some permutation
+     * @return conjugate permutation group of {@code this} with the specified permutation
+     */
+    public PermutationGroup conjugate(Permutation permutation) {
+        checkDegree(permutation.degree());
+        if (bsgs == null) {
+            ArrayList<Permutation> newGens = new ArrayList<>(generators().size());
+            for (Permutation p : generators())
+                newGens.add(permutation.conjugate(p));
+            return new PermutationGroup(newGens);
+        } else {
+            List<BSGSElement> bsgs = getBSGS();
+            ArrayList<BSGSElement> new_bsgs = new ArrayList<>(bsgs.size());
+            for (BSGSElement e : bsgs) {
+                ArrayList<Permutation> newStabs = new ArrayList<>(e.stabilizerGenerators.size());
+                for (Permutation p : e.stabilizerGenerators)
+                    newStabs.add(permutation.conjugate(p));
+                new_bsgs.add(new BSGSCandidateElement(permutation.newIndexOf(e.basePoint), newStabs, new int[degree]).asBSGSElement());
+            }
+            return new PermutationGroup(new_bsgs, true);
+        }
+    }
+
+    /**
      * Returns true if specified group is equals to this group, i.e. it is isomorphic and acts same on the &Omega;(degree).
      *
-     * @param oth permutation group
+     * @param obj permutation group
      * @return true if specified group has the same order and all its generators are contained in this group
      * @throws IllegalArgumentException {@code oth.degree != this.degree()}
      */
-    public boolean equals(PermutationGroup oth) {
+    public boolean equals(Object obj) {
+        if (obj == null)
+            return false;
+        if (obj.getClass() != this.getClass())
+            return false;
+        PermutationGroup oth = (PermutationGroup) obj;
         if (degree != oth.degree)
             throw new IllegalArgumentException("Not same degrees.");
 
