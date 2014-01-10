@@ -624,6 +624,61 @@ public final class PermutationGroup
         return new PermutationGroup(asBSGSList(bsgs.subList(set.length, bsgs.size())), true);
     }
 
+    /**
+     * Calculates a group which isomorphic to a pointwise stabilizer of specified set but acts on points that are not
+     * stabilized, i.e. the degree of the resulting group equal to {@code this.degree() - set.length} (under the
+     * assumption that set contains distinct points).
+     *
+     * @param set set of points
+     * @return pointwise stabilizer of specified set of points that acts on points which not contained in specified set
+     */
+    public PermutationGroup pointwiseStabilizerRestricted(int... set) {
+        if (set.length == 0)
+            return this;
+
+        set = MathUtils.getSortedDistinct(set);
+        final int newDegree = degree - set.length;
+        int[] newBase = set.clone();
+        ArraysUtils.quickSort(newBase, ordering());
+
+        ArrayList<BSGSCandidateElement> bsgs = getBSGSCandidate();
+        AlgorithmsBase.rebase(bsgs, newBase);
+
+        if (bsgs.size() <= newBase.length)
+            return new PermutationGroup(createEmptyBSGS(newDegree), true);
+
+        int[] closure = new int[newDegree];
+        int[] mapping = new int[degree];
+        Arrays.fill(mapping, -1);
+        int pointer = 0, counter = 0;
+        for (int i = 0; i < degree; ++i) {
+            if (pointer < set.length && i == set[pointer]) {
+                ++pointer;
+                continue;
+            } else {
+                closure[counter] = i;
+                mapping[i] = counter;
+                ++counter;
+            }
+        }
+        ArrayList<BSGSCandidateElement> stab = new ArrayList<>();
+        for (int i = newBase.length; i < bsgs.size(); ++i) {
+            BSGSCandidateElement e = bsgs.get(i);
+            if (mapping[e.basePoint] == -1)
+                continue;
+            ArrayList<Permutation> newStabs = new ArrayList<>(e.stabilizerGenerators.size());
+            for (Permutation p : e.stabilizerGenerators) {
+                int[] perm = new int[newDegree];
+                for (int j = 0; j < newDegree; ++j)
+                    perm[j] = mapping[p.newIndexOf(closure[j])];
+                newStabs.add(new PermutationOneLine(p.antisymmetry(), perm));
+            }
+            stab.add(new BSGSCandidateElement(mapping[e.basePoint], newStabs, new int[newDegree]));
+        }
+
+        return new PermutationGroup(asBSGSList(stab), true);
+    }
+
     private static final double NORMAL_CLOSURE_CONFIDENCE_LEVEL = 1 - 1E-6;
 
     /**

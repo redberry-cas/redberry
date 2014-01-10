@@ -26,6 +26,7 @@ import cc.redberry.core.context.CC;
 import cc.redberry.core.number.NumberUtils;
 import cc.redberry.core.utils.ArraysUtils;
 import cc.redberry.core.utils.IntComparator;
+import cc.redberry.core.utils.MathUtils;
 import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.random.Well1024a;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
@@ -898,6 +899,63 @@ public class PermutationGroupTest extends AbstractTestClass {
         Permutation perm;
         while ((perm = mappings.take()) != null)
             System.out.println(perm);
+    }
+
+    @Test
+    public void testPointwiseStabilizerRestricted1() throws Exception {
+        Permutation perm1 = new PermutationOneLine(8, new int[][]{{1, 2, 3}});
+        Permutation perm2 = new PermutationOneLine(8, new int[][]{{3, 4, 5, 6, 7}});
+        PermutationGroup pg = new PermutationGroup(perm1, perm2);
+        PermutationGroup ps = pg.pointwiseStabilizer(1, 2, 3);
+        PermutationGroup psr = pg.pointwiseStabilizerRestricted(1, 2, 3);
+        assertEquals(ps.order(), psr.order());
+        assertTrue(AlgorithmsBase.isBSGS(psr.getBSGS()));
+    }
+
+    @Test
+    public void testPointwiseStabilizerRestricted2_WithGap() {
+        GapGroupsInterface gap = getGapInterface();
+        for (int degree = 4; degree < 50; ++degree) {
+            int nrPrimitiveGroups = gap.nrPrimitiveGroups(degree);
+            //System.out.println("DEGREE: " + degree);
+            for (int i = 0; i < nrPrimitiveGroups; ++i) {
+                PermutationGroup group = gap.primitiveGroup(degree, i);
+                int[] set = new int[degree / 3];
+                for (int k = 0; k < set.length; ++k)
+                    set[k] = CC.getRandomGenerator().nextInt(degree);
+
+                PermutationGroup ps = group.pointwiseStabilizer(set);
+                PermutationGroup psr = group.pointwiseStabilizerRestricted(set);
+                assertTrue(AlgorithmsBase.isBSGS(psr.getBSGS()));
+                assertEquals(psr.degree(), degree - MathUtils.getSortedDistinct(set).length);
+                assertEquals(ps.order(), psr.order());
+
+                if (doLongTest()) {
+                    if (ps.order().compareTo(BigInteger.valueOf(1_000_000)) > 0)
+                        continue;
+                    gap.evaluateRedberryGroup("ps", ps.generators());
+                    gap.evaluateRedberryGroup("psr", psr.generators());
+                    assertTrue(!gap.evaluate("IsomorphismGroups(ps, psr)").contains("fail"));
+                }
+            }
+        }
+    }
+
+    @Test
+    public void testPointwiseStabilizerRestricted2() throws Exception {
+        Permutation[] generators = {
+                new PermutationOneLine(16, new int[][]{{1, 12, 6, 5, 14}, {2, 7, 9, 8, 4}, {3, 11, 15, 13, 10}}),
+                new PermutationOneLine(16, new int[][]{{1, 4}, {2, 15}, {3, 11}, {6, 14}, {7, 10}, {9, 12}}),
+                new PermutationOneLine(16, new int[][]{{0, 1}, {2, 3}, {4, 5}, {6, 7}, {8, 9}, {10, 11}, {12, 13}, {14, 15}})};
+        PermutationGroup pg = new PermutationGroup(generators);
+        int[] set = {5, 12, 13, 15, 15};
+        PermutationGroup ps = pg.pointwiseStabilizer(set);
+        assertTrue(AlgorithmsBase.isBSGS(ps.getBSGS()));
+
+        PermutationGroup psr = pg.pointwiseStabilizerRestricted(set);
+        assertTrue(AlgorithmsBase.isBSGS(psr.getBSGS()));
+
+        assertEquals(ps.order(), psr.order());
     }
 
     private static PermutationGroup pointWiseStabilizerBruteForce(PermutationGroup pg, int[] points) {
