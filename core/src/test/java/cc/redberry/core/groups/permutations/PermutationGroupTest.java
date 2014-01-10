@@ -985,6 +985,8 @@ public class PermutationGroupTest extends AbstractTestClass {
                 PermutationGroup group = gap.primitiveGroup(degree, i);
                 if (group.isSymmetric() || group.isAlternating())
                     continue;
+                //calc bsgs
+                group.order();
                 assertTrue(AlgorithmsBase.isBSGS(group.conjugate(new PermutationOneLine(
                         Permutations.randomPermutation(degree))).getBSGS()));
             }
