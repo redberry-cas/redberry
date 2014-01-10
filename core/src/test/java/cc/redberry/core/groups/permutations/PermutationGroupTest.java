@@ -958,6 +958,39 @@ public class PermutationGroupTest extends AbstractTestClass {
         assertEquals(ps.order(), psr.order());
     }
 
+    @Test
+    public void testConjugate1() {
+        Permutation perm1 = new PermutationOneLine(8, new int[][]{{1, 2, 3}});
+        Permutation perm2 = new PermutationOneLine(8, new int[][]{{3, 4, 5, 6, 7}});
+        PermutationGroup pg = new PermutationGroup(perm1, perm2);
+
+        Permutation c = new PermutationOneLine(1, 0, 2, 3, 4, 5, 6, 7);
+
+        PermutationGroup expected = new PermutationGroup(
+                new PermutationOneLine(8, new int[][]{{0, 2, 3}}), perm2);
+        assertEquals(expected, pg.conjugate(c));
+
+        c = new PermutationOneLine(0, 1, 2, 4, 3, 5, 6, 7);
+        expected = new PermutationGroup(
+                new PermutationOneLine(8, new int[][]{{4, 3, 5, 6, 7}}), perm1);
+        assertEquals(expected, pg.conjugate(c));
+    }
+
+    @Test
+    public void testConjugate2_WithGap() {
+        GapGroupsInterface gap = getGapInterface();
+        for (int degree = 4; degree < 50; ++degree) {
+            int nrPrimitiveGroups = gap.nrPrimitiveGroups(degree);
+            for (int i = 0; i < nrPrimitiveGroups; ++i) {
+                PermutationGroup group = gap.primitiveGroup(degree, i);
+                if (group.isSymmetric() || group.isAlternating())
+                    continue;
+                assertTrue(AlgorithmsBase.isBSGS(group.conjugate(new PermutationOneLine(
+                        Permutations.randomPermutation(degree))).getBSGS()));
+            }
+        }
+    }
+
     private static PermutationGroup pointWiseStabilizerBruteForce(PermutationGroup pg, int[] points) {
         PermutationGroup stab = pg;
         for (int i : points)
