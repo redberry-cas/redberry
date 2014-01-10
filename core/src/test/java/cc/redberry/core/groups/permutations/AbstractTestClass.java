@@ -104,7 +104,7 @@ public class AbstractTestClass {
 
     private static Boolean testPerformance;
 
-    private static boolean doTestPerformance() {
+    protected static boolean doTestPerformance() {
         if (testPerformance == null)
             testPerformance = Boolean.valueOf(System.getProperty("testPerformance"));
         return testPerformance.booleanValue();
@@ -112,7 +112,7 @@ public class AbstractTestClass {
 
     private static Boolean doLongTest = null;
 
-    private boolean doLongTest() {
+    protected boolean doLongTest() {
         if (doLongTest != null)
             return doLongTest.booleanValue();
         return doLongTest = Boolean.valueOf(System.getProperty("longTest"));
