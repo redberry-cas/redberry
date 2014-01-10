@@ -22,10 +22,10 @@
  */
 package cc.redberry.core.transformations.symmetrization;
 
-import cc.redberry.core.combinatorics.Symmetry;
-import cc.redberry.core.combinatorics.symmetries.Symmetries;
 import cc.redberry.core.groups.permutations.Permutation;
 import cc.redberry.core.indexmapping.Mapping;
+import cc.redberry.core.indices.Indices;
+import cc.redberry.core.indices.SimpleIndices;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.number.Rational;
 import cc.redberry.core.tensor.*;
@@ -41,24 +41,20 @@ import java.util.List;
  * @since 1.1.6
  */
 public final class SymmetrizeTransformation implements Transformation {
-    private final int[] indices;
-    private final List<Permutation>  symmetries;
+    private final SimpleIndices indices;
     private final boolean multiplyBySymmetryFactor;
 
-    /**
-     * @param indices                  indices
-     * @param symmetries               symmetries
-     * @param multiplyBySymmetryFactor specifies whether the resulting expression should be divided by the
-     *                                 number of symmetries (the order of the corresponding symmetric group)
-     */
-    public SymmetrizeTransformation(int[] indices, List<Permutation> symmetries, boolean multiplyBySymmetryFactor) {
+    public SymmetrizeTransformation(SimpleIndices indices, boolean multiplyBySymmetryFactor) {
         this.indices = indices;
-        this.symmetries = symmetries;
         this.multiplyBySymmetryFactor = multiplyBySymmetryFactor;
     }
 
     @Override
     public Tensor transform(Tensor t) {
+        if(t instanceof SimpleTensor){
+
+        }
+
         if (!multiplyBySymmetryFactor) {
             SumBuilder sb = new SumBuilder();
             for (Permutation symmetry : symmetries)

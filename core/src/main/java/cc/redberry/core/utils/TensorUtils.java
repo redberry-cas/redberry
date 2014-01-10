@@ -23,9 +23,6 @@
 package cc.redberry.core.utils;
 
 import cc.redberry.concurrent.OutputPortUnsafe;
-import cc.redberry.core.combinatorics.Symmetry;
-import cc.redberry.core.combinatorics.symmetries.Symmetries;
-import cc.redberry.core.combinatorics.symmetries.SymmetriesFactory;
 import cc.redberry.core.context.CC;
 import cc.redberry.core.groups.permutations.Permutation;
 import cc.redberry.core.groups.permutations.PermutationOneLine;

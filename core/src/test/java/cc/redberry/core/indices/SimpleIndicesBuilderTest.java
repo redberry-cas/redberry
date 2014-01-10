@@ -23,17 +23,12 @@
 package cc.redberry.core.indices;
 
 import cc.redberry.core.TAssert;
-import cc.redberry.core.combinatorics.Symmetry;
-import cc.redberry.core.combinatorics.symmetries.Symmetries;
 import cc.redberry.core.groups.permutations.Permutation;
 import cc.redberry.core.groups.permutations.PermutationGroup;
 import cc.redberry.core.groups.permutations.PermutationOneLine;
 import cc.redberry.core.parser.ParserIndices;
 import cc.redberry.core.tensor.SimpleTensor;
 import org.junit.Test;
-
-import java.util.Arrays;
-import java.util.List;
 
 import static cc.redberry.core.tensor.Tensors.parse;
 import static cc.redberry.core.tensor.Tensors.parseSimple;

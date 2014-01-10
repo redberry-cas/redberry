@@ -22,25 +22,6 @@
  */
 package cc.redberry.core.transformations.symmetrization;
 
-import cc.redberry.core.TAssert;
-import cc.redberry.core.combinatorics.IntCombinationsGenerator;
-import cc.redberry.core.combinatorics.Symmetry;
-import cc.redberry.core.combinatorics.symmetries.Symmetries;
-import cc.redberry.core.combinatorics.symmetries.SymmetriesFactory;
-import cc.redberry.core.groups.permutations.Permutation;
-import cc.redberry.core.groups.permutations.PermutationGroup;
-import cc.redberry.core.parser.ParserIndices;
-import cc.redberry.core.tensor.SimpleTensor;
-import cc.redberry.core.tensor.Tensor;
-import cc.redberry.core.tensor.Tensors;
-import cc.redberry.core.utils.TensorUtils;
-import org.apache.commons.math3.util.ArithmeticUtils;
-import org.junit.Ignore;
-import org.junit.Test;
-
-import java.util.ArrayList;
-import java.util.List;
-
 import static cc.redberry.core.TAssert.assertEquals;
 
 /**

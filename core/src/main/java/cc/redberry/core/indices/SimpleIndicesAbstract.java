@@ -22,8 +22,8 @@
  */
 package cc.redberry.core.indices;
 
-import cc.redberry.core.combinatorics.Symmetry;
 import cc.redberry.core.groups.permutations.Permutation;
+import cc.redberry.core.groups.permutations.PermutationGroup;
 import cc.redberry.core.indexmapping.IndexMapping;
 import cc.redberry.core.utils.ArraysUtils;
 import cc.redberry.core.utils.IntArrayList;
@@ -207,9 +207,9 @@ abstract class SimpleIndicesAbstract extends AbstractIndices implements SimpleIn
      *
      * @param indices indices to compare with this
      * @return < code>Boolean.FALSE</code> if indices are equals this,
-     *         <code>Boolean.TRUE</code> if indices differs from this on -1 (i.e. on odd
-     *         transposition) and
-     *         <code>null</code> in other case.
+     * <code>Boolean.TRUE</code> if indices differs from this on -1 (i.e. on odd
+     * transposition) and
+     * <code>null</code> in other case.
      */
     public Boolean _equalsWithSymmetries(SimpleIndices indices) {
         if (indices.getClass() != this.getClass())
@@ -237,5 +237,24 @@ abstract class SimpleIndicesAbstract extends AbstractIndices implements SimpleIn
     @Override
     public StructureOfIndices getStructureOfIndices() {
         return new StructureOfIndices(this);
+    }
+
+    @Override
+    public IndicesSymmetries getSymmetriesOf(SimpleIndices subindices) {
+        //positions of indices in this that should be stabilized
+        int[] points = new int[size() - subindices.size()];
+        int pointer = 0, index;
+        for (int s = 0; s < subindices.size(); ++s) {
+            index = subindices.get(s);
+            while (get(pointer) != index)
+                points[pointer++] = pointer;
+            if (pointer == size())
+                throw new IllegalArgumentException(
+                        "Specified subindices " + subindices + "are not subindices of this " + this + ".");
+            ++pointer;
+        }
+
+        return IndicesSymmetries.create(new StructureOfIndices(subindices),
+                getSymmetries().getPermutationGroup().pointwiseStabilizerRestricted(points));
     }
 }

@@ -22,13 +22,11 @@
  */
 package cc.redberry.physics.feyncalc;
 
-import cc.redberry.core.combinatorics.Combinatorics;
-import cc.redberry.core.combinatorics.Permutation;
-import cc.redberry.core.combinatorics.Symmetry;
 import cc.redberry.core.combinatorics.symmetries.Symmetries;
 import cc.redberry.core.combinatorics.symmetries.SymmetriesFactory;
 import cc.redberry.core.context.CC;
 import cc.redberry.core.context.NameAndStructureOfIndices;
+import cc.redberry.core.groups.permutations.Permutations;
 import cc.redberry.core.indexmapping.IndexMappings;
 import cc.redberry.core.indexmapping.Mapping;
 import cc.redberry.core.indexmapping.MappingsPort;
@@ -312,11 +310,11 @@ public class LeviCivitaSimplifyTransformation implements Transformation {
             return symmetries;
         symmetries = new HashMap<>();
         Symmetries ss = SymmetriesFactory.createSymmetries(indicesSize);
-        ss.addUnsafe(new Symmetry(true, Combinatorics.createTransposition(indicesSize, 0, 1)));
+        ss.addUnsafe(new Symmetry(true, Permutations.createTransposition(indicesSize, 0, 1)));
         if (indicesSize % 2 == 0)
-            ss.addUnsafe(new Symmetry(true, Combinatorics.createCycle(indicesSize)));
+            ss.addUnsafe(new Symmetry(true, Permutations.createCycle(indicesSize)));
         else
-            ss.addUnsafe(new Symmetry(false, Combinatorics.createCycle(indicesSize)));
+            ss.addUnsafe(new Symmetry(false, Permutations.createCycle(indicesSize)));
         for (Symmetry symmetry : ss)
             symmetries.put(symmetry.getPermutation(), symmetry.isAntiSymmetry());
         cachedLeviCivitaSymmetries.put(indicesSize, symmetries);

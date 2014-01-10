@@ -26,13 +26,12 @@ import cc.redberry.core.context.CC;
 import cc.redberry.core.utils.ArraysUtils;
 import cc.redberry.core.utils.BitArray;
 import cc.redberry.core.utils.IntArrayList;
+import cc.redberry.core.utils.MathUtils;
 import org.apache.commons.math3.random.RandomGenerator;
 
+import java.lang.reflect.Array;
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 
 /**
  * Static methods to operate with permutations.
@@ -298,34 +297,6 @@ public final class Permutations {
     }
 
     /**
-     * Creates random permutation of specified dimension
-     *
-     * @param n   dimension
-     * @param rnd random generator
-     * @return random permutation of specified dimension
-     */
-    public static int[] randomPermutation(final int n, RandomGenerator rnd) {
-        int[] p = new int[n];
-        for (int i = 0; i < n; ++i)
-            p[i] = i;
-        for (int i = n; i > 1; --i)
-            ArraysUtils.swap(p, i - 1, rnd.nextInt(i));
-        for (int i = n; i > 1; --i)
-            ArraysUtils.swap(p, i - 1, rnd.nextInt(i));
-        return p;
-    }
-
-    /**
-     * Creates random permutation of specified dimension
-     *
-     * @param n dimension
-     * @return random permutation of specified dimension
-     */
-    public static int[] randomPermutation(final int n) {
-        return randomPermutation(n, CC.getRandomGenerator());
-    }
-
-    /**
      * Converts cycles to one-line notation.
      *
      * @param degree degree of permutation
@@ -406,6 +377,36 @@ public final class Permutations {
         return sizes.toArray();
     }
 
+    /***************************************** RANDOM *****************************************************/
+
+    /**
+     * Creates random permutation of specified dimension
+     *
+     * @param n   dimension
+     * @param rnd random generator
+     * @return random permutation of specified dimension
+     */
+    public static int[] randomPermutation(final int n, RandomGenerator rnd) {
+        int[] p = new int[n];
+        for (int i = 0; i < n; ++i)
+            p[i] = i;
+        for (int i = n; i > 1; --i)
+            ArraysUtils.swap(p, i - 1, rnd.nextInt(i));
+        for (int i = n; i > 1; --i)
+            ArraysUtils.swap(p, i - 1, rnd.nextInt(i));
+        return p;
+    }
+
+    /**
+     * Creates random permutation of specified dimension
+     *
+     * @param n dimension
+     * @return random permutation of specified dimension
+     */
+    public static int[] randomPermutation(final int n) {
+        return randomPermutation(n, CC.getRandomGenerator());
+    }
+
     /**
      * Randomly permutes the specified array.
      *
@@ -417,7 +418,7 @@ public final class Permutations {
 
 
     /**
-     * Randomly permute the specified list using the specified source of randomness.
+     * Randomly permutes the specified list using the specified source of randomness.
      *
      * @param a   - the array to be shuffled.
      * @param rnd - the source of randomness to use to shuffle the list.
@@ -428,8 +429,104 @@ public final class Permutations {
     }
 
     /**
+     * Randomly permutes the specified list using the specified source of randomness.
+     *
+     * @param a   - the array to be shuffled.
+     * @param rnd - the source of randomness to use to shuffle the list.
+     */
+    public static void shuffle(Object[] a, RandomGenerator rnd) {
+        for (int i = a.length; i > 1; --i)
+            ArraysUtils.swap(a, i - 1, rnd.nextInt(i));
+    }
+
+
+    /**
+     * Randomly permute the specified list using the specified source of randomness.
+     *
+     * @param a - the array to be shuffled.
+     */
+    public static void shuffle(Object[] a) {
+        shuffle(a, CC.getRandomGenerator());
+    }
+
+    /**
      * **************************************** FACTORIES **************************************************
      */
+    /**
+     * Permutes specified array according to specified permutation and returns the result.
+     *
+     * @param array       array
+     * @param permutation permutation in one-line notation
+     * @param <T>         any type
+     * @return new array permuted with specified permutation
+     * @throws IllegalArgumentException if array length not equals to permutation length
+     * @throws IllegalArgumentException if permutation is not consistent with one-line notation
+     */
+    public static <T> T[] permute(T[] array, final int[] permutation) {
+        if (array.length != permutation.length)
+            throw new IllegalArgumentException();
+        if (!testPermutationCorrectness(permutation))
+            throw new IllegalArgumentException();
+        Class<?> type = array.getClass().getComponentType();
+        @SuppressWarnings("unchecked") // OK, because array is of type T
+                T[] newArray = (T[]) Array.newInstance(type, array.length);
+        for (int i = 0; i < permutation.length; ++i)
+            newArray[i] = array[permutation[i]];
+        return newArray;
+    }
+
+    /**
+     * Permutes specified array according to specified permutation and returns the result.
+     *
+     * @param array       array
+     * @param permutation permutation in one-line notation
+     * @return new array permuted with specified permutation
+     * @throws IllegalArgumentException if array length not equals to permutation length
+     * @throws IllegalArgumentException if permutation is not consistent with one-line notation
+     */
+    public static int[] permute(int[] array, final int[] permutation) {
+        if (array.length != permutation.length)
+            throw new IllegalArgumentException();
+        if (!testPermutationCorrectness(permutation))
+            throw new IllegalArgumentException();
+        int[] newArray = new int[array.length];
+        for (int i = 0; i < permutation.length; ++i)
+            newArray[i] = array[permutation[i]];
+        return newArray;
+    }
+
+    public static int[] getRandomSortedDistinctArray(final int minValue, final int maxvalue, int length, RandomGenerator generator) {
+        if (maxvalue - minValue < length)
+            throw new IllegalArgumentException("This is not possible.");
+        if (length == 0)
+            return new int[0];
+        if (length == 1)
+            return new int[]{minValue + generator.nextInt(maxvalue - minValue)};
+        if (length == 2) {
+            int a = minValue + generator.nextInt(maxvalue - minValue);
+            int b;
+            while ((b = minValue + generator.nextInt(maxvalue - minValue)) == a) ;
+            return new int[]{a, b};
+        }
+
+        int[] res = new int[length + (int) (0.7 * ((double) length))];
+        for (int i = 0; i < res.length; ++i)
+            res[i] = minValue + generator.nextInt(maxvalue - minValue);
+        res = MathUtils.getSortedDistinct(res);
+        if (res.length == length)
+            return res;
+        if (res.length > length)
+            return Arrays.copyOf(res, length);
+
+        while (res.length != length) {
+            int next;
+            while ((Arrays.binarySearch(res, next = minValue + generator.nextInt(maxvalue - minValue))) >= 0) ;
+            res = ArraysUtils.addAll(res, next);
+        }
+
+        return res;
+    }
+
 
     private static final Permutation[] cachedIdentities = new Permutation[128];
 

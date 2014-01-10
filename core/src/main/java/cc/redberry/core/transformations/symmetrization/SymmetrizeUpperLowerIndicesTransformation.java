@@ -23,8 +23,6 @@
 package cc.redberry.core.transformations.symmetrization;
 
 import cc.redberry.core.combinatorics.IntPermutationsGenerator;
-import cc.redberry.core.combinatorics.Symmetry;
-import cc.redberry.core.combinatorics.symmetries.Symmetries;
 import cc.redberry.core.groups.permutations.Permutation;
 import cc.redberry.core.indexmapping.Mapping;
 import cc.redberry.core.indices.Indices;

@@ -22,7 +22,6 @@
  */
 package cc.redberry.core.indices;
 
-import cc.redberry.core.combinatorics.symmetries.Symmetries;
 import cc.redberry.core.groups.permutations.Permutation;
 import cc.redberry.core.groups.permutations.PermutationGroup;
 import cc.redberry.core.groups.permutations.PermutationOneLine;
@@ -77,6 +76,12 @@ public final class IndicesSymmetries
         return new IndicesSymmetries(structureOfIndices);
     }
 
+    public static IndicesSymmetries create(StructureOfIndices structureOfIndices, PermutationGroup group) {
+        if (structureOfIndices.size() == 0)
+            return EMPTY_INDICES_SYMMETRIES;
+        return new IndicesSymmetries(structureOfIndices, group.generators(), group);
+    }
+
     public static IndicesSymmetries create(StructureOfIndices structureOfIndices,
                                            List<Permutation> generators) {
         if (structureOfIndices.size() == 0)
@@ -90,15 +95,6 @@ public final class IndicesSymmetries
 
     public List<Permutation> getGenerators() {
         return Collections.unmodifiableList(generators);
-    }
-
-    /**
-     * Returns the reference on the internal representation of symmetries.
-     *
-     * @return the reference on the internal representation of symmetries
-     */
-    public Symmetries getInnerSymmetries() {
-        return null;
     }
 
     @Override

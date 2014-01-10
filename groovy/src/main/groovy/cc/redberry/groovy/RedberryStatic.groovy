@@ -23,7 +23,7 @@
 
 package cc.redberry.groovy
 
-import cc.redberry.core.combinatorics.Symmetry
+
 import cc.redberry.core.combinatorics.symmetries.Symmetries
 import cc.redberry.core.combinatorics.symmetries.SymmetriesFactory
 import cc.redberry.core.context.CC

@@ -23,9 +23,9 @@
 package cc.redberry.core.tensor;
 
 import cc.redberry.core.TAssert;
-import cc.redberry.core.combinatorics.Combinatorics;
 import cc.redberry.core.combinatorics.IntCombinationsGenerator;
 import cc.redberry.core.combinatorics.IntPermutationsGenerator;
+import cc.redberry.core.groups.permutations.Permutations;
 import cc.redberry.core.indexmapping.IndexMappings;
 import cc.redberry.core.indexmapping.Mapping;
 import cc.redberry.core.indices.IndexType;
@@ -512,7 +512,7 @@ public class ApplyIndexMappingTest {
                 for (int[] p : gen) {
                     TAssert.assertEquals(
                             applyIndexMappingAutomatically(t,
-                                    new Mapping(Combinatorics.reorder(_from, p), Combinatorics.reorder(_to, p))),
+                                    new Mapping(Permutations.permute(_from, p), Permutations.permute(_to, p))),
                             ApplyIndexMapping.applyIndexMapping(
                                     t, new Mapping(freeFrom, __to), new int[0]));
                 }

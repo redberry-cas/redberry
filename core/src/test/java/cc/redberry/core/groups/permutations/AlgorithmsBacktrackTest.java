@@ -22,7 +22,6 @@
  */
 package cc.redberry.core.groups.permutations;
 
-import cc.redberry.core.combinatorics.Combinatorics;
 import cc.redberry.core.context.CC;
 import cc.redberry.core.number.NumberUtils;
 import cc.redberry.core.utils.Indicator;
@@ -144,7 +143,7 @@ public class AlgorithmsBacktrackTest extends AbstractTestClass {
                 //System.out.println("  " + i);
                 List<BSGSElement> group = createBSGSList(Arrays.asList(gap.primitiveGenerators(degree, i)));
                 int nl = 1 + CC.getRandomGenerator().nextInt(degree / 4);
-                int[] set = Combinatorics.getRandomSortedDistinctArray(0, degree, nl, CC.getRandomGenerator());
+                int[] set = Permutations.getRandomSortedDistinctArray(0, degree, nl, CC.getRandomGenerator());
                 //System.out.println(Arrays.toString(set));
                 RawSetwiseStabilizerCriteria criteria = new RawSetwiseStabilizerCriteria(set, getBaseAsArray(group));
 
@@ -218,7 +217,7 @@ public class AlgorithmsBacktrackTest extends AbstractTestClass {
                 else
                     setl = degree / 10 - 1;
 
-                int[] set = Combinatorics.getRandomSortedDistinctArray(0, degree,
+                int[] set = Permutations.getRandomSortedDistinctArray(0, degree,
                         setl,
                         CC.getRandomGenerator());
                 PermutationGroup stabilizer = testSearchStabilizerRaw(g, set);
@@ -270,7 +269,7 @@ public class AlgorithmsBacktrackTest extends AbstractTestClass {
                     setl = degree / 15 - 1;
                 if (setl == 0)
                     setl = 1;
-                int[] set = Combinatorics.getRandomSortedDistinctArray(0, degree,
+                int[] set = Permutations.getRandomSortedDistinctArray(0, degree,
                         setl,
                         CC.getRandomGenerator());
 

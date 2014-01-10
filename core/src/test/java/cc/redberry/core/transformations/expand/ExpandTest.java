@@ -23,7 +23,6 @@
 package cc.redberry.core.transformations.expand;
 
 import cc.redberry.core.TAssert;
-import cc.redberry.core.combinatorics.Combinatorics;
 import cc.redberry.core.context.CC;
 import cc.redberry.core.indexmapping.IndexMappings;
 import cc.redberry.core.parser.ParserIndices;

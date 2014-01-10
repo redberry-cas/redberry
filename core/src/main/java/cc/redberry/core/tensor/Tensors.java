@@ -22,8 +22,6 @@
  */
 package cc.redberry.core.tensor;
 
-import cc.redberry.core.combinatorics.Combinatorics;
-import cc.redberry.core.combinatorics.Symmetry;
 import cc.redberry.core.context.CC;
 import cc.redberry.core.context.NameDescriptor;
 import cc.redberry.core.context.NameDescriptorForSimpleTensor;
@@ -752,7 +750,7 @@ public final class Tensors {
      * @param index1 first index
      * @param index2 second index
      * @return metric tensor if specified indices have same states and
-     *         Kronecker tensor if specified indices have different states
+     * Kronecker tensor if specified indices have different states
      * @throws IllegalArgumentException if indices have different types
      * @throws IllegalArgumentException if indices have same states and non metric types
      */
@@ -817,9 +815,8 @@ public final class Tensors {
      *
      * @param expression string to be parsed
      * @return result of parsing
-     * @throws cc.redberry.core.parser.ParserException
-     *          if expression does not satisfy correct Redberry
-     *          input notation for tensors
+     * @throws cc.redberry.core.parser.ParserException if expression does not satisfy correct Redberry
+     *                                                 input notation for tensors
      */
     public static Tensor parse(String expression) {
         return CC.current().getParseManager().parse(expression);
@@ -830,9 +827,8 @@ public final class Tensors {
      *
      * @param expressions array of strings to be parsed
      * @return array of parsed tensors
-     * @throws cc.redberry.core.parser.ParserException
-     *          if expression does not satisfy correct Redberry
-     *          input notation for tensors
+     * @throws cc.redberry.core.parser.ParserException if expression does not satisfy correct Redberry
+     *                                                 input notation for tensors
      */
     public static Tensor[] parse(final String... expressions) {
         Tensor[] r = new Tensor[expressions.length];
@@ -848,9 +844,8 @@ public final class Tensors {
      * @param expression    string to be parsed
      * @param preprocessors AST transformers
      * @return result of parsing
-     * @throws cc.redberry.core.parser.ParserException
-     *          if expression does not satisfy correct Redberry
-     *          input notation for tensors
+     * @throws cc.redberry.core.parser.ParserException if expression does not satisfy correct Redberry
+     *                                                 input notation for tensors
      */
     public static Tensor parse(String expression, ParseTokenTransformer... preprocessors) {
         return CC.current().getParseManager().parse(expression, preprocessors);
@@ -861,10 +856,9 @@ public final class Tensors {
      *
      * @param expression string to be parsed
      * @return simple tensor
-     * @throws IllegalArgumentException if expression does not represents simple tensor
-     * @throws cc.redberry.core.parser.ParserException
-     *                                  if expression does not satisfy correct Redberry
-     *                                  input notation for tensors
+     * @throws IllegalArgumentException                if expression does not represents simple tensor
+     * @throws cc.redberry.core.parser.ParserException if expression does not satisfy correct Redberry
+     *                                                 input notation for tensors
      */
     public static SimpleTensor parseSimple(String expression) {
         Tensor t = parse(expression);
@@ -878,10 +872,9 @@ public final class Tensors {
      *
      * @param expression string to be parsed
      * @return simple tensor
-     * @throws IllegalArgumentException if string expression does not represents {@link Expression}
-     * @throws cc.redberry.core.parser.ParserException
-     *                                  if expression does not satisfy correct Redberry
-     *                                  input notation for tensors
+     * @throws IllegalArgumentException                if string expression does not represents {@link Expression}
+     * @throws cc.redberry.core.parser.ParserException if expression does not satisfy correct Redberry
+     *                                                 input notation for tensors
      */
     public static Expression parseExpression(String expression) {
         Tensor t = parse(expression);
@@ -903,14 +896,12 @@ public final class Tensors {
      * @param permutation permutation
      * @param sign        sign of symmetry ({@code true} means '-', {@code false} means '+')
      * @param type        type of indices
-     * @throws IllegalArgumentException if string expression does not represents a simple tensor
-     * @throws cc.redberry.core.parser.ParserException
-     *                                  if expression does not satisfy correct Redberry
-     *                                  input notation for tensors
-     * @throws IllegalArgumentException if {@code permutation.length() != indices.size(type)}
-     * @throws cc.redberry.core.combinatorics.InconsistentGeneratorsException
-     *                                  if the specified symmetry is
-     *                                  inconsistent with already defined
+     * @throws IllegalArgumentException                                       if string expression does not represents a simple tensor
+     * @throws cc.redberry.core.parser.ParserException                        if expression does not satisfy correct Redberry
+     *                                                                        input notation for tensors
+     * @throws IllegalArgumentException                                       if {@code permutation.length() != indices.size(type)}
+     * @throws cc.redberry.core.combinatorics.InconsistentGeneratorsException if the specified symmetry is
+     *                                                                        inconsistent with already defined
      */
     public static void addSymmetry(String tensor, IndexType type, boolean sign, int... permutation) {
         parseSimple(tensor).getIndices().getSymmetries().add(type.getType(), sign, permutation);
@@ -923,10 +914,9 @@ public final class Tensors {
      * @param permutation permutation
      * @param sign        sign of symmetry ({@code true} means '-', {@code false} means '+')
      * @param type        type of indices
-     * @throws IllegalArgumentException if {@code permutation.length() != indices.size(type)}
-     * @throws cc.redberry.core.combinatorics.InconsistentGeneratorsException
-     *                                  if the specified symmetry is
-     *                                  inconsistent with already defined
+     * @throws IllegalArgumentException                                       if {@code permutation.length() != indices.size(type)}
+     * @throws cc.redberry.core.combinatorics.InconsistentGeneratorsException if the specified symmetry is
+     *                                                                        inconsistent with already defined
      */
     public static void addSymmetry(SimpleTensor tensor, IndexType type, boolean sign, int... permutation) {
         tensor.getIndices().getSymmetries().add(type.getType(), sign, permutation);
@@ -938,14 +928,12 @@ public final class Tensors {
      * @param tensor      string representation of simple tensor
      * @param permutation permutation
      * @param type        type of indices
-     * @throws IllegalArgumentException if string expression does not represents a simple tensor
-     * @throws cc.redberry.core.parser.ParserException
-     *                                  if expression does not satisfy correct Redberry
-     *                                  input notation for tensors
-     * @throws IllegalArgumentException if {@code permutation.length() != indices.size(type)}
-     * @throws cc.redberry.core.combinatorics.InconsistentGeneratorsException
-     *                                  if the specified symmetry is
-     *                                  inconsistent with already defined
+     * @throws IllegalArgumentException                                       if string expression does not represents a simple tensor
+     * @throws cc.redberry.core.parser.ParserException                        if expression does not satisfy correct Redberry
+     *                                                                        input notation for tensors
+     * @throws IllegalArgumentException                                       if {@code permutation.length() != indices.size(type)}
+     * @throws cc.redberry.core.combinatorics.InconsistentGeneratorsException if the specified symmetry is
+     *                                                                        inconsistent with already defined
      */
     public static void addSymmetry(String tensor, IndexType type, int... permutation) {
         addSymmetry(tensor, type, false, permutation);
@@ -957,10 +945,9 @@ public final class Tensors {
      * @param tensor      simple tensor
      * @param permutation permutation
      * @param type        type of indices
-     * @throws IllegalArgumentException if {@code permutation.length() != indices.size(type)}
-     * @throws cc.redberry.core.combinatorics.InconsistentGeneratorsException
-     *                                  if the specified symmetry is
-     *                                  inconsistent with already defined
+     * @throws IllegalArgumentException                                       if {@code permutation.length() != indices.size(type)}
+     * @throws cc.redberry.core.combinatorics.InconsistentGeneratorsException if the specified symmetry is
+     *                                                                        inconsistent with already defined
      */
     public static void addSymmetry(SimpleTensor tensor, IndexType type, int... permutation) {
         addSymmetry(tensor, type, false, permutation);
@@ -972,14 +959,12 @@ public final class Tensors {
      * @param tensor      string representation of simple tensor
      * @param permutation permutation
      * @param type        type of indices
-     * @throws IllegalArgumentException if string expression does not represents a simple tensor
-     * @throws cc.redberry.core.parser.ParserException
-     *                                  if expression does not satisfy correct Redberry
-     *                                  input notation for tensors
-     * @throws IllegalArgumentException if {@code permutation.length() != indices.size(type)}
-     * @throws cc.redberry.core.combinatorics.InconsistentGeneratorsException
-     *                                  if the specified symmetry is
-     *                                  inconsistent with already defined
+     * @throws IllegalArgumentException                                       if string expression does not represents a simple tensor
+     * @throws cc.redberry.core.parser.ParserException                        if expression does not satisfy correct Redberry
+     *                                                                        input notation for tensors
+     * @throws IllegalArgumentException                                       if {@code permutation.length() != indices.size(type)}
+     * @throws cc.redberry.core.combinatorics.InconsistentGeneratorsException if the specified symmetry is
+     *                                                                        inconsistent with already defined
      */
     public static void addAntiSymmetry(String tensor, IndexType type, int... permutation) {
         addSymmetry(tensor, type, true, permutation);
@@ -991,10 +976,9 @@ public final class Tensors {
      * @param tensor      simple tensor
      * @param permutation permutation
      * @param type        type of indices
-     * @throws IllegalArgumentException if {@code permutation.length() != indices.size(type)}
-     * @throws cc.redberry.core.combinatorics.InconsistentGeneratorsException
-     *                                  if the specified symmetry is
-     *                                  inconsistent with already defined
+     * @throws IllegalArgumentException                                       if {@code permutation.length() != indices.size(type)}
+     * @throws cc.redberry.core.combinatorics.InconsistentGeneratorsException if the specified symmetry is
+     *                                                                        inconsistent with already defined
      */
     public static void addAntiSymmetry(SimpleTensor tensor, IndexType type, int... permutation) {
         addSymmetry(tensor, type, true, permutation);
@@ -1005,15 +989,13 @@ public final class Tensors {
      *
      * @param tensor      string representation of simple tensor
      * @param permutation permutation
-     * @throws IllegalArgumentException if string expression does not represents a simple tensor
-     * @throws cc.redberry.core.parser.ParserException
-     *                                  if expression does not satisfy correct Redberry
-     *                                  input notation for tensors
-     * @throws IllegalArgumentException if there are more then one type of indices in corresponding tensor
-     * @throws IllegalArgumentException if {@code permutation.length() != indices.size(type)}
-     * @throws cc.redberry.core.combinatorics.InconsistentGeneratorsException
-     *                                  if the specified symmetry is
-     *                                  inconsistent with already defined
+     * @throws IllegalArgumentException                                       if string expression does not represents a simple tensor
+     * @throws cc.redberry.core.parser.ParserException                        if expression does not satisfy correct Redberry
+     *                                                                        input notation for tensors
+     * @throws IllegalArgumentException                                       if there are more then one type of indices in corresponding tensor
+     * @throws IllegalArgumentException                                       if {@code permutation.length() != indices.size(type)}
+     * @throws cc.redberry.core.combinatorics.InconsistentGeneratorsException if the specified symmetry is
+     *                                                                        inconsistent with already defined
      */
     public static void addSymmetry(String tensor, int... permutation) {
         parseSimple(tensor).getIndices().getSymmetries().addSymmetry(permutation);
@@ -1024,11 +1006,10 @@ public final class Tensors {
      *
      * @param tensor      simple tensor
      * @param permutation permutation
-     * @throws IllegalArgumentException if there are more then one type of indices in corresponding tensor
-     * @throws IllegalArgumentException if {@code permutation.length() != indices.size(type)}
-     * @throws cc.redberry.core.combinatorics.InconsistentGeneratorsException
-     *                                  if the specified symmetry is
-     *                                  inconsistent with already defined
+     * @throws IllegalArgumentException                                       if there are more then one type of indices in corresponding tensor
+     * @throws IllegalArgumentException                                       if {@code permutation.length() != indices.size(type)}
+     * @throws cc.redberry.core.combinatorics.InconsistentGeneratorsException if the specified symmetry is
+     *                                                                        inconsistent with already defined
      */
     public static void addSymmetry(SimpleTensor tensor, int... permutation) {
         tensor.getIndices().getSymmetries().addSymmetry(permutation);
@@ -1039,15 +1020,13 @@ public final class Tensors {
      *
      * @param tensor      string representation of simple tensor
      * @param permutation permutation
-     * @throws IllegalArgumentException if string expression does not represents a simple tensor
-     * @throws cc.redberry.core.parser.ParserException
-     *                                  if expression does not satisfy correct Redberry
-     *                                  input notation for tensors
-     * @throws IllegalArgumentException if there are more then one type of indices in corresponding tensor
-     * @throws IllegalArgumentException if {@code permutation.length() != indices.size(type)}
-     * @throws cc.redberry.core.combinatorics.InconsistentGeneratorsException
-     *                                  if the specified symmetry is
-     *                                  inconsistent with already defined
+     * @throws IllegalArgumentException                                       if string expression does not represents a simple tensor
+     * @throws cc.redberry.core.parser.ParserException                        if expression does not satisfy correct Redberry
+     *                                                                        input notation for tensors
+     * @throws IllegalArgumentException                                       if there are more then one type of indices in corresponding tensor
+     * @throws IllegalArgumentException                                       if {@code permutation.length() != indices.size(type)}
+     * @throws cc.redberry.core.combinatorics.InconsistentGeneratorsException if the specified symmetry is
+     *                                                                        inconsistent with already defined
      */
     public static void addAntiSymmetry(String tensor, int... permutation) {
         parseSimple(tensor).getIndices().getSymmetries().addAntiSymmetry(permutation);
@@ -1058,11 +1037,10 @@ public final class Tensors {
      *
      * @param tensor      simple tensor
      * @param permutation permutation
-     * @throws IllegalArgumentException if there are more then one type of indices in corresponding tensor
-     * @throws IllegalArgumentException if {@code permutation.length() != indices.size(type)}
-     * @throws cc.redberry.core.combinatorics.InconsistentGeneratorsException
-     *                                  if the specified symmetry is
-     *                                  inconsistent with already defined
+     * @throws IllegalArgumentException                                       if there are more then one type of indices in corresponding tensor
+     * @throws IllegalArgumentException                                       if {@code permutation.length() != indices.size(type)}
+     * @throws cc.redberry.core.combinatorics.InconsistentGeneratorsException if the specified symmetry is
+     *                                                                        inconsistent with already defined
      */
     public static void addAntiSymmetry(SimpleTensor tensor, int... permutation) {
         tensor.getIndices().getSymmetries().addAntiSymmetry(permutation);
@@ -1078,7 +1056,7 @@ public final class Tensors {
     public static void setAntiSymmetric(SimpleTensor tensor, IndexType type) {
         int dimension = tensor.getIndices().size(type);
         boolean symmetriesAreEmpty = tensor.getIndices().getSymmetries().isTrivial();
-        addSymmetry(tensor, type, true, Combinatorics.createTransposition(dimension));
+        addSymmetry(tensor, type, true, Permutations.createTransposition(dimension));
         if (dimension > 2)
             if (symmetriesAreEmpty)
                 tensor.getIndices().getSymmetries().add(type.getType(), new PermutationOneLine(dimension % 2 == 0 ? true : false, Permutations.createCycle(dimension)));
@@ -1094,7 +1072,7 @@ public final class Tensors {
     public static void setAntiSymmetric(SimpleTensor tensor) {
         int dimension = tensor.getIndices().size();
         boolean symmetriesAreEmpty = tensor.getIndices().getSymmetries().isTrivial();
-        tensor.getIndices().getSymmetries().addAntiSymmetry(Combinatorics.createTransposition(dimension));
+        tensor.getIndices().getSymmetries().addAntiSymmetry(Permutations.createTransposition(dimension));
         if (dimension > 2) {
             if (symmetriesAreEmpty)
                 tensor.getIndices().getSymmetries().add(dimension % 2 == 0 ? true : false, Permutations.createCycle(dimension));
@@ -1107,10 +1085,9 @@ public final class Tensors {
      * Adds permutational (anti)symmetries to specified tensor, such that it becomes completely antisymmetric.
      *
      * @param tensor string representation of simple tensor
-     * @throws IllegalArgumentException if string expression does not represents a simple tensor
-     * @throws cc.redberry.core.parser.ParserException
-     *                                  if expression does not satisfy correct Redberry
-     *                                  input notation for tensors
+     * @throws IllegalArgumentException                if string expression does not represents a simple tensor
+     * @throws cc.redberry.core.parser.ParserException if expression does not satisfy correct Redberry
+     *                                                 input notation for tensors
      */
     public static void setAntiSymmetric(String tensor) {
         setAntiSymmetric(parseSimple(tensor));
@@ -1126,7 +1103,7 @@ public final class Tensors {
     public static void setSymmetric(SimpleTensor tensor, IndexType type) {
         int dimension = tensor.getIndices().size(type);
         boolean symmetriesAreEmpty = tensor.getIndices().getSymmetries().isTrivial();
-        tensor.getIndices().getSymmetries().addSymmetry(type, Combinatorics.createCycle(dimension));
+        tensor.getIndices().getSymmetries().addSymmetry(type, Permutations.createCycle(dimension));
         if (symmetriesAreEmpty)
             tensor.getIndices().getSymmetries().add(type.getType(), new PermutationOneLine(false, Permutations.createTransposition(dimension)));
         else
@@ -1141,7 +1118,7 @@ public final class Tensors {
     public static void setSymmetric(SimpleTensor tensor) {
         int dimension = tensor.getIndices().size();
         boolean symmetriesAreEmpty = tensor.getIndices().getSymmetries().isTrivial();
-        tensor.getIndices().getSymmetries().addSymmetry(Combinatorics.createCycle(dimension));
+        tensor.getIndices().getSymmetries().addSymmetry(Permutations.createCycle(dimension));
         if (symmetriesAreEmpty)
             tensor.getIndices().getSymmetries().addSymmetry(Permutations.createTransposition(dimension));
         else
@@ -1152,10 +1129,9 @@ public final class Tensors {
      * Adds permutational symmetries to specified tensor, such that it becomes completely symmetric.
      *
      * @param tensor string representation of simple tensor
-     * @throws IllegalArgumentException if string expression does not represents a simple tensor
-     * @throws cc.redberry.core.parser.ParserException
-     *                                  if expression does not satisfy correct Redberry
-     *                                  input notation for tensors
+     * @throws IllegalArgumentException                if string expression does not represents a simple tensor
+     * @throws cc.redberry.core.parser.ParserException if expression does not satisfy correct Redberry
+     *                                                 input notation for tensors
      */
     public static void setSymmetric(String tensor) {
         setSymmetric(parseSimple(tensor));

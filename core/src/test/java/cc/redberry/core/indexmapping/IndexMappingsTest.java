@@ -23,8 +23,8 @@
 package cc.redberry.core.indexmapping;
 
 import cc.redberry.concurrent.OutputPortUnsafe;
-import cc.redberry.core.combinatorics.Combinatorics;
 import cc.redberry.core.context.CC;
+import cc.redberry.core.groups.permutations.Permutations;
 import cc.redberry.core.indices.IndexType;
 import cc.redberry.core.indices.IndicesUtils;
 import cc.redberry.core.tensor.Tensor;
@@ -38,9 +38,7 @@ import org.junit.Test;
 import java.util.Arrays;
 import java.util.Set;
 
-import static cc.redberry.core.tensor.Tensors.addSymmetry;
-import static cc.redberry.core.tensor.Tensors.multiply;
-import static cc.redberry.core.tensor.Tensors.parse;
+import static cc.redberry.core.tensor.Tensors.*;
 
 public class IndexMappingsTest {
 
@@ -492,7 +490,7 @@ public class IndexMappingsTest {
 
         Tensor source = multiply(tensors);
         for (int i = 0; i < 100; ++i) {
-            int[] perm = Combinatorics.randomPermutation(n2);
+            int[] perm = Permutations.randomPermutation(n2);
             Tensor[] tar = new Tensor[n2];
             for (int j = 0; j < n2; ++j)
                 tar[j] = tensors[perm[j]];

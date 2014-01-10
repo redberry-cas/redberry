@@ -23,7 +23,6 @@
 package cc.redberry.core.indices;
 
 import cc.redberry.core.combinatorics.IntPermutationsGenerator;
-import cc.redberry.core.combinatorics.Symmetry;
 import cc.redberry.core.context.CC;
 import cc.redberry.core.context.ContextManager;
 import cc.redberry.core.context.ContextSettings;

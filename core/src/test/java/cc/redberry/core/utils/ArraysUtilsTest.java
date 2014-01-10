@@ -22,15 +22,13 @@
  */
 package cc.redberry.core.utils;
 
-import cc.redberry.core.combinatorics.Combinatorics;
 import cc.redberry.core.context.CC;
 import cc.redberry.core.groups.permutations.InducedOrdering;
+import cc.redberry.core.groups.permutations.Permutations;
 import org.junit.Assert;
 import org.junit.Test;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  * @author Dmitry Bolotin
@@ -62,10 +60,10 @@ public class ArraysUtilsTest {
     @Test
     public void testSortPermutation1() {
         for (int i = 0; i < 100; ++i) {
-            int[] a = Combinatorics.randomPermutation(10);
+            int[] a = Permutations.randomPermutation(10);
             int[] sorted = a.clone();
             int[] permutation = ArraysUtils.quickSortP(sorted);
-            assertArrayEquals(Combinatorics.reorder(a, permutation), sorted);
+            assertArrayEquals(Permutations.permute(a, permutation), sorted);
         }
     }
 

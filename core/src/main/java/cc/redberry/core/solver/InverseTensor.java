@@ -137,8 +137,7 @@ public final class InverseTensor {
             }
 
         //creating tensor of the most general form from the specified samples
-        GeneratedTensor generatedTensor = TensorGenerator.generateStructure(inverseLhs.getIndices(), samples, inverseLhs.getIndices().getSymmetries().getInnerSymmetries(), symmetricForm, true, true
-        );
+        GeneratedTensor generatedTensor = TensorGenerator.generateStructure(inverseLhs.getIndices(), samples, symmetricForm, true, true);
         unknownCoefficients = generatedTensor.coefficients;
         //creating inverse tensor expression
         generalInverse = Tensors.expression(inverseLhs, generatedTensor.generatedTensor);
@@ -276,7 +275,7 @@ public final class InverseTensor {
      * @param mapleBinDir     path to Maple bin directory (e.g. "/home/user/maple14/bin")
      * @param path            path to your temporary folder
      * @return tensor inverse to the specified tensor according to the specified
-     *         equation and null if inverse does not exist
+     * equation and null if inverse does not exist
      * @throws IOException
      * @throws InterruptedException when Maple fails to run
      */
@@ -335,7 +334,7 @@ public final class InverseTensor {
      * @param mapleBinDir        path to Maple bin directory (e.g. "/home/user/maple14/bin")
      * @param path               path to your temporary folder
      * @return tensor inverse to the specified tensor according to the specified
-     *         equation and null if inverse does not exist
+     * equation and null if inverse does not exist
      * @throws IOException
      * @throws InterruptedException when Maple fails to run
      */
@@ -392,7 +391,7 @@ public final class InverseTensor {
      * @param mathematicaBinDir path to Mathematica bin directory (e.g. "/home/user/maple14/bin")
      * @param path              path to your temporary folder
      * @return tensor inverse to the specified tensor according to the specified
-     *         equation and null if inverse does not exist
+     * equation and null if inverse does not exist
      * @throws IOException
      * @throws InterruptedException when Mathematica fails to run
      */
@@ -446,7 +445,7 @@ public final class InverseTensor {
      * @param mathematicaBinDir  path to Mathematica bin directory (e.g. "/home/user/maple14/bin")
      * @param path               path to your temporary folder
      * @return tensor inverse to the specified tensor according to the specified
-     *         equation and null if inverse does not exist
+     * equation and null if inverse does not exist
      * @throws IOException
      * @throws InterruptedException when Mathematica fails to run
      */

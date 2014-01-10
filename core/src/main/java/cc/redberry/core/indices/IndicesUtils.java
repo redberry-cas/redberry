@@ -22,13 +22,13 @@
  */
 package cc.redberry.core.indices;
 
-import cc.redberry.core.combinatorics.Permutation;
 import cc.redberry.core.context.CC;
 import cc.redberry.core.context.Context;
 import cc.redberry.core.context.OutputFormat;
+import cc.redberry.core.groups.permutations.Permutation;
 import cc.redberry.core.utils.IntArray;
-import cc.redberry.core.utils.MathUtils;
 import cc.redberry.core.utils.IntArrayList;
+import cc.redberry.core.utils.MathUtils;
 
 import java.util.Arrays;
 
@@ -189,7 +189,7 @@ public final class IndicesUtils {
      *
      * @param index specified index
      * @return index name (code) with type (first 30 bits), but without state
-     *         bit (in other words with state bit set to zero)
+     * bit (in other words with state bit set to zero)
      */
     public static int getNameWithType(int index) {
         return index & 0x7FFFFFFF;
@@ -475,7 +475,7 @@ public final class IndicesUtils {
      * @param indices     indices array to be checked
      * @param permutation permutation in one-line notation
      * @return {@code false} if permutation permutes indices with different
-     *         types or have different length and true in other case
+     * types or have different length and true in other case
      */
     public static boolean isPermutationConsistentWithIndices(final int[] indices, final int[] permutation) {
         if (indices.length != permutation.length)
@@ -494,12 +494,12 @@ public final class IndicesUtils {
      * @param indices     indices array to be checked
      * @param permutation permutation in one-line notation
      * @return {@code false} if permutation permutes indices with different
-     *         types or have different length and true in other case
+     * types or have different length and true in other case
      */
     public static boolean isPermutationConsistentWithIndices(final int[] indices, Permutation permutation) {
-        if (indices.length != permutation.dimension())
+        if (indices.length != permutation.degree())
             return false;
-        for (int i = 0; i < permutation.dimension(); ++i)
+        for (int i = 0; i < permutation.degree(); ++i)
             if (getRawTypeInt(indices[i]) != getRawTypeInt(indices[permutation.newIndexOf(i)]))
                 return false;
         return true;
@@ -531,7 +531,7 @@ public final class IndicesUtils {
      * @param u indices
      * @param v indices
      * @return true if at least one free index of {@code u} is contracted
-     *         with some free index of {@code v}
+     * with some free index of {@code v}
      */
     public static boolean haveIntersections(Indices u, Indices v) {
         //todo can be improved

@@ -23,7 +23,6 @@
 package cc.redberry.core.tensorgenerator;
 
 import cc.redberry.core.TAssert;
-import cc.redberry.core.combinatorics.Symmetry;
 import cc.redberry.core.combinatorics.symmetries.Symmetries;
 import cc.redberry.core.combinatorics.symmetries.SymmetriesFactory;
 import cc.redberry.core.parser.ParserIndices;
