@@ -22,6 +22,7 @@
  */
 package cc.redberry.core.parser;
 
+import cc.redberry.core.context.OutputFormat;
 import cc.redberry.core.indices.Indices;
 import cc.redberry.core.indices.IndicesFactory;
 import cc.redberry.core.number.Complex;
@@ -70,5 +71,9 @@ public class ParseTokenNumber extends ParseToken {
             return false;
         final ParseTokenNumber other = (ParseTokenNumber) obj;
         return Objects.equals(this.value, other.value);
+    }
+
+    public String toString(OutputFormat mode) {
+        return "(" + value.toString(mode) + ")";
     }
 }

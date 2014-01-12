@@ -22,8 +22,9 @@
  */
 package cc.redberry.core.parser;
 
+import cc.redberry.core.context.CC;
 import cc.redberry.core.context.NameAndStructureOfIndices;
-import cc.redberry.core.indices.Indices;
+import cc.redberry.core.context.OutputFormat;
 import cc.redberry.core.indices.SimpleIndices;
 import cc.redberry.core.indices.StructureOfIndices;
 import cc.redberry.core.tensor.Tensor;
@@ -94,5 +95,43 @@ public class ParseTokenSimpleTensor extends ParseToken {
         if (!Objects.equals(this.indices, other.indices))
             return false;
         return Objects.equals(this.name, other.name);
+    }
+
+    public boolean isKroneckerOrMetric() {
+        return name.equals(CC.getNameManager().getKroneckerName()) ||
+                name.equals(CC.getNameManager().getMetricName());
+    }
+
+    public boolean isKronecker() {
+        return name.equals(CC.getNameManager().getKroneckerName());
+    }
+
+    @Override
+    public String toString(OutputFormat mode) {
+        //Initializing StringBuilder
+        StringBuilder sb = new StringBuilder();
+
+        //Adding tensor name
+        if (mode == OutputFormat.Maple && isKroneckerOrMetric()) {
+            if (isKronecker())
+                sb.append("KroneckerDelta");
+            else
+                sb.append("g_");
+        } else
+            sb.append(name);
+
+        //If there are no indices return builder content
+        if (indices.size() == 0)
+            return sb.toString();
+
+        //Writing indices
+        boolean external = mode == OutputFormat.WolframMathematica || mode == OutputFormat.Maple;
+        if (external)
+            sb.append("[");
+        sb.append(indices.toString(mode));
+        if (external)
+            sb.append("]");
+
+        return sb.toString();
     }
 }

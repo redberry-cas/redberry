@@ -22,6 +22,7 @@
  */
 package cc.redberry.core.parser;
 
+import cc.redberry.core.context.OutputFormat;
 import cc.redberry.core.indices.Indices;
 import cc.redberry.core.indices.IndicesBuilder;
 import cc.redberry.core.indices.IndicesFactory;
@@ -44,13 +45,13 @@ public class ParseToken {
      */
     public final TokenType tokenType;
     /**
-     * Parent node.
-     */
-    public ParseToken parent;
-    /**
      * Child nodes.
      */
     public final ParseToken[] content;
+    /**
+     * Parent node.
+     */
+    public ParseToken parent;
 
     /**
      * @param tokenType node type
@@ -95,6 +96,36 @@ public class ParseToken {
             builder.append(node).append(", ");
         builder.deleteCharAt(builder.length() - 1).deleteCharAt(builder.length() - 1).append("]");
         return builder.toString();
+    }
+
+    public String toString(OutputFormat mode) {
+        StringBuilder sb = new StringBuilder();
+        switch (tokenType) {
+            case Product:
+                char operatorChar = mode == OutputFormat.LaTeX ? ' ' : '*';
+
+                for (int i = 0; ; ++i) {
+                    sb.append(content[i].toString(mode));
+                    if (i == content.length - 1)
+                        return sb.toString();
+                    sb.append(operatorChar);
+                }
+                //throw new RuntimeException();
+            case Sum:
+                sb.append("(");
+                String temp;
+                for (int i = 0; ; ++i) {
+                    temp = content[i].toString(mode);
+                    if ((temp.charAt(0) == '-' || temp.charAt(0) == '+') && sb.length() != 0)
+                        sb.deleteCharAt(sb.length() - 1);
+                    sb.append(content[i].toString(mode));
+                    if (i == content.length - 1)
+                        return sb.append(")").toString();
+                    sb.append('+');
+                }
+                //throw new RuntimeException();
+        }
+        throw new RuntimeException("Unsupported token type.");
     }
 
     protected Tensor[] contentToTensors() {
