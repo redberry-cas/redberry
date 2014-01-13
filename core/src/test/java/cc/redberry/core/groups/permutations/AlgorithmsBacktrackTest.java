@@ -44,6 +44,16 @@ import static cc.redberry.core.groups.permutations.PermutationsTestUtils.*;
 public class AlgorithmsBacktrackTest extends AbstractTestClass {
 
     @Test
+    public void testSameGroupSearch() {
+        PermutationGroup s30_known = PermutationGroup.symmetricGroup(30);
+        ArrayList<BSGSCandidateElement> s30_bsgs = new ArrayList<>();
+        AlgorithmsBacktrack.subgroupSearch(s30_known.getBSGS(),
+                s30_bsgs, BacktrackSearchTestFunction.TRUE, Indicator.TRUE_INDICATOR);
+        PermutationGroup s30 = new PermutationGroup(asBSGSList(s30_bsgs), true);
+        assertEquals(s30_known, s30);
+    }
+
+    @Test
     public void test1() {
         //no any pruning, just property test
         Permutation

@@ -108,8 +108,7 @@ public final class IndexMappings {
     }
 
     /**
-     * Tests whether specified mapping is a mapping from <i>{@code from}</i> tensor onto <i>{@code to}</i> tensor, i.e.
-     * this method returns {@code true} if and only if
+     * Tests whether specified mapping is a mapping from <i>{@code from}</i> tensor onto <i>{@code to}</i> tensor.
      *
      * @param mapping mapping
      * @param from    tensor <i>{@code from}</i>

@@ -59,7 +59,6 @@ public class TensorGenerator {
     private final int[] lowerArray, upperArray;
     private final List<SimpleTensor> coefficients = new ArrayList<>();
     private final boolean symmetricForm;
-    private final IndicesSymmetries symmetries;
     private final SimpleIndices indices;
     private Tensor result;
     private final boolean withCoefficients;
@@ -69,7 +68,6 @@ public class TensorGenerator {
             this.samples = expandSamples(samples);
         else this.samples = samples;
 
-        this.symmetries = indices.getSymmetries();
         this.indices = indices;
         this.symmetricForm = symmetricForm;
         this.lowerArray = indices.getLower().copy();
@@ -147,12 +145,12 @@ public class TensorGenerator {
                 term = FastTensors.multiplySumElementsOnFactors((Sum) term);
             result.put(term);
         }
-        this.result = (symmetries == null || symmetries.isTrivial()) ? result.build() : symmetrize(result.build(), symmetries);
+        this.result = indices.getSymmetries().isTrivial() ? result.build() : symmetrize(result.build());
     }
 
-    private Tensor symmetrize(Tensor result, IndicesSymmetries symmetries) {
+    private Tensor symmetrize(Tensor result) {
         //todo rewrite this slag
-        result = new SymmetrizeTransformation(indices.getAllIndices().copy(), symmetries, true).transform(result);
+        result = new SymmetrizeTransformation(indices, false).transform(result);
         result = ExpandTransformation.expand(result);
 
         if (!(result instanceof Sum))

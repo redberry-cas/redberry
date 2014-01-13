@@ -255,13 +255,15 @@ public final class AlgorithmsBacktrack {
 
                 //<= here we obtained next permutation in group that is a new generator in the subgroup we search for
                 //extend group with a new generator
-                subgroup.get(0).stabilizerGenerators.add(word[level]);
-                subgroup.get(0).recalculateOrbitAndSchreierVector();
-                //recalculate subgroup
-                AlgorithmsBase.SchreierSimsAlgorithm(subgroup);
+                if (!AlgorithmsBase.membershipTest(subgroup, word[level])) {
+                    subgroup.get(0).stabilizerGenerators.add(word[level]);
+                    subgroup.get(0).recalculateOrbitAndSchreierVector();
+                    //recalculate subgroup
+                    AlgorithmsBase.SchreierSimsAlgorithm(subgroup);
 
-                //dump subgroup_rebase
-                subgroup_rebase = AlgorithmsBase.clone(subgroup);
+                    //dump subgroup_rebase
+                    subgroup_rebase = AlgorithmsBase.clone(subgroup);
+                }
 
                 //<= we've found new subgroup generator and we can skip all other elements in current branch:
                 level = subgroupLevel;

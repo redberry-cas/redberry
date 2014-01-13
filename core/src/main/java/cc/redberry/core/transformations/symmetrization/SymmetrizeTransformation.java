@@ -26,7 +26,9 @@ import cc.redberry.core.groups.permutations.Permutation;
 import cc.redberry.core.groups.permutations.PermutationGroup;
 import cc.redberry.core.groups.permutations.PermutationOneLine;
 import cc.redberry.core.indexmapping.Mapping;
-import cc.redberry.core.indices.*;
+import cc.redberry.core.indices.Indices;
+import cc.redberry.core.indices.IndicesUtils;
+import cc.redberry.core.indices.SimpleIndices;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.number.Rational;
 import cc.redberry.core.tensor.*;
@@ -37,7 +39,6 @@ import cc.redberry.core.utils.TensorUtils;
 import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.Iterator;
-import java.util.List;
 
 import static cc.redberry.core.indices.IndicesUtils.getNameWithType;
 
@@ -135,17 +136,17 @@ public final class SymmetrizeTransformation implements Transformation {
         int[] nonStabilizedPoints = new int[indices.size()];
         int[] mapping = new int[indices.size()];
         int sPointer = 0, nPointer = 0, index;
-        for (int s = 0; s < allIndices.size(); ++s)
-            if ((index = Arrays.binarySearch(sortedIndicesNames, getNameWithType(allIndices.get(s)))) < 0) {
-                stabilizedPoints[sPointer] = s;
-                mapping[sPointer++] = index;
-            } else
-                nonStabilizedPoints[nPointer++] = s;
-
+        for (int s = 0; s < allIndices.size(); ++s) {
+            index = Arrays.binarySearch(sortedIndicesNames, getNameWithType(allIndices.get(s)));
+            if (index < 0)
+                stabilizedPoints[sPointer++] = s;
+            else {
+                nonStabilizedPoints[nPointer] = s;
+                mapping[nPointer++] = index;
+            }
+        }
         PermutationGroup result = allIndices.getSymmetries().getPermutationGroup().
                 pointwiseStabilizerRestricted(stabilizedPoints);
-        result = result.conjugate(new PermutationOneLine(mapping));
-
-        return result;
+        return result.conjugate(new PermutationOneLine(mapping));
     }
 }

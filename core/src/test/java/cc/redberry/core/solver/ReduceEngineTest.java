@@ -307,7 +307,7 @@ public class ReduceEngineTest {
 
     @Test
     public void test10() throws Exception {
-        GeneratedTensor genTensor = TensorGenerator.generateStructure(ParserIndices.parseSimple("_abc"), new Tensor[]{parse("g_mn"), parse("k_m")}, null, true, true, true);
+        GeneratedTensor genTensor = TensorGenerator.generateStructure(ParserIndices.parseSimple("_abc"), new Tensor[]{parse("g_mn"), parse("k_m")}, true, true, true);
 
         Expression[] equations = new Expression[]{
                 parseExpression("F_mnp*F^mnp = 1"), expression(parse("F_abc"), genTensor.generatedTensor)

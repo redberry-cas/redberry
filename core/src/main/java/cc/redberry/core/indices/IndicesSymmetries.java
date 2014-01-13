@@ -140,6 +140,25 @@ public final class IndicesSymmetries
         return add(type, new PermutationOneLine(sign, permutation));
     }
 
+    public void setSymmetric() {
+        if (permutationGroup != null)
+            throw new IllegalArgumentException();
+        PermutationGroup sym = null;
+        int[] counts = structureOfIndices.getTypesCounts();
+        for (int c : counts) {
+            if (c != 0)
+                if (sym == null)
+                    sym = PermutationGroup.symmetricGroup(c);
+                else
+                    sym = sym.directProduct(PermutationGroup.symmetricGroup(c));
+
+        }
+
+        permutationGroup = sym;
+        generators.clear();
+        generators.addAll(sym.generators());
+    }
+
     public boolean add(boolean sign, int[] permutation) {
         byte type = -1;
         StructureOfIndices.TypeData typeData;
