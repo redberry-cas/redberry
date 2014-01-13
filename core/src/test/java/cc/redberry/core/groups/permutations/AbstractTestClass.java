@@ -46,6 +46,7 @@ public class AbstractTestClass {
 
     @Before
     public void beforeMethod() {
+        Assume.assumeTrue(doTestPerformance());
         if (name.getMethodName().toLowerCase().contains("performancetest"))
             Assume.assumeTrue(doTestPerformance());
         if (name.getMethodName().toLowerCase().contains("withgap"))

@@ -205,10 +205,6 @@ public final class OneLoopInput {
         inputValues[5] = M;
 
         checkConsistency();
-        Tensors.addSymmetry("R_lm", IndexType.LatinLower, false, new int[]{1, 0});
-        Tensors.addSymmetry("R_lmab", IndexType.LatinLower, true, new int[]{0, 1, 3, 2});
-        Tensors.addSymmetry("R_lmab", IndexType.LatinLower, false, new int[]{2, 3, 0, 1});
-
 
         this.L = Tensors.expression(Tensors.parse("L"), new Complex(operatorOrder));
         this.hatQuantities = new Expression[HAT_QUANTITIES_GENERAL_COUNT][];

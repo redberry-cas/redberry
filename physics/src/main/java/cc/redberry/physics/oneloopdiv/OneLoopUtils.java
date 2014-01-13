@@ -23,6 +23,7 @@
 
 package cc.redberry.physics.oneloopdiv;
 
+import cc.redberry.core.indices.IndexType;
 import cc.redberry.core.tensor.Expression;
 import cc.redberry.core.tensor.Tensors;
 
@@ -50,9 +51,17 @@ public final class OneLoopUtils {
      * </pre>
      *
      * @return the definition of the anti de Sitter background, with the
-     *         cosmological constant denoted as {@code La}.
+     * cosmological constant denoted as {@code La}.
      */
     public static Expression[] antiDeSitterBackground() {
         return antiDeSitterBackground.clone();
+    }
+
+    public static void setUpRiemannSymmetries() {
+        Tensors.addSymmetry("R_lm", IndexType.LatinLower, false, new int[]{1, 0});
+        Tensors.addSymmetry("R_lmab", IndexType.LatinLower, true, new int[]{0, 1, 3, 2});
+        Tensors.addSymmetry("R_lmab", IndexType.LatinLower, false, new int[]{2, 3, 0, 1});
+
+
     }
 }

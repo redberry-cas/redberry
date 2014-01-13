@@ -147,10 +147,8 @@ public class OneLoopCountertermsTest {
 
     @Test
     public void testMin_1() {
-        Tensors.addSymmetry("R_lm", IndexType.LatinLower, false, new int[]{1, 0});
+        OneLoopUtils.setUpRiemannSymmetries();
         Tensors.addSymmetry("F_lm", IndexType.LatinLower, true, new int[]{1, 0});
-        Tensors.addSymmetry("R_lmab", IndexType.LatinLower, true, new int[]{0, 1, 3, 2});
-        Tensors.addSymmetry("R_lmab", IndexType.LatinLower, false, new int[]{2, 3, 0, 1});
 
         String FR_ =
                 "FR= Power[L,2]*Power[(L-1),2]*(-2*n^a)*g^{bc}*g^{lm}*n_q*((1/60)*R^q_{blc}*F_{am}"
@@ -186,6 +184,7 @@ public class OneLoopCountertermsTest {
 
     @Test
     public void testMinimalSecondOrderOperator() {
+        OneLoopUtils.setUpRiemannSymmetries();
         //TIME = 6.1 s
         Expression iK = Tensors.parseExpression("iK_a^b=d_a^b");
         Expression K = Tensors.parseExpression("K^lm_a^b=d_a^b*g^{lm}");
@@ -206,6 +205,7 @@ public class OneLoopCountertermsTest {
 
     @Test
     public void testMinimalSecondOrderOperatorBarvinskyVilkovisky() {
+        OneLoopUtils.setUpRiemannSymmetries();
         //TIME = 4.5 s
         //Phys. Rep. 119 ( 1985) 1-74
         Expression iK = Tensors.parseExpression("iK_a^b=d_a^b");
@@ -229,6 +229,7 @@ public class OneLoopCountertermsTest {
     public void testMinimalFourthOrderOperator() {
         //TIME = 6.2 s
         Tensors.addSymmetry("P_lm", IndexType.LatinLower, false, 1, 0);
+        OneLoopUtils.setUpRiemannSymmetries();
 
         Expression iK = Tensors.parseExpression("iK_a^b=d_a^b");
         Expression K = Tensors.parseExpression("K^{lmcd}_a^{b}="
@@ -251,6 +252,7 @@ public class OneLoopCountertermsTest {
     @Test
     public void testVectorField0() {
         Tensors.addSymmetry("P_lm", IndexType.LatinLower, false, 1, 0);
+        OneLoopUtils.setUpRiemannSymmetries();
 
         Expression iK = Tensors.parseExpression("iK_a^b=d_a^b+c*n_a*n^b");
         Expression K = Tensors.parseExpression("K^{lm}_a^{b}=g^{lm}*d_{a}^{b}-k/2*(g^{lb}*d_a^m+g^{mb}*d_a^l)");
@@ -269,6 +271,7 @@ public class OneLoopCountertermsTest {
         OneLoopCounterterms action = OneLoopCounterterms.calculateOneLoopCounterterms(input);
         Tensor A = action.getCounterterms().get(1);
         A = Tensors.parseExpression("P^l_l = P").transform(A);
+        System.out.println(A);
         Tensor expected = Tensors.parse("7/60*Power[R, 2]-4/15*R^{l m }*R_{l m }+1/2*P^{c }_{a }*P^{a }_{c }+1/6*P*R");
         TAssert.assertEquals(A, expected);
     }
@@ -276,6 +279,7 @@ public class OneLoopCountertermsTest {
     @Test
     public void testGravityGhosts0() {
         Tensors.addSymmetry("P_lm", IndexType.LatinLower, false, 1, 0);
+        OneLoopUtils.setUpRiemannSymmetries();
 
         Expression iK = Tensors.parseExpression("iK_a^b=d_a^b+gamma*n_a*n^b");
         Expression K = Tensors.parseExpression("K^{lm}_a^{b}=d_a^b*g^lm-1/2*beta*(d_a^l*g^mb+d_a^m*g^lb)");
@@ -309,6 +313,7 @@ public class OneLoopCountertermsTest {
     @Test
     public void testVectorField() {
         Tensors.addSymmetry("P_lm", IndexType.LatinLower, false, 1, 0);
+        OneLoopUtils.setUpRiemannSymmetries();
 
         Expression iK = Tensors.parseExpression("iK_a^b=d_a^b+c*n_a*n^b");
         Expression K = Tensors.parseExpression("K^{lm}_a^{b}=g^{lm}*d_{a}^{b}-k/2*(g^{lb}*d_a^m+g^{mb}*d_a^l)");
@@ -351,6 +356,7 @@ public class OneLoopCountertermsTest {
     @Test
     public void testGravityGhosts() {
         Tensors.addSymmetry("P_lm", IndexType.LatinLower, false, 1, 0);
+        OneLoopUtils.setUpRiemannSymmetries();
 
         Expression iK = Tensors.parseExpression("iK_a^b=d_a^b+gamma*n_a*n^b");
         Expression K = Tensors.parseExpression("K^{lm}_a^{b}=d_a^b*g^lm-1/2*beta*(d_a^l*g^mb+d_a^m*g^lb)");
@@ -388,6 +394,7 @@ public class OneLoopCountertermsTest {
     @Test
     public void testSquaredVectorField() {
         Tensors.addSymmetry("P_lm", IndexType.LatinLower, false, 1, 0);
+        OneLoopUtils.setUpRiemannSymmetries();
 
         Expression iK = Tensors.parseExpression("iK_a^b=d_a^b+(2*c+Power[c,2])*n_a*n^b");
         Expression K = Tensors.parseExpression("K^{lmcd}_a^{b}="
@@ -468,6 +475,7 @@ public class OneLoopCountertermsTest {
 
     @Test
     public void testLambdaGaugeGravity() {
+        OneLoopUtils.setUpRiemannSymmetries();
 
         Expression iK = Tensors.parseExpression("iK_ab^cd = "
                 + "(d_a^c*d_b^d+d_b^c*d_a^d)/2+"
@@ -528,6 +536,7 @@ public class OneLoopCountertermsTest {
 
     @Test
     public void testSpin3Ghosts() {
+        OneLoopUtils.setUpRiemannSymmetries();
         //TIME = 990 s
         Expression iK = Tensors.parseExpression(
                 "iK^{ab}_{lm} = P^{ab}_{lm}-1/4*c*g_{lm}*g^{ab}+"
@@ -574,6 +583,7 @@ public class OneLoopCountertermsTest {
 
     @Test
     public void testNonMinimalGaugeGravity() {
+        OneLoopUtils.setUpRiemannSymmetries();
         //FIXME works more than hour
         Tensors.addSymmetry("R_lm", IndexType.LatinLower, false, new int[]{1, 0});
         Tensors.addSymmetry("R_lmab", IndexType.LatinLower, true, new int[]{0, 1, 3, 2});

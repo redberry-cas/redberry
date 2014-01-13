@@ -234,8 +234,12 @@ class RedberryStaticTest {
     @Test
     public void testSymmetrize() {
         use(Redberry) {
-            assertEquals Symmetrize['_ab'.si, CreateSymmetries([1, 0])] >> 'T_ab'.t, 'T_ab/2 + T_ba/2'.t
-            assertEquals Symmetrize['_ab'.si, CreateSymmetries([[1, 0], true])] >> 'T_ab'.t, 'T_ab/2 - T_ba/2'.t
+            def si = '_ab'.si
+            si.symmetries.add(CreateSymmetry([1, 0]))
+            assertEquals Symmetrize[si] >> 'T_ab'.t, 'T_ab/2 + T_ba/2'.t
+            si = '_ab'.si
+            si.symmetries.add(CreateSymmetry([[1, 0], true]))
+            assertEquals Symmetrize[si] >> 'T_ab'.t, 'T_ab/2 - T_ba/2'.t
         }
     }
 }

@@ -36,6 +36,7 @@ public final class NonMinimalGravityBenchmark {
 //        Benchmarks.burnJVM();
         Benchmarks.Timer timer = new Benchmarks.Timer();
         timer.start();
+        OneLoopUtils.setUpRiemannSymmetries();
 //        Benchmarks.testNonMinimalGaugeGravity();
         Benchmarks.testSpin3Ghosts();
         System.out.println("Non minimal gravity: " + timer.elapsedTimeInSeconds() + " s.");

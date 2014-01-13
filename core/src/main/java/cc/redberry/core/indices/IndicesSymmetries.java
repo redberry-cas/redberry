@@ -177,6 +177,9 @@ public final class IndicesSymmetries
 
 
     public boolean add(byte type, Permutation symmetry) {
+        if (permutationGroup != null)
+            throw new IllegalArgumentException();
+
         StructureOfIndices.TypeData data = structureOfIndices.getTypeData(type);
         if (data == null)
             throw new IllegalArgumentException("No such type: " + IndexType.getType(type));
@@ -195,10 +198,14 @@ public final class IndicesSymmetries
 
 
     public boolean add(Permutation symmetry) {
+        if (permutationGroup != null)
+            throw new IllegalArgumentException();
         return generators.add(symmetry);
     }
 
     public boolean addAll(Collection<Permutation> symmetry) {
+        if (permutationGroup != null)
+            throw new IllegalArgumentException();
         return generators.addAll(symmetry);
     }
 

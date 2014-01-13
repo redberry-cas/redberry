@@ -94,6 +94,7 @@ public final class Benchmarks {
     }
 
     public static void main(String[] args) {
+
         //Processor family: Intel(R) Core(TM) i5 CPU M 430  @ 2.27GHz.
         //-Xmx value : 3g.
         //Max memory used: 1.2g.
@@ -124,6 +125,8 @@ public final class Benchmarks {
 
         //suppressing output
         System.setOut(new PrintStream(dummyOutputStream));
+
+        OneLoopUtils.setUpRiemannSymmetries();
         //burning JVM
         burnJVM();
         Timer timer = new Timer();
