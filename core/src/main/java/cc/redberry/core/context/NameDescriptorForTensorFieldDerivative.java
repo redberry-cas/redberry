@@ -98,7 +98,7 @@ final class NameDescriptorForTensorFieldDerivative extends NameDescriptorForTens
         j = 1;
         int cycle[];
         for (i = 0; i < orders.length; ++i) {
-            if (orders[i] >= 2) {
+            if (structuresOfIndices[i + 1].size() != 0 && orders[i] >= 2) {
                 //adding symmetries for indices from each slot
                 cycle = Permutations.createBlockCycle(structuresOfIndices[i + 1].size(), 2);
                 aggregator.addAll(mapping[j]);
