@@ -22,6 +22,8 @@
  */
 package cc.redberry.core.groups.permutations;
 
+import cc.redberry.core.utils.IntArray;
+
 import java.lang.reflect.Array;
 import java.math.BigInteger;
 import java.util.Arrays;
@@ -139,6 +141,11 @@ public final class PermutationOneLine implements Permutation {
     @Override
     public int[] oneLine() {
         return permutation.clone();
+    }
+
+    @Override
+    public IntArray oneLineImmutable() {
+        return new IntArray(permutation);
     }
 
     @Override

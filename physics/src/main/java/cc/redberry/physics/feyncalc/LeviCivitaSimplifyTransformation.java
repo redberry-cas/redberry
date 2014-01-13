@@ -22,10 +22,11 @@
  */
 package cc.redberry.physics.feyncalc;
 
-import cc.redberry.core.combinatorics.symmetries.Symmetries;
-import cc.redberry.core.combinatorics.symmetries.SymmetriesFactory;
 import cc.redberry.core.context.CC;
 import cc.redberry.core.context.NameAndStructureOfIndices;
+import cc.redberry.core.groups.permutations.Permutation;
+import cc.redberry.core.groups.permutations.PermutationGroup;
+import cc.redberry.core.groups.permutations.PermutationOneLine;
 import cc.redberry.core.groups.permutations.Permutations;
 import cc.redberry.core.indexmapping.IndexMappings;
 import cc.redberry.core.indexmapping.Mapping;
@@ -49,10 +50,7 @@ import cc.redberry.core.utils.IntArrayList;
 import cc.redberry.core.utils.TensorUtils;
 import gnu.trove.map.hash.TIntObjectHashMap;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import static cc.redberry.core.indices.IndicesUtils.*;
 import static cc.redberry.core.tensor.StructureOfContractions.getToTensorIndex;
@@ -201,7 +199,7 @@ public class LeviCivitaSimplifyTransformation implements Transformation {
             //symmetries of product, which is contracted with Levi-Civita
             MappingsPort port = IndexMappings.createPort(temp, temp);
             Mapping mapping;
-            Symmetry sym;
+            Permutation sym;
 
             //check for two symmetric indices of product contracted with two antisymmetric indices of eps
             while ((mapping = port.take()) != null) {
@@ -211,7 +209,7 @@ public class LeviCivitaSimplifyTransformation implements Transformation {
                 if (!checkNonPermutingPositions(sym, nonPermutableArray))
                     continue;
                 //bingo!
-                if (sym.isAntiSymmetry() != symmetries.get(sym.getPermutation()))
+                if (sym.antisymmetry() != symmetries.get(sym.oneLineImmutable()))
                     return Complex.ZERO;
             }
 
@@ -309,14 +307,16 @@ public class LeviCivitaSimplifyTransformation implements Transformation {
         if (symmetries != null)
             return symmetries;
         symmetries = new HashMap<>();
-        Symmetries ss = SymmetriesFactory.createSymmetries(indicesSize);
-        ss.addUnsafe(new Symmetry(true, Permutations.createTransposition(indicesSize, 0, 1)));
+        ArrayList<Permutation> ss = new ArrayList<>();
+        ss.add(new PermutationOneLine(true, Permutations.createTransposition(indicesSize, 0, 1)));
         if (indicesSize % 2 == 0)
-            ss.addUnsafe(new Symmetry(true, Permutations.createCycle(indicesSize)));
+            ss.add(new PermutationOneLine(true, Permutations.createCycle(indicesSize)));
         else
-            ss.addUnsafe(new Symmetry(false, Permutations.createCycle(indicesSize)));
-        for (Symmetry symmetry : ss)
-            symmetries.put(symmetry.getPermutation(), symmetry.isAntiSymmetry());
+            ss.add(new PermutationOneLine(false, Permutations.createCycle(indicesSize)));
+
+        PermutationGroup lc = new PermutationGroup(ss);
+        for (Permutation symmetry : lc)
+            symmetries.put(symmetry.oneLineImmutable(), symmetry.antisymmetry());
         cachedLeviCivitaSymmetries.put(indicesSize, symmetries);
         return symmetries;
     }
