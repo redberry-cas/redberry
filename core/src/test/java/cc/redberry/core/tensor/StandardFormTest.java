@@ -268,4 +268,12 @@ public class StandardFormTest {
         b = EliminateFromSymmetriesTransformation.ELIMINATE_FROM_SYMMETRIES.transform(b);
         TAssert.assertEquals(a, b);
     }
+
+    @Test
+    public void testRational() {
+        Tensor a = parse("1/2 + 3/4");
+        Tensor e = parse("5/4");
+        Assert.assertEquals(a.toString(), "5/4");
+        Assert.assertEquals(e, a);
+    }
 }
