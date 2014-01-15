@@ -276,4 +276,15 @@ public class StandardFormTest {
         Assert.assertEquals(a.toString(), "5/4");
         Assert.assertEquals(e, a);
     }
+
+    @Test
+    public void test5() {
+        addAntiSymmetry("R_abcd", 1, 0, 2, 3);
+        addSymmetry("R_abcd", 2, 3, 0, 1);
+        addSymmetry("R_ab", 1, 0);
+        Tensor t = parse("-R^{c}_{r}^{nb}*R_{tncb} + R^{d}_{ncr}*R^{c}_{d}^{n}_{t}");
+        Assert.assertTrue(TensorUtils.isZero(t));
+        t = parse("-(25/16)*R^{c}_{r}^{nb}*R_{tncb}+(25/16)*R^{d}_{ncr}*R^{c}_{d}^{n}_{t}");
+        Assert.assertTrue(TensorUtils.isZero(t));
+    }
 }

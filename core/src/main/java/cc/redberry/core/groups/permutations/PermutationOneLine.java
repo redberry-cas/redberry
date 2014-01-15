@@ -184,6 +184,16 @@ public final class PermutationOneLine implements Permutation {
     }
 
     @Override
+    public char[] permute(char[] array) {
+        if (isIdentity)
+            return array.clone();
+        final char[] result = new char[array.length];
+        for (int i = 0; i < array.length; ++i)
+            result[i] = array[permutation[i]];
+        return result;
+    }
+
+    @Override
     public <T> T[] permute(T[] array) {
         if (isIdentity)
             return array.clone();

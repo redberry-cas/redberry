@@ -22,6 +22,10 @@
  */
 package cc.redberry.core.groups.permutations;
 
+import cc.redberry.concurrent.OutputPortUnsafe;
+import cc.redberry.core.combinatorics.IntCombinationPermutationGenerator;
+import cc.redberry.core.combinatorics.IntCombinationsGenerator;
+import cc.redberry.core.combinatorics.IntPermutationsGenerator;
 import cc.redberry.core.context.CC;
 import cc.redberry.core.number.NumberUtils;
 import cc.redberry.core.utils.ArraysUtils;
@@ -632,6 +636,49 @@ public class PermutationGroupTest extends AbstractTestClass {
         System.out.println("Time " + timeStat);
         System.out.println("Not null " + notNullStat);
     }
+
+    @Test
+    public void testMapping2() {
+        Permutation a = new PermutationOneLine(true, 1, 0, 2, 3),
+                b = new PermutationOneLine(true, 0, 1, 3, 2),
+                c = new PermutationOneLine(false, 2, 3, 0, 1);
+        final PermutationGroup pg = new PermutationGroup(a, b, c);
+
+        Permutation[] all = new Permutation[pg.order().intValue()];
+        int counter = 0;
+        for (Permutation p : pg)
+            all[counter++] = p;
+
+        int degree = pg.degree();
+        for (int k = 0; k < degree; ++k) {
+            IntCombinationsGenerator comb = new IntCombinationsGenerator(degree, k);
+            int[] from;
+            while (comb.hasNext()) {
+                from = comb.next();
+                IntCombinationPermutationGenerator mapGen = new IntCombinationPermutationGenerator(degree, k);
+                while (mapGen.hasNext()) {
+                    int[] to = mapGen.next();
+                    Iterator<Permutation> search = new OutputPortUnsafe.PortIterator<>(pg.mapping(from, to));
+
+                    Set<Permutation> actual = new HashSet<>();
+                    while (search.hasNext())
+                        actual.add(search.next());
+
+                    Set<Permutation> expected = new HashSet<>();
+                    out:
+                    for (Permutation ppp : all) {
+                        for (int i = 0; i < k; ++i)
+                            if (ppp.newIndexOf(from[i]) != to[i])
+                                continue out;
+                        expected.add(ppp);
+                    }
+
+                    assertEquals(expected, actual);
+                }
+            }
+        }
+    }
+
 
     @Test
     public void testNormalClosure1() throws Exception {

@@ -99,6 +99,14 @@ public interface Permutation extends Comparable<Permutation> {
      * @param array array
      * @return permuted array
      */
+    public char[] permute(char[] array);
+
+    /**
+     * Permutes array and returns the result.
+     *
+     * @param array array
+     * @return permuted array
+     */
     public <T> T[] permute(T[] array);
 
     /**

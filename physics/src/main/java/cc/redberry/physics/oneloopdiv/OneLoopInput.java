@@ -109,7 +109,7 @@ public final class OneLoopInput {
      *                      Lagrangian, i.e. the integer value of {@code L}.
      *                      Currently supported second and fourth order
      *                      operators.
-     * @param iK          inverse of {@code Kn} tensor. The input
+     * @param iK            inverse of {@code Kn} tensor. The input
      *                      expression should be in the form
      *                      {@code iK^{...}_{...} = ...}.
      * @param K             tensor {@code K} in the form {@code K^{...}_{...} = ....}.
@@ -154,7 +154,7 @@ public final class OneLoopInput {
      *                          Lagrangian, i.e. the integer value of {@code L}.
      *                          Currently supported second and fourth order
      *                          operators.
-     * @param iK              inverse tensors to tensor {@code Kn}. The input
+     * @param iK                inverse tensors to tensor {@code Kn}. The input
      *                          expression should be in the form
      *                          {@code iK^{...}_{...} = ...}.
      * @param K                 tensor {@code K} in the form {@code K^{...}_{...} = ....}.
@@ -308,7 +308,9 @@ public final class OneLoopInput {
         symmetry[1] = 0;
         for (i = 2; i < symmetry.length; ++i)
             symmetry[i] = i;
-        Tensors.addSymmetry((SimpleTensor) F.get(0), IndexType.LatinLower, true, symmetry);
+        //todo fix symmetry adding!!!
+        if (!((SimpleTensor) F.get(0)).getIndices().getSymmetries().isPermGroupInited())
+            Tensors.addSymmetry((SimpleTensor) F.get(0), IndexType.LatinLower, true, symmetry);
         this.F = F;
 
         covariantIndicesString = IndicesUtils.toString(Arrays.copyOfRange(covariantIndices, 0, 2), OutputFormat.Redberry);

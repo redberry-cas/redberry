@@ -116,6 +116,10 @@ public final class IndicesSymmetries
         return positionsInOrbits;
     }
 
+    public boolean isPermGroupInited(){
+        return permutationGroup != null;
+    }
+
     public boolean addSymmetry(int... permutation) {
         return add(false, permutation);
     }

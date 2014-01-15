@@ -23,9 +23,14 @@
 package cc.redberry.core.indexmapping;
 
 import cc.redberry.concurrent.OutputPortUnsafe;
+import cc.redberry.core.TAssert;
 import cc.redberry.core.context.CC;
+import cc.redberry.core.groups.permutations.Permutation;
+import cc.redberry.core.groups.permutations.PermutationGroup;
+import cc.redberry.core.groups.permutations.PermutationOneLine;
 import cc.redberry.core.groups.permutations.Permutations;
 import cc.redberry.core.indices.IndexType;
+import cc.redberry.core.indices.Indices;
 import cc.redberry.core.indices.IndicesUtils;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.tensor.Tensors;
@@ -36,6 +41,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.Set;
 
 import static cc.redberry.core.tensor.Tensors.*;
@@ -475,7 +481,6 @@ public class IndexMappingsTest {
     public void test16() {
         Tensor from = parse("f[1]"), to = parse("f[-1]");
         Mapping buffer = IndexMappings.getFirst(from, to);
-        System.out.println(buffer);
         Assert.assertTrue(buffer == null);
     }
 
@@ -498,4 +503,88 @@ public class IndexMappingsTest {
             Assert.assertTrue(IndexMappings.getFirst(source, temp) != null);
         }
     }
+
+    @Test
+    public void test18() {
+        addAntiSymmetry("R_abcd", 1, 0, 2, 3);
+        addSymmetry("R_abcd", 2, 3, 0, 1);
+        addSymmetry("R_ab", 1, 0);
+        Tensor from = parse("(25/16)*R^{c}_{r}^{nb}*R_{tncb}");
+        Tensor to = parse("(25/16)*R^{d}_{ncr}*R^{c}_{d}^{n}_{t}");
+        TAssert.assertEquals(from, to);
+        Assert.assertEquals(2, IndexMappings.getAllMappings(from, to).size());
+    }
+
+    @Test
+    public void test18a() {
+        addAntiSymmetry("R_abcd", 1, 0, 2, 3);
+        addSymmetry("R_abcd", 2, 3, 0, 1);
+        addSymmetry("R_ab", 1, 0);
+        Tensor from = parse("R^{c}_{r}^{nb}*R_{tncb}");
+        Tensor to = parse("  R^{d}_{ncr}*R^{c}_{d}^{n}_{t}");
+        Indices freeIndices = from.getIndices().getFree();
+        int[] free = freeIndices.getAllIndices().copy();
+        IndexMappingBuffer tester = new IndexMappingBufferTester(free, false);
+        OutputPortUnsafe<IndexMappingBuffer> port = IndexMappings.createPortOfBuffers(tester, from, to);
+        Assert.assertTrue(port.take() != null);
+    }
+
+//    @Test
+//    public void calcMapping() {
+//        char[] firstFrom = {'c', 'r', 'n', 'b'};
+//        char[] firstTo = {'d', 'n', 'c', 'r'};
+//
+//        char[] secondFrom = {'t', 'n', 'c', 'b'};
+//        char[] secondTo = {'c', 'd', 'n', 't'};
+//
+//        Permutation a = new PermutationOneLine(true, 1, 0, 2, 3),
+//                b = new PermutationOneLine(true, 0, 1, 3, 2),
+//                c = new PermutationOneLine(false, 2, 3, 0, 1);
+//        final PermutationGroup pg = new PermutationGroup(a, b, c);
+//
+//        Iterator<Permutation> firstIterator = pg.iterator();
+//        fff:
+//        while (firstIterator.hasNext()) {
+//            Permutation first = firstIterator.next();
+//            for (int i = 0; i < 4; ++i) {
+//                char from = firstFrom[first.newIndexOf(i)];
+//                char to = firstTo[i];
+//                if (from == 'r' && to != 'r')
+//                    continue fff;
+//                if (to == 'r' && from != 'r')
+//                    continue fff;
+//            }
+//
+//            Iterator<Permutation> secondIterator = pg.iterator();
+//            sss:
+//            while (secondIterator.hasNext()) {
+//                Permutation second = secondIterator.next();
+//                for (int i = 0; i < 4; ++i) {
+//                    char from = secondFrom[second.newIndexOf(i)];
+//                    char to = secondTo[i];
+//
+//                    if (from == 't' && to != 't')
+//                        continue sss;
+//                    if (to == 't' && from != 't')
+//                        continue sss;
+//
+//                    for (int j = 0; j < 4; ++j) {
+//                        if (firstFrom[first.newIndexOf(j)] == from)
+//                            if (firstTo[j] != to)
+//                                continue sss;
+//                    }
+//
+//                }
+//                System.out.println(first);
+//                System.out.println(second);
+//                System.out.println();
+//                System.out.println(Arrays.toString(first.permute(firstFrom)));
+//                System.out.println(Arrays.toString(firstTo));
+//                System.out.println();
+//                System.out.println(Arrays.toString(second.permute(secondFrom)));
+//                System.out.println(Arrays.toString(secondTo));
+//            }
+//
+//        }
+//    }
 }
