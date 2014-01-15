@@ -148,7 +148,7 @@ public final class OneLoopInput {
      * background is a number of transformations (usually substitutions) which defines the
      * additional rules for Riemann tensor processing. For example, it can be the anti de
      * Sitter background ({@link OneLoopUtils#antiDeSitterBackground}) or flat background
-     * (with R_\alpha\beta\gamma\rho = 0) and so on.
+     * (with R_abcd = 0) and so on.
      *
      * @param operatorOrder     the order of the differential operator in the
      *                          Lagrangian, i.e. the integer value of {@code L}.
@@ -308,8 +308,8 @@ public final class OneLoopInput {
         symmetry[1] = 0;
         for (i = 2; i < symmetry.length; ++i)
             symmetry[i] = i;
-        //todo fix symmetry adding!!!
-        if (!((SimpleTensor) F.get(0)).getIndices().getSymmetries().isPermGroupInited())
+        if (!((SimpleTensor) F.get(0)).getIndices().getSymmetries().isPermGroupInited()) //<= this is ok.
+            // if user forget to add symmetry to this tensor we'll do it if possible
             Tensors.addSymmetry((SimpleTensor) F.get(0), IndexType.LatinLower, true, symmetry);
         this.F = F;
 
@@ -319,7 +319,7 @@ public final class OneLoopInput {
                 append(covariantIndicesString).
                 append("=iK*F").
                 append(covariantIndicesString);
-        Tensor HATF = (Expression) Tensors.parse(sb.toString(), insertion);
+        Tensor HATF = Tensors.parse(sb.toString(), insertion);
 
         HATF = F.transform(HATF);
         HATF = inputValues[0].transform(HATF);

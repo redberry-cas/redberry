@@ -111,7 +111,6 @@ public class TensorGenerator {
                 for (int j = 0; j < combination[i]; ++j) {
                     Tensor temp = samples[i];
 
-//                    IndexMappingDirect im = new IndexMappingDirect();
                     IntArray termLow = temp.getIndices().getFree().getLower();
                     IntArray termUp = temp.getIndices().getFree().getUpper();
 
