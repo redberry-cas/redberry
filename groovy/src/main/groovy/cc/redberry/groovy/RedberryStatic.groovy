@@ -328,10 +328,11 @@ class RedberryStatic {
      **********************************************************************/
 
 
-    static GeneralIndicesInsertion indicesInsertion = new GeneralIndicesInsertion();
+    private static final GeneralIndicesInsertion indicesInsertion = new GeneralIndicesInsertion();
 
-    static {
-        CC.current().getParseManager().defaultParserPreprocessors.add(indicesInsertion);
+    private static void ensureIndicesInsertionAddedToParser() {
+        if (!CC.current().getParseManager().defaultParserPreprocessors.contains(indicesInsertion))
+            CC.current().getParseManager().defaultParserPreprocessors.add(indicesInsertion);
     }
 
     /**
@@ -340,6 +341,7 @@ class RedberryStatic {
      * @see GeneralIndicesInsertion
      */
     public static void defineMatrices(Object... objs) {
+        ensureIndicesInsertionAddedToParser()
         def bufferOfTensors = [], bufferOfDescriptors = [];
         objs.each { obj ->
             if (obj instanceof MatrixDescriptor)
@@ -362,6 +364,7 @@ class RedberryStatic {
      * @deprecated matrix descriptors
      */
     public static void defineMatrix(String tensor, MatrixDescriptor... descriptors) {
+        ensureIndicesInsertionAddedToParser()
         ParseTokenSimpleTensor token = CC.current().parseManager.parser.parse(tensor);
 
         use(Redberry) {
