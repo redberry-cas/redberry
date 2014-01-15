@@ -103,7 +103,7 @@ final class ProviderSimpleTensor extends IndexMappingProviderAbstractFT<SimpleTe
             return currentBuffer = null;
         }
 
-        if (fromIndices.getSymmetries().isTrivial()) {
+        if (fromIndices.size() == 1 || fromIndices.getSymmetries().isTrivial()) {
             IndexMappingBuffer tempBuffer = currentBuffer;
             for (int i = 0; i < size; ++i)
                 if (!tempBuffer.tryMap(fromIndices.get(i), toIndices.get(i)))
