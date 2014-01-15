@@ -22,8 +22,8 @@
  */
 package cc.redberry.core.indices;
 
-import cc.redberry.core.groups.permutations.Permutation;
-import cc.redberry.core.groups.permutations.PermutationGroup;
+import cc.redberry.core.groups.permutations.PermutationOneLine;
+import cc.redberry.core.groups.permutations.Permutations;
 import cc.redberry.core.indexmapping.IndexMapping;
 import cc.redberry.core.utils.ArraysUtils;
 import cc.redberry.core.utils.IntArrayList;
@@ -194,50 +194,36 @@ abstract class SimpleIndicesAbstract extends AbstractIndices implements SimpleIn
 
     @Override
     public boolean equalsWithSymmetries(SimpleIndices indices) {
-        return _equalsWithSymmetries(indices) == Boolean.FALSE;
-    }
-
-    /**
-     * More informative method, comparing indices using their symmetries lists.
-     * It returns
-     * <code>Boolean.FALSE</code> if indices are equals this,
-     * <code>Boolean.TRUE</code> if indices differs from this on -1 (i.e. on odd
-     * transposition) and
-     * <code>null</code> in other case.
-     *
-     * @param indices indices to compare with this
-     * @return < code>Boolean.FALSE</code> if indices are equals this,
-     * <code>Boolean.TRUE</code> if indices differs from this on -1 (i.e. on odd
-     * transposition) and
-     * <code>null</code> in other case.
-     */
-    public Boolean _equalsWithSymmetries(SimpleIndices indices) {
         if (indices.getClass() != this.getClass())
-            return null;
+            return false;
         if (data.length != indices.size())
-            return null;
-        SimpleIndicesOfTensor _indices = (SimpleIndicesOfTensor) indices;
-        boolean sign1;
+            return false;
+
+        int[] permutation = new int[data.length];
         out:
-        for (Permutation s1 : symmetries) {
-            sign1 = s1.antisymmetry();
-            for (int i = 0; i < data.length; ++i)
-                if (data[s1.newIndexOf(i)] != (_indices).data[i])
+        for (int i = 0; i < data.length; ++i) {
+            int from = data[i];
+            for (int j = 0; j < data.length; ++j)
+                if (indices.get(j) == from) {
+                    permutation[j] = i;
                     continue out;
-            return sign1;
+                }
+            return false;
         }
-        return null;
+        if (!Permutations.testPermutationCorrectness(permutation))
+            return false;
+
+        return this.getSymmetries().getPermutationGroup().membershipTest(
+                new PermutationOneLine(permutation));
     }
 
     @Override
-    public short[] getDiffIds() {
-        return symmetries.getDiffIds();
+    public short[] getPositionsInOrbits() {
+        return symmetries.getPositionsInOrbits();
     }
 
     @Override
     public StructureOfIndices getStructureOfIndices() {
         return new StructureOfIndices(this);
     }
-
-
 }

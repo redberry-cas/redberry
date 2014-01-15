@@ -78,7 +78,6 @@ public interface Indices {
      */
     int size();
 
-
     /**
      * Returns the number of indices of specified type.
      *
@@ -202,7 +201,7 @@ public interface Indices {
     boolean equals(Object other);
 
     /**
-     * TODO: rename and document
+     * @see IndicesSymmetries#getPositionsInOrbits()
      */
-    short[] getDiffIds();
+    short[] getPositionsInOrbits();
 }

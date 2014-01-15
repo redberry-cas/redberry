@@ -273,7 +273,7 @@ public class IndicesTest {
         SimpleTensor r = parseSimple("R_abcd");
         addSymmetry(r, IndexType.LatinLower, false, 2, 3, 0, 1);
         addSymmetry(r, IndexType.LatinLower, true, 1, 0, 2, 3);
-        short[] diffIds = r.getIndices().getDiffIds();
+        short[] diffIds = r.getIndices().getPositionsInOrbits();
         short[] expected = new short[4];
         Assert.assertTrue(Arrays.equals(diffIds, expected));
     }
@@ -298,7 +298,7 @@ public class IndicesTest {
             for (int i = 0; i < p.length; ++i)
                 r.getIndices().getSymmetries().add(symmetries[p[i]]);
 
-            short[] diffIds = r.getIndices().getDiffIds();
+            short[] diffIds = r.getIndices().getPositionsInOrbits();
             short[] expected = {0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0};
             Assert.assertTrue(Arrays.equals(diffIds, expected));
         }

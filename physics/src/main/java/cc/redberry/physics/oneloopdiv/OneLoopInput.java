@@ -308,7 +308,7 @@ public final class OneLoopInput {
         symmetry[1] = 0;
         for (i = 2; i < symmetry.length; ++i)
             symmetry[i] = i;
-        if (!((SimpleTensor) F.get(0)).getIndices().getSymmetries().isPermGroupInited()) //<= this is ok.
+        if (((SimpleTensor) F.get(0)).getIndices().getSymmetries().availableForModification()) //<= this is ok.
             // if user forget to add symmetry to this tensor we'll do it if possible
             Tensors.addSymmetry((SimpleTensor) F.get(0), IndexType.LatinLower, true, symmetry);
         this.F = F;

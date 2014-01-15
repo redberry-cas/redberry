@@ -260,7 +260,7 @@ public final class ProductsBijectionsPort implements OutputPortUnsafe<int[]> {
                 int seedTargetIndex = bijection[seedFromIndex];
 
                 //Diff ids of indices. Cloned because it will be sorted.
-                short[] diffIds = seedFrom.getIndices().getDiffIds().clone(); // (!!!)
+                short[] diffIds = seedFrom.getIndices().getPositionsInOrbits().clone(); // (!!!)
                 //Sorting with permutation retrieval.
                 //This step needed because we use the fastest (we think so)
                 //method of collecting indices with the same index id [Permutable indices].

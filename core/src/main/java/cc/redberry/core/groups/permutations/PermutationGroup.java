@@ -207,6 +207,18 @@ public final class PermutationGroup
     }
 
     /**
+     * Creates symmetric group of specified degree, where all odd permutations are antisymmetries. BSGS structure of
+     * symmetric group will be constructed in O(n^2) time.
+     *
+     * @param degree degree
+     * @return antisymmetric group of specified degree
+     * @see cc.redberry.core.groups.permutations.AlgorithmsBase#createSymmetricGroupBSGS(int)
+     */
+    public static PermutationGroup antisymmetricGroup(int degree) {
+        return new PermutationGroup(createAntisymmetricGroupBSGS(degree), true);
+    }
+
+    /**
      * Creates alternating group of specified degree. BSGS structure of alternating group will be constructed in O(n^2) time.
      *
      * @param degree degree

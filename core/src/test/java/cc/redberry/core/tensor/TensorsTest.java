@@ -349,7 +349,7 @@ public class TensorsTest {
     @Test(timeout = 300L)
     public void testSetSymmetric4() {
         setAntiSymmetric("e_abcd");
-        Iterator<Permutation> it = parseSimple("e_abcd").getIndices().getSymmetries().iterator();
+        Iterator<Permutation> it = parseSimple("e_abcd").getIndices().getSymmetries().getPermutationGroup().iterator();
         while (it.hasNext()) it.next();
     }
 

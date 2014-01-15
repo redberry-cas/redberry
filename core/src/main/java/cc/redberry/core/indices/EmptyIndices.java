@@ -167,7 +167,7 @@ class EmptyIndices implements Indices {
     }
 
     /**
-     * Do nothing
+     * Does nothing
      */
     @Override
     public void testConsistentWithException() {
@@ -232,7 +232,7 @@ class EmptyIndices implements Indices {
      * @return short[0]
      */
     @Override
-    public short[] getDiffIds() {
+    public short[] getPositionsInOrbits() {
         return new short[0];
     }
 }

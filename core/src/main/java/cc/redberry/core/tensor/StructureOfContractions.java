@@ -102,7 +102,7 @@ public final class StructureOfContractions {
         for (tensorIndex = 0; tensorIndex < data.length; ++tensorIndex) {
             //Main algorithm
             Indices tInds = data[tensorIndex].getIndices();
-            short[] diffIds = tInds.getDiffIds();
+            short[] diffIds = tInds.getPositionsInOrbits();
 
             //FUTURE move to other place
             if (tInds.size() >= 0x10000)

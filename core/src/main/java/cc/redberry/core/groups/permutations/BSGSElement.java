@@ -75,6 +75,15 @@ public class BSGSElement {
     }
 
     /**
+     * Returns a reference to the list of stabilizers.
+     *
+     * @return reference to the list of stabilizers
+     */
+    public List<Permutation> getStabilizerGeneratorsReference() {
+        return stabilizerGenerators;
+    }
+
+    /**
      * Calculates the transversal of specified point (u<sub>&beta;</sub>), i.e. the element
      * u<sub>&beta;</sub> such that &beta;<sub>i</sub><sup>u<sub>&beta;</sub></sup> =  &beta;.
      *
