@@ -22,6 +22,7 @@
  */
 package cc.redberry.core.groups.permutations;
 
+import cc.redberry.core.AbstractRedberryTestClass;
 import cc.redberry.core.utils.ArraysUtils;
 import org.junit.Assume;
 import org.junit.Before;
@@ -35,10 +36,8 @@ import java.util.concurrent.TimeUnit;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public class AbstractTestClass {
-
-    @Rule
-    public TestName name = new TestName();
+public class AbstractTestClass
+        extends AbstractRedberryTestClass {
 
     public GapGroupsInterface getGapInterface() {
         return getStaticInstance();
@@ -46,12 +45,9 @@ public class AbstractTestClass {
 
     @Before
     public void beforeMethod() {
-        if (name.getMethodName().toLowerCase().contains("performancetest"))
-            Assume.assumeTrue(doTestPerformance());
+        super.beforeMethod();
         if (name.getMethodName().toLowerCase().contains("withgap"))
             Assume.assumeTrue(getGapInterface() != null);
-        if (name.getMethodName().toLowerCase().contains("longtest"))
-            Assume.assumeTrue(doLongTest());
     }
 
     private static GapGroupsInterface gapStaticInstance = null;
@@ -100,21 +96,5 @@ public class AbstractTestClass {
             System.out.println("[Redberry] no GAP found on the system.");
 
         return gapStaticInstance;
-    }
-
-    private static Boolean testPerformance;
-
-    protected static boolean doTestPerformance() {
-        if (testPerformance == null)
-            testPerformance = Boolean.valueOf(System.getProperty("testPerformance"));
-        return testPerformance.booleanValue();
-    }
-
-    private static Boolean doLongTest = null;
-
-    protected boolean doLongTest() {
-        if (doLongTest != null)
-            return doLongTest.booleanValue();
-        return doLongTest = Boolean.valueOf(System.getProperty("longTest"));
     }
 }
