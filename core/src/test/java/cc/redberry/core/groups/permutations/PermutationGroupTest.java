@@ -736,7 +736,7 @@ public class PermutationGroupTest extends AbstractTestClass {
     }
 
     @Test
-    public void testDerivedSubgroup1_WithGap_longtes() {
+    public void testDerivedSubgroup1_WithGap_longtest() {
         GapGroupsInterface gap = getGapInterface();
         for (int degree = 4; degree < 50; ++degree) {
             int nrPrimitiveGroups = gap.nrPrimitiveGroups(degree);
