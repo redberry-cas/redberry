@@ -86,13 +86,13 @@ final class EmptySimpleIndices extends EmptyIndices implements SimpleIndices {
     }
 
     /**
-     * Returns {@code Symmetries.EMPTY_SYMMETRIES}
+     * Returns empty symmetries.
      *
-     * @return {@code Symmetries.EMPTY_SYMMETRIES}
+     * @return empty symmetries
      */
     @Override
     public IndicesSymmetries getSymmetries() {
-        return IndicesSymmetries.EMPTY_SYMMETRIES;
+        return IndicesSymmetries.EMPTY_INDICES_SYMMETRIES;
     }
 
     /**

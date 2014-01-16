@@ -1180,7 +1180,7 @@ public final class AlgorithmsBase {
     public static ArrayList<BSGSElement> createEmptyBSGS(int degree) {
         ArrayList<BSGSElement> bsgs = new ArrayList<>();
         ArrayList<Permutation> gens = new ArrayList<>();
-        gens.add(Permutations.getIdentityOneLine(degree));
+        gens.add(Permutations.createIdentityPermutation(degree));
         bsgs.add(new BSGSCandidateElement(0, gens, new int[degree]).asBSGSElement());
         return bsgs;
     }
@@ -1193,6 +1193,10 @@ public final class AlgorithmsBase {
      * Cached BSGS structures for symmetric groups.
      */
     private static final ArrayList<BSGSElement>[] CACHED_SYMMETRIC_GROUPS = new ArrayList[SMALL_DEGREE_THRESHOLD];
+    /**
+     * Cached BSGS structures for antisymmetric groups.
+     */
+    private static final ArrayList<BSGSElement>[] CACHED_ANTISYMMETRIC_GROUPS = new ArrayList[SMALL_DEGREE_THRESHOLD];
     /**
      * Cached BSGS structures for alternating groups.
      */
@@ -1466,6 +1470,50 @@ public final class AlgorithmsBase {
             bsgs.add(element);
         }
         return bsgs;
+    }
+
+    /**
+     * Creates base and strong generating set of symmetric group of specified degree, where all odd permutations are
+     * antisymmetries. Symmetric group of degree smaller then {@link #SMALL_DEGREE_THRESHOLD} will provide zero-time
+     * access to all transversals in each stabilizer; group with larger degree will provide <i>log(size of orbit)</i>
+     * access. Additionally, small degree group with fixed degree will be constructed once (at the first invocation of
+     * this method with specified degree) and then cached, so second invocation of this method with same degree will
+     * return same reference.
+     *
+     * @param degree group degree
+     * @return base and strong generating set of symmetric group
+     */
+    public static ArrayList<BSGSElement> createAntisymmetricGroupBSGS(final int degree) {
+        if (degree == 0)
+            throw new IllegalArgumentException("Degree = 0.");
+
+        /* For symmetric group we can construct BSGS explicitly without call of Schreier-Sims algorithm */
+
+        //For small degree groups we'll construct all BSGS elements with a "quick" access to all transversals
+        if (degree <= SMALL_DEGREE_THRESHOLD) {
+            ArrayList<BSGSElement> bsgs = CACHED_ANTISYMMETRIC_GROUPS[degree - 1];
+            if (bsgs == null) {
+                bsgs = convertToAntisymmetric(createSymmetricGroupBSGS(degree));
+                CACHED_ANTISYMMETRIC_GROUPS[degree - 1] = bsgs;
+            }
+            return bsgs;
+        }
+
+        //For groups with large degree we'll construct all BSGS elements with a log(degree) access to all transversals
+        return convertToAntisymmetric(createSymmetricGroupBSGS(degree));
+    }
+
+    private static ArrayList<BSGSElement> convertToAntisymmetric(ArrayList<BSGSElement> symmetricGroup) {
+        ArrayList<BSGSCandidateElement> bsgs = asBSGSCandidatesList(symmetricGroup);
+        for (BSGSCandidateElement c : bsgs) {
+            ListIterator<Permutation> stabs = c.getStabilizerGeneratorsReference().listIterator();
+            while (stabs.hasNext()) {
+                Permutation p = stabs.next();
+                if (p.parity() == 1)
+                    stabs.set(new PermutationOneLine(true, p.oneLine()));
+            }
+        }
+        return asBSGSList(bsgs);
     }
 
     /**

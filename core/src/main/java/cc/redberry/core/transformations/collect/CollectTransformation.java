@@ -23,7 +23,7 @@
 package cc.redberry.core.transformations.collect;
 
 import cc.redberry.concurrent.OutputPortUnsafe;
-import cc.redberry.core.combinatorics.Combinatorics;
+import cc.redberry.core.groups.permutations.Permutations;
 import cc.redberry.core.indexgenerator.IndexGeneratorImpl;
 import cc.redberry.core.indexmapping.IndexMapping;
 import cc.redberry.core.indexmapping.IndexMappings;
@@ -121,7 +121,7 @@ public class CollectTransformation implements Transformation {
             int[] match;
             for (Split base : nodes) {
                 if ((match = matchFactors(base.factors, toAdd.factors)) != null) {
-                    Tensor[] toAddFactors = Combinatorics.reorder(toAdd.factors, match);
+                    Tensor[] toAddFactors = Permutations.permute(toAdd.factors, match);
                     Mapping mapping =
                             IndexMappings.createBijectiveProductPort(toAddFactors, base.factors).take();
 
@@ -306,7 +306,7 @@ public class CollectTransformation implements Transformation {
                 begin = i;
             }
         }
-        return Combinatorics.inverse(permutation);
+        return Permutations.inverse(permutation);
     }
 
     private static boolean matchSimpleTensors(Tensor a, Tensor b) {

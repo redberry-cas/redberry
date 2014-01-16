@@ -119,8 +119,7 @@ public final class ReduceEngine {
                 unknownCoefficients.add(nVar);
                 generalSolutions[i] = Tensors.expression(vars[i], nVar);
             } else {
-                generatedTensor = TensorGenerator.generateStructure(vars[i].getIndices(), samples, vars[i].getIndices().getSymmetries().getInnerSymmetries(), symmetricForm[i], true, true
-                );
+                generatedTensor = TensorGenerator.generateStructure(vars[i].getIndices(), samples, symmetricForm[i], true, true);
 
                 unknownCoefficients.ensureCapacity(generatedTensor.coefficients.length);
                 for (SimpleTensor st : generatedTensor.coefficients)

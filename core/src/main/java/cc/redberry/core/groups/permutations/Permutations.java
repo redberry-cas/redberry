@@ -26,14 +26,12 @@ import cc.redberry.core.context.CC;
 import cc.redberry.core.utils.ArraysUtils;
 import cc.redberry.core.utils.BitArray;
 import cc.redberry.core.utils.IntArrayList;
+import cc.redberry.core.utils.MathUtils;
 import org.apache.commons.math3.random.RandomGenerator;
-import org.apache.commons.math3.random.Well19937a;
 
+import java.lang.reflect.Array;
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 
 /**
  * Static methods to operate with permutations.
@@ -298,59 +296,6 @@ public final class Permutations {
         return orbits.toArray(new int[orbits.size()][]);
     }
 
-
-    private static final int[][] cachedIdentities = new int[64][];
-
-    private static int[] createIdentityPermutationArray(int length) {
-        int[] array = new int[length];
-        for (int i = 0; i < length; ++i)
-            array[i] = i;
-        return array;
-    }
-
-    static int[] getIdentityPermutationArray(int length) {
-        if (cachedIdentities.length <= length)
-            return createIdentityPermutationArray(length);
-        if (cachedIdentities[length] == null)
-            synchronized (cachedIdentities) {
-                if (cachedIdentities[length] == null)
-                    cachedIdentities[length] = createIdentityPermutationArray(length);
-            }
-        return cachedIdentities[length];
-    }
-
-    public static PermutationOneLine getIdentityOneLine(int degree) {
-        return new PermutationOneLine(getIdentityPermutationArray(degree));
-    }
-
-    /**
-     * Creates random permutation of specified dimension
-     *
-     * @param n   dimension
-     * @param rnd random generator
-     * @return random permutation of specified dimension
-     */
-    public static int[] randomPermutation(final int n, RandomGenerator rnd) {
-        int[] p = new int[n];
-        for (int i = 0; i < n; ++i)
-            p[i] = i;
-        for (int i = n; i > 1; --i)
-            ArraysUtils.swap(p, i - 1, rnd.nextInt(i));
-        for (int i = n; i > 1; --i)
-            ArraysUtils.swap(p, i - 1, rnd.nextInt(i));
-        return p;
-    }
-
-    /**
-     * Creates random permutation of specified dimension
-     *
-     * @param n dimension
-     * @return random permutation of specified dimension
-     */
-    public static int[] randomPermutation(final int n) {
-        return randomPermutation(n, CC.getRandomGenerator());
-    }
-
     /**
      * Converts cycles to one-line notation.
      *
@@ -432,6 +377,36 @@ public final class Permutations {
         return sizes.toArray();
     }
 
+    /***************************************** RANDOM *****************************************************/
+
+    /**
+     * Creates random permutation of specified dimension
+     *
+     * @param n   dimension
+     * @param rnd random generator
+     * @return random permutation of specified dimension
+     */
+    public static int[] randomPermutation(final int n, RandomGenerator rnd) {
+        int[] p = new int[n];
+        for (int i = 0; i < n; ++i)
+            p[i] = i;
+        for (int i = n; i > 1; --i)
+            ArraysUtils.swap(p, i - 1, rnd.nextInt(i));
+        for (int i = n; i > 1; --i)
+            ArraysUtils.swap(p, i - 1, rnd.nextInt(i));
+        return p;
+    }
+
+    /**
+     * Creates random permutation of specified dimension
+     *
+     * @param n dimension
+     * @return random permutation of specified dimension
+     */
+    public static int[] randomPermutation(final int n) {
+        return randomPermutation(n, CC.getRandomGenerator());
+    }
+
     /**
      * Randomly permutes the specified array.
      *
@@ -443,7 +418,7 @@ public final class Permutations {
 
 
     /**
-     * Randomly permute the specified list using the specified source of randomness.
+     * Randomly permutes the specified list using the specified source of randomness.
      *
      * @param a   - the array to be shuffled.
      * @param rnd - the source of randomness to use to shuffle the list.
@@ -453,6 +428,222 @@ public final class Permutations {
             ArraysUtils.swap(a, i - 1, rnd.nextInt(i));
     }
 
+    /**
+     * Randomly permutes the specified list using the specified source of randomness.
+     *
+     * @param a   - the array to be shuffled.
+     * @param rnd - the source of randomness to use to shuffle the list.
+     */
+    public static void shuffle(Object[] a, RandomGenerator rnd) {
+        for (int i = a.length; i > 1; --i)
+            ArraysUtils.swap(a, i - 1, rnd.nextInt(i));
+    }
+
+
+    /**
+     * Randomly permute the specified list using the specified source of randomness.
+     *
+     * @param a - the array to be shuffled.
+     */
+    public static void shuffle(Object[] a) {
+        shuffle(a, CC.getRandomGenerator());
+    }
+
+    /**
+     * **************************************** FACTORIES **************************************************
+     */
+    /**
+     * Permutes specified array according to specified permutation and returns the result.
+     *
+     * @param array       array
+     * @param permutation permutation in one-line notation
+     * @param <T>         any type
+     * @return new array permuted with specified permutation
+     * @throws IllegalArgumentException if array length not equals to permutation length
+     * @throws IllegalArgumentException if permutation is not consistent with one-line notation
+     */
+    public static <T> T[] permute(T[] array, final int[] permutation) {
+        if (array.length != permutation.length)
+            throw new IllegalArgumentException();
+        if (!testPermutationCorrectness(permutation))
+            throw new IllegalArgumentException();
+        Class<?> type = array.getClass().getComponentType();
+        @SuppressWarnings("unchecked") // OK, because array is of type T
+                T[] newArray = (T[]) Array.newInstance(type, array.length);
+        for (int i = 0; i < permutation.length; ++i)
+            newArray[i] = array[permutation[i]];
+        return newArray;
+    }
+
+    /**
+     * Permutes specified array according to specified permutation and returns the result.
+     *
+     * @param array       array
+     * @param permutation permutation in one-line notation
+     * @return new array permuted with specified permutation
+     * @throws IllegalArgumentException if array length not equals to permutation length
+     * @throws IllegalArgumentException if permutation is not consistent with one-line notation
+     */
+    public static int[] permute(int[] array, final int[] permutation) {
+        if (array.length != permutation.length)
+            throw new IllegalArgumentException();
+        if (!testPermutationCorrectness(permutation))
+            throw new IllegalArgumentException();
+        int[] newArray = new int[array.length];
+        for (int i = 0; i < permutation.length; ++i)
+            newArray[i] = array[permutation[i]];
+        return newArray;
+    }
+
+    public static int[] getRandomSortedDistinctArray(final int minValue, final int maxvalue, int length, RandomGenerator generator) {
+        if (maxvalue - minValue < length)
+            throw new IllegalArgumentException("This is not possible.");
+        if (length == 0)
+            return new int[0];
+        if (length == 1)
+            return new int[]{minValue + generator.nextInt(maxvalue - minValue)};
+        if (length == 2) {
+            int a = minValue + generator.nextInt(maxvalue - minValue);
+            int b;
+            while ((b = minValue + generator.nextInt(maxvalue - minValue)) == a) ;
+            return new int[]{a, b};
+        }
+
+        int[] res = new int[length + (int) (0.7 * ((double) length))];
+        for (int i = 0; i < res.length; ++i)
+            res[i] = minValue + generator.nextInt(maxvalue - minValue);
+        res = MathUtils.getSortedDistinct(res);
+        if (res.length == length)
+            return res;
+        if (res.length > length)
+            return Arrays.copyOf(res, length);
+
+        while (res.length != length) {
+            int next;
+            while ((Arrays.binarySearch(res, next = minValue + generator.nextInt(maxvalue - minValue))) >= 0) ;
+            res = ArraysUtils.addAll(res, next);
+        }
+
+        return res;
+    }
+
+
+    private static final Permutation[] cachedIdentities = new Permutation[128];
+
+    public static int[] createIdentityArray(int length) {
+        int[] array = new int[length];
+        for (int i = 0; i < length; ++i)
+            array[i] = i;
+        return array;
+    }
+
+    public static Permutation createIdentityPermutation(int degree) {
+        if (degree < cachedIdentities.length) {
+            if (cachedIdentities[degree] == null)
+                cachedIdentities[degree] = new PermutationOneLine(createIdentityArray(degree));
+            return cachedIdentities[degree];
+        }
+        return new PermutationOneLine(createIdentityArray(degree));
+    }
+
+    /**
+     * Creates transposition of first two elements written in one-line notation
+     * with specified dimension, i.e. an array of form [1,0,2,3,4,...,{@code dimension - 1}].
+     *
+     * @param dimension dimension of the resulting permutation, e.g. the array length
+     * @return transposition permutation in one-line notation
+     */
+    public static int[] createTransposition(int dimension) {
+        if (dimension < 0)
+            throw new IllegalArgumentException("Dimension is negative.");
+        if (dimension > 1)
+            return createTransposition(dimension, 0, 1);
+        return new int[dimension];
+    }
+
+    /**
+     * Creates transposition in one-line notation
+     *
+     * @param dimension dimension of the resulting permutation, e.g. the array length
+     * @param position1 first position
+     * @param position2 second position
+     * @return transposition
+     */
+    public static int[] createTransposition(int dimension, int position1, int position2) {
+        if (dimension < 0)
+            throw new IllegalArgumentException("Dimension is negative.");
+        if (position1 < 0 || position2 < 0)
+            throw new IllegalArgumentException("Negative index.");
+        if (position1 >= dimension || position2 >= dimension)
+            throw new IndexOutOfBoundsException();
+
+        int[] transposition = new int[dimension];
+        int i = 1;
+        for (; i < dimension; ++i)
+            transposition[i] = i;
+        i = transposition[position1];
+        transposition[position1] = transposition[position2];
+        transposition[position2] = i;
+        return transposition;
+    }
+
+    /**
+     * Creates cycle permutation written in one-line notation,
+     * i.e. an array of form [{@code dimension-1},0,1, ...,{@code dimension-2}].
+     *
+     * @param dimension dimension of the resulting permutation, e.g. the array length
+     * @return cycle permutation in one-line notation
+     */
+    public static int[] createCycle(int dimension) {
+        if (dimension < 0)
+            throw new IllegalArgumentException("Negative degree");
+
+        int[] cycle = new int[dimension];
+        for (int i = 0; i < dimension - 1; ++i)
+            cycle[i + 1] = i;
+        cycle[0] = dimension - 1;
+        return cycle;
+    }
+
+
+    public static int[] createBlockCycle(int blockSize, int numberOfBlocks) {
+        final int[] cycle = new int[blockSize * numberOfBlocks];
+
+        int i = blockSize * (numberOfBlocks - 1) - 1;
+        for (; i >= 0; --i) cycle[i] = i + blockSize;
+        i = blockSize * (numberOfBlocks - 1);
+        int k = 0;
+        for (; i < cycle.length; ++i)
+            cycle[i] = k++;
+
+        return cycle;
+    }
+
+    public static int[] createBlockTransposition(final int length1, final int length2) {
+        final int[] r = new int[length1 + length2];
+        int i = 0;
+        for (; i < length2; ++i) {
+            r[i] = length1 + i;
+        }
+        for (; i < r.length; ++i)
+            r[i] = i - length2;
+        return r;
+    }
+
+    /**
+     * Returns the inverse permutation for the specified one.
+     * <p/>
+     * <p>One-line notation for permutations is used.</p>
+     *
+     * @param permutation permutation in one-line notation
+     * @return inverse permutation to the specified one
+     */
+    public static int[] inverse(int[] permutation) {
+        int[] inverse = new int[permutation.length];
+        for (int i = 0; i < permutation.length; ++i)
+            inverse[permutation[i]] = i;
+        return inverse;
+    }
 
     /**
      * Throws exception if p.length() != size.

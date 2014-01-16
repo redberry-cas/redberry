@@ -205,7 +205,7 @@ final class SortedIndices extends AbstractIndices {
     }
 
     @Override
-    public short[] getDiffIds() {
+    public short[] getPositionsInOrbits() {
         return ShortArrayFactory.getZeroFilledShortArray(data.length);
     }
 }

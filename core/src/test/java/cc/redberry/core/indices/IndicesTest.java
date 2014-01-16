@@ -23,11 +23,12 @@
 package cc.redberry.core.indices;
 
 import cc.redberry.core.combinatorics.IntPermutationsGenerator;
-import cc.redberry.core.combinatorics.Symmetry;
 import cc.redberry.core.context.CC;
 import cc.redberry.core.context.ContextManager;
 import cc.redberry.core.context.ContextSettings;
 import cc.redberry.core.context.OutputFormat;
+import cc.redberry.core.groups.permutations.Permutation;
+import cc.redberry.core.groups.permutations.PermutationOneLine;
 import cc.redberry.core.parser.ParserIndices;
 import cc.redberry.core.tensor.SimpleTensor;
 import cc.redberry.core.tensor.random.RandomTensor;
@@ -272,21 +273,21 @@ public class IndicesTest {
         SimpleTensor r = parseSimple("R_abcd");
         addSymmetry(r, IndexType.LatinLower, false, 2, 3, 0, 1);
         addSymmetry(r, IndexType.LatinLower, true, 1, 0, 2, 3);
-        short[] diffIds = r.getIndices().getDiffIds();
+        short[] diffIds = r.getIndices().getPositionsInOrbits();
         short[] expected = new short[4];
         Assert.assertTrue(Arrays.equals(diffIds, expected));
     }
 
     @Test
     public void testDiffIds2() {
-        Symmetry[] symmetries = new Symmetry[]{
-                new Symmetry(false, new int[]{1, 0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11}),
-                new Symmetry(false, new int[]{0, 2, 1, 3, 4, 5, 6, 7, 8, 9, 10, 11}),
-                new Symmetry(false, new int[]{0, 1, 3, 2, 4, 5, 6, 7, 8, 9, 10, 11}),
-                new Symmetry(false, new int[]{0, 1, 2, 4, 3, 5, 6, 7, 8, 9, 10, 11}),
-                new Symmetry(false, new int[]{0, 1, 2, 3, 5, 4, 6, 7, 8, 9, 10, 11}),
-                new Symmetry(false, new int[]{0, 1, 2, 3, 4, 6, 7, 11, 10, 9, 8, 5}),
-                new Symmetry(false, new int[]{0, 1, 2, 3, 4, 5, 6, 7, 8, 11, 10, 9})
+        Permutation[] symmetries = new Permutation[]{
+                new PermutationOneLine(false, new int[]{1, 0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11}),
+                new PermutationOneLine(false, new int[]{0, 2, 1, 3, 4, 5, 6, 7, 8, 9, 10, 11}),
+                new PermutationOneLine(false, new int[]{0, 1, 3, 2, 4, 5, 6, 7, 8, 9, 10, 11}),
+                new PermutationOneLine(false, new int[]{0, 1, 2, 4, 3, 5, 6, 7, 8, 9, 10, 11}),
+                new PermutationOneLine(false, new int[]{0, 1, 2, 3, 5, 4, 6, 7, 8, 9, 10, 11}),
+                new PermutationOneLine(false, new int[]{0, 1, 2, 3, 4, 6, 7, 11, 10, 9, 8, 5}),
+                new PermutationOneLine(false, new int[]{0, 1, 2, 3, 4, 5, 6, 7, 8, 11, 10, 9})
         };
         IntPermutationsGenerator gen = new IntPermutationsGenerator(symmetries.length);
         int[] p;
@@ -295,9 +296,9 @@ public class IndicesTest {
             SimpleTensor r = parseSimple("R_abcdefghijkl");
             p = gen.next();
             for (int i = 0; i < p.length; ++i)
-                r.getIndices().getSymmetries().addUnsafe(symmetries[p[i]]);
+                r.getIndices().getSymmetries().add(symmetries[p[i]]);
 
-            short[] diffIds = r.getIndices().getDiffIds();
+            short[] diffIds = r.getIndices().getPositionsInOrbits();
             short[] expected = {0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0};
             Assert.assertTrue(Arrays.equals(diffIds, expected));
         }

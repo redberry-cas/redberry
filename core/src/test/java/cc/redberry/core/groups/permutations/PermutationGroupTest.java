@@ -22,6 +22,10 @@
  */
 package cc.redberry.core.groups.permutations;
 
+import cc.redberry.concurrent.OutputPortUnsafe;
+import cc.redberry.core.combinatorics.IntCombinationPermutationGenerator;
+import cc.redberry.core.combinatorics.IntCombinationsGenerator;
+import cc.redberry.core.combinatorics.IntPermutationsGenerator;
 import cc.redberry.core.context.CC;
 import cc.redberry.core.number.NumberUtils;
 import cc.redberry.core.utils.ArraysUtils;
@@ -282,12 +286,12 @@ public class PermutationGroupTest extends AbstractTestClass {
 
     @Test
     public void testIdentityGroup() throws Exception {
-        PermutationGroup id = new PermutationGroup(Permutations.getIdentityOneLine(10));
+        PermutationGroup id = new PermutationGroup(Permutations.createIdentityPermutation(10));
 
-        assertTrue(id.membershipTest(Permutations.getIdentityOneLine(10)));
+        assertTrue(id.membershipTest(Permutations.createIdentityPermutation(10)));
 
         Set<Permutation> set = new HashSet<>();
-        set.add(Permutations.getIdentityOneLine(10));
+        set.add(Permutations.createIdentityPermutation(10));
 
         for (Permutation p : id)
             assertTrue(set.remove(p));
@@ -634,6 +638,49 @@ public class PermutationGroupTest extends AbstractTestClass {
     }
 
     @Test
+    public void testMapping2() {
+        Permutation a = new PermutationOneLine(true, 1, 0, 2, 3),
+                b = new PermutationOneLine(true, 0, 1, 3, 2),
+                c = new PermutationOneLine(false, 2, 3, 0, 1);
+        final PermutationGroup pg = new PermutationGroup(a, b, c);
+
+        Permutation[] all = new Permutation[pg.order().intValue()];
+        int counter = 0;
+        for (Permutation p : pg)
+            all[counter++] = p;
+
+        int degree = pg.degree();
+        for (int k = 0; k < degree; ++k) {
+            IntCombinationsGenerator comb = new IntCombinationsGenerator(degree, k);
+            int[] from;
+            while (comb.hasNext()) {
+                from = comb.next();
+                IntCombinationPermutationGenerator mapGen = new IntCombinationPermutationGenerator(degree, k);
+                while (mapGen.hasNext()) {
+                    int[] to = mapGen.next();
+                    Iterator<Permutation> search = new OutputPortUnsafe.PortIterator<>(pg.mapping(from, to));
+
+                    Set<Permutation> actual = new HashSet<>();
+                    while (search.hasNext())
+                        actual.add(search.next());
+
+                    Set<Permutation> expected = new HashSet<>();
+                    out:
+                    for (Permutation ppp : all) {
+                        for (int i = 0; i < k; ++i)
+                            if (ppp.newIndexOf(from[i]) != to[i])
+                                continue out;
+                        expected.add(ppp);
+                    }
+
+                    assertEquals(expected, actual);
+                }
+            }
+        }
+    }
+
+
+    @Test
     public void testNormalClosure1() throws Exception {
         PermutationGroup s3 = PermutationGroup.symmetricGroup(3);
         PermutationGroup a3 = PermutationGroup.alternatingGroup(3);
@@ -689,7 +736,7 @@ public class PermutationGroupTest extends AbstractTestClass {
     }
 
     @Test
-    public void testDerivedSubgroup1_WithGap_longtes() {
+    public void testDerivedSubgroup1_WithGap_longtest() {
         GapGroupsInterface gap = getGapInterface();
         for (int degree = 4; degree < 50; ++degree) {
             int nrPrimitiveGroups = gap.nrPrimitiveGroups(degree);

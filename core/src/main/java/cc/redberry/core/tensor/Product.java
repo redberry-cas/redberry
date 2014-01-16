@@ -568,7 +568,7 @@ public final class Product extends MultiTensor {
         for (tensorIndex = 0; tensorIndex < data.length; ++tensorIndex) {
             //Main algorithm
             Indices tInds = data[tensorIndex].getIndices();
-            short[] diffIds = tInds.getDiffIds();
+            short[] diffIds = tInds.getPositionsInOrbits();
             for (i = 0; i < tInds.size(); ++i) {
                 index = tInds.get(i);
                 state = IndicesUtils.getStateInt(index);

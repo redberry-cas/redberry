@@ -109,7 +109,7 @@ public final class OneLoopInput {
      *                      Lagrangian, i.e. the integer value of {@code L}.
      *                      Currently supported second and fourth order
      *                      operators.
-     * @param iK          inverse of {@code Kn} tensor. The input
+     * @param iK            inverse of {@code Kn} tensor. The input
      *                      expression should be in the form
      *                      {@code iK^{...}_{...} = ...}.
      * @param K             tensor {@code K} in the form {@code K^{...}_{...} = ....}.
@@ -148,13 +148,13 @@ public final class OneLoopInput {
      * background is a number of transformations (usually substitutions) which defines the
      * additional rules for Riemann tensor processing. For example, it can be the anti de
      * Sitter background ({@link OneLoopUtils#antiDeSitterBackground}) or flat background
-     * (with R_\alpha\beta\gamma\rho = 0) and so on.
+     * (with R_abcd = 0) and so on.
      *
      * @param operatorOrder     the order of the differential operator in the
      *                          Lagrangian, i.e. the integer value of {@code L}.
      *                          Currently supported second and fourth order
      *                          operators.
-     * @param iK              inverse tensors to tensor {@code Kn}. The input
+     * @param iK                inverse tensors to tensor {@code Kn}. The input
      *                          expression should be in the form
      *                          {@code iK^{...}_{...} = ...}.
      * @param K                 tensor {@code K} in the form {@code K^{...}_{...} = ....}.
@@ -205,9 +205,13 @@ public final class OneLoopInput {
         inputValues[5] = M;
 
         checkConsistency();
-        Tensors.addSymmetry("R_lm", IndexType.LatinLower, false, new int[]{1, 0});
-        Tensors.addSymmetry("R_lmab", IndexType.LatinLower, true, new int[]{0, 1, 3, 2});
-        Tensors.addSymmetry("R_lmab", IndexType.LatinLower, false, new int[]{2, 3, 0, 1});
+        //add symmetries if possible
+        if (Tensors.parseSimple("R_lmab").getIndices().getSymmetries().availableForModification()) {
+            Tensors.addSymmetry("R_lmab", IndexType.LatinLower, true, new int[]{0, 1, 3, 2});
+            Tensors.addSymmetry("R_lmab", IndexType.LatinLower, false, new int[]{2, 3, 0, 1});
+        }
+        if (Tensors.parseSimple("R_lm").getIndices().getSymmetries().availableForModification())
+            Tensors.addSymmetry("R_lm", IndexType.LatinLower, false, new int[]{1, 0});
 
 
         this.L = Tensors.expression(Tensors.parse("L"), new Complex(operatorOrder));
@@ -312,7 +316,9 @@ public final class OneLoopInput {
         symmetry[1] = 0;
         for (i = 2; i < symmetry.length; ++i)
             symmetry[i] = i;
-        Tensors.addSymmetry((SimpleTensor) F.get(0), IndexType.LatinLower, true, symmetry);
+        if (((SimpleTensor) F.get(0)).getIndices().getSymmetries().availableForModification()) //<= this is ok.
+            // if user forget to add symmetry to this tensor we'll do it if possible
+            Tensors.addSymmetry((SimpleTensor) F.get(0), IndexType.LatinLower, true, symmetry);
         this.F = F;
 
         covariantIndicesString = IndicesUtils.toString(Arrays.copyOfRange(covariantIndices, 0, 2), OutputFormat.Redberry);
@@ -321,7 +327,7 @@ public final class OneLoopInput {
                 append(covariantIndicesString).
                 append("=iK*F").
                 append(covariantIndicesString);
-        Tensor HATF = (Expression) Tensors.parse(sb.toString(), insertion);
+        Tensor HATF = Tensors.parse(sb.toString(), insertion);
 
         HATF = F.transform(HATF);
         HATF = inputValues[0].transform(HATF);

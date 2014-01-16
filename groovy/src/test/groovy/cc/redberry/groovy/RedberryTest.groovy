@@ -22,7 +22,9 @@
  */
 package cc.redberry.groovy
 
+import cc.redberry.core.groups.permutations.PermutationOneLine
 import cc.redberry.core.indexmapping.IndexMappings
+import cc.redberry.core.tensor.Tensors
 import org.apache.commons.math3.util.ArithmeticUtils
 import org.junit.Test
 
@@ -76,6 +78,25 @@ class RedberryTest {
             def count = 0
             mappings.each { count += it.sign ? 1 : 0 }
             assert 2 * count == ArithmeticUtils.factorial(from.indices.size())
+        }
+    }
+
+    @Test
+    public void testPermutation1() {
+        use(Redberry) {
+            assert [1, 0].p == new PermutationOneLine(1, 0)
+            assert [2, [[1, 0]]].p == [1, 0].p
+            assert -[1, 0].p == new PermutationOneLine(true, 1, 0)
+            assert [4, [[1, 0], [2, 3]]].p == new PermutationOneLine(4, [[1, 0], [2, 3]] as int[][])
+        }
+    }
+
+    @Test
+    public void testPermutation2() {
+        use(Redberry) {
+            println(-[1, 0].p)
+            Tensors.addSymmetry 'f_abc', -[1, 0, 2].p
+            assert 'f_abc + f_bac'.t == 0.t
         }
     }
 }

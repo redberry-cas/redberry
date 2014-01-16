@@ -23,11 +23,11 @@
 package cc.redberry.core.utils;
 
 import cc.redberry.core.TAssert;
-import cc.redberry.core.combinatorics.Combinatorics;
-import cc.redberry.core.combinatorics.Symmetry;
-import cc.redberry.core.combinatorics.symmetries.Symmetries;
-import cc.redberry.core.combinatorics.symmetries.SymmetriesFactory;
 import cc.redberry.core.context.CC;
+import cc.redberry.core.groups.permutations.Permutation;
+import cc.redberry.core.groups.permutations.PermutationGroup;
+import cc.redberry.core.groups.permutations.PermutationOneLine;
+import cc.redberry.core.groups.permutations.Permutations;
 import cc.redberry.core.indexmapping.Mapping;
 import cc.redberry.core.indices.IndexType;
 import cc.redberry.core.parser.ParserIndices;
@@ -37,6 +37,9 @@ import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.tensor.Tensors;
 import cc.redberry.core.transformations.EliminateFromSymmetriesTransformation;
 import org.junit.Test;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static cc.redberry.core.TAssert.*;
 import static cc.redberry.core.tensor.Tensors.parse;
@@ -149,31 +152,22 @@ public class TensorUtilsTest {
         CC.resetTensorNames(2103403802553543528L);
         Tensor t = parse("g_{ab}*g^{rs}*g_{mn}*g^{pq}");
         //t.indices = ^{pqrs}_{abmn}
-        Symmetries actual = TensorUtils.findIndicesSymmetries(t.getIndices().getAllIndices().copy(), t);
+        List<Permutation> actual = TensorUtils.findIndicesSymmetries(t.getIndices().getAllIndices().copy(), t);
 
-        Symmetry[] symmetries = new Symmetry[]{
-                new Symmetry(false, new int[]{0, 1, 2, 3, 4, 5, 6, 7}),
-                new Symmetry(false, new int[]{1, 0, 2, 3, 4, 5, 6, 7}),
-                new Symmetry(false, new int[]{0, 1, 2, 3, 4, 5, 7, 6}),
-                new Symmetry(false, new int[]{0, 1, 3, 2, 4, 5, 6, 7}),
-                new Symmetry(false, new int[]{0, 1, 2, 3, 5, 4, 6, 7}),
-                new Symmetry(false, new int[]{6, 7, 2, 3, 4, 5, 0, 1}),
-                new Symmetry(false, new int[]{0, 1, 6, 7, 4, 5, 2, 3}),
-                new Symmetry(false, new int[]{0, 1, 4, 5, 2, 3, 6, 7})};
-        Symmetries expected = SymmetriesFactory.createSymmetries(8);
-        for (Symmetry symmetry : symmetries)
+        Permutation[] symmetries = new Permutation[]{
+                new PermutationOneLine(false, new int[]{0, 1, 2, 3, 4, 5, 6, 7}),
+                new PermutationOneLine(false, new int[]{1, 0, 2, 3, 4, 5, 6, 7}),
+                new PermutationOneLine(false, new int[]{0, 1, 2, 3, 4, 5, 7, 6}),
+                new PermutationOneLine(false, new int[]{0, 1, 3, 2, 4, 5, 6, 7}),
+                new PermutationOneLine(false, new int[]{0, 1, 2, 3, 5, 4, 6, 7}),
+                new PermutationOneLine(false, new int[]{6, 7, 2, 3, 4, 5, 0, 1}),
+                new PermutationOneLine(false, new int[]{0, 1, 6, 7, 4, 5, 2, 3}),
+                new PermutationOneLine(false, new int[]{0, 1, 4, 5, 2, 3, 6, 7})};
+        List<Permutation> expected = new ArrayList<>();
+        for (Permutation symmetry : symmetries)
             expected.add(symmetry);
 
-        int basisDimension = actual.getBasisSymmetries().size();
-        for (Symmetry s1 : symmetries)
-            actual.add(s1);
-
-        assertTrue(actual.getBasisSymmetries().size() == basisDimension);
-
-        for (Symmetry s1 : actual)
-            expected.add(s1);
-
-        assertTrue(expected.getBasisSymmetries().size() == basisDimension);
+        assertEqualsSymmetries(new PermutationGroup(actual), new PermutationGroup(expected));
     }
 
     @Test
@@ -182,7 +176,7 @@ public class TensorUtilsTest {
         int[] to = {2, 3, 0, 1};
         int[] indices = {0, 1, 2, 3};
         Mapping mapping = new Mapping(from, to);
-        assertTrue(TensorUtils.getSymmetryFromMapping(indices, mapping).equals(new Symmetry(false, to)));
+        assertTrue(TensorUtils.getSymmetryFromMapping(indices, mapping).equals(new PermutationOneLine(false, to)));
     }
 
     @Test
@@ -193,7 +187,7 @@ public class TensorUtilsTest {
         Mapping mapping = new Mapping(from, to);
         assertTrue(
                 TensorUtils.getSymmetryFromMapping(indices, mapping).equals(
-                        new Symmetry(false, to)));
+                        new PermutationOneLine(false, to)));
     }
 
     @Test
@@ -212,38 +206,38 @@ public class TensorUtilsTest {
     private static void assertFindSymmetries(SimpleTensor tensor) {
         int dimension = tensor.getIndices().size();
         int baseSize = 1 + (dimension / 3);
-        Symmetry[] base = new Symmetry[baseSize];
+        Permutation[] base = new Permutation[baseSize];
         for (int i = 0; i < baseSize; ++i)
-            base[i] = new Symmetry(false, Combinatorics.randomPermutation(dimension));
+            base[i] = new PermutationOneLine(false, Permutations.randomPermutation(dimension));
 
-        Symmetries expectedSymmetries = SymmetriesFactory.createSymmetries(dimension);
-        for (Symmetry s : base) {
+        List<Permutation> expectedSymmetries = new ArrayList<>();
+        for (Permutation s : base) {
             tensor.getIndices().getSymmetries().add((byte) 0, s);
             expectedSymmetries.add(s);
         }
 
-        assertEqualsSymmetries(expectedSymmetries,
-                findIndicesSymmetries(tensor.getIndices(), tensor));
+        assertEqualsSymmetries(new PermutationGroup(expectedSymmetries),
+                new PermutationGroup(findIndicesSymmetries(tensor.getIndices(), tensor)));
     }
 
     @Test
     public void testSymmetries5() {
         Tensor t = parse("d_a^b*d_c^d");
-        Symmetries actual = getIndicesSymmetriesForIndicesWithSameStates(ParserIndices.parse("_ab^cd"), t);
-        Symmetries expected = SymmetriesFactory.createSymmetries(4);
-        expected.add(new Symmetry(false, new int[]{1, 0, 2, 3}));
-        expected.add(new Symmetry(false, new int[]{0, 1, 3, 2}));
-        assertEqualsSymmetries(actual, expected);
+        List<Permutation> actual = getIndicesSymmetriesForIndicesWithSameStates(ParserIndices.parse("_ab^cd"), t);
+        List<Permutation> expected = new ArrayList<>();
+        expected.add(new PermutationOneLine(new int[]{1, 0, 2, 3}));
+        expected.add(new PermutationOneLine(new int[]{0, 1, 3, 2}));
+        assertEqualsSymmetries(new PermutationGroup(actual), new PermutationGroup(expected));
     }
 
     @Test
     public void testSymmetries6() {
         Tensor t = parse("g_ab*g^cd");
-        Symmetries actual = getIndicesSymmetriesForIndicesWithSameStates(ParserIndices.parse("_ab^cd"), t);
-        Symmetries expected = SymmetriesFactory.createSymmetries(4);
-        expected.add(new Symmetry(false, new int[]{1, 0, 2, 3}));
-        expected.add(new Symmetry(false, new int[]{0, 1, 3, 2}));
-        assertEqualsSymmetries(actual, expected);
+        List<Permutation> actual = getIndicesSymmetriesForIndicesWithSameStates(ParserIndices.parse("_ab^cd"), t);
+        List<Permutation> expected =  new ArrayList<>();
+        expected.add(new PermutationOneLine(false, new int[]{1, 0, 2, 3}));
+        expected.add(new PermutationOneLine(false, new int[]{0, 1, 3, 2}));
+        assertEqualsSymmetries(new PermutationGroup(actual), new PermutationGroup(expected));
     }
 
     @Test

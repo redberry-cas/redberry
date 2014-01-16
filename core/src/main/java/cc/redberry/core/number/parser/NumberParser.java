@@ -106,6 +106,7 @@ public class NumberParser<T extends cc.redberry.core.number.Number<T>> {
     }
 
     public T parse(String expression) {
+        expression = expression.trim();
         for (TokenParser parser : parsers) {
             @SuppressWarnings("unchecked") T element = (T) parser.parse(expression, this);
             if (element == null)

@@ -1,4 +1,3 @@
-
 /*
  * Redberry: symbolic tensor computations.
  *
@@ -21,12 +20,28 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
+package cc.redberry.core.context;
+
+import org.junit.Assert;
+import org.junit.Test;
+
+import static cc.redberry.core.context.NameDescriptorForTensorFieldDerivative.convertPermutation;
 
 /**
- * Implementation of subgroup of symmetric group.
- *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
- * @since 1.0
  */
-package cc.redberry.core.combinatorics.symmetries;
+public class NameDescriptorForTensorFieldDerivativeTest {
+    @Test
+    public void testConvert1() {
+        int[] p = {3, 2, 1, 0};
+        int[] map = {1, 2, 4, 3};
+
+        int[] expected = {0, 3, 4, 1, 2, 5, 6, 7, 8, 9};
+        Assert.assertArrayEquals(convertPermutation(p, map, 10), expected);
+
+        map = new int[]{-1, 0, 1, 3, 2, -1, -1, -1, -1, -1};
+        Assert.assertArrayEquals(convertPermutation(expected, map, 4), p);
+    }
+
+}

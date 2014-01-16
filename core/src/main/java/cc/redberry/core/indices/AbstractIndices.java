@@ -118,6 +118,20 @@ abstract class AbstractIndices implements Indices {
         return data[position];
     }
 
+//    @Override
+//    public boolean containsSubIndices(Indices subIndices) {
+//        int pointer = 0, index;
+//        for (int s = 0; s < subIndices.size(); ++s) {
+//            index = subIndices.get(s);
+//            while (get(pointer) != index)
+//                pointer++;
+//            if (pointer == size())
+//                return false;
+//            ++pointer;
+//        }
+//        return true;
+//    }
+
     @Override
     public final int hashCode() {
         return 291 + Arrays.hashCode(this.data);

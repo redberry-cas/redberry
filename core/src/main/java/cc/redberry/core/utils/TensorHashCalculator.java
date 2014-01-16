@@ -47,7 +47,7 @@ public final class TensorHashCalculator {
     private static int _hashWithIndices(final Tensor tensor, final int[] indices) {
         if (tensor instanceof SimpleTensor) {
             SimpleIndices si = ((SimpleTensor) tensor).getIndices();
-            short[] sInds = si.getDiffIds();
+            short[] sInds = si.getPositionsInOrbits();
             int hash = tensor.hashCode();
             int pos;
             for (int i = 0; i < si.size(); ++i)

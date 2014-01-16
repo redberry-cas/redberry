@@ -22,6 +22,8 @@
  */
 package cc.redberry.core.groups.permutations;
 
+import cc.redberry.core.utils.IntArray;
+
 import java.lang.reflect.Array;
 import java.math.BigInteger;
 import java.util.Arrays;
@@ -142,6 +144,11 @@ public final class PermutationOneLine implements Permutation {
     }
 
     @Override
+    public IntArray oneLineImmutable() {
+        return new IntArray(permutation);
+    }
+
+    @Override
     public int[][] cycles() {
         return Permutations.convertOneLineToCycles(permutation);
     }
@@ -171,6 +178,16 @@ public final class PermutationOneLine implements Permutation {
         if (isIdentity)
             return array.clone();
         final int[] result = new int[array.length];
+        for (int i = 0; i < array.length; ++i)
+            result[i] = array[permutation[i]];
+        return result;
+    }
+
+    @Override
+    public char[] permute(char[] array) {
+        if (isIdentity)
+            return array.clone();
+        final char[] result = new char[array.length];
         for (int i = 0; i < array.length; ++i)
             result[i] = array[permutation[i]];
         return result;
@@ -319,7 +336,7 @@ public final class PermutationOneLine implements Permutation {
     public Permutation getIdentity() {
         if (isIdentity)
             return this;
-        return new PermutationOneLine(true, false, Permutations.getIdentityPermutationArray(permutation.length), true);
+        return Permutations.createIdentityPermutation(degree());
     }
 
     @Override
@@ -426,7 +443,8 @@ public final class PermutationOneLine implements Permutation {
 
     @Override
     public String toStringCycles() {
-        String cycles = Arrays.deepToString(cycles()).replace("[", "{").replace("]", "}");
+        //String cycles = Arrays.deepToString(cycles()).replace("[", "{").replace("]", "}");
+        String cycles = "[" + degree() + ", " + Arrays.deepToString(cycles()) + "]";
         return (antisymmetry ? "-" : "+") + cycles;
     }
 

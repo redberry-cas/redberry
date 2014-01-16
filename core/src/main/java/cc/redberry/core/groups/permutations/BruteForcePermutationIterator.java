@@ -57,17 +57,16 @@ final class BruteForcePermutationIterator implements Iterator<PermutationOneLine
         set = new TreeSet<>(JUST_PERMUTATION_COMPARATOR);
         this.upperLayer = new ArrayList<>();
         //noinspection unchecked
-        this.upperLayer.add(new PermutationOneLine(Permutations.getIdentityPermutationArray(permutations.get(0).degree())));
+        this.upperLayer.add((PermutationOneLine) Permutations.createIdentityPermutation(permutations.get(0).degree()));
         this.lowerLayer = permutations;
     }
 
     PermutationOneLine current;
 
     /**
-     * @throws cc.redberry.core.combinatorics.InconsistentGeneratorsException
-     *          if combinatorics are inconsistent,
-     *          e.g. it can happens when symmetries represents identical permutation but
-     *          has different {@code signums}
+     * @throws cc.redberry.core.combinatorics.InconsistentGeneratorsException if combinatorics are inconsistent,
+     *                                                                        e.g. it can happens when symmetries represents identical permutation but
+     *                                                                        has different {@code signums}
      */
     @Override
     public boolean hasNext() {

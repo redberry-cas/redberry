@@ -70,7 +70,7 @@ class RedberryStaticTest {
 
             def tensor = 'R^acbd*Sin[R_abcd*R^abcd]'.t;
             def tr =
-                Differentiate[ExpandAndEliminate, 'R^ma_m^b', 'R^mc_m^d'] & EliminateFromSymmetries & 'd_m^m = 4'.t & 'R^a_man = R_mn'.t & 'R^a_a = R'.t
+                    Differentiate[ExpandAndEliminate, 'R^ma_m^b', 'R^mc_m^d'] & EliminateFromSymmetries & 'd_m^m = 4'.t & 'R^a_man = R_mn'.t & 'R^a_a = R'.t
 
             assertTrue tr >> tensor == '6*R*Cos[R_{abcd}*R^{abcd}]-4*Sin[R_{abcd}*R^{abcd}]*R_{ab}*R_{cd}*R^{acbd}'.t
         }
@@ -234,8 +234,12 @@ class RedberryStaticTest {
     @Test
     public void testSymmetrize() {
         use(Redberry) {
-            assertEquals Symmetrize['_ab'.si, CreateSymmetries([1, 0])] >> 'T_ab'.t, 'T_ab/2 + T_ba/2'.t
-            assertEquals Symmetrize['_ab'.si, CreateSymmetries([[1, 0], true])] >> 'T_ab'.t, 'T_ab/2 - T_ba/2'.t
+            def si = '_ab'.si
+            si.symmetries.add([1, 0].p)
+            assertEquals Symmetrize[si] >> 'T_ab'.t, 'T_ab/2 + T_ba/2'.t
+            si = '_ab'.si
+            si.symmetries.add(-[1, 0].p)
+            assertEquals Symmetrize[si] >> 'T_ab'.t, 'T_ab/2 - T_ba/2'.t
         }
     }
 }

@@ -22,6 +22,8 @@
  */
 package cc.redberry.core.groups.permutations;
 
+import cc.redberry.core.utils.IntArray;
+
 import java.math.BigInteger;
 import java.util.Arrays;
 
@@ -40,6 +42,13 @@ public interface Permutation extends Comparable<Permutation> {
      * @return array that represents this permutation in one-line notation
      */
     int[] oneLine();
+
+    /**
+     * Returns immutable array that represents this permutation in one-line notation.
+     *
+     * @return immutable array that represents this permutation in one-line notation
+     */
+    IntArray oneLineImmutable ();
 
     /**
      * Returns an array of disjoint cycles that represent this permutation.
@@ -83,6 +92,14 @@ public interface Permutation extends Comparable<Permutation> {
      * @return permuted array
      */
     public int[] permute(int[] array);
+
+    /**
+     * Permutes array and returns the result.
+     *
+     * @param array array
+     * @return permuted array
+     */
+    public char[] permute(char[] array);
 
     /**
      * Permutes array and returns the result.

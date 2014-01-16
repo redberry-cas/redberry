@@ -23,9 +23,9 @@
 package cc.redberry.core.tensor;
 
 import cc.redberry.core.TAssert;
-import cc.redberry.core.combinatorics.Combinatorics;
 import cc.redberry.core.combinatorics.IntCombinationsGenerator;
 import cc.redberry.core.combinatorics.IntPermutationsGenerator;
+import cc.redberry.core.groups.permutations.Permutations;
 import cc.redberry.core.indexmapping.IndexMappings;
 import cc.redberry.core.indexmapping.Mapping;
 import cc.redberry.core.indices.IndexType;
@@ -302,14 +302,13 @@ public class ApplyIndexMappingTest {
 
     @Test
     public void testManyMappings() {
+        addSymmetry("G^a_bc", IndexType.LatinLower, false, 0, 2, 1);
         Tensor riman1 = parse("g_ax*(d_c*G^x_bd-d_d*G^x_bc+G^x_yc*G^y_bd-G^x_yd*G^y_bc)");
         //                        g_px*(d_r*G^x_qs-d_s*G^x_qr+G^x_yr*G^y_qs-G^x_ys*G^y_qr)
         //                        g_px*(d_s*G^x_qr-d_r*G^x_qs+G^x_ys*G^y_qr-G^x_yr*G^y_qs)
 
         Tensor riman2 = parse("g_px*(d_r*G^x_qs-d_s*G^x_qr+G^x_yr*G^y_qs-G^x_ys*G^y_qr)");
 
-        addSymmetry("G^a_bc", IndexType.LatinLower, false, 0, 2, 1);
-        addSymmetry("g_ab", IndexType.LatinLower, false, 1, 0);
 
         Set<Mapping> buffers = IndexMappings.getAllMappings(riman1, riman2);
         Tensor[] targets = new Tensor[buffers.size()];
@@ -512,7 +511,7 @@ public class ApplyIndexMappingTest {
                 for (int[] p : gen) {
                     TAssert.assertEquals(
                             applyIndexMappingAutomatically(t,
-                                    new Mapping(Combinatorics.reorder(_from, p), Combinatorics.reorder(_to, p))),
+                                    new Mapping(Permutations.permute(_from, p), Permutations.permute(_to, p))),
                             ApplyIndexMapping.applyIndexMapping(
                                     t, new Mapping(freeFrom, __to), new int[0]));
                 }

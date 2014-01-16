@@ -207,6 +207,18 @@ public final class PermutationGroup
     }
 
     /**
+     * Creates symmetric group of specified degree, where all odd permutations are antisymmetries. BSGS structure of
+     * symmetric group will be constructed in O(n^2) time.
+     *
+     * @param degree degree
+     * @return antisymmetric group of specified degree
+     * @see cc.redberry.core.groups.permutations.AlgorithmsBase#createSymmetricGroupBSGS(int)
+     */
+    public static PermutationGroup antisymmetricGroup(int degree) {
+        return new PermutationGroup(createAntisymmetricGroupBSGS(degree), true);
+    }
+
+    /**
      * Creates alternating group of specified degree. BSGS structure of alternating group will be constructed in O(n^2) time.
      *
      * @param degree degree
@@ -215,6 +227,16 @@ public final class PermutationGroup
      */
     public static PermutationGroup alternatingGroup(int degree) {
         return new PermutationGroup(createAlternatingGroupBSGS(degree), true);
+    }
+
+    /**
+     * Creates trivial group of specified degree.
+     *
+     * @param degree degree
+     * @return trivial group of specified degree
+     */
+    public static PermutationGroup trivialGroup(int degree) {
+        return new PermutationGroup(Permutations.createIdentityPermutation(degree));
     }
 
     /**
@@ -235,6 +257,16 @@ public final class PermutationGroup
     }
 
     ////////////////////// METHODS THAT NOT USE BSGS /////////////////////////
+
+    /**
+     * Returns positions of points in array of orbits, i.e. for each point {@code orbits()[getPositionsInOrbits()[point]]} -
+     * is its orbit.
+     *
+     * @return positions of points in array of orbits
+     */
+    public int[] getPositionsInOrbits() {
+        return positionsInOrbits.clone();
+    }
 
     /**
      * Returns an unmodifiable list of group generators.

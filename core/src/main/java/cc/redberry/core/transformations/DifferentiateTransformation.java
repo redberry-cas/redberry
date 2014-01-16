@@ -319,8 +319,9 @@ public final class DifferentiateTransformation implements Transformation {
             int[] allIndices = addAll(allFreeVarIndices, allFreeArgIndices);
             SimpleIndices dIndices = IndicesFactory.createSimple(null, allIndices);
             SimpleTensor symmetric = simpleTensor("@!@#@##_AS@23@@#", dIndices);
-            Tensor derivative = new SymmetrizeTransformation(allFreeVarIndices,
-                    varIndices.getSymmetries().getInnerSymmetries(), true).transform(symmetric);
+            SimpleIndices allFreeVarIndicesI = IndicesFactory.createSimple(varIndices.getSymmetries(), allFreeVarIndices);
+            Tensor derivative =
+                    new SymmetrizeTransformation(allFreeVarIndicesI, true).transform(symmetric);
 
             derivative = applyIndexMapping(
                     derivative,

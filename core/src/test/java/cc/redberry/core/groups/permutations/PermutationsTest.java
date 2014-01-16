@@ -210,4 +210,20 @@ public class PermutationsTest {
         }
     }
 
+    @Test
+    public void testCycle() {
+        int[] c = Permutations.createBlockCycle(3, 4);
+        Assert.assertArrayEquals(c, new int[]{3, 4, 5, 6, 7, 8, 9, 10, 11, 0, 1, 2});
+        int[] perm = {3, 4, 5, 0, 1, 2, 6, 7, 8, 9, 10, 11};
+        PermutationGroup g = new PermutationGroup(new PermutationOneLine(c), new PermutationOneLine(perm));
+        Assert.assertEquals(24, g.order().intValue());
+    }
+
+    @Test
+    public void testBlockTransposition() {
+        Assert.assertArrayEquals(Permutations.createBlockTransposition(2, 3), new int[]{2, 3, 4, 0, 1});
+        Assert.assertArrayEquals(Permutations.createBlockTransposition(0, 3), new int[]{0, 1, 2});
+        Assert.assertArrayEquals(Permutations.createBlockTransposition(3, 0), new int[]{0, 1, 2});
+        Assert.assertArrayEquals(Permutations.createBlockTransposition(3, 3), new int[]{3, 4, 5, 0, 1, 2});
+    }
 }

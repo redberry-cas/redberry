@@ -22,9 +22,10 @@
  */
 package cc.redberry.core.tensor.random;
 
-import cc.redberry.core.combinatorics.Symmetry;
 import cc.redberry.core.context.CC;
 import cc.redberry.core.context.NameDescriptor;
+import cc.redberry.core.groups.permutations.PermutationOneLine;
+import cc.redberry.core.groups.permutations.Permutations;
 import cc.redberry.core.indexgenerator.IndexGeneratorImpl;
 import cc.redberry.core.indexmapping.Mapping;
 import cc.redberry.core.indices.*;
@@ -33,7 +34,7 @@ import cc.redberry.core.tensor.*;
 import cc.redberry.core.utils.IntArrayList;
 import cc.redberry.core.utils.TensorUtils;
 import gnu.trove.set.hash.TIntHashSet;
-import org.apache.commons.math3.random.BitsStreamGenerator;
+import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.random.Well19937c;
 
 import java.util.ArrayList;
@@ -46,7 +47,7 @@ import java.util.List;
  */
 public final class RandomTensor {
 
-    protected final BitsStreamGenerator random;
+    protected final RandomGenerator random;
     protected long seed;
     protected final static byte TYPES_COUNT = 4;
     protected final static byte[] TYPES = {0, 1, 2, 3};
@@ -88,7 +89,7 @@ public final class RandomTensor {
             int[] minIndices,
             int[] maxIndices,
             boolean withSymmetries,
-            BitsStreamGenerator random) {
+            RandomGenerator random) {
         this.random = random;
         this.random.setSeed(seed = random.nextLong());
         this.minIndices = minIndices;
@@ -236,7 +237,7 @@ public final class RandomTensor {
     }
 
     private void addRandomSymmetries(NameDescriptor descriptor) {//TODO add antisymmetries
-        if (!descriptor.getSymmetries().isEmpty())
+        if (!descriptor.getSymmetries().isTrivial()) //todo <= review this moment
             return;
         StructureOfIndices typeStructure = descriptor.getStructureOfIndices();
         int i;
@@ -248,7 +249,7 @@ public final class RandomTensor {
                 continue;
             int count = random.nextInt(4);
             for (i = 0; i < count; ++i)
-                descriptor.getSymmetries().addUnsafe(type, new Symmetry(false, nextPermutation(typeData.length)));
+                descriptor.getSymmetries().add(type, new PermutationOneLine(false, nextPermutation(typeData.length)));
         }
     }
 
@@ -436,38 +437,7 @@ public final class RandomTensor {
     }
 
     public int[] nextPermutation(final int dimension) {
-        if (dimension == 0)
-            return new int[0];
-        int[] permutation = new int[dimension];
-        if (dimension == 1)
-            return permutation;
-        if (dimension == 2) {
-            permutation[1] = 1;
-            if (random.nextBoolean())
-                swap(permutation, 0, 1);
-            return permutation;
-        }
-        int i, r = nextInt(1000);
-        //cycle permutation
-        if (r < 100) {
-            for (i = 0; i < dimension - 1; ++i)
-                permutation[i] = i + 1;
-            permutation[dimension - 1] = 0;
-            return permutation;
-        }
-        for (i = 1; i < dimension; ++i)
-            permutation[i] = i;
-        //else composition of transpositions
-        if (r < 700) {
-            int p1, p2;
-            final int tries = nextInt(3) + 1;
-            for (i = 0; i < tries; ++i) {
-                while ((p1 = nextInt(dimension)) == (p2 = nextInt(dimension))) ;
-                swap(permutation, p1, p2);
-            }
-        }
-        //else identity
-        return permutation;
+        return Permutations.randomPermutation(dimension, random);
     }
 
     public final void shuffle(final int[] target) {

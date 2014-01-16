@@ -23,11 +23,11 @@
 
 package cc.redberry.groovy
 
-import cc.redberry.core.combinatorics.Symmetry
-import cc.redberry.core.combinatorics.symmetries.Symmetries
-import cc.redberry.core.combinatorics.symmetries.SymmetriesFactory
+
 import cc.redberry.core.context.CC
 import cc.redberry.core.context.OutputFormat
+import cc.redberry.core.groups.permutations.Permutation
+import cc.redberry.core.groups.permutations.PermutationOneLine
 import cc.redberry.core.indices.SimpleIndices
 import cc.redberry.core.indices.StructureOfIndices
 import cc.redberry.core.parser.ParseTokenSimpleTensor
@@ -150,43 +150,43 @@ class RedberryStatic {
      * @see ExpandTransformation
      */
     public static final TransformationWrapper_SimpleTensors_Or_Transformations Expand =
-        new TransformationWrapper_SimpleTensors_Or_Transformations(ExpandTransformation, ExpandTransformation.EXPAND)
+            new TransformationWrapper_SimpleTensors_Or_Transformations(ExpandTransformation, ExpandTransformation.EXPAND)
 
     /**
      * Expands out all products and integer powers in any part of expression.
      * @see ExpandAllTransformation
      */
     public static final TransformationWrapper_SimpleTensors_Or_Transformations ExpandAll =
-        new TransformationWrapper_SimpleTensors_Or_Transformations(ExpandAllTransformation, ExpandAllTransformation.EXPAND_ALL)
+            new TransformationWrapper_SimpleTensors_Or_Transformations(ExpandAllTransformation, ExpandAllTransformation.EXPAND_ALL)
 
     /**
      * Expands out products and powers that appear as denominators.
      * @see ExpandNumeratorTransformation
      */
     public static final TransformationWrapper_SimpleTensors_Or_Transformations ExpandNumerator =
-        new TransformationWrapper_SimpleTensors_Or_Transformations(ExpandNumeratorTransformation,
-                ExpandNumeratorTransformation.EXPAND_NUMERATOR)
+            new TransformationWrapper_SimpleTensors_Or_Transformations(ExpandNumeratorTransformation,
+                    ExpandNumeratorTransformation.EXPAND_NUMERATOR)
 
     /**
      * Expands out products and powers that appear in the numerator.
      * @see ExpandDenominatorTransformation
      */
     public static final TransformationWrapper_SimpleTensors_Or_Transformations ExpandDenominator =
-        new TransformationWrapper_SimpleTensors_Or_Transformations(ExpandDenominatorTransformation,
-                ExpandDenominatorTransformation.EXPAND_DENOMINATOR)
+            new TransformationWrapper_SimpleTensors_Or_Transformations(ExpandDenominatorTransformation,
+                    ExpandDenominatorTransformation.EXPAND_DENOMINATOR)
 
     /**
      * Collects terms by pattern
      */
     public static final TransformationWrapper Collect =
-        new TransformationWrapper_SimpleTensors_And_Transformations(CollectTransformation)
+            new TransformationWrapper_SimpleTensors_And_Transformations(CollectTransformation)
 
     /**
      * Gives a partial derivative.
      * @see DifferentiateTransformation
      */
     public static final TransformationWrapper Differentiate =
-        new TransformationWrapper_SimpleTensors_And_Transformations(DifferentiateTransformation)
+            new TransformationWrapper_SimpleTensors_And_Transformations(DifferentiateTransformation)
 
     /**
      * Eliminates metrics and Kronecker deltas
@@ -221,7 +221,7 @@ class RedberryStatic {
      * @see EliminateFromSymmetriesTransformation
      */
     public static final Transformation EliminateFromSymmetries =
-        EliminateFromSymmetriesTransformation.ELIMINATE_FROM_SYMMETRIES;
+            EliminateFromSymmetriesTransformation.ELIMINATE_FROM_SYMMETRIES;
 
     /**
      * Puts terms in a sum over a common denominator, and cancels factors in the result.
@@ -294,8 +294,8 @@ class RedberryStatic {
      * @see PowerExpandTransformation
      */
     public static final TransformationWrapper_SimpleTensors_Or_Transformations PowerExpand =
-        new TransformationWrapper_SimpleTensors_Or_Transformations(PowerExpandTransformation,
-                PowerExpandTransformation.POWER_EXPAND_TRANSFORMATION)
+            new TransformationWrapper_SimpleTensors_Or_Transformations(PowerExpandTransformation,
+                    PowerExpandTransformation.POWER_EXPAND_TRANSFORMATION)
 
     /**
      * Expands all powers of products and powers with respect to specified variables and unwraps powers of
@@ -304,8 +304,8 @@ class RedberryStatic {
      * @see PowerExpandUnwrapTransformation
      */
     public static final TransformationWrapper_SimpleTensors_Or_Transformations PowerExpandUnwrap =
-        new TransformationWrapper_SimpleTensors_Or_Transformations(PowerExpandUnwrapTransformation,
-                PowerExpandUnwrapTransformation.POWER_EXPAND_UNWRAP_TRANSFORMATION)
+            new TransformationWrapper_SimpleTensors_Or_Transformations(PowerExpandUnwrapTransformation,
+                    PowerExpandUnwrapTransformation.POWER_EXPAND_UNWRAP_TRANSFORMATION)
 
     /**
      * Gives a symmetrization of tensor with respect to specified indices under the specified symmetries.
@@ -318,8 +318,8 @@ class RedberryStatic {
         SymmetrizeWrapper() {
         }
 
-        public Transformation getAt(SimpleIndices indices, Symmetries symmetries) {
-            return new SymmetrizeTransformation(indices.free.allIndices.copy(), symmetries, true)
+        public Transformation getAt(SimpleIndices indices) {
+            return new SymmetrizeTransformation(indices, true)
         }
     }
 
@@ -328,10 +328,11 @@ class RedberryStatic {
      **********************************************************************/
 
 
-    static GeneralIndicesInsertion indicesInsertion = new GeneralIndicesInsertion();
+    private static final GeneralIndicesInsertion indicesInsertion = new GeneralIndicesInsertion();
 
-    static {
-        CC.current().getParseManager().defaultParserPreprocessors.add(indicesInsertion);
+    private static void ensureIndicesInsertionAddedToParser() {
+        if (!CC.current().getParseManager().defaultParserPreprocessors.contains(indicesInsertion))
+            CC.current().getParseManager().defaultParserPreprocessors.add(indicesInsertion);
     }
 
     /**
@@ -340,6 +341,7 @@ class RedberryStatic {
      * @see GeneralIndicesInsertion
      */
     public static void defineMatrices(Object... objs) {
+        ensureIndicesInsertionAddedToParser()
         def bufferOfTensors = [], bufferOfDescriptors = [];
         objs.each { obj ->
             if (obj instanceof MatrixDescriptor)
@@ -362,6 +364,7 @@ class RedberryStatic {
      * @deprecated matrix descriptors
      */
     public static void defineMatrix(String tensor, MatrixDescriptor... descriptors) {
+        ensureIndicesInsertionAddedToParser()
         ParseTokenSimpleTensor token = CC.current().parseManager.parser.parse(tensor);
 
         use(Redberry) {
@@ -392,7 +395,7 @@ class RedberryStatic {
      **********************************/
 
     private static final Map GenerateTensorDefaultOptions =
-        [Symmetries: null, GeneratedParameters: { i -> "C[$i]" }, GenerateParameters: 'true', SymmetricForm: 'false', RaiseLower: 'true'];
+            [Symmetries: null, GeneratedParameters: { i -> "C[$i]" }, GenerateParameters: 'true', SymmetricForm: 'false', RaiseLower: 'true'];
 
     /**
      * Generates tensor of the most general form with specified free indices and from specified samples.
@@ -404,15 +407,14 @@ class RedberryStatic {
      */
     public static Tensor GenerateTensor(SimpleIndices indices,
                                         Collection samples,
-                                        Map options = [Symmetries: null, GeneratedParameters: { i -> "C[$i]" }, GenerateParameters: 'true', SymmetricForm: 'false', RaiseLower: 'true']) {
+                                        Map options = [GeneratedParameters: { i -> "C[$i]" }, GenerateParameters: 'true', SymmetricForm: 'false', RaiseLower: 'true']) {
         use(Redberry) {
             def allOptions = new HashMap(GenerateTensorDefaultOptions)
             allOptions.putAll(options)
-            Symmetries symmetries = allOptions.get('Symmetries')
             def symmetricForm = Boolean.valueOf(allOptions.get('SymmetricForm'))
             def generateCoefficients = Boolean.valueOf(allOptions.get('GenerateParameters'))
             def raiseLower = Boolean.valueOf(allOptions.get('RaiseLower'))
-            def struct = TensorGenerator.generateStructure(indices, samples.t as Tensor[], symmetries, symmetricForm, generateCoefficients, raiseLower)
+            def struct = TensorGenerator.generateStructure(indices, samples.t as Tensor[], symmetricForm, generateCoefficients, raiseLower)
             def result = struct.generatedTensor
             def generatedParameters = allOptions.get('GeneratedParameters')
             int i = 0
@@ -433,14 +435,13 @@ class RedberryStatic {
      */
     public static Collection GenerateTensorWithCoefficients(SimpleIndices indices,
                                                             Collection samples,
-                                                            Map options = [Symmetries: null, SymmetricForm: 'false', RaiseLower: 'true']) {
+                                                            Map options = [SymmetricForm: 'false', RaiseLower: 'true']) {
         use(Redberry) {
             def allOptions = new HashMap(GenerateTensorDefaultOptions)
             allOptions.putAll(options)
-            Symmetries symmetries = allOptions.get('Symmetries')
             def symmetricForm = Boolean.valueOf(allOptions.get('SymmetricForm'))
             def raiseLower = Boolean.valueOf(allOptions.get('RaiseLower'))
-            def struct = TensorGenerator.generateStructure(indices, samples.t as Tensor[], symmetries, symmetricForm, true, raiseLower)
+            def struct = TensorGenerator.generateStructure(indices, samples.t as Tensor[], symmetricForm, true, raiseLower)
             return [struct.generatedTensor, struct.coefficients as Collection]
         }
     }
@@ -556,32 +557,19 @@ class RedberryStatic {
      ************* Utilities ***********
      ***********************************/
 
-    /**
-     * Creates a symmetry from an int array and boolean sign (optional) given in form e.g. [[1,2,0],true]
-     * (antisymmetry) or [2,3,4,1,0] (symmetry).
-     *
-     * @param collection permutation + sign (optional)
-     * @return {@link Symmetry} instance
-     */
-    public static Symmetry CreateSymmetry(Collection collection) {
-        if (collection[1] instanceof Boolean)
-            return new Symmetry(collection[1], collection[0] as int[])
-        return new Symmetry(false, collection as int[])
-    }
+//    /**
+//     * Creates an instance of {@link Symmetries} from a set of symmetries.
+//     * @param collection collection of symmetries
+//     * @return instance of {@link Symmetries}
+//     */
+//    public static PermutationGroup CreateSymmetries(Object... collection) {
+//        def s = CreateSymmetry(collection[0])
+//        Symmetries symmetries = SymmetriesFactory.createSymmetries(s.dimension())
+//        collection.each { symmetries.add(CreateSymmetry(it)) }
+//        return symmetries
+//    }
 
-    /**
-     * Creates an instance of {@link Symmetries} from a set of symmetries.
-     * @param collection collection of symmetries
-     * @return instance of {@link Symmetries}
-     */
-    public static Symmetries CreateSymmetries(Object... collection) {
-        def s = CreateSymmetry(collection[0])
-        Symmetries symmetries = SymmetriesFactory.createSymmetries(s.dimension())
-        collection.each { symmetries.add(CreateSymmetry(it)) }
-        return symmetries
-    }
-
-    public static Symmetries FindIndicesSymmetries(SimpleIndices indices, tensor) {
+    public static List<Permutation> FindIndicesSymmetries(SimpleIndices indices, tensor) {
         use(Redberry) {
             return TensorUtils.findIndicesSymmetries(indices, tensor.t)
         }
