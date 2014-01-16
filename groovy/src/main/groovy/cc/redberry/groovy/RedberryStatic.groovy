@@ -557,19 +557,6 @@ class RedberryStatic {
      ************* Utilities ***********
      ***********************************/
 
-    /**
-     * Creates a symmetry from an int array and boolean sign (optional) given in form e.g. [[1,2,0],true]
-     * (antisymmetry) or [2,3,4,1,0] (symmetry).
-     *
-     * @param collection permutation + sign (optional)
-     * @return {@link Permutation} instance
-     */
-    public static Permutation CreateSymmetry(Collection collection) {
-        if (collection[1] instanceof Boolean)
-            return new PermutationOneLine(collection[1], collection[0] as int[])
-        return new PermutationOneLine(false, collection as int[])
-    }
-
 //    /**
 //     * Creates an instance of {@link Symmetries} from a set of symmetries.
 //     * @param collection collection of symmetries
