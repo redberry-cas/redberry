@@ -205,6 +205,14 @@ public final class OneLoopInput {
         inputValues[5] = M;
 
         checkConsistency();
+        //add symmetries if possible
+        if (Tensors.parseSimple("R_lmab").getIndices().getSymmetries().availableForModification()) {
+            Tensors.addSymmetry("R_lmab", IndexType.LatinLower, true, new int[]{0, 1, 3, 2});
+            Tensors.addSymmetry("R_lmab", IndexType.LatinLower, false, new int[]{2, 3, 0, 1});
+        }
+        if (Tensors.parseSimple("R_lm").getIndices().getSymmetries().availableForModification())
+            Tensors.addSymmetry("R_lm", IndexType.LatinLower, false, new int[]{1, 0});
+
 
         this.L = Tensors.expression(Tensors.parse("L"), new Complex(operatorOrder));
         this.hatQuantities = new Expression[HAT_QUANTITIES_GENERAL_COUNT][];

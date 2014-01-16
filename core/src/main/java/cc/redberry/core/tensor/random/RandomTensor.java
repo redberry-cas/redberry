@@ -237,7 +237,7 @@ public final class RandomTensor {
     }
 
     private void addRandomSymmetries(NameDescriptor descriptor) {//TODO add antisymmetries
-        if (!descriptor.getSymmetries().isTrivial())
+        if (!descriptor.getSymmetries().isTrivial()) //todo <= review this moment
             return;
         StructureOfIndices typeStructure = descriptor.getStructureOfIndices();
         int i;

@@ -44,6 +44,7 @@ import java.util.List;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  * @since 1.0
+ * @deprecated
  */
 public final class SymmetrizeUpperLowerIndicesTransformation implements Transformation {
 

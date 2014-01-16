@@ -443,7 +443,8 @@ public final class PermutationOneLine implements Permutation {
 
     @Override
     public String toStringCycles() {
-        String cycles = Arrays.deepToString(cycles()).replace("[", "{").replace("]", "}");
+        //String cycles = Arrays.deepToString(cycles()).replace("[", "{").replace("]", "}");
+        String cycles = "[" + degree() + ", " + Arrays.deepToString(cycles()) + "]";
         return (antisymmetry ? "-" : "+") + cycles;
     }
 

@@ -24,6 +24,8 @@
 package cc.redberry.groovy
 
 import cc.redberry.core.combinatorics.IntPermutationsGenerator
+import cc.redberry.core.groups.permutations.Permutation
+import cc.redberry.core.groups.permutations.PermutationOneLine
 import cc.redberry.core.indexmapping.IndexMappings
 import cc.redberry.core.indexmapping.Mapping
 import cc.redberry.core.indexmapping.MappingsPort
@@ -48,6 +50,7 @@ import cc.redberry.core.utils.IntArray
 import cc.redberry.core.utils.IntArrayList
 import cc.redberry.core.utils.TensorUtils
 import org.codehaus.groovy.runtime.DefaultGroovyMethods
+import org.codehaus.groovy.runtime.InvokerHelper
 
 import static cc.redberry.core.tensor.Tensors.*
 
@@ -70,9 +73,7 @@ class Redberry {
         return new Complex(number2Real(num));
     }
 
-    /*
-    * Math operations
-    */
+    ///////////////////////////////////////////// TENSORS AND BUILDERS ////////////////////////////////////////////////
 
     /**
      * Returns the result of summation of several tensors.
@@ -296,9 +297,7 @@ class Redberry {
             return DefaultGroovyMethods.asType(tensor, clazz)
     }
 
-    /*
-     * Indices
-     */
+    //////////////////////////////////////////////// INDICES //////////////////////////////////////////////////////////
 
     /**
      * Returns the index at the specified position in indices
@@ -479,9 +478,8 @@ class Redberry {
         return Arrays.equals(a.allIndices.copy(), b.allIndices.copy())
     }
 
-    /*
-    * Tensor traversing
-    */
+    ///////////////////////////////////////// TREE TRAVERSAL ///////////////////////////////////////////////////////
+
     /**
      * Expression-tree traversal parent-after-child
      * @param t expression
@@ -572,9 +570,7 @@ class Redberry {
 //        return transformParentBeforeChild(t, TraverseGuide.ALL, closure);
 //    }
 
-    /*
-    * Transformations
-    */
+    ///////////////////////////////////////// TRANSFORMATIONS ///////////////////////////////////////////////////////
 
     /**
      * Joins two transformations in a single one, which will apply both transformations sequentially
@@ -783,16 +779,13 @@ class Redberry {
         return DefaultGroovyMethods.asType(num, clazz)
     }
 
-
     static Object asType(String string, Class clazz) {
         if (clazz == Tensor)
             return parse(string);
         return DefaultGroovyMethods.asType(string, clazz);
     }
 
-    /*
-     * Tensor comparison and Mapping
-     */
+    //////////////////////////////////////////////// MAPPINGS //////////////////////////////////////////////////////////
 
     /**
      * Returns {@code true} if tensors are mathematically (not programmatically) equal
@@ -895,9 +888,7 @@ class Redberry {
         }
     }
 
-    /*
-     * Matrix descriptors
-     */
+    //////////////////////////////////////////////// MATRICES //////////////////////////////////////////////////////////
 
     /**
      * Covector with respect to specified type
@@ -945,9 +936,7 @@ class Redberry {
         return new MatrixDescriptor(type, upper, lower);
     }
 
-    /*
-     * Parse
-     */
+    //////////////////////////////////////////////// PARSE //////////////////////////////////////////////////////////
 
     /**
      * Parse string to tensor
@@ -1037,9 +1026,28 @@ class Redberry {
         return ParserIndices.parseSimple(string)
     }
 
-    /*
-     * Tensor creation
+    /**
+     * Creates the mapping of indices from a given string representation.
+     *
+     * @param string string representation of a mapping
+     * @return mapping of indices
      */
+    static Mapping getMapping(String string) {
+        string = string.trim().substring(1, string.length() - 1).trim()
+        IntArrayList from = new IntArrayList(), to = new IntArrayList()
+        int fromIndex
+        string.split(',').each {
+            def split = it.split('->')
+            if (split.length == 2) {
+                fromIndex = IndicesUtils.parseIndex(split[0].trim())
+                from.add(IndicesUtils.getNameWithType(fromIndex))
+                to.add(IndicesUtils.getRawStateInt(fromIndex) ^ IndicesUtils.parseIndex(split[1].trim()))
+            }
+        }
+        return new Mapping(from.toArray(), to.toArray())
+    }
+
+    //////////////////////////////////////////////// TENSOR CREATE /////////////////////////////////////////////////////
 
     /**
      * Creates {@link Expression} from given l.h.s. and r.h.s.
@@ -1069,30 +1077,38 @@ class Redberry {
         return expression(lhs, rhs)
     }
 
-    /**
-     * Creates the mapping of indices from a given string representation.
-     *
-     * @param string string representation of a mapping
-     * @return mapping of indices
-     */
-    static Mapping getMapping(String string) {
-        string = string.trim().substring(1, string.length() - 1).trim()
-        IntArrayList from = new IntArrayList(), to = new IntArrayList()
-        int fromIndex
-        string.split(',').each {
-            def split = it.split('->')
-            if (split.length == 2) {
-                fromIndex = IndicesUtils.parseIndex(split[0].trim())
-                from.add(IndicesUtils.getNameWithType(fromIndex))
-                to.add(IndicesUtils.getRawStateInt(fromIndex) ^ IndicesUtils.parseIndex(split[1].trim()))
+    ////////////////////////////////////////////// PERMUTATIONS ///////////////////////////////////////////////////////
+
+    static Permutation getP(List list) {
+        //one-line notation
+        boolean oneLine = true;
+        for (def i : list)
+            if (!(i instanceof Integer)) {
+                oneLine = false;
+                break;
             }
-        }
-        return new Mapping(from.toArray(), to.toArray())
+        if (oneLine)
+            return new PermutationOneLine(list as int[])
+
+        int degree = list[0]
+        return new PermutationOneLine(degree, list[1] as int[][])
     }
 
-    /*
-     * Combinatorics
-     */
+    static Permutation negative(Permutation permutation) {
+        return new PermutationOneLine(true ^ permutation.antisymmetry(), permutation.oneLine())
+    }
+
+    static Permutation positive(Permutation permutation) {
+        return permutation;
+    }
+
+    static Permutation power(Permutation permutation, int exponent) {
+        return permutation.pow(exponent);
+    }
+
+    static Permutation multiply(Permutation a, Permutation b) {
+        return a.composition(b);
+    }
 
     static <T> void permutations(List<T> list, Closure<List<T>> closure) {
         IntPermutationsGenerator generator = new IntPermutationsGenerator(list.size());
@@ -1103,6 +1119,5 @@ class Redberry {
             closure.call(temp)
         }
     }
-
 
 }

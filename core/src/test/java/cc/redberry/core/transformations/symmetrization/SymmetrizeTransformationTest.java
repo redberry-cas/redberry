@@ -22,21 +22,15 @@
  */
 package cc.redberry.core.transformations.symmetrization;
 
-import cc.redberry.core.combinatorics.IntCombinationsGenerator;
-import cc.redberry.core.groups.permutations.Permutation;
+import cc.redberry.core.TAssert;
 import cc.redberry.core.groups.permutations.PermutationGroup;
 import cc.redberry.core.groups.permutations.PermutationOneLine;
 import cc.redberry.core.indices.SimpleIndices;
 import cc.redberry.core.parser.ParserIndices;
-import cc.redberry.core.tensor.SimpleTensor;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.tensor.Tensors;
-import org.apache.commons.math3.util.ArithmeticUtils;
-import org.junit.Ignore;
+import org.junit.Assert;
 import org.junit.Test;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import static cc.redberry.core.TAssert.assertEquals;
 
@@ -111,7 +105,25 @@ public class SymmetrizeTransformationTest {
         SymmetrizeTransformation symmetrizeTransformation =
                 new SymmetrizeTransformation(indices, true);
         Tensor t = Tensors.parse("T_abc");
-        System.out.println(t = symmetrizeTransformation.transform(t));
-        System.out.println(Tensors.parseExpression("T_abc = A_a*B_b*C_c").transform(t));
+        t = symmetrizeTransformation.transform(t);
+        TAssert.assertEquals(t, "(1/6)*T_{cba}+(1/6)*T_{abc}+(1/6)*T_{cab}+(1/6)*T_{bca}+(1/6)*T_{acb}+(1/6)*T_{bac}");
+        Assert.assertEquals(t.size(), Tensors.parseExpression("T_abc = A_a*B_b*C_c").transform(t).size());
+    }
+
+    @Test
+    public void testAll6() {
+        Tensors.parseSimple("C_abcde").getIndices().getSymmetries().add(
+                new PermutationOneLine(5, new int[][]{{1, 2, 3, 4}}));
+        Tensors.parseSimple("C_abcde").getIndices().getSymmetries().add(
+                new PermutationOneLine(5, new int[][]{{0, 1, 2, 4, 3}}));
+
+        SimpleIndices indices = ParserIndices.parseSimple("_abcde");
+        indices.getSymmetries().setSymmetric();
+        SymmetrizeTransformation tr = new SymmetrizeTransformation(indices, false);
+
+        Tensor r = tr.transform(Tensors.parseSimple("C_abcde"));
+        Assert.assertEquals(r.size(), PermutationGroup.symmetricGroup(5).leftCosetRepresentatives(
+                Tensors.parseSimple("C_abcde").getIndices().getSymmetries().getPermutationGroup()).length);
+
     }
 }

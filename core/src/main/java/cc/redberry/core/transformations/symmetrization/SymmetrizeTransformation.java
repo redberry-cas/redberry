@@ -56,6 +56,13 @@ public final class SymmetrizeTransformation implements Transformation {
     private final boolean multiplyBySymmetryFactor;
     private final PermutationGroup indicesGroup;
 
+    /**
+     * Creates transformation that makes tensors symmetric in specified indices, symmetry group of the result will be
+     * guaranteed a super group of permutation group of specified indices.
+     *
+     * @param indices                  simple indices with symmetries
+     * @param multiplyBySymmetryFactor if specified, then resulting sum will be divided by its size
+     */
     public SymmetrizeTransformation(SimpleIndices indices, boolean multiplyBySymmetryFactor) {
         this.indices = indices;
         this.indicesArray = indices.toArray();
