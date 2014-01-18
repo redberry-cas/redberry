@@ -215,7 +215,7 @@ public class PermutationsTest {
         int[] c = Permutations.createBlockCycle(3, 4);
         Assert.assertArrayEquals(c, new int[]{3, 4, 5, 6, 7, 8, 9, 10, 11, 0, 1, 2});
         int[] perm = {3, 4, 5, 0, 1, 2, 6, 7, 8, 9, 10, 11};
-        PermutationGroup g = new PermutationGroup(new PermutationOneLine(c), new PermutationOneLine(perm));
+        PermutationGroup g = PermutationGroup.createPermutationGroup(new PermutationOneLine(c), new PermutationOneLine(perm));
         Assert.assertEquals(24, g.order().intValue());
     }
 

@@ -101,7 +101,7 @@ public final class SymmetrizeTransformation implements Transformation {
                 factor = indicesGroup.order();
             } else {
                 //otherwise we might will be more lucky if compute it group of symmetries and then compute coset reps.
-                PermutationGroup t_group = new PermutationGroup(
+                PermutationGroup t_group = PermutationGroup.createPermutationGroup(
                         TensorUtils.findIndicesSymmetries(indices, t));
                 PermutationGroup union = t_group.union(indicesGroup);
                 Permutation[] reps = union.leftCosetRepresentatives(t_group);

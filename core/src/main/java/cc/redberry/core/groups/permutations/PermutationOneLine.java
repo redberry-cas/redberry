@@ -134,6 +134,11 @@ public final class PermutationOneLine implements Permutation {
     }
 
     @Override
+    public int length() {
+        return permutation.length;
+    }
+
+    @Override
     public boolean antisymmetry() {
         return antisymmetry;
     }
@@ -155,12 +160,12 @@ public final class PermutationOneLine implements Permutation {
 
     @Override
     public int newIndexOf(int i) {
-        return permutation[i];
+        return i < permutation.length ? permutation[i] : i;
     }
 
     @Override
     public int imageOf(int i) {
-        return permutation[i];
+        return i < permutation.length ? permutation[i] : i;
     }
 
     @Override
@@ -169,7 +174,7 @@ public final class PermutationOneLine implements Permutation {
             return set.clone();
         final int[] result = new int[set.length];
         for (int i = 0; i < set.length; ++i)
-            result[i] = permutation[set[i]];
+            result[i] = newIndexOf(set[i]);
         return result;
     }
 
@@ -179,7 +184,7 @@ public final class PermutationOneLine implements Permutation {
             return array.clone();
         final int[] result = new int[array.length];
         for (int i = 0; i < array.length; ++i)
-            result[i] = array[permutation[i]];
+            result[i] = array[newIndexOf(i)];
         return result;
     }
 
@@ -189,7 +194,7 @@ public final class PermutationOneLine implements Permutation {
             return array.clone();
         final char[] result = new char[array.length];
         for (int i = 0; i < array.length; ++i)
-            result[i] = array[permutation[i]];
+            result[i] = array[newIndexOf(i)];
         return result;
     }
 
@@ -200,12 +205,14 @@ public final class PermutationOneLine implements Permutation {
         @SuppressWarnings("unchecked")
         final T[] result = (T[]) Array.newInstance(array.getClass().getComponentType(), array.length - 1);
         for (int i = 0; i < array.length; ++i)
-            result[i] = array[permutation[i]];
+            result[i] = array[newIndexOf(i)];
         return result;
     }
 
     @Override
     public int newIndexOfUnderInverse(int i) {
+        if (i >= permutation.length)
+            return i;
         for (int j = permutation.length - 1; j >= 0; --j)
             if (permutation[j] == i)
                 return j;
@@ -224,18 +231,16 @@ public final class PermutationOneLine implements Permutation {
 
     @Override
     public Permutation composition(final Permutation other) {
-        if (permutation.length != other.degree())
-            throw new IllegalArgumentException();
-
         if (this.isIdentity)
             return other;
         if (other.isIdentity())
             return this;
 
-        final int[] result = new int[permutation.length];
+        final int new_degree = Math.max(length(), other.length());
+        final int[] result = new int[new_degree];
         boolean resultIsIdentity = true;
-        for (int i = permutation.length - 1; i >= 0; --i) {
-            result[i] = other.newIndexOf(permutation[i]);
+        for (int i = new_degree - 1; i >= 0; --i) {
+            result[i] = other.newIndexOf(newIndexOf(i));
             resultIsIdentity &= result[i] == i;
         }
 
@@ -248,9 +253,6 @@ public final class PermutationOneLine implements Permutation {
 
     @Override
     public Permutation composition(Permutation a, Permutation b) {
-        if (permutation.length != a.degree() || permutation.length != b.degree())
-            throw new IllegalArgumentException();
-
         if (this.isIdentity)
             return a.composition(b);
         if (a.isIdentity())
@@ -258,10 +260,11 @@ public final class PermutationOneLine implements Permutation {
         if (b.isIdentity())
             return composition(a);
 
-        final int[] result = new int[permutation.length];
+        final int new_degree = Math.max(Math.max(length(), a.length()), b.length());
+        final int[] result = new int[new_degree];
         boolean resultIsIdentity = true;
-        for (int i = permutation.length - 1; i >= 0; --i) {
-            result[i] = b.newIndexOf(a.newIndexOf(permutation[i]));
+        for (int i = new_degree - 1; i >= 0; --i) {
+            result[i] = b.newIndexOf(a.newIndexOf(newIndexOf(i)));
             resultIsIdentity &= result[i] == i;
         }
 
@@ -275,9 +278,6 @@ public final class PermutationOneLine implements Permutation {
 
     @Override
     public Permutation composition(Permutation a, Permutation b, Permutation c) {
-        if (permutation.length != a.degree() || permutation.length != b.degree())
-            throw new IllegalArgumentException();
-
         if (this.isIdentity)
             return a.composition(b, c);
         if (a.isIdentity())
@@ -287,10 +287,12 @@ public final class PermutationOneLine implements Permutation {
         if (c.isIdentity())
             return composition(b, c);
 
-        final int[] result = new int[permutation.length];
+        final int new_degree = Math.max(c.length(), Math.max(
+                Math.max(length(), a.length()), b.length()));
+        final int[] result = new int[new_degree];
         boolean resultIsIdentity = true;
-        for (int i = permutation.length - 1; i >= 0; --i) {
-            result[i] = c.newIndexOf(b.newIndexOf(a.newIndexOf(permutation[i])));
+        for (int i = new_degree - 1; i >= 0; --i) {
+            result[i] = c.newIndexOf(b.newIndexOf(a.newIndexOf(newIndexOf(i))));
             resultIsIdentity &= result[i] == i;
         }
 
@@ -304,9 +306,6 @@ public final class PermutationOneLine implements Permutation {
 
     @Override
     public Permutation compositionWithInverse(final Permutation other) {
-        if (permutation.length != other.degree())
-            throw new IllegalArgumentException();
-
         if (this.isIdentity)
             return other.inverse();
         if (other.isIdentity())
@@ -336,7 +335,7 @@ public final class PermutationOneLine implements Permutation {
     public Permutation getIdentity() {
         if (isIdentity)
             return this;
-        return Permutations.createIdentityPermutation(degree());
+        return Permutations.createIdentityPermutation(permutation.length);
     }
 
     @Override
@@ -349,9 +348,15 @@ public final class PermutationOneLine implements Permutation {
         return !isIdentity && Permutations.orderOfPermutationIsOdd(permutation);
     }
 
+//    @Override
+//    public int degree() {
+//        return permutation.length;
+//    }
+
+
     @Override
-    public int degree() {
-        return permutation.length;
+    public int internalDegree() {
+        return Permutations.internalDegree(permutation);
     }
 
     @Override
@@ -376,12 +381,10 @@ public final class PermutationOneLine implements Permutation {
         Permutation that = (Permutation) o;
         if (antisymmetry != that.antisymmetry())
             return false;
-        if (degree() != that.degree())
-            return false;
-        for (int i = 0; i < permutation.length; ++i)
-            if (permutation[i] != that.newIndexOf(i))
+        final int max = Math.max(length(), that.length());
+        for (int i = 0; i < max; ++i)
+            if (newIndexOf(i) != that.newIndexOf(i))
                 return false;
-
         return true;
     }
 
@@ -391,31 +394,16 @@ public final class PermutationOneLine implements Permutation {
     }
 
     @Override
-    public PermutationOneLine extendAfter(final int newDegree) {
-        if (newDegree < permutation.length)
-            throw new IllegalArgumentException("New degree is smaller then this degree.");
-        if (newDegree == permutation.length)
+    public PermutationOneLine moveRight(final int size) {
+        if (size == 0)
             return this;
-        int[] p = new int[newDegree];
-        System.arraycopy(permutation, 0, p, 0, permutation.length);
-        for (int i = permutation.length; i < newDegree; ++i)
-            p[i] = i;
-        return new PermutationOneLine(isIdentity, antisymmetry, p, true);
-    }
-
-    @Override
-    public PermutationOneLine extendBefore(final int newDegree) {
-        if (newDegree < permutation.length)
-            throw new IllegalArgumentException("New degree is smaller then this degree.");
-        if (newDegree == permutation.length)
-            return this;
-        int[] p = new int[newDegree];
+        final int[] p = new int[size + permutation.length];
         int i = 1;
-        for (; i < newDegree - permutation.length; ++i)
+        for (; i < size; ++i)
             p[i] = i;
         int k = i;
-        for (; i < newDegree; ++i)
-            p[i] = permutation[i - k] + k;
+        for (; i < p.length; ++i)
+            p[i] = permutation[i - k] + size;
         return new PermutationOneLine(isIdentity, antisymmetry, p, true);
     }
 
@@ -444,21 +432,20 @@ public final class PermutationOneLine implements Permutation {
     @Override
     public String toStringCycles() {
         //String cycles = Arrays.deepToString(cycles()).replace("[", "{").replace("]", "}");
-        String cycles = "[" + degree() + ", " + Arrays.deepToString(cycles()) + "]";
+        String cycles = Arrays.deepToString(cycles());
         return (antisymmetry ? "-" : "+") + cycles;
     }
 
 
     @Override
     public int compareTo(Permutation t) {
-        if (t.degree() != permutation.length)
-            throw new IllegalArgumentException("Not same degrees.");
+        final int max = Math.max(length(), t.length());
         if (antisymmetry != t.antisymmetry())
             return antisymmetry ? -1 : 1;
-        for (int i = 0; i < permutation.length; ++i)
-            if (permutation[i] < t.newIndexOf(i))
+        for (int i = 0; i < max; ++i)
+            if (newIndexOf(i) < t.newIndexOf(i))
                 return -1;
-            else if (permutation[i] > t.newIndexOf(i))
+            else if (newIndexOf(i) > t.newIndexOf(i))
                 return 1;
         return 0;
     }

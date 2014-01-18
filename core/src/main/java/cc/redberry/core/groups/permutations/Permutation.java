@@ -48,7 +48,7 @@ public interface Permutation extends Comparable<Permutation> {
      *
      * @return immutable array that represents this permutation in one-line notation
      */
-    IntArray oneLineImmutable ();
+    IntArray oneLineImmutable();
 
     /**
      * Returns an array of disjoint cycles that represent this permutation.
@@ -233,13 +233,17 @@ public interface Permutation extends Comparable<Permutation> {
      */
     public boolean orderIsOdd();
 
-    /**
-     * Returns the degree of this permutation; in other words, the number of elements in set on which this
-     * permutation acts (the length of permutation written in one-line notation).
-     *
-     * @return degree of this permutation
-     */
-    public int degree();
+//    /**
+//     * Returns the degree of this permutation; in other words, the number of elements in set on which this
+//     * permutation acts (the length of permutation written in one-line notation).
+//     *
+//     * @return degree of this permutation
+//     */
+//    public int degree();
+
+    public int internalDegree();
+
+    public int length();
 
     /**
      * Returns this raised to the specified exponent.
@@ -257,22 +261,9 @@ public interface Permutation extends Comparable<Permutation> {
     public int parity();
 
     /**
-     * Extends this permutation to specified degree, by inserting identity action in the initial segment of this
-     * permutation.
-     *
-     * @param newDegree new degree
-     * @return equivalent permutation with specified degree
+     * TODO: WRITE DOCUMENTATION
      */
-    public Permutation extendBefore(int newDegree);
-
-    /**
-     * Extends this permutation to specified degree, by inserting identity action at the end of this permutation (if
-     * written in one-line notation).
-     *
-     * @param newDegree new degree
-     * @return equivalent permutation with specified degree
-     */
-    public Permutation extendAfter(int newDegree);
+    public Permutation moveRight(int size);
 
     /**
      * Returns lengths of cycles in disjoint cycle notation.

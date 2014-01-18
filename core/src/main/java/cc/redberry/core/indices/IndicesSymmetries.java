@@ -116,7 +116,7 @@ public final class IndicesSymmetries {
     public static IndicesSymmetries create(StructureOfIndices structureOfIndices,
                                            List<Permutation> generators) {
         for (Permutation p : generators)
-            if (p.degree() != structureOfIndices.size())
+            if (p.internalDegree() > structureOfIndices.size())
                 throw new IllegalArgumentException("Permutation degree not equal to indices size.");
         if (structureOfIndices.size() == 0)
             return EMPTY_INDICES_SYMMETRIES;
@@ -150,9 +150,9 @@ public final class IndicesSymmetries {
     public PermutationGroup getPermutationGroup() {
         if (permutationGroup == null) {
             if (generators.isEmpty())
-                permutationGroup = PermutationGroup.trivialGroup(structureOfIndices.size());
+                permutationGroup = PermutationGroup.trivialGroup();
             else
-                permutationGroup = new PermutationGroup(generators);
+                permutationGroup = PermutationGroup.createPermutationGroup(generators);
         }
         return permutationGroup;
     }
@@ -172,11 +172,14 @@ public final class IndicesSymmetries {
     public short[] getPositionsInOrbits() {
         if (positionsInOrbits == null) {
             final int[] positionsInOrbitsInt = getPermutationGroup().getPositionsInOrbits();
-            positionsInOrbits = new short[positionsInOrbitsInt.length];
-            for (int i = 0; i < positionsInOrbitsInt.length; ++i) {
+            positionsInOrbits = new short[structureOfIndices.size()];
+            int i = 0;
+            for (; i < positionsInOrbitsInt.length; ++i) {
                 assert positionsInOrbitsInt[i] < Short.MAX_VALUE;
                 positionsInOrbits[i] = (short) positionsInOrbitsInt[i];
             }
+            for (; i < structureOfIndices.size(); ++i)
+                positionsInOrbits[i] = (short) i;
         }
         return positionsInOrbits;
     }
@@ -344,7 +347,7 @@ public final class IndicesSymmetries {
         StructureOfIndices.TypeData data = structureOfIndices.getTypeData(type);
         if (data == null)
             throw new IllegalArgumentException("No such type: " + IndexType.getType(type));
-        if (data.length != symmetry.degree())
+        if (data.length < symmetry.internalDegree())
             throw new IllegalArgumentException("Wrong symmetry length.");
         int[] s = new int[structureOfIndices.size()];
         int i = 0;

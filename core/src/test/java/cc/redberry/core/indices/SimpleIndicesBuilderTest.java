@@ -100,7 +100,7 @@ public class SimpleIndicesBuilderTest {
         Permutation s3 = new PermutationOneLine(false, new int[]{0, 1, 3, 2});
         Permutation[] expected = {s1, s2, s3};
 
-        TAssert.assertEquals(ibs.getIndices().getSymmetries().getPermutationGroup(), new PermutationGroup(expected));
+        TAssert.assertEquals(ibs.getIndices().getSymmetries().getPermutationGroup(), PermutationGroup.createPermutationGroup(expected));
     }
 
     @Test
@@ -126,7 +126,7 @@ public class SimpleIndicesBuilderTest {
         Permutation s3 = new PermutationOneLine(false, new int[]{0, 1, 2, 3, 5, 4, 6, 7});
         Permutation[] expected = {s1, s2, s3};
 
-        TAssert.assertEquals(ibs.getIndices().getSymmetries().getPermutationGroup(), new PermutationGroup(expected));
+        TAssert.assertEquals(ibs.getIndices().getSymmetries().getPermutationGroup(), PermutationGroup.createPermutationGroup(expected));
     }
 
     @Test
@@ -153,6 +153,6 @@ public class SimpleIndicesBuilderTest {
         Permutation s3 = new PermutationOneLine(false, new int[]{0, 1, 3, 2, 4, 5, 6, 7});
         Permutation[] expected = {s1, s2, s3};
 
-        TAssert.assertEquals(ibs.getIndices().getSymmetries().getPermutationGroup(), new PermutationGroup(expected));
+        TAssert.assertEquals(ibs.getIndices().getSymmetries().getPermutationGroup(), PermutationGroup.createPermutationGroup(expected));
     }
 }

@@ -62,7 +62,7 @@ public final class AlgorithmsBacktrack {
                                                  final BacktrackSearchPayload payload,
                                                  final Indicator<Permutation> property) {
         final int[] base = AlgorithmsBase.getBaseAsArray(group);
-        final InducedOrdering ordering = new InducedOrdering(base, group.get(0).degree());
+        final InducedOrdering ordering = new InducedOrdering(base, group.get(0).maximumMovedPoint());
         subgroupSearchWithPayload(group, subgroup, payload, property, base, ordering);
     }
 
@@ -94,7 +94,10 @@ public final class AlgorithmsBacktrack {
 
         //<= initialization
 
-        final int degree = group.get(0).degree();
+        final int degree = group.get(0).maximumMovedPoint();
+        if (!subgroup.isEmpty() && subgroup.get(0).maximumMovedPoint() > degree)
+            throw new IllegalArgumentException("Specified subgroup is not a subgroup of specified group.");
+
         final int size = group.size();
 
         final Permutation identity = group.get(0).stabilizerGenerators.get(0).getIdentity();
@@ -179,7 +182,7 @@ public final class AlgorithmsBacktrack {
             //Calculating the orbit of g(β_l) under stabilizer of [g(β_1), g(β_1),...g(β_l-1)] which will be used in
             // the first iteration (the line with "isMinimalInOrbit(subgroup_rebase.get(level).orbitList, image,
             // ordering)").
-            replaceBasePointWithRedundancy(subgroup_rebase, level, image);
+            replaceBasePointWithRedundancy(subgroup_rebase, level, image, degree);
             while (level < size - 1
                     // check PROPOSITION 4.7 (i)
                     //≺-least element of subgroup orbits with respect to base g(B(l))
@@ -228,7 +231,7 @@ public final class AlgorithmsBacktrack {
                 image = word[level].newIndexOf(base[level]);
                 //calculating the orbit of g(β_l) under stabilizer of [g(β_1), g(β_1),...g(β_l-1)] which will be used in
                 //the next iteration cycle (the line with "isMinimalInOrbit(subgroup_rebase.get(level).orbitList, image, ordering)")
-                replaceBasePointWithRedundancy(subgroup_rebase, level, image);
+                replaceBasePointWithRedundancy(subgroup_rebase, level, image, degree);
 
                 payload.afterLevelIncrement(level);
 
@@ -259,7 +262,7 @@ public final class AlgorithmsBacktrack {
                     subgroup.get(0).stabilizerGenerators.add(word[level]);
                     subgroup.get(0).recalculateOrbitAndSchreierVector();
                     //recalculate subgroup
-                    AlgorithmsBase.SchreierSimsAlgorithm(subgroup);
+                    AlgorithmsBase.SchreierSimsAlgorithm(subgroup, degree);
 
                     //dump subgroup_rebase
                     subgroup_rebase = AlgorithmsBase.clone(subgroup);
@@ -352,7 +355,7 @@ public final class AlgorithmsBacktrack {
     public static Permutation[] leftCosetRepresentatives(final List<? extends BSGSElement> group,
                                                          final List<? extends BSGSElement> subgroup) {
         final int[] base = AlgorithmsBase.getBaseAsArray(group);
-        final InducedOrdering ordering = new InducedOrdering(base, group.get(0).degree());
+        final InducedOrdering ordering = new InducedOrdering(base, group.get(0).maximumMovedPoint());
         return leftCosetRepresentatives(group, subgroup, base, ordering);
     }
 
@@ -384,7 +387,7 @@ public final class AlgorithmsBacktrack {
 
         //<= initialization
 
-        final int degree = group.get(0).degree();
+        final int degree = group.get(0).maximumMovedPoint();
         final int size = group.size();
 
         //we'll start from the end
@@ -421,7 +424,7 @@ public final class AlgorithmsBacktrack {
         while (true) {
             //at each level we test our basic image to satisfy required conditions for a coset minimality
             image = word[level].newIndexOf(base[level]);
-            replaceBasePointWithRedundancy(subgroup_rebase, level, image);
+            replaceBasePointWithRedundancy(subgroup_rebase, level, image, degree);
             while (level < size - 1
                     // check PROPOSITION 4.7 (i)
                     //≺-least element of subgroup orbits with respect to base g(B(l))
@@ -451,7 +454,7 @@ public final class AlgorithmsBacktrack {
                 image = word[level].newIndexOf(base[level]);
                 //calculating the orbit of g(β_l) under stabilizer of [g(β_1), g(β_1),...g(β_l-1)] which will be used in
                 //the next iteration cycle (the line with "isMinimalInOrbit(subgroup_rebase.get(level).orbitList, image, ordering)")
-                replaceBasePointWithRedundancy(subgroup_rebase, level, image);
+                replaceBasePointWithRedundancy(subgroup_rebase, level, image, degree);
             }
 
             ++____VISITED_NODES___[0];
@@ -498,7 +501,7 @@ public final class AlgorithmsBacktrack {
                                                 final List<? extends BSGSElement> group,
                                                 final List<? extends BSGSElement> subgroup) {
         final int[] base = AlgorithmsBase.getBaseAsArray(group);
-        final InducedOrdering ordering = new InducedOrdering(base, group.get(0).degree());
+        final InducedOrdering ordering = new InducedOrdering(base, group.get(0).maximumMovedPoint());
         return leftTransversalOf(element, group, subgroup, base, ordering);
     }
 
@@ -521,7 +524,7 @@ public final class AlgorithmsBacktrack {
         if (group.size() == 0 || subgroup.size() == 0)
             throw new IllegalArgumentException("Empty group.");
 
-        final int degree = group.get(0).degree();
+        final int degree = group.get(0).maximumMovedPoint();
         final ArrayList<BSGSCandidateElement> _subgroup = AlgorithmsBase.asBSGSCandidatesList(subgroup);
         rebaseWithRedundancy(_subgroup, base, degree);
 
@@ -537,14 +540,15 @@ public final class AlgorithmsBacktrack {
         for (int level = 0; level < group.size(); ++level) {
 
             image = transversal.newIndexOf(base[level]);
-            minimalImage[level] = ordering.min(Permutations.getOrbitList(_subgroup.get(level).stabilizerGenerators, image));
+            minimalImage[level] = ordering.min(Permutations.getOrbitList(_subgroup.get(level).stabilizerGenerators,
+                    image, degree));
             //find element that maps image to minimalImage[level]
             //the following two lines can be done with the use of backtrack search
-            replaceBasePointWithRedundancy(_subgroup, level, image);
+            replaceBasePointWithRedundancy(_subgroup, level, image, degree);
             transversal = transversal.composition(_subgroup.get(level).getTransversalOf(minimalImage[level]));
 
             //element found: rebase
-            replaceBasePointWithRedundancy(_subgroup, level, minimalImage[level]);
+            replaceBasePointWithRedundancy(_subgroup, level, minimalImage[level], degree);
         }
         return transversal;
     }
@@ -568,10 +572,10 @@ public final class AlgorithmsBacktrack {
         }
 
         final ArrayList<BSGSCandidateElement> smaller = AlgorithmsBase.asBSGSCandidatesList(group1);
-        rebaseWithRedundancy(smaller, AlgorithmsBase.getBaseAsArray(group2), group2.get(0).degree());
+        rebaseWithRedundancy(smaller, AlgorithmsBase.getBaseAsArray(group2), group2.get(0).maximumMovedPoint());
 
         final ArrayList<BSGSCandidateElement> larger = AlgorithmsBase.asBSGSCandidatesList(group2);
-        rebaseWithRedundancy(larger, AlgorithmsBase.getBaseAsArray(smaller), group2.get(0).degree());
+        rebaseWithRedundancy(larger, AlgorithmsBase.getBaseAsArray(smaller), group2.get(0).maximumMovedPoint());
 
         assert smaller.size() == larger.size();
 
@@ -639,7 +643,7 @@ public final class AlgorithmsBacktrack {
      */
     static void rebaseWithRedundancy(final ArrayList<BSGSCandidateElement> group,
                                      final int[] base, final int degree) {
-        AlgorithmsBase.rebase(group, base);
+        AlgorithmsBase.rebase(group, base, degree);
         if (group.size() < base.length)
             for (int i = group.size(); i < base.length; ++i)
                 group.add(new BSGSCandidateElement(base[i], new ArrayList<Permutation>(), new int[degree]));
@@ -676,7 +680,7 @@ public final class AlgorithmsBacktrack {
      * @param newPoint new point
      */
     private static void replaceBasePointWithRedundancy(final ArrayList<BSGSCandidateElement> group,
-                                                       final int index, final int newPoint) {
+                                                       final int index, final int newPoint, final int degree) {
         if (group.get(index).basePoint == newPoint)
             return;
 
@@ -714,7 +718,7 @@ public final class AlgorithmsBacktrack {
             AlgorithmsBase.changeBasePointWithTranspositions(group, index, newPoint);*/
 
         //replace with transpositions
-        AlgorithmsBase.changeBasePointWithTranspositions(group, index, newPoint);
+        AlgorithmsBase.changeBasePointWithTranspositions(group, index, newPoint, degree);
 
         //keep bsgs with a fixed size
         assert group.size() >= oldSize;

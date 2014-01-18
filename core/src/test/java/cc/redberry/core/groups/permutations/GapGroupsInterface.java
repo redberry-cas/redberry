@@ -107,7 +107,7 @@ public final class GapGroupsInterface {
     }
 
     public PermutationGroup evaluateToPermutationGroup(String command) {
-        return new PermutationGroup(evaluateToGenerators(stringToGapCommand(command)));
+        return PermutationGroup.createPermutationGroup(evaluateToGenerators(stringToGapCommand(command)));
     }
 
     public boolean evaluateToBoolean(String command) {

@@ -167,7 +167,7 @@ public class TensorUtilsTest {
         for (Permutation symmetry : symmetries)
             expected.add(symmetry);
 
-        assertEqualsSymmetries(new PermutationGroup(actual), new PermutationGroup(expected));
+        assertEqualsSymmetries(PermutationGroup.createPermutationGroup(actual), PermutationGroup.createPermutationGroup(expected));
     }
 
     @Test
@@ -216,8 +216,8 @@ public class TensorUtilsTest {
             expectedSymmetries.add(s);
         }
 
-        assertEqualsSymmetries(new PermutationGroup(expectedSymmetries),
-                new PermutationGroup(findIndicesSymmetries(tensor.getIndices(), tensor)));
+        assertEqualsSymmetries(PermutationGroup.createPermutationGroup(expectedSymmetries),
+                PermutationGroup.createPermutationGroup(findIndicesSymmetries(tensor.getIndices(), tensor)));
     }
 
     @Test
@@ -227,7 +227,7 @@ public class TensorUtilsTest {
         List<Permutation> expected = new ArrayList<>();
         expected.add(new PermutationOneLine(new int[]{1, 0, 2, 3}));
         expected.add(new PermutationOneLine(new int[]{0, 1, 3, 2}));
-        assertEqualsSymmetries(new PermutationGroup(actual), new PermutationGroup(expected));
+        assertEqualsSymmetries(PermutationGroup.createPermutationGroup(actual), PermutationGroup.createPermutationGroup(expected));
     }
 
     @Test
@@ -237,7 +237,7 @@ public class TensorUtilsTest {
         List<Permutation> expected =  new ArrayList<>();
         expected.add(new PermutationOneLine(false, new int[]{1, 0, 2, 3}));
         expected.add(new PermutationOneLine(false, new int[]{0, 1, 3, 2}));
-        assertEqualsSymmetries(new PermutationGroup(actual), new PermutationGroup(expected));
+        assertEqualsSymmetries(PermutationGroup.createPermutationGroup(actual), PermutationGroup.createPermutationGroup(expected));
     }
 
     @Test

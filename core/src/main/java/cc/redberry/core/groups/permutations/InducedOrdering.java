@@ -73,6 +73,10 @@ public class InducedOrdering implements IntComparator {
 
     @Override
     public int compare(int a, int b) {
+        if (a > positions.length)
+            return b > positions.length ? 0 : 1;
+        if (b > positions.length)
+            return a > positions.length ? 0 : -1;
         return Integer.compare(positions[a + 1], positions[b + 1]);
     }
 
