@@ -944,6 +944,33 @@ public final class Tensors {
     }
 
     /**
+     * Attaches symmetries to simple tensor.
+     *
+     * @param tensor       simple tensor
+     * @param permutations permutations
+     * @throws java.lang.IllegalStateException    if this tensor is already in use (it's permutation group calculated)
+     * @throws java.lang.IllegalArgumentException if degree of some permutation differs from the size of indices
+     *                                            of specified tensor
+     */
+    public static void addSymmetries(SimpleTensor tensor, Permutation... permutations) {
+        for (Permutation p : permutations)
+            tensor.getIndices().getSymmetries().add(p);
+    }
+
+    /**
+     * Attaches symmetris to simple tensor.
+     *
+     * @param tensor       string representation of simple tensor
+     * @param permutations permutations
+     * @throws java.lang.IllegalStateException    if this tensor is already in use (it's permutation group calculated)
+     * @throws java.lang.IllegalArgumentException if degree of some permutation differs from the size of indices
+     *                                            of specified tensor
+     */
+    public static void addSymmetries(String tensor, Permutation... permutations) {
+        addSymmetries(parseSimple(tensor), permutations);
+    }
+
+    /**
      * Attaches symmetry to simple tensor with respect to indices of specified type.
      *
      * @param tensor      string representation of simple tensor
@@ -1164,5 +1191,26 @@ public final class Tensors {
         setSymmetric(parseSimple(tensor));
     }
 
+    /**
+     * Makes simple tensors symmetric.
+     *
+     * @param tensors string representation of simple tensors
+     * @throws java.lang.IllegalStateException if this tensor is already in use (it's permutation group calculated)
+     */
+    public static void setSymmetric(String... tensors) {
+        for (String tensor : tensors)
+            setSymmetric(tensor);
+    }
+
+    /**
+     * Makes simple tensors symmetric.
+     *
+     * @param tensors string representation of simple tensors
+     * @throws java.lang.IllegalStateException if this tensor is already in use (it's permutation group calculated)
+     */
+    public static void setAntisymmetric(String... tensors) {
+        for (String tensor : tensors)
+            setAntiSymmetric(tensor);
+    }
 
 }

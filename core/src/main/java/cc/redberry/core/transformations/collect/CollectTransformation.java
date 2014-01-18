@@ -138,7 +138,9 @@ public class CollectTransformation implements Transformation {
             nodes.add(toAdd);
         }
 
-
+        Tensor r = Transformation.Util.applySequentially(notMatched.build(), transformations);
+        notMatched = new SumBuilder();
+        notMatched.put(r);
         for (ArrayList<Split> splits : map.valueCollection())
             for (Split split : splits)
                 notMatched.put(split.toTensor(transformations));

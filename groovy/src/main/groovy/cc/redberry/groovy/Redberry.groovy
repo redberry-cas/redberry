@@ -35,10 +35,7 @@ import cc.redberry.core.number.Numeric
 import cc.redberry.core.number.Rational
 import cc.redberry.core.number.Real
 import cc.redberry.core.parser.ParserIndices
-import cc.redberry.core.tensor.Expression
-import cc.redberry.core.tensor.Tensor
-import cc.redberry.core.tensor.TensorBuilder
-import cc.redberry.core.tensor.Tensors
+import cc.redberry.core.tensor.*
 import cc.redberry.core.tensor.iterator.FromChildToParentIterator
 import cc.redberry.core.tensor.iterator.FromParentToChildIterator
 import cc.redberry.core.tensor.iterator.TraverseGuide
@@ -50,7 +47,6 @@ import cc.redberry.core.utils.IntArray
 import cc.redberry.core.utils.IntArrayList
 import cc.redberry.core.utils.TensorUtils
 import org.codehaus.groovy.runtime.DefaultGroovyMethods
-import org.codehaus.groovy.runtime.InvokerHelper
 
 import static cc.redberry.core.tensor.Tensors.*
 
@@ -951,6 +947,21 @@ class Redberry {
      */
     static Tensor getT(String string) {
         return parse(string)
+    }
+
+    /**
+     * Parse string to simple tensor
+     * @param string string representation of simple tensor
+     * @return simple tensor
+     * @see cc.redberry.core.tensor.SimpleTensor
+     * @see Tensors#parse(java.lang.String)
+     * @throws cc.redberry.core.parser.ParserException
+     *          if expression does not satisfy correct Redberry
+     *          input notation for tensors
+     *
+     */
+    static SimpleTensor getSt(String string) {
+        return parseSimple(string)
     }
 
     /**

@@ -33,6 +33,7 @@ import cc.redberry.core.transformations.Transformation;
 import cc.redberry.core.transformations.expand.ExpandAllTransformation;
 import cc.redberry.core.transformations.expand.ExpandNumeratorTransformation;
 import cc.redberry.core.transformations.expand.ExpandTransformation;
+import cc.redberry.core.transformations.factor.FactorTransformation;
 import cc.redberry.core.transformations.fractions.TogetherTransformation;
 import cc.redberry.core.utils.TensorUtils;
 import org.junit.Assert;
