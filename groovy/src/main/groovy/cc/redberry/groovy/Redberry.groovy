@@ -1101,8 +1101,7 @@ class Redberry {
         if (oneLine)
             return new PermutationOneLine(list as int[])
 
-        int degree = list[0]
-        return new PermutationOneLine(degree, list[1] as int[][])
+        return new PermutationOneLine(list as int[][])
     }
 
     static Permutation negative(Permutation permutation) {

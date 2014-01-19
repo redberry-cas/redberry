@@ -69,24 +69,22 @@ public final class PermutationOneLine implements Permutation {
      * antisymmetry ({@code true} means antisymmetry)
      *
      * @param antisymmetry antisymmetry (true - antisymmetry, false - symmetry)
-     * @param degree       degree of permutation
      * @param cycles       disjoint cycles
      * @throws IllegalArgumentException if permutation is inconsistent with disjoint cycles notation
      * @throws IllegalArgumentException if antisymmetry is true and permutation order is odd
      */
-    public PermutationOneLine(boolean antisymmetry, int degree, int[][] cycles) {
-        this(antisymmetry, Permutations.convertCyclesToOneLine(degree, cycles));
+    public PermutationOneLine(boolean antisymmetry, int[][] cycles) {
+        this(antisymmetry, Permutations.convertCyclesToOneLine(cycles));
     }
 
     /**
      * Creates permutation from a given array of disjoint cycles.
      *
-     * @param degree degree of permutation
      * @param cycles disjoint cycles
      * @throws IllegalArgumentException if permutation is inconsistent with disjoint cycles notation
      */
-    public PermutationOneLine(int degree, int[][] cycles) {
-        this(Permutations.convertCyclesToOneLine(degree, cycles));
+    public PermutationOneLine(int[][] cycles) {
+        this(Permutations.convertCyclesToOneLine(cycles));
     }
 
     /**

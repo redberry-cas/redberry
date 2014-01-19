@@ -342,8 +342,8 @@ public class AlgorithmsBaseTest extends AbstractTestClass {
     @Test
     public void testRemoveRedundant4() {
         int[][] a = {{0, 4}, {1, 3}, {2, 9}, {6, 10}}, b = {{2, 10, 4}, {3, 6, 8}, {5, 7, 9}};
-        PermutationGroup pg = PermutationGroup.createPermutationGroup(new PermutationOneLine(11, a),
-                new PermutationOneLine(11, b));
+        PermutationGroup pg = PermutationGroup.createPermutationGroup(new PermutationOneLine(a),
+                new PermutationOneLine(b));
         ArrayList<BSGSCandidateElement> bsgs = pg.getBSGSCandidate();
 
         for (int i = 0; i < bsgs.size() - 1; ++i) {
@@ -614,8 +614,8 @@ public class AlgorithmsBaseTest extends AbstractTestClass {
     @Test
     public void testSwapAdjacentBasePoints2a() {
         int[][] a = {{0, 4}, {1, 3}, {2, 9}, {6, 10}}, b = {{2, 10, 4}, {3, 6, 8}, {5, 7, 9}};
-        PermutationGroup pg = PermutationGroup.createPermutationGroup(new PermutationOneLine(11, a),
-                new PermutationOneLine(11, b));
+        PermutationGroup pg = PermutationGroup.createPermutationGroup(new PermutationOneLine(a),
+                new PermutationOneLine(b));
         ArrayList<BSGSCandidateElement> bsgs = pg.getBSGSCandidate();
         removeRedundantGenerators(bsgs);
         assertTrue(isBSGS(bsgs));

@@ -127,17 +127,17 @@ public class EqualsTest
                 new PermutationOneLine(2, 3, 0, 1));
 
         Tensors.parseSimple("A_abcde").getIndices().getSymmetries().add(
-                new PermutationOneLine(5, new int[][]{{0, 1, 2, 3, 4}}));
+                new PermutationOneLine(new int[][]{{0, 1, 2, 3, 4}}));
 
         Tensors.parseSimple("B_abcde").getIndices().getSymmetries().add(
-                new PermutationOneLine(5, new int[][]{{1, 3}, {2, 4}}));
+                new PermutationOneLine(new int[][]{{1, 3}, {2, 4}}));
         Tensors.parseSimple("B_abcde").getIndices().getSymmetries().add(
-                new PermutationOneLine(5, new int[][]{{0, 1, 2, 4, 3}}));
+                new PermutationOneLine(new int[][]{{0, 1, 2, 4, 3}}));
 
         Tensors.parseSimple("C_abcde").getIndices().getSymmetries().add(
-                new PermutationOneLine(5, new int[][]{{1, 2, 3, 4}}));
+                new PermutationOneLine(new int[][]{{1, 2, 3, 4}}));
         Tensors.parseSimple("C_abcde").getIndices().getSymmetries().add(
-                new PermutationOneLine(5, new int[][]{{0, 1, 2, 4, 3}}));
+                new PermutationOneLine(new int[][]{{0, 1, 2, 4, 3}}));
 
         randomTensor.addToNamespace(Tensors.parse("R_abcd", "A_abcde", "B_abcde", "C_abcde"));
 

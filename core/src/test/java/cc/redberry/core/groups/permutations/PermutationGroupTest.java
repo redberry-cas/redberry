@@ -699,8 +699,8 @@ public class PermutationGroupTest extends AbstractTestClass {
         int[][] b = {{1, 2, 3, 4, 5, 6, 7}};
         int[][] c = {{1, 2, 3}};
         int[][] d = {{3, 4, 5, 6, 7}};
-        PermutationGroup pg1 = PermutationGroup.createPermutationGroup(new PermutationOneLine(8, a), new PermutationOneLine(8, b));
-        PermutationGroup pg2 = PermutationGroup.createPermutationGroup(new PermutationOneLine(8, c), new PermutationOneLine(8, d));
+        PermutationGroup pg1 = PermutationGroup.createPermutationGroup(new PermutationOneLine(a), new PermutationOneLine(b));
+        PermutationGroup pg2 = PermutationGroup.createPermutationGroup(new PermutationOneLine(c), new PermutationOneLine(d));
 
         PermutationGroup nc = pg1.normalClosureOf(pg2);
         assertTrue(nc.equals(pg2));
@@ -766,7 +766,7 @@ public class PermutationGroupTest extends AbstractTestClass {
         int[][] a = {{0, 1}, {2, 3}};
         int[][] b = {{0, 2}, {1, 3}};
         int[][] c = {{0, 3}, {1, 2}};
-        PermutationGroup expected = PermutationGroup.createPermutationGroup(new PermutationOneLine(4, a), new PermutationOneLine(4, b), new PermutationOneLine(4, c));
+        PermutationGroup expected = PermutationGroup.createPermutationGroup(new PermutationOneLine(a), new PermutationOneLine(b), new PermutationOneLine(c));
         assertTrue(expected.equals(v4));
     }
 
@@ -855,19 +855,19 @@ public class PermutationGroupTest extends AbstractTestClass {
     public void testCentralizer2() throws Exception {
         PermutationGroup a8 = PermutationGroup.alternatingGroup(8);
         int[][] p1 = {{0, 1, 2}, {3, 4, 5}};
-        PermutationGroup c = a8.centralizerOf(new PermutationOneLine(a8.degree(), p1));
+        PermutationGroup c = a8.centralizerOf(new PermutationOneLine(p1));
         int[][] p2 = {{3, 4, 5}};
         int[][] p3 = {{0, 3}, {1, 4}, {2, 5}, {6, 7}};
         PermutationGroup expected = PermutationGroup.createPermutationGroup(
-                new PermutationOneLine(a8.degree(), p1),
-                new PermutationOneLine(a8.degree(), p2),
-                new PermutationOneLine(a8.degree(), p3));
+                new PermutationOneLine(p1),
+                new PermutationOneLine(p2),
+                new PermutationOneLine(p3));
         assertTrue(expected.equals(c));
         assertTrue(c.center().equals(
-                PermutationGroup.createPermutationGroup(new PermutationOneLine(a8.degree(), p1))));
+                PermutationGroup.createPermutationGroup(new PermutationOneLine(p1))));
         int[][] p4 = {{0, 2, 1}, {3, 4, 5}};
         assertTrue(c.derivedSubgroup().equals(
-                PermutationGroup.createPermutationGroup(new PermutationOneLine(a8.degree(), p4))));
+                PermutationGroup.createPermutationGroup(new PermutationOneLine(p4))));
     }
 
     @Test
@@ -937,8 +937,8 @@ public class PermutationGroupTest extends AbstractTestClass {
 
     @Test
     public void testExample3() {
-        Permutation perm1 = new PermutationOneLine(8, new int[][]{{1, 2, 3}});
-        Permutation perm2 = new PermutationOneLine(8, new int[][]{{3, 4, 5, 6, 7}});
+        Permutation perm1 = new PermutationOneLine(new int[][]{{1, 2, 3}});
+        Permutation perm2 = new PermutationOneLine(new int[][]{{3, 4, 5, 6, 7}});
         PermutationGroup pg = PermutationGroup.createPermutationGroup(perm1, perm2);
 
         BacktrackSearch mappings = pg.mapping(new int[]{7, 2, 1, 3}, new int[]{5, 3, 6, 1});
@@ -949,8 +949,8 @@ public class PermutationGroupTest extends AbstractTestClass {
 
     @Test
     public void testPointwiseStabilizerRestricted1() throws Exception {
-        Permutation perm1 = new PermutationOneLine(8, new int[][]{{1, 2, 3}});
-        Permutation perm2 = new PermutationOneLine(8, new int[][]{{3, 4, 5, 6, 7}});
+        Permutation perm1 = new PermutationOneLine(new int[][]{{1, 2, 3}});
+        Permutation perm2 = new PermutationOneLine(new int[][]{{3, 4, 5, 6, 7}});
         PermutationGroup pg = PermutationGroup.createPermutationGroup(perm1, perm2);
         PermutationGroup ps = pg.pointwiseStabilizer(1, 2, 3);
         PermutationGroup psr = pg.pointwiseStabilizerRestricted(1, 2, 3);
@@ -990,9 +990,9 @@ public class PermutationGroupTest extends AbstractTestClass {
     @Test
     public void testPointwiseStabilizerRestricted2() throws Exception {
         Permutation[] generators = {
-                new PermutationOneLine(16, new int[][]{{1, 12, 6, 5, 14}, {2, 7, 9, 8, 4}, {3, 11, 15, 13, 10}}),
-                new PermutationOneLine(16, new int[][]{{1, 4}, {2, 15}, {3, 11}, {6, 14}, {7, 10}, {9, 12}}),
-                new PermutationOneLine(16, new int[][]{{0, 1}, {2, 3}, {4, 5}, {6, 7}, {8, 9}, {10, 11}, {12, 13}, {14, 15}})};
+                new PermutationOneLine(new int[][]{{1, 12, 6, 5, 14}, {2, 7, 9, 8, 4}, {3, 11, 15, 13, 10}}),
+                new PermutationOneLine(new int[][]{{1, 4}, {2, 15}, {3, 11}, {6, 14}, {7, 10}, {9, 12}}),
+                new PermutationOneLine(new int[][]{{0, 1}, {2, 3}, {4, 5}, {6, 7}, {8, 9}, {10, 11}, {12, 13}, {14, 15}})};
         PermutationGroup pg = PermutationGroup.createPermutationGroup(generators);
         int[] set = {5, 12, 13, 15, 15};
         PermutationGroup ps = pg.pointwiseStabilizer(set);
@@ -1006,19 +1006,19 @@ public class PermutationGroupTest extends AbstractTestClass {
 
     @Test
     public void testConjugate1() {
-        Permutation perm1 = new PermutationOneLine(8, new int[][]{{1, 2, 3}});
-        Permutation perm2 = new PermutationOneLine(8, new int[][]{{3, 4, 5, 6, 7}});
+        Permutation perm1 = new PermutationOneLine(new int[][]{{1, 2, 3}});
+        Permutation perm2 = new PermutationOneLine(new int[][]{{3, 4, 5, 6, 7}});
         PermutationGroup pg = PermutationGroup.createPermutationGroup(perm1, perm2);
 
         Permutation c = new PermutationOneLine(1, 0, 2, 3, 4, 5, 6, 7);
 
         PermutationGroup expected = PermutationGroup.createPermutationGroup(
-                new PermutationOneLine(8, new int[][]{{0, 2, 3}}), perm2);
+                new PermutationOneLine(new int[][]{{0, 2, 3}}), perm2);
         assertEquals(expected, pg.conjugate(c));
 
         c = new PermutationOneLine(0, 1, 2, 4, 3, 5, 6, 7);
         expected = PermutationGroup.createPermutationGroup(
-                new PermutationOneLine(8, new int[][]{{4, 3, 5, 6, 7}}), perm1);
+                new PermutationOneLine(new int[][]{{4, 3, 5, 6, 7}}), perm1);
         assertEquals(expected, pg.conjugate(c));
     }
 

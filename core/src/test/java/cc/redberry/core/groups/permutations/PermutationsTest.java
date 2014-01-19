@@ -180,7 +180,18 @@ public class PermutationsTest {
             int degree = 1 + CC.getRandomGenerator().nextInt(100);
             int[] p = Permutations.randomPermutation(degree);
             int[][] cycles = Permutations.convertOneLineToCycles(p);
-            Assert.assertArrayEquals(p, Permutations.convertCyclesToOneLine(degree, cycles));
+            int[] r = Permutations.convertCyclesToOneLine(cycles);
+            int len = Math.min(r.length, p.length);
+            int j = 0;
+            for (; j < len; ++j)
+                Assert.assertEquals(p[j], r[j]);
+            int t = j;
+            for (; t < r.length; ++t)
+                Assert.assertEquals(t, r[t]);
+            t = j;
+            for (; t < r.length; ++t)
+                Assert.assertEquals(t, r[t]);
+
         }
     }
 

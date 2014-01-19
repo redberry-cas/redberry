@@ -338,11 +338,14 @@ public final class Permutations {
     /**
      * Converts cycles to one-line notation.
      *
-     * @param degree degree of permutation
      * @param cycles disjoint cycles
      * @return permutation written in one-line notation
      */
-    public static int[] convertCyclesToOneLine(final int degree, final int[][] cycles) {
+    public static int[] convertCyclesToOneLine(final int[][] cycles) {
+        int degree = -1;
+        for (int[] cycle : cycles)
+            degree = Math.max(degree, ArraysUtils.max(cycle));
+        ++degree;
         final int[] permutation = new int[degree];
         for (int i = 1; i < degree; ++i)
             permutation[i] = i;
