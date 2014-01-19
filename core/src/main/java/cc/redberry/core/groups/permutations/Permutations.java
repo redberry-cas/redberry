@@ -53,7 +53,7 @@ public final class Permutations {
         return r + 1;
     }
 
-    public static int maximumMovedPoint(final List<? extends Permutation> permutations) {
+    public static int internalDegree(final List<? extends Permutation> permutations) {
         int r = 0;
         for (Permutation p : permutations)
             r = Math.max(r, p.internalDegree());
@@ -222,7 +222,7 @@ public final class Permutations {
      * @return orbit of specified point
      */
     public static IntArrayList getOrbitList(List<Permutation> generators, int point) {
-        return getOrbitList(generators, point, maximumMovedPoint(generators));
+        return getOrbitList(generators, point, internalDegree(generators));
     }
 
     /**
@@ -281,7 +281,7 @@ public final class Permutations {
      * @return size of point orbit
      */
     public static int getOrbitSize(List<Permutation> generators, int point) {
-        return getOrbitList(generators, point, maximumMovedPoint(generators)).size();
+        return getOrbitList(generators, point, internalDegree(generators)).size();
     }
 
     /**

@@ -162,7 +162,7 @@ public final class AlgorithmsBase {
      * @throws IllegalArgumentException if not all permutations have same length
      */
     public static List<BSGSCandidateElement> createRawBSGSCandidate(final List<Permutation> generators) {
-        return createRawBSGSCandidate(generators, Permutations.maximumMovedPoint(generators));
+        return createRawBSGSCandidate(generators, Permutations.internalDegree(generators));
     }
 
 
@@ -229,7 +229,7 @@ public final class AlgorithmsBase {
      */
     public static List<BSGSCandidateElement> createRawBSGSCandidate(final int[] knownBase,
                                                                     final List<Permutation> generators) {
-        return createRawBSGSCandidate(knownBase, generators, Permutations.maximumMovedPoint(generators));
+        return createRawBSGSCandidate(knownBase, generators, Permutations.internalDegree(generators));
     }
 
     /**
@@ -247,7 +247,7 @@ public final class AlgorithmsBase {
      */
     public static List<BSGSCandidateElement> createRawBSGSCandidate(final int[] knownBase,
                                                                     final List<Permutation> generators, int degree) {
-        //final int length = Math.max(ArraysUtils.max(knownBase), Permutations.maximumMovedPoint(generators));
+        //final int length = Math.max(ArraysUtils.max(knownBase), Permutations.internalDegree(generators));
         if (degree == 0)
             return Collections.EMPTY_LIST;
 
@@ -319,7 +319,7 @@ public final class AlgorithmsBase {
      * @see #SchreierSimsAlgorithm(java.util.ArrayList)
      */
     public static List<BSGSElement> createBSGSList(final List<Permutation> generators) {
-        return createBSGSList(generators, Permutations.maximumMovedPoint(generators));
+        return createBSGSList(generators, Permutations.internalDegree(generators));
     }
 
     /**
@@ -375,7 +375,7 @@ public final class AlgorithmsBase {
      * @see #SchreierSimsAlgorithm(java.util.ArrayList)
      */
     public static List<BSGSElement> createBSGSList(final int[] knownBase, final List<Permutation> generators) {
-        return createBSGSList(knownBase, generators, Permutations.maximumMovedPoint(generators));
+        return createBSGSList(knownBase, generators, Permutations.internalDegree(generators));
     }
 
     /**
@@ -418,7 +418,7 @@ public final class AlgorithmsBase {
     public static void makeUseOfAllGenerators(List<BSGSCandidateElement> BSGSCandidate) {
         //all group generators
         List<Permutation> generators = BSGSCandidate.get(0).stabilizerGenerators;
-        final int length = getMaxPoint(BSGSCandidate);
+        final int length = internalDegree(BSGSCandidate);
         if (length == 0)
             return;
         //iterate over all generators find each one that fixes all base points
@@ -456,7 +456,7 @@ public final class AlgorithmsBase {
      *                                                                              generators are inconsistent (due to antisymmetries)
      */
     public static void SchreierSimsAlgorithm(ArrayList<BSGSCandidateElement> BSGSCandidate) {
-        SchreierSimsAlgorithm(BSGSCandidate, getMaxPoint(BSGSCandidate));
+        SchreierSimsAlgorithm(BSGSCandidate, internalDegree(BSGSCandidate));
     }
 
     /**
@@ -571,7 +571,7 @@ public final class AlgorithmsBase {
      */
     public static void RandomSchreierSimsAlgorithm(ArrayList<BSGSCandidateElement> BSGSCandidate,
                                                    double confidenceLevel, RandomGenerator randomGenerator) {
-        RandomSchreierSimsAlgorithm(BSGSCandidate, confidenceLevel, getMaxPoint(BSGSCandidate), randomGenerator);
+        RandomSchreierSimsAlgorithm(BSGSCandidate, confidenceLevel, internalDegree(BSGSCandidate), randomGenerator);
 
     }
 
@@ -679,7 +679,7 @@ public final class AlgorithmsBase {
      */
     public static void RandomSchreierSimsAlgorithmForKnownOrder(ArrayList<BSGSCandidateElement> BSGSCandidate,
                                                                 BigInteger groupOrder, RandomGenerator randomGenerator) {
-        RandomSchreierSimsAlgorithmForKnownOrder(BSGSCandidate, groupOrder, getMaxPoint(BSGSCandidate), randomGenerator);
+        RandomSchreierSimsAlgorithmForKnownOrder(BSGSCandidate, groupOrder, internalDegree(BSGSCandidate), randomGenerator);
     }
 
     /**
@@ -789,7 +789,7 @@ public final class AlgorithmsBase {
 
         /* REMOVEGENS in Sec. 4.4.4 in [Holt05] IS WRONG!!! */
 
-        int degree = getMaxPoint(BSGSCandidate);
+        int degree = internalDegree(BSGSCandidate);
         if (degree == 0)
             return;
         //the following is correct
@@ -980,19 +980,19 @@ public final class AlgorithmsBase {
         return num;
     }
 
-    static int getMaxPoint(List<? extends BSGSElement> bsgs) {
-        return Math.max(bsgs.get(0).maximumMovedPoint(), maxBasePoint(bsgs));
+    static int internalDegree(List<? extends BSGSElement> bsgs) {
+        return Math.max(bsgs.get(0).maximumMovedPoint(), internalDegreeOfBase(bsgs));
     }
 
-    static int getMaxPoint(List<? extends BSGSElement> bsgs, int[] newBase) {
-        return Math.max(getMaxPoint(bsgs), ArraysUtils.max(newBase));
+    static int internalDegree(List<? extends BSGSElement> bsgs, int[] newBase) {
+        return Math.max(internalDegree(bsgs), ArraysUtils.max(newBase));
     }
 
-    static int maxBasePoint(List<? extends BSGSElement> bsgs) {
+    static int internalDegreeOfBase(List<? extends BSGSElement> bsgs) {
         int r = -1;
         for (BSGSElement element : bsgs)
             r = Math.max(r, element.basePoint);
-        return r;
+        return r + 1;
     }
 
 
@@ -1004,7 +1004,7 @@ public final class AlgorithmsBase {
      * @param i    position of base point to swap with next point
      */
     public static void swapAdjacentBasePoints(ArrayList<BSGSCandidateElement> BSGS, int i) {
-        swapAdjacentBasePoints(BSGS, i, getMaxPoint(BSGS));
+        swapAdjacentBasePoints(BSGS, i, internalDegree(BSGS));
     }
 
     /**
@@ -1105,7 +1105,7 @@ public final class AlgorithmsBase {
      * @param newBase new base
      */
     public static void rebaseWithTranspositions(ArrayList<BSGSCandidateElement> BSGS, int[] newBase) {
-        rebaseWithTranspositions(BSGS, newBase, getMaxPoint(BSGS, newBase));
+        rebaseWithTranspositions(BSGS, newBase, internalDegree(BSGS, newBase));
     }
 
     /**
@@ -1139,7 +1139,7 @@ public final class AlgorithmsBase {
      * @param newBase new base
      */
     public static void rebaseWithConjugationAndTranspositions(ArrayList<BSGSCandidateElement> BSGS, int[] newBase) {
-        rebaseWithConjugationAndTranspositions(BSGS, newBase, getMaxPoint(BSGS, newBase));
+        rebaseWithConjugationAndTranspositions(BSGS, newBase, internalDegree(BSGS, newBase));
     }
 
     /**
@@ -1365,7 +1365,7 @@ public final class AlgorithmsBase {
         generators.addAll(bsgs1.get(0).stabilizerGenerators);
         generators.addAll(bsgs1.get(0).stabilizerGenerators);
 
-        int degree = Math.max(ArraysUtils.max(base) + 1, Permutations.maximumMovedPoint(generators));
+        int degree = Math.max(ArraysUtils.max(base) + 1, Permutations.internalDegree(generators));
         ArrayList<BSGSCandidateElement> bsgs = (ArrayList) createRawBSGSCandidate(base, generators, degree);
 
         SchreierSimsAlgorithm(bsgs, degree);

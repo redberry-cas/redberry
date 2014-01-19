@@ -44,7 +44,7 @@ class TensorGeneratorTest {
             def t = GenerateTensor(indices, ['g_ab', 'k_a'])
             t = Collect['C[x]'.t] >> t
             assert indices.symmetries.permutationGroup ==
-                    new PermutationGroup(FindIndicesSymmetries(indices, t))
+                    PermutationGroup.createPermutationGroup(FindIndicesSymmetries(indices, t))
         }
     }
 
@@ -53,7 +53,7 @@ class TensorGeneratorTest {
         use(Redberry) {
             def indices = '_{abc}'.si
             def t = GenerateTensor(indices, ['g_mn', 'k_m'], [SymmetricForm: true])
-            assert new PermutationGroup(FindIndicesSymmetries(indices, t)).isSymmetric()
+            assert PermutationGroup.createPermutationGroup(FindIndicesSymmetries(indices, t)).isSymmetric()
         }
     }
 

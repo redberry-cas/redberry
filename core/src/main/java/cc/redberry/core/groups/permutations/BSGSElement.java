@@ -178,7 +178,7 @@ public class BSGSElement {
 
     public int maximumMovedPoint() {
         return maximumMovedPoint == -1 ?
-                maximumMovedPoint = Permutations.maximumMovedPoint(stabilizerGenerators) : maximumMovedPoint;
+                maximumMovedPoint = Permutations.internalDegree(stabilizerGenerators) : maximumMovedPoint;
     }
 
     @Override

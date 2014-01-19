@@ -261,7 +261,10 @@ public interface Permutation extends Comparable<Permutation> {
     public int parity();
 
     /**
-     * TODO: WRITE DOCUMENTATION
+     * Inserts identity action on the set [0, 1, ..., size - 1]; as result the degree of resulting permutation will be
+     * size + degree of this.
+     *
+     * @param size size of the set
      */
     public Permutation moveRight(int size);
 

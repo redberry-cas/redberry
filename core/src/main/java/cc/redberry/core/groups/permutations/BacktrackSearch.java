@@ -103,7 +103,7 @@ public final class BacktrackSearch implements OutputPortUnsafe<Permutation> {
         this.tuple = new int[size];
         Arrays.fill(tuple, -1);
         //comparator of points in Ω(n)
-        this.ordering = new InducedOrdering(AlgorithmsBase.getBaseAsArray(bsgs), bsgs.get(0).maximumMovedPoint());
+        this.ordering = new InducedOrdering(AlgorithmsBase.getBaseAsArray(bsgs), AlgorithmsBase.internalDegree(bsgs));
         //permutation word
         this.word = new Permutation[bsgs.size()];
         this.sortedOrbits = new int[bsgs.size()][];
