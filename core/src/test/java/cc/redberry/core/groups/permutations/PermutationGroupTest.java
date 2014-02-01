@@ -1050,7 +1050,7 @@ public class PermutationGroupTest extends AbstractTestClass {
 
     @Test
     public void testUniformity1() throws Exception {
-        RandomGenerator rg = new Well19937c(12341234L);
+        RandomGenerator rg = new Well19937c(123234L);
 
         testUniformity(new PermutationGroup(
                 new PermutationOneLine(2, 0, 1, 3, 4)),
@@ -1099,11 +1099,13 @@ public class PermutationGroupTest extends AbstractTestClass {
 
         ChiSquaredDistribution distribution = new ChiSquaredDistribution(k - 1);
 
-        // Can't reject uniformity hypothesis
-        assertTrue(distribution.cumulativeProbability(chiSq) < 0.99);
+        for (Map.Entry<Permutation, Integer> e : counts.entrySet()) {
+            System.out.println("" + e.getKey() + ": " + e.getValue());
+        }
 
-        //for (Map.Entry<Permutation, Integer> e : counts.entrySet()) {
-        //    System.out.println("" + e.getKey() + ": " + e.getValue());
-        //}
+        double pValue = distribution.cumulativeProbability(chiSq);
+
+        // Can't reject uniformity hypothesis
+        assertTrue(pValue < 0.99);
     }
 }
