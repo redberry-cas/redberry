@@ -30,6 +30,7 @@ import cc.redberry.core.utils.IntComparator;
 import cc.redberry.core.utils.MathUtils;
 import gnu.trove.set.hash.TIntHashSet;
 import org.apache.commons.math3.primes.Primes;
+import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.util.FastMath;
 
 import java.math.BigInteger;
@@ -515,6 +516,32 @@ public final class PermutationGroup
             if (!membershipTest(p))
                 return false;
         return true;
+    }
+
+    /**
+     * Returns uniformly distributed random permutation from this group.
+     *
+     * <p>This method uses BSGS.</p>
+     *
+     * @param generator random generator to be used in generation of random permutation
+     * @return uniformly distributed random permutation from this group
+     */
+    public Permutation randomPermutation(RandomGenerator generator) {
+        // Getting BSGS
+        List<BSGSElement> bsgs = getBSGS();
+
+        // Getting random transversal from first BSGS element
+        BSGSElement element = bsgs.get(0);
+        Permutation result = element.getTransversalOf(element.getOrbitPoint(generator.nextInt(element.orbitSize())));
+
+        for (int i = 1; i < bsgs.size(); ++i) {
+            element = bsgs.get(i);
+
+            // Multiplying result by random transversal from each BSGS element
+            result = result.composition(element.getTransversalOf(element.getOrbitPoint(generator.nextInt(element.orbitSize()))));
+        }
+
+        return result;
     }
 
     /**
