@@ -731,6 +731,7 @@ public final class AlgorithmsBacktrack {
         }
     }
 
+    //todo remove
     private static boolean assertPartialBaseImage(final int level, final Permutation[] word,
                                                   final int[] base,
                                                   final ArrayList<? extends BSGSElement> subgroup_rebase) {
