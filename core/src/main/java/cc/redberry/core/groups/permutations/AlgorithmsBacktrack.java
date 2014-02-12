@@ -62,7 +62,13 @@ public final class AlgorithmsBacktrack {
                                                  final BacktrackSearchPayload payload,
                                                  final Indicator<Permutation> property) {
         final int[] base = AlgorithmsBase.getBaseAsArray(group);
-        final InducedOrdering ordering = new InducedOrdering(base, group.get(0).maximumMovedPoint());
+
+        int maxPoint;
+        if (subgroup.isEmpty())
+            maxPoint = Math.max(group.get(0).maximumMovedPoint(), ArraysUtils.max(base) + 1);
+        else
+            maxPoint = Math.max(group.get(0).maximumMovedPoint(), subgroup.get(0).maximumMovedPoint());
+        final InducedOrdering ordering = new InducedOrdering(base, maxPoint);
         subgroupSearchWithPayload(group, subgroup, payload, property, base, ordering);
     }
 
@@ -94,7 +100,7 @@ public final class AlgorithmsBacktrack {
 
         //<= initialization
 
-        final int degree = group.get(0).maximumMovedPoint();
+        final int degree = Math.max(group.get(0).maximumMovedPoint(), ArraysUtils.max(base) + 1);
         if (!subgroup.isEmpty() && subgroup.get(0).maximumMovedPoint() > degree)
             throw new IllegalArgumentException("Specified subgroup is not a subgroup of specified group.");
 
