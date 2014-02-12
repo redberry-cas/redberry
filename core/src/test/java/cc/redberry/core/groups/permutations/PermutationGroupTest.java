@@ -35,6 +35,7 @@ import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.random.Well1024a;
 import org.apache.commons.math3.random.Well19937c;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
+import org.junit.Assert;
 import org.junit.Test;
 
 import java.math.BigInteger;
@@ -367,39 +368,62 @@ public class PermutationGroupTest extends AbstractTestClass {
     @Test
     public void testPointwiseStabilizer3_WithGap() {
         GapGroupsInterface gap = getGapInterface();
-        for (int degree = 4; degree < 50; ++degree) {
-            int nrPrimitiveGroups = gap.nrPrimitiveGroups(degree);
-            //System.out.println("DEGREE: " + degree);
-            for (int i = 0; i < nrPrimitiveGroups; ++i) {
-                gap.evaluate("g:= PrimitiveGroup( " + degree + ", " + (i + 1) + ");");
-                if ((gap.evaluateToBoolean("IsNaturalSymmetricGroup(g);") ||
-                        gap.evaluateToBoolean("IsNaturalAlternatingGroup(g);")) && degree > 7)
-                    continue;
-
-                PermutationGroup group = gap.primitiveGroup(degree, i);
-                if (group.degree() < 11)
-                    continue;
-                for (int aa = 0; aa < 10; ++aa) {
-                    int[] set = new int[5];
-                    Arrays.fill(set, -1);
-                    int step = group.degree() / set.length;
-                    int j = 0;
-                    for (int ii = 0; ii < group.degree() && j < set.length; ii += 1 + CC.getRandomGenerator().nextInt(step), ++j)
-                        set[j] = ii;
-                    j = set.length - 1;
-                    while (set[j] == -1) {
-                        --j;
-                    }
-                    set = Arrays.copyOf(set, j);
-                    if (set.length == 0)
+        for (int asa = 0; asa < 100; ++asa) {
+            for (int degree = 4; degree < 50; ++degree) {
+                int nrPrimitiveGroups = gap.nrPrimitiveGroups(degree);
+                //System.out.println("DEGREE: " + degree);
+                for (int i = 0; i < nrPrimitiveGroups; ++i) {
+                    gap.evaluate("g:= PrimitiveGroup( " + degree + ", " + (i + 1) + ");");
+                    if ((gap.evaluateToBoolean("IsNaturalSymmetricGroup(g);") ||
+                            gap.evaluateToBoolean("IsNaturalAlternatingGroup(g);")) && degree > 7)
                         continue;
 
+                    PermutationGroup group = gap.primitiveGroup(degree, i);
+                    if (group.degree() < 11)
+                        continue;
+                    for (int aa = 0; aa < 10; ++aa) {
+                        int[] set = new int[5];
+                        Arrays.fill(set, -1);
+                        int step = group.degree() / set.length;
+                        int j = 0;
+                        for (int ii = 0; ii < group.degree() && j < set.length; ii += 1 + CC.getRandomGenerator().nextInt(step), ++j)
+                            set[j] = ii;
+                        j = set.length - 1;
+                        while (set[j] == -1) {
+                            --j;
+                        }
+                        set = Arrays.copyOf(set, j);
+                        if (set.length == 0)
+                            continue;
 
-                    PermutationGroup stab = group.pointwiseStabilizer(set);
-                    assertTrue(stab.equals(pointWiseStabilizerBruteForce(group, set)));
+
+                        PermutationGroup stab = group.pointwiseStabilizer(set);
+                        try {
+                            assertTrue(stab.equals(pointWiseStabilizerBruteForce(group, set)));
+                        } catch (AssertionError err) {
+                            System.out.println(group);
+                            System.out.println(Arrays.toString(set));
+                            System.out.println(stab);
+                            System.out.println(pointWiseStabilizerBruteForce(group, set));
+                            throw err;
+                        }
+                    }
                 }
             }
         }
+    }
+
+    @Test
+    public void testPointwiseStabilizer3a() {
+        PermutationGroup parent = PermutationGroup.createPermutationGroup(
+                new PermutationOneLine(new int[][]{{1, 27, 20, 9, 31, 21, 18, 11, 28, 13, 30, 14, 6, 2, 3, 24, 12, 5, 26, 15, 29, 22, 10, 7, 25, 23, 17, 19, 16, 8, 4}}),
+                new PermutationOneLine(new int[][]{{1, 3, 22, 13, 9}, {2, 21, 27, 4, 8}, {5, 11, 20, 24, 18}, {6, 29, 25, 17, 19}, {7, 30, 15, 28, 26}, {10, 23, 14, 31, 12}}),
+                new PermutationOneLine(new int[][]{{2, 18}, {3, 19}, {6, 22}, {7, 23}, {10, 26}, {11, 27}, {14, 30}, {15, 31}}),
+                new PermutationOneLine(new int[][]{{0, 1}, {2, 3}, {4, 5}, {6, 7}, {8, 9}, {10, 11}, {12, 13}, {14, 15}, {16, 17}, {18, 19}, {20, 21}, {22, 23}, {24, 25}, {26, 27}, {28, 29}, {30, 31}}));
+        int[] set = {0, 5, 10, 16};
+        PermutationGroup stab = parent.pointwiseStabilizer(set);
+        PermutationGroup stabBruteForce = pointWiseStabilizerBruteForce(parent, set);
+        Assert.assertEquals(stab, stabBruteForce);
     }
 
     @Test

@@ -47,7 +47,7 @@ final class NameDescriptorForTensorFieldImpl extends NameDescriptorForTensorFiel
     }
 
     @Override
-    public String getName(SimpleIndices indices) {
+    public String getName(SimpleIndices indices, OutputFormat format) {
         return name;
     }
 
