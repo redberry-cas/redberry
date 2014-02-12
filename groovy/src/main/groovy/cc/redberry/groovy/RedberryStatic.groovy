@@ -23,11 +23,10 @@
 
 package cc.redberry.groovy
 
-
 import cc.redberry.core.context.CC
 import cc.redberry.core.context.OutputFormat
 import cc.redberry.core.groups.permutations.Permutation
-import cc.redberry.core.groups.permutations.PermutationOneLine
+import cc.redberry.core.groups.permutations.PermutationGroup
 import cc.redberry.core.indices.SimpleIndices
 import cc.redberry.core.indices.StructureOfIndices
 import cc.redberry.core.parser.ParseTokenSimpleTensor
@@ -390,9 +389,19 @@ class RedberryStatic {
         }
     }
 
-    /***********************************
-     ************* Solver ** ***********
-     **********************************/
+/************************************************************************************
+ ******************************** Permutation group *********************************
+ ************************************************************************************/
+
+    public static PermutationGroup Group(Object... permutations) {
+        use(Redberry) {
+            return PermutationGroup.createPermutationGroup(permutations.collect({ it.p }))
+        }
+    }
+
+/************************************************************************************
+ **************************************** Solver ************************************
+ ************************************************************************************/
 
     private static final Map GenerateTensorDefaultOptions =
             [Symmetries: null, GeneratedParameters: { i -> "C[$i]" }, GenerateParameters: 'true', SymmetricForm: 'false', RaiseLower: 'true'];
@@ -512,7 +521,8 @@ class RedberryStatic {
             def tensorEach = { t ->
                 t.parentAfterChild { ten ->
                     if (ten.class == SimpleTensor &&
-                            ten.toString(OutputFormat.Redberry) ==~ /${CC.getNameManager().DEFAULT_VAR_SYMBOL_PREFIX}\d+/) {
+                            ten.toString(OutputFormat.Redberry) ==~
+                            /${CC.getNameManager().DEFAULT_VAR_SYMBOL_PREFIX}\d+/) {
                         if (!replacements.containsKey(ten.toString(OutputFormat.Redberry)))
                             replacements.put(ten.toString(), _generatedParameters(i++))
                     }

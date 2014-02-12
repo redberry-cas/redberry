@@ -99,4 +99,14 @@ class RedberryTest {
             assert 'f_abc + f_bac'.t == 0.t
         }
     }
+
+    @Test
+    public void testPermutation3() {
+        use(Redberry) {
+            assert -[1, 0].p == [-1, 0].p
+            assert -[[0, 1, 4, 5]].p == [[0, -1, -4, -5]].p
+            assert -[[0, -1, -4, -5]].p == [[0, 1, 4, 5]].p
+        }
+    }
+
 }

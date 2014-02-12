@@ -23,6 +23,7 @@
 
 package cc.redberry.groovy
 
+import cc.redberry.core.groups.permutations.PermutationGroup
 import cc.redberry.core.transformations.factor.JasFactor
 import org.junit.Test
 
@@ -240,6 +241,17 @@ class RedberryStaticTest {
             si = '_ab'.si
             si.symmetries.add(-[1, 0].p)
             assertEquals Symmetrize[si] >> 'T_ab'.t, 'T_ab/2 - T_ba/2'.t
+        }
+    }
+
+    @Test
+    public void testPermutationGroup() {
+        use(Redberry) {
+            def gr
+            gr = Group([1, 0])
+            assert gr instanceof PermutationGroup
+            gr = Group(+[[0, 1]], -[[2, 3]])
+            assert gr instanceof PermutationGroup
         }
     }
 }

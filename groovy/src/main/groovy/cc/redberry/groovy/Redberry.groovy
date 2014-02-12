@@ -1090,18 +1090,45 @@ class Redberry {
 
     ////////////////////////////////////////////// PERMUTATIONS ///////////////////////////////////////////////////////
 
-    static Permutation getP(List list) {
-        //one-line notation
-        boolean oneLine = true;
-        for (def i : list)
-            if (!(i instanceof Integer)) {
-                oneLine = false;
-                break;
-            }
-        if (oneLine)
-            return new PermutationOneLine(list as int[])
+    static Permutation getP(Object obj) {
+        if (obj instanceof Permutation)
+            return obj
+        else if (obj instanceof List) {
+            //check one-line notation
+            boolean oneLine = true;
+            boolean negative = false;
+            for (def i : obj)
+                if (!(i instanceof Integer)) {
+                    oneLine = false;
+                    break;
+                } else if (i < 0)
+                    negative = true
 
-        return new PermutationOneLine(list as int[][])
+            if (oneLine && negative)
+                obj = obj.collect { i -> -i }
+
+            //check cycles
+            if (!oneLine) {
+                for (def c in obj) {
+                    if (!(c instanceof List))
+                        throw new IllegalArgumentException("Permutation is no either in one-line nor in cycles notation " + obj);
+
+                    for (def i in c) {
+                        if (!(i instanceof Integer))
+                            throw new IllegalArgumentException("Permutation is no either in one-line nor in cycles notation " + obj);
+                        else if (i < 0)
+                            negative = true
+                    }
+                }
+                if (negative)
+                    obj = obj.collect { c -> c.collect { i -> -i } }
+            }
+
+            if (oneLine)
+                return new PermutationOneLine(negative, obj as int[])
+            return new PermutationOneLine(negative, obj as int[][])
+        } else
+            throw new NoSuchMethodException("No such property .p for class " + obj.getClass())
     }
 
     static Permutation negative(Permutation permutation) {
