@@ -30,8 +30,10 @@ import cc.redberry.core.number.NumberUtils;
 import cc.redberry.core.utils.ArraysUtils;
 import cc.redberry.core.utils.IntComparator;
 import cc.redberry.core.utils.MathUtils;
+import org.apache.commons.math3.distribution.ChiSquaredDistribution;
 import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.random.Well1024a;
+import org.apache.commons.math3.random.Well19937c;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.junit.Test;
 
@@ -1044,5 +1046,66 @@ public class PermutationGroupTest extends AbstractTestClass {
         for (int i : points)
             stab = stab.pointwiseStabilizer(i);
         return stab;
+    }
+
+    @Test
+    public void testUniformity1() throws Exception {
+        RandomGenerator rg = new Well19937c(123234L);
+
+        testUniformity(new PermutationGroup(
+                new PermutationOneLine(2, 0, 1, 3, 4)),
+                rg);
+        testUniformity(new PermutationGroup(
+                new PermutationOneLine(1, 2, 0, 4, 3),
+                new PermutationOneLine(0, 1, 2, 4, 3)),
+                rg);
+    }
+
+    private void testUniformity(PermutationGroup group,
+                                RandomGenerator randomGenerator) {
+        if (group.order().compareTo(BigInteger.valueOf(200)) > 0)
+            throw new IllegalArgumentException("Group is too big.");
+
+        Map<Permutation, Integer> counts = new HashMap<>();
+
+        int N = doLongTest() ? 100000 : 10000;
+
+        int k = group.order().intValue();
+
+        Permutation p;
+        for (int i = 0; i < N; ++i) {
+            p = group.randomPermutation(randomGenerator);
+
+            assertTrue(group.membershipTest(p));
+
+            Integer value = counts.get(p);
+            if (value == null)
+                counts.put(p, 1);
+            else
+                counts.put(p, 1 + value);
+        }
+
+        //Calculating chiSqare value
+
+        double chiSq = 0.0, s;
+        double m = 1.0 * N / k;
+
+        for (Map.Entry<Permutation, Integer> e : counts.entrySet()) {
+            s = (e.getValue() - m);
+            chiSq += s * s;
+        }
+
+        chiSq /= m;
+
+        ChiSquaredDistribution distribution = new ChiSquaredDistribution(k - 1);
+
+        for (Map.Entry<Permutation, Integer> e : counts.entrySet()) {
+            System.out.println("" + e.getKey() + ": " + e.getValue());
+        }
+
+        double pValue = distribution.cumulativeProbability(chiSq);
+
+        // Can't reject uniformity hypothesis
+        assertTrue(pValue < 0.99);
     }
 }
