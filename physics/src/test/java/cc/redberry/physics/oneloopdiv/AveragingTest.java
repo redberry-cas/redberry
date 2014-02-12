@@ -24,12 +24,11 @@
 package cc.redberry.physics.oneloopdiv;
 
 import cc.redberry.core.context.CC;
-import cc.redberry.core.context.OutputFormat;
 import cc.redberry.core.indices.IndexType;
 import cc.redberry.core.tensor.Expression;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.tensor.Tensors;
-import cc.redberry.core.transformations.EliminateFromSymmetriesTransformation;
+import cc.redberry.core.transformations.EliminateDueSymmetriesTransformation;
 import cc.redberry.core.transformations.EliminateMetricsTransformation;
 import cc.redberry.core.transformations.expand.ExpandTransformation;
 import cc.redberry.core.utils.TensorUtils;
@@ -174,7 +173,7 @@ public class AveragingTest {
         t = ExpandTransformation.expand(t);
         t = EliminateMetricsTransformation.eliminate(t);
         t = Tensors.parseExpression("d_\\mu^\\mu = 4").transform(t);
-        t = EliminateFromSymmetriesTransformation.ELIMINATE_FROM_SYMMETRIES.transform(t);
+        t = EliminateDueSymmetriesTransformation.ELIMINATE_DUE_SYMMETRIES.transform(t);
     }
 
     @Ignore

@@ -217,10 +217,10 @@ class RedberryStatic {
      * Removes parts of expressions, which are zero because of the symmetries (symmetric and antisymmetric
      * at the same time).
      *
-     * @see EliminateFromSymmetriesTransformation
+     * @see EliminateDueSymmetriesTransformation
      */
-    public static final Transformation EliminateFromSymmetries =
-            EliminateFromSymmetriesTransformation.ELIMINATE_FROM_SYMMETRIES;
+    public static final Transformation EliminateDueSymmetries =
+            EliminateDueSymmetriesTransformation.ELIMINATE_DUE_SYMMETRIES;
 
     /**
      * Puts terms in a sum over a common denominator, and cancels factors in the result.
