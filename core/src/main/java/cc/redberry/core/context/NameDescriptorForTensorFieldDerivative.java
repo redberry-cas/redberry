@@ -56,7 +56,24 @@ final class NameDescriptorForTensorFieldDerivative extends NameDescriptorForTens
     }
 
     @Override
-    public String getName(SimpleIndices indices) {
+    public String getName(SimpleIndices indices, OutputFormat format) {
+        if (format == OutputFormat.WolframMathematica) {
+            String[] spl = name.split("~");
+            return new StringBuilder().append("Derivative")
+                    .append(spl[1].replace("(", "[").replace(")", "]"))
+                    .append("[").append(spl[0]).append("]").toString();
+        }
+        if (format == OutputFormat.Maple) {
+            StringBuilder sb = new StringBuilder();
+            sb.append("D[");
+            for (int j = 0; j < orders.length; ++j)
+                for (int i = 0; i < orders[j]; ++i)
+                    sb.append(j + 1).append(",");
+            sb.deleteCharAt(sb.length() - 1);
+            sb.append("]").append("(");
+            sb.append(name.split("~")[0]).append(")");
+            return sb.toString();
+        }
         return name;
     }
 
@@ -148,16 +165,14 @@ final class NameDescriptorForTensorFieldDerivative extends NameDescriptorForTens
         StringBuilder sb = new StringBuilder();
         sb.append(parent.name);
         sb.append('~');
-        if (orders.length != 1)
-            sb.append('(');
+        sb.append('(');
         for (int i = 0; ; ++i) {
             sb.append(orders[i]);
             if (i == orders.length - 1)
                 break;
             sb.append(',');
         }
-        if (orders.length != 1)
-            sb.append(')');
+        sb.append(')');
         return sb.toString();
     }
 

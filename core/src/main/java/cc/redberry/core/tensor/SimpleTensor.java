@@ -93,13 +93,13 @@ public class SimpleTensor extends Tensor {
         StringBuilder sb = new StringBuilder();
 
         //Adding tensor name
-        if (mode == OutputFormat.Maple && isKroneckerOrMetric(this)) {
-            if (isKronecker(this))
-                sb.append("KroneckerDelta");
-            else
-                sb.append("g_");
-        } else
-            sb.append(CC.getNameDescriptor(name).getName(indices));
+//        if (mode == OutputFormat.Maple && isKroneckerOrMetric(this)) {
+//            if (isKronecker(this))
+//                sb.append("KroneckerDelta");
+//            else
+//                sb.append("g_");
+//        } else
+        sb.append(CC.getNameDescriptor(name).getName(indices, mode));
 
         //If there are no indices return builder content
         if (indices.size() == 0)

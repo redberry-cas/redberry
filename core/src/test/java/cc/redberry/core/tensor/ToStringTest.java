@@ -60,4 +60,30 @@ public class ToStringTest {
         Assert.assertEquals(t.toString(OutputFormat.Maple), "T[~mu,~nu]");
         Assert.assertEquals(t.toString(OutputFormat.Redberry), "T^{\\mu\\nu}");
     }
+
+    @Test
+    public void test5() {
+        Tensor t = parse("g_mn");
+        Assert.assertEquals(t.toString(OutputFormat.Maple), "g_[m,n]");
+        t = parse("d_m^n");
+        Assert.assertEquals(t.toString(OutputFormat.Maple), "KroneckerDelta[m,~n]");
+    }
+
+    @Test
+    public void test6() {
+        TensorField t = (TensorField) parse("f~(1)[x]");
+        Assert.assertEquals("Derivative[1][f][x]", t.toString(OutputFormat.WolframMathematica));
+        t = (TensorField) parse("f~(1,2,0)[x,y,2]");
+        Assert.assertEquals("Derivative[1,2,0][f][x,y,2]", t.toString(OutputFormat.WolframMathematica));
+    }
+
+    @Test
+    public void test7() {
+        TensorField t = (TensorField) parse("f~(1)[x]");
+        Assert.assertEquals("D[1](f)(x)", t.toString(OutputFormat.Maple));
+        t = (TensorField) parse("f~(1,2,0)[x,y,2]");
+        Assert.assertEquals("D[1,2,2](f)(x,y,2)", t.toString(OutputFormat.Maple));
+    }
+
+
 }
