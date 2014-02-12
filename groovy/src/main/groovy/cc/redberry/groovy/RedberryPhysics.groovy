@@ -29,6 +29,7 @@ import cc.redberry.core.tensor.SimpleTensor
 import cc.redberry.core.tensor.Tensor
 import cc.redberry.core.transformations.Transformation
 import cc.redberry.core.transformations.TransformationCollection
+import cc.redberry.core.transformations.reverse.ReverseTransformation
 import cc.redberry.physics.feyncalc.*
 import cc.redberry.physics.oneloopdiv.OneLoopCounterterms
 import cc.redberry.physics.oneloopdiv.OneLoopInput
@@ -203,32 +204,6 @@ public class RedberryPhysics {
 
         Transformation getAt(SimpleTensor leviCivita) {
             return new LeviCivitaSimplifyTransformation(leviCivita, minkowskiSpace);
-        }
-    }
-
-    /**
-     * Inverse matrices of specified matrix type.
-     * @see InverseOrderOfMatricesTransformation
-     */
-    public static final GInverseOrderOfMatrices InverseOrderOfMatrices = new GInverseOrderOfMatrices();
-
-    private static final class GInverseOrderOfMatrices {
-
-        Transformation getAt(Object... types) {
-            List<Transformation> tr = new ArrayList<>();
-
-            for (Object type : types)
-                if (type instanceof IndexType)
-                    tr.add(new InverseOrderOfMatricesTransformation(type));
-                else if (type instanceof Collection)
-                    for (IndexType type1 : type)
-                        tr.add(new InverseOrderOfMatricesTransformation(type1));
-
-            return new TransformationCollection(tr);
-        }
-
-        Transformation getAt(IndexType type) {
-            new InverseOrderOfMatricesTransformation(type)
         }
     }
 

@@ -20,7 +20,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
-package cc.redberry.physics.feyncalc;
+package cc.redberry.core.transformations.reverse;
 
 import cc.redberry.core.context.CC;
 import cc.redberry.core.graph.GraphType;
@@ -38,13 +38,21 @@ import cc.redberry.core.utils.ArraysUtils;
 import java.util.Arrays;
 
 /**
+ * Reverses the order of matrices in expression.
+ *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public final class InverseOrderOfMatricesTransformation implements Transformation {
+public final class ReverseTransformation implements Transformation {
     private final IndexType type;
 
-    public InverseOrderOfMatricesTransformation(IndexType type) {
+    /**
+     * Creates transformations that reverses order of matrices of specified type.
+     *
+     * @param type index type
+     * @throws java.lang.IllegalArgumentException if type is not a matrix type (i.e. it has metric)
+     */
+    public ReverseTransformation(IndexType type) {
         assertType(type);
         this.type = type;
     }
@@ -59,6 +67,13 @@ public final class InverseOrderOfMatricesTransformation implements Transformatio
             throw new IllegalArgumentException("Type should be non-metric.");
     }
 
+    /**
+     * Reverses the order of matrices of specified type in expression.
+     *
+     * @param t    tensor
+     * @param type matrix type
+     * @return reversed tensor
+     */
     public static Tensor inverseOrderOfMatrices(Tensor t, IndexType type) {
         assertType(type);
         return inverseOrderOfMatrices1(t, type);

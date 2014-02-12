@@ -27,6 +27,7 @@ import cc.redberry.core.context.CC
 import cc.redberry.core.context.OutputFormat
 import cc.redberry.core.groups.permutations.Permutation
 import cc.redberry.core.groups.permutations.PermutationGroup
+import cc.redberry.core.indices.IndexType
 import cc.redberry.core.indices.SimpleIndices
 import cc.redberry.core.indices.StructureOfIndices
 import cc.redberry.core.parser.ParseTokenSimpleTensor
@@ -53,6 +54,7 @@ import cc.redberry.core.transformations.fractions.GetNumeratorTransformation
 import cc.redberry.core.transformations.fractions.TogetherTransformation
 import cc.redberry.core.transformations.powerexpand.PowerExpandTransformation
 import cc.redberry.core.transformations.powerexpand.PowerExpandUnwrapTransformation
+import cc.redberry.core.transformations.reverse.ReverseTransformation
 import cc.redberry.core.transformations.symmetrization.SymmetrizeTransformation
 import cc.redberry.core.utils.BitArray
 import cc.redberry.core.utils.TensorUtils
@@ -319,6 +321,30 @@ class RedberryStatic {
 
         public Transformation getAt(SimpleIndices indices) {
             return new SymmetrizeTransformation(indices, true)
+        }
+    }
+
+    /**
+     * Reverses the order of matrices of specified matrix type.
+     * @see cc.redberry.core.transformations.reverse.ReverseTransformation
+     */
+    public static final GReverse Reverse = new GReverse();
+
+    private static final class GReverse {
+
+        Transformation getAt(IndexType... types) {
+            if (types.length == 1)
+                return new ReverseTransformation(type);
+
+            List<Transformation> tr = new ArrayList<>();
+            for (IndexType type : types)
+                tr.add(new ReverseTransformation(type));
+
+            return new TransformationCollection(tr);
+        }
+
+        Transformation getAt(IndexType type) {
+            return new ReverseTransformation(type)
         }
     }
 
