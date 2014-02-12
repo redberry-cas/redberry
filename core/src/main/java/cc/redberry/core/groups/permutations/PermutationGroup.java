@@ -836,10 +836,11 @@ public final class PermutationGroup
 
                 if (!AlgorithmsBase.membershipTest(closure, c)) {
                     closure.get(0).stabilizerGenerators.add(c);
+                    //todo remove after fix Schreier vector length
                     if (subgroup.internalDegree < c.internalDegree()) {
                         //if we add new generator - be sure that Schreier vector has appropriate length
                         closure.set(0, new BSGSCandidateElement(closure.get(0).basePoint,
-                                closure.get(0).stabilizerGenerators, new int[c.internalDegree()]));
+                                closure.get(0).stabilizerGenerators, new int[c.internalDegree() + 1]));
                     }
 
                     added = true;
