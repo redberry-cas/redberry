@@ -1421,8 +1421,9 @@ public final class PermutationGroup
         if (naturalDegree != oth.naturalDegree)
             return false;
 
-        if (orbits.length != oth.orbits.length)
-            return false;
+        //todo add orbits equals!
+//        if (orbits.length != oth.orbits.length) //length of orbits = internalDegree!!!
+//            return false;
         //todo add orbits equals!
         //if (!Arrays.deepEquals(orbits, oth.orbits))
         //    return false;
