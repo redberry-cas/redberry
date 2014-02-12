@@ -1052,10 +1052,10 @@ public class PermutationGroupTest extends AbstractTestClass {
     public void testUniformity1() throws Exception {
         RandomGenerator rg = new Well19937c(123234L);
 
-        testUniformity(new PermutationGroup(
+        testUniformity(PermutationGroup.createPermutationGroup(
                 new PermutationOneLine(2, 0, 1, 3, 4)),
                 rg);
-        testUniformity(new PermutationGroup(
+        testUniformity(PermutationGroup.createPermutationGroup(
                 new PermutationOneLine(1, 2, 0, 4, 3),
                 new PermutationOneLine(0, 1, 2, 4, 3)),
                 rg);
