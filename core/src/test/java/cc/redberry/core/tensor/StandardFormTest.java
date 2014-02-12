@@ -26,14 +26,12 @@ import cc.redberry.core.TAssert;
 import cc.redberry.core.context.CC;
 import cc.redberry.core.indices.IndexType;
 import cc.redberry.core.number.Complex;
-import cc.redberry.core.transformations.CollectScalarFactorsTransformation;
-import cc.redberry.core.transformations.EliminateFromSymmetriesTransformation;
+import cc.redberry.core.transformations.EliminateDueSymmetriesTransformation;
 import cc.redberry.core.transformations.EliminateMetricsTransformation;
 import cc.redberry.core.transformations.Transformation;
 import cc.redberry.core.transformations.expand.ExpandAllTransformation;
 import cc.redberry.core.transformations.expand.ExpandNumeratorTransformation;
 import cc.redberry.core.transformations.expand.ExpandTransformation;
-import cc.redberry.core.transformations.factor.FactorTransformation;
 import cc.redberry.core.transformations.fractions.TogetherTransformation;
 import cc.redberry.core.utils.TensorUtils;
 import org.junit.Assert;
@@ -265,8 +263,8 @@ public class StandardFormTest {
 
         b = EliminateMetricsTransformation.eliminate(b);
 
-        a = EliminateFromSymmetriesTransformation.ELIMINATE_FROM_SYMMETRIES.transform(a);
-        b = EliminateFromSymmetriesTransformation.ELIMINATE_FROM_SYMMETRIES.transform(b);
+        a = EliminateDueSymmetriesTransformation.ELIMINATE_DUE_SYMMETRIES.transform(a);
+        b = EliminateDueSymmetriesTransformation.ELIMINATE_DUE_SYMMETRIES.transform(b);
         TAssert.assertEquals(a, b);
     }
 

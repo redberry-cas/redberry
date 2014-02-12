@@ -28,7 +28,7 @@ import cc.redberry.core.indices.IndexType;
 import cc.redberry.core.tensor.Expression;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.tensor.Tensors;
-import cc.redberry.core.transformations.EliminateFromSymmetriesTransformation;
+import cc.redberry.core.transformations.EliminateDueSymmetriesTransformation;
 import cc.redberry.core.transformations.EliminateMetricsTransformation;
 import cc.redberry.core.transformations.expand.ExpandTransformation;
 import cc.redberry.core.transformations.factor.FactorTransformation;
@@ -196,7 +196,7 @@ public class OneLoopCountertermsTest {
         OneLoopCounterterms action = OneLoopCounterterms.calculateOneLoopCounterterms(input);
 
         Tensor A = action.getCounterterms().get(1);
-        A = EliminateFromSymmetriesTransformation.ELIMINATE_FROM_SYMMETRIES.transform(A);
+        A = EliminateDueSymmetriesTransformation.ELIMINATE_DUE_SYMMETRIES.transform(A);
 
         //this is the exact K.V. result with corrections that 1/12*F_..*F^.. and oth are not under tr operation and that tr of 1 is 4
         Tensor expected = Tensors.parse("1/30*Power[R, 2]+1/12*F_{m b }^{e }_{p_5 }*F^{m b p_5 }_{e }+1/15*R_{d m }*R^{d m }+1/2*W^{a }_{p_5 }*W^{p_5 }_{a }+1/6*R*W^{b }_{b }");
@@ -219,7 +219,7 @@ public class OneLoopCountertermsTest {
 
         OneLoopCounterterms action = OneLoopCounterterms.calculateOneLoopCounterterms(input);
         Tensor A = action.getCounterterms().get(1);
-        A = EliminateFromSymmetriesTransformation.ELIMINATE_FROM_SYMMETRIES.transform(A);
+        A = EliminateDueSymmetriesTransformation.ELIMINATE_DUE_SYMMETRIES.transform(A);
         //this is the exact Barvinsky and Vilkovisky
         Tensor expected = Tensors.parse("1/12*F_{m b }^{e }_{p_5 }*F^{m b p_5 }_{e }+1/2*W^{p_5 }_{a }*W^{a }_{p_5 }+-1/45*Power[R, 2]+1/15*R^{l m }*R_{l m }");
         TAssert.assertEquals(A, expected);
@@ -244,7 +244,7 @@ public class OneLoopCountertermsTest {
         OneLoopCounterterms action = OneLoopCounterterms.calculateOneLoopCounterterms(input);
         Tensor A = action.getCounterterms().get(1);
 
-        A = EliminateFromSymmetriesTransformation.ELIMINATE_FROM_SYMMETRIES.transform(A);
+        A = EliminateDueSymmetriesTransformation.ELIMINATE_DUE_SYMMETRIES.transform(A);
         Tensor expected = Tensors.parse("44/135*R**2-32/135*R_lm*R^lm+2/3*F_lmab*F^lmba");
         TAssert.assertEquals(A, expected);
     }

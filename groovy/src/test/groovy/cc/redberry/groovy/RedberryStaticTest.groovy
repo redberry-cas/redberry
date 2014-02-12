@@ -71,7 +71,7 @@ class RedberryStaticTest {
 
             def tensor = 'R^acbd*Sin[R_abcd*R^abcd]'.t;
             def tr =
-                    Differentiate[ExpandAndEliminate, 'R^ma_m^b', 'R^mc_m^d'] & EliminateFromSymmetries & 'd_m^m = 4'.t & 'R^a_man = R_mn'.t & 'R^a_a = R'.t
+                    Differentiate[ExpandAndEliminate, 'R^ma_m^b', 'R^mc_m^d'] & EliminateDueSymmetries & 'd_m^m = 4'.t & 'R^a_man = R_mn'.t & 'R^a_a = R'.t
 
             assertTrue tr >> tensor == '6*R*Cos[R_{abcd}*R^{abcd}]-4*Sin[R_{abcd}*R^{abcd}]*R_{ab}*R_{cd}*R^{acbd}'.t
         }

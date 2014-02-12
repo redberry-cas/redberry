@@ -36,14 +36,14 @@ import cc.redberry.core.utils.TensorUtils;
  * @author Stanislav Poslavsky
  * @since 1.0
  */
-public final class EliminateFromSymmetriesTransformation implements Transformation {
+public final class EliminateDueSymmetriesTransformation implements Transformation {
     /**
      * Singleton instance.
      */
-    public static final EliminateFromSymmetriesTransformation ELIMINATE_FROM_SYMMETRIES
-            = new EliminateFromSymmetriesTransformation();
+    public static final EliminateDueSymmetriesTransformation ELIMINATE_DUE_SYMMETRIES
+            = new EliminateDueSymmetriesTransformation();
 
-    private EliminateFromSymmetriesTransformation() {
+    private EliminateDueSymmetriesTransformation() {
     }
 
     @Override
