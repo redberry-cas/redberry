@@ -36,14 +36,7 @@ final class BruteForcePermutationIterator implements Iterator<PermutationOneLine
     static final Comparator<PermutationOneLine> JUST_PERMUTATION_COMPARATOR = new Comparator<PermutationOneLine>() {
         @Override
         public int compare(PermutationOneLine o1, PermutationOneLine o2) {
-            if (o1.permutation.length != o2.permutation.length)
-                throw new IllegalArgumentException("different dimensions of comparing combinatorics");
-            for (int i = 0; i < o1.permutation.length; ++i)
-                if (o1.permutation[i] < o2.permutation[i])
-                    return -1;
-                else if (o1.permutation[i] > o2.permutation[i])
-                    return 1;
-            return 0;
+            return o1.compareTo(o2);
         }
     };
     private TreeSet<PermutationOneLine> set = null;
@@ -57,7 +50,7 @@ final class BruteForcePermutationIterator implements Iterator<PermutationOneLine
         set = new TreeSet<>(JUST_PERMUTATION_COMPARATOR);
         this.upperLayer = new ArrayList<>();
         //noinspection unchecked
-        this.upperLayer.add((PermutationOneLine) Permutations.createIdentityPermutation(permutations.get(0).degree()));
+        this.upperLayer.add((PermutationOneLine) Permutations.createIdentityPermutation(Permutations.internalDegree(permutations)));
         this.lowerLayer = permutations;
     }
 

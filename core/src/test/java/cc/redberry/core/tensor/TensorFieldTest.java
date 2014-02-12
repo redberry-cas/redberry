@@ -56,17 +56,17 @@ public class TensorFieldTest {
         PermutationGroup _expected;
 
         d = Tensors.parseSimple("f~(2)_{mn ab}[x_a]");
-        _expected = new PermutationGroup(new PermutationOneLine(false, new int[]{0, 1, 3, 2}));
+        _expected = PermutationGroup.createPermutationGroup(new PermutationOneLine(false, new int[]{0, 1, 3, 2}));
         assertTrue(d.getIndices().getSymmetries().getPermutationGroup().equals(_expected));
 
         d = Tensors.parseSimple("f~(3)_{mn abc}[x_a]");
-        _expected = new PermutationGroup(
+        _expected = PermutationGroup.createPermutationGroup(
                 new PermutationOneLine(false, new int[]{0, 1, 3, 2, 4}),
                 new PermutationOneLine(false, new int[]{0, 1, 4, 3, 2}));
         assertTrue(d.getIndices().getSymmetries().getPermutationGroup().equals(_expected));
 
         d = Tensors.parseSimple("f~(3)_{mn ab cd ef}[x_ab]");
-        _expected = new PermutationGroup(
+        _expected = PermutationGroup.createPermutationGroup(
                 new PermutationOneLine(false, new int[]{0, 1, 4, 5, 2, 3, 6, 7}),
                 new PermutationOneLine(false, new int[]{0, 1, 6, 7, 2, 3, 4, 5}));
         assertTrue(d.getIndices().getSymmetries().getPermutationGroup().equals(_expected));
@@ -80,13 +80,13 @@ public class TensorFieldTest {
         addSymmetry(parseSimple("f_mn[x_a]"), 1, 0);
 
         d = Tensors.parseSimple("f~(2)_{mn ab}[x_a]");
-        _expected = new PermutationGroup(
+        _expected = PermutationGroup.createPermutationGroup(
                 new PermutationOneLine(false, new int[]{1, 0, 2, 3}),
                 new PermutationOneLine(false, new int[]{0, 1, 3, 2}));
         assertTrue(d.getIndices().getSymmetries().getPermutationGroup().equals(_expected));
 
         d = Tensors.parseSimple("f~(3)_{mn abc}[x_a]");
-        _expected = new PermutationGroup(
+        _expected = PermutationGroup.createPermutationGroup(
                 new PermutationOneLine(false, new int[]{1, 0, 2, 3, 4}),
                 new PermutationOneLine(false, new int[]{0, 1, 3, 2, 4}),
                 new PermutationOneLine(false, new int[]{0, 1, 4, 3, 2}));
@@ -95,7 +95,7 @@ public class TensorFieldTest {
 
         addAntiSymmetry(parseSimple("f_mn[x_ab]"), 1, 0);
         d = Tensors.parseSimple("f~(3)_{mn ab cd ef}[x_ab]");
-        _expected = new PermutationGroup(
+        _expected = PermutationGroup.createPermutationGroup(
                 new PermutationOneLine(true, new int[]{1, 0, 2, 3, 4, 5, 6, 7}),
                 new PermutationOneLine(false, new int[]{0, 1, 4, 5, 2, 3, 6, 7}),
                 new PermutationOneLine(false, new int[]{0, 1, 6, 7, 2, 3, 4, 5}));

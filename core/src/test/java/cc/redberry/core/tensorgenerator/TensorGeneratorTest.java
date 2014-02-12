@@ -168,7 +168,7 @@ public class TensorGeneratorTest {
         GeneratedTensor actual = TensorGenerator.generateStructure(indices,
                 Tensors.parse("d^i_j", "g_ab", "g^ab", "p_a", "p^a"), false, true, true);
 
-        PermutationGroup found = new PermutationGroup(
+        PermutationGroup found = PermutationGroup.createPermutationGroup(
                 TensorUtils.findIndicesSymmetries(ParserIndices.parseSimple("^apb_cdq"), actual.generatedTensor));
 
         assertEquals(found, indices.getSymmetries().getPermutationGroup());
@@ -192,7 +192,7 @@ public class TensorGeneratorTest {
         GeneratedTensor actual = TensorGenerator.generateStructure(indices,
                 Tensors.parse("d^i_j", "g_ab", "g^ab", "p_a", "p^a"), false, true, true);
 
-        PermutationGroup found = new PermutationGroup(
+        PermutationGroup found = PermutationGroup.createPermutationGroup(
                 TensorUtils.findIndicesSymmetries(ParserIndices.parseSimple("^ab_cd"), actual.generatedTensor));
 
         assertTrue(found.containsSubgroup(indices.getSymmetries().getPermutationGroup()));
@@ -212,7 +212,7 @@ public class TensorGeneratorTest {
         GeneratedTensor actual = TensorGenerator.generateStructure(indices,
                 Tensors.parse("d^i_j", "g_ab", "g^ab", "p_a", "p^a"), false, true, true);
 
-        PermutationGroup found = new PermutationGroup(
+        PermutationGroup found = PermutationGroup.createPermutationGroup(
                 TensorUtils.findIndicesSymmetries(ParserIndices.parseSimple("^apb_cdq"), actual.generatedTensor));
         assertEquals(found, indices.getSymmetries().getPermutationGroup());
         Tensor[] real = TensorUtils.getAllSymbols(actual.generatedTensor).toArray(new Tensor[0]);

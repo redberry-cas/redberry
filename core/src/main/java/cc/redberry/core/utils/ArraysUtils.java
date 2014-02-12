@@ -54,6 +54,13 @@ public final class ArraysUtils {
         System.arraycopy(source.innerArray, srcPos, dest, destPos, length);
     }
 
+    public static int max(int[] array) {
+        int a = -1;
+        for (int i : array)
+            a = Math.max(a, i);
+        return a;
+    }
+
     public static int[] getSeriesFrom0(int size) {
         int[] ret = new int[size];
         for (int i = size; i >= 0; ++i)

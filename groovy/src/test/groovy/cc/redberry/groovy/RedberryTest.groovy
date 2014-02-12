@@ -85,9 +85,9 @@ class RedberryTest {
     public void testPermutation1() {
         use(Redberry) {
             assert [1, 0].p == new PermutationOneLine(1, 0)
-            assert [2, [[1, 0]]].p == [1, 0].p
+            assert [[1, 0]].p == [1, 0].p
             assert -[1, 0].p == new PermutationOneLine(true, 1, 0)
-            assert [4, [[1, 0], [2, 3]]].p == new PermutationOneLine(4, [[1, 0], [2, 3]] as int[][])
+            assert [[1, 0], [2, 3]].p == new PermutationOneLine([[1, 0], [2, 3]] as int[][])
         }
     }
 
@@ -99,4 +99,14 @@ class RedberryTest {
             assert 'f_abc + f_bac'.t == 0.t
         }
     }
+
+    @Test
+    public void testPermutation3() {
+        use(Redberry) {
+            assert -[1, 0].p == [-1, 0].p
+            assert -[[0, 1, 4, 5]].p == [[0, -1, -4, -5]].p
+            assert -[[0, -1, -4, -5]].p == [[0, 1, 4, 5]].p
+        }
+    }
+
 }

@@ -44,6 +44,22 @@ public final class Permutations {
     private Permutations() {
     }
 
+
+    public static int internalDegree(final int[] permutation) {
+        int r = -1;
+        for (int i = 0; i < permutation.length; ++i)
+            if (permutation[i] != i)
+                r = i;
+        return r + 1;
+    }
+
+    public static int internalDegree(final List<? extends Permutation> permutations) {
+        int r = 0;
+        for (Permutation p : permutations)
+            r = Math.max(r, p.internalDegree());
+        return r;
+    }
+
     /**
      * Calculates parity of specified permutation
      *
@@ -205,14 +221,26 @@ public final class Permutations {
      * @param point      point
      * @return orbit of specified point
      */
-    public static IntArrayList getOrbitList(Collection<Permutation> generators, int point) {
+    public static IntArrayList getOrbitList(List<Permutation> generators, int point) {
+        return getOrbitList(generators, point, internalDegree(generators));
+    }
+
+    /**
+     * Returns an orbit of specified point
+     *
+     * @param generators        a list of group generators
+     * @param point             point
+     * @param maximumMovedPoint largest integer moved by the generators or bigger
+     * @return orbit of specified point
+     */
+    public static IntArrayList getOrbitList(Collection<Permutation> generators, int point, int maximumMovedPoint) {
         //orbit as list
         IntArrayList orbitList = new IntArrayList();
         orbitList.add(point);
         if (generators.isEmpty())
             return orbitList;//throw new IllegalArgumentException("Empty generators.");
         //seen points
-        BitArray seen = new BitArray(generators.iterator().next().degree());
+        BitArray seen = new BitArray(maximumMovedPoint);
         seen.set(point);
         int imageOfPoint;
         //main loop over all points in orbit
@@ -233,6 +261,17 @@ public final class Permutations {
         return orbitList;
     }
 
+    /**
+     * Returns a size of specified point orbit
+     *
+     * @param generators        a list of group generators
+     * @param point             point
+     * @param maximumMovedPoint largest integer moved by the generators or bigger
+     * @return size of point orbit
+     */
+    public static int getOrbitSize(List<Permutation> generators, int point, int maximumMovedPoint) {
+        return getOrbitList(generators, point, maximumMovedPoint).size();
+    }
 
     /**
      * Returns a size of specified point orbit
@@ -241,8 +280,8 @@ public final class Permutations {
      * @param point      point
      * @return size of point orbit
      */
-    public static int getOrbitSize(Collection<Permutation> generators, int point) {
-        return getOrbitList(generators, point).size();
+    public static int getOrbitSize(List<Permutation> generators, int point) {
+        return getOrbitList(generators, point, internalDegree(generators)).size();
     }
 
     /**
@@ -299,11 +338,14 @@ public final class Permutations {
     /**
      * Converts cycles to one-line notation.
      *
-     * @param degree degree of permutation
      * @param cycles disjoint cycles
      * @return permutation written in one-line notation
      */
-    public static int[] convertCyclesToOneLine(final int degree, final int[][] cycles) {
+    public static int[] convertCyclesToOneLine(final int[][] cycles) {
+        int degree = -1;
+        for (int[] cycle : cycles)
+            degree = Math.max(degree, ArraysUtils.max(cycle));
+        ++degree;
         final int[] permutation = new int[degree];
         for (int i = 1; i < degree; ++i)
             permutation[i] = i;
@@ -546,6 +588,12 @@ public final class Permutations {
         return new PermutationOneLine(createIdentityArray(degree));
     }
 
+    public static final int DEFAULT_IDENTITY_LENGTH = 10;
+
+    public static Permutation createIdentityPermutation() {
+        return createIdentityPermutation(DEFAULT_IDENTITY_LENGTH);
+    }
+
     /**
      * Creates transposition of first two elements written in one-line notation
      * with specified dimension, i.e. an array of form [1,0,2,3,4,...,{@code dimension - 1}].
@@ -643,27 +691,5 @@ public final class Permutations {
         for (int i = 0; i < permutation.length; ++i)
             inverse[permutation[i]] = i;
         return inverse;
-    }
-
-    /**
-     * Throws exception if p.length() != size.
-     *
-     * @param p    permutation
-     * @param size size
-     */
-    public static void checkSizeWithException(Permutation p, int size) {
-        if (p.degree() != size)
-            throw new IllegalArgumentException("Different size of permutation.");
-    }
-
-    /**
-     * Throws exception if a != size.
-     *
-     * @param a
-     * @param size size
-     */
-    public static void checkSizeWithException(int a, int size) {
-        if (a != size)
-            throw new IllegalArgumentException("Different size of permutation.");
     }
 }

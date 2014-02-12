@@ -497,9 +497,9 @@ public final class IndicesUtils {
      * types or have different length and true in other case
      */
     public static boolean isPermutationConsistentWithIndices(final int[] indices, Permutation permutation) {
-        if (indices.length != permutation.degree())
+        if (indices.length < permutation.internalDegree())
             return false;
-        for (int i = 0; i < permutation.degree(); ++i)
+        for (int i = 0, s = permutation.internalDegree(); i < s; ++i)
             if (getRawTypeInt(indices[i]) != getRawTypeInt(indices[permutation.newIndexOf(i)]))
                 return false;
         return true;

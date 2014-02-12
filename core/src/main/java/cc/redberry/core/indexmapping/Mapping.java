@@ -217,7 +217,7 @@ public final class Mapping implements Transformation {
             sb.append(IndicesUtils.toString(toData[i]));
             if (i == imax)
                 break;
-            sb.append(",");
+            sb.append(", ");
         }
         sb.append("}");
         return sb.toString();

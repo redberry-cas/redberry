@@ -314,7 +314,7 @@ public class LeviCivitaSimplifyTransformation implements Transformation {
         else
             ss.add(new PermutationOneLine(false, Permutations.createCycle(indicesSize)));
 
-        PermutationGroup lc = new PermutationGroup(ss);
+        PermutationGroup lc = PermutationGroup.createPermutationGroup(ss);
         for (Permutation symmetry : lc)
             symmetries.put(symmetry.oneLineImmutable(), symmetry.antisymmetry());
         cachedLeviCivitaSymmetries.put(indicesSize, symmetries);

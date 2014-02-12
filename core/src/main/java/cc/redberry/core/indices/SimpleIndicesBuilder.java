@@ -137,7 +137,7 @@ public final class SimpleIndicesBuilder {
             for (Permutation s : holder.generators) {
                 c = new int[data.length];
                 for (j = 0; j < data.length; ++j)
-                    if (cosort[j] < position || cosort[j] >= position + s.degree())
+                    if (cosort[j] < position || cosort[j] >= position + holder.length)
                         c[j] = j;
                     else
                         c[j] = cosortInv[s.newIndexOf(cosort[j] - position) + position];

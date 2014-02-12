@@ -92,8 +92,6 @@ public class BSGSElement {
      * @see #getInverseTransversalOf(int)
      */
     public Permutation getTransversalOf(int point) {
-        if (SchreierVector[point] == -2)
-            throw new IllegalArgumentException("Specified point does not belong to orbit of this base element.");
         Permutation transversal = getInverseTransversalOf(point).inverse();
         assert transversal.newIndexOf(basePoint) == point;
         return transversal;
@@ -107,7 +105,7 @@ public class BSGSElement {
      * @return inverse of the element that maps this base point to the specified point.
      */
     public Permutation getInverseTransversalOf(int point) {
-        if (SchreierVector[point] == -2)
+        if (point >= SchreierVector.length || SchreierVector[point] == -2)
             throw new IllegalArgumentException("Specified point does not belong to orbit of this base element.");
         Permutation temp = Permutations.createIdentityPermutation(SchreierVector.length);
         while (SchreierVector[temp.newIndexOf(point)] != -1)
@@ -132,6 +130,8 @@ public class BSGSElement {
      * @return true if specified point belongs to the orbit of this &beta;<sub>i</sub>.
      */
     public boolean belongsToOrbit(int point) {
+        if (point >= SchreierVector.length)
+            return false;
         return SchreierVector[point] != -2;
     }
 
@@ -164,14 +164,21 @@ public class BSGSElement {
         return orbitList.get(i);
     }
 
-    /**
-     * Returns a degree of permutations. More specifically, it returns
-     * {@code stabilizerGenerators.get(0).length();}
-     *
-     * @return degree of permutations
-     */
-    public int degree() {
-        return stabilizerGenerators.get(0).degree();
+//    /**
+//     * Returns a degree of permutations. More specifically, it returns
+//     * {@code stabilizerGenerators.get(0).length();}
+//     *
+//     * @return degree of permutations
+//     */
+//    public int degree() {
+//        return stabilizerGenerators.get(0).degree();
+//    }
+
+    int maximumMovedPoint = -1;
+
+    public int maximumMovedPoint() {
+        return maximumMovedPoint == -1 ?
+                maximumMovedPoint = Permutations.internalDegree(stabilizerGenerators) : maximumMovedPoint;
     }
 
     @Override

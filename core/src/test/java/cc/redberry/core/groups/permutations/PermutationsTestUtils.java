@@ -22,7 +22,6 @@
  */
 package cc.redberry.core.groups.permutations;
 
-import cc.redberry.core.TAssert;
 import cc.redberry.core.combinatorics.IntCombinationsGenerator;
 import cc.redberry.core.combinatorics.IntPermutationsGenerator;
 import cc.redberry.core.number.NumberUtils;
@@ -32,7 +31,6 @@ import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 import static cc.redberry.core.TAssert.assertTrue;
@@ -91,7 +89,7 @@ public class PermutationsTestUtils {
         //empty initial subgroup
         ArrayList<BSGSCandidateElement> subgroup = new ArrayList<>();
         AlgorithmsBacktrack.subgroupSearch(bsgs, subgroup, rw, rw);
-        return new PermutationGroup(AlgorithmsBase.asBSGSList(subgroup), true);
+        return PermutationGroup.createPermutationGroupFromBSGS(AlgorithmsBase.asBSGSList(subgroup));
     }
 
     public static void assertHaveNoIntersections(Permutation[] a, Permutation[] b) {

@@ -57,8 +57,6 @@ public class InducedOrderingOfPermutations implements Comparator<Permutation> {
 
     @Override
     public int compare(Permutation a, Permutation b) {
-        if (a.degree() != b.degree())
-            throw new IllegalArgumentException("Not same degree.");
         int compare;
         for (int i : base)
             if ((compare = inducedOrdering.compare(a.newIndexOf(i), b.newIndexOf(i))) != 0)
