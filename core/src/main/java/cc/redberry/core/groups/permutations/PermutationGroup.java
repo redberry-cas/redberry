@@ -1410,7 +1410,7 @@ public final class PermutationGroup
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append("PermutationGroup( ");
+        sb.append("Group( ");
         List<Permutation> gens = generators();
         for (int i = 0; ; ++i) {
             sb.append(gens.get(i));
