@@ -22,7 +22,7 @@
  */
 package cc.redberry.core.indexmapping;
 
-import cc.redberry.concurrent.OutputPortUnsafe;
+import cc.redberry.core.utils.OutputPort;
 
 /**
  * Internal interface representing a index mapping provider (IMP).
@@ -44,7 +44,7 @@ import cc.redberry.concurrent.OutputPortUnsafe;
  * @author Stanislav Poslavsky
  * @since 1.0
  */
-interface IndexMappingProvider extends OutputPortUnsafe<IndexMappingBuffer> {
+interface IndexMappingProvider extends OutputPort<IndexMappingBuffer> {
 
     boolean tick();
 

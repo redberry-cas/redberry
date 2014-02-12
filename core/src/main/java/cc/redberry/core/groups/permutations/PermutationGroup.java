@@ -1210,7 +1210,7 @@ public final class PermutationGroup
         ensureBSGSIsInitialized();
         if (naturalDegree == 0)
             return new SingleIterator<>(Permutations.createIdentityPermutation());
-        return new PermIterator(); //new OutputPortUnsafe.PortIterator<>(new BacktrackSearch(bsgs));
+        return new PermIterator(); //new OutputPort.PortIterator<>(new BacktrackSearch(bsgs));
     }
 
     /**

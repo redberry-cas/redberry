@@ -22,7 +22,7 @@
  */
 package cc.redberry.core.context;
 
-import cc.redberry.concurrent.OutputPortUnsafe;
+import cc.redberry.core.utils.OutputPort;
 import cc.redberry.core.tensor.SimpleTensor;
 import org.apache.commons.math3.random.RandomGenerator;
 
@@ -149,7 +149,7 @@ public final class CC {
      *
      * @return output port which generates new symbol via {@link #generateNewSymbol()} at each {@code take()} invocation.
      */
-    public static OutputPortUnsafe<SimpleTensor> getParametersGenerator() {
+    public static OutputPort<SimpleTensor> getParametersGenerator() {
         return current().getDefaultParametersGenerator();
     }
 

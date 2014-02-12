@@ -22,14 +22,14 @@
  */
 package cc.redberry.core.solver.frobenius;
 
-import cc.redberry.concurrent.OutputPortUnsafe;
+import cc.redberry.core.utils.OutputPort;
 
 /**
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-interface SolutionProvider extends OutputPortUnsafe<int[]> {
+interface SolutionProvider extends OutputPort<int[]> {
     boolean tick();
     int[] currentRemainders();
 }

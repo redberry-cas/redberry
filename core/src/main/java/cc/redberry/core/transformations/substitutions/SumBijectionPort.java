@@ -22,7 +22,7 @@
  */
 package cc.redberry.core.transformations.substitutions;
 
-import cc.redberry.concurrent.OutputPortUnsafe;
+import cc.redberry.core.utils.OutputPort;
 import cc.redberry.core.combinatorics.IntCombinationPermutationGenerator;
 import cc.redberry.core.indexmapping.IndexMappings;
 import cc.redberry.core.indexmapping.Mapping;
@@ -36,7 +36,7 @@ import java.util.List;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public final class SumBijectionPort implements OutputPortUnsafe<SumBijectionPort.BijectionContainer> {
+public final class SumBijectionPort implements OutputPort<SumBijectionPort.BijectionContainer> {
 
     private List<Mapper> mappers;
     private int[] bijection;
@@ -181,13 +181,13 @@ public final class SumBijectionPort implements OutputPortUnsafe<SumBijectionPort
         }
     }
 
-    private static interface MapperSource extends Mapper, OutputPortUnsafe<Mapping> {
+    private static interface MapperSource extends Mapper, OutputPort<Mapping> {
     }
 
     private static final class SinglePairSource extends AbstaractMapper
             implements MapperSource {
 
-        private final OutputPortUnsafe<Mapping> mappingsPort;
+        private final OutputPort<Mapping> mappingsPort;
         private final int[] fromPointer;
 
         public SinglePairSource(Tensor from, Tensor to, int fromPointer) {
@@ -236,7 +236,7 @@ public final class SumBijectionPort implements OutputPortUnsafe<SumBijectionPort
     private static final class StretchPairSource extends AbstractStretchMapper
             implements MapperSource {
 
-        private OutputPortUnsafe<Mapping> currentSource;
+        private OutputPort<Mapping> currentSource;
 
         public StretchPairSource(Tensor[] from, Tensor[] to, int fromPointer) {
             super(from, to, fromPointer);

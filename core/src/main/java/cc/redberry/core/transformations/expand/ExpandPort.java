@@ -22,7 +22,7 @@
  */
 package cc.redberry.core.transformations.expand;
 
-import cc.redberry.concurrent.OutputPortUnsafe;
+import cc.redberry.core.utils.OutputPort;
 import cc.redberry.core.combinatorics.IntTuplesPort;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.number.NumberUtils;
@@ -46,14 +46,14 @@ public final class ExpandPort {
 
     public static Tensor expandUsingPort(Tensor t) {
         SumBuilder sb = new SumBuilder();
-        OutputPortUnsafe<Tensor> port = createPort(t);
+        OutputPort<Tensor> port = createPort(t);
         Tensor n;
         while ((n = port.take()) != null)
             sb.put(n);
         return sb.build();
     }
 
-    public static OutputPortUnsafe<Tensor> createPort(Tensor tensor) {
+    public static OutputPort<Tensor> createPort(Tensor tensor) {
         if (tensor instanceof Product)
             return new ProductPort(tensor);
         if (tensor instanceof Sum)
@@ -61,10 +61,10 @@ public final class ExpandPort {
         if (ExpandUtils.isExpandablePower(tensor) && !TensorUtils.isNegativeNaturalNumber(tensor.get(1)))
             return new PowerPort(tensor);
         else
-            return new OutputPortUnsafe.Singleton<>(tensor);
+            return new OutputPort.Singleton<>(tensor);
     }
 
-    private static interface ResettablePort extends OutputPortUnsafe<Tensor> {
+    private static interface ResettablePort extends OutputPort<Tensor> {
         void reset();
     }
 
@@ -74,7 +74,7 @@ public final class ExpandPort {
         private final int power;
         private IntTuplesPort tuplesPort;
         private final int[] initialForbidden;
-        private OutputPortUnsafe<Tensor> currentPort;
+        private OutputPort<Tensor> currentPort;
 
         public PowerPort(Tensor tensor, int[] initialForbidden) {
             base = tensor.get(0);
@@ -90,7 +90,7 @@ public final class ExpandPort {
             this(tensor, TensorUtils.getAllIndicesNamesT(tensor.get(0)).toArray());
         }
 
-        OutputPortUnsafe<Tensor> nextPort() {
+        OutputPort<Tensor> nextPort() {
             final int[] tuple = tuplesPort.take();
             if (tuple == null)
                 return null;
@@ -122,7 +122,7 @@ public final class ExpandPort {
         }
     }
 
-    private static final class ProductPort implements OutputPortUnsafe<Tensor> {
+    private static final class ProductPort implements OutputPort<Tensor> {
 
         private final ProductBuilder base;
         private ProductBuilder currentBuilder;
@@ -231,13 +231,13 @@ public final class ExpandPort {
 
     private static final class SumPort implements ResettablePort {
 
-        private final OutputPortUnsafe<Tensor>[] ports;
+        private final OutputPort<Tensor>[] ports;
         private final Tensor tensor;
         private int pointer;
 
         public SumPort(Tensor tensor) {
             this.tensor = tensor;
-            this.ports = new OutputPortUnsafe[tensor.size()];
+            this.ports = new OutputPort[tensor.size()];
             reset();
         }
 

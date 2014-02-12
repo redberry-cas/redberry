@@ -22,7 +22,6 @@
  */
 package cc.redberry.core.utils;
 
-import cc.redberry.concurrent.OutputPortUnsafe;
 import cc.redberry.core.indices.IndicesFactory;
 import cc.redberry.core.tensor.SimpleTensor;
 import cc.redberry.core.tensor.Tensor;
@@ -35,9 +34,9 @@ import gnu.trove.set.hash.TIntHashSet;
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
- * @see TensorUtils#generateReplacementsOfScalars(cc.redberry.core.tensor.Tensor, cc.redberry.concurrent.OutputPortUnsafe)
+ * @see TensorUtils#generateReplacementsOfScalars(cc.redberry.core.tensor.Tensor, OutputPort)
  */
-public class LocalSymbolsProvider implements OutputPortUnsafe<SimpleTensor> {
+public class LocalSymbolsProvider implements OutputPort<SimpleTensor> {
     private final String prefix;
     private final TIntHashSet forbiddenNames;
     private long counter = 0;
