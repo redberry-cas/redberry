@@ -20,7 +20,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
-package cc.redberry.physics.feyncalc;
+package cc.redberry.core.transformations.reverse;
 
 import cc.redberry.core.TAssert;
 import cc.redberry.core.context.CC;
@@ -31,13 +31,13 @@ import org.junit.Test;
 import static cc.redberry.core.indices.IndexType.Matrix1;
 import static cc.redberry.core.tensor.Tensors.parse;
 import static cc.redberry.core.tensor.Tensors.parseSimple;
-import static cc.redberry.physics.feyncalc.InverseOrderOfMatricesTransformation.inverseOrderOfMatrices;
+import static cc.redberry.core.transformations.reverse.ReverseTransformation.inverseOrderOfMatrices;
 
 /**
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public class InverseOrderOfMatricesTransformationTest {
+public class ReverseTransformationTest {
     @Test
     public void test1() {
         GeneralIndicesInsertion gii = new GeneralIndicesInsertion();
