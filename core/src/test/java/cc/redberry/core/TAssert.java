@@ -22,7 +22,7 @@
  */
 package cc.redberry.core;
 
-import cc.redberry.concurrent.OutputPortUnsafe;
+import cc.redberry.core.utils.OutputPort;
 import cc.redberry.core.groups.permutations.PermutationGroup;
 import cc.redberry.core.indexmapping.IndexMappings;
 import cc.redberry.core.indexmapping.Mapping;
@@ -140,7 +140,7 @@ public class TAssert {
     }
 
     public static void soutMappingsOP(Tensor from, Tensor to) {
-        final OutputPortUnsafe<Mapping> opu =
+        final OutputPort<Mapping> opu =
                 IndexMappings.createPort(from, to);
         Mapping mapping;
         int count = 0;

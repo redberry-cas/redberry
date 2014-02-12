@@ -22,14 +22,13 @@
  */
 package cc.redberry.core.context;
 
-import cc.redberry.concurrent.OutputPortUnsafe;
+import cc.redberry.core.utils.OutputPort;
 import cc.redberry.core.indices.*;
 import cc.redberry.core.parser.ParseManager;
 import cc.redberry.core.tensor.SimpleTensor;
 import cc.redberry.core.tensor.Tensors;
 import cc.redberry.core.utils.BitArray;
 import org.apache.commons.math3.random.RandomGenerator;
-import org.apache.commons.math3.random.Well44497b;
 
 /**
  * This class represents Redberry context. It stores all Redberry session data (in some sense it stores static data).
@@ -329,13 +328,13 @@ public final class Context {
      *
      * @return output port which generates new symbol via {@link #generateNewSymbol()} at each {@code take()} invocation.
      */
-    public OutputPortUnsafe<SimpleTensor> getDefaultParametersGenerator() {
+    public OutputPort<SimpleTensor> getDefaultParametersGenerator() {
         return defaultGeneratedParameters;
     }
 
     private final GeneratedParameters defaultGeneratedParameters = new GeneratedParameters();
 
-    private final class GeneratedParameters implements OutputPortUnsafe<SimpleTensor> {
+    private final class GeneratedParameters implements OutputPort<SimpleTensor> {
         @Override
         public SimpleTensor take() {
             return generateNewSymbol();

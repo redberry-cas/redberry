@@ -22,7 +22,7 @@
  */
 package cc.redberry.core.indexmapping;
 
-import cc.redberry.concurrent.OutputPortUnsafe;
+import cc.redberry.core.utils.OutputPort;
 import cc.redberry.core.combinatorics.IntPermutationsGenerator;
 import cc.redberry.core.tensor.Tensor;
 
@@ -159,10 +159,10 @@ final class ProviderSum implements IndexMappingProvider {
 
         private final Tensor[] from, to;
         private final IntPermutationsGenerator permutationGenerator;
-        private OutputPortUnsafe<IndexMappingBuffer> currentSource = null;
+        private OutputPort<IndexMappingBuffer> currentSource = null;
         private int[] currentPermutation;
 
-        public StretchPairSource(final OutputPortUnsafe<IndexMappingBuffer> opu,
+        public StretchPairSource(final OutputPort<IndexMappingBuffer> opu,
                                  final Tensor[] from, final Tensor[] to) {
             super(opu);
             this.from = from;

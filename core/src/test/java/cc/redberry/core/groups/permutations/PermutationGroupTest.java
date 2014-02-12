@@ -22,7 +22,7 @@
  */
 package cc.redberry.core.groups.permutations;
 
-import cc.redberry.concurrent.OutputPortUnsafe;
+import cc.redberry.core.utils.OutputPort;
 import cc.redberry.core.combinatorics.IntCombinationPermutationGenerator;
 import cc.redberry.core.combinatorics.IntCombinationsGenerator;
 import cc.redberry.core.context.CC;
@@ -659,7 +659,7 @@ public class PermutationGroupTest extends AbstractTestClass {
                 IntCombinationPermutationGenerator mapGen = new IntCombinationPermutationGenerator(degree, k);
                 while (mapGen.hasNext()) {
                     int[] to = mapGen.next();
-                    Iterator<Permutation> search = new OutputPortUnsafe.PortIterator<>(pg.mapping(from, to));
+                    Iterator<Permutation> search = new OutputPort.PortIterator<>(pg.mapping(from, to));
 
                     Set<Permutation> actual = new HashSet<>();
                     while (search.hasNext())

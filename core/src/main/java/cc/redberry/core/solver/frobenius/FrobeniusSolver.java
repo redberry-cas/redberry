@@ -22,7 +22,7 @@
  */
 package cc.redberry.core.solver.frobenius;
 
-import cc.redberry.concurrent.OutputPortUnsafe;
+import cc.redberry.core.utils.OutputPort;
 
 /**
  * Solves system of Frobenius equations.
@@ -46,8 +46,8 @@ import cc.redberry.concurrent.OutputPortUnsafe;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public final class FrobeniusSolver implements OutputPortUnsafe<int[]> {
-    private final OutputPortUnsafe<int[]> provider;
+public final class FrobeniusSolver implements OutputPort<int[]> {
+    private final OutputPort<int[]> provider;
 
     /**
      * Constructs solver from the given system of equations (see class documentation for example).

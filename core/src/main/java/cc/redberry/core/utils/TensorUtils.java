@@ -22,7 +22,6 @@
  */
 package cc.redberry.core.utils;
 
-import cc.redberry.concurrent.OutputPortUnsafe;
 import cc.redberry.core.context.CC;
 import cc.redberry.core.groups.permutations.Permutation;
 import cc.redberry.core.groups.permutations.PermutationOneLine;
@@ -758,7 +757,7 @@ public class TensorUtils {
      * @see LocalSymbolsProvider
      */
     public static Expression[] generateReplacementsOfScalars(Tensor tensor,
-                                                             OutputPortUnsafe<SimpleTensor> generatedCoefficients) {
+                                                             OutputPort<SimpleTensor> generatedCoefficients) {
         THashSet<Tensor> scalars = new THashSet<>();
         FromChildToParentIterator iterator = new FromChildToParentIterator(tensor);
         Tensor c;

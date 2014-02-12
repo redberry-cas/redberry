@@ -20,7 +20,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
-package cc.redberry.concurrent;
+package cc.redberry.core.utils;
 
 import java.util.Iterator;
 
@@ -28,10 +28,10 @@ import java.util.Iterator;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public interface OutputPortUnsafe<T> {
+public interface OutputPort<T> {
     T take();
 
-    public static final class Singleton<T> implements OutputPortUnsafe<T> {
+    public static final class Singleton<T> implements OutputPort<T> {
         private T element;
 
         public Singleton(T element) {
@@ -47,10 +47,10 @@ public interface OutputPortUnsafe<T> {
     }
 
     public static final class PortIterator<T> implements Iterator<T> {
-        private final OutputPortUnsafe<T> opu;
+        private final OutputPort<T> opu;
         private T next;
 
-        public PortIterator(OutputPortUnsafe<T> opu) {
+        public PortIterator(OutputPort<T> opu) {
             this.opu = opu;
         }
 
@@ -71,9 +71,9 @@ public interface OutputPortUnsafe<T> {
     }
 
     public static final class PortIterable<T> implements Iterable<T> {
-        private final OutputPortUnsafe<T> opu;
+        private final OutputPort<T> opu;
 
-        public PortIterable(OutputPortUnsafe<T> opu) {
+        public PortIterable(OutputPort<T> opu) {
             this.opu = opu;
         }
 

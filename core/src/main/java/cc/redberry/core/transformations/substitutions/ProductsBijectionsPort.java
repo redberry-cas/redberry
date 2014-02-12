@@ -22,7 +22,7 @@
  */
 package cc.redberry.core.transformations.substitutions;
 
-import cc.redberry.concurrent.OutputPortUnsafe;
+import cc.redberry.core.utils.OutputPort;
 import cc.redberry.core.combinatorics.Combinatorics;
 import cc.redberry.core.combinatorics.IntCombinatorialGenerator;
 import cc.redberry.core.combinatorics.IntDistinctTuplesPort;
@@ -46,7 +46,7 @@ import static cc.redberry.core.tensor.StructureOfContractions.*;
  * @author Stanislav Poslavsky
  * @since 1.0
  */
-public final class ProductsBijectionsPort implements OutputPortUnsafe<int[]> {
+public final class ProductsBijectionsPort implements OutputPort<int[]> {
     //private ProductContent targetContent;
     //private ProductContent fromContent;
 
@@ -124,7 +124,7 @@ public final class ProductsBijectionsPort implements OutputPortUnsafe<int[]> {
         return false;
     }
 
-    private class InnerPort implements OutputPortUnsafe<int[]> {
+    private class InnerPort implements OutputPort<int[]> {
 
         boolean closed = false;
         final int[] bijection;

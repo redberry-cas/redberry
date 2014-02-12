@@ -22,21 +22,21 @@
  */
 package cc.redberry.core.indexmapping;
 
-import cc.redberry.concurrent.OutputPortUnsafe;
+import cc.redberry.core.utils.OutputPort;
 
 /**
- * Wrapper class for {@link OutputPortUnsafe<IndexMappingBuffer>} that invokes a
+ * Wrapper class for {@link cc.redberry.core.utils.OutputPort <IndexMappingBuffer>} that invokes a
  * {@link cc.redberry.core.indexmapping.IndexMappingBuffer#removeContracted()} method for each output object.
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  * @since 1.0
  */
-final class MappingsPortRemovingContracted implements OutputPortUnsafe<IndexMappingBuffer> {
+final class MappingsPortRemovingContracted implements OutputPort<IndexMappingBuffer> {
 
-    private final OutputPortUnsafe<IndexMappingBuffer> provider;
+    private final OutputPort<IndexMappingBuffer> provider;
 
-    public MappingsPortRemovingContracted(OutputPortUnsafe<IndexMappingBuffer> provider) {
+    public MappingsPortRemovingContracted(OutputPort<IndexMappingBuffer> provider) {
         this.provider = provider;
     }
 

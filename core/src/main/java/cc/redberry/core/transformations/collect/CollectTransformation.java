@@ -22,7 +22,7 @@
  */
 package cc.redberry.core.transformations.collect;
 
-import cc.redberry.concurrent.OutputPortUnsafe;
+import cc.redberry.core.utils.OutputPort;
 import cc.redberry.core.groups.permutations.Permutations;
 import cc.redberry.core.indexgenerator.IndexGeneratorImpl;
 import cc.redberry.core.indexmapping.IndexMapping;
@@ -98,7 +98,7 @@ public class CollectTransformation implements Transformation {
     private Tensor transform1(Tensor t) {
         SumBuilder notMatched = new SumBuilder();
         TIntObjectHashMap<ArrayList<Split>> map = new TIntObjectHashMap<>();
-        OutputPortUnsafe<Tensor> port = ExpandPort.createPort(t);
+        OutputPort<Tensor> port = ExpandPort.createPort(t);
         Tensor current;
         Split toAdd;
         ArrayList<Split> nodes;

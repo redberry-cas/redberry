@@ -22,7 +22,7 @@
  */
 package cc.redberry.core.indexmapping;
 
-import cc.redberry.concurrent.OutputPortUnsafe;
+import cc.redberry.core.utils.OutputPort;
 import cc.redberry.core.groups.permutations.Permutation;
 import cc.redberry.core.indices.SimpleIndices;
 import cc.redberry.core.tensor.SimpleTensor;
@@ -69,7 +69,7 @@ final class ProviderSimpleTensor extends IndexMappingProviderAbstractFT<SimpleTe
     };
     private Iterator<Permutation> searchForPermutations;
 
-    private ProviderSimpleTensor(OutputPortUnsafe<IndexMappingBuffer> opu, SimpleTensor from, SimpleTensor to) {
+    private ProviderSimpleTensor(OutputPort<IndexMappingBuffer> opu, SimpleTensor from, SimpleTensor to) {
         super(opu, from, to);
     }
 
@@ -143,7 +143,7 @@ final class ProviderSimpleTensor extends IndexMappingProviderAbstractFT<SimpleTe
         if (permMappingFrom == null)
             searchForPermutations = fromIndices.getSymmetries().getPermutationGroup().iterator();
         else
-            searchForPermutations = new OutputPortUnsafe.PortIterator<>(
+            searchForPermutations = new OutputPort.PortIterator<>(
                     fromIndices.getSymmetries().getPermutationGroup().mapping(
                             permMappingFrom.toArray(), permMappingTo.toArray()));
         return take();

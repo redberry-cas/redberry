@@ -22,14 +22,14 @@
  */
 package cc.redberry.core.solver.frobenius;
 
-import cc.redberry.concurrent.OutputPortUnsafe;
+import cc.redberry.core.utils.OutputPort;
 
 /**
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-final class TotalSolutionProvider implements OutputPortUnsafe<int[]> {
+final class TotalSolutionProvider implements OutputPort<int[]> {
     private final SolutionProvider[] providers;
     private boolean inited = false;
 

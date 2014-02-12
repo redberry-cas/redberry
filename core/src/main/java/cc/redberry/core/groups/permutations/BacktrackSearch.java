@@ -22,7 +22,7 @@
  */
 package cc.redberry.core.groups.permutations;
 
-import cc.redberry.concurrent.OutputPortUnsafe;
+import cc.redberry.core.utils.OutputPort;
 import cc.redberry.core.utils.ArraysUtils;
 import cc.redberry.core.utils.Indicator;
 import cc.redberry.core.utils.IntComparator;
@@ -31,7 +31,7 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * An iterator (organized as output port {@link OutputPortUnsafe}) over group elements, that scans group in increasing
+ * An iterator (organized as output port {@link cc.redberry.core.utils.OutputPort}) over group elements, that scans group in increasing
  * order permutations according to the ordering induced by a base (in increasing order of base images). To be precise:
  * if base B = [b1, b2, b3,..,bn], then element g <i>which maps all base points into themselves</i> (g(b) &isin; B
  * for each b &isin; B) is guaranteed to precedes (<b>&lt;</b>) an element h, which base image succeeds
@@ -61,7 +61,7 @@ import java.util.List;
  * @see cc.redberry.core.groups.permutations.BacktrackSearchTestFunction
  * @since 1.1.6
  */
-public final class BacktrackSearch implements OutputPortUnsafe<Permutation> {
+public final class BacktrackSearch implements OutputPort<Permutation> {
     final List<? extends BSGSElement> bsgs;
     //tuple[i] - current transversal of i-th base point
     final int[] tuple;
