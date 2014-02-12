@@ -1159,6 +1159,23 @@ public final class Tensors {
     }
 
     /**
+     * Makes simple tensors antisymmetric.
+     *
+     * @param tensors string representation of simple tensor
+     * @throws java.lang.IllegalStateException if this tensor is already in use (it's permutation group calculated)
+     */
+    public static void setAntiSymmetric(Object... tensors) {
+        for (Object tensor : tensors) {
+            if (tensor instanceof SimpleTensor)
+                setAntiSymmetric((SimpleTensor) tensor);
+            else if (tensor instanceof String)
+                setAntiSymmetric((String) tensor);
+            else
+                throw new IllegalArgumentException("Not a tensor " + tensor);
+        }
+    }
+
+    /**
      * Makes simple tensor symmetric with respect to indices of specified type.
      *
      * @param tensor simple tensor
@@ -1197,10 +1214,17 @@ public final class Tensors {
      * @param tensors string representation of simple tensors
      * @throws java.lang.IllegalStateException if this tensor is already in use (it's permutation group calculated)
      */
-    public static void setSymmetric(String... tensors) {
-        for (String tensor : tensors)
-            setSymmetric(tensor);
+    public static void setSymmetric(Object... tensors) {
+        for (Object tensor : tensors) {
+            if (tensor instanceof SimpleTensor)
+                setSymmetric((SimpleTensor) tensor);
+            else if (tensor instanceof String)
+                setSymmetric((String) tensor);
+            else
+                throw new IllegalArgumentException("Not a tensor " + tensor);
+        }
     }
+
 
     /**
      * Makes simple tensors symmetric.
