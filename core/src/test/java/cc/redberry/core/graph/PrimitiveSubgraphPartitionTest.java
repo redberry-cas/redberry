@@ -31,6 +31,7 @@ import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.tensor.random.RandomTensor;
 import cc.redberry.core.utils.IntArrayList;
 import cc.redberry.core.utils.TensorUtils;
+import org.apache.commons.math3.random.Well19937c;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -49,7 +50,7 @@ public class PrimitiveSubgraphPartitionTest {
         RandomTensor random = new RandomTensor(
                 5, 20,
                 new int[]{1, 0, 0, 0},
-                new int[]{3, 0, 0, 0}, false);
+                new int[]{3, 0, 0, 0}, false, true);
 
         for (int i = 0; i < 300; ++i) {
             Product product = (Product) ((Product) random.nextProduct(20)).getDataSubProduct();
@@ -88,8 +89,8 @@ public class PrimitiveSubgraphPartitionTest {
         RandomTensor random = new RandomTensor(
                 5, 20,
                 new int[]{1, 0, 0, 0},
-                new int[]{3, 0, 0, 0}, false,
-                -7201529248298620939L);
+                new int[]{3, 0, 0, 0}, false, true,
+                new Well19937c(-7201529248298620939L));
 
         Product product = (Product) parse("H_{gf}*J_{a}*I^{j}_{h}*I^{dc}*I^{i}_{j}*I^{e}_{d}*A_{i}^{h}*E^{g}*E^{f}*E_{e}*J_{cb}");
         PrimitiveSubgraph[] ss = calculatePartition(product, IndexType.LatinLower);

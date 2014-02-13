@@ -86,7 +86,7 @@ public class EqualsTest
     @Test
     public void test1() {
         RandomGenerator rnd = CC.getRandomGenerator();
-        RandomTensor randomTensor = new RandomTensor(2, 5, new int[]{2, 0, 0, 0}, new int[]{5, 0, 0, 0}, true, rnd);
+        RandomTensor randomTensor = new RandomTensor(2, 5, new int[]{2, 0, 0, 0}, new int[]{5, 0, 0, 0}, true, true, rnd);
 
         for (int i = 0; i < 50; ++i) {
             SimpleIndices ind = IndicesFactory.createSimple(null,
