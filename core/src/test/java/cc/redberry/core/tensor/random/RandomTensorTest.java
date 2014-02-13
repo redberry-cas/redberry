@@ -51,7 +51,7 @@ public class RandomTensorTest {
                 10,
                 new int[]{4, 0, 0, 0},
                 new int[]{10, 0, 0, 0},
-                false, new Well19937c());
+                false, true, new Well19937c());
         Tensor t = rp.nextProduct(4, ParserIndices.parseSimple("_nm"));
         Assert.assertTrue(t.getIndices().getFree().equalsRegardlessOrder(ParserIndices.parseSimple("_nm")));
     }
@@ -63,7 +63,7 @@ public class RandomTensorTest {
                 10,
                 new int[]{4, 0, 0, 0},
                 new int[]{10, 0, 0, 0},
-                false, new Well19937c());
+                false, true, new Well19937c());
         Tensor t = rp.nextSum(5, 4, ParserIndices.parseSimple("_nm"));
         Assert.assertTrue(t.getIndices().equalsRegardlessOrder(ParserIndices.parseSimple("_nm")));
     }
@@ -72,7 +72,7 @@ public class RandomTensorTest {
     public void testProduct1() {
         for (int j = 0; j < 20; ++j) {
             CC.resetTensorNames();
-            RandomTensor random = new RandomTensor(5, 20, new int[]{2, 0, 0, 0}, new int[]{10, 0, 0, 0}, true);
+            RandomTensor random = new RandomTensor(5, 20, new int[]{2, 0, 0, 0}, new int[]{10, 0, 0, 0}, true, true);
             for (int i = 0; i < 20; ++i) {
                 Tensor t = random.nextProduct(5, ParserIndices.parseSimple("_mnab^cd"));
                 Assert.assertTrue(t.getIndices().getFree().equalsRegardlessOrder(ParserIndices.parseSimple("_mnab^cd")));
@@ -84,14 +84,14 @@ public class RandomTensorTest {
     @Test
     public void testNullPointer() {
         CC.resetTensorNames(2312);
-        RandomTensor random = new RandomTensor(5, 6, new int[]{2, 0, 0, 0}, new int[]{3, 0, 0, 0}, true, 7643543L);
+        RandomTensor random = new RandomTensor(5, 6, new int[]{2, 0, 0, 0}, new int[]{3, 0, 0, 0}, true, true, new Well19937c(7643543L));
         random.nextSum(5, 2, ParserIndices.parseSimple("_mn"));
         random.nextSum(5, 2, ParserIndices.parseSimple("^mn"));
     }
 
     @Test
     public void testMetric() {
-        RandomTensor random = new RandomTensor(0, 0, new int[]{2, 0, 0, 0}, new int[]{3, 0, 0, 0}, true);
+        RandomTensor random = new RandomTensor(0, 0, new int[]{2, 0, 0, 0}, new int[]{3, 0, 0, 0}, true, true);
         random.addToNamespace(parse("g_mn"));
         Assert.assertTrue(Tensors.isKroneckerOrMetric(random.nextSimpleTensor()));
         for (int i = 0; i < 10; ++i) {
@@ -105,7 +105,7 @@ public class RandomTensorTest {
 
     @Test
     public void testTree1() {
-        RandomTensor random = new RandomTensor(0, 0, new int[]{1, 0, 0, 0}, new int[]{3, 0, 0, 0}, true);
+        RandomTensor random = new RandomTensor(0, 0, new int[]{1, 0, 0, 0}, new int[]{3, 0, 0, 0}, true, true);
         random.addToNamespace(parse("f_n"), parse("g_mn"));
         for (int i = 0; i < 100; ++i) {
             Tensor r = random.nextTensorTree(RandomTensor.TensorType.Product, 5, 2, 2, ParserIndices.parseSimple("_abc"));
@@ -118,7 +118,7 @@ public class RandomTensorTest {
     public void testTree2() {
         for (int i = 0; i < 100; ++i) {
             CC.resetTensorNames();
-            RandomTensor random = new RandomTensor(0, 0, new int[]{1, 0, 0, 0}, new int[]{3, 0, 0, 0}, true);
+            RandomTensor random = new RandomTensor(0, 0, new int[]{1, 0, 0, 0}, new int[]{3, 0, 0, 0}, true, true);
             random.addToNamespace(parse("f_n"), parse("g_mn"));
             Tensor r = random.nextTensorTree(RandomTensor.TensorType.Product, 5, 2, 2, ParserIndices.parseSimple("_abc"));
             TAssert.assertIndicesConsistency(r);
@@ -135,5 +135,13 @@ public class RandomTensorTest {
             TAssert.assertIndicesConsistency(r);
             TAssert.assertTrue(r instanceof Product || r.size() <= 4);
         }
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testGenerateNewDescriptors() {
+        RandomTensor rnd = new RandomTensor(false);
+        rnd.clearNamespace();
+        rnd.addToNamespace(parse("T_abcd"), parse("T_ab"));
+        rnd.nextProduct(2, ParserIndices.parseSimple("_abc"));
     }
 }

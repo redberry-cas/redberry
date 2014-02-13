@@ -162,7 +162,7 @@ public class IndicesTest {
                 1000,
                 new int[]{0, 0, 0, 0},
                 new int[]{10, 10, 10, 10},
-                false, new Well19937c());
+                false, true, new Well19937c());
         StructureOfIndices typeStructure;
         Indices indices;
         SimpleIndicesBuilder builder;
@@ -192,7 +192,7 @@ public class IndicesTest {
                 1000,
                 new int[]{0, 0, 0, 0},
                 new int[]{10, 10, 10, 10},
-                false, new Well19937c());
+                false, true, new Well19937c());
         StructureOfIndices typeStructure;
         Indices indices;
         IndicesBuilder builder;
@@ -222,7 +222,7 @@ public class IndicesTest {
                 1000,
                 new int[]{0, 0, 0, 0},
                 new int[]{10, 10, 10, 10},
-                false, new Well19937c());
+                false, true, new Well19937c());
         StructureOfIndices typeStructure;
         Indices indices;
         for (int i = 0; i < 1000; ++i) {
@@ -248,7 +248,7 @@ public class IndicesTest {
                 1000,
                 new int[]{0, 0, 0, 0},
                 new int[]{10, 10, 10, 10},
-                false, new Well19937c());
+                false, true, new Well19937c());
         StructureOfIndices typeStructure;
         Indices indices;
         for (int i = 0; i < 1000; ++i) {
@@ -329,7 +329,7 @@ public class IndicesTest {
                 1000,
                 new int[]{0, 0, 0, 0},
                 new int[]{10, 10, 10, 10},
-                false, new Well19937c());
+                false, true, new Well19937c());
         StructureOfIndices typeStructure;
         Indices indices;
         for (int i = 0; i < 1000; ++i) {
@@ -349,7 +349,7 @@ public class IndicesTest {
                 1000,
                 new int[]{0, 0, 0, 0},
                 new int[]{10, 10, 10, 10},
-                false, new Well19937c());
+                false, true, new Well19937c());
         StructureOfIndices typeStructure;
         Indices indices;
         for (int i = 0; i < 1000; ++i) {

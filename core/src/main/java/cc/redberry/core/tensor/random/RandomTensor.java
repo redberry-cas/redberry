@@ -35,6 +35,7 @@ import cc.redberry.core.utils.IntArrayList;
 import cc.redberry.core.utils.TensorUtils;
 import gnu.trove.set.hash.TIntHashSet;
 import org.apache.commons.math3.random.RandomGenerator;
+import org.apache.commons.math3.random.Well1024a;
 import org.apache.commons.math3.random.Well19937c;
 
 import java.util.ArrayList;
@@ -64,6 +65,8 @@ public final class RandomTensor {
     private final List<NameDescriptor> namespace;
     private final int initialNamespaceSize;
 
+    private final boolean generateNewDescriptors;
+
     public static enum TensorType {
         Product, Sum
     }
@@ -73,15 +76,21 @@ public final class RandomTensor {
      * {@code new RandomTensor(2, 5, new int[]{0, 0, 0, 0}, new int[]{4, 0, 0, 0}, true)}
      */
     public RandomTensor() {
-        this(2, 5, new int[]{0, 0, 0, 0}, new int[]{4, 4, 4, 4}, true);
+        this(true);
+    }
+
+    public RandomTensor(boolean generateNewDescriptors) {
+        this(2, 5, new int[]{0, 0, 0, 0}, new int[]{4, 4, 4, 4}, true, generateNewDescriptors);
     }
 
     /**
-     * @param minDiffNDs     min number of different tensors
-     * @param maxDiffNDs     max number of different tensors
-     * @param minIndices     min number of indices in each tensor.
-     * @param maxIndices     max number of indices in each tensor.
-     * @param withSymmetries add symmetries to tensors
+     * @param minDiffNDs             min number of different tensors
+     * @param maxDiffNDs             max number of different tensors
+     * @param minIndices             min number of indices in each tensor.
+     * @param maxIndices             max number of indices in each tensor.
+     * @param withSymmetries         add symmetries to tensors
+     * @param generateNewDescriptors if false then only specified tensors will be used
+     * @param random                 random generator
      */
     public RandomTensor(
             int minDiffNDs,
@@ -89,7 +98,9 @@ public final class RandomTensor {
             int[] minIndices,
             int[] maxIndices,
             boolean withSymmetries,
+            boolean generateNewDescriptors,
             RandomGenerator random) {
+        this.generateNewDescriptors = generateNewDescriptors;
         this.random = random;
         this.random.setSeed(seed = random.nextLong());
         this.minIndices = minIndices;
@@ -107,11 +118,13 @@ public final class RandomTensor {
     }
 
     /**
-     * @param minDiffNDs     minimum number of different tensors
-     * @param maxDiffNDs     maximum number of different tensors
-     * @param minIndices     minimum number of indices in each tensor.
-     * @param maxIndices     maximum number of indices in each tensor.
-     * @param withSymmetries add symmetries to tensors
+     * @param minDiffNDs             minimum number of different tensors
+     * @param maxDiffNDs             maximum number of different tensors
+     * @param minIndices             minimum number of indices in each tensor.
+     * @param maxIndices             maximum number of indices in each tensor.
+     * @param withSymmetries         add symmetries to tensors
+     * @param generateNewDescriptors if false then only specified tensors will be used
+     * @param seed                   random seed
      */
     public RandomTensor(
             int minDiffNDs,
@@ -119,37 +132,27 @@ public final class RandomTensor {
             int[] minIndices,
             int[] maxIndices,
             boolean withSymmetries,
+            boolean generateNewDescriptors,
             long seed) {
-        this.random = new Well19937c();
-        this.random.setSeed(seed);
-        this.minIndices = minIndices;
-        this.maxIndices = maxIndices;
-        this.withSymmetries = withSymmetries;
-        int di = 1, t;
-        for (int i = 0; i < TYPES.length; ++i)
-            di *= (t = maxIndices[i] - minIndices[i]) == 0 ? 1 : t;
-        this.diffStringNames = (maxDiffNDs - minDiffNDs) / di;
-//        namespace = new NameDescriptor[minDiffNDs + (int) (0.5 * (maxDiffNDs - minDiffNDs))];//TODO add randomization
-        //initial namespace size
-        initialNamespaceSize = minDiffNDs + (int) (0.5 * (maxDiffNDs - minDiffNDs));
-        namespace = new ArrayList<>(initialNamespaceSize);//TODO add randomization
-        generateDescriptors();
+        this(minDiffNDs, maxDiffNDs, minIndices, maxIndices, withSymmetries, generateNewDescriptors, new Well1024a(seed));
     }
 
     /**
-     * @param minDiffNDs     minimum number of different tensors
-     * @param maxDiffNDs     maximum number of different tensors
-     * @param minIndices     minimum number of indices in each tensor.
-     * @param maxIndices     maximum number of indices in each tensor.
-     * @param withSymmetries add symmetries to tensors
+     * @param minDiffNDs             minimum number of different tensors
+     * @param maxDiffNDs             maximum number of different tensors
+     * @param minIndices             minimum number of indices in each tensor.
+     * @param maxIndices             maximum number of indices in each tensor.
+     * @param withSymmetries         add symmetries to tensors
+     * @param generateNewDescriptors if false then only specified tensors will be used
      */
     public RandomTensor(
             int minDiffNDs,
             int maxDiffNDs,
             int[] minIndices,
             int[] maxIndices,
-            boolean withSymmetries) {
-        this(minDiffNDs, maxDiffNDs, minIndices, maxIndices, withSymmetries, new Well19937c());
+            boolean withSymmetries,
+            boolean generateNewDescriptors) {
+        this(minDiffNDs, maxDiffNDs, minIndices, maxIndices, withSymmetries, generateNewDescriptors, new Well19937c());
     }
 
     public void clearNamespace() {
@@ -226,6 +229,9 @@ public final class RandomTensor {
                 positions.add(i);
         if (!positions.isEmpty())
             return namespace.get(positions.get(random.nextInt(positions.size())));
+
+        if (!generateNewDescriptors)
+            throw new IllegalArgumentException("No descriptor for such structure.");
 
         //create new nameDescriptor
         NameDescriptor nameDescriptor = CC.getNameManager().mapNameDescriptor(nextName(), typeStructure);
@@ -462,11 +468,6 @@ public final class RandomTensor {
         a[p1] = a[p2];
         a[p2] = c;
     }
-
-    public static RandomTensor createWithDefaultValues() {
-        return new RandomTensor(5, 10, new int[]{0, 0, 0, 0}, new int[]{3, 3, 3, 3}, false);
-    }
-
     private int getRandomValue(int min, int max) {
         if (min == max)
             return min;
