@@ -270,49 +270,54 @@ public final class RandomTensor {
     public Tensor nextProduct(int minProductSize, Indices indices) {
         if (minProductSize < 2)
             throw new IllegalArgumentException();
-        return nextProductTree(1, minProductSize, 0, indices);
+        return nextProductTree(1, new Parameters(0, 0, minProductSize, minProductSize), indices);
     }
 
     public Tensor nextProduct(int minProductSize) {
         return nextProduct(minProductSize, IndicesFactory.createSimple(null, nextIndices(nextNameDescriptor().getStructureOfIndices())));
     }
 
-    public Tensor nextSum(int sumSize, int averageProductSize, Indices indices) {//TODO introduce Poisson 
-        return nextSumTree(2, sumSize, averageProductSize, indices);
+    public Tensor nextSum(Parameters parameters, Indices indices) {
+        return nextSumTree(2, parameters, indices);
     }
 
-    public Tensor nextTensorTree(int depth, int avrProductSize, int avrSumSize, Indices indices) {
+    public Tensor nextSum(int sumSize, int productSize, Indices indices) {//TODO introduce Poisson
+        return nextSumTree(2, new Parameters(sumSize, sumSize, productSize, productSize), indices);
+    }
+
+    public Tensor nextTensorTree(int depth, Parameters parameters, Indices indices) {
         return nextTensorTree(random.nextBoolean() ? TensorType.Product : TensorType.Sum,
-                depth, avrProductSize, avrSumSize, indices);
+                depth, parameters, indices);
     }
 
-    public Tensor nextTensorTree(TensorType head, int depth, int avrProductSize, int avrSumSize, Indices indices) {
+    public Tensor nextTensorTree(TensorType head, int depth, Parameters parameters, Indices indices) {
         indices = indices.getFree();
         if (depth == 0)
             return nextSimpleTensor(IndicesFactory.createSimple(null, indices));
         if (head == TensorType.Product)
-            return nextProductTree(depth, avrProductSize, avrSumSize, indices);
+            return nextProductTree(depth, parameters, indices);
         if (head == TensorType.Sum)
-            return nextSumTree(depth, avrProductSize, avrSumSize, indices);
+            return nextSumTree(depth, parameters, indices);
         throw new RuntimeException();
     }
 
 
-    protected Tensor nextTensorTree(TensorType head, int depth, int avrProductSize, int avrSumSize) {
-        return nextTensorTree(head, depth, avrProductSize, avrSumSize,
+    protected Tensor nextTensorTree(TensorType head, int depth, Parameters parameters) {
+        return nextTensorTree(head, depth, parameters,
                 IndicesFactory.createSimple(null, nextIndices(nextNameDescriptor().getStructureOfIndices())));
     }
 
 
-    public Tensor nextProductTree(int depth, int avrProductSize, int avrSumSize, Indices indices) {
+    public Tensor nextProductTree(int depth, Parameters parameters, Indices indices) {
+        int productSize = getRandomValue(parameters.minProductSize, parameters.maxProductSize);
         indices = indices.getFree();
         StructureOfIndices typeStructure = new StructureOfIndices(IndicesFactory.createSimple(null, indices));
         List<Tensor> descriptors = new ArrayList<>();
         int totalIndicesCounts[] = new int[TYPES.length];
         Tensor nd;
         int i;
-        for (i = 0; i < avrProductSize; ++i) {
-            descriptors.add(nd = nextTensorTree(TensorType.Sum, depth - 1, avrProductSize, avrSumSize));
+        for (i = 0; i < productSize; ++i) {
+            descriptors.add(nd = nextTensorTree(TensorType.Sum, depth - 1, parameters));
             for (byte b : TYPES) {
                 StructureOfIndices.TypeData typeData = IndicesFactory.createSimple(null, nd.getIndices().getFree()).getStructureOfIndices().getTypeData(b);
                 if (typeData != null)
@@ -326,7 +331,7 @@ public final class RandomTensor {
             if (typeData == null)
                 continue;
             while (totalIndicesCounts[b] < typeData.length) {
-                descriptors.add(nd = nextTensorTree(TensorType.Sum, depth - 1, avrProductSize, avrSumSize));
+                descriptors.add(nd = nextTensorTree(TensorType.Sum, depth - 1, parameters));
                 for (byte bb : TYPES) {
                     StructureOfIndices.TypeData typeData1 = IndicesFactory.createSimple(null, nd.getIndices().getFree()).getStructureOfIndices().getTypeData(bb);
                     if (typeData1 != null)
@@ -340,7 +345,7 @@ public final class RandomTensor {
             if ((totalIndicesCounts[b] - (typeData == null ? 0 : typeData.length)) % 2 != 0) {
                 int[] typeCount = new int[TYPES.length];
                 typeCount[b] = 1;
-                descriptors.add(nextTensorTree(TensorType.Sum, depth - 1, avrProductSize, avrSumSize, IndicesFactory.createSimple(null, nextIndices(new StructureOfIndices(TYPES, typeCount)))));
+                descriptors.add(nextTensorTree(TensorType.Sum, depth - 1, parameters, IndicesFactory.createSimple(null, nextIndices(new StructureOfIndices(TYPES, typeCount)))));
                 ++totalIndicesCounts[b];
             }
         }
@@ -375,7 +380,7 @@ public final class RandomTensor {
         }
 
         //Creating resulting product
-        ProductBuilder pb = new ProductBuilder(10, avrProductSize);
+        ProductBuilder pb = new ProductBuilder(10, productSize);
         for (Tensor descriptor : descriptors) {
             StructureOfIndices its = IndicesFactory.createSimple(null, descriptor.getIndices().getFree()).getStructureOfIndices();
             int[] factorIndices = new int[its.size()];
@@ -405,10 +410,12 @@ public final class RandomTensor {
         return pb.build();
     }
 
-    public Tensor nextSumTree(int depth, int avrProductSize, int avrSumSize, Indices indices) {
-        TensorBuilder sum = new SumBuilder(avrSumSize);
-        for (int i = 0; i < avrSumSize; ++i)
-            sum.put(nextTensorTree(TensorType.Product, depth - 1, avrProductSize, avrSumSize, indices));
+
+    public Tensor nextSumTree(int depth, Parameters parameters, Indices indices) {
+        int sumSize = getRandomValue(parameters.minSumSize, parameters.maxSumSize);
+        TensorBuilder sum = new SumBuilder();
+        for (int i = 0; i < sumSize; ++i)
+            sum.put(nextTensorTree(TensorType.Product, depth - 1, parameters, indices));
         return sum.build();
     }
 
@@ -460,4 +467,36 @@ public final class RandomTensor {
         return new RandomTensor(5, 10, new int[]{0, 0, 0, 0}, new int[]{3, 3, 3, 3}, false);
     }
 
+    private int getRandomValue(int min, int max) {
+        if (min == max)
+            return min;
+        return min + random.nextInt(max - min);
+    }
+
+    public static class Parameters {
+        final int minSumSize, maxSumSize, minProductSize, maxProductSize;
+
+        public Parameters(int minSumSize, int maxSumSize, int minProductSize, int maxProductSize) {
+            this.minSumSize = minSumSize;
+            this.maxSumSize = maxSumSize;
+            this.minProductSize = minProductSize;
+            this.maxProductSize = maxProductSize;
+        }
+    }
+
+    public Tensor nextTensorTree(int depth, int productSize, int sumSize, Indices indices) {
+        return nextTensorTree(depth, new Parameters(sumSize, sumSize, productSize, productSize), indices);
+    }
+
+    public Tensor nextTensorTree(TensorType head, int depth, int productSize, int sumSize, Indices indices) {
+        return nextTensorTree(head, depth, new Parameters(sumSize, sumSize, productSize, productSize), indices);
+    }
+
+    public Tensor nextSumTree(int depth, int productSize, int sumSize, Indices indices) {
+        return nextSumTree(depth, new Parameters(sumSize, sumSize, productSize, productSize), indices);
+    }
+
+    public Tensor nextProductTree(int depth, int productSize, int sumSize, Indices indices) {
+        return nextProductTree(depth, new Parameters(sumSize, sumSize, productSize, productSize), indices);
+    }
 }
