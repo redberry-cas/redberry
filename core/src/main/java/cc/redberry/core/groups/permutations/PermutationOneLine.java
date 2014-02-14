@@ -88,6 +88,16 @@ public final class PermutationOneLine implements Permutation {
     }
 
     /**
+     * Creates permutation from given array in one-line notation
+     *
+     * @param permutation permutation in one-line notation
+     * @throws IllegalArgumentException if permutation array is inconsistent with one-line notation
+     */
+    public PermutationOneLine(int... permutation) {
+        this(false, permutation);
+    }
+
+    /**
      * Creates permutation with antisymmetry property from given array in one-line notation and boolean value of
      * antisymmetry ({@code true} means antisymmetry)
      *
@@ -102,16 +112,6 @@ public final class PermutationOneLine implements Permutation {
         this.permutation = permutation.clone();
         this.antisymmetry = antisymmetry;
         this.isIdentity = Permutations.isIdentity(permutation);
-    }
-
-    /**
-     * Creates permutation from given array in one-line notation
-     *
-     * @param permutation permutation in one-line notation
-     * @throws IllegalArgumentException if permutation array is inconsistent with one-line notation
-     */
-    public PermutationOneLine(int... permutation) {
-        this(false, permutation);
     }
 
     //!no check for one-line notation => unsafe constructor
@@ -345,12 +345,6 @@ public final class PermutationOneLine implements Permutation {
     public boolean orderIsOdd() {
         return !isIdentity && Permutations.orderOfPermutationIsOdd(permutation);
     }
-
-//    @Override
-//    public int degree() {
-//        return permutation.length;
-//    }
-
 
     @Override
     public int internalDegree() {

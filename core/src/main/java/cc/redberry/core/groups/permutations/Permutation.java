@@ -233,16 +233,18 @@ public interface Permutation extends Comparable<Permutation> {
      */
     public boolean orderIsOdd();
 
-//    /**
-//     * Returns the degree of this permutation; in other words, the number of elements in set on which this
-//     * permutation acts (the length of permutation written in one-line notation).
-//     *
-//     * @return degree of this permutation
-//     */
-//    public int degree();
-
+    /**
+     * Returns a largest moved point plus one.
+     *
+     * @return largest moved point plus one
+     */
     public int internalDegree();
 
+    /**
+     * Returns length of the underlying array (at low-level).
+     *
+     * @return length of the underlying array (at low-level)
+     */
     public int length();
 
     /**
