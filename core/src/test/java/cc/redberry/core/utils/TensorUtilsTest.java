@@ -26,7 +26,7 @@ import cc.redberry.core.TAssert;
 import cc.redberry.core.context.CC;
 import cc.redberry.core.groups.permutations.Permutation;
 import cc.redberry.core.groups.permutations.PermutationGroup;
-import cc.redberry.core.groups.permutations.PermutationOneLine;
+import cc.redberry.core.groups.permutations.PermutationOneLineInt;
 import cc.redberry.core.groups.permutations.Permutations;
 import cc.redberry.core.indexmapping.Mapping;
 import cc.redberry.core.indices.IndexType;
@@ -155,14 +155,14 @@ public class TensorUtilsTest {
         List<Permutation> actual = TensorUtils.findIndicesSymmetries(t.getIndices().getAllIndices().copy(), t);
 
         Permutation[] symmetries = new Permutation[]{
-                new PermutationOneLine(false, new int[]{0, 1, 2, 3, 4, 5, 6, 7}),
-                new PermutationOneLine(false, new int[]{1, 0, 2, 3, 4, 5, 6, 7}),
-                new PermutationOneLine(false, new int[]{0, 1, 2, 3, 4, 5, 7, 6}),
-                new PermutationOneLine(false, new int[]{0, 1, 3, 2, 4, 5, 6, 7}),
-                new PermutationOneLine(false, new int[]{0, 1, 2, 3, 5, 4, 6, 7}),
-                new PermutationOneLine(false, new int[]{6, 7, 2, 3, 4, 5, 0, 1}),
-                new PermutationOneLine(false, new int[]{0, 1, 6, 7, 4, 5, 2, 3}),
-                new PermutationOneLine(false, new int[]{0, 1, 4, 5, 2, 3, 6, 7})};
+                Permutations.createPermutation(false, new int[]{0, 1, 2, 3, 4, 5, 6, 7}),
+                Permutations.createPermutation(false, new int[]{1, 0, 2, 3, 4, 5, 6, 7}),
+                Permutations.createPermutation(false, new int[]{0, 1, 2, 3, 4, 5, 7, 6}),
+                Permutations.createPermutation(false, new int[]{0, 1, 3, 2, 4, 5, 6, 7}),
+                Permutations.createPermutation(false, new int[]{0, 1, 2, 3, 5, 4, 6, 7}),
+                Permutations.createPermutation(false, new int[]{6, 7, 2, 3, 4, 5, 0, 1}),
+                Permutations.createPermutation(false, new int[]{0, 1, 6, 7, 4, 5, 2, 3}),
+                Permutations.createPermutation(false, new int[]{0, 1, 4, 5, 2, 3, 6, 7})};
         List<Permutation> expected = new ArrayList<>();
         for (Permutation symmetry : symmetries)
             expected.add(symmetry);
@@ -176,7 +176,7 @@ public class TensorUtilsTest {
         int[] to = {2, 3, 0, 1};
         int[] indices = {0, 1, 2, 3};
         Mapping mapping = new Mapping(from, to);
-        assertTrue(TensorUtils.getSymmetryFromMapping(indices, mapping).equals(new PermutationOneLine(false, to)));
+        assertTrue(TensorUtils.getSymmetryFromMapping(indices, mapping).equals(Permutations.createPermutation(false, to)));
     }
 
     @Test
@@ -187,7 +187,7 @@ public class TensorUtilsTest {
         Mapping mapping = new Mapping(from, to);
         assertTrue(
                 TensorUtils.getSymmetryFromMapping(indices, mapping).equals(
-                        new PermutationOneLine(false, to)));
+                        Permutations.createPermutation(false, to)));
     }
 
     @Test
@@ -208,7 +208,7 @@ public class TensorUtilsTest {
         int baseSize = 1 + (dimension / 3);
         Permutation[] base = new Permutation[baseSize];
         for (int i = 0; i < baseSize; ++i)
-            base[i] = new PermutationOneLine(false, Permutations.randomPermutation(dimension));
+            base[i] = Permutations.createPermutation(false, Permutations.randomPermutation(dimension));
 
         List<Permutation> expectedSymmetries = new ArrayList<>();
         for (Permutation s : base) {
@@ -225,8 +225,8 @@ public class TensorUtilsTest {
         Tensor t = parse("d_a^b*d_c^d");
         List<Permutation> actual = getIndicesSymmetriesForIndicesWithSameStates(ParserIndices.parse("_ab^cd"), t);
         List<Permutation> expected = new ArrayList<>();
-        expected.add(new PermutationOneLine(new int[]{1, 0, 2, 3}));
-        expected.add(new PermutationOneLine(new int[]{0, 1, 3, 2}));
+        expected.add(Permutations.createPermutation(new int[]{1, 0, 2, 3}));
+        expected.add(Permutations.createPermutation(new int[]{0, 1, 3, 2}));
         assertEqualsSymmetries(PermutationGroup.createPermutationGroup(actual), PermutationGroup.createPermutationGroup(expected));
     }
 
@@ -235,8 +235,8 @@ public class TensorUtilsTest {
         Tensor t = parse("g_ab*g^cd");
         List<Permutation> actual = getIndicesSymmetriesForIndicesWithSameStates(ParserIndices.parse("_ab^cd"), t);
         List<Permutation> expected =  new ArrayList<>();
-        expected.add(new PermutationOneLine(false, new int[]{1, 0, 2, 3}));
-        expected.add(new PermutationOneLine(false, new int[]{0, 1, 3, 2}));
+        expected.add(Permutations.createPermutation(false, new int[]{1, 0, 2, 3}));
+        expected.add(Permutations.createPermutation(false, new int[]{0, 1, 3, 2}));
         assertEqualsSymmetries(PermutationGroup.createPermutationGroup(actual), PermutationGroup.createPermutationGroup(expected));
     }
 

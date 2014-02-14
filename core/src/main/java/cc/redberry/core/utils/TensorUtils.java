@@ -24,7 +24,7 @@ package cc.redberry.core.utils;
 
 import cc.redberry.core.context.CC;
 import cc.redberry.core.groups.permutations.Permutation;
-import cc.redberry.core.groups.permutations.PermutationOneLine;
+import cc.redberry.core.groups.permutations.PermutationOneLineInt;
 import cc.redberry.core.groups.permutations.Permutations;
 import cc.redberry.core.indexmapping.IndexMappings;
 import cc.redberry.core.indexmapping.Mapping;
@@ -513,7 +513,7 @@ public class TensorUtils {
             if (permutation[i] == -1)
                 permutation[i] = i;
 
-        return new PermutationOneLine(mapping.getSign(), permutation); //this is inverse permutation
+        return Permutations.createPermutation(mapping.getSign(), permutation); //this is inverse permutation
     }
 
     public static Permutation getSymmetryFromMapping(final int[] indices, Mapping mapping) {

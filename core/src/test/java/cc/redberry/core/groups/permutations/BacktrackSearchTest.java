@@ -45,8 +45,8 @@ public class BacktrackSearchTest extends AbstractTestClass {
     @Test
     public void testAll1() throws Exception {
         List<Permutation> generators = new ArrayList<>();
-        generators.add(new PermutationOneLine(0, 2, 1, 3, 4));
-        generators.add(new PermutationOneLine(3, 2, 4, 0, 1));
+        generators.add(Permutations.createPermutation(0, 2, 1, 3, 4));
+        generators.add(Permutations.createPermutation(3, 2, 4, 0, 1));
 
         List<BSGSElement> bsgs = AlgorithmsBase.createBSGSList(generators);
 
@@ -69,8 +69,8 @@ public class BacktrackSearchTest extends AbstractTestClass {
 
     @Test
     public void testAll2() throws Exception {
-        Permutation gen0 = new PermutationOneLine(4, 8, 7, 1, 6, 5, 0, 9, 3, 2);
-        Permutation gen1 = new PermutationOneLine(0, 5, 4, 6, 2, 1, 3, 7, 9, 8);
+        Permutation gen0 = Permutations.createPermutation(4, 8, 7, 1, 6, 5, 0, 9, 3, 2);
+        Permutation gen1 = Permutations.createPermutation(0, 5, 4, 6, 2, 1, 3, 7, 9, 8);
 
         ArrayList<Permutation> generators = new ArrayList<>();
         generators.add(gen0);
@@ -99,27 +99,27 @@ public class BacktrackSearchTest extends AbstractTestClass {
     @Test
     public void testAll3() {
         //an example from Sec. 4.6.1 in [Holt05]
-        Permutation a0 = new PermutationOneLine(0, 1, 2, 3, 4, 5);
-        Permutation a1 = new PermutationOneLine(0, 1, 2, 3, 5, 4);
-        Permutation a2 = new PermutationOneLine(0, 3, 2, 1, 4, 5);
-        Permutation a3 = new PermutationOneLine(0, 3, 2, 1, 5, 4);
-        Permutation a4 = new PermutationOneLine(1, 0, 3, 2, 4, 5);
-        Permutation a5 = new PermutationOneLine(1, 0, 3, 2, 5, 4);
-        Permutation a6 = new PermutationOneLine(1, 2, 3, 0, 4, 5);
-        Permutation a7 = new PermutationOneLine(1, 2, 3, 0, 5, 4);
-        Permutation a8 = new PermutationOneLine(2, 1, 0, 3, 4, 5);
-        Permutation a9 = new PermutationOneLine(2, 1, 0, 3, 5, 4);
-        Permutation a10 = new PermutationOneLine(2, 3, 0, 1, 4, 5);
-        Permutation a11 = new PermutationOneLine(2, 3, 0, 1, 5, 4);
-        Permutation a12 = new PermutationOneLine(3, 0, 1, 2, 4, 5);
-        Permutation a13 = new PermutationOneLine(3, 0, 1, 2, 5, 4);
-        Permutation a14 = new PermutationOneLine(3, 2, 1, 0, 4, 5);
-        Permutation a15 = new PermutationOneLine(3, 2, 1, 0, 5, 4);
+        Permutation a0 = Permutations.createPermutation(0, 1, 2, 3, 4, 5);
+        Permutation a1 = Permutations.createPermutation(0, 1, 2, 3, 5, 4);
+        Permutation a2 = Permutations.createPermutation(0, 3, 2, 1, 4, 5);
+        Permutation a3 = Permutations.createPermutation(0, 3, 2, 1, 5, 4);
+        Permutation a4 = Permutations.createPermutation(1, 0, 3, 2, 4, 5);
+        Permutation a5 = Permutations.createPermutation(1, 0, 3, 2, 5, 4);
+        Permutation a6 = Permutations.createPermutation(1, 2, 3, 0, 4, 5);
+        Permutation a7 = Permutations.createPermutation(1, 2, 3, 0, 5, 4);
+        Permutation a8 = Permutations.createPermutation(2, 1, 0, 3, 4, 5);
+        Permutation a9 = Permutations.createPermutation(2, 1, 0, 3, 5, 4);
+        Permutation a10 = Permutations.createPermutation(2, 3, 0, 1, 4, 5);
+        Permutation a11 = Permutations.createPermutation(2, 3, 0, 1, 5, 4);
+        Permutation a12 = Permutations.createPermutation(3, 0, 1, 2, 4, 5);
+        Permutation a13 = Permutations.createPermutation(3, 0, 1, 2, 5, 4);
+        Permutation a14 = Permutations.createPermutation(3, 2, 1, 0, 4, 5);
+        Permutation a15 = Permutations.createPermutation(3, 2, 1, 0, 5, 4);
         final Permutation[] expected = {a0, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15};
 
-        Permutation gen0 = new PermutationOneLine(1, 2, 3, 0, 4, 5);
-        Permutation gen1 = new PermutationOneLine(0, 3, 2, 1, 4, 5);
-        Permutation gen2 = new PermutationOneLine(0, 1, 2, 3, 5, 4);
+        Permutation gen0 = Permutations.createPermutation(1, 2, 3, 0, 4, 5);
+        Permutation gen1 = Permutations.createPermutation(0, 3, 2, 1, 4, 5);
+        Permutation gen2 = Permutations.createPermutation(0, 1, 2, 3, 5, 4);
         ArrayList<Permutation> generators = new ArrayList<>();
         generators.add(gen0);
         generators.add(gen1);
@@ -194,15 +194,15 @@ public class BacktrackSearchTest extends AbstractTestClass {
         //find all permutations that satisfies the following conditions:
         //g(0) = 0 or 2, g(1) = 1
 
-        Permutation a0 = new PermutationOneLine(0, 1, 2, 3, 4, 5);
-        Permutation a1 = new PermutationOneLine(0, 1, 2, 3, 5, 4);
-        Permutation a2 = new PermutationOneLine(2, 1, 0, 3, 4, 5);
-        Permutation a3 = new PermutationOneLine(2, 1, 0, 3, 5, 4);
+        Permutation a0 = Permutations.createPermutation(0, 1, 2, 3, 4, 5);
+        Permutation a1 = Permutations.createPermutation(0, 1, 2, 3, 5, 4);
+        Permutation a2 = Permutations.createPermutation(2, 1, 0, 3, 4, 5);
+        Permutation a3 = Permutations.createPermutation(2, 1, 0, 3, 5, 4);
         final Permutation[] expected = {a0, a1, a2, a3};
 
-        Permutation gen0 = new PermutationOneLine(1, 2, 3, 0, 4, 5);
-        Permutation gen1 = new PermutationOneLine(0, 3, 2, 1, 4, 5);
-        Permutation gen2 = new PermutationOneLine(0, 1, 2, 3, 5, 4);
+        Permutation gen0 = Permutations.createPermutation(1, 2, 3, 0, 4, 5);
+        Permutation gen1 = Permutations.createPermutation(0, 3, 2, 1, 4, 5);
+        Permutation gen2 = Permutations.createPermutation(0, 1, 2, 3, 5, 4);
         ArrayList<Permutation> generators = new ArrayList<>();
         generators.add(gen0);
         generators.add(gen1);
@@ -234,19 +234,19 @@ public class BacktrackSearchTest extends AbstractTestClass {
     public void testPrune2() {
         //no any pruning, just property test
 
-        Permutation a0 = new PermutationOneLine(0, 1, 2, 3, 4, 5);
-        Permutation a1 = new PermutationOneLine(0, 3, 2, 1, 4, 5);
-        Permutation a2 = new PermutationOneLine(1, 0, 3, 2, 4, 5);
-        Permutation a3 = new PermutationOneLine(1, 2, 3, 0, 4, 5);
-        Permutation a4 = new PermutationOneLine(2, 1, 0, 3, 4, 5);
-        Permutation a5 = new PermutationOneLine(2, 3, 0, 1, 4, 5);
-        Permutation a6 = new PermutationOneLine(3, 0, 1, 2, 4, 5);
-        Permutation a7 = new PermutationOneLine(3, 2, 1, 0, 4, 5);
+        Permutation a0 = Permutations.createPermutation(0, 1, 2, 3, 4, 5);
+        Permutation a1 = Permutations.createPermutation(0, 3, 2, 1, 4, 5);
+        Permutation a2 = Permutations.createPermutation(1, 0, 3, 2, 4, 5);
+        Permutation a3 = Permutations.createPermutation(1, 2, 3, 0, 4, 5);
+        Permutation a4 = Permutations.createPermutation(2, 1, 0, 3, 4, 5);
+        Permutation a5 = Permutations.createPermutation(2, 3, 0, 1, 4, 5);
+        Permutation a6 = Permutations.createPermutation(3, 0, 1, 2, 4, 5);
+        Permutation a7 = Permutations.createPermutation(3, 2, 1, 0, 4, 5);
         final Permutation[] expected = {a0, a1, a2, a3, a4, a5, a6, a7};
 
-        Permutation gen0 = new PermutationOneLine(1, 2, 3, 0, 4, 5);
-        Permutation gen1 = new PermutationOneLine(0, 3, 2, 1, 4, 5);
-        Permutation gen2 = new PermutationOneLine(0, 1, 2, 3, 5, 4);
+        Permutation gen0 = Permutations.createPermutation(1, 2, 3, 0, 4, 5);
+        Permutation gen1 = Permutations.createPermutation(0, 3, 2, 1, 4, 5);
+        Permutation gen2 = Permutations.createPermutation(0, 1, 2, 3, 5, 4);
         ArrayList<Permutation> generators = new ArrayList<>();
         generators.add(gen0);
         generators.add(gen1);
@@ -331,8 +331,8 @@ public class BacktrackSearchTest extends AbstractTestClass {
 
     @Test
     public void testSearchStabilizer1() throws Exception {
-        Permutation gen0 = new PermutationOneLine(4, 8, 7, 1, 6, 5, 0, 9, 3, 2);
-        Permutation gen1 = new PermutationOneLine(7, 4, 1, 8, 5, 2, 9, 0, 6, 3);
+        Permutation gen0 = Permutations.createPermutation(4, 8, 7, 1, 6, 5, 0, 9, 3, 2);
+        Permutation gen1 = Permutations.createPermutation(7, 4, 1, 8, 5, 2, 9, 0, 6, 3);
         PermutationGroup pg = PermutationGroup.createPermutationGroup(gen0, gen1);
         int[] set = {4, 9};
         testBruteForceSearchStabilizer(pg, set);
@@ -340,10 +340,10 @@ public class BacktrackSearchTest extends AbstractTestClass {
 
     @Test
     public void testSearchStabilizer2() throws Exception {
-        Permutation gen0 = new PermutationOneLine(1, 2, 0, 4, 5, 3, 7, 8, 6, 9);
-        Permutation gen1 = new PermutationOneLine(0, 1, 2, 6, 7, 8, 3, 4, 5, 9);
-        Permutation gen2 = new PermutationOneLine(0, 5, 7, 8, 1, 3, 4, 6, 2, 9);
-        Permutation gen3 = new PermutationOneLine(9, 1, 2, 6, 5, 4, 3, 8, 7, 0);
+        Permutation gen0 = Permutations.createPermutation(1, 2, 0, 4, 5, 3, 7, 8, 6, 9);
+        Permutation gen1 = Permutations.createPermutation(0, 1, 2, 6, 7, 8, 3, 4, 5, 9);
+        Permutation gen2 = Permutations.createPermutation(0, 5, 7, 8, 1, 3, 4, 6, 2, 9);
+        Permutation gen3 = Permutations.createPermutation(9, 1, 2, 6, 5, 4, 3, 8, 7, 0);
 
         PermutationGroup pg = PermutationGroup.createPermutationGroup(gen0, gen1, gen2, gen3);
         int[] set = {0, 3};
@@ -352,9 +352,9 @@ public class BacktrackSearchTest extends AbstractTestClass {
 
     @Test
     public void testSearchStabilizer3() throws Exception {
-        Permutation gen0 = new PermutationOneLine(0, 3, 4, 5, 6, 7, 8, 9, 10, 1, 2, 11, 19, 20, 12, 21, 13, 14, 22, 23, 15, 16, 24, 17, 25, 26, 18);
-        Permutation gen1 = new PermutationOneLine(11, 1, 18, 3, 22, 26, 9, 25, 7, 5, 24, 12, 13, 14, 0, 2, 15, 16, 17, 4, 19, 20, 21, 6, 8, 10, 23);
-        Permutation gen2 = new PermutationOneLine(0, 1, 2, 3, 4, 5, 6, 9, 10, 7, 8, 11, 12, 14, 13, 16, 15, 17, 18, 20, 19, 21, 22, 23, 24, 26, 25);
+        Permutation gen0 = Permutations.createPermutation(0, 3, 4, 5, 6, 7, 8, 9, 10, 1, 2, 11, 19, 20, 12, 21, 13, 14, 22, 23, 15, 16, 24, 17, 25, 26, 18);
+        Permutation gen1 = Permutations.createPermutation(11, 1, 18, 3, 22, 26, 9, 25, 7, 5, 24, 12, 13, 14, 0, 2, 15, 16, 17, 4, 19, 20, 21, 6, 8, 10, 23);
+        Permutation gen2 = Permutations.createPermutation(0, 1, 2, 3, 4, 5, 6, 9, 10, 7, 8, 11, 12, 14, 13, 16, 15, 17, 18, 20, 19, 21, 22, 23, 24, 26, 25);
 
         PermutationGroup pg = PermutationGroup.createPermutationGroup(gen0, gen1, gen2);
         int[] set = {5, 7, 10, 11, 14, 16, 17, 19};

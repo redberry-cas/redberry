@@ -56,7 +56,7 @@ public class PermutationsTest {
         RandomGenerator randomGenerator = new Well1024a(seed);
         List<Permutation> source = new ArrayList<>();
         for (int i = 0; i < 10; ++i)
-            source.add(new PermutationOneLine(Permutations.randomPermutation(n, randomGenerator)));
+            source.add(Permutations.createPermutation(Permutations.randomPermutation(n, randomGenerator)));
         randomness(source, 10, 50, randomGenerator);
 
         ArrayList<BSGSCandidateElement> bsgs;
@@ -82,7 +82,7 @@ public class PermutationsTest {
         for (int C = 0; C < 50; ++C) {
             List<Permutation> source = new ArrayList<>();
             for (int i = 0; i < 10; ++i)
-                source.add(new PermutationOneLine(Permutations.randomPermutation(degree, CC.getRandomGenerator())));
+                source.add(Permutations.createPermutation(Permutations.randomPermutation(degree, CC.getRandomGenerator())));
             randomness(source, 10, 50, CC.getRandomGenerator());
 
             for (int t = 0; t < 50; ++t) {
@@ -134,7 +134,7 @@ public class PermutationsTest {
                         ArraysUtils.swap(perm, prev + rndm.nextInt(s), prev + rndm.nextInt(s));
                     prev += s + 1;
                 } while (prev < degree);
-                source.add(new PermutationOneLine(perm));
+                source.add(Permutations.createPermutation(perm));
             }
 
             randomness(source, 10, 50, rndm);
@@ -226,7 +226,7 @@ public class PermutationsTest {
         int[] c = Permutations.createBlockCycle(3, 4);
         Assert.assertArrayEquals(c, new int[]{3, 4, 5, 6, 7, 8, 9, 10, 11, 0, 1, 2});
         int[] perm = {3, 4, 5, 0, 1, 2, 6, 7, 8, 9, 10, 11};
-        PermutationGroup g = PermutationGroup.createPermutationGroup(new PermutationOneLine(c), new PermutationOneLine(perm));
+        PermutationGroup g = PermutationGroup.createPermutationGroup(Permutations.createPermutation(c), Permutations.createPermutation(perm));
         Assert.assertEquals(24, g.order().intValue());
     }
 

@@ -27,7 +27,7 @@ import cc.redberry.core.context.NameDescriptor;
 import cc.redberry.core.context.NameDescriptorForSimpleTensor;
 import cc.redberry.core.context.NameDescriptorForTensorField;
 import cc.redberry.core.groups.permutations.Permutation;
-import cc.redberry.core.groups.permutations.PermutationOneLine;
+import cc.redberry.core.groups.permutations.PermutationOneLineInt;
 import cc.redberry.core.groups.permutations.Permutations;
 import cc.redberry.core.indices.*;
 import cc.redberry.core.number.Complex;
@@ -1135,7 +1135,7 @@ public final class Tensors {
         int dimension = tensor.getIndices().size(type);
         addSymmetry(tensor, type, true, Permutations.createTransposition(dimension));
         if (dimension > 2)
-            tensor.getIndices().getSymmetries().add(type.getType(), new PermutationOneLine(dimension % 2 == 0 ? true : false, Permutations.createCycle(dimension)));
+            tensor.getIndices().getSymmetries().add(type.getType(), Permutations.createPermutation(dimension % 2 == 0 ? true : false, Permutations.createCycle(dimension)));
     }
 
     /**

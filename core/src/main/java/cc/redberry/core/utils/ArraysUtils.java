@@ -54,6 +54,42 @@ public final class ArraysUtils {
         System.arraycopy(source.innerArray, srcPos, dest, destPos, length);
     }
 
+    public static int[] short2int(final short[] a) {
+        int[] r = new int[a.length];
+        for (int i = 0; i < a.length; ++i)
+            r[i] = a[i];
+        return r;
+    }
+
+    public static short[] int2short(final int[] a) {
+        short[] r = new short[a.length];
+        for (int i = 0; i < a.length; ++i)
+            r[i] = (short) a[i];
+        return r;
+    }
+
+
+    public static int[] byte2int(final byte[] a) {
+        int[] r = new int[a.length];
+        for (int i = 0; i < a.length; ++i)
+            r[i] = a[i];
+        return r;
+    }
+
+    public static short[] byte2short(final byte[] a) {
+        short[] r = new short[a.length];
+        for (int i = 0; i < a.length; ++i)
+            r[i] = a[i];
+        return r;
+    }
+
+    public static byte[] int2byte(final int[] a) {
+        byte[] r = new byte[a.length];
+        for (int i = 0; i < a.length; ++i)
+            r[i] = (byte) a[i];
+        return r;
+    }
+
     public static int max(int[] array) {
         int a = -1;
         for (int i : array)

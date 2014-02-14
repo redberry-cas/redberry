@@ -73,7 +73,7 @@ public class InducedOrderingTest {
             for (int i = 0; i < base.length; ++i)
                 base[i] = CC.getRandomGenerator().nextInt(degree);
             base = MathUtils.getSortedDistinct(base);
-            base = new PermutationOneLine(
+            base = Permutations.createPermutation(
                     Permutations.randomPermutation(base.length, CC.getRandomGenerator())
             ).permute(base);
 

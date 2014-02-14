@@ -37,13 +37,13 @@ import java.util.List;
 public class BruteForcePermutationIteratorTest {
     @Test
     public void testInfLoop() {
-        List<PermutationOneLine> permutations = new ArrayList<>();
+        List<Permutation> permutations = new ArrayList<>();
         for (int tt = 0; tt < 1000; ++tt) {
             permutations.clear();
             for (int i = 0; i < 10; ++i) {
-                PermutationOneLine p = null;
+                Permutation p = null;
                 try {
-                    p = new PermutationOneLine(i % 2 == 0 ? true : false, Permutations.randomPermutation(10));
+                    p = Permutations.createPermutation(i % 2 == 0 ? true : false, Permutations.randomPermutation(10));
                 } catch (Exception e) {
                 }
                 if (p != null)
@@ -73,17 +73,17 @@ public class BruteForcePermutationIteratorTest {
     @Ignore//this test fails onto infinite loop ??
     @Test
     public void testInfLoop2() {
-        List<PermutationOneLine> permutations = new ArrayList<>();
-        permutations.add(new PermutationOneLine(true, 1, 3, 9, 4, 7, 6, 2, 0, 8, 5));
-        permutations.add(new PermutationOneLine(false, 3, 8, 4, 6, 9, 1, 2, 0, 5, 7));
-        permutations.add(new PermutationOneLine(false, 9, 1, 6, 3, 8, 2, 4, 5, 7, 0));
-        permutations.add(new PermutationOneLine(false, 5, 7, 8, 1, 9, 6, 4, 3, 0, 2));
-        permutations.add(new PermutationOneLine(true, 5, 9, 3, 0, 8, 4, 1, 6, 7, 2));
-        permutations.add(new PermutationOneLine(false, 7, 0, 6, 2, 1, 3, 9, 4, 5, 8));
-        permutations.add(new PermutationOneLine(false, 0, 5, 8, 6, 7, 2, 9, 4, 1, 3));
+        List<Permutation> permutations = new ArrayList<>();
+        permutations.add(Permutations.createPermutation(true, 1, 3, 9, 4, 7, 6, 2, 0, 8, 5));
+        permutations.add(Permutations.createPermutation(false, 3, 8, 4, 6, 9, 1, 2, 0, 5, 7));
+        permutations.add(Permutations.createPermutation(false, 9, 1, 6, 3, 8, 2, 4, 5, 7, 0));
+        permutations.add(Permutations.createPermutation(false, 5, 7, 8, 1, 9, 6, 4, 3, 0, 2));
+        permutations.add(Permutations.createPermutation(true, 5, 9, 3, 0, 8, 4, 1, 6, 7, 2));
+        permutations.add(Permutations.createPermutation(false, 7, 0, 6, 2, 1, 3, 9, 4, 5, 8));
+        permutations.add(Permutations.createPermutation(false, 0, 5, 8, 6, 7, 2, 9, 4, 1, 3));
 
         BruteForcePermutationIterator bf = new BruteForcePermutationIterator(new ArrayList<>(permutations));
-        List<PermutationOneLine> all = new ArrayList<>(4628800);
+        List<Permutation> all = new ArrayList<>(4628800);
         int tr = 0;
 //        System.out.println(NumberUtils.factorial(10));
         System.out.println(4628800 / 10000);

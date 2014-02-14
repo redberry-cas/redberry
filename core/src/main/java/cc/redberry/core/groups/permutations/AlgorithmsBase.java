@@ -50,8 +50,8 @@ import static cc.redberry.core.groups.permutations.RandomPermutation.*;
  * {@link cc.redberry.core.groups.permutations.BSGSCandidateElement}) and <i>immutable</i> --- {@code List<BSGSElement>}
  * (unmodifiable). The first form is used as a candidate BSGS of permutation group, while the second everywhere
  * considered as a valid BSGS. For illustration, consider the following code:
- * <pre style="background:#f1f1f1;color:#000"> 1:  <span style="color:#a08000">Permutation</span> perm1 <span style="color:#2060a0">=</span> <span style="color:#2060a0">new</span> <span style="color:#a08000">PermutationOneLine</span>(<span style="color:#0080a0">1</span>, <span style="color:#0080a0">2</span>, <span style="color:#0080a0">3</span>, <span style="color:#0080a0">4</span>, <span style="color:#0080a0">0</span>);
- * 2:  <span style="color:#a08000">Permutation</span> perm2 <span style="color:#2060a0">=</span> <span style="color:#2060a0">new</span> <span style="color:#a08000">PermutationOneLine</span>(<span style="color:#0080a0">1</span>, <span style="color:#0080a0">3</span>, <span style="color:#0080a0">0</span>, <span style="color:#0080a0">4</span>, <span style="color:#0080a0">2</span>);
+ * <pre style="background:#f1f1f1;color:#000"> 1:  <span style="color:#a08000">Permutation</span> perm1 <span style="color:#2060a0">=</span> <span style="color:#2060a0">new</span> <span style="color:#a08000">PermutationOneLineInt</span>(<span style="color:#0080a0">1</span>, <span style="color:#0080a0">2</span>, <span style="color:#0080a0">3</span>, <span style="color:#0080a0">4</span>, <span style="color:#0080a0">0</span>);
+ * 2:  <span style="color:#a08000">Permutation</span> perm2 <span style="color:#2060a0">=</span> <span style="color:#2060a0">new</span> <span style="color:#a08000">PermutationOneLineInt</span>(<span style="color:#0080a0">1</span>, <span style="color:#0080a0">3</span>, <span style="color:#0080a0">0</span>, <span style="color:#0080a0">4</span>, <span style="color:#0080a0">2</span>);
  * 3:  <span style="color:#406040">//create a candidate BSGS</span>
  * 4:  <span style="color:#a08000">ArrayList&lt;<span style="color:#a08000">BSGSCandidateElement</span>></span> candidate <span style="color:#2060a0">=</span> (<span style="color:#a08000">ArrayList</span>) <span style="color:#a08000">AlgorithmsBase</span><span style="color:#2060a0">.</span>createRawBSGSCandidate(perm1, perm2);
  * 5:  <span style="color:#406040">//apply randomized Schreier-Sims algorithm to candidate BSGS (add missing base points and basic stabilizers)</span>
@@ -1466,7 +1466,7 @@ public final class AlgorithmsBase {
 
             //filling Schreier vector for (012)
             SchreierVector[i + 1] = stabilizers.size();
-            stabilizers.add(new PermutationOneLine(perm));
+            stabilizers.add(Permutations.createPermutation(perm));
             SchreierVector[i + 2] = stabilizers.size();
             stabilizers.add(stabilizers.get(0).pow(2));
 
@@ -1485,7 +1485,7 @@ public final class AlgorithmsBase {
                     perm[j] = i + inverseParity + t;
 
                 SchreierVector[i + k] = stabilizers.size();
-                stabilizers.add(base.composition(new PermutationOneLine(perm)));
+                stabilizers.add(base.composition(Permutations.createPermutation(perm)));
             }
             bsgs.add(new BSGSElement(i, new ArrayList<>(stabilizers), SchreierVector, orbit));
             stabilizers.clear();
@@ -1520,7 +1520,7 @@ public final class AlgorithmsBase {
             perm[i + 2] = i;
 
             //filling Schreier vector for (012)
-            stabilizers.add(new PermutationOneLine(perm));
+            stabilizers.add(Permutations.createPermutation(perm));
             stabilizers.add(stabilizers.get(0).pow(2));
 
             int inverseParity = 1 - ((degree - i) % 2);
@@ -1540,7 +1540,7 @@ public final class AlgorithmsBase {
                 for (int t = 0; j < degree; ++j, ++t)
                     perm[j] = i + inverseParity + t;
 
-                stabilizers.add(base.composition(new PermutationOneLine(perm)));
+                stabilizers.add(base.composition(Permutations.createPermutation(perm)));
             }
             bsgs.add(new BSGSCandidateElement(i, new ArrayList<>(stabilizers), new int[degree]).asBSGSElement());
             stabilizers.clear();
@@ -1607,7 +1607,7 @@ public final class AlgorithmsBase {
                     permutation[k] = k;
                 permutation[j] = i;
                 permutation[i] = j;
-                stabilizers[c] = new PermutationOneLine(permutation);
+                stabilizers[c] = Permutations.createPermutation(permutation);
                 SchreierVector[j] = c++;
             }
 
@@ -1638,7 +1638,7 @@ public final class AlgorithmsBase {
                 permutation[j] = j;
             permutation[i] = i + 1;
             permutation[i + 1] = i;
-            stabilizers.add(new PermutationOneLine(permutation));
+            stabilizers.add(Permutations.createPermutation(permutation));
 
             int image, k, l;
             //provide log(size of orbit) access
@@ -1657,7 +1657,7 @@ public final class AlgorithmsBase {
                 for (; k < degree; ++k)
                     permutation[k] = i + (l++);
 
-                stabilizers.add(new PermutationOneLine(permutation));
+                stabilizers.add(Permutations.createPermutation(permutation));
             }
 
             //Collections.reverse(stabilizers);
@@ -1706,7 +1706,7 @@ public final class AlgorithmsBase {
             while (stabs.hasNext()) {
                 Permutation p = stabs.next();
                 if (p.parity() == 1)
-                    stabs.set(new PermutationOneLine(true, p.oneLine()));
+                    stabs.set(Permutations.createPermutation(true, p.oneLine()));
             }
         }
         return asBSGSList(bsgs);

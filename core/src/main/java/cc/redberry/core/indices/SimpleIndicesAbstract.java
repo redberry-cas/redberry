@@ -22,7 +22,7 @@
  */
 package cc.redberry.core.indices;
 
-import cc.redberry.core.groups.permutations.PermutationOneLine;
+import cc.redberry.core.groups.permutations.PermutationOneLineInt;
 import cc.redberry.core.groups.permutations.Permutations;
 import cc.redberry.core.indexmapping.IndexMapping;
 import cc.redberry.core.utils.ArraysUtils;
@@ -214,7 +214,7 @@ abstract class SimpleIndicesAbstract extends AbstractIndices implements SimpleIn
             return false;
 
         return this.getSymmetries().getPermutationGroup().membershipTest(
-                new PermutationOneLine(permutation));
+                Permutations.createPermutation(permutation));
     }
 
     @Override

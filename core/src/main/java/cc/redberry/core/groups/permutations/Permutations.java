@@ -44,13 +44,28 @@ public final class Permutations {
     private Permutations() {
     }
 
-
     public static int internalDegree(final int[] permutation) {
-        int r = -1;
-        for (int i = 0; i < permutation.length; ++i)
+        int i;
+        for (i = permutation.length - 1; i >= 0; --i)
             if (permutation[i] != i)
-                r = i;
-        return r + 1;
+                break;
+        return i + 1;
+    }
+
+    public static short internalDegree(final short[] permutation) {
+        int i;
+        for (i = permutation.length - 1; i >= 0; --i)
+            if (permutation[i] != i)
+                break;
+        return (short) (i + 1);
+    }
+
+    public static byte internalDegree(final byte[] permutation) {
+        int i;
+        for (i = permutation.length - 1; i >= 0; --i)
+            if (permutation[i] != i)
+                break;
+        return (byte) (i + 1);
     }
 
     public static int internalDegree(final List<? extends Permutation> permutations) {
@@ -95,12 +110,106 @@ public final class Permutations {
     }
 
     /**
+     * Calculates parity of specified permutation
+     *
+     * @param permutation permutation
+     * @return parity of permutation
+     */
+    public static int parity(short[] permutation) {
+        //we shall decompose this permutation into product of cycles and calculate l.c.m. of their sizes
+
+        //to mark viewed points
+        BitArray used = new BitArray(permutation.length);
+        //lcm
+        int start, pointer, currentSize, counter = 0;
+        int numOfTranspositions = 0;
+        //while not all points are seen
+        //loop over cycles
+        while (counter < permutation.length) {
+            //get first point that was not already traversed
+            start = pointer = used.nextZeroBit(0);
+            currentSize = 0;
+            //processing current cycle
+            //loop over current cycle
+            do {
+                assert !used.get(pointer);
+                used.set(pointer);
+                pointer = permutation[pointer];
+                ++currentSize;
+            } while (pointer != start);
+            counter += currentSize;
+            numOfTranspositions += currentSize - 1;
+        }
+        return numOfTranspositions % 2;
+    }
+
+    /**
+     * Calculates parity of specified permutation
+     *
+     * @param permutation permutation
+     * @return parity of permutation
+     */
+    public static int parity(byte[] permutation) {
+        //we shall decompose this permutation into product of cycles and calculate l.c.m. of their sizes
+
+        //to mark viewed points
+        BitArray used = new BitArray(permutation.length);
+        //lcm
+        int start, pointer, currentSize, counter = 0;
+        int numOfTranspositions = 0;
+        //while not all points are seen
+        //loop over cycles
+        while (counter < permutation.length) {
+            //get first point that was not already traversed
+            start = pointer = used.nextZeroBit(0);
+            currentSize = 0;
+            //processing current cycle
+            //loop over current cycle
+            do {
+                assert !used.get(pointer);
+                used.set(pointer);
+                pointer = permutation[pointer];
+                ++currentSize;
+            } while (pointer != start);
+            counter += currentSize;
+            numOfTranspositions += currentSize - 1;
+        }
+        return numOfTranspositions % 2;
+    }
+
+    /**
      * Returns true if specified permutation, written in one-line notation, is identity and false otherwise.
      *
      * @param permutation permutation in one-line notation
      * @return true if specified permutation is identity and false otherwise
      */
     public static boolean isIdentity(final int[] permutation) {
+        for (int i = 0; i < permutation.length; ++i)
+            if (i != permutation[i])
+                return false;
+        return true;
+    }
+
+    /**
+     * Returns true if specified permutation, written in one-line notation, is identity and false otherwise.
+     *
+     * @param permutation permutation in one-line notation
+     * @return true if specified permutation is identity and false otherwise
+     */
+    public static boolean isIdentity(final short[] permutation) {
+        for (int i = 0; i < permutation.length; ++i)
+            if (i != permutation[i])
+                return false;
+        return true;
+    }
+
+    /**
+     * Returns true if specified permutation, written in one-line notation, is identity and false otherwise.
+     *
+     * @param permutation permutation in one-line notation
+     * @return true if specified permutation is identity and false otherwise
+     */
+    public static boolean isIdentity(final byte[] permutation) {
         for (int i = 0; i < permutation.length; ++i)
             if (i != permutation[i])
                 return false;
@@ -121,12 +230,76 @@ public final class Permutations {
 
     /**
      * Tests whether the specified array satisfies the one-line notation for permutations
+     * and in case of negative sign that its order is even
+     *
+     * @param permutation array to be tested
+     * @return {@code true} if specified array satisfies the one-line notation for permutations and if sign is true
+     * that its order is even
+     */
+    public static boolean testPermutationCorrectness(short[] permutation, boolean sign) {
+        return testPermutationCorrectness(permutation) && (sign ? !orderOfPermutationIsOdd(permutation) : true);
+    }
+
+    /**
+     * Tests whether the specified array satisfies the one-line notation for permutations
+     * and in case of negative sign that its order is even
+     *
+     * @param permutation array to be tested
+     * @return {@code true} if specified array satisfies the one-line notation for permutations and if sign is true
+     * that its order is even
+     */
+    public static boolean testPermutationCorrectness(byte[] permutation, boolean sign) {
+        return testPermutationCorrectness(permutation) && (sign ? !orderOfPermutationIsOdd(permutation) : true);
+    }
+
+    /**
+     * Tests whether the specified array satisfies the one-line notation for permutations
      *
      * @param permutation array to be tested
      * @return {@code true} if specified array satisfies the one-line notation for permutations and {@code false} if
      * not
      */
     public static boolean testPermutationCorrectness(int[] permutation) {
+        int length = permutation.length;
+        BitArray checked = new BitArray(length);
+        for (int i = 0; i < length; ++i) {
+            if (permutation[i] >= length || permutation[i] < 0)
+                return false;
+            if (checked.get(permutation[i]))
+                return false;
+            checked.set(permutation[i]);
+        }
+        return checked.isFull();
+    }
+
+    /**
+     * Tests whether the specified array satisfies the one-line notation for permutations
+     *
+     * @param permutation array to be tested
+     * @return {@code true} if specified array satisfies the one-line notation for permutations and {@code false} if
+     * not
+     */
+    public static boolean testPermutationCorrectness(short[] permutation) {
+        int length = permutation.length;
+        BitArray checked = new BitArray(length);
+        for (int i = 0; i < length; ++i) {
+            if (permutation[i] >= length || permutation[i] < 0)
+                return false;
+            if (checked.get(permutation[i]))
+                return false;
+            checked.set(permutation[i]);
+        }
+        return checked.isFull();
+    }
+
+    /**
+     * Tests whether the specified array satisfies the one-line notation for permutations
+     *
+     * @param permutation array to be tested
+     * @return {@code true} if specified array satisfies the one-line notation for permutations and {@code false} if
+     * not
+     */
+    public static boolean testPermutationCorrectness(byte[] permutation) {
         int length = permutation.length;
         BitArray checked = new BitArray(length);
         for (int i = 0; i < length; ++i) {
@@ -179,6 +352,84 @@ public final class Permutations {
     }
 
     /**
+     * Calculates the order of specified permutation. Since the maximum order g(n) of permutation in symmetric group
+     * S(n) is about log(g(n)) <= sqrt(n log(n))* (1 + log log(n) / (2 log(n))), then g(n) can be very big (e.g.
+     * for n = 1000, g(n) ~1e25). The algorithm decomposes permutation into product of cycles and returns l.c.m. of their sizes.
+     *
+     * @param permutation
+     * @return order of specified permutation
+     */
+    public static BigInteger orderOfPermutation(short[] permutation) {
+        //we shall decompose this permutation into product of cycles and calculate l.c.m. of their sizes
+
+        //to mark viewed points
+        BitArray used = new BitArray(permutation.length);
+        //lcm
+        BigInteger lcm = BigInteger.ONE, temp;
+
+        int start, pointer, currentSize, counter = 0;
+        //while not all points are seen
+        //loop over cycles
+        while (counter < permutation.length) {
+            //get first point that was not already traversed
+            start = pointer = used.nextZeroBit(0);
+            currentSize = 0;
+            //processing current cycle
+            //loop over current cycle
+            do {
+                assert !used.get(pointer);
+                used.set(pointer);
+                pointer = permutation[pointer];
+                ++currentSize;
+            } while (pointer != start);
+            counter += currentSize;
+            temp = BigInteger.valueOf(currentSize);
+            //calculate l.c.m.
+            lcm = (lcm.divide(lcm.gcd(temp))).multiply(temp);
+        }
+        return lcm;
+    }
+
+    /**
+     * Calculates the order of specified permutation. Since the maximum order g(n) of permutation in symmetric group
+     * S(n) is about log(g(n)) <= sqrt(n log(n))* (1 + log log(n) / (2 log(n))), then g(n) can be very big (e.g.
+     * for n = 1000, g(n) ~1e25). The algorithm decomposes permutation into product of cycles and returns l.c.m. of their sizes.
+     *
+     * @param permutation
+     * @return order of specified permutation
+     */
+    public static BigInteger orderOfPermutation(byte[] permutation) {
+        //we shall decompose this permutation into product of cycles and calculate l.c.m. of their sizes
+
+        //to mark viewed points
+        BitArray used = new BitArray(permutation.length);
+        //lcm
+        BigInteger lcm = BigInteger.ONE, temp;
+
+        int start, pointer, currentSize, counter = 0;
+        //while not all points are seen
+        //loop over cycles
+        while (counter < permutation.length) {
+            //get first point that was not already traversed
+            start = pointer = used.nextZeroBit(0);
+            currentSize = 0;
+            //processing current cycle
+            //loop over current cycle
+            do {
+                assert !used.get(pointer);
+                used.set(pointer);
+                pointer = permutation[pointer];
+                ++currentSize;
+            } while (pointer != start);
+            counter += currentSize;
+            temp = BigInteger.valueOf(currentSize);
+            //calculate l.c.m.
+            lcm = (lcm.divide(lcm.gcd(temp))).multiply(temp);
+        }
+        return lcm;
+    }
+
+    /**
      * Returns true if order of specified permutation is odd and false otherwise. This algorithm is very fast since
      * it does not compute order of element, but calculates just its parity without use of any "hard" computations
      * with g.c.d./l.c.m./BigInteger arithmetics etc.
@@ -187,6 +438,78 @@ public final class Permutations {
      * @return true if order of specified permutation is odd and false otherwise
      */
     public static boolean orderOfPermutationIsOdd(final int[] permutation) {
+        //decompose this permutation into product of cycles and calculate parity of l.c.m. of their sizes
+
+        //to mark viewed points
+        BitArray used = new BitArray(permutation.length);
+        int start, pointer, currentSize, counter = 0;
+        //while not all points are seen
+        //loop over cycles
+        while (counter < permutation.length) {
+            //get first point that was not already traversed
+            start = pointer = used.nextZeroBit(0);
+            currentSize = 0;
+            //processing current cycle
+            //loop over current cycle
+            do {
+                assert !used.get(pointer);
+                used.set(pointer);
+                pointer = permutation[pointer];
+                ++currentSize;
+            } while (pointer != start);
+            if (currentSize % 2 == 0)
+                return false;
+            counter += currentSize;
+        }
+        //all sizes are odd
+        return true;
+    }
+
+    /**
+     * Returns true if order of specified permutation is odd and false otherwise. This algorithm is very fast since
+     * it does not compute order of element, but calculates just its parity without use of any "hard" computations
+     * with g.c.d./l.c.m./BigInteger arithmetics etc.
+     *
+     * @param permutation permutation
+     * @return true if order of specified permutation is odd and false otherwise
+     */
+    public static boolean orderOfPermutationIsOdd(final short[] permutation) {
+        //decompose this permutation into product of cycles and calculate parity of l.c.m. of their sizes
+
+        //to mark viewed points
+        BitArray used = new BitArray(permutation.length);
+        int start, pointer, currentSize, counter = 0;
+        //while not all points are seen
+        //loop over cycles
+        while (counter < permutation.length) {
+            //get first point that was not already traversed
+            start = pointer = used.nextZeroBit(0);
+            currentSize = 0;
+            //processing current cycle
+            //loop over current cycle
+            do {
+                assert !used.get(pointer);
+                used.set(pointer);
+                pointer = permutation[pointer];
+                ++currentSize;
+            } while (pointer != start);
+            if (currentSize % 2 == 0)
+                return false;
+            counter += currentSize;
+        }
+        //all sizes are odd
+        return true;
+    }
+
+    /**
+     * Returns true if order of specified permutation is odd and false otherwise. This algorithm is very fast since
+     * it does not compute order of element, but calculates just its parity without use of any "hard" computations
+     * with g.c.d./l.c.m./BigInteger arithmetics etc.
+     *
+     * @param permutation permutation
+     * @return true if order of specified permutation is odd and false otherwise
+     */
+    public static boolean orderOfPermutationIsOdd(final byte[] permutation) {
         //decompose this permutation into product of cycles and calculate parity of l.c.m. of their sizes
 
         //to mark viewed points
@@ -391,12 +714,128 @@ public final class Permutations {
     }
 
     /**
+     * Converts permutation written in one-line notation to disjoint cycles notation.
+     *
+     * @param permutation permutation written in one-line notation
+     * @return permutation written in disjoint cycles notation
+     */
+    public static int[][] convertOneLineToCycles(final short[] permutation) {
+        ArrayList<int[]> cycles = new ArrayList<>();
+        BitArray seen = new BitArray(permutation.length);
+        int counter = 0;
+        while (counter < permutation.length) {
+            int start = seen.nextZeroBit(0);
+            if (permutation[start] == start) {
+                ++counter;
+                seen.set(start);
+                continue;
+            }
+            IntArrayList cycle = new IntArrayList();
+            while (!seen.get(start)) {
+                seen.set(start);
+                ++counter;
+                cycle.add(start);
+                start = permutation[start];
+            }
+            cycles.add(cycle.toArray());
+        }
+        return cycles.toArray(new int[cycles.size()][]);
+    }
+
+    /**
+     * Converts permutation written in one-line notation to disjoint cycles notation.
+     *
+     * @param permutation permutation written in one-line notation
+     * @return permutation written in disjoint cycles notation
+     */
+    public static int[][] convertOneLineToCycles(final byte[] permutation) {
+        ArrayList<int[]> cycles = new ArrayList<>();
+        BitArray seen = new BitArray(permutation.length);
+        int counter = 0;
+        while (counter < permutation.length) {
+            int start = seen.nextZeroBit(0);
+            if (permutation[start] == start) {
+                ++counter;
+                seen.set(start);
+                continue;
+            }
+            IntArrayList cycle = new IntArrayList();
+            while (!seen.get(start)) {
+                seen.set(start);
+                ++counter;
+                cycle.add(start);
+                start = permutation[start];
+            }
+            cycles.add(cycle.toArray());
+        }
+        return cycles.toArray(new int[cycles.size()][]);
+    }
+
+    /**
      * Returns an array of cycles lengths.
      *
      * @param permutation permutation written in one-line notation
      * @return an array of cycles lengths
      */
     public static int[] lengthsOfCycles(final int[] permutation) {
+        IntArrayList sizes = new IntArrayList();
+        BitArray seen = new BitArray(permutation.length);
+        int counter = 0;
+        while (counter < permutation.length) {
+            int start = seen.nextZeroBit(0);
+            if (permutation[start] == start) {
+                ++counter;
+                seen.set(start);
+                continue;
+            }
+            int size = 0;
+            while (!seen.get(start)) {
+                seen.set(start);
+                ++counter;
+                ++size;
+                start = permutation[start];
+            }
+            sizes.add(size);
+        }
+        return sizes.toArray();
+    }
+
+    /**
+     * Returns an array of cycles lengths.
+     *
+     * @param permutation permutation written in one-line notation
+     * @return an array of cycles lengths
+     */
+    public static int[] lengthsOfCycles(final short[] permutation) {
+        IntArrayList sizes = new IntArrayList();
+        BitArray seen = new BitArray(permutation.length);
+        int counter = 0;
+        while (counter < permutation.length) {
+            int start = seen.nextZeroBit(0);
+            if (permutation[start] == start) {
+                ++counter;
+                seen.set(start);
+                continue;
+            }
+            int size = 0;
+            while (!seen.get(start)) {
+                seen.set(start);
+                ++counter;
+                ++size;
+                start = permutation[start];
+            }
+            sizes.add(size);
+        }
+        return sizes.toArray();
+    }
+
+    /**
+     * Returns an array of cycles lengths.
+     *
+     * @param permutation permutation written in one-line notation
+     * @return an array of cycles lengths
+     */
+    public static int[] lengthsOfCycles(final byte[] permutation) {
         IntArrayList sizes = new IntArrayList();
         BitArray seen = new BitArray(permutation.length);
         int counter = 0;
@@ -494,6 +933,78 @@ public final class Permutations {
     /**
      * **************************************** FACTORIES **************************************************
      */
+
+    /**
+     * Creates permutation instance from a given array that represents permutation in disjoint cycle notation.
+     * <p>This method will automatically choose an appropriate underlying implementation of Permutation depending on
+     * the permutation length.</p>
+     * <p>If order of specified permutation is odd and antisymmetry is specified, then exception will thrown, since
+     * such antisymmetry is impossible from the mathematical point of view.</p>
+     *
+     * @param antisymmetry if true, then antisymmetry will be created
+     * @param cycles       array of disjoint cycles
+     * @return an instance of {@code Permutation}
+     * @throws java.lang.IllegalArgumentException if specified array is inconsistent with disjoint cycle notation
+     * @throws IllegalArgumentException           if antisymmetry is true and permutation order is odd
+     */
+    public static Permutation createPermutation(boolean antisymmetry, int[][] cycles) {
+        return createPermutation(antisymmetry, convertCyclesToOneLine(cycles));
+    }
+
+    /**
+     * Creates permutation instance from a given array that represents permutation in disjoint cycle notation.
+     * <p>This method will automatically choose an appropriate underlying implementation of Permutation depending on
+     * the permutation length.</p>
+     *
+     * @param cycles array of disjoint cycles
+     * @return an instance of {@code Permutation}
+     * @throws java.lang.IllegalArgumentException if specified array is inconsistent with disjoint cycle notation
+     */
+    public static Permutation createPermutation(int[][] cycles) {
+        return createPermutation(false, convertCyclesToOneLine(cycles));
+    }
+
+    /**
+     * Creates permutation instance from a given array that represents permutation in one-line notation.
+     * <p>This method will automatically choose an appropriate underlying implementation of Permutation depending on
+     * the permutation length.</p>
+     *
+     * @param oneLine array that represents permutation in one line notation
+     * @return an instance of {@code Permutation}
+     * @throws java.lang.IllegalArgumentException if specified array is inconsistent with one-line notation
+     */
+    public static Permutation createPermutation(int... oneLine) {
+        return createPermutation(false, oneLine);
+    }
+
+    /**
+     * Creates permutation instance from a given array that represents permutation in one-line notation.
+     * <p>This method will automatically choose an appropriate underlying implementation of Permutation depending on
+     * the permutation length.</p>
+     * <p>If order of specified permutation is odd and antisymmetry is specified, then exception will thrown, since
+     * such antisymmetry is impossible from the mathematical point of view.</p>
+     *
+     * @param antisymmetry if true, then antisymmetry will be created
+     * @param oneLine      array that represents permutation in one line notation
+     * @return an instance of {@code Permutation}
+     * @throws java.lang.IllegalArgumentException if specified array is inconsistent with one-line notation
+     * @throws IllegalArgumentException           if antisymmetry is true and permutation order is odd
+     */
+    public static Permutation createPermutation(boolean antisymmetry, int... oneLine) {
+        boolean _byte = true, _short = true;
+        for (int i : oneLine) {
+            if (i > Short.MAX_VALUE - 1) {  //-1 is because internalDegree calculated as largest moved point + 1
+                _short = false;
+                _byte = false;
+            } else if (i > Byte.MAX_VALUE - 1) _byte = false;
+        }
+        if (_byte)
+            return new PermutationOneLineByte(antisymmetry, ArraysUtils.int2byte(oneLine));
+        if (_short)
+            return new PermutationOneLineShort(antisymmetry, ArraysUtils.int2short(oneLine));
+        return new PermutationOneLineInt(antisymmetry, oneLine);
+    }
+
     /**
      * Permutes specified array according to specified permutation and returns the result.
      *
@@ -596,10 +1107,10 @@ public final class Permutations {
     public static Permutation createIdentityPermutation(int degree) {
         if (degree < cachedIdentities.length) {
             if (cachedIdentities[degree] == null)
-                cachedIdentities[degree] = new PermutationOneLine(createIdentityArray(degree));
+                cachedIdentities[degree] = Permutations.createPermutation(createIdentityArray(degree));
             return cachedIdentities[degree];
         }
-        return new PermutationOneLine(createIdentityArray(degree));
+        return Permutations.createPermutation(createIdentityArray(degree));
     }
 
     /**

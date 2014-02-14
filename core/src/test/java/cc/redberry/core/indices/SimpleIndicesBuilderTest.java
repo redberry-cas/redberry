@@ -25,7 +25,8 @@ package cc.redberry.core.indices;
 import cc.redberry.core.TAssert;
 import cc.redberry.core.groups.permutations.Permutation;
 import cc.redberry.core.groups.permutations.PermutationGroup;
-import cc.redberry.core.groups.permutations.PermutationOneLine;
+import cc.redberry.core.groups.permutations.PermutationOneLineInt;
+import cc.redberry.core.groups.permutations.Permutations;
 import cc.redberry.core.parser.ParserIndices;
 import cc.redberry.core.tensor.SimpleTensor;
 import org.junit.Test;
@@ -95,9 +96,9 @@ public class SimpleIndicesBuilderTest {
         assertTrue(ibs.getIndices().equals(expectedIndices));
 
         //Expected
-        Permutation s1 = new PermutationOneLine(false, new int[]{0, 1, 2, 3});
-        Permutation s2 = new PermutationOneLine(false, new int[]{1, 0, 2, 3});
-        Permutation s3 = new PermutationOneLine(false, new int[]{0, 1, 3, 2});
+        Permutation s1 = Permutations.createPermutation(false, new int[]{0, 1, 2, 3});
+        Permutation s2 = Permutations.createPermutation(false, new int[]{1, 0, 2, 3});
+        Permutation s3 = Permutations.createPermutation(false, new int[]{0, 1, 3, 2});
         Permutation[] expected = {s1, s2, s3};
 
         TAssert.assertEquals(ibs.getIndices().getSymmetries().getPermutationGroup(), PermutationGroup.createPermutationGroup(expected));
@@ -121,9 +122,9 @@ public class SimpleIndicesBuilderTest {
         assertTrue(ibs.getIndices().equals(expectedIndices));
 
         //Expected
-        Permutation s1 = new PermutationOneLine(false, new int[]{0, 1, 2, 3, 4, 5, 6, 7});
-        Permutation s2 = new PermutationOneLine(false, new int[]{0, 1, 3, 2, 4, 5, 6, 7});
-        Permutation s3 = new PermutationOneLine(false, new int[]{0, 1, 2, 3, 5, 4, 6, 7});
+        Permutation s1 = Permutations.createPermutation(false, new int[]{0, 1, 2, 3, 4, 5, 6, 7});
+        Permutation s2 = Permutations.createPermutation(false, new int[]{0, 1, 3, 2, 4, 5, 6, 7});
+        Permutation s3 = Permutations.createPermutation(false, new int[]{0, 1, 2, 3, 5, 4, 6, 7});
         Permutation[] expected = {s1, s2, s3};
 
         TAssert.assertEquals(ibs.getIndices().getSymmetries().getPermutationGroup(), PermutationGroup.createPermutationGroup(expected));
@@ -148,9 +149,9 @@ public class SimpleIndicesBuilderTest {
         assertTrue(ibs.getIndices().equals(expectedIndices));
 
         //Expected
-        Permutation s1 = new PermutationOneLine(false, new int[]{0, 1, 2, 3, 4, 5, 6, 7});
-        Permutation s2 = new PermutationOneLine(false, new int[]{1, 0, 2, 3, 4, 5, 6, 7});
-        Permutation s3 = new PermutationOneLine(false, new int[]{0, 1, 3, 2, 4, 5, 6, 7});
+        Permutation s1 = Permutations.createPermutation(false, new int[]{0, 1, 2, 3, 4, 5, 6, 7});
+        Permutation s2 = Permutations.createPermutation(false, new int[]{1, 0, 2, 3, 4, 5, 6, 7});
+        Permutation s3 = Permutations.createPermutation(false, new int[]{0, 1, 3, 2, 4, 5, 6, 7});
         Permutation[] expected = {s1, s2, s3};
 
         TAssert.assertEquals(ibs.getIndices().getSymmetries().getPermutationGroup(), PermutationGroup.createPermutationGroup(expected));

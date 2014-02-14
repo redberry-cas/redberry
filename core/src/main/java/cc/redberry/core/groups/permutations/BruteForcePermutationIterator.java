@@ -32,29 +32,29 @@ import java.util.*;
  * @author Stanislav Poslavsky
  * @since 1.0
  */
-final class BruteForcePermutationIterator implements Iterator<PermutationOneLine> {
-    static final Comparator<PermutationOneLine> JUST_PERMUTATION_COMPARATOR = new Comparator<PermutationOneLine>() {
+final class BruteForcePermutationIterator implements Iterator<Permutation> {
+    static final Comparator<Permutation> JUST_PERMUTATION_COMPARATOR = new Comparator<Permutation>() {
         @Override
-        public int compare(PermutationOneLine o1, PermutationOneLine o2) {
+        public int compare(Permutation o1, Permutation o2) {
             return o1.compareTo(o2);
         }
     };
-    private TreeSet<PermutationOneLine> set = null;
-    private List<PermutationOneLine> upperLayer;
-    private List<PermutationOneLine> lowerLayer = new ArrayList<>();
-    private List<PermutationOneLine> nextLayer = new ArrayList<>();
+    private TreeSet<Permutation> set = null;
+    private List<Permutation> upperLayer;
+    private List<Permutation> lowerLayer = new ArrayList<>();
+    private List<Permutation> nextLayer = new ArrayList<>();
     private boolean forward = false;
     private int upperIndex = 0, lowerIndex = 0;
 
-    public BruteForcePermutationIterator(List<PermutationOneLine> permutations) {
+    public BruteForcePermutationIterator(List<Permutation> permutations) {
         set = new TreeSet<>(JUST_PERMUTATION_COMPARATOR);
         this.upperLayer = new ArrayList<>();
         //noinspection unchecked
-        this.upperLayer.add((PermutationOneLine) Permutations.createIdentityPermutation(Permutations.internalDegree(permutations)));
+        this.upperLayer.add(Permutations.createIdentityPermutation(Permutations.internalDegree(permutations)));
         this.lowerLayer = permutations;
     }
 
-    PermutationOneLine current;
+    Permutation current;
 
     /**
      * @throws cc.redberry.core.combinatorics.InconsistentGeneratorsException if combinatorics are inconsistent,
@@ -67,12 +67,12 @@ final class BruteForcePermutationIterator implements Iterator<PermutationOneLine
     }
 
     @Override
-    public PermutationOneLine next() {
+    public Permutation next() {
         return current;
     }
 
-    private PermutationOneLine next1() {
-        PermutationOneLine composition = null;
+    private Permutation next1() {
+        Permutation composition = null;
         while (composition == null)
             if (forward) {
                 composition = tryPair(upperLayer.get(upperIndex), lowerLayer.get(lowerIndex));
@@ -99,9 +99,9 @@ final class BruteForcePermutationIterator implements Iterator<PermutationOneLine
         nextLayer = new ArrayList<>();
     }
 
-    private PermutationOneLine tryPair(PermutationOneLine p0, PermutationOneLine p1) {
-        PermutationOneLine composition = (PermutationOneLine) p0.composition(p1);
-        PermutationOneLine setComposition = set.ceiling(composition);
+    private Permutation tryPair(Permutation p0, Permutation p1) {
+        Permutation composition =  p0.composition(p1);
+        Permutation setComposition = set.ceiling(composition);
         if (setComposition != null && JUST_PERMUTATION_COMPARATOR.compare(setComposition, composition) == 0)
             if (setComposition.equals(composition))
                 return null;
