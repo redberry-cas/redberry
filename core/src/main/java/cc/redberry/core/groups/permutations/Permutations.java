@@ -569,9 +569,12 @@ public final class Permutations {
         return res;
     }
 
-
-    private static final Permutation[] cachedIdentities = new Permutation[128];
-
+    /**
+     * Creates array that represents identity one-line permutation of specified degree.
+     *
+     * @param length degree of permutation (array length)
+     * @return array that represents identity one-line permutation of specified degree
+     */
     public static int[] createIdentityArray(int length) {
         int[] array = new int[length];
         for (int i = 0; i < length; ++i)
@@ -579,6 +582,17 @@ public final class Permutations {
         return array;
     }
 
+    /**
+     * Cached identities
+     */
+    private static final Permutation[] cachedIdentities = new Permutation[128];
+
+    /**
+     * Creates identity permutation with with specified degree.
+     *
+     * @param degree size of internal buffer of permutation
+     * @return identity permutation
+     */
     public static Permutation createIdentityPermutation(int degree) {
         if (degree < cachedIdentities.length) {
             if (cachedIdentities[degree] == null)
@@ -588,8 +602,16 @@ public final class Permutations {
         return new PermutationOneLine(createIdentityArray(degree));
     }
 
+    /**
+     * Default (optimal for average problem) value of identity permutation length
+     */
     public static final int DEFAULT_IDENTITY_LENGTH = 10;
 
+    /**
+     * Returns identity permutation.
+     *
+     * @return identity permutation
+     */
     public static Permutation createIdentityPermutation() {
         return createIdentityPermutation(DEFAULT_IDENTITY_LENGTH);
     }
