@@ -162,7 +162,7 @@ public final class AlgorithmsBase {
      * @throws IllegalArgumentException if not all permutations have same length
      */
     public static List<BSGSCandidateElement> createRawBSGSCandidate(final List<Permutation> generators) {
-        return createRawBSGSCandidate(generators, Permutations.internalDegree(generators));
+        return createRawBSGSCandidate(generators, Permutations.SchreierVectorCapacity(generators));
     }
 
 
@@ -208,10 +208,10 @@ public final class AlgorithmsBase {
         // corresponding G^(i) is G^(0) = G, so its stabilizer generators (stabilizes zero points)
         // are just generators of group
         ArrayList<BSGSCandidateElement> BSGS = new ArrayList<>();
-        BSGS.add(new BSGSCandidateElement(firstBasePoint, new ArrayList<>(generators), new int[degree]));
+        BSGS.add(new BSGSCandidateElement(firstBasePoint, new ArrayList<>(generators), degree));
 
         //make use all unused generators
-        makeUseOfAllGenerators(BSGS);
+        makeUseOfAllGenerators(BSGS, degree);
         return BSGS;
     }
 
@@ -276,7 +276,7 @@ public final class AlgorithmsBase {
             if (i == 0) {
                 // corresponding G^(i) is G^(0) = G, so its stabilizer generators (stabilizes zero points)
                 // are just generators of group
-                BSGS.add(new BSGSCandidateElement(base.get(i), new ArrayList<>(generators), new int[degree]));
+                BSGS.add(new BSGSCandidateElement(base.get(i), new ArrayList<>(generators), degree));
                 continue;
             }
             //lets find generators that fixes all points before current point
@@ -288,11 +288,11 @@ public final class AlgorithmsBase {
                         continue allgenerators;
                 stabilizerGenerators.add(stabilizerGenerator);
             }
-            BSGS.add(new BSGSCandidateElement(base.get(i), stabilizerGenerators, new int[degree]));
+            BSGS.add(new BSGSCandidateElement(base.get(i), stabilizerGenerators, degree));
         }
 
         //make use all unused generators
-        makeUseOfAllGenerators(BSGS);
+        makeUseOfAllGenerators(BSGS, degree);
 
         return BSGS;
     }
@@ -414,12 +414,12 @@ public final class AlgorithmsBase {
      * generator and add this point to specified BSGS candidate.
      *
      * @param BSGSCandidate BSGS candidate
+     * @param degree        degree of group used to create Schreier vectors of proper length
      */
-    public static void makeUseOfAllGenerators(List<BSGSCandidateElement> BSGSCandidate) {
+    public static void makeUseOfAllGenerators(List<BSGSCandidateElement> BSGSCandidate, int degree) {
         //all group generators
         List<Permutation> generators = BSGSCandidate.get(0).stabilizerGenerators;
-        final int length = internalDegree(BSGSCandidate);
-        if (length == 0)
+        if (degree == 0)
             return;
         //iterate over all generators find each one that fixes all base points
         for (Permutation generator : generators) {
@@ -435,13 +435,13 @@ public final class AlgorithmsBase {
             if (fixesBase) {
                 //current generator fixes all points in base
                 //in order to make it in use let's find any point that is not fixed under current generator
-                for (int point = 0; point < length; ++point)
+                for (int point = 0; point < degree; ++point)
                     if (generator.newIndexOf(point) != point) {
                         //this point is not fixed by current generator
                         //let's add this point to base
                         BSGSCandidate.add(new BSGSCandidateElement(point,
                                 BSGSCandidate.get(BSGSCandidate.size() - 1).getStabilizersOfThisBasePoint(),
-                                new int[length]));
+                                degree));
                     }
             }
         }
@@ -529,7 +529,7 @@ public final class AlgorithmsBase {
                             for (int i = 0; i < degree; ++i)
                                 if (strip.remainder.newIndexOf(i) != i) {
                                     // adding this point to BSGS (with empty stabilizers set, since it is a last point)
-                                    BSGSCandidate.add(new BSGSCandidateElement(i, new ArrayList<Permutation>(), new int[degree]));
+                                    BSGSCandidate.add(new BSGSCandidateElement(i, new ArrayList<Permutation>(), degree));
                                     //here we can proceed, but we break
                                     break;
                                 }
@@ -601,7 +601,7 @@ public final class AlgorithmsBase {
         //recalculate BSGSCandidate
         for (BSGSCandidateElement element : BSGSCandidate)
             element.recalculateOrbitAndSchreierVector();
-        makeUseOfAllGenerators(BSGSCandidate);
+        makeUseOfAllGenerators(BSGSCandidate, degree);
 
         //counts the random elements sifted without change to BSGS
         int sifted = 0;
@@ -636,7 +636,7 @@ public final class AlgorithmsBase {
                 for (int i = 0; i < degree; ++i)
                     if (strip.remainder.newIndexOf(i) != i) {
                         // adding this point to BSGS (with empty stabilizers set, since it is a last point)
-                        BSGSCandidate.add(new BSGSCandidateElement(i, new ArrayList<Permutation>(), new int[degree]));
+                        BSGSCandidate.add(new BSGSCandidateElement(i, new ArrayList<Permutation>(), degree));
                         //here we can proceed, but we break
                         break;
                     }
@@ -708,7 +708,7 @@ public final class AlgorithmsBase {
         //recalculate BSGSCandidate
         for (BSGSCandidateElement element : BSGSCandidate)
             element.recalculateOrbitAndSchreierVector();
-        makeUseOfAllGenerators(BSGSCandidate);
+        makeUseOfAllGenerators(BSGSCandidate, degree);
 
         //main loop
         Permutation randomElement;
@@ -738,7 +738,7 @@ public final class AlgorithmsBase {
                 for (int i = 0; i < degree; ++i)
                     if (strip.remainder.newIndexOf(i) != i) {
                         // adding this point to BSGS (with empty stabilizers set, since it is a last point)
-                        BSGSCandidate.add(new BSGSCandidateElement(i, new ArrayList<Permutation>(), new int[degree]));
+                        BSGSCandidate.add(new BSGSCandidateElement(i, new ArrayList<Permutation>(), degree));
                         //here we can proceed, but we break
                         break;
                     }
@@ -1046,7 +1046,7 @@ public final class AlgorithmsBase {
 
         //we shall store the orbit of ithBeta under new stabilizers in BSGSCandidateElement
         BSGSCandidateElement newOrbitStabilizer =
-                new BSGSCandidateElement(ithBeta, newStabilizers, new int[degree]);
+                new BSGSCandidateElement(ithBeta, newStabilizers, degree);
 
         //main loop
         main:
@@ -1086,9 +1086,9 @@ public final class AlgorithmsBase {
 
         //swap base points (orbits and and Schreier vectors will be recalculated in constructors)
         BSGSCandidateElement ith = new BSGSCandidateElement(BSGS.get(i + 1).basePoint,
-                BSGS.get(i).stabilizerGenerators, new int[degree]);
+                BSGS.get(i).stabilizerGenerators, degree);
         BSGSCandidateElement jth = new BSGSCandidateElement(BSGS.get(i).basePoint,
-                newStabilizers, new int[degree]);
+                newStabilizers, degree);
         BSGS.set(i, ith);
         BSGS.set(i + 1, jth);
     }
@@ -1203,7 +1203,7 @@ public final class AlgorithmsBase {
                 //conjugating base point
                 int newBasePoint = conjugation.newIndexOf(element.basePoint);
                 elementsIterator.set(
-                        new BSGSCandidateElement(newBasePoint, newStabilizers, new int[degree]));
+                        new BSGSCandidateElement(newBasePoint, newStabilizers, degree));
             }
         }
         removeRedundantBaseRemnant(BSGS);
@@ -1232,8 +1232,7 @@ public final class AlgorithmsBase {
 
         if (insertionPosition == BSGS.size()) {
             //<- no element that fixes new base point
-            BSGS.add(new BSGSCandidateElement(newBasePoint, new ArrayList<Permutation>(),
-                    new int[degree]));
+            BSGS.add(new BSGSCandidateElement(newBasePoint, new ArrayList<Permutation>(), degree));
         } else if (BSGS.get(insertionPosition).basePoint != newBasePoint) {
             //<- we've found an element (call it pivot) that stabilizes all
             // points before pivot and also a new base point
@@ -1242,8 +1241,7 @@ public final class AlgorithmsBase {
             //stabilizers of new base point inserted are same to stabilizers of pivot
             BSGS.add(insertionPosition,
                     new BSGSCandidateElement(newBasePoint,
-                            new ArrayList<>(BSGS.get(insertionPosition).stabilizerGenerators),
-                            new int[degree]));
+                            new ArrayList<>(BSGS.get(insertionPosition).stabilizerGenerators), degree));
         }
         //then just swap
         //note, that if insertionPosition <= i then no any swap needed
@@ -1320,11 +1318,12 @@ public final class AlgorithmsBase {
 
             int[] SchreierVector = new int[deg];
             Arrays.fill(SchreierVector, 0, degree1, -2);
-            System.arraycopy(element.SchreierVector, 0, SchreierVector, degree1, degree2);
+            System.arraycopy(element.SchreierVector.data, 0, SchreierVector, degree1, degree2);
             IntArrayList orbit = new IntArrayList(element.orbitList.size());
             for (int i = element.orbitList.size() - 1; i >= 0; --i)
                 orbit.add(element.orbitList.get(i) + degree1);
-            groupBsgsExtended.add(new BSGSElement(element.basePoint + degree1, stabilizers, SchreierVector, orbit));
+            groupBsgsExtended.add(new BSGSElement(element.basePoint + degree1, stabilizers,
+                    new SchreierVector(SchreierVector), orbit));
         }
 
         ArrayList<BSGSElement> bsgs = new ArrayList<>(bsgs1.size() + bsgs2.size());
@@ -1335,9 +1334,10 @@ public final class AlgorithmsBase {
                 stabilizers.add(p);
             stabilizers.addAll(groupBsgsExtended.get(0).stabilizerGenerators);
             int[] SchreierVector = new int[deg];
-            System.arraycopy(element.SchreierVector, 0, SchreierVector, 0, degree1);
+            System.arraycopy(element.SchreierVector.data, 0, SchreierVector, 0, degree1);
             Arrays.fill(SchreierVector, degree1, deg, -2);
-            bsgs.add(new BSGSElement(element.basePoint, stabilizers, SchreierVector, element.orbitList));
+            bsgs.add(new BSGSElement(element.basePoint, stabilizers,
+                    new SchreierVector(SchreierVector), element.orbitList));
         }
         bsgs.addAll(groupBsgsExtended);
 
@@ -1378,7 +1378,7 @@ public final class AlgorithmsBase {
         TRIVIAL_BSGS = new ArrayList<>(1);
         ArrayList<Permutation> gens = new ArrayList<>();
         gens.add(Permutations.createIdentityPermutation());
-        TRIVIAL_BSGS.add(new BSGSCandidateElement(0, gens, new int[1]).asBSGSElement());
+        TRIVIAL_BSGS.add(new BSGSCandidateElement(0, gens, 1).asBSGSElement());
     }
 
     /**
@@ -1487,7 +1487,7 @@ public final class AlgorithmsBase {
                 SchreierVector[i + k] = stabilizers.size();
                 stabilizers.add(base.composition(Permutations.createPermutation(perm)));
             }
-            bsgs.add(new BSGSElement(i, new ArrayList<>(stabilizers), SchreierVector, orbit));
+            bsgs.add(new BSGSElement(i, new ArrayList<>(stabilizers), new SchreierVector(SchreierVector), orbit));
             stabilizers.clear();
         }
         return bsgs;
@@ -1542,7 +1542,7 @@ public final class AlgorithmsBase {
 
                 stabilizers.add(base.composition(Permutations.createPermutation(perm)));
             }
-            bsgs.add(new BSGSCandidateElement(i, new ArrayList<>(stabilizers), new int[degree]).asBSGSElement());
+            bsgs.add(new BSGSCandidateElement(i, new ArrayList<>(stabilizers), degree).asBSGSElement());
             stabilizers.clear();
         }
         return bsgs;
@@ -1611,7 +1611,8 @@ public final class AlgorithmsBase {
                 SchreierVector[j] = c++;
             }
 
-            BSGSElement element = new BSGSElement(i, Arrays.asList(stabilizers), SchreierVector, orbit);
+            BSGSElement element = new BSGSElement(i, Arrays.asList(stabilizers),
+                    new SchreierVector(SchreierVector), orbit);
             bsgs.add(element);
         }
         return bsgs;
@@ -1662,7 +1663,7 @@ public final class AlgorithmsBase {
 
             //Collections.reverse(stabilizers);
 
-            BSGSElement element = new BSGSCandidateElement(i, stabilizers, new int[degree]).asBSGSElement();
+            BSGSElement element = new BSGSCandidateElement(i, stabilizers, degree).asBSGSElement();
             bsgs.add(element);
         }
         return bsgs;

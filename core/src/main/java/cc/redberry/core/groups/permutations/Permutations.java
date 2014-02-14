@@ -75,6 +75,13 @@ public final class Permutations {
         return r;
     }
 
+    public static int SchreierVectorCapacity(final List<? extends Permutation> permutations) {
+        int r = 0;
+        for (Permutation p : permutations)
+            r = Math.max(r, p.internalDegree());
+        return r;
+    }
+
     /**
      * Calculates parity of specified permutation
      *
@@ -553,7 +560,7 @@ public final class Permutations {
      *
      * @param generators        a list of group generators
      * @param point             point
-     * @param maximumMovedPoint largest integer moved by the generators or bigger
+     * @param maximumMovedPoint largest integer moved by the generators plus one or bigger
      * @return orbit of specified point
      */
     public static IntArrayList getOrbitList(Collection<Permutation> generators, int point, int maximumMovedPoint) {

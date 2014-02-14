@@ -25,7 +25,6 @@ package cc.redberry.core.groups.permutations;
 import cc.redberry.core.utils.IntArrayList;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -41,19 +40,44 @@ public final class BSGSCandidateElement extends BSGSElement {
     /**
      * Basic raw constructor.
      *
-     * @param basePoint
-     * @param stabilizerGenerators
-     * @param schreierVector
+     * @param basePoint            base point
+     * @param stabilizerGenerators stabilizers
      */
-    BSGSCandidateElement(int basePoint, List<Permutation> stabilizerGenerators, int[] schreierVector) {
-        super(basePoint, stabilizerGenerators, schreierVector, new IntArrayList());
+    BSGSCandidateElement(int basePoint, List<Permutation> stabilizerGenerators) {
+        this(basePoint, stabilizerGenerators, calculateSVCapacity(stabilizerGenerators));
+        internalDegree = SchreierVector.length();
+    }
+
+    /**
+     * Calculates minimal capacity needed to store Schreier vector
+     *
+     * @param stabilizerGenerators stabilizers
+     * @return minimal capacity needed to store Schreier vector
+     */
+    private static int calculateSVCapacity(List<Permutation> stabilizerGenerators) {
+        int capacity = -1;
+        for (Permutation p : stabilizerGenerators)
+            capacity = Math.max(capacity, p.internalDegree());
+        return capacity;
+    }
+
+    /**
+     * Basic raw constructor.
+     *
+     * @param basePoint              base point
+     * @param stabilizerGenerators   stabilizers
+     * @param SchreierVectorCapacity initial capacity of Schreier vector
+     */
+    BSGSCandidateElement(int basePoint, List<Permutation> stabilizerGenerators, int SchreierVectorCapacity) {
+        super(basePoint, stabilizerGenerators, new SchreierVector(SchreierVectorCapacity), new IntArrayList());
         assert stabilizerGenerators instanceof ArrayList;
         //creating list of orbit points
         orbitList.add(basePoint);
         recalculateOrbitAndSchreierVector();
     }
 
-    private BSGSCandidateElement(int basePoint, List<Permutation> stabilizerGenerators, int[] schreierVector, IntArrayList orbitList) {
+    private BSGSCandidateElement(int basePoint, List<Permutation> stabilizerGenerators,
+                                 SchreierVector schreierVector, IntArrayList orbitList) {
         super(basePoint, stabilizerGenerators, schreierVector, orbitList);
     }
 
@@ -65,9 +89,9 @@ public final class BSGSCandidateElement extends BSGSElement {
         //clear orbit list
         orbitList.removeAfter(1);
         //fill Schreier vector with some dummmy values
-        Arrays.fill(SchreierVector, -2);
+        SchreierVector.reset();
         //base point
-        SchreierVector[basePoint] = -1;
+        SchreierVector.set(basePoint, -1);
 
         int imageOfPoint;
         //main loop over all points in orbit
@@ -78,11 +102,11 @@ public final class BSGSCandidateElement extends BSGSElement {
                 //image of point under permutation
                 imageOfPoint = stabilizerGenerators.get(stabilizerIndex).newIndexOf(orbitList.get(orbitIndex));
                 //testing whether current permutation maps orbit point into orbit or not
-                if (SchreierVector[imageOfPoint] == -2) {
+                if (SchreierVector.get(imageOfPoint) == -2) {
                     //adding new point to orbit
                     orbitList.add(imageOfPoint);
                     //filling Schreier vector
-                    SchreierVector[imageOfPoint] = stabilizerIndex;
+                    SchreierVector.set(imageOfPoint, stabilizerIndex);
                 }
             }
         }

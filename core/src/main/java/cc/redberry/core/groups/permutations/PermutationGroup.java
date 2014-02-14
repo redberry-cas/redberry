@@ -787,7 +787,7 @@ public final class PermutationGroup
                     perm[j] = mapping[p.newIndexOf(closure[j])];
                 newStabs.add(Permutations.createPermutation(p.antisymmetry(), perm));
             }
-            stab.add(new BSGSCandidateElement(mapping[e.basePoint], newStabs, new int[newDegree]));
+            stab.add(new BSGSCandidateElement(mapping[e.basePoint], newStabs, newDegree));
         }
 
         return createPermutationGroupFromBSGS(asBSGSList(stab));
@@ -840,7 +840,7 @@ public final class PermutationGroup
                     if (subgroup.internalDegree < c.internalDegree()) {
                         //if we add new generator - be sure that Schreier vector has appropriate length
                         closure.set(0, new BSGSCandidateElement(closure.get(0).basePoint,
-                                closure.get(0).stabilizerGenerators, new int[c.internalDegree() + 1]));
+                                closure.get(0).stabilizerGenerators, c.internalDegree() + 1));
                     }
 
                     added = true;
@@ -1400,7 +1400,7 @@ public final class PermutationGroup
                 ArrayList<Permutation> newStabs = new ArrayList<>(e.stabilizerGenerators.size());
                 for (Permutation p : e.stabilizerGenerators)
                     newStabs.add(permutation.conjugate(p));
-                new_bsgs.add(new BSGSCandidateElement(permutation.newIndexOf(e.basePoint), newStabs, new int[internalDegree]).asBSGSElement());
+                new_bsgs.add(new BSGSCandidateElement(permutation.newIndexOf(e.basePoint), newStabs, internalDegree).asBSGSElement());
             }
             return createPermutationGroupFromBSGS(new_bsgs);
         }

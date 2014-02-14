@@ -423,6 +423,40 @@ public final class ArraysUtils {
     }
 
     /**
+     * Assigns the specified int value to each element of the specified
+     * range of the specified list.  The range to be filled
+     * extends from index <tt>fromIndex</tt>, inclusive, to index
+     * <tt>toIndex</tt>, exclusive.  (If <tt>fromIndex==toIndex</tt>, the
+     * range to be filled is empty.)
+     *
+     * @param list      the list to be filled
+     * @param fromIndex the index of the first element (inclusive) to be
+     *                  filled with the specified value
+     * @param toIndex   the index of the last element (exclusive) to be
+     *                  filled with the specified value
+     * @param value     the value to be stored in all elements of the array
+     * @throws IllegalArgumentException       if <tt>fromIndex &gt; toIndex</tt>
+     * @throws ArrayIndexOutOfBoundsException if <tt>fromIndex &lt; 0</tt> or
+     *                                        <tt>toIndex &gt; a.length</tt>
+     */
+    public static void fill(IntArrayList list, int fromIndex, int toIndex, int value) {
+        if (toIndex >= list.size())
+            throw new IndexOutOfBoundsException();
+        Arrays.fill(list.data, fromIndex, toIndex, value);
+    }
+
+    /**
+     * Assigns the specified int value to each element of the specified list
+     * of ints.
+     *
+     * @param list  the array to be filled
+     * @param value the value to be stored in all elements of the array
+     */
+    public static void fill(IntArrayList list, int value) {
+        fill(list, 0, list.size(), value);
+    }
+
+    /**
      * Searches a range of
      * the specified array of ints for the specified value using the
      * binary search algorithm.

@@ -750,7 +750,7 @@ public class AlgorithmsBaseTest extends AbstractTestClass {
         //0,1,2
         int[] oldBase = {0, 1, 2};
         assertArrayEquals(oldBase, getBaseAsArray(bsgs));
-        bsgs.add(new BSGSCandidateElement(2, new ArrayList<Permutation>(), new int[degree]));
+        bsgs.add(new BSGSCandidateElement(2, new ArrayList<Permutation>(), degree));
         assertTrue(isBSGS(bsgs));
         swapAdjacentBasePoints(bsgs, 2, degree);
         assertTrue(isBSGS(bsgs));
@@ -769,21 +769,21 @@ public class AlgorithmsBaseTest extends AbstractTestClass {
         int[] oldBase = {0, 1, 2};
 
         //add redundant point 5
-        bsgs.add(new BSGSCandidateElement(5, new ArrayList<Permutation>(), new int[degree]));
+        bsgs.add(new BSGSCandidateElement(5, new ArrayList<Permutation>(), degree));
         assertTrue(isBSGS(bsgs));
         SchreierSimsAlgorithm(bsgs);
         assertTrue(isBSGS(bsgs));
         assertArrayEquals(new int[]{0, 1, 2, 5}, getBaseAsArray(bsgs));
 
         //add redundant point 3
-        bsgs.add(new BSGSCandidateElement(3, new ArrayList<Permutation>(), new int[degree]));
+        bsgs.add(new BSGSCandidateElement(3, new ArrayList<Permutation>(), degree));
         assertTrue(isBSGS(bsgs));
         SchreierSimsAlgorithm(bsgs);
         assertTrue(isBSGS(bsgs));
         assertArrayEquals(new int[]{0, 1, 2, 5, 3}, getBaseAsArray(bsgs));
 
         //add redundant point 6
-        bsgs.add(new BSGSCandidateElement(6, new ArrayList<Permutation>(), new int[degree]));
+        bsgs.add(new BSGSCandidateElement(6, new ArrayList<Permutation>(), degree));
         assertTrue(isBSGS(bsgs));
         SchreierSimsAlgorithm(bsgs);
         assertTrue(isBSGS(bsgs));

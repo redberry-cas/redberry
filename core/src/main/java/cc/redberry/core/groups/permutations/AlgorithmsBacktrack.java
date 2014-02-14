@@ -109,7 +109,7 @@ public final class AlgorithmsBacktrack {
         final Permutation identity = group.get(0).stabilizerGenerators.get(0).getIdentity();
 
         if (subgroup.isEmpty()) {//if subgroup was empty
-            subgroup.add(new BSGSCandidateElement(base[0], new ArrayList<Permutation>(), new int[degree]));
+            subgroup.add(new BSGSCandidateElement(base[0], new ArrayList<Permutation>(), degree));
             subgroup.get(0).stabilizerGenerators.add(identity);
         }
 
@@ -652,7 +652,7 @@ public final class AlgorithmsBacktrack {
         AlgorithmsBase.rebase(group, base, degree);
         if (group.size() < base.length)
             for (int i = group.size(); i < base.length; ++i)
-                group.add(new BSGSCandidateElement(base[i], new ArrayList<Permutation>(), new int[degree]));
+                group.add(new BSGSCandidateElement(base[i], new ArrayList<Permutation>(), degree));
     }
 
     /**
