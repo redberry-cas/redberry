@@ -125,14 +125,14 @@ public class PermutationsTestUtils {
         IntPermutationsGenerator gen = new IntPermutationsGenerator(4);
         int i = 0;
         for (int[] p : gen)
-            a[i++] = new PermutationOneLine(ArraysUtils.addAll(p, 4, 5, 6, 7));
+            a[i++] = Permutations.createPermutation(ArraysUtils.addAll(p, 4, 5, 6, 7));
 
         gen = new IntPermutationsGenerator(4);
         Permutation[] b = new Permutation[12];
         i = 0;
         for (int[] p : gen) {
             if (i >= 8 && i < 20)
-                b[i - 8] = new PermutationOneLine(ArraysUtils.addAll(p, 4, 5, 6, 7));
+                b[i - 8] = Permutations.createPermutation(ArraysUtils.addAll(p, 4, 5, 6, 7));
             ++i;
         }
         try {
@@ -160,7 +160,7 @@ public class PermutationsTestUtils {
 
         int i = 0;
         for (int[] p : gen)
-            all[i++] = new PermutationOneLine(p);
+            all[i++] = Permutations.createPermutation(p);
 
         IntCombinationsGenerator combGen;
         Permutation[] a, b;
@@ -202,7 +202,7 @@ public class PermutationsTestUtils {
 
         int i = 0;
         for (int[] p : gen)
-            all[i++] = new PermutationOneLine(p);
+            all[i++] = Permutations.createPermutation(p);
 
         IntCombinationsGenerator combGen;
         Permutation[] a, b;

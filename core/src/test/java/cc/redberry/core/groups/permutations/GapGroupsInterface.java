@@ -154,7 +154,7 @@ public final class GapGroupsInterface {
             int[] p = new int[ints.length];
             for (int j = 0; j < ints.length; ++j)
                 p[j] = Integer.valueOf(ints[j]) - 1;
-            generators[i] = new PermutationOneLine(p);
+            generators[i] = Permutations.createPermutation(p);
         }
 
         return generators;

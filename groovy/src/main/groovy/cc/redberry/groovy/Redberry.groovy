@@ -25,7 +25,8 @@ package cc.redberry.groovy
 
 import cc.redberry.core.combinatorics.IntPermutationsGenerator
 import cc.redberry.core.groups.permutations.Permutation
-import cc.redberry.core.groups.permutations.PermutationOneLine
+import cc.redberry.core.groups.permutations.PermutationOneLineInt
+import cc.redberry.core.groups.permutations.Permutations
 import cc.redberry.core.indexmapping.IndexMappings
 import cc.redberry.core.indexmapping.Mapping
 import cc.redberry.core.indexmapping.MappingsPort
@@ -1125,14 +1126,14 @@ class Redberry {
             }
 
             if (oneLine)
-                return new PermutationOneLine(negative, obj as int[])
-            return new PermutationOneLine(negative, obj as int[][])
+                return Permutations.createPermutation(negative, obj as int[])
+            return Permutations.createPermutation(negative, obj as int[][])
         } else
             throw new NoSuchMethodException("No such property .p for class " + obj.getClass())
     }
 
     static Permutation negative(Permutation permutation) {
-        return new PermutationOneLine(true ^ permutation.antisymmetry(), permutation.oneLine())
+        return new PermutationOneLineInt(true ^ permutation.antisymmetry(), permutation.oneLine())
     }
 
     static Permutation positive(Permutation permutation) {

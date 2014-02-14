@@ -533,9 +533,9 @@ public class IndexMappingsTest {
 //        char[] secondFrom = {'t', 'n', 'c', 'b'};
 //        char[] secondTo = {'c', 'd', 'n', 't'};
 //
-//        Permutation a = new PermutationOneLine(true, 1, 0, 2, 3),
-//                b = new PermutationOneLine(true, 0, 1, 3, 2),
-//                c = new PermutationOneLine(false, 2, 3, 0, 1);
+//        Permutation a = new PermutationOneLineInt(true, 1, 0, 2, 3),
+//                b = new PermutationOneLineInt(true, 0, 1, 3, 2),
+//                c = new PermutationOneLineInt(false, 2, 3, 0, 1);
 //        final PermutationGroup pg = new PermutationGroup(a, b, c);
 //
 //        Iterator<Permutation> firstIterator = pg.iterator();

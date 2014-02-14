@@ -23,14 +23,12 @@
 package cc.redberry.core.context;
 
 import cc.redberry.core.groups.permutations.Permutation;
-import cc.redberry.core.groups.permutations.PermutationOneLine;
+import cc.redberry.core.groups.permutations.PermutationOneLineInt;
 import cc.redberry.core.groups.permutations.Permutations;
 import cc.redberry.core.indices.SimpleIndices;
 import cc.redberry.core.indices.StructureOfIndices;
 import cc.redberry.core.utils.ArraysUtils;
 import cc.redberry.core.utils.IntArrayList;
-
-import java.util.List;
 
 /**
  * @author Dmitry Bolotin
@@ -121,7 +119,7 @@ final class NameDescriptorForTensorFieldDerivative extends NameDescriptorForTens
                 aggregator.addAll(mapping[j]);
                 aggregator.addAll(mapping[j + 1]);
                 symmetries.add(
-                        new PermutationOneLine(convertPermutation(cycle, aggregator.toArray(), baseStructure.size())));
+                        Permutations.createPermutation(convertPermutation(cycle, aggregator.toArray(), baseStructure.size())));
 
                 if (orders[i] >= 3) {
                     for (k = 2; k < orders[i]; ++k)
@@ -129,7 +127,7 @@ final class NameDescriptorForTensorFieldDerivative extends NameDescriptorForTens
 
                     cycle = Permutations.createBlockCycle(structuresOfIndices[i + 1].size(), orders[i]);
                     symmetries.add(
-                            new PermutationOneLine(convertPermutation(cycle, aggregator.toArray(), baseStructure.size())));
+                            Permutations.createPermutation(convertPermutation(cycle, aggregator.toArray(), baseStructure.size())));
                 }
                 aggregator.clear();
             }
@@ -138,7 +136,7 @@ final class NameDescriptorForTensorFieldDerivative extends NameDescriptorForTens
     }
 
     static Permutation convertPermutation(Permutation permutation, int[] mapping, int newDimension) {
-        return new PermutationOneLine(permutation.antisymmetry(),
+        return Permutations.createPermutation(permutation.antisymmetry(),
                 convertPermutation(permutation.oneLine(), mapping, newDimension));
     }
 

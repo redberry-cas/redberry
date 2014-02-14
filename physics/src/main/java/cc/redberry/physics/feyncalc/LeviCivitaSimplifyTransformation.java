@@ -26,7 +26,7 @@ import cc.redberry.core.context.CC;
 import cc.redberry.core.context.NameAndStructureOfIndices;
 import cc.redberry.core.groups.permutations.Permutation;
 import cc.redberry.core.groups.permutations.PermutationGroup;
-import cc.redberry.core.groups.permutations.PermutationOneLine;
+import cc.redberry.core.groups.permutations.PermutationOneLineInt;
 import cc.redberry.core.groups.permutations.Permutations;
 import cc.redberry.core.indexmapping.IndexMappings;
 import cc.redberry.core.indexmapping.Mapping;
@@ -308,11 +308,11 @@ public class LeviCivitaSimplifyTransformation implements Transformation {
             return symmetries;
         symmetries = new HashMap<>();
         ArrayList<Permutation> ss = new ArrayList<>();
-        ss.add(new PermutationOneLine(true, Permutations.createTransposition(indicesSize, 0, 1)));
+        ss.add(Permutations.createPermutation(true, Permutations.createTransposition(indicesSize, 0, 1)));
         if (indicesSize % 2 == 0)
-            ss.add(new PermutationOneLine(true, Permutations.createCycle(indicesSize)));
+            ss.add(Permutations.createPermutation(true, Permutations.createCycle(indicesSize)));
         else
-            ss.add(new PermutationOneLine(false, Permutations.createCycle(indicesSize)));
+            ss.add(Permutations.createPermutation(false, Permutations.createCycle(indicesSize)));
 
         PermutationGroup lc = PermutationGroup.createPermutationGroup(ss);
         for (Permutation symmetry : lc)

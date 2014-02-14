@@ -22,7 +22,7 @@
  */
 package cc.redberry.groovy
 
-import cc.redberry.core.groups.permutations.PermutationOneLine
+import cc.redberry.core.groups.permutations.PermutationOneLineInt
 import cc.redberry.core.indexmapping.IndexMappings
 import cc.redberry.core.tensor.Tensors
 import org.apache.commons.math3.util.ArithmeticUtils
@@ -84,10 +84,10 @@ class RedberryTest {
     @Test
     public void testPermutation1() {
         use(Redberry) {
-            assert [1, 0].p == new PermutationOneLine(1, 0)
+            assert [1, 0].p == new PermutationOneLineInt(1, 0)
             assert [[1, 0]].p == [1, 0].p
-            assert -[1, 0].p == new PermutationOneLine(true, 1, 0)
-            assert [[1, 0], [2, 3]].p == new PermutationOneLine([[1, 0], [2, 3]] as int[][])
+            assert -[1, 0].p == new PermutationOneLineInt(true, 1, 0)
+            assert [[1, 0], [2, 3]].p == new PermutationOneLineInt([[1, 0], [2, 3]] as int[][])
         }
     }
 

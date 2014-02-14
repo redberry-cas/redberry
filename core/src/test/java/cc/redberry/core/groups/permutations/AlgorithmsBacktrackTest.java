@@ -57,9 +57,9 @@ public class AlgorithmsBacktrackTest extends AbstractTestClass {
     public void test1() {
         //no any pruning, just property test
         Permutation
-                a = new PermutationOneLine(1, 2, 3, 0, 4, 5),
-                b = new PermutationOneLine(0, 3, 2, 1, 4, 5),
-                c = new PermutationOneLine(0, 1, 2, 3, 5, 4);
+                a = Permutations.createPermutation(1, 2, 3, 0, 4, 5),
+                b = Permutations.createPermutation(0, 3, 2, 1, 4, 5),
+                c = Permutations.createPermutation(0, 1, 2, 3, 5, 4);
         ArrayList<Permutation> generators = new ArrayList<>(Arrays.asList(a, b, c));
         List<BSGSElement> bsgs = AlgorithmsBase.createBSGSList(new int[]{0, 1, 4}, generators);
 
@@ -85,9 +85,9 @@ public class AlgorithmsBacktrackTest extends AbstractTestClass {
     public void test2() throws Exception {
         //no any pruning, just property test
         Permutation
-                a = new PermutationOneLine(1, 2, 3, 0, 4, 5),
-                b = new PermutationOneLine(0, 3, 2, 1, 4, 5),
-                c = new PermutationOneLine(0, 1, 2, 3, 5, 4);
+                a = Permutations.createPermutation(1, 2, 3, 0, 4, 5),
+                b = Permutations.createPermutation(0, 3, 2, 1, 4, 5),
+                c = Permutations.createPermutation(0, 1, 2, 3, 5, 4);
         ArrayList<Permutation> generators = new ArrayList<>(Arrays.asList(a, b, c));
 
         List<BSGSElement> bsgs = AlgorithmsBase.createBSGSList(new int[]{0, 1, 4}, generators);
@@ -111,14 +111,14 @@ public class AlgorithmsBacktrackTest extends AbstractTestClass {
         assertTrue(isBSGS(subgroup));
         base = AlgorithmsBase.getBaseAsArray(subgroup);
 
-        Permutation a0 = new PermutationOneLine(0, 1, 2, 3, 4, 5);
-        Permutation a1 = new PermutationOneLine(0, 3, 2, 1, 4, 5);
-        Permutation a2 = new PermutationOneLine(1, 0, 3, 2, 4, 5);
-        Permutation a3 = new PermutationOneLine(1, 2, 3, 0, 4, 5);
-        Permutation a4 = new PermutationOneLine(2, 1, 0, 3, 4, 5);
-        Permutation a5 = new PermutationOneLine(2, 3, 0, 1, 4, 5);
-        Permutation a6 = new PermutationOneLine(3, 0, 1, 2, 4, 5);
-        Permutation a7 = new PermutationOneLine(3, 2, 1, 0, 4, 5);
+        Permutation a0 = Permutations.createPermutation(0, 1, 2, 3, 4, 5);
+        Permutation a1 = Permutations.createPermutation(0, 3, 2, 1, 4, 5);
+        Permutation a2 = Permutations.createPermutation(1, 0, 3, 2, 4, 5);
+        Permutation a3 = Permutations.createPermutation(1, 2, 3, 0, 4, 5);
+        Permutation a4 = Permutations.createPermutation(2, 1, 0, 3, 4, 5);
+        Permutation a5 = Permutations.createPermutation(2, 3, 0, 1, 4, 5);
+        Permutation a6 = Permutations.createPermutation(3, 0, 1, 2, 4, 5);
+        Permutation a7 = Permutations.createPermutation(3, 2, 1, 0, 4, 5);
         final Permutation[] expected = {a0, a1, a2, a3, a4, a5, a6, a7};
 
         Comparator<Permutation> permutationComparator = new InducedOrderingOfPermutations(base, a.length());
@@ -333,8 +333,8 @@ public class AlgorithmsBacktrackTest extends AbstractTestClass {
 
     @Test
     public void testSetwiseStabilizer1a_raw() throws Exception {
-        Permutation gen0 = new PermutationOneLine(4, 8, 7, 1, 6, 5, 0, 9, 3, 2);
-        Permutation gen1 = new PermutationOneLine(7, 4, 1, 8, 5, 2, 9, 0, 6, 3);
+        Permutation gen0 = Permutations.createPermutation(4, 8, 7, 1, 6, 5, 0, 9, 3, 2);
+        Permutation gen1 = Permutations.createPermutation(7, 4, 1, 8, 5, 2, 9, 0, 6, 3);
         PermutationGroup pg = PermutationGroup.createPermutationGroup(gen0, gen1);
 
         int[] set = {4, 9};
@@ -344,10 +344,10 @@ public class AlgorithmsBacktrackTest extends AbstractTestClass {
 
     @Test
     public void testSetwiseStabilizer1b_raw() throws Exception {
-        Permutation gen0 = new PermutationOneLine(1, 2, 0, 4, 5, 3, 7, 8, 6, 9);
-        Permutation gen1 = new PermutationOneLine(0, 1, 2, 6, 7, 8, 3, 4, 5, 9);
-        Permutation gen2 = new PermutationOneLine(0, 5, 7, 8, 1, 3, 4, 6, 2, 9);
-        Permutation gen3 = new PermutationOneLine(9, 1, 2, 6, 5, 4, 3, 8, 7, 0);
+        Permutation gen0 = Permutations.createPermutation(1, 2, 0, 4, 5, 3, 7, 8, 6, 9);
+        Permutation gen1 = Permutations.createPermutation(0, 1, 2, 6, 7, 8, 3, 4, 5, 9);
+        Permutation gen2 = Permutations.createPermutation(0, 5, 7, 8, 1, 3, 4, 6, 2, 9);
+        Permutation gen3 = Permutations.createPermutation(9, 1, 2, 6, 5, 4, 3, 8, 7, 0);
 
         PermutationGroup pg = PermutationGroup.createPermutationGroup(gen0, gen1, gen2, gen3);
         int[] set = {0, 3};
@@ -357,8 +357,8 @@ public class AlgorithmsBacktrackTest extends AbstractTestClass {
 
     @Test
     public void testSetwiseStabilizer1c_raw() throws Exception {
-        Permutation gen0 = new PermutationOneLine(4, 3, 9, 1, 0, 5, 10, 7, 8, 2, 6);
-        Permutation gen1 = new PermutationOneLine(0, 1, 10, 6, 2, 7, 8, 9, 3, 5, 4);
+        Permutation gen0 = Permutations.createPermutation(4, 3, 9, 1, 0, 5, 10, 7, 8, 2, 6);
+        Permutation gen1 = Permutations.createPermutation(0, 1, 10, 6, 2, 7, 8, 9, 3, 5, 4);
 
         PermutationGroup pg = PermutationGroup.createPermutationGroup(gen0, gen1);
         int[] set = {3, 7};
@@ -368,8 +368,8 @@ public class AlgorithmsBacktrackTest extends AbstractTestClass {
 
     @Test
     public void testLeftCosetRepresentatives1() {
-        Permutation gen0 = new PermutationOneLine(4, 3, 9, 1, 0, 5, 10, 7, 8, 2, 6);
-        Permutation gen1 = new PermutationOneLine(0, 1, 10, 6, 2, 7, 8, 9, 3, 5, 4);
+        Permutation gen0 = Permutations.createPermutation(4, 3, 9, 1, 0, 5, 10, 7, 8, 2, 6);
+        Permutation gen1 = Permutations.createPermutation(0, 1, 10, 6, 2, 7, 8, 9, 3, 5, 4);
 
         PermutationGroup pg = PermutationGroup.createPermutationGroup(gen0, gen1);
         int[] set = {3, 7};
@@ -399,8 +399,8 @@ public class AlgorithmsBacktrackTest extends AbstractTestClass {
 
     @Test
     public void testLeftCosetRepresentative1() {
-        Permutation gen0 = new PermutationOneLine(4, 3, 9, 1, 0, 5, 10, 7, 8, 2, 6);
-        Permutation gen1 = new PermutationOneLine(0, 1, 10, 6, 2, 7, 8, 9, 3, 5, 4);
+        Permutation gen0 = Permutations.createPermutation(4, 3, 9, 1, 0, 5, 10, 7, 8, 2, 6);
+        Permutation gen1 = Permutations.createPermutation(0, 1, 10, 6, 2, 7, 8, 9, 3, 5, 4);
 
         PermutationGroup pg = PermutationGroup.createPermutationGroup(gen0, gen1);
         int[] base = pg.getBase();
@@ -442,8 +442,8 @@ public class AlgorithmsBacktrackTest extends AbstractTestClass {
 
     @Test
     public void testLeftCosetRepresentatives2() {
-        Permutation gen0 = new PermutationOneLine(4, 3, 9, 1, 0, 5, 10, 7, 8, 2, 6);
-        Permutation gen1 = new PermutationOneLine(0, 1, 10, 6, 2, 7, 8, 9, 3, 5, 4);
+        Permutation gen0 = Permutations.createPermutation(4, 3, 9, 1, 0, 5, 10, 7, 8, 2, 6);
+        Permutation gen1 = Permutations.createPermutation(0, 1, 10, 6, 2, 7, 8, 9, 3, 5, 4);
 
         PermutationGroup pg = PermutationGroup.createPermutationGroup(gen0, gen1);
         int[] set = {3, 7};
@@ -519,8 +519,8 @@ public class AlgorithmsBacktrackTest extends AbstractTestClass {
 
     @Test
     public void testIntersection1() {
-        Permutation gen0 = new PermutationOneLine(4, 3, 9, 1, 0, 5, 10, 7, 8, 2, 6);
-        Permutation gen1 = new PermutationOneLine(0, 1, 10, 6, 2, 7, 8, 9, 3, 5, 4);
+        Permutation gen0 = Permutations.createPermutation(4, 3, 9, 1, 0, 5, 10, 7, 8, 2, 6);
+        Permutation gen1 = Permutations.createPermutation(0, 1, 10, 6, 2, 7, 8, 9, 3, 5, 4);
 
         List<BSGSElement> pg = PermutationGroup.createPermutationGroup(gen0, gen1).getBSGS();
         System.out.println(calculateOrder(pg));
