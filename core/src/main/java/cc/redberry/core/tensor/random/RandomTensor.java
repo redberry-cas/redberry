@@ -72,8 +72,8 @@ public final class RandomTensor {
     }
 
     /**
-     * Creates random with default values. Same as
-     * {@code new RandomTensor(2, 5, new int[]{0, 0, 0, 0}, new int[]{4, 0, 0, 0}, true)}
+     * Creates random with default values. Same as {@code new RandomTensor(2, 5, new int[]{0, 0, 0, 0}, new int[]{4, 0,
+     * 0, 0}, true)}
      */
     public RandomTensor() {
         this(true);
@@ -297,6 +297,9 @@ public final class RandomTensor {
     }
 
     public Tensor nextTensorTree(TensorType head, int depth, Parameters parameters, Indices indices) {
+        if (head == null)
+            nextTensorTree(depth, parameters, indices);
+
         indices = indices.getFree();
         if (depth == 0)
             return nextSimpleTensor(IndicesFactory.createSimple(null, indices));
@@ -468,6 +471,7 @@ public final class RandomTensor {
         a[p1] = a[p2];
         a[p2] = c;
     }
+
     private int getRandomValue(int min, int max) {
         if (min == max)
             return min;
