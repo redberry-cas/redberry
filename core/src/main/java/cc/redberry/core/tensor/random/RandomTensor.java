@@ -180,6 +180,9 @@ public final class RandomTensor {
     }
 
     private void generateDescriptors() {
+        if (!generateNewDescriptors)
+            return;
+
         for (int i = 0; i < initialNamespaceSize; ++i) {
             int[] typesCount = new int[TYPES_COUNT];
             for (int j = 0; j < TYPES_COUNT; ++j)
