@@ -157,6 +157,13 @@ public interface Permutation extends Comparable<Permutation> {
     public boolean antisymmetry();
 
     /**
+     * If this is antisymmetry, then converts this permutation to symmetry.
+     *
+     * @return same permutation with {@code false} antisymmetry
+     */
+    public Permutation toSymmetry();
+
+    /**
      * Returns the result of  {@code this * other}. Applying the resulting permutation is equivalent to applying
      * {@code other} after {@code this}.
      *

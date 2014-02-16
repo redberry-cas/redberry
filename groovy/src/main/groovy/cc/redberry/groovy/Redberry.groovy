@@ -1132,6 +1132,10 @@ class Redberry {
             throw new NoSuchMethodException("No such property .p for class " + obj.getClass())
     }
 
+    static boolean equals(Permutation a, Permutation b){
+        return a.equals(b)
+    }
+
     static Permutation negative(Permutation permutation) {
         return new PermutationOneLineInt(true ^ permutation.antisymmetry(), permutation.oneLine())
     }

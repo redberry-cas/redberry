@@ -68,12 +68,12 @@ public final class Permutations {
         return (byte) (i + 1);
     }
 
-    public static int internalDegree(final List<? extends Permutation> permutations) {
-        int r = 0;
-        for (Permutation p : permutations)
-            r = Math.max(r, p.internalDegree());
-        return r;
-    }
+//    public static int internalDegree(final List<? extends Permutation> permutations) {
+//        int r = 0;
+//        for (Permutation p : permutations)
+//            r = Math.max(r, p.internalDegree());
+//        return r;
+//    }
 
     public static int SchreierVectorCapacity(final List<? extends Permutation> permutations) {
         int r = 0;
@@ -552,25 +552,25 @@ public final class Permutations {
      * @return orbit of specified point
      */
     public static IntArrayList getOrbitList(List<Permutation> generators, int point) {
-        return getOrbitList(generators, point, internalDegree(generators));
+        return getOrbitList(generators, point, SchreierVectorCapacity(generators));
     }
 
     /**
      * Returns an orbit of specified point
      *
-     * @param generators        a list of group generators
-     * @param point             point
-     * @param maximumMovedPoint largest integer moved by the generators plus one or bigger
+     * @param generators a list of group generators
+     * @param point      point
+     * @param degree     largest integer moved by the generators plus one or bigger
      * @return orbit of specified point
      */
-    public static IntArrayList getOrbitList(Collection<Permutation> generators, int point, int maximumMovedPoint) {
+    public static IntArrayList getOrbitList(Collection<Permutation> generators, int point, int degree) {
         //orbit as list
         IntArrayList orbitList = new IntArrayList();
         orbitList.add(point);
         if (generators.isEmpty())
             return orbitList;//throw new IllegalArgumentException("Empty generators.");
         //seen points
-        BitArray seen = new BitArray(maximumMovedPoint);
+        BitArray seen = new BitArray(degree);
         seen.set(point);
         int imageOfPoint;
         //main loop over all points in orbit
@@ -594,13 +594,13 @@ public final class Permutations {
     /**
      * Returns a size of specified point orbit
      *
-     * @param generators        a list of group generators
-     * @param point             point
-     * @param maximumMovedPoint largest integer moved by the generators or bigger
+     * @param generators a list of group generators
+     * @param point      point
+     * @param degree     largest integer moved by the generators plus one or bigger
      * @return size of point orbit
      */
-    public static int getOrbitSize(List<Permutation> generators, int point, int maximumMovedPoint) {
-        return getOrbitList(generators, point, maximumMovedPoint).size();
+    public static int getOrbitSize(List<Permutation> generators, int point, int degree) {
+        return getOrbitList(generators, point, degree).size();
     }
 
     /**
@@ -611,7 +611,7 @@ public final class Permutations {
      * @return size of point orbit
      */
     public static int getOrbitSize(List<Permutation> generators, int point) {
-        return getOrbitList(generators, point, internalDegree(generators)).size();
+        return getOrbitList(generators, point, SchreierVectorCapacity(generators)).size();
     }
 
     /**
@@ -1130,7 +1130,7 @@ public final class Permutations {
      *
      * @return identity permutation
      */
-    public static Permutation createIdentityPermutation() {
+    public static Permutation getIdentityPermutation() {
         return createIdentityPermutation(DEFAULT_IDENTITY_LENGTH);
     }
 

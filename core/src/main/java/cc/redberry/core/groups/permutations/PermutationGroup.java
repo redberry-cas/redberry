@@ -178,7 +178,7 @@ public final class PermutationGroup
         this.positionsInOrbits = new int[internalDegree];
         this.generators = bsgs.get(0).stabilizerGenerators;
         this.orbits = Permutations.orbits(bsgs.get(0).stabilizerGenerators, this.positionsInOrbits);
-        this.ordering = new InducedOrdering(base, internalDegree);
+        this.ordering = new InducedOrdering(base);
     }
 
     //trivial group
@@ -189,9 +189,9 @@ public final class PermutationGroup
         this.internalDegree = 0;
         this.order = BigInteger.ONE;
         this.positionsInOrbits = new int[0];
-        this.generators = Collections.singletonList(Permutations.createIdentityPermutation());
+        this.generators = Collections.singletonList(Permutations.getIdentityPermutation());
         this.orbits = new int[0][0];
-        this.ordering = new InducedOrdering(base, 0);
+        this.ordering = new InducedOrdering(base);
     }
 
     public static PermutationGroup trivialGroup() {
@@ -213,7 +213,7 @@ public final class PermutationGroup
      * @param generators generating set
      */
     public static PermutationGroup createPermutationGroup(List<Permutation> generators) {
-        int degree = Permutations.internalDegree(generators);
+        int degree = Permutations.SchreierVectorCapacity(generators);
         if (degree == 0)
             return TRIVIAL_GROUP;
         return new PermutationGroup(generators, degree, degree, 0);
@@ -225,10 +225,10 @@ public final class PermutationGroup
      * @param bsgs base and strong generating set
      */
     public static PermutationGroup createPermutationGroupFromBSGS(List<BSGSElement> bsgs) {
-        int degree = AlgorithmsBase.internalDegree(bsgs);
+        int degree = bsgs.get(0).internalDegree();
         if (degree == 0)
             return TRIVIAL_GROUP;
-        return new PermutationGroup(bsgs, bsgs.get(0).maximumMovedPoint(), degree);
+        return new PermutationGroup(bsgs, bsgs.get(0).internalDegree(), degree);
     }
 
     /**
@@ -278,7 +278,7 @@ public final class PermutationGroup
                 bsgs = TRIVIAL_BSGS;
             base = getBaseAsArray(bsgs);
             order = calculateOrder(bsgs);
-            ordering = new InducedOrdering(base, internalDegree);
+            ordering = new InducedOrdering(base);
         }
     }
 
@@ -938,7 +938,7 @@ public final class PermutationGroup
         int[] newBase = getBaseAsArray(bsgs);
         SetwiseStabilizerSearchTest swTest = new SetwiseStabilizerSearchTest(newBase, set);
         AlgorithmsBacktrack.subgroupSearch(bsgs, stabilizer,
-                swTest, swTest, newBase, new InducedOrdering(newBase, internalDegree));
+                swTest, swTest, newBase, new InducedOrdering(newBase));
 
         return createPermutationGroupFromBSGS(asBSGSList(stabilizer));
     }
@@ -1011,7 +1011,7 @@ public final class PermutationGroup
      */
     public Permutation[] leftCosetRepresentatives(PermutationGroup subgroup) {
         if (isTrivial())
-            return new Permutation[]{Permutations.createIdentityPermutation()};
+            return new Permutation[]{Permutations.getIdentityPermutation()};
         //todo implement special cases for Alt and Sym
         return AlgorithmsBacktrack.leftCosetRepresentatives(getBSGS(), subgroup.getBSGS(), base(), ordering());
     }
@@ -1210,7 +1210,7 @@ public final class PermutationGroup
     public Iterator<Permutation> iterator() {
         ensureBSGSIsInitialized();
         if (naturalDegree == 0)
-            return new SingleIterator<>(Permutations.createIdentityPermutation());
+            return new SingleIterator<>(Permutations.getIdentityPermutation());
         return new PermIterator(); //new OutputPort.PortIterator<>(new BacktrackSearch(bsgs));
     }
 

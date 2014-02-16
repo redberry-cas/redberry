@@ -23,6 +23,7 @@
 package cc.redberry.core.groups.permutations;
 
 
+import cc.redberry.core.utils.ArraysUtils;
 import cc.redberry.core.utils.IntArrayList;
 import cc.redberry.core.utils.IntComparator;
 
@@ -45,9 +46,9 @@ public class InducedOrdering implements IntComparator {
      *
      * @param base base permutation group
      */
-    public InducedOrdering(final int[] base, final int degree) {
+    public InducedOrdering(final int[] base) {
+        this.degree = ArraysUtils.max(base) + 1;
         this.positions = new int[degree + 2];
-        this.degree = degree;
 
         Arrays.fill(positions, -1);
         for (int i = 0; i < base.length; ++i)
@@ -74,9 +75,9 @@ public class InducedOrdering implements IntComparator {
     @Override
     public int compare(int a, int b) {
         if (a > positions.length - 2)
-            return b > positions.length - 2 ? 0 : 1;
+            return b > positions.length - 2 ? Integer.compare(a, b) : 1;
         if (b > positions.length - 2)
-            return a > positions.length - 2 ? 0 : -1;
+            return a > positions.length - 2 ? Integer.compare(a, b) : -1;
         return Integer.compare(positions[a + 1], positions[b + 1]);
     }
 

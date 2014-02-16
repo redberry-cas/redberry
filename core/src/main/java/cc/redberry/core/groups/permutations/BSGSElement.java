@@ -59,6 +59,11 @@ public class BSGSElement {
      * List of orbit points.
      */
     final IntArrayList orbitList;
+    /**
+     * Maximum internal degrees of stabilizers
+     */
+    int internalDegree = -1;//lazy initialization
+
 
     /**
      * Basic raw constructor.
@@ -172,11 +177,9 @@ public class BSGSElement {
 //        return stabilizerGenerators.get(0).degree();
 //    }
 
-    int internalDegree = -1;
-
-    public int maximumMovedPoint() {
+    public int internalDegree() {
         return internalDegree == -1 ?
-                internalDegree = Permutations.internalDegree(stabilizerGenerators) : internalDegree;
+                internalDegree = Permutations.SchreierVectorCapacity(stabilizerGenerators) : internalDegree;
     }
 
     @Override

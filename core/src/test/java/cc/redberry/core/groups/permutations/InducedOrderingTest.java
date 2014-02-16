@@ -39,7 +39,7 @@ public class InducedOrderingTest {
     @Test
     public void testBaseComparator1() {
         int[] base = {0, 2, 1};
-        InducedOrdering comparator = new InducedOrdering(base, 5);
+        InducedOrdering comparator = new InducedOrdering(base);
         int[] array = {1, 0, 2};
         ArraysUtils.quickSort(array, comparator);
         assertArrayEquals(base, array);
@@ -48,7 +48,7 @@ public class InducedOrderingTest {
     @Test
     public void testBaseComparator2() {
         int[] base = {0, 2, 1};
-        InducedOrdering comparator = new InducedOrdering(base, 5);
+        InducedOrdering comparator = new InducedOrdering(base);
         int[] array = {5, 1, 0, 2};
         ArraysUtils.quickSort(array, comparator);
         int[] expected = {0, 2, 1, 5};
@@ -59,7 +59,7 @@ public class InducedOrderingTest {
     @Test
     public void testBaseComparator3() {
         int[] base = {6, 7, 1};
-        InducedOrdering comparator = new InducedOrdering(base, 11);
+        InducedOrdering comparator = new InducedOrdering(base);
         int[] array = {5, 1, 0, 2, 7, 8, 9, 10, 6};
         ArraysUtils.quickSort(array, comparator);
         assertSetIsSorted(comparator, array);
@@ -77,12 +77,12 @@ public class InducedOrderingTest {
                     Permutations.randomPermutation(base.length, CC.getRandomGenerator())
             ).permute(base);
 
-            InducedOrdering ordering = new InducedOrdering(base, degree);
+            InducedOrdering ordering = new InducedOrdering(base);
 
             int min = ordering.minElement(),
                     max = ordering.maxElement();
 
-            for (int i = 0; i < degree; ++i) {
+            for (int i = 0; i <= ArraysUtils.max(base); ++i) {
                 assertTrue(ordering.compare(min, i) < 0);
                 assertTrue(ordering.compare(i, min) > 0);
                 assertTrue(ordering.compare(max, i) > 0);
@@ -95,7 +95,7 @@ public class InducedOrderingTest {
     public void testMinMax1a() {
         int degree = 10;
         int[] base = {4, 9, 5, 2, 8};
-        InducedOrdering ordering = new InducedOrdering(base, degree);
+        InducedOrdering ordering = new InducedOrdering(base);
         int min = ordering.minElement(), max = ordering.maxElement();
         for (int i = 0; i < degree; ++i) {
             assertTrue(ordering.compare(min, i) < 0);

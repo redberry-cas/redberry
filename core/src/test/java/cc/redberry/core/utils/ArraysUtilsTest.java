@@ -109,7 +109,7 @@ public class ArraysUtilsTest {
         for (int i = 0; i < base.length; ++i)
             base[i] = CC.getRandomGenerator().nextInt(base.length);
 
-        IntComparator comparator = new InducedOrdering(base, degree);
+        IntComparator comparator = new InducedOrdering(base);
 
         final int[] array = new int[1000];
         final int[] cosort = new int[1000];
