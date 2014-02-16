@@ -22,7 +22,6 @@
  */
 package cc.redberry.core.groups.permutations;
 
-import cc.redberry.core.utils.OutputPort;
 import cc.redberry.core.combinatorics.IntCombinationPermutationGenerator;
 import cc.redberry.core.combinatorics.IntCombinationsGenerator;
 import cc.redberry.core.context.CC;
@@ -30,6 +29,7 @@ import cc.redberry.core.number.NumberUtils;
 import cc.redberry.core.utils.ArraysUtils;
 import cc.redberry.core.utils.IntComparator;
 import cc.redberry.core.utils.MathUtils;
+import cc.redberry.core.utils.OutputPort;
 import org.apache.commons.math3.distribution.ChiSquaredDistribution;
 import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.random.Well1024a;
@@ -52,16 +52,16 @@ public class PermutationGroupTest extends AbstractTestClass {
     public void test1() {
         Permutation b, c;
 
-        b = new PermutationOneLine(1, 0, 2, 3, 4, 5);
-        c = new PermutationOneLine(1, 2, 3, 4, 5, 0);
+        b = Permutations.createPermutation(1, 0, 2, 3, 4, 5);
+        c = Permutations.createPermutation(1, 2, 3, 4, 5, 0);
 
         PermutationGroup pg = PermutationGroup.createPermutationGroup(b, c);
         assertEquals(NumberUtils.factorial(6), pg.order());
 
         assertTrue(pg.membershipTest(b));
         assertTrue(pg.membershipTest(c));
-        b = new PermutationOneLine(1, 0, 2, 5, 4, 3);
-        c = new PermutationOneLine(1, 3, 2, 5, 0, 4);
+        b = Permutations.createPermutation(1, 0, 2, 5, 4, 3);
+        c = Permutations.createPermutation(1, 3, 2, 5, 0, 4);
         assertTrue(pg.membershipTest(b));
         assertTrue(pg.membershipTest(c));
     }
@@ -70,8 +70,8 @@ public class PermutationGroupTest extends AbstractTestClass {
     public void test2() {
         Permutation b, c;
 
-        b = new PermutationOneLine(1, 0, 2, 3, 4, 5);
-        c = new PermutationOneLine(2, 3, 4, 5, 0, 1);
+        b = Permutations.createPermutation(1, 0, 2, 3, 4, 5);
+        c = Permutations.createPermutation(2, 3, 4, 5, 0, 1);
 
         PermutationGroup pg = PermutationGroup.createPermutationGroup(b, c);
         assertEquals(24, pg.order().intValue());
@@ -81,8 +81,8 @@ public class PermutationGroupTest extends AbstractTestClass {
     public void testIterator1() {
         Permutation b, c;
 
-        b = new PermutationOneLine(1, 0, 2, 3, 4, 5);
-        c = new PermutationOneLine(1, 2, 3, 4, 5, 0);
+        b = Permutations.createPermutation(1, 0, 2, 3, 4, 5);
+        c = Permutations.createPermutation(1, 2, 3, 4, 5, 0);
 
         PermutationGroup pg = PermutationGroup.createPermutationGroup(b, c);
         int order = pg.order().intValue();
@@ -94,10 +94,10 @@ public class PermutationGroupTest extends AbstractTestClass {
 
     @Test
     public void testIterator2() {
-        PermutationOneLine b, c;
+        Permutation b, c;
 
-        b = new PermutationOneLine(1, 4, 2, 3, 0, 5);
-        c = new PermutationOneLine(1, 0, 4, 3, 5, 2);
+        b = Permutations.createPermutation(1, 4, 2, 3, 0, 5);
+        c = Permutations.createPermutation(1, 0, 4, 3, 5, 2);
 
         PermutationGroup pg = PermutationGroup.createPermutationGroup(b, c);
         int order = pg.order().intValue();
@@ -116,10 +116,10 @@ public class PermutationGroupTest extends AbstractTestClass {
 
     @Test
     public void testIterator3() {
-        PermutationOneLine b, c;
+        Permutation b, c;
 
-        b = new PermutationOneLine(1, 4, 2, 3, 0, 5);
-        c = new PermutationOneLine(true, 2, 0, 4, 5, 3, 1);
+        b = Permutations.createPermutation(1, 4, 2, 3, 0, 5);
+        c = Permutations.createPermutation(true, 2, 0, 4, 5, 3, 1);
 
         PermutationGroup pg = PermutationGroup.createPermutationGroup(b, c);
         int order = pg.order().intValue();
@@ -138,10 +138,10 @@ public class PermutationGroupTest extends AbstractTestClass {
 
     @Test
     public void testIterator3a() {
-        PermutationOneLine b, c;
+        Permutation b, c;
 
-        b = new PermutationOneLine(true, 1, 0, 2);
-        c = new PermutationOneLine(true, 0, 2, 1);
+        b = Permutations.createPermutation(true, 1, 0, 2);
+        c = Permutations.createPermutation(true, 0, 2, 1);
 
         PermutationGroup pg = PermutationGroup.createPermutationGroup(b, c);
         int order = pg.order().intValue();
@@ -162,8 +162,8 @@ public class PermutationGroupTest extends AbstractTestClass {
     public void testInconsistentGenerators() {
         Permutation b, c;
 
-        b = new PermutationOneLine(true, 1, 0, 2);
-        c = new PermutationOneLine(0, 2, 1);
+        b = Permutations.createPermutation(true, 1, 0, 2);
+        c = Permutations.createPermutation(0, 2, 1);
 
         PermutationGroup pg = PermutationGroup.createPermutationGroup(b, c);
         pg.order();
@@ -172,16 +172,16 @@ public class PermutationGroupTest extends AbstractTestClass {
     @Test
     public void testInconsistentGenerators1() {
         RandomGenerator random = new Well1024a();
-        List<PermutationOneLine> permutations = new ArrayList<>();
+        List<Permutation> permutations = new ArrayList<>();
 
         //long start = System.currentTimeMillis();
         int inconsistentGeneratorsCount = 0;
         while (inconsistentGeneratorsCount < 500) {
             permutations.clear();
             for (int i = 0; i < 10; ++i) {
-                PermutationOneLine p = null;
+                Permutation p = null;
                 try {
-                    p = new PermutationOneLine(i % 2 == 0 ? true : false, Permutations.randomPermutation(6, random));
+                    p = Permutations.createPermutation(i % 2 == 0 ? true : false, Permutations.randomPermutation(6, random));
                 } catch (IllegalArgumentException e) {
                 }
                 if (p != null)
@@ -224,8 +224,8 @@ public class PermutationGroupTest extends AbstractTestClass {
     public void testBSGS1() {
         Permutation a, b, c, d, e, generators[];
         PermutationGroup group;
-        a = new PermutationOneLine(1, 0, 2, 3, 4, 5, 6);
-        b = new PermutationOneLine(2, 1, 3, 4, 5, 6, 0);
+        a = Permutations.createPermutation(1, 0, 2, 3, 4, 5, 6);
+        b = Permutations.createPermutation(2, 1, 3, 4, 5, 6, 0);
         generators = new Permutation[]{a, b};
         group = PermutationGroup.createPermutationGroup(generators);
         System.out.println(
@@ -237,37 +237,37 @@ public class PermutationGroupTest extends AbstractTestClass {
         Permutation a, b, c, d, e, generators[];
         PermutationGroup group;
 
-        a = new PermutationOneLine(1, 0, 2, 3, 4, 5, 6);
-        b = new PermutationOneLine(1, 2, 3, 4, 5, 6, 0);
+        a = Permutations.createPermutation(1, 0, 2, 3, 4, 5, 6);
+        b = Permutations.createPermutation(1, 2, 3, 4, 5, 6, 0);
         generators = new Permutation[]{a, b};
         group = PermutationGroup.createPermutationGroup(generators);
         assertEquals(group.order().longValue(), 5040L);
         assertGroupIterator(group);
 
-        b = new PermutationOneLine(1, 2, 3, 4, 5, 6, 0);
-        a = new PermutationOneLine(1, 0, 2, 3, 4, 5, 6);
-        c = new PermutationOneLine(1, 2, 3, 5, 6, 4, 0);
-        d = new PermutationOneLine(1, 4, 3, 2, 5, 6, 0);
+        b = Permutations.createPermutation(1, 2, 3, 4, 5, 6, 0);
+        a = Permutations.createPermutation(1, 0, 2, 3, 4, 5, 6);
+        c = Permutations.createPermutation(1, 2, 3, 5, 6, 4, 0);
+        d = Permutations.createPermutation(1, 4, 3, 2, 5, 6, 0);
         generators = new Permutation[]{a, b, c, d};
         group = PermutationGroup.createPermutationGroup(generators);
         assertEquals(group.order().longValue(), 5040L);
         assertGroupIterator(group);
 
-        b = new PermutationOneLine(1, 2, 3, 4, 5, 6, 0, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19);
-        a = new PermutationOneLine(1, 0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19);
-        c = new PermutationOneLine(1, 2, 3, 5, 6, 4, 0, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19);
-        d = new PermutationOneLine(1, 4, 3, 2, 5, 6, 0, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19);
-        e = new PermutationOneLine(1, 0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 19, 18);
+        b = Permutations.createPermutation(1, 2, 3, 4, 5, 6, 0, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19);
+        a = Permutations.createPermutation(1, 0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19);
+        c = Permutations.createPermutation(1, 2, 3, 5, 6, 4, 0, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19);
+        d = Permutations.createPermutation(1, 4, 3, 2, 5, 6, 0, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19);
+        e = Permutations.createPermutation(1, 0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 19, 18);
         generators = new Permutation[]{a, b, c, d, e};
         group = PermutationGroup.createPermutationGroup(generators);
         assertEquals(group.order().longValue(), 10080L);
         assertGroupIterator(group);
 
-        b = new PermutationOneLine(1, 2, 3, 4, 5, 6, 0, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19);
-        a = new PermutationOneLine(1, 0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19);
-        c = new PermutationOneLine(1, 2, 3, 5, 6, 4, 0, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19);
-        d = new PermutationOneLine(1, 4, 3, 2, 5, 6, 0, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19);
-        e = new PermutationOneLine(1, 0, 2, 3, 14, 5, 6, 7, 8, 9, 10, 11, 12, 13, 4, 15, 16, 17, 18, 19);
+        b = Permutations.createPermutation(1, 2, 3, 4, 5, 6, 0, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19);
+        a = Permutations.createPermutation(1, 0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19);
+        c = Permutations.createPermutation(1, 2, 3, 5, 6, 4, 0, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19);
+        d = Permutations.createPermutation(1, 4, 3, 2, 5, 6, 0, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19);
+        e = Permutations.createPermutation(1, 0, 2, 3, 14, 5, 6, 7, 8, 9, 10, 11, 12, 13, 4, 15, 16, 17, 18, 19);
         generators = new Permutation[]{a, b, c, d, e};
         group = PermutationGroup.createPermutationGroup(generators);
         assertEquals(group.order().longValue(), 5040L * 8L);
@@ -305,8 +305,8 @@ public class PermutationGroupTest extends AbstractTestClass {
     public void testOrbit1() {
         Permutation a, b, c, d, e, generators[];
         PermutationGroup group;
-        a = new PermutationOneLine(1, 0, 2, 3, 4, 5, 6, 7);
-        b = new PermutationOneLine(2, 1, 3, 4, 5, 6, 0, 7);
+        a = Permutations.createPermutation(1, 0, 2, 3, 4, 5, 6, 7);
+        b = Permutations.createPermutation(2, 1, 3, 4, 5, 6, 0, 7);
         generators = new Permutation[]{a, b};
         group = PermutationGroup.createPermutationGroup(generators);
 
@@ -366,9 +366,9 @@ public class PermutationGroupTest extends AbstractTestClass {
     }
 
     @Test
-    public void testPointwiseStabilizer3_WithGap() {
+    public void testPointwiseStabilizer3_WithGap_longTest() {
         GapGroupsInterface gap = getGapInterface();
-        for (int asa = 0; asa < 100; ++asa) {
+        for (int asa = 0; asa < 10; ++asa) {
             for (int degree = 4; degree < 50; ++degree) {
                 int nrPrimitiveGroups = gap.nrPrimitiveGroups(degree);
                 //System.out.println("DEGREE: " + degree);
@@ -398,15 +398,7 @@ public class PermutationGroupTest extends AbstractTestClass {
 
 
                         PermutationGroup stab = group.pointwiseStabilizer(set);
-                        try {
-                            assertTrue(stab.equals(pointWiseStabilizerBruteForce(group, set)));
-                        } catch (AssertionError err) {
-                            System.out.println(group);
-                            System.out.println(Arrays.toString(set));
-                            System.out.println(stab);
-                            System.out.println(pointWiseStabilizerBruteForce(group, set));
-                            throw err;
-                        }
+                        assertTrue(stab.equals(pointWiseStabilizerBruteForce(group, set)));
                     }
                 }
             }
@@ -416,10 +408,10 @@ public class PermutationGroupTest extends AbstractTestClass {
     @Test
     public void testPointwiseStabilizer3a() {
         PermutationGroup parent = PermutationGroup.createPermutationGroup(
-                new PermutationOneLine(new int[][]{{1, 27, 20, 9, 31, 21, 18, 11, 28, 13, 30, 14, 6, 2, 3, 24, 12, 5, 26, 15, 29, 22, 10, 7, 25, 23, 17, 19, 16, 8, 4}}),
-                new PermutationOneLine(new int[][]{{1, 3, 22, 13, 9}, {2, 21, 27, 4, 8}, {5, 11, 20, 24, 18}, {6, 29, 25, 17, 19}, {7, 30, 15, 28, 26}, {10, 23, 14, 31, 12}}),
-                new PermutationOneLine(new int[][]{{2, 18}, {3, 19}, {6, 22}, {7, 23}, {10, 26}, {11, 27}, {14, 30}, {15, 31}}),
-                new PermutationOneLine(new int[][]{{0, 1}, {2, 3}, {4, 5}, {6, 7}, {8, 9}, {10, 11}, {12, 13}, {14, 15}, {16, 17}, {18, 19}, {20, 21}, {22, 23}, {24, 25}, {26, 27}, {28, 29}, {30, 31}}));
+                Permutations.createPermutation(new int[][]{{1, 27, 20, 9, 31, 21, 18, 11, 28, 13, 30, 14, 6, 2, 3, 24, 12, 5, 26, 15, 29, 22, 10, 7, 25, 23, 17, 19, 16, 8, 4}}),
+                Permutations.createPermutation(new int[][]{{1, 3, 22, 13, 9}, {2, 21, 27, 4, 8}, {5, 11, 20, 24, 18}, {6, 29, 25, 17, 19}, {7, 30, 15, 28, 26}, {10, 23, 14, 31, 12}}),
+                Permutations.createPermutation(new int[][]{{2, 18}, {3, 19}, {6, 22}, {7, 23}, {10, 26}, {11, 27}, {14, 30}, {15, 31}}),
+                Permutations.createPermutation(new int[][]{{0, 1}, {2, 3}, {4, 5}, {6, 7}, {8, 9}, {10, 11}, {12, 13}, {14, 15}, {16, 17}, {18, 19}, {20, 21}, {22, 23}, {24, 25}, {26, 27}, {28, 29}, {30, 31}}));
         int[] set = {0, 5, 10, 16};
         PermutationGroup stab = parent.pointwiseStabilizer(set);
         PermutationGroup stabBruteForce = pointWiseStabilizerBruteForce(parent, set);
@@ -429,19 +421,15 @@ public class PermutationGroupTest extends AbstractTestClass {
     @Test
     public void testSetwiseStabilizer1_WithGap() {
         PermutationGroup group = getGapInterface().primitiveGroup(12, 0);
-
         PermutationGroup stab = group.setwiseStabilizer(0, 1, 2);
-        System.out.println(stab.order());
-        System.out.println(group.order().divide(stab.order()));
         assertTrue(group.containsSubgroup(stab));
-
     }
 
     @Test
     public void testAlt1() {
         //n = 5
-        PermutationOneLine a1 = new PermutationOneLine(new int[]{1, 2, 0, 3, 4, 5, 6});
-        PermutationOneLine a2 = new PermutationOneLine(new int[]{1, 2, 3, 4, 5, 6, 0});
+        Permutation a1 = Permutations.createPermutation(new int[]{1, 2, 0, 3, 4, 5, 6});
+        Permutation a2 = Permutations.createPermutation(new int[]{1, 2, 3, 4, 5, 6, 0});
         PermutationGroup pg = PermutationGroup.createPermutationGroup(a1, a2);
         assertTrue(pg.isAlternating());
     }
@@ -449,8 +437,8 @@ public class PermutationGroupTest extends AbstractTestClass {
     @Test
     public void testAlt2() {
         //n = 5
-        PermutationOneLine a1 = new PermutationOneLine(new int[]{1, 2, 0, 3, 4, 5});
-        PermutationOneLine a2 = new PermutationOneLine(new int[]{0, 2, 3, 4, 5, 1});
+        Permutation a1 = Permutations.createPermutation(new int[]{1, 2, 0, 3, 4, 5});
+        Permutation a2 = Permutations.createPermutation(new int[]{0, 2, 3, 4, 5, 1});
         PermutationGroup pg = PermutationGroup.createPermutationGroup(a1, a2);
         assertTrue(pg.isAlternating());
     }
@@ -664,9 +652,9 @@ public class PermutationGroupTest extends AbstractTestClass {
 
     @Test
     public void testMapping2() {
-        Permutation a = new PermutationOneLine(true, 1, 0, 2, 3),
-                b = new PermutationOneLine(true, 0, 1, 3, 2),
-                c = new PermutationOneLine(false, 2, 3, 0, 1);
+        Permutation a = Permutations.createPermutation(true, 1, 0, 2, 3),
+                b = Permutations.createPermutation(true, 0, 1, 3, 2),
+                c = Permutations.createPermutation(false, 2, 3, 0, 1);
         final PermutationGroup pg = PermutationGroup.createPermutationGroup(a, b, c);
 
         Permutation[] all = new Permutation[pg.order().intValue()];
@@ -698,7 +686,12 @@ public class PermutationGroupTest extends AbstractTestClass {
                         expected.add(ppp);
                     }
 
-                    assertEquals(expected, actual);
+                    try {
+                        assertEquals(expected, actual);
+                    } catch (AssertionError err) {
+                        int asas = 0;
+                        throw err;
+                    }
                 }
             }
         }
@@ -725,8 +718,8 @@ public class PermutationGroupTest extends AbstractTestClass {
         int[][] b = {{1, 2, 3, 4, 5, 6, 7}};
         int[][] c = {{1, 2, 3}};
         int[][] d = {{3, 4, 5, 6, 7}};
-        PermutationGroup pg1 = PermutationGroup.createPermutationGroup(new PermutationOneLine(a), new PermutationOneLine(b));
-        PermutationGroup pg2 = PermutationGroup.createPermutationGroup(new PermutationOneLine(c), new PermutationOneLine(d));
+        PermutationGroup pg1 = PermutationGroup.createPermutationGroup(Permutations.createPermutation(a), Permutations.createPermutation(b));
+        PermutationGroup pg2 = PermutationGroup.createPermutationGroup(Permutations.createPermutation(c), Permutations.createPermutation(d));
 
         PermutationGroup nc = pg1.normalClosureOf(pg2);
         assertTrue(nc.equals(pg2));
@@ -792,7 +785,7 @@ public class PermutationGroupTest extends AbstractTestClass {
         int[][] a = {{0, 1}, {2, 3}};
         int[][] b = {{0, 2}, {1, 3}};
         int[][] c = {{0, 3}, {1, 2}};
-        PermutationGroup expected = PermutationGroup.createPermutationGroup(new PermutationOneLine(a), new PermutationOneLine(b), new PermutationOneLine(c));
+        PermutationGroup expected = PermutationGroup.createPermutationGroup(Permutations.createPermutation(a), Permutations.createPermutation(b), Permutations.createPermutation(c));
         assertTrue(expected.equals(v4));
     }
 
@@ -814,11 +807,24 @@ public class PermutationGroupTest extends AbstractTestClass {
         for (int degree = 3; degree < 150; degree += 5) {
             for (int i = 0; i < gap.nrPrimitiveGroups(degree); i += 2) {
                 gap.evaluate("g:= PrimitiveGroup( " + degree + ", " + (i + 1) + ");");
+                System.out.println(degree + "   " + i);
                 PermutationGroup p = gap.primitiveGroup(degree, i);
+                System.out.println(gap.evaluate("g;"));
+                System.out.println(gap.evaluateToBoolean("IsNaturalSymmetricGroup(g);"));
+                System.out.println(p.isSymmetric());
                 assertEquals(gap.evaluateToBoolean("IsNaturalSymmetricGroup(g);"), p.isSymmetric());
                 assertEquals(gap.evaluateToBoolean("IsNaturalAlternatingGroup(g);"), p.isAlternating());
             }
         }
+    }
+
+    @Test
+    public void testIsSymOrAlt2a_WithGap() {
+        GapGroupsInterface gap = getGapInterface();
+        gap.evaluate("g:= PrimitiveGroup(128, 7);");
+        PermutationGroup p = gap.primitiveGroup(128, 6);
+        assertEquals(gap.evaluateToBoolean("IsNaturalSymmetricGroup(g);"), p.isSymmetric());
+        assertEquals(gap.evaluateToBoolean("IsNaturalAlternatingGroup(g);"), p.isAlternating());
     }
 
     @Test
@@ -868,11 +874,11 @@ public class PermutationGroupTest extends AbstractTestClass {
     public void testCentralizer1() throws Exception {
         PermutationGroup s4 = PermutationGroup.symmetricGroup(4);
 
-        PermutationGroup s2 = PermutationGroup.createPermutationGroup(new PermutationOneLine(1, 0, 2, 3));
+        PermutationGroup s2 = PermutationGroup.createPermutationGroup(Permutations.createPermutation(1, 0, 2, 3));
         PermutationGroup v4 = s4.centralizerOf(s2);
         PermutationGroup expected = PermutationGroup.createPermutationGroup(
-                new PermutationOneLine(1, 0, 2, 3),
-                new PermutationOneLine(0, 1, 3, 2)
+                Permutations.createPermutation(1, 0, 2, 3),
+                Permutations.createPermutation(0, 1, 3, 2)
         );
         assertTrue(expected.equals(v4));
     }
@@ -881,19 +887,19 @@ public class PermutationGroupTest extends AbstractTestClass {
     public void testCentralizer2() throws Exception {
         PermutationGroup a8 = PermutationGroup.alternatingGroup(8);
         int[][] p1 = {{0, 1, 2}, {3, 4, 5}};
-        PermutationGroup c = a8.centralizerOf(new PermutationOneLine(p1));
+        PermutationGroup c = a8.centralizerOf(Permutations.createPermutation(p1));
         int[][] p2 = {{3, 4, 5}};
         int[][] p3 = {{0, 3}, {1, 4}, {2, 5}, {6, 7}};
         PermutationGroup expected = PermutationGroup.createPermutationGroup(
-                new PermutationOneLine(p1),
-                new PermutationOneLine(p2),
-                new PermutationOneLine(p3));
+                Permutations.createPermutation(p1),
+                Permutations.createPermutation(p2),
+                Permutations.createPermutation(p3));
         assertTrue(expected.equals(c));
         assertTrue(c.center().equals(
-                PermutationGroup.createPermutationGroup(new PermutationOneLine(p1))));
+                PermutationGroup.createPermutationGroup(Permutations.createPermutation(p1))));
         int[][] p4 = {{0, 2, 1}, {3, 4, 5}};
         assertTrue(c.derivedSubgroup().equals(
-                PermutationGroup.createPermutationGroup(new PermutationOneLine(p4))));
+                PermutationGroup.createPermutationGroup(Permutations.createPermutation(p4))));
     }
 
     @Test
@@ -913,8 +919,8 @@ public class PermutationGroupTest extends AbstractTestClass {
     public void testExample1() throws Exception {
         //Construct permutation group of degree 13 with two generators written in one-line notation
         PermutationGroup pg = PermutationGroup.createPermutationGroup(
-                new PermutationOneLine(9, 1, 2, 0, 4, 8, 5, 11, 6, 3, 10, 12, 7),
-                new PermutationOneLine(2, 0, 1, 8, 3, 5, 7, 11, 4, 12, 9, 6, 10));
+                Permutations.createPermutation(9, 1, 2, 0, 4, 8, 5, 11, 6, 3, 10, 12, 7),
+                Permutations.createPermutation(2, 0, 1, 8, 3, 5, 7, 11, 4, 12, 9, 6, 10));
         //this group is transitive
         assert pg.isTransitive();
         //its order = 5616
@@ -954,8 +960,8 @@ public class PermutationGroupTest extends AbstractTestClass {
     public void testExample2() {
         PermutationGroup group = PermutationGroup.symmetricGroup(4);
         PermutationGroup subgroup = PermutationGroup.createPermutationGroup(
-                new PermutationOneLine(1, 0, 2, 3),
-                new PermutationOneLine(0, 1, 3, 2));
+                Permutations.createPermutation(1, 0, 2, 3),
+                Permutations.createPermutation(0, 1, 3, 2));
         Permutation[] cosetRepresentatives = group.leftCosetRepresentatives(subgroup);
         assert cosetRepresentatives.length == group.order().divide(subgroup.order()).intValue();
         System.out.println(Arrays.toString(cosetRepresentatives));
@@ -963,8 +969,8 @@ public class PermutationGroupTest extends AbstractTestClass {
 
     @Test
     public void testExample3() {
-        Permutation perm1 = new PermutationOneLine(new int[][]{{1, 2, 3}});
-        Permutation perm2 = new PermutationOneLine(new int[][]{{3, 4, 5, 6, 7}});
+        Permutation perm1 = Permutations.createPermutation(new int[][]{{1, 2, 3}});
+        Permutation perm2 = Permutations.createPermutation(new int[][]{{3, 4, 5, 6, 7}});
         PermutationGroup pg = PermutationGroup.createPermutationGroup(perm1, perm2);
 
         BacktrackSearch mappings = pg.mapping(new int[]{7, 2, 1, 3}, new int[]{5, 3, 6, 1});
@@ -975,8 +981,8 @@ public class PermutationGroupTest extends AbstractTestClass {
 
     @Test
     public void testPointwiseStabilizerRestricted1() throws Exception {
-        Permutation perm1 = new PermutationOneLine(new int[][]{{1, 2, 3}});
-        Permutation perm2 = new PermutationOneLine(new int[][]{{3, 4, 5, 6, 7}});
+        Permutation perm1 = Permutations.createPermutation(new int[][]{{1, 2, 3}});
+        Permutation perm2 = Permutations.createPermutation(new int[][]{{3, 4, 5, 6, 7}});
         PermutationGroup pg = PermutationGroup.createPermutationGroup(perm1, perm2);
         PermutationGroup ps = pg.pointwiseStabilizer(1, 2, 3);
         PermutationGroup psr = pg.pointwiseStabilizerRestricted(1, 2, 3);
@@ -1016,9 +1022,9 @@ public class PermutationGroupTest extends AbstractTestClass {
     @Test
     public void testPointwiseStabilizerRestricted2() throws Exception {
         Permutation[] generators = {
-                new PermutationOneLine(new int[][]{{1, 12, 6, 5, 14}, {2, 7, 9, 8, 4}, {3, 11, 15, 13, 10}}),
-                new PermutationOneLine(new int[][]{{1, 4}, {2, 15}, {3, 11}, {6, 14}, {7, 10}, {9, 12}}),
-                new PermutationOneLine(new int[][]{{0, 1}, {2, 3}, {4, 5}, {6, 7}, {8, 9}, {10, 11}, {12, 13}, {14, 15}})};
+                Permutations.createPermutation(new int[][]{{1, 12, 6, 5, 14}, {2, 7, 9, 8, 4}, {3, 11, 15, 13, 10}}),
+                Permutations.createPermutation(new int[][]{{1, 4}, {2, 15}, {3, 11}, {6, 14}, {7, 10}, {9, 12}}),
+                Permutations.createPermutation(new int[][]{{0, 1}, {2, 3}, {4, 5}, {6, 7}, {8, 9}, {10, 11}, {12, 13}, {14, 15}})};
         PermutationGroup pg = PermutationGroup.createPermutationGroup(generators);
         int[] set = {5, 12, 13, 15, 15};
         PermutationGroup ps = pg.pointwiseStabilizer(set);
@@ -1032,19 +1038,19 @@ public class PermutationGroupTest extends AbstractTestClass {
 
     @Test
     public void testConjugate1() {
-        Permutation perm1 = new PermutationOneLine(new int[][]{{1, 2, 3}});
-        Permutation perm2 = new PermutationOneLine(new int[][]{{3, 4, 5, 6, 7}});
+        Permutation perm1 = Permutations.createPermutation(new int[][]{{1, 2, 3}});
+        Permutation perm2 = Permutations.createPermutation(new int[][]{{3, 4, 5, 6, 7}});
         PermutationGroup pg = PermutationGroup.createPermutationGroup(perm1, perm2);
 
-        Permutation c = new PermutationOneLine(1, 0, 2, 3, 4, 5, 6, 7);
+        Permutation c = Permutations.createPermutation(1, 0, 2, 3, 4, 5, 6, 7);
 
         PermutationGroup expected = PermutationGroup.createPermutationGroup(
-                new PermutationOneLine(new int[][]{{0, 2, 3}}), perm2);
+                Permutations.createPermutation(new int[][]{{0, 2, 3}}), perm2);
         assertEquals(expected, pg.conjugate(c));
 
-        c = new PermutationOneLine(0, 1, 2, 4, 3, 5, 6, 7);
+        c = Permutations.createPermutation(0, 1, 2, 4, 3, 5, 6, 7);
         expected = PermutationGroup.createPermutationGroup(
-                new PermutationOneLine(new int[][]{{4, 3, 5, 6, 7}}), perm1);
+                Permutations.createPermutation(new int[][]{{4, 3, 5, 6, 7}}), perm1);
         assertEquals(expected, pg.conjugate(c));
     }
 
@@ -1059,7 +1065,7 @@ public class PermutationGroupTest extends AbstractTestClass {
                     continue;
                 //calc bsgs
                 group.order();
-                assertTrue(AlgorithmsBase.isBSGS(group.conjugate(new PermutationOneLine(
+                assertTrue(AlgorithmsBase.isBSGS(group.conjugate(Permutations.createPermutation(
                         Permutations.randomPermutation(degree))).getBSGS()));
             }
         }
@@ -1077,11 +1083,11 @@ public class PermutationGroupTest extends AbstractTestClass {
         RandomGenerator rg = new Well19937c(123234L);
 
         testUniformity(PermutationGroup.createPermutationGroup(
-                new PermutationOneLine(2, 0, 1, 3, 4)),
+                Permutations.createPermutation(2, 0, 1, 3, 4)),
                 rg);
         testUniformity(PermutationGroup.createPermutationGroup(
-                new PermutationOneLine(1, 2, 0, 4, 3),
-                new PermutationOneLine(0, 1, 2, 4, 3)),
+                Permutations.createPermutation(1, 2, 0, 4, 3),
+                Permutations.createPermutation(0, 1, 2, 4, 3)),
                 rg);
     }
 

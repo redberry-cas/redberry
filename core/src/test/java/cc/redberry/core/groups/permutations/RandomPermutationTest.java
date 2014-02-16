@@ -54,8 +54,8 @@ public class RandomPermutationTest {
         for (int tt = 0; tt < 10; ++tt) {
             int n = 10;
             List<Permutation> source = new ArrayList<>();
-            source.add(new PermutationOneLine(new int[]{1, 0, 2, 3, 4, 5, 6, 7, 8, 9}));
-            source.add(new PermutationOneLine(new int[]{2, 3, 4, 5, 6, 7, 8, 9, 0, 1}));
+            source.add(Permutations.createPermutation(new int[]{1, 0, 2, 3, 4, 5, 6, 7, 8, 9}));
+            source.add(Permutations.createPermutation(new int[]{2, 3, 4, 5, 6, 7, 8, 9, 0, 1}));
             randomness(source);
 
             int[] histo = new int[n];
@@ -64,7 +64,7 @@ public class RandomPermutationTest {
             for (int i = 0; i < COUNT; ++i) {
                 temp = random(source);
                 for (int k = 0; k < n; ++k) {
-                    if (((PermutationOneLine) temp).permutation[k] == k)
+                    if (((PermutationOneLineInt) temp).permutation[k] == k)
                         ++histo[k];
                 }
             }
@@ -85,8 +85,8 @@ public class RandomPermutationTest {
             //symmetric group
             int n = 10;
             List<Permutation> source = new ArrayList<>();
-            source.add(new PermutationOneLine(new int[]{1, 0, 2, 3, 4, 5, 6, 7, 8, 9}));
-            source.add(new PermutationOneLine(new int[]{1, 2, 3, 4, 5, 6, 7, 8, 9, 0}));
+            source.add(Permutations.createPermutation(new int[]{1, 0, 2, 3, 4, 5, 6, 7, 8, 9}));
+            source.add(Permutations.createPermutation(new int[]{1, 2, 3, 4, 5, 6, 7, 8, 9, 0}));
             randomness(source);
 
             int[] histo = new int[n];
@@ -95,7 +95,7 @@ public class RandomPermutationTest {
             for (int i = 0; i < COUNT; ++i) {
                 temp = random(source);
                 for (int k = 0; k < n; ++k) {
-                    if (((PermutationOneLine) temp).permutation[k] == k)
+                    if (((PermutationOneLineInt) temp).permutation[k] == k)
                         ++histo[k];
                 }
             }
@@ -181,7 +181,7 @@ public class RandomPermutationTest {
         do {
             init.clear();
             for (int i = 0; i < 2; ++i)
-                init.add(new PermutationOneLine(Permutations.randomPermutation(n, randomGenerator)));
+                init.add(Permutations.createPermutation(Permutations.randomPermutation(n, randomGenerator)));
             randomness(init, 20, 50, CC.getRandomGenerator());
 
             generators.clear();
@@ -207,9 +207,9 @@ public class RandomPermutationTest {
         int n = 15;
         long seed = currentTimeMillis();
         List<Permutation> allgenerators = new ArrayList<>();
-        allgenerators.add(new PermutationOneLine(5, 0, 9, 3, 7, 11, 2, 8, 14, 6, 12, 10, 1, 4, 13));
-        allgenerators.add(new PermutationOneLine(11, 5, 6, 3, 4, 1, 13, 7, 9, 2, 12, 10, 0, 8, 14));
-        allgenerators.add(new PermutationOneLine(10, 0, 2, 3, 8, 5, 6, 14, 13, 7, 11, 12, 1, 9, 4));
+        allgenerators.add(Permutations.createPermutation(5, 0, 9, 3, 7, 11, 2, 8, 14, 6, 12, 10, 1, 4, 13));
+        allgenerators.add(Permutations.createPermutation(11, 5, 6, 3, 4, 1, 13, 7, 9, 2, 12, 10, 0, 8, 14));
+        allgenerators.add(Permutations.createPermutation(10, 0, 2, 3, 8, 5, 6, 14, 13, 7, 11, 12, 1, 9, 4));
 
         TLongSet orders = new TLongHashSet();
         List<Permutation> generators = new ArrayList<>();
@@ -282,8 +282,8 @@ public class RandomPermutationTest {
     @Test
     public void testExample1() {
 //primitive permutation group with 5616 elements
-Permutation perm1 = new PermutationOneLine(9, 1, 2, 0, 4, 8, 5, 11, 6, 3, 10, 12, 7);
-Permutation perm2 = new PermutationOneLine(2, 0, 1, 8, 3, 5, 7, 11, 4, 12, 9, 6, 10);
+Permutation perm1 = Permutations.createPermutation(9, 1, 2, 0, 4, 8, 5, 11, 6, 3, 10, 12, 7);
+Permutation perm2 = Permutations.createPermutation(2, 0, 1, 8, 3, 5, 7, 11, 4, 12, 9, 6, 10);
 ArrayList<Permutation> generators = new ArrayList<>(Arrays.asList(perm1, perm2));
 //we'll use a list of generators as a source of randomness
 //this brings some randomization in generators list

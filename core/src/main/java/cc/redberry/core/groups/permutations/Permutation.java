@@ -25,14 +25,18 @@ package cc.redberry.core.groups.permutations;
 import cc.redberry.core.utils.IntArray;
 
 import java.math.BigInteger;
-import java.util.Arrays;
 
 /**
- * Interface describing a single permutation.
+ * Interface describing a single permutation. See {@link cc.redberry.core.groups.permutations.Permutations#createPermutation(boolean, int[])}
+ * and {@link cc.redberry.core.groups.permutations.Permutations#createPermutation(boolean, int[][])} on how to construct permutations.
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
- * @see PermutationOneLine
+ * @see cc.redberry.core.groups.permutations.Permutations#createPermutation(boolean, int[])
+ * @see cc.redberry.core.groups.permutations.Permutations#createPermutation(boolean, int[][])
+ * @see cc.redberry.core.groups.permutations.PermutationOneLineInt
+ * @see cc.redberry.core.groups.permutations.PermutationOneLineShort
+ * @see cc.redberry.core.groups.permutations.PermutationOneLineByte
  * @since 1.0
  */
 public interface Permutation extends Comparable<Permutation> {
@@ -62,9 +66,19 @@ public interface Permutation extends Comparable<Permutation> {
      *
      * @param i point
      * @return image of specified point under the action of this permutation
-     * @throws java.lang.IndexOutOfBoundsException if {@code i < 0 || i > degree()}
      */
     public int newIndexOf(int i);
+
+//    /**
+//     * Returns image of specified point under the action of this permutation.This method is same as
+//     * {@link #newIndexOf(int)}, but throws exception if specified point greater then the internal low-level array that
+//     * represents this permutation.
+//     *
+//     * @param i point
+//     * @return image of specified point under the action of this permutation
+//     * @throws java.lang.IndexOutOfBoundsException if {@code i > length()}
+//     */
+//    public int newIndexOfInternal(int i);
 
     /**
      * Returns image of specified point under the action of this permutation. This method is absolutely same as
@@ -72,7 +86,6 @@ public interface Permutation extends Comparable<Permutation> {
      *
      * @param i point
      * @return image of specified point under the action of this permutation
-     * @throws java.lang.IndexOutOfBoundsException if {@code i < 0 || i > degree()}
      */
     public int imageOf(int i);
 
@@ -81,7 +94,6 @@ public interface Permutation extends Comparable<Permutation> {
      *
      * @param set set
      * @return image of specified set under this permutation
-     * @throws java.lang.IndexOutOfBoundsException if some point is negative or greater then {@link #degree()}
      */
     public int[] imageOf(int[] set);
 
@@ -114,7 +126,6 @@ public interface Permutation extends Comparable<Permutation> {
      *
      * @param p permutation
      * @return conjugation of specified element by this permutation, i.e. this^-1 * p * this
-     * @throws IllegalArgumentException        if {@code other.degree() != this.degree()}
      * @throws InconsistentGeneratorsException if the result of composition is inconsistent symmetry (antisymmetry with odd
      *                                         parity of permutation)
      */
@@ -125,7 +136,6 @@ public interface Permutation extends Comparable<Permutation> {
      *
      * @param p permutation
      * @return commutator of this and specified permutation, i.e. this^-1 * p^-1 * this * p
-     * @throws IllegalArgumentException        if {@code other.degree() != this.degree()}
      * @throws InconsistentGeneratorsException if the result of composition is inconsistent symmetry (antisymmetry with odd
      *                                         parity of permutation)
      */
@@ -152,7 +162,6 @@ public interface Permutation extends Comparable<Permutation> {
      *
      * @param other other permutation
      * @return the result of  {@code this * other}
-     * @throws IllegalArgumentException        if {@code other.degree() != this.degree()}
      * @throws InconsistentGeneratorsException if the result of composition is inconsistent symmetry (antisymmetry with odd
      *                                         parity of permutation)
      */
@@ -165,7 +174,6 @@ public interface Permutation extends Comparable<Permutation> {
      * @param a other permutation
      * @param b other permutation
      * @return the result of  {@code this * a * b}
-     * @throws IllegalArgumentException        if {@code a.degree() != this.degree() || b.degree() != this.degree()}
      * @throws InconsistentGeneratorsException if the result of composition is inconsistent symmetry (antisymmetry with odd
      *                                         permutation parity)
      */
@@ -179,7 +187,6 @@ public interface Permutation extends Comparable<Permutation> {
      * @param b other permutation
      * @param c other permutation
      * @return the result of  {@code this * a * b * c}
-     * @throws IllegalArgumentException        if {@code a.degree() != this.degree() || b.degree() != this.degree() || c.degree() != this.degree()}
      * @throws InconsistentGeneratorsException if the result of composition is inconsistent symmetry (antisymmetry with odd
      *                                         permutation parity)
      */
@@ -191,7 +198,6 @@ public interface Permutation extends Comparable<Permutation> {
      *
      * @param other other permutation
      * @return the result of  {@code this * other.inverse()}
-     * @throws IllegalArgumentException        if {@code other.degree() != this.degree()}
      * @throws InconsistentGeneratorsException if the result of composition is inconsistent symmetry (antisymmetry with odd
      *                                         permutation parity)
      */
@@ -233,16 +239,18 @@ public interface Permutation extends Comparable<Permutation> {
      */
     public boolean orderIsOdd();
 
-//    /**
-//     * Returns the degree of this permutation; in other words, the number of elements in set on which this
-//     * permutation acts (the length of permutation written in one-line notation).
-//     *
-//     * @return degree of this permutation
-//     */
-//    public int degree();
-
+    /**
+     * Returns a largest moved point plus one.
+     *
+     * @return largest moved point plus one
+     */
     public int internalDegree();
 
+    /**
+     * Returns length of the underlying array (at low-level).
+     *
+     * @return length of the underlying array (at low-level)
+     */
     public int length();
 
     /**

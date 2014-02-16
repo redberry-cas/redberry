@@ -262,7 +262,7 @@ public final class IndicesSymmetries {
                 type = (byte) i;
             }
         }
-        add(type, new PermutationOneLine(sign, permutation));
+        add(type, Permutations.createPermutation(sign, permutation));
     }
 
     /**
@@ -310,7 +310,7 @@ public final class IndicesSymmetries {
      *                                            of specified type
      */
     public void add(IndexType type, boolean sign, int... permutation) {
-        add(type.getType(), new PermutationOneLine(sign, permutation));
+        add(type.getType(), Permutations.createPermutation(sign, permutation));
     }
 
     /**
@@ -327,7 +327,7 @@ public final class IndicesSymmetries {
      *                                            of specified type
      */
     public void add(byte type, boolean sign, int... permutation) {
-        add(type, new PermutationOneLine(sign, permutation));
+        add(type, Permutations.createPermutation(sign, permutation));
     }
 
     /**
@@ -357,7 +357,7 @@ public final class IndicesSymmetries {
             s[i] = symmetry.newIndexOf(j) + data.from;
         for (; i < structureOfIndices.size(); ++i)
             s[i] = i;
-        generators.add(new PermutationOneLine(symmetry.antisymmetry(), s));
+        generators.add(Permutations.createPermutation(symmetry.antisymmetry(), s));
     }
 
 

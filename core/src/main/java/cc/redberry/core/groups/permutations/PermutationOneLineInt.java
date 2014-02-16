@@ -30,37 +30,21 @@ import java.util.Arrays;
 
 /**
  * The implementation of {@link Permutation} based on the one-line notation. The instances of this class are immutable.
- * <p><b>Construction</b>
- * To construct a single permutation one can use either disjoint cycles notation either one-line notation (in both cases
- * the numeration of points starts from 0):
- * <br>
- * <pre style="background:#f1f1f1;color:#000"><span style="color:#406040"> //same permutation</span>
- * <span style="color:#406040">//in one-line notation</span>
- * <span style="color:#a08000">Permutation</span> a <span style="color:#2060a0">=</span> <span style="color:#2060a0">new</span> <span style="color:#a08000">PermutationOneLine</span>(<span style="color:#0080a0">1</span>, <span style="color:#0080a0">3</span>, <span style="color:#0080a0">4</span>, <span style="color:#0080a0">0</span>, <span style="color:#0080a0">2</span>);
- * <span style="color:#406040">//in disjoint cycles notation</span>
- * <span style="color:#a08000">Permutation</span> b <span style="color:#2060a0">=</span> <span style="color:#2060a0">new</span> <span style="color:#a08000">PermutationOneLine</span>(<span style="color:#0080a0">5</span>, <span style="color:#2060a0">new</span> <span style="color:#a08000">int</span>[][]{{<span style="color:#0080a0">2</span>, <span style="color:#0080a0">4</span>}, {<span style="color:#0080a0">3</span>, <span style="color:#0080a0">0</span>, <span style="color:#0080a0">1</span>}});
- * <span style="color:#2060a0">assert</span> a<span style="color:#2060a0">.</span>equals(b);
- * </pre>
- * In the case of antisymmetry, an {@code IllegalArgumentException} can be thrown, since if the {@link #order()} of
- * permutation is odd, then it cannot represent a valid antisymmetry. For example, both
- * <span style="background:#f1f1f1;color:#000"><span style="color:#2060a0">new</span> <span style="color:#a08000">PermutationOneLine</span>(true, <span style="color:#0080a0">0</span>, <span style="color:#0080a0">1</span>, <span style="color:#0080a0">3</span>, <span style="color:#0080a0">4</span>, <span style="color:#0080a0">2</span>)</span>
- * or
- * <span style="background:#f1f1f1;color:#000"><span style="color:#2060a0">new</span> <span style="color:#a08000">PermutationOneLine</span>(true, <span style="color:#0080a0">5</span>, <span style="color:#2060a0">new</span> <span style="color:#a08000">int</span>[][]{{<span style="color:#0080a0">2</span>, <span style="color:#0080a0">3</span>, <span style="color:#0080a0">4</span>}})</span>
- * will throw exception.
- * </p>
- * <p><b>Implementation</b>
- * The implementation is based on the one-line notation; this class holds an array that
- * represents permutation in one-line notation thereby providing O(1) complexity for {@code imageOf(int)} and O(degree)
- * complexity for composition.
+ * <p>
+ * The implementation is based on {@code int[]} array in one-line notation and provides O(1) complexity for
+ * {@code imageOf(int)} and O(degree) complexity for composition.
  * </p>
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  * @see cc.redberry.core.groups.permutations.Permutation
+ * @see cc.redberry.core.groups.permutations.Permutations#createPermutation(boolean, int[])
+ * @see cc.redberry.core.groups.permutations.Permutations#createPermutation(boolean, int[][])
  * @since 1.0
  */
-public final class PermutationOneLine implements Permutation {
+public final class PermutationOneLineInt implements Permutation {
     final int[] permutation;
+    final int internalDegree;
     final boolean isIdentity;
     final boolean antisymmetry;
 
@@ -73,7 +57,7 @@ public final class PermutationOneLine implements Permutation {
      * @throws IllegalArgumentException if permutation is inconsistent with disjoint cycles notation
      * @throws IllegalArgumentException if antisymmetry is true and permutation order is odd
      */
-    public PermutationOneLine(boolean antisymmetry, int[][] cycles) {
+    public PermutationOneLineInt(boolean antisymmetry, int[][] cycles) {
         this(antisymmetry, Permutations.convertCyclesToOneLine(cycles));
     }
 
@@ -83,8 +67,18 @@ public final class PermutationOneLine implements Permutation {
      * @param cycles disjoint cycles
      * @throws IllegalArgumentException if permutation is inconsistent with disjoint cycles notation
      */
-    public PermutationOneLine(int[][] cycles) {
+    public PermutationOneLineInt(int[][] cycles) {
         this(Permutations.convertCyclesToOneLine(cycles));
+    }
+
+    /**
+     * Creates permutation from given array in one-line notation
+     *
+     * @param permutation permutation in one-line notation
+     * @throws IllegalArgumentException if permutation array is inconsistent with one-line notation
+     */
+    public PermutationOneLineInt(int... permutation) {
+        this(false, permutation);
     }
 
     /**
@@ -96,39 +90,32 @@ public final class PermutationOneLine implements Permutation {
      * @throws IllegalArgumentException if permutation is inconsistent with one-line notation
      * @throws IllegalArgumentException if antisymmetry is true and permutation order is odd
      */
-    public PermutationOneLine(boolean antisymmetry, int... permutation) {
+    public PermutationOneLineInt(boolean antisymmetry, int... permutation) {
         if (!Permutations.testPermutationCorrectness(permutation, antisymmetry))
             throw new IllegalArgumentException("Inconsistent permutation.");
         this.permutation = permutation.clone();
         this.antisymmetry = antisymmetry;
         this.isIdentity = Permutations.isIdentity(permutation);
-    }
-
-    /**
-     * Creates permutation from given array in one-line notation
-     *
-     * @param permutation permutation in one-line notation
-     * @throws IllegalArgumentException if permutation array is inconsistent with one-line notation
-     */
-    public PermutationOneLine(int... permutation) {
-        this(false, permutation);
+        this.internalDegree = Permutations.internalDegree(permutation);
     }
 
     //!no check for one-line notation => unsafe constructor
-    private PermutationOneLine(boolean isIdentity, boolean antisymmetry, int[] permutation) {
+    PermutationOneLineInt(boolean isIdentity, boolean antisymmetry, int internalDegree, int[] permutation) {
         this.isIdentity = isIdentity;
         this.permutation = permutation;
         this.antisymmetry = antisymmetry;
+        this.internalDegree = internalDegree;
         if (antisymmetry && Permutations.orderOfPermutationIsOdd(permutation))
             throw new InconsistentGeneratorsException();
     }
 
     //!!no any checks, used only to create inverse or identity permutation
-    private PermutationOneLine(boolean isIdentity, boolean antisymmetry, int[] permutation, boolean identity) {
+    PermutationOneLineInt(boolean isIdentity, boolean antisymmetry, int internalDegree, int[] permutation, boolean identity) {
         assert identity;
         this.permutation = permutation;
         this.antisymmetry = antisymmetry;
         this.isIdentity = isIdentity;
+        this.internalDegree = internalDegree;
     }
 
     @Override
@@ -158,12 +145,12 @@ public final class PermutationOneLine implements Permutation {
 
     @Override
     public int newIndexOf(int i) {
-        return i < permutation.length ? permutation[i] : i;
+        return i < internalDegree ? permutation[i] : i;
     }
 
     @Override
     public int imageOf(int i) {
-        return i < permutation.length ? permutation[i] : i;
+        return i < internalDegree ? permutation[i] : i;
     }
 
     @Override
@@ -234,16 +221,19 @@ public final class PermutationOneLine implements Permutation {
         if (other.isIdentity())
             return this;
 
-        final int new_degree = Math.max(length(), other.length());
-        final int[] result = new int[new_degree];
+        final int newLength = Math.max(internalDegree(), other.internalDegree());
+        int newInternalDegree = -1;
+        final int[] result = new int[newLength];
         boolean resultIsIdentity = true;
-        for (int i = new_degree - 1; i >= 0; --i) {
+        for (int i = 0; i < newLength; ++i) {
             result[i] = other.newIndexOf(newIndexOf(i));
             resultIsIdentity &= result[i] == i;
+            newInternalDegree = result[i] == i ? newInternalDegree : i;
         }
 
         try {
-            return new PermutationOneLine(resultIsIdentity, antisymmetry ^ other.antisymmetry(), result);
+            return new PermutationOneLineInt(resultIsIdentity, antisymmetry ^ other.antisymmetry(),
+                    newInternalDegree + 1, result);
         } catch (InconsistentGeneratorsException ex) {
             throw new InconsistentGeneratorsException(this + " and " + other);
         }
@@ -258,17 +248,19 @@ public final class PermutationOneLine implements Permutation {
         if (b.isIdentity())
             return composition(a);
 
-        final int new_degree = Math.max(Math.max(length(), a.length()), b.length());
-        final int[] result = new int[new_degree];
+        final int newLength = Math.max(Math.max(internalDegree(), a.internalDegree()), b.internalDegree());
+        int newInternalDegree = -1;
+        final int[] result = new int[newLength];
         boolean resultIsIdentity = true;
-        for (int i = new_degree - 1; i >= 0; --i) {
+        for (int i = 0; i < newLength; ++i) {
             result[i] = b.newIndexOf(a.newIndexOf(newIndexOf(i)));
             resultIsIdentity &= result[i] == i;
+            newInternalDegree = result[i] == i ? newInternalDegree : i;
         }
 
         try {
-            return new PermutationOneLine(resultIsIdentity,
-                    antisymmetry ^ a.antisymmetry() ^ b.antisymmetry(), result);
+            return new PermutationOneLineInt(resultIsIdentity,
+                    antisymmetry ^ a.antisymmetry() ^ b.antisymmetry(), newInternalDegree + 1, result);
         } catch (InconsistentGeneratorsException ex) {
             throw new InconsistentGeneratorsException(this + " and " + a + " and " + b);
         }
@@ -285,18 +277,20 @@ public final class PermutationOneLine implements Permutation {
         if (c.isIdentity())
             return composition(b, c);
 
-        final int new_degree = Math.max(c.length(), Math.max(
-                Math.max(length(), a.length()), b.length()));
-        final int[] result = new int[new_degree];
+        final int newLength = Math.max(c.internalDegree(), Math.max(
+                Math.max(internalDegree(), a.internalDegree()), b.internalDegree()));
+        final int[] result = new int[newLength];
+        int newInternalDegree = -1;
         boolean resultIsIdentity = true;
-        for (int i = new_degree - 1; i >= 0; --i) {
+        for (int i = 0; i < newLength; ++i) {
             result[i] = c.newIndexOf(b.newIndexOf(a.newIndexOf(newIndexOf(i))));
             resultIsIdentity &= result[i] == i;
+            newInternalDegree = result[i] == i ? newInternalDegree : i;
         }
 
         try {
-            return new PermutationOneLine(resultIsIdentity,
-                    antisymmetry ^ a.antisymmetry() ^ b.antisymmetry() ^ c.antisymmetry(), result);
+            return new PermutationOneLineInt(resultIsIdentity,
+                    antisymmetry ^ a.antisymmetry() ^ b.antisymmetry() ^ c.antisymmetry(), newInternalDegree + 1, result);
         } catch (InconsistentGeneratorsException ex) {
             throw new InconsistentGeneratorsException(this + " and " + a + " and " + b + " and " + c);
         }
@@ -320,7 +314,7 @@ public final class PermutationOneLine implements Permutation {
         for (int i = permutation.length - 1; i >= 0; --i)
             inv[permutation[i]] = i;
 
-        return new PermutationOneLine(false, antisymmetry, inv, true);
+        return new PermutationOneLineInt(false, antisymmetry, internalDegree, inv, true);
     }
 
 
@@ -346,15 +340,9 @@ public final class PermutationOneLine implements Permutation {
         return !isIdentity && Permutations.orderOfPermutationIsOdd(permutation);
     }
 
-//    @Override
-//    public int degree() {
-//        return permutation.length;
-//    }
-
-
     @Override
     public int internalDegree() {
-        return Permutations.internalDegree(permutation);
+        return internalDegree;
     }
 
     @Override
@@ -379,11 +367,20 @@ public final class PermutationOneLine implements Permutation {
         Permutation that = (Permutation) o;
         if (antisymmetry != that.antisymmetry())
             return false;
-        final int max = Math.max(length(), that.length());
+        final int max = Math.max(internalDegree(), that.internalDegree());
         for (int i = 0; i < max; ++i)
             if (newIndexOf(i) != that.newIndexOf(i))
                 return false;
         return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = 1;
+        for (int i = 0; i < internalDegree; ++i)
+            result = 31 * result + permutation[i];
+        result = 31 * result + (antisymmetry ? 1 : 0);
+        return result;
     }
 
     @Override
@@ -392,7 +389,7 @@ public final class PermutationOneLine implements Permutation {
     }
 
     @Override
-    public PermutationOneLine moveRight(final int size) {
+    public PermutationOneLineInt moveRight(final int size) {
         if (size == 0)
             return this;
         final int[] p = new int[size + permutation.length];
@@ -402,19 +399,12 @@ public final class PermutationOneLine implements Permutation {
         int k = i;
         for (; i < p.length; ++i)
             p[i] = permutation[i - k] + size;
-        return new PermutationOneLine(isIdentity, antisymmetry, p, true);
+        return new PermutationOneLineInt(isIdentity, antisymmetry, size + internalDegree, p, true);
     }
 
     @Override
     public int[] lengthsOfCycles() {
         return Permutations.lengthsOfCycles(permutation);
-    }
-
-    @Override
-    public int hashCode() {
-        int result = Arrays.hashCode(permutation);
-        result = 31 * result + (antisymmetry ? 1 : 0);
-        return result;
     }
 
     @Override
@@ -434,10 +424,9 @@ public final class PermutationOneLine implements Permutation {
         return (antisymmetry ? "-" : "+") + cycles;
     }
 
-
     @Override
     public int compareTo(Permutation t) {
-        final int max = Math.max(length(), t.length());
+        final int max = Math.max(internalDegree(), t.internalDegree());
         if (antisymmetry != t.antisymmetry())
             return antisymmetry ? -1 : 1;
         for (int i = 0; i < max; ++i)

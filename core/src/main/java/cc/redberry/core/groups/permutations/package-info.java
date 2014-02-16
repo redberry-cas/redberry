@@ -26,7 +26,7 @@
  * <p><big><b>Permutations</b></big></p>
  * <p>
  * The interface {@link cc.redberry.core.groups.permutations.Permutation} describes a wide functionality of a single
- * permutation; it has only one implementation ---  {@link cc.redberry.core.groups.permutations.PermutationOneLine}
+ * permutation; it has only one implementation ---  {@link cc.redberry.core.groups.permutations.PermutationOneLineInt}
  * which provides the most balanced proportion between performance and memory usage.
  * <p><b>Symmetries and antisymmetries</b>
  * In many physical applications, permutations arise as symmetries of some mathematical structures. For example,
@@ -56,7 +56,7 @@
  * </p>
  *
  * @see cc.redberry.core.groups.permutations.Permutation
- * @see cc.redberry.core.groups.permutations.PermutationOneLine
+ * @see cc.redberry.core.groups.permutations.PermutationOneLineInt
  * @see cc.redberry.core.groups.permutations.PermutationGroup
  * @see cc.redberry.core.groups.permutations.AlgorithmsBase
  * @see cc.redberry.core.groups.permutations.AlgorithmsBacktrack

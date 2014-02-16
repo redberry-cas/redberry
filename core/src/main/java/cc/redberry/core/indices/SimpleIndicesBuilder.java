@@ -23,7 +23,7 @@
 package cc.redberry.core.indices;
 
 import cc.redberry.core.groups.permutations.Permutation;
-import cc.redberry.core.groups.permutations.PermutationOneLine;
+import cc.redberry.core.groups.permutations.PermutationOneLineInt;
 import cc.redberry.core.groups.permutations.Permutations;
 import cc.redberry.core.utils.ArraysUtils;
 import cc.redberry.core.utils.IntArrayList;
@@ -141,7 +141,7 @@ public final class SimpleIndicesBuilder {
                         c[j] = j;
                     else
                         c[j] = cosortInv[s.newIndexOf(cosort[j] - position) + position];
-                resultingSymmetries.add(new PermutationOneLine(s.antisymmetry(), c));
+                resultingSymmetries.add(Permutations.createPermutation(s.antisymmetry(), c));
             }
             //increasing position in the total symmetry array
             position += holder.length;

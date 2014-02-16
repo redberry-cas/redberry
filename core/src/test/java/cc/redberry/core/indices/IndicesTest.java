@@ -28,7 +28,8 @@ import cc.redberry.core.context.ContextManager;
 import cc.redberry.core.context.ContextSettings;
 import cc.redberry.core.context.OutputFormat;
 import cc.redberry.core.groups.permutations.Permutation;
-import cc.redberry.core.groups.permutations.PermutationOneLine;
+import cc.redberry.core.groups.permutations.PermutationOneLineInt;
+import cc.redberry.core.groups.permutations.Permutations;
 import cc.redberry.core.parser.ParserIndices;
 import cc.redberry.core.tensor.SimpleTensor;
 import cc.redberry.core.tensor.random.RandomTensor;
@@ -281,13 +282,13 @@ public class IndicesTest {
     @Test
     public void testDiffIds2() {
         Permutation[] symmetries = new Permutation[]{
-                new PermutationOneLine(false, new int[]{1, 0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11}),
-                new PermutationOneLine(false, new int[]{0, 2, 1, 3, 4, 5, 6, 7, 8, 9, 10, 11}),
-                new PermutationOneLine(false, new int[]{0, 1, 3, 2, 4, 5, 6, 7, 8, 9, 10, 11}),
-                new PermutationOneLine(false, new int[]{0, 1, 2, 4, 3, 5, 6, 7, 8, 9, 10, 11}),
-                new PermutationOneLine(false, new int[]{0, 1, 2, 3, 5, 4, 6, 7, 8, 9, 10, 11}),
-                new PermutationOneLine(false, new int[]{0, 1, 2, 3, 4, 6, 7, 11, 10, 9, 8, 5}),
-                new PermutationOneLine(false, new int[]{0, 1, 2, 3, 4, 5, 6, 7, 8, 11, 10, 9})
+                Permutations.createPermutation(false, new int[]{1, 0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11}),
+                Permutations.createPermutation(false, new int[]{0, 2, 1, 3, 4, 5, 6, 7, 8, 9, 10, 11}),
+                Permutations.createPermutation(false, new int[]{0, 1, 3, 2, 4, 5, 6, 7, 8, 9, 10, 11}),
+                Permutations.createPermutation(false, new int[]{0, 1, 2, 4, 3, 5, 6, 7, 8, 9, 10, 11}),
+                Permutations.createPermutation(false, new int[]{0, 1, 2, 3, 5, 4, 6, 7, 8, 9, 10, 11}),
+                Permutations.createPermutation(false, new int[]{0, 1, 2, 3, 4, 6, 7, 11, 10, 9, 8, 5}),
+                Permutations.createPermutation(false, new int[]{0, 1, 2, 3, 4, 5, 6, 7, 8, 11, 10, 9})
         };
         IntPermutationsGenerator gen = new IntPermutationsGenerator(symmetries.length);
         int[] p;
