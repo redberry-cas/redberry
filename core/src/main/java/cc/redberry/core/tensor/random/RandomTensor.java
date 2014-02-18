@@ -155,6 +155,10 @@ public final class RandomTensor {
         this(minDiffNDs, maxDiffNDs, minIndices, maxIndices, withSymmetries, generateNewDescriptors, new Well19937c());
     }
 
+    public RandomGenerator getRandom() {
+        return random;
+    }
+
     public void clearNamespace() {
         namespace.clear();
     }
