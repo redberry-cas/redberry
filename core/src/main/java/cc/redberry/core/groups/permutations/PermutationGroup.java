@@ -47,27 +47,27 @@ import static cc.redberry.core.number.NumberUtils.factorial;
  * <p>
  * The following example gives a brief overview of the basic usage of {@code PermutationGroup}
  * <br>
- * <pre style="background:#f1f1f1;color:#000"><span style="color:#406040"> //Construct permutation group of degree 13 with two generators (written in one-line notation)</span>
+ * <pre style="background:#f1f1f1;color:#000"><span style="color:#406040">//Construct permutation group of degree 13 with two generators (written in one-line notation)</span>
  * <span style="color:#a08000">PermutationGroup</span> pg <span style="color:#2060a0">=</span> <span style="color:#2060a0">new</span> <span style="color:#a08000">PermutationGroup</span>(
- * <span style="color:#2060a0">new</span> <span style="color:#a08000">PermutationOneLineInt</span>(<span style="color:#0080a0">9</span>, <span style="color:#0080a0">1</span>, <span style="color:#0080a0">2</span>, <span style="color:#0080a0">0</span>, <span style="color:#0080a0">4</span>, <span style="color:#0080a0">8</span>, <span style="color:#0080a0">5</span>, <span style="color:#0080a0">11</span>, <span style="color:#0080a0">6</span>, <span style="color:#0080a0">3</span>, <span style="color:#0080a0">10</span>, <span style="color:#0080a0">12</span>, <span style="color:#0080a0">7</span>),
- * <span style="color:#2060a0">new</span> <span style="color:#a08000">PermutationOneLineInt</span>(<span style="color:#0080a0">2</span>, <span style="color:#0080a0">0</span>, <span style="color:#0080a0">1</span>, <span style="color:#0080a0">8</span>, <span style="color:#0080a0">3</span>, <span style="color:#0080a0">5</span>, <span style="color:#0080a0">7</span>, <span style="color:#0080a0">11</span>, <span style="color:#0080a0">4</span>, <span style="color:#0080a0">12</span>, <span style="color:#0080a0">9</span>, <span style="color:#0080a0">6</span>, <span style="color:#0080a0">10</span>));
+ * <span style="color:#a08000">Permutations</span><span style="color:#2060a0">.</span>createPermutation(<span style="color:#0080a0">9</span>, <span style="color:#0080a0">1</span>, <span style="color:#0080a0">2</span>, <span style="color:#0080a0">0</span>, <span style="color:#0080a0">4</span>, <span style="color:#0080a0">8</span>, <span style="color:#0080a0">5</span>, <span style="color:#0080a0">11</span>, <span style="color:#0080a0">6</span>, <span style="color:#0080a0">3</span>, <span style="color:#0080a0">10</span>, <span style="color:#0080a0">12</span>, <span style="color:#0080a0">7</span>),
+ * <span style="color:#a08000">Permutations</span><span style="color:#2060a0">.</span>createPermutation(<span style="color:#0080a0">2</span>, <span style="color:#0080a0">0</span>, <span style="color:#0080a0">1</span>, <span style="color:#0080a0">8</span>, <span style="color:#0080a0">3</span>, <span style="color:#0080a0">5</span>, <span style="color:#0080a0">7</span>, <span style="color:#0080a0">11</span>, <span style="color:#0080a0">4</span>, <span style="color:#0080a0">12</span>, <span style="color:#0080a0">9</span>, <span style="color:#0080a0">6</span>, <span style="color:#0080a0">10</span>));
  * <span style="color:#406040">//this group is transitive</span>
  * <span style="color:#2060a0">assert</span> pg<span style="color:#2060a0">.</span>isTransitive();
  * <span style="color:#406040">//its order = 5616</span>
  * <span style="color:#a08000">System</span><span style="color:#2060a0">.</span>out<span style="color:#2060a0">.</span>println(pg<span style="color:#2060a0">.</span>order());
- * <br><span style="color:#406040">//Create alternating group Alt(13)</span>
+ * <span style="color:#406040">//Create alternating group Alt(13)</span>
  * <span style="color:#a08000">PermutationGroup</span> alt13 <span style="color:#2060a0">=</span> <span style="color:#a08000">PermutationGroup</span><span style="color:#2060a0">.</span>alternatingGroup(<span style="color:#0080a0">13</span>);
  * <span style="color:#406040">//its order = 3113510400</span>
  * <span style="color:#a08000">System</span><span style="color:#2060a0">.</span>out<span style="color:#2060a0">.</span>println(alt13<span style="color:#2060a0">.</span>order());
  * <span style="color:#2060a0">assert</span> alt13<span style="color:#2060a0">.</span>containsSubgroup(pg);
- * <br><span style="color:#406040">//Direct product of two groups</span>
+ * <span style="color:#406040">//Direct product of two groups</span>
  * <span style="color:#a08000">PermutationGroup</span> pp <span style="color:#2060a0">=</span> pg<span style="color:#2060a0">.</span>directProduct(<span style="color:#a08000">PermutationGroup</span><span style="color:#2060a0">.</span>symmetricGroup(<span style="color:#0080a0">8</span>));
- * <br><span style="color:#406040">//Setwise stabilizer</span>
- * <span style="color:#a08000">PermutationGroup</span> sw <span style="color:#2060a0">=</span> pp<span style="color:#2060a0">.</span>setwiseStabilizer(<span style="color:#0080a0">1</span>, <span style="color:#0080a0">2</span>, <span style="color:#0080a0">3</span>, <span style="color:#0080a0">9</span>, <span style="color:#0080a0">10</span>, <span style="color:#0080a0">11</span>, <span style="color:#0080a0">12</span>, <span style="color:#0080a0">13</span>, <span style="color:#0080a0">14</span>, <span style="color:#0080a0">15</span>, <span style="color:#0080a0">16</span>, <span style="color:#0080a0">17</span>, <span style="color:#0080a0">18</span>);
+ * <span style="color:#406040">//Setwise stabilizer</span>
+ * <span style="color:#a08000">PermutationGroup</span> sw <span style="color:#2060a0">=</span> pp<span style="color:#2060a0">.</span>setwiseStabilizer(<span style="color:#0080a0">1</span>, <span style="color:#0080a0">2</span>, <span style="color:#0080a0">3</span>, <span style="color:#0080a0">9</span>, <span style="color:#0080a0">10</span>, <span style="color:#0080a0">11</span>, <span style="color:#0080a0">12</span>, <span style="color:#0080a0">3</span>, <span style="color:#0080a0">14</span>, <span style="color:#0080a0">15</span>, <span style="color:#0080a0">16</span>, <span style="color:#0080a0">17</span>, <span style="color:#0080a0">18</span>);
  * <span style="color:#2060a0">assert</span> pp<span style="color:#2060a0">.</span>containsSubgroup(sw);
  * <span style="color:#406040">//its order = 17280</span>
  * <span style="color:#a08000">System</span><span style="color:#2060a0">.</span>out<span style="color:#2060a0">.</span>println(sw<span style="color:#2060a0">.</span>order());
- * <br><span style="color:#406040">//Center of this stabilizer</span>
+ * <span style="color:#406040">//Center of this stabilizer</span>
  * <span style="color:#a08000">PermutationGroup</span> center <span style="color:#2060a0">=</span> sw<span style="color:#2060a0">.</span>center();
  * <span style="color:#406040">//it is abelian group</span>
  * <span style="color:#2060a0">assert</span> center<span style="color:#2060a0">.</span>isAbelian();
@@ -77,9 +77,9 @@ import static cc.redberry.core.number.NumberUtils.factorial;
  * <span style="color:#406040">//orbits of center</span>
  * <span style="color:#a08000">int</span>[][] orbits <span style="color:#2060a0">=</span> center<span style="color:#2060a0">.</span>orbits();
  * <span style="color:#2060a0">for</span> (<span style="color:#a08000">int</span>[] orbit <span style="color:#2060a0">:</span> orbits)
- * <span style="color:#2060a0">    if</span> (orbit<span style="color:#2060a0">.</span>length <span style="color:#2060a0">!=</span> <span style="color:#0080a0">1</span>)
- * <span style="color:#a08000">        System</span><span style="color:#2060a0">.</span>out<span style="color:#2060a0">.</span>print(<span style="color:#a08000">Arrays</span><span style="color:#2060a0">.</span>toString(orbit));
- * <span style="color:#406040">    //[2, 10], [3, 9], [6, 8], [11, 12], [19, 20]</span>
+ * <span style="color:#2060a0">if</span> (orbit<span style="color:#2060a0">.</span>length <span style="color:#2060a0">!=</span> <span style="color:#0080a0">1</span>)
+ * <span style="color:#a08000">System</span><span style="color:#2060a0">.</span>out<span style="color:#2060a0">.</span>print(<span style="color:#a08000">Arrays</span><span style="color:#2060a0">.</span>toString(orbit));
+ * <span style="color:#406040">//[2, 10], [3, 9], [6, 8], [11, 12], [19, 20]</span>
  * </pre>
  * </p>
  * <p>
@@ -586,7 +586,7 @@ public final class PermutationGroup
 
     /**
      * Returns uniformly distributed random permutation from this group.
-     *
+     * <p/>
      * <p>This method uses BSGS.</p>
      *
      * @param generator random generator to be used in generation of random permutation
