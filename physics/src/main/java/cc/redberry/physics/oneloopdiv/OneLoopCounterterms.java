@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2013:
+ * Copyright (c) 2010-2014:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -544,7 +544,7 @@ public final class OneLoopCounterterms {
         Tensor temp;
 
         //Calculating Delta- tensors
-        System.out.println("Evaluating \\Delta- tensors.");
+        //System.out.println("Evaluating \\Delta- tensors.");
 
         //DELTA_1,2
         for (i = 0; i < 2; ++i) {
@@ -558,7 +558,7 @@ public final class OneLoopCounterterms {
                 temp = tr.transform(temp);
 
             deltaExpressions[i] = (Expression) temp;
-            System.out.println("delta" + i + " done");
+            //System.out.println("delta" + i + " done");
         }
         Tensor[] combinations;
         Expression[] calculatedCombinations;
@@ -570,13 +570,13 @@ public final class OneLoopCounterterms {
                 Tensors.parse("HATK^{l}*HATK^{m}*HATK^{a}", deltaIndicesInsertion)
         };
         calculatedCombinations = new Expression[combinations.length];
-        System.out.println("Delta3:");
+        //System.out.println("Delta3:");
         for (i = 0; i < combinations.length; ++i) {
             temp = combinations[i];
-//            System.out.println("Delta3: subs" + i);
+//            //System.out.println("Delta3: subs" + i);
             for (Expression hatK : input.getHatQuantities(0))
                 temp = hatK.transform(temp);
-//            System.out.println("Delta3: expand" + i);
+//            //System.out.println("Delta3: expand" + i);
             temp = ExpandTransformation.expand(temp, common);
             for (Transformation tr : common)
                 temp = tr.transform(temp);
@@ -587,12 +587,12 @@ public final class OneLoopCounterterms {
         temp = input.getL().transform(temp);
         for (Expression t : calculatedCombinations)
             temp = new NaiveSubstitution(t.get(0), t.get(1)).transform(temp);//t.transform(temp);
-//        System.out.println("Delta3:expand");
+//        //System.out.println("Delta3:expand");
         temp = ExpandTransformation.expand(temp, common);
-//        System.out.println("Delta3:subs");
+//        //System.out.println("Delta3:subs");
         for (Transformation tr : common)
             temp = tr.transform(temp);
-        System.out.println("Delta3:done");
+        //System.out.println("Delta3:done");
         deltaExpressions[2] = (Expression) temp;
         //DELTA_4  //todo for different L values some combinations can be neglected
         combinations = new Tensor[]{
@@ -605,15 +605,15 @@ public final class OneLoopCounterterms {
                 Tensors.parse("HATK^{ab}*HATK^{l}*HATK^{m}", deltaIndicesInsertion),
                 Tensors.parse("HATK^{b}*HATK^{a}*HATK^{l}*HATK^{m}", deltaIndicesInsertion)};
         calculatedCombinations = new Expression[combinations.length];
-        System.out.println("Delta4:");
+        //System.out.println("Delta4:");
         for (i = 0; i < combinations.length; ++i) {
             temp = combinations[i];
-//            System.out.println("Delta4: subs " + i);
+//            //System.out.println("Delta4: subs " + i);
             for (Expression hatK : input.getHatQuantities(0))
                 temp = hatK.transform(temp);
-//            System.out.println("Delta4: expand " + i);
+//            //System.out.println("Delta4: expand " + i);
             temp = ExpandTransformation.expand(temp, common);
-//            System.out.println("Delta4: tr" + i);
+//            //System.out.println("Delta4: tr" + i);
             for (Transformation tr : common)
                 temp = tr.transform(temp);
             calculatedCombinations[i] = Tensors.expression(combinations[i], temp);
@@ -622,18 +622,18 @@ public final class OneLoopCounterterms {
         temp = input.getL().transform(temp);
         for (Expression t : calculatedCombinations)
             temp = new NaiveSubstitution(t.get(0), t.get(1)).transform(temp);//t.transform(temp);
-//        System.out.println("Delta4: expand");
+//        //System.out.println("Delta4: expand");
         temp = ExpandTransformation.expand(temp, common);
-        System.out.println("Delta4: tr");
+        //System.out.println("Delta4: tr");
         for (Transformation tr : common)
             temp = tr.transform(temp);
         deltaExpressions[3] = (Expression) temp;
 
-        System.out.println("Evaluating \\Delta- tensors done. Evaluating action terms.");
+        //System.out.println("Evaluating \\Delta- tensors done. Evaluating action terms.");
 
         for (i = 0; i < terms.length; ++i) {
             temp = terms[i];
-//            System.out.println(temp.get(0));
+//            //System.out.println(temp.get(0));
             temp = input.getL().transform(temp);
 
             temp = input.getF().transform(temp);
@@ -653,22 +653,22 @@ public final class OneLoopCounterterms {
 
             for (Expression kn : input.getKnQuantities())
                 temp = kn.transform(temp);
-//            System.out.println("kn " + temp.get(0));
+//            //System.out.println("kn " + temp.get(0));
 
             for (Expression[] hatQuantities : input.getHatQuantities())
                 for (Expression hatQ : hatQuantities)
                     temp = hatQ.transform(temp);
 
-//            System.out.println("k " + temp.get(0));
+//            //System.out.println("k " + temp.get(0));
             for (Expression delta : deltaExpressions)
                 temp = delta.transform(temp);
 
-//            System.out.println("delta " + temp.get(0));
+//            //System.out.println("delta " + temp.get(0));
             temp = ExpandTransformation.expand(temp, all);
             for (Transformation tr : all)
                 temp = tr.transform(temp);
 
-//            System.out.println("expand " + temp.get(0));
+//            //System.out.println("expand " + temp.get(0));
 
             //todo remove this line after fixing Redberry #42
 //            temp = ExpandTransformation.expand(temp);
@@ -678,21 +678,21 @@ public final class OneLoopCounterterms {
             temp = ExpandTransformation.expand(temp, all);
             for (Transformation tr : all)
                 temp = tr.transform(temp);
-//            System.out.println("expand " + temp.get(0));
+//            //System.out.println("expand " + temp.get(0));
 
             temp = ExpandTransformation.expand(temp, all);
 
-//            System.out.println("expand " + temp.get(0));
+//            //System.out.println("expand " + temp.get(0));
 
             terms[i] = (Expression) temp;
-            System.out.println(temp);
+            //System.out.println(temp);
         }
 
 
         for (Expression term : terms)
             ACTION = (Expression) term.transform(ACTION);
 
-        System.out.println(ACTION);
+        //System.out.println(ACTION);
 
         return new OneLoopCounterterms(Flat, WR, SR, SSR, FF, FR, RR, deltaExpressions[0], deltaExpressions[1], deltaExpressions[2], deltaExpressions[3], ACTION);
     }

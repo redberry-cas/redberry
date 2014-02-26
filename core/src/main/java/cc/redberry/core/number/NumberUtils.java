@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2013:
+ * Copyright (c) 2010-2014:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -104,15 +104,17 @@ public final class NumberUtils {
         return n.compareTo(root.pow(2)) == 0;
     }
 
+    public static BigInteger TWO_BIG_INT = new BigInteger("2");
+
     public static boolean isIntegerOdd(Complex complex) {
         if (complex.isInteger())
-            return complex.getReal().abs().intValue() % 2 == 1;
+            return !complex.getReal().bigIntValue().mod(TWO_BIG_INT).equals(BigInteger.ZERO);
         return false;
     }
 
     public static boolean isIntegerEven(Complex complex) {
         if (complex.isInteger())
-            return complex.getReal().intValue() % 2 == 0;
+            return complex.getReal().bigIntValue().mod(TWO_BIG_INT).equals(BigInteger.ZERO);
         return false;
     }
 
@@ -143,6 +145,25 @@ public final class NumberUtils {
             if (exponent.testBit(0)) result = result.multiply(base);
             base = base.multiply(base);
             exponent = exponent.shiftRight(1);
+        }
+        return result;
+    }
+
+    public static long pow(long base, long exponent) {
+        long result = 1;
+        while (exponent > 0) {
+            if (exponent % 2 == 1) result *= base;
+            base *= base;
+            exponent >>= 1;
+        }
+        return result;
+    }
+
+    public static BigInteger factorial(int n) {
+        BigInteger result = BigInteger.ONE;
+        while (n != 0) {
+            result = result.multiply(BigInteger.valueOf(n));
+            --n;
         }
         return result;
     }

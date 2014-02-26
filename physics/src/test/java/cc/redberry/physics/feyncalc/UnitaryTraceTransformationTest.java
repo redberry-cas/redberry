@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2013:
+ * Copyright (c) 2010-2014:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -27,7 +27,7 @@ import cc.redberry.core.context.CC;
 import cc.redberry.core.indices.IndexType;
 import cc.redberry.core.parser.preprocessor.GeneralIndicesInsertion;
 import cc.redberry.core.tensor.Tensor;
-import cc.redberry.core.transformations.EliminateFromSymmetriesTransformation;
+import cc.redberry.core.transformations.EliminateDueSymmetriesTransformation;
 import cc.redberry.core.transformations.EliminateMetricsTransformation;
 import cc.redberry.core.transformations.Transformation;
 import cc.redberry.core.transformations.expand.ExpandTransformation;
@@ -64,7 +64,7 @@ public class UnitaryTraceTransformationTest {
         setAntiSymmetric("f_abc");
         Tensor t = parse("Tr[T_a*T_b*T_c]");
         t = unitaryTrace(t);
-        t = EliminateFromSymmetriesTransformation.ELIMINATE_FROM_SYMMETRIES.transform(t);
+        t = EliminateDueSymmetriesTransformation.ELIMINATE_DUE_SYMMETRIES.transform(t);
         Tensor expected = parse("d_abc/4+I/4*f_abc");
         TAssert.assertEquals(t, expected);
     }
@@ -86,7 +86,7 @@ public class UnitaryTraceTransformationTest {
         t1 = unitaryTrace(t1);
         System.out.println(subtract(t, t1));
 
-        t = EliminateFromSymmetriesTransformation.ELIMINATE_FROM_SYMMETRIES.transform(t);
+        t = EliminateDueSymmetriesTransformation.ELIMINATE_DUE_SYMMETRIES.transform(t);
         Tensor expected = parse("-(I/8)*f_adx*d_bc^x + (I/8)*d_adx*f_bc^x+1/8*d_ade*d_bc^e - 1/8*d_bde*d_ac^e+1/8*d_cde*d_ab^e + 1/(4*N)*g_ad*g_bc - 1/(4*N)*g_ac*g_bd + 1/(4*N)*g_ab*g_cd");
         System.out.println(t);
         System.out.println(expected);
@@ -110,7 +110,7 @@ public class UnitaryTraceTransformationTest {
 
         Tensor t = parse("Tr[M_\\alpha*M_\\beta*M_\\gamma]");
         t = trace.transform(t);
-        t = EliminateFromSymmetriesTransformation.ELIMINATE_FROM_SYMMETRIES.transform(t);
+        t = EliminateDueSymmetriesTransformation.ELIMINATE_DUE_SYMMETRIES.transform(t);
 
         Tensor expected = parse("r_\\alpha\\beta\\gamma/4+I/4*e_\\alpha\\beta\\gamma");
         TAssert.assertEquals(t, expected);
@@ -134,7 +134,7 @@ public class UnitaryTraceTransformationTest {
         Tensor t = parse("g^ab*g^cr*Tr[T_a*T_b*T_c + f_abc]*Tr[T_p*T_q*T_r - 1/12*d_pqr]");
         t = trace.transform(t);
         t = ExpandTransformation.expand(t, EliminateMetricsTransformation.ELIMINATE_METRICS);
-        t = EliminateFromSymmetriesTransformation.ELIMINATE_FROM_SYMMETRIES.transform(t);
+        t = EliminateDueSymmetriesTransformation.ELIMINATE_DUE_SYMMETRIES.transform(t);
         TAssert.assertEquals(t, "0");
     }
 
@@ -168,7 +168,7 @@ public class UnitaryTraceTransformationTest {
         TAssert.assertEquals(trace.transform(t), "g_bd/8/N**2-g_bd/8");
         t = parse("Tr[T_a*T_b*T_c*T_d*T^a*T^b*T^c]");
 //        System.out.println(trace.transform(t));
-        t = EliminateFromSymmetriesTransformation.ELIMINATE_FROM_SYMMETRIES.transform(trace.transform(t));
+        t = EliminateDueSymmetriesTransformation.ELIMINATE_DUE_SYMMETRIES.transform(trace.transform(t));
         System.out.println(t);
         TAssert.assertEquals(trace.transform(t), "0");
 
@@ -199,7 +199,7 @@ public class UnitaryTraceTransformationTest {
 //        TAssert.assertEquals(trace.transform(t), "0");
 
         t = parse("Tr[T_a*T_b*T_c*T_d*T^a*T^b*T^c]");
-        t = EliminateFromSymmetriesTransformation.ELIMINATE_FROM_SYMMETRIES.transform(trace.transform(t));
+        t = EliminateDueSymmetriesTransformation.ELIMINATE_DUE_SYMMETRIES.transform(trace.transform(t));
         t = parseExpression("f_abc = I*e_abc").transform(t);
         t = new LeviCivitaSimplifyTransformation(parseSimple("e_abc"), false).transform(t);
         t = new UnitarySimplifyTransformation(

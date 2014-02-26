@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2013:
+ * Copyright (c) 2010-2014:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -193,8 +193,8 @@ public final class ApplyIndexMapping {
     /**
      * Minimizes total dummies count.
      *
-     * @param t
-     * @return
+     * @param t tensor
+     * @return result
      */
     public static Tensor optimizeDummies(Tensor t) {
         if (t instanceof SimpleTensor || t instanceof ScalarFunction)

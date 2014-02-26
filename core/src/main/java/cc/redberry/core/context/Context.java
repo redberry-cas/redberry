@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2013:
+ * Copyright (c) 2010-2014:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -22,12 +22,13 @@
  */
 package cc.redberry.core.context;
 
-import cc.redberry.concurrent.OutputPortUnsafe;
+import cc.redberry.core.utils.OutputPort;
 import cc.redberry.core.indices.*;
 import cc.redberry.core.parser.ParseManager;
 import cc.redberry.core.tensor.SimpleTensor;
 import cc.redberry.core.tensor.Tensors;
 import cc.redberry.core.utils.BitArray;
+import org.apache.commons.math3.random.RandomGenerator;
 
 /**
  * This class represents Redberry context. It stores all Redberry session data (in some sense it stores static data).
@@ -78,12 +79,12 @@ public final class Context {
     public Context(ContextSettings contextSettings) {
         this.parseManager = new ParseManager(contextSettings.getParser());
         this.converterManager = contextSettings.getConverterManager();
-        nameManager = new NameManager(contextSettings.getNameManagerSeed(), contextSettings.getKronecker(), contextSettings.getMetricName());
-
-        defaultOutputFormat = contextSettings.getDefaultOutputFormat();
+        this.nameManager = new NameManager(contextSettings.getNameManagerSeed(),
+                contextSettings.getKronecker(), contextSettings.getMetricName());
+        this.defaultOutputFormat = contextSettings.getDefaultOutputFormat();
 
         for (IndexType type : contextSettings.getMetricTypes())
-            metricTypes.set(type.getType());
+            this.metricTypes.set(type.getType());
     }
 
     /**
@@ -327,17 +328,26 @@ public final class Context {
      *
      * @return output port which generates new symbol via {@link #generateNewSymbol()} at each {@code take()} invocation.
      */
-    public OutputPortUnsafe<SimpleTensor> getDefaultParametersGenerator() {
+    public OutputPort<SimpleTensor> getDefaultParametersGenerator() {
         return defaultGeneratedParameters;
     }
 
     private final GeneratedParameters defaultGeneratedParameters = new GeneratedParameters();
 
-    private final class GeneratedParameters implements OutputPortUnsafe<SimpleTensor> {
+    private final class GeneratedParameters implements OutputPort<SimpleTensor> {
         @Override
         public SimpleTensor take() {
             return generateNewSymbol();
         }
+    }
+
+    /**
+     * Returns random generator used by Redberry in current session.
+     *
+     * @return random generator used by Redberry in current session
+     */
+    public RandomGenerator getRandomGenerator() {
+        return nameManager.getRandomGenerator();
     }
 
     /**

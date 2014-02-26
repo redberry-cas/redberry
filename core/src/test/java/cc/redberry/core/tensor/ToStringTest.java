@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2013:
+ * Copyright (c) 2010-2014:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -44,6 +44,46 @@ public class ToStringTest {
     public void test2() {
         Tensor t = parse("T_{\\mu_{1} \\nu_{2}} ");
         Assert.assertEquals(t.toString(OutputFormat.WolframMathematica), "T[-Subscript[\\[Mu], 1],-Subscript[\\[Nu], 2]]");
-        Assert.assertEquals(t.toString(OutputFormat.Maple), "T[mu_1,nu_2]");
+        Assert.assertEquals(t.toString(OutputFormat.Maple), "T[mu1,nu2]");
     }
+
+    @Test
+    public void test3() {
+        Tensor t = parse("T_{\\mu_{1} \\nu_{2}}^abc_d");
+        Assert.assertEquals(t.toString(OutputFormat.Cadabra), "T_{a b c d \\mu_{1} \\nu_{2}}");
+    }
+
+    @Test
+    public void test4() {
+        Tensor t = parse("T^{\\mu\\nu}");
+        Assert.assertEquals(t.toString(OutputFormat.WolframMathematica), "T[\\[Mu],\\[Nu]]");
+        Assert.assertEquals(t.toString(OutputFormat.Maple), "T[~mu,~nu]");
+        Assert.assertEquals(t.toString(OutputFormat.Redberry), "T^{\\mu\\nu}");
+    }
+
+    @Test
+    public void test5() {
+        Tensor t = parse("g_mn");
+        Assert.assertEquals(t.toString(OutputFormat.Maple), "g_[m,n]");
+        t = parse("d_m^n");
+        Assert.assertEquals(t.toString(OutputFormat.Maple), "KroneckerDelta[m,~n]");
+    }
+
+    @Test
+    public void test6() {
+        TensorField t = (TensorField) parse("f~(1)[x]");
+        Assert.assertEquals("Derivative[1][f][x]", t.toString(OutputFormat.WolframMathematica));
+        t = (TensorField) parse("f~(1,2,0)[x,y,2]");
+        Assert.assertEquals("Derivative[1,2,0][f][x,y,2]", t.toString(OutputFormat.WolframMathematica));
+    }
+
+    @Test
+    public void test7() {
+        TensorField t = (TensorField) parse("f~(1)[x]");
+        Assert.assertEquals("D[1](f)(x)", t.toString(OutputFormat.Maple));
+        t = (TensorField) parse("f~(1,2,0)[x,y,2]");
+        Assert.assertEquals("D[1,2,2](f)(x,y,2)", t.toString(OutputFormat.Maple));
+    }
+
+
 }

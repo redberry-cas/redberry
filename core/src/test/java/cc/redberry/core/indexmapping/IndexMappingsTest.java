@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2013:
+ * Copyright (c) 2010-2014:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -22,9 +22,12 @@
  */
 package cc.redberry.core.indexmapping;
 
-import cc.redberry.concurrent.OutputPortUnsafe;
+import cc.redberry.core.utils.OutputPort;
+import cc.redberry.core.TAssert;
 import cc.redberry.core.context.CC;
+import cc.redberry.core.groups.permutations.Permutations;
 import cc.redberry.core.indices.IndexType;
+import cc.redberry.core.indices.Indices;
 import cc.redberry.core.indices.IndicesUtils;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.tensor.Tensors;
@@ -37,8 +40,7 @@ import org.junit.Test;
 import java.util.Arrays;
 import java.util.Set;
 
-import static cc.redberry.core.tensor.Tensors.addSymmetry;
-import static cc.redberry.core.tensor.Tensors.parse;
+import static cc.redberry.core.tensor.Tensors.*;
 
 public class IndexMappingsTest {
 
@@ -47,7 +49,7 @@ public class IndexMappingsTest {
         for (int i = 0; i < 100; ++i) {
             CC.resetTensorNames();
             Tensor t = Tensors.parse("A_a*B_bc-A_b*B_ac");
-            OutputPortUnsafe<IndexMappingBuffer> opu = IndexMappings.createPortOfBuffers(t, t);
+            OutputPort<IndexMappingBuffer> opu = IndexMappings.createPortOfBuffers(t, t);
             byte mask = 0;
             IndexMappingBuffer buffer;
             while ((buffer = opu.take()) != null)
@@ -61,7 +63,7 @@ public class IndexMappingsTest {
         addSymmetry("F_mn", IndexType.LatinLower, true, 1, 0);
         Tensor from = parse("F_mn*F^mn");
         Tensor to = parse("F_mn*F^nm");
-        OutputPortUnsafe<IndexMappingBuffer> mp = IndexMappings.createPortOfBuffers(from, to);
+        OutputPort<IndexMappingBuffer> mp = IndexMappings.createPortOfBuffers(from, to);
         IndexMappingBuffer buffer;
         boolean sign = false;
         while ((buffer = mp.take()) != null)
@@ -76,7 +78,7 @@ public class IndexMappingsTest {
     public void test3() {
         Tensor f = parse("a*b");
         Tensor t = parse("-a*b");
-        OutputPortUnsafe<IndexMappingBuffer> mp = IndexMappings.createPortOfBuffers(f, t);
+        OutputPort<IndexMappingBuffer> mp = IndexMappings.createPortOfBuffers(f, t);
 
         IndexMappingBuffer buffer;
         boolean sign = false;
@@ -93,7 +95,7 @@ public class IndexMappingsTest {
     public void test4() {
         Tensor f = parse("1");
         Tensor t = parse("-1");
-        OutputPortUnsafe<IndexMappingBuffer> mp = IndexMappings.createPortOfBuffers(f, t);
+        OutputPort<IndexMappingBuffer> mp = IndexMappings.createPortOfBuffers(f, t);
         IndexMappingBuffer buffer;
 
         boolean sign = false;
@@ -111,7 +113,7 @@ public class IndexMappingsTest {
         Tensor f = parse("A_ab^ab-d");
         Tensor t = parse("A_ba^ab+d");
         Tensors.addSymmetry("A_abmn", IndexType.LatinLower, true, 0, 1, 3, 2);
-        OutputPortUnsafe<IndexMappingBuffer> mp = IndexMappings.createPortOfBuffers(f, t);
+        OutputPort<IndexMappingBuffer> mp = IndexMappings.createPortOfBuffers(f, t);
 
         IndexMappingBuffer buffer;
         boolean sign = false;
@@ -184,7 +186,7 @@ public class IndexMappingsTest {
         Tensor riman1 = parse("g_ax*(d_c*G^x_bd-d_d*G^x_bc+G^x_yc*G^y_bd-G^x_yd*G^y_bc)");
         Tensor riman2 = parse("g_px*(d_r*G^x_qs-d_s*G^x_qr+G^x_yr*G^y_qs-G^x_ys*G^y_qr)");
 
-        OutputPortUnsafe<IndexMappingBuffer> mp = IndexMappings.createPortOfBuffers(riman1, riman2);
+        OutputPort<IndexMappingBuffer> mp = IndexMappings.createPortOfBuffers(riman1, riman2);
         IndexMappingBuffer buffera;
         while ((buffera = mp.take()) != null)
             System.out.println(buffera);
@@ -276,7 +278,7 @@ public class IndexMappingsTest {
         addSymmetry("R_abcd", IndexType.LatinLower, true, new int[]{0, 1, 3, 2});
         Tensor from = parse("R_{abcd}*R^abcd");
         Tensor to = parse("R_abcd*R^abdc");
-        OutputPortUnsafe<IndexMappingBuffer> opu = IndexMappings.createPortOfBuffers(from, to);
+        OutputPort<IndexMappingBuffer> opu = IndexMappings.createPortOfBuffers(from, to);
         IndexMappingBuffer buffer;
         while ((buffer = opu.take()) != null)
             Assert.assertTrue(buffer.getSign());
@@ -287,7 +289,7 @@ public class IndexMappingsTest {
     public void performanceTest() {
         Tensor from = Tensors.parse("f^{\\gamma }_{\\epsilon }*f^{\\delta }_{\\phi }*f^{\\mu_{9} }_{\\psi }*n_{\\upsilon }*n_{\\chi }*d^{\\alpha }_{\\gamma }*d^{\\nu }_{\\delta }*g^{\\upsilon \\phi }*g^{\\chi \\psi }*g^{\\mu \\epsilon }*d^{\\beta }_{\\nu_{9} }+f^{\\gamma }_{\\zeta }*f^{\\delta }_{\\alpha_1 }*f^{\\mu_{9} }_{\\gamma_1 }*n_{\\omega }*n_{\\beta_1 }*d^{\\beta }_{\\gamma }*d^{\\nu }_{\\delta }*g^{\\omega \\alpha_1 }*g^{\\beta_1 \\gamma_1 }*g^{\\mu \\zeta }*d^{\\alpha }_{\\nu_{9} }+f^{\\gamma }_{\\eta }*f^{\\delta }_{\\epsilon_1 }*f^{\\mu_{9} }_{\\eta_1 }*n_{\\delta_1 }*n_{\\zeta_1 }*d^{\\alpha }_{\\gamma }*d^{\\beta }_{\\delta }*g^{\\delta_1 \\epsilon_1 }*g^{\\zeta_1 \\eta_1 }*g^{\\mu \\eta }*d^{\\nu }_{\\nu_{9} }+f^{\\gamma }_{\\theta }*f^{\\delta }_{\\iota_1 }*f^{\\mu_{9} }_{\\lambda_1 }*n_{\\theta_1 }*n_{\\kappa_1 }*d^{\\nu }_{\\gamma }*d^{\\beta }_{\\delta }*g^{\\theta_1 \\iota_1 }*g^{\\kappa_1 \\lambda_1 }*g^{\\mu \\theta }*d^{\\alpha }_{\\nu_{9} }+f^{\\gamma }_{\\iota }*f^{\\delta }_{\\nu_1 }*f^{\\mu_{9} }_{\\pi_1 }*n_{\\mu_1 }*n_{\\xi_1 }*d^{\\nu }_{\\gamma }*d^{\\alpha }_{\\delta }*g^{\\mu_1 \\nu_1 }*g^{\\xi_1 \\pi_1 }*g^{\\mu \\iota }*d^{\\beta }_{\\nu_{9} }+f^{\\gamma }_{\\kappa }*f^{\\delta }_{\\sigma_1 }*f^{\\mu_{9} }_{\\upsilon_1 }*n_{\\rho_1 }*n_{\\tau_1 }*d^{\\beta }_{\\gamma }*d^{\\alpha }_{\\delta }*g^{\\rho_1 \\sigma_1 }*g^{\\tau_1 \\upsilon_1 }*g^{\\mu \\kappa }*d^{\\nu }_{\\nu_{9} }+f^{\\gamma }_{\\lambda }*f^{\\delta }_{\\chi_1 }*f^{\\mu_{9} }_{\\omega_1 }*n_{\\phi_1 }*n_{\\psi_1 }*d^{\\mu }_{\\gamma }*d^{\\alpha }_{\\delta }*g^{\\phi_1 \\chi_1 }*g^{\\psi_1 \\omega_1 }*g^{\\nu \\lambda }*d^{\\beta }_{\\nu_{9} }+f^{\\gamma }_{\\xi }*f^{\\delta }_{\\beta_2 }*f^{\\mu_{9} }_{\\delta_2 }*n_{\\alpha_2 }*n_{\\gamma_2 }*d^{\\beta }_{\\gamma }*d^{\\alpha }_{\\delta }*g^{\\alpha_2 \\beta_2 }*g^{\\gamma_2 \\delta_2 }*g^{\\nu \\xi }*d^{\\mu }_{\\nu_{9} }+f^{\\gamma }_{\\pi }*f^{\\delta }_{\\zeta_2 }*f^{\\mu_{9} }_{\\theta_2 }*n_{\\epsilon_2 }*n_{\\eta_2 }*d^{\\alpha }_{\\gamma }*d^{\\beta }_{\\delta }*g^{\\epsilon_2 \\zeta_2 }*g^{\\eta_2 \\theta_2 }*g^{\\nu \\pi }*d^{\\mu }_{\\nu_{9} }+f^{\\gamma }_{\\rho }*f^{\\delta }_{\\kappa_2 }*f^{\\mu_{9} }_{\\mu_2 }*n_{\\iota_2 }*n_{\\lambda_2 }*d^{\\mu }_{\\gamma }*d^{\\beta }_{\\delta }*g^{\\iota_2 \\kappa_2 }*g^{\\lambda_2 \\mu_2 }*g^{\\nu \\rho }*d^{\\alpha }_{\\nu_{9} }+f^{\\gamma }_{\\sigma }*f^{\\delta }_{\\xi_2 }*f^{\\mu_{9} }_{\\rho_2 }*n_{\\nu_2 }*n_{\\pi_2 }*d^{\\mu }_{\\gamma }*d^{\\beta }_{\\delta }*g^{\\nu_2 \\xi_2 }*g^{\\pi_2 \\rho_2 }*g^{\\alpha \\sigma }*d^{\\nu }_{\\nu_{9} }+f^{\\gamma }_{\\tau }*f^{\\delta }_{\\tau_2 }*f^{\\mu_{9} }_{\\phi_2 }*n_{\\sigma_2 }*n_{\\upsilon_2 }*d^{\\nu }_{\\gamma }*d^{\\beta }_{\\delta }*g^{\\sigma_2 \\tau_2 }*g^{\\upsilon_2 \\phi_2 }*g^{\\alpha \\tau }*d^{\\mu }_{\\nu_{9} }");
         Tensor to = Tensors.parse("f^{\\delta }_{\\epsilon }*f^{\\gamma }_{\\phi }*f^{\\mu_{9} }_{\\psi }*n_{\\upsilon }*n_{\\chi }*d^{\\alpha }_{\\gamma }*d^{\\beta }_{\\delta }*g^{\\upsilon \\phi }*g^{\\chi \\psi }*g^{\\mu \\epsilon }*d^{\\nu }_{\\nu_{9} }+f^{\\delta }_{\\zeta }*f^{\\gamma }_{\\alpha_1 }*f^{\\mu_{9} }_{\\gamma_1 }*n_{\\omega }*n_{\\beta_1 }*d^{\\beta }_{\\gamma }*d^{\\alpha }_{\\delta }*g^{\\omega \\alpha_1 }*g^{\\beta_1 \\gamma_1 }*g^{\\mu \\zeta }*d^{\\nu }_{\\nu_{9} }+f^{\\delta }_{\\eta }*f^{\\gamma }_{\\epsilon_1 }*f^{\\mu_{9} }_{\\eta_1 }*n_{\\delta_1 }*n_{\\zeta_1 }*d^{\\alpha }_{\\gamma }*d^{\\nu }_{\\delta }*g^{\\delta_1 \\epsilon_1 }*g^{\\zeta_1 \\eta_1 }*g^{\\mu \\eta }*d^{\\beta }_{\\nu_{9} }+f^{\\delta }_{\\theta }*f^{\\gamma }_{\\iota_1 }*f^{\\mu_{9} }_{\\lambda_1 }*n_{\\theta_1 }*n_{\\kappa_1 }*d^{\\nu }_{\\gamma }*d^{\\alpha }_{\\delta }*g^{\\theta_1 \\iota_1 }*g^{\\kappa_1 \\lambda_1 }*g^{\\mu \\theta }*d^{\\beta }_{\\nu_{9} }+f^{\\delta }_{\\iota }*f^{\\gamma }_{\\nu_1 }*f^{\\mu_{9} }_{\\pi_1 }*n_{\\mu_1 }*n_{\\xi_1 }*d^{\\nu }_{\\gamma }*d^{\\beta }_{\\delta }*g^{\\mu_1 \\nu_1 }*g^{\\xi_1 \\pi_1 }*g^{\\mu \\iota }*d^{\\alpha }_{\\nu_{9} }+f^{\\delta }_{\\kappa }*f^{\\gamma }_{\\sigma_1 }*f^{\\mu_{9} }_{\\upsilon_1 }*n_{\\rho_1 }*n_{\\tau_1 }*d^{\\beta }_{\\gamma }*d^{\\nu }_{\\delta }*g^{\\rho_1 \\sigma_1 }*g^{\\tau_1 \\upsilon_1 }*g^{\\mu \\kappa }*d^{\\alpha }_{\\nu_{9} }+f^{\\delta }_{\\lambda }*f^{\\gamma }_{\\chi_1 }*f^{\\mu_{9} }_{\\omega_1 }*n_{\\phi_1 }*n_{\\psi_1 }*d^{\\mu }_{\\gamma }*d^{\\beta }_{\\delta }*g^{\\phi_1 \\chi_1 }*g^{\\psi_1 \\omega_1 }*g^{\\nu \\lambda }*d^{\\alpha }_{\\nu_{9} }+f^{\\delta }_{\\xi }*f^{\\gamma }_{\\beta_2 }*f^{\\mu_{9} }_{\\delta_2 }*n_{\\alpha_2 }*n_{\\gamma_2 }*d^{\\beta }_{\\gamma }*d^{\\mu }_{\\delta }*g^{\\alpha_2 \\beta_2 }*g^{\\gamma_2 \\delta_2 }*g^{\\nu \\xi }*d^{\\alpha }_{\\nu_{9} }+f^{\\delta }_{\\pi }*f^{\\gamma }_{\\zeta_2 }*f^{\\mu_{9} }_{\\theta_2 }*n_{\\epsilon_2 }*n_{\\eta_2 }*d^{\\alpha }_{\\gamma }*d^{\\mu }_{\\delta }*g^{\\epsilon_2 \\zeta_2 }*g^{\\eta_2 \\theta_2 }*g^{\\nu \\pi }*d^{\\beta }_{\\nu_{9} }+f^{\\delta }_{\\rho }*f^{\\gamma }_{\\kappa_2 }*f^{\\mu_{9} }_{\\mu_2 }*n_{\\iota_2 }*n_{\\lambda_2 }*d^{\\mu }_{\\gamma }*d^{\\alpha }_{\\delta }*g^{\\iota_2 \\kappa_2 }*g^{\\lambda_2 \\mu_2 }*g^{\\nu \\rho }*d^{\\beta }_{\\nu_{9} }+f^{\\delta }_{\\sigma }*f^{\\gamma }_{\\xi_2 }*f^{\\mu_{9} }_{\\rho_2 }*n_{\\nu_2 }*n_{\\pi_2 }*d^{\\mu }_{\\gamma }*d^{\\nu }_{\\delta }*g^{\\nu_2 \\xi_2 }*g^{\\pi_2 \\rho_2 }*g^{\\alpha \\sigma }*d^{\\beta }_{\\nu_{9} }+f^{\\delta }_{\\tau }*f^{\\gamma }_{\\tau_2 }*f^{\\mu_{9} }_{\\phi_2 }*n_{\\sigma_2 }*n_{\\upsilon_2 }*d^{\\nu }_{\\gamma }*d^{\\mu }_{\\delta }*g^{\\sigma_2 \\tau_2 }*g^{\\upsilon_2 \\phi_2 }*g^{\\alpha \\tau }*d^{\\beta }_{\\nu_{9} }");
-        OutputPortUnsafe<IndexMappingBuffer> opu = IndexMappings.createPortOfBuffers(from, to);
+        OutputPort<IndexMappingBuffer> opu = IndexMappings.createPortOfBuffers(from, to);
         IndexMappingBuffer buffer;
 
         buffer = opu.take();
@@ -410,7 +412,7 @@ public class IndexMappingsTest {
     @Test
     public void test13() {
         Tensor from = parse("Sin[a-b]");
-        OutputPortUnsafe<IndexMappingBuffer> mapping = IndexMappings.createPortOfBuffers(from, from);
+        OutputPort<IndexMappingBuffer> mapping = IndexMappings.createPortOfBuffers(from, from);
         IndexMappingBuffer first = mapping.take();
         Assert.assertTrue(first.isEmpty());
         Assert.assertTrue(!first.getSign());
@@ -421,7 +423,7 @@ public class IndexMappingsTest {
     public void test14() {
         Tensor[] from = new Tensor[]{parse("f_a"), parse("f_b")};
         Tensor[] to = new Tensor[]{parse("f_a"), parse("f^a")};
-        OutputPortUnsafe<Mapping> mapping = IndexMappings.createBijectiveProductPort(from, to);
+        OutputPort<Mapping> mapping = IndexMappings.createBijectiveProductPort(from, to);
         Mapping first = mapping.take();
         Mapping b = IndexMappingTestUtils.parse("+;_a->_a;_b->^a");
         Assert.assertEquals(first, b);
@@ -463,7 +465,7 @@ public class IndexMappingsTest {
 //          to = parse("f_mn*T^nm");
 
 //        IndexMappingBuffer buffer;
-//        OutputPortUnsafe<IndexMappingBuffer> port = IndexMappings.createPortOfBuffers(from, to);
+//        OutputPort<IndexMappingBuffer> port = IndexMappings.createPortOfBuffers(from, to);
 //        while ((buffer = port.take()) != null)
 //            System.out.println(buffer);
 
@@ -475,8 +477,110 @@ public class IndexMappingsTest {
     public void test16() {
         Tensor from = parse("f[1]"), to = parse("f[-1]");
         Mapping buffer = IndexMappings.getFirst(from, to);
-        System.out.println(buffer);
         Assert.assertTrue(buffer == null);
     }
 
+    @Test(timeout = 1000)
+    public void test17() {
+        int n = 15, n2 = n * 2, c = 0;
+        Tensor[] tensors = new Tensor[n2];
+        for (char i = 'a'; c < n; ++i, ++c) {
+            tensors[c * 2] = parse("f_" + i);
+            tensors[c * 2 + 1] = parse("f^" + i);
+        }
+
+        Tensor source = multiply(tensors);
+        for (int i = 0; i < 100; ++i) {
+            int[] perm = Permutations.randomPermutation(n2);
+            Tensor[] tar = new Tensor[n2];
+            for (int j = 0; j < n2; ++j)
+                tar[j] = tensors[perm[j]];
+            Tensor temp = multiply(tar);
+            Assert.assertTrue(IndexMappings.getFirst(source, temp) != null);
+        }
+    }
+
+    @Test
+    public void test18() {
+        addAntiSymmetry("R_abcd", 1, 0, 2, 3);
+        addSymmetry("R_abcd", 2, 3, 0, 1);
+        addSymmetry("R_ab", 1, 0);
+        Tensor from = parse("(25/16)*R^{c}_{r}^{nb}*R_{tncb}");
+        Tensor to = parse("(25/16)*R^{d}_{ncr}*R^{c}_{d}^{n}_{t}");
+        TAssert.assertEquals(from, to);
+        Assert.assertEquals(2, IndexMappings.getAllMappings(from, to).size());
+    }
+
+    @Test
+    public void test18a() {
+        addAntiSymmetry("R_abcd", 1, 0, 2, 3);
+        addSymmetry("R_abcd", 2, 3, 0, 1);
+        addSymmetry("R_ab", 1, 0);
+        Tensor from = parse("R^{c}_{r}^{nb}*R_{tncb}");
+        Tensor to = parse("  R^{d}_{ncr}*R^{c}_{d}^{n}_{t}");
+        Indices freeIndices = from.getIndices().getFree();
+        int[] free = freeIndices.getAllIndices().copy();
+        IndexMappingBuffer tester = new IndexMappingBufferTester(free, false);
+        OutputPort<IndexMappingBuffer> port = IndexMappings.createPortOfBuffers(tester, from, to);
+        Assert.assertTrue(port.take() != null);
+    }
+
+//    @Test
+//    public void calcMapping() {
+//        char[] firstFrom = {'c', 'r', 'n', 'b'};
+//        char[] firstTo = {'d', 'n', 'c', 'r'};
+//
+//        char[] secondFrom = {'t', 'n', 'c', 'b'};
+//        char[] secondTo = {'c', 'd', 'n', 't'};
+//
+//        Permutation a = new PermutationOneLineInt(true, 1, 0, 2, 3),
+//                b = new PermutationOneLineInt(true, 0, 1, 3, 2),
+//                c = new PermutationOneLineInt(false, 2, 3, 0, 1);
+//        final PermutationGroup pg = new PermutationGroup(a, b, c);
+//
+//        Iterator<Permutation> firstIterator = pg.iterator();
+//        fff:
+//        while (firstIterator.hasNext()) {
+//            Permutation first = firstIterator.next();
+//            for (int i = 0; i < 4; ++i) {
+//                char from = firstFrom[first.newIndexOf(i)];
+//                char to = firstTo[i];
+//                if (from == 'r' && to != 'r')
+//                    continue fff;
+//                if (to == 'r' && from != 'r')
+//                    continue fff;
+//            }
+//
+//            Iterator<Permutation> secondIterator = pg.iterator();
+//            sss:
+//            while (secondIterator.hasNext()) {
+//                Permutation second = secondIterator.next();
+//                for (int i = 0; i < 4; ++i) {
+//                    char from = secondFrom[second.newIndexOf(i)];
+//                    char to = secondTo[i];
+//
+//                    if (from == 't' && to != 't')
+//                        continue sss;
+//                    if (to == 't' && from != 't')
+//                        continue sss;
+//
+//                    for (int j = 0; j < 4; ++j) {
+//                        if (firstFrom[first.newIndexOf(j)] == from)
+//                            if (firstTo[j] != to)
+//                                continue sss;
+//                    }
+//
+//                }
+//                System.out.println(first);
+//                System.out.println(second);
+//                System.out.println();
+//                System.out.println(Arrays.toString(first.permute(firstFrom)));
+//                System.out.println(Arrays.toString(firstTo));
+//                System.out.println();
+//                System.out.println(Arrays.toString(second.permute(secondFrom)));
+//                System.out.println(Arrays.toString(secondTo));
+//            }
+//
+//        }
+//    }
 }

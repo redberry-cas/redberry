@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2013:
+ * Copyright (c) 2010-2014:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -23,9 +23,13 @@
 package cc.redberry.core.indices;
 
 import cc.redberry.core.combinatorics.IntPermutationsGenerator;
-import cc.redberry.core.combinatorics.Symmetry;
 import cc.redberry.core.context.CC;
+import cc.redberry.core.context.ContextManager;
+import cc.redberry.core.context.ContextSettings;
 import cc.redberry.core.context.OutputFormat;
+import cc.redberry.core.groups.permutations.Permutation;
+import cc.redberry.core.groups.permutations.PermutationOneLineInt;
+import cc.redberry.core.groups.permutations.Permutations;
 import cc.redberry.core.parser.ParserIndices;
 import cc.redberry.core.tensor.SimpleTensor;
 import cc.redberry.core.tensor.random.RandomTensor;
@@ -159,7 +163,7 @@ public class IndicesTest {
                 1000,
                 new int[]{0, 0, 0, 0},
                 new int[]{10, 10, 10, 10},
-                false, new Well19937c());
+                false, true, new Well19937c());
         StructureOfIndices typeStructure;
         Indices indices;
         SimpleIndicesBuilder builder;
@@ -189,7 +193,7 @@ public class IndicesTest {
                 1000,
                 new int[]{0, 0, 0, 0},
                 new int[]{10, 10, 10, 10},
-                false, new Well19937c());
+                false, true, new Well19937c());
         StructureOfIndices typeStructure;
         Indices indices;
         IndicesBuilder builder;
@@ -219,7 +223,7 @@ public class IndicesTest {
                 1000,
                 new int[]{0, 0, 0, 0},
                 new int[]{10, 10, 10, 10},
-                false, new Well19937c());
+                false, true, new Well19937c());
         StructureOfIndices typeStructure;
         Indices indices;
         for (int i = 0; i < 1000; ++i) {
@@ -245,7 +249,7 @@ public class IndicesTest {
                 1000,
                 new int[]{0, 0, 0, 0},
                 new int[]{10, 10, 10, 10},
-                false, new Well19937c());
+                false, true, new Well19937c());
         StructureOfIndices typeStructure;
         Indices indices;
         for (int i = 0; i < 1000; ++i) {
@@ -270,21 +274,21 @@ public class IndicesTest {
         SimpleTensor r = parseSimple("R_abcd");
         addSymmetry(r, IndexType.LatinLower, false, 2, 3, 0, 1);
         addSymmetry(r, IndexType.LatinLower, true, 1, 0, 2, 3);
-        short[] diffIds = r.getIndices().getDiffIds();
+        short[] diffIds = r.getIndices().getPositionsInOrbits();
         short[] expected = new short[4];
         Assert.assertTrue(Arrays.equals(diffIds, expected));
     }
 
     @Test
     public void testDiffIds2() {
-        Symmetry[] symmetries = new Symmetry[]{
-                new Symmetry(new int[]{1, 0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11}, false),
-                new Symmetry(new int[]{0, 2, 1, 3, 4, 5, 6, 7, 8, 9, 10, 11}, false),
-                new Symmetry(new int[]{0, 1, 3, 2, 4, 5, 6, 7, 8, 9, 10, 11}, false),
-                new Symmetry(new int[]{0, 1, 2, 4, 3, 5, 6, 7, 8, 9, 10, 11}, false),
-                new Symmetry(new int[]{0, 1, 2, 3, 5, 4, 6, 7, 8, 9, 10, 11}, false),
-                new Symmetry(new int[]{0, 1, 2, 3, 4, 6, 7, 11, 10, 9, 8, 5}, false),
-                new Symmetry(new int[]{0, 1, 2, 3, 4, 5, 6, 7, 8, 11, 10, 9}, false)
+        Permutation[] symmetries = new Permutation[]{
+                Permutations.createPermutation(false, new int[]{1, 0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11}),
+                Permutations.createPermutation(false, new int[]{0, 2, 1, 3, 4, 5, 6, 7, 8, 9, 10, 11}),
+                Permutations.createPermutation(false, new int[]{0, 1, 3, 2, 4, 5, 6, 7, 8, 9, 10, 11}),
+                Permutations.createPermutation(false, new int[]{0, 1, 2, 4, 3, 5, 6, 7, 8, 9, 10, 11}),
+                Permutations.createPermutation(false, new int[]{0, 1, 2, 3, 5, 4, 6, 7, 8, 9, 10, 11}),
+                Permutations.createPermutation(false, new int[]{0, 1, 2, 3, 4, 6, 7, 11, 10, 9, 8, 5}),
+                Permutations.createPermutation(false, new int[]{0, 1, 2, 3, 4, 5, 6, 7, 8, 11, 10, 9})
         };
         IntPermutationsGenerator gen = new IntPermutationsGenerator(symmetries.length);
         int[] p;
@@ -293,9 +297,9 @@ public class IndicesTest {
             SimpleTensor r = parseSimple("R_abcdefghijkl");
             p = gen.next();
             for (int i = 0; i < p.length; ++i)
-                r.getIndices().getSymmetries().addUnsafe(symmetries[p[i]]);
+                r.getIndices().getSymmetries().add(symmetries[p[i]]);
 
-            short[] diffIds = r.getIndices().getDiffIds();
+            short[] diffIds = r.getIndices().getPositionsInOrbits();
             short[] expected = {0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0};
             Assert.assertTrue(Arrays.equals(diffIds, expected));
         }
@@ -307,6 +311,17 @@ public class IndicesTest {
         Assert.assertEquals(indices.toString(), "_{a}^{cd}_{\\alpha\\beta}^{\\gamma\\Gamma}");
         Assert.assertEquals(indices.toString(OutputFormat.WolframMathematica), "-a,c,d,-\\[Alpha],-\\[Beta],\\[Gamma],\\[CapitalGamma]");
         Assert.assertEquals(indices.toString(OutputFormat.Maple), "a,~c,~d,alpha,beta,~gamma,~Gamma");
+        Assert.assertEquals(indices.toString(OutputFormat.Cadabra), "_{a c d \\alpha \\beta \\gamma \\Gamma}");
+    }
+
+    @Test
+    public void testToString2() {
+        ContextSettings settings = new ContextSettings(OutputFormat.Redberry, "d");
+        settings.addMetricIndexType(IndexType.LatinLower);
+        ContextManager.initializeNew(settings);
+
+        Indices indices = ParserIndices.parseSimple("_{a}^bc_A^B_CD^EF");
+        Assert.assertEquals(indices.toString(OutputFormat.Cadabra), "_{a b c}_{A}^{B}_{C D}^{E F}");
     }
 
     @Test
@@ -315,7 +330,7 @@ public class IndicesTest {
                 1000,
                 new int[]{0, 0, 0, 0},
                 new int[]{10, 10, 10, 10},
-                false, new Well19937c());
+                false, true, new Well19937c());
         StructureOfIndices typeStructure;
         Indices indices;
         for (int i = 0; i < 1000; ++i) {
@@ -335,7 +350,7 @@ public class IndicesTest {
                 1000,
                 new int[]{0, 0, 0, 0},
                 new int[]{10, 10, 10, 10},
-                false, new Well19937c());
+                false, true, new Well19937c());
         StructureOfIndices typeStructure;
         Indices indices;
         for (int i = 0; i < 1000; ++i) {

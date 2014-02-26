@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2013:
+ * Copyright (c) 2010-2014:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -22,7 +22,7 @@
  */
 package cc.redberry.core.transformations.expand;
 
-import cc.redberry.concurrent.OutputPort;
+import cc.redberry.core.utils.OutputPort;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.tensor.*;
 import cc.redberry.core.transformations.Transformation;
@@ -33,7 +33,6 @@ import gnu.trove.set.hash.TIntHashSet;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicLong;
 
 import static cc.redberry.core.tensor.Tensors.multiply;
 
@@ -53,7 +52,7 @@ public final class ExpandUtils {
 
         private final Tensor sum1, sum2;
         private final Tensor[] factors;
-        private final AtomicLong atomicLong = new AtomicLong();
+        private long index = 0;
 
         /**
          * Creates port from two sums.
@@ -88,11 +87,11 @@ public final class ExpandUtils {
          */
         @Override
         public Tensor take() {
-            long index = atomicLong.getAndIncrement();
             if (index >= sum1.size() * sum2.size())
                 return null;
             int i1 = (int) (index / sum2.size());
             int i2 = (int) (index % sum2.size());
+            ++index;
             if (factors.length == 0)
                 return Tensors.multiply(sum1.get(i1), sum2.get(i2));
             else

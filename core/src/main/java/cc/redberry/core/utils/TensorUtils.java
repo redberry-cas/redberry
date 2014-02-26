@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2013:
+ * Copyright (c) 2010-2014:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -22,11 +22,10 @@
  */
 package cc.redberry.core.utils;
 
-import cc.redberry.concurrent.OutputPortUnsafe;
-import cc.redberry.core.combinatorics.Symmetry;
-import cc.redberry.core.combinatorics.symmetries.Symmetries;
-import cc.redberry.core.combinatorics.symmetries.SymmetriesFactory;
 import cc.redberry.core.context.CC;
+import cc.redberry.core.groups.permutations.Permutation;
+import cc.redberry.core.groups.permutations.PermutationOneLineInt;
+import cc.redberry.core.groups.permutations.Permutations;
 import cc.redberry.core.indexmapping.IndexMappings;
 import cc.redberry.core.indexmapping.Mapping;
 import cc.redberry.core.indexmapping.MappingsPort;
@@ -43,10 +42,7 @@ import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 import static cc.redberry.core.tensor.Tensors.*;
 
@@ -487,7 +483,7 @@ public class TensorUtils {
         return IndexMappings.isZeroDueToSymmetry(t);
     }
 
-    private static Symmetry getSymmetryFromMapping1(final int[] sortedIndicesNames, final int[] _sortPermutation, Mapping mapping) {
+    private static Permutation getSymmetryFromMapping1(final int[] sortedIndicesNames, final int[] _sortPermutation, Mapping mapping) {
         final int dimension = sortedIndicesNames.length;
 
         IntArray _fromIndices = mapping.getFromNames();
@@ -509,7 +505,7 @@ public class TensorUtils {
             if (positionInIndices < 0)
 //                 throw new IllegalArgumentException();
 //                todo review
-                return new Symmetry(dimension);
+                return Permutations.createIdentityPermutation(dimension);
 
             permutation[_sortPermutation[i]] = _sortPermutation[positionInIndices];
         }
@@ -517,17 +513,17 @@ public class TensorUtils {
             if (permutation[i] == -1)
                 permutation[i] = i;
 
-        return new Symmetry(permutation, mapping.getSign()); //this is inverse permutation
+        return Permutations.createPermutation(mapping.getSign(), permutation); //this is inverse permutation
     }
 
-    public static Symmetry getSymmetryFromMapping(final int[] indices, Mapping mapping) {
+    public static Permutation getSymmetryFromMapping(final int[] indices, Mapping mapping) {
         int[] sortedIndicesNames = IndicesUtils.getIndicesNames(indices);
         int[] _sortPermutation = ArraysUtils.quickSortP(sortedIndicesNames);
         return getSymmetryFromMapping1(sortedIndicesNames, _sortPermutation, mapping);
     }
 
-    public static Symmetries getSymmetriesFromMappings(final int[] indices, MappingsPort mappingsPort) {
-        Symmetries symmetries = SymmetriesFactory.createSymmetries(indices.length);
+    public static List<Permutation> getSymmetriesFromMappings(final int[] indices, MappingsPort mappingsPort) {
+        List<Permutation> symmetries = new ArrayList<>();
         int[] sortedIndicesNames = IndicesUtils.getIndicesNames(indices);
         int[] sortPermutation = ArraysUtils.quickSortP(sortedIndicesNames);
         Mapping buffer;
@@ -536,20 +532,20 @@ public class TensorUtils {
         return symmetries;
     }
 
-    public static Symmetries findIndicesSymmetries(int[] indices, Tensor tensor) {
+    public static List<Permutation> findIndicesSymmetries(int[] indices, Tensor tensor) {
         return getSymmetriesFromMappings(indices, IndexMappings.createPort(tensor, tensor));
     }
 
-    public static Symmetries findIndicesSymmetries(SimpleIndices indices, Tensor tensor) {
+    public static List<Permutation> findIndicesSymmetries(SimpleIndices indices, Tensor tensor) {
         return getSymmetriesFromMappings(indices.getAllIndices().copy(), IndexMappings.createPort(tensor, tensor));
     }
 
-    public static Symmetries getIndicesSymmetriesForIndicesWithSameStates(final int[] indices, Tensor tensor) {
-        Symmetries total = findIndicesSymmetries(indices, tensor);
-        Symmetries symmetries = SymmetriesFactory.createSymmetries(indices.length);
+    public static List<Permutation> getIndicesSymmetriesForIndicesWithSameStates(final int[] indices, Tensor tensor) {
+        List<Permutation> total = findIndicesSymmetries(indices, tensor);
+        List<Permutation> symmetries = new ArrayList<>();
         int i;
         OUT:
-        for (Symmetry s : total) {
+        for (Permutation s : total) {
             for (i = 0; i < indices.length; ++i)
                 if (IndicesUtils.getRawStateInt(indices[i]) != IndicesUtils.getRawStateInt(indices[s.newIndexOf(i)]))
                     continue OUT;
@@ -761,7 +757,7 @@ public class TensorUtils {
      * @see LocalSymbolsProvider
      */
     public static Expression[] generateReplacementsOfScalars(Tensor tensor,
-                                                             OutputPortUnsafe<SimpleTensor> generatedCoefficients) {
+                                                             OutputPort<SimpleTensor> generatedCoefficients) {
         THashSet<Tensor> scalars = new THashSet<>();
         FromChildToParentIterator iterator = new FromChildToParentIterator(tensor);
         Tensor c;

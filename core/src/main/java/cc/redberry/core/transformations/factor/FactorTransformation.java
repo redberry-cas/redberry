@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2013:
+ * Copyright (c) 2010-2014:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -79,7 +79,7 @@ public class FactorTransformation implements Transformation {
      * @param tensor              tensor
      * @param factorScalars       if false, then only symbolic (without any indices) sub-tensors will be factorized
      * @param factorizationEngine factorization engine
-     * @return
+     * @return result
      */
     public static Tensor factor(Tensor tensor, boolean factorScalars, FactorizationEngine factorizationEngine) {
         if (factorScalars) {
@@ -101,7 +101,7 @@ public class FactorTransformation implements Transformation {
      *
      * @param tensor        tensor
      * @param factorScalars if false, then only symbolic (without any indices) sub-tensors will be factorized
-     * @return
+     * @return result
      */
     public static Tensor factor(Tensor tensor, boolean factorScalars) {
         return factor(tensor, factorScalars, JasFactor.ENGINE);
@@ -171,16 +171,51 @@ public class FactorTransformation implements Transformation {
                                 for (int j = c.size() - 1; j > i; --j)
                                     pb.put(c.get(j));
                             }
-                            pb.put(factorizationEngine.factor(c.get(i)));
+                            pb.put(factorSum1(c.get(i), factorizationEngine));
                         } else if (pb != null)
                             pb.put(c.get(i));
                     }
                     iterator.set(pb == null ? c : pb.build());
                 } else iterator.set(c);
             } else
-                iterator.set(factorizationEngine.factor(c));
+                iterator.set(factorSum1(c, factorizationEngine));
         }
         return iterator.result();
+    }
+
+    private static Tensor factorSum1(Tensor sum, FactorizationEngine engine) {
+        Tensor[] parts = reIm(sum);
+        if (!TensorUtils.isZero(parts[0])) {
+            Tensor im = parts[0];
+            if (im instanceof Sum)
+                im = FastTensors.multiplySumElementsOnFactor((Sum) im, Complex.IMAGINARY_UNIT);
+            else
+                im = Tensors.multiply(im, Complex.IMAGINARY_UNIT);
+            im = engine.factor(im);
+            im = Tensors.multiply(im, Complex.NEGATIVE_IMAGINARY_UNIT);
+            parts[0] = im;
+        }
+
+        if (!TensorUtils.isZero(parts[1]))
+            parts[1] = engine.factor(parts[1]);
+
+
+        return Tensors.sum(parts[0], parts[1]);
+    }
+
+    private static Tensor[] reIm(Tensor sum) {
+        IntArrayList im = new IntArrayList(sum.size());
+        for (int i = sum.size() - 1; i >= 0; --i) {
+            if (sum.get(i) instanceof Complex && !((Complex) sum.get(i)).getImaginary().isZero())
+                im.add(i);
+            else if (sum.get(i) instanceof Product && !((Product) sum.get(i)).getFactor().getImaginary().isZero())
+                im.add(i);
+        }
+        Tensor[] parts = new Tensor[2];
+        int[] positions = im.toArray();
+        parts[0] = ((Sum) sum).select(positions);
+        parts[1] = ((Sum) sum).remove(positions);
+        return parts;
     }
 
     private static boolean needTogether(Tensor t) {

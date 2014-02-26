@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2013:
+ * Copyright (c) 2010-2014:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -22,9 +22,9 @@
  */
 package cc.redberry.core.tensor;
 
-import cc.redberry.core.combinatorics.Symmetry;
-import cc.redberry.core.combinatorics.symmetries.Symmetries;
-import cc.redberry.core.combinatorics.symmetries.SymmetriesFactory;
+import cc.redberry.core.groups.permutations.PermutationGroup;
+import cc.redberry.core.groups.permutations.PermutationOneLineInt;
+import cc.redberry.core.groups.permutations.Permutations;
 import cc.redberry.core.indices.SimpleIndices;
 import cc.redberry.core.parser.ParserIndices;
 import junit.framework.Assert;
@@ -33,6 +33,7 @@ import org.junit.Test;
 import java.util.Arrays;
 
 import static cc.redberry.core.TAssert.assertEqualsSymmetries;
+import static cc.redberry.core.TAssert.assertTrue;
 import static cc.redberry.core.tensor.Tensors.*;
 
 /**
@@ -53,67 +54,54 @@ public class TensorFieldTest {
     @Test
     public void testDerivativeSymmetries1() {
         SimpleTensor d;
-        Symmetry[] _expected;
+        PermutationGroup _expected;
 
         d = Tensors.parseSimple("f~(2)_{mn ab}[x_a]");
-        _expected = new Symmetry[]{
-                new Symmetry(new int[]{0, 1, 3, 2}, false)};
-        assertEqualsSymmetries(
-                d, create(_expected));
+        _expected = PermutationGroup.createPermutationGroup(Permutations.createPermutation(false, new int[]{0, 1, 3, 2}));
+        assertTrue(d.getIndices().getSymmetries().getPermutationGroup().equals(_expected));
 
         d = Tensors.parseSimple("f~(3)_{mn abc}[x_a]");
-        _expected = new Symmetry[]{
-                new Symmetry(new int[]{0, 1, 3, 2, 4}, false),
-                new Symmetry(new int[]{0, 1, 4, 3, 2}, false)};
-        assertEqualsSymmetries(
-                d, create(_expected));
+        _expected = PermutationGroup.createPermutationGroup(
+                Permutations.createPermutation(false, new int[]{0, 1, 3, 2, 4}),
+                Permutations.createPermutation(false, new int[]{0, 1, 4, 3, 2}));
+        assertTrue(d.getIndices().getSymmetries().getPermutationGroup().equals(_expected));
 
         d = Tensors.parseSimple("f~(3)_{mn ab cd ef}[x_ab]");
-        _expected = new Symmetry[]{
-                new Symmetry(new int[]{0, 1, 4, 5, 2, 3, 6, 7}, false),
-                new Symmetry(new int[]{0, 1, 6, 7, 2, 3, 4, 5}, false)};
-        assertEqualsSymmetries(d, create(_expected));
+        _expected = PermutationGroup.createPermutationGroup(
+                Permutations.createPermutation(false, new int[]{0, 1, 4, 5, 2, 3, 6, 7}),
+                Permutations.createPermutation(false, new int[]{0, 1, 6, 7, 2, 3, 4, 5}));
+        assertTrue(d.getIndices().getSymmetries().getPermutationGroup().equals(_expected));
     }
 
     @Test
     public void testDerivativeSymmetries2() {
         SimpleTensor d;
-        Symmetry[] _expected;
+        PermutationGroup _expected;
 
         addSymmetry(parseSimple("f_mn[x_a]"), 1, 0);
 
         d = Tensors.parseSimple("f~(2)_{mn ab}[x_a]");
-        _expected = new Symmetry[]{
-                new Symmetry(new int[]{1, 0, 2, 3}, false),
-                new Symmetry(new int[]{0, 1, 3, 2}, false)};
-        assertEqualsSymmetries(
-                d, create(_expected));
+        _expected = PermutationGroup.createPermutationGroup(
+                Permutations.createPermutation(false, new int[]{1, 0, 2, 3}),
+                Permutations.createPermutation(false, new int[]{0, 1, 3, 2}));
+        assertTrue(d.getIndices().getSymmetries().getPermutationGroup().equals(_expected));
 
         d = Tensors.parseSimple("f~(3)_{mn abc}[x_a]");
-        _expected = new Symmetry[]{
-                new Symmetry(new int[]{1, 0, 2, 3, 4}, false),
-                new Symmetry(new int[]{0, 1, 3, 2, 4}, false),
-                new Symmetry(new int[]{0, 1, 4, 3, 2}, false)};
-        assertEqualsSymmetries(
-                d, create(_expected));
+        _expected = PermutationGroup.createPermutationGroup(
+                Permutations.createPermutation(false, new int[]{1, 0, 2, 3, 4}),
+                Permutations.createPermutation(false, new int[]{0, 1, 3, 2, 4}),
+                Permutations.createPermutation(false, new int[]{0, 1, 4, 3, 2}));
+        assertTrue(d.getIndices().getSymmetries().getPermutationGroup().equals(_expected));
 
 
         addAntiSymmetry(parseSimple("f_mn[x_ab]"), 1, 0);
         d = Tensors.parseSimple("f~(3)_{mn ab cd ef}[x_ab]");
-        _expected = new Symmetry[]{
-                new Symmetry(new int[]{1, 0, 2, 3, 4, 5, 6, 7}, true),
-                new Symmetry(new int[]{0, 1, 4, 5, 2, 3, 6, 7}, false),
-                new Symmetry(new int[]{0, 1, 6, 7, 2, 3, 4, 5}, false)};
-        assertEqualsSymmetries(d, create(_expected));
+        _expected = PermutationGroup.createPermutationGroup(
+                Permutations.createPermutation(true, new int[]{1, 0, 2, 3, 4, 5, 6, 7}),
+                Permutations.createPermutation(false, new int[]{0, 1, 4, 5, 2, 3, 6, 7}),
+                Permutations.createPermutation(false, new int[]{0, 1, 6, 7, 2, 3, 4, 5}));
+        assertTrue(d.getIndices().getSymmetries().getPermutationGroup().equals(_expected));
     }
-
-    private static Symmetries create(Symmetry... symmetries) {
-        Symmetries expected = SymmetriesFactory.createSymmetries(symmetries[0].dimension());
-        for (Symmetry sym : symmetries)
-            expected.addUnsafe(sym);
-        return expected;
-    }
-
 
     @Test
     public void testPartition1() {

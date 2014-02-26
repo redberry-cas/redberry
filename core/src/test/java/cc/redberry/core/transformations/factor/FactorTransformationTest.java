@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2013:
+ * Copyright (c) 2010-2014:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -30,6 +30,7 @@ import cc.redberry.core.tensor.ProductBuilder;
 import cc.redberry.core.tensor.SimpleTensor;
 import cc.redberry.core.tensor.SumBuilder;
 import cc.redberry.core.tensor.Tensor;
+import cc.redberry.core.transformations.expand.ExpandTransformation;
 import cc.redberry.core.utils.TensorUtils;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -360,5 +361,10 @@ public class FactorTransformationTest {
         Tensor t = parse("a**(-1)*b-(b*rc3+a)**(-1)*b-(b*rc3+a)**(-1)*b**2*a**(-1)*rc3");
         TAssert.assertEquals(factor(t), "0");
     }
-//     -4*m**10-s*m**8+1+(1/32)*(-48*m**4+1-40*s*m**2-3*s**2)*s*m**4
+
+    @Test
+    public void test25() {
+        Tensor t = parse("I*a + f");
+        TAssert.assertEquals(factor(t), "I*a + f");
+    }
 }

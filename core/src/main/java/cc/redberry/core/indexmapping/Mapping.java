@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2013:
+ * Copyright (c) 2010-2014:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -217,7 +217,7 @@ public final class Mapping implements Transformation {
             sb.append(IndicesUtils.toString(toData[i]));
             if (i == imax)
                 break;
-            sb.append(",");
+            sb.append(", ");
         }
         sb.append("}");
         return sb.toString();

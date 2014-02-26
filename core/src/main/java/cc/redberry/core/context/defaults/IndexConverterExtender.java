@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2013:
+ * Copyright (c) 2010-2014:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -117,7 +117,7 @@ public final class IndexConverterExtender implements IndexSymbolConverter {
             if (mode == OutputFormat.WolframMathematica)
                 return "Subscript[" + symbol + ", " + subscript + "]";
             if (mode == OutputFormat.Maple)
-                return symbol + "_" + subscript;
+                return symbol + subscript;
             return symbol + "_" + ("{" + subscript + "}");
         }
     }

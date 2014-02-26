@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2013:
+ * Copyright (c) 2010-2014:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -22,17 +22,19 @@
  */
 package cc.redberry.core.tensorgenerator;
 
-import cc.redberry.core.combinatorics.symmetries.Symmetries;
 import cc.redberry.core.context.CC;
 import cc.redberry.core.indexmapping.IndexMappings;
 import cc.redberry.core.indexmapping.Mapping;
+import cc.redberry.core.indices.IndicesFactory;
+import cc.redberry.core.indices.IndicesSymmetries;
 import cc.redberry.core.indices.SimpleIndices;
+import cc.redberry.core.indices.StructureOfIndices;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.number.Rational;
 import cc.redberry.core.solver.frobenius.FrobeniusSolver;
 import cc.redberry.core.tensor.*;
 import cc.redberry.core.transformations.expand.ExpandTransformation;
-import cc.redberry.core.transformations.symmetrization.SymmetrizeSimpleTensorTransformation;
+import cc.redberry.core.transformations.symmetrization.SymmetrizeTransformation;
 import cc.redberry.core.transformations.symmetrization.SymmetrizeUpperLowerIndicesTransformation;
 import cc.redberry.core.utils.IntArray;
 import cc.redberry.core.utils.TensorUtils;
@@ -57,17 +59,15 @@ public class TensorGenerator {
     private final int[] lowerArray, upperArray;
     private final List<SimpleTensor> coefficients = new ArrayList<>();
     private final boolean symmetricForm;
-    private final Symmetries symmetries;
     private final SimpleIndices indices;
     private Tensor result;
     private final boolean withCoefficients;
 
-    private TensorGenerator(SimpleIndices indices, Tensor[] samples, Symmetries symmetries, boolean symmetricForm, boolean withCoefficients, boolean raiseLowerSamples) {
+    private TensorGenerator(SimpleIndices indices, Tensor[] samples, boolean symmetricForm, boolean withCoefficients, boolean raiseLowerSamples) {
         if (raiseLowerSamples)
             this.samples = expandSamples(samples);
         else this.samples = samples;
 
-        this.symmetries = symmetries;
         this.indices = indices;
         this.symmetricForm = symmetricForm;
         this.lowerArray = indices.getLower().copy();
@@ -111,7 +111,6 @@ public class TensorGenerator {
                 for (int j = 0; j < combination[i]; ++j) {
                     Tensor temp = samples[i];
 
-//                    IndexMappingDirect im = new IndexMappingDirect();
                     IntArray termLow = temp.getIndices().getFree().getLower();
                     IntArray termUp = temp.getIndices().getFree().getUpper();
 
@@ -145,22 +144,13 @@ public class TensorGenerator {
                 term = FastTensors.multiplySumElementsOnFactors((Sum) term);
             result.put(term);
         }
-        this.result = (symmetries == null || symmetries.isEmpty()) ? result.build() : symmetrize(result.build(), symmetries);
+        this.result = indices.getSymmetries().isTrivial() ? result.build() : symmetrize(result.build());
     }
 
-    private Tensor symmetrize(Tensor result, Symmetries symmetries) {
+    private Tensor symmetrize(Tensor result) {
         //todo rewrite this slag
-        SimpleTensor st = Tensors.parseSimple("#$#$#A$#ASD" + indices);
-        Expression expr = Tensors.expression(st, result);
-        Tensor symmetrized = SymmetrizeSimpleTensorTransformation.symmetrize(
-                st, st.getIndices().getAllIndices().copy(), symmetries);
-        if (symmetrized instanceof Product)
-            symmetrized = Tensors.multiply(symmetrized, ((Product) symmetrized).getFactor().reciprocal());
-
-        assert symmetrized instanceof Sum;
-
-        result = ExpandTransformation.expand(expr.transform(symmetrized));
-
+        result = new SymmetrizeTransformation(indices, false).transform(result);
+        result = ExpandTransformation.expand(result);
 
         if (!(result instanceof Sum))
             return result;
@@ -222,16 +212,14 @@ public class TensorGenerator {
      *
      * @param indices          free indices of the resulting tensor
      * @param samples          samples which used to  generate tensor of the general form
-     * @param symmetries       symmetries of the resulting tensor
      * @param symmetricForm    specifies whether the resulting tensor should be symmetric
      * @param withCoefficients specifies whether each term in the result should be multiplied on arbitrary coefficient
      * @param raiseLower       specifies whether indices of samples should be raised and lowered in the most general form
      * @return tensor of the most general form with specified free indices from specified tensors
      */
     public static Tensor generate(SimpleIndices indices, Tensor[] samples,
-                                  Symmetries symmetries, boolean symmetricForm,
-                                  boolean withCoefficients, boolean raiseLower) {
-        return new TensorGenerator(indices, samples, symmetries, symmetricForm, withCoefficients, raiseLower).result();
+                                  boolean symmetricForm, boolean withCoefficients, boolean raiseLower) {
+        return new TensorGenerator(indices, samples, symmetricForm, withCoefficients, raiseLower).result();
     }
 
 
@@ -240,17 +228,15 @@ public class TensorGenerator {
      *
      * @param indices          free indices of the resulting tensor
      * @param samples          samples which used to  generate tensor of the general form
-     * @param symmetries       symmetries of the resulting tensor
      * @param symmetricForm    specifies whether the resulting tensor should be symmetric
      * @param withCoefficients specifies whether each term in the result should be multiplied on arbitrary coefficient
      * @param raiseLower       specifies whether indices of samples should be raised and lowered in the most general form
      * @return tensor of the most general form with specified free indices from specified tensors and array of
-     *         generated coefficients
+     * generated coefficients
      */
     public static GeneratedTensor generateStructure(SimpleIndices indices, Tensor[] samples,
-                                                    Symmetries symmetries, boolean symmetricForm,
-                                                    boolean withCoefficients, boolean raiseLower) {
-        TensorGenerator generator = new TensorGenerator(indices, samples, symmetries, symmetricForm, withCoefficients, raiseLower);
+                                                    boolean symmetricForm, boolean withCoefficients, boolean raiseLower) {
+        TensorGenerator generator = new TensorGenerator(indices, samples, symmetricForm, withCoefficients, raiseLower);
         SimpleTensor[] generatedCoefficients = TensorUtils.getAllSymbols(generator.result()).toArray(new SimpleTensor[0]);
         return new GeneratedTensor(generatedCoefficients,
                 generator.result());
@@ -259,9 +245,12 @@ public class TensorGenerator {
 
     private static class Wrapper {
         private final Tensor tensor;
+        private final StructureOfIndices freeIndices;
 
         private Wrapper(Tensor tensor) {
             this.tensor = tensor;
+            this.freeIndices = new StructureOfIndices(
+                    IndicesFactory.createSimple(null, tensor.getIndices().getFree()));
         }
 
         @Override
@@ -271,8 +260,8 @@ public class TensorGenerator {
 
             Wrapper wrapper = (Wrapper) o;
 
-            return IndexMappings.mappingExists(tensor, wrapper.tensor)
-                    || IndexMappings.mappingExists(wrapper.tensor, tensor);
+            return freeIndices.equals(wrapper.freeIndices) &&
+                    IndexMappings.anyMappingExists(tensor, wrapper.tensor);
         }
 
         @Override

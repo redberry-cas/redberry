@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2013:
+ * Copyright (c) 2010-2014:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -22,8 +22,8 @@
  */
 package cc.redberry.core.transformations.collect;
 
-import cc.redberry.concurrent.OutputPortUnsafe;
-import cc.redberry.core.combinatorics.Combinatorics;
+import cc.redberry.core.utils.OutputPort;
+import cc.redberry.core.groups.permutations.Permutations;
 import cc.redberry.core.indexgenerator.IndexGeneratorImpl;
 import cc.redberry.core.indexmapping.IndexMapping;
 import cc.redberry.core.indexmapping.IndexMappings;
@@ -89,9 +89,16 @@ public class CollectTransformation implements Transformation {
 
     @Override
     public Tensor transform(Tensor t) {
+        if (t instanceof Expression)
+            return Transformation.Util.applyToEachChild(t, this);
+        else
+            return transform1(t);
+    }
+
+    private Tensor transform1(Tensor t) {
         SumBuilder notMatched = new SumBuilder();
         TIntObjectHashMap<ArrayList<Split>> map = new TIntObjectHashMap<>();
-        OutputPortUnsafe<Tensor> port = ExpandPort.createPort(t);
+        OutputPort<Tensor> port = ExpandPort.createPort(t);
         Tensor current;
         Split toAdd;
         ArrayList<Split> nodes;
@@ -114,7 +121,7 @@ public class CollectTransformation implements Transformation {
             int[] match;
             for (Split base : nodes) {
                 if ((match = matchFactors(base.factors, toAdd.factors)) != null) {
-                    Tensor[] toAddFactors = Combinatorics.reorder(toAdd.factors, match);
+                    Tensor[] toAddFactors = Permutations.permute(toAdd.factors, match);
                     Mapping mapping =
                             IndexMappings.createBijectiveProductPort(toAddFactors, base.factors).take();
 
@@ -131,7 +138,9 @@ public class CollectTransformation implements Transformation {
             nodes.add(toAdd);
         }
 
-
+        Tensor r = Transformation.Util.applySequentially(notMatched.build(), transformations);
+        notMatched = new SumBuilder();
+        notMatched.put(r);
         for (ArrayList<Split> splits : map.valueCollection())
             for (Split split : splits)
                 notMatched.put(split.toTensor(transformations));
@@ -299,7 +308,7 @@ public class CollectTransformation implements Transformation {
                 begin = i;
             }
         }
-        return Combinatorics.inverse(permutation);
+        return Permutations.inverse(permutation);
     }
 
     private static boolean matchSimpleTensors(Tensor a, Tensor b) {

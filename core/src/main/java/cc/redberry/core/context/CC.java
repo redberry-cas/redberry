@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2013:
+ * Copyright (c) 2010-2014:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -22,8 +22,9 @@
  */
 package cc.redberry.core.context;
 
-import cc.redberry.concurrent.OutputPortUnsafe;
+import cc.redberry.core.utils.OutputPort;
 import cc.redberry.core.tensor.SimpleTensor;
+import org.apache.commons.math3.random.RandomGenerator;
 
 /**
  * Redberry current context. This class statically delegates common useful methods from
@@ -148,7 +149,16 @@ public final class CC {
      *
      * @return output port which generates new symbol via {@link #generateNewSymbol()} at each {@code take()} invocation.
      */
-    public static OutputPortUnsafe<SimpleTensor> getParametersGenerator() {
+    public static OutputPort<SimpleTensor> getParametersGenerator() {
         return current().getDefaultParametersGenerator();
+    }
+
+    /**
+     * Returns random generator used by Redberry in current session.
+     *
+     * @return random generator used by Redberry in current session
+     */
+    public static RandomGenerator getRandomGenerator() {
+        return current().getRandomGenerator();
     }
 }

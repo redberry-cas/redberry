@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2013:
+ * Copyright (c) 2010-2014:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -78,7 +78,6 @@ public interface Indices {
      */
     int size();
 
-
     /**
      * Returns the number of indices of specified type.
      *
@@ -93,7 +92,7 @@ public interface Indices {
      *
      * @param position position of the index
      * @return the index at the specified position in this
-     *         <code>Indices</code>
+     * <code>Indices</code>
      * @throws IndexOutOfBoundsException - if the index is out of range (index <
      *                                   0 || index >= size())
      */
@@ -106,7 +105,7 @@ public interface Indices {
      * @param type     IndexType
      * @param position position of the index to return
      * @return the index of the specified type at the
-     *         specified position in this <code>Indices</code>
+     * specified position in this <code>Indices</code>
      * @throws IndexOutOfBoundsException - if the index is out of range
      */
     int get(IndexType type, int position);
@@ -142,7 +141,7 @@ public interface Indices {
      *
      * @param type the type of indices
      * @return indices of the specified type, which are contained
-     *         in this indices object.
+     * in this indices object.
      */
     Indices getOfType(IndexType type);
 
@@ -152,7 +151,7 @@ public interface Indices {
      *
      * @param indices indices
      * @return {@code true} if this {@code Indices} object contains exactly same
-     *         indices as specified one, with no respect to the relative ordering of indices.
+     * indices as specified one, with no respect to the relative ordering of indices.
      */
     boolean equalsRegardlessOrder(Indices indices);
 
@@ -160,6 +159,24 @@ public interface Indices {
      * Returns always {@code true} in public API methods.
      */
     void testConsistentWithException();
+
+//    /**
+//     * Returns true if this indices contains specified subindices, i.e. {@code this} contains each index of specified
+//     * {@code subIndices} and indices in {@code subindices} appear in the same order as in {@code this}.
+//     *
+//     * @param subIndices subindices
+//     * @return true if this indices contains specified subindices
+//     */
+//    boolean containsSubIndices(Indices subIndices);
+//
+//    /**
+//     * Returns true if this indices contains specified subindices case insensitive.
+//     *
+//     * @param subIndices subindices
+//     * @return true if this indices contains specified subindices case insensitive
+//     * @see #containsSubIndices(Indices)
+//     */
+//    boolean containsSubIndicesCaseInsensitive(Indices subIndices);
 
     /**
      * This method applies specified {@link IndexMapping} to this {@code Indices} object and
@@ -184,18 +201,7 @@ public interface Indices {
     boolean equals(Object other);
 
     /**
-     * Returns the array of indices <b>id</b>s with respect to symmetries. First
-     * of all, for SortedIndices, it always returns the array with length equal
-     * to #size() and filled by zeros. For SimpleIndices we assume, that each
-     * index in Indices data array have some <b>id</b>, which is {@code short}.
-     * If there is no any symmetries, index <b>id</b> is equal to the index
-     * position in Indices data array. If there is a symmetry, which transpose
-     * two indices, then their <b>id</b>s are equal, otherwise their <b>id</b>s
-     * are not equals. For example, if we consider the following symmetries: [2,
-     * 1, 0, 3, 4, 5, 6, 7] and [0, 1, 2, 3, 7, 4, 6, 5], the resulting diffIds
-     * array will be the following: [0, 0, 1, 2, 3, 3, 4, 3]
-     *
-     * @return the array of indices <b>id</b>s with respect to symmetries
+     * @see IndicesSymmetries#getPositionsInOrbits()
      */
-    short[] getDiffIds();
+    short[] getPositionsInOrbits();
 }

@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2013:
+ * Copyright (c) 2010-2014:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -24,6 +24,8 @@
 package cc.redberry.groovy
 
 import cc.redberry.core.combinatorics.IntPermutationsGenerator
+import cc.redberry.core.groups.permutations.Permutation
+import cc.redberry.core.groups.permutations.Permutations
 import cc.redberry.core.indexmapping.IndexMappings
 import cc.redberry.core.indexmapping.Mapping
 import cc.redberry.core.indexmapping.MappingsPort
@@ -33,10 +35,7 @@ import cc.redberry.core.number.Numeric
 import cc.redberry.core.number.Rational
 import cc.redberry.core.number.Real
 import cc.redberry.core.parser.ParserIndices
-import cc.redberry.core.tensor.Expression
-import cc.redberry.core.tensor.Tensor
-import cc.redberry.core.tensor.TensorBuilder
-import cc.redberry.core.tensor.Tensors
+import cc.redberry.core.tensor.*
 import cc.redberry.core.tensor.iterator.FromChildToParentIterator
 import cc.redberry.core.tensor.iterator.FromParentToChildIterator
 import cc.redberry.core.tensor.iterator.TraverseGuide
@@ -70,9 +69,7 @@ class Redberry {
         return new Complex(number2Real(num));
     }
 
-    /*
-    * Math operations
-    */
+    ///////////////////////////////////////////// TENSORS AND BUILDERS ////////////////////////////////////////////////
 
     /**
      * Returns the result of summation of several tensors.
@@ -296,9 +293,7 @@ class Redberry {
             return DefaultGroovyMethods.asType(tensor, clazz)
     }
 
-    /*
-     * Indices
-     */
+    //////////////////////////////////////////////// INDICES //////////////////////////////////////////////////////////
 
     /**
      * Returns the index at the specified position in indices
@@ -479,9 +474,8 @@ class Redberry {
         return Arrays.equals(a.allIndices.copy(), b.allIndices.copy())
     }
 
-    /*
-    * Tensor traversing
-    */
+    ///////////////////////////////////////// TREE TRAVERSAL ///////////////////////////////////////////////////////
+
     /**
      * Expression-tree traversal parent-after-child
      * @param t expression
@@ -572,9 +566,7 @@ class Redberry {
 //        return transformParentBeforeChild(t, TraverseGuide.ALL, closure);
 //    }
 
-    /*
-    * Transformations
-    */
+    ///////////////////////////////////////// TRANSFORMATIONS ///////////////////////////////////////////////////////
 
     /**
      * Joins two transformations in a single one, which will apply both transformations sequentially
@@ -783,16 +775,13 @@ class Redberry {
         return DefaultGroovyMethods.asType(num, clazz)
     }
 
-
     static Object asType(String string, Class clazz) {
         if (clazz == Tensor)
             return parse(string);
         return DefaultGroovyMethods.asType(string, clazz);
     }
 
-    /*
-     * Tensor comparison and Mapping
-     */
+    //////////////////////////////////////////////// MAPPINGS //////////////////////////////////////////////////////////
 
     /**
      * Returns {@code true} if tensors are mathematically (not programmatically) equal
@@ -895,9 +884,7 @@ class Redberry {
         }
     }
 
-    /*
-     * Matrix descriptors
-     */
+    //////////////////////////////////////////////// MATRICES //////////////////////////////////////////////////////////
 
     /**
      * Covector with respect to specified type
@@ -945,9 +932,7 @@ class Redberry {
         return new MatrixDescriptor(type, upper, lower);
     }
 
-    /*
-     * Parse
-     */
+    //////////////////////////////////////////////// PARSE //////////////////////////////////////////////////////////
 
     /**
      * Parse string to tensor
@@ -962,6 +947,21 @@ class Redberry {
      */
     static Tensor getT(String string) {
         return parse(string)
+    }
+
+    /**
+     * Parse string to simple tensor
+     * @param string string representation of simple tensor
+     * @return simple tensor
+     * @see cc.redberry.core.tensor.SimpleTensor
+     * @see Tensors#parse(java.lang.String)
+     * @throws cc.redberry.core.parser.ParserException
+     *          if expression does not satisfy correct Redberry
+     *          input notation for tensors
+     *
+     */
+    static SimpleTensor getSt(String string) {
+        return parseSimple(string)
     }
 
     /**
@@ -1037,9 +1037,28 @@ class Redberry {
         return ParserIndices.parseSimple(string)
     }
 
-    /*
-     * Tensor creation
+    /**
+     * Creates the mapping of indices from a given string representation.
+     *
+     * @param string string representation of a mapping
+     * @return mapping of indices
      */
+    static Mapping getMapping(String string) {
+        string = string.trim().substring(1, string.length() - 1).trim()
+        IntArrayList from = new IntArrayList(), to = new IntArrayList()
+        int fromIndex
+        string.split(',').each {
+            def split = it.split('->')
+            if (split.length == 2) {
+                fromIndex = IndicesUtils.parseIndex(split[0].trim())
+                from.add(IndicesUtils.getNameWithType(fromIndex))
+                to.add(IndicesUtils.getRawStateInt(fromIndex) ^ IndicesUtils.parseIndex(split[1].trim()))
+            }
+        }
+        return new Mapping(from.toArray(), to.toArray())
+    }
+
+    //////////////////////////////////////////////// TENSOR CREATE /////////////////////////////////////////////////////
 
     /**
      * Creates {@link Expression} from given l.h.s. and r.h.s.
@@ -1069,30 +1088,68 @@ class Redberry {
         return expression(lhs, rhs)
     }
 
-    /**
-     * Creates the mapping of indices from a given string representation.
-     *
-     * @param string string representation of a mapping
-     * @return mapping of indices
-     */
-    static Mapping getMapping(String string) {
-        string = string.trim().substring(1, string.length() - 1).trim()
-        IntArrayList from = new IntArrayList(), to = new IntArrayList()
-        int fromIndex
-        string.split(',').each {
-            def split = it.split('->')
-            if (split.length == 2) {
-                fromIndex = IndicesUtils.parseIndex(split[0].trim())
-                from.add(IndicesUtils.getNameWithType(fromIndex))
-                to.add(IndicesUtils.getRawStateInt(fromIndex) ^ IndicesUtils.parseIndex(split[1].trim()))
+    ////////////////////////////////////////////// PERMUTATIONS ///////////////////////////////////////////////////////
+
+    static Permutation getP(Object obj) {
+        if (obj instanceof Permutation)
+            return obj
+        else if (obj instanceof List) {
+            //check one-line notation
+            boolean oneLine = true;
+            boolean negative = false;
+            for (def i : obj)
+                if (!(i instanceof Integer)) {
+                    oneLine = false;
+                    break;
+                } else if (i < 0)
+                    negative = true
+
+            if (oneLine && negative)
+                obj = obj.collect { i -> -i }
+
+            //check cycles
+            if (!oneLine) {
+                for (def c in obj) {
+                    if (!(c instanceof List))
+                        throw new IllegalArgumentException("Permutation is no either in one-line nor in cycles notation " + obj);
+
+                    for (def i in c) {
+                        if (!(i instanceof Integer))
+                            throw new IllegalArgumentException("Permutation is no either in one-line nor in cycles notation " + obj);
+                        else if (i < 0)
+                            negative = true
+                    }
+                }
+                if (negative)
+                    obj = obj.collect { c -> c.collect { i -> -i } }
             }
-        }
-        return new Mapping(from.toArray(), to.toArray())
+
+            if (oneLine)
+                return Permutations.createPermutation(negative, obj as int[])
+            return Permutations.createPermutation(negative, obj as int[][])
+        } else
+            throw new NoSuchMethodException("No such property .p for class " + obj.getClass())
     }
 
-    /*
-     * Combinatorics
-     */
+    static boolean equals(Permutation a, Permutation b){
+        return a.equals(b)
+    }
+
+    static Permutation negative(Permutation permutation) {
+        return permutation.negate();
+    }
+
+    static Permutation positive(Permutation permutation) {
+        return permutation;
+    }
+
+    static Permutation power(Permutation permutation, int exponent) {
+        return permutation.pow(exponent);
+    }
+
+    static Permutation multiply(Permutation a, Permutation b) {
+        return a.composition(b);
+    }
 
     static <T> void permutations(List<T> list, Closure<List<T>> closure) {
         IntPermutationsGenerator generator = new IntPermutationsGenerator(list.size());
@@ -1103,6 +1160,5 @@ class Redberry {
             closure.call(temp)
         }
     }
-
 
 }

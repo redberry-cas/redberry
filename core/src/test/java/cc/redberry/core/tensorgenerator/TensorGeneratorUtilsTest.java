@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2013:
+ * Copyright (c) 2010-2014:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -22,11 +22,10 @@
  */
 package cc.redberry.core.tensorgenerator;
 
+import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.tensor.Tensors;
 import junit.framework.Assert;
 import org.junit.Test;
-
-import java.util.Arrays;
 
 /**
  * @author Dmitry Bolotin
@@ -38,5 +37,11 @@ public class TensorGeneratorUtilsTest {
 //        Assert.assertEquals(TensorGeneratorUtils.allStatesCombinations(Tensors.parseSimple("f_ab")).length, 4);
 //        Assert.assertEquals(TensorGeneratorUtils.allStatesCombinations(Tensors.parseSimple("p_b")).length, 2);
         Assert.assertEquals(TensorGeneratorUtils.allStatesCombinations(Tensors.parseSimple("g_ab")).length, 3);
+    }
+
+    @Test
+    public void test2() {
+        Tensor[] comb = TensorGeneratorUtils.allStatesCombinations(Tensors.parseSimple("F^a_ab"));
+        Assert.assertEquals(2, comb.length);
     }
 }

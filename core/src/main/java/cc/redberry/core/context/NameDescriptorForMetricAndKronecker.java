@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2013:
+ * Copyright (c) 2010-2014:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -27,6 +27,9 @@ import cc.redberry.core.indices.SimpleIndices;
 import cc.redberry.core.indices.StructureOfIndices;
 
 import java.util.Arrays;
+
+import static cc.redberry.core.tensor.Tensors.isKronecker;
+import static cc.redberry.core.tensor.Tensors.isKroneckerOrMetric;
 
 /**
  * Specific implementation of {@link NameDescriptor} for Kronecker and metric tensors.
@@ -67,8 +70,11 @@ final class NameDescriptorForMetricAndKronecker extends NameDescriptor {
     }
 
     @Override
-    public String getName(SimpleIndices indices) {
-        return (IndicesUtils.getRawStateInt(indices.get(0)) ^ IndicesUtils.getRawStateInt(indices.get(1))) == 0x80000000 ? names[0] : names[1];
+    public String getName(SimpleIndices indices, OutputFormat format) {
+        boolean metric = IndicesUtils.haveEqualStates(indices.get(0), indices.get(1));
+        if (format == OutputFormat.Maple)
+            return metric ? "g_" : "KroneckerDelta";
+        return metric ? names[1] : names[0];
     }
 
     @Override

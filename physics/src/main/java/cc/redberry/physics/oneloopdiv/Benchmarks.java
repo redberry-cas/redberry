@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2013:
+ * Copyright (c) 2010-2014:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -94,6 +94,7 @@ public final class Benchmarks {
     }
 
     public static void main(String[] args) {
+
         //Processor family: Intel(R) Core(TM) i5 CPU M 430  @ 2.27GHz.
         //-Xmx value : 3g.
         //Max memory used: 1.2g.
@@ -124,6 +125,9 @@ public final class Benchmarks {
 
         //suppressing output
         System.setOut(new PrintStream(dummyOutputStream));
+
+        OneLoopUtils.setUpRiemannSymmetries();
+        Tensors.addSymmetry("P_lm", IndexType.LatinLower, false, 1, 0);
         //burning JVM
         burnJVM();
         Timer timer = new Timer();
@@ -190,8 +194,6 @@ public final class Benchmarks {
      * non-minimal gauge.
      */
     public static void testVectorField() {
-        CC.setDefaultOutputFormat(OutputFormat.RedberryConsole);
-        Tensors.addSymmetry("P_lm", IndexType.LatinLower, false, 1, 0);
 
         Expression iK = Tensors.parseExpression("iK_a^b=d_a^b+c*n_a*n^b");
         Expression K = Tensors.parseExpression("K^{lm}_a^{b}=g^{lm}*d_{a}^{b}-k/2*(g^{lb}*d_a^m+g^{mb}*d_a^l)");
@@ -217,8 +219,6 @@ public final class Benchmarks {
      * in the non-minimal gauge.
      */
     public static void testSquaredVectorField() {
-        CC.setDefaultOutputFormat(OutputFormat.RedberryConsole);
-        Tensors.addSymmetry("P_lm", IndexType.LatinLower, false, 1, 0);
 
         Expression iK = Tensors.parseExpression("iK_a^b=d_a^b+(2*c+Power[c,2])*n_a*n^b");
         Expression K = Tensors.parseExpression("K^{lmcd}_a^{b}="
@@ -286,8 +286,6 @@ public final class Benchmarks {
      * </pre>
      */
     public static void testGravityGhosts() {
-        CC.setDefaultOutputFormat(OutputFormat.RedberryConsole);
-        Tensors.addSymmetry("P_lm", IndexType.LatinLower, false, 1, 0);
 
         Expression iK = Tensors.parseExpression("iK_a^b=d_a^b+gamma*n_a*n^b");
         Expression K = Tensors.parseExpression("K^{lm}_a^{b}=d_a^b*g^lm-1/2*beta*(d_a^l*g^mb+d_a^m*g^lb)");
@@ -318,10 +316,6 @@ public final class Benchmarks {
      * </pre>
      */
     public static void testLambdaGaugeGravity() {
-        CC.setDefaultOutputFormat(OutputFormat.RedberryConsole);
-        Tensors.addSymmetry("R_lm", 1, 0);
-        Tensors.addAntiSymmetry("R_lmab", 1, 0, 2, 3);
-        Tensors.addSymmetry("R_lmab", 2, 3, 0, 1);
 
         Expression iK = Tensors.parseExpression("iK_ab^cd = "
                 + "(d_a^c*d_b^d+d_b^c*d_a^d)/2+"
@@ -376,7 +370,6 @@ public final class Benchmarks {
      */
     public static void testMinimalSecondOrderOperator() {
         //TIME = 6.1 s
-        CC.setDefaultOutputFormat(OutputFormat.RedberryConsole);
 
         Expression iK = Tensors.parseExpression("iK_a^b=d_a^b");
         Expression K = Tensors.parseExpression("K^lm_a^b=d_a^b*g^{lm}");
@@ -396,7 +389,6 @@ public final class Benchmarks {
      */
     public static void testMinimalSecondOrderOperatorBarvinskyVilkovisky() {
         //TIME = 4.5 s
-        CC.setDefaultOutputFormat(OutputFormat.RedberryConsole);
 
         //Phys. Rep. 119 ( 1985) 1-74 
         Expression iK = Tensors.parseExpression("iK_a^b=d_a^b");
@@ -417,8 +409,6 @@ public final class Benchmarks {
      */
     public static void testMinimalFourthOrderOperator() {
         //TIME = 6.2 s
-        CC.setDefaultOutputFormat(OutputFormat.RedberryConsole);
-        Tensors.addSymmetry("P_lm", IndexType.LatinLower, false, 1, 0);
 
         Expression iK = Tensors.parseExpression("iK_a^b=d_a^b");
         Expression K = Tensors.parseExpression("K^{lmcd}_a^{b}="
@@ -439,7 +429,6 @@ public final class Benchmarks {
      */
     public static void testSpin3Ghosts() {
         //TIME = 990 s
-        CC.setDefaultOutputFormat(OutputFormat.RedberryConsole);
         Expression iK = Tensors.parseExpression(
                 "iK^{ab}_{lm} = P^{ab}_{lm}-1/4*c*g_{lm}*g^{ab}+"
                         + "(1/4)*b*(n_{l}*n^{a}*d^{b}_{m}+n_{l}*n^{b}*d^{a}_{m}+n_{m}*n^{a}*d^{b}_{l}+n_{m}*n^{b}*d^{a}_{l})+"
@@ -489,12 +478,6 @@ public final class Benchmarks {
      * </pre>
      */
     public static void testNonMinimalGaugeGravity() {
-        //FIXME works more than hour
-        CC.setDefaultOutputFormat(OutputFormat.RedberryConsole);
-        Tensors.addSymmetry("R_lm", IndexType.LatinLower, false, new int[]{1, 0});
-        Tensors.addSymmetry("R_lmab", IndexType.LatinLower, true, new int[]{0, 1, 3, 2});
-        Tensors.addSymmetry("R_lmab", IndexType.LatinLower, false, new int[]{2, 3, 0, 1});
-
 
         Expression iK = Tensors.parseExpression("iK_ab^cd = "
                 + "(d_a^c*d_b^d+d_b^c*d_a^d)/2-"

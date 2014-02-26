@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2013:
+ * Copyright (c) 2010-2014:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -31,20 +31,21 @@ import java.util.Arrays;
  * <br></br>For example, if a set of arrays length is {K<sub>i</sub>} = [2,3,2],
  * then the following tuples will be produced
  * <code><pre>
- * [0, 0, 0]
- * [0, 0, 1]
- * [0, 1, 0]
- * [0, 1, 1]
- * [0, 2, 0]
- * [0, 2, 1]
- * [1, 0, 0]
- * [1, 0, 1]
- * [1, 1, 0]
- * [1, 1, 1]
- * [1, 2, 0]
- * [1, 2, 1]
+ *    arr      lastUpdateDepth
+ * [0, 0, 0]          0
+ * [0, 0, 1]          2
+ * [0, 1, 0]          1
+ * [0, 1, 1]          2
+ * [0, 2, 0]          1
+ * [0, 2, 1]          2
+ * [1, 0, 0]          0
+ * [1, 0, 1]          2
+ * [1, 1, 0]          1
+ * [1, 1, 1]          2
+ * [1, 2, 0]          1
+ * [1, 2, 1]          2
  * </pre></code>
- *
+ * <p/>
  * <p>This class is implemented via output port pattern and the calculation of the next
  * tuple occurs only on the invocation of {@link #take()}.</p>
  * <p><b>Note:</b> method {@link #take()} returns the same reference on each invocation.
@@ -59,6 +60,7 @@ public final class IntTuplesPort implements IntCombinatorialPort {
 
     private final int[] upperBounds;
     private int[] current;
+    private int lastUpdateDepth = -1;
 
     public IntTuplesPort(final int... upperBounds) {
         checkWithException(upperBounds);
@@ -82,7 +84,7 @@ public final class IntTuplesPort implements IntCombinatorialPort {
             current[pointer] = 0;
             next = true;
         }
-        while (--pointer >= 0 && next) {
+        while (next && --pointer >= 0) {
             next = false;
             ++current[pointer];
             if (current[pointer] == upperBounds[pointer]) {
@@ -90,9 +92,17 @@ public final class IntTuplesPort implements IntCombinatorialPort {
                 next = true;
             }
         }
+        if (lastUpdateDepth != -1)
+            lastUpdateDepth = pointer;
+        else
+            lastUpdateDepth = 0;
         if (next)
             return null;
         return current;
+    }
+
+    public int getLastUpdateDepth() {
+        return lastUpdateDepth;
     }
 
     /**

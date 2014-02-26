@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2013:
+ * Copyright (c) 2010-2014:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -167,7 +167,7 @@ class EmptyIndices implements Indices {
     }
 
     /**
-     * Do nothing
+     * Does nothing
      */
     @Override
     public void testConsistentWithException() {
@@ -232,7 +232,7 @@ class EmptyIndices implements Indices {
      * @return short[0]
      */
     @Override
-    public short[] getDiffIds() {
+    public short[] getPositionsInOrbits() {
         return new short[0];
     }
 }

@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2013:
+ * Copyright (c) 2010-2014:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -48,12 +48,15 @@ public enum OutputFormat {
      */
     UTF8("^", "_"),
     /**
-     * This format specifies expressions to be outputted in the Redberry input notation. The produces strings
+     * This format specifies expressions to be outputted in the Redberry input notation. Produced strings
      * can be parsed in Redberry.
      */
     Redberry("^", "_"),
-    @Deprecated
-    RedberryConsole("^", "_"),
+    /**
+     * This format specifies expressions to be outputted in the Redberry input notation. Produced strings
+     * can be parsed in Redberry.
+     */
+    Cadabra("^", "_"),
     /**
      * This format specifies expressions to be outputted in the Wolfram Mathematica input notation.
      */
@@ -75,5 +78,39 @@ public enum OutputFormat {
     private OutputFormat(String upperIndexPrefix, String lowerIndexPrefix) {
         this.upperIndexPrefix = upperIndexPrefix;
         this.lowerIndexPrefix = lowerIndexPrefix;
+    }
+
+    /**
+     * Returns {@link #lowerIndexPrefix} if {@code intState == 0} and {@link #upperIndexPrefix} if {@code intState == 1}
+     *
+     * @param intState int state (0 - lower, 1 - upper)
+     * @return prefix
+     */
+    public String getPrefixFromIntState(int intState) {
+        switch (intState) {
+            case 0:
+                return lowerIndexPrefix;
+            case 1:
+                return upperIndexPrefix;
+            default:
+                throw new IllegalArgumentException("Not a state int");
+        }
+    }
+
+    /**
+     * Returns {@link #lowerIndexPrefix} if {@code intState == 0} and {@link #upperIndexPrefix} if {@code intState == 0x80000000}
+     *
+     * @param rawIntState int state (0 - lower, 0x80000000 - upper)
+     * @return prefix
+     */
+    public String getPrefixFromRawIntState(int rawIntState) {
+        switch (rawIntState) {
+            case 0:
+                return lowerIndexPrefix;
+            case 0x80000000:
+                return upperIndexPrefix;
+            default:
+                throw new IllegalArgumentException("Not a state int");
+        }
     }
 }

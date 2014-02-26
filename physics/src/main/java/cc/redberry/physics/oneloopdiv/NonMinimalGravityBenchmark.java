@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2013:
+ * Copyright (c) 2010-2014:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -36,6 +36,7 @@ public final class NonMinimalGravityBenchmark {
 //        Benchmarks.burnJVM();
         Benchmarks.Timer timer = new Benchmarks.Timer();
         timer.start();
+        OneLoopUtils.setUpRiemannSymmetries();
 //        Benchmarks.testNonMinimalGaugeGravity();
         Benchmarks.testSpin3Ghosts();
         System.out.println("Non minimal gravity: " + timer.elapsedTimeInSeconds() + " s.");

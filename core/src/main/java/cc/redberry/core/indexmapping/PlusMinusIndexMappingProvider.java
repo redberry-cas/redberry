@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2013:
+ * Copyright (c) 2010-2014:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -22,7 +22,7 @@
  */
 package cc.redberry.core.indexmapping;
 
-import cc.redberry.concurrent.OutputPortUnsafe;
+import cc.redberry.core.utils.OutputPort;
 
 /**
  * Provides two index mappings for each input mapping: the same as input mapping and with opposite sign.
@@ -34,7 +34,7 @@ import cc.redberry.concurrent.OutputPortUnsafe;
 class PlusMinusIndexMappingProvider extends IndexMappingProviderAbstract {
     private boolean state = false;
 
-    public PlusMinusIndexMappingProvider(OutputPortUnsafe<IndexMappingBuffer> opu) {
+    public PlusMinusIndexMappingProvider(OutputPort<IndexMappingBuffer> opu) {
         super(opu);
     }
 

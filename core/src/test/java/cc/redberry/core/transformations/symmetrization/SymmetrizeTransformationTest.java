@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2013:
+ * Copyright (c) 2010-2014:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -23,17 +23,14 @@
 package cc.redberry.core.transformations.symmetrization;
 
 import cc.redberry.core.TAssert;
-import cc.redberry.core.combinatorics.IntCombinationsGenerator;
-import cc.redberry.core.combinatorics.Symmetry;
-import cc.redberry.core.combinatorics.symmetries.Symmetries;
-import cc.redberry.core.combinatorics.symmetries.SymmetriesFactory;
+import cc.redberry.core.groups.permutations.PermutationGroup;
+import cc.redberry.core.groups.permutations.PermutationOneLineInt;
+import cc.redberry.core.groups.permutations.Permutations;
+import cc.redberry.core.indices.SimpleIndices;
 import cc.redberry.core.parser.ParserIndices;
-import cc.redberry.core.tensor.SimpleTensor;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.tensor.Tensors;
-import cc.redberry.core.utils.TensorUtils;
-import org.apache.commons.math3.util.ArithmeticUtils;
-import org.junit.Ignore;
+import org.junit.Assert;
 import org.junit.Test;
 
 import static cc.redberry.core.TAssert.assertEquals;
@@ -47,107 +44,87 @@ public class SymmetrizeTransformationTest {
     @Test
     public void testEmpty() {
         SymmetrizeTransformation symmetrizeTransformation = new SymmetrizeTransformation(
-                ParserIndices.parse("_abmn"), SymmetriesFactory.createSymmetries(4), true);
+                ParserIndices.parseSimple("_abmn"), true);
         Tensor t = Tensors.parse("g_mn*g_ab");
-        System.out.println(symmetrizeTransformation.transform(t));
         assertEquals(symmetrizeTransformation.transform(t), "g_mn*g_ab");
     }
 
     @Test
     public void testIdentity() {
-        Symmetries symmetries = SymmetriesFactory.createSymmetries(4);
-        symmetries.add(new Symmetry(new int[]{1, 0, 2, 3}, false));
-        SymmetrizeTransformation symmetrizeTransformation = new SymmetrizeTransformation(
-                ParserIndices.parse("_abmn"), symmetries, true);
+        SimpleIndices indices = ParserIndices.parseSimple("_abmn");
+        indices.getSymmetries().add(Permutations.createPermutation(1, 0, 2, 3));
+        SymmetrizeTransformation symmetrizeTransformation =
+                new SymmetrizeTransformation(indices, true);
         Tensor t = Tensors.parse("g_mn*g_ab");
-        System.out.println(symmetrizeTransformation.transform(t));
         assertEquals(symmetrizeTransformation.transform(t), t);
     }
 
     @Test
     public void testAll1() {
-        Symmetries symmetries = SymmetriesFactory.createFullSymmetries(4);
-        SymmetrizeTransformation symmetrizeTransformation = new SymmetrizeTransformation(
-                ParserIndices.parse("_abmn"), symmetries, true);
+        SimpleIndices indices = ParserIndices.parseSimple("_abmn");
+        indices.getSymmetries().setSymmetric();
+        SymmetrizeTransformation symmetrizeTransformation =
+                new SymmetrizeTransformation(indices, true);
         Tensor t = Tensors.parse("g_mn*g_ab");
         assertEquals(symmetrizeTransformation.transform(t), "(1/3)*g_mn*g_ab+(1/3)*g_am*g_bn+(1/3)*g_an*g_bm");
     }
 
     @Test
     public void testAll2() {
-        Symmetries symmetries = SymmetriesFactory.createFullSymmetries(2);
-        SymmetrizeTransformation symmetrizeTransformation = new SymmetrizeTransformation(
-                ParserIndices.parse("_ab"), symmetries, true);
+        SimpleIndices indices = ParserIndices.parseSimple("_ab");
+        indices.getSymmetries().setSymmetric();
+        SymmetrizeTransformation symmetrizeTransformation =
+                new SymmetrizeTransformation(indices, true);
         Tensor t = Tensors.parse("A_a*B_b");
         assertEquals(symmetrizeTransformation.transform(t), "(1/2)*A_a*B_b+(1/2)*A_b*B_a");
     }
 
     @Test
     public void testAll3() {
-        Symmetries symmetries = SymmetriesFactory.createFullSymmetries(2);
-        SymmetrizeTransformation symmetrizeTransformation = new SymmetrizeTransformation(
-                ParserIndices.parse("_a^c"), symmetries, true);
+        SimpleIndices indices = ParserIndices.parseSimple("_a^c");
+        indices.getSymmetries().setSymmetric();
+        SymmetrizeTransformation symmetrizeTransformation =
+                new SymmetrizeTransformation(indices, true);
         Tensor t = Tensors.parse("A_a*A^c");
         assertEquals(symmetrizeTransformation.transform(t), "A_a*A^c");
     }
 
     @Test
     public void testAll4() {
-        Symmetries symmetries = SymmetriesFactory.createFullSymmetries(2);
-        SymmetrizeTransformation symmetrizeTransformation = new SymmetrizeTransformation(
-                ParserIndices.parse("_a^c"), symmetries, true);
+        SimpleIndices indices = ParserIndices.parseSimple("_a^c");
+        indices.getSymmetries().setSymmetric();
+        SymmetrizeTransformation symmetrizeTransformation =
+                new SymmetrizeTransformation(indices, true);
         Tensor t = Tensors.parse("A_a*B^c");
         assertEquals(symmetrizeTransformation.transform(t), "(1/2)*A_a*B^c+(1/2)*B_a*A^c");
     }
 
     @Test
     public void testAll5() {
-        Symmetries symmetries = SymmetriesFactory.createFullSymmetries(3);
-        SymmetrizeTransformation symmetrizeTransformation = new SymmetrizeTransformation(
-                ParserIndices.parse("_abc"), symmetries, true);
+        SimpleIndices indices = ParserIndices.parseSimple("_abc");
+        indices.getSymmetries().setSymmetric();
+        SymmetrizeTransformation symmetrizeTransformation =
+                new SymmetrizeTransformation(indices, true);
         Tensor t = Tensors.parse("T_abc");
-        System.out.println(t = symmetrizeTransformation.transform(t));
-        System.out.println(Tensors.parseExpression("T_abc = A_a*B_b*C_c").transform(t));
+        t = symmetrizeTransformation.transform(t);
+        TAssert.assertEquals(t, "(1/6)*T_{cba}+(1/6)*T_{abc}+(1/6)*T_{cab}+(1/6)*T_{bca}+(1/6)*T_{acb}+(1/6)*T_{bac}");
+        Assert.assertEquals(t.size(), Tensors.parseExpression("T_abc = A_a*B_b*C_c").transform(t).size());
     }
 
-    @Ignore
     @Test
-    public void testAllGroups() {
-        SimpleTensor tensor = Tensors.parseSimple("T_abcdef");
-        int[] indices = tensor.getIndices().getAllIndices().copy();
+    public void testAll6() {
+        Tensors.parseSimple("C_abcde").getIndices().getSymmetries().add(
+                Permutations.createPermutation(new int[][]{{1, 2, 3, 4}}));
+        Tensors.parseSimple("C_abcde").getIndices().getSymmetries().add(
+                Permutations.createPermutation(new int[][]{{0, 1, 2, 4, 3}}));
 
-        int dim = indices.length, order = (int) ArithmeticUtils.factorial(indices.length);
-        System.out.println(ArithmeticUtils.pow(2, order));
+        SimpleIndices indices = ParserIndices.parseSimple("_abcde");
+        indices.getSymmetries().setSymmetric();
+        SymmetrizeTransformation tr = new SymmetrizeTransformation(indices, false);
 
-        Symmetries symmetries = SymmetriesFactory.createFullAntiSymmetries(dim);
-        Symmetry[] all = new Symmetry[order];
-        int p = -1;
-        for (Symmetry s : symmetries)
-            all[++p] = s;
-
-
-        int counter = 0;
-        IntCombinationsGenerator combinations;
-        Symmetries temp;
-        SymmetrizeTransformation symmetrize;
-        Tensor symmetrization;
-        for (p = 0; p <= 12; ++p) {
-            System.out.println("\n\n\nSS " + p + "\n\n\n");
-            combinations = new IntCombinationsGenerator(order, p);
-            for (int[] combination : combinations) {
-                counter++;
-                temp = SymmetriesFactory.createSymmetries(dim);
-                for (int position : combination)
-                    temp.add(all[position]);
-                symmetrize = new SymmetrizeTransformation(indices, temp, true);
-                symmetrization = symmetrize.transform(tensor);
-                if (symmetrization.size() > 6)
-                    continue;
-                TAssert.assertEqualsSymmetries(temp, TensorUtils.findIndicesSymmetries(indices, symmetrization));
-                System.out.println(counter);
-            }
-        }
-
+        Tensor r = tr.transform(Tensors.parseSimple("C_abcde"));
+        Assert.assertEquals(r.size(), PermutationGroup.symmetricGroup(5).leftCosetRepresentatives(
+                Tensors.parseSimple("C_abcde").getIndices().getSymmetries().getPermutationGroup()).length);
 
     }
 }

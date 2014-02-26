@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2013:
+ * Copyright (c) 2010-2014:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -45,9 +45,18 @@ public class ParserExpression implements TokenParser {
         if (expression.indexOf('=') != expression.lastIndexOf('='))
             throw new ParserException("Several '=' symbols.");
         String[] parts = expression.split("=");
+        parts[0] = parts[0].trim();
+
+        boolean preprocessing = false;
+        if (parts[0].charAt(parts[0].length() - 1) == ':') {
+            preprocessing = true;
+            parts[0] = parts[0].substring(0, parts[0].length() - 1);
+        }
+
         ParseToken left = parser.parse(parts[0]);
         ParseToken right = parser.parse(parts[1]);
-        return new ParseToken(TokenType.Expression, left, right);
+
+        return new ParseTokenExpression(preprocessing, left, right);
     }
 
     @Override

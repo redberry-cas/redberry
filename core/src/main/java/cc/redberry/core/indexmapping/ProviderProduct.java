@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2013:
+ * Copyright (c) 2010-2014:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -22,7 +22,7 @@
  */
 package cc.redberry.core.indexmapping;
 
-import cc.redberry.concurrent.OutputPortUnsafe;
+import cc.redberry.core.utils.OutputPort;
 import cc.redberry.core.combinatorics.IntPermutationsGenerator;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.tensor.Product;
@@ -127,9 +127,9 @@ final class ProviderProduct implements IndexMappingProvider {
     //    private final ProductContent from, to;
 //    private PermutationsProvider permutationsProvider;
     private final DummyIndexMappingProvider dummyProvider;
-    private final OutputPortUnsafe<IndexMappingBuffer> op;
+    private final OutputPort<IndexMappingBuffer> op;
 
-    private ProviderProduct(final OutputPortUnsafe<IndexMappingBuffer> opu,
+    private ProviderProduct(final OutputPort<IndexMappingBuffer> opu,
                             final Product from, final Product to) {
         this.dummyProvider = new DummyIndexMappingProvider(opu);
 //        this.from = from;

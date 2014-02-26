@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2013:
+ * Copyright (c) 2010-2014:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -135,7 +135,18 @@ public abstract class NameDescriptor {
      * @param indices indices (in case of metric or Kronecker) and null in other cases
      * @return string name of tensor
      */
-    public abstract String getName(SimpleIndices indices);
+    public String getName(SimpleIndices indices) {
+        return getName(indices, CC.getDefaultOutputFormat());
+    }
+
+    /**
+     * Returns string name of tensor in specified output format. The first argument can be {@code null}.
+     *
+     * @param indices indices (in case of metric or Kronecker) and null in other cases
+     * @param format  output format
+     * @return string name of tensor
+     */
+    public abstract String getName(SimpleIndices indices, OutputFormat format);
 
     @Override
     public String toString() {

@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2013:
+ * Copyright (c) 2010-2014:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -57,7 +57,7 @@ public interface Transformation {
          *
          * @param tensor
          * @param transformation
-         * @return
+         * @return result
          */
         public static Tensor applyToEachChild(Tensor tensor, final Transformation transformation) {
             TensorBuilder builder = null;

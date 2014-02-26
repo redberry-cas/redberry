@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2013:
+ * Copyright (c) 2010-2014:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -22,16 +22,14 @@
  */
 package cc.redberry.core.transformations.expand;
 
-import cc.redberry.core.tensor.Product;
-import cc.redberry.core.tensor.Tensor;
-import cc.redberry.core.tensor.TensorField;
-import cc.redberry.core.tensor.Tensors;
+import cc.redberry.core.tensor.*;
 import cc.redberry.core.tensor.functions.ScalarFunction;
 import cc.redberry.core.tensor.iterator.TraverseGuide;
 import cc.redberry.core.tensor.iterator.TraversePermission;
 import cc.redberry.core.transformations.Transformation;
 import cc.redberry.core.transformations.fractions.NumeratorDenominator;
 
+import static cc.redberry.core.utils.TensorUtils.isNegativeNaturalNumber;
 import static cc.redberry.core.utils.TensorUtils.isPositiveIntegerPower;
 
 /**

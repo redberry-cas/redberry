@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2013:
+ * Copyright (c) 2010-2014:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -22,7 +22,7 @@
  */
 package cc.redberry.core.transformations.substitutions;
 
-import cc.redberry.concurrent.OutputPortUnsafe;
+import cc.redberry.core.utils.OutputPort;
 import cc.redberry.core.combinatorics.IntDistinctTuplesPort;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.utils.IntArrayList;
@@ -31,7 +31,7 @@ import cc.redberry.core.utils.IntArrayList;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-final class IndexlessBijectionsPort implements OutputPortUnsafe<int[]> {
+final class IndexlessBijectionsPort implements OutputPort<int[]> {
 
     private boolean finished = false;
     private final IntDistinctTuplesPort combinationsPort;

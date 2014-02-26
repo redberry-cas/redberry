@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2013:
+ * Copyright (c) 2010-2014:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -177,8 +177,8 @@ public class DifferentiateTransformationTest {
             Tensor v = differentiate(t, var2, var1);
             v = eliminate(expand(v));
             v = d.transform(R1.transform(R2.transform(v)));
-            u = EliminateFromSymmetriesTransformation.ELIMINATE_FROM_SYMMETRIES.transform(u);
-            v = EliminateFromSymmetriesTransformation.ELIMINATE_FROM_SYMMETRIES.transform(v);
+            u = EliminateDueSymmetriesTransformation.ELIMINATE_DUE_SYMMETRIES.transform(u);
+            v = EliminateDueSymmetriesTransformation.ELIMINATE_DUE_SYMMETRIES.transform(v);
             TAssert.assertEquals(u, v);
         }
     }
@@ -216,8 +216,8 @@ public class DifferentiateTransformationTest {
             Tensor u = differentiate(t, var1, var2);
             u = eliminate(expand(u));
             u = d.transform(R1.transform(R2.transform(u)));
-            u = EliminateFromSymmetriesTransformation.ELIMINATE_FROM_SYMMETRIES.transform(u);
-            v = EliminateFromSymmetriesTransformation.ELIMINATE_FROM_SYMMETRIES.transform(v);
+            u = EliminateDueSymmetriesTransformation.ELIMINATE_DUE_SYMMETRIES.transform(u);
+            v = EliminateDueSymmetriesTransformation.ELIMINATE_DUE_SYMMETRIES.transform(v);
             TAssert.assertEquals(u, v);
         }
     }
@@ -241,13 +241,15 @@ public class DifferentiateTransformationTest {
         Tensor t = parse("R_abcd");
         SimpleTensor var1 = parseSimple("R_mnpq");
         Tensor u = differentiate(t, var1);
-        TAssert.assertEquals(u, "(1/8)*(-d_{a}^{m}*d_{c}^{q}*d_{d}^{p}*d_{b}^{n}-d_{a}^{n}*d_{d}^{q}*d_{c}^{p}*d_{b}^{m}-d_{a}^{q}*d_{d}^{n}*d_{b}^{p}*d_{c}^{m}+d_{c}^{q}*d_{a}^{n}*d_{d}^{p}*d_{b}^{m}+d_{c}^{n}*d_{a}^{q}*d_{b}^{p}*d_{d}^{m}+d_{b}^{q}*d_{a}^{p}*d_{d}^{n}*d_{c}^{m}+d_{a}^{m}*d_{d}^{q}*d_{c}^{p}*d_{b}^{n}-d_{b}^{q}*d_{a}^{p}*d_{c}^{n}*d_{d}^{m})");
+        Tensor expected = parse("(1/8)*(-d_{a}^{m}*d_{c}^{q}*d_{d}^{p}*d_{b}^{n}-d_{a}^{n}*d_{d}^{q}*d_{c}^{p}*d_{b}^{m}-d_{a}^{q}*d_{d}^{n}*d_{b}^{p}*d_{c}^{m}+d_{c}^{q}*d_{a}^{n}*d_{d}^{p}*d_{b}^{m}+d_{c}^{n}*d_{a}^{q}*d_{b}^{p}*d_{d}^{m}+d_{b}^{q}*d_{a}^{p}*d_{d}^{n}*d_{c}^{m}+d_{a}^{m}*d_{d}^{q}*d_{c}^{p}*d_{b}^{n}-d_{b}^{q}*d_{a}^{p}*d_{c}^{n}*d_{d}^{m})");
+        expected = ExpandTransformation.expand(expected);
+        TAssert.assertEquals(u, expected);
     }
 
     @Test
     public void test8() {
         Tensor u = differentiate(parse("g_ab"), parseSimple("g^mn"));
-        TAssert.assertEquals(u, "1/2*(g_am*g_bn+g_bm*g_an)");
+        TAssert.assertEquals(u, "1/2*g_am*g_bn+1/2*g_bm*g_an");
     }
 
     @Ignore
@@ -267,7 +269,7 @@ public class DifferentiateTransformationTest {
     public void test10() {
         setSymmetric(parseSimple("g_abc"), IndexType.LatinLower);
         Tensor u = differentiate(parse("g_abc"), parseSimple("g^mnp"));
-        TAssert.assertEquals(u, "(1/6)*(g_{am}*g_{cn}*g_{bp}+g_{ap}*g_{cm}*g_{bn}+g_{am}*g_{cp}*g_{bn}+g_{an}*g_{cm}*g_{bp}+g_{ap}*g_{bm}*g_{cn}+g_{an}*g_{bm}*g_{cp})");
+        TAssert.assertEquals(u, ExpandTransformation.expand(parse("(1/6)*(g_{am}*g_{cn}*g_{bp}+g_{ap}*g_{cm}*g_{bn}+g_{am}*g_{cp}*g_{bn}+g_{an}*g_{cm}*g_{bp}+g_{ap}*g_{bm}*g_{cn}+g_{an}*g_{bm}*g_{cp})")));
     }
 
     @Test
@@ -333,7 +335,7 @@ public class DifferentiateTransformationTest {
                 parseExpression("R_mn^a_a = 0"),
                 parseExpression("R^a_man = R_mn"),
                 parseExpression("R^a_a = R"),
-                EliminateFromSymmetriesTransformation.ELIMINATE_FROM_SYMMETRIES
+                EliminateDueSymmetriesTransformation.ELIMINATE_DUE_SYMMETRIES
         };
         Tensor t1 = differentiate(tensor, var2, var1);
         t1 = eliminate(expand(t1));

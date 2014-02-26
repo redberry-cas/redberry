@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2013:
+ * Copyright (c) 2010-2014:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -531,5 +531,11 @@ public class ParserTest {
     public void testGreek2() {
         Tensor t = parse("A_{\\Xi}");
         TAssert.assertEquals(IndicesUtils.getNameWithoutType(t.getIndices().get(0)), 4);
+    }
+
+    @Test
+    public void testPreprocessing1() {
+        parse(" x:= y");
+        TAssert.assertEquals(parse("x**2"), "y**2");
     }
 }

@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2013:
+ * Copyright (c) 2010-2014:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -22,65 +22,153 @@
  */
 package cc.redberry.core.groups.permutations;
 
-import java.util.Arrays;
+import cc.redberry.core.utils.IntArray;
+
+import java.math.BigInteger;
 
 /**
+ * Interface describing a single permutation. See {@link cc.redberry.core.groups.permutations.Permutations#createPermutation(boolean, int[])}
+ * and {@link cc.redberry.core.groups.permutations.Permutations#createPermutation(boolean, int[][])} on how to construct permutations.
+ *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
+ * @see cc.redberry.core.groups.permutations.Permutations#createPermutation(boolean, int[])
+ * @see cc.redberry.core.groups.permutations.Permutations#createPermutation(boolean, int[][])
+ * @see cc.redberry.core.groups.permutations.PermutationOneLineInt
+ * @see cc.redberry.core.groups.permutations.PermutationOneLineShort
+ * @see cc.redberry.core.groups.permutations.PermutationOneLineByte
+ * @since 1.0
  */
-public final class Permutation implements Comparable<Permutation> {
-    final int[] permutation;
-    final boolean sign;
+public interface Permutation extends Comparable<Permutation> {
+    /**
+     * Returns array that represents this permutation in one-line notation.
+     *
+     * @return array that represents this permutation in one-line notation
+     */
+    int[] oneLine();
 
     /**
-     * Creates permutation with sign from given array in one-line notation and boolean value of
-     * sign ({@code true} means minus)
+     * Returns immutable array that represents this permutation in one-line notation.
      *
-     * @param sign        sign of permutation ({@code true} means minus)
-     * @param permutation permutation in one-line notation
-     * @throws IllegalArgumentException if permutation array is inconsistent
+     * @return immutable array that represents this permutation in one-line notation
      */
-    public Permutation(boolean sign, int... permutation) {
-        if (!Combinatorics.testPermutationCorrectness(permutation))
-            throw new IllegalArgumentException();
-        this.permutation = permutation.clone();
-        this.sign = sign;
-    }
+    IntArray oneLineImmutable();
 
     /**
-     * Creates permutation from given array in one-line notation
+     * Returns an array of disjoint cycles that represent this permutation.
      *
-     * @param permutation permutation in one-line notation
-     * @throws IllegalArgumentException if permutation array is inconsistent
+     * @return array of disjoint cycles that represent this permutation
      */
-    public Permutation(int... permutation) {
-        this(false, permutation);
-    }
-
-    //unsafe constructor
-    Permutation(boolean unsafe, boolean sign, int... permutation) {
-        this.permutation = permutation;
-        this.sign = sign;
-    }
+    int[][] cycles();
 
     /**
-     * Return the new position of specified element under this permutation (i-th number in one-line notation)
+     * Returns image of specified point under the action of this permutation.
      *
-     * @param i position of element in set
-     * @return i-th number in one-line notation
+     * @param i point
+     * @return image of specified point under the action of this permutation
      */
-    public int newIndexOf(int i) {
-        return permutation[i];
-    }
+    public int newIndexOf(int i);
+
+//    /**
+//     * Returns image of specified point under the action of this permutation.This method is same as
+//     * {@link #newIndexOf(int)}, but throws exception if specified point greater then the internal low-level array that
+//     * represents this permutation.
+//     *
+//     * @param i point
+//     * @return image of specified point under the action of this permutation
+//     * @throws java.lang.IndexOutOfBoundsException if {@code i > length()}
+//     */
+//    public int newIndexOfInternal(int i);
 
     /**
-     * Returns the sign of this permutation.
+     * Returns image of specified point under the action of this permutation. This method is absolutely same as
+     * {@link #newIndexOf(int)} without any difference.
      *
-     * @return sign of this permutation
+     * @param i point
+     * @return image of specified point under the action of this permutation
      */
-    public boolean isSign() {
-        return sign;
-    }
+    public int imageOf(int i);
+
+    /**
+     * Returns image of specified set of points under the action of this permutation.
+     *
+     * @param set set
+     * @return image of specified set under this permutation
+     */
+    public int[] imageOf(int[] set);
+
+    /**
+     * Permutes array and returns the result.
+     *
+     * @param array array
+     * @return permuted array
+     */
+    public int[] permute(int[] array);
+
+    /**
+     * Permutes array and returns the result.
+     *
+     * @param array array
+     * @return permuted array
+     */
+    public char[] permute(char[] array);
+
+    /**
+     * Permutes array and returns the result.
+     *
+     * @param array array
+     * @return permuted array
+     */
+    public <T> T[] permute(T[] array);
+
+    /**
+     * Returns conjugation of specified element by this permutation, i.e. this^-1 * p * this
+     *
+     * @param p permutation
+     * @return conjugation of specified element by this permutation, i.e. this^-1 * p * this
+     * @throws InconsistentGeneratorsException if the result of composition is inconsistent symmetry (antisymmetry with odd
+     *                                         parity of permutation)
+     */
+    public Permutation conjugate(Permutation p);
+
+    /**
+     * Returns commutator of this and specified permutation, i.e. this^-1 * p^-1 * this * p.
+     *
+     * @param p permutation
+     * @return commutator of this and specified permutation, i.e. this^-1 * p^-1 * this * p
+     * @throws InconsistentGeneratorsException if the result of composition is inconsistent symmetry (antisymmetry with odd
+     *                                         parity of permutation)
+     */
+    public Permutation commutator(Permutation p);
+
+    /**
+     * Returns image of specified point under the action of inverse of this permutation.
+     *
+     * @param i point
+     * @return image of specified point under the action of inverse of this permutation
+     */
+    public int newIndexOfUnderInverse(int i);
+
+    /**
+     * Returns true if this permutation is antisymmetry and false otherwise.
+     *
+     * @return true if this permutation is antisymmetry and false otherwise
+     */
+    public boolean antisymmetry();
+
+    /**
+     * If this is antisymmetry, then converts this permutation to symmetry.
+     *
+     * @return same permutation with {@code false} antisymmetry
+     */
+    public Permutation toSymmetry();
+
+    /**
+     * Changes sign (symmetry to antisymmetry and vice versa) of this permutation
+     *
+     * @return same permutation with changed sign
+     */
+    public Permutation negate();
 
     /**
      * Returns the result of  {@code this * other}. Applying the resulting permutation is equivalent to applying
@@ -88,17 +176,35 @@ public final class Permutation implements Comparable<Permutation> {
      *
      * @param other other permutation
      * @return the result of  {@code this * other}
-     * @throws IllegalArgumentException if {@code other.length != this.length}
+     * @throws InconsistentGeneratorsException if the result of composition is inconsistent symmetry (antisymmetry with odd
+     *                                         parity of permutation)
      */
-    public Permutation composition(final Permutation other) {
-        if (permutation.length != other.permutation.length)
-            throw new IllegalArgumentException();
-        final int[] result = new int[permutation.length];
-        for (int i = permutation.length - 1; i >= 0; --i)
-            result[i] = other.permutation[permutation[i]];
-        return new Permutation(true, sign ^ other.sign, result);
-    }
+    public Permutation composition(Permutation other);
 
+    /**
+     * Returns the result of  {@code this * a * b}. Applying the resulting permutation is equivalent to applying
+     * {@code b} after {@code a} after {@code this}.
+     *
+     * @param a other permutation
+     * @param b other permutation
+     * @return the result of  {@code this * a * b}
+     * @throws InconsistentGeneratorsException if the result of composition is inconsistent symmetry (antisymmetry with odd
+     *                                         permutation parity)
+     */
+    public Permutation composition(Permutation a, Permutation b);
+
+    /**
+     * Returns the result of  {@code this * a * b * c}. Applying the resulting permutation is equivalent to applying
+     * {@code c} after {@code b} after {@code a} after {@code this}.
+     *
+     * @param a other permutation
+     * @param b other permutation
+     * @param c other permutation
+     * @return the result of  {@code this * a * b * c}
+     * @throws InconsistentGeneratorsException if the result of composition is inconsistent symmetry (antisymmetry with odd
+     *                                         permutation parity)
+     */
+    public Permutation composition(Permutation a, Permutation b, Permutation c);
 
     /**
      * Returns the result of  {@code this * other.inverse()}. Applying the resulting permutation is equivalent
@@ -106,113 +212,102 @@ public final class Permutation implements Comparable<Permutation> {
      *
      * @param other other permutation
      * @return the result of  {@code this * other.inverse()}
-     * @throws IllegalArgumentException if {@code other.length != this.length}
+     * @throws InconsistentGeneratorsException if the result of composition is inconsistent symmetry (antisymmetry with odd
+     *                                         permutation parity)
      */
-    public Permutation compositionWithInverse(final Permutation other) {
-        //todo improve!!!
-        return composition(other.inverse());
-    }
+    public Permutation compositionWithInverse(Permutation other);
 
     /**
      * Returns the inverse permutation of this.
      *
      * @return the inverse permutation of this
      */
-    public Permutation inverse() {
-        final int[] inv = new int[permutation.length];
-        for (int i = permutation.length - 1; i >= 0; --i)
-            inv[permutation[i]] = i;
-        return new Permutation(true, sign, inv);
-    }
-
+    public Permutation inverse();
 
     /**
      * Returns {@code true} if this represents identity permutation
      *
      * @return {@code true} if this is identity permutation
      */
-    public boolean isIdentity() {
-        for (int i = permutation.length - 1; i >= 0; --i)
-            if (permutation[i] != i) return false;
-        return true;
-    }
+    public boolean isIdentity();
 
     /**
-     * Returns the array permuted by this permutation
+     * Returns the identity permutation with the degree of this permutation
      *
-     * @param array specified array
-     * @return the array permuted by this permutation
-     * @throws IllegalArgumentException if this.length != array.length
+     * @return identity permutation with the degree of this permutation
      */
-    public int[] permute(int[] array) {
-        if (array.length != permutation.length)
-            throw new IllegalArgumentException();
-        final int[] perm = new int[array.length];
-        for (int i = permutation.length - 1; i >= 0; --i)
-            perm[i] = array[permutation[i]];
-        return perm;
-    }
-
-    public Permutation getIdentity() {
-        return Combinatorics.getIdentity(permutation.length);
-    }
-
-    public int length() {
-        return permutation.length;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Permutation that = (Permutation) o;
-        return (sign == that.sign) && Arrays.equals(permutation, that.permutation);
-    }
-
-    @Override
-    public int hashCode() {
-        int result = Arrays.hashCode(permutation);
-        result = 31 * result + (sign ? 1 : 0);
-        return result;
-    }
+    public Permutation getIdentity();
 
     /**
-     * Returns the string representation of this permutation in one-line
-     * notation.
+     * Calculates and returns the order of this permutation.
      *
-     * @return the string representation of this permutation in one-line
-     *         notation
+     * @return order of this permutation
+     * @see Permutations#orderOfPermutation(int[])
      */
-    @Override
-    public String toString() {
-        return (sign ? "-" : "+") + Arrays.toString(permutation);
-    }
+    public BigInteger order();
 
     /**
-     * Compares this permutation with other. The algorithm sequentially compares
-     * integers {@code i1} and {@code i2} in arrays, representing this
-     * permutation and other permutation relatively. If on some step {@code i1 > i2}
-     * returns 1, if one some step {@code i2 > i1 } returns -1, and if on all
-     * steps
-     * {@code i1 == i2} returns 0 (combinatorics are equals).
+     * Returns true if order of this permutation is odd and false otherwise.
      *
-     * @param t permutation to compare
-     * @return 1 if this one is "greater" -1 if t is "greater", 0 if this and t
-     *         equals.
-     * @throws IllegalArgumentException if dimensions of this and t are not '
-     *                                  equals
+     * @return true if order of this permutation is odd and false otherwise
      */
-    @Override
-    public int compareTo(Permutation t) {
-        if (t.permutation.length != permutation.length)
-            throw new IllegalArgumentException("different dimensions of comparing combinatorics");
-        if (sign != t.sign)
-            return sign ? -1 : 1;
-        for (int i = 0; i < permutation.length; ++i)
-            if (permutation[i] < t.permutation[i])
-                return -1;
-            else if (permutation[i] > t.permutation[i])
-                return 1;
-        return 0;
-    }
+    public boolean orderIsOdd();
+
+    /**
+     * Returns a largest moved point plus one.
+     *
+     * @return largest moved point plus one
+     */
+    public int internalDegree();
+
+    /**
+     * Returns length of the underlying array (at low-level).
+     *
+     * @return length of the underlying array (at low-level)
+     */
+    public int length();
+
+    /**
+     * Returns this raised to the specified exponent.
+     *
+     * @param exponent exponent
+     * @return this raised to the specified exponent
+     */
+    public Permutation pow(int exponent);
+
+    /**
+     * Returns parity of this permutations.
+     *
+     * @return parity of this permutations
+     */
+    public int parity();
+
+    /**
+     * Inserts identity action on the set [0, 1, ..., size - 1]; as result the degree of resulting permutation will be
+     * size + degree of this.
+     *
+     * @param size size of the set
+     */
+    public Permutation moveRight(int size);
+
+    /**
+     * Returns lengths of cycles in disjoint cycle notation.
+     *
+     * @return lengths of cycles in disjoint cycle notation
+     */
+    int[] lengthsOfCycles();
+
+    /**
+     * Returns a string representation of this permutation in one-line notation.
+     *
+     * @return a string representation of this permutation in one-line notation
+     */
+    String toStringOneLine();
+
+    /**
+     * Returns a string representation of this permutation in disjoint cycles notation.
+     *
+     * @return a string representation of this permutation in disjoint cycles notation
+     */
+    String toStringCycles();
 }

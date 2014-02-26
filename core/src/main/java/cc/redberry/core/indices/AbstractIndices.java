@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2013:
+ * Copyright (c) 2010-2014:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -22,9 +22,11 @@
  */
 package cc.redberry.core.indices;
 
+import cc.redberry.core.context.CC;
 import cc.redberry.core.context.Context;
 import cc.redberry.core.context.OutputFormat;
 import cc.redberry.core.utils.IntArray;
+import cc.redberry.core.utils.IntArrayList;
 
 import java.lang.ref.WeakReference;
 import java.util.Arrays;
@@ -116,6 +118,20 @@ abstract class AbstractIndices implements Indices {
         return data[position];
     }
 
+//    @Override
+//    public boolean containsSubIndices(Indices subIndices) {
+//        int pointer = 0, index;
+//        for (int s = 0; s < subIndices.size(); ++s) {
+//            index = subIndices.get(s);
+//            while (get(pointer) != index)
+//                pointer++;
+//            if (pointer == size())
+//                return false;
+//            ++pointer;
+//        }
+//        return true;
+//    }
+
     @Override
     public final int hashCode() {
         return 291 + Arrays.hashCode(this.data);
@@ -147,41 +163,64 @@ abstract class AbstractIndices implements Indices {
                     break;
                 sb.append(",");
             }
+        } else if (format == Cadabra) {
+            IntArrayList nonMetricIndices = new IntArrayList();
+            IntArrayList metricIndices = new IntArrayList(data.length);
+            for (int i = 0; i < data.length; ++i)
+                if (CC.isMetric(IndicesUtils.getType(data[i])))
+                    metricIndices.add(data[i]);
+                else
+                    nonMetricIndices.add(data[i]);
+
+            if (!metricIndices.isEmpty()) {
+                sb.append("_{");
+                for (int i = 0, size = metricIndices.size() - 1; ; ++i) {
+                    sb.append(Context.get().getIndexConverterManager().getSymbol(metricIndices.get(i), format));
+                    if (i == size)
+                        break;
+                    sb.append(' ');
+                }
+                sb.append('}');
+            }
+
+            if (!nonMetricIndices.isEmpty()) {
+                currentState = (nonMetricIndices.get(0) >>> 31);
+                sb.append(format.lowerIndexPrefix).append('{');
+                int lastState = currentState;
+                for (int i = 0, size = nonMetricIndices.size() - 1; ; ++i) {
+                    currentState = nonMetricIndices.get(i) >>> 31;
+                    if (lastState != currentState) {
+                        sb.append('}').append(format.getPrefixFromIntState(currentState)).append('{');
+                        lastState = currentState;
+                    }
+                    sb.append(Context.get().getIndexConverterManager().getSymbol(nonMetricIndices.get(i), format));
+
+                    if (i == size)
+                        break;
+                    if (currentState == nonMetricIndices.get(i + 1) >>> 31)
+                        sb.append(' ');
+                }
+                sb.append('}');
+            }
         } else {
             String latexBrackets = format == LaTeX ? "{}" : "";
 
             currentState = (data[0] >>> 31);
-            if (currentState == 0)
-                sb.append(format.lowerIndexPrefix).append("{");
-            else
-                sb.append(format.upperIndexPrefix).append("{");
+            sb.append(format.getPrefixFromIntState(currentState)).append('{');
 
             int lastState = currentState;
             for (int i = 0; i < data.length; i++) {
                 currentState = data[i] >>> 31;
                 if (lastState != currentState) {
-                    if (lastState == 0)
-                        sb.append("}").append(latexBrackets).append(format.upperIndexPrefix).append("{");
-                    if (lastState == 1)
-                        sb.append("}").append(latexBrackets).append(format.lowerIndexPrefix).append("{");
+                    sb.append('}').append(latexBrackets).append(format.getPrefixFromIntState(currentState)).append('{');
                     lastState = currentState;
                 }
                 sb.append(Context.get().getIndexConverterManager().getSymbol(data[i], format));
             }
-            sb.append("}");
+            sb.append('}');
         }
 
         return sb.toString();
-    }
-
-    private static String beginingSeparator(OutputFormat format) {
-        switch (format) {
-            case WolframMathematica:
-            case Maple:
-                return "-";
-            default:
-                return "_";
-        }
     }
 
     @Override

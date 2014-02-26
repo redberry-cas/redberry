@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2013:
+ * Copyright (c) 2010-2014:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -22,14 +22,17 @@
  */
 package cc.redberry.core.indexmapping;
 
-import cc.redberry.concurrent.OutputPortUnsafe;
-import cc.redberry.core.combinatorics.Symmetry;
+import cc.redberry.core.utils.OutputPort;
+import cc.redberry.core.groups.permutations.Permutation;
 import cc.redberry.core.indices.SimpleIndices;
 import cc.redberry.core.tensor.SimpleTensor;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.tensor.TensorField;
+import cc.redberry.core.utils.IntArrayList;
 
 import java.util.Iterator;
+
+import static cc.redberry.core.indices.IndicesUtils.*;
 
 /**
  * {@link SimpleTensor}-specific mapping provider.
@@ -57,16 +60,16 @@ final class ProviderSimpleTensor extends IndexMappingProviderAbstractFT<SimpleTe
         public IndexMappingProvider create(IndexMappingProvider opu, Tensor from, Tensor to) {
             if (((TensorField) from).getName() != ((TensorField) to).getName())
                 return IndexMappingProvider.Util.EMPTY_PROVIDER;
-            for (int i = 0; i < from.size(); ++i){
+            for (int i = 0; i < from.size(); ++i) {
                 if (!IndexMappings.positiveMappingExists(from.get(i), to.get(i)))
                     return IndexMappingProvider.Util.EMPTY_PROVIDER;
             }
             return new ProviderSimpleTensor(opu, (SimpleTensor) from, (SimpleTensor) to);
         }
     };
-    private Iterator<Symmetry> symmetryIterator;
+    private Iterator<Permutation> searchForPermutations;
 
-    private ProviderSimpleTensor(OutputPortUnsafe<IndexMappingBuffer> opu, SimpleTensor from, SimpleTensor to) {
+    private ProviderSimpleTensor(OutputPort<IndexMappingBuffer> opu, SimpleTensor from, SimpleTensor to) {
         super(opu, from, to);
     }
 
@@ -84,38 +87,71 @@ final class ProviderSimpleTensor extends IndexMappingProviderAbstractFT<SimpleTe
             return r;
         }
 
-        if (symmetryIterator != null) {
-            OUT:
-            while (symmetryIterator.hasNext()) {
-                Symmetry s = symmetryIterator.next();
+        if (searchForPermutations != null) {
+            Permutation permutation;
+            out:
+            while (searchForPermutations.hasNext()) {
+                permutation = searchForPermutations.next();
                 IndexMappingBuffer tempBuffer = currentBuffer.clone();
                 for (int i = 0; i < size; ++i)
-                    if (!tempBuffer.tryMap(fromIndices.get(s.newIndexOf(i)), toIndices.get(i)))
-                        continue OUT;
-                tempBuffer.addSign(s.isAntiSymmetry());
+                    if (!tempBuffer.tryMap(fromIndices.get(i), toIndices.get(permutation.newIndexOf(i))))
+                        continue out;
+                tempBuffer.addSign(permutation.antisymmetry());
                 return tempBuffer;
             }
-            symmetryIterator = null;
-            currentBuffer = null;
-            return null;
+            searchForPermutations = null;
+            return currentBuffer = null;
         }
-        if (fromIndices.getSymmetries().isEmpty()) {
+
+        if (fromIndices.size() == 1 || fromIndices.getSymmetries().isTrivial()) {
             IndexMappingBuffer tempBuffer = currentBuffer;
             for (int i = 0; i < size; ++i)
-                if (!tempBuffer.tryMap(fromIndices.get(i), toIndices.get(i))) {
-                    currentBuffer = null;
-                    return null;
-                }
+                if (!tempBuffer.tryMap(fromIndices.get(i), toIndices.get(i)))
+                    return currentBuffer = null;
             currentBuffer = null;
             return tempBuffer;
         }
-        symmetryIterator = fromIndices.getSymmetries().iterator();
+
+        //try to find partial mapping
+        IntArrayList permMappingFrom = null, permMappingTo = null;
+        outer:
+        for (int mapFrom = 0; mapFrom < size; ++mapFrom) {
+            int fromIndex = fromIndices.get(mapFrom);
+            IndexMappingBufferRecord bRec = currentBuffer.getMap().get(getNameWithType(fromIndex));
+            //no such index in mapping yet
+            if (bRec == null)
+                continue;
+            //index contained in mapping have same state
+            if (getRawStateInt(fromIndex) == bRec.getFromRawState())
+                return currentBuffer = null;
+            //toIndex that we'll find in toIndices
+            int toIndex = inverseIndexState(setRawState(bRec.getToRawState(), bRec.getIndexName()));
+            for (int mapTo = 0; mapTo < size; ++mapTo) {
+                if (toIndices.get(mapTo) == toIndex) {
+                    if (permMappingFrom == null) {
+                        permMappingFrom = new IntArrayList();
+                        permMappingTo = new IntArrayList();
+                    }
+                    permMappingFrom.add(mapFrom);
+                    permMappingTo.add(mapTo);
+                    continue outer;
+                }
+            }
+            //no index found in toIndices
+            return currentBuffer = null;
+        }
+        if (permMappingFrom == null)
+            searchForPermutations = fromIndices.getSymmetries().getPermutationGroup().iterator();
+        else
+            searchForPermutations = new OutputPort.PortIterator<>(
+                    fromIndices.getSymmetries().getPermutationGroup().mapping(
+                            permMappingFrom.toArray(), permMappingTo.toArray()));
         return take();
     }
 
     @Override
     protected void _tick() {
-        symmetryIterator = null;
+        searchForPermutations = null;
         currentBuffer = null;
     }
 }

@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2013:
+ * Copyright (c) 2010-2014:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -23,10 +23,10 @@
 package cc.redberry.core.transformations.substitutions;
 
 import cc.redberry.core.TAssert;
-import cc.redberry.core.combinatorics.Combinatorics;
 import cc.redberry.core.combinatorics.IntPermutationsGenerator;
 import cc.redberry.core.context.CC;
 import cc.redberry.core.context.OutputFormat;
+import cc.redberry.core.groups.permutations.Permutations;
 import cc.redberry.core.indices.IndexType;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.tensor.*;
@@ -365,7 +365,7 @@ public class SubstitutionsTest {
         Expression[] temp;
         while (generator.hasNext()) {
             permutation = generator.next();
-            temp = Combinatorics.reorder(es, permutation);
+            temp = Permutations.permute(es, permutation);
             for (Expression e : temp)
                 t = e.transform(t);
             TAssert.assertIndicesConsistency(t);
@@ -401,7 +401,7 @@ public class SubstitutionsTest {
         Expression[] temp;
         while (generator.hasNext()) {
             permutation = generator.next();
-            temp = Combinatorics.reorder(es, permutation);
+            temp = Permutations.permute(es, permutation);
             for (Expression e : temp)
                 t = e.transform(t);
             TAssert.assertIndicesConsistency(t);
@@ -421,10 +421,10 @@ public class SubstitutionsTest {
     public void testSimple24() {
         CC.resetTensorNames(-1030130556496293426L);
         Tensor t = parse("(f+g*k)*(d+h*f*f)");
-        System.out.println(t);
+        //System.out.println(t);
         Expression f = parseExpression("f=f_m^m+f1_a^a");
         t = f.transform(t);
-        System.out.println(t);
+        //System.out.println(t);
         TAssert.assertIndicesConsistency(t);
     }
 
@@ -805,7 +805,7 @@ public class SubstitutionsTest {
 
     @Test
     public void testSum3() {
-        for (int i = 0; i < 1000; ++i) {
+        for (int i = 0; i < 100; ++i) {
             CC.resetTensorNames();
             addSymmetry("R_mnp", IndexType.LatinLower, true, 2, 1, 0);
             Tensor target = parse("f_i + R_ijk*F^jk + R_ijk*F^kj - R_kij*F^jk");
@@ -820,6 +820,14 @@ public class SubstitutionsTest {
         Tensor target = parse("f_i + R_ijk*F^kj + R_ijk*F^jk - R_kij*F^jk");
         target = parseExpression("f_i + R_ijk*F^kj - R_kij*F^jk = - R_ikj*F^jk ").transform(target);
         TAssert.assertEquals(target, "-F^{jk}*R_{ikj}+F^{jk}*R_{ijk}");
+    }
+
+    @Test
+    public void testSum4() {
+        CC.resetTensorNames(2634486062579664417L);
+        Tensor target = parse("A_abc + A_bca + A_cab + A_acb + A_bac + A_cba");
+        target = parseExpression("A_abc + A_bca + A_cab = F_abc").transform(target);
+        TAssert.assertEquals(target, "F_{abc}+F_{bac}");
     }
 
     //TODO tests for Sum
@@ -1130,7 +1138,7 @@ public class SubstitutionsTest {
         Expression[] temp;
         while (generator.hasNext()) {
             permutation = generator.next();
-            temp = Combinatorics.reorder(es, permutation);
+            temp = Permutations.permute(es, permutation);
             for (Expression e : temp)
                 t = e.transform(t);
             TAssert.assertIndicesConsistency(t);

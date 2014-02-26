@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2013:
+ * Copyright (c) 2010-2014:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -24,9 +24,11 @@ package cc.redberry.core.tensor;
 
 import cc.redberry.core.TAssert;
 import cc.redberry.core.combinatorics.IntPermutationsGenerator;
-import cc.redberry.core.combinatorics.Symmetry;
+import cc.redberry.core.context.CC;
+import cc.redberry.core.groups.permutations.Permutation;
 import cc.redberry.core.indices.IndicesFactory;
 import cc.redberry.core.indices.SimpleIndices;
+import cc.redberry.core.indices.StructureOfIndices;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.parser.ParserIndices;
 import cc.redberry.core.transformations.expand.ExpandTransformation;
@@ -347,7 +349,19 @@ public class TensorsTest {
     @Test(timeout = 300L)
     public void testSetSymmetric4() {
         setAntiSymmetric("e_abcd");
-        Iterator<Symmetry> it = parseSimple("e_abcd").getIndices().getSymmetries().iterator();
+        Iterator<Permutation> it = parseSimple("e_abcd").getIndices().getSymmetries().getPermutationGroup().iterator();
         while (it.hasNext()) it.next();
+    }
+
+    @Test
+    public void testSymbolsReferences() {
+        Object o = parse("a");
+        TAssert.assertTrue(parse("a") == parse("a"));
+        TAssert.assertTrue(parse("a") == o);
+        TAssert.assertTrue(o == Tensors.simpleTensor("a", IndicesFactory.EMPTY_SIMPLE_INDICES));
+        TAssert.assertTrue(o == Tensors.simpleTensor(
+                CC.getNameManager().mapNameDescriptor("a", StructureOfIndices.EMPTY).getName(null),
+                IndicesFactory.EMPTY_SIMPLE_INDICES));
+        TAssert.assertTrue(o == Tensors.setIndices((SimpleTensor) o, new int[0]));
     }
 }

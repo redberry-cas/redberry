@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2013:
+ * Copyright (c) 2010-2014:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -22,7 +22,7 @@
  */
 package cc.redberry.core.indexmapping;
 
-import cc.redberry.concurrent.OutputPortUnsafe;
+import cc.redberry.core.utils.OutputPort;
 import cc.redberry.core.indices.Indices;
 import cc.redberry.core.indices.IndicesUtils;
 import cc.redberry.core.number.Complex;
@@ -108,8 +108,7 @@ public final class IndexMappings {
     }
 
     /**
-     * Tests whether specified mapping is a mapping from <i>{@code from}</i> tensor onto <i>{@code to}</i> tensor, i.e.
-     * this method returns {@code true} if and only if
+     * Tests whether specified mapping is a mapping from <i>{@code from}</i> tensor onto <i>{@code to}</i> tensor.
      *
      * @param mapping mapping
      * @param from    tensor <i>{@code from}</i>
@@ -121,6 +120,17 @@ public final class IndexMappings {
         return IndexMappingBufferTester.test(new IndexMappingBufferTester(mapping), from, to);
     }
 
+
+    /**
+     * Returns {@code true} if there is mapping from {@code a} on tensor {@code b} or vice versa.
+     *
+     * @param a tensor
+     * @param b tensor
+     * @return {@code true} if there is mapping from {@code a} on tensor {@code b} or vice versa
+     */
+    public static boolean anyMappingExists(Tensor a, Tensor b) {
+        return mappingExists(a, b) || mappingExists(b, a);
+    }
 
     /**
      * Returns {@code true} if there is mapping of tensor {@code from} on tensor {@code to}.
@@ -142,7 +152,7 @@ public final class IndexMappings {
      */
     public static boolean positiveMappingExists(Tensor from, Tensor to) {
         IndexMappingBuffer buffer;
-        OutputPortUnsafe<IndexMappingBuffer> port = createPortOfBuffers(from, to);
+        OutputPort<IndexMappingBuffer> port = createPortOfBuffers(from, to);
         while ((buffer = port.take()) != null)
             if (!buffer.getSign())
                 return true;
@@ -165,7 +175,7 @@ public final class IndexMappings {
             return false;
         int[] free = freeIndices.getAllIndices().copy();
         IndexMappingBuffer tester = new IndexMappingBufferTester(free, false);
-        OutputPortUnsafe<IndexMappingBuffer> mp = IndexMappings.createPortOfBuffers(tester, u, v);
+        OutputPort<IndexMappingBuffer> mp = IndexMappings.createPortOfBuffers(tester, u, v);
         IndexMappingBuffer buffer;
 
         while ((buffer = mp.take()) != null)
@@ -206,7 +216,7 @@ public final class IndexMappings {
     public static boolean isZeroDueToSymmetry(Tensor t) {
         int[] indices = IndicesUtils.getIndicesNames(t.getIndices().getFree());
         IndexMappingBufferTester bufferTester = new IndexMappingBufferTester(indices, false);
-        OutputPortUnsafe<IndexMappingBuffer> mp = IndexMappings.createPortOfBuffers(bufferTester, t, t);
+        OutputPort<IndexMappingBuffer> mp = IndexMappings.createPortOfBuffers(bufferTester, t, t);
         IndexMappingBuffer buffer;
         while ((buffer = mp.take()) != null)
             if (buffer.getSign())
@@ -225,7 +235,7 @@ public final class IndexMappings {
         return getAllMappings(IndexMappings.createPort(from, to));
     }
 
-    private static Set<Mapping> getAllMappings(OutputPortUnsafe<Mapping> opu) {
+    private static Set<Mapping> getAllMappings(OutputPort<Mapping> opu) {
         Set<Mapping> res = new HashSet<>();
         Mapping c;
         while ((c = opu.take()) != null)
@@ -246,7 +256,7 @@ public final class IndexMappings {
      * @param to   to tensor
      * @return output port of mappings
      */
-    static OutputPortUnsafe<IndexMappingBuffer> createPortOfBuffers(Tensor from, Tensor to) {
+    static OutputPort<IndexMappingBuffer> createPortOfBuffers(Tensor from, Tensor to) {
         return createPortOfBuffers(new IndexMappingBufferImpl(), from, to);
     }
 
@@ -259,7 +269,7 @@ public final class IndexMappings {
      * @param to     to tensor
      * @return output port of mapping
      */
-    static OutputPortUnsafe<IndexMappingBuffer> createPortOfBuffers(final IndexMappingBuffer buffer,
+    static OutputPort<IndexMappingBuffer> createPortOfBuffers(final IndexMappingBuffer buffer,
                                                                     final Tensor from, final Tensor to) {
         final IndexMappingProvider provider = createPort(IndexMappingProvider.Util.singleton(buffer), from, to);
         provider.tick();
