@@ -142,6 +142,11 @@ public final class PermutationOneLineByte implements Permutation {
     }
 
     @Override
+    public PermutationOneLineByte negate() {
+        return new PermutationOneLineByte(false, antisymmetry ^ true, internalDegree, permutation);
+    }
+
+    @Override
     public int[] oneLine() {
         return byte2int(permutation);
     }

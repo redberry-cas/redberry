@@ -574,19 +574,19 @@ public class AlgorithmsBaseTest extends AbstractTestClass {
             SchreierSimsAlgorithm(bsgs1);
             for (int i = 0; i < bsgs1.size() - 1; ++i) {
                 bsgs2 = AlgorithmsBase.clone(bsgs1);
-                swapAdjacentBasePoints(bsgs2, i, degree);
+                swapAdjacentBasePoints(bsgs2, i);
                 assertTrue(isBSGS(bsgs2));
                 int[] p = Permutations.randomPermutation(degree);
                 for (int pp : p) {
                     if (pp > bsgs2.size() - 2)
                         continue;
-                    swapAdjacentBasePoints(bsgs2, pp, degree);
+                    swapAdjacentBasePoints(bsgs2, pp);
                     assertTrue(isBSGS(bsgs2));
                 }
                 for (int pp : p) {
                     if (pp > bsgs2.size() - 2)
                         continue;
-                    swapAdjacentBasePoints(bsgs2, pp, degree);
+                    swapAdjacentBasePoints(bsgs2, pp);
                     assertTrue(isBSGS(bsgs2));
                 }
             }
@@ -620,27 +620,27 @@ public class AlgorithmsBaseTest extends AbstractTestClass {
         removeRedundantGenerators(bsgs);
         assertTrue(isBSGS(bsgs));
 
-        swapAdjacentBasePoints(bsgs, 2, pg.degree());
+        swapAdjacentBasePoints(bsgs, 2);
         assertTrue(isBSGS(bsgs));
         removeRedundantGenerators(bsgs);
         assertTrue(isBSGS(bsgs));
 
-        swapAdjacentBasePoints(bsgs, 0, pg.degree());
+        swapAdjacentBasePoints(bsgs, 0);
         assertTrue(isBSGS(bsgs));
         removeRedundantGenerators(bsgs);
         assertTrue(isBSGS(bsgs));
 
-        swapAdjacentBasePoints(bsgs, 0, pg.degree());
+        swapAdjacentBasePoints(bsgs, 0);
         assertTrue(isBSGS(bsgs));
         removeRedundantGenerators(bsgs);
         assertTrue(isBSGS(bsgs));
 
-        swapAdjacentBasePoints(bsgs, 1, pg.degree());
+        swapAdjacentBasePoints(bsgs, 1);
         assertTrue(isBSGS(bsgs));
         removeRedundantGenerators(bsgs);
         assertTrue(isBSGS(bsgs));
 
-        swapAdjacentBasePoints(bsgs, 2, pg.degree());
+        swapAdjacentBasePoints(bsgs, 2);
         assertTrue(isBSGS(bsgs));
         removeRedundantGenerators(bsgs);
         assertTrue(isBSGS(bsgs));
@@ -663,7 +663,7 @@ public class AlgorithmsBaseTest extends AbstractTestClass {
                 removeRedundantGenerators(bsgs1);
                 for (int j = 0; j < bsgs1.size() - 1; j += 2) {
                     ArrayList<BSGSCandidateElement> bsgs2 = bsgs1;
-                    swapAdjacentBasePoints(bsgs2, j, degree);
+                    swapAdjacentBasePoints(bsgs2, j);
                     removeRedundantBaseRemnant(bsgs2);
                     removeRedundantGenerators(bsgs2);
                     assertTrue(isBSGS(bsgs2, 1 - 1E-9, CC.getRandomGenerator()));
@@ -671,7 +671,7 @@ public class AlgorithmsBaseTest extends AbstractTestClass {
                     for (int pp : p) {
                         if (pp > bsgs2.size() - 2)
                             continue;
-                        swapAdjacentBasePoints(bsgs2, pp, degree);
+                        swapAdjacentBasePoints(bsgs2, pp);
                         removeRedundantBaseRemnant(bsgs2);
                         removeRedundantGenerators(bsgs2);
                         assertTrue(isBSGS(bsgs2, 1 - 1E-9, CC.getRandomGenerator()));
@@ -697,19 +697,19 @@ public class AlgorithmsBaseTest extends AbstractTestClass {
                 SchreierSimsAlgorithm(bsgs1);
                 for (int j = 0; j < bsgs1.size() - 1; ++j) {
                     ArrayList<BSGSCandidateElement> bsgs2 = AlgorithmsBase.clone(bsgs1);
-                    swapAdjacentBasePoints(bsgs2, j, degree);
+                    swapAdjacentBasePoints(bsgs2, j);
                     assertTrue(isBSGS(bsgs2));
                     int[] p = Permutations.randomPermutation(degree, CC.getRandomGenerator());
                     for (int pp : p) {
                         if (pp > bsgs2.size() - 2)
                             continue;
-                        swapAdjacentBasePoints(bsgs2, pp, degree);
+                        swapAdjacentBasePoints(bsgs2, pp);
                         assertTrue(isBSGS(bsgs2));
                     }
                     for (int pp : p) {
                         if (pp > bsgs2.size() - 2)
                             continue;
-                        swapAdjacentBasePoints(bsgs2, pp, degree);
+                        swapAdjacentBasePoints(bsgs2, pp);
                         assertTrue(isBSGS(bsgs2));
                     }
                 }
@@ -752,7 +752,7 @@ public class AlgorithmsBaseTest extends AbstractTestClass {
         assertArrayEquals(oldBase, getBaseAsArray(bsgs));
         bsgs.add(new BSGSCandidateElement(2, new ArrayList<Permutation>(), degree));
         assertTrue(isBSGS(bsgs));
-        swapAdjacentBasePoints(bsgs, 2, degree);
+        swapAdjacentBasePoints(bsgs, 2);
         assertTrue(isBSGS(bsgs));
         assertEquals(0, bsgs.get(3).stabilizerGenerators.size());
     }
@@ -790,22 +790,22 @@ public class AlgorithmsBaseTest extends AbstractTestClass {
         assertArrayEquals(new int[]{0, 1, 2, 5, 3, 6}, getBaseAsArray(bsgs));
 
         //swap redundant points
-        swapAdjacentBasePoints(bsgs, 3, degree);
+        swapAdjacentBasePoints(bsgs, 3);
         assertTrue(isBSGS(bsgs));
 
         for (int i = bsgs.size() - 2; i >= 0; --i) {
             ArrayList<BSGSCandidateElement> copy = AlgorithmsBase.clone(bsgs);
-            swapAdjacentBasePoints(copy, i, degree);
+            swapAdjacentBasePoints(copy, i);
             assertTrue(isBSGS(copy));
         }
 
         for (int i = bsgs.size() - 2; i >= 0; --i) {
-            swapAdjacentBasePoints(bsgs, i, degree);
+            swapAdjacentBasePoints(bsgs, i);
             assertTrue(isBSGS(bsgs));
         }
 
         for (int i = 0; i <= 100; ++i) {
-            swapAdjacentBasePoints(bsgs, CC.getRandomGenerator().nextInt(bsgs.size() - 2), degree);
+            swapAdjacentBasePoints(bsgs, CC.getRandomGenerator().nextInt(bsgs.size() - 2));
             assertTrue(isBSGS(bsgs));
         }
     }
@@ -838,7 +838,7 @@ public class AlgorithmsBaseTest extends AbstractTestClass {
                 for (int j = 0; j < 5; ++j) {
                     int[] oldBase = getBaseAsArray(bsgs);
                     int[] newBase = Permutations.createPermutation(Permutations.randomPermutation(oldBase.length)).permute(oldBase);
-                    AlgorithmsBase.rebaseWithTranspositions(bsgs, newBase, degree);
+                    AlgorithmsBase.rebaseWithTranspositions(bsgs, newBase);
                     assertTrue(isBSGS(bsgs, 1 - 1E-9, CC.getRandomGenerator()));
                     final int[] _newBase = getBaseAsArray(bsgs);
                     for (int r = 0; r < _newBase.length && r < newBase.length; ++r)
@@ -862,7 +862,7 @@ public class AlgorithmsBaseTest extends AbstractTestClass {
                 for (int j = 0; j < 50; ++j) {
                     int[] oldBase = getBaseAsArray(bsgs);
                     int[] newBase = Permutations.createPermutation(Permutations.randomPermutation(oldBase.length)).permute(oldBase);
-                    AlgorithmsBase.rebaseWithTranspositions(bsgs, newBase, degree);
+                    AlgorithmsBase.rebaseWithTranspositions(bsgs, newBase);
                     assertTrue(isBSGS(bsgs));
                     final int[] _newBase = getBaseAsArray(bsgs);
                     for (int r = 0; r < _newBase.length && r < newBase.length; ++r)
@@ -984,7 +984,7 @@ public class AlgorithmsBaseTest extends AbstractTestClass {
                     int[] oldBase = getBaseAsArray(bsgs);
                     int[] newBase = Permutations.createPermutation(
                             Permutations.randomPermutation(oldBase.length)).permute(oldBase);
-                    rebaseWithConjugationAndTranspositions(bsgs, newBase, degree);
+                    rebaseWithConjugationAndTranspositions(bsgs, newBase);
                     assertTrue(isBSGS(bsgs, 1 - 1E-9, CC.getRandomGenerator()));
                     final int[] _newBase = getBaseAsArray(bsgs);
                     for (int r = 0; r < _newBase.length && r < newBase.length; ++r)
@@ -1011,7 +1011,7 @@ public class AlgorithmsBaseTest extends AbstractTestClass {
                     int[] oldBase = getBaseAsArray(bsgs);
                     int[] newBase = Permutations.createPermutation(
                             Permutations.randomPermutation(oldBase.length)).permute(oldBase);
-                    rebaseWithConjugationAndTranspositions(bsgs, newBase, degree);
+                    rebaseWithConjugationAndTranspositions(bsgs, newBase);
                     assertTrue(isBSGS(bsgs));
                     final int[] _newBase = getBaseAsArray(bsgs);
                     for (int r = 0; r < _newBase.length && r < newBase.length; ++r)
@@ -1044,7 +1044,7 @@ public class AlgorithmsBaseTest extends AbstractTestClass {
                                     int[] oldBase = getBaseAsArray(bsgs);
                                     int[] newBase = Permutations.createPermutation(
                                             Permutations.randomPermutation(oldBase.length)).permute(oldBase);
-                                    rebaseWithConjugationAndTranspositions(bsgs, newBase, deg);
+                                    rebaseWithConjugationAndTranspositions(bsgs, newBase);
                                     final int[] _newBase = getBaseAsArray(bsgs);
                                     for (int r = 0; r < _newBase.length && r < newBase.length; ++r)
                                         assertEquals(newBase[r], _newBase[r]);

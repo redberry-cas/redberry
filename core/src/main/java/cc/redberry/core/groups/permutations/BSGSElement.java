@@ -62,7 +62,7 @@ public class BSGSElement {
     /**
      * Maximum internal degrees of stabilizers
      */
-    int internalDegree = -1;//lazy initialization
+    int internalDegree;
 
 
     /**
@@ -77,6 +77,7 @@ public class BSGSElement {
         this.stabilizerGenerators = stabilizerGenerators;
         this.SchreierVector = schreierVector;
         this.orbitList = orbitList;
+        this.internalDegree = Permutations.SchreierVectorCapacity(stabilizerGenerators);
     }
 
     /**
@@ -178,8 +179,7 @@ public class BSGSElement {
 //    }
 
     public int internalDegree() {
-        return internalDegree == -1 ?
-                internalDegree = Permutations.SchreierVectorCapacity(stabilizerGenerators) : internalDegree;
+        return internalDegree;
     }
 
     @Override

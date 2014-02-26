@@ -586,7 +586,7 @@ public final class PermutationGroup
 
     /**
      * Returns uniformly distributed random permutation from this group.
-     *
+     * <p/>
      * <p>This method uses BSGS.</p>
      *
      * @param generator random generator to be used in generation of random permutation
@@ -723,11 +723,10 @@ public final class PermutationGroup
             return this;
 
         set = MathUtils.getSortedDistinct(set.clone());
-        int newDegree = Math.max(internalDegree, set[set.length - 1] + 1);
         ArraysUtils.quickSort(set, ordering());
 
         ArrayList<BSGSCandidateElement> bsgs = getBSGSCandidate();
-        AlgorithmsBase.rebase(bsgs, set, newDegree);
+        AlgorithmsBase.rebase(bsgs, set);
 
         if (bsgs.size() <= set.length)
             return createPermutationGroupFromBSGS(TRIVIAL_BSGS);
@@ -755,8 +754,7 @@ public final class PermutationGroup
         ArraysUtils.quickSort(newBase, ordering());
 
         ArrayList<BSGSCandidateElement> bsgs = getBSGSCandidate();
-        int tempDegree = Math.max(internalDegree, set[set.length - 1] + 1);
-        AlgorithmsBase.rebase(bsgs, newBase, tempDegree);
+        AlgorithmsBase.rebase(bsgs, newBase);
 
         if (bsgs.size() <= newBase.length)
             return createPermutationGroupFromBSGS(TRIVIAL_BSGS);
@@ -835,7 +833,7 @@ public final class PermutationGroup
                         RandomPermutation.random(closureSource));
 
                 if (!AlgorithmsBase.membershipTest(closure, c)) {
-                    closure.get(0).stabilizerGenerators.add(c);
+                    closure.get(0).addStabilizer(c);
                     //todo remove after fix Schreier vector length
                     if (subgroup.internalDegree < c.internalDegree()) {
                         //if we add new generator - be sure that Schreier vector has appropriate length
@@ -851,7 +849,7 @@ public final class PermutationGroup
             // if some element belongs to closure, the the result of membership test will be guaranteed true (nos such
             // guarantee in the case of false).
             if (added)
-                AlgorithmsBase.RandomSchreierSimsAlgorithm(closure, NORMAL_CLOSURE_CONFIDENCE_LEVEL, internalDegree, CC.getRandomGenerator());
+                AlgorithmsBase.RandomSchreierSimsAlgorithm(closure, NORMAL_CLOSURE_CONFIDENCE_LEVEL, CC.getRandomGenerator());
             //testing closure
             completed = true;
             for (Permutation generator : generators)
@@ -863,7 +861,7 @@ public final class PermutationGroup
         }
         //check BSGS
         if (globalAdded)
-            AlgorithmsBase.SchreierSimsAlgorithm(closure, internalDegree);
+            AlgorithmsBase.SchreierSimsAlgorithm(closure);
         return createPermutationGroupFromBSGS(asBSGSList(closure));
     }
 
@@ -920,7 +918,7 @@ public final class PermutationGroup
         //so at each level l < set.length we test that g(β_l) ∈ set, and if l >= set.length, then g(β_l) !∈ set
         ArraysUtils.quickSort(set, ordering());
         ArrayList<BSGSCandidateElement> bsgs = getBSGSCandidate();
-        AlgorithmsBase.rebase(bsgs, set, internalDegree);
+        AlgorithmsBase.rebase(bsgs, set);
 
         //sorting set according to natural ordering
         Arrays.sort(set);
@@ -1128,7 +1126,7 @@ public final class PermutationGroup
             if (bsgs.get(i).basePoint == from && bsgs.get(i).belongsToOrbit(to))
                 return bsgs.get(i).getTransversalOf(to);
         ArrayList<BSGSCandidateElement> bsgs_c = asBSGSCandidatesList(bsgs);
-        AlgorithmsBase.changeBasePointWithTranspositions(bsgs_c, 0, from, internalDegree);
+        AlgorithmsBase.changeBasePointWithTranspositions(bsgs_c, 0, from);
         return bsgs_c.get(0).getTransversalOf(to);
     }
 
@@ -1173,7 +1171,7 @@ public final class PermutationGroup
         ArrayList<BSGSCandidateElement> bsgs = getBSGSCandidate();
         int newDegree = Math.max(internalDegree, Math.max(ArraysUtils.max(from) + 1, ArraysUtils.max(to) + 1));
 
-        AlgorithmsBacktrack.rebaseWithRedundancy(bsgs, _from_, newDegree);
+        AlgorithmsBacktrack.rebaseWithRedundancy(bsgs, _from_, internalDegree);
 
         SearchForMapping mapping = new SearchForMapping(_from_, _to_);
         return new BacktrackSearch(bsgs, mapping, mapping);
@@ -1286,7 +1284,7 @@ public final class PermutationGroup
         }
 
         final ArrayList<BSGSCandidateElement> group_bsgs = getBSGSCandidate();
-        AlgorithmsBase.rebase(group_bsgs, base, internalDegree);
+        AlgorithmsBase.rebase(group_bsgs, base);
 
         final ArrayList<BSGSCandidateElement> subgroup_bsgs = subgroup.getBSGSCandidate();
         AlgorithmsBacktrack.rebaseWithRedundancy(subgroup_bsgs, base, internalDegree);

@@ -60,7 +60,7 @@ final class SchreierVector {
 
     public void set(int position, int num) {
         if (position >= data.length)
-            ensureCapacity(position);
+            ensureCapacity(position + 1);
         data[position] = num;
     }
 

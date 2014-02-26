@@ -164,6 +164,13 @@ public interface Permutation extends Comparable<Permutation> {
     public Permutation toSymmetry();
 
     /**
+     * Changes sign (symmetry to antisymmetry and vice versa) of this permutation
+     *
+     * @return same permutation with changed sign
+     */
+    public Permutation negate();
+
+    /**
      * Returns the result of  {@code this * other}. Applying the resulting permutation is equivalent to applying
      * {@code other} after {@code this}.
      *

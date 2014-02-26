@@ -81,6 +81,11 @@ public final class BSGSCandidateElement extends BSGSElement {
         super(basePoint, stabilizerGenerators, schreierVector, orbitList);
     }
 
+    public void addStabilizer(Permutation stabilizer) {
+        internalDegree = Math.max(internalDegree, stabilizer.internalDegree());
+        stabilizerGenerators.add(stabilizer);
+        recalculateOrbitAndSchreierVector();
+    }
 
     /**
      * Calculates Schreier vector according to the algorithm ORBITSV in Sec. 4.1.1 of  <b>[Holt05]</b>

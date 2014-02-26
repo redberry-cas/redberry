@@ -134,6 +134,11 @@ public final class PermutationOneLineInt implements Permutation {
     }
 
     @Override
+    public PermutationOneLineInt negate() {
+        return new PermutationOneLineInt(false, antisymmetry ^ true, internalDegree, permutation);
+    }
+
+    @Override
     public int[] oneLine() {
         return permutation.clone();
     }

@@ -117,6 +117,11 @@ public final class PermutationOneLineShort implements Permutation {
     }
 
     @Override
+    public PermutationOneLineShort negate() {
+        return new PermutationOneLineShort(false, antisymmetry ^ true, internalDegree, permutation);
+    }
+
+    @Override
     public int[] oneLine() {
         return short2int(permutation);
     }
