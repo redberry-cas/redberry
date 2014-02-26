@@ -194,7 +194,7 @@ public class LeviCivitaSimplifyTransformation implements Transformation {
             int[] nonPermutableArray = nonPermutableList.toArray();
 
             //symmetries of eps indices, which are contracted with other product (also totally antisymmetric)
-            Map<IntArray, Boolean> symmetries = getEpsilonSymmetries(indices.length);
+            Map<Permutation, Boolean> symmetries = getEpsilonSymmetries(indices.length);
 
             //symmetries of product, which is contracted with Levi-Civita
             MappingsPort port = IndexMappings.createPort(temp, temp);
@@ -209,7 +209,7 @@ public class LeviCivitaSimplifyTransformation implements Transformation {
                 if (!checkNonPermutingPositions(sym, nonPermutableArray))
                     continue;
                 //bingo!
-                if (sym.antisymmetry() != symmetries.get(sym.oneLineImmutable()))
+                if (sym.antisymmetry() != symmetries.get(sym))
                     return Complex.ZERO;
             }
 
@@ -302,27 +302,20 @@ public class LeviCivitaSimplifyTransformation implements Transformation {
     }
 
 
-    private static Map<IntArray, Boolean> getEpsilonSymmetries(int indicesSize) {
-        Map<IntArray, Boolean> symmetries = cachedLeviCivitaSymmetries.get(indicesSize);
+    private static Map<Permutation, Boolean> getEpsilonSymmetries(int indicesSize) {
+        Map<Permutation, Boolean> symmetries = cachedLeviCivitaSymmetries.get(indicesSize);
         if (symmetries != null)
             return symmetries;
         symmetries = new HashMap<>();
-        ArrayList<Permutation> ss = new ArrayList<>();
-        ss.add(Permutations.createPermutation(true, Permutations.createTransposition(indicesSize, 0, 1)));
-        if (indicesSize % 2 == 0)
-            ss.add(Permutations.createPermutation(true, Permutations.createCycle(indicesSize)));
-        else
-            ss.add(Permutations.createPermutation(false, Permutations.createCycle(indicesSize)));
-
-        PermutationGroup lc = PermutationGroup.createPermutationGroup(ss);
+        PermutationGroup lc = PermutationGroup.antisymmetricGroup(indicesSize);
         for (Permutation symmetry : lc)
-            symmetries.put(symmetry.oneLineImmutable(), symmetry.antisymmetry());
+            symmetries.put(symmetry.toSymmetry(), symmetry.antisymmetry());
         cachedLeviCivitaSymmetries.put(indicesSize, symmetries);
         return symmetries;
     }
 
     private static TIntObjectHashMap<ParseToken> cachedLeviCivitaSelfContractions = new TIntObjectHashMap<>();
-    private static TIntObjectHashMap<Map<IntArray, Boolean>> cachedLeviCivitaSymmetries = new TIntObjectHashMap<>();
+    private static TIntObjectHashMap<Map<Permutation, Boolean>> cachedLeviCivitaSymmetries = new TIntObjectHashMap<>();
 
     private static void checkLeviCivita(SimpleTensor LeviCivita) {
         SimpleIndices indices = LeviCivita.getIndices();

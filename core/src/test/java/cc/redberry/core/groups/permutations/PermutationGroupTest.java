@@ -807,11 +807,7 @@ public class PermutationGroupTest extends AbstractTestClass {
         for (int degree = 3; degree < 150; degree += 5) {
             for (int i = 0; i < gap.nrPrimitiveGroups(degree); i += 2) {
                 gap.evaluate("g:= PrimitiveGroup( " + degree + ", " + (i + 1) + ");");
-                System.out.println(degree + "   " + i);
                 PermutationGroup p = gap.primitiveGroup(degree, i);
-                System.out.println(gap.evaluate("g;"));
-                System.out.println(gap.evaluateToBoolean("IsNaturalSymmetricGroup(g);"));
-                System.out.println(p.isSymmetric());
                 assertEquals(gap.evaluateToBoolean("IsNaturalSymmetricGroup(g);"), p.isSymmetric());
                 assertEquals(gap.evaluateToBoolean("IsNaturalAlternatingGroup(g);"), p.isAlternating());
             }
@@ -874,7 +870,7 @@ public class PermutationGroupTest extends AbstractTestClass {
     public void testCentralizer1() throws Exception {
         PermutationGroup s4 = PermutationGroup.symmetricGroup(4);
 
-        PermutationGroup s2 = PermutationGroup.createPermutationGroup(Permutations.createPermutation(1, 0, 2, 3));
+        PermutationGroup s2 = PermutationGroup.createPermutationGroup(Permutations.createPermutation(1, 0));
         PermutationGroup v4 = s4.centralizerOf(s2);
         PermutationGroup expected = PermutationGroup.createPermutationGroup(
                 Permutations.createPermutation(1, 0, 2, 3),

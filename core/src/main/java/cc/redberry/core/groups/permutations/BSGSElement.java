@@ -54,11 +54,16 @@ public class BSGSElement {
     /**
      * Schreier vector that encodes information about stabilizer of &beta;<sub>i</sub> in G<sup>(i)</sup>.
      */
-    final int[] SchreierVector;
+    final SchreierVector SchreierVector;
     /**
      * List of orbit points.
      */
     final IntArrayList orbitList;
+    /**
+     * Maximum internal degrees of stabilizers
+     */
+    int internalDegree;
+
 
     /**
      * Basic raw constructor.
@@ -67,11 +72,12 @@ public class BSGSElement {
      * @param stabilizerGenerators
      * @param schreierVector
      */
-    BSGSElement(int basePoint, List<Permutation> stabilizerGenerators, int[] schreierVector, IntArrayList orbitList) {
+    BSGSElement(int basePoint, List<Permutation> stabilizerGenerators, SchreierVector schreierVector, IntArrayList orbitList) {
         this.basePoint = basePoint;
         this.stabilizerGenerators = stabilizerGenerators;
         this.SchreierVector = schreierVector;
         this.orbitList = orbitList;
+        this.internalDegree = Permutations.SchreierVectorCapacity(stabilizerGenerators);
     }
 
     /**
@@ -105,12 +111,12 @@ public class BSGSElement {
      * @return inverse of the element that maps this base point to the specified point.
      */
     public Permutation getInverseTransversalOf(int point) {
-        if (point >= SchreierVector.length || SchreierVector[point] == -2)
+        if (SchreierVector.get(point) == -2)
             throw new IllegalArgumentException("Specified point does not belong to orbit of this base element.");
-        Permutation temp = Permutations.createIdentityPermutation(SchreierVector.length);
-        while (SchreierVector[temp.newIndexOf(point)] != -1)
+        Permutation temp = Permutations.createIdentityPermutation(SchreierVector.length());
+        while (SchreierVector.get(temp.newIndexOf(point)) != -1)
             temp = temp.compositionWithInverse(
-                    stabilizerGenerators.get(SchreierVector[temp.newIndexOf(point)]));
+                    stabilizerGenerators.get(SchreierVector.get(temp.newIndexOf(point))));
         return temp;
     }
 
@@ -130,9 +136,7 @@ public class BSGSElement {
      * @return true if specified point belongs to the orbit of this &beta;<sub>i</sub>.
      */
     public boolean belongsToOrbit(int point) {
-        if (point >= SchreierVector.length)
-            return false;
-        return SchreierVector[point] != -2;
+        return SchreierVector.get(point) != -2;
     }
 
     /**
@@ -142,7 +146,7 @@ public class BSGSElement {
      */
     public BSGSCandidateElement asBSGSCandidateElement() {
         return new BSGSCandidateElement(basePoint,
-                new ArrayList<>(stabilizerGenerators), new int[SchreierVector.length]);
+                new ArrayList<>(stabilizerGenerators), SchreierVector.length());
     }
 
     /**
@@ -174,11 +178,8 @@ public class BSGSElement {
 //        return stabilizerGenerators.get(0).degree();
 //    }
 
-    int maximumMovedPoint = -1;
-
-    public int maximumMovedPoint() {
-        return maximumMovedPoint == -1 ?
-                maximumMovedPoint = Permutations.internalDegree(stabilizerGenerators) : maximumMovedPoint;
+    public int internalDegree() {
+        return internalDegree;
     }
 
     @Override

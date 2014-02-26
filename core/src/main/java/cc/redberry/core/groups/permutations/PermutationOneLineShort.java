@@ -112,6 +112,16 @@ public final class PermutationOneLineShort implements Permutation {
     }
 
     @Override
+    public Permutation toSymmetry() {
+        return antisymmetry ? new PermutationOneLineShort(isIdentity, false, internalDegree, permutation, true) : this;
+    }
+
+    @Override
+    public PermutationOneLineShort negate() {
+        return new PermutationOneLineShort(false, antisymmetry ^ true, internalDegree, permutation);
+    }
+
+    @Override
     public int[] oneLine() {
         return short2int(permutation);
     }
@@ -359,8 +369,9 @@ public final class PermutationOneLineShort implements Permutation {
         Permutation that = (Permutation) o;
         if (antisymmetry != that.antisymmetry())
             return false;
-        final int max = Math.max(internalDegree(), that.internalDegree());
-        for (int i = 0; i < max; ++i)
+        if (internalDegree != that.internalDegree())
+            return false;
+        for (int i = 0; i < internalDegree; ++i)
             if (newIndexOf(i) != that.newIndexOf(i))
                 return false;
         return true;

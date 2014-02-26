@@ -41,8 +41,8 @@ public class InducedOrderingOfPermutations implements Comparator<Permutation> {
      *
      * @param base base of permutation group
      */
-    public InducedOrderingOfPermutations(final int[] base, final int degree) {
-        this.inducedOrdering = new InducedOrdering(base, degree);
+    public InducedOrderingOfPermutations(final int[] base) {
+        this.inducedOrdering = new InducedOrdering(base);
         this.base = base;
     }
 

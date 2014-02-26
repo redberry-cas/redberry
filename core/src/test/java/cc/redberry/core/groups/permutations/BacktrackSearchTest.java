@@ -52,7 +52,7 @@ public class BacktrackSearchTest extends AbstractTestClass {
 
 
         BacktrackSearch search = new BacktrackSearch(bsgs);
-        InducedOrderingOfPermutations comparator = new InducedOrderingOfPermutations(getBaseAsArray(bsgs), 5);
+        InducedOrderingOfPermutations comparator = new InducedOrderingOfPermutations(getBaseAsArray(bsgs));
 
         Permutation previous = null, current;
         int i = 0;
@@ -80,7 +80,7 @@ public class BacktrackSearchTest extends AbstractTestClass {
 
 
         PermutationLessThenTestComparator comparator = new PermutationLessThenTestComparator(getBaseAsArray(bsgs),
-                bsgs.get(0).maximumMovedPoint());
+                bsgs.get(0).internalDegree());
         BacktrackSearch search = new BacktrackSearch(bsgs);
 
         Permutation previous = null, current;
@@ -171,7 +171,7 @@ public class BacktrackSearchTest extends AbstractTestClass {
 
                 BacktrackSearch search = new BacktrackSearch(bsgs);
                 PermutationLessThenTestComparator comparator = new PermutationLessThenTestComparator(getBaseAsArray(bsgs),
-                        bsgs.get(0).maximumMovedPoint());
+                        bsgs.get(0).internalDegree());
 
                 Permutation previous = null, current;
                 int count = 0;
@@ -282,7 +282,7 @@ public class BacktrackSearchTest extends AbstractTestClass {
      * @param function some function that will be executes on each element
      */
     public static void printElements(List<BSGSElement> bsgs, final PFunction function) {
-        IntComparator comparator = new InducedOrdering(getBaseAsArray(bsgs), bsgs.get(0).maximumMovedPoint());
+        IntComparator comparator = new InducedOrdering(getBaseAsArray(bsgs));
 
         int k = bsgs.size();
         int[] c = new int[k];
@@ -403,7 +403,7 @@ public class BacktrackSearchTest extends AbstractTestClass {
             this.base = base;
             this.sortedBase = base.clone();
             Arrays.sort(sortedBase);
-            this.baseComparator = new InducedOrdering(base, degree);
+            this.baseComparator = new InducedOrdering(base);
         }
 
         @Override

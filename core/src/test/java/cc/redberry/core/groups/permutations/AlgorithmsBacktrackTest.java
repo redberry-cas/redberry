@@ -121,7 +121,7 @@ public class AlgorithmsBacktrackTest extends AbstractTestClass {
         Permutation a7 = Permutations.createPermutation(3, 2, 1, 0, 4, 5);
         final Permutation[] expected = {a0, a1, a2, a3, a4, a5, a6, a7};
 
-        Comparator<Permutation> permutationComparator = new InducedOrderingOfPermutations(base, a.length());
+        Comparator<Permutation> permutationComparator = new InducedOrderingOfPermutations(base);
         Arrays.sort(expected, permutationComparator);
 
         assertEquals(BigInteger.valueOf(8), calculateOrder(subgroup));
@@ -404,7 +404,7 @@ public class AlgorithmsBacktrackTest extends AbstractTestClass {
 
         PermutationGroup pg = PermutationGroup.createPermutationGroup(gen0, gen1);
         int[] base = pg.getBase();
-        InducedOrderingOfPermutations pordering = new InducedOrderingOfPermutations(base, pg.degree());
+        InducedOrderingOfPermutations pordering = new InducedOrderingOfPermutations(base);
         int[] set = {3, 7};
 
         PermutationGroup stabilizer = testSearchStabilizerRaw(pg, set);
@@ -537,13 +537,13 @@ public class AlgorithmsBacktrackTest extends AbstractTestClass {
     }
 
     public static PermutationGroup testSearchStabilizerRaw(List<? extends BSGSElement> bsgs, int[] set) {
-        int degree = bsgs.get(0).maximumMovedPoint();
+        int degree = bsgs.get(0).internalDegree();
         int[] base = getBaseAsArray(bsgs);
         RawSetwiseStabilizerCriteria rw = new RawSetwiseStabilizerCriteria(set, base);
 
         //empty initial subgroup
         ArrayList<BSGSCandidateElement> subgroup = new ArrayList<>();
-        subgroup.add(new BSGSCandidateElement(0, new ArrayList<Permutation>(), new int[degree]));
+        subgroup.add(new BSGSCandidateElement(0, new ArrayList<Permutation>(), degree));
         subgroup.get(0).stabilizerGenerators.add(Permutations.createIdentityPermutation(degree));
 
         AlgorithmsBacktrack.subgroupSearch(bsgs, subgroup, rw, rw);
