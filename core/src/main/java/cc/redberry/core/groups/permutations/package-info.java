@@ -26,8 +26,10 @@
  * <p><big><b>Permutations</b></big></p>
  * <p>
  * The interface {@link cc.redberry.core.groups.permutations.Permutation} describes a wide functionality of a single
- * permutation; it has only one implementation ---  {@link cc.redberry.core.groups.permutations.PermutationOneLineInt}
- * which provides the most balanced proportion between performance and memory usage.
+ * permutation; it has several implementations ({@link cc.redberry.core.groups.permutations.PermutationOneLineByte},
+ * {@link cc.redberry.core.groups.permutations.PermutationOneLineInt} etc.) and in order to create permutation in the
+ * appropriate implementation (from the stand point of memory consumption) one should use static methods {@code createPermutation(...)} in
+ * {@link cc.redberry.core.groups.permutations.Permutations} class.
  * <p><b>Symmetries and antisymmetries</b>
  * In many physical applications, permutations arise as symmetries of some mathematical structures. For example,
  * consider a function of 3 variables with the following property: f(x,y,z) == f(z,x,y). This symmetry can be put in

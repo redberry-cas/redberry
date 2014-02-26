@@ -160,7 +160,7 @@ public final class AlgorithmsBase {
      * @return raw BSGS candidate
      */
     public static List<BSGSCandidateElement> createRawBSGSCandidate(final List<Permutation> generators) {
-        return createRawBSGSCandidate(generators, Permutations.SchreierVectorCapacity(generators));
+        return createRawBSGSCandidate(generators, Permutations.internalDegree(generators));
     }
 
 
@@ -172,7 +172,7 @@ public final class AlgorithmsBase {
      *
      * @param generators group generators
      * @param degree     degree of group used to create Schreier vectors of proper length
-     *                   (see {@link cc.redberry.core.groups.permutations.Permutations#SchreierVectorCapacity(java.util.List)})
+     *                   (see {@link cc.redberry.core.groups.permutations.Permutations#internalDegree(java.util.List)})
      * @return raw BSGS candidate
      */
     public static List<BSGSCandidateElement> createRawBSGSCandidate(final List<Permutation> generators, int degree) {
@@ -226,7 +226,7 @@ public final class AlgorithmsBase {
      */
     public static List<BSGSCandidateElement> createRawBSGSCandidate(final int[] knownBase,
                                                                     final List<Permutation> generators) {
-        return createRawBSGSCandidate(knownBase, generators, Permutations.SchreierVectorCapacity(generators));
+        return createRawBSGSCandidate(knownBase, generators, Permutations.internalDegree(generators));
     }
 
     /**
@@ -239,7 +239,7 @@ public final class AlgorithmsBase {
      * @param knownBase  some proposed base points
      * @param generators group generators
      * @param degree     degree of group used to create Schreier vectors of proper length
-     *                   (see {@link cc.redberry.core.groups.permutations.Permutations#SchreierVectorCapacity(java.util.List)})
+     *                   (see {@link cc.redberry.core.groups.permutations.Permutations#internalDegree(java.util.List)})
      * @return raw BSGS candidate
      */
     public static List<BSGSCandidateElement> createRawBSGSCandidate(final int[] knownBase,
@@ -311,7 +311,7 @@ public final class AlgorithmsBase {
      * @see #SchreierSimsAlgorithm(java.util.ArrayList)
      */
     public static List<BSGSElement> createBSGSList(final List<Permutation> generators) {
-        return createBSGSList(generators, Permutations.SchreierVectorCapacity(generators));
+        return createBSGSList(generators, Permutations.internalDegree(generators));
     }
 
     /**
@@ -329,7 +329,7 @@ public final class AlgorithmsBase {
      *
      * @param generators a set of group generators
      * @param degree     degree of group used to create Schreier vectors of proper length
-     *                   (see {@link cc.redberry.core.groups.permutations.Permutations#SchreierVectorCapacity(java.util.List)})
+     *                   (see {@link cc.redberry.core.groups.permutations.Permutations#internalDegree(java.util.List)})
      * @return BSGS represented as array of its element
      * @throws cc.redberry.core.groups.permutations.InconsistentGeneratorsException if algorithm detects that specified
      *                                                                              generators are inconsistent (due to antisymmetries)
@@ -367,7 +367,7 @@ public final class AlgorithmsBase {
      * @see #SchreierSimsAlgorithm(java.util.ArrayList)
      */
     public static List<BSGSElement> createBSGSList(final int[] knownBase, final List<Permutation> generators) {
-        return createBSGSList(knownBase, generators, Permutations.SchreierVectorCapacity(generators));
+        return createBSGSList(knownBase, generators, Permutations.internalDegree(generators));
     }
 
     /**
@@ -386,7 +386,7 @@ public final class AlgorithmsBase {
      * @param knownBase  proposed base points
      * @param generators a set of group generators
      * @param degree     degree of group used to create Schreier vectors of proper length
-     *                   (see {@link cc.redberry.core.groups.permutations.Permutations#SchreierVectorCapacity(java.util.List)})
+     *                   (see {@link cc.redberry.core.groups.permutations.Permutations#internalDegree(java.util.List)})
      * @return BSGS represented as array of its element
      * @throws cc.redberry.core.groups.permutations.InconsistentGeneratorsException if algorithm detects that specified
      *                                                                              generators are inconsistent (due to antisymmetries)
@@ -1187,7 +1187,7 @@ public final class AlgorithmsBase {
      * from the second.
      *
      * @param bsgs1 BSGS of first group
-     * @param bsgs1 BSGS of second group
+     * @param bsgs2 BSGS of second group
      * @return direct product first group × second group
      */
     public static ArrayList<BSGSElement> directProduct(List<? extends BSGSElement> bsgs1, List<? extends BSGSElement> bsgs2) {
@@ -1250,7 +1250,7 @@ public final class AlgorithmsBase {
         generators.addAll(bsgs1.get(0).stabilizerGenerators);
         generators.addAll(bsgs1.get(0).stabilizerGenerators);
 
-        int degree = Math.max(ArraysUtils.max(base) + 1, Permutations.SchreierVectorCapacity(generators));
+        int degree = Math.max(ArraysUtils.max(base) + 1, Permutations.internalDegree(generators));
         ArrayList<BSGSCandidateElement> bsgs = (ArrayList) createRawBSGSCandidate(base, generators, degree);
         SchreierSimsAlgorithm(bsgs);
         return bsgs;

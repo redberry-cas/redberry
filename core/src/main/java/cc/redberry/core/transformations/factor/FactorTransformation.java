@@ -79,7 +79,7 @@ public class FactorTransformation implements Transformation {
      * @param tensor              tensor
      * @param factorScalars       if false, then only symbolic (without any indices) sub-tensors will be factorized
      * @param factorizationEngine factorization engine
-     * @return
+     * @return result
      */
     public static Tensor factor(Tensor tensor, boolean factorScalars, FactorizationEngine factorizationEngine) {
         if (factorScalars) {
@@ -101,7 +101,7 @@ public class FactorTransformation implements Transformation {
      *
      * @param tensor        tensor
      * @param factorScalars if false, then only symbolic (without any indices) sub-tensors will be factorized
-     * @return
+     * @return result
      */
     public static Tensor factor(Tensor tensor, boolean factorScalars) {
         return factor(tensor, factorScalars, JasFactor.ENGINE);

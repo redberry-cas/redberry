@@ -61,21 +61,12 @@
  *         <td>Enumerates all permutations of dimension N ( N! permutations) and allows to affect on the
  *              enumeration order.</td>
  *     </tr>
- *     <tr>
- *         <td>{@link cc.redberry.core.combinatorics.IntPermutationsSpanGenerator}</td>
- *         <td>Enumerates all permutations from the subgroup of a symmetric group, which is defined by a generating set.</td>
- *     </tr>
  * </table>
- * </p>
- *
- * <p><b><i>Permutations.</i></b> Permutations are represented in the one-line notation and implemented in
- * {@link cc.redberry.core.combinatorics.Permutation}. Class {@link cc.redberry.core.combinatorics.Symmetry} implements a permutational symmetry. Class
- * {@link cc.redberry.core.combinatorics.PermutationsSpanIterator} allows to enumerate all permutations (or symmetries) from a given group, defined by
- * a generating set.
  * </p>
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  * @since 1.0
+ * @see cc.redberry.core.groups.permutations
  */
 package cc.redberry.core.combinatorics;

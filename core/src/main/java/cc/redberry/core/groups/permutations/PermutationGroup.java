@@ -206,7 +206,7 @@ public final class PermutationGroup
      * @param generators generating set
      */
     public static PermutationGroup createPermutationGroup(List<Permutation> generators) {
-        int degree = Permutations.SchreierVectorCapacity(generators);
+        int degree = Permutations.internalDegree(generators);
         if (degree == 0)
             return TRIVIAL_GROUP;
         return new PermutationGroup(generators, degree, 0);

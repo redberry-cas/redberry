@@ -193,8 +193,8 @@ public final class ApplyIndexMapping {
     /**
      * Minimizes total dummies count.
      *
-     * @param t
-     * @return
+     * @param t tensor
+     * @return result
      */
     public static Tensor optimizeDummies(Tensor t) {
         if (t instanceof SimpleTensor || t instanceof ScalarFunction)

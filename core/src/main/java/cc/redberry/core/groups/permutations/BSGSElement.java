@@ -77,7 +77,7 @@ public class BSGSElement {
         this.stabilizerGenerators = stabilizerGenerators;
         this.SchreierVector = schreierVector;
         this.orbitList = orbitList;
-        this.internalDegree = Permutations.SchreierVectorCapacity(stabilizerGenerators);
+        this.internalDegree = Permutations.internalDegree(stabilizerGenerators);
     }
 
     /**

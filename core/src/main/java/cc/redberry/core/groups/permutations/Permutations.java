@@ -44,6 +44,12 @@ public final class Permutations {
     private Permutations() {
     }
 
+    /**
+     * Calculates <i>degree</i> of permutation, i.e.larges point moved by specified permutation plus one.
+     *
+     * @param permutation permutation
+     * @return larges point moved by specified permutation plus one
+     */
     public static int internalDegree(final int[] permutation) {
         int i;
         for (i = permutation.length - 1; i >= 0; --i)
@@ -52,6 +58,12 @@ public final class Permutations {
         return i + 1;
     }
 
+    /**
+     * Calculates <i>degree</i> of permutation, i.e.larges point moved by specified permutation plus one.
+     *
+     * @param permutation permutation
+     * @return larges point moved by specified permutation plus one
+     */
     public static short internalDegree(final short[] permutation) {
         int i;
         for (i = permutation.length - 1; i >= 0; --i)
@@ -60,6 +72,12 @@ public final class Permutations {
         return (short) (i + 1);
     }
 
+    /**
+     * Calculates <i>degree</i> of permutation, i.e.larges point moved by specified permutation plus one.
+     *
+     * @param permutation permutation
+     * @return larges point moved by specified permutation plus one
+     */
     public static byte internalDegree(final byte[] permutation) {
         int i;
         for (i = permutation.length - 1; i >= 0; --i)
@@ -68,14 +86,14 @@ public final class Permutations {
         return (byte) (i + 1);
     }
 
-//    public static int internalDegree(final List<? extends Permutation> permutations) {
-//        int r = 0;
-//        for (Permutation p : permutations)
-//            r = Math.max(r, p.internalDegree());
-//        return r;
-//    }
-
-    public static int SchreierVectorCapacity(final List<? extends Permutation> permutations) {
+    /**
+     * Calculates common <i>degree</i> of specified permutations, i.e.larges point moved by specified permutations plus
+     * one.
+     *
+     * @param permutations permutations
+     * @return larges point moved by specified permutations plus one
+     */
+    public static int internalDegree(final List<? extends Permutation> permutations) {
         int r = 0;
         for (Permutation p : permutations)
             r = Math.max(r, p.internalDegree());
@@ -552,7 +570,7 @@ public final class Permutations {
      * @return orbit of specified point
      */
     public static IntArrayList getOrbitList(List<Permutation> generators, int point) {
-        return getOrbitList(generators, point, SchreierVectorCapacity(generators));
+        return getOrbitList(generators, point, internalDegree(generators));
     }
 
     /**
@@ -611,7 +629,7 @@ public final class Permutations {
      * @return size of point orbit
      */
     public static int getOrbitSize(List<Permutation> generators, int point) {
-        return getOrbitList(generators, point, SchreierVectorCapacity(generators)).size();
+        return getOrbitList(generators, point, internalDegree(generators)).size();
     }
 
     /**

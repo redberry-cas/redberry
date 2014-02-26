@@ -50,7 +50,7 @@ final class BruteForcePermutationIterator implements Iterator<Permutation> {
         set = new TreeSet<>(JUST_PERMUTATION_COMPARATOR);
         this.upperLayer = new ArrayList<>();
         //noinspection unchecked
-        this.upperLayer.add(Permutations.createIdentityPermutation(Permutations.SchreierVectorCapacity(permutations)));
+        this.upperLayer.add(Permutations.createIdentityPermutation(Permutations.internalDegree(permutations)));
         this.lowerLayer = permutations;
     }
 

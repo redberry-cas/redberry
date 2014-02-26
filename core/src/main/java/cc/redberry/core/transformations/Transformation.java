@@ -57,7 +57,7 @@ public interface Transformation {
          *
          * @param tensor
          * @param transformation
-         * @return
+         * @return result
          */
         public static Tensor applyToEachChild(Tensor tensor, final Transformation transformation) {
             TensorBuilder builder = null;
