@@ -870,7 +870,7 @@ public class PermutationGroupTest extends AbstractTestClass {
     public void testCentralizer1() throws Exception {
         PermutationGroup s4 = PermutationGroup.symmetricGroup(4);
 
-        PermutationGroup s2 = PermutationGroup.createPermutationGroup(Permutations.createPermutation(1, 0, 2, 3));
+        PermutationGroup s2 = PermutationGroup.createPermutationGroup(Permutations.createPermutation(1, 0));
         PermutationGroup v4 = s4.centralizerOf(s2);
         PermutationGroup expected = PermutationGroup.createPermutationGroup(
                 Permutations.createPermutation(1, 0, 2, 3),

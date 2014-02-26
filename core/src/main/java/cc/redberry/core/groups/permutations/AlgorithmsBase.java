@@ -38,11 +38,11 @@ import static cc.redberry.core.groups.permutations.RandomPermutation.*;
 /**
  * Algorithms for constructing, modifying and manipulating base and strong generating set (BSGS) of permutation group
  * including Schreier-Sims algorithm and its randomized versions, algorithms for changing base of BSGS, algorithms for
- * creating BSGS of symmetric and alternating groups and many other utility methods.
+ * creating BSGS of symmetric and alternating groups and other utility methods.
  * <p><b>BSGS data structure</b>
  * The data structure used for representing BSGS is an array list of
  * BSGS elements (see {@link cc.redberry.core.groups.permutations.BSGSElement}); <i>i-th</i> item in this list
- * contains <i>i-th</i> point of base and <i>i-th</i> basic stabilizer in stabilizers chain (pointwise stabilizer of all
+ * contains <i>i-th</i> base point and <i>i-th</i> basic stabilizer in stabilizers chain (pointwise stabilizer of all
  * points before <i>i-th</i> point, exclusive), represented by its generators.
  * </p>
  * <p> The BSGS structure appears in two forms:
@@ -50,16 +50,16 @@ import static cc.redberry.core.groups.permutations.RandomPermutation.*;
  * {@link cc.redberry.core.groups.permutations.BSGSCandidateElement}) and <i>immutable</i> --- {@code List<BSGSElement>}
  * (unmodifiable). The first form is used as a candidate BSGS of permutation group, while the second everywhere
  * considered as a valid BSGS. For illustration, consider the following code:
- * <pre style="background:#f1f1f1;color:#000"> 1:  <span style="color:#a08000">Permutation</span> perm1 <span style="color:#2060a0">=</span> <span style="color:#2060a0">new</span> <span style="color:#a08000">PermutationOneLineInt</span>(<span style="color:#0080a0">1</span>, <span style="color:#0080a0">2</span>, <span style="color:#0080a0">3</span>, <span style="color:#0080a0">4</span>, <span style="color:#0080a0">0</span>);
- * 2:  <span style="color:#a08000">Permutation</span> perm2 <span style="color:#2060a0">=</span> <span style="color:#2060a0">new</span> <span style="color:#a08000">PermutationOneLineInt</span>(<span style="color:#0080a0">1</span>, <span style="color:#0080a0">3</span>, <span style="color:#0080a0">0</span>, <span style="color:#0080a0">4</span>, <span style="color:#0080a0">2</span>);
- * 3:  <span style="color:#406040">//create a candidate BSGS</span>
- * 4:  <span style="color:#a08000">ArrayList&lt;<span style="color:#a08000">BSGSCandidateElement</span>></span> candidate <span style="color:#2060a0">=</span> (<span style="color:#a08000">ArrayList</span>) <span style="color:#a08000">AlgorithmsBase</span><span style="color:#2060a0">.</span>createRawBSGSCandidate(perm1, perm2);
- * 5:  <span style="color:#406040">//apply randomized Schreier-Sims algorithm to candidate BSGS (add missing base points and basic stabilizers)</span>
- * 6:  <span style="color:#a08000">AlgorithmsBase</span><span style="color:#2060a0">.</span>RandomSchreierSimsAlgorithm(candidate, <span style="color:#0080a0">0.9999</span>, <span style="color:#2060a0">new</span> <span style="color:#a08000">Well1024a</span>());
- * 7:  <span style="color:#406040">//if our random Schreier-Sims was not enough</span>
- * 8:  <span style="color:#2060a0">if</span> (<span style="color:#2060a0">!</span><span style="color:#a08000">AlgorithmsBase</span><span style="color:#2060a0">.</span>isBSGS(candidate))
- * 9:  <span style="color:#a08000">    AlgorithmsBase</span><span style="color:#2060a0">.</span>SchreierSimsAlgorithm(candidate);
- * 10: <span style="color:#a08000">List&lt;<span style="color:#a08000">BSGSElement</span>></span> bsgs <span style="color:#2060a0">=</span> <span style="color:#a08000">AlgorithmsBase</span><span style="color:#2060a0">.</span>asBSGSList(candidate);
+ * <pre style="background:#f1f1f1;color:#000"> <span style="color:#0080a0">1</span><span style="color:#2060a0">:</span> <span style="color:#a08000">Permutation</span> perm1 <span style="color:#2060a0">=</span> <span style="color:#a08000">Permutations</span><span style="color:#2060a0">.</span>createPermutation(<span style="color:#0080a0">1</span>, <span style="color:#0080a0">2</span>, <span style="color:#0080a0">3</span>, <span style="color:#0080a0">4</span>, <span style="color:#0080a0">0</span>);
+ * <span style="color:#0080a0">2</span><span style="color:#2060a0">:</span> <span style="color:#a08000">Permutation</span> perm2 <span style="color:#2060a0">=</span> <span style="color:#a08000">Permutations</span><span style="color:#2060a0">.</span>createPermutation(<span style="color:#0080a0">1</span>, <span style="color:#0080a0">3</span>, <span style="color:#0080a0">0</span>, <span style="color:#0080a0">4</span>, <span style="color:#0080a0">2</span>);
+ * <span style="color:#0080a0">3</span><span style="color:#2060a0">:</span> <span style="color:#406040">//create a candidate BSGS</span>
+ * <span style="color:#0080a0">4</span><span style="color:#2060a0">:</span> <span style="color:#a08000">ArrayList&lt;<span style="color:#a08000">BSGSCandidateElement</span>></span> candidate <span style="color:#2060a0">=</span> (<span style="color:#a08000">ArrayList</span>) <span style="color:#a08000">AlgorithmsBase</span><span style="color:#2060a0">.</span>createRawBSGSCandidate(perm1, perm2);
+ * <span style="color:#0080a0">5</span><span style="color:#2060a0">:</span> <span style="color:#406040">//apply randomized Schreier-Sims algorithm to candidate BSGS (add missing base points and basic stabilizers)</span>
+ * <span style="color:#0080a0">6</span><span style="color:#2060a0">:</span> <span style="color:#a08000">AlgorithmsBase</span><span style="color:#2060a0">.</span>RandomSchreierSimsAlgorithm(candidate, <span style="color:#0080a0">0.9999</span>,  <span style="color:#2060a0">new</span> <span style="color:#a08000">Well1024a</span>());
+ * <span style="color:#0080a0">7</span><span style="color:#2060a0">:</span> <span style="color:#406040">//if our random Schreier-Sims was not enough</span>
+ * <span style="color:#0080a0">8</span><span style="color:#2060a0">:</span> <span style="color:#2060a0">if</span> (<span style="color:#2060a0">!</span><span style="color:#a08000">AlgorithmsBase</span><span style="color:#2060a0">.</span>isBSGS(candidate))
+ * <span style="color:#0080a0">9</span><span style="color:#2060a0">:</span>     <span style="color:#a08000">AlgorithmsBase</span><span style="color:#2060a0">.</span>SchreierSimsAlgorithm(candidate);
+ * <span style="color:#0080a0">10</span><span style="color:#2060a0">:</span> <span style="color:#a08000">List&lt;<span style="color:#a08000">BSGSElement</span>></span> bsgs <span style="color:#2060a0">=</span> <span style="color:#a08000">AlgorithmsBase</span><span style="color:#2060a0">.</span>asBSGSList(candidate);
  * </pre>
  * In this example we construct a very raw candidate BSGS in the line 4 and then apply randomized Schreier-Sims
  * algorithm which modifies it. Still after, there is a very small ~0.01% probability that this candidate is not a real
@@ -140,12 +140,11 @@ public final class AlgorithmsBase {
     /**
      * Creates a raw BSGS candidate represented as list. This method simply takes all distinct points that can be
      * mapped onto another points under any of generators and adjoins these points to a base. If generating set is
-     * empty, or it fixes all points, then this method returns {@code Collections.EMPTY_LIST}, otherwise it returns an
+     * empty or it fixes all points, then this method returns {@code Collections.EMPTY_LIST}, otherwise it returns an
      * {@code ArrayList} which can be further used in Schreier-Sims algorithm.
      *
      * @param generators group generators
      * @return raw BSGS candidate
-     * @throws IllegalArgumentException if not all permutations have same length
      */
     public static List<BSGSCandidateElement> createRawBSGSCandidate(final Permutation... generators) {
         return createRawBSGSCandidate(Arrays.asList(generators));
@@ -154,12 +153,11 @@ public final class AlgorithmsBase {
     /**
      * Creates a raw BSGS candidate represented as list. This method simply takes all distinct points that can be
      * mapped onto another points under any of generators and adjoins these points to a base. If generating set is
-     * empty, or it fixes all points, then this method returns {@code Collections.EMPTY_LIST}, otherwise it returns an
+     * empty or it fixes all points, then this method returns {@code Collections.EMPTY_LIST}, otherwise it returns an
      * {@code ArrayList} which can be further used in Schreier-Sims algorithm.
      *
      * @param generators group generators
      * @return raw BSGS candidate
-     * @throws IllegalArgumentException if not all permutations have same length
      */
     public static List<BSGSCandidateElement> createRawBSGSCandidate(final List<Permutation> generators) {
         return createRawBSGSCandidate(generators, Permutations.SchreierVectorCapacity(generators));
@@ -169,13 +167,13 @@ public final class AlgorithmsBase {
     /**
      * Creates a raw BSGS candidate represented as list. This method simply takes all distinct points that can be
      * mapped onto another points under any of generators and adjoins these points to a base. If generating set is
-     * empty, or it fixes all points, then this method returns {@code Collections.EMPTY_LIST}, otherwise it returns an
+     * empty or it fixes all points, then this method returns {@code Collections.EMPTY_LIST}, otherwise it returns an
      * {@code ArrayList} which can be further used in Schreier-Sims algorithm.
      *
      * @param generators group generators
      * @param degree     degree of group used to create Schreier vectors of proper length
+     *                   (see {@link cc.redberry.core.groups.permutations.Permutations#SchreierVectorCapacity(java.util.List)})
      * @return raw BSGS candidate
-     * @throws IllegalArgumentException if not all permutations have same length
      */
     public static List<BSGSCandidateElement> createRawBSGSCandidate(final List<Permutation> generators, int degree) {
         if (degree == 0)
@@ -225,7 +223,6 @@ public final class AlgorithmsBase {
      * @param knownBase  some proposed base points
      * @param generators group generators
      * @return raw BSGS candidate
-     * @throws IllegalArgumentException if not all permutations have same length
      */
     public static List<BSGSCandidateElement> createRawBSGSCandidate(final int[] knownBase,
                                                                     final List<Permutation> generators) {
@@ -242,8 +239,8 @@ public final class AlgorithmsBase {
      * @param knownBase  some proposed base points
      * @param generators group generators
      * @param degree     degree of group used to create Schreier vectors of proper length
+     *                   (see {@link cc.redberry.core.groups.permutations.Permutations#SchreierVectorCapacity(java.util.List)})
      * @return raw BSGS candidate
-     * @throws IllegalArgumentException if not all permutations have same length
      */
     public static List<BSGSCandidateElement> createRawBSGSCandidate(final int[] knownBase,
                                                                     final List<Permutation> generators, int degree) {
@@ -298,11 +295,10 @@ public final class AlgorithmsBase {
      * <p>
      * The underlying code schematically organized as follows:
      * <pre><code>
-     * int degree = Permutations.internalDegree(generators);
-     * List&lt;BSGSCandidateElement&gt; BSGSCandidate = createRawBSGSCandidate(generators, degree);
+     * List&lt;BSGSCandidateElement&gt; BSGSCandidate = createRawBSGSCandidate(generators);
      * if (BSGSCandidate.isEmpty())
      *    return TRIVIAL_BSGS;
-     * SchreierSimsAlgorithm((ArrayList) BSGSCandidate, degree);
+     * SchreierSimsAlgorithm((ArrayList) BSGSCandidate);
      * return asBSGSList(BSGSCandidate);
      * </code></pre>
      * </p>
@@ -311,7 +307,6 @@ public final class AlgorithmsBase {
      * @return BSGS represented as array of its element
      * @throws cc.redberry.core.groups.permutations.InconsistentGeneratorsException if algorithm detects that specified
      *                                                                              generators are inconsistent (due to antisymmetries)
-     * @throws IllegalArgumentException                                             if not all permutations have same length
      * @see #createRawBSGSCandidate(java.util.List)
      * @see #SchreierSimsAlgorithm(java.util.ArrayList)
      */
@@ -327,16 +322,17 @@ public final class AlgorithmsBase {
      * List&lt;BSGSCandidateElement&gt; BSGSCandidate = createRawBSGSCandidate(generators, degree);
      * if (BSGSCandidate.isEmpty())
      *    return TRIVIAL_BSGS;
-     * SchreierSimsAlgorithm((ArrayList) BSGSCandidate, degree);
+     * SchreierSimsAlgorithm((ArrayList) BSGSCandidate);
      * return asBSGSList(BSGSCandidate);
      * </code></pre>
      * </p>
      *
      * @param generators a set of group generators
+     * @param degree     degree of group used to create Schreier vectors of proper length
+     *                   (see {@link cc.redberry.core.groups.permutations.Permutations#SchreierVectorCapacity(java.util.List)})
      * @return BSGS represented as array of its element
      * @throws cc.redberry.core.groups.permutations.InconsistentGeneratorsException if algorithm detects that specified
      *                                                                              generators are inconsistent (due to antisymmetries)
-     * @throws IllegalArgumentException                                             if not all permutations have same length
      * @see #createRawBSGSCandidate(java.util.List)
      * @see #SchreierSimsAlgorithm(java.util.ArrayList)
      */
@@ -354,11 +350,10 @@ public final class AlgorithmsBase {
      * <p>
      * The underlying code schematically organized as follows:
      * <pre><code>
-     * int degree = Permutations.internalDegree(generators);
-     * List&lt;BSGSCandidateElement&gt; BSGSCandidate = createRawBSGSCandidate(knownBase, generators, degree);
+     * List&lt;BSGSCandidateElement&gt; BSGSCandidate = createRawBSGSCandidate(knownBase, generators);
      * if (BSGSCandidate.isEmpty())
      *    return Collections.EMPTY_LIST;
-     * SchreierSimsAlgorithm((ArrayList) BSGSCandidate, degree);
+     * SchreierSimsAlgorithm((ArrayList) BSGSCandidate);
      * return asBSGSList(BSGSCandidate);
      * </code></pre>
      * </p>
@@ -368,7 +363,6 @@ public final class AlgorithmsBase {
      * @return BSGS represented as array of its element
      * @throws cc.redberry.core.groups.permutations.InconsistentGeneratorsException if algorithm detects that specified
      *                                                                              generators are inconsistent (due to antisymmetries)
-     * @throws IllegalArgumentException                                             if not all permutations have same length
      * @see #createRawBSGSCandidate(int[], java.util.List)
      * @see #SchreierSimsAlgorithm(java.util.ArrayList)
      */
@@ -381,7 +375,7 @@ public final class AlgorithmsBase {
      * <p>
      * The underlying code organized as follows:
      * <pre><code>
-     * List&lt;BSGSCandidateElement&gt; BSGSCandidate = createRawBSGSCandidate(knownBase, generators);
+     * List&lt;BSGSCandidateElement&gt; BSGSCandidate = createRawBSGSCandidate(knownBase, generators, degree);
      * if (BSGSCandidate.isEmpty())
      *    return TRIVIAL_BSGS;
      * SchreierSimsAlgorithm((ArrayList) BSGSCandidate);
@@ -389,12 +383,13 @@ public final class AlgorithmsBase {
      * </code></pre>
      * </p>
      *
-     * @param generators a set of group generators
      * @param knownBase  proposed base points
+     * @param generators a set of group generators
+     * @param degree     degree of group used to create Schreier vectors of proper length
+     *                   (see {@link cc.redberry.core.groups.permutations.Permutations#SchreierVectorCapacity(java.util.List)})
      * @return BSGS represented as array of its element
      * @throws cc.redberry.core.groups.permutations.InconsistentGeneratorsException if algorithm detects that specified
      *                                                                              generators are inconsistent (due to antisymmetries)
-     * @throws IllegalArgumentException                                             if not all permutations have same length
      * @see #createRawBSGSCandidate(int[], java.util.List)
      * @see #SchreierSimsAlgorithm(java.util.ArrayList)
      */
@@ -875,7 +870,8 @@ public final class AlgorithmsBase {
      * @param randomGenerator random generator
      * @return true if specified BSGS candidate is a real BSGS and false otherwise
      */
-    public static boolean isBSGS(List<? extends BSGSElement> BSGSCandidate, double confidenceLevel, RandomGenerator randomGenerator) {
+    public static boolean isBSGS(List<? extends BSGSElement> BSGSCandidate, double confidenceLevel,
+                                 RandomGenerator randomGenerator) {
         if (confidenceLevel > 1 || confidenceLevel < 0)
             throw new IllegalArgumentException("Confidence level must be between 0 and 1.");
 
@@ -943,10 +939,11 @@ public final class AlgorithmsBase {
 
         //i-th and (i+1)-th base points
         int ithBeta = BSGS.get(i).basePoint, jthBeta = BSGS.get(i + 1).basePoint;
-        final int degree = Math.max(BSGS.get(0).internalDegree(), Math.max(ithBeta + 1, jthBeta + 1));
+        //"effective" degree can be greater
+        final int effectiveDegree = Math.max(BSGS.get(0).internalDegree(), Math.max(ithBeta + 1, jthBeta + 1));
 
         //computing size of orbit of beta_{i+1} under G^(i)
-        int d = Permutations.getOrbitSize(BSGS.get(i).stabilizerGenerators, BSGS.get(i + 1).basePoint, degree);
+        int d = Permutations.getOrbitSize(BSGS.get(i).stabilizerGenerators, BSGS.get(i + 1).basePoint, effectiveDegree);
         //as we know |H| = s |G^(i+2)|, where s
         int s = (int) ((((long) BSGS.get(i).orbitSize()) * BSGS.get(i + 1).orbitSize()) / ((long) d));//avoid integer overflow
 
@@ -959,14 +956,14 @@ public final class AlgorithmsBase {
 
 
         //allowed points
-        BitArray allowedPoints = new BitArray(degree);
+        BitArray allowedPoints = new BitArray(effectiveDegree);
         allowedPoints.setAll(BSGS.get(i).orbitList, true);
         allowedPoints.set(ithBeta, false);
         allowedPoints.set(jthBeta, false);
 
         //we shall store the orbit of ithBeta under new stabilizers in BSGSCandidateElement
         BSGSCandidateElement newOrbitStabilizer =
-                new BSGSCandidateElement(ithBeta, newStabilizers, degree);
+                new BSGSCandidateElement(ithBeta, newStabilizers, effectiveDegree);
 
         //main loop
         main:
@@ -981,7 +978,7 @@ public final class AlgorithmsBase {
                 if (!BSGS.get(i + 1).belongsToOrbit(newIndexUnderInverse)) {
                     //then this transversal is bad and we can skip the orbit of this point under new stabilizers
                     IntArrayList toRemove = Permutations.getOrbitList(
-                            newOrbitStabilizer.stabilizerGenerators, nextBasePoint, degree);
+                            newOrbitStabilizer.stabilizerGenerators, nextBasePoint, effectiveDegree);
                     allowedPoints.setAll(toRemove, false);
                 } else {
                     //<-ok this transversal is good
@@ -994,7 +991,7 @@ public final class AlgorithmsBase {
                     if (!newOrbitStabilizer.belongsToOrbit(newStabilizer.newIndexOf(ithBeta))) {
                         newOrbitStabilizer.addStabilizer(newStabilizer);
                         IntArrayList toRemove = Permutations.getOrbitList(
-                                newOrbitStabilizer.stabilizerGenerators, nextBasePoint, degree);
+                                newOrbitStabilizer.stabilizerGenerators, nextBasePoint, effectiveDegree);
                         allowedPoints.setAll(toRemove, false);
                         continue main;
                     }
@@ -1004,9 +1001,9 @@ public final class AlgorithmsBase {
 
         //swap base points (orbits and and Schreier vectors will be recalculated in constructors)
         BSGSCandidateElement ith = new BSGSCandidateElement(BSGS.get(i + 1).basePoint,
-                BSGS.get(i).stabilizerGenerators, degree);
+                BSGS.get(i).stabilizerGenerators, effectiveDegree);
         BSGSCandidateElement jth = new BSGSCandidateElement(BSGS.get(i).basePoint,
-                newStabilizers, degree);
+                newStabilizers, effectiveDegree);
         BSGS.set(i, ith);
         BSGS.set(i + 1, jth);
     }

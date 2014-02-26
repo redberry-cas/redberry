@@ -126,10 +126,6 @@ public final class PermutationGroup
      */
     private final int internalDegree;
     /**
-     * Degree that used to represent Schreier vectors etc.
-     */
-    private final int naturalDegree;
-    /**
      * Points accessory in orbits
      */
     private final int[] positionsInOrbits;
@@ -157,23 +153,21 @@ public final class PermutationGroup
      */
     private InducedOrdering ordering = null;
 
-    private PermutationGroup(List<Permutation> generators, int naturalDegree, int internalDegree, int b) {
+    private PermutationGroup(List<Permutation> generators, int internalDegree, int b) {
         if (generators.isEmpty())
             throw new IllegalArgumentException("Empty generators.");
         this.generators = Collections.unmodifiableList(new ArrayList<>(generators));
         this.internalDegree = internalDegree;
-        this.naturalDegree = naturalDegree;
         this.positionsInOrbits = new int[internalDegree];
         this.orbits = Permutations.orbits(generators, this.positionsInOrbits);
     }
 
-    private PermutationGroup(List<BSGSElement> bsgs, int naturalDegree, int internalDegree) {
+    private PermutationGroup(List<BSGSElement> bsgs, int internalDegree) {
         if (bsgs.isEmpty())
             throw new IllegalArgumentException("Empty BSGS specified.");
         this.bsgs = Collections.unmodifiableList(bsgs);
         this.base = getBaseAsArray(bsgs);
         this.internalDegree = internalDegree;
-        this.naturalDegree = naturalDegree;
         this.order = calculateOrder(bsgs);
         this.positionsInOrbits = new int[internalDegree];
         this.generators = bsgs.get(0).stabilizerGenerators;
@@ -185,8 +179,7 @@ public final class PermutationGroup
     private PermutationGroup() {
         this.bsgs = AlgorithmsBase.TRIVIAL_BSGS;
         this.base = new int[0];
-        this.naturalDegree = 0;
-        this.internalDegree = 0;
+        this.internalDegree = 1;
         this.order = BigInteger.ONE;
         this.positionsInOrbits = new int[0];
         this.generators = Collections.singletonList(Permutations.getIdentityPermutation());
@@ -216,7 +209,7 @@ public final class PermutationGroup
         int degree = Permutations.SchreierVectorCapacity(generators);
         if (degree == 0)
             return TRIVIAL_GROUP;
-        return new PermutationGroup(generators, degree, degree, 0);
+        return new PermutationGroup(generators, degree, 0);
     }
 
     /**
@@ -228,7 +221,7 @@ public final class PermutationGroup
         int degree = bsgs.get(0).internalDegree();
         if (degree == 0)
             return TRIVIAL_GROUP;
-        return new PermutationGroup(bsgs, bsgs.get(0).internalDegree(), degree);
+        return new PermutationGroup(bsgs, degree);
     }
 
     /**
@@ -276,6 +269,8 @@ public final class PermutationGroup
                 bsgs = AlgorithmsBase.createBSGSList(generators, internalDegree);
             if (bsgs.isEmpty())
                 bsgs = TRIVIAL_BSGS;
+            else
+                bsgs = Collections.unmodifiableList(bsgs);
             base = getBaseAsArray(bsgs);
             order = calculateOrder(bsgs);
             ordering = new InducedOrdering(base);
@@ -309,7 +304,7 @@ public final class PermutationGroup
      * @return the largest point moved by this group plus one
      */
     public int degree() {
-        return naturalDegree;
+        return internalDegree;
     }
 
     /**
@@ -633,7 +628,7 @@ public final class PermutationGroup
             return isSymmetric = false;
         if (isTrivial() || !isTransitive())
             return isSymmetric = false;
-        if (naturalDegree > 2 && generators().size() == 1)
+        if (internalDegree > 2 && generators().size() == 1)
             return isSymmetric = false;
 
         isSymmetric = isSymOrAlt(DEFAULT_CONFIDENCE_LEVEL);
@@ -646,7 +641,7 @@ public final class PermutationGroup
                 }
             return isSymmetric = containsOdd;
         } else
-            return isSymmetric = order().equals(factorial(naturalDegree));
+            return isSymmetric = order().equals(factorial(internalDegree));
     }
 
     private Boolean isAlternating = null;
@@ -667,7 +662,7 @@ public final class PermutationGroup
 
         isAlternating = isSymOrAlt(DEFAULT_CONFIDENCE_LEVEL);
         if (!isAlternating)
-            isAlternating = order().equals(factorial(naturalDegree).divide(BigInteger.valueOf(2)));
+            isAlternating = order().equals(factorial(internalDegree).divide(BigInteger.valueOf(2)));
 
         if (isAlternating) {
             List<Permutation> generators = generators();
@@ -687,15 +682,15 @@ public final class PermutationGroup
      * @param CL confidence level
      */
     private boolean isSymOrAlt(double CL) {
-        if (naturalDegree < 8)
+        if (internalDegree < 8)
             return false;
-        double c = naturalDegree <= 16 ? 0.34 : 0.57;
-        int num = (int) (-FastMath.log(1 - CL) * FastMath.log(2, naturalDegree) / c);
+        double c = internalDegree <= 16 ? 0.34 : 0.57;
+        int num = (int) (-FastMath.log(1 - CL) * FastMath.log(2, internalDegree) / c);
         List<Permutation> randomSource = randomSource();
         for (int i = 0; i < num; ++i) {
             int[] lengths = RandomPermutation.random(randomSource).lengthsOfCycles();
             for (int length : lengths)
-                if (length > naturalDegree / 2 && length < naturalDegree - 2 && Primes.isPrime(length))
+                if (length > internalDegree / 2 && length < internalDegree - 2 && Primes.isPrime(length))
                     return true;
         }
         return false;
@@ -707,7 +702,7 @@ public final class PermutationGroup
      * @return true if this group is regular and false otherwise
      */
     public boolean isRegular() {
-        return isTransitive() && order().compareTo(BigInteger.valueOf(naturalDegree)) == 0;
+        return isTransitive() && order().equals(BigInteger.valueOf(internalDegree));
     }
 
     /**
@@ -729,7 +724,7 @@ public final class PermutationGroup
         AlgorithmsBase.rebase(bsgs, set);
 
         if (bsgs.size() <= set.length)
-            return createPermutationGroupFromBSGS(TRIVIAL_BSGS);
+            return TRIVIAL_GROUP;
 
         return createPermutationGroupFromBSGS(asBSGSList(bsgs.subList(set.length, bsgs.size())));
     }
@@ -749,7 +744,7 @@ public final class PermutationGroup
             return this;
 
         set = MathUtils.getSortedDistinct(set);
-        final int newDegree = naturalDegree - set.length;
+        final int newDegree = internalDegree - set.length;
         int[] newBase = set.clone();
         ArraysUtils.quickSort(newBase, ordering());
 
@@ -757,7 +752,7 @@ public final class PermutationGroup
         AlgorithmsBase.rebase(bsgs, newBase);
 
         if (bsgs.size() <= newBase.length)
-            return createPermutationGroupFromBSGS(TRIVIAL_BSGS);
+            return TRIVIAL_GROUP;
 
         int[] closure = new int[newDegree];
         int[] mapping = new int[internalDegree];
@@ -804,16 +799,16 @@ public final class PermutationGroup
         if (subgroup.isTrivial())
             return subgroup;
 
-        if (isAlternating() && naturalDegree > 4)
+        if (isAlternating() && internalDegree > 4)
             return this;
 
-        if (isSymmetric() && naturalDegree != 4) {
+        if (isSymmetric() && internalDegree != 4) {
             //in this case the only nontrivial normal subgroup is Alt(degree)
             //check that all generators of subgroups are even:
             for (Permutation p : subgroup.generators)
                 if (p.parity() == 1)
                     return this; //subgroup contains odd permutations
-            return alternatingGroup(naturalDegree);
+            return alternatingGroup(internalDegree);
         }
         //resulting BSGS
         ArrayList<BSGSCandidateElement> closure = subgroup.getBSGSCandidate();
@@ -834,13 +829,6 @@ public final class PermutationGroup
 
                 if (!AlgorithmsBase.membershipTest(closure, c)) {
                     closure.get(0).addStabilizer(c);
-                    //todo remove after fix Schreier vector length
-                    if (subgroup.internalDegree < c.internalDegree()) {
-                        //if we add new generator - be sure that Schreier vector has appropriate length
-                        closure.set(0, new BSGSCandidateElement(closure.get(0).basePoint,
-                                closure.get(0).stabilizerGenerators, c.internalDegree() + 1));
-                    }
-
                     added = true;
                     globalAdded = true;
                 }
@@ -852,11 +840,12 @@ public final class PermutationGroup
                 AlgorithmsBase.RandomSchreierSimsAlgorithm(closure, NORMAL_CLOSURE_CONFIDENCE_LEVEL, CC.getRandomGenerator());
             //testing closure
             completed = true;
+            out:
             for (Permutation generator : generators)
                 for (Permutation cGenerator : closure.get(0).stabilizerGenerators)
                     if (!AlgorithmsBase.membershipTest(closure, generator.conjugate(cGenerator))) {
                         completed = false;
-                        break;
+                        break out;
                     }
         }
         //check BSGS
@@ -882,7 +871,7 @@ public final class PermutationGroup
                     commutator.add(c);
             }
         if (commutator.isEmpty())
-            return createPermutationGroupFromBSGS(TRIVIAL_BSGS);
+            return TRIVIAL_GROUP;
         return union(group).normalClosureOf(createPermutationGroup(commutator));
     }
 
@@ -897,8 +886,8 @@ public final class PermutationGroup
         if (derivedSubgroup != null)
             return derivedSubgroup;
         if (isSymmetric())
-            return derivedSubgroup = alternatingGroup(naturalDegree);
-        if (isAlternating() && naturalDegree > 4)
+            return derivedSubgroup = alternatingGroup(internalDegree);
+        if (isAlternating() && internalDegree > 4)
             return derivedSubgroup = this;
         return derivedSubgroup = commutator(this);
     }
@@ -1137,13 +1126,13 @@ public final class PermutationGroup
      * <p><b>Example:</b></p>
      * The following code
      * <br>
-     * <pre style="background:#f1f1f1;color:#000"><span style="color:#a08000"> Permutation</span> perm1 <span style="color:#2060a0">=</span> <span style="color:#2060a0">new</span> <span style="color:#a08000">PermutationOneLineInt</span>(<span style="color:#0080a0">8</span>, <span style="color:#2060a0">new</span> <span style="color:#a08000">int</span>[][]{{<span style="color:#0080a0">1</span>, <span style="color:#0080a0">2</span>, <span style="color:#0080a0">3</span>}});
-     * <span style="color:#a08000">Permutation</span> perm2 <span style="color:#2060a0">=</span> <span style="color:#2060a0">new</span> <span style="color:#a08000">PermutationOneLineInt</span>(<span style="color:#0080a0">8</span>, <span style="color:#2060a0">new</span> <span style="color:#a08000">int</span>[][]{{<span style="color:#0080a0">3</span>, <span style="color:#0080a0">4</span>, <span style="color:#0080a0">5</span>, <span style="color:#0080a0">6</span>, <span style="color:#0080a0">7</span>}});
-     * <span style="color:#a08000">PermutationGroup</span> pg <span style="color:#2060a0">=</span> <span style="color:#2060a0">new</span> <span style="color:#a08000">PermutationGroup</span>(perm1, perm2);
+     * <pre style="background:#f1f1f1;color:#000"><span style="color:#a08000">Permutation</span> perm1 <span style="color:#2060a0">=</span> <span style="color:#a08000">Permutations</span><span style="color:#2060a0">.</span>createPermutation(<span style="color:#0080a0">8</span>, <span style="color:#2060a0">new</span> <span style="color:#a08000">int</span>[][]{{<span style="color:#0080a0">1</span>, <span style="color:#0080a0">2</span>, <span style="color:#0080a0">3</span>}});
+     * <span style="color:#a08000">Permutation</span> perm2 <span style="color:#2060a0">=</span> <span style="color:#a08000">Permutations</span><span style="color:#2060a0">.</span>createPermutation(<span style="color:#0080a0">8</span>, <span style="color:#2060a0">new</span> <span style="color:#a08000">int</span>[][]{{<span style="color:#0080a0">3</span>, <span style="color:#0080a0">4</span>, <span style="color:#0080a0">5</span>, <span style="color:#0080a0">6</span>, <span style="color:#0080a0">7</span>}});
+     * <span style="color:#a08000">PermutationGroup</span> pg <span style="color:#2060a0">=</span> <span style="color:#a08000">PermutationGroup</span><span style="color:#2060a0">.</span>createPermutationGroup(perm1, perm2);
      * <span style="color:#a08000">BacktrackSearch</span> mappings <span style="color:#2060a0">=</span> pg<span style="color:#2060a0">.</span>mapping(<span style="color:#2060a0">new</span> <span style="color:#a08000">int</span>[]{<span style="color:#0080a0">7</span>, <span style="color:#0080a0">2</span>, <span style="color:#0080a0">1</span>, <span style="color:#0080a0">3</span>}, <span style="color:#2060a0">new</span> <span style="color:#a08000">int</span>[]{<span style="color:#0080a0">5</span>, <span style="color:#0080a0">3</span>, <span style="color:#0080a0">6</span>, <span style="color:#0080a0">1</span>});
      * <span style="color:#a08000">Permutation</span> perm;
      * <span style="color:#2060a0">while</span> ((perm <span style="color:#2060a0">=</span> mappings<span style="color:#2060a0">.</span>take()) <span style="color:#2060a0">!=</span> null)
-     * <span style="color:#a08000">    System</span><span style="color:#2060a0">.</span>out<span style="color:#2060a0">.</span>println(perm);
+     * <span style="color:#a08000">System</span><span style="color:#2060a0">.</span>out<span style="color:#2060a0">.</span>println(perm);
      * </pre>
      * will produce 3 permutations (in cycles notation):
      * <br>
@@ -1207,7 +1196,7 @@ public final class PermutationGroup
     @Override
     public Iterator<Permutation> iterator() {
         ensureBSGSIsInitialized();
-        if (naturalDegree == 0)
+        if (internalDegree == 1)
             return new SingleIterator<>(Permutations.getIdentityPermutation());
         return new PermIterator(); //new OutputPort.PortIterator<>(new BacktrackSearch(bsgs));
     }
@@ -1267,7 +1256,7 @@ public final class PermutationGroup
      * @return centralizer of specified subgroup
      */
     public PermutationGroup centralizerOf(final PermutationGroup subgroup) {
-        if (subgroup.isAbelian() && subgroup.isTransitive(0, naturalDegree))
+        if (subgroup.isAbelian() && subgroup.isTransitive(0, internalDegree))
             return subgroup;
         //todo special case for Sym(n)
 
@@ -1368,9 +1357,9 @@ public final class PermutationGroup
      */
     public PermutationGroup center() {
         if (center == null) {
-            if (isSymmetric() && naturalDegree >= 3)
+            if (isSymmetric() && internalDegree >= 3)
                 return center = createPermutationGroup(generators().get(0).getIdentity());
-            if (isAlternating() && naturalDegree >= 4)
+            if (isAlternating() && internalDegree >= 4)
                 return center = createPermutationGroup(generators().get(0).getIdentity());
             return center = centralizerOf(this);
         }
@@ -1416,12 +1405,12 @@ public final class PermutationGroup
         if (obj.getClass() != this.getClass())
             return false;
         PermutationGroup oth = (PermutationGroup) obj;
-        if (naturalDegree != oth.naturalDegree)
+        if (internalDegree != oth.internalDegree)
             return false;
 
         //todo add orbits equals!
-//        if (orbits.length != oth.orbits.length) //length of orbits = internalDegree!!!
-//            return false;
+        if (orbits.length != oth.orbits.length)
+            return false;
         //todo add orbits equals!
         //if (!Arrays.deepEquals(orbits, oth.orbits))
         //    return false;
