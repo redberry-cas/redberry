@@ -30,6 +30,7 @@ import cc.redberry.core.indexmapping.IndexMappings;
 import cc.redberry.core.indexmapping.Mapping;
 import cc.redberry.core.indices.IndexType;
 import cc.redberry.core.parser.ParserIndices;
+import cc.redberry.core.tensor.random.RandomTensor;
 import cc.redberry.core.utils.ArraysUtils;
 import cc.redberry.core.utils.IntArrayList;
 import cc.redberry.core.utils.TensorUtils;
@@ -537,6 +538,20 @@ public class ApplyIndexMappingTest {
     public void testOptimize3() {
         Tensor t = optimizeDummies(parse("a*c_a*r^a = x*(b_b^b + f_r*f^r)"));
         Assert.assertEquals(1, TensorUtils.getAllDummyIndicesT(t).size());
+    }
+
+    @Test
+    public void testOptimize4() {
+        RandomTensor rnd = new RandomTensor();
+        rnd.clearNamespace();
+        rnd.addToNamespace(parse("A_\\mu"));
+        rnd.addToNamespace(parse("A_\\mu\\nu"));
+        rnd.addToNamespace(parse("B_a"));
+        rnd.addToNamespace(parse("B_ab"));
+        for (int i = 0; i < 100; ++i) {
+            Tensor t = rnd.nextTensorTree(4, new RandomTensor.Parameters(10, 20, 5, 10), ParserIndices.parseSimple("_ab\\mu\\nu"));
+            optimizeDummies(t);
+        }
     }
 
     @Test
