@@ -359,7 +359,7 @@ class Redberry {
             return DefaultGroovyMethods.asType(indices, clazz)
     }
 
-    static Indices asType(int[] indices, Class clazz) {
+    static Object asType(int[] indices, Class clazz) {
         if (clazz == SimpleIndices)
             return IndicesFactory.createSimple(null, indices)
         else if (clazz == Indices)
@@ -1093,7 +1093,7 @@ class Redberry {
     static Permutation getP(Object obj) {
         if (obj instanceof Permutation)
             return obj
-        else if (obj instanceof List) {
+        else if (obj instanceof List || obj instanceof int[] || obj instanceof int[][]) {
             //check one-line notation
             boolean oneLine = true;
             boolean negative = false;
@@ -1131,7 +1131,7 @@ class Redberry {
             throw new NoSuchMethodException("No such property .p for class " + obj.getClass())
     }
 
-    static boolean equals(Permutation a, Permutation b){
+    static boolean equals(Permutation a, Permutation b) {
         return a.equals(b)
     }
 
