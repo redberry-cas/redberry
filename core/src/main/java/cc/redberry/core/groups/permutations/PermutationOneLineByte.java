@@ -26,7 +26,10 @@ import cc.redberry.core.utils.IntArray;
 
 import java.lang.reflect.Array;
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 import static cc.redberry.core.utils.ArraysUtils.byte2int;
 import static cc.redberry.core.utils.ArraysUtils.byte2short;
@@ -210,6 +213,17 @@ public final class PermutationOneLineByte implements Permutation {
         for (int i = 0; i < array.length; ++i)
             result[i] = array[newIndexOf(i)];
         return result;
+    }
+
+    @Override
+    public <T> List<T> permute(List<T> set) {
+        if (isIdentity)
+            return new ArrayList<>(set);
+
+        final List<T> list = new ArrayList<>(set.size());
+        for (int i = 0; i < set.size(); ++i)
+            list.add(set.get(newIndexOf(i)));
+        return list;
     }
 
     @Override

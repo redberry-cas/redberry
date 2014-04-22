@@ -25,6 +25,7 @@ package cc.redberry.core.groups.permutations;
 import cc.redberry.core.utils.IntArray;
 
 import java.math.BigInteger;
+import java.util.List;
 
 /**
  * Interface describing a single permutation. See {@link cc.redberry.core.groups.permutations.Permutations#createPermutation(boolean, int[])}
@@ -120,6 +121,14 @@ public interface Permutation extends Comparable<Permutation> {
      * @return permuted array
      */
     public <T> T[] permute(T[] array);
+
+    /**
+     * Permutes list and returns the result.
+     *
+     * @param array array
+     * @return permuted array
+     */
+    public <T> List<T> permute(List<T> array);
 
     /**
      * Returns conjugation of specified element by this permutation, i.e. this^-1 * p * this

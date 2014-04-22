@@ -26,7 +26,10 @@ import cc.redberry.core.utils.IntArray;
 
 import java.lang.reflect.Array;
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * The implementation of {@link Permutation} based on the one-line notation. The instances of this class are immutable.
@@ -202,6 +205,17 @@ public final class PermutationOneLineInt implements Permutation {
         for (int i = 0; i < array.length; ++i)
             result[i] = array[newIndexOf(i)];
         return result;
+    }
+
+    @Override
+    public <T> List<T> permute(List<T> set) {
+        if (isIdentity)
+            return new ArrayList<>(set);
+
+        final List<T> list = new ArrayList<>(set.size());
+        for (int i = 0; i < set.size(); ++i)
+            list.add(set.get(newIndexOf(i)));
+        return list;
     }
 
     @Override
