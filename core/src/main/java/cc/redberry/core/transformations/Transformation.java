@@ -78,6 +78,22 @@ public interface Transformation {
             return builder.build();
         }
 
+        /**
+         * Applies transformation until the specified expression is unchanged under transformation.
+         *
+         * @param t              tensor
+         * @param transformation transformation
+         * @return result
+         */
+        public static Tensor applyUntilUnchanged(Tensor t, final Transformation transformation) {
+            Tensor r;
+            do {
+                r = t;
+                t = transformation.transform(r);
+            } while (r != t);
+            return r;
+        }
+
     }
 
     /**
