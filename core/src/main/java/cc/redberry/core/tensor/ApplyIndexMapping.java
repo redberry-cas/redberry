@@ -37,7 +37,9 @@ import cc.redberry.core.utils.ArraysUtils;
 import cc.redberry.core.utils.IntArray;
 import cc.redberry.core.utils.IntArrayList;
 import cc.redberry.core.utils.TensorUtils;
+import gnu.trove.iterator.TByteObjectIterator;
 import gnu.trove.iterator.TIntIterator;
+import gnu.trove.map.hash.TByteObjectHashMap;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
 
@@ -204,8 +206,8 @@ public final class ApplyIndexMapping {
             Tensor[] oldData = t instanceof Sum ? ((Sum) t).data : t.toArray(),
                     newData = null;
             Tensor c;
-            TIntHashSet dummies[] = new TIntHashSet[t.size()];
-            int maxDummiesPosition = -1;
+            DummiesContainer dummies[] = new DummiesContainer[t.size()];
+            TByteObjectHashMap<MaxType> maxTypeCounts = new TByteObjectHashMap<>();
             for (int i = oldData.length - 1; i >= 0; --i) {
                 c = optimizeDummies(oldData[i]);
                 if (c != oldData[i]) {
@@ -213,10 +215,22 @@ public final class ApplyIndexMapping {
                         newData = oldData.clone();
                     newData[i] = c;
                 }
-                dummies[i] = TensorUtils.getAllDummyIndicesT(c);
-                if (maxDummiesPosition == -1 || dummies[maxDummiesPosition].size() < dummies[i].size())
-                    maxDummiesPosition = i;
+                dummies[i] = new DummiesContainer(TensorUtils.getAllDummyIndicesT(c));
+                dummies[i].update(i, maxTypeCounts);
             }
+            int totalDummiesCount = 0;
+            for (MaxType type : maxTypeCounts.valueCollection())
+                totalDummiesCount += type.count;
+
+            int[] totalDummies = new int[totalDummiesCount];
+            int p = 0;
+            for (TByteObjectIterator<MaxType> maxTypeIterator = maxTypeCounts.iterator(); maxTypeIterator.hasNext(); ) {
+                maxTypeIterator.advance();
+                MaxType maxType = maxTypeIterator.value();
+                dummies[maxType.pointer].write(maxTypeIterator.key(), p, maxType.count, totalDummies);
+                p += maxType.count;
+            }
+
 
             TIntHashSet temp;
             TIntIterator iterator;
@@ -267,6 +281,55 @@ public final class ApplyIndexMapping {
                 return optimizeDummies(t);
             }
         });
+    }
+
+    static final class MaxType {
+        int count;
+        int pointer;
+
+        MaxType(int count, int pointer) {
+            this.count = count;
+            this.pointer = pointer;
+        }
+    }
+
+    static final class DummiesContainer {
+        final int[] dummies;
+//        final TByteIntHashMap typesCounts;
+
+        DummiesContainer(TIntHashSet dummiesT) {
+            this.dummies = dummiesT.toArray();
+            Arrays.sort(dummies);
+//            this.typesCounts = new TByteIntHashMap();
+        }
+
+        private static int binarySearchAbs(int i) {
+            return i < 0 ? ~i : i;
+        }
+
+        void update(int pointer, TByteObjectHashMap<MaxType> maxTypeValues) {
+            int previousPointer = 0, current;
+            byte type;
+            while (previousPointer < dummies.length) {
+                type = IndicesUtils.getType(dummies[previousPointer]);
+                current = binarySearchAbs(Arrays.binarySearch(dummies, previousPointer, dummies.length, (type + 1) << 24));
+                final int count = current - previousPointer;
+                final MaxType typeInfo = maxTypeValues.get(type);
+                if (typeInfo == null)
+                    maxTypeValues.put(type, new MaxType(count, pointer));
+                else if (typeInfo.count < count) {
+                    typeInfo.count = count;
+                    typeInfo.pointer = pointer;
+                }
+                previousPointer = current;
+            }
+        }
+
+        void write(byte type, int start, int count, int[] dest) {
+            int startPointer = binarySearchAbs(Arrays.binarySearch(dummies, 0, dummies.length, type << 24));
+            assert count == binarySearchAbs(Arrays.binarySearch(dummies, startPointer, dummies.length, (type + 1) << 24)) - startPointer;
+            System.arraycopy(dummies, startPointer, dest, start, startPointer + count);
+        }
     }
 
     private static Tensor renameDummyWithSign(Tensor tensor, int[] forbidden, boolean sign) {
