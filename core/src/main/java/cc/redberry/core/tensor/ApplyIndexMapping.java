@@ -33,12 +33,8 @@ import cc.redberry.core.indices.SimpleIndices;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.tensor.functions.ScalarFunction;
 import cc.redberry.core.transformations.Transformation;
-import cc.redberry.core.utils.ArraysUtils;
-import cc.redberry.core.utils.IntArray;
-import cc.redberry.core.utils.IntArrayList;
-import cc.redberry.core.utils.TensorUtils;
+import cc.redberry.core.utils.*;
 import gnu.trove.iterator.TByteObjectIterator;
-import gnu.trove.iterator.TIntIterator;
 import gnu.trove.map.hash.TByteObjectHashMap;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
@@ -231,42 +227,53 @@ public final class ApplyIndexMapping {
                 p += maxType.count;
             }
 
+            MasterDummiesContainer masterDummies = new MasterDummiesContainer(totalDummies);
 
-            TIntHashSet temp;
-            TIntIterator iterator;
-            int count, index;
+            int[] from = new int[totalDummiesCount], to = new int[totalDummiesCount];
+            int start, current, count, index, typeStartInFrom;
+            byte previousType, type;
             for (int i = oldData.length - 1; i >= 0; --i) {
-                if (i == maxDummiesPosition)
+                if (dummies[i].dummies.length == 0)
                     continue;
+                count = typeStartInFrom = 0;
 
-                iterator = dummies[i].iterator();
-                count = 0;
-                while (iterator.hasNext())
-                    if (!dummies[maxDummiesPosition].contains(iterator.next()))
-                        ++count;
+                previousType = IndicesUtils.getType(dummies[i].dummies[0]);
+                start = current = masterDummies.typeStart(previousType, 0);
+
+                for (int j = 0; j < dummies[i].dummies.length; ++j) {
+                    index = dummies[i].dummies[j];
+                    type = IndicesUtils.getType(index);
+                    if (previousType != type) {
+                        for (int k = count - 1; k >= typeStartInFrom; --k) {
+                            to[k] = masterDummies.nextAndRemove(start);
+                            assert IndicesUtils.getType(to[k]) == IndicesUtils.getType(from[k])
+                                    && IndicesUtils.getType(from[k]) == previousType;
+                        }
+                        previousType = type;
+                        start = masterDummies.typeStart(type, start);
+                        typeStartInFrom = count;
+                    }
+                    if ((current = masterDummies.remove(index, current)) < 0) {
+                        current = binarySearchAbs(current);
+                        from[count++] = index;
+                    }
+                }
+
+                for (int k = count - 1; k >= typeStartInFrom; --k) {
+                    to[k] = masterDummies.nextAndRemove(start);
+                    assert IndicesUtils.getType(to[k]) == IndicesUtils.getType(from[k])
+                            && IndicesUtils.getType(from[k]) == previousType;
+                }
+
+                masterDummies.reset();
 
                 if (count == 0)
                     continue;
 
-                int[] from = new int[count], to = new int[count];
-
-                temp = new TIntHashSet(dummies[maxDummiesPosition]);
-                iterator = dummies[i].iterator();
-                while (iterator.hasNext())
-                    if (!temp.remove(index = iterator.next()))
-                        from[--count] = index;
-
-                assert count == 0;
-                iterator = temp.iterator();
-                count = to.length;
-                while (iterator.hasNext() && count > 0)
-                    to[--count] = iterator.next();
-
                 if (newData == null)
                     newData = oldData.clone();
 
-                Arrays.sort(from);
-                newData[i] = applyIndexMapping(newData[i], new IndexMapper(from, to), false);
+                newData[i] = applyIndexMapping(newData[i], new IndexMapper(from, to, count), false);
             }
 
             if (newData == null)
@@ -293,18 +300,47 @@ public final class ApplyIndexMapping {
         }
     }
 
+    static final class MasterDummiesContainer {
+        final int[] totalDummies;
+        final BitArray removed;
+
+        MasterDummiesContainer(final int[] totalDummies) {
+            this.totalDummies = totalDummies;
+            Arrays.sort(this.totalDummies);
+            this.removed = new BitArray(totalDummies.length);
+        }
+
+        void reset() {
+            removed.clearAll();
+        }
+
+        int remove(final int index, final int start) {
+            int r = Arrays.binarySearch(totalDummies, start, totalDummies.length, index);
+            if (r >= 0) removed.set(r);
+            return r;
+        }
+
+        int typeStart(byte type, int from) {
+            return binarySearchAbs(Arrays.binarySearch(totalDummies, from, totalDummies.length, type << 24));
+        }
+
+        int nextAndRemove(final int start) {
+            int pointer = removed.nextZeroBit(start);
+            removed.set(pointer);
+            return totalDummies[pointer];
+        }
+    }
+
+    private static int binarySearchAbs(int i) {
+        return i < 0 ? ~i : i;
+    }
+
     static final class DummiesContainer {
         final int[] dummies;
-//        final TByteIntHashMap typesCounts;
 
         DummiesContainer(TIntHashSet dummiesT) {
             this.dummies = dummiesT.toArray();
             Arrays.sort(dummies);
-//            this.typesCounts = new TByteIntHashMap();
-        }
-
-        private static int binarySearchAbs(int i) {
-            return i < 0 ? ~i : i;
         }
 
         void update(int pointer, TByteObjectHashMap<MaxType> maxTypeValues) {
@@ -328,7 +364,7 @@ public final class ApplyIndexMapping {
         void write(byte type, int start, int count, int[] dest) {
             int startPointer = binarySearchAbs(Arrays.binarySearch(dummies, 0, dummies.length, type << 24));
             assert count == binarySearchAbs(Arrays.binarySearch(dummies, startPointer, dummies.length, (type + 1) << 24)) - startPointer;
-            System.arraycopy(dummies, startPointer, dest, start, startPointer + count);
+            System.arraycopy(dummies, startPointer, dest, start, count);
         }
     }
 
@@ -737,15 +773,21 @@ public final class ApplyIndexMapping {
     private final static class IndexMapper implements IndexMapping {
 
         private final int[] from, to;
+        private final int size;
 
-        public IndexMapper(int[] from, int[] to) {
+        private IndexMapper(int[] from, int[] to, int size) {
             this.from = from;
             this.to = to;
+            this.size = size;
+        }
+
+        public IndexMapper(int[] from, int[] to) {
+            this(from, to, from.length);
         }
 
         @Override
         public int map(int index) {
-            int position = Arrays.binarySearch(from, IndicesUtils.getNameWithType(index));
+            int position = Arrays.binarySearch(from, 0, size, IndicesUtils.getNameWithType(index));
             if (position < 0)
                 return index;
             return IndicesUtils.getRawStateInt(index) ^ to[position];
