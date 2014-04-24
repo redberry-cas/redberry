@@ -384,7 +384,7 @@ class Redberry {
      */
     static Iterator<Integer> iterator(final Indices indices) {
         def position = 0;
-        new Iterator<Integer>() {
+        return new Iterator<Integer>() {
 
             @Override
             boolean hasNext() {
@@ -762,7 +762,7 @@ class Redberry {
 
     static Object asType(Collection collection, Class clazz) {
         if (clazz == Indices)
-            return IndicesFactory.create(* collection)
+            return IndicesFactory.create(*collection)
         if (clazz == Transformation)
             return new TransformationCollection(collection)
         return DefaultGroovyMethods.asType(collection, clazz);
