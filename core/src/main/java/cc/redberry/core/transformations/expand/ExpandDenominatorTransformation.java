@@ -22,15 +22,10 @@
  */
 package cc.redberry.core.transformations.expand;
 
-import cc.redberry.core.tensor.*;
-import cc.redberry.core.tensor.functions.ScalarFunction;
-import cc.redberry.core.tensor.iterator.TraverseGuide;
-import cc.redberry.core.tensor.iterator.TraversePermission;
+import cc.redberry.core.tensor.Tensor;
+import cc.redberry.core.tensor.Tensors;
 import cc.redberry.core.transformations.Transformation;
 import cc.redberry.core.transformations.fractions.NumeratorDenominator;
-
-import static cc.redberry.core.utils.TensorUtils.isNegativeNaturalNumber;
-import static cc.redberry.core.utils.TensorUtils.isPositiveIntegerPower;
 
 /**
  * Expands out products and powers that appear as denominators in expressions.
@@ -39,30 +34,11 @@ import static cc.redberry.core.utils.TensorUtils.isPositiveIntegerPower;
  * @author Stanislav Poslavsky
  * @since 1.0
  */
-public final class ExpandDenominatorTransformation extends AbstractExpandTransformation {
-    /**
-     * Default traverse guide.
-     */
-    public static TraverseGuide ExpandDenominatorTraverseGuide = new TraverseGuide() {
-        @Override
-        public TraversePermission getPermission(Tensor tensor, Tensor parent, int indexInParent) {
-            if (tensor instanceof ScalarFunction)
-                return TraversePermission.DontShow;
-            if (tensor instanceof TensorField)
-                return TraversePermission.DontShow;
-            if (isPositiveIntegerPower(tensor))
-                return TraversePermission.DontShow;
-            return TraversePermission.Enter;
-        }
-    };
+public final class ExpandDenominatorTransformation extends AbstractExpandNumeratorDenominatorTransformation {
     /**
      * The default instance.
      */
     public static final ExpandDenominatorTransformation EXPAND_DENOMINATOR = new ExpandDenominatorTransformation();
-
-    private ExpandDenominatorTransformation() {
-        super(new Transformation[0], ExpandDenominatorTraverseGuide);
-    }
 
     /**
      * Creates expand transformation with specified additional transformations to
@@ -71,19 +47,11 @@ public final class ExpandDenominatorTransformation extends AbstractExpandTransfo
      * @param transformations transformations to be applied after each step of expand
      */
     public ExpandDenominatorTransformation(Transformation[] transformations) {
-        super(transformations, ExpandDenominatorTraverseGuide);
+        super(transformations);
     }
 
-    /**
-     * Creates expand transformation with specified additional transformations to
-     * be applied after each step of expand and leaves unexpanded parts of expression specified by
-     * {@code traverseGuide}.
-     *
-     * @param transformations transformations to be applied after each step of expand
-     * @param traverseGuide   traverse guide
-     */
-    public ExpandDenominatorTransformation(Transformation[] transformations, TraverseGuide traverseGuide) {
-        super(transformations, traverseGuide);
+    private ExpandDenominatorTransformation() {
+        super();
     }
 
     /**
@@ -108,11 +76,9 @@ public final class ExpandDenominatorTransformation extends AbstractExpandTransfo
     }
 
     @Override
-    protected Tensor expandProduct(Product product, Transformation[] transformations) {
+    protected Tensor expandProduct(Tensor product) {
         NumeratorDenominator numDen = NumeratorDenominator.getNumeratorAndDenominator(product, NumeratorDenominator.integerDenominatorIndicator);
-        Tensor denominator = numDen.denominator;
-        if (denominator instanceof Product)
-            denominator = ExpandUtils.expandProductOfSums((Product) numDen.denominator, transformations);
+        Tensor denominator = ExpandTransformation.expand(numDen.denominator, transformations);
         if (numDen.denominator == denominator)
             return product;
         return Tensors.multiply(numDen.numerator, Tensors.reciprocal(denominator));

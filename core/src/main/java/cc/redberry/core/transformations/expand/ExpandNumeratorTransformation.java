@@ -37,7 +37,7 @@ import cc.redberry.core.transformations.fractions.NumeratorDenominator;
  * @author Stanislav Poslavsky
  * @since 1.0
  */
-public final class ExpandNumeratorTransformation extends AbstractExpandTransformation {
+public final class ExpandNumeratorTransformation extends AbstractExpandNumeratorDenominatorTransformation {
     /**
      * The default instance.
      */
@@ -55,18 +55,6 @@ public final class ExpandNumeratorTransformation extends AbstractExpandTransform
      */
     public ExpandNumeratorTransformation(Transformation[] transformations) {
         super(transformations);
-    }
-
-    /**
-     * Creates expand transformation with specified additional transformations to
-     * be applied after each step of expand and leaves unexpanded parts of expression specified by
-     * {@code traverseGuide}.
-     *
-     * @param transformations transformations to be applied after each step of expand
-     * @param traverseGuide   traverse guide
-     */
-    public ExpandNumeratorTransformation(Transformation[] transformations, TraverseGuide traverseGuide) {
-        super(transformations, traverseGuide);
     }
 
     /**
@@ -91,11 +79,9 @@ public final class ExpandNumeratorTransformation extends AbstractExpandTransform
     }
 
     @Override
-    protected Tensor expandProduct(Product product, Transformation[] transformations) {
+    protected Tensor expandProduct(Tensor product) {
         NumeratorDenominator numDen = NumeratorDenominator.getNumeratorAndDenominator(product, NumeratorDenominator.integerDenominatorIndicator);
-        Tensor numerator = numDen.numerator;
-        if (numerator instanceof Product)
-            numerator = ExpandUtils.expandProductOfSums((Product) numDen.numerator, transformations);
+        Tensor numerator = ExpandTransformation.expand(numDen.numerator, transformations);
         if (numDen.numerator == numerator)
             return product;
         return Tensors.multiply(numerator, Tensors.reciprocal(numDen.denominator));

@@ -72,9 +72,9 @@ public class ExpandNumeratorTransformationTest {
 
     @Test
     public void test6() {
-        Tensor t = parse("f_m*(a+b)**2/x+f_m*(c+d)**2/y");
+        Tensor t = parse("f_m*(a+b)**2/x+g_m*(c+d)**2/y");
         Tensor a = expandNumerator(t);
-        Tensor e = parse("(f_m*a**2+f_m*2*a*b+f_m*b**2)/x+(f_m*c**2+f_m*2*c*d+f_m*d**2)/y");
+        Tensor e = parse("(f_m*a**2+f_m*2*a*b+f_m*b**2)/x+(g_m*c**2+g_m*2*c*d+g_m*d**2)/y");
         TAssert.assertEquals(a, e);
     }
 

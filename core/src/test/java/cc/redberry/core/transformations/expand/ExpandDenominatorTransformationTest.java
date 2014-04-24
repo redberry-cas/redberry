@@ -34,6 +34,7 @@ import static cc.redberry.core.transformations.expand.ExpandDenominatorTransform
  * @author Stanislav Poslavsky
  */
 public class ExpandDenominatorTransformationTest {
+
     @Test
     public void test1() {
         Tensor t = parse("(a+b)/(c+d)");
@@ -50,7 +51,6 @@ public class ExpandDenominatorTransformationTest {
     @Test
     public void test3() {
         Tensor a = expandDenominator(parse("(a+b)**2/(c+d)**2"));
-        System.out.println(a);
         Tensor e = parse("(a+b)**2/(c**2+2*c*d+d**2)");
         TAssert.assertEquals(a, e);
     }
@@ -92,9 +92,22 @@ public class ExpandDenominatorTransformationTest {
 
     @Test
     public void test9() {
-    Tensor a = expandDenominator(parse("1/(k_i*(a^i+b^i))**2"));
-    Tensor e = parse("1/(k_i*a^i+k_i*b^i)**2");
-    TAssert.assertEquals(a, e);
+        Tensor a = expandDenominator(parse("(a+b)**2/(k_i*(a^i+b^i))**2"));
+        Tensor e = parse("(a+b)**2/(k_i*a^i*k_j*a^j+2*k_j*a^j*k_i*b^i+k_i*b^i*k_j*b^j)");
+        TAssert.assertEquals(a, e);
     }
-    //todo more tests
+
+    @Test
+    public void test10(){
+        Tensor a = expandDenominator(parse("(a + b/(1 + c)**2)**(-2)"));
+        Tensor e = parse("(a**2 + b**2/(1 + c)**4 + (2*a*b)/(1 + c)**2)**(-1)");
+        TAssert.assertEquals(a, e);
+    }
+
+    @Test
+    public void test11(){
+        Tensor a = expandDenominator(parse("(b*(c + d) + (e + f)/a)**(-2)"));
+        Tensor e = parse("(b**2*c**2 + 2*b**2*c*d + b**2*d**2 + (2*b*c*e)/a + (2*b*d*e)/a + e**2/a**2 + (2*b*c*f)/a + (2*b*d*f)/a + (2*e*f)/a**2 + f**2/a**2)**(-1)");
+        TAssert.assertEquals(a, e);
+    }
 }
