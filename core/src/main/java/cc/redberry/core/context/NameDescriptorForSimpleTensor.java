@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2013:
+ * Copyright (c) 2010-2014:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -49,7 +49,7 @@ public final class NameDescriptorForSimpleTensor extends NameDescriptor {
     }
 
     @Override
-    public String getName(SimpleIndices indices) {
+    public String getName(SimpleIndices indices, OutputFormat format) {
         return name;
     }
 

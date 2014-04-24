@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2013:
+ * Copyright (c) 2010-2014:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -24,9 +24,11 @@ package cc.redberry.core.transformations.expand;
 
 import cc.redberry.core.TAssert;
 import cc.redberry.core.context.CC;
+import cc.redberry.core.parser.ParserIndices;
 import cc.redberry.core.tensor.*;
 import cc.redberry.core.tensor.iterator.TraverseState;
 import cc.redberry.core.tensor.iterator.TreeTraverseIterator;
+import cc.redberry.core.tensor.random.RandomTensor;
 import cc.redberry.core.transformations.CollectScalarFactorsTransformation;
 import cc.redberry.core.transformations.EliminateMetricsTransformation;
 import cc.redberry.core.transformations.Transformation;
@@ -34,6 +36,7 @@ import cc.redberry.core.transformations.TransformationCollection;
 import cc.redberry.core.transformations.fractions.TogetherTransformation;
 import cc.redberry.core.utils.TensorUtils;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import static cc.redberry.core.tensor.Tensors.parse;
@@ -460,5 +463,86 @@ public class ExpandTest {
         Tensor t = parse("(-2050*(f^{q}+57*f_{n}*f^{n}*f^{q})*f_{q}*(f_{a}-33*f_{j}*f^{j}*f_{a})-96*(25*f_{l}*f^{l}*f_{j}*f^{j}-75*f_{l}*f^{l})*f_{a})*(67*f_{v}*f^{v}*(-81*f_{f}*f^{f}*f_{b}+30*f_{b})+5734*f_{f}*f^{f}*(-67*f_{e}*f^{e}*f_{h}*f^{h}*f_{b}-48*f_{b}))*(4032*f^{d}*f_{d}*f_{c}+33440*f_{g}*f^{g}*f^{k}*f_{c}*(f_{k}+f_{d}*f^{d}*f_{k}))");
         t = ExpandTransformation.expand(t, EliminateMetricsTransformation.ELIMINATE_METRICS, CollectScalarFactorsTransformation.COLLECT_SCALAR_FACTORS);
         t = EliminateMetricsTransformation.eliminate(t);
+    }
+
+    @Ignore
+    @Test
+    public void test45_performance() {
+        CC.resetTensorNames(8164763714862784L);
+        RandomTensor r = new RandomTensor();
+        r.reset(8164763714862784L);
+        r.clearNamespace();
+        r.addToNamespace(parse("F_a"));
+        r.addToNamespace(parse("g_mn"));
+        Tensor t;
+
+//        t = parse("5850*d^{e}_{e}*g_{ba}*F^{i}*F_{i}*F_{c}+6159876*F^{e}*F_{e}*F^{o}*F_{o}*F^{f}*F_{g}*F_{f}*F^{g}*F_{a}*F_{b}*F_{c}+494160*F_{i}*F^{f}*F^{i}*F_{f}*F_{a}*F_{b}*F_{c}+427050*g_{ab}*F_{f}*F^{f}*F^{i}*F_{i}*F_{c}-77958*F_{e}*F_{l}*F^{l}*F_{g}*F_{i}*F_{d}*F^{i}*F^{g}*F^{e}*F^{d}*F_{o}*F^{o}*F_{a}*F_{b}*F_{c}-1080*d^{e}_{e}*d_{j}^{j}*F_{a}*F_{b}*F_{c}-90*d^{e}_{e}*F_{a}*F_{b}*F_{c}+5772*d_{h}^{h}*d^{m}_{m}*d_{n}^{n}*F_{d}*F_{g}*F^{d}*F^{g}*F_{a}*F_{b}*F_{c}-312754*d_{n}^{n}*d^{m}_{m}*F^{l}*F_{i}*F_{d}*F^{d}*F_{l}*F^{g}*F_{g}*F^{i}*F_{a}*F_{b}*F_{c}+5694*d_{n}^{n}*d^{m}_{m}*F^{g}*F^{i}*F_{i}*F_{g}*F_{a}*F_{b}*F_{c}+70200*d^{e}_{e}*d_{j}^{j}*g_{ba}*F^{i}*F_{i}*F_{c}+(2*F^{f}*F_{f}*F^{g}*F_{g}-70*d^{f}_{g}*F_{f}*F^{g})*(2*g^{ke}*F_{k}*F_{c}+d^{j}_{k}*g^{ke}*F_{j}*F_{c})*(F_{o}*F^{o}*F_{b}+91*g_{mo}*d^{m}_{b}*F^{o}+d^{l}_{l}*d^{m}_{o}*d^{o}_{b}*F_{m})*(71*d^{i}_{e}*F_{i}*F_{a}+g^{hi}*g_{ia}*F_{h}*F_{e}-31*g_{ia}*F^{i}*F_{e})-71*d^{m}_{m}*d_{o}^{o}*d_{h}^{h}*d^{f}_{f}*F_{d}*F^{e}*F_{e}*F^{d}*F_{l}*F^{l}*F_{a}*F_{b}*F_{c}+627630*d^{l}_{l}*F^{f}*F_{i}*F^{i}*F_{f}*F_{a}*F_{b}*F_{c}+41040*d_{j}^{j}*d^{e}_{e}*F_{i}*F^{i}*F_{a}*F_{b}*F_{c}-4084470*d_{j}^{j}*F^{i}*F_{i}*F_{a}*F_{b}*F_{c}-418*d_{h}^{h}*d^{m}_{m}*d_{n}^{n}*F^{d}*F_{g}*F^{g}*F_{d}*F_{l}*F^{l}*F_{a}*F_{b}*F_{c}+343633*d^{m}_{m}*d_{o}^{o}*F^{g}*F^{i}*F_{g}*F^{e}*F_{i}*F_{e}*F_{a}*F_{b}*F_{c}-7524*d_{h}^{h}*F^{d}*F_{g}*F^{g}*F^{l}*F_{l}*F_{d}*F_{o}*F^{o}*F_{a}*F_{b}*F_{c}+427050*g_{ab}*F_{i}*F^{f}*F_{f}*F_{k}*F^{i}*F^{k}*F_{c}-4331*d_{n}^{n}*d^{m}_{m}*F^{i}*F_{e}*F^{l}*F^{d}*F^{e}*F^{g}*F_{g}*F_{l}*F_{i}*F_{d}*F_{a}*F_{b}*F_{c}-5606568*F_{d}*F_{g}*F^{g}*F_{l}*F^{d}*F_{i}*F^{l}*F^{i}*F_{o}*F^{o}*F_{a}*F_{b}*F_{c}+90*(-65*d^{i}_{h}*d^{d}_{a}*F^{h}*F_{i}-38*F^{i}*F_{i}*F_{a}*F^{d}+d_{i}^{d}*F^{i}*F_{a})*(12*d_{j}^{j}*g_{cl}*F^{l}+d_{k}^{l}*F^{k}*F_{l}*F_{c}+g^{kl}*d^{j}_{k}*g_{lc}*F_{j})*(73*g_{bd}*F^{f}*F_{f}+d^{e}_{e}*g_{bf}*d^{f}_{d}-58*g_{df}*F^{f}*F_{b})-79236*d_{h}^{h}*F_{e}*F_{d}*F^{d}*F^{g}*F^{e}*F_{l}*F^{l}*F_{g}*F_{o}*F^{o}*F_{a}*F_{b}*F_{c}-340650*F^{i}*F_{i}*F_{a}*F_{b}*F_{c}+(-79*g_{el}*F^{l}*F_{d}+71*F^{l}*F_{l}*F_{d}*F_{e}+g^{kl}*g_{ek}*F_{l}*F_{d})*(73*d_{b}^{d}*F_{i}*F^{i}+d_{h}^{h}*d_{b}^{i}*F_{i}*F^{d}+F^{i}*F_{i}*F_{b}*F^{d})*(61*F_{g}*F^{g}*F_{c}*F^{e}+d^{f}_{f}*d_{c}^{g}*F_{g}*F^{e}+d^{e}_{c}*F_{g}*F^{g})*(d_{o}^{n}*d^{m}_{m}*d^{o}_{n}*F_{a}+17*F_{o}*F^{o}*F_{a}+d_{o}^{n}*F^{o}*F_{n}*F_{a})-4402*d^{m}_{m}*d_{o}^{o}*d_{h}^{h}*F^{e}*F^{d}*F_{g}*F^{l}*F^{g}*F_{l}*F_{e}*F_{d}*F_{a}*F_{b}*F_{c}+5130450*d_{j}^{j}*g_{ab}*F^{f}*F_{i}*F_{f}*F^{i}*F_{c}+140016*F^{i}*F_{i}*F^{f}*F_{g}*F_{f}*F^{g}*F_{a}*F_{b}*F_{c}+78*d_{h}^{h}*d_{o}^{o}*d^{f}_{f}*d^{m}_{m}*F^{d}*F^{e}*F_{e}*F_{d}*F_{a}*F_{b}*F_{c}+103650*d^{l}_{l}*F_{i}*F^{i}*F_{g}*F^{f}*F_{f}*F^{g}*F_{a}*F_{b}*F_{c}");
+        t = r.nextTensorTree(4, 3, 4, ParserIndices.parseSimple(""));
+        System.out.println(t);
+
+        Transformation tr = new TransformationCollection(
+                parseExpression("d_i^i = 4"),
+                EliminateMetricsTransformation.ELIMINATE_METRICS,
+                new ExpandTransformation(
+                        parseExpression("d_i^i = 4"),
+                        EliminateMetricsTransformation.ELIMINATE_METRICS,
+                        CollectScalarFactorsTransformation.COLLECT_SCALAR_FACTORS
+                ),
+                parseExpression("d_i^i = 4"),
+                EliminateMetricsTransformation.ELIMINATE_METRICS,
+                CollectScalarFactorsTransformation.COLLECT_SCALAR_FACTORS
+        );
+        long start;
+        for (int i = 0; i < 100; ++i) {
+            start = System.currentTimeMillis();
+            System.out.println(tr.transform(t));
+            System.out.println("Time: " + (System.currentTimeMillis() - start) + " ms");
+        }
+    }
+
+    @Test
+    public void test46() throws Exception {
+        CC.resetTensorNames(8164763714862784L);
+        RandomTensor r = new RandomTensor();
+        r.reset(8164763714862784L);
+        r.clearNamespace();
+        r.addToNamespace(parse("F_a"));
+        r.addToNamespace(parse("g_mn"));
+
+        Tensor t = parse("-29658447*(F^{b}*F_{b})**5+6475950*(F_{i}*F^{i})**6+30856032*(F_{d}*F^{d})**3-37389627*(F_{d}*F^{d})**4+(-6475950*(F_{b}*F^{b})**4+38697399*(F_{b}*F^{b})**2-8030178*(F_{b}*F^{b})**3)*(F^{a}*F_{a})**2+(37056825*(F_{b}*F^{b})**2+41503644)*(F_{h}*F^{h})**3+(631800*(F_{b}*F^{b})**4+2307528*(F_{b}*F^{b})**3-72359676*(F_{c}*F^{c})**2)*F^{a}*F_{a}+(-4049136-3615300*(F_{b}*F^{b})**2)*(F_{h}*F^{h})**2+4049136*(F^{d}*F_{d})**2");
+        Transformation tr = new TransformationCollection(
+                parseExpression("d_i^i = 4"),
+                EliminateMetricsTransformation.ELIMINATE_METRICS,
+                new ExpandTransformation(
+                        parseExpression("d_i^i = 4"),
+                        EliminateMetricsTransformation.ELIMINATE_METRICS,
+                        CollectScalarFactorsTransformation.COLLECT_SCALAR_FACTORS
+                ),
+                parseExpression("d_i^i = 4"),
+                EliminateMetricsTransformation.ELIMINATE_METRICS,
+                CollectScalarFactorsTransformation.COLLECT_SCALAR_FACTORS
+        );
+
+        System.out.println(t = tr.transform(t));
+        System.out.println(t = tr.transform(t));
+        System.out.println(t = tr.transform(t));
+        System.out.println(t = tr.transform(t));
+
+        System.out.println(tr.transform(
+                parse("-631800*(F^{b}*F_{b})**5-2307528*(F_{d}*F^{d})**4+72359676*(F_{d}*F^{d})**3+631800*(F_{b}*F^{b})**4*F^{a}*F_{a}+2307528*(F_{b}*F^{b})**3*F^{a}*F_{a}-72359676*(F_{c}*F^{c})**2*F^{a}*F_{a}")
+        ));
+    }
+
+    @Test
+    public void test47() {
+        Expression e1 = parseExpression("p_a*p^a = x");
+        Expression e2 = parseExpression("k_a*k^a = x");
+
+        Tensor t = parse("(p_a*p^a + k_r*k^r)**2");
+        TAssert.assertEquals(ExpandTransformation.expand(t, e1, e2), "4*x**2");
+        t = parse("(p_a*p^a + k_r*k^r)**3");
+        TAssert.assertEquals(ExpandTransformation.expand(t, e1, e2), "8*x**3");
+        t = parse("(p_a*p^a + k_r*k^r)**4");
+        TAssert.assertEquals(ExpandTransformation.expand(t, e1, e2), "16*x**4");
     }
 }

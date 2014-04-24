@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2013:
+ * Copyright (c) 2010-2014:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -22,7 +22,11 @@
  */
 package cc.redberry.groovy
 
+import cc.redberry.core.groups.permutations.Permutation
+import cc.redberry.core.groups.permutations.PermutationOneLineInt
+import cc.redberry.core.groups.permutations.Permutations
 import cc.redberry.core.indexmapping.IndexMappings
+import cc.redberry.core.tensor.Tensors
 import org.apache.commons.math3.util.ArithmeticUtils
 import org.junit.Test
 
@@ -76,6 +80,34 @@ class RedberryTest {
             def count = 0
             mappings.each { count += it.sign ? 1 : 0 }
             assert 2 * count == ArithmeticUtils.factorial(from.indices.size())
+        }
+    }
+
+    @Test
+    public void testPermutation1() {
+        use(Redberry) {
+            assert Permutations.createPermutation(1, 0) == [1, 0].p
+            assert [[1, 0]].p == [1, 0].p
+            assert -[1, 0].p == Permutations.createPermutation(true, 1, 0)
+            assert [[1, 0], [2, 3]].p == Permutations.createPermutation([[1, 0], [2, 3]] as int[][])
+        }
+    }
+
+    @Test
+    public void testPermutation2() {
+        use(Redberry) {
+            println(-[1, 0].p)
+            Tensors.addSymmetry 'f_abc', -[1, 0, 2].p
+            assert 'f_abc + f_bac'.t == 0.t
+        }
+    }
+
+    @Test
+    public void testPermutation3() {
+        use(Redberry) {
+            assert -[1, 0].p == [-1, 0].p
+            assert -[[0, 1, 4, 5]].p == [[0, -1, -4, -5]].p
+            assert -[[0, -1, -4, -5]].p == [[0, 1, 4, 5]].p
         }
     }
 

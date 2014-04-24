@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2013:
+ * Copyright (c) 2010-2014:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -22,9 +22,10 @@
  */
 package cc.redberry.core.tensor.random;
 
-import cc.redberry.core.combinatorics.Symmetry;
 import cc.redberry.core.context.CC;
 import cc.redberry.core.context.NameDescriptor;
+import cc.redberry.core.groups.permutations.PermutationOneLineInt;
+import cc.redberry.core.groups.permutations.Permutations;
 import cc.redberry.core.indexgenerator.IndexGeneratorImpl;
 import cc.redberry.core.indexmapping.Mapping;
 import cc.redberry.core.indices.*;
@@ -33,7 +34,8 @@ import cc.redberry.core.tensor.*;
 import cc.redberry.core.utils.IntArrayList;
 import cc.redberry.core.utils.TensorUtils;
 import gnu.trove.set.hash.TIntHashSet;
-import org.apache.commons.math3.random.BitsStreamGenerator;
+import org.apache.commons.math3.random.RandomGenerator;
+import org.apache.commons.math3.random.Well1024a;
 import org.apache.commons.math3.random.Well19937c;
 
 import java.util.ArrayList;
@@ -46,7 +48,7 @@ import java.util.List;
  */
 public final class RandomTensor {
 
-    protected final BitsStreamGenerator random;
+    protected final RandomGenerator random;
     protected long seed;
     protected final static byte TYPES_COUNT = 4;
     protected final static byte[] TYPES = {0, 1, 2, 3};
@@ -63,24 +65,32 @@ public final class RandomTensor {
     private final List<NameDescriptor> namespace;
     private final int initialNamespaceSize;
 
+    private final boolean generateNewDescriptors;
+
     public static enum TensorType {
         Product, Sum
     }
 
     /**
-     * Creates random with default values. Same as
-     * {@code new RandomTensor(2, 5, new int[]{0, 0, 0, 0}, new int[]{4, 0, 0, 0}, true)}
+     * Creates random with default values. Same as {@code new RandomTensor(2, 5, new int[]{0, 0, 0, 0}, new int[]{4, 0,
+     * 0, 0}, true)}
      */
     public RandomTensor() {
-        this(2, 5, new int[]{0, 0, 0, 0}, new int[]{4, 4, 4, 4}, true);
+        this(true);
+    }
+
+    public RandomTensor(boolean generateNewDescriptors) {
+        this(2, 5, new int[]{0, 0, 0, 0}, new int[]{4, 4, 4, 4}, true, generateNewDescriptors);
     }
 
     /**
-     * @param minDiffNDs     min number of different tensors
-     * @param maxDiffNDs     max number of different tensors
-     * @param minIndices     min number of indices in each tensor.
-     * @param maxIndices     max number of indices in each tensor.
-     * @param withSymmetries add symmetries to tensors
+     * @param minDiffNDs             min number of different tensors
+     * @param maxDiffNDs             max number of different tensors
+     * @param minIndices             min number of indices in each tensor.
+     * @param maxIndices             max number of indices in each tensor.
+     * @param withSymmetries         add symmetries to tensors
+     * @param generateNewDescriptors if false then only specified tensors will be used
+     * @param random                 random generator
      */
     public RandomTensor(
             int minDiffNDs,
@@ -88,7 +98,9 @@ public final class RandomTensor {
             int[] minIndices,
             int[] maxIndices,
             boolean withSymmetries,
-            BitsStreamGenerator random) {
+            boolean generateNewDescriptors,
+            RandomGenerator random) {
+        this.generateNewDescriptors = generateNewDescriptors;
         this.random = random;
         this.random.setSeed(seed = random.nextLong());
         this.minIndices = minIndices;
@@ -106,11 +118,13 @@ public final class RandomTensor {
     }
 
     /**
-     * @param minDiffNDs     minimum number of different tensors
-     * @param maxDiffNDs     maximum number of different tensors
-     * @param minIndices     minimum number of indices in each tensor.
-     * @param maxIndices     maximum number of indices in each tensor.
-     * @param withSymmetries add symmetries to tensors
+     * @param minDiffNDs             minimum number of different tensors
+     * @param maxDiffNDs             maximum number of different tensors
+     * @param minIndices             minimum number of indices in each tensor.
+     * @param maxIndices             maximum number of indices in each tensor.
+     * @param withSymmetries         add symmetries to tensors
+     * @param generateNewDescriptors if false then only specified tensors will be used
+     * @param seed                   random seed
      */
     public RandomTensor(
             int minDiffNDs,
@@ -118,37 +132,31 @@ public final class RandomTensor {
             int[] minIndices,
             int[] maxIndices,
             boolean withSymmetries,
+            boolean generateNewDescriptors,
             long seed) {
-        this.random = new Well19937c();
-        this.random.setSeed(seed);
-        this.minIndices = minIndices;
-        this.maxIndices = maxIndices;
-        this.withSymmetries = withSymmetries;
-        int di = 1, t;
-        for (int i = 0; i < TYPES.length; ++i)
-            di *= (t = maxIndices[i] - minIndices[i]) == 0 ? 1 : t;
-        this.diffStringNames = (maxDiffNDs - minDiffNDs) / di;
-//        namespace = new NameDescriptor[minDiffNDs + (int) (0.5 * (maxDiffNDs - minDiffNDs))];//TODO add randomization
-        //initial namespace size
-        initialNamespaceSize = minDiffNDs + (int) (0.5 * (maxDiffNDs - minDiffNDs));
-        namespace = new ArrayList<>(initialNamespaceSize);//TODO add randomization
-        generateDescriptors();
+        this(minDiffNDs, maxDiffNDs, minIndices, maxIndices, withSymmetries, generateNewDescriptors, new Well1024a(seed));
     }
 
     /**
-     * @param minDiffNDs     minimum number of different tensors
-     * @param maxDiffNDs     maximum number of different tensors
-     * @param minIndices     minimum number of indices in each tensor.
-     * @param maxIndices     maximum number of indices in each tensor.
-     * @param withSymmetries add symmetries to tensors
+     * @param minDiffNDs             minimum number of different tensors
+     * @param maxDiffNDs             maximum number of different tensors
+     * @param minIndices             minimum number of indices in each tensor.
+     * @param maxIndices             maximum number of indices in each tensor.
+     * @param withSymmetries         add symmetries to tensors
+     * @param generateNewDescriptors if false then only specified tensors will be used
      */
     public RandomTensor(
             int minDiffNDs,
             int maxDiffNDs,
             int[] minIndices,
             int[] maxIndices,
-            boolean withSymmetries) {
-        this(minDiffNDs, maxDiffNDs, minIndices, maxIndices, withSymmetries, new Well19937c());
+            boolean withSymmetries,
+            boolean generateNewDescriptors) {
+        this(minDiffNDs, maxDiffNDs, minIndices, maxIndices, withSymmetries, generateNewDescriptors, new Well19937c());
+    }
+
+    public RandomGenerator getRandom() {
+        return random;
     }
 
     public void clearNamespace() {
@@ -176,6 +184,9 @@ public final class RandomTensor {
     }
 
     private void generateDescriptors() {
+        if (!generateNewDescriptors)
+            return;
+
         for (int i = 0; i < initialNamespaceSize; ++i) {
             int[] typesCount = new int[TYPES_COUNT];
             for (int j = 0; j < TYPES_COUNT; ++j)
@@ -226,6 +237,9 @@ public final class RandomTensor {
         if (!positions.isEmpty())
             return namespace.get(positions.get(random.nextInt(positions.size())));
 
+        if (!generateNewDescriptors)
+            throw new IllegalArgumentException("No descriptor for such structure.");
+
         //create new nameDescriptor
         NameDescriptor nameDescriptor = CC.getNameManager().mapNameDescriptor(nextName(), typeStructure);
         if (withSymmetries)
@@ -236,7 +250,7 @@ public final class RandomTensor {
     }
 
     private void addRandomSymmetries(NameDescriptor descriptor) {//TODO add antisymmetries
-        if (!descriptor.getSymmetries().isEmpty())
+        if (!descriptor.getSymmetries().isTrivial()) //todo <= review this moment
             return;
         StructureOfIndices typeStructure = descriptor.getStructureOfIndices();
         int i;
@@ -248,7 +262,7 @@ public final class RandomTensor {
                 continue;
             int count = random.nextInt(4);
             for (i = 0; i < count; ++i)
-                descriptor.getSymmetries().addUnsafe(type, new Symmetry(nextPermutation(typeData.length), false));
+                descriptor.getSymmetries().add(type, Permutations.createPermutation(false, nextPermutation(typeData.length)));
         }
     }
 
@@ -269,49 +283,57 @@ public final class RandomTensor {
     public Tensor nextProduct(int minProductSize, Indices indices) {
         if (minProductSize < 2)
             throw new IllegalArgumentException();
-        return nextProductTree(1, minProductSize, 0, indices);
+        return nextProductTree(1, new Parameters(0, 0, minProductSize, minProductSize), indices);
     }
 
     public Tensor nextProduct(int minProductSize) {
         return nextProduct(minProductSize, IndicesFactory.createSimple(null, nextIndices(nextNameDescriptor().getStructureOfIndices())));
     }
 
-    public Tensor nextSum(int sumSize, int averageProductSize, Indices indices) {//TODO introduce Poisson 
-        return nextSumTree(2, sumSize, averageProductSize, indices);
+    public Tensor nextSum(Parameters parameters, Indices indices) {
+        return nextSumTree(2, parameters, indices);
     }
 
-    public Tensor nextTensorTree(int depth, int avrProductSize, int avrSumSize, Indices indices) {
+    public Tensor nextSum(int sumSize, int productSize, Indices indices) {//TODO introduce Poisson
+        return nextSumTree(2, new Parameters(sumSize, sumSize, productSize, productSize), indices);
+    }
+
+    public Tensor nextTensorTree(int depth, Parameters parameters, Indices indices) {
         return nextTensorTree(random.nextBoolean() ? TensorType.Product : TensorType.Sum,
-                depth, avrProductSize, avrSumSize, indices);
+                depth, parameters, indices);
     }
 
-    public Tensor nextTensorTree(TensorType head, int depth, int avrProductSize, int avrSumSize, Indices indices) {
+    public Tensor nextTensorTree(TensorType head, int depth, Parameters parameters, Indices indices) {
+        if (head == null)
+            nextTensorTree(depth, parameters, indices);
+
         indices = indices.getFree();
         if (depth == 0)
             return nextSimpleTensor(IndicesFactory.createSimple(null, indices));
         if (head == TensorType.Product)
-            return nextProductTree(depth, avrProductSize, avrSumSize, indices);
+            return nextProductTree(depth, parameters, indices);
         if (head == TensorType.Sum)
-            return nextSumTree(depth, avrProductSize, avrSumSize, indices);
+            return nextSumTree(depth, parameters, indices);
         throw new RuntimeException();
     }
 
 
-    protected Tensor nextTensorTree(TensorType head, int depth, int avrProductSize, int avrSumSize) {
-        return nextTensorTree(head, depth, avrProductSize, avrSumSize,
+    protected Tensor nextTensorTree(TensorType head, int depth, Parameters parameters) {
+        return nextTensorTree(head, depth, parameters,
                 IndicesFactory.createSimple(null, nextIndices(nextNameDescriptor().getStructureOfIndices())));
     }
 
 
-    public Tensor nextProductTree(int depth, int avrProductSize, int avrSumSize, Indices indices) {
+    public Tensor nextProductTree(int depth, Parameters parameters, Indices indices) {
+        int productSize = getRandomValue(parameters.minProductSize, parameters.maxProductSize);
         indices = indices.getFree();
         StructureOfIndices typeStructure = new StructureOfIndices(IndicesFactory.createSimple(null, indices));
         List<Tensor> descriptors = new ArrayList<>();
         int totalIndicesCounts[] = new int[TYPES.length];
         Tensor nd;
         int i;
-        for (i = 0; i < avrProductSize; ++i) {
-            descriptors.add(nd = nextTensorTree(TensorType.Sum, depth - 1, avrProductSize, avrSumSize));
+        for (i = 0; i < productSize; ++i) {
+            descriptors.add(nd = nextTensorTree(TensorType.Sum, depth - 1, parameters));
             for (byte b : TYPES) {
                 StructureOfIndices.TypeData typeData = IndicesFactory.createSimple(null, nd.getIndices().getFree()).getStructureOfIndices().getTypeData(b);
                 if (typeData != null)
@@ -325,7 +347,7 @@ public final class RandomTensor {
             if (typeData == null)
                 continue;
             while (totalIndicesCounts[b] < typeData.length) {
-                descriptors.add(nd = nextTensorTree(TensorType.Sum, depth - 1, avrProductSize, avrSumSize));
+                descriptors.add(nd = nextTensorTree(TensorType.Sum, depth - 1, parameters));
                 for (byte bb : TYPES) {
                     StructureOfIndices.TypeData typeData1 = IndicesFactory.createSimple(null, nd.getIndices().getFree()).getStructureOfIndices().getTypeData(bb);
                     if (typeData1 != null)
@@ -339,7 +361,7 @@ public final class RandomTensor {
             if ((totalIndicesCounts[b] - (typeData == null ? 0 : typeData.length)) % 2 != 0) {
                 int[] typeCount = new int[TYPES.length];
                 typeCount[b] = 1;
-                descriptors.add(nextTensorTree(TensorType.Sum, depth - 1, avrProductSize, avrSumSize, IndicesFactory.createSimple(null, nextIndices(new StructureOfIndices(TYPES, typeCount)))));
+                descriptors.add(nextTensorTree(TensorType.Sum, depth - 1, parameters, IndicesFactory.createSimple(null, nextIndices(new StructureOfIndices(TYPES, typeCount)))));
                 ++totalIndicesCounts[b];
             }
         }
@@ -374,7 +396,7 @@ public final class RandomTensor {
         }
 
         //Creating resulting product
-        ProductBuilder pb = new ProductBuilder(10, avrProductSize);
+        ProductBuilder pb = new ProductBuilder(10, productSize);
         for (Tensor descriptor : descriptors) {
             StructureOfIndices its = IndicesFactory.createSimple(null, descriptor.getIndices().getFree()).getStructureOfIndices();
             int[] factorIndices = new int[its.size()];
@@ -404,10 +426,12 @@ public final class RandomTensor {
         return pb.build();
     }
 
-    public Tensor nextSumTree(int depth, int avrProductSize, int avrSumSize, Indices indices) {
-        TensorBuilder sum = new SumBuilder(avrSumSize);
-        for (int i = 0; i < avrSumSize; ++i)
-            sum.put(nextTensorTree(TensorType.Product, depth - 1, avrProductSize, avrSumSize, indices));
+
+    public Tensor nextSumTree(int depth, Parameters parameters, Indices indices) {
+        int sumSize = getRandomValue(parameters.minSumSize, parameters.maxSumSize);
+        TensorBuilder sum = new SumBuilder();
+        for (int i = 0; i < sumSize; ++i)
+            sum.put(nextTensorTree(TensorType.Product, depth - 1, parameters, indices));
         return sum.build();
     }
 
@@ -436,38 +460,7 @@ public final class RandomTensor {
     }
 
     public int[] nextPermutation(final int dimension) {
-        if (dimension == 0)
-            return new int[0];
-        int[] permutation = new int[dimension];
-        if (dimension == 1)
-            return permutation;
-        if (dimension == 2) {
-            permutation[1] = 1;
-            if (random.nextBoolean())
-                swap(permutation, 0, 1);
-            return permutation;
-        }
-        int i, r = nextInt(1000);
-        //cycle permutation
-        if (r < 100) {
-            for (i = 0; i < dimension - 1; ++i)
-                permutation[i] = i + 1;
-            permutation[dimension - 1] = 0;
-            return permutation;
-        }
-        for (i = 1; i < dimension; ++i)
-            permutation[i] = i;
-        //else composition of transpositions
-        if (r < 700) {
-            int p1, p2;
-            final int tries = nextInt(3) + 1;
-            for (i = 0; i < tries; ++i) {
-                while ((p1 = nextInt(dimension)) == (p2 = nextInt(dimension))) ;
-                swap(permutation, p1, p2);
-            }
-        }
-        //else identity
-        return permutation;
+        return Permutations.randomPermutation(dimension, random);
     }
 
     public final void shuffle(final int[] target) {
@@ -486,8 +479,36 @@ public final class RandomTensor {
         a[p2] = c;
     }
 
-    public static RandomTensor createWithDefaultValues() {
-        return new RandomTensor(5, 10, new int[]{0, 0, 0, 0}, new int[]{3, 3, 3, 3}, false);
+    private int getRandomValue(int min, int max) {
+        if (min == max)
+            return min;
+        return min + random.nextInt(max - min);
     }
 
+    public static class Parameters {
+        final int minSumSize, maxSumSize, minProductSize, maxProductSize;
+
+        public Parameters(int minSumSize, int maxSumSize, int minProductSize, int maxProductSize) {
+            this.minSumSize = minSumSize;
+            this.maxSumSize = maxSumSize;
+            this.minProductSize = minProductSize;
+            this.maxProductSize = maxProductSize;
+        }
+    }
+
+    public Tensor nextTensorTree(int depth, int productSize, int sumSize, Indices indices) {
+        return nextTensorTree(depth, new Parameters(sumSize, sumSize, productSize, productSize), indices);
+    }
+
+    public Tensor nextTensorTree(TensorType head, int depth, int productSize, int sumSize, Indices indices) {
+        return nextTensorTree(head, depth, new Parameters(sumSize, sumSize, productSize, productSize), indices);
+    }
+
+    public Tensor nextSumTree(int depth, int productSize, int sumSize, Indices indices) {
+        return nextSumTree(depth, new Parameters(sumSize, sumSize, productSize, productSize), indices);
+    }
+
+    public Tensor nextProductTree(int depth, int productSize, int sumSize, Indices indices) {
+        return nextProductTree(depth, new Parameters(sumSize, sumSize, productSize, productSize), indices);
+    }
 }

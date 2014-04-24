@@ -2,7 +2,7 @@
 /*
  * JAS: Java Algebra System.
  *
- * Copyright (c) 2000-2013:
+ * Copyright (c) 2000-2014:
  *    Heinz Kredel   <kredel@rz.uni-mannheim.de>
  *
  * This file is part of Java Algebra System (JAS).

@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2013:
+ * Copyright (c) 2010-2014:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -23,10 +23,10 @@
 package cc.redberry.core.transformations.substitutions;
 
 import cc.redberry.core.TAssert;
-import cc.redberry.core.combinatorics.Combinatorics;
 import cc.redberry.core.combinatorics.IntPermutationsGenerator;
 import cc.redberry.core.context.CC;
 import cc.redberry.core.context.OutputFormat;
+import cc.redberry.core.groups.permutations.Permutations;
 import cc.redberry.core.indices.IndexType;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.tensor.*;
@@ -365,7 +365,7 @@ public class SubstitutionsTest {
         Expression[] temp;
         while (generator.hasNext()) {
             permutation = generator.next();
-            temp = Combinatorics.reorder(es, permutation);
+            temp = Permutations.permute(es, permutation);
             for (Expression e : temp)
                 t = e.transform(t);
             TAssert.assertIndicesConsistency(t);
@@ -401,7 +401,7 @@ public class SubstitutionsTest {
         Expression[] temp;
         while (generator.hasNext()) {
             permutation = generator.next();
-            temp = Combinatorics.reorder(es, permutation);
+            temp = Permutations.permute(es, permutation);
             for (Expression e : temp)
                 t = e.transform(t);
             TAssert.assertIndicesConsistency(t);
@@ -421,10 +421,10 @@ public class SubstitutionsTest {
     public void testSimple24() {
         CC.resetTensorNames(-1030130556496293426L);
         Tensor t = parse("(f+g*k)*(d+h*f*f)");
-        System.out.println(t);
+        //System.out.println(t);
         Expression f = parseExpression("f=f_m^m+f1_a^a");
         t = f.transform(t);
-        System.out.println(t);
+        //System.out.println(t);
         TAssert.assertIndicesConsistency(t);
     }
 
@@ -1138,7 +1138,7 @@ public class SubstitutionsTest {
         Expression[] temp;
         while (generator.hasNext()) {
             permutation = generator.next();
-            temp = Combinatorics.reorder(es, permutation);
+            temp = Permutations.permute(es, permutation);
             for (Expression e : temp)
                 t = e.transform(t);
             TAssert.assertIndicesConsistency(t);

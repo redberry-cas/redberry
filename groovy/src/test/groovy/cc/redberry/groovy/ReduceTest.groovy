@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2013:
+ * Copyright (c) 2010-2014:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -188,11 +188,12 @@ class ReduceTest {
     @Test
     public void testReduce5() {
         use(Redberry) {
+            addSymmetry 'F_abcd', 1, 0, 2, 3
+            addSymmetry 'F_abcd', 2, 3, 0, 1
+
             for (def externalSolver in ['Maple', 'Mathematica']) {
                 if (getPath(externalSolver) == null)
                     continue
-                addSymmetry 'F_abcd', 1, 0, 2, 3
-                addSymmetry 'F_abcd', 2, 3, 0, 1
 
                 def genTensor = GenerateTensorWithCoefficients('_{ab cd}'.si, ['g_mn', 'k_m'])
                 def equations = ['F_{ab cd}*F^{ab pq} = F_{cd}^{pq}', 'F_a^acd = 0', 'k^a*F_abcd = 0', 'F_abcd'.eq(genTensor[0])]
@@ -213,11 +214,12 @@ class ReduceTest {
     @Test
     public void testReduce6() {
         use(Redberry) {
+            addSymmetry 'F_abcd', 1, 0, 2, 3
+            addSymmetry 'F_abcd', 2, 3, 0, 1
+
             for (def externalSolver in ['Maple', 'Mathematica']) {
                 if (getPath(externalSolver) == null)
                     continue
-                addSymmetry 'F_abcd', 1, 0, 2, 3
-                addSymmetry 'F_abcd', 2, 3, 0, 1
 
                 def genTensor = GenerateTensorWithCoefficients('_{ab cd}'.si, ['g_mn', 'k_m'])
                 def equations = ['F_{ab cd}*F^{ab pq} = F_{cd}^{pq}', 'F_a^acd = 0', 'F_abcd*F^acbd = F^a_ba^b/2', 'F_abcd'.eq(genTensor[0])]

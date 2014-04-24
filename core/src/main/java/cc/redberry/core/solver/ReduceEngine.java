@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2013:
+ * Copyright (c) 2010-2014:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -119,8 +119,7 @@ public final class ReduceEngine {
                 unknownCoefficients.add(nVar);
                 generalSolutions[i] = Tensors.expression(vars[i], nVar);
             } else {
-                generatedTensor = TensorGenerator.generateStructure(vars[i].getIndices(), samples, vars[i].getIndices().getSymmetries().getInnerSymmetries(), symmetricForm[i], true, true
-                );
+                generatedTensor = TensorGenerator.generateStructure(vars[i].getIndices(), samples, symmetricForm[i], true, true);
 
                 unknownCoefficients.ensureCapacity(generatedTensor.coefficients.length);
                 for (SimpleTensor st : generatedTensor.coefficients)

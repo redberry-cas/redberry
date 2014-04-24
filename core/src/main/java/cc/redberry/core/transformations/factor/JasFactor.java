@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2013:
+ * Copyright (c) 2010-2014:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -44,17 +44,20 @@ import java.util.SortedMap;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public class JasFactor {
-    public static final FactorizationEngine ENGINE = new FactorizationEngine() {
-        @Override
-        public Tensor factor(Tensor tensor) {
-            return JasFactor.factor(tensor);
-        }
-    };
+public final class JasFactor implements FactorizationEngine {
+    public static final JasFactor ENGINE = new JasFactor();
+
+    private JasFactor() {
+    }
+
+    @Override
+    public Tensor factor(Tensor tensor) {
+        return factor1(tensor);
+    }
 
     static final char START_CHAR = 'a';
 
-    static Tensor factor(Tensor t) {
+    static Tensor factor1(Tensor t) {
         if (!(t instanceof MultiTensor || t instanceof Power))
             return t;
         TIntObjectMap<Var> vars = getVars(t);

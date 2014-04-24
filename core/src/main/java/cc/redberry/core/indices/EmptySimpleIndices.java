@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2013:
+ * Copyright (c) 2010-2014:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -86,13 +86,13 @@ final class EmptySimpleIndices extends EmptyIndices implements SimpleIndices {
     }
 
     /**
-     * Returns {@code Symmetries.EMPTY_SYMMETRIES}
+     * Returns empty symmetries.
      *
-     * @return {@code Symmetries.EMPTY_SYMMETRIES}
+     * @return empty symmetries
      */
     @Override
     public IndicesSymmetries getSymmetries() {
-        return IndicesSymmetries.EMPTY_SYMMETRIES;
+        return IndicesSymmetries.EMPTY_INDICES_SYMMETRIES;
     }
 
     /**

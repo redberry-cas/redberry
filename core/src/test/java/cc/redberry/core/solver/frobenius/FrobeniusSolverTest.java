@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2013:
+ * Copyright (c) 2010-2014:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -22,10 +22,12 @@
  */
 package cc.redberry.core.solver.frobenius;
 
+import cc.redberry.core.context.CC;
+import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import java.util.Arrays;
+import java.util.*;
 
 import static cc.redberry.core.solver.frobenius.FrobeniusUtils.*;
 
@@ -222,5 +224,71 @@ public class FrobeniusSolverTest {
         }
     }
 
+    @Test
+    public void testName() throws Exception {
+        for (int c = 0; c < 100; ++c) {
+            int N = 7;
+            int[][] equations = new int[1][N];
+            int total = 0;
+            for (int i = 0; i < N - 1; ++i) {
+                equations[0][i] = 5 + CC.getRandomGenerator().nextInt(5);
+                total += equations[0][i];
+            }
+            equations[0][N - 1] = 2 * total - 1;
+            int[] equation = Arrays.copyOfRange(equations[0], 0, equations[0].length - 1);
 
+            ArrayList<int[]> expected = (ArrayList) FbUtils.getAllSolutions(equations);
+            ArrayList<int[]> actual = (ArrayList) allFBSolutions(equation, equations[0][equations[0].length - 1]);
+
+            Comparator<int[]> comparator = new Comparator<int[]>() {
+                @Override
+                public int compare(int[] o1, int[] o2) {
+                    return Integer.compare(Arrays.hashCode(o1), Arrays.hashCode(o2));
+                }
+            };
+            Collections.sort(expected, comparator);
+            Collections.sort(actual, comparator);
+
+            Assert.assertEquals(expected.size(), actual.size());
+            for (int i = 0; i < actual.size(); ++i)
+                Assert.assertArrayEquals(expected.get(i), actual.get(i));
+        }
+    }
+
+    private static List<int[]> allFBSolutions(int[] system, int total) {
+        ArrayList<int[]> all = new ArrayList<>();
+        int[] solution = new int[system.length];//initialized by zeros
+        int pointer = system.length - 1, temp;
+        out:
+        while (true) {
+            do { //the following loop can be optimized by calculation of remainder
+                ++solution[pointer];
+            } while ((temp = total(system, solution)) < total);
+
+            if (temp == total && pointer != 0)
+                all.add(solution.clone());
+            do {
+                if (pointer == 0) {
+                    if (temp == total) //not lose the last solution!
+                        all.add(solution.clone());
+                    break out;
+                }
+                for (int i = pointer; i < system.length; ++i)
+                    solution[i] = 0;
+                ++solution[--pointer];
+            } while ((temp = total(system, solution)) > total);
+            pointer = system.length - 1;
+            if (temp == total)
+                all.add(solution.clone());
+        }
+        return all;
+    }
+
+
+    public static int total(int[] system, int[] solution) {
+        int total = 0;
+        for (int i = 0; i < system.length; ++i)
+            total += system[i] * solution[i];
+        return total;
+    }
 }

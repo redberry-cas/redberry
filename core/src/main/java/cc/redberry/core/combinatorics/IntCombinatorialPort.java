@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2013:
+ * Copyright (c) 2010-2014:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -22,7 +22,7 @@
  */
 package cc.redberry.core.combinatorics;
 
-import cc.redberry.concurrent.OutputPortUnsafe;
+import cc.redberry.core.utils.OutputPort;
 
 /**
  * This interface is common for all combinatorial iterators.
@@ -31,7 +31,7 @@ import cc.redberry.concurrent.OutputPortUnsafe;
  * @author Stanislav Poslavsky
  * @since 1.0
  */
-public interface IntCombinatorialPort extends OutputPortUnsafe<int[]> {
+public interface IntCombinatorialPort extends OutputPort<int[]> {
     /**
      * Resets the iteration
      */

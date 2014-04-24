@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2013:
+ * Copyright (c) 2010-2014:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -94,7 +94,7 @@ public final class IntPermutationsGenerator
         for (int i = 0; i < size - 1; ++i) {
             if (permutation[i] >= size || permutation[i] < 0)
                 throw new IllegalArgumentException("Wrong permutation input: image of " + i + " element"
-                        + " greater then dimension");
+                        + " greater then degree");
             for (int j = i + 1; j < size; ++j)
                 if (permutation[i] == permutation[j])
                     throw new IllegalArgumentException("Wrong permutation input: to elemets have the same image");

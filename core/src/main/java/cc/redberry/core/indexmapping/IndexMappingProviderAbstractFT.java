@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2013:
+ * Copyright (c) 2010-2014:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -22,7 +22,7 @@
  */
 package cc.redberry.core.indexmapping;
 
-import cc.redberry.concurrent.OutputPortUnsafe;
+import cc.redberry.core.utils.OutputPort;
 import cc.redberry.core.tensor.Tensor;
 
 /**
@@ -36,7 +36,7 @@ abstract class IndexMappingProviderAbstractFT<T extends Tensor> extends IndexMap
 
     protected final T from, to;
 
-    public IndexMappingProviderAbstractFT(OutputPortUnsafe<IndexMappingBuffer> opu, T from, T to) {
+    public IndexMappingProviderAbstractFT(OutputPort<IndexMappingBuffer> opu, T from, T to) {
         super(opu);
         this.from = from;
         this.to = to;

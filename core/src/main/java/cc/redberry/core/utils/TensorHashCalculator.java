@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2013:
+ * Copyright (c) 2010-2014:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -47,7 +47,7 @@ public final class TensorHashCalculator {
     private static int _hashWithIndices(final Tensor tensor, final int[] indices) {
         if (tensor instanceof SimpleTensor) {
             SimpleIndices si = ((SimpleTensor) tensor).getIndices();
-            short[] sInds = si.getDiffIds();
+            short[] sInds = si.getPositionsInOrbits();
             int hash = tensor.hashCode();
             int pos;
             for (int i = 0; i < si.size(); ++i)

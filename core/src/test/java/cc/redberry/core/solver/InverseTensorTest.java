@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2013:
+ * Copyright (c) 2010-2014:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -288,10 +288,10 @@ public class InverseTensorTest {
                 SymmetrizeUpperLowerIndicesTransformation.symmetrizeUpperLowerIndices(toInv, true));
 
         Tensor eqRhs = Tensors.parse("d_i^a*d_j^b*d_k^c");
+        Tensors.addSymmetry("KINV_abcdpq", 3, 4, 5, 0, 1, 2);
         Expression equation = ExpressionFactory.FACTORY.create(Tensors.parse("K^abc_pqr*KINV^pqr_ijk"),
                 ExpandTransformation.expand(SymmetrizeUpperLowerIndicesTransformation.symmetrizeUpperLowerIndices(eqRhs, true)));
 
-        Tensors.addSymmetry("KINV_abcdpq", 3, 4, 5, 0, 1, 2);
 
         Tensor[] samples = {Tensors.parse("g_mn"), Tensors.parse("g^mn"), Tensors.parse("d_m^n"), Tensors.parse("n_m"), Tensors.parse("n^b")};
 

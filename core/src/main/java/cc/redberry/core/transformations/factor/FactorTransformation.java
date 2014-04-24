@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2013:
+ * Copyright (c) 2010-2014:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -56,6 +56,7 @@ public class FactorTransformation implements Transformation {
     private final boolean factorScalars;
     private final FactorizationEngine factorizationEngine;
 
+
     /**
      * @param factorScalars       specifies whether scalar but not symbolic (i.e. scalar indexed expressions) should be
      *                            factorized on a par with symbolic (i.e. without any indices) expressions
@@ -79,7 +80,7 @@ public class FactorTransformation implements Transformation {
      * @param tensor              tensor
      * @param factorScalars       if false, then only symbolic (without any indices) sub-tensors will be factorized
      * @param factorizationEngine factorization engine
-     * @return
+     * @return result
      */
     public static Tensor factor(Tensor tensor, boolean factorScalars, FactorizationEngine factorizationEngine) {
         if (factorScalars) {
@@ -101,7 +102,7 @@ public class FactorTransformation implements Transformation {
      *
      * @param tensor        tensor
      * @param factorScalars if false, then only symbolic (without any indices) sub-tensors will be factorized
-     * @return
+     * @return result
      */
     public static Tensor factor(Tensor tensor, boolean factorScalars) {
         return factor(tensor, factorScalars, JasFactor.ENGINE);
@@ -150,13 +151,16 @@ public class FactorTransformation implements Transformation {
     }
 
     private static Tensor factorSymbolicTerm(Tensor sum, FactorizationEngine factorizationEngine) {
-        TreeIterator iterator = new FromChildToParentIterator(sum);
         Tensor c;
-        while ((c = iterator.next()) != null)
-            if (c instanceof Sum)
-                iterator.set(factorOut(c, factorizationEngine));
+        if (factorizationEngine instanceof JasFactor) {
+            TreeIterator iterator = new FromChildToParentIterator(sum);
+            while ((c = iterator.next()) != null)
+                if (c instanceof Sum)
+                    iterator.set(factorOut(c, factorizationEngine));
+            sum = iterator.result();
+        }
 
-        iterator = new FromParentToChildIterator(iterator.result());
+        TreeIterator iterator = new FromParentToChildIterator(sum);
         while ((c = iterator.next()) != null) {
             if (!(c instanceof Sum))
                 continue;

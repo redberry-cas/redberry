@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2013:
+ * Copyright (c) 2010-2014:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -177,8 +177,8 @@ public class DifferentiateTransformationTest {
             Tensor v = differentiate(t, var2, var1);
             v = eliminate(expand(v));
             v = d.transform(R1.transform(R2.transform(v)));
-            u = EliminateFromSymmetriesTransformation.ELIMINATE_FROM_SYMMETRIES.transform(u);
-            v = EliminateFromSymmetriesTransformation.ELIMINATE_FROM_SYMMETRIES.transform(v);
+            u = EliminateDueSymmetriesTransformation.ELIMINATE_DUE_SYMMETRIES.transform(u);
+            v = EliminateDueSymmetriesTransformation.ELIMINATE_DUE_SYMMETRIES.transform(v);
             TAssert.assertEquals(u, v);
         }
     }
@@ -216,8 +216,8 @@ public class DifferentiateTransformationTest {
             Tensor u = differentiate(t, var1, var2);
             u = eliminate(expand(u));
             u = d.transform(R1.transform(R2.transform(u)));
-            u = EliminateFromSymmetriesTransformation.ELIMINATE_FROM_SYMMETRIES.transform(u);
-            v = EliminateFromSymmetriesTransformation.ELIMINATE_FROM_SYMMETRIES.transform(v);
+            u = EliminateDueSymmetriesTransformation.ELIMINATE_DUE_SYMMETRIES.transform(u);
+            v = EliminateDueSymmetriesTransformation.ELIMINATE_DUE_SYMMETRIES.transform(v);
             TAssert.assertEquals(u, v);
         }
     }
@@ -335,7 +335,7 @@ public class DifferentiateTransformationTest {
                 parseExpression("R_mn^a_a = 0"),
                 parseExpression("R^a_man = R_mn"),
                 parseExpression("R^a_a = R"),
-                EliminateFromSymmetriesTransformation.ELIMINATE_FROM_SYMMETRIES
+                EliminateDueSymmetriesTransformation.ELIMINATE_DUE_SYMMETRIES
         };
         Tensor t1 = differentiate(tensor, var2, var1);
         t1 = eliminate(expand(t1));

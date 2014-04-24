@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2013:
+ * Copyright (c) 2010-2014:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -23,6 +23,8 @@
 package cc.redberry.core.combinatorics;
 
 import cc.redberry.core.TAssert;
+import cc.redberry.core.groups.permutations.Permutation;
+import cc.redberry.core.groups.permutations.Permutations;
 import junit.framework.Assert;
 import org.junit.Test;
 
@@ -82,7 +84,7 @@ public class IntDistinctTuplesPortTest {
         int[] arr = {1, 2, 3};
         Set<int[]> expected = new HashSet<>();
         for (int[] a : Combinatorics.createIntGenerator(3, 3))
-            expected.add(Combinatorics.reorder(arr, a));
+            expected.add(Permutations.permute(arr, a));
 
         TAssert.assertEquals(actual, expected);
     }

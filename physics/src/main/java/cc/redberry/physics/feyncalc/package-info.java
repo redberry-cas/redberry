@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2013:
+ * Copyright (c) 2010-2014:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -23,10 +23,10 @@
 /**
  * Transformations and tools for Feynman graph calculation.
  *
- * @see DiracTraceTransformation
- * @see UnitarySimplifyTransformation
- * @see UnitaryTraceTransformation
- * @see LeviCivitaSimplifyTransformation
+ * @see cc.redberry.physics.feyncalc.DiracTraceTransformation
+ * @see cc.redberry.physics.feyncalc.UnitarySimplifyTransformation
+ * @see cc.redberry.physics.feyncalc.UnitaryTraceTransformation
+ * @see cc.redberry.physics.feyncalc.LeviCivitaSimplifyTransformation
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky

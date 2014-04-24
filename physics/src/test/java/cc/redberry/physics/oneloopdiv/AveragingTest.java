@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2013:
+ * Copyright (c) 2010-2014:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -24,12 +24,11 @@
 package cc.redberry.physics.oneloopdiv;
 
 import cc.redberry.core.context.CC;
-import cc.redberry.core.context.OutputFormat;
 import cc.redberry.core.indices.IndexType;
 import cc.redberry.core.tensor.Expression;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.tensor.Tensors;
-import cc.redberry.core.transformations.EliminateFromSymmetriesTransformation;
+import cc.redberry.core.transformations.EliminateDueSymmetriesTransformation;
 import cc.redberry.core.transformations.EliminateMetricsTransformation;
 import cc.redberry.core.transformations.expand.ExpandTransformation;
 import cc.redberry.core.utils.TensorUtils;
@@ -86,8 +85,8 @@ public class AveragingTest {
 
     @Test
     public void test5() {
-        Tensor ff = (Expression) Tensors.parse("FF=(-1/6)*F^{\\nu \\beta \\epsilon }_{\\zeta }*F_{\\nu \\beta }^{\\zeta }_{\\epsilon }+n^{\\mu }*F^{\\alpha }_{\\nu }^{\\epsilon }_{\\lambda }*n^{\\nu }*F_{\\alpha \\mu }^{\\lambda }_{\\epsilon }+(-8/3)*n^{\\mu }*F_{\\beta \\nu }^{\\epsilon }_{\\lambda }*n^{\\alpha }*n^{\\beta }*n^{\\nu }*F_{\\alpha \\mu }^{\\lambda }_{\\epsilon }");
         Tensors.addSymmetry("F_{\\mu\\nu\\alpha\\beta}", IndexType.GreekLower, true, new int[]{1, 0, 2, 3});
+        Tensor ff = Tensors.parse("FF=(-1/6)*F^{\\nu \\beta \\epsilon }_{\\zeta }*F_{\\nu \\beta }^{\\zeta }_{\\epsilon }+n^{\\mu }*F^{\\alpha }_{\\nu }^{\\epsilon }_{\\lambda }*n^{\\nu }*F_{\\alpha \\mu }^{\\lambda }_{\\epsilon }+(-8/3)*n^{\\mu }*F_{\\beta \\nu }^{\\epsilon }_{\\lambda }*n^{\\alpha }*n^{\\beta }*n^{\\nu }*F_{\\alpha \\mu }^{\\lambda }_{\\epsilon }");
         ff = new Averaging(Tensors.parseSimple("n_\\mu")).transform(ff);
         ff = ExpandTransformation.expand(ff);
         ff = EliminateMetricsTransformation.ELIMINATE_METRICS.transform(ff);
@@ -174,7 +173,7 @@ public class AveragingTest {
         t = ExpandTransformation.expand(t);
         t = EliminateMetricsTransformation.eliminate(t);
         t = Tensors.parseExpression("d_\\mu^\\mu = 4").transform(t);
-        t = EliminateFromSymmetriesTransformation.ELIMINATE_FROM_SYMMETRIES.transform(t);
+        t = EliminateDueSymmetriesTransformation.ELIMINATE_DUE_SYMMETRIES.transform(t);
     }
 
     @Ignore

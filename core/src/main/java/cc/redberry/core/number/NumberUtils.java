@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2013:
+ * Copyright (c) 2010-2014:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -145,6 +145,25 @@ public final class NumberUtils {
             if (exponent.testBit(0)) result = result.multiply(base);
             base = base.multiply(base);
             exponent = exponent.shiftRight(1);
+        }
+        return result;
+    }
+
+    public static long pow(long base, long exponent) {
+        long result = 1;
+        while (exponent > 0) {
+            if (exponent % 2 == 1) result *= base;
+            base *= base;
+            exponent >>= 1;
+        }
+        return result;
+    }
+
+    public static BigInteger factorial(int n) {
+        BigInteger result = BigInteger.ONE;
+        while (n != 0) {
+            result = result.multiply(BigInteger.valueOf(n));
+            --n;
         }
         return result;
     }

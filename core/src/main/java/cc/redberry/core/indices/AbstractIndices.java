@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2013:
+ * Copyright (c) 2010-2014:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -117,6 +117,20 @@ abstract class AbstractIndices implements Indices {
     public final int get(int position) {
         return data[position];
     }
+
+//    @Override
+//    public boolean containsSubIndices(Indices subIndices) {
+//        int pointer = 0, index;
+//        for (int s = 0; s < subIndices.size(); ++s) {
+//            index = subIndices.get(s);
+//            while (get(pointer) != index)
+//                pointer++;
+//            if (pointer == size())
+//                return false;
+//            ++pointer;
+//        }
+//        return true;
+//    }
 
     @Override
     public final int hashCode() {

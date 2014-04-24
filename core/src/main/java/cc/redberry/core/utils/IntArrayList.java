@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2013:
+ * Copyright (c) 2010-2014:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -22,6 +22,7 @@
  */
 package cc.redberry.core.utils;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 
 /**
@@ -42,6 +43,13 @@ public final class IntArrayList {
     public IntArrayList(int initialCapacity) {
         data = new int[initialCapacity];
     }
+
+
+    public IntArrayList(IntArrayList list) {
+        this.data = list.data.clone();
+        size = list.size;
+    }
+
 
     public IntArrayList(int[] data) {
         this.data = data;
@@ -201,6 +209,58 @@ public final class IntArrayList {
             throw new IndexOutOfBoundsException();
         size = point;
     }
+
+    public int remove(int index) {
+        int oldValue = data[index];
+        int numMoved = size - index - 1;
+        if (numMoved > 0)
+            System.arraycopy(data, index + 1, data, index,
+                    numMoved);
+        --size;
+        return oldValue;
+    }
+
+    public boolean removeElement(int element) {
+        int i = indexOf(element);
+        if (i < 0) return false;
+        remove(i);
+        return true;
+    }
+
+    public boolean removeAll(IntArrayList c) {
+        return removeAll(c, 0, c.size);
+    }
+
+    public boolean removeAll(IntArrayList c, final int cbegin, final int cend) {
+        return removeAll(c.data, cbegin, cend);
+    }
+
+    public boolean removeAll(int[] c) {
+        return removeAll(c, 0, c.length);
+    }
+
+    public boolean removeAll(int[] c, final int cbegin, final int cend) {
+        int r = 0, w = 0;
+        boolean modified = false;
+        for (; r < size; r++) {
+            modified = false;
+            for (int i = cbegin; i < cend; ++i)
+                if (c[i] == data[r]) {
+                    modified = true;
+                    break;
+                }
+            if (!modified)
+                data[w++] = data[r];
+        }
+
+        if (w != size) {
+            size = w;
+            modified = true;
+        }
+
+        return modified;
+    }
+
 
     public int indexOf(int value) {
         for (int i = 0; i < size; ++i)

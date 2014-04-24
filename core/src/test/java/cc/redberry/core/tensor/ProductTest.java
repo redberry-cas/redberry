@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2013:
+ * Copyright (c) 2010-2014:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -30,6 +30,7 @@ import cc.redberry.core.number.Complex;
 import cc.redberry.core.tensor.random.RandomTensor;
 import cc.redberry.core.transformations.EliminateMetricsTransformation;
 import cc.redberry.core.utils.TensorUtils;
+import org.apache.commons.math3.random.Well1024a;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -235,7 +236,7 @@ public class ProductTest {
         int minProductSize, from, to;
         for (int count = 0; count < 1000; ++count) {
             CC.resetTensorNames();
-            random = new RandomTensor(1, 100, new int[]{0, 0, 0, 0}, new int[]{2, 0, 0, 0}, true);
+            random = new RandomTensor(1, 100, new int[]{0, 0, 0, 0}, new int[]{2, 0, 0, 0}, true, true);
             minProductSize = 2 + random.nextInt(200);
             Tensor tensor = random.nextProduct(minProductSize);
             if (!(tensor instanceof Product))
@@ -464,7 +465,7 @@ public class ProductTest {
 
     @Test
     public void testRemove5() {
-        RandomTensor rnd = new RandomTensor(5, 10, new int[]{0, 0, 0, 0}, new int[]{3, 3, 3, 3}, false, 1L);
+        RandomTensor rnd = new RandomTensor(5, 10, new int[]{0, 0, 0, 0}, new int[]{3, 3, 3, 3}, false, true, new Well1024a(1L));
         Product pr = (Product) rnd.nextProduct(8);
         int size = pr.size();
         IntCombinationsGenerator gen;

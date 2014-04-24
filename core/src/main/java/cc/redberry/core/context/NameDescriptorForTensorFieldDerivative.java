@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2013:
+ * Copyright (c) 2010-2014:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -22,14 +22,13 @@
  */
 package cc.redberry.core.context;
 
-import cc.redberry.core.combinatorics.Combinatorics;
-import cc.redberry.core.combinatorics.Symmetry;
+import cc.redberry.core.groups.permutations.Permutation;
+import cc.redberry.core.groups.permutations.PermutationOneLineInt;
+import cc.redberry.core.groups.permutations.Permutations;
 import cc.redberry.core.indices.SimpleIndices;
 import cc.redberry.core.indices.StructureOfIndices;
 import cc.redberry.core.utils.ArraysUtils;
 import cc.redberry.core.utils.IntArrayList;
-
-import java.util.List;
 
 /**
  * @author Dmitry Bolotin
@@ -55,7 +54,24 @@ final class NameDescriptorForTensorFieldDerivative extends NameDescriptorForTens
     }
 
     @Override
-    public String getName(SimpleIndices indices) {
+    public String getName(SimpleIndices indices, OutputFormat format) {
+        if (format == OutputFormat.WolframMathematica) {
+            String[] spl = name.split("~");
+            return new StringBuilder().append("Derivative")
+                    .append(spl[1].replace("(", "[").replace(")", "]"))
+                    .append("[").append(spl[0]).append("]").toString();
+        }
+        if (format == OutputFormat.Maple) {
+            StringBuilder sb = new StringBuilder();
+            sb.append("D[");
+            for (int j = 0; j < orders.length; ++j)
+                for (int i = 0; i < orders[j]; ++i)
+                    sb.append(j + 1).append(",");
+            sb.deleteCharAt(sb.length() - 1);
+            sb.append("]").append("(");
+            sb.append(name.split("~")[0]).append(")");
+            return sb.toString();
+        }
         return name;
     }
 
@@ -88,31 +104,30 @@ final class NameDescriptorForTensorFieldDerivative extends NameDescriptorForTens
         int[][] mapping = baseStructure.getPartitionMappings(partition);
 
         //adding field symmetries
-        List<Symmetry> fieldSymmetries = parent.symmetries.getInnerSymmetries().getBasisSymmetries();
-        for (k = 1; k < fieldSymmetries.size(); ++k)
-            symmetries.addUnsafe(fieldSymmetries.get(k).convert(mapping[0], baseStructure.size()));
+        for (Permutation p : parent.symmetries.getGenerators())
+            symmetries.add(convertPermutation(p, mapping[0], baseStructure.size()));
 
 
-        //adding block symmetries
+        //adding block symmetries of derivatives
         IntArrayList aggregator = new IntArrayList();
         j = 1;
-        int a, b, cycle[];
+        int cycle[];
         for (i = 0; i < orders.length; ++i) {
-            if (orders[i] >= 2) {
+            if (structuresOfIndices[i + 1].size() != 0 && orders[i] >= 2) {
                 //adding symmetries for indices from each slot
-                cycle = Combinatorics.createBlockCycle(structuresOfIndices[i + 1].size(), 2);
+                cycle = Permutations.createBlockCycle(structuresOfIndices[i + 1].size(), 2);
                 aggregator.addAll(mapping[j]);
                 aggregator.addAll(mapping[j + 1]);
-                symmetries.addUnsafe(
-                        new Symmetry(Combinatorics.convertPermutation(cycle, aggregator.toArray(), baseStructure.size()), false));
+                symmetries.add(
+                        Permutations.createPermutation(convertPermutation(cycle, aggregator.toArray(), baseStructure.size())));
 
                 if (orders[i] >= 3) {
                     for (k = 2; k < orders[i]; ++k)
                         aggregator.addAll(mapping[j + k]);
 
-                    cycle = Combinatorics.createBlockCycle(structuresOfIndices[i + 1].size(), orders[i]);
-                    symmetries.addUnsafe(
-                            new Symmetry(Combinatorics.convertPermutation(cycle, aggregator.toArray(), baseStructure.size()), false));
+                    cycle = Permutations.createBlockCycle(structuresOfIndices[i + 1].size(), orders[i]);
+                    symmetries.add(
+                            Permutations.createPermutation(convertPermutation(cycle, aggregator.toArray(), baseStructure.size())));
                 }
                 aggregator.clear();
             }
@@ -120,20 +135,42 @@ final class NameDescriptorForTensorFieldDerivative extends NameDescriptorForTens
         }
     }
 
+    static Permutation convertPermutation(Permutation permutation, int[] mapping, int newDimension) {
+        return Permutations.createPermutation(permutation.antisymmetry(),
+                convertPermutation(permutation.oneLine(), mapping, newDimension));
+    }
+
+    static int[] convertPermutation(int[] permutation, int[] mapping, int newDimension) {
+        assert permutation.length == mapping.length;
+
+        int[] result = new int[newDimension];
+        for (int i = 0; i < newDimension; ++i)
+            result[i] = i;
+
+        int k;
+        for (int i = permutation.length - 1; i >= 0; --i)
+            if (mapping[i] != -1) {
+                k = mapping[permutation[i]];
+                assert k != -1;
+                result[mapping[i]] = k;
+            }
+
+        return result;
+    }
+
+
     private static String generateName(final int[] orders, NameDescriptorForTensorFieldImpl parent) {
         StringBuilder sb = new StringBuilder();
         sb.append(parent.name);
         sb.append('~');
-        if (orders.length != 1)
-            sb.append('(');
+        sb.append('(');
         for (int i = 0; ; ++i) {
             sb.append(orders[i]);
             if (i == orders.length - 1)
                 break;
             sb.append(',');
         }
-        if (orders.length != 1)
-            sb.append(')');
+        sb.append(')');
         return sb.toString();
     }
 

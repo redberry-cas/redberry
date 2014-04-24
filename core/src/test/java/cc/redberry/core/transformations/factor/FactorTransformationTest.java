@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2013:
+ * Copyright (c) 2010-2014:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -30,6 +30,7 @@ import cc.redberry.core.tensor.ProductBuilder;
 import cc.redberry.core.tensor.SimpleTensor;
 import cc.redberry.core.tensor.SumBuilder;
 import cc.redberry.core.tensor.Tensor;
+import cc.redberry.core.transformations.expand.ExpandTransformation;
 import cc.redberry.core.utils.TensorUtils;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -120,7 +121,7 @@ public class FactorTransformationTest {
             Tensor t = randomFactorableProduct(random);
             Tensor expand = expand(t);
             System.out.println(expand);
-            Tensor factor = JasFactor.factor(expand);
+            Tensor factor = JasFactor.factor1(expand);
             TAssert.assertEquals(expand(factor), expand);
         }
     }
@@ -135,7 +136,7 @@ public class FactorTransformationTest {
         System.out.println("Test: " + t);
         Tensor expand = expand(t);
         System.out.println(expand.toString(OutputFormat.WolframMathematica));
-        Tensor factor = JasFactor.factor(expand);
+        Tensor factor = JasFactor.factor1(expand);
         System.out.println(factor);
         System.out.println(expand(factor));
 
@@ -319,7 +320,7 @@ public class FactorTransformationTest {
         Tensor t = parse("L*(-7*s**3*m**4-216*s**2*m**6+128*m**10-96-3*m**4*s-240*m**8*s)");
         System.out.println(t.toString(OutputFormat.WolframMathematica));
 //        t = parseExpression("m = 1").transform(t);
-        System.out.println(JasFactor.factor(t));
+        System.out.println(JasFactor.factor1(t));
 //        System.out.println(factor(t));
 //            TAssert.assertEquals(factorOut(t), "(a-b)*(c*(a-b) - d*(a-b)**2 - d)");
     }
@@ -366,6 +367,4 @@ public class FactorTransformationTest {
         Tensor t = parse("I*a + f");
         TAssert.assertEquals(factor(t), "I*a + f");
     }
-
-//     -4*m**10-s*m**8+1+(1/32)*(-48*m**4+1-40*s*m**2-3*s**2)*s*m**4
 }

@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2013:
+ * Copyright (c) 2010-2014:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -95,7 +95,7 @@ public class IntDistinctTuplesPort implements IntCombinatorialPort {
             temp.loadValueFrom(setMasks[i]);
             temp.and(previousMask);
 
-            nextBit = temp.nextBit(combination[i] - 1);
+            nextBit = temp.nextBit(combination[i]);
             if (nextBit != -1) {
                 combination[i] = nextBit;
                 previousMask.clear(nextBit);
@@ -135,7 +135,7 @@ public class IntDistinctTuplesPort implements IntCombinatorialPort {
             temp.loadValueFrom(setMasks[i]);
             temp.and(previousMask);
 
-            nextBit = temp.nextBit(combination[i] - 1);
+            nextBit = temp.nextBit(combination[i]);
             if (nextBit != -1) {
                 combination[i] = nextBit;
                 previousMask.clear(nextBit);

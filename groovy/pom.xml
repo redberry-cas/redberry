@@ -2,7 +2,7 @@
 <!--
   ~ Redberry: symbolic tensor computations.
   ~
-  ~ Copyright (c) 2010-2013:
+  ~ Copyright (c) 2010-2014:
   ~   Stanislav Poslavsky   <stvlpos@mail.ru>
   ~   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
   ~
@@ -20,19 +20,18 @@
   ~
   ~ You should have received a copy of the GNU General Public License
   ~ along with Redberry. If not, see <http://www.gnu.org/licenses/>.
-  -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  --><project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>cc.redberry</groupId>
     <artifactId>groovy</artifactId>
-    <version>1.1.6-SNAPSHOT</version>
+    <version>1.1.7-SNAPSHOT</version>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <!-- <gmavenVersion>1.4</gmavenVersion>
         <gmavenProviderSelection>2.0</gmavenProviderSelection> -->
-        <groovyVersion>2.1.5</groovyVersion>
+        <groovyVersion>2.2.2</groovyVersion>
     </properties>
 
     <parent>
@@ -226,6 +225,21 @@
                 <!--</execution>-->
                 <!--</executions>-->
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.12</version>
+                <configuration>
+                    <properties>
+                        <property>
+                            <name>listener</name>
+                            <!-- Resets the context before running each test -->
+                            <value>cc.redberry.core.GlobalRunListener</value>
+                        </property>
+                    </properties>
+                    <!-- <skipTests>true</skipTests> -->
+                </configuration>
+            </plugin>
         </plugins>
     </build>
     <dependencies>
@@ -237,19 +251,19 @@
         <dependency>
             <groupId>cc.redberry</groupId>
             <artifactId>core</artifactId>
-            <version>1.1.6-SNAPSHOT</version>
+            <version>1.1.7-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>cc.redberry</groupId>
             <artifactId>core</artifactId>
-            <version>1.1.6-SNAPSHOT</version>
+            <version>1.1.7-SNAPSHOT</version>
             <type>test-jar</type>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>cc.redberry</groupId>
             <artifactId>physics</artifactId>
-            <version>1.1.6-SNAPSHOT</version>
+            <version>1.1.7-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.codehaus.groovy</groupId>

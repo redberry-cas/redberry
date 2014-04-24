@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2013:
+ * Copyright (c) 2010-2014:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -23,8 +23,8 @@
 package cc.redberry.core.transformations.collect;
 
 import cc.redberry.core.TAssert;
-import cc.redberry.core.combinatorics.Combinatorics;
 import cc.redberry.core.context.CC;
+import cc.redberry.core.groups.permutations.Permutations;
 import cc.redberry.core.tensor.*;
 import cc.redberry.core.tensor.iterator.FromChildToParentIterator;
 import cc.redberry.core.transformations.EliminateMetricsTransformation;
@@ -36,7 +36,6 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.Arrays;
-import java.util.Random;
 
 import static cc.redberry.core.tensor.Tensors.*;
 
@@ -247,16 +246,15 @@ public class CollectTransformationTest {
     @Test
     public void testMatch() {
         for (int i = 0; i < 100; ++i) {
-            Random rnd = new Random();
             CC.resetTensorNames();
             SimpleTensor[] a = {parseSimple("f_a[-x_a-y_a]"), parseSimple("f_c[x_b]"), parseSimple("f_d[y_d]"),
                     parseSimple("g[x]"), parseSimple("g[-f-x]"), parseSimple("g[f]")};
             SimpleTensor[] b = a.clone();
-            Combinatorics.shuffle(b, rnd);
+            Permutations.shuffle(b);
             Arrays.sort(a);
             Arrays.sort(b);
             int[] match = CollectTransformation.matchFactors(a, b);
-            Assert.assertArrayEquals(a, Combinatorics.reorder(b, match));
+            Assert.assertArrayEquals(a, Permutations.permute(b, match));
         }
     }
 
