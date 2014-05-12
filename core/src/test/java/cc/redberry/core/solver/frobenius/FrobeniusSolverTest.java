@@ -213,19 +213,26 @@ public class FrobeniusSolverTest {
     }
 
     @Test
-    public void test19() {
-        int[][] equations = {{12, 16, 20, 27, 123}, {1, 0, 3, 0, 12}};
-
-        FrobeniusSolver solver = new FrobeniusSolver(equations);
-        int[] solution;
-        while ((solution = solver.take()) != null) {
-            System.out.println(Arrays.toString(solution));
-            System.out.println(solution);
-        }
+    public void test20_recursive() {
+        int[][] equations = {{12, 16, 20, 27, 123}};
+        List<int[]> solutions = FbUtils.getAllSolutions(equations);
+        List<int[]> actual = allFBSolutionsRecursive(equations[0]);
+        Comparator<int[]> comparator = new Comparator<int[]>() {
+            @Override
+            public int compare(int[] o1, int[] o2) {
+                return Integer.compare(Arrays.hashCode(o1), Arrays.hashCode(o2));
+            }
+        };
+        Collections.sort(solutions, comparator);
+        Collections.sort(actual, comparator);
+        Assert.assertEquals(solutions.size(), actual.size());
+        for (int i = 0; i < actual.size(); ++i)
+            Assert.assertArrayEquals(solutions.get(i), actual.get(i));
     }
 
+    @Ignore
     @Test
-    public void testName() throws Exception {
+    public void testTiming() throws Exception {
         for (int c = 0; c < 100; ++c) {
             int N = 7;
             int[][] equations = new int[1][N];
@@ -282,6 +289,36 @@ public class FrobeniusSolverTest {
                 all.add(solution.clone());
         }
         return all;
+    }
+
+    private static List<int[]> allFBSolutionsRecursive(int[] equation) {
+        return allFBSolutionsRecursive(
+                Arrays.copyOfRange(equation, 0, equation.length - 1),
+                equation[equation.length - 1]);
+    }
+
+    private static List<int[]> allFBSolutionsRecursive(int[] system, int total) {
+        List<int[]> all = new ArrayList<>();
+        final int[] solution = new int[system.length];
+        addFBSolution(system, total, all, 0, solution, 0);
+        return all;
+    }
+
+    private static void addFBSolution(final int[] system,
+                                      int total,
+                                      final List<int[]> solutions,
+                                      int index,
+                                      final int[] solution,
+                                      int tempSum) {
+        if (index == system.length)
+            return;
+        for (int i = 0; tempSum <= total; ++i) {
+            solution[index] = i;
+            if (tempSum == total && index == system.length - 1)
+                solutions.add(solution.clone());
+            addFBSolution(system, total, solutions, index + 1, solution, tempSum);
+            tempSum = tempSum + system[index];
+        }
     }
 
 
