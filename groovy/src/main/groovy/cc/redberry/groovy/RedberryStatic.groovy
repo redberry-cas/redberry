@@ -53,7 +53,7 @@ import cc.redberry.core.transformations.fractions.GetDenominatorTransformation
 import cc.redberry.core.transformations.fractions.GetNumeratorTransformation
 import cc.redberry.core.transformations.fractions.TogetherTransformation
 import cc.redberry.core.transformations.powerexpand.PowerExpandTransformation
-import cc.redberry.core.transformations.powerexpand.PowerExpandUnwrapTransformation
+import cc.redberry.core.transformations.powerexpand.PowerUnfoldTransformation
 import cc.redberry.core.transformations.reverse.ReverseTransformation
 import cc.redberry.core.transformations.symmetrization.SymmetrizeTransformation
 import cc.redberry.core.utils.BitArray
@@ -237,7 +237,7 @@ class RedberryStatic {
     public static final Transformation TogetherFactor = TogetherTransformation.TOGETHER_FACTOR;
 
     /**
-     * Replaces complex numbers in the expression to their complex conjugation.
+     * Replaces complex numbers in the expression with their complex conjugations.
      * @see ComplexConjugateTransformation
      */
     public static final Transformation Conjugate = ComplexConjugateTransformation.COMPLEX_CONJUGATE;
@@ -302,11 +302,11 @@ class RedberryStatic {
      * Expands all powers of products and powers with respect to specified variables and unwraps powers of
      * indexed arguments into products (e.g. (A_m*A^m)**2 -> A_m*A^m*A_a*A^a).
      *
-     * @see PowerExpandUnwrapTransformation
+     * @see PowerUnfoldTransformation
      */
-    public static final TransformationWrapper_SimpleTensors_Or_Transformations PowerExpandUnwrap =
-            new TransformationWrapper_SimpleTensors_Or_Transformations(PowerExpandUnwrapTransformation,
-                    PowerExpandUnwrapTransformation.POWER_EXPAND_UNWRAP_TRANSFORMATION)
+    public static final TransformationWrapper_SimpleTensors_Or_Transformations PowerUnfold =
+            new TransformationWrapper_SimpleTensors_Or_Transformations(PowerUnfoldTransformation,
+                    PowerUnfoldTransformation.POWER_UNFOLD_TRANSFORMATION)
 
     /**
      * Gives a symmetrization of tensor with respect to specified indices under the specified symmetries.

@@ -222,4 +222,41 @@ public final class Mapping implements Transformation {
         sb.append("}");
         return sb.toString();
     }
+
+    /**
+     * Parses string representation of Mapping in the form -{a->b, ^c->_d} etc.
+     *
+     * @param string string representation of mapping in the form -{a->b, ^c->_d} etc.
+     * @return mapping
+     */
+    public static Mapping valueOf(String string) {
+        string = string.trim();
+        int start = 0;
+        boolean sign = false;
+        if (string.charAt(0) == '-') {
+            sign = true;
+            start = 1;
+        } else if (string.charAt(0) == '+')
+            start = 1;
+
+        if (string.charAt(start) != '{'
+                || string.charAt(string.length() - 1) != '}')
+            throw new IllegalArgumentException("Not valid syntax for mapping: " + string);
+
+        string = string.substring(start + 1, string.length() - 1).trim();
+        int fromIndex;
+        final String[] split = string.split(",");
+        int[] from = new int[split.length], to = new int[split.length];
+        for (int i = 0; i < split.length; ++i) {
+            String[] fromTo = split[i].split("->");
+            if (fromTo.length != 2)
+                throw new IllegalArgumentException("Not valid syntax for mapping: " + string);
+
+            fromIndex = IndicesUtils.parseIndex(fromTo[0]);
+            from[i] = IndicesUtils.getNameWithType(fromIndex);
+            to[i] = IndicesUtils.getRawStateInt(fromIndex) ^ IndicesUtils.parseIndex(fromTo[1]);
+        }
+        return new Mapping(from, to, sign);
+    }
+
 }

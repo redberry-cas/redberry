@@ -500,6 +500,7 @@ public class ExpandTest {
         }
     }
 
+    @Ignore
     @Test
     public void test46() throws Exception {
         CC.resetTensorNames(8164763714862784L);

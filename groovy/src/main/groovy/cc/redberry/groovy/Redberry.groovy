@@ -377,6 +377,10 @@ class Redberry {
             return DefaultGroovyMethods.asType(indices, clazz)
     }
 
+    static Indices getIndices(IntArray indices) {
+        return IndicesFactory.create(indices.copy())
+    }
+
     /**
      * Iterator over single indices integers in {@code indices} object
      * @param indices indices
@@ -1044,18 +1048,7 @@ class Redberry {
      * @return mapping of indices
      */
     static Mapping getMapping(String string) {
-        string = string.trim().substring(1, string.length() - 1).trim()
-        IntArrayList from = new IntArrayList(), to = new IntArrayList()
-        int fromIndex
-        string.split(',').each {
-            def split = it.split('->')
-            if (split.length == 2) {
-                fromIndex = IndicesUtils.parseIndex(split[0].trim())
-                from.add(IndicesUtils.getNameWithType(fromIndex))
-                to.add(IndicesUtils.getRawStateInt(fromIndex) ^ IndicesUtils.parseIndex(split[1].trim()))
-            }
-        }
-        return new Mapping(from.toArray(), to.toArray())
+        return Mapping.valueOf(string);
     }
 
     //////////////////////////////////////////////// TENSOR CREATE /////////////////////////////////////////////////////

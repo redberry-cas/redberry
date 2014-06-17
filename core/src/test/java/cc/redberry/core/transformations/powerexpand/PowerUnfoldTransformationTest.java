@@ -33,10 +33,10 @@ import static cc.redberry.core.tensor.Tensors.parseSimple;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public class PowerExpandUnwrapTransformationTest {
+public class PowerUnfoldTransformationTest {
     @Test
     public void test1() throws Exception {
-        PowerExpandUnwrapTransformation pe = PowerExpandUnwrapTransformation.POWER_EXPAND_UNWRAP_TRANSFORMATION;
+        PowerUnfoldTransformation pe = PowerUnfoldTransformation.POWER_UNFOLD_TRANSFORMATION;
         TAssert.assertEquals(pe.transform(parse("(a_m*b^m*c)**2")), "c**2*a_{m}*a_{a}*b^{m}*b^{a}");
 
         TAssert.assertEquals(pe.transform(parse("(a_m*a^m*c)**2")), "c**2*a_{m}*a_{a}*a^{m}*a^{a}");
@@ -45,14 +45,14 @@ public class PowerExpandUnwrapTransformationTest {
     @Test
     public void test2() {
         SimpleTensor[] vars = new SimpleTensor[]{parseSimple("A_m")};
-        PowerExpandUnwrapTransformation pe = new PowerExpandUnwrapTransformation(vars);
+        PowerUnfoldTransformation pe = new PowerUnfoldTransformation(vars);
         TAssert.assertEquals(pe.transform(parse("(A_m*A^m)**2")), "A_{m}*A_{a}*A^{m}*A^{a}");
     }
 
     @Test
     public void test3() {
         SimpleTensor[] vars = new SimpleTensor[]{parseSimple("A_m")};
-        PowerExpandUnwrapTransformation pe = new PowerExpandUnwrapTransformation(vars);
+        PowerUnfoldTransformation pe = new PowerUnfoldTransformation(vars);
         TAssert.assertEquals(pe.transform(parse("(A_m*A^m*c)**2")), "c**2*A_{m}*A_{a}*A^{m}*A^{a}");
     }
 }

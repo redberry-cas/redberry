@@ -403,13 +403,22 @@ public final class IndicesUtils {
         return toString(indices, CC.getDefaultOutputFormat());
     }
 
+    /**
+     * Parse single index.
+     * @param string string representation of index
+     * @return integer representation of index
+     */
     public static int parseIndex(String string) {
+        string = string.trim();
         boolean state = string.charAt(0) == '^';
+        int start = 0;
+        if(string.charAt(0) == '^' || string.charAt(0) == '_')
+            start = 1;
         int nameWithType;
-        if (string.charAt(1) == '{')
-            nameWithType = Context.get().getIndexConverterManager().getCode(string.substring(2, string.length() - 1));
+        if (string.charAt(start) == '{')
+            nameWithType = Context.get().getIndexConverterManager().getCode(string.substring(start + 1, string.length() - 1));
         else
-            nameWithType = Context.get().getIndexConverterManager().getCode(string.substring(1));
+            nameWithType = Context.get().getIndexConverterManager().getCode(string.substring(start));
         return state ? (0x80000000 ^ nameWithType) : nameWithType;
     }
 

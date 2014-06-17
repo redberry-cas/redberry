@@ -84,6 +84,11 @@ public final class Sum extends MultiTensor {
     }
 
     @Override
+    public Tensor[] toArray() {
+        return data.clone();
+    }
+
+    @Override
     public Tensor get(int i) {
         return data[i];
     }
