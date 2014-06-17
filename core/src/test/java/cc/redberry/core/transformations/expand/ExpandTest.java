@@ -546,4 +546,11 @@ public class ExpandTest {
         t = parse("(p_a*p^a + k_r*k^r)**4");
         TAssert.assertEquals(ExpandTransformation.expand(t, e1, e2), "16*x**4");
     }
+
+    @Test
+    public void test48() {
+        Tensor t = parse("((a-b)*f_{m}*f^{m}+a+b)*(a+b)*f_{a}*f^{a}");
+        TAssert.assertEquals(
+                "(-b**2+a**2)*f_{a}*f^{a}*f_{m}*f^{m}+(a**2+2*a*b+b**2)*f_{a}*f^{a}", expand(t));
+    }
 }
