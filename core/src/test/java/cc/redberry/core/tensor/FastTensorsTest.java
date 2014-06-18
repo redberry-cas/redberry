@@ -23,6 +23,7 @@
 package cc.redberry.core.tensor;
 
 import cc.redberry.core.TAssert;
+import cc.redberry.core.context.CC;
 import cc.redberry.core.number.Complex;
 import org.junit.Test;
 
@@ -55,6 +56,47 @@ public class FastTensorsTest {
         Tensor actual = FastTensors.multiplySumElementsOnFactorAndExpand((Sum) t, parse("1/(x**2 - 2*x*y + y**2)"));
         Tensor expected = Complex.ZERO;
         TAssert.assertEquals(actual, expected);
+    }
+
+    @Test
+    public void test4() {
+        for (int i = 0; i < 30; ++i) {
+            CC.resetTensorNames();
+            Tensor sum = parse("b+(-b+a)*f_{m}*f^{m}+a");
+            Tensor factor = parse("f_a*f^a");
+            Tensor actual = FastTensors.multiplySumElementsOnFactorAndExpand((Sum) sum, factor);
+            Tensor expected = parse("(a + b)*f_a*f^a + (- b + a)*f_{m}*f^{m}*f_a*f^a");
+            TAssert.assertEquals(actual, expected);
+        }
+    }
+
+    @Test
+    public void test5() {
+        for (int i = 0; i < 30; ++i) {
+            CC.resetTensorNames();
+            Tensor sum = parse("(a + b)*f_a*f^a + (a - b)*f_{m}*f^{m}*f_a*f^a");
+            Tensor factor = parse("(b + a)");
+            Tensor actual = FastTensors.multiplySumElementsOnFactorAndExpand((Sum) sum, factor);
+            Tensor expected = parse("(a**2 + b**2+ 2*a*b )*f_a*f^a + (a**2 - b**2)*f_{m}*f^{m}*f_a*f^a");
+            TAssert.assertEquals(actual, expected);
+        }
+    }
+
+    @Test
+    public void test6() {
+        for (int i = 0; i < 30; ++i) {
+            CC.resetTensorNames();
+            Tensor sum = parse("b+(-b+a)*f_{m}*f^{m}+a");
+            Tensor factor = parse("f_a*f^a");
+            Tensor actual = FastTensors.multiplySumElementsOnFactorAndExpand((Sum) sum, factor);
+            Tensor expected = parse("(a + b)*f_a*f^a + (- b + a)*f_{m}*f^{m}*f_a*f^a");
+            TAssert.assertEquals(actual, expected);
+            sum = actual;
+            factor = parse("(b + a)");
+            actual = FastTensors.multiplySumElementsOnFactorAndExpand((Sum) sum, factor);
+            expected = parse("(a**2 + b**2+ 2*a*b )*f_a*f^a + (a**2 - b**2)*f_{m}*f^{m}*f_a*f^a");
+            TAssert.assertEquals(actual, expected);
+        }
     }
 
 }

@@ -74,7 +74,8 @@ public final class FastTensors {
             return Complex.ZERO;
         if (TensorUtils.isOne(factor))
             return sum;
-        if (TensorUtils.haveIndicesIntersections(sum, factor))
+        if (TensorUtils.haveIndicesIntersections(sum, factor)
+                || (sum.indices.size() == 0 && factor.getIndices().size() != 0))
             return multiplyWithBuilder(sum, factor, transformations);
         else
             return multiplyWithFactory(sum, factor, transformations);
