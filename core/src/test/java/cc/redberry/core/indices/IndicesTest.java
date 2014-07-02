@@ -28,7 +28,6 @@ import cc.redberry.core.context.ContextManager;
 import cc.redberry.core.context.ContextSettings;
 import cc.redberry.core.context.OutputFormat;
 import cc.redberry.core.groups.permutations.Permutation;
-import cc.redberry.core.groups.permutations.PermutationOneLineInt;
 import cc.redberry.core.groups.permutations.Permutations;
 import cc.redberry.core.parser.ParserIndices;
 import cc.redberry.core.tensor.SimpleTensor;

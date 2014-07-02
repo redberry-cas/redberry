@@ -23,21 +23,19 @@
 package cc.redberry.core.tensor;
 
 import cc.redberry.core.context.OutputFormat;
+import cc.redberry.core.graph.GraphType;
 import cc.redberry.core.graph.GraphUtils;
-import cc.redberry.core.indices.Indices;
-import cc.redberry.core.indices.IndicesBuilder;
-import cc.redberry.core.indices.IndicesFactory;
-import cc.redberry.core.indices.IndicesUtils;
+import cc.redberry.core.graph.PrimitiveSubgraph;
+import cc.redberry.core.graph.PrimitiveSubgraphPartition;
+import cc.redberry.core.indices.*;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.number.NumberUtils;
-import cc.redberry.core.utils.ArraysUtils;
-import cc.redberry.core.utils.HashFunctions;
-import cc.redberry.core.utils.SoftReferenceWrapper;
-import cc.redberry.core.utils.TensorUtils;
+import cc.redberry.core.utils.*;
 import gnu.trove.set.hash.TIntHashSet;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.EnumSet;
 import java.util.List;
 
 /**
@@ -804,32 +802,72 @@ public final class Product extends MultiTensor {
     }
 
     @Override
-    public String toString(OutputFormat mode) {
+    public String toString(OutputFormat format) {
         StringBuilder sb = new StringBuilder();
-        char operatorChar = mode == OutputFormat.LaTeX ? ' ' : '*';
+        char operatorChar = format == OutputFormat.LaTeX ? ' ' : '*';
 
         if (factor.isReal() && factor.getReal().signum() < 0) {
             sb.append('-');
             Complex f = factor.abs();
             if (!f.isOne())
-                sb.append(((Tensor) f).toString(mode, Product.class)).append(operatorChar);
+                sb.append(((Tensor) f).toString(format, Product.class)).append(operatorChar);
         } else if (factor != Complex.ONE)
-            sb.append(((Tensor) factor).toString(mode, Product.class)).append(operatorChar);
+            sb.append(((Tensor) factor).toString(format, Product.class)).append(operatorChar);
 
         int i = 0, size = factor == Complex.ONE ? size() : size() - 1;
 
         for (; i < indexlessData.length; ++i) {
-            sb.append(indexlessData[i].toString(mode, Product.class));
+            sb.append(indexlessData[i].toString(format, Product.class));
             if (i == size - 1)
                 return sb.toString();
             sb.append(operatorChar);
         }
-        for (; ; ++i) {
-            sb.append(data[i - indexlessData.length].toString(mode, Product.class));
-            if (i == size - 1)
-                return sb.toString();
-            sb.append(operatorChar);
+        EnumSet<IndexType> matrixTypes = IndicesUtils.nonMetricTypes(indices);
+        if (matrixTypes.isEmpty())
+            for (; ; ++i) {
+                sb.append(data[i - indexlessData.length].toString(format, Product.class));
+                if (i == size - 1)
+                    return sb.toString();
+                sb.append(operatorChar);
+            }
+        else
+            return printMatrices(matrixTypes, sb, format, operatorChar);
+    }
+
+    private String printMatrices(EnumSet<IndexType> matrixTypes,
+                                 StringBuilder sb, OutputFormat format,
+                                 char operatorChar) {
+        BitArray printed = new BitArray(data.length);
+        for (IndexType type : matrixTypes) {
+            PrimitiveSubgraph[] subgraphs =
+                    PrimitiveSubgraphPartition.calculatePartition(
+                            contentReference.getReferent(), type);
+            for (PrimitiveSubgraph subgraph : subgraphs) {
+                if (subgraph.getGraphType() == GraphType.Graph)
+                    continue;
+                if (subgraph.getGraphType() == GraphType.Cycle)
+                    sb.append("Tr[");
+                for (int i = 0; i < subgraph.size(); ++i) {
+                    printed.set(i);
+                    sb.append(data[subgraph.getPosition(i)].toString(format, Product.class));
+                    if (i == subgraph.size() - 1
+                            && subgraph.getGraphType() == GraphType.Cycle) {
+                        if (matrixTypes.size() != 1)
+                            sb.append(", ").append(type);
+                        sb.append("]");
+                    }
+                    sb.append(operatorChar);
+                }
+            }
         }
+        for (int i = 0; i < data.length; ++i)
+            if (!printed.get(i)) {
+                sb.append(data[i].toString(format, Product.class));
+                sb.append(operatorChar);
+            }
+        if (sb.charAt(sb.length() - 1) == operatorChar)
+            sb.deleteCharAt(sb.length() - 1);
+        return sb.toString();
     }
 
     @Override

@@ -25,6 +25,8 @@ package cc.redberry.core.indices;
 import cc.redberry.core.context.OutputFormat;
 import org.junit.Test;
 
+import static cc.redberry.core.indices.IndicesUtils.setRawState;
+import static cc.redberry.core.indices.IndicesUtils.setState;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -43,5 +45,16 @@ public class IndicesUtilsTest {
 
         int index2 = IndicesUtils.parseIndex("_a");
         assertTrue("_a".equals(IndicesUtils.toString(index2, OutputFormat.LaTeX)));
+    }
+    @Test
+    public void testSetState() {
+        int index = IndicesUtils.parseIndex("_a");
+        assertTrue("^a".equals(IndicesUtils.toString(setState(true, index))));
+        index = IndicesUtils.parseIndex("^a");
+        assertTrue("^a".equals(IndicesUtils.toString(setState(true, index))));
+        index = IndicesUtils.parseIndex("^a");
+        assertTrue("_a".equals(IndicesUtils.toString(setRawState(0, index))));
+        index = IndicesUtils.parseIndex("^a");
+        assertTrue("_a".equals(IndicesUtils.toString(setState(false, index))));
     }
 }

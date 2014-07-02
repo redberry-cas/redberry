@@ -31,6 +31,7 @@ import cc.redberry.core.utils.IntArrayList;
 import cc.redberry.core.utils.MathUtils;
 
 import java.util.Arrays;
+import java.util.EnumSet;
 
 /**
  * This class provides static methods to work with individual index and indices
@@ -227,11 +228,22 @@ public final class IndicesUtils {
      * <br/>Expression used by this method is: <b><code>rawState | index</code></b>
      *
      * @param rawState raw state
-     * @param index    index to change type in
-     * @return index with new type
+     * @param index    index
+     * @return index with new state
      */
     public static int setRawState(int rawState, int index) {
-        return rawState | index;
+        return rawState | (index & 0x7FFFFFFF);
+    }
+
+    /**
+     * Changes index state to specified state (true - upper, false - lower).
+     *
+     * @param state index state: true - upper, false - lower)
+     * @param index index to change type in
+     * @return index with new state
+     */
+    public static int setState(boolean state, int index) {
+        return setRawState(state ? 0x80000000 : 0, index);
     }
 
     /**
@@ -260,19 +272,12 @@ public final class IndicesUtils {
 
     /**
      * Returns index type enum value.
-     * <p/>
-     * <b>NOTE:</b> this method is low-performance, so use it only when you are
-     * sure, that need exactly enum value, otherwise use method {@link #getType(int)
-     * }.
      *
      * @param index index
      * @return index type enum value
      */
     public static IndexType getTypeEnum(int index) {
-        for (IndexType type : IndexType.values())
-            if (type.getType() == getType(index))
-                return type;
-        throw new RuntimeException("Unknown type");
+        return IndexType.getType(getType(index));
     }
 
     /**
@@ -405,6 +410,7 @@ public final class IndicesUtils {
 
     /**
      * Parse single index.
+     *
      * @param string string representation of index
      * @return integer representation of index
      */
@@ -412,7 +418,7 @@ public final class IndicesUtils {
         string = string.trim();
         boolean state = string.charAt(0) == '^';
         int start = 0;
-        if(string.charAt(0) == '^' || string.charAt(0) == '_')
+        if (string.charAt(0) == '^' || string.charAt(0) == '_')
             start = 1;
         int nameWithType;
         if (string.charAt(start) == '{')
@@ -596,5 +602,35 @@ public final class IndicesUtils {
         if (freeU.size() == 0 || freeV.size() == 0)
             return new int[0];
         return getIntersections(((AbstractIndices) freeU).data, ((AbstractIndices) freeV).data);
+    }
+
+    /**
+     * Returns {@code true} if specified indices contain any index with non metric type.
+     *
+     * @param indices indices
+     * @return {@code true} if specified indices contain any index with non metric type
+     */
+    public static boolean containsNonMetric(final Indices indices) {
+        for (int i = 0; i < indices.size(); ++i) {
+            if (!CC.isMetric(getType(indices.get(i))))
+                return true;
+        }
+        return false;
+    }
+
+    /**
+     * Returns all non metric types that present in specified indices.
+     *
+     * @param indices indices
+     * @return all non metric types that present in specified indices
+     */
+    public static EnumSet<IndexType> nonMetricTypes(final Indices indices) {
+        EnumSet<IndexType> types = EnumSet.noneOf(IndexType.class);
+        for (int i = 0; i < indices.size(); ++i) {
+            int index = indices.get(i);
+            if (!CC.isMetric(getType(index)))
+                types.add(getTypeEnum(index));
+        }
+        return types;
     }
 }

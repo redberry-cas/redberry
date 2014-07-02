@@ -205,19 +205,24 @@ abstract class AbstractIndices implements Indices {
         } else {
             String latexBrackets = format == LaTeX ? "{}" : "";
 
-            currentState = (data[0] >>> 31);
-            sb.append(format.getPrefixFromIntState(currentState)).append('{');
-
-            int lastState = currentState;
+            int totalToPrint = 0;
+            int lastState = -1;
             for (int i = 0; i < data.length; i++) {
+                if (!CC.isMetric(IndicesUtils.getType(data[i])) && !format.printMatrixIndices)
+                    continue;
                 currentState = data[i] >>> 31;
                 if (lastState != currentState) {
-                    sb.append('}').append(latexBrackets).append(format.getPrefixFromIntState(currentState)).append('{');
+                    if (totalToPrint != 0)
+                        sb.append('}');
+                    sb.append(latexBrackets).append(format.getPrefixFromIntState(currentState)).append('{');
                     lastState = currentState;
                 }
                 sb.append(Context.get().getIndexConverterManager().getSymbol(data[i], format));
+                ++totalToPrint;
             }
             sb.append('}');
+            if(totalToPrint == 0)
+                return "";
         }
 
         return sb.toString();

@@ -64,7 +64,12 @@ public enum OutputFormat {
     /**
      * This format specifies expressions to be outputted in the Maplesoft Maple input notation.
      */
-    Maple("~", "");
+    Maple("~", ""),
+    /**
+     * This format will not print explicit indices of matrices. E.g. if A and B are matrices, that it will
+     * produce A*B instead of A^i'_j'*B^j'_k'.
+     */
+    SimpleRedberry("^", "_", false);
 
     /**
      * Prefix, which specifies upper index (e.g. '^' in LaTeX)
@@ -74,10 +79,19 @@ public enum OutputFormat {
      * Prefix, which specifies lower index (e.g. '_' in LaTeX)
      */
     public final String lowerIndexPrefix;
+    /**
+     * Specifies whether print matrix indices or not.
+     */
+    public final boolean printMatrixIndices;
 
     private OutputFormat(String upperIndexPrefix, String lowerIndexPrefix) {
+        this(upperIndexPrefix, lowerIndexPrefix, true);
+    }
+
+    private OutputFormat(String upperIndexPrefix, String lowerIndexPrefix, boolean printMatrixIndices) {
         this.upperIndexPrefix = upperIndexPrefix;
         this.lowerIndexPrefix = lowerIndexPrefix;
+        this.printMatrixIndices = printMatrixIndices;
     }
 
     /**

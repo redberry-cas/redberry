@@ -22,7 +22,6 @@
  */
 package cc.redberry.core.tensor;
 
-import cc.redberry.core.indices.InconsistentIndicesException;
 import cc.redberry.core.indices.Indices;
 import cc.redberry.core.indices.IndicesBuilder;
 import cc.redberry.core.indices.IndicesFactory;
@@ -127,11 +126,7 @@ public final class ProductFactory implements TensorFactory {
             IndicesBuilder builder = new IndicesBuilder();
             for (i = dataContainer.list.size() - 1; i >= 0; --i)
                 builder.append(dataContainer.list.get(i));
-            try {
-                indices = builder.getIndices();
-            } catch (InconsistentIndicesException exception) {
-                throw new InconsistentIndicesException(exception.getIndex());
-            }
+            indices = builder.getIndices();
         }
 
         //Processing indexless data

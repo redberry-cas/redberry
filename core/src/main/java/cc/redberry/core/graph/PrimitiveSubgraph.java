@@ -63,6 +63,25 @@ public final class PrimitiveSubgraph {
         return partition.clone();
     }
 
+    /**
+     * Returns actual position of i-th tensor in sub-graph.
+     *
+     * @param i position in tensor
+     * @return position in graph
+     */
+    public int getPosition(int i) {
+        return partition[i];
+    }
+
+    /**
+     * Returns size of subgrph.
+     *
+     * @return size of subgrph
+     */
+    public int size() {
+        return partition.length;
+    }
+
     @Override
     public String toString() {
         return graphType + ": " + Arrays.toString(partition);

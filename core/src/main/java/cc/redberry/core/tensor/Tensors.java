@@ -27,7 +27,6 @@ import cc.redberry.core.context.NameDescriptor;
 import cc.redberry.core.context.NameDescriptorForSimpleTensor;
 import cc.redberry.core.context.NameDescriptorForTensorField;
 import cc.redberry.core.groups.permutations.Permutation;
-import cc.redberry.core.groups.permutations.PermutationOneLineInt;
 import cc.redberry.core.groups.permutations.Permutations;
 import cc.redberry.core.indices.*;
 import cc.redberry.core.number.Complex;
@@ -320,7 +319,7 @@ public final class Tensors {
         if (descriptor == null)
             throw new IllegalArgumentException("This name is not registered in the system.");
         if (!descriptor.getStructureOfIndices().isStructureOf(indices))
-            throw new IllegalArgumentException("Specified indices are not indices of specified tensor.");
+            throw new IllegalArgumentException("Specified indices ( " + indices + " )are not indices of specified tensor ( " + descriptor + " ).");
 
         if (indices.size() == 0) {
             assert indices == IndicesFactory.EMPTY_SIMPLE_INDICES;

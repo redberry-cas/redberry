@@ -62,6 +62,10 @@ public class TAssert {
         assertEquals(actual, Tensors.parse(expected));
     }
 
+    public static void assertEquals(String actual, Tensor expected) {
+        assertEquals(expected, Tensors.parse(actual));
+    }
+
     public static void assertEquals(Tensor[] actual, Tensor[] expected) {
         org.junit.Assert.assertTrue(actual.length == expected.length);
         for (int i = 0; i < actual.length; ++i)
