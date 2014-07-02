@@ -848,7 +848,7 @@ public final class Product extends MultiTensor {
                 if (subgraph.getGraphType() == GraphType.Cycle)
                     sb.append("Tr[");
                 for (int i = 0; i < subgraph.size(); ++i) {
-                    printed.set(i);
+                    printed.set(subgraph.getPosition(i));
                     sb.append(data[subgraph.getPosition(i)].toString(format, Product.class));
                     if (i == subgraph.size() - 1
                             && subgraph.getGraphType() == GraphType.Cycle) {

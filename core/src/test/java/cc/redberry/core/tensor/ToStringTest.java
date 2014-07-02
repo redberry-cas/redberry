@@ -112,6 +112,16 @@ public class ToStringTest {
         assertSimpleRedberryString("2*c*Tr[A*B]");
     }
 
+    @Test
+    public void test9() {
+        GeneralIndicesInsertion gii = new GeneralIndicesInsertion();
+        gii.addInsertionRule(parseSimple("G_a^a'_b'"), IndexType.Matrix1);
+        gii.addInsertionRule(parseSimple("U_a^A'_B'"), IndexType.Matrix2);
+        CC.current().getParseManager().defaultParserPreprocessors.add(gii);
+        Tensor t = parse("G_a*G_b*U_m*U_n");
+        Assert.assertEquals("G_{a}*G_{b}*U_{m}*U_{n}", t.toString(OutputFormat.SimpleRedberry));
+    }
+
     @Ignore//random not working with matrices
     @Test
     public void test9Random() {

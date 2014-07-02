@@ -334,7 +334,7 @@ class RedberryStatic {
 
         Transformation getAt(Collection<IndexType> types) {
             if (types.size() == 1)
-                return new ReverseTransformation(type);
+                return new ReverseTransformation(types.iterator().next());
 
             List<Transformation> tr = new ArrayList<>();
             for (IndexType type : types)
