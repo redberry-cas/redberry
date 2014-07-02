@@ -115,7 +115,7 @@ class RedberryStatic {
         @Override
         Transformation getAt(Collection args) {
             use(Redberry) {
-                return transformationClass.newInstance(* args.collect { it instanceof String ? it.t : it })
+                return transformationClass.newInstance(*args.collect { it instanceof String ? it.t : it })
             }
         }
     }
@@ -332,8 +332,8 @@ class RedberryStatic {
 
     private static final class GReverse {
 
-        Transformation getAt(IndexType... types) {
-            if (types.length == 1)
+        Transformation getAt(Collection<IndexType> types) {
+            if (types.size() == 1)
                 return new ReverseTransformation(type);
 
             List<Transformation> tr = new ArrayList<>();
@@ -360,6 +360,14 @@ class RedberryStatic {
             CC.current().getParseManager().defaultParserPreprocessors.add(indicesInsertion);
     }
 
+    private static boolean onceSetFormat = false
+
+    private static void setupSimpleRedberryOutputOnce() {
+        if (!onceSetFormat && CC.defaultOutputFormat == OutputFormat.Redberry)
+            CC.setDefaultOutputFormat(OutputFormat.SimpleRedberry)
+        onceSetFormat = true
+    }
+
     /**
      * Tells Redberry to consider specified tensors as matrices and use matrix multiplication rules
      * @param objs input
@@ -367,20 +375,21 @@ class RedberryStatic {
      */
     public static void defineMatrices(Object... objs) {
         ensureIndicesInsertionAddedToParser()
+        setupSimpleRedberryOutputOnce()
         def bufferOfTensors = [], bufferOfDescriptors = [];
         objs.each { obj ->
             if (obj instanceof MatrixDescriptor)
                 bufferOfDescriptors << obj
             else {
                 if (bufferOfDescriptors) {
-                    bufferOfTensors.each { it -> defineMatrices(it, * bufferOfDescriptors) }
+                    bufferOfTensors.each { it -> defineMatrices(it, *bufferOfDescriptors) }
                     bufferOfTensors = []
                     bufferOfDescriptors = []
                 }
                 bufferOfTensors << obj
             }
         }
-        bufferOfTensors.each { it -> defineMatrix(it, * bufferOfDescriptors) }
+        bufferOfTensors.each { it -> defineMatrix(it, *bufferOfDescriptors) }
     }
 
     /**
@@ -483,7 +492,7 @@ class RedberryStatic {
 
     private static final Map ReduceDefaultOptions = Collections.unmodifiableMap(
             [Transformations: [], SymmetricForm: [], GeneratedParameters: { i -> "C[$i]" },
-                    ExternalSolver: [Solver: '', Path: '', KeepFreeParams: 'false', TmpDir: System.getProperty("java.io.tmpdir")]])
+             ExternalSolver : [Solver: '', Path: '', KeepFreeParams: 'false', TmpDir: System.getProperty("java.io.tmpdir")]])
 
     private static final Map ReduceDefaultExternalSolverOptions = Collections.unmodifiableMap(
             [Solver: '', Path: '', KeepFreeParams: 'true', TmpDir: System.getProperty("java.io.tmpdir")])
