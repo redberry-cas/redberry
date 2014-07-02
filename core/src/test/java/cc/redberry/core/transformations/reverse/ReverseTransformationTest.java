@@ -29,6 +29,7 @@ import cc.redberry.core.tensor.Tensor;
 import org.junit.Test;
 
 import static cc.redberry.core.indices.IndexType.Matrix1;
+import static cc.redberry.core.indices.IndexType.Matrix2;
 import static cc.redberry.core.tensor.Tensors.parse;
 import static cc.redberry.core.tensor.Tensors.parseSimple;
 import static cc.redberry.core.transformations.reverse.ReverseTransformation.inverseOrderOfMatrices;
@@ -64,5 +65,19 @@ public class ReverseTransformationTest {
         t = parse("cv*A*B*C*v");
         exp = parse("cv*C*B*A*v");
         TAssert.assertEquals(inverseOrderOfMatrices(t, Matrix1), exp);
+    }
+
+    @Test
+    public void test2() {
+        GeneralIndicesInsertion gii = new GeneralIndicesInsertion();
+        gii.addInsertionRule(parseSimple("G_a^a'_b'"), Matrix1);
+        gii.addInsertionRule(parseSimple("U_a^A'_B'"), Matrix2);
+        CC.current().getParseManager().defaultParserPreprocessors.add(gii);
+        Tensor t = parse("G_a*G_b*U_m*U_n");
+        ReverseTransformation reverse = new ReverseTransformation(Matrix2);
+        t = reverse.transform(t);
+        reverse = new ReverseTransformation(Matrix1);
+        t = reverse.transform(t);
+        TAssert.assertEquals(t, parse("G_b*G_a*U_n*U_m"));
     }
 }
