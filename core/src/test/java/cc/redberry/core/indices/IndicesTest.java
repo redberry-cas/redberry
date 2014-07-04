@@ -65,14 +65,14 @@ public class IndicesTest {
     public void testGetUpper1() {
         Indices indices = parse("g_mn*T^ab*D^n_b").getIndices(); //sorted indices
         Indices upper = ParserIndices.parseSimple("^a");
-        assertTrue(indices.getFree().getUpper().equals(upper.getAllIndices()));
+        assertTrue(indices.getFree().getUpper().equals(upper));
     }
 
     @Test
     public void testGetLower() {
         Indices indices = parse("g_mn*T^ab*D^n_b").getIndices(); //sorted indices
         Indices upper = ParserIndices.parseSimple("_m");
-        assertTrue(indices.getFree().getLower().equals(upper.getAllIndices()));
+        assertTrue(indices.getFree().getLower().equals(upper));
     }
 
     @Test

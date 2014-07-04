@@ -205,7 +205,7 @@ public class CollectTransformation implements Transformation {
 
         Indices factorIndices = new IndicesBuilder().append(factors).getIndices();
         TIntHashSet dummies = new TIntHashSet(IndicesUtils.getIntersections(
-                factorIndices.getUpper().copy(), factorIndices.getLower().copy()));
+                factorIndices.getUpper().toArray(), factorIndices.getLower().toArray()));
         SimpleIndices currentFactorIndices;
         IntArrayList from = new IntArrayList(), to = new IntArrayList();
         ArrayList<Tensor> kroneckers = new ArrayList<>();

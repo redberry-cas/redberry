@@ -23,7 +23,6 @@
 package cc.redberry.core.indices;
 
 import cc.redberry.core.groups.permutations.Permutation;
-import cc.redberry.core.groups.permutations.PermutationOneLineInt;
 import cc.redberry.core.groups.permutations.Permutations;
 import cc.redberry.core.utils.ArraysUtils;
 import cc.redberry.core.utils.IntArrayList;
@@ -71,7 +70,7 @@ public final class SimpleIndicesBuilder {
     public SimpleIndicesBuilder append(SimpleIndices indices) {
         if (indices.size() == 0)
             return this;
-        data.addAll(((SimpleIndicesAbstract) indices).data);
+        data.addAll(((AbstractSimpleIndices) indices).data);
         symmetries.add(new SymmetriesHolder(indices.size(), indices.getSymmetries().getGenerators()));
         return this;
     }

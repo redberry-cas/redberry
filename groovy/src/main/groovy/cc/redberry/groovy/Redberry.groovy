@@ -43,8 +43,6 @@ import cc.redberry.core.transformations.Transformation
 import cc.redberry.core.transformations.TransformationCollection
 import cc.redberry.core.transformations.substitutions.SubstitutionIterator
 import cc.redberry.core.transformations.substitutions.SubstitutionTransformation
-import cc.redberry.core.utils.IntArray
-import cc.redberry.core.utils.IntArrayList
 import cc.redberry.core.utils.TensorUtils
 import org.codehaus.groovy.runtime.DefaultGroovyMethods
 
@@ -368,19 +366,6 @@ class Redberry {
             return DefaultGroovyMethods.asType(indices, clazz)
     }
 
-    static Indices asType(IntArray indices, Class clazz) {
-        if (clazz == SimpleIndices)
-            return IndicesFactory.createSimple(null, indices.copy())
-        else if (clazz == Indices)
-            return IndicesFactory.create(indices.copy())
-        else
-            return DefaultGroovyMethods.asType(indices, clazz)
-    }
-
-    static Indices getIndices(IntArray indices) {
-        return IndicesFactory.create(indices.copy())
-    }
-
     /**
      * Iterator over single indices integers in {@code indices} object
      * @param indices indices
@@ -474,10 +459,6 @@ class Redberry {
             throw new IllegalArgumentException()
     }
 
-    static boolean equals(SimpleIndices a, SimpleIndices b) {
-        return Arrays.equals(a.allIndices.copy(), b.allIndices.copy())
-    }
-
     ///////////////////////////////////////// TREE TRAVERSAL ///////////////////////////////////////////////////////
 
     /**
@@ -561,14 +542,6 @@ class Redberry {
     static Tensor transformParentAfterChild(Tensor t, Closure<Tensor> closure) {
         return transformParentAfterChild(t, TraverseGuide.ALL, closure);
     }
-
-//todo implement
-//    static Tensor transformParentBeforeChild(Tensor t, TraverseGuide guide, Closure<Tensor> closure) {
-//    }
-//
-//    static Tensor transformParentBeforeChild(Tensor t, Closure<Tensor> closure) {
-//        return transformParentBeforeChild(t, TraverseGuide.ALL, closure);
-//    }
 
     ///////////////////////////////////////// TRANSFORMATIONS ///////////////////////////////////////////////////////
 
