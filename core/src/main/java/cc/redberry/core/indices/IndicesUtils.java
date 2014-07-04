@@ -104,6 +104,14 @@ import java.util.Arrays;
  * @since 1.0
  */
 public final class IndicesUtils {
+    /**
+     * Raw state int for upper indices
+     */
+    public static final int UPPER_RAW_STATE_INT = 0x80000000;
+    /**
+     * Raw state int for lower indices
+     */
+    public static final int LOWER_RAW_STATE_INT = 0x80000000;
 
     private IndicesUtils() {
     }
@@ -405,6 +413,7 @@ public final class IndicesUtils {
 
     /**
      * Parse single index.
+     *
      * @param string string representation of index
      * @return integer representation of index
      */
@@ -412,7 +421,7 @@ public final class IndicesUtils {
         string = string.trim();
         boolean state = string.charAt(0) == '^';
         int start = 0;
-        if(string.charAt(0) == '^' || string.charAt(0) == '_')
+        if (string.charAt(0) == '^' || string.charAt(0) == '_')
             start = 1;
         int nameWithType;
         if (string.charAt(start) == '{')

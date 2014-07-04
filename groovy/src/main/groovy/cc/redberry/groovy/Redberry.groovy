@@ -24,6 +24,7 @@
 package cc.redberry.groovy
 
 import cc.redberry.core.combinatorics.IntPermutationsGenerator
+import cc.redberry.core.context.OutputFormat
 import cc.redberry.core.groups.permutations.Permutation
 import cc.redberry.core.groups.permutations.Permutations
 import cc.redberry.core.indexmapping.IndexMappings
@@ -292,6 +293,78 @@ class Redberry {
     }
 
     //////////////////////////////////////////////// INDICES //////////////////////////////////////////////////////////
+
+    /**
+     * Returns a string representation of single index
+     * @param index index
+     * @param format output format
+     * @return string representation of single index
+     */
+    static String toStringIndex(Integer index, OutputFormat format) {
+        return IndicesUtils.toString(index, format)
+    }
+
+    /**
+     * Returns a string representation of single index
+     * @param index index
+     * @return string representation of single index
+     */
+    static String toStringIndex(Integer index) {
+        return IndicesUtils.toString(index)
+    }
+/**
+     * Inverses state of index
+     * @param index index
+     * @return index with inverted state
+     */
+    static Integer invert(Integer index) {
+        return IndicesUtils.inverseIndexState(index)
+    }
+
+    /**
+     * Returns true if index is upper and false otherwise
+     * @param index index
+     * @return true if index is upper and false otherwise
+     */
+    static boolean isUpper(Integer index) {
+        return IndicesUtils.getState(index)
+    }
+
+    /**
+     * Returns true if index is lower and false otherwise
+     * @param index index
+     * @return true if index is lower and false otherwise
+     */
+    static boolean isLower(Integer index) {
+        return !IndicesUtils.getState(index)
+    }
+
+    /**
+     * Makes index upper
+     * @param index index
+     * @return contravariant index
+     */
+    static Integer toUpper(Integer index) {
+        return IndicesUtils.setRawState(IndicesUtils.UPPER_RAW_STATE_INT, index)
+    }
+
+    /**
+     * Makes index lower
+     * @param index index
+     * @return covariant index
+     */
+    static Integer toLower(Integer index) {
+        return IndicesUtils.setRawState(IndicesUtils.LOWER_RAW_STATE_INT, index)
+    }
+
+    /**
+     * Returns type of index
+     * @param index index
+     * @return type of index
+     */
+    static IndexType getType(Integer index) {
+        return IndicesUtils.getTypeEnum(index);
+    }
 
     /**
      * Returns the index at the specified position in indices
@@ -772,6 +845,26 @@ class Redberry {
     }
 
     /**
+     * Changes sign of mapping
+     * @param mapping mapping
+     * @return mapping multiplied by minus one
+     */
+    static Mapping negative(Mapping mapping) {
+        return mapping.addSign(true);
+    }
+
+    /**
+     * Returns a mapping from indices {@code from} to indices {@code to}.
+     *
+     * @param from {@code from} indices
+     * @param to {@code to} indices
+     * @return a single mappingç
+     */
+    static Mapping mod(Indices from, Indices to) {
+        return new Mapping(from.toArray(), to.toArray());
+    }
+
+    /**
      * Returns the container of mappings from tensor {@code from} onto tensor {@code to}. This structure is iterable
      * and also can be manipulated as single transformation which simply applies first possible mapping.
      *
@@ -1012,6 +1105,17 @@ class Redberry {
      */
     static SimpleIndices getSi(String string) {
         return ParserIndices.parseSimple(string)
+    }
+
+    /**
+     * Converts list of integers to SimpleIndices
+     * @param list list of integers
+     * @return simple indices
+     * @see SimpleIndices
+     * @throws IllegalArgumentException if list does not represent correct indices object.
+     */
+    static SimpleIndices getSi(List list) {
+        return IndicesFactory.createSimple(null, list as int[])
     }
 
     /**
