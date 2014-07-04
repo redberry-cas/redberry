@@ -26,13 +26,11 @@ import cc.redberry.core.context.CC;
 import cc.redberry.core.context.ContextManager;
 import cc.redberry.core.context.NameDescriptor;
 import cc.redberry.core.context.OutputFormat;
+import cc.redberry.core.indices.IndicesUtils;
 import cc.redberry.core.indices.SimpleIndices;
 import cc.redberry.core.utils.EmptyIterator;
 
 import java.util.Iterator;
-
-import static cc.redberry.core.tensor.Tensors.isKronecker;
-import static cc.redberry.core.tensor.Tensors.isKroneckerOrMetric;
 
 /**
  * Implementation of simple tensor.
@@ -89,6 +87,18 @@ public class SimpleTensor extends Tensor {
 
     @Override
     public String toString(OutputFormat mode) {
+        if (Tensors.isKronecker(this)
+                && !mode.printMatrixIndices
+                && !CC.isMetric(IndicesUtils.getType(indices.get(0)))) {
+            if (indices.getFree().size() == 0)
+                return toString0(OutputFormat.Redberry);
+            return "";
+        }
+        return toString0(mode);
+    }
+
+
+    private String toString0(OutputFormat mode) {
         //Initializing StringBuilder
         StringBuilder sb = new StringBuilder();
 

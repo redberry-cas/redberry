@@ -44,7 +44,6 @@ import cc.redberry.core.transformations.TransformationCollection
 import cc.redberry.core.transformations.substitutions.SubstitutionIterator
 import cc.redberry.core.transformations.substitutions.SubstitutionTransformation
 import cc.redberry.core.utils.IntArray
-import cc.redberry.core.utils.IntArrayList
 import cc.redberry.core.utils.TensorUtils
 import org.codehaus.groovy.runtime.DefaultGroovyMethods
 
@@ -1039,6 +1038,18 @@ class Redberry {
      */
     static SimpleIndices getSi(String string) {
         return ParserIndices.parseSimple(string)
+    }
+
+    /**
+     * Converts indices to SimpleIndices
+     * @param indices indices
+     * @return simple indices
+     * @see SimpleIndices
+     * @see ParserIndices#parseSimple(java.lang.String)
+     * @throws IllegalArgumentException if string does not represent correct indices object.
+     */
+    static SimpleIndices getSi(Indices indices) {
+        return IndicesFactory.createSimple(null, indices)
     }
 
     /**

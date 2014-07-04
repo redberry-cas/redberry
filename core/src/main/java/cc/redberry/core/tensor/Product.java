@@ -822,22 +822,30 @@ public final class Product extends MultiTensor {
                 return sb.toString();
             sb.append(operatorChar);
         }
+        if (!format.printMatrixIndices)
+            return printData(sb, format, operatorChar);
         EnumSet<IndexType> matrixTypes = IndicesUtils.nonMetricTypes(indices);
         if (matrixTypes.isEmpty())
-            for (; ; ++i) {
-                sb.append(data[i - indexlessData.length].toString(format, Product.class));
-                if (i == size - 1)
-                    return sb.toString();
-                sb.append(operatorChar);
-            }
+            return printData(sb, format, operatorChar);
         else
             return printMatrices(matrixTypes, sb, format, operatorChar);
+    }
+
+    private String printData(StringBuilder sb, OutputFormat format, char operatorChar) {
+        for (int i = 0; i < data.length; ++i) {
+            sb.append(data[i].toString(format, Product.class));
+            if (i == data.length - 1)
+                return sb.toString();
+            sb.append(operatorChar);
+        }
+        return sb.toString();
     }
 
     private String printMatrices(EnumSet<IndexType> matrixTypes,
                                  StringBuilder sb, OutputFormat format,
                                  char operatorChar) {
         BitArray printed = new BitArray(data.length);
+        String temp;
         for (IndexType type : matrixTypes) {
             PrimitiveSubgraph[] subgraphs =
                     PrimitiveSubgraphPartition.calculatePartition(
@@ -845,18 +853,27 @@ public final class Product extends MultiTensor {
             for (PrimitiveSubgraph subgraph : subgraphs) {
                 if (subgraph.getGraphType() == GraphType.Graph)
                     continue;
-                if (subgraph.getGraphType() == GraphType.Cycle)
+                if (subgraph.getGraphType() == GraphType.Cycle) {
+                    //in case Tr[1] we must print d^a'_a'
+                    if (subgraph.size() == 1 && Tensors.isKronecker(data[subgraph.getPosition(0)])) {
+                        temp = data[subgraph.getPosition(0)].toString(format);
+                        sb.append(temp);
+                        if (!temp.isEmpty())
+                            sb.append(operatorChar);
+                        continue;
+                    }
                     sb.append("Tr[");
+                }
                 for (int i = 0; i < subgraph.size(); ++i) {
                     printed.set(subgraph.getPosition(i));
-                    sb.append(data[subgraph.getPosition(i)].toString(format, Product.class));
                     if (i == subgraph.size() - 1
                             && subgraph.getGraphType() == GraphType.Cycle) {
                         if (matrixTypes.size() != 1)
                             sb.append(", ").append(type);
                         sb.append("]");
                     }
-                    sb.append(operatorChar);
+                    if (sb.charAt(sb.length() - 1) != operatorChar)
+                        sb.append(operatorChar);
                 }
             }
         }

@@ -22,7 +22,13 @@
  */
 package cc.redberry.physics.feyncalc;
 
+import cc.redberry.core.context.CC;
+import cc.redberry.core.indices.IndexType;
+import cc.redberry.core.parser.preprocessor.GeneralIndicesInsertion;
 import org.junit.Test;
+
+import static cc.redberry.core.indices.IndexType.Matrix2;
+import static cc.redberry.core.tensor.Tensors.*;
 
 /**
  * @author Dmitry Bolotin
@@ -31,7 +37,17 @@ import org.junit.Test;
 public class UnitarySimplifyTransformationTest {
     @Test
     public void test1() {
+        GeneralIndicesInsertion indicesInsertion = new GeneralIndicesInsertion();
+        CC.current().getParseManager().defaultParserPreprocessors.add(indicesInsertion);
+        indicesInsertion.addInsertionRule(parseSimple("T^a'_b'A"), IndexType.Matrix1);
 
+        setAntiSymmetric("f_ABC");
+        setSymmetric("d_ABC");
+
+        UnitarySimplifyTransformation tr = new UnitarySimplifyTransformation(parseSimple("T_A"),
+                parseSimple("f_ABC"), parseSimple("d_ABC"), parseSimple("n"));
+
+        System.out.println(tr.transform(parse("T_A*T^A")));
 
     }
 }
