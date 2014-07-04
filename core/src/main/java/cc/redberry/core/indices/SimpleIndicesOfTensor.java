@@ -27,7 +27,7 @@ package cc.redberry.core.indices;
  * @author Stanislav Poslavsky
  * @since 1.0
  */
-final class SimpleIndicesOfTensor extends SimpleIndicesAbstract {
+final class SimpleIndicesOfTensor extends AbstractSimpleIndices {
 
     SimpleIndicesOfTensor(int[] data, IndicesSymmetries symmetries) {
         super(data, symmetries);

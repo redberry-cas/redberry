@@ -25,10 +25,7 @@ package cc.redberry.core.tensorgenerator;
 import cc.redberry.core.context.CC;
 import cc.redberry.core.indexmapping.IndexMappings;
 import cc.redberry.core.indexmapping.Mapping;
-import cc.redberry.core.indices.IndicesFactory;
-import cc.redberry.core.indices.IndicesSymmetries;
-import cc.redberry.core.indices.SimpleIndices;
-import cc.redberry.core.indices.StructureOfIndices;
+import cc.redberry.core.indices.*;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.number.Rational;
 import cc.redberry.core.solver.frobenius.FrobeniusSolver;
@@ -70,8 +67,8 @@ public class TensorGenerator {
 
         this.indices = indices;
         this.symmetricForm = symmetricForm;
-        this.lowerArray = indices.getLower().copy();
-        this.upperArray = indices.getUpper().copy();
+        this.lowerArray = indices.getLower().toArray();
+        this.upperArray = indices.getUpper().toArray();
         this.withCoefficients = withCoefficients;
         Arrays.sort(lowerArray);
         Arrays.sort(upperArray);
@@ -85,14 +82,14 @@ public class TensorGenerator {
         int totalLowCount = lowerArray.length, i, k;
         int[] lowCounts = new int[samples.length + 1];
         for (i = 0; i < samples.length; ++i)
-            lowCounts[i] = samples[i].getIndices().getFree().getLower().length();
+            lowCounts[i] = samples[i].getIndices().getFree().getLower().size();
         lowCounts[i] = totalLowCount;
 
         //processing up indices
         int totalUpCount = upperArray.length;
         int[] upCounts = new int[samples.length + 1];
         for (i = 0; i < samples.length; ++i)
-            upCounts[i] = samples[i].getIndices().getFree().getUpper().length();
+            upCounts[i] = samples[i].getIndices().getFree().getUpper().size();
         upCounts[i] = totalUpCount;
 
         //solving Frobenius equations
@@ -111,18 +108,18 @@ public class TensorGenerator {
                 for (int j = 0; j < combination[i]; ++j) {
                     Tensor temp = samples[i];
 
-                    IntArray termLow = temp.getIndices().getFree().getLower();
-                    IntArray termUp = temp.getIndices().getFree().getUpper();
+                    Indices termLow = temp.getIndices().getFree().getLower();
+                    Indices termUp = temp.getIndices().getFree().getUpper();
 
-                    int[] oldIndices = new int[termUp.length() + termLow.length()],
+                    int[] oldIndices = new int[termUp.size() + termLow.size()],
                             newIndices = oldIndices.clone();
-                    for (k = 0; k < termUp.length(); ++k) {
+                    for (k = 0; k < termUp.size(); ++k) {
                         oldIndices[k] = termUp.get(k);
                         newIndices[k] = upperArray[u++];
                     }
-                    for (k = 0; k < termLow.length(); ++k) {
-                        oldIndices[k + termUp.length()] = termLow.get(k);
-                        newIndices[k + termUp.length()] = lowerArray[l++];
+                    for (k = 0; k < termLow.size(); ++k) {
+                        oldIndices[k + termUp.size()] = termLow.get(k);
+                        newIndices[k + termUp.size()] = lowerArray[l++];
                     }
                     temp = ApplyIndexMapping.applyIndexMapping(temp, new Mapping(oldIndices, newIndices), indices.getAllIndices().copy());
                     tCombination.add(temp);

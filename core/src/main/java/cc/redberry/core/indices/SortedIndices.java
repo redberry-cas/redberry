@@ -26,6 +26,7 @@ import cc.redberry.core.indexmapping.IndexMapping;
 import cc.redberry.core.utils.ArraysUtils;
 import cc.redberry.core.utils.IntArrayList;
 
+import java.lang.ref.WeakReference;
 import java.util.Arrays;
 
 /**
@@ -43,11 +44,33 @@ final class SortedIndices extends AbstractIndices {
         this.firstLower = firstLower;
     }
 
+    private SortedIndices(int[] data, int firstLower, UpperLowerIndices upperLowerIndices) {
+        super(data);
+        this.firstLower = firstLower;
+        this.upperLower = new WeakReference<>(upperLowerIndices);
+    }
+
     SortedIndices(int[] data) {
         super(data);
         Arrays.sort(this.data);
         firstLower = ArraysUtils.binarySearch1(data, 0);
         testConsistentWithException();
+    }
+
+    @Override
+    public Indices getUpper() {
+        UpperLowerIndices ul = getUpperLowerIndices();
+        if (ul.upper.length == 0)
+            return EmptyIndices.EMPTY_INDICES_INSTANCE;
+        return new SortedIndices(ul.upper, ul.upper.length, new UpperLowerIndices(ul.upper, new int[0]));
+    }
+
+    @Override
+    public Indices getLower() {
+        UpperLowerIndices ul = getUpperLowerIndices();
+        if (ul.lower.length == 0)
+            return EmptyIndices.EMPTY_INDICES_INSTANCE;
+        return new SortedIndices(ul.lower, 0, new UpperLowerIndices(new int[0], ul.lower));
     }
 
     @Override
