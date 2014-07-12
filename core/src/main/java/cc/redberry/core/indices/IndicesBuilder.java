@@ -174,7 +174,7 @@ public final class IndicesBuilder {
      * @throws InconsistentIndicesException if there was more then one same index (with same names, types and states)
      */
     public Indices getIndices() {
-        return IndicesFactory.create(data.toArray());
+        return UnsafeIndicesFactory.createSortedWithoutCopy(data.toArray());
     }
 
     /**
@@ -182,7 +182,7 @@ public final class IndicesBuilder {
      * {@code IndicesBuilder}.
      *
      * @return integer array, representing indices, constructed in this
-     *         {@code IndicesBuilder}
+     * {@code IndicesBuilder}
      */
     public int[] toArray() {
         return data.toArray();

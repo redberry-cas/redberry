@@ -546,7 +546,6 @@ public final class ArraysUtils {
      */
     public static int binarySearch1(int[] a, int fromIndex, int toIndex,
                                     int key) {
-        Arrays.binarySearch(a, key);
         int low = fromIndex;
         int high = toIndex - 1;
 
@@ -558,14 +557,18 @@ public final class ArraysUtils {
                 low = mid + 1;
             else if (midVal > key)
                 high = mid - 1;
-            else
+            else {
+                while (mid > 0 && a[mid - 1] == a[mid]) --mid;
                 return mid; // key found
+            }
         }
+        if (low >= a.length) return low;
+        while (low > 0 && a[low - 1] == a[low]) --low;
         return low;  // key not found.
     }
 
     /**
-     * Returns xor of objects hashes spreaded by {@link HashFunctions#JenkinWang32shift(int) }
+     * Returns xor of objects hashes via {@link HashFunctions#JenkinWang32shift(int) }
      *
      * @param objects array
      * @return commutative hash

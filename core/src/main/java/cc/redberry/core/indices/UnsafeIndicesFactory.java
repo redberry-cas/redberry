@@ -64,4 +64,10 @@ public class UnsafeIndicesFactory {
             return IndicesFactory.EMPTY_SIMPLE_INDICES;
         return new SimpleIndicesIsolated(true, data, symmetries, ul);
     }
+
+    static Indices createSortedWithoutCopy(int[] data){
+        if (data.length == 0)
+            return IndicesFactory.EMPTY_SIMPLE_INDICES;
+        return new SortedIndices(data);
+    }
 }

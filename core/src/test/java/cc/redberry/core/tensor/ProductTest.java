@@ -25,6 +25,7 @@ package cc.redberry.core.tensor;
 import cc.redberry.core.TAssert;
 import cc.redberry.core.combinatorics.IntCombinationsGenerator;
 import cc.redberry.core.context.CC;
+import cc.redberry.core.indices.InconsistentIndicesException;
 import cc.redberry.core.indices.IndexType;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.tensor.random.RandomTensor;
@@ -501,4 +502,8 @@ public class ProductTest {
         }
     }
 
+    @Test(expected = InconsistentIndicesException.class)
+    public void testInconsistentIndices1() {
+        CC.current().getParseManager().getParser().parse("s_a*f_ac").getIndices();
+    }
 }
