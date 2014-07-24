@@ -312,7 +312,8 @@ class Redberry {
     static String toStringIndex(Integer index) {
         return IndicesUtils.toString(index)
     }
-/**
+
+    /**
      * Inverses state of index
      * @param index index
      * @return index with inverted state
@@ -1116,6 +1117,17 @@ class Redberry {
      */
     static SimpleIndices getSi(List list) {
         return IndicesFactory.createSimple(null, list as int[])
+    }
+
+    /**
+     * Converts indices to SimpleIndices
+     * @param indices indices
+     * @return simple indices
+     * @see SimpleIndices
+     * @throws IllegalArgumentException if list does not represent correct indices object.
+     */
+    static SimpleIndices getSi(Indices indices) {
+        return IndicesFactory.createSimple(null, indices)
     }
 
     /**
