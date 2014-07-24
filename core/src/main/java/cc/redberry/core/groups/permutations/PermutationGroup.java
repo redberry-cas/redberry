@@ -1279,10 +1279,9 @@ public final class PermutationGroup
         AlgorithmsBacktrack.rebaseWithRedundancy(subgroup_bsgs, base, internalDegree);
 
         final Permutation[] mappings = new Permutation[base.length - 1];
-        for (int i = 1; i < base.length; ++i) {
-            if (base[i] < subgroup.internalDegree && subgroup.positionsInOrbits[base[i]] == subgroup.positionsInOrbits[base[i - 1]])
+        for (int i = 1; i < base.length; ++i)
+            if (base[i] < subgroup.internalDegree && subgroup.indexOfOrbit(base[i]) == subgroup.indexOfOrbit(base[i - 1]))
                 mappings[i - 1] = subgroup.mapping(base[i - 1], base[i]);
-        }
 
         CentralizerSearchTest centralizerSearch = new CentralizerSearchTest(group_bsgs, subgroup, base, mappings);
 

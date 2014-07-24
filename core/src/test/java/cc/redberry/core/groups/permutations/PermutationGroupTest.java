@@ -1067,6 +1067,20 @@ public class PermutationGroupTest extends AbstractTestClass {
         }
     }
 
+    @Test
+    public void testCentralizer() {
+        PermutationGroup gr = PermutationGroup.createPermutationGroup(
+                Permutations.createPermutation(new int[][]{{0, 1, 4, 5}}),
+                Permutations.createPermutation(new int[][]{{3, 5, 9, 7}}),
+                Permutations.createPermutation(new int[][]{{11, 2, 9, 10}}));
+
+        PermutationGroup c = PermutationGroup.createPermutationGroup(
+                Permutations.createPermutation(new int[][]{{3, 4, 5}}));
+
+        //todo test with GAP
+        Assert.assertEquals(15120, gr.centralizerOf(c).order().intValue());
+    }
+
     private static PermutationGroup pointWiseStabilizerBruteForce(PermutationGroup pg, int[] points) {
         PermutationGroup stab = pg;
         for (int i : points)
@@ -1079,11 +1093,11 @@ public class PermutationGroupTest extends AbstractTestClass {
         RandomGenerator rg = new Well19937c(123234L);
 
         testUniformity(PermutationGroup.createPermutationGroup(
-                Permutations.createPermutation(2, 0, 1, 3, 4)),
+                        Permutations.createPermutation(2, 0, 1, 3, 4)),
                 rg);
         testUniformity(PermutationGroup.createPermutationGroup(
-                Permutations.createPermutation(1, 2, 0, 4, 3),
-                Permutations.createPermutation(0, 1, 2, 4, 3)),
+                        Permutations.createPermutation(1, 2, 0, 4, 3),
+                        Permutations.createPermutation(0, 1, 2, 4, 3)),
                 rg);
     }
 
