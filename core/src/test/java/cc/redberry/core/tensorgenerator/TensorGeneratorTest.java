@@ -164,7 +164,7 @@ public class TensorGeneratorTest {
     @Test
     public void test10() {
         SimpleIndices indices = ParserIndices.parseSimple("^apb_cdq");
-        indices.getSymmetries().add(Permutations.createPermutation(3, 4, 5, 0, 1, 2));
+        indices.getSymmetries().addSymmetry(Permutations.createPermutation(3, 4, 5, 0, 1, 2));
         GeneratedTensor actual = TensorGenerator.generateStructure(indices,
                 Tensors.parse("d^i_j", "g_ab", "g^ab", "p_a", "p^a"), false, true, true);
 
@@ -188,7 +188,7 @@ public class TensorGeneratorTest {
     @Test
     public void test10a() {
         SimpleIndices indices = ParserIndices.parseSimple("^ab_cd");
-        indices.getSymmetries().add(Permutations.createPermutation(3, 0, 1, 2));
+        indices.getSymmetries().addSymmetry(Permutations.createPermutation(3, 0, 1, 2));
         GeneratedTensor actual = TensorGenerator.generateStructure(indices,
                 Tensors.parse("d^i_j", "g_ab", "g^ab", "p_a", "p^a"), false, true, true);
 
@@ -207,8 +207,8 @@ public class TensorGeneratorTest {
     @Test
     public void test11() {
         SimpleIndices indices = ParserIndices.parseSimple("^apb_cdq");
-        indices.getSymmetries().add(Permutations.createPermutation(3, 4, 5, 0, 1, 2));
-        indices.getSymmetries().add(Permutations.createPermutation(true, 2, 1, 0, 3, 4, 5));
+        indices.getSymmetries().addSymmetry(Permutations.createPermutation(3, 4, 5, 0, 1, 2));
+        indices.getSymmetries().addSymmetry(Permutations.createPermutation(true, 2, 1, 0, 3, 4, 5));
         GeneratedTensor actual = TensorGenerator.generateStructure(indices,
                 Tensors.parse("d^i_j", "g_ab", "g^ab", "p_a", "p^a"), false, true, true);
 

@@ -24,7 +24,6 @@ package cc.redberry.core.tensor.random;
 
 import cc.redberry.core.context.CC;
 import cc.redberry.core.context.NameDescriptor;
-import cc.redberry.core.groups.permutations.PermutationOneLineInt;
 import cc.redberry.core.groups.permutations.Permutations;
 import cc.redberry.core.indexgenerator.IndexGeneratorImpl;
 import cc.redberry.core.indexmapping.Mapping;
@@ -262,7 +261,7 @@ public final class RandomTensor {
                 continue;
             int count = random.nextInt(4);
             for (i = 0; i < count; ++i)
-                descriptor.getSymmetries().add(type, Permutations.createPermutation(false, nextPermutation(typeData.length)));
+                descriptor.getSymmetries().addSymmetry(type, Permutations.createPermutation(false, nextPermutation(typeData.length)));
         }
     }
 

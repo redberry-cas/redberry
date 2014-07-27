@@ -301,7 +301,7 @@ public class IndicesTest {
             SimpleTensor r = parseSimple("R_abcdefghijkl");
             p = gen.next();
             for (int i = 0; i < p.length; ++i)
-                r.getIndices().getSymmetries().add(symmetries[p[i]]);
+                r.getIndices().getSymmetries().addSymmetry(symmetries[p[i]]);
 
             short[] diffIds = r.getIndices().getPositionsInOrbits();
             short[] expected = {0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0};

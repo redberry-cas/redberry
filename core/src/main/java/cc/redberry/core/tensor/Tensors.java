@@ -966,7 +966,7 @@ public final class Tensors {
      *                                            of specified type
      */
     public static void addSymmetry(SimpleTensor tensor, IndexType type, Permutation permutation) {
-        tensor.getIndices().getSymmetries().add(type.getType(), permutation);
+        tensor.getIndices().getSymmetries().addSymmetry(type.getType(), permutation);
     }
 
     /**
@@ -979,7 +979,7 @@ public final class Tensors {
      *                                            of specified tensor
      */
     public static void addSymmetry(SimpleTensor tensor, Permutation permutation) {
-        tensor.getIndices().getSymmetries().add(permutation);
+        tensor.getIndices().getSymmetries().addSymmetry(permutation);
     }
 
     /**
@@ -1006,7 +1006,7 @@ public final class Tensors {
      */
     public static void addSymmetries(SimpleTensor tensor, Permutation... permutations) {
         for (Permutation p : permutations)
-            tensor.getIndices().getSymmetries().add(p);
+            tensor.getIndices().getSymmetries().addSymmetry(p);
     }
 
     /**
@@ -1187,7 +1187,7 @@ public final class Tensors {
         int dimension = tensor.getIndices().size(type);
         addSymmetry(tensor, type, true, Permutations.createTransposition(dimension));
         if (dimension > 2)
-            tensor.getIndices().getSymmetries().add(type.getType(), Permutations.createPermutation(dimension % 2 == 0 ? true : false, Permutations.createCycle(dimension)));
+            tensor.getIndices().getSymmetries().addSymmetry(type.getType(), Permutations.createPermutation(dimension % 2 == 0 ? true : false, Permutations.createCycle(dimension)));
     }
 
     /**

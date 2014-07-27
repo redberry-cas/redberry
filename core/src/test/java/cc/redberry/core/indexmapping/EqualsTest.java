@@ -119,24 +119,24 @@ public class EqualsTest
         RandomTensor randomTensor = new RandomTensor();
         randomTensor.clearNamespace();
 
-        Tensors.parseSimple("R_abcd").getIndices().getSymmetries().add(
+        Tensors.parseSimple("R_abcd").getIndices().getSymmetries().addSymmetry(
                 Permutations.createPermutation(1, 0, 2, 3));
-        Tensors.parseSimple("R_abcd").getIndices().getSymmetries().add(
+        Tensors.parseSimple("R_abcd").getIndices().getSymmetries().addSymmetry(
                 Permutations.createPermutation(0, 1, 3, 2));
-        Tensors.parseSimple("R_abcd").getIndices().getSymmetries().add(
+        Tensors.parseSimple("R_abcd").getIndices().getSymmetries().addSymmetry(
                 Permutations.createPermutation(2, 3, 0, 1));
 
-        Tensors.parseSimple("A_abcde").getIndices().getSymmetries().add(
+        Tensors.parseSimple("A_abcde").getIndices().getSymmetries().addSymmetry(
                 Permutations.createPermutation(new int[][]{{0, 1, 2, 3, 4}}));
 
-        Tensors.parseSimple("B_abcde").getIndices().getSymmetries().add(
+        Tensors.parseSimple("B_abcde").getIndices().getSymmetries().addSymmetry(
                 Permutations.createPermutation(new int[][]{{1, 3}, {2, 4}}));
-        Tensors.parseSimple("B_abcde").getIndices().getSymmetries().add(
+        Tensors.parseSimple("B_abcde").getIndices().getSymmetries().addSymmetry(
                 Permutations.createPermutation(new int[][]{{0, 1, 2, 4, 3}}));
 
-        Tensors.parseSimple("C_abcde").getIndices().getSymmetries().add(
+        Tensors.parseSimple("C_abcde").getIndices().getSymmetries().addSymmetry(
                 Permutations.createPermutation(new int[][]{{1, 2, 3, 4}}));
-        Tensors.parseSimple("C_abcde").getIndices().getSymmetries().add(
+        Tensors.parseSimple("C_abcde").getIndices().getSymmetries().addSymmetry(
                 Permutations.createPermutation(new int[][]{{0, 1, 2, 4, 3}}));
 
         randomTensor.addToNamespace(Tensors.parse("R_abcd", "A_abcde", "B_abcde", "C_abcde"));
