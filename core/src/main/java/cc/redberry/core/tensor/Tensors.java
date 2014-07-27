@@ -27,7 +27,6 @@ import cc.redberry.core.context.NameDescriptor;
 import cc.redberry.core.context.NameDescriptorForSimpleTensor;
 import cc.redberry.core.context.NameDescriptorForTensorField;
 import cc.redberry.core.groups.permutations.Permutation;
-import cc.redberry.core.groups.permutations.PermutationOneLineInt;
 import cc.redberry.core.groups.permutations.Permutations;
 import cc.redberry.core.indices.*;
 import cc.redberry.core.number.Complex;
@@ -37,6 +36,7 @@ import cc.redberry.core.utils.TensorUtils;
 import gnu.trove.set.hash.TIntHashSet;
 
 import java.util.ArrayList;
+import java.util.Collection;
 
 /**
  * Factory methods to create tensors.
@@ -109,6 +109,21 @@ public final class Tensors {
     }
 
     /**
+     * Returns the result of multiplication of specified tensors. Einstein notation
+     * assumed. If there is a chance that some factors have conflicting
+     * (same name) dummy indices use {@link #multiplyAndRenameConflictingDummies(Tensor...)}
+     * instead.
+     *
+     * @param factors collection of factors to be multiplied
+     * @return result of multiplication
+     * @throws InconsistentIndicesException if there is indices clash
+     */
+    public static Tensor multiply(final Collection<Tensor> factors) {
+        //TODO add check for indices consistency
+        return multiply(factors.toArray(new Tensor[factors.size()]));
+    }
+
+    /**
      * Returns result of multiplication of specified tensors taking care about
      * all conflicting dummy indices in factors. Einstein notation assumed.
      *
@@ -162,6 +177,18 @@ public final class Tensors {
 //            }
 //        }
 //        return p;
+    }
+
+    /**
+     * Returns result of multiplication of specified tensors taking care about
+     * all conflicting dummy indices in factors. Einstein notation assumed.
+     *
+     * @param factors array of factors to be multiplied
+     * @return result of multiplication
+     * @throws InconsistentIndicesException if there is indices clash
+     */
+    public static Tensor multiplyAndRenameConflictingDummies(Collection<Tensor> factors) {
+        return multiplyAndRenameConflictingDummies(factors.toArray(new Tensor[factors.size()]));
     }
 
     /**
@@ -238,6 +265,17 @@ public final class Tensors {
      */
     public static Tensor sum(Tensor... tensors) {
         return SumFactory.FACTORY.create(tensors);
+    }
+
+    /**
+     * Returns the result of summation of several tensors.
+     *
+     * @param tensors collection of summands
+     * @return result of summation
+     * @throws TensorException if tensors have different free indices
+     */
+    public static Tensor sum(Collection<Tensor> tensors) {
+        return sum(tensors.toArray(new Tensor[tensors.size()]));
     }
 
     /**
@@ -466,6 +504,20 @@ public final class Tensors {
         for (int i = 0; i < argIndices.length; ++i)
             argIndices[i] = IndicesFactory.createSimple(null, arguments[i].getIndices().getFree());
         return field(name, indices, argIndices, arguments);
+    }
+
+    /**
+     * Returns new tensor field with specified string name, indices and
+     * arguments list. Free indices of arguments assumed as arguments indices
+     * bindings of this field bindings.
+     *
+     * @param name      int name of the field
+     * @param indices   indices
+     * @param arguments arguments list
+     * @return new instance of {@link TensorField} object
+     */
+    public static TensorField field(String name, SimpleIndices indices, Collection<Tensor> arguments) {
+        return field(name, indices, arguments.toArray(new Tensor[arguments.size()]));
     }
 
     /**

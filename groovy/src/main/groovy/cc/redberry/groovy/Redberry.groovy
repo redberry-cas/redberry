@@ -211,10 +211,11 @@ class Redberry {
      * @return element at specified positions in expression-tree
      * @see Tensor#get(int)
      */
-    static Tensor getAt(Tensor a, Collection positions) {
+    static List<Tensor> getAt(Tensor a, Collection<Integer> positions) {
+        ArrayList<Tensor> result = new ArrayList<>()
         for (int i : positions)
-            a = a.get(i)
-        return a;
+            result.add(a.get(i))
+        return result;
     }
 
     /**
@@ -226,11 +227,34 @@ class Redberry {
      * @return array with retrieved tensors
      * @see Tensor#getRange(int, int)
      */
-    static Tensor[] getAt(Tensor a, IntRange range) {
+    static List<Tensor> getAt(Tensor a, IntRange range) {
         int from = range.fromInt, to = range.toInt;
         if (from == 0 && to == a.size())
-            return a.toArray();
-        return a.getRange(from, to);
+            return new ArrayList<Tensor>(Arrays.asList(a.toArray()));
+        return new ArrayList<Tensor>(Arrays.asList(a.getRange(from, to)));
+    }
+
+    /**
+     * Selects tensors at the specified positions and puts it together.
+     *
+     * @param positions positions in tensor
+     * @return result subtensor
+     * @see MultiTensor#select(int [ ])
+     */
+    static Tensor select(MultiTensor a, Collection positions) {
+        return a.select(positions as int[]);
+    }
+
+    /**
+     * Removes tensors at the specified positions and returns the result.
+     *
+     * @param positions position in tensor
+     * @return result of removing
+     * @throws IndexOutOfBoundsException
+     * @see MultiTensor#remove(int [ ])
+     */
+    static Tensor remove(MultiTensor a, Collection positions) {
+        return a.remove(positions as int[]);
     }
 
     /**
@@ -269,6 +293,16 @@ class Redberry {
     }
 
     /**
+     * Adds ability for {@link TensorFactory} to create tensor from list
+     * @param factory tensor factory
+     * @param tensors a list of tensors
+     * @return result
+     */
+    static Tensor create(TensorFactory factory, List tensors) {
+        return factory.create(tensors.toArray(new Tensor[tensors.size()]))
+    }
+
+    /**
      * Returns a list of tensor content
      * @param tensor tensor
      * @return a list of tensor content
@@ -277,19 +311,40 @@ class Redberry {
         return tensor.toArray() as List
     }
 
+    /////////////////////////////////////////// PRODUCT CONTENT ///////////////////////////////////////////////////////
+
     /**
-     * Tensor as array, list etc.
-     * @param tensor
-     * @param clazz
-     * @return
+     * Returns i-th element of indexed data in content.
+     *
+     * @param i position
+     * @return i-th element of indexed data in content
      */
-    static Object asType(Tensor tensor, Class clazz) {
+    static Tensor getAt(ProductContent content, int i) {
+        return content.get(i)
+    }
+
+    /**
+     * Returns a range of indexed data specified by range.
+     *
+     * @param from from position (inclusive)
+     * @param to to position (exclusive)
+     * @return range
+     */
+    static List<Tensor> getAt(ProductContent content, Range range) {
+        return content.getRange(range.from, range.to) as List
+    }
+
+    /**
+     * Returns a range of indexed data specified by range.
+     *
+     * @param from from position (inclusive)
+     * @param to to position (exclusive)
+     * @return range
+     */
+    static List<Tensor> asType(ProductContent content, Class clazz) {
         if (clazz == List)
-            return tensor.toArray() as List
-        else if (clazz == Tensor[])
-            return tensor.toArray()
-        else
-            return DefaultGroovyMethods.asType(tensor, clazz)
+            return content.dataCopy as List
+        return DefaultGroovyMethods.asType(content, clazz)
     }
 
     //////////////////////////////////////////////// INDICES //////////////////////////////////////////////////////////
@@ -394,6 +449,61 @@ class Redberry {
             sub[i] = indices.get(i + range.from);
         return IndicesFactory.create(sub)
     }
+    /**
+     * Returns sub indices of specified range
+     *
+     * @param indices indices
+     * @param range range
+     * @return sub indices of specified range
+     * @throws IndexOutOfBoundsException
+     */
+    static Indices getAt(Indices indices, int[] range) {
+        return getAt(indices, range as List)
+    }
+
+    /**
+     * Returns sub indices of specified range
+     *
+     * @param indices indices
+     * @param range range
+     * @return sub indices of specified range
+     * @throws IndexOutOfBoundsException
+     */
+    static SimpleIndices getAt(SimpleIndices indices, int[] range) {
+        return getAt(indices, range as List)
+    }
+
+    /**
+     * Returns sub indices of specified range
+     *
+     * @param indices indices
+     * @param range range
+     * @return sub indices of specified range
+     * @throws IndexOutOfBoundsException
+     */
+    static Indices getAt(Indices indices, Collection range) {
+        int[] sub = new int[range.size()]
+        int c = 0
+        for (def i in range)
+            sub[c++] = indices.get(i);
+        return IndicesFactory.create(sub)
+    }
+
+    /**
+     * Returns sub indices of specified range
+     *
+     * @param indices indices
+     * @param range range
+     * @return sub indices of specified range
+     * @throws IndexOutOfBoundsException
+     */
+    static SimpleIndices getAt(SimpleIndices indices, Collection range) {
+        int[] sub = new int[range.size()]
+        int c = 0
+        for (def i in range)
+            sub[c++] = indices.get(i);
+        return IndicesFactory.createSimple(null, sub)
+    }
 
     /**
      * Returns sub indices of specified range
@@ -423,22 +533,6 @@ class Redberry {
      * @see Indices#get(cc.redberry.core.indices.IndexType, int)
      */
     static int getAt(Indices indices, IndexType type, int position) { indices.get(type, position) }
-
-    static Object asType(Indices indices, Class clazz) {
-        if (clazz == int[])
-            return indices.getAllIndices().copy()
-        else
-            return DefaultGroovyMethods.asType(indices, clazz)
-    }
-
-    static Object asType(int[] indices, Class clazz) {
-        if (clazz == SimpleIndices)
-            return IndicesFactory.createSimple(null, indices)
-        else if (clazz == Indices)
-            return IndicesFactory.create(indices)
-        else
-            return DefaultGroovyMethods.asType(indices, clazz)
-    }
 
     /**
      * Iterator over single indices integers in {@code indices} object
@@ -807,18 +901,38 @@ class Redberry {
         return t;
     }
 
-    /*
-     * Type conversions
+    //////////////////////////////////////////// TYPE CONVERSION ///////////////////////////////////////////////////////
+
+    /**
+     * Tensor as array, list etc.
+     * @param tensor
+     * @param clazz
+     * @return
      */
+    static Object asType(Tensor tensor, Class clazz) {
+        if (clazz == List)
+            return tensor.toArray() as List
+        else if (clazz == Tensor[])
+            return tensor.toArray()
+        else if (clazz == String)
+            return tensor.toString()
+        else
+            return DefaultGroovyMethods.asType(tensor, clazz)
+    }
 
     static Object asType(Collection collection, Class clazz) {
         if (clazz == Indices)
             return IndicesFactory.create(*collection)
-        if (clazz == Transformation)
+        else if (clazz == SimpleIndices)
+            return IndicesFactory.createSimple(null, *collection)
+        else if (clazz == Transformation)
             return new TransformationCollection(collection)
+        else if (clazz == Product)
+            return Tensors.multiplyAndRenameConflictingDummies(getT(collection).toArray(new Tensor[collection.size()]))
+        else if (clazz == Sum)
+            return Tensors.sum(getT(collection).toArray(new Tensor[collection.size()]))
         return DefaultGroovyMethods.asType(collection, clazz);
     }
-
 
     static Tensor asType(Number num, Class clazz) {
         if (clazz == Tensor)
@@ -832,6 +946,24 @@ class Redberry {
         return DefaultGroovyMethods.asType(string, clazz);
     }
 
+    static Object asType(int[] indices, Class clazz) {
+        if (clazz == SimpleIndices)
+            return IndicesFactory.createSimple(null, indices)
+        else if (clazz == Indices)
+            return IndicesFactory.create(indices)
+        else
+            return DefaultGroovyMethods.asType(indices, clazz)
+    }
+
+    static Object asType(Indices indices, Class clazz) {
+        if (clazz == int[])
+            return indices.getAllIndices().copy()
+        else if (clazz == List)
+            return indices.toArray() as List
+        else
+            return DefaultGroovyMethods.asType(indices, clazz)
+    }
+
     //////////////////////////////////////////////// MAPPINGS //////////////////////////////////////////////////////////
 
     /**
@@ -841,8 +973,24 @@ class Redberry {
      * @return {@code true} if tensors are mathematically (not programmatically) equal, {@code false} otherwise
      * @see TensorUtils#equals(cc.redberry.core.tensor.Tensor, cc.redberry.core.tensor.Tensor)
      */
-    static boolean equals(Tensor a, Tensor b) {
+    static boolean equals(Tensor a, b) {
+        if (b.getClass() != a.getClass())
+            return false;
         return TensorUtils.equals(a, b);
+    }
+
+    /**
+     * Returns {@code true} if tensors are mathematically (not programmatically) equal
+     * @param a tensor
+     * @param b tensor
+     * @return {@code true} if tensors are mathematically (not programmatically) equal, {@code false} otherwise
+     * @see TensorUtils#equals(cc.redberry.core.tensor.Tensor, cc.redberry.core.tensor.Tensor)
+     */
+    static int compareTo(Tensor a, Object b) {
+        if (Redberry.equals(a, b))
+            return 0;
+        return 1
+        //return DefaultGroovyMethods.compareTo(a, b)
     }
 
     /**
@@ -1243,4 +1391,13 @@ class Redberry {
         }
     }
 
+    ////////////////////////////////////////////// LISTS ///////////////////////////////////////////////////////
+
+    static Tensor sum(Collection collection) {
+        return Tensors.sum(getT(collection).toArray(new Tensor[collection.size()]))
+    }
+
+    static Tensor multiply(Collection collection) {
+        return Tensors.multiplyAndRenameConflictingDummies(getT(collection).toArray(new Tensor[collection.size()]))
+    }
 }

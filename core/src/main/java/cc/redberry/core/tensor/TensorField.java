@@ -101,10 +101,19 @@ public final class TensorField extends SimpleTensor {
      *
      * @return tensor field from which the derivative is taken
      */
-    public TensorField getTargetField() {
+    public TensorField getParentField() {
         if (!isDerivative())
             return this;
-        return Tensors.field(getNameDescriptor().getParent().getId(), calcIndicesPartition()[0][0], args);
+        return Tensors.field(getNameDescriptor().getParent().getId(), getPartitionOfIndices()[0][0], args);
+    }
+
+    /**
+     * Returns the order of derivative with respect to argument at specified position.
+     *
+     * @return the order of derivative with respect to argument at specified position
+     */
+    public int getDeivativeOrder(int i) {
+        return getNameDescriptor().getDerivativeOrder(i);
     }
 
     /**
@@ -114,7 +123,7 @@ public final class TensorField extends SimpleTensor {
      *
      * @return partition of derivative indices
      */
-    public SimpleIndices[][] calcIndicesPartition() {
+    public SimpleIndices[][] getPartitionOfIndices() {
 
         NameDescriptorForTensorField fieldDescriptor = getNameDescriptor();
         if (!fieldDescriptor.isDerivative()) {

@@ -26,6 +26,7 @@ import cc.redberry.core.graph.GraphUtils;
 import cc.redberry.core.indices.Indices;
 import cc.redberry.core.indices.IndicesUtils;
 import cc.redberry.core.utils.ArraysUtils;
+import cc.redberry.core.utils.IntArrayList;
 
 import java.util.Arrays;
 
@@ -170,6 +171,72 @@ public final class StructureOfContractions {
                 freeContractions[freePointer++] = contraction;
             else
                 contractions[tensorIndex][indexIndex] = contraction;
+        }
+    }
+
+    public Contraction[] getContractedWith(int position) {
+        long[] indicesContractions = contractions[position];
+        int[] involvedTensors = new int[contractions.length];
+        Arrays.fill(involvedTensors, -1);
+        IntArrayList[] indicesFrom = new IntArrayList[contractions.length];
+        IntArrayList[] indicesTo = new IntArrayList[contractions.length];
+
+        IntArrayList freeIndices = new IntArrayList();
+        int tensorsCount = 0;
+        for (int i = 0; i < indicesContractions.length; ++i) {
+            int tensorIndex = getToTensorIndex(indicesContractions[i]);
+            if (tensorIndex == -1) {
+                freeIndices.add(i);
+                continue;
+            }
+            if (involvedTensors[tensorIndex] == -1) {
+                involvedTensors[tensorIndex] = tensorIndex;
+                indicesFrom[tensorIndex] = new IntArrayList();
+                indicesTo[tensorIndex] = new IntArrayList();
+                ++tensorsCount;
+            }
+            indicesFrom[tensorIndex].add(i);
+            indicesTo[tensorIndex].add(getToIndexId(indicesContractions[i]));
+        }
+        int f = freeIndices.size() == 0 ? 0 : 1;
+        Contraction[] result = new Contraction[tensorsCount + f];
+        if (f == 1)
+            result[0] = new Contraction(-1, freeIndices.toArray(), null);
+        tensorsCount = f;
+        for (int i = 0; i < contractions.length; ++i) {
+            if (involvedTensors[i] == -1)
+                continue;
+            result[tensorsCount++] = new Contraction(involvedTensors[i], indicesFrom[i].toArray(), indicesTo[i].toArray());
+        }
+        return result;
+    }
+
+    public static final class Contraction {
+        final int tensor;
+        final int[] indicesFrom;
+        final int[] indicesTo;
+
+        public Contraction(int tensor, int[] indicesFrom, int[] indicesTo) {
+            this.tensor = tensor;
+            this.indicesFrom = indicesFrom;
+            this.indicesTo = indicesTo;
+        }
+
+        public int getTensor() {
+            return tensor;
+        }
+
+        public int[] getIndicesFrom() {
+            return indicesFrom;
+        }
+
+        public int[] getIndicesTo() {
+            return indicesTo;
+        }
+
+        @Override
+        public String toString() {
+            return "tensor: " + tensor + ", indices from: " + Arrays.toString(indicesFrom) + ", indices to: " + Arrays.toString(indicesTo);
         }
     }
 
