@@ -620,7 +620,7 @@ class Redberry {
         if (toAdd instanceof String)
             toAdd = ParserIndices.parseSimple(toAdd);
         if (toAdd instanceof Indices || toAdd instanceof Integer || toAdd instanceof int[])
-            return new SimpleIndicesBuilder().append(indices).append(toAdd).indices;
+            return new IndicesBuilder().append(indices).append(toAdd).indices;
         if (toAdd instanceof Collection)
             return new IndicesBuilder().append(indices).append(toAdd as int[]).indices;
         else

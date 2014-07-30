@@ -112,7 +112,7 @@ final class EmptySimpleIndices extends EmptyIndices implements SimpleIndices {
      */
     @Override
     public IndicesSymmetries getSymmetries() {
-        return IndicesSymmetries.EMPTY_INDICES_SYMMETRIES;
+        return IndicesSymmetries.getEmpty();
     }
 
     /**
@@ -160,6 +160,6 @@ final class EmptySimpleIndices extends EmptyIndices implements SimpleIndices {
 
     @Override
     public StructureOfIndices getStructureOfIndices() {
-        return StructureOfIndices.EMPTY;
+        return StructureOfIndices.getEmpty();
     }
 }

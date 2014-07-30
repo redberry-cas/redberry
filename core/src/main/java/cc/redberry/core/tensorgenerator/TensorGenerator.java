@@ -33,7 +33,6 @@ import cc.redberry.core.tensor.*;
 import cc.redberry.core.transformations.expand.ExpandTransformation;
 import cc.redberry.core.transformations.symmetrization.SymmetrizeTransformation;
 import cc.redberry.core.transformations.symmetrization.SymmetrizeUpperLowerIndicesTransformation;
-import cc.redberry.core.utils.IntArray;
 import cc.redberry.core.utils.TensorUtils;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import org.apache.commons.math3.util.ArithmeticUtils;
@@ -246,7 +245,7 @@ public class TensorGenerator {
 
         private Wrapper(Tensor tensor) {
             this.tensor = tensor;
-            this.freeIndices = new StructureOfIndices(
+            this.freeIndices = StructureOfIndices.create(
                     IndicesFactory.createSimple(null, tensor.getIndices().getFree()));
         }
 

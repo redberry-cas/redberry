@@ -59,11 +59,11 @@ public class ParseTokenTensorField extends ParseTokenSimpleTensor {
     @Override
     public NameAndStructureOfIndices getIndicesTypeStructureAndName() {
         StructureOfIndices[] typeStructures = new StructureOfIndices[1 + argumentsIndices.length];
-        typeStructures[0] = new StructureOfIndices(indices);
+        typeStructures[0] = StructureOfIndices.create(indices);
         for (int i = 0; i < argumentsIndices.length; ++i) {
             if (argumentsIndices[i] == null)
                 argumentsIndices[i] = IndicesFactory.createSimple(null, content[i].getIndices().getFree());
-            typeStructures[i + 1] = new StructureOfIndices(argumentsIndices[i]);
+            typeStructures[i + 1] = StructureOfIndices.create(argumentsIndices[i]);
         }
         return new NameAndStructureOfIndices(name, typeStructures);
     }

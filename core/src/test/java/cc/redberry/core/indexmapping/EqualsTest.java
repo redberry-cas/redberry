@@ -90,7 +90,7 @@ public class EqualsTest
 
         for (int i = 0; i < 50; ++i) {
             SimpleIndices ind = IndicesFactory.createSimple(null,
-                    randomTensor.nextIndices(new StructureOfIndices((byte) 0, 1 + rnd.nextInt(10))));
+                    randomTensor.nextIndices(StructureOfIndices.create((byte) 0, 1 + rnd.nextInt(10))));
             Tensor a = randomTensor.nextProduct(2 + rnd.nextInt(10), ind);
             Tensor b = rewriteTensor(a, rnd).toTensor();
             TAssert.assertEquals(a, b);
@@ -143,7 +143,7 @@ public class EqualsTest
 
         for (int i = 0; i < numberOfTests; ++i) {
             SimpleIndices ind = IndicesFactory.createSimple(null,
-                    randomTensor.nextIndices(new StructureOfIndices((byte) 0, 1 + rnd.nextInt(6))));
+                    randomTensor.nextIndices(StructureOfIndices.create((byte) 0, 1 + rnd.nextInt(6))));
 
             Tensor a = randomTensor.nextTensorTree(RandomTensor.TensorType.Product, treeDepth,
                     2 + (pSize == 0 ? 0 : rnd.nextInt(pSize)),

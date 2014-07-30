@@ -240,6 +240,6 @@ abstract class AbstractSimpleIndices extends AbstractIndices implements SimpleIn
 
     @Override
     public StructureOfIndices getStructureOfIndices() {
-        return new StructureOfIndices(this);
+        return StructureOfIndices.create(this);
     }
 }

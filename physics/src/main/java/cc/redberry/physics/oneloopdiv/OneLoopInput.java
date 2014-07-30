@@ -232,7 +232,7 @@ public final class OneLoopInput {
 
         Indicator<ParseTokenSimpleTensor> indicator = new Indicator<ParseTokenSimpleTensor>() {
 
-            private final StructureOfIndices F_TYPES = new StructureOfIndices(IndexType.LatinLower, 2);
+            private final StructureOfIndices F_TYPES = StructureOfIndices.create(IndexType.LatinLower, 2);
 
             @Override
             public boolean is(ParseTokenSimpleTensor object) {

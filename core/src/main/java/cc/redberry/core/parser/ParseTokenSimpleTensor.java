@@ -69,7 +69,7 @@ public class ParseTokenSimpleTensor extends ParseToken {
      * @return {@link NameAndStructureOfIndices}
      */
     public NameAndStructureOfIndices getIndicesTypeStructureAndName() {
-        return new NameAndStructureOfIndices(name, new StructureOfIndices[]{new StructureOfIndices(indices)});
+        return new NameAndStructureOfIndices(name, new StructureOfIndices[]{StructureOfIndices.create(indices)});
     }
 
     @Override

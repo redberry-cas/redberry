@@ -360,7 +360,7 @@ public class TensorsTest {
         TAssert.assertTrue(parse("a") == o);
         TAssert.assertTrue(o == Tensors.simpleTensor("a", IndicesFactory.EMPTY_SIMPLE_INDICES));
         TAssert.assertTrue(o == Tensors.simpleTensor(
-                CC.getNameManager().mapNameDescriptor("a", StructureOfIndices.EMPTY).getName(null),
+                CC.getNameManager().mapNameDescriptor("a", StructureOfIndices.getEmpty()).getName(null),
                 IndicesFactory.EMPTY_SIMPLE_INDICES));
         TAssert.assertTrue(o == Tensors.setIndices((SimpleTensor) o, new int[0]));
     }

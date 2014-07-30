@@ -198,7 +198,7 @@ public class GeneralIndicesInsertion implements ParseTokenTransformer {
                                 null : BitArray.EMPTY;
                     }
                 StructureOfIndices[] structures = originalStructureAndName.getStructure().clone();
-                structures[0] = new StructureOfIndices(allCounts, states);
+                structures[0] = StructureOfIndices.create(allCounts, states);
                 keys[omitted - 1] = new NameAndStructureOfIndices(originalStructureAndName.getName(),
                         structures);
             }
