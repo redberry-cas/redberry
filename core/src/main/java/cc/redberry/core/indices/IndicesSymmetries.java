@@ -116,7 +116,7 @@ public final class IndicesSymmetries {
     public static IndicesSymmetries create(StructureOfIndices structureOfIndices,
                                            List<Permutation> generators) {
         for (Permutation p : generators)
-            if (p.internalDegree() > structureOfIndices.size())
+            if (p.degree() > structureOfIndices.size())
                 throw new IllegalArgumentException("Permutation degree not equal to indices size.");
         if (structureOfIndices.size() == 0)
             return getEmpty();
@@ -347,7 +347,7 @@ public final class IndicesSymmetries {
         StructureOfIndices.TypeData data = structureOfIndices.getTypeData(type);
         if (data == null)
             throw new IllegalArgumentException("No such type: " + IndexType.getType(type));
-        if (data.length < symmetry.internalDegree())
+        if (data.length < symmetry.degree())
             throw new IllegalArgumentException("Wrong symmetry length.");
         int[] s = new int[structureOfIndices.size()];
         int i = 0;

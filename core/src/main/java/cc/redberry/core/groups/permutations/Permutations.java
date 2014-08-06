@@ -96,7 +96,7 @@ public final class Permutations {
     public static int internalDegree(final List<? extends Permutation> permutations) {
         int r = 0;
         for (Permutation p : permutations)
-            r = Math.max(r, p.internalDegree());
+            r = Math.max(r, p.degree());
         return r;
     }
 

@@ -267,7 +267,7 @@ public interface Permutation extends Comparable<Permutation> {
      *
      * @return largest moved point plus one
      */
-    public int internalDegree();
+    public int degree();
 
     /**
      * Returns length of the underlying array (at low-level).
