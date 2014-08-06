@@ -970,6 +970,8 @@ public final class PermutationGroup
      * @return true if specified group is a subgroup of this
      */
     public boolean containsSubgroup(PermutationGroup subgroup) {
+        if (degree() < subgroup.degree())
+            return false;
         if (isTrivial())
             return subgroup.isTrivial();
         if (isSymmetric())
@@ -1059,9 +1061,14 @@ public final class PermutationGroup
         if (group.containsSubgroup(this))
             return group;
 
-        int[] base = MathUtils.intSetUnion(getBase(), group.getBase());
+        int[] thisBase = getBase(), othBase = group.getBase();
+        Arrays.sort(thisBase);
+        Arrays.sort(othBase);
+        int[] base = MathUtils.intSetUnion(thisBase, othBase);
         //new generators
-        ArrayList<Permutation> generators = new ArrayList<>(generators());
+        ArrayList<Permutation> generators = new ArrayList<>(
+                generators().size() + group.generators().size());
+        generators.addAll(generators());
         generators.addAll(group.generators());
         PermutationGroup r = createPermutationGroup(generators);
         r.base = base;
