@@ -1381,6 +1381,75 @@ class Redberry {
         return a.composition(b);
     }
 
+    static Iterator<Integer> iterator(final Permutation p) {
+        return new PIterator(p)
+    }
+
+    private static final class PIterator implements Iterator<Integer> {
+        int state = 0;
+        final Permutation p;
+
+        PIterator(Permutation p) {
+            this.p = p
+        }
+
+        @Override
+        void remove() {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        boolean hasNext() {
+            return state < p.degree()
+        }
+
+        @Override
+        Integer next() {
+            ++state
+            return p.newIndexOf(state - 1)
+        }
+    }
+
+    /**
+     * Returns image of specified point under the action of this permutation.
+     *
+     * @param i point
+     * @return image of specified point under the action of this permutation
+     */
+    static int getAt(Permutation p, int i) {
+        return p.newIndexOf(i)
+    }
+
+    /**
+     * Returns image of specified set of points under the action of this permutation.
+     *
+     * @param set set
+     * @return image of specified set under this permutation
+     */
+    static List getAt(Permutation p, int[] i) {
+        return p.imageOf(i) as List
+    }
+
+    /**
+     * Returns image of specified set of points under the action of this permutation.
+     *
+     * @param set set
+     * @return image of specified set under this permutation
+     */
+    static List getAt(Permutation p, Collection i) {
+        return p.imageOf(i as int[])
+    }
+
+    /**
+     * Permutes list and returns the result.
+     *
+     * @param array array
+     * @return permuted array
+     */
+    static List rightShift(Permutation p, List i) {
+        return p.permute(i)
+    }
+
     static <T> void permutations(List<T> list, Closure<List<T>> closure) {
         IntPermutationsGenerator generator = new IntPermutationsGenerator(list.size());
         for (int[] permutation : generator) {
