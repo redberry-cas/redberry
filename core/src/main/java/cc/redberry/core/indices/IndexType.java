@@ -22,6 +22,7 @@
  */
 package cc.redberry.core.indices;
 
+import cc.redberry.core.context.CC;
 import cc.redberry.core.context.ContextSettings;
 import cc.redberry.core.context.IndexSymbolConverter;
 import cc.redberry.core.context.defaults.IndexWithStrokeConverter;
@@ -106,6 +107,15 @@ public enum IndexType {
      */
     public byte getType() {
         return converter.getType();
+    }
+
+    /**
+     * Returns whether this type is metric.
+     *
+     * @return whether this type is metric
+     */
+    public boolean isMetric() {
+        return CC.isMetric(getType());
     }
 
     public static byte[] getBytes() {

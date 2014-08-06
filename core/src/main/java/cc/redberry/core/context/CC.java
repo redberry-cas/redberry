@@ -22,6 +22,7 @@
  */
 package cc.redberry.core.context;
 
+import cc.redberry.core.indices.IndexType;
 import cc.redberry.core.utils.OutputPort;
 import cc.redberry.core.tensor.SimpleTensor;
 import org.apache.commons.math3.random.RandomGenerator;
@@ -57,6 +58,16 @@ public final class CC {
      */
     public static boolean isMetric(byte type) {
         return current().isMetric(type);
+    }
+
+    /**
+     * Returns true if metric is defined for specified index type.
+     *
+     * @param type index type
+     * @return true if metric is defined for specified index type
+     */
+    public static boolean isMetric(IndexType type) {
+        return current().isMetric(type.getType());
     }
 
     /**
