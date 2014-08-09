@@ -70,6 +70,23 @@ public final class ParseManager {
         return t;
     }
 
+
+    /**
+     * @param expression          string expression
+     * @param tensorPreprocessors transformation
+     * @param nodesPreprocessors  AST transformers
+     * @return tensor
+     */
+    public Tensor parse(String expression, List<Transformation> tensorPreprocessors, List<ParseTokenTransformer> nodesPreprocessors) {
+        ParseToken node = parser.parse(expression);
+        for (ParseTokenTransformer tr : nodesPreprocessors)
+            node = tr.transform(node);
+        Tensor t = node.toTensor();
+        for (Transformation tr : tensorPreprocessors)
+            t = tr.transform(t);
+        return t;
+    }
+
     /**
      * @param expression         string expression
      * @param nodesPreprocessors AST transformers
@@ -84,9 +101,7 @@ public final class ParseManager {
      * @return tensor
      */
     public Tensor parse(String expression) {
-        return parse(expression,
-                defaultTensorPreprocessors.toArray(new Transformation[defaultTensorPreprocessors.size()]),
-                defaultParserPreprocessors.toArray(new ParseTokenTransformer[defaultParserPreprocessors.size()]));
+        return parse(expression, defaultTensorPreprocessors, defaultParserPreprocessors);
     }
 
     public Parser getParser() {
