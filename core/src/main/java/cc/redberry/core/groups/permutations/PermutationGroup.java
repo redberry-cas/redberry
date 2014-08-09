@@ -581,13 +581,20 @@ public final class PermutationGroup
 
     /**
      * Returns uniformly distributed random permutation from this group.
-     * <p/>
-     * <p>This method uses BSGS.</p>
+     *
+     * @return uniformly distributed random permutation from this group
+     */
+    public Permutation randomElement() {
+        return randomElement(CC.getRandomGenerator());
+    }
+
+    /**
+     * Returns uniformly distributed random permutation from this group.
      *
      * @param generator random generator to be used in generation of random permutation
      * @return uniformly distributed random permutation from this group
      */
-    public Permutation randomPermutation(RandomGenerator generator) {
+    public Permutation randomElement(RandomGenerator generator) {
         // Getting BSGS
         List<BSGSElement> bsgs = getBSGS();
 
@@ -1078,23 +1085,23 @@ public final class PermutationGroup
     /**
      * Returns an intersection of this group with specified group.
      *
-     * @param subgroup permutation group
+     * @param oth permutation group
      * @return intersections of groups
      */
-    public PermutationGroup intersection(PermutationGroup subgroup) {
+    public PermutationGroup intersection(PermutationGroup oth) {
         if (isTrivial())
             return this;
-        if (subgroup.isTrivial())
-            return subgroup;
+        if (oth.isTrivial())
+            return oth;
         ArrayList<BSGSCandidateElement> intersection = new ArrayList<>();
-        AlgorithmsBacktrack.intersection(getBSGS(), subgroup.getBSGS(), intersection);
+        AlgorithmsBacktrack.intersection(getBSGS(), oth.getBSGS(), intersection);
         return createPermutationGroupFromBSGS(asBSGSList(intersection));
     }
 
     /**
      * Returns direct product of this group and specified group. This product is organized as follows:
      * the initial segment of each permutation is equal to permutation taken from this, while the rest is taken from
-     * specified permutation.
+     * specified group.
      *
      * @param group another group
      * @return direct product this × other
