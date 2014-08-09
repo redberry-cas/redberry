@@ -928,9 +928,9 @@ class Redberry {
         else if (clazz == Transformation)
             return new TransformationCollection(collection)
         else if (clazz == Product)
-            return Tensors.multiplyAndRenameConflictingDummies(getT(collection).toArray(new Tensor[collection.size()]))
+            return Tensors.multiplyAndRenameConflictingDummies(getT(collection))
         else if (clazz == Sum)
-            return Tensors.sum(getT(collection).toArray(new Tensor[collection.size()]))
+            return Tensors.sum(getT(collection))
         return DefaultGroovyMethods.asType(collection, clazz);
     }
 
@@ -989,7 +989,7 @@ class Redberry {
     static int compareTo(Tensor a, Object b) {
         if (Redberry.equals(a, b))
             return 0;
-        return 1
+        return a.compareTo(b)
         //return DefaultGroovyMethods.compareTo(a, b)
     }
 

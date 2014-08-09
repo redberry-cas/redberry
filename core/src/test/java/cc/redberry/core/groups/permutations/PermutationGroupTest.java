@@ -1239,7 +1239,7 @@ public class PermutationGroupTest extends AbstractTestClass {
 
         Permutation p;
         for (int i = 0; i < N; ++i) {
-            p = group.randomPermutation(randomGenerator);
+            p = group.randomElement(randomGenerator);
 
             assertTrue(group.membershipTest(p));
 
