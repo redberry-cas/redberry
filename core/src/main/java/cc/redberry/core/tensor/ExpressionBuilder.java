@@ -62,7 +62,8 @@ public class ExpressionBuilder implements TensorBuilder {
             indices = IndicesFactory.create(left.getIndices().getFree());
         } else if (right == null) {
             right = tensor;
-            if (!indices.equalsRegardlessOrder(right.getIndices().getFree()) && !TensorUtils.isZero(right))
+            if (!TensorUtils.isZero(right) && !TensorUtils.isIndeterminate(right)
+                    && !indices.equalsRegardlessOrder(right.getIndices().getFree()))
                 throw new TensorException("Inconsistent indices in expression.", tensor);
         } else
             throw new TensorException("Expression have only two parts.");

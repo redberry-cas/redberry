@@ -46,7 +46,8 @@ public class ExpressionFactory implements TensorFactory {
             throw new IllegalArgumentException("Wrong number of arguments.");
         if (tensors[0] == null || tensors[1] == null)
             throw new NullPointerException();
-        if (!tensors[0].getIndices().getFree().equalsRegardlessOrder(tensors[1].getIndices().getFree()) && !TensorUtils.isZero(tensors[1]))
+        if (!TensorUtils.isZero(tensors[1]) && !TensorUtils.isIndeterminate(tensors[1])
+                && !tensors[0].getIndices().getFree().equalsRegardlessOrder(tensors[1].getIndices().getFree()))
             throw new TensorException("Inconsistent indices in expression.");
         return new Expression(IndicesFactory.create(tensors[0].getIndices().getFree()), tensors[0], tensors[1]);
     }
