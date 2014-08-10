@@ -156,6 +156,15 @@ class Redberry {
     static Tensor multiply(Tensor a, Number b) { Tensors.multiply(a, number2Complex(b)); }
 
     /**
+     * Multiplies tensor on number
+     * @param a tensor
+     * @param b number
+     * @return the result
+     * @see Tensors#multiply(cc.redberry.core.tensor.Tensor ...)
+     */
+    static Tensor multiply(Number b, Tensor a) { Tensors.multiply(a, number2Complex(b)); }
+
+    /**
      * Power function. Returns tensor raised to specified power.
      *
      * @param a base
