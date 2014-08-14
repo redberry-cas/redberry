@@ -23,13 +23,11 @@
 
 package cc.redberry.groovy
 
-import cc.redberry.core.indices.IndexType
 import cc.redberry.core.tensor.Expression
 import cc.redberry.core.tensor.SimpleTensor
 import cc.redberry.core.tensor.Tensor
 import cc.redberry.core.transformations.Transformation
 import cc.redberry.core.transformations.TransformationCollection
-import cc.redberry.core.transformations.reverse.ReverseTransformation
 import cc.redberry.physics.feyncalc.*
 import cc.redberry.physics.oneloopdiv.OneLoopCounterterms
 import cc.redberry.physics.oneloopdiv.OneLoopInput
@@ -62,6 +60,31 @@ public class RedberryPhysics {
     }
 
     /**
+     * Returns mandelstam and mass shell substitutions following from the provided map
+     * of "momentum - mass of particle" and notation of Mandelstam variables.
+     *
+     * @param momentumMasses "momentum - mass of particle"
+     * @param s notation for s
+     * @param t notation for t
+     * @param u notation for u
+     * @return resulting substitutions
+     */
+    public static Transformation setMandelstam(Map<String, String> momentumMasses, Object s, Object t, Object u) {
+        if (momentumMasses.size() != 4)
+            throw new IllegalArgumentException();
+        Tensor[][] result = new Tensor[4][2];
+        int i = 0;
+        momentumMasses.each { a, b -> result[i][0] = parse(a); result[i++][1] = parse(b); }
+        return new TransformationCollection(
+                FeynCalcUtils.setMandelstam(result, parse0(s), parse0(t), parse0(u)));
+    }
+
+    private static Tensor parse0(Object o) {
+        if (o instanceof String || o instanceof GString)
+            return parse(o.toString());
+        return (Tensor) o;
+    }
+    /**
      * Calculates trace of Dirac matrices in four dimensions.
      * @see DiracTraceTransformation
      */
@@ -83,7 +106,7 @@ public class RedberryPhysics {
         Transformation getAt(Collection args) {
             use(Redberry) {
                 args = args.collect { if (it instanceof String) it.t else it }
-                return new DiracTraceTransformation(* args);
+                return new DiracTraceTransformation(*args);
             }
         }
 
@@ -119,7 +142,7 @@ public class RedberryPhysics {
         Transformation getAt(Collection args) {
             use(Redberry) {
                 args = args.collect { if (it instanceof String) it.t else it }
-                return new UnitaryTraceTransformation(* args);
+                return new UnitaryTraceTransformation(*args);
             }
         }
 
@@ -149,7 +172,7 @@ public class RedberryPhysics {
         Transformation getAt(Collection args) {
             use(Redberry) {
                 args = args.collect { if (it instanceof String) it.t else it }
-                return new UnitarySimplifyTransformation(* args);
+                return new UnitarySimplifyTransformation(*args);
             }
         }
 
