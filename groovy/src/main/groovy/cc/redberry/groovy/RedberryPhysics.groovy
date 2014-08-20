@@ -84,13 +84,52 @@ public class RedberryPhysics {
             return parse(o.toString());
         return (Tensor) o;
     }
+
+    private static abstract class AbstractTransformationWithDefaultParameters
+            implements Transformation {
+
+        @Override
+        Tensor transform(Tensor t) {
+            return defaultTransformation().transform(t)
+        }
+
+        final Transformation defaultTransformation() {
+            return getAt(defaultParameters())
+        }
+
+        protected abstract Transformation create(Collection args);
+
+        protected abstract Transformation create(Map args);
+
+        protected abstract Map defaultParameters();
+
+        public final Transformation getAt(Collection args) {
+            use(Redberry) {
+                args = args.collect { if (it instanceof String) it.t else it }
+                return create(args);
+            }
+        }
+
+        public final Transformation getAt(Map args) {
+            use(Redberry) {
+                args = new HashMap(args)
+                Map newArgs = new HashMap(defaultParameters())
+                newArgs.putAll(args)
+                newArgs.entrySet().each { it.value = it.value.t }
+                return create(newArgs);
+            }
+        }
+    }
+
     /**
      * Calculates trace of Dirac matrices in four dimensions.
      * @see DiracTraceTransformation
      */
     public static final GDiracTrace DiracTrace = new GDiracTrace();
 
-    private static final class GDiracTrace {
+    private static final class GDiracTrace extends AbstractTransformationWithDefaultParameters {
+        private static final Map defaultArgs = [Gamma: 'G_a', Gamma5: 'G5', LeviCivita: 'e_abcd']
+
 
         Transformation getAt(String gamma) {
             use(Redberry) {
@@ -102,28 +141,19 @@ public class RedberryPhysics {
             return new DiracTraceTransformation(gamma);
         }
 
-
-        Transformation getAt(Collection args) {
-            use(Redberry) {
-                args = args.collect { if (it instanceof String) it.t else it }
-                return new DiracTraceTransformation(*args);
-            }
+        @Override
+        protected Transformation create(Collection args) {
+            return new DiracTraceTransformation(*args)
         }
 
-        private static final Map defaultArgs = [Gamma: 'G_a', Gamma5: 'G5', LeviCivita: 'e_abcd']
+        @Override
+        protected Transformation create(Map args) {
+            return new DiracTraceTransformation(args['Gamma'], args['Gamma5'], args['LeviCivita']);
+        }
 
-        Transformation getAt(Map args) {
-            use(Redberry) {
-
-                args = new HashMap(args)
-                args.entrySet().each { it.value = it.value.toString() }
-
-                Map newArgs = new HashMap(defaultArgs)
-                newArgs.putAll(args)
-                newArgs.entrySet().each { it.value = it.value.t }
-
-                return new DiracTraceTransformation(newArgs['Gamma'], newArgs['Gamma5'], newArgs['LeviCivita']);
-            }
+        @Override
+        protected Map defaultParameters() {
+            return defaultArgs;
         }
     }
 
@@ -133,32 +163,24 @@ public class RedberryPhysics {
      */
     public static final GUnitaryTrace UnitaryTrace = new GUnitaryTrace();
 
+    static final Map unitaryDefaultParameters = [Matrix: 'T_A', f: 'f_ABC', d: 'd_ABC', N: 'N']
 
-    private static final Map unitaryDefaultParameters = [
-            Matrix: 'T_A', f: 'f_ABC', d: 'd_ABC', N: 'N']
 
-    private static final class GUnitaryTrace {
-
-        Transformation getAt(Collection args) {
-            use(Redberry) {
-                args = args.collect { if (it instanceof String) it.t else it }
-                return new UnitaryTraceTransformation(*args);
-            }
+    private static final class GUnitaryTrace extends AbstractTransformationWithDefaultParameters {
+        @Override
+        protected Transformation create(Collection args) {
+            return new UnitaryTraceTransformation(*args);
         }
 
-        Transformation getAt(Map args) {
-            use(Redberry) {
-                args = new HashMap(args)
-                args.entrySet().each { it.value = it.value.toString() }
-
-                Map newArgs = new HashMap(unitaryDefaultParameters)
-                newArgs.putAll(args)
-                newArgs.entrySet().each { it.value = it.value.t }
-
-                return new UnitaryTraceTransformation(newArgs['Matrix'], newArgs['f'], newArgs['d'], newArgs['N']);
-            }
+        @Override
+        protected Transformation create(Map args) {
+            return new UnitaryTraceTransformation(args['Matrix'], args['f'], args['d'], args['N']);
         }
 
+        @Override
+        protected Map defaultParameters() {
+            return unitaryDefaultParameters;
+        }
     }
 
     /**
@@ -167,26 +189,21 @@ public class RedberryPhysics {
      */
     public static final GUnitarySimplify UnitarySimplify = new GUnitarySimplify();
 
-    private static final class GUnitarySimplify {
+    private static final class GUnitarySimplify extends AbstractTransformationWithDefaultParameters {
 
-        Transformation getAt(Collection args) {
-            use(Redberry) {
-                args = args.collect { if (it instanceof String) it.t else it }
-                return new UnitarySimplifyTransformation(*args);
-            }
+        @Override
+        protected Transformation create(Collection args) {
+            return new UnitarySimplifyTransformation(*args);
         }
 
-        Transformation getAt(Map args) {
-            use(Redberry) {
-                args = new HashMap(args)
-                args.entrySet().each { it.value = it.value.toString() }
+        @Override
+        protected Transformation create(Map args) {
+            return new UnitarySimplifyTransformation(args['Matrix'], args['f'], args['d'], args['N']);
+        }
 
-                Map newArgs = new HashMap(unitaryDefaultParameters)
-                newArgs.putAll(args)
-                newArgs.entrySet().each { it.value = it.value.t }
-
-                return new UnitarySimplifyTransformation(newArgs['Matrix'], newArgs['f'], newArgs['d'], newArgs['N']);
-            }
+        @Override
+        protected Map defaultParameters() {
+            return unitaryDefaultParameters
         }
     }
 

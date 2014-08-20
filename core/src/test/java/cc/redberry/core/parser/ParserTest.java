@@ -538,4 +538,9 @@ public class ParserTest {
         parse(" x:= y");
         TAssert.assertEquals(parse("x**2"), "y**2");
     }
+
+    @Test(expected = BracketsError.class)
+    public void testUnbalancedBrackets1() throws Exception {
+        parse("(a");
+    }
 }

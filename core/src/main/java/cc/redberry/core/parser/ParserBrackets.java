@@ -39,26 +39,42 @@ public class ParserBrackets implements TokenParser {
 
     @Override
     public ParseToken parseToken(String expression, Parser parser) {
-        if (expression.charAt(0) == '(' && expression.charAt(expression.length() - 1) == ')') {
-            char[] expressionChars = expression.toCharArray();
-            int level = 0;
-            for (char c : expressionChars) {
-                if (c == '(')
-                    level++;
-                if (level < 1)
-                    return null;
-                if (c == ')')
-                    level--;
+        if (expression.charAt(0) == '(')
+            if (expression.charAt(expression.length() - 1) != ')')
+                checkWithException(expression);
+            else {
+                int level = 0;
+                for (int i = 0; i < expression.length(); ++i) {
+                    char c = expression.charAt(i);
+                    if (c == '(')
+                        level++;
+                    if (level < 1)
+                        return null;
+                    if (c == ')')
+                        level--;
+                }
+                if (level != 0)
+                    throw new BracketsError();
+                return parser.parse(expression.substring(1, expression.length() - 1));
             }
-            if (level != 0)
-                throw new BracketsError();
-            return parser.parse(expression.substring(1, expression.length() - 1));
-        } else
-            return null;
+        return null;
     }
 
     @Override
     public int priority() {
         return parserID;
+    }
+
+    private void checkWithException(String expression) {
+        int level = 0;
+        for (int i = 0; i < expression.length(); ++i) {
+            char c = expression.charAt(i);
+            if (c == '(')
+                level++;
+            if (c == ')')
+                level--;
+        }
+        if (level != 0)
+            throw new BracketsError(expression);
     }
 }

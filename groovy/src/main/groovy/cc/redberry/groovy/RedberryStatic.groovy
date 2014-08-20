@@ -337,9 +337,9 @@ class RedberryStatic {
 
     private static final class GReverse {
 
-        Transformation getAt(IndexType... types) {
-            if (types.length == 1)
-                return new ReverseTransformation(type);
+        Transformation getAt(Collection<IndexType> types) {
+            if (types.size() == 1)
+                return new ReverseTransformation(types[0]);
 
             List<Transformation> tr = new ArrayList<>();
             for (IndexType type : types)
