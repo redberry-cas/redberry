@@ -543,4 +543,14 @@ public class ParserTest {
     public void testUnbalancedBrackets1() throws Exception {
         parse("(a");
     }
+
+    @Test
+    public void testD1() throws Exception {
+        parse("x*D[x_c][h_cb[x_a]]*D[x_e][h_e^b[x_a]]");
+    }
+
+    @Test
+    public void testD2() throws Exception {
+        parse("x*D[x_o][h_pq[x_a]]*D[x_z][h_tr[x_a]]");
+    }
 }

@@ -66,7 +66,7 @@ public class ParserTensorField implements TokenParser {
             if (level == 0)
                 inBrackets = false;
             if (level < 0)
-                throw new BracketsError();
+                throw new BracketsError(expression);
         }
         return true;
     }
