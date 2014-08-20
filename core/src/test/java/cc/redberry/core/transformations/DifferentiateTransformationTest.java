@@ -470,4 +470,9 @@ public class DifferentiateTransformationTest {
         t = ExpandAndEliminateTransformation.EXPAND_AND_ELIMINATE.transform(t);
         TAssert.assertEquals(t, "2*f~1[x_{ba}*x^{ab}]*x^{mn}");
     }
+
+    @Test
+    public void testRename1() throws Exception {
+        System.out.println(parse("D[x_c][h_cb[x_a]]"));
+    }
 }

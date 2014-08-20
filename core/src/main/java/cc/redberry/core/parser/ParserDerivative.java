@@ -41,21 +41,23 @@ public class ParserDerivative implements TokenParser {
                 || !expression.substring(0, 2).equals("D[")
                 || expression.charAt(expression.length() - 1) != ']') return null;
         String[] parts = expression.split("\\]\\[");
+        if (parts.length != 2)
+            return null;
         String argStr = parts[1].substring(0, parts[1].length() - 1);
         if (!ParseUtils.checkBracketsConsistence(argStr)) return null;
 
         ParseToken arg = parser.parse(argStr);
         if (arg == null) return null;
 
-        final char[] _vars = parts[0].substring(2).toCharArray();
+        final char[] chars = parts[0].substring(2).toCharArray();
         int[] levels = new int[2];
         StringBuilder buffer = new StringBuilder();
-        char c;
         List<ParseToken> tokens = new ArrayList<>();
         tokens.add(arg);
-        for (int i = 0; i < _vars.length; ++i) {
+        char c;
+        for (int i = 0; i < chars.length; ++i) {
             if (levels[0] < 0 || levels[1] < 0) return null;
-            c = _vars[i];
+            c = chars[i];
             if (c == '(') ++levels[0];
             else if (c == '[') ++levels[1];
             else if (c == ')') --levels[0];

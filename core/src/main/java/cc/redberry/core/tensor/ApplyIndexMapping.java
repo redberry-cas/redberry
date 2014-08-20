@@ -822,8 +822,8 @@ public final class ApplyIndexMapping {
             int[] _forbidden = forbidden.toArray();
             for (int i = field.size() - 1; i >= 0; --i) {
                 arg = field.args[i];
-                IndexGeneratorImpl ig = new IndexGeneratorImpl(_forbidden);
                 _from = TensorUtils.getAllIndicesNamesT(arg).toArray();
+                IndexGeneratorImpl ig = new IndexGeneratorImpl(ArraysUtils.addAll(_forbidden, _from));
                 Arrays.sort(_from);
                 _to = new int[_from.length];
                 for (j = _from.length - 1; j >= 0; --j) {
