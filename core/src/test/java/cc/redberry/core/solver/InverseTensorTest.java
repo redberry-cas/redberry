@@ -34,10 +34,7 @@ import cc.redberry.core.transformations.expand.ExpandTransformation;
 import cc.redberry.core.transformations.factor.FactorTransformation;
 import cc.redberry.core.transformations.symmetrization.SymmetrizeUpperLowerIndicesTransformation;
 import cc.redberry.core.utils.TensorUtils;
-import org.junit.Assert;
-import org.junit.Assume;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.*;
 
 import java.io.File;
 import java.util.Arrays;
@@ -46,6 +43,7 @@ import java.util.Arrays;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
+//@Ignore
 public class InverseTensorTest {
 
     public final String mapleBinDir;
@@ -179,7 +177,7 @@ public class InverseTensorTest {
             Assert.assertTrue(TensorUtils.equals(expected, actual));
         }
         if (mathematicaBinDir != null) {
-            actual = InverseTensor.findInverseWithMathematica(toInverse, equation, samples, false, transformations, mathematicaBinDir, "/home/stas/Projects/redberry"/*temporaryDir*/);
+            actual = InverseTensor.findInverseWithMathematica(toInverse, equation, samples, false, transformations, mathematicaBinDir, temporaryDir);
             System.out.println(actual);
             Tensor temp;
             temp = ((Expression) actual).transform(equation);
@@ -275,6 +273,7 @@ public class InverseTensorTest {
         }
     }
 
+    @Ignore
     @Test
     public void testSymmetries1() throws Exception {
         Transformation[] transformations = new Transformation[]{Tensors.parseExpression("n_a*n^a=1"), Tensors.parseExpression("d_a^a=4")};
