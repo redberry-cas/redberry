@@ -29,13 +29,13 @@ import cc.redberry.core.context.OutputFormat;
 import cc.redberry.core.indices.*;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.tensor.*;
+import cc.redberry.core.transformations.DifferentiateTransformation;
 import cc.redberry.core.utils.TensorUtils;
 import junit.framework.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import static cc.redberry.core.tensor.Tensors.parse;
-import static cc.redberry.core.tensor.Tensors.parseSimple;
+import static cc.redberry.core.tensor.Tensors.*;
 
 /**
  * @author Dmitry Bolotin
@@ -552,5 +552,17 @@ public class ParserTest {
     @Test
     public void testD2() throws Exception {
         parse("x*D[x_o][h_pq[x_a]]*D[x_z][h_tr[x_a]]");
+    }
+
+    @Test
+    public void testD3() throws Exception {
+        parse("x*D[x_ab, y_cd][h_pq[x_pq, y_cd]*h^pw[y_dc, x_pq]*h_w^q[x_eb, y_eb*x^eb]]" +
+                "*D[x^ab, y^cd][h_pq[x_pq, y_cd]*h^pw[y_dc, x_pq]*h_w^q[x_eb, y_eb*x^eb]]");
+    }
+
+    @Test
+    public void test25() {
+        addSymmetry("x_mn", 1, 0);
+        parse("D[x_mn][f[x_mn*x^nm]]");
     }
 }
