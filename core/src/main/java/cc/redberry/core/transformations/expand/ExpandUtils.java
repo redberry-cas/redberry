@@ -113,7 +113,7 @@ public final class ExpandUtils {
      */
     public static Tensor expandPairOfSums(Sum s1, Sum s2, Tensor[] factors, Transformation[] transformations) {
         ExpandPairPort epp = new ExpandPairPort(s1, s2, factors);
-        TensorBuilder sum = new SumBuilder();
+        TensorBuilder sum = new SumBuilder(s1.size() * s2.size());
         Tensor t;
         while ((t = epp.take()) != null)
             sum.put(apply(transformations, t));

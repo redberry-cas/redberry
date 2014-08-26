@@ -93,6 +93,17 @@ class Redberry {
     static Tensor plus(Tensor a, Number b) { Tensors.sum(a, number2Complex(b)); }
 
     /**
+     * Adds {@code b} to {@code a}
+     *
+     * @param a tensor
+     * @param b number
+     * @return {@code a} - {@code b}
+     * @throws cc.redberry.core.tensor.TensorException if a is not scalar
+     * @see Tensors#sum(cc.redberry.core.tensor.Tensor, cc.redberry.core.tensor.Tensor)
+     */
+    static Tensor plus(Number b, Tensor a) { Tensors.sum(a, number2Complex(b)); }
+
+    /**
      * Subtracts {@code b} from {@code a}
      *
      * @param a tensor
@@ -115,6 +126,17 @@ class Redberry {
     static Tensor minus(Tensor a, Number b) { Tensors.subtract(a, number2Complex(b)); }
 
     /**
+     * Subtracts {@code a} from {@code b}
+     *
+     * @param a tensor
+     * @param b number
+     * @return {@code b} - {@code a}
+     * @throws cc.redberry.core.tensor.TensorException if a is not scalar
+     * @see Tensors#subtract(cc.redberry.core.tensor.Tensor, cc.redberry.core.tensor.Tensor)
+     */
+    static Tensor minus(Number b, Tensor a) { Tensors.subtract(number2Complex(b), a); }
+
+    /**
      * Returns {@code a} divided by {@code b}.
      *
      * @param a tensor
@@ -133,6 +155,15 @@ class Redberry {
      * @see Tensors#divide(cc.redberry.core.tensor.Tensor, cc.redberry.core.tensor.Tensor)
      */
     static Tensor div(Tensor a, Number b) { Tensors.divide(a, number2Complex(b)); }
+
+    /**
+     * Divides number on specified tensor
+     * @param a tensor
+     * @param b number
+     * @return the result
+     * @see Tensors#divide(cc.redberry.core.tensor.Tensor, cc.redberry.core.tensor.Tensor)
+     */
+    static Tensor div(Number b, Tensor a) { Tensors.divide(number2Complex(b), a); }
 
     /**
      * Returns result of multiplication of specified tensors taking care about
