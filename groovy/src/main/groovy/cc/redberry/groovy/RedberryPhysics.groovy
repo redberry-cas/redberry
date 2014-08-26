@@ -42,8 +42,7 @@ import static cc.redberry.core.tensor.Tensors.parseSimple
  * @author Stanislav Poslavsky
  */
 public final class RedberryPhysics {
-    private RedberryPhysics() {
-    }
+
     /**
      * Returns mandelstam and mass shell substitutions following from the provided map
      * of "momentum - mass of particle".
@@ -60,6 +59,32 @@ public final class RedberryPhysics {
         return new TransformationCollection(FeynCalcUtils.setMandelstam(result));
     }
 
+    /**
+     * Returns mandelstam and mass shell substitutions following from the provided map
+     * of "momentum - mass of particle" and notation of Mandelstam variables.
+     *
+     * @param momentumMasses "momentum - mass of particle"
+     * @param s notation for s
+     * @param t notation for t
+     * @param u notation for u
+     * @return resulting substitutions
+     */
+    public static Transformation setMandelstam(Map<String, String> momentumMasses, Object s, Object t, Object u) {
+        if (momentumMasses.size() != 4)
+            throw new IllegalArgumentException();
+        Tensor[][] result = new Tensor[4][2];
+        int i = 0;
+        momentumMasses.each { a, b -> result[i][0] = parse(a); result[i++][1] = parse(b); }
+        return new TransformationCollection(
+                FeynCalcUtils.setMandelstam(result, parse0(s), parse0(t), parse0(u)));
+    }
+
+    private static Tensor parse0(Object o) {
+        if (o instanceof String || o instanceof GString)
+            return parse(o.toString());
+        return (Tensor) o;
+    }
+
     private static abstract class AbstractTransformationWithDefaultParameters
             implements Transformation {
 
@@ -69,7 +94,7 @@ public final class RedberryPhysics {
         }
 
         final Transformation defaultTransformation() {
-            return create(defaultParameters())
+            return getAt(defaultParameters())
         }
 
         protected abstract Transformation create(Collection args);
