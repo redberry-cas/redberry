@@ -37,7 +37,7 @@ public class StructureOfIndicesTest {
     @Test
     public void test1() {
         SimpleIndices si = ParserIndices.parseSimple("_ab'c'^d'");
-        StructureOfIndices st = new StructureOfIndices(si);
+        StructureOfIndices st = StructureOfIndices.create(si);
         assertTrue(st.isStructureOf(si));
         assertFalse(st.isStructureOf(ParserIndices.parseSimple("_ab'^c'd'")));
         assertTrue(st.isStructureOf(ParserIndices.parseSimple("^a_b'c'^d'")));

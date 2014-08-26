@@ -22,8 +22,6 @@
  */
 package cc.redberry.groovy
 
-import cc.redberry.core.groups.permutations.Permutation
-import cc.redberry.core.groups.permutations.PermutationOneLineInt
 import cc.redberry.core.groups.permutations.Permutations
 import cc.redberry.core.indexmapping.IndexMappings
 import cc.redberry.core.tensor.Tensors
@@ -59,7 +57,7 @@ class RedberryTest {
         use(Redberry) {
             def a = 'Sin[Sin[x]*Sin[y]]'.t
             assert a[0] == 'Sin[x]*Sin[y]'.t
-            assert (a[0, 0, 0] == 'x'.t || a[0, 0, 0] == 'y'.t)
+            assert (a[0][0][0] == 'x'.t || a[0][0][0] == 'y'.t)
 
             a = 'a*b*c*F_mn*G_ab'.t
             assert a[0..3] == ('a*b*c'.t.toArray() as List)

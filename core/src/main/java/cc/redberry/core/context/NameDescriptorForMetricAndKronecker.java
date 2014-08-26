@@ -28,7 +28,6 @@ import cc.redberry.core.indices.StructureOfIndices;
 
 import java.util.Arrays;
 
-import static cc.redberry.core.tensor.Tensors.isKronecker;
 import static cc.redberry.core.tensor.Tensors.isKroneckerOrMetric;
 
 /**
@@ -52,9 +51,9 @@ final class NameDescriptorForMetricAndKronecker extends NameDescriptor {
     private static StructureOfIndices[] createIndicesTypeStructures(byte type) {
         StructureOfIndices[] structures = new StructureOfIndices[1];
         if (!CC.isMetric(type))
-            structures[0] = new StructureOfIndices(type, 2, true, false);
+            structures[0] = StructureOfIndices.create(type, 2, true, false);
         else
-            structures[0] = new StructureOfIndices(type, 2);
+            structures[0] = StructureOfIndices.create(type, 2);
         return structures;
     }
 

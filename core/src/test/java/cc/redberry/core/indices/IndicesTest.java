@@ -53,6 +53,11 @@ public class IndicesTest {
     public IndicesTest() {
     }
 
+    @Test(expected = InconsistentIndicesException.class)
+    public void testInconsistentIndices1() {
+        IndicesFactory.create(new int[]{0, 0, 2});
+    }
+
     @Test
     public void testGetSymmetries() {
         SimpleTensor t = (SimpleTensor) parse("g_mn");
@@ -64,14 +69,14 @@ public class IndicesTest {
     public void testGetUpper1() {
         Indices indices = parse("g_mn*T^ab*D^n_b").getIndices(); //sorted indices
         Indices upper = ParserIndices.parseSimple("^a");
-        assertTrue(indices.getFree().getUpper().equals(upper.getAllIndices()));
+        assertTrue(indices.getFree().getUpper().equals(upper));
     }
 
     @Test
     public void testGetLower() {
         Indices indices = parse("g_mn*T^ab*D^n_b").getIndices(); //sorted indices
         Indices upper = ParserIndices.parseSimple("_m");
-        assertTrue(indices.getFree().getLower().equals(upper.getAllIndices()));
+        assertTrue(indices.getFree().getLower().equals(upper));
     }
 
     @Test
@@ -296,7 +301,7 @@ public class IndicesTest {
             SimpleTensor r = parseSimple("R_abcdefghijkl");
             p = gen.next();
             for (int i = 0; i < p.length; ++i)
-                r.getIndices().getSymmetries().add(symmetries[p[i]]);
+                r.getIndices().getSymmetries().addSymmetry(symmetries[p[i]]);
 
             short[] diffIds = r.getIndices().getPositionsInOrbits();
             short[] expected = {0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0};

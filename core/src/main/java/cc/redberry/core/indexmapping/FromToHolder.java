@@ -32,7 +32,7 @@ import cc.redberry.core.utils.ArraysUtils;
  * @author Stanislav Poslavsky
  * @since 1.1
  */
-public final class FromToHolder {
+final class FromToHolder {
     final int[] from, to;
     final boolean sign;
 

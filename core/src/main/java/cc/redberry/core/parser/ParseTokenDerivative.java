@@ -24,12 +24,17 @@ package cc.redberry.core.parser;
 
 import cc.redberry.core.indices.Indices;
 import cc.redberry.core.indices.IndicesBuilder;
+import cc.redberry.core.indices.IndicesUtils;
+import cc.redberry.core.tensor.ApplyIndexMapping;
 import cc.redberry.core.tensor.SimpleTensor;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.tensor.TensorField;
 import cc.redberry.core.transformations.DifferentiateTransformation;
 import cc.redberry.core.transformations.EliminateMetricsTransformation;
+import cc.redberry.core.transformations.ExpandAndEliminateTransformation;
 import cc.redberry.core.transformations.Transformation;
+import cc.redberry.core.utils.TensorUtils;
+import gnu.trove.set.hash.TIntHashSet;
 
 /**
  * @author Dmitry Bolotin
@@ -55,14 +60,27 @@ public class ParseTokenDerivative extends ParseToken {
     @Override
     public Tensor toTensor() {
         SimpleTensor[] vars = new SimpleTensor[content.length - 1];
-        Tensor temp;
+        Tensor temp = content[0].toTensor();
+
+        TIntHashSet allowedDummies = TensorUtils.getAllIndicesNamesT(temp);
+        IndicesBuilder free = new IndicesBuilder().append(temp.getIndices());
         for (int i = 1; i < content.length; ++i) {
             temp = content[i].toTensor();
+            free.append(temp.getIndices().getInverted());
+            allowedDummies.addAll(IndicesUtils.getIndicesNames(temp.getIndices()));
             if (!(temp instanceof SimpleTensor) && !(temp instanceof TensorField))
                 throw new IllegalArgumentException("Derivative with respect to non simple argument: " + temp);
             vars[i - 1] = (SimpleTensor) temp;
         }
-        return new DifferentiateTransformation(vars, new Transformation[]{EliminateMetricsTransformation.ELIMINATE_METRICS}
+        allowedDummies.removeAll(IndicesUtils.getIndicesNames(free.getIndices().getFree()));
+        Tensor result = new DifferentiateTransformation(
+                vars, new Transformation[]{ExpandAndEliminateTransformation.EXPAND_AND_ELIMINATE}
         ).transform(content[0].toTensor());
+        result = ApplyIndexMapping.optimizeDummies(result);
+        TIntHashSet generated = TensorUtils.getAllDummyIndicesT(result);
+        generated.removeAll(allowedDummies);
+
+        result = ApplyIndexMapping.renameDummy(result, generated.toArray(), allowedDummies.toArray());
+        return result;
     }
 }

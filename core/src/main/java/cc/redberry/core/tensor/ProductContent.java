@@ -22,7 +22,10 @@
  */
 package cc.redberry.core.tensor;
 
+import cc.redberry.core.utils.ArrayIterator;
+
 import java.util.Arrays;
+import java.util.Iterator;
 
 /**
  * This class is a container of information about graph structure of product.
@@ -31,7 +34,7 @@ import java.util.Arrays;
  * @author Stanislav Poslavsky
  * @since 1.0
  */
-public final class ProductContent {
+public final class ProductContent implements Iterable<Tensor>{
     /**
      * Singleton for empty instance.
      */
@@ -166,6 +169,11 @@ public final class ProductContent {
      */
     public Tensor[] getDataCopy() {
         return data.clone();
+    }
+
+    @Override
+    public Iterator<Tensor> iterator() {
+        return new ArrayIterator<>(data);
     }
 
     private int[] stretchHashReflection;

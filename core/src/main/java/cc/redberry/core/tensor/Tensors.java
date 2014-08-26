@@ -36,6 +36,7 @@ import cc.redberry.core.utils.TensorUtils;
 import gnu.trove.set.hash.TIntHashSet;
 
 import java.util.ArrayList;
+import java.util.Collection;
 
 /**
  * Factory methods to create tensors.
@@ -108,6 +109,21 @@ public final class Tensors {
     }
 
     /**
+     * Returns the result of multiplication of specified tensors. Einstein notation
+     * assumed. If there is a chance that some factors have conflicting
+     * (same name) dummy indices use {@link #multiplyAndRenameConflictingDummies(Tensor...)}
+     * instead.
+     *
+     * @param factors collection of factors to be multiplied
+     * @return result of multiplication
+     * @throws InconsistentIndicesException if there is indices clash
+     */
+    public static Tensor multiply(final Collection<Tensor> factors) {
+        //TODO add check for indices consistency
+        return multiply(factors.toArray(new Tensor[factors.size()]));
+    }
+
+    /**
      * Returns result of multiplication of specified tensors taking care about
      * all conflicting dummy indices in factors. Einstein notation assumed.
      *
@@ -161,6 +177,18 @@ public final class Tensors {
 //            }
 //        }
 //        return p;
+    }
+
+    /**
+     * Returns result of multiplication of specified tensors taking care about
+     * all conflicting dummy indices in factors. Einstein notation assumed.
+     *
+     * @param factors array of factors to be multiplied
+     * @return result of multiplication
+     * @throws InconsistentIndicesException if there is indices clash
+     */
+    public static Tensor multiplyAndRenameConflictingDummies(Collection<Tensor> factors) {
+        return multiplyAndRenameConflictingDummies(factors.toArray(new Tensor[factors.size()]));
     }
 
     /**
@@ -237,6 +265,17 @@ public final class Tensors {
      */
     public static Tensor sum(Tensor... tensors) {
         return SumFactory.FACTORY.create(tensors);
+    }
+
+    /**
+     * Returns the result of summation of several tensors.
+     *
+     * @param tensors collection of summands
+     * @return result of summation
+     * @throws TensorException if tensors have different free indices
+     */
+    public static Tensor sum(Collection<Tensor> tensors) {
+        return sum(tensors.toArray(new Tensor[tensors.size()]));
     }
 
     /**
@@ -465,6 +504,20 @@ public final class Tensors {
         for (int i = 0; i < argIndices.length; ++i)
             argIndices[i] = IndicesFactory.createSimple(null, arguments[i].getIndices().getFree());
         return field(name, indices, argIndices, arguments);
+    }
+
+    /**
+     * Returns new tensor field with specified string name, indices and
+     * arguments list. Free indices of arguments assumed as arguments indices
+     * bindings of this field bindings.
+     *
+     * @param name      int name of the field
+     * @param indices   indices
+     * @param arguments arguments list
+     * @return new instance of {@link TensorField} object
+     */
+    public static TensorField field(String name, SimpleIndices indices, Collection<Tensor> arguments) {
+        return field(name, indices, arguments.toArray(new Tensor[arguments.size()]));
     }
 
     /**
@@ -913,7 +966,7 @@ public final class Tensors {
      *                                            of specified type
      */
     public static void addSymmetry(SimpleTensor tensor, IndexType type, Permutation permutation) {
-        tensor.getIndices().getSymmetries().add(type.getType(), permutation);
+        tensor.getIndices().getSymmetries().addSymmetry(type.getType(), permutation);
     }
 
     /**
@@ -926,7 +979,7 @@ public final class Tensors {
      *                                            of specified tensor
      */
     public static void addSymmetry(SimpleTensor tensor, Permutation permutation) {
-        tensor.getIndices().getSymmetries().add(permutation);
+        tensor.getIndices().getSymmetries().addSymmetry(permutation);
     }
 
     /**
@@ -953,7 +1006,7 @@ public final class Tensors {
      */
     public static void addSymmetries(SimpleTensor tensor, Permutation... permutations) {
         for (Permutation p : permutations)
-            tensor.getIndices().getSymmetries().add(p);
+            tensor.getIndices().getSymmetries().addSymmetry(p);
     }
 
     /**
@@ -1134,7 +1187,7 @@ public final class Tensors {
         int dimension = tensor.getIndices().size(type);
         addSymmetry(tensor, type, true, Permutations.createTransposition(dimension));
         if (dimension > 2)
-            tensor.getIndices().getSymmetries().add(type.getType(), Permutations.createPermutation(dimension % 2 == 0 ? true : false, Permutations.createCycle(dimension)));
+            tensor.getIndices().getSymmetries().addSymmetry(type.getType(), Permutations.createPermutation(dimension % 2 == 0 ? true : false, Permutations.createCycle(dimension)));
     }
 
     /**

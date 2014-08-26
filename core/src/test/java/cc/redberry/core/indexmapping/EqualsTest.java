@@ -90,7 +90,7 @@ public class EqualsTest
 
         for (int i = 0; i < 50; ++i) {
             SimpleIndices ind = IndicesFactory.createSimple(null,
-                    randomTensor.nextIndices(new StructureOfIndices((byte) 0, 1 + rnd.nextInt(10))));
+                    randomTensor.nextIndices(StructureOfIndices.create((byte) 0, 1 + rnd.nextInt(10))));
             Tensor a = randomTensor.nextProduct(2 + rnd.nextInt(10), ind);
             Tensor b = rewriteTensor(a, rnd).toTensor();
             TAssert.assertEquals(a, b);
@@ -119,31 +119,31 @@ public class EqualsTest
         RandomTensor randomTensor = new RandomTensor();
         randomTensor.clearNamespace();
 
-        Tensors.parseSimple("R_abcd").getIndices().getSymmetries().add(
+        Tensors.parseSimple("R_abcd").getIndices().getSymmetries().addSymmetry(
                 Permutations.createPermutation(1, 0, 2, 3));
-        Tensors.parseSimple("R_abcd").getIndices().getSymmetries().add(
+        Tensors.parseSimple("R_abcd").getIndices().getSymmetries().addSymmetry(
                 Permutations.createPermutation(0, 1, 3, 2));
-        Tensors.parseSimple("R_abcd").getIndices().getSymmetries().add(
+        Tensors.parseSimple("R_abcd").getIndices().getSymmetries().addSymmetry(
                 Permutations.createPermutation(2, 3, 0, 1));
 
-        Tensors.parseSimple("A_abcde").getIndices().getSymmetries().add(
+        Tensors.parseSimple("A_abcde").getIndices().getSymmetries().addSymmetry(
                 Permutations.createPermutation(new int[][]{{0, 1, 2, 3, 4}}));
 
-        Tensors.parseSimple("B_abcde").getIndices().getSymmetries().add(
+        Tensors.parseSimple("B_abcde").getIndices().getSymmetries().addSymmetry(
                 Permutations.createPermutation(new int[][]{{1, 3}, {2, 4}}));
-        Tensors.parseSimple("B_abcde").getIndices().getSymmetries().add(
+        Tensors.parseSimple("B_abcde").getIndices().getSymmetries().addSymmetry(
                 Permutations.createPermutation(new int[][]{{0, 1, 2, 4, 3}}));
 
-        Tensors.parseSimple("C_abcde").getIndices().getSymmetries().add(
+        Tensors.parseSimple("C_abcde").getIndices().getSymmetries().addSymmetry(
                 Permutations.createPermutation(new int[][]{{1, 2, 3, 4}}));
-        Tensors.parseSimple("C_abcde").getIndices().getSymmetries().add(
+        Tensors.parseSimple("C_abcde").getIndices().getSymmetries().addSymmetry(
                 Permutations.createPermutation(new int[][]{{0, 1, 2, 4, 3}}));
 
         randomTensor.addToNamespace(Tensors.parse("R_abcd", "A_abcde", "B_abcde", "C_abcde"));
 
         for (int i = 0; i < numberOfTests; ++i) {
             SimpleIndices ind = IndicesFactory.createSimple(null,
-                    randomTensor.nextIndices(new StructureOfIndices((byte) 0, 1 + rnd.nextInt(6))));
+                    randomTensor.nextIndices(StructureOfIndices.create((byte) 0, 1 + rnd.nextInt(6))));
 
             Tensor a = randomTensor.nextTensorTree(RandomTensor.TensorType.Product, treeDepth,
                     2 + (pSize == 0 ? 0 : rnd.nextInt(pSize)),

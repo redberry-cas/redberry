@@ -74,9 +74,8 @@ public final class PowerUnfoldTransformation implements Transformation {
         Tensor c;
 
         while ((c = iterator.next()) != null)
-            if (powerExpandApplicable(c, toExpandIndicator))
+            if (powerUnfoldApplicable(c, toExpandIndicator))
                 iterator.set(Tensors.multiply(powerExpandIntoChainToArray1(c, iterator.getForbidden(), toExpandIndicator)));
-
 
         return iterator.result();
     }

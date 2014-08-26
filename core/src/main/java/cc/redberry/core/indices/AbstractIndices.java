@@ -43,19 +43,19 @@ import static cc.redberry.core.context.OutputFormat.*;
  */
 abstract class AbstractIndices implements Indices {
 
-    protected final int[] data;
+    final int[] data;
     //FUTURE investigate performance
-    private WeakReference<UpperLowerIndices> upperLower = new WeakReference<>(null);
+    WeakReference<UpperLowerIndices> upperLower = new WeakReference<>(null);
 
     AbstractIndices(int[] data) {
         this.data = data;
     }
 
-    protected abstract UpperLowerIndices calculateUpperLower();
+    abstract UpperLowerIndices calculateUpperLower();
 
     abstract int[] getSortedData();
 
-    protected UpperLowerIndices getUpperLowerIndices() {
+    UpperLowerIndices getUpperLowerIndices() {
         WeakReference<UpperLowerIndices> wul = upperLower;
         UpperLowerIndices ul = wul.get();
         if (ul == null) {
@@ -71,28 +71,6 @@ abstract class AbstractIndices implements Indices {
     }
 
     @Override
-    public final IntArray getUpper() {
-        WeakReference<UpperLowerIndices> wul = upperLower;
-        UpperLowerIndices ul = wul.get();
-        if (ul == null) {
-            ul = calculateUpperLower();
-            upperLower = new WeakReference<>(ul);
-        }
-        return new IntArray(ul.upper);
-    }
-
-    @Override
-    public final IntArray getLower() {
-        WeakReference<UpperLowerIndices> wul = upperLower;
-        UpperLowerIndices ul = wul.get();
-        if (ul == null) {
-            ul = calculateUpperLower();
-            upperLower = new WeakReference<>(ul);
-        }
-        return new IntArray(ul.lower);
-    }
-
-    @Override
     public final IntArray getAllIndices() {
         return new IntArray(data);
     }
@@ -103,8 +81,6 @@ abstract class AbstractIndices implements Indices {
             return true;
         if (indices instanceof EmptyIndices)
             return data.length == 0;
-//        if (data.length == 0)
-//            return indices.size() == 0;
         return Arrays.equals(getSortedData(), ((AbstractIndices) indices).getSortedData());
     }
 
@@ -141,7 +117,7 @@ abstract class AbstractIndices implements Indices {
     public boolean equals(Object obj) {
         if (obj == null)
             return false;
-        if (getClass() != obj.getClass())
+        if (!(obj instanceof AbstractIndices))
             return false;
         return Arrays.equals(this.data, ((AbstractIndices) obj).data);
     }
@@ -233,7 +209,7 @@ abstract class AbstractIndices implements Indices {
         return toString(Context.get().getDefaultOutputFormat());
     }
 
-    protected static class UpperLowerIndices {
+    final static class UpperLowerIndices {
 
         final int[] upper;
         final int[] lower;

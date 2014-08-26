@@ -1634,9 +1634,9 @@ public final class AlgorithmsBase {
     }
 
     static int[] getBaseAsArray(final List<? extends BSGSElement> BSGS, int from) {
-        int[] base = new int[BSGS.size()];
+        int[] base = new int[BSGS.size() - from];
         for (int i = from, size = BSGS.size(); i < size; ++i)
-            base[i] = BSGS.get(i).basePoint;
+            base[i - from] = BSGS.get(i).basePoint;
         return base;
     }
 

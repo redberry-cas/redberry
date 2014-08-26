@@ -229,7 +229,7 @@ public class BulkTestsForParser {
                 "Flat", "FF", "WR", "SR", "SSR", "FR", "RR", "Kn"};
 
         //F_{\\mu\\nu} type structure
-        final StructureOfIndices F_TYPE_STRUCTURE = new StructureOfIndices(IndexType.GreekLower.getType(), 2);
+        final StructureOfIndices F_TYPE_STRUCTURE = StructureOfIndices.create(IndexType.GreekLower.getType(), 2);
         //matrices indicator for parse preprocessor
         final Indicator<ParseTokenSimpleTensor> matricesIndicator = new Indicator<ParseTokenSimpleTensor>() {
 

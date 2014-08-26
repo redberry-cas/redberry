@@ -20,35 +20,23 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
-package cc.redberry.core.indices;
+package cc.redberry.core.tensor;
 
-/**
- * @author Dmitry Bolotin
- * @author Stanislav Poslavsky
- * @since 1.0
- */
-final class SimpleIndicesOfTensor extends AbstractSimpleIndices {
+import cc.redberry.core.context.CC;
+import org.junit.Test;
 
-    SimpleIndicesOfTensor(int[] data, IndicesSymmetries symmetries) {
-        super(data, symmetries);
-    }
+import java.util.Arrays;
 
-    SimpleIndicesOfTensor(boolean notResort, int[] data, IndicesSymmetries symmetries) {
-        super(notResort, data, symmetries);
-    }
+import static org.junit.Assert.*;
 
-    @Override
-    public void setSymmetries(IndicesSymmetries symmetries) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public IndicesSymmetries getSymmetries() {
-        return symmetries;
-    }
-
-    @Override
-    protected SimpleIndices create(int[] data, IndicesSymmetries symmetries) {
-        return new SimpleIndicesOfTensor(true, data, symmetries);
+public class StructureOfContractionsTest {
+    @Test
+    public void test1() throws Exception {
+        CC.resetTensorNames(1233444123);
+        Product product = (Product) Tensors.parse("f_ab*t^bca*g_cd");
+        System.out.println(product);
+        System.out.println(
+                Arrays.toString(
+                        product.getContent().getStructureOfContractions().getContractedWith(1)));
     }
 }

@@ -466,7 +466,7 @@ public final class OneLoopCounterterms {
                 "Flat", "FF", "WR", "SR", "SSR", "FR", "RR", "Kn"};
 
         //F_{lm} type structure
-        final StructureOfIndices F_TYPE_STRUCTURE = new StructureOfIndices(IndexType.LatinLower.getType(), 2);
+        final StructureOfIndices F_TYPE_STRUCTURE = StructureOfIndices.create(IndexType.LatinLower.getType(), 2);
         //matrices indicator for parse preprocessor
         final Indicator<ParseTokenSimpleTensor> matricesIndicator = new Indicator<ParseTokenSimpleTensor>() {
 

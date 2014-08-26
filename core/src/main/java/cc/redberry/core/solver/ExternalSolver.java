@@ -167,7 +167,13 @@ public class ExternalSolver {
 
         //running external program
         try {
-            Process p = Runtime.getRuntime().exec(programBinDir + "/" + scriptCreator.getScriptExecutionCommand() + " " + path + "/equations." + scriptCreator.getScriptExtension());
+            String[] parameters = scriptCreator.getParameters();
+            String[] exec = new String[2 + parameters.length];
+            exec[0] = programBinDir + "/" + scriptCreator.getScriptExecutionCommand();
+            for (i = 0; i < parameters.length; ++i)
+                exec[i + 1] = parameters[i];
+            exec[exec.length - 1] = path + "/equations." + scriptCreator.getScriptExtension();
+            Process p = Runtime.getRuntime().exec(exec);
             BufferedReader bri = new BufferedReader(new InputStreamReader(p.getInputStream()));
             BufferedReader bre = new BufferedReader(new InputStreamReader(p.getErrorStream()));
             String line;
@@ -241,6 +247,8 @@ public class ExternalSolver {
         String getScriptExecutionCommand();
 
         String getScriptExtension();
+
+        String[] getParameters();
     }
 
     public static final class MathematicaScriptCreator implements ExternalScriptCreator {
@@ -303,7 +311,12 @@ public class ExternalSolver {
 
         @Override
         public String getScriptExecutionCommand() {
-            return "MathematicaScript -script";
+            return "MathematicaScript";
+        }
+
+        @Override
+        public String[] getParameters() {
+            return new String[]{"-script"};
         }
 
         @Override
@@ -371,6 +384,11 @@ public class ExternalSolver {
         @Override
         public String getScriptExtension() {
             return "maple";
+        }
+
+        @Override
+        public String[] getParameters() {
+            return new String[0];
         }
     }
 }

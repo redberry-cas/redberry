@@ -54,6 +54,20 @@ public class UnsafeIndicesFactory {
     public static SimpleIndices createIsolatedUnsafeWithoutSort(IndicesSymmetries symmetries, int... data) {
         if (data.length == 0)
             return IndicesFactory.EMPTY_SIMPLE_INDICES;
-        return new SimpleIndicesIsolated(data, symmetries);
+        return new SimpleIndicesIsolated(true, data, symmetries);
+    }
+
+    static SimpleIndices createIsolatedUnsafeWithoutSort0(IndicesSymmetries symmetries,
+                                                          int[] data,
+                                                          AbstractIndices.UpperLowerIndices ul) {
+        if (data.length == 0)
+            return IndicesFactory.EMPTY_SIMPLE_INDICES;
+        return new SimpleIndicesIsolated(true, data, symmetries, ul);
+    }
+
+    static Indices createSortedWithoutCopy(int[] data){
+        if (data.length == 0)
+            return IndicesFactory.EMPTY_SIMPLE_INDICES;
+        return new SortedIndices(data);
     }
 }

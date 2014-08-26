@@ -581,13 +581,20 @@ public final class PermutationGroup
 
     /**
      * Returns uniformly distributed random permutation from this group.
-     * <p/>
-     * <p>This method uses BSGS.</p>
+     *
+     * @return uniformly distributed random permutation from this group
+     */
+    public Permutation randomElement() {
+        return randomElement(CC.getRandomGenerator());
+    }
+
+    /**
+     * Returns uniformly distributed random permutation from this group.
      *
      * @param generator random generator to be used in generation of random permutation
      * @return uniformly distributed random permutation from this group
      */
-    public Permutation randomPermutation(RandomGenerator generator) {
+    public Permutation randomElement(RandomGenerator generator) {
         // Getting BSGS
         List<BSGSElement> bsgs = getBSGS();
 
@@ -970,6 +977,8 @@ public final class PermutationGroup
      * @return true if specified group is a subgroup of this
      */
     public boolean containsSubgroup(PermutationGroup subgroup) {
+        if (degree() < subgroup.degree())
+            return false;
         if (isTrivial())
             return subgroup.isTrivial();
         if (isSymmetric())
@@ -1059,9 +1068,14 @@ public final class PermutationGroup
         if (group.containsSubgroup(this))
             return group;
 
-        int[] base = MathUtils.intSetUnion(getBase(), group.getBase());
+        int[] thisBase = getBase(), othBase = group.getBase();
+        Arrays.sort(thisBase);
+        Arrays.sort(othBase);
+        int[] base = MathUtils.intSetUnion(thisBase, othBase);
         //new generators
-        ArrayList<Permutation> generators = new ArrayList<>(generators());
+        ArrayList<Permutation> generators = new ArrayList<>(
+                generators().size() + group.generators().size());
+        generators.addAll(generators());
         generators.addAll(group.generators());
         PermutationGroup r = createPermutationGroup(generators);
         r.base = base;
@@ -1071,23 +1085,23 @@ public final class PermutationGroup
     /**
      * Returns an intersection of this group with specified group.
      *
-     * @param subgroup permutation group
+     * @param oth permutation group
      * @return intersections of groups
      */
-    public PermutationGroup intersection(PermutationGroup subgroup) {
+    public PermutationGroup intersection(PermutationGroup oth) {
         if (isTrivial())
             return this;
-        if (subgroup.isTrivial())
-            return subgroup;
+        if (oth.isTrivial())
+            return oth;
         ArrayList<BSGSCandidateElement> intersection = new ArrayList<>();
-        AlgorithmsBacktrack.intersection(getBSGS(), subgroup.getBSGS(), intersection);
+        AlgorithmsBacktrack.intersection(getBSGS(), oth.getBSGS(), intersection);
         return createPermutationGroupFromBSGS(asBSGSList(intersection));
     }
 
     /**
      * Returns direct product of this group and specified group. This product is organized as follows:
      * the initial segment of each permutation is equal to permutation taken from this, while the rest is taken from
-     * specified permutation.
+     * specified group.
      *
      * @param group another group
      * @return direct product this × other
@@ -1279,10 +1293,9 @@ public final class PermutationGroup
         AlgorithmsBacktrack.rebaseWithRedundancy(subgroup_bsgs, base, internalDegree);
 
         final Permutation[] mappings = new Permutation[base.length - 1];
-        for (int i = 1; i < base.length; ++i) {
-            if (base[i] < subgroup.internalDegree && subgroup.positionsInOrbits[base[i]] == subgroup.positionsInOrbits[base[i - 1]])
+        for (int i = 1; i < base.length; ++i)
+            if (base[i] < subgroup.internalDegree && subgroup.indexOfOrbit(base[i]) == subgroup.indexOfOrbit(base[i - 1]))
                 mappings[i - 1] = subgroup.mapping(base[i - 1], base[i]);
-        }
 
         CentralizerSearchTest centralizerSearch = new CentralizerSearchTest(group_bsgs, subgroup, base, mappings);
 

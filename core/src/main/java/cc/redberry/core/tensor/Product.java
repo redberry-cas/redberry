@@ -716,7 +716,7 @@ public final class Product extends MultiTensor {
 
     @Override
     public TensorFactory getFactory() {
-        return null;
+        return ProductFactory.FACTORY;
     }
 
     /**

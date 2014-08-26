@@ -115,8 +115,8 @@ public final class ReverseTransformation implements Transformation {
                     leftIndices = left.getIndices();
                     leftSubIndices = leftIndices.getOfType(type);
 
-                    leftUpperCount = leftSubIndices.getUpper().length();
-                    leftLowerCount = leftSubIndices.getLower().length();
+                    leftUpperCount = leftSubIndices.getUpper().size();
+                    leftLowerCount = leftSubIndices.getLower().size();
 
                     if (leftUpperCount != leftLowerCount) {
                         if (leftLowerCount != 0 && leftUpperCount != 0)
@@ -137,8 +137,8 @@ public final class ReverseTransformation implements Transformation {
                     rightIndices = right.getIndices();
                     rightSubIndices = rightIndices.getOfType(type);
 
-                    rightUpperCount = rightSubIndices.getUpper().length();
-                    rightLowerCount = rightSubIndices.getLower().length();
+                    rightUpperCount = rightSubIndices.getUpper().size();
+                    rightLowerCount = rightSubIndices.getLower().size();
 
                     if (rightUpperCount != rightLowerCount) {
                         if (rightUpperCount != 0 && rightLowerCount != 0)

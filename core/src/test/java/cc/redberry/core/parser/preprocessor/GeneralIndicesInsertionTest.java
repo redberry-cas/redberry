@@ -101,6 +101,7 @@ public class GeneralIndicesInsertionTest {
         indicesInsertion.addInsertionRule(parseSimple("f^a'A'_b'B'[x]"), IndexType.Matrix1);
         indicesInsertion.addInsertionRule(parseSimple("f^a'A'_b'B'[x]"), IndexType.Matrix2);
 
+        System.out.println(parse("f[x] = 1 + c"));
         TAssert.assertEquals(parse("f[x] = 1 + c"), "f^{a'}_{b'}^{A'}_{B'}[x] = (c+1)*d^{a'}_{b'}*d^{A'}_{B'}");
     }
 
@@ -168,5 +169,4 @@ public class GeneralIndicesInsertionTest {
         indicesInsertion.addInsertionRule(parseSimple("B^a'b'_c'd'e'"), IndexType.Matrix1);
         TAssert.assertEquals(parse("A*B"), "A^{a'}_{f'}*B^{f'b'}_{c'd'e'}");
     }
-
 }

@@ -24,6 +24,7 @@ package cc.redberry.core.transformations;
 
 import cc.redberry.core.indexgenerator.IndexGeneratorImpl;
 import cc.redberry.core.indexmapping.Mapping;
+import cc.redberry.core.indices.Indices;
 import cc.redberry.core.indices.IndicesFactory;
 import cc.redberry.core.indices.IndicesUtils;
 import cc.redberry.core.indices.SimpleIndices;
@@ -130,19 +131,30 @@ public final class DifferentiateTransformation implements Transformation {
 
         SimpleTensor[] resolvedVars = vars;
         if (needRename) {
-            TIntHashSet forbidden = TensorUtils.getAllIndicesNamesT(tensor);
-            for (SimpleTensor var : vars)
-                forbidden.addAll(getIndicesNames(var.getIndices().getFree()));
+            TIntHashSet allTensorIndices = TensorUtils.getAllIndicesNamesT(tensor);
+            TIntHashSet dummyTensorIndices = new TIntHashSet(allTensorIndices);
+            dummyTensorIndices.removeAll(tensor.getIndices().getFree().getAllIndices().copy());
 
-            resolvedVars = vars.clone();
-            for (int i = 0; i < vars.length; ++i)
-                if (!forbidden.isEmpty() && resolvedVars[i].getIndices().size() != 0) {
-                    if (resolvedVars[i].getIndices().size() != resolvedVars[i].getIndices().getFree().size())
-                        resolvedVars[i] = (SimpleTensor) renameDummy(resolvedVars[i], forbidden.toArray());
-                    forbidden.addAll(getIndicesNames(resolvedVars[i].getIndices()));
+            needRename = false;
+            for (SimpleTensor var : vars)
+                if (containsIndicesNames(allTensorIndices, var.getIndices().getNamesOfDummies())
+                        || containsIndicesNames(dummyTensorIndices, var.getIndices())) {
+                    needRename = true;
+                    break;
                 }
-            tensor = renameDummy(tensor, TensorUtils.getAllIndicesNamesT(resolvedVars).toArray(), forbidden);
-            tensor = renameIndicesOfFieldsArguments(tensor, forbidden);
+            for (SimpleTensor var : vars)
+                allTensorIndices.addAll(getIndicesNames(var.getIndices().getFree()));
+            if (needRename) {
+                resolvedVars = vars.clone();
+                for (int i = 0; i < vars.length; ++i)
+                    if (!allTensorIndices.isEmpty() && resolvedVars[i].getIndices().size() != 0) {
+                        if (resolvedVars[i].getIndices().size() != resolvedVars[i].getIndices().getFree().size())
+                            resolvedVars[i] = (SimpleTensor) renameDummy(resolvedVars[i], allTensorIndices.toArray());
+                        allTensorIndices.addAll(getIndicesNames(resolvedVars[i].getIndices()));
+                    }
+                tensor = renameDummy(tensor, TensorUtils.getAllIndicesNamesT(resolvedVars).toArray(), allTensorIndices);
+            }
+            tensor = renameIndicesOfFieldsArguments(tensor, allTensorIndices);
         }
 
         for (SimpleTensor var : resolvedVars)
@@ -153,13 +165,33 @@ public final class DifferentiateTransformation implements Transformation {
 
     private static Tensor differentiate(Tensor tensor, Transformation[] expandAndContract, SimpleTensor var) {
         if (var.getIndices().size() != 0) {
-            TIntHashSet forbidden = TensorUtils.getAllIndicesNamesT(tensor);
-            var = (SimpleTensor) renameDummy(var, TensorUtils.getAllIndicesNamesT(tensor).toArray());
-            forbidden.addAll(IndicesUtils.getIndicesNames(var.getIndices()));
-            tensor = renameDummy(tensor, TensorUtils.getAllIndicesNamesT(var).toArray(), forbidden);
-            tensor = renameIndicesOfFieldsArguments(tensor, forbidden);
+            TIntHashSet allTensorIndices = TensorUtils.getAllIndicesNamesT(tensor);
+            TIntHashSet dummyTensorIndices = new TIntHashSet(allTensorIndices);
+            dummyTensorIndices.removeAll(tensor.getIndices().getFree().getAllIndices().copy());
+            if (containsIndicesNames(allTensorIndices, var.getIndices().getNamesOfDummies())
+                    || containsIndicesNames(dummyTensorIndices, var.getIndices())) {
+                allTensorIndices.addAll(IndicesUtils.getIndicesNames(var.getIndices()));
+                var = (SimpleTensor) renameDummy(var, TensorUtils.getAllIndicesNamesT(tensor).toArray());
+                tensor = renameDummy(tensor, TensorUtils.getAllIndicesNamesT(var).toArray(), allTensorIndices);
+            } else
+                allTensorIndices.addAll(IndicesUtils.getIndicesNames(var.getIndices()));
+            tensor = renameIndicesOfFieldsArguments(tensor, allTensorIndices);
         }
         return differentiate1(tensor, createRule(var), expandAndContract);
+    }
+
+    private static boolean containsIndicesNames(TIntHashSet set, Indices indices) {
+        for (int i = 0; i < indices.size(); ++i)
+            if (set.contains(getNameWithType(indices.get(i))))
+                return true;
+        return false;
+    }
+
+    private static boolean containsIndicesNames(TIntHashSet set, int[] indices) {
+        for (int i : indices)
+            if (set.contains(getNameWithType(i)))
+                return true;
+        return false;
     }
 
     private static Tensor differentiateWithRenaming(Tensor tensor, SimpleTensorDifferentiationRule rule, Transformation[] expandAndEliminate) {

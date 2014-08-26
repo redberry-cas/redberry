@@ -42,20 +42,18 @@ import cc.redberry.core.utils.IntArray;
 public interface Indices {
 
     /**
-     * Return immutable {@link IntArray} of upper case indices.
+     * Returns upper (contravariant) indices.
      *
-     * @return {@code IntArray} of upper case indices
-     * @see IntArray
+     * @return upper indices
      */
-    IntArray getUpper();
+    Indices getUpper();
 
     /**
-     * Return immutable {@link IntArray} of lower case indices.
+     * Returns lower (covariant) indices.
      *
-     * @return {@code IntArray} of lower case indices
-     * @see IntArray
+     * @return lower indices
      */
-    IntArray getLower();
+    Indices getLower();
 
     /**
      * Return immutable {@link IntArray} of all indices.

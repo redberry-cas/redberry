@@ -45,6 +45,7 @@ import static cc.redberry.core.tensor.Tensors.parseSimple;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
+@Ignore
 public class ToStringTest {
     @Test
     public void test1() {

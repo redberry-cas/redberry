@@ -22,9 +22,14 @@
  */
 package cc.redberry.core.indices;
 
-import cc.redberry.core.groups.permutations.*;
+import cc.redberry.core.groups.permutations.Permutation;
+import cc.redberry.core.groups.permutations.PermutationGroup;
+import cc.redberry.core.groups.permutations.Permutations;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Wrapper of {@link cc.redberry.core.groups.permutations.PermutationGroup} that holds symmetries of indices. This
@@ -38,11 +43,6 @@ import java.util.*;
  * @since 1.0
  */
 public final class IndicesSymmetries {
-    /**
-     * For indices with zero length
-     */
-    static final IndicesSymmetries EMPTY_INDICES_SYMMETRIES
-            = new IndicesSymmetries(StructureOfIndices.EMPTY, Collections.EMPTY_LIST, null);
     /**
      * Structure of indices
      */
@@ -84,7 +84,7 @@ public final class IndicesSymmetries {
      */
     public static IndicesSymmetries create(StructureOfIndices structureOfIndices) {
         if (structureOfIndices.size() == 0)
-            return EMPTY_INDICES_SYMMETRIES;
+            return getEmpty();
         return new IndicesSymmetries(structureOfIndices);
     }
 
@@ -100,7 +100,7 @@ public final class IndicesSymmetries {
         if (group.degree() != structureOfIndices.size())
             throw new IllegalArgumentException("Degree of permutation group not equal to indices size.");
         if (structureOfIndices.size() == 0)
-            return EMPTY_INDICES_SYMMETRIES;
+            return getEmpty();
         return new IndicesSymmetries(structureOfIndices, group.generators(), group);
     }
 
@@ -116,10 +116,10 @@ public final class IndicesSymmetries {
     public static IndicesSymmetries create(StructureOfIndices structureOfIndices,
                                            List<Permutation> generators) {
         for (Permutation p : generators)
-            if (p.internalDegree() > structureOfIndices.size())
+            if (p.degree() > structureOfIndices.size())
                 throw new IllegalArgumentException("Permutation degree not equal to indices size.");
         if (structureOfIndices.size() == 0)
-            return EMPTY_INDICES_SYMMETRIES;
+            return getEmpty();
         return new IndicesSymmetries(structureOfIndices, new ArrayList<>(generators), null);
     }
 
@@ -262,7 +262,7 @@ public final class IndicesSymmetries {
                 type = (byte) i;
             }
         }
-        add(type, Permutations.createPermutation(sign, permutation));
+        addSymmetry(type, Permutations.createPermutation(sign, permutation));
     }
 
     /**
@@ -310,7 +310,7 @@ public final class IndicesSymmetries {
      *                                            of specified type
      */
     public void add(IndexType type, boolean sign, int... permutation) {
-        add(type.getType(), Permutations.createPermutation(sign, permutation));
+        addSymmetry(type.getType(), Permutations.createPermutation(sign, permutation));
     }
 
     /**
@@ -327,7 +327,7 @@ public final class IndicesSymmetries {
      *                                            of specified type
      */
     public void add(byte type, boolean sign, int... permutation) {
-        add(type, Permutations.createPermutation(sign, permutation));
+        addSymmetry(type, Permutations.createPermutation(sign, permutation));
     }
 
     /**
@@ -340,14 +340,14 @@ public final class IndicesSymmetries {
      * @throws java.lang.IllegalArgumentException if this structure of indices is inconsistent with specified
      *                                            permutation (permutation mixes indices of different types)
      */
-    public void add(byte type, Permutation symmetry) {
+    public void addSymmetry(byte type, Permutation symmetry) {
         if (permutationGroup != null)
             throw new IllegalStateException("Permutation group is already in use.");
 
         StructureOfIndices.TypeData data = structureOfIndices.getTypeData(type);
         if (data == null)
             throw new IllegalArgumentException("No such type: " + IndexType.getType(type));
-        if (data.length < symmetry.internalDegree())
+        if (data.length < symmetry.degree())
             throw new IllegalArgumentException("Wrong symmetry length.");
         int[] s = new int[structureOfIndices.size()];
         int i = 0;
@@ -370,10 +370,42 @@ public final class IndicesSymmetries {
      * @throws java.lang.IllegalArgumentException if this structure of indices is inconsistent with specified
      *                                            permutation (permutation mixes indices of different types)
      */
-    public void add(Permutation symmetry) {
+    public void addSymmetry(Permutation symmetry) {
         if (permutationGroup != null)
             throw new IllegalStateException("Permutation group is already in use.");
         generators.add(symmetry);
+    }
+
+    /**
+     * Adds specified symmetries to this.
+     *
+     * @param symmetries symmetries
+     * @throws java.lang.IllegalStateException    if this instance of symmetries is already in use (permutation group
+     *                                            calculated)
+     * @throws java.lang.IllegalArgumentException if this structure of indices is inconsistent with specified
+     *                                            permutation (permutation mixes indices of different types)
+     */
+    public void addSymmetries(Permutation... symmetries) {
+        if (permutationGroup != null)
+            throw new IllegalStateException("Permutation group is already in use.");
+        for (Permutation symmetry : symmetries)
+            generators.add(symmetry);
+    }
+
+    /**
+     * Adds specified symmetries to this.
+     *
+     * @param symmetries symmetries
+     * @throws java.lang.IllegalStateException    if this instance of symmetries is already in use (permutation group
+     *                                            calculated)
+     * @throws java.lang.IllegalArgumentException if this structure of indices is inconsistent with specified
+     *                                            permutation (permutation mixes indices of different types)
+     */
+    public void addSymmetries(Collection<Permutation> symmetries) {
+        if (permutationGroup != null)
+            throw new IllegalStateException("Permutation group is already in use.");
+        for (Permutation symmetry : symmetries)
+            generators.add(symmetry);
     }
 
     /**
@@ -449,8 +481,22 @@ public final class IndicesSymmetries {
     @Override
     public IndicesSymmetries clone() {
         if (structureOfIndices.size() == 0)
-            return EMPTY_INDICES_SYMMETRIES;
+            return getEmpty();
         return new IndicesSymmetries(structureOfIndices, new ArrayList<>(generators), permutationGroup);
+    }
+
+    /**
+     * For indices with zero length
+     */
+    private static IndicesSymmetries EMPTY_INDICES_SYMMETRIES;
+
+    /**
+     * For indices with zero length
+     */
+    public static IndicesSymmetries getEmpty() {
+        if (EMPTY_INDICES_SYMMETRIES == null)
+            EMPTY_INDICES_SYMMETRIES = new IndicesSymmetries(StructureOfIndices.getEmpty(), Collections.EMPTY_LIST, null);
+        return EMPTY_INDICES_SYMMETRIES;
     }
 
     @Override

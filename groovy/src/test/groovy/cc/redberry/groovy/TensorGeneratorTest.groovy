@@ -39,7 +39,7 @@ class TensorGeneratorTest {
     public void testSymmetries1() throws Exception {
         use(Redberry) {
             def indices = '_{abcd}'.si
-            indices.symmetries.add(-[0, 2, 1, 3].p)
+            indices.symmetries.addSymmetry(-[0, 2, 1, 3].p)
 
             def t = GenerateTensor(indices, ['g_ab', 'k_a'])
             t = Collect['C[x]'.t] >> t

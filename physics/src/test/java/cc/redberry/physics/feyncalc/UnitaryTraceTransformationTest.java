@@ -223,7 +223,8 @@ public class UnitaryTraceTransformationTest {
         UnitaryTraceTransformation tr = new UnitaryTraceTransformation(parseSimple("m_a"),
                 parseSimple("f_abc"), parseSimple("d_abc"), parseSimple("n"));
         Tensor t = parse("Tr[m^a*m_b*m^c*(p^b*m_a + p_a*m^b)]");
-        TAssert.assertEquals(parse("((1/4)*n-(1/2)*n**(-1))*p^{c}"), tr.transform(t));
+        TAssert.assertEquals(parse("((1/4)*n-(1/2)*n**(-1))*p^{c}"),
+                tr.transform(ExpandTransformation.expand(t)));
     }
 
     static Tensor unitaryTrace(Tensor t) {

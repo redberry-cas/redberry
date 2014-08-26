@@ -28,7 +28,6 @@ import java.lang.reflect.Array;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 import static cc.redberry.core.utils.ArraysUtils.short2int;
@@ -228,7 +227,7 @@ public final class PermutationOneLineShort implements Permutation {
         if (other.isIdentity())
             return this;
 
-        final int newLength = Math.max(internalDegree(), other.internalDegree());
+        final int newLength = Math.max(degree(), other.degree());
         if (newLength > Short.MAX_VALUE)
             return toIntRepresentation().composition(other);
 
@@ -258,7 +257,7 @@ public final class PermutationOneLineShort implements Permutation {
         if (b.isIdentity())
             return composition(a);
 
-        final int newLength = Math.max(Math.max(internalDegree(), a.internalDegree()), b.internalDegree());
+        final int newLength = Math.max(Math.max(degree(), a.degree()), b.degree());
         if (newLength > Short.MAX_VALUE)
             return toIntRepresentation().composition(a, b);
 
@@ -290,8 +289,8 @@ public final class PermutationOneLineShort implements Permutation {
         if (c.isIdentity())
             return composition(b, c);
 
-        final int newLength = Math.max(c.internalDegree(), Math.max(
-                Math.max(internalDegree(), a.internalDegree()), b.internalDegree()));
+        final int newLength = Math.max(c.degree(), Math.max(
+                Math.max(degree(), a.degree()), b.degree()));
         if (newLength > Short.MAX_VALUE)
             return toIntRepresentation().composition(a, b, c);
 
@@ -357,7 +356,7 @@ public final class PermutationOneLineShort implements Permutation {
     }
 
     @Override
-    public int internalDegree() {
+    public int degree() {
         return internalDegree;
     }
 
@@ -365,6 +364,8 @@ public final class PermutationOneLineShort implements Permutation {
     public Permutation pow(int exponent) {
         if (isIdentity)
             return this;
+        if (exponent < 0)
+            return inverse().pow(-exponent);
         Permutation base = this, result = getIdentity();
         while (exponent != 0) {
             if (exponent % 2 == 1)
@@ -383,7 +384,7 @@ public final class PermutationOneLineShort implements Permutation {
         Permutation that = (Permutation) o;
         if (antisymmetry != that.antisymmetry())
             return false;
-        if (internalDegree != that.internalDegree())
+        if (internalDegree != that.degree())
             return false;
         for (int i = 0; i < internalDegree; ++i)
             if (newIndexOf(i) != that.newIndexOf(i))
@@ -447,7 +448,7 @@ public final class PermutationOneLineShort implements Permutation {
 
     @Override
     public int compareTo(Permutation t) {
-        final int max = Math.max(internalDegree(), t.internalDegree());
+        final int max = Math.max(degree(), t.degree());
         if (antisymmetry != t.antisymmetry())
             return antisymmetry ? -1 : 1;
         for (int i = 0; i < max; ++i)

@@ -307,7 +307,7 @@ public final class NameManager {
             while (stringNames.contains(name));
             stringNames.add(name);
             NameDescriptor nd = new NameDescriptorForSimpleTensor(name,
-                    new StructureOfIndices[]{StructureOfIndices.EMPTY}, newNameId);
+                    new StructureOfIndices[]{StructureOfIndices.getEmpty()}, newNameId);
             readLock.unlock();
             rLocked = false;
             writeLock.lock();

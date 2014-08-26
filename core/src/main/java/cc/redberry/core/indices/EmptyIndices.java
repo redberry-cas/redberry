@@ -111,8 +111,8 @@ class EmptyIndices implements Indices {
      * @return {@code IntArray.EMPTY_ARRAY}
      */
     @Override
-    public IntArray getUpper() {
-        return IntArray.EMPTY_ARRAY;
+    public Indices getUpper() {
+        return this;
     }
 
     /**
@@ -121,8 +121,8 @@ class EmptyIndices implements Indices {
      * @return {@code IntArray.EMPTY_ARRAY}
      */
     @Override
-    public IntArray getLower() {
-        return IntArray.EMPTY_ARRAY;
+    public Indices getLower() {
+        return this;
     }
 
     /**
@@ -202,7 +202,7 @@ class EmptyIndices implements Indices {
      */
     @Override
     public boolean equals(Object obj) {
-        return obj == this;
+        return obj instanceof EmptyIndices;
     }
 
     /**
@@ -217,9 +217,9 @@ class EmptyIndices implements Indices {
     }
 
     /**
-     * Returns 1
+     * Returns hash code
      *
-     * @return 1
+     * @return hash code
      */
     @Override
     public int hashCode() {

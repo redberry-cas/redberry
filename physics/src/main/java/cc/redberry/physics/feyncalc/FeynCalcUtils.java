@@ -47,10 +47,10 @@ public final class FeynCalcUtils {
         return setMandelstam(tt);
     }
 
-    public static Expression[] setMandelstam(Tensor[][] momentums) {
+    public static Expression[] setMandelstam(Tensor[][] momentums, Tensor s, Tensor t, Tensor u) {
         checkMandelstamInput(momentums);
-        SimpleTensor s = parseSimple("s"), t = parseSimple("t"), u = parseSimple("u");
-
+        if (s.getIndices().getFree().size() != 0 || t.getIndices().getFree().size() != 0 || u.getIndices().getFree().size() != 0)
+            throw new IllegalArgumentException("Mandelstam variables should be scalar.");
         Expression[] result = new Expression[10];
         int i;
         // (k1,k1) = m1^2, (k2,k2) = m2^2, (k3,k3) = m3^2, (k4,k4) = m4^2
@@ -80,6 +80,10 @@ public final class FeynCalcUtils {
                 sum(u, negate(sum(pow(momentums[1][1], 2), pow(momentums[2][1], 2)))));
 
         return result;
+    }
+
+    public static Expression[] setMandelstam(Tensor[][] momentums) {
+        return setMandelstam(momentums, parse("s"), parse("t"), parse("u"));
     }
 
     private static void checkMandelstamInput(Tensor[][] momentums) {

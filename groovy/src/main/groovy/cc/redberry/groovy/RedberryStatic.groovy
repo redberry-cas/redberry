@@ -23,6 +23,10 @@
 
 package cc.redberry.groovy
 
+import cc.redberry.core.combinatorics.Combinatorics
+import cc.redberry.core.combinatorics.IntCombinationsGenerator
+import cc.redberry.core.combinatorics.IntPermutationsGenerator
+import cc.redberry.core.combinatorics.IntTuplesPort
 import cc.redberry.core.context.CC
 import cc.redberry.core.context.OutputFormat
 import cc.redberry.core.groups.permutations.Permutation
@@ -57,6 +61,7 @@ import cc.redberry.core.transformations.powerexpand.PowerUnfoldTransformation
 import cc.redberry.core.transformations.reverse.ReverseTransformation
 import cc.redberry.core.transformations.symmetrization.SymmetrizeTransformation
 import cc.redberry.core.utils.BitArray
+import cc.redberry.core.utils.OutputPort
 import cc.redberry.core.utils.TensorUtils
 
 /**
@@ -334,7 +339,7 @@ class RedberryStatic {
 
         Transformation getAt(Collection<IndexType> types) {
             if (types.size() == 1)
-                return new ReverseTransformation(types.iterator().next());
+                return new ReverseTransformation(types[0]);
 
             List<Transformation> tr = new ArrayList<>();
             for (IndexType type : types)
@@ -431,6 +436,74 @@ class RedberryStatic {
     public static PermutationGroup Group(Object... permutations) {
         use(Redberry) {
             return PermutationGroup.createPermutationGroup(permutations.collect({ it.p }))
+        }
+    }
+
+    public static PermutationGroup SymmetricGroup(int degree) {
+        use(Redberry) {
+            return PermutationGroup.symmetricGroup(degree)
+        }
+    }
+
+    public static PermutationGroup AlternatingGroup(int degree) {
+        use(Redberry) {
+            return PermutationGroup.alternatingGroup(degree)
+        }
+    }
+
+/************************************************************************************
+ *********************************** Combinatorics **********************************
+ ************************************************************************************/
+
+    public static Iterable<List<Integer>> Permutations(int n) {
+        return new IntArrayIterableListWrapper(new IntPermutationsGenerator(n))
+    }
+
+    public static Iterable<List<Integer>> CombinationsWithPermutations(int n, int k) {
+        return new IntArrayIterableListWrapper(Combinatorics.createIntGenerator(n, k))
+    }
+
+    public static Iterable<List<Integer>> Combinations(int n, int k) {
+        return new IntArrayIterableListWrapper(new IntCombinationsGenerator(n, k))
+    }
+
+
+    public static Iterable<List<Integer>> Tuples(List bounds) {
+        return Tuples(bounds as int[])
+    }
+
+    public static Iterable<List<Integer>> Tuples(int[] bounds) {
+        return new IntArrayIterableListWrapper(new OutputPort.PortIterator<int[]>(new IntTuplesPort(bounds)))
+    }
+
+    private static final class IntArrayIterableListWrapper implements Iterable<List<Integer>> {
+        final Iterator<int[]> iterator;
+
+        IntArrayIterableListWrapper(Iterator<int[]> iterator) {
+            this.iterator = iterator
+        }
+
+        @Override
+        Iterator<List<Integer>> iterator() {
+            return new IntArrayIteratorListWrapper(iterator)
+        }
+    }
+
+    private static final class IntArrayIteratorListWrapper implements Iterator<List<Integer>> {
+        final Iterator<int[]> iterator;
+
+        IntArrayIteratorListWrapper(Iterator<int[]> iterator) {
+            this.iterator = iterator
+        }
+
+        @Override
+        boolean hasNext() {
+            return iterator.hasNext()
+        }
+
+        @Override
+        List<Integer> next() {
+            return iterator.next() as List
         }
     }
 

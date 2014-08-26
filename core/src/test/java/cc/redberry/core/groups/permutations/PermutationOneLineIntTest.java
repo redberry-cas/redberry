@@ -189,7 +189,7 @@ public class PermutationOneLineIntTest {
             for (int i = 0; i < maxL; ++i)
                 expected[i] = ap2[ap1[i]];
             Assert.assertArrayEquals(Arrays.copyOfRange(expected, 0, actual.length), actual);
-            Assert.assertEquals(pp3.internalDegree(), Permutations.internalDegree(expected));
+            Assert.assertEquals(pp3.degree(), Permutations.internalDegree(expected));
         }
     }
 

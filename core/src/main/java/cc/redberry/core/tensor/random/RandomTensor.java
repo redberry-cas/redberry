@@ -191,7 +191,7 @@ public final class RandomTensor {
             int[] typesCount = new int[TYPES_COUNT];
             for (int j = 0; j < TYPES_COUNT; ++j)
                 typesCount[j] = minIndices[j] + nextInt(maxIndices[j] - minIndices[j]);
-            StructureOfIndices typeStructure = new StructureOfIndices(TYPES, typesCount);
+            StructureOfIndices typeStructure = StructureOfIndices.create(TYPES, typesCount);
             NameDescriptor nameDescriptor = CC.getNameManager().mapNameDescriptor(nextName(), typeStructure);
             if (withSymmetries)
                 addRandomSymmetries(nameDescriptor);
@@ -262,7 +262,7 @@ public final class RandomTensor {
                 continue;
             int count = random.nextInt(4);
             for (i = 0; i < count; ++i)
-                descriptor.getSymmetries().add(type, Permutations.createPermutation(false, nextPermutation(typeData.length)));
+                descriptor.getSymmetries().addSymmetry(type, Permutations.createPermutation(false, nextPermutation(typeData.length)));
         }
     }
 
@@ -327,7 +327,7 @@ public final class RandomTensor {
     public Tensor nextProductTree(int depth, Parameters parameters, Indices indices) {
         int productSize = getRandomValue(parameters.minProductSize, parameters.maxProductSize);
         indices = indices.getFree();
-        StructureOfIndices typeStructure = new StructureOfIndices(IndicesFactory.createSimple(null, indices));
+        StructureOfIndices typeStructure = StructureOfIndices.create(IndicesFactory.createSimple(null, indices));
         List<Tensor> descriptors = new ArrayList<>();
         int totalIndicesCounts[] = new int[TYPES.length];
         Tensor nd;
@@ -361,7 +361,7 @@ public final class RandomTensor {
             if ((totalIndicesCounts[b] - (typeData == null ? 0 : typeData.length)) % 2 != 0) {
                 int[] typeCount = new int[TYPES.length];
                 typeCount[b] = 1;
-                descriptors.add(nextTensorTree(TensorType.Sum, depth - 1, parameters, IndicesFactory.createSimple(null, nextIndices(new StructureOfIndices(TYPES, typeCount)))));
+                descriptors.add(nextTensorTree(TensorType.Sum, depth - 1, parameters, IndicesFactory.createSimple(null, nextIndices(StructureOfIndices.create(TYPES, typeCount)))));
                 ++totalIndicesCounts[b];
             }
         }

@@ -269,7 +269,7 @@ public final class Context {
             index2 = t;
         }
         SimpleIndices indices = IndicesFactory.createSimple(null, index1, index2);
-        NameDescriptor nd = nameManager.mapNameDescriptor(nameManager.getKroneckerName(), new StructureOfIndices(indices));
+        NameDescriptor nd = nameManager.mapNameDescriptor(nameManager.getKroneckerName(), StructureOfIndices.create(indices));
         int name = nd.getId();
         return Tensors.simpleTensor(name, indices);
     }
@@ -291,7 +291,7 @@ public final class Context {
                 || !metricTypes.get(type))
             throw new IllegalArgumentException("Not metric indices.");
         SimpleIndices indices = IndicesFactory.createSimple(null, index1, index2);
-        NameDescriptor nd = nameManager.mapNameDescriptor(nameManager.getMetricName(), new StructureOfIndices(indices));
+        NameDescriptor nd = nameManager.mapNameDescriptor(nameManager.getMetricName(), StructureOfIndices.create(indices));
         int name = nd.getId();
         return Tensors.simpleTensor(name, indices);
     }

@@ -24,6 +24,7 @@ package cc.redberry.core.transformations.powerexpand;
 
 import cc.redberry.core.TAssert;
 import cc.redberry.core.tensor.SimpleTensor;
+import cc.redberry.core.tensor.Tensor;
 import org.junit.Test;
 
 import static cc.redberry.core.tensor.Tensors.parse;
@@ -54,5 +55,12 @@ public class PowerUnfoldTransformationTest {
         SimpleTensor[] vars = new SimpleTensor[]{parseSimple("A_m")};
         PowerUnfoldTransformation pe = new PowerUnfoldTransformation(vars);
         TAssert.assertEquals(pe.transform(parse("(A_m*A^m*c)**2")), "c**2*A_{m}*A_{a}*A^{m}*A^{a}");
+    }
+
+    @Test
+    public void test4() {
+        Tensor t = parse("A_i^i**2");
+        PowerUnfoldTransformation pe = PowerUnfoldTransformation.POWER_UNFOLD_TRANSFORMATION;
+        TAssert.assertEquals(pe.transform(t), parse("A_i^i*A_j^j"));
     }
 }
