@@ -822,70 +822,196 @@ public final class Product extends MultiTensor {
                 return sb.toString();
             sb.append(operatorChar);
         }
-        if (!format.printMatrixIndices)
+        EnumSet<IndexType> matrixTypes;
+        if (format.printMatrixIndices || (matrixTypes = IndicesUtils.nonMetricTypes(indices)).isEmpty())
             return printData(sb, format, operatorChar);
-        EnumSet<IndexType> matrixTypes = IndicesUtils.nonMetricTypes(indices);
-        if (matrixTypes.isEmpty())
-            return printData(sb, format, operatorChar);
-        else
-            return printMatrices(matrixTypes, sb, format, operatorChar);
+        return printMatrices(sb, format, operatorChar, matrixTypes);
     }
 
     private String printData(StringBuilder sb, OutputFormat format, char operatorChar) {
-        for (int i = 0; i < data.length; ++i) {
+        for (int i = 0; ; ++i) {
             sb.append(data[i].toString(format, Product.class));
             if (i == data.length - 1)
                 return sb.toString();
             sb.append(operatorChar);
         }
+    }
+
+    private String printMatrices(StringBuilder sb, OutputFormat format, char operatorChar, EnumSet<IndexType> matrixTypes) {
+        sb.append(new MatricesPrinter(format, operatorChar, matrixTypes).sb.toString());
         return sb.toString();
     }
 
-    private String printMatrices(EnumSet<IndexType> matrixTypes,
-                                 StringBuilder sb, OutputFormat format,
-                                 char operatorChar) {
-        BitArray printed = new BitArray(data.length);
-        String temp;
-        for (IndexType type : matrixTypes) {
-            PrimitiveSubgraph[] subgraphs =
-                    PrimitiveSubgraphPartition.calculatePartition(
-                            contentReference.getReferent(), type);
-            for (PrimitiveSubgraph subgraph : subgraphs) {
-                if (subgraph.getGraphType() == GraphType.Graph)
-                    continue;
-                if (subgraph.getGraphType() == GraphType.Cycle) {
-                    //in case Tr[1] we must print d^a'_a'
-                    if (subgraph.size() == 1 && Tensors.isKronecker(data[subgraph.getPosition(0)])) {
-                        temp = data[subgraph.getPosition(0)].toString(format);
-                        sb.append(temp);
-                        if (!temp.isEmpty())
-                            sb.append(operatorChar);
-                        continue;
-                    }
-                    sb.append("Tr[");
-                }
-                for (int i = 0; i < subgraph.size(); ++i) {
-                    printed.set(subgraph.getPosition(i));
-                    if (i == subgraph.size() - 1
-                            && subgraph.getGraphType() == GraphType.Cycle) {
-                        if (matrixTypes.size() != 1)
-                            sb.append(", ").append(type);
-                        sb.append("]");
-                    }
-                    if (sb.charAt(sb.length() - 1) != operatorChar)
-                        sb.append(operatorChar);
-                }
+    private final class MatricesPrinter {
+        final OutputFormat format;
+        final char operatorChar;
+        final EnumSet<IndexType> matrixTypes;
+        final BitArray matrixPrint = new BitArray(data.length);
+        final BitArray graphPrint = new BitArray(data.length);
+        final StringBuilder sb = new StringBuilder();
+
+        private MatricesPrinter(OutputFormat format, char operatorChar, EnumSet<IndexType> matrixTypes) {
+            this.format = format;
+            this.operatorChar = operatorChar;
+            this.matrixTypes = matrixTypes;
+            printData();
+        }
+
+        void fillGraphPrint(int[] partition) {
+            for (int i : partition) {
+                graphPrint.set(i);
+                matrixPrint.set(i);
             }
         }
-        for (int i = 0; i < data.length; ++i)
-            if (!printed.get(i)) {
-                sb.append(data[i].toString(format, Product.class));
-                sb.append(operatorChar);
+
+        void printData() {
+            ArrayList<SubgraphContainer> subgraphs = new ArrayList<>();
+            for (IndexType type : matrixTypes) {
+                PrimitiveSubgraph[] sgs = PrimitiveSubgraphPartition.calculatePartition(getContent(), type);
+                out0:
+                for (PrimitiveSubgraph sg : sgs) {
+                    int[] partition = sg.getPartition();
+                    TIntHashSet points = new TIntHashSet(partition);
+                    boolean newSg = true, newGraph = false;
+                    IntArrayList matched = new IntArrayList();
+                    for (int i = subgraphs.size() - 1; i >= 0; --i) {
+                        SubgraphContainer container = subgraphs.get(i);
+                        if (points.equals(container.points)) {
+                            //completely same
+                            if (container.graphType != sg.getGraphType()
+                                    || !Arrays.equals(container.partition, partition)) {
+                                fillGraphPrint(subgraphs.get(i).partition);
+                                subgraphs.remove(i);
+                                continue out0;
+                            }
+                            container.types.add(type);
+                            newSg = false;
+                            matched.add(i);
+                        } else if (intersects(points, container.points)) {
+                            //just intersects
+                            fillGraphPrint(subgraphs.get(i).partition);
+                            subgraphs.remove(i);
+                            newSg = false;
+                            newGraph = true;
+                            for (int j = 0; j < matched.size(); ++j) {
+                                fillGraphPrint(subgraphs.get(matched.get(j)).partition);
+                                subgraphs.remove(matched.get(j));
+                            }
+                        }
+                    }
+                    if (newSg)
+                        subgraphs.add(new SubgraphContainer(sg.getGraphType(), partition, points, type));
+                    else if (newGraph) fillGraphPrint(partition);
+                }
             }
-        if (sb.charAt(sb.length() - 1) == operatorChar)
-            sb.deleteCharAt(sb.length() - 1);
-        return sb.toString();
+
+            for (int i = 0; i < subgraphs.size(); ++i) {
+                SubgraphContainer subgraph = subgraphs.get(i);
+                int ppLength = sb.length();
+                if (subgraph.graphType == GraphType.Cycle)
+                    printTrace(subgraph);
+                else if (subgraph.graphType == GraphType.Line)
+                    printProductOfMatrices(subgraph);
+                else {
+                    for (int j = 0; j < subgraph.partition.length; ++j) {
+                        matrixPrint.set(subgraph.partition[j]);
+                        graphPrint.set(subgraph.partition[j]);
+                    }
+                    continue;
+                }
+                if (i == subgraphs.size() - 1)
+                    break;
+                if (sb.length() != ppLength)
+                    sb.append(operatorChar);
+            }
+
+            removeLastOperatorChar();
+            //printing graph structures
+            if (!graphPrint.isEmpty()) {
+                if (sb.length() != 0)
+                    sb.append(operatorChar);
+                OutputFormat printMatrixIndices = format.printMatrixIndices();
+                for (int i = 0; i < data.length; ++i)
+                    if (graphPrint.get(i)) {
+                        sb.append(data[i].toString(printMatrixIndices, Product.class));
+                        sb.append(operatorChar);
+                    }
+                removeLastOperatorChar();
+            }
+            //if nothing more to print
+            if (matrixPrint.isFull())
+                return;
+
+            if (sb.length() != 0)
+                sb.append(operatorChar);
+            for (int i = 0; i < data.length; ++i)
+                if (!matrixPrint.get(i)) {
+                    sb.append(data[i].toString(format, Product.class));
+                    sb.append(operatorChar);
+                }
+            removeLastOperatorChar();
+        }
+
+        void removeLastOperatorChar() {
+            if (sb.length() > 0 && sb.charAt(sb.length() - 1) == operatorChar)
+                sb.deleteCharAt(sb.length() - 1);
+        }
+
+        void printTrace(SubgraphContainer subgraph) {
+            if (subgraph.partition.length == 1 && Tensors.isKronecker(data[subgraph.partition[0]])) {
+                int position = subgraph.partition[0];
+                matrixPrint.set(position);
+                sb.append(data[position].toString(format.printMatrixIndices(), Product.class));
+            } else {
+                sb.append("Tr[");
+                printProductOfMatrices(subgraph);
+                if (subgraph.types.size() > 1) {
+                    sb.append(", ");
+                    for (int i = 0; ; ++i) {
+                        sb.append(subgraph.types.get(i));
+                        if (i == subgraph.types.size() - 1)
+                            break;
+                        sb.append(", ");
+                    }
+                }
+                sb.append("]");
+            }
+        }
+
+        void printProductOfMatrices(SubgraphContainer subgraph) {
+            for (int i = 0; ; ++i) {
+                int position = subgraph.partition[i];
+                matrixPrint.set(position);
+                String str = data[position].toString(format, Product.class);
+                sb.append(str);
+                if (i == subgraph.partition.length - 1)
+                    return;
+                if (!str.isEmpty())
+                    sb.append(operatorChar);
+            }
+        }
     }
+
+    static boolean intersects(TIntHashSet a, TIntHashSet b) {
+        a = new TIntHashSet(a);
+        a.retainAll(b);
+        return a.size() != 0;
+    }
+
+    private static class SubgraphContainer {
+        private final List<IndexType> types = new ArrayList<>();
+        private final GraphType graphType;
+        private final int[] partition;
+        private final TIntHashSet points;
+
+        private SubgraphContainer(GraphType graphType, int[] partition, TIntHashSet points, IndexType type) {
+            this.graphType = graphType;
+            this.partition = partition;
+            this.points = points;
+            this.types.add(type);
+        }
+    }
+
 
     @Override
     protected String toString(OutputFormat mode, Class<? extends Tensor> clazz) {

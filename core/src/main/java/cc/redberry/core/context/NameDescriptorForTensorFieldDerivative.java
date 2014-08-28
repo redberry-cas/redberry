@@ -54,13 +54,13 @@ final class NameDescriptorForTensorFieldDerivative extends NameDescriptorForTens
 
     @Override
     public String getName(SimpleIndices indices, OutputFormat format) {
-        if (format == OutputFormat.WolframMathematica) {
+        if (format.is(OutputFormat.WolframMathematica)) {
             String[] spl = name.split("~");
             return new StringBuilder().append("Derivative")
                     .append(spl[1].replace("(", "[").replace(")", "]"))
                     .append("[").append(spl[0]).append("]").toString();
         }
-        if (format == OutputFormat.Maple) {
+        if (format.is(OutputFormat.Maple)) {
             StringBuilder sb = new StringBuilder();
             sb.append("D[");
             for (int j = 0; j < orders.length; ++j)

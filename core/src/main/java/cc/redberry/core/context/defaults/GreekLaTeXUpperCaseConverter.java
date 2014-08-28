@@ -124,15 +124,15 @@ public final class GreekLaTeXUpperCaseConverter extends SymbolArrayConverter {
     public String getSymbol(int code, OutputFormat mode) throws IndexConverterException {
         String symbol;
         try {
-            if (mode == OutputFormat.UTF8)
+            if (mode.is(OutputFormat.UTF8))
                 return utf[code];
             symbol = symbols[code];
         } catch (ArrayIndexOutOfBoundsException e) {
             throw new IndexConverterException();
         }
-        if (mode == OutputFormat.WolframMathematica)
+        if (mode.is(OutputFormat.WolframMathematica))
             symbol = "\\[Capital" + Character.toUpperCase(symbol.charAt(1)) + symbol.substring(2) + "]";
-        if (mode == OutputFormat.Maple)
+        if (mode.is(OutputFormat.Maple))
             symbol = symbol.substring(1);
         return symbol;
     }

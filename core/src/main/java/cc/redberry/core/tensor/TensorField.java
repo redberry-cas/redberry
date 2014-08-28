@@ -163,7 +163,7 @@ public final class TensorField extends SimpleTensor {
         StringBuilder sb = new StringBuilder();
         sb.append(super.toString(mode));
 
-        if (mode == OutputFormat.Maple)
+        if (mode.is(OutputFormat.Maple))
             sb.append('(');
         else sb.append('[');
 
@@ -173,7 +173,7 @@ public final class TensorField extends SimpleTensor {
         }
         sb.deleteCharAt(sb.length() - 1);
 
-        if (mode == OutputFormat.Maple)
+        if (mode.is(OutputFormat.Maple))
             sb.append(')');
         else sb.append(']');
 

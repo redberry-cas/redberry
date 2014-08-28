@@ -22,13 +22,17 @@
  */
 package cc.redberry.core.context;
 
-import cc.redberry.core.utils.OutputPort;
 import cc.redberry.core.indices.*;
 import cc.redberry.core.parser.ParseManager;
 import cc.redberry.core.tensor.SimpleTensor;
 import cc.redberry.core.tensor.Tensors;
 import cc.redberry.core.utils.BitArray;
+import cc.redberry.core.utils.OutputPort;
 import org.apache.commons.math3.random.RandomGenerator;
+
+import java.util.Collections;
+import java.util.EnumSet;
+import java.util.Set;
 
 /**
  * This class represents Redberry context. It stores all Redberry session data (in some sense it stores static data).
@@ -68,7 +72,15 @@ public final class Context {
      * Holds information about metric types.
      * This is a "map" from (byte) type to (bit) isMetric
      */
-    private final BitArray metricTypes = new BitArray(128);
+    private final BitArray metricTypesBits = new BitArray(128);
+    /**
+     * Metric types.
+     */
+    private final Set<IndexType> metricTypes;
+    /**
+     * Matrix types.
+     */
+    private final Set<IndexType> matrixTypes;
 
     /**
      * Creates context from the settings
@@ -83,8 +95,33 @@ public final class Context {
                 contextSettings.getKronecker(), contextSettings.getMetricName());
         this.defaultOutputFormat = contextSettings.getDefaultOutputFormat();
 
-        for (IndexType type : contextSettings.getMetricTypes())
-            this.metricTypes.set(type.getType());
+        EnumSet<IndexType> metricTypes = EnumSet.noneOf(IndexType.class);
+        EnumSet<IndexType> matrixTypes = EnumSet.allOf(IndexType.class);
+        for (IndexType type : contextSettings.getMetricTypes()) {
+            matrixTypes.remove(type);
+            metricTypes.add(type);
+            this.metricTypesBits.set(type.getType());
+        }
+        this.metricTypes = Collections.unmodifiableSet(metricTypes);
+        this.matrixTypes = Collections.unmodifiableSet(matrixTypes);
+    }
+
+    /**
+     * Returns all metric types.
+     *
+     * @return all metric types
+     */
+    public Set<IndexType> getMetricTypes() {
+        return metricTypes;
+    }
+
+    /**
+     * Returns all matrix types.
+     *
+     * @return all matrix types
+     */
+    public Set<IndexType> getMatrixTypes() {
+        return matrixTypes;
     }
 
     /**
@@ -247,7 +284,7 @@ public final class Context {
      * @return true if metric is defined for the specified index type
      */
     public boolean isMetric(byte type) {
-        return metricTypes.get(type);
+        return metricTypesBits.get(type);
     }
 
     /**
@@ -288,7 +325,7 @@ public final class Context {
         byte type;
         if ((type = IndicesUtils.getType(index1)) != IndicesUtils.getType(index2)
                 || !IndicesUtils.haveEqualStates(index1, index2)
-                || !metricTypes.get(type))
+                || !metricTypesBits.get(type))
             throw new IllegalArgumentException("Not metric indices.");
         SimpleIndices indices = IndicesFactory.createSimple(null, index1, index2);
         NameDescriptor nd = nameManager.mapNameDescriptor(nameManager.getMetricName(), StructureOfIndices.create(indices));
@@ -303,7 +340,7 @@ public final class Context {
      * @param index1 first index
      * @param index2 second index
      * @return metric tensor if specified indices have same states and
-     *         Kronecker tensor if specified indices have different states
+     * Kronecker tensor if specified indices have different states
      * @throws IllegalArgumentException if indices have different types
      * @throws IllegalArgumentException if indices have same states and non metric types
      */

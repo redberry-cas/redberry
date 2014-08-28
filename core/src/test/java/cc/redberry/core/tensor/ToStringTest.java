@@ -25,18 +25,18 @@ package cc.redberry.core.tensor;
 import cc.redberry.core.TAssert;
 import cc.redberry.core.context.CC;
 import cc.redberry.core.context.OutputFormat;
+import cc.redberry.core.indexmapping.IndexMappings;
 import cc.redberry.core.indices.IndexType;
 import cc.redberry.core.indices.IndicesFactory;
-import cc.redberry.core.indices.IndicesUtils;
 import cc.redberry.core.parser.preprocessor.GeneralIndicesInsertion;
 import cc.redberry.core.tensor.iterator.FromChildToParentIterator;
 import cc.redberry.core.tensor.random.RandomTensor;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.Arrays;
 
+import static cc.redberry.core.context.OutputFormat.Redberry;
 import static cc.redberry.core.context.OutputFormat.SimpleRedberry;
 import static cc.redberry.core.tensor.Tensors.parse;
 import static cc.redberry.core.tensor.Tensors.parseSimple;
@@ -45,7 +45,6 @@ import static cc.redberry.core.tensor.Tensors.parseSimple;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-@Ignore
 public class ToStringTest {
     @Test
     public void test1() {
@@ -125,94 +124,159 @@ public class ToStringTest {
     }
 
     @Test
-    public void test10(){
+    public void test10() {
         GeneralIndicesInsertion gii = new GeneralIndicesInsertion();
         gii.addInsertionRule(parseSimple("G_a^a'_b'"), IndexType.Matrix1);
         gii.addInsertionRule(parseSimple("U_a^A'_B'"), IndexType.Matrix2);
         CC.current().getParseManager().defaultParserPreprocessors.add(gii);
         Tensor t = parse("Tr[G_a*G_b*U_m*U_n]");
         Assert.assertFalse(t.toString(OutputFormat.Redberry).contains("Tr"));
+        assertSimpleRedberryString("Tr[G_a*G_b*U_m*U_n]");
     }
 
-
     @Test
-    public void test11(){
+    public void test11() {
         GeneralIndicesInsertion gii = new GeneralIndicesInsertion();
         gii.addInsertionRule(parseSimple("G_a^a'_b'"), IndexType.Matrix1);
         CC.current().getParseManager().defaultParserPreprocessors.add(gii);
         Tensor t = parse("G_a*G_b + f_ab*d^a'_a'");
-        System.out.println(t.toString(SimpleRedberry));
-        t = parse("d^a'_a'");
-        System.out.println(t.toString(SimpleRedberry));
+        assertSimpleRedberryString("G_a*G_b + f_ab*d^a'_a'");
+        assertSimpleRedberryString("Tr[G_a*G_b] + f_ab*d^a'_a'");
     }
 
-    @Ignore//random not working with matrices
+    @Test
+    public void test12() {
+        GeneralIndicesInsertion gii = new GeneralIndicesInsertion();
+        gii.addInsertionRule(parseSimple("G_a^a'_b'"), IndexType.Matrix1);
+        CC.current().getParseManager().defaultParserPreprocessors.add(gii);
+        assertSimpleRedberryString("G_a*G^a + 1");
+        assertSimpleRedberryString("G_a*G^a + f_a^a");
+    }
+
+    @Test
+    public void test12a() {
+        GeneralIndicesInsertion gii = new GeneralIndicesInsertion();
+        gii.addInsertionRule(parseSimple("G_a^a'_b'"), IndexType.Matrix1);
+        CC.current().getParseManager().defaultParserPreprocessors.add(gii);
+        System.out.println(parse("G_a*G^a + f_a^a").toString(SimpleRedberry));
+    }
+
+    @Test
+    public void test13() {
+        GeneralIndicesInsertion gii = new GeneralIndicesInsertion();
+        gii.addInsertionRule(parseSimple("G^a'_b'"), IndexType.Matrix1);
+        gii.addInsertionRule(parseSimple("Q^A'_B'"), IndexType.Matrix2);
+        gii.addInsertionRule(parseSimple("P^a'_b'"), IndexType.Matrix1);
+        gii.addInsertionRule(parseSimple("L^A'_B'"), IndexType.Matrix2);
+
+        CC.current().getParseManager().defaultParserPreprocessors.add(gii);
+        assertSimpleRedberryString("(Q+G)*(P+L)");
+    }
+
+    @Test
+    public void test14() {
+        GeneralIndicesInsertion gii = new GeneralIndicesInsertion();
+        gii.addInsertionRule(parseSimple("G^a'_b'"), IndexType.Matrix1);
+        gii.addInsertionRule(parseSimple("Q^A'_B'"), IndexType.Matrix2);
+        gii.addInsertionRule(parseSimple("P^A'_B'"), IndexType.Matrix2);
+        gii.addInsertionRule(parseSimple("L^A'_B'"), IndexType.Matrix2);
+
+        CC.current().getParseManager().defaultParserPreprocessors.add(gii);
+        assertSimpleRedberryString("(Q+G)*(P+L)");
+    }
+
+    @Test
+    public void test15() {
+        CC.resetTensorNames(1234);
+        GeneralIndicesInsertion gii = new GeneralIndicesInsertion();
+        gii.addInsertionRule(parseSimple("C^a'_b'"), IndexType.Matrix1);
+        gii.addInsertionRule(parseSimple("S^A'_B'"), IndexType.Matrix2);
+        gii.addInsertionRule(parseSimple("Q^A'_B'"), IndexType.Matrix2);
+        gii.addInsertionRule(parseSimple("R^A'_B'"), IndexType.Matrix2);
+
+        CC.current().getParseManager().defaultParserPreprocessors.add(gii);
+        assertSimpleRedberryString("(S+Q)*(R+C)");
+    }
+
+    @Test
+    public void test16() {
+        CC.resetTensorNames(1234);
+        GeneralIndicesInsertion gii = new GeneralIndicesInsertion();
+        gii.addInsertionRule(parseSimple("F^a'_b'"), IndexType.Matrix1);
+        gii.addInsertionRule(parseSimple("K^a'_b'"), IndexType.Matrix1);
+        gii.addInsertionRule(parseSimple("N^A'_B'"), IndexType.Matrix2);
+        gii.addInsertionRule(parseSimple("L^A'_B'"), IndexType.Matrix2);
+
+        CC.current().getParseManager().defaultParserPreprocessors.add(gii);
+        System.out.println(parse("Tr[(N+L)*(F+K)]").toString(SimpleRedberry));
+        assertSimpleRedberryString("Tr[(N+L)*(F+K)]");
+    }
+
     @Test
     public void test9Random() {
-        GeneralIndicesInsertion indicesInsertion = new GeneralIndicesInsertion();
-        CC.current().getParseManager().defaultParserPreprocessors.add(indicesInsertion);
-
-        SimpleTensor[] matrices = {
-                parseSimple("A^a'_b'"),
-                parseSimple("B^a'_b'"),
-                parseSimple("C^a'_b'"),
-                parseSimple("D^A'_B'"),
-                parseSimple("E^A'_B'"),
-        };
-        for (SimpleTensor st : matrices)
-            indicesInsertion.addInsertionRule(st, IndicesUtils.getTypeEnum(st.getIndices().get(0)));
-
-        RandomTensor randomTensor = new RandomTensor();
-        randomTensor.clearNamespace();
-        randomTensor.reset(123);
-        randomTensor.addToNamespace(matrices);
-        randomTensor.addToNamespace(parse("F_ab"));
-        randomTensor.addToNamespace(parse("J_cd"));
-        for (int i = 0; i < 100; ++i)
-            assertSimpleRedberryString(
-                    randomTensor.nextTensorTree(4, 10, 10, IndicesFactory.EMPTY_INDICES));
-
-
+        test(System.currentTimeMillis(), 1000, 10, 0, 3, 3, 3);
     }
+
 
     @Test
     public void test10Random() {
-        CC.resetTensorNames(123);
-        SimpleTensor[] matrices = {
-                parseSimple("A_m^a'_b'"),
-                parseSimple("B_mn^a'_b'"),
-                parseSimple("C_a^a'_b'"),
-                parseSimple("D_ab^A'_B'"),
-                parseSimple("E_c^A'_B'"),
-        };
+        test(System.currentTimeMillis(), 1000, 10, 2, 3, 3, 3);
+    }
+
+    public static void test(long seed, int tries, int latinL, int latinU, int depth, int product, int sum) {
+        CC.resetTensorNames(seed);
+        GeneralIndicesInsertion indicesInsertion = new GeneralIndicesInsertion();
+        CC.current().getParseManager().defaultParserPreprocessors.add(indicesInsertion);
+
+        SimpleTensor[] matrices = new SimpleTensor[latinL];
+        char start = 'A';
+        int i = 0;
+        for (; i < matrices.length; ++i) {
+            if (start == 'I')
+                ++start;
+            matrices[i] = parseSimple(String.valueOf(start++) + "^a'_b'");
+        }
+
+        matrices = Arrays.copyOf(matrices, latinL + latinU);
+        for (; i < matrices.length; ++i) {
+            if (start == 'I')
+                ++start;
+            matrices[i] = parseSimple(String.valueOf(start++) + "^A'_B'");
+        }
 
         SimpleTensor[] matricesSimple = new SimpleTensor[matrices.length];
-        for (int i = 0; i < matrices.length; ++i)
+        for (i = 0; i < matrices.length; ++i)
             matricesSimple[i] = parseSimple(matrices[i].toString(SimpleRedberry));
-        System.out.println(Arrays.toString(matricesSimple));
-        //simple random
-        RandomTensor randomTensor = new RandomTensor();
-        randomTensor.reset(123);
+        for (SimpleTensor st : matrices)
+            indicesInsertion.addInsertionRule(st, extractMatrixType(st));
+
+
+        RandomTensor randomTensor = new RandomTensor(false);
         randomTensor.clearNamespace();
+        randomTensor.reset(seed);
         randomTensor.addToNamespace(matricesSimple);
         randomTensor.addToNamespace(parse("F_ab"));
         randomTensor.addToNamespace(parse("J_cd"));
 
-        GeneralIndicesInsertion indicesInsertion = new GeneralIndicesInsertion();
-        CC.current().getParseManager().defaultParserPreprocessors.add(indicesInsertion);
-        for (SimpleTensor st : matrices) {
-            indicesInsertion.addInsertionRule(st, extractMatrixType(st));
+        int k = 0;
+        for (i = 0; i < tries; ++i) {
+            Tensor tensor = randomTensor.nextTensorTree(depth, product, sum, IndicesFactory.EMPTY_INDICES);
+            if (containsPow(tensor))
+                continue;
+            assertSimpleRedberryString(tensor.toString(SimpleRedberry));
+            assertSimpleRedberryString("Tr[" + tensor.toString(SimpleRedberry) + "]");
+            ++k;
         }
+        System.out.println(k);
+    }
 
-        //System.out.println(parse("A_m*A_n"));
-        for (int i = 0; i < 100; ++i) {
-            System.out.println(i);
-            Tensor r = randomTensor.nextTensorTree(1, 3, 3, IndicesFactory.EMPTY_INDICES);
-            assertSingleType(r, IndexType.LatinLower);
-            //System.out.println(r);
-            assertSimpleRedberryString(parse(r.toString()));
-        }
 
+    private static boolean containsPow(Tensor t) {
+        FromChildToParentIterator it = new FromChildToParentIterator(t);
+        while ((t = it.next()) != null)
+            if (t.getClass() == Power.class)
+                return true;
+        return false;
     }
 
     private static IndexType extractMatrixType(SimpleTensor st) {
@@ -222,15 +286,14 @@ public class ToStringTest {
         return null;
     }
 
-    private static void assertSimpleRedberryString(Tensor t) {
-        System.out.println(t.toString(SimpleRedberry));
-        System.out.println(parse(t.toString(SimpleRedberry)).toString(SimpleRedberry));
-        TAssert.assertEquals(t, parse(t.toString(SimpleRedberry)));
-    }
-
     private static void assertSimpleRedberryString(String tensor) {
+        System.out.println(tensor);
         Tensor t = parse(tensor);
-        TAssert.assertEquals(t, parse(t.toString(SimpleRedberry)));
+        System.out.println(t.toString(Redberry));
+        System.out.println(t.toString(SimpleRedberry));
+        System.out.println(parse(t.toString(SimpleRedberry)));
+        System.out.println();
+        TAssert.assertTrue(IndexMappings.anyMappingExists(t, parse(t.toString(SimpleRedberry))));
     }
 
     private static void assertSingleType(Tensor t, IndexType type) {

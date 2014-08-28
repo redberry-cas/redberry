@@ -368,7 +368,7 @@ class RedberryStatic {
     private static boolean onceSetFormat = false
 
     private static void setupSimpleRedberryOutputOnce() {
-        if (!onceSetFormat && CC.defaultOutputFormat == OutputFormat.Redberry)
+        if (!onceSetFormat && CC.defaultOutputFormat.is(OutputFormat.Redberry))
             CC.setDefaultOutputFormat(OutputFormat.SimpleRedberry)
         onceSetFormat = true
     }

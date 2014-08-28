@@ -102,7 +102,7 @@ public class ParseToken {
         StringBuilder sb = new StringBuilder();
         switch (tokenType) {
             case Product:
-                char operatorChar = mode == OutputFormat.LaTeX ? ' ' : '*';
+                char operatorChar = mode.is(OutputFormat.LaTeX) ? ' ' : '*';
 
                 for (int i = 0; ; ++i) {
                     sb.append(content[i].toString(mode));
