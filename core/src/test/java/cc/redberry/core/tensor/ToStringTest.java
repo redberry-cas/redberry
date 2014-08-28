@@ -32,6 +32,7 @@ import cc.redberry.core.parser.preprocessor.GeneralIndicesInsertion;
 import cc.redberry.core.tensor.iterator.FromChildToParentIterator;
 import cc.redberry.core.tensor.random.RandomTensor;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.Arrays;
@@ -212,12 +213,14 @@ public class ToStringTest {
         assertSimpleRedberryString("Tr[(N+L)*(F+K)]");
     }
 
+//    @Ignore
     @Test
     public void test9Random() {
         test(System.currentTimeMillis(), 1000, 10, 0, 3, 3, 3);
     }
 
 
+//    @Ignore
     @Test
     public void test10Random() {
         test(System.currentTimeMillis(), 1000, 10, 2, 3, 3, 3);
@@ -287,13 +290,13 @@ public class ToStringTest {
     }
 
     private static void assertSimpleRedberryString(String tensor) {
-        System.out.println(tensor);
+//        System.out.println(tensor);
         Tensor t = parse(tensor);
-        System.out.println(t.toString(Redberry));
-        System.out.println(t.toString(SimpleRedberry));
-        System.out.println(parse(t.toString(SimpleRedberry)));
-        System.out.println();
-        TAssert.assertTrue(IndexMappings.anyMappingExists(t, parse(t.toString(SimpleRedberry))));
+//        System.out.println(t.toString(Redberry));
+//        System.out.println(t.toString(SimpleRedberry));
+//        System.out.println(parse(t.toString(SimpleRedberry)));
+//        System.out.println();
+        TAssert.assertTrue(IndexMappings.anyMappingExists(t, parse(t.toString(Redberry))));
     }
 
     private static void assertSingleType(Tensor t, IndexType type) {

@@ -822,6 +822,7 @@ public final class Product extends MultiTensor {
                 return sb.toString();
             sb.append(operatorChar);
         }
+        removeLastOperatorChar(sb, operatorChar);
         EnumSet<IndexType> matrixTypes;
         if (format.printMatrixIndices || (matrixTypes = IndicesUtils.nonMetricTypes(indices)).isEmpty())
             return printData(sb, format, operatorChar);
@@ -829,17 +830,27 @@ public final class Product extends MultiTensor {
     }
 
     private String printData(StringBuilder sb, OutputFormat format, char operatorChar) {
+        sb.append(operatorChar);
         for (int i = 0; ; ++i) {
             sb.append(data[i].toString(format, Product.class));
             if (i == data.length - 1)
-                return sb.toString();
+                break;
             sb.append(operatorChar);
         }
+        removeLastOperatorChar(sb, operatorChar);
+        return sb.toString();
     }
 
     private String printMatrices(StringBuilder sb, OutputFormat format, char operatorChar, EnumSet<IndexType> matrixTypes) {
+        sb.append(operatorChar);
         sb.append(new MatricesPrinter(format, operatorChar, matrixTypes).sb.toString());
+        removeLastOperatorChar(sb, operatorChar);
         return sb.toString();
+    }
+
+    static void removeLastOperatorChar(StringBuilder sb, char operatorChar) {
+        if (sb.length() > 0 && sb.charAt(sb.length() - 1) == operatorChar)
+            sb.deleteCharAt(sb.length() - 1);
     }
 
     private final class MatricesPrinter {
@@ -953,8 +964,7 @@ public final class Product extends MultiTensor {
         }
 
         void removeLastOperatorChar() {
-            if (sb.length() > 0 && sb.charAt(sb.length() - 1) == operatorChar)
-                sb.deleteCharAt(sb.length() - 1);
+            Product.removeLastOperatorChar(sb, operatorChar);
         }
 
         void printTrace(SubgraphContainer subgraph) {

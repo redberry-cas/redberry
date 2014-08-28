@@ -91,8 +91,8 @@ public class SimpleTensor extends Tensor {
 
     @Override
     public String toString(OutputFormat mode, Class clazz) {
-        if (Tensors.isKronecker(this)
-                && !mode.printMatrixIndices
+        if (!mode.printMatrixIndices
+                && Tensors.isKronecker(this)
                 && !CC.isMetric(IndicesUtils.getType(indices.get(0)))) {
             String str = clazz == Sum.class ? "1" : "";
             return indices.getFree().size() == 0 ? toString0(mode.printMatrixIndices()) : str;
