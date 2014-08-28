@@ -294,7 +294,7 @@ public class GeneralIndicesInsertion implements ParseTokenTransformer {
                     if (node.content.length == 1)
                         types = EnumSet.allOf(IndexType.class);
                     else {
-                        types = new HashSet<>();
+                        types = EnumSet.noneOf(IndexType.class);
                         ParseToken pn;
                         IndexType type;
 

@@ -22,8 +22,6 @@
  */
 package cc.redberry.groovy
 
-import cc.redberry.core.groups.permutations.Permutation
-import cc.redberry.core.groups.permutations.PermutationOneLineInt
 import cc.redberry.core.groups.permutations.Permutations
 import cc.redberry.core.indexmapping.IndexMappings
 import cc.redberry.core.tensor.Tensors

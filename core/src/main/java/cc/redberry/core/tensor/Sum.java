@@ -188,7 +188,10 @@ public final class Sum extends MultiTensor {
             temp = get(i).toString(mode, Sum.class);
             if ((temp.charAt(0) == '-' || temp.charAt(0) == '+') && sb.length() != 0)
                 sb.deleteCharAt(sb.length() - 1);
-            sb.append(get(i).toString(mode, Sum.class));
+            String str = get(i).toString(mode, Sum.class);
+            if (str.contains("'") && !mode.printMatrixIndices)
+                return toString(mode.printMatrixIndices());
+            sb.append(str);
             if (i == size() - 1)
                 return sb.toString();
             sb.append('+');

@@ -129,7 +129,7 @@ abstract class AbstractIndices implements Indices {
         StringBuilder sb = new StringBuilder();
         int currentState;
 
-        if (format == WolframMathematica || format == Maple) {
+        if (format.is(WolframMathematica) || format.is(Maple)) {
             for (int i = 0; ; i++) {
                 currentState = data[i] >>> 31;
                 if (currentState == 1) sb.append(format.upperIndexPrefix);
@@ -139,7 +139,7 @@ abstract class AbstractIndices implements Indices {
                     break;
                 sb.append(",");
             }
-        } else if (format == Cadabra) {
+        } else if (format.is(Cadabra)) {
             IntArrayList nonMetricIndices = new IntArrayList();
             IntArrayList metricIndices = new IntArrayList(data.length);
             for (int i = 0; i < data.length; ++i)
@@ -179,21 +179,26 @@ abstract class AbstractIndices implements Indices {
                 sb.append('}');
             }
         } else {
-            String latexBrackets = format == LaTeX ? "{}" : "";
+            String latexBrackets = format.is(LaTeX) ? "{}" : "";
 
-            currentState = (data[0] >>> 31);
-            sb.append(format.getPrefixFromIntState(currentState)).append('{');
-
-            int lastState = currentState;
+            int totalToPrint = 0;
+            int lastState = -1;
             for (int i = 0; i < data.length; i++) {
+                if (!CC.isMetric(IndicesUtils.getType(data[i])) && !format.printMatrixIndices)
+                    continue;
                 currentState = data[i] >>> 31;
                 if (lastState != currentState) {
-                    sb.append('}').append(latexBrackets).append(format.getPrefixFromIntState(currentState)).append('{');
+                    if (totalToPrint != 0)
+                        sb.append('}');
+                    sb.append(latexBrackets).append(format.getPrefixFromIntState(currentState)).append('{');
                     lastState = currentState;
                 }
                 sb.append(Context.get().getIndexConverterManager().getSymbol(data[i], format));
+                ++totalToPrint;
             }
             sb.append('}');
+            if (totalToPrint == 0)
+                return "";
         }
 
         return sb.toString();

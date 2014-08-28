@@ -112,7 +112,7 @@ public class ParseTokenSimpleTensor extends ParseToken {
         StringBuilder sb = new StringBuilder();
 
         //Adding tensor name
-        if (mode == OutputFormat.Maple && isKroneckerOrMetric()) {
+        if (mode.is(OutputFormat.Maple) && isKroneckerOrMetric()) {
             if (isKronecker())
                 sb.append("KroneckerDelta");
             else
@@ -125,7 +125,7 @@ public class ParseTokenSimpleTensor extends ParseToken {
             return sb.toString();
 
         //Writing indices
-        boolean external = mode == OutputFormat.WolframMathematica || mode == OutputFormat.Maple;
+        boolean external = mode.is(OutputFormat.WolframMathematica) || mode.is(OutputFormat.Maple);
         if (external)
             sb.append("[");
         sb.append(indices.toString(mode));

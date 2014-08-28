@@ -144,4 +144,11 @@ public class RandomTensorTest {
         rnd.addToNamespace(parse("T_abcd"), parse("T_ab"));
         rnd.nextProduct(2, ParserIndices.parseSimple("_abc"));
     }
+
+    @Test
+    public void test2() {
+        RandomTensor rnd = new RandomTensor(false);
+        IndicesFactory.create(
+                rnd.nextIndices(ParserIndices.parseSimple("^a'_b'").getStructureOfIndices()));
+    }
 }

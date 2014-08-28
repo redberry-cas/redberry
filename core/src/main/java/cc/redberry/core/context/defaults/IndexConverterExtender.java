@@ -114,9 +114,9 @@ public final class IndexConverterExtender implements IndexSymbolConverter {
             return innerConverter.getSymbol(code, mode);
         else {
             String symbol = innerConverter.getSymbol(code % (innerConverter.maxNumberOfSymbols() + 1), mode);
-            if (mode == OutputFormat.WolframMathematica)
+            if (mode.is(OutputFormat.WolframMathematica))
                 return "Subscript[" + symbol + ", " + subscript + "]";
-            if (mode == OutputFormat.Maple)
+            if (mode.is(OutputFormat.Maple))
                 return symbol + subscript;
             return symbol + "_" + ("{" + subscript + "}");
         }

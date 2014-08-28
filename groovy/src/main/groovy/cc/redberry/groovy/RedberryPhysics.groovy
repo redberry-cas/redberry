@@ -41,7 +41,7 @@ import static cc.redberry.core.tensor.Tensors.parseSimple
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public class RedberryPhysics {
+public final class RedberryPhysics {
 
     /**
      * Returns mandelstam and mass shell substitutions following from the provided map

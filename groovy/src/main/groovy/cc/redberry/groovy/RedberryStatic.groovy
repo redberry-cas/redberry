@@ -365,6 +365,14 @@ class RedberryStatic {
             CC.current().getParseManager().defaultParserPreprocessors.add(indicesInsertion);
     }
 
+    private static boolean onceSetFormat = false
+
+    private static void setupSimpleRedberryOutputOnce() {
+        if (!onceSetFormat && CC.defaultOutputFormat.is(OutputFormat.Redberry))
+            CC.setDefaultOutputFormat(OutputFormat.SimpleRedberry)
+        onceSetFormat = true
+    }
+
     /**
      * Tells Redberry to consider specified tensors as matrices and use matrix multiplication rules
      * @param objs input
@@ -372,6 +380,7 @@ class RedberryStatic {
      */
     public static void defineMatrices(Object... objs) {
         ensureIndicesInsertionAddedToParser()
+        setupSimpleRedberryOutputOnce()
         def bufferOfTensors = [], bufferOfDescriptors = [];
         objs.each { obj ->
             if (obj instanceof MatrixDescriptor)

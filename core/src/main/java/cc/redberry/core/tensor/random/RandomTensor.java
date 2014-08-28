@@ -38,6 +38,7 @@ import org.apache.commons.math3.random.Well1024a;
 import org.apache.commons.math3.random.Well19937c;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -49,9 +50,9 @@ public final class RandomTensor {
 
     protected final RandomGenerator random;
     protected long seed;
-    protected final static byte TYPES_COUNT = 4;
-    protected final static byte[] TYPES = {0, 1, 2, 3};
-    protected static final int[] ALPHABETS_SIZES = new int[4];
+    protected final static byte TYPES_COUNT = IndexType.TYPES_COUNT;
+    protected final static byte[] TYPES = IndexType.getBytes();
+    protected static final int[] ALPHABETS_SIZES = new int[IndexType.TYPES_COUNT];
 
     static {
         for (byte b : TYPES)
@@ -102,12 +103,12 @@ public final class RandomTensor {
         this.generateNewDescriptors = generateNewDescriptors;
         this.random = random;
         this.random.setSeed(seed = random.nextLong());
-        this.minIndices = minIndices;
-        this.maxIndices = maxIndices;
+        this.minIndices = Arrays.copyOf(minIndices, TYPES_COUNT);
+        this.maxIndices = Arrays.copyOf(maxIndices, TYPES_COUNT);
         this.withSymmetries = withSymmetries;
         int di = 1, t;
-        for (int i = 0; i < TYPES.length; ++i)
-            di *= (t = maxIndices[i] - minIndices[i]) == 0 ? 1 : t;
+        for (int i = 0; i < TYPES_COUNT; ++i)
+            di *= (t = this.maxIndices[i] - this.minIndices[i]) == 0 ? 1 : t;
         this.diffStringNames = (maxDiffNDs - minDiffNDs) / di;
 //        namespace = new NameDescriptor[minDiffNDs + (int) (0.5 * (maxDiffNDs - minDiffNDs))];//TODO add randomization
         //initial namespace size
@@ -397,19 +398,26 @@ public final class RandomTensor {
         //Creating resulting product
         ProductBuilder pb = new ProductBuilder(10, productSize);
         for (Tensor descriptor : descriptors) {
-            StructureOfIndices its = IndicesFactory.createSimple(null, descriptor.getIndices().getFree()).getStructureOfIndices();
+            Indices free = descriptor.getIndices().getFree();
+            StructureOfIndices its = IndicesFactory.createSimple(null, free).getStructureOfIndices();
             int[] factorIndices = new int[its.size()];
             int position = 0;
             for (byte b : TYPES) {
                 StructureOfIndices.TypeData typeData = its.getTypeData(b);
-                if (typeData == null)
+                if (typeData == null || typeData.length == 0)
                     continue;
-                for (i = 0; i < typeData.length; ++i)
-                    factorIndices[position++] = indicesSpace[b][--totalIndicesCounts[b]];
+                if (typeData.states == null)
+                    for (i = 0; i < typeData.length; ++i)
+                        factorIndices[position++] = indicesSpace[b][--totalIndicesCounts[b]];
+                else
+                    for (i = 0; i < typeData.length; ++i)
+                        factorIndices[position++] = IndicesUtils.setState(typeData.states.get(i),
+                                indicesSpace[b][--totalIndicesCounts[b]]);
+
             }
 
             descriptor = ApplyIndexMapping.applyIndexMapping(descriptor,
-                    new Mapping(descriptor.getIndices().getFree().getAllIndices().copy(), factorIndices), forbidden.toArray());
+                    new Mapping(free.getAllIndices().copy(), factorIndices), forbidden.toArray());
             descriptor = ApplyIndexMapping.renameDummy(descriptor, forbidden.toArray());
             forbidden.addAll(TensorUtils.getAllIndicesNamesT(descriptor));
 
@@ -440,21 +448,29 @@ public final class RandomTensor {
         int p = 0;
         for (byte b : TYPES) {
             StructureOfIndices.TypeData typeData = structureOfIndices.getTypeData(b);
-            if (typeData == null)
+            if (typeData == null || typeData.length == 0)
                 continue;
             typeInd = new int[typeData.length];
-            int i;
-            int contracted = (contracted = nextInt(indices.length / 2)) == 0 ? 1 : contracted;
-            for (i = 0; i < typeInd.length / contracted; ++i)
-                typeInd[i] = IndicesUtils.setType(b, i);
-            if (i - contracted < 0)
-                contracted = i;
-            for (; i < typeInd.length; ++i)
-                typeInd[i] = IndicesUtils.createIndex(i - contracted, b, true);
-            shuffle(typeInd);
+            if (typeData.states != null) {
+                //in the case of matrix indices
+                int[] names = nextPermutation(typeInd.length);
+                for (int i = 0; i < typeInd.length; ++i)
+                    typeInd[i] = IndicesUtils.createIndex(names[i], b, typeData.states.get(i));
+            } else {
+                int i;
+                int contracted = (contracted = nextInt(indices.length / 2)) == 0 ? 1 : contracted;
+                for (i = 0; i < typeInd.length / contracted; ++i)
+                    typeInd[i] = IndicesUtils.setType(b, i);
+                if (i - contracted < 0)
+                    contracted = i;
+                for (; i < typeInd.length; ++i)
+                    typeInd[i] = IndicesUtils.createIndex(i - contracted, b, true);
+                shuffle(typeInd);
+            }
             System.arraycopy(typeInd, 0, indices, p, typeInd.length);
             p += typeInd.length;
         }
+
         return indices;
     }
 
