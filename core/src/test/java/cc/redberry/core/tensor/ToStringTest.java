@@ -213,17 +213,14 @@ public class ToStringTest {
         assertSimpleRedberryString("Tr[(N+L)*(F+K)]");
     }
 
-//    @Ignore
     @Test
     public void test9Random() {
-        test(System.currentTimeMillis(), 1000, 10, 0, 3, 3, 3);
+        test(System.currentTimeMillis(), 500, 10, 0, 3, 3, 3);
     }
 
-
-//    @Ignore
     @Test
     public void test10Random() {
-        test(System.currentTimeMillis(), 1000, 10, 2, 3, 3, 3);
+        test(System.currentTimeMillis(), 500, 10, 2, 3, 3, 3);
     }
 
     public static void test(long seed, int tries, int latinL, int latinU, int depth, int product, int sum) {

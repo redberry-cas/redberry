@@ -139,9 +139,12 @@ public class SimpleTensor extends Tensor {
     }
 
 
-    private String toString0(OutputFormat mode) {
+    String toString0(OutputFormat mode) {
+        //Initializing StringBuilder
         StringBuilder sb = new StringBuilder();
+
         sb.append(CC.getNameDescriptor(name).getName(indices, mode));
+
         //If there are no indices return builder content
         if (indices.size() == 0)
             return sb.toString();
