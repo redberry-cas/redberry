@@ -28,11 +28,12 @@ import cc.redberry.core.context.OutputFormat;
 import cc.redberry.core.indexmapping.IndexMappings;
 import cc.redberry.core.indices.IndexType;
 import cc.redberry.core.indices.IndicesFactory;
+import cc.redberry.core.indices.SimpleIndices;
+import cc.redberry.core.parser.ParserIndices;
 import cc.redberry.core.parser.preprocessor.GeneralIndicesInsertion;
 import cc.redberry.core.tensor.iterator.FromChildToParentIterator;
 import cc.redberry.core.tensor.random.RandomTensor;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.Arrays;
@@ -211,6 +212,29 @@ public class ToStringTest {
         CC.current().getParseManager().defaultParserPreprocessors.add(gii);
         System.out.println(parse("Tr[(N+L)*(F+K)]").toString(SimpleRedberry));
         assertSimpleRedberryString("Tr[(N+L)*(F+K)]");
+    }
+
+    @Test
+    public void test17Random() throws Exception {
+        testRandomRedberry(100);
+    }
+
+    @Test
+    public void test17Random_longtest() throws Exception {
+        testRandomRedberry(1000);
+    }
+
+    private static void testRandomRedberry(int n) {
+        RandomTensor randomTensor = new RandomTensor(false);
+        randomTensor.reset();
+        randomTensor.addToNamespace(parse("F_mnl"), parse("F_mc"), parse("F_a"), parse("x"), parse("y"));
+        SimpleIndices[] indices = {ParserIndices.parseSimple("_abc"), ParserIndices.parseSimple("_ab"), ParserIndices.parseSimple("_a"), IndicesFactory.EMPTY_SIMPLE_INDICES};
+        for (SimpleIndices ii : indices) {
+            for (int i = 0; i < n; ++i) {
+                Tensor tensor = randomTensor.nextTensorTree(3, 3, 3, ii);
+                TAssert.assertEquals(tensor, parse(tensor.toString(Redberry)));
+            }
+        }
     }
 
     @Test

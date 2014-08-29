@@ -801,6 +801,7 @@ public final class Product extends MultiTensor {
         }
     }
 
+
     @Override
     public String toString(OutputFormat format) {
         StringBuilder sb = new StringBuilder();
@@ -822,16 +823,18 @@ public final class Product extends MultiTensor {
                 return sb.toString();
             sb.append(operatorChar);
         }
-        removeLastOperatorChar(sb, operatorChar);
+
+//        removeLastOperatorChar(sb, operatorChar);
         EnumSet<IndexType> matrixTypes;
         if (format.printMatrixIndices || (matrixTypes = IndicesUtils.nonMetricTypes(indices)).isEmpty())
             return printData(sb, format, operatorChar);
         return printMatrices(sb, format, operatorChar, matrixTypes);
     }
 
+
     private String printData(StringBuilder sb, OutputFormat format, char operatorChar) {
-        if (sb.length() != 0)
-            sb.append(operatorChar);
+//        if (sb.length() != 0)
+//            sb.append(operatorChar);
         for (int i = 0; ; ++i) {
             sb.append(data[i].toString(format, Product.class));
             if (i == data.length - 1)
@@ -843,8 +846,8 @@ public final class Product extends MultiTensor {
     }
 
     private String printMatrices(StringBuilder sb, OutputFormat format, char operatorChar, EnumSet<IndexType> matrixTypes) {
-        if (sb.length() != 0)
-            sb.append(operatorChar);
+//        if (sb.length() != 0)
+//            sb.append(operatorChar);
         sb.append(new MatricesPrinter(format, operatorChar, matrixTypes).sb.toString());
         removeLastOperatorChar(sb, operatorChar);
         return sb.toString();
