@@ -31,9 +31,7 @@ import cc.redberry.core.context.CC
 import cc.redberry.core.context.OutputFormat
 import cc.redberry.core.groups.permutations.Permutation
 import cc.redberry.core.groups.permutations.PermutationGroup
-import cc.redberry.core.indices.IndexType
-import cc.redberry.core.indices.SimpleIndices
-import cc.redberry.core.indices.StructureOfIndices
+import cc.redberry.core.indices.*
 import cc.redberry.core.parser.ParseTokenSimpleTensor
 import cc.redberry.core.parser.preprocessor.GeneralIndicesInsertion
 import cc.redberry.core.solver.ExternalSolver
@@ -326,6 +324,36 @@ class RedberryStatic {
 
         public Transformation getAt(SimpleIndices indices) {
             return new SymmetrizeTransformation(indices, true)
+        }
+    }
+
+    public static final FullySymmetrizeWrapper FullySymmetrize = new FullySymmetrizeWrapper(true);
+
+    public static final FullySymmetrizeWrapper FullyAntiSymmetrize = new FullySymmetrizeWrapper(false);
+
+    public static final class FullySymmetrizeWrapper implements Transformation {
+        final boolean symm;
+
+        FullySymmetrizeWrapper(boolean symm) {
+            this.symm = symm
+        }
+
+        private SimpleIndices prepareIndices(Indices indices) {
+            SimpleIndices indices0 = IndicesFactory.createSimple(null, indices)
+            if (symm)
+                indices0.symmetries.setSymmetric()
+            else
+                indices0.symmetries.setAntiSymmetric()
+            return indices0
+        }
+
+        @Override
+        Tensor transform(Tensor t) {
+            return new SymmetrizeTransformation(prepareIndices(t.indices), true).transform(t)
+        }
+
+        public Transformation getAt(SimpleIndices indices) {
+            return new SymmetrizeTransformation(prepareIndices(indices), true)
         }
     }
 
