@@ -533,6 +533,11 @@ class RedberryStatic {
         List<Integer> next() {
             return iterator.next() as List
         }
+
+        @Override
+        void remove() {
+            throw new UnsupportedOperationException()
+        }
     }
 
 /************************************************************************************
