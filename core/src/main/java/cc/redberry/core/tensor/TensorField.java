@@ -96,13 +96,34 @@ public final class TensorField extends SimpleTensor {
     }
 
     /**
+     * Return tensor field from which the derivative is taken. If {@code this} is derivative (e.g. {@code f_m~(1)[k_a]}),
+     * returns target tensor field of {@code this} (i.e. {@code f[k_a]}); otherwise, returns {@code this}.
+     *
+     * @return tensor field from which the derivative is taken
+     */
+    public TensorField getParentField() {
+        if (!isDerivative())
+            return this;
+        return Tensors.field(getNameDescriptor().getParent().getId(), getPartitionOfIndices()[0][0], args);
+    }
+
+    /**
+     * Returns the order of derivative with respect to argument at specified position.
+     *
+     * @return the order of derivative with respect to argument at specified position
+     */
+    public int getDeivativeOrder(int i) {
+        return getNameDescriptor().getDerivativeOrder(i);
+    }
+
+    /**
      * Calculates and returns partition of derivative indices. The resulting array organized as follows:
      * {@code result[0][0]} --- contains pure field indices ({@code result[0].length == 1}), {@code result[i][j]} ---
      * are indices formed by j-th derivative with respect to i-th field argument
      *
      * @return partition of derivative indices
      */
-    public SimpleIndices[][] calcIndicesPartition() {
+    public SimpleIndices[][] getPartitionOfIndices() {
 
         NameDescriptorForTensorField fieldDescriptor = getNameDescriptor();
         if (!fieldDescriptor.isDerivative()) {
@@ -136,13 +157,13 @@ public final class TensorField extends SimpleTensor {
     }
 
     @Override
-    public String toString(OutputFormat mode) {
+    public String toString0(OutputFormat mode) {
         //TODO add argIndices toString(REDBERRY)
 
         StringBuilder sb = new StringBuilder();
-        sb.append(super.toString(mode));
+        sb.append(super.toString0(mode));
 
-        if (mode == OutputFormat.Maple)
+        if (mode.is(OutputFormat.Maple))
             sb.append('(');
         else sb.append('[');
 
@@ -152,7 +173,7 @@ public final class TensorField extends SimpleTensor {
         }
         sb.deleteCharAt(sb.length() - 1);
 
-        if (mode == OutputFormat.Maple)
+        if (mode.is(OutputFormat.Maple))
             sb.append(')');
         else sb.append(']');
 

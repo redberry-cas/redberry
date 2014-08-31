@@ -67,7 +67,7 @@ public final class SymmetrizeUpperLowerIndicesTransformation implements Transfor
         Indices indices = IndicesFactory.create(tensor.getIndices().getFree());
         int[] indicesArray = indices.getAllIndices().copy();
         List<Permutation> symmetries = TensorUtils.getIndicesSymmetriesForIndicesWithSameStates(indicesArray, tensor);
-        int lowerCount = indices.getLower().length(), upperCount = indices.getUpper().length();
+        int lowerCount = indices.getLower().size(), upperCount = indices.getUpper().size();
 
         IntPermutationsGenerator lowIndicesPermutationsGenerator,
                 upperIndicesPermutationGenerator;

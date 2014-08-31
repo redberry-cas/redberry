@@ -1067,6 +1067,20 @@ public class PermutationGroupTest extends AbstractTestClass {
         }
     }
 
+    @Test
+    public void testCentralizer() {
+        PermutationGroup gr = PermutationGroup.createPermutationGroup(
+                Permutations.createPermutation(new int[][]{{0, 1, 4, 5}}),
+                Permutations.createPermutation(new int[][]{{3, 5, 9, 7}}),
+                Permutations.createPermutation(new int[][]{{11, 2, 9, 10}}));
+
+        PermutationGroup c = PermutationGroup.createPermutationGroup(
+                Permutations.createPermutation(new int[][]{{3, 4, 5}}));
+
+        //todo test with GAP
+        Assert.assertEquals(15120, gr.centralizerOf(c).order().intValue());
+    }
+
     private static PermutationGroup pointWiseStabilizerBruteForce(PermutationGroup pg, int[] points) {
         PermutationGroup stab = pg;
         for (int i : points)
@@ -1079,12 +1093,137 @@ public class PermutationGroupTest extends AbstractTestClass {
         RandomGenerator rg = new Well19937c(123234L);
 
         testUniformity(PermutationGroup.createPermutationGroup(
-                Permutations.createPermutation(2, 0, 1, 3, 4)),
+                        Permutations.createPermutation(2, 0, 1, 3, 4)),
                 rg);
         testUniformity(PermutationGroup.createPermutationGroup(
-                Permutations.createPermutation(1, 2, 0, 4, 3),
-                Permutations.createPermutation(0, 1, 2, 4, 3)),
+                        Permutations.createPermutation(1, 2, 0, 4, 3),
+                        Permutations.createPermutation(0, 1, 2, 4, 3)),
                 rg);
+    }
+
+    @Test
+    public void test3() {
+        int[][] perm1 = {
+                {1, 28, 5, 3, 13, 25, 8, 4, 17, 11, 29, 7, 2, 21, 23, 10, 6},
+                {9, 16, 22, 30, 18, 15, 20, 19, 14}};
+        int[][] perm2 = {{1, 4, 27}, {2, 5, 3}};
+        PermutationGroup group = PermutationGroup.createPermutationGroup(
+                Permutations.createPermutation(perm1),
+                Permutations.createPermutation(perm2));
+        Assert.assertEquals(group.order(), new BigInteger("28810681675776000"));
+
+        Assert.assertFalse(group.isSymmetric());
+        Assert.assertFalse(group.isAlternating());
+        Assert.assertFalse(group.isAbelian());
+
+
+        int[] o = group.orbit(20);
+        int[] e = {9, 16, 22, 30, 18, 15, 20, 19, 14};
+        Arrays.sort(o);
+        Arrays.sort(e);
+        Assert.assertArrayEquals(e, o);
+
+
+        PermutationGroup pStabilizer = group.pointwiseStabilizer(3, 27, 25);
+        Assert.assertFalse(pStabilizer.isAbelian());
+        Assert.assertEquals(pStabilizer.order(), new BigInteger("5884534656000"));
+        //println pStabilizer
+
+
+        Permutation p = Permutations.createPermutation(new int[][]{{1, 28, 2, 8, 27, 10, 11}, {21, 29, 23}});
+        Assert.assertTrue(group.membershipTest(p));
+
+
+        Permutation n = Permutations.createPermutation(new int[][]{{7, 19, 5, 17, 3, 4, 21, 25}});
+        Assert.assertFalse(group.membershipTest(n));
+
+        PermutationGroup sStabilizer = group.setwiseStabilizer(3, 27, 25);
+        Assert.assertFalse(sStabilizer.isAbelian());
+        //println sStabilizer
+
+        Assert.assertEquals(sStabilizer.order(), new BigInteger("35307207936000"));
+
+
+        PermutationGroup dSubgroup = group.derivedSubgroup();
+        Assert.assertFalse(dSubgroup.isSymmetric());
+        Assert.assertFalse(dSubgroup.isAlternating());
+        Assert.assertFalse(dSubgroup.isAbelian());
+        Assert.assertEquals(dSubgroup.order(), new BigInteger("3201186852864000"));
+
+        int[][] perm3 = {{1, 17, 12, 19}, {23, 25}};
+        int[][] perm4 = {{4, 14, 26}};
+        PermutationGroup oth = PermutationGroup.createPermutationGroup(
+                Permutations.createPermutation(perm3),
+                Permutations.createPermutation(perm4));
+
+        Assert.assertFalse(group.containsSubgroup(oth));
+
+        PermutationGroup union = group.union(oth);
+        Assert.assertTrue(union.containsSubgroup(group));
+        Assert.assertTrue(union.containsSubgroup(oth));
+
+        Assert.assertEquals(union.order(), new BigInteger("4420880996869850977271808000000"));
+        Assert.assertFalse(union.isSymmetric());
+        Assert.assertFalse(union.isAlternating());
+
+        PermutationGroup intersection = union.intersection(group);
+        Assert.assertEquals(group, intersection);
+    }
+
+    @Test
+    public void testIntersection2() {
+        int[][] perm1 = {
+                {1, 28, 5, 3, 13, 25, 8, 4, 17, 11, 29, 7, 2, 21, 23, 10, 6},
+                {9, 16, 22, 30, 18, 15, 20, 19, 14}};
+        int[][] perm2 = {{1, 4, 27}, {2, 5, 3}};
+        PermutationGroup group = PermutationGroup.createPermutationGroup(
+                Permutations.createPermutation(perm1),
+                Permutations.createPermutation(perm2));
+        //build bsgs
+        group.order();
+
+        int[][] perm3 = {{1, 17, 12, 19}, {23, 25}};
+        int[][] perm4 = {{4, 14, 26}};
+        PermutationGroup oth = PermutationGroup.createPermutationGroup(
+                Permutations.createPermutation(perm3),
+                Permutations.createPermutation(perm4));
+        //build bsgs
+        oth.order();
+
+
+        PermutationGroup union = group.union(oth);
+        //build bsgs
+        union.order();
+        PermutationGroup intersection = union.intersection(group);
+        Assert.assertEquals(group, intersection);
+    }
+
+    @Test
+    public void testIntersection3() {
+        int[][] perm1 = {
+                {1, 28, 5, 3, 13, 25, 8, 4, 17, 11, 29, 7, 2, 21, 23, 10, 6},
+                {9, 16, 22, 30, 18, 15, 20, 19, 14}};
+        int[][] perm2 = {{1, 4, 27}, {2, 5, 3}};
+        PermutationGroup group = PermutationGroup.createPermutationGroup(
+                Permutations.createPermutation(perm1),
+                Permutations.createPermutation(perm2));
+        //build bsgs
+        group.order();
+
+        int[][] perm3 = {{1, 17, 12, 19}, {23, 25}};
+        int[][] perm4 = {{4, 14, 26}};
+        PermutationGroup oth = PermutationGroup.createPermutationGroup(
+                Permutations.createPermutation(perm3),
+                Permutations.createPermutation(perm4));
+        //build bsgs
+        oth.order();
+
+
+        PermutationGroup union = group.union(oth);
+        //build bsgs
+        union.order();
+        PermutationGroup intersection = union.intersection(group);
+        Assert.assertEquals(group, intersection);
     }
 
     private void testUniformity(PermutationGroup group,
@@ -1100,7 +1239,7 @@ public class PermutationGroupTest extends AbstractTestClass {
 
         Permutation p;
         for (int i = 0; i < N; ++i) {
-            p = group.randomPermutation(randomGenerator);
+            p = group.randomElement(randomGenerator);
 
             assertTrue(group.membershipTest(p));
 

@@ -96,7 +96,7 @@ public final class Permutations {
     public static int internalDegree(final List<? extends Permutation> permutations) {
         int r = 0;
         for (Permutation p : permutations)
-            r = Math.max(r, p.internalDegree());
+            r = Math.max(r, p.degree());
         return r;
     }
 
@@ -1051,6 +1051,27 @@ public final class Permutations {
         for (int i = 0; i < permutation.length; ++i)
             newArray[i] = array[permutation[i]];
         return newArray;
+    }
+
+    /**
+     * Permutes specified list according to specified permutation and returns the result.
+     *
+     * @param array       array
+     * @param permutation permutation in one-line notation
+     * @param <T>         any type
+     * @return new array permuted with specified permutation
+     * @throws IllegalArgumentException if array length not equals to permutation length
+     * @throws IllegalArgumentException if permutation is not consistent with one-line notation
+     */
+    public static <T> List<T> permute(List<T> array, final int[] permutation) {
+        if (array.size() != permutation.length)
+            throw new IllegalArgumentException();
+        if (!testPermutationCorrectness(permutation))
+            throw new IllegalArgumentException();
+        final List<T> list = new ArrayList<>(array.size());
+        for (int i = 0; i < array.size(); ++i)
+            list.add(array.get(permutation[i]));
+        return list;
     }
 
     /**

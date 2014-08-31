@@ -26,13 +26,15 @@ import cc.redberry.core.context.CC;
 import cc.redberry.core.context.ContextManager;
 import cc.redberry.core.context.NameDescriptor;
 import cc.redberry.core.context.OutputFormat;
+import cc.redberry.core.indices.IndexType;
+import cc.redberry.core.indices.IndicesUtils;
 import cc.redberry.core.indices.SimpleIndices;
 import cc.redberry.core.utils.EmptyIterator;
 
+import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.Iterator;
-
-import static cc.redberry.core.tensor.Tensors.isKronecker;
-import static cc.redberry.core.tensor.Tensors.isKroneckerOrMetric;
+import java.util.List;
 
 /**
  * Implementation of simple tensor.
@@ -88,17 +90,59 @@ public class SimpleTensor extends Tensor {
     }
 
     @Override
+    public String toString(OutputFormat mode, Class clazz) {
+        if (!mode.printMatrixIndices
+                && Tensors.isKronecker(this)
+                && !CC.isMetric(IndicesUtils.getType(indices.get(0)))) {
+            String str = clazz == Sum.class ? "1" : "";
+            return indices.getFree().size() == 0 ? toString0(mode.printMatrixIndices()) : str;
+        }
+        if (!mode.printMatrixIndices) {
+            if (clazz != Product.class) {
+                EnumSet<IndexType> matrixTypes = IndicesUtils.nonMetricTypes(indices);
+                if (matrixTypes.isEmpty())
+                    return toString0(mode);
+
+                List<IndexType> traces = new ArrayList<>();
+                for (IndexType type : matrixTypes) {
+                    SimpleIndices ofType = indices.getOfType(type);
+                    if (ofType.getFree().size() == 0) {
+                        //trace
+                        traces.add(type);
+                    }
+                }
+                if (traces.size() != 0) {
+                    StringBuilder sb = new StringBuilder();
+                    sb.append("Tr[").append(toString0(mode));
+                    if (traces.size() != matrixTypes.size()) {
+                        sb.append(", ");
+                        for (int i = 0; ; ++i) {
+                            sb.append(traces.get(i));
+                            if (i == traces.size() - 1)
+                                break;
+                            sb.append(", ");
+                        }
+                    }
+                    sb.append("]");
+                    return sb.toString();
+                } else
+                    return toString0(mode);
+            } else
+                return toString0(mode);
+        }
+        return toString0(mode);
+    }
+
+    @Override
     public String toString(OutputFormat mode) {
+        return toString(mode, null);
+    }
+
+
+    String toString0(OutputFormat mode) {
         //Initializing StringBuilder
         StringBuilder sb = new StringBuilder();
 
-        //Adding tensor name
-//        if (mode == OutputFormat.Maple && isKroneckerOrMetric(this)) {
-//            if (isKronecker(this))
-//                sb.append("KroneckerDelta");
-//            else
-//                sb.append("g_");
-//        } else
         sb.append(CC.getNameDescriptor(name).getName(indices, mode));
 
         //If there are no indices return builder content
@@ -106,7 +150,7 @@ public class SimpleTensor extends Tensor {
             return sb.toString();
 
         //Writing indices
-        boolean external = mode == OutputFormat.WolframMathematica || mode == OutputFormat.Maple;
+        boolean external = mode.is(OutputFormat.WolframMathematica) || mode.is(OutputFormat.Maple);
         if (external)
             sb.append("[");
         sb.append(indices.toString(mode));

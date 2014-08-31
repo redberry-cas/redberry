@@ -47,7 +47,7 @@ public class JasFactorTest extends TestCase {
         t = parse("(4*m**2 + s)*(16*m**4+4*m**2*s+s**2)");
         t = expand(t);
 
-        System.out.println(JasFactor.factor(t));
+        System.out.println(JasFactor.factor1(t));
     }
 
     @Test

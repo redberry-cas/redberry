@@ -28,7 +28,7 @@ import org.junit.Test
 import static cc.redberry.core.indices.IndexType.Matrix1
 import static cc.redberry.core.indices.IndexType.Matrix2
 import static cc.redberry.groovy.RedberryPhysics.*
-import static cc.redberry.groovy.RedberryStatic.*
+import static cc.redberry.groovy.RedberryStatic.defineMatrices
 import static junit.framework.Assert.assertTrue
 
 /**
@@ -63,6 +63,13 @@ class RedberryPhysicsTest {
     public void testLeviCivita() {
         use(Redberry) {
             assertTrue LeviCivitaSimplify.minkowski['e_abcd'] >> 'e_abcd*e^abcd'.t == '-24'.t
+        }
+    }
+
+    @Test
+    public void testSetMandelstam() {
+        use(Redberry) {
+            println setMandelstam([k1_a: 'm1', k2_a: 'm2', k3_a: 'm3', k4_a: 'm4'], 'r', 'p', 'q')
         }
     }
 }

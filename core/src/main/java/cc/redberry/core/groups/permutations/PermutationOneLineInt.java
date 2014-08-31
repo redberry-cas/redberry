@@ -26,7 +26,9 @@ import cc.redberry.core.utils.IntArray;
 
 import java.lang.reflect.Array;
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * The implementation of {@link Permutation} based on the one-line notation. The instances of this class are immutable.
@@ -205,6 +207,17 @@ public final class PermutationOneLineInt implements Permutation {
     }
 
     @Override
+    public <T> List<T> permute(List<T> set) {
+        if (isIdentity)
+            return new ArrayList<>(set);
+
+        final List<T> list = new ArrayList<>(set.size());
+        for (int i = 0; i < set.size(); ++i)
+            list.add(set.get(newIndexOf(i)));
+        return list;
+    }
+
+    @Override
     public int newIndexOfUnderInverse(int i) {
         if (i >= permutation.length)
             return i;
@@ -231,7 +244,7 @@ public final class PermutationOneLineInt implements Permutation {
         if (other.isIdentity())
             return this;
 
-        final int newLength = Math.max(internalDegree(), other.internalDegree());
+        final int newLength = Math.max(degree(), other.degree());
         int newInternalDegree = -1;
         final int[] result = new int[newLength];
         boolean resultIsIdentity = true;
@@ -258,7 +271,7 @@ public final class PermutationOneLineInt implements Permutation {
         if (b.isIdentity())
             return composition(a);
 
-        final int newLength = Math.max(Math.max(internalDegree(), a.internalDegree()), b.internalDegree());
+        final int newLength = Math.max(Math.max(degree(), a.degree()), b.degree());
         int newInternalDegree = -1;
         final int[] result = new int[newLength];
         boolean resultIsIdentity = true;
@@ -287,8 +300,8 @@ public final class PermutationOneLineInt implements Permutation {
         if (c.isIdentity())
             return composition(b, c);
 
-        final int newLength = Math.max(c.internalDegree(), Math.max(
-                Math.max(internalDegree(), a.internalDegree()), b.internalDegree()));
+        final int newLength = Math.max(c.degree(), Math.max(
+                Math.max(degree(), a.degree()), b.degree()));
         final int[] result = new int[newLength];
         int newInternalDegree = -1;
         boolean resultIsIdentity = true;
@@ -351,7 +364,7 @@ public final class PermutationOneLineInt implements Permutation {
     }
 
     @Override
-    public int internalDegree() {
+    public int degree() {
         return internalDegree;
     }
 
@@ -359,6 +372,8 @@ public final class PermutationOneLineInt implements Permutation {
     public Permutation pow(int exponent) {
         if (isIdentity)
             return this;
+        if (exponent < 0)
+            return inverse().pow(-exponent);
         Permutation base = this, result = getIdentity();
         while (exponent != 0) {
             if (exponent % 2 == 1)
@@ -377,7 +392,7 @@ public final class PermutationOneLineInt implements Permutation {
         Permutation that = (Permutation) o;
         if (antisymmetry != that.antisymmetry())
             return false;
-        if (internalDegree != that.internalDegree())
+        if (internalDegree != that.degree())
             return false;
         for (int i = 0; i < internalDegree; ++i)
             if (newIndexOf(i) != that.newIndexOf(i))
@@ -437,7 +452,7 @@ public final class PermutationOneLineInt implements Permutation {
 
     @Override
     public int compareTo(Permutation t) {
-        final int max = Math.max(internalDegree(), t.internalDegree());
+        final int max = Math.max(degree(), t.degree());
         if (antisymmetry != t.antisymmetry())
             return antisymmetry ? -1 : 1;
         for (int i = 0; i < max; ++i)

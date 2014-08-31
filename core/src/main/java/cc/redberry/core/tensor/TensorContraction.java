@@ -27,13 +27,11 @@ import cc.redberry.core.utils.HashFunctions;
 import java.util.Arrays;
 
 /**
- *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  * @since 1.0
  */
 public final class TensorContraction implements Comparable<TensorContraction> {
-    
     public final short tensorId; //aka stretch Id
     public final long[] indexContractions;
     private int hash = -1;
@@ -43,7 +41,7 @@ public final class TensorContraction implements Comparable<TensorContraction> {
         this.indexContractions = indexContractions;
     }
 
-    public void sortContractions() {
+    void sortContractions() {
         Arrays.sort(indexContractions);
     }
 

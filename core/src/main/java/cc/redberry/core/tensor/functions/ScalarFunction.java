@@ -29,6 +29,8 @@ import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.tensor.TensorException;
 import cc.redberry.core.utils.TensorUtils;
 
+import static cc.redberry.core.context.OutputFormat.*;
+
 /**
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
@@ -68,15 +70,14 @@ public abstract class ScalarFunction extends Tensor {
     @Override
     public final String toString(OutputFormat mode) {
         String stringSymbol = functionName();
-        switch (mode) {
-            case UTF8:
-                return stringSymbol + "(" + argument.toString(OutputFormat.UTF8) + ")";
-            case LaTeX:
-                return "\\" + stringSymbol.toLowerCase() + "(" + argument.toString(OutputFormat.UTF8) + ")";
-            case Redberry:
-                return Character.toString(Character.toUpperCase(stringSymbol.charAt(0))) + stringSymbol.substring(1, stringSymbol.length()) + "[" + argument.toString(OutputFormat.Redberry) + "]";
-            default:
-                return stringSymbol + "(" + argument.toString(OutputFormat.UTF8) + ")";
-        }
+        if (mode.is(UTF8))
+            return stringSymbol + "(" + argument.toString(UTF8) + ")";
+        if (mode.is(LaTeX))
+            return "\\" + stringSymbol.toLowerCase() + "(" + argument.toString(UTF8) + ")";
+        if (mode.is(Redberry))
+            return Character.toString(Character.toUpperCase(stringSymbol.charAt(0))) + stringSymbol.substring(1, stringSymbol.length()) + "[" + argument.toString(OutputFormat.Redberry) + "]";
+        else
+            return stringSymbol + "(" + argument.toString(UTF8) + ")";
+
     }
 }

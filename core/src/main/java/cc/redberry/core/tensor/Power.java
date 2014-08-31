@@ -28,6 +28,9 @@ import cc.redberry.core.indices.IndicesFactory;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.utils.TensorUtils;
 
+import static cc.redberry.core.context.OutputFormat.LaTeX;
+import static cc.redberry.core.context.OutputFormat.WolframMathematica;
+
 /**
  * Representation of mathematical power <i>A^B</i>.
  *
@@ -75,10 +78,10 @@ public final class Power extends Tensor {
 
     @Override
     public String toString(OutputFormat mode) {
-        if (mode == OutputFormat.WolframMathematica)
+        if (mode.is(WolframMathematica))
             return "Power[" + argument.toString(mode) + ", " + power.toString(mode) + "]";
 
-        if (mode == OutputFormat.LaTeX)
+        if (mode.is(LaTeX))
             if (TensorUtils.isRealNegativeNumber(power))
                 return "\\frac{1}{" + argument.toString(mode, Power.class) +
                         (TensorUtils.isMinusOne(power) ?

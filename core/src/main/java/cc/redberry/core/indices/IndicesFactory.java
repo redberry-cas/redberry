@@ -65,8 +65,8 @@ public class IndicesFactory {
     public static SimpleIndices createSimple(IndicesSymmetries symmetries, Indices indices) {
         if (indices.size() == 0)
             return EmptySimpleIndices.EMPTY_SIMPLE_INDICES_INSTANCE;
-        if (indices instanceof SimpleIndicesAbstract)
-            return new SimpleIndicesIsolated(((SimpleIndicesAbstract) indices).data, symmetries);
+        if (indices instanceof AbstractSimpleIndices)
+            return new SimpleIndicesIsolated(((AbstractSimpleIndices) indices).data, symmetries);
         return new SimpleIndicesIsolated(indices.getAllIndices().copy(), symmetries);
     }
 

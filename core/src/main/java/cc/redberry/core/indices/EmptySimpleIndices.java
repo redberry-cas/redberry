@@ -77,6 +77,26 @@ final class EmptySimpleIndices extends EmptyIndices implements SimpleIndices {
     }
 
     /**
+     * Returns {@code EmptySimpleIndices} instance
+     *
+     * @return {@code EmptySimpleIndices} instance
+     */
+    @Override
+    public SimpleIndices getUpper() {
+        return this;
+    }
+
+    /**
+     * Returns {@code EmptySimpleIndices} instance
+     *
+     * @return {@code EmptySimpleIndices} instance
+     */
+    @Override
+    public SimpleIndices getLower() {
+        return this;
+    }
+
+    /**
      * Doing nothing
      */
     @Override
@@ -92,7 +112,7 @@ final class EmptySimpleIndices extends EmptyIndices implements SimpleIndices {
      */
     @Override
     public IndicesSymmetries getSymmetries() {
-        return IndicesSymmetries.EMPTY_INDICES_SYMMETRIES;
+        return IndicesSymmetries.getEmpty();
     }
 
     /**
@@ -114,7 +134,7 @@ final class EmptySimpleIndices extends EmptyIndices implements SimpleIndices {
      */
     @Override
     public boolean equals(Object obj) {
-        return obj == this; // :))
+        return obj instanceof EmptyIndices;
     }
 
     /**
@@ -129,9 +149,9 @@ final class EmptySimpleIndices extends EmptyIndices implements SimpleIndices {
     }
 
     /**
-     * Returns 1
+     * Returns hash code
      *
-     * @return 1
+     * @return hash code
      */
     @Override
     public int hashCode() {
@@ -140,6 +160,6 @@ final class EmptySimpleIndices extends EmptyIndices implements SimpleIndices {
 
     @Override
     public StructureOfIndices getStructureOfIndices() {
-        return StructureOfIndices.EMPTY;
+        return StructureOfIndices.getEmpty();
     }
 }

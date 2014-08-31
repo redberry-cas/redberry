@@ -121,7 +121,7 @@ public class FactorTransformationTest {
             Tensor t = randomFactorableProduct(random);
             Tensor expand = expand(t);
             System.out.println(expand);
-            Tensor factor = JasFactor.factor(expand);
+            Tensor factor = JasFactor.factor1(expand);
             TAssert.assertEquals(expand(factor), expand);
         }
     }
@@ -136,7 +136,7 @@ public class FactorTransformationTest {
         System.out.println("Test: " + t);
         Tensor expand = expand(t);
         System.out.println(expand.toString(OutputFormat.WolframMathematica));
-        Tensor factor = JasFactor.factor(expand);
+        Tensor factor = JasFactor.factor1(expand);
         System.out.println(factor);
         System.out.println(expand(factor));
 
@@ -320,7 +320,7 @@ public class FactorTransformationTest {
         Tensor t = parse("L*(-7*s**3*m**4-216*s**2*m**6+128*m**10-96-3*m**4*s-240*m**8*s)");
         System.out.println(t.toString(OutputFormat.WolframMathematica));
 //        t = parseExpression("m = 1").transform(t);
-        System.out.println(JasFactor.factor(t));
+        System.out.println(JasFactor.factor1(t));
 //        System.out.println(factor(t));
 //            TAssert.assertEquals(factorOut(t), "(a-b)*(c*(a-b) - d*(a-b)**2 - d)");
     }

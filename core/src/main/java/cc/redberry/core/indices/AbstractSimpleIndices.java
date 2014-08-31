@@ -22,7 +22,6 @@
  */
 package cc.redberry.core.indices;
 
-import cc.redberry.core.groups.permutations.PermutationOneLineInt;
 import cc.redberry.core.groups.permutations.Permutations;
 import cc.redberry.core.indexmapping.IndexMapping;
 import cc.redberry.core.utils.ArraysUtils;
@@ -35,9 +34,9 @@ import java.util.Arrays;
  * @author Stanislav Poslavsky
  * @since 1.0
  */
-abstract class SimpleIndicesAbstract extends AbstractIndices implements SimpleIndices {
+abstract class AbstractSimpleIndices extends AbstractIndices implements SimpleIndices {
 
-    protected IndicesSymmetries symmetries = null;
+    IndicesSymmetries symmetries = null;
 
     /**
      * Construct {@code SimpleIndicesOfTensor} instance from specified indices
@@ -46,7 +45,7 @@ abstract class SimpleIndicesAbstract extends AbstractIndices implements SimpleIn
      * @param data       array of indices
      * @param symmetries symmetries of this indices
      */
-    protected SimpleIndicesAbstract(int[] data, IndicesSymmetries symmetries) {
+    AbstractSimpleIndices(int[] data, IndicesSymmetries symmetries) {
         super(data);
 
         assert data.length != 0;
@@ -59,10 +58,28 @@ abstract class SimpleIndicesAbstract extends AbstractIndices implements SimpleIn
         testConsistentWithException();
     }
 
-    protected SimpleIndicesAbstract(boolean notResort, int[] data, IndicesSymmetries symmetries) {
+    AbstractSimpleIndices(boolean notResort, int[] data, IndicesSymmetries symmetries) {
         super(data);
         assert data.length != 0;
         this.symmetries = symmetries;
+    }
+
+    @Override
+    public SimpleIndices getUpper() {
+        UpperLowerIndices ul = getUpperLowerIndices();
+        if (ul.upper.length == 0)
+            return EmptySimpleIndices.EMPTY_SIMPLE_INDICES_INSTANCE;
+        return UnsafeIndicesFactory.createIsolatedUnsafeWithoutSort0(null,
+                ul.upper, new UpperLowerIndices(ul.upper, new int[0]));
+    }
+
+    @Override
+    public SimpleIndices getLower() {
+        UpperLowerIndices ul = getUpperLowerIndices();
+        if (ul.lower.length == 0)
+            return EmptySimpleIndices.EMPTY_SIMPLE_INDICES_INSTANCE;
+        return UnsafeIndicesFactory.createIsolatedUnsafeWithoutSort0(null,
+                ul.lower, new UpperLowerIndices(new int[0], ul.lower));
     }
 
     @Override
@@ -125,7 +142,6 @@ abstract class SimpleIndicesAbstract extends AbstractIndices implements SimpleIn
             if (y)
                 dataList.add(data[i]);
         }
-        //todo review
         return UnsafeIndicesFactory.createIsolatedUnsafeWithoutSort(null, dataList.toArray());
     }
 
@@ -175,7 +191,7 @@ abstract class SimpleIndicesAbstract extends AbstractIndices implements SimpleIn
         return si;
     }
 
-    protected abstract SimpleIndices create(int[] data, IndicesSymmetries symmetries);
+    abstract SimpleIndices create(int[] data, IndicesSymmetries symmetries);
 
     @Override
     int[] getSortedData() {
@@ -224,6 +240,6 @@ abstract class SimpleIndicesAbstract extends AbstractIndices implements SimpleIn
 
     @Override
     public StructureOfIndices getStructureOfIndices() {
-        return new StructureOfIndices(this);
+        return StructureOfIndices.create(this);
     }
 }

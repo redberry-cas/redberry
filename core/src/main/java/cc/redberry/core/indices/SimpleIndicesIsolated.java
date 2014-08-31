@@ -22,12 +22,14 @@
  */
 package cc.redberry.core.indices;
 
+import java.lang.ref.WeakReference;
+
 /**
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  * @since 1.0
  */
-final class SimpleIndicesIsolated extends SimpleIndicesAbstract {
+final class SimpleIndicesIsolated extends AbstractSimpleIndices {
 
     SimpleIndicesIsolated(int[] data, IndicesSymmetries symmetries) {
         super(data, symmetries);
@@ -35,6 +37,11 @@ final class SimpleIndicesIsolated extends SimpleIndicesAbstract {
 
     SimpleIndicesIsolated(boolean notResort, int[] data, IndicesSymmetries symmetries) {
         super(notResort, data, symmetries);
+    }
+
+    SimpleIndicesIsolated(boolean notSort, int[] data, IndicesSymmetries symmetries, UpperLowerIndices ul) {
+        super(notSort, data, symmetries);
+        this.upperLower = new WeakReference<>(ul);
     }
 
     @Override
@@ -45,7 +52,7 @@ final class SimpleIndicesIsolated extends SimpleIndicesAbstract {
     @Override
     public IndicesSymmetries getSymmetries() {
         if (symmetries == null)
-            symmetries = IndicesSymmetries.create(new StructureOfIndices(this));
+            symmetries = IndicesSymmetries.create(StructureOfIndices.create(this));
         return symmetries;
     }
 

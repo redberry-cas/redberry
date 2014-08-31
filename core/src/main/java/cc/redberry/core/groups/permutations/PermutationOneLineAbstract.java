@@ -33,7 +33,7 @@ import java.util.Arrays;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public abstract class PermutationOneLineAbstract implements Permutation {
+abstract class PermutationOneLineAbstract implements Permutation {
     private final boolean isIdentity;
     private final boolean antisymmetry;
 
@@ -141,9 +141,9 @@ public abstract class PermutationOneLineAbstract implements Permutation {
         Permutation that = (Permutation) o;
         if (antisymmetry != that.antisymmetry())
             return false;
-        if (internalDegree() != that.internalDegree())
+        if (degree() != that.degree())
             return false;
-        for (int i = 0; i < internalDegree(); ++i)
+        for (int i = 0; i < degree(); ++i)
             if (newIndexOf(i) != that.newIndexOf(i))
                 return false;
         return true;
@@ -152,9 +152,9 @@ public abstract class PermutationOneLineAbstract implements Permutation {
     @Override
     public int[][] cycles() {
         ArrayList<int[]> cycles = new ArrayList<>();
-        BitArray seen = new BitArray(internalDegree());
+        BitArray seen = new BitArray(degree());
         int counter = 0;
-        while (counter < internalDegree()) {
+        while (counter < degree()) {
             int start = seen.nextZeroBit(0);
             if (newIndexOf(start) == start) {
                 ++counter;
@@ -177,7 +177,7 @@ public abstract class PermutationOneLineAbstract implements Permutation {
     @Override
     public int hashCode() {
         int result = 1;
-        for (int i = 0; i < internalDegree(); ++i)
+        for (int i = 0; i < degree(); ++i)
             result = 31 * result + newIndexOf(i);
         result = 31 * result + (antisymmetry ? 1 : 0);
         return result;
@@ -200,7 +200,7 @@ public abstract class PermutationOneLineAbstract implements Permutation {
     }
 
     private String toStringArray() {
-        int iMax = internalDegree() - 1;
+        int iMax = degree() - 1;
         if (iMax == -1)
             return "[]";
 
@@ -216,12 +216,12 @@ public abstract class PermutationOneLineAbstract implements Permutation {
 
     @Override
     public int compareTo(Permutation t) {
-        int c = Integer.compare(internalDegree(), t.internalDegree());
+        int c = Integer.compare(degree(), t.degree());
         if (c != 0)
             return c;
         if (antisymmetry != t.antisymmetry())
             return antisymmetry ? -1 : 1;
-        for (int i = 0; i < internalDegree(); ++i)
+        for (int i = 0; i < degree(); ++i)
             if (newIndexOf(i) < t.newIndexOf(i))
                 return -1;
             else if (newIndexOf(i) > t.newIndexOf(i))

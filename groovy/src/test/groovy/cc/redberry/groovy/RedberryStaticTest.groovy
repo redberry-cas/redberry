@@ -236,10 +236,10 @@ class RedberryStaticTest {
     public void testSymmetrize() {
         use(Redberry) {
             def si = '_ab'.si
-            si.symmetries.add([1, 0].p)
+            si.symmetries.addSymmetry([1, 0].p)
             assertEquals Symmetrize[si] >> 'T_ab'.t, 'T_ab/2 + T_ba/2'.t
             si = '_ab'.si
-            si.symmetries.add(-[1, 0].p)
+            si.symmetries.addSymmetry(-[1, 0].p)
             assertEquals Symmetrize[si] >> 'T_ab'.t, 'T_ab/2 - T_ba/2'.t
         }
     }

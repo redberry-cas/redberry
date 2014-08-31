@@ -22,11 +22,11 @@
  */
 package cc.redberry.core.transformations.expand;
 
-import cc.redberry.core.utils.OutputPort;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.tensor.*;
 import cc.redberry.core.transformations.Transformation;
 import cc.redberry.core.utils.ArraysUtils;
+import cc.redberry.core.utils.OutputPort;
 import cc.redberry.core.utils.TensorUtils;
 import gnu.trove.set.hash.TIntHashSet;
 
@@ -35,6 +35,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import static cc.redberry.core.tensor.Tensors.multiply;
+import static cc.redberry.core.tensor.Tensors.pow;
 
 /**
  * Utility static methods.
@@ -112,7 +113,7 @@ public final class ExpandUtils {
      */
     public static Tensor expandPairOfSums(Sum s1, Sum s2, Tensor[] factors, Transformation[] transformations) {
         ExpandPairPort epp = new ExpandPairPort(s1, s2, factors);
-        TensorBuilder sum = new SumBuilder();
+        TensorBuilder sum = new SumBuilder(s1.size() * s2.size());
         Tensor t;
         while ((t = epp.take()) != null)
             sum.put(apply(transformations, t));
@@ -331,9 +332,14 @@ public final class ExpandUtils {
         //TODO improve algorithm using Newton formula!!!
         int i;
         Tensor temp = argument;
-        for (i = power - 1; i >= 1; --i)
+        for (i = power - 1; i >= 1; --i) {
             temp = expandPairOfSums((Sum) temp,
                     argument, transformations);
+            if (!(temp instanceof Sum)) {
+                temp = multiply(temp, apply(transformations, pow(argument, i - 1)));
+                break;
+            }
+        }
         return temp;
     }
 
@@ -345,10 +351,15 @@ public final class ExpandUtils {
         TIntHashSet argIndices = TensorUtils.getAllIndicesNamesT(argument);
         forbidden.ensureCapacity(argIndices.size() * power);
         forbidden.addAll(argIndices);
-        for (i = power - 1; i >= 1; --i)
+        for (i = power - 1; i >= 1; --i) {
             temp = expandPairOfSums((Sum) temp,
                     (Sum) ApplyIndexMapping.renameDummy(argument, forbidden.toArray(), forbidden),
                     transformations);
+            if (!(temp instanceof Sum)) {
+                temp = multiply(temp, apply(transformations, pow(argument, i - 1)));
+                break;
+            }
+        }
 
         return temp;
     }

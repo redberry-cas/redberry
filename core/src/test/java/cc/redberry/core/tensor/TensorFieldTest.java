@@ -23,7 +23,6 @@
 package cc.redberry.core.tensor;
 
 import cc.redberry.core.groups.permutations.PermutationGroup;
-import cc.redberry.core.groups.permutations.PermutationOneLineInt;
 import cc.redberry.core.groups.permutations.Permutations;
 import cc.redberry.core.indices.SimpleIndices;
 import cc.redberry.core.parser.ParserIndices;
@@ -106,7 +105,7 @@ public class TensorFieldTest {
     @Test
     public void testPartition1() {
         TensorField f = (TensorField) parse("f~(2,3,2)_{mn {ab cd} {x y z} {AB}}[x_ab,f_c, x_A]");
-        SimpleIndices[][] iP = f.calcIndicesPartition();
+        SimpleIndices[][] iP = f.getPartitionOfIndices();
         SimpleIndices[][] asserted = new SimpleIndices[][]{{ParserIndices.parseSimple("_mn")},
                 {ParserIndices.parseSimple("_ab"), ParserIndices.parseSimple("_cd")},
                 {ParserIndices.parseSimple("_x"), ParserIndices.parseSimple("_y"), ParserIndices.parseSimple("_z")},

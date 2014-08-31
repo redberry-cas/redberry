@@ -42,7 +42,7 @@ public class ContextSettings {
     private String kronecker = "d";
     private String metricName = "g";
     //optional
-    private EnumSet<IndexType> merticTypes = EnumSet.noneOf(IndexType.class);
+    private EnumSet<IndexType> metricTypes = EnumSet.noneOf(IndexType.class);
     private Long nameManagerSeed;
     private IndexConverterManager converterManager = IndexConverterManager.DEFAULT;
     private Parser parser = Parser.DEFAULT;
@@ -59,7 +59,7 @@ public class ContextSettings {
     }
 
     EnumSet<IndexType> getMetricTypes() {
-        return merticTypes;
+        return metricTypes;
     }
 
     /**
@@ -68,7 +68,7 @@ public class ContextSettings {
      * @param type index type
      */
     public void removeMetricIndexType(IndexType type) {
-        merticTypes.remove(type);
+        metricTypes.remove(type);
     }
 
     /**
@@ -77,7 +77,7 @@ public class ContextSettings {
      * @param type index type
      */
     public void addMetricIndexType(IndexType type) {
-        merticTypes.add(type);
+        metricTypes.add(type);
     }
 
     /**

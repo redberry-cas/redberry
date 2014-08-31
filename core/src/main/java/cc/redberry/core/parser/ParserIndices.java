@@ -108,6 +108,6 @@ public final class ParserIndices {
         String remainder = matcher.replaceAll("");
         remainder = remainder.replaceAll("[\\{\\}\\s]*", "");
         if (remainder.length() != 0)
-            throw new ParserException();
+            throw new ParserException("Incorrect indices: " + expression);
     }
 }

@@ -39,12 +39,12 @@ import static cc.redberry.core.transformations.powerexpand.PowerExpandUtils.*;
  * @author Stanislav Poslavsky
  * @since 1.1.5
  */
-public final class PowerExpandUnwrapTransformation implements Transformation {
-    public static final PowerExpandUnwrapTransformation POWER_EXPAND_UNWRAP_TRANSFORMATION =
-            new PowerExpandUnwrapTransformation();
+public final class PowerUnfoldTransformation implements Transformation {
+    public static final PowerUnfoldTransformation POWER_UNFOLD_TRANSFORMATION =
+            new PowerUnfoldTransformation();
     private final Indicator<Tensor> toExpandIndicator;
 
-    private PowerExpandUnwrapTransformation() {
+    private PowerUnfoldTransformation() {
         this(Indicator.TRUE_INDICATOR);
     }
 
@@ -54,7 +54,7 @@ public final class PowerExpandUnwrapTransformation implements Transformation {
      *
      * @param toExpandIndicator applies only to powers that match this indicator
      */
-    public PowerExpandUnwrapTransformation(final Indicator<Tensor> toExpandIndicator) {
+    public PowerUnfoldTransformation(final Indicator<Tensor> toExpandIndicator) {
         this.toExpandIndicator = toExpandIndicator;
     }
 
@@ -64,7 +64,7 @@ public final class PowerExpandUnwrapTransformation implements Transformation {
      *
      * @param vars patterns
      */
-    public PowerExpandUnwrapTransformation(final SimpleTensor[] vars) {
+    public PowerUnfoldTransformation(final SimpleTensor[] vars) {
         this(Indicator.Utils.iterativeIndicator(varsToIndicator(vars)));
     }
 
@@ -74,9 +74,8 @@ public final class PowerExpandUnwrapTransformation implements Transformation {
         Tensor c;
 
         while ((c = iterator.next()) != null)
-            if (powerExpandApplicable(c, toExpandIndicator))
+            if (powerUnfoldApplicable(c, toExpandIndicator))
                 iterator.set(Tensors.multiply(powerExpandIntoChainToArray1(c, iterator.getForbidden(), toExpandIndicator)));
-
 
         return iterator.result();
     }

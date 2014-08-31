@@ -43,19 +43,19 @@ import static cc.redberry.core.context.OutputFormat.*;
  */
 abstract class AbstractIndices implements Indices {
 
-    protected final int[] data;
+    final int[] data;
     //FUTURE investigate performance
-    private WeakReference<UpperLowerIndices> upperLower = new WeakReference<>(null);
+    WeakReference<UpperLowerIndices> upperLower = new WeakReference<>(null);
 
     AbstractIndices(int[] data) {
         this.data = data;
     }
 
-    protected abstract UpperLowerIndices calculateUpperLower();
+    abstract UpperLowerIndices calculateUpperLower();
 
     abstract int[] getSortedData();
 
-    protected UpperLowerIndices getUpperLowerIndices() {
+    UpperLowerIndices getUpperLowerIndices() {
         WeakReference<UpperLowerIndices> wul = upperLower;
         UpperLowerIndices ul = wul.get();
         if (ul == null) {
@@ -71,28 +71,6 @@ abstract class AbstractIndices implements Indices {
     }
 
     @Override
-    public final IntArray getUpper() {
-        WeakReference<UpperLowerIndices> wul = upperLower;
-        UpperLowerIndices ul = wul.get();
-        if (ul == null) {
-            ul = calculateUpperLower();
-            upperLower = new WeakReference<>(ul);
-        }
-        return new IntArray(ul.upper);
-    }
-
-    @Override
-    public final IntArray getLower() {
-        WeakReference<UpperLowerIndices> wul = upperLower;
-        UpperLowerIndices ul = wul.get();
-        if (ul == null) {
-            ul = calculateUpperLower();
-            upperLower = new WeakReference<>(ul);
-        }
-        return new IntArray(ul.lower);
-    }
-
-    @Override
     public final IntArray getAllIndices() {
         return new IntArray(data);
     }
@@ -103,8 +81,6 @@ abstract class AbstractIndices implements Indices {
             return true;
         if (indices instanceof EmptyIndices)
             return data.length == 0;
-//        if (data.length == 0)
-//            return indices.size() == 0;
         return Arrays.equals(getSortedData(), ((AbstractIndices) indices).getSortedData());
     }
 
@@ -141,7 +117,7 @@ abstract class AbstractIndices implements Indices {
     public boolean equals(Object obj) {
         if (obj == null)
             return false;
-        if (getClass() != obj.getClass())
+        if (!(obj instanceof AbstractIndices))
             return false;
         return Arrays.equals(this.data, ((AbstractIndices) obj).data);
     }
@@ -153,7 +129,7 @@ abstract class AbstractIndices implements Indices {
         StringBuilder sb = new StringBuilder();
         int currentState;
 
-        if (format == WolframMathematica || format == Maple) {
+        if (format.is(WolframMathematica) || format.is(Maple)) {
             for (int i = 0; ; i++) {
                 currentState = data[i] >>> 31;
                 if (currentState == 1) sb.append(format.upperIndexPrefix);
@@ -163,7 +139,7 @@ abstract class AbstractIndices implements Indices {
                     break;
                 sb.append(",");
             }
-        } else if (format == Cadabra) {
+        } else if (format.is(Cadabra)) {
             IntArrayList nonMetricIndices = new IntArrayList();
             IntArrayList metricIndices = new IntArrayList(data.length);
             for (int i = 0; i < data.length; ++i)
@@ -203,21 +179,26 @@ abstract class AbstractIndices implements Indices {
                 sb.append('}');
             }
         } else {
-            String latexBrackets = format == LaTeX ? "{}" : "";
+            String latexBrackets = format.is(LaTeX) ? "{}" : "";
 
-            currentState = (data[0] >>> 31);
-            sb.append(format.getPrefixFromIntState(currentState)).append('{');
-
-            int lastState = currentState;
+            int totalToPrint = 0;
+            int lastState = -1;
             for (int i = 0; i < data.length; i++) {
+                if (!CC.isMetric(IndicesUtils.getType(data[i])) && !format.printMatrixIndices)
+                    continue;
                 currentState = data[i] >>> 31;
                 if (lastState != currentState) {
-                    sb.append('}').append(latexBrackets).append(format.getPrefixFromIntState(currentState)).append('{');
+                    if (totalToPrint != 0)
+                        sb.append('}');
+                    sb.append(latexBrackets).append(format.getPrefixFromIntState(currentState)).append('{');
                     lastState = currentState;
                 }
                 sb.append(Context.get().getIndexConverterManager().getSymbol(data[i], format));
+                ++totalToPrint;
             }
             sb.append('}');
+            if (totalToPrint == 0)
+                return "";
         }
 
         return sb.toString();
@@ -228,7 +209,7 @@ abstract class AbstractIndices implements Indices {
         return toString(Context.get().getDefaultOutputFormat());
     }
 
-    protected static class UpperLowerIndices {
+    final static class UpperLowerIndices {
 
         final int[] upper;
         final int[] lower;

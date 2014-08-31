@@ -24,7 +24,6 @@ package cc.redberry.core.transformations.symmetrization;
 
 import cc.redberry.core.TAssert;
 import cc.redberry.core.groups.permutations.PermutationGroup;
-import cc.redberry.core.groups.permutations.PermutationOneLineInt;
 import cc.redberry.core.groups.permutations.Permutations;
 import cc.redberry.core.indices.SimpleIndices;
 import cc.redberry.core.parser.ParserIndices;
@@ -52,7 +51,7 @@ public class SymmetrizeTransformationTest {
     @Test
     public void testIdentity() {
         SimpleIndices indices = ParserIndices.parseSimple("_abmn");
-        indices.getSymmetries().add(Permutations.createPermutation(1, 0, 2, 3));
+        indices.getSymmetries().addSymmetry(Permutations.createPermutation(1, 0, 2, 3));
         SymmetrizeTransformation symmetrizeTransformation =
                 new SymmetrizeTransformation(indices, true);
         Tensor t = Tensors.parse("g_mn*g_ab");
@@ -113,9 +112,9 @@ public class SymmetrizeTransformationTest {
 
     @Test
     public void testAll6() {
-        Tensors.parseSimple("C_abcde").getIndices().getSymmetries().add(
+        Tensors.parseSimple("C_abcde").getIndices().getSymmetries().addSymmetry(
                 Permutations.createPermutation(new int[][]{{1, 2, 3, 4}}));
-        Tensors.parseSimple("C_abcde").getIndices().getSymmetries().add(
+        Tensors.parseSimple("C_abcde").getIndices().getSymmetries().addSymmetry(
                 Permutations.createPermutation(new int[][]{{0, 1, 2, 4, 3}}));
 
         SimpleIndices indices = ParserIndices.parseSimple("_abcde");

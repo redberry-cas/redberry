@@ -39,14 +39,21 @@ public final class PowerExpandUtils {
     private PowerExpandUtils() {
     }
 
+    public static boolean powerUnfoldApplicable(Tensor power, Indicator<Tensor> indicator) {
+        return power instanceof Power &&
+                (power.get(0).getIndices().size() != 0
+                        || (power.get(0) instanceof Product && !TensorUtils.isInteger(power.get(1)))
+                ) && powerExpandApplicable1(power, indicator);
+    }
+
     public static boolean powerExpandApplicable(Tensor power, Indicator<Tensor> indicator) {
-        return power instanceof Power && power.get(0) instanceof Product && powerExpandApplicable1(power, indicator);
+        return power instanceof Power && power.get(0) instanceof Product && !TensorUtils.isInteger(power.get(1)) && powerExpandApplicable1(power, indicator);
     }
 
     static boolean powerExpandApplicable1(Tensor power, Indicator<Tensor> indicator) {
         for (Tensor t : power.get(0))
             if (indicator.is(t)) return true;
-        return false;
+        return indicator.is(power);
     }
 
     public static Tensor[] powerExpandToArray(Power power) {
@@ -114,7 +121,12 @@ public final class PowerExpandUtils {
         if (!TensorUtils.isPositiveNaturalNumber(power.get(1)))
             return powerExpandToArray1(power, indicator);
         final int exponent = ((Complex) power.get(1)).intValue();
-        final Tensor[] scalars = ((Product) power.get(0)).getAllScalars();
+        final Tensor[] scalars;
+        if (power.get(0) instanceof Product)
+            scalars = ((Product) power.get(0)).getAllScalars();
+        else
+            scalars = new Tensor[]{power.get(0)};
+
         ArrayList<Tensor> factorOut = new ArrayList<>(scalars.length),
                 leave = new ArrayList<>(scalars.length);
 
@@ -123,7 +135,7 @@ public final class PowerExpandUtils {
         Tensor temp;
         for (int i = 0; i < scalars.length; ++i) {
             if (indicator.is(scalars[i])) {
-                if (scalars[i] instanceof SimpleTensor)   //simple symbolic factor
+                if (scalars[i] instanceof SimpleTensor && scalars[i].getIndices().size() == 0)//simple symbolic factor
                     factorOut.add(Tensors.pow(scalars[i], exponent));
                 else
                     for (j = 0; j < exponent; ++j) {

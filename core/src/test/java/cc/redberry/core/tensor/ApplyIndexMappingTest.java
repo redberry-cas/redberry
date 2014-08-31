@@ -30,6 +30,7 @@ import cc.redberry.core.indexmapping.IndexMappings;
 import cc.redberry.core.indexmapping.Mapping;
 import cc.redberry.core.indices.IndexType;
 import cc.redberry.core.parser.ParserIndices;
+import cc.redberry.core.tensor.random.RandomTensor;
 import cc.redberry.core.utils.ArraysUtils;
 import cc.redberry.core.utils.IntArrayList;
 import cc.redberry.core.utils.TensorUtils;
@@ -513,7 +514,8 @@ public class ApplyIndexMappingTest {
                             applyIndexMappingAutomatically(t,
                                     new Mapping(Permutations.permute(_from, p), Permutations.permute(_to, p))),
                             ApplyIndexMapping.applyIndexMapping(
-                                    t, new Mapping(freeFrom, __to), new int[0]));
+                                    t, new Mapping(freeFrom, __to), new int[0])
+                    );
                 }
             }
         }
@@ -540,6 +542,20 @@ public class ApplyIndexMappingTest {
     }
 
     @Test
+    public void testOptimize4() {
+        RandomTensor rnd = new RandomTensor();
+        rnd.clearNamespace();
+        rnd.addToNamespace(parse("A_\\mu"));
+        rnd.addToNamespace(parse("A_\\mu\\nu"));
+        rnd.addToNamespace(parse("B_a"));
+        rnd.addToNamespace(parse("B_ab"));
+        for (int i = 0; i < 30; ++i) {
+            Tensor t = rnd.nextTensorTree(4, new RandomTensor.Parameters(5, 10, 4, 7), ParserIndices.parseSimple("_ab\\mu\\nu"));
+            optimizeDummies(t);
+        }
+    }
+
+    @Test
     public void testApplyAndRenameDummies1() {
         Tensor t;
         t = applyIndexMappingAndRenameAllDummies(parse("f_e*f^e"), Mapping.IDENTITY, new int[]{0});
@@ -551,4 +567,41 @@ public class ApplyIndexMappingTest {
         t = applyIndexMappingAndRenameAllDummies(parse("f_b*f^b"), Mapping.IDENTITY, new int[]{1});
         TAssert.assertEqualsExactly(t, "f_b*f^b");
     }
+
+//    @Test
+//    public void testDummiesContainer1() throws Exception {
+//        Tensor t = parse("T_{abc \\mu \\Lambda\\Gamma}^{abc \\mu \\Lambda\\Gamma}");
+//        DummiesContainer container = new DummiesContainer(TensorUtils.getAllDummyIndicesT(t));
+//        Assert.assertEquals(3, container.typesCounts.get((byte) 0));
+//        Assert.assertEquals(1, container.typesCounts.get((byte) 2));
+//        Assert.assertEquals(2, container.typesCounts.get((byte) 3));
+//        Assert.assertFalse(container.typesCounts.containsKey((byte) 1));
+//        Assert.assertFalse(container.typesCounts.containsKey((byte) 4));
+//        Assert.assertFalse(container.typesCounts.containsKey((byte) 5));
+//    }
+//
+//    @Test
+//    public void testDummiesContainer2() throws Exception {
+//        Tensor t = parse("T_{abc ABCDE \\Lambda\\Gamma}^{abc ABCDE \\Lambda\\Gamma}");
+//        DummiesContainer container = new DummiesContainer(TensorUtils.getAllDummyIndicesT(t));
+//        Assert.assertEquals(3, container.typesCounts.get((byte) 0));
+//        Assert.assertEquals(5, container.typesCounts.get((byte) 1));
+//        Assert.assertEquals(2, container.typesCounts.get((byte) 3));
+//        Assert.assertFalse(container.typesCounts.containsKey((byte) 2));
+//        Assert.assertFalse(container.typesCounts.containsKey((byte) 4));
+//        Assert.assertFalse(container.typesCounts.containsKey((byte) 5));
+//    }
+//
+//    @Test
+//    public void testDummiesContainer3() throws Exception {
+//        Tensor t = parse("T_{ ABCDE \\Lambda'\\Gamma'}^{ABCDE \\Lambda'\\Gamma'}");
+//        DummiesContainer container = new DummiesContainer(TensorUtils.getAllDummyIndicesT(t));
+//        Assert.assertEquals(5, container.typesCounts.get((byte) 1));
+//        Assert.assertEquals(2, container.typesCounts.get((byte) 7));
+//        for (byte b = Byte.MIN_VALUE; b < Byte.MAX_VALUE; ++b) {
+//            if (b == 1 || b == 7)
+//                continue;
+//            Assert.assertFalse(container.typesCounts.containsKey(b));
+//        }
+//    }
 }

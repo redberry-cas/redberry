@@ -107,7 +107,7 @@ public class ReduceEngineTest {
             assertSolution(eqs, solution);
         }
         if (mathematicaBinDir != null) {
-            Expression[][] solution = ExternalSolver.solveSystemWithMathematica(rd, false, mathematicaBinDir, "/home/stas/Projects/redberry");
+            Expression[][] solution = ExternalSolver.solveSystemWithMathematica(rd, false, mathematicaBinDir, temporaryDir);
             System.out.println(Arrays.toString(solution));
             assertSolution(eqs, solution);
         }

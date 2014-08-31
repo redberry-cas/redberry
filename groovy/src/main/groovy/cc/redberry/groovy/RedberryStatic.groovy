@@ -23,13 +23,15 @@
 
 package cc.redberry.groovy
 
+import cc.redberry.core.combinatorics.Combinatorics
+import cc.redberry.core.combinatorics.IntCombinationsGenerator
+import cc.redberry.core.combinatorics.IntPermutationsGenerator
+import cc.redberry.core.combinatorics.IntTuplesPort
 import cc.redberry.core.context.CC
 import cc.redberry.core.context.OutputFormat
 import cc.redberry.core.groups.permutations.Permutation
 import cc.redberry.core.groups.permutations.PermutationGroup
-import cc.redberry.core.indices.IndexType
-import cc.redberry.core.indices.SimpleIndices
-import cc.redberry.core.indices.StructureOfIndices
+import cc.redberry.core.indices.*
 import cc.redberry.core.parser.ParseTokenSimpleTensor
 import cc.redberry.core.parser.preprocessor.GeneralIndicesInsertion
 import cc.redberry.core.solver.ExternalSolver
@@ -53,10 +55,11 @@ import cc.redberry.core.transformations.fractions.GetDenominatorTransformation
 import cc.redberry.core.transformations.fractions.GetNumeratorTransformation
 import cc.redberry.core.transformations.fractions.TogetherTransformation
 import cc.redberry.core.transformations.powerexpand.PowerExpandTransformation
-import cc.redberry.core.transformations.powerexpand.PowerExpandUnwrapTransformation
+import cc.redberry.core.transformations.powerexpand.PowerUnfoldTransformation
 import cc.redberry.core.transformations.reverse.ReverseTransformation
 import cc.redberry.core.transformations.symmetrization.SymmetrizeTransformation
 import cc.redberry.core.utils.BitArray
+import cc.redberry.core.utils.OutputPort
 import cc.redberry.core.utils.TensorUtils
 
 /**
@@ -115,7 +118,7 @@ class RedberryStatic {
         @Override
         Transformation getAt(Collection args) {
             use(Redberry) {
-                return transformationClass.newInstance(* args.collect { it instanceof String ? it.t : it })
+                return transformationClass.newInstance(*args.collect { it instanceof String ? it.t : it })
             }
         }
     }
@@ -237,7 +240,7 @@ class RedberryStatic {
     public static final Transformation TogetherFactor = TogetherTransformation.TOGETHER_FACTOR;
 
     /**
-     * Replaces complex numbers in the expression to their complex conjugation.
+     * Replaces complex numbers in the expression with their complex conjugations.
      * @see ComplexConjugateTransformation
      */
     public static final Transformation Conjugate = ComplexConjugateTransformation.COMPLEX_CONJUGATE;
@@ -302,11 +305,11 @@ class RedberryStatic {
      * Expands all powers of products and powers with respect to specified variables and unwraps powers of
      * indexed arguments into products (e.g. (A_m*A^m)**2 -> A_m*A^m*A_a*A^a).
      *
-     * @see PowerExpandUnwrapTransformation
+     * @see PowerUnfoldTransformation
      */
-    public static final TransformationWrapper_SimpleTensors_Or_Transformations PowerExpandUnwrap =
-            new TransformationWrapper_SimpleTensors_Or_Transformations(PowerExpandUnwrapTransformation,
-                    PowerExpandUnwrapTransformation.POWER_EXPAND_UNWRAP_TRANSFORMATION)
+    public static final TransformationWrapper_SimpleTensors_Or_Transformations PowerUnfold =
+            new TransformationWrapper_SimpleTensors_Or_Transformations(PowerUnfoldTransformation,
+                    PowerUnfoldTransformation.POWER_UNFOLD_TRANSFORMATION)
 
     /**
      * Gives a symmetrization of tensor with respect to specified indices under the specified symmetries.
@@ -324,6 +327,36 @@ class RedberryStatic {
         }
     }
 
+    public static final FullySymmetrizeWrapper FullySymmetrize = new FullySymmetrizeWrapper(true);
+
+    public static final FullySymmetrizeWrapper FullyAntiSymmetrize = new FullySymmetrizeWrapper(false);
+
+    public static final class FullySymmetrizeWrapper implements Transformation {
+        final boolean symm;
+
+        FullySymmetrizeWrapper(boolean symm) {
+            this.symm = symm
+        }
+
+        private SimpleIndices prepareIndices(Indices indices) {
+            SimpleIndices indices0 = IndicesFactory.createSimple(null, indices)
+            if (symm)
+                indices0.symmetries.setSymmetric()
+            else
+                indices0.symmetries.setAntiSymmetric()
+            return indices0
+        }
+
+        @Override
+        Tensor transform(Tensor t) {
+            return new SymmetrizeTransformation(prepareIndices(t.indices), true).transform(t)
+        }
+
+        public Transformation getAt(SimpleIndices indices) {
+            return new SymmetrizeTransformation(prepareIndices(indices), true)
+        }
+    }
+
     /**
      * Reverses the order of matrices of specified matrix type.
      * @see cc.redberry.core.transformations.reverse.ReverseTransformation
@@ -332,9 +365,9 @@ class RedberryStatic {
 
     private static final class GReverse {
 
-        Transformation getAt(IndexType... types) {
-            if (types.length == 1)
-                return new ReverseTransformation(type);
+        Transformation getAt(Collection<IndexType> types) {
+            if (types.size() == 1)
+                return new ReverseTransformation(types[0]);
 
             List<Transformation> tr = new ArrayList<>();
             for (IndexType type : types)
@@ -360,6 +393,14 @@ class RedberryStatic {
             CC.current().getParseManager().defaultParserPreprocessors.add(indicesInsertion);
     }
 
+    private static boolean onceSetFormat = false
+
+    private static void setupSimpleRedberryOutputOnce() {
+        if (!onceSetFormat && CC.defaultOutputFormat.is(OutputFormat.Redberry))
+            CC.setDefaultOutputFormat(OutputFormat.SimpleRedberry)
+        onceSetFormat = true
+    }
+
     /**
      * Tells Redberry to consider specified tensors as matrices and use matrix multiplication rules
      * @param objs input
@@ -367,20 +408,21 @@ class RedberryStatic {
      */
     public static void defineMatrices(Object... objs) {
         ensureIndicesInsertionAddedToParser()
+        setupSimpleRedberryOutputOnce()
         def bufferOfTensors = [], bufferOfDescriptors = [];
         objs.each { obj ->
             if (obj instanceof MatrixDescriptor)
                 bufferOfDescriptors << obj
             else {
                 if (bufferOfDescriptors) {
-                    bufferOfTensors.each { it -> defineMatrices(it, * bufferOfDescriptors) }
+                    bufferOfTensors.each { it -> defineMatrices(it, *bufferOfDescriptors) }
                     bufferOfTensors = []
                     bufferOfDescriptors = []
                 }
                 bufferOfTensors << obj
             }
         }
-        bufferOfTensors.each { it -> defineMatrix(it, * bufferOfDescriptors) }
+        bufferOfTensors.each { it -> defineMatrix(it, *bufferOfDescriptors) }
     }
 
     /**
@@ -422,6 +464,79 @@ class RedberryStatic {
     public static PermutationGroup Group(Object... permutations) {
         use(Redberry) {
             return PermutationGroup.createPermutationGroup(permutations.collect({ it.p }))
+        }
+    }
+
+    public static PermutationGroup SymmetricGroup(int degree) {
+        use(Redberry) {
+            return PermutationGroup.symmetricGroup(degree)
+        }
+    }
+
+    public static PermutationGroup AlternatingGroup(int degree) {
+        use(Redberry) {
+            return PermutationGroup.alternatingGroup(degree)
+        }
+    }
+
+/************************************************************************************
+ *********************************** Combinatorics **********************************
+ ************************************************************************************/
+
+    public static Iterable<List<Integer>> Permutations(int n) {
+        return new IntArrayIterableListWrapper(new IntPermutationsGenerator(n))
+    }
+
+    public static Iterable<List<Integer>> CombinationsWithPermutations(int n, int k) {
+        return new IntArrayIterableListWrapper(Combinatorics.createIntGenerator(n, k))
+    }
+
+    public static Iterable<List<Integer>> Combinations(int n, int k) {
+        return new IntArrayIterableListWrapper(new IntCombinationsGenerator(n, k))
+    }
+
+
+    public static Iterable<List<Integer>> Tuples(List bounds) {
+        return Tuples(bounds as int[])
+    }
+
+    public static Iterable<List<Integer>> Tuples(int[] bounds) {
+        return new IntArrayIterableListWrapper(new OutputPort.PortIterator<int[]>(new IntTuplesPort(bounds)))
+    }
+
+    private static final class IntArrayIterableListWrapper implements Iterable<List<Integer>> {
+        final Iterator<int[]> iterator;
+
+        IntArrayIterableListWrapper(Iterator<int[]> iterator) {
+            this.iterator = iterator
+        }
+
+        @Override
+        Iterator<List<Integer>> iterator() {
+            return new IntArrayIteratorListWrapper(iterator)
+        }
+    }
+
+    private static final class IntArrayIteratorListWrapper implements Iterator<List<Integer>> {
+        final Iterator<int[]> iterator;
+
+        IntArrayIteratorListWrapper(Iterator<int[]> iterator) {
+            this.iterator = iterator
+        }
+
+        @Override
+        boolean hasNext() {
+            return iterator.hasNext()
+        }
+
+        @Override
+        List<Integer> next() {
+            return iterator.next() as List
+        }
+
+        @Override
+        void remove() {
+            throw new UnsupportedOperationException()
         }
     }
 
@@ -483,7 +598,7 @@ class RedberryStatic {
 
     private static final Map ReduceDefaultOptions = Collections.unmodifiableMap(
             [Transformations: [], SymmetricForm: [], GeneratedParameters: { i -> "C[$i]" },
-                    ExternalSolver: [Solver: '', Path: '', KeepFreeParams: 'false', TmpDir: System.getProperty("java.io.tmpdir")]])
+             ExternalSolver : [Solver: '', Path: '', KeepFreeParams: 'false', TmpDir: System.getProperty("java.io.tmpdir")]])
 
     private static final Map ReduceDefaultExternalSolverOptions = Collections.unmodifiableMap(
             [Solver: '', Path: '', KeepFreeParams: 'true', TmpDir: System.getProperty("java.io.tmpdir")])

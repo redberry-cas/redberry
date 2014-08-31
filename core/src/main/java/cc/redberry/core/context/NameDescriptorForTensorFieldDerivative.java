@@ -23,7 +23,6 @@
 package cc.redberry.core.context;
 
 import cc.redberry.core.groups.permutations.Permutation;
-import cc.redberry.core.groups.permutations.PermutationOneLineInt;
 import cc.redberry.core.groups.permutations.Permutations;
 import cc.redberry.core.indices.SimpleIndices;
 import cc.redberry.core.indices.StructureOfIndices;
@@ -55,13 +54,13 @@ final class NameDescriptorForTensorFieldDerivative extends NameDescriptorForTens
 
     @Override
     public String getName(SimpleIndices indices, OutputFormat format) {
-        if (format == OutputFormat.WolframMathematica) {
+        if (format.is(OutputFormat.WolframMathematica)) {
             String[] spl = name.split("~");
             return new StringBuilder().append("Derivative")
                     .append(spl[1].replace("(", "[").replace(")", "]"))
                     .append("[").append(spl[0]).append("]").toString();
         }
-        if (format == OutputFormat.Maple) {
+        if (format.is(OutputFormat.Maple)) {
             StringBuilder sb = new StringBuilder();
             sb.append("D[");
             for (int j = 0; j < orders.length; ++j)
@@ -105,7 +104,7 @@ final class NameDescriptorForTensorFieldDerivative extends NameDescriptorForTens
 
         //adding field symmetries
         for (Permutation p : parent.symmetries.getGenerators())
-            symmetries.add(convertPermutation(p, mapping[0], baseStructure.size()));
+            symmetries.addSymmetry(convertPermutation(p, mapping[0], baseStructure.size()));
 
 
         //adding block symmetries of derivatives
@@ -118,7 +117,7 @@ final class NameDescriptorForTensorFieldDerivative extends NameDescriptorForTens
                 cycle = Permutations.createBlockCycle(structuresOfIndices[i + 1].size(), 2);
                 aggregator.addAll(mapping[j]);
                 aggregator.addAll(mapping[j + 1]);
-                symmetries.add(
+                symmetries.addSymmetry(
                         Permutations.createPermutation(convertPermutation(cycle, aggregator.toArray(), baseStructure.size())));
 
                 if (orders[i] >= 3) {
@@ -126,7 +125,7 @@ final class NameDescriptorForTensorFieldDerivative extends NameDescriptorForTens
                         aggregator.addAll(mapping[j + k]);
 
                     cycle = Permutations.createBlockCycle(structuresOfIndices[i + 1].size(), orders[i]);
-                    symmetries.add(
+                    symmetries.addSymmetry(
                             Permutations.createPermutation(convertPermutation(cycle, aggregator.toArray(), baseStructure.size())));
                 }
                 aggregator.clear();

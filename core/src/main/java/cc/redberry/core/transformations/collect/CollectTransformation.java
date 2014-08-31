@@ -22,6 +22,7 @@
  */
 package cc.redberry.core.transformations.collect;
 
+import cc.redberry.core.transformations.powerexpand.PowerUnfoldTransformation;
 import cc.redberry.core.utils.OutputPort;
 import cc.redberry.core.groups.permutations.Permutations;
 import cc.redberry.core.indexgenerator.IndexGeneratorImpl;
@@ -34,7 +35,6 @@ import cc.redberry.core.tensor.*;
 import cc.redberry.core.transformations.EliminateMetricsTransformation;
 import cc.redberry.core.transformations.Transformation;
 import cc.redberry.core.transformations.expand.ExpandPort;
-import cc.redberry.core.transformations.powerexpand.PowerExpandUnwrapTransformation;
 import cc.redberry.core.utils.ArraysUtils;
 import cc.redberry.core.utils.IntArrayList;
 import cc.redberry.core.utils.TensorUtils;
@@ -71,7 +71,7 @@ public class CollectTransformation implements Transformation {
      */
     public CollectTransformation(SimpleTensor[] patterns, Transformation[] transformations) {
         patternsNames = new TIntHashSet();
-        powerExpand = new PowerExpandUnwrapTransformation(patterns);
+        powerExpand = new PowerUnfoldTransformation(patterns);
         for (SimpleTensor t : patterns)
             patternsNames.add(t.getName());
         this.transformations = transformations;
@@ -205,7 +205,7 @@ public class CollectTransformation implements Transformation {
 
         Indices factorIndices = new IndicesBuilder().append(factors).getIndices();
         TIntHashSet dummies = new TIntHashSet(IndicesUtils.getIntersections(
-                factorIndices.getUpper().copy(), factorIndices.getLower().copy()));
+                factorIndices.getUpper().toArray(), factorIndices.getLower().toArray()));
         SimpleIndices currentFactorIndices;
         IntArrayList from = new IntArrayList(), to = new IntArrayList();
         ArrayList<Tensor> kroneckers = new ArrayList<>();

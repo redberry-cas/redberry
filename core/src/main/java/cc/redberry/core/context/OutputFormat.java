@@ -35,37 +35,44 @@ import cc.redberry.core.tensor.Tensor;
  * @see Tensor#toString()
  * @since 1.0
  */
-public enum OutputFormat {
-
+public final class OutputFormat {
     /**
      * This format specifies expressions to be outputted in the LaTeX notation. The produces strings
      * can be simply putted in some LaTeX math environments and compiled via LaTeX compiler.
      */
-    LaTeX("^", "_"),
+    public static final OutputFormat LaTeX = new OutputFormat(0, "^", "_"),
     /**
      * This format specifies greek letters to be printed as is (if stdout supports utf-8 characters).
      * In other aspects it is similar to {@link OutputFormat#Redberry}
      */
-    UTF8("^", "_"),
+    UTF8 = new OutputFormat(1, "^", "_"),
     /**
      * This format specifies expressions to be outputted in the Redberry input notation. Produced strings
      * can be parsed in Redberry.
      */
-    Redberry("^", "_"),
+    Redberry = new OutputFormat(2, "^", "_"),
     /**
      * This format specifies expressions to be outputted in the Redberry input notation. Produced strings
      * can be parsed in Redberry.
      */
-    Cadabra("^", "_"),
+    Cadabra = new OutputFormat(3, "^", "_"),
     /**
      * This format specifies expressions to be outputted in the Wolfram Mathematica input notation.
      */
-    WolframMathematica("", "-"),
+    WolframMathematica = new OutputFormat(4, "", "-"),
     /**
      * This format specifies expressions to be outputted in the Maplesoft Maple input notation.
      */
-    Maple("~", "");
-
+    Maple = new OutputFormat(5, "~", ""),
+    /**
+     * This format will not print explicit indices of matrices. E.g. if A and B are matrices, that it will
+     * produce A*B instead of A^i'_j'*B^j'_k'.
+     */
+    SimpleRedberry = new OutputFormat(6, "^", "_", false);
+    /**
+     * Unique identifier.
+     */
+    public final int id;
     /**
      * Prefix, which specifies upper index (e.g. '^' in LaTeX)
      */
@@ -74,10 +81,52 @@ public enum OutputFormat {
      * Prefix, which specifies lower index (e.g. '_' in LaTeX)
      */
     public final String lowerIndexPrefix;
+    /**
+     * Specifies whether print matrix indices or not.
+     */
+    public final boolean printMatrixIndices;
 
-    private OutputFormat(String upperIndexPrefix, String lowerIndexPrefix) {
+    private OutputFormat(OutputFormat format, boolean printMatrixIndices) {
+        this(format.id, format.upperIndexPrefix, format.lowerIndexPrefix, printMatrixIndices);
+    }
+
+    private OutputFormat(int id, String upperIndexPrefix, String lowerIndexPrefix) {
+        this(id, upperIndexPrefix, lowerIndexPrefix, true);
+    }
+
+    private OutputFormat(int id, String upperIndexPrefix, String lowerIndexPrefix, boolean printMatrixIndices) {
+        this.id = id;
         this.upperIndexPrefix = upperIndexPrefix;
         this.lowerIndexPrefix = lowerIndexPrefix;
+        this.printMatrixIndices = printMatrixIndices;
+    }
+
+    /**
+     * Returns output format that will not print matrix indices.
+     *
+     * @return output format that will not print matrix indices
+     */
+    public OutputFormat doNotPrintMatrixIndices() {
+        return printMatrixIndices ? new OutputFormat(this, false) : this;
+    }
+
+    /**
+     * Returns output format that will always print matrix indices.
+     *
+     * @return output format that will always print matrix indices
+     */
+    public OutputFormat printMatrixIndices() {
+        return printMatrixIndices ? this : new OutputFormat(this, true);
+    }
+
+    /**
+     * Returns whether this and oth defines same format.
+     *
+     * @param oth other format
+     * @return whether this and oth defines same format
+     */
+    public boolean is(OutputFormat oth) {
+        return id == oth.id;
     }
 
     /**

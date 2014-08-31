@@ -56,6 +56,7 @@ public class FactorTransformation implements Transformation {
     private final boolean factorScalars;
     private final FactorizationEngine factorizationEngine;
 
+
     /**
      * @param factorScalars       specifies whether scalar but not symbolic (i.e. scalar indexed expressions) should be
      *                            factorized on a par with symbolic (i.e. without any indices) expressions
@@ -150,13 +151,16 @@ public class FactorTransformation implements Transformation {
     }
 
     private static Tensor factorSymbolicTerm(Tensor sum, FactorizationEngine factorizationEngine) {
-        TreeIterator iterator = new FromChildToParentIterator(sum);
         Tensor c;
-        while ((c = iterator.next()) != null)
-            if (c instanceof Sum)
-                iterator.set(factorOut(c, factorizationEngine));
+        if (factorizationEngine instanceof JasFactor) {
+            TreeIterator iterator = new FromChildToParentIterator(sum);
+            while ((c = iterator.next()) != null)
+                if (c instanceof Sum)
+                    iterator.set(factorOut(c, factorizationEngine));
+            sum = iterator.result();
+        }
 
-        iterator = new FromParentToChildIterator(iterator.result());
+        TreeIterator iterator = new FromParentToChildIterator(sum);
         while ((c = iterator.next()) != null) {
             if (!(c instanceof Sum))
                 continue;

@@ -28,9 +28,6 @@ import cc.redberry.core.indices.StructureOfIndices;
 
 import java.util.Arrays;
 
-import static cc.redberry.core.tensor.Tensors.isKronecker;
-import static cc.redberry.core.tensor.Tensors.isKroneckerOrMetric;
-
 /**
  * Specific implementation of {@link NameDescriptor} for Kronecker and metric tensors.
  *
@@ -52,9 +49,9 @@ final class NameDescriptorForMetricAndKronecker extends NameDescriptor {
     private static StructureOfIndices[] createIndicesTypeStructures(byte type) {
         StructureOfIndices[] structures = new StructureOfIndices[1];
         if (!CC.isMetric(type))
-            structures[0] = new StructureOfIndices(type, 2, true, false);
+            structures[0] = StructureOfIndices.create(type, 2, true, false);
         else
-            structures[0] = new StructureOfIndices(type, 2);
+            structures[0] = StructureOfIndices.create(type, 2);
         return structures;
     }
 
@@ -72,7 +69,7 @@ final class NameDescriptorForMetricAndKronecker extends NameDescriptor {
     @Override
     public String getName(SimpleIndices indices, OutputFormat format) {
         boolean metric = IndicesUtils.haveEqualStates(indices.get(0), indices.get(1));
-        if (format == OutputFormat.Maple)
+        if (format.is(OutputFormat.Maple))
             return metric ? "g_" : "KroneckerDelta";
         return metric ? names[1] : names[0];
     }

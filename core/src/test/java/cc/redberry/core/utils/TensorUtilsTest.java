@@ -26,7 +26,6 @@ import cc.redberry.core.TAssert;
 import cc.redberry.core.context.CC;
 import cc.redberry.core.groups.permutations.Permutation;
 import cc.redberry.core.groups.permutations.PermutationGroup;
-import cc.redberry.core.groups.permutations.PermutationOneLineInt;
 import cc.redberry.core.groups.permutations.Permutations;
 import cc.redberry.core.indexmapping.Mapping;
 import cc.redberry.core.indices.IndexType;
@@ -212,7 +211,7 @@ public class TensorUtilsTest {
 
         List<Permutation> expectedSymmetries = new ArrayList<>();
         for (Permutation s : base) {
-            tensor.getIndices().getSymmetries().add((byte) 0, s);
+            tensor.getIndices().getSymmetries().addSymmetry((byte) 0, s);
             expectedSymmetries.add(s);
         }
 

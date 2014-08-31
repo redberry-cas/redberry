@@ -22,9 +22,12 @@
  */
 package cc.redberry.core.context;
 
-import cc.redberry.core.utils.OutputPort;
+import cc.redberry.core.indices.IndexType;
 import cc.redberry.core.tensor.SimpleTensor;
+import cc.redberry.core.utils.OutputPort;
 import org.apache.commons.math3.random.RandomGenerator;
+
+import java.util.Set;
 
 /**
  * Redberry current context. This class statically delegates common useful methods from
@@ -57,6 +60,16 @@ public final class CC {
      */
     public static boolean isMetric(byte type) {
         return current().isMetric(type);
+    }
+
+    /**
+     * Returns true if metric is defined for specified index type.
+     *
+     * @param type index type
+     * @return true if metric is defined for specified index type
+     */
+    public static boolean isMetric(IndexType type) {
+        return current().isMetric(type.getType());
     }
 
     /**
@@ -94,6 +107,24 @@ public final class CC {
      */
     public static OutputFormat getDefaultOutputFormat() {
         return current().getDefaultOutputFormat();
+    }
+
+    /**
+     * Returns all metric types.
+     *
+     * @return all metric types
+     */
+    public static Set<IndexType> getMetricTypes() {
+        return current().getMetricTypes();
+    }
+
+    /**
+     * Returns all matrix types.
+     *
+     * @return all matrix types
+     */
+    public static Set<IndexType> getMatrixTypes() {
+        return current().getMatrixTypes();
     }
 
     /**

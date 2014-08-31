@@ -117,6 +117,15 @@ public abstract class AbstractSumBuilder implements TensorBuilder {
             tensor = toNumeric(tensor);
         if (TensorUtils.isZero(tensor))
             return;
+        if (TensorUtils.isIndeterminate(tensor)) {
+            complex = complex.add((Complex) tensor);
+            return;
+        }
+        if (complex.isInfinite()) {
+            if (tensor instanceof Complex)
+                complex.add((Complex) tensor);
+            return;
+        }
         if (indices == null) {
             indices = IndicesFactory.create(tensor.getIndices().getFree());
             sortedFreeIndices = indices.getAllIndices().copy();

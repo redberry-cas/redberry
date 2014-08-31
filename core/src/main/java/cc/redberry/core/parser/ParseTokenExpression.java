@@ -24,9 +24,9 @@ package cc.redberry.core.parser;
 
 import cc.redberry.core.context.Context;
 import cc.redberry.core.indices.Indices;
-import cc.redberry.core.tensor.Expression;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.tensor.Tensors;
+import cc.redberry.core.transformations.Transformation;
 
 /**
  * @author Dmitry Bolotin
@@ -45,9 +45,12 @@ public class ParseTokenExpression extends ParseToken {
 
     @Override
     public Tensor toTensor() {
-        Expression expression = Tensors.expression(content[0].toTensor(), content[1].toTensor());
-        if (tokenType == TokenType.PreprocessingExpression)
-            Context.get().getParseManager().defaultTensorPreprocessors.add(expression);
+        Tensor expression = Tensors.expression(content[0].toTensor(), content[1].toTensor());
+        if (tokenType == TokenType.PreprocessingExpression) {
+            for (Transformation tr : Context.get().getParseManager().defaultTensorPreprocessors)
+                expression = tr.transform(expression);
+            Context.get().getParseManager().defaultTensorPreprocessors.add((Transformation) expression);
+        }
         return expression;
     }
 }

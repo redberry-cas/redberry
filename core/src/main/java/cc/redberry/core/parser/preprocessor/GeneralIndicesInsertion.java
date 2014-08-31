@@ -198,7 +198,7 @@ public class GeneralIndicesInsertion implements ParseTokenTransformer {
                                 null : BitArray.EMPTY;
                     }
                 StructureOfIndices[] structures = originalStructureAndName.getStructure().clone();
-                structures[0] = new StructureOfIndices(allCounts, states);
+                structures[0] = StructureOfIndices.create(allCounts, states);
                 keys[omitted - 1] = new NameAndStructureOfIndices(originalStructureAndName.getName(),
                         structures);
             }
@@ -294,7 +294,7 @@ public class GeneralIndicesInsertion implements ParseTokenTransformer {
                     if (node.content.length == 1)
                         types = EnumSet.allOf(IndexType.class);
                     else {
-                        types = new HashSet<>();
+                        types = EnumSet.noneOf(IndexType.class);
                         ParseToken pn;
                         IndexType type;
 

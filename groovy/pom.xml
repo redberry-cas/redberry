@@ -25,13 +25,13 @@
 
     <groupId>cc.redberry</groupId>
     <artifactId>groovy</artifactId>
-    <version>1.1.6</version>
+    <version>1.1.7</version>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <!-- <gmavenVersion>1.4</gmavenVersion>
         <gmavenProviderSelection>2.0</gmavenProviderSelection> -->
-        <groovyVersion>2.1.5</groovyVersion>
+        <groovyVersion>2.2.2</groovyVersion>
     </properties>
 
     <parent>
@@ -93,7 +93,7 @@
         </developer>
     </developers>
 
-    <scm><connection>scm:hg:http://bitbucket.org/redberry/redberry-groovy</connection><tag>v1.1.6</tag><url>https://bitbucket.org/redberry/redberry-groovy/src/?at=v1.1.6</url></scm>
+    <scm><connection>scm:hg:http://bitbucket.org/redberry/redberry-groovy</connection><tag>v1.1.7</tag><url>https://bitbucket.org/redberry/redberry-groovy/src/?at=v1.1.7</url></scm>
 
     <issueManagement>
         <system>YouTRACK</system>
@@ -251,19 +251,19 @@
         <dependency>
             <groupId>cc.redberry</groupId>
             <artifactId>core</artifactId>
-            <version>1.1.6</version>
+            <version>1.1.7</version>
         </dependency>
         <dependency>
             <groupId>cc.redberry</groupId>
             <artifactId>core</artifactId>
-            <version>1.1.6</version>
+            <version>1.1.7</version>
             <type>test-jar</type>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>cc.redberry</groupId>
             <artifactId>physics</artifactId>
-            <version>1.1.6</version>
+            <version>1.1.7</version>
         </dependency>
         <dependency>
             <groupId>org.codehaus.groovy</groupId>

@@ -57,7 +57,7 @@ public final class BSGSCandidateElement extends BSGSElement {
     private static int calculateSVCapacity(List<Permutation> stabilizerGenerators) {
         int capacity = -1;
         for (Permutation p : stabilizerGenerators)
-            capacity = Math.max(capacity, p.internalDegree());
+            capacity = Math.max(capacity, p.degree());
         return capacity;
     }
 
@@ -82,7 +82,7 @@ public final class BSGSCandidateElement extends BSGSElement {
     }
 
     public void addStabilizer(Permutation stabilizer) {
-        internalDegree = Math.max(internalDegree, stabilizer.internalDegree());
+        internalDegree = Math.max(internalDegree, stabilizer.degree());
         stabilizerGenerators.add(stabilizer);
         recalculateOrbitAndSchreierVector();
     }

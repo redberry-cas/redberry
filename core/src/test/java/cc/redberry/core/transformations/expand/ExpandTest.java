@@ -24,7 +24,6 @@ package cc.redberry.core.transformations.expand;
 
 import cc.redberry.core.TAssert;
 import cc.redberry.core.context.CC;
-import cc.redberry.core.indexmapping.IndexMappings;
 import cc.redberry.core.parser.ParserIndices;
 import cc.redberry.core.tensor.*;
 import cc.redberry.core.tensor.iterator.TraverseState;
@@ -40,7 +39,6 @@ import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import static cc.redberry.core.tensor.Tensors.multiply;
 import static cc.redberry.core.tensor.Tensors.parse;
 import static cc.redberry.core.tensor.Tensors.parseExpression;
 import static cc.redberry.core.transformations.expand.ExpandPort.expandUsingPort;
@@ -492,7 +490,8 @@ public class ExpandTest {
                 ),
                 parseExpression("d_i^i = 4"),
                 EliminateMetricsTransformation.ELIMINATE_METRICS,
-                CollectScalarFactorsTransformation.COLLECT_SCALAR_FACTORS);
+                CollectScalarFactorsTransformation.COLLECT_SCALAR_FACTORS
+        );
         long start;
         for (int i = 0; i < 100; ++i) {
             start = System.currentTimeMillis();
@@ -501,6 +500,7 @@ public class ExpandTest {
         }
     }
 
+    @Ignore
     @Test
     public void test46() throws Exception {
         CC.resetTensorNames(8164763714862784L);
@@ -521,7 +521,8 @@ public class ExpandTest {
                 ),
                 parseExpression("d_i^i = 4"),
                 EliminateMetricsTransformation.ELIMINATE_METRICS,
-                CollectScalarFactorsTransformation.COLLECT_SCALAR_FACTORS);
+                CollectScalarFactorsTransformation.COLLECT_SCALAR_FACTORS
+        );
 
         System.out.println(t = tr.transform(t));
         System.out.println(t = tr.transform(t));
@@ -535,7 +536,22 @@ public class ExpandTest {
 
     @Test
     public void test47() {
-        Tensor t = parse("-(F^{b}*F_{b})**5-(F_{d}*F^{d})**4+(F_{d}*F^{d})**3+((F_{b}*F^{b})**4+(F_{b}*F^{b})**3-(F_{c}*F^{c})**2)*F^{a}*F_{a}");
+        Expression e1 = parseExpression("p_a*p^a = x");
+        Expression e2 = parseExpression("k_a*k^a = x");
 
+        Tensor t = parse("(p_a*p^a + k_r*k^r)**2");
+        TAssert.assertEquals(ExpandTransformation.expand(t, e1, e2), "4*x**2");
+        t = parse("(p_a*p^a + k_r*k^r)**3");
+        TAssert.assertEquals(ExpandTransformation.expand(t, e1, e2), "8*x**3");
+        t = parse("(p_a*p^a + k_r*k^r)**4");
+        TAssert.assertEquals(ExpandTransformation.expand(t, e1, e2), "16*x**4");
+    }
+
+    @Test
+    public void test48() {
+        Tensor t = parse("((a-b)*f_{m}*f^{m}+a+b)*(a+b)*f_{a}*f^{a}");
+        TAssert.assertEquals(
+                parse("(-b**2+a**2)*f_{a}*f^{a}*f_{m}*f^{m}+(a**2+2*a*b+b**2)*f_{a}*f^{a}"),
+                expand(t));
     }
 }
