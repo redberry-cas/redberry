@@ -86,11 +86,11 @@
         </developer>
     </developers>
 
-    <scm><connection>scm:hg:http://bitbucket.org/redberry/redberry-core</connection><url>https://bitbucket.org/redberry/redberry-core/src/</url></scm>
+    <scm><connection>scm:hg:http://bitbucket.org/redberry/redberry</connection><url>https://bitbucket.org/redberry/redberry</url></scm>
 
     <issueManagement>
         <system>YouTRACK</system>
-        <url>http://dev.redberry.cc/</url>
+        <url>http://youtrack.redberry.cc/</url>
     </issueManagement>
 
     <build>
@@ -98,7 +98,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>2.3.2</version>
+                <version>3.2</version>
                 <configuration>
                     <source>1.7</source>
                     <target>1.7</target>
@@ -116,11 +116,6 @@
                     </execution>
                 </executions>
             </plugin>
-            <!--<plugin>-->
-            <!--<groupId>org.apache.maven.plugins</groupId>-->
-            <!--<artifactId>maven-checkstyle-plugin</artifactId>-->
-            <!--<version>2.9.1</version>-->
-            <!--</plugin>-->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
@@ -133,11 +128,9 @@
                             <value>cc.redberry.core.GlobalRunListener</value>
                         </property>
                     </properties>
-                    <!-- <skipTests>true</skipTests> -->
                 </configuration>
             </plugin>
             <plugin>
-                <!-- TODO: remove or replace with castom assembly descriptor -->
                 <artifactId>maven-assembly-plugin</artifactId>
                 <configuration>
                     <descriptorRefs>

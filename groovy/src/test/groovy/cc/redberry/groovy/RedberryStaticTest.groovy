@@ -93,18 +93,19 @@ class RedberryStaticTest {
             assertEquals "A^{a'}_{A'}^{\\alpha'\\beta'}_{\\gamma'\\delta'}", "A".t.toString()
 
             defineMatrices "B", "C", Matrix1.vector, Matrix2.covector, Matrix3.tensor(2, 2);
-            assertEquals "B^{a'}_{A'}^{\\alpha'\\beta'}_{\\gamma'\\delta'}", "B".t.toString()
-            assertEquals "C^{a'}_{A'}^{\\alpha'\\beta'}_{\\gamma'\\delta'}", "C".t.toString()
+
+            assertEquals "B^{a'}_{A'}^{\\alpha'\\beta'}_{\\gamma'\\delta'}".t.toString(), "B".t.toString()
+            assertEquals "C^{a'}_{A'}^{\\alpha'\\beta'}_{\\gamma'\\delta'}".t.toString(), "C".t.toString()
 
             defineMatrices "G", Matrix1.vector,
                     "M", "K", Matrix2.covector, Matrix3.tensor(2, 2),
                     "O", "T", Matrix4.tensor(3, 3)
 
-            assertEquals 'G^{a\'}', "G".t.toString()
-            assertEquals 'M_{A\'}^{\\alpha\'\\beta\'}_{\\gamma\'\\delta\'}', "M".t.toString()
-            assertEquals 'K_{A\'}^{\\alpha\'\\beta\'}_{\\gamma\'\\delta\'}', "K".t.toString()
-            assertEquals 'O^{\\Gamma\'\\Delta\'\\Theta\'}_{\\Lambda\'\\Xi\'\\Pi\'}', "O".t.toString()
-            assertEquals 'T^{\\Gamma\'\\Delta\'\\Theta\'}_{\\Lambda\'\\Xi\'\\Pi\'}', "T".t.toString()
+            assertEquals 'G^{a\'}'.t.toString(), "G".t.toString()
+            assertEquals 'M_{A\'}^{\\alpha\'\\beta\'}_{\\gamma\'\\delta\'}'.t.toString(), "M".t.toString()
+            assertEquals 'K_{A\'}^{\\alpha\'\\beta\'}_{\\gamma\'\\delta\'}'.t.toString(), "K".t.toString()
+            assertEquals 'O^{\\Gamma\'\\Delta\'\\Theta\'}_{\\Lambda\'\\Xi\'\\Pi\'}'.t.toString(), "O".t.toString()
+            assertEquals 'T^{\\Gamma\'\\Delta\'\\Theta\'}_{\\Lambda\'\\Xi\'\\Pi\'}'.t.toString(), "T".t.toString()
         }
     }
 
@@ -114,7 +115,6 @@ class RedberryStaticTest {
             def t = 'f[x]*f[-x] + a*f[x]*f[-x]'.t
             assertTrue Collect['f[x]'] >> t == '(1+a)*f[-x]*f[x]'.t
         }
-
     }
 
     @Test
