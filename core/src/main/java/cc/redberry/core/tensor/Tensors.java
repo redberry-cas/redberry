@@ -205,9 +205,9 @@ public final class Tensors {
         int i;
         Tensor f;
         for (i = factors.length - 1; i >= 0; --i) {
-            if ((f = factors[i]) instanceof Sum || f.getIndices().getFree().size() == 0) {
+            if ((f = factors[i]) instanceof MultiTensor || f.getIndices().getFree().size() == 0) {
                 toResolve.add(f);
-                forbidden.addAll(f.getIndices().getFree().getAllIndices().copy());
+                forbidden.addAll(IndicesUtils.getIndicesNames(f.getIndices().getFree()));
             } else {
                 forbidden.addAll(TensorUtils.getAllIndicesNamesT(f));
                 result[i] = f;
@@ -873,6 +873,26 @@ public final class Tensors {
      */
     public static Tensor parse(String expression) {
         return CC.current().getParseManager().parse(expression);
+    }
+
+    /**
+     * Converts int value to Complex.
+     *
+     * @param i integer
+     * @return same Complex
+     */
+    public static Tensor parse(int i) {
+        return new Complex(i);
+    }
+
+    /**
+     * Converts long value to Complex.
+     *
+     * @param i long integer
+     * @return same Complex
+     */
+    public static Tensor parse(long i) {
+        return new Complex(i);
     }
 
     /**
