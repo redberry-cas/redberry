@@ -29,7 +29,6 @@ import cc.redberry.core.context.OutputFormat;
 import cc.redberry.core.indices.*;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.tensor.*;
-import cc.redberry.core.transformations.DifferentiateTransformation;
 import cc.redberry.core.utils.TensorUtils;
 import junit.framework.Assert;
 import org.junit.Ignore;
@@ -564,5 +563,11 @@ public class ParserTest {
     public void test25() {
         addSymmetry("x_mn", 1, 0);
         parse("D[x_mn][f[x_mn*x^nm]]");
+    }
+
+    @Test
+    public void testSet1() throws Exception {
+        Tensor t = parse("D[x] := x");
+        Assert.assertEquals("D[x] = x", t.toString());
     }
 }

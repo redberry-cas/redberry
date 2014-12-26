@@ -22,6 +22,7 @@
  */
 package cc.redberry.core.indexgenerator;
 
+import cc.redberry.core.indices.IndexType;
 import gnu.trove.map.hash.TByteObjectHashMap;
 
 import java.util.Arrays;
@@ -64,7 +65,7 @@ public final class IndexGeneratorFromData implements IndexGenerator {
     public int generate(byte type) {
         IntProvider ig = generators.get(type);
         if (ig == null)
-            throw new IndexOutOfBoundsException("No allowed indices with specified type.");
+            throw new IndexOutOfBoundsException("No allowed indices with specified type: " + IndexType.getType(type));
         return setType(type, ig.getNext());
     }
 

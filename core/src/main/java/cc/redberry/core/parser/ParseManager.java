@@ -66,7 +66,8 @@ public final class ParseManager {
             node = tr.transform(node);
         Tensor t = node.toTensor();
         for (Transformation tr : tensorPreprocessors)
-            t = tr.transform(t);
+            if (tr != t)
+                t = tr.transform(t);
         return t;
     }
 
@@ -83,7 +84,8 @@ public final class ParseManager {
             node = tr.transform(node);
         Tensor t = node.toTensor();
         for (Transformation tr : tensorPreprocessors)
-            t = tr.transform(t);
+            if (tr != t)
+                t = tr.transform(t);
         return t;
     }
 

@@ -33,9 +33,11 @@ import cc.redberry.core.transformations.Transformation;
  * @author Stanislav Poslavsky
  */
 public class ParseTokenExpression extends ParseToken {
+    public final boolean preprocess;
 
-    public ParseTokenExpression(boolean preprocessing, ParseToken lhs, ParseToken rhs) {
-        super(preprocessing ? TokenType.PreprocessingExpression : TokenType.Expression, lhs, rhs);
+    public ParseTokenExpression(boolean preprocess, ParseToken lhs, ParseToken rhs) {
+        super(TokenType.Expression, lhs, rhs);
+        this.preprocess = preprocess;
     }
 
     @Override
@@ -46,7 +48,7 @@ public class ParseTokenExpression extends ParseToken {
     @Override
     public Tensor toTensor() {
         Tensor expression = Tensors.expression(content[0].toTensor(), content[1].toTensor());
-        if (tokenType == TokenType.PreprocessingExpression) {
+        if (preprocess) {
             for (Transformation tr : Context.get().getParseManager().defaultTensorPreprocessors)
                 expression = tr.transform(expression);
             Context.get().getParseManager().defaultTensorPreprocessors.add((Transformation) expression);

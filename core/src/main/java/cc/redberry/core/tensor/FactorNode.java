@@ -64,7 +64,7 @@ final class FactorNode {
 
     @Override
     public FactorNode clone() {
-        //factorForbiddenIndices are immuable
+        //factorForbiddenIndices are immutable
         return new FactorNode(factor, builder.clone(), factorForbiddenIndices);
     }
 }

@@ -254,5 +254,22 @@ class RedberryStaticTest {
             assert gr instanceof PermutationGroup
         }
     }
+
+
+    @Test
+    public void testBind1() throws Exception {
+        use(Redberry) {
+            def t1 = 't1_i'.t, t2 = 't2_o'.t
+            println(bind(['k1_r': t1, 'k2_a': t2]))
+        }
+    }
+
+    @Test
+    public void testBind2() throws Exception {
+        use(Redberry) {
+            def t1 = 't1_i[x_a]'.t, t2 = 't2_o[y_p]'.t
+            println(bind(['k1_r[e_u]': t1, 'k2_a[r_r]': t2]))
+        }
+    }
 }
 

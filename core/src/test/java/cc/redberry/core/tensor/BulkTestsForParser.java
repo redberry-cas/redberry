@@ -185,6 +185,7 @@ public class BulkTestsForParser {
     }
 
     private static void checkTensor(Tensor t) {
+        TAssert.assertIndicesConsistency(t);
         TAssert.assertEqualsExactly(t, Tensors.parse(t.toString()));
         //t = inverseIndices(t);
         //TAssert.assertEqualsExactly(t, Tensors.parse(t.toString()));

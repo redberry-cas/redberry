@@ -30,7 +30,6 @@ import cc.redberry.core.tensor.ProductBuilder;
 import cc.redberry.core.tensor.SimpleTensor;
 import cc.redberry.core.tensor.SumBuilder;
 import cc.redberry.core.tensor.Tensor;
-import cc.redberry.core.transformations.expand.ExpandTransformation;
 import cc.redberry.core.utils.TensorUtils;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -39,8 +38,8 @@ import java.util.Random;
 
 import static cc.redberry.core.tensor.Tensors.*;
 import static cc.redberry.core.transformations.expand.ExpandTransformation.expand;
+import static cc.redberry.core.transformations.factor.FactorTransformation.FACTOR;
 import static cc.redberry.core.transformations.factor.FactorTransformation.factor;
-import static cc.redberry.core.transformations.factor.FactorTransformation.factorOut;
 
 /**
  * @author Dmitry Bolotin
@@ -182,7 +181,7 @@ public class FactorTransformationTest {
         for (int i = 0; i < 100; ++i) {
             CC.resetTensorNames();
             Tensor t = parse("a*b*c + a*b*d");
-            TAssert.assertEquals(factorOut(t), "a*b*(c+d)");
+            TAssert.assertEquals(FACTOR.factorOut(t), "a*b*(c+d)");
         }
     }
 
@@ -192,7 +191,7 @@ public class FactorTransformationTest {
         for (int i = 0; i < 100; ++i) {
             CC.resetTensorNames();
             Tensor t = parse("a*b*c + a*b*d");
-            TAssert.assertEquals(factorOut(t), "a*b*(c+d)");
+            TAssert.assertEquals(FACTOR.factorOut(t), "a*b*(c+d)");
         }
     }
 
@@ -201,7 +200,7 @@ public class FactorTransformationTest {
         for (int i = 0; i < 100; ++i) {
             CC.resetTensorNames();
             Tensor t = parse("a**2*b*c + a*b**2*d*e + a*b");
-            TAssert.assertEquals(factorOut(t), "a*b*(a*c + d*b*e + 1)");
+            TAssert.assertEquals(FACTOR.factorOut(t), "a*b*(a*c + d*b*e + 1)");
         }
     }
 
@@ -211,7 +210,7 @@ public class FactorTransformationTest {
         for (int i = 0; i < 100; ++i) {
             CC.resetTensorNames();
             Tensor t = parse("a**(-2)*b**(-1)*c + a**(-1)*b**(-2)*d*e + 1/(a*b)");
-            TAssert.assertEquals(factorOut(t), "1/(a*b)*(1/a*c + d/b*e + 1)");
+            TAssert.assertEquals(FACTOR.factorOut(t), "1/(a*b)*(1/a*c + d/b*e + 1)");
         }
     }
 
@@ -220,7 +219,7 @@ public class FactorTransformationTest {
         for (int i = 0; i < 100; ++i) {
             CC.resetTensorNames();
             Tensor t = parse("a**(-2)*b**(-1)*c + a**(-1)*b**(-2)*d*e + a*b");
-            TAssert.assertEquals(factorOut(t), t);
+            TAssert.assertEquals(FACTOR.factorOut(t), t);
         }
     }
 
@@ -229,7 +228,7 @@ public class FactorTransformationTest {
         for (int i = 0; i < 100; ++i) {
             CC.resetTensorNames();
             Tensor t = parse("(a-b)**2*c + (b-a)**3*d");
-            TAssert.assertEquals(factorOut(t), "(a-b)**2*(c - d*(a-b))");
+            TAssert.assertEquals(FACTOR.factorOut(t), "(a-b)**2*(c - d*(a-b))");
         }
     }
 
@@ -238,7 +237,7 @@ public class FactorTransformationTest {
         for (int i = 0; i < 100; ++i) {
             CC.resetTensorNames();
             Tensor t = parse("(a-b)**2*c + (b-a)**3*d + (b-a)*d");
-            TAssert.assertEquals(factorOut(t), "(a-b)*(c*(a-b) - d*(a-b)**2 - d)");
+            TAssert.assertEquals(FACTOR.factorOut(t), "(a-b)*(c*(a-b) - d*(a-b)**2 - d)");
         }
     }
 
@@ -248,7 +247,7 @@ public class FactorTransformationTest {
         for (int i = 0; i < 100; ++i) {
             CC.resetTensorNames();
             Tensor t = parse("(a-b)**2*c + a-b");
-            TAssert.assertEquals(factorOut(t), "(a-b)*(c*(a-b) + 1)");
+            TAssert.assertEquals(FACTOR.factorOut(t), "(a-b)*(c*(a-b) + 1)");
         }
     }
 
@@ -257,14 +256,14 @@ public class FactorTransformationTest {
         for (int i = 0; i < 100; ++i) {
             CC.resetTensorNames();
             Tensor t = parse("(a-b)**3*c + a**2 - 2*a*b + b**2");
-            TAssert.assertEquals(factorOut(t), "(a-b)**2*(c*(a-b) + 1)");
+            TAssert.assertEquals(FACTOR.factorOut(t), "(a-b)**2*(c*(a-b) + 1)");
         }
     }
 
     @Test
     public void testFactorOut17() {
         Tensor t = parse("(a+a*b)**(-2) + a");
-        TAssert.assertEquals(factorOut(t), "(1+b)**(-2)*a**(-2) + a");
+        TAssert.assertEquals(FACTOR.factorOut(t), "(1+b)**(-2)*a**(-2) + a");
     }
 
     @Test

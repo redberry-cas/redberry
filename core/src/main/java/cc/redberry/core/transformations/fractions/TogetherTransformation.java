@@ -47,51 +47,34 @@ import static cc.redberry.core.transformations.CollectScalarFactorsTransformatio
 //TODO review after logical completion of tensors standard form strategy 
 public final class TogetherTransformation implements Transformation {
 
-    public static final TogetherTransformation TOGETHER = new TogetherTransformation(false);
-    public static final TogetherTransformation TOGETHER_FACTOR = new TogetherTransformation(true);
+    public static final TogetherTransformation TOGETHER = new TogetherTransformation();
+    public static final TogetherTransformation TOGETHER_FACTOR = new TogetherTransformation(FactorTransformation.FACTOR);
 
-    private final boolean doFactor;
+    private final Transformation factor;
 
-    private TogetherTransformation(boolean doFactor) {
-        this.doFactor = doFactor;
+    public TogetherTransformation(Transformation factor) {
+        this.factor = factor;
+    }
+
+    public TogetherTransformation() {
+        this(null);
     }
 
     @Override
     public Tensor transform(Tensor t) {
-        return together(t, doFactor);
-    }
-
-    /**
-     * Puts terms in a sum over a common denominator.
-     *
-     * @param t tensor
-     * @return result
-     */
-    public static Tensor together(Tensor t) {
-        return together(t, false);
-    }
-
-    /**
-     * Puts terms in a sum over a common denominator and cancels factors in the result if specified.
-     *
-     * @param t        tensor
-     * @param doFactor specifies whether to cancel factors in the result
-     * @return result
-     */
-    //todo make two separate methods
-    public static Tensor together(Tensor t, boolean doFactor) {
         FromChildToParentIterator iterator = new FromChildToParentIterator(t);
         Tensor c;
         while ((c = iterator.next()) != null) {
             if (c instanceof Sum)
-                iterator.set(togetherSum(c, doFactor));
+                iterator.set(togetherSum(c));
             if (c instanceof Product)
                 iterator.set(collectScalarFactorsInProduct((Product) c));
         }
         return iterator.result();
+
     }
 
-    private static Tensor togetherSum(Tensor t, boolean doFactor) {
+    private Tensor togetherSum(Tensor t) {
         boolean performTogether = false;
         for (Tensor s : t)
             if (s instanceof Product) {
@@ -107,7 +90,7 @@ public final class TogetherTransformation implements Transformation {
         if (!performTogether)
             return t;
 
-        SplitStruct base = splitFraction(t.get(0), doFactor), temp;
+        SplitStruct base = splitFraction(t.get(0)), temp;
         @SuppressWarnings("unchecked") List<Tensor> numeratorTerms[] = new List[t.size()];
         numeratorTerms[0] = new ArrayList<>();
         numeratorTerms[0].add(base.numerator);
@@ -116,7 +99,7 @@ public final class TogetherTransformation implements Transformation {
         int i, j;
         for (i = 1; i < t.size(); ++i) {
             s = t.get(i);
-            temp = splitFraction(s, doFactor);
+            temp = splitFraction(s);
 
             List<Tensor> newNumeratorTerm = new ArrayList<>();
             newNumeratorTerm.add(temp.numerator);
@@ -172,9 +155,9 @@ public final class TogetherTransformation implements Transformation {
         }
     }
 
-    private static SplitStruct splitFraction(Tensor tensor, boolean doFactor) {
-        if (doFactor)
-            tensor = FactorTransformation.factor(tensor, false);
+    private SplitStruct splitFraction(Tensor tensor) {
+        if (factor != null)
+            tensor = factor.transform(tensor);
 
         THashMap<Tensor, Complex> map = new THashMap<>();
         if (checkPower(tensor)) {
@@ -205,5 +188,41 @@ public final class TogetherTransformation implements Transformation {
 
     private static boolean checkPower(Tensor power) {
         return power instanceof Power && TensorUtils.isRealNegativeNumber(power.get(1));
+    }
+
+
+    /**
+     * Puts terms in a sum over a common denominator.
+     *
+     * @param t tensor
+     * @return result
+     */
+    public static Tensor together(Tensor t) {
+        return TOGETHER.transform(t);
+    }
+
+    /**
+     * Puts terms in a sum over a common denominator and cancels factors in the result if specified.
+     *
+     * @param t      tensor
+     * @param factor factor transformation
+     * @return result
+     */
+    public static Tensor together(Tensor t, Transformation factor) {
+        return new TogetherTransformation(factor).transform(t);
+    }
+
+    /**
+     * Puts terms in a sum over a common denominator and cancels factors in the result if specified.
+     *
+     * @param t        tensor
+     * @param doFactor specifies whether to cancel factors in the result
+     * @return result
+     */
+    //todo make two separate methods
+    public static Tensor together(Tensor t, boolean doFactor) {
+        if (!doFactor)
+            return together(t);
+        else return TOGETHER_FACTOR.transform(t);
     }
 }

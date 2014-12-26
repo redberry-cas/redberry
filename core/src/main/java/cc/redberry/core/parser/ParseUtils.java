@@ -25,6 +25,7 @@ package cc.redberry.core.parser;
 import cc.redberry.core.indices.Indices;
 import cc.redberry.core.indices.IndicesUtils;
 import cc.redberry.core.number.Complex;
+import cc.redberry.core.tensor.Expression;
 import cc.redberry.core.tensor.SimpleTensor;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.tensor.TensorField;
@@ -92,6 +93,8 @@ public class ParseUtils {
         }
         if (tensor instanceof Complex)
             return new ParseTokenNumber((Complex) tensor);
+        if (tensor instanceof Expression)
+            return new ParseTokenExpression(false, tensor2AST(tensor.get(0)), tensor2AST(tensor.get(1)));
 
         ParseToken[] content = new ParseToken[tensor.size()];
         int i = 0;

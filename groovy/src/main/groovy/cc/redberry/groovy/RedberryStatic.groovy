@@ -41,6 +41,7 @@ import cc.redberry.core.solver.frobenius.FrobeniusSolver
 import cc.redberry.core.tensor.Expression
 import cc.redberry.core.tensor.SimpleTensor
 import cc.redberry.core.tensor.Tensor
+import cc.redberry.core.tensor.TensorField
 import cc.redberry.core.tensorgenerator.TensorGenerator
 import cc.redberry.core.transformations.*
 import cc.redberry.core.transformations.collect.CollectTransformation
@@ -736,5 +737,29 @@ class RedberryStatic {
         long stop = System.currentTimeMillis();
         if (stdout) println('Time: ' + (stop - start) + ' ms.')
         return (stop - start)
+    }
+
+    /**
+     * Binds specified definitions for variables
+     * @param map def <-> var
+     * @return a list of corresponding transformations
+     */
+    public static List bind(Map map) {
+        use(Redberry) {
+            return map.collect {
+                def key = it.key.t, val = it.value.t
+                if (val.class == TensorField && key.class == TensorField) {
+                    for (int i = 0; i < key.size() && i < val.size(); ++i)
+                        key = mapIndices(key[i], val[i]) >> key
+                }
+                def mapping = key.indices.free % val.indices.free
+                (mapping >> key).eq(val)
+            }
+        }
+    }
+
+    private static Object mapIndices(key, val) {
+        def mapping = key.indices.free % val.indices.free
+        (mapping >> key).eq(val)
     }
 }
