@@ -1226,6 +1226,25 @@ public class PermutationGroupTest extends AbstractTestClass {
         Assert.assertEquals(group, intersection);
     }
 
+    @Test
+    public void testIntersection4() {
+int[][] perm1 = {{0, 1}};
+int[][] perm2 = {{2, 3}};
+int[][] perm3 = {{0, 1, 3}};
+int[][] perm4 = {{2, 4, 5, 6}};
+
+Permutation p1 = Permutations.createPermutation(perm1);
+Permutation p2 = Permutations.createPermutation(perm2);
+Permutation p3 = Permutations.createPermutation(perm3);
+Permutation p4 = Permutations.createPermutation(perm4);
+PermutationGroup group = PermutationGroup.createPermutationGroup(p1, p2);
+PermutationGroup oth = PermutationGroup.createPermutationGroup(p3, p4);
+
+Assert.assertTrue(oth.intersection(group).isTrivial());
+        Assert.assertTrue(group.intersection(oth).isTrivial());
+        System.out.println(oth.membershipTest(p1));
+    }
+
     private void testUniformity(PermutationGroup group,
                                 RandomGenerator randomGenerator) {
         if (group.order().compareTo(BigInteger.valueOf(200)) > 0)
