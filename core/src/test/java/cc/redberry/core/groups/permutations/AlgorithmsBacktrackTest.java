@@ -139,6 +139,16 @@ public class AlgorithmsBacktrackTest extends AbstractTestClass {
     }
 
     @Test
+    public void test3() {
+        PermutationGroup sym6 = PermutationGroup.alternatingGroup(3);
+        ArrayList<BSGSCandidateElement> subgroup = new ArrayList<>();
+        ArrayList<BSGSCandidateElement> bsgs = sym6.getBSGSCandidate();
+        AlgorithmsBacktrack.rebaseWithRedundancy(bsgs, new int[]{0, 1, 2, 3, 4}, 6);
+        AlgorithmsBacktrack.subgroupSearch(bsgs, subgroup, BacktrackSearchTestFunction.TRUE, Indicator.TRUE_INDICATOR);
+        Assert.assertEquals(1, subgroup.get(0).stabilizerGenerators.size());
+    }
+
+    @Test
     public void testSetwiseStabilizer1_raw_WithGap_longtest() throws Exception {
         GapGroupsInterface gap = getGapInterface();
         for (int degree = 4; degree < 50; ++degree) {
@@ -531,6 +541,52 @@ public class AlgorithmsBacktrackTest extends AbstractTestClass {
         System.out.println(intersection.get(0).stabilizerGenerators);
         System.out.println(calculateOrder(intersection));
     }
+
+    @Test
+    public void testIntersection2() {
+        PermutationGroup sym = PermutationGroup.symmetricGroup(6);
+        PermutationGroup alt = PermutationGroup.alternatingGroup(3);
+        Assert.assertEquals(alt, sym.intersection(alt));
+    }
+
+    @Test
+    public void testIntersection5_withGap() {
+        GapGroupsInterface gap = getGapInterface();
+        for (int degree = 4; degree < 50; ++degree) {
+            int nrPrimitiveGroups = gap.nrPrimitiveGroups(degree);
+            for (int i = 0; i < nrPrimitiveGroups; ++i) {
+                gap.evaluate("g1:= PrimitiveGroup( " + degree + ", " + (i + 1) + ");");
+                if ((gap.evaluateToBoolean("IsNaturalSymmetricGroup(g1);") ||
+                        gap.evaluateToBoolean("IsNaturalAlternatingGroup(g1);")) && degree > 7)
+                    continue;
+//                System.out.println("Degree: " + degree + ", index ");
+                PermutationGroup g1 = gap.primitiveGroup(degree, i);
+                for (int d = 4; d < degree; ++d) {
+                    int nrPG = gap.nrPrimitiveGroups(d);
+                    for (int j = 0; j < nrPG; ++j) {
+                        if (d == degree && j == i)
+                            continue;
+                        gap.evaluate("g2:= PrimitiveGroup( " + d + ", " + (j + 1) + ");");
+                        if ((gap.evaluateToBoolean("IsNaturalSymmetricGroup(g2);") ||
+                                gap.evaluateToBoolean("IsNaturalAlternatingGroup(g2);")) && degree > 7)
+                            continue;
+
+                        PermutationGroup g2 = gap.primitiveGroup(d, j);
+                        PermutationGroup intersection = g1.intersection(g2);
+                        gap.evaluateRedberryGroup("actual", intersection.generators());
+                        System.out.println();
+                        System.out.println("" + degree + "  " + d + ",  " + i + "  " + j);
+                        System.out.println(gap.evaluate("Intersection(g1,g2);"));
+                        System.out.println(intersection);
+                        Assert.assertTrue(gap.evaluateToBoolean("actual = Intersection(g1,g2);"));
+
+
+                    }
+                }
+            }
+        }
+    }
+
 
     public static PermutationGroup testSearchStabilizerRaw(PermutationGroup pg, int[] set) {
         return testSearchStabilizerRaw(pg.getBSGS(), set);

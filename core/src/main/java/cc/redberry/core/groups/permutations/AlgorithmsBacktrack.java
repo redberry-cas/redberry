@@ -567,18 +567,24 @@ public final class AlgorithmsBacktrack {
     public static void intersection(final List<? extends BSGSElement> group1,
                                     final List<? extends BSGSElement> group2,
                                     final ArrayList<BSGSCandidateElement> intersection) {
-        //todo implement special cases
+        //TODO implement special cases?
 
         if (AlgorithmsBase.calculateOrder(group2).compareTo(AlgorithmsBase.calculateOrder(group1)) < 0) {
             intersection(group2, group1, intersection);
             return;
         }
 
+        //group1 is now has smaller order than group2 => we will run SUBGROUPSEARCH on smaller group
         final ArrayList<BSGSCandidateElement> smaller = AlgorithmsBase.asBSGSCandidatesList(group1);
         final ArrayList<BSGSCandidateElement> larger = AlgorithmsBase.asBSGSCandidatesList(group2);
+        //maximal internal degree from given groups
         int degree = larger.get(0).internalDegree();
-        rebaseWithRedundancy(smaller, AlgorithmsBase.getBaseAsArray(group2), degree);
-        rebaseWithRedundancy(larger, AlgorithmsBase.getBaseAsArray(smaller), degree);
+
+        //make same base for given groups
+        rebaseWithRedundancy(smaller, AlgorithmsBase.getBaseAsArray(larger), degree);
+        //store base reference
+        final int[] base = AlgorithmsBase.getBaseAsArray(smaller);
+        rebaseWithRedundancy(larger, base, degree);
 
         assert smaller.size() == larger.size();
 
@@ -587,38 +593,49 @@ public final class AlgorithmsBacktrack {
         for (int i = 0; i < intersectionWord.length; ++i)
             intersectionWord[i] = identity;
 
+        //testing conditions described in Sec. 4.6.6 o [Holt05]
         final BacktrackSearchPayload payload = new BacktrackSearchPayload() {
             @Override
             public void beforeLevelIncrement(int level) {
-                int image = wordReference[level].newIndexOf(smaller.get(level).basePoint);
+                int image = wordReference[level].newIndexOf(base[level]);
 
                 if (level == 0)
                     intersectionWord[level] = larger.get(level).getTransversalOf(image);
                 else
-                    intersectionWord[level] = larger.get(level).getTransversalOf(
-                            intersectionWord[level - 1].newIndexOfUnderInverse(image)).composition(intersectionWord[level - 1]);
+                    intersectionWord[level] = larger.get(level).getTransversalOf(intersectionWord[level - 1]
+                            .newIndexOfUnderInverse(image)).composition(intersectionWord[level - 1]);
             }
 
             @Override
             public void afterLevelIncrement(int level) {
-
             }
 
             @Override
             public boolean test(Permutation permutation, int level) {
-                if (level == 0)
-                    return larger.get(level).belongsToOrbit(
-                            wordReference[level].newIndexOf(smaller.get(level).basePoint));
-                else
-                    return larger.get(level).belongsToOrbit(
-                            intersectionWord[level - 1].newIndexOfUnderInverse(
-                                    wordReference[level].newIndexOf(
-                                            smaller.get(level).basePoint)));
+                boolean b = level == 0 ?
+                        larger.get(level).belongsToOrbit(
+                                wordReference[level].newIndexOf(base[level]))
+                        :
+                        larger.get(level).belongsToOrbit(
+                                intersectionWord[level - 1].newIndexOfUnderInverse(
+                                        wordReference[level].newIndexOf(base[level])));
+                if(!b){
+                    int i = 0;
+                }
+                return b;
             }
 
         };
 
-        subgroupSearchWithPayload(smaller, intersection, payload, Indicator.TRUE_INDICATOR);
+        //final test for intersection
+        final Indicator<Permutation> intersectionProperty = new Indicator<Permutation>() {
+            @Override
+            public boolean is(Permutation p) {
+                return AlgorithmsBase.membershipTest(larger, p);
+            }
+        };
+
+        subgroupSearchWithPayload(smaller, intersection, payload, intersectionProperty);
     }
 
 //    /**
@@ -640,8 +657,9 @@ public final class AlgorithmsBacktrack {
     /**
      * Changes base keeping redundant remnant points.
      *
-     * @param group group
-     * @param base  new base
+     * @param group  group
+     * @param base   new base
+     * @param degree degree
      */
     static void rebaseWithRedundancy(final ArrayList<BSGSCandidateElement> group,
                                      final int[] base, int degree) {
