@@ -139,6 +139,7 @@ public final class AlgorithmsBacktrack {
         if (!subgroup.isEmpty() && subgroup.get(0).internalDegree() > degree)
             throw new IllegalArgumentException("Specified subgroup is not a subgroup of specified group.");
 
+        //size of stabilizers chain
         final int size = group.size();
 
         final Permutation identity = group.get(0).stabilizerGenerators.get(0).getIdentity();
@@ -204,7 +205,7 @@ public final class AlgorithmsBacktrack {
         // The above enables us to choose a point in this orbit that must be greater then g(β_l)
         final int[] maxRepresentative = new int[size];
         maxRepresentative[level] =
-                subgroup.get(level).orbitSize() <= 1 ? degree :
+                subgroup.get(level).orbitSize() <= 1 ? Integer.MAX_VALUE :
                         sortedOrbits[level][sortedOrbits[level].length - subgroup.get(level).orbitSize() + 1];
 
         //<= initialized
@@ -259,10 +260,8 @@ public final class AlgorithmsBacktrack {
                         max = ordering.max(max, word[j].newIndexOf(base[j]));
 
                 maxImages[level] = max;
-                maxRepresentative[level] =
-                        maxRepresentative[level] =
-                                subgroup.get(level).orbitSize() <= 1 ? degree :
-                                        sortedOrbits[level][sortedOrbits[level].length - subgroup.get(level).orbitSize() + 1];
+                maxRepresentative[level] = subgroup.get(level).orbitSize() <= 1 ? Integer.MAX_VALUE :
+                        sortedOrbits[level][sortedOrbits[level].length - subgroup.get(level).orbitSize() + 1];
 
                 //reset tuple and calculate next permutation
                 tuple[level] = 0;
@@ -329,7 +328,7 @@ public final class AlgorithmsBacktrack {
                 //<= recalculate data needed to test (ii) from PROPOSITION 4.7
                 maxImages[level] = ordering.minElement();
                 maxRepresentative[level] =
-                        subgroup.get(level).orbitSize() <= 1 ? degree :
+                        subgroup.get(level).orbitSize() <= 1 ? Integer.MAX_VALUE :
                                 sortedOrbits[level][sortedOrbits[level].length - subgroup.get(level).orbitSize() + 1];
             }
 
@@ -612,17 +611,13 @@ public final class AlgorithmsBacktrack {
 
             @Override
             public boolean test(Permutation permutation, int level) {
-                boolean b = level == 0 ?
+                return level == 0 ?
                         larger.get(level).belongsToOrbit(
                                 wordReference[level].newIndexOf(base[level]))
                         :
                         larger.get(level).belongsToOrbit(
                                 intersectionWord[level - 1].newIndexOfUnderInverse(
                                         wordReference[level].newIndexOf(base[level])));
-                if(!b){
-                    int i = 0;
-                }
-                return b;
             }
 
         };
