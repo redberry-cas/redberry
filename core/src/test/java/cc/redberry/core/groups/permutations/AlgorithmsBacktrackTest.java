@@ -27,6 +27,7 @@ import cc.redberry.core.number.NumberUtils;
 import cc.redberry.core.utils.Indicator;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.math.BigInteger;
@@ -35,6 +36,8 @@ import java.util.*;
 import static cc.redberry.core.TAssert.assertEquals;
 import static cc.redberry.core.TAssert.assertTrue;
 import static cc.redberry.core.groups.permutations.AlgorithmsBase.*;
+import static cc.redberry.core.groups.permutations.PermutationGroup.createPermutationGroup;
+import static cc.redberry.core.groups.permutations.Permutations.createPermutation;
 import static cc.redberry.core.groups.permutations.PermutationsTestUtils.*;
 
 /**
@@ -136,6 +139,17 @@ public class AlgorithmsBacktrackTest extends AbstractTestClass {
         assertEquals(expected.length, ii);
         Arrays.sort(actual, permutationComparator);
         Assert.assertArrayEquals(expected, actual);
+    }
+
+    @Test
+    public void test3() {
+        PermutationGroup sym2 = PermutationGroup.symmetricGroup(2);
+        ArrayList<BSGSCandidateElement> subgroup = new ArrayList<>();
+        ArrayList<BSGSCandidateElement> bsgs = sym2.getBSGSCandidate();
+        AlgorithmsBacktrack.rebaseWithRedundancy(bsgs, new int[]{0, 1, 2}, sym2.degree());
+        assertTrue(isBSGS(bsgs));
+        AlgorithmsBacktrack.subgroupSearch(bsgs, subgroup, BacktrackSearchTestFunction.TRUE, Indicator.TRUE_INDICATOR);
+        assertEquals(sym2, PermutationGroup.createPermutationGroupFromBSGS(asBSGSList(subgroup)));
     }
 
     @Test
@@ -531,6 +545,88 @@ public class AlgorithmsBacktrackTest extends AbstractTestClass {
         System.out.println(intersection.get(0).stabilizerGenerators);
         System.out.println(calculateOrder(intersection));
     }
+
+    @Test
+    public void testIntersection2() {
+        PermutationGroup sym = PermutationGroup.symmetricGroup(6);
+        PermutationGroup alt = PermutationGroup.alternatingGroup(3);
+        Assert.assertEquals(alt, sym.intersection(alt));
+    }
+
+    @Test
+    public void testIntersection3() {
+        //PermutationGroup g1 = gap.primitiveGroup(17, 5);
+        //PermutationGroup g2 = gap.primitiveGroup(16, 17);
+
+        PermutationGroup g1 = createPermutationGroup(
+                createPermutation(new int[][]{{2, 12, 8, 9, 10, 6, 16, 4, 3, 11, 13, 5, 7, 15, 14}}),
+                createPermutation(new int[][]{{0, 8, 1}, {2, 13, 5}, {3, 11, 10}, {6, 15, 9}, {12, 16, 14}}));
+        PermutationGroup g2 = createPermutationGroup(
+                createPermutation(new int[][]{{1, 15, 8, 4, 2}, {3, 14, 7, 12, 6}, {5, 13, 9, 11, 10}}),
+                createPermutation(new int[][]{{1, 15}, {3, 13}, {5, 11}, {7, 9}}),
+                createPermutation(new int[][]{{0, 1}, {2, 3}, {4, 5}, {6, 7}, {8, 9}, {10, 11}, {12, 13}, {14, 15}}));
+
+        PermutationGroup expected = createPermutationGroup(
+                createPermutation(new int[][]{{0, 15}, {1, 14}, {2, 13}, {3, 12}, {4, 11}, {5, 10}, {6, 9}, {7, 8}}));
+
+        assertTrue(g1.containsSubgroup(expected));
+        assertTrue(g2.containsSubgroup(expected));
+
+        assertEquals(expected, g1.intersection(g2));
+        assertEquals(expected, g2.intersection(g1));
+    }
+
+    @Test
+    public void testIntersection5_longTest_withGap() {
+        long redberryTiming = 0, gapTiming = 0, start;
+        GapGroupsInterface gap = getGapInterface();
+        for (int degree = 4; degree < 25; ++degree) {
+            //System.out.println("Degree: " + degree);
+            int nrPrimitiveGroups = gap.nrPrimitiveGroups(degree);
+            for (int i = 0; i < nrPrimitiveGroups; ++i) {
+                gap.evaluate("g1:= PrimitiveGroup( " + degree + ", " + (i + 1) + ");");
+                if ((gap.evaluateToBoolean("IsNaturalSymmetricGroup(g1);") ||
+                        gap.evaluateToBoolean("IsNaturalAlternatingGroup(g1);")) && degree > 7)
+                    continue;
+                PermutationGroup g1 = gap.primitiveGroup(degree, i);
+                for (int d = 4; d < degree; ++d) {
+                    int nrPG = gap.nrPrimitiveGroups(d);
+                    for (int j = 0; j < nrPG; ++j) {
+                        gap.evaluate("g2:= PrimitiveGroup( " + d + ", " + (j + 1) + ");");
+                        if ((gap.evaluateToBoolean("IsNaturalSymmetricGroup(g2);") ||
+                                gap.evaluateToBoolean("IsNaturalAlternatingGroup(g2);")) && degree > 7)
+                            continue;
+
+                        PermutationGroup g2 = gap.primitiveGroup(d, j);
+                        //initialize BSGS
+                        g1.order();
+                        g2.order();
+                        gap.evaluate("Order(g1); Order(g2);");
+
+                        start = System.currentTimeMillis();
+                        PermutationGroup intersection = g1.intersection(g2);
+                        redberryTiming += (System.currentTimeMillis() - start);
+
+                        start = System.currentTimeMillis();
+                        gap.evaluate("intr:= Intersection(g1,g2);");
+                        gapTiming += (System.currentTimeMillis() - start);
+
+                        gap.evaluateRedberryGroup("actual", intersection.generators());
+                        boolean test = gap.evaluateToBoolean("actual = intr;");
+                        if (!test) {
+                            System.out.println("" + degree + "  " + d + ",  " + i + "  " + j);
+                            System.out.println(gap.evaluate("Intersection(g1,g2);"));
+                            System.out.println(intersection);
+                        }
+                        Assert.assertTrue(test);
+                    }
+                }
+            }
+        }
+        System.out.println("Redberry timing: " + redberryTiming);
+        System.out.println("GAP timing: " + gapTiming);
+    }
+
 
     public static PermutationGroup testSearchStabilizerRaw(PermutationGroup pg, int[] set) {
         return testSearchStabilizerRaw(pg.getBSGS(), set);

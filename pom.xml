@@ -20,9 +20,11 @@
   ~
   ~ You should have received a copy of the GNU General Public License
   ~ along with Redberry. If not, see <http://www.gnu.org/licenses/>.
-  --><project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  -->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    
+
     <groupId>redberry.cc</groupId>
     <artifactId>all</artifactId>
     <version>1.1.8-SNAPSHOT</version>
@@ -35,16 +37,16 @@
         <module>groovy</module>
     </modules>
 
-   <url>http://redberry.cc/</url>
+    <url>http://redberry.cc/</url>
 
     <description>
-        Redberry is an open source computer algebra system designed for tensor 
-        manipulation.  It implements basic computer algebra system routines as well as 
-        complex tools for real computations in physics. 
-        
+        Redberry is an open source computer algebra system designed for tensor
+        manipulation. It implements basic computer algebra system routines as well as
+        complex tools for real computations in physics.
+
         This is the aggregating pom for all Redberry modules.
     </description>
-    
+
     <licenses>
         <license>
             <name>GNU General Public License, version 3</name>
@@ -84,11 +86,14 @@
         </developer>
     </developers>
 
-    <scm><connection>scm:hg:http://bitbucket.org/redberry/redberry-all</connection><url>https://bitbucket.org/redberry/redberry-all/src/</url></scm>
+    <scm>
+        <connection>scm:hg:http://bitbucket.org/redberry/redberry</connection>
+        <url>https://bitbucket.org/redberry/redberry/</url>
+    </scm>
 
     <issueManagement>
         <system>YouTRACK</system>
-        <url>http://dev.redberry.cc/</url>
+        <url>http://youtrack.redberry.cc/</url>
     </issueManagement>
-    
+
 </project>

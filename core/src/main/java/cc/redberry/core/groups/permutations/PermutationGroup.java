@@ -263,14 +263,20 @@ public final class PermutationGroup
      */
     private void ensureBSGSIsInitialized() {
         if (bsgs == null) {
-            if (base != null)
+            if (isSym0()) //if known Sym
+                bsgs = AlgorithmsBase.createSymmetricGroupBSGS(internalDegree);
+            else if (isAlt0()) //if known Alt
+                bsgs = AlgorithmsBase.createAlternatingGroupBSGS(internalDegree);
+            else if (base != null)
                 bsgs = AlgorithmsBase.createBSGSList(base, generators, internalDegree);
             else
                 bsgs = AlgorithmsBase.createBSGSList(generators, internalDegree);
+
             if (bsgs.isEmpty())
                 bsgs = TRIVIAL_BSGS;
             else
                 bsgs = Collections.unmodifiableList(bsgs);
+
             base = getBaseAsArray(bsgs);
             order = calculateOrder(bsgs);
             ordering = new InducedOrdering(base);
@@ -624,6 +630,27 @@ public final class PermutationGroup
     private Boolean isSymmetric = null;
 
     /**
+     * Returns {@code true} if it is known that this group is symmetric, {@code false} if it is not known.
+     *
+     * @return {@code true} if it is known that this group is symmetric, {@code false} if it is not known
+     */
+    private boolean isSym0() {
+        if (isTrivial() || !isTransitive())
+            return isSymmetric = false;
+        if (internalDegree > 2 && generators().size() == 1)
+            return isSymmetric = false;
+        boolean isSym = isSymOrAlt(DEFAULT_CONFIDENCE_LEVEL);
+        if (!isSym) return false;
+        boolean containsOdd = false;
+        for (Permutation p : generators())
+            if (p.parity() == 1) {
+                containsOdd = true;
+                break;
+            }
+        return isSymmetric = containsOdd;
+    }
+
+    /**
      * Returns true if this group is natural symmetric group and false otherwise.
      *
      * @return true is this group is natural symmetric group and false otherwise
@@ -631,27 +658,29 @@ public final class PermutationGroup
     public boolean isSymmetric() {
         if (isSymmetric != null)
             return isSymmetric;
-        if (isTrivial())
-            return isSymmetric = false;
-        if (isTrivial() || !isTransitive())
-            return isSymmetric = false;
-        if (internalDegree > 2 && generators().size() == 1)
-            return isSymmetric = false;
-
-        isSymmetric = isSymOrAlt(DEFAULT_CONFIDENCE_LEVEL);
-        if (isSymmetric) {
-            boolean containsOdd = false;
-            for (Permutation p : generators())
-                if (p.parity() == 1) {
-                    containsOdd = true;
-                    break;
-                }
-            return isSymmetric = containsOdd;
-        } else
-            return isSymmetric = order().equals(factorial(internalDegree));
+        isSymmetric = isSym0();
+        if (!isSymmetric)
+            isSymmetric = order().equals(factorial(internalDegree));
+        return isSymmetric;
     }
 
     private Boolean isAlternating = null;
+
+    /**
+     * Returns {@code true} if it is known that this group is alternating, {@code false} if it is not known.
+     *
+     * @return {@code true} if it is known that this group is alternating, {@code false} if it is not known
+     */
+    private boolean isAlt0() {
+        if (isTrivial() || !isTransitive())
+            return isAlternating = false;
+        boolean isAlt = isSymOrAlt(DEFAULT_CONFIDENCE_LEVEL);
+        if (!isAlt) return false;
+        for (Permutation p : generators())
+            if (p.parity() == 1)
+                return isAlternating = false;
+        return isAlternating = true;
+    }
 
     /**
      * Returns true is this group is natural alternating group Alt(degree) and false otherwise.
@@ -661,23 +690,17 @@ public final class PermutationGroup
     public boolean isAlternating() {
         if (isAlternating != null)
             return isAlternating;
-        if (isTrivial())
-            return isAlternating = false;
 
-        if (isTrivial() || !isTransitive())
-            return isAlternating = false;
+        isAlternating = isAlt0();
+        if (isAlternating)
+            return isAlternating.booleanValue();
 
-        isAlternating = isSymOrAlt(DEFAULT_CONFIDENCE_LEVEL);
-        if (!isAlternating)
-            isAlternating = order().equals(factorial(internalDegree).divide(BigInteger.valueOf(2)));
+        isAlternating = order().equals(factorial(internalDegree).divide(BigInteger.valueOf(2)));
 
-        if (isAlternating) {
-            List<Permutation> generators = generators();
-            for (Permutation p : generators)
+        if (isAlternating)
+            for (Permutation p : generators())
                 if (p.parity() == 1)
                     return isAlternating = false;
-        }
-
         return isAlternating;
     }
 
@@ -1093,6 +1116,17 @@ public final class PermutationGroup
             return this;
         if (oth.isTrivial())
             return oth;
+        if (isSymmetric()) {
+            if (oth.degree() <= degree())
+                return oth;
+            int[] points = new int[oth.degree() - degree()];
+            for (int i = 0; i < points.length; ++i)
+                points[i] = degree() + i;
+            return oth.pointwiseStabilizer(points);
+        }
+        if (oth.isSymmetric())
+            return oth.intersection(this);
+
         ArrayList<BSGSCandidateElement> intersection = new ArrayList<>();
         AlgorithmsBacktrack.intersection(getBSGS(), oth.getBSGS(), intersection);
         return createPermutationGroupFromBSGS(asBSGSList(intersection));
@@ -1443,6 +1477,27 @@ public final class PermutationGroup
         List<Permutation> gens = generators();
         for (int i = 0; ; ++i) {
             sb.append(gens.get(i));
+            if (i == gens.size() - 1)
+                return sb.append(" )").toString();
+            sb.append(", ");
+        }
+    }
+
+    /**
+     * Returns string to directly paste into Java code.
+     *
+     * @return Java code for this permutation group
+     */
+    public String toStringJava() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("PermutationGroup.createPermutationGroup( ");
+        List<Permutation> gens = generators();
+        for (int i = 0; ; ++i) {
+            String p = gens.get(i).toString().replace("[", "{").replace("]", "}").replace("+", "").replace("-", "");
+            if (gens.get(i).antisymmetry())
+                sb.append("Permutations.createPermutation(true, new int[][]").append(p).append(")");
+            else
+                sb.append("Permutations.createPermutation(new int[][]").append(p).append(")");
             if (i == gens.size() - 1)
                 return sb.append(" )").toString();
             sb.append(", ");
