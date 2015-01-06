@@ -721,7 +721,7 @@ class RedberryStatic {
 //        return symmetries
 //    }
 
-    public static List<Permutation> FindIndicesSymmetries(SimpleIndices indices, tensor) {
+    public static List<Permutation> findIndicesSymmetries(SimpleIndices indices, tensor) {
         use(Redberry) {
             return TensorUtils.findIndicesSymmetries(indices, tensor.t)
         }

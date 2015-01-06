@@ -26,7 +26,7 @@ import cc.redberry.core.groups.permutations.PermutationGroup
 import org.junit.Test
 
 import static cc.redberry.groovy.RedberryStatic.Collect
-import static cc.redberry.groovy.RedberryStatic.FindIndicesSymmetries
+import static cc.redberry.groovy.RedberryStatic.findIndicesSymmetries
 import static cc.redberry.groovy.RedberryStatic.GenerateTensor
 
 /**
@@ -44,7 +44,7 @@ class TensorGeneratorTest {
             def t = GenerateTensor(indices, ['g_ab', 'k_a'])
             t = Collect['C[x]'.t] >> t
             assert indices.symmetries.permutationGroup ==
-                    PermutationGroup.createPermutationGroup(FindIndicesSymmetries(indices, t))
+                    PermutationGroup.createPermutationGroup(findIndicesSymmetries(indices, t))
         }
     }
 
@@ -53,7 +53,7 @@ class TensorGeneratorTest {
         use(Redberry) {
             def indices = '_{abc}'.si
             def t = GenerateTensor(indices, ['g_mn', 'k_m'], [SymmetricForm: true])
-            assert PermutationGroup.createPermutationGroup(FindIndicesSymmetries(indices, t)).isSymmetric()
+            assert PermutationGroup.createPermutationGroup(findIndicesSymmetries(indices, t)).isSymmetric()
         }
     }
 

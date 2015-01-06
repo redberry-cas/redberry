@@ -1304,7 +1304,7 @@ public final class Tensors {
      * @param tensors string representation of simple tensors
      * @throws java.lang.IllegalStateException if this tensor is already in use (it's permutation group calculated)
      */
-    public static void setAntisymmetric(String... tensors) {
+    public static void setAntiSymmetric(String... tensors) {
         for (String tensor : tensors)
             setAntiSymmetric(tensor);
     }

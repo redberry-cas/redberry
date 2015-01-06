@@ -1168,7 +1168,7 @@ class Redberry {
             return getFirst().toString()
         }
 
-        public boolean isExist(){
+        public boolean isExists(){
             return getFirst() != null
         }
 
