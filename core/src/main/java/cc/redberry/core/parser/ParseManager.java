@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2014:
+ * Copyright (c) 2010-2015:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -66,7 +66,8 @@ public final class ParseManager {
             node = tr.transform(node);
         Tensor t = node.toTensor();
         for (Transformation tr : tensorPreprocessors)
-            t = tr.transform(t);
+            if (tr != t)
+                t = tr.transform(t);
         return t;
     }
 
@@ -83,7 +84,8 @@ public final class ParseManager {
             node = tr.transform(node);
         Tensor t = node.toTensor();
         for (Transformation tr : tensorPreprocessors)
-            t = tr.transform(t);
+            if (tr != t)
+                t = tr.transform(t);
         return t;
     }
 

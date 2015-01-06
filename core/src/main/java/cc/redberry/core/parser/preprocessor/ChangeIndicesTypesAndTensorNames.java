@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2014:
+ * Copyright (c) 2010-2015:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -61,10 +61,9 @@ public class ChangeIndicesTypesAndTensorNames implements ParseTokenTransformer {
                 return node;
             case ScalarFunction:
                 return new ParseTokenScalarFunction(((ParseTokenScalarFunction) node).function, transformContent(node.content));
-            case PreprocessingExpression:
             case Expression:
                 ParseToken[] nContent = transformContent(node.content);
-                return new ParseTokenExpression(node.tokenType == TokenType.PreprocessingExpression, nContent[0], nContent[1]);
+                return new ParseTokenExpression(((ParseTokenExpression) node).preprocess, nContent[0], nContent[1]);
             default:
                 return new ParseToken(node.tokenType, transformContent(node.content));
         }

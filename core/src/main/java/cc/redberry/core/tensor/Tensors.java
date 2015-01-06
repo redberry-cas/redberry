@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2014:
+ * Copyright (c) 2010-2015:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -205,9 +205,9 @@ public final class Tensors {
         int i;
         Tensor f;
         for (i = factors.length - 1; i >= 0; --i) {
-            if ((f = factors[i]) instanceof Sum || f.getIndices().getFree().size() == 0) {
+            if ((f = factors[i]) instanceof MultiTensor || f.getIndices().getFree().size() == 0) {
                 toResolve.add(f);
-                forbidden.addAll(f.getIndices().getFree().getAllIndices().copy());
+                forbidden.addAll(IndicesUtils.getIndicesNames(f.getIndices().getFree()));
             } else {
                 forbidden.addAll(TensorUtils.getAllIndicesNamesT(f));
                 result[i] = f;
@@ -876,6 +876,46 @@ public final class Tensors {
     }
 
     /**
+     * Converts int value to Complex.
+     *
+     * @param i integer
+     * @return same Complex
+     */
+    public static Tensor parse(int i) {
+        return new Complex(i);
+    }
+
+    /**
+     * Converts long value to Complex.
+     *
+     * @param i long integer
+     * @return same Complex
+     */
+    public static Tensor parse(long i) {
+        return new Complex(i);
+    }
+
+    /**
+     * Converts double value to Complex.
+     *
+     * @param i double
+     * @return same Complex
+     */
+    public static Tensor parse(double i) {
+        return new Complex(i);
+    }
+
+    /**
+     * Converts float value to Complex.
+     *
+     * @param i float
+     * @return same Complex
+     */
+    public static Tensor parse(float i) {
+        return new Complex(i);
+    }
+
+    /**
      * Converts array of string expressions into array of tensors.
      *
      * @param expressions array of strings to be parsed
@@ -1284,7 +1324,7 @@ public final class Tensors {
      * @param tensors string representation of simple tensors
      * @throws java.lang.IllegalStateException if this tensor is already in use (it's permutation group calculated)
      */
-    public static void setAntisymmetric(String... tensors) {
+    public static void setAntiSymmetric(String... tensors) {
         for (String tensor : tensors)
             setAntiSymmetric(tensor);
     }

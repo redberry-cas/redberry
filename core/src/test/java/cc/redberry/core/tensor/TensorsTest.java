@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2014:
+ * Copyright (c) 2010-2015:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -25,14 +25,19 @@ package cc.redberry.core.tensor;
 import cc.redberry.core.TAssert;
 import cc.redberry.core.combinatorics.IntPermutationsGenerator;
 import cc.redberry.core.context.CC;
+import cc.redberry.core.context.OutputFormat;
 import cc.redberry.core.groups.permutations.Permutation;
-import cc.redberry.core.indices.IndicesFactory;
-import cc.redberry.core.indices.SimpleIndices;
-import cc.redberry.core.indices.StructureOfIndices;
+import cc.redberry.core.indices.*;
 import cc.redberry.core.number.Complex;
+import cc.redberry.core.parser.ParseToken;
+import cc.redberry.core.parser.ParseTokenSimpleTensor;
 import cc.redberry.core.parser.ParserIndices;
+import cc.redberry.core.parser.TokenType;
 import cc.redberry.core.transformations.expand.ExpandTransformation;
 import cc.redberry.core.utils.TensorUtils;
+import org.apache.commons.math3.random.RandomDataGenerator;
+import org.apache.commons.math3.random.RandomGenerator;
+import org.apache.commons.math3.random.Well19937c;
 import org.junit.Test;
 
 import java.util.Iterator;

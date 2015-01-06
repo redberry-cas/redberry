@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2014:
+ * Copyright (c) 2010-2015:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -44,6 +44,5 @@ public enum TokenType {
     Number,
     ScalarFunction,
     Derivative,
-    Dummy,
-    PreprocessingExpression
+    Dummy
 }

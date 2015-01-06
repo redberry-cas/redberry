@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2014:
+ * Copyright (c) 2010-2015:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -25,6 +25,7 @@ package cc.redberry.core.groups.permutations;
 import cc.redberry.core.context.CC;
 import cc.redberry.core.number.NumberUtils;
 import cc.redberry.core.utils.Timing;
+import gnu.trove.set.hash.TIntHashSet;
 import org.apache.commons.math3.random.Well1024a;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.junit.Assert;
@@ -32,12 +33,16 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import java.math.BigInteger;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Random;
 
 import static cc.redberry.core.TAssert.assertEquals;
 import static cc.redberry.core.TAssert.assertTrue;
 import static cc.redberry.core.groups.permutations.AlgorithmsBase.*;
-import static cc.redberry.core.groups.permutations.AlgorithmsBase.createRawBSGSCandidate;
+import static cc.redberry.core.groups.permutations.PermutationGroup.createPermutationGroup;
+import static cc.redberry.core.groups.permutations.Permutations.createPermutation;
 import static cc.redberry.core.groups.permutations.RandomPermutation.random;
 import static cc.redberry.core.groups.permutations.RandomPermutation.randomness;
 import static cc.redberry.core.utils.Timing.timing;
@@ -1181,6 +1186,33 @@ public class AlgorithmsBaseTest extends AbstractTestClass {
             }
         }
         System.out.println(stat);
+    }
+
+    @Test
+    public void testRebase1() {
+        //GAP: PrimitiveGroup(16, 18);
+        PermutationGroup group = createPermutationGroup(
+                createPermutation(new int[][]{{1, 15, 8, 4, 2}, {3, 14, 7, 12, 6}, {5, 13, 9, 11, 10}}),
+                createPermutation(new int[][]{{1, 15}, {3, 13}, {5, 11}, {7, 9}}),
+                createPermutation(new int[][]{{0, 1}, {2, 3}, {4, 5}, {6, 7}, {8, 9}, {10, 11}, {12, 13}, {14, 15}}));
+        ArrayList<BSGSCandidateElement> bsgs;
+
+        int[] base = {2, 0, 1}, newBase;
+
+        bsgs = group.getBSGSCandidate();
+        rebaseFromScratch(bsgs, base);
+        newBase = getBaseAsArray(bsgs);
+        assertEquals(newBase.length, new TIntHashSet(newBase).size());
+
+        bsgs = group.getBSGSCandidate();
+        rebaseWithTranspositions(bsgs, base);
+        newBase = getBaseAsArray(bsgs);
+        assertEquals(newBase.length, new TIntHashSet(newBase).size());
+
+        bsgs = group.getBSGSCandidate();
+        rebaseWithConjugationAndTranspositions(bsgs, base);
+        newBase = getBaseAsArray(bsgs);
+        assertEquals(newBase.length, new TIntHashSet(newBase).size());
     }
 
     @Test

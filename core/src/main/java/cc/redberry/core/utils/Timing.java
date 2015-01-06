@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2014:
+ * Copyright (c) 2010-2015:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -43,7 +43,20 @@ public final class Timing {
         return new Object[]{elapsed, result};
     }
 
+    public static Object[] microTiming(TimingJob job, boolean printMessage) {
+        long start = System.nanoTime();
+        Object result = job.doJob();
+        long elapsed = (System.nanoTime() - start) / 1000;
+        if (printMessage)
+            System.out.println("Timing: " + elapsed + "µs");
+        return new Object[]{elapsed, result};
+    }
+
     public static Object[] timing(TimingJob job) {
         return timing(job, true);
+    }
+
+    public static Object[] microTiming(TimingJob job) {
+        return microTiming(job, true);
     }
 }

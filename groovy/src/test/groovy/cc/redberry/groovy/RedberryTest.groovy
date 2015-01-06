@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2014:
+ * Copyright (c) 2010-2015:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -108,5 +108,4 @@ class RedberryTest {
             assert -[[0, -1, -4, -5]].p == [[0, 1, 4, 5]].p
         }
     }
-
 }

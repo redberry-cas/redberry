@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2014:
+ * Copyright (c) 2010-2015:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -775,6 +775,41 @@ class Redberry {
     }
 
     /**
+     * Joins two transformations in a single one, which will apply both transformations sequentially
+     * @param tr1 transformation
+     * @param tr2 transformation
+     * @return joined transformation, which will apply both transformations sequentially
+     */
+    static Transformation and(Transformation tr1, List tr2) {
+        def transformations = [];
+        if (tr1 instanceof TransformationCollection)
+            transformations.addAll(tr1.transformations)
+        else
+            transformations << tr1
+
+        transformations.addAll(tr2)
+
+        new TransformationCollection(transformations)
+    }
+
+    /**
+     * Joins two transformations in a single one, which will apply both transformations sequentially
+     * @param tr1 transformation
+     * @param tr2 transformation
+     * @return joined transformation, which will apply both transformations sequentially
+     */
+    static Transformation and(List tr1, Transformation tr2) {
+        def transformations = [];
+        transformations.addAll(tr1)
+        if (tr2 instanceof TransformationCollection)
+            transformations.addAll(tr2.transformations)
+        else
+            transformations << tr2
+
+        new TransformationCollection(transformations)
+    }
+
+    /**
      * Joins two substitutions in a single one, which will apply both substitutions "simultaneously"
      * @param tr1 substitution
      * @param tr2 substitution
@@ -939,6 +974,24 @@ class Redberry {
         for (Transformation tr in transformations)
             t = tr.transform(t);
         return t;
+    }
+
+    /**
+     * Applies tensor field substitutions without matching arguments
+     * @param substitution
+     * @return
+     */
+    static Transformation getHold(Expression substitution) {
+        return new SubstitutionTransformation(substitution).asSimpleSubstitution()
+    }
+
+    /**
+     * Applies tensor field substitutions without matching arguments
+     * @param substitution
+     * @return
+     */
+    static Transformation getHold(SubstitutionTransformation substitution) {
+        return substitution.asSimpleSubstitution()
     }
 
     //////////////////////////////////////////// TYPE CONVERSION ///////////////////////////////////////////////////////
@@ -1113,6 +1166,10 @@ class Redberry {
         @Override
         public String toString() {
             return getFirst().toString()
+        }
+
+        public boolean isExists(){
+            return getFirst() != null
         }
 
         private static class MappingsIterator implements Iterator<Mapping> {

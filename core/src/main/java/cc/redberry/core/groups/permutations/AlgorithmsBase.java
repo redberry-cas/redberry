@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2014:
+ * Copyright (c) 2010-2015:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -1019,6 +1019,16 @@ public final class AlgorithmsBase {
                                                   int oldBasePointPosition, int newBasePoint) {
         assert BSGS.get(oldBasePointPosition).basePoint != newBasePoint;
 
+        //let's check whether this point is already presented in BSGS
+        for (int index = oldBasePointPosition + 1; index < BSGS.size(); ++index)
+            if (BSGS.get(index).basePoint == newBasePoint) {
+                //<- newBasePoint is already in BSGS => just swap
+                while (index > oldBasePointPosition)
+                    swapAdjacentBasePoints(BSGS, --index);
+                return;
+            }
+
+
         int insertionPosition = oldBasePointPosition + 1;
         insertion_points:
         for (; insertionPosition < BSGS.size(); ++insertionPosition) {
@@ -1643,7 +1653,7 @@ public final class AlgorithmsBase {
     /**
      * Returns a deep copy of specified list
      *
-     * @param BSGSCandidate
+     * @param BSGSCandidate BSGS candidate
      * @return deep copy of specified list
      */
     public static ArrayList<BSGSCandidateElement> clone(List<BSGSCandidateElement> BSGSCandidate) {

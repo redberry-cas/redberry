@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2014:
+ * Copyright (c) 2010-2015:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -92,9 +92,10 @@ public final class GapGroupsInterface {
     }
 
     public String evaluateRedberryGroup(String var, List<Permutation> generators) {
+        if(generators.isEmpty())
+            return evaluate(var.trim() + ":= Group(());");
         StringBuilder sb = new StringBuilder();
         sb.append(var.trim()).append(":= Group(");
-
         for (Iterator<Permutation> it = generators.iterator(); ; ) {
             Permutation p = it.next();
             sb.append("PermList(").append(convertToGapList(p.oneLine())).append(")");
