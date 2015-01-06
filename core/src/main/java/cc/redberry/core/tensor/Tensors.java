@@ -896,6 +896,26 @@ public final class Tensors {
     }
 
     /**
+     * Converts double value to Complex.
+     *
+     * @param i double
+     * @return same Complex
+     */
+    public static Tensor parse(double i) {
+        return new Complex(i);
+    }
+
+    /**
+     * Converts float value to Complex.
+     *
+     * @param i float
+     * @return same Complex
+     */
+    public static Tensor parse(float i) {
+        return new Complex(i);
+    }
+
+    /**
      * Converts array of string expressions into array of tensors.
      *
      * @param expressions array of strings to be parsed
