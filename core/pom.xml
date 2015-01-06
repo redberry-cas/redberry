@@ -25,7 +25,7 @@
 
     <groupId>cc.redberry</groupId>
     <artifactId>core</artifactId>
-    <version>1.1.8-SNAPSHOT</version>
+    <version>1.1.8</version>
     <packaging>jar</packaging>
 
     <parent>
@@ -86,7 +86,7 @@
         </developer>
     </developers>
 
-    <scm><connection>scm:hg:http://bitbucket.org/redberry/redberry</connection><url>https://bitbucket.org/redberry/redberry</url></scm>
+    <scm><connection>scm:hg:http://bitbucket.org/redberry/redberry-core</connection><tag>v1.1.8</tag><url>https://bitbucket.org/redberry/redberry-core/src/?at=v1.1.8</url></scm>
 
     <issueManagement>
         <system>YouTRACK</system>
