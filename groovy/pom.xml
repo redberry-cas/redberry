@@ -25,7 +25,7 @@
 
     <groupId>cc.redberry</groupId>
     <artifactId>groovy</artifactId>
-    <version>1.1.8</version>
+    <version>1.1.9-SNAPSHOT</version>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -93,7 +93,7 @@
         </developer>
     </developers>
 
-    <scm><connection>scm:hg:http://bitbucket.org/redberry/redberry-groovy</connection><tag>v1.1.8</tag><url>https://bitbucket.org/redberry/redberry-groovy/src/?at=v1.1.8</url></scm>
+    <scm><connection>scm:hg:http://bitbucket.org/redberry/redberry-groovy</connection><url>https://bitbucket.org/redberry/redberry-groovy/src/</url></scm>
 
     <issueManagement>
         <system>YouTRACK</system>
@@ -251,19 +251,19 @@
         <dependency>
             <groupId>cc.redberry</groupId>
             <artifactId>core</artifactId>
-            <version>1.1.8</version>
+            <version>1.1.9-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>cc.redberry</groupId>
             <artifactId>core</artifactId>
-            <version>1.1.8</version>
+            <version>1.1.9-SNAPSHOT</version>
             <type>test-jar</type>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>cc.redberry</groupId>
             <artifactId>physics</artifactId>
-            <version>1.1.8</version>
+            <version>1.1.9-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.codehaus.groovy</groupId>
