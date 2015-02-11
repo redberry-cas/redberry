@@ -199,9 +199,6 @@ public final class AlgorithmsBase {
             return Collections.EMPTY_LIST;
         }
 
-        // our "proto-base" with only one point
-        IntArrayList base = new IntArrayList();
-        base.add(firstBasePoint);
         // our "proto-BSGS" with only one element
         // corresponding G^(i) is G^(0) = G, so its stabilizer generators (stabilizes zero points)
         // are just generators of group
