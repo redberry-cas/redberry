@@ -61,7 +61,13 @@ public final class TensorHashCalculator {
 
         int hash = tensor.hashCode();
         if (tensor instanceof Product) {
-            ProductContent pc = ((Product) tensor).getContent();
+            Product product = (Product) tensor;
+            ProductContent pc = product.getContent();
+            if (pc.size() == 1) {
+                int dataHash = _hashWithIndices(pc.get(0), indices);
+                return product.getFactor().isOneOrMinusOne()
+                        ? dataHash : dataHash * product.getFactor().hashCode();
+            }
             //TODO may be refactor with noncommutative operation using stretcIds 
             for (int i = pc.size() - 1; i >= 0; --i)
                 hash += HashFunctions.JenkinWang32shift((int) pc.getStretchId(i)) * _hashWithIndices(pc.get(i), indices);
