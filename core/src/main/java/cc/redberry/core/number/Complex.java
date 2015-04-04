@@ -175,7 +175,17 @@ public final class Complex extends Tensor
 
     @Override
     protected int hash() {
-        return 47 * (329 + real.hashCode()) + this.imaginary.hashCode();
+        int i = hashWithSign();
+        return i * i;
+    }
+
+    /**
+     * The hash codes of opposite numbers are also opposite
+     *
+     * @return hash code
+     */
+    public int hashWithSign() {
+        return real.hashCode() + 329 * this.imaginary.hashCode();
     }
 
     @Override

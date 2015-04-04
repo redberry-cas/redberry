@@ -214,8 +214,13 @@ public final class Numeric extends Real implements Serializable {
      */
     @Override
     public int hashCode() {
+        if (this.value == ONE.value)
+            return 1;
+        else if (this.value == MINUS_ONE.value)
+            return -1;
         long bits = Double.doubleToLongBits(value * value);
-        return (int) (bits ^ (bits >>> 32));
+        int h = (int) (bits ^ (bits >>> 32));
+        return value > 0.0 ? h : -h;
     }
 
     /**

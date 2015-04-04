@@ -23,14 +23,18 @@
 package cc.redberry.core.tensor;
 
 import cc.redberry.core.TAssert;
-import cc.redberry.core.utils.MathUtils;
 import cc.redberry.core.number.Complex;
+import cc.redberry.core.utils.MathUtils;
 import cc.redberry.core.utils.TensorUtils;
 import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.Arrays;
 import java.util.Random;
+
+import static cc.redberry.core.tensor.Tensors.parse;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 
 /**
  * @author Dmitry Bolotin
@@ -84,6 +88,87 @@ public class SumTest {
 //        Tensor c = Tensors.parse("f_nm + h_nm");
         Assert.assertEquals(a.hashCode(), b.hashCode());
 //        Assert.assertEquals(a.hashCode(), c.hashCode());
+    }
+
+
+    @Test
+    public void testHash3() throws Exception {
+        int a = parse("a + 2*b - c").hashCode();
+        int b = parse("-a - 2*b + c").hashCode();
+        int c = parse("a - 2*b - c").hashCode();
+
+        assertEquals(a, b);
+        assertFalse(a == c);
+    }
+
+    @Test
+    public void testHash4() throws Exception {
+        int a = parse("a + 2*b - c").hashCode();
+        int b = parse("-a - 2*b + c").hashCode();
+        int c = parse("a - 2*b - c").hashCode();
+
+        assertEquals(a, b);
+        assertFalse(a == c);
+    }
+
+
+    @Test
+    public void testHash5() throws Exception {
+        int a = parse("a + b - c").hashCode();
+        int b = parse("-a - b + c").hashCode();
+        int c = parse("a - b - c").hashCode();
+
+        assertEquals(a, b);
+        assertFalse(a == c);
+    }
+
+
+    @Test
+    public void testHash6() throws Exception {
+        int a = parse("x**2 - 2*x*y + y**2").hashCode();
+        int b = parse("-x**2 + 2*x*y - y**2").hashCode();
+        int c = parse("-x**2 - 2*x*y - y**2").hashCode();
+
+        assertEquals(a, b);
+        assertFalse(a == c);
+    }
+
+    @Test
+    public void testHash7() throws Exception {
+        int a = parse("a_i + b_i - c_i").hashCode();
+        int b = parse("-a_i - b_i + c_i").hashCode();
+        int c = parse("a_i - b_i - c_i").hashCode();
+
+        assertEquals(a, b);
+        assertFalse(a == c);
+    }
+
+    @Test
+    public void testHash8() throws Exception {
+        int a = parse("a_ij + b_ij - c_ij").hashCode();
+        int b = parse("-a_ij - b_ij + c_ij").hashCode();
+        int c = parse("a_ij - b_ij - c_ij").hashCode();
+
+        assertEquals(a, b);
+        assertEquals(a, c);
+    }
+
+
+    @Test
+    public void testHash9() throws Exception {
+        int a = parse("1-x").hashCode();
+        int b = parse("x-1").hashCode();
+
+        assertEquals(a, b);
+    }
+
+    @Test
+    public void testHash10() throws Exception {
+        Tensor t, d;
+        t = parse("1/(1 - x)**2");
+        d = parse("2*(-x+1)**(-3)");
+        System.out.println(d);
+        TAssert.assertEquals(d, "-2/(x-1)**3");
     }
 
     @Test

@@ -93,6 +93,11 @@ public class ProductTest {
     }
 
     @Test
+    public void testHashCode7() {
+        Assert.assertEquals(Tensors.parse("(-212)*D").hashCode(),
+                Tensors.parse("212*D").hashCode());
+    }
+    @Test
     public void contentTest0() {
         for (int i = 0; i < 100; ++i) {
             CC.resetTensorNames();

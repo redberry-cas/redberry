@@ -26,6 +26,8 @@ import cc.redberry.core.number.parser.NumberParser;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.math.BigInteger;
+
 /**
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
@@ -132,5 +134,24 @@ public class ComplexTest {
             sb.append("9");
         Real r = NumberParser.REAL_PARSER.parse(sb.toString());
         r.doubleValue();
+    }
+
+    @Test
+    public void testHashCode1() throws Exception {
+        Complex a;
+        a = new Complex(123, 23);
+        Assert.assertEquals(a.hashWithSign(), -a.negate().hashWithSign());
+        a = new Complex(123., 23.);
+        Assert.assertEquals(a.hashWithSign(), -a.negate().hashWithSign());
+        a = new Complex(new BigInteger("921312312321312312"), new BigInteger("9213123123213123122"));
+        Assert.assertEquals(a.hashWithSign(), -a.negate().hashWithSign());
+    }
+
+    @Test
+    public void testHashCode2() throws Exception {
+        Assert.assertEquals(0, Complex.ZERO.hashCode());
+        Assert.assertEquals(1, Complex.ONE.hashCode());
+        Assert.assertEquals(1, Complex.MINUS_ONE.hashCode());
+        Assert.assertEquals(-1, Complex.MINUS_ONE.hashWithSign());
     }
 }

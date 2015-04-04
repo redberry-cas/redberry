@@ -396,7 +396,7 @@ public final class Product extends MultiTensor {
     private int calculateHash() {
         int result;
         if (factor == Complex.ONE || factor == Complex.MINUS_ONE)
-            result = 0;
+            result = 0; //important for -a.hash() == a.hash()
         else
             result = factor.hashCode();
 
