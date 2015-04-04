@@ -72,4 +72,16 @@ class RedberryPhysicsTest {
             println setMandelstam([k1_a: 'm1', k2_a: 'm2', k3_a: 'm3', k4_a: 'm4'], 'r', 'p', 'q')
         }
     }
+
+    @Test
+    public void testDT1() throws Exception {
+        use(Redberry) {
+
+            defineMatrices 'G_a', Matrix1.matrix,
+                    'G5', Matrix1.matrix
+
+            def dt = DiracTrace[[Simplifications: 't_a^a = y'.t]]
+            assert '-4*t_{cd}+4*t_{dc}+(4*y+4*x)*g_{cd}'.t == (dt >> 'Tr[(G_a*G_b*t^ab + x)*G_c*G_d]'.t)
+        }
+    }
 }

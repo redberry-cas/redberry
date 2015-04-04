@@ -68,12 +68,24 @@ public class DiracTraceTransformation implements Transformation {
     private final ParseTokenTransformer tokenTransformer;
     private final Expression deltaTrace;
 
+    private final Transformation expandAndEliminate;
+
     /**
      * Creates transformation with specified notation for gamma matrix.
      *
      * @param gammaMatrix tensor, which will be considered as gamma matrix
      */
     public DiracTraceTransformation(final SimpleTensor gammaMatrix) {
+        this(gammaMatrix, new Transformation[0]);
+    }
+
+    /**
+     * Creates transformation with specified notation for gamma matrix.
+     *
+     * @param gammaMatrix     tensor, which will be considered as gamma matrix
+     * @param simplifications additional simplifcation rules
+     */
+    public DiracTraceTransformation(final SimpleTensor gammaMatrix, final Transformation[] simplifications) {
         checkNotation(gammaMatrix);
         this.gammaName = gammaMatrix.getName();
         //no gamma5 should be in tensors
@@ -81,6 +93,8 @@ public class DiracTraceTransformation implements Transformation {
         final IndexType[] types = TraceUtils.extractTypesFromMatrix(gammaMatrix);
         this.metricType = types[0];
         this.matrixType = types[1];
+        this.expandAndEliminate = new ExpandAndEliminateTransformation(simplifications);
+        ;
 
         tokenTransformer = new ChangeIndicesTypesAndTensorNames(new TypesAndNamesTransformer() {
             @Override
@@ -113,6 +127,7 @@ public class DiracTraceTransformation implements Transformation {
         this.deltaTrace = (Expression) tokenTransformer.transform(CC.current().getParseManager().getParser().parse("d^a_a=4")).toTensor();
     }
 
+
     /**
      * Creates transformation with specified notations for gamma matrices and Levi-Civita tensor.
      *
@@ -123,22 +138,39 @@ public class DiracTraceTransformation implements Transformation {
     public DiracTraceTransformation(final SimpleTensor gammaMatrix,
                                     final SimpleTensor gamma5,
                                     final SimpleTensor leviCivita) {
-        this(gammaMatrix, gamma5, leviCivita, true);
+        this(gammaMatrix, gamma5, leviCivita, new Transformation[0], true);
     }
 
     /**
      * Creates transformation with specified notations for gamma matrices and Levi-Civita tensor.
      *
-     * @param gammaMatrix    tensor, which will be considered as gamma matrix
-     * @param gamma5         tensor, which will be considered as gamma5 matrix
-     * @param leviCivita     tensor, which will be considered as Levi-Civita tensor
-     * @param minkowskiSpace if {@code true}, then Levi-Civita tensor will be considered in Minkovski
-     *                       space (so e.g. e_abcd*e^abcd = -24), otherwise in Euclidean space
-     *                       (so e.g. e_abcd*e^abcd = +24)
+     * @param gammaMatrix     tensor, which will be considered as gamma matrix
+     * @param gamma5          tensor, which will be considered as gamma5 matrix
+     * @param leviCivita      tensor, which will be considered as Levi-Civita tensor
+     * @param simplifications additional simplification rules
      */
     public DiracTraceTransformation(final SimpleTensor gammaMatrix,
                                     final SimpleTensor gamma5,
                                     final SimpleTensor leviCivita,
+                                    final Transformation[] simplifications) {
+        this(gammaMatrix, gamma5, leviCivita, simplifications, true);
+    }
+
+    /**
+     * Creates transformation with specified notations for gamma matrices and Levi-Civita tensor.
+     *
+     * @param gammaMatrix     tensor, which will be considered as gamma matrix
+     * @param gamma5          tensor, which will be considered as gamma5 matrix
+     * @param leviCivita      tensor, which will be considered as Levi-Civita tensor
+     * @param simplifications additional simplification rules
+     * @param minkowskiSpace  if {@code true}, then Levi-Civita tensor will be considered in Minkovski
+     *                        space (so e.g. e_abcd*e^abcd = -24), otherwise in Euclidean space
+     *                        (so e.g. e_abcd*e^abcd = +24)
+     */
+    public DiracTraceTransformation(final SimpleTensor gammaMatrix,
+                                    final SimpleTensor gamma5,
+                                    final SimpleTensor leviCivita,
+                                    final Transformation[] simplifications,
                                     final boolean minkowskiSpace) {
         checkNotation(gammaMatrix, gamma5, leviCivita);
         this.gammaName = gammaMatrix.getName();
@@ -146,6 +178,9 @@ public class DiracTraceTransformation implements Transformation {
         final IndexType[] types = TraceUtils.extractTypesFromMatrix(gammaMatrix);
         this.metricType = types[0];
         this.matrixType = types[1];
+
+        this.expandAndEliminate = new ExpandAndEliminateTransformation(simplifications);
+        ;
 
         tokenTransformer = new ChangeIndicesTypesAndTensorNames(new TypesAndNamesTransformer() {
             @Override
@@ -180,8 +215,10 @@ public class DiracTraceTransformation implements Transformation {
 
     @Override
     public Tensor transform(Tensor tensor) {
-        //todo may be check for contains gammas
-        tensor = ExpandAndEliminateTransformation.expandAndEliminate(tensor);
+        if (!containsGammaMatrices(tensor))
+            return tensor;
+
+        tensor = expandAndEliminate.transform(tensor);
         FromChildToParentIterator iterator = new FromChildToParentIterator(tensor);
         Tensor current;
         out:
@@ -337,7 +374,7 @@ public class DiracTraceTransformation implements Transformation {
                 //final simplifications
                 traces.put(product.remove(positionsOfMatrices.toArray()));
                 current = traces.build();
-                current = ExpandAndEliminateTransformation.expandAndEliminate(current);
+                current = expandAndEliminate.transform(current);
                 current = deltaTrace.transform(current);
                 if (simplifyLeviCivita != null)
                     current = simplifyLeviCivita.transform(current);
@@ -345,6 +382,15 @@ public class DiracTraceTransformation implements Transformation {
             }
         }
         return iterator.result();
+    }
+
+    private boolean containsGammaMatrices(Tensor t) {
+        if (t.getClass().equals(SimpleTensor.class))
+            return t.hashCode() == gammaName || t.hashCode() == gamma5Name;
+        else for (Tensor p : t)
+            if (containsGammaMatrices(p))
+                return true;
+        return false;
     }
 
     private SimpleTensor setMatrixIndices(SimpleTensor gamma, int matrixUpper, int matrixLower) {
@@ -507,7 +553,7 @@ public class DiracTraceTransformation implements Transformation {
         return transform(product);
     }
 
-    private static final void checkNotation(SimpleTensor gammaMatrix) {
+    private static void checkNotation(SimpleTensor gammaMatrix) {
         final IndexType[] types = TraceUtils.extractTypesFromMatrix(gammaMatrix);
         IndexType metricType = types[0];
         IndexType matrixType = types[1];
@@ -517,9 +563,9 @@ public class DiracTraceTransformation implements Transformation {
             throw new IllegalArgumentException("Not a gamma: " + gammaMatrix);
     }
 
-    private static final void checkNotation(SimpleTensor gammaMatrix,
-                                            SimpleTensor gamma5Matrix,
-                                            SimpleTensor leviCivita) {
+    private static void checkNotation(SimpleTensor gammaMatrix,
+                                      SimpleTensor gamma5Matrix,
+                                      SimpleTensor leviCivita) {
         final IndexType[] types = TraceUtils.extractTypesFromMatrix(gammaMatrix);
         IndexType metricType = types[0];
         IndexType matrixType = types[1];

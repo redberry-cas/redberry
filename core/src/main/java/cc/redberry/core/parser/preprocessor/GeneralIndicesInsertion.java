@@ -510,7 +510,7 @@ public class GeneralIndicesInsertion implements ParseTokenTransformer {
                         continue;
                     if (expected.lower[i] != 1 || expected.upper[i] != 1)
                         throw new IllegalArgumentException("Deltas insertion is only supported for one upper and " +
-                                "one lower omitted indices.");
+                                "one lower omitted indices; node: " + node);
                     multipliers.add(new ParseTokenSimpleTensor(IndicesFactory.createSimple(null, upper[i][0], lower[i][0]),
                             CC.current().getKroneckerName()));
                 }

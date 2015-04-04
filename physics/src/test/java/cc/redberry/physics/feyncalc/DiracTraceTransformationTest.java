@@ -31,6 +31,7 @@ import cc.redberry.core.tensor.SimpleTensor;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.tensor.iterator.FromChildToParentIterator;
 import cc.redberry.core.transformations.EliminateMetricsTransformation;
+import cc.redberry.core.transformations.Transformation;
 import cc.redberry.core.transformations.expand.ExpandTransformation;
 import junit.framework.Assert;
 import org.junit.Test;
@@ -448,7 +449,8 @@ public class DiracTraceTransformationTest {
     }
 
     private static Tensor trace(Tensor t) {
-        return new DiracTraceTransformation(parseSimple("G^{a a'}_b'"), parseSimple("G5^a'_b'"), parseSimple("e_abcd"), true).transform(t);
+        return new DiracTraceTransformation(parseSimple("G^{a a'}_b'"), parseSimple("G5^a'_b'"), parseSimple("e_abcd"),
+                new Transformation[0], true).transform(t);
     }
 
     private static Tensor simplifyLeviCivita(Tensor t, SimpleTensor eps) {

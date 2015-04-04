@@ -158,6 +158,14 @@ class RedberryStatic {
             new TransformationWrapper_SimpleTensors_Or_Transformations(ExpandTransformation, ExpandTransformation.EXPAND)
 
     /**
+     * Expands out product of sums and positive integer powers and
+     * permanently eliminates metric and Kronecker deltas
+     */
+    public static final Transformation ExpandAndEliminate =
+            new TransformationWrapper_SimpleTensors_Or_Transformations(ExpandAndEliminateTransformation,
+                    ExpandAndEliminateTransformation.EXPAND_AND_ELIMINATE)
+
+    /**
      * Expands out all products and integer powers in any part of expression.
      * @see ExpandAllTransformation
      */
@@ -198,14 +206,6 @@ class RedberryStatic {
      * @see EliminateMetricsTransformation
      */
     public static final Transformation EliminateMetrics = EliminateMetricsTransformation.ELIMINATE_METRICS
-
-    /**
-     * Expands out product of sums and positive integer powers and
-     * permanently eliminates metric and Kronecker deltas
-     */
-    public static final Transformation ExpandAndEliminate = new TransformationCollection(
-            new ExpandTransformation(EliminateMetricsTransformation.ELIMINATE_METRICS),
-            EliminateMetricsTransformation.ELIMINATE_METRICS)
 
     /**
      * Gives the numerator of expression.
@@ -316,6 +316,11 @@ class RedberryStatic {
      * Gives a symmetrization of tensor with respect to specified indices under the specified symmetries.
      */
     public static final SymmetrizeWrapper Symmetrize = SymmetrizeWrapper.INSTANCE;
+
+    /**
+     * The identity transformation
+     */
+    public static final Transformation Identity = Transformation.INDENTITY;
 
     public static final class SymmetrizeWrapper {
         public static final SymmetrizeWrapper INSTANCE = new SymmetrizeWrapper()
@@ -709,17 +714,6 @@ class RedberryStatic {
      ************* Utilities ***********
      ***********************************/
 
-//    /**
-//     * Creates an instance of {@link Symmetries} from a set of symmetries.
-//     * @param collection collection of symmetries
-//     * @return instance of {@link Symmetries}
-//     */
-//    public static PermutationGroup CreateSymmetries(Object... collection) {
-//        def s = CreateSymmetry(collection[0])
-//        Symmetries symmetries = SymmetriesFactory.createSymmetries(s.dimension())
-//        collection.each { symmetries.add(CreateSymmetry(it)) }
-//        return symmetries
-//    }
 
     public static List<Permutation> findIndicesSymmetries(SimpleIndices indices, tensor) {
         use(Redberry) {
@@ -761,5 +755,26 @@ class RedberryStatic {
     private static Object mapIndices(key, val) {
         def mapping = key.indices.free % val.indices.free
         (mapping >> key).eq(val)
+    }
+
+    /**
+     * Evaluates code block discarding all exceptions and output
+     * @param closure
+     * @return
+     */
+    public static <T> T Quiet(Closure<T> closure) {
+        def out = System.out
+        try {
+            System.setOut(new PrintStream(new OutputStream() {
+                @Override
+                void write(int b) throws IOException {
+                }
+            }))
+            return closure.call()
+        } catch (Throwable e) {
+
+        } finally {
+            System.setOut(out)
+        }
     }
 }

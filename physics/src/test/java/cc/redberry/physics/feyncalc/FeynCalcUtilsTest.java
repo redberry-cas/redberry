@@ -53,4 +53,29 @@ public class FeynCalcUtilsTest {
         for(Expression e: ma)
             System.out.println(e);
     }
+
+    @Test
+    public void test2() throws Exception {
+
+        Tensor[][] input = new Tensor[][]{
+                {parse("k1_i"), parse("m1")}, {parse("k2_i"), parse("m2")}, {parse("k3_i"), parse("m3")},
+                {parse("k4_i"), parse("m4")}, {parse("k5_i"), parse("m5")}
+        };
+        Expression[] ma = FeynCalcUtils.setMandelstam5(input);
+
+        // k1_{a}*k2^{a} = (1/2)*(-m1**2+s-m2**2)
+        // k1_{a}*k3^{a} = (1/2)*(m1**2+m3**2-t1)
+        // k1_{a}*k4^{a} = (1/2)*(m1**2-t2+m4**2)
+        // k1_{a}*k5^{a} = (1/2)*(-m1**2+t2+s-m4**2-m2**2-m3**2+t1)
+        // k2_{a}*k3^{a} = (1/2)*(-u1+m2**2+m3**2)
+        // k2_{a}*k4^{a} = (1/2)*(m4**2+m2**2-u2)
+        // k5^{a}*k2_{a} = (1/2)*(u1-m1**2+s-m4**2-m2**2-m3**2+u2)
+        // k4^{a}*k3_{a} = (1/2)*(-u1-t2+m5**2+2*m1**2-s+m4**2+m3**2-t1-u2+2*m2**2)
+        // k5^{a}*k3_{a} = (1/2)*(-m1**2+t2-m5**2+s-m4**2-m2**2-m3**2+u2)
+        // k5^{a}*k4_{a} = (1/2)*(u1-m1**2-m5**2+s-m4**2-m2**2-m3**2+t1)
+
+        for(Expression e: ma)
+            System.out.println(e);
+
+    }
 }

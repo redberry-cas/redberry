@@ -80,7 +80,7 @@ public final class TransformationCollection implements Transformation {
             sb.append(transformations[i]);
             if (i == transformations.length - 1)
                 break;
-            sb.append("\n");
+            sb.append(" & ");
         }
         return sb.toString();
     }

@@ -79,6 +79,45 @@ public final class RedberryPhysics {
                 FeynCalcUtils.setMandelstam(result, parse0(s), parse0(t), parse0(u)));
     }
 
+    /**
+     * Returns generalized mandelstam for 2->3 reaction and mass shell substitutions following from the provided map
+     * of "momentum - mass of particle" and notation of Mandelstam variables.
+     *
+     * @param momentumMasses "momentum - mass of particle"
+     * @return resulting substitutions
+     */
+    public static Transformation setMandelstam5(Map<String, String> momentumMasses) {
+        if (momentumMasses.size() != 5)
+            throw new IllegalArgumentException();
+        Tensor[][] result = new Tensor[5][2];
+        int i = 0;
+        momentumMasses.each { a, b -> result[i][0] = parse(a); result[i++][1] = parse(b); }
+        return new TransformationCollection(FeynCalcUtils.setMandelstam5(result));
+    }
+
+    /**
+     * Returns generalized mandelstam for 2->3 reaction and mass shell substitutions following from the provided map
+     * of "momentum - mass of particle" and notation of Mandelstam variables.
+     *
+     * @param momentumMasses "momentum - mass of particle"
+     * @param s notation for s = (k1 + k2)^2
+     * @param t1 notation for t1 = (k1 - k3)^2
+     * @param t2 notation for t2 = (k1 - k4)^2
+     * @param u1 notation for u1 = (k2 - k3)^2
+     * @param u2 notation for u2 = (k2 - k4)^2
+     * @return resulting substitutions
+     */
+    public static Transformation setMandelstam5(Map<String, String> momentumMasses,
+                                                Object s, Object t1, Object t2, Object u1, Object u2) {
+        if (momentumMasses.size() != 5)
+            throw new IllegalArgumentException();
+        Tensor[][] result = new Tensor[5][2];
+        int i = 0;
+        momentumMasses.each { a, b -> result[i][0] = parse(a); result[i++][1] = parse(b); }
+        return new TransformationCollection(
+                FeynCalcUtils.setMandelstam5(result, parse0(s), parse0(t1), parse0(t2), parse0(u1), parse0(u2)));
+    }
+
     private static Tensor parse0(Object o) {
         if (o instanceof String || o instanceof GString)
             return parse(o.toString());
@@ -128,7 +167,8 @@ public final class RedberryPhysics {
     public static final GDiracTrace DiracTrace = new GDiracTrace();
 
     private static final class GDiracTrace extends AbstractTransformationWithDefaultParameters {
-        private static final Map defaultArgs = [Gamma: 'G_a', Gamma5: 'G5', LeviCivita: 'e_abcd']
+        private static
+        final Map defaultArgs = [Gamma: 'G_a', Gamma5: 'G5', LeviCivita: 'e_abcd', Simplifications: Transformation.INDENTITY]
 
 
         Transformation getAt(String gamma) {
@@ -148,7 +188,7 @@ public final class RedberryPhysics {
 
         @Override
         protected Transformation create(Map args) {
-            return new DiracTraceTransformation(args['Gamma'], args['Gamma5'], args['LeviCivita']);
+            return new DiracTraceTransformation(args['Gamma'], args['Gamma5'], args['LeviCivita'], args['Simplifications']);
         }
 
         @Override

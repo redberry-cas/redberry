@@ -271,5 +271,23 @@ class RedberryStaticTest {
             println(bind(['k1_r[e_u]': t1, 'k2_a[r_r]': t2]))
         }
     }
+
+    @Test
+    public void testEE1() throws Exception {
+        use(Redberry) {
+            assert '4*y**2'.t == ExpandAndEliminate['x = y'] >> '(x + y)**2'.t
+        }
+    }
+
+    @Test
+    public void testQuiet1() throws Exception {
+        Quiet { throw new RuntimeException() }
+    }
+
+    @Test
+    public void testQuiet2() throws Exception {
+        Quiet { println 'quiet' }
+        println 'not quiet'
+    }
 }
 

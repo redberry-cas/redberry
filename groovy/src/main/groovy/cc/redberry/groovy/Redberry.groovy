@@ -1265,6 +1265,12 @@ class Redberry {
         return parse(string)
     }
 
+    /*
+     * for convenience
+     */
+    static Transformation getT(Transformation tr){
+        return tr;
+    }
     /**
      * Parse string to simple tensor
      * @param string string representation of simple tensor

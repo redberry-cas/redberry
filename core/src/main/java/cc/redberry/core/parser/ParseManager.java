@@ -109,4 +109,12 @@ public final class ParseManager {
     public Parser getParser() {
         return parser;
     }
+
+    /**
+     * Clears all defaults
+     */
+    public void reset() {
+        defaultParserPreprocessors.clear();
+        defaultTensorPreprocessors.clear();
+    }
 }

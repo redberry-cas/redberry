@@ -40,6 +40,11 @@ public interface Transformation {
         public Tensor transform(Tensor t) {
             return t;
         }
+
+        @Override
+        public String toString() {
+            return "Identity";
+        }
     };
 
     public static final class Util {
