@@ -30,7 +30,6 @@ import cc.redberry.core.utils.TensorHashCalculator;
 import cc.redberry.core.utils.TensorUtils;
 
 import java.util.Arrays;
-import java.util.Comparator;
 
 /**
  * Representation of sum.
@@ -65,7 +64,7 @@ public final class Sum extends MultiTensor {
         this.hash = hash;
     }
 
-    private static int hash0(Tensor[] data, Indices indices) {
+    private static int hash0(final Tensor[] data, final Indices indices) {
         if (indices.size() > 1)
             return Arrays.hashCode(data);
 
@@ -93,7 +92,7 @@ public final class Sum extends MultiTensor {
         return result * result;
     }
 
-    private static boolean isSymbolicPoly(Tensor t) {
+    private static boolean isSymbolicPoly(final Tensor t) {
         //indices are already checked
         if (t instanceof Complex)
             return true;

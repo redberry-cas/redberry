@@ -982,7 +982,9 @@ class Redberry {
      * @return
      */
     static Transformation getHold(Expression substitution) {
-        return new SubstitutionTransformation(substitution).asSimpleSubstitution()
+        if (substitution[0] instanceof SimpleTensor)
+            return new SubstitutionTransformation(substitution).asSimpleSubstitution()
+        else return substitution
     }
 
     /**
@@ -1168,7 +1170,7 @@ class Redberry {
             return getFirst().toString()
         }
 
-        public boolean isExists(){
+        public boolean isExists() {
             return getFirst() != null
         }
 
@@ -1268,7 +1270,8 @@ class Redberry {
     /*
      * for convenience
      */
-    static Transformation getT(Transformation tr){
+
+    static Transformation getT(Transformation tr) {
         return tr;
     }
     /**
