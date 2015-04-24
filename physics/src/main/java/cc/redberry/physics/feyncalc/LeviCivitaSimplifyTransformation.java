@@ -301,7 +301,8 @@ public class LeviCivitaSimplifyTransformation implements Transformation {
         return substitutions;
     }
 
-    private static synchronized Map<Permutation, Boolean> getEpsilonSymmetries(int indicesSize) {
+    synchronized
+    private static Map<Permutation, Boolean> getEpsilonSymmetries(int indicesSize) {
         Map<Permutation, Boolean> symmetries = cachedLeviCivitaSymmetries.get(indicesSize);
         if (symmetries != null)
             return symmetries;

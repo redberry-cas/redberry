@@ -78,7 +78,8 @@ public class Expression extends Tensor implements Transformation {
 
     @Override
     public String toString(OutputFormat mode) {
-        return left.toString(mode) + " = " + right.toString(mode);
+        String eq = mode.is(OutputFormat.Maple) ? " := " : " = ";
+        return left.toString(mode) + eq + right.toString(mode);
     }
 
     @Override

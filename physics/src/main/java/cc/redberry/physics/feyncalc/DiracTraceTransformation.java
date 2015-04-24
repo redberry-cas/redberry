@@ -213,12 +213,60 @@ public class DiracTraceTransformation implements Transformation {
         this.deltaTrace = (Expression) tokenTransformer.transform(CC.current().getParseManager().getParser().parse("d^a_a=4")).toTensor();
     }
 
+
+    private Tensor expandDiracStructures(final Tensor t) {
+        FromChildToParentIterator iterator = new FromChildToParentIterator(t);
+        Tensor current;
+        while ((current = iterator.next()) != null) {
+            if (!(current instanceof Product))
+                continue;
+
+            //early termination
+            if (!containsGammaMatrices(current))
+                continue;
+
+            Product product = (Product) current;
+
+            //positions of matrices
+            IntArrayList positionsOfMatrices = new IntArrayList();
+            int sizeOfIndexless = product.sizeOfIndexlessPart();
+            PrimitiveSubgraph[] partition
+                    = PrimitiveSubgraphPartition.calculatePartition(product.getContent(), matrixType);
+
+            //traces (expand brackets)
+            ProductBuilder traces = new ProductBuilder();
+
+            traces:
+            for (PrimitiveSubgraph subgraph : partition) {
+                if (subgraph.getGraphType() != GraphType.Cycle)
+                    continue traces;
+
+                int[] positions = subgraph.getPartition();
+                for (int i = positions.length - 1; i >= 0; --i)
+                    positions[i] = positions[i] + sizeOfIndexless;
+
+                positionsOfMatrices.addAll(positions);
+
+                //expand each cycle
+                traces.put(expandAndEliminate.transform(product.select(positions)));
+            }
+
+            if (positionsOfMatrices.isEmpty())
+                continue;
+            traces.put(product.remove(positionsOfMatrices.toArray()));
+            iterator.set(traces.build());
+        }
+
+        return iterator.result();
+    }
+
+
     @Override
     public Tensor transform(Tensor tensor) {
         if (!containsGammaMatrices(tensor))
             return tensor;
 
-        tensor = expandAndEliminate.transform(tensor);
+        tensor = expandDiracStructures(tensor);
         FromChildToParentIterator iterator = new FromChildToParentIterator(tensor);
         Tensor current;
         out:
@@ -444,6 +492,7 @@ public class DiracTraceTransformation implements Transformation {
         return tensor;
     }
 
+    synchronized
     private static ParseToken createRawGammaSubstitution(int numberOfGammas) {
         ParseToken substitution = cachedRawGammaTraces.get(numberOfGammas);
         if (substitution == null) {

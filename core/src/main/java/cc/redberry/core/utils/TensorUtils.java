@@ -24,7 +24,6 @@ package cc.redberry.core.utils;
 
 import cc.redberry.core.context.CC;
 import cc.redberry.core.groups.permutations.Permutation;
-import cc.redberry.core.groups.permutations.PermutationOneLineInt;
 import cc.redberry.core.groups.permutations.Permutations;
 import cc.redberry.core.indexmapping.IndexMappings;
 import cc.redberry.core.indexmapping.Mapping;
@@ -151,15 +150,8 @@ public class TensorUtils {
     }
 
     public static boolean isSymbolic(Tensor t) {
-        if (t.getClass() == SimpleTensor.class)
-            return t.getIndices().size() == 0;
-        if (t instanceof TensorField) {
-            boolean b = t.getIndices().size() == 0;
-            if (!b)
-                return false;
-        }
-        if (t instanceof Complex)
-            return true;
+        if (t.getIndices().size() != 0)
+            return false;
         for (Tensor c : t)
             if (!isSymbolic(c))
                 return false;
@@ -271,6 +263,21 @@ public class TensorUtils {
                 break;
             }
         return contains;
+    }
+
+    /**
+     * Returns whether expressions contains imaginary parts (I)
+     *
+     * @param t expression
+     * @return whether expressions contains imaginary parts (I)
+     */
+    public static boolean hasImaginaryPart(Tensor t) {
+        if (t instanceof Complex)
+            return !((Complex) t).getImaginary().isZero();
+        else for (Tensor f : t)
+            if (hasImaginaryPart(f))
+                return true;
+        return false;
     }
 
     public static boolean equalsExactly(Tensor[] u, Tensor[] v) {

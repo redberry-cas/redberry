@@ -151,7 +151,7 @@ public final class UnitaryTraceTransformation implements Transformation {
                     for (int i = partition.length - 1; i >= 0; --i) {
                         partition[i] = sizeOfIndexless + partition[i];
                         //contains not only unitary matrices
-                        if (!isUnitaryMatrix(product.get(partition[i]), unitaryMatrix))
+                        if (!isUnitaryMatrixOrOne(product.get(partition[i]), unitaryMatrix))
                             continue out;
                     }
 
@@ -183,8 +183,12 @@ public final class UnitaryTraceTransformation implements Transformation {
         return newTensor;
     }
 
-    private static final boolean isUnitaryMatrix(Tensor tensor, int unitaryMatrix) {
-        return tensor instanceof SimpleTensor && ((SimpleTensor) tensor).getName() == unitaryMatrix;
+    private static boolean isUnitaryMatrixOrOne(Tensor tensor, int unitaryMatrix) {
+        if (tensor instanceof SimpleTensor) {
+            int name = ((SimpleTensor) tensor).getName();
+            return name == unitaryMatrix || CC.getNameManager().isKroneckerOrMetric(name);
+        }
+        return false;
     }
 
     /*
