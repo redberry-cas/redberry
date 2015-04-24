@@ -23,11 +23,16 @@
 package cc.redberry.physics.feyncalc;
 
 import cc.redberry.core.TAssert;
+import cc.redberry.core.context.CC;
+import cc.redberry.core.indices.IndicesFactory;
 import cc.redberry.core.tensor.SimpleTensor;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.tensor.Tensors;
-import junit.framework.Assert;
-import junit.framework.TestCase;
+import cc.redberry.core.tensor.random.RandomTensor;
+import cc.redberry.core.transformations.*;
+import cc.redberry.core.transformations.expand.ExpandTransformation;
+import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 
 import static cc.redberry.core.number.Complex.ZERO;
@@ -37,7 +42,11 @@ import static cc.redberry.core.tensor.Tensors.*;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public class LeviCivitaSimplifyTransformationTest extends TestCase {
+public class LeviCivitaSimplifyTransformationTest {
+    @Before
+    public void before() {
+        CC.reset();
+    }
 
     @Test
     public void test1() {
@@ -162,6 +171,40 @@ public class LeviCivitaSimplifyTransformationTest extends TestCase {
         Tensor t = parse("e_abcd*e_k^c_mn*e^dam_s*e^n_x^bk");
         t = simplifyLeviCivita(t, eps);
         TAssert.assertEquals(t, "12*g_sx");
+    }
+
+    @Test
+    public void test9() {
+        setAntiSymmetric("e_abcd");
+        setAntiSymmetric("D_ac");
+        setAntiSymmetric("B_abc");
+        setAntiSymmetric("A_abc");
+
+        RandomTensor rnd = new RandomTensor(false);
+        rnd.addToNamespace(parse("F_a"));
+        rnd.addToNamespace(parse("A_ab"));
+        rnd.addToNamespace(parse("B_abc"));
+        rnd.addToNamespace(parse("D_ac"));
+        rnd.addToNamespace(parse("g_ac"));
+        rnd.addToNamespace(parse("e_abcd"));
+
+
+        Tensor t1 = rnd.nextSum(20, 8, IndicesFactory.EMPTY_INDICES);
+        Tensor t2 = rnd.nextSum(20, 8, IndicesFactory.EMPTY_INDICES);
+        Transformation tr = new TransformationCollection(
+                EliminateMetricsTransformation.ELIMINATE_METRICS,
+                Tensors.parseExpression("A_ab*B^bac = T^c"),
+                Tensors.parseExpression("A_ab*A^ba = xx"),
+                Tensors.parseExpression("D_ab*D^ba = yy"),
+                EliminateDueSymmetriesTransformation.ELIMINATE_DUE_SYMMETRIES,
+                new LeviCivitaSimplifyTransformation(parseSimple("e_abcd"), true),
+                ExpandAndEliminateTransformation.EXPAND_AND_ELIMINATE,
+                Tensors.parseExpression("A_ab*B^bac = T^c"),
+                Tensors.parseExpression("A_ab*A^ba = xx"),
+                Tensors.parseExpression("D_ab*D^ba = yy")
+        );
+
+        new ExpandTransformation(tr).transform(multiplyAndRenameConflictingDummies(t1, t2));
     }
 
     private static Tensor simplifyLeviCivita(Tensor t, SimpleTensor eps) {
