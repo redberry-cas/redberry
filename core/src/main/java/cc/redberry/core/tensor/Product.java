@@ -430,6 +430,10 @@ public final class Product extends MultiTensor {
         return indexlessData.clone();
     }
 
+    public int indexlessLength() {
+        return indexlessData.length;
+    }
+
     @Override
     public TensorBuilder getBuilder() {
         return new ProductBuilder(indexlessData.length, data.length);

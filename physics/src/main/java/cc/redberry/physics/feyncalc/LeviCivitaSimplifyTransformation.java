@@ -26,8 +26,6 @@ import cc.redberry.core.context.CC;
 import cc.redberry.core.context.NameAndStructureOfIndices;
 import cc.redberry.core.groups.permutations.Permutation;
 import cc.redberry.core.groups.permutations.PermutationGroup;
-import cc.redberry.core.groups.permutations.PermutationOneLineInt;
-import cc.redberry.core.groups.permutations.Permutations;
 import cc.redberry.core.indexmapping.IndexMappings;
 import cc.redberry.core.indexmapping.Mapping;
 import cc.redberry.core.indexmapping.MappingsPort;
@@ -45,12 +43,14 @@ import cc.redberry.core.tensor.iterator.FromChildToParentIterator;
 import cc.redberry.core.transformations.EliminateMetricsTransformation;
 import cc.redberry.core.transformations.Transformation;
 import cc.redberry.core.transformations.expand.ExpandTransformation;
-import cc.redberry.core.utils.IntArray;
 import cc.redberry.core.utils.IntArrayList;
 import cc.redberry.core.utils.TensorUtils;
 import gnu.trove.map.hash.TIntObjectHashMap;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 import static cc.redberry.core.indices.IndicesUtils.*;
 import static cc.redberry.core.tensor.StructureOfContractions.getToTensorIndex;
@@ -209,7 +209,7 @@ public class LeviCivitaSimplifyTransformation implements Transformation {
                 if (!checkNonPermutingPositions(sym, nonPermutableArray))
                     continue;
                 //bingo!
-                if (sym.antisymmetry() != symmetries.get(sym))
+                if (sym.antisymmetry() != symmetries.get(sym.toSymmetry()))
                     return Complex.ZERO;
             }
 
@@ -294,14 +294,14 @@ public class LeviCivitaSimplifyTransformation implements Transformation {
 
         //d^a_a = numberOfIndices
         substitutions[1] = expression(createKronecker(
-                setType(typeOfLeviCivitaIndices, 0),
-                setType(typeOfLeviCivitaIndices, 0x80000000)),
+                        setType(typeOfLeviCivitaIndices, 0),
+                        setType(typeOfLeviCivitaIndices, 0x80000000)),
                 new Complex(numberOfIndices));
 
         return substitutions;
     }
 
-
+    synchronized
     private static Map<Permutation, Boolean> getEpsilonSymmetries(int indicesSize) {
         Map<Permutation, Boolean> symmetries = cachedLeviCivitaSymmetries.get(indicesSize);
         if (symmetries != null)
