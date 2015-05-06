@@ -239,23 +239,28 @@ public class FactorTransformation implements Transformation {
         return false;
     }
 
-    private static boolean isSymbolic(Tensor t) {
+    private boolean isSymbolic(Tensor t) {
+        //in case of Wolfram etc., just check that there is no indices
+        if (!(factorizationEngine instanceof JasFactor))
+            return TensorUtils.isSymbolic(t);
+        return isSymbolicPoly(t);
+    }
+
+    private static boolean isSymbolicPoly(Tensor t) {
         if (t.getIndices().size() != 0 || t instanceof ScalarFunction)
             return false;
         if (t instanceof SimpleTensor)
             return t.size() == 0;//not a field
         if (t instanceof Power) {
-            if (!isSymbolic(t.get(0)))
+            if (!isSymbolicPoly(t.get(0)))
                 return false;
             if (!TensorUtils.isInteger(t.get(1)))
                 return false;
             Complex e = (Complex) t.get(1);
-            if (!e.isReal() || e.isNumeric())
-                return false;
-            return true;
+            return e.isReal() && !e.isNumeric();
         }
         for (Tensor tt : t)
-            if (!isSymbolic(tt))
+            if (!isSymbolicPoly(tt))
                 return false;
         return true;
     }

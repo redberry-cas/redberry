@@ -74,10 +74,10 @@ public abstract class ScalarFunction extends Tensor {
             return stringSymbol + "(" + argument.toString(UTF8) + ")";
         if (mode.is(LaTeX))
             return "\\" + stringSymbol.toLowerCase() + "(" + argument.toString(UTF8) + ")";
-        if (mode.is(Redberry))
-            return Character.toString(Character.toUpperCase(stringSymbol.charAt(0))) + stringSymbol.substring(1, stringSymbol.length()) + "[" + argument.toString(OutputFormat.Redberry) + "]";
+        if (mode.is(Redberry) || mode.is(SimpleRedberry) || mode.is(WolframMathematica))
+            return Character.toString(Character.toUpperCase(stringSymbol.charAt(0))) + stringSymbol.substring(1, stringSymbol.length()) + "[" + argument.toString(mode) + "]";
         else
-            return stringSymbol + "(" + argument.toString(UTF8) + ")";
+            return stringSymbol + "(" + argument.toString(mode) + ")";
 
     }
 }
