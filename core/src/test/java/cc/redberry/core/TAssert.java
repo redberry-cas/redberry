@@ -180,6 +180,9 @@ public class TAssert {
                 b.getIndices().getSymmetries().getPermutationGroup()));
     }
 
+    public static void assertSymbolic(Tensor t) {
+        org.junit.Assert.assertTrue(TensorUtils.isSymbolic(t));
+    }
 //    public static void assertOpposite(Tensor target, Tensor expected) {
 //        assertTrue(TTest.testOpposite(target, expected));
 //    }

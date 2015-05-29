@@ -45,10 +45,7 @@ import cc.redberry.core.tensor.TensorField
 import cc.redberry.core.tensorgenerator.TensorGenerator
 import cc.redberry.core.transformations.*
 import cc.redberry.core.transformations.collect.CollectTransformation
-import cc.redberry.core.transformations.expand.ExpandAllTransformation
-import cc.redberry.core.transformations.expand.ExpandDenominatorTransformation
-import cc.redberry.core.transformations.expand.ExpandNumeratorTransformation
-import cc.redberry.core.transformations.expand.ExpandTransformation
+import cc.redberry.core.transformations.expand.*
 import cc.redberry.core.transformations.factor.FactorTransformation
 import cc.redberry.core.transformations.factor.FactorizationEngine
 import cc.redberry.core.transformations.factor.JasFactor
@@ -187,6 +184,13 @@ class RedberryStatic {
     public static final TransformationWrapper_SimpleTensors_Or_Transformations ExpandDenominator =
             new TransformationWrapper_SimpleTensors_Or_Transformations(ExpandDenominatorTransformation,
                     ExpandDenominatorTransformation.EXPAND_DENOMINATOR)
+
+    /**
+     * Expands out products leaving all symbolic parts unexpanded.
+     * @see ExpandTensorsTransformation
+     */
+    public static final TransformationWrapper_SimpleTensors_Or_Transformations ExpandTensors =
+            new TransformationWrapper_SimpleTensors_Or_Transformations(ExpandTensorsTransformation, ExpandTensorsTransformation.EXPAND_TENSORS)
 
     /**
      * Collects terms by pattern
