@@ -554,4 +554,13 @@ public class ExpandTest {
                 parse("(-b**2+a**2)*f_{a}*f^{a}*f_{m}*f^{m}+(a**2+2*a*b+b**2)*f_{a}*f^{a}"),
                 expand(t));
     }
+
+    @Test
+    public void test49() throws Exception {
+        Tensor t = parse("(2*(c+a)-164*a)*(f_{a}+t_{a})*f^{a}");
+        Transformation[] subs = {parseExpression("f_a*f^a = a"), parseExpression("f_a*t^a = b"), parseExpression("t_a*t^a = c")};
+        Tensor expected = parse("-162*a*b+2*c*a+2*c*b-162*a**2");
+        Tensor actual = ExpandTransformation.expand(t, subs);
+        TAssert.assertEquals(expected, actual);
+    }
 }

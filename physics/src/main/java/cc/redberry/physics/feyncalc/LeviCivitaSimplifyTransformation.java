@@ -127,12 +127,13 @@ public class LeviCivitaSimplifyTransformation implements Transformation {
     }
 
 
-    private Tensor simplifyProduct(Tensor product) {
+    private Tensor simplifyProduct(Tensor t) {
         /*
          * Simplifying symmetries
          */
 
-        ProductContent content = ((Product) product).getContent();
+        Product product = (Product) t;
+        ProductContent content = product.getContent();
         //positions of Levi-Civita tensors in product
         IntArrayList epsPositions = new IntArrayList();
         int i = 0, sizeOfComponent = content.size();
@@ -222,13 +223,19 @@ public class LeviCivitaSimplifyTransformation implements Transformation {
         if (epsPositions.size() == 1)
             return product;
 
+        int[] epsPoss = epsPositions.toArray();
+        for (i = 0; i < epsPoss.length; ++i)
+            epsPoss[i] += product.sizeOfIndexlessPart();
+
+        Tensor epsSubProduct = product.select(epsPoss);
+        Tensor remnant = product.remove(epsPoss);
         for (Expression exp : leviCivitaSimplifications)
-            product = exp.transform(product);
+            epsSubProduct = exp.transform(epsSubProduct);
 
         //todo expand only Levi-Civita sums
-        product = EliminateMetricsTransformation.eliminate(ExpandTransformation.expand(product, EliminateMetricsTransformation.ELIMINATE_METRICS));
-        product = leviCivitaSimplifications[1].transform(product);
-        return product;
+        epsSubProduct = EliminateMetricsTransformation.eliminate(ExpandTransformation.expand(epsSubProduct, EliminateMetricsTransformation.ELIMINATE_METRICS));
+        epsSubProduct = leviCivitaSimplifications[1].transform(epsSubProduct);
+        return multiply(epsSubProduct, remnant);
     }
 
     private static boolean checkNonPermutingPositions(Permutation permutation, int[] nonPermutablePositions) {

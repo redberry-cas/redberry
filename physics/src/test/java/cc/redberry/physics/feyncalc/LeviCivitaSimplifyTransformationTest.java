@@ -129,6 +129,17 @@ public class LeviCivitaSimplifyTransformationTest {
     }
 
     @Test
+    public void test4a() throws Exception {
+        SimpleTensor eps = parseSimple("e_abcf");
+        addAntiSymmetry("e_abcd", 1, 0, 2, 3);
+        addAntiSymmetry("e_abcd", 1, 2, 3, 0);
+        Tensor t;
+
+        t = parse("-4*I*e^{dh}_{b}^{f}*e_{g}^{b}_{ah}*e_{cdef}");
+        TAssert.assertEquals(simplifyLeviCivita(t, eps), "16*I*e_aceg");
+    }
+
+    @Test
     public void test5() {
         Tensors.setAntiSymmetric("e_abcd");
         SimpleTensor eps = parseSimple("e_abcf");

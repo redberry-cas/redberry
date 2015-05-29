@@ -352,7 +352,6 @@ public final class Product extends MultiTensor {
                 newData.toArray(new Tensor[newData.size()]));
     }
 
-
     private static Tensor createProduct(Indices indices, Complex factor, Tensor[] indexless, Tensor[] data) {
         if (indexless.length == 0 && data.length == 0)
             return factor;
@@ -430,6 +429,11 @@ public final class Product extends MultiTensor {
         return indexlessData.clone();
     }
 
+    /**
+     * Returns length of {@link #getIndexless()} array
+     *
+     * @return length of {@link #getIndexless()} array
+     */
     public int indexlessLength() {
         return indexlessData.length;
     }

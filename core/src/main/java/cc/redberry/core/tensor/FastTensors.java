@@ -133,9 +133,7 @@ public final class FastTensors {
      * @return whether the resulting tensor was reduced to simplified form after multiply
      */
     private static boolean isReduced(Tensor initial, Tensor factor, Tensor result) {
-        if (initial instanceof Product && !(result instanceof Product))
-            return true;
-        return false;
+        return !initial.getClass().equals(result.getClass());
     }
 
 }
