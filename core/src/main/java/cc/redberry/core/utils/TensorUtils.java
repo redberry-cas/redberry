@@ -58,13 +58,32 @@ public class TensorUtils {
     }
 
     /**
+     * Returns a brief list of tensor properties (type, indices, size, etc.)
+     *
+     * @param expr expression
+     * @return brief list of tensor properties
+     */
+    public static String info(Tensor expr) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("// [")
+                .append(expr.getClass().getSimpleName()).append(",\n//  ")
+                .append("size = ").append(expr.size()).append(",\n//  ")
+                .append("symbolic = ").append(TensorUtils.isSymbolic(expr)).append(",\n//  ")
+                .append("freeIndices = ").append(expr.getIndices().getFree()).append(",\n//  ")
+                .append("indices = ").append(expr.getIndices()).append(",\n//  ")
+                .append("symbolsAppear = ").append(TensorUtils.getAllDiffSimpleTensors(expr))
+                .append("\n//]");
+        return sb.toString();
+    }
+
+    /**
      * Returns true if at least one free index of {@code u} is contracted
      * with some free index of {@code v}.
      *
      * @param u tensor
      * @param v tensor
      * @return true if at least one free index of {@code u} is contracted
-     *         with some free index of {@code v}
+     * with some free index of {@code v}
      */
     public static boolean haveIndicesIntersections(Tensor u, Tensor v) {
         return IndicesUtils.haveIntersections(u.getIndices(), v.getIndices());
@@ -206,7 +225,7 @@ public class TensorUtils {
      *
      * @param t tensor
      * @return true, if specified tensor is {@code a^(N)}, where {@code N} - a natural number and {@code a} - is a
-     *         simple tensor
+     * simple tensor
      */
     public static boolean isPositiveIntegerPowerOfSimpleTensor(Tensor t) {
         return isPositiveIntegerPower(t) && t.get(0) instanceof SimpleTensor;
@@ -218,7 +237,7 @@ public class TensorUtils {
      *
      * @param t tensor
      * @return true, if specified tensor is {@code a^(N)}, where {@code N} - a natural number and {@code a} - is a
-     *         product of tensors
+     * product of tensors
      */
     public static boolean isPositiveIntegerPowerOfProduct(Tensor t) {
         return isPositiveIntegerPower(t) && t.get(0) instanceof Product;
@@ -424,7 +443,7 @@ public class TensorUtils {
      * @param u tensor
      * @param v tensor
      * @return {@code true} {@code true} if tensor u mathematically (not programming) equals to tensor v,
-     *         {@code false} if they they differ only in the sign and {@code null} otherwise
+     * {@code false} if they they differ only in the sign and {@code null} otherwise
      */
     public static Boolean compare1(Tensor u, Tensor v) {
         return IndexMappings.compare1(u, v);
@@ -747,7 +766,7 @@ public class TensorUtils {
      *
      * @param tensor tensor
      * @return set of replacement rules for all scalar (but not symbolic) sub-tensors appearing in the specified
-     *         tensor
+     * tensor
      */
     public static Expression[] generateReplacementsOfScalars(Tensor tensor) {
         return generateReplacementsOfScalars(tensor, CC.getParametersGenerator());
@@ -760,7 +779,7 @@ public class TensorUtils {
      * @param tensor                tensor
      * @param generatedCoefficients allows to control how coefficients are generated
      * @return set of replacement rules for all scalar (but not symbolic) sub-tensors appearing in the specified
-     *         tensor
+     * tensor
      * @see LocalSymbolsProvider
      */
     public static Expression[] generateReplacementsOfScalars(Tensor tensor,

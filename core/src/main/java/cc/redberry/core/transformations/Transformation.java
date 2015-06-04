@@ -35,7 +35,7 @@ public interface Transformation {
     /**
      * Singleton instance for identity transformation.
      */
-    public static final Transformation INDENTITY = new Transformation() {
+    Transformation INDENTITY = new Transformation() {
         @Override
         public Tensor transform(Tensor t) {
             return t;
@@ -47,7 +47,7 @@ public interface Transformation {
         }
     };
 
-    public static final class Util {
+    final class Util {
         private Util() {
         }
 
