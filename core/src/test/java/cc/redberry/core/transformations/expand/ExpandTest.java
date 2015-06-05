@@ -563,4 +563,25 @@ public class ExpandTest {
         Tensor actual = ExpandTransformation.expand(t, subs);
         TAssert.assertEquals(expected, actual);
     }
+
+    @Test
+    public void test50() {
+        Tensor t = Tensors.parse("(b+a)*(c+a)+(a+b)*(c+b)");
+        TAssert.assertEquals(t, expandUsingPort(t, false));
+    }
+
+    @Test
+    public void test51() throws Exception {
+        Tensor t = parse("((a+b)*(f_a + r_a) + (a + c)*t_a)*(c+r)*k^a");
+        TAssert.assertEquals("(c+r)*(a+b)*f_a*k^a + (c+r)*(a+b)*r_a*k^a + (c+r)*(a+c)*t_a*k^a", expandUsingPort(t, false));
+    }
+
+    @Test
+    public void test52() throws Exception {
+        for (int i = 0; i < 33; ++i) {
+            CC.reset();
+            Tensor t = parse("((a+b)*(c+d)*(f_a + (k+i)*t_a) + (a + c)*t_a)*(c+r)*((a+b)*f^a + (c+d)*t^a)");
+            TAssert.assertEquals("((c+d)**2*(c+r)*(a+b)+(a+c)*(c+r)*(a+b)+(c+d)*(c+r)*(i+k)*(a+b)**2)*t_{a}*f^{a}+(c+d)*(c+r)*(a+b)**2*f_{a}*f^{a}+((c+d)**2*(c+r)*(i+k)*(a+b)+(a+c)*(c+d)*(c+r))*t_{a}*t^{a}", expandUsingPort(t, false));
+        }
+    }
 }

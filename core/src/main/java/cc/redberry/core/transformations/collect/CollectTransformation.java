@@ -22,8 +22,6 @@
  */
 package cc.redberry.core.transformations.collect;
 
-import cc.redberry.core.transformations.powerexpand.PowerUnfoldTransformation;
-import cc.redberry.core.utils.OutputPort;
 import cc.redberry.core.groups.permutations.Permutations;
 import cc.redberry.core.indexgenerator.IndexGeneratorImpl;
 import cc.redberry.core.indexmapping.IndexMapping;
@@ -35,8 +33,10 @@ import cc.redberry.core.tensor.*;
 import cc.redberry.core.transformations.EliminateMetricsTransformation;
 import cc.redberry.core.transformations.Transformation;
 import cc.redberry.core.transformations.expand.ExpandPort;
+import cc.redberry.core.transformations.powerexpand.PowerUnfoldTransformation;
 import cc.redberry.core.utils.ArraysUtils;
 import cc.redberry.core.utils.IntArrayList;
+import cc.redberry.core.utils.OutputPort;
 import cc.redberry.core.utils.TensorUtils;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.set.hash.TIntHashSet;
@@ -59,6 +59,26 @@ public class CollectTransformation implements Transformation {
     private final TIntHashSet patternsNames;
     private final Transformation powerExpand;
     private final Transformation[] transformations;
+    private final boolean expandSymbolic;
+
+    /**
+     * Creates Collect transformation that collects together terms that involve
+     * the same powers of objects matching specified simple tensors or tensor fields and applies specified
+     * transformations to the expression that forms the coefficient of each term obtained.
+     *
+     * @param patterns        specified simple tensors or tensor fields
+     * @param transformations transformations to be applied to the expression that forms the coefficient
+     *                        of each term obtained
+     * @param expandSymbolic  specify whether to expand symbolic subexpression or leave them as is
+     */
+    public CollectTransformation(SimpleTensor[] patterns, Transformation[] transformations, boolean expandSymbolic) {
+        patternsNames = new TIntHashSet();
+        powerExpand = new PowerUnfoldTransformation(patterns);
+        for (SimpleTensor t : patterns)
+            patternsNames.add(t.getName());
+        this.transformations = transformations;
+        this.expandSymbolic = expandSymbolic;
+    }
 
     /**
      * Creates Collect transformation that collects together terms that involve
@@ -70,11 +90,7 @@ public class CollectTransformation implements Transformation {
      *                        of each term obtained
      */
     public CollectTransformation(SimpleTensor[] patterns, Transformation[] transformations) {
-        patternsNames = new TIntHashSet();
-        powerExpand = new PowerUnfoldTransformation(patterns);
-        for (SimpleTensor t : patterns)
-            patternsNames.add(t.getName());
-        this.transformations = transformations;
+        this(patterns, transformations, true);
     }
 
     /**
@@ -85,6 +101,17 @@ public class CollectTransformation implements Transformation {
      */
     public CollectTransformation(SimpleTensor... patterns) {
         this(patterns, new Transformation[0]);
+    }
+
+    /**
+     * Creates Collect transformation that collects together terms that involve
+     * the same powers of objects matching specified simple tensors or tensor fields.
+     *
+     * @param patterns       specified simple tensors or tensor fields
+     * @param expandSymbolic specify whether to expand symbolic subexpression or leave them as is
+     */
+    public CollectTransformation(SimpleTensor[] patterns, boolean expandSymbolic) {
+        this(patterns, new Transformation[0], expandSymbolic);
     }
 
     @Override
@@ -98,7 +125,7 @@ public class CollectTransformation implements Transformation {
     private Tensor transform1(Tensor t) {
         SumBuilder notMatched = new SumBuilder();
         TIntObjectHashMap<ArrayList<Split>> map = new TIntObjectHashMap<>();
-        OutputPort<Tensor> port = ExpandPort.createPort(t);
+        OutputPort<Tensor> port = ExpandPort.createPort(t, expandSymbolic);
         Tensor current;
         Split toAdd;
         ArrayList<Split> nodes;
