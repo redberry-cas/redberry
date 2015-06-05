@@ -22,9 +22,12 @@
  */
 package cc.redberry.core.transformations.expand;
 
+import cc.redberry.core.context.CC;
+import cc.redberry.core.context.OutputFormat;
 import cc.redberry.core.tensor.*;
 import cc.redberry.core.tensor.iterator.TraverseGuide;
 import cc.redberry.core.transformations.Transformation;
+import cc.redberry.core.transformations.TransformationToStringAble;
 import cc.redberry.core.transformations.substitutions.SubstitutionIterator;
 
 import java.util.ArrayList;
@@ -40,7 +43,7 @@ import static cc.redberry.core.transformations.expand.ExpandUtils.multiplySumEle
  * @author Stanislav Poslavsky
  * @since 1.1.9
  */
-public final class ExpandTensorsTransformation implements Transformation {
+public final class ExpandTensorsTransformation implements TransformationToStringAble {
     /**
      * The default instance.
      */
@@ -144,5 +147,15 @@ public final class ExpandTensorsTransformation implements Transformation {
                     base = null;
                 }
             }
+    }
+
+    @Override
+    public String toString(OutputFormat outputFormat) {
+        return "ExpandTensors";
+    }
+
+    @Override
+    public String toString() {
+        return toString(CC.getDefaultOutputFormat());
     }
 }

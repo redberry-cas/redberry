@@ -22,6 +22,8 @@
  */
 package cc.redberry.core.transformations.expand;
 
+import cc.redberry.core.context.CC;
+import cc.redberry.core.context.OutputFormat;
 import cc.redberry.core.tensor.Product;
 import cc.redberry.core.tensor.Sum;
 import cc.redberry.core.tensor.Tensor;
@@ -85,5 +87,15 @@ public final class ExpandNumeratorTransformation extends AbstractExpandNumerator
         if (numDen.numerator == numerator)
             return product;
         return Tensors.multiply(numerator, Tensors.reciprocal(numDen.denominator));
+    }
+
+    @Override
+    public String toString(OutputFormat outputFormat) {
+        return "ExpandNumerator";
+    }
+
+    @Override
+    public String toString() {
+        return toString(CC.getDefaultOutputFormat());
     }
 }

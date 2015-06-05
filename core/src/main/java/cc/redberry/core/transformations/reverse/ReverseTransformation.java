@@ -23,6 +23,7 @@
 package cc.redberry.core.transformations.reverse;
 
 import cc.redberry.core.context.CC;
+import cc.redberry.core.context.OutputFormat;
 import cc.redberry.core.graph.GraphType;
 import cc.redberry.core.graph.PrimitiveSubgraph;
 import cc.redberry.core.graph.PrimitiveSubgraphPartition;
@@ -33,6 +34,7 @@ import cc.redberry.core.indices.Indices;
 import cc.redberry.core.tensor.*;
 import cc.redberry.core.tensor.iterator.FromChildToParentIterator;
 import cc.redberry.core.transformations.Transformation;
+import cc.redberry.core.transformations.TransformationToStringAble;
 import cc.redberry.core.utils.ArraysUtils;
 
 import java.util.Arrays;
@@ -43,7 +45,7 @@ import java.util.Arrays;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public final class ReverseTransformation implements Transformation {
+public final class ReverseTransformation implements TransformationToStringAble {
     private final IndexType type;
 
     /**
@@ -183,7 +185,7 @@ public final class ReverseTransformation implements Transformation {
                 new Mapping(from.getAllIndices().copy(), to.getAllIndices().copy()), new int[0]);
     }
 
-    private static final Indices renameOfType(Indices indices, Indices fromSubIndices, Indices toSubIndices) {
+    private static Indices renameOfType(Indices indices, Indices fromSubIndices, Indices toSubIndices) {
         return indices.applyIndexMapping(new Mapper(fromSubIndices, toSubIndices));
     }
 
@@ -205,5 +207,13 @@ public final class ReverseTransformation implements Transformation {
         }
     }
 
+    @Override
+    public String toString(OutputFormat outputFormat) {
+        return "Reverse[" + type + "]";
+    }
 
+    @Override
+    public String toString() {
+        return toString(CC.getDefaultOutputFormat());
+    }
 }

@@ -22,11 +22,14 @@
  */
 package cc.redberry.core.transformations.powerexpand;
 
+import cc.redberry.core.context.CC;
+import cc.redberry.core.context.OutputFormat;
 import cc.redberry.core.tensor.SimpleTensor;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.tensor.Tensors;
 import cc.redberry.core.tensor.iterator.FromChildToParentIterator;
 import cc.redberry.core.transformations.Transformation;
+import cc.redberry.core.transformations.TransformationToStringAble;
 import cc.redberry.core.utils.Indicator;
 
 import static cc.redberry.core.transformations.powerexpand.PowerExpandUtils.*;
@@ -38,7 +41,7 @@ import static cc.redberry.core.transformations.powerexpand.PowerExpandUtils.*;
  * @author Stanislav Poslavsky
  * @since 1.1.5
  */
-public final class PowerExpandTransformation implements Transformation {
+public final class PowerExpandTransformation implements TransformationToStringAble {
     public static final PowerExpandTransformation POWER_EXPAND_TRANSFORMATION = new PowerExpandTransformation();
     private final Indicator<Tensor> toExpandIndicator;
 
@@ -76,5 +79,16 @@ public final class PowerExpandTransformation implements Transformation {
                 iterator.set(Tensors.multiply(powerExpandToArray1(c, toExpandIndicator)));
 
         return iterator.result();
+    }
+
+
+    @Override
+    public String toString(OutputFormat outputFormat) {
+        return "PowerExpand";
+    }
+
+    @Override
+    public String toString() {
+        return toString(CC.getDefaultOutputFormat());
     }
 }

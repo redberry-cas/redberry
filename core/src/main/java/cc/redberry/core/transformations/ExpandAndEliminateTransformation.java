@@ -22,6 +22,8 @@
  */
 package cc.redberry.core.transformations;
 
+import cc.redberry.core.context.CC;
+import cc.redberry.core.context.OutputFormat;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.transformations.expand.ExpandTransformation;
 import cc.redberry.core.utils.ArraysUtils;
@@ -30,7 +32,7 @@ import cc.redberry.core.utils.ArraysUtils;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public class ExpandAndEliminateTransformation implements Transformation {
+public class ExpandAndEliminateTransformation implements TransformationToStringAble {
     public static final ExpandAndEliminateTransformation EXPAND_AND_ELIMINATE = new ExpandAndEliminateTransformation();
 
     private final Transformation[] transformations;
@@ -55,5 +57,15 @@ public class ExpandAndEliminateTransformation implements Transformation {
 
     public static Tensor expandAndEliminate(Tensor t, Transformation... transformations) {
         return new ExpandAndEliminateTransformation(transformations).transform(t);
+    }
+
+    @Override
+    public String toString(OutputFormat f) {
+        return "ExpandAndEliminate";
+    }
+
+    @Override
+    public String toString() {
+        return toString(CC.getDefaultOutputFormat());
     }
 }

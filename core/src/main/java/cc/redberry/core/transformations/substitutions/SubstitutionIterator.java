@@ -139,7 +139,7 @@ public final class SubstitutionIterator implements TreeIterator {
 //        return fc.getForbidden().toArray();
     }
 
-    private static interface ForbiddenContainer extends Payload<ForbiddenContainer> {
+    private interface ForbiddenContainer extends Payload<ForbiddenContainer> {
         TIntSet getForbidden();
 
         void submit(TIntSet removed, TIntSet added);

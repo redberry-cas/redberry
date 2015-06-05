@@ -22,6 +22,9 @@
  */
 package cc.redberry.core.transformations.substitutions;
 
+import cc.redberry.core.context.CC;
+import cc.redberry.core.context.OutputFormat;
+import cc.redberry.core.context.ToString;
 import cc.redberry.core.indexmapping.Mapping;
 import cc.redberry.core.indices.IndexType;
 import cc.redberry.core.indices.IndicesUtils;
@@ -35,7 +38,7 @@ import gnu.trove.iterator.TIntIterator;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-abstract class PrimitiveSubstitution {
+abstract class PrimitiveSubstitution implements ToString {
     final Tensor from, to;
     final boolean toIsSymbolic;
     //if positive, then adds dummies
@@ -81,4 +84,18 @@ abstract class PrimitiveSubstitution {
     }
 
     abstract Tensor newTo_(Tensor currentNode, SubstitutionIterator iterator);
+
+    @Override
+    public String toString(OutputFormat outputFormat) {
+        String symb;
+        if (outputFormat.is(OutputFormat.WolframMathematica))
+            symb = "->";
+        else symb = "=";
+        return from.toString(outputFormat) + symb + to.toString(outputFormat);
+    }
+
+    @Override
+    public String toString() {
+        return toString(CC.getDefaultOutputFormat());
+    }
 }

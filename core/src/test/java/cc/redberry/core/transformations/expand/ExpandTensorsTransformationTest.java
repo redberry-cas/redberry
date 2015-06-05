@@ -140,6 +140,12 @@ public class ExpandTensorsTransformationTest {
         TAssert.assertEquals(ExpandTransformation.expand(applySequentially(ExpandTransformation.expand(applySequentially(t, subs), subs), subs)), ExpandTransformation.expand(expand(t, subs)));
     }
 
+    @Test
+    public void test14() throws Exception {
+        Tensor t = parse("2*((a+b)*(a_i*a^i + b_i*b^i) + (c+d)*(a_i*a^i + b_i*b^i))*((a+b)*(a_i*a^i + b_i*b^i) + (c+d)*(a_i*a^i + b_i*b^i))");
+        TAssert.assertEquals("4*(d+b+c+a)**2*a_{i}*a^{i}*b_{a}*b^{a}+2*(d+b+c+a)**2*a_{i}*a^{i}*a_{a}*a^{a}+2*(d+b+c+a)**2*b_{i}*b^{i}*b_{a}*b^{a}",expand(t));
+    }
+
     @Ignore
     @Test
     public void testPerformance() throws Exception {

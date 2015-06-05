@@ -24,6 +24,7 @@ package cc.redberry.core.transformations.expand;
 
 import cc.redberry.core.tensor.*;
 import cc.redberry.core.transformations.Transformation;
+import cc.redberry.core.transformations.TransformationToStringAble;
 
 /**
  * Abstract class for {@link cc.redberry.core.transformations.expand.ExpandDenominatorTransformation} and
@@ -31,7 +32,7 @@ import cc.redberry.core.transformations.Transformation;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public abstract class AbstractExpandNumeratorDenominatorTransformation implements Transformation{
+public abstract class AbstractExpandNumeratorDenominatorTransformation implements TransformationToStringAble{
     protected final Transformation[] transformations;
 
     protected AbstractExpandNumeratorDenominatorTransformation(Transformation[] transformations) {

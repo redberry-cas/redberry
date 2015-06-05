@@ -22,6 +22,8 @@
  */
 package cc.redberry.core.transformations.expand;
 
+import cc.redberry.core.context.CC;
+import cc.redberry.core.context.OutputFormat;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.tensor.Tensors;
 import cc.redberry.core.transformations.Transformation;
@@ -82,5 +84,15 @@ public final class ExpandDenominatorTransformation extends AbstractExpandNumerat
         if (numDen.denominator == denominator)
             return product;
         return Tensors.multiply(numDen.numerator, Tensors.reciprocal(denominator));
+    }
+
+    @Override
+    public String toString(OutputFormat outputFormat) {
+        return "ExpandDenominator";
+    }
+
+    @Override
+    public String toString() {
+        return toString(CC.getDefaultOutputFormat());
     }
 }

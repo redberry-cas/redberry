@@ -22,6 +22,8 @@
  */
 package cc.redberry.core.transformations.expand;
 
+import cc.redberry.core.context.CC;
+import cc.redberry.core.context.OutputFormat;
 import cc.redberry.core.tensor.Product;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.tensor.Tensors;
@@ -109,5 +111,15 @@ public final class ExpandAllTransformation extends AbstractExpandTransformation 
         if (denExpanded || res != temp)
             return res;
         return product;
+    }
+
+    @Override
+    public String toString(OutputFormat outputFormat) {
+        return "ExpandAll";
+    }
+
+    @Override
+    public String toString() {
+        return toString(CC.getDefaultOutputFormat());
     }
 }
