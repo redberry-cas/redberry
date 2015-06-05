@@ -123,7 +123,14 @@ class RedberryStaticTest {
             def t = 'f[x,x**2]+(x+1)*f~(1,0)[x,x**2]+2*x*(x+1)*f~(0,1)[x,x**2]'.t
             assertTrue Collect['f~(0,1)[x, y]', 'f~(1,0)[x, y]', Factor] >> t == 'f[x,x**2]+(x+1)*f~(1,0)[x,x**2]+2*x*(x+1)*f~(0,1)[x,x**2]'.t
         }
+    }
 
+    @Test
+    public void testCollect3() throws Exception {
+        use(Redberry) {
+            def t = '(a+b)**2*A_mq*B_n^q + (a+b)**2*A_qn*C_m^q'.t
+            assertEquals('A_iq*((a+b)**2*d^i_m*B_n^q + (a+b)**2*d^q_n*C_m^i)', Collect['A_mn', [ExpandSymbolic: false]] >> t)
+        }
     }
 
     @Test

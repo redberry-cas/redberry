@@ -348,4 +348,12 @@ public class CollectTransformationTest {
         TAssert.assertEquals("(d_{a}^{c}*d_{b}^{d}+d_{a}^{d}*d_{b}^{c})*cu*G_c*G_d*v",
                 e.transpose().transform(tr.transform(t)));
     }
+
+    @Test
+    public void test15() {
+        SimpleTensor[] simpleTensors = {parseSimple("A_mn")};
+        CollectTransformation ct = new CollectTransformation(simpleTensors, false);
+        Tensor t = parse("(a+b)**2*A_mq*B_n^q + (a+b)**2*A_qn*C_m^q");
+        TAssert.assertEquals(ct.transform(t), "A_iq*((a+b)**2*d^i_m*B_n^q + (a+b)**2*d^q_n*C_m^i)");
+    }
 }
