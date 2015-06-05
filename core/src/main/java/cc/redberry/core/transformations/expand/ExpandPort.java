@@ -22,11 +22,11 @@
  */
 package cc.redberry.core.transformations.expand;
 
-import cc.redberry.core.utils.OutputPort;
 import cc.redberry.core.combinatorics.IntTuplesPort;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.number.NumberUtils;
 import cc.redberry.core.tensor.*;
+import cc.redberry.core.utils.OutputPort;
 import cc.redberry.core.utils.TensorUtils;
 import gnu.trove.set.hash.TIntHashSet;
 
@@ -64,12 +64,11 @@ public final class ExpandPort {
             return new OutputPort.Singleton<>(tensor);
     }
 
-    private static interface ResettablePort extends OutputPort<Tensor> {
+    private interface ResettablePort extends OutputPort<Tensor> {
         void reset();
     }
 
     private static final class PowerPort implements ResettablePort {
-
         private final Tensor base;
         private final int power;
         private IntTuplesPort tuplesPort;
@@ -123,7 +122,6 @@ public final class ExpandPort {
     }
 
     private static final class ProductPort implements OutputPort<Tensor> {
-
         private final ProductBuilder base;
         private ProductBuilder currentBuilder;
         private final ResettablePort[] sumsAndPowers;
@@ -230,11 +228,11 @@ public final class ExpandPort {
     }
 
     private static final class SumPort implements ResettablePort {
-
         private final OutputPort<Tensor>[] ports;
         private final Tensor tensor;
         private int pointer;
 
+        @SuppressWarnings("unchecked")
         public SumPort(Tensor tensor) {
             this.tensor = tensor;
             this.ports = new OutputPort[tensor.size()];
