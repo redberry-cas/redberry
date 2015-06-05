@@ -22,11 +22,11 @@
  */
 package cc.redberry.core.transformations.expand;
 
-import cc.redberry.core.utils.OutputPort;
 import cc.redberry.core.combinatorics.IntTuplesPort;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.number.NumberUtils;
 import cc.redberry.core.tensor.*;
+import cc.redberry.core.utils.OutputPort;
 import cc.redberry.core.utils.TensorUtils;
 import gnu.trove.set.hash.TIntHashSet;
 
@@ -34,6 +34,8 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
+import static cc.redberry.core.utils.TensorUtils.isSymbolic;
 
 /**
  * Output port, which iteratively gives expand tensor.
@@ -45,38 +47,49 @@ import java.util.List;
 public final class ExpandPort {
 
     public static Tensor expandUsingPort(Tensor t) {
+        return expandUsingPort(t, true);
+    }
+
+    public static Tensor expandUsingPort(Tensor t, boolean expandSymbolic) {
+        OutputPort<Tensor> port = createPort(t, expandSymbolic);
+        if (port instanceof OutputPort.Singleton)
+            return port.take();
         SumBuilder sb = new SumBuilder();
-        OutputPort<Tensor> port = createPort(t);
         Tensor n;
         while ((n = port.take()) != null)
             sb.put(n);
         return sb.build();
     }
 
-    public static OutputPort<Tensor> createPort(Tensor tensor) {
+    public static OutputPort<Tensor> createPort(Tensor tensor, boolean expandSymbolic) {
         if (tensor instanceof Product)
-            return new ProductPort(tensor);
+            return new ProductPort(tensor, expandSymbolic);
         if (tensor instanceof Sum)
-            return new SumPort(tensor);
-        if (ExpandUtils.isExpandablePower(tensor) && !TensorUtils.isNegativeNaturalNumber(tensor.get(1)))
-            return new PowerPort(tensor);
+            return new SumPort(tensor, expandSymbolic);
+        if (ExpandUtils.isExpandablePower(tensor)
+                && !TensorUtils.isNegativeNaturalNumber(tensor.get(1)))
+            if (!expandSymbolic && isSymbolic(tensor.get(0)))
+                return new OutputPort.Singleton<>(tensor);
+            else
+                return new PowerPort(tensor, expandSymbolic);
         else
             return new OutputPort.Singleton<>(tensor);
     }
 
-    private static interface ResettablePort extends OutputPort<Tensor> {
+    private interface ResettablePort extends OutputPort<Tensor> {
         void reset();
     }
 
     private static final class PowerPort implements ResettablePort {
-
         private final Tensor base;
         private final int power;
         private IntTuplesPort tuplesPort;
         private final int[] initialForbidden;
         private OutputPort<Tensor> currentPort;
+        private final boolean expandSymbolic;
 
-        public PowerPort(Tensor tensor, int[] initialForbidden) {
+        public PowerPort(Tensor tensor, int[] initialForbidden, boolean expandSymbolic) {
+            this.expandSymbolic = expandSymbolic;
             base = tensor.get(0);
             power = ((Complex) tensor.get(1)).getReal().intValue();
             int[] upperBounds = new int[power];
@@ -86,8 +99,8 @@ public final class ExpandPort {
             currentPort = nextPort();
         }
 
-        public PowerPort(Tensor tensor) {
-            this(tensor, TensorUtils.getAllIndicesNamesT(tensor.get(0)).toArray());
+        public PowerPort(Tensor tensor, boolean expandSymbolic) {
+            this(tensor, TensorUtils.getAllIndicesNamesT(tensor.get(0)).toArray(), expandSymbolic);
         }
 
         OutputPort<Tensor> nextPort() {
@@ -100,7 +113,7 @@ public final class ExpandPort {
             for (int i = 1; i < tuple.length; ++i)
                 builder.put(ApplyIndexMapping.renameDummy(base.get(tuple[i]), added.toArray(), added));
 
-            return createPort(builder.build());
+            return createPort(builder.build(), expandSymbolic);
         }
 
         @Override
@@ -123,29 +136,30 @@ public final class ExpandPort {
     }
 
     private static final class ProductPort implements OutputPort<Tensor> {
-
         private final ProductBuilder base;
         private ProductBuilder currentBuilder;
         private final ResettablePort[] sumsAndPowers;
         private final Tensor[] currentMultipliers;
         private final Tensor tensor;
+        private final boolean expandSymbolic;
 
-        public ProductPort(Tensor tensor) {
+        public ProductPort(Tensor tensor, boolean expandSymbolic) {
             this.tensor = tensor;
+            this.expandSymbolic = expandSymbolic;
             this.base = new ProductBuilder();
             List<ResettablePort> sumOrPowerPorts = new ArrayList<>();
             int theLargestSumPosition = 0, theLargestSumSize = 0, productSize = tensor.size();
             Tensor m;
             for (int i = 0; i < productSize; ++i) {
                 m = tensor.get(i);
-                if (m instanceof Sum) {
+                if (m instanceof Sum && expandIfSymbolic(m)) {
                     if (m.size() > theLargestSumSize) {
                         theLargestSumPosition = sumOrPowerPorts.size();
                         theLargestSumSize = m.size();
                     }
-                    sumOrPowerPorts.add(new SumPort(m));
+                    sumOrPowerPorts.add(new SumPort(m, expandSymbolic));
                 } else if (ExpandUtils.isExpandablePower(m)) {
-                    if (TensorUtils.isNegativeNaturalNumber(m.get(1))) {
+                    if (TensorUtils.isNegativeNaturalNumber(m.get(1)) || !expandIfSymbolic(m.get(0))) {
 //                        base.put(Tensors.reciprocal(ExpandUtils.expandPower(
 //                                (Sum) m.get(0), ((Complex) m.get(1)).getReal().intValue(),
 //                                TensorUtils.getAllIndicesNamesT(tensor).toArray(), new Transformation[0])));
@@ -157,7 +171,7 @@ public final class ExpandPort {
                         theLargestSumPosition = sumOrPowerPorts.size();
                         theLargestSumSize = m.size();
                     }
-                    sumOrPowerPorts.add(new PowerPort(m, TensorUtils.getAllIndicesNamesT(tensor).toArray()));
+                    sumOrPowerPorts.add(new PowerPort(m, TensorUtils.getAllIndicesNamesT(tensor).toArray(), expandSymbolic));
                 } else
                     base.put(m);
             }
@@ -175,6 +189,10 @@ public final class ExpandPort {
                     currentMultipliers[productSize] = sumsAndPowers[productSize].take();
                 currentBuilder = nextCombination();
             }
+        }
+
+        private boolean expandIfSymbolic(Tensor t) {
+            return expandSymbolic || !isSymbolic(t);
         }
 
         private ProductBuilder nextCombination() {
@@ -230,13 +248,15 @@ public final class ExpandPort {
     }
 
     private static final class SumPort implements ResettablePort {
-
         private final OutputPort<Tensor>[] ports;
         private final Tensor tensor;
         private int pointer;
+        private boolean expandSymbolic;
 
-        public SumPort(Tensor tensor) {
+        @SuppressWarnings("unchecked")
+        public SumPort(Tensor tensor, boolean expandSymbolic) {
             this.tensor = tensor;
+            this.expandSymbolic = expandSymbolic;
             this.ports = new OutputPort[tensor.size()];
             reset();
         }
@@ -245,7 +265,7 @@ public final class ExpandPort {
         public void reset() {
             pointer = 0;
             for (int i = tensor.size() - 1; i >= 0; --i)
-                ports[i] = createPort(tensor.get(i));
+                ports[i] = createPort(tensor.get(i), expandSymbolic);
         }
 
         @Override

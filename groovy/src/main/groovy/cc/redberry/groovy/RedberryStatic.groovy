@@ -160,6 +160,31 @@ class RedberryStatic {
         }
     }
 
+    private static final class CollectWrapper extends TransformationWrapper {
+        CollectWrapper() {
+            super(CollectTransformation)
+        }
+
+        @Override
+        Transformation getAt(Collection args) {
+            def _args = []
+            def _tr = []
+            def opts = [ExpandSymbolic: true]
+            args.each { t ->
+                if (t instanceof String || t instanceof GString)
+                    t = t.t
+
+                if (t instanceof SimpleTensor)
+                    _args << t
+                if (t instanceof Transformation)
+                    _tr << t
+                if (t instanceof Map)
+                    opts.putAll(t)
+            }
+            return transformationClass.newInstance(_args as SimpleTensor[], _tr as Transformation[], opts['ExpandSymbolic']);
+        }
+    }
+
     /**
      * Expands out products and positive integer powers.
      * @see ExpandTransformation
@@ -208,8 +233,7 @@ class RedberryStatic {
     /**
      * Collects terms by pattern
      */
-    public static final TransformationWrapper Collect =
-            new TransformationWrapper_SimpleTensors_And_Transformations(CollectTransformation)
+    public static final TransformationWrapper Collect = new CollectWrapper()
 
     /**
      * Gives a partial derivative.
