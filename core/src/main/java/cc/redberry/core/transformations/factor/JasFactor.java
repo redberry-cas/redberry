@@ -25,6 +25,7 @@ package cc.redberry.core.transformations.factor;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.number.Rational;
 import cc.redberry.core.tensor.*;
+import cc.redberry.core.transformations.Transformation;
 import cc.redberry.core.transformations.factor.jasfactor.edu.jas.arith.BigInteger;
 import cc.redberry.core.transformations.factor.jasfactor.edu.jas.arith.BigRational;
 import cc.redberry.core.transformations.factor.jasfactor.edu.jas.poly.*;
@@ -44,14 +45,14 @@ import java.util.SortedMap;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public final class JasFactor implements FactorizationEngine {
+public final class JasFactor implements Transformation {
     public static final JasFactor ENGINE = new JasFactor();
 
     private JasFactor() {
     }
 
     @Override
-    public Tensor factor(Tensor tensor) {
+    public Tensor transform(Tensor tensor) {
         return factor1(tensor);
     }
 

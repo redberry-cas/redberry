@@ -561,6 +561,16 @@ class Redberry {
     }
 
     /**
+     * Returns indices of the specified type, which are contained
+     * in {@code Indices} object.
+     *
+     * @param indices self
+     * @param type the type of indices
+     * @return indices of the specified type, which are contained in indices object.
+     */
+    static Indices getAt(Indices indices, IndexType type) { indices.getOfType(type) }
+
+    /**
      * Returns the index of the specified type at the
      * specified position in indices
      *
@@ -760,6 +770,10 @@ class Redberry {
      * @return joined transformation, which will apply both transformations sequentially
      */
     static Transformation and(Transformation tr1, Transformation tr2) {
+        if (tr1 == Transformation.INDENTITY)
+            return tr2
+        if (tr2 == Transformation.INDENTITY)
+            return tr1
         def transformations = [];
         if (tr1 instanceof TransformationCollection)
             transformations.addAll(tr1.transformations)
@@ -781,6 +795,9 @@ class Redberry {
      * @return joined transformation, which will apply both transformations sequentially
      */
     static Transformation and(Transformation tr1, List tr2) {
+        if (tr1 == Transformation.INDENTITY)
+            return new TransformationCollection(tr2)
+
         def transformations = [];
         if (tr1 instanceof TransformationCollection)
             transformations.addAll(tr1.transformations)
@@ -799,6 +816,9 @@ class Redberry {
      * @return joined transformation, which will apply both transformations sequentially
      */
     static Transformation and(List tr1, Transformation tr2) {
+        if (tr2 == Transformation.INDENTITY)
+            return new TransformationCollection(tr1)
+
         def transformations = [];
         transformations.addAll(tr1)
         if (tr2 instanceof TransformationCollection)

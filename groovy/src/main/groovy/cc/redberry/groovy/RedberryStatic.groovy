@@ -48,7 +48,6 @@ import cc.redberry.core.transformations.*
 import cc.redberry.core.transformations.collect.CollectTransformation
 import cc.redberry.core.transformations.expand.*
 import cc.redberry.core.transformations.factor.FactorTransformation
-import cc.redberry.core.transformations.factor.FactorizationEngine
 import cc.redberry.core.transformations.factor.JasFactor
 import cc.redberry.core.transformations.fractions.GetDenominatorTransformation
 import cc.redberry.core.transformations.fractions.GetNumeratorTransformation
@@ -324,7 +323,7 @@ class RedberryStatic {
 
         private static final def defaultOptions = [FactorScalars: true, FactorizationEngine: JasFactor.ENGINE]
 
-        public Transformation getAt(boolean factorScalars, FactorizationEngine factorizationEngine = JasFactor.ENGINE) {
+        public Transformation getAt(boolean factorScalars, Transformation factorizationEngine = JasFactor.ENGINE) {
             return new FactorTransformation(factorScalars, factorizationEngine)
         }
 
@@ -451,11 +450,41 @@ class RedberryStatic {
     /**
      * Inverts free indices of expression
      */
-    public static final Transformation InvertIndices = { Tensor expr ->
+    public static final Transformation InvertIndices = new InvertIndicesWrapper(null)
+
+    private static Tensor invertIndicesOfType(Tensor expr, IndexType... types) {
         use(Redberry) {
-            (expr.indices.free.si % expr.indices.free.si.inverted) >> expr
+            for (IndexType type : types) {
+                def ind = expr.indices.free[type].si
+                expr = (ind % ind.inverted) >> expr
+            }
+            expr
         }
-    } as Transformation
+    }
+
+    private static Tensor invertIndices(Tensor expr) {
+        use(Redberry) {
+            def ind = expr.indices.free.si
+            (ind % ind.inverted) >> expr
+        }
+    }
+
+    private static final class InvertIndicesWrapper implements Transformation {
+        private IndexType[] types
+
+        InvertIndicesWrapper(IndexType[] types) {
+            this.types = types
+        }
+
+        public Transformation getAt(IndexType... types) {
+            return new InvertIndicesWrapper(types)
+        }
+
+        @Override
+        Tensor transform(Tensor expr) {
+            types == null ? invertIndices(expr) : invertIndicesOfType(expr, types)
+        }
+    }
 
     /***********************************************************************
      ********************* Matrices definition *****************************

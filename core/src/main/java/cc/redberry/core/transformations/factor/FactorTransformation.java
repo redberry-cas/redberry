@@ -31,6 +31,7 @@ import cc.redberry.core.tensor.functions.ScalarFunction;
 import cc.redberry.core.tensor.iterator.FromChildToParentIterator;
 import cc.redberry.core.tensor.iterator.FromParentToChildIterator;
 import cc.redberry.core.tensor.iterator.TreeIterator;
+import cc.redberry.core.transformations.Transformation;
 import cc.redberry.core.transformations.TransformationToStringAble;
 import cc.redberry.core.transformations.fractions.TogetherTransformation;
 import cc.redberry.core.utils.IntArrayList;
@@ -56,7 +57,7 @@ public class FactorTransformation implements TransformationToStringAble {
      */
     public static final FactorTransformation FACTOR = new FactorTransformation(true, JasFactor.ENGINE);
     private final boolean factorScalars;
-    private final FactorizationEngine factorizationEngine;
+    private final Transformation factorizationEngine;
 
 
     /**
@@ -64,12 +65,12 @@ public class FactorTransformation implements TransformationToStringAble {
      *                            factorized on a par with symbolic (i.e. without any indices) expressions
      * @param factorizationEngine custom factorization engine
      */
-    public FactorTransformation(boolean factorScalars, FactorizationEngine factorizationEngine) {
+    public FactorTransformation(boolean factorScalars, Transformation factorizationEngine) {
         this.factorScalars = factorScalars;
         this.factorizationEngine = factorizationEngine;
     }
 
-    public FactorizationEngine getFactorizationEngine() {
+    public Transformation getFactorizationEngine() {
         return factorizationEngine;
     }
 
@@ -155,7 +156,7 @@ public class FactorTransformation implements TransformationToStringAble {
             }
             return iterator.result();
         } else {
-            return factorizationEngine.factor(sum);
+            return factorizationEngine.transform(sum);
         }
     }
 
@@ -167,13 +168,13 @@ public class FactorTransformation implements TransformationToStringAble {
                 im = FastTensors.multiplySumElementsOnFactor((Sum) im, Complex.IMAGINARY_UNIT);
             else
                 im = Tensors.multiply(im, Complex.IMAGINARY_UNIT);
-            im = factorizationEngine.factor(im);
+            im = factorizationEngine.transform(im);
             im = Tensors.multiply(im, Complex.NEGATIVE_IMAGINARY_UNIT);
             parts[0] = im;
         }
 
         if (!TensorUtils.isZero(parts[1]))
-            parts[1] = factorizationEngine.factor(parts[1]);
+            parts[1] = factorizationEngine.transform(parts[1]);
 
 
         return Tensors.sum(parts[0], parts[1]);
@@ -187,7 +188,7 @@ public class FactorTransformation implements TransformationToStringAble {
      * @param factorizationEngine factorization engine
      * @return result
      */
-    public static Tensor factor(Tensor tensor, boolean factorScalars, FactorizationEngine factorizationEngine) {
+    public static Tensor factor(Tensor tensor, boolean factorScalars, Transformation factorizationEngine) {
         return new FactorTransformation(factorScalars, factorizationEngine).transform(tensor);
     }
 
