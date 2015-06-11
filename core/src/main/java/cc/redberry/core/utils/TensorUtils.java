@@ -68,7 +68,7 @@ public class TensorUtils {
         sb.append("// [")
                 .append(expr.getClass().getSimpleName()).append(",\n//  ")
                 .append("size = ").append(expr.size()).append(",\n//  ")
-                .append("symbolic = ").append(TensorUtils.isSymbolic(expr)).append(",\n//  ")
+                .append("symbolic = ").append(isSymbolic(expr)).append(",\n//  ")
                 .append("freeIndices = ").append(expr.getIndices().getFree()).append(",\n//  ")
                 .append("indices = ").append(expr.getIndices()).append(",\n//  ")
                 .append("symbolsCount = ").append(symbolsCount(expr)).append(",\n//  ")
