@@ -29,6 +29,7 @@ import cc.redberry.core.combinatorics.IntPermutationsGenerator
 import cc.redberry.core.combinatorics.IntTuplesPort
 import cc.redberry.core.context.CC
 import cc.redberry.core.context.OutputFormat
+import cc.redberry.core.context.ToString
 import cc.redberry.core.groups.permutations.Permutation
 import cc.redberry.core.groups.permutations.PermutationGroup
 import cc.redberry.core.indices.*
@@ -47,7 +48,6 @@ import cc.redberry.core.transformations.*
 import cc.redberry.core.transformations.collect.CollectTransformation
 import cc.redberry.core.transformations.expand.*
 import cc.redberry.core.transformations.factor.FactorTransformation
-import cc.redberry.core.transformations.factor.FactorizationEngine
 import cc.redberry.core.transformations.factor.JasFactor
 import cc.redberry.core.transformations.fractions.GetDenominatorTransformation
 import cc.redberry.core.transformations.fractions.GetNumeratorTransformation
@@ -99,7 +99,7 @@ class RedberryStatic {
     }
 
     private static final class TransformationWrapper_SimpleTensors_Or_Transformations extends
-            TransformationWrapper implements Transformation {
+            TransformationWrapper implements TransformationToStringAble {
 
         final Transformation instance;
 
@@ -118,6 +118,18 @@ class RedberryStatic {
             use(Redberry) {
                 return transformationClass.newInstance(*args.collect { it instanceof String ? it.t : it })
             }
+        }
+
+        @Override
+        String toString(OutputFormat outputFormat) {
+            if (instance instanceof ToString)
+                return instance.toString(outputFormat)
+            else return instance.toString()
+        }
+
+        @Override
+        String toString() {
+            return toString(CC.defaultOutputFormat)
         }
     }
 
@@ -298,7 +310,7 @@ class RedberryStatic {
      */
     public static final FactorWrapper Factor = FactorWrapper.INSTANCE;
 
-    public static final class FactorWrapper implements Transformation {
+    public static final class FactorWrapper implements TransformationToStringAble {
         public static final FactorWrapper INSTANCE = new FactorWrapper()
 
         private FactorWrapper() {
@@ -311,7 +323,7 @@ class RedberryStatic {
 
         private static final def defaultOptions = [FactorScalars: true, FactorizationEngine: JasFactor.ENGINE]
 
-        public Transformation getAt(boolean factorScalars, FactorizationEngine factorizationEngine = JasFactor.ENGINE) {
+        public Transformation getAt(boolean factorScalars, Transformation factorizationEngine = JasFactor.ENGINE) {
             return new FactorTransformation(factorScalars, factorizationEngine)
         }
 
@@ -319,6 +331,16 @@ class RedberryStatic {
             def allOptions = new HashMap(defaultOptions)
             allOptions.putAll(map)
             return new FactorTransformation(allOptions['FactorScalars'], allOptions['FactorizationEngine'])
+        }
+
+        @Override
+        String toString(OutputFormat outputFormat) {
+            return 'Factor'
+        }
+
+        @Override
+        String toString() {
+            return toString(CC.defaultOutputFormat)
         }
     }
 
@@ -365,7 +387,7 @@ class RedberryStatic {
 
     public static final FullySymmetrizeWrapper FullyAntiSymmetrize = new FullySymmetrizeWrapper(false);
 
-    public static final class FullySymmetrizeWrapper implements Transformation {
+    public static final class FullySymmetrizeWrapper implements TransformationToStringAble {
         final boolean symm;
 
         FullySymmetrizeWrapper(boolean symm) {
@@ -388,6 +410,16 @@ class RedberryStatic {
 
         public Transformation getAt(SimpleIndices indices) {
             return new SymmetrizeTransformation(prepareIndices(indices), true)
+        }
+
+        @Override
+        String toString(OutputFormat outputFormat) {
+            return symm ? 'FullySymmetrize' : 'FullyAntiSymmetrize'
+        }
+
+        @Override
+        String toString() {
+            return toString(CC.defaultOutputFormat)
         }
     }
 
@@ -412,6 +444,45 @@ class RedberryStatic {
 
         Transformation getAt(IndexType type) {
             return new ReverseTransformation(type)
+        }
+    }
+
+    /**
+     * Inverts free indices of expression
+     */
+    public static final Transformation InvertIndices = new InvertIndicesWrapper(null)
+
+    private static Tensor invertIndicesOfType(Tensor expr, IndexType... types) {
+        use(Redberry) {
+            for (IndexType type : types) {
+                def ind = expr.indices.free[type].si
+                expr = (ind % ind.inverted) >> expr
+            }
+            expr
+        }
+    }
+
+    private static Tensor invertIndices(Tensor expr) {
+        use(Redberry) {
+            def ind = expr.indices.free.si
+            (ind % ind.inverted) >> expr
+        }
+    }
+
+    private static final class InvertIndicesWrapper implements Transformation {
+        private IndexType[] types
+
+        InvertIndicesWrapper(IndexType[] types) {
+            this.types = types
+        }
+
+        public Transformation getAt(IndexType... types) {
+            return new InvertIndicesWrapper(types)
+        }
+
+        @Override
+        Tensor transform(Tensor expr) {
+            types == null ? invertIndices(expr) : invertIndicesOfType(expr, types)
         }
     }
 

@@ -22,6 +22,8 @@
  */
 package cc.redberry.core.transformations.factor;
 
+import cc.redberry.core.context.CC;
+import cc.redberry.core.context.OutputFormat;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.number.Rational;
 import cc.redberry.core.tensor.*;
@@ -30,6 +32,7 @@ import cc.redberry.core.tensor.iterator.FromChildToParentIterator;
 import cc.redberry.core.tensor.iterator.FromParentToChildIterator;
 import cc.redberry.core.tensor.iterator.TreeIterator;
 import cc.redberry.core.transformations.Transformation;
+import cc.redberry.core.transformations.TransformationToStringAble;
 import cc.redberry.core.transformations.fractions.TogetherTransformation;
 import cc.redberry.core.utils.IntArrayList;
 import cc.redberry.core.utils.LocalSymbolsProvider;
@@ -48,13 +51,13 @@ import java.util.List;
  * @author Stanislav Poslavsky
  * @since 1.1
  */
-public class FactorTransformation implements Transformation {
+public class FactorTransformation implements TransformationToStringAble {
     /**
      * Singleton instance.
      */
     public static final FactorTransformation FACTOR = new FactorTransformation(true, JasFactor.ENGINE);
     private final boolean factorScalars;
-    private final FactorizationEngine factorizationEngine;
+    private final Transformation factorizationEngine;
 
 
     /**
@@ -62,12 +65,12 @@ public class FactorTransformation implements Transformation {
      *                            factorized on a par with symbolic (i.e. without any indices) expressions
      * @param factorizationEngine custom factorization engine
      */
-    public FactorTransformation(boolean factorScalars, FactorizationEngine factorizationEngine) {
+    public FactorTransformation(boolean factorScalars, Transformation factorizationEngine) {
         this.factorScalars = factorScalars;
         this.factorizationEngine = factorizationEngine;
     }
 
-    public FactorizationEngine getFactorizationEngine() {
+    public Transformation getFactorizationEngine() {
         return factorizationEngine;
     }
 
@@ -84,42 +87,6 @@ public class FactorTransformation implements Transformation {
             return tensor;
         } else
             return factorSymbolicTerms(tensor);
-    }
-
-
-    /**
-     * Factors scalar parts of tensor over the integers.
-     *
-     * @param tensor              tensor
-     * @param factorScalars       if false, then only symbolic (without any indices) sub-tensors will be factorized
-     * @param factorizationEngine factorization engine
-     * @return result
-     */
-    public static Tensor factor(Tensor tensor, boolean factorScalars, FactorizationEngine factorizationEngine) {
-        return new FactorTransformation(factorScalars, factorizationEngine).transform(tensor);
-    }
-
-    /**
-     * Factors scalar parts of tensor over the integers. The
-     * implementation is based on Heinz Kredel Java Algebra System (http://krum.rz.uni-mannheim.de/jas/).
-     *
-     * @param tensor        tensor
-     * @param factorScalars if false, then only symbolic (without any indices) sub-tensors will be factorized
-     * @return result
-     */
-    public static Tensor factor(Tensor tensor, boolean factorScalars) {
-        return factor(tensor, factorScalars, JasFactor.ENGINE);
-    }
-
-    /**
-     * Factors scalar of tensor over the integers. The
-     * implementation is based on Heinz Kredel Java Algebra System (http://krum.rz.uni-mannheim.de/jas/).
-     *
-     * @param tensor tensor
-     * @return result
-     */
-    public static Tensor factor(Tensor tensor) {
-        return factor(tensor, true, JasFactor.ENGINE);
     }
 
     private Tensor factorSymbolicTerms(Tensor tensor) {
@@ -161,33 +128,36 @@ public class FactorTransformation implements Transformation {
                 if (c instanceof Sum)
                     iterator.set(factorOut(c));
             sum = iterator.result();
-        }
 
-        TreeIterator iterator = new FromParentToChildIterator(sum);
-        while ((c = iterator.next()) != null) {
-            if (!(c instanceof Sum))
-                continue;
-            if (needTogether(c)) {
-                c = TogetherTransformation.together(c, this);
-                if (c instanceof Product) {
-                    TensorBuilder pb = null;
-                    for (int i = c.size() - 1; i >= 0; --i) {
-                        if (c.get(i) instanceof Sum) {
-                            if (pb == null) {
-                                pb = c.getBuilder();
-                                for (int j = c.size() - 1; j > i; --j)
-                                    pb.put(c.get(j));
-                            }
-                            pb.put(factorSum1(c.get(i)));
-                        } else if (pb != null)
-                            pb.put(c.get(i));
-                    }
-                    iterator.set(pb == null ? c : pb.build());
-                } else iterator.set(c);
-            } else
-                iterator.set(factorSum1(c));
+
+            iterator = new FromParentToChildIterator(sum);
+            while ((c = iterator.next()) != null) {
+                if (!(c instanceof Sum))
+                    continue;
+                if (needTogether(c)) {
+                    c = TogetherTransformation.together(c, this);
+                    if (c instanceof Product) {
+                        TensorBuilder pb = null;
+                        for (int i = c.size() - 1; i >= 0; --i) {
+                            if (c.get(i) instanceof Sum) {
+                                if (pb == null) {
+                                    pb = c.getBuilder();
+                                    for (int j = c.size() - 1; j > i; --j)
+                                        pb.put(c.get(j));
+                                }
+                                pb.put(factorSum1(c.get(i)));
+                            } else if (pb != null)
+                                pb.put(c.get(i));
+                        }
+                        iterator.set(pb == null ? c : pb.build());
+                    } else iterator.set(c);
+                } else
+                    iterator.set(factorSum1(c));
+            }
+            return iterator.result();
+        } else {
+            return factorizationEngine.transform(sum);
         }
-        return iterator.result();
     }
 
     private Tensor factorSum1(Tensor sum) {
@@ -198,16 +168,51 @@ public class FactorTransformation implements Transformation {
                 im = FastTensors.multiplySumElementsOnFactor((Sum) im, Complex.IMAGINARY_UNIT);
             else
                 im = Tensors.multiply(im, Complex.IMAGINARY_UNIT);
-            im = factorizationEngine.factor(im);
+            im = factorizationEngine.transform(im);
             im = Tensors.multiply(im, Complex.NEGATIVE_IMAGINARY_UNIT);
             parts[0] = im;
         }
 
         if (!TensorUtils.isZero(parts[1]))
-            parts[1] = factorizationEngine.factor(parts[1]);
+            parts[1] = factorizationEngine.transform(parts[1]);
 
 
         return Tensors.sum(parts[0], parts[1]);
+    }
+
+    /**
+     * Factors scalar parts of tensor over the integers.
+     *
+     * @param tensor              tensor
+     * @param factorScalars       if false, then only symbolic (without any indices) sub-tensors will be factorized
+     * @param factorizationEngine factorization engine
+     * @return result
+     */
+    public static Tensor factor(Tensor tensor, boolean factorScalars, Transformation factorizationEngine) {
+        return new FactorTransformation(factorScalars, factorizationEngine).transform(tensor);
+    }
+
+    /**
+     * Factors scalar parts of tensor over the integers. The
+     * implementation is based on Heinz Kredel Java Algebra System (http://krum.rz.uni-mannheim.de/jas/).
+     *
+     * @param tensor        tensor
+     * @param factorScalars if false, then only symbolic (without any indices) sub-tensors will be factorized
+     * @return result
+     */
+    public static Tensor factor(Tensor tensor, boolean factorScalars) {
+        return factor(tensor, factorScalars, JasFactor.ENGINE);
+    }
+
+    /**
+     * Factors scalar of tensor over the integers. The
+     * implementation is based on Heinz Kredel Java Algebra System (http://krum.rz.uni-mannheim.de/jas/).
+     *
+     * @param tensor tensor
+     * @return result
+     */
+    public static Tensor factor(Tensor tensor) {
+        return factor(tensor, true, JasFactor.ENGINE);
     }
 
     private static Tensor[] reIm(Tensor sum) {
@@ -278,10 +283,9 @@ public class FactorTransformation implements Transformation {
         if (tensor instanceof Sum)
             return false;
         if (tensor instanceof Product)
-            if (tensor instanceof Product)
-                for (Tensor t : tensor)
-                    if (isIntegerPowerOfSum(t))
-                        return true;
+            for (Tensor t : tensor)
+                if (isIntegerPowerOfSum(t))
+                    return true;
         return isIntegerPowerOfSum(tensor);
     }
 
@@ -581,5 +585,15 @@ public class FactorTransformation implements Transformation {
 
     private static final class Int {
         int value;
+    }
+
+    @Override
+    public String toString(OutputFormat outputFormat) {
+        return "Factor";
+    }
+
+    @Override
+    public String toString() {
+        return toString(CC.getDefaultOutputFormat());
     }
 }

@@ -42,6 +42,7 @@ import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicLong;
 
 import static cc.redberry.core.tensor.Tensors.*;
 
@@ -53,7 +54,6 @@ import static cc.redberry.core.tensor.Tensors.*;
  * @since 1.0
  */
 public class TensorUtils {
-
     private TensorUtils() {
     }
 
@@ -68,12 +68,31 @@ public class TensorUtils {
         sb.append("// [")
                 .append(expr.getClass().getSimpleName()).append(",\n//  ")
                 .append("size = ").append(expr.size()).append(",\n//  ")
-                .append("symbolic = ").append(TensorUtils.isSymbolic(expr)).append(",\n//  ")
+                .append("symbolic = ").append(isSymbolic(expr)).append(",\n//  ")
                 .append("freeIndices = ").append(expr.getIndices().getFree()).append(",\n//  ")
                 .append("indices = ").append(expr.getIndices()).append(",\n//  ")
+                .append("symbolsCount = ").append(symbolsCount(expr)).append(",\n//  ")
                 .append("symbolsAppear = ").append(TensorUtils.getAllDiffSimpleTensors(expr))
                 .append("\n//]");
         return sb.toString();
+    }
+
+    /**
+     * Returns the number of symbols contained in expression (including duplicates)
+     * @param expr expression
+     * @return number of symbols contained in expression (including duplicates)
+     */
+    public static long symbolsCount(Tensor expr) {
+        AtomicLong counter = new AtomicLong();
+        symbolsCount(expr, counter);
+        return counter.get();
+    }
+
+    private static void symbolsCount(Tensor expr, AtomicLong counter) {
+        if (expr instanceof SimpleTensor)
+            counter.incrementAndGet();
+        for (Tensor t : expr)
+            symbolsCount(t, counter);
     }
 
     /**

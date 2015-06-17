@@ -22,6 +22,8 @@
  */
 package cc.redberry.core.transformations;
 
+import cc.redberry.core.context.CC;
+import cc.redberry.core.context.OutputFormat;
 import cc.redberry.core.indexgenerator.IndexGeneratorImpl;
 import cc.redberry.core.indexmapping.Mapping;
 import cc.redberry.core.indices.Indices;
@@ -49,7 +51,7 @@ import static cc.redberry.core.utils.ArraysUtils.addAll;
  * @author Stanislav Poslavsky
  * @since 1.0
  */
-public final class DifferentiateTransformation implements Transformation {
+public final class DifferentiateTransformation implements TransformationToStringAble {
 
     private final SimpleTensor[] vars;
     private final Transformation[] expandAndContract;
@@ -72,6 +74,21 @@ public final class DifferentiateTransformation implements Transformation {
     @Override
     public Tensor transform(Tensor t) {
         return differentiate(t, expandAndContract, vars);
+    }
+
+    @Override
+    public String toString(OutputFormat f) {
+        StringBuilder sb = new StringBuilder().append("Differentiate[");
+        for (int i = 0; ; ++i) {
+            sb.append(vars[i].toString(f));
+            if (i == vars.length)
+                return sb.append("]").toString();
+        }
+    }
+
+    @Override
+    public String toString() {
+        return toString(CC.getDefaultOutputFormat());
     }
 
     /**

@@ -296,5 +296,16 @@ class RedberryStaticTest {
         Quiet { println 'quiet' }
         println 'not quiet'
     }
+
+
+    @Test
+    public void testInvertIndices() throws Exception {
+        use(Redberry) {
+            assertEquals('f_ab'.t, InvertIndices >> 'f^ab'.t)
+            assertEquals('f_ab'.t, InvertIndices[LatinLower] >> 'f^ab'.t)
+            assertEquals('f_abC'.t, InvertIndices[LatinLower] >> 'f^ab_C'.t)
+        }
+    }
+
 }
 

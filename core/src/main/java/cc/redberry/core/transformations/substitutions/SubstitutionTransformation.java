@@ -22,9 +22,11 @@
  */
 package cc.redberry.core.transformations.substitutions;
 
+import cc.redberry.core.context.CC;
+import cc.redberry.core.context.OutputFormat;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.tensor.*;
-import cc.redberry.core.transformations.Transformation;
+import cc.redberry.core.transformations.TransformationToStringAble;
 import cc.redberry.core.utils.TensorUtils;
 
 import static cc.redberry.core.utils.TensorUtils.shareSimpleTensors;
@@ -36,7 +38,7 @@ import static cc.redberry.core.utils.TensorUtils.shareSimpleTensors;
  * @author Stanislav Poslavsky
  * @since 1.0
  */
-public final class SubstitutionTransformation implements Transformation {
+public final class SubstitutionTransformation implements TransformationToStringAble {
     private final PrimitiveSubstitution[] primitiveSubstitutions;
     private final boolean applyIfModified;
 
@@ -151,7 +153,7 @@ public final class SubstitutionTransformation implements Transformation {
      * the inner substitutions as simple substitutions.
      *
      * @return new substitution, which treats all of
-     *         the inner substitutions as simple substitutions.
+     * the inner substitutions as simple substitutions.
      */
     public SubstitutionTransformation asSimpleSubstitution() {
         SubstitutionTransformation ss = new SubstitutionTransformation(primitiveSubstitutions.clone(), applyIfModified);
@@ -230,17 +232,20 @@ public final class SubstitutionTransformation implements Transformation {
     }
 
     @Override
-    public String toString() {
+    public String toString(OutputFormat outputFormat) {
         StringBuilder builder = new StringBuilder();
         builder.append('{');
-        PrimitiveSubstitution tr;
         for (int i = 0; ; ++i) {
-            tr = primitiveSubstitutions[i];
-            builder.append(tr.from).append(" -> ").append(tr.to);
+            builder.append(primitiveSubstitutions[i].toString(outputFormat));
             if (i == primitiveSubstitutions.length - 1)
                 break;
             builder.append(',');
         }
         return builder.append('}').toString();
+    }
+
+    @Override
+    public String toString() {
+        return toString(CC.getDefaultOutputFormat());
     }
 }

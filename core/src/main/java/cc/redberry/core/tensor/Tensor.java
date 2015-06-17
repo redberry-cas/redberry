@@ -24,6 +24,7 @@ package cc.redberry.core.tensor;
 
 import cc.redberry.core.context.Context;
 import cc.redberry.core.context.OutputFormat;
+import cc.redberry.core.context.ToString;
 import cc.redberry.core.indices.Indices;
 
 import java.util.Iterator;
@@ -41,7 +42,8 @@ import java.util.Iterator;
  */
 public abstract class Tensor
         implements Comparable<Tensor>,
-        Iterable<Tensor> {
+        Iterable<Tensor>,
+        ToString{
 
     /**
      * Hash code of this tensor.
@@ -135,6 +137,7 @@ public abstract class Tensor
      * @param outputFormat output format
      * @return a string representation of a tensor
      */
+    @Override
     public abstract String toString(OutputFormat outputFormat);
 
     /**

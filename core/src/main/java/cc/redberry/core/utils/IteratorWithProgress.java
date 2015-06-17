@@ -20,42 +20,46 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
-package cc.redberry.core.transformations.fractions;
+package cc.redberry.core.utils;
 
-import cc.redberry.core.context.CC;
-import cc.redberry.core.context.OutputFormat;
-import cc.redberry.core.tensor.Tensor;
-import cc.redberry.core.transformations.Transformation;
-import cc.redberry.core.transformations.TransformationToStringAble;
+import java.util.Iterator;
 
 /**
- * Gives the denominator of expression.
- *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
- * @since 1.0
  */
-public class GetDenominatorTransformation implements TransformationToStringAble {
-    /**
-     * Singleton instance.
-     */
-    public static final GetDenominatorTransformation GET_DENOMINATOR = new GetDenominatorTransformation();
+public class IteratorWithProgress<E> implements Iterator<E> {
+    protected final Iterator<E> innerIterator;
+    protected final long totalCount;
+    protected final Consumer out;
 
-    private GetDenominatorTransformation() {
+    public IteratorWithProgress(Iterator<E> innerIterator, long totalCount, Consumer out) {
+        this.innerIterator = innerIterator;
+        this.totalCount = totalCount;
+        this.out = out;
     }
 
     @Override
-    public Tensor transform(Tensor t) {
-        return NumeratorDenominator.getNumeratorAndDenominator(t).denominator;
+    public boolean hasNext() {
+        return innerIterator.hasNext();
     }
 
-    @Override
-    public String toString(OutputFormat outputFormat) {
-        return "Denominator";
-    }
+    protected int prevPercent = -1;
+    protected long currentPosition = 0;
 
     @Override
-    public String toString() {
-        return toString(CC.getDefaultOutputFormat());
+    public E next() {
+        ++currentPosition;
+        E next = innerIterator.next();
+        int percent = (int) (100.0 * currentPosition / totalCount);
+        if (percent != prevPercent) {
+            out.consume(percent);
+            prevPercent = percent;
+        }
+        return next;
+    }
+
+    public interface Consumer {
+        void consume(int a);
     }
 }

@@ -22,6 +22,8 @@
  */
 package cc.redberry.core.transformations;
 
+import cc.redberry.core.context.CC;
+import cc.redberry.core.context.OutputFormat;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.tensor.TensorBuilder;
 
@@ -35,7 +37,7 @@ public interface Transformation {
     /**
      * Singleton instance for identity transformation.
      */
-    Transformation INDENTITY = new Transformation() {
+    Transformation INDENTITY = new TransformationToStringAble() {
         @Override
         public Tensor transform(Tensor t) {
             return t;
@@ -43,6 +45,11 @@ public interface Transformation {
 
         @Override
         public String toString() {
+            return toString(CC.getDefaultOutputFormat());
+        }
+
+        @Override
+        public String toString(OutputFormat outputFormat) {
             return "Identity";
         }
     };

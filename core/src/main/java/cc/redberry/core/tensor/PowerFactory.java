@@ -61,6 +61,8 @@ public final class PowerFactory implements TensorFactory {
 
             if (a.isMinusOne() && p.equals(Complex.ONE_HALF))
                 return Complex.IMAGINARY_UNIT;
+            if (a.isMinusOne() && p.equals(Complex.MINUS_ONE_HALF))
+                return Complex.IMAGINARY_UNIT.negate();
         }
         if (TensorUtils.isOne(power))
             return argument;
