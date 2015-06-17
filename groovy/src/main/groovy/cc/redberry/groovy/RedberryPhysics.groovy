@@ -168,7 +168,9 @@ public final class RedberryPhysics {
 
     private static final class GDiracTrace extends AbstractTransformationWithDefaultParameters {
         private static
-        final Map defaultArgs = [Gamma: 'G_a', Gamma5: 'G5', LeviCivita: 'e_abcd', Simplifications: Transformation.INDENTITY]
+        final Map defaultArgs = [Gamma    : 'G_a', Gamma5: 'G5', LeviCivita: 'e_abcd',
+                                 Minkowski: true, Simplifications: Transformation.INDENTITY,
+                                 Dimension: '4', TraceOfOne: 'default']
 
 
         Transformation getAt(String gamma) {
@@ -188,7 +190,16 @@ public final class RedberryPhysics {
 
         @Override
         protected Transformation create(Map args) {
-            return new DiracTraceTransformation(args['Gamma'], args['Gamma5'], args['LeviCivita'], args['Simplifications']);
+            def tr = args['Simplifications']
+            if (tr instanceof Transformation)
+                tr = [tr] as Transformation[]
+
+            if (args['TraceOfOne'].toString() == 'default')
+                return new DiracTraceTransformation(args['Gamma'], args['Gamma5'], args['LeviCivita'],
+                        tr, args['Minkowski'], args['Dimension']);
+            else
+                return new DiracTraceTransformation(args['Gamma'], args['Gamma5'], args['LeviCivita'],
+                        tr, args['Minkowski'], args['Dimension'], args['TraceOfOne']);
         }
 
         @Override
