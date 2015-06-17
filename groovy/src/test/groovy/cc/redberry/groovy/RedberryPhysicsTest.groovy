@@ -84,4 +84,17 @@ class RedberryPhysicsTest {
             assert '-4*t_{cd}+4*t_{dc}+(4*y+4*x)*g_{cd}'.t == (dt >> 'Tr[(G_a*G_b*t^ab + x)*G_c*G_d]'.t)
         }
     }
+
+    @Test
+    public void testDiracTrace2() {
+        use(Redberry) {
+            defineMatrices 'G_a', 'G5', Matrix1.matrix
+
+            def dTrace = DiracTrace[[Dimension: 'D']]
+            assert dTrace >> 'Tr[G_a*G_b*G_c*G_d]'.t == '2**((1/2)*D)*g_{ad}*g_{bc}+2**((1/2)*D)*g_{ab}*g_{cd}-2**((1/2)*D)*g_{ac}*g_{bd}'.t
+
+            dTrace = DiracTrace[[Dimension: 'D', TraceOfOne: 4]]
+            assert dTrace >> 'Tr[G_a*G_b*G_c*G_d]'.t == '4*g_{ad}*g_{bc}+4*g_{ab}*g_{cd}-4*g_{ac}*g_{bd}'.t
+        }
+    }
 }

@@ -1357,6 +1357,10 @@ class Redberry {
         return number2Complex(number)
     }
 
+    /** Convenient method */
+    static boolean getT(Boolean b) {
+        return b
+    }
     /**
      * Parse string to indices
      * @param string string representation of indices

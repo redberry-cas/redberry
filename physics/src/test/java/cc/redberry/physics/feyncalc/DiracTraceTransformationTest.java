@@ -34,6 +34,7 @@ import cc.redberry.core.transformations.EliminateMetricsTransformation;
 import cc.redberry.core.transformations.Transformation;
 import cc.redberry.core.transformations.expand.ExpandTransformation;
 import junit.framework.Assert;
+import org.junit.Before;
 import org.junit.Test;
 
 import static cc.redberry.core.tensor.Tensors.*;
@@ -43,6 +44,11 @@ import static cc.redberry.core.tensor.Tensors.*;
  * @author Stanislav Poslavsky
  */
 public class DiracTraceTransformationTest {
+    @Before
+    public void before() {
+        CC.reset();
+    }
+
     @Test
     public void test1() {
         for (int i = 0; i < 100; ++i) {
@@ -446,6 +452,30 @@ public class DiracTraceTransformationTest {
 
         t = parse("Tr[G_a*G_b]*Tr[G_c*G_d] + Tr[G_a*G_b]*g_cd + f_abcd");
         TAssert.assertEquals(tr(t), "20*g_ab*g_cd + f_abcd");
+    }
+
+    @Test
+    public void test15() {
+        GeneralIndicesInsertion indicesInsertion = new GeneralIndicesInsertion();
+        CC.current().getParseManager().defaultParserPreprocessors.add(indicesInsertion);
+        indicesInsertion.addInsertionRule(parseSimple("G^a'_b'a"), IndexType.Matrix1);
+
+        Tensor t;
+        t = parse("Tr[G_a*G_b + g_ab]");
+        TAssert.assertEquals(tr(t), "8*g_ab");
+    }
+
+    @Test
+    public void test16() {
+        GeneralIndicesInsertion indicesInsertion = new GeneralIndicesInsertion();
+        CC.current().getParseManager().defaultParserPreprocessors.add(indicesInsertion);
+        indicesInsertion.addInsertionRule(parseSimple("G^a'_b'a"), IndexType.Matrix1);
+
+        Transformation dTrace = new DiracTraceTransformation(parseSimple("G^{a a'}_b'"),
+                new Transformation[0], parse("6"));
+        Tensor t;
+        t = parse("Tr[G_a*G_b + g_ab]");
+        TAssert.assertEquals(dTrace.transform(t), "16*g_ab");
     }
 
     private static Tensor trace(Tensor t) {
