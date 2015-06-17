@@ -44,6 +44,11 @@ public class IteratorWithProgress<E> implements Iterator<E> {
         return innerIterator.hasNext();
     }
 
+    @Override
+    public void remove() {
+        innerIterator.remove();
+    }
+
     protected int prevPercent = -1;
     protected long currentPosition = 0;
 
