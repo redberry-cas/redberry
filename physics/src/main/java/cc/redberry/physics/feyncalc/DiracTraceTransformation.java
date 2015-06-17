@@ -94,7 +94,6 @@ public class DiracTraceTransformation implements Transformation {
         this.metricType = types[0];
         this.matrixType = types[1];
         this.expandAndEliminate = new ExpandAndEliminateTransformation(simplifications);
-        ;
 
         tokenTransformer = new ChangeIndicesTypesAndTensorNames(new TypesAndNamesTransformer() {
             @Override
@@ -180,7 +179,6 @@ public class DiracTraceTransformation implements Transformation {
         this.matrixType = types[1];
 
         this.expandAndEliminate = new ExpandAndEliminateTransformation(simplifications);
-        ;
 
         tokenTransformer = new ChangeIndicesTypesAndTensorNames(new TypesAndNamesTransformer() {
             @Override
