@@ -28,6 +28,7 @@ import org.junit.Test
 import static cc.redberry.core.indices.IndexType.Matrix1
 import static cc.redberry.core.indices.IndexType.Matrix2
 import static cc.redberry.groovy.RedberryPhysics.*
+import static cc.redberry.groovy.RedberryStatic.EliminateMetrics
 import static cc.redberry.groovy.RedberryStatic.defineMatrices
 import static junit.framework.Assert.assertTrue
 
@@ -63,6 +64,9 @@ class RedberryPhysicsTest {
     public void testLeviCivita() {
         use(Redberry) {
             assertTrue LeviCivitaSimplify.minkowski['e_abcd'] >> 'e_abcd*e^abcd'.t == '-24'.t
+            assertTrue LeviCivitaSimplify.minkowski['e_abcd'.t] >> 'e_abcd*e^abcd'.t == '-24'.t
+            def tr = LeviCivitaSimplify.minkowski[[OverallSimplifications: EliminateMetrics & 't^i_i = 3'.t]]
+            assert tr >> 't^i_j*e_abci*e^abcj'.t == 18.t
         }
     }
 

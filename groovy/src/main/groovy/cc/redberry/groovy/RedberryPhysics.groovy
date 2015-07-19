@@ -282,19 +282,39 @@ public final class RedberryPhysics {
         }
     }
 
-    private static final class LeviCivitaSpace {
+    private static final class LeviCivitaSpace extends AbstractTransformationWithDefaultParameters {
+        private static
+        final Map defaultArgs = [LeviCivita            : 'e_abcd', Simplifications: Transformation.INDENTITY,
+                                 OverallSimplifications: Transformation.INDENTITY,]
         final boolean minkowskiSpace;
 
         LeviCivitaSpace(boolean minkowskiSpace) {
             this.minkowskiSpace = minkowskiSpace
         }
 
-        Transformation getAt(String leviCivita) {
-            return new LeviCivitaSimplifyTransformation(parseSimple(leviCivita), minkowskiSpace);
+        @Override
+        protected Transformation create(Collection args) {
+            def args1 = [] + args
+            args1.add(1, minkowskiSpace)
+            return new LeviCivitaSimplifyTransformation(*args1)
+        }
+
+        @Override
+        protected Transformation create(Map args) {
+            return new LeviCivitaSimplifyTransformation(args['LeviCivita'], minkowskiSpace, args['Simplifications'], args['OverallSimplifications'])
+        }
+
+        @Override
+        protected Map defaultParameters() {
+            return defaultArgs
         }
 
         Transformation getAt(SimpleTensor leviCivita) {
             return new LeviCivitaSimplifyTransformation(leviCivita, minkowskiSpace);
+        }
+
+        Transformation getAt(String leviCivita) {
+            return new LeviCivitaSimplifyTransformation(parseSimple(leviCivita), minkowskiSpace);
         }
     }
 

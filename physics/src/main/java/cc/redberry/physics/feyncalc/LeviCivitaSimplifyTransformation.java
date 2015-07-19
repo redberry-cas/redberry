@@ -40,9 +40,7 @@ import cc.redberry.core.parser.preprocessor.ChangeIndicesTypesAndTensorNames;
 import cc.redberry.core.parser.preprocessor.TypesAndNamesTransformer;
 import cc.redberry.core.tensor.*;
 import cc.redberry.core.tensor.iterator.FromChildToParentIterator;
-import cc.redberry.core.transformations.EliminateMetricsTransformation;
 import cc.redberry.core.transformations.Transformation;
-import cc.redberry.core.transformations.expand.ExpandTransformation;
 import cc.redberry.core.utils.IntArrayList;
 import cc.redberry.core.utils.TensorUtils;
 import gnu.trove.map.hash.TIntObjectHashMap;
@@ -55,6 +53,9 @@ import java.util.Set;
 import static cc.redberry.core.indices.IndicesUtils.*;
 import static cc.redberry.core.tensor.StructureOfContractions.getToTensorIndex;
 import static cc.redberry.core.tensor.Tensors.*;
+import static cc.redberry.core.transformations.EliminateMetricsTransformation.ELIMINATE_METRICS;
+import static cc.redberry.core.transformations.EliminateMetricsTransformation.eliminate;
+import static cc.redberry.core.transformations.expand.ExpandTransformation.expand;
 
 /**
  * Simplifies combinations of Levi-Civita tensors.
@@ -70,11 +71,11 @@ public class LeviCivitaSimplifyTransformation implements Transformation {
     private final int numberOfIndices;
     private final IndexType typeOfLeviCivitaIndices;
     private final ChangeIndicesTypesAndTensorNames tokenTransformer;
+    private final Transformation simplifications, overallSimplifications;
     /**
      * First is Levi-Civita self-contraction and second is d^a_a = numberOfIndices
      */
     private final Expression[] leviCivitaSimplifications;
-
 
     /**
      * Creates transformation, which simplifies combinations of Levi-Civita tensors in Euclidean or Minkowski space.
@@ -85,8 +86,38 @@ public class LeviCivitaSimplifyTransformation implements Transformation {
      *                       (so e.g. e_abcd*e^abcd = +24)
      */
     public LeviCivitaSimplifyTransformation(SimpleTensor leviCivita, boolean minkowskiSpace) {
-        checkLeviCivita(leviCivita);
+        this(leviCivita, minkowskiSpace, Transformation.INDENTITY, Transformation.INDENTITY);
+    }
 
+
+    /**
+     * Creates transformation, which simplifies combinations of Levi-Civita tensors in Euclidean or Minkowski space.
+     *
+     * @param leviCivita      tensor, which will be considered as Levi-Civita tensor
+     * @param minkowskiSpace  if {@code true}, then Levi-Civita tensor will be considered in Minkowski
+     *                        space (so e.g. e_abcd*e^abcd = -24), otherwise in Euclidean space
+     *                        (so e.g. e_abcd*e^abcd = +24)
+     * @param simplifications additional transformations applied to each simplified combination of Levi-Civita tensors
+     */
+    public LeviCivitaSimplifyTransformation(SimpleTensor leviCivita, boolean minkowskiSpace, Transformation simplifications) {
+        this(leviCivita, minkowskiSpace, simplifications, Transformation.INDENTITY);
+    }
+
+    /**
+     * Creates transformation, which simplifies combinations of Levi-Civita tensors in Euclidean or Minkowski space.
+     *
+     * @param leviCivita             tensor, which will be considered as Levi-Civita tensor
+     * @param minkowskiSpace         if {@code true}, then Levi-Civita tensor will be considered in Minkowski
+     *                               space (so e.g. e_abcd*e^abcd = -24), otherwise in Euclidean space
+     *                               (so e.g. e_abcd*e^abcd = +24)
+     * @param simplifications        additional transformations applied to each simplified combination of Levi-Civita tensors
+     * @param overallSimplifications additional transformations applied to each simplified product of Levi-Civita tensors
+     */
+    public LeviCivitaSimplifyTransformation(SimpleTensor leviCivita, boolean minkowskiSpace,
+                                            Transformation simplifications, Transformation overallSimplifications) {
+        checkLeviCivita(leviCivita);
+        this.simplifications = simplifications;
+        this.overallSimplifications = overallSimplifications;
         this.leviCivita = leviCivita.getName();
         this.minkowskiSpace = minkowskiSpace;
         this.numberOfIndices = leviCivita.getIndices().size();
@@ -233,9 +264,9 @@ public class LeviCivitaSimplifyTransformation implements Transformation {
             epsSubProduct = exp.transform(epsSubProduct);
 
         //todo expand only Levi-Civita sums
-        epsSubProduct = EliminateMetricsTransformation.eliminate(ExpandTransformation.expand(epsSubProduct, EliminateMetricsTransformation.ELIMINATE_METRICS));
+        epsSubProduct = simplifications.transform(eliminate(expand(epsSubProduct, ELIMINATE_METRICS, simplifications)));
         epsSubProduct = leviCivitaSimplifications[1].transform(epsSubProduct);
-        return multiply(epsSubProduct, remnant);
+        return overallSimplifications.transform(multiply(epsSubProduct, remnant));
     }
 
     private static boolean checkNonPermutingPositions(Permutation permutation, int[] nonPermutablePositions) {
