@@ -911,6 +911,13 @@ public final class Product extends MultiTensor {
                             container.types.add(type);
                             newSg = false;
                             matched.add(i);
+                        } else if (includes(partition, container.partition)
+                                && sg.getGraphType() == container.graphType) {
+                            //can safely remove smaller partition
+                            if (partition.length < container.partition.length)
+                                continue out0;
+                            else
+                                subgraphs.remove(i);
                         } else if (intersects(points, container.points)) {
                             //just intersects
                             fillGraphPrint(subgraphs.get(i).partition);
@@ -1035,6 +1042,20 @@ public final class Product extends MultiTensor {
         }
     }
 
+    //l and s are distinct
+    static boolean includes(int[] l, int[] s) {
+        if (s.length > l.length)
+            return includes(s, l);
+
+        int p = 0;
+        for (int v : s) {
+            while (p < l.length && l[p] != v)
+                ++p;
+            if (p == l.length)
+                return false;
+        }
+        return true;
+    }
 
     @Override
     protected String toString(OutputFormat mode, Class<? extends Tensor> clazz) {

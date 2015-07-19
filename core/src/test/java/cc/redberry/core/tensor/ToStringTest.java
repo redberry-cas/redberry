@@ -224,6 +224,20 @@ public class ToStringTest {
         testRandomRedberry(1000);
     }
 
+    @Test
+    public void test18() throws Exception {
+        GeneralIndicesInsertion gii = new GeneralIndicesInsertion();
+        gii.addInsertionRule(parseSimple("cu_{a'A'}[p_{m}]"), IndexType.Matrix1);
+        gii.addInsertionRule(parseSimple("cu_{a'A'}[p_{m}]"), IndexType.Matrix2);
+        gii.addInsertionRule(parseSimple("v^{a'C'}[p_{m}]"), IndexType.Matrix1);
+        gii.addInsertionRule(parseSimple("v^{a'C'}[p_{m}]"), IndexType.Matrix2);
+        gii.addInsertionRule(parseSimple("T_{B}^{B'}_{C'}"), IndexType.Matrix2);
+        CC.current().getParseManager().defaultParserPreprocessors.add(gii);
+
+        Tensor t = parse("cu[p1_m[charm]]*T_A*T_B*v[p2_m[charm]]");//parse("T_{B}^{B'}_{C'}*T_{A}^{A'}_{B'}*cu_{a'A'}[p1_{m}[charm]]*v^{a'C'}[p2_{m}[charm]]");
+        System.out.println(t.toString(SimpleRedberry));
+    }
+
     private static void testRandomRedberry(int n) {
         RandomTensor randomTensor = new RandomTensor(false);
         randomTensor.reset();
