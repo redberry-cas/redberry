@@ -104,7 +104,7 @@ public final class GreekLaTeXUpperCaseConverter extends SymbolArrayConverter {
     public static final GreekLaTeXUpperCaseConverter INSTANCE = new GreekLaTeXUpperCaseConverter();
 
     private GreekLaTeXUpperCaseConverter() {
-        super(symbols, utf);
+        super(symbols);
     }
 
     /**

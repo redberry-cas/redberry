@@ -35,19 +35,10 @@ import java.util.Arrays;
  * @since 1.0
  */
 abstract class SymbolArrayConverter implements IndexSymbolConverter {
-
     private final String[] sortedSymbols;
     private final int[] coSortedCodes;
 
-    private final String[] symbols;
-    private final String[] utf;
-
-    public SymbolArrayConverter(String[] symbols, String[] utf) {
-        this.symbols = symbols;
-        this.utf = utf;
-        if (symbols.length != utf.length)
-            throw new RuntimeException();
-
+    public SymbolArrayConverter(String[] symbols) {
         this.sortedSymbols = symbols.clone();
         this.coSortedCodes = new int[symbols.length];
         for (int i = 0; i < coSortedCodes.length; ++i)

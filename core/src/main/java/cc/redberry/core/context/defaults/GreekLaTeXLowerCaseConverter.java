@@ -80,7 +80,7 @@ public final class GreekLaTeXLowerCaseConverter extends SymbolArrayConverter {
     public static final GreekLaTeXLowerCaseConverter INSTANCE = new GreekLaTeXLowerCaseConverter();
 
     private GreekLaTeXLowerCaseConverter() {
-        super(symbols, utf);
+        super(symbols);
     }
 
     /**
