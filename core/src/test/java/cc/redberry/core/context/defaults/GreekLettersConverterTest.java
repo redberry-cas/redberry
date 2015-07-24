@@ -30,7 +30,7 @@ import org.junit.Test;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public class SymbolArrayConverterTest {
+public class GreekLettersConverterTest {
     @Test
     public void test1() throws Exception {
         String[] symbols = new String[11];
@@ -59,10 +59,11 @@ public class SymbolArrayConverterTest {
         utf[9] = Character.toString((char) 0x03A8);
         utf[10] = Character.toString((char) 0x03A9);
 
-        SymbolArrayConverter converter = GreekLaTeXUpperCaseConverter.INSTANCE;
+        GreekLettersConverter converter = GreekLaTeXUpperCaseConverter.INSTANCE;
         for (int i = 0; i < symbols.length; ++i) {
             Assert.assertTrue(converter.applicableToSymbol(symbols[i]));
             Assert.assertEquals(converter.getCode(symbols[i]), i);
+            Assert.assertEquals(converter.getCode(utf[i]), i);
             Assert.assertEquals(converter.getSymbol(i, OutputFormat.LaTeX), symbols[i]);
             Assert.assertEquals(converter.getSymbol(i, OutputFormat.UTF8), utf[i]);
         }
@@ -110,10 +111,11 @@ public class SymbolArrayConverterTest {
         }
 
 
-        SymbolArrayConverter converter = GreekLaTeXLowerCaseConverter.INSTANCE;
+        GreekLettersConverter converter = GreekLaTeXLowerCaseConverter.INSTANCE;
         for (int i = 0; i < symbols.length; ++i) {
             Assert.assertTrue(converter.applicableToSymbol(symbols[i]));
             Assert.assertEquals(converter.getCode(symbols[i]), i);
+            Assert.assertEquals(converter.getCode(utf[i]), i);
             Assert.assertEquals(converter.getSymbol(i, OutputFormat.LaTeX), symbols[i]);
             Assert.assertEquals(converter.getSymbol(i, OutputFormat.UTF8), utf[i]);
         }

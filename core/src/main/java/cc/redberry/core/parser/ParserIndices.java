@@ -96,7 +96,7 @@ public final class ParserIndices {
     /**
      * A bit of regex
      */
-    public static final Pattern pattern = Pattern.compile("((?>(?>[a-zA-Z])|(?>\\\\[a-zA-Z]*))(?>_(?>(?>[0-9])|(?>[\\{][0-9\\s]*[\\}])))?[']*)");
+    public static final Pattern pattern = Pattern.compile("((?>(?>[a-zA-Z\\p{InGreek}])|(?>\\\\[a-zA-Z]*))(?>_(?>(?>[0-9])|(?>[\\{][0-9\\s]*[\\}])))?[']*)");
 
     static void parse(String expression, IntArrayList indices, int state) {
         Matcher matcher = pattern.matcher(expression);
