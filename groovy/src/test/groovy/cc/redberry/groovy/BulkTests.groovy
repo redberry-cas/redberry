@@ -23,6 +23,7 @@
 package cc.redberry.groovy
 
 import cc.redberry.core.utils.TensorUtils
+import org.junit.Ignore
 import org.junit.Test
 
 import static cc.redberry.core.TAssert.assertEquals
@@ -228,6 +229,7 @@ public class BulkTests {
         }
     }
 
+    @Ignore
     @Test
     public void testComptonScatteringQCD_longTest() throws Exception {
         use(Redberry) {
@@ -235,7 +237,7 @@ public class BulkTests {
             //unitary matrices
             defineMatrices 'T_A', Matrix2.matrix,
                     //gamma matrices
-                    'G_a', Matrix1.matrix,
+                    'G5', 'G_a', Matrix1.matrix,
                     //quark wave function
                     'u[p_a]', Matrix1.vector, Matrix2.vector,
                     //its conjugation
@@ -285,6 +287,8 @@ public class BulkTests {
             //Mandelstam and mass shell substitutions
             def mandelstam = setMandelstam(
                     ['k1_m': 'm', 'p1_m': '0', 'k2_m': 'm', 'p2_m': '0'])
+            mandelstam &= n2
+
             //simplify matrix element
             M = (ExpandAll & EliminateMetrics & n2 & mandelstam) >> M
 
@@ -313,10 +317,11 @@ public class BulkTests {
             M2 = 'u[k2_m]*cu[k2_m] = m + k2^m*G_m'.t >> M2
             M2 = 'u[k1_m]*cu[k1_m] = m + k1^m*G_m'.t >> M2
 
-            M2 <<= ExpandAndEliminate & mandelstam
-
             //trace of gamma matrices
-            M2 = DiracTrace['G_a'] >> M2
+            println 'before tr'
+            M2 = ExpandTensors[EliminateMetrics & mandelstam] & EliminateMetrics & mandelstam & DiracTrace[[Gamma: 'G_a', Simplifications: EliminateMetrics & mandelstam]] >> M2
+            assert false
+            println 'tr'
             //trace of unitary matrices
             M2 = UnitaryTrace >> M2
 
@@ -340,7 +345,8 @@ public class BulkTests {
             }
 
             assert TensorUtils.isSymbolic(M2)
+            println 'factoring'
+            println(Factor >> M2)
         }
-
     }
 }
