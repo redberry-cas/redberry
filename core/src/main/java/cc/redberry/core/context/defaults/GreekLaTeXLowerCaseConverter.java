@@ -22,9 +22,6 @@
  */
 package cc.redberry.core.context.defaults;
 
-import cc.redberry.core.context.IndexConverterException;
-import cc.redberry.core.context.OutputFormat;
-
 /**
  * {@link cc.redberry.core.context.IndexSymbolConverter} for Greek lower case letters.
  *
@@ -32,7 +29,7 @@ import cc.redberry.core.context.OutputFormat;
  * @author Stanislav Poslavsky
  * @since 1.0
  */
-public final class GreekLaTeXLowerCaseConverter extends SymbolArrayConverter {
+public final class GreekLaTeXLowerCaseConverter extends GreekLettersConverter {
     private static final String[] symbols = new String[23];
     private static final String[] utf = new String[23];
 
@@ -80,37 +77,14 @@ public final class GreekLaTeXLowerCaseConverter extends SymbolArrayConverter {
     public static final GreekLaTeXLowerCaseConverter INSTANCE = new GreekLaTeXLowerCaseConverter();
 
     private GreekLaTeXLowerCaseConverter() {
-        super(symbols);
+        super(symbols, utf);
     }
-
-    /**
-     * Index type = 2
-     */
-    public static final byte TYPE = 2;
 
     /**
      * @return 2
      */
     @Override
     public byte getType() {
-        return TYPE;
+        return 2;
     }
-
-    @Override
-    public String getSymbol(int code, OutputFormat mode) throws IndexConverterException {
-        String symbol;
-        try {
-            if (mode.is(OutputFormat.UTF8))
-                return utf[code];
-            symbol = symbols[code];
-        } catch (ArrayIndexOutOfBoundsException e) {
-            throw new IndexConverterException();
-        }
-        if (mode.is(OutputFormat.WolframMathematica))
-            symbol = "\\[" + Character.toUpperCase(symbol.charAt(1)) + symbol.substring(2) + "]";
-        if (mode.is(OutputFormat.Maple))
-            symbol = symbol.substring(1);
-        return symbol;
-    }
-
 }
