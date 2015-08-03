@@ -77,8 +77,7 @@ public final class SubstitutionTransformation implements TransformationToStringA
      * @param expressions an array of the expressions
      */
     public SubstitutionTransformation(Expression... expressions) {
-        this(expressions, expressions.length == 1 ?
-                !shareSimpleTensors(expressions[0].get(0), expressions[0].get(1)) : false);
+        this(expressions, expressions.length == 1 && !shareSimpleTensors(expressions[0].get(0), expressions[0].get(1)));
     }
 
     /**
@@ -146,6 +145,22 @@ public final class SubstitutionTransformation implements TransformationToStringA
         for (int i = 0; i < from.length; ++i)
             primitiveSubstitutions[i] = createPrimitiveSubstitution(from[i], to[i]);
         this.applyIfModified = applyIfModified;
+    }
+
+
+    /**
+     * Returns transposed substitution rule (i.e. from a->b to b->a)
+     *
+     * @return transposed substitution (lhs swapped with rhs)
+     */
+    public SubstitutionTransformation transpose() {
+        Tensor[] from = new Tensor[primitiveSubstitutions.length],
+                to = new Tensor[primitiveSubstitutions.length];
+        for (int i = primitiveSubstitutions.length - 1; i >= 0; --i) {
+            from[i] = primitiveSubstitutions[i].to;
+            to[i] = primitiveSubstitutions[i].from;
+        }
+        return new SubstitutionTransformation(from, to, applyIfModified);
     }
 
     /**

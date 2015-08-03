@@ -1016,6 +1016,44 @@ class Redberry {
         return substitution.asSimpleSubstitution()
     }
 
+    /**
+     * Applies tensor field substitutions without matching arguments
+     * @param substitution
+     * @return
+     */
+    static List<Transformation> getHold(List<Transformation> substitutions) {
+        List trs = []
+        for (Transformation subs : substitutions) {
+            if (subs instanceof Expression || subs instanceof SubstitutionTransformation)
+                trs << getHold(subs)
+            else trs << subs
+        }
+        return trs
+    }
+
+    /**
+     * Replaces each substitution with transposed one
+     * @param list list of substitutions
+     * @return transposed substitutions (i.e. swapped lhs and rhs)
+     */
+    static Transformation transpose(Transformation expression) {
+        if (expression instanceof SubstitutionTransformation)
+            return expression.transpose()
+        else if (expression instanceof Expression)
+            return expression.transpose()
+        else if (expression instanceof TransformationCollection)
+            return new TransformationCollection(expression.collect { transpose(it) })
+        else throw new IllegalArgumentException("Cannot transpose $expression")
+    }
+
+    /**
+     * Replaces each substitution with transposed one
+     * @param list list of substitutions
+     * @return transposed substitutions (i.e. swapped lhs and rhs)
+     */
+    static List<Transformation> transpose(List<Transformation> list) {
+        return list.collect { transpose(it) }
+    }
     //////////////////////////////////////////// TYPE CONVERSION ///////////////////////////////////////////////////////
 
     /**
