@@ -52,6 +52,11 @@ public class ChangeIndicesTypesAndTensorNamesTest {
         ParseToken token = CC.current().getParseManager().getParser().parse(str);
         TypesAndNamesTransformer transformer = new TypesAndNamesTransformer() {
             @Override
+            public int newIndex(int oldIndex, NameAndStructureOfIndices oldDescriptor) {
+                return oldIndex;
+            }
+
+            @Override
             public IndexType newType(IndexType oldType, NameAndStructureOfIndices old) {
                 return oldType == LatinLower ? LatinUpper : oldType;
             }

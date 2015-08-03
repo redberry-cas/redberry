@@ -78,8 +78,10 @@ public class ChangeIndicesTypesAndTensorNames implements ParseTokenTransformer {
 
     private SimpleIndices transformIndices(SimpleIndices old, NameAndStructureOfIndices oldDescriptor) {
         int[] newIndices = new int[old.size()];
-        for (int i = old.size() - 1; i >= 0; --i)
+        for (int i = old.size() - 1; i >= 0; --i) {
             newIndices[i] = IndicesUtils.setType(transformer.newType(IndicesUtils.getTypeEnum(old.get(i)), oldDescriptor), old.get(i));
+            newIndices[i] = transformer.newIndex(newIndices[i], oldDescriptor);
+        }
         return IndicesFactory.createSimple(null, newIndices);
     }
 }

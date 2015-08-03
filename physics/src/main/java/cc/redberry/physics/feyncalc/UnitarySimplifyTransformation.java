@@ -70,6 +70,11 @@ public class UnitarySimplifyTransformation implements Transformation {
 
         ChangeIndicesTypesAndTensorNames tokenTransformer = new ChangeIndicesTypesAndTensorNames(new TypesAndNamesTransformer() {
             @Override
+            public int newIndex(int oldIndex, NameAndStructureOfIndices oldDescriptor) {
+                return oldIndex;
+            }
+
+            @Override
             public IndexType newType(IndexType oldType, NameAndStructureOfIndices old) {
                 if (oldType == IndexType.LatinLower)
                     return types[0];
