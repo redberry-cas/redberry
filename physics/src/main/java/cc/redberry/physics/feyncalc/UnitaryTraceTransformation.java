@@ -91,8 +91,8 @@ public final class UnitaryTraceTransformation implements Transformation {
             }
 
             @Override
-            public String newName(NameAndStructureOfIndices old) {
-                switch (old.getName()) {
+            public String newName(String oldName, NameAndStructureOfIndices old) {
+                switch (oldName) {
                     case unitaryMatrixName:
                         return unitaryMatrix.getStringName();
                     case structureConstantName:
@@ -103,7 +103,7 @@ public final class UnitaryTraceTransformation implements Transformation {
                         if (!(dimension instanceof Complex))
                             return dimension.toString(OutputFormat.Redberry);
                     default:
-                        return old.getName();
+                        return oldName;
                 }
             }
         });

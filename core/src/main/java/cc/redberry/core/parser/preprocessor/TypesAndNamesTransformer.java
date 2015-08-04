@@ -37,7 +37,7 @@ public interface TypesAndNamesTransformer {
 
     int newIndex(int oldIndex, NameAndStructureOfIndices oldDescriptor);
 
-    String newName(NameAndStructureOfIndices oldDescriptor);
+    String newName(String oldName, NameAndStructureOfIndices oldDescriptor);
 
     class Utils {
 
@@ -60,8 +60,8 @@ public interface TypesAndNamesTransformer {
                 }
 
                 @Override
-                public String newName(NameAndStructureOfIndices oldDescriptor) {
-                    return oldDescriptor.getName();
+                public String newName(String oldName, NameAndStructureOfIndices oldDescriptor) {
+                    return oldName;
                 }
             };
         }
@@ -79,10 +79,61 @@ public interface TypesAndNamesTransformer {
                 }
 
                 @Override
-                public String newName(NameAndStructureOfIndices oldDescriptor) {
+                public String newName(String oldName, NameAndStructureOfIndices oldDescriptor) {
+                    return oldName;
+                }
+            };
+        }
+
+        public static TypesAndNamesTransformer changeName(final String[] from, final String[] to) {
+            final String[] from0 = from.clone(), to0 = to.clone();
+            ArraysUtils.quickSort(from0, to0);
+
+            return new TypesAndNamesTransformer() {
+                @Override
+                public int newIndex(int oldIndex, NameAndStructureOfIndices oldDescriptor) {
+                    return oldIndex;
+                }
+
+                @Override
+                public IndexType newType(IndexType old, NameAndStructureOfIndices oldDescriptor) {
+                    return old;
+                }
+
+                @Override
+                public String newName(String oldName, NameAndStructureOfIndices oldDescriptor) {
+                    int i = Arrays.binarySearch(from0, oldDescriptor.getName());
+                    if (i >= 0)
+                        return to0[i];
                     return oldDescriptor.getName();
                 }
             };
         }
+
+        public static TypesAndNamesTransformer and(final TypesAndNamesTransformer... a) {
+            return new TypesAndNamesTransformer() {
+                @Override
+                public int newIndex(int oldIndex, NameAndStructureOfIndices oldDescriptor) {
+                    for (TypesAndNamesTransformer tr : a)
+                        oldIndex = tr.newIndex(oldIndex, oldDescriptor);
+                    return oldIndex;
+                }
+
+                @Override
+                public IndexType newType(IndexType old, NameAndStructureOfIndices oldDescriptor) {
+                    for (TypesAndNamesTransformer tr : a)
+                        old = tr.newType(old, oldDescriptor);
+                    return old;
+                }
+
+                @Override
+                public String newName(String oldName, NameAndStructureOfIndices oldDescriptor) {
+                    for (TypesAndNamesTransformer tr : a)
+                        oldName = tr.newName(oldName, oldDescriptor);
+                    return oldName;
+                }
+            };
+        }
+
     }
 }

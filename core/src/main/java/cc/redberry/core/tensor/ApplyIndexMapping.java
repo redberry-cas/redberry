@@ -491,8 +491,15 @@ public final class ApplyIndexMapping {
         }
         int[] freeIndicesNames = IndicesUtils.getIndicesNames(tensor.getIndices().getFree());
         Arrays.sort(freeIndicesNames);
-        if (!mapping.getFromNames().equalsToArray(freeIndicesNames))
-            throw new IllegalArgumentException("From indices names does not match free indices names of tensor.");
+        if (!mapping.getFromNames().equalsToArray(freeIndicesNames)) {
+            String fromIndices;
+            try {
+                fromIndices = IndicesUtils.toString(mapping.getFromNames().copy());
+            } catch (Exception e) {
+                fromIndices = "error";
+            }
+            throw new IllegalArgumentException("From indices names (" + fromIndices + ") does not match free indices names of tensor (" + IndicesUtils.toString(freeIndicesNames) + ").");
+        }
         Tensor result = _applyIndexMapping(tensor, mapping, forbidden);
         return mapping.getSign() ? Tensors.negate(result) : result;
     }

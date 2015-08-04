@@ -32,10 +32,11 @@ import cc.redberry.core.parser.preprocessor.TypesAndNamesTransformer;
 import cc.redberry.core.tensor.Expression;
 import cc.redberry.core.tensor.SimpleTensor;
 import cc.redberry.core.tensor.Tensor;
+import cc.redberry.core.tensor.Tensors;
 import cc.redberry.core.transformations.Transformation;
 
+import static cc.redberry.core.indices.IndicesFactory.createSimple;
 import static cc.redberry.core.indices.IndicesUtils.*;
-import static cc.redberry.core.indices.IndicesUtils.getType;
 import static cc.redberry.core.tensor.Tensors.simpleTensor;
 
 /**
@@ -82,8 +83,8 @@ public abstract class AbstractTransformationWithGammas implements Transformation
             }
 
             @Override
-            public String newName(NameAndStructureOfIndices oldDescriptor) {
-                switch (oldDescriptor.getName()) {
+            public String newName(String oldName, NameAndStructureOfIndices oldDescriptor) {
+                switch (oldName) {
                     case gamma5StringName:
                         throw new IllegalArgumentException("Gamma5 is not specified.");
                     case leviCivitaStringName:
@@ -128,8 +129,8 @@ public abstract class AbstractTransformationWithGammas implements Transformation
             }
 
             @Override
-            public String newName(NameAndStructureOfIndices oldDescriptor) {
-                switch (oldDescriptor.getName()) {
+            public String newName(String oldName, NameAndStructureOfIndices oldDescriptor) {
+                switch (oldName) {
                     case gammaMatrixStringName:
                         return gammaMatrix.getStringName();
                     case gamma5StringName:
@@ -196,9 +197,17 @@ public abstract class AbstractTransformationWithGammas implements Transformation
                 || gamma5Matrix.getIndices().size(matrixType) != 2)
             throw new IllegalArgumentException("Not a gamma5: " + gamma5Matrix);
 
-        if (leviCivita.getIndices().size() != 4
-                || leviCivita.getIndices().size(metricType) != 4)
+        if (leviCivita != null && (leviCivita.getIndices().size() != 4
+                || leviCivita.getIndices().size(metricType) != 4))
             throw new IllegalArgumentException("Not a Levi-Civita: " + leviCivita);
+    }
+
+    protected final SimpleTensor setUpperMatrixIndex(SimpleTensor gamma, int matrixUpper) {
+        return setMatrixIndices(gamma, matrixUpper, gamma.getIndices().getLower().get(matrixType, 0));
+    }
+
+    protected final SimpleTensor setLowerMatrixIndex(SimpleTensor gamma, int matrixLower) {
+        return setMatrixIndices(gamma, gamma.getIndices().getUpper().get(matrixType, 0), matrixLower);
     }
 
     protected static SimpleTensor setMatrixIndices(SimpleTensor gamma, int matrixUpper, int matrixLower) {

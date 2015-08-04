@@ -428,7 +428,6 @@ public final class DiracTraceTransformation extends AbstractTransformationWithGa
         }
         return iterator.result();
     }
-
     /*
      * *********************
      * Trace without gamma5

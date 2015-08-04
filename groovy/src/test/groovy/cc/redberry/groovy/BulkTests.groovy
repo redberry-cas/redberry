@@ -22,7 +22,9 @@
  */
 package cc.redberry.groovy
 
+import cc.redberry.core.context.CC
 import cc.redberry.core.utils.TensorUtils
+import org.junit.Before
 import org.junit.Ignore
 import org.junit.Test
 
@@ -39,6 +41,11 @@ import static cc.redberry.groovy.RedberryStatic.*
  * @author Stanislav Poslavsky
  */
 public class BulkTests {
+    @Before
+    public void setUp() throws Exception {
+        CC.reset()
+    }
+
     @Test
     public void testBhaBhaScattering() throws Exception {
         use(Redberry) {

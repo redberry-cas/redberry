@@ -62,8 +62,8 @@ public class ChangeIndicesTypesAndTensorNamesTest {
             }
 
             @Override
-            public String newName(NameAndStructureOfIndices old) {
-                return old.getName().equals("f") ? "k" : old.getName();
+            public String newName(String oldName, NameAndStructureOfIndices old) {
+                return oldName.equals("f") ? "k" : old.getName();
             }
         };
         token = new ChangeIndicesTypesAndTensorNames(transformer).transform(token);

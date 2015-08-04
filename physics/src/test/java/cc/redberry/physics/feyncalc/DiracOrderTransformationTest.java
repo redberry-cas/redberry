@@ -28,6 +28,7 @@ import cc.redberry.core.context.OutputFormat;
 import cc.redberry.core.indices.IndexType;
 import cc.redberry.core.parser.preprocessor.GeneralIndicesInsertion;
 import cc.redberry.core.tensor.Tensor;
+import org.junit.Before;
 import org.junit.Test;
 
 import static cc.redberry.core.TAssert.assertEquals;
@@ -39,9 +40,15 @@ import static cc.redberry.core.tensor.Tensors.parseSimple;
  * Created by poslavsky on 03/08/15.
  */
 public class DiracOrderTransformationTest {
+
+    @Before
+    public void setUp() throws Exception {
+        CC.reset();
+    }
+
     @Test
     public void test1() throws Exception {
-//        CC.setDefaultOutputFormat(OutputFormat.SimpleRedberry);
+        CC.setDefaultOutputFormat(OutputFormat.SimpleRedberry);
         GeneralIndicesInsertion indicesInsertion = new GeneralIndicesInsertion();
         CC.current().getParseManager().defaultParserPreprocessors.add(indicesInsertion);
         indicesInsertion.addInsertionRule(parseSimple("G^a'_b'a"), IndexType.Matrix1);
@@ -112,12 +119,27 @@ public class DiracOrderTransformationTest {
         CC.current().getParseManager().defaultParserPreprocessors.add(indicesInsertion);
         indicesInsertion.addInsertionRule(parseSimple("G^a'_b'a"), IndexType.Matrix1);
         indicesInsertion.addInsertionRule(parseSimple("G5^a'_b'"), IndexType.Matrix1);
+        indicesInsertion.addInsertionRule(parseSimple("A^a'_b'"), IndexType.Matrix1);
 
         DiracOrderTransformation order = new DiracOrderTransformation(parseSimple("G_a"));
         Tensor t;
-        t = parse("k^a*k^b*G_b*G_a");
-        System.out.println(order.transform(t));
-//        assertEquals("G_{a}*G_{b}*G_{c}*G_{d}*G_{e}-2*G_{c}*G_{d}*G_{e}*g_{ab}+2*G_{b}*G_{d}*G_{e}*g_{ac}-2*G_{b}*G_{c}*G_{e}*g_{ad}+2*G_{b}*G_{c}*G_{d}*g_{ae}-2*G_{a}*G_{d}*G_{e}*g_{bc}+2*G_{a}*G_{c}*G_{e}*g_{bd}-2*G_{a}*G_{c}*G_{d}*g_{be}-2*G_{a}*G_{b}*G_{e}*g_{cd}+2*G_{a}*G_{b}*G_{d}*g_{ce}-2*G_{a}*G_{b}*G_{c}*g_{de}+4*g_{be}*g_{cd}*G_{a}-4*g_{bd}*g_{ce}*G_{a}+4*g_{bc}*g_{de}*G_{a}-4*g_{ae}*g_{cd}*G_{b}+4*g_{ad}*g_{ce}*G_{b}-4*g_{ac}*g_{de}*G_{b}+4*g_{ae}*g_{bd}*G_{c}-4*g_{ad}*g_{be}*G_{c}+4*g_{ab}*g_{de}*G_{c}-4*g_{ae}*g_{bc}*G_{d}+4*g_{ac}*g_{be}*G_{d}-4*g_{ab}*g_{ce}*G_{d}+4*g_{ad}*g_{bc}*G_{e}-4*g_{ac}*g_{bd}*G_{e}+4*g_{ab}*g_{cd}*G_{e}",
-//                EliminateMetricsTransformation.eliminate(order.transform(t)));
+        t = parse("G_b*G_a*A*G_d*G_c");
+        assertEquals("-2*G_{a}*G_{b}*A*g_{dc}+4*A*g_{ba}*g_{dc}+G_{a}*G_{b}*A*G_{c}*G_{d}-2*A*G_{c}*G_{d}*g_{ba}",
+                order.transform(t));
+    }
+
+    @Test
+    public void test5() throws Exception {
+        CC.setDefaultOutputFormat(OutputFormat.SimpleRedberry);
+        GeneralIndicesInsertion indicesInsertion = new GeneralIndicesInsertion();
+        CC.current().getParseManager().defaultParserPreprocessors.add(indicesInsertion);
+        indicesInsertion.addInsertionRule(parseSimple("G^a'_b'a"), IndexType.Matrix1);
+        indicesInsertion.addInsertionRule(parseSimple("G5^a'_b'"), IndexType.Matrix1);
+
+        DiracOrderTransformation order = new DiracOrderTransformation(parseSimple("G_a"), parseSimple("G5"));
+        Tensor t;
+        t = parse("G5*G_d*G_c*G5*G_b*G_a");
+        assertEquals("G_{a}*G_{b}*G_{c}*G_{d}-2*G_{c}*G_{d}*g_{ab}+2*G_{b}*G_{d}*g_{ac}-2*G_{b}*G_{c}*g_{ad}-2*G_{a}*G_{d}*g_{bc}+4*g_{ad}*g_{bc}+2*G_{a}*G_{c}*g_{bd}-4*g_{ac}*g_{bd}-2*G_{a}*G_{b}*g_{cd}+4*g_{ab}*g_{cd}",
+                order.transform(t));
     }
 }

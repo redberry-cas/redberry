@@ -247,11 +247,31 @@ public final class IndicesUtils {
      * Changes index state to specified state (true - upper, false - lower).
      *
      * @param state index state: true - upper, false - lower)
-     * @param index index to change type in
+     * @param index index to change state in
      * @return index with new state
      */
     public static int setState(boolean state, int index) {
         return setRawState(state ? 0x80000000 : 0, index);
+    }
+
+    /**
+     * Makes index upper.
+     *
+     * @param index index
+     * @return raised index
+     */
+    public static int raise(int index) {
+        return setRawState(0x80000000, index);
+    }
+
+    /**
+     * Makes index lower.
+     *
+     * @param index index
+     * @return lowered index
+     */
+    public static int lower(int index) {
+        return setRawState(0, index);
     }
 
     /**

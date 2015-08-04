@@ -138,8 +138,8 @@ public class LeviCivitaSimplifyTransformation implements Transformation {
                     }
 
                     @Override
-                    public String newName(NameAndStructureOfIndices old) {
-                        return old.getName().equals(defaultLeviCivitaName) ? leviCivitaName : old.getName();
+                    public String newName(String oldName, NameAndStructureOfIndices old) {
+                        return oldName.equals(defaultLeviCivitaName) ? leviCivitaName : oldName;
                     }
                 }
         );
