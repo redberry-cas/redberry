@@ -29,6 +29,7 @@ import cc.redberry.core.graph.PrimitiveSubgraphPartition;
 import cc.redberry.core.groups.permutations.Permutations;
 import cc.redberry.core.indexmapping.Mapping;
 import cc.redberry.core.indices.IndexType;
+import cc.redberry.core.indices.Indices;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.tensor.*;
 import cc.redberry.core.transformations.ExpandTensorAndEliminateTransformation;
@@ -44,9 +45,9 @@ import java.util.HashMap;
 import java.util.List;
 
 import static cc.redberry.core.indices.IndicesFactory.createSimple;
-import static cc.redberry.core.indices.IndicesUtils.getNameWithType;
-import static cc.redberry.core.indices.IndicesUtils.setType;
+import static cc.redberry.core.indices.IndicesUtils.*;
 import static cc.redberry.core.tensor.FastTensors.multiplySumElementsOnFactor;
+import static cc.redberry.core.tensor.StructureOfContractions.getToTensorIndex;
 import static cc.redberry.core.tensor.Tensors.*;
 import static cc.redberry.core.transformations.EliminateMetricsTransformation.eliminate;
 
@@ -87,19 +88,19 @@ public final class DiracOrderTransformation extends AbstractTransformationWithGa
     public Tensor transform(Tensor tensor) {
         SubstitutionIterator iterator = new SubstitutionIterator(tensor);
         Tensor current;
-        out:
         while ((current = iterator.next()) != null) {
             if (!(current instanceof Product))
                 continue;
             if (current.getIndices().size(matrixType) == 0)
                 continue;
-            if (!containsGammaMatrices(current))
+            if (!containsGammaOr5Matrices(current))
                 continue;
             if (simplifyG5 != null)
                 current = simplifyG5.transform(current);
             Product product = (Product) current;
             int offset = product.sizeOfIndexlessPart();
             ProductContent pc = product.getContent();
+            StructureOfContractions st = pc.getStructureOfContractions();
 
             PrimitiveSubgraph[] partition
                     = PrimitiveSubgraphPartition.calculatePartition(pc, matrixType);
@@ -112,7 +113,7 @@ public final class DiracOrderTransformation extends AbstractTransformationWithGa
                     continue;
 
                 IntArrayList tPositionsOfGammas = new IntArrayList();
-                List<Tensor> gammas = new ArrayList<>();
+                List<Gamma> gammas = new ArrayList<>();
                 for (int i = 0; i < subgraph.size(); ++i) {
                     Tensor g5 = null;
                     for (; i < subgraph.size(); ++i) {
@@ -120,19 +121,25 @@ public final class DiracOrderTransformation extends AbstractTransformationWithGa
                         if (!isGammaOrGamma5(t))
                             break;
                         else {
+                            tPositionsOfGammas.add(offset + subgraph.getPosition(i));
                             if (isGamma5(t))
                                 g5 = t;
-                            tPositionsOfGammas.add(offset + subgraph.getPosition(i));
-                            gammas.add(t);
+                            else
+                                gammas.add(new Gamma(t, t.getIndices().get(metricType, 0), getContraction(subgraph.getPosition(i), pc, st)));
                         }
                     }
                     if (!gammas.isEmpty()) {
-                        Tensor o = orderArray(gammas.toArray(new Tensor[gammas.size()]));
+                        Tensor o = orderArray(gammas.toArray(new Gamma[gammas.size()]));
                         if (o == null)
                             continue gammas;
                         positionsOfGammas.addAll(tPositionsOfGammas);
-                        if (g5 != null)
-                            o = o instanceof Sum ? FastTensors.multiplySumElementsOnFactor((Sum) o, g5) : multiply(o, g5);
+                        if (g5 != null) {
+                            if (o instanceof Sum) {
+                                Tensor[] pair = resolveDummy(o, g5);
+                                o = FastTensors.multiplySumElementsOnFactor((Sum) pair[0], pair[1]);
+                            } else
+                                o = multiplyAndRenameConflictingDummies(o, g5);
+                        }
                         ordered.add(o);
                     }
                     gammas.clear();
@@ -148,6 +155,47 @@ public final class DiracOrderTransformation extends AbstractTransformationWithGa
             iterator.safeSet(simple);
         }
         return iterator.result();
+    }
+
+    private Tensor getContraction(int gamma,
+                                  ProductContent pc,
+                                  StructureOfContractions sc) {
+        Indices indices = pc.get(gamma).getIndices();
+        int j = 0;
+        for (; j < indices.size(); ++j)
+            if (metricType.getType() == getType(indices.get(j)))
+                break;
+        int to = getToTensorIndex(sc.contractions[gamma][j]);
+        if (to == -1)
+            return null;
+        return pc.get(to);
+    }
+
+    private static final class Gamma implements Comparable<Gamma> {
+        final Tensor gamma;
+        final int index;
+        final Tensor contraction;
+
+        public Gamma(Tensor gamma, int index, Tensor contraction) {
+            this.gamma = gamma;
+            this.index = index;
+            this.contraction = contraction;
+        }
+
+        boolean contracted() {
+            return contraction instanceof SimpleTensor && contraction.getIndices().size() == 1;
+        }
+
+        @Override
+        public int compareTo(Gamma o) {
+            if (contracted() && o.contracted())
+                return ((SimpleTensor) contraction).getStringName().compareTo((((SimpleTensor) o.contraction)).getStringName());
+            else if (contracted() && !o.contracted())
+                return -1;
+            else if (o.contracted() && !contracted())
+                return 1;
+            else return Integer.compare(getNameWithoutType(index), getNameWithoutType(o.index));
+        }
     }
 
     //todo static thread local cache!
@@ -175,7 +223,7 @@ public final class DiracOrderTransformation extends AbstractTransformationWithGa
         for (int i = 0; i < permutation.length; ++i)
             metricIndices[i] = setType(metricType, i);
 
-        metricIndices = Permutations.permute(metricIndices, permutation);
+        metricIndices = Permutations.permute(metricIndices, Permutations.inverse(permutation));
         Tensor[] gammas = new Tensor[permutation.length];
         int matrixIndex, u = matrixIndex = setType(matrixType, 0);
         for (int i = 0; i < permutation.length; ++i) {
@@ -190,16 +238,24 @@ public final class DiracOrderTransformation extends AbstractTransformationWithGa
     }
 
     private Tensor orderArray(Tensor[] gammas) {
+        Gamma[] gs = new Gamma[gammas.length];
+        for (int i = 0; i < gammas.length; ++i)
+            gs[i] = new Gamma(gammas[i], gammas[i].getIndices().get(metricType, 0), null);
+        return orderArray(gs);
+    }
+
+    private Tensor orderArray(Gamma[] gammas) {
         final int numberOfGammas = gammas.length;
-        int[] mIndices = new int[numberOfGammas], mIndicesNames = new int[numberOfGammas];
-        for (int i = 0; i < numberOfGammas; ++i) {
-            int index = gammas[i].getIndices().get(metricType, 0);
-            mIndices[i] = index;
-            mIndicesNames[i] = getNameWithType(index);
-        }
         int[] permutation = Permutations.createIdentityArray(numberOfGammas);
+
+        Tensor fGamma = gammas[0].gamma, lGamma = gammas[gammas.length - 1].gamma;
+        int[] mIndices = new int[numberOfGammas];
+        for (int i = 0; i < numberOfGammas; ++i)
+            mIndices[i] = gammas[i].index;
+
         //use stable sort!
-        ArraysUtils.insertionSort(mIndicesNames, permutation);
+        //!! gammas is lost now !!
+        ArraysUtils.insertionSort(gammas, permutation);
         if (Permutations.isIdentity(permutation))
             return null;//signals that array is sorted!
 
@@ -214,9 +270,9 @@ public final class DiracOrderTransformation extends AbstractTransformationWithGa
         System.arraycopy(cached.getOriginalIndices(metricType), 0, iFrom, 0, numberOfGammas);
         System.arraycopy(mIndices, 0, iTo, 0, numberOfGammas);
         iFrom[numberOfGammas] = cached.originalArray[0].getIndices().getUpper().get(matrixType, 0);
-        iTo[numberOfGammas] = gammas[0].getIndices().getUpper().get(matrixType, 0);
+        iTo[numberOfGammas] = fGamma.getIndices().getUpper().get(matrixType, 0);
         iFrom[numberOfGammas + 1] = cached.originalArray[numberOfGammas - 1].getIndices().getLower().get(matrixType, 0);
-        iTo[numberOfGammas + 1] = gammas[numberOfGammas - 1].getIndices().getLower().get(matrixType, 0);
+        iTo[numberOfGammas + 1] = lGamma.getIndices().getLower().get(matrixType, 0);
         return eliminate(ApplyIndexMapping.applyIndexMapping(cached.ordered, new Mapping(iFrom, iTo)));
     }
 
@@ -225,8 +281,8 @@ public final class DiracOrderTransformation extends AbstractTransformationWithGa
         int swaps = 0;
         for (int i = 0; i < gammas.length - 1; i++)
             for (int j = 0; j < gammas.length - i - 1; j++)
-                if (getNameWithType(gammas[j].getIndices().get(metricType, 0)) >
-                        getNameWithType(gammas[j + 1].getIndices().get(metricType, 0))) {
+                if (getNameWithoutType(gammas[j].getIndices().get(metricType, 0)) >
+                        getNameWithoutType(gammas[j + 1].getIndices().get(metricType, 0))) {
                     Tensor metric = multiply(Complex.TWO,
                             createMetricOrKronecker(gammas[j].getIndices().get(metricType, 0),
                                     gammas[j + 1].getIndices().get(metricType, 0)));
@@ -246,11 +302,7 @@ public final class DiracOrderTransformation extends AbstractTransformationWithGa
                     if (swaps % 2 == 1)
                         adj = negate(adj);
                     sb.put(adj);
-                    Tensor t = gammas[j];
-                    gammas[j] = new Mapping(gammas[j].getIndices().getOfType(metricType).toArray(),
-                            gammas[j + 1].getIndices().getOfType(metricType).toArray()).transform(gammas[j]);
-                    gammas[j + 1] = new Mapping(gammas[j + 1].getIndices().getOfType(metricType).toArray(),
-                            t.getIndices().getOfType(metricType).toArray()).transform(gammas[j + 1]);
+                    swapAdj(gammas, j);
                     ++swaps;
                 }
         Tensor ordered = multiply(gammas);

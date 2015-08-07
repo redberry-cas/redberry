@@ -27,7 +27,6 @@ import cc.redberry.core.graph.GraphType;
 import cc.redberry.core.graph.PrimitiveSubgraph;
 import cc.redberry.core.graph.PrimitiveSubgraphPartition;
 import cc.redberry.core.indices.IndexType;
-import cc.redberry.core.indices.IndicesFactory;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.parser.ParseToken;
 import cc.redberry.core.parser.ParseUtils;
@@ -215,7 +214,7 @@ public final class DiracTraceTransformation extends AbstractTransformationWithGa
                 continue;
 
             //early termination
-            if (!containsGammaMatrices(current))
+            if (!containsGammaOr5Matrices(current))
                 continue;
 
             Product product = (Product) current;
@@ -256,7 +255,7 @@ public final class DiracTraceTransformation extends AbstractTransformationWithGa
 
     @Override
     public Tensor transform(Tensor tensor) {
-        if (!containsGammaMatrices(tensor))
+        if (!containsGammaOr5Matrices(tensor))
             return tensor;
 
         tensor = expandDiracStructures(tensor);

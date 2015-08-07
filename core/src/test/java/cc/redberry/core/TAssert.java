@@ -22,7 +22,6 @@
  */
 package cc.redberry.core;
 
-import cc.redberry.core.utils.OutputPort;
 import cc.redberry.core.groups.permutations.PermutationGroup;
 import cc.redberry.core.indexmapping.IndexMappings;
 import cc.redberry.core.indexmapping.Mapping;
@@ -31,10 +30,12 @@ import cc.redberry.core.tensor.SimpleTensor;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.tensor.Tensors;
 import cc.redberry.core.utils.IntArray;
+import cc.redberry.core.utils.OutputPort;
 import cc.redberry.core.utils.TensorUtils;
 import org.junit.Assert;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * @author Dmitry Bolotin
@@ -51,7 +52,7 @@ public class TAssert {
     }
 
     public static void assertEquals(Tensor actual, Tensor expected) {
-        org.junit.Assert.assertTrue(TensorUtils.equals(actual, expected));
+        org.junit.Assert.assertTrue(String.format("%s != %s", actual, expected), TensorUtils.equals(actual, expected));
     }
 
     public static void assertNotEquals(Tensor actual, Tensor expected) {
@@ -182,6 +183,10 @@ public class TAssert {
 
     public static void assertSymbolic(Tensor t) {
         org.junit.Assert.assertTrue(TensorUtils.isSymbolic(t));
+    }
+
+    private static String failMessage(Tensor actual, Tensor expected) {
+        return String.format("%s != %s", actual, expected);
     }
 //    public static void assertOpposite(Tensor target, Tensor expected) {
 //        assertTrue(TTest.testOpposite(target, expected));

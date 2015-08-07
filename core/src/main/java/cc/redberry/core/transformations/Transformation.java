@@ -93,15 +93,31 @@ public interface Transformation {
         /**
          * Applies transformation until the specified expression is unchanged under transformation.
          *
-         * @param t              tensor
-         * @param transformation transformation
+         * @param t               tensor
+         * @param transformations transformation
          * @return result
          */
-        public static Tensor applyUntilUnchanged(Tensor t, final Transformation transformation) {
+        public static Tensor applyUntilUnchanged(Tensor t, final Transformation... transformations) {
+            return applyUntilUnchanged(t, Integer.MAX_VALUE, transformations);
+        }
+
+        /**
+         * Applies transformation until the specified expression is unchanged under transformation.
+         *
+         * @param t               tensor
+         * @param limit           iteration limit
+         * @param transformations transformation
+         * @return result
+         */
+        public static Tensor applyUntilUnchanged(Tensor t, int limit, final Transformation... transformations) {
             Tensor r;
             do {
+                if (limit == 0)
+                    throw new RuntimeException("Steel changed after " + limit + " tries.");
                 r = t;
-                t = transformation.transform(r);
+                for (Transformation tr : transformations)
+                    t = tr.transform(t);
+                --limit;
             } while (r != t);
             return r;
         }

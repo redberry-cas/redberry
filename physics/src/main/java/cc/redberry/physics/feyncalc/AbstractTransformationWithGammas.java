@@ -32,10 +32,8 @@ import cc.redberry.core.parser.preprocessor.TypesAndNamesTransformer;
 import cc.redberry.core.tensor.Expression;
 import cc.redberry.core.tensor.SimpleTensor;
 import cc.redberry.core.tensor.Tensor;
-import cc.redberry.core.tensor.Tensors;
 import cc.redberry.core.transformations.Transformation;
 
-import static cc.redberry.core.indices.IndicesFactory.createSimple;
 import static cc.redberry.core.indices.IndicesUtils.*;
 import static cc.redberry.core.tensor.Tensors.simpleTensor;
 
@@ -57,45 +55,7 @@ public abstract class AbstractTransformationWithGammas implements Transformation
     public AbstractTransformationWithGammas(final SimpleTensor gammaMatrix,
                                             final Tensor dimension,
                                             final Tensor traceOfOne) {
-        checkNotation(gammaMatrix);
-        this.gammaName = gammaMatrix.getName();
-        //no gamma5 should be in tensors
-        this.gamma5Name = Integer.MIN_VALUE;
-        final IndexType[] types = TraceUtils.extractTypesFromMatrix(gammaMatrix);
-        this.metricType = types[0];
-        this.matrixType = types[1];
-
-        tokenTransformer = new ChangeIndicesTypesAndTensorNames(new TypesAndNamesTransformer() {
-            @Override
-            public int newIndex(int oldIndex, NameAndStructureOfIndices oldDescriptor) {
-                return oldIndex;
-            }
-
-            @Override
-            public IndexType newType(IndexType oldType, NameAndStructureOfIndices oldDescriptor) {
-                switch (oldType) {
-                    case LatinLower:
-                        return metricType;
-                    case Matrix1:
-                        return matrixType;
-                }
-                return oldType;
-            }
-
-            @Override
-            public String newName(String oldName, NameAndStructureOfIndices oldDescriptor) {
-                switch (oldName) {
-                    case gamma5StringName:
-                        throw new IllegalArgumentException("Gamma5 is not specified.");
-                    case leviCivitaStringName:
-                        throw new IllegalArgumentException("Levi-Civita is not specified.");
-                    default:
-                        return oldDescriptor.getName();
-                }
-            }
-        });
-        this.traceOfOne = (Expression) tokenTransformer.transform(CC.current().getParseManager().getParser().parse("d^a'_a'=" + traceOfOne)).toTensor();
-        this.deltaTrace = (Expression) tokenTransformer.transform(CC.current().getParseManager().getParser().parse("d^a_a=" + dimension)).toTensor();
+        this(gammaMatrix, null, null, dimension, traceOfOne);
     }
 
     public AbstractTransformationWithGammas(final SimpleTensor gammaMatrix,
@@ -105,7 +65,7 @@ public abstract class AbstractTransformationWithGammas implements Transformation
                                             final Tensor traceOfOne) {
         checkNotation(gammaMatrix, gamma5, leviCivita);
         this.gammaName = gammaMatrix.getName();
-        this.gamma5Name = gamma5.getName();
+        this.gamma5Name = gamma5 == null ? Integer.MIN_VALUE : gamma5.getName();
         final IndexType[] types = TraceUtils.extractTypesFromMatrix(gammaMatrix);
         this.metricType = types[0];
         this.matrixType = types[1];
@@ -134,8 +94,12 @@ public abstract class AbstractTransformationWithGammas implements Transformation
                     case gammaMatrixStringName:
                         return gammaMatrix.getStringName();
                     case gamma5StringName:
+                        if (gamma5 == null)
+                            throw new IllegalArgumentException("Gamma5 is not specified.");
                         return gamma5.getStringName();
                     case leviCivitaStringName:
+                        if (leviCivita == null)
+                            throw new IllegalArgumentException("Levi-Civita is not specified.");
                         return leviCivita.getStringName();
                     default:
                         return oldDescriptor.getName();
@@ -162,9 +126,18 @@ public abstract class AbstractTransformationWithGammas implements Transformation
         return (h == gamma5Name) && tensor.getClass().equals(SimpleTensor.class);
     }
 
-    protected final boolean containsGammaMatrices(Tensor t) {
+    protected final boolean containsGammaOr5Matrices(Tensor t) {
         if (t.getClass().equals(SimpleTensor.class))
             return t.hashCode() == gammaName || t.hashCode() == gamma5Name;
+        else for (Tensor p : t)
+            if (containsGammaOr5Matrices(p))
+                return true;
+        return false;
+    }
+
+    protected final boolean containsGammaMatrices(Tensor t) {
+        if (t.getClass().equals(SimpleTensor.class))
+            return t.hashCode() == gammaName;
         else for (Tensor p : t)
             if (containsGammaMatrices(p))
                 return true;
@@ -193,8 +166,8 @@ public abstract class AbstractTransformationWithGammas implements Transformation
                 || gammaMatrix.getIndices().size(matrixType) != 2)
             throw new IllegalArgumentException("Not a gamma: " + gammaMatrix);
 
-        if (gamma5Matrix.getIndices().size() != 2
-                || gamma5Matrix.getIndices().size(matrixType) != 2)
+        if (gamma5Matrix != null && (gamma5Matrix.getIndices().size() != 2
+                || gamma5Matrix.getIndices().size(matrixType) != 2))
             throw new IllegalArgumentException("Not a gamma5: " + gamma5Matrix);
 
         if (leviCivita != null && (leviCivita.getIndices().size() != 4
@@ -210,6 +183,12 @@ public abstract class AbstractTransformationWithGammas implements Transformation
         return setMatrixIndices(gamma, gamma.getIndices().getUpper().get(matrixType, 0), matrixLower);
     }
 
+    protected final void swapAdj(Tensor[] gammas, int j) {
+        Tensor t = gammas[j];
+        gammas[j] = setMetricIndex((SimpleTensor) gammas[j], gammas[j + 1].getIndices().get(metricType, 0));
+        gammas[j + 1] = setMetricIndex((SimpleTensor) gammas[j + 1], t.getIndices().get(metricType, 0));
+    }
+
     protected static SimpleTensor setMatrixIndices(SimpleTensor gamma, int matrixUpper, int matrixLower) {
         int[] indices = gamma.getIndices().getAllIndices().copy();
         for (int i = indices.length - 1; i >= 0; --i)
@@ -218,6 +197,14 @@ public abstract class AbstractTransformationWithGammas implements Transformation
                         createIndex(matrixUpper, getType(indices[i]), getState(indices[i]))
                         : createIndex(matrixLower, getType(indices[i]), getState(indices[i]));
             }
+        return simpleTensor(gamma.getName(), IndicesFactory.createSimple(null, indices));
+    }
+
+    protected static SimpleTensor setMetricIndex(SimpleTensor gamma, int metricIndex) {
+        int[] indices = gamma.getIndices().getAllIndices().copy();
+        for (int i = indices.length - 1; i >= 0; --i)
+            if (CC.isMetric(getType(indices[i])))
+                indices[i] = metricIndex;
         return simpleTensor(gamma.getName(), IndicesFactory.createSimple(null, indices));
     }
 }

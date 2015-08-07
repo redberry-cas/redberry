@@ -35,6 +35,7 @@ import static cc.redberry.core.TAssert.assertEquals;
 import static cc.redberry.core.TAssert.assertTrue;
 import static cc.redberry.core.tensor.Tensors.parse;
 import static cc.redberry.core.tensor.Tensors.parseSimple;
+import static cc.redberry.core.transformations.ExpandAndEliminateTransformation.expandAndEliminate;
 
 /**
  * Created by poslavsky on 03/08/15.
@@ -140,6 +141,79 @@ public class DiracOrderTransformationTest {
         Tensor t;
         t = parse("G5*G_d*G_c*G5*G_b*G_a");
         assertEquals("G_{a}*G_{b}*G_{c}*G_{d}-2*G_{c}*G_{d}*g_{ab}+2*G_{b}*G_{d}*g_{ac}-2*G_{b}*G_{c}*g_{ad}-2*G_{a}*G_{d}*g_{bc}+4*g_{ad}*g_{bc}+2*G_{a}*G_{c}*g_{bd}-4*g_{ac}*g_{bd}-2*G_{a}*G_{b}*g_{cd}+4*g_{ab}*g_{cd}",
+                order.transform(t));
+    }
+
+
+    @Test
+    public void test6() throws Exception {
+        CC.setDefaultOutputFormat(OutputFormat.SimpleRedberry);
+        GeneralIndicesInsertion indicesInsertion = new GeneralIndicesInsertion();
+        CC.current().getParseManager().defaultParserPreprocessors.add(indicesInsertion);
+        indicesInsertion.addInsertionRule(parseSimple("G^a'_b'a"), IndexType.Matrix1);
+        indicesInsertion.addInsertionRule(parseSimple("G5^a'_b'"), IndexType.Matrix1);
+
+        DiracOrderTransformation order = new DiracOrderTransformation(parseSimple("G_a"), parseSimple("G5"));
+        Tensor t;
+        t = parse("G5*G_d*G_c*G5*G_b*G5*G_a");
+        assertEquals(
+                expandAndEliminate(parse("-(G_{a}*G_{b}*G_{c}*G_{d}-2*G_{c}*G_{d}*g_{ab}+2*G_{b}*G_{d}*g_{ac}-2*G_{b}*G_{c}*g_{ad}-2*G_{a}*G_{d}*g_{bc}+4*g_{ad}*g_{bc}+2*G_{a}*G_{c}*g_{bd}-4*g_{ac}*g_{bd}-2*G_{a}*G_{b}*g_{cd}+4*g_{ab}*g_{cd})*G5")),
+                order.transform(t));
+    }
+
+    @Test
+    public void test7() throws Exception {
+        CC.setDefaultOutputFormat(OutputFormat.SimpleRedberry);
+        GeneralIndicesInsertion indicesInsertion = new GeneralIndicesInsertion();
+        CC.current().getParseManager().defaultParserPreprocessors.add(indicesInsertion);
+        indicesInsertion.addInsertionRule(parseSimple("G^a'_b'a"), IndexType.Matrix1);
+        indicesInsertion.addInsertionRule(parseSimple("G5^a'_b'"), IndexType.Matrix1);
+
+        DiracOrderTransformation order = new DiracOrderTransformation(parseSimple("G_a"), parseSimple("G5"));
+
+        Tensor t;
+        t = parse("G_{c}*G_{a}*G_{b}");
+        assertEquals(parse("G_a*G_b*G_c-2*g_bc*G_a+2*g_ac*G_b"),
+                order.transform(t));
+    }
+
+    @Test
+    public void test8() throws Exception {
+        CC.setDefaultOutputFormat(OutputFormat.SimpleRedberry);
+        GeneralIndicesInsertion indicesInsertion = new GeneralIndicesInsertion();
+        CC.current().getParseManager().defaultParserPreprocessors.add(indicesInsertion);
+        indicesInsertion.addInsertionRule(parseSimple("G^a'_b'a"), IndexType.Matrix1);
+        indicesInsertion.addInsertionRule(parseSimple("G5^a'_b'"), IndexType.Matrix1);
+
+        DiracOrderTransformation order = new DiracOrderTransformation(parseSimple("G_a"), parseSimple("G5"));
+        Tensor t;
+        t = parse("G_a*p^a*G_b");
+        assertTrue(t == order.transform(t));
+
+        t = parse("G_a*p^b*G_b");
+        assertEquals(parse("2*p_{a}-G_{b}*p^{b}*G_{a}"),
+                order.transform(t));
+
+        t = parse("G_a*p^a*G_b*q^b");
+        assertTrue(t == order.transform(t));
+
+        t = parse("G_a*q^a*G_b*p^b");
+        assertEquals(parse("2*p_a*q^a-G_a*p^a*G_b*q^b"),
+                order.transform(t));
+
+        t = parse("G_a*q^a*G_b*p^b*G_c*f^c");
+        assertEquals(parse("-f_a*G^a*G^b*p_b*G^c*q_c-2*f^b*G^a*p_a*q_b+2*f^a*G^b*p_a*q_b+2*f_a*G^a*p^b*q_b"),
+                order.transform(t));
+
+        t = parse("-f_a*G^a*G^b*p_b*G^c*q_c-2*f^b*G^a*p_a*q_b+2*f^a*G^b*p_a*q_b+2*f_a*G^a*p^b*q_b");
+        assertTrue(t == order.transform(t));
+
+        t = parse("G^{d}*q_{d}*G^{g}*f_{g}*G^{c}*p_{c}");
+        assertEquals(parse("f_a*G^a*G^b*p_b*G^c*q_c+2*f^b*G^a*p_a*q_b-2*f_a*G^a*p^b*q_b"),
+                order.transform(t));
+
+        t = parse("2*k_{z}*k^{z}*p^{y}*q_{y}*G^{d}*q_{d}*G^{g}*f_{g}*G^{c}*p_{c}");
+        assertEquals(parse("2*k_{z}*k^{z}*p^{y}*q_{y}*f_a*G^a*G^b*p_b*G^c*q_c+4*k_{z}*k^{z}*p^{y}*q_{y}*f^b*G^a*p_a*q_b-+4*k_{z}*k^{z}*p^{y}*q_{y}*f_a*G^a*p^b*q_b"),
                 order.transform(t));
     }
 }

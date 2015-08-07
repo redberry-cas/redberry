@@ -197,7 +197,7 @@ public final class Tensors {
      * @param factors tensors
      * @return the array of tensors with renamed dummy indices
      */
-    public static Tensor[] resolveDummy(Tensor[] factors) {
+    public static Tensor[] resolveDummy(Tensor... factors) {
         Tensor[] result = new Tensor[factors.length];
         TIntHashSet forbidden = new TIntHashSet();
         ArrayList<Tensor> toResolve = new ArrayList<>();
@@ -809,6 +809,24 @@ public final class Tensors {
      */
     public static SimpleTensor createMetricOrKronecker(int index1, int index2) {
         return CC.current().createMetricOrKronecker(index1, index2);
+    }
+
+
+    /**
+     * Returns metric tensor if specified indices have same states and
+     * Kronecker tensor if specified indices have different states.
+     *
+     * @param indices indices
+     * @return metric tensor if specified indices have same states and
+     * Kronecker tensor if specified indices have different states
+     * @throws IllegalArgumentException if indices have different types
+     * @throws IllegalArgumentException if indices have same states and non metric types
+     * @throws IllegalArgumentException if indices.size() != 2
+     */
+    public static SimpleTensor createMetricOrKronecker(Indices indices) {
+        if (indices.size() != 2)
+            throw new IllegalArgumentException();
+        return CC.current().createMetricOrKronecker(indices.get(0), indices.get(1));
     }
 
     /**
