@@ -32,8 +32,10 @@ import cc.redberry.core.parser.preprocessor.TypesAndNamesTransformer;
 import cc.redberry.core.tensor.Expression;
 import cc.redberry.core.tensor.SimpleTensor;
 import cc.redberry.core.tensor.Tensor;
+import cc.redberry.core.tensor.Tensors;
 import cc.redberry.core.transformations.Transformation;
 
+import static cc.redberry.core.indices.IndicesFactory.createSimple;
 import static cc.redberry.core.indices.IndicesUtils.*;
 import static cc.redberry.core.tensor.Tensors.simpleTensor;
 
@@ -187,6 +189,46 @@ public abstract class AbstractTransformationWithGammas implements Transformation
         Tensor t = gammas[j];
         gammas[j] = setMetricIndex((SimpleTensor) gammas[j], gammas[j + 1].getIndices().get(metricType, 0));
         gammas[j + 1] = setMetricIndex((SimpleTensor) gammas[j + 1], t.getIndices().get(metricType, 0));
+    }
+
+    protected Tensor[] cutAdj(Tensor[] original, int i) {
+        if (original.length < 2)
+            return original;
+
+        Tensor[] n = new Tensor[original.length - 2];
+        System.arraycopy(original, 0, n, 0, i);
+        System.arraycopy(original, i + 2, n, i, original.length - i - 2);
+
+        if (n.length == 0)
+            return n;
+
+        int u, l;
+        if (i == 0) {
+            i = 1;
+            u = original[0].getIndices().getUpper().get(matrixType, 0);
+            l = n[i - 1].getIndices().getLower().get(matrixType, 0);
+        } else if (i == original.length - 2) {
+            u = n[i - 1].getIndices().getUpper().get(matrixType, 0);
+            l = original[original.length - 1].getIndices().getLower().get(matrixType, 0);
+        } else {
+            u = n[i - 1].getIndices().getUpper().get(matrixType, 0);
+            l = n[i].getIndices().getUpper().get(matrixType, 0);
+        }
+
+        n[i - 1] = setMatrixIndices((SimpleTensor) n[i - 1], u, l);
+        return n;
+    }
+
+    protected Tensor[] createLine(final int length) {
+        Tensor[] gammas = new Tensor[length];
+        int matrixIndex, u = matrixIndex = setType(matrixType, 0);
+        for (int i = 0; i < length; ++i)
+            gammas[i] = Tensors.simpleTensor(gammaName,
+                    createSimple(null,
+                            u | 0x80000000,
+                            u = ++matrixIndex,
+                            setType(metricType, i)));
+        return gammas;
     }
 
     protected static SimpleTensor setMatrixIndices(SimpleTensor gamma, int matrixUpper, int matrixLower) {

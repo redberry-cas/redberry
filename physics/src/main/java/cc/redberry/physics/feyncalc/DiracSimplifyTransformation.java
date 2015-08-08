@@ -27,11 +27,9 @@ import cc.redberry.core.context.OutputFormat;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.parser.ParseToken;
 import cc.redberry.core.parser.Parser;
-import cc.redberry.core.tensor.Expression;
 import cc.redberry.core.tensor.Product;
 import cc.redberry.core.tensor.SimpleTensor;
 import cc.redberry.core.tensor.Tensor;
-import cc.redberry.core.transformations.ExpandTensorAndEliminateTransformation;
 import cc.redberry.core.transformations.Transformation;
 import cc.redberry.core.transformations.TransformationCollection;
 import cc.redberry.core.transformations.TransformationToStringAble;
@@ -72,7 +70,7 @@ public final class DiracSimplifyTransformation extends AbstractTransformationWit
         if (gamma5 != null)
             overall.add(new SimplifyGamma5Transformation(gammaMatrix, gamma5));
         overall.add(new ApplySubstitutions(setupSubs()));
-        overall.add(new DiracSimplify0(gammaMatrix, dimension, traceOfOne, new ExpandTensorAndEliminateTransformation(simplifications)));
+        overall.add(new DiracSimplify0(gammaMatrix, dimension, traceOfOne, simplifications));
         overall.add(this.traceOfOne);
         overall.add(this.deltaTrace);
         this.overall = new TransformationCollection(overall);

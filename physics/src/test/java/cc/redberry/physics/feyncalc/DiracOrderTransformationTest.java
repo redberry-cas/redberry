@@ -216,4 +216,26 @@ public class DiracOrderTransformationTest {
         assertEquals(parse("2*k_{z}*k^{z}*p^{y}*q_{y}*f_a*G^a*G^b*p_b*G^c*q_c+4*k_{z}*k^{z}*p^{y}*q_{y}*f^b*G^a*p_a*q_b-+4*k_{z}*k^{z}*p^{y}*q_{y}*f_a*G^a*p^b*q_b"),
                 order.transform(t));
     }
+
+
+    @Test
+    public void test9() throws Exception {
+        CC.setDefaultOutputFormat(OutputFormat.SimpleRedberry);
+        GeneralIndicesInsertion indicesInsertion = new GeneralIndicesInsertion();
+        CC.current().getParseManager().defaultParserPreprocessors.add(indicesInsertion);
+        indicesInsertion.addInsertionRule(parseSimple("G^a'_b'a"), IndexType.Matrix1);
+        indicesInsertion.addInsertionRule(parseSimple("G5^a'_b'"), IndexType.Matrix1);
+        indicesInsertion.addInsertionRule(parseSimple("u^a'"), IndexType.Matrix1);
+        indicesInsertion.addInsertionRule(parseSimple("cu_a'"), IndexType.Matrix1);
+
+        DiracOrderTransformation order = new DiracOrderTransformation(parseSimple("G_a"), parseSimple("G5"));
+        Tensor t;
+        t = parse("cu*G_a*p^a*G_b*u");
+        assertTrue(t == order.transform(t));
+
+        t = parse("cu*G_a*p^b*G_b*u");
+        assertEquals(parse("2*p_{a}*cu*u-cu*G_{b}*p^{b}*G_{a}*u"),
+                order.transform(t));
+
+    }
 }

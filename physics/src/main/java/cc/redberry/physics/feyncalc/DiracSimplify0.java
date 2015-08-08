@@ -30,6 +30,7 @@ import cc.redberry.core.indexmapping.Mapping;
 import cc.redberry.core.indices.Indices;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.tensor.*;
+import cc.redberry.core.transformations.ExpandTensorsAndEliminateTransformation;
 import cc.redberry.core.transformations.Transformation;
 import cc.redberry.core.transformations.substitutions.SubstitutionIterator;
 import cc.redberry.core.utils.IntArrayList;
@@ -39,7 +40,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static cc.redberry.core.indices.IndicesFactory.createSimple;
 import static cc.redberry.core.indices.IndicesUtils.getType;
 import static cc.redberry.core.indices.IndicesUtils.setType;
 import static cc.redberry.core.tensor.StructureOfContractions.getToTensorIndex;
@@ -54,9 +54,9 @@ final class DiracSimplify0
         extends AbstractTransformationWithGammas {
     private final Transformation expandAndEliminate;
 
-    public DiracSimplify0(SimpleTensor gammaMatrix, Tensor dimension, Tensor traceOfOne, Transformation expandAndEliminate) {
+    public DiracSimplify0(SimpleTensor gammaMatrix, Tensor dimension, Tensor traceOfOne, Transformation simplifications) {
         super(gammaMatrix, dimension, traceOfOne);
-        this.expandAndEliminate = expandAndEliminate;
+        this.expandAndEliminate = new ExpandTensorsAndEliminateTransformation(simplifications);
     }
 
     @Override
@@ -178,25 +178,13 @@ final class DiracSimplify0
 
     }
 
-    protected Tensor[] createArray(final int length) {
-        Tensor[] gammas = new Tensor[length];
-        int matrixIndex, u = matrixIndex = setType(matrixType, 0);
-        for (int i = 0; i < length; ++i)
-            gammas[i] = Tensors.simpleTensor(gammaName,
-                    createSimple(null,
-                            u | 0x80000000,
-                            u = ++matrixIndex,
-                            setType(metricType, i)));
-        return gammas;
-    }
-
     private final TIntObjectHashMap<Tensor> cache = new TIntObjectHashMap<>();
 
     private Tensor order(Tensor[] gammas) {
         int numberOfGammas = gammas.length;
         Tensor tensor = cache.get(numberOfGammas);
         if (tensor == null)
-            cache.put(numberOfGammas, tensor = order0(createArray(numberOfGammas)));
+            cache.put(numberOfGammas, tensor = order0(createLine(numberOfGammas)));
         int[] iFrom = new int[numberOfGammas + 2], iTo = new int[numberOfGammas + 2];
         for (int i = 0; i < numberOfGammas; ++i) {
             iFrom[i] = setType(metricType, i);

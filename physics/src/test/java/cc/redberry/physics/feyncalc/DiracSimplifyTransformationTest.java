@@ -54,5 +54,27 @@ public class DiracSimplifyTransformationTest {
 
         t = parse("G5*G_a*G_b");
         TAssert.assertEquals("G_a*G_b*G5", ds.transform(t));
+
+        t = parse("G5*G_a*G_b*G_c*G_d*p^a*p^d*G^c*G5*G^b");
+        TAssert.assertEquals("-4*p^{d}*p_{d}", ds.transform(t));
+    }
+
+    @Test
+    public void test2() throws Exception {
+        CC.setDefaultOutputFormat(OutputFormat.SimpleRedberry);
+        GeneralIndicesInsertion indicesInsertion = new GeneralIndicesInsertion();
+        CC.current().getParseManager().defaultParserPreprocessors.add(indicesInsertion);
+        indicesInsertion.addInsertionRule(parseSimple("G^a'_b'a"), IndexType.Matrix1);
+        indicesInsertion.addInsertionRule(parseSimple("G5^a'_b'"), IndexType.Matrix1);
+        indicesInsertion.addInsertionRule(parseSimple("cu_b'"), IndexType.Matrix1);
+        indicesInsertion.addInsertionRule(parseSimple("u^b'"), IndexType.Matrix1);
+        indicesInsertion.addInsertionRule(parseSimple("cv_b'"), IndexType.Matrix1);
+        indicesInsertion.addInsertionRule(parseSimple("v^b'"), IndexType.Matrix1);
+
+        DiracSimplifyTransformation ds = new DiracSimplifyTransformation(parseSimple("G_a"), parseSimple("G5"));
+
+        Tensor t;
+        t = parse("cu*G_a*G_b*G^a*u");
+        TAssert.assertEquals("-2*cu*G_b*u", ds.transform(t));
     }
 }

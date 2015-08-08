@@ -32,7 +32,7 @@ import cc.redberry.core.indices.IndexType;
 import cc.redberry.core.indices.Indices;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.tensor.*;
-import cc.redberry.core.transformations.ExpandTensorAndEliminateTransformation;
+import cc.redberry.core.transformations.ExpandTensorsAndEliminateTransformation;
 import cc.redberry.core.transformations.Transformation;
 import cc.redberry.core.transformations.TransformationToStringAble;
 import cc.redberry.core.transformations.substitutions.SubstitutionIterator;
@@ -62,25 +62,25 @@ public final class DiracOrderTransformation extends AbstractTransformationWithGa
 
     public DiracOrderTransformation(SimpleTensor gammaMatrix) {
         super(gammaMatrix, Complex.FOUR, Complex.FOUR);
-        this.expandAndEliminate = ExpandTensorAndEliminateTransformation.EXPAND_TENSORS_AND_ELIMINATE;
+        this.expandAndEliminate = ExpandTensorsAndEliminateTransformation.EXPAND_TENSORS_AND_ELIMINATE;
         this.simplifyG5 = null;
     }
 
     public DiracOrderTransformation(SimpleTensor gammaMatrix, Tensor dimension, Tensor traceOfOne) {
         super(gammaMatrix, dimension, traceOfOne);
-        this.expandAndEliminate = ExpandTensorAndEliminateTransformation.EXPAND_TENSORS_AND_ELIMINATE;
+        this.expandAndEliminate = ExpandTensorsAndEliminateTransformation.EXPAND_TENSORS_AND_ELIMINATE;
         this.simplifyG5 = null;
     }
 
     public DiracOrderTransformation(SimpleTensor gammaMatrix, SimpleTensor gamma5) {
         super(gammaMatrix, gamma5, null, Complex.FOUR, Complex.FOUR);
-        this.expandAndEliminate = ExpandTensorAndEliminateTransformation.EXPAND_TENSORS_AND_ELIMINATE;
+        this.expandAndEliminate = ExpandTensorsAndEliminateTransformation.EXPAND_TENSORS_AND_ELIMINATE;
         this.simplifyG5 = new SimplifyGamma5Transformation(gammaMatrix, gamma5);
     }
 
     public DiracOrderTransformation(SimpleTensor gammaMatrix, SimpleTensor gamma5, Tensor dimension, Tensor traceOfOne) {
         super(gammaMatrix, gamma5, null, dimension, traceOfOne);
-        this.expandAndEliminate = ExpandTensorAndEliminateTransformation.EXPAND_TENSORS_AND_ELIMINATE;
+        this.expandAndEliminate = ExpandTensorsAndEliminateTransformation.EXPAND_TENSORS_AND_ELIMINATE;
         this.simplifyG5 = new SimplifyGamma5Transformation(gammaMatrix, gamma5);
     }
 
@@ -310,34 +310,6 @@ public final class DiracOrderTransformation extends AbstractTransformationWithGa
             ordered = negate(ordered);
         sb.put(ordered);
         return sb.build();
-    }
-
-    private Tensor[] cutAdj(Tensor[] original, int i) {
-        if (original.length < 2)
-            return original;
-
-        Tensor[] n = new Tensor[original.length - 2];
-        System.arraycopy(original, 0, n, 0, i);
-        System.arraycopy(original, i + 2, n, i, original.length - i - 2);
-
-        if (n.length == 0)
-            return n;
-
-        int u, l;
-        if (i == 0) {
-            i = 1;
-            u = original[0].getIndices().getUpper().get(matrixType, 0);
-            l = n[i - 1].getIndices().getLower().get(matrixType, 0);
-        } else if (i == original.length - 2) {
-            u = n[i - 1].getIndices().getUpper().get(matrixType, 0);
-            l = original[original.length - 1].getIndices().getLower().get(matrixType, 0);
-        } else {
-            u = n[i - 1].getIndices().getUpper().get(matrixType, 0);
-            l = n[i].getIndices().getUpper().get(matrixType, 0);
-        }
-
-        n[i - 1] = setMatrixIndices((SimpleTensor) n[i - 1], u, l);
-        return n;
     }
 
     @Override

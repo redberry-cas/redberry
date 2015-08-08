@@ -191,6 +191,14 @@ public final class IntArrayList {
         return replaced;
     }
 
+    public int first() {
+        return get(0);
+    }
+
+    public int last() {
+        return get(size - 1);
+    }
+
     public int[] toArray() {
         return Arrays.copyOfRange(data, 0, size);
     }

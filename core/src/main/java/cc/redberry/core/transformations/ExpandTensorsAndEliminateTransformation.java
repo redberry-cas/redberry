@@ -32,16 +32,16 @@ import cc.redberry.core.utils.ArraysUtils;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public class ExpandTensorAndEliminateTransformation implements TransformationToStringAble {
-    public static final ExpandTensorAndEliminateTransformation EXPAND_TENSORS_AND_ELIMINATE = new ExpandTensorAndEliminateTransformation();
+public final class ExpandTensorsAndEliminateTransformation implements TransformationToStringAble {
+    public static final ExpandTensorsAndEliminateTransformation EXPAND_TENSORS_AND_ELIMINATE = new ExpandTensorsAndEliminateTransformation();
 
     private final Transformation[] transformations;
 
-    private ExpandTensorAndEliminateTransformation() {
+    private ExpandTensorsAndEliminateTransformation() {
         this.transformations = new Transformation[]{EliminateMetricsTransformation.ELIMINATE_METRICS};
     }
 
-    public ExpandTensorAndEliminateTransformation(Transformation... transformations) {
+    public ExpandTensorsAndEliminateTransformation(Transformation... transformations) {
         this.transformations = ArraysUtils.addAll(new Transformation[]{EliminateMetricsTransformation.ELIMINATE_METRICS}, transformations);
     }
 
