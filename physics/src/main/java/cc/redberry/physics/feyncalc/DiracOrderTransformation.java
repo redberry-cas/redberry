@@ -32,6 +32,7 @@ import cc.redberry.core.indices.IndexType;
 import cc.redberry.core.indices.Indices;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.tensor.*;
+import cc.redberry.core.transformations.ExpandAndEliminateTransformation;
 import cc.redberry.core.transformations.ExpandTensorsAndEliminateTransformation;
 import cc.redberry.core.transformations.Transformation;
 import cc.redberry.core.transformations.TransformationToStringAble;
@@ -72,15 +73,24 @@ public final class DiracOrderTransformation extends AbstractTransformationWithGa
         this.simplifyG5 = null;
     }
 
+    public DiracOrderTransformation(SimpleTensor gammaMatrix, Tensor dimension) {
+        this(gammaMatrix, dimension, guessTraceOfOne(dimension));
+    }
+
     public DiracOrderTransformation(SimpleTensor gammaMatrix, SimpleTensor gamma5) {
         super(gammaMatrix, gamma5, null, Complex.FOUR, Complex.FOUR);
         this.expandAndEliminate = ExpandTensorsAndEliminateTransformation.EXPAND_TENSORS_AND_ELIMINATE;
         this.simplifyG5 = new SimplifyGamma5Transformation(gammaMatrix, gamma5);
     }
 
-    public DiracOrderTransformation(SimpleTensor gammaMatrix, SimpleTensor gamma5, Tensor dimension, Tensor traceOfOne) {
+    public DiracOrderTransformation(SimpleTensor gammaMatrix, SimpleTensor gamma5, Tensor dimension, Transformation simplifications) {
+        this(gammaMatrix, gamma5, dimension, guessTraceOfOne(dimension), simplifications);
+    }
+
+    public DiracOrderTransformation(SimpleTensor gammaMatrix, SimpleTensor gamma5, Tensor dimension, Tensor traceOfOne,
+                                    Transformation simplification) {
         super(gammaMatrix, gamma5, null, dimension, traceOfOne);
-        this.expandAndEliminate = ExpandTensorsAndEliminateTransformation.EXPAND_TENSORS_AND_ELIMINATE;
+        this.expandAndEliminate = new ExpandAndEliminateTransformation(simplification);
         this.simplifyG5 = new SimplifyGamma5Transformation(gammaMatrix, gamma5);
     }
 

@@ -161,7 +161,7 @@ public final class RedberryPhysics {
     }
 
     /**
-     * Calculates trace of Dirac matrices in four dimensions.
+     * Calculates trace of Dirac matrices in d dimensions (default 4).
      * @see DiracTraceTransformation
      */
     public static final GDiracTrace DiracTrace = new GDiracTrace();
@@ -200,6 +200,168 @@ public final class RedberryPhysics {
             else
                 return new DiracTraceTransformation(args['Gamma'], args['Gamma5'], args['LeviCivita'],
                         tr, args['Minkowski'], args['Dimension'], args['TraceOfOne']);
+        }
+
+        @Override
+        protected Map defaultParameters() {
+            return defaultArgs;
+        }
+    }
+
+    /**
+     * Simplifies products of gamma matrices
+     * @see DiracSimplifyTransformation
+     */
+    public static final GDiracSimplify DiracSimplify = new GDiracSimplify();
+
+    private static final class GDiracSimplify extends AbstractTransformationWithDefaultParameters {
+        private static
+        final Map defaultArgs = [Gamma          : 'G_a', Gamma5: 'G5',
+                                 Simplifications: Transformation.INDENTITY,
+                                 Dimension      : '4', TraceOfOne: 'default']
+
+
+        Transformation getAt(String gamma) {
+            use(Redberry) {
+                return new DiracSimplifyTransformation(gamma.t);
+            }
+        }
+
+        Transformation getAt(SimpleTensor gamma) {
+            return new DiracSimplifyTransformation(gamma);
+        }
+
+        @Override
+        protected Transformation create(Collection args) {
+            return new DiracSimplifyTransformation(*args)
+        }
+
+        @Override
+        protected Transformation create(Map args) {
+            def tr = args['Simplifications']
+            if (args['TraceOfOne'].toString() == 'default')
+                return new DiracSimplifyTransformation(args['Gamma'], args['Gamma5'], args['Dimension'], tr);
+            else
+                return new DiracSimplifyTransformation(args['Gamma'], args['Gamma5'], args['Dimension'], args['TraceOfOne'], tr);
+        }
+
+        @Override
+        protected Map defaultParameters() {
+            return defaultArgs;
+        }
+    }
+
+    /**
+     * Simplifies expressions involving gamma5 atrices
+     * @see SimplifyGamma5Transformation
+     */
+    public static final GDiracSimplify5 DiracSimplify5 = new GDiracSimplify5();
+
+    private static final class GDiracSimplify5 extends AbstractTransformationWithDefaultParameters {
+        private static
+        final Map defaultArgs = [Gamma: 'G_a', Gamma5: 'G5']
+
+
+        Transformation getAt(String gamma, String gamma5) {
+            use(Redberry) {
+                return new SimplifyGamma5Transformation(gamma.t, gamma5.t);
+            }
+        }
+
+        Transformation getAt(SimpleTensor gamma, SimpleTensor gamma5) {
+            return new SimplifyGamma5Transformation(gamma, gamma5);
+        }
+
+        @Override
+        protected Transformation create(Collection args) {
+            return new SimplifyGamma5Transformation(*args)
+        }
+
+        @Override
+        protected Transformation create(Map args) {
+            return new SimplifyGamma5Transformation(args['Gamma'], args['Gamma5']);
+        }
+
+        @Override
+        protected Map defaultParameters() {
+            return defaultArgs;
+        }
+    }
+
+    /**
+     * Puts products of gammas in canonical order
+     * @see DiracOrderTransformation
+     */
+    public static final GDiracOrder DiracOrder = new GDiracOrder();
+
+    private static final class GDiracOrder extends AbstractTransformationWithDefaultParameters {
+        private static
+        final Map defaultArgs = [Gamma          : 'G_a', Gamma5: 'G5',
+                                 Simplifications: Transformation.INDENTITY,
+                                 Dimension      : '4', TraceOfOne: 'default']
+
+
+        Transformation getAt(String gamma) {
+            use(Redberry) {
+                return new DiracOrderTransformation(gamma.t);
+            }
+        }
+
+        Transformation getAt(SimpleTensor gamma) {
+            return new DiracOrderTransformation(gamma);
+        }
+
+        @Override
+        protected Transformation create(Collection args) {
+            return new DiracOrderTransformation(*args)
+        }
+
+        @Override
+        protected Transformation create(Map args) {
+            def tr = args['Simplifications']
+            if (args['TraceOfOne'].toString() == 'default')
+                return new DiracOrderTransformation(args['Gamma'], args['Gamma5'], args['Dimension'], tr);
+            else
+                return new DiracOrderTransformation(args['Gamma'], args['Gamma5'], args['Dimension'], args['TraceOfOne'], tr);
+        }
+
+        @Override
+        protected Map defaultParameters() {
+            return defaultArgs;
+        }
+    }
+
+    /**
+     * Simplifies spinors using Dirac equation
+     * @see SpinorsSimplifyTransformation
+     */
+    public static final GSpinorsSimplify SpinorsSimplify = new GSpinorsSimplify();
+
+    private static final class GSpinorsSimplify extends AbstractTransformationWithDefaultParameters {
+        private static
+        final Map defaultArgs = [Gamma          : 'G_a', Gamma5: 'G5',
+                                 u              : '', v: '', uBar: '', vBar: '',
+                                 momentum       : '', mass: '',
+                                 Simplifications: Transformation.INDENTITY,
+                                 Dimension      : '4', TraceOfOne: 'default',
+                                 DiracSimplify  : true]
+
+        @Override
+        protected Transformation create(Collection args) {
+            return new DiracOrderTransformation(*args)
+        }
+
+        @Override
+        protected Transformation create(Map args) {
+            def tr = args['Simplifications']
+            if (args['TraceOfOne'].toString() == 'default')
+                return new SpinorsSimplifyTransformation(args['Gamma'], args['Gamma5'], args['Dimension'],
+                        args['u'], args['v'], args['uBar'], args['vBar'], args['momentum'], args['mass'], tr,
+                        args['DiracSimplify']);
+            else
+                return new SpinorsSimplifyTransformation(args['Gamma'], args['Gamma5'], args['Dimension'], args['TraceOfOne'],
+                        args['u'], args['v'], args['uBar'], args['vBar'], args['momentum'], args['mass'], tr,
+                        args['DiracSimplify']);
         }
 
         @Override

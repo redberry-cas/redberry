@@ -105,7 +105,7 @@ public class SpinorsSimplifyTransformationTest {
                 parseSimple("u[p_a]"), parseSimple("v[p_a]"),
                 parseSimple("cu[p_a]"), parseSimple("cv[p_a]"),
                 parseSimple("p_a"), parseSimple("m"));
-        
+
         Tensor t;
         t = parse("cu[p_a]*G_a*p^a");
         TAssert.assertEquals("m*cu[p_a]", sp.transform(t));

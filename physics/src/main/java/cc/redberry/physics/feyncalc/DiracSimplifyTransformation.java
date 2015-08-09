@@ -62,6 +62,11 @@ public final class DiracSimplifyTransformation extends AbstractTransformationWit
     }
 
     public DiracSimplifyTransformation(SimpleTensor gammaMatrix, SimpleTensor gamma5,
+                                       Tensor dimension, Transformation simplifications) {
+        this(gammaMatrix, gamma5, dimension, guessTraceOfOne(dimension), simplifications);
+    }
+
+    public DiracSimplifyTransformation(SimpleTensor gammaMatrix, SimpleTensor gamma5,
                                        Tensor dimension, final Tensor traceOfOne,
                                        Transformation simplifications) {
         super(gammaMatrix, gamma5, null, dimension, traceOfOne);

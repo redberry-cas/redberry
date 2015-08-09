@@ -26,6 +26,7 @@ import cc.redberry.core.context.CC;
 import cc.redberry.core.context.NameAndStructureOfIndices;
 import cc.redberry.core.indices.IndexType;
 import cc.redberry.core.indices.IndicesFactory;
+import cc.redberry.core.number.Complex;
 import cc.redberry.core.parser.ParseTokenTransformer;
 import cc.redberry.core.parser.preprocessor.ChangeIndicesTypesAndTensorNames;
 import cc.redberry.core.parser.preprocessor.TypesAndNamesTransformer;
@@ -34,10 +35,13 @@ import cc.redberry.core.tensor.SimpleTensor;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.tensor.Tensors;
 import cc.redberry.core.transformations.Transformation;
+import cc.redberry.core.utils.TensorUtils;
 
 import static cc.redberry.core.indices.IndicesFactory.createSimple;
 import static cc.redberry.core.indices.IndicesUtils.*;
-import static cc.redberry.core.tensor.Tensors.simpleTensor;
+import static cc.redberry.core.tensor.Tensors.*;
+import static cc.redberry.core.tensor.Tensors.divide;
+import static cc.redberry.core.tensor.Tensors.pow;
 
 /**
  * @author Dmitry Bolotin
@@ -248,5 +252,11 @@ public abstract class AbstractTransformationWithGammas implements Transformation
             if (CC.isMetric(getType(indices[i])))
                 indices[i] = metricIndex;
         return simpleTensor(gamma.getName(), IndicesFactory.createSimple(null, indices));
+    }
+
+    protected static Tensor guessTraceOfOne(Tensor dimension) {
+        if (TensorUtils.isIntegerOdd(dimension))
+            return pow(Complex.TWO, divide(subtract(dimension, Complex.ONE), Complex.TWO));
+        else return pow(Complex.TWO, divide(dimension, Complex.TWO));
     }
 }

@@ -101,4 +101,16 @@ class RedberryPhysicsTest {
             assert dTrace >> 'Tr[G_a*G_b*G_c*G_d]'.t == '4*g_{ad}*g_{bc}+4*g_{ab}*g_{cd}-4*g_{ac}*g_{bd}'.t
         }
     }
+
+    @Test
+    public void testDiracSimplify1() throws Exception {
+        use(Redberry) {
+            defineMatrices 'G_a', 'G5', Matrix1.matrix
+
+            def dS = DiracSimplify[[Dimension: 'D']]
+            assert dS >> '2*G_a*G^a*G_b'.t == '2*D*G_b'.t
+
+            assert dS >> '2*G_a*G_b*G^a'.t == '-2*(D-2)*G_{b}'.t
+        }
+    }
 }

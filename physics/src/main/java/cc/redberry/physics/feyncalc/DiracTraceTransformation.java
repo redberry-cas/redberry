@@ -88,12 +88,6 @@ public final class DiracTraceTransformation extends AbstractTransformationWithGa
         this(gammaMatrix, simplifications, dimension, guessTraceOfOne(dimension));
     }
 
-    private static Tensor guessTraceOfOne(Tensor dimension) {
-        if (TensorUtils.isIntegerOdd(dimension))
-            return pow(Complex.TWO, divide(subtract(dimension, Complex.ONE), Complex.TWO));
-        else return pow(Complex.TWO, divide(dimension, Complex.TWO));
-    }
-
     /**
      * Creates transformation with specified notation for gamma matrix.
      *

@@ -71,6 +71,17 @@ public final class SpinorsSimplifyTransformation extends AbstractTransformationW
     }
 
     public SpinorsSimplifyTransformation(SimpleTensor gammaMatrix, SimpleTensor gamma5,
+                                         Tensor dimension,
+                                         SimpleTensor u, SimpleTensor v,
+                                         SimpleTensor uBar, SimpleTensor vBar,
+                                         SimpleTensor momentum, SimpleTensor mass,
+                                         Transformation simplifications,
+                                         boolean diracSimplify) {
+        this(gammaMatrix, gamma5, dimension, guessTraceOfOne(dimension),
+                u, v, uBar, vBar, momentum, mass, simplifications, diracSimplify);
+    }
+
+    public SpinorsSimplifyTransformation(SimpleTensor gammaMatrix, SimpleTensor gamma5,
                                          Tensor dimension, Tensor traceOfOne,
                                          SimpleTensor u, SimpleTensor v,
                                          SimpleTensor uBar, SimpleTensor vBar,

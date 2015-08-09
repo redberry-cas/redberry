@@ -41,7 +41,7 @@ public final class ExpandAndEliminateTransformation implements TransformationToS
         this.transformations = new Transformation[]{EliminateMetricsTransformation.ELIMINATE_METRICS};
     }
 
-    public ExpandAndEliminateTransformation(Transformation[] transformations) {
+    public ExpandAndEliminateTransformation(Transformation... transformations) {
         this.transformations = ArraysUtils.addAll(new Transformation[]{EliminateMetricsTransformation.ELIMINATE_METRICS}, transformations);
     }
 
