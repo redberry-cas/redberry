@@ -634,7 +634,7 @@ public final class Tensors {
 
         NameDescriptor descriptor = tensor.getNameDescriptor();
         if (!descriptor.getStructureOfIndices().isStructureOf(indices))
-            throw new IllegalArgumentException("Illegal structure of indices.");
+            throw new IllegalArgumentException(String.format("Illegal structure of indices (tensor = %s, indices = %s).", tensor, indices));
 
         if (indices.size() == 0)
             return tensor;

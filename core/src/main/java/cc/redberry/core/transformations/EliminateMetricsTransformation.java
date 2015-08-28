@@ -149,7 +149,7 @@ public final class EliminateMetricsTransformation implements TransformationToStr
         }
     }
 
-    private static interface MetricsChain {
+    private interface MetricsChain {
 
         boolean mergeWith(MetricWrapper mk);
 

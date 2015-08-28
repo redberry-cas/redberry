@@ -86,7 +86,7 @@ public class LeviCivitaSimplifyTransformation implements Transformation {
      *                       (so e.g. e_abcd*e^abcd = +24)
      */
     public LeviCivitaSimplifyTransformation(SimpleTensor leviCivita, boolean minkowskiSpace) {
-        this(leviCivita, minkowskiSpace, Transformation.INDENTITY, Transformation.INDENTITY);
+        this(leviCivita, minkowskiSpace, Transformation.IDENTITY, Transformation.IDENTITY);
     }
 
 
@@ -100,7 +100,7 @@ public class LeviCivitaSimplifyTransformation implements Transformation {
      * @param simplifications additional transformations applied to each simplified combination of Levi-Civita tensors
      */
     public LeviCivitaSimplifyTransformation(SimpleTensor leviCivita, boolean minkowskiSpace, Transformation simplifications) {
-        this(leviCivita, minkowskiSpace, simplifications, Transformation.INDENTITY);
+        this(leviCivita, minkowskiSpace, simplifications, Transformation.IDENTITY);
     }
 
     /**

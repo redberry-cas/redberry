@@ -154,7 +154,7 @@ public final class RedberryPhysics {
                 args = new HashMap(args)
                 Map newArgs = new HashMap(defaultParameters())
                 newArgs.putAll(args)
-                newArgs.entrySet().each { it.value = it.value.t }
+                newArgs.entrySet().each { it.value = it.value == null ? null : it.value.t }
                 return create(newArgs);
             }
         }
@@ -169,7 +169,7 @@ public final class RedberryPhysics {
     private static final class GDiracTrace extends AbstractTransformationWithDefaultParameters {
         private static
         final Map defaultArgs = [Gamma    : 'G_a', Gamma5: 'G5', LeviCivita: 'e_abcd',
-                                 Minkowski: true, Simplifications: Transformation.INDENTITY,
+                                 Minkowski: true, Simplifications: Transformation.IDENTITY,
                                  Dimension: '4', TraceOfOne: 'default']
 
 
@@ -217,7 +217,7 @@ public final class RedberryPhysics {
     private static final class GDiracSimplify extends AbstractTransformationWithDefaultParameters {
         private static
         final Map defaultArgs = [Gamma          : 'G_a', Gamma5: 'G5',
-                                 Simplifications: Transformation.INDENTITY,
+                                 Simplifications: Transformation.IDENTITY,
                                  Dimension      : '4', TraceOfOne: 'default']
 
 
@@ -297,7 +297,7 @@ public final class RedberryPhysics {
     private static final class GDiracOrder extends AbstractTransformationWithDefaultParameters {
         private static
         final Map defaultArgs = [Gamma          : 'G_a', Gamma5: 'G5',
-                                 Simplifications: Transformation.INDENTITY,
+                                 Simplifications: Transformation.IDENTITY,
                                  Dimension      : '4', TraceOfOne: 'default']
 
 
@@ -340,15 +340,15 @@ public final class RedberryPhysics {
     private static final class GSpinorsSimplify extends AbstractTransformationWithDefaultParameters {
         private static
         final Map defaultArgs = [Gamma          : 'G_a', Gamma5: 'G5',
-                                 u              : '', v: '', uBar: '', vBar: '',
-                                 momentum       : '', mass: '',
-                                 Simplifications: Transformation.INDENTITY,
+                                 u              : null, v: null, uBar: null, vBar: null,
+                                 momentum       : null, mass: null,
+                                 Simplifications: Transformation.IDENTITY,
                                  Dimension      : '4', TraceOfOne: 'default',
                                  DiracSimplify  : true]
 
         @Override
         protected Transformation create(Collection args) {
-            return new DiracOrderTransformation(*args)
+            return new SpinorsSimplifyTransformation(*args)
         }
 
         @Override
@@ -446,8 +446,8 @@ public final class RedberryPhysics {
 
     private static final class LeviCivitaSpace extends AbstractTransformationWithDefaultParameters {
         private static
-        final Map defaultArgs = [LeviCivita            : 'e_abcd', Simplifications: Transformation.INDENTITY,
-                                 OverallSimplifications: Transformation.INDENTITY,]
+        final Map defaultArgs = [LeviCivita            : 'e_abcd', Simplifications: Transformation.IDENTITY,
+                                 OverallSimplifications: Transformation.IDENTITY,]
         final boolean minkowskiSpace;
 
         LeviCivitaSpace(boolean minkowskiSpace) {

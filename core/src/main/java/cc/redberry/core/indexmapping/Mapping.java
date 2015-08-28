@@ -57,7 +57,7 @@ public final class Mapping implements Transformation {
     /**
      * Identity mapping
      */
-    public static final Mapping IDENTITY = new Mapping(new int[0], new int[0], false, false);
+    public static final Mapping IDENTITY_MAPPING = new Mapping(new int[0], new int[0], false, false);
 
     /**
      * Creates mapping from given {@code from} and {@code to} arrays of indices.

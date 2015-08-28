@@ -54,7 +54,7 @@ public class DiracSimplify0Test {
         indicesInsertion.addInsertionRule(parseSimple("G^a'_b'a"), IndexType.Matrix1);
         indicesInsertion.addInsertionRule(parseSimple("G5^a'_b'"), IndexType.Matrix1);
 
-        DiracSimplify0 ds = new DiracSimplify0(parseSimple("G_a"), parse("4"), parse("4"), EXPAND_AND_ELIMINATE);
+        DiracSimplify0 ds = new DiracSimplify0(parseSimple("G_a"), parseSimple("G5"), parse("4"), parse("4"), EXPAND_AND_ELIMINATE);
 
         Tensor t;
         t = parse("G_a*G_b*G_c*k^a*k^b");
@@ -81,7 +81,7 @@ public class DiracSimplify0Test {
         indicesInsertion.addInsertionRule(parseSimple("G^a'_b'a"), IndexType.Matrix1);
         indicesInsertion.addInsertionRule(parseSimple("G5^a'_b'"), IndexType.Matrix1);
 
-        DiracSimplify0 ds = new DiracSimplify0(parseSimple("G_a"), parse("4"), parse("4"), EXPAND_AND_ELIMINATE);
+        DiracSimplify0 ds = new DiracSimplify0(parseSimple("G_a"), parseSimple("G5"), parse("4"), parse("4"), EXPAND_AND_ELIMINATE);
 
         Tensor t;
         t = parse("G_a*G_c*G_b*k^a*k^b");
@@ -108,7 +108,7 @@ public class DiracSimplify0Test {
         indicesInsertion.addInsertionRule(parseSimple("G^a'_b'a"), IndexType.Matrix1);
         indicesInsertion.addInsertionRule(parseSimple("G5^a'_b'"), IndexType.Matrix1);
 
-        DiracSimplify0 ds = new DiracSimplify0(parseSimple("G_a"), parse("4"), parse("4"), EXPAND_AND_ELIMINATE);
+        DiracSimplify0 ds = new DiracSimplify0(parseSimple("G_a"), parseSimple("G5"), parse("4"), parse("4"), EXPAND_AND_ELIMINATE);
 
         Tensor t;
         t = parse("G_a*G^c*G^d*G_b*k^a*k^b");
@@ -135,7 +135,7 @@ public class DiracSimplify0Test {
         indicesInsertion.addInsertionRule(parseSimple("G^a'_b'a"), IndexType.Matrix1);
         indicesInsertion.addInsertionRule(parseSimple("G5^a'_b'"), IndexType.Matrix1);
 
-        DiracSimplify0 ds = new DiracSimplify0(parseSimple("G_a"), parse("4"), parse("4"), EXPAND_AND_ELIMINATE);
+        DiracSimplify0 ds = new DiracSimplify0(parseSimple("G_a"), parseSimple("G5"), parse("4"), parse("4"), EXPAND_AND_ELIMINATE);
 
         Tensor t;
         t = parse("G_a*G_b*G_c*G_d*q^a*q^b*k^c*k^d");
@@ -159,7 +159,7 @@ public class DiracSimplify0Test {
         indicesInsertion.addInsertionRule(parseSimple("G^a'_b'a"), IndexType.Matrix1);
         indicesInsertion.addInsertionRule(parseSimple("G5^a'_b'"), IndexType.Matrix1);
 
-        DiracSimplify0 ds = new DiracSimplify0(parseSimple("G_a"), parse("4"), parse("4"), EXPAND_AND_ELIMINATE);
+        DiracSimplify0 ds = new DiracSimplify0(parseSimple("G_a"), parseSimple("G5"), parse("4"), parse("4"), EXPAND_AND_ELIMINATE);
 
         Tensor t;
 
@@ -353,7 +353,7 @@ public class DiracSimplify0Test {
         indicesInsertion.addInsertionRule(parseSimple("G^a'_b'a"), IndexType.Matrix1);
         indicesInsertion.addInsertionRule(parseSimple("G5^a'_b'"), IndexType.Matrix1);
 
-        DiracSimplify0 ds = new DiracSimplify0(parseSimple("G_a"), parse("4"), parse("4"), EXPAND_AND_ELIMINATE);
+        DiracSimplify0 ds = new DiracSimplify0(parseSimple("G_a"), parseSimple("G5"), parse("4"), parse("4"), EXPAND_AND_ELIMINATE);
 
         Tensor t;
         t = parse("G^a*p_a*G^b*q_b*G^c*p_c*G^d*k_d*f_e*G^e");
@@ -487,7 +487,7 @@ public class DiracSimplify0Test {
         indicesInsertion.addInsertionRule(parseSimple("G^a'_b'a"), IndexType.Matrix1);
         indicesInsertion.addInsertionRule(parseSimple("G5^a'_b'"), IndexType.Matrix1);
 
-        DiracSimplify0 ds0 = new DiracSimplify0(parseSimple("G_a"), parse("4"), parse("4"), EXPAND_AND_ELIMINATE);
+        DiracSimplify0 ds0 = new DiracSimplify0(parseSimple("G_a"), parseSimple("G5"), parse("4"), parse("4"), EXPAND_AND_ELIMINATE);
         DiracOrderTransformation dot = new DiracOrderTransformation(parseSimple("G_a"), parse("4"), parse("4"));
         Transformation ds = new TransformationCollection(ds0, dot);
 
@@ -505,7 +505,7 @@ public class DiracSimplify0Test {
         indicesInsertion.addInsertionRule(parseSimple("G^a'_b'a"), IndexType.Matrix1);
         indicesInsertion.addInsertionRule(parseSimple("G5^a'_b'"), IndexType.Matrix1);
 
-        DiracSimplify0 ds = new DiracSimplify0(parseSimple("G_a"), parse("4"), parse("4"), EXPAND_AND_ELIMINATE);
+        DiracSimplify0 ds = new DiracSimplify0(parseSimple("G_a"), parseSimple("G5"), parse("4"), parse("4"), EXPAND_AND_ELIMINATE);
 
         Tensor t;
 
@@ -521,7 +521,7 @@ public class DiracSimplify0Test {
         indicesInsertion.addInsertionRule(parseSimple("G^a'_b'a"), IndexType.Matrix1);
         indicesInsertion.addInsertionRule(parseSimple("G5^a'_b'"), IndexType.Matrix1);
 
-        DiracSimplify0 ds0 = new DiracSimplify0(parseSimple("G_a"), parse("4"), parse("4"), EXPAND_AND_ELIMINATE);
+        DiracSimplify0 ds0 = new DiracSimplify0(parseSimple("G_a"), parseSimple("G5"), parse("4"), parse("4"), EXPAND_AND_ELIMINATE);
         DiracOrderTransformation dot = new DiracOrderTransformation(parseSimple("G_a"), parse("4"), parse("4"));
         Transformation ds = new TransformationCollection(ds0, dot);
 
@@ -1786,32 +1786,28 @@ public class DiracSimplify0Test {
         assertEquals("4*f_c*G^c*k_d*k^d*p^a*p^b*q_a*q_b-2*f_a*G^a*G^b*p_b*G^c*q_c*k_d*k^d*p^e*q_e-f_a*G^a*k_b*k^b*p_c*p^c*q_d*q^d", ds.transform(t));
         t = parse("f_a*G^a*G^b*k_b*G^c*k_c*G^d*q_d*G^e*q_e*G^f*p_f*G^g*p_g");
         assertEquals("f_a*G^a*k_b*k^b*p_c*p^c*q_d*q^d", ds.transform(t));
-//
-//
-//        int[] a = list.toArray();
-//        Object[][] els = co.toArray(new Object[co.size()][]);
-//        ArraysUtils.quickSort(a, els);
-//
-//        for (int i = 0; i < a.length; ++i) {
-//            System.out.println(a[i]);
-//            System.out.println(Arrays.toString(els[i]));
-//        }
     }
 
-//    static IntArrayList list = new IntArrayList();
-//    static ArrayList<Object[]> co = new ArrayList<>();
+    @Test
+    public void test6() throws Exception {
+        CC.setDefaultOutputFormat(OutputFormat.SimpleRedberry);
+        GeneralIndicesInsertion indicesInsertion = new GeneralIndicesInsertion();
+        CC.current().getParseManager().defaultParserPreprocessors.add(indicesInsertion);
+        indicesInsertion.addInsertionRule(parseSimple("G^a'_b'a"), IndexType.Matrix1);
+        indicesInsertion.addInsertionRule(parseSimple("G5^a'_b'"), IndexType.Matrix1);
+
+        DiracSimplify0 ds = new DiracSimplify0(parseSimple("G_a"), parseSimple("G5"), parse("4"), parse("4"), EXPAND_AND_ELIMINATE);
+
+        DiracTraceTransformation dt = new DiracTraceTransformation(parseSimple("G_a"), parseSimple("G5"), parseSimple("e_abcd"));
+        Tensor t;
+        t = parse("Tr[G_a*G_b*G5*G_c*G_d]*p^b*p^c");
+        TAssert.assertEquals(dt.transform(parse("-k_e*k^e*Tr[G_a*G_c*G5]")), dt.transform(ds.transform(t)));
+    }
 
     private static void assertEquals(String a, Tensor b) {
         Tensor at = parse(a);
         if (at.getIndices().size(IndexType.Matrix1) == 0)
             at = expandAndEliminate(multiplyAndRenameConflictingDummies(parse("d^a'_b'"), at));
-//        try {
         TAssert.assertEquals(at, b);
-//        } catch (AssertionError err) {
-//            list.add(a.length());
-//            co.add(new Object[]{err.getStackTrace()[4], b});
-////            System.out.println(a.length());
-////            System.out.println(err.getStackTrace()[4]);
-//        }
     }
 }

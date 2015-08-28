@@ -22,17 +22,14 @@
  */
 package cc.redberry.physics.feyncalc;
 
-import cc.redberry.core.context.CC;
 import cc.redberry.core.graph.GraphType;
 import cc.redberry.core.graph.PrimitiveSubgraph;
 import cc.redberry.core.graph.PrimitiveSubgraphPartition;
 import cc.redberry.core.indexmapping.IndexMappings;
 import cc.redberry.core.indexmapping.Mapping;
 import cc.redberry.core.indices.Indices;
-import cc.redberry.core.indices.IndicesFactory;
+import cc.redberry.core.indices.SimpleIndices;
 import cc.redberry.core.number.Complex;
-import cc.redberry.core.parser.ParseToken;
-import cc.redberry.core.parser.Parser;
 import cc.redberry.core.tensor.*;
 import cc.redberry.core.transformations.ExpandTensorsAndEliminateTransformation;
 import cc.redberry.core.transformations.Transformation;
@@ -40,11 +37,10 @@ import cc.redberry.core.transformations.TransformationCollection;
 import cc.redberry.core.transformations.substitutions.SubstitutionIterator;
 import cc.redberry.core.utils.IntArrayList;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 import static cc.redberry.core.indexmapping.IndexMappings.anyMappingExists;
+import static cc.redberry.core.indices.IndicesFactory.createSimple;
 import static cc.redberry.core.indices.IndicesUtils.*;
 import static cc.redberry.core.tensor.FastTensors.multiplySumElementsOnFactor;
 import static cc.redberry.core.tensor.StructureOfContractions.getToTensorIndex;
@@ -57,9 +53,10 @@ import static cc.redberry.core.transformations.EliminateMetricsTransformation.el
  */
 public final class SpinorsSimplifyTransformation extends AbstractTransformationWithGammas {
     private final SimpleTensor u, v, uBar, vBar, momentum, mass;
-    private final Expression uSubs, vSubs, uBarSubs, vBarSubs, p2;
+    private final Transformation uSubs, vSubs, uBarSubs, vBarSubs, p2;
     private final Transformation simplifyG5;
     private final Transformation expandAndEliminate;
+    private final Transformation ortohonality;
     private final DiracSimplifyTransformation diracSimplify;
 
     public SpinorsSimplifyTransformation(SimpleTensor gammaMatrix,
@@ -67,7 +64,7 @@ public final class SpinorsSimplifyTransformation extends AbstractTransformationW
                                          SimpleTensor uBar, SimpleTensor vBar,
                                          SimpleTensor momentum, SimpleTensor mass) {
         this(gammaMatrix, null, Complex.FOUR, Complex.FOUR, u, v, uBar, vBar,
-                momentum, mass, Transformation.INDENTITY, true);
+                momentum, mass, Transformation.IDENTITY, true);
     }
 
     public SpinorsSimplifyTransformation(SimpleTensor gammaMatrix, SimpleTensor gamma5,
@@ -89,6 +86,11 @@ public final class SpinorsSimplifyTransformation extends AbstractTransformationW
                                          Transformation simplifications,
                                          boolean diracSimplify) {
         super(gammaMatrix, gamma5, null, dimension, traceOfOne);
+        checkSpinorNotation(u, false);
+        checkSpinorNotation(v, false);
+        checkSpinorNotation(uBar, true);
+        checkSpinorNotation(vBar, true);
+
         this.u = u;
         this.v = v;
         this.uBar = uBar;
@@ -96,32 +98,80 @@ public final class SpinorsSimplifyTransformation extends AbstractTransformationW
         this.momentum = momentum;
         this.mass = mass;
 
-        Transformation match = new TransformationCollection(
-                expression(simpleTensor("cu", IndicesFactory.createSimple(null, setType(matrixType, 0))),
-                        setIndices(uBar, IndicesFactory.createSimple(null, setType(matrixType, 0)))),
-                expression(simpleTensor("u", IndicesFactory.createSimple(null, setState(true, setType(matrixType, 0)))),
-                        setIndices(u, IndicesFactory.createSimple(null, setState(true, setType(matrixType, 0))))),
-                expression(simpleTensor("cv", IndicesFactory.createSimple(null, setType(matrixType, 0))),
-                        setIndices(vBar, IndicesFactory.createSimple(null, setType(matrixType, 0)))),
-                expression(simpleTensor("v", IndicesFactory.createSimple(null, setState(true, setType(matrixType, 0)))),
-                        setIndices(v, IndicesFactory.createSimple(null, setState(true, setType(matrixType, 0))))),
-                expression(simpleTensor("p", IndicesFactory.createSimple(null, setState(true, setType(metricType, 0)))),
-                        setIndices(momentum, IndicesFactory.createSimple(null, setState(true, setType(metricType, 0))))),
-                expression(simpleTensor("mass", IndicesFactory.EMPTY_SIMPLE_INDICES),
-                        setIndices(mass, IndicesFactory.EMPTY_SIMPLE_INDICES)));
-        this.uSubs = (Expression) match.transform(tokenTransformer.transform(uPatt).toTensor());
-        this.uBarSubs = (Expression) match.transform(tokenTransformer.transform(uBarPatt).toTensor());
-        this.vSubs = (Expression) match.transform(tokenTransformer.transform(vPatt).toTensor());
-        this.vBarSubs = (Expression) match.transform(tokenTransformer.transform(vBarPatt).toTensor());
-        this.p2 = (Expression) match.transform(tokenTransformer.transform(p2Patt).toTensor());
-
+        this.uSubs = createSubs(u, false);
+        this.uBarSubs = createBarSubs(uBar, false);
+        this.vSubs = createSubs(v, true);
+        this.vBarSubs = createBarSubs(vBar, true);
+        this.p2 = createP2Subs();
         this.simplifyG5 = gamma5 == null ? null : new SimplifyGamma5Transformation(gammaMatrix, gamma5);
         this.expandAndEliminate = new ExpandTensorsAndEliminateTransformation(simplifications);
         this.diracSimplify = diracSimplify ? new DiracSimplifyTransformation(gammaMatrix, gamma5, new TransformationCollection(simplifications, p2)) : null;
+
+        List<Transformation> ortoh = new ArrayList<>();
+        Expression[] ort = createOrtIdentities(uBar, v);
+        if(ort != null) ortoh.addAll(Arrays.asList(ort));
+        ort = createOrtIdentities(vBar, u);
+        if(ort != null) ortoh.addAll(Arrays.asList(ort));
+        this.ortohonality = new TransformationCollection(ortoh);
+    }
+
+    private void checkSpinorNotation(SimpleTensor spinor, boolean bar) {
+        if (spinor == null)
+            return;
+        SimpleIndices m = spinor.getIndices().getOfType(matrixType);
+        if (m.size() != 1 || bar == getState(m.get(0)))
+            throw new IllegalArgumentException("Illegal notation for spinor " + spinor);
+    }
+
+    private Expression createBarSubs(SimpleTensor spinor, boolean negate) {
+        if (spinor == null) return null;
+        int dummy = spinor.getIndices().get(matrixType, 0), free = dummy + 1;
+        SimpleTensor gamma = simpleTensor(gammaName, createSimple(null,
+                setState(true, dummy), free, setType(metricType, 0)));
+        SimpleTensor mom = setIndices(momentum, createSimple(null, setState(true, setType(metricType, 0))));
+        SimpleTensor rhs = setMatrixIndices0(spinor, free);
+        return expression(multiply(spinor, gamma, mom), negate ? negate(multiply(mass, rhs)) : multiply(mass, rhs));
+    }
+
+    private Expression createSubs(SimpleTensor spinor, boolean negate) {
+        if (spinor == null) return null;
+        int dummy = setState(false, spinor.getIndices().get(matrixType, 0)), free = setState(true, dummy + 1);
+        SimpleTensor gamma = simpleTensor(gammaName, createSimple(null,
+                free, dummy, setType(metricType, 0)));
+        SimpleTensor mom = setIndices(momentum, createSimple(null, setState(true, setType(metricType, 0))));
+        SimpleTensor rhs = setMatrixIndices0(spinor, free);
+        return expression(multiply(spinor, gamma, mom), negate ? negate(multiply(mass, rhs)) : multiply(mass, rhs));
+    }
+
+    private Expression createP2Subs() {
+        return expression(multiply(momentum, setIndices(momentum, momentum.getIndices().getInverted())), pow(mass, 2));
+    }
+
+    private Expression[] createOrtIdentities(SimpleTensor bar, SimpleTensor spinor) {
+        if (bar == null || spinor == null) return null;
+        int dummy = setState(false, bar.getIndices().get(matrixType, 0));
+        Tensor lhs0 = multiply(setMatrixIndices0(bar, dummy), setMatrixIndices0(spinor, inverseIndexState(dummy)));
+        Tensor lhs1 = multiply(
+                setMatrixIndices0(bar, dummy),
+                simpleTensor(gammaName, createSimple(null, inverseIndexState(dummy), dummy + 1, setType(metricType, 0))),
+                setIndices(momentum, createSimple(null, setState(true, setType(metricType, 0)))),
+                setMatrixIndices0(spinor, inverseIndexState(dummy + 1)));
+        return new Expression[]{expression(lhs0, Complex.ZERO), expression(lhs1, Complex.ZERO)};
+    }
+
+    private SimpleTensor setMatrixIndices0(SimpleTensor tensor, int... indices) {
+        int[] newIndices = new int[tensor.getIndices().size()];
+        int j = 0;
+        for (int i = 0; i < tensor.getIndices().size(); ++i)
+            if (getType(tensor.getIndices().get(i)) == matrixType.getType())
+                newIndices[i] = indices[j++];
+            else newIndices[i] = tensor.getIndices().get(i);
+        return setIndices(tensor, createSimple(null, newIndices));
     }
 
     @Override
     public Tensor transform(Tensor tensor) {
+        tensor = ortohonality.transform(tensor);
         SubstitutionIterator iterator = new SubstitutionIterator(tensor);
         Tensor current;
         while ((current = iterator.next()) != null) {
@@ -145,6 +195,7 @@ public final class SpinorsSimplifyTransformation extends AbstractTransformationW
             ArrayList<Tensor> simplified = new ArrayList<>();
             IntArrayList matched = new IntArrayList();
             IntArrayList momentums = new IntArrayList();
+
             gammas:
             for (PrimitiveSubgraph subgraph : partition) {
                 matched.clear();
@@ -281,11 +332,48 @@ public final class SpinorsSimplifyTransformation extends AbstractTransformationW
             this.length = length;
             this.left = left;
         }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            Holder holder = (Holder) o;
+            return index == holder.index && length == holder.length && left == holder.left;
+        }
+
+        @Override
+        public int hashCode() {
+            int result = index;
+            result = 31 * result + length;
+            result = 31 * result + (left ? 1 : 0);
+            return result;
+        }
     }
 
     private final Map<Holder, Tensor> cache = new HashMap<>();
 
     Tensor move(Tensor[] gammas, int index, boolean left) {
+        if (gammas.length == 1)
+            return gammas[0];
+        if ((index == 0 && left) || (index == gammas.length - 1 && !left))
+            return multiply(gammas);
+        Tensor gPart, rest;
+        if (left) {
+            gPart = move0(Arrays.copyOfRange(gammas, 0, index + 1), index, left);
+            rest = multiply(Arrays.copyOfRange(gammas, index + 1, gammas.length));
+        } else {
+            gPart = move0(Arrays.copyOfRange(gammas, index, gammas.length), 0, left);
+            rest = multiply(Arrays.copyOfRange(gammas, 0, index));
+        }
+
+        if (gPart instanceof Sum)
+            gPart = FastTensors.multiplySumElementsOnFactorAndResolveDummies((Sum) gPart, rest);
+        else
+            gPart = multiplyAndRenameConflictingDummies(gPart, rest);
+        return eliminate(gPart);
+    }
+
+    Tensor move0(Tensor[] gammas, int index, boolean left) {
         if (gammas.length == 1)
             return gammas[0];
         if ((index == 0 && left) || (index == gammas.length - 1 && !left))
@@ -334,7 +422,7 @@ public final class SpinorsSimplifyTransformation extends AbstractTransformationW
         sb.put(adj);
 
         swapAdj(gammas, index - 1);
-        sb.put(negate(move(gammas, index - 1, true)));
+        sb.put(negate(move0(gammas, index - 1, true)));
         return sb.build();
     }
 
@@ -364,7 +452,7 @@ public final class SpinorsSimplifyTransformation extends AbstractTransformationW
         sb.put(adj);
 
         swapAdj(gammas, index);
-        sb.put(negate(move(gammas, index + 1, false)));
+        sb.put(negate(move0(gammas, index + 1, false)));
         return sb.build();
     }
 
@@ -380,31 +468,18 @@ public final class SpinorsSimplifyTransformation extends AbstractTransformationW
     }
 
     private SpinorType isSpinor(Tensor st) {
-        if (anyMappingExists(st, u))
+        if (u != null && anyMappingExists(st, u))
             return SpinorType.u;
-        else if (anyMappingExists(st, v))
+        else if (v != null && anyMappingExists(st, v))
             return SpinorType.v;
-        else if (anyMappingExists(st, uBar))
+        else if (uBar != null && anyMappingExists(st, uBar))
             return SpinorType.uBar;
-        else if (anyMappingExists(st, vBar))
+        else if (vBar != null && anyMappingExists(st, vBar))
             return SpinorType.vBar;
         else return null;
     }
 
     private enum SpinorType {
         u, v, uBar, vBar
-    }
-
-
-    private static final Parser parser;
-    private static final ParseToken uPatt, vPatt, uBarPatt, vBarPatt, p2Patt;
-
-    static {
-        parser = CC.current().getParseManager().getParser();
-        uBarPatt = parser.parse("cu_a'*G^aa'_b'*p_a = cu_b'*mass");
-        vBarPatt = parser.parse("cv_a'*G^aa'_b'*p_a = -cv_b'*mass");
-        uPatt = parser.parse("G^aa'_b'*p_a*u^b'= u^a'*mass");
-        vPatt = parser.parse("G^aa'_b'*p_a*v^b'= -v^a'*mass");
-        p2Patt = parser.parse("p_a*p^a = mass**2");
     }
 }

@@ -50,11 +50,11 @@ public final class DiracSimplifyTransformation extends AbstractTransformationWit
     private final Transformation overall;
 
     public DiracSimplifyTransformation(SimpleTensor gammaMatrix) {
-        this(gammaMatrix, null, Complex.FOUR, Complex.FOUR, Transformation.INDENTITY);
+        this(gammaMatrix, null, Complex.FOUR, Complex.FOUR, Transformation.IDENTITY);
     }
 
     public DiracSimplifyTransformation(SimpleTensor gammaMatrix, SimpleTensor gamma5) {
-        this(gammaMatrix, gamma5, Complex.FOUR, Complex.FOUR, Transformation.INDENTITY);
+        this(gammaMatrix, gamma5, Complex.FOUR, Complex.FOUR, Transformation.IDENTITY);
     }
 
     public DiracSimplifyTransformation(SimpleTensor gammaMatrix, SimpleTensor gamma5, Transformation simplifications) {
@@ -75,7 +75,7 @@ public final class DiracSimplifyTransformation extends AbstractTransformationWit
         if (gamma5 != null)
             overall.add(new SimplifyGamma5Transformation(gammaMatrix, gamma5));
         overall.add(new ApplySubstitutions(setupSubs()));
-        overall.add(new DiracSimplify0(gammaMatrix, dimension, traceOfOne, simplifications));
+        overall.add(new DiracSimplify0(gammaMatrix, gamma5, dimension, traceOfOne, simplifications));
         overall.add(this.traceOfOne);
         overall.add(this.deltaTrace);
         this.overall = new TransformationCollection(overall);

@@ -54,8 +54,8 @@ final class DiracSimplify0
         extends AbstractTransformationWithGammas {
     private final Transformation expandAndEliminate;
 
-    public DiracSimplify0(SimpleTensor gammaMatrix, Tensor dimension, Tensor traceOfOne, Transformation simplifications) {
-        super(gammaMatrix, dimension, traceOfOne);
+    public DiracSimplify0(SimpleTensor gammaMatrix, SimpleTensor gamma5, Tensor dimension, Tensor traceOfOne, Transformation simplifications) {
+        super(gammaMatrix, gamma5, null, dimension, traceOfOne);
         this.expandAndEliminate = new ExpandTensorsAndEliminateTransformation(simplifications);
     }
 
@@ -84,7 +84,25 @@ final class DiracSimplify0
 
             gammas:
             for (PrimitiveSubgraph subgraph : partition) {
-                if (subgraph.getGraphType() != GraphType.Cycle && subgraph.getGraphType() != GraphType.Line)
+                if (subgraph.getGraphType() == GraphType.Cycle) {
+                    //check for G5 and move it e.g. left
+                    int g5 = -1;
+                    for (int i = 0; i < subgraph.size(); ++i)
+                        if (isGamma5(pc.get(subgraph.getPosition(i)))) {
+                            g5 = i;
+                            break;
+                        }
+                    if (g5 != -1) {
+                        int[] newPartition = new int[subgraph.size()];
+                        for (int i = 0; i < g5; ++i)
+                            newPartition[i + newPartition.length - g5] = subgraph.getPosition(i);
+                        for (int i = g5; i < newPartition.length; ++i)
+                            newPartition[i - g5] = subgraph.getPosition(i);
+
+                        subgraph = new PrimitiveSubgraph(subgraph.getGraphType(), newPartition);
+                    }
+
+                } else if (subgraph.getGraphType() != GraphType.Line)
                     continue;
 
                 List<Element> couples = new ArrayList<>();

@@ -200,6 +200,12 @@ class RedberryStatic {
                     ExpandAndEliminateTransformation.EXPAND_AND_ELIMINATE)
 
     /**
+     * Expands out product of sums of tensors and permanently eliminates metric and Kronecker deltas
+     */
+    public static final Transformation ExpandTensorsAndEliminate =
+            new TransformationWrapper_SimpleTensors_Or_Transformations(ExpandTensorsAndEliminateTransformation,
+                    ExpandTensorsAndEliminateTransformation.EXPAND_TENSORS_AND_ELIMINATE)
+/**
      * Expands out all products and integer powers in any part of expression.
      * @see ExpandAllTransformation
      */
@@ -370,7 +376,7 @@ class RedberryStatic {
     /**
      * The identity transformation
      */
-    public static final Transformation Identity = Transformation.INDENTITY;
+    public static final Transformation Identity = Transformation.IDENTITY;
 
     public static final class SymmetrizeWrapper {
         public static final SymmetrizeWrapper INSTANCE = new SymmetrizeWrapper()

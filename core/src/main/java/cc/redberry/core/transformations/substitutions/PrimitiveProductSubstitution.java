@@ -212,7 +212,7 @@ class PrimitiveProductSubstitution extends PrimitiveSubstitution {
                     return null;
                 dataBijection = new int[0];
                 currentData = new Tensor[0];
-                mapping = Mapping.IDENTITY;
+                mapping = Mapping.IDENTITY_MAPPING;
             } else {
                 if (fromContent.size() != 1)
                     return null;

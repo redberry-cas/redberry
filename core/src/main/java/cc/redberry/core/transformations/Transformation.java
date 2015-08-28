@@ -37,7 +37,7 @@ public interface Transformation {
     /**
      * Singleton instance for identity transformation.
      */
-    Transformation INDENTITY = new TransformationToStringAble() {
+    Transformation IDENTITY = new TransformationToStringAble() {
         @Override
         public Tensor transform(Tensor t) {
             return t;
@@ -111,13 +111,14 @@ public interface Transformation {
          */
         public static Tensor applyUntilUnchanged(Tensor t, int limit, final Transformation... transformations) {
             Tensor r;
+            int l = limit;
             do {
-                if (limit == 0)
+                if (l == 0)
                     throw new RuntimeException("Steel changed after " + limit + " tries.");
                 r = t;
                 for (Transformation tr : transformations)
                     t = tr.transform(t);
-                --limit;
+                --l;
             } while (r != t);
             return r;
         }

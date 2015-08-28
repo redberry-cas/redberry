@@ -113,4 +113,16 @@ class RedberryPhysicsTest {
             assert dS >> '2*G_a*G_b*G^a'.t == '-2*(D-2)*G_{b}'.t
         }
     }
+
+
+    @Test
+    public void testSpinorsSimplify1() throws Exception {
+        use(Redberry) {
+            defineMatrices 'G_a', 'G5', Matrix1.matrix,
+                    'cu', Matrix1.covector
+
+            def dS = SpinorsSimplify[[uBar: 'cu', momentum: 'p_a', mass: 'm']]
+            assert dS >> 'cu*G^a*p_a'.t == 'm*cu'.t
+        }
+    }
 }

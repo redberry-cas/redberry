@@ -87,6 +87,35 @@ public class SpinorsSimplifyTransformationTest {
 
         t = parse("p^a*G_a*G_b*G_c*u");
         TAssert.assertEquals("m*G_b*G_c*u+2*G_c*u*p_b-2*G_b*u*p_c", sp.transform(t));
+
+        t = parse("p^a*G_a*G_b*G_c*v");
+        TAssert.assertEquals("-m*G_b*G_c*v+2*G_c*v*p_b-2*G_b*v*p_c", sp.transform(t));
+
+        t = parse("cu*p^a*G_a*G_b*G_c*v");
+        TAssert.assertEquals("m*cu*G_b*G_c*v", sp.transform(t));
+    }
+
+
+    @Test
+    public void test1_a() throws Exception {
+        CC.setDefaultOutputFormat(OutputFormat.SimpleRedberry);
+        GeneralIndicesInsertion indicesInsertion = new GeneralIndicesInsertion();
+        CC.current().getParseManager().defaultParserPreprocessors.add(indicesInsertion);
+        indicesInsertion.addInsertionRule(parseSimple("G^a'_b'a"), IndexType.Matrix1);
+        indicesInsertion.addInsertionRule(parseSimple("G5^a'_b'"), IndexType.Matrix1);
+        indicesInsertion.addInsertionRule(parseSimple("cu_b'"), IndexType.Matrix1);
+        indicesInsertion.addInsertionRule(parseSimple("u^b'"), IndexType.Matrix1);
+        indicesInsertion.addInsertionRule(parseSimple("cv_b'"), IndexType.Matrix1);
+        indicesInsertion.addInsertionRule(parseSimple("v^b'"), IndexType.Matrix1);
+
+        SpinorsSimplifyTransformation sp = new SpinorsSimplifyTransformation(parseSimple("G_a"),
+                null, parseSimple("v"),
+                null, null,
+                parseSimple("p_a"), parseSimple("m"));
+
+        Tensor t;
+        t = parse("cu*p^a*G_a*G_b*v");
+        TAssert.assertEquals("2*cu*v*p_{b}+m*cu*G_{b}*v", sp.transform(t));
     }
 
     @Test
@@ -116,10 +145,68 @@ public class SpinorsSimplifyTransformationTest {
         t = parse("cu[p_a]*G_a*p^a*G_b*p^b*u[p_a]");
         TAssert.assertEquals("m**2*cu[p_{a}]*u[p_{a}]", sp.transform(t));
 
+        t = parse("cu[p1_a]*G_a*p^a*G_b*p^b*u[p1_a]");
+        TAssert.assertTrue(t == sp.transform(t));
+
         t = parse("2*p_i*p_j*Tr[G_p*G^q]*cu[p_a]*G_c*G_a*p^a*G_b*p^b*G^c*u[p_a]");
         TAssert.assertEquals("2*p_i*p_j*Tr[G_p*G^q]*4*m**2*cu[p_{a}]*u[p_{a}]", sp.transform(t));
 
         t = parse("2*p_i*p_j*Tr[G^i*G^j]*cu[p_a]*G_c*G_a*p^a*G_b*p^b*G^c*u[p_a]");
         TAssert.assertEquals("2*m**2*4*4*m**2*cu[p_{a}]*u[p_{a}]", sp.transform(t));
     }
+
+    @Test
+    public void test3() throws Exception {
+        CC.setDefaultOutputFormat(OutputFormat.SimpleRedberry);
+        GeneralIndicesInsertion indicesInsertion = new GeneralIndicesInsertion();
+        CC.current().getParseManager().defaultParserPreprocessors.add(indicesInsertion);
+        indicesInsertion.addInsertionRule(parseSimple("G^a'_b'a"), IndexType.Matrix1);
+        indicesInsertion.addInsertionRule(parseSimple("G5^a'_b'"), IndexType.Matrix1);
+        indicesInsertion.addInsertionRule(parseSimple("T^A'_B'"), IndexType.Matrix2);
+
+        indicesInsertion.addInsertionRule(parseSimple("cu_{a'A'}[p1_{m}[charm]]"), IndexType.Matrix1);
+        indicesInsertion.addInsertionRule(parseSimple("cu_{a'A'}[p1_{m}[charm]]"), IndexType.Matrix2);
+
+        indicesInsertion.addInsertionRule(parseSimple("v^b'B'[p2_a[charm]]"), IndexType.Matrix1);
+        indicesInsertion.addInsertionRule(parseSimple("v^b'B'[p2_a[charm]]"), IndexType.Matrix2);
+
+
+        SpinorsSimplifyTransformation sp2 = new SpinorsSimplifyTransformation(parseSimple("G_a"),
+                null, null, parseSimple("cu[p1_a[charm]]"), null,
+                parseSimple("p1_a[charm]"), parseSimple("mc"));
+
+        Tensor t = parse("p1^{a}[charm]*p1^{e}[charm]*v^{b'A'}[p2_{m}[charm]]*G_{a}^{e'}_{b'}*G_{b}^{a'}_{e'}*cu_{a'A'}[p1_{m}[charm]]*k2^{g}*e^{b}_{kge}*k1^{k}");
+        sp2.transform(t);
+        TAssert.assertTrue(true);
+    }
+
+    @Test
+    public void test4() throws Exception {
+        CC.setDefaultOutputFormat(OutputFormat.SimpleRedberry);
+        GeneralIndicesInsertion indicesInsertion = new GeneralIndicesInsertion();
+        CC.current().getParseManager().defaultParserPreprocessors.add(indicesInsertion);
+        indicesInsertion.addInsertionRule(parseSimple("G^a'_b'a"), IndexType.Matrix1);
+        indicesInsertion.addInsertionRule(parseSimple("G5^a'_b'"), IndexType.Matrix1);
+        indicesInsertion.addInsertionRule(parseSimple("cu_b'"), IndexType.Matrix1);
+        indicesInsertion.addInsertionRule(parseSimple("u^b'"), IndexType.Matrix1);
+        indicesInsertion.addInsertionRule(parseSimple("cv_b'"), IndexType.Matrix1);
+        indicesInsertion.addInsertionRule(parseSimple("v^b'"), IndexType.Matrix1);
+
+        SpinorsSimplifyTransformation sp = new SpinorsSimplifyTransformation(parseSimple("G_a"),
+                parseSimple("u"), parseSimple("v"),
+                parseSimple("cu"), parseSimple("cv"),
+                parseSimple("p_a"), parseSimple("m"));
+
+        Tensor t;
+        t = parse("cu*v");
+        TAssert.assertEquals("0", sp.transform(t));
+
+        t = parse("cu*G_a*p^a*v");
+        TAssert.assertEquals("0", sp.transform(t));
+
+        t = parse("cu*G_a*p^a*G_b*p^b*v");
+        TAssert.assertEquals("0", sp.transform(t));
+    }
+
+
 }

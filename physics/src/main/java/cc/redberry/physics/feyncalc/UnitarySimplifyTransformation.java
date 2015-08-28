@@ -48,7 +48,7 @@ import static cc.redberry.physics.feyncalc.TraceUtils.*;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public class UnitarySimplifyTransformation implements Transformation {
+public final class UnitarySimplifyTransformation implements Transformation {
     final Transformation unitarySimplifications;
 
     /**

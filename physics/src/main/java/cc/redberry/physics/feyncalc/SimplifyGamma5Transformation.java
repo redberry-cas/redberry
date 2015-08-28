@@ -67,6 +67,7 @@ public final class SimplifyGamma5Transformation extends AbstractTransformationWi
 
             IntArrayList positionsOfGammas = new IntArrayList();
             List<Tensor> ordered = new ArrayList<>();
+            out:
             for (PrimitiveSubgraph subgraph : partition) {
                 if (subgraph.getGraphType() != GraphType.Cycle && subgraph.getGraphType() != GraphType.Line)
                     continue;
@@ -78,8 +79,18 @@ public final class SimplifyGamma5Transformation extends AbstractTransformationWi
                 for (int i = 0; i < subgraph.size(); ++i)
                     if (isGamma5(pc.get(subgraph.getPosition(i))))
                         ++g5;
-                if (g5 == 0 || (g5 == 1 && isGamma5(pc.get(subgraph.getPosition(subgraph.size() - 1)))))
+                if (g5 == 0)
                     continue;
+                if (g5 == 1) {
+                    if (subgraph.getGraphType() == GraphType.Cycle)
+                        continue;
+                    //check g5 is not last
+                    for (int i = subgraph.size() - 1; i >= 0; --i)
+                        if (isGamma(pc.get(subgraph.getPosition(i))))
+                            break;
+                        else if (isGamma5(pc.get(subgraph.getPosition(i))))
+                            continue out;
+                }
 
                 List<Tensor> gammas = new ArrayList<>();
                 for (int i = 0; i < subgraph.size(); ++i) {
