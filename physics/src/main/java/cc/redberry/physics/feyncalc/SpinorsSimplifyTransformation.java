@@ -68,6 +68,14 @@ public final class SpinorsSimplifyTransformation extends AbstractTransformationW
     }
 
     public SpinorsSimplifyTransformation(SimpleTensor gammaMatrix, SimpleTensor gamma5,
+                                         SimpleTensor u, SimpleTensor v,
+                                         SimpleTensor uBar, SimpleTensor vBar,
+                                         SimpleTensor momentum, SimpleTensor mass) {
+        this(gammaMatrix, gamma5, Complex.FOUR, Complex.FOUR,
+                u, v, uBar, vBar, momentum, mass, Transformation.IDENTITY, true);
+    }
+
+    public SpinorsSimplifyTransformation(SimpleTensor gammaMatrix, SimpleTensor gamma5,
                                          Tensor dimension,
                                          SimpleTensor u, SimpleTensor v,
                                          SimpleTensor uBar, SimpleTensor vBar,
@@ -109,9 +117,9 @@ public final class SpinorsSimplifyTransformation extends AbstractTransformationW
 
         List<Transformation> ortoh = new ArrayList<>();
         Expression[] ort = createOrtIdentities(uBar, v);
-        if(ort != null) ortoh.addAll(Arrays.asList(ort));
+        if (ort != null) ortoh.addAll(Arrays.asList(ort));
         ort = createOrtIdentities(vBar, u);
-        if(ort != null) ortoh.addAll(Arrays.asList(ort));
+        if (ort != null) ortoh.addAll(Arrays.asList(ort));
         this.ortohonality = new TransformationCollection(ortoh);
     }
 
@@ -240,7 +248,7 @@ public final class SpinorsSimplifyTransformation extends AbstractTransformationW
                     int i = 1;
                     for (; i <= matched.first(); ++i) {
                         Tensor r = pc.get(subgraph.getPosition(i));
-                        if (!isGamma(r)) {
+                        if (!isGammaOrGamma5(r)) {
                             gammas = null;
                             break;
                         }
@@ -276,7 +284,7 @@ public final class SpinorsSimplifyTransformation extends AbstractTransformationW
                     int i = subgraph.size() - 2;
                     for (; i >= matched.last(); --i) {
                         Tensor r = pc.get(subgraph.getPosition(i));
-                        if (!isGamma(r)) {
+                        if (!isGammaOrGamma5(r)) {
                             gammas = null;
                             break;
                         }
@@ -325,11 +333,13 @@ public final class SpinorsSimplifyTransformation extends AbstractTransformationW
 
     private static final class Holder {
         final int index, length;
+        final IntArrayList g5s;
         final boolean left;
 
-        public Holder(int index, int length, boolean left) {
+        public Holder(int index, int length, IntArrayList g5s, boolean left) {
             this.index = index;
             this.length = length;
+            this.g5s = g5s;
             this.left = left;
         }
 
@@ -338,7 +348,11 @@ public final class SpinorsSimplifyTransformation extends AbstractTransformationW
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
             Holder holder = (Holder) o;
-            return index == holder.index && length == holder.length && left == holder.left;
+
+            return index == holder.index
+                    && length == holder.length
+                    && left == holder.left
+                    && g5s.equals(holder.g5s);
         }
 
         @Override
@@ -346,6 +360,7 @@ public final class SpinorsSimplifyTransformation extends AbstractTransformationW
             int result = index;
             result = 31 * result + length;
             result = 31 * result + (left ? 1 : 0);
+            result = 31 * result + g5s.hashCode();
             return result;
         }
     }
@@ -380,21 +395,32 @@ public final class SpinorsSimplifyTransformation extends AbstractTransformationW
             return multiply(gammas);
 
         int numberOfGammas = gammas.length;
-        Holder key = new Holder(index, numberOfGammas, left);
+        IntArrayList iFrom = new IntArrayList(numberOfGammas + 2),
+                iTo = new IntArrayList(numberOfGammas + 2),
+                g5s = new IntArrayList();
+
+        for (int i = 0; i < numberOfGammas; ++i) {
+            if (isGamma5(gammas[i]))
+                g5s.add(i);
+            else {
+                iFrom.add(setType(metricType, i));
+                iTo.add(gammas[i].getIndices().get(metricType, 0));
+            }
+        }
+        iFrom.add(setType(matrixType, 0) | 0x80000000);
+        iTo.add(gammas[0].getIndices().getUpper().get(matrixType, 0));
+        iFrom.add(setType(matrixType, numberOfGammas));
+        iTo.add(gammas[numberOfGammas - 1].getIndices().getLower().get(matrixType, 0));
+
+        Holder key = new Holder(index, numberOfGammas, g5s, left);
         Tensor tensor = cache.get(key);
         if (tensor == null)
-            cache.put(key, tensor = left ? toLeft0(createLine(numberOfGammas), index) : toRight0(createLine(numberOfGammas), index));
+            cache.put(key, tensor = left ?
+                    toLeft0(createLine(numberOfGammas, g5s), index)
+                    : toRight0(createLine(numberOfGammas, g5s), index));
 
-        int[] iFrom = new int[numberOfGammas + 2], iTo = new int[numberOfGammas + 2];
-        for (int i = 0; i < numberOfGammas; ++i) {
-            iFrom[i] = setType(metricType, i);
-            iTo[i] = gammas[i].getIndices().get(metricType, 0);
-        }
-        iFrom[numberOfGammas] = setType(matrixType, 0) | 0x80000000;
-        iTo[numberOfGammas] = gammas[0].getIndices().getUpper().get(matrixType, 0);
-        iFrom[numberOfGammas + 1] = setType(matrixType, numberOfGammas);
-        iTo[numberOfGammas + 1] = gammas[numberOfGammas - 1].getIndices().getLower().get(matrixType, 0);
-        return eliminate(ApplyIndexMapping.applyIndexMapping(tensor, new Mapping(iFrom, iTo)));
+        return eliminate(ApplyIndexMapping.applyIndexMapping(tensor,
+                new Mapping(iFrom.toArray(), iTo.toArray())));
     }
 
     Tensor toLeft0(Tensor[] gammas, int index) {
@@ -403,27 +429,35 @@ public final class SpinorsSimplifyTransformation extends AbstractTransformationW
         if (gammas.length == 1)
             return gammas[0];
 
-        SumBuilder sb = new SumBuilder();
+        if (isGamma5(gammas[index]) && isGamma5(gammas[index - 1])) {
+            swapAdj(gammas, index - 1);
+            return toLeft0(gammas, index - 1);
+        } else if (isGamma5(gammas[index]) || isGamma5(gammas[index - 1])) {
+            swapAdj(gammas, index - 1);
+            return negate(toLeft0(gammas, index - 1));
+        } else {
+            SumBuilder sb = new SumBuilder();
 
-        Tensor metric = multiply(Complex.TWO,
-                createMetricOrKronecker(gammas[index - 1].getIndices().get(metricType, 0),
-                        gammas[index].getIndices().get(metricType, 0)));
-        Tensor[] cadj = cutAdj(gammas, index - 1);
-        Tensor adj;
-        if (cadj.length == 0)
-            adj = createMetricOrKronecker(gammas[index - 1].getIndices().getUpper().get(matrixType, 0),
-                    gammas[index].getIndices().getLower().get(matrixType, 0));
-        else if (cadj.length == 1)
-            adj = cadj[0];
-        else
-            adj = multiply(cadj);
-        adj = adj instanceof Sum ?
-                multiplySumElementsOnFactor((Sum) adj, metric) : multiply(adj, metric);
-        sb.put(adj);
+            Tensor metric = multiply(Complex.TWO,
+                    createMetricOrKronecker(gammas[index - 1].getIndices().get(metricType, 0),
+                            gammas[index].getIndices().get(metricType, 0)));
+            Tensor[] cadj = cutAdj(gammas, index - 1);
+            Tensor adj;
+            if (cadj.length == 0)
+                adj = createMetricOrKronecker(gammas[index - 1].getIndices().getUpper().get(matrixType, 0),
+                        gammas[index].getIndices().getLower().get(matrixType, 0));
+            else if (cadj.length == 1)
+                adj = cadj[0];
+            else
+                adj = multiply(cadj);
+            adj = adj instanceof Sum ?
+                    multiplySumElementsOnFactor((Sum) adj, metric) : multiply(adj, metric);
+            sb.put(adj);
 
-        swapAdj(gammas, index - 1);
-        sb.put(negate(move0(gammas, index - 1, true)));
-        return sb.build();
+            swapAdj(gammas, index - 1);
+            sb.put(negate(move0(gammas, index - 1, true)));
+            return sb.build();
+        }
     }
 
     Tensor toRight0(Tensor[] gammas, int index) {
@@ -433,27 +467,56 @@ public final class SpinorsSimplifyTransformation extends AbstractTransformationW
         if (gammas.length == 1)
             return gammas[0];
 
-        SumBuilder sb = new SumBuilder();
+        if (isGamma5(gammas[index]) && isGamma5(gammas[index + 1])) {
+            swapAdj(gammas, index);
+            return toRight0(gammas, index + 1);
+        } else if (isGamma5(gammas[index]) || isGamma5(gammas[index + 1])) {
+            swapAdj(gammas, index);
+            return negate(toRight0(gammas, index + 1));
+        } else {
+            SumBuilder sb = new SumBuilder();
 
-        Tensor metric = multiply(Complex.TWO,
-                createMetricOrKronecker(gammas[index].getIndices().get(metricType, 0),
-                        gammas[index + 1].getIndices().get(metricType, 0)));
-        Tensor[] cadj = cutAdj(gammas, index);
-        Tensor adj;
-        if (cadj.length == 0)
-            adj = createMetricOrKronecker(gammas[index].getIndices().getUpper().get(matrixType, 0),
-                    gammas[index + 1].getIndices().getLower().get(matrixType, 0));
-        else if (cadj.length == 1)
-            adj = cadj[0];
-        else
-            adj = multiply(cadj);
-        adj = adj instanceof Sum ?
-                multiplySumElementsOnFactor((Sum) adj, metric) : multiply(adj, metric);
-        sb.put(adj);
+            Tensor metric = multiply(Complex.TWO,
+                    createMetricOrKronecker(gammas[index].getIndices().get(metricType, 0),
+                            gammas[index + 1].getIndices().get(metricType, 0)));
+            Tensor[] cadj = cutAdj(gammas, index);
+            Tensor adj;
+            if (cadj.length == 0)
+                adj = createMetricOrKronecker(gammas[index].getIndices().getUpper().get(matrixType, 0),
+                        gammas[index + 1].getIndices().getLower().get(matrixType, 0));
+            else if (cadj.length == 1)
+                adj = cadj[0];
+            else
+                adj = multiply(cadj);
+            adj = adj instanceof Sum ?
+                    multiplySumElementsOnFactor((Sum) adj, metric) : multiply(adj, metric);
+            sb.put(adj);
 
-        swapAdj(gammas, index);
-        sb.put(negate(move0(gammas, index + 1, false)));
-        return sb.build();
+            swapAdj(gammas, index);
+            sb.put(negate(move0(gammas, index + 1, false)));
+            return sb.build();
+        }
+    }
+
+    private Tensor[] createLine(final int length, final IntArrayList g5s) {
+        Tensor[] gammas = new Tensor[length];
+        int matrixIndex, metricIndex = 0, u = matrixIndex = setType(matrixType, 0);
+        int j = 0;
+        for (int i = 0; i < length; ++i) {
+            if (j < g5s.size() && g5s.get(j) == i) {
+                gammas[i] = Tensors.simpleTensor(gamma5Name,
+                        createSimple(null,
+                                u | 0x80000000,
+                                u = ++matrixIndex));
+                ++j;
+            } else
+                gammas[i] = Tensors.simpleTensor(gammaName,
+                        createSimple(null,
+                                u | 0x80000000,
+                                u = ++matrixIndex,
+                                setType(metricType, metricIndex++)));
+        }
+        return gammas;
     }
 
     private int withMomentum(int gamma,

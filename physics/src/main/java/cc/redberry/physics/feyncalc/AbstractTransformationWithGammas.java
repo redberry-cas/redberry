@@ -25,6 +25,7 @@ package cc.redberry.physics.feyncalc;
 import cc.redberry.core.context.CC;
 import cc.redberry.core.context.NameAndStructureOfIndices;
 import cc.redberry.core.indices.IndexType;
+import cc.redberry.core.indices.Indices;
 import cc.redberry.core.indices.IndicesFactory;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.parser.ParseTokenTransformer;
@@ -40,8 +41,6 @@ import cc.redberry.core.utils.TensorUtils;
 import static cc.redberry.core.indices.IndicesFactory.createSimple;
 import static cc.redberry.core.indices.IndicesUtils.*;
 import static cc.redberry.core.tensor.Tensors.*;
-import static cc.redberry.core.tensor.Tensors.divide;
-import static cc.redberry.core.tensor.Tensors.pow;
 
 /**
  * @author Dmitry Bolotin
@@ -191,8 +190,8 @@ public abstract class AbstractTransformationWithGammas implements Transformation
 
     protected final void swapAdj(Tensor[] gammas, int j) {
         Tensor t = gammas[j];
-        gammas[j] = setMetricIndex((SimpleTensor) gammas[j], gammas[j + 1].getIndices().get(metricType, 0));
-        gammas[j + 1] = setMetricIndex((SimpleTensor) gammas[j + 1], t.getIndices().get(metricType, 0));
+        gammas[j] = setMatrixIndices((SimpleTensor) gammas[j + 1], gammas[j].getIndices().getOfType(matrixType));
+        gammas[j + 1] = setMatrixIndices((SimpleTensor) t, gammas[j + 1].getIndices().getOfType(matrixType));
     }
 
     protected Tensor[] cutAdj(Tensor[] original, int i) {
@@ -233,6 +232,10 @@ public abstract class AbstractTransformationWithGammas implements Transformation
                             u = ++matrixIndex,
                             setType(metricType, i)));
         return gammas;
+    }
+
+    protected static SimpleTensor setMatrixIndices(SimpleTensor gamma, Indices matrixIndices) {
+        return setMatrixIndices(gamma, matrixIndices.getUpper().get(0), matrixIndices.getLower().get(0));
     }
 
     protected static SimpleTensor setMatrixIndices(SimpleTensor gamma, int matrixUpper, int matrixLower) {

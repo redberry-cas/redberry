@@ -208,5 +208,40 @@ public class SpinorsSimplifyTransformationTest {
         TAssert.assertEquals("0", sp.transform(t));
     }
 
+    @Test
+    public void test5() throws Exception {
+        CC.setDefaultOutputFormat(OutputFormat.SimpleRedberry);
+        GeneralIndicesInsertion indicesInsertion = new GeneralIndicesInsertion();
+        CC.current().getParseManager().defaultParserPreprocessors.add(indicesInsertion);
+        indicesInsertion.addInsertionRule(parseSimple("G^a'_b'a"), IndexType.Matrix1);
+        indicesInsertion.addInsertionRule(parseSimple("G5^a'_b'"), IndexType.Matrix1);
+        indicesInsertion.addInsertionRule(parseSimple("cu_b'"), IndexType.Matrix1);
+        indicesInsertion.addInsertionRule(parseSimple("u^b'"), IndexType.Matrix1);
+        indicesInsertion.addInsertionRule(parseSimple("cv_b'"), IndexType.Matrix1);
+        indicesInsertion.addInsertionRule(parseSimple("v^b'"), IndexType.Matrix1);
+
+        SpinorsSimplifyTransformation sp = new SpinorsSimplifyTransformation(
+                parseSimple("G_a"),parseSimple("G5"),
+                parseSimple("u"), parseSimple("v"),
+                parseSimple("cu"), parseSimple("cv"),
+                parseSimple("p_a"), parseSimple("m"));
+
+        Tensor t;
+        t = parse("G_a*p^a*G5*u");
+        TAssert.assertEquals("-G5*m*u", sp.transform(t));
+        t = parse("G_a*p^a*G5*G5*u");
+        TAssert.assertEquals("m*u", sp.transform(t));
+
+        t = parse("cu*G_a*p^a*G5");
+        TAssert.assertEquals("m*cu*G5", sp.transform(t));
+        t = parse("cu*G5*G_a*p^a*G5");
+        TAssert.assertEquals("-m*cu", sp.transform(t));
+
+        t = parse("G_{c}^{a'}_{d'}*G_{k}^{d'}_{g'}*G_{l}^{g'}_{e'}*v^{f'}*G5^{e'}_{f'}*cu_{a'}*eps^{c}_{a}[h[bottom]]*k2^{k}*k2^{a}*k1^{l}");
+        System.out.println( t);
+
+        System.out.println(parse("G_{a}^{f'}_{b'}*G^{me'}_{f'}*G^{da'}_{e'}*cu_{a'}*v^{b'}*k2^{a}*k2^{k}*p1^{e}*e^{b}_{nke}*k1_{m}*k1^{n}*eps_{bd}"));
+    }
+
 
 }
