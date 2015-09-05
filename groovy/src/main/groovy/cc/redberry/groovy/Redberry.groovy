@@ -879,6 +879,34 @@ class Redberry {
     }
 
     /**
+     * Repeatedly applies transformation until tensor no longer changes.
+     * @param tensor tensor
+     * @param transformation transformation
+     * @return the result
+     * @see Transformation#transform(cc.redberry.core.tensor.Tensor)
+     */
+    static Tensor rightShiftUnsigned(Transformation transformation, Tensor tensor) {
+        return Transformation.Util.applyUntilUnchanged(tensor, 50, transformation);
+    }
+
+    /**
+     * Repeatedly applies transformations until tensor no longer changes.
+     * @param tensor tensor
+     * @param transformations transformations
+     * @return the result
+     * @see Transformation#transform(cc.redberry.core.tensor.Tensor)
+     */
+    static Tensor rightShiftUnsigned(Collection transformations, Tensor tensor) {
+        transformations = transformations.collect { if (it instanceof String) parse(it); else it; }
+        def tr
+        if (isCollectionOfType(transformations, Expression))
+            tr = new SubstitutionTransformation(transformations as Expression[])
+        else
+            tr = new TransformationCollection(transformations)
+        return Transformation.Util.applyUntilUnchanged(tensor, tr)
+    }
+
+    /**
      * Applies transformation to tensor
      * @param tensor tensor
      * @param transformation transformation
