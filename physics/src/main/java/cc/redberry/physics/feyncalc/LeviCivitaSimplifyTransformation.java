@@ -86,7 +86,7 @@ public class LeviCivitaSimplifyTransformation implements Transformation {
      *                       (so e.g. e_abcd*e^abcd = +24)
      */
     public LeviCivitaSimplifyTransformation(SimpleTensor leviCivita, boolean minkowskiSpace) {
-        this(leviCivita, minkowskiSpace, Transformation.INDENTITY, Transformation.INDENTITY);
+        this(leviCivita, minkowskiSpace, Transformation.IDENTITY, Transformation.IDENTITY);
     }
 
 
@@ -100,7 +100,7 @@ public class LeviCivitaSimplifyTransformation implements Transformation {
      * @param simplifications additional transformations applied to each simplified combination of Levi-Civita tensors
      */
     public LeviCivitaSimplifyTransformation(SimpleTensor leviCivita, boolean minkowskiSpace, Transformation simplifications) {
-        this(leviCivita, minkowskiSpace, simplifications, Transformation.INDENTITY);
+        this(leviCivita, minkowskiSpace, simplifications, Transformation.IDENTITY);
     }
 
     /**
@@ -128,13 +128,18 @@ public class LeviCivitaSimplifyTransformation implements Transformation {
         this.tokenTransformer = new ChangeIndicesTypesAndTensorNames(
                 new TypesAndNamesTransformer() {
                     @Override
+                    public int newIndex(int oldIndex, NameAndStructureOfIndices oldDescriptor) {
+                        return oldIndex;
+                    }
+
+                    @Override
                     public IndexType newType(IndexType oldType, NameAndStructureOfIndices old) {
                         return typeOfLeviCivitaIndices;
                     }
 
                     @Override
-                    public String newName(NameAndStructureOfIndices old) {
-                        return old.getName().equals(defaultLeviCivitaName) ? leviCivitaName : old.getName();
+                    public String newName(String oldName, NameAndStructureOfIndices old) {
+                        return oldName.equals(defaultLeviCivitaName) ? leviCivitaName : oldName;
                     }
                 }
         );

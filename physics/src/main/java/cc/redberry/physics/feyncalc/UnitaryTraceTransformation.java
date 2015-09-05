@@ -77,6 +77,11 @@ public final class UnitaryTraceTransformation implements Transformation {
 
         ChangeIndicesTypesAndTensorNames tokenTransformer = new ChangeIndicesTypesAndTensorNames(new TypesAndNamesTransformer() {
             @Override
+            public int newIndex(int oldIndex, NameAndStructureOfIndices oldDescriptor) {
+                return oldIndex;
+            }
+
+            @Override
             public IndexType newType(IndexType oldType, NameAndStructureOfIndices old) {
                 if (oldType == IndexType.LatinLower)
                     return types[0];
@@ -86,8 +91,8 @@ public final class UnitaryTraceTransformation implements Transformation {
             }
 
             @Override
-            public String newName(NameAndStructureOfIndices old) {
-                switch (old.getName()) {
+            public String newName(String oldName, NameAndStructureOfIndices old) {
+                switch (oldName) {
                     case unitaryMatrixName:
                         return unitaryMatrix.getStringName();
                     case structureConstantName:
@@ -98,7 +103,7 @@ public final class UnitaryTraceTransformation implements Transformation {
                         if (!(dimension instanceof Complex))
                             return dimension.toString(OutputFormat.Redberry);
                     default:
-                        return old.getName();
+                        return oldName;
                 }
             }
         });

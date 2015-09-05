@@ -22,7 +22,6 @@
  */
 package cc.redberry.core.utils;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 
 /**
@@ -90,7 +89,7 @@ public final class IntArrayList {
         size++;
     }
 
-    public void addAll(int[] arr) {
+    public void addAll(int... arr) {
         int arrLen = arr.length;
         ensureCapacity(arrLen + size);
         System.arraycopy(arr, 0, data, size, arrLen);
@@ -190,6 +189,14 @@ public final class IntArrayList {
                 replaced = true;
             }
         return replaced;
+    }
+
+    public int first() {
+        return get(0);
+    }
+
+    public int last() {
+        return get(size - 1);
     }
 
     public int[] toArray() {

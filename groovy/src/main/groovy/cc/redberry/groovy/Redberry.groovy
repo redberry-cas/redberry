@@ -770,9 +770,9 @@ class Redberry {
      * @return joined transformation, which will apply both transformations sequentially
      */
     static Transformation and(Transformation tr1, Transformation tr2) {
-        if (tr1 == Transformation.INDENTITY)
+        if (tr1 == Transformation.IDENTITY)
             return tr2
-        if (tr2 == Transformation.INDENTITY)
+        if (tr2 == Transformation.IDENTITY)
             return tr1
         def transformations = [];
         if (tr1 instanceof TransformationCollection)
@@ -795,7 +795,7 @@ class Redberry {
      * @return joined transformation, which will apply both transformations sequentially
      */
     static Transformation and(Transformation tr1, List tr2) {
-        if (tr1 == Transformation.INDENTITY)
+        if (tr1 == Transformation.IDENTITY)
             return new TransformationCollection(tr2)
 
         def transformations = [];
@@ -816,7 +816,7 @@ class Redberry {
      * @return joined transformation, which will apply both transformations sequentially
      */
     static Transformation and(List tr1, Transformation tr2) {
-        if (tr2 == Transformation.INDENTITY)
+        if (tr2 == Transformation.IDENTITY)
             return new TransformationCollection(tr1)
 
         def transformations = [];

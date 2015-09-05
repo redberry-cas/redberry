@@ -25,43 +25,43 @@ package cc.redberry.core.transformations;
 import cc.redberry.core.context.CC;
 import cc.redberry.core.context.OutputFormat;
 import cc.redberry.core.tensor.Tensor;
-import cc.redberry.core.transformations.expand.ExpandTransformation;
+import cc.redberry.core.transformations.expand.ExpandTensorsTransformation;
 import cc.redberry.core.utils.ArraysUtils;
 
 /**
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public final class ExpandAndEliminateTransformation implements TransformationToStringAble {
-    public static final ExpandAndEliminateTransformation EXPAND_AND_ELIMINATE = new ExpandAndEliminateTransformation();
+public final class ExpandTensorsAndEliminateTransformation implements TransformationToStringAble {
+    public static final ExpandTensorsAndEliminateTransformation EXPAND_TENSORS_AND_ELIMINATE = new ExpandTensorsAndEliminateTransformation();
 
     private final Transformation[] transformations;
 
-    private ExpandAndEliminateTransformation() {
+    private ExpandTensorsAndEliminateTransformation() {
         this.transformations = new Transformation[]{EliminateMetricsTransformation.ELIMINATE_METRICS};
     }
 
-    public ExpandAndEliminateTransformation(Transformation... transformations) {
+    public ExpandTensorsAndEliminateTransformation(Transformation... transformations) {
         this.transformations = ArraysUtils.addAll(new Transformation[]{EliminateMetricsTransformation.ELIMINATE_METRICS}, transformations);
     }
 
     @Override
     public Tensor transform(Tensor t) {
-        return Transformation.Util.applySequentially(ExpandTransformation.expand(t, transformations), transformations);
+        return Transformation.Util.applySequentially(new ExpandTensorsTransformation(transformations).transform(t), transformations);
     }
 
-    public static Tensor expandAndEliminate(Tensor t) {
-        return EXPAND_AND_ELIMINATE.transform(t);
+    public static Tensor expandTensorsAndEliminate(Tensor t) {
+        return EXPAND_TENSORS_AND_ELIMINATE.transform(t);
     }
 
 
-    public static Tensor expandAndEliminate(Tensor t, Transformation... transformations) {
+    public static Tensor expandTensorsAndEliminate(Tensor t, Transformation... transformations) {
         return new ExpandAndEliminateTransformation(transformations).transform(t);
     }
 
     @Override
     public String toString(OutputFormat f) {
-        return "ExpandAndEliminate";
+        return "ExpandTensorsAndEliminate";
     }
 
     @Override
