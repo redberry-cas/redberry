@@ -55,8 +55,8 @@ public class DiracSimplifyTransformationTest {
         t = parse("G5*G_a*G_b");
         TAssert.assertEquals("G_a*G_b*G5", ds.transform(t));
 
-        t = parse("G5*G_a*G_b*G_c*G_d*p^a*p^d*G^c*G5*G^b");
-        TAssert.assertEquals("-4*p^{d}*p_{d}", ds.transform(t));
+        t = parse("G5*G_a*G_b*G_c*G_d*p^a*p^d*G^c*G5*G^b + G5");
+        TAssert.assertEquals("-4*p^{d}*p_{d} + G5", ds.transform(t));
     }
 
     @Test
