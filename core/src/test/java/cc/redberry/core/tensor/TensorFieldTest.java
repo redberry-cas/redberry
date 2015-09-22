@@ -113,4 +113,10 @@ public class TensorFieldTest {
 
         Assert.assertTrue(Arrays.deepEquals(iP, asserted));
     }
+
+    @Test
+    public void testNames() {
+        Tensor t1 = parse("F[S_A'^B']"), t2 = parse("F[S^A'_B']");
+        Assert.assertEquals(((TensorField) t1).getName(), ((TensorField) t2).getName());
+    }
 }
