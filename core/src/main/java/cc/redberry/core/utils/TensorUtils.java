@@ -72,7 +72,7 @@ public class TensorUtils {
                 .append("freeIndices = ").append(expr.getIndices().getFree()).append(",\n//  ")
                 .append("indices = ").append(expr.getIndices()).append(",\n//  ")
                 .append("symbolsCount = ").append(symbolsCount(expr)).append(",\n//  ")
-                .append("symbolsAppear = ").append(TensorUtils.getAllDiffSimpleTensors(expr))
+                .append("symbolsAppear = ").append(getAllDiffSimpleTensors(expr))
                 .append("\n//]");
         return sb.toString();
     }
