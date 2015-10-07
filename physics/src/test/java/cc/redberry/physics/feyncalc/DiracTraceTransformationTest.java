@@ -27,15 +27,23 @@ import cc.redberry.core.context.CC;
 import cc.redberry.core.context.ContextManager;
 import cc.redberry.core.indices.IndexType;
 import cc.redberry.core.parser.preprocessor.GeneralIndicesInsertion;
+import cc.redberry.core.tensor.Expression;
 import cc.redberry.core.tensor.SimpleTensor;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.tensor.iterator.FromChildToParentIterator;
 import cc.redberry.core.transformations.EliminateMetricsTransformation;
+import cc.redberry.core.transformations.ExpandAndEliminateTransformation;
 import cc.redberry.core.transformations.Transformation;
 import cc.redberry.core.transformations.expand.ExpandTransformation;
+import cc.redberry.core.transformations.factor.FactorTransformation;
+import cc.redberry.core.utils.ArraysUtils;
 import junit.framework.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static cc.redberry.core.tensor.Tensors.*;
 
@@ -476,6 +484,83 @@ public class DiracTraceTransformationTest {
         Tensor t;
         t = parse("Tr[G_a*G_b + g_ab]");
         TAssert.assertEquals(dTrace.transform(t), "16*g_ab");
+    }
+
+    @Ignore
+    @Test
+    public void test17() throws Exception {
+        List<String> strs = new ArrayList<>();
+        for (int i = 0; i < 10; ++i) {
+            System.out.println(i);
+            CC.reset();
+//            System.out.println( CC.getNameManager().getSeed());
+//            CC.resetTensorNames(8586962076050102392L);
+            setAntiSymmetric("e_abcd");
+            GeneralIndicesInsertion indicesInsertion = new GeneralIndicesInsertion();
+            CC.current().getParseManager().defaultParserPreprocessors.add(indicesInsertion);
+            indicesInsertion.addInsertionRule(parseSimple("G^a'_b'a"), IndexType.Matrix1);
+            indicesInsertion.addInsertionRule(parseSimple("V^a'_b'a"), IndexType.Matrix1);
+            indicesInsertion.addInsertionRule(parseSimple("G5^a'_b'"), IndexType.Matrix1);
+            indicesInsertion.addInsertionRule(parseSimple("D^a'_b'[p_m]"), IndexType.Matrix1);
+
+            Expression D = parseExpression("D[p_m] = p_m*G^m + m");
+            Expression V = parseExpression("V_a = G_a*(1 + v*G5)");
+            Expression[] mandelstam = FeynCalcUtils.setMandelstam(new String[][]{
+                    {"k1_a", "0"}, {"k2_a", "0"},
+                    {"p1_a", "m"}, {"p2_a", "m"}});
+
+            Transformation[] trs = {
+                    EliminateMetricsTransformation.ELIMINATE_METRICS,
+                    parseExpression("e_abcd*k1^a*k2^b*p1^c*p2^d = 0")};
+            trs = ArraysUtils.addAll(trs, mandelstam);
+            Transformation lc = new LeviCivitaSimplifyTransformation(parseSimple("e_abcd"), true);
+            Transformation uRep = parseExpression("u = 2*m**2 -s -t");
+
+            Tensor t;
+            t = parse("Tr[D[p1_{m}+k1_{m}-p2_{m}]*D[p1_{m}-k1_{m}-p2_{m}]*V_{c}*V_{b}*V_{a}*D[p1_{m}-k1_{m}+p2_{m}]]*k2^{b}*k1^{a}*(p1^{c}+k2^{c})");
+            t = D.transform(t);
+            t = V.transform(t);
+            Tensor expected = parse("-(v+1)*(v-1)*(-3*t**3+24*s*m**4+u**3+s*t**2-6*u*s*m**2-s**2*m**2+7*m**2*t**2-3*u**2*m**2-2*m**4*t+3*s**2*t-4*u*m**2*t+3*u**2*t-10*s*m**2*t-s**3+u*s**2+2*u*m**4-u**2*s-u*t**2)");
+            expected = uRep.transform(expected);
+            expected = ExpandTransformation.expand(expected);
+
+            Transformation dTrace;
+            dTrace = new DiracTraceTransformation(
+                    parseSimple("G^{a a'}_b'"),
+                    parseSimple("G5^{a'}_b'"),
+                    parseSimple("e_abcd"),
+                    new Transformation[0]);
+            Tensor r = t;
+            r = dTrace.transform(r);
+            r = ExpandAndEliminateTransformation.expandAndEliminate(r);
+            r = Transformation.Util.applySequentially(r, trs);
+            r = lc.transform(r);
+            r = uRep.transform(r);
+            r = ExpandTransformation.expand(r);
+//            System.out.println(r);
+//            TAssert.assertEquals(expected, r);
+            strs.add(r.toString());
+//
+            dTrace = new DiracTraceTransformation(
+                    parseSimple("G^{a a'}_b'"),
+                    parseSimple("G5^{a'}_b'"),
+                    parseSimple("e_abcd"),
+                    trs);
+            r = t;
+            r = dTrace.transform(r);
+            r = ExpandAndEliminateTransformation.expandAndEliminate(r);
+            r = Transformation.Util.applySequentially(r, trs);
+            r = lc.transform(r);
+            r = uRep.transform(r);
+            r = ExpandTransformation.expand(r);
+//            r = FactorTransformation.factor(r);
+            TAssert.assertEquals(expected, r);
+        }
+
+        CC.reset();
+        for (String str : strs) {
+            System.out.println(parse(str));
+        }
     }
 
     private static Tensor trace(Tensor t) {

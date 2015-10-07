@@ -36,13 +36,14 @@ import cc.redberry.core.tensor.iterator.FromChildToParentIterator;
 import cc.redberry.core.transformations.EliminateMetricsTransformation;
 import cc.redberry.core.transformations.ExpandAndEliminateTransformation;
 import cc.redberry.core.transformations.Transformation;
+import cc.redberry.core.transformations.TransformationCollection;
 import cc.redberry.core.utils.IntArrayList;
 import cc.redberry.core.utils.TensorUtils;
 
 import java.util.HashMap;
 
 import static cc.redberry.core.indices.IndicesFactory.createSimple;
-import static cc.redberry.core.indices.IndicesUtils.*;
+import static cc.redberry.core.indices.IndicesUtils.setType;
 import static cc.redberry.core.tensor.Tensors.*;
 
 /**
@@ -196,7 +197,7 @@ public final class DiracTraceTransformation extends AbstractTransformationWithGa
                                     final Tensor traceOfOne) {
         super(gammaMatrix, gamma5, leviCivita, dimension, traceOfOne);
         this.expandAndEliminate = new ExpandAndEliminateTransformation(simplifications);
-        this.simplifyLeviCivita = new LeviCivitaSimplifyTransformation(leviCivita, minkowskiSpace);
+        this.simplifyLeviCivita = new LeviCivitaSimplifyTransformation(leviCivita, minkowskiSpace, new TransformationCollection(simplifications));
     }
 
 
@@ -214,33 +215,22 @@ public final class DiracTraceTransformation extends AbstractTransformationWithGa
             Product product = (Product) current;
 
             //positions of matrices
-            IntArrayList positionsOfMatrices = new IntArrayList();
-            int sizeOfIndexless = product.sizeOfIndexlessPart();
             PrimitiveSubgraph[] partition
                     = PrimitiveSubgraphPartition.calculatePartition(product.getContent(), matrixType);
 
             //traces (expand brackets)
-            ProductBuilder traces = new ProductBuilder();
-
+            boolean containsTraces = false;
             traces:
             for (PrimitiveSubgraph subgraph : partition) {
                 if (subgraph.getGraphType() != GraphType.Cycle)
                     continue traces;
-
-                int[] positions = subgraph.getPartition();
-                for (int i = positions.length - 1; i >= 0; --i)
-                    positions[i] = positions[i] + sizeOfIndexless;
-
-                positionsOfMatrices.addAll(positions);
-
                 //expand each cycle
-                traces.put(expandAndEliminate.transform(product.select(positions)));
+                containsTraces = true;
             }
 
-            if (positionsOfMatrices.isEmpty())
-                continue;
-            traces.put(product.remove(positionsOfMatrices.toArray()));
-            iterator.set(traces.build());
+            if (containsTraces)
+                iterator.set(multiply(product.getIndexlessSubProduct(),
+                        expandAndEliminate.transform(product.getDataSubProduct())));
         }
 
         return iterator.result();
@@ -414,8 +404,12 @@ public final class DiracTraceTransformation extends AbstractTransformationWithGa
                 current = expandAndEliminate.transform(current);
                 current = deltaTrace.transform(current);
                 current = traceOfOne.transform(current);
-                if (simplifyLeviCivita != null)
+                if (simplifyLeviCivita != null) {
                     current = simplifyLeviCivita.transform(current);
+                    current = expandAndEliminate.transform(current);
+                    current = deltaTrace.transform(current);
+                    current = traceOfOne.transform(current);
+                }
                 iterator.set(current);
             }
         }
