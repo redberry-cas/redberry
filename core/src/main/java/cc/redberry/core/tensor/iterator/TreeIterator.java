@@ -60,4 +60,11 @@ public interface TreeIterator {
      * @return current depth in the tree
      */
     int depth();
+
+    final class Factory {
+        static TreeIterator create(Tensor t, boolean fromChildToParent, TraverseGuide guide) {
+            if (fromChildToParent) return new FromChildToParentIterator(t, guide);
+            else return new FromParentToChildIterator(t, guide);
+        }
+    }
 }

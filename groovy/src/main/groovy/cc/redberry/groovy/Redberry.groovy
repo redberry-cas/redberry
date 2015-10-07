@@ -40,6 +40,7 @@ import cc.redberry.core.tensor.*
 import cc.redberry.core.tensor.iterator.FromChildToParentIterator
 import cc.redberry.core.tensor.iterator.FromParentToChildIterator
 import cc.redberry.core.tensor.iterator.TraverseGuide
+import cc.redberry.core.tensor.iterator.TreeIterator
 import cc.redberry.core.transformations.Transformation
 import cc.redberry.core.transformations.TransformationCollection
 import cc.redberry.core.transformations.substitutions.SubstitutionIterator
@@ -761,6 +762,48 @@ class Redberry {
         return transformParentAfterChild(t, TraverseGuide.ALL, closure);
     }
 
+    /**
+     * Expression-tree traversal and modification without any checks on indices consistency
+     * @param t expression
+     * @param parentAfterChild tree traversal direction
+     * @param closure do stuff
+     * @param guide traverse guide
+     * @return the result
+     * @see SubstitutionIterator
+     * @see TraverseGuide
+     */
+    static Tensor modifyTree(Tensor t, boolean parentAfterChild, TraverseGuide guide, Closure<Tensor> closure) {
+        TreeIterator iterator = TreeIterator.Factory.create(t, parentAfterChild, guide)
+        Tensor c;
+        while ((c = iterator.next()) != null)
+            iterator.set(closure.call(c));
+
+        return iterator.result();
+    }
+
+    /**
+     * Expression-tree traversal and modification without any checks on indices consistency
+     * @param t expression
+     * @param parentAfterChild tree traversal direction
+     * @param closure do stuff
+     * @return the result
+     * @see SubstitutionIterator
+     */
+    static Tensor modifyTree(Tensor t, boolean parentAfterChild, Closure<Tensor> closure) {
+        return modifyTree(t, parentAfterChild, TraverseGuide.ALL, closure);
+    }
+
+    /**
+     * Expression-tree traversal and modification without any checks on indices consistency
+     * @param t expression
+     * @param closure do stuff
+     * @return the result
+     * @see SubstitutionIterator
+     */
+    static Tensor modifyTree(Tensor t, Closure<Tensor> closure) {
+        return modifyTree(t, true, closure);
+    }
+
     ///////////////////////////////////////// TRANSFORMATIONS ///////////////////////////////////////////////////////
 
     /**
@@ -826,6 +869,19 @@ class Redberry {
         else
             transformations << tr2
 
+        new TransformationCollection(transformations)
+    }
+
+    /**
+     * Joins two transformations in a single one, which will apply both transformations sequentially
+     * @param tr1 transformation
+     * @param tr2 transformation
+     * @return joined transformation, which will apply both transformations sequentially
+     */
+    static Transformation and(List tr1, List tr2) {
+        def transformations = [];
+        transformations.addAll(tr1)
+        transformations.addAll(tr2)
         new TransformationCollection(transformations)
     }
 
