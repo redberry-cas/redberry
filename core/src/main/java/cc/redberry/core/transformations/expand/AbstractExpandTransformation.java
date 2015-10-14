@@ -81,6 +81,11 @@ abstract class AbstractExpandTransformation implements TransformationToStringAbl
         this.traverseGuide = traverseGuide;
     }
 
+    protected AbstractExpandTransformation(ExpandOptions options) {
+        this.transformations = new Transformation[]{options.simplifications};
+        this.traverseGuide = options.traverseGuide;
+    }
+
     @Override
     public Tensor transform(Tensor tensor) {
         SubstitutionIterator iterator = new SubstitutionIterator(tensor, traverseGuide);

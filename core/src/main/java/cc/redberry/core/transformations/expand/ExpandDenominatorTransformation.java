@@ -28,6 +28,8 @@ import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.tensor.Tensors;
 import cc.redberry.core.transformations.Transformation;
 import cc.redberry.core.transformations.fractions.NumeratorDenominator;
+import cc.redberry.core.transformations.options.Creator;
+import cc.redberry.core.transformations.options.Options;
 
 /**
  * Expands out products and powers that appear as denominators in expressions.
@@ -50,6 +52,11 @@ public final class ExpandDenominatorTransformation extends AbstractExpandNumerat
      */
     public ExpandDenominatorTransformation(Transformation[] transformations) {
         super(transformations);
+    }
+
+    @Creator
+    public ExpandDenominatorTransformation(@Options GeneralExpandOptions options) {
+        super(options);
     }
 
     private ExpandDenominatorTransformation() {

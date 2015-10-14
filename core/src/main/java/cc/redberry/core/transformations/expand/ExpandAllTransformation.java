@@ -30,6 +30,8 @@ import cc.redberry.core.tensor.Tensors;
 import cc.redberry.core.tensor.iterator.TraverseGuide;
 import cc.redberry.core.transformations.Transformation;
 import cc.redberry.core.transformations.fractions.NumeratorDenominator;
+import cc.redberry.core.transformations.options.Creator;
+import cc.redberry.core.transformations.options.Options;
 
 import static cc.redberry.core.tensor.Tensors.reciprocal;
 
@@ -72,6 +74,11 @@ public final class ExpandAllTransformation extends AbstractExpandTransformation 
         super(transformations, traverseGuide);
     }
 
+    @Creator
+    public ExpandAllTransformation(@Options ExpandOptions options) {
+        super(options);
+    }
+    
     /**
      * Expands out all products and integer powers in any part of expression.
      *

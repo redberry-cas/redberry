@@ -28,6 +28,8 @@ import cc.redberry.core.tensor.*;
 import cc.redberry.core.tensor.iterator.TraverseGuide;
 import cc.redberry.core.transformations.Transformation;
 import cc.redberry.core.transformations.TransformationToStringAble;
+import cc.redberry.core.transformations.options.Creator;
+import cc.redberry.core.transformations.options.Options;
 import cc.redberry.core.transformations.substitutions.SubstitutionIterator;
 
 import java.util.ArrayList;
@@ -92,6 +94,14 @@ public final class ExpandTensorsTransformation implements TransformationToString
         this.transformations = transformations;
         this.traverseGuide = traverseGuide;
     }
+
+    @Creator
+    public ExpandTensorsTransformation(@Options ExpandTensorsOptions options) {
+        this.leaveScalars = options.leaveScalars;
+        this.transformations = new Transformation[]{options.simplifications};
+        this.traverseGuide = options.traverseGuide;
+    }
+
 
     @Override
     public Tensor transform(Tensor tensor) {

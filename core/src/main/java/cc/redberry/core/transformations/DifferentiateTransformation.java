@@ -33,6 +33,9 @@ import cc.redberry.core.indices.SimpleIndices;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.tensor.*;
 import cc.redberry.core.tensor.functions.ScalarFunction;
+import cc.redberry.core.transformations.options.Creator;
+import cc.redberry.core.transformations.options.Option;
+import cc.redberry.core.transformations.options.Options;
 import cc.redberry.core.transformations.substitutions.SubstitutionTransformation;
 import cc.redberry.core.transformations.symmetrization.SymmetrizeTransformation;
 import cc.redberry.core.utils.TensorUtils;
@@ -69,6 +72,12 @@ public final class DifferentiateTransformation implements TransformationToString
     public DifferentiateTransformation(SimpleTensor[] vars, Transformation[] expandAndContract) {
         this.vars = vars;
         this.expandAndContract = expandAndContract;
+    }
+
+    @Creator(vararg = true)
+    public DifferentiateTransformation(SimpleTensor[] vars, @Options DifferentiateOptions options) {
+        this.vars = vars;
+        this.expandAndContract = new Transformation[]{options.simplifications};
     }
 
     @Override
@@ -402,6 +411,18 @@ public final class DifferentiateTransformation implements TransformationToString
         @Override
         int[] getForbidden() {
             return TensorUtils.getAllIndicesNamesT(derivative).toArray();
+        }
+    }
+
+    public static final class DifferentiateOptions {
+        @Option(name = "Simplifications")
+        public Transformation simplifications = IDENTITY;
+
+        public DifferentiateOptions() {
+        }
+
+        public DifferentiateOptions(Transformation simplifications) {
+            this.simplifications = simplifications;
         }
     }
 }

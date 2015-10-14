@@ -33,6 +33,8 @@ import cc.redberry.core.tensor.*;
 import cc.redberry.core.transformations.EliminateMetricsTransformation;
 import cc.redberry.core.transformations.Transformation;
 import cc.redberry.core.transformations.expand.ExpandPort;
+import cc.redberry.core.transformations.options.Creator;
+import cc.redberry.core.transformations.options.Options;
 import cc.redberry.core.transformations.powerexpand.PowerUnfoldTransformation;
 import cc.redberry.core.utils.ArraysUtils;
 import cc.redberry.core.utils.IntArrayList;
@@ -101,6 +103,11 @@ public class CollectTransformation implements Transformation {
      */
     public CollectTransformation(SimpleTensor... patterns) {
         this(patterns, new Transformation[0]);
+    }
+
+    @Creator(vararg = true)
+    public CollectTransformation(SimpleTensor[] patterns, @Options CollectOptions options) {
+        this(patterns, new Transformation[]{options.simplifications}, options.expandSymbolic);
     }
 
     /**
