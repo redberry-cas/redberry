@@ -71,7 +71,7 @@ public final class PermutationOneLineByte implements Permutation {
      */
     public PermutationOneLineByte(boolean antisymmetry, byte... permutation) {
         if (!Permutations.testPermutationCorrectness(permutation, antisymmetry))
-            throw new IllegalArgumentException("Inconsistent permutation.");
+            throw new IllegalArgumentException("Inconsistent permutation: " + Arrays.toString(permutation));
         this.permutation = permutation.clone();
         this.antisymmetry = antisymmetry;
         this.isIdentity = Permutations.isIdentity(permutation);
