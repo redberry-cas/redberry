@@ -28,8 +28,8 @@ import cc.redberry.core.transformations.options.Option;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public class ExpandTensorsOptions extends ExpandOptions {
-    @Option(name = "LeaveScalars")
+public final class ExpandTensorsOptions extends ExpandOptions {
+    @Option(name = "LeaveScalars", index = 3)
     public boolean leaveScalars = false;
 
     public ExpandTensorsOptions() {

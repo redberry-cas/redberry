@@ -65,7 +65,7 @@ public final class PowerExpandTransformation implements TransformationToStringAb
      *
      * @param vars simple tensors
      */
-    @Creator(vararg = true)
+    @Creator(vararg = true, hasArgs = true)
     public PowerExpandTransformation(final SimpleTensor... vars) {
         this(varsToIndicator(vars));
     }

@@ -36,6 +36,8 @@ import cc.redberry.core.transformations.ExpandAndEliminateTransformation;
 import cc.redberry.core.transformations.ExpandTensorsAndEliminateTransformation;
 import cc.redberry.core.transformations.Transformation;
 import cc.redberry.core.transformations.TransformationToStringAble;
+import cc.redberry.core.transformations.options.Creator;
+import cc.redberry.core.transformations.options.Options;
 import cc.redberry.core.transformations.substitutions.SubstitutionIterator;
 import cc.redberry.core.utils.ArraysUtils;
 import cc.redberry.core.utils.IntArray;
@@ -92,6 +94,13 @@ public final class DiracOrderTransformation extends AbstractTransformationWithGa
         super(gammaMatrix, gamma5, null, dimension, traceOfOne);
         this.expandAndEliminate = new ExpandAndEliminateTransformation(simplification);
         this.simplifyG5 = new SimplifyGamma5Transformation(gammaMatrix, gamma5);
+    }
+
+    @Creator
+    public DiracOrderTransformation(@Options DiracOptions options) {
+        super(options.gammaMatrix, options.gamma5, null, options.dimension, options.traceOfOne);
+        this.expandAndEliminate = options.expandAndEliminate;
+        this.simplifyG5 = new SimplifyGamma5Transformation(options.gammaMatrix, options.gamma5);
     }
 
     @Override

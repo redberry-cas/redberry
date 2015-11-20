@@ -59,7 +59,7 @@ public final class ExpandNumeratorTransformation extends AbstractExpandNumerator
     }
 
     @Creator
-    public ExpandNumeratorTransformation(@Options GeneralExpandOptions options) {
+    public ExpandNumeratorTransformation(@Options ExpandOptions options) {
         super(options);
     }
 

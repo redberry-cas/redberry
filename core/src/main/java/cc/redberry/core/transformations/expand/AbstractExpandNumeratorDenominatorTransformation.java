@@ -44,7 +44,7 @@ public abstract class AbstractExpandNumeratorDenominatorTransformation implement
         this(new Transformation[0]);
     }
 
-    protected AbstractExpandNumeratorDenominatorTransformation(GeneralExpandOptions options) {
+    protected AbstractExpandNumeratorDenominatorTransformation(ExpandOptions options) {
         this(new Transformation[]{options.simplifications});
     }
 

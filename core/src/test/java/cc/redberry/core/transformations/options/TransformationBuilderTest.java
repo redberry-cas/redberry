@@ -45,16 +45,16 @@ import static cc.redberry.core.transformations.options.TransformationBuilder.cre
  */
 public class TransformationBuilderTest {
     static class opts {
-        @Option(name = "integer")
+        @Option(name = "integer", index = 0)
         public int integer;
 
-        @Option(name = "requiredInteger", required = true)
+        @Option(name = "requiredInteger", index = 1)
         public int requiredInteger;
 
-        @Option(name = "defaultString")
+        @Option(name = "defaultString", index = 2)
         public String defaultString = "default";
 
-        @Option(name = "string")
+        @Option(name = "string", index = 3)
         public String string;
 
         public opts() {
@@ -91,15 +91,10 @@ public class TransformationBuilderTest {
         }
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void test1() throws Exception {
-        TransformationBuilder.buildFromMap(opts.class, new HashMap<String, Object>());
-    }
-
     @Test
     public void test2() throws Exception {
         Assert.assertEquals(new opts(1, "string"),
-                TransformationBuilder.buildFromMap(opts.class, new HashMap<String, Object>() {{
+                TransformationBuilder.buildOptionsFromMap(opts.class, new HashMap<String, Object>() {{
                     put("requiredInteger", 1);
                     put("string", "string");
                 }}));
@@ -150,5 +145,13 @@ public class TransformationBuilderTest {
                 }});
 
         TAssert.assertEquals(t, d.transform(t));
+    }
+
+
+    @Test
+    public void testExpand2() throws Exception {
+        ExpandTransformation expand = createTransformation(ExpandTransformation.class,
+                Collections.emptyList());
+        TAssert.assertEquals("g_mn*g^mn + g_mn*t^mn", expand.transform(Tensors.parse("g_mn*(g^mn + t^mn)")));
     }
 }

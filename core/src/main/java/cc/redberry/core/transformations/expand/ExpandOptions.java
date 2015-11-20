@@ -23,16 +23,19 @@
 package cc.redberry.core.transformations.expand;
 
 import cc.redberry.core.tensor.iterator.TraverseGuide;
+import cc.redberry.core.transformations.Transformation;
 import cc.redberry.core.transformations.options.Option;
 
 /**
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public class ExpandOptions extends GeneralExpandOptions {
-    @Option(name = "TraverseGuide")
+public class ExpandOptions {
+    @Option(name = "Simplifications", index = 0)
+    public Transformation simplifications = Transformation.IDENTITY;
+
+    @Option(name = "TraverseGuide", index = 1)
     public TraverseGuide traverseGuide = AbstractExpandTransformation.DefaultExpandTraverseGuide;
 
-    public ExpandOptions() {
-    }
+    public ExpandOptions() {}
 }

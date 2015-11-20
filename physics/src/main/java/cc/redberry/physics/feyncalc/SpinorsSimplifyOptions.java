@@ -20,31 +20,36 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
-package cc.redberry.core.transformations.options;
+package cc.redberry.physics.feyncalc;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import cc.redberry.core.tensor.SimpleTensor;
+import cc.redberry.core.transformations.options.Option;
 
 /**
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-@Target({ElementType.FIELD, ElementType.PARAMETER})
-@Retention(RetentionPolicy.RUNTIME)
-public @interface Option {
-    /**
-     * Name for option
-     *
-     * @return option name
-     */
-    String name();
+public class SpinorsSimplifyOptions extends DiracOptions {
+    @Option(name = "u", index = 9)
+    public SimpleTensor u;
 
-    /**
-     * Position of option in the list of options
-     *
-     * @return position of option in the list of options
-     */
-    int index();
+    @Option(name = "v", index = 10)
+    public SimpleTensor v;
+
+    @Option(name = "uBar", index = 11)
+    public SimpleTensor uBar;
+
+    @Option(name = "vBar", index = 12)
+    public SimpleTensor vBar;
+
+    @Option(name = "Momentum", index = 13)
+    public SimpleTensor momentum;
+
+    @Option(name = "Mass", index = 14)
+    public SimpleTensor mass;
+
+    @Option(name = "DiracSimplify", index = 15)
+    public boolean doDiracSimplify = false;
+
+    public SpinorsSimplifyOptions() {}
 }

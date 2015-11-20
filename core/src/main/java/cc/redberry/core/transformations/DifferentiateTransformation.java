@@ -74,7 +74,7 @@ public final class DifferentiateTransformation implements TransformationToString
         this.expandAndContract = expandAndContract;
     }
 
-    @Creator(vararg = true)
+    @Creator(vararg = true, hasArgs = true)
     public DifferentiateTransformation(SimpleTensor[] vars, @Options DifferentiateOptions options) {
         this.vars = vars;
         this.expandAndContract = new Transformation[]{options.simplifications};
@@ -415,7 +415,7 @@ public final class DifferentiateTransformation implements TransformationToString
     }
 
     public static final class DifferentiateOptions {
-        @Option(name = "Simplifications")
+        @Option(name = "Simplifications", index = 0)
         public Transformation simplifications = IDENTITY;
 
         public DifferentiateOptions() {

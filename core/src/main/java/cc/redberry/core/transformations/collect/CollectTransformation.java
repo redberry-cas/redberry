@@ -34,6 +34,7 @@ import cc.redberry.core.transformations.EliminateMetricsTransformation;
 import cc.redberry.core.transformations.Transformation;
 import cc.redberry.core.transformations.expand.ExpandPort;
 import cc.redberry.core.transformations.options.Creator;
+import cc.redberry.core.transformations.options.Option;
 import cc.redberry.core.transformations.options.Options;
 import cc.redberry.core.transformations.powerexpand.PowerUnfoldTransformation;
 import cc.redberry.core.utils.ArraysUtils;
@@ -105,7 +106,7 @@ public class CollectTransformation implements Transformation {
         this(patterns, new Transformation[0]);
     }
 
-    @Creator(vararg = true)
+    @Creator(vararg = true, hasArgs = true)
     public CollectTransformation(SimpleTensor[] patterns, @Options CollectOptions options) {
         this(patterns, new Transformation[]{options.simplifications}, options.expandSymbolic);
     }
@@ -396,5 +397,15 @@ public class CollectTransformation implements Transformation {
                 return to[index];
             return from;
         }
+    }
+
+    public static final class CollectOptions {
+        @Option(name = "Simplifications", index = 0)
+        public Transformation simplifications = Transformation.IDENTITY;
+
+        @Option(name = "ExpandSymbolic", index = 1)
+        public boolean expandSymbolic = true;
+
+        public CollectOptions() {}
     }
 }

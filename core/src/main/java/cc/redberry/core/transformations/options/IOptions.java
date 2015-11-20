@@ -20,19 +20,12 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
-package cc.redberry.core.transformations.expand;
-
-import cc.redberry.core.transformations.Transformation;
-import cc.redberry.core.transformations.options.Option;
+package cc.redberry.core.transformations.options;
 
 /**
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public class GeneralExpandOptions {
-    @Option(name = "Simplifications")
-    public Transformation simplifications = Transformation.IDENTITY;
-
-    public GeneralExpandOptions() {
-    }
+public interface IOptions {
+    void triggerCreate();
 }

@@ -37,6 +37,8 @@ import cc.redberry.core.transformations.EliminateMetricsTransformation;
 import cc.redberry.core.transformations.ExpandAndEliminateTransformation;
 import cc.redberry.core.transformations.Transformation;
 import cc.redberry.core.transformations.TransformationCollection;
+import cc.redberry.core.transformations.options.Creator;
+import cc.redberry.core.transformations.options.Options;
 import cc.redberry.core.utils.IntArrayList;
 import cc.redberry.core.utils.TensorUtils;
 
@@ -53,8 +55,7 @@ import static cc.redberry.core.tensor.Tensors.*;
  * @author Stanislav Poslavsky
  */
 public final class DiracTraceTransformation extends AbstractTransformationWithGammas {
-    private final LeviCivitaSimplifyTransformation simplifyLeviCivita;
-    private final Transformation expandAndEliminate;
+    private final Transformation simplifyLeviCivita, expandAndEliminate;
 
     /**
      * Creates transformation with specified notation for gamma matrix.
@@ -200,6 +201,12 @@ public final class DiracTraceTransformation extends AbstractTransformationWithGa
         this.simplifyLeviCivita = new LeviCivitaSimplifyTransformation(leviCivita, minkowskiSpace, new TransformationCollection(simplifications));
     }
 
+    @Creator
+    public DiracTraceTransformation(@Options DiracOptions options) {
+        super(options.gammaMatrix, options.gamma5, options.leviCivita, options.dimension, options.traceOfOne);
+        this.simplifyLeviCivita = options.simplifyLeviCivita;
+        this.expandAndEliminate = options.expandAndEliminate;
+    }
 
     private Tensor expandDiracStructures(final Tensor t) {
         FromChildToParentIterator iterator = new FromChildToParentIterator(t);

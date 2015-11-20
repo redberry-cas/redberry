@@ -20,31 +20,31 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
-package cc.redberry.core.transformations.options;
+package cc.redberry.physics.feyncalc;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import cc.redberry.core.tensor.SimpleTensor;
+import cc.redberry.core.tensor.Tensor;
+import cc.redberry.core.transformations.options.Option;
+
+import static cc.redberry.core.tensor.Tensors.parse;
+import static cc.redberry.core.tensor.Tensors.parseSimple;
 
 /**
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-@Target({ElementType.FIELD, ElementType.PARAMETER})
-@Retention(RetentionPolicy.RUNTIME)
-public @interface Option {
-    /**
-     * Name for option
-     *
-     * @return option name
-     */
-    String name();
+public class UnitarySimplifyOptions {
+    @Option(name = "Matrix", index = 0)
+    public SimpleTensor unitaryMatrix = parseSimple("T_A");
 
-    /**
-     * Position of option in the list of options
-     *
-     * @return position of option in the list of options
-     */
-    int index();
+    @Option(name = "f", index = 1)
+    public SimpleTensor structureConstant = parseSimple("f_ABC");
+
+    @Option(name = "d", index = 2)
+    public SimpleTensor symmetricConstant = parseSimple("d_ABC");
+
+    @Option(name = "N", index = 3)
+    public Tensor dimension = parse("N");
+
+    public UnitarySimplifyOptions() {}
 }

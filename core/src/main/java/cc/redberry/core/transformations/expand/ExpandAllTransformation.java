@@ -78,7 +78,7 @@ public final class ExpandAllTransformation extends AbstractExpandTransformation 
     public ExpandAllTransformation(@Options ExpandOptions options) {
         super(options);
     }
-    
+
     /**
      * Expands out all products and integer powers in any part of expression.
      *

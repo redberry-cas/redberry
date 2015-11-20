@@ -27,8 +27,8 @@ import cc.redberry.core.context.OutputFormat;
 import cc.redberry.core.tensor.SimpleTensor;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.tensor.Tensors;
-import cc.redberry.core.transformations.Transformation;
 import cc.redberry.core.transformations.TransformationToStringAble;
+import cc.redberry.core.transformations.options.Creator;
 import cc.redberry.core.transformations.substitutions.SubstitutionIterator;
 import cc.redberry.core.utils.Indicator;
 
@@ -67,7 +67,8 @@ public final class PowerUnfoldTransformation implements TransformationToStringAb
      *
      * @param vars patterns
      */
-    public PowerUnfoldTransformation(final SimpleTensor[] vars) {
+    @Creator(vararg = true, hasArgs = true)
+    public PowerUnfoldTransformation(final SimpleTensor... vars) {
         this(Indicator.Utils.iterativeIndicator(varsToIndicator(vars)));
     }
 

@@ -20,22 +20,32 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
-package cc.redberry.core.transformations.collect;
+package cc.redberry.physics.feyncalc;
 
+import cc.redberry.core.tensor.SimpleTensor;
 import cc.redberry.core.transformations.Transformation;
 import cc.redberry.core.transformations.options.Option;
+
+import static cc.redberry.core.tensor.Tensors.parseSimple;
 
 /**
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public class CollectOptions {
-    @Option(name = "Simplifications")
+public class LeviCivitaSimplifyOptions {
+    @Option(name = "LeviCivita", index = 0)
+    public SimpleTensor leviCivita = parseSimple("e_abcd");
+
+    @Option(name = "Minkowski", index = 1)
+    public boolean minkowskiSpace = true;
+
+    @Option(name = "Simplifications", index = 2)
     public Transformation simplifications = Transformation.IDENTITY;
 
-    @Option(name = "ExpandSymbolic")
-    public boolean expandSymbolic = true;
+    @Option(name = "OverallSimplifications", index = 3)
+    public Transformation overallSimplifications = Transformation.IDENTITY;
 
-    public CollectOptions() {
-    }
+    public LeviCivitaSimplifyOptions() {}
+
+    public LeviCivitaSimplifyOptions(boolean minkowskiSpace) {this.minkowskiSpace = minkowskiSpace;}
 }

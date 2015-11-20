@@ -55,7 +55,7 @@ public final class ExpandDenominatorTransformation extends AbstractExpandNumerat
     }
 
     @Creator
-    public ExpandDenominatorTransformation(@Options GeneralExpandOptions options) {
+    public ExpandDenominatorTransformation(@Options ExpandOptions options) {
         super(options);
     }
 

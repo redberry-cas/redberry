@@ -28,11 +28,25 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
+ * Marks constructor as a creator.
+ *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
 @Target(ElementType.CONSTRUCTOR)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Creator {
+    /**
+     * Whether required argument list allows vararg.
+     *
+     * @return whether required argument list allows vararg
+     */
     boolean vararg() default false;
+
+    /**
+     * Whether arguments should be passed
+     *
+     * @return whether there are required arguments
+     */
+    boolean hasArgs() default false;
 }

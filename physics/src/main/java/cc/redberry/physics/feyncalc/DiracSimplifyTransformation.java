@@ -33,6 +33,8 @@ import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.transformations.Transformation;
 import cc.redberry.core.transformations.TransformationCollection;
 import cc.redberry.core.transformations.TransformationToStringAble;
+import cc.redberry.core.transformations.options.Creator;
+import cc.redberry.core.transformations.options.Options;
 import cc.redberry.core.transformations.substitutions.SubstitutionIterator;
 import cc.redberry.core.utils.ArraysUtils;
 
@@ -79,6 +81,11 @@ public final class DiracSimplifyTransformation extends AbstractTransformationWit
         overall.add(this.traceOfOne);
         overall.add(this.deltaTrace);
         this.overall = new TransformationCollection(overall);
+    }
+
+    @Creator
+    public DiracSimplifyTransformation(@Options DiracOptions options) {
+        this(options.gammaMatrix, options.gamma5, options.dimension, options.traceOfOne, options.simplifications);
     }
 
     private Transformation[] setupSubs() {

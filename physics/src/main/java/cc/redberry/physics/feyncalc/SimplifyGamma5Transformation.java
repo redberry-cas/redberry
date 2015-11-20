@@ -31,6 +31,8 @@ import cc.redberry.core.tensor.ProductContent;
 import cc.redberry.core.tensor.SimpleTensor;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.tensor.iterator.FromChildToParentIterator;
+import cc.redberry.core.transformations.options.Creator;
+import cc.redberry.core.transformations.options.Options;
 import cc.redberry.core.utils.IntArrayList;
 
 import java.util.ArrayList;
@@ -47,6 +49,11 @@ import static cc.redberry.core.tensor.Tensors.*;
 public final class SimplifyGamma5Transformation extends AbstractTransformationWithGammas {
     public SimplifyGamma5Transformation(SimpleTensor gammaMatrix, SimpleTensor gamma5) {
         super(gammaMatrix, gamma5, null, null, null);
+    }
+
+    @Creator
+    public SimplifyGamma5Transformation(@Options DiracOptions options) {
+        this(options.gammaMatrix, options.gamma5);
     }
 
     @Override

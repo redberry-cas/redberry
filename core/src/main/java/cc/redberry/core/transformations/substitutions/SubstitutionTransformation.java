@@ -147,7 +147,6 @@ public final class SubstitutionTransformation implements TransformationToStringA
         this.applyIfModified = applyIfModified;
     }
 
-
     /**
      * Returns transposed substitution rule (i.e. from a->b to b->a)
      *

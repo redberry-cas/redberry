@@ -37,7 +37,7 @@ import cc.redberry.core.transformations.options.Creator;
 public final class ReverseTransformation implements TransformationToStringAble {
     private final SingleReverse[] reverse;
 
-    @Creator(vararg = true)
+    @Creator(vararg = true, hasArgs = true)
     public ReverseTransformation(IndexType... types) {
         reverse = new SingleReverse[types.length];
         for (int i = 0; i < types.length; i++)
@@ -64,5 +64,4 @@ public final class ReverseTransformation implements TransformationToStringAble {
     public String toString() {
         return toString(CC.getDefaultOutputFormat());
     }
-
 }
