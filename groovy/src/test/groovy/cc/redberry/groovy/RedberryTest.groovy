@@ -113,22 +113,4 @@ class RedberryTest {
             assert -[[0, -1, -4, -5]].p == [[0, 1, 4, 5]].p
         }
     }
-
-    public static Transformation create(Class tr, List args) {
-        def map = args[args.size() - 1];
-        if (!(map instanceof Map))
-            map = [:]
-        else
-            args = args.subList(0, args.size() - 1)
-        return TransformationBuilder.createTransformation(tr, args, map)
-    }
-
-    @Test
-    public void testaaa1() throws Exception {
-        use(Redberry) {
-            Differentiate[[1, 2, 3]]
-            println create(ExpandTransformation.class, [[Simplifications: EliminateMetrics]])
-        }
-
-    }
 }
