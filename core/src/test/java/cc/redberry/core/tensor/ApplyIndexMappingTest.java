@@ -296,7 +296,7 @@ public class ApplyIndexMappingTest {
     @Test
     public void emptyMapping1() {
         Tensor target = parse("A_mn*(B_m^m+C)*U^mn");
-        target = ApplyIndexMapping.applyIndexMapping(target, Mapping.IDENTITY);
+        target = ApplyIndexMapping.applyIndexMapping(target, Mapping.IDENTITY_MAPPING);
         Tensor standard = parse("A_mn*(B_m^m+C)*U^mn");
         Assert.assertTrue(TensorUtils.equalsExactly(target, standard));
     }
@@ -558,13 +558,13 @@ public class ApplyIndexMappingTest {
     @Test
     public void testApplyAndRenameDummies1() {
         Tensor t;
-        t = applyIndexMappingAndRenameAllDummies(parse("f_e*f^e"), Mapping.IDENTITY, new int[]{0});
+        t = applyIndexMappingAndRenameAllDummies(parse("f_e*f^e"), Mapping.IDENTITY_MAPPING, new int[]{0});
         TAssert.assertEqualsExactly(t, "f_a*f^a");
 
-        t = applyIndexMappingAndRenameAllDummies(parse("f_e*f^e"), Mapping.IDENTITY, new int[]{1});
+        t = applyIndexMappingAndRenameAllDummies(parse("f_e*f^e"), Mapping.IDENTITY_MAPPING, new int[]{1});
         TAssert.assertEqualsExactly(t, "f_b*f^b");
 
-        t = applyIndexMappingAndRenameAllDummies(parse("f_b*f^b"), Mapping.IDENTITY, new int[]{1});
+        t = applyIndexMappingAndRenameAllDummies(parse("f_b*f^b"), Mapping.IDENTITY_MAPPING, new int[]{1});
         TAssert.assertEqualsExactly(t, "f_b*f^b");
     }
 

@@ -278,6 +278,7 @@ public class FactorTransformationTest {
         TAssert.assertEquals(factor(t), "(2+b)/(a*(1 + b))");
     }
 
+    @Ignore//broken JAS
     @Test
     public void test19() {
         for (int i = 0; i < 100; ++i) {
@@ -304,6 +305,16 @@ public class FactorTransformationTest {
         TAssert.assertEquals(factor(t, false), "(a+b)*H^{i}_{i}+(a+b)*F^{i}_{i}");
 
     }
+
+    @Ignore//broken JAS
+    @Test
+    public void test19b() {
+        CC.resetTensorNames(-3825151666224616969L);
+        Tensor t;
+        t = parse("a+b*a+(a**2+2*a*b+b**2)/(a+b)*F^i_i+(a**2+2*a*b+b**2)*(a+b)**(-1)*H^i_i");
+        TAssert.assertEquals(factor(t, true), "(a+b)*H^{i}_{i}+(a+b)*F^{i}_{i}+a+a*b");
+    }
+
 
     @Ignore
     @Test

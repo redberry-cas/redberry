@@ -31,9 +31,13 @@ import cc.redberry.core.number.Complex;
 import cc.redberry.core.tensor.random.RandomTensor;
 import cc.redberry.core.transformations.EliminateMetricsTransformation;
 import cc.redberry.core.utils.TensorUtils;
+import gnu.trove.set.hash.TIntHashSet;
+import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.random.Well1024a;
 import org.junit.Assert;
 import org.junit.Test;
+
+import java.util.Arrays;
 
 import static cc.redberry.core.tensor.Tensors.*;
 
@@ -90,6 +94,12 @@ public class ProductTest {
 
         Assert.assertEquals(t1.getContent().getStructureOfContractionsHashed(), t2.getContent().getStructureOfContractionsHashed());
         Assert.assertEquals(t1.hashCode(), t2.hashCode());
+    }
+
+    @Test
+    public void testHashCode7() {
+        Assert.assertEquals(Tensors.parse("(-212)*D").hashCode(),
+                Tensors.parse("212*D").hashCode());
     }
 
     @Test
@@ -505,5 +515,31 @@ public class ProductTest {
     @Test(expected = InconsistentIndicesException.class)
     public void testInconsistentIndices1() {
         CC.current().getParseManager().getParser().parse("s_a*f_ac").getIndices();
+    }
+
+    @Test
+    public void test1() throws Exception {
+        RandomGenerator rnd = CC.getRandomGenerator();
+        int[] a = new int[30];
+        for (int i = 0; i < a.length; ++i)
+            a[i] = i;
+        for (int i = 0; i < 1000; ++i) {
+            int[] b = new int[rnd.nextInt(a.length)];
+            for (int j = 0; j < b.length; ++j)
+                b[j] = rnd.nextInt(a.length);
+            b = new TIntHashSet(b).toArray();
+            Arrays.sort(b);
+            TAssert.assertTrue(Product.includes(a, b));
+            TAssert.assertTrue(Product.includes(b, a));
+            if (b.length < 2)
+                continue;
+
+            int[] c = b.clone();
+            int s = rnd.nextInt(b.length - 1), t = c[s];
+            c[s] = c[s + 1];
+            c[s + 1] = t;
+            TAssert.assertFalse(Product.includes(a, c));
+            TAssert.assertFalse(Product.includes(c, a));
+        }
     }
 }

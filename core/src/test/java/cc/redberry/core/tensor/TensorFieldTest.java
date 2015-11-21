@@ -26,12 +26,11 @@ import cc.redberry.core.groups.permutations.PermutationGroup;
 import cc.redberry.core.groups.permutations.Permutations;
 import cc.redberry.core.indices.SimpleIndices;
 import cc.redberry.core.parser.ParserIndices;
-import junit.framework.Assert;
+import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.Arrays;
 
-import static cc.redberry.core.TAssert.assertEqualsSymmetries;
 import static cc.redberry.core.TAssert.assertTrue;
 import static cc.redberry.core.tensor.Tensors.*;
 
@@ -112,5 +111,11 @@ public class TensorFieldTest {
                 {ParserIndices.parseSimple("_A"), ParserIndices.parseSimple("_B")}};
 
         Assert.assertTrue(Arrays.deepEquals(iP, asserted));
+    }
+
+    @Test
+    public void testNames() {
+        Tensor t1 = parse("F[S_A'^B']"), t2 = parse("F[S^A'_B']");
+        Assert.assertTrue(((TensorField) t1).getName() != ((TensorField) t2).getName());
     }
 }

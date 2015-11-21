@@ -22,11 +22,17 @@
  */
 package cc.redberry.core.transformations.fractions;
 
+import cc.redberry.core.context.CC;
+import cc.redberry.core.context.OutputFormat;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.tensor.*;
-import cc.redberry.core.tensor.iterator.FromChildToParentIterator;
 import cc.redberry.core.transformations.Transformation;
+import cc.redberry.core.transformations.TransformationToStringAble;
 import cc.redberry.core.transformations.factor.FactorTransformation;
+import cc.redberry.core.transformations.options.Creator;
+import cc.redberry.core.transformations.options.Option;
+import cc.redberry.core.transformations.options.Options;
+import cc.redberry.core.transformations.substitutions.SubstitutionIterator;
 import cc.redberry.core.utils.THashMap;
 import cc.redberry.core.utils.TensorUtils;
 
@@ -45,9 +51,8 @@ import static cc.redberry.core.transformations.CollectScalarFactorsTransformatio
  * @since 1.0
  */
 //TODO review after logical completion of tensors standard form strategy 
-public final class TogetherTransformation implements Transformation {
-
-    public static final TogetherTransformation TOGETHER = new TogetherTransformation();
+public final class TogetherTransformation implements TransformationToStringAble {
+    public static final TogetherTransformation TOGETHER = new TogetherTransformation(IDENTITY);
     public static final TogetherTransformation TOGETHER_FACTOR = new TogetherTransformation(FactorTransformation.FACTOR);
 
     private final Transformation factor;
@@ -56,22 +61,22 @@ public final class TogetherTransformation implements Transformation {
         this.factor = factor;
     }
 
-    public TogetherTransformation() {
-        this(null);
+    @Creator
+    public TogetherTransformation(@Options TogetherOptions options) {
+        this(options.factor);
     }
 
     @Override
     public Tensor transform(Tensor t) {
-        FromChildToParentIterator iterator = new FromChildToParentIterator(t);
+        SubstitutionIterator iterator = new SubstitutionIterator(t);
         Tensor c;
         while ((c = iterator.next()) != null) {
             if (c instanceof Sum)
-                iterator.set(togetherSum(c));
+                iterator.safeSet(togetherSum(c));
             if (c instanceof Product)
-                iterator.set(collectScalarFactorsInProduct((Product) c));
+                iterator.safeSet(collectScalarFactorsInProduct((Product) c));
         }
-        return iterator.result();
-
+        return factor.transform(iterator.result());
     }
 
     private Tensor togetherSum(Tensor t) {
@@ -134,7 +139,7 @@ public final class TogetherTransformation implements Transformation {
         }
         SumBuilder numeratorSumBuilder = new SumBuilder();
         for (List<Tensor> term : numeratorTerms)
-            numeratorSumBuilder.put(collectScalarFactors(Tensors.multiplyAndRenameConflictingDummies(term.toArray(new Tensor[term.size()]))));//TODO ?rename conflicts
+            numeratorSumBuilder.put(collectScalarFactors(Tensors.multiplyAndRenameConflictingDummies(term.toArray(new Tensor[term.size()]))));
         //TODO improve performance
         Tensor[] resultProduct = new Tensor[1 + base.denominators.size()];
         resultProduct[0] = numeratorSumBuilder.build();
@@ -156,8 +161,7 @@ public final class TogetherTransformation implements Transformation {
     }
 
     private SplitStruct splitFraction(Tensor tensor) {
-        if (factor != null)
-            tensor = factor.transform(tensor);
+        tensor = factor.transform(tensor);
 
         THashMap<Tensor, Complex> map = new THashMap<>();
         if (checkPower(tensor)) {
@@ -224,5 +228,22 @@ public final class TogetherTransformation implements Transformation {
         if (!doFactor)
             return together(t);
         else return TOGETHER_FACTOR.transform(t);
+    }
+
+    @Override
+    public String toString(OutputFormat outputFormat) {
+        return "Together";
+    }
+
+    @Override
+    public String toString() {
+        return toString(CC.getDefaultOutputFormat());
+    }
+
+    public static final class TogetherOptions {
+        @Option(name = "Factor", index = 0)
+        public Transformation factor;
+
+        public TogetherOptions() {}
     }
 }

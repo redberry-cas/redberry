@@ -22,12 +22,16 @@
  */
 package cc.redberry.core.transformations.expand;
 
+import cc.redberry.core.context.CC;
+import cc.redberry.core.context.OutputFormat;
 import cc.redberry.core.tensor.Product;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.tensor.Tensors;
 import cc.redberry.core.tensor.iterator.TraverseGuide;
 import cc.redberry.core.transformations.Transformation;
 import cc.redberry.core.transformations.fractions.NumeratorDenominator;
+import cc.redberry.core.transformations.options.Creator;
+import cc.redberry.core.transformations.options.Options;
 
 import static cc.redberry.core.tensor.Tensors.reciprocal;
 
@@ -70,6 +74,11 @@ public final class ExpandAllTransformation extends AbstractExpandTransformation 
         super(transformations, traverseGuide);
     }
 
+    @Creator
+    public ExpandAllTransformation(@Options ExpandOptions options) {
+        super(options);
+    }
+
     /**
      * Expands out all products and integer powers in any part of expression.
      *
@@ -109,5 +118,15 @@ public final class ExpandAllTransformation extends AbstractExpandTransformation 
         if (denExpanded || res != temp)
             return res;
         return product;
+    }
+
+    @Override
+    public String toString(OutputFormat outputFormat) {
+        return "ExpandAll";
+    }
+
+    @Override
+    public String toString() {
+        return toString(CC.getDefaultOutputFormat());
     }
 }

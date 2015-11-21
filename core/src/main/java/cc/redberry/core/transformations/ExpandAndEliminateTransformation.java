@@ -22,25 +22,58 @@
  */
 package cc.redberry.core.transformations;
 
+import cc.redberry.core.context.CC;
+import cc.redberry.core.context.OutputFormat;
 import cc.redberry.core.tensor.Tensor;
+import cc.redberry.core.transformations.expand.ExpandOptions;
 import cc.redberry.core.transformations.expand.ExpandTransformation;
+import cc.redberry.core.transformations.options.Creator;
+import cc.redberry.core.transformations.options.Options;
+import cc.redberry.core.utils.ArraysUtils;
 
 /**
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public class ExpandAndEliminateTransformation implements Transformation {
+public final class ExpandAndEliminateTransformation implements TransformationToStringAble {
     public static final ExpandAndEliminateTransformation EXPAND_AND_ELIMINATE = new ExpandAndEliminateTransformation();
 
+    private final Transformation[] transformations;
+
     private ExpandAndEliminateTransformation() {
+        this.transformations = new Transformation[]{EliminateMetricsTransformation.ELIMINATE_METRICS};
+    }
+
+    public ExpandAndEliminateTransformation(Transformation... transformations) {
+        this.transformations = ArraysUtils.addAll(new Transformation[]{EliminateMetricsTransformation.ELIMINATE_METRICS}, transformations);
+    }
+
+    @Creator
+    public ExpandAndEliminateTransformation(@Options ExpandOptions options) {
+        this.transformations = new Transformation[]{options.simplifications};
     }
 
     @Override
     public Tensor transform(Tensor t) {
-        return expandAndEliminate(t);
+        return Transformation.Util.applySequentially(ExpandTransformation.expand(t, transformations), transformations);
     }
 
     public static Tensor expandAndEliminate(Tensor t) {
-        return EliminateMetricsTransformation.eliminate(ExpandTransformation.expand(t, EliminateMetricsTransformation.ELIMINATE_METRICS));
+        return EXPAND_AND_ELIMINATE.transform(t);
+    }
+
+
+    public static Tensor expandAndEliminate(Tensor t, Transformation... transformations) {
+        return new ExpandAndEliminateTransformation(transformations).transform(t);
+    }
+
+    @Override
+    public String toString(OutputFormat f) {
+        return "ExpandAndEliminate";
+    }
+
+    @Override
+    public String toString() {
+        return toString(CC.getDefaultOutputFormat());
     }
 }

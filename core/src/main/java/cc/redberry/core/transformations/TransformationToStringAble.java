@@ -20,24 +20,13 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
-package cc.redberry.core.transformations.factor;
+package cc.redberry.core.transformations;
 
-import cc.redberry.core.tensor.Tensor;
+import cc.redberry.core.context.ToString;
 
 /**
- * Abstract factorization engine.
- *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public interface FactorizationEngine {
-
-    /**
-     * Factors a multivariate symbolic polynomial.
-     *
-     * @param tensor symbolic (without any indexes) polynomial or rational expression
-     * @return factorization
-     * @throws RuntimeException if specified tensor is not symbolic (without any indexes) expression
-     */
-    Tensor factor(Tensor tensor);
+public interface TransformationToStringAble extends Transformation, ToString {
 }

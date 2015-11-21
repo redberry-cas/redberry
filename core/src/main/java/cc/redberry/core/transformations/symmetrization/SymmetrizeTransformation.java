@@ -33,6 +33,9 @@ import cc.redberry.core.number.Complex;
 import cc.redberry.core.number.Rational;
 import cc.redberry.core.tensor.*;
 import cc.redberry.core.transformations.Transformation;
+import cc.redberry.core.transformations.options.Creator;
+import cc.redberry.core.transformations.options.Option;
+import cc.redberry.core.transformations.options.Options;
 import cc.redberry.core.utils.ArrayIterator;
 import cc.redberry.core.utils.TensorUtils;
 
@@ -70,6 +73,11 @@ public final class SymmetrizeTransformation implements Transformation {
         Arrays.sort(this.sortedIndicesNames);
         this.indicesGroup = indices.getSymmetries().getPermutationGroup();
         this.multiplyBySymmetryFactor = multiplyBySymmetryFactor;
+    }
+
+    @Creator(hasArgs = true)
+    public SymmetrizeTransformation(SimpleIndices indices, @Options SymmetrizeOptions options) {
+        this(indices, options.multiplyBySymmetryFactor);
     }
 
     private static final BigInteger SMALL_ORDER_MAX_VALUE = BigInteger.valueOf(1_000);
@@ -155,5 +163,12 @@ public final class SymmetrizeTransformation implements Transformation {
         PermutationGroup result = allIndices.getSymmetries().getPermutationGroup().
                 pointwiseStabilizerRestricted(stabilizedPoints);
         return result.conjugate(Permutations.createPermutation(mapping));
+    }
+
+    public static final class SymmetrizeOptions {
+        @Option(name = "SymmetryFactor", index = 0)
+        public boolean multiplyBySymmetryFactor = true;
+
+        public SymmetrizeOptions() {}
     }
 }

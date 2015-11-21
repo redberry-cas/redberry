@@ -22,6 +22,8 @@
  */
 package cc.redberry.core.transformations;
 
+import cc.redberry.core.context.CC;
+import cc.redberry.core.context.OutputFormat;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.tensor.iterator.FromChildToParentIterator;
@@ -33,7 +35,7 @@ import cc.redberry.core.tensor.iterator.FromChildToParentIterator;
  * @author Stanislav Poslavsky
  * @since 1.0
  */
-public final class ComplexConjugateTransformation implements Transformation {
+public final class ComplexConjugateTransformation implements TransformationToStringAble {
     /**
      * Singleton instance.
      */
@@ -50,5 +52,15 @@ public final class ComplexConjugateTransformation implements Transformation {
             if (c instanceof Complex)
                 iterator.set(((Complex) c).conjugate());
         return iterator.result();
+    }
+
+    @Override
+    public String toString(OutputFormat f) {
+        return "Conjugate";
+    }
+
+    @Override
+    public String toString() {
+        return toString(CC.getDefaultOutputFormat());
     }
 }

@@ -54,10 +54,15 @@ public final class PowerFactory implements TensorFactory {
 
             Complex a = (Complex) argument;
             Complex p = (Complex) power;
-            Complex result = Exponentiation.exponentiateIfPossible(a, p);
 
+            Complex result = Exponentiation.exponentiateIfPossible(a, p);
             if (result != null)
                 return result;
+
+            if (a.isMinusOne() && p.equals(Complex.ONE_HALF))
+                return Complex.IMAGINARY_UNIT;
+            if (a.isMinusOne() && p.equals(Complex.MINUS_ONE_HALF))
+                return Complex.IMAGINARY_UNIT.negate();
         }
         if (TensorUtils.isOne(power))
             return argument;

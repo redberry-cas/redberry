@@ -34,6 +34,8 @@ import junit.framework.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import java.nio.charset.Charset;
+
 import static cc.redberry.core.tensor.Tensors.*;
 
 /**
@@ -569,5 +571,11 @@ public class ParserTest {
     public void testSet1() throws Exception {
         Tensor t = parse("D[x] := x");
         Assert.assertEquals("D[x] = x", t.toString());
+    }
+
+    @Test
+    public void testUnicode1() throws Exception {
+        TAssert.assertEquals(parse("F_\\mu\\nu*(A^\\alpha\\beta + M_\\mu * N^\\mu\\alpha\\beta)"),
+                parse("F_μν*(A^αβ + M_μ * N^μαβ)"));
     }
 }

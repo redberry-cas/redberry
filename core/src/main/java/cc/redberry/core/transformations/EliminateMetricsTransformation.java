@@ -22,6 +22,8 @@
  */
 package cc.redberry.core.transformations;
 
+import cc.redberry.core.context.CC;
+import cc.redberry.core.context.OutputFormat;
 import cc.redberry.core.indexmapping.IndexMapping;
 import cc.redberry.core.indices.SimpleIndices;
 import cc.redberry.core.tensor.*;
@@ -35,7 +37,7 @@ import java.util.*;
  * @author Stanislav Poslavsky
  * @since 1.0
  */
-public final class EliminateMetricsTransformation implements Transformation {
+public final class EliminateMetricsTransformation implements TransformationToStringAble {
     /**
      * Singleton instance.
      */
@@ -147,7 +149,7 @@ public final class EliminateMetricsTransformation implements Transformation {
         }
     }
 
-    private static interface MetricsChain {
+    private interface MetricsChain {
 
         boolean mergeWith(MetricWrapper mk);
 
@@ -379,5 +381,15 @@ public final class EliminateMetricsTransformation implements Transformation {
             final MetricWrapper other = (MetricWrapper) obj;
             return Arrays.equals(this.indices, other.indices);
         }
+    }
+
+    @Override
+    public String toString(OutputFormat f) {
+        return "EliminateMetrics";
+    }
+
+    @Override
+    public String toString() {
+        return toString(CC.getDefaultOutputFormat());
     }
 }

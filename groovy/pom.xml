@@ -25,7 +25,7 @@
 
     <groupId>cc.redberry</groupId>
     <artifactId>groovy</artifactId>
-    <version>1.1.8</version>
+    <version>1.1.9</version>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -93,7 +93,7 @@
         </developer>
     </developers>
 
-    <scm><connection>scm:hg:http://bitbucket.org/redberry/redberry-groovy</connection><tag>v1.1.8</tag><url>https://bitbucket.org/redberry/redberry-groovy/src/?at=v1.1.8</url></scm>
+    <scm><connection>scm:hg:http://bitbucket.org/redberry/redberry-groovy</connection><tag>v1.1.9</tag><url>https://bitbucket.org/redberry/redberry-groovy/src/?at=v1.1.9</url></scm>
 
     <issueManagement>
         <system>YouTRACK</system>
@@ -191,6 +191,8 @@
                 <version>3.2</version>
                 <configuration>
                     <compilerId>groovy-eclipse-compiler</compilerId>
+                    <source>1.7</source>
+                    <target>1.7</target>
                 </configuration>
                 <dependencies>
                     <dependency>
@@ -251,19 +253,19 @@
         <dependency>
             <groupId>cc.redberry</groupId>
             <artifactId>core</artifactId>
-            <version>1.1.8</version>
+            <version>1.1.9</version>
         </dependency>
         <dependency>
             <groupId>cc.redberry</groupId>
             <artifactId>core</artifactId>
-            <version>1.1.8</version>
+            <version>1.1.9</version>
             <type>test-jar</type>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>cc.redberry</groupId>
             <artifactId>physics</artifactId>
-            <version>1.1.8</version>
+            <version>1.1.9</version>
         </dependency>
         <dependency>
             <groupId>org.codehaus.groovy</groupId>
@@ -275,6 +277,11 @@
             <artifactId>junit</artifactId>
             <version>4.8.2</version>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.codehaus.groovy</groupId>
+            <artifactId>groovy-backports-compat23</artifactId>
+            <version>2.3.5</version>
         </dependency>
     </dependencies>
 </project>

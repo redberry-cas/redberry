@@ -239,7 +239,7 @@ public final class Rational extends Real implements Serializable {
 
     @Override
     public int hashCode() {
-        return fraction.abs().hashCode();
+        return fraction.getNumerator().hashCode() * fraction.getDenominator().hashCode();
     }
 
     @Override

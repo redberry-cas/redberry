@@ -22,6 +22,8 @@
  */
 package cc.redberry.core.transformations;
 
+import cc.redberry.core.context.CC;
+import cc.redberry.core.context.OutputFormat;
 import cc.redberry.core.indexgenerator.IndexGeneratorImpl;
 import cc.redberry.core.indexmapping.Mapping;
 import cc.redberry.core.indices.Indices;
@@ -31,6 +33,9 @@ import cc.redberry.core.indices.SimpleIndices;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.tensor.*;
 import cc.redberry.core.tensor.functions.ScalarFunction;
+import cc.redberry.core.transformations.options.Creator;
+import cc.redberry.core.transformations.options.Option;
+import cc.redberry.core.transformations.options.Options;
 import cc.redberry.core.transformations.substitutions.SubstitutionTransformation;
 import cc.redberry.core.transformations.symmetrization.SymmetrizeTransformation;
 import cc.redberry.core.utils.TensorUtils;
@@ -49,7 +54,7 @@ import static cc.redberry.core.utils.ArraysUtils.addAll;
  * @author Stanislav Poslavsky
  * @since 1.0
  */
-public final class DifferentiateTransformation implements Transformation {
+public final class DifferentiateTransformation implements TransformationToStringAble {
 
     private final SimpleTensor[] vars;
     private final Transformation[] expandAndContract;
@@ -69,9 +74,30 @@ public final class DifferentiateTransformation implements Transformation {
         this.expandAndContract = expandAndContract;
     }
 
+    @Creator(vararg = true, hasArgs = true)
+    public DifferentiateTransformation(SimpleTensor[] vars, @Options DifferentiateOptions options) {
+        this.vars = vars;
+        this.expandAndContract = new Transformation[]{options.simplifications};
+    }
+
     @Override
     public Tensor transform(Tensor t) {
         return differentiate(t, expandAndContract, vars);
+    }
+
+    @Override
+    public String toString(OutputFormat f) {
+        StringBuilder sb = new StringBuilder().append("Differentiate[");
+        for (int i = 0; ; ++i) {
+            sb.append(vars[i].toString(f));
+            if (i == vars.length)
+                return sb.append("]").toString();
+        }
+    }
+
+    @Override
+    public String toString() {
+        return toString(CC.getDefaultOutputFormat());
     }
 
     /**
@@ -385,6 +411,18 @@ public final class DifferentiateTransformation implements Transformation {
         @Override
         int[] getForbidden() {
             return TensorUtils.getAllIndicesNamesT(derivative).toArray();
+        }
+    }
+
+    public static final class DifferentiateOptions {
+        @Option(name = "Simplifications", index = 0)
+        public Transformation simplifications = IDENTITY;
+
+        public DifferentiateOptions() {
+        }
+
+        public DifferentiateOptions(Transformation simplifications) {
+            this.simplifications = simplifications;
         }
     }
 }

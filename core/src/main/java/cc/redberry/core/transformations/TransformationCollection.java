@@ -22,12 +22,13 @@
  */
 package cc.redberry.core.transformations;
 
+import cc.redberry.core.context.CC;
+import cc.redberry.core.context.OutputFormat;
+import cc.redberry.core.context.ToString;
 import cc.redberry.core.tensor.Tensor;
+import cc.redberry.core.utils.ArrayIterator;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 /**
  * Collection of transformation. The transformations in this collection will be applied sequentially.
@@ -35,7 +36,7 @@ import java.util.List;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public final class TransformationCollection implements Transformation {
+public final class TransformationCollection implements TransformationToStringAble, Iterable<Transformation> {
     private final Transformation[] transformations;
 
     /**
@@ -74,14 +75,27 @@ public final class TransformationCollection implements Transformation {
     }
 
     @Override
-    public String toString() {
+    public String toString(OutputFormat f) {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; ; ++i) {
-            sb.append(transformations[i]);
+            if (transformations[i] instanceof ToString)
+                sb.append(((ToString) transformations[i]).toString(f));
+            else
+                sb.append(transformations[i]);
             if (i == transformations.length - 1)
                 break;
-            sb.append("\n");
+            sb.append(" & ");
         }
         return sb.toString();
+    }
+
+    @Override
+    public String toString() {
+        return toString(CC.getDefaultOutputFormat());
+    }
+
+    @Override
+    public Iterator<Transformation> iterator() {
+        return new ArrayIterator<>(transformations);
     }
 }

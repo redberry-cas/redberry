@@ -759,6 +759,59 @@ public final class ArraysUtils {
     }
 
     /**
+     * Sorts the specified target array of objects into ascending order, according to the natural ordering of its
+     * elements using insertion sort algorithm and simultaneously permutes the {@code coSort} objects array in the same
+     * way then specified target array. This sort guarantee O(n^2) performance in the worst case and O(n) in the best
+     * case (nearly sorted input). <p/> <p> This sort is the best choice for small arrays with elements number < 100.
+     * <p/> <p>This sort is guaranteed to be <i>stable</i>: equal elements will not be reordered as a result of the
+     * sort; <i>adaptive</i>: performance adapts to the initial order of elements and <i>in-place</i>: requires constant
+     * amount of additional space.
+     *
+     * @param target the array to be sorted
+     * @param coSort the array which will be permuted in the same way as the target array during sorting
+     *               procedure
+     * @throws IllegalArgumentException if coSort length less then target length.
+     */
+    public static <T extends Comparable<T>> void insertionSort(T[] target, int[] coSort) {
+        insertionSort(target, 0, target.length, coSort);
+    }
+
+    /**
+     * Sorts the specified target array of objects into ascending order, according to the natural ordering of its
+     * elements using insertion sort algorithm and simultaneously permutes the {@code coSort} objects array in the same
+     * way then specified target array. This sort guarantee O(n^2) performance in the worst case and O(n) in the best
+     * case (nearly sorted input). The range to be sorted extends from index <tt>fromIndex</tt>, inclusive, to index
+     * <tt>toIndex</tt>, exclusive. (If <tt>fromIndex==toIndex</tt>, the range to be sorted is empty.) <p/> <p> This
+     * sort is the best choice for small arrays with elements number < 100. <p/> <p>This sort is guaranteed to be
+     * <i>stable</i>: equal elements will not be reordered as a result of the sort; <i>adaptive</i>: performance adapts
+     * to the initial order of elements and <i>in-place</i>: requires constant amount of additional space.
+     *
+     * @param target    the array to be sorted
+     * @param fromIndex the index of the first element (inclusive) to be sorted
+     * @param toIndex   the index of the last element (exclusive) to be sorted
+     * @param coSort    the array which will be permuted in the same way as the target array, during
+     *                  sorting procedure
+     * @throws IllegalArgumentException       if <tt>fromIndex &gt; toIndex</tt>
+     * @throws ArrayIndexOutOfBoundsException if <tt>fromIndex &lt; 0</tt> or <tt>toIndex &gt; target.length</tt> or
+     *                                        <tt>toIndex &gt; coSort.length</tt>
+     */
+    public static <T extends Comparable<T>> void insertionSort(T[] target, int fromIndex, int toIndex, int[] coSort) {
+        int i, j;
+        T key;
+        int keyC;
+        for (i = fromIndex + 1; i < toIndex; i++) {
+            key = target[i];
+            keyC = coSort[i];
+            for (j = i; j > fromIndex && target[j - 1].compareTo(key) > 0; j--) {
+                target[j] = target[j - 1];
+                coSort[j] = coSort[j - 1];
+            }
+            target[j] = key;
+            coSort[j] = keyC;
+        }
+    }
+
+    /**
      * Sorts the specified array of ints into ascending order using TimSort algorithm and simultaneously permutes the
      * {@code coSort} ints array in the same way as the target array. <p/> <p> NOTE: using of this method is
      * very good for large arrays with more then 100 elements, in other case using of insertion sort is highly

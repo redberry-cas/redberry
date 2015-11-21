@@ -136,6 +136,14 @@ public final class Context {
     }
 
     /**
+     * Resets all definitions.
+     */
+    public synchronized void reset() {
+        resetTensorNames();
+        parseManager.reset();
+    }
+
+    /**
      * This method resets all tensor names in the namespace and sets a
      * specified seed to the {@link NameManager}. If this method is invoked
      * with constant seed before any interactions with Redberry, further

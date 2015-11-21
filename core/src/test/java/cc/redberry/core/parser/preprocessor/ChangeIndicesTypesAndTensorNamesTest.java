@@ -52,13 +52,18 @@ public class ChangeIndicesTypesAndTensorNamesTest {
         ParseToken token = CC.current().getParseManager().getParser().parse(str);
         TypesAndNamesTransformer transformer = new TypesAndNamesTransformer() {
             @Override
+            public int newIndex(int oldIndex, NameAndStructureOfIndices oldDescriptor) {
+                return oldIndex;
+            }
+
+            @Override
             public IndexType newType(IndexType oldType, NameAndStructureOfIndices old) {
                 return oldType == LatinLower ? LatinUpper : oldType;
             }
 
             @Override
-            public String newName(NameAndStructureOfIndices old) {
-                return old.getName().equals("f") ? "k" : old.getName();
+            public String newName(String oldName, NameAndStructureOfIndices old) {
+                return oldName.equals("f") ? "k" : old.getName();
             }
         };
         token = new ChangeIndicesTypesAndTensorNames(transformer).transform(token);

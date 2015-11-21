@@ -38,6 +38,8 @@ import cc.redberry.core.tensor.*;
 import cc.redberry.core.tensor.iterator.FromChildToParentIterator;
 import cc.redberry.core.transformations.ExpandAndEliminateTransformation;
 import cc.redberry.core.transformations.Transformation;
+import cc.redberry.core.transformations.options.Creator;
+import cc.redberry.core.transformations.options.Options;
 import cc.redberry.core.utils.IntArrayList;
 
 import static cc.redberry.core.tensor.Tensors.multiply;
@@ -58,6 +60,11 @@ public final class UnitaryTraceTransformation implements Transformation {
     private final Expression singleTrace;
     private final Transformation simplifications;
 
+    @Creator
+    public UnitaryTraceTransformation(@Options UnitarySimplifyOptions options) {
+        this(options.unitaryMatrix, options.structureConstant, options.symmetricConstant, options.dimension);
+    }
+
     /**
      * Creates transformation with given definitions.
      *
@@ -77,6 +84,11 @@ public final class UnitaryTraceTransformation implements Transformation {
 
         ChangeIndicesTypesAndTensorNames tokenTransformer = new ChangeIndicesTypesAndTensorNames(new TypesAndNamesTransformer() {
             @Override
+            public int newIndex(int oldIndex, NameAndStructureOfIndices oldDescriptor) {
+                return oldIndex;
+            }
+
+            @Override
             public IndexType newType(IndexType oldType, NameAndStructureOfIndices old) {
                 if (oldType == IndexType.LatinLower)
                     return types[0];
@@ -86,8 +98,8 @@ public final class UnitaryTraceTransformation implements Transformation {
             }
 
             @Override
-            public String newName(NameAndStructureOfIndices old) {
-                switch (old.getName()) {
+            public String newName(String oldName, NameAndStructureOfIndices old) {
+                switch (oldName) {
                     case unitaryMatrixName:
                         return unitaryMatrix.getStringName();
                     case structureConstantName:
@@ -98,7 +110,7 @@ public final class UnitaryTraceTransformation implements Transformation {
                         if (!(dimension instanceof Complex))
                             return dimension.toString(OutputFormat.Redberry);
                     default:
-                        return old.getName();
+                        return oldName;
                 }
             }
         });
@@ -151,7 +163,7 @@ public final class UnitaryTraceTransformation implements Transformation {
                     for (int i = partition.length - 1; i >= 0; --i) {
                         partition[i] = sizeOfIndexless + partition[i];
                         //contains not only unitary matrices
-                        if (!isUnitaryMatrix(product.get(partition[i]), unitaryMatrix))
+                        if (!isUnitaryMatrixOrOne(product.get(partition[i]), unitaryMatrix))
                             continue out;
                     }
 
@@ -183,8 +195,12 @@ public final class UnitaryTraceTransformation implements Transformation {
         return newTensor;
     }
 
-    private static final boolean isUnitaryMatrix(Tensor tensor, int unitaryMatrix) {
-        return tensor instanceof SimpleTensor && ((SimpleTensor) tensor).getName() == unitaryMatrix;
+    private static boolean isUnitaryMatrixOrOne(Tensor tensor, int unitaryMatrix) {
+        if (tensor instanceof SimpleTensor) {
+            int name = ((SimpleTensor) tensor).getName();
+            return name == unitaryMatrix || CC.getNameManager().isKroneckerOrMetric(name);
+        }
+        return false;
     }
 
     /*

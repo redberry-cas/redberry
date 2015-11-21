@@ -32,7 +32,7 @@ import cc.redberry.core.context.OutputFormat;
  * @author Stanislav Poslavsky
  * @since 1.0
  */
-public final class GreekLaTeXUpperCaseConverter extends SymbolArrayConverter {
+public final class GreekLaTeXUpperCaseConverter extends GreekLettersConverter {
     private static final String[] symbols = new String[11];
     private static final String[] utf = new String[11];
 
@@ -108,32 +108,19 @@ public final class GreekLaTeXUpperCaseConverter extends SymbolArrayConverter {
     }
 
     /**
-     * Index type = 3
-     */
-    public static final byte TYPE = 3;
-
-    /**
      * @return 3
      */
     @Override
     public byte getType() {
-        return TYPE;
+        return 3;
     }
 
     @Override
     public String getSymbol(int code, OutputFormat mode) throws IndexConverterException {
-        String symbol;
-        try {
-            if (mode.is(OutputFormat.UTF8))
-                return utf[code];
-            symbol = symbols[code];
-        } catch (ArrayIndexOutOfBoundsException e) {
-            throw new IndexConverterException();
+        if (mode.is(OutputFormat.WolframMathematica)) {
+            String symbol = symbols[code];
+            return "\\[Capital" + Character.toUpperCase(symbol.charAt(1)) + symbol.substring(2) + "]";
         }
-        if (mode.is(OutputFormat.WolframMathematica))
-            symbol = "\\[Capital" + Character.toUpperCase(symbol.charAt(1)) + symbol.substring(2) + "]";
-        if (mode.is(OutputFormat.Maple))
-            symbol = symbol.substring(1);
-        return symbol;
+        return super.getSymbol(code, mode);
     }
 }

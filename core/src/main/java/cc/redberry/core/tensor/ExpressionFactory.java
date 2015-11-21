@@ -48,7 +48,8 @@ public class ExpressionFactory implements TensorFactory {
             throw new NullPointerException();
         if (!TensorUtils.isZero(tensors[1]) && !TensorUtils.isIndeterminate(tensors[1])
                 && !tensors[0].getIndices().getFree().equalsRegardlessOrder(tensors[1].getIndices().getFree()))
-            throw new TensorException("Inconsistent indices in expression.");
+            throw new TensorException(String.format("Inconsistent indices in expression: %s != %s",
+                    tensors[0].getIndices().getFree(), tensors[1].getIndices().getFree()));
         return new Expression(IndicesFactory.create(tensors[0].getIndices().getFree()), tensors[0], tensors[1]);
     }
 }

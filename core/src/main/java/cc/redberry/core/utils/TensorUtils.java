@@ -24,7 +24,6 @@ package cc.redberry.core.utils;
 
 import cc.redberry.core.context.CC;
 import cc.redberry.core.groups.permutations.Permutation;
-import cc.redberry.core.groups.permutations.PermutationOneLineInt;
 import cc.redberry.core.groups.permutations.Permutations;
 import cc.redberry.core.indexmapping.IndexMappings;
 import cc.redberry.core.indexmapping.Mapping;
@@ -43,6 +42,7 @@ import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicLong;
 
 import static cc.redberry.core.tensor.Tensors.*;
 
@@ -54,8 +54,45 @@ import static cc.redberry.core.tensor.Tensors.*;
  * @since 1.0
  */
 public class TensorUtils {
-
     private TensorUtils() {
+    }
+
+    /**
+     * Returns a brief list of tensor properties (type, indices, size, etc.)
+     *
+     * @param expr expression
+     * @return brief list of tensor properties
+     */
+    public static String info(Tensor expr) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("// [")
+                .append(expr.getClass().getSimpleName()).append(",\n//  ")
+                .append("size = ").append(expr.size()).append(",\n//  ")
+                .append("symbolic = ").append(isSymbolic(expr)).append(",\n//  ")
+                .append("freeIndices = ").append(expr.getIndices().getFree()).append(",\n//  ")
+                .append("indices = ").append(expr.getIndices()).append(",\n//  ")
+                .append("symbolsCount = ").append(symbolsCount(expr)).append(",\n//  ")
+                .append("symbolsAppear = ").append(getAllDiffSimpleTensors(expr))
+                .append("\n//]");
+        return sb.toString();
+    }
+
+    /**
+     * Returns the number of symbols contained in expression (including duplicates)
+     * @param expr expression
+     * @return number of symbols contained in expression (including duplicates)
+     */
+    public static long symbolsCount(Tensor expr) {
+        AtomicLong counter = new AtomicLong();
+        symbolsCount(expr, counter);
+        return counter.get();
+    }
+
+    private static void symbolsCount(Tensor expr, AtomicLong counter) {
+        if (expr instanceof SimpleTensor)
+            counter.incrementAndGet();
+        for (Tensor t : expr)
+            symbolsCount(t, counter);
     }
 
     /**
@@ -65,7 +102,7 @@ public class TensorUtils {
      * @param u tensor
      * @param v tensor
      * @return true if at least one free index of {@code u} is contracted
-     *         with some free index of {@code v}
+     * with some free index of {@code v}
      */
     public static boolean haveIndicesIntersections(Tensor u, Tensor v) {
         return IndicesUtils.haveIntersections(u.getIndices(), v.getIndices());
@@ -151,15 +188,8 @@ public class TensorUtils {
     }
 
     public static boolean isSymbolic(Tensor t) {
-        if (t.getClass() == SimpleTensor.class)
-            return t.getIndices().size() == 0;
-        if (t instanceof TensorField) {
-            boolean b = t.getIndices().size() == 0;
-            if (!b)
-                return false;
-        }
-        if (t instanceof Complex)
-            return true;
+        if (t.getIndices().size() != 0)
+            return false;
         for (Tensor c : t)
             if (!isSymbolic(c))
                 return false;
@@ -214,7 +244,7 @@ public class TensorUtils {
      *
      * @param t tensor
      * @return true, if specified tensor is {@code a^(N)}, where {@code N} - a natural number and {@code a} - is a
-     *         simple tensor
+     * simple tensor
      */
     public static boolean isPositiveIntegerPowerOfSimpleTensor(Tensor t) {
         return isPositiveIntegerPower(t) && t.get(0) instanceof SimpleTensor;
@@ -226,7 +256,7 @@ public class TensorUtils {
      *
      * @param t tensor
      * @return true, if specified tensor is {@code a^(N)}, where {@code N} - a natural number and {@code a} - is a
-     *         product of tensors
+     * product of tensors
      */
     public static boolean isPositiveIntegerPowerOfProduct(Tensor t) {
         return isPositiveIntegerPower(t) && t.get(0) instanceof Product;
@@ -271,6 +301,21 @@ public class TensorUtils {
                 break;
             }
         return contains;
+    }
+
+    /**
+     * Returns whether expressions contains imaginary parts (I)
+     *
+     * @param t expression
+     * @return whether expressions contains imaginary parts (I)
+     */
+    public static boolean hasImaginaryPart(Tensor t) {
+        if (t instanceof Complex)
+            return !((Complex) t).getImaginary().isZero();
+        else for (Tensor f : t)
+            if (hasImaginaryPart(f))
+                return true;
+        return false;
     }
 
     public static boolean equalsExactly(Tensor[] u, Tensor[] v) {
@@ -417,7 +462,7 @@ public class TensorUtils {
      * @param u tensor
      * @param v tensor
      * @return {@code true} {@code true} if tensor u mathematically (not programming) equals to tensor v,
-     *         {@code false} if they they differ only in the sign and {@code null} otherwise
+     * {@code false} if they they differ only in the sign and {@code null} otherwise
      */
     public static Boolean compare1(Tensor u, Tensor v) {
         return IndexMappings.compare1(u, v);
@@ -740,7 +785,7 @@ public class TensorUtils {
      *
      * @param tensor tensor
      * @return set of replacement rules for all scalar (but not symbolic) sub-tensors appearing in the specified
-     *         tensor
+     * tensor
      */
     public static Expression[] generateReplacementsOfScalars(Tensor tensor) {
         return generateReplacementsOfScalars(tensor, CC.getParametersGenerator());
@@ -753,7 +798,7 @@ public class TensorUtils {
      * @param tensor                tensor
      * @param generatedCoefficients allows to control how coefficients are generated
      * @return set of replacement rules for all scalar (but not symbolic) sub-tensors appearing in the specified
-     *         tensor
+     * tensor
      * @see LocalSymbolsProvider
      */
     public static Expression[] generateReplacementsOfScalars(Tensor tensor,

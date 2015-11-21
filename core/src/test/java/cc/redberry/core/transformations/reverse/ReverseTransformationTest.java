@@ -32,7 +32,7 @@ import static cc.redberry.core.indices.IndexType.Matrix1;
 import static cc.redberry.core.indices.IndexType.Matrix2;
 import static cc.redberry.core.tensor.Tensors.parse;
 import static cc.redberry.core.tensor.Tensors.parseSimple;
-import static cc.redberry.core.transformations.reverse.ReverseTransformation.inverseOrderOfMatrices;
+import static cc.redberry.core.transformations.reverse.SingleReverse.inverseOrderOfMatrices;
 
 /**
  * @author Dmitry Bolotin

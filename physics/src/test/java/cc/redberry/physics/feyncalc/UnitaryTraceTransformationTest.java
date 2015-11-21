@@ -227,6 +227,26 @@ public class UnitaryTraceTransformationTest {
                 tr.transform(ExpandTransformation.expand(t)));
     }
 
+    @Test
+    public void test8() {
+        GeneralIndicesInsertion indicesInsertion = new GeneralIndicesInsertion();
+        CC.current().getParseManager().defaultParserPreprocessors.add(indicesInsertion);
+        indicesInsertion.addInsertionRule(parseSimple("T^a'_b'a"), IndexType.Matrix1);
+
+        setSymmetric("d_abd");
+        setAntiSymmetric("f_abc");
+        setAntiSymmetric("e_abc");
+
+        Transformation trace = new UnitaryTraceTransformation(
+                parseSimple("T_a"),
+                parseSimple("f_abc"),
+                parseSimple("d_abc"),
+                parse("N"));
+        Tensor t;
+        t = parse("T^aa'_b'*T^bb'_c'*d^c'_a'");
+        TAssert.assertEquals("(1/2)*g^{ba}", trace.transform(t));
+    }
+
     static Tensor unitaryTrace(Tensor t) {
         return new UnitaryTraceTransformation(parseSimple("T_a^a'_b'"), parseSimple("f_abc"), parseSimple("d_abc"), parseSimple("N")).transform(t);
     }

@@ -352,7 +352,6 @@ public final class Product extends MultiTensor {
                 newData.toArray(new Tensor[newData.size()]));
     }
 
-
     private static Tensor createProduct(Indices indices, Complex factor, Tensor[] indexless, Tensor[] data) {
         if (indexless.length == 0 && data.length == 0)
             return factor;
@@ -396,7 +395,7 @@ public final class Product extends MultiTensor {
     private int calculateHash() {
         int result;
         if (factor == Complex.ONE || factor == Complex.MINUS_ONE)
-            result = 0;
+            result = 0; //important for -a.hash() == a.hash()
         else
             result = factor.hashCode();
 
@@ -428,6 +427,15 @@ public final class Product extends MultiTensor {
      */
     public Tensor[] getIndexless() {
         return indexlessData.clone();
+    }
+
+    /**
+     * Returns length of {@link #getIndexless()} array
+     *
+     * @return length of {@link #getIndexless()} array
+     */
+    public int indexlessLength() {
+        return indexlessData.length;
     }
 
     @Override
@@ -903,6 +911,13 @@ public final class Product extends MultiTensor {
                             container.types.add(type);
                             newSg = false;
                             matched.add(i);
+                        } else if (includes(partition, container.partition)
+                                && sg.getGraphType() == container.graphType) {
+                            //can safely remove smaller partition
+                            if (partition.length < container.partition.length)
+                                continue out0;
+                            else
+                                subgraphs.remove(i);
                         } else if (intersects(points, container.points)) {
                             //just intersects
                             fillGraphPrint(subgraphs.get(i).partition);
@@ -1027,6 +1042,20 @@ public final class Product extends MultiTensor {
         }
     }
 
+    //l and s are distinct
+    static boolean includes(int[] l, int[] s) {
+        if (s.length > l.length)
+            return includes(s, l);
+
+        int p = 0;
+        for (int v : s) {
+            while (p < l.length && l[p] != v)
+                ++p;
+            if (p == l.length)
+                return false;
+        }
+        return true;
+    }
 
     @Override
     protected String toString(OutputFormat mode, Class<? extends Tensor> clazz) {

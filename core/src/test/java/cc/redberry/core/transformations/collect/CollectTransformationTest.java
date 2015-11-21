@@ -25,6 +25,8 @@ package cc.redberry.core.transformations.collect;
 import cc.redberry.core.TAssert;
 import cc.redberry.core.context.CC;
 import cc.redberry.core.groups.permutations.Permutations;
+import cc.redberry.core.indices.IndexType;
+import cc.redberry.core.parser.preprocessor.GeneralIndicesInsertion;
 import cc.redberry.core.tensor.*;
 import cc.redberry.core.tensor.iterator.FromChildToParentIterator;
 import cc.redberry.core.transformations.EliminateMetricsTransformation;
@@ -328,4 +330,30 @@ public class CollectTransformationTest {
         TAssert.assertEquals(tr.transform(t), "f*(a+b) = d*(a+b)");
     }
 
+    @Test
+    public void test14() throws Exception {
+        GeneralIndicesInsertion indicesInsertion = new GeneralIndicesInsertion();
+        CC.current().getParseManager().defaultParserPreprocessors.add(indicesInsertion);
+        indicesInsertion.addInsertionRule(parseSimple("G^a'_b'a"), IndexType.Matrix1);
+        indicesInsertion.addInsertionRule(parseSimple("cu_a'"), IndexType.Matrix1);
+        indicesInsertion.addInsertionRule(parseSimple("v^a'"), IndexType.Matrix1);
+
+
+        Tensor t = parse("cu*G_a*G_b*v + cu*G_b*G_a*v");
+        Expression e = parseExpression("cu*G_a*G_b*v = f_ab");
+        t = e.transform(t);
+
+        SimpleTensor[] pattern = {parseSimple("f_ab")};
+        CollectTransformation tr = new CollectTransformation(pattern);
+        TAssert.assertEquals("(d_{a}^{c}*d_{b}^{d}+d_{a}^{d}*d_{b}^{c})*cu*G_c*G_d*v",
+                e.transpose().transform(tr.transform(t)));
+    }
+
+    @Test
+    public void test15() {
+        SimpleTensor[] simpleTensors = {parseSimple("A_mn")};
+        CollectTransformation ct = new CollectTransformation(simpleTensors, false);
+        Tensor t = parse("(a+b)**2*A_mq*B_n^q + (a+b)**2*A_qn*C_m^q");
+        TAssert.assertEquals(ct.transform(t), "A_iq*((a+b)**2*d^i_m*B_n^q + (a+b)**2*d^q_n*C_m^i)");
+    }
 }

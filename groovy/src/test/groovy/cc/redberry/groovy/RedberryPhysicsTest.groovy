@@ -23,12 +23,13 @@
 
 package cc.redberry.groovy
 
+import org.junit.Before
 import org.junit.Test
 
 import static cc.redberry.core.indices.IndexType.Matrix1
 import static cc.redberry.core.indices.IndexType.Matrix2
 import static cc.redberry.groovy.RedberryPhysics.*
-import static cc.redberry.groovy.RedberryStatic.defineMatrices
+import static cc.redberry.groovy.RedberryStatic.*
 import static junit.framework.Assert.assertTrue
 
 /**
@@ -36,15 +37,21 @@ import static junit.framework.Assert.assertTrue
  * @author Stanislav Poslavsky
  */
 class RedberryPhysicsTest {
+    @Before
+    public void setUp() throws Exception {
+        Reset()
+    }
 
     @Test
     public void testDiracTrace1() {
         use(Redberry) {
-            defineMatrices 'G_a', Matrix1.matrix,
-                    'G_\\alpha', Matrix2.matrix
-
+            defineMatrices 'G_a', 'G5', Matrix1.matrix
             assertTrue DiracTrace['G_a'] >> 'Tr[G_a*G_b]'.t == '4*g_ab'.t
-            assertTrue DiracTrace['G_\\alpha'] >> 'Tr[G_\\alpha*G_\\beta]'.t == '4*g_\\alpha\\beta'.t
+
+            Reset()
+
+            defineMatrices 'G_\\alpha', 'G5', Matrix2.matrix
+            assertTrue DiracTrace['G_\\alpha', 'G5', 'e_\\alpha\\beta\\gamma\\delta'] >> 'Tr[G_\\alpha*G_\\beta]'.t == '4*g_\\alpha\\beta'.t
         }
     }
 
@@ -63,6 +70,9 @@ class RedberryPhysicsTest {
     public void testLeviCivita() {
         use(Redberry) {
             assertTrue LeviCivitaSimplify.minkowski['e_abcd'] >> 'e_abcd*e^abcd'.t == '-24'.t
+            assertTrue LeviCivitaSimplify.minkowski['e_abcd'.t] >> 'e_abcd*e^abcd'.t == '-24'.t
+            def tr = LeviCivitaSimplify.minkowski[[OverallSimplifications: EliminateMetrics & 't^i_i = 3'.t]]
+            assert tr >> 't^i_j*e_abci*e^abcj'.t == 18.t
         }
     }
 
@@ -70,6 +80,57 @@ class RedberryPhysicsTest {
     public void testSetMandelstam() {
         use(Redberry) {
             println setMandelstam([k1_a: 'm1', k2_a: 'm2', k3_a: 'm3', k4_a: 'm4'], 'r', 'p', 'q')
+        }
+    }
+
+    @Test
+    public void testDT1() throws Exception {
+        use(Redberry) {
+
+            defineMatrices 'G_a', Matrix1.matrix,
+                    'G5', Matrix1.matrix
+
+            def dt = DiracTrace[[Simplifications: 't_a^a = y'.t]]
+            assert '-4*t_{cd}+4*t_{dc}+(4*y+4*x)*g_{cd}'.t == (dt >> 'Tr[(G_a*G_b*t^ab + x)*G_c*G_d]'.t)
+        }
+    }
+
+    @Test
+    public void testDiracTrace2() {
+        use(Redberry) {
+            defineMatrices 'G_a', 'G5', Matrix1.matrix
+
+            def dTrace = DiracTrace[[Dimension: 'D']]
+            assert dTrace >> 'Tr[G_a*G_b*G_c*G_d]'.t == '2**((1/2)*D)*g_{ad}*g_{bc}+2**((1/2)*D)*g_{ab}*g_{cd}-2**((1/2)*D)*g_{ac}*g_{bd}'.t
+
+            dTrace = DiracTrace[[Dimension: 'D', TraceOfOne: 4]]
+            assert dTrace >> 'Tr[G_a*G_b*G_c*G_d]'.t == '4*g_{ad}*g_{bc}+4*g_{ab}*g_{cd}-4*g_{ac}*g_{bd}'.t
+        }
+    }
+
+    @Test
+    public void testDiracSimplify1() throws Exception {
+        use(Redberry) {
+            defineMatrices 'G_a', 'G5', Matrix1.matrix
+
+            def dS = DiracSimplify[[Dimension: 'D']]
+            assert dS >> '2*G_a*G^a*G_b'.t == '2*D*G_b'.t
+
+            assert dS >> '2*G_a*G_b*G^a'.t == '-2*(D-2)*G_{b}'.t
+        }
+    }
+
+
+    @Test
+    public void testSpinorsSimplify1() throws Exception {
+        use(Redberry) {
+            defineMatrices 'G_a', 'G5', Matrix1.matrix,
+                    'cu', Matrix1.covector
+
+            def dS = SpinorsSimplify[[uBar: 'cu', Momentum: 'p_a', Mass: 'm']]
+            assert dS >> 'cu*G^a*p_a'.t == 'm*cu'.t
+
+            assert dS >> 'cu*G_b*G^a*p_a'.t == '-m*cu*G_{b}+2*cu*p_{b}'.t
         }
     }
 }

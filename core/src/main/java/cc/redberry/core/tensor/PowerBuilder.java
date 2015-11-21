@@ -56,13 +56,13 @@ public final class PowerBuilder implements TensorBuilder {
         if (tensor == null)
             throw new NullPointerException();
         if (!TensorUtils.isScalar(tensor))
-            throw new IllegalArgumentException("Non-scalar tensor on input of Power builder.");
+            throw new IllegalArgumentException("Non-scalar tensor on input of Power builder: " + tensor);
         if (argument == null)
             argument = tensor;
         else if (power == null)
             power = tensor;
         else
-            throw new IllegalStateException("Power buider can not take more than two put() invocations.");
+            throw new IllegalStateException("Power builder can not take more than two put() invocations.");
     }
 
     @Override

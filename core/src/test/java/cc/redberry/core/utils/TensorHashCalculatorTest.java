@@ -30,8 +30,7 @@ import org.junit.Test;
 import static cc.redberry.core.indices.IndexType.LatinLower;
 import static cc.redberry.core.tensor.Tensors.*;
 import static cc.redberry.core.utils.TensorHashCalculator.hashWithIndices;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  * @author Dmitry Bolotin
@@ -62,6 +61,14 @@ public class TensorHashCalculatorTest {
         Tensor b = parse("T_{cdab}");
         Assert.assertTrue(hashWithIndices(a) != hashWithIndices(b));
     }
+
+    @Test
+    public void test3() throws Exception {
+        Tensor a = parse("(A_abc - A_bac)");
+        Tensor b = parse("(A_bac - A_abc)");
+        assertEquals(TensorHashCalculator.hashWithIndices(a), TensorHashCalculator.hashWithIndices(b));
+    }
+
 
     //    @Test
 //    public void test2() {

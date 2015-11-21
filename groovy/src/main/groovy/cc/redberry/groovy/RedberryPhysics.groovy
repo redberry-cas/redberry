@@ -24,7 +24,6 @@
 package cc.redberry.groovy
 
 import cc.redberry.core.tensor.Expression
-import cc.redberry.core.tensor.SimpleTensor
 import cc.redberry.core.tensor.Tensor
 import cc.redberry.core.transformations.Transformation
 import cc.redberry.core.transformations.TransformationCollection
@@ -33,7 +32,6 @@ import cc.redberry.physics.oneloopdiv.OneLoopCounterterms
 import cc.redberry.physics.oneloopdiv.OneLoopInput
 
 import static cc.redberry.core.tensor.Tensors.parse
-import static cc.redberry.core.tensor.Tensors.parseSimple
 
 /**
  * Groovy facade for transformations and utility methods from redberry-physics.
@@ -79,133 +77,94 @@ public final class RedberryPhysics {
                 FeynCalcUtils.setMandelstam(result, parse0(s), parse0(t), parse0(u)));
     }
 
+    /**
+     * Returns generalized mandelstam for 2->3 reaction and mass shell substitutions following from the provided map
+     * of "momentum - mass of particle" and notation of Mandelstam variables.
+     *
+     * @param momentumMasses "momentum - mass of particle"
+     * @return resulting substitutions
+     */
+    public static Transformation setMandelstam5(Map<String, String> momentumMasses) {
+        if (momentumMasses.size() != 5)
+            throw new IllegalArgumentException();
+        Tensor[][] result = new Tensor[5][2];
+        int i = 0;
+        momentumMasses.each { a, b -> result[i][0] = parse(a); result[i++][1] = parse(b); }
+        return new TransformationCollection(FeynCalcUtils.setMandelstam5(result));
+    }
+
+    /**
+     * Returns generalized mandelstam for 2->3 reaction and mass shell substitutions following from the provided map
+     * of "momentum - mass of particle" and notation of Mandelstam variables.
+     *
+     * @param momentumMasses "momentum - mass of particle"
+     * @param s notation for s = (k1 + k2)^2
+     * @param t1 notation for t1 = (k1 - k3)^2
+     * @param t2 notation for t2 = (k1 - k4)^2
+     * @param u1 notation for u1 = (k2 - k3)^2
+     * @param u2 notation for u2 = (k2 - k4)^2
+     * @return resulting substitutions
+     */
+    public static Transformation setMandelstam5(Map<String, String> momentumMasses,
+                                                Object s, Object t1, Object t2, Object u1, Object u2) {
+        if (momentumMasses.size() != 5)
+            throw new IllegalArgumentException();
+        Tensor[][] result = new Tensor[5][2];
+        int i = 0;
+        momentumMasses.each { a, b -> result[i][0] = parse(a); result[i++][1] = parse(b); }
+        return new TransformationCollection(
+                FeynCalcUtils.setMandelstam5(result, parse0(s), parse0(t1), parse0(t2), parse0(u1), parse0(u2)));
+    }
+
     private static Tensor parse0(Object o) {
         if (o instanceof String || o instanceof GString)
             return parse(o.toString());
         return (Tensor) o;
     }
 
-    private static abstract class AbstractTransformationWithDefaultParameters
-            implements Transformation {
-
-        @Override
-        Tensor transform(Tensor t) {
-            return defaultTransformation().transform(t)
-        }
-
-        final Transformation defaultTransformation() {
-            return getAt(defaultParameters())
-        }
-
-        protected abstract Transformation create(Collection args);
-
-        protected abstract Transformation create(Map args);
-
-        protected abstract Map defaultParameters();
-
-        public final Transformation getAt(Collection args) {
-            use(Redberry) {
-                args = args.collect { if (it instanceof String) it.t else it }
-                return create(args);
-            }
-        }
-
-        public final Transformation getAt(Map args) {
-            use(Redberry) {
-                args = new HashMap(args)
-                Map newArgs = new HashMap(defaultParameters())
-                newArgs.putAll(args)
-                newArgs.entrySet().each { it.value = it.value.t }
-                return create(newArgs);
-            }
-        }
-    }
-
     /**
-     * Calculates trace of Dirac matrices in four dimensions.
+     * Calculates trace of Dirac matrices in d dimensions (default 4).
      * @see DiracTraceTransformation
      */
-    public static final GDiracTrace DiracTrace = new GDiracTrace();
+    public static final DSLTransformationInst DiracTrace = new DSLTransformationInst(DiracTraceTransformation);
 
-    private static final class GDiracTrace extends AbstractTransformationWithDefaultParameters {
-        private static final Map defaultArgs = [Gamma: 'G_a', Gamma5: 'G5', LeviCivita: 'e_abcd']
+    /**
+     * Simplifies products of gamma matrices
+     * @see DiracSimplifyTransformation
+     */
+    public static final DSLTransformationInst DiracSimplify = new DSLTransformationInst(DiracSimplifyTransformation);
 
+    /**
+     * Simplifies expressions involving gamma5 atrices
+     * @see SimplifyGamma5Transformation
+     */
+    public static final DSLTransformationInst DiracSimplify5 = new DSLTransformationInst(SimplifyGamma5Transformation);
 
-        Transformation getAt(String gamma) {
-            use(Redberry) {
-                return new DiracTraceTransformation(gamma.t);
-            }
-        }
+    /**
+     * Puts products of gammas in canonical order
+     * @see DiracOrderTransformation
+     */
+    public static final DSLTransformationInst DiracOrder = new DSLTransformationInst(DiracOrderTransformation);
 
-        Transformation getAt(SimpleTensor gamma) {
-            return new DiracTraceTransformation(gamma);
-        }
-
-        @Override
-        protected Transformation create(Collection args) {
-            return new DiracTraceTransformation(*args)
-        }
-
-        @Override
-        protected Transformation create(Map args) {
-            return new DiracTraceTransformation(args['Gamma'], args['Gamma5'], args['LeviCivita']);
-        }
-
-        @Override
-        protected Map defaultParameters() {
-            return defaultArgs;
-        }
-    }
+    /**
+     * Simplifies spinors using Dirac equation
+     * @see SpinorsSimplifyTransformation
+     */
+    public static
+    final DSLTransformation SpinorsSimplify = new DSLTransformation(SpinorsSimplifyTransformation);
 
     /**
      * Calculates trace of unitary matrices
      * @see UnitaryTraceTransformation
      */
-    public static final GUnitaryTrace UnitaryTrace = new GUnitaryTrace();
-
-    static final Map unitaryDefaultParameters = [Matrix: 'T_A', f: 'f_ABC', d: 'd_ABC', N: 'N']
-
-
-    private static final class GUnitaryTrace extends AbstractTransformationWithDefaultParameters {
-        @Override
-        protected Transformation create(Collection args) {
-            return new UnitaryTraceTransformation(*args);
-        }
-
-        @Override
-        protected Transformation create(Map args) {
-            return new UnitaryTraceTransformation(args['Matrix'], args['f'], args['d'], args['N']);
-        }
-
-        @Override
-        protected Map defaultParameters() {
-            return unitaryDefaultParameters;
-        }
-    }
+    public static final DSLTransformationInst UnitaryTrace = new DSLTransformationInst(UnitaryTraceTransformation);
 
     /**
      * Simplifies combinations of unitary matrices
      * @see UnitarySimplifyTransformation
      */
-    public static final GUnitarySimplify UnitarySimplify = new GUnitarySimplify();
-
-    private static final class GUnitarySimplify extends AbstractTransformationWithDefaultParameters {
-
-        @Override
-        protected Transformation create(Collection args) {
-            return new UnitarySimplifyTransformation(*args);
-        }
-
-        @Override
-        protected Transformation create(Map args) {
-            return new UnitarySimplifyTransformation(args['Matrix'], args['f'], args['d'], args['N']);
-        }
-
-        @Override
-        protected Map defaultParameters() {
-            return unitaryDefaultParameters
-        }
-    }
+    public static
+    final DSLTransformationInst UnitarySimplify = new DSLTransformationInst(UnitarySimplifyTransformation);
 
     /**
      * Simplifies combinations of Levi-Civita tensors.
@@ -213,37 +172,26 @@ public final class RedberryPhysics {
      */
     public static final GLeviCivita LeviCivitaSimplify = new GLeviCivita();
 
-    private static final class GLeviCivita {
+    private final static DSLTransformationInst LeviCivitaSimplify_minkowski = new DSLTransformationInst(
+            new LeviCivitaSimplifyTransformation(new LeviCivitaSimplifyOptions(true)))
 
+    private final static DSLTransformationInst LeviCivitaSimplify_euclidean = new DSLTransformationInst(
+            new LeviCivitaSimplifyTransformation(new LeviCivitaSimplifyOptions(false)))
+
+    private static final class GLeviCivita {
         /**
          * Simplifies in Minkowski space
          * @return transformation in Minkowski space
          */
-        LeviCivitaSpace getMinkowski() {
-            return new LeviCivitaSpace(true);
+        DSLTransformationInst getMinkowski() {
+            return LeviCivitaSimplify_minkowski;
         }
         /**
          * Simplifies in Euclidean space
          * @return transformation in Euclidean space
          */
-        LeviCivitaSpace getEuclidean() {
-            return new LeviCivitaSpace(false);
-        }
-    }
-
-    private static final class LeviCivitaSpace {
-        final boolean minkowskiSpace;
-
-        LeviCivitaSpace(boolean minkowskiSpace) {
-            this.minkowskiSpace = minkowskiSpace
-        }
-
-        Transformation getAt(String leviCivita) {
-            return new LeviCivitaSimplifyTransformation(parseSimple(leviCivita), minkowskiSpace);
-        }
-
-        Transformation getAt(SimpleTensor leviCivita) {
-            return new LeviCivitaSimplifyTransformation(leviCivita, minkowskiSpace);
+        DSLTransformationInst getEuclidean() {
+            return LeviCivitaSimplify_euclidean;
         }
     }
 

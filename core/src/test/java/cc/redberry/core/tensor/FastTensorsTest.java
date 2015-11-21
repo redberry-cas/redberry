@@ -25,6 +25,7 @@ package cc.redberry.core.tensor;
 import cc.redberry.core.TAssert;
 import cc.redberry.core.context.CC;
 import cc.redberry.core.number.Complex;
+import cc.redberry.core.transformations.expand.ExpandTransformation;
 import org.junit.Test;
 
 import static cc.redberry.core.tensor.Tensors.parse;

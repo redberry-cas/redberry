@@ -341,6 +341,8 @@ public final class IndicesSymmetries {
      *                                            permutation (permutation mixes indices of different types)
      */
     public void addSymmetry(byte type, Permutation symmetry) {
+        if (symmetry.isIdentity())
+            return;
         if (permutationGroup != null)
             throw new IllegalStateException("Permutation group is already in use.");
 

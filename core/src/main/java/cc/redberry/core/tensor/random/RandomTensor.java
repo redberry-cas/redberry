@@ -238,7 +238,7 @@ public final class RandomTensor {
             return namespace.get(positions.get(random.nextInt(positions.size())));
 
         if (!generateNewDescriptors)
-            throw new IllegalArgumentException("No descriptor for such structure.");
+            throw new IllegalArgumentException("No descriptor for such structure: " + typeStructure);
 
         //create new nameDescriptor
         NameDescriptor nameDescriptor = CC.getNameManager().mapNameDescriptor(nextName(), typeStructure);

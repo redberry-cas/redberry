@@ -371,6 +371,8 @@ public final class ExpandUtils {
             if (!(t instanceof Product))
                 return t;
             Product p = (Product) t;
+            if (p.indexlessLength() == 0)
+                return t;
             Tensor indexless = p.getIndexlessSubProduct();
             return Tensors.multiply(ExpandTransformation.expand(indexless), p.getDataSubProduct());
 

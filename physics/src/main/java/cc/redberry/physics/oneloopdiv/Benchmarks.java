@@ -95,6 +95,16 @@ public final class Benchmarks {
 
     public static void main(String[] args) {
 
+        //MacBook Air
+        //Minimal second order : 0 s.
+        //Minimal fourth order : 0 s.
+        //Vector field : 8 s.
+        //Gravity ghosts : 8 s.
+        //Squared vector field : 54 s.
+        //Lambda gauge gravity : 522 s.
+        //Spin 3 ghosts : > 10000 s.
+
+
         //Processor family: Intel(R) Core(TM) i5 CPU M 430  @ 2.27GHz.
         //-Xmx value : 3g.
         //Max memory used: 1.2g.
@@ -119,8 +129,8 @@ public final class Benchmarks {
         //Minimal fourth order : 1 s.
         //Vector field : 14 s.
         //Gravity ghosts : 14 s.
-        //Squared vector field : 219 s.
-        //Lambda gauge gravity : 521 s.
+                //Squared vector field : 219 s.
+                //Lambda gauge gravity : 521 s.
         //Spin 3 ghosts : 627 s.
 
         //suppressing output

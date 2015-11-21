@@ -24,7 +24,9 @@
 package cc.redberry.groovy
 
 import cc.redberry.core.groups.permutations.PermutationGroup
+import cc.redberry.core.transformations.expand.ExpandTransformation
 import cc.redberry.core.transformations.factor.JasFactor
+import org.junit.Before
 import org.junit.Test
 
 import static cc.redberry.core.TAssert.assertEquals
@@ -35,6 +37,12 @@ import static cc.redberry.core.tensor.Tensors.addSymmetry
 import static cc.redberry.groovy.RedberryStatic.*
 
 class RedberryStaticTest {
+
+    @Before
+    public void setUp() throws Exception {
+        Reset()
+    }
+
     @Test
     void testExpand1() throws Exception {
         use(Redberry) {
@@ -58,7 +66,7 @@ class RedberryStaticTest {
     void testDifferentiate1() throws Exception {
         use(Redberry) {
             def tensor = '(f+d)*(f+d+c)'.t;
-            assertTrue tensor << Differentiate['d=0'.t, 'f'] == '2*f+c'.t
+            assertTrue tensor << Differentiate['f', 'd=0'.t] == '2*f+c'.t
         }
     }
 
@@ -70,8 +78,7 @@ class RedberryStaticTest {
             addSymmetry('R_abcd', 2, 3, 0, 1)
 
             def tensor = 'R^acbd*Sin[R_abcd*R^abcd]'.t;
-            def tr =
-                    Differentiate[ExpandAndEliminate, 'R^ma_m^b', 'R^mc_m^d'] & EliminateDueSymmetries & 'd_m^m = 4'.t & 'R^a_man = R_mn'.t & 'R^a_a = R'.t
+            def tr = Differentiate['R^ma_m^b', 'R^mc_m^d', ExpandAndEliminate] & EliminateDueSymmetries & 'd_m^m = 4'.t & 'R^a_man = R_mn'.t & 'R^a_a = R'.t
 
             assertTrue tr >> tensor == '6*R*Cos[R_{abcd}*R^{abcd}]-4*Sin[R_{abcd}*R^{abcd}]*R_{ab}*R_{cd}*R^{acbd}'.t
         }
@@ -123,13 +130,20 @@ class RedberryStaticTest {
             def t = 'f[x,x**2]+(x+1)*f~(1,0)[x,x**2]+2*x*(x+1)*f~(0,1)[x,x**2]'.t
             assertTrue Collect['f~(0,1)[x, y]', 'f~(1,0)[x, y]', Factor] >> t == 'f[x,x**2]+(x+1)*f~(1,0)[x,x**2]+2*x*(x+1)*f~(0,1)[x,x**2]'.t
         }
+    }
 
+    @Test
+    public void testCollect3() throws Exception {
+        use(Redberry) {
+            def t = '(a+b)**2*A_mq*B_n^q + (a+b)**2*A_qn*C_m^q'.t
+            assertEquals('A_iq*((a+b)**2*d^i_m*B_n^q + (a+b)**2*d^q_n*C_m^i)', Collect['A_mn', [ExpandSymbolic: false]] >> t)
+        }
     }
 
     @Test
     public void testExpand3() {
         use(Redberry) {
-            assertTrue Expand['x = y'.t, 'f = a'.t] >> 'x*(x + f)'.t == 'a*y+y**2'.t
+            assertTrue Expand['x = y'.t&'f = a'.t] >> 'x*(x + f)'.t == 'a*y+y**2'.t
             assertTrue Expand >> 'x*(x + f)'.t == 'f*x+x**2'.t
             assertTrue Expand['x = a'] >> 'x*(x + f)'.t == 'f*a+a**2'.t
             assertTrue Expand['x = a'.t] >> 'x*(x + f)'.t == 'f*a+a**2'.t
@@ -216,20 +230,14 @@ class RedberryStaticTest {
             assertEquals Factor >> 'a**2+2*a*b+b**2'.t, '(a+b)**2'
             assertEquals Factor[[FactorScalars: false]] >> 'a**2+2*a*b+b**2'.t, '(a+b)**2'
             assertEquals Factor[[FactorScalars: true]] >> 'a**2+2*a*b+b**2'.t, '(a+b)**2'
-            assertEquals Factor[false] >> 'a**2+2*a*b+b**2'.t, '(a+b)**2'
-            assertEquals Factor[true] >> 'a**2+2*a*b+b**2'.t, '(a+b)**2'
             assertEquals Factor[[FactorScalars: false, FactorizationEngine: JasFactor.ENGINE]] >> 'a**2+2*a*b+b**2'.t, '(a+b)**2'
             assertEquals Factor[[FactorScalars: true, FactorizationEngine: JasFactor.ENGINE]] >> 'a**2+2*a*b+b**2'.t, '(a+b)**2'
-            assertEquals Factor[false, JasFactor.ENGINE] >> 'a**2+2*a*b+b**2'.t, '(a+b)**2'
-            assertEquals Factor[true, JasFactor.ENGINE] >> 'a**2+2*a*b+b**2'.t, '(a+b)**2'
 
 
             assertEquals Factor >> 'k_m*k^m*(a+b) + k_m*f^m*(a+b)'.t, '(k_m*k^m + k_m*f^m)*(a+b)'
             assertEquals Factor[[FactorScalars: false]] >> 'k_m*k^m*(a+b) + k_m*f^m*(a+b)'.t, 'k_m*k^m*(a+b) + k_m*f^m*(a+b)'
             assertEquals Factor[[FactorScalars: true]] >> 'k_m*k^m*(a+b) + k_m*f^m*(a+b)'.t, '(k_m*k^m + k_m*f^m)*(a+b)'
-            assertEquals Factor[false] >> 'k_m*k^m*(a+b) + k_m*f^m*(a+b)'.t, 'k_m*k^m*(a+b) + k_m*f^m*(a+b)'
-            assertEquals Factor[true] >> 'k_m*k^m*(a+b) + k_m*f^m*(a+b)'.t, '(k_m*k^m + k_m*f^m)*(a+b)'
-        }
+            }
     }
 
     @Test
@@ -269,6 +277,34 @@ class RedberryStaticTest {
         use(Redberry) {
             def t1 = 't1_i[x_a]'.t, t2 = 't2_o[y_p]'.t
             println(bind(['k1_r[e_u]': t1, 'k2_a[r_r]': t2]))
+        }
+    }
+
+    @Test
+    public void testEE1() throws Exception {
+        use(Redberry) {
+            assert '4*y**2'.t == ExpandAndEliminate['x = y'] >> '(x + y)**2'.t
+        }
+    }
+
+    @Test
+    public void testQuiet1() throws Exception {
+        Quiet { throw new RuntimeException() }
+    }
+
+    @Test
+    public void testQuiet2() throws Exception {
+        Quiet { println 'quiet' }
+        println 'not quiet'
+    }
+
+
+    @Test
+    public void testInvertIndices() throws Exception {
+        use(Redberry) {
+            assertEquals('f_ab'.t, InvertIndices >> 'f^ab'.t)
+            assertEquals('f_ab'.t, InvertIndices[LatinLower] >> 'f^ab'.t)
+            assertEquals('f_abC'.t, InvertIndices[LatinLower] >> 'f^ab_C'.t)
         }
     }
 }

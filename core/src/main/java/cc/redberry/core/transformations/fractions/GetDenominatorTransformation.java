@@ -22,8 +22,11 @@
  */
 package cc.redberry.core.transformations.fractions;
 
+import cc.redberry.core.context.CC;
+import cc.redberry.core.context.OutputFormat;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.transformations.Transformation;
+import cc.redberry.core.transformations.TransformationToStringAble;
 
 /**
  * Gives the denominator of expression.
@@ -32,7 +35,7 @@ import cc.redberry.core.transformations.Transformation;
  * @author Stanislav Poslavsky
  * @since 1.0
  */
-public class GetDenominatorTransformation implements Transformation {
+public class GetDenominatorTransformation implements TransformationToStringAble {
     /**
      * Singleton instance.
      */
@@ -44,5 +47,15 @@ public class GetDenominatorTransformation implements Transformation {
     @Override
     public Tensor transform(Tensor t) {
         return NumeratorDenominator.getNumeratorAndDenominator(t).denominator;
+    }
+
+    @Override
+    public String toString(OutputFormat outputFormat) {
+        return "Denominator";
+    }
+
+    @Override
+    public String toString() {
+        return toString(CC.getDefaultOutputFormat());
     }
 }

@@ -150,6 +150,13 @@ public final class CC {
     }
 
     /**
+     * Resets all definitions.
+     */
+    public static void reset() {
+        current().reset();
+    }
+
+    /**
      * This method resets all tensor names in the namespace and sets a
      * specified seed to the {@link NameManager}. If this method is invoked
      * with constant seed before any interactions with Redberry, further

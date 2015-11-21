@@ -32,6 +32,7 @@ import cc.redberry.core.utils.TensorUtils;
 import java.util.ArrayList;
 
 import static cc.redberry.core.tensor.Tensors.multiply;
+import static cc.redberry.core.tensor.Tensors.resolveDummy;
 
 /**
  * Utility rare, but fast methods with tensor modifications.
@@ -42,6 +43,19 @@ import static cc.redberry.core.tensor.Tensors.multiply;
  */
 public final class FastTensors {
     private FastTensors() {
+    }
+
+    /**
+     * Multiplies each element in specified sum on some factor.
+     *
+     * @param sum    sum
+     * @param factor factor
+     * @return resulting sum
+     */
+    public static Tensor multiplySumElementsOnFactorAndResolveDummies(Sum sum, Tensor factor) {
+        Tensor[] pair = resolveDummy(sum, factor);
+        int i = pair[0] instanceof Sum ? 0 : 1;
+        return multiplySumElementsOnFactor((Sum) pair[i], pair[1 - i], new Transformation[0]);
     }
 
     /**
@@ -133,9 +147,7 @@ public final class FastTensors {
      * @return whether the resulting tensor was reduced to simplified form after multiply
      */
     private static boolean isReduced(Tensor initial, Tensor factor, Tensor result) {
-        if (initial instanceof Product && !(result instanceof Product))
-            return true;
-        return false;
+        return !initial.getClass().equals(result.getClass());
     }
 
 }

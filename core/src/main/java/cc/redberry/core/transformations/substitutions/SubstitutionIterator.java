@@ -83,7 +83,8 @@ public final class SubstitutionIterator implements TreeIterator {
         }
 
         if (!tensor.getIndices().getFree().equalsRegardlessOrder(oldTensor.getIndices().getFree()))
-            throw new RuntimeException("Substitution with different free indices.");
+            throw new RuntimeException(String.format("Substituting tensor %s with different free indices (%s != %s).",
+                    tensor, oldTensor.getIndices().getFree(), tensor.getIndices().getFree() ));
 
         if (supposeIndicesAreAdded) {
             StackPosition<ForbiddenContainer> previous = innerIterator.currentStackPosition().previous();
@@ -139,7 +140,7 @@ public final class SubstitutionIterator implements TreeIterator {
 //        return fc.getForbidden().toArray();
     }
 
-    private static interface ForbiddenContainer extends Payload<ForbiddenContainer> {
+    private interface ForbiddenContainer extends Payload<ForbiddenContainer> {
         TIntSet getForbidden();
 
         void submit(TIntSet removed, TIntSet added);

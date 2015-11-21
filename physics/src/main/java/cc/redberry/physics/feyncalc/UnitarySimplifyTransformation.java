@@ -31,12 +31,13 @@ import cc.redberry.core.parser.ParseToken;
 import cc.redberry.core.parser.Parser;
 import cc.redberry.core.parser.preprocessor.ChangeIndicesTypesAndTensorNames;
 import cc.redberry.core.parser.preprocessor.TypesAndNamesTransformer;
-import cc.redberry.core.tensor.Expression;
 import cc.redberry.core.tensor.SimpleTensor;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.transformations.EliminateMetricsTransformation;
 import cc.redberry.core.transformations.Transformation;
 import cc.redberry.core.transformations.TransformationCollection;
+import cc.redberry.core.transformations.options.Creator;
+import cc.redberry.core.transformations.options.Options;
 
 import java.util.ArrayList;
 
@@ -49,8 +50,13 @@ import static cc.redberry.physics.feyncalc.TraceUtils.*;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public class UnitarySimplifyTransformation implements Transformation {
+public final class UnitarySimplifyTransformation implements Transformation {
     final Transformation unitarySimplifications;
+
+    @Creator
+    public UnitarySimplifyTransformation(@Options UnitarySimplifyOptions options) {
+        this(options.unitaryMatrix, options.structureConstant, options.symmetricConstant, options.dimension);
+    }
 
     /**
      * Creates transformation with given definitions.
@@ -70,6 +76,11 @@ public class UnitarySimplifyTransformation implements Transformation {
 
         ChangeIndicesTypesAndTensorNames tokenTransformer = new ChangeIndicesTypesAndTensorNames(new TypesAndNamesTransformer() {
             @Override
+            public int newIndex(int oldIndex, NameAndStructureOfIndices oldDescriptor) {
+                return oldIndex;
+            }
+
+            @Override
             public IndexType newType(IndexType oldType, NameAndStructureOfIndices old) {
                 if (oldType == IndexType.LatinLower)
                     return types[0];
@@ -79,8 +90,8 @@ public class UnitarySimplifyTransformation implements Transformation {
             }
 
             @Override
-            public String newName(NameAndStructureOfIndices old) {
-                switch (old.getName()) {
+            public String newName(String oldName, NameAndStructureOfIndices old) {
+                switch (oldName) {
                     case unitaryMatrixName:
                         return unitaryMatrix.getStringName();
                     case structureConstantName:
@@ -91,7 +102,7 @@ public class UnitarySimplifyTransformation implements Transformation {
                         if (!(dimension instanceof Complex))
                             return dimension.toString(OutputFormat.Redberry);
                     default:
-                        return old.getName();
+                        return oldName;
                 }
             }
         });

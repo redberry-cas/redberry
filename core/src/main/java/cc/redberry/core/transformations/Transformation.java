@@ -22,6 +22,8 @@
  */
 package cc.redberry.core.transformations;
 
+import cc.redberry.core.context.CC;
+import cc.redberry.core.context.OutputFormat;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.tensor.TensorBuilder;
 
@@ -35,14 +37,24 @@ public interface Transformation {
     /**
      * Singleton instance for identity transformation.
      */
-    public static final Transformation INDENTITY = new Transformation() {
+    Transformation IDENTITY = new TransformationToStringAble() {
         @Override
         public Tensor transform(Tensor t) {
             return t;
         }
+
+        @Override
+        public String toString() {
+            return toString(CC.getDefaultOutputFormat());
+        }
+
+        @Override
+        public String toString(OutputFormat outputFormat) {
+            return "Identity";
+        }
     };
 
-    public static final class Util {
+    final class Util {
         private Util() {
         }
 
@@ -81,15 +93,32 @@ public interface Transformation {
         /**
          * Applies transformation until the specified expression is unchanged under transformation.
          *
-         * @param t              tensor
-         * @param transformation transformation
+         * @param t               tensor
+         * @param transformations transformation
          * @return result
          */
-        public static Tensor applyUntilUnchanged(Tensor t, final Transformation transformation) {
+        public static Tensor applyUntilUnchanged(Tensor t, final Transformation... transformations) {
+            return applyUntilUnchanged(t, Integer.MAX_VALUE, transformations);
+        }
+
+        /**
+         * Applies transformation until the specified expression is unchanged under transformation.
+         *
+         * @param t               tensor
+         * @param limit           iteration limit
+         * @param transformations transformation
+         * @return result
+         */
+        public static Tensor applyUntilUnchanged(Tensor t, int limit, final Transformation... transformations) {
             Tensor r;
+            int l = limit;
             do {
+                if (l == 0)
+                    throw new RuntimeException("Steel changed after " + limit + " tries.");
                 r = t;
-                t = transformation.transform(r);
+                for (Transformation tr : transformations)
+                    t = tr.transform(t);
+                --l;
             } while (r != t);
             return r;
         }

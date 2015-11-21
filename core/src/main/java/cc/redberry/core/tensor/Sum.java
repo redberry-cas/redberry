@@ -54,7 +54,7 @@ public final class Sum extends MultiTensor {
         for (i = 0; i < data.length; ++i)
             wrappers[i] = new TensorWrapper(data[i]);
         ArraysUtils.quickSort(wrappers, data);
-        this.hash = Arrays.hashCode(data);
+        this.hash = hash0(data, indices);
     }
 
     Sum(Indices indices, Tensor[] data, int hash) {
@@ -64,8 +64,51 @@ public final class Sum extends MultiTensor {
         this.hash = hash;
     }
 
-    private static final class TensorWrapper implements Comparable<TensorWrapper> {
+    private static int hash0(final Tensor[] data, final Indices indices) {
+        if (indices.size() > 1)
+            return Arrays.hashCode(data);
 
+        //try to check whether sum is a simple polynomial
+        boolean isSimplePoly = true;
+        //hash codes of each term
+        int[] termsHashes = new int[data.length];
+        for (int i = 0; i < data.length; i++) {
+            termsHashes[i] = data[i].hashCode();
+            if (!isSymbolicPoly(data[i]))
+                isSimplePoly = false;
+        }
+
+        if (!isSimplePoly)
+            return Arrays.hashCode(termsHashes);
+
+        int result = 0;
+        for (int i = 0; i < data.length; i++) {
+            if (data[i] instanceof Product)
+                termsHashes[i] *= ((Product) data[i]).factor.hashWithSign();
+            else if (data[i] instanceof Complex)
+                termsHashes[i] *= ((Complex) data[i]).hashWithSign();
+            result = 31 * result + termsHashes[i];
+        }
+        return result * result;
+    }
+
+    private static boolean isSymbolicPoly(final Tensor t) {
+        //indices are already checked
+        if (t instanceof Complex)
+            return true;
+        else if (t instanceof SimpleTensor)//todo if TensorField (when symmetries)?
+            return t.getIndices().size() <= 1;
+        else if (t instanceof Product || t instanceof Power) {
+            for (Tensor m : t)
+                if (!isSymbolicPoly(m))
+                    return false;
+            return true;
+        }
+
+        return false;
+    }
+
+    private static final class TensorWrapper implements Comparable<TensorWrapper> {
         final Tensor tensor;
         final int hashWithIndices;
 
@@ -143,10 +186,9 @@ public final class Sum extends MultiTensor {
         Tensor[] newData = new Tensor[data.length - positions.length];
         int pointer = 0, counter = -1;
         for (int i = 0; i < data.length; ++i)
-            if (pointer < positions.length && i == positions[pointer]) {
+            if (pointer < positions.length && i == positions[pointer])
                 ++pointer;
-                continue;
-            } else newData[++counter] = data[i];
+            else newData[++counter] = data[i];
         if (newData.length == 1) return newData[0];
         return new Sum(newData, indices);
     }

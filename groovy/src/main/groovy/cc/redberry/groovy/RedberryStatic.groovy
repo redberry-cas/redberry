@@ -45,13 +45,8 @@ import cc.redberry.core.tensor.TensorField
 import cc.redberry.core.tensorgenerator.TensorGenerator
 import cc.redberry.core.transformations.*
 import cc.redberry.core.transformations.collect.CollectTransformation
-import cc.redberry.core.transformations.expand.ExpandAllTransformation
-import cc.redberry.core.transformations.expand.ExpandDenominatorTransformation
-import cc.redberry.core.transformations.expand.ExpandNumeratorTransformation
-import cc.redberry.core.transformations.expand.ExpandTransformation
+import cc.redberry.core.transformations.expand.*
 import cc.redberry.core.transformations.factor.FactorTransformation
-import cc.redberry.core.transformations.factor.FactorizationEngine
-import cc.redberry.core.transformations.factor.JasFactor
 import cc.redberry.core.transformations.fractions.GetDenominatorTransformation
 import cc.redberry.core.transformations.fractions.GetNumeratorTransformation
 import cc.redberry.core.transformations.fractions.TogetherTransformation
@@ -63,6 +58,8 @@ import cc.redberry.core.utils.BitArray
 import cc.redberry.core.utils.OutputPort
 import cc.redberry.core.utils.TensorUtils
 
+import static cc.redberry.core.indices.IndexType.*
+
 /**
  * Groovy facade for Redberry transformations and utility methods.
  *
@@ -71,141 +68,71 @@ import cc.redberry.core.utils.TensorUtils
  */
 class RedberryStatic {
 
-    private static abstract class TransformationWrapper {
-        protected final Class<Transformation> transformationClass;
-
-        TransformationWrapper(Class<Transformation> transformationClass) {
-            this.transformationClass = transformationClass
-        }
-
-        Transformation getAt(String string) {
-            use(Redberry) {
-                return transformationClass.newInstance(string.t)
-            }
-        }
-
-        Transformation getAt(GString string) {
-            use(Redberry) {
-                return transformationClass.newInstance(string.t)
-            }
-        }
-
-        Transformation getAt(Object object) {
-            use(Redberry) {
-                if (object instanceof String || object instanceof GString)
-                    object = object.t
-                return transformationClass.newInstance(object)
-            }
-        }
-
-        abstract Transformation getAt(Collection args);
-    }
-
-    private static final class TransformationWrapper_SimpleTensors_Or_Transformations extends
-            TransformationWrapper implements Transformation {
-
-        final Transformation instance;
-
-        TransformationWrapper_SimpleTensors_Or_Transformations(Class<Transformation> transformationClass, Transformation instance) {
-            super(transformationClass)
-            this.instance = instance
-        }
-
-        @Override
-        Tensor transform(Tensor t) {
-            return instance.transform(t)
-        }
-
-        @Override
-        Transformation getAt(Collection args) {
-            use(Redberry) {
-                return transformationClass.newInstance(*args.collect { it instanceof String ? it.t : it })
-            }
-        }
-    }
-
-    private static final class TransformationWrapper_SimpleTensors_And_Transformations extends
-            TransformationWrapper {
-
-        TransformationWrapper_SimpleTensors_And_Transformations(Class<Transformation> transformationClass) {
-            super(transformationClass)
-        }
-
-        @Override
-        Transformation getAt(Collection args) {
-            use(Redberry) {
-                def _args = []
-                def _tr = []
-                args.each { t ->
-                    if (t instanceof String || t instanceof GString)
-                        t = t.t
-
-                    if (t instanceof SimpleTensor)
-                        _args << t
-                    if (t instanceof Transformation)
-                        _tr << t
-                }
-                return transformationClass.newInstance(_args as SimpleTensor[], _tr as Transformation[]);
-            }
-        }
-    }
-
     /**
      * Expands out products and positive integer powers.
      * @see ExpandTransformation
      */
-    public static final TransformationWrapper_SimpleTensors_Or_Transformations Expand =
-            new TransformationWrapper_SimpleTensors_Or_Transformations(ExpandTransformation, ExpandTransformation.EXPAND)
+    public static final DSLTransformationInst Expand =
+            new DSLTransformationInst(ExpandTransformation.EXPAND)
+
+    /**
+     * Expands out product of sums and positive integer powers and
+     * permanently eliminates metric and Kronecker deltas
+     */
+    public static final DSLTransformationInst ExpandAndEliminate =
+            new DSLTransformationInst(ExpandAndEliminateTransformation.EXPAND_AND_ELIMINATE)
+
+    /**
+     * Expands out product of sums of tensors and permanently eliminates metric and Kronecker deltas
+     */
+    public static final DSLTransformationInst ExpandTensorsAndEliminate =
+            new DSLTransformationInst(ExpandTensorsAndEliminateTransformation.EXPAND_TENSORS_AND_ELIMINATE)
 
     /**
      * Expands out all products and integer powers in any part of expression.
      * @see ExpandAllTransformation
      */
-    public static final TransformationWrapper_SimpleTensors_Or_Transformations ExpandAll =
-            new TransformationWrapper_SimpleTensors_Or_Transformations(ExpandAllTransformation, ExpandAllTransformation.EXPAND_ALL)
+    public static final DSLTransformationInst ExpandAll =
+            new DSLTransformationInst(ExpandAllTransformation.EXPAND_ALL)
 
     /**
      * Expands out products and powers that appear as denominators.
      * @see ExpandNumeratorTransformation
      */
-    public static final TransformationWrapper_SimpleTensors_Or_Transformations ExpandNumerator =
-            new TransformationWrapper_SimpleTensors_Or_Transformations(ExpandNumeratorTransformation,
-                    ExpandNumeratorTransformation.EXPAND_NUMERATOR)
+    public static final DSLTransformationInst ExpandNumerator =
+            new DSLTransformationInst(ExpandNumeratorTransformation.EXPAND_NUMERATOR)
 
     /**
      * Expands out products and powers that appear in the numerator.
      * @see ExpandDenominatorTransformation
      */
-    public static final TransformationWrapper_SimpleTensors_Or_Transformations ExpandDenominator =
-            new TransformationWrapper_SimpleTensors_Or_Transformations(ExpandDenominatorTransformation,
-                    ExpandDenominatorTransformation.EXPAND_DENOMINATOR)
+    public static final DSLTransformationInst ExpandDenominator =
+            new DSLTransformationInst(ExpandDenominatorTransformation.EXPAND_DENOMINATOR)
+
+    /**
+     * Expands out products leaving all symbolic parts unexpanded.
+     * @see ExpandTensorsTransformation
+     */
+    public static final DSLTransformationInst ExpandTensors =
+            new DSLTransformationInst(ExpandTensorsTransformation.EXPAND_TENSORS)
 
     /**
      * Collects terms by pattern
      */
-    public static final TransformationWrapper Collect =
-            new TransformationWrapper_SimpleTensors_And_Transformations(CollectTransformation)
+    public static final DSLTransformation Collect = new DSLTransformation(CollectTransformation)
 
     /**
      * Gives a partial derivative.
      * @see DifferentiateTransformation
      */
-    public static final TransformationWrapper Differentiate =
-            new TransformationWrapper_SimpleTensors_And_Transformations(DifferentiateTransformation)
+    public static final DSLTransformation Differentiate =
+            new DSLTransformation(DifferentiateTransformation)
 
     /**
      * Eliminates metrics and Kronecker deltas
      * @see EliminateMetricsTransformation
      */
     public static final Transformation EliminateMetrics = EliminateMetricsTransformation.ELIMINATE_METRICS
-
-    /**
-     * Expands out product of sums and positive integer powers and
-     * permanently eliminates metric and Kronecker deltas
-     */
-    public static final Transformation ExpandAndEliminate = new TransformationCollection(
-            new ExpandTransformation(EliminateMetricsTransformation.ELIMINATE_METRICS),
-            EliminateMetricsTransformation.ELIMINATE_METRICS)
 
     /**
      * Gives the numerator of expression.
@@ -232,13 +159,15 @@ class RedberryStatic {
      * Puts terms in a sum over a common denominator, and cancels factors in the result.
      * @see TogetherTransformation
      */
-    public static final Transformation Together = TogetherTransformation.TOGETHER;
+    public static final DSLTransformationInst Together =
+            new DSLTransformationInst(TogetherTransformation.TOGETHER)
 
     /**
      * Puts terms in a sum over a common denominator, and cancels all symbolic factors in the result.
      * @see TogetherTransformation
      */
-    public static final Transformation TogetherFactor = TogetherTransformation.TOGETHER_FACTOR;
+    public static final DSLTransformationInst TogetherFactor =
+            new DSLTransformationInst(TogetherTransformation.TOGETHER_FACTOR)
 
     /**
      * Replaces complex numbers in the expression with their complex conjugations.
@@ -268,39 +197,14 @@ class RedberryStatic {
      * Factors a polynomial over the integers.
      * @see FactorTransformation
      */
-    public static final FactorWrapper Factor = FactorWrapper.INSTANCE;
-
-    public static final class FactorWrapper implements Transformation {
-        public static final FactorWrapper INSTANCE = new FactorWrapper()
-
-        private FactorWrapper() {
-        }
-
-        @Override
-        public Tensor transform(Tensor t) {
-            return FactorTransformation.factor(t)
-        }
-
-        private static final def defaultOptions = [FactorScalars: true, FactorizationEngine: JasFactor.ENGINE]
-
-        public Transformation getAt(boolean factorScalars, FactorizationEngine factorizationEngine = JasFactor.ENGINE) {
-            return new FactorTransformation(factorScalars, factorizationEngine)
-        }
-
-        public Transformation getAt(Map map = [FactorScalars: true, FactorizationEngine: JasFactor.ENGINE]) {
-            def allOptions = new HashMap(defaultOptions)
-            allOptions.putAll(map)
-            return new FactorTransformation(allOptions['FactorScalars'], allOptions['FactorizationEngine'])
-        }
-    }
+    public static final DSLTransformationInst Factor = new DSLTransformationInst(FactorTransformation.FACTOR);
 
     /**
      *  Expands all powers of products and powers with respect to specified variables.
      * @see PowerExpandTransformation
      */
-    public static final TransformationWrapper_SimpleTensors_Or_Transformations PowerExpand =
-            new TransformationWrapper_SimpleTensors_Or_Transformations(PowerExpandTransformation,
-                    PowerExpandTransformation.POWER_EXPAND_TRANSFORMATION)
+    public static final DSLTransformationInst PowerExpand =
+            new DSLTransformationInst(PowerExpandTransformation.POWER_EXPAND_TRANSFORMATION)
 
     /**
      * Expands all powers of products and powers with respect to specified variables and unwraps powers of
@@ -308,31 +212,24 @@ class RedberryStatic {
      *
      * @see PowerUnfoldTransformation
      */
-    public static final TransformationWrapper_SimpleTensors_Or_Transformations PowerUnfold =
-            new TransformationWrapper_SimpleTensors_Or_Transformations(PowerUnfoldTransformation,
-                    PowerUnfoldTransformation.POWER_UNFOLD_TRANSFORMATION)
+    public static final DSLTransformationInst PowerUnfold =
+            new DSLTransformationInst(PowerUnfoldTransformation.POWER_UNFOLD_TRANSFORMATION)
 
     /**
      * Gives a symmetrization of tensor with respect to specified indices under the specified symmetries.
      */
-    public static final SymmetrizeWrapper Symmetrize = SymmetrizeWrapper.INSTANCE;
+    public static final DSLTransformation Symmetrize = new DSLTransformation(SymmetrizeTransformation)
 
-    public static final class SymmetrizeWrapper {
-        public static final SymmetrizeWrapper INSTANCE = new SymmetrizeWrapper()
-
-        SymmetrizeWrapper() {
-        }
-
-        public Transformation getAt(SimpleIndices indices) {
-            return new SymmetrizeTransformation(indices, true)
-        }
-    }
+    /**
+     * The identity transformation
+     */
+    public static final Transformation Identity = Transformation.IDENTITY;
 
     public static final FullySymmetrizeWrapper FullySymmetrize = new FullySymmetrizeWrapper(true);
 
     public static final FullySymmetrizeWrapper FullyAntiSymmetrize = new FullySymmetrizeWrapper(false);
 
-    public static final class FullySymmetrizeWrapper implements Transformation {
+    public static final class FullySymmetrizeWrapper implements TransformationToStringAble {
         final boolean symm;
 
         FullySymmetrizeWrapper(boolean symm) {
@@ -350,11 +247,21 @@ class RedberryStatic {
 
         @Override
         Tensor transform(Tensor t) {
-            return new SymmetrizeTransformation(prepareIndices(t.indices), true).transform(t)
+            return new SymmetrizeTransformation(prepareIndices(t.indices.free), true).transform(t)
         }
 
         public Transformation getAt(SimpleIndices indices) {
-            return new SymmetrizeTransformation(prepareIndices(indices), true)
+            return new SymmetrizeTransformation(prepareIndices(indices.free), true)
+        }
+
+        @Override
+        String toString(OutputFormat outputFormat) {
+            return symm ? 'FullySymmetrize' : 'FullyAntiSymmetrize'
+        }
+
+        @Override
+        String toString() {
+            return toString(CC.defaultOutputFormat)
         }
     }
 
@@ -362,23 +269,45 @@ class RedberryStatic {
      * Reverses the order of matrices of specified matrix type.
      * @see cc.redberry.core.transformations.reverse.ReverseTransformation
      */
-    public static final GReverse Reverse = new GReverse();
+    public static final DSLTransformationInst Reverse =
+            new DSLTransformationInst(new ReverseTransformation(Matrix1, Matrix2, Matrix3, Matrix4))
 
-    private static final class GReverse {
+    /**
+     * Inverts free indices of expression
+     */
+    public static final Transformation InvertIndices = new InvertIndicesWrapper(null)
 
-        Transformation getAt(Collection<IndexType> types) {
-            if (types.size() == 1)
-                return new ReverseTransformation(types[0]);
+    private static Tensor invertIndicesOfType(Tensor expr, IndexType... types) {
+        use(Redberry) {
+            for (IndexType type : types) {
+                def ind = expr.indices.free[type].si
+                expr = (ind % ind.inverted) >> expr
+            }
+            expr
+        }
+    }
 
-            List<Transformation> tr = new ArrayList<>();
-            for (IndexType type : types)
-                tr.add(new ReverseTransformation(type));
+    private static Tensor invertIndices(Tensor expr) {
+        use(Redberry) {
+            def ind = expr.indices.free.si
+            (ind % ind.inverted) >> expr
+        }
+    }
 
-            return new TransformationCollection(tr);
+    private static final class InvertIndicesWrapper implements Transformation {
+        private IndexType[] types
+
+        InvertIndicesWrapper(IndexType[] types) {
+            this.types = types
         }
 
-        Transformation getAt(IndexType type) {
-            return new ReverseTransformation(type)
+        public Transformation getAt(IndexType... types) {
+            return new InvertIndicesWrapper(types)
+        }
+
+        @Override
+        Tensor transform(Tensor expr) {
+            types == null ? invertIndices(expr) : invertIndicesOfType(expr, types)
         }
     }
 
@@ -387,7 +316,7 @@ class RedberryStatic {
      **********************************************************************/
 
 
-    private static final GeneralIndicesInsertion indicesInsertion = new GeneralIndicesInsertion();
+    private static GeneralIndicesInsertion indicesInsertion = new GeneralIndicesInsertion();
 
     private static void ensureIndicesInsertionAddedToParser() {
         if (!CC.current().getParseManager().defaultParserPreprocessors.contains(indicesInsertion))
@@ -709,17 +638,6 @@ class RedberryStatic {
      ************* Utilities ***********
      ***********************************/
 
-//    /**
-//     * Creates an instance of {@link Symmetries} from a set of symmetries.
-//     * @param collection collection of symmetries
-//     * @return instance of {@link Symmetries}
-//     */
-//    public static PermutationGroup CreateSymmetries(Object... collection) {
-//        def s = CreateSymmetry(collection[0])
-//        Symmetries symmetries = SymmetriesFactory.createSymmetries(s.dimension())
-//        collection.each { symmetries.add(CreateSymmetry(it)) }
-//        return symmetries
-//    }
 
     public static List<Permutation> findIndicesSymmetries(SimpleIndices indices, tensor) {
         use(Redberry) {
@@ -761,5 +679,31 @@ class RedberryStatic {
     private static Object mapIndices(key, val) {
         def mapping = key.indices.free % val.indices.free
         (mapping >> key).eq(val)
+    }
+
+    /**
+     * Evaluates code block discarding all exceptions and output
+     * @param closure
+     * @return
+     */
+    public static <T> T Quiet(Closure<T> closure) {
+        def out = System.out
+        try {
+            System.setOut(new PrintStream(new OutputStream() {
+                @Override
+                void write(int b) throws IOException {
+                }
+            }))
+            return closure.call()
+        } catch (Throwable e) {
+
+        } finally {
+            System.setOut(out)
+        }
+    }
+
+    public static void Reset() {
+        CC.reset()
+        indicesInsertion = new GeneralIndicesInsertion()
     }
 }

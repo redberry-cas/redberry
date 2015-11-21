@@ -31,6 +31,7 @@ import cc.redberry.core.tensor.functions.ScalarFunction;
 import cc.redberry.core.tensor.iterator.TraverseGuide;
 import cc.redberry.core.tensor.iterator.TraversePermission;
 import cc.redberry.core.transformations.Transformation;
+import cc.redberry.core.transformations.TransformationToStringAble;
 import cc.redberry.core.transformations.substitutions.SubstitutionIterator;
 import cc.redberry.core.utils.TensorUtils;
 
@@ -41,7 +42,7 @@ import static cc.redberry.core.utils.TensorUtils.isNegativeIntegerPower;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-abstract class AbstractExpandTransformation implements Transformation {
+abstract class AbstractExpandTransformation implements TransformationToStringAble {
     public static TraverseGuide DefaultExpandTraverseGuide = new TraverseGuide() {
         @Override
         public TraversePermission getPermission(Tensor tensor, Tensor parent, int indexInParent) {
@@ -78,6 +79,11 @@ abstract class AbstractExpandTransformation implements Transformation {
     protected AbstractExpandTransformation(Transformation[] transformations, TraverseGuide traverseGuide) {
         this.transformations = transformations;
         this.traverseGuide = traverseGuide;
+    }
+
+    protected AbstractExpandTransformation(ExpandOptions options) {
+        this.transformations = new Transformation[]{options.simplifications};
+        this.traverseGuide = options.traverseGuide;
     }
 
     @Override

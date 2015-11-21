@@ -22,10 +22,14 @@
  */
 package cc.redberry.core.transformations.expand;
 
+import cc.redberry.core.context.CC;
+import cc.redberry.core.context.OutputFormat;
 import cc.redberry.core.tensor.Product;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.tensor.iterator.TraverseGuide;
 import cc.redberry.core.transformations.Transformation;
+import cc.redberry.core.transformations.options.Creator;
+import cc.redberry.core.transformations.options.Options;
 
 /**
  * Expands out products and positive integer powers in tensor.
@@ -66,6 +70,11 @@ public final class ExpandTransformation extends AbstractExpandTransformation {
         super(transformations, traverseGuide);
     }
 
+    @Creator
+    public ExpandTransformation(@Options ExpandOptions options) {
+        super(options);
+    }
+
     /**
      * Expands out products and positive integer powers in tensor.
      *
@@ -91,5 +100,15 @@ public final class ExpandTransformation extends AbstractExpandTransformation {
     @Override
     protected Tensor expandProduct(Product product, Transformation[] transformations) {
         return ExpandUtils.expandProductOfSums(product, transformations);
+    }
+
+    @Override
+    public String toString(OutputFormat outputFormat) {
+        return "Expand";
+    }
+
+    @Override
+    public String toString() {
+        return toString(CC.getDefaultOutputFormat());
     }
 }

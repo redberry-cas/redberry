@@ -26,6 +26,9 @@ import cc.redberry.core.indices.Indices;
 import junit.framework.Assert;
 import org.junit.Test;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 /**
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
@@ -35,5 +38,11 @@ public class ParserIndicesTest {
     public void test1() {
         Indices in = ParserIndices.parseSimple("_{AC_{21}B}");
         Assert.assertTrue(in.size() == 3);
+    }
+
+    @Test
+    public void test2() {
+        Assert.assertEquals(ParserIndices.parseSimple("_μν^αβ"),
+                ParserIndices.parseSimple("_\\mu\\nu^\\alpha\\beta"));
     }
 }

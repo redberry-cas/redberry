@@ -40,6 +40,7 @@ import cc.redberry.core.tensor.*
 import cc.redberry.core.tensor.iterator.FromChildToParentIterator
 import cc.redberry.core.tensor.iterator.FromParentToChildIterator
 import cc.redberry.core.tensor.iterator.TraverseGuide
+import cc.redberry.core.tensor.iterator.TreeIterator
 import cc.redberry.core.transformations.Transformation
 import cc.redberry.core.transformations.TransformationCollection
 import cc.redberry.core.transformations.substitutions.SubstitutionIterator
@@ -561,6 +562,16 @@ class Redberry {
     }
 
     /**
+     * Returns indices of the specified type, which are contained
+     * in {@code Indices} object.
+     *
+     * @param indices self
+     * @param type the type of indices
+     * @return indices of the specified type, which are contained in indices object.
+     */
+    static Indices getAt(Indices indices, IndexType type) { indices.getOfType(type) }
+
+    /**
      * Returns the index of the specified type at the
      * specified position in indices
      *
@@ -751,6 +762,48 @@ class Redberry {
         return transformParentAfterChild(t, TraverseGuide.ALL, closure);
     }
 
+    /**
+     * Expression-tree traversal and modification without any checks on indices consistency
+     * @param t expression
+     * @param parentAfterChild tree traversal direction
+     * @param closure do stuff
+     * @param guide traverse guide
+     * @return the result
+     * @see SubstitutionIterator
+     * @see TraverseGuide
+     */
+    static Tensor modifyTree(Tensor t, boolean parentAfterChild, TraverseGuide guide, Closure<Tensor> closure) {
+        TreeIterator iterator = TreeIterator.Factory.create(t, parentAfterChild, guide)
+        Tensor c;
+        while ((c = iterator.next()) != null)
+            iterator.set(closure.call(c));
+
+        return iterator.result();
+    }
+
+    /**
+     * Expression-tree traversal and modification without any checks on indices consistency
+     * @param t expression
+     * @param parentAfterChild tree traversal direction
+     * @param closure do stuff
+     * @return the result
+     * @see SubstitutionIterator
+     */
+    static Tensor modifyTree(Tensor t, boolean parentAfterChild, Closure<Tensor> closure) {
+        return modifyTree(t, parentAfterChild, TraverseGuide.ALL, closure);
+    }
+
+    /**
+     * Expression-tree traversal and modification without any checks on indices consistency
+     * @param t expression
+     * @param closure do stuff
+     * @return the result
+     * @see SubstitutionIterator
+     */
+    static Tensor modifyTree(Tensor t, Closure<Tensor> closure) {
+        return modifyTree(t, true, closure);
+    }
+
     ///////////////////////////////////////// TRANSFORMATIONS ///////////////////////////////////////////////////////
 
     /**
@@ -760,6 +813,10 @@ class Redberry {
      * @return joined transformation, which will apply both transformations sequentially
      */
     static Transformation and(Transformation tr1, Transformation tr2) {
+        if (tr1 == Transformation.IDENTITY)
+            return tr2
+        if (tr2 == Transformation.IDENTITY)
+            return tr1
         def transformations = [];
         if (tr1 instanceof TransformationCollection)
             transformations.addAll(tr1.transformations)
@@ -781,6 +838,9 @@ class Redberry {
      * @return joined transformation, which will apply both transformations sequentially
      */
     static Transformation and(Transformation tr1, List tr2) {
+        if (tr1 == Transformation.IDENTITY)
+            return new TransformationCollection(tr2)
+
         def transformations = [];
         if (tr1 instanceof TransformationCollection)
             transformations.addAll(tr1.transformations)
@@ -799,6 +859,9 @@ class Redberry {
      * @return joined transformation, which will apply both transformations sequentially
      */
     static Transformation and(List tr1, Transformation tr2) {
+        if (tr2 == Transformation.IDENTITY)
+            return new TransformationCollection(tr1)
+
         def transformations = [];
         transformations.addAll(tr1)
         if (tr2 instanceof TransformationCollection)
@@ -806,6 +869,19 @@ class Redberry {
         else
             transformations << tr2
 
+        new TransformationCollection(transformations)
+    }
+
+    /**
+     * Joins two transformations in a single one, which will apply both transformations sequentially
+     * @param tr1 transformation
+     * @param tr2 transformation
+     * @return joined transformation, which will apply both transformations sequentially
+     */
+    static Transformation and(List tr1, List tr2) {
+        def transformations = [];
+        transformations.addAll(tr1)
+        transformations.addAll(tr2)
         new TransformationCollection(transformations)
     }
 
@@ -856,6 +932,34 @@ class Redberry {
             if (!type.isAssignableFrom(t.class))
                 return false;
         return true;
+    }
+
+    /**
+     * Repeatedly applies transformation until tensor no longer changes.
+     * @param tensor tensor
+     * @param transformation transformation
+     * @return the result
+     * @see Transformation#transform(cc.redberry.core.tensor.Tensor)
+     */
+    static Tensor rightShiftUnsigned(Transformation transformation, Tensor tensor) {
+        return Transformation.Util.applyUntilUnchanged(tensor, 50, transformation);
+    }
+
+    /**
+     * Repeatedly applies transformations until tensor no longer changes.
+     * @param tensor tensor
+     * @param transformations transformations
+     * @return the result
+     * @see Transformation#transform(cc.redberry.core.tensor.Tensor)
+     */
+    static Tensor rightShiftUnsigned(Collection transformations, Tensor tensor) {
+        transformations = transformations.collect { if (it instanceof String) parse(it); else it; }
+        def tr
+        if (isCollectionOfType(transformations, Expression))
+            tr = new SubstitutionTransformation(transformations as Expression[])
+        else
+            tr = new TransformationCollection(transformations)
+        return Transformation.Util.applyUntilUnchanged(tensor, tr)
     }
 
     /**
@@ -982,7 +1086,9 @@ class Redberry {
      * @return
      */
     static Transformation getHold(Expression substitution) {
-        return new SubstitutionTransformation(substitution).asSimpleSubstitution()
+        if (substitution[0] instanceof SimpleTensor)
+            return new SubstitutionTransformation(substitution).asSimpleSubstitution()
+        else return substitution
     }
 
     /**
@@ -994,6 +1100,44 @@ class Redberry {
         return substitution.asSimpleSubstitution()
     }
 
+    /**
+     * Applies tensor field substitutions without matching arguments
+     * @param substitution
+     * @return
+     */
+    static List<Transformation> getHold(List<Transformation> substitutions) {
+        List trs = []
+        for (Transformation subs : substitutions) {
+            if (subs instanceof Expression || subs instanceof SubstitutionTransformation)
+                trs << getHold(subs)
+            else trs << subs
+        }
+        return trs
+    }
+
+    /**
+     * Replaces each substitution with transposed one
+     * @param list list of substitutions
+     * @return transposed substitutions (i.e. swapped lhs and rhs)
+     */
+    static Transformation transpose(Transformation expression) {
+        if (expression instanceof SubstitutionTransformation)
+            return expression.transpose()
+        else if (expression instanceof Expression)
+            return expression.transpose()
+        else if (expression instanceof TransformationCollection)
+            return new TransformationCollection(expression.collect { transpose(it) })
+        else throw new IllegalArgumentException("Cannot transpose $expression")
+    }
+
+    /**
+     * Replaces each substitution with transposed one
+     * @param list list of substitutions
+     * @return transposed substitutions (i.e. swapped lhs and rhs)
+     */
+    static List<Transformation> transpose(List<Transformation> list) {
+        return list.collect { transpose(it) }
+    }
     //////////////////////////////////////////// TYPE CONVERSION ///////////////////////////////////////////////////////
 
     /**
@@ -1168,7 +1312,7 @@ class Redberry {
             return getFirst().toString()
         }
 
-        public boolean isExists(){
+        public boolean isExists() {
             return getFirst() != null
         }
 
@@ -1265,6 +1409,13 @@ class Redberry {
         return parse(string)
     }
 
+    /*
+     * for convenience
+     */
+
+    static Transformation getT(Transformation tr) {
+        return tr;
+    }
     /**
      * Parse string to simple tensor
      * @param string string representation of simple tensor
@@ -1328,6 +1479,10 @@ class Redberry {
         return number2Complex(number)
     }
 
+    /** Convenient method */
+    static boolean getT(Boolean b) {
+        return b
+    }
     /**
      * Parse string to indices
      * @param string string representation of indices

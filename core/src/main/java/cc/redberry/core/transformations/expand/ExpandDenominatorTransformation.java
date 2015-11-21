@@ -22,10 +22,14 @@
  */
 package cc.redberry.core.transformations.expand;
 
+import cc.redberry.core.context.CC;
+import cc.redberry.core.context.OutputFormat;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.tensor.Tensors;
 import cc.redberry.core.transformations.Transformation;
 import cc.redberry.core.transformations.fractions.NumeratorDenominator;
+import cc.redberry.core.transformations.options.Creator;
+import cc.redberry.core.transformations.options.Options;
 
 /**
  * Expands out products and powers that appear as denominators in expressions.
@@ -48,6 +52,11 @@ public final class ExpandDenominatorTransformation extends AbstractExpandNumerat
      */
     public ExpandDenominatorTransformation(Transformation[] transformations) {
         super(transformations);
+    }
+
+    @Creator
+    public ExpandDenominatorTransformation(@Options ExpandOptions options) {
+        super(options);
     }
 
     private ExpandDenominatorTransformation() {
@@ -82,5 +91,15 @@ public final class ExpandDenominatorTransformation extends AbstractExpandNumerat
         if (numDen.denominator == denominator)
             return product;
         return Tensors.multiply(numDen.numerator, Tensors.reciprocal(denominator));
+    }
+
+    @Override
+    public String toString(OutputFormat outputFormat) {
+        return "ExpandDenominator";
+    }
+
+    @Override
+    public String toString() {
+        return toString(CC.getDefaultOutputFormat());
     }
 }
