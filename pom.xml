@@ -25,7 +25,7 @@
 
     <groupId>redberry.cc</groupId>
     <artifactId>all</artifactId>
-    <version>1.1.9-SNAPSHOT</version>
+    <version>1.1.9</version>
     <packaging>pom</packaging>
     <name>redberry-all</name>
 
@@ -84,7 +84,7 @@
         </developer>
     </developers>
 
-    <scm><connection>scm:hg:http://bitbucket.org/redberry/redberry-all</connection><url>https://bitbucket.org/redberry/redberry-all/src/</url></scm>
+    <scm><connection>scm:hg:http://bitbucket.org/redberry/redberry-all</connection><tag>v1.1.9</tag><url>https://bitbucket.org/redberry/redberry-all/src/?at=v1.1.9</url></scm>
 
     <issueManagement>
         <system>YouTRACK</system>
