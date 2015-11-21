@@ -27,7 +27,6 @@ import org.junit.Test
 import static cc.redberry.core.indices.IndexType.Matrix1
 import static cc.redberry.core.indices.IndexType.Matrix2
 import static cc.redberry.core.tensor.Tensors.antiSymmetric
-import static cc.redberry.core.tensor.Tensors.setSymmetric
 import static cc.redberry.groovy.RedberryPhysics.*
 import static cc.redberry.groovy.RedberryStatic.*
 
@@ -55,7 +54,8 @@ class DSLTransformationsTest {
                     '(a+b)**5 * A_a * B^b + A^b * B_a + A_a * C^b + A^b * D_a'.t ==
                     'A_c*B^d*((b+a)**5*d_a^c*d^b_d+g_ad*g^bc)+(C^b*d_a^c+g^bc*D_a)*A_c'.t
 
-            assert a ==
+            assert Collect['A_i', 'B_i', [ExpandSymbolic: true]] >>
+                    '(a+b)**2 * A_a * B^b + A^b * B_a + A_a * C^b + A^b * D_a'.t ==
                     'A_c*B^d*((b**2+a**2+2*a*b)*d_a^c*d^b_d+g_ad*g^bc)+(C^b*d_a^c+g^bc*D_a)*A_c'.t
 
             assert Collect['A_i', 'B_i', [Identity, true]] >>
