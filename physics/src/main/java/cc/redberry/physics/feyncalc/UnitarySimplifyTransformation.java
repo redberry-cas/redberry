@@ -36,6 +36,8 @@ import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.transformations.EliminateMetricsTransformation;
 import cc.redberry.core.transformations.Transformation;
 import cc.redberry.core.transformations.TransformationCollection;
+import cc.redberry.core.transformations.options.Creator;
+import cc.redberry.core.transformations.options.Options;
 
 import java.util.ArrayList;
 
@@ -50,6 +52,11 @@ import static cc.redberry.physics.feyncalc.TraceUtils.*;
  */
 public final class UnitarySimplifyTransformation implements Transformation {
     final Transformation unitarySimplifications;
+
+    @Creator
+    public UnitarySimplifyTransformation(@Options UnitarySimplifyOptions options) {
+        this(options.unitaryMatrix, options.structureConstant, options.symmetricConstant, options.dimension);
+    }
 
     /**
      * Creates transformation with given definitions.

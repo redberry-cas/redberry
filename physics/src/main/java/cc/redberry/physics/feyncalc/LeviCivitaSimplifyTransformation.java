@@ -41,6 +41,8 @@ import cc.redberry.core.parser.preprocessor.TypesAndNamesTransformer;
 import cc.redberry.core.tensor.*;
 import cc.redberry.core.tensor.iterator.FromChildToParentIterator;
 import cc.redberry.core.transformations.Transformation;
+import cc.redberry.core.transformations.options.Creator;
+import cc.redberry.core.transformations.options.Options;
 import cc.redberry.core.utils.IntArrayList;
 import cc.redberry.core.utils.TensorUtils;
 import gnu.trove.map.hash.TIntObjectHashMap;
@@ -144,6 +146,11 @@ public class LeviCivitaSimplifyTransformation implements Transformation {
                 }
         );
         leviCivitaSimplifications = getLeviCivitaSubstitutions();
+    }
+
+    @Creator
+    public LeviCivitaSimplifyTransformation(@Options LeviCivitaSimplifyOptions options) {
+        this(options.leviCivita, options.minkowskiSpace, options.simplifications, options.overallSimplifications);
     }
 
     @Override

@@ -25,7 +25,10 @@ package cc.redberry.core.transformations;
 import cc.redberry.core.context.CC;
 import cc.redberry.core.context.OutputFormat;
 import cc.redberry.core.tensor.Tensor;
+import cc.redberry.core.transformations.expand.ExpandOptions;
 import cc.redberry.core.transformations.expand.ExpandTransformation;
+import cc.redberry.core.transformations.options.Creator;
+import cc.redberry.core.transformations.options.Options;
 import cc.redberry.core.utils.ArraysUtils;
 
 /**
@@ -43,6 +46,11 @@ public final class ExpandAndEliminateTransformation implements TransformationToS
 
     public ExpandAndEliminateTransformation(Transformation... transformations) {
         this.transformations = ArraysUtils.addAll(new Transformation[]{EliminateMetricsTransformation.ELIMINATE_METRICS}, transformations);
+    }
+
+    @Creator
+    public ExpandAndEliminateTransformation(@Options ExpandOptions options) {
+        this.transformations = new Transformation[]{options.simplifications};
     }
 
     @Override

@@ -38,6 +38,8 @@ import cc.redberry.core.tensor.*;
 import cc.redberry.core.tensor.iterator.FromChildToParentIterator;
 import cc.redberry.core.transformations.ExpandAndEliminateTransformation;
 import cc.redberry.core.transformations.Transformation;
+import cc.redberry.core.transformations.options.Creator;
+import cc.redberry.core.transformations.options.Options;
 import cc.redberry.core.utils.IntArrayList;
 
 import static cc.redberry.core.tensor.Tensors.multiply;
@@ -57,6 +59,11 @@ public final class UnitaryTraceTransformation implements Transformation {
     private final Expression pairProduct;
     private final Expression singleTrace;
     private final Transformation simplifications;
+
+    @Creator
+    public UnitaryTraceTransformation(@Options UnitarySimplifyOptions options) {
+        this(options.unitaryMatrix, options.structureConstant, options.symmetricConstant, options.dimension);
+    }
 
     /**
      * Creates transformation with given definitions.

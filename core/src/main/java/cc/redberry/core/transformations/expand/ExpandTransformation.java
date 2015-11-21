@@ -28,6 +28,8 @@ import cc.redberry.core.tensor.Product;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.tensor.iterator.TraverseGuide;
 import cc.redberry.core.transformations.Transformation;
+import cc.redberry.core.transformations.options.Creator;
+import cc.redberry.core.transformations.options.Options;
 
 /**
  * Expands out products and positive integer powers in tensor.
@@ -66,6 +68,11 @@ public final class ExpandTransformation extends AbstractExpandTransformation {
      */
     public ExpandTransformation(Transformation[] transformations, TraverseGuide traverseGuide) {
         super(transformations, traverseGuide);
+    }
+
+    @Creator
+    public ExpandTransformation(@Options ExpandOptions options) {
+        super(options);
     }
 
     /**

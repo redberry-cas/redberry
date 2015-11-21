@@ -93,7 +93,7 @@ abstract class ParserOperator implements TokenParser {
             if (c == ')' || c == ']')
                 level--;
             if (level < 0)
-                throw new BracketsError();
+                throw new BracketsError(expression);
             if (c == ' ' && indicesLevel == 0)
                 continue;
             if (c == operatorSymbol && level == 0 && testOperator(expressionChars, i)) {

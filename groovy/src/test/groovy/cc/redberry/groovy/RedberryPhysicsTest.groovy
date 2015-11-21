@@ -23,13 +23,13 @@
 
 package cc.redberry.groovy
 
+import org.junit.Before
 import org.junit.Test
 
 import static cc.redberry.core.indices.IndexType.Matrix1
 import static cc.redberry.core.indices.IndexType.Matrix2
 import static cc.redberry.groovy.RedberryPhysics.*
-import static cc.redberry.groovy.RedberryStatic.EliminateMetrics
-import static cc.redberry.groovy.RedberryStatic.defineMatrices
+import static cc.redberry.groovy.RedberryStatic.*
 import static junit.framework.Assert.assertTrue
 
 /**
@@ -37,15 +37,21 @@ import static junit.framework.Assert.assertTrue
  * @author Stanislav Poslavsky
  */
 class RedberryPhysicsTest {
+    @Before
+    public void setUp() throws Exception {
+        Reset()
+    }
 
     @Test
     public void testDiracTrace1() {
         use(Redberry) {
-            defineMatrices 'G_a', Matrix1.matrix,
-                    'G_\\alpha', Matrix2.matrix
-
+            defineMatrices 'G_a', 'G5', Matrix1.matrix
             assertTrue DiracTrace['G_a'] >> 'Tr[G_a*G_b]'.t == '4*g_ab'.t
-            assertTrue DiracTrace['G_\\alpha'] >> 'Tr[G_\\alpha*G_\\beta]'.t == '4*g_\\alpha\\beta'.t
+
+            Reset()
+
+            defineMatrices 'G_\\alpha', 'G5', Matrix2.matrix
+            assertTrue DiracTrace['G_\\alpha', 'G5', 'e_\\alpha\\beta\\gamma\\delta'] >> 'Tr[G_\\alpha*G_\\beta]'.t == '4*g_\\alpha\\beta'.t
         }
     }
 
@@ -121,8 +127,10 @@ class RedberryPhysicsTest {
             defineMatrices 'G_a', 'G5', Matrix1.matrix,
                     'cu', Matrix1.covector
 
-            def dS = SpinorsSimplify[[uBar: 'cu', momentum: 'p_a', mass: 'm']]
+            def dS = SpinorsSimplify[[uBar: 'cu', Momentum: 'p_a', Mass: 'm']]
             assert dS >> 'cu*G^a*p_a'.t == 'm*cu'.t
+
+            assert dS >> 'cu*G_b*G^a*p_a'.t == '-m*cu*G_{b}+2*cu*p_{b}'.t
         }
     }
 }

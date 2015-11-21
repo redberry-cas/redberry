@@ -24,13 +24,12 @@ package cc.redberry.core.transformations.expand;
 
 import cc.redberry.core.context.CC;
 import cc.redberry.core.context.OutputFormat;
-import cc.redberry.core.tensor.Product;
-import cc.redberry.core.tensor.Sum;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.tensor.Tensors;
-import cc.redberry.core.tensor.iterator.TraverseGuide;
 import cc.redberry.core.transformations.Transformation;
 import cc.redberry.core.transformations.fractions.NumeratorDenominator;
+import cc.redberry.core.transformations.options.Creator;
+import cc.redberry.core.transformations.options.Options;
 
 /**
  * Expands out products and powers that appear as numerators in expressions.
@@ -57,6 +56,11 @@ public final class ExpandNumeratorTransformation extends AbstractExpandNumerator
      */
     public ExpandNumeratorTransformation(Transformation[] transformations) {
         super(transformations);
+    }
+
+    @Creator
+    public ExpandNumeratorTransformation(@Options ExpandOptions options) {
+        super(options);
     }
 
     /**

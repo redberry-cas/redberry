@@ -26,14 +26,15 @@ import cc.redberry.core.context.CC;
 import cc.redberry.core.context.OutputFormat;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.tensor.*;
-import cc.redberry.core.tensor.iterator.FromChildToParentIterator;
 import cc.redberry.core.transformations.Transformation;
 import cc.redberry.core.transformations.TransformationToStringAble;
 import cc.redberry.core.transformations.factor.FactorTransformation;
+import cc.redberry.core.transformations.options.Creator;
+import cc.redberry.core.transformations.options.Option;
+import cc.redberry.core.transformations.options.Options;
 import cc.redberry.core.transformations.substitutions.SubstitutionIterator;
 import cc.redberry.core.utils.THashMap;
 import cc.redberry.core.utils.TensorUtils;
-import gnu.trove.set.hash.TIntHashSet;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -51,7 +52,7 @@ import static cc.redberry.core.transformations.CollectScalarFactorsTransformatio
  */
 //TODO review after logical completion of tensors standard form strategy 
 public final class TogetherTransformation implements TransformationToStringAble {
-    public static final TogetherTransformation TOGETHER = new TogetherTransformation();
+    public static final TogetherTransformation TOGETHER = new TogetherTransformation(IDENTITY);
     public static final TogetherTransformation TOGETHER_FACTOR = new TogetherTransformation(FactorTransformation.FACTOR);
 
     private final Transformation factor;
@@ -60,8 +61,9 @@ public final class TogetherTransformation implements TransformationToStringAble 
         this.factor = factor;
     }
 
-    public TogetherTransformation() {
-        this(null);
+    @Creator
+    public TogetherTransformation(@Options TogetherOptions options) {
+        this(options.factor);
     }
 
     @Override
@@ -74,7 +76,7 @@ public final class TogetherTransformation implements TransformationToStringAble 
             if (c instanceof Product)
                 iterator.safeSet(collectScalarFactorsInProduct((Product) c));
         }
-        return iterator.result();
+        return factor.transform(iterator.result());
     }
 
     private Tensor togetherSum(Tensor t) {
@@ -159,8 +161,7 @@ public final class TogetherTransformation implements TransformationToStringAble 
     }
 
     private SplitStruct splitFraction(Tensor tensor) {
-        if (factor != null)
-            tensor = factor.transform(tensor);
+        tensor = factor.transform(tensor);
 
         THashMap<Tensor, Complex> map = new THashMap<>();
         if (checkPower(tensor)) {
@@ -237,5 +238,12 @@ public final class TogetherTransformation implements TransformationToStringAble 
     @Override
     public String toString() {
         return toString(CC.getDefaultOutputFormat());
+    }
+
+    public static final class TogetherOptions {
+        @Option(name = "Factor", index = 0)
+        public Transformation factor;
+
+        public TogetherOptions() {}
     }
 }

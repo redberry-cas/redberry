@@ -34,6 +34,9 @@ import cc.redberry.core.tensor.iterator.TreeIterator;
 import cc.redberry.core.transformations.Transformation;
 import cc.redberry.core.transformations.TransformationToStringAble;
 import cc.redberry.core.transformations.fractions.TogetherTransformation;
+import cc.redberry.core.transformations.options.Creator;
+import cc.redberry.core.transformations.options.Option;
+import cc.redberry.core.transformations.options.Options;
 import cc.redberry.core.utils.IntArrayList;
 import cc.redberry.core.utils.LocalSymbolsProvider;
 import cc.redberry.core.utils.TensorUtils;
@@ -68,6 +71,12 @@ public class FactorTransformation implements TransformationToStringAble {
     public FactorTransformation(boolean factorScalars, Transformation factorizationEngine) {
         this.factorScalars = factorScalars;
         this.factorizationEngine = factorizationEngine;
+    }
+
+    @Creator
+    public FactorTransformation(@Options FactorOptions options) {
+        this.factorScalars = options.factorScalars;
+        this.factorizationEngine = options.factorizationEngine;
     }
 
     public Transformation getFactorizationEngine() {
@@ -595,5 +604,15 @@ public class FactorTransformation implements TransformationToStringAble {
     @Override
     public String toString() {
         return toString(CC.getDefaultOutputFormat());
+    }
+
+    public static final class FactorOptions {
+        @Option(name = "FactorScalars", index = 0)
+        public boolean factorScalars = true;
+
+        @Option(name = "FactorizationEngine", index = 1)
+        public Transformation factorizationEngine = JasFactor.ENGINE;
+
+        public FactorOptions() {}
     }
 }

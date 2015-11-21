@@ -28,8 +28,8 @@ import cc.redberry.core.tensor.SimpleTensor;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.tensor.Tensors;
 import cc.redberry.core.tensor.iterator.FromChildToParentIterator;
-import cc.redberry.core.transformations.Transformation;
 import cc.redberry.core.transformations.TransformationToStringAble;
+import cc.redberry.core.transformations.options.Creator;
 import cc.redberry.core.utils.Indicator;
 
 import static cc.redberry.core.transformations.powerexpand.PowerExpandUtils.*;
@@ -65,6 +65,7 @@ public final class PowerExpandTransformation implements TransformationToStringAb
      *
      * @param vars simple tensors
      */
+    @Creator(vararg = true, hasArgs = true)
     public PowerExpandTransformation(final SimpleTensor... vars) {
         this(varsToIndicator(vars));
     }

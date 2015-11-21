@@ -34,6 +34,8 @@ import cc.redberry.core.tensor.*;
 import cc.redberry.core.transformations.ExpandTensorsAndEliminateTransformation;
 import cc.redberry.core.transformations.Transformation;
 import cc.redberry.core.transformations.TransformationCollection;
+import cc.redberry.core.transformations.options.Creator;
+import cc.redberry.core.transformations.options.Options;
 import cc.redberry.core.transformations.substitutions.SubstitutionIterator;
 import cc.redberry.core.utils.IntArrayList;
 
@@ -92,7 +94,7 @@ public final class SpinorsSimplifyTransformation extends AbstractTransformationW
                                          SimpleTensor uBar, SimpleTensor vBar,
                                          SimpleTensor momentum, SimpleTensor mass,
                                          Transformation simplifications,
-                                         boolean diracSimplify) {
+                                         boolean doDiracSimplify) {
         super(gammaMatrix, gamma5, null, dimension, traceOfOne);
         checkSpinorNotation(u, false);
         checkSpinorNotation(v, false);
@@ -113,7 +115,8 @@ public final class SpinorsSimplifyTransformation extends AbstractTransformationW
         this.p2 = createP2Subs();
         this.simplifyG5 = gamma5 == null ? null : new SimplifyGamma5Transformation(gammaMatrix, gamma5);
         this.expandAndEliminate = new ExpandTensorsAndEliminateTransformation(simplifications);
-        this.diracSimplify = diracSimplify ? new DiracSimplifyTransformation(gammaMatrix, gamma5, new TransformationCollection(simplifications, p2)) : null;
+        this.diracSimplify = doDiracSimplify ? new DiracSimplifyTransformation(
+                gammaMatrix, gamma5, dimension, traceOfOne, new TransformationCollection(simplifications, p2)) : null;
 
         List<Transformation> ortoh = new ArrayList<>();
         Expression[] ort = createOrtIdentities(uBar, v);
@@ -121,6 +124,13 @@ public final class SpinorsSimplifyTransformation extends AbstractTransformationW
         ort = createOrtIdentities(vBar, u);
         if (ort != null) ortoh.addAll(Arrays.asList(ort));
         this.ortohonality = new TransformationCollection(ortoh);
+    }
+
+    @Creator
+    public SpinorsSimplifyTransformation(@Options SpinorsSimplifyOptions options) {
+        this(options.gammaMatrix, options.gamma5, options.dimension, options.traceOfOne,
+                options.u, options.v, options.uBar, options.vBar, options.momentum, options.mass,
+                options.simplifications, options.doDiracSimplify);
     }
 
     private void checkSpinorNotation(SimpleTensor spinor, boolean bar) {

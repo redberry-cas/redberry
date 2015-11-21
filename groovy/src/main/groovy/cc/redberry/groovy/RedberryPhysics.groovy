@@ -24,7 +24,6 @@
 package cc.redberry.groovy
 
 import cc.redberry.core.tensor.Expression
-import cc.redberry.core.tensor.SimpleTensor
 import cc.redberry.core.tensor.Tensor
 import cc.redberry.core.transformations.Transformation
 import cc.redberry.core.transformations.TransformationCollection
@@ -33,7 +32,6 @@ import cc.redberry.physics.oneloopdiv.OneLoopCounterterms
 import cc.redberry.physics.oneloopdiv.OneLoopInput
 
 import static cc.redberry.core.tensor.Tensors.parse
-import static cc.redberry.core.tensor.Tensors.parseSimple
 
 /**
  * Groovy facade for transformations and utility methods from redberry-physics.
@@ -124,301 +122,49 @@ public final class RedberryPhysics {
         return (Tensor) o;
     }
 
-    private static abstract class AbstractTransformationWithDefaultParameters
-            implements Transformation {
-
-        @Override
-        Tensor transform(Tensor t) {
-            return defaultTransformation().transform(t)
-        }
-
-        final Transformation defaultTransformation() {
-            return getAt(defaultParameters())
-        }
-
-        protected abstract Transformation create(Collection args);
-
-        protected abstract Transformation create(Map args);
-
-        protected abstract Map defaultParameters();
-
-        public final Transformation getAt(Collection args) {
-            use(Redberry) {
-                args = args.collect { if (it instanceof String) it.t else it }
-                return create(args);
-            }
-        }
-
-        public final Transformation getAt(Map args) {
-            use(Redberry) {
-                args = new HashMap(args)
-                Map newArgs = new HashMap(defaultParameters())
-                newArgs.putAll(args)
-                newArgs.entrySet().each { it.value = it.value == null ? null : it.value.t }
-                return create(newArgs);
-            }
-        }
-    }
-
     /**
      * Calculates trace of Dirac matrices in d dimensions (default 4).
      * @see DiracTraceTransformation
      */
-    public static final GDiracTrace DiracTrace = new GDiracTrace();
-
-    private static final class GDiracTrace extends AbstractTransformationWithDefaultParameters {
-        private static
-        final Map defaultArgs = [Gamma    : 'G_a', Gamma5: 'G5', LeviCivita: 'e_abcd',
-                                 Minkowski: true, Simplifications: Transformation.IDENTITY,
-                                 Dimension: '4', TraceOfOne: 'default']
-
-
-        Transformation getAt(String gamma) {
-            use(Redberry) {
-                return new DiracTraceTransformation(gamma.t);
-            }
-        }
-
-        Transformation getAt(SimpleTensor gamma) {
-            return new DiracTraceTransformation(gamma);
-        }
-
-        @Override
-        protected Transformation create(Collection args) {
-            return new DiracTraceTransformation(*args)
-        }
-
-        @Override
-        protected Transformation create(Map args) {
-            def tr = args['Simplifications']
-            if (tr instanceof Transformation)
-                tr = [tr] as Transformation[]
-
-            if (args['TraceOfOne'].toString() == 'default')
-                return new DiracTraceTransformation(args['Gamma'], args['Gamma5'], args['LeviCivita'],
-                        tr, args['Minkowski'], args['Dimension']);
-            else
-                return new DiracTraceTransformation(args['Gamma'], args['Gamma5'], args['LeviCivita'],
-                        tr, args['Minkowski'], args['Dimension'], args['TraceOfOne']);
-        }
-
-        @Override
-        protected Map defaultParameters() {
-            return defaultArgs;
-        }
-    }
+    public static final DSLTransformationInst DiracTrace = new DSLTransformationInst(DiracTraceTransformation);
 
     /**
      * Simplifies products of gamma matrices
      * @see DiracSimplifyTransformation
      */
-    public static final GDiracSimplify DiracSimplify = new GDiracSimplify();
-
-    private static final class GDiracSimplify extends AbstractTransformationWithDefaultParameters {
-        private static
-        final Map defaultArgs = [Gamma          : 'G_a', Gamma5: 'G5',
-                                 Simplifications: Transformation.IDENTITY,
-                                 Dimension      : '4', TraceOfOne: 'default']
-
-
-        Transformation getAt(String gamma) {
-            use(Redberry) {
-                return new DiracSimplifyTransformation(gamma.t);
-            }
-        }
-
-        Transformation getAt(SimpleTensor gamma) {
-            return new DiracSimplifyTransformation(gamma);
-        }
-
-        @Override
-        protected Transformation create(Collection args) {
-            return new DiracSimplifyTransformation(*args)
-        }
-
-        @Override
-        protected Transformation create(Map args) {
-            def tr = args['Simplifications']
-            if (args['TraceOfOne'].toString() == 'default')
-                return new DiracSimplifyTransformation(args['Gamma'], args['Gamma5'], args['Dimension'], tr);
-            else
-                return new DiracSimplifyTransformation(args['Gamma'], args['Gamma5'], args['Dimension'], args['TraceOfOne'], tr);
-        }
-
-        @Override
-        protected Map defaultParameters() {
-            return defaultArgs;
-        }
-    }
+    public static final DSLTransformationInst DiracSimplify = new DSLTransformationInst(DiracSimplifyTransformation);
 
     /**
      * Simplifies expressions involving gamma5 atrices
      * @see SimplifyGamma5Transformation
      */
-    public static final GDiracSimplify5 DiracSimplify5 = new GDiracSimplify5();
-
-    private static final class GDiracSimplify5 extends AbstractTransformationWithDefaultParameters {
-        private static
-        final Map defaultArgs = [Gamma: 'G_a', Gamma5: 'G5']
-
-
-        Transformation getAt(String gamma, String gamma5) {
-            use(Redberry) {
-                return new SimplifyGamma5Transformation(gamma.t, gamma5.t);
-            }
-        }
-
-        Transformation getAt(SimpleTensor gamma, SimpleTensor gamma5) {
-            return new SimplifyGamma5Transformation(gamma, gamma5);
-        }
-
-        @Override
-        protected Transformation create(Collection args) {
-            return new SimplifyGamma5Transformation(*args)
-        }
-
-        @Override
-        protected Transformation create(Map args) {
-            return new SimplifyGamma5Transformation(args['Gamma'], args['Gamma5']);
-        }
-
-        @Override
-        protected Map defaultParameters() {
-            return defaultArgs;
-        }
-    }
+    public static final DSLTransformationInst DiracSimplify5 = new DSLTransformationInst(SimplifyGamma5Transformation);
 
     /**
      * Puts products of gammas in canonical order
      * @see DiracOrderTransformation
      */
-    public static final GDiracOrder DiracOrder = new GDiracOrder();
-
-    private static final class GDiracOrder extends AbstractTransformationWithDefaultParameters {
-        private static
-        final Map defaultArgs = [Gamma          : 'G_a', Gamma5: 'G5',
-                                 Simplifications: Transformation.IDENTITY,
-                                 Dimension      : '4', TraceOfOne: 'default']
-
-
-        Transformation getAt(String gamma) {
-            use(Redberry) {
-                return new DiracOrderTransformation(gamma.t);
-            }
-        }
-
-        Transformation getAt(SimpleTensor gamma) {
-            return new DiracOrderTransformation(gamma);
-        }
-
-        @Override
-        protected Transformation create(Collection args) {
-            return new DiracOrderTransformation(*args)
-        }
-
-        @Override
-        protected Transformation create(Map args) {
-            def tr = args['Simplifications']
-            if (args['TraceOfOne'].toString() == 'default')
-                return new DiracOrderTransformation(args['Gamma'], args['Gamma5'], args['Dimension'], tr);
-            else
-                return new DiracOrderTransformation(args['Gamma'], args['Gamma5'], args['Dimension'], args['TraceOfOne'], tr);
-        }
-
-        @Override
-        protected Map defaultParameters() {
-            return defaultArgs;
-        }
-    }
+    public static final DSLTransformationInst DiracOrder = new DSLTransformationInst(DiracOrderTransformation);
 
     /**
      * Simplifies spinors using Dirac equation
      * @see SpinorsSimplifyTransformation
      */
-    public static final GSpinorsSimplify SpinorsSimplify = new GSpinorsSimplify();
-
-    private static final class GSpinorsSimplify extends AbstractTransformationWithDefaultParameters {
-        private static
-        final Map defaultArgs = [Gamma          : 'G_a', Gamma5: 'G5',
-                                 u              : null, v: null, uBar: null, vBar: null,
-                                 momentum       : null, mass: null,
-                                 Simplifications: Transformation.IDENTITY,
-                                 Dimension      : '4', TraceOfOne: 'default',
-                                 DiracSimplify  : true]
-
-        @Override
-        protected Transformation create(Collection args) {
-            return new SpinorsSimplifyTransformation(*args)
-        }
-
-        @Override
-        protected Transformation create(Map args) {
-            def tr = args['Simplifications']
-            if (args['TraceOfOne'].toString() == 'default')
-                return new SpinorsSimplifyTransformation(args['Gamma'], args['Gamma5'], args['Dimension'],
-                        args['u'], args['v'], args['uBar'], args['vBar'], args['momentum'], args['mass'], tr,
-                        args['DiracSimplify']);
-            else
-                return new SpinorsSimplifyTransformation(args['Gamma'], args['Gamma5'], args['Dimension'], args['TraceOfOne'],
-                        args['u'], args['v'], args['uBar'], args['vBar'], args['momentum'], args['mass'], tr,
-                        args['DiracSimplify']);
-        }
-
-        @Override
-        protected Map defaultParameters() {
-            return defaultArgs;
-        }
-    }
+    public static
+    final DSLTransformation SpinorsSimplify = new DSLTransformation(SpinorsSimplifyTransformation);
 
     /**
      * Calculates trace of unitary matrices
      * @see UnitaryTraceTransformation
      */
-    public static final GUnitaryTrace UnitaryTrace = new GUnitaryTrace();
-
-    static final Map unitaryDefaultParameters = [Matrix: 'T_A', f: 'f_ABC', d: 'd_ABC', N: 'N']
-
-
-    private static final class GUnitaryTrace extends AbstractTransformationWithDefaultParameters {
-        @Override
-        protected Transformation create(Collection args) {
-            return new UnitaryTraceTransformation(*args);
-        }
-
-        @Override
-        protected Transformation create(Map args) {
-            return new UnitaryTraceTransformation(args['Matrix'], args['f'], args['d'], args['N']);
-        }
-
-        @Override
-        protected Map defaultParameters() {
-            return unitaryDefaultParameters;
-        }
-    }
+    public static final DSLTransformationInst UnitaryTrace = new DSLTransformationInst(UnitaryTraceTransformation);
 
     /**
      * Simplifies combinations of unitary matrices
      * @see UnitarySimplifyTransformation
      */
-    public static final GUnitarySimplify UnitarySimplify = new GUnitarySimplify();
-
-    private static final class GUnitarySimplify extends AbstractTransformationWithDefaultParameters {
-
-        @Override
-        protected Transformation create(Collection args) {
-            return new UnitarySimplifyTransformation(*args);
-        }
-
-        @Override
-        protected Transformation create(Map args) {
-            return new UnitarySimplifyTransformation(args['Matrix'], args['f'], args['d'], args['N']);
-        }
-
-        @Override
-        protected Map defaultParameters() {
-            return unitaryDefaultParameters
-        }
-    }
+    public static
+    final DSLTransformationInst UnitarySimplify = new DSLTransformationInst(UnitarySimplifyTransformation);
 
     /**
      * Simplifies combinations of Levi-Civita tensors.
@@ -426,57 +172,26 @@ public final class RedberryPhysics {
      */
     public static final GLeviCivita LeviCivitaSimplify = new GLeviCivita();
 
-    private static final class GLeviCivita {
+    private final static DSLTransformationInst LeviCivitaSimplify_minkowski = new DSLTransformationInst(
+            new LeviCivitaSimplifyTransformation(new LeviCivitaSimplifyOptions(true)))
 
+    private final static DSLTransformationInst LeviCivitaSimplify_euclidean = new DSLTransformationInst(
+            new LeviCivitaSimplifyTransformation(new LeviCivitaSimplifyOptions(false)))
+
+    private static final class GLeviCivita {
         /**
          * Simplifies in Minkowski space
          * @return transformation in Minkowski space
          */
-        LeviCivitaSpace getMinkowski() {
-            return new LeviCivitaSpace(true);
+        DSLTransformationInst getMinkowski() {
+            return LeviCivitaSimplify_minkowski;
         }
         /**
          * Simplifies in Euclidean space
          * @return transformation in Euclidean space
          */
-        LeviCivitaSpace getEuclidean() {
-            return new LeviCivitaSpace(false);
-        }
-    }
-
-    private static final class LeviCivitaSpace extends AbstractTransformationWithDefaultParameters {
-        private static
-        final Map defaultArgs = [LeviCivita            : 'e_abcd', Simplifications: Transformation.IDENTITY,
-                                 OverallSimplifications: Transformation.IDENTITY,]
-        final boolean minkowskiSpace;
-
-        LeviCivitaSpace(boolean minkowskiSpace) {
-            this.minkowskiSpace = minkowskiSpace
-        }
-
-        @Override
-        protected Transformation create(Collection args) {
-            def args1 = [] + args
-            args1.add(1, minkowskiSpace)
-            return new LeviCivitaSimplifyTransformation(*args1)
-        }
-
-        @Override
-        protected Transformation create(Map args) {
-            return new LeviCivitaSimplifyTransformation(args['LeviCivita'], minkowskiSpace, args['Simplifications'], args['OverallSimplifications'])
-        }
-
-        @Override
-        protected Map defaultParameters() {
-            return defaultArgs
-        }
-
-        Transformation getAt(SimpleTensor leviCivita) {
-            return new LeviCivitaSimplifyTransformation(leviCivita, minkowskiSpace);
-        }
-
-        Transformation getAt(String leviCivita) {
-            return new LeviCivitaSimplifyTransformation(parseSimple(leviCivita), minkowskiSpace);
+        DSLTransformationInst getEuclidean() {
+            return LeviCivitaSimplify_euclidean;
         }
     }
 

@@ -29,10 +29,11 @@ import cc.redberry.core.transformations.TransformationToStringAble;
 /**
  * Abstract class for {@link cc.redberry.core.transformations.expand.ExpandDenominatorTransformation} and
  * {@link cc.redberry.core.transformations.expand.ExpandNumeratorTransformation}.
+ *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public abstract class AbstractExpandNumeratorDenominatorTransformation implements TransformationToStringAble{
+public abstract class AbstractExpandNumeratorDenominatorTransformation implements TransformationToStringAble {
     protected final Transformation[] transformations;
 
     protected AbstractExpandNumeratorDenominatorTransformation(Transformation[] transformations) {
@@ -41,6 +42,10 @@ public abstract class AbstractExpandNumeratorDenominatorTransformation implement
 
     protected AbstractExpandNumeratorDenominatorTransformation() {
         this(new Transformation[0]);
+    }
+
+    protected AbstractExpandNumeratorDenominatorTransformation(ExpandOptions options) {
+        this(new Transformation[]{options.simplifications});
     }
 
     @Override
