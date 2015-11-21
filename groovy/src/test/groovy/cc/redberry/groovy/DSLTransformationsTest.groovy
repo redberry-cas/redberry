@@ -27,6 +27,7 @@ import org.junit.Test
 import static cc.redberry.core.indices.IndexType.Matrix1
 import static cc.redberry.core.indices.IndexType.Matrix2
 import static cc.redberry.core.tensor.Tensors.antiSymmetric
+import static cc.redberry.core.tensor.Tensors.setSymmetric
 import static cc.redberry.groovy.RedberryPhysics.*
 import static cc.redberry.groovy.RedberryStatic.*
 
@@ -54,8 +55,7 @@ class DSLTransformationsTest {
                     '(a+b)**5 * A_a * B^b + A^b * B_a + A_a * C^b + A^b * D_a'.t ==
                     'A_c*B^d*((b+a)**5*d_a^c*d^b_d+g_ad*g^bc)+(C^b*d_a^c+g^bc*D_a)*A_c'.t
 
-            assert Collect['A_i', 'B_i', [ExpandSymbolic: true]] >>
-                    '(a+b)**2 * A_a * B^b + A^b * B_a + A_a * C^b + A^b * D_a'.t ==
+            assert a ==
                     'A_c*B^d*((b**2+a**2+2*a*b)*d_a^c*d^b_d+g_ad*g^bc)+(C^b*d_a^c+g^bc*D_a)*A_c'.t
 
             assert Collect['A_i', 'B_i', [Identity, true]] >>
@@ -227,6 +227,11 @@ class DSLTransformationsTest {
             assert DiracTrace[[Dimension: 'D', TraceOfOne: 4]] >> 'Tr[G_a*G_b*G_c*G_d]'.t ==
                     '4*g_{ad}*g_{bc}+4*g_{ab}*g_{cd}-4*g_{ac}*g_{bd}'.t
 
+            def expr = 'Tr[(p^a + k^a)*(p^b + k^b)*G_a*G_b*G_c*G_d]'.t
+            def mandelstam = setMandelstam([k_a: '0', p_a: '0', q_a: 'm', r_a: 'm'], 's', 't', 'u')
+            assert DiracTrace[[Simplifications: mandelstam]] >> expr ==
+                    '4*s*g_{cd}'.t
+
             Reset()
 
             setAntiSymmetric 'e_abcd'
@@ -239,6 +244,43 @@ class DSLTransformationsTest {
 
             assert LeviCivitaSimplify.euclidean[[LeviCivita: 'f_abcd'.t]] >> '4*f^h_d^fb*f_abch*f_e^d_gf'.t ==
                     '16*f_{eagc}'.t
+
+            Reset()
+
+            defineMatrices 'F_\\mu', 'F5', Matrix2.matrix
+            def dTrace = DiracTrace[[Gamma: 'F_\\mu', Gamma5: 'F5', LeviCivita: 'Eps_{\\mu\\nu\\alpha\\beta}']]
+            assert dTrace >> 'Tr[F_\\mu*F_\\nu*F_\\alpha*F_\\beta * F5]'.t ==
+                    '-4*I*Eps_{\\mu\\nu\\alpha\\beta}'.t
+
+            Reset()
+
+            defineMatrices 'G_a', 'G5', Matrix1.matrix
+            assert DiracOrder >> 'G_b*G_a'.t ==
+                    '2*g_{ba}-G_{a}*G_{b}'.t
+
+            assert DiracOrder[[Dimension: 10]] >> 'G_b*G_a'.t ==
+                    '2*g_{ba}-G_{a}*G_{b}'.t
+
+            assert DiracOrder >> 'G5*G_b*G_a'.t ==
+                    '2*G5*g_{ba}-G_{a}*G_{b}*G5'.t
+
+            assert DiracSimplify >> 'G_a*G^a'.t ==
+                    '4 + 0*G_a*G^a'.t
+
+            assert DiracSimplify >> 'G_a*G_b*G^a'.t ==
+                    '-2*G_{b}'.t
+
+            assert DiracSimplify >> 'G_a*G_b*G^a*G^b'.t ==
+                    '-8 + 0*G_a*G^a'.t
+
+            assert DiracSimplify[[Dimension: 'N']] >> 'G_a*G^a'.t ==
+                    'N + 0*G_a*G^a'.t
+
+            assert DiracSimplify[[Dimension: 'N']] >> 'G_a*G^a'.t ==
+                    'N + 0*G_a*G^a'.t
+
+            assert DiracSimplify[[Dimension: 'N']] >> 'G_a*G^a'.t ==
+                    'N + 0*G_a*G^a'.t
         }
     }
 }

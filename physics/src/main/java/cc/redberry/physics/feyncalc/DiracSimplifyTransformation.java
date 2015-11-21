@@ -77,6 +77,7 @@ public final class DiracSimplifyTransformation extends AbstractTransformationWit
         if (gamma5 != null)
             overall.add(new SimplifyGamma5Transformation(gammaMatrix, gamma5));
         overall.add(new ApplySubstitutions(setupSubs()));
+        overall.add(simplifications);
         overall.add(new DiracSimplify0(gammaMatrix, gamma5, dimension, traceOfOne, simplifications));
         overall.add(this.traceOfOne);
         overall.add(this.deltaTrace);

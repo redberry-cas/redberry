@@ -115,7 +115,8 @@ public final class SpinorsSimplifyTransformation extends AbstractTransformationW
         this.p2 = createP2Subs();
         this.simplifyG5 = gamma5 == null ? null : new SimplifyGamma5Transformation(gammaMatrix, gamma5);
         this.expandAndEliminate = new ExpandTensorsAndEliminateTransformation(simplifications);
-        this.diracSimplify = doDiracSimplify ? new DiracSimplifyTransformation(gammaMatrix, gamma5, new TransformationCollection(simplifications, p2)) : null;
+        this.diracSimplify = doDiracSimplify ? new DiracSimplifyTransformation(
+                gammaMatrix, gamma5, dimension, traceOfOne, new TransformationCollection(simplifications, p2)) : null;
 
         List<Transformation> ortoh = new ArrayList<>();
         Expression[] ort = createOrtIdentities(uBar, v);

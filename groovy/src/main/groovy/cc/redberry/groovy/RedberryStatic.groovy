@@ -247,11 +247,11 @@ class RedberryStatic {
 
         @Override
         Tensor transform(Tensor t) {
-            return new SymmetrizeTransformation(prepareIndices(t.indices), true).transform(t)
+            return new SymmetrizeTransformation(prepareIndices(t.indices.free), true).transform(t)
         }
 
         public Transformation getAt(SimpleIndices indices) {
-            return new SymmetrizeTransformation(prepareIndices(indices), true)
+            return new SymmetrizeTransformation(prepareIndices(indices.free), true)
         }
 
         @Override

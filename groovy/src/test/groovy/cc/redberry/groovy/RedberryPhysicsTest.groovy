@@ -129,6 +129,8 @@ class RedberryPhysicsTest {
 
             def dS = SpinorsSimplify[[uBar: 'cu', Momentum: 'p_a', Mass: 'm']]
             assert dS >> 'cu*G^a*p_a'.t == 'm*cu'.t
+
+            assert dS >> 'cu*G_b*G^a*p_a'.t == '-m*cu*G_{b}+2*cu*p_{b}'.t
         }
     }
 }
