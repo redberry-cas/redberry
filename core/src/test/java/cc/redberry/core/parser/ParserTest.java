@@ -31,10 +31,9 @@ import cc.redberry.core.number.Complex;
 import cc.redberry.core.tensor.*;
 import cc.redberry.core.utils.TensorUtils;
 import junit.framework.Assert;
+import org.junit.After;
 import org.junit.Ignore;
 import org.junit.Test;
-
-import java.nio.charset.Charset;
 
 import static cc.redberry.core.tensor.Tensors.*;
 
@@ -43,6 +42,11 @@ import static cc.redberry.core.tensor.Tensors.*;
  * @author Stanislav Poslavsky
  */
 public class ParserTest {
+
+    @After
+    public void after() {
+        CC.setParserAllowsSameVariance(false);
+    }
 
     @Test
     public void test1() {
@@ -577,5 +581,31 @@ public class ParserTest {
     public void testUnicode1() throws Exception {
         TAssert.assertEquals(parse("F_\\mu\\nu*(A^\\alpha\\beta + M_\\mu * N^\\mu\\alpha\\beta)"),
                 parse("F_μν*(A^αβ + M_μ * N^μαβ)"));
+    }
+
+    @Test
+    public void testSameVariance1() throws Exception {
+        CC.setParserAllowsSameVariance(true);
+
+        TAssert.assertEquals("t_a^a", parse("t_a^a"));
+        TAssert.assertEquals("t_a*t^a", parse("t_a*t_a"));
+        TAssert.assertEquals("(t_a + b_a)*t^a", parse("(t_a + b_a)*t_a"));
+    }
+
+    @Test
+    public void testSameVariance2() throws Exception {
+        CC.setParserAllowsSameVariance(true);
+        parse("A_mn*(B_m^m+C)*U^mn");
+    }
+
+    @Test
+    public void testSameVariance3() throws Exception {
+        CC.setParserAllowsSameVariance(true);
+        String expr = "(a + b_m*(k^m + p^m + b_a*(t^am + v^abc*(t^m_bc + v^m_bc))))" +
+                "*(a + b_n*(k^n + p^n + b_d*(t^dn + v^def*(t^n_ef + v^n_ef))))" +
+                "*(a*(f_qwertyuioplkjhgfdsazxcvbnm^qwertyuioplkjhgfdsazxcvbnm)**2344 + b_i*(k^i + p^i + b_gxy*(t^gixy + v^gqr*(t^xyi_qr + v_qr*(f^xyi*(t_qwtu*o^qwtu)**2 + d^xyi*(t_qwtu*o^qwtu)**2 + x*((t_qwthu*o^qhwtu)**2*d^xyi + k^xyi*(t_qwtus*o^sqwtu)**2))))))";
+
+        expr = expr.replace("^", "_");
+        parse(expr);
     }
 }

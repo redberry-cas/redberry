@@ -199,4 +199,23 @@ public final class CC {
     public static RandomGenerator getRandomGenerator() {
         return current().getRandomGenerator();
     }
+
+    /**
+     * Allows to parse expressions with repeated indices of the same variance (like T_aa or T_a*T^a which results in T^a_a
+     * and T^a*T_a respactively)
+     *
+     * @param b allow or not to parse repeated indices with same variance
+     */
+    public static void setParserAllowsSameVariance(boolean b) {
+        current().setParserAllowsSameVariance(b);
+    }
+
+    /**
+     * Returns whether repeated indices of the same variance are allowed to be parsed
+     *
+     * @return whether repeated indices of the same variance are allowed to be parsed
+     */
+    public static boolean getParserAllowsSameVariance() {
+        return current().getParserAllowsSameVariance();
+    }
 }

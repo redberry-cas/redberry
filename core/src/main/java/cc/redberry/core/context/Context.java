@@ -286,6 +286,25 @@ public final class Context {
     }
 
     /**
+     * Allows to parse expressions with repeated indices of the same variance (like T_aa or T_a*T^a which results in T^a_a
+     * and T^a*T_a respactively)
+     *
+     * @param b allow or not to parse repeated indices with same variance
+     */
+    public void setParserAllowsSameVariance(boolean b) {
+        parseManager.getParser().setAllowSameVariance(b);
+    }
+
+    /**
+     * Returns whether repeated indices of the same variance are allowed to be parsed
+     *
+     * @return whether repeated indices of the same variance are allowed to be parsed
+     */
+    public boolean getParserAllowsSameVariance() {
+        return parseManager.getParser().isAllowSameVariance();
+    }
+
+    /**
      * Returns true if metric is defined for the specified index type.
      *
      * @param type index type

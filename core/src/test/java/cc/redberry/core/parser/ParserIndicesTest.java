@@ -45,4 +45,20 @@ public class ParserIndicesTest {
         Assert.assertEquals(ParserIndices.parseSimple("_μν^αβ"),
                 ParserIndices.parseSimple("_\\mu\\nu^\\alpha\\beta"));
     }
+
+    @Test
+    public void test3() {
+        Assert.assertEquals(ParserIndices.parseSimpleIgnoringVariance("_aabc"),
+                ParserIndices.parseSimple("^a_abc"));
+
+        Assert.assertEquals(ParserIndices.parseSimpleIgnoringVariance("_abca"),
+                ParserIndices.parseSimple("^a_bca"));
+
+        Assert.assertEquals(ParserIndices.parseSimpleIgnoringVariance("_bcaa"),
+                ParserIndices.parseSimple("_bc^a_a"));
+
+        Assert.assertEquals(ParserIndices.parseSimpleIgnoringVariance("^abab"),
+                ParserIndices.parseSimple("_ab^ab"));
+
+    }
 }

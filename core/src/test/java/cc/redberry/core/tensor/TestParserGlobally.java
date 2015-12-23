@@ -25,10 +25,11 @@ package cc.redberry.core.tensor;
 import cc.redberry.core.TAssert;
 import cc.redberry.core.context.CC;
 import cc.redberry.core.context.OutputFormat;
+import cc.redberry.core.indexmapping.Mapping;
 import cc.redberry.core.indices.IndexType;
 import cc.redberry.core.indices.IndicesFactory;
-import cc.redberry.core.indices.StructureOfIndices;
 import cc.redberry.core.indices.IndicesUtils;
+import cc.redberry.core.indices.StructureOfIndices;
 import cc.redberry.core.number.parser.NumberParserTest;
 import cc.redberry.core.parser.ParseTokenSimpleTensor;
 import cc.redberry.core.parser.ParserTest;
@@ -37,7 +38,7 @@ import cc.redberry.core.tensor.iterator.FromChildToParentIterator;
 import cc.redberry.core.tensor.iterator.TraverseGuide;
 import cc.redberry.core.utils.Indicator;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
-import org.junit.Assert;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -49,24 +50,45 @@ import java.util.regex.Pattern;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public class BulkTestsForParser {
+public class TestParserGlobally {
 
     @Before
     public void beforeMethod() {
         CC.setDefaultOutputFormat(OutputFormat.Redberry);
     }
 
+    @After
+    public void tearDown() throws Exception {
+        CC.setParserAllowsSameVariance(false);
+    }
+
+    private static final String path = "src/test";
 
     @Test
     public void testAllExpressionsInTestDirectory() {
-        File testDirectory = new File("src/test");
+        runTests(false, false);
+    }
+
+    @Test
+    public void testAllExpressionsInTestDirectory_allowSameInvariance() {
+        runTests(true, false);
+    }
+
+    @Test
+    public void testAllExpressionsInTestDirectory_withSameInvariance() {
+        runTests(true, true);
+    }
+
+    public void runTests(boolean allowSameVariance, boolean raiseOrLowerAll) {
+        CC.setParserAllowsSameVariance(allowSameVariance);
+        File testDirectory = new File(path);
         Counter c = new Counter(), m = new Counter();
         DescriptiveStatistics statistics = new DescriptiveStatistics();
-        testParseRecurrently(testDirectory, c, m, statistics);
+        testParseRecurrently(testDirectory, c, m, statistics, raiseOrLowerAll);
         System.out.println("Total number of lines containing parse(..): " + c.counter);
         System.out.println("Total number of matched and parsed lines: " + m.counter);
         System.out.println("Strings statistics: \n\t" + statistics.toString().replace("\n", "\n\t"));
-        Assert.assertTrue((c.counter - m.counter) < 2);
+        //Assert.assertTrue((c.counter - m.counter) < 2);
     }
 
     private static final Pattern pattern = Pattern.compile(
@@ -85,9 +107,10 @@ public class BulkTestsForParser {
     private static void testParseRecurrently(File file,
                                              Counter containsParseLinesCounter,
                                              Counter matchedLinesCounter,
-                                             DescriptiveStatistics statistics) {
+                                             DescriptiveStatistics statistics,
+                                             boolean raiseOrLowerAll) {
         if (file.isFile()) {
-            if (file.getName().equals(BulkTestsForParser.class.getSimpleName() + ".java"))
+            if (file.getName().equals(TestParserGlobally.class.getSimpleName() + ".java"))
                 return;
             if (file.getName().equals(ParserTest.class.getSimpleName() + ".java"))
                 return;
@@ -114,6 +137,20 @@ public class BulkTestsForParser {
                         string = bufferedString + "\n" + string;
                         bufferedString = null;
                     }
+                    if (string.contains("expected = InconsistentIndicesException.class")) {
+                        bufferedString = null;
+                        //skip next line
+                        bufferedReader.readLine();
+                        ++lineNumber;
+
+                        while ((string = bufferedReader.readLine()) != null) {
+                            ++lineNumber;
+                            if (string.contains("@Test"))
+                                break;
+                        }
+                        continue;
+                    }
+
                     matchedParse = false;
                     if (string.contains("IndexMappingTestUtils.parse") || string.contains("ParserIndices.parse"))
                         continue;
@@ -142,10 +179,20 @@ public class BulkTestsForParser {
                             tensorString = tensorString.split("\"")[0];
                         }
 
+                        if (tensorString.contains("Tr["))
+                            continue;
+
                         try {
                             statistics.addValue(tensorString.length());
                             tensor = Tensors.parse(tensorString);
                             checkTensor(tensor);
+
+                            if (raiseOrLowerAll) {
+                                Tensor tensor1 = Tensors.parse(tensorString.replace("^", "_"));
+                                checkTensor(tensor1);
+                                if (tensorString.length() < 500)
+                                    TAssert.assertEquals(lower(tensor), lower(tensor1));
+                            }
                         } catch (AssertionError | RuntimeException e) {
 
                             System.out.println(e.getClass().getSimpleName() + ":");
@@ -158,10 +205,10 @@ public class BulkTestsForParser {
                     }
 
                     if (containsParse && !matchedParse && bufferedString == null) {
-                        System.out.println("Parse but not matched:");
-                        System.out.println(string);
-                        System.out.println(file + "  line: " + lineNumber);
-                        System.out.println();
+//                        System.out.println("Parse but not matched:");
+//                        System.out.println(string);
+//                        System.out.println(file + "  line: " + lineNumber);
+//                        System.out.println();
                     }
                     if (containsParse && bufferedString == null)
                         containsParseLinesCounter.increase();
@@ -178,10 +225,18 @@ public class BulkTestsForParser {
             File[] listOfFiles = file.listFiles();
             if (listOfFiles != null) {
                 for (int i = 0; i < listOfFiles.length; i++)
-                    testParseRecurrently(listOfFiles[i], containsParseLinesCounter, matchedLinesCounter, statistics);
+                    testParseRecurrently(listOfFiles[i], containsParseLinesCounter, matchedLinesCounter, statistics, raiseOrLowerAll);
             }
         } else
-            throw new RuntimeException();
+            throw new RuntimeException(file.toString());
+    }
+
+    private static Tensor lower(Tensor t) {
+        int[] ints = t.getIndices().getFree().toArray();
+        int lower[] = new int[ints.length];
+        for (int i = 0; i < ints.length; i++)
+            lower[i] = IndicesUtils.lower(ints[i]);
+        return ApplyIndexMapping.applyIndexMapping(t, new Mapping(ints, lower));
     }
 
     private static void checkTensor(Tensor t) {
