@@ -25,7 +25,7 @@
 
     <groupId>redberry.cc</groupId>
     <artifactId>all</artifactId>
-    <version>1.2-SNAPSHOT-SNAPSHOT</version>
+    <version>1.2-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>redberry-all</name>
 
