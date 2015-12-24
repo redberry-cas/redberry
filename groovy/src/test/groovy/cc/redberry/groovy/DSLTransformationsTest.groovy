@@ -100,6 +100,9 @@ class DSLTransformationsTest {
             assert ExpandAndEliminate >> '(g_mn - A_nm)*(A^mn + g^nm)'.t ==
                     '-A^{mn}*A_{nm}+d^{n}_{n}'.t
 
+            assert ExpandTensorsAndEliminate['d^n_n = 78'] >> '(g_mn - A_nm)*(A^mn + g^nm)'.t ==
+                    '-A^{mn}*A_{nm}+78'.t
+
             assert Expand >> '(x_n + y_n)*(f_m - r_m)'.t ==
                     'x_{n}*f_{m}+f_{m}*y_{n}-r_{m}*y_{n}-x_{n}*r_{m}'.t
 

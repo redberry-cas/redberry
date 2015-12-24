@@ -40,7 +40,7 @@ import static cc.redberry.groovy.RedberryStatic.*
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public class BulkTests {
+public class TestPhysicsExamples {
     @Before
     public void setUp() throws Exception {
         CC.reset()
