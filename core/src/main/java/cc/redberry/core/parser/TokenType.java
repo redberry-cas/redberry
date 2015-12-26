@@ -44,5 +44,6 @@ public enum TokenType {
     Number,
     ScalarFunction,
     Derivative,
+    Trace,
     Dummy
 }

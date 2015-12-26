@@ -123,6 +123,9 @@ public class ParserTensorField implements TokenParser {
                 && arguments.get(0).getIndices().getFree().size() == 0)
             return new ParseToken(TokenType.Power, new ParseToken[]{arguments.get(0), new ParseTokenNumber(Complex.ONE_HALF)});
 
+        if (simpleTensorNode.name.toLowerCase().equals("tr"))
+            return new ParseToken(TokenType.Trace, arguments.toArray(new ParseToken[arguments.size()]));
+
         return new ParseTokenTensorField(
                 simpleTensorNode.indices,
                 simpleTensorNode.name,

@@ -191,8 +191,8 @@ public final class IndexMappings {
      *
      * @param u tensor
      * @param v tensor
-     * @return {@code true} {@code true} if tensor u mathematically (not programming) equals to tensor v,
-     *         {@code false} if they they differ only in the sign and {@code null} otherwise
+     * @return {@code true} {@code false} if tensor u mathematically (not programming) equals to tensor v,
+     *         {@code true} if they they differ only in the sign and {@code null} otherwise
      */
     public static Boolean compare1(Tensor u, Tensor v) {
         Indices freeIndices = u.getIndices().getFree();

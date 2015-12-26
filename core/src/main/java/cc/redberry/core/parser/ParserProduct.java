@@ -101,7 +101,9 @@ public class ParserProduct extends ParserOperator {
                     break;
                 }
             }
-        } else if (token.tokenType == TokenType.Product || token.tokenType == TokenType.Sum)
+        } else if (token.tokenType == TokenType.Product
+                || token.tokenType == TokenType.Trace
+                || token.tokenType == TokenType.Sum)
             for (ParseToken c : token.content)
                 revertIndex(c, index);
     }

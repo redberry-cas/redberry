@@ -145,26 +145,24 @@ public class GeneralIndicesInsertion implements ParseTokenTransformer {
     private void transformInsideFieldsAndScalarFunctions(ParseToken pn) {
         if (pn.tokenType == TokenType.TensorField) {
             ParseTokenTensorField pntf = (ParseTokenTensorField) pn;
-            if (!pntf.name.equalsIgnoreCase("tr"))
-                for (int i = 0; i < pn.content.length; ++i) {
-                    ParseToken newArgNode = transform(pntf.content[i]);
-                    pntf.content[i] = newArgNode;
-                    newArgNode.parent = pntf;
-
-                    SimpleIndices oldArgIndices = pntf.argumentsIndices[i];
-                    if (oldArgIndices != null) {
-                        IntArrayList newArgIndices = new IntArrayList(oldArgIndices.getAllIndices().copy());
-                        Indices newIndices = newArgNode.getIndices();
-                        for (byte j = 0; j < TYPES_COUNT; ++j) {
-                            if (oldArgIndices.size(IndexType.getType(j)) < newIndices.size(IndexType.getType(j))) {
-                                if (oldArgIndices.size(IndexType.getType(j)) != 0)
-                                    throw new IllegalArgumentException("Error in field arg indices.");
-                                newArgIndices.addAll(newIndices.getOfType(IndexType.getType(j)).getAllIndices());
-                            }
+            for (int i = 0; i < pn.content.length; ++i) {
+                ParseToken newArgNode = transform(pntf.content[i]);
+                pntf.content[i] = newArgNode;
+                newArgNode.parent = pntf;
+                SimpleIndices oldArgIndices = pntf.argumentsIndices[i];
+                if (oldArgIndices != null) {
+                    IntArrayList newArgIndices = new IntArrayList(oldArgIndices.getAllIndices().copy());
+                    Indices newIndices = newArgNode.getIndices();
+                    for (byte j = 0; j < TYPES_COUNT; ++j) {
+                        if (oldArgIndices.size(IndexType.getType(j)) < newIndices.size(IndexType.getType(j))) {
+                            if (oldArgIndices.size(IndexType.getType(j)) != 0)
+                                throw new IllegalArgumentException("Error in field arg indices.");
+                            newArgIndices.addAll(newIndices.getOfType(IndexType.getType(j)).getAllIndices());
                         }
-                        pntf.argumentsIndices[i] = IndicesFactory.createSimple(null, newArgIndices.toArray());
                     }
+                    pntf.argumentsIndices[i] = IndicesFactory.createSimple(null, newArgIndices.toArray());
                 }
+            }
         }
         if (pn.tokenType == TokenType.Power || pn.tokenType == TokenType.ScalarFunction) {
             for (int i = 0; i < pn.content.length; ++i)
@@ -287,43 +285,42 @@ public class GeneralIndicesInsertion implements ParseTokenTransformer {
     private IITransformer createTransformer(ParseToken node) {
         IITransformer t;
         switch (node.tokenType) {
-            case TensorField:
-                if (((ParseTokenTensorField) node).name.equalsIgnoreCase("tr")) {
-                    Set<IndexType> types;
-                    int i;
-                    if (node.content.length == 1)
-                        types = EnumSet.allOf(IndexType.class);
-                    else {
-                        types = EnumSet.noneOf(IndexType.class);
-                        ParseToken pn;
-                        IndexType type;
+            case Trace:
+                Set<IndexType> types;
+                int i;
+                if (node.content.length == 1)
+                    types = EnumSet.allOf(IndexType.class);
+                else {
+                    types = EnumSet.noneOf(IndexType.class);
+                    ParseToken pn;
+                    IndexType type;
 
-                        for (i = 1; i < node.content.length; ++i) {
-                            if ((pn = node.content[i]).tokenType != TokenType.SimpleTensor)
+                    for (i = 1; i < node.content.length; ++i) {
+                        if ((pn = node.content[i]).tokenType != TokenType.SimpleTensor)
+                            throw new IllegalArgumentException("Error in trace indices list.");
+                        if ((type = IndexType.fromShortString(((ParseTokenSimpleTensor) pn).name)) == null)
+                            if ((type = IndexType.valueOf(((ParseTokenSimpleTensor) pn).name)) == null)
                                 throw new IllegalArgumentException("Error in trace indices list.");
-                            if ((type = IndexType.fromShortString(((ParseTokenSimpleTensor) pn).name)) == null)
-                                if ((type = IndexType.valueOf(((ParseTokenSimpleTensor) pn).name)) == null)
-                                    throw new IllegalArgumentException("Error in trace indices list.");
-                            types.add(type);
-                        }
+                        types.add(type);
                     }
-
-                    ParseToken nested = node.content[0];
-                    ParseToken parent = node.parent;
-                    for (i = 0; i < parent.content.length; ++i) {
-                        if (parent.content[i] == node) {
-                            parent.content[i] = nested;
-                            nested.parent = parent;
-                            break;
-                        }
-                    }
-                    assert i != parent.content.length;
-
-                    IITransformer innerTransformer = createTransformer(nested);
-                    if (innerTransformer == null)
-                        return null;
-                    return new TraceTransformer(innerTransformer, types);
                 }
+
+                ParseToken nested = node.content[0];
+                ParseToken parent = node.parent;
+                for (i = 0; i < parent.content.length; ++i) {
+                    if (parent.content[i] == node) {
+                        parent.content[i] = nested;
+                        nested.parent = parent;
+                        break;
+                    }
+                }
+                assert i != parent.content.length;
+
+                IITransformer innerTransformer = createTransformer(nested);
+                if (innerTransformer == null)
+                    return null;
+                return new TraceTransformer(innerTransformer, types);
+            case TensorField:
             case SimpleTensor:
                 InsertionRule rule = mappedRules.get(((ParseTokenSimpleTensor) node).getIndicesTypeStructureAndName());
                 if (rule != null)
@@ -350,20 +347,20 @@ public class GeneralIndicesInsertion implements ParseTokenTransformer {
                         lhsTransformer.getOuterIndices(),
                         rhsOuterIndices = rhsTransformer == null ? OuterIndices.EMPTY :
                                 rhsTransformer.getOuterIndices();
-                for (int i = 0; i < TYPES_COUNT; ++i)
-                    if ((rhsOuterIndices.upper[i] != 0
-                            || rhsOuterIndices.lower[i] != 0) && !lhsOuterIndices.initialized[i])
+                for (int j = 0; j < TYPES_COUNT; ++j)
+                    if ((rhsOuterIndices.upper[j] != 0
+                            || rhsOuterIndices.lower[j] != 0) && !lhsOuterIndices.initialized[j])
                         throw new IllegalArgumentException("Inconsistent matrix expression.");
                 return new SumTransformer(new IITransformer[]{lhsTransformer, rhsTransformer},
                         lhsOuterIndices, node);
             case Sum:
                 IITransformer[] transformersArray = new IITransformer[node.content.length];
-                int i;
+                int k;
                 OuterIndices outerIndices = null, currentOI;
-                for (i = 0; i < transformersArray.length; ++i) {
-                    transformersArray[i] = createTransformer(node.content[i]);
-                    if (transformersArray[i] != null) {
-                        currentOI = transformersArray[i].getOuterIndices();
+                for (k = 0; k < transformersArray.length; ++k) {
+                    transformersArray[k] = createTransformer(node.content[k]);
+                    if (transformersArray[k] != null) {
+                        currentOI = transformersArray[k].getOuterIndices();
                         if (outerIndices != null)
                             outerIndices.cumulativeAggregate(currentOI);
                         else
@@ -380,15 +377,13 @@ public class GeneralIndicesInsertion implements ParseTokenTransformer {
         }
     }
 
-    private static interface IITransformer {
-
+    private interface IITransformer {
         OuterIndices getOuterIndices();
 
         void apply(IndexGeneratorImpl generator, int[][] upper, int[][] lower);
     }
 
     private static class SimpleTransformer implements IITransformer {
-
         private final ParseTokenSimpleTensor node;
         //private final InsertionRule insertionRule;
         private final OuterIndices outerIndices = new OuterIndices();
@@ -429,7 +424,6 @@ public class GeneralIndicesInsertion implements ParseTokenTransformer {
     }
 
     private static abstract class MIITransformer implements IITransformer {
-
         protected final IITransformer[] transformers;
 
         public MIITransformer(IITransformer[] transformers) {

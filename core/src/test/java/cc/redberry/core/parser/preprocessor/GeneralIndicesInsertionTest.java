@@ -24,7 +24,9 @@ package cc.redberry.core.parser.preprocessor;
 
 import cc.redberry.core.TAssert;
 import cc.redberry.core.context.CC;
+import cc.redberry.core.context.OutputFormat;
 import cc.redberry.core.indices.IndexType;
+import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -32,6 +34,10 @@ import static cc.redberry.core.tensor.Tensors.parse;
 import static cc.redberry.core.tensor.Tensors.parseSimple;
 
 public class GeneralIndicesInsertionTest {
+    @Before
+    public void setUp() throws Exception {
+        CC.reset();
+    }
 
     @Test
     public void test1() {
@@ -79,6 +85,14 @@ public class GeneralIndicesInsertionTest {
     }
 
     @Test
+    public void test3a() {
+        GeneralIndicesInsertion indicesInsertion = new GeneralIndicesInsertion();
+        CC.current().getParseManager().defaultParserPreprocessors.add(indicesInsertion);
+        indicesInsertion.addInsertionRule(parseSimple("K^A'_B'"), IndexType.Matrix2);
+        TAssert.assertEquals(parse("Tr[K]"), "K^A'_A'");
+    }
+
+    @Test
     public void test4() {
         GeneralIndicesInsertion indicesInsertion = new GeneralIndicesInsertion();
         CC.current().getParseManager().defaultParserPreprocessors.add(indicesInsertion);
@@ -101,7 +115,7 @@ public class GeneralIndicesInsertionTest {
         indicesInsertion.addInsertionRule(parseSimple("f^a'A'_b'B'[x]"), IndexType.Matrix1);
         indicesInsertion.addInsertionRule(parseSimple("f^a'A'_b'B'[x]"), IndexType.Matrix2);
 
-        System.out.println(parse("f[x] = 1 + c"));
+        System.out.println(parse("f[x] = 1 + c").toString(OutputFormat.Redberry));
         TAssert.assertEquals(parse("f[x] = 1 + c"), "f^{a'}_{b'}^{A'}_{B'}[x] = (c+1)*d^{a'}_{b'}*d^{A'}_{B'}");
     }
 
