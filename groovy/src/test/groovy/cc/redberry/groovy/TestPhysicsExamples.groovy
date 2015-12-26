@@ -49,7 +49,7 @@ public class TestPhysicsExamples {
     @Test
     public void testBhaBhaScattering() throws Exception {
         use(Redberry) {
-            defineMatrices 'G_a', 'V_i', Matrix1.matrix,
+            defineMatrices 'G_a', 'G5', 'V_i', Matrix1.matrix,
                     'v[p_a]', 'u[p_a]', Matrix1.vector,
                     'cv[p_a]', 'cu[p_a]', Matrix1.covector
 

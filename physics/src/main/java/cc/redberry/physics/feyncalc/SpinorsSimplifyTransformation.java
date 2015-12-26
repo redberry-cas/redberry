@@ -22,6 +22,7 @@
  */
 package cc.redberry.physics.feyncalc;
 
+import cc.redberry.core.context.OutputFormat;
 import cc.redberry.core.graph.GraphType;
 import cc.redberry.core.graph.PrimitiveSubgraph;
 import cc.redberry.core.graph.PrimitiveSubgraphPartition;
@@ -131,6 +132,11 @@ public final class SpinorsSimplifyTransformation extends AbstractTransformationW
         this(options.gammaMatrix, options.gamma5, options.dimension, options.traceOfOne,
                 options.u, options.v, options.uBar, options.vBar, options.momentum, options.mass,
                 options.simplifications, options.doDiracSimplify);
+    }
+
+    @Override
+    public String toString(OutputFormat outputFormat) {
+        return "SpinorsSimplify";
     }
 
     private void checkSpinorNotation(SimpleTensor spinor, boolean bar) {

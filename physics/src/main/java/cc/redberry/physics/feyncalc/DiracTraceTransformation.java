@@ -23,6 +23,7 @@
 package cc.redberry.physics.feyncalc;
 
 import cc.redberry.core.context.CC;
+import cc.redberry.core.context.OutputFormat;
 import cc.redberry.core.graph.GraphType;
 import cc.redberry.core.graph.PrimitiveSubgraph;
 import cc.redberry.core.graph.PrimitiveSubgraphPartition;
@@ -206,6 +207,11 @@ public final class DiracTraceTransformation extends AbstractTransformationWithGa
         super(options.gammaMatrix, options.gamma5, options.leviCivita, options.dimension, options.traceOfOne);
         this.simplifyLeviCivita = options.simplifyLeviCivita;
         this.expandAndEliminate = options.expandAndEliminate;
+    }
+
+    @Override
+    public String toString(OutputFormat outputFormat) {
+        return "DiracTrace";
     }
 
     private Tensor expandDiracStructures(final Tensor t) {

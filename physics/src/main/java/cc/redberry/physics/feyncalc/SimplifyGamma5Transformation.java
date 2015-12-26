@@ -22,6 +22,7 @@
  */
 package cc.redberry.physics.feyncalc;
 
+import cc.redberry.core.context.OutputFormat;
 import cc.redberry.core.graph.GraphType;
 import cc.redberry.core.graph.PrimitiveSubgraph;
 import cc.redberry.core.graph.PrimitiveSubgraphPartition;
@@ -54,6 +55,11 @@ public final class SimplifyGamma5Transformation extends AbstractTransformationWi
     @Creator
     public SimplifyGamma5Transformation(@Options DiracOptions options) {
         this(options.gammaMatrix, options.gamma5);
+    }
+
+    @Override
+    public String toString(OutputFormat outputFormat) {
+        return "SimplifyGamma5";
     }
 
     @Override

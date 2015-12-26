@@ -36,6 +36,7 @@ import cc.redberry.core.tensor.SimpleTensor;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.tensor.Tensors;
 import cc.redberry.core.transformations.Transformation;
+import cc.redberry.core.transformations.TransformationToStringAble;
 import cc.redberry.core.utils.TensorUtils;
 
 import static cc.redberry.core.indices.IndicesFactory.createSimple;
@@ -46,7 +47,7 @@ import static cc.redberry.core.tensor.Tensors.*;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public abstract class AbstractTransformationWithGammas implements Transformation {
+public abstract class AbstractTransformationWithGammas implements TransformationToStringAble {
     /*
     * Defaults
     */
@@ -232,6 +233,11 @@ public abstract class AbstractTransformationWithGammas implements Transformation
                             u = ++matrixIndex,
                             setType(metricType, i)));
         return gammas;
+    }
+
+    @Override
+    public String toString() {
+        return toString(CC.getDefaultOutputFormat());
     }
 
     protected static SimpleTensor setMatrixIndices(SimpleTensor gamma, Indices matrixIndices) {

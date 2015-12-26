@@ -36,6 +36,7 @@ import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.transformations.EliminateMetricsTransformation;
 import cc.redberry.core.transformations.Transformation;
 import cc.redberry.core.transformations.TransformationCollection;
+import cc.redberry.core.transformations.TransformationToStringAble;
 import cc.redberry.core.transformations.options.Creator;
 import cc.redberry.core.transformations.options.Options;
 
@@ -50,7 +51,7 @@ import static cc.redberry.physics.feyncalc.TraceUtils.*;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public final class UnitarySimplifyTransformation implements Transformation {
+public final class UnitarySimplifyTransformation implements TransformationToStringAble {
     final Transformation unitarySimplifications;
 
     @Creator
@@ -155,6 +156,16 @@ public final class UnitarySimplifyTransformation implements Transformation {
             old = t;
         }
         return t;
+    }
+
+    @Override
+    public String toString(OutputFormat outputFormat) {
+        return "UnitarySimplify";
+    }
+    
+    @Override
+    public String toString() {
+        return toString(CC.getDefaultOutputFormat());
     }
 
     private static final Parser parser;

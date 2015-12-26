@@ -22,6 +22,7 @@
  */
 package cc.redberry.groovy;
 
+import cc.redberry.core.context.CC;
 import cc.redberry.core.context.OutputFormat;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.transformations.Transformation;
@@ -63,10 +64,27 @@ public final class DSLTransformationInst<T extends Transformation>
     }
 
     @Override
+    public String toString() {
+        return toString(CC.getDefaultOutputFormat());
+    }
+
+    private T dummyInstance = null;
+
+    @Override
     public String toString(OutputFormat outputFormat) {
-        if (instance instanceof TransformationToStringAble)
-            return ((TransformationToStringAble) instance).toString(outputFormat);
+        if (dummyInstance == null) {
+            if (this.instance != null)
+                dummyInstance = this.instance;
+            else
+                try {
+                    dummyInstance = TransformationBuilder.createTransformation(clazz, Collections.emptyList());
+                } catch (Exception e) {
+                    return super.toString();
+                }
+        }
+        if (dummyInstance instanceof TransformationToStringAble)
+            return ((TransformationToStringAble) dummyInstance).toString(outputFormat);
         else
-            return instance.toString();
+            return dummyInstance.toString();
     }
 }

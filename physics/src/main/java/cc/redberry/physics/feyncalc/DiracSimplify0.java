@@ -22,6 +22,7 @@
  */
 package cc.redberry.physics.feyncalc;
 
+import cc.redberry.core.context.OutputFormat;
 import cc.redberry.core.graph.GraphType;
 import cc.redberry.core.graph.PrimitiveSubgraph;
 import cc.redberry.core.graph.PrimitiveSubgraphPartition;
@@ -57,6 +58,11 @@ final class DiracSimplify0
     public DiracSimplify0(SimpleTensor gammaMatrix, SimpleTensor gamma5, Tensor dimension, Tensor traceOfOne, Transformation simplifications) {
         super(gammaMatrix, gamma5, null, dimension, traceOfOne);
         this.expandAndEliminate = new ExpandTensorsAndEliminateTransformation(simplifications);
+    }
+
+    @Override
+    public String toString(OutputFormat outputFormat) {
+        return "DiracSimplify0";
     }
 
     @Override
