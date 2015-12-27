@@ -894,6 +894,13 @@ public final class Tensors {
     }
 
     /**
+     * Dummy method
+     */
+    public static Tensor parse(Tensor expression) {
+        return expression;
+    }
+
+    /**
      * Converts int value to Complex.
      *
      * @param i integer

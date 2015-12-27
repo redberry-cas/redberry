@@ -24,6 +24,7 @@
 package cc.redberry.groovy
 
 import cc.redberry.core.tensor.Expression
+import cc.redberry.core.tensor.SimpleTensor
 import cc.redberry.core.tensor.Tensor
 import cc.redberry.core.transformations.Transformation
 import cc.redberry.core.transformations.TransformationCollection
@@ -345,5 +346,26 @@ public final class RedberryPhysics {
                                                   Transformation transformation) {
         OneLoopInput input = new OneLoopInput(4, KInv, K, S, W, N, M, F, transformation)
         return OneLoopCounterterms.calculateOneLoopCounterterms(input);
+    }
+
+    /**
+     * Generates a substitution for tensor integral reduction via Passarino-Veltman method. Note: the performance is
+     * limited for a large order or large number of external momentums.
+     *
+     * @param order power of loop momentum (q_i - 1, q_i*q_j - 2 etc.)
+     * @param loopMomentum loop momentum
+     * @param externalMomentums list of external momentums
+     * @param simplifications additional simplification rules (e.g. Mandelstam substitutions for products of external momentum)
+     * @return substitution in the form like {@code q_i*q_j = p1_i * p2_j * C1 + ... }
+     */
+    public static Expression PassarinoVeltman(int order, def loopMomentum,
+                                              def externalMomentums,
+                                              Transformation simplifications = Transformation.IDENTITY) {
+        use(Redberry) {
+            return PassarinoVeltman.generateSubstitution(order,
+                    loopMomentum.t,
+                    externalMomentums.t as SimpleTensor[],
+                    simplifications);
+        }
     }
 }

@@ -53,7 +53,7 @@ import static cc.redberry.core.tensor.Tensors.*;
  * @author Stanislav Poslavsky
  * @since 1.0
  */
-public class TensorUtils {
+public final class TensorUtils {
     private TensorUtils() {
     }
 
@@ -79,6 +79,7 @@ public class TensorUtils {
 
     /**
      * Returns the number of symbols contained in expression (including duplicates)
+     *
      * @param expr expression
      * @return number of symbols contained in expression (including duplicates)
      */
@@ -695,7 +696,34 @@ public class TensorUtils {
         return det1(matrix);
     }
 
+    /**
+     * Gives inverse matrix.
+     *
+     * @param matrix matrix
+     * @return inverse matrix
+     */
+    public static Tensor[][] inverse(Tensor[][] matrix) {
+        checkMatrix(matrix);
+        if (matrix.length == 1)
+            return new Tensor[][]{{reciprocal(matrix[0][0])}};
+
+        Tensor det = det(matrix);
+
+        int length = matrix.length;
+        Tensor[][] inverse = new Tensor[length][length];
+        for (int i = 0; i < length; ++i) {
+            for (int j = 0; j < length; ++j) {
+                inverse[j][i] = divide(det(deleteFromMatrix(matrix, i, j)), det);
+                if ((i + j) % 2 != 0)
+                    inverse[j][i] = negate(inverse[j][i]);
+            }
+        }
+        return inverse;
+    }
+
     private static void checkMatrix(Tensor[][] tensors) {
+        if (tensors.length == 0)
+            throw new RuntimeException("Empty matrix.");
         int cc = tensors.length;
         for (Tensor[] tt : tensors)
             if (tt.length != cc)
@@ -709,7 +737,7 @@ public class TensorUtils {
         SumBuilder sum = new SumBuilder();
         Tensor temp;
         for (int i = 0; i < matrix.length; ++i) {
-            temp = multiply(matrix[0][i], det(deleteFromMatrix(matrix, 0, i)));
+            temp = multiplyAndRenameConflictingDummies(matrix[0][i], det(deleteFromMatrix(matrix, 0, i)));
             if (i % 2 == 1)
                 temp = negate(temp);
             sum.put(temp);
@@ -816,5 +844,4 @@ public class TensorUtils {
             replacements[++i] = expression(scalar, generatedCoefficients.take());
         return replacements;
     }
-
 }

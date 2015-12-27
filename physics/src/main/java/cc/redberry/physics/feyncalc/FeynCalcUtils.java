@@ -40,14 +40,7 @@ import static cc.redberry.core.tensor.Tensors.*;
 public final class FeynCalcUtils {
 
     public static Expression[] setMandelstam(String[][] momentums) {
-        final Tensor[][] tt = new Tensor[momentums.length][];
-        int j;
-        for (int i = 0; i < tt.length; ++i) {
-            tt[i] = new Tensor[momentums[i].length];
-            for (j = 0; j < tt[i].length; ++j)
-                tt[i][j] = parse(momentums[i][j]);
-        }
-        return setMandelstam(tt);
+        return setMandelstam(parse2(momentums));
     }
 
     public static Expression[] setMandelstam(Tensor[][] momentums) {
@@ -87,6 +80,10 @@ public final class FeynCalcUtils {
                 sum(u, negate(sum(pow(momentums[1][1], 2), pow(momentums[2][1], 2)))));
 
         return result;
+    }
+
+    public static Expression[] setMandelstam5(String[][] momentums) {
+        return setMandelstam5(parse2(momentums));
     }
 
     public static Expression[] setMandelstam5(Tensor[][] momentums) {
@@ -165,9 +162,18 @@ public final class FeynCalcUtils {
         }
     }
 
-    private static Tensor mul2(Tensor a) {
-        return multiply(a, Complex.TWO);
+    private static Tensor[][] parse2(String[][] momentums) {
+        final Tensor[][] tt = new Tensor[momentums.length][];
+        int j;
+        for (int i = 0; i < tt.length; ++i) {
+            tt[i] = new Tensor[momentums[i].length];
+            for (j = 0; j < tt[i].length; ++j)
+                tt[i][j] = parse(momentums[i][j]);
+        }
+        return tt;
     }
+
+    ;
 
     private static Tensor contract(Tensor a, Tensor b) {
         return Tensors.multiplyAndRenameConflictingDummies(a, invertIndices(b));

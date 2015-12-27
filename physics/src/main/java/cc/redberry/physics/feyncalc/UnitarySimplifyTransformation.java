@@ -162,7 +162,7 @@ public final class UnitarySimplifyTransformation implements TransformationToStri
     public String toString(OutputFormat outputFormat) {
         return "UnitarySimplify";
     }
-    
+
     @Override
     public String toString() {
         return toString(CC.getDefaultOutputFormat());

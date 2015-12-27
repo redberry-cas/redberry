@@ -187,7 +187,7 @@ public class CollectTransformation implements Transformation {
     private boolean match(Tensor t) {
         if (t instanceof SimpleTensor)
             return patternsNames.contains(t.hashCode());
-        if (TensorUtils.isPositiveIntegerPower(t))
+        else if (TensorUtils.isPositiveIntegerPower(t))
             return patternsNames.contains(t.get(0).hashCode());
         return false;
     }
@@ -372,7 +372,6 @@ public class CollectTransformation implements Transformation {
             return t;
         }
     }
-
 
     private static abstract class DirectIndexMapping implements IndexMapping {
         final int[] from, to;

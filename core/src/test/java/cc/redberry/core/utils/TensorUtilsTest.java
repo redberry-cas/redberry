@@ -233,7 +233,7 @@ public class TensorUtilsTest {
     public void testSymmetries6() {
         Tensor t = parse("g_ab*g^cd");
         List<Permutation> actual = getIndicesSymmetriesForIndicesWithSameStates(ParserIndices.parse("_ab^cd"), t);
-        List<Permutation> expected =  new ArrayList<>();
+        List<Permutation> expected = new ArrayList<>();
         expected.add(Permutations.createPermutation(false, new int[]{1, 0, 2, 3}));
         expected.add(Permutations.createPermutation(false, new int[]{0, 1, 3, 2}));
         assertEqualsSymmetries(PermutationGroup.createPermutationGroup(actual), PermutationGroup.createPermutationGroup(expected));
@@ -341,5 +341,41 @@ public class TensorUtilsTest {
 
         t = parse("k_a*k^m + f_a^m[k_m*k^m] + t_d*k^d*ff_a^m");
         assertEquals(generateReplacementsOfScalars(t).length, 2);
+    }
+
+    @Test
+    public void testInverse1() throws Exception {
+        Tensor[][] matrix = {
+                {parse("3"), parse("4"), parse("5")},
+                {parse("2"), parse("5"), parse("11")},
+                {parse("1"), parse("6"), parse("-13")}
+        };
+
+        Tensor[][] inverse = inverse(matrix);
+        Tensor[][] expected = {
+                {parse("131/210"), parse("-41/105"), parse("-19/210")},
+                {parse("-37/210"), parse("22/105"), parse("23/210")},
+                {parse("-1/30"), parse("1/15"), parse("-1/30")}
+        };
+
+        for (int i = 0; i < matrix.length; ++i)
+            for (int j = 0; j < matrix.length; ++j)
+                TAssert.assertEquals(inverse[i][j], expected[i][j]);
+    }
+
+    @Test
+    public void testInverse2() throws Exception {
+        Tensor[][] matrix = {
+                {parse("3")}
+        };
+
+        Tensor[][] inverse = inverse(matrix);
+        Tensor[][] expected = {
+                {parse("1/3")}
+        };
+
+        for (int i = 0; i < matrix.length; ++i)
+            for (int j = 0; j < matrix.length; ++j)
+                TAssert.assertEquals(inverse[i][j], expected[i][j]);
     }
 }

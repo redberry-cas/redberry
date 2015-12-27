@@ -133,4 +133,13 @@ class RedberryPhysicsTest {
             assert dS >> 'cu*G_b*G^a*p_a'.t == '-m*cu*G_{b}+2*cu*p_{b}'.t
         }
     }
+
+    @Test
+    public void testPV() throws Exception {
+        use(Redberry) {
+            PassarinoVeltman(1, 'q_a', ['k_a', 'p_a'], Identity)
+            PassarinoVeltman(1, 'q_a'.t, ['k_a', 'p_a'].t, 'k_a*p^a = X'.t)
+            PassarinoVeltman(1, 'q_a'.t, ['k_a', 'p_a'])
+        }
+    }
 }
