@@ -713,7 +713,7 @@ public final class TensorUtils {
         Tensor[][] inverse = new Tensor[length][length];
         for (int i = 0; i < length; ++i) {
             for (int j = 0; j < length; ++j) {
-                inverse[j][i] = divide(det(deleteFromMatrix(matrix, i, j)), det);
+                inverse[j][i] = divideAndRenameConflictingDummies(det(deleteFromMatrix(matrix, i, j)), det);
                 if ((i + j) % 2 != 0)
                     inverse[j][i] = negate(inverse[j][i]);
             }

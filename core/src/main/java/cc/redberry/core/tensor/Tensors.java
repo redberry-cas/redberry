@@ -257,6 +257,19 @@ public final class Tensors {
     }
 
     /**
+     * Returns {@code a} divided by {@code b}. This method takes care about
+     * all conflicting dummy indices in factors. Einstein notation assumed.
+     *
+     * @param a tensor
+     * @param b scalar tensor
+     * @return {@code a} divided by {@code b}.
+     * @throws IllegalArgumentException if b is not scalar
+     */
+    public static Tensor divideAndRenameConflictingDummies(Tensor a, Tensor b) {
+        return multiplyAndRenameConflictingDummies(a, reciprocal(b));
+    }
+
+    /**
      * Returns the result of summation of several tensors.
      *
      * @param tensors array of summands

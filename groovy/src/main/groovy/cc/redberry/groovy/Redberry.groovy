@@ -146,7 +146,7 @@ class Redberry {
      * @throws IllegalArgumentException if b is not scalar
      * @see Tensors#divide(cc.redberry.core.tensor.Tensor, cc.redberry.core.tensor.Tensor)
      */
-    static Tensor div(Tensor a, Tensor b) { Tensors.divide(a, b); }
+    static Tensor div(Tensor a, Tensor b) { Tensors.divideAndRenameConflictingDummies(a, b); }
 
     /**
      * Divides tensor on specified number

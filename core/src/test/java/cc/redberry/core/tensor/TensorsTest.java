@@ -370,4 +370,42 @@ public class TensorsTest {
         Tensor expr = parse("(A_abc - A_bac)*T^c + (A_bac - A_abc)*T^c");
         TAssert.assertEquals(expr, Complex.ZERO);
     }
+
+    @Test(expected = IndexOutOfBoundsException.class, timeout = 100_000)
+    public void testRenameConflicts7() throws Exception {
+        while (true) {
+            CC.reset();
+            setAntiSymmetric("e_abcd");
+            Tensor tAmps = parse("((q_{k}*q^{k}+pPsi1_{k}*pPsi1^{k}+pEta2_{k}*pEta2^{k}+2*pPsi1^{k}*q_{k}+2*pEta2_{k}*pPsi1^{k}+2*pEta2^{k}*q_{k})**(-1)*(pPsi1_{i}*pPsi1^{i}+pEta2_{i}*pEta2^{i}+pEta2_{i}*pPsi1^{i})**(-1)*(pPsi1_{b}*pPsi1^{b}+pEta2_{b}*pEta2^{b}+2*pEta2_{b}*pPsi1^{b})**(-1)*(q_{h}*q^{h})**(-1)*(pEta1_{g}*pEta1^{g}+pPsi1_{g}*pPsi1^{g}+pEta2_{g}*pEta2^{g}+pEta1_{g}*pEta2^{g}+pEta2^{g}*pPsi1_{g}+pEta1^{g}*pPsi1_{g})**(-1)+(q_{k}*q^{k})**(-1)*(q_{l}*q^{l}+pEta2_{l}*pEta2^{l}-pEta2_{l}*q^{l})**(-1)*(q_{e}*q^{e}+pPsi1_{e}*pPsi1^{e}+pPsi1_{e}*q^{e})**(-1)*(pPsi1_{n}*pPsi1^{n}+pEta2_{n}*pEta2^{n}+pEta2_{n}*pPsi1^{n})**(-1)*(pEta1_{i}*pEta1^{i}+pPsi1_{i}*pPsi1^{i}+pEta2_{i}*pEta2^{i}+pEta1_{i}*pEta2^{i}+pEta2^{i}*pPsi1_{i}+pEta1^{i}*pPsi1_{i})**(-1))*e^{c}_{ma}^{j}*pPsi_{c}*eps^{a}*pEta_{j}*epsPsi^{m}");
+            Tensor num = parse("e^{c}_{ma}^{j}*pPsi_{c}*eps^{a}*pEta_{j}*epsPsi^{m}");
+            Tensor den = parse("(pPsi2^{j}*pEta1_{j}+pEta1_{j}*pEta1^{j}+pPsi2_{j}*pPsi2^{j})" +
+                    "*(pPsi2^{i}*pEta1_{i}+pEta1_{i}*pEta1^{i}+pPsi2_{i}*pPsi2^{i})" +
+                    "*(pEta2^{g}*pEta1_{g}+pPsi2_{g}*pEta1^{g}+pEta1_{g}*pEta1^{g}+pEta2_{g}*pEta2^{g}+pEta2^{g}*pPsi2_{g}+pPsi2_{g}*pPsi2^{g})" +
+                    "*(pPsi2^{k}*pEta1_{k}+q_{k}*pPsi2^{k}+pEta1_{k}*pEta1^{k}+q_{k}*pEta1^{k}+q_{k}*q^{k}+pPsi2_{k}*pPsi2^{k})" +
+                    "*q_{h}*q^{h}");
+
+            Tensor sum = Complex.ZERO;
+            sum = sum(sum, tAmps);
+            sum = sum(sum, divide(num, den));
+        }
+    }
+
+    @Test
+    public void testRenameConflicts8() throws Exception {
+        for (int i = 0; i < 100; ++i) {
+            CC.reset();
+            setAntiSymmetric("e_abcd");
+            Tensor tAmps = parse("((q_{k}*q^{k}+pPsi1_{k}*pPsi1^{k}+pEta2_{k}*pEta2^{k}+2*pPsi1^{k}*q_{k}+2*pEta2_{k}*pPsi1^{k}+2*pEta2^{k}*q_{k})**(-1)*(pPsi1_{i}*pPsi1^{i}+pEta2_{i}*pEta2^{i}+pEta2_{i}*pPsi1^{i})**(-1)*(pPsi1_{b}*pPsi1^{b}+pEta2_{b}*pEta2^{b}+2*pEta2_{b}*pPsi1^{b})**(-1)*(q_{h}*q^{h})**(-1)*(pEta1_{g}*pEta1^{g}+pPsi1_{g}*pPsi1^{g}+pEta2_{g}*pEta2^{g}+pEta1_{g}*pEta2^{g}+pEta2^{g}*pPsi1_{g}+pEta1^{g}*pPsi1_{g})**(-1)+(q_{k}*q^{k})**(-1)*(q_{l}*q^{l}+pEta2_{l}*pEta2^{l}-pEta2_{l}*q^{l})**(-1)*(q_{e}*q^{e}+pPsi1_{e}*pPsi1^{e}+pPsi1_{e}*q^{e})**(-1)*(pPsi1_{n}*pPsi1^{n}+pEta2_{n}*pEta2^{n}+pEta2_{n}*pPsi1^{n})**(-1)*(pEta1_{i}*pEta1^{i}+pPsi1_{i}*pPsi1^{i}+pEta2_{i}*pEta2^{i}+pEta1_{i}*pEta2^{i}+pEta2^{i}*pPsi1_{i}+pEta1^{i}*pPsi1_{i})**(-1))*e^{c}_{ma}^{j}*pPsi_{c}*eps^{a}*pEta_{j}*epsPsi^{m}");
+            Tensor num = parse("e^{c}_{ma}^{j}*pPsi_{c}*eps^{a}*pEta_{j}*epsPsi^{m}");
+            Tensor den = parse("(pPsi2^{j}*pEta1_{j}+pEta1_{j}*pEta1^{j}+pPsi2_{j}*pPsi2^{j})" +
+                    "*(pPsi2^{i}*pEta1_{i}+pEta1_{i}*pEta1^{i}+pPsi2_{i}*pPsi2^{i})" +
+                    "*(pEta2^{g}*pEta1_{g}+pPsi2_{g}*pEta1^{g}+pEta1_{g}*pEta1^{g}+pEta2_{g}*pEta2^{g}+pEta2^{g}*pPsi2_{g}+pPsi2_{g}*pPsi2^{g})" +
+                    "*(pPsi2^{k}*pEta1_{k}+q_{k}*pPsi2^{k}+pEta1_{k}*pEta1^{k}+q_{k}*pEta1^{k}+q_{k}*q^{k}+pPsi2_{k}*pPsi2^{k})" +
+                    "*q_{h}*q^{h}");
+
+            Tensor sum = Complex.ZERO;
+            sum = sum(sum, tAmps);
+            sum = sum(sum, divideAndRenameConflictingDummies(num, den));
+        }
+    }
 }

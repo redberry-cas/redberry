@@ -173,7 +173,6 @@ public final class PassarinoVeltman {
         return null;
     }
 
-
     private static final class Monomial {
         final Tensor coeff;
         final int index;
