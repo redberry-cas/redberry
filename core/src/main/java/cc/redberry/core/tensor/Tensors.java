@@ -838,7 +838,7 @@ public final class Tensors {
      */
     public static SimpleTensor createMetricOrKronecker(Indices indices) {
         if (indices.size() != 2)
-            throw new IllegalArgumentException();
+            throw new IllegalArgumentException("Inconsistent indices for metric: " + indices);
         return CC.current().createMetricOrKronecker(indices.get(0), indices.get(1));
     }
 

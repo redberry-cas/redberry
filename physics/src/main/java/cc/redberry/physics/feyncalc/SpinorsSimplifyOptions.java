@@ -25,6 +25,8 @@ package cc.redberry.physics.feyncalc;
 import cc.redberry.core.tensor.SimpleTensor;
 import cc.redberry.core.transformations.options.Option;
 
+import static cc.redberry.core.tensor.Tensors.parseSimple;
+
 /**
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
@@ -52,4 +54,14 @@ public class SpinorsSimplifyOptions extends DiracOptions {
     public boolean doDiracSimplify = false;
 
     public SpinorsSimplifyOptions() {}
+
+    public SpinorsSimplifyOptions(String u, String v, String uBar, String vBar,
+                                  String momentum, String mass) {
+        this.u = u == null ? null : parseSimple(u);
+        this.v = v == null ? null : parseSimple(v);
+        this.uBar = uBar == null ? null : parseSimple(uBar);
+        this.vBar = vBar == null ? null : parseSimple(vBar);
+        this.momentum = parseSimple(momentum);
+        this.mass = parseSimple(mass);
+    }
 }

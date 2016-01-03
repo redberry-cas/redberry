@@ -350,7 +350,7 @@ public class GeneralIndicesInsertion implements ParseTokenTransformer {
                 for (int j = 0; j < TYPES_COUNT; ++j)
                     if ((rhsOuterIndices.upper[j] != 0
                             || rhsOuterIndices.lower[j] != 0) && !lhsOuterIndices.initialized[j])
-                        throw new IllegalArgumentException("Inconsistent matrix expression.");
+                        throw new IllegalArgumentException("Inconsistent matrix expression: " + node);
                 return new SumTransformer(new IITransformer[]{lhsTransformer, rhsTransformer},
                         lhsOuterIndices, node);
             case Sum:

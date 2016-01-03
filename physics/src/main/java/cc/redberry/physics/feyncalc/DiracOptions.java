@@ -31,13 +31,12 @@ import cc.redberry.core.transformations.Transformation;
 import cc.redberry.core.transformations.options.IOptions;
 import cc.redberry.core.transformations.options.Option;
 
-import static cc.redberry.physics.feyncalc.AbstractTransformationWithGammas.guessTraceOfOne;
 
 /**
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public class DiracOptions implements IOptions {
+public class DiracOptions implements IOptions, Cloneable {
     @Option(name = "Gamma", index = 0)
     public SimpleTensor gammaMatrix = Tensors.parseSimple("G_a");
 
@@ -54,23 +53,39 @@ public class DiracOptions implements IOptions {
     public Tensor traceOfOne;
 
     @Option(name = "Simplifications", index = 5)
-    public Transformation simplifications = Transformation.IDENTITY;
+    public Transformation simplifications = ExpandAndEliminateTransformation.EXPAND_AND_ELIMINATE;
 
     @Option(name = "Minkowski", index = 6)
     public boolean minkowskiSpace = true;
 
     @Option(name = "LeviCivitaSimplify", index = 7)
-    public Transformation simplifyLeviCivita = null;
+    public Transformation simplifyLeviCivita = new LeviCivitaSimplifyTransformation(leviCivita, true);
 
     @Option(name = "ExpandAndEliminate", index = 8)
-    public Transformation expandAndEliminate = null;
+    public Transformation expandAndEliminate = ExpandAndEliminateTransformation.EXPAND_AND_ELIMINATE;
 
     public DiracOptions() {}
 
     @Override
+    public DiracOptions clone() {
+        try {
+            return (DiracOptions) super.clone();
+        } catch (CloneNotSupportedException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    protected DiracOptions setExpand(Transformation expand) {
+        DiracOptions options = clone();
+        options.expandAndEliminate = expand;
+        return options;
+    }
+
+
+    @Override
     public void triggerCreate() {
         if (traceOfOne == null)
-            traceOfOne = guessTraceOfOne(dimension);
+            traceOfOne = AbstractFeynCalcTransformation.guessTraceOfOne(dimension);
         if (expandAndEliminate == null)
             expandAndEliminate = new ExpandAndEliminateTransformation(simplifications);
         if (simplifyLeviCivita == null)

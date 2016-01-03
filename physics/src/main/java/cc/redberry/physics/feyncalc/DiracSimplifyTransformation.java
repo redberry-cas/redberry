@@ -22,129 +22,54 @@
  */
 package cc.redberry.physics.feyncalc;
 
-import cc.redberry.core.context.CC;
 import cc.redberry.core.context.OutputFormat;
-import cc.redberry.core.number.Complex;
-import cc.redberry.core.parser.ParseToken;
-import cc.redberry.core.parser.Parser;
 import cc.redberry.core.tensor.Product;
 import cc.redberry.core.tensor.SimpleTensor;
 import cc.redberry.core.tensor.Tensor;
-import cc.redberry.core.transformations.Transformation;
-import cc.redberry.core.transformations.TransformationCollection;
-import cc.redberry.core.transformations.TransformationToStringAble;
 import cc.redberry.core.transformations.options.Creator;
 import cc.redberry.core.transformations.options.Options;
 import cc.redberry.core.transformations.substitutions.SubstitutionIterator;
-import cc.redberry.core.utils.ArraysUtils;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import static cc.redberry.core.transformations.EliminateMetricsTransformation.ELIMINATE_METRICS;
 
 /**
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public final class DiracSimplifyTransformation extends AbstractTransformationWithGammas
-        implements TransformationToStringAble {
-    private final Transformation overall;
-
-    public DiracSimplifyTransformation(SimpleTensor gammaMatrix) {
-        this(gammaMatrix, null, Complex.FOUR, Complex.FOUR, Transformation.IDENTITY);
-    }
-
-    public DiracSimplifyTransformation(SimpleTensor gammaMatrix, SimpleTensor gamma5) {
-        this(gammaMatrix, gamma5, Complex.FOUR, Complex.FOUR, Transformation.IDENTITY);
-    }
-
-    public DiracSimplifyTransformation(SimpleTensor gammaMatrix, SimpleTensor gamma5, Transformation simplifications) {
-        this(gammaMatrix, gamma5, Complex.FOUR, Complex.FOUR, simplifications);
-    }
-
-    public DiracSimplifyTransformation(SimpleTensor gammaMatrix, SimpleTensor gamma5,
-                                       Tensor dimension, Transformation simplifications) {
-        this(gammaMatrix, gamma5, dimension, guessTraceOfOne(dimension), simplifications);
-    }
-
-    public DiracSimplifyTransformation(SimpleTensor gammaMatrix, SimpleTensor gamma5,
-                                       Tensor dimension, final Tensor traceOfOne,
-                                       Transformation simplifications) {
-        super(gammaMatrix, gamma5, null, dimension, traceOfOne);
-
-        List<Transformation> overall = new ArrayList<>();
-        if (gamma5 != null)
-            overall.add(new SimplifyGamma5Transformation(gammaMatrix, gamma5));
-        overall.add(new ApplySubstitutions(setupSubs()));
-        overall.add(simplifications);
-        overall.add(new DiracSimplify0(gammaMatrix, gamma5, dimension, traceOfOne, simplifications));
-        overall.add(this.traceOfOne);
-        overall.add(this.deltaTrace);
-        this.overall = new TransformationCollection(overall);
-    }
+public final class DiracSimplifyTransformation extends AbstractTransformationWithGammas {
+    private final SimplifyGamma5Transformation simplify5;
+    private final DiracSimplify0 ds0;
+    private final DiracSimplify1 ds1;
 
     @Creator
     public DiracSimplifyTransformation(@Options DiracOptions options) {
-        this(options.gammaMatrix, options.gamma5, options.dimension, options.traceOfOne, options.simplifications);
-    }
-
-    private Transformation[] setupSubs() {
-        ParseToken[] ss = {s1, s2, s3, s4};
-        Transformation[] subs = new Transformation[ss.length];
-        for (int i = 0; i < ss.length; ++i)
-            subs[i] = (Transformation) deltaTrace.transform(tokenTransformer.transform(ss[i]).toTensor());
-        return subs;
+        super(options);
+        this.simplify5 = new SimplifyGamma5Transformation(options);
+        this.ds0 = new DiracSimplify0(options);
+        this.ds1 = new DiracSimplify1(options);
     }
 
     @Override
     public Tensor transform(Tensor tensor) {
-        return Transformation.Util.applyUntilUnchanged(tensor, 1000, overall);
-    }
+        SubstitutionIterator iterator = new SubstitutionIterator(tensor);
+        Tensor original;
+        out:
+        while ((original = iterator.next()) != null) {
+            if (!(original instanceof Product))
+                continue;
+            if (original.getIndices().size(matrixType) == 0)
+                continue;
+            if (!containsGammaOr5Matrices(original))
+                continue;
 
-    private final class ApplySubstitutions implements Transformation {
-        final Transformation[] substitutions;
-
-        public ApplySubstitutions(Transformation... substitutions) {
-            this.substitutions = ArraysUtils.addAll(substitutions, ELIMINATE_METRICS);
+            original = simplify5.transform(original);
+            original = ds0.transform(original);
+            original = ds1.transform(original);
+            iterator.safeSet(original);
         }
-
-        @Override
-        public Tensor transform(Tensor tensor) {
-            SubstitutionIterator iterator = new SubstitutionIterator(tensor);
-            Tensor current;
-            while ((current = iterator.next()) != null) {
-                if (current instanceof Product)
-                    current = Transformation.Util.applyUntilUnchanged(current, substitutions);
-                iterator.safeSet(current);
-            }
-            return iterator.result();
-        }
+        return iterator.result();
     }
 
     @Override
     public String toString(OutputFormat outputFormat) {
         return "DiracSimplify";
-    }
-
-    private static final Parser parser;
-    /**
-     * G_a*G^a = d
-     * G_a*G_b*G^a = -(d-2)*G_b
-     * G_a*G_b*G_c*G^a = 4*g_bc - (4-d)*G_b*G_c
-     * G_a*G_b*G_c*G_d*G^a = -2*G_d*G_c*G_b + (4-d)*G_b*G_c*G_d
-     */
-    private static final ParseToken s1, s2, s3, s4;
-
-    static {
-        parser = CC.current().getParseManager().getParser();
-        //G_a*G^a = d
-        s1 = parser.parse("G_a^a'_b'*G^a^b'_c' = d^z_z*d^a'_c'");
-        //G_a*G_b*G^a = -(d-2)*G_b
-        s2 = parser.parse("G_a^a'_b'*G_b^b'_c'*G^ac'_d' = -(d^z_z-2)*G_b^a'_d'");
-        //G_a*G_b*G_c*G^a = 4*g_bc - (4-d)*G_b*G_c
-        s3 = parser.parse("G_a^a'_b'*G_b^b'_c'*G_c^c'_d'*G^ad'_e' = 4*g_bc*d^a'_e' - (4-d^z_z)*G_b^a'_b'*G_c^b'_e'");
-        //G_a*G_b*G_c*G_d*G^a = -2*G_d*G_c*G_b + (4-d)*G_b*G_c*G_d
-        s4 = parser.parse("G_a^a'_b'*G_b^b'_c'*G_c^c'_d'*G_d^d'_e'*G^ae'_f' = -2*G_d^a'_b'*G_c^b'_c'*G_b^c'_f' + (4-d^z_z)*G_b^a'_b'*G_c^b'_c'*G_d^c'_f'");
     }
 }

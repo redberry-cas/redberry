@@ -23,33 +23,24 @@
 package cc.redberry.physics.feyncalc;
 
 import cc.redberry.core.context.OutputFormat;
-import cc.redberry.core.graph.GraphType;
-import cc.redberry.core.graph.PrimitiveSubgraph;
-import cc.redberry.core.graph.PrimitiveSubgraphPartition;
 import cc.redberry.core.groups.permutations.Permutations;
 import cc.redberry.core.indexmapping.Mapping;
 import cc.redberry.core.indices.IndexType;
 import cc.redberry.core.indices.Indices;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.tensor.*;
-import cc.redberry.core.transformations.ExpandAndEliminateTransformation;
-import cc.redberry.core.transformations.ExpandTensorsAndEliminateTransformation;
-import cc.redberry.core.transformations.Transformation;
-import cc.redberry.core.transformations.TransformationToStringAble;
 import cc.redberry.core.transformations.options.Creator;
 import cc.redberry.core.transformations.options.Options;
-import cc.redberry.core.transformations.substitutions.SubstitutionIterator;
 import cc.redberry.core.utils.ArraysUtils;
 import cc.redberry.core.utils.IntArray;
 import cc.redberry.core.utils.IntArrayList;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 
 import static cc.redberry.core.indices.IndicesFactory.createSimple;
 import static cc.redberry.core.indices.IndicesUtils.*;
 import static cc.redberry.core.tensor.FastTensors.multiplySumElementsOnFactor;
+import static cc.redberry.core.tensor.FastTensors.multiplySumElementsOnFactorAndResolveDummies;
 import static cc.redberry.core.tensor.StructureOfContractions.getToTensorIndex;
 import static cc.redberry.core.tensor.Tensors.*;
 import static cc.redberry.core.transformations.EliminateMetricsTransformation.eliminate;
@@ -58,122 +49,43 @@ import static cc.redberry.core.transformations.EliminateMetricsTransformation.el
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public final class DiracOrderTransformation extends AbstractTransformationWithGammas
-        implements TransformationToStringAble {
-    private final Transformation simplifyG5;
-    private final Transformation expandAndEliminate;
-
-    public DiracOrderTransformation(SimpleTensor gammaMatrix) {
-        super(gammaMatrix, Complex.FOUR, Complex.FOUR);
-        this.expandAndEliminate = ExpandTensorsAndEliminateTransformation.EXPAND_TENSORS_AND_ELIMINATE;
-        this.simplifyG5 = null;
-    }
-
-    public DiracOrderTransformation(SimpleTensor gammaMatrix, Tensor dimension, Tensor traceOfOne) {
-        super(gammaMatrix, dimension, traceOfOne);
-        this.expandAndEliminate = ExpandTensorsAndEliminateTransformation.EXPAND_TENSORS_AND_ELIMINATE;
-        this.simplifyG5 = null;
-    }
-
-    public DiracOrderTransformation(SimpleTensor gammaMatrix, Tensor dimension) {
-        this(gammaMatrix, dimension, guessTraceOfOne(dimension));
-    }
-
-    public DiracOrderTransformation(SimpleTensor gammaMatrix, SimpleTensor gamma5) {
-        super(gammaMatrix, gamma5, null, Complex.FOUR, Complex.FOUR);
-        this.expandAndEliminate = ExpandTensorsAndEliminateTransformation.EXPAND_TENSORS_AND_ELIMINATE;
-        this.simplifyG5 = new SimplifyGamma5Transformation(gammaMatrix, gamma5);
-    }
-
-    public DiracOrderTransformation(SimpleTensor gammaMatrix, SimpleTensor gamma5, Tensor dimension, Transformation simplifications) {
-        this(gammaMatrix, gamma5, dimension, guessTraceOfOne(dimension), simplifications);
-    }
-
-    public DiracOrderTransformation(SimpleTensor gammaMatrix, SimpleTensor gamma5, Tensor dimension, Tensor traceOfOne,
-                                    Transformation simplification) {
-        super(gammaMatrix, gamma5, null, dimension, traceOfOne);
-        this.expandAndEliminate = new ExpandAndEliminateTransformation(simplification);
-        this.simplifyG5 = new SimplifyGamma5Transformation(gammaMatrix, gamma5);
-    }
-
+public final class DiracOrderTransformation extends AbstractFeynCalcTransformation {
     @Creator
     public DiracOrderTransformation(@Options DiracOptions options) {
-        super(options.gammaMatrix, options.gamma5, null, options.dimension, options.traceOfOne);
-        this.expandAndEliminate = options.expandAndEliminate;
-        this.simplifyG5 = new SimplifyGamma5Transformation(options.gammaMatrix, options.gamma5);
+        super(options, new SimplifyGamma5Transformation(options));
     }
 
     @Override
-    public Tensor transform(Tensor tensor) {
-        SubstitutionIterator iterator = new SubstitutionIterator(tensor);
-        Tensor current;
-        while ((current = iterator.next()) != null) {
-            if (!(current instanceof Product))
-                continue;
-            if (current.getIndices().size(matrixType) == 0)
-                continue;
-            if (!containsGammaOr5Matrices(current))
-                continue;
-            if (simplifyG5 != null)
-                current = simplifyG5.transform(current);
-            Product product = (Product) current;
-            int offset = product.sizeOfIndexlessPart();
-            ProductContent pc = product.getContent();
-            StructureOfContractions st = pc.getStructureOfContractions();
+    protected Tensor transformLine(ProductOfGammas pg, IntArrayList modifiedElements) {
+        assert pg.g5Positions.size() == 0 || (pg.g5Positions.size() == 1 && pg.g5Positions.first() == pg.length - 1)
+                : "G5s are not simplified";
 
-            PrimitiveSubgraph[] partition
-                    = PrimitiveSubgraphPartition.calculatePartition(pc, matrixType);
+        int length = pg.length;
+        if (pg.g5Positions.size() == 1)
+            --length;
 
-            IntArrayList positionsOfGammas = new IntArrayList();
-            List<Tensor> ordered = new ArrayList<>();
-            gammas:
-            for (PrimitiveSubgraph subgraph : partition) {
-                if (subgraph.getGraphType() != GraphType.Cycle && subgraph.getGraphType() != GraphType.Line)
-                    continue;
+        if (length <= 1)
+            return null;
 
-                IntArrayList tPositionsOfGammas = new IntArrayList();
-                List<Gamma> gammas = new ArrayList<>();
-                for (int i = 0; i < subgraph.size(); ++i) {
-                    Tensor g5 = null;
-                    for (; i < subgraph.size(); ++i) {
-                        Tensor t = pc.get(subgraph.getPosition(i));
-                        if (!isGammaOrGamma5(t))
-                            break;
-                        else {
-                            tPositionsOfGammas.add(offset + subgraph.getPosition(i));
-                            if (isGamma5(t))
-                                g5 = t;
-                            else
-                                gammas.add(new Gamma(t, t.getIndices().get(metricType, 0), getContraction(subgraph.getPosition(i), pc, st)));
-                        }
-                    }
-                    if (!gammas.isEmpty()) {
-                        Tensor o = orderArray(gammas.toArray(new Gamma[gammas.size()]));
-                        if (o == null)
-                            continue gammas;
-                        positionsOfGammas.addAll(tPositionsOfGammas);
-                        if (g5 != null) {
-                            if (o instanceof Sum) {
-                                Tensor[] pair = resolveDummy(o, g5);
-                                o = FastTensors.multiplySumElementsOnFactor((Sum) pair[0], pair[1]);
-                            } else
-                                o = multiplyAndRenameConflictingDummies(o, g5);
-                        }
-                        ordered.add(o);
-                    }
-                    gammas.clear();
-                }
-            }
-            if (positionsOfGammas.isEmpty())
-                continue;
-
-            ordered.add(product.remove(positionsOfGammas.toArray()));
-            Tensor simple = expandAndEliminate.transform(multiplyAndRenameConflictingDummies(ordered));
-            simple = traceOfOne.transform(simple);
-            simple = deltaTrace.transform(simple);
-            iterator.safeSet(simple);
+        ProductContent pc = pg.pc;
+        StructureOfContractions st = pc.getStructureOfContractions();
+        Gamma[] gammas = new Gamma[length];
+        for (int i = 0; i < length; i++) {
+            Tensor gamma = pc.get(pg.gPositions.get(i));
+            gammas[i] = new Gamma(gamma, gamma.getIndices().get(metricType, 0), getContraction(pg.gPositions.get(i), pc, st));
         }
-        return iterator.result();
+        Tensor ordered = orderArray(gammas);
+        if (ordered == null)
+            return null;
+
+        if (pg.g5Positions.size() == 1) {
+            Tensor g5 = pc.get(pg.gPositions.get(pg.g5Positions.first()));
+            if (ordered instanceof Sum)
+                ordered = multiplySumElementsOnFactorAndResolveDummies((Sum) ordered, g5);
+            else
+                ordered = multiplyAndRenameConflictingDummies(ordered, g5);
+        }
+        return ordered;
     }
 
     private Tensor getContraction(int gamma,
@@ -188,53 +100,6 @@ public final class DiracOrderTransformation extends AbstractTransformationWithGa
         if (to == -1)
             return null;
         return pc.get(to);
-    }
-
-    private static final class Gamma implements Comparable<Gamma> {
-        final Tensor gamma;
-        final int index;
-        final Tensor contraction;
-
-        public Gamma(Tensor gamma, int index, Tensor contraction) {
-            this.gamma = gamma;
-            this.index = index;
-            this.contraction = contraction;
-        }
-
-        boolean contracted() {
-            return contraction instanceof SimpleTensor && contraction.getIndices().size() == 1;
-        }
-
-        @Override
-        public int compareTo(Gamma o) {
-            if (contracted() && o.contracted())
-                return ((SimpleTensor) contraction).getStringName().compareTo((((SimpleTensor) o.contraction)).getStringName());
-            else if (contracted() && !o.contracted())
-                return -1;
-            else if (o.contracted() && !contracted())
-                return 1;
-            else return Integer.compare(getNameWithoutType(index), getNameWithoutType(o.index));
-        }
-    }
-
-    //todo static thread local cache!
-    private final HashMap<IntArray, Cached> cache = new HashMap<>();
-
-    private static final class Cached {
-        protected final Tensor[] originalArray;
-        private final Tensor ordered;
-
-        public Cached(Tensor[] originalArray, Tensor ordered) {
-            this.originalArray = originalArray;
-            this.ordered = ordered;
-        }
-
-        int[] getOriginalIndices(IndexType metricType) {
-            int[] metricIndices = new int[originalArray.length];
-            for (int i = 0; i < originalArray.length; ++i)
-                metricIndices[i] = originalArray[i].getIndices().get(metricType, 0);
-            return metricIndices;
-        }
     }
 
     private Tensor[] createArray(final int[] permutation) {
@@ -334,5 +199,51 @@ public final class DiracOrderTransformation extends AbstractTransformationWithGa
     @Override
     public String toString(OutputFormat outputFormat) {
         return "DiracOrder";
+    }
+
+    private final HashMap<IntArray, Cached> cache = new HashMap<>();
+
+    private static final class Cached {
+        final Tensor[] originalArray;
+        final Tensor ordered;
+
+        public Cached(Tensor[] originalArray, Tensor ordered) {
+            this.originalArray = originalArray;
+            this.ordered = ordered;
+        }
+
+        int[] getOriginalIndices(IndexType metricType) {
+            int[] metricIndices = new int[originalArray.length];
+            for (int i = 0; i < originalArray.length; ++i)
+                metricIndices[i] = originalArray[i].getIndices().get(metricType, 0);
+            return metricIndices;
+        }
+    }
+
+    private static final class Gamma implements Comparable<Gamma> {
+        final Tensor gamma;
+        final int index;
+        final Tensor contraction;
+
+        public Gamma(Tensor gamma, int index, Tensor contraction) {
+            this.gamma = gamma;
+            this.index = index;
+            this.contraction = contraction;
+        }
+
+        boolean contracted() {
+            return contraction instanceof SimpleTensor && contraction.getIndices().size() == 1;
+        }
+
+        @Override
+        public int compareTo(Gamma o) {
+            if (contracted() && o.contracted())
+                return ((SimpleTensor) contraction).getStringName().compareTo((((SimpleTensor) o.contraction)).getStringName());
+            else if (contracted() && !o.contracted())
+                return -1;
+            else if (o.contracted() && !contracted())
+                return 1;
+            else return Integer.compare(getNameWithoutType(index), getNameWithoutType(o.index));
+        }
     }
 }

@@ -23,17 +23,11 @@
 package cc.redberry.physics.feyncalc;
 
 import cc.redberry.core.context.OutputFormat;
-import cc.redberry.core.graph.GraphType;
-import cc.redberry.core.graph.PrimitiveSubgraph;
-import cc.redberry.core.graph.PrimitiveSubgraphPartition;
 import cc.redberry.core.indexmapping.IndexMappings;
 import cc.redberry.core.indexmapping.Mapping;
 import cc.redberry.core.indices.Indices;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.tensor.*;
-import cc.redberry.core.transformations.ExpandTensorsAndEliminateTransformation;
-import cc.redberry.core.transformations.Transformation;
-import cc.redberry.core.transformations.substitutions.SubstitutionIterator;
 import cc.redberry.core.utils.IntArrayList;
 import gnu.trove.map.hash.TIntObjectHashMap;
 
@@ -48,16 +42,13 @@ import static cc.redberry.core.tensor.Tensors.*;
 import static cc.redberry.core.transformations.EliminateMetricsTransformation.eliminate;
 
 /**
- * @author Dmitry Bolotin
+ * Simplifies contractions of gammas with same momentums like k^a*k^b*G_a*G_b
+ *
  * @author Stanislav Poslavsky
  */
-final class DiracSimplify0
-        extends AbstractTransformationWithGammas {
-    private final Transformation expandAndEliminate;
-
-    public DiracSimplify0(SimpleTensor gammaMatrix, SimpleTensor gamma5, Tensor dimension, Tensor traceOfOne, Transformation simplifications) {
-        super(gammaMatrix, gamma5, null, dimension, traceOfOne);
-        this.expandAndEliminate = new ExpandTensorsAndEliminateTransformation(simplifications);
+final class DiracSimplify0 extends AbstractFeynCalcTransformation {
+    DiracSimplify0(DiracOptions options) {
+        super(options, IDENTITY);
     }
 
     @Override
@@ -66,119 +57,87 @@ final class DiracSimplify0
     }
 
     @Override
-    public Tensor transform(Tensor tensor) {
-        SubstitutionIterator iterator = new SubstitutionIterator(tensor);
-        Tensor current;
-        while ((current = iterator.next()) != null) {
-            if (!(current instanceof Product))
+    protected Tensor transformLine(ProductOfGammas pg, IntArrayList modifiedElements) {
+        assert pg.g5Positions.size() == 0 || (pg.g5Positions.size() == 1 && pg.g5Positions.first() == pg.length - 1)
+                : "G5s are not simplified";
+
+        int length = pg.length;
+        if (pg.g5Positions.size() == 1)
+            --length;
+
+        ProductContent pc = pg.pc;
+        StructureOfContractions sc = pc.getStructureOfContractions();
+
+        int numberOfCouples = 0;
+        List<Element> couples = new ArrayList<>();
+        out:
+        for (int i = 0; i < length; ++i) {
+            Element contraction = getContraction(i, pg.gPositions.get(i), pc, sc);
+            if (contraction == null)
                 continue;
-            if (current.getIndices().size(matrixType) == 0)
+            Tensor t1 = pc.get(contraction.tIndex1);
+            if (!(t1 instanceof SimpleTensor) || t1.getIndices().size() != 1)
                 continue;
-            if (!containsGammaMatrices(current))
-                continue;
-            Product product = (Product) current;
-            int offset = product.sizeOfIndexlessPart();
-            ProductContent pc = product.getContent();
-            StructureOfContractions sc = pc.getStructureOfContractions();
-
-            PrimitiveSubgraph[] partition
-                    = PrimitiveSubgraphPartition.calculatePartition(pc, matrixType);
-
-            IntArrayList modifiedMultipliers = new IntArrayList();
-            List<Tensor> ordered = new ArrayList<>();
-            boolean needRetry = false;
-
-            gammas:
-            for (PrimitiveSubgraph subgraph : partition) {
-                if (subgraph.getGraphType() == GraphType.Cycle) {
-                    //check for G5 and move it e.g. left
-                    int g5 = -1;
-                    for (int i = 0; i < subgraph.size(); ++i)
-                        if (isGamma5(pc.get(subgraph.getPosition(i)))) {
-                            g5 = i;
-                            break;
-                        }
-                    if (g5 != -1) {
-                        int[] newPartition = new int[subgraph.size()];
-                        for (int i = 0; i < g5; ++i)
-                            newPartition[i + newPartition.length - g5] = subgraph.getPosition(i);
-                        for (int i = g5; i < newPartition.length; ++i)
-                            newPartition[i - g5] = subgraph.getPosition(i);
-
-                        subgraph = new PrimitiveSubgraph(subgraph.getGraphType(), newPartition);
-                    }
-
-                } else if (subgraph.getGraphType() != GraphType.Line)
-                    continue;
-
-                List<Element> couples = new ArrayList<>();
-                for (int i = 0; i < subgraph.size(); ++i) {
-                    couples.clear();
-                    boolean coupled;
-                    for (; i < subgraph.size(); ++i) {
-                        Tensor t = pc.get(subgraph.getPosition(i));
-                        if (!isGamma(t))
-                            break;
-                        else {
-                            coupled = false;
-                            Element contraction = getContraction(i, subgraph.getPosition(i), pc, sc);
-                            if (contraction == null)
-                                continue;
-                            Tensor t1 = pc.get(contraction.tIndex1);
-                            if (!(t1 instanceof SimpleTensor) || t1.getIndices().size() != 1)
-                                continue;
-                            for (int k = 0; k < couples.size(); ++k)
-                                if (match(pc, couples.get(k), contraction)) {
-                                    couples.get(k).couple(contraction);
-                                    coupled = true;
-                                    break;
-                                }
-                            if (!coupled)
-                                couples.add(contraction);
-                        }
-                    }
-
-                    //filter couples
-                    for (int j = couples.size() - 1; j >= 0; --j)
-                        if (!couples.get(j).coupled())
-                            couples.remove(j);
-
-                    if (couples.isEmpty())
+            for (Element couple : couples)
+                if (match(pc, couple, contraction)) {
+                    if (couple.coupled())
                         continue;
-
-                    Element[] els = couples.toArray(new Element[couples.size()]);
-                    Arrays.sort(els);
-
-                    int[] mask = new int[subgraph.size()];
-                    for (Element el : els) {
-                        if (!el.available(mask)) {
-                            needRetry = true;
-                            continue;
-                        }
-                        el.cover(mask, modifiedMultipliers, subgraph, offset);
-                        ordered.add(simplify(el, subgraph, pc));
-                    }
+                    couple.couple(contraction);
+                    ++numberOfCouples;
+                    continue out;
                 }
-
-            }
-            if (modifiedMultipliers.isEmpty())
-                continue;
-
-            ordered.add(product.remove(modifiedMultipliers.toArray()));
-            Tensor simple = expandAndEliminate.transform(multiplyAndRenameConflictingDummies(ordered));
-            simple = traceOfOne.transform(simple);
-            simple = deltaTrace.transform(simple);
-            if (needRetry)
-                simple = transform(simple);
-            iterator.safeSet(simple);
+            couples.add(contraction);
         }
-        return iterator.result();
+
+        //no any couples
+        if (numberOfCouples == 0)
+            return null;
+
+        Element[] els = new Element[numberOfCouples];
+        for (Element couple : couples)
+            if (couple.coupled())
+                els[--numberOfCouples] = couple;
+
+        Arrays.sort(els);
+
+        List<Tensor> ordered = new ArrayList<>();
+        int[] mask = new int[length];
+        for (Element el : els) {
+            modifiedElements.addAll(el.tIndex1, el.tIndex2);
+            if (!el.available(mask)) {
+                ordered.add(pc.get(el.tIndex1));
+                ordered.add(pc.get(el.tIndex2));
+                continue;
+            }
+            Tensor simplified = simplify(el, pg.gPositions, pc);
+            if (simplified != null) {
+                ordered.add(simplified);
+                el.cover(mask);
+            }
+        }
+        for (int i = 0; i < mask.length; i++)
+            if (mask[i] != -1)
+                ordered.add(pc.get(pg.gPositions.get(i)));
+
+        Tensor result = expandAndEliminate.transform(multiplyAndRenameConflictingDummies(ordered));
+        if (pg.g5Positions.size() == 1) {
+            Tensor g5 = pc.get(pg.gPositions.get(pg.g5Positions.first()));
+            if (result instanceof Sum)
+                result = FastTensors.multiplySumElementsOnFactorAndResolveDummies((Sum) result, g5);
+            else
+                result = multiplyAndRenameConflictingDummies(result, g5);
+        }
+
+        return transform(result);
     }
 
-    private Tensor simplify(Element el, PrimitiveSubgraph partition, ProductContent pc) {
+    private Tensor simplify(Element el, IntArrayList gPositions, ProductContent pc) {
         Tensor[] gammas = new Tensor[el.gIndex2 - el.gIndex1 + 1];
-        for (int i = el.gIndex1; i <= el.gIndex2; ++i)
-            gammas[i - el.gIndex1] = pc.get(partition.getPosition(i));
+        for (int i = el.gIndex1; i <= el.gIndex2; ++i) {
+            gammas[i - el.gIndex1] = pc.get(gPositions.get(i));
+            if (!isGamma(pc.get(gPositions.get(i))))
+                return null;//can not simplify
+        }
 
         Tensor r = order(gammas);
         Tensor m = multiply(pc.get(el.tIndex1), pc.get(el.tIndex2));
@@ -271,6 +230,7 @@ final class DiracSimplify0
         }
 
         void couple(Element o) {
+            assert tIndex2 == -1;
             tIndex2 = o.tIndex1;
             gIndex2 = o.gIndex1;
             assert gIndex2 > gIndex1;
@@ -280,13 +240,13 @@ final class DiracSimplify0
             return tIndex2 != -1;
         }
 
-        void cover(int[] mask, IntArrayList modified, PrimitiveSubgraph subgraph, int offset) {
-            modified.ensureCapacity(gIndex2 - gIndex1 + 3);
-            for (int i = gIndex1; i <= gIndex2; ++i) {
+        void cover(int[] mask) {
+            for (int i = gIndex1; i <= gIndex2; ++i)
                 mask[i] = -1;
-                modified.add(subgraph.getPosition(i) + offset);
-            }
-            modified.addAll(tIndex1 + offset, tIndex2 + offset);
+        }
+
+        int length() {
+            return gIndex2 - gIndex1;
         }
 
         boolean available(int[] mask) {

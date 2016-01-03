@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2015:
+ * Copyright (c) 2010-2016:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -20,15 +20,20 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
-package cc.redberry.concurrent;
+package cc.redberry.physics.feyncalc;
+
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
- * Interface for passive objects provider.
- *
- * @author Bolotin Dmitriy (bolotin.dmitriy@gmail.com)
- * @param <T>
+ * Created by poslavsky on 04/01/16.
  */
-public interface OutputPort<T> {
+public class DiracOptionsTest {
+    @Test
+    public void testq() throws Exception {
+        DiracOptions options = new DiracOptions();
+        System.out.println(options == options.clone());
 
-    T take() throws InterruptedException;
+    }
 }

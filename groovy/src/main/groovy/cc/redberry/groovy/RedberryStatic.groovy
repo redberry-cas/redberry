@@ -689,11 +689,7 @@ class RedberryStatic {
     public static <T> T Quiet(Closure<T> closure) {
         def out = System.out
         try {
-            System.setOut(new PrintStream(new OutputStream() {
-                @Override
-                void write(int b) throws IOException {
-                }
-            }))
+            System.setOut(dummyPrintStream)
             return closure.call()
         } catch (Throwable e) {
 
@@ -701,6 +697,12 @@ class RedberryStatic {
             System.setOut(out)
         }
     }
+
+    private static final PrintStream dummyPrintStream = new PrintStream(new OutputStream() {
+        @Override
+        void write(int b) throws IOException {
+        }
+    });
 
     public static void Reset() {
         CC.reset()
