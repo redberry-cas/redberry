@@ -30,6 +30,10 @@ import cc.redberry.core.transformations.ExpandAndEliminateTransformation;
 import cc.redberry.core.transformations.Transformation;
 import cc.redberry.core.transformations.options.IOptions;
 import cc.redberry.core.transformations.options.Option;
+import cc.redberry.core.utils.TensorUtils;
+
+import static cc.redberry.core.tensor.Tensors.*;
+import static cc.redberry.core.transformations.Transformation.IDENTITY;
 
 
 /**
@@ -53,16 +57,16 @@ public class DiracOptions implements IOptions, Cloneable {
     public Tensor traceOfOne;
 
     @Option(name = "Simplifications", index = 5)
-    public Transformation simplifications = ExpandAndEliminateTransformation.EXPAND_AND_ELIMINATE;
+    public Transformation simplifications = IDENTITY;
 
     @Option(name = "Minkowski", index = 6)
     public boolean minkowskiSpace = true;
 
     @Option(name = "LeviCivitaSimplify", index = 7)
-    public Transformation simplifyLeviCivita = new LeviCivitaSimplifyTransformation(leviCivita, true);
+    public Transformation simplifyLeviCivita = null;
 
     @Option(name = "ExpandAndEliminate", index = 8)
-    public Transformation expandAndEliminate = ExpandAndEliminateTransformation.EXPAND_AND_ELIMINATE;
+    public Transformation expandAndEliminate = null;
 
     public DiracOptions() {}
 
@@ -81,14 +85,22 @@ public class DiracOptions implements IOptions, Cloneable {
         return options;
     }
 
+    boolean created = false;
 
     @Override
     public void triggerCreate() {
+        created = true;
         if (traceOfOne == null)
-            traceOfOne = AbstractFeynCalcTransformation.guessTraceOfOne(dimension);
+            traceOfOne = guessTraceOfOne(dimension);
         if (expandAndEliminate == null)
             expandAndEliminate = new ExpandAndEliminateTransformation(simplifications);
         if (simplifyLeviCivita == null)
             simplifyLeviCivita = new LeviCivitaSimplifyTransformation(leviCivita, minkowskiSpace, simplifications);
+    }
+
+    protected static Tensor guessTraceOfOne(Tensor dimension) {
+        if (TensorUtils.isIntegerOdd(dimension))
+            return pow(Complex.TWO, divide(subtract(dimension, Complex.ONE), Complex.TWO));
+        else return pow(Complex.TWO, divide(dimension, Complex.TWO));
     }
 }

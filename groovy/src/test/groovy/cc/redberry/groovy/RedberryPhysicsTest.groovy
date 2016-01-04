@@ -114,9 +114,10 @@ class RedberryPhysicsTest {
             defineMatrices 'G_a', 'G5', Matrix1.matrix
 
             def dS = DiracSimplify[[Dimension: 'D']]
+
             assert dS >> '2*G_a*G^a*G_b'.t == '2*D*G_b'.t
 
-            assert dS >> '2*G_a*G_b*G^a'.t == '-2*(D-2)*G_{b}'.t
+            assert (Factor >> (dS >> '2*G_a*G_b*G^a'.t)) == '-2*(D-2)*G_{b}'.t
         }
     }
 

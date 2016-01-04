@@ -62,27 +62,18 @@ public abstract class AbstractTransformationWithGammas implements Transformation
     protected final Transformation expandAndEliminate;
 
     protected AbstractTransformationWithGammas(DiracOptions options) {
-        this(options.gammaMatrix, options.gamma5, options.leviCivita, options.dimension, options.traceOfOne, options.expandAndEliminate);
-    }
-
-    private AbstractTransformationWithGammas(SimpleTensor gammaMatrix,
-                                             SimpleTensor gamma5,
-                                             SimpleTensor leviCivita,
-                                             Tensor dimension,
-                                             Tensor traceOfOne,
-                                             Transformation expandAndEliminate) {
-        checkNotation(gammaMatrix, gamma5, leviCivita);
-        this.gammaName = gammaMatrix.getName();
-        this.gamma5Name = gamma5 == null ? Integer.MIN_VALUE : gamma5.getName();
-        final IndexType[] types = TraceUtils.extractTypesFromMatrix(gammaMatrix);
+        checkNotation(options.gammaMatrix, options.gamma5, options.leviCivita);
+        if (!options.created)
+            options.triggerCreate();
+        this.gammaName = options.gammaMatrix.getName();
+        this.gamma5Name = options.gamma5 == null ? Integer.MIN_VALUE : options.gamma5.getName();
+        final IndexType[] types = TraceUtils.extractTypesFromMatrix(options.gammaMatrix);
         this.metricType = types[0];
         this.matrixType = types[1];
-        this.tokenTransformer = createTokenTransformer(metricType, matrixType, gammaMatrix, gamma5, leviCivita);
-        this.expandAndEliminate = expandAndEliminate;
-        if (traceOfOne == null)
-            traceOfOne = guessTraceOfOne(dimension);
-        this.traceOfOne = (Expression) tokenTransformer.transform(CC.current().getParseManager().getParser().parse("d^a'_a'=" + traceOfOne)).toTensor();
-        this.deltaTrace = (Expression) tokenTransformer.transform(CC.current().getParseManager().getParser().parse("d^a_a=" + dimension)).toTensor();
+        this.tokenTransformer = createTokenTransformer(metricType, matrixType, options.gammaMatrix, options.gamma5, options.leviCivita);
+        this.expandAndEliminate = options.expandAndEliminate;
+        this.traceOfOne = (Expression) tokenTransformer.transform(CC.current().getParseManager().getParser().parse("d^a'_a'=" + options.traceOfOne)).toTensor();
+        this.deltaTrace = (Expression) tokenTransformer.transform(CC.current().getParseManager().getParser().parse("d^a_a=" + options.dimension)).toTensor();
     }
 
     @Override
@@ -307,12 +298,6 @@ public abstract class AbstractTransformationWithGammas implements Transformation
             if (CC.isMetric(getType(indices[i])))
                 indices[i] = metricIndex;
         return simpleTensor(gamma.getName(), IndicesFactory.createSimple(null, indices));
-    }
-
-    protected static Tensor guessTraceOfOne(Tensor dimension) {
-        if (TensorUtils.isIntegerOdd(dimension))
-            return pow(Complex.TWO, divide(subtract(dimension, Complex.ONE), Complex.TWO));
-        else return pow(Complex.TWO, divide(dimension, Complex.TWO));
     }
 
     protected static Tensor defaultTraceOfOne() {
