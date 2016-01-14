@@ -143,4 +143,11 @@ class RedberryPhysicsTest {
             PassarinoVeltman(1, 'q_a'.t, ['k_a', 'p_a'])
         }
     }
+
+    @Test
+    public void testFourier() throws Exception {
+        use(Redberry){
+            println LagrangeFourier >> 'f[x_a]*f[x_a] + f*f[x_a]*f[x_a]'.t
+        }
+    }
 }

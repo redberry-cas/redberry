@@ -24,7 +24,7 @@
 package cc.redberry.groovy
 
 import cc.redberry.core.groups.permutations.PermutationGroup
-import cc.redberry.core.transformations.expand.ExpandTransformation
+import cc.redberry.core.number.Complex
 import cc.redberry.core.transformations.factor.JasFactor
 import org.junit.Before
 import org.junit.Test
@@ -34,6 +34,7 @@ import static cc.redberry.core.TAssert.assertTrue
 import static cc.redberry.core.indices.IndexType.*
 import static cc.redberry.core.tensor.Tensors.addAntiSymmetry
 import static cc.redberry.core.tensor.Tensors.addSymmetry
+import static cc.redberry.core.utils.TensorUtils.Count
 import static cc.redberry.groovy.RedberryStatic.*
 
 class RedberryStaticTest {
@@ -143,7 +144,7 @@ class RedberryStaticTest {
     @Test
     public void testExpand3() {
         use(Redberry) {
-            assertTrue Expand['x = y'.t&'f = a'.t] >> 'x*(x + f)'.t == 'a*y+y**2'.t
+            assertTrue Expand['x = y'.t & 'f = a'.t] >> 'x*(x + f)'.t == 'a*y+y**2'.t
             assertTrue Expand >> 'x*(x + f)'.t == 'f*x+x**2'.t
             assertTrue Expand['x = a'] >> 'x*(x + f)'.t == 'f*a+a**2'.t
             assertTrue Expand['x = a'.t] >> 'x*(x + f)'.t == 'f*a+a**2'.t
@@ -237,7 +238,7 @@ class RedberryStaticTest {
             assertEquals Factor >> 'k_m*k^m*(a+b) + k_m*f^m*(a+b)'.t, '(k_m*k^m + k_m*f^m)*(a+b)'
             assertEquals Factor[[FactorScalars: false]] >> 'k_m*k^m*(a+b) + k_m*f^m*(a+b)'.t, 'k_m*k^m*(a+b) + k_m*f^m*(a+b)'
             assertEquals Factor[[FactorScalars: true]] >> 'k_m*k^m*(a+b) + k_m*f^m*(a+b)'.t, '(k_m*k^m + k_m*f^m)*(a+b)'
-            }
+        }
     }
 
     @Test
@@ -298,13 +299,34 @@ class RedberryStaticTest {
         println 'not quiet'
     }
 
-
     @Test
     public void testInvertIndices() throws Exception {
         use(Redberry) {
             assertEquals('f_ab'.t, InvertIndices >> 'f^ab'.t)
             assertEquals('f_ab'.t, InvertIndices[LatinLower] >> 'f^ab'.t)
             assertEquals('f_abC'.t, InvertIndices[LatinLower] >> 'f^ab_C'.t)
+        }
+    }
+
+    @Test
+    public void testCount1() throws Exception {
+        use(Redberry) {
+            assert Count('a*b*c*f_ab*e_cd'.t, *['a', 'f_ab'].t) == 2
+        }
+    }
+
+    @Test
+    public void testCount2() throws Exception {
+        use(Redberry) {
+            assert Count('a*b*c*f~(1)_abf[x_a]*e_cd'.t, *['a', 'f_ab[x_a]'].t) == 2
+        }
+    }
+
+    @Test
+    public void testClosure1() throws Exception {
+        use(Redberry) {
+            def e = Expand[{ x -> x instanceof Complex ? 0.t : x }]
+            assert e >> '(x+2)**2'.t == '4*x+x**2'.t
         }
     }
 }
