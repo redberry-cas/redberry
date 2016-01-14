@@ -26,6 +26,8 @@ import cc.redberry.core.number.Complex;
 import cc.redberry.core.tensor.Tensors;
 import cc.redberry.core.transformations.Transformation;
 import cc.redberry.core.transformations.options.TransformationBuilder;
+import groovy.lang.Closure;
+import org.codehaus.groovy.runtime.DefaultGroovyMethods;
 
 import java.math.BigInteger;
 import java.util.*;
@@ -108,6 +110,8 @@ public class DSLTransformation<T extends Transformation> {
         try {
             if (o instanceof String)
                 return Tensors.parse((String) o);
+            else if (o instanceof Closure)
+                return DefaultGroovyMethods.asType(o, Transformation.class);
             else if (o instanceof Number) {
                 if (o instanceof BigInteger)
                     return new Complex((BigInteger) o);

@@ -755,10 +755,50 @@ class Redberry {
      * Expression-tree traversal and modification
      * @param t expression
      * @param closure do stuff
+     * @param guide traverse guide
+     * @return the result
+     * @see SubstitutionIterator
+     * @see TraverseGuide
+     */
+    static Tensor transformParentAfterChild(Tensor t, TraverseGuide guide, Transformation closure) {
+        SubstitutionIterator iterator = new SubstitutionIterator(t, guide);
+        Tensor c;
+        while ((c = iterator.next()) != null)
+            iterator.safeSet(closure.transform(c));
+
+        return iterator.result();
+    }
+
+    /**
+     * Expression-tree traversal and modification
+     * @param t expression
+     * @param closure do stuff
      * @return the result
      * @see SubstitutionIterator
      */
     static Tensor transformParentAfterChild(Tensor t, Closure<Tensor> closure) {
+        return transformParentAfterChild(t, TraverseGuide.ALL, closure);
+    }
+
+    /**
+     * Expression-tree traversal and modification
+     * @param t expression
+     * @param closure do stuff
+     * @return the result
+     * @see SubstitutionIterator
+     */
+    static Tensor mapTransform(Tensor t, Closure<Tensor> closure) {
+        return transformParentAfterChild(t, TraverseGuide.ALL, closure);
+    }
+
+    /**
+     * Expression-tree traversal and modification
+     * @param t expression
+     * @param closure do stuff
+     * @return the result
+     * @see SubstitutionIterator
+     */
+    static Tensor mapTransform(Tensor t, Transformation closure) {
         return transformParentAfterChild(t, TraverseGuide.ALL, closure);
     }
 
