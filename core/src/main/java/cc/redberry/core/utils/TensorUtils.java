@@ -844,4 +844,117 @@ public final class TensorUtils {
             replacements[++i] = expression(scalar, generatedCoefficients.take());
         return replacements;
     }
+
+    /**
+     * Returns the number of occurences of {@code patterns} in {@code expression}
+     *
+     * @param expression expression
+     * @param patterns   patterns
+     * @return number of occurences of {@code patterns} in {@code expression}
+     */
+    public static int Count(final Tensor expression, final Tensor... patterns) {
+        return Count(expression, 1, Arrays.asList(patterns), false);
+    }
+
+    /**
+     * Returns the number of occurences of {@code patterns} in {@code expression}
+     *
+     * @param expression expression
+     * @param patterns   patterns
+     * @return number of occurences of {@code patterns} in {@code expression}
+     */
+    public static int Count(final Tensor expression, final List<Tensor> patterns) {
+        return Count(expression, 1, patterns, false);
+    }
+
+    /**
+     * Returns the number of occurences of {@code patterns} in {@code expression}
+     *
+     * @param expression expression
+     * @param patterns   patterns
+     * @param level      level specification
+     * @return number of occurences of {@code patterns} in {@code expression}
+     */
+    public static int Count(final Tensor expression, final int level, final List<Tensor> patterns, final boolean sumPowers) {
+        if (level == 0)
+            return 0;
+        if (level < 0)
+            throw new IllegalArgumentException();
+        int count = 0;
+        if (level == 1) {
+            out:
+            for (Tensor el : expression) {
+                for (Tensor p : patterns) {
+                    int c = match0(el, p, sumPowers);
+                    count += c;
+                    if (c > 0)
+                        continue out;
+                }
+            }
+        } else {
+            for (Tensor el : expression)
+                count += Count(el, level - 1, patterns, sumPowers);
+        }
+        return count;
+    }
+
+    /**
+     * Gives the maximum power with which {@code pattern} appears in the expanded form of {@code expression}.
+     *
+     * @param expression expression
+     * @param pattern    simple tensor or field
+     * @return maximum power with which {@code pattern} appears in the expanded form of {@code expression}
+     */
+    public static int Exponent(final Tensor expression, Tensor... pattern) {
+        return Exponent(expression, Arrays.asList(pattern));
+    }
+
+    /**
+     * Gives the maximum power with which {@code pattern} appears in the expanded form of {@code expression}.
+     *
+     * @param expression expression
+     * @param pattern    simple tensor or field
+     * @return maximum power with which {@code pattern} appears in the expanded form of {@code expression}
+     */
+    public static int Exponent(final Tensor expression, List<Tensor> pattern) {
+        if (expression instanceof SimpleTensor)
+            return match1(expression, pattern);
+        else if (isPositiveIntegerPower(expression)) {
+            return ((Complex) expression.get(1)).intValue() * Exponent(expression.get(0), pattern);
+        } else if (expression instanceof Product) {
+            int exponent = 0;
+            for (Tensor tensor : expression)
+                exponent += Exponent(tensor, pattern);
+            return exponent;
+        } else if (expression instanceof Sum) {
+            int exponent = 0;
+            for (Tensor tensor : expression)
+                exponent = Math.max(exponent, Exponent(tensor, pattern));
+            return exponent;
+        } else return 0;
+    }
+
+    private static int match0(final Tensor el, final Tensor patt, final boolean sumPowers) {
+        if (sumPowers && isPositiveIntegerPower(el))
+            return ((Complex) el.get(1)).intValue() * match0(el.get(0), patt, false);
+        else if (IndexMappings.anyMappingExists(patt, el))
+            return 1;
+        else if (patt instanceof TensorField && el instanceof TensorField
+                && !((TensorField) patt).isDerivative())
+            return (((TensorField) el).getParentField().getName() == ((TensorField) patt).getName()) ? 1 : 0;
+        return 0;
+    }
+
+    private static int match1(final Tensor el, final List<Tensor> patterns) {
+        for (Tensor patt : patterns) {
+            if (IndexMappings.anyMappingExists(patt, el))
+                return 1;
+            else if (patt instanceof TensorField
+                    && el instanceof TensorField
+                    && !((TensorField) patt).isDerivative()
+                    && (((TensorField) el).getParentField().getName() == ((TensorField) patt).getName()))
+                return 1;
+        }
+        return 0;
+    }
 }

@@ -38,6 +38,7 @@ import cc.redberry.core.transformations.EliminateDueSymmetriesTransformation;
 import org.junit.Test;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static cc.redberry.core.TAssert.*;
@@ -377,5 +378,21 @@ public class TensorUtilsTest {
         for (int i = 0; i < matrix.length; ++i)
             for (int j = 0; j < matrix.length; ++j)
                 TAssert.assertEquals(inverse[i][j], expected[i][j]);
+    }
+
+    @Test
+    public void testCount() throws Exception {
+        assertEquals(3, Count(parse("a*f[x]**2*f[y]"), 1, Arrays.asList(parse("f[x]")), true));
+        assertEquals(1, Count(parse("a*b*c*f~(1)_abf[x_a]*e_cd"), parse("f_ab[x_a]")));
+        assertEquals(9, Count(parse("h~(2)_{dpbz}[x_{d}]*h~(1)_{rcf}[x_{d}]*h^{j}_{k}[x_{a}]*h^{o}_{t}[x_{a}]*h^{u}_{v}[x_{a}]*h^{n}_{m}[x_{a}]*h^{p}_{o}[x_{a}]*h^{a}_{u}[x_{a}]*h^{q}_{j}[x_{a}]"), parse("h_ab[p_a]")));
+    }
+
+
+    @Test
+    public void testExponent() throws Exception {
+        assertEquals(3, Exponent(parse("f[x] + a*f[x]**2*f[y]"), parse("f[y]")));
+        assertEquals(6, Exponent(parse("(y*x**2 + 1)**3 + x**4"), parse("x")));
+        assertEquals(1, Exponent(parse("a*b*c*f~(1)_abf[x_a]*e_cd"), parse("f_ab[x_a]")));
+        assertEquals(9, Exponent(parse("h~(2)_{dpbz}[x_{d}]*h~(1)_{rcf}[x_{d}]*h^{j}_{k}[x_{a}]*h^{o}_{t}[x_{a}]*h^{u}_{v}[x_{a}]*h^{n}_{m}[x_{a}]*h^{p}_{o}[x_{a}]*h^{a}_{u}[x_{a}]*h^{q}_{j}[x_{a}]"), parse("h_ab[p_a]")));
     }
 }
