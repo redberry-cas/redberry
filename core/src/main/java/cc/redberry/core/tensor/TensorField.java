@@ -26,6 +26,7 @@ import cc.redberry.core.context.NameDescriptorForTensorField;
 import cc.redberry.core.context.OutputFormat;
 import cc.redberry.core.indices.SimpleIndices;
 import cc.redberry.core.indices.SimpleIndicesBuilder;
+import cc.redberry.core.utils.TensorUtils;
 
 import java.util.Arrays;
 import java.util.Iterator;
@@ -38,7 +39,6 @@ import java.util.Iterator;
  * @since 1.0
  */
 public final class TensorField extends SimpleTensor {
-
     protected Tensor[] args;
     protected SimpleIndices[] argIndices;
 
@@ -68,6 +68,10 @@ public final class TensorField extends SimpleTensor {
 
     public boolean isDerivative() {
         return getNameDescriptor().isDerivative();
+    }
+
+    public boolean isDiracDelta() {
+        return getNameDescriptor().isDiracDelta();
     }
 
     @Override
@@ -219,8 +223,9 @@ public final class TensorField extends SimpleTensor {
                 throw new IllegalStateException("No more arguments in field.");
             if (tensor == null)
                 throw new NullPointerException();
-            if (!tensor.getIndices().getFree().equalsRegardlessOrder(field.getArgIndices(pointer)))
-                throw new IllegalArgumentException("Free indices of puted tensor differs from field argument binding indices!");
+            if (!tensor.getIndices().getFree().equalsRegardlessOrder(field.getArgIndices(pointer)) && !TensorUtils.isZero(tensor))
+                throw new IllegalArgumentException("Free indices of putted tensor " + tensor.getIndices().getFree()
+                        + " differs from field argument binding indices " + field.getArgIndices(pointer) + "!");
             data[pointer++] = tensor;
         }
 

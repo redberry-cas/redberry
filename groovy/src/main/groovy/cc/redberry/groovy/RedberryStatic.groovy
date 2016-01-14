@@ -182,6 +182,13 @@ class RedberryStatic {
     public static final Transformation Numeric = ToNumericTransformation.TO_NUMERIC;
 
     /**
+     * Applies Dirac delta-functions
+     * @see ApplyDiracDeltasTransformation
+     */
+    public static
+    final Transformation ApplyDiracDeltas = ApplyDiracDeltasTransformation.APPLY_DIRAC_DELTAS_TRANSFORMATION;
+
+    /**
      * Collects similar scalar factors in products.
      * @see CollectNonScalarsTransformation
      */

@@ -25,6 +25,8 @@ package cc.redberry.core.context;
 import cc.redberry.core.indices.*;
 import cc.redberry.core.parser.ParseManager;
 import cc.redberry.core.tensor.SimpleTensor;
+import cc.redberry.core.tensor.Tensor;
+import cc.redberry.core.tensor.TensorField;
 import cc.redberry.core.tensor.Tensors;
 import cc.redberry.core.utils.BitArray;
 import cc.redberry.core.utils.OutputPort;
@@ -385,6 +387,17 @@ public final class Context {
     public SimpleTensor generateNewSymbol() {
         NameDescriptor nameDescriptor = nameManager.generateNewSymbolDescriptor();
         return Tensors.simpleTensor(nameDescriptor.getId(), IndicesFactory.EMPTY_SIMPLE_INDICES);
+    }
+
+    /**
+     * Returns a delta function with specified arguments
+     *
+     * @param a tensor
+     * @param b tensor
+     * @return DiracDelta[a, b]
+     */
+    public TensorField createDeltaFunction(Tensor a, Tensor b) {
+        return Tensors.field(nameManager.getDiracDeltaName(), IndicesFactory.EMPTY_SIMPLE_INDICES, new Tensor[]{a, b});
     }
 
     /**

@@ -548,10 +548,12 @@ public final class ApplyIndexMapping {
     }
 
     public static Tensor applyIndexMappingAndRenameAllDummies(Tensor tensor, Mapping mapping, int[] allowedDummies) {
+        if (TensorUtils.isZero(tensor))
+            return tensor;
         int[] freeIndicesNames = IndicesUtils.getIndicesNames(tensor.getIndices().getFree());
         Arrays.sort(freeIndicesNames);
         if (!mapping.getFromNames().equalsToArray(freeIndicesNames))
-            throw new IllegalArgumentException("From indices names does not match free indices names of tensor.");
+            throw new IllegalArgumentException("From indices names does not match free indices names of tensor. Tensor: " + tensor + " mapping: " + mapping);
 
         final int[] dummies = TensorUtils.getAllDummyIndicesT(tensor).toArray();
         int[] from = new int[mapping.size() + dummies.length];

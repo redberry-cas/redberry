@@ -36,8 +36,8 @@ final class NameDescriptorForTensorFieldImpl extends NameDescriptorForTensorFiel
     final HashMap<DerivativeDescriptor, NameDescriptorForTensorFieldDerivative> derivatives = new HashMap<>();
     final NameAndStructureOfIndices[] keys;
 
-    public NameDescriptorForTensorFieldImpl(String name, StructureOfIndices[] indexTypeStructures, int id) {
-        super(indexTypeStructures, id, new int[indexTypeStructures.length - 1], name);
+    public NameDescriptorForTensorFieldImpl(String name, StructureOfIndices[] indexTypeStructures, int id, boolean isDiracDelta) {
+        super(indexTypeStructures, id, new int[indexTypeStructures.length - 1], name, isDiracDelta);
         this.keys = new NameAndStructureOfIndices[]{new NameAndStructureOfIndices(name, indexTypeStructures)};
     }
 

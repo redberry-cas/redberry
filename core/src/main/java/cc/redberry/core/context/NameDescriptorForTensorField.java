@@ -35,11 +35,18 @@ public abstract class NameDescriptorForTensorField extends NameDescriptor {
     final int[] orders;
     final String name;
     int[][] indicesPartitionMapping = null;
+    final boolean isDiracDelta;
 
-    NameDescriptorForTensorField(StructureOfIndices[] indexTypeStructures, int id, int[] orders, String name) {
+    NameDescriptorForTensorField(StructureOfIndices[] indexTypeStructures, int id, int[] orders,
+                                 String name, boolean isDiracDelta) {
         super(indexTypeStructures, id);
         this.orders = orders;
         this.name = name;
+        this.isDiracDelta = isDiracDelta;
+    }
+
+    public boolean isDiracDelta() {
+        return isDiracDelta;
     }
 
     public int[] getDerivativeOrders() {

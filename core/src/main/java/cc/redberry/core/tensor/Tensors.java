@@ -824,6 +824,16 @@ public final class Tensors {
         return CC.current().createMetricOrKronecker(index1, index2);
     }
 
+    /**
+     * Returns a delta function with specified arguments
+     *
+     * @param a tensor
+     * @param b tensor
+     * @return DiracDelta[a, b]
+     */
+    public static TensorField createDiracDelta(Tensor a, Tensor b) {
+        return CC.current().createDeltaFunction(a, b);
+    }
 
     /**
      * Returns metric tensor if specified indices have same states and

@@ -41,6 +41,7 @@ import cc.redberry.core.transformations.symmetrization.SymmetrizeTransformation;
 import cc.redberry.core.utils.TensorUtils;
 import gnu.trove.set.hash.TIntHashSet;
 
+import static cc.redberry.core.indexmapping.IndexMappings.anyMappingExists;
 import static cc.redberry.core.indices.IndicesUtils.*;
 import static cc.redberry.core.tensor.ApplyIndexMapping.*;
 import static cc.redberry.core.tensor.Tensors.*;
@@ -55,9 +56,9 @@ import static cc.redberry.core.utils.ArraysUtils.addAll;
  * @since 1.0
  */
 public final class DifferentiateTransformation implements TransformationToStringAble {
-
     private final SimpleTensor[] vars;
     private final Transformation[] expandAndContract;
+    private final boolean useDeltaFunction;
 
     /**
      * Creates transformations which differentiate with respect to specified simple tensors.
@@ -65,24 +66,41 @@ public final class DifferentiateTransformation implements TransformationToString
      * @param vars
      */
     public DifferentiateTransformation(SimpleTensor... vars) {
+        this(true, vars);
+    }
+
+    /**
+     * Creates transformations which differentiate with respect to specified simple tensors.
+     *
+     * @param useDeltaFunction use Dirac's deltas
+     * @param vars
+     */
+    public DifferentiateTransformation(boolean useDeltaFunction, SimpleTensor... vars) {
+        this.useDeltaFunction = useDeltaFunction;
         this.vars = vars;
         this.expandAndContract = new Transformation[0];
     }
 
     public DifferentiateTransformation(SimpleTensor[] vars, Transformation[] expandAndContract) {
+        this(true, vars, expandAndContract);
+    }
+
+    public DifferentiateTransformation(boolean useDeltaFunction, SimpleTensor[] vars, Transformation[] expandAndContract) {
+        this.useDeltaFunction = useDeltaFunction;
         this.vars = vars;
         this.expandAndContract = expandAndContract;
     }
 
     @Creator(vararg = true, hasArgs = true)
     public DifferentiateTransformation(SimpleTensor[] vars, @Options DifferentiateOptions options) {
+        this.useDeltaFunction = options.useDiracDelta;
         this.vars = vars;
         this.expandAndContract = new Transformation[]{options.simplifications};
     }
 
     @Override
     public Tensor transform(Tensor t) {
-        return differentiate(t, expandAndContract, vars);
+        return differentiate(t, expandAndContract, useDeltaFunction, vars);
     }
 
     @Override
@@ -110,10 +128,24 @@ public final class DifferentiateTransformation implements TransformationToString
      * @throws IllegalArgumentException if both order is not one and var is not scalar.
      */
     public static Tensor differentiate(Tensor tensor, SimpleTensor var, int order) {
+        return differentiate(tensor, var, order, false);
+    }
+
+    /**
+     * Gives the multiple derivative of specified order of specified tensor with respect to specified simple tensor.
+     *
+     * @param tensor           tensor to be differentiated
+     * @param var              simple tensor
+     * @param order            order of derivative
+     * @param useDeltaFunction use Dirac deltas
+     * @return derivative
+     * @throws IllegalArgumentException if both order is not one and var is not scalar.
+     */
+    public static Tensor differentiate(Tensor tensor, SimpleTensor var, int order, boolean useDeltaFunction) {
         if (var.getIndices().size() != 0 && order > 1)
             throw new IllegalArgumentException();
         for (; order > 0; --order)
-            tensor = differentiate(tensor, new Transformation[0], var);
+            tensor = differentiate(tensor, new Transformation[0], var, useDeltaFunction);
         return tensor;
     }
 
@@ -126,27 +158,42 @@ public final class DifferentiateTransformation implements TransformationToString
      * @throws IllegalArgumentException if there is clash of indices
      */
     public static Tensor differentiate(Tensor tensor, SimpleTensor... vars) {
+        return differentiate(tensor, true, vars);
+    }
+
+    /**
+     * Gives the multiple derivative of specified tensor with respect to specified arguments.
+     *
+     * @param tensor           tensor to be differentiated
+     * @param useDeltaFunction use Dirac deltas
+     * @param vars             arguments
+     * @return derivative
+     * @throws IllegalArgumentException if there is clash of indices
+     */
+    public static Tensor differentiate(Tensor tensor, boolean useDeltaFunction, SimpleTensor... vars) {
         if (vars.length == 0)
             return tensor;
         if (vars.length == 1)
-            return differentiate(tensor, new Transformation[0], vars[0]);
-        return differentiate(tensor, new Transformation[0], vars);
+            return differentiate(tensor, new Transformation[0], useDeltaFunction, vars[0]);
+        return differentiate(tensor, new Transformation[0], useDeltaFunction, vars);
     }
 
     /**
      * Gives the multiple derivative of specified tensor with respect to specified arguments.
      *
      * @param tensor            tensor to be differentiated
-     * @param vars              arguments
      * @param expandAndContract additional transformations to be applied after each step of differentiation
+     * @param useDeltaFunction  use Dirac deltas
+     * @param vars              arguments
      * @return derivative
      * @throws IllegalArgumentException if there is clash of indices
      */
-    public static Tensor differentiate(Tensor tensor, Transformation[] expandAndContract, SimpleTensor... vars) {
+    public static Tensor differentiate(Tensor tensor, Transformation[] expandAndContract,
+                                       boolean useDeltaFunction, SimpleTensor... vars) {
         if (vars.length == 0)
             return tensor;
         if (vars.length == 1)
-            return differentiate(tensor, expandAndContract, vars[0]);
+            return differentiate(tensor, expandAndContract, vars[0], useDeltaFunction);
 
         boolean needRename = false;
         for (SimpleTensor var : vars)
@@ -184,12 +231,13 @@ public final class DifferentiateTransformation implements TransformationToString
         }
 
         for (SimpleTensor var : resolvedVars)
-            tensor = differentiate1(tensor, createRule(var), expandAndContract);
+            tensor = differentiate1(tensor, createRule(var, useDeltaFunction), expandAndContract);
 
         return tensor;
     }
 
-    private static Tensor differentiate(Tensor tensor, Transformation[] expandAndContract, SimpleTensor var) {
+    private static Tensor differentiate(Tensor tensor, Transformation[] expandAndContract,
+                                        SimpleTensor var, boolean useDeltaFunction) {
         if (var.getIndices().size() != 0) {
             TIntHashSet allTensorIndices = TensorUtils.getAllIndicesNamesT(tensor);
             TIntHashSet dummyTensorIndices = new TIntHashSet(allTensorIndices);
@@ -203,7 +251,7 @@ public final class DifferentiateTransformation implements TransformationToString
                 allTensorIndices.addAll(IndicesUtils.getIndicesNames(var.getIndices()));
             tensor = renameIndicesOfFieldsArguments(tensor, allTensorIndices);
         }
-        return differentiate1(tensor, createRule(var), expandAndContract);
+        return differentiate1(tensor, createRule(var, useDeltaFunction), expandAndContract);
     }
 
     private static boolean containsIndicesNames(TIntHashSet set, Indices indices) {
@@ -226,13 +274,32 @@ public final class DifferentiateTransformation implements TransformationToString
         return differentiate1(tensor, newRule, expandAndEliminate);
     }
 
-    private static Tensor differentiate1(Tensor tensor, SimpleTensorDifferentiationRule rule, Transformation[] transformations) {
-        if (tensor.getClass() == SimpleTensor.class) {
-            Tensor temp = rule.differentiateSimpleTensor((SimpleTensor) tensor);
-            return applyTransformations(temp, transformations);
-        }
-        if (tensor.getClass() == TensorField.class) {
+    private static Tensor differentiateSimpleTensor(
+            final SimpleTensor tensor, final SimpleTensorDifferentiationRule rule, final Transformation[] transformations) {
+        Tensor temp = rule.differentiateSimpleTensor(tensor);
+        return applyTransformations(temp, transformations);
+    }
+
+    private static Tensor differentiate1(final Tensor tensor, final SimpleTensorDifferentiationRule rule,
+                                         final Transformation[] transformations) {
+        if (tensor instanceof Complex)
+            return Complex.ZERO;
+        else if (tensor.getClass() == SimpleTensor.class)
+            return differentiateSimpleTensor((SimpleTensor) tensor, rule, transformations);
+        else if (tensor.getClass() == TensorField.class) {
             TensorField field = (TensorField) tensor;
+            if (rule.var.getName() == field.getName()) {
+                TensorField varF = (TensorField) rule.var;
+                if (rule.useDeltaFunction) {
+                    ProductBuilder pb = new ProductBuilder();
+                    pb.put(differentiateSimpleTensor((SimpleTensor) tensor, rule, transformations));
+                    for (int i = 0; i < varF.size(); i++)
+                        pb.put(createDiracDelta(field.get(i), varF.get(i)));
+                    return pb.build();
+                } else if (anyMappingExists(varF, field) || anyMappingExists(field, varF))
+                    return differentiateSimpleTensor((SimpleTensor) tensor, rule, transformations);
+            }
+
             SumBuilder result = new SumBuilder(tensor.size());
             Tensor dArg;
 
@@ -247,8 +314,7 @@ public final class DifferentiateTransformation implements TransformationToString
 
             }
             return applyTransformations(EliminateMetricsTransformation.eliminate(result.build()), transformations);
-        }
-        if (tensor instanceof Sum) {
+        } else if (tensor instanceof Sum) {
             SumBuilder builder = new SumBuilder();
             Tensor temp;
             for (Tensor t : tensor) {
@@ -257,14 +323,12 @@ public final class DifferentiateTransformation implements TransformationToString
                 builder.put(temp);
             }
             return builder.build();
-        }
-        if (tensor instanceof ScalarFunction) {
+        } else if (tensor instanceof ScalarFunction) {
             Tensor temp = multiply(((ScalarFunction) tensor).derivative(),
                     differentiateWithRenaming(tensor.get(0), rule, transformations));
             temp = applyTransformations(temp, transformations);
             return temp;
-        }
-        if (tensor instanceof Power) {
+        } else if (tensor instanceof Power) {
             //e^f*ln(g) -> g^f*(f'*ln(g)+f/g*g') ->f*g^(f-1)*g' + g^f*ln(g)*f'
             Tensor temp = sum(
                     multiplyAndRenameConflictingDummies(tensor.get(1),
@@ -275,8 +339,7 @@ public final class DifferentiateTransformation implements TransformationToString
                             differentiateWithRenaming(tensor.get(1), rule, transformations)));
             temp = applyTransformations(temp, transformations);
             return temp;
-        }
-        if (tensor instanceof Product) {
+        } else if (tensor instanceof Product) {
             SumBuilder result = new SumBuilder();
             Tensor temp;
             for (int i = tensor.size() - 1; i >= 0; --i) {
@@ -287,9 +350,7 @@ public final class DifferentiateTransformation implements TransformationToString
                 result.put(temp);
             }
             return result.build();
-        }
-        if (tensor instanceof Complex)
-            return Complex.ZERO;
+        } ;
         throw new UnsupportedOperationException();
     }
 
@@ -299,18 +360,19 @@ public final class DifferentiateTransformation implements TransformationToString
         return tensor;
     }
 
-    private static SimpleTensorDifferentiationRule createRule(SimpleTensor var) {
+    private static SimpleTensorDifferentiationRule createRule(SimpleTensor var, boolean useDeltaFunction) {
         if (var.getIndices().size() == 0)
-            return new SymbolicDifferentiationRule(var);
-        return new SymmetricDifferentiationRule(var);
+            return new SymbolicDifferentiationRule(var, useDeltaFunction);
+        return new SymmetricDifferentiationRule(var, useDeltaFunction);
     }
 
     private static abstract class SimpleTensorDifferentiationRule {
+        final SimpleTensor var;
+        final boolean useDeltaFunction;
 
-        protected final SimpleTensor var;
-
-        protected SimpleTensorDifferentiationRule(SimpleTensor var) {
+        public SimpleTensorDifferentiationRule(SimpleTensor var, boolean useDeltaFunction) {
             this.var = var;
+            this.useDeltaFunction = useDeltaFunction;
         }
 
         Tensor differentiateSimpleTensor(SimpleTensor simpleTensor) {
@@ -328,8 +390,8 @@ public final class DifferentiateTransformation implements TransformationToString
 
     private static final class SymbolicDifferentiationRule extends SimpleTensorDifferentiationRule {
 
-        private SymbolicDifferentiationRule(SimpleTensor var) {
-            super(var);
+        private SymbolicDifferentiationRule(SimpleTensor var, boolean useDeltaFunction) {
+            super(var, useDeltaFunction);
         }
 
         @Override
@@ -353,15 +415,16 @@ public final class DifferentiateTransformation implements TransformationToString
         private final Tensor derivative;
         private final int[] allFreeFrom, freeVarIndices;
 
-        private SymmetricDifferentiationRule(SimpleTensor var, Tensor derivative, int[] allFreeFrom, int[] freeVarIndices) {
-            super(var);
+        private SymmetricDifferentiationRule(SimpleTensor var, Tensor derivative, int[] allFreeFrom,
+                                             int[] freeVarIndices, boolean useDeltaFunction) {
+            super(var, useDeltaFunction);
             this.derivative = derivative;
             this.allFreeFrom = allFreeFrom;
             this.freeVarIndices = freeVarIndices;
         }
 
-        SymmetricDifferentiationRule(SimpleTensor var) {
-            super(var);
+        SymmetricDifferentiationRule(SimpleTensor var, boolean useDeltaFunction) {
+            super(var, useDeltaFunction);
             SimpleIndices varIndices = var.getIndices();
             int[] allFreeVarIndices = new int[varIndices.size()];
             int[] allFreeArgIndices = new int[varIndices.size()];
@@ -405,7 +468,8 @@ public final class DifferentiateTransformation implements TransformationToString
         @Override
         SimpleTensorDifferentiationRule newRuleForTensor(Tensor tensor) {
             return new SymmetricDifferentiationRule(this.var,
-                    renameDummy(derivative, TensorUtils.getAllIndicesNamesT(tensor).toArray()), allFreeFrom, freeVarIndices);
+                    renameDummy(derivative, TensorUtils.getAllIndicesNamesT(tensor).toArray()),
+                    allFreeFrom, freeVarIndices, useDeltaFunction);
         }
 
         @Override
@@ -417,6 +481,8 @@ public final class DifferentiateTransformation implements TransformationToString
     public static final class DifferentiateOptions {
         @Option(name = "Simplifications", index = 0)
         public Transformation simplifications = IDENTITY;
+        @Option(name = "DiracDelta", index = 1)
+        public boolean useDiracDelta = true;
 
         public DifferentiateOptions() {
         }
