@@ -24,6 +24,7 @@ package cc.redberry.physics.feyncalc;
 
 import cc.redberry.core.context.CC;
 import cc.redberry.core.context.NameAndStructureOfIndices;
+import cc.redberry.core.context.OutputFormat;
 import cc.redberry.core.groups.permutations.Permutation;
 import cc.redberry.core.groups.permutations.PermutationGroup;
 import cc.redberry.core.indexmapping.IndexMappings;
@@ -41,6 +42,7 @@ import cc.redberry.core.parser.preprocessor.TypesAndNamesTransformer;
 import cc.redberry.core.tensor.*;
 import cc.redberry.core.tensor.iterator.FromChildToParentIterator;
 import cc.redberry.core.transformations.Transformation;
+import cc.redberry.core.transformations.TransformationToStringAble;
 import cc.redberry.core.transformations.options.Creator;
 import cc.redberry.core.transformations.options.Options;
 import cc.redberry.core.utils.IntArrayList;
@@ -65,7 +67,7 @@ import static cc.redberry.core.transformations.expand.ExpandTransformation.expan
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public class LeviCivitaSimplifyTransformation implements Transformation {
+public class LeviCivitaSimplifyTransformation implements TransformationToStringAble {
     private static final String defaultLeviCivitaName = "eps";
 
     private final int leviCivita;
@@ -349,6 +351,16 @@ public class LeviCivitaSimplifyTransformation implements Transformation {
                 new Complex(numberOfIndices));
 
         return substitutions;
+    }
+
+    @Override
+    public String toString() {
+        return toString(CC.getDefaultOutputFormat());
+    }
+
+    @Override
+    public String toString(OutputFormat outputFormat) {
+        return "LeviCivitaSimplify";
     }
 
     synchronized

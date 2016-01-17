@@ -38,6 +38,7 @@ import cc.redberry.core.tensor.*;
 import cc.redberry.core.tensor.iterator.FromChildToParentIterator;
 import cc.redberry.core.transformations.ExpandAndEliminateTransformation;
 import cc.redberry.core.transformations.Transformation;
+import cc.redberry.core.transformations.TransformationToStringAble;
 import cc.redberry.core.transformations.options.Creator;
 import cc.redberry.core.transformations.options.Options;
 import cc.redberry.core.utils.IntArrayList;
@@ -52,7 +53,7 @@ import static cc.redberry.physics.feyncalc.TraceUtils.*;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public final class UnitaryTraceTransformation implements Transformation {
+public final class UnitaryTraceTransformation implements TransformationToStringAble{
     private final int unitaryMatrix;
     private final IndexType matrixType;
 
@@ -193,6 +194,16 @@ public final class UnitaryTraceTransformation implements Transformation {
             oldTensor = newTensor;
         }
         return newTensor;
+    }
+
+    @Override
+    public String toString(OutputFormat outputFormat) {
+        return "UnitaryTrace";
+    }
+
+    @Override
+    public String toString() {
+        return toString(CC.getDefaultOutputFormat());
     }
 
     private static boolean isUnitaryMatrixOrOne(Tensor tensor, int unitaryMatrix) {

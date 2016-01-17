@@ -22,6 +22,7 @@
  */
 package cc.redberry.core.tensor;
 
+import cc.redberry.core.TAssert;
 import cc.redberry.core.groups.permutations.PermutationGroup;
 import cc.redberry.core.groups.permutations.Permutations;
 import cc.redberry.core.indices.SimpleIndices;
@@ -117,5 +118,15 @@ public class TensorFieldTest {
     public void testNames() {
         Tensor t1 = parse("F[S_A'^B']"), t2 = parse("F[S^A'_B']");
         Assert.assertTrue(((TensorField) t1).getName() != ((TensorField) t2).getName());
+    }
+
+    @Test
+    public void testZeroArg() throws Exception {
+        Tensor t = parse("f[x_a, y_a]");
+        TAssert.assertEquals("f[0, y_a]",
+                parseExpression("x_a = 0").transform(t));
+
+        TAssert.assertEquals("f[1/0, y_a]",
+                parseExpression("x_a = 1/0").transform(t));
     }
 }

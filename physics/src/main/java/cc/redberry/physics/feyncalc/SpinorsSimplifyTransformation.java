@@ -22,6 +22,7 @@
  */
 package cc.redberry.physics.feyncalc;
 
+import cc.redberry.core.context.OutputFormat;
 import cc.redberry.core.graph.GraphType;
 import cc.redberry.core.graph.PrimitiveSubgraph;
 import cc.redberry.core.graph.PrimitiveSubgraphPartition;
@@ -31,7 +32,6 @@ import cc.redberry.core.indices.Indices;
 import cc.redberry.core.indices.SimpleIndices;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.tensor.*;
-import cc.redberry.core.transformations.ExpandTensorsAndEliminateTransformation;
 import cc.redberry.core.transformations.Transformation;
 import cc.redberry.core.transformations.TransformationCollection;
 import cc.redberry.core.transformations.options.Creator;
@@ -57,66 +57,31 @@ public final class SpinorsSimplifyTransformation extends AbstractTransformationW
     private final SimpleTensor u, v, uBar, vBar, momentum, mass;
     private final Transformation uSubs, vSubs, uBarSubs, vBarSubs, p2;
     private final Transformation simplifyG5;
-    private final Transformation expandAndEliminate;
     private final Transformation ortohonality;
-    private final DiracSimplifyTransformation diracSimplify;
+    private final Transformation diracSimplify;
 
-    public SpinorsSimplifyTransformation(SimpleTensor gammaMatrix,
-                                         SimpleTensor u, SimpleTensor v,
-                                         SimpleTensor uBar, SimpleTensor vBar,
-                                         SimpleTensor momentum, SimpleTensor mass) {
-        this(gammaMatrix, null, Complex.FOUR, Complex.FOUR, u, v, uBar, vBar,
-                momentum, mass, Transformation.IDENTITY, true);
-    }
+    @Creator
+    public SpinorsSimplifyTransformation(@Options SpinorsSimplifyOptions options) {
+        super(options);
+        checkSpinorNotation(options.u, false);
+        checkSpinorNotation(options.v, false);
+        checkSpinorNotation(options.uBar, true);
+        checkSpinorNotation(options.vBar, true);
 
-    public SpinorsSimplifyTransformation(SimpleTensor gammaMatrix, SimpleTensor gamma5,
-                                         SimpleTensor u, SimpleTensor v,
-                                         SimpleTensor uBar, SimpleTensor vBar,
-                                         SimpleTensor momentum, SimpleTensor mass) {
-        this(gammaMatrix, gamma5, Complex.FOUR, Complex.FOUR,
-                u, v, uBar, vBar, momentum, mass, Transformation.IDENTITY, true);
-    }
-
-    public SpinorsSimplifyTransformation(SimpleTensor gammaMatrix, SimpleTensor gamma5,
-                                         Tensor dimension,
-                                         SimpleTensor u, SimpleTensor v,
-                                         SimpleTensor uBar, SimpleTensor vBar,
-                                         SimpleTensor momentum, SimpleTensor mass,
-                                         Transformation simplifications,
-                                         boolean diracSimplify) {
-        this(gammaMatrix, gamma5, dimension, guessTraceOfOne(dimension),
-                u, v, uBar, vBar, momentum, mass, simplifications, diracSimplify);
-    }
-
-    public SpinorsSimplifyTransformation(SimpleTensor gammaMatrix, SimpleTensor gamma5,
-                                         Tensor dimension, Tensor traceOfOne,
-                                         SimpleTensor u, SimpleTensor v,
-                                         SimpleTensor uBar, SimpleTensor vBar,
-                                         SimpleTensor momentum, SimpleTensor mass,
-                                         Transformation simplifications,
-                                         boolean doDiracSimplify) {
-        super(gammaMatrix, gamma5, null, dimension, traceOfOne);
-        checkSpinorNotation(u, false);
-        checkSpinorNotation(v, false);
-        checkSpinorNotation(uBar, true);
-        checkSpinorNotation(vBar, true);
-
-        this.u = u;
-        this.v = v;
-        this.uBar = uBar;
-        this.vBar = vBar;
-        this.momentum = momentum;
-        this.mass = mass;
+        this.u = options.u;
+        this.v = options.v;
+        this.uBar = options.uBar;
+        this.vBar = options.vBar;
+        this.momentum = options.momentum;
+        this.mass = options.mass;
 
         this.uSubs = createSubs(u, false);
         this.uBarSubs = createBarSubs(uBar, false);
         this.vSubs = createSubs(v, true);
         this.vBarSubs = createBarSubs(vBar, true);
         this.p2 = createP2Subs();
-        this.simplifyG5 = gamma5 == null ? null : new SimplifyGamma5Transformation(gammaMatrix, gamma5);
-        this.expandAndEliminate = new ExpandTensorsAndEliminateTransformation(simplifications);
-        this.diracSimplify = doDiracSimplify ? new DiracSimplifyTransformation(
-                gammaMatrix, gamma5, dimension, traceOfOne, new TransformationCollection(simplifications, p2)) : null;
+        this.simplifyG5 = options.gamma5 == null ? IDENTITY : new SimplifyGamma5Transformation(options);
+        this.diracSimplify = options.doDiracSimplify ? new DiracSimplifyTransformation(options) : IDENTITY;
 
         List<Transformation> ortoh = new ArrayList<>();
         Expression[] ort = createOrtIdentities(uBar, v);
@@ -126,11 +91,9 @@ public final class SpinorsSimplifyTransformation extends AbstractTransformationW
         this.ortohonality = new TransformationCollection(ortoh);
     }
 
-    @Creator
-    public SpinorsSimplifyTransformation(@Options SpinorsSimplifyOptions options) {
-        this(options.gammaMatrix, options.gamma5, options.dimension, options.traceOfOne,
-                options.u, options.v, options.uBar, options.vBar, options.momentum, options.mass,
-                options.simplifications, options.doDiracSimplify);
+    @Override
+    public String toString(OutputFormat outputFormat) {
+        return "SpinorsSimplify";
     }
 
     private void checkSpinorNotation(SimpleTensor spinor, boolean bar) {
@@ -199,8 +162,7 @@ public final class SpinorsSimplifyTransformation extends AbstractTransformationW
                 continue;
             if (!containsGammaOr5Matrices(current))
                 continue;
-            if (simplifyG5 != null)
-                current = simplifyG5.transform(current);
+            current = simplifyG5.transform(current);
             Product product = (Product) current;
             int offset = product.sizeOfIndexlessPart();
             ProductContent pc = product.getContent();
@@ -329,12 +291,9 @@ public final class SpinorsSimplifyTransformation extends AbstractTransformationW
 
             simplified.add(product.remove(changed.toArray()));
             Tensor simple = expandAndEliminate.transform(multiplyAndRenameConflictingDummies(simplified));
-            if (diracSimplify != null)
-                simple = diracSimplify.transform(simple);
-            else {
-                simple = traceOfOne.transform(simple);
-                simple = deltaTrace.transform(simple);
-            }
+            simple = diracSimplify.transform(simple);
+            simple = traceOfOne.transform(simple);
+            simple = deltaTrace.transform(simple);
             simple = p2.transform(simple);
             iterator.safeSet(transform(simple));
         }

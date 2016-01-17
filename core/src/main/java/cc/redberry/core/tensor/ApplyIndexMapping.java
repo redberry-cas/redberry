@@ -26,10 +26,7 @@ import cc.redberry.core.indexgenerator.IndexGeneratorFromData;
 import cc.redberry.core.indexgenerator.IndexGeneratorImpl;
 import cc.redberry.core.indexmapping.IndexMapping;
 import cc.redberry.core.indexmapping.Mapping;
-import cc.redberry.core.indices.IndicesBuilder;
-import cc.redberry.core.indices.IndicesFactory;
-import cc.redberry.core.indices.IndicesUtils;
-import cc.redberry.core.indices.SimpleIndices;
+import cc.redberry.core.indices.*;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.tensor.functions.ScalarFunction;
 import cc.redberry.core.transformations.Transformation;
@@ -551,10 +548,12 @@ public final class ApplyIndexMapping {
     }
 
     public static Tensor applyIndexMappingAndRenameAllDummies(Tensor tensor, Mapping mapping, int[] allowedDummies) {
+        if (TensorUtils.isZero(tensor))
+            return tensor;
         int[] freeIndicesNames = IndicesUtils.getIndicesNames(tensor.getIndices().getFree());
         Arrays.sort(freeIndicesNames);
         if (!mapping.getFromNames().equalsToArray(freeIndicesNames))
-            throw new IllegalArgumentException("From indices names does not match free indices names of tensor.");
+            throw new IllegalArgumentException("From indices names does not match free indices names of tensor. Tensor: " + tensor + " mapping: " + mapping);
 
         final int[] dummies = TensorUtils.getAllDummyIndicesT(tensor).toArray();
         int[] from = new int[mapping.size() + dummies.length];
@@ -963,5 +962,18 @@ public final class ApplyIndexMapping {
         Arrays.sort(freeIndices);
         if (!Arrays.equals(freeIndices, from))
             throw new IllegalArgumentException("From indices are not equal to free indices of tensor.");
+    }
+
+    /**
+     * Inverts indices of tensor
+     *
+     * @param tensor tensor
+     * @return tensor with inverted indices
+     */
+    public static Tensor invertIndices(Tensor tensor) {
+        Indices indices = tensor.getIndices().getFree();
+        if (indices.size() == 0)
+            return tensor;
+        return applyIndexMapping(tensor, new Mapping(indices.toArray(), indices.getInverted().toArray()));
     }
 }

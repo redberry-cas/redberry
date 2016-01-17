@@ -23,26 +23,24 @@
 package cc.redberry.physics.feyncalc;
 
 import cc.redberry.core.context.CC;
+import cc.redberry.core.context.OutputFormat;
 import cc.redberry.core.graph.GraphType;
 import cc.redberry.core.graph.PrimitiveSubgraph;
 import cc.redberry.core.graph.PrimitiveSubgraphPartition;
-import cc.redberry.core.indices.IndexType;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.parser.ParseToken;
-import cc.redberry.core.parser.ParseUtils;
 import cc.redberry.core.parser.Parser;
 import cc.redberry.core.tensor.*;
 import cc.redberry.core.tensor.iterator.FromChildToParentIterator;
 import cc.redberry.core.transformations.EliminateMetricsTransformation;
-import cc.redberry.core.transformations.ExpandAndEliminateTransformation;
 import cc.redberry.core.transformations.Transformation;
 import cc.redberry.core.transformations.TransformationCollection;
 import cc.redberry.core.transformations.options.Creator;
 import cc.redberry.core.transformations.options.Options;
+import cc.redberry.core.transformations.substitutions.SubstitutionTransformation;
+import cc.redberry.core.utils.Indicator;
 import cc.redberry.core.utils.IntArrayList;
-import cc.redberry.core.utils.TensorUtils;
-
-import java.util.HashMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 
 import static cc.redberry.core.indices.IndicesFactory.createSimple;
 import static cc.redberry.core.indices.IndicesUtils.setType;
@@ -54,158 +52,25 @@ import static cc.redberry.core.tensor.Tensors.*;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public final class DiracTraceTransformation extends AbstractTransformationWithGammas {
-    private final Transformation simplifyLeviCivita, expandAndEliminate;
-
-    /**
-     * Creates transformation with specified notation for gamma matrix.
-     *
-     * @param gammaMatrix tensor, which will be considered as gamma matrix
-     */
-    public DiracTraceTransformation(final SimpleTensor gammaMatrix) {
-        this(gammaMatrix, new Transformation[0]);
-    }
-
-    /**
-     * Creates transformation with specified notation for gamma matrix.
-     *
-     * @param gammaMatrix     tensor, which will be considered as gamma matrix
-     * @param simplifications additional simplification rules
-     */
-    public DiracTraceTransformation(final SimpleTensor gammaMatrix,
-                                    final Transformation[] simplifications) {
-        this(gammaMatrix, simplifications, Complex.FOUR, Complex.FOUR);
-    }
-
-    /**
-     * Creates transformation with specified notation for gamma matrix.
-     *
-     * @param gammaMatrix     tensor, which will be considered as gamma matrix
-     * @param simplifications additional simplification rules
-     * @param dimension       space-time dimension (so Tr[1] = 2^(D/2) or 2^((D-1)/2))
-     */
-    public DiracTraceTransformation(final SimpleTensor gammaMatrix,
-                                    final Transformation[] simplifications,
-                                    final Tensor dimension) {
-        this(gammaMatrix, simplifications, dimension, guessTraceOfOne(dimension));
-    }
-
-    /**
-     * Creates transformation with specified notation for gamma matrix.
-     *
-     * @param gammaMatrix     tensor, which will be considered as gamma matrix
-     * @param simplifications additional simplification rules
-     * @param dimension       space-time dimension
-     * @param traceOfOne      value of Tr[1]
-     */
-    public DiracTraceTransformation(final SimpleTensor gammaMatrix,
-                                    final Transformation[] simplifications,
-                                    final Tensor dimension,
-                                    final Tensor traceOfOne) {
-        super(gammaMatrix, dimension, traceOfOne);
-        this.expandAndEliminate = new ExpandAndEliminateTransformation(simplifications);
-        this.simplifyLeviCivita = null;
-    }
-
-
-    /**
-     * Creates transformation with specified notations for gamma matrices and Levi-Civita tensor.
-     *
-     * @param gammaMatrix tensor, which will be considered as gamma matrix
-     * @param gamma5      tensor, which will be considered as gamma5 matrix
-     * @param leviCivita  tensor, which will be considered as Levi-Civita tensor
-     */
-    public DiracTraceTransformation(final SimpleTensor gammaMatrix,
-                                    final SimpleTensor gamma5,
-                                    final SimpleTensor leviCivita) {
-        this(gammaMatrix, gamma5, leviCivita, new Transformation[0], true);
-    }
-
-    /**
-     * Creates transformation with specified notations for gamma matrices and Levi-Civita tensor.
-     *
-     * @param gammaMatrix     tensor, which will be considered as gamma matrix
-     * @param gamma5          tensor, which will be considered as gamma5 matrix
-     * @param leviCivita      tensor, which will be considered as Levi-Civita tensor
-     * @param simplifications additional simplification rules
-     */
-    public DiracTraceTransformation(final SimpleTensor gammaMatrix,
-                                    final SimpleTensor gamma5,
-                                    final SimpleTensor leviCivita,
-                                    final Transformation[] simplifications) {
-        this(gammaMatrix, gamma5, leviCivita, simplifications, true);
-    }
-
-    /**
-     * Creates transformation with specified notations for gamma matrices and Levi-Civita tensor.
-     *
-     * @param gammaMatrix     tensor, which will be considered as gamma matrix
-     * @param gamma5          tensor, which will be considered as gamma5 matrix
-     * @param leviCivita      tensor, which will be considered as Levi-Civita tensor
-     * @param simplifications additional simplification rules
-     * @param minkowskiSpace  if {@code true}, then Levi-Civita tensor will be considered in Minkovski
-     *                        space (so e.g. e_abcd*e^abcd = -24), otherwise in Euclidean space
-     *                        (so e.g. e_abcd*e^abcd = +24)
-     */
-    public DiracTraceTransformation(final SimpleTensor gammaMatrix,
-                                    final SimpleTensor gamma5,
-                                    final SimpleTensor leviCivita,
-                                    final Transformation[] simplifications,
-                                    final boolean minkowskiSpace) {
-        this(gammaMatrix, gamma5, leviCivita, simplifications, minkowskiSpace, Complex.FOUR, Complex.FOUR);
-    }
-
-    /**
-     * Creates transformation with specified notations for gamma matrices and Levi-Civita tensor.
-     *
-     * @param gammaMatrix     tensor, which will be considered as gamma matrix
-     * @param gamma5          tensor, which will be considered as gamma5 matrix
-     * @param leviCivita      tensor, which will be considered as Levi-Civita tensor
-     * @param simplifications additional simplification rules
-     * @param minkowskiSpace  if {@code true}, then Levi-Civita tensor will be considered in Minkovski
-     *                        space (so e.g. e_abcd*e^abcd = -24), otherwise in Euclidean space
-     *                        (so e.g. e_abcd*e^abcd = +24)
-     * @param dimension       space-time dimension (not applicable in case of gamma5, i.e. must be 4 for correct result)
-     */
-    public DiracTraceTransformation(final SimpleTensor gammaMatrix,
-                                    final SimpleTensor gamma5,
-                                    final SimpleTensor leviCivita,
-                                    final Transformation[] simplifications,
-                                    final boolean minkowskiSpace,
-                                    final Tensor dimension) {
-        this(gammaMatrix, gamma5, leviCivita, simplifications, minkowskiSpace, dimension, guessTraceOfOne(dimension));
-    }
-
-    /**
-     * Creates transformation with specified notations for gamma matrices and Levi-Civita tensor.
-     *
-     * @param gammaMatrix     tensor, which will be considered as gamma matrix
-     * @param gamma5          tensor, which will be considered as gamma5 matrix
-     * @param leviCivita      tensor, which will be considered as Levi-Civita tensor
-     * @param simplifications additional simplification rules
-     * @param minkowskiSpace  if {@code true}, then Levi-Civita tensor will be considered in Minkovski
-     *                        space (so e.g. e_abcd*e^abcd = -24), otherwise in Euclidean space
-     *                        (so e.g. e_abcd*e^abcd = +24)
-     * @param dimension       space-time dimension (not applicable in case of gamma5, i.e. must be 4 for correct result)
-     * @param traceOfOne      value of Tr[1] (not applicable in case of gamma5, i.e. must be 4 for correct result)
-     */
-    public DiracTraceTransformation(final SimpleTensor gammaMatrix,
-                                    final SimpleTensor gamma5,
-                                    final SimpleTensor leviCivita,
-                                    final Transformation[] simplifications,
-                                    final boolean minkowskiSpace,
-                                    final Tensor dimension,
-                                    final Tensor traceOfOne) {
-        super(gammaMatrix, gamma5, leviCivita, dimension, traceOfOne);
-        this.expandAndEliminate = new ExpandAndEliminateTransformation(simplifications);
-        this.simplifyLeviCivita = new LeviCivitaSimplifyTransformation(leviCivita, minkowskiSpace, new TransformationCollection(simplifications));
-    }
+public final class DiracTraceTransformation extends AbstractFeynCalcTransformation {
+    private final Transformation simplifyLeviCivita;
 
     @Creator
     public DiracTraceTransformation(@Options DiracOptions options) {
-        super(options.gammaMatrix, options.gamma5, options.leviCivita, options.dimension, options.traceOfOne);
+        super(doLC(options), new SimplifyGamma5Transformation(options));
         this.simplifyLeviCivita = options.simplifyLeviCivita;
-        this.expandAndEliminate = options.expandAndEliminate;
+    }
+
+    private static DiracOptions doLC(DiracOptions options) {
+        if (options.simplifyLeviCivita == null)
+            return options;
+        return options.setExpand(new TransformationCollection(
+                options.expandAndEliminate, options.simplifyLeviCivita));
+    }
+
+    @Override
+    public String toString(OutputFormat outputFormat) {
+        return "DiracTrace";
     }
 
     private Tensor expandDiracStructures(final Tensor t) {
@@ -243,284 +108,115 @@ public final class DiracTraceTransformation extends AbstractTransformationWithGa
         return iterator.result();
     }
 
-
     @Override
     public Tensor transform(Tensor tensor) {
         if (!containsGammaOr5Matrices(tensor))
             return tensor;
 
         tensor = expandDiracStructures(tensor);
-        tensor = EliminateMetricsTransformation.eliminate(tensor);
-        FromChildToParentIterator iterator = new FromChildToParentIterator(tensor);
-        Tensor current;
-        out:
-        while ((current = iterator.next()) != null) {
-            if (TensorUtils.equals(traceOfOne.get(0), current))
-                iterator.set(traceOfOne.get(1));
-            else if (isGammaOrGamma5(current)
-                    && current.getIndices().getFree().size(matrixType) == 0)
-                iterator.set(Complex.ZERO);
-            else if (current instanceof Product) {
-                if (current.getIndices().getFree().size(matrixType) != 0)
-                    continue;
-                //fast check
-                boolean needTrace = false;
-                for (Tensor t : current)
-                    if (isGammaOrGamma5(t)) {
-                        needTrace = true;
-                        break;
-                    }
-                if (!needTrace)
-                    continue;
-
-                //selecting unitary matrices from product
-                //extracting trace combinations from product
-                Product product = (Product) current;
-                //positions of matrices
-                IntArrayList positionsOfMatrices = new IntArrayList();
-                int sizeOfIndexless = product.sizeOfIndexlessPart();
-                ProductContent pc = product.getContent();
-                PrimitiveSubgraph[] partition
-                        = PrimitiveSubgraphPartition.calculatePartition(pc, matrixType);
-
-                //calculated traces
-                ProductBuilder traces = new ProductBuilder();
-
-                traces:
-                for (PrimitiveSubgraph subgraph : partition) {
-                    if (subgraph.getGraphType() != GraphType.Cycle)
-                        continue;
-
-                    int numberOfGammas = 0, numberOfGamma5s = 0;
-
-                    Tensor gamma;
-                    //actual positions in current
-                    int[] positions = subgraph.getPartition();
-                    assert positions.length > 1;
-
-                    for (int i = positions.length - 1; i >= 0; --i) {
-                        positions[i] = positions[i] + sizeOfIndexless;
-                        gamma = product.get(positions[i]);
-                        if (gamma instanceof SimpleTensor) {
-                            if (((SimpleTensor) gamma).getName() == gammaName)
-                                ++numberOfGammas;
-                            else if (((SimpleTensor) gamma).getName() == gamma5Name)
-                                ++numberOfGamma5s;
-                            else
-                                //not a gamma matrix
-                                continue traces;
-                        } else {
-                            //not a gamma matrix
-                            continue traces;
-                        }
-                    }
-
-                    //early terminations
-                    if (numberOfGammas % 2 == 1
-                            || (numberOfGammas == 2 && numberOfGamma5s % 2 == 1)) {
-                        iterator.set(Complex.ZERO);
-                        continue out;
-                    }
-                    if (numberOfGammas == 0 && numberOfGamma5s % 2 == 1) {
-                        iterator.set(Complex.ZERO);
-                        continue out;
-                    }
-
-                    positionsOfMatrices.addAll(positions);
-                    if (numberOfGamma5s == 0)
-                        traces.put(traceWithout5(product.select(positions), numberOfGammas, traceOfOne.get(1)));
-                    else {
-                        //early check
-                        if (numberOfGammas == 0) {
-                            //numberOfGamma5s % 2 == 0
-                            traces.put(Complex.FOUR);
-                            continue traces;
-                        }
-
-
-                        //eliminating excess products of gamma5s
-                        if (numberOfGamma5s > 1) {
-                            //take into account odd number of swaps
-                            boolean sign = false;
-                            //product of gammas as ordered array (will be filled without excess gamma5s)
-                            final SimpleTensor[] orderedProduct = new SimpleTensor[numberOfGammas + (numberOfGamma5s % 2 == 0 ? 0 : 1)];
-                            int counter = -1;
-
-                            //index of tensor in product content, which is contracted with current gamma5
-                            int positionOfPreviousGamma = -2;
-
-                            SimpleTensor currentGamma;
-                            for (int positionOfGamma = 0; positionOfGamma < positions.length; ++positionOfGamma) {
-                                currentGamma = (SimpleTensor) product.get(positions[positionOfGamma]);
-                                if (currentGamma.getName() == gamma5Name) {
-                                    //adding one gamma5 if they are odd number
-                                    if (positionOfPreviousGamma == -2) {
-                                        if (numberOfGamma5s % 2 == 1) {
-                                            orderedProduct[++counter] = currentGamma;
-                                            positionOfPreviousGamma = -1;
-                                        } else {
-                                            positionOfPreviousGamma = positionOfGamma;
-                                        }
-                                        continue;
-                                    }
-                                    if (positionOfPreviousGamma == -1)
-                                        positionOfPreviousGamma = positionOfGamma;
-                                    else {
-                                        //odd number of swaps
-                                        if ((positionOfGamma - positionOfPreviousGamma) % 2 == 0)
-                                            sign ^= true;
-                                        positionOfPreviousGamma = -1;
-                                    }
-                                } else
-                                    orderedProduct[++counter] = currentGamma;
-                            }
-
-                            //fixing new indices contractions
-                            int u = 0, l = 0;
-                            for (int i = 0; ; ++i) {
-                                if (i == orderedProduct.length - 1) {
-                                    orderedProduct[i] = setMatrixIndices(orderedProduct[i], u, 0);
-                                    break;
-                                }
-                                orderedProduct[i] = setMatrixIndices(orderedProduct[i], u, ++l);
-                                u = l;
-                            }
-
-                            Tensor withoutExcessGamma5s = multiply(orderedProduct);
-
-                            if (numberOfGamma5s % 2 == 0)
-                                withoutExcessGamma5s = traceWithout5(withoutExcessGamma5s, numberOfGammas, traceOfOne.get(1));
-                            else {
-                                withoutExcessGamma5s = traceWith5(withoutExcessGamma5s, numberOfGammas);
-                                withoutExcessGamma5s = simplifyLeviCivita.transform(withoutExcessGamma5s);
-                            }
-
-                            if (sign)
-                                withoutExcessGamma5s = negate(withoutExcessGamma5s);
-                            traces.put(withoutExcessGamma5s);
-                        } else
-                            traces.put(traceWith5(product.select(positions), numberOfGammas));
-                    }
-                }
-                if (positionsOfMatrices.isEmpty())
-                    continue out;
-
-                //final simplifications
-                traces.put(product.remove(positionsOfMatrices.toArray()));
-                current = traces.build();
-                current = expandAndEliminate.transform(current);
-                current = deltaTrace.transform(current);
-                current = traceOfOne.transform(current);
-                if (simplifyLeviCivita != null) {
-                    current = simplifyLeviCivita.transform(current);
-                    current = expandAndEliminate.transform(current);
-                    current = deltaTrace.transform(current);
-                    current = traceOfOne.transform(current);
-                }
-                iterator.set(current);
-            }
-        }
-        return iterator.result();
-    }
-    /*
-     * *********************
-     * Trace without gamma5
-     * *********************
-     */
-
-    private static final class Index {
-        final int numberOfGammas;
-        final Tensor traceOfOne;
-
-        public Index(int numberOfGammas, Tensor traceOfOne) {
-            this.numberOfGammas = numberOfGammas;
-            this.traceOfOne = traceOfOne;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            Index oth = (Index) o;
-            return numberOfGammas == oth.numberOfGammas && TensorUtils.equals(traceOfOne, oth.traceOfOne);
-        }
-
-        @Override
-        public int hashCode() {
-            return 31 * numberOfGammas + traceOfOne.hashCode();
-        }
+        tensor = new SubstitutionTransformation(new Expression[]{traceOfOne, deltaTrace}).transform(tensor);
+        return super.transform(tensor);
     }
 
-    /**
-     * cached substitutions of traces without 5
-     */
-    private final HashMap<Index, Expression> cachedSubstitutions = new HashMap<>();
-
-    private Tensor traceWithout5(Tensor tensor, int numberOfGammas, Tensor traceOfOne) {
-        Index key = new Index(numberOfGammas, traceOfOne);
-        Expression substitution = cachedSubstitutions.get(key);
-        if (substitution == null) {
-            ParseToken rawSubstitution = createRawGammaSubstitution(numberOfGammas, traceOfOne);
-            substitution = (Expression) tokenTransformer.transform(rawSubstitution).toTensor();
-            cachedSubstitutions.put(key, substitution);
-        }
-
-        tensor = substitution.transform(tensor);
-        tensor = ExpandAndEliminateTransformation.expandAndEliminate(tensor);
-        tensor = deltaTrace.transform(tensor);
-        tensor = this.traceOfOne.transform(tensor);
-        return tensor;
+    @Override
+    protected Indicator<GraphType> graphFilter() {
+        return traceFilter;
     }
 
-    synchronized
-    private static ParseToken createRawGammaSubstitution(int numberOfGammas, Tensor traceOfOne) {
-        Index key = new Index(numberOfGammas, traceOfOne);
-        ParseToken substitution = cachedRawGammaTraces.get(key);
-        if (substitution == null) {
+    @Override
+    protected Tensor transformLine(ProductOfGammas pg, IntArrayList modifiedElements) {
+        assert pg.g5Positions.size() == 0 || (pg.g5Positions.size() == 1 && pg.g5Positions.first() == pg.length - 1)
+                : "G5s are not simplified";
+        assert pg.graphType == GraphType.Cycle;
 
+        Tensor p = pg.toProduct();
+        if (pg.g5Positions.isEmpty())
+            return traceWithout5(p, pg.length);
+        else
+            return traceWith5(p, pg.length);
+    }
+
+    private TIntObjectHashMap<Expression> cachedTraces = new TIntObjectHashMap<>();
+
+    private Expression getTraceSubstitution(int length) {
+        Expression trace = cachedTraces.get(length);
+        if (trace == null) {
             //product of gamma matrices as array
-            Tensor[] gammas = new Tensor[numberOfGammas];
-            int matrixIndex = setType(IndexType.Matrix1, 0) - 1, metricIndex = -1;
+            Tensor[] data = new Tensor[length];
+            int matrixIndex = setType(matrixType, 0) - 1, metricIndex = -1;
             int firstUpper, u = firstUpper = ++matrixIndex, i;
-            for (i = 0; i < numberOfGammas; ++i) {
-                gammas[i] = Tensors.simpleTensor(gammaMatrixStringName,
+            for (i = 0; i < length; ++i) {
+                data[i] = Tensors.simpleTensor(gammaMatrixStringName,
                         createSimple(null,
                                 u | 0x80000000,
-                                i == numberOfGammas - 1 ? firstUpper : (u = ++matrixIndex),
-                                ++metricIndex));
+                                i == length - 1 ? firstUpper : (u = ++matrixIndex),
+                                setType(metricType, ++metricIndex)));
 
             }
-            Expression expression = expression(Tensors.multiply(gammas), traceOfArray(gammas, traceOfOne));
-            substitution = ParseUtils.tensor2AST(expression);
-            cachedRawGammaTraces.put(key, substitution);
+            Tensor rhs = traceOfArray(data);
+            rhs = expandAndEliminate.transform(rhs);
+            cachedTraces.put(length, trace = expression(multiply(data), rhs));
         }
-        return substitution;
+        return trace;
     }
 
-    private static Tensor traceOfArray(Tensor[] product, Tensor traceOfOne) {
+    private Tensor traceOfArray(Tensor[] data) {
         //calculates trace using recursive algorithm
-        if (product.length == 1)
+        if (data.length == 1)
             return Complex.ZERO;
-        if (product.length == 2)
-            return multiply(traceOfOne,
-                    createMetricOrKronecker(product[0].getIndices().get(IndexType.LatinLower, 0),
-                            product[1].getIndices().get(IndexType.LatinLower, 0)));
-        if (product.length % 2 != 0)
+        if (data.length == 2)
+            return multiply(traceOfOne.get(1),
+                    createMetricOrKronecker(data[0].getIndices().get(metricType, 0),
+                            data[1].getIndices().get(metricType, 0)));
+        if (data.length % 2 != 0)
             return Complex.ZERO;
         SumBuilder sb = new SumBuilder();
         Tensor temp;
-        //todo why to multiply by Complex.TWO and after Complex.ONE_HALF???
-        for (int i = 0; i < product.length - 1; ++i) {
+        for (int i = 0; i < data.length - 1; ++i) {
             temp = multiply(Complex.TWO,
-                    createMetricOrKronecker(product[i].getIndices().get(IndexType.LatinLower, 0),
-                            product[i + 1].getIndices().get(IndexType.LatinLower, 0)),
-                    traceOfArray(subArray(product, i, i + 1), traceOfOne));
+                    createMetricOrKronecker(data[i].getIndices().get(metricType, 0),
+                            data[i + 1].getIndices().get(metricType, 0)),
+                    traceOfArray(subArray(data, i, i + 1)));
             if (i % 2 != 0)
                 temp = negate(temp);
             sb.put(temp);
-            swap(product, i, i + 1);
+            swap(data, i, i + 1);
         }
         return multiply(Complex.ONE_HALF, sb.build());
+    }
+
+    private Tensor traceWithout5(Tensor product, int numberOfGammas) {
+        product = getTraceSubstitution(numberOfGammas).transform(product);
+        product = EliminateMetricsTransformation.eliminate(product);
+        product = deltaTrace.transform(product);
+        product = traceOfOne.transform(product);
+        return product;
+    }
+
+    private Tensor traceWith5(Tensor product, int numberOfGammas) {
+        if (traceOf4GammasWith5 == null) {
+            traceOf4GammasWith5 = (Expression) tokenTransformer.transform(traceOf4GammasWith5Token).toTensor();
+            chiholmKahaneIdentity = (Expression) tokenTransformer.transform(chiholmKahaneToken).toTensor();
+            chiholmKahaneIdentityReversed = (Expression) tokenTransformer.transform(chiholmKahaneTokenReversed).toTensor();
+            chiholmKahaneIdentityReversed = (Expression) deltaTrace.transform(chiholmKahaneIdentityReversed);
+        }
+
+        if (numberOfGammas == 5)//including one gama5
+            product = traceOf4GammasWith5.transform(product);
+        else {
+            product = chiholmKahaneIdentityReversed.transform(product);
+            //no gamma5 leaved
+            product = getTraceSubstitution(numberOfGammas + 1).transform(product);
+        }
+        product = expandAndEliminate.transform(product);
+        product = deltaTrace.transform(product);
+        product = traceOfOne.transform(product);
+        if (simplifyLeviCivita != null) {
+            product = simplifyLeviCivita.transform(product);
+            product = deltaTrace.transform(product);
+            product = traceOfOne.transform(product);
+        }
+        return product;
     }
 
     private static Tensor[] subArray(Tensor[] array, int a, int b) {
@@ -540,14 +236,12 @@ public final class DiracTraceTransformation extends AbstractTransformationWithGa
         array[b] = temp;
     }
 
-    /*
-    * Cached parse tokens
-    */
-    private static HashMap<Index, ParseToken> cachedRawGammaTraces = new HashMap<>();
-
-    public static void resetCache() {
-        cachedRawGammaTraces = new HashMap<>();
-    }
+    private static Indicator<GraphType> traceFilter = new Indicator<GraphType>() {
+        @Override
+        public boolean is(GraphType object) {
+            return object == GraphType.Cycle;
+        }
+    };
 
     /*
      * *********************
@@ -563,26 +257,7 @@ public final class DiracTraceTransformation extends AbstractTransformationWithGa
      * Chiholm-Kahane identitie:
      * G_a*G_b*G_c = g_ab*G_c-g_ac*G_b+g_bc*G_a-I*e_abcd*G5*G^d
      */
-    private Transformation chiholmKahaneIdentity;
-
-
-    private Tensor traceWith5(Tensor product, int numberOfGammas) {
-        if (traceOf4GammasWith5 == null) {
-            traceOf4GammasWith5 = (Expression) tokenTransformer.transform(traceOf4GammasWith5Token).toTensor();
-            chiholmKahaneIdentity = (Expression) tokenTransformer.transform(chiholmKahaneToken).toTensor();
-        }
-
-        if (numberOfGammas == 4)
-            return traceOf4GammasWith5.transform(product);
-
-        product = chiholmKahaneIdentity.transform(product);
-        product = ExpandAndEliminateTransformation.expandAndEliminate(product);
-        product = traceOf4GammasWith5.transform(product);
-        product = simplifyLeviCivita.transform(product);
-        product = deltaTrace.transform(product);
-        product = traceOfOne.transform(product);
-        return transform(product);
-    }
+    private Expression chiholmKahaneIdentity, chiholmKahaneIdentityReversed;
 
     private static final Parser parser;
     /**
@@ -594,10 +269,16 @@ public final class DiracTraceTransformation extends AbstractTransformationWithGa
      * G_a*G_b*G_c = g_ab*G_c-g_ac*G_b+g_bc*G_a-I*e_abcd*G5*G^d
      */
     private static final ParseToken chiholmKahaneToken;
+    /**
+     * Chiholm-Kahane identitie:
+     * G5*G^d  = -I*e_abcd*G_a*G_b*G_c/(D-3)/(D-2)/(D-1)
+     */
+    private static final ParseToken chiholmKahaneTokenReversed;
 
     static {
         parser = CC.current().getParseManager().getParser();
         traceOf4GammasWith5Token = parser.parse("G_a^a'_b'*G_b^b'_c'*G_c^c'_d'*G_d^d'_e'*G5^e'_a' = -4*I*eps_abcd");
         chiholmKahaneToken = parser.parse("G_a^a'_c'*G_b^c'_d'*G_c^d'_b' = g_ab*G_c^a'_b'-g_ac*G_b^a'_b'+g_bc*G_a^a'_b'-I*e_abcd*G5^a'_c'*G^dc'_b'");
+        chiholmKahaneTokenReversed = parser.parse("G5^a'_c'*G^dc'_b' = -I*e^abcd*G_a^a'_c'*G_b^c'_d'*G_c^d'_b'/(d^n_n-3)/(d^n_n-2)/(d^n_n-1)");
     }
 }

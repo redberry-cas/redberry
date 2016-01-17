@@ -257,6 +257,19 @@ public final class Tensors {
     }
 
     /**
+     * Returns {@code a} divided by {@code b}. This method takes care about
+     * all conflicting dummy indices in factors. Einstein notation assumed.
+     *
+     * @param a tensor
+     * @param b scalar tensor
+     * @return {@code a} divided by {@code b}.
+     * @throws IllegalArgumentException if b is not scalar
+     */
+    public static Tensor divideAndRenameConflictingDummies(Tensor a, Tensor b) {
+        return multiplyAndRenameConflictingDummies(a, reciprocal(b));
+    }
+
+    /**
      * Returns the result of summation of several tensors.
      *
      * @param tensors array of summands
@@ -811,6 +824,16 @@ public final class Tensors {
         return CC.current().createMetricOrKronecker(index1, index2);
     }
 
+    /**
+     * Returns a delta function with specified arguments
+     *
+     * @param a tensor
+     * @param b tensor
+     * @return DiracDelta[a, b]
+     */
+    public static TensorField createDiracDelta(Tensor a, Tensor b) {
+        return CC.current().createDeltaFunction(a, b);
+    }
 
     /**
      * Returns metric tensor if specified indices have same states and
@@ -825,7 +848,7 @@ public final class Tensors {
      */
     public static SimpleTensor createMetricOrKronecker(Indices indices) {
         if (indices.size() != 2)
-            throw new IllegalArgumentException();
+            throw new IllegalArgumentException("Inconsistent indices for metric: " + indices);
         return CC.current().createMetricOrKronecker(indices.get(0), indices.get(1));
     }
 
@@ -891,6 +914,13 @@ public final class Tensors {
      */
     public static Tensor parse(String expression) {
         return CC.current().getParseManager().parse(expression);
+    }
+
+    /**
+     * Dummy method
+     */
+    public static Tensor parse(Tensor expression) {
+        return expression;
     }
 
     /**

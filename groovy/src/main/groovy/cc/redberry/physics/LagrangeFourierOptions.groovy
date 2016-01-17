@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2015:
+ * Copyright (c) 2010-2016:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -20,15 +20,17 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
-package cc.redberry.concurrent;
+package cc.redberry.physics
+
+import cc.redberry.core.transformations.Transformation
+import cc.redberry.core.transformations.options.Option
 
 /**
- * Interface for passive objects provider.
- *
- * @author Bolotin Dmitriy (bolotin.dmitriy@gmail.com)
- * @param <T>
+ * Created by poslavsky on 06/01/16.
  */
-public interface OutputPort<T> {
-
-    T take() throws InterruptedException;
+class LagrangeFourierOptions {
+    @Option(name = 'ExpandAndEliminate', index = 0)
+    public Transformation expandAndEliminate;
+    @Option(name = 'Momentum', index = 1)
+    def momentum = 'p'
 }

@@ -25,7 +25,10 @@ package cc.redberry.core.transformations;
 import cc.redberry.core.context.CC;
 import cc.redberry.core.context.OutputFormat;
 import cc.redberry.core.tensor.Tensor;
+import cc.redberry.core.transformations.expand.ExpandOptions;
 import cc.redberry.core.transformations.expand.ExpandTensorsTransformation;
+import cc.redberry.core.transformations.options.Creator;
+import cc.redberry.core.transformations.options.Options;
 import cc.redberry.core.utils.ArraysUtils;
 
 /**
@@ -45,6 +48,11 @@ public final class ExpandTensorsAndEliminateTransformation implements Transforma
         this.transformations = ArraysUtils.addAll(new Transformation[]{EliminateMetricsTransformation.ELIMINATE_METRICS}, transformations);
     }
 
+    @Creator
+    public ExpandTensorsAndEliminateTransformation(@Options ExpandOptions options) {
+        this.transformations = new Transformation[]{EliminateMetricsTransformation.ELIMINATE_METRICS, options.simplifications};
+    }
+
     @Override
     public Tensor transform(Tensor t) {
         return Transformation.Util.applySequentially(new ExpandTensorsTransformation(transformations).transform(t), transformations);
@@ -56,7 +64,7 @@ public final class ExpandTensorsAndEliminateTransformation implements Transforma
 
 
     public static Tensor expandTensorsAndEliminate(Tensor t, Transformation... transformations) {
-        return new ExpandAndEliminateTransformation(transformations).transform(t);
+        return new ExpandTensorsAndEliminateTransformation(transformations).transform(t);
     }
 
     @Override

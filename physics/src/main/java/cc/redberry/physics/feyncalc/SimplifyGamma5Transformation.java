@@ -22,20 +22,14 @@
  */
 package cc.redberry.physics.feyncalc;
 
+import cc.redberry.core.context.OutputFormat;
 import cc.redberry.core.graph.GraphType;
-import cc.redberry.core.graph.PrimitiveSubgraph;
-import cc.redberry.core.graph.PrimitiveSubgraphPartition;
-import cc.redberry.core.number.Complex;
-import cc.redberry.core.tensor.Product;
-import cc.redberry.core.tensor.ProductContent;
 import cc.redberry.core.tensor.SimpleTensor;
 import cc.redberry.core.tensor.Tensor;
-import cc.redberry.core.tensor.iterator.FromChildToParentIterator;
 import cc.redberry.core.transformations.options.Creator;
 import cc.redberry.core.transformations.options.Options;
 import cc.redberry.core.utils.IntArrayList;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import static cc.redberry.core.indices.IndicesFactory.createSimple;
@@ -46,88 +40,52 @@ import static cc.redberry.core.tensor.Tensors.*;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public final class SimplifyGamma5Transformation extends AbstractTransformationWithGammas {
-    public SimplifyGamma5Transformation(SimpleTensor gammaMatrix, SimpleTensor gamma5) {
-        super(gammaMatrix, gamma5, null, null, null);
-    }
-
+public final class SimplifyGamma5Transformation extends AbstractFeynCalcTransformation {
     @Creator
     public SimplifyGamma5Transformation(@Options DiracOptions options) {
-        this(options.gammaMatrix, options.gamma5);
+        super(options.setExpand(IDENTITY), IDENTITY);
     }
 
     @Override
-    public Tensor transform(Tensor tensor) {
-        FromChildToParentIterator iterator = new FromChildToParentIterator(tensor);
-        Tensor current;
-        while ((current = iterator.next()) != null) {
-            if (!(current instanceof Product))
-                continue;
-            if (current.getIndices().size(matrixType) == 0)
-                continue;
-            Product product = (Product) current;
-            int offset = product.sizeOfIndexlessPart();
-            ProductContent pc = product.getContent();
+    public String toString(OutputFormat outputFormat) {
+        return "SimplifyGamma5";
+    }
 
-            PrimitiveSubgraph[] partition
-                    = PrimitiveSubgraphPartition.calculatePartition(pc, matrixType);
+    @Override
+    protected Tensor transformLine(ProductOfGammas pg, IntArrayList modifiedElements) {
+        //single matrix
+        if (pg.length == 1)
+            return null;
+        //no g5s
+        if (pg.g5Positions.isEmpty())
+            return null;
 
-            IntArrayList positionsOfGammas = new IntArrayList();
-            List<Tensor> ordered = new ArrayList<>();
-            out:
-            for (PrimitiveSubgraph subgraph : partition) {
-                if (subgraph.getGraphType() != GraphType.Cycle && subgraph.getGraphType() != GraphType.Line)
-                    continue;
-
-                if (subgraph.size() < 2)
-                    continue;
-
-                int g5 = 0;
-                for (int i = 0; i < subgraph.size(); ++i)
-                    if (isGamma5(pc.get(subgraph.getPosition(i))))
-                        ++g5;
-                if (g5 == 0)
-                    continue;
-                if (g5 == 1) {
-                    if (subgraph.getGraphType() == GraphType.Cycle)
-                        continue;
-                    //check g5 is not last
-                    for (int i = subgraph.size() - 1; i >= 0; --i)
-                        if (isGamma(pc.get(subgraph.getPosition(i))))
-                            break;
-                        else if (isGamma5(pc.get(subgraph.getPosition(i))))
-                            continue out;
-                }
-
-                List<Tensor> gammas = new ArrayList<>();
-                for (int i = 0; i < subgraph.size(); ++i) {
-                    for (; i < subgraph.size(); ++i) {
-                        if (!isGammaOrGamma5(pc.get(subgraph.getPosition(i))))
-                            break;
-                        else {
-                            positionsOfGammas.add(offset + subgraph.getPosition(i));
-                            gammas.add(pc.get(subgraph.getPosition(i)));
-                        }
-                    }
-                    if (!gammas.isEmpty())
-                        ordered.add(simplifyProduct(gammas));
-                    gammas.clear();
-                }
-            }
-            if (positionsOfGammas.isEmpty())
-                continue;
-
-            ordered.add(product.remove(positionsOfGammas.toArray()));
-            iterator.set(multiply(ordered));
+        if (pg.g5Positions.size() == 1) {
+            //single g5 in trace -> nothing to do
+            if (pg.graphType == GraphType.Cycle)
+                return null;
+            //single g5 at the last position -> nothing to do
+            if (pg.g5Positions.first() == pg.length - 1)
+                return null;
         }
-        return iterator.result();
+
+        if (pg.g5Positions.size() == pg.length) {//only g5s
+            if (pg.length % 2 == 0) {
+                //all gammas cancel
+                if (pg.graphType == GraphType.Cycle)
+                    return traceOfOne.get(1);
+                else
+                    return createMetricOrKronecker(pg.getIndices().getFree());
+            } else {
+                assert pg.graphType != GraphType.Cycle;//this should be already processed
+                return setMatrixIndices((SimpleTensor) pg.pc.get(pg.gPositions.first()), pg.getIndices().getFree());
+            }
+        }
+
+        return simplifyProduct(pg.toList());
     }
 
     private Tensor simplifyProduct(List<Tensor> gammas) {
-        if (gammas.size() == 0)
-            return Complex.ONE;
-        else if (gammas.size() == 1)
-            return gammas.get(0);
         int upper = gammas.get(0).getIndices().getUpper().get(matrixType, 0),
                 lower = gammas.get(gammas.size() - 1).getIndices().getLower().get(matrixType, 0);
         int initialSize = gammas.size();
@@ -154,24 +112,5 @@ public final class SimplifyGamma5Transformation extends AbstractTransformationWi
         Tensor r = multiply(gammas);
         if (sign) r = negate(r);
         return r;
-    }
-
-    private int del(List<Tensor> arr, int i) {
-        Tensor t = arr.remove(i);
-        if (arr.isEmpty())
-            return t.getIndices().getLower().get(matrixType, 0);
-        if (i == 0) {
-            arr.set(0, setUpperMatrixIndex((SimpleTensor) arr.get(0),
-                    t.getIndices().getUpper().get(matrixType, 0)));
-            return t.getIndices().getLower().get(matrixType, 0);
-        } else if (i == arr.size()) {
-            arr.set(arr.size() - 1, setLowerMatrixIndex((SimpleTensor) arr.get(arr.size() - 1),
-                    t.getIndices().getLower().get(matrixType, 0)));
-            return t.getIndices().getUpper().get(matrixType, 0);
-        } else {
-            arr.set(i, setUpperMatrixIndex((SimpleTensor) arr.get(i),
-                    t.getIndices().getUpper().get(matrixType, 0)));
-            return t.getIndices().getLower().get(matrixType, 0);
-        }
     }
 }

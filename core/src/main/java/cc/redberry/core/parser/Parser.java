@@ -35,18 +35,23 @@ public final class Parser {
     /**
      * Default parser.
      */
-    public static final Parser DEFAULT =
-            new Parser(ParserBrackets.INSTANCE,
-                    ParserSum.INSTANCE,
-                    ParserProduct.INSTANCE,
-                    ParserSimpleTensor.INSTANCE,
-                    ParserTensorField.INSTANCE,
-                    ParserDerivative.INSTANCE,
-                    ParserPower.INSTANCE,
-                    ParserNumber.INSTANCE,
-                    ParserFunctions.INSTANCE,
-                    ParserExpression.INSTANCE,
-                    ParserPowerAst.INSTANCE);
+    private static final TokenParser[] defaultTokenParsers = {
+            ParserBrackets.INSTANCE,
+            ParserSum.INSTANCE,
+            ParserProduct.INSTANCE,
+            ParserSimpleTensor.INSTANCE,
+            ParserTensorField.INSTANCE,
+            ParserDerivative.INSTANCE,
+            ParserPower.INSTANCE,
+            ParserNumber.INSTANCE,
+            ParserFunctions.INSTANCE,
+            ParserExpression.INSTANCE,
+            ParserPowerAst.INSTANCE
+    };
+
+    public static final Parser DEFAULT = new Parser(defaultTokenParsers.clone());
+
+    private boolean allowSameVariance;
     private final TokenParser[] tokenParsers;
 
     /**
@@ -67,9 +72,7 @@ public final class Parser {
      */
     public ParseToken parse(String expression) {
         //replacing comments
-        expression = expression.replaceAll("//.*|(\"(?:\\\\[^\"]|\\\\\"|.)*?\")|(?s)/\\*.*?\\*/","");
-        //join strings
-        expression = expression.replaceAll("\n","");
+        expression = deleteComments(expression);
         if (expression.isEmpty())
             throw new IllegalArgumentException("Empty expression.");
         for (TokenParser tokenParser : tokenParsers) {
@@ -78,5 +81,17 @@ public final class Parser {
                 return node;
         }
         throw new ParserException("No appropriate parser for expression: \"" + expression + "\"");
+    }
+
+    public boolean isAllowSameVariance() {
+        return allowSameVariance;
+    }
+
+    public void setAllowSameVariance(boolean allowSameVariance) {
+        this.allowSameVariance = allowSameVariance;
+    }
+
+    private static String deleteComments(String expression) {
+        return expression.replaceAll("//.*|(\"(?:\\\\[^\"]|\\\\\"|.)*?\")|(?s)/\\*.*?\\*/", "").replaceAll("\n", "");
     }
 }

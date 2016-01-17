@@ -65,6 +65,7 @@ public final class NameManager {
 
     private final Map<NameAndStructureOfIndices, NameDescriptor> fromStructure = new HashMap<>();
     private final String[] kroneckerAndMetricNames = {"d", "g"};
+    private volatile String diracDeltaName = "DiracDelta";
     private final IntArrayList kroneckerAndMetricIds = new IntArrayList();
 
     NameManager(Long seed, String kronecker, String metric) {
@@ -127,6 +128,22 @@ public final class NameManager {
         rebuild();
     }
 
+    /**
+     * Returns the default string name of Dirac's delta function
+     *
+     * @return string name of Dirac's delta function
+     */
+    public String getDiracDeltaName() {
+        return diracDeltaName;
+    }
+
+    /**
+     * Sets the default string name of Dirac's delta function
+     */
+    public void setDiracDeltaName(String diracDeltaName) {
+        this.diracDeltaName = diracDeltaName;
+    }
+
     private void rebuild() {
         writeLock.lock();
         try {
@@ -141,7 +158,7 @@ public final class NameManager {
 
     private NameDescriptor createDescriptor(final String sname, final StructureOfIndices[] structuresOfIndices, int id) {
         if (structuresOfIndices.length != 1)
-            return new NameDescriptorForTensorFieldImpl(sname, structuresOfIndices, id);
+            return new NameDescriptorForTensorFieldImpl(sname, structuresOfIndices, id, sname.equals(diracDeltaName) && structuresOfIndices.length == 3);
         final StructureOfIndices its = structuresOfIndices[0];
         if (its.size() != 2)
             return new NameDescriptorForSimpleTensor(sname, structuresOfIndices, id);

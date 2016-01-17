@@ -114,9 +114,10 @@ class RedberryPhysicsTest {
             defineMatrices 'G_a', 'G5', Matrix1.matrix
 
             def dS = DiracSimplify[[Dimension: 'D']]
+
             assert dS >> '2*G_a*G^a*G_b'.t == '2*D*G_b'.t
 
-            assert dS >> '2*G_a*G_b*G^a'.t == '-2*(D-2)*G_{b}'.t
+            assert (Factor >> (dS >> '2*G_a*G_b*G^a'.t)) == '-2*(D-2)*G_{b}'.t
         }
     }
 
@@ -131,6 +132,22 @@ class RedberryPhysicsTest {
             assert dS >> 'cu*G^a*p_a'.t == 'm*cu'.t
 
             assert dS >> 'cu*G_b*G^a*p_a'.t == '-m*cu*G_{b}+2*cu*p_{b}'.t
+        }
+    }
+
+    @Test
+    public void testPV() throws Exception {
+        use(Redberry) {
+            PassarinoVeltman(1, 'q_a', ['k_a', 'p_a'], Identity)
+            PassarinoVeltman(1, 'q_a'.t, ['k_a', 'p_a'].t, 'k_a*p^a = X'.t)
+            PassarinoVeltman(1, 'q_a'.t, ['k_a', 'p_a'])
+        }
+    }
+
+    @Test
+    public void testFourier() throws Exception {
+        use(Redberry){
+            println LagrangeFourier >> 'f[x_a]*f[x_a] + f*f[x_a]*f[x_a]'.t
         }
     }
 }

@@ -76,6 +76,7 @@ public class ParseToken {
     public Indices getIndices() {
         switch (tokenType) {
             case Product:
+            case Trace:
                 IndicesBuilder builder = new IndicesBuilder();
                 for (ParseToken node : content)
                     builder.append(node.getIndices());
@@ -101,13 +102,15 @@ public class ParseToken {
     public String toString(OutputFormat mode) {
         StringBuilder sb = new StringBuilder();
         switch (tokenType) {
+            case Trace:
+                sb.append("Tr[");
             case Product:
                 char operatorChar = mode.is(OutputFormat.LaTeX) ? ' ' : '*';
 
                 for (int i = 0; ; ++i) {
                     sb.append(content[i].toString(mode));
                     if (i == content.length - 1)
-                        return sb.toString();
+                        return tokenType == TokenType.Trace ? sb.append("]").toString() : sb.toString();
                     sb.append(operatorChar);
                 }
                 //throw new RuntimeException();
@@ -147,6 +150,7 @@ public class ParseToken {
             case Power:
                 assert content.length == 2;
                 return Tensors.pow(content[0].toTensor(), content[1].toTensor());
+            case Trace:
             case Product:
                 return Tensors.multiplyAndRenameConflictingDummies(contentToTensors());
         }

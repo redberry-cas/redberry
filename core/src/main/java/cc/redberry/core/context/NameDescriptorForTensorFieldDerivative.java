@@ -37,7 +37,7 @@ final class NameDescriptorForTensorFieldDerivative extends NameDescriptorForTens
     final NameDescriptorForTensorFieldImpl parent;
 
     NameDescriptorForTensorFieldDerivative(int id, final int[] orders, NameDescriptorForTensorFieldImpl parent) {
-        super(generateStructures(parent, orders), id, orders, generateName(orders, parent));
+        super(generateStructures(parent, orders), id, orders, generateName(orders, parent), parent.isDiracDelta);
         this.parent = parent;
         initializeSymmetries();
     }

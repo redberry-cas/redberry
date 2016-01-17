@@ -30,14 +30,17 @@ import cc.redberry.core.transformations.ExpandAndEliminateTransformation;
 import cc.redberry.core.transformations.Transformation;
 import cc.redberry.core.transformations.options.IOptions;
 import cc.redberry.core.transformations.options.Option;
+import cc.redberry.core.utils.TensorUtils;
 
-import static cc.redberry.physics.feyncalc.AbstractTransformationWithGammas.guessTraceOfOne;
+import static cc.redberry.core.tensor.Tensors.*;
+import static cc.redberry.core.transformations.Transformation.IDENTITY;
+
 
 /**
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public class DiracOptions implements IOptions {
+public class DiracOptions implements IOptions, Cloneable {
     @Option(name = "Gamma", index = 0)
     public SimpleTensor gammaMatrix = Tensors.parseSimple("G_a");
 
@@ -54,7 +57,7 @@ public class DiracOptions implements IOptions {
     public Tensor traceOfOne;
 
     @Option(name = "Simplifications", index = 5)
-    public Transformation simplifications = Transformation.IDENTITY;
+    public Transformation simplifications = IDENTITY;
 
     @Option(name = "Minkowski", index = 6)
     public boolean minkowskiSpace = true;
@@ -68,12 +71,36 @@ public class DiracOptions implements IOptions {
     public DiracOptions() {}
 
     @Override
+    public DiracOptions clone() {
+        try {
+            return (DiracOptions) super.clone();
+        } catch (CloneNotSupportedException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    protected DiracOptions setExpand(Transformation expand) {
+        DiracOptions options = clone();
+        options.expandAndEliminate = expand;
+        return options;
+    }
+
+    boolean created = false;
+
+    @Override
     public void triggerCreate() {
+        created = true;
         if (traceOfOne == null)
             traceOfOne = guessTraceOfOne(dimension);
         if (expandAndEliminate == null)
             expandAndEliminate = new ExpandAndEliminateTransformation(simplifications);
         if (simplifyLeviCivita == null)
             simplifyLeviCivita = new LeviCivitaSimplifyTransformation(leviCivita, minkowskiSpace, simplifications);
+    }
+
+    protected static Tensor guessTraceOfOne(Tensor dimension) {
+        if (TensorUtils.isIntegerOdd(dimension))
+            return pow(Complex.TWO, divide(subtract(dimension, Complex.ONE), Complex.TWO));
+        else return pow(Complex.TWO, divide(dimension, Complex.TWO));
     }
 }

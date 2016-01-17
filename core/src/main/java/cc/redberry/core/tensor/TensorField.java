@@ -26,6 +26,7 @@ import cc.redberry.core.context.NameDescriptorForTensorField;
 import cc.redberry.core.context.OutputFormat;
 import cc.redberry.core.indices.SimpleIndices;
 import cc.redberry.core.indices.SimpleIndicesBuilder;
+import cc.redberry.core.utils.TensorUtils;
 
 import java.util.Arrays;
 import java.util.Iterator;
@@ -38,7 +39,6 @@ import java.util.Iterator;
  * @since 1.0
  */
 public final class TensorField extends SimpleTensor {
-
     protected Tensor[] args;
     protected SimpleIndices[] argIndices;
 
@@ -68,6 +68,10 @@ public final class TensorField extends SimpleTensor {
 
     public boolean isDerivative() {
         return getNameDescriptor().isDerivative();
+    }
+
+    public boolean isDiracDelta() {
+        return getNameDescriptor().isDiracDelta();
     }
 
     @Override
@@ -195,22 +199,27 @@ public final class TensorField extends SimpleTensor {
         private final TensorField field;
         private int pointer = 0;
         private final Tensor[] data;
+        private boolean changedSignature = false;
 
         public Builder(TensorField field) {
             this.field = field;
             this.data = new Tensor[field.size()];
         }
 
-        Builder(TensorField field, Tensor[] data, int pointer) {
+        Builder(TensorField field, Tensor[] data, int pointer, boolean changedSignature) {
             this.field = field;
             this.data = data;
+            this.pointer = pointer;
+            this.changedSignature = changedSignature;
         }
 
         @Override
         public Tensor build() {
             if (pointer != data.length)
                 throw new IllegalStateException("Tensor field not fully constructed.");
-            return new TensorField(field, data);
+            if (changedSignature)
+                return Tensors.field(field.getStringName(), field.getIndices(), data);
+            else return new TensorField(field, data);
         }
 
         @Override
@@ -220,18 +229,21 @@ public final class TensorField extends SimpleTensor {
             if (tensor == null)
                 throw new NullPointerException();
             if (!tensor.getIndices().getFree().equalsRegardlessOrder(field.getArgIndices(pointer)))
-                throw new IllegalArgumentException("Free indices of puted tensor differs from field argument binding indices!");
+                if (TensorUtils.isZeroOrIndeterminate(tensor))
+                    this.changedSignature = true;
+                else throw new IllegalArgumentException(
+                        "Free indices of putted tensor " + tensor.getIndices().getFree()
+                                + " differs from field argument binding indices " + field.getArgIndices(pointer) + "!");
             data[pointer++] = tensor;
         }
 
         @Override
         public TensorBuilder clone() {
-            return new Builder(field, data.clone(), pointer);
+            return new Builder(field, data.clone(), pointer, changedSignature);
         }
     }
 
     private static final class Factory implements TensorFactory {
-
         private final TensorField field;
 
         public Factory(TensorField field) {
@@ -242,13 +254,21 @@ public final class TensorField extends SimpleTensor {
         public Tensor create(Tensor... tensors) {
             if (tensors.length != field.size())
                 throw new IllegalArgumentException("Wrong arguments count.");
+            boolean changedSignature = false;
             for (int i = tensors.length - 1; i >= 0; --i) {
                 if (tensors[i] == null)
                     throw new NullPointerException();
-                if (!tensors[i].getIndices().getFree().equalsRegardlessOrder(field.getArgIndices(i)))
-                    throw new IllegalArgumentException("Free indices of puted tensor differs from field argument binding indices!");
+                if (!tensors[i].getIndices().getFree().equalsRegardlessOrder(field.getArgIndices(i))) {
+                    if (TensorUtils.isZeroOrIndeterminate(tensors[i]))
+                        changedSignature = true;
+                    else throw new IllegalArgumentException(
+                            "Free indices of putted tensor " + tensors[i].getIndices().getFree()
+                                    + " differs from field argument binding indices " + field.getArgIndices(i) + "!");
+                }
             }
-            return new TensorField(field, tensors);
+            if (changedSignature)
+                return Tensors.field(field.getStringName(), field.getIndices(), tensors);
+            else return new TensorField(field, tensors);
         }
     }
 }

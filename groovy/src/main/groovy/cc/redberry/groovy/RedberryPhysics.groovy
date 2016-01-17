@@ -23,10 +23,15 @@
 
 package cc.redberry.groovy
 
+import cc.redberry.core.context.CC
+import cc.redberry.core.context.OutputFormat
 import cc.redberry.core.tensor.Expression
+import cc.redberry.core.tensor.SimpleTensor
 import cc.redberry.core.tensor.Tensor
 import cc.redberry.core.transformations.Transformation
 import cc.redberry.core.transformations.TransformationCollection
+import cc.redberry.core.transformations.TransformationToStringAble
+import cc.redberry.physics.LagrangeFourierTransformation
 import cc.redberry.physics.feyncalc.*
 import cc.redberry.physics.oneloopdiv.OneLoopCounterterms
 import cc.redberry.physics.oneloopdiv.OneLoopInput
@@ -178,7 +183,7 @@ public final class RedberryPhysics {
     private final static DSLTransformationInst LeviCivitaSimplify_euclidean = new DSLTransformationInst(
             new LeviCivitaSimplifyTransformation(new LeviCivitaSimplifyOptions(false)))
 
-    private static final class GLeviCivita {
+    private static final class GLeviCivita implements TransformationToStringAble {
         /**
          * Simplifies in Minkowski space
          * @return transformation in Minkowski space
@@ -192,6 +197,21 @@ public final class RedberryPhysics {
          */
         DSLTransformationInst getEuclidean() {
             return LeviCivitaSimplify_euclidean;
+        }
+
+        @Override
+        String toString(OutputFormat outputFormat) {
+            return getMinkowski().toString(outputFormat)
+        }
+
+        @Override
+        String toString() {
+            return toString(CC.defaultOutputFormat)
+        }
+
+        @Override
+        Tensor transform(Tensor t) {
+            return getMinkowski().transform(t)
         }
     }
 
@@ -346,4 +366,50 @@ public final class RedberryPhysics {
         OneLoopInput input = new OneLoopInput(4, KInv, K, S, W, N, M, F, transformation)
         return OneLoopCounterterms.calculateOneLoopCounterterms(input);
     }
+
+    /**
+     * Generates a substitution for tensor integral reduction via Passarino-Veltman method. Note: the performance is
+     * limited for a large order or large number of external momentums.
+     *
+     * @param order power of loop momentum (q_i - 1, q_i*q_j - 2 etc.)
+     * @param loopMomentum loop momentum
+     * @param externalMomentums list of external momentums
+     * @param simplifications additional simplification rules (e.g. Mandelstam substitutions for products of external momentum)
+     * @return substitution in the form like {@code q_i*q_j = p1_i * p2_j * C1 + ... }
+     */
+    public static Expression PassarinoVeltman(int order, def loopMomentum,
+                                              def externalMomentums,
+                                              Transformation simplifications = Transformation.IDENTITY) {
+        use(Redberry) {
+            return PassarinoVeltman.generateSubstitution(order,
+                    loopMomentum.t,
+                    externalMomentums.t as SimpleTensor[],
+                    simplifications);
+        }
+    }
+
+    /**
+     * Generates a substitution for tensor integral reduction via Passarino-Veltman method. Note: the performance is
+     * limited for a large order or large number of external momentums.
+     *
+     * @param order power of loop momentum (q_i - 1, q_i*q_j - 2 etc.)
+     * @param loopMomentum loop momentum
+     * @param externalMomentums list of external momentums
+     * @param simplifications additional simplification rules (e.g. Mandelstam substitutions for products of external momentum)
+     * @return substitution in the form like {@code q_i*q_j = p1_i * p2_j * C1 + ... }
+     */
+    public static Expression PassarinoVeltman(List orders, def loopMomentum,
+                                              def externalMomentums,
+                                              Transformation simplifications = Transformation.IDENTITY) {
+        new TransformationCollection(orders.collect {
+            PassarinoVeltman(it, loopMomentum, externalMomentums, simplifications)
+        })
+    }
+
+    /**
+     * Simplifies combinations of unitary matrices
+     * @see UnitarySimplifyTransformation
+     */
+    public static
+    final DSLTransformationInst LagrangeFourier = new DSLTransformationInst(LagrangeFourierTransformation.INSTANCE);
 }

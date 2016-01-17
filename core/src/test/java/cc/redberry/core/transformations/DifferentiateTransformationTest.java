@@ -32,10 +32,12 @@ import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.transformations.expand.ExpandAllTransformation;
 import cc.redberry.core.transformations.expand.ExpandTransformation;
 import cc.redberry.core.transformations.fractions.TogetherTransformation;
+import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
 import static cc.redberry.core.tensor.Tensors.*;
+import static cc.redberry.core.transformations.ApplyDiracDeltasTransformation.APPLY_DIRAC_DELTAS_TRANSFORMATION;
 import static cc.redberry.core.transformations.DifferentiateTransformation.differentiate;
 import static cc.redberry.core.transformations.EliminateMetricsTransformation.ELIMINATE_METRICS;
 import static cc.redberry.core.transformations.EliminateMetricsTransformation.eliminate;
@@ -46,6 +48,10 @@ import static cc.redberry.core.transformations.expand.ExpandTransformation.expan
  * @author Stanislav Poslavsky
  */
 public class DifferentiateTransformationTest {
+    @Before
+    public void setUp() throws Exception {
+        CC.reset();
+    }
 
     @Test
     public void test1() {
@@ -301,7 +307,7 @@ public class DifferentiateTransformationTest {
         Tensor tensor = parse("R_mnab*R^pqnm*Sin[1/la**2*R_abcd*R^cdab]");
         SimpleTensor var1 = parseSimple("R_abmn");
         SimpleTensor var2 = parseSimple("R^pqmn");
-        tensor = differentiate(tensor, new Transformation[]{ExpandAllTransformation.EXPAND_ALL, ELIMINATE_METRICS}, var1, var2);
+        tensor = differentiate(tensor, new Transformation[]{ExpandAllTransformation.EXPAND_ALL, ELIMINATE_METRICS}, false, var1, var2);
 //        tensor = differentiate(tensor, true, var2);
         tensor = parseExpression("R_mnab = 1/3*(g_mb*g_na - g_ma*g_nb)*la").transform(tensor);
         tensor = ExpandAllTransformation.expandAll(tensor);
@@ -316,7 +322,7 @@ public class DifferentiateTransformationTest {
         addAntiSymmetry("R_abcd", 1, 0, 2, 3);
         addSymmetry("R_abcd", 2, 3, 0, 1);
         Tensor t = parse("R_abcd*R^abcd");
-        t = differentiate(t, new Transformation[]{ExpandAllTransformation.EXPAND_ALL, ELIMINATE_METRICS}, parseSimple("R_mnpq"));
+        t = differentiate(t, new Transformation[]{ExpandAllTransformation.EXPAND_ALL, ELIMINATE_METRICS}, false, parseSimple("R_mnpq"));
         TAssert.assertEquals(t, "2*R^mnpq");
     }
 
@@ -342,7 +348,7 @@ public class DifferentiateTransformationTest {
         for (Transformation tr : trs)
             t1 = tr.transform(t1);
         Tensor t2 = differentiate(tensor,
-                new Transformation[]{ExpandTransformation.EXPAND, ELIMINATE_METRICS},
+                new Transformation[]{ExpandTransformation.EXPAND, ELIMINATE_METRICS}, false,
                 var2, var1);
         t2 = eliminate(expand(t2));
         for (Transformation tr : trs)
@@ -472,7 +478,36 @@ public class DifferentiateTransformationTest {
     }
 
     @Test
+    public void test26() {
+        addSymmetry("f_mn[x]", 1, 0);
+        DifferentiateTransformation df = new DifferentiateTransformation(false, parseSimple("f_ab[x]"));
+        TAssert.assertEquals("(1/2)*d_{m}^{a}*d_{n}^{b}+(1/2)*d_{n}^{a}*d_{m}^{b}", df.transform(parse("f_mn[x]")));
+    }
+
+    @Test
+    public void test27() {
+        DifferentiateTransformation df = new DifferentiateTransformation(parseSimple("f_ab[q]"));
+        TAssert.assertEquals("DiracDelta[x,q]*d_{m}^{a}*d_{n}^{b}", df.transform(parse("f_mn[x]")));
+    }
+
+    @Test
     public void testRename1() throws Exception {
         System.out.println(parse("D[x_c][h_cb[x_a]]"));
     }
+
+    @Test
+    public void test28() {
+        DifferentiateTransformation df = new DifferentiateTransformation(
+                parseSimple("f_a[p]"), parseSimple("f_b[q]"), parseSimple("f_c[r]"));
+
+        Tensor t = parse("(p0+p1)*f_k[p0]*f_l[p1]*f_m[-p0-p1] + (l0-l1)*f_l[l1]*f_m[l0]*f_k[-l0-l1]");
+        t = df.transform(t);
+        t = APPLY_DIRAC_DELTAS_TRANSFORMATION.transform(t);
+        t = parseExpression("DiracDelta[a, b] = D[a-b]").transform(t);
+        t = parseExpression("D[-r-p-q] = 1").transform(t);
+        TAssert.assertEquals("(r+q)*d_{l}^{a}*d_{k}^{b}*d_{m}^{c}+(r+q)*d_{l}^{a}*d_{k}^{c}*d_{m}^{b}" +
+                "+(q+p)*d_{k}^{a}*d_{l}^{c}*d_{m}^{b}+(q+p)*d_{m}^{a}*d_{k}^{b}*d_{l}^{c}" +
+                "+(r+p)*d_{m}^{a}*d_{k}^{c}*d_{l}^{b}+(r+p)*d_{k}^{a}*d_{m}^{c}*d_{l}^{b}", t);
+    }
+
 }

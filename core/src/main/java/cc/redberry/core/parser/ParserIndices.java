@@ -24,6 +24,7 @@ package cc.redberry.core.parser;
 
 import cc.redberry.core.context.CC;
 import cc.redberry.core.indices.IndicesFactory;
+import cc.redberry.core.indices.IndicesUtils;
 import cc.redberry.core.indices.SimpleIndices;
 import cc.redberry.core.utils.IntArrayList;
 
@@ -39,7 +40,7 @@ import java.util.regex.Pattern;
  */
 public final class ParserIndices {
     /**
-     * Parses string expression an returns indices.
+     * Parses string expression and returns indices.
      *
      * @param expression string representation of indices
      * @return integer indices
@@ -47,6 +48,26 @@ public final class ParserIndices {
      */
     public static SimpleIndices parseSimple(String expression) {
         return IndicesFactory.createSimple(null, parse(expression));
+    }
+
+    /**
+     * Parses string expression and returns indices allowing repeated indices with same states (like T_ii): appropriate
+     * raising or lowering will be performed automatically.
+     *
+     * @param expression string representation of indices
+     * @return integer indices
+     * @throws IllegalArgumentException if string does not represent correct indices object.
+     */
+    public static SimpleIndices parseSimpleIgnoringVariance(String expression) {
+        int[] indices = parse(expression);
+        out:
+        for (int i = 0; i < indices.length - 1; ++i)
+            for (int j = i + 1; j < indices.length; ++j)
+                if (indices[i] == indices[j]) {
+                    indices[i] = IndicesUtils.inverseIndexState(indices[i]);
+                    continue out;
+                }
+        return IndicesFactory.createSimple(null, indices);
     }
 
     /**

@@ -67,6 +67,18 @@ public class TAssert {
         assertEquals(expected, Tensors.parse(actual));
     }
 
+    public static void assertMappingExists(String actual, String expected) {
+        assertMappingExists(Tensors.parse(actual), Tensors.parse(expected));
+    }
+
+    public static void assertMappingExists(String actual, Tensor expected) {
+        assertMappingExists(Tensors.parse(actual), expected);
+    }
+
+    public static void assertMappingExists(Tensor actual, Tensor expected) {
+        assertTrue(IndexMappings.anyMappingExists(actual, expected));
+    }
+
     public static void assertEquals(Tensor[] actual, Tensor[] expected) {
         org.junit.Assert.assertTrue(actual.length == expected.length);
         for (int i = 0; i < actual.length; ++i)

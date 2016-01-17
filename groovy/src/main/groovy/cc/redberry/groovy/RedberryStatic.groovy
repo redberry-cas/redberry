@@ -182,6 +182,13 @@ class RedberryStatic {
     public static final Transformation Numeric = ToNumericTransformation.TO_NUMERIC;
 
     /**
+     * Applies Dirac delta-functions
+     * @see ApplyDiracDeltasTransformation
+     */
+    public static
+    final Transformation ApplyDiracDeltas = ApplyDiracDeltasTransformation.APPLY_DIRAC_DELTAS_TRANSFORMATION;
+
+    /**
      * Collects similar scalar factors in products.
      * @see CollectNonScalarsTransformation
      */
@@ -689,11 +696,7 @@ class RedberryStatic {
     public static <T> T Quiet(Closure<T> closure) {
         def out = System.out
         try {
-            System.setOut(new PrintStream(new OutputStream() {
-                @Override
-                void write(int b) throws IOException {
-                }
-            }))
+            System.setOut(dummyPrintStream)
             return closure.call()
         } catch (Throwable e) {
 
@@ -701,6 +704,12 @@ class RedberryStatic {
             System.setOut(out)
         }
     }
+
+    private static final PrintStream dummyPrintStream = new PrintStream(new OutputStream() {
+        @Override
+        void write(int b) throws IOException {
+        }
+    });
 
     public static void Reset() {
         CC.reset()

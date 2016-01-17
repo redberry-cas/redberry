@@ -25,6 +25,8 @@ package cc.redberry.core.context;
 import cc.redberry.core.indices.*;
 import cc.redberry.core.parser.ParseManager;
 import cc.redberry.core.tensor.SimpleTensor;
+import cc.redberry.core.tensor.Tensor;
+import cc.redberry.core.tensor.TensorField;
 import cc.redberry.core.tensor.Tensors;
 import cc.redberry.core.utils.BitArray;
 import cc.redberry.core.utils.OutputPort;
@@ -286,6 +288,25 @@ public final class Context {
     }
 
     /**
+     * Allows to parse expressions with repeated indices of the same variance (like T_aa or T_a*T^a which results in T^a_a
+     * and T^a*T_a respactively)
+     *
+     * @param b allow or not to parse repeated indices with same variance
+     */
+    public void setParserAllowsSameVariance(boolean b) {
+        parseManager.getParser().setAllowSameVariance(b);
+    }
+
+    /**
+     * Returns whether repeated indices of the same variance are allowed to be parsed
+     *
+     * @return whether repeated indices of the same variance are allowed to be parsed
+     */
+    public boolean getParserAllowsSameVariance() {
+        return parseManager.getParser().isAllowSameVariance();
+    }
+
+    /**
      * Returns true if metric is defined for the specified index type.
      *
      * @param type index type
@@ -366,6 +387,17 @@ public final class Context {
     public SimpleTensor generateNewSymbol() {
         NameDescriptor nameDescriptor = nameManager.generateNewSymbolDescriptor();
         return Tensors.simpleTensor(nameDescriptor.getId(), IndicesFactory.EMPTY_SIMPLE_INDICES);
+    }
+
+    /**
+     * Returns a delta function with specified arguments
+     *
+     * @param a tensor
+     * @param b tensor
+     * @return DiracDelta[a, b]
+     */
+    public TensorField createDeltaFunction(Tensor a, Tensor b) {
+        return Tensors.field(nameManager.getDiracDeltaName(), IndicesFactory.EMPTY_SIMPLE_INDICES, new Tensor[]{a, b});
     }
 
     /**

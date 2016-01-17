@@ -53,7 +53,7 @@ import static cc.redberry.core.tensor.Tensors.*;
  * @author Stanislav Poslavsky
  * @since 1.0
  */
-public class TensorUtils {
+public final class TensorUtils {
     private TensorUtils() {
     }
 
@@ -79,6 +79,7 @@ public class TensorUtils {
 
     /**
      * Returns the number of symbols contained in expression (including duplicates)
+     *
      * @param expr expression
      * @return number of symbols contained in expression (including duplicates)
      */
@@ -461,8 +462,8 @@ public class TensorUtils {
      *
      * @param u tensor
      * @param v tensor
-     * @return {@code true} {@code true} if tensor u mathematically (not programming) equals to tensor v,
-     * {@code false} if they they differ only in the sign and {@code null} otherwise
+     * @return {@code true} {@code false} if tensor u mathematically (not programming) equals to tensor v,
+     * {@code true} if they they differ only in the sign and {@code null} otherwise
      */
     public static Boolean compare1(Tensor u, Tensor v) {
         return IndexMappings.compare1(u, v);
@@ -695,7 +696,34 @@ public class TensorUtils {
         return det1(matrix);
     }
 
+    /**
+     * Gives inverse matrix.
+     *
+     * @param matrix matrix
+     * @return inverse matrix
+     */
+    public static Tensor[][] inverse(Tensor[][] matrix) {
+        checkMatrix(matrix);
+        if (matrix.length == 1)
+            return new Tensor[][]{{reciprocal(matrix[0][0])}};
+
+        Tensor det = det(matrix);
+
+        int length = matrix.length;
+        Tensor[][] inverse = new Tensor[length][length];
+        for (int i = 0; i < length; ++i) {
+            for (int j = 0; j < length; ++j) {
+                inverse[j][i] = divideAndRenameConflictingDummies(det(deleteFromMatrix(matrix, i, j)), det);
+                if ((i + j) % 2 != 0)
+                    inverse[j][i] = negate(inverse[j][i]);
+            }
+        }
+        return inverse;
+    }
+
     private static void checkMatrix(Tensor[][] tensors) {
+        if (tensors.length == 0)
+            throw new RuntimeException("Empty matrix.");
         int cc = tensors.length;
         for (Tensor[] tt : tensors)
             if (tt.length != cc)
@@ -709,7 +737,7 @@ public class TensorUtils {
         SumBuilder sum = new SumBuilder();
         Tensor temp;
         for (int i = 0; i < matrix.length; ++i) {
-            temp = multiply(matrix[0][i], det(deleteFromMatrix(matrix, 0, i)));
+            temp = multiplyAndRenameConflictingDummies(matrix[0][i], det(deleteFromMatrix(matrix, 0, i)));
             if (i % 2 == 1)
                 temp = negate(temp);
             sum.put(temp);
@@ -817,4 +845,116 @@ public class TensorUtils {
         return replacements;
     }
 
+    /**
+     * Returns the number of occurences of {@code patterns} in {@code expression}
+     *
+     * @param expression expression
+     * @param patterns   patterns
+     * @return number of occurences of {@code patterns} in {@code expression}
+     */
+    public static int Count(final Tensor expression, final Tensor... patterns) {
+        return Count(expression, 1, Arrays.asList(patterns), false);
+    }
+
+    /**
+     * Returns the number of occurences of {@code patterns} in {@code expression}
+     *
+     * @param expression expression
+     * @param patterns   patterns
+     * @return number of occurences of {@code patterns} in {@code expression}
+     */
+    public static int Count(final Tensor expression, final List<Tensor> patterns) {
+        return Count(expression, 1, patterns, false);
+    }
+
+    /**
+     * Returns the number of occurences of {@code patterns} in {@code expression}
+     *
+     * @param expression expression
+     * @param patterns   patterns
+     * @param level      level specification
+     * @return number of occurences of {@code patterns} in {@code expression}
+     */
+    public static int Count(final Tensor expression, final int level, final List<Tensor> patterns, final boolean sumPowers) {
+        if (level == 0)
+            return 0;
+        if (level < 0)
+            throw new IllegalArgumentException();
+        int count = 0;
+        if (level == 1) {
+            out:
+            for (Tensor el : expression) {
+                for (Tensor p : patterns) {
+                    int c = match0(el, p, sumPowers);
+                    count += c;
+                    if (c > 0)
+                        continue out;
+                }
+            }
+        } else {
+            for (Tensor el : expression)
+                count += Count(el, level - 1, patterns, sumPowers);
+        }
+        return count;
+    }
+
+    /**
+     * Gives the maximum power with which {@code pattern} appears in the expanded form of {@code expression}.
+     *
+     * @param expression expression
+     * @param pattern    simple tensor or field
+     * @return maximum power with which {@code pattern} appears in the expanded form of {@code expression}
+     */
+    public static int Exponent(final Tensor expression, Tensor... pattern) {
+        return Exponent(expression, Arrays.asList(pattern));
+    }
+
+    /**
+     * Gives the maximum power with which {@code pattern} appears in the expanded form of {@code expression}.
+     *
+     * @param expression expression
+     * @param pattern    simple tensor or field
+     * @return maximum power with which {@code pattern} appears in the expanded form of {@code expression}
+     */
+    public static int Exponent(final Tensor expression, List<Tensor> pattern) {
+        if (expression instanceof SimpleTensor)
+            return match1(expression, pattern);
+        else if (isPositiveIntegerPower(expression)) {
+            return ((Complex) expression.get(1)).intValue() * Exponent(expression.get(0), pattern);
+        } else if (expression instanceof Product) {
+            int exponent = 0;
+            for (Tensor tensor : expression)
+                exponent += Exponent(tensor, pattern);
+            return exponent;
+        } else if (expression instanceof Sum) {
+            int exponent = 0;
+            for (Tensor tensor : expression)
+                exponent = Math.max(exponent, Exponent(tensor, pattern));
+            return exponent;
+        } else return 0;
+    }
+
+    private static int match0(final Tensor el, final Tensor patt, final boolean sumPowers) {
+        if (sumPowers && isPositiveIntegerPower(el))
+            return ((Complex) el.get(1)).intValue() * match0(el.get(0), patt, false);
+        else if (IndexMappings.anyMappingExists(patt, el))
+            return 1;
+        else if (patt instanceof TensorField && el instanceof TensorField
+                && !((TensorField) patt).isDerivative())
+            return (((TensorField) el).getParentField().getName() == ((TensorField) patt).getName()) ? 1 : 0;
+        return 0;
+    }
+
+    private static int match1(final Tensor el, final List<Tensor> patterns) {
+        for (Tensor patt : patterns) {
+            if (IndexMappings.anyMappingExists(patt, el))
+                return 1;
+            else if (patt instanceof TensorField
+                    && el instanceof TensorField
+                    && !((TensorField) patt).isDerivative()
+                    && (((TensorField) el).getParentField().getName() == ((TensorField) patt).getName()))
+                return 1;
+        }
+        return 0;
+    }
 }

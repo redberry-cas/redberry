@@ -69,7 +69,7 @@ public final class PrimitiveSubgraph {
      * @param i position in tensor
      * @return position in graph
      */
-    public int getPosition(int i) {
+    public int getPosition(final int i) {
         return partition[i];
     }
 

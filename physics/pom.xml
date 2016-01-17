@@ -25,7 +25,7 @@
 
     <groupId>cc.redberry</groupId>
     <artifactId>physics</artifactId>
-    <version>1.1.9</version>
+    <version>1.1.10</version>
     <packaging>jar</packaging>
 
     <parent>
@@ -87,7 +87,7 @@
         </developer>
     </developers>
 
-    <scm><connection>scm:hg:http://bitbucket.org/redberry/redberry-physics</connection><tag>v1.1.9</tag><url>https://bitbucket.org/redberry/redberry-physics/src/?at=v1.1.9</url></scm>
+    <scm><connection>scm:hg:http://bitbucket.org/redberry/redberry-physics</connection><tag>v1.1.10</tag><url>https://bitbucket.org/redberry/redberry-physics/src/?at=v1.1.10</url></scm>
 
     <issueManagement>
         <system>YouTRACK</system>
@@ -144,12 +144,12 @@
         <dependency>
             <groupId>cc.redberry</groupId>
             <artifactId>core</artifactId>
-            <version>1.1.9</version>
+            <version>1.1.10</version>
         </dependency>
         <dependency>
             <groupId>cc.redberry</groupId>
             <artifactId>core</artifactId>
-            <version>1.1.9</version>
+            <version>1.1.10</version>
             <type>test-jar</type>
             <scope>test</scope>
         </dependency>

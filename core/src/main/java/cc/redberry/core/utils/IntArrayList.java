@@ -268,6 +268,10 @@ public final class IntArrayList {
         return modified;
     }
 
+    public void sumWith(int value) {
+        for (int i = 0; i < size; i++)
+            data[i] += value;
+    }
 
     public int indexOf(int value) {
         for (int i = 0; i < size; ++i)
