@@ -169,6 +169,10 @@ public abstract class AbstractSumBuilder implements TensorBuilder {
     @Override
     public abstract TensorBuilder clone();
 
+    public int size(){
+        return summands.size();
+    }
+
     static Boolean compareFactors(Tensor u, Tensor v) {
         return TensorUtils.compare1(u, v);
 //        IndexMappingBuffer buffer;

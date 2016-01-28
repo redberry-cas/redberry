@@ -23,31 +23,21 @@
 package cc.redberry.physics.feyncalc;
 
 import cc.redberry.core.TAssert;
-import cc.redberry.core.context.CC;
-import cc.redberry.core.indices.IndexType;
 import cc.redberry.core.number.Complex;
-import cc.redberry.core.parser.preprocessor.GeneralIndicesInsertion;
-import cc.redberry.core.tensor.Expression;
 import cc.redberry.core.tensor.SimpleTensor;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.tensor.iterator.FromChildToParentIterator;
 import cc.redberry.core.transformations.EliminateMetricsTransformation;
 import cc.redberry.core.transformations.Transformation;
-import cc.redberry.core.transformations.TransformationCollection;
-import cc.redberry.core.transformations.expand.ExpandTransformation;
-import cc.redberry.core.utils.ArraysUtils;
 import junit.framework.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.List;
 
 import static cc.redberry.core.tensor.Tensors.*;
 import static cc.redberry.core.transformations.ExpandAndEliminateTransformation.expandAndEliminate;
-import static cc.redberry.core.transformations.Transformation.IDENTITY;
 
 /**
  * @author Dmitry Bolotin
@@ -413,6 +403,19 @@ public class DiracTraceTransformationTest extends AbstractFeynCalcTest {
     @Test
     public void test21() throws Exception {
         testFeynCalcData("DiracTrace_abcdefgg5");
+    }
+
+    @Ignore
+    @Test
+    public void testCache1() throws Exception {
+        DiracOptions dOpts = new DiracOptions();
+        Transformation dTrace = new DiracTraceTransformation(dOpts);
+
+        for (int i = 0; i < 10; ++i) {
+            long start = System.currentTimeMillis();
+            dTrace.transform(parse("Tr[G_a*G_b*G_c*G_d*G_e*G_f*G_g*G_h*G_k*G_l]"));
+            Assert.assertTrue(i < 5 || System.currentTimeMillis() - start < 100);
+        }
     }
 
     void testFeynCalcData(String resourceFile) throws Exception {

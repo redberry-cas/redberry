@@ -37,6 +37,7 @@ import cc.redberry.core.transformations.Transformation;
 import cc.redberry.core.transformations.TransformationCollection;
 import cc.redberry.core.transformations.options.Creator;
 import cc.redberry.core.transformations.options.Options;
+import cc.redberry.core.transformations.substitutions.SubstitutionIterator;
 import cc.redberry.core.transformations.substitutions.SubstitutionTransformation;
 import cc.redberry.core.utils.Indicator;
 import cc.redberry.core.utils.IntArrayList;
@@ -74,7 +75,7 @@ public final class DiracTraceTransformation extends AbstractFeynCalcTransformati
     }
 
     private Tensor expandDiracStructures(final Tensor t) {
-        FromChildToParentIterator iterator = new FromChildToParentIterator(t);
+        SubstitutionIterator iterator = new SubstitutionIterator(t);
         Tensor current;
         while ((current = iterator.next()) != null) {
             if (!(current instanceof Product))
@@ -101,7 +102,7 @@ public final class DiracTraceTransformation extends AbstractFeynCalcTransformati
             }
 
             if (containsTraces)
-                iterator.set(multiply(product.getIndexlessSubProduct(),
+                iterator.safeSet(multiply(product.getIndexlessSubProduct(),
                         expandAndEliminate.transform(product.getDataSubProduct())));
         }
 

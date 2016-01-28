@@ -23,44 +23,58 @@
 package cc.redberry.groovy;
 
 import cc.redberry.core.context.CC;
+import cc.redberry.core.context.ContextEvent;
+import cc.redberry.core.context.ContextListener;
 import cc.redberry.core.context.OutputFormat;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.transformations.Transformation;
 import cc.redberry.core.transformations.TransformationToStringAble;
 import cc.redberry.core.transformations.options.TransformationBuilder;
 
-import java.util.Collections;
-
 /**
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
 public final class DSLTransformationInst<T extends Transformation>
-        extends DSLTransformation<T> implements TransformationToStringAble {
-    private final T instance;
+        extends DSLTransformation<T> implements TransformationToStringAble,
+        ContextListener {
+    protected volatile T instance = null;
 
     @SuppressWarnings("unchecked")
     public DSLTransformationInst(T instance) {
         super((Class<T>) instance.getClass());
         this.instance = instance;
+        /* no need to register as listener since default instance provided */
     }
 
     @SuppressWarnings("unchecked")
-    public DSLTransformationInst(Class<T> clazz) throws Exception {
+    DSLTransformationInst(Class<T> clazz) {
         super(clazz);
-        this.instance = null;
+        CC.current().registerListener(this);
+    }
+
+    private void ensureInstanceCreated() {
+        if (instance == null)
+            synchronized (this) {
+                if (instance == null)
+                    try {
+                        instance = TransformationBuilder.createTransformationWithDefaultOptions(clazz);
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+            }
+    }
+
+    @Override
+    public void onEvent(ContextEvent event) {
+        if (event == ContextEvent.RESET)
+            instance = null;
     }
 
     @Override
     public Tensor transform(Tensor t) {
-        if (instance == null)
-            try {
-                return TransformationBuilder.createTransformation(clazz, Collections.emptyList()).transform(t);
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-        else
-            return instance.transform(t);
+        ensureInstanceCreated();
+        return instance.transform(t);
     }
 
     @Override
@@ -68,23 +82,11 @@ public final class DSLTransformationInst<T extends Transformation>
         return toString(CC.getDefaultOutputFormat());
     }
 
-    private T dummyInstance = null;
-
     @Override
     public String toString(OutputFormat outputFormat) {
-        if (dummyInstance == null) {
-            if (this.instance != null)
-                dummyInstance = this.instance;
-            else
-                try {
-                    dummyInstance = TransformationBuilder.createTransformation(clazz, Collections.emptyList());
-                } catch (Exception e) {
-                    return super.toString();
-                }
-        }
-        if (dummyInstance instanceof TransformationToStringAble)
-            return ((TransformationToStringAble) dummyInstance).toString(outputFormat);
-        else
-            return dummyInstance.toString();
+        ensureInstanceCreated();
+        if (instance instanceof TransformationToStringAble)
+            return ((TransformationToStringAble) instance).toString(outputFormat);
+        else return instance.toString();
     }
 }

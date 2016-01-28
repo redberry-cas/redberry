@@ -60,6 +60,13 @@ public class DiracSimplifyTransformationTest extends AbstractFeynCalcTest {
     }
 
     @Test
+    public void test2a() throws Exception {
+        Tensor t;
+        t = parse("Tr[G_a*G_b*G_c*G_d*G_e*G_d*G_u]");
+        TAssert.assertEquals("0", dSimplify.transform(t));
+    }
+
+    @Test
     public void test3() throws Exception {
         for (int i = 0; i < 10; ++i) {
             setUp();

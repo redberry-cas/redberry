@@ -23,6 +23,8 @@
 
 package cc.redberry.groovy
 
+import cc.redberry.core.context.CC
+import cc.redberry.core.context.OutputFormat
 import cc.redberry.core.groups.permutations.PermutationGroup
 import cc.redberry.core.number.Complex
 import cc.redberry.core.transformations.factor.JasFactor
@@ -97,23 +99,23 @@ class RedberryStaticTest {
     @Test
     void testMatrices() throws Exception {
         use(Redberry) {
-            defineMatrix "A", Matrix1.vector, Matrix2.covector, Matrix3.tensor(2, 2);
-            assertEquals "A^{a'}_{A'}^{\\alpha'\\beta'}_{\\gamma'\\delta'}", "A".t.toString()
+            defineMatrices "A", Matrix1.vector, Matrix2.covector, Matrix3.tensor(2, 2);
+            assertEquals "A^{a'}_{A'}^{\\alpha'\\beta'}_{\\gamma'\\delta'}", "A".t.toString(OutputFormat.Redberry)
 
             defineMatrices "B", "C", Matrix1.vector, Matrix2.covector, Matrix3.tensor(2, 2);
 
-            assertEquals "B^{a'}_{A'}^{\\alpha'\\beta'}_{\\gamma'\\delta'}".t.toString(), "B".t.toString()
-            assertEquals "C^{a'}_{A'}^{\\alpha'\\beta'}_{\\gamma'\\delta'}".t.toString(), "C".t.toString()
+            assertEquals "B^{a'}_{A'}^{\\alpha'\\beta'}_{\\gamma'\\delta'}".t.toString(OutputFormat.Redberry), "B".t.toString(OutputFormat.Redberry)
+            assertEquals "C^{a'}_{A'}^{\\alpha'\\beta'}_{\\gamma'\\delta'}".t.toString(OutputFormat.Redberry), "C".t.toString(OutputFormat.Redberry)
 
             defineMatrices "G", Matrix1.vector,
                     "M", "K", Matrix2.covector, Matrix3.tensor(2, 2),
                     "O", "T", Matrix4.tensor(3, 3)
 
             assertEquals 'G^{a\'}'.t.toString(), "G".t.toString()
-            assertEquals 'M_{A\'}^{\\alpha\'\\beta\'}_{\\gamma\'\\delta\'}'.t.toString(), "M".t.toString()
-            assertEquals 'K_{A\'}^{\\alpha\'\\beta\'}_{\\gamma\'\\delta\'}'.t.toString(), "K".t.toString()
-            assertEquals 'O^{\\Gamma\'\\Delta\'\\Theta\'}_{\\Lambda\'\\Xi\'\\Pi\'}'.t.toString(), "O".t.toString()
-            assertEquals 'T^{\\Gamma\'\\Delta\'\\Theta\'}_{\\Lambda\'\\Xi\'\\Pi\'}'.t.toString(), "T".t.toString()
+            assertEquals 'M_{A\'}^{\\alpha\'\\beta\'}_{\\gamma\'\\delta\'}'.t.toString(OutputFormat.Redberry), "M".t.toString(OutputFormat.Redberry)
+            assertEquals 'K_{A\'}^{\\alpha\'\\beta\'}_{\\gamma\'\\delta\'}'.t.toString(OutputFormat.Redberry), "K".t.toString(OutputFormat.Redberry)
+            assertEquals 'O^{\\Gamma\'\\Delta\'\\Theta\'}_{\\Lambda\'\\Xi\'\\Pi\'}'.t.toString(OutputFormat.Redberry), "O".t.toString(OutputFormat.Redberry)
+            assertEquals 'T^{\\Gamma\'\\Delta\'\\Theta\'}_{\\Lambda\'\\Xi\'\\Pi\'}'.t.toString(OutputFormat.Redberry), "T".t.toString(OutputFormat.Redberry)
         }
     }
 

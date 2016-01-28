@@ -23,6 +23,7 @@
 
 package cc.redberry.groovy
 
+import cc.redberry.core.context.CC
 import org.junit.Before
 import org.junit.Test
 
@@ -146,8 +147,21 @@ class RedberryPhysicsTest {
 
     @Test
     public void testFourier() throws Exception {
-        use(Redberry){
+        use(Redberry) {
             println LagrangeFourier >> 'f[x_a]*f[x_a] + f*f[x_a]*f[x_a]'.t
+        }
+    }
+
+    @Test
+    public void testContextReset() throws Exception {
+        use(Redberry) {
+            defineMatrices 'G_a', 'G5', Matrix1.matrix
+            assert DiracTrace >> 'Tr[G_a*G_b]'.t == '4*g_ab'.t
+
+            Reset()
+
+            defineMatrices 'G_a', 'G5', Matrix1.matrix
+            assert DiracTrace >> 'Tr[G_a*G_b]'.t == '4*g_ab'.t
         }
     }
 }

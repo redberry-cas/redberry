@@ -35,6 +35,7 @@ import org.apache.commons.math3.random.RandomGenerator;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * This class represents Redberry context. It stores all Redberry session data (in some sense it stores static data).
@@ -83,6 +84,11 @@ public final class Context {
      * Matrix types.
      */
     private final Set<IndexType> matrixTypes;
+
+    /**
+     * Context listeners
+     */
+    private final Set<ContextListener> listeners = Collections.newSetFromMap(new ConcurrentHashMap<ContextListener, Boolean>());
 
     /**
      * Creates context from the settings
@@ -135,14 +141,15 @@ public final class Context {
      */
     public synchronized void resetTensorNames() {
         nameManager.reset();
+        resetEvent();
     }
 
     /**
      * Resets all definitions.
      */
     public synchronized void reset() {
-        resetTensorNames();
         parseManager.reset();
+        resetTensorNames();
     }
 
     /**
@@ -159,6 +166,7 @@ public final class Context {
      */
     public synchronized void resetTensorNames(long seed) {
         nameManager.reset(seed);
+        resetEvent();
     }
 
     /**
@@ -425,6 +433,40 @@ public final class Context {
      */
     public RandomGenerator getRandomGenerator() {
         return nameManager.getRandomGenerator();
+    }
+
+    /**
+     * Register new context listener
+     *
+     * @param listener listener
+     */
+    public void registerListener(ContextListener listener) {
+        listeners.add(listener);
+    }
+
+    /**
+     * Unregister listener
+     *
+     * @param listener listener
+     */
+    public void unregisterListener(ContextListener listener) {
+        listeners.remove(listener);
+    }
+
+    /**
+     * New context event
+     *
+     * @param event event
+     */
+    public void newEvent(ContextEvent event) {
+        synchronized (this) {
+            for (ContextListener listener : listeners)
+                listener.onEvent(event);
+        }
+    }
+
+    private void resetEvent() {
+        newEvent(ContextEvent.RESET);
     }
 
     /**

@@ -35,15 +35,15 @@ import cc.redberry.core.parser.Parser;
 import cc.redberry.core.parser.preprocessor.ChangeIndicesTypesAndTensorNames;
 import cc.redberry.core.parser.preprocessor.TypesAndNamesTransformer;
 import cc.redberry.core.tensor.*;
-import cc.redberry.core.tensor.iterator.FromChildToParentIterator;
 import cc.redberry.core.transformations.ExpandAndEliminateTransformation;
 import cc.redberry.core.transformations.Transformation;
 import cc.redberry.core.transformations.TransformationToStringAble;
 import cc.redberry.core.transformations.options.Creator;
 import cc.redberry.core.transformations.options.Options;
+import cc.redberry.core.transformations.substitutions.SubstitutionIterator;
 import cc.redberry.core.utils.IntArrayList;
 
-import static cc.redberry.core.tensor.Tensors.multiply;
+import static cc.redberry.core.tensor.Tensors.multiplyAndRenameConflictingDummies;
 import static cc.redberry.core.tensor.Tensors.parseExpression;
 import static cc.redberry.physics.feyncalc.TraceUtils.*;
 
@@ -53,7 +53,7 @@ import static cc.redberry.physics.feyncalc.TraceUtils.*;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public final class UnitaryTraceTransformation implements TransformationToStringAble{
+public final class UnitaryTraceTransformation implements TransformationToStringAble {
     private final int unitaryMatrix;
     private final IndexType matrixType;
 
@@ -128,7 +128,7 @@ public final class UnitaryTraceTransformation implements TransformationToStringA
 
     @Override
     public Tensor transform(Tensor t) {
-        FromChildToParentIterator iterator = new FromChildToParentIterator(t);
+        SubstitutionIterator iterator = new SubstitutionIterator(t);
         Tensor c;
         while ((c = iterator.next()) != null) {
             if (c instanceof SimpleTensor) {
@@ -174,8 +174,8 @@ public final class UnitaryTraceTransformation implements TransformationToStringA
                 }
                 //compiling the result
                 c = product.remove(positionsOfMatrices.toArray());
-                c = multiply(c, calculatedTraces.build());
-                iterator.set(simplifications.transform(c));
+                c = multiplyAndRenameConflictingDummies(c, calculatedTraces.build());
+                iterator.safeSet(simplifications.transform(c));
             }
         }
         return simplifications.transform(iterator.result());

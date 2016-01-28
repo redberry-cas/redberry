@@ -136,6 +136,25 @@ public final class TransformationBuilder {
     }
 
     /**
+     * Creates default instance of transformation of specified clazz using default Options value.
+     *
+     * @param clazz {@link Transformation} class
+     * @param <T>   transformation type
+     * @return an instance of the transformation
+     * @throws Exception
+     */
+    public static <T extends Transformation> T
+    createTransformationWithDefaultOptions(Class<T> clazz)
+            throws Exception {
+        if (hasRequiredArguments(clazz))
+            throw new RuntimeException("Required arguments are not specified.");
+        else {
+            CreatorData c = getCreatorData(clazz);
+            return (T) c.creator.newInstance(c.optionsClass.newInstance());
+        }
+    }
+
+    /**
      * Creates transformation of specified clazz with specified list of required arguments and a list of
      * options.
      *
@@ -156,6 +175,47 @@ public final class TransformationBuilder {
     private static <T extends Transformation> T
     createTransformation0(Class<T> clazz, List<Object> arguments, Object options)
             throws Exception {
+        CreatorData c = getCreatorData(clazz);
+
+        if (c.optionsClass == null)
+            if (c.creatorAnnotation.vararg())
+                return (T) c.creator.newInstance(new Object[]{
+                        arguments.toArray((Object[]) Array.newInstance(c.argTypes[0].getComponentType(), arguments.size()))});
+            else
+                return (T) c.creator.newInstance(arguments.toArray());
+
+        Object opts = null;
+        if (options instanceof Map)
+            opts = buildOptionsFromMap(c.optionsClass, (Map) options);
+        else if (options instanceof List)
+            opts = buildOptionsFromList(c.optionsClass, (List) options);
+
+        Object[] initargs;
+        if (c.creatorAnnotation.vararg()) {
+            initargs = new Object[]{arguments.toArray(
+                    (Object[]) Array.newInstance(c.argTypes[0].getComponentType(), arguments.size())),
+                    opts};
+        } else {
+            initargs = new Object[arguments.size() + 1];
+            for (int i = 0; i < arguments.size(); i++)
+                initargs[i] = arguments.get(i);
+            initargs[arguments.size()] = opts;
+        }
+        return (T) c.creator.newInstance(initargs);
+    }
+
+    private static boolean hasRequiredArguments(Class<? extends Transformation> clazz) {
+        Creator creatorAnnotation;
+        for (Constructor<?> constructor : clazz.getConstructors()) {
+            creatorAnnotation = constructor.getAnnotation(Creator.class);
+            if (creatorAnnotation != null)
+                return creatorAnnotation.hasArgs();
+        }
+
+        throw new RuntimeException("No creator.");
+    }
+
+    private static CreatorData getCreatorData(Class clazz) {
         Constructor<?> creator = null;
         Creator creatorAnnotation = null;
         for (Constructor<?> constructor : clazz.getConstructors()) {
@@ -184,42 +244,20 @@ public final class TransformationBuilder {
                 }
             }
         }
-
-        if (optionsClass == null)
-            if (creatorAnnotation.vararg())
-                return (T) creator.newInstance(new Object[]{
-                        arguments.toArray((Object[]) Array.newInstance(argTypes[0].getComponentType(), arguments.size()))});
-            else
-                return (T) creator.newInstance(arguments.toArray());
-
-        Object opts = null;
-        if (options instanceof Map)
-            opts = buildOptionsFromMap(optionsClass, (Map) options);
-        else if (options instanceof List)
-            opts = buildOptionsFromList(optionsClass, (List) options);
-
-        Object[] initargs;
-        if (creatorAnnotation.vararg()) {
-            initargs = new Object[]{arguments.toArray(
-                    (Object[]) Array.newInstance(argTypes[0].getComponentType(), arguments.size())),
-                    opts};
-        } else {
-            initargs = new Object[arguments.size() + 1];
-            for (int i = 0; i < arguments.size(); i++)
-                initargs[i] = arguments.get(i);
-            initargs[arguments.size()] = opts;
-        }
-        return (T) creator.newInstance(initargs);
+        return new CreatorData(creatorAnnotation, optionsClass, creator, argTypes);
     }
 
-    private static boolean hasRequiredArguments(Class<? extends Transformation> clazz) {
-        Creator creatorAnnotation;
-        for (Constructor<?> constructor : clazz.getConstructors()) {
-            creatorAnnotation = constructor.getAnnotation(Creator.class);
-            if (creatorAnnotation != null)
-                return creatorAnnotation.hasArgs();
-        }
+    private static final class CreatorData {
+        final Creator creatorAnnotation;
+        final Class optionsClass;
+        final Constructor<?> creator;
+        final Class<?>[] argTypes;
 
-        throw new RuntimeException("No creator.");
+        CreatorData(Creator creatorAnnotation, Class optionsClass, Constructor<?> creator, Class<?>[] argTypes) {
+            this.creatorAnnotation = creatorAnnotation;
+            this.optionsClass = optionsClass;
+            this.creator = creator;
+            this.argTypes = argTypes;
+        }
     }
 }

@@ -197,6 +197,22 @@ public final class UnitarySimplifyTransformation implements TransformationToStri
     private static final ParseToken aSymmetricCombinationToken;
 
     /**
+     * d_iac*f_hbc*f_ghi = -N/2 * d_abg
+     */
+    private static final ParseToken triple1;
+    /**
+     * d_iac*d_hbc*f_ghi = (4-N^2)/2N f_abg
+     */
+    private static final ParseToken triple2;
+    /**
+     * d_iac*d_hbc*d_ghi = (N^2-12)/2N d_abg
+     */
+    private static final ParseToken triple3;
+    /**
+     * f_iac*f_hbc*f_ghi = -N/2 f_abg
+     */
+    private static final ParseToken triple4;
+    /**
      * f_a^ab = 0
      */
     private static final ParseToken aSymmetricTraceToken;
@@ -231,10 +247,16 @@ public final class UnitarySimplifyTransformation implements TransformationToStri
         numberOfGeneratorsToken = parser.parse("d^a_a = N**2-1");
         dimensionToken = parser.parse("d^a'_a' = N");
 
+        triple1 = parser.parse("D_iac*F_hb^c*F_g^hi = -N/2 * D_abg");
+        triple2 = parser.parse("D_iac*D_hb^c*D_g^hi = (4-N**2)/2/N*F_abg");
+        triple3 = parser.parse("D_iac*D_hb^c*D_g^hi = (N**2-12)/2/N*D_abg");
+        triple4 = parser.parse("F_iac*F_hb^c*F_g^hi = -N/2*F_abg");
+
         unitarySimplificationsTokens = new ParseToken[]{
                 contraction1Token, contraction2Token,
                 symmetricCombinationToken, aSymmetricCombinationToken, symmetricTraceToken,
-                aSymmetricTraceToken, symmetrySimplificationToken, numberOfGeneratorsToken, dimensionToken};
+                aSymmetricTraceToken, symmetrySimplificationToken, numberOfGeneratorsToken, dimensionToken,
+                triple1, triple2, triple3, triple4};
     }
 
 }

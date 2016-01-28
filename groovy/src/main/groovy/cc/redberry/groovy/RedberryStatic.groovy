@@ -67,7 +67,6 @@ import static cc.redberry.core.indices.IndexType.*
  * @author Stanislav Poslavsky
  */
 class RedberryStatic {
-
     /**
      * Expands out products and positive integer powers.
      * @see ExpandTransformation
@@ -327,7 +326,10 @@ class RedberryStatic {
 
     private static void ensureIndicesInsertionAddedToParser() {
         if (!CC.current().getParseManager().defaultParserPreprocessors.contains(indicesInsertion))
-            CC.current().getParseManager().defaultParserPreprocessors.add(indicesInsertion);
+            synchronized (this) {
+                if (!CC.current().getParseManager().defaultParserPreprocessors.contains(indicesInsertion))
+                    CC.current().getParseManager().defaultParserPreprocessors.add(indicesInsertion);
+            }
     }
 
     private static boolean onceSetFormat = false

@@ -30,26 +30,29 @@ public final class Timing {
     private Timing() {
     }
 
-    public static interface TimingJob<T> {
+    public interface TimingJob<T> {
         T doJob();
     }
 
-    public static Object[] timing(TimingJob job, boolean printMessage) {
-        long start = System.currentTimeMillis();
+    private static Object[] timing(TimingJob job, boolean printMessage, long div, String pf) {
+        long start = System.nanoTime();
         Object result = job.doJob();
-        long elapsed = System.currentTimeMillis() - start;
+        long elapsed = (System.nanoTime() - start) / div;
         if (printMessage)
-            System.out.println("Timing: " + elapsed + "ms");
+            System.out.println("Timing: " + elapsed + pf);
         return new Object[]{elapsed, result};
     }
 
+    public static Object[] timing(TimingJob job, boolean printMessage) {
+        return timing(job, printMessage, 1000_000L, "ms");
+    }
+
     public static Object[] microTiming(TimingJob job, boolean printMessage) {
-        long start = System.nanoTime();
-        Object result = job.doJob();
-        long elapsed = (System.nanoTime() - start) / 1000;
-        if (printMessage)
-            System.out.println("Timing: " + elapsed + "µs");
-        return new Object[]{elapsed, result};
+        return timing(job, printMessage, 1000L, "µs");
+    }
+
+    public static Object[] nanoTiming(TimingJob job, boolean printMessage) {
+        return timing(job, printMessage, 1L, "ns");
     }
 
     public static Object[] timing(TimingJob job) {
@@ -58,5 +61,9 @@ public final class Timing {
 
     public static Object[] microTiming(TimingJob job) {
         return microTiming(job, true);
+    }
+
+    public static Object[] nanoTiming(TimingJob job) {
+        return nanoTiming(job, true);
     }
 }
