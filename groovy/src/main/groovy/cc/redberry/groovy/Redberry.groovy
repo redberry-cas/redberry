@@ -46,6 +46,8 @@ import cc.redberry.core.transformations.TransformationCollection
 import cc.redberry.core.transformations.substitutions.SubstitutionIterator
 import cc.redberry.core.transformations.substitutions.SubstitutionTransformation
 import cc.redberry.core.utils.TensorUtils
+import cc.redberry.core.utils.TimingStatistics
+import cc.redberry.core.utils.TransformationWithTimer
 import org.codehaus.groovy.runtime.DefaultGroovyMethods
 
 import static cc.redberry.core.tensor.Tensors.*
@@ -1178,6 +1180,17 @@ class Redberry {
     static List<Transformation> transpose(List<Transformation> list) {
         return list.collect { transpose(it) }
     }
+
+    static TransformationWithTimer collectStats(Transformation transformation, TimingStatistics statistics) {
+        TransformationWithTimer tt = new TransformationWithTimer(transformation)
+        statistics.collectStatistics(tt)
+        return tt
+    }
+
+    static Tensor call(Transformation transformation, Tensor tensor) {
+        return transformation.transform(tensor)
+    }
+
     //////////////////////////////////////////// TYPE CONVERSION ///////////////////////////////////////////////////////
 
     /**

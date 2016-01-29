@@ -36,8 +36,7 @@ import cc.redberry.core.transformations.options.TransformationBuilder;
  * @author Stanislav Poslavsky
  */
 public final class DSLTransformationInst<T extends Transformation>
-        extends DSLTransformation<T> implements TransformationToStringAble,
-        ContextListener {
+        extends DSLTransformation<T> implements TransformationToStringAble, ContextListener {
     protected volatile T instance = null;
 
     @SuppressWarnings("unchecked")
