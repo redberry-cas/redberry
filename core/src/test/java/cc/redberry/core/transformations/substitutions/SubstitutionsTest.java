@@ -22,21 +22,30 @@
  */
 package cc.redberry.core.transformations.substitutions;
 
+import cc.redberry.core.AbstractRedberryTestClass;
 import cc.redberry.core.TAssert;
 import cc.redberry.core.combinatorics.IntPermutationsGenerator;
 import cc.redberry.core.context.CC;
 import cc.redberry.core.context.OutputFormat;
 import cc.redberry.core.groups.permutations.Permutations;
 import cc.redberry.core.indices.IndexType;
+import cc.redberry.core.indices.IndicesFactory;
 import cc.redberry.core.number.Complex;
+import cc.redberry.core.parser.preprocessor.GeneralIndicesInsertion;
 import cc.redberry.core.tensor.*;
+import cc.redberry.core.tensor.random.RandomTensor;
 import cc.redberry.core.transformations.EliminateMetricsTransformation;
 import cc.redberry.core.transformations.Transformation;
+import cc.redberry.core.transformations.TransformationCollection;
 import cc.redberry.core.transformations.expand.ExpandTransformation;
 import cc.redberry.core.utils.TensorUtils;
-import junit.framework.Assert;
+import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static cc.redberry.core.TAssert.*;
 import static cc.redberry.core.tensor.Tensors.*;
@@ -45,7 +54,7 @@ import static cc.redberry.core.tensor.Tensors.*;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public class SubstitutionsTest {
+public class SubstitutionsTest extends AbstractRedberryTestClass {
 
     private static Tensor contract(Tensor tensor) {
         return EliminateMetricsTransformation.ELIMINATE_METRICS.transform(tensor);
@@ -58,6 +67,11 @@ public class SubstitutionsTest {
     private static Tensor substitute(Tensor tensor, String testSimpletitution) {
         Expression e = (Expression) parse(testSimpletitution);
         return e.transform(tensor);
+    }
+
+    @Before
+    public void setUp() throws Exception {
+        CC.reset();
     }
 
     @Test
@@ -1074,8 +1088,94 @@ public class SubstitutionsTest {
         TAssert.assertEquals(t, "2*x*y");
     }
 
+    @Test
+    public void testProduct27() throws Exception {
+        Tensor t = parse("2*a*f_iA*k^ij*T^A_j");
+        Expression subs = parseExpression("f_jB*k^jc = R_B^c");
+        TAssert.assertEquals("2*a*R^{j}_{A}*T_{j}^{A}", subs.transform(t));
+    }
 
-    //TODO tests for Product
+    @Test
+    public void testProduct28() throws Exception {
+        GeneralIndicesInsertion indicesInsertion = new GeneralIndicesInsertion();
+        CC.current().getParseManager().defaultParserPreprocessors.add(indicesInsertion);
+        indicesInsertion.addInsertionRule(parseSimple("T^A'_B'"), IndexType.Matrix2);
+
+
+        setAntiSymmetric("f_ABC");
+        setSymmetric("d_ABC");
+
+        Tensor t = parse("Tr[T_{I}*T_{A}*T_{J}]");
+        Expression subs = parseExpression("T_{A}*T_{B} = (1/2)*T^{C}*d_{ABC}+(1/2)*N**(-1)*g_{AB}+(1/2*I)*T^{C}*f_{ABC}");
+
+        TAssert.assertEquals("((1/2)*T^{C}*d_{AIC}+(1/2*I)*T^{C}*f_{AIC}+(1/2)*N**(-1)*g_{AI})*T_{J}", subs.transform(t));
+    }
+
+
+    @Test
+    public void testProduct29() throws Exception {
+        for (int i = 0; i < 100; i++) {
+            CC.reset();
+            GeneralIndicesInsertion indicesInsertion = new GeneralIndicesInsertion();
+            CC.current().getParseManager().defaultParserPreprocessors.add(indicesInsertion);
+            indicesInsertion.addInsertionRule(parseSimple("T^A'_B'"), IndexType.Matrix2);
+
+
+            setAntiSymmetric("f_ABC");
+            setSymmetric("d_ABC");
+
+            Tensor t = parse("(1/2)*N**(-1)*Tr[T_{J}]*g_{IA}");
+            Expression subs = parseExpression("T_{A}*T^{A} = (1/2)*N**(-1)*(-1+N**2)");
+
+            TAssert.assertEquals(t, subs.transform(t));
+        }
+    }
+
+    @Test
+    public void testProduct30() throws Exception {
+        Expression[] exprs = {
+                parseExpression("p1_a*p1^a = m1"),
+                parseExpression("p1_a*p2^a = 0"),
+                parseExpression("p1_a*p3^a = s13"),
+                parseExpression("p1_a*p4^a = s14"),
+                parseExpression("p1_a*p5^a = s15"),
+                parseExpression("p2_a*p2^a = m2"),
+                parseExpression("p2_a*p3^a = 0"),
+                parseExpression("p2_a*p4^a = s24"),
+                parseExpression("p2_a*p5^a = s25"),
+                parseExpression("p3_a*p3^a = m3"),
+                parseExpression("p3_a*p4^a = s34"),
+                parseExpression("p3_a*p5^a = 0"),
+                parseExpression("p4_a*p4^a = m4"),
+                parseExpression("p4_a*p5^a = s45"),
+                parseExpression("p5_a*p5^a = m5"),
+        };
+
+        List<Transformation> bf = new ArrayList<>();
+        for (Expression expr : exprs)
+            bf.add(new BruteForceProductSubs(expr));
+
+        TransformationCollection seqSubs = new TransformationCollection(bf);
+        SubstitutionTransformation subs = new SubstitutionTransformation(exprs);
+
+        for (int i = 0; i < it(10, 100); i++) {
+            RandomTensor rnd = new RandomTensor();
+            rnd.clearNamespace();
+            rnd.addToNamespace(parse("p1_a"), parse("p2_a"), parse("p3_a"), parse("p4_a"), parse("p5_a"));
+
+            Tensor expr = rnd.nextTensorTree(3, 4, 4, IndicesFactory.EMPTY_INDICES);
+
+            Tensor a = subs.transform(expr);
+            a = new ExpandTransformation(subs).transform(a);
+            a = subs.transform(a);
+
+            Tensor b = seqSubs.transform(expr);
+            b = new ExpandTransformation(seqSubs).transform(b);
+            b = seqSubs.transform(b);
+
+            TAssert.assertEquals(a, b);
+        }
+    }
 
     @Test
     public void testPower13() {
@@ -1332,5 +1432,48 @@ public class SubstitutionsTest {
         Tensor r = parse("F_b*(f_{g}^{g}*d_{k}^{k}*f_{c}+(1 + d^{j}_{j})*f_{g}^{g}*f_{h}^{h}*f_{c})");
         r = parseExpression("d^{g}_{g} = f_{a}^{a}").transform(r);
         TAssert.assertIndicesConsistency(r);
+    }
+
+    @Test
+    public void test32() throws Exception {
+        Expression[] subs = {
+                parseExpression("x  = a"),
+                parseExpression("z  = b"),
+                parseExpression("Z1 = 0"),
+                parseExpression("f  = a"),
+                parseExpression("Z2 = 0")
+        };
+
+        SubstitutionTransformation tr = new SubstitutionTransformation(subs);
+
+        RandomTensor rnd = new RandomTensor();
+        rnd.clearNamespace();
+        rnd.addToNamespace(parse("x"), parse("z"), parse("Z1"), parse("f"), parse("Z2"), parse("a"), parse("b"));
+
+        for (int i = 0; i < 10; i++) {
+            Tensor expr = rnd.nextTensorTree(4, 3, 4, IndicesFactory.EMPTY_INDICES);
+            Tensor ac = Transformation.Util.applyUntilUnchanged(expr, tr);
+            Tensor exp = Transformation.Util.applySequentially(expr, subs);
+            TAssert.assertEquals(ac, exp);
+        }
+    }
+
+
+    static final class BruteForceProductSubs implements Transformation {
+        final PrimitiveProductSubstitution ps;
+
+        public BruteForceProductSubs(Expression expr) {
+            this.ps = new PrimitiveProductSubstitution(expr.get(0), expr.get(1));
+        }
+
+        @Override
+        public Tensor transform(Tensor t) {
+            SubstitutionIterator it = new SubstitutionIterator(t);
+            Tensor c;
+            while ((c = it.next()) != null)
+                if (c instanceof Product)
+                    it.safeSet(ps.algorithm_subgraph_search((Product) c, it));
+            return it.result();
+        }
     }
 }

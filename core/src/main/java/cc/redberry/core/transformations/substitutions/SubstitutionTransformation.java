@@ -27,6 +27,7 @@ import cc.redberry.core.context.OutputFormat;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.tensor.*;
 import cc.redberry.core.transformations.TransformationToStringAble;
+import cc.redberry.core.utils.ArraysUtils;
 import cc.redberry.core.utils.TensorUtils;
 
 import static cc.redberry.core.utils.TensorUtils.shareSimpleTensors;
@@ -40,11 +41,12 @@ import static cc.redberry.core.utils.TensorUtils.shareSimpleTensors;
  */
 public final class SubstitutionTransformation implements TransformationToStringAble {
     private final PrimitiveSubstitution[] primitiveSubstitutions;
-    private final boolean applyIfModified;
+    final boolean applyIfModified;
 
     private SubstitutionTransformation(PrimitiveSubstitution[] primitiveSubstitutions, boolean applyIfModified) {
         this.primitiveSubstitutions = primitiveSubstitutions;
         this.applyIfModified = applyIfModified;
+        sortPrimitiveSubstitutions();
     }
 
     /**
@@ -60,6 +62,7 @@ public final class SubstitutionTransformation implements TransformationToStringA
         primitiveSubstitutions = new PrimitiveSubstitution[expressions.length];
         for (int i = expressions.length - 1; i >= 0; --i)
             primitiveSubstitutions[i] = createPrimitiveSubstitution(expressions[i].get(0), expressions[i].get(1));
+        sortPrimitiveSubstitutions();
     }
 
     /**
@@ -77,7 +80,7 @@ public final class SubstitutionTransformation implements TransformationToStringA
      * @param expressions an array of the expressions
      */
     public SubstitutionTransformation(Expression... expressions) {
-        this(expressions, expressions.length == 1 && !shareSimpleTensors(expressions[0].get(0), expressions[0].get(1)));
+        this(expressions, !shareSimpleTensors0(expressions));
     }
 
     /**
@@ -96,6 +99,7 @@ public final class SubstitutionTransformation implements TransformationToStringA
         primitiveSubstitutions = new PrimitiveSubstitution[1];
         primitiveSubstitutions[0] = createPrimitiveSubstitution(from, to);
         this.applyIfModified = applyIfModified;
+        sortPrimitiveSubstitutions();
     }
 
 
@@ -110,7 +114,7 @@ public final class SubstitutionTransformation implements TransformationToStringA
      *                                  to {@code to[i]} free indices
      */
     public SubstitutionTransformation(Tensor[] from, Tensor[] to) {
-        this(from, to, from.length == 1 ? !shareSimpleTensors(from[0], to[0]) : false);
+        this(from, to, !shareSimpleTensors0(from, to));
     }
 
 
@@ -145,6 +149,33 @@ public final class SubstitutionTransformation implements TransformationToStringA
         for (int i = 0; i < from.length; ++i)
             primitiveSubstitutions[i] = createPrimitiveSubstitution(from[i], to[i]);
         this.applyIfModified = applyIfModified;
+        sortPrimitiveSubstitutions();
+    }
+
+    private static boolean shareSimpleTensors0(Expression[] exprs) {
+        for (Expression a : exprs)
+            for (Expression b : exprs)
+                if (shareSimpleTensors(a.get(0), b.get(1)))
+                    return true;
+        return false;
+    }
+
+    private static boolean shareSimpleTensors0(Tensor[] from, Tensor[] to) {
+        for (Tensor a : from)
+            for (Tensor b : to)
+                if (shareSimpleTensors(a, b))
+                    return true;
+        return false;
+    }
+
+    /**
+     * Put zero substitutions on first
+     */
+    private void sortPrimitiveSubstitutions() {
+        int zeros = 0;
+        for (int i = 0; i < primitiveSubstitutions.length; i++)
+            if (TensorUtils.isZeroOrIndeterminate(primitiveSubstitutions[i].to))
+                ArraysUtils.swap(primitiveSubstitutions, zeros++, i);
     }
 
     /**

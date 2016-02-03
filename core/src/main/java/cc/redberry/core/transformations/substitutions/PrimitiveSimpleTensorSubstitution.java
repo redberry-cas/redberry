@@ -30,7 +30,7 @@ import cc.redberry.core.tensor.Tensor;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-class PrimitiveSimpleTensorSubstitution extends PrimitiveSubstitution {
+final class PrimitiveSimpleTensorSubstitution extends PrimitiveSubstitution {
     PrimitiveSimpleTensorSubstitution(Tensor from, Tensor to) {
         super(from, to);
     }

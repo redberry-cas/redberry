@@ -45,7 +45,7 @@ import static cc.redberry.core.indices.IndicesUtils.*;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-class PrimitiveTensorFieldSubstitution extends PrimitiveSubstitution {
+final class PrimitiveTensorFieldSubstitution extends PrimitiveSubstitution {
     private NameDescriptorForTensorField fromDescriptor;
     private final IntArray orders;
     private final HashMap<IntArray, DFromTo> derivatives = new HashMap<>();

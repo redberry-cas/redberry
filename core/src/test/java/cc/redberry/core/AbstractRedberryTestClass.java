@@ -22,7 +22,6 @@
  */
 package cc.redberry.core;
 
-import cc.redberry.core.groups.permutations.GapGroupsInterface;
 import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Rule;
@@ -33,7 +32,6 @@ import org.junit.rules.TestName;
  * @author Stanislav Poslavsky
  */
 public class AbstractRedberryTestClass {
-
     @Rule
     public TestName name = new TestName();
 
@@ -43,6 +41,10 @@ public class AbstractRedberryTestClass {
             Assume.assumeTrue(doTestPerformance());
         if (name.getMethodName().toLowerCase().contains("longtest"))
             Assume.assumeTrue(doLongTest());
+    }
+
+    public int it(int notLong, int longTest) {
+        return doLongTest() ? longTest : notLong;
     }
 
     private static Boolean testPerformance;

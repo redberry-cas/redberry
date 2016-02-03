@@ -34,7 +34,7 @@ import java.util.Iterator;
  * @author Stanislav Poslavsky
  * @since 1.0
  */
-public final class ProductContent implements Iterable<Tensor>{
+public final class ProductContent implements Iterable<Tensor> {
     /**
      * Singleton for empty instance.
      */
@@ -97,6 +97,24 @@ public final class ProductContent implements Iterable<Tensor>{
      */
     public StructureOfContractions getStructureOfContractions() {
         return structureOfContractions;
+    }
+
+    /**
+     * Returns the first element of this content data
+     *
+     * @return first element of this content data
+     */
+    public Tensor first() {
+        return data[0];
+    }
+
+    /**
+     * Returns the last element of this content data
+     *
+     * @return last element of this content data
+     */
+    public Tensor last() {
+        return data[data.length - 1];
     }
 
     /**

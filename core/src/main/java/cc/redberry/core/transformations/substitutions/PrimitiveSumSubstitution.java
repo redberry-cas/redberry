@@ -32,13 +32,18 @@ import java.util.Arrays;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-class PrimitiveSumSubstitution extends PrimitiveSubstitution {
+final class PrimitiveSumSubstitution extends PrimitiveSubstitution {
     public PrimitiveSumSubstitution(Tensor from, Tensor to) {
         super(from, to);
     }
 
     @Override
     Tensor newTo_(Tensor current, SubstitutionIterator iterator) {
+        //early termination
+        if (current.get(0).hashCode() > from.get(0).hashCode()
+                || current.get(current.size() - 1).hashCode() < from.get(from.size() - 1).hashCode())
+            return current;
+
         Tensor old = null;
         while (old != current) {
             old = current;

@@ -25,6 +25,7 @@ package cc.redberry.physics.feyncalc;
 import cc.redberry.core.TAssert;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.utils.TensorUtils;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import static cc.redberry.core.tensor.Tensors.*;
@@ -32,6 +33,7 @@ import static cc.redberry.core.tensor.Tensors.*;
 /**
  * Created by poslavsky on 03/01/16.
  */
+@Ignore
 public class SchoutenIdentities4Test {
     @Test
     public void test1() throws Exception {

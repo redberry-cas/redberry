@@ -83,6 +83,14 @@ abstract class PrimitiveSubstitution implements ToString {
         return ApplyIndexMapping.applyIndexMappingAndRenameAllDummies(to, mapping, TensorUtils.getAllDummyIndicesT(oldFrom).toArray());
     }
 
+    Tensor applyIndexMappingToTo(int[] oldDummies, Tensor to, Mapping mapping, SubstitutionIterator iterator) {
+        if (toIsSymbolic)
+            return mapping.getSign() ? Tensors.negate(to) : to;
+        if (possiblyAddsDummies)
+            return ApplyIndexMapping.applyIndexMapping(to, mapping, iterator.getForbidden());
+        return ApplyIndexMapping.applyIndexMappingAndRenameAllDummies(to, mapping, oldDummies);
+    }
+
     abstract Tensor newTo_(Tensor currentNode, SubstitutionIterator iterator);
 
     @Override
