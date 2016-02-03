@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2015:
+ * Copyright (c) 2010-2016:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -20,27 +20,18 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
-package cc.redberry.core.transformations.substitutions;
+package cc.redberry.core.test;
 
-import cc.redberry.core.indexmapping.IndexMappings;
-import cc.redberry.core.indexmapping.Mapping;
-import cc.redberry.core.tensor.Tensor;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-final class PrimitiveSimpleTensorSubstitution extends PrimitiveSubstitution {
-    PrimitiveSimpleTensorSubstitution(Tensor from, Tensor to) {
-        super(from, to);
-    }
-
-    @Override
-    Tensor newTo_(Tensor currentNode, SubstitutionIterator iterator) {
-        Mapping mapping =
-                IndexMappings.getFirst(from, currentNode);
-        if (mapping == null)
-            return currentNode;
-        return applyIndexMappingToTo(currentNode, to, mapping, iterator);
-    }
+@Target(ElementType.METHOD)
+@Retention(RetentionPolicy.RUNTIME)
+public @interface PerformanceTest {
 }

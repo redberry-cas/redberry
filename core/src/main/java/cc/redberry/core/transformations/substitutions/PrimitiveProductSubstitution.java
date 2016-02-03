@@ -22,11 +22,13 @@
  */
 package cc.redberry.core.transformations.substitutions;
 
+import cc.redberry.core.indexmapping.IndexMappings;
 import cc.redberry.core.indexmapping.Mapping;
 import cc.redberry.core.indices.IndicesBuilder;
 import cc.redberry.core.indices.IndicesUtils;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.tensor.*;
+import cc.redberry.core.utils.IntArrayList;
 import cc.redberry.core.utils.TensorUtils;
 import gnu.trove.set.hash.TIntHashSet;
 
@@ -38,127 +40,63 @@ import static cc.redberry.core.indexmapping.IndexMappings.createBijectiveProduct
 import static cc.redberry.core.indexmapping.IndexMappings.getFirst;
 import static cc.redberry.core.tensor.ApplyIndexMapping.applyIndexMapping;
 import static cc.redberry.core.tensor.ApplyIndexMapping.applyIndexMappingAndRenameAllDummies;
+import static cc.redberry.core.tensor.StructureOfContractions.getToTensorIndex;
 import static cc.redberry.core.utils.TensorUtils.getAllIndicesNamesT;
 
 /**
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-class PrimitiveProductSubstitution extends PrimitiveSubstitution {
+final class PrimitiveProductSubstitution extends PrimitiveSubstitution {
     private final Complex fromFactor;
     private final Tensor[] fromIndexless, fromData;
+    private final Tensor indexlessSubProductReciprocal;
     private final ProductContent fromContent;
+    private final boolean zeroRhs;
+    final boolean simpleContractions;
+    final boolean simpleCombinations;
 
     public PrimitiveProductSubstitution(Tensor from, Tensor to) {
         super(from, to);
         Product product = (Product) from;
         this.fromFactor = product.getFactor();
         this.fromIndexless = product.getIndexless();
+        this.indexlessSubProductReciprocal = Tensors.reciprocal(product.getIndexlessSubProduct());
         this.fromContent = product.getContent();
         this.fromData = fromContent.getDataCopy();
+        this.simpleContractions = fromContent.size() == 2 && product.getIndices().size() > product.getIndices().getFree().size();
+        this.simpleCombinations = fromContent.size() == 2;
+        this.zeroRhs = TensorUtils.isZeroOrIndeterminate(to);
     }
-
-//    @Override
-//    Tensor newTo_(Tensor currentNode, SubstitutionIterator iterator) {
-//        TIntHashSet forbidden = null;
-//        while (currentNode instanceof Product) {
-//            Product cp = (Product) currentNode;
-//            IndexMappingBuffer buffer = null;
-//
-//            final Tensor[] currentIndexless = cp.getIndexless();
-//            int[] indexlessBijection;
-//            IndexlessBijectionsPort indexlessPort = new IndexlessBijectionsPort(fromIndexless, currentIndexless);
-//            while ((indexlessBijection = indexlessPort.take()) != null) {
-//                buffer = createBijectiveProductPort(fromIndexless, extract(currentIndexless, indexlessBijection)).take();
-//                if (buffer != null)
-//                    break;
-//            }
-//            if (buffer == null)
-//                break;
-//
-//            boolean sign = buffer.getSignum();
-//            buffer = null;
-//            ProductContent currentContent = cp.getContent();
-//            final Tensor[] currentData = currentContent.getDataCopy();
-//            int[] dataBijection;
-//            ProductsBijectionsPort dataPort = new ProductsBijectionsPort(fromContent, currentContent);
-//            while ((dataBijection = dataPort.take()) != null) {
-//                buffer = createBijectiveProductPort(fromData, extract(currentData, dataBijection)).take();
-//                if (buffer != null)
-//                    break;
-//            }
-//            if (buffer == null)
-//                break;
-//
-//            buffer.addSignum(sign);
-//            Tensor newTo;
-//            int i;
-//            if (toIsSymbolic)
-//                newTo = buffer.getSignum() ? Tensors.negate(to) : to;
-//            else {
-//                if (forbidden == null) {
-//                    //TODO review
-//                    forbidden = new TIntHashSet(iterator.getForbidden());
-//                    int pivot = 0;
-//                    for (i = 0; i < currentIndexless.length; ++i) {
-//                        if (pivot < indexlessBijection.length && i == indexlessBijection[pivot])
-//                            ++pivot;
-//                        else
-//                            forbidden.addAll(getAllIndicesNamesT(currentIndexless[i]));
-//                    }
-//                    pivot = 0;
-//                    for (i = 0; i < currentData.length; ++i) {
-//                        if (pivot < dataBijection.length && i == dataBijection[pivot])
-//                            ++pivot;
-//                        else
-//                            forbidden.addAll(getAllIndicesNamesT(currentData[i]));
-//                    }
-//
-//                }
-//                newTo = applyIndexMapping(to, buffer, forbidden.toArray());
-//                if (newTo != to)
-//                    forbidden.addAll(getAllIndicesNamesT(newTo));
-//            }
-//
-//            Arrays.sort(indexlessBijection);
-//            Arrays.sort(dataBijection);
-//
-//            ProductBuilder builder = new ProductBuilder();
-//            builder.put(newTo);
-//
-//            int pivot = 0;
-//            for (i = 0; i < currentIndexless.length; ++i) {
-//                if (pivot < indexlessBijection.length && i == indexlessBijection[pivot])
-//                    ++pivot;
-//                else
-//                    builder.put(currentIndexless[i]);
-//            }
-//            pivot = 0;
-//            for (i = 0; i < currentData.length; ++i) {
-//                if (pivot < dataBijection.length && i == dataBijection[pivot])
-//                    ++pivot;
-//                else
-//                    builder.put(currentData[i]);
-//            }
-//
-//
-//            builder.put(cp.getFactor().divide(fromFactor));
-//            currentNode = builder.build();
-//        }
-//        return currentNode;
-//    }
 
     @Override
     Tensor newTo_(Tensor currentNode, SubstitutionIterator iterator) {
         Product product = (Product) currentNode;
+        //early termination
+        if (product.sizeWithoutFactor() < ((Product) from).sizeWithoutFactor())
+            return currentNode;
+        if (product.sizeOfDataPart() < ((Product) from).sizeOfDataPart())
+            return currentNode;
+        ProductContent content = product.getContent();
+        if (fromContent.size() > 0 &&
+                (content.first().hashCode() > fromContent.first().hashCode()
+                        || content.last().hashCode() < fromContent.last().hashCode()))
+            return currentNode;
+
+
+        //complete subgraph search
+        return algorithm_subgraph_search(product, iterator);
+    }
+
+    /* COMPLETE SUBGRAPH SEARCH */
+
+    Tensor algorithm_subgraph_search(final Product product, final SubstitutionIterator iterator) {
         Complex factor = product.getFactor();
         PContent content = new PContent(product.getIndexless(), product.getDataSubProduct());
-
-        //TODO getForbidden only if necessary!!!!!!!!!!!!!!!!!
         ForbiddenContainer forbidden = new ForbiddenContainer();
-        SubsResult subsResult = atomicSubstitute(content, forbidden, iterator);
+        SubsResult subsResult = atomic_substitute(content, forbidden, iterator);
         if (subsResult == null)
-            return currentNode;
+            return product;
 
         List<Tensor> newTos = new ArrayList<>();
         while (true) {
@@ -167,7 +105,7 @@ class PrimitiveProductSubstitution extends PrimitiveSubstitution {
             factor = factor.divide(fromFactor);
             newTos.add(subsResult.newTo);
             content = subsResult.remainder;
-            subsResult = atomicSubstitute(content, forbidden, iterator);
+            subsResult = atomic_substitute(content, forbidden, iterator);
         }
         Tensor[] result = new Tensor[newTos.size() + content.indexless.length + 2];
         System.arraycopy(newTos.toArray(new Tensor[newTos.size()]), 0, result, 0, newTos.size());
@@ -177,7 +115,8 @@ class PrimitiveProductSubstitution extends PrimitiveSubstitution {
         return Tensors.multiply(result);
     }
 
-    SubsResult atomicSubstitute(PContent content, ForbiddenContainer forbidden, SubstitutionIterator iterator) {
+    private SubsResult atomic_substitute(final PContent content, final ForbiddenContainer forbidden,
+                                         final SubstitutionIterator iterator) {
         Mapping mapping = null;
         int[] indexlessBijection, dataBijection;
 
@@ -314,4 +253,204 @@ class PrimitiveProductSubstitution extends PrimitiveSubstitution {
         }
     }
 
+
+    /* FAST BRUTE FORCE OPTIMIZATIONS */
+
+    public static ResultContained algorithm_with_simple_contractions(final Product cProduct,
+                                                                     final PrimitiveProductSubstitution[] subs,
+                                                                     final SubstitutionIterator iterator) {
+        final ProductContent content = cProduct.getContent();
+        final StructureOfContractions st = content.getStructureOfContractions();
+
+        int first;
+        final int cSize = content.size();
+        final int[] mask = new int[cSize];
+        Arrays.fill(mask, 0);
+        final int[] rPowers = new int[subs.length];
+        Arrays.fill(rPowers, 0);
+
+        final ArrayList<Tensor> newTo = new ArrayList<>();
+        final IntArrayList toRemove = new IntArrayList();
+        final int offset = cProduct.sizeOfIndexlessPart();
+
+        boolean supposeIndicesAreAdded = false;
+        for (int iSub = 0; iSub < subs.length; iSub++) {
+            assert subs[iSub].simpleContractions;
+
+            final int firstHash = subs[iSub].fromContent.get(0).hashCode(),
+                    secondHash = subs[iSub].fromContent.get(1).hashCode();
+
+            for (first = 0; first < cSize; ++first)
+                if (content.get(first).hashCode() == firstHash)
+                    break;
+            if (first == cSize)
+                continue;
+
+            out:
+            for (; first < cSize && content.get(first).hashCode() == firstHash; ++first) {
+                if (mask[first] != 0)
+                    continue;
+                for (long contraction : st.contractions[first]) {
+                    int second = getToTensorIndex(contraction);
+                    if (second == -1 || mask[second] != 0 || first == second
+                            || content.get(second).hashCode() != secondHash)
+                        continue;
+                    Mapping mapping = IndexMappings.createBijectiveProductPort(subs[iSub].fromData, new Tensor[]{content.get(first), content.get(second)}).take();
+                    if (mapping == null && firstHash == secondHash)
+                        mapping = IndexMappings.createBijectiveProductPort(subs[iSub].fromData, new Tensor[]{content.get(second), content.get(first)}).take();
+
+                    if (mapping == null)
+                        continue;
+
+                    if (subs[iSub].zeroRhs)
+                        return new ResultContained(subs[iSub].to);
+
+                    supposeIndicesAreAdded |= subs[iSub].possiblyAddsDummies;
+                    final TIntHashSet dummies = TensorUtils.getAllDummyIndicesIncludingScalarFunctionsT(content.get(first));
+                    dummies.addAll(TensorUtils.getAllDummyIndicesIncludingScalarFunctionsT(content.get(second)));
+                    dummies.addAll(new IndicesBuilder().append(content.get(first)).append(content.get(second)).getIndices().getNamesOfDummies());
+
+                    newTo.add(subs[iSub].applyIndexMappingToTo(dummies.toArray(), subs[iSub].to, mapping, iterator));
+                    ++rPowers[iSub];
+                    mask[first] = mask[second] = -1;
+                    toRemove.ensureCapacity(2);
+                    toRemove.add(offset + first);
+                    toRemove.add(offset + second);
+                    continue out;
+                }
+            }
+
+        }
+        return new ResultContained(__build__(subs, cProduct, rPowers, toRemove, newTo), supposeIndicesAreAdded);
+    }
+
+    public static ResultContained algorithm_with_simple_combinations(final Product cProduct,
+                                                                     final PrimitiveProductSubstitution[] subs,
+                                                                     final SubstitutionIterator iterator) {
+        final ProductContent content = cProduct.getContent();
+        final int cSize = content.size();
+        final int offset = cProduct.sizeOfIndexlessPart();
+        final int[] mask = new int[cSize];
+        Arrays.fill(mask, 0);
+        final int[] rPowers = new int[subs.length];
+        Arrays.fill(rPowers, 0);
+        final ArrayList<Tensor> newTo = new ArrayList<>();
+        final IntArrayList toRemove = new IntArrayList();
+        boolean possiblyAddsDummies = false;
+
+        for (int iSub = 0; iSub < subs.length; ++iSub) {
+            assert subs[iSub].simpleCombinations;
+
+            final int firstHash = subs[iSub].fromContent.get(0).hashCode(),
+                    secondHash = subs[iSub].fromContent.get(1).hashCode();
+
+            assert firstHash <= secondHash;
+
+            if (content.get(0).hashCode() > firstHash
+                    || content.get(cSize - 1).hashCode() < secondHash)
+                continue;
+
+            int firstBegin, firstEnd, secondBegin, secondEnd;
+            for (firstBegin = 0; firstBegin < cSize; ++firstBegin)
+                if (content.get(firstBegin).hashCode() == firstHash)
+                    break;
+            if (firstBegin == cSize)
+                continue;
+
+            for (firstEnd = firstBegin + 1; firstEnd < cSize; ++firstEnd)
+                if (content.get(firstEnd).hashCode() != firstHash)
+                    break;
+
+            if (secondHash == firstHash) {
+                secondBegin = firstBegin;
+                secondEnd = firstEnd;
+            } else {
+                for (secondBegin = firstEnd; secondBegin < cSize; ++secondBegin)
+                    if (content.get(secondBegin).hashCode() == secondHash)
+                        break;
+                if (secondBegin == cSize)
+                    continue;
+
+                for (secondEnd = secondBegin + 1; secondEnd < cSize; ++secondEnd)
+                    if (content.get(secondEnd).hashCode() != secondHash)
+                        break;
+            }
+
+            out:
+            for (int i = firstBegin; i < firstEnd; ++i) {
+                if (mask[i] != 0)
+                    continue;
+                for (int j = secondBegin; j < secondEnd; ++j) {
+                    if (i == j || mask[j] != 0)
+                        continue;
+                    Mapping mapping = IndexMappings.createBijectiveProductPort(subs[iSub].fromData, new Tensor[]{content.get(i), content.get(j)}).take();
+                    if (mapping == null && firstHash == secondHash)
+                        mapping = IndexMappings.createBijectiveProductPort(subs[iSub].fromData, new Tensor[]{content.get(j), content.get(i)}).take();
+
+                    if (mapping == null)
+                        continue;
+
+                    if (subs[iSub].zeroRhs)
+                        return new ResultContained(subs[iSub].to);
+
+                    possiblyAddsDummies |= subs[iSub].possiblyAddsDummies;
+                    final TIntHashSet dummies = TensorUtils.getAllDummyIndicesIncludingScalarFunctionsT(content.get(i));
+                    dummies.addAll(TensorUtils.getAllDummyIndicesIncludingScalarFunctionsT(content.get(j)));
+                    dummies.addAll(new IndicesBuilder().append(content.get(i)).append(content.get(j)).getIndices().getNamesOfDummies());
+
+                    newTo.add(subs[iSub].applyIndexMappingToTo(dummies.toArray(), subs[iSub].to, mapping, iterator));
+                    ++rPowers[iSub];
+
+                    mask[i] = mask[j] = -1;
+                    toRemove.ensureCapacity(2);
+                    toRemove.add(offset + i);
+                    toRemove.add(offset + j);
+                    continue out;
+                }
+            }
+        }
+        return new ResultContained(__build__(subs, cProduct, rPowers, toRemove, newTo), possiblyAddsDummies);
+    }
+
+    static class ResultContained {
+        final Tensor result;
+        final boolean possiblyAddsDummies;
+
+        public ResultContained(Tensor result) {
+            this(result, false);
+        }
+
+        public ResultContained(Tensor result, boolean possiblyAddsDummies) {
+            this.result = result;
+            this.possiblyAddsDummies = possiblyAddsDummies;
+        }
+    }
+
+    private static Tensor __build__(final PrimitiveProductSubstitution[] subs,
+                                    final Product cProduct,
+                                    final int[] rPowers,
+                                    final IntArrayList toRemove,
+                                    final ArrayList<Tensor> newTo) {
+
+        if (newTo.isEmpty())
+            return cProduct;
+
+        newTo.ensureCapacity(2);
+        boolean possiblyAddsDummies = false;
+        for (int i = 0; i < rPowers.length; ++i) {
+            possiblyAddsDummies |= subs[i].possiblyAddsDummies;
+            if (rPowers[i] != 0)
+                newTo.add(Tensors.pow(subs[i].indexlessSubProductReciprocal, rPowers[i]));
+        }
+        newTo.add(cProduct.remove(toRemove.toArray()));
+        final Tensor result = Tensors.multiplyAndRenameConflictingDummies(newTo);
+        if (possiblyAddsDummies)
+            //dummies will be renamed later automatically
+            return result;
+        else
+            //manual dummies renaming
+            return ApplyIndexMapping.renameDummy(result,
+                    TensorUtils.getAllDummyIndicesIncludingScalarFunctionsT(result).toArray(),
+                    TensorUtils.getAllDummyIndicesIncludingScalarFunctionsT(cProduct).toArray());
+    }
 }

@@ -22,8 +22,10 @@
  */
 
 
+import cc.redberry.core.context.CC;
 import cc.redberry.core.context.ContextManager;
 import org.junit.runner.Description;
+import org.junit.runner.notification.Failure;
 import org.junit.runner.notification.RunListener;
 
 /**
@@ -38,5 +40,20 @@ public class GlobalRunListener extends RunListener {
     @Override
     public void testStarted(Description description) throws Exception {
         ContextManager.initializeNew();
+    }
+
+    @Override
+    public void testFailure(Failure failure) throws Exception {
+        System.out.println("Test " + failure.getTestHeader() + " failed with name manager seed: " + CC.getNameManager().getSeed());
+    }
+
+    @Override
+    public void testIgnored(Description description) throws Exception {
+        System.out.println("###IGNORED: " + description.getDisplayName());
+    }
+
+    @Override
+    public void testAssumptionFailure(Failure failure) {
+        System.out.println("###IGNORED: " + failure.getTestHeader());
     }
 }

@@ -31,6 +31,7 @@ import cc.redberry.core.tensor.Tensor
 import cc.redberry.core.transformations.Transformation
 import cc.redberry.core.transformations.TransformationCollection
 import cc.redberry.core.transformations.TransformationToStringAble
+import cc.redberry.core.transformations.substitutions.SubstitutionTransformation
 import cc.redberry.physics.LagrangeFourierTransformation
 import cc.redberry.physics.feyncalc.*
 import cc.redberry.physics.oneloopdiv.OneLoopCounterterms
@@ -59,7 +60,7 @@ public final class RedberryPhysics {
         Tensor[][] result = new Tensor[4][2];
         int i = 0;
         momentumMasses.each { a, b -> result[i][0] = parse(a); result[i++][1] = parse(b); }
-        return new TransformationCollection(FeynCalcUtils.setMandelstam(result));
+        return new SubstitutionTransformation(FeynCalcUtils.setMandelstam(result), true);
     }
 
     /**
@@ -78,8 +79,8 @@ public final class RedberryPhysics {
         Tensor[][] result = new Tensor[4][2];
         int i = 0;
         momentumMasses.each { a, b -> result[i][0] = parse(a); result[i++][1] = parse(b); }
-        return new TransformationCollection(
-                FeynCalcUtils.setMandelstam(result, parse0(s), parse0(t), parse0(u)));
+        return new SubstitutionTransformation(
+                FeynCalcUtils.setMandelstam(result, parse0(s), parse0(t), parse0(u)), true);
     }
 
     /**
@@ -95,7 +96,7 @@ public final class RedberryPhysics {
         Tensor[][] result = new Tensor[5][2];
         int i = 0;
         momentumMasses.each { a, b -> result[i][0] = parse(a); result[i++][1] = parse(b); }
-        return new TransformationCollection(FeynCalcUtils.setMandelstam5(result));
+        return new SubstitutionTransformation(FeynCalcUtils.setMandelstam5(result), true);
     }
 
     /**
@@ -117,8 +118,8 @@ public final class RedberryPhysics {
         Tensor[][] result = new Tensor[5][2];
         int i = 0;
         momentumMasses.each { a, b -> result[i][0] = parse(a); result[i++][1] = parse(b); }
-        return new TransformationCollection(
-                FeynCalcUtils.setMandelstam5(result, parse0(s), parse0(t1), parse0(t2), parse0(u1), parse0(u2)));
+        return new SubstitutionTransformation(
+                FeynCalcUtils.setMandelstam5(result, parse0(s), parse0(t1), parse0(t2), parse0(u1), parse0(u2)), true);
     }
 
     private static Tensor parse0(Object o) {

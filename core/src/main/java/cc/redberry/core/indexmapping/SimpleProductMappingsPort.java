@@ -53,8 +53,8 @@ final class SimpleProductMappingsPort implements OutputPort<IndexMappingBuffer> 
     @Override
     public IndexMappingBuffer take() {
         if (!inited) {
-            for (int i = 0; i < providers.length; ++i)
-                providers[i].tick();
+            for (IndexMappingProvider provider : providers)
+                provider.tick();
             inited = true;
         }
         int i = providers.length - 1;

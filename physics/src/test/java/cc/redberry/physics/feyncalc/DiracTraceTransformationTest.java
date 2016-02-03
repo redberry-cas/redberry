@@ -27,6 +27,7 @@ import cc.redberry.core.number.Complex;
 import cc.redberry.core.tensor.SimpleTensor;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.tensor.iterator.FromChildToParentIterator;
+import cc.redberry.core.test.LongTest;
 import cc.redberry.core.transformations.EliminateMetricsTransformation;
 import cc.redberry.core.transformations.Transformation;
 import junit.framework.Assert;
@@ -395,7 +396,8 @@ public class DiracTraceTransformationTest extends AbstractFeynCalcTest {
     }
 
     @Test
-    public void test20_longTest() throws Exception {
+    @LongTest
+    public void test20() throws Exception {
         testFeynCalcData("DiracTrace_abcdef5");
     }
 

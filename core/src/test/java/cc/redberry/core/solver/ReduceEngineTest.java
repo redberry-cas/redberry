@@ -81,14 +81,19 @@ public class ReduceEngineTest {
             System.out.println("MAPLE directory: " + mapleBinDir);
         this.mapleBinDir = mapleBinDir;
 
-        String mathematicaBinDir = "/usr/local/bin";
-        File mathematicaScriptExecutor = new File(mathematicaBinDir + "/MathematicaScript");
-        if (!mathematicaScriptExecutor.exists())
-            mathematicaBinDir = null;
-        else
-            System.out.println("Mathematica script executor:" + mathematicaScriptExecutor.getAbsolutePath());
+        String[] mathematicaBinDir = {"/usr/local/bin", "/Applications/Mathematica.app/Contents/MacOS"};
+        String dir = null;
+        for (String s : mathematicaBinDir) {
+            File mathematicaScriptExecutor = new File(s + "/MathematicaScript");
+            if (!mathematicaScriptExecutor.exists())
+                continue;
 
-        this.mathematicaBinDir = mathematicaBinDir;
+
+            System.out.println("Mathematica script executor:" + mathematicaScriptExecutor.getAbsolutePath());
+            dir = s;
+            break;
+        }
+        this.mathematicaBinDir = dir;
         temporaryDir = System.getProperty("java.io.tmpdir");
     }
 
@@ -118,10 +123,10 @@ public class ReduceEngineTest {
 
         Expression[] equations = {
                 Tensors.expression(parse("(d_p^a*d_q^b*d_r^c+"
-                        + "6*(-1/2+2*b**2)*g_pq*g^ab*d_r^c+"
-                        + "3*(-1+2)*n_p*n^a*d_q^b*d_r^c+"
-                        + "6*(1/2+2*b)*(n_p*n_q*g^ab*d_r^c+n^a*n^b*g_pq*d_r^c)+"
-                        + "6*(-1/4+2*b**2)*n_p*g_qr*n^a*g^bc)*iK^pqr_ijk"),
+                                + "6*(-1/2+2*b**2)*g_pq*g^ab*d_r^c+"
+                                + "3*(-1+2)*n_p*n^a*d_q^b*d_r^c+"
+                                + "6*(1/2+2*b)*(n_p*n_q*g^ab*d_r^c+n^a*n^b*g_pq*d_r^c)+"
+                                + "6*(-1/4+2*b**2)*n_p*g_qr*n^a*g^bc)*iK^pqr_ijk"),
 
                         SymmetrizeUpperLowerIndicesTransformation.symmetrizeUpperLowerIndices(parse("d_i^a*d_j^b*d_k^c"), true))
         };

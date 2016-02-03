@@ -24,10 +24,11 @@ package cc.redberry.core.groups.permutations;
 
 import cc.redberry.core.context.CC;
 import cc.redberry.core.number.NumberUtils;
+import cc.redberry.core.test.LongTest;
+import cc.redberry.core.test.PerformanceTest;
 import cc.redberry.core.utils.Indicator;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.math.BigInteger;
@@ -44,7 +45,7 @@ import static cc.redberry.core.groups.permutations.PermutationsTestUtils.*;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public class AlgorithmsBacktrackTest extends AbstractTestClass {
+public class AlgorithmsBacktrackTest extends AbstractPermutationTest {
 
     @Test
     public void testSameGroupSearch() {
@@ -153,7 +154,9 @@ public class AlgorithmsBacktrackTest extends AbstractTestClass {
     }
 
     @Test
-    public void testSetwiseStabilizer1_raw_WithGap_longtest() throws Exception {
+    @TestWithGAP
+    @LongTest
+    public void testSetwiseStabilizer1_raw() throws Exception {
         GapGroupsInterface gap = getGapInterface();
         for (int degree = 4; degree < 50; ++degree) {
             int nrPrimitiveGroups = gap.nrPrimitiveGroups(degree);
@@ -203,7 +206,9 @@ public class AlgorithmsBacktrackTest extends AbstractTestClass {
     }
 
     @Test
-    public void testSetwiseStabilizer2_raw_WithGap_PerformanceTest() throws Exception {
+    @TestWithGAP
+    @PerformanceTest
+    public void testSetwiseStabilizer2_raw() throws Exception {
 
         DescriptiveStatistics statistics = new DescriptiveStatistics();
         int scanned = 0;
@@ -255,7 +260,9 @@ public class AlgorithmsBacktrackTest extends AbstractTestClass {
 
 
     @Test
-    public void testSetwiseStabilizer2_raw_visited_nodes_stat_WithGap_PerformanceTest() throws Exception {
+    @TestWithGAP
+    @PerformanceTest
+    public void testSetwiseStabilizer2_raw_visited_nodes_stat() throws Exception {
         DescriptiveStatistics orders = new DescriptiveStatistics();
         DescriptiveStatistics visited = new DescriptiveStatistics();
         GapGroupsInterface gap = getGapInterface();
@@ -312,7 +319,8 @@ public class AlgorithmsBacktrackTest extends AbstractTestClass {
     }
 
     @Test
-    public void testSetwiseStabilizer3_raw_all_set_WithGap() throws Exception {
+    @TestWithGAP
+    public void testSetwiseStabilizer3_raw_all_set() throws Exception {
         DescriptiveStatistics visited = new DescriptiveStatistics();
         int scanned = 0;
         GapGroupsInterface gap = getGapInterface();
@@ -486,7 +494,8 @@ public class AlgorithmsBacktrackTest extends AbstractTestClass {
     }
 
     @Test
-    public void testLeftCosetRepresentatives3_WithGap() {
+    @TestWithGAP
+    public void testLeftCosetRepresentatives3() {
         DescriptiveStatistics visited = new DescriptiveStatistics();
         int scanned = 0;
         GapGroupsInterface gap = getGapInterface();
@@ -577,7 +586,9 @@ public class AlgorithmsBacktrackTest extends AbstractTestClass {
     }
 
     @Test
-    public void testIntersection5_longTest_withGap() {
+    @TestWithGAP
+    @LongTest
+    public void testIntersection5() {
         long redberryTiming = 0, gapTiming = 0, start;
         GapGroupsInterface gap = getGapInterface();
         for (int degree = 4; degree < 25; ++degree) {

@@ -204,6 +204,15 @@ public final class Product extends MultiTensor {
         return indexlessData.length + (factor == Complex.ONE ? 0 : 1);
     }
 
+    /**
+     * Returns the size of data part (i.e. including only those terms that have nonempty indices).
+     *
+     * @return size of data part (i.e. including only those terms that have nonempty indices)
+     */
+    public int sizeOfDataPart() {
+        return data.length;
+    }
+
     @Override
     public Tensor set(int i, Tensor tensor) {
         if (i >= size() || i < 0)
@@ -427,6 +436,15 @@ public final class Product extends MultiTensor {
      */
     public Tensor[] getIndexless() {
         return indexlessData.clone();
+    }
+
+    /**
+     * Returns i-th element of indexless data.
+     *
+     * @return i-th element of indexless data
+     */
+    public Tensor getIndexless(int i) {
+        return indexlessData[i];
     }
 
     /**

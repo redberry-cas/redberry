@@ -22,11 +22,13 @@
  */
 package cc.redberry.core.indexmapping;
 
-import cc.redberry.core.AbstractRedberryTestClass;
 import cc.redberry.core.TAssert;
 import cc.redberry.core.context.CC;
 import cc.redberry.core.context.OutputFormat;
-import cc.redberry.core.groups.permutations.*;
+import cc.redberry.core.groups.permutations.Permutation;
+import cc.redberry.core.groups.permutations.PermutationGroup;
+import cc.redberry.core.groups.permutations.Permutations;
+import cc.redberry.core.groups.permutations.RandomPermutation;
 import cc.redberry.core.indices.IndicesFactory;
 import cc.redberry.core.indices.IndicesUtils;
 import cc.redberry.core.indices.SimpleIndices;
@@ -37,6 +39,8 @@ import cc.redberry.core.parser.TokenType;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.tensor.Tensors;
 import cc.redberry.core.tensor.random.RandomTensor;
+import cc.redberry.core.test.RedberryTest;
+import cc.redberry.core.test.TestUtils;
 import cc.redberry.core.utils.TensorUtils;
 import org.apache.commons.math3.random.RandomGenerator;
 import org.junit.Test;
@@ -46,7 +50,7 @@ import org.junit.Test;
  * @author Stanislav Poslavsky
  */
 public class EqualsTest
-        extends AbstractRedberryTestClass {
+        extends RedberryTest {
 
     private static ParseToken rewriteTensor(Tensor tensor, RandomGenerator rg) {
         String sTensor = tensor.toString(OutputFormat.Redberry);
@@ -98,13 +102,8 @@ public class EqualsTest
     }
 
     @Test
-    public void test2_longTest() {
-        testNonTrivialGroups(500, 20, 0, 1);
-    }
-
-    @Test
     public void test2() {
-        testNonTrivialGroups(50, 15, 0, 1);
+        testNonTrivialGroups(TestUtils.its(50, 500), 20, 0, 1);
     }
 
     @Test

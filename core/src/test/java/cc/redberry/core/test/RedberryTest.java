@@ -20,44 +20,29 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
-package cc.redberry.core;
+package cc.redberry.core.test;
 
-import cc.redberry.core.groups.permutations.GapGroupsInterface;
 import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.rules.TestName;
 
+import static cc.redberry.core.test.TestUtils.doLongTests;
+import static cc.redberry.core.test.TestUtils.doPerformanceTests;
+
 /**
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public class AbstractRedberryTestClass {
-
+public class RedberryTest {
     @Rule
     public TestName name = new TestName();
 
     @Before
-    public void beforeMethod() {
-        if (name.getMethodName().toLowerCase().contains("performancetest"))
-            Assume.assumeTrue(doTestPerformance());
-        if (name.getMethodName().toLowerCase().contains("longtest"))
-            Assume.assumeTrue(doLongTest());
-    }
-
-    private static Boolean testPerformance;
-
-    protected static boolean doTestPerformance() {
-        if (testPerformance == null)
-            testPerformance = Boolean.valueOf(System.getProperty("testPerformance"));
-        return testPerformance.booleanValue();
-    }
-
-    private static Boolean doLongTest = null;
-
-    protected boolean doLongTest() {
-        if (doLongTest != null)
-            return doLongTest.booleanValue();
-        return doLongTest = Boolean.valueOf(System.getProperty("longTest"));
+    public void beforeMethod() throws Exception {
+        if (getClass().getMethod(name.getMethodName()).isAnnotationPresent(LongTest.class))
+            Assume.assumeTrue(doLongTests());
+        if (getClass().getMethod(name.getMethodName()).isAnnotationPresent(PerformanceTest.class))
+            Assume.assumeTrue(doPerformanceTests());
     }
 }

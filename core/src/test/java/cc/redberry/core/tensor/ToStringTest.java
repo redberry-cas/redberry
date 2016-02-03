@@ -33,6 +33,7 @@ import cc.redberry.core.parser.ParserIndices;
 import cc.redberry.core.parser.preprocessor.GeneralIndicesInsertion;
 import cc.redberry.core.tensor.iterator.FromChildToParentIterator;
 import cc.redberry.core.tensor.random.RandomTensor;
+import cc.redberry.core.test.TestUtils;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -216,12 +217,7 @@ public class ToStringTest {
 
     @Test
     public void test17Random() throws Exception {
-        testRandomRedberry(100);
-    }
-
-    @Test
-    public void test17Random_longtest() throws Exception {
-        testRandomRedberry(1000);
+        testRandomRedberry(TestUtils.its(100, 1000));
     }
 
     @Test

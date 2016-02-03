@@ -22,21 +22,16 @@
  */
 package cc.redberry.core.groups.permutations;
 
-import cc.redberry.core.context.CC;
-import cc.redberry.core.groups.permutations.*;
 import org.junit.Assert;
 import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-
 /**
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public class GapGroupsInterfaceTest extends AbstractTestClass {
+public class GapGroupsInterfaceTest extends AbstractPermutationTest {
     @Before
     public void beforeMethod() {
         Assume.assumeTrue(getGapInterface() != null);
@@ -64,7 +59,8 @@ public class GapGroupsInterfaceTest extends AbstractTestClass {
     }
 
     @Test
-    public void testEvaluateToBigInteger1_WithGap() throws Exception {
+    @TestWithGAP
+    public void testEvaluateToBigInteger1() throws Exception {
         GapGroupsInterface gap = getGapInterface();
         gap.evaluateToBigInteger("Order(PrimitiveGroup(58,1));");
     }

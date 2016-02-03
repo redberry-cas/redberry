@@ -952,7 +952,7 @@ class Redberry {
     }
 
     private static final class SubstitutionContainer implements Transformation {
-        final List expressions;
+        final List<Expression> expressions;
 
         SubstitutionContainer(expressions) {
             this.expressions = expressions
