@@ -26,6 +26,8 @@ import cc.redberry.core.combinatorics.IntCombinationPermutationGenerator;
 import cc.redberry.core.combinatorics.IntCombinationsGenerator;
 import cc.redberry.core.context.CC;
 import cc.redberry.core.number.NumberUtils;
+import cc.redberry.core.test.LongTest;
+import cc.redberry.core.test.PerformanceTest;
 import cc.redberry.core.utils.ArraysUtils;
 import cc.redberry.core.utils.IntComparator;
 import cc.redberry.core.utils.MathUtils;
@@ -41,13 +43,15 @@ import org.junit.Test;
 import java.math.BigInteger;
 import java.util.*;
 
+import static cc.redberry.core.test.TestUtils.doLongTests;
+import static cc.redberry.core.test.TestUtils.its;
 import static org.junit.Assert.*;
 
 /**
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public class PermutationGroupTest extends AbstractTestClass {
+public class PermutationGroupTest extends AbstractPermutationTest {
     @Test
     public void test1() {
         Permutation b, c;
@@ -323,7 +327,8 @@ public class PermutationGroupTest extends AbstractTestClass {
     }
 
     @Test
-    public void testPointwiseStabilizer1_WithGap() {
+    @TestWithGAP
+    public void testPointwiseStabilizer1() {
         PermutationGroup group = getGapInterface().primitiveGroup(23, 1);
         List<BSGSElement> bsgs = group.getBSGS();
         int[] base = group.getBase();
@@ -340,7 +345,8 @@ public class PermutationGroupTest extends AbstractTestClass {
     }
 
     @Test
-    public void testPointwiseStabilizer2_WithGap() {
+    @TestWithGAP
+    public void testPointwiseStabilizer2() {
         GapGroupsInterface gap = getGapInterface();
         for (int degree = 4; degree < 50; ++degree) {
             int nrPrimitiveGroups = gap.nrPrimitiveGroups(degree);
@@ -366,7 +372,9 @@ public class PermutationGroupTest extends AbstractTestClass {
     }
 
     @Test
-    public void testPointwiseStabilizer3_WithGap_longTest() {
+    @TestWithGAP
+    @LongTest
+    public void testPointwiseStabilizer3() {
         GapGroupsInterface gap = getGapInterface();
         for (int asa = 0; asa < 10; ++asa) {
             for (int degree = 4; degree < 50; ++degree) {
@@ -419,7 +427,8 @@ public class PermutationGroupTest extends AbstractTestClass {
     }
 
     @Test
-    public void testSetwiseStabilizer1_WithGap() {
+    @TestWithGAP
+    public void testSetwiseStabilizer1() {
         PermutationGroup group = getGapInterface().primitiveGroup(12, 0);
         PermutationGroup stab = group.setwiseStabilizer(0, 1, 2);
         assertTrue(group.containsSubgroup(stab));
@@ -575,7 +584,9 @@ public class PermutationGroupTest extends AbstractTestClass {
 
 
     @Test
-    public void testMappingPerformance1_WithGap_PerformanceTest() {
+    @TestWithGAP
+    @PerformanceTest
+    public void testMappingPerformance1() {
         GapGroupsInterface gap = getGapInterface();
         for (int degree = 4; degree < 50; ++degree) {
             int nrPrimitiveGroups = gap.nrPrimitiveGroups(degree);
@@ -726,7 +737,8 @@ public class PermutationGroupTest extends AbstractTestClass {
     }
 
     @Test
-    public void testNormalClosure1_WithGap() {
+    @TestWithGAP
+    public void testNormalClosure1_with_gap() {
         GapGroupsInterface gap = getGapInterface();
         int degree = 157, i = 6, j = 8;
         System.out.println(gap.nrPrimitiveGroups(degree));
@@ -738,7 +750,8 @@ public class PermutationGroupTest extends AbstractTestClass {
     }
 
     @Test
-    public void testDerivedSubgroup1_WithGap() {
+    @TestWithGAP
+    public void testDerivedSubgroup1() {
         GapGroupsInterface gap = getGapInterface();
         for (int degree = 4; degree < 50; degree += 5) {
             int nrPrimitiveGroups = gap.nrPrimitiveGroups(degree);
@@ -754,7 +767,9 @@ public class PermutationGroupTest extends AbstractTestClass {
     }
 
     @Test
-    public void testDerivedSubgroup1_WithGap_longtest() {
+    @TestWithGAP
+    @LongTest
+    public void testDerivedSubgroup1_long_test() {
         GapGroupsInterface gap = getGapInterface();
         for (int degree = 4; degree < 50; ++degree) {
             int nrPrimitiveGroups = gap.nrPrimitiveGroups(degree);
@@ -802,7 +817,8 @@ public class PermutationGroupTest extends AbstractTestClass {
     }
 
     @Test
-    public void testIsSymOrAlt2_WithGap() {
+    @TestWithGAP
+    public void testIsSymOrAlt2() {
         GapGroupsInterface gap = getGapInterface();
         for (int degree = 3; degree < 150; degree += 5) {
             for (int i = 0; i < gap.nrPrimitiveGroups(degree); i += 2) {
@@ -815,7 +831,8 @@ public class PermutationGroupTest extends AbstractTestClass {
     }
 
     @Test
-    public void testIsSymOrAlt2a_WithGap() {
+    @TestWithGAP
+    public void testIsSymOrAlt2a() {
         GapGroupsInterface gap = getGapInterface();
         gap.evaluate("g:= PrimitiveGroup(128, 7);");
         PermutationGroup p = gap.primitiveGroup(128, 6);
@@ -824,7 +841,9 @@ public class PermutationGroupTest extends AbstractTestClass {
     }
 
     @Test
-    public void testIsSymOrAlt2_WithGap_longtest() {
+    @TestWithGAP
+    @LongTest
+    public void testIsSymOrAlt2_long_test() {
         GapGroupsInterface gap = getGapInterface();
         for (int degree = 3; degree < 150; ++degree) {
             for (int i = 0; i < gap.nrPrimitiveGroups(degree); ++i) {
@@ -899,7 +918,8 @@ public class PermutationGroupTest extends AbstractTestClass {
     }
 
     @Test
-    public void testCenter_WithGap() {
+    @TestWithGAP
+    public void testCenter() {
         GapGroupsInterface gap = getGapInterface();
         for (int degree = 3; degree < 50; ++degree) {
             for (int i = 0; i < gap.nrPrimitiveGroups(degree); ++i) {
@@ -987,7 +1007,8 @@ public class PermutationGroupTest extends AbstractTestClass {
     }
 
     @Test
-    public void testPointwiseStabilizerRestricted2_WithGap() {
+    @TestWithGAP
+    public void testPointwiseStabilizerRestricted2_with_gap() {
         GapGroupsInterface gap = getGapInterface();
         for (int degree = 4; degree < 50; ++degree) {
             int nrPrimitiveGroups = gap.nrPrimitiveGroups(degree);
@@ -1004,7 +1025,7 @@ public class PermutationGroupTest extends AbstractTestClass {
                 assertTrue(psr.degree() <= (degree - MathUtils.getSortedDistinct(set).length));
                 assertEquals(ps.order(), psr.order());
 
-                if (doLongTest()) {
+                if (doLongTests()) {
                     if (ps.order().compareTo(BigInteger.valueOf(1_000_000)) > 0)
                         continue;
                     gap.evaluateRedberryGroup("ps", ps.generators());
@@ -1051,7 +1072,8 @@ public class PermutationGroupTest extends AbstractTestClass {
     }
 
     @Test
-    public void testConjugate2_WithGap() {
+    @TestWithGAP
+    public void testConjugate2() {
         GapGroupsInterface gap = getGapInterface();
         for (int degree = 4; degree < 50; ++degree) {
             int nrPrimitiveGroups = gap.nrPrimitiveGroups(degree);
@@ -1251,7 +1273,7 @@ public class PermutationGroupTest extends AbstractTestClass {
 
         Map<Permutation, Integer> counts = new HashMap<>();
 
-        int N = doLongTest() ? 100000 : 10000;
+        int N = its(10000, 100000);
 
         int k = group.order().intValue();
 

@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2015:
+ * Copyright (c) 2010-2016:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -20,28 +20,18 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
+package cc.redberry.core.groups.permutations;
 
-
-import cc.redberry.core.context.ContextManager;
-import org.junit.runner.Description;
-import org.junit.runner.notification.RunListener;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public class GlobalRunListener extends RunListener {
-
-    public GlobalRunListener() {
-    }
-
-    @Override
-    public void testStarted(Description description) throws Exception {
-        ContextManager.initializeNew();
-    }
-
-    @Override
-    public void testIgnored(Description description) throws Exception {
-        System.out.println("###IGNORED: " + description.getMethodName());
-    }
+@Target(ElementType.METHOD)
+@Retention(RetentionPolicy.RUNTIME)
+public @interface TestWithGAP {
 }

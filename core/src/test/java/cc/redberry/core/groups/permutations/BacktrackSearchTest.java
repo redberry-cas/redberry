@@ -40,7 +40,7 @@ import static cc.redberry.core.groups.permutations.PermutationsTestUtils.RawSetw
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public class BacktrackSearchTest extends AbstractTestClass {
+public class BacktrackSearchTest extends AbstractPermutationTest {
 
     @Test
     public void testAll1() throws Exception {
@@ -149,7 +149,8 @@ public class BacktrackSearchTest extends AbstractTestClass {
 
 
     @Test
-    public void testAllPrimitive_WithGap() throws Exception {
+    @TestWithGAP
+    public void testAllPrimitive() throws Exception {
         GapGroupsInterface gap = getGapInterface();
         int scanned = 0;
         for (int degree = 4; degree < 50; ++degree) {

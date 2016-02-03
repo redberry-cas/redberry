@@ -22,7 +22,7 @@
  */
 package cc.redberry.core.transformations.substitutions;
 
-import cc.redberry.core.AbstractRedberryTestClass;
+import cc.redberry.core.test.RedberryTest;
 import cc.redberry.core.TAssert;
 import cc.redberry.core.combinatorics.IntPermutationsGenerator;
 import cc.redberry.core.context.CC;
@@ -34,6 +34,7 @@ import cc.redberry.core.number.Complex;
 import cc.redberry.core.parser.preprocessor.GeneralIndicesInsertion;
 import cc.redberry.core.tensor.*;
 import cc.redberry.core.tensor.random.RandomTensor;
+import cc.redberry.core.test.TestUtils;
 import cc.redberry.core.transformations.EliminateMetricsTransformation;
 import cc.redberry.core.transformations.Transformation;
 import cc.redberry.core.transformations.TransformationCollection;
@@ -54,7 +55,7 @@ import static cc.redberry.core.tensor.Tensors.*;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public class SubstitutionsTest extends AbstractRedberryTestClass {
+public class SubstitutionsTest extends RedberryTest {
 
     private static Tensor contract(Tensor tensor) {
         return EliminateMetricsTransformation.ELIMINATE_METRICS.transform(tensor);
@@ -1158,7 +1159,7 @@ public class SubstitutionsTest extends AbstractRedberryTestClass {
         TransformationCollection seqSubs = new TransformationCollection(bf);
         SubstitutionTransformation subs = new SubstitutionTransformation(exprs);
 
-        for (int i = 0; i < it(10, 100); i++) {
+        for (int i = 0; i < TestUtils.its(10, 100); i++) {
             RandomTensor rnd = new RandomTensor();
             rnd.clearNamespace();
             rnd.addToNamespace(parse("p1_a"), parse("p2_a"), parse("p3_a"), parse("p4_a"), parse("p5_a"));

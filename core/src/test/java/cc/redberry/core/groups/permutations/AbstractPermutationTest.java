@@ -22,31 +22,27 @@
  */
 package cc.redberry.core.groups.permutations;
 
-import cc.redberry.core.AbstractRedberryTestClass;
+import cc.redberry.core.test.RedberryTest;
 import cc.redberry.core.utils.ArraysUtils;
 import org.junit.Assume;
 import org.junit.Before;
-import org.junit.Rule;
-import org.junit.rules.TestName;
 
 import java.io.IOException;
-import java.util.concurrent.TimeUnit;
 
 /**
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public class AbstractTestClass
-        extends AbstractRedberryTestClass {
+public class AbstractPermutationTest extends RedberryTest {
 
     public GapGroupsInterface getGapInterface() {
         return getStaticInstance();
     }
 
     @Before
-    public void beforeMethod() {
+    public void beforeMethod() throws Exception {
         super.beforeMethod();
-        if (name.getMethodName().toLowerCase().contains("withgap"))
+        if (getClass().getMethod(name.getMethodName()).isAnnotationPresent(TestWithGAP.class))
             Assume.assumeTrue(getGapInterface() != null);
     }
 

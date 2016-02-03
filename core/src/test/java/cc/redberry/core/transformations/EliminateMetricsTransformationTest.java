@@ -30,6 +30,7 @@ import cc.redberry.core.tensor.Expression;
 import cc.redberry.core.tensor.ProductBuilder;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.tensor.Tensors;
+import cc.redberry.core.test.PerformanceTest;
 import cc.redberry.core.transformations.expand.ExpandTransformation;
 import cc.redberry.core.utils.TensorUtils;
 import org.junit.Ignore;
@@ -437,6 +438,7 @@ public class EliminateMetricsTransformationTest {
 
     @Ignore
     @Test(timeout = 3000L)
+    @PerformanceTest
     public void performanceTest1() {
         long start, stop;
         start = System.currentTimeMillis();

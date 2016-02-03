@@ -23,6 +23,7 @@
 package cc.redberry.groovy
 
 import cc.redberry.core.context.CC
+import cc.redberry.core.test.LongTest
 import cc.redberry.core.utils.TensorUtils
 import org.junit.Before
 import org.junit.Ignore
@@ -240,7 +241,8 @@ public class TestPhysicsExamples {
 
     @Ignore
     @Test
-    public void testComptonScatteringQCD_longTest() throws Exception {
+    @LongTest
+    public void testComptonScatteringQCD() throws Exception {
         use(Redberry) {
             //setting up matrix objects
             //unitary matrices

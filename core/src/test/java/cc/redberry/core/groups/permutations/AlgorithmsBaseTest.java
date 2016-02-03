@@ -24,6 +24,8 @@ package cc.redberry.core.groups.permutations;
 
 import cc.redberry.core.context.CC;
 import cc.redberry.core.number.NumberUtils;
+import cc.redberry.core.test.LongTest;
+import cc.redberry.core.test.PerformanceTest;
 import cc.redberry.core.utils.Timing;
 import gnu.trove.set.hash.TIntHashSet;
 import org.apache.commons.math3.random.Well1024a;
@@ -45,6 +47,7 @@ import static cc.redberry.core.groups.permutations.PermutationGroup.createPermut
 import static cc.redberry.core.groups.permutations.Permutations.createPermutation;
 import static cc.redberry.core.groups.permutations.RandomPermutation.random;
 import static cc.redberry.core.groups.permutations.RandomPermutation.randomness;
+import static cc.redberry.core.test.TestUtils.its;
 import static cc.redberry.core.utils.Timing.timing;
 import static org.junit.Assert.assertArrayEquals;
 
@@ -52,7 +55,7 @@ import static org.junit.Assert.assertArrayEquals;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public class AlgorithmsBaseTest extends AbstractTestClass {
+public class AlgorithmsBaseTest extends AbstractPermutationTest {
 
 ///////////////////////////////////////////// TEST FACTORIES ///////////////////////////////////////////////////////////
 
@@ -116,7 +119,8 @@ public class AlgorithmsBaseTest extends AbstractTestClass {
     }
 
     @Test
-    public void testCreateSymmetricGroup4_large_degree_longtest() throws Exception {
+    @LongTest
+    public void testCreateSymmetricGroup4_large_degree_long_test() throws Exception {
         int[] degrees = {107, 109, 110, 112};
         for (int degree : degrees) {
             List<BSGSElement> bsgs = createSymmetricGroupBSGS(degree);
@@ -149,7 +153,8 @@ public class AlgorithmsBaseTest extends AbstractTestClass {
     }
 
     @Test
-    public void testCreateSymmetricGroup5_large_degree_longtest() throws Exception {
+    @LongTest
+    public void testCreateSymmetricGroup5_large_degree_long_test() throws Exception {
         int[] degrees = {AlgorithmsBase.SMALL_DEGREE_THRESHOLD + 11, AlgorithmsBase.SMALL_DEGREE_THRESHOLD + 12};
         for (int degree : degrees) {
             List<BSGSElement> bsgs = createSymmetricGroupBSGS(degree);
@@ -211,7 +216,8 @@ public class AlgorithmsBaseTest extends AbstractTestClass {
     }
 
     @Test
-    public void testCreateAlternatingGroup2_large_degree_longtest() throws Exception {
+    @LongTest
+    public void testCreateAlternatingGroup2_large_degre() throws Exception {
         int[] degrees = {127, 128};
         for (int degree : degrees) {
             List<BSGSElement> bsgs = AlgorithmsBase.createAlternatingGroupBSGS(degree);
@@ -228,7 +234,8 @@ public class AlgorithmsBaseTest extends AbstractTestClass {
 ////////////////////////////////////////// TEST REMOVE REDUNDANT GENERATORS  ///////////////////////////////////////////
 
     @Test
-    public void testRemoveRedundant0_longtest() {
+    @LongTest
+    public void testRemoveRedundant0() {
         int degree = 20;
         int COUNT = 500;
         DescriptiveStatistics removed = new DescriptiveStatistics();
@@ -287,28 +294,13 @@ public class AlgorithmsBaseTest extends AbstractTestClass {
 
     @Test
     public void testRemoveRedundant2() {
-        final int COUNT = 10;//50;//100;
-        testRemoveRedundant(COUNT, true, false);
+        testRemoveRedundant(its(10, 50), true, false);
     }
 
     @Test
     public void testRemoveRedundant3() {
-        final int COUNT = 10;//50;//100;
-        testRemoveRedundant(COUNT, true, true);
+        testRemoveRedundant(its(10, 50), true, true);
     }
-
-    @Test
-    public void testRemoveRedundant2_longtest() {
-        final int COUNT = 50;//100;
-        testRemoveRedundant(COUNT, true, false);
-    }
-
-    @Test
-    public void testRemoveRedundant3_longtest() {
-        final int COUNT = 50;//100;
-        testRemoveRedundant(COUNT, true, true);
-    }
-
 
     private static void testRemoveRedundant(int COUNT, boolean applySchreierSims, boolean bringRandomness) {
         DescriptiveStatistics removed = new DescriptiveStatistics();
@@ -370,7 +362,8 @@ public class AlgorithmsBaseTest extends AbstractTestClass {
 
 
     @Test
-    public void testSchreierSims1_WithGap() throws Exception {
+    @TestWithGAP
+    public void testSchreierSims1_withGAP() throws Exception {
         GapGroupsInterface gap = getGapInterface();
         for (int degree = 2; degree < 100; ++degree) {
             int nrPrimitiveGroups = gap.nrPrimitiveGroups(degree);
@@ -384,7 +377,9 @@ public class AlgorithmsBaseTest extends AbstractTestClass {
     }
 
     @Test
-    public void testSchreierSims2_WithGap_PerformanceTest() throws Exception {
+    @TestWithGAP
+    @PerformanceTest
+    public void testSchreierSims2_performance() throws Exception {
         GapGroupsInterface gap = getGapInterface();
         for (int degree = 2; degree < 100; ++degree) {
             int nrPrimitiveGroups = gap.nrPrimitiveGroups(degree);
@@ -423,7 +418,8 @@ public class AlgorithmsBaseTest extends AbstractTestClass {
     }
 
     @Test
-    public void testRandomSchreierSim_WithGap() {
+    @TestWithGAP
+    public void testRandomSchreierSim() {
         double CL = 0.999;
         int trueBsgs = 0, total = 0;
         GapGroupsInterface gap = getGapInterface();
@@ -451,7 +447,9 @@ public class AlgorithmsBaseTest extends AbstractTestClass {
     }
 
     @Test
-    public void testRandomSchreierSim_WithGap_longtest() {
+    @TestWithGAP
+    @LongTest
+    public void testRandomSchreierSim_long() {
         double CL = 0.999;
         int trueBsgs = 0, total = 0;
         GapGroupsInterface gap = getGapInterface();
@@ -479,7 +477,8 @@ public class AlgorithmsBaseTest extends AbstractTestClass {
     }
 
     @Test
-    public void testRandomSchreierSimsWithOrder_WithGap() {
+    @TestWithGAP
+    public void testRandomSchreierSimsWithOrder() {
         GapGroupsInterface gap = getGapInterface();
         for (int degree = 2; degree < 70; ++degree) {
             int nrPrimitiveGroups = gap.nrPrimitiveGroups(degree);
@@ -503,7 +502,9 @@ public class AlgorithmsBaseTest extends AbstractTestClass {
 
 
     @Test
-    public void testRandomSchreierSimsWithOrder_WithGap_longtest() {
+    @TestWithGAP
+    @LongTest
+    public void testRandomSchreierSimsWithOrder_long() {
         GapGroupsInterface gap = getGapInterface();
         for (int degree = 2; degree < 100; ++degree) {
             int nrPrimitiveGroups = gap.nrPrimitiveGroups(degree);
@@ -560,7 +561,8 @@ public class AlgorithmsBaseTest extends AbstractTestClass {
 ////////////////////////////////////////////// TEST BASE CHANGE ////////////////////////////////////////////////////////
 
     @Test
-    public void testSwapAdjacentBasePoints1_longtest() {
+    @LongTest
+    public void testSwapAdjacentBasePoints1() {
         int degree = 15;
         int COUNT = 10;
         List<Permutation> source = new ArrayList<>();
@@ -652,7 +654,8 @@ public class AlgorithmsBaseTest extends AbstractTestClass {
     }
 
     @Test
-    public void testSwapAdjacentBasePoints2_WithGap() {
+    @TestWithGAP
+    public void testSwapAdjacentBasePoints2() {
         GapGroupsInterface gap = getGapInterface();
         for (int degree = 2; degree < 50; ++degree) {
             int nrPrimitiveGroups = gap.nrPrimitiveGroups(degree);
@@ -687,7 +690,9 @@ public class AlgorithmsBaseTest extends AbstractTestClass {
     }
 
     @Test
-    public void testSwapAdjacentBasePoints2_WithGap_longtest() {
+    @TestWithGAP
+    @LongTest
+    public void testSwapAdjacentBasePoints2_long_test() {
         GapGroupsInterface gap = getGapInterface();
         for (int degree = 2; degree < 20; ++degree) {
             int nrPrimitiveGroups = gap.nrPrimitiveGroups(degree);
@@ -830,7 +835,8 @@ public class AlgorithmsBaseTest extends AbstractTestClass {
     }
 
     @Test
-    public void testRebaseWithTranspositions2_WithGap() {
+    @TestWithGAP
+    public void testRebaseWithTranspositions2() {
         GapGroupsInterface gap = getGapInterface();
         for (int degree = 2; degree < 55; ++degree) {
             int nrPrimitiveGroups = gap.nrPrimitiveGroups(degree);
@@ -854,7 +860,9 @@ public class AlgorithmsBaseTest extends AbstractTestClass {
     }
 
     @Test
-    public void testRebaseWithTranspositions2_WithGap_longtest() {
+    @TestWithGAP
+    @LongTest
+    public void testRebaseWithTranspositions2_long_test() {
         GapGroupsInterface gap = getGapInterface();
         for (int degree = 2; degree < 55; ++degree) {
             int nrPrimitiveGroups = gap.nrPrimitiveGroups(degree);
@@ -878,7 +886,9 @@ public class AlgorithmsBaseTest extends AbstractTestClass {
     }
 
     @Test
-    public void testRebaseWithTranspositions3_WithGap_PerformanceTest() {
+    @TestWithGAP
+    @PerformanceTest
+    public void testRebaseWithTranspositions3() {
         DescriptiveStatistics timings = new DescriptiveStatistics();
         GapGroupsInterface gap = getGapInterface();
         for (int degree = 2; degree < 150; ++degree) {
@@ -973,7 +983,8 @@ public class AlgorithmsBaseTest extends AbstractTestClass {
     }
 
     @Test
-    public void testRebaseWithConjugationAndTranspositions1_WithGap() {
+    @TestWithGAP
+    public void testRebaseWithConjugationAndTranspositions1() {
         GapGroupsInterface gap = getGapInterface();
         for (int degree = 2; degree < 55; ++degree) {
             int nrPrimitiveGroups = gap.nrPrimitiveGroups(degree);
@@ -1000,7 +1011,9 @@ public class AlgorithmsBaseTest extends AbstractTestClass {
     }
 
     @Test
-    public void testRebaseWithConjugationAndTranspositions1_WithGap_longtest() {
+    @TestWithGAP
+    @LongTest
+    public void testRebaseWithConjugationAndTranspositions1_long_test() {
         GapGroupsInterface gap = getGapInterface();
         for (int degree = 2; degree < 55; ++degree) {
             int nrPrimitiveGroups = gap.nrPrimitiveGroups(degree);
@@ -1027,7 +1040,9 @@ public class AlgorithmsBaseTest extends AbstractTestClass {
     }
 
     @Test
-    public void testRebaseWithConjugationAndTranspositions2_WithGap_PerformanceTest() {
+    @TestWithGAP
+    @PerformanceTest
+    public void testRebaseWithConjugationAndTranspositions2() {
 
         DescriptiveStatistics timings = new DescriptiveStatistics();
         GapGroupsInterface gap = getGapInterface();
@@ -1102,7 +1117,8 @@ public class AlgorithmsBaseTest extends AbstractTestClass {
     }
 
     @Test
-    public void testRebaseFromScratch1_WithGap() {
+    @TestWithGAP
+    public void testRebaseFromScratch1() {
         GapGroupsInterface gap = getGapInterface();
         for (int degree = 30; degree < 45; ++degree) {
             int nrPrimitiveGroups = gap.nrPrimitiveGroups(degree);
@@ -1128,7 +1144,9 @@ public class AlgorithmsBaseTest extends AbstractTestClass {
     }
 
     @Test
-    public void testRebaseFromScratch1_WithGap_longtest() {
+    @TestWithGAP
+    @LongTest
+    public void testRebaseFromScratch1_long_test() {
         GapGroupsInterface gap = getGapInterface();
         for (int degree = 30; degree < 45; ++degree) {
             int nrPrimitiveGroups = gap.nrPrimitiveGroups(degree);
@@ -1154,7 +1172,9 @@ public class AlgorithmsBaseTest extends AbstractTestClass {
     }
 
     @Test
-    public void rebaseFromScratch2_WithGap_PerformanceTest() {
+    @TestWithGAP
+    @PerformanceTest
+    public void rebaseFromScratch2() {
         DescriptiveStatistics stat = new DescriptiveStatistics();
         GapGroupsInterface gap = getGapInterface();
         for (int degree = 2; degree < 55; ++degree) {

@@ -29,6 +29,7 @@ import cc.redberry.core.indices.IndexType;
 import cc.redberry.core.parser.preprocessor.GeneralIndicesInsertion;
 import cc.redberry.core.tensor.Expression;
 import cc.redberry.core.tensor.Tensor;
+import cc.redberry.core.test.RedberryTest;
 import cc.redberry.core.transformations.Transformation;
 import cc.redberry.core.transformations.TransformationCollection;
 import org.junit.Before;
@@ -44,7 +45,7 @@ import static cc.redberry.core.transformations.Transformation.IDENTITY;
 /**
  * Created by poslavsky on 02/01/16.
  */
-public class AbstractFeynCalcTest {
+public class AbstractFeynCalcTest extends RedberryTest {
     protected GeneralIndicesInsertion indicesInsertion;
     protected DiracOrderTransformation dOrder;
     protected DiracTraceTransformation dTrace;
@@ -59,6 +60,7 @@ public class AbstractFeynCalcTest {
 
     @Before
     public void setUp() throws Exception {
+        super.beforeMethod();
         setUp(System.currentTimeMillis());
     }
 
