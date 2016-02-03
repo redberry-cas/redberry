@@ -30,6 +30,11 @@ import cc.redberry.core.transformations.TransformationToStringAble;
 import cc.redberry.core.utils.ArraysUtils;
 import cc.redberry.core.utils.TensorUtils;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import static cc.redberry.core.transformations.substitutions.PrimitiveProductSubstitution.algorithm_with_simple_combinations;
+import static cc.redberry.core.transformations.substitutions.PrimitiveProductSubstitution.algorithm_with_simple_contractions;
 import static cc.redberry.core.utils.TensorUtils.shareSimpleTensors;
 
 /**
@@ -41,12 +46,13 @@ import static cc.redberry.core.utils.TensorUtils.shareSimpleTensors;
  */
 public final class SubstitutionTransformation implements TransformationToStringAble {
     private final PrimitiveSubstitution[] primitiveSubstitutions;
+    private final PrimitiveSubstitutions container;
     final boolean applyIfModified;
 
     private SubstitutionTransformation(PrimitiveSubstitution[] primitiveSubstitutions, boolean applyIfModified) {
         this.primitiveSubstitutions = primitiveSubstitutions;
         this.applyIfModified = applyIfModified;
-        sortPrimitiveSubstitutions();
+        this.container = create(this.primitiveSubstitutions);
     }
 
     /**
@@ -62,7 +68,7 @@ public final class SubstitutionTransformation implements TransformationToStringA
         primitiveSubstitutions = new PrimitiveSubstitution[expressions.length];
         for (int i = expressions.length - 1; i >= 0; --i)
             primitiveSubstitutions[i] = createPrimitiveSubstitution(expressions[i].get(0), expressions[i].get(1));
-        sortPrimitiveSubstitutions();
+        this.container = create(this.primitiveSubstitutions);
     }
 
     /**
@@ -99,7 +105,7 @@ public final class SubstitutionTransformation implements TransformationToStringA
         primitiveSubstitutions = new PrimitiveSubstitution[1];
         primitiveSubstitutions[0] = createPrimitiveSubstitution(from, to);
         this.applyIfModified = applyIfModified;
-        sortPrimitiveSubstitutions();
+        this.container = create(this.primitiveSubstitutions);
     }
 
 
@@ -149,7 +155,7 @@ public final class SubstitutionTransformation implements TransformationToStringA
         for (int i = 0; i < from.length; ++i)
             primitiveSubstitutions[i] = createPrimitiveSubstitution(from[i], to[i]);
         this.applyIfModified = applyIfModified;
-        sortPrimitiveSubstitutions();
+        this.container = create(this.primitiveSubstitutions);
     }
 
     private static boolean shareSimpleTensors0(Expression[] exprs) {
@@ -166,16 +172,6 @@ public final class SubstitutionTransformation implements TransformationToStringA
                 if (shareSimpleTensors(a, b))
                     return true;
         return false;
-    }
-
-    /**
-     * Put zero substitutions on first
-     */
-    private void sortPrimitiveSubstitutions() {
-        int zeros = 0;
-        for (int i = 0; i < primitiveSubstitutions.length; i++)
-            if (TensorUtils.isZeroOrIndeterminate(primitiveSubstitutions[i].to))
-                ArraysUtils.swap(primitiveSubstitutions, zeros++, i);
     }
 
     /**
@@ -201,13 +197,13 @@ public final class SubstitutionTransformation implements TransformationToStringA
      * the inner substitutions as simple substitutions.
      */
     public SubstitutionTransformation asSimpleSubstitution() {
-        SubstitutionTransformation ss = new SubstitutionTransformation(primitiveSubstitutions.clone(), applyIfModified);
+        PrimitiveSubstitution[] primitiveSubstitutions = this.primitiveSubstitutions.clone();
         for (int i = primitiveSubstitutions.length - 1; i >= 0; --i)
-            ss.primitiveSubstitutions[i] =
+            primitiveSubstitutions[i] =
                     new PrimitiveSimpleTensorSubstitution(
-                            ss.primitiveSubstitutions[i].from,
-                            ss.primitiveSubstitutions[i].to);
-        return ss;
+                            primitiveSubstitutions[i].from,
+                            primitiveSubstitutions[i].to);
+        return new SubstitutionTransformation(primitiveSubstitutions, applyIfModified);
     }
 
     private static void checkConsistence(Tensor[] from, Tensor[] to) {
@@ -252,6 +248,30 @@ public final class SubstitutionTransformation implements TransformationToStringA
         return new PrimitiveSimpleTensorSubstitution(from, to);
     }
 
+//    @Override
+//    public Tensor transform(Tensor t) {
+//        SubstitutionIterator iterator = new SubstitutionIterator(t);
+//        Tensor current;
+//        boolean supposeIndicesAreAdded;
+//        while ((current = iterator.next()) != null) {
+//            if (!applyIfModified && iterator.isCurrentModified())
+//                continue;
+//            Tensor old = current;
+//            supposeIndicesAreAdded = false;
+//            for (PrimitiveSubstitution primitiveSubstitution : primitiveSubstitutions) {
+//                current = primitiveSubstitution.newTo(old, iterator);
+//                if (current != old) {
+//                    supposeIndicesAreAdded |= primitiveSubstitution.possiblyAddsDummies;
+//                    if (!applyIfModified)
+//                        break;
+//                }
+//                old = current;
+//            }
+//            iterator.set(current, supposeIndicesAreAdded);
+//        }
+//        return iterator.result();
+//    }
+
     @Override
     public Tensor transform(Tensor t) {
         SubstitutionIterator iterator = new SubstitutionIterator(t);
@@ -260,16 +280,35 @@ public final class SubstitutionTransformation implements TransformationToStringA
         while ((current = iterator.next()) != null) {
             if (!applyIfModified && iterator.isCurrentModified())
                 continue;
-            Tensor old = current;
+
             supposeIndicesAreAdded = false;
-            for (PrimitiveSubstitution primitiveSubstitution : primitiveSubstitutions) {
-                current = primitiveSubstitution.newTo(old, iterator);
-                if (current != old) {
-                    supposeIndicesAreAdded |= primitiveSubstitution.possiblyAddsDummies;
-                    if (!applyIfModified)
-                        break;
-                }
+            Tensor old = current;
+            if (current instanceof Product && container.pContractions.length != 0) {
+                PrimitiveProductSubstitution.ResultContained r = algorithm_with_simple_contractions(
+                        (Product) current, container.pContractions, iterator);
+                current = r.result;
+                supposeIndicesAreAdded |= r.possiblyAddsDummies;
+            }
+
+            if (current instanceof Product && (current == old || applyIfModified) && container.pCombinations.length != 0) {
+                PrimitiveProductSubstitution.ResultContained r = algorithm_with_simple_combinations(
+                        (Product) current, container.pCombinations, iterator);
+                current = r.result;
+                supposeIndicesAreAdded |= r.possiblyAddsDummies;
+            }
+
+
+            if (current == old || applyIfModified) {
                 old = current;
+                for (PrimitiveSubstitution primitiveSubstitution : container.others) {
+                    current = primitiveSubstitution.newTo(old, iterator);
+                    if (current != old) {
+                        supposeIndicesAreAdded |= primitiveSubstitution.possiblyAddsDummies;
+                        if (!applyIfModified)
+                            break;
+                    }
+                    old = current;
+                }
             }
             iterator.set(current, supposeIndicesAreAdded);
         }
@@ -292,5 +331,63 @@ public final class SubstitutionTransformation implements TransformationToStringA
     @Override
     public String toString() {
         return toString(CC.getDefaultOutputFormat());
+    }
+
+    private static PrimitiveSubstitutions create(final PrimitiveSubstitution... subs) {
+        List<PrimitiveProductSubstitution> simpleProductCombinations = new ArrayList<>();
+        List<PrimitiveProductSubstitution> simpleProductContractions = new ArrayList<>();
+        List<PrimitiveSubstitution> others = new ArrayList<>();
+
+        for (PrimitiveSubstitution ps : subs) {
+            if (ps instanceof PrimitiveProductSubstitution) {
+                PrimitiveProductSubstitution pps = (PrimitiveProductSubstitution) ps;
+                if (pps.simpleContractions)
+                    simpleProductContractions.add(pps);
+                else if (pps.simpleCombinations)
+                    simpleProductCombinations.add(pps);
+                else others.add(pps);
+            } else
+                others.add(ps);
+        }
+
+        return new PrimitiveSubstitutions(
+                to_array1(simpleProductCombinations),
+                to_array1(simpleProductContractions),
+                to_array0(others));
+    }
+
+    static PrimitiveSubstitution[] to_array0(List<PrimitiveSubstitution> list) {
+        return list.toArray(new PrimitiveSubstitution[list.size()]);
+    }
+
+    static PrimitiveProductSubstitution[] to_array1(List<PrimitiveProductSubstitution> list) {
+        return list.toArray(new PrimitiveProductSubstitution[list.size()]);
+    }
+
+    /**
+     * Put zero substitutions on first
+     */
+    private static void sortPrimitiveSubstitutions(final PrimitiveSubstitution[] primitiveSubstitutions) {
+        int zeros = 0;
+        for (int i = 0; i < primitiveSubstitutions.length; i++)
+            if (TensorUtils.isZeroOrIndeterminate(primitiveSubstitutions[i].to))
+                ArraysUtils.swap(primitiveSubstitutions, zeros++, i);
+    }
+
+    private static class PrimitiveSubstitutions {
+        final PrimitiveSubstitution[] others;
+        final PrimitiveProductSubstitution[] pCombinations;
+        final PrimitiveProductSubstitution[] pContractions;
+
+        PrimitiveSubstitutions(PrimitiveProductSubstitution[] pCombinations,
+                               PrimitiveProductSubstitution[] pContractions,
+                               PrimitiveSubstitution[] others) {
+            this.pCombinations = pCombinations;
+            this.pContractions = pContractions;
+            this.others = others;
+            sortPrimitiveSubstitutions(this.pCombinations);
+            sortPrimitiveSubstitutions(this.pContractions);
+            sortPrimitiveSubstitutions(this.others);
+        }
     }
 }

@@ -22,7 +22,6 @@
  */
 package cc.redberry.core.transformations.substitutions;
 
-import cc.redberry.core.test.RedberryTest;
 import cc.redberry.core.TAssert;
 import cc.redberry.core.combinatorics.IntPermutationsGenerator;
 import cc.redberry.core.context.CC;
@@ -34,6 +33,7 @@ import cc.redberry.core.number.Complex;
 import cc.redberry.core.parser.preprocessor.GeneralIndicesInsertion;
 import cc.redberry.core.tensor.*;
 import cc.redberry.core.tensor.random.RandomTensor;
+import cc.redberry.core.test.RedberryTest;
 import cc.redberry.core.test.TestUtils;
 import cc.redberry.core.transformations.EliminateMetricsTransformation;
 import cc.redberry.core.transformations.Transformation;
@@ -1174,7 +1174,7 @@ public class SubstitutionsTest extends RedberryTest {
             b = new ExpandTransformation(seqSubs).transform(b);
             b = seqSubs.transform(b);
 
-            TAssert.assertEquals(a, b);
+            TAssert.assertEquals(expand(a), expand(b));
         }
     }
 
