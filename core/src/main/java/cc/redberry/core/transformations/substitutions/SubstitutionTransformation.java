@@ -283,16 +283,17 @@ public final class SubstitutionTransformation implements TransformationToStringA
 
             supposeIndicesAreAdded = false;
             Tensor old = current;
-            if (current instanceof Product && container.pContractions.length != 0) {
+            if (current instanceof Product && ((Product) current).sizeOfDataPart() >= 2 && container.pContractions.length != 0) {
                 PrimitiveProductSubstitution.ResultContained r = algorithm_with_simple_contractions(
                         (Product) current, container.pContractions, iterator);
                 current = r.result;
                 supposeIndicesAreAdded |= r.possiblyAddsDummies;
             }
 
-            if (current instanceof Product && (current == old || applyIfModified) && container.pCombinations.length != 0) {
+            if (current instanceof Product && ((Product) current).sizeOfDataPart() >= 2
+                    && (current == old || applyIfModified) && container.pCombinations.length != 0) {
                 PrimitiveProductSubstitution.ResultContained r = algorithm_with_simple_combinations(
-                        (Product) current, container.pCombinations, iterator);
+                        ((Product) current), container.pCombinations, iterator);
                 current = r.result;
                 supposeIndicesAreAdded |= r.possiblyAddsDummies;
             }
