@@ -26,11 +26,14 @@ import cc.redberry.core.context.CC;
 import cc.redberry.core.context.OutputFormat;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.tensor.*;
+import cc.redberry.core.transformations.Transformation;
+import cc.redberry.core.transformations.TransformationCollection;
 import cc.redberry.core.transformations.TransformationToStringAble;
 import cc.redberry.core.utils.ArraysUtils;
 import cc.redberry.core.utils.TensorUtils;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static cc.redberry.core.transformations.substitutions.PrimitiveProductSubstitution.algorithm_with_simple_combinations;
@@ -172,6 +175,41 @@ public final class SubstitutionTransformation implements TransformationToStringA
                 if (shareSimpleTensors(a, b))
                     return true;
         return false;
+    }
+
+    /**
+     * Adds specified transformations to the list of substitutions
+     *
+     * @param subs additional substitutions
+     * @return a substitution transformation
+     */
+    public SubstitutionTransformation add(Transformation... subs) {
+        return add(Arrays.asList(subs));
+    }
+
+    /**
+     * Adds specified transformations to the list of substitutions
+     *
+     * @param subs additional substitutions
+     * @return a substitution transformation
+     */
+    public SubstitutionTransformation add(Iterable<Transformation> subs) {
+        List<PrimitiveSubstitution> r = new ArrayList<>();
+        r.addAll(Arrays.asList(primitiveSubstitutions));
+        add(r, subs);
+        return new SubstitutionTransformation(r.toArray(new PrimitiveSubstitution[r.size()]), applyIfModified);
+    }
+
+    private static void add(List<PrimitiveSubstitution> r, Iterable<Transformation> subs) {
+        for (Transformation tr : subs) {
+            if (tr instanceof SubstitutionTransformation)
+                r.addAll(Arrays.asList(((SubstitutionTransformation) tr).primitiveSubstitutions));
+            else if (tr instanceof Expression)
+                r.add(createPrimitiveSubstitution(((Expression) tr).get(0), ((Expression) tr).get(1)));
+            else if (tr instanceof TransformationCollection)
+                add(r, ((TransformationCollection) tr).getTransformations());
+            else throw new IllegalArgumentException("Not a substitution: " + tr);
+        }
     }
 
     /**

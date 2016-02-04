@@ -112,6 +112,9 @@ final class ProductOfGammas {
 
         int iPartition = 0, iSubgraphPosition = 0;
 
+        //cache
+        final IntArrayList gPositions = new IntArrayList(), g5Positions = new IntArrayList();
+
         @Override
         public ProductOfGammas take() {
             if (iPartition == partition.length)
@@ -126,9 +129,8 @@ final class ProductOfGammas {
 
             PrimitiveSubgraph currentSubgraph = partition[iPartition];
 
-            //todo cache!!!!!!!
-            IntArrayList gPositions = new IntArrayList(),
-                    g5Positions = new IntArrayList();
+            gPositions.clear();
+            g5Positions.clear();
 
             for (; ; ++iSubgraphPosition) {
                 if (iSubgraphPosition == currentSubgraph.size()) {

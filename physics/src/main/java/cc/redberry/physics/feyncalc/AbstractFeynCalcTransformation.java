@@ -50,6 +50,8 @@ public abstract class AbstractFeynCalcTransformation extends AbstractTransformat
     @Override
     public Tensor transform(Tensor tensor) {
         SubstitutionIterator iterator = new SubstitutionIterator(tensor);
+        IntArrayList modifiedElements = new IntArrayList();
+        List<Tensor> processed = new ArrayList<>();
         Tensor original;
         out:
         while ((original = iterator.next()) != null) {
@@ -68,9 +70,7 @@ public abstract class AbstractFeynCalcTransformation extends AbstractTransformat
             }
 
             Product product = (Product) current;
-            IntArrayList modifiedElements = new IntArrayList();
-            List<Tensor> processed = new ArrayList<>();
-
+            modifiedElements.clear(); processed.clear();
             ProductOfGammas.It gammas = new ProductOfGammas.It(gammaName, gamma5Name, product, matrixType, graphFilter());
             ProductOfGammas line;
             while ((line = gammas.take()) != null) {
@@ -97,8 +97,7 @@ public abstract class AbstractFeynCalcTransformation extends AbstractTransformat
             processed.add(result);
             result = expandAndEliminate.transform(
                     Tensors.multiplyAndRenameConflictingDummies(processed));
-            result = traceOfOne.transform(result);
-            result = deltaTrace.transform(result);
+            result = deltaTraces.transform(result);
             iterator.safeSet(result);
         }
         return iterator.result();

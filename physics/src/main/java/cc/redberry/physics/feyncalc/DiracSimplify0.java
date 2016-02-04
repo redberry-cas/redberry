@@ -145,8 +145,7 @@ final class DiracSimplify0 extends AbstractFeynCalcTransformation {
             r = FastTensors.multiplySumElementsOnFactor((Sum) r, m);
         else r = multiply(r, m);
         r = expandAndEliminate.transform(r);
-        r = traceOfOne.transform(r);
-        r = deltaTrace.transform(r);
+        r = deltaTraces.transform(r);
         return r;
     }
 

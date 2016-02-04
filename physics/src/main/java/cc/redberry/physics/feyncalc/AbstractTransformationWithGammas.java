@@ -27,7 +27,6 @@ import cc.redberry.core.context.NameAndStructureOfIndices;
 import cc.redberry.core.indices.IndexType;
 import cc.redberry.core.indices.Indices;
 import cc.redberry.core.indices.IndicesFactory;
-import cc.redberry.core.number.Complex;
 import cc.redberry.core.parser.ParseTokenTransformer;
 import cc.redberry.core.parser.preprocessor.ChangeIndicesTypesAndTensorNames;
 import cc.redberry.core.parser.preprocessor.TypesAndNamesTransformer;
@@ -37,14 +36,15 @@ import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.tensor.Tensors;
 import cc.redberry.core.transformations.Transformation;
 import cc.redberry.core.transformations.TransformationToStringAble;
+import cc.redberry.core.transformations.substitutions.SubstitutionTransformation;
 import cc.redberry.core.utils.ArraysUtils;
-import cc.redberry.core.utils.TensorUtils;
 
 import java.util.List;
 
 import static cc.redberry.core.indices.IndicesFactory.createSimple;
 import static cc.redberry.core.indices.IndicesUtils.*;
-import static cc.redberry.core.tensor.Tensors.*;
+import static cc.redberry.core.tensor.Tensors.parse;
+import static cc.redberry.core.tensor.Tensors.simpleTensor;
 
 /**
  * @author Dmitry Bolotin
@@ -58,6 +58,7 @@ public abstract class AbstractTransformationWithGammas implements Transformation
     protected final int gammaName, gamma5Name;
     protected final IndexType metricType, matrixType;
     protected final Expression deltaTrace, traceOfOne;
+    protected final SubstitutionTransformation deltaTraces;
     protected final ParseTokenTransformer tokenTransformer;
     protected final Transformation expandAndEliminate;
 
@@ -74,6 +75,7 @@ public abstract class AbstractTransformationWithGammas implements Transformation
         this.expandAndEliminate = options.expandAndEliminate;
         this.traceOfOne = (Expression) tokenTransformer.transform(CC.current().getParseManager().getParser().parse("d^a'_a'=" + options.traceOfOne)).toTensor();
         this.deltaTrace = (Expression) tokenTransformer.transform(CC.current().getParseManager().getParser().parse("d^a_a=" + options.dimension)).toTensor();
+        this.deltaTraces = new SubstitutionTransformation(new Expression[]{this.traceOfOne, this.deltaTrace}, true);
     }
 
     @Override
