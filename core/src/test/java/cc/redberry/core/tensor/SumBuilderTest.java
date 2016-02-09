@@ -207,4 +207,22 @@ public class SumBuilderTest {
         r = parseExpression("X_a = C_a").transform(r);
         TAssert.assertIndicesConsistency(r);
     }
+
+    @Test
+    public void test19() throws Exception {
+        Tensors.setSymmetric("T_abcd", "T_abc");
+        Tensor A = parse("T_abmj*T_defi*T^ab_c*T^cdj*T^i_n^m*T^efn");
+        Tensor B = parse("T_mnij*T_ebfa*T^mi_c*T^a_d^b*T^dne*T^fcj");
+        Tensor C = parse("T_abmj*T_defi*T^ab_c*T^cef*T^i_n^m*T^djn");
+
+        Assert.assertEquals(A.hashCode(), B.hashCode());
+        Assert.assertEquals(A.hashCode(), C.hashCode());
+        TAssert.assertNotEquals(A, C);
+
+        SumBuilder sb = new SumBuilder();
+        sb.put(parse("2"));
+        sb.put(A); sb.put(B); sb.put(C);
+        Assert.assertEquals(3, sb.size());
+        Assert.assertEquals(1, sb.sizeOfMap());
+    }
 }

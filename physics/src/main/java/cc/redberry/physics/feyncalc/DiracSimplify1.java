@@ -49,7 +49,7 @@ final class DiracSimplify1 extends AbstractFeynCalcTransformation {
         ParseToken[] ss = {s1, s2, s3, s4};
         this.subs = new Expression[ss.length];
         for (int i = 0; i < ss.length; ++i)
-            subs[i] = (Expression) deltaTrace.transform(tokenTransformer.transform(ss[i]).toTensor());
+            subs[i] = (Expression) deltaTraces.transform(tokenTransformer.transform(ss[i]).toTensor());
     }
 
     @Override
@@ -84,12 +84,11 @@ final class DiracSimplify1 extends AbstractFeynCalcTransformation {
             return null;
         lengths.sort();
 
-        Transformation[] overall = new Transformation[lengths.size() + 3];
+        Transformation[] overall = new Transformation[lengths.size() + 2];
         for (int i = lengths.size() - 1; i >= 0; --i)
             overall[i] = createSubstitution(lengths.get(i));
         overall[lengths.size()] = expandAndEliminate;
-        overall[lengths.size() + 1] = deltaTrace;
-        overall[lengths.size() + 2] = traceOfOne;
+        overall[lengths.size() + 1] = deltaTraces;
         return transform(Transformation.Util.applyUntilUnchanged(multiply(pg.toArray()), overall));
     }
 

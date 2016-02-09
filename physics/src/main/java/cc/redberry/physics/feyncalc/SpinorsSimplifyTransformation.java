@@ -292,8 +292,7 @@ public final class SpinorsSimplifyTransformation extends AbstractTransformationW
             simplified.add(product.remove(changed.toArray()));
             Tensor simple = expandAndEliminate.transform(multiplyAndRenameConflictingDummies(simplified));
             simple = diracSimplify.transform(simple);
-            simple = traceOfOne.transform(simple);
-            simple = deltaTrace.transform(simple);
+            simple = deltaTraces.transform(simple);
             simple = p2.transform(simple);
             iterator.safeSet(transform(simple));
         }

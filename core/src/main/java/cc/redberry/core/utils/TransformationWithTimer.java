@@ -62,6 +62,8 @@ public final class TransformationWithTimer implements TransformationToStringAble
 
     public void resetTiming() { elapsedTime = 0;}
 
+    public void incrementNanos(final long amount) { elapsedTime += amount;}
+
     @Override
     public Tensor transform(Tensor t) {
         long start = System.nanoTime();

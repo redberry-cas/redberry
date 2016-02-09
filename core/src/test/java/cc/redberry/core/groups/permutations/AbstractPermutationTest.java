@@ -23,6 +23,7 @@
 package cc.redberry.core.groups.permutations;
 
 import cc.redberry.core.test.RedberryTest;
+import cc.redberry.core.test.TestUtils;
 import cc.redberry.core.utils.ArraysUtils;
 import org.junit.Assume;
 import org.junit.Before;
@@ -43,7 +44,7 @@ public class AbstractPermutationTest extends RedberryTest {
     public void beforeMethod() throws Exception {
         super.beforeMethod();
         if (getClass().getMethod(name.getMethodName()).isAnnotationPresent(TestWithGAP.class))
-            Assume.assumeTrue(getGapInterface() != null);
+            Assume.assumeTrue(getGapInterface() != null && !TestUtils.skipGAPTests());
     }
 
     private static GapGroupsInterface gapStaticInstance = null;

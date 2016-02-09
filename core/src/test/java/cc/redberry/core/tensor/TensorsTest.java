@@ -32,6 +32,7 @@ import cc.redberry.core.indices.StructureOfIndices;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.parser.ParserIndices;
 import cc.redberry.core.transformations.expand.ExpandTransformation;
+import cc.redberry.core.utils.TensorHashCalculator;
 import cc.redberry.core.utils.TensorUtils;
 import org.junit.Test;
 
@@ -407,5 +408,12 @@ public class TensorsTest {
             sum = sum(sum, tAmps);
             sum = sum(sum, divideAndRenameConflictingDummies(num, den));
         }
+    }
+
+    @Test
+    public void testSum1() throws Exception {
+        Tensor a = parse("f_i + R_ijk*F^kj - R_kij*F^jk +  R_ijk*F^jk ");
+        Tensor b = parse("f_i + R_ijk*F^jk + R_ijk*F^kj - R_kij*F^jk");
+        TAssert.assertEquals(a, b);
     }
 }

@@ -542,4 +542,12 @@ public class ProductTest {
             TAssert.assertFalse(Product.includes(c, a));
         }
     }
+
+    @Test
+    public void testHash1() throws Exception {
+        addSymmetry("R_mnp", IndexType.LatinLower, false, 2, 1, 0);
+        Tensor a = parse("F^{jk}*R_{kji}");
+        Tensor b = parse("F^{kj}*R_{kji}");
+        Assert.assertFalse(a.hashCode() == b.hashCode());
+    }
 }

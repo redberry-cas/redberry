@@ -32,7 +32,7 @@ import static java.lang.Math.min;
  * also provides additional functionality like {@link #loadValueFrom(BitArray, int, int, int)} and {@link
  * #copyOfRange(int, int)}.
  */
-public class BitArray {
+public final class BitArray {
     public static final BitArray EMPTY = new BitArray(0);
 
     final int[] data;

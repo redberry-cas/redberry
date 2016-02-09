@@ -54,7 +54,7 @@ public final class RedberryPhysics {
      * @param momentumMasses "momentum - mass of particle"
      * @return resulting substitutions
      */
-    public static Transformation setMandelstam(Map<String, String> momentumMasses) {
+    public static SubstitutionTransformation setMandelstam(Map<String, String> momentumMasses) {
         if (momentumMasses.size() != 4)
             throw new IllegalArgumentException();
         Tensor[][] result = new Tensor[4][2];
@@ -73,7 +73,7 @@ public final class RedberryPhysics {
      * @param u notation for u
      * @return resulting substitutions
      */
-    public static Transformation setMandelstam(Map<String, String> momentumMasses, Object s, Object t, Object u) {
+    public static SubstitutionTransformation setMandelstam(Map<String, String> momentumMasses, Object s, Object t, Object u) {
         if (momentumMasses.size() != 4)
             throw new IllegalArgumentException();
         Tensor[][] result = new Tensor[4][2];
@@ -90,7 +90,7 @@ public final class RedberryPhysics {
      * @param momentumMasses "momentum - mass of particle"
      * @return resulting substitutions
      */
-    public static Transformation setMandelstam5(Map<String, String> momentumMasses) {
+    public static SubstitutionTransformation setMandelstam5(Map<String, String> momentumMasses) {
         if (momentumMasses.size() != 5)
             throw new IllegalArgumentException();
         Tensor[][] result = new Tensor[5][2];
@@ -111,7 +111,7 @@ public final class RedberryPhysics {
      * @param u2 notation for u2 = (k2 - k4)^2
      * @return resulting substitutions
      */
-    public static Transformation setMandelstam5(Map<String, String> momentumMasses,
+    public static SubstitutionTransformation setMandelstam5(Map<String, String> momentumMasses,
                                                 Object s, Object t1, Object t2, Object u1, Object u2) {
         if (momentumMasses.size() != 5)
             throw new IllegalArgumentException();
