@@ -132,16 +132,43 @@ public final class DiracTraceTransformation extends AbstractFeynCalcTransformati
                 : "G5s are not simplified";
         assert pg.graphType == GraphType.Cycle;
 
-        Tensor p = pg.toProduct();
-        if (pg.g5Positions.isEmpty())
-            return traceWithout5(p, pg.length);
-        else
-            return traceWith5(p, pg.length);
+        return trace(pg.toProduct(), pg.length, pg.g5Positions.isEmpty());
     }
 
-    private TIntObjectHashMap<Expression> cachedTraces = new TIntObjectHashMap<>();
+    private final TIntObjectHashMap<Tensor[]> globalCache = new TIntObjectHashMap<>();
 
-    private Expression getTraceSubstitution(int length) {
+    private Tensor trace(final Tensor productOfGammas, final int numberOfGammas, final boolean without5) {
+        if (!cache)
+            return trace_do_calc(productOfGammas, numberOfGammas, without5);
+
+        Tensor[] r = globalCache.get(productOfGammas.hashCode());
+        if (r == null) {
+            Tensor res = trace_do_calc(productOfGammas, numberOfGammas, without5);
+            globalCache.put(productOfGammas.hashCode(), new Tensor[]{productOfGammas, res});
+            return res;
+        }
+        Mapping mapping = IndexMappings.getFirst(r[0], productOfGammas);
+        if (mapping == null)
+            return trace_do_calc(productOfGammas, numberOfGammas, without5);
+
+        return ApplyIndexMapping.applyIndexMapping(r[1], mapping);
+    }
+
+    private Tensor trace_do_calc(final Tensor productOfGammas, final int numberOfGammas, final boolean without5) {
+        return without5 ? traceWithout5_do_calc(productOfGammas, numberOfGammas)
+                : traceWith5_do_calc(productOfGammas, numberOfGammas);
+    }
+
+    private Tensor traceWithout5_do_calc(Tensor productOfGammas, final int numberOfGammas) {
+        productOfGammas = getTraceSubstitution(numberOfGammas).transform(productOfGammas);
+        productOfGammas = EliminateMetricsTransformation.eliminate(productOfGammas);
+        productOfGammas = deltaTraces.transform(productOfGammas);
+        return productOfGammas;
+    }
+
+    private final TIntObjectHashMap<Expression> cachedTraces = new TIntObjectHashMap<>();
+
+    private Expression getTraceSubstitution(final int length) {
         Expression trace = cachedTraces.get(length);
         if (trace == null) {
             //product of gamma matrices as array
@@ -163,7 +190,7 @@ public final class DiracTraceTransformation extends AbstractFeynCalcTransformati
         return trace;
     }
 
-    private Tensor traceOfArray(Tensor[] data) {
+    private Tensor traceOfArray(final Tensor[] data) {
         //calculates trace using recursive algorithm
         if (data.length == 1)
             return Complex.ZERO;
@@ -188,49 +215,7 @@ public final class DiracTraceTransformation extends AbstractFeynCalcTransformati
         return multiply(Complex.ONE_HALF, sb.build());
     }
 
-    final TIntObjectHashMap<Expression> globalCache = new TIntObjectHashMap<>();
-
-    private Tensor traceWithout5(Tensor productOfGammas, int numberOfGammas) {
-        if (!cache)
-            return traceWithout5_do_calc(productOfGammas, numberOfGammas);
-
-        Expression r = globalCache.get(productOfGammas.hashCode());
-        if (r == null) {
-            Tensor res = traceWithout5_do_calc(productOfGammas, numberOfGammas);
-            globalCache.put(productOfGammas.hashCode(), expression(productOfGammas, res));
-            return res;
-        }
-        Mapping mapping = IndexMappings.getFirst(r.get(0), productOfGammas);
-        if (mapping == null)
-            return traceWithout5_do_calc(productOfGammas, numberOfGammas);
-
-        return ApplyIndexMapping.applyIndexMapping(r.get(1), mapping);
-    }
-
-    private Tensor traceWithout5_do_calc(Tensor productOfGammas, int numberOfGammas) {
-        productOfGammas = getTraceSubstitution(numberOfGammas).transform(productOfGammas);
-        productOfGammas = EliminateMetricsTransformation.eliminate(productOfGammas);
-        productOfGammas = deltaTraces.transform(productOfGammas);
-        return productOfGammas;
-    }
-
-    private Tensor traceWith5(Tensor productOfGammas, int numberOfGammas) {
-        if (!cache)
-            return traceWith5_do_calc(productOfGammas, numberOfGammas);
-        Expression r = globalCache.get(productOfGammas.hashCode());
-        if (r == null) {
-            Tensor res = traceWith5_do_calc(productOfGammas, numberOfGammas);
-            globalCache.put(productOfGammas.hashCode(), expression(productOfGammas, res));
-            return res;
-        }
-        Mapping mapping = IndexMappings.getFirst(r.get(0), productOfGammas);
-        if (mapping == null)
-            return traceWith5_do_calc(productOfGammas, numberOfGammas);
-
-        return ApplyIndexMapping.applyIndexMapping(r.get(1), mapping);
-    }
-
-    private Tensor traceWith5_do_calc(Tensor product, int numberOfGammas) {
+    private Tensor traceWith5_do_calc(Tensor product, final int numberOfGammas) {
         if (traceOf4GammasWith5 == null) {
             traceOf4GammasWith5 = (Expression) tokenTransformer.transform(traceOf4GammasWith5Token).toTensor();
             chiholmKahaneIdentity = (Expression) tokenTransformer.transform(chiholmKahaneToken).toTensor();
@@ -254,7 +239,7 @@ public final class DiracTraceTransformation extends AbstractFeynCalcTransformati
         return product;
     }
 
-    private static Tensor[] subArray(Tensor[] array, int a, int b) {
+    private static Tensor[] subArray(final Tensor[] array, final int a, final int b) {
         Tensor[] result = new Tensor[array.length - 2];
         int k = 0;
         for (int i = 0; i < array.length; ++i) {
@@ -265,7 +250,7 @@ public final class DiracTraceTransformation extends AbstractFeynCalcTransformati
         return result;
     }
 
-    private static void swap(Tensor[] array, int a, int b) {
+    private static void swap(final Tensor[] array, final int a, final int b) {
         Tensor temp = array[a];
         array[a] = array[b];
         array[b] = temp;
