@@ -140,8 +140,7 @@ public final class SumBijectionPort implements OutputPort<SumBijectionPort.Bijec
         return r;
     }
 
-    private static interface Mapper {
-
+    private interface Mapper {
         int[] nextMapping(Mapping buffer);
 
         void reset();
@@ -174,14 +173,14 @@ public final class SumBijectionPort implements OutputPort<SumBijectionPort.Bijec
         }
 
         public boolean test(Mapping buffer) {
-            for (int i = 1; i < from.length; ++i)
+            for (int i = 0; i < from.length; ++i)
                 if (!IndexMappings.testMapping(buffer, from[i], to[currentPermutation[i]]))
                     return false;
             return true;
         }
     }
 
-    private static interface MapperSource extends Mapper, OutputPort<Mapping> {
+    private interface MapperSource extends Mapper, OutputPort<Mapping> {
     }
 
     private static final class SinglePairSource extends AbstaractMapper

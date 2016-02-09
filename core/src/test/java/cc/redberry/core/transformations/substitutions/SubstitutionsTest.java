@@ -821,9 +821,9 @@ public class SubstitutionsTest extends RedberryTest {
     @Test
     public void testSum3() {
         for (int i = 0; i < 100; ++i) {
-            CC.resetTensorNames();
+            CC.reset();
             addSymmetry("R_mnp", IndexType.LatinLower, true, 2, 1, 0);
-            Tensor target = parse("f_i + R_ijk*F^jk + R_ijk*F^kj - R_kij*F^jk");
+            Tensor target = parse(   "f_i + R_ijk*F^jk + R_ijk*F^kj - R_kij*F^jk");
             target = parseExpression("f_m + R_bma*F^ba - R_ljm*F^lj =  R_bam*F^ab ").transform(target);
             TAssert.assertEquals(target, "0");
         }
