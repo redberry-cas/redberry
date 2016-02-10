@@ -283,27 +283,29 @@ public final class Algorithm1 {
         final int[] temp = new int[contractions.length];
         for (int i = from; i < to; ++i) {
             Arrays.fill(temp, 0);
-            int vHash = 137;
-            boolean freeOnly = true;
-            for (long contraction : contractions[i]) {
-                int toPosition = toPosition(contraction);
-                short diffId = data[i].getIndices().getPositionsInOrbits()[fromIPosition(contraction)];
-                if (toPosition == -1)
-                    vHash += 53 * (diffId + 1);
-                else {
-                    freeOnly = false;
-                    temp[toPosition] += JenkinWang32shift(17 * hashCodes[i]
-                            + 91 * hashCodes[toPosition]
-                            + 3671 * (diffId + 1)
-                            + 2797 * (toDiffId(contraction) + 1));
-                }
-            }
-            if (!freeOnly)
-                for (int j = 0; j < contractions.length; ++j)
-                    if (i != j)
-                        vHash += JenkinWang32shift(temp[j]);
+//            int vHash = 137;
+//            boolean freeOnly = true;
+//            for (long contraction : contractions[i]) {
+//                int toPosition = toPosition(contraction);
+//                short diffId = data[i].getIndices().getPositionsInOrbits()[fromIPosition(contraction)];
+//                if (toPosition == -1)
+//                    vHash += 53 * (diffId + 1);
+//                else {
+//                    freeOnly = false;
+//                    temp[toPosition] += JenkinWang32shift(17 * hashCodes[i]
+//                            + 91 * hashCodes[toPosition]
+//                            + 3671 * (diffId + 1)
+//                            + 2797 * (toDiffId(contraction) + 1));
+//                }
+//            }
+//            if (!freeOnly)
+//                for (int j = 0; j < contractions.length; ++j)
+//                    if (i != j)
+//                        vHash += JenkinWang32shift(temp[j]);
 
-            refinement[i - from] += 17 * vHash - JenkinWang32shift(temp[i]);
+//            int vHash = refine(temp, 2, data, i, contractions, hashCodes);
+//            refinement[i - from] += 17 * vHash - JenkinWang32shift(temp[i]);
+            refinement[i - from] = refine(temp, 2, data, i, contractions, hashCodes);
         }
         boolean refined = false;
         for (int i = 1; i < refinement.length; i++)
@@ -314,6 +316,37 @@ public final class Algorithm1 {
         if (refined)
             System.arraycopy(refinement, 0, hashCodes, from, refinement.length);
         return refined;
+    }
+
+    static int refine(final int[] temp, final int level,
+                      final Tensor[] data,
+                      final int i, final long[][] contractions,
+                      final int[] hashCodes) {
+        if (level == 0)
+            return 0;
+        final int jLevel = JenkinWang32shift(level);
+        int vHash = 137;
+        boolean freeOnly = true;
+        for (long contraction : contractions[i]) {
+            int toPosition = toPosition(contraction);
+            short diffId = data[i].getIndices().getPositionsInOrbits()[fromIPosition(contraction)];
+            if (toPosition == -1)
+                vHash += 53 * (diffId + 1) + jLevel;
+            else {
+                freeOnly = false;
+                temp[toPosition] += JenkinWang32shift(level
+                        + 17 * hashCodes[i]
+                        + 91 * hashCodes[toPosition]
+                        + 3671 * (diffId + 1)
+                        + 2797 * (toDiffId(contraction) + 1));
+                refine(temp, level - 1, data, toPosition, contractions, hashCodes);
+            }
+        }
+        if (!freeOnly)
+            for (int j = 0; j < contractions.length; ++j)
+                if (i != j)
+                    vHash += JenkinWang32shift(temp[j]);
+        return vHash - JenkinWang32shift(temp[i]);
     }
 
     static int contractionsHashCode(long[][] contractions) {

@@ -152,7 +152,16 @@ public class CollisionsTest {
                 Assert.assertEquals(hash, algorithm1_shuffle(tensors.get(i)).hash);
         }
     }
-
+    @Test
+    public void testAlgorithm1_SameHash1() throws Exception {
+        setSymmetric("T_ab", "T_abc", "T_abcd");
+        for (int k = 0; k < 100; k++) {
+            List<Tensor> tensors = generateListOfSameTensors(matrixRandomSource(true), 100, 6, 0);
+            int hash = algorithm1_shuffle(tensors.get(0)).hash;
+            for (int i = 1; i < tensors.size(); i++)
+                Assert.assertEquals(hash, algorithm1_shuffle(tensors.get(i)).hash);
+        }
+    }
     @Test
     public void testAlgorithm0_HashCollisions0() throws Exception {
         setSymmetric("T_ab", "T_abc");
@@ -176,6 +185,7 @@ public class CollisionsTest {
 
     @Test
     public void testAlgorithm0_HashCollisions0_Traces() throws Exception {
+        CC.resetTensorNames(123);
         setUpMatrices();
         List<Tensor> tts = generateListOfDiffTensors(matrixRandomSource(true), 50, 9, 1);
         Assert.assertTrue(tts.size() > 1);
@@ -197,6 +207,7 @@ public class CollisionsTest {
 
     @Test
     public void testAlgorithm1_HashCollisions0_Traces() throws Exception {
+        CC.resetTensorNames(123);
         setUpMatrices();
         List<Tensor> tts = generateListOfDiffTensors(matrixRandomSource(true), 50, 9, 1);
         Assert.assertTrue(tts.size() > 1);
