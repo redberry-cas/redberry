@@ -22,10 +22,11 @@
  */
 package cc.redberry.core.tensor;
 
+import cc.redberry.core.context.OutputFormat;
 import cc.redberry.core.indices.Indices;
 import cc.redberry.core.indices.IndicesFactory;
 import cc.redberry.core.number.Complex;
-import cc.redberry.core.utils.TensorHashCalculator;
+import cc.redberry.core.utils.HashingStrategy;
 import cc.redberry.core.utils.TensorUtils;
 import gnu.trove.map.hash.TIntObjectHashMap;
 
@@ -43,11 +44,11 @@ import static cc.redberry.core.transformations.ToNumericTransformation.toNumeric
  * @since 1.0
  */
 public abstract class AbstractSumBuilder implements TensorBuilder {
-
     final TIntObjectHashMap<List<FactorNode>> summands;
     Complex complex = Complex.ZERO;
     Indices indices = null;
     int[] sortedFreeIndices;
+    private int size = 0;
 
     /**
      * Creates builder with default initial capacity.
@@ -143,14 +144,15 @@ public abstract class AbstractSumBuilder implements TensorBuilder {
             return;
         }
 
-        Split split = split(tensor);
+        final Split split = split(tensor);
 
-        Integer hash = TensorHashCalculator.hashWithIndices(split.factor, sortedFreeIndices);//=split.factor.hashCode();
-        List<FactorNode> factorNodes = summands.get(hash);
+        final int hash = HashingStrategy.hashWithIndices(split.factor, sortedFreeIndices);//=split.factor.hashCode();
+        final List<FactorNode> factorNodes = summands.get(hash);
         if (factorNodes == null) {
-            List<FactorNode> fns = new ArrayList<>();
+            List<FactorNode> fns = new ArrayList<>(1);
             fns.add(new FactorNode(split.factor, split.getBuilder()));
             summands.put(hash, fns);
+            ++size;
         } else {
             Boolean b = null;
             for (FactorNode node : factorNodes)
@@ -161,15 +163,21 @@ public abstract class AbstractSumBuilder implements TensorBuilder {
                         node.put(split.summand, split.factor);
                     break;
                 }
-            if (b == null)
+            if (b == null) {
                 factorNodes.add(new FactorNode(split.factor, split.getBuilder()));
+                ++size;
+            }
         }
     }
 
     @Override
     public abstract TensorBuilder clone();
 
-    public int size(){
+    public int size() {
+        return size + (complex.isZero() ? 0 : 1);
+    }
+
+    public int sizeOfMap() {
         return summands.size();
     }
 

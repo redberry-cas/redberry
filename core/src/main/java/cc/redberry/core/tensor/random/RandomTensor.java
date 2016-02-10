@@ -34,8 +34,6 @@ import cc.redberry.core.utils.IntArrayList;
 import cc.redberry.core.utils.TensorUtils;
 import gnu.trove.set.hash.TIntHashSet;
 import org.apache.commons.math3.random.RandomGenerator;
-import org.apache.commons.math3.random.Well1024a;
-import org.apache.commons.math3.random.Well19937c;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -134,7 +132,7 @@ public final class RandomTensor {
             boolean withSymmetries,
             boolean generateNewDescriptors,
             long seed) {
-        this(minDiffNDs, maxDiffNDs, minIndices, maxIndices, withSymmetries, generateNewDescriptors, new Well1024a(seed));
+        this(minDiffNDs, maxDiffNDs, minIndices, maxIndices, withSymmetries, generateNewDescriptors, CC.getRandomGenerator());
     }
 
     /**
@@ -152,7 +150,7 @@ public final class RandomTensor {
             int[] maxIndices,
             boolean withSymmetries,
             boolean generateNewDescriptors) {
-        this(minDiffNDs, maxDiffNDs, minIndices, maxIndices, withSymmetries, generateNewDescriptors, new Well19937c());
+        this(minDiffNDs, maxDiffNDs, minIndices, maxIndices, withSymmetries, generateNewDescriptors, CC.getRandomGenerator());
     }
 
     public RandomGenerator getRandom() {

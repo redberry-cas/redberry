@@ -32,7 +32,6 @@ import cc.redberry.core.indices.StructureOfIndices;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.parser.ParserIndices;
 import cc.redberry.core.transformations.expand.ExpandTransformation;
-import cc.redberry.core.utils.TensorHashCalculator;
 import cc.redberry.core.utils.TensorUtils;
 import org.junit.Test;
 

@@ -32,7 +32,7 @@ import cc.redberry.core.indices.Indices;
 import cc.redberry.core.indices.IndicesUtils;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.tensor.Tensors;
-import cc.redberry.core.utils.TensorHashCalculator;
+import cc.redberry.core.utils.HashingStrategy;
 import cc.redberry.core.utils.TensorUtils;
 import org.junit.Assert;
 import org.junit.Ignore;
@@ -320,8 +320,8 @@ public class IndexMappingsTest {
     public void testScalars2() {
         Tensor from = Tensors.parse("P_{\\psi }^{\\psi }_{\\gamma \\delta }*P^{\\tau \\xi }_{\\kappa_1 \\lambda_1 }*n_{\\tau }*n_{\\xi }*n^{\\epsilon }*n^{\\mu }*n^{\\zeta }*n^{\\nu }*n^{\\beta }*g^{\\theta_1 \\iota_1 }");
         Tensor to = Tensors.parse("P_{\\upsilon }^{\\upsilon }_{\\kappa_1 \\lambda_1 }*P^{\\chi \\psi }_{\\gamma \\delta }*n_{\\chi }*n_{\\psi }*n^{\\epsilon }*n^{\\nu }*n^{\\zeta }*n^{\\mu }*n^{\\beta }*g^{\\theta_1 \\iota_1 }");
-        System.out.println(TensorHashCalculator.hashWithIndices(from));
-        System.out.println(TensorHashCalculator.hashWithIndices(to));
+        System.out.println(HashingStrategy.hashWithIndices(from));
+        System.out.println(HashingStrategy.hashWithIndices(to));
 
         IndexMappingBuffer buffer = IndexMappings.createPortOfBuffers(from, to).take();
         System.out.println(buffer);

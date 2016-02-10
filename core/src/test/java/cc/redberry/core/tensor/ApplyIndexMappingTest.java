@@ -568,7 +568,15 @@ public class ApplyIndexMappingTest {
         TAssert.assertEqualsExactly(t, "f_b*f^b");
     }
 
-//    @Test
+    @Test(expected = IllegalArgumentException.class)
+    public void testMatrixIndices() throws Exception {
+        Tensor t = parse("G_a'b'");
+        Mapping mapping = Mapping.valueOf("{_a' -> ^c', _b' -> ^d'}");
+        System.out.println(mapping);
+        System.out.println(mapping.transform(t));
+    }
+
+    //    @Test
 //    public void testDummiesContainer1() throws Exception {
 //        Tensor t = parse("T_{abc \\mu \\Lambda\\Gamma}^{abc \\mu \\Lambda\\Gamma}");
 //        DummiesContainer container = new DummiesContainer(TensorUtils.getAllDummyIndicesT(t));

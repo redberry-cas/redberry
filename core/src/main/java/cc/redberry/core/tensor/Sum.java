@@ -26,7 +26,7 @@ import cc.redberry.core.context.OutputFormat;
 import cc.redberry.core.indices.Indices;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.utils.ArraysUtils;
-import cc.redberry.core.utils.TensorHashCalculator;
+import cc.redberry.core.utils.HashingStrategy;
 import cc.redberry.core.utils.TensorUtils;
 
 import java.util.Arrays;
@@ -114,7 +114,7 @@ public final class Sum extends MultiTensor {
 
         public TensorWrapper(Tensor tensor) {
             this.tensor = tensor;
-            hashWithIndices = TensorHashCalculator.hashWithIndices(tensor);
+            hashWithIndices = HashingStrategy.hashWithIndices(tensor);
         }
 
         @Override

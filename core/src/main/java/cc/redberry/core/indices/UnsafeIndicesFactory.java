@@ -29,7 +29,7 @@ package cc.redberry.core.indices;
  * @author Stanislav Poslavsky
  * @since 1.0
  */
-public class UnsafeIndicesFactory {
+public final class UnsafeIndicesFactory {
 
     /**
      * Creates simple indices of simple tensor.

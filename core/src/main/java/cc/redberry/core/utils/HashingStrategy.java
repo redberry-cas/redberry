@@ -39,9 +39,8 @@ import java.util.Arrays;
  * @author Stanislav Poslavsky
  * @since 1.0
  */
-public final class TensorHashCalculator {
-
-    private TensorHashCalculator() {
+public final class HashingStrategy {
+    private HashingStrategy() {
     }
 
     private static int _hashWithIndices(final Tensor tensor, final int[] indices) {
@@ -68,7 +67,7 @@ public final class TensorHashCalculator {
                 return product.getFactor().isOneOrMinusOne()
                         ? dataHash : dataHash * product.getFactor().hashCode();
             }
-            //TODO may be refactor with noncommutative operation using stretcIds 
+            //TODO may be refactor with noncommutative operation using stretcIds
             for (int i = pc.size() - 1; i >= 0; --i)
                 hash += HashFunctions.JenkinWang32shift((int) pc.getStretchId(i)) * _hashWithIndices(pc.get(i), indices);
             return hash;
