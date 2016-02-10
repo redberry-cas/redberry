@@ -48,7 +48,7 @@ public final class GraphStructure {
     public final int[] components;
     public final int componentCount;
 
-    private GraphStructure(long[] freeContractions, long[][] contractions, int[] components, int componentCount) {
+    GraphStructure(long[] freeContractions, long[][] contractions, int[] components, int componentCount) {
         this.freeContractions = freeContractions;
         this.contractions = contractions;
         this.components = components;
@@ -200,7 +200,20 @@ public final class GraphStructure {
         return hash;
     }
 
-//    public int graphHashCodeWithIndices(final ProductContent pc, final int[] sortedIndices) {
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < contractions.length; i++) {
+            for (long l : contractions[i]) {
+                sb.append(i).append("_").append(getFromIndexId(l)).append(" -> ").append(getToTensorIndex(l)).append("_").append(getToIndexId(l));
+                sb.append("\n");
+            }
+
+        }
+        return sb.toString();
+    }
+
+    //    public int graphHashCodeWithIndices(final ProductContent pc, final int[] sortedIndices) {
 //        final Tensor[] data = pc.getDataReference();
 //        if (data.length == 1)
 //            return HashingStrategy._hashWithIndices(data[0], sortedIndices);

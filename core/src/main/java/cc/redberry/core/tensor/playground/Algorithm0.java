@@ -91,7 +91,7 @@ public final class Algorithm0 {
             for (i = 0; i < tInds.size(); ++i) {
                 index = tInds.get(i);
                 state = getStateInt(index);
-                info[state][pointer[state]] = packToLong(tensorIndex, stretchIndices[tensorIndex], diffIds[i]);
+                info[state][pointer[state]] = hashedInfo(tensorIndex, stretchIndices[tensorIndex], diffIds[i]);
                 indices[state][pointer[state]++] = getNameWithType(index);
             }
 
@@ -107,25 +107,23 @@ public final class Algorithm0 {
 
         //Creating input graph components
         final int[] components = GraphUtils.calculateConnectedComponents(
-                infoToTensorIndices(upperInfo), infoToTensorIndices(lowerInfo), data.length + 1);
-
-        //assert Arrays.equals(indices[0], indices[1]);
+                positionsFromHashedInfo(upperInfo), positionsFromHashedInfo(lowerInfo), data.length + 1);
         assert Arrays.equals(indices[0], indices[1]);
 
         final int[] pointers = new int[data.length];
         int freePointer = 0;
         for (i = 0; i < differentIndicesCount; ++i) {
             //Contractions from lower to upper
-            tensorIndex = (int) (info[0][i] >> 32);
-            long contraction = (0x0000FFFF00000000L & (info[0][i] << 32)) | (0xFFFFFFFFL & (info[1][i]));
+            tensorIndex = tPosition(info[0][i]);//int) (info[0][i] >> 32);
+            long contraction = hashedContraction(info[0][i], info[1][i]);//0x0000FFFF00000000L & (info[0][i] << 32)) | (0xFFFFFFFFL & (info[1][i]));
             if (tensorIndex == -1)
                 freeContraction[freePointer++] = contraction;
             else
                 contractions[tensorIndex][pointers[tensorIndex]++] = contraction;
 
             //Contractions from upper to lower
-            tensorIndex = (int) (info[1][i] >> 32);
-            contraction = (0x0000FFFF00000000L & (info[1][i] << 32)) | (0xFFFFFFFFL & (info[0][i]));
+            tensorIndex = tPosition(info[1][i]);// (int) (info[1][i] >> 32);
+            contraction = hashedContraction(info[1][i], info[0][i]); //(0x0000FFFF00000000L & (info[1][i] << 32)) | (0xFFFFFFFFL & (info[0][i]));
             if (tensorIndex == -1)
                 freeContraction[freePointer++] = contraction;
             else
@@ -146,7 +144,7 @@ public final class Algorithm0 {
         Arrays.sort(sortedIndices);
         Wrapper[] wrappers = new Wrapper[data.length];
         for (i = 0; i < data.length; ++i)
-            wrappers[i] = new Wrapper(hashCodes[i], components[i + 1], data[i], sortedIndices, contractions[i]);
+            wrappers[i] = new Wrapper(data[i].hashCode(), hashCodes[i], components[i + 1], data[i], sortedIndices, contractions[i]);
 
         ArraysUtils.quickSort(wrappers, data);
 
@@ -180,8 +178,6 @@ public final class Algorithm0 {
         return HashFunctions.Wang64to32shift(hash);
     }
 
-    static final long dummyTensorInfo = -65536;
-
     private static short[] calculateStretchIndices(final Tensor[] data) {
         final short[] stretchIndex = new short[data.length];
         //stretchIndex[0] = 0;
@@ -198,17 +194,30 @@ public final class Algorithm0 {
         return stretchIndex;
     }
 
-    private static long packToLong(final int tensorIndex, final short stretchIndex, final short id) {
-        return (((long) tensorIndex) << 32) | (0xFFFF0000L & (stretchIndex << 16)) | (0xFFFFL & id);
+    private static long hashedInfo(final int tPosition, final short tStretch, final short diffId) {
+        return (((long) tPosition) << 32) | (0xFFFF0000L & (tStretch << 16)) | (0xFFFFL & diffId);
     }
 
-    private static int[] infoToTensorIndices(final long[] info) {
+    static final long dummyTensorInfo = hashedInfo(-1, (short) -1, (short) 0);
+
+    private static int tPosition(final long info) {
+        return (int) (info >>> 32);
+    }
+
+    private static int[] positionsFromHashedInfo(final long[] info) {
         final int[] result = new int[info.length];
         for (int i = 0; i < info.length; ++i)
             result[i] = ((int) (info[i] >> 32)) + 1;
         return result;
     }
 
+    private static long hashedContraction(long lInfo, long uInfo) {
+        return (0x0000FFFF00000000L & (lInfo << 32)) | (0xFFFFFFFFL & uInfo);
+    }
+
+    private static long hashedContraction(short fromDiffId, short toStretch, short toDiffId) {
+        return (0x0000FFFF00000000L & (((long) fromDiffId) << 32)) | (0xFFFF0000L & (toStretch << 16)) | (0xFFFFL & toDiffId);
+    }
 
     private static int hc(Tensor t, int[] inds) {
         Indices ind = t.getIndices().getFree();
@@ -223,12 +232,14 @@ public final class Algorithm0 {
     }
 
     private static class Wrapper implements Comparable<Wrapper> {
+        final int tensorHash;
         final int graphHash;
         final int indicesHash;
         final int graphComponent;
         final long[] contractions;
 
-        private Wrapper(int graphHash, int graphComponent, Tensor t, int[] indices, long[] contractions) {
+        private Wrapper(int tensorHash, int graphHash, int graphComponent, Tensor t, int[] indices, long[] contractions) {
+            this.tensorHash = tensorHash;
             this.graphHash = graphHash;
             this.graphComponent = graphComponent;
             this.indicesHash = hc(t, indices);
@@ -237,7 +248,9 @@ public final class Algorithm0 {
 
         @Override
         public int compareTo(final Wrapper o) {
-            int c = Integer.compare(graphHash, o.graphHash);
+            int c = Integer.compare(tensorHash, o.tensorHash);
+            if (c == 0)
+                c = Integer.compare(graphHash, o.graphHash);
             if (c == 0)
                 c = Integer.compare(indicesHash, o.indicesHash);
             if (c == 0)

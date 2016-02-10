@@ -40,16 +40,17 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static cc.redberry.core.TAssert.assertEquals;
 import static cc.redberry.core.TAssert.assertTrue;
-import static cc.redberry.core.indices.IndexType.LatinLower;
-import static cc.redberry.core.indices.IndexType.Matrix1;
+import static cc.redberry.core.indices.IndexType.*;
 import static cc.redberry.core.indices.IndicesFactory.createAlphabetical;
 import static cc.redberry.core.indices.IndicesUtils.inverseIndexState;
 import static cc.redberry.core.tensor.Tensors.*;
 import static cc.redberry.core.tensor.playground.Algorithm0.algorithm0;
+import static cc.redberry.core.tensor.playground.Algorithm1.algorithm1;
 
 /**
  * @author Dmitry Bolotin
@@ -76,6 +77,15 @@ public class CollisionsTest {
             Tensor[] dataCopy = ((Product) tensor).getContent().getDataCopy();
             Permutations.shuffle(dataCopy, CC.getRandomGenerator());
             return algorithm0(dataCopy, tensor.getIndices());
+        }
+        throw new RuntimeException();
+    }
+
+    static ProductData algorithm1_shuffle(final Tensor tensor) {
+        if (tensor instanceof Product) {
+            Tensor[] dataCopy = ((Product) tensor).getContent().getDataCopy();
+            Permutations.shuffle(dataCopy, CC.getRandomGenerator());
+            return algorithm1(dataCopy, tensor.getIndices());
         }
         throw new RuntimeException();
     }
@@ -120,6 +130,30 @@ public class CollisionsTest {
     }
 
     @Test
+    public void testAlgorithm1_0() throws Exception {
+        CC.resetTensorNames(~90012345678L);
+        CC.setParserAllowsSameVariance(true);
+        Product t = (Product) parse("f_abc*f_apq*f_bpr*f_cqr");
+
+        System.out.println("Original:");
+        System.out.println(t.getContent().getStructureOfContractions());
+        System.out.println("\n\nAlgorithm1:");
+        ProductData pd = algorithm1_shuffle(t);
+        System.out.println(pd.content.structureOfContractions);
+    }
+
+    @Test
+    public void testAlgorithm1_SameHash0() throws Exception {
+        setSymmetric("T_ab", "T_abc", "T_abcd");
+        for (int k = 0; k < 100; k++) {
+            List<Tensor> tensors = generateListOfSameTensors(defaultRandomSource(), 100, 6, 0);
+            int hash = algorithm1_shuffle(tensors.get(0)).hash;
+            for (int i = 1; i < tensors.size(); i++)
+                Assert.assertEquals(hash, algorithm1_shuffle(tensors.get(i)).hash);
+        }
+    }
+
+    @Test
     public void testAlgorithm0_HashCollisions0() throws Exception {
         setSymmetric("T_ab", "T_abc");
         List<Tensor> tts = generateListOfDiffTensors(defaultRandomSource(), 5000, 6, 0);
@@ -158,30 +192,36 @@ public class CollisionsTest {
         assertEquals(hashSet_default.size(), hashSet_alg0.size());
 
         System.out.println("Diff: " + tts.size() + "  hash: " + hashSet_alg0.size());
+        //Diff: 41  hash: 1
     }
 
     @Test
-    public void testAlgorithm0_MatrixCollisions() throws Exception {
+    public void testAlgorithm1_HashCollisions0_Traces() throws Exception {
         setUpMatrices();
-        List<Tensor> tts = generateListOfDiffTensors(matrixRandomSource(true), 1000, 9, 1);
+        List<Tensor> tts = generateListOfDiffTensors(matrixRandomSource(true), 50, 9, 1);
+        Assert.assertTrue(tts.size() > 1);
         Assert.assertEquals(tts.size(), sum(tts).size());
-        Tensor tensor = tts.get(0);
+
+        TIntHashSet hashSet_default = new TIntHashSet();
+        TIntHashSet hashSet_alg1 = new TIntHashSet();
         for (Tensor tt : tts) {
-            System.out.println(tt);
-            System.out.println(TensorUtils.compare1(tt, tensor));
+            hashSet_alg1.add(algorithm1(tt).hash);
+            hashSet_default.add(tt.hashCode());
         }
+
+        assertTrue(tts.size() >= hashSet_alg1.size());
+//        assertEquals(hashSet_default.size(), hashSet_alg1.size());
+
+        System.out.println("Diff: " + tts.size() + "  hash: " + hashSet_alg1.size());
     }
 
     @Test
     public void test3() throws Exception {
-        Product parse = (Product) parse("f_a*f^ab");
-        System.out.println(algorithm0(parse.toArray(), parse.getIndices()).hash);
-
-        parse = (Product) parse("f_a*f^ba");
-        System.out.println(algorithm0(parse.toArray(), parse.getIndices()).hash);
-
-        parse = (Product) parse("f_a*f^ac");
-        System.out.println(algorithm0(parse.toArray(), parse.getIndices()).hash);
+        RandomSource def = defaultRandomSource();
+        for (int i = 0; i < 100; ++i) {
+            Tensor t = def.randomProduct(10, 4);
+            System.out.println(algorithm0_shuffle(t).hash == algorithm1_shuffle(t).hash);
+        }
     }
 
     static List<Tensor> generateListOfSameTensors(RandomSource randomSource, int size, int pSize, int freeIndices) {
@@ -269,6 +309,7 @@ public class CollisionsTest {
     static RandomSource matrixRandomSource(final boolean doTrace) {
         return new RandomSource() {
             int a = 0;
+
             @Override
             public Tensor randomProduct(int pSize, int indices) {
                 StringBuilder sb = new StringBuilder();

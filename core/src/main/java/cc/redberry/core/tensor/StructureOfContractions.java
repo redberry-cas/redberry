@@ -174,6 +174,19 @@ public final class StructureOfContractions {
         }
     }
 
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < contractions.length; i++) {
+            for (long l : contractions[i]) {
+                sb.append(i).append("_").append(getFromIndexId(l)).append(" -> ").append(getToTensorIndex(l)).append("_").append(getToIndexId(l));
+                sb.append("\n");
+            }
+
+        }
+        return sb.toString();
+    }
+
     public Contraction[] getContractedWith(int position) {
         long[] indicesContractions = contractions[position];
         int[] involvedTensors = new int[contractions.length];
