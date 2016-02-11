@@ -28,7 +28,6 @@ import cc.redberry.core.indices.IndicesUtils;
 import cc.redberry.core.tensor.Product;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.utils.ArraysUtils;
-import cc.redberry.core.utils.HashFunctions;
 
 import java.util.Arrays;
 
@@ -40,27 +39,27 @@ import static cc.redberry.core.utils.HashFunctions.JenkinWang32shift;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public final class Algorithm1 extends IAlgorithm {
-    public static final Algorithm1 ALGORITHM_1 = new Algorithm1("algorithm1");
+public class Algorithm3 extends IAlgorithm {
+    public static final Algorithm3 ALGORITHM_3 = new Algorithm3("algorithm3");
 
-    public Algorithm1(String name) {
+    public Algorithm3(String name) {
         super(name);
     }
 
     @Override
     ProductData calc0(Tensor t) {
-        return algorithm1(t);
+        return algorithm3(t);
     }
 
-    static boolean DO_REFINEMENT = true;
+    static final int REFINEMENT_LEVEL = 2;
 
-    static ProductData algorithm1(final Tensor tensor) {
+    static ProductData algorithm3(final Tensor tensor) {
         if (tensor instanceof Product)
-            return algorithm1(((Product) tensor).getContent().getDataCopy(), tensor.getIndices());
+            return algorithm3(((Product) tensor).getContent().getDataCopy(), tensor.getIndices());
         throw new RuntimeException();
     }
 
-    static ProductData algorithm1(final Tensor[] data, final Indices tIndices) {
+    static ProductData algorithm3(final Tensor[] data, final Indices tIndices) {
         //<- Important!
         Arrays.sort(data);
 
@@ -85,96 +84,42 @@ public final class Algorithm1 extends IAlgorithm {
         final long[][] contractions = new long[data.length][];
         final long[] freeContraction = new long[freeIndices.size()];
 
-        final long[][] hashedContractions = new long[data.length][];
-        final long[] hashedFreeContraction = new long[freeIndices.size()];
 
+        calculateInfo(data, freeIndices, info, indices, contractions);
+        assert Arrays.equals(indices[0], indices[1]);
 
-        calculateInfo(data, freeIndices, info, indices, hashedContractions);
+        int i;
+        final int[] hashCodes = new int[data.length];
+        for (i = 0; i < data.length; ++i)
+            hashCodes[i] = data[i].hashCode();
+        reCalculateContractions(differentIndicesCount, info, freeContraction, contractions);
+        refine(hashCodes, contractions, data);
 
         //Calculating connected components
         int[] components = GraphUtils.calculateConnectedComponents(
                 positionsFromInfo(upperInfo), positionsFromInfo(lowerInfo), data.length + 1);
-
-        //<-- Here we have mature info arrays
-
-        assert Arrays.equals(indices[0], indices[1]);
-
-
-        calculateHashedContractions(data, differentIndicesCount, stretchIndices, info, hashedFreeContraction, hashedContractions);
-
-        int i;
-        for (i = 0; i < data.length; i++)
-            Arrays.sort(hashedContractions[i]);
-        Arrays.sort(hashedFreeContraction);
-
-        final int[] hashCodes = new int[data.length];
-        for (i = 0; i < data.length; ++i)
-            hashCodes[i] = data[i].hashCode() + 91 * contractionsHashCode(hashedContractions[i]);
 
         //<- do additional sort
         final int[] sortedIndices = IndicesUtils.getIndicesNames(freeIndices);
         Arrays.sort(sortedIndices);
         final Wrapper[] wrappers = new Wrapper[data.length];
         for (i = 0; i < data.length; ++i)
-            wrappers[i] = new Wrapper(data[i].hashCode(), hashCodes[i], components[i + 1], data[i], sortedIndices, hashedContractions[i], contractions[i]);
+            wrappers[i] = new Wrapper(data[i].hashCode(), hashCodes[i], components[i + 1], data[i], sortedIndices);
 
         ArraysUtils.quickSort(wrappers, data);
 
-        for (i = 0; i < data.length; ++i) {
-            hashedContractions[i] = wrappers[i].hashedContractions;
-            contractions[i] = wrappers[i].contractions;
+        for (i = 0; i < data.length; ++i)
             hashCodes[i] = wrappers[i].graphHash;
-        }
 
-        //<- do hash refinement
-        if (DO_REFINEMENT) {
-            //recalculate info after sort!
-            calculateInfo(data, freeIndices, info, indices, contractions);
-            calculateContractions(differentIndicesCount, info, freeContraction, contractions);
-            int refinementBegin = 0;
-            boolean inStretch = false, successRefinement = false;
-            for (i = 1; i < data.length; ++i) {
-                if (hashCodes[i - 1] == hashCodes[i]) {
-                    if (!inStretch) {
-                        refinementBegin = i - 1;
-                        inStretch = true;
-                    }
-                } else {
-                    if (inStretch) {
-                        successRefinement |= refine(hashCodes, refinementBegin, i, contractions, data);
-                        inStretch = false;
-                    }
-                }
-            }
-            if (inStretch)
-                successRefinement |= refine(hashCodes, refinementBegin, data.length, contractions, data);
-
-            if (successRefinement) {
-                //again do additional sort
-                for (i = 0; i < data.length; ++i)
-                    wrappers[i] = new Wrapper(data[i].hashCode(), hashCodes[i], components[i + 1], data[i], sortedIndices, hashedContractions[i], contractions[i]);
-
-                ArraysUtils.quickSort(wrappers, data);
-
-                for (i = 0; i < data.length; ++i) {
-                    hashedContractions[i] = wrappers[i].hashedContractions;
-                    contractions[i] = wrappers[i].contractions;
-                    hashCodes[i] = wrappers[i].graphHash;
-                }
-            }
-
-            calculateInfo(data, freeIndices, info, indices, contractions);
-            calculateContractions(differentIndicesCount, info, freeContraction, contractions);
-            components = GraphUtils.calculateConnectedComponents(
-                    positionsFromInfo(upperInfo), positionsFromInfo(lowerInfo), data.length + 1);
-        }
+        calculateInfo(data, freeIndices, info, indices, contractions);
+        reCalculateContractions(differentIndicesCount, info, freeContraction, contractions);
+        components = GraphUtils.calculateConnectedComponents(
+                positionsFromInfo(upperInfo), positionsFromInfo(lowerInfo), data.length + 1);
 
         GraphStructure structureOfContractions = new GraphStructure(freeContraction, contractions, components, 1); //todo <- wrong components
         ContentData content = new ContentData(null, structureOfContractions, data, stretchIndices, hashCodes);
 
         int hashCode = Arrays.hashCode(hashCodes);
-        hashCode = 7 * hashCode + contractionsHashCode(hashedFreeContraction);
-        hashCode = 7 * hashCode + contractionsHashCode(hashedContractions);
         return new ProductData(data, tIndices, content, hashCode);
     }
 
@@ -215,56 +160,10 @@ public final class Algorithm1 extends IAlgorithm {
         ArraysUtils.quickSort(indices[1], info[1]);
     }
 
-    static void calculateHashedContractions(final Tensor[] data, final int differentIndicesCount,
-                                            final short[] stretchIndices, final long[][] info,
-                                            final long[] hashedFreeContraction, final long[][] hashedContractions) {
-        int fromPosition, freePointer = 0, fromIPosition, toIPosition, toPosition;
-        short toStretchId, fromDiffId, toDiffId;
-        for (int i = 0; i < differentIndicesCount; ++i) {
-            //Contractions from lower to upper
-            fromPosition = tPosition(info[0][i]); //From tensor index
-            toPosition = tPosition(info[1][i]);
-            fromIPosition = iPosition(info[0][i]);
-            toIPosition = iPosition(info[1][i]);
-
-            if (toPosition == -1) {
-                toStretchId = -1; toDiffId = 0;
-            } else {
-                toStretchId = stretchIndices[toPosition];
-                toDiffId = data[toPosition].getIndices().getPositionsInOrbits()[toIPosition];
-            }
-            if (fromPosition == -1)
-                hashedFreeContraction[freePointer] = hashedContraction((short) 0, toStretchId, toDiffId);
-            else {
-                fromDiffId = data[fromPosition].getIndices().getPositionsInOrbits()[fromIPosition];
-                hashedContractions[fromPosition][fromIPosition] = hashedContraction(fromDiffId, toStretchId, toDiffId);
-            }
-
-            //Contractions from upper to lower
-            fromPosition = tPosition(info[1][i]); //From tensor index
-            toPosition = tPosition(info[0][i]);
-            fromIPosition = iPosition(info[1][i]);
-            toIPosition = iPosition(info[0][i]);
-
-            if (toPosition == -1) {
-                toStretchId = -1; toDiffId = 0;
-            } else {
-                toStretchId = stretchIndices[toPosition];
-                toDiffId = data[toPosition].getIndices().getPositionsInOrbits()[toIPosition];
-            }
-            if (fromPosition == -1)
-                hashedFreeContraction[freePointer] = hashedContraction((short) 0, toStretchId, toDiffId);
-            else {
-                fromDiffId = data[fromPosition].getIndices().getPositionsInOrbits()[fromIPosition];
-                hashedContractions[fromPosition][fromIPosition] = hashedContraction(fromDiffId, toStretchId, toDiffId);
-            }
-        }
-    }
-
-    static void calculateContractions(final int differentIndicesCount,
-                                      final long[][] info,
-                                      final long[] freeContraction,
-                                      final long[][] contractions) {
+    static void reCalculateContractions(final int differentIndicesCount,
+                                        final long[][] info,
+                                        final long[] freeContraction,
+                                        final long[][] contractions) {
         int fromPosition, freePointer = 0, fromIPosition;
         for (int i = 0; i < differentIndicesCount; ++i) {
             //Contractions from lower to upper
@@ -290,47 +189,14 @@ public final class Algorithm1 extends IAlgorithm {
         }
     }
 
-    static boolean refine(final int[] hashCodes, final int from, final int to,
-                          final long[][] contractions, final Tensor[] data) {
-        assert to > from + 1;
-        final int[] refinement = new int[to - from];
-        final int[] temp = new int[contractions.length];
-        for (int i = from; i < to; ++i) {
+    static void refine(final int[] hashCodes, final long[][] contractions, final Tensor[] data) {
+        final int[] temp = new int[data.length];
+        final int[] newHashCodes = new int[data.length];
+        for (int i = 0; i < data.length; ++i) {
             Arrays.fill(temp, 0);
-//            int vHash = 137;
-//            boolean freeOnly = true;
-//            for (long contraction : contractions[i]) {
-//                int toPosition = toPosition(contraction);
-//                short diffId = data[i].getIndices().getPositionsInOrbits()[fromIPosition(contraction)];
-//                if (toPosition == -1)
-//                    vHash += 53 * (diffId + 1);
-//                else {
-//                    freeOnly = false;
-//                    temp[toPosition] += JenkinWang32shift(17 * hashCodes[i]
-//                            + 91 * hashCodes[toPosition]
-//                            + 3671 * (diffId + 1)
-//                            + 2797 * (toDiffId(contraction) + 1));
-//                }
-//            }
-//            if (!freeOnly)
-//                for (int j = 0; j < contractions.length; ++j)
-//                    if (i != j)
-//                        vHash += JenkinWang32shift(temp[j]);
-
-//            int vHash = refine(temp, 2, data, i, contractions, hashCodes);
-//            refinement[i - from] += 17 * vHash - JenkinWang32shift(temp[i]);
-
-            refinement[i - from] = refine(temp, 2, data, i, contractions, hashCodes, true);
+            newHashCodes[i] += refine(temp, REFINEMENT_LEVEL, data, i, contractions, hashCodes, true);
         }
-        boolean refined = false;
-        for (int i = 1; i < refinement.length; i++)
-            if (refinement[i - 1] != refinement[i]) {
-                refined = true;
-                break;
-            }
-        if (refined)
-            System.arraycopy(refinement, 0, hashCodes, from, refinement.length);
-        return refined;
+        System.arraycopy(newHashCodes, 0, hashCodes, 0, data.length);
     }
 
     static int refine(final int[] temp, final int level,
@@ -357,25 +223,13 @@ public final class Algorithm1 extends IAlgorithm {
                 refine(temp, level - 1, data, toPosition, contractions, hashCodes, false);
             }
         }
-        if (!freeOnly && sum)
+        if (!sum)
+            return 0;
+        if (!freeOnly)
             for (int j = 0; j < contractions.length; ++j)
                 if (i != j)
                     vHash += JenkinWang32shift(temp[j]);
         return vHash - JenkinWang32shift(temp[i]);
-    }
-
-    static int contractionsHashCode(long[][] contractions) {
-        int result = 1;
-        for (long[] element : contractions)
-            result = 31 * result + contractionsHashCode(element);
-        return result;
-    }
-
-    static int contractionsHashCode(long[] indexContractions) {
-        long hash = 1L;
-        for (long l : indexContractions)
-            hash ^= 7 * hash + HashFunctions.JenkinWang64shift(l);
-        return HashFunctions.Wang64to32shift(hash);
     }
 
     private static short[] calculateStretchIndices(final Tensor[] data) {
@@ -405,6 +259,7 @@ public final class Algorithm1 extends IAlgorithm {
      *                  used !!!!!!!!! )
      * @return packed record (long)
      */
+
     private static long info(final int tPosition, final short diffId, final int iPosition) {
         return (((long) iPosition) << 48) | (((long) tPosition) << 16) | (0xFFFFL & diffId);
     }
@@ -471,16 +326,12 @@ public final class Algorithm1 extends IAlgorithm {
         final int graphHash;
         final int indicesHash;
         final int graphComponent;
-        final long[] hashedContractions;
-        final long[] contractions;
 
-        private Wrapper(int tensorHash, int graphHash, int graphComponent, Tensor t, int[] indices, long[] hashedContractions, long[] contractions) {
+        private Wrapper(int tensorHash, int graphHash, int graphComponent, Tensor t, int[] indices) {
             this.tensorHash = tensorHash;
             this.graphHash = graphHash;
             this.graphComponent = graphComponent;
             this.indicesHash = hc(t, indices);
-            this.hashedContractions = hashedContractions;
-            this.contractions = contractions;
         }
 
         @Override

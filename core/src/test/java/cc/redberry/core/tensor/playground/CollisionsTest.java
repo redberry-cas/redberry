@@ -33,6 +33,8 @@ import cc.redberry.core.tensor.*;
 import cc.redberry.core.tensor.random.RandomTensor;
 import cc.redberry.core.test.TestUtils;
 import cc.redberry.core.utils.TensorUtils;
+import gnu.trove.iterator.TIntLongIterator;
+import gnu.trove.map.hash.TIntLongHashMap;
 import gnu.trove.set.hash.TIntHashSet;
 import org.junit.Assert;
 import org.junit.Before;
@@ -40,17 +42,23 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import static cc.redberry.core.TAssert.assertEquals;
 import static cc.redberry.core.TAssert.assertTrue;
-import static cc.redberry.core.indices.IndexType.*;
+import static cc.redberry.core.indices.IndexType.LatinLower;
+import static cc.redberry.core.indices.IndexType.Matrix1;
 import static cc.redberry.core.indices.IndicesFactory.createAlphabetical;
 import static cc.redberry.core.indices.IndicesUtils.inverseIndexState;
 import static cc.redberry.core.tensor.Tensors.*;
+import static cc.redberry.core.tensor.playground.Algorithm0.ALGORITHM_0;
 import static cc.redberry.core.tensor.playground.Algorithm0.algorithm0;
+import static cc.redberry.core.tensor.playground.Algorithm1.ALGORITHM_1;
 import static cc.redberry.core.tensor.playground.Algorithm1.algorithm1;
+import static cc.redberry.core.tensor.playground.Algorithm2.ALGORITHM_2;
+import static cc.redberry.core.tensor.playground.Algorithm2.algorithm2;
+import static cc.redberry.core.tensor.playground.Algorithm3.ALGORITHM_3;
+import static cc.redberry.core.tensor.playground.Algorithm3.algorithm3;
 
 /**
  * @author Dmitry Bolotin
@@ -61,33 +69,6 @@ public class CollisionsTest {
     @Before
     public void setUp() throws Exception {
         CC.reset();
-    }
-
-    static ProductData algorithmDefault_shuffle(final Tensor tensor) {
-        if (tensor instanceof Product) {
-            Tensor[] dataCopy = ((Product) tensor).getContent().getDataCopy();
-            Product p = (Product) Tensors.multiply(dataCopy);
-            return new ProductData(p.getContent().getDataCopy(), p.getIndices(), null, p.hashCode());
-        }
-        throw new RuntimeException();
-    }
-
-    static ProductData algorithm0_shuffle(final Tensor tensor) {
-        if (tensor instanceof Product) {
-            Tensor[] dataCopy = ((Product) tensor).getContent().getDataCopy();
-            Permutations.shuffle(dataCopy, CC.getRandomGenerator());
-            return algorithm0(dataCopy, tensor.getIndices());
-        }
-        throw new RuntimeException();
-    }
-
-    static ProductData algorithm1_shuffle(final Tensor tensor) {
-        if (tensor instanceof Product) {
-            Tensor[] dataCopy = ((Product) tensor).getContent().getDataCopy();
-            Permutations.shuffle(dataCopy, CC.getRandomGenerator());
-            return algorithm1(dataCopy, tensor.getIndices());
-        }
-        throw new RuntimeException();
     }
 
     @Test
@@ -130,108 +111,220 @@ public class CollisionsTest {
     }
 
     @Test
-    public void testAlgorithm1_0() throws Exception {
-        CC.resetTensorNames(~90012345678L);
-        CC.setParserAllowsSameVariance(true);
-        Product t = (Product) parse("f_abc*f_apq*f_bpr*f_cqr");
-
-        System.out.println("Original:");
-        System.out.println(t.getContent().getStructureOfContractions());
-        System.out.println("\n\nAlgorithm1:");
-        ProductData pd = algorithm1_shuffle(t);
-        System.out.println(pd.content.structureOfContractions);
-    }
-
-    @Test
     public void testAlgorithm1_SameHash0() throws Exception {
         setSymmetric("T_ab", "T_abc", "T_abcd");
-        for (int k = 0; k < 100; k++) {
+        for (int k = 0; k < 1000; k++) {
             List<Tensor> tensors = generateListOfSameTensors(defaultRandomSource(), 100, 6, 0);
             int hash = algorithm1_shuffle(tensors.get(0)).hash;
             for (int i = 1; i < tensors.size(); i++)
                 Assert.assertEquals(hash, algorithm1_shuffle(tensors.get(i)).hash);
         }
     }
+
+
     @Test
-    public void testAlgorithm1_SameHash1() throws Exception {
+    public void testAlgorithm2_SameHash0() throws Exception {
         setSymmetric("T_ab", "T_abc", "T_abcd");
         for (int k = 0; k < 100; k++) {
-            List<Tensor> tensors = generateListOfSameTensors(matrixRandomSource(true), 100, 6, 0);
-            int hash = algorithm1_shuffle(tensors.get(0)).hash;
+            List<Tensor> tensors = generateListOfSameTensors(defaultRandomSource(), 100, 6, 0);
+            int hash = algorithm2_shuffle(tensors.get(0)).hash;
             for (int i = 1; i < tensors.size(); i++)
-                Assert.assertEquals(hash, algorithm1_shuffle(tensors.get(i)).hash);
+                Assert.assertEquals(hash, algorithm2_shuffle(tensors.get(i)).hash);
         }
-    }
-    @Test
-    public void testAlgorithm0_HashCollisions0() throws Exception {
-        setSymmetric("T_ab", "T_abc");
-        List<Tensor> tts = generateListOfDiffTensors(defaultRandomSource(), 5000, 6, 0);
-        Assert.assertTrue(tts.size() > 1);
-        Assert.assertEquals(tts.size(), sum(tts).size());
-
-        TIntHashSet hashSet_default = new TIntHashSet();
-        TIntHashSet hashSet_alg0 = new TIntHashSet();
-        for (Tensor tt : tts) {
-            hashSet_alg0.add(algorithm0(tt).hash);
-            hashSet_default.add(tt.hashCode());
-        }
-
-        assertTrue(tts.size() >= hashSet_alg0.size());
-        assertEquals(hashSet_default.size(), hashSet_alg0.size());
-
-        System.out.println("Diff: " + tts.size() + "  hash: " + hashSet_alg0.size());
     }
 
 
     @Test
-    public void testAlgorithm0_HashCollisions0_Traces() throws Exception {
-        CC.resetTensorNames(123);
+    public void testAlgorithm3_SameHash0() throws Exception {
+        CC.reset();
+        testSameHash3(defaultRandomSource(), 0);
+        testSameHash3(defaultRandomSource(), 5);
+
+        CC.reset();
+        setSymmetric("T_ab", "T_abc", "T_abcd");
+        testSameHash3(defaultRandomSource(), 0);
+        testSameHash3(defaultRandomSource(), 5);
+
+        CC.reset();
+        testSameHash3(randomSource3(), 0);
+        testSameHash3(randomSource3(), 5);
+
+        CC.reset();
+        setSymmetric("T_ab", "T_abc", "T_abcd");
+        testSameHash3(randomSource3(), 0);
+        testSameHash3(randomSource3(), 5);
+
+        CC.reset();
         setUpMatrices();
-        List<Tensor> tts = generateListOfDiffTensors(matrixRandomSource(true), 50, 9, 1);
-        Assert.assertTrue(tts.size() > 1);
-        Assert.assertEquals(tts.size(), sum(tts).size());
+        testSameHash3(matrixRandomSource(true), 0);
+        testSameHash3(matrixRandomSource(true), 6);
+
+        CC.reset();
+        setUpMatrices();
+        testSameHash3(matrixRandomSource(false), 0);
+        testSameHash3(matrixRandomSource(false), 6);
+    }
+
+    static void testSameHash3(RandomSource source, int iSize) {
+        for (int k = 0; k < 1000; k++) {
+            List<Tensor> tensors = generateListOfSameTensors(source, 1000, 16, iSize);
+            int hash = algorithm3_shuffle(tensors.get(0)).hash;
+            for (int i = 1; i < tensors.size(); i++)
+                Assert.assertEquals(hash, algorithm3_shuffle(tensors.get(i)).hash);
+        }
+        System.out.println("ok");
+    }
+
+    @Test
+    public void testAlgorithm2_HashCollisions() throws Exception {
+        CC.resetTensorNames(123);
+        setSymmetric("T_ab", "T_abc", "T_abcd");
+        List<Tensor> tts = generateListOfDiffTensors(randomSource3(), 100, 7, 1);
 
         TIntHashSet hashSet_default = new TIntHashSet();
         TIntHashSet hashSet_alg0 = new TIntHashSet();
+        TIntHashSet hashSet_alg1 = new TIntHashSet();
+        TIntHashSet hashSet_alg2 = new TIntHashSet();
+        TIntHashSet hashSet_alg3 = new TIntHashSet();
+
+        System.out.println("Calculating hash codes:");
         for (Tensor tt : tts) {
             hashSet_alg0.add(algorithm0(tt).hash);
+            hashSet_alg1.add(algorithm1(tt).hash);
+            hashSet_alg2.add(algorithm2(tt).hash);
+            hashSet_alg3.add(algorithm3(tt).hash);
             hashSet_default.add(tt.hashCode());
         }
 
+        System.out.println("Diff: " + tts.size()
+                + "\nAlg0 diff hash: " + hashSet_alg0.size()
+                + "\nAlg1 diff hash: " + hashSet_alg1.size()
+                + "\nAlg2 diff hash: " + hashSet_alg2.size()
+                + "\nAlg3 diff hash: " + hashSet_alg3.size());
+
+        Assert.assertTrue(tts.size() > 1);
+        Assert.assertEquals(tts.size(), sum(tts).size());
+        assertTrue(tts.size() >= hashSet_alg0.size());
+        assertEquals(hashSet_default.size(), hashSet_alg0.size());
+    }
+
+    @Test
+    public void testAlgorithm2_HashCollisions_Traces() throws Exception {
+        CC.resetTensorNames(123);
+
+        List<Tensor> tts = generateListOfDiffTensors(matrixRandomSource(true), 50, 8, 0);
+
+        TIntHashSet hashSet_default = new TIntHashSet();
+        TIntHashSet hashSet_alg0 = new TIntHashSet();
+        TIntHashSet hashSet_alg1 = new TIntHashSet();
+        TIntHashSet hashSet_alg2 = new TIntHashSet();
+        TIntHashSet hashSet_alg3 = new TIntHashSet();
+
+        System.out.println("Calculating hash codes:");
+        for (Tensor tt : tts) {
+            hashSet_alg0.add(algorithm0(tt).hash);
+            hashSet_alg1.add(algorithm1(tt).hash);
+            hashSet_alg2.add(algorithm2(tt).hash);
+            hashSet_alg3.add(algorithm3(tt).hash);
+            hashSet_default.add(tt.hashCode());
+        }
+
+        System.out.println("Diff: " + tts.size()
+                + "\nAlg0 diff hash: " + hashSet_alg0.size()
+                + "\nAlg1 diff hash: " + hashSet_alg1.size()
+                + "\nAlg2 diff hash: " + hashSet_alg2.size()
+                + "\nAlg3 diff hash: " + hashSet_alg3.size());
+
+        Assert.assertTrue(tts.size() > 1);
+        Assert.assertEquals(tts.size(), sum(tts).size());
         assertTrue(tts.size() >= hashSet_alg0.size());
         assertEquals(hashSet_default.size(), hashSet_alg0.size());
 
-        System.out.println("Diff: " + tts.size() + "  hash: " + hashSet_alg0.size());
         //Diff: 41  hash: 1
     }
 
-    @Test
-    public void testAlgorithm1_HashCollisions0_Traces() throws Exception {
-        CC.resetTensorNames(123);
-        setUpMatrices();
-        List<Tensor> tts = generateListOfDiffTensors(matrixRandomSource(true), 50, 9, 1);
-        Assert.assertTrue(tts.size() > 1);
-        Assert.assertEquals(tts.size(), sum(tts).size());
 
-        TIntHashSet hashSet_default = new TIntHashSet();
-        TIntHashSet hashSet_alg1 = new TIntHashSet();
-        for (Tensor tt : tts) {
-            hashSet_alg1.add(algorithm1(tt).hash);
-            hashSet_default.add(tt.hashCode());
+    @Test
+    public void testPerformance1() throws Exception {
+        setUpMatrices();
+        setSymmetric("T_ab", "T_abc", "T_abcd");
+        IAlgorithm[] algorithms = {
+                ALGORITHM_DEFAULT,
+                ALGORITHM_0,
+                ALGORITHM_1,
+                ALGORITHM_2,
+                ALGORITHM_3
+        };
+        TIntHashSet[] hashes = new TIntHashSet[algorithms.length];
+        TIntLongHashMap[] pSizeStat = new TIntLongHashMap[algorithms.length];
+        TIntLongHashMap[] iSizeStat = new TIntLongHashMap[algorithms.length];
+        for (int i = 0; i < algorithms.length; i++) {
+            hashes[i] = new TIntHashSet();
+            pSizeStat[i] = new TIntLongHashMap();
+            iSizeStat[i] = new TIntLongHashMap();
         }
 
-        assertTrue(tts.size() >= hashSet_alg1.size());
-//        assertEquals(hashSet_default.size(), hashSet_alg1.size());
 
-        System.out.println("Diff: " + tts.size() + "  hash: " + hashSet_alg1.size());
-    }
+        RandomSource source = randomSource3();
+        for (int i = 0; i < 1000; i++) {
+            Tensor product = source.randomProduct(8, 0);
+            for (int j = 0; j < 10; j++)
+                for (IAlgorithm algorithm : algorithms)
+                    algorithm.calc(product);
+        }
 
-    @Test
-    public void test3() throws Exception {
-        RandomSource def = defaultRandomSource();
-        for (int i = 0; i < 100; ++i) {
-            Tensor t = def.randomProduct(10, 4);
-            System.out.println(algorithm0_shuffle(t).hash == algorithm1_shuffle(t).hash);
+        for (int pSize = 3; pSize < 25; ++pSize) {
+            for (IAlgorithm algorithm : algorithms)
+                algorithm.restart();
+
+            for (int i = 0; i < 1000; i++) {
+                Tensor product = source.randomProduct(pSize, pSize % 2);
+                for (int j = 0; j < 100; j++)
+                    for (int k = 0; k < algorithms.length; k++) {
+                        hashes[k].add(algorithms[k].calc(product).hash);
+                        iSizeStat[k].adjustOrPutValue(product.getIndices().getNamesOfDummies().length,
+                                algorithms[k].timingMillis(),
+                                algorithms[k].timingMillis());
+                    }
+            }
+
+            for (int k = 0; k < algorithms.length; k++)
+                pSizeStat[k].put(pSize, algorithms[k].timingMillis());
+        }
+
+        System.out.println("\npSize:\n");
+        for (int k = 0; k < algorithms.length; k++) {
+            TIntLongIterator it = pSizeStat[k].iterator();
+            System.out.println();
+            System.out.print(algorithms[k].name + "={");
+            while (it.hasNext()) {
+                it.advance();
+                System.out.print("{" + it.key() + ", " + it.value() + "}");
+                if (!it.hasNext())
+                    break;
+                System.out.print(",");
+            }
+            System.out.print("};");
+        }
+
+        System.out.println("\niSize:\n");
+        for (int k = 0; k < algorithms.length; k++) {
+            TIntLongIterator it = iSizeStat[k].iterator();
+            System.out.println();
+            System.out.print("i" + algorithms[k].name + "={");
+            while (it.hasNext()) {
+                it.advance();
+                System.out.print("{" + it.key() + ", " + it.value() + "}");
+                if (!it.hasNext())
+                    break;
+                System.out.print(",");
+            }
+            System.out.print("};");
+        }
+
+        System.out.println("\n");
+        for (int k = 0; k < algorithms.length; k++) {
+            System.out.println(algorithms[k].name + "   diff hash codes: " + hashes[k].size());
         }
     }
 
@@ -251,6 +344,7 @@ public class CollisionsTest {
         List<Tensor> tensors = new ArrayList<>();
         out:
         for (int i = 0; i < size; i++) {
+            System.out.println(i);
             Tensor candidate = ((Product) randomSource.randomProduct(pSize, freeIndices)).getDataSubProduct();
             if (!tensors.isEmpty() && candidate.size() != pSize)
                 continue;
@@ -348,8 +442,6 @@ public class CollisionsTest {
                         done.add(from); done.add(to);
                     }
                 }
-
-                System.out.println(a++);
                 int[] free = line.getIndices().getOfType(LatinLower).getFree().toArray();
                 Permutations.shuffle(free);
                 return new Mapping(free,
@@ -368,5 +460,62 @@ public class CollisionsTest {
         CC.current().getParseManager().defaultParserPreprocessors.add(indicesInsertion);
         indicesInsertion.addInsertionRule(parseSimple("G^a'_b'a"), Matrix1);
         indicesInsertion.addInsertionRule(parseSimple("G5^a'_b'"), Matrix1);
+    }
+
+    static final IAlgorithm ALGORITHM_DEFAULT = new IAlgorithm("   default") {
+        @Override
+        ProductData calc0(Tensor tensor) {
+            if (tensor instanceof Product) {
+                Product p = (Product) ((Product) tensor).getDataSubProduct();
+                p.calculateContent();
+                return new ProductData(null, null, null, p.hashCode());
+            }
+            throw new RuntimeException();
+        }
+    };
+
+    static ProductData algorithmDefault_shuffle(final Tensor tensor) {
+        if (tensor instanceof Product) {
+            Tensor[] dataCopy = ((Product) tensor).getContent().getDataCopy();
+            Product p = (Product) Tensors.multiply(dataCopy);
+            return new ProductData(p.getContent().getDataCopy(), p.getIndices(), null, p.hashCode());
+        }
+        throw new RuntimeException();
+    }
+
+    static ProductData algorithm0_shuffle(final Tensor tensor) {
+        if (tensor instanceof Product) {
+            Tensor[] dataCopy = ((Product) tensor).getContent().getDataCopy();
+            Permutations.shuffle(dataCopy, CC.getRandomGenerator());
+            return algorithm0(dataCopy, tensor.getIndices());
+        }
+        throw new RuntimeException();
+    }
+
+    static ProductData algorithm1_shuffle(final Tensor tensor) {
+        if (tensor instanceof Product) {
+            Tensor[] dataCopy = ((Product) tensor).getContent().getDataCopy();
+            Permutations.shuffle(dataCopy, CC.getRandomGenerator());
+            return algorithm1(dataCopy, tensor.getIndices());
+        }
+        throw new RuntimeException();
+    }
+
+    static ProductData algorithm2_shuffle(final Tensor tensor) {
+        if (tensor instanceof Product) {
+            Tensor[] dataCopy = ((Product) tensor).getContent().getDataCopy();
+            Permutations.shuffle(dataCopy, CC.getRandomGenerator());
+            return algorithm2(dataCopy, tensor.getIndices());
+        }
+        throw new RuntimeException();
+    }
+
+    static ProductData algorithm3_shuffle(final Tensor tensor) {
+        if (tensor instanceof Product) {
+            Tensor[] dataCopy = ((Product) tensor).getContent().getDataCopy();
+            Permutations.shuffle(dataCopy, CC.getRandomGenerator());
+            return algorithm3(dataCopy, tensor.getIndices());
+        }
+        throw new RuntimeException();
     }
 }

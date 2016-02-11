@@ -40,7 +40,18 @@ import static cc.redberry.core.utils.HashFunctions.JenkinWang32shift;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public final class Algorithm0 {
+public final class Algorithm0 extends IAlgorithm {
+    public static final Algorithm0 ALGORITHM_0 = new Algorithm0("algorithm0");
+
+    public Algorithm0(String name) {
+        super(name);
+    }
+
+    @Override
+    ProductData calc0(Tensor t) {
+        return algorithm0(t);
+    }
+
     static ProductData algorithm0(final Tensor tensor) {
         if (tensor instanceof Product)
             return algorithm0(((Product) tensor).getContent().getDataCopy(), tensor.getIndices());
@@ -167,7 +178,7 @@ public final class Algorithm0 {
     static int contractionsHashCode(long[][] contractions) {
         int result = 1;
         for (long[] element : contractions)
-            result = 31 * result + Arrays.hashCode(element);
+            result = 31 * result + contractionsHashCode(element);
         return result;
     }
 

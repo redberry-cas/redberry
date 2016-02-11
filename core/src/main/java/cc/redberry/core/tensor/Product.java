@@ -535,7 +535,7 @@ public final class Product extends MultiTensor {
         return new Product(indices, Complex.ONE, new Tensor[0], data, contentReference);
     }
 
-    private ProductContent calculateContent() {
+    public ProductContent calculateContent() {
         if (data.length == 0) {
             contentReference.resetReferent(ProductContent.EMPTY_INSTANCE);
             return ProductContent.EMPTY_INSTANCE;
