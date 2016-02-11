@@ -22,8 +22,6 @@
  */
 package cc.redberry.core.tensor.playground;
 
-import cc.redberry.core.tensor.StructureOfContractions;
-import cc.redberry.core.tensor.StructureOfContractionsHashed;
 import cc.redberry.core.tensor.Tensor;
 
 /**

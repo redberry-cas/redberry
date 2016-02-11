@@ -227,7 +227,7 @@ public final class GraphStructure {
 //            Arrays.fill(temp, 0);
 //            int tHash = 137;
 //            for (long contraction : contractions[i]) {
-//                final int to = getToTensorIndex(contraction);
+//                final int to = toPosition(contraction);
 //                final short fromIndexId = getFromIndexId(contraction);
 //                if (to == -1)
 //                    tHash += 17 * hashOfIndices[i] + 53 * (data[i].getIndices().getPositionsInOrbits()[fromIndexId] + 1);
@@ -251,7 +251,7 @@ public final class GraphStructure {
 //    private int indicesHash(Tensor[] data, int i, int[] sortedIndices) {
 //        int tHash = 0;
 //        for (long contraction : contractions[i]) {
-//            final int to = getToTensorIndex(contraction);
+//            final int to = toPosition(contraction);
 //            if (to != -1)
 //                continue;
 //            final short fromIndexId = getFromIndexId(contraction);

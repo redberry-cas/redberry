@@ -67,9 +67,9 @@ public final class HashingStrategy {
                 return product.getFactor().isOneOrMinusOne()
                         ? dataHash : dataHash * product.getFactor().hashCode();
             }
-            //TODO may be refactor with noncommutative operation using stretcIds
+
             for (int i = pc.size() - 1; i >= 0; --i)
-                hash += HashFunctions.JenkinWang32shift((int) pc.getStretchId(i)) * _hashWithIndices(pc.get(i), indices);
+                hash += hash * 17 + HashFunctions.JenkinWang32shift(pc.getVertexHash(i)) * _hashWithIndices(pc.get(i), indices);
             return hash;
         }
 

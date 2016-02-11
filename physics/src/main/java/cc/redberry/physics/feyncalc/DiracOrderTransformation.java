@@ -41,7 +41,7 @@ import static cc.redberry.core.indices.IndicesFactory.createSimple;
 import static cc.redberry.core.indices.IndicesUtils.*;
 import static cc.redberry.core.tensor.FastTensors.multiplySumElementsOnFactor;
 import static cc.redberry.core.tensor.FastTensors.multiplySumElementsOnFactorAndResolveDummies;
-import static cc.redberry.core.tensor.StructureOfContractions.getToTensorIndex;
+import static cc.redberry.core.tensor.StructureOfContractions.toPosition;
 import static cc.redberry.core.tensor.Tensors.*;
 import static cc.redberry.core.transformations.EliminateMetricsTransformation.eliminate;
 
@@ -96,7 +96,7 @@ public final class DiracOrderTransformation extends AbstractFeynCalcTransformati
         for (; j < indices.size(); ++j)
             if (metricType.getType() == getType(indices.get(j)))
                 break;
-        int to = getToTensorIndex(sc.contractions[gamma][j]);
+        int to = toPosition(sc.contractions[gamma][j]);
         if (to == -1)
             return null;
         return pc.get(to);

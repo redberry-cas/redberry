@@ -107,9 +107,9 @@ public class ProductsBijectionsPortTest {
                         for (int j = 0; j < fcs.contractions[i].length; ++j) {
                             long contraction = fcs.contractions[i][j];
                             Tensor from1 = fromData[i];
-                            if (StructureOfContractions.getToTensorIndex(contraction) == -1)
+                            if (StructureOfContractions.toPosition(contraction) == -1)
                                 continue;
-                            Tensor to1 = fromData[StructureOfContractions.getToTensorIndex(contraction)];
+                            Tensor to1 = fromData[StructureOfContractions.toPosition(contraction)];
                             int indexFrom = j;
                             System.out.println(from1 + "\t" + to1 + "\t" + indexFrom);
                         }

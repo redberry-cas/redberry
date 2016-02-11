@@ -176,6 +176,14 @@ public class CollisionsTest {
     }
 
     @Test
+    public void testSameHashRegardlessIndices() throws Exception {
+        Tensor t1 = parse("T_abc*T^abd");
+        Tensor t2 = parse("T_abc*T^pqr");
+        System.out.println(t1.hashCode() == t2.hashCode());
+        System.out.println(algorithm3_shuffle(t1).hash == algorithm3_shuffle(t2).hash);
+    }
+
+    @Test
     public void testAlgorithm2_HashCollisions() throws Exception {
         CC.resetTensorNames(123);
         setSymmetric("T_ab", "T_abc", "T_abcd");

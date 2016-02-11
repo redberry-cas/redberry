@@ -219,7 +219,7 @@ public class Algorithm3 extends IAlgorithm {
                         + 17 * hashCodes[i]
                         + 91 * hashCodes[toPosition]
                         + 3671 * (diffId + 1)
-                        + 2797 * (toDiffId(contraction) + 1));
+                        + 2797 * (toIDiffId(contraction) + 1));
                 refine(temp, level - 1, data, toPosition, contractions, hashCodes, false);
             }
         }
@@ -301,7 +301,7 @@ public class Algorithm3 extends IAlgorithm {
         return (int) (contraction >> 32);
     }
 
-    static short toDiffId(final long contraction) {
+    static short toIDiffId(final long contraction) {
         return (short) (0xFFFF & (contraction >> 16));
     }
 

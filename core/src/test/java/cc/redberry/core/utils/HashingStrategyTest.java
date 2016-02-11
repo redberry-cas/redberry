@@ -86,9 +86,7 @@ public class HashingStrategyTest {
         Tensor b = parse("Tr[G_{b}*G_{a}*G_{c}]");
 
         ProductContent pc = ((Product) a).getContent();
-        System.out.println(Arrays.toString(pc.getStretchIds()));
-        StructureOfContractionsHashed st = pc.getStructureOfContractionsHashed();
-
+        
 
         System.out.println(a.toString(OutputFormat.SimpleRedberry));
         System.out.println(b.toString(OutputFormat.SimpleRedberry));

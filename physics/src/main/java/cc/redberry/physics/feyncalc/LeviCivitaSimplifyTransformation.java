@@ -55,7 +55,7 @@ import java.util.Map;
 import java.util.Set;
 
 import static cc.redberry.core.indices.IndicesUtils.*;
-import static cc.redberry.core.tensor.StructureOfContractions.getToTensorIndex;
+import static cc.redberry.core.tensor.StructureOfContractions.toPosition;
 import static cc.redberry.core.tensor.Tensors.*;
 import static cc.redberry.core.transformations.EliminateMetricsTransformation.ELIMINATE_METRICS;
 import static cc.redberry.core.transformations.EliminateMetricsTransformation.eliminate;
@@ -79,7 +79,7 @@ public class LeviCivitaSimplifyTransformation implements TransformationToStringA
     /**
      * First is Levi-Civita self-contraction and second is d^a_a = numberOfIndices
      */
-    private final Expression[] leviCivitaSimplifications;
+    private final Transformation[] leviCivitaSimplifications;
 
     /**
      * Creates transformation, which simplifies combinations of Levi-Civita tensors in Euclidean or Minkowski space.
@@ -202,7 +202,7 @@ public class LeviCivitaSimplifyTransformation implements TransformationToStringA
         for (i = 0; i < sizeOfComponent; ++i) {
             //traversing contractions and building single component
             for (long contraction : fs.contractions[epsPositions.get(i)]) {
-                toIndex = getToTensorIndex(contraction);
+                toIndex = toPosition(contraction);
                 if (toIndex == -1)
                     continue;
                 temp = content.get(toIndex);
@@ -274,12 +274,13 @@ public class LeviCivitaSimplifyTransformation implements TransformationToStringA
 
         Tensor epsSubProduct = product.select(epsPoss);
         Tensor remnant = product.remove(epsPoss);
-        for (Expression exp : leviCivitaSimplifications)
+        for (Transformation exp : leviCivitaSimplifications)
             epsSubProduct = exp.transform(epsSubProduct);
 
         //todo expand only Levi-Civita sums
         epsSubProduct = simplifications.transform(eliminate(expand(epsSubProduct, ELIMINATE_METRICS, simplifications)));
         epsSubProduct = leviCivitaSimplifications[1].transform(epsSubProduct);
+        epsSubProduct = leviCivitaSimplifications[2].transform(epsSubProduct);
         return overallSimplifications.transform(multiply(epsSubProduct, remnant));
     }
 
@@ -339,8 +340,8 @@ public class LeviCivitaSimplifyTransformation implements TransformationToStringA
         return substitution;
     }
 
-    private Expression[] getLeviCivitaSubstitutions() {
-        Expression[] substitutions = new Expression[2];
+    private Transformation[] getLeviCivitaSubstitutions() {
+        Transformation[] substitutions = new Transformation[3];
         //Levi-Civita self-contraction
         substitutions[0] = getLeviCivitaSelfContraction();
 
@@ -350,6 +351,18 @@ public class LeviCivitaSimplifyTransformation implements TransformationToStringA
                         setType(typeOfLeviCivitaIndices, 0x80000000)),
                 new Complex(numberOfIndices));
 
+        substitutions[2] = new Transformation() {
+            @Override
+            public Tensor transform(Tensor t) {
+                FromChildToParentIterator it = new FromChildToParentIterator(t);
+                Tensor c;
+                while ((c = it.next()) != null)
+                    if (isLeviCivita(c, leviCivita) && c.getIndices().getFree().size() < numberOfIndices)
+                        it.set(Complex.ZERO);
+
+                return it.result();
+            }
+        };
         return substitutions;
     }
 

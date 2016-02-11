@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2015:
+ * Copyright (c) 2010-2016:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -22,21 +22,20 @@
  */
 package cc.redberry.core.tensor;
 
-import cc.redberry.core.context.CC;
 import org.junit.Test;
 
 import java.util.Arrays;
 
-import static org.junit.Assert.*;
-
+/**
+ * Created by poslavsky on 12/02/16.
+ */
 public class StructureOfContractionsTest {
     @Test
     public void test1() throws Exception {
-        CC.resetTensorNames(1233444123);
-        Product product = (Product) Tensors.parse("f_ab*t^bca*g_cd");
-        System.out.println(product);
-        System.out.println(
-                Arrays.toString(
-                        product.getContent().getStructureOfContractions().getContractedWith(1)));
+        Product t = (Product) Tensors.parse("f_a*f^a*f_b*f^b*f_c*f^c");
+        System.out.println(t);
+        System.out.println(t.getContent().getStructureOfContractions().componentCount);
+        System.out.println(Arrays.toString(t.getContent().getStructureOfContractions().components));
+        System.out.println(Arrays.toString(t.getContent().vertexHashCodes()));
     }
 }

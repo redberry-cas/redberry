@@ -38,6 +38,11 @@ import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.List;
 
+import static cc.redberry.core.indices.IndicesUtils.getNameWithType;
+import static cc.redberry.core.indices.IndicesUtils.getStateInt;
+import static cc.redberry.core.tensor.StructureOfContractions.*;
+import static cc.redberry.core.utils.HashFunctions.JenkinWang32shift;
+
 /**
  * Representation of product of mathematical expressions.
  * <p/>
@@ -70,7 +75,6 @@ public final class Product extends MultiTensor {
      * Reference to cached ProductContent object.
      */
     final SoftReferenceWrapper<ProductContent> contentReference;
-//    SoftReference<ProductContent> contentReference;
     /**
      * Hash code of this product.
      */
@@ -414,7 +418,7 @@ public final class Product extends MultiTensor {
             result = result * 17 + t.hashCode();
         if (factor == Complex.MINUS_ONE && size() == 2)
             return result;
-        return result - 79 * getContent().getStructureOfContractionsHashed().hashCode();
+        return result - 79 * getContent().graphHash();
     }
 
     /**
@@ -468,17 +472,17 @@ public final class Product extends MultiTensor {
      * @return all scalar factors in this product
      */
     public Tensor[] getAllScalars() {
-        Tensor[] scalras = getContent().getScalars();
+        Tensor[] scalars = getContent().getScalars();
         if (factor == Complex.ONE) {
-            Tensor[] allScalars = new Tensor[indexlessData.length + scalras.length];
+            Tensor[] allScalars = new Tensor[indexlessData.length + scalars.length];
             System.arraycopy(indexlessData, 0, allScalars, 0, indexlessData.length);
-            System.arraycopy(scalras, 0, allScalars, indexlessData.length, scalras.length);
+            System.arraycopy(scalars, 0, allScalars, indexlessData.length, scalars.length);
             return allScalars;
         } else {
-            Tensor[] allScalars = new Tensor[1 + indexlessData.length + scalras.length];
+            Tensor[] allScalars = new Tensor[1 + indexlessData.length + scalars.length];
             allScalars[0] = factor;
             System.arraycopy(indexlessData, 0, allScalars, 1, indexlessData.length);
-            System.arraycopy(scalras, 0, allScalars, indexlessData.length + 1, scalras.length);
+            System.arraycopy(scalars, 0, allScalars, indexlessData.length + 1, scalars.length);
             return allScalars;
         }
     }
@@ -535,206 +539,6 @@ public final class Product extends MultiTensor {
         return new Product(indices, Complex.ONE, new Tensor[0], data, contentReference);
     }
 
-    public ProductContent calculateContent() {
-        if (data.length == 0) {
-            contentReference.resetReferent(ProductContent.EMPTY_INSTANCE);
-            return ProductContent.EMPTY_INSTANCE;
-        }
-        final Indices freeIndices = indices.getFree();
-        final int differentIndicesCount = (getIndices().size() + freeIndices.size()) / 2;
-
-        //Names (names with type, see IndicesUtils.getNameWithType() ) of all indices in this multiplication
-        //It will be used as index name -> index index [0,1,2,3...] mapping
-        final int[] upperIndices = new int[differentIndicesCount], lowerIndices = new int[differentIndicesCount];
-        //This is sorage for intermediate information about indices, used in the algorithm (see below)
-        //Structure:
-        //
-        final long[] upperInfo = new long[differentIndicesCount], lowerInfo = new long[differentIndicesCount];
-
-        //This is for generalization of algorithm
-        //indices[0] == lowerIndices
-        //indices[1] == lowerIndices
-        final int[][] indices = new int[][]{lowerIndices, upperIndices};
-
-        //This is for generalization of algorithm too
-        //info[0] == lowerInfo
-        //info[1] == lowerInfo
-        final long[][] info = new long[][]{lowerInfo, upperInfo};
-
-        //Pointers for lower and upper indices, used in algorithm
-        //pointer[0] - pointer to lower
-        //pointer[1] - pointer to upper
-        final int[] pointer = new int[2];
-        final short[] stretchIndices = calculateStretchIndices(); //for performance
-
-        //Allocating array for results, one contraction for each tensor
-        final TensorContraction[] contractions = new TensorContraction[data.length];
-        //There is one dummy tensor with index -1, it represents fake
-        //tensor contracting with whole Product to leave no contracting indices.
-        //So, all "conractions" with this dummy "contraction" looks like a scalar
-        //product. (sorry for English)
-        final TensorContraction freeContraction = new TensorContraction((short) -1, new long[freeIndices.size()]);
-
-        int state, index, i;
-
-        //Processing free indices = creating contractions for dummy tensor
-        for (i = 0; i < freeIndices.size(); ++i) {
-            index = freeIndices.get(i);
-            //Inverse state (because it is state of index at (??) dummy tensor,
-            //contracted with this free index)
-            state = 1 - IndicesUtils.getStateInt(index);
-            //Important:
-            info[state][pointer[state]] = dummyTensorInfo;
-            indices[state][pointer[state]++] = IndicesUtils.getNameWithType(index);
-        }
-
-        int tensorIndex;
-        for (tensorIndex = 0; tensorIndex < data.length; ++tensorIndex) {
-            //Main algorithm
-            Indices tInds = data[tensorIndex].getIndices();
-            short[] diffIds = tInds.getPositionsInOrbits();
-            for (i = 0; i < tInds.size(); ++i) {
-                index = tInds.get(i);
-                state = IndicesUtils.getStateInt(index);
-                info[state][pointer[state]] = packToLong(tensorIndex, stretchIndices[tensorIndex], diffIds[i]);
-                indices[state][pointer[state]++] = IndicesUtils.getNameWithType(index);
-            }
-
-            //Result allocation
-            contractions[tensorIndex] = new TensorContraction(stretchIndices[tensorIndex], new long[tInds.size()]);
-        }
-
-        //Here we can use unstable sorting algorithm (all indices are different)
-        ArraysUtils.quickSort(indices[0], info[0]);
-        ArraysUtils.quickSort(indices[1], info[1]);
-
-        //<-- Here we have mature info arrays
-
-        //Processing scalar and non scalar parts
-
-        //Creating input graph components
-        int[] components = GraphUtils.calculateConnectedComponents(
-                infoToTensorIndices(upperInfo), infoToTensorIndices(lowerInfo), data.length + 1);
-
-        //the number of components
-        final int componentCount = components[components.length - 1]; //Last element of this array contains components count 
-        //(this is specification of GraphUtils.calculateConnectedComponents method)
-        int[] componentSizes = new int[componentCount];
-
-        //patch for jvm bug (7u4 ~ 7u14)
-        //commented in v1.1.5
-        //Arrays.fill(componentSizes, 0);
-
-        //finding each component size
-        for (i = 1; i < components.length - 1; ++i)
-            ++componentSizes[components[i]];
-
-        //allocating resulting datas 0 - is non scalar data
-        Tensor[][] datas = new Tensor[componentCount][];
-        for (i = 0; i < componentCount; ++i)
-            datas[i] = new Tensor[componentSizes[i]];
-
-        //from here we shall use components sizes as pointers
-        Arrays.fill(componentSizes, 0);
-
-        //writing data
-        for (i = 1; i < data.length + 1; ++i)
-            datas[components[i]][componentSizes[components[i]]++] = data[i - 1];
-
-        Tensor nonScalar = null;
-        if (componentCount == 1) //There are no scalar subproducts in this product
-            if (data.length == 1)
-                nonScalar = data[0];
-            else
-                nonScalar = new Product(this.indices, Complex.ONE, new Tensor[0], data, this.contentReference, 0);
-//                nonScalar = new Product(Complex.ONE, new Tensor[0], data, ProductContent.EMPTY_INSTANCE, this.indices);
-        else if (datas[0].length > 0)
-            nonScalar = Tensors.multiply(datas[0]);
-
-        Tensor[] scalars = new Tensor[componentCount - 1];
-
-        if (nonScalar == null && componentCount == 2 && factor == Complex.ONE && indexlessData.length == 0)
-            scalars[0] = this;
-        else {
-            for (i = 1; i < componentCount; ++i)
-                scalars[i - 1] = Tensors.multiply(datas[i]);
-            Arrays.sort(scalars); //TODO use nonstable sort
-        }
-
-        //assert Arrays.equals(indices[0], indices[1]);
-        assert Arrays.equals(indices[0], indices[1]);
-
-        final int[] pointers = new int[data.length];
-        int freePointer = 0;
-        for (i = 0; i < differentIndicesCount; ++i) {
-            //Contractions from lower to upper
-            tensorIndex = (int) (info[0][i] >> 32);
-            long contraction = (0x0000FFFF00000000L & (info[0][i] << 32))
-                    | (0xFFFFFFFFL & (info[1][i]));
-            if (tensorIndex == -1)
-                freeContraction.indexContractions[freePointer++] = contraction;
-            else
-                contractions[tensorIndex].indexContractions[pointers[tensorIndex]++] = contraction;
-
-            //Contractions from upper to lower
-            tensorIndex = (int) (info[1][i] >> 32);
-            contraction = (0x0000FFFF00000000L & (info[1][i] << 32))
-                    | (0xFFFFFFFFL & (info[0][i]));
-            if (tensorIndex == -1)
-                freeContraction.indexContractions[freePointer++] = contraction;
-            else
-                contractions[tensorIndex].indexContractions[pointers[tensorIndex]++] = contraction;
-        }
-
-        //Sorting per-index contractions in each TensorContraction
-        for (TensorContraction contraction : contractions)
-            contraction.sortContractions();
-        freeContraction.sortContractions();
-
-        int[] inds = IndicesUtils.getIndicesNames(this.indices.getFree());
-        Arrays.sort(inds);
-        ScaffoldWrapper[] wrappers = new ScaffoldWrapper[contractions.length];
-        for (i = 0; i < contractions.length; ++i)
-            wrappers[i] = new ScaffoldWrapper(inds, components[i + 1], data[i], contractions[i]);
-
-        ArraysUtils.quickSort(wrappers, data);
-
-        for (i = 0; i < contractions.length; ++i)
-            contractions[i] = wrappers[i].tc;
-
-        //Here we can use unstable sort algorithm
-        //ArraysUtils.quickSort(contractions, 0, contractions.length, data);
-
-        //Form resulting content
-        StructureOfContractionsHashed structureOfContractionsHashed = new StructureOfContractionsHashed(freeContraction, contractions);
-
-        //TODO should be lazy field in ProductContent
-        StructureOfContractions structureOfContractions = new StructureOfContractions(data, differentIndicesCount, freeIndices);
-        ProductContent content = new ProductContent(structureOfContractionsHashed, structureOfContractions, scalars, nonScalar, stretchIndices, data);
-        contentReference.resetReferent(content);
-
-        if (componentCount == 1 && nonScalar instanceof Product) {
-            ((Product) nonScalar).hash = ((Product) nonScalar).calculateHash(); //TODO !!!discuss with Dima!!!
-        }
-        return content;
-    }
-
-    private short[] calculateStretchIndices() {
-        short[] stretchIndex = new short[data.length];
-        //stretchIndex[0] = 0;       
-        short index = 0;
-        int oldHash = data[0].hashCode();
-        for (int i = 1; i < data.length; ++i)
-            if (oldHash == data[i].hashCode())
-                stretchIndex[i] = index;
-            else {
-                stretchIndex[i] = ++index;
-                oldHash = data[i].hashCode();
-            }
-
-        return stretchIndex;
-    }
-
     @Override
     protected int hash() {
         return hash;
@@ -743,88 +547,6 @@ public final class Product extends MultiTensor {
     @Override
     public TensorFactory getFactory() {
         return ProductFactory.FACTORY;
-    }
-
-    /**
-     * Function to pack data to intermediate 64-bit record.
-     *
-     * @param tensorIndex  index of tensor in the data array (before second sorting)
-     * @param stretchIndex stretch index of this tensor (sequence number of tensors hash in array)
-     * @param id           id of index in tensor indices list (could be !=0 only for simple tensors)
-     * @return packed record (long)
-     */
-    private static long packToLong(final int tensorIndex, final short stretchIndex, final short id) {
-        return (((long) tensorIndex) << 32) | (0xFFFF0000L & (stretchIndex << 16)) | (0xFFFFL & id);
-    }
-
-    private static int[] infoToTensorIndices(final long[] info) {
-        final int[] result = new int[info.length];
-        for (int i = 0; i < info.length; ++i)
-            result[i] = ((int) (info[i] >> 32)) + 1;
-        return result;
-    }
-
-    //-65536 == packToLong(-1, (short) -1, (short) 0);
-    private static final long dummyTensorInfo = -65536;
-    //        private static class ProductContent {
-    //
-    //        final ContractionStructure contractionStructure;
-    //        final FullContractionsStructure fullContractionsStructure;
-    //        final Tensor[] scalars;
-    //        final Tensor nonScalar;
-    //        final short[] stretchIndices;
-    //
-    //        public ProductContent(ContractionStructure contractionStructure,
-    //                              FullContractionsStructure fullContractionsStructure,
-    //                              Tensor[] scalars, Tensor nonScalar,
-    //                              short[] stretchIndices) {
-    //            this.contractionStructure = contractionStructure;
-    //            this.fullContractionsStructure = fullContractionsStructure;
-    //            this.scalars = scalars;
-    //            this.nonScalar = nonScalar;
-    //            this.stretchIndices = stretchIndices;
-    //        }
-    //    }
-
-    private static int hc(Tensor t, int[] inds) {
-        Indices ind = t.getIndices().getFree();
-        int h = 31;
-        int ii;
-        for (int i = ind.size() - 1; i >= 0; --i) {
-            ii = IndicesUtils.getNameWithType(ind.get(i));
-            if ((ii = Arrays.binarySearch(inds, ii)) >= 0)
-                h ^= HashFunctions.JenkinWang32shift(ii);
-        }
-        return h;
-    }
-
-    private static class ScaffoldWrapper implements Comparable<ScaffoldWrapper> {
-
-        final int[] inds;
-        final int component;
-        final Tensor t;
-        final TensorContraction tc;
-        final int hashWithIndices;
-
-        private ScaffoldWrapper(int[] inds, int component, Tensor t, TensorContraction tc) {
-            this.inds = inds;
-            this.t = t;
-            this.tc = tc;
-            this.component = component;
-            hashWithIndices = hc(t, inds);
-        }
-
-        @Override
-        public int compareTo(ScaffoldWrapper o) {
-            int r = tc.compareTo(o.tc);
-            if (r != 0)
-                return r;
-
-            if ((r = Integer.compare(hashWithIndices, o.hashWithIndices)) != 0)
-                return r;
-
-            return Integer.compare(component, o.component);
-        }
     }
 
 
@@ -1082,4 +804,491 @@ public final class Product extends MultiTensor {
         else
             return toString(mode);
     }
+
+
+    //================== Calculating content ==========================//
+
+    private static final int REFINEMENT_LEVEL = 2;
+
+    public ProductContent calculateContent() {
+        if (data.length == 0) {
+            contentReference.resetReferent(ProductContent.EMPTY_INSTANCE);
+            return ProductContent.EMPTY_INSTANCE;
+        }
+
+        //<- Important! Data assumed to be sorted.
+        //Arrays.sort(data);
+
+        final Indices freeIndices = this.indices.getFree();
+        final int differentIndicesCount = (this.indices.size() + freeIndices.size()) / 2;
+
+        final int[]
+                upperIndices = new int[differentIndicesCount],
+                lowerIndices = new int[differentIndicesCount];
+
+        final long[]
+                upperInfo = new long[differentIndicesCount],
+                lowerInfo = new long[differentIndicesCount];
+
+        final int[][] indices = new int[][]{lowerIndices, upperIndices};
+        final long[][] info = new long[][]{lowerInfo, upperInfo};
+
+        //Allocating array for results, one contraction for each tensor
+        final long[][] contractions = new long[data.length][];
+
+        calculateInfo(data, freeIndices, info, indices, contractions);
+        assert Arrays.equals(indices[0], indices[1]);
+
+        int i;
+        final int[] hashCodes = new int[data.length];
+        for (i = 0; i < data.length; ++i)
+            hashCodes[i] = data[i].hashCode();
+        reCalculateContractions(differentIndicesCount, info, contractions);
+        refine(hashCodes, contractions, data);
+
+        //calculating connected components
+        final int[] components = GraphUtils.calculateConnectedComponents(
+                positionsFromInfo(upperInfo), positionsFromInfo(lowerInfo), data.length + 1);
+        //the number of components
+        final int componentCount = components[components.length - 1];
+
+
+        //<- do additional sort
+        final int[] sortedIndices = IndicesUtils.getIndicesNames(freeIndices);
+        Arrays.sort(sortedIndices);
+        final Wrapper[] wrappers = new Wrapper[data.length];
+        for (i = 0; i < data.length; ++i)
+            wrappers[i] = new Wrapper(data[i].hashCode(), hashCodes[i], components[i + 1], data[i], sortedIndices);
+
+        ArraysUtils.quickSort(wrappers, data);
+
+        for (i = 0; i < data.length; ++i) {
+            hashCodes[i] = wrappers[i].graphHash;
+            components[i + 1] = wrappers[i].component;
+        }
+
+        calculateInfo(data, freeIndices, info, indices, contractions);
+        reCalculateContractions(differentIndicesCount, info, contractions);
+
+        //<- All graph/hash stuff is done.
+
+
+        final int[] componentSizes = new int[componentCount];
+        //finding each component size
+        for (i = 1; i < components.length - 1; ++i)
+            ++componentSizes[components[i]];
+
+        //allocating resulting datas 0 - is non scalar data
+        final Tensor[][] sData = new Tensor[componentCount][];
+        for (i = 0; i < componentCount; ++i)
+            sData[i] = new Tensor[componentSizes[i]];
+
+        //from here we shall use components sizes as pointers
+        Arrays.fill(componentSizes, 0);
+        for (i = 1; i < data.length + 1; ++i)
+            sData[components[i]][componentSizes[components[i]]++] = data[i - 1];
+
+        Tensor nonScalar = null;
+        if (componentCount == 1) //There are no scalar subproducts in this product
+            if (data.length == 1)
+                nonScalar = data[0];
+            else
+                nonScalar = new Product(this.indices, Complex.ONE, new Tensor[0], data, this.contentReference, 0);
+        else if (sData[0].length > 0)
+            nonScalar = Tensors.multiply(sData[0]);
+
+        final Tensor[] scalars = new Tensor[componentCount - 1];
+        if (nonScalar == null && componentCount == 2 && factor == Complex.ONE && indexlessData.length == 0)
+            scalars[0] = this;
+        else {
+            for (i = 1; i < componentCount; ++i)
+                scalars[i - 1] = Tensors.multiply(sData[i]);
+            Arrays.sort(scalars);
+        }
+
+        ProductContent pc = new ProductContent(new StructureOfContractions(contractions), data, hashCodes, nonScalar, scalars);
+        contentReference.resetReferent(pc);
+
+        if (componentCount == 1 && nonScalar instanceof Product)
+            ((Product) nonScalar).hash = ((Product) nonScalar).calculateHash();
+
+        return pc;
+    }
+
+    static void calculateInfo(final Tensor[] data,
+                              final Indices freeIndices,
+                              final long[][] info,
+                              final int[][] indices,
+                              final long[][] contractions) {
+        final int[] pointer = new int[2];
+        int tensorIndex, state, index, i;
+        //Processing free indices = creating contractions for dummy tensor
+        for (i = 0; i < freeIndices.size(); ++i) {
+            index = freeIndices.get(i);
+            state = 1 - getStateInt(index);
+            //Important:
+            info[state][pointer[state]] = dummyInfo;
+            indices[state][pointer[state]++] = getNameWithType(index);
+        }
+
+        for (tensorIndex = 0; tensorIndex < data.length; ++tensorIndex) {
+            //Main algorithm
+            Indices tInds = data[tensorIndex].getIndices();
+            short[] diffIds = tInds.getPositionsInOrbits();
+            for (i = 0; i < tInds.size(); ++i) {
+                index = tInds.get(i);
+                state = getStateInt(index);
+                info[state][pointer[state]] = info(tensorIndex, diffIds[i], i);
+                indices[state][pointer[state]++] = IndicesUtils.getNameWithType(index);
+            }
+
+            contractions[tensorIndex] = new long[tInds.size()];
+        }
+
+        //Here we can use unstable sorting algorithm (all indices are different)
+        ArraysUtils.quickSort(indices[0], info[0]);
+        ArraysUtils.quickSort(indices[1], info[1]);
+    }
+
+    static void reCalculateContractions(final int differentIndicesCount,
+                                        final long[][] info,
+                                        final long[][] contractions) {
+        int fromPosition, fromIPosition;
+        for (int i = 0; i < differentIndicesCount; ++i) {
+            //Contractions from lower to upper
+            fromPosition = tPosition(info[0][i]); //From tensor index
+            fromIPosition = iPosition(info[0][i]);
+
+            long contraction = contraction(info[0][i], info[1][i]);
+            if (fromPosition != -1)
+                contractions[fromPosition][fromIPosition] = contraction;
+
+
+            //Contractions from upper to lower
+            fromPosition = tPosition(info[1][i]); //From tensor index
+            fromIPosition = iPosition(info[1][i]);
+
+            contraction = contraction(info[1][i], info[0][i]);
+            if (fromPosition != -1)
+                contractions[fromPosition][fromIPosition] = contraction;
+        }
+    }
+
+    static void refine(final int[] hashCodes, final long[][] contractions, final Tensor[] data) {
+        final int[] temp = new int[data.length];
+        final int[] newHashCodes = new int[data.length];
+        for (int i = 0; i < data.length; ++i) {
+            Arrays.fill(temp, 0);
+            newHashCodes[i] += refine(temp, REFINEMENT_LEVEL, data, i, contractions, hashCodes, true);
+        }
+        System.arraycopy(newHashCodes, 0, hashCodes, 0, data.length);
+    }
+
+    static int refine(final int[] temp, final int level,
+                      final Tensor[] data, final int i,
+                      final long[][] contractions,
+                      final int[] hashCodes,
+                      final boolean sum) {
+        if (level == 0)
+            return 0;
+        final int jLevel = JenkinWang32shift(level);
+        int vHash = 137;
+        boolean freeOnly = true;
+        for (long contraction : contractions[i]) {
+            int toPosition = toPosition(contraction);
+            short diffId = data[i].getIndices().getPositionsInOrbits()[fromIPosition(contraction)];
+            if (toPosition == -1)
+                vHash += JenkinWang32shift(53 * (diffId + 1) + jLevel);
+            else {
+                freeOnly = false;
+                temp[toPosition] += JenkinWang32shift(level
+                        + 17 * hashCodes[i]
+                        + 91 * hashCodes[toPosition]
+                        + 3671 * (diffId + 1)
+                        + 2797 * (toIDiffId(contraction) + 1));
+                refine(temp, level - 1, data, toPosition, contractions, hashCodes, false);
+            }
+        }
+        if (!sum)
+            return 0;
+        if (!freeOnly)
+            for (int j = 0; j < contractions.length; ++j)
+                if (i != j)
+                    vHash += JenkinWang32shift(temp[j]);
+        return vHash - JenkinWang32shift(temp[i]);
+    }
+
+    /**
+     * Function to pack data to intermediate 64-bit record.
+     *
+     * @param tPosition index of tensor in the data array (before second
+     *                  sorting)
+     * @param diffId    id of index in tensor indices list (could be !=0 only
+     *                  for simple tensors)
+     * @param iPosition index of Index in Indices of tensor ( only 16 bits
+     *                  used !!!!!!!!! )
+     * @return packed record (long)
+     */
+
+    private static long info(final int tPosition, final short diffId, final int iPosition) {
+        return (((long) iPosition) << 48) | (((long) tPosition) << 16) | (0xFFFFL & diffId);
+    }
+
+    private static long contraction(long lInfo, long uInfo) {
+        return (0xFFFFFFFFFFFF0000L & (uInfo << 16)) | (0xFFFFL & (lInfo));
+    }
+
+    private static final long dummyInfo = info(-1, (short) 0, -1);
+
+    private static int tPosition(final long info) {
+        return (int) (0xFFFFFFFFL & (info >> 16));
+    }
+
+    private static int iPosition(final long info) {
+        return (int) (0xFFFFL & (info >> 48));
+    }
+
+    private static int[] positionsFromInfo(final long[] info) {
+        final int[] result = new int[info.length];
+        for (int i = 0; i < info.length; ++i)
+            result[i] = tPosition(info[i]) + 1;
+        return result;
+    }
+
+    private static int hc(Tensor t, int[] inds) {
+        Indices ind = t.getIndices().getFree();
+        int h = 31;
+        int ii;
+        for (int i = ind.size() - 1; i >= 0; --i) {
+            ii = getNameWithType(ind.get(i));
+            if ((ii = Arrays.binarySearch(inds, ii)) >= 0)
+                h ^= JenkinWang32shift(ii);
+        }
+        return h;
+    }
+
+    private static class Wrapper implements Comparable<Wrapper> {
+        final int tensorHash;
+        final int graphHash;
+        final int indicesHash;
+        final int component;
+
+        private Wrapper(int tensorHash, int graphHash, int component, Tensor t, int[] indices) {
+            this.tensorHash = tensorHash;
+            this.graphHash = graphHash;
+            this.component = component;
+            this.indicesHash = hc(t, indices);
+        }
+
+        @Override
+        public int compareTo(final Wrapper o) {
+            int c = Integer.compare(tensorHash, o.tensorHash);
+            if (c == 0)
+                c = Integer.compare(graphHash, o.graphHash);
+            if (c == 0)
+                c = Integer.compare(indicesHash, o.indicesHash);
+            if (c == 0)
+                c = Integer.compare(component, o.component);
+            return c;
+        }
+    }
+
+//    public ProductContent calculateContent() {
+//        if (data.length == 0) {
+//            contentReference.resetReferent(ProductContent.EMPTY_INSTANCE);
+//            return ProductContent.EMPTY_INSTANCE;
+//        }
+//        final Indices freeIndices = indices.getFree();
+//        final int differentIndicesCount = (getIndices().size() + freeIndices.size()) / 2;
+//
+//        //Names (names with type, see IndicesUtils.getNameWithType() ) of all indices in this multiplication
+//        //It will be used as index name -> index index [0,1,2,3...] mapping
+//        final int[] upperIndices = new int[differentIndicesCount], lowerIndices = new int[differentIndicesCount];
+//        //This is sorage for intermediate information about indices, used in the algorithm (see below)
+//        //Structure:
+//        //
+//        final long[] upperInfo = new long[differentIndicesCount], lowerInfo = new long[differentIndicesCount];
+//
+//        //This is for generalization of algorithm
+//        //indices[0] == lowerIndices
+//        //indices[1] == lowerIndices
+//        final int[][] indices = new int[][]{lowerIndices, upperIndices};
+//
+//        //This is for generalization of algorithm too
+//        //info[0] == lowerInfo
+//        //info[1] == lowerInfo
+//        final long[][] info = new long[][]{lowerInfo, upperInfo};
+//
+//        //Pointers for lower and upper indices, used in algorithm
+//        //pointer[0] - pointer to lower
+//        //pointer[1] - pointer to upper
+//        final int[] pointer = new int[2];
+//        final short[] stretchIndices = calculateStretchIndices(); //for performance
+//
+//        //Allocating array for results, one contraction for each tensor
+//        final TensorContraction[] contractions = new TensorContraction[data.length];
+//        //There is one dummy tensor with index -1, it represents fake
+//        //tensor contracting with whole Product to leave no contracting indices.
+//        //So, all "conractions" with this dummy "contraction" looks like a scalar
+//        //product. (sorry for English)
+//        final TensorContraction freeContraction = new TensorContraction((short) -1, new long[freeIndices.size()]);
+//
+//        int state, index, i;
+//
+//        //Processing free indices = creating contractions for dummy tensor
+//        for (i = 0; i < freeIndices.size(); ++i) {
+//            index = freeIndices.get(i);
+//            //Inverse state (because it is state of index at (??) dummy tensor,
+//            //contracted with this free index)
+//            state = 1 - IndicesUtils.getStateInt(index);
+//            //Important:
+//            info[state][pointer[state]] = dummyTensorInfo;
+//            indices[state][pointer[state]++] = IndicesUtils.getNameWithType(index);
+//        }
+//
+//        int tensorIndex;
+//        for (tensorIndex = 0; tensorIndex < data.length; ++tensorIndex) {
+//            //Main algorithm
+//            Indices tInds = data[tensorIndex].getIndices();
+//            short[] diffIds = tInds.getPositionsInOrbits();
+//            for (i = 0; i < tInds.size(); ++i) {
+//                index = tInds.get(i);
+//                state = IndicesUtils.getStateInt(index);
+//                info[state][pointer[state]] = packToLong(tensorIndex, stretchIndices[tensorIndex], diffIds[i]);
+//                indices[state][pointer[state]++] = IndicesUtils.getNameWithType(index);
+//            }
+//
+//            //Result allocation
+//            contractions[tensorIndex] = new TensorContraction(stretchIndices[tensorIndex], new long[tInds.size()]);
+//        }
+//
+//        //Here we can use unstable sorting algorithm (all indices are different)
+//        ArraysUtils.quickSort(indices[0], info[0]);
+//        ArraysUtils.quickSort(indices[1], info[1]);
+//
+//        //<-- Here we have mature info arrays
+//
+//        //Processing scalar and non scalar parts
+//
+//        //Creating input graph components
+//        int[] components = GraphUtils.calculateConnectedComponents(
+//                infoToTensorIndices(upperInfo), infoToTensorIndices(lowerInfo), data.length + 1);
+//
+//        //the number of components
+//        final int componentCount = components[components.length - 1]; //Last element of this array contains components count
+//        //(this is specification of GraphUtils.calculateConnectedComponents method)
+//        int[] componentSizes = new int[componentCount];
+//
+//        //patch for jvm bug (7u4 ~ 7u14)
+//        //commented in v1.1.5
+//        //Arrays.fill(componentSizes, 0);
+//
+//        //finding each component size
+//        for (i = 1; i < components.length - 1; ++i)
+//            ++componentSizes[components[i]];
+//
+//        //allocating resulting datas 0 - is non scalar data
+//        Tensor[][] datas = new Tensor[componentCount][];
+//        for (i = 0; i < componentCount; ++i)
+//            datas[i] = new Tensor[componentSizes[i]];
+//
+//        //from here we shall use components sizes as pointers
+//        Arrays.fill(componentSizes, 0);
+//
+//        //writing data
+//        for (i = 1; i < data.length + 1; ++i)
+//            datas[components[i]][componentSizes[components[i]]++] = data[i - 1];
+//
+//        Tensor nonScalar = null;
+//        if (componentCount == 1) //There are no scalar subproducts in this product
+//            if (data.length == 1)
+//                nonScalar = data[0];
+//            else
+//                nonScalar = new Product(this.indices, Complex.ONE, new Tensor[0], data, this.contentReference, 0);
+////                nonScalar = new Product(Complex.ONE, new Tensor[0], data, ProductContent.EMPTY_INSTANCE, this.indices);
+//        else if (datas[0].length > 0)
+//            nonScalar = Tensors.multiply(datas[0]);
+//
+//        Tensor[] scalars = new Tensor[componentCount - 1];
+//
+//        if (nonScalar == null && componentCount == 2 && factor == Complex.ONE && indexlessData.length == 0)
+//            scalars[0] = this;
+//        else {
+//            for (i = 1; i < componentCount; ++i)
+//                scalars[i - 1] = Tensors.multiply(datas[i]);
+//            Arrays.sort(scalars); //TODO use nonstable sort
+//        }
+//
+//        //assert Arrays.equals(indices[0], indices[1]);
+//        assert Arrays.equals(indices[0], indices[1]);
+//
+//        final int[] pointers = new int[data.length];
+//        int freePointer = 0;
+//        for (i = 0; i < differentIndicesCount; ++i) {
+//            //Contractions from lower to upper
+//            tensorIndex = (int) (info[0][i] >> 32);
+//            long contraction = (0x0000FFFF00000000L & (info[0][i] << 32))
+//                    | (0xFFFFFFFFL & (info[1][i]));
+//            if (tensorIndex == -1)
+//                freeContraction.indexContractions[freePointer++] = contraction;
+//            else
+//                contractions[tensorIndex].indexContractions[pointers[tensorIndex]++] = contraction;
+//
+//            //Contractions from upper to lower
+//            tensorIndex = (int) (info[1][i] >> 32);
+//            contraction = (0x0000FFFF00000000L & (info[1][i] << 32))
+//                    | (0xFFFFFFFFL & (info[0][i]));
+//            if (tensorIndex == -1)
+//                freeContraction.indexContractions[freePointer++] = contraction;
+//            else
+//                contractions[tensorIndex].indexContractions[pointers[tensorIndex]++] = contraction;
+//        }
+//
+//        //Sorting per-index contractions in each TensorContraction
+//        for (TensorContraction contraction : contractions)
+//            contraction.sortContractions();
+//        freeContraction.sortContractions();
+//
+//        int[] inds = IndicesUtils.getIndicesNames(this.indices.getFree());
+//        Arrays.sort(inds);
+//        ScaffoldWrapper[] wrappers = new ScaffoldWrapper[contractions.length];
+//        for (i = 0; i < contractions.length; ++i)
+//            wrappers[i] = new ScaffoldWrapper(inds, components[i + 1], data[i], contractions[i]);
+//
+//        ArraysUtils.quickSort(wrappers, data);
+//
+//        for (i = 0; i < contractions.length; ++i)
+//            contractions[i] = wrappers[i].tc;
+//
+//        //Here we can use unstable sort algorithm
+//        //ArraysUtils.quickSort(contractions, 0, contractions.length, data);
+//
+//        //Form resulting content
+//
+//        //TODO should be lazy field in ProductContent
+//        StructureOfContractions structureOfContractions = null;//new StructureOfContractions(data, differentIndicesCount, freeIndices);
+//        ProductContent content = new ProductContent(structureOfContractions, scalars, nonScalar, data, null);
+//        contentReference.resetReferent(content);
+//
+//        if (componentCount == 1 && nonScalar instanceof Product) {
+//            ((Product) nonScalar).hash = ((Product) nonScalar).calculateHash(); //TODO !!!discuss with Dima!!!
+//        }
+//        return content;
+//    }
+//
+//    private short[] calculateStretchIndices() {
+//        short[] stretchIndex = new short[data.length];
+//        //stretchIndex[0] = 0;
+//        short index = 0;
+//        int oldHash = data[0].hashCode();
+//        for (int i = 1; i < data.length; ++i)
+//            if (oldHash == data[i].hashCode())
+//                stretchIndex[i] = index;
+//            else {
+//                stretchIndex[i] = ++index;
+//                oldHash = data[i].hashCode();
+//            }
+//
+//        return stretchIndex;
+//    }
 }
