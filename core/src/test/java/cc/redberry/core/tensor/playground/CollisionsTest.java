@@ -32,6 +32,7 @@ import cc.redberry.core.parser.preprocessor.GeneralIndicesInsertion;
 import cc.redberry.core.tensor.*;
 import cc.redberry.core.tensor.random.RandomTensor;
 import cc.redberry.core.test.TestUtils;
+import cc.redberry.core.utils.HashFunctions;
 import cc.redberry.core.utils.TensorUtils;
 import gnu.trove.iterator.TIntLongIterator;
 import gnu.trove.map.hash.TIntLongHashMap;
@@ -173,6 +174,76 @@ public class CollisionsTest {
                 Assert.assertEquals(hash, algorithm3_shuffle(tensors.get(i)).hash);
         }
         System.out.println("ok");
+    }
+
+
+    @Test
+    public void test_CC_Timings() throws Exception {
+        final boolean[] arr = new boolean[128];
+        for (int i = 0; i < 128; i++) {
+            arr[i] = CC.getRandomGenerator().nextBoolean();
+        }
+
+        boolean r = true;
+        for (int i = 0; i < 15000; i++) {
+            r ^= callCC(100);
+            r ^= noCallCC(arr, 100);
+        }
+
+        final int its = 10_000_000;
+        final int fits = 10;
+
+        long start;
+        start = System.nanoTime();
+        for (int k = 0; k < 10; k++)
+            for (int i = 0; i < fits; i++)
+                r ^= ref(its);
+        long ref = System.nanoTime() - start;
+
+        start = System.nanoTime();
+        for (int k = 0; k < 10; k++)
+            for (int i = 0; i < fits; i++)
+                r ^= callCC(its);
+        long call = System.nanoTime() - start;
+
+        start = System.nanoTime();
+        for (int k = 0; k < 10; k++)
+            for (int i = 0; i < fits; i++)
+                r ^= noCallCC(arr, its);
+        long nocall = System.nanoTime() - start;
+
+        System.out.println(r);
+        System.out.println(ref / 1000_000);
+        System.out.println(call / 1000_000);
+        System.out.println(nocall / 1000_000);
+    }
+
+    private static boolean ref(final int its) {
+        boolean a = true;
+        for (int i = 0; i < its; i++) {
+            byte j = (byte) ((0x7FFFFFFF & HashFunctions.JenkinWang32shift(i)) % 5);
+            a ^= IndicesUtils.getState(i * j - 17 * HashFunctions.JenkinWang32shift(i - 23 * j));
+            a ^= IndicesUtils.getState(i * j * i - 93 * HashFunctions.JenkinWang32shift(j - 23 * i));
+        }
+        return a;
+    }
+
+    private static boolean callCC(final int its) {
+        boolean a = true;
+        for (int i = 0; i < its; i++) {
+            byte j = (byte) ((0x7FFFFFFF & HashFunctions.JenkinWang32shift(i)) % 5);
+            a ^= CC.isMetric(j);
+        }
+        return a;
+    }
+
+    private static boolean noCallCC(final boolean[] arr, final int its) {
+        boolean a = true;
+        for (int i = 0; i < its; i++) {
+            byte j = (byte) ((0x7FFFFFFF & HashFunctions.JenkinWang32shift(i)) % 5);
+            a ^= arr[j];
+        }
+        return a;
     }
 
     @Test

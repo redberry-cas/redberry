@@ -42,10 +42,13 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static cc.redberry.core.indices.IndexType.LatinLower;
 import static cc.redberry.core.indices.IndexType.Matrix1;
+import static cc.redberry.core.indices.IndicesFactory.createAlphabetical;
+import static cc.redberry.core.indices.IndicesUtils.inverseIndexState;
 import static cc.redberry.core.tensor.HashingStrategy.iGraphHash;
 import static cc.redberry.core.tensor.HashingStrategy.iHash;
 import static cc.redberry.core.tensor.Tensors.*;
@@ -440,13 +443,14 @@ public class HashingStrategyTest {
 
     @Test
     public void testRandomFull() throws Exception {
-        doRandomTest(100);
+        doRandomTest(100, 10);
     }
 
     @Test
     @LongTest
     public void testRandomFull_long() throws Exception {
-        doRandomTest(1000);
+        doRandomTest(1000, 10);
+        doRandomTest(100, 100);
     }
 
     @Test
@@ -454,7 +458,7 @@ public class HashingStrategyTest {
         setSymmetric("r_abcd");
         setAntiSymmetric("f_abc");
         setAntiSymmetric("f_abcd");
-        doRandomTest(100);
+        doRandomTest(100, 10);
     }
 
     @Test
@@ -463,10 +467,25 @@ public class HashingStrategyTest {
         setSymmetric("r_abcd");
         setAntiSymmetric("f_abc");
         setAntiSymmetric("f_abcd");
-        doRandomTest(1000);
+        doRandomTest(1000, 10);
+        doRandomTest(100, 100);
     }
 
-    static void doRandomTest(int longTestTries) {
+    @Test
+    public void testRandom4_RandomMatrices() throws Exception {
+        GeneralIndicesInsertion indicesInsertion = new GeneralIndicesInsertion();
+        CC.current().getParseManager().defaultParserPreprocessors.add(indicesInsertion);
+        indicesInsertion.addInsertionRule(parseSimple("G^a'_b'a"), Matrix1);
+        indicesInsertion.addInsertionRule(parseSimple("G5^a'_b'"), Matrix1);
+
+        for (int pSize : new int[]{5, 8, 10, 13})
+            for (int iSize : new int[]{0, 1, 2, 3, 4})
+                for (boolean doTrace : new boolean[]{true, false})
+                    for (int k = 0; k < its(5, 30); k++)
+                        assertAllSame(generateListOfSameTensors(randomMatrixProduct(pSize, iSize, doTrace), its(5, 30)));
+    }
+
+    static void doRandomTest(int longTestTries, int longTestRTs) {
         RandomTensor rnd = new RandomTensor();
         rnd.clearNamespace();
         rnd.addToNamespace(parse("k_a"));
@@ -476,19 +495,19 @@ public class HashingStrategyTest {
         rnd.addToNamespace(parse("f_abcd"));
         rnd.addToNamespace(parse("r_abcd"));
 
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < its(10, longTestRTs); i++) {
             Tensor t = rnd.nextTensorTree(3, 5, 10, ParserIndices.parseSimple(""));
             List<Tensor> list = generateListOfSameTensors(t, its(10, longTestTries));
             assertAllSame(list);
         }
 
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < its(10, longTestRTs); i++) {
             Tensor t = rnd.nextTensorTree(3, 5, 10, ParserIndices.parseSimple("ab"));
             List<Tensor> list = generateListOfSameTensors(t, its(10, longTestTries));
             assertAllSame(list);
         }
 
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < its(10, longTestRTs); i++) {
             Tensor t = rnd.nextTensorTree(3, 5, 10, ParserIndices.parseSimple("abcdpq"));
             List<Tensor> list = generateListOfSameTensors(t, its(10, longTestTries));
             assertAllSame(list);
@@ -563,4 +582,40 @@ public class HashingStrategyTest {
         return tensor;
     }
 
+    static Tensor randomMatrixProduct(int pSize, int indices, final boolean doTrace) {
+        if (pSize % 2 == 0 && indices % 2 != 0)
+            indices = indices - 1;
+        if (pSize % 2 != 0 && indices % 2 == 0)
+            indices = indices + 1;
+
+        StringBuilder sb = new StringBuilder();
+        if (doTrace)
+            sb.append("Tr[");
+        for (int i = 0; ; i++) {
+            sb.append("G").append(IndicesUtils.toString(i));
+            if (i == pSize - 1)
+                break;
+            sb.append("*");
+        }
+        if (doTrace)
+            sb.append("]");
+        Tensor line = parse(sb.toString());
+
+        TIntHashSet done = new TIntHashSet();
+        while (line.getIndices().getOfType(LatinLower).getFree().size() != indices) {
+            int from = CC.getRandomGenerator().nextInt(pSize);
+            int to = CC.getRandomGenerator().nextInt(pSize);
+            if (from != to && !done.contains(from) && !done.contains(to)) {
+                line = new Mapping(
+                        new int[]{from},
+                        new int[]{inverseIndexState(to)})
+                        .transform(line);
+                done.add(from); done.add(to);
+            }
+        }
+        int[] free = line.getIndices().getOfType(LatinLower).getFree().toArray();
+        Permutations.shuffle(free);
+        return new Mapping(free,
+                createAlphabetical(LatinLower, free.length).toArray()).transform(line);
+    }
 }
