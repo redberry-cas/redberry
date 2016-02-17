@@ -449,7 +449,7 @@ public class HashingStrategyTest {
     @Test
     @LongTest
     public void testRandomFull_long() throws Exception {
-        doRandomTest(1000, 10);
+        //doRandomTest(1000, 10);
         doRandomTest(100, 100);
     }
 
@@ -467,7 +467,7 @@ public class HashingStrategyTest {
         setSymmetric("r_abcd");
         setAntiSymmetric("f_abc");
         setAntiSymmetric("f_abcd");
-        doRandomTest(1000, 10);
+        //doRandomTest(1000, 10);
         doRandomTest(100, 100);
     }
 
@@ -481,8 +481,8 @@ public class HashingStrategyTest {
         for (int pSize : new int[]{5, 8, 10, 13})
             for (int iSize : new int[]{0, 1, 2, 3, 4})
                 for (boolean doTrace : new boolean[]{true, false})
-                    for (int k = 0; k < its(5, 30); k++)
-                        assertAllSame(generateListOfSameTensors(randomMatrixProduct(pSize, iSize, doTrace), its(5, 30)));
+                    for (int k = 0; k < its(5, 15); k++)
+                        assertAllSame(generateListOfSameTensors(randomMatrixProduct(pSize, iSize, doTrace), its(5, 15)));
     }
 
     static void doRandomTest(int longTestTries, int longTestRTs) {
