@@ -973,8 +973,7 @@ public final class Product extends MultiTensor {
     //when all indices are free
     private ProductContent calculateContentWithNoContractions() {
         if (data.length == 1) {
-            final ProductContent pc = new ProductContent(new StructureOfContractions(
-                    new long[][]{getFreeContractions(data[0].getIndices().size())}, new int[1], 1),
+            final ProductContent pc = new ProductContent(getFreeStructure(indices.size()),
                     data, new int[]{data[0].hashCode()}, new int[]{HashingStrategy.iHash(data[0])},
                     data[0], new Tensor[0]);
             this.contentReference.resetReferent(pc);
@@ -1019,11 +1018,25 @@ public final class Product extends MultiTensor {
     }
 
     private static final long[][] freeContractionsCache;
+    private static final StructureOfContractions[] freeStructuresCache;
+    private static final int[] singleComponent;
 
     static {
-        freeContractionsCache = new long[64][];
-        for (int i = 0; i < freeContractionsCache.length; ++i)
+        final int cacheSize = 64;
+        freeContractionsCache = new long[cacheSize][];
+        freeStructuresCache = new StructureOfContractions[cacheSize];
+        singleComponent = new int[1];
+        for (int i = 0; i < freeContractionsCache.length; ++i) {
             freeContractionsCache[i] = getFreeContractions0(i);
+            freeStructuresCache[i] = new StructureOfContractions(new long[][]{freeContractionsCache[i]}, singleComponent, 1);
+        }
+    }
+
+    private static StructureOfContractions getFreeStructure(final int sizeOfIndices) {
+        if (sizeOfIndices >= freeContractionsCache.length)
+            return new StructureOfContractions(new long[][]{getFreeContractions(sizeOfIndices)}, singleComponent, 1);
+        else
+            return freeStructuresCache[sizeOfIndices];
     }
 
     private static long[] getFreeContractions(final int sizeOfIndices) {

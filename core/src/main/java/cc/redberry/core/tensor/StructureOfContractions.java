@@ -51,7 +51,7 @@ public final class StructureOfContractions {
         this.componentCount = componentCounter + 1;
     }
 
-    public StructureOfContractions(long[][] contractions, int[] components, int componentCount) {
+    StructureOfContractions(long[][] contractions, int[] components, int componentCount) {
         this.contractions = contractions;
         this.components = components;
         this.componentCount = componentCount;
