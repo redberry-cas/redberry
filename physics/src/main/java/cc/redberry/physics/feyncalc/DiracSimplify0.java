@@ -37,7 +37,7 @@ import java.util.List;
 
 import static cc.redberry.core.indices.IndicesUtils.getType;
 import static cc.redberry.core.indices.IndicesUtils.setType;
-import static cc.redberry.core.tensor.StructureOfContractions.getToTensorIndex;
+import static cc.redberry.core.tensor.StructureOfContractions.toPosition;
 import static cc.redberry.core.tensor.Tensors.*;
 import static cc.redberry.core.transformations.EliminateMetricsTransformation.eliminate;
 
@@ -145,8 +145,7 @@ final class DiracSimplify0 extends AbstractFeynCalcTransformation {
             r = FastTensors.multiplySumElementsOnFactor((Sum) r, m);
         else r = multiply(r, m);
         r = expandAndEliminate.transform(r);
-        r = traceOfOne.transform(r);
-        r = deltaTrace.transform(r);
+        r = deltaTraces.transform(r);
         return r;
     }
 
@@ -214,7 +213,7 @@ final class DiracSimplify0 extends AbstractFeynCalcTransformation {
         for (; j < indices.size(); ++j)
             if (metricType.getType() == getType(indices.get(j)))
                 break;
-        int to = getToTensorIndex(sc.contractions[gamma][j]);
+        int to = toPosition(sc.contractions[gamma][j]);
         if (to == -1)
             return null;
         return new Element(to, gIndex);

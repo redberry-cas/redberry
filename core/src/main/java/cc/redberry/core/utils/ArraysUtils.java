@@ -867,6 +867,8 @@ public final class ArraysUtils {
         return permutation;
     }
 
+    // =================  QUICKSORT INT[] INT[] =================
+
     /**
      * Sorts the specified target array of ints into ascending numerical order and simultaneously permutes the {@code
      * coSort} ints array in the same way as the target array. <p/> The code was taken from the jdk6 Arrays
@@ -1022,6 +1024,141 @@ public final class ArraysUtils {
                 : (x[b] > x[c] ? b : x[a] > x[c] ? c : a));
     }
 
+    // =================  QUICKSORT LONG[] LONG[] =================
+
+    /**
+     * Sorts the specified target array of ints into ascending numerical order and simultaneously permutes the {@code
+     * coSort} longs array in the same way as the target array. <p/> The code was taken from the jdk6 Arrays
+     * class. <p/> The sorting algorithm is a tuned quicksort, adapted from Jon L. Bentley and M. Douglas McIlroy's
+     * "Engineering a Sort Function", Software-Practice and Experience, Vol. 23(11) P. 1249-1265 (November 1993). This
+     * algorithm offers n*log(n) performance on many data sets that cause other quicksorts to degrade to quadratic
+     * performance. <p/> <p/> <p><b>NOTE: this is unstable sort algorithm, so additional combinatorics of the {@code
+     * coSort} array can be perfomed. Use this method only if you are sure, in what you are doing. If not - use stable
+     * sort methods like an insertion sort or Tim sort.</b>
+     *
+     * @param target the array to be sorted
+     * @param coSort the array which will be permuted in the same way as the target array during sorting
+     *               procedure
+     * @throws IllegalArgumentException if coSort length less then target length.
+     */
+    public static void quickSort(long[] target, long[] coSort) {
+        quickSort1(target, 0, target.length, coSort);
+    }
+
+    /**
+     * Sorts the specified range of the specified target array of ints into ascending numerical order and simultaneously
+     * permutes the {@code coSort} longs array in the same way as the target array. The range to be sorted
+     * extends from index <tt>fromIndex</tt>, inclusive, to index <tt>toIndex</tt>, exclusive. (If
+     * <tt>fromIndex==toIndex</tt>, the range to be sorted is empty.)<p> <p/> The code was taken from the jdk6 Arrays
+     * class. <p/> The sorting algorithm is a tuned quicksort, adapted from Jon L. Bentley and M. Douglas McIlroy's
+     * "Engineering a Sort Function", Software-Practice and Experience, Vol. 23(11) P. 1249-1265 (November 1993). This
+     * algorithm offers n*log(n) performance on many data sets that cause other quicksorts to degrade to quadratic
+     * performance. <p/> <p/> <p><b>NOTE: this is unstable sort algorithm, so additional combinatorics of the {@code
+     * coSort} array can be performed. Use this method only if you are sure, in what you are doing. If not - use stable
+     * sort methods like an insertion sort or Tim sort.</b>
+     *
+     * @param target    the array to be sorted
+     * @param fromIndex the index of the first element (inclusive) to be sorted
+     * @param toIndex   the index of the last element (exclusive) to be sorted
+     * @param coSort    the array which will be permuted in the same way as the target array, during
+     *                  sorting procedure
+     * @throws IllegalArgumentException       if <tt>fromIndex &gt; toIndex</tt>
+     * @throws ArrayIndexOutOfBoundsException if <tt>fromIndex &lt; 0</tt> or <tt>toIndex &gt; target.length</tt> or
+     *                                        <tt>toIndex &gt; coSort.length</tt>
+     */
+    public static void quickSort(long[] target, int fromIndex, int toIndex, long[] coSort) {
+        rangeCheck(target.length, fromIndex, toIndex);
+        rangeCheck(coSort.length, fromIndex, toIndex);
+        quickSort1(target, fromIndex, toIndex - fromIndex, coSort);
+    }
+
+    /**
+     * This method is the same as {@link #quickSort(int[], int, int, long[])  ) }, but without range checking. <p/>
+     * <p><b>NOTE: this is unstable sort algorithm, so additional combinatorics of the {@code coSort} array can be
+     * performed. Use this method only if you are sure, in what you are doing. If not - use stable sort methods like an
+     * insertion sort or Tim sort.</b>
+     *
+     * @param target    the array to be sorted
+     * @param fromIndex the index of the first element (inclusive) to be sorted
+     * @param length    the length of the sorting subarray.
+     * @param coSort    the array which will be permuted in the same way as the target array, during
+     *                  sorting procedure
+     */
+    public static void quickSort1(long target[], int fromIndex, int length, long[] coSort) {
+        // Insertion quickSort on smallest arrays
+        if (length < 7) {
+            for (int i = fromIndex; i < length + fromIndex; i++)
+                for (int j = i; j > fromIndex && target[j - 1] > target[j]; j--)
+                    swap(target, j, j - 1, coSort);
+            return;
+        }
+
+        // Choose a partition element, v
+        int m = fromIndex + (length >> 1);       // Small arrays, middle element
+        if (length > 7) {
+            int l = fromIndex;
+            int n = fromIndex + length - 1;
+            if (length > 40) {        // Big arrays, pseudomedian of 9
+                int s = length / 8;
+                l = med3(target, l, l + s, l + 2 * s);
+                m = med3(target, m - s, m, m + s);
+                n = med3(target, n - 2 * s, n - s, n);
+            }
+            m = med3(target, l, m, n); // Mid-size, med of 3
+        }
+        long v = target[m];
+
+        // Establish Invariant: v* (<v)* (>v)* v*
+        int a = fromIndex, b = a, c = fromIndex + length - 1, d = c;
+        while (true) {
+            while (b <= c && target[b] <= v) {
+                if (target[b] == v)
+                    swap(target, a++, b, coSort);
+                b++;
+            }
+            while (c >= b && target[c] >= v) {
+                if (target[c] == v)
+                    swap(target, c, d--, coSort);
+                c--;
+            }
+            if (b > c)
+                break;
+            swap(target, b++, c--, coSort);
+        }
+
+        // Swap partition elements back to middle
+        int s, n = fromIndex + length;
+        s = Math.min(a - fromIndex, b - a);
+        vecswap(target, fromIndex, b - s, s, coSort);
+        s = Math.min(d - c, n - d - 1);
+        vecswap(target, b, n - s, s, coSort);
+
+        // Recursively quickSort non-partition-elements
+        if ((s = b - a) > 1)
+            quickSort1(target, fromIndex, s, coSort);
+        if ((s = d - c) > 1)
+            quickSort1(target, n - s, s, coSort);
+
+    }
+
+    private static void swap(long x[], int a, int b, long[] coSort) {
+        swap(x, a, b);
+        swap(coSort, a, b);
+    }
+
+    private static void vecswap(long x[], int a, int b, int n, long[] coSort) {
+        for (int i = 0; i < n; i++, a++, b++)
+            swap(x, a, b, coSort);
+    }
+
+    private static int med3(long x[], int a, int b, int c) {
+        return (x[a] < x[b]
+                ? (x[b] < x[c] ? b : x[a] < x[c] ? c : a)
+                : (x[b] > x[c] ? b : x[a] > x[c] ? c : a));
+    }
+
+    // =================  QUICKSORT INT[] LONG[] =================
+
     /**
      * Sorts the specified target array of ints into ascending numerical order and simultaneously permutes the {@code
      * coSort} longs array in the same way as the target array. <p/> The code was taken from the jdk6 Arrays
@@ -1156,6 +1293,8 @@ public final class ArraysUtils {
             swap(x, a, b, coSort);
     }
 
+    // =================  QUICKSORT OBJECT[] OBJECT[] =================
+
     /**
      * Sorts the specified target array of objects into ascending order, according to the natural ordering of its
      * elements and simultaneously permutes the {@code coSort} objects array in the same way then specified target
@@ -1286,6 +1425,8 @@ public final class ArraysUtils {
         for (int i = 0; i < n; i++, a++, b++)
             swap(x, a, b, coSort);
     }
+
+    // =================  QUICKSORT OBJECT[] INT[] =================
 
     /**
      * Sorts the specified target array of objects into ascending order, according to the natural ordering of its
@@ -1431,6 +1572,8 @@ public final class ArraysUtils {
                 : (x[b].compareTo(x[c]) > 0 ? b : x[a].compareTo(x[c]) > 0 ? c : a));
     }
 
+    // =================  QUICKSORT INT[] OBJECT[] =================
+
     /**
      * Sorts the specified target array of ints into ascending numerical order and simultaneously permutes the {@code
      * coSort} Objects array in the same way as the target array. <p/> The code was taken from the jdk6 Arrays
@@ -1563,6 +1706,8 @@ public final class ArraysUtils {
         quickSort(target, 0, target.length, permutation);
         return permutation;
     }
+
+    // =================  QUICKSORT SHORT[] INT[] =================
 
     /**
      * Sorts the specified range of the specified target array of ints into ascending numerical order and simultaneously

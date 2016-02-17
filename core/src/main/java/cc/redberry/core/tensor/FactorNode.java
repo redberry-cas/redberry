@@ -22,8 +22,6 @@
  */
 package cc.redberry.core.tensor;
 
-import cc.redberry.core.indexgenerator.IndexGenerator;
-import cc.redberry.core.indexgenerator.IndexGeneratorFromData;
 import cc.redberry.core.utils.TensorUtils;
 import gnu.trove.set.hash.TIntHashSet;
 
@@ -32,7 +30,6 @@ import gnu.trove.set.hash.TIntHashSet;
  * @author Stanislav Poslavsky
  */
 final class FactorNode {
-
     final Tensor factor;
     private final TensorBuilder builder;
     int[] factorForbiddenIndices;

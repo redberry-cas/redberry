@@ -1446,6 +1446,7 @@ public final class PermutationGroup
      * @param obj permutation group
      * @return true if specified group has the same order and all its generators are contained in this group
      */
+    @Override
     public boolean equals(Object obj) {
         if (obj == null)
             return false;
@@ -1468,6 +1469,27 @@ public final class PermutationGroup
             return oth.membershipTest(generators());
         else
             return membershipTest(oth.generators());
+    }
+
+    /**
+     * Returns hashCode based on the order of the group
+     *
+     * @return hashCode
+     */
+    @Override
+    public int hashCode() {
+        int hash = order.hashCode();
+        for (int[] orbit : orbits)
+            hash += HashFunctions.JenkinWang32shift(orbit.length);
+        return hash;
+    }
+
+    public int hashCodeIncludeOrbitPoints() {
+        int hash = order.hashCode();
+        for (int[] orbit : orbits)
+            for (int p : orbit)
+                hash += HashFunctions.JenkinWang32shift(p);
+        return hash;
     }
 
     @Override

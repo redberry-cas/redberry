@@ -20,22 +20,37 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
-package cc.redberry.core.tensor;
+package cc.redberry.core.tensor.playground;
 
-import org.junit.Test;
-
-import java.util.Arrays;
+import cc.redberry.core.tensor.Tensor;
 
 /**
- * Created by poslavsky on 12/02/16.
+ * @author Dmitry Bolotin
+ * @author Stanislav Poslavsky
  */
-public class StructureOfContractionsTest {
-    @Test
-    public void test1() throws Exception {
-        Product t = (Product) Tensors.parse("f_a*f^a*f_b*f^b*f_c*f^c");
-        System.out.println(t);
-        System.out.println(t.getContent().getStructureOfContractions().componentCount);
-        System.out.println(Arrays.toString(t.getContent().getStructureOfContractions().components));
-        System.out.println(Arrays.toString(t.getContent().hashCodes));
+public abstract class IAlgorithm {
+    long timing;
+    final String name;
+
+    public IAlgorithm(String name) {
+        this.name = name;
     }
+
+
+    long timingMillis() {
+        return timing / 1_000_000;
+    }
+
+    ProductData calc(Tensor t) {
+        long start = System.nanoTime();
+        ProductData pd = calc0(t);
+        timing += System.nanoTime() - start;
+        return pd;
+    }
+
+    void restart() {
+        timing = 0;
+    }
+
+    abstract ProductData calc0(Tensor t);
 }

@@ -36,7 +36,7 @@ import java.util.List;
 
 import static cc.redberry.core.indices.IndicesUtils.getStateInt;
 import static cc.redberry.core.indices.IndicesUtils.getType;
-import static cc.redberry.core.tensor.StructureOfContractions.getToTensorIndex;
+import static cc.redberry.core.tensor.StructureOfContractions.toPosition;
 
 /**
  * This class represents a partition of graph into sub-graphs of types specified in {@link GraphType}. Such a partition
@@ -225,7 +225,7 @@ public final class PrimitiveSubgraphPartition {
             if (getType(index) != type.getType())
                 continue;
 
-            toTensorIndex = getToTensorIndex(contractions[i]);
+            toTensorIndex = toPosition(contractions[i]);
             int state = 1 - getStateInt(index);
 
             if (links[state] >= -1 && links[state] != toTensorIndex)
@@ -266,7 +266,7 @@ public final class PrimitiveSubgraphPartition {
                 if (getType(index) != type.getType())
                     continue;
 
-                toTensorIndex = getToTensorIndex(contractions[i]);
+                toTensorIndex = toPosition(contractions[i]);
                 if (toTensorIndex == -1 || used.get(toTensorIndex))
                     continue;
                 used.set(toTensorIndex);

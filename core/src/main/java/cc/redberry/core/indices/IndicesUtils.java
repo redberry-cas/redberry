@@ -464,7 +464,7 @@ public final class IndicesUtils {
      * @return array of indices names (with types)
      */
     public static int[] getIndicesNames(Indices indices) {
-        int a[] = new int[indices.size()];
+        final int a[] = new int[indices.size()];
         for (int i = indices.size() - 1; i >= 0; --i)
             a[i] = getNameWithType(indices.get(i));
         return a;

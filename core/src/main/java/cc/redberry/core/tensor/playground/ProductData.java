@@ -20,22 +20,31 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
-package cc.redberry.core.tensor;
+package cc.redberry.core.tensor.playground;
 
-import org.junit.Test;
+import cc.redberry.core.graph.GraphUtils;
+import cc.redberry.core.indices.Indices;
+import cc.redberry.core.indices.IndicesUtils;
+import cc.redberry.core.number.Complex;
+import cc.redberry.core.tensor.*;
+import cc.redberry.core.utils.ArraysUtils;
 
 import java.util.Arrays;
 
 /**
- * Created by poslavsky on 12/02/16.
+ * @author Dmitry Bolotin
+ * @author Stanislav Poslavsky
  */
-public class StructureOfContractionsTest {
-    @Test
-    public void test1() throws Exception {
-        Product t = (Product) Tensors.parse("f_a*f^a*f_b*f^b*f_c*f^c");
-        System.out.println(t);
-        System.out.println(t.getContent().getStructureOfContractions().componentCount);
-        System.out.println(Arrays.toString(t.getContent().getStructureOfContractions().components));
-        System.out.println(Arrays.toString(t.getContent().hashCodes));
+final class ProductData {
+    final Tensor[] data;
+    final Indices indices;
+    final ContentData content;
+    final int hash;
+
+    ProductData(Tensor[] data, Indices indices, ContentData content, int hash) {
+        this.data = data;
+        this.indices = indices;
+        this.content = content;
+        this.hash = hash;
     }
 }

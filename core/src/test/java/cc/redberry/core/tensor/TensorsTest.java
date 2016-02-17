@@ -408,4 +408,11 @@ public class TensorsTest {
             sum = sum(sum, divideAndRenameConflictingDummies(num, den));
         }
     }
+
+    @Test
+    public void testSum1() throws Exception {
+        Tensor a = parse("f_i + R_ijk*F^kj - R_kij*F^jk +  R_ijk*F^jk ");
+        Tensor b = parse("f_i + R_ijk*F^jk + R_ijk*F^kj - R_kij*F^jk");
+        TAssert.assertEquals(a, b);
+    }
 }

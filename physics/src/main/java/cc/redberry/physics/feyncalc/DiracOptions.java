@@ -68,6 +68,9 @@ public class DiracOptions implements IOptions, Cloneable {
     @Option(name = "ExpandAndEliminate", index = 8)
     public Transformation expandAndEliminate = null;
 
+    @Option(name = "Cache", index = 9)
+    public boolean cache = false;
+
     public DiracOptions() {}
 
     @Override

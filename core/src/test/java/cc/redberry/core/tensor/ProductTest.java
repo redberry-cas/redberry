@@ -92,7 +92,7 @@ public class ProductTest {
         Product t1 = (Product) parse("R^abcd*R_abcd");
         Product t2 = (Product) parse("R^abcd*R_abdc");
 
-        Assert.assertEquals(t1.getContent().getStructureOfContractionsHashed(), t2.getContent().getStructureOfContractionsHashed());
+        //Assert.assertEquals(t1.getContent().getStructureOfContractionsHashed(), t2.getContent().getStructureOfContractionsHashed());
         Assert.assertEquals(t1.hashCode(), t2.hashCode());
     }
 
@@ -541,5 +541,13 @@ public class ProductTest {
             TAssert.assertFalse(Product.includes(a, c));
             TAssert.assertFalse(Product.includes(c, a));
         }
+    }
+
+    @Test
+    public void testHash1() throws Exception {
+        addSymmetry("R_mnp", IndexType.LatinLower, false, 2, 1, 0);
+        Tensor a = parse("F^{jk}*R_{kji}");
+        Tensor b = parse("F^{kj}*R_{kji}");
+        Assert.assertFalse(a.hashCode() == b.hashCode());
     }
 }

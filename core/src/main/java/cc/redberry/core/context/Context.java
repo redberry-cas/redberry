@@ -28,7 +28,6 @@ import cc.redberry.core.tensor.SimpleTensor;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.tensor.TensorField;
 import cc.redberry.core.tensor.Tensors;
-import cc.redberry.core.utils.BitArray;
 import cc.redberry.core.utils.OutputPort;
 import org.apache.commons.math3.random.RandomGenerator;
 
@@ -75,7 +74,7 @@ public final class Context {
      * Holds information about metric types.
      * This is a "map" from (byte) type to (bit) isMetric
      */
-    private final BitArray metricTypesBits = new BitArray(128);
+    private final boolean[] metricTypesBits = new boolean[128];
     /**
      * Metric types.
      */
@@ -108,7 +107,7 @@ public final class Context {
         for (IndexType type : contextSettings.getMetricTypes()) {
             matrixTypes.remove(type);
             metricTypes.add(type);
-            this.metricTypesBits.set(type.getType());
+            this.metricTypesBits[type.getType()] = true;
         }
         this.metricTypes = Collections.unmodifiableSet(metricTypes);
         this.matrixTypes = Collections.unmodifiableSet(matrixTypes);
@@ -320,8 +319,8 @@ public final class Context {
      * @param type index type
      * @return true if metric is defined for the specified index type
      */
-    public boolean isMetric(byte type) {
-        return metricTypesBits.get(type);
+    public final boolean isMetric(byte type) {
+        return metricTypesBits[type];
     }
 
     /**
@@ -362,7 +361,7 @@ public final class Context {
         byte type;
         if ((type = IndicesUtils.getType(index1)) != IndicesUtils.getType(index2)
                 || !IndicesUtils.haveEqualStates(index1, index2)
-                || !metricTypesBits.get(type))
+                || !metricTypesBits[type])
             throw new IllegalArgumentException("Not metric indices.");
         SimpleIndices indices = IndicesFactory.createSimple(null, index1, index2);
         NameDescriptor nd = nameManager.mapNameDescriptor(nameManager.getMetricName(), StructureOfIndices.create(indices));

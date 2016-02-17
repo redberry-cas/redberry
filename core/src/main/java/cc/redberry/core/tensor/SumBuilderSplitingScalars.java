@@ -57,6 +57,6 @@ public final class SumBuilderSplitingScalars extends AbstractSumBuilder {
         for (List<FactorNode> vals : summands.valueCollection())
             for (int i = vals.size() - 1; i >= 0; --i)
                 vals.set(i, vals.get(i).clone());
-        return new SumBuilderSplitingScalars(summands, complex, indices, sortedFreeIndices.clone());
+        return new SumBuilderSplitingScalars(summands, complex, indices, sortedNames.clone());
     }
 }

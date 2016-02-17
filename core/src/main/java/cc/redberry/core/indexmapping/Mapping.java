@@ -23,6 +23,7 @@
 package cc.redberry.core.indexmapping;
 
 import cc.redberry.core.indices.IndicesUtils;
+import cc.redberry.core.indices.SimpleIndices;
 import cc.redberry.core.tensor.ApplyIndexMapping;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.transformations.Transformation;
@@ -58,6 +59,16 @@ public final class Mapping implements Transformation {
      * Identity mapping
      */
     public static final Mapping IDENTITY_MAPPING = new Mapping(new int[0], new int[0], false, false);
+
+    /**
+     * Creates mapping from given {@code from} and {@code to} arrays of indices.
+     *
+     * @param from indices from
+     * @param to   indices to
+     */
+    public Mapping(SimpleIndices from, SimpleIndices to) {
+        this(from.toArray(), to.toArray(), false);
+    }
 
     /**
      * Creates mapping from given {@code from} and {@code to} arrays of indices.

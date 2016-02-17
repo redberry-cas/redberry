@@ -20,22 +20,21 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
-package cc.redberry.core.tensor;
+package cc.redberry.core.indices;
 
+import cc.redberry.core.groups.permutations.Permutations;
+import cc.redberry.core.parser.ParserIndices;
+import org.junit.Assert;
 import org.junit.Test;
 
-import java.util.Arrays;
-
 /**
- * Created by poslavsky on 12/02/16.
+ * Created by poslavsky on 06/02/16.
  */
-public class StructureOfContractionsTest {
+public class IndicesSymmetriesTest {
     @Test
     public void test1() throws Exception {
-        Product t = (Product) Tensors.parse("f_a*f^a*f_b*f^b*f_c*f^c");
-        System.out.println(t);
-        System.out.println(t.getContent().getStructureOfContractions().componentCount);
-        System.out.println(Arrays.toString(t.getContent().getStructureOfContractions().components));
-        System.out.println(Arrays.toString(t.getContent().hashCodes));
+        SimpleIndices indices = ParserIndices.parseSimple("_abcdefpq");
+        indices.getSymmetries().addSymmetries(Permutations.createPermutation(1, 0, 3, 2));
+        Assert.assertArrayEquals(new short[]{0, 0, 1, 1, 4, 5, 6, 7}, indices.getPositionsInOrbits());
     }
 }

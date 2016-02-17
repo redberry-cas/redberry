@@ -22,12 +22,12 @@
  */
 package cc.redberry.core.indexmapping;
 
-import cc.redberry.core.utils.OutputPort;
 import cc.redberry.core.combinatorics.IntPermutationsGenerator;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.tensor.Product;
 import cc.redberry.core.tensor.ProductContent;
 import cc.redberry.core.tensor.Tensor;
+import cc.redberry.core.utils.OutputPort;
 import cc.redberry.core.utils.stretces.PrecalculatedStretches;
 import cc.redberry.core.utils.stretces.Stretch;
 
@@ -50,7 +50,7 @@ final class ProviderProduct implements IndexMappingProvider {
 
         @Override
         public IndexMappingProvider create(IndexMappingProvider opu, Tensor from, Tensor to) {
-            Product pfrom = (Product) from,
+             Product pfrom = (Product) from,
                     pto = (Product) to;
             if (pfrom.sizeWithoutFactor() != pto.sizeWithoutFactor())
                 return IndexMappingProvider.Util.EMPTY_PROVIDER;
@@ -62,7 +62,7 @@ final class ProviderProduct implements IndexMappingProvider {
                     if (pfrom.getWithoutFactor(i).hashCode() != pto.getWithoutFactor(i).hashCode())
                         return IndexMappingProvider.Util.EMPTY_PROVIDER;
             ProductContent fromContent = pfrom.getContent(), toContent = pto.getContent();
-            if (!fromContent.getStructureOfContractionsHashed().equals(toContent.getStructureOfContractionsHashed()))
+            if (!fromContent.compatibleWithGraph(toContent))
                 return IndexMappingProvider.Util.EMPTY_PROVIDER;
             Tensor[] fromScalars = pfrom.getAllScalarsWithoutFactor(), toScalars = pto.getAllScalarsWithoutFactor();
             if (fromScalars.length != toScalars.length)
@@ -170,7 +170,7 @@ final class ProviderProduct implements IndexMappingProvider {
 
         begin = 0;
         for (i = 1; i <= fromContent.size(); ++i)
-            if (i == fromContent.size() || !fromContent.getStructureOfContractionsHashed().get(i).equals(fromContent.getStructureOfContractionsHashed().get(i - 1))) {
+            if (i == fromContent.size() || fromContent.getVertexHash(i) != fromContent.getVertexHash(i - 1)) {
                 if (i - 1 != begin)
                     stretches.add(new Pair(fromContent.getRange(begin, i), toContent.getRange(begin, i)));
                 else

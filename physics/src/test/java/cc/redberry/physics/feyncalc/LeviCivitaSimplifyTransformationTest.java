@@ -159,6 +159,7 @@ public class LeviCivitaSimplifyTransformationTest {
 
     @Test
     public void test6() {
+        CC.resetTensorNames(1233);
         setAntiSymmetric("e_abcd");
         SimpleTensor eps = parseSimple("e_abcf");
         Tensor t = parse("e_abcd*e^b_n^a_m*e^m_e^n_f");

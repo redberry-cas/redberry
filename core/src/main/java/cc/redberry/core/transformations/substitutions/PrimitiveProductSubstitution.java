@@ -40,7 +40,7 @@ import static cc.redberry.core.indexmapping.IndexMappings.createBijectiveProduct
 import static cc.redberry.core.indexmapping.IndexMappings.getFirst;
 import static cc.redberry.core.tensor.ApplyIndexMapping.applyIndexMapping;
 import static cc.redberry.core.tensor.ApplyIndexMapping.applyIndexMappingAndRenameAllDummies;
-import static cc.redberry.core.tensor.StructureOfContractions.getToTensorIndex;
+import static cc.redberry.core.tensor.StructureOfContractions.toPosition;
 import static cc.redberry.core.utils.TensorUtils.getAllIndicesNamesT;
 
 /**
@@ -291,7 +291,7 @@ final class PrimitiveProductSubstitution extends PrimitiveSubstitution {
                 if (mask[first] != 0)
                     continue;
                 for (long contraction : st.contractions[first]) {
-                    int second = getToTensorIndex(contraction);
+                    int second = toPosition(contraction);
                     if (second == -1 || mask[second] != 0 || first == second
                             || content.get(second).hashCode() != secondHash)
                         continue;

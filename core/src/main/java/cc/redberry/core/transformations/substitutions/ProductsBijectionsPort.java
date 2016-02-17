@@ -185,12 +185,12 @@ public final class ProductsBijectionsPort implements OutputPort<int[]> {
                         fromContraction = currentInfo.fromContractions[j];
                         targetContraction = currentInfo.targetContractions[currentInfo.permutation[j]];
 
-                        assert getFromIndexId(fromContraction) == getFromIndexId(targetContraction);
+                        assert fromIPosition(fromContraction) == fromIPosition(targetContraction);
 
-                        fromTensorIndex = getToTensorIndex(fromContraction);
-                        targetTensorIndex = getToTensorIndex(targetContraction);
+                        fromTensorIndex = toPosition(fromContraction);
+                        targetTensorIndex = toPosition(targetContraction);
 
-                        if (getToIndexId(fromContraction) != getToIndexId(targetContraction)) {
+                        if (toIDiffId(fromContraction) != toIDiffId(targetContraction)) {
                             if (!currentInfo.nextAndResetRightChain()) {
                                 closed = true;
                                 return null;
@@ -277,16 +277,16 @@ public final class ProductsBijectionsPort implements OutputPort<int[]> {
                         //Corresponding contraction in target tensor
                         long targetIndexContraction = targetContractions[seedTargetIndex][diffIdsPermutation[stretch.from]];
 
-                        final int fromTensorIndex = getToTensorIndex(fromIndexContraction); //Index of contracting tensor in from array
+                        final int fromTensorIndex = toPosition(fromIndexContraction); //Index of contracting tensor in from array
                         if (fromTensorIndex == -1) //Not contracted index of from
                             continue;
 
-                        if (getToIndexId(fromIndexContraction) != getToIndexId(targetIndexContraction)) { //Contracts with different index id
+                        if (toIDiffId(fromIndexContraction) != toIDiffId(targetIndexContraction)) { //Contracts with different index id
                             closed = true;
                             return;
                         }
 
-                        final int targetTensorIndex = getToTensorIndex(targetIndexContraction); //Index of contracting tensor in target array
+                        final int targetTensorIndex = toPosition(targetIndexContraction); //Index of contracting tensor in target array
                         if (targetTensorIndex == -1) {//Not contracted index of target (but from is contracted with some tensor),
                             // so this bijection is impossible
                             closed = true;
@@ -317,14 +317,14 @@ public final class ProductsBijectionsPort implements OutputPort<int[]> {
                         //Counting tensors in from array contracting with other tensor (non free)
                         int count = 0;
                         for (j = 0; j < stretch.length; ++j)
-                            if (getToTensorIndex(fromContractions[seedFromIndex][diffIdsPermutation[stretch.from + j]]) != -1) //TODO addAll bijection == -1 (????)
+                            if (toPosition(fromContractions[seedFromIndex][diffIdsPermutation[stretch.from + j]]) != -1) //TODO addAll bijection == -1 (????)
                                 ++count;
                         long[] fromContractions_ = new long[count]; //Positions of permutating indices (contractions) in from array
                         long[] targetContractions_ = new long[stretch.length];
                         count = 0; //used as pointer below (to save 4 bytes of stack memory :-D )
                         long contraction;
                         for (j = 0; j < stretch.length; ++j) {
-                            if (getToTensorIndex(contraction = fromContractions[seedFromIndex][diffIdsPermutation[stretch.from + j]]) != -1)
+                            if (toPosition(contraction = fromContractions[seedFromIndex][diffIdsPermutation[stretch.from + j]]) != -1)
                                 fromContractions_[count++] = contraction;
                             targetContractions_[j] = targetContractions[seedTargetIndex][diffIdsPermutation[stretch.from + j]];
                         }
@@ -351,7 +351,7 @@ public final class ProductsBijectionsPort implements OutputPort<int[]> {
         /**
          * Indices in array of contractions for some (seed) tensor in from
          * array. None of this contractions points (in terms of
-         * getToTensorIndex()) to -1 tensor
+         * toPosition()) to -1 tensor
          */
         final long[] fromContractions;
         /**

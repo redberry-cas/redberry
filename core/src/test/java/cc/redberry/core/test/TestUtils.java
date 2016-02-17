@@ -46,6 +46,12 @@ public final class TestUtils {
                 Objects.equals(System.getProperty("longTest"), "true");
     }
 
+    public static boolean skipGAPTests() {
+        return Objects.equals(System.getProperty("noGAP"), "") ||
+                Objects.equals(System.getProperty("noGAP"), "true") ||
+                Objects.equals(System.getProperty("noGap"), "") ||
+                Objects.equals(System.getProperty("noGap"), "true");
+    }
 
     public static int its(int shortTest, int longTest) {
         return doLongTests() ? longTest : shortTest;

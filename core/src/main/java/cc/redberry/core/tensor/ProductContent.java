@@ -38,56 +38,67 @@ public final class ProductContent implements Iterable<Tensor> {
     /**
      * Singleton for empty instance.
      */
-    public static final ProductContent EMPTY_INSTANCE =
-            new ProductContent(StructureOfContractionsHashed.EMPTY_INSTANCE,
-                    StructureOfContractions.EMPTY_FULL_CONTRACTIONS_STRUCTURE,
-                    new Tensor[0],
-                    null,
-                    new short[0],
-                    new Tensor[0],
-                    new int[0]);
-    private final StructureOfContractionsHashed structureOfContractionsHashed;
+    public static final ProductContent EMPTY_INSTANCE = new ProductContent();
     private final StructureOfContractions structureOfContractions;
-    private final Tensor[] scalars;
-    private final Tensor nonScalar;
-    private final short[] stretchIndices;
-    private final Tensor[] data;
+    final Tensor[] data;
+    final int[] hashCodes;
+    final int[] iHashCodes;
+    final Tensor nonScalar, scalars[];
 
-    ProductContent(StructureOfContractionsHashed structureOfContractionsHashed,
-                   StructureOfContractions structureOfContractions,
-                   Tensor[] scalars, Tensor nonScalar,
-                   short[] stretchIndices,
-                   Tensor[] data) {
-        this.structureOfContractionsHashed = structureOfContractionsHashed;
+    ProductContent(StructureOfContractions structureOfContractions,
+                   Tensor[] data, int[] hashCodes, int[] iHashCodes,
+                   Tensor nonScalar, Tensor[] scalars) {
         this.structureOfContractions = structureOfContractions;
-        this.scalars = scalars;
-        this.nonScalar = nonScalar;
-        this.stretchIndices = stretchIndices;
         this.data = data;
+        this.hashCodes = hashCodes;
+        this.iHashCodes = iHashCodes;
+        this.nonScalar = nonScalar;
+        this.scalars = scalars;
     }
 
-    private ProductContent(StructureOfContractionsHashed structureOfContractionsHashed,
-                           StructureOfContractions structureOfContractions,
-                           Tensor[] scalars, Tensor nonScalar,
-                           short[] stretchIndices,
-                           Tensor[] data,
-                           int[] stretchHashReflection) {
-        this.structureOfContractionsHashed = structureOfContractionsHashed;
-        this.structureOfContractions = structureOfContractions;
-        this.scalars = scalars;
-        this.nonScalar = nonScalar;
-        this.stretchIndices = stretchIndices;
-        this.data = data;
-        this.stretchHashReflection = stretchHashReflection;
+    private ProductContent() {
+        this.structureOfContractions = StructureOfContractions.EMPTY_FULL_CONTRACTIONS_STRUCTURE;
+        this.data = new Tensor[0];
+        this.hashCodes = new int[0];
+        this.iHashCodes = new int[0];
+        this.nonScalar = null;
+        this.scalars = new Tensor[0];
     }
 
     /**
-     * Returns hashed structure of product contractions.
+     * Graph hash code
      *
-     * @return hashed structure of product contractions
+     * @return hash code of underlying graph
      */
-    public StructureOfContractionsHashed getStructureOfContractionsHashed() {
-        return structureOfContractionsHashed;
+    int graphHash() {
+        return Arrays.hashCode(hashCodes);
+    }
+
+    /**
+     * Graph hash code with indices
+     *
+     * @return hash code of underlying graph
+     */
+    int iGraphHash() {
+        return Arrays.hashCode(iHashCodes);
+    }
+
+    /**
+     * Returns hash code of a specified vertex of graph ("clever" hash)
+     *
+     * @param i i-th vertex
+     * @return hash code of a specified vertex
+     */
+    public int getVertexHash(int i) {
+        return hashCodes[i];
+    }
+
+    public boolean compatibleWithGraph(ProductContent other) {
+        return Arrays.equals(hashCodes, other.hashCodes);
+    }
+
+    public boolean iCompatibleWithGraph(ProductContent other) {
+        return Arrays.equals(iHashCodes, other.iHashCodes);
     }
 
     /**
@@ -136,21 +147,6 @@ public final class ProductContent implements Iterable<Tensor> {
     }
 
     /**
-     * @return ids
-     */
-    public short[] getStretchIds() {
-        return stretchIndices.clone();
-    }
-
-    /**
-     * @param i position
-     * @return id
-     */
-    public short getStretchId(int i) {
-        return stretchIndices[i];
-    }
-
-    /**
      * Returns i-th element of indexed data in this product.
      *
      * @param i position
@@ -192,24 +188,5 @@ public final class ProductContent implements Iterable<Tensor> {
     @Override
     public Iterator<Tensor> iterator() {
         return new ArrayIterator<>(data);
-    }
-
-    private int[] stretchHashReflection;
-
-    /**
-     * @param hashCode hashCode
-     * @return id
-     */
-    public short getStretchIndexByHash(final int hashCode) {
-        if (stretchHashReflection == null) {
-            stretchHashReflection = new int[stretchIndices[stretchIndices.length - 1] + 1];
-            //TODO performance (!!!)
-            for (int i = 0; i < stretchIndices.length; ++i)
-                stretchHashReflection[stretchIndices[i]] = data[i].hashCode();
-        }
-        int index = Arrays.binarySearch(stretchHashReflection, hashCode);
-        if (index < 0)
-            return -1;
-        return (short) index;
     }
 }

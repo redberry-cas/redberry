@@ -32,9 +32,25 @@ import java.util.*;
  * @author Stanislav Poslavsky
  */
 public class TimingStatistics {
-    final Set<WeakReference<TransformationWithTimer>> set = new HashSet<>();
+    final Set<WeakReference<TransformationWithTimer>> set;
+    final Comparator<Transformation> comparator;
 
     public TimingStatistics() {
+        this.set = new HashSet<>();
+        this.comparator = null;
+    }
+
+    public TimingStatistics(final Comparator<Transformation> comp) {
+        this.comparator = comp;
+        this.set = new TreeSet<>(new Comparator<WeakReference<TransformationWithTimer>>() {
+            @Override
+            public int compare(WeakReference<TransformationWithTimer> o1, WeakReference<TransformationWithTimer> o2) {
+                TransformationWithTimer t1 = o1.get(), t2 = o2.get();
+                if (t1 == null || t2 == null)
+                    return 1;
+                return comp.compare(t1, t2);
+            }
+        });
     }
 
     public void collectStatistics(TransformationWithTimer transformation) {
@@ -49,6 +65,28 @@ public class TimingStatistics {
                 it.remove();
             else
                 tr.resetTiming();
+        }
+    }
+
+    public synchronized void merge(TimingStatistics stats) {
+        merge(stats, comparator);
+    }
+
+    public synchronized void merge(TimingStatistics stats, Comparator<Transformation> comparator) {
+        out:
+        for (WeakReference<TransformationWithTimer> oth : stats.set) {
+            TransformationWithTimer othTr = oth.get();
+            if (othTr == null)
+                continue;
+            for (WeakReference<TransformationWithTimer> reference : set) {
+                TransformationWithTimer tr = reference.get();
+                if (tr != null)
+                    if (comparator.compare(tr, othTr) == 0) {
+                        tr.incrementNanos(othTr.elapsedNanos());
+                        continue out;
+                    }
+            }
+            collectStatistics(othTr);
         }
     }
 

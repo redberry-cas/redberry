@@ -65,6 +65,15 @@ public class DifferentiateTransformationTest {
     }
 
     @Test
+    public void test1a() {
+        Tensor t = parse("x*Sin[y**3]");
+        SimpleTensor var = parseSimple("y");
+        Tensor d = differentiate(t, var, 1);
+        Tensor expected = parse("3*y**2*Cos[y**3]*x");
+        TAssert.assertEquals(d, expected);
+    }
+
+    @Test
     public void test2() {
         Tensor t = parse("Sin[f^mn*(x_mn+x_nm)]");
         SimpleTensor var = parseSimple("x_ij");

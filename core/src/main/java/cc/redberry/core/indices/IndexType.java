@@ -84,7 +84,7 @@ public enum IndexType {
      */
     private final String shortString;
 
-    private IndexType(IndexSymbolConverter converter, String shortString) {
+    IndexType(IndexSymbolConverter converter, String shortString) {
         this.shortString = shortString;
         this.converter = converter;
     }

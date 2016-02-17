@@ -75,7 +75,6 @@ public final class TensorContraction implements Comparable<TensorContraction> {
             this.hash = HashFunctions.Wang64to32shift(hash);
         }
         return hash;
-
     }
 
     @Override

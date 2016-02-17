@@ -22,15 +22,16 @@
  */
 package cc.redberry.core.transformations.substitutions;
 
+import cc.redberry.core.TAssert;
 import cc.redberry.core.context.CC;
 import cc.redberry.core.indices.IndexType;
+import cc.redberry.core.tensor.Sum;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.tensor.Tensors;
 import junit.framework.Assert;
 import org.junit.Test;
 
-import java.util.Arrays;
-
+import static cc.redberry.core.tensor.Tensors.addSymmetry;
 import static cc.redberry.core.tensor.Tensors.parse;
 
 /**
@@ -85,9 +86,45 @@ public class SumBijectionPortTest {
 
     @Test
     public void test5() {
-        CC.resetTensorNames(2634486062579664417L);
-        Tensor target = parse("f_i + R_ijk*F^kj + R_ijk*F^jk - R_kij*F^jk");
-        Tensor from = parse("f_i + R_ijk*F^kj - R_kij*F^jk");
-        Assert.assertTrue(Arrays.equals(new SumBijectionPort(from, target).take().bijection, new int[]{0, 1, 3}));
+        for (int i = 0; i < 10; i++) {
+            CC.reset();
+            Tensor target = parse("f_i + R_ijk*F^kj + R_ijk*F^jk - R_kij*F^jk");
+            Tensor from = parse("f_i + R_ijk*F^kj - R_kij*F^jk");
+
+            SumBijectionPort port = new SumBijectionPort(from, target);
+            SumBijectionPort.BijectionContainer take;
+            int a = 0;
+            while ((take = port.take()) != null) {
+                ++a;
+                TAssert.assertEquals(from, ((Sum) target).select(take.bijection));
+            }
+            Assert.assertEquals(1, a);
+        }
+    }
+
+    @Test
+    public void test6() {
+        for (int i = 0; i < 10; i++) {
+            CC.reset();
+            addSymmetry("R_mnp", IndexType.LatinLower, true, 2, 1, 0);
+
+//            Tensor target = parse("f_i + R_ijk*F^kj - R_kij*F^jk         +  R_ijk*F^jk ");
+            Tensor target = parse("f_i + R_ijk*F^jk + R_ijk*F^kj         - R_kij*F^jk");
+            Tensor from = parse("  f_m - R_ljm*F^lj + R_bma*F^ba   ");// =  R_bam*F^ab
+            //                     f_m + R_mjk*F^kj - R_kmj*F^jk         = -R_mjk*F^jk
+
+            Tensor to = parse("R_bam*F^ab");
+
+            SumBijectionPort port = new SumBijectionPort(from, target);
+            SumBijectionPort.BijectionContainer take;
+            int a = 0;
+            while ((take = port.take()) != null) {
+                ++a;
+                Sum sum = ((Sum) target);
+                TAssert.assertEquals(take.mapping.transform(from), sum.select(take.bijection));
+                TAssert.assertEquals("0", Tensors.sum(sum.remove(take.bijection), take.mapping.transform(to)));
+            }
+            Assert.assertEquals(1, a);
+        }
     }
 }

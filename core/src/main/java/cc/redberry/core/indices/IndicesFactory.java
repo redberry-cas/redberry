@@ -29,9 +29,7 @@ package cc.redberry.core.indices;
  * @author Stanislav Poslavsky
  * @since 1.0
  */
-//TODO discuss with Stas. Final revision of indices types....
 public class IndicesFactory {
-
     /**
      * Singleton object for empty indices.
      */
@@ -96,5 +94,30 @@ public class IndicesFactory {
         if (data.length == 0)
             return EMPTY_INDICES;
         return new SortedIndices(data.clone());
+    }
+
+    /**
+     * Creates indices in alphabetical order (_abcd...)
+     *
+     * @param type type of indices
+     * @param size size of indices
+     * @return indices in alphabetical order of specified size and type
+     */
+    public static SimpleIndices createAlphabetical(final IndexType type, final int size) {
+        return createAlphabetical(type.getType(), size);
+    }
+
+    /**
+     * Creates indices in alphabetical order (_abcd...)
+     *
+     * @param type type of indices
+     * @param size size of indices
+     * @return indices in alphabetical order of specified size and type
+     */
+    public static SimpleIndices createAlphabetical(final byte type, final int size) {
+        final int[] indices = new int[size];
+        for (int i = 0; i < size; i++)
+            indices[i] = IndicesUtils.setType(type, i);
+        return UnsafeIndicesFactory.createIsolatedUnsafeWithoutSort(null, indices);
     }
 }

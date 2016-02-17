@@ -159,6 +159,11 @@ final class EmptySimpleIndices extends EmptyIndices implements SimpleIndices {
     }
 
     @Override
+    public int contractionsHash() {
+        return 0;
+    }
+
+    @Override
     public StructureOfIndices getStructureOfIndices() {
         return StructureOfIndices.getEmpty();
     }

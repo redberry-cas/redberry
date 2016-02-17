@@ -45,7 +45,7 @@ import static cc.redberry.core.indexmapping.IndexMappings.anyMappingExists;
 import static cc.redberry.core.indices.IndicesFactory.createSimple;
 import static cc.redberry.core.indices.IndicesUtils.*;
 import static cc.redberry.core.tensor.FastTensors.multiplySumElementsOnFactor;
-import static cc.redberry.core.tensor.StructureOfContractions.getToTensorIndex;
+import static cc.redberry.core.tensor.StructureOfContractions.toPosition;
 import static cc.redberry.core.tensor.Tensors.*;
 import static cc.redberry.core.transformations.EliminateMetricsTransformation.eliminate;
 
@@ -292,8 +292,7 @@ public final class SpinorsSimplifyTransformation extends AbstractTransformationW
             simplified.add(product.remove(changed.toArray()));
             Tensor simple = expandAndEliminate.transform(multiplyAndRenameConflictingDummies(simplified));
             simple = diracSimplify.transform(simple);
-            simple = traceOfOne.transform(simple);
-            simple = deltaTrace.transform(simple);
+            simple = deltaTraces.transform(simple);
             simple = p2.transform(simple);
             iterator.safeSet(transform(simple));
         }
@@ -496,7 +495,7 @@ public final class SpinorsSimplifyTransformation extends AbstractTransformationW
         for (; j < indices.size(); ++j)
             if (metricType.getType() == getType(indices.get(j)))
                 break;
-        return getToTensorIndex(sc.contractions[gamma][j]);
+        return toPosition(sc.contractions[gamma][j]);
     }
 
     private SpinorType isSpinor(Tensor st) {

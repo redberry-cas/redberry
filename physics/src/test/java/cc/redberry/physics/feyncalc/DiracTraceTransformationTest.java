@@ -345,6 +345,16 @@ public class DiracTraceTransformationTest extends AbstractFeynCalcTest {
         TAssert.assertEquals(dTrace.transform(t), "-4*I*e_agec");
     }
 
+    @Test
+    public void test13b() throws Exception {
+        setUp(8996284584077168957L);
+
+        Tensor t;
+
+        t = parse("Tr[(-I)*(-I)*e_abcj*G5*G^j*G^d*e_edgf*G5*G^f*G^b*G5]");
+        TAssert.assertEquals(dTrace.transform(t), simplifyLeviCivita.transform(parse("4*I*e_abcj*e_edgf*e^jdfb")));
+    }
+
     //Expression schouten = parseExpression("g_fa*e_bcde = -(g_fb*e_cdea + g_fc*e_deab+g_fd*e_eabc+g_fe*e_abcd)");
     private static final SimpleTensor defaultGamma = parseSimple("G^a'_b'a");
 

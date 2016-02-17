@@ -20,22 +20,29 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
-package cc.redberry.core.tensor;
-
-import org.junit.Test;
-
-import java.util.Arrays;
+package cc.redberry.core.tensor.playground;
 
 /**
- * Created by poslavsky on 12/02/16.
+ * Representation of hashed graph of product.
+ *
+ * @author Dmitry Bolotin
+ * @author Stanislav Poslavsky
+ * @since 1.0
  */
-public class StructureOfContractionsTest {
-    @Test
-    public void test1() throws Exception {
-        Product t = (Product) Tensors.parse("f_a*f^a*f_b*f^b*f_c*f^c");
-        System.out.println(t);
-        System.out.println(t.getContent().getStructureOfContractions().componentCount);
-        System.out.println(Arrays.toString(t.getContent().getStructureOfContractions().components));
-        System.out.println(Arrays.toString(t.getContent().hashCodes));
+final class GraphStructureHashed {
+    /**
+     * Singleton for empty structure
+     */
+    public static final GraphStructureHashed EMPTY_INSTANCE =
+            new GraphStructureHashed(new short[0], new long[0], new long[0][0]);
+
+    final short[] stretchIndices;
+    final long[] freeContraction;
+    final long[][] contractions;
+
+    public GraphStructureHashed(short[] stretchIndices, long[] freeContraction, long[][] contractions) {
+        this.stretchIndices = stretchIndices;
+        this.freeContraction = freeContraction;
+        this.contractions = contractions;
     }
 }
