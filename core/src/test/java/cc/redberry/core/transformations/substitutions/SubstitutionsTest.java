@@ -26,10 +26,12 @@ import cc.redberry.core.TAssert;
 import cc.redberry.core.combinatorics.IntPermutationsGenerator;
 import cc.redberry.core.context.CC;
 import cc.redberry.core.context.OutputFormat;
+import cc.redberry.core.groups.permutations.PermutationGroup;
 import cc.redberry.core.groups.permutations.Permutations;
 import cc.redberry.core.indices.IndexType;
 import cc.redberry.core.indices.IndicesFactory;
 import cc.redberry.core.number.Complex;
+import cc.redberry.core.parser.ParserIndices;
 import cc.redberry.core.parser.preprocessor.GeneralIndicesInsertion;
 import cc.redberry.core.tensor.*;
 import cc.redberry.core.tensor.random.RandomTensor;
@@ -823,7 +825,7 @@ public class SubstitutionsTest extends RedberryTest {
         for (int i = 0; i < 100; ++i) {
             CC.reset();
             addSymmetry("R_mnp", IndexType.LatinLower, true, 2, 1, 0);
-            Tensor target = parse(   "f_i + R_ijk*F^jk + R_ijk*F^kj - R_kij*F^jk");
+            Tensor target = parse("f_i + R_ijk*F^jk + R_ijk*F^kj - R_kij*F^jk");
             target = parseExpression("f_m + R_bma*F^ba - R_ljm*F^lj =  R_bam*F^ab ").transform(target);
             TAssert.assertEquals(target, "0");
         }
@@ -839,13 +841,19 @@ public class SubstitutionsTest extends RedberryTest {
 
     @Test
     public void testSum4() {
-        CC.resetTensorNames(2634486062579664417L);
-        Tensor target = parse("A_abc + A_bca + A_cab + A_acb + A_bac + A_cba");
-        target = parseExpression("A_abc + A_bca + A_cab = F_abc").transform(target);
-        TAssert.assertEquals(target, "F_{abc}+F_{bac}");
-    }
+        for (int i = 0; i < 100; i++) {
+            CC.reset();
 
-    //TODO tests for Sum
+            addSymmetries(parseSimple("F_abc"),
+                    Permutations.createPermutation(new int[][]{{0, 2, 1}}),
+                    Permutations.createPermutation(new int[][]{{0, 1, 2}}));
+            Tensor target = parse("A_abc + A_bca + A_cab + A_acb + A_bac + A_cba");
+            PermutationGroup group = PermutationGroup.createPermutationGroup(TensorUtils.findIndicesSymmetries(ParserIndices.parse("_abc"), target));
+            Assert.assertTrue(group.isSymmetric());
+            target = parseExpression("A_abc + A_bca + A_cab = F_abc").transform(target);
+            TAssert.assertEquals("F_abc + F_acb", target);
+        }
+    }
 
     @Test
     public void testProduct1() {
@@ -1098,18 +1106,30 @@ public class SubstitutionsTest extends RedberryTest {
 
     @Test
     public void testProduct28() throws Exception {
-        GeneralIndicesInsertion indicesInsertion = new GeneralIndicesInsertion();
-        CC.current().getParseManager().defaultParserPreprocessors.add(indicesInsertion);
-        indicesInsertion.addInsertionRule(parseSimple("T^A'_B'"), IndexType.Matrix2);
+        for (int i = 0; i < 10; i++) {
+            CC.reset();
+            GeneralIndicesInsertion indicesInsertion = new GeneralIndicesInsertion();
+            CC.current().getParseManager().defaultParserPreprocessors.add(indicesInsertion);
+            indicesInsertion.addInsertionRule(parseSimple("T^A'_B'_A"), IndexType.Matrix2);
 
 
-        setAntiSymmetric("f_ABC");
-        setSymmetric("d_ABC");
+            setAntiSymmetric("f_ABC");
+            setSymmetric("d_ABC");
 
-        Tensor t = parse("Tr[T_{I}*T_{A}*T_{J}]");
-        Expression subs = parseExpression("T_{A}*T_{B} = (1/2)*T^{C}*d_{ABC}+(1/2)*N**(-1)*g_{AB}+(1/2*I)*T^{C}*f_{ABC}");
+            Tensor t = parse("Tr[T_{I}*T_{A}*T_{J}]");
+            Expression subs = parseExpression("T_{A}*T_{B} = (1/2)*T^{C}*d_{ABC}+(1/2)*N**(-1)*g_{AB}+(1/2*I)*T^{C}*f_{ABC}");
 
-        TAssert.assertEquals("((1/2)*T^{C}*d_{AIC}+(1/2*I)*T^{C}*f_{AIC}+(1/2)*N**(-1)*g_{AI})*T_{J}", subs.transform(t));
+            Tensor p1 = parse("Tr[((1/2)*T^{C}*d_{IAC}+(1/2*I)*T^{C}*f_{IAC}+(1/2)*N**(-1)*g_{IA})*T_{J}]");
+            Tensor p2 = parse("Tr[T_{I}*((1/2)*T^{C}*d_{AJC}+(1/2)*N**(-1)*g_{AJ}+(1/2*I)*T^{C}*f_{AJC})]");
+            Tensor p3 = parse("Tr[T_{A}*((1/2)*T^{C}*d_{JIC}+(1/2)*N**(-1)*g_{JI}+(1/2*I)*T^{C}*f_{JIC})]");
+            final Tensor tr = subs.transform(t);
+            boolean match = false;
+            match |= TensorUtils.equals(p1, tr);
+            match |= TensorUtils.equals(p2, tr);
+            match |= TensorUtils.equals(p3, tr);
+
+            Assert.assertTrue(match);
+        }
     }
 
 

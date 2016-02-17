@@ -22,11 +22,11 @@
  */
 package cc.redberry.core.tensor;
 
-import cc.redberry.core.context.OutputFormat;
+import cc.redberry.core.indexmapping.IndexMappings;
 import cc.redberry.core.indices.Indices;
 import cc.redberry.core.indices.IndicesFactory;
+import cc.redberry.core.indices.IndicesUtils;
 import cc.redberry.core.number.Complex;
-import cc.redberry.core.utils.HashingStrategy;
 import cc.redberry.core.utils.TensorUtils;
 import gnu.trove.map.hash.TIntObjectHashMap;
 
@@ -47,7 +47,7 @@ public abstract class AbstractSumBuilder implements TensorBuilder {
     final TIntObjectHashMap<List<FactorNode>> summands;
     Complex complex = Complex.ZERO;
     Indices indices = null;
-    int[] sortedFreeIndices;
+    int[] sortedNames;
     private int size = 0;
 
     /**
@@ -66,11 +66,11 @@ public abstract class AbstractSumBuilder implements TensorBuilder {
         summands = new TIntObjectHashMap<>(initialCapacity);
     }
 
-    AbstractSumBuilder(TIntObjectHashMap<List<FactorNode>> summands, Complex complex, Indices indices, int[] sortedFreeIndices) {
+    AbstractSumBuilder(TIntObjectHashMap<List<FactorNode>> summands, Complex complex, Indices indices, int[] sortedNames) {
         this.summands = summands;
         this.complex = complex;
         this.indices = indices;
-        this.sortedFreeIndices = sortedFreeIndices;
+        this.sortedNames = sortedNames;
     }
 
     @Override
@@ -129,8 +129,8 @@ public abstract class AbstractSumBuilder implements TensorBuilder {
         }
         if (indices == null) {
             indices = IndicesFactory.create(tensor.getIndices().getFree());
-            sortedFreeIndices = indices.getAllIndices().copy();
-            Arrays.sort(sortedFreeIndices);
+            sortedNames = IndicesUtils.getIndicesNames(indices);
+            Arrays.sort(sortedNames);
         } else if (!indices.equalsRegardlessOrder(tensor.getIndices().getFree()))
             throw new TensorException("Inconsistent indices in sum. " +
                     "Expected: " + indices + " Actual: " + tensor.getIndices().getFree(), tensor);//TODO improve message
@@ -146,7 +146,7 @@ public abstract class AbstractSumBuilder implements TensorBuilder {
 
         final Split split = split(tensor);
 
-        final int hash = HashingStrategy.hashWithIndices(split.factor, sortedFreeIndices);//=split.factor.hashCode();
+        final int hash = iHash(split.factor, sortedNames);
         final List<FactorNode> factorNodes = summands.get(hash);
         if (factorNodes == null) {
             List<FactorNode> fns = new ArrayList<>(1);
@@ -165,10 +165,26 @@ public abstract class AbstractSumBuilder implements TensorBuilder {
                 }
             if (b == null) {
                 factorNodes.add(new FactorNode(split.factor, split.getBuilder()));
+                if (DEBUG_PRINT_SAME_FLAG) {
+                    System.out.println("\n");
+                    for (FactorNode node : factorNodes)
+                        System.out.println(node.factor);
+                }
                 ++size;
             }
         }
     }
+
+    private static int iHash(final Tensor t, final int[] sortedNames) {
+        if (t instanceof Product)
+            return ((Product) t).iHashCode();
+        else if (t instanceof SimpleTensor)
+            return HashingStrategy.iGraphHash((SimpleTensor) t, sortedNames);
+        else
+            return HashingStrategy.iHash(t, sortedNames);
+    }
+
+    public static boolean DEBUG_PRINT_SAME_FLAG = false;
 
     @Override
     public abstract TensorBuilder clone();
@@ -182,24 +198,6 @@ public abstract class AbstractSumBuilder implements TensorBuilder {
     }
 
     static Boolean compareFactors(Tensor u, Tensor v) {
-        return TensorUtils.compare1(u, v);
-//        IndexMappingBuffer buffer;
-//        if (u.getIndices().size() == 0) <- getFree() !!!
-//            buffer = IndexMappings.createPort(u, v).take();
-//        else {
-//            int[] fromIndices = u.getIndices().getFree().getAllIndices().copy();
-//            for (int i = 0; i < fromIndices.length; ++i)
-//                fromIndices[i] = IndicesUtils.getNameWithType(fromIndices[i]);
-//            buffer = IndexMappings.createPort(new IndexMappingBufferTester(fromIndices, false), u, v).take();
-//        }
-//        if (buffer == null)
-//            return null;
-//        assert buffer.isEmpty();
-//        return buffer.getSignum();
+        return IndexMappings.compare1_withoutCheck(u, v);
     }
-
-//    @Override
-//    public String toString() {
-//        return clone().build().toString();
-//    }
 }

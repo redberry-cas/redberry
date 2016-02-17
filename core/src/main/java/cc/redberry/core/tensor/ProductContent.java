@@ -22,7 +22,6 @@
  */
 package cc.redberry.core.tensor;
 
-import cc.redberry.core.number.Complex;
 import cc.redberry.core.utils.ArrayIterator;
 
 import java.util.Arrays;
@@ -41,16 +40,18 @@ public final class ProductContent implements Iterable<Tensor> {
      */
     public static final ProductContent EMPTY_INSTANCE = new ProductContent();
     private final StructureOfContractions structureOfContractions;
-    private final Tensor[] data;
-    private final int[] hashCodes;
-    private final Tensor nonScalar, scalars[];
+    final Tensor[] data;
+    final int[] hashCodes;
+    final int[] iHashCodes;
+    final Tensor nonScalar, scalars[];
 
     ProductContent(StructureOfContractions structureOfContractions,
-                   Tensor[] data, int[] hashCodes,
+                   Tensor[] data, int[] hashCodes, int[] iHashCodes,
                    Tensor nonScalar, Tensor[] scalars) {
         this.structureOfContractions = structureOfContractions;
         this.data = data;
         this.hashCodes = hashCodes;
+        this.iHashCodes = iHashCodes;
         this.nonScalar = nonScalar;
         this.scalars = scalars;
     }
@@ -59,6 +60,7 @@ public final class ProductContent implements Iterable<Tensor> {
         this.structureOfContractions = StructureOfContractions.EMPTY_FULL_CONTRACTIONS_STRUCTURE;
         this.data = new Tensor[0];
         this.hashCodes = new int[0];
+        this.iHashCodes = new int[0];
         this.nonScalar = null;
         this.scalars = new Tensor[0];
     }
@@ -73,6 +75,15 @@ public final class ProductContent implements Iterable<Tensor> {
     }
 
     /**
+     * Graph hash code with indices
+     *
+     * @return hash code of underlying graph
+     */
+    int iGraphHash() {
+        return Arrays.hashCode(iHashCodes);
+    }
+
+    /**
      * Returns hash code of a specified vertex of graph ("clever" hash)
      *
      * @param i i-th vertex
@@ -82,12 +93,12 @@ public final class ProductContent implements Iterable<Tensor> {
         return hashCodes[i];
     }
 
-    public int[] vertexHashCodes(){
-        return hashCodes.clone();
-    }
-
     public boolean compatibleWithGraph(ProductContent other) {
         return Arrays.equals(hashCodes, other.hashCodes);
+    }
+
+    public boolean iCompatibleWithGraph(ProductContent other) {
+        return Arrays.equals(iHashCodes, other.iHashCodes);
     }
 
     /**

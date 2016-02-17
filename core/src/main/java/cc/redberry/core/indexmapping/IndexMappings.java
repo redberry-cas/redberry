@@ -22,12 +22,12 @@
  */
 package cc.redberry.core.indexmapping;
 
-import cc.redberry.core.utils.OutputPort;
 import cc.redberry.core.indices.Indices;
 import cc.redberry.core.indices.IndicesUtils;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.tensor.*;
 import cc.redberry.core.tensor.functions.*;
+import cc.redberry.core.utils.OutputPort;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -114,7 +114,7 @@ public final class IndexMappings {
      * @param from    tensor <i>{@code from}</i>
      * @param to      tensor <i>{@code to}</i>
      * @return {@code true} if specified mapping is a mapping from <i>{@code from}</i> tensor onto
-     *         <i>{@code to}</i> tensor and {@code false} in other case.
+     * <i>{@code to}</i> tensor and {@code false} in other case.
      */
     public static boolean testMapping(Mapping mapping, Tensor from, Tensor to) {
         return IndexMappingBufferTester.test(new IndexMappingBufferTester(mapping), from, to);
@@ -173,6 +173,11 @@ public final class IndexMappings {
         Indices freeIndices = u.getIndices().getFree();
         if (!freeIndices.equalsRegardlessOrder(v.getIndices().getFree()))
             return false;
+        if (HashingStrategy.iHash(u) != HashingStrategy.iHash(v))
+            return false;
+        if (u instanceof Product && v instanceof Product)
+            if (!((Product) u).getContent().iCompatibleWithGraph(((Product) v).getContent()))
+                return false;
         int[] free = freeIndices.getAllIndices().copy();
         IndexMappingBuffer tester = new IndexMappingBufferTester(free, false);
         OutputPort<IndexMappingBuffer> mp = IndexMappings.createPortOfBuffers(tester, u, v);
@@ -192,12 +197,27 @@ public final class IndexMappings {
      * @param u tensor
      * @param v tensor
      * @return {@code true} {@code false} if tensor u mathematically (not programming) equals to tensor v,
-     *         {@code true} if they they differ only in the sign and {@code null} otherwise
+     * {@code true} if they they differ only in the sign and {@code null} otherwise
      */
     public static Boolean compare1(Tensor u, Tensor v) {
         Indices freeIndices = u.getIndices().getFree();
         if (!freeIndices.equalsRegardlessOrder(v.getIndices().getFree()))
             return null;
+        if (HashingStrategy.iHash(u) != HashingStrategy.iHash(v))
+            return null;
+        if (u instanceof Product && v instanceof Product)
+            if (!((Product) u).getContent().iCompatibleWithGraph(((Product) v).getContent()))
+                return null;
+        int[] free = freeIndices.getAllIndices().copy();
+        IndexMappingBuffer tester = new IndexMappingBufferTester(free, false);
+        IndexMappingBuffer buffer = IndexMappings.createPortOfBuffers(tester, u, v).take();
+        if (buffer == null)
+            return null;
+        return buffer.getSign();
+    }
+
+    public static Boolean compare1_withoutCheck(Tensor u, Tensor v) {
+        Indices freeIndices = u.getIndices().getFree();
         int[] free = freeIndices.getAllIndices().copy();
         IndexMappingBuffer tester = new IndexMappingBufferTester(free, false);
         IndexMappingBuffer buffer = IndexMappings.createPortOfBuffers(tester, u, v).take();
@@ -270,7 +290,7 @@ public final class IndexMappings {
      * @return output port of mapping
      */
     static OutputPort<IndexMappingBuffer> createPortOfBuffers(final IndexMappingBuffer buffer,
-                                                                    final Tensor from, final Tensor to) {
+                                                              final Tensor from, final Tensor to) {
         final IndexMappingProvider provider = createPort(IndexMappingProvider.Util.singleton(buffer), from, to);
         provider.tick();
         return new MappingsPortRemovingContracted(provider);

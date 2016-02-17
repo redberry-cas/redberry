@@ -29,6 +29,9 @@ import cc.redberry.core.utils.IntArrayList;
 
 import java.util.Arrays;
 
+import static cc.redberry.core.indices.IndicesUtils.areContracted;
+import static cc.redberry.core.utils.HashFunctions.JenkinWang32shift;
+
 /**
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
@@ -241,5 +244,25 @@ abstract class AbstractSimpleIndices extends AbstractIndices implements SimpleIn
     @Override
     public StructureOfIndices getStructureOfIndices() {
         return StructureOfIndices.create(this);
+    }
+
+    @Override
+    public int contractionsHash() {
+        if (data.length == 1)
+            return 0;
+        if (data.length == 2) {
+            if (areContracted(data[0], data[1]))
+                return 104729;
+            else
+                return 0;
+        }
+
+        final short[] orbits = getPositionsInOrbits();
+        int hash = 0;
+        for (int i = 0; i < data.length - 1; ++i)
+            for (int j = i + 1; j < data.length; ++j)
+                if (areContracted(data[i], data[j]))
+                    hash += JenkinWang32shift(orbits[i] + 19 * orbits[j]);
+        return hash;
     }
 }

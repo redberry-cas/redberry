@@ -187,7 +187,7 @@ public class CollisionsTest {
     public void testAlgorithm2_HashCollisions() throws Exception {
         CC.resetTensorNames(123);
         setSymmetric("T_ab", "T_abc", "T_abcd");
-        List<Tensor> tts = generateListOfDiffTensors(randomSource3(), 100, 7, 1);
+        List<Tensor> tts = generateListOfDiffTensors(randomSource3(), 100, 10, 0);
 
         TIntHashSet hashSet_default = new TIntHashSet();
         TIntHashSet hashSet_alg0 = new TIntHashSet();
@@ -205,6 +205,7 @@ public class CollisionsTest {
         }
 
         System.out.println("Diff: " + tts.size()
+                + "\nDefa diff hash: " + hashSet_default.size()
                 + "\nAlg0 diff hash: " + hashSet_alg0.size()
                 + "\nAlg1 diff hash: " + hashSet_alg1.size()
                 + "\nAlg2 diff hash: " + hashSet_alg2.size()
@@ -219,6 +220,7 @@ public class CollisionsTest {
     @Test
     public void testAlgorithm2_HashCollisions_Traces() throws Exception {
         CC.resetTensorNames(123);
+        setUpMatrices();
 
         List<Tensor> tts = generateListOfDiffTensors(matrixRandomSource(true), 50, 8, 0);
 
@@ -238,6 +240,7 @@ public class CollisionsTest {
         }
 
         System.out.println("Diff: " + tts.size()
+                + "\nDefa diff hash: " + hashSet_default.size()
                 + "\nAlg0 diff hash: " + hashSet_alg0.size()
                 + "\nAlg1 diff hash: " + hashSet_alg1.size()
                 + "\nAlg2 diff hash: " + hashSet_alg2.size()
@@ -475,7 +478,7 @@ public class CollisionsTest {
         ProductData calc0(Tensor tensor) {
             if (tensor instanceof Product) {
                 Product p = (Product) ((Product) tensor).getDataSubProduct();
-                p.calculateContent();
+                //p.calculateContent();
                 return new ProductData(null, null, null, p.hashCode());
             }
             throw new RuntimeException();

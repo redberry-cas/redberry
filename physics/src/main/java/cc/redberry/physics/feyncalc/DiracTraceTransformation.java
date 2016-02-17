@@ -90,20 +90,26 @@ public final class DiracTraceTransformation extends AbstractFeynCalcTransformati
             Product product = (Product) current;
 
             //positions of matrices
+            final ProductContent pc = product.getContent();
             PrimitiveSubgraph[] partition
-                    = PrimitiveSubgraphPartition.calculatePartition(product.getContent(), matrixType);
+                    = PrimitiveSubgraphPartition.calculatePartition(pc, matrixType);
 
             //traces (expand brackets)
-            boolean containsTraces = false;
+            boolean containsTraces = false, containsSums = false;
             traces:
             for (PrimitiveSubgraph subgraph : partition) {
                 if (subgraph.getGraphType() != GraphType.Cycle)
                     continue traces;
                 //expand each cycle
                 containsTraces = true;
+                for (int i = 0; i < subgraph.size(); ++i) {
+                    containsSums = pc.get(subgraph.getPosition(i)) instanceof Sum;
+                    if (containsSums)
+                        break traces;
+                }
             }
 
-            if (containsTraces)
+            if (containsTraces && containsSums)
                 iterator.safeSet(multiply(product.getIndexlessSubProduct(),
                         expandAndEliminate.transform(product.getDataSubProduct())));
         }
@@ -141,10 +147,11 @@ public final class DiracTraceTransformation extends AbstractFeynCalcTransformati
         if (!cache)
             return trace_do_calc(productOfGammas, numberOfGammas, without5);
 
-        Tensor[] r = globalCache.get(productOfGammas.hashCode());
+        int hashCode = ((Product) productOfGammas).iHashCode();
+        Tensor[] r = globalCache.get(hashCode);
         if (r == null) {
             Tensor res = trace_do_calc(productOfGammas, numberOfGammas, without5);
-            globalCache.put(productOfGammas.hashCode(), new Tensor[]{productOfGammas, res});
+            globalCache.put(hashCode, new Tensor[]{productOfGammas, res});
             return res;
         }
         Mapping mapping = IndexMappings.getFirst(r[0], productOfGammas);

@@ -58,7 +58,6 @@ import static cc.redberry.core.utils.HashFunctions.JenkinWang32shift;
  * @since 1.0
  */
 public final class Product extends MultiTensor {
-
     /**
      * Numerical factor.
      */
@@ -79,6 +78,10 @@ public final class Product extends MultiTensor {
      * Hash code of this product.
      */
     int hash;
+    /**
+     * Hash code of this product sensitive to particular free indices configuration (to within equality).
+     */
+    int iHash;
 
     Product(Indices indices, Complex factor, Tensor[] indexless, Tensor[] data) {
         super(indices);
@@ -91,7 +94,7 @@ public final class Product extends MultiTensor {
 
         this.contentReference = new SoftReferenceWrapper<>();
         calculateContent();
-        this.hash = calculateHash();
+        calculateHash();
     }
 
     Product(Complex factor, Tensor[] indexlessData, Tensor[] data, ProductContent content, Indices indices) {
@@ -104,17 +107,18 @@ public final class Product extends MultiTensor {
             calculateContent();
         else
             this.contentReference.resetReferent(content);
-        this.hash = calculateHash();
+        calculateHash();
     }
 
     //very unsafe
-    Product(Indices indices, Complex factor, Tensor[] indexlessData, Tensor[] data, SoftReferenceWrapper<ProductContent> contentReference, int hash) {
+    Product(Indices indices, Complex factor, Tensor[] indexlessData, Tensor[] data, SoftReferenceWrapper<ProductContent> contentReference, int hash, int iHash) {
         super(indices);
         this.factor = factor;
         this.indexlessData = indexlessData;
         this.data = data;
         this.contentReference = contentReference;
         this.hash = hash;
+        this.iHash = iHash;
     }
 
     //very unsafe
@@ -124,7 +128,7 @@ public final class Product extends MultiTensor {
         this.indexlessData = indexlessData;
         this.data = data;
         this.contentReference = contentReference;
-        this.hash = calculateHash();
+        calculateHash();
     }
 
     private static Complex getDefaultReference(Complex factor) {
@@ -405,10 +409,10 @@ public final class Product extends MultiTensor {
         return factor;
     }
 
-    private int calculateHash() {
+    private void calculateHash() {
         int result;
         if (factor == Complex.ONE || factor == Complex.MINUS_ONE)
-            result = 0; //important for -a.hash() == a.hash()
+            result = 0;
         else
             result = factor.hashCode();
 
@@ -416,9 +420,13 @@ public final class Product extends MultiTensor {
             result = result * 31 + t.hashCode();
         for (Tensor t : data)
             result = result * 17 + t.hashCode();
-        if (factor == Complex.MINUS_ONE && size() == 2)
-            return result;
-        return result - 79 * getContent().graphHash();
+        if (factor == Complex.MINUS_ONE && size() == 2) {
+            hash = result;
+            iHash = HashingStrategy.iHash(get(1));
+            return;
+        }
+        hash = result - 79 * getContent().graphHash();
+        iHash = result - 79 * getContent().iGraphHash();
     }
 
     /**
@@ -544,11 +552,19 @@ public final class Product extends MultiTensor {
         return hash;
     }
 
+    /**
+     * Returns hash code sensitive to free indices configuration (to within equality relation)
+     *
+     * @return hash code sensitive to free indices configuration
+     */
+    public int iHashCode() {
+        return iHash;
+    }
+
     @Override
     public TensorFactory getFactory() {
         return ProductFactory.FACTORY;
     }
-
 
     @Override
     public String toString(OutputFormat format) {
@@ -810,7 +826,7 @@ public final class Product extends MultiTensor {
 
     private static final int REFINEMENT_LEVEL = 2;
 
-    public ProductContent calculateContent() {
+    private ProductContent calculateContent() {
         if (data.length == 0) {
             contentReference.resetReferent(ProductContent.EMPTY_INSTANCE);
             return ProductContent.EMPTY_INSTANCE;
@@ -838,13 +854,28 @@ public final class Product extends MultiTensor {
 
         calculateInfo(data, freeIndices, info, indices, contractions);
         assert Arrays.equals(indices[0], indices[1]);
+        reCalculateContractions(differentIndicesCount, info, contractions);
+
+        final int[] sortedIndices = IndicesUtils.getIndicesNames(freeIndices); //<- indices are sorted
+        Arrays.sort(sortedIndices);
+        assert !(freeIndices instanceof SimpleIndices);
 
         int i;
         final int[] hashCodes = new int[data.length];
-        for (i = 0; i < data.length; ++i)
-            hashCodes[i] = data[i].hashCode();
-        reCalculateContractions(differentIndicesCount, info, contractions);
-        refine(hashCodes, contractions, data);
+        int[] iHashCodes;
+        if (sortedIndices.length == 0) {
+            for (i = 0; i < data.length; ++i)
+                hashCodes[i] = data[i].hashCode();
+            refine(hashCodes, contractions, data);
+            iHashCodes = hashCodes;
+        } else {
+            iHashCodes = new int[data.length];
+            for (i = 0; i < data.length; ++i) {
+                hashCodes[i] = data[i].hashCode();
+                iHashCodes[i] = HashingStrategy.iHash(data[i], sortedIndices);
+            }
+            iRefine(hashCodes, iHashCodes, contractions, data);
+        }
 
         //calculating connected components
         final int[] components = GraphUtils.calculateConnectedComponents(
@@ -852,18 +883,15 @@ public final class Product extends MultiTensor {
         //the number of components
         final int componentCount = components[components.length - 1];
 
-
-        //<- do additional sort
-        final int[] sortedIndices = IndicesUtils.getIndicesNames(freeIndices);
-        Arrays.sort(sortedIndices);
         final Wrapper[] wrappers = new Wrapper[data.length];
         for (i = 0; i < data.length; ++i)
-            wrappers[i] = new Wrapper(data[i].hashCode(), hashCodes[i], components[i + 1], data[i], sortedIndices);
+            wrappers[i] = new Wrapper(data[i].hashCode(), hashCodes[i], iHashCodes[i], components[i + 1]);
 
         ArraysUtils.quickSort(wrappers, data);
 
         for (i = 0; i < data.length; ++i) {
             hashCodes[i] = wrappers[i].graphHash;
+            iHashCodes[i] = wrappers[i].iGraphHash;
             components[i + 1] = wrappers[i].component;
         }
 
@@ -893,7 +921,7 @@ public final class Product extends MultiTensor {
             if (data.length == 1)
                 nonScalar = data[0];
             else
-                nonScalar = new Product(this.indices, Complex.ONE, new Tensor[0], data, this.contentReference, 0);
+                nonScalar = new Product(this.indices, Complex.ONE, new Tensor[0], data, this.contentReference, 0, 0);
         else if (sData[0].length > 0)
             nonScalar = Tensors.multiply(sData[0]);
 
@@ -906,11 +934,11 @@ public final class Product extends MultiTensor {
             Arrays.sort(scalars);
         }
 
-        ProductContent pc = new ProductContent(new StructureOfContractions(contractions), data, hashCodes, nonScalar, scalars);
+        ProductContent pc = new ProductContent(new StructureOfContractions(contractions), data, hashCodes, iHashCodes, nonScalar, scalars);
         contentReference.resetReferent(pc);
 
         if (componentCount == 1 && nonScalar instanceof Product)
-            ((Product) nonScalar).hash = ((Product) nonScalar).calculateHash();
+            ((Product) nonScalar).calculateHash();
 
         return pc;
     }
@@ -963,7 +991,6 @@ public final class Product extends MultiTensor {
             if (fromPosition != -1)
                 contractions[fromPosition][fromIPosition] = contraction;
 
-
             //Contractions from upper to lower
             fromPosition = tPosition(info[1][i]); //From tensor index
             fromIPosition = iPosition(info[1][i]);
@@ -984,11 +1011,13 @@ public final class Product extends MultiTensor {
         System.arraycopy(newHashCodes, 0, hashCodes, 0, data.length);
     }
 
-    static int refine(final int[] temp, final int level,
-                      final Tensor[] data, final int i,
-                      final long[][] contractions,
-                      final int[] hashCodes,
-                      final boolean sum) {
+    private static int refine(final int[] temp,
+                              final int level,
+                              final Tensor[] data,
+                              final int i,
+                              final long[][] contractions,
+                              final int[] hashCodes,
+                              final boolean doSum) {
         if (level == 0)
             return 0;
         final int jLevel = JenkinWang32shift(level);
@@ -1009,13 +1038,130 @@ public final class Product extends MultiTensor {
                 refine(temp, level - 1, data, toPosition, contractions, hashCodes, false);
             }
         }
-        if (!sum)
+        if (!doSum)
             return 0;
-        if (!freeOnly)
+        if (!freeOnly) {
             for (int j = 0; j < contractions.length; ++j)
                 if (i != j)
                     vHash += JenkinWang32shift(temp[j]);
+        }
         return vHash - JenkinWang32shift(temp[i]);
+    }
+
+    static void iRefine(final int[] hashCodes, final int[] iHashCodes,
+                        final long[][] contractions, final Tensor[] data) {
+        final int[] temp = new int[data.length], iTemp = new int[data.length];
+        final int[] newHashCodes = new int[data.length], newIHashCodes = new int[data.length];
+        for (int i = 0; i < data.length; ++i) {
+            Arrays.fill(temp, 0);
+            Arrays.fill(iTemp, 0);
+            final int[] r = iRefine(temp, iTemp, REFINEMENT_LEVEL, data, i, contractions, hashCodes, iHashCodes, true);
+            newHashCodes[i] += r[0];
+            newIHashCodes[i] += r[1];
+        }
+        System.arraycopy(newHashCodes, 0, hashCodes, 0, data.length);
+        System.arraycopy(newIHashCodes, 0, iHashCodes, 0, data.length);
+    }
+
+    private final static int[] zero = {0, 0};
+
+    private static int[] iRefine(final int[] temp,
+                                 final int[] iTemp,
+                                 final int level,
+                                 final Tensor[] data,
+                                 final int i,
+                                 final long[][] contractions,
+                                 final int[] hashCodes,
+                                 final int[] iHashCodes,
+                                 final boolean doSum) {
+        if (level == 0)
+            return zero;
+        final int jLevel = JenkinWang32shift(level);
+        int vHash = 137, iVHash = 139;
+        boolean freeOnly = true;
+        for (long contraction : contractions[i]) {
+            int toPosition = toPosition(contraction);
+            short diffId = data[i].getIndices().getPositionsInOrbits()[fromIPosition(contraction)];
+            int toAdd;
+            if (toPosition == -1) {
+                toAdd = JenkinWang32shift(53 * (diffId + 1) + jLevel);
+                vHash += toAdd;
+                iVHash += toAdd + iHashCodes[i];
+            } else {
+                freeOnly = false;
+                toAdd = JenkinWang32shift(level
+                        + 17 * hashCodes[i]
+                        + 91 * hashCodes[toPosition]
+                        + 3671 * (diffId + 1)
+                        + 2797 * (toIDiffId(contraction) + 1));
+                temp[toPosition] += toAdd;
+                iTemp[toPosition] += toAdd + iHashCodes[i] + 19 * iHashCodes[toPosition];
+                iRefine(temp, iTemp, level - 1, data, toPosition, contractions, hashCodes, iHashCodes, false);
+            }
+        }
+        if (!doSum)
+            return zero;
+        if (!freeOnly) {
+            for (int j = 0; j < contractions.length; ++j)
+                if (i != j) {
+                    vHash += JenkinWang32shift(temp[j]);
+                    iVHash += JenkinWang32shift(iTemp[j]);
+                }
+        }
+        return new int[]{vHash - JenkinWang32shift(temp[i]), iVHash - JenkinWang32shift(iTemp[i])};
+    }
+
+    static void iRefineIHashCodesOnly(final int[] hashCodes, final int[] iHashCodes,
+                                      final long[][] contractions, final Tensor[] data) {
+        final int[] iTemp = new int[data.length];
+        final int[] newIHashCodes = new int[data.length];
+        for (int i = 0; i < data.length; ++i) {
+            Arrays.fill(iTemp, 0);
+            newIHashCodes[i] += iRefineIHashCodesOnly(iTemp, REFINEMENT_LEVEL, data, i, contractions, hashCodes, iHashCodes, true);
+        }
+        System.arraycopy(newIHashCodes, 0, iHashCodes, 0, data.length);
+    }
+
+    private static int iRefineIHashCodesOnly(final int[] iTemp,
+                                             final int level,
+                                             final Tensor[] data,
+                                             final int i,
+                                             final long[][] contractions,
+                                             final int[] hashCodes,
+                                             final int[] iHashCodes,
+                                             final boolean doSum) {
+        if (level == 0)
+            return 0;
+        final int jLevel = JenkinWang32shift(level);
+        int iVHash = 139;
+        boolean freeOnly = true;
+        for (long contraction : contractions[i]) {
+            int toPosition = toPosition(contraction);
+            short diffId = data[i].getIndices().getPositionsInOrbits()[fromIPosition(contraction)];
+            int toAdd;
+            if (toPosition == -1) {
+                toAdd = JenkinWang32shift(53 * (diffId + 1) + jLevel);
+                iVHash += toAdd + iHashCodes[i];
+            } else {
+                freeOnly = false;
+                toAdd = JenkinWang32shift(level
+                        + 17 * hashCodes[i]
+                        + 91 * hashCodes[toPosition]
+                        + 3671 * (diffId + 1)
+                        + 2797 * (toIDiffId(contraction) + 1));
+                iTemp[toPosition] += toAdd + iHashCodes[i] + 19 * iHashCodes[toPosition];
+                iRefineIHashCodesOnly(iTemp, level - 1, data, toPosition, contractions, hashCodes, iHashCodes, false);
+            }
+        }
+        if (!doSum)
+            return 0;
+        if (!freeOnly) {
+            for (int j = 0; j < contractions.length; ++j)
+                if (i != j) {
+                    iVHash += JenkinWang32shift(iTemp[j]);
+                }
+        }
+        return iVHash - JenkinWang32shift(iTemp[i]);
     }
 
     /**
@@ -1055,29 +1201,17 @@ public final class Product extends MultiTensor {
         return result;
     }
 
-    private static int hc(Tensor t, int[] inds) {
-        Indices ind = t.getIndices().getFree();
-        int h = 31;
-        int ii;
-        for (int i = ind.size() - 1; i >= 0; --i) {
-            ii = getNameWithType(ind.get(i));
-            if ((ii = Arrays.binarySearch(inds, ii)) >= 0)
-                h ^= JenkinWang32shift(ii);
-        }
-        return h;
-    }
-
     private static class Wrapper implements Comparable<Wrapper> {
         final int tensorHash;
         final int graphHash;
-        final int indicesHash;
+        final int iGraphHash;
         final int component;
 
-        private Wrapper(int tensorHash, int graphHash, int component, Tensor t, int[] indices) {
+        private Wrapper(int tensorHash, int graphHash, int iGraphHash, int component) {
             this.tensorHash = tensorHash;
             this.graphHash = graphHash;
             this.component = component;
-            this.indicesHash = hc(t, indices);
+            this.iGraphHash = iGraphHash;
         }
 
         @Override
@@ -1086,7 +1220,7 @@ public final class Product extends MultiTensor {
             if (c == 0)
                 c = Integer.compare(graphHash, o.graphHash);
             if (c == 0)
-                c = Integer.compare(indicesHash, o.indicesHash);
+                c = Integer.compare(iGraphHash, o.iGraphHash);
             if (c == 0)
                 c = Integer.compare(component, o.component);
             return c;

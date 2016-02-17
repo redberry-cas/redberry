@@ -84,6 +84,8 @@ public interface SimpleIndices extends Indices {
     @Override
     SimpleIndices applyIndexMapping(IndexMapping im);
 
+    int contractionsHash();
+
     /**
      * Compares simple indices taking into account possible permutations according to the symmetries.
      *

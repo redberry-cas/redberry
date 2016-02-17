@@ -36,6 +36,6 @@ public class StructureOfContractionsTest {
         System.out.println(t);
         System.out.println(t.getContent().getStructureOfContractions().componentCount);
         System.out.println(Arrays.toString(t.getContent().getStructureOfContractions().components));
-        System.out.println(Arrays.toString(t.getContent().vertexHashCodes()));
+        System.out.println(Arrays.toString(t.getContent().hashCodes));
     }
 }

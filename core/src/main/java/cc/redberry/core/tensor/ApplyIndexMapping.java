@@ -920,7 +920,7 @@ public final class ApplyIndexMapping {
             if (data == null) data = p.data;//no cloning
             if (indexless == null) indexless = p.indexlessData;//no cloning
 
-            return new Product(p.indices, p.factor, indexless, data, p.contentReference, p.hash);
+            return new Product(p.indices, p.factor, indexless, data, p.contentReference, p.hash, p.iHash);
         }
         if (tensor instanceof Sum) {
             Sum s = (Sum) tensor;

@@ -25,10 +25,8 @@ package cc.redberry.core.tensor.playground;
 import cc.redberry.core.graph.GraphUtils;
 import cc.redberry.core.indices.Indices;
 import cc.redberry.core.indices.IndicesUtils;
-import cc.redberry.core.tensor.ProductContent;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.utils.ArraysUtils;
-import cc.redberry.core.utils.HashingStrategy;
 
 import java.util.Arrays;
 
