@@ -836,6 +836,11 @@ public final class Product extends MultiTensor {
         //Arrays.sort(data);
 
         final Indices freeIndices = this.indices.getFree();
+        if (freeIndices.size() == this.indices.size()) {
+            //no any contractions
+            return calculateContentWithNoContractions();
+        }
+
         final int differentIndicesCount = (this.indices.size() + freeIndices.size()) / 2;
 
         final int[]
@@ -859,6 +864,31 @@ public final class Product extends MultiTensor {
         final int[] sortedIndices = IndicesUtils.getIndicesNames(freeIndices); //<- indices are sorted
         Arrays.sort(sortedIndices);
         assert !(freeIndices instanceof SimpleIndices);
+
+        if (data.length == 1) {
+            Tensor[] scalars;
+            Tensor nonScalar;
+            final int[] hashCodes = new int[1], iHashCodes = new int[1];
+            if (data[0] instanceof SimpleTensor) {
+                SimpleTensor st = (SimpleTensor) data[0];
+                hashCodes[0] = HashingStrategy.iGraphHashWithoutIndices(st);
+                iHashCodes[0] = HashingStrategy.iGraphHash(st, sortedIndices);
+            } else {
+                hashCodes[0] = data[0].hashCode();
+                iHashCodes[0] = HashingStrategy.iHash(data[0], sortedIndices);
+            }
+            if (freeIndices.size() == 0) {
+                scalars = new Tensor[]{data[0]};
+                nonScalar = null;
+            } else {
+                scalars = new Tensor[0];
+                nonScalar = data[0];
+            }
+
+            final ProductContent pc = new ProductContent(new StructureOfContractions(contractions, new int[1], 1), data, hashCodes, iHashCodes, nonScalar, scalars);
+            contentReference.resetReferent(pc);
+            return pc;
+        }
 
         int i;
         final int[] hashCodes = new int[data.length];
@@ -918,10 +948,7 @@ public final class Product extends MultiTensor {
 
         Tensor nonScalar = null;
         if (componentCount == 1) //There are no scalar subproducts in this product
-            if (data.length == 1)
-                nonScalar = data[0];
-            else
-                nonScalar = new Product(this.indices, Complex.ONE, new Tensor[0], data, this.contentReference, 0, 0);
+            nonScalar = new Product(this.indices, Complex.ONE, new Tensor[0], data, this.contentReference, 0, 0);
         else if (sData[0].length > 0)
             nonScalar = Tensors.multiply(sData[0]);
 
@@ -941,6 +968,80 @@ public final class Product extends MultiTensor {
             ((Product) nonScalar).calculateHash();
 
         return pc;
+    }
+
+    //when all indices are free
+    private ProductContent calculateContentWithNoContractions() {
+        if (data.length == 1) {
+            final ProductContent pc = new ProductContent(new StructureOfContractions(
+                    new long[][]{getFreeContractions(data[0].getIndices().size())}, new int[1], 1),
+                    data, new int[]{data[0].hashCode()}, new int[]{HashingStrategy.iHash(data[0])},
+                    data[0], new Tensor[0]);
+            this.contentReference.resetReferent(pc);
+            return pc;
+        }
+
+        final int[] hashCodes = new int[data.length], iHashCodes = new int[data.length];
+        final int[] sortedIndices = IndicesUtils.getIndicesNames(this.indices);
+        Arrays.sort(sortedIndices);
+
+        int i;
+        for (i = 0; i < data.length; ++i) {
+            hashCodes[i] = data[i].hashCode();
+            iHashCodes[i] = HashingStrategy.iHash(data[i], sortedIndices);
+        }
+
+        final int[] components = new int[data.length];
+        for (i = 0; i < data.length; ++i)
+            components[i] = i;
+
+        final Wrapper[] wrappers = new Wrapper[data.length];
+        for (i = 0; i < data.length; ++i)
+            wrappers[i] = new Wrapper(data[i].hashCode(), hashCodes[i], iHashCodes[i], components[i]);
+
+        ArraysUtils.quickSort(wrappers, data);
+
+        for (i = 0; i < data.length; ++i) {
+            hashCodes[i] = wrappers[i].graphHash;
+            iHashCodes[i] = wrappers[i].iGraphHash;
+            components[i] = wrappers[i].component;
+        }
+        final long[][] contractions = new long[data.length][];
+        for (i = 0; i < data.length; ++i)
+            contractions[i] = getFreeContractions(data[i].getIndices().size());
+
+        final Product nonScalar = new Product(this.indices, Complex.ONE, new Tensor[0], data, this.contentReference, 0, 0);
+        ProductContent pc = new ProductContent(new StructureOfContractions(contractions, components, data.length), data, hashCodes, iHashCodes, nonScalar, new Tensor[0]);
+        this.contentReference.resetReferent(pc);
+
+        nonScalar.calculateHash();
+        return pc;
+    }
+
+    private static final long[][] freeContractionsCache;
+
+    static {
+        freeContractionsCache = new long[64][];
+        for (int i = 0; i < freeContractionsCache.length; ++i)
+            freeContractionsCache[i] = getFreeContractions0(i);
+    }
+
+    private static long[] getFreeContractions(final int sizeOfIndices) {
+        if (sizeOfIndices >= freeContractionsCache.length)
+            return getFreeContractions0(sizeOfIndices);
+        else
+            return freeContractionsCache[sizeOfIndices];
+    }
+
+    private static long[] getFreeContractions0(final int sizeOfIndices) {
+        final long[] contractions = new long[sizeOfIndices];
+        for (int i = 0; i < sizeOfIndices; ++i)
+            contractions[i] = freeContraction(i);
+        return contractions;
+    }
+
+    private static long freeContraction(final int fromIPosition) {
+        return 0xFFFFFFFFFFFF0000L | (0xFFFFL & fromIPosition);
     }
 
     static void calculateInfo(final Tensor[] data,

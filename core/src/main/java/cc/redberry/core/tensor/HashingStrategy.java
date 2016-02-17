@@ -64,9 +64,15 @@ public final class HashingStrategy {
         return iGraphHash(tensor, sortedNames);
     }
 
+    public static int iGraphHashWithoutIndices(final SimpleTensor tensor) {
+        return tensor.hashCode() + tensor.getIndices().contractionsHash();
+    }
+
     public static int iGraphHash(final SimpleTensor tensor, final int[] sortedNames) {
+        int hash = iGraphHashWithoutIndices(tensor);
+        if (sortedNames.length == 0)
+            return hash;
         SimpleIndices si = tensor.getIndices();
-        int hash = tensor.hashCode() + si.contractionsHash();
         short[] orbits = si.getPositionsInOrbits();
         int pos;
         for (int i = 0; i < si.size(); ++i)

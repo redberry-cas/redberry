@@ -51,6 +51,12 @@ public final class StructureOfContractions {
         this.componentCount = componentCounter + 1;
     }
 
+    public StructureOfContractions(long[][] contractions, int[] components, int componentCount) {
+        this.contractions = contractions;
+        this.components = components;
+        this.componentCount = componentCount;
+    }
+
     private void fillComponents(final int[] components, int component, int position) {
         for (long l : contractions[position]) {
             int to = toPosition(l);
