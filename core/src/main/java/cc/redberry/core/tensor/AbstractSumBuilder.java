@@ -135,6 +135,7 @@ public abstract class AbstractSumBuilder implements TensorBuilder {
             throw new TensorException("Inconsistent indices in sum. " +
                     "Expected: " + indices + " Actual: " + tensor.getIndices().getFree(), tensor);//TODO improve message
         if (tensor instanceof Sum) {
+            summands.ensureCapacity(tensor.size() - summands.size());
             for (Tensor s : tensor)
                 put(s);
             return;
