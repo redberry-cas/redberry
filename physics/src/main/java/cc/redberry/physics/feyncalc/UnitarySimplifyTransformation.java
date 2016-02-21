@@ -248,8 +248,8 @@ public final class UnitarySimplifyTransformation implements TransformationToStri
         dimensionToken = parser.parse("d^a'_a' = N");
 
         triple1 = parser.parse("D_iac*F_hb^c*F_g^hi = -N/2 * D_abg");
-        triple2 = parser.parse("D_iac*D_hb^c*D_g^hi = (4-N**2)/2/N*F_abg");
-        triple3 = parser.parse("D_iac*D_hb^c*D_g^hi = (N**2-12)/2/N*D_abg");
+        triple2 = parser.parse("D_iac*D_hb^c*F_g^hi = (4-N**2)/(2*N)*F_abg");
+        triple3 = parser.parse("D_iac*D_hb^c*D_g^hi = (N**2-12)/(2*N)*D_abg");
         triple4 = parser.parse("F_iac*F_hb^c*F_g^hi = -N/2*F_abg");
 
         unitarySimplificationsTokens = new ParseToken[]{

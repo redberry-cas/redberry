@@ -29,6 +29,7 @@ import cc.redberry.core.graph.GraphType;
 import cc.redberry.core.graph.PrimitiveSubgraph;
 import cc.redberry.core.graph.PrimitiveSubgraphPartition;
 import cc.redberry.core.indices.IndexType;
+import cc.redberry.core.indices.Indices;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.parser.ParseToken;
 import cc.redberry.core.parser.Parser;
@@ -41,10 +42,13 @@ import cc.redberry.core.transformations.TransformationToStringAble;
 import cc.redberry.core.transformations.options.Creator;
 import cc.redberry.core.transformations.options.Options;
 import cc.redberry.core.transformations.substitutions.SubstitutionIterator;
+import cc.redberry.core.utils.ArraysUtils;
 import cc.redberry.core.utils.IntArrayList;
 
-import static cc.redberry.core.tensor.Tensors.multiplyAndRenameConflictingDummies;
-import static cc.redberry.core.tensor.Tensors.parseExpression;
+import java.util.ArrayList;
+import java.util.List;
+
+import static cc.redberry.core.tensor.Tensors.*;
 import static cc.redberry.physics.feyncalc.TraceUtils.*;
 
 /**
@@ -55,6 +59,7 @@ import static cc.redberry.physics.feyncalc.TraceUtils.*;
  */
 public final class UnitaryTraceTransformation implements TransformationToStringAble {
     private final int unitaryMatrix;
+    private final IndexType colorType;
     private final IndexType matrixType;
 
     private final Expression pairProduct;
@@ -81,6 +86,7 @@ public final class UnitaryTraceTransformation implements TransformationToStringA
         checkUnitaryInput(unitaryMatrix, structureConstant, symmetricConstant, dimension);
         this.unitaryMatrix = unitaryMatrix.getName();
         final IndexType[] types = extractTypesFromMatrix(unitaryMatrix);
+        this.colorType = types[0];
         this.matrixType = types[1];
 
         ChangeIndicesTypesAndTensorNames tokenTransformer = new ChangeIndicesTypesAndTensorNames(new TypesAndNamesTransformer() {
@@ -150,9 +156,9 @@ public final class UnitaryTraceTransformation implements TransformationToStringA
 
                 //positions of unitary matrices
                 IntArrayList positionsOfMatrices = new IntArrayList();
-                //calculated traces
-                ProductBuilder calculatedTraces = new ProductBuilder();
 
+                //calculated traces
+                List<Tensor> calculatedTraces = new ArrayList<>();
                 out:
                 for (PrimitiveSubgraph subgraph : subgraphs) {
                     //not a trace
@@ -169,13 +175,30 @@ public final class UnitaryTraceTransformation implements TransformationToStringA
                     }
 
                     //calculate trace
-                    calculatedTraces.put(traceOfProduct(product.select(partition)));
+                    calculatedTraces.add(traceOfProduct(product.select(partition)));
                     positionsOfMatrices.addAll(partition);
                 }
+
+                positionsOfMatrices.sort();
+                IntArrayList positionsOfUObjects = new IntArrayList();
+                for (int i = 0; i < productContent.size(); ++i) {
+                    final Indices indices = productContent.get(i).getIndices();
+                    if (indices.size(colorType) != 0 || indices.size(matrixType) != 0)
+                        if (ArraysUtils.binarySearch(positionsOfMatrices, sizeOfIndexless + i) < 0)
+                            positionsOfUObjects.add(sizeOfIndexless + i);
+                }
+
+                calculatedTraces.add(product.select(positionsOfUObjects.toArray()));
+                positionsOfMatrices.addAll(positionsOfUObjects);
+
+                Tensor[] uPartArray = calculatedTraces.toArray(new Tensor[calculatedTraces.size()]);
+                Tensor uPart = multiplyAndRenameConflictingDummies(uPartArray);
+                uPart = ExpandAndEliminateTransformation.expandAndEliminate(uPart);
+                uPart = simplifications.transform(uPart);
                 //compiling the result
                 c = product.remove(positionsOfMatrices.toArray());
-                c = multiplyAndRenameConflictingDummies(c, calculatedTraces.build());
-                iterator.safeSet(simplifications.transform(c));
+                c = multiplyAndRenameConflictingDummies(c, uPart);
+                iterator.safeSet(c);
             }
         }
         return simplifications.transform(iterator.result());

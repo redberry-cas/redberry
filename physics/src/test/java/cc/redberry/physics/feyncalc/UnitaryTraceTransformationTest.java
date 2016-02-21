@@ -25,12 +25,14 @@ package cc.redberry.physics.feyncalc;
 import cc.redberry.core.TAssert;
 import cc.redberry.core.context.CC;
 import cc.redberry.core.indices.IndexType;
+import cc.redberry.core.number.Complex;
 import cc.redberry.core.parser.preprocessor.GeneralIndicesInsertion;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.transformations.EliminateDueSymmetriesTransformation;
 import cc.redberry.core.transformations.EliminateMetricsTransformation;
 import cc.redberry.core.transformations.Transformation;
 import cc.redberry.core.transformations.expand.ExpandTransformation;
+import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -41,6 +43,10 @@ import static cc.redberry.core.tensor.Tensors.*;
  * @author Stanislav Poslavsky
  */
 public class UnitaryTraceTransformationTest {
+    @Before
+    public void setUp() throws Exception {
+        CC.reset();
+    }
 
     @Test
     public void test1() {
@@ -50,7 +56,6 @@ public class UnitaryTraceTransformationTest {
 
         Tensor t = parse("Tr[T_a*T_b]");
         t = unitaryTrace(t);
-        System.out.println(t);
         TAssert.assertEquals(t, parse("g_ab/2"));
     }
 
@@ -245,6 +250,22 @@ public class UnitaryTraceTransformationTest {
         Tensor t;
         t = parse("T^aa'_b'*T^bb'_c'*d^c'_a'");
         TAssert.assertEquals("(1/2)*g^{ba}", trace.transform(t));
+    }
+
+    @Test
+    public void test9() throws Exception {
+        GeneralIndicesInsertion indicesInsertion = new GeneralIndicesInsertion();
+        CC.current().getParseManager().defaultParserPreprocessors.add(indicesInsertion);
+        indicesInsertion.addInsertionRule(parseSimple("T^A'_B'A"), IndexType.Matrix2);
+
+        setSymmetric("d_ABC");
+        setAntiSymmetric("f_ABC");
+
+        final UnitarySimplifyOptions options = new UnitarySimplifyOptions();
+        options.dimension = parse("3");
+        final UnitaryTraceTransformation tr = new UnitaryTraceTransformation(options);
+        Tensor t = parse("Tr[T_{G}*T_{H}*T_{A}*T_{I}]*f^{BHI}");
+        TAssert.assertEquals(Complex.ZERO, tr.transform(t));
     }
 
     static Tensor unitaryTrace(Tensor t) {
