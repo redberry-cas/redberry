@@ -28,48 +28,77 @@ import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.transformations.Transformation;
 import cc.redberry.core.transformations.TransformationToStringAble;
 
+import java.util.concurrent.atomic.AtomicLong;
+
 /**
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public final class TransformationWithTimer implements TransformationToStringAble {
+public final class TransformationWithTimer implements TransformationToStringAble, Comparable<TransformationWithTimer> {
     public final Transformation transformation;
-    private volatile long elapsedTime = 0;
+    public final String name;
+    public final AtomicLong invocations = new AtomicLong(0);
+    public final AtomicLong elapsedTime = new AtomicLong(0);
 
     public TransformationWithTimer(Transformation transformation) {
-        this.transformation = transformation;
+        this(transformation, null);
+    }
+
+    public TransformationWithTimer(Transformation tr, String name) {
+        this.transformation = tr instanceof TransformationWithTimer ? ((TransformationWithTimer) tr).transformation : tr;
+        this.name = name;
+    }
+
+    public long invocations() {
+        return invocations.get();
+    }
+
+    public long elapsed() {
+        return elapsedTime.get();
     }
 
     public long elapsedNanos() {
-        return elapsedTime;
+        return elapsed();
     }
 
     public long elapsedMicros() {
-        return elapsedTime / 1000L;
+        return elapsedNanos() / 1000L;
     }
 
     public long elapsedMillis() {
-        return elapsedTime / 1000_000L;
+        return elapsedNanos() / 1000_000L;
     }
 
     public long elapsedSeconds() {
-        return elapsedTime / 1000_000_000L;
+        return elapsedNanos() / 1000_000_000L;
     }
 
     public long elapsedMinutes() {
-        return elapsedTime / 60_000_000_000L;
+        return elapsedNanos() / 60_000_000_000L;
     }
 
-    public void resetTiming() { elapsedTime = 0;}
+    public void resetTiming() { elapsedTime.set(0);}
 
-    public void incrementNanos(final long amount) { elapsedTime += amount;}
+    public void resetInvocations() { invocations.set(0);}
+
+    public void reset() {resetTiming(); resetInvocations();}
+
+    public void incrementNanos(final long amount) { elapsedTime.addAndGet(amount);}
 
     @Override
     public Tensor transform(Tensor t) {
         long start = System.nanoTime();
         Tensor r = transformation.transform(t);
-        elapsedTime += System.nanoTime() - start;
+        elapsedTime.addAndGet(System.nanoTime() - start);
+        invocations.incrementAndGet();
         return r;
+    }
+
+    @Override
+    public int compareTo(TransformationWithTimer o) {
+        if (this == o)
+            return 0;
+        return toString().compareTo(o.toString());
     }
 
     @Override
@@ -79,8 +108,14 @@ public final class TransformationWithTimer implements TransformationToStringAble
 
     @Override
     public String toString(OutputFormat outputFormat) {
+        if (name != null)
+            return name;
         if (transformation instanceof TransformationToStringAble)
             return ((TransformationToStringAble) transformation).toString(outputFormat);
         else return transformation.toString();
+    }
+
+    TimingStatistics.StatEntry stats() {
+        return new TimingStatistics.StatEntry(elapsed(), invocations());
     }
 }

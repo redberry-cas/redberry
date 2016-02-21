@@ -46,8 +46,6 @@ import cc.redberry.core.transformations.TransformationCollection
 import cc.redberry.core.transformations.substitutions.SubstitutionIterator
 import cc.redberry.core.transformations.substitutions.SubstitutionTransformation
 import cc.redberry.core.utils.TensorUtils
-import cc.redberry.core.utils.TimingStatistics
-import cc.redberry.core.utils.TransformationWithTimer
 import org.codehaus.groovy.runtime.DefaultGroovyMethods
 
 import static cc.redberry.core.tensor.Tensors.*
@@ -1181,12 +1179,6 @@ class Redberry {
         return list.collect { transpose(it) }
     }
 
-    static TransformationWithTimer collectStats(Transformation transformation, TimingStatistics statistics) {
-        TransformationWithTimer tt = new TransformationWithTimer(transformation)
-        statistics.collectStatistics(tt)
-        return tt
-    }
-
     static Tensor call(Transformation transformation, Tensor tensor) {
         return transformation.transform(tensor)
     }
@@ -1301,6 +1293,28 @@ class Redberry {
      */
     static Mapping mod(Indices from, Indices to) {
         return new Mapping(from.toArray(), to.toArray());
+    }
+
+    /**
+     * Returns a mapping from indices {@code from} to indices {@code to}.
+     *
+     * @param from {@code from} indices
+     * @param to {@code to} indices
+     * @return a single mappingç
+     */
+    static Mapping mod(int[] from, int[] to) {
+        return new Mapping(from, to);
+    }
+
+    /**
+     * Returns a mapping from indices {@code from} to indices {@code to}.
+     *
+     * @param from {@code from} indices
+     * @param to {@code to} indices
+     * @return a single mappingç
+     */
+    static Mapping mod(List from, List to) {
+        return new Mapping(from as int[], to as int[]);
     }
 
     /**
@@ -1559,6 +1573,17 @@ class Redberry {
      */
     static SimpleIndices getSi(String string) {
         return ParserIndices.parseSimple(string)
+    }
+
+    /**
+     * Converts list of integers to SimpleIndices
+     * @param array list of integers
+     * @return simple indices
+     * @see SimpleIndices
+     * @throws IllegalArgumentException if list does not represent correct indices object.
+     */
+    static SimpleIndices getSi(int[] array) {
+        return IndicesFactory.createSimple(null, array)
     }
 
     /**

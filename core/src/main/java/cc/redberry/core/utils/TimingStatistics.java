@@ -22,100 +22,126 @@
  */
 package cc.redberry.core.utils;
 
-import cc.redberry.core.transformations.Transformation;
-
-import java.lang.ref.WeakReference;
+import java.text.NumberFormat;
 import java.util.*;
 
 /**
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public class TimingStatistics {
-    final Set<WeakReference<TransformationWithTimer>> set;
-    final Comparator<Transformation> comparator;
+public final class TimingStatistics {
+    final TreeMap<TransformationWithTimer, StatEntry> set = new TreeMap<>();
 
-    public TimingStatistics() {
-        this.set = new HashSet<>();
-        this.comparator = null;
+    public TimingStatistics() {}
+
+    public void track(TransformationWithTimer... transformations) {
+        track(Arrays.asList(transformations));
     }
 
-    public TimingStatistics(final Comparator<Transformation> comp) {
-        this.comparator = comp;
-        this.set = new TreeSet<>(new Comparator<WeakReference<TransformationWithTimer>>() {
-            @Override
-            public int compare(WeakReference<TransformationWithTimer> o1, WeakReference<TransformationWithTimer> o2) {
-                TransformationWithTimer t1 = o1.get(), t2 = o2.get();
-                if (t1 == null || t2 == null)
-                    return 1;
-                return comp.compare(t1, t2);
-            }
-        });
-    }
-
-    public void collectStatistics(TransformationWithTimer transformation) {
-        set.add(new WeakReference<>(transformation));
+    public void track(Collection<TransformationWithTimer> transformations) {
+        for (TransformationWithTimer transformation : transformations) {
+            set.put(transformation, EMPTY);
+            transformation.reset();
+        }
     }
 
     public void resetAll() {
-        Iterator<WeakReference<TransformationWithTimer>> it = set.iterator();
-        while (it.hasNext()) {
-            TransformationWithTimer tr = it.next().get();
-            if (tr == null)
-                it.remove();
-            else
-                tr.resetTiming();
-        }
+        for (TransformationWithTimer tr : set.keySet())
+            tr.reset();
     }
 
     public synchronized void merge(TimingStatistics stats) {
-        merge(stats, comparator);
-    }
-
-    public synchronized void merge(TimingStatistics stats, Comparator<Transformation> comparator) {
-        out:
-        for (WeakReference<TransformationWithTimer> oth : stats.set) {
-            TransformationWithTimer othTr = oth.get();
-            if (othTr == null)
-                continue;
-            for (WeakReference<TransformationWithTimer> reference : set) {
-                TransformationWithTimer tr = reference.get();
-                if (tr != null)
-                    if (comparator.compare(tr, othTr) == 0) {
-                        tr.incrementNanos(othTr.elapsedNanos());
-                        continue out;
-                    }
-            }
-            collectStatistics(othTr);
+        for (Map.Entry<TransformationWithTimer, StatEntry> entry : stats.set.entrySet()) {
+            final TransformationWithTimer tr = entry.getKey();
+            final TransformationWithTimer in = set.floorKey(tr);
+            if (in == null || in.compareTo(tr) != 0) {
+                set.put(tr, entry.getValue());
+                tr.reset();
+            } else
+                set.put(in, set.get(in).add(entry.getValue()));
         }
     }
 
-    private Map<Transformation, Long> getStatistics(long div) {
-        Map<Transformation, Long> map = new HashMap<>(this.set.size());
-        Iterator<WeakReference<TransformationWithTimer>> it = this.set.iterator();
-        while (it.hasNext()) {
-            WeakReference<TransformationWithTimer> next = it.next();
-            TransformationWithTimer tr = next.get();
-            if (tr == null)
-                it.remove();
-            else map.put(tr, tr.elapsedNanos() / div);
+    private void collectStatistics() {
+        for (Map.Entry<TransformationWithTimer, StatEntry> entry : set.entrySet()) {
+            final TransformationWithTimer tr = entry.getKey();
+            set.put(tr, entry.getValue().add(tr.stats()));
+            tr.reset();
         }
-        return map;
     }
 
-    public Map<Transformation, Long> getStatisticsNanos() {
-        return getStatistics(1L);
+    public static String toStringStatistics(TreeMap<TransformationWithTimer, StatEntry> data, long div, String dc) {
+        String totalStr = "Total";
+        int longestString = totalStr.length();
+        for (TransformationWithTimer tr : data.keySet())
+            longestString = Math.max(tr.toString().length(), longestString);
+        StringBuilder sb = new StringBuilder();
+        final Iterator<Map.Entry<TransformationWithTimer, StatEntry>> it = data.entrySet().iterator();
+        long totalTiming = 0;
+        long totalInvocations = 0;
+        for (; it.hasNext(); ) {
+            final Map.Entry<TransformationWithTimer, StatEntry> entry = it.next();
+            String k = entry.getKey().toString();
+            k = k.concat(emptyString(longestString - k.length()));
+            final long timing = entry.getValue().elapsed / div;
+            final long invocations = entry.getValue().invocations;
+            totalTiming += timing;
+            totalInvocations += invocations;
+            sb.append(k).append(FORMAT.format(timing)).append(dc).append(" (").append(FORMAT.format(invocations)).append(" invocations)");
+            sb.append("\n");
+        }
+        totalStr = totalStr.concat(emptyString(longestString - totalStr.length()));
+        sb.append(totalStr).append(FORMAT.format(totalTiming)).append(dc).append(" (").append(FORMAT.format(totalInvocations)).append(" invocations)");
+        return sb.toString();
     }
 
-    public Map<Transformation, Long> getStatisticsMicros() {
-        return getStatistics(1000L);
+    private String toStringStatistics(long div, String dc) {
+        collectStatistics();
+        return toStringStatistics(set, div, dc);
     }
 
-    public Map<Transformation, Long> getStatisticsMillis() {
-        return getStatistics(1000_000L);
+    public String toStringNanos() {
+        return toStringStatistics(1, "ns");
     }
 
-    public Map<Transformation, Long> getStatisticsSeconds() {
-        return getStatistics(1000_000_000L);
+    public String toStringMicros() {
+        return toStringStatistics(1_000, "us");
+    }
+
+    public String toStringMillis() {
+        return toStringStatistics(1_000_000, "ms");
+    }
+
+    public String toStringSeconds() {
+        return toStringStatistics(1_000_000_000, "s");
+    }
+
+    @Override
+    public String toString() {
+        return toStringMillis();
+    }
+
+    private static String emptyString(int length) {
+        final char[] arr = new char[length + 3];
+        Arrays.fill(arr, ' ');
+        arr[length + 1] = ':';
+        return new String(arr);
+    }
+
+    private static final NumberFormat FORMAT = NumberFormat.getNumberInstance(Locale.US);
+    private static final StatEntry EMPTY = new StatEntry(0, 0);
+
+    public static final class StatEntry {
+        public final long elapsed;
+        public final long invocations;
+
+        public StatEntry(long elapsed, long invocations) {
+            this.elapsed = elapsed;
+            this.invocations = invocations;
+        }
+
+        private StatEntry add(StatEntry oth) {
+            return new StatEntry(elapsed + oth.elapsed, invocations + oth.invocations);
+        }
     }
 }

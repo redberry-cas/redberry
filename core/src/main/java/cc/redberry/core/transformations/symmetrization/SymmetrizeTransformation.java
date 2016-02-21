@@ -148,17 +148,14 @@ public final class SymmetrizeTransformation implements Transformation {
     private PermutationGroup conjugatedSymmetriesOfSubIndices(SimpleIndices allIndices) {
         //positions of indices in allIndices that should be stabilized
         int[] stabilizedPoints = new int[allIndices.size() - indices.size()];
-        int[] nonStabilizedPoints = new int[indices.size()];
         int[] mapping = new int[indices.size()];
         int sPointer = 0, nPointer = 0, index;
         for (int s = 0; s < allIndices.size(); ++s) {
             index = Arrays.binarySearch(sortedIndicesNames, getNameWithType(allIndices.get(s)));
             if (index < 0)
                 stabilizedPoints[sPointer++] = s;
-            else {
-                nonStabilizedPoints[nPointer] = s;
+            else
                 mapping[nPointer++] = index;
-            }
         }
         PermutationGroup result = allIndices.getSymmetries().getPermutationGroup().
                 pointwiseStabilizerRestricted(stabilizedPoints);

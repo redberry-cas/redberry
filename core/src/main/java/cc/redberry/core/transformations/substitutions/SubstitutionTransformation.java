@@ -354,6 +354,13 @@ public final class SubstitutionTransformation implements TransformationToStringA
         return iterator.result();
     }
 
+    public Expression[] getExpressions() {
+        Expression[] expressions = new Expression[primitiveSubstitutions.length];
+        for (int i = 0; i < primitiveSubstitutions.length; i++)
+            expressions[i] = Tensors.expression(primitiveSubstitutions[i].from, primitiveSubstitutions[i].to);
+        return expressions;
+    }
+
     @Override
     public String toString(OutputFormat outputFormat) {
         StringBuilder builder = new StringBuilder();

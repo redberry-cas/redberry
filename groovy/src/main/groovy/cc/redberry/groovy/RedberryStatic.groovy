@@ -57,6 +57,7 @@ import cc.redberry.core.transformations.symmetrization.SymmetrizeTransformation
 import cc.redberry.core.utils.BitArray
 import cc.redberry.core.utils.OutputPort
 import cc.redberry.core.utils.TensorUtils
+import cc.redberry.core.utils.TransformationWithTimer
 
 import static cc.redberry.core.indices.IndexType.*
 
@@ -664,6 +665,16 @@ class RedberryStatic {
         long stop = System.currentTimeMillis();
         if (stdout) println('Time: ' + (stop - start) + ' ms.')
         return (stop - start)
+    }
+
+    /**
+     * Returns transformation with timer
+     * @param name name
+     * @param transformation
+     * @return
+     */
+    public static TransformationWithTimer timing(String name, Transformation transformation) {
+        return new TransformationWithTimer(transformation, name);
     }
 
     /**
