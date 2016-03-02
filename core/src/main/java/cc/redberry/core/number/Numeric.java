@@ -183,7 +183,7 @@ public final class Numeric extends Real implements Serializable {
 
     @Override
     public Numeric multiply(final int n) {
-        return n == 1 ? this : createNumeric(value * n);
+        return n == 1 ? this : createNumeric(value * ((double) n));
     }
 
     @Override
@@ -205,7 +205,7 @@ public final class Numeric extends Real implements Serializable {
 
     @Override
     public Numeric reciprocal() {
-        return createNumeric(1 / value);
+        return createNumeric(1.0 / value);
     }
 
     /**
@@ -435,7 +435,7 @@ public final class Numeric extends Real implements Serializable {
 
     @Override
     public int signum() {
-        return value > 0 ? 1 : value == 0 ? 0 : -1;
+        return value > 0.0 ? 1 : value == 0.0 ? 0 : -1;
     }
 
     @Override

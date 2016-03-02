@@ -95,6 +95,23 @@ public final class SubstitutionTransformation implements TransformationToStringA
     /**
      * Creates a substitution.
      *
+     * @param expressions expressions
+     */
+    public SubstitutionTransformation(TransformationCollection expressions) {
+        this(toExpressions(expressions));
+    }
+
+    private static Expression[] toExpressions(TransformationCollection expressions){
+        final List<Transformation> list = expressions.getTransformations();
+        Expression[] r = new Expression[list.size()];
+        for (int i = 0; i < r.length; i++)
+            r[i] = (Expression) list.get(i);
+        return r;
+    }
+
+    /**
+     * Creates a substitution.
+     *
      * @param from            from tensor
      * @param to              to tensor
      * @param applyIfModified if false, then if some substitution was

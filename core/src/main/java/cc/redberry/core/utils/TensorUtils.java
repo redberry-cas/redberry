@@ -579,10 +579,14 @@ public final class TensorUtils {
     }
 
     public static List<Permutation> findIndicesSymmetries(int[] indices, Tensor tensor) {
+        if (isZero(tensor))
+            return Collections.singletonList(Permutations.createIdentityPermutation(0));
         return getSymmetriesFromMappings(indices, IndexMappings.createPort(tensor, tensor));
     }
 
     public static List<Permutation> findIndicesSymmetries(SimpleIndices indices, Tensor tensor) {
+        if (isZero(tensor))
+            return Collections.singletonList(Permutations.createIdentityPermutation(0));
         return getSymmetriesFromMappings(indices.getAllIndices().copy(), IndexMappings.createPort(tensor, tensor));
     }
 
