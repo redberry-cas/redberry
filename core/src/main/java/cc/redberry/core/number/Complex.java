@@ -347,6 +347,10 @@ public final class Complex extends Tensor
         return imaginary.isZero() && (real.isOne() || real.isMinusOne());
     }
 
+    public boolean isImaginaryOneOrImaginaryMinusOne() {
+        return real.isZero() && (imaginary.isOne() || imaginary.isMinusOne());
+    }
+
     /**
      * Returns double value of the real part.
      *
@@ -402,6 +406,8 @@ public final class Complex extends Tensor
      * @return the conjugate of this Complex object.
      */
     public Complex conjugate() {
+        if (imaginary.isZero())
+            return this;
         return new Complex(real, imaginary.negate());
     }
 
