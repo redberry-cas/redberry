@@ -118,4 +118,10 @@ public class FactorOutNumberTest {
         t = Tensors.parse("2*(12*a+12*b/13) + 24*c");
         TAssert.assertEquals("24*(a+b/13+c)", FACTOR_OUT_NUMBER.transform(t));
     }
+
+    @Test
+    public void test3() throws Exception {
+        Tensor t = Tensors.parse("-I*a - I*b");
+        TAssert.assertEquals("-I*(a+b)", FACTOR_OUT_NUMBER.transform(t));
+    }
 }

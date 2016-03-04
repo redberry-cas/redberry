@@ -23,11 +23,11 @@
 package cc.redberry.physics.feyncalc;
 
 import cc.redberry.core.indices.IndicesFactory;
-import cc.redberry.core.tensor.Expression;
-import cc.redberry.core.tensor.Sum;
-import cc.redberry.core.tensor.Tensor;
+import cc.redberry.core.number.Complex;
+import cc.redberry.core.tensor.*;
 import cc.redberry.core.tensor.iterator.FromChildToParentIterator;
 import cc.redberry.core.transformations.Transformation;
+import cc.redberry.core.transformations.substitutions.SubstitutionTransformation;
 import cc.redberry.core.utils.TensorUtils;
 import gnu.trove.map.hash.TIntObjectHashMap;
 
@@ -49,6 +49,8 @@ public final class AbbreviationsBuilder implements Transformation {
     final TIntObjectHashMap<List<Abbreviation>> abbrs = new TIntObjectHashMap<>();
     final int maxSumSize;
     final String abbrPrefix;
+    public boolean abbreviateScalars = true;
+    public boolean abbreviateScalarsSeparately = false;
 
     public AbbreviationsBuilder(int maxSumSize, String abbrPrefix) {
         this.maxSumSize = maxSumSize;
@@ -63,31 +65,57 @@ public final class AbbreviationsBuilder implements Transformation {
     public Tensor transform(Tensor t) {
         FromChildToParentIterator iterator = new FromChildToParentIterator(t);
         Tensor c;
-        out:
         while ((c = iterator.next()) != null) {
-            if (!(c instanceof Sum) || c.size() > maxSumSize
-                    || c.getIndices().size() != 0 || !TensorUtils.isSymbolic(c))
-                continue;
-
-            final int hashCode = c.hashCode();
-            List<Abbreviation> list = abbrs.get(hashCode);
-            if (list == null)
-                abbrs.put(hashCode, list = new ArrayList<>());
-
-            for (Abbreviation abbr : list) {
-                Boolean compare = TensorUtils.compare1(abbr.definition, c);
-                if (compare != null) {
-                    ++abbr.count;
-                    iterator.set(compare ? abbr.negatedAbbreviation : abbr.abbreviation);
-                    continue out;
-                }
-            }
-
-            Abbreviation abbr = nextAbbreviation(c);
-            list.add(abbr);
-            iterator.set(abbr.abbreviation);
+            if (c instanceof Product && abbreviateScalars)
+                iterator.set(abbreviateProduct(c));
+            if (c instanceof Sum
+                    && c.size() < maxSumSize
+                    && TensorUtils.isSymbolic(c))
+                iterator.set(abbreviate(c));
         }
         return iterator.result();
+    }
+
+    private Tensor abbreviateProduct(Tensor c) {
+        Product p = (Product) c;
+        final ProductContent content = p.getContent();
+        Tensor[] scalars = content.getScalars();
+        if (scalars.length == 0)
+            return c;
+
+        Tensor nonScalar = content.getNonScalar();
+        if (nonScalar == null)
+            nonScalar = Complex.ONE;
+
+        Tensor abbr;
+        if (abbreviateScalarsSeparately) {
+            ProductBuilder pb = new ProductBuilder();
+            for (Tensor sc : nonScalar)
+                pb.put(abbreviate(sc));
+            abbr = pb.build();
+        } else
+            abbr = abbreviate(multiply(scalars));
+
+        return multiply(p.getIndexlessSubProduct(), abbr, nonScalar);
+    }
+
+    private Tensor abbreviate(Tensor c) {
+        final int hashCode = c.hashCode();
+        List<Abbreviation> list = abbrs.get(hashCode);
+        if (list == null)
+            abbrs.put(hashCode, list = new ArrayList<>());
+
+        for (Abbreviation abbr : list) {
+            Boolean compare = TensorUtils.compare1(abbr.definition, c);
+            if (compare != null) {
+                ++abbr.count;
+                return compare ? abbr.negatedAbbreviation : abbr.abbreviation;
+            }
+        }
+
+        Abbreviation abbr = nextAbbreviation(c);
+        list.add(abbr);
+        return abbr.abbreviation;
     }
 
     private int abbrCounter = 0;
@@ -104,6 +132,14 @@ public final class AbbreviationsBuilder implements Transformation {
             r.addAll(abbr);
         Collections.sort(r, TOPOLOGICAL_SORT_COMPARATOR);
         return r;
+    }
+
+    public SubstitutionTransformation abbreviationReplacements() {
+        final List<Abbreviation> abbrs = getAbbreviations();
+        final Expression[] subs = new Expression[abbrs.size()];
+        for (int i = 0; i < abbrs.size(); i++)
+            subs[i] = abbrs.get(i).asSubstitution();
+        return new SubstitutionTransformation(subs, true);
     }
 
     public static final class Abbreviation {

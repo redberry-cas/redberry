@@ -53,7 +53,7 @@ public final class FactorOutNumber implements TransformationToStringAble {
                 continue;
 
             for (int i = c.size() - 1; i >= 0; --i)
-                if (!isComposite(getFactor(c.get(i))))
+                if (isComposite(getFactor(c.get(i))))
                     continue out;
 
             final BigInteger[] nums = new BigInteger[c.size()], dens = new BigInteger[c.size()];
@@ -98,10 +98,9 @@ public final class FactorOutNumber implements TransformationToStringAble {
     }
 
     private static boolean isComposite(Complex a) {
-        return !(a == null
+        return (a == null
                 || !(a.getReal().isZero() || a.getImaginary().isZero())
                 || a.isOneOrMinusOne()
-                || a.isImaginaryOneOrImaginaryMinusOne()
                 || a.isNumeric());
     }
 

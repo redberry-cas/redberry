@@ -22,23 +22,34 @@
  */
 package cc.redberry.physics.feyncalc;
 
+import cc.redberry.core.TAssert;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.tensor.Tensors;
+import cc.redberry.core.transformations.substitutions.SubstitutionTransformation;
 import org.junit.Test;
+
+import static cc.redberry.core.transformations.Transformation.Util.applyUntilUnchanged;
+import static cc.redberry.core.transformations.expand.ExpandTransformation.expand;
 
 /**
  * Created by poslavsky on 03/03/16.
  */
-public class AbbreviationTest {
+public class AbbreviationsBuilderTest {
     @Test
     public void test1() throws Exception {
         AbbreviationsBuilder abbrs = new AbbreviationsBuilder();
 
-        final Tensor t = abbrs.transform(Tensors.parse("(c*(a+b) + f)*f_a + (c*(a+b) + f)*t_a"));
+        Tensor t = Tensors.parse("(c*(a+b) + f)*k_a*k^a*f_q + 2*(c*(-a-b) - f)*k_a*k^a*t_q");
+        assertCorrectAbbreviations(abbrs, t);
 
-        System.out.println(t);
-        for (AbbreviationsBuilder.Abbreviation abb : abbrs.getAbbreviations()) {
-            System.out.println(abb);
-        }
+        Tensor r = abbrs.transform(t);
+
+        System.out.println(r);
+    }
+
+    private static void assertCorrectAbbreviations(AbbreviationsBuilder abbrs, Tensor t) {
+        Tensor r = abbrs.transform(t);
+        SubstitutionTransformation subs = abbrs.abbreviationReplacements();
+        TAssert.assertEquals(expand(t), expand(applyUntilUnchanged(r, subs)));
     }
 }
