@@ -98,7 +98,7 @@ public class DiracOptions implements IOptions, Cloneable {
         if (expandAndEliminate == null)
             expandAndEliminate = new ExpandAndEliminateTransformation(simplifications);
         if (simplifyLeviCivita == null)
-            simplifyLeviCivita = new LeviCivitaSimplifyTransformation(leviCivita, minkowskiSpace, simplifications);
+            simplifyLeviCivita = new LeviCivitaSimplifyTransformation(leviCivita, minkowskiSpace, simplifications, IDENTITY, dimension);
     }
 
     protected static Tensor guessTraceOfOne(Tensor dimension) {

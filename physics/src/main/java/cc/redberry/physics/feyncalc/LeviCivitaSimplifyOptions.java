@@ -23,6 +23,7 @@
 package cc.redberry.physics.feyncalc;
 
 import cc.redberry.core.tensor.SimpleTensor;
+import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.transformations.Transformation;
 import cc.redberry.core.transformations.options.Option;
 
@@ -44,6 +45,9 @@ public class LeviCivitaSimplifyOptions {
 
     @Option(name = "OverallSimplifications", index = 3)
     public Transformation overallSimplifications = Transformation.IDENTITY;
+
+    @Option(name = "Dimension", index = 4)
+    public Tensor dim = null;
 
     public LeviCivitaSimplifyOptions() {}
 

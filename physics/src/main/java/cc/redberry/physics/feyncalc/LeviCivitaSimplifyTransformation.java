@@ -119,6 +119,23 @@ public class LeviCivitaSimplifyTransformation implements TransformationToStringA
      */
     public LeviCivitaSimplifyTransformation(SimpleTensor leviCivita, boolean minkowskiSpace,
                                             Transformation simplifications, Transformation overallSimplifications) {
+        this(leviCivita, minkowskiSpace, simplifications, overallSimplifications, null);
+    }
+
+    /**
+     * Creates transformation, which simplifies combinations of Levi-Civita tensors in Euclidean or Minkowski space.
+     *
+     * @param leviCivita             tensor, which will be considered as Levi-Civita tensor
+     * @param minkowskiSpace         if {@code true}, then Levi-Civita tensor will be considered in Minkowski
+     *                               space (so e.g. e_abcd*e^abcd = -24), otherwise in Euclidean space
+     *                               (so e.g. e_abcd*e^abcd = +24)
+     * @param simplifications        additional transformations applied to each simplified combination of Levi-Civita tensors
+     * @param overallSimplifications additional transformations applied to each simplified product of Levi-Civita tensors
+     * @param dimension              values fo d^n_n
+     */
+    public LeviCivitaSimplifyTransformation(SimpleTensor leviCivita, boolean minkowskiSpace,
+                                            Transformation simplifications, Transformation overallSimplifications,
+                                            Tensor dimension) {
         checkLeviCivita(leviCivita);
         this.simplifications = simplifications;
         this.overallSimplifications = overallSimplifications;
@@ -147,12 +164,12 @@ public class LeviCivitaSimplifyTransformation implements TransformationToStringA
                     }
                 }
         );
-        leviCivitaSimplifications = getLeviCivitaSubstitutions();
+        leviCivitaSimplifications = getLeviCivitaSubstitutions(dimension == null ? new Complex(numberOfIndices) : dimension);
     }
 
     @Creator
     public LeviCivitaSimplifyTransformation(@Options LeviCivitaSimplifyOptions options) {
-        this(options.leviCivita, options.minkowskiSpace, options.simplifications, options.overallSimplifications);
+        this(options.leviCivita, options.minkowskiSpace, options.simplifications, options.overallSimplifications, options.dim);
     }
 
     @Override
@@ -340,16 +357,16 @@ public class LeviCivitaSimplifyTransformation implements TransformationToStringA
         return substitution;
     }
 
-    private Transformation[] getLeviCivitaSubstitutions() {
+    private Transformation[] getLeviCivitaSubstitutions(Tensor traceOfOne) {
         Transformation[] substitutions = new Transformation[3];
         //Levi-Civita self-contraction
         substitutions[0] = getLeviCivitaSelfContraction();
 
-        //d^a_a = numberOfIndices
+        //d^a_a = dimension
         substitutions[1] = expression(createKronecker(
                         setType(typeOfLeviCivitaIndices, 0),
                         setType(typeOfLeviCivitaIndices, 0x80000000)),
-                new Complex(numberOfIndices));
+                traceOfOne);
 
         substitutions[2] = new Transformation() {
             @Override

@@ -306,6 +306,6 @@ public final class DiracTraceTransformation extends AbstractFeynCalcTransformati
         parser = CC.current().getParseManager().getParser();
         traceOf4GammasWith5Token = parser.parse("G_a^a'_b'*G_b^b'_c'*G_c^c'_d'*G_d^d'_e'*G5^e'_a' = -4*I*eps_abcd");
         chiholmKahaneToken = parser.parse("G_a^a'_c'*G_b^c'_d'*G_c^d'_b' = g_ab*G_c^a'_b'-g_ac*G_b^a'_b'+g_bc*G_a^a'_b'-I*e_abcd*G5^a'_c'*G^dc'_b'");
-        chiholmKahaneTokenReversed = parser.parse("G5^a'_c'*G^dc'_b' = -I*e^abcd*G_a^a'_c'*G_b^c'_d'*G_c^d'_b'/(d^n_n-3)/(d^n_n-2)/(d^n_n-1)");
+        chiholmKahaneTokenReversed = parser.parse("G5^a'_c'*G^dc'_b' = -I*e^abcd*G_a^a'_c'*G_b^c'_d'*G_c^d'_b'/(4-3)/(4-2)/(4-1)");
     }
 }
