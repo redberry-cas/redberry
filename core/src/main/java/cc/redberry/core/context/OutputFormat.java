@@ -68,7 +68,11 @@ public final class OutputFormat {
      * This format will not print explicit indices of matrices. E.g. if A and B are matrices, that it will
      * produce A*B instead of A^i'_j'*B^j'_k'.
      */
-    SimpleRedberry = new OutputFormat(6, "^", "_", false);
+    SimpleRedberry = new OutputFormat(6, "^", "_", false),
+    /**
+     * Fomat used to export expressions for C/C++
+     */
+    C = new OutputFormat(7, "^", "_");
     /**
      * Unique identifier.
      */

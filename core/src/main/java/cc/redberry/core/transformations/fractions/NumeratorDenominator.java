@@ -24,10 +24,12 @@ package cc.redberry.core.transformations.fractions;
 
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.number.NumberUtils;
+import cc.redberry.core.number.Rational;
 import cc.redberry.core.tensor.*;
 import cc.redberry.core.utils.Indicator;
 import cc.redberry.core.utils.TensorUtils;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -76,12 +78,31 @@ public final class NumeratorDenominator {
         if (!(tensor instanceof Product))
             return new NumeratorDenominator(tensor, Complex.ONE);
 
+        Product p = (Product) tensor;
+        Complex factor = p.getFactor();
         ProductBuilder denominators = new ProductBuilder();
+        boolean newFactor = false;
+        if (factor.isReal() && factor.getReal() instanceof Rational) {
+            Rational r = (Rational) factor.getReal();
+            if (!r.getDenominator().equals(BigInteger.ONE)) {
+                newFactor = true;
+                denominators.put(new Complex(r.getDenominator()));
+                factor = new Complex(r.getNumerator());
+            }
+        }
+
         Tensor temp = tensor;
         Tensor t;
         Tensor exponent;
         for (int i = tensor.size() - 1; i >= 0; --i) {
             t = tensor.get(i);
+            if (i == 0 && newFactor) {
+                assert t instanceof Complex;
+                if (temp instanceof Product)
+                    temp = ((Product) temp).remove(i);
+                else
+                    temp = Complex.ONE;
+            }
             if (denominatorIndicator.is(t)) {
                 exponent = Tensors.negate(t.get(1));
                 denominators.put(Tensors.pow(t.get(0), exponent));
@@ -91,6 +112,8 @@ public final class NumeratorDenominator {
                     temp = Complex.ONE;
             }
         }
+        if (newFactor)
+            temp = Tensors.multiply(temp, factor);
         return new NumeratorDenominator(temp, denominators.build());
     }
 

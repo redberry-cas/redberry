@@ -30,6 +30,7 @@ import cc.redberry.core.graph.PrimitiveSubgraphPartition;
 import cc.redberry.core.indices.*;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.number.NumberUtils;
+import cc.redberry.core.transformations.fractions.NumeratorDenominator;
 import cc.redberry.core.utils.*;
 import gnu.trove.set.hash.TIntHashSet;
 
@@ -568,6 +569,8 @@ public final class Product extends MultiTensor {
 
     @Override
     public String toString(OutputFormat format) {
+        if (format.is(OutputFormat.C))
+            return toCppString();
         StringBuilder sb = new StringBuilder();
         char operatorChar = format == OutputFormat.LaTeX ? ' ' : '*';
 
@@ -595,6 +598,31 @@ public final class Product extends MultiTensor {
         return printMatrices(sb, format, operatorChar, matrixTypes);
     }
 
+    private String toCppString() {
+        final NumeratorDenominator nd = NumeratorDenominator.getNumeratorAndDenominator(this);
+        StringBuilder sb = new StringBuilder();
+        sb.append(toCppString(nd.getNumerator()));
+        if (!TensorUtils.isOne(nd.denominator))
+            sb.append("/(").append(toCppString(nd.getDenominator())).append(")");
+        return sb.toString();
+    }
+
+    private static String toCppString(Tensor t) {
+        if (t instanceof Product)
+            return ((Product) t).toCppString0();
+        return t.toString(OutputFormat.C);
+    }
+
+    private String toCppString0() {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; ; i++) {
+            sb.append(get(i).toString(OutputFormat.C, Product.class));
+            if (i == size() - 1)
+                break;
+            sb.append("*");
+        }
+        return sb.toString();
+    }
 
     private String printData(StringBuilder sb, OutputFormat format, char operatorChar) {
 //        if (sb.length() != 0)
