@@ -28,6 +28,7 @@ import cc.redberry.core.tensor.*;
 import cc.redberry.core.tensor.iterator.FromChildToParentIterator;
 import cc.redberry.core.transformations.Transformation;
 import cc.redberry.core.transformations.substitutions.SubstitutionTransformation;
+import cc.redberry.core.utils.Indicator;
 import cc.redberry.core.utils.TensorUtils;
 import gnu.trove.map.hash.TIntObjectHashMap;
 
@@ -51,6 +52,9 @@ public final class AbbreviationsBuilder implements Transformation {
     final String abbrPrefix;
     public boolean abbreviateScalars = true;
     public boolean abbreviateScalarsSeparately = false;
+    public boolean abbreviateTopLevel = false;
+    @SuppressWarnings("unchecked")
+    public Indicator<Tensor> filter = Indicator.TRUE_INDICATOR;
 
     public AbbreviationsBuilder(int maxSumSize, String abbrPrefix) {
         this.maxSumSize = maxSumSize;
@@ -66,8 +70,12 @@ public final class AbbreviationsBuilder implements Transformation {
         FromChildToParentIterator iterator = new FromChildToParentIterator(t);
         Tensor c;
         while ((c = iterator.next()) != null) {
+            if (!abbreviateTopLevel && iterator.depth() == 0)
+                continue;
             if (c instanceof Product && abbreviateScalars)
                 iterator.set(abbreviateProduct(c));
+            if (!filter.is(c))
+                continue;
             if (c instanceof Sum
                     && c.size() < maxSumSize
                     && TensorUtils.isSymbolic(c))
@@ -90,8 +98,11 @@ public final class AbbreviationsBuilder implements Transformation {
         Tensor abbr;
         if (abbreviateScalarsSeparately) {
             ProductBuilder pb = new ProductBuilder();
-            for (Tensor sc : nonScalar)
-                pb.put(abbreviate(sc));
+            for (Tensor sc : scalars) {
+                if (filter.is(sc))
+                    pb.put(abbreviate(sc));
+                else pb.put(sc);
+            }
             abbr = pb.build();
         } else
             abbr = abbreviate(multiply(scalars));
@@ -140,6 +151,14 @@ public final class AbbreviationsBuilder implements Transformation {
         for (int i = 0; i < abbrs.size(); i++)
             subs[i] = abbrs.get(i).asSubstitution();
         return new SubstitutionTransformation(subs, true);
+    }
+
+    public long abbreviationsSymbolCount() {
+        long s = 0;
+        for (List<Abbreviation> abbr : abbrs.valueCollection())
+            for (Abbreviation abb : abbr)
+                s += TensorUtils.symbolsCount(abb.definition);
+        return s;
     }
 
     public static final class Abbreviation {

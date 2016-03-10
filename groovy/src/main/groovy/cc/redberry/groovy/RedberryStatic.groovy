@@ -207,6 +207,13 @@ class RedberryStatic {
     public static final DSLTransformationInst Factor = new DSLTransformationInst(FactorTransformation.FACTOR);
 
     /**
+     * Factors a polynomial over the integers.
+     * @see FactorTransformation
+     */
+    public static
+    final Transformation FactorOutNumber = cc.redberry.core.transformations.factor.FactorOutNumber.FACTOR_OUT_NUMBER;
+
+    /**
      *  Expands all powers of products and powers with respect to specified variables.
      * @see PowerExpandTransformation
      */

@@ -47,6 +47,35 @@ public class AbbreviationsBuilderTest {
         System.out.println(r);
     }
 
+    @Test
+    public void test2() throws Exception {
+        AbbreviationsBuilder abbrs = new AbbreviationsBuilder();
+        abbrs.abbreviateTopLevel = true;
+
+        Tensor t = Tensors.parse("a*(c+d) + b*(c+d)");
+        assertCorrectAbbreviations(abbrs, t);
+
+        Tensor r = abbrs.transform(t);
+
+        System.out.println(r);
+    }
+
+    @Test
+    public void test3() throws Exception {
+        AbbreviationsBuilder abbrs = new AbbreviationsBuilder();
+        abbrs.abbreviateTopLevel = false;
+
+        Tensor t = Tensors.parse("(a+b)*k_a*p^a + (a+b)*f_a*t^a");
+        assertCorrectAbbreviations(abbrs, t);
+
+        Tensor r = abbrs.transform(t);
+
+        System.out.println(r);
+        for (AbbreviationsBuilder.Abbreviation abbreviation : abbrs.getAbbreviations()) {
+            System.out.println(abbreviation);
+        }
+    }
+
     private static void assertCorrectAbbreviations(AbbreviationsBuilder abbrs, Tensor t) {
         Tensor r = abbrs.transform(t);
         SubstitutionTransformation subs = abbrs.abbreviationReplacements();
