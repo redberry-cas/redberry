@@ -868,7 +868,19 @@ public final class TensorUtils {
      * @return number of occurences of {@code patterns} in {@code expression}
      */
     public static int Count(final Tensor expression, final List<Tensor> patterns) {
-        return Count(expression, 1, patterns, false);
+        return Count(expression, Integer.MAX_VALUE, patterns, false);
+    }
+
+    /**
+     * Returns the number of occurences of {@code patterns} in {@code expression}
+     *
+     * @param expression expression
+     * @param patterns   patterns
+     * @param level      level specification
+     * @return number of occurences of {@code patterns} in {@code expression}
+     */
+    public static int Count(final Tensor expression, final int level, final Tensor... patterns) {
+        return Count(expression, level, Arrays.asList(patterns), false);
     }
 
     /**
@@ -885,20 +897,18 @@ public final class TensorUtils {
         if (level < 0)
             throw new IllegalArgumentException();
         int count = 0;
-        if (level == 1) {
-            out:
-            for (Tensor el : expression) {
-                for (Tensor p : patterns) {
-                    int c = match0(el, p, sumPowers);
-                    count += c;
-                    if (c > 0)
-                        continue out;
-                }
+
+        out:
+        for (Tensor el : expression) {
+            for (Tensor p : patterns) {
+                int c = match0(el, p, sumPowers);
+                count += c;
+                if (c > 0)
+                    continue out;
             }
-        } else {
-            for (Tensor el : expression)
-                count += Count(el, level - 1, patterns, sumPowers);
+            count += Count(el, level - 1, patterns, sumPowers);
         }
+
         return count;
     }
 
@@ -960,5 +970,14 @@ public final class TensorUtils {
                 return 1;
         }
         return 0;
+    }
+
+    public static boolean containsImaginary(final Tensor t) {
+        if (t instanceof Complex)
+            return !((Complex) t).getImaginary().isZero();
+        for (Tensor tensor : t)
+            if (containsImaginary(tensor))
+                return true;
+        return false;
     }
 }
