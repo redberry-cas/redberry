@@ -32,10 +32,7 @@ import cc.redberry.core.utils.Indicator;
 import cc.redberry.core.utils.TensorUtils;
 import gnu.trove.map.hash.TIntObjectHashMap;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 
 import static cc.redberry.core.tensor.Tensors.*;
 
@@ -55,6 +52,7 @@ public final class AbbreviationsBuilder implements Transformation {
     public boolean abbreviateTopLevel = false;
     @SuppressWarnings("unchecked")
     public Indicator<Tensor> filter = Indicator.TRUE_INDICATOR;
+    private int abbrCounter = 0;
 
     public AbbreviationsBuilder(int maxSumSize, String abbrPrefix) {
         this.maxSumSize = maxSumSize;
@@ -128,8 +126,6 @@ public final class AbbreviationsBuilder implements Transformation {
         list.add(abbr);
         return abbr.abbreviation;
     }
-
-    private int abbrCounter = 0;
 
     private Abbreviation nextAbbreviation(Tensor t) {
         int index = abbrCounter++;

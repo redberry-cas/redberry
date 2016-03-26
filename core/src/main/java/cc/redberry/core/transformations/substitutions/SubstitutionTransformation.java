@@ -34,6 +34,7 @@ import cc.redberry.core.utils.TensorUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import static cc.redberry.core.transformations.substitutions.PrimitiveProductSubstitution.algorithm_with_simple_combinations;
@@ -101,7 +102,7 @@ public final class SubstitutionTransformation implements TransformationToStringA
         this(toExpressions(expressions));
     }
 
-    private static Expression[] toExpressions(TransformationCollection expressions){
+    private static Expression[] toExpressions(TransformationCollection expressions) {
         final List<Transformation> list = expressions.getTransformations();
         Expression[] r = new Expression[list.size()];
         for (int i = 0; i < r.length; i++)
@@ -192,6 +193,16 @@ public final class SubstitutionTransformation implements TransformationToStringA
                 if (shareSimpleTensors(a, b))
                     return true;
         return false;
+    }
+
+    /**
+     * Adds specified transformations to the list of substitutions
+     *
+     * @param subs additional substitutions
+     * @return a substitution transformation
+     */
+    public SubstitutionTransformation add(Expression subs) {
+        return add(Collections.singletonList((Transformation) subs));
     }
 
     /**

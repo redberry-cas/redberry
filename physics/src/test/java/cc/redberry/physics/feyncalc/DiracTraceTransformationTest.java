@@ -23,6 +23,8 @@
 package cc.redberry.physics.feyncalc;
 
 import cc.redberry.core.TAssert;
+import cc.redberry.core.context.CC;
+import cc.redberry.core.context.OutputFormat;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.tensor.SimpleTensor;
 import cc.redberry.core.tensor.Tensor;
@@ -30,6 +32,7 @@ import cc.redberry.core.tensor.iterator.FromChildToParentIterator;
 import cc.redberry.core.test.LongTest;
 import cc.redberry.core.transformations.EliminateMetricsTransformation;
 import cc.redberry.core.transformations.Transformation;
+import cc.redberry.core.transformations.TransformationCollection;
 import junit.framework.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -417,6 +420,21 @@ public class DiracTraceTransformationTest extends AbstractFeynCalcTest {
         testFeynCalcData("DiracTrace_abcdefgg5");
     }
 
+    @LongTest
+    @Test
+    //test gamma5 in Larin scheme
+    public void test22() throws Exception {
+        DiracOptions dOpts = new DiracOptions();
+        dOpts.dimension = parse("D");
+        dOpts.traceOfOne = Complex.FOUR;
+        dTrace = new DiracTraceTransformation(dOpts);
+        dSimplify = new DiracSimplifyTransformation(dOpts);
+        CC.setDefaultOutputFormat(OutputFormat.Redberry);
+
+        testFeynCalcData("DiracTraceD_ppqrst5", new TransformationCollection(dSimplify, dTrace));
+        testFeynCalcData("DiracTraceD_ppqqrrst5", new TransformationCollection(dSimplify, dTrace));
+    }
+
     @Ignore
     @Test
     public void testCache1() throws Exception {
@@ -431,6 +449,10 @@ public class DiracTraceTransformationTest extends AbstractFeynCalcTest {
     }
 
     void testFeynCalcData(String resourceFile) throws Exception {
+        testFeynCalcData(resourceFile, dTrace);
+    }
+
+    void testFeynCalcData(String resourceFile, Transformation dTrace) throws Exception {
         BufferedReader reader = new BufferedReader(new InputStreamReader(
                 DiracSimplify0.class.getResourceAsStream(resourceFile)));
 

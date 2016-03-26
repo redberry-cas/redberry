@@ -80,9 +80,10 @@ public class AbstractFeynCalcTest extends RedberryTest {
         indicesInsertion.addInsertionRule(parseSimple("T^A'_B'"), IndexType.Matrix2);
 
 
+        setAntiSymmetric("e_abcd");
         parse("GS[p_a] := p_a*G^a");
         parse("Pair[p_a, q_a] := p_a*q^a");
-        setAntiSymmetric("e_abcd");
+        parse("Eps[p_a, q_a, k_a, f_a] := e_abcd*p^a*q^b*k^c*f^d");
 
         diracOptions = new DiracOptions();
         dOrder = new DiracOrderTransformation(diracOptions);

@@ -301,12 +301,4 @@ public abstract class AbstractTransformationWithGammas implements Transformation
                 indices[i] = metricIndex;
         return simpleTensor(gamma.getName(), IndicesFactory.createSimple(null, indices));
     }
-
-    protected static Tensor defaultTraceOfOne() {
-        return defaultDimension();
-    }
-
-    protected static Tensor defaultDimension() {
-        return parse("4");
-    }
 }
