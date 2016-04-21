@@ -105,5 +105,5 @@ public interface StackPosition<T extends Payload<T>> {
      * @return current index in initial tensor and {@link Integer#MAX_VALUE}
      *         if initial tensor was rebuilt
      */
-    public int currentIndex();
+    int currentIndex();
 }

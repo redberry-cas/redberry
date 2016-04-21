@@ -26,13 +26,17 @@ import cc.redberry.core.indices.IndicesFactory;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.tensor.*;
 import cc.redberry.core.tensor.iterator.FromChildToParentIterator;
+import cc.redberry.core.tensor.iterator.TreeTraverseIterator;
 import cc.redberry.core.transformations.Transformation;
 import cc.redberry.core.transformations.substitutions.SubstitutionTransformation;
 import cc.redberry.core.utils.Indicator;
 import cc.redberry.core.utils.TensorUtils;
 import gnu.trove.map.hash.TIntObjectHashMap;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 
 import static cc.redberry.core.tensor.Tensors.*;
 
@@ -50,8 +54,10 @@ public final class AbbreviationsBuilder implements Transformation {
     public boolean abbreviateScalars = true;
     public boolean abbreviateScalarsSeparately = false;
     public boolean abbreviateTopLevel = false;
+
     @SuppressWarnings("unchecked")
     public Indicator<Tensor> filter = Indicator.TRUE_INDICATOR;
+    public Indicator<FromChildToParentIterator> aFilter = Indicator.TRUE_INDICATOR;
     private int abbrCounter = 0;
 
     public AbbreviationsBuilder(int maxSumSize, String abbrPrefix) {
@@ -73,6 +79,8 @@ public final class AbbreviationsBuilder implements Transformation {
             if (c instanceof Product && abbreviateScalars)
                 iterator.set(abbreviateProduct(c));
             if (!filter.is(c))
+                continue;
+            if (!aFilter.is(iterator))
                 continue;
             if (c instanceof Sum
                     && c.size() < maxSumSize
@@ -179,7 +187,7 @@ public final class AbbreviationsBuilder implements Transformation {
         }
     }
 
-    private final Comparator<Abbreviation> TOPOLOGICAL_SORT_COMPARATOR = new Comparator<Abbreviation>() {
+    private static final Comparator<Abbreviation> TOPOLOGICAL_SORT_COMPARATOR = new Comparator<Abbreviation>() {
         @Override
         public int compare(Abbreviation o1, Abbreviation o2) {
             return Integer.compare(o1.index, o2.index);

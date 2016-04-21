@@ -23,6 +23,7 @@
 package cc.redberry.core.tensor.iterator;
 
 import cc.redberry.core.tensor.Tensor;
+import cc.redberry.core.utils.Indicator;
 
 /*
  * Wrapper for TreeTraverseIterator. Traverse tensor into or out according to
@@ -66,4 +67,12 @@ abstract class TreeIteratorAbstract implements TreeIterator {
     public void set(Tensor tensor) {
         iterator.set(tensor);
     }
+
+    public StackPosition currentStackPosition() {return iterator.currentStackPosition();}
+
+    public boolean isUnder(Indicator indicator, int searchDepth) {return iterator.isUnder(indicator, searchDepth);}
+
+    public boolean checkLevel(Indicator indicator, int level) {return iterator.checkLevel(indicator, level);}
+
+    public Tensor current() {return iterator.current();}
 }

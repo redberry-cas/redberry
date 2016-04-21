@@ -601,7 +601,7 @@ public final class Product extends MultiTensor {
     private String toCppString() {
         final NumeratorDenominator nd = NumeratorDenominator.getNumeratorAndDenominator(this);
         StringBuilder sb = new StringBuilder();
-        sb.append(toCppString(nd.getNumerator()));
+        sb.append("(").append(toCppString(nd.getNumerator())).append(")");
         if (!TensorUtils.isOne(nd.denominator))
             sb.append("/(").append(toCppString(nd.getDenominator())).append(")");
         return sb.toString();
