@@ -604,13 +604,28 @@ public final class TensorUtils {
         return symmetries;
     }
 
+    public static THashSet<Tensor> getAllScalars(Tensor... tensors) {
+        THashSet<Tensor> set = new THashSet<>();
+        for (Tensor tensor : tensors)
+            addScalars(tensor, set);
+        return set;
+    }
+
+    private static void addScalars(Tensor t, THashSet<Tensor> set) {
+        if (t instanceof Product)
+            set.addAll(Arrays.asList(((Product) t).getContent().getScalars()));
+        else
+            for (Tensor r : t)
+                addScalars(r, set);
+    }
+
+
     public static Set<SimpleTensor> getAllSymbols(Tensor... tensors) {
         Set<SimpleTensor> set = new HashSet<>();
         for (Tensor tensor : tensors)
             addSymbols(tensor, set);
         return set;
     }
-
 
     private static void addSymbols(Tensor tensor, Set<SimpleTensor> set) {
         if (isSymbol(tensor)) {
@@ -835,13 +850,7 @@ public final class TensorUtils {
      */
     public static Expression[] generateReplacementsOfScalars(Tensor tensor,
                                                              OutputPort<SimpleTensor> generatedCoefficients) {
-        THashSet<Tensor> scalars = new THashSet<>();
-        FromChildToParentIterator iterator = new FromChildToParentIterator(tensor);
-        Tensor c;
-        while ((c = iterator.next()) != null)
-            if (c instanceof Product)
-                scalars.addAll(Arrays.asList(((Product) c).getContent().getScalars()));
-
+        THashSet<Tensor> scalars = getAllScalars(tensor);
         Expression[] replacements = new Expression[scalars.size()];
         int i = -1;
         for (Tensor scalar : scalars)
