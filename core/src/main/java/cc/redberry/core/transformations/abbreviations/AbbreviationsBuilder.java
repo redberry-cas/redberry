@@ -20,13 +20,12 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
-package cc.redberry.physics.feyncalc;
+package cc.redberry.core.transformations.abbreviations;
 
 import cc.redberry.core.indices.IndicesFactory;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.tensor.*;
 import cc.redberry.core.tensor.iterator.FromChildToParentIterator;
-import cc.redberry.core.tensor.iterator.TreeTraverseIterator;
 import cc.redberry.core.transformations.Transformation;
 import cc.redberry.core.transformations.substitutions.SubstitutionTransformation;
 import cc.redberry.core.utils.Indicator;
@@ -49,8 +48,8 @@ public final class AbbreviationsBuilder implements Transformation {
     public static final String DEFAULT_ABBR_PREFIX = "abbr";
 
     final TIntObjectHashMap<List<Abbreviation>> abbrs = new TIntObjectHashMap<>();
-    final int maxSumSize;
-    final String abbrPrefix;
+    public int maxSumSize = DEFAULT_ABBR_SIZE;
+    public String abbrPrefix = DEFAULT_ABBR_PREFIX;
     public boolean abbreviateScalars = true;
     public boolean abbreviateScalarsSeparately = false;
     public boolean abbreviateTopLevel = false;
@@ -59,15 +58,6 @@ public final class AbbreviationsBuilder implements Transformation {
     public Indicator<Tensor> filter = Indicator.TRUE_INDICATOR;
     public Indicator<FromChildToParentIterator> aFilter = Indicator.TRUE_INDICATOR;
     private int abbrCounter = 0;
-
-    public AbbreviationsBuilder(int maxSumSize, String abbrPrefix) {
-        this.maxSumSize = maxSumSize;
-        this.abbrPrefix = abbrPrefix;
-    }
-
-    public AbbreviationsBuilder() {
-        this(DEFAULT_ABBR_SIZE, DEFAULT_ABBR_PREFIX);
-    }
 
     @Override
     public Tensor transform(Tensor t) {
