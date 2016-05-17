@@ -32,10 +32,11 @@ import cc.redberry.core.utils.Indicator;
 import cc.redberry.core.utils.TensorUtils;
 import gnu.trove.map.hash.TIntObjectHashMap;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
+import java.util.*;
 
 import static cc.redberry.core.tensor.Tensors.*;
 
@@ -43,7 +44,7 @@ import static cc.redberry.core.tensor.Tensors.*;
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
  */
-public final class AbbreviationsBuilder implements Transformation {
+public final class AbbreviationsBuilder implements Transformation, Serializable {
     public static final int DEFAULT_ABBR_SIZE = 50;
     public static final String DEFAULT_ABBR_PREFIX = "abbr";
 
@@ -55,8 +56,9 @@ public final class AbbreviationsBuilder implements Transformation {
     public boolean abbreviateTopLevel = false;
 
     @SuppressWarnings("unchecked")
-    public Indicator<Tensor> filter = Indicator.TRUE_INDICATOR;
-    public Indicator<FromChildToParentIterator> aFilter = Indicator.TRUE_INDICATOR;
+    public transient Indicator<Tensor> filter = Indicator.TRUE_INDICATOR;
+    @SuppressWarnings("unchecked")
+    public transient Indicator<FromChildToParentIterator> aFilter = Indicator.TRUE_INDICATOR;
     private int abbrCounter = 0;
 
     @Override
@@ -131,6 +133,31 @@ public final class AbbreviationsBuilder implements Transformation {
                 simpleTensor(abbrPrefix + index, IndicesFactory.EMPTY_SIMPLE_INDICES));
     }
 
+    public Abbreviation addAbbreviation(Abbreviation oth) {
+        final int hashCode = oth.definition.hashCode();
+        List<Abbreviation> list = abbrs.get(hashCode);
+        if (list == null)
+            abbrs.put(hashCode, list = new ArrayList<>());
+        for (ListIterator<Abbreviation> iterator = list.listIterator(); iterator.hasNext(); ) {
+            Abbreviation abbr = iterator.next();
+            Boolean compare = TensorUtils.compare1(abbr.definition, oth.definition);
+            if (compare != null) {
+                oth = new Abbreviation(abbr.index, compare ? negate(oth.definition) : oth.definition, oth.abbreviation);
+                iterator.set(oth);
+                return abbr;
+            }
+        }
+
+        oth = new Abbreviation(abbrCounter++, oth.definition, oth.abbreviation);
+        list.add(oth);
+        return oth;
+    }
+
+    public void mergeFrom(AbbreviationsBuilder oth) {
+        for (Abbreviation abbr : oth.getAbbreviations())
+            addAbbreviation(abbr);
+    }
+
     public List<Abbreviation> getAbbreviations() {
         ArrayList<Abbreviation> r = new ArrayList<>();
         for (List<Abbreviation> abbr : abbrs.valueCollection())
@@ -155,10 +182,46 @@ public final class AbbreviationsBuilder implements Transformation {
         return s;
     }
 
-    public static final class Abbreviation {
+
+    @Override
+    public String toString() {
+        return "AbbreviationsBuilder{\n\t" +
+                "abbrs=" + abbrs + "\n\t" +
+                "maxSumSize=" + maxSumSize + "\n\t" +
+                "abbrPrefix='" + abbrPrefix + '\'' + "\n\t" +
+                "abbreviateScalars=" + abbreviateScalars + "\n\t" +
+                "abbreviateScalarsSeparately=" + abbreviateScalarsSeparately + "\n\t" +
+                "abbreviateTopLevel=" + abbreviateTopLevel + "\n\t" +
+                "filter=" + filter + "\n\t" +
+                "aFilter=" + aFilter + "\n\t" +
+                "abbrCounter=" + abbrCounter + "\n" +
+                '}';
+    }
+
+    private void writeObject(ObjectOutputStream oos)
+            throws IOException {
+        oos.defaultWriteObject();
+    }
+
+    private void readObject(ObjectInputStream ois)
+            throws ClassNotFoundException, IOException {
+        ois.defaultReadObject();
+        this.filter = Indicator.TRUE_INDICATOR;
+        this.aFilter = Indicator.TRUE_INDICATOR;
+    }
+
+    public static final class Abbreviation implements Serializable {
         public long count = 1;
         public final int index;
-        public final Tensor definition, abbreviation, negatedAbbreviation;
+        public final transient Tensor definition, abbreviation, negatedAbbreviation;
+
+        private Abbreviation(long count, int index, Tensor definition, Tensor abbreviation, Tensor negatedAbbreviation) {
+            this.count = count;
+            this.index = index;
+            this.definition = definition;
+            this.abbreviation = abbreviation;
+            this.negatedAbbreviation = negatedAbbreviation;
+        }
 
         public Abbreviation(int index, Tensor definition, Tensor abbreviation) {
             this.index = index;
@@ -174,6 +237,49 @@ public final class AbbreviationsBuilder implements Transformation {
         @Override
         public String toString() {
             return "(" + count + ") " + abbreviation + " = " + definition;
+        }
+
+        private void writeObject(ObjectOutputStream oos)
+                throws IOException {
+            oos.defaultWriteObject();
+            oos.writeObject(definition.toString());
+            oos.writeObject(abbreviation.toString());
+            oos.writeObject(negatedAbbreviation.toString());
+        }
+
+        private transient Tensor[] weakContainer = null;
+
+        private void readObject(ObjectInputStream ois)
+                throws ClassNotFoundException, IOException {
+            // default deserialization
+            ois.defaultReadObject();
+            weakContainer = new Tensor[3];
+            weakContainer[0] = parse((String) ois.readObject());
+            weakContainer[1] = parse((String) ois.readObject());
+            weakContainer[2] = parse((String) ois.readObject());
+        }
+
+        private Object readResolve() {
+            final Abbreviation abbr = new Abbreviation(count, index, weakContainer[0], weakContainer[1], weakContainer[2]);
+            weakContainer = null;
+            return abbr;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            Abbreviation that = (Abbreviation) o;
+
+            return abbreviation.equals(that.abbreviation) && TensorUtils.equals(definition, that.definition);
+        }
+
+        @Override
+        public int hashCode() {
+            int result = definition.hashCode();
+            result = 31 * result + abbreviation.hashCode();
+            return result;
         }
     }
 

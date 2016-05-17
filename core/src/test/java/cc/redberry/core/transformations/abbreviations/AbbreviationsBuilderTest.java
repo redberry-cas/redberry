@@ -26,7 +26,15 @@ import cc.redberry.core.TAssert;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.tensor.Tensors;
 import cc.redberry.core.transformations.substitutions.SubstitutionTransformation;
+import org.junit.Assert;
 import org.junit.Test;
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.util.HashSet;
+import java.util.Set;
 
 import static cc.redberry.core.transformations.Transformation.Util.applyUntilUnchanged;
 import static cc.redberry.core.transformations.expand.ExpandTransformation.expand;
@@ -74,6 +82,30 @@ public class AbbreviationsBuilderTest {
         for (AbbreviationsBuilder.Abbreviation abbreviation : abbrs.getAbbreviations()) {
             System.out.println(abbreviation);
         }
+    }
+
+    @Test
+    public void test4() throws Exception {
+        AbbreviationsBuilder abbrs = new AbbreviationsBuilder();
+        abbrs.abbreviateTopLevel = true;
+        abbrs.transform(Tensors.parse("(a+b)*k_a*p^a + (a+b)*f_a*t^a"));
+
+        ByteArrayOutputStream str = new ByteArrayOutputStream(1024 * 100);
+        ObjectOutputStream out = new ObjectOutputStream(str);
+        out.writeObject(abbrs);
+        out.close();
+        str.close();
+
+        ByteArrayInputStream fileIn = new ByteArrayInputStream(str.toByteArray());
+        ObjectInputStream in = new ObjectInputStream(fileIn);
+        AbbreviationsBuilder des = (AbbreviationsBuilder) in.readObject();
+        in.close();
+        fileIn.close();
+
+        Assert.assertEquals(abbrs.abbreviateTopLevel, des.abbreviateTopLevel);
+        final Set<AbbreviationsBuilder.Abbreviation> expected = new HashSet<>(abbrs.getAbbreviations());
+        final Set<AbbreviationsBuilder.Abbreviation> actual = new HashSet<>(des.getAbbreviations());
+        Assert.assertEquals(actual, expected);
     }
 
     private static void assertCorrectAbbreviations(AbbreviationsBuilder abbrs, Tensor t) {
