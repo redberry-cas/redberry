@@ -23,8 +23,10 @@
 package cc.redberry.physics.feyncalc;
 
 import cc.redberry.core.tensor.SimpleTensor;
+import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.transformations.options.Option;
 
+import static cc.redberry.core.tensor.Tensors.parse;
 import static cc.redberry.core.tensor.Tensors.parseSimple;
 
 /**
@@ -48,7 +50,7 @@ public class SpinorsSimplifyOptions extends DiracOptions {
     public SimpleTensor momentum;
 
     @Option(name = "Mass", index = 14)
-    public SimpleTensor mass;
+    public Tensor mass;
 
     @Option(name = "DiracSimplify", index = 15)
     public boolean doDiracSimplify = false;
@@ -62,6 +64,6 @@ public class SpinorsSimplifyOptions extends DiracOptions {
         this.uBar = uBar == null ? null : parseSimple(uBar);
         this.vBar = vBar == null ? null : parseSimple(vBar);
         this.momentum = parseSimple(momentum);
-        this.mass = parseSimple(mass);
+        this.mass = parse(mass);
     }
 }

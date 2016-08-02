@@ -27,15 +27,13 @@ import cc.redberry.core.number.Complex;
 import cc.redberry.core.tensor.*;
 import cc.redberry.core.tensor.iterator.FromChildToParentIterator;
 import cc.redberry.core.transformations.Transformation;
+import cc.redberry.core.transformations.TransformationCollection;
 import cc.redberry.core.transformations.substitutions.SubstitutionTransformation;
 import cc.redberry.core.utils.Indicator;
 import cc.redberry.core.utils.TensorUtils;
 import gnu.trove.map.hash.TIntObjectHashMap;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.Serializable;
+import java.io.*;
 import java.util.*;
 
 import static cc.redberry.core.tensor.Tensors.*;
@@ -54,6 +52,7 @@ public final class AbbreviationsBuilder implements Transformation, Serializable 
     public boolean abbreviateScalars = true;
     public boolean abbreviateScalarsSeparately = false;
     public boolean abbreviateTopLevel = false;
+    public boolean locked = false;
 
     @SuppressWarnings("unchecked")
     public transient Indicator<Tensor> filter = Indicator.TRUE_INDICATOR;
@@ -122,6 +121,9 @@ public final class AbbreviationsBuilder implements Transformation, Serializable 
             }
         }
 
+        if (locked)
+            return c;
+
         Abbreviation abbr = nextAbbreviation(c);
         list.add(abbr);
         return abbr.abbreviation;
@@ -182,6 +184,47 @@ public final class AbbreviationsBuilder implements Transformation, Serializable 
         return s;
     }
 
+    public TransformationCollection getReplacements() {
+        final List<Abbreviation> abbrs = getAbbreviations();
+        List<Expression> subs = new ArrayList<>(abbrs.size());
+        for (Abbreviation abbreviation : abbrs)
+            subs.add(abbreviation.asSubstitution().transpose());
+        return new TransformationCollection(subs);
+    }
+
+    public void writeToFile(String file) throws IOException {
+        writeToFile(new File(file));
+    }
+
+    public void writeToFile(File file) throws IOException {
+        writeToFile(this, file);
+    }
+
+    public static void writeToFile(AbbreviationsBuilder abbrs, String file) throws IOException {
+        writeToFile(abbrs, new File(file));
+    }
+
+    public static void writeToFile(AbbreviationsBuilder abbrs, File file) throws IOException {
+        new ObjectOutputStream(new FileOutputStream(file)).writeObject(abbrs);
+    }
+
+    public static AbbreviationsBuilder readFromFile(String file) throws IOException, ClassNotFoundException {
+        return readFromFile(new File(file));
+    }
+
+    public static AbbreviationsBuilder readFromFile(File file) throws IOException, ClassNotFoundException {
+        final AbbreviationsBuilder tr = (AbbreviationsBuilder) new ObjectInputStream(new FileInputStream(file)).readObject();
+        final List<Abbreviation> abbrs = tr.getAbbreviations();
+        tr.abbrs.clear();
+        for (Abbreviation abbr : abbrs) {
+            final int hashCode = abbr.definition.hashCode();
+            List<Abbreviation> e = tr.abbrs.get(hashCode);
+            if (e == null)
+                tr.abbrs.put(hashCode, e = new ArrayList<>());
+            e.add(abbr);
+        }
+        return tr;
+    }
 
     @Override
     public String toString() {
@@ -203,6 +246,7 @@ public final class AbbreviationsBuilder implements Transformation, Serializable 
         oos.defaultWriteObject();
     }
 
+    @SuppressWarnings("unchecked")
     private void readObject(ObjectInputStream ois)
             throws ClassNotFoundException, IOException {
         ois.defaultReadObject();

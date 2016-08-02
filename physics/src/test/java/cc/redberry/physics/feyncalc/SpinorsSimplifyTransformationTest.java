@@ -198,4 +198,19 @@ public class SpinorsSimplifyTransformationTest extends AbstractFeynCalcTest {
 
         System.out.println(parse("G_{a}^{f'}_{b'}*G^{me'}_{f'}*G^{da'}_{e'}*cu_{a'}*v^{b'}*k2^{a}*k2^{k}*p1^{e}*e^{b}_{nke}*k1_{m}*k1^{n}*eps_{bd}"));
     }
+
+    @Test
+    public void test6() throws Exception {
+        indicesInsertion.addInsertionRule(parseSimple("cu_b'"), IndexType.Matrix1);
+        indicesInsertion.addInsertionRule(parseSimple("u^b'"), IndexType.Matrix1);
+        indicesInsertion.addInsertionRule(parseSimple("cv_b'[x_a]"), IndexType.Matrix1);
+        indicesInsertion.addInsertionRule(parseSimple("v^b'"), IndexType.Matrix1);
+
+        SpinorsSimplifyTransformation sp = new SpinorsSimplifyTransformation(
+                new SpinorsSimplifyOptions(null, null, null, "cv[x_a]", "p_a", "0"));
+
+        Tensor t;
+        t = parse("cv[x_a]*G_{a}*u*p^{a}");
+        System.out.println(sp.transform(t));
+    }
 }

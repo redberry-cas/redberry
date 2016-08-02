@@ -54,7 +54,8 @@ import static cc.redberry.core.transformations.EliminateMetricsTransformation.el
  * @author Stanislav Poslavsky
  */
 public final class SpinorsSimplifyTransformation extends AbstractTransformationWithGammas {
-    private final SimpleTensor u, v, uBar, vBar, momentum, mass;
+    private final SimpleTensor u, v, uBar, vBar, momentum;
+    private final Tensor mass;
     private final Transformation uSubs, vSubs, uBarSubs, vBarSubs, p2;
     private final Transformation simplifyG5;
     private final Transformation ortohonality;

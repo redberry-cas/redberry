@@ -44,7 +44,7 @@ public final class TransformationCollection implements TransformationToStringAbl
      *
      * @param transformations collection of transformations
      */
-    public TransformationCollection(Collection<Transformation> transformations) {
+    public TransformationCollection(Collection<? extends Transformation> transformations) {
         //todo if collection in collection
         this.transformations = transformations.toArray(new Transformation[transformations.size()]);
     }
