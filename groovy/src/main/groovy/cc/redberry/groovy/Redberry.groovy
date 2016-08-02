@@ -71,6 +71,20 @@ class Redberry {
 
     ///////////////////////////////////////////// TENSORS AND BUILDERS ////////////////////////////////////////////////
 
+    //overcome Groovy 2.4.x bug
+    static Object plus(Iterable<Tensor> a, Iterable<Tensor> b) {
+        if (a instanceof Tensor && b instanceof Tensor)
+            return plus((Tensor) a, (Tensor) b)
+        return DefaultGroovyMethods.plus(a, b)
+    }
+
+    //overcome Groovy 2.4.x bug
+    static Object minus(Iterable<Tensor> a, Iterable<Tensor> b) {
+        if (a instanceof Tensor && b instanceof Tensor)
+            return minus((Tensor) a, (Tensor) b)
+        return DefaultGroovyMethods.plus(a, b)
+    }
+
     /**
      * Returns the result of summation of several tensors.
      *
