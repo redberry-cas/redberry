@@ -37,7 +37,6 @@ import java.util.Arrays;
  * @since 1.0
  */
 public final class StructureOfIndices {
-
     private final int[] typesCounts = new int[IndexType.TYPES_COUNT];
     private final BitArray[] states = new BitArray[IndexType.TYPES_COUNT];
     private final int size;
@@ -572,7 +571,7 @@ public final class StructureOfIndices {
     /**
      * Container of information about structure of indices of a particular type.
      */
-    public static class TypeData {
+    public static final class TypeData {
 
         /**
          * Position in indices, from which this type of indices begins

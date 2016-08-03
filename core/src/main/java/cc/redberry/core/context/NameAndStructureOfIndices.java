@@ -36,7 +36,7 @@ import java.util.Objects;
  * @author Stanislav Poslavsky
  * @since 1.1
  */
-public class NameAndStructureOfIndices {
+public final class NameAndStructureOfIndices {
 
     private String name;
     private StructureOfIndices[] structure;
