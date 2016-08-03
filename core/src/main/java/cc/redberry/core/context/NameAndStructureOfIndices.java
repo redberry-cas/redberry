@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2015:
+ * Copyright (c) 2010-2016:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -24,67 +24,43 @@ package cc.redberry.core.context;
 
 import cc.redberry.core.indices.StructureOfIndices;
 
-import java.util.Arrays;
-import java.util.Objects;
-
 /**
- * Container for the structure of indices (see {@link cc.redberry.core.indices.StructureOfIndices}) of tensor
- * and its string name. Two simple tensors are considered to have different mathematical nature if and only if
- * their {@code IndicesTypeStructureAndName} are not equal.
- *
- * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
- * @since 1.1
  */
 public final class NameAndStructureOfIndices {
+    final String name;
+    final StructureOfIndices structureOfIndices;
 
-    private String name;
-    private StructureOfIndices[] structure;
-
-    /**
-     * @param name      name of tensor
-     * @param structure structure of tensor indices
-     */
-    public NameAndStructureOfIndices(String name, StructureOfIndices[] structure) {
+    public NameAndStructureOfIndices(String name, StructureOfIndices structureOfIndices) {
         this.name = name;
-        this.structure = structure;
+        this.structureOfIndices = structureOfIndices;
     }
 
-    /**
-     * Returns name of tensor.
-     *
-     * @return name of tensor
-     */
     public String getName() {
         return name;
     }
 
-    /**
-     * Returns structure of tensor indices.
-     *
-     * @return structure of tensor indices
-     */
-    public StructureOfIndices[] getStructure() {
-        return structure;
+    public StructureOfIndices getStructureOfIndices() {
+        return structureOfIndices;
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        final NameAndStructureOfIndices other = (NameAndStructureOfIndices) obj;
-        if (!Objects.equals(this.name, other.name))
-            return false;
-        return Arrays.equals(structure, structure);
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        NameAndStructureOfIndices that = (NameAndStructureOfIndices) o;
+
+        if (!name.equals(that.name)) return false;
+        if (!structureOfIndices.equals(that.structureOfIndices)) return false;
+
+        return true;
     }
 
     @Override
     public int hashCode() {
-        int hash = 3;
-        hash = 37 * hash + Objects.hashCode(this.name);
-        hash = 37 * hash + Arrays.hashCode(this.structure);
-        return hash;
+        int result = name.hashCode();
+        result = 31 * result + structureOfIndices.hashCode();
+        return result;
     }
 }

@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2015:
+ * Copyright (c) 2010-2016:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -22,366 +22,128 @@
  */
 package cc.redberry.core.context;
 
-import cc.redberry.core.indices.IndexType;
+import cc.redberry.core.indices.IndicesSymmetries;
 import cc.redberry.core.indices.StructureOfIndices;
-import cc.redberry.core.parser.ParserException;
-import cc.redberry.core.utils.ArraysUtils;
-import cc.redberry.core.utils.IntArrayList;
+import cc.redberry.core.tensor.SimpleTensor;
+import cc.redberry.core.tensor.UnsafeTensors;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import org.apache.commons.math3.random.RandomGenerator;
-import org.apache.commons.math3.random.Well44497b;
 
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
- * Object of this class represents a namespace of simple tensor and tensor fields in Redberry.
- * It is responsible for generation of unique name descriptors ({@link NameDescriptor}) and integer
- * identifiers for simple tensors and fields from raw data. These identifiers are the same for tensors
- * with the same mathematical nature. They are generated randomly in order to obtain the uniform distribution
- * through Redberry session. Each session of Redberry holds only one instance of this class, it can be obtained
- * through {@link CC#getNameManager()}.
- *
- * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
- * @since 1.0
  */
 public final class NameManager {
+    private static final int STARTUP_NAMESPACE_SIZE = 1024;
 
-    private long seed;
-    private final RandomGenerator random;
-    private final ReentrantReadWriteLock readWriteLock = new ReentrantReadWriteLock();
-    private final Lock readLock = readWriteLock.readLock();
-    private final Lock writeLock = readWriteLock.writeLock();
-    private final TIntObjectHashMap<NameDescriptor> fromId = new TIntObjectHashMap<>();
-    private HashSet<String> stringNames = new HashSet<>();
-    /**
-     * String generator
-     */
-    private final StringGenerator stringGenerator = new StringGenerator();
+    final HashMap<NameAndStructureOfIndices, VarDescriptor> namesTable = new HashMap<>();
+    final TIntObjectHashMap<VarDescriptor> idsTable = new TIntObjectHashMap<>(STARTUP_NAMESPACE_SIZE);
+    final IdProvider idProvider;
 
-    private final Map<NameAndStructureOfIndices, NameDescriptor> fromStructure = new HashMap<>();
-    private final String[] kroneckerAndMetricNames = {"d", "g"};
-    private volatile String diracDeltaName = "DiracDelta";
-    private final IntArrayList kroneckerAndMetricIds = new IntArrayList();
-
-    NameManager(Long seed, String kronecker, String metric) {
-        if (seed == null) {
-            random = new Well44497b();
-            random.setSeed(this.seed = random.nextLong());
-        } else
-            random = new Well44497b(this.seed = seed);
-        kroneckerAndMetricNames[0] = kronecker;
-        kroneckerAndMetricNames[1] = metric;
+    public NameManager(IdProvider idProvider) {
+        this.idProvider = idProvider;
     }
 
-    /**
-     * Returns {@code true} if specified identifier is identifier of metric or Kronecker tensor
-     *
-     * @param name unique simple tensor identifier
-     * @return {@code true} if specified identifier is identifier of metric or Kronecker tensor
-     */
-    public boolean isKroneckerOrMetric(int name) {
-        return ArraysUtils.binarySearch(kroneckerAndMetricIds, name) >= 0;
+    NameManager fork() {
+        final NameManager nm = new NameManager(idProvider);
+        nm.namesTable.putAll(this.namesTable);
+        nm.idsTable.putAll(this.idsTable);
+
+        return nm;
     }
 
-    /**
-     * Returns string representation of Kronecker delta name
-     *
-     * @return string representation of Kronecker delta name
-     */
-    public String getKroneckerName() {
-        return kroneckerAndMetricNames[0];
+    synchronized void reset() {
+        namesTable.clear();
+        idsTable.clear();
     }
 
-    /**
-     * Returns string representation of metric tensor name
-     *
-     * @return string representation of metric tensor name
-     */
-    public String getMetricName() {
-        return kroneckerAndMetricNames[1];
+    int size() {
+        return namesTable.size();
     }
 
-    /**
-     * Sets the default Kronecker tensor name. After this step, Kronecker tensor
-     * will be printed with the specified string name.
-     *
-     * @param name string representation of Kronecker tensor name
-     */
-    public void setKroneckerName(String name) {
-        kroneckerAndMetricNames[0] = name;
-        rebuild();
+    synchronized void clear(int id) {
+        final VarDescriptor nd = idsTable.remove(id);
+        if (nd == null)
+            return;
+        namesTable.remove(new NameAndStructureOfIndices(nd.baseName, nd.varIndicesStructure));
+        for (String alias : nd.aliases)
+            namesTable.remove(new NameAndStructureOfIndices(alias, nd.varIndicesStructure));
     }
 
-    /**
-     * Sets the default metric tensor name. After this step, metric tensor
-     * will be printed with the specified string name.
-     *
-     * @param name string representation of metric tensor name
-     */
-    public void setMetricName(String name) {
-        kroneckerAndMetricNames[1] = name;
-        rebuild();
-    }
-
-    /**
-     * Returns the default string name of Dirac's delta function
-     *
-     * @return string name of Dirac's delta function
-     */
-    public String getDiracDeltaName() {
-        return diracDeltaName;
-    }
-
-    /**
-     * Sets the default string name of Dirac's delta function
-     */
-    public void setDiracDeltaName(String diracDeltaName) {
-        this.diracDeltaName = diracDeltaName;
-    }
-
-    private void rebuild() {
-        writeLock.lock();
-        try {
-            fromStructure.clear();
-            for (NameDescriptor descriptor : fromId.valueCollection())
-                for (NameAndStructureOfIndices itsan : descriptor.getKeys())
-                    fromStructure.put(itsan, descriptor);
-        } finally {
-            writeLock.unlock();
+    synchronized void clear(int... ids) {
+        for (int id : ids) {
+            final VarDescriptor nd = idsTable.remove(id);
+            if (nd == null)
+                continue;
+            namesTable.remove(new NameAndStructureOfIndices(nd.baseName, nd.varIndicesStructure));
+            for (String alias : nd.aliases)
+                namesTable.remove(new NameAndStructureOfIndices(alias, nd.varIndicesStructure));
         }
     }
 
-    private NameDescriptor createDescriptor(final String sname, final StructureOfIndices[] structuresOfIndices, int id) {
-        if (structuresOfIndices.length != 1)
-            return new NameDescriptorForTensorFieldImpl(sname, structuresOfIndices, id, sname.equals(diracDeltaName) && structuresOfIndices.length == 3);
-        final StructureOfIndices its = structuresOfIndices[0];
-        if (its.size() != 2)
-            return new NameDescriptorForSimpleTensor(sname, structuresOfIndices, id);
-        for (byte b = 0; b < IndexType.TYPES_COUNT; ++b)
-            if (its.typeCount(b) == 2) {
-                if (CC.isMetric(b)) {
-                    if (sname.equals(kroneckerAndMetricNames[0]) || sname.equals(kroneckerAndMetricNames[1])) {
-                        NameDescriptor descriptor = new NameDescriptorForMetricAndKronecker(kroneckerAndMetricNames, b, id);
-                        descriptor.getSymmetries().add(b, false, 1, 0);
-                        return descriptor;
-                    }
-                } else {
-                    if (sname.equals(kroneckerAndMetricNames[1]))
-                        throw new ParserException("Metric is not specified for non metric index type.");
-                    if (sname.equals(kroneckerAndMetricNames[0])) {
-                        if (its.getTypeData(b).states.get(0) != true || its.getTypeData(b).states.get(1) != false)
-                            throw new ParserException("Illegal Kroneckers indices states.");
-                        NameDescriptor descriptor = new NameDescriptorForMetricAndKronecker(kroneckerAndMetricNames, b, id);
-                        return descriptor;
-                    }
+    public VarDescriptor resolve(final String name,
+                                 final StructureOfIndices structureOfIndices,
+                                 final VarIndicesProvider indicesProvider) {
+        NameAndStructureOfIndices key = new NameAndStructureOfIndices(name, structureOfIndices);
+        VarDescriptor nd = namesTable.get(key);
+        if (nd == null) {
+            synchronized (this) {
+                nd = namesTable.get(key);
+                if (nd == null) {
+                    final int id = idProvider.id(key, idsTable);
+                    SimpleTensor cachedInstance = null;
+                    if (structureOfIndices.size() == 0)
+                        cachedInstance = UnsafeTensors.symbol(id);
+                    nd = new VarDescriptor(id, name, structureOfIndices,
+                            IndicesSymmetries.create(structureOfIndices),
+                            indicesProvider, cachedInstance);
+
+                    idsTable.put(id, nd);
+                    namesTable.put(key, nd);
                 }
             }
-        return new NameDescriptorForSimpleTensor(sname, structuresOfIndices, id);
-    }
-
-    //USE IT ONLY INSIDE LOCK!!!
-    private void registerDescriptor(NameDescriptor descriptor) {
-        fromId.put(descriptor.getId(), descriptor);
-        for (NameAndStructureOfIndices key1 : descriptor.getKeys())
-            fromStructure.put(key1, descriptor);
-        descriptor.registerInNameManager(this);
-    }
-
-    /**
-     * This method returns the existing name descriptor of simple tensor from the raw data if it contains in the
-     * namespace or constructs and puts to namespace new instance of name descriptor otherwise.
-     *
-     * @param sname              string name of tensor
-     * @param structureOfIndices structure of tensor indices (first element in array) and structure of indices
-     *                           of arguments (in case of tensor field)
-     * @return name descriptor corresponding to the specified information of tensor
-     */
-    public NameDescriptor mapNameDescriptor(String sname, StructureOfIndices... structureOfIndices) {
-        NameAndStructureOfIndices key = new NameAndStructureOfIndices(sname, structureOfIndices);
-        boolean rLocked = true;
-        readLock.lock();
-        try {
-            NameDescriptor knownND = fromStructure.get(key);
-            if (knownND == null) {
-                readLock.unlock();
-                rLocked = false;
-                writeLock.lock();
-                try {
-                    knownND = fromStructure.get(key);
-                    if (knownND == null) { //Double check
-                        int name = generateNewName();
-                        NameDescriptor descriptor = createDescriptor(sname, structureOfIndices, name);
-                        if (descriptor instanceof NameDescriptorForMetricAndKronecker) {
-                            kroneckerAndMetricIds.add(name);
-                            kroneckerAndMetricIds.sort();
-                        }
-                        registerDescriptor(descriptor);
-                        stringNames.add(sname);
-                        return descriptor;
-                    }
-                    readLock.lock();
-                    rLocked = true;
-                } finally {
-                    writeLock.unlock();
-                }
-            }
-            return knownND;
-        } finally {
-            if (rLocked)
-                readLock.unlock();
         }
+        return nd;
     }
 
-    NameDescriptorForTensorFieldDerivative createDescriptorForFieldDerivative(NameDescriptorForTensorFieldImpl field, int[] orders) {
-        //todo readLock?
-        writeLock.lock();
-        try {
-            NameDescriptorForTensorFieldDerivative result = new NameDescriptorForTensorFieldDerivative(generateNewName(), orders, field);
-            registerDescriptor(result);
-            return result;
-        } finally {
-            writeLock.unlock();
+    public VarDescriptor resolve(final String name,
+                                 final StructureOfIndices structureOfIndices) {
+        return resolve(name, structureOfIndices, VarIndicesProvider.SelfIndices);
+    }
+
+    synchronized void addNameAlias(final VarDescriptor nd, String alias) {
+        nd.aliases.add(alias);
+        namesTable.put(new NameAndStructureOfIndices(alias, nd.varIndicesStructure), nd);
+    }
+
+    VarDescriptor getVarDescriptor(int id) {
+        return idsTable.get(id);
+    }
+
+    interface IdProvider {
+        int id(NameAndStructureOfIndices key, TIntObjectHashMap<VarDescriptor> generatedIds);
+    }
+
+    static IdProvider HashBasedIdProvider = new IdProvider() {
+        @Override
+        public int id(NameAndStructureOfIndices key, TIntObjectHashMap<VarDescriptor> generatedIds) {
+            int id = key.hashCode();
+            while (generatedIds.contains(id))
+                ++id;
+            return id;
         }
-    }
+    };
 
-    /**
-     * See {@link Context#resetTensorNames()}.
-     */
-    void reset() {
-        writeLock.lock();
-        try {
-            kroneckerAndMetricIds.clear();
-            stringNames.clear();
-            fromId.clear();
-            fromStructure.clear();
-            random.setSeed(this.seed = random.nextLong());
-        } finally {
-            writeLock.unlock();
-        }
-    }
-
-    /**
-     * See {@link Context#resetTensorNames()}.
-     */
-    void reset(long seed) {
-        writeLock.lock();
-        try {
-            kroneckerAndMetricIds.clear();
-            stringNames.clear();
-            fromId.clear();
-            fromStructure.clear();
-            random.setSeed(this.seed = seed);
-        } finally {
-            writeLock.unlock();
-        }
-    }
-
-    /**
-     * <b>Important:</b> run only in write lock!
-     */
-    private int generateNewName() {
-        int name;
-        do
-            name = random.nextInt();
-        while (fromId.containsKey(name));
-        return name;
-    }
-
-    /**
-     * Returns the name descriptor of the specified unique identifier of simple tensor.
-     *
-     * @param nameId unique identifier of simple tensor
-     * @return name descriptor of the specified unique identifier of simple tensor
-     */
-    public NameDescriptor getNameDescriptor(int nameId) {
-        readLock.lock();
-        try {
-            return fromId.get(nameId);
-        } finally {
-            readLock.unlock();
-        }
-    }
-
-    /**
-     * Returns a descriptor for symbol which was not already parsed.
-     *
-     * @return a descriptor for symbol which was not already parsed
-     */
-    public NameDescriptor generateNewSymbolDescriptor() {
-        boolean rLocked = true;
-        readLock.lock();
-        try {
-            int newNameId = generateNewName();
-
-            String name;
+    static IdProvider RandomIdProvider = new IdProvider() {
+        @Override
+        public int id(NameAndStructureOfIndices key, TIntObjectHashMap<VarDescriptor> generatedIds) {
+            final RandomGenerator rnd = Context.get().randomGenerator();
+            int id;
             do
-                name = stringGenerator.nextString();
-            while (stringNames.contains(name));
-            stringNames.add(name);
-            NameDescriptor nd = new NameDescriptorForSimpleTensor(name,
-                    new StructureOfIndices[]{StructureOfIndices.getEmpty()}, newNameId);
-            readLock.unlock();
-            rLocked = false;
-            writeLock.lock();
-            try {
-                registerDescriptor(nd);
-                readLock.lock();
-                rLocked = true;
-            } finally {
-                writeLock.unlock();
-            }
-            return nd;
-        } finally {
-            if (rLocked)
-                readLock.unlock();
+                id = rnd.nextInt();
+            while (generatedIds.containsKey(id));
+            return id;
         }
-    }
-
-    public static final String DEFAULT_VAR_SYMBOL_PREFIX = "rc";
-
-    private static final class StringGenerator {
-        long count = 0;
-
-        String nextString() {
-            return (DEFAULT_VAR_SYMBOL_PREFIX + Long.toString(count++));
-        }
-    }
-
-    public int size() {
-        writeLock.lock();
-        try {
-            return fromId.size();
-        } finally {
-            writeLock.unlock();
-        }
-    }
-    /*
-    public boolean containsNameId(int nameId) {
-        if (nameId < 0)
-            return false;
-        writeLock.lock();
-        try {
-            return fromId.size() > nameId;
-        } finally {
-            writeLock.unlock();
-        }
-    }*/
-
-    /**
-     * Returns the seed of the random generator used in name manager.
-     *
-     * @return seed of the random generator
-     */
-    public long getSeed() {
-        return seed;
-    }
-
-    public RandomGenerator getRandomGenerator() {
-        return random;
-    }
+    };
 }

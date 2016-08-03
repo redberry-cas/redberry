@@ -20,9 +20,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
-package cc.redberry.core.context2;
+package cc.redberry.core.context;
 
-import cc.redberry.core.context.OutputFormat;
 import cc.redberry.core.indices.IndicesUtils;
 import cc.redberry.core.indices.SimpleIndices;
 

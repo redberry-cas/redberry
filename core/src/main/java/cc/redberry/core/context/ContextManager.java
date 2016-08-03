@@ -22,8 +22,6 @@
  */
 package cc.redberry.core.context;
 
-import cc.redberry.core.context.defaults.DefaultContextFactory;
-
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
@@ -87,13 +85,13 @@ public final class ContextManager {
 
     /**
      * This method initializes and sets current session context from
-     * the specified {@code context settings} ({@link ContextSettings}).
+     * the specified {@code context settings} ({@link ContextConfiguration}).
      * After invocation of this method, all the tensors that exist in
      * the current thread will be invalidated.
      *
      * @return created context
      */
-    public static Context initializeNew(ContextSettings contextSettings) {
+    public static Context initializeNew(ContextConfiguration contextSettings) {
         Context context = new Context(contextSettings);
         threadLocalContainer.get().context = context;
         return context;

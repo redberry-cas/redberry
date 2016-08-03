@@ -20,57 +20,45 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
-package cc.redberry.core.context2;
+package cc.redberry.core.context;
 
 import cc.redberry.core.indices.*;
 
 /**
+ * Computes indices and symmetries of function
+ *
  * @author Stanislav Poslavsky
  */
 public interface VarIndicesProvider {
+    /**
+     * Computes indices of function
+     *
+     * @param self    head indices (e.g. for function {@code f_ab[x_a, y_a] -- "_ab"})
+     * @param indices indices of arguments (e.g. for function {@code f_ab[x_a, y_a] -- {"_a", "_a"}})
+     * @return resulting indices of function
+     */
     SimpleIndices compute(SimpleIndices self, Indices... indices);
 
-    IndicesSymmetries unique();
-
     /**
-     * Holds a unique
+     * Returns indices of head (indices of arguments are irrelevant)
      */
-    final class SymmetriesHolder implements VarIndicesProvider {
-        public final IndicesSymmetries symmetries;
-
-        public SymmetriesHolder(IndicesSymmetries symmetries) {
-            this.symmetries = symmetries;
-        }
-
+    VarIndicesProvider SelfIndices = new VarIndicesProvider() {
         @Override
         public SimpleIndices compute(SimpleIndices self, Indices... indices) {
-            return UnsafeIndicesFactory.createOfTensor(symmetries, self);
+            return self;
         }
+    };
 
-        @Override
-        public IndicesSymmetries unique() {
-            return symmetries;
-        }
-    }
-
-    final class IndicesPropagator implements VarIndicesProvider {
-        public static final IndicesPropagator IndicesPropagator = new IndicesPropagator();
-
-        private IndicesPropagator() {
-        }
-
+    /**
+     * Returns indices of first arg (e.g. Expand[x_a] has indices "_a")
+     */
+    VarIndicesProvider FirstArg = new VarIndicesProvider() {
         @Override
         public SimpleIndices compute(SimpleIndices self, Indices... indices) {
             if (self.size() != 0 || indices.length != 1)
-                throw new IllegalStateException();
-
+                throw new IllegalArgumentException();
             SimpleIndices argIndices = IndicesFactory.createSimple(null, indices[0]);
             return UnsafeIndicesFactory.createOfTensor(IndicesSymmetries.create(argIndices.getStructureOfIndices()), argIndices);
         }
-
-        @Override
-        public IndicesSymmetries unique() {
-            return null;
-        }
-    }
+    };
 }

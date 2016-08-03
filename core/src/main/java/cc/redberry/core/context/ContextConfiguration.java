@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2015:
+ * Copyright (c) 2010-2016:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -20,30 +20,34 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
-package cc.redberry.core.context.defaults;
+package cc.redberry.core.context;
 
-import cc.redberry.core.context.Context;
-import cc.redberry.core.context.ContextFactory;
+import cc.redberry.core.indices.IndexType;
+
+import java.util.EnumSet;
+
+import static cc.redberry.core.indices.IndexType.*;
 
 /**
- * Context factory, which creates context with default settings (see {@link DefaultContextSettings}).
- *
- * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
- * @since 1.0
  */
-public final class DefaultContextFactory implements ContextFactory {
-    /**
-     * Singleton instance
-     */
-    public static final DefaultContextFactory INSTANCE = new DefaultContextFactory();
+public final class ContextConfiguration implements Cloneable {
+    public String metricName = "g";
 
-    private DefaultContextFactory() {
-    }
+    public String kroneckerName = "d";
+
+    public EnumSet<IndexType> metricTypes = EnumSet.of(LatinLower, LatinUpper, GreekLower, GreekUpper);
+
+    public OutputFormat defaultOutputFormat = OutputFormat.Redberry;
+
+    public NameManager.IdProvider idProvider = NameManager.HashBasedIdProvider;
 
     @Override
-    public Context createContext() {
-        //Creating context defaults
-        return new Context(DefaultContextSettings.create());
+    public ContextConfiguration clone() {
+        try {
+            return (ContextConfiguration) super.clone();
+        } catch (CloneNotSupportedException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

@@ -24,10 +24,10 @@ package cc.redberry.core.context;
 
 import cc.redberry.core.indices.IndexType;
 import cc.redberry.core.tensor.SimpleTensor;
-import cc.redberry.core.utils.OutputPort;
 import org.apache.commons.math3.random.RandomGenerator;
 
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Redberry current context. This class statically delegates common useful methods from
@@ -41,6 +41,17 @@ import java.util.Set;
 public final class CC {
 
     private CC() {
+    }
+
+    private static AtomicLong counter = new AtomicLong(0);
+
+    /**
+     * DEPRECATED legacy code
+     */
+    @Deprecated
+    public static SimpleTensor generateNewSymbol() {
+        //TODO DELETE
+        return (SimpleTensor) current().getParseManager().parse("var" + counter.getAndIncrement());
     }
 
     /**
@@ -78,8 +89,8 @@ public final class CC {
      * @param name integer name of tensor
      * @return corresponding  {@code NameDescriptor}
      */
-    public static NameDescriptor getNameDescriptor(int name) {
-        return current().getNameDescriptor(name);
+    public static VarDescriptor getVarDescriptor(int name) {
+        return current().getVarDescriptor(name);
     }
 
     /**
@@ -89,15 +100,6 @@ public final class CC {
      */
     public static NameManager getNameManager() {
         return current().getNameManager();
-    }
-
-    /**
-     * Returns index converter manager of current session.
-     *
-     * @return index converter manager of current session
-     */
-    public static IndexConverterManager getIndexConverterManager() {
-        return current().getIndexConverterManager();
     }
 
     /**
@@ -173,23 +175,23 @@ public final class CC {
     }
 
 
-    /**
-     * Generates a new symbol which never used before during current session.
-     *
-     * @return new symbol which never used before during current session
-     */
-    public static SimpleTensor generateNewSymbol() {
-        return current().generateNewSymbol();
-    }
-
-    /**
-     * Return output port which generates new symbol via {@link #generateNewSymbol()} at each {@code take()} invocation.
-     *
-     * @return output port which generates new symbol via {@link #generateNewSymbol()} at each {@code take()} invocation.
-     */
-    public static OutputPort<SimpleTensor> getParametersGenerator() {
-        return current().getDefaultParametersGenerator();
-    }
+//    /**
+//     * Generates a new symbol which never used before during current session.
+//     *
+//     * @return new symbol which never used before during current session
+//     */
+//    public static SimpleTensor generateNewSymbol() {
+//        return current().generateNewSymbol();
+//    }
+//
+//    /**
+//     * Return output port which generates new symbol via {@link #generateNewSymbol()} at each {@code take()} invocation.
+//     *
+//     * @return output port which generates new symbol via {@link #generateNewSymbol()} at each {@code take()} invocation.
+//     */
+//    public static OutputPort<SimpleTensor> getParametersGenerator() {
+//        return current().getDefaultParametersGenerator();
+//    }
 
     /**
      * Returns random generator used by Redberry in current session.
