@@ -119,6 +119,7 @@ public class CollectTransformationTest {
 
         Tensor t = parse("A_mq*B_n^q + A^q_n*C_mq");
         System.out.println(t);
+        System.out.println(ct.transform(t));
         TAssert.assertEquals(ct.transform(t), "A_iq*(d^i_m*B_n^q + d^q_n*C_m^i)");
     }
 

@@ -30,7 +30,7 @@ import cc.redberry.core.indices.*;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.tensor.*;
 import cc.redberry.core.utils.TensorUtils;
-import junit.framework.Assert;
+import org.junit.Assert;
 import org.junit.After;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -144,13 +144,6 @@ public class ParserTest {
         Tensor v = Tensors.parse("c*(1+3/(-2)*I)");
         Assert.assertTrue(TensorUtils.equalsExactly(u, v));
         Assert.assertTrue(v instanceof Product);
-    }
-
-    @Test
-    public void test123() {
-        CC.resetTensorNames(1202870200402377417L);
-        Tensor t = Tensors.parse("(-s+pT**2)**4*s**4");
-        Assert.assertEquals(t.toString(), "(-s+pT**2)**4*s**4");
     }
 
     @Test
@@ -402,15 +395,15 @@ public class ParserTest {
         SimpleTensor nonField = parseSimple("f");
     }
 
-    @Test(expected = ParserException.class)
-    public void testKronecker1() {
-        parse("d_a'^b'");
-    }
-
-    @Test(expected = ParserException.class)
-    public void testMetric1() {
-        parse("g_a'b'");
-    }
+//    @Test(expected = ParserException.class)
+//    public void testKronecker1() {
+//        parse("d_a'^b'");
+//    }
+//
+//    @Test(expected = ParserException.class)
+//    public void testMetric1() {
+//        parse("g_a'b'");
+//    }
 
     @Test(expected = ParserException.class)
     public void testFieldDerivative1() throws Exception {
@@ -503,8 +496,8 @@ public class ParserTest {
     @Test
     public void testMetric2() {
         SimpleTensor a = parseSimple("g_mn");
-        SimpleTensor b = parseSimple("g_mn[x_m]");
-        Assert.assertTrue(a.getName() != b.getName());
+        TensorField b = (TensorField) parse("g_mn[x_m]");
+        Assert.assertTrue(a.getName() == b.getHead().getName());
     }
 
     @Test

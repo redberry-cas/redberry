@@ -43,7 +43,7 @@ public final class CC {
     private CC() {
     }
 
-    private static AtomicLong counter = new AtomicLong(0);
+    private static final AtomicLong counter = new AtomicLong(0);
 
     /**
      * DEPRECATED legacy code

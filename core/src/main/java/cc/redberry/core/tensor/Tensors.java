@@ -403,7 +403,7 @@ public final class Tensors {
         if (args.length != argIndices.length)
             throw new IllegalArgumentException("args.length != argIndices.length");
         for (int i = args.length - 1; i >= 0; --i)
-            if (!args[i].getIndices().equalsRegardlessOrder(argIndices[i]))
+            if (!args[i].getIndices().getFree().equalsRegardlessOrder(argIndices[i]))
                 throw new IllegalArgumentException("Inconsistent arg indices (arg = " + args[i] + ", argIndices = " + argIndices[i] + ")");
 
         return field0(head, args, argIndices);
@@ -424,7 +424,7 @@ public final class Tensors {
         return field0(head, args, argIndices);
     }
 
-    private static TensorField field0(SimpleTensor head, Tensor[] args, SimpleIndices[] argIndices){
+    private static TensorField field0(SimpleTensor head, Tensor[] args, SimpleIndices[] argIndices) {
         final SimpleIndices indices = head.getVarDescriptor().computeIndices(head.getIndices(), argIndices);
         return new TensorField(indices, head, args, argIndices);
     }
@@ -826,7 +826,7 @@ public final class Tensors {
      * @throws IllegalArgumentException if indices have different types
      */
     public static SimpleTensor createKronecker(int index1, int index2) {
-        return CC.current().Globals().createKronecker(index1, index2);
+        return CC.current().createKronecker(index1, index2);
     }
 
     /**
@@ -840,7 +840,7 @@ public final class Tensors {
      * @throws IllegalArgumentException if indices have non metric types
      */
     public static SimpleTensor createMetric(int index1, int index2) {
-        return CC.current().Globals().createMetric(index1, index2);
+        return CC.current().createMetric(index1, index2);
     }
 
     /**
@@ -855,18 +855,7 @@ public final class Tensors {
      * @throws IllegalArgumentException if indices have same states and non metric types
      */
     public static SimpleTensor createMetricOrKronecker(int index1, int index2) {
-        return CC.current().Globals().createMetricOrKronecker(index1, index2);
-    }
-
-    /**
-     * Returns a delta function with specified arguments
-     *
-     * @param a tensor
-     * @param b tensor
-     * @return DiracDelta[a, b]
-     */
-    public static TensorField createDiracDelta(Tensor a, Tensor b) {
-        return CC.current().Globals().createDeltaFunction(a, b);
+        return CC.current().createMetricOrKronecker(index1, index2);
     }
 
     /**
@@ -883,7 +872,7 @@ public final class Tensors {
     public static SimpleTensor createMetricOrKronecker(Indices indices) {
         if (indices.size() != 2)
             throw new IllegalArgumentException("Inconsistent indices for metric: " + indices);
-        return CC.current().Globals().createMetricOrKronecker(indices.get(0), indices.get(1));
+        return CC.current().createMetricOrKronecker(indices.get(0), indices.get(1));
     }
 
     /**
@@ -895,7 +884,7 @@ public final class Tensors {
     public static boolean isKronecker(Tensor t) {
         if (!(t instanceof SimpleTensor))
             return false;
-        return CC.current().Globals().isKronecker((SimpleTensor) t);
+        return CC.current().isKronecker((SimpleTensor) t);
     }
 
     /**
@@ -907,7 +896,7 @@ public final class Tensors {
     public static boolean isMetric(Tensor t) {
         if (!(t instanceof SimpleTensor))
             return false;
-        return CC.current().Globals().isMetric((SimpleTensor) t);
+        return CC.current().isMetric((SimpleTensor) t);
     }
 
     /**
@@ -919,7 +908,7 @@ public final class Tensors {
     public static boolean isKroneckerOrMetric(Tensor t) {
         if (!(t instanceof SimpleTensor))
             return false;
-        return CC.current().Globals().isKroneckerOrMetric((SimpleTensor) t);
+        return CC.current().isKroneckerOrMetric((SimpleTensor) t);
     }
 
     /**
@@ -929,7 +918,7 @@ public final class Tensors {
      * @return {@code true} if specified tensor is metric or Kronecker tensor
      */
     public static boolean isKroneckerOrMetric(SimpleTensor t) {
-        return CC.current().Globals().isKroneckerOrMetric(t);
+        return CC.current().isKroneckerOrMetric(t);
     }
 
 
@@ -1040,6 +1029,22 @@ public final class Tensors {
         if (!(t instanceof SimpleTensor))
             throw new IllegalArgumentException("Input tensor is not SimpleTensor.");
         return (SimpleTensor) t;
+    }
+
+    /**
+     * Converts a string into function.
+     *
+     * @param expression string to be parsed
+     * @return simple tensor
+     * @throws IllegalArgumentException                if expression does not represents simple tensor
+     * @throws cc.redberry.core.parser.ParserException if expression does not satisfy correct Redberry
+     *                                                 input notation for tensors
+     */
+    public static TensorField parseField(String expression) {
+        Tensor t = parse(expression);
+        if (!(t instanceof TensorField))
+            throw new IllegalArgumentException("Input tensor is not SimpleTensor.");
+        return (TensorField) t;
     }
 
     /**

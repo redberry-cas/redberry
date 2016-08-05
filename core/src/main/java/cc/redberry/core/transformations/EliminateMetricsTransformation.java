@@ -74,12 +74,6 @@ public final class EliminateMetricsTransformation implements TransformationToStr
                     newHead = chain.apply(head);
 
             final VarDescriptor descriptor = head.getVarDescriptor();
-            if (!descriptor.propagatesIndices())
-                if (head == newHead)
-                    return tensor;
-                else
-                    return Tensors.replaceHead(f, newHead);
-
             boolean transformed = head != newHead;
             Tensor[] newArgs = new Tensor[f.size()];
             for (int i = 0; i < f.size(); ++i) {

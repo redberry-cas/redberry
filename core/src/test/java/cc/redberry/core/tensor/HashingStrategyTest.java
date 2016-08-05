@@ -392,7 +392,7 @@ public class HashingStrategyTest {
 
     @Test
     public void test19() throws Exception {
-        Assert.assertTrue(iHash(parseSimple("f_a[x,y]")) != iHash(parseSimple("f_a[p,q]")));
+        Assert.assertTrue(iHash(parseField("f_a[x,y]")) != iHash(parseField("f_a[p,q]")));
     }
 
     @Test

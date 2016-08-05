@@ -223,10 +223,10 @@ public class ToStringTest {
     @Test
     public void test18() throws Exception {
         GeneralIndicesInsertion gii = new GeneralIndicesInsertion();
-        gii.addInsertionRule(parseSimple("cu_{a'A'}[p_{m}]"), IndexType.Matrix1);
-        gii.addInsertionRule(parseSimple("cu_{a'A'}[p_{m}]"), IndexType.Matrix2);
-        gii.addInsertionRule(parseSimple("v^{a'C'}[p_{m}]"), IndexType.Matrix1);
-        gii.addInsertionRule(parseSimple("v^{a'C'}[p_{m}]"), IndexType.Matrix2);
+        gii.addInsertionRule(parseSimple("cu_{a'A'}"), IndexType.Matrix1);
+        gii.addInsertionRule(parseSimple("cu_{a'A'}"), IndexType.Matrix2);
+        gii.addInsertionRule(parseSimple("v^{a'C'}"), IndexType.Matrix1);
+        gii.addInsertionRule(parseSimple("v^{a'C'}"), IndexType.Matrix2);
         gii.addInsertionRule(parseSimple("T_{B}^{B'}_{C'}"), IndexType.Matrix2);
         CC.current().getParseManager().defaultParserPreprocessors.add(gii);
 
@@ -337,4 +337,10 @@ public class ToStringTest {
             Assert.assertEquals(c.getIndices().size(), c.getIndices().size(type));
     }
 
+    @Test
+    public void test19Metric() throws Exception {
+        final SimpleTensor g = parseSimple("g_ab");
+        final SimpleTensor d = parseSimple("d_a^b");
+        Assert.assertEquals(g.getName(), d.getName());
+    }
 }

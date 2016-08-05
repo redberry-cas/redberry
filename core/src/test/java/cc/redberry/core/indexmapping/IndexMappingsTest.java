@@ -183,7 +183,6 @@ public class IndexMappingsTest {
     @Test
     public void testRimanSymmetries1() {
         addSymmetry("G^a_bc", IndexType.LatinLower, false, 0, 2, 1);
-        addSymmetry("g_ab", IndexType.LatinLower, false, 1, 0);
         Tensor riman1 = parse("g_ax*(d_c*G^x_bd-d_d*G^x_bc+G^x_yc*G^y_bd-G^x_yd*G^y_bc)");
         Tensor riman2 = parse("g_px*(d_r*G^x_qs-d_s*G^x_qr+G^x_yr*G^y_qs-G^x_ys*G^y_qr)");
 

@@ -702,6 +702,27 @@ public final class ApplyIndexMapping {
             return tensor;
         }
 
+        if (tensor instanceof TensorField) {
+            TensorField f = (TensorField) tensor;
+            SimpleTensor head = f.getHead(), newHead = (SimpleTensor) mapping.transform(head);
+            final VarDescriptor descriptor = head.getVarDescriptor();
+            Tensor[] args = null;
+            if (descriptor.propagatesIndices())
+                for (int i = 0; i < f.size(); ++i)
+                    if (descriptor.propagatesIndices(i)) {
+                        Tensor arg = f.args[i];
+                        Tensor newArg = mapping.transform(arg);
+                        if (arg != newArg) {
+                            if (args == null)
+                                args = f.args.clone();
+                            args[i] = newArg;
+                        }
+                    }
+            if (head == newHead && args == null)
+                return tensor;
+            else return Tensors.field(newHead, args);
+        }
+
         if (tensor instanceof Complex || tensor instanceof ScalarFunction)
             return tensor;
 

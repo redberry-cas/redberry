@@ -26,10 +26,7 @@ import cc.redberry.core.indices.*;
 import cc.redberry.core.parser.ParseManager;
 import cc.redberry.core.parser.Parser;
 import cc.redberry.core.tensor.SimpleTensor;
-import cc.redberry.core.tensor.Tensor;
-import cc.redberry.core.tensor.TensorField;
 import cc.redberry.core.tensor.Tensors;
-import cc.redberry.core.utils.IntArrayList;
 import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.random.Well1024a;
 
@@ -75,6 +72,15 @@ public final class Context {
      */
     private long randomSeed;
 
+    /**
+     * VarDescriptors for metric tensors
+     */
+    private final EnumMap<IndexType, VarDescriptor> metricDescriptors;
+    /**
+     * Ids (names) of different metric tensors (for fast access)
+     */
+    private final int[] metricIds;
+
     Context(ContextConfiguration cc) {
         this.contextConfiguration = cc.clone();
         this.parseManager = new ParseManager(Parser.DEFAULT);
@@ -86,24 +92,33 @@ public final class Context {
             metricTypesBits[metricType.getType()] = true;
 
         randomGenerator.setSeed(this.randomSeed = randomGenerator.nextLong());
+
+        this.metricDescriptors = new EnumMap<>(IndexType.class);
+        this.metricIds = new int[contextConfiguration.metricTypes.size()];
+        updateHashes();
     }
 
-    private GlobalTensors globals = null;
-
-    public GlobalTensors Globals() {
-        if (globals == null)
-            synchronized (this) {
-                if (globals == null)
-                    globals = new GlobalTensors();
-            }
-
-        return globals;
+    private void updateHashes() {
+        int i = 0;
+        for (IndexType mt : metricTypes) {
+            final StructureOfIndices st = StructureOfIndices.createOfMetric(mt, metricTypes);
+            final VarDescriptor nd = nameManager.resolve(
+                    contextConfiguration.metricName, st);
+            nd.setNameFormatter(new NameFormatter.MetricOrKronecker(
+                    contextConfiguration.metricName,
+                    contextConfiguration.kroneckerName
+            ));
+            nd.getSymmetries().setSymmetric();
+            nameManager.addNameAlias(nd, contextConfiguration.kroneckerName);
+            metricDescriptors.put(mt, nd);
+            metricIds[i++] = nd.id;
+        }
+        Arrays.sort(this.metricIds);
     }
 
     public RandomGenerator randomGenerator() {
         return randomGenerator;
     }
-
 
     /**
      * Returns all metric types.
@@ -130,9 +145,9 @@ public final class Context {
      * must not be used! This method is mainly used in unit tests, so
      * avoid invocations of this method in general computations.</p>
      */
+    @Deprecated
     public synchronized void resetTensorNames() {
-        nameManager.reset();
-        resetEvent();
+        resetTensorNames(randomGenerator.nextLong());
     }
 
     /**
@@ -155,9 +170,11 @@ public final class Context {
      * must not be used! This method is mainly used in unit tests, so
      * avoid invocations of this method in general computations.</p>
      */
+    @Deprecated
     public synchronized void resetTensorNames(long seed) {
         nameManager.reset();
         resetRandom(seed);
+        updateHashes();
         resetEvent();
     }
 
@@ -315,163 +332,105 @@ public final class Context {
         return ContextManager.getCurrentContext();
     }
 
+    /**
+     * Returns {@code true} if specified tensor is a Kronecker tensor
+     *
+     * @param t tensor
+     * @return {@code true} if specified tensor is a Kronecker tensor
+     */
+    public boolean isKronecker(SimpleTensor t) {
+        return isKroneckerOrMetric(t.getName())
+                && !IndicesUtils.haveEqualStates(t.getIndices().get(0), t.getIndices().get(1));
+    }
 
-    public final class GlobalTensors {
-        private GlobalTensors() { }
+    /**
+     * Returns {@code true} if specified tensor is a metric tensor
+     *
+     * @param t tensor
+     * @return {@code true} if specified tensor is a metric tensor
+     */
+    public boolean isMetric(SimpleTensor t) {
+        return isKroneckerOrMetric(t.getName())
+                && IndicesUtils.haveEqualStates(t.getIndices().get(0), t.getIndices().get(1));
+    }
 
-        /**
-         * VarDescriptors for metric tensors
-         */
-        private final EnumMap<IndexType, VarDescriptor> metricDescriptors;
-        /**
-         * Ids (names) of different metric tensors (for fast access)
-         */
-        private final int[] metricIds;
+    /**
+     * Returns {@code true} if specified {@code id} corresponds to metric or Kronecker tensor
+     *
+     * @param t id
+     * @return {@code true} if specified {@code id} corresponds to metric or Kronecker tensor
+     */
+    public boolean isKroneckerOrMetric(int t) {
+        return Arrays.binarySearch(metricIds, t) >= 0;
+    }
 
-        /* Initializing stuff with metric tensors */ {
-            metricDescriptors = new EnumMap<>(IndexType.class);
-            IntArrayList metricIds = new IntArrayList();
-            for (IndexType mt : metricTypes) {
-                final StructureOfIndices st = StructureOfIndices.create(mt, 2);
-                final VarDescriptor nd = nameManager.resolve(
-                        contextConfiguration.metricName, st);
-                nd.setNameFormatter(new NameFormatter.MetricOrKronecker(
-                        contextConfiguration.metricName,
-                        contextConfiguration.kroneckerName
-                ));
-                nameManager.addNameAlias(nd, contextConfiguration.kroneckerName);
-                metricDescriptors.put(mt, nd);
-                metricIds.add(nd.id);
-            }
-            this.metricIds = metricIds.toArray();
-            Arrays.sort(this.metricIds);
+
+    /**
+     * Returns {@code true} if specified tensor is a metric or a Kronecker tensor
+     *
+     * @param t tensor
+     * @return {@code true} if specified tensor is a metric or a Kronecker tensor
+     */
+    public boolean isKroneckerOrMetric(SimpleTensor t) {
+        return isKroneckerOrMetric(t.getName());
+    }
+
+    /**
+     * Returns Kronecker tensor with specified upper and lower indices.
+     *
+     * @param index1 first index
+     * @param index2 second index
+     * @return Kronecker tensor with specified upper and lower indices
+     * @throws IllegalArgumentException if indices have same states
+     * @throws IllegalArgumentException if indices have different types
+     */
+    public SimpleTensor createKronecker(int index1, int index2) {
+        byte type;
+        if ((type = IndicesUtils.getType(index1)) != IndicesUtils.getType(index2) || IndicesUtils.getRawStateInt(index1) == IndicesUtils.getRawStateInt(index2))
+            throw new IllegalArgumentException("This is not kronecker indices!");
+        if (!Context.this.isMetric(type) && IndicesUtils.getState(index2)) {
+            int t = index1;
+            index1 = index2;
+            index2 = t;
         }
+        SimpleIndices indices = IndicesFactory.createSimple(null, index1, index2);
+        return Tensors.simpleTensor(metricDescriptors.get(IndexType.getType(type)).id, indices);
+    }
 
-        /**
-         * Returns {@code true} if specified tensor is a Kronecker tensor
-         *
-         * @param t tensor
-         * @return {@code true} if specified tensor is a Kronecker tensor
-         */
-        public boolean isKronecker(SimpleTensor t) {
-            return isKroneckerOrMetric(t.getName())
-                    && !IndicesUtils.haveEqualStates(t.getIndices().get(0), t.getIndices().get(1));
-        }
+    /**
+     * Returns metric tensor with specified indices.
+     *
+     * @param index1 first index
+     * @param index2 second index
+     * @return metric tensor with specified indices
+     * @throws IllegalArgumentException if indices have different states
+     * @throws IllegalArgumentException if indices have different types
+     * @throws IllegalArgumentException if indices have non metric types
+     */
+    public SimpleTensor createMetric(int index1, int index2) {
+        byte type;
+        if ((type = IndicesUtils.getType(index1)) != IndicesUtils.getType(index2)
+                || !IndicesUtils.haveEqualStates(index1, index2)
+                || !metricTypesBits[type])
+            throw new IllegalArgumentException("Not metric indices.");
+        SimpleIndices indices = IndicesFactory.createSimple(null, index1, index2);
+        return Tensors.simpleTensor(metricDescriptors.get(IndexType.getType(type)).id, indices);
+    }
 
-        /**
-         * Returns {@code true} if specified tensor is a metric tensor
-         *
-         * @param t tensor
-         * @return {@code true} if specified tensor is a metric tensor
-         */
-        public boolean isMetric(SimpleTensor t) {
-            return isKroneckerOrMetric(t.getName())
-                    && IndicesUtils.haveEqualStates(t.getIndices().get(0), t.getIndices().get(1));
-        }
-
-        /**
-         * Returns {@code true} if specified {@code id} corresponds to metric or Kronecker tensor
-         *
-         * @param t id
-         * @return {@code true} if specified {@code id} corresponds to metric or Kronecker tensor
-         */
-        public boolean isKroneckerOrMetric(int t) {
-            return Arrays.binarySearch(metricIds, t) >= 0;
-        }
-
-
-        /**
-         * Returns {@code true} if specified tensor is a metric or a Kronecker tensor
-         *
-         * @param t tensor
-         * @return {@code true} if specified tensor is a metric or a Kronecker tensor
-         */
-        public boolean isKroneckerOrMetric(SimpleTensor t) {
-            return isKroneckerOrMetric(t.getName());
-        }
-
-        /**
-         * Returns Kronecker tensor with specified upper and lower indices.
-         *
-         * @param index1 first index
-         * @param index2 second index
-         * @return Kronecker tensor with specified upper and lower indices
-         * @throws IllegalArgumentException if indices have same states
-         * @throws IllegalArgumentException if indices have different types
-         */
-        public SimpleTensor createKronecker(int index1, int index2) {
-            byte type;
-            if ((type = IndicesUtils.getType(index1)) != IndicesUtils.getType(index2) || IndicesUtils.getRawStateInt(index1) == IndicesUtils.getRawStateInt(index2))
-                throw new IllegalArgumentException("This is not kronecker indices!");
-            if (!Context.this.isMetric(type) && IndicesUtils.getState(index2)) {
-                int t = index1;
-                index1 = index2;
-                index2 = t;
-            }
-            SimpleIndices indices = IndicesFactory.createSimple(null, index1, index2);
-            return Tensors.simpleTensor(metricDescriptors.get(IndexType.getType(type)).id, indices);
-        }
-
-        /**
-         * Returns metric tensor with specified indices.
-         *
-         * @param index1 first index
-         * @param index2 second index
-         * @return metric tensor with specified indices
-         * @throws IllegalArgumentException if indices have different states
-         * @throws IllegalArgumentException if indices have different types
-         * @throws IllegalArgumentException if indices have non metric types
-         */
-        public SimpleTensor createMetric(int index1, int index2) {
-            byte type;
-            if ((type = IndicesUtils.getType(index1)) != IndicesUtils.getType(index2)
-                    || !IndicesUtils.haveEqualStates(index1, index2)
-                    || !metricTypesBits[type])
-                throw new IllegalArgumentException("Not metric indices.");
-            SimpleIndices indices = IndicesFactory.createSimple(null, index1, index2);
-            return Tensors.simpleTensor(metricDescriptors.get(IndexType.getType(type)).id, indices);
-        }
-
-        /**
-         * Returns metric tensor if specified indices have same states and
-         * Kronecker tensor if specified indices have different states.
-         *
-         * @param index1 first index
-         * @param index2 second index
-         * @return metric tensor if specified indices have same states and
-         * Kronecker tensor if specified indices have different states
-         * @throws IllegalArgumentException if indices have different types
-         * @throws IllegalArgumentException if indices have same states and non metric types
-         */
-        public SimpleTensor createMetricOrKronecker(int index1, int index2) {
-            if (IndicesUtils.getRawStateInt(index1) == IndicesUtils.getRawStateInt(index2))
-                return createMetric(index1, index2);
-            return createKronecker(index1, index2);
-        }
-
-        /**
-         * DiracDelta
-         */
-        private final SimpleTensor DiracDelta;
-
-        /* Initializing stuff with DiracDelta */ {
-            DiracDelta = (SimpleTensor) parseManager.parse("DiracDelta");
-        }
-
-        /**
-         * Returns a delta function with specified arguments
-         *
-         * @param a tensor
-         * @param b tensor
-         * @return DiracDelta[a, b]
-         */
-        public TensorField createDeltaFunction(Tensor a, Tensor b) {
-            return Tensors.field(DiracDelta, a, b);
-        }
-
-        public boolean isDiracDelta(TensorField d) {
-            return d.getHead() == DiracDelta && d.size() == 2 && d.get(0).getIndices().size() == d.get(1).getIndices().size();
-        }
-
+    /**
+     * Returns metric tensor if specified indices have same states and
+     * Kronecker tensor if specified indices have different states.
+     *
+     * @param index1 first index
+     * @param index2 second index
+     * @return metric tensor if specified indices have same states and
+     * Kronecker tensor if specified indices have different states
+     * @throws IllegalArgumentException if indices have different types
+     * @throws IllegalArgumentException if indices have same states and non metric types
+     */
+    public SimpleTensor createMetricOrKronecker(int index1, int index2) {
+        if (IndicesUtils.getRawStateInt(index1) == IndicesUtils.getRawStateInt(index2))
+            return createMetric(index1, index2);
+        return createKronecker(index1, index2);
     }
 }

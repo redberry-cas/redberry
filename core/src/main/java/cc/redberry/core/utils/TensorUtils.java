@@ -22,7 +22,6 @@
  */
 package cc.redberry.core.utils;
 
-import cc.redberry.core.context.CC;
 import cc.redberry.core.groups.permutations.Permutation;
 import cc.redberry.core.groups.permutations.Permutations;
 import cc.redberry.core.indexmapping.IndexMappings;
@@ -375,7 +374,7 @@ public final class TensorUtils {
                 }
         }
         if (u.getClass() == TensorField.class) {
-            if (((SimpleTensor) u).getName() != ((SimpleTensor) v).getName()
+            if (((TensorField) u).getHead().getName() != ((TensorField) v).getHead().getName()
                     || !u.getIndices().equals(v.getIndices()))
                 return false;
         }
@@ -426,7 +425,7 @@ public final class TensorUtils {
     }
 
     private static void appendAllIndicesNamesT(Tensor tensor, TIntHashSet set, boolean includeScalarFunctions) {
-        if (tensor instanceof SimpleTensor) {
+        if (tensor instanceof SimpleTensor || tensor instanceof TensorField) {
             Indices ind = tensor.getIndices();
             set.ensureCapacity(ind.size());
             final int size = ind.size();

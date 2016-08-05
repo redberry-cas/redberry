@@ -60,7 +60,7 @@ public class IndicesTest {
 
     @Test
     public void testGetSymmetries() {
-        SimpleTensor t = (SimpleTensor) parse("g_mn");
+        SimpleTensor t = (SimpleTensor) parse("f_mn");
         addSymmetry(t, IndexType.LatinLower, false, 1, 0);
         assertTrue(CC.getVarDescriptor(t.getName()).getSymmetries() == t.getIndices().getSymmetries());
     }

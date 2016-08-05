@@ -42,9 +42,13 @@ public final class ApplyDiracDeltasTransformation implements TransformationToStr
     private ApplyDiracDeltasTransformation() {
     }
 
-    private static boolean isDiracDelta(Tensor t){
-        return t instanceof TensorField && CC.current().Globals().isDiracDelta((TensorField) t);
+    private static boolean isDiracDelta(Tensor t) {
+        return t instanceof TensorField
+                && ((TensorField) t).getHead().getName() == Tensors.parseSimple("DiracDelta").getName()
+                && t.size() == 2
+                && t.get(0).getIndices().getFree().size() == t.get(1).getIndices().getFree().size();
     }
+
     private static boolean containsDiracDeltas(Tensor t) {
         if (isDiracDelta(t)) {
             if (t.get(0) instanceof SimpleTensor)

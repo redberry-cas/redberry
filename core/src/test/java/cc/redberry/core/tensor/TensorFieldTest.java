@@ -118,7 +118,7 @@ public class TensorFieldTest {
     @Test
     public void testNames() {
         Tensor t1 = parse("F[S_A'^B']"), t2 = parse("F[S^A'_B']");
-        Assert.assertTrue(((TensorField) t1).getHead().getName() != ((TensorField) t2).getHead().getName());
+        Assert.assertTrue(((TensorField) t1).getHead().getName() == ((TensorField) t2).getHead().getName());
     }
 
     @Test
