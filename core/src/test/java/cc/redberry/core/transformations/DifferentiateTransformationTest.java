@@ -312,7 +312,7 @@ public class DifferentiateTransformationTest {
     public void test13() {
         addAntiSymmetry("R_abcd", 1, 0, 2, 3);
         addSymmetry("R_abcd", 2, 3, 0, 1);
-        System.out.println(CC.getNameManager().getSeed());
+        System.out.println(CC.current().getSeed());
         Tensor tensor = parse("R_mnab*R^pqnm*Sin[1/la**2*R_abcd*R^cdab]");
         SimpleTensor var1 = parseSimple("R_abmn");
         SimpleTensor var2 = parseSimple("R^pqmn");

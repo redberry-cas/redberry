@@ -49,7 +49,7 @@ public class ProductsBijectionsPortTest {
         Product to = (Product) Tensors.parse("x_mn*f_ab*f^ab*f_xy");
         System.out.println(from);
         System.out.println(to);
-        System.out.println(CC.getNameManager().getSeed());
+        System.out.println(CC.current().getSeed());
         ProductsBijectionsPort pbp = new ProductsBijectionsPort(from.getContent(), to.getContent());
         int[] bijection;
         while ((bijection = pbp.take()) != null)
@@ -100,7 +100,7 @@ public class ProductsBijectionsPortTest {
             while ((bijection = port.take()) != null) {
                 System.out.println(Arrays.toString(bijection));
                 if (Arrays.binarySearch(bijection, -1) >= 0) {
-                    System.out.println(CC.getNameManager().getSeed());
+                    System.out.println(CC.current().getSeed());
                     System.exit(0);
                     StructureOfContractions fcs = from.getContent().getStructureOfContractions();
                     for (int i = 0; i < fcs.contractions.length; ++i)
@@ -158,7 +158,7 @@ public class ProductsBijectionsPortTest {
             while ((bijection = port.take()) != null)
                 ++count;
             if (count != 2)
-                System.out.println(CC.getNameManager().getSeed());
+                System.out.println(CC.current().getSeed());
             assertTrue(count == 2);
         }
     }

@@ -232,7 +232,7 @@ public final class UnitaryTraceTransformation implements TransformationToStringA
     private static boolean isUnitaryMatrixOrOne(Tensor tensor, int unitaryMatrix) {
         if (tensor instanceof SimpleTensor) {
             int name = ((SimpleTensor) tensor).getName();
-            return name == unitaryMatrix || CC.getNameManager().isKroneckerOrMetric(name);
+            return name == unitaryMatrix || CC.current().Globals().isKroneckerOrMetric(name);
         }
         return false;
     }

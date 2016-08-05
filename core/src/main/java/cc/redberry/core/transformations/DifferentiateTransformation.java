@@ -286,35 +286,36 @@ public final class DifferentiateTransformation implements TransformationToString
             return Complex.ZERO;
         else if (tensor.getClass() == SimpleTensor.class)
             return differentiateSimpleTensor((SimpleTensor) tensor, rule, transformations);
-        else if (tensor.getClass() == TensorField.class) {
-            TensorField field = (TensorField) tensor;
-            if (rule.var.getName() == field.getName()) {
-                TensorField varF = (TensorField) rule.var;
-                if (rule.useDeltaFunction) {
-                    ProductBuilder pb = new ProductBuilder();
-                    pb.put(differentiateSimpleTensor((SimpleTensor) tensor, rule, transformations));
-                    for (int i = 0; i < varF.size(); i++)
-                        pb.put(createDiracDelta(field.get(i), varF.get(i)));
-                    return pb.build();
-                } else if (anyMappingExists(varF, field) || anyMappingExists(field, varF))
-                    return differentiateSimpleTensor((SimpleTensor) tensor, rule, transformations);
-            }
-
-            SumBuilder result = new SumBuilder(tensor.size());
-            Tensor dArg;
-
-            for (int i = tensor.size() - 1; i >= 0; --i) {
-                dArg = differentiate1(field.get(i), rule, transformations);
-                if (TensorUtils.isZero(dArg)) continue;
-
-                result.put(
-                        multiply(dArg,
-                                fieldDerivative(field, field.getArgIndices(i).getInverted(), i))
-                );
-
-            }
-            return applyTransformations(EliminateMetricsTransformation.eliminate(result.build()), transformations);
-        } else if (tensor instanceof Sum) {
+//        else if (tensor.getClass() == TensorField.class) {
+//            TensorField field = (TensorField) tensor;
+//            if (rule.var.getName() == field.getName()) {
+//                TensorField varF = (TensorField) rule.var;
+//                if (rule.useDeltaFunction) {
+//                    ProductBuilder pb = new ProductBuilder();
+//                    pb.put(differentiateSimpleTensor((SimpleTensor) tensor, rule, transformations));
+//                    for (int i = 0; i < varF.size(); i++)
+//                        pb.put(createDiracDelta(field.get(i), varF.get(i)));
+//                    return pb.build();
+//                } else if (anyMappingExists(varF, field) || anyMappingExists(field, varF))
+//                    return differentiateSimpleTensor((SimpleTensor) tensor, rule, transformations);
+//            }
+//
+//            SumBuilder result = new SumBuilder(tensor.size());
+//            Tensor dArg;
+//
+//            for (int i = tensor.size() - 1; i >= 0; --i) {
+//                dArg = differentiate1(field.get(i), rule, transformations);
+//                if (TensorUtils.isZero(dArg)) continue;
+//
+//                result.put(
+//                        multiply(dArg,
+//                                fieldDerivative(field, field.getArgIndices(i).getInverted(), i))
+//                );
+//
+//            }
+//            return applyTransformations(EliminateMetricsTransformation.eliminate(result.build()), transformations);
+//        }
+        else if (tensor instanceof Sum) {
             SumBuilder builder = new SumBuilder();
             Tensor temp;
             for (Tensor t : tensor) {

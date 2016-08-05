@@ -23,7 +23,7 @@
 package cc.redberry.physics.feyncalc;
 
 import cc.redberry.core.context.CC;
-import cc.redberry.core.context.NameDescriptor;
+import cc.redberry.core.context.VarDescriptor;
 import cc.redberry.core.indices.IndexType;
 import cc.redberry.core.indices.IndicesUtils;
 import cc.redberry.core.indices.StructureOfIndices;
@@ -40,7 +40,7 @@ final class TraceUtils {
     static final IndexType[] extractTypesFromMatrix(SimpleTensor matrix) {
         if (matrix.getIndices().size() != 3)
             throw new IllegalArgumentException("Not a matrix: " + matrix + ".");
-        NameDescriptor descriptor = CC.getVarDescriptor(matrix.getName());
+        VarDescriptor descriptor = CC.getVarDescriptor(matrix.getName());
         StructureOfIndices typeStructure = descriptor.getStructureOfIndices();
         byte metricType = -1, matrixType = -1;
         int typeCount;

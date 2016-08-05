@@ -58,7 +58,7 @@ public final class GapGroupsInterface {
         this.readThread.setDaemon(true);
         this.readThread.start();
         //reset GAP seed
-        evaluate("Reset(GlobalMersenneTwister, " + CC.getNameManager().getSeed() + ");");
+        evaluate("Reset(GlobalMersenneTwister, " + CC.current().getSeed() + ");");
     }
 
     public String evaluate(String command) {

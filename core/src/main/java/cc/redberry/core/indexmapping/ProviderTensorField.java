@@ -23,7 +23,6 @@
 package cc.redberry.core.indexmapping;
 
 import cc.redberry.core.context.VarDescriptor;
-import cc.redberry.core.tensor.SimpleTensor;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.tensor.TensorField;
 import cc.redberry.core.utils.OutputPort;
@@ -45,24 +44,29 @@ final class ProviderTensorField extends IndexMappingProviderAbstract {
             TensorField fromF = (TensorField) from, toF = (TensorField) to;
             if (fromF.getHead().getName() != toF.getHead().getName() || fromF.size() != toF.size())
                 return IndexMappingProvider.Util.EMPTY_PROVIDER;
+            VarDescriptor headDescriptor = fromF.getHead().getVarDescriptor();
+            boolean propagateArguments = false;
             for (int i = 0; i < from.size(); ++i) {
-                if (!IndexMappings.positiveMappingExists(from.get(i), to.get(i)))
+                if (headDescriptor.propagatesIndices(i))
+                    propagateArguments = true;
+                else if (!IndexMappings.positiveMappingExists(from.get(i), to.get(i)))
                     return IndexMappingProvider.Util.EMPTY_PROVIDER;
             }
-            return new ProviderSimpleTensor(opu, (SimpleTensor) from, (SimpleTensor) to);
+            if (!propagateArguments)
+                return ProviderSimpleTensor.FACTORY_SIMPLETENSOR.create(opu, fromF.getHead(), toF.getHead());
+            return new ProviderTensorField(opu, fromF, toF);
         }
     };
 
-    public ProviderTensorField(OutputPort<IndexMappingBuffer> opu, TensorField from, TensorField to, boolean propagateArgumetns) {
+    private ProviderTensorField(OutputPort<IndexMappingBuffer> opu, TensorField from, TensorField to) {
         super(opu);
         IndexMappingProvider pr;
         List<IndexMappingProvider> headAndArgsChain = new ArrayList<>();
         headAndArgsChain.add(pr = IndexMappings.createPort(dummyProvider = new DummyIndexMappingProvider(opu), from.getHead(), to.getHead()));
         VarDescriptor headDescriptor = from.getHead().getVarDescriptor();
-        if (propagateArgumetns)
-            for (int i = 0; i < from.size(); ++i)
-                if (headDescriptor.propagatesIndices(i))
-                    headAndArgsChain.add(pr = IndexMappings.createPort(pr, from.get(i), to.get(i)));
+        for (int i = 0; i < from.size(); ++i)
+            if (headDescriptor.propagatesIndices(i))
+                headAndArgsChain.add(pr = IndexMappings.createPort(pr, from.get(i), to.get(i)));
         headAndArgsProvider = new SimpleProductMappingsPort(headAndArgsChain.toArray(new IndexMappingProvider[headAndArgsChain.size()]));
     }
 

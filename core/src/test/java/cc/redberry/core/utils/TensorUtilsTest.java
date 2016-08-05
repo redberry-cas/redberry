@@ -322,27 +322,27 @@ public class TensorUtilsTest {
         TAssert.assertTrue(shareSimpleTensors(parse("x"),
                 parse("-x")));
     }
-
-    @Test
-    public void testGenerateReplacementsOfScalars1() {
-        Tensor t;
-        Expression[] expressions;
-
-        t = parse("a*b");
-        assertEquals(generateReplacementsOfScalars(t).length, 0);
-
-        t = parse("1/(k_m*k^m)");
-        assertEquals(generateReplacementsOfScalars(t).length, 1);
-
-        t = parse("1/(k_m*k^m) + f[k_m*k^m]");
-        assertEquals(generateReplacementsOfScalars(t).length, 1);
-
-        t = parse("k_a*k^m + f_a^m[k_m*k^m]");
-        assertEquals(generateReplacementsOfScalars(t).length, 1);
-
-        t = parse("k_a*k^m + f_a^m[k_m*k^m] + t_d*k^d*ff_a^m");
-        assertEquals(generateReplacementsOfScalars(t).length, 2);
-    }
+//
+//    @Test
+//    public void testGenerateReplacementsOfScalars1() {
+//        Tensor t;
+//        Expression[] expressions;
+//
+//        t = parse("a*b");
+//        assertEquals(generateReplacementsOfScalars(t).length, 0);
+//
+//        t = parse("1/(k_m*k^m)");
+//        assertEquals(generateReplacementsOfScalars(t).length, 1);
+//
+//        t = parse("1/(k_m*k^m) + f[k_m*k^m]");
+//        assertEquals(generateReplacementsOfScalars(t).length, 1);
+//
+//        t = parse("k_a*k^m + f_a^m[k_m*k^m]");
+//        assertEquals(generateReplacementsOfScalars(t).length, 1);
+//
+//        t = parse("k_a*k^m + f_a^m[k_m*k^m] + t_d*k^d*ff_a^m");
+//        assertEquals(generateReplacementsOfScalars(t).length, 2);
+//    }
 
     @Test
     public void testInverse1() throws Exception {

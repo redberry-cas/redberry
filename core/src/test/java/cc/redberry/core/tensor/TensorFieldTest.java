@@ -105,19 +105,20 @@ public class TensorFieldTest {
     @Test
     public void testPartition1() {
         TensorField f = (TensorField) parse("f~(2,3,2)_{mn {ab cd} {x y z} {AB}}[x_ab,f_c, x_A]");
-        SimpleIndices[][] iP = f.getPartitionOfIndices();
-        SimpleIndices[][] asserted = new SimpleIndices[][]{{ParserIndices.parseSimple("_mn")},
-                {ParserIndices.parseSimple("_ab"), ParserIndices.parseSimple("_cd")},
-                {ParserIndices.parseSimple("_x"), ParserIndices.parseSimple("_y"), ParserIndices.parseSimple("_z")},
-                {ParserIndices.parseSimple("_A"), ParserIndices.parseSimple("_B")}};
-
-        Assert.assertTrue(Arrays.deepEquals(iP, asserted));
+        Assert.assertTrue(false);
+//        SimpleIndices[][] iP = f.getPartitionOfIndices();
+//        SimpleIndices[][] asserted = new SimpleIndices[][]{{ParserIndices.parseSimple("_mn")},
+//                {ParserIndices.parseSimple("_ab"), ParserIndices.parseSimple("_cd")},
+//                {ParserIndices.parseSimple("_x"), ParserIndices.parseSimple("_y"), ParserIndices.parseSimple("_z")},
+//                {ParserIndices.parseSimple("_A"), ParserIndices.parseSimple("_B")}};
+//
+//        Assert.assertTrue(Arrays.deepEquals(iP, asserted));
     }
 
     @Test
     public void testNames() {
         Tensor t1 = parse("F[S_A'^B']"), t2 = parse("F[S^A'_B']");
-        Assert.assertTrue(((TensorField) t1).getName() != ((TensorField) t2).getName());
+        Assert.assertTrue(((TensorField) t1).getHead().getName() != ((TensorField) t2).getHead().getName());
     }
 
     @Test

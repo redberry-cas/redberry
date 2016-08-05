@@ -363,10 +363,10 @@ public class CollectTransformation implements Transformation {
         if (t instanceof SimpleTensor) {
             SimpleTensor st = (SimpleTensor) t;
             SimpleIndices newIndices = st.getIndices().applyIndexMapping(mapping);
-            if (t instanceof TensorField)
-                return Tensors.field(st.getName(), newIndices, ((TensorField) st).getArgIndices(), ((TensorField) st).getArguments());
-            else
-                return Tensors.simpleTensor(st.getName(), newIndices);
+            return Tensors.simpleTensor(st.getName(), newIndices);
+        } else if (t instanceof TensorField) {
+            TensorField st = (TensorField) t;
+            return Tensors.replaceHead(st, (SimpleTensor) applyDirectMapping(st.getHead(), mapping));
         } else {
             assert t.getIndices().size() == 0;
             return t;

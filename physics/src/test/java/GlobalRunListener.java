@@ -44,7 +44,7 @@ public class GlobalRunListener extends RunListener {
 
     @Override
     public void testFailure(Failure failure) throws Exception {
-        System.out.println("Test " + failure.getTestHeader() + " failed with name manager seed: " + CC.getNameManager().getSeed());
+        System.out.println("Test " + failure.getTestHeader() + " failed with seed: " + CC.current().getSeed());
     }
 
     @Override

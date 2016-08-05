@@ -117,7 +117,7 @@ public final class NameManager {
         namesTable.put(new NameAndStructureOfIndices(alias, nd.varIndicesStructure), nd);
     }
 
-    VarDescriptor getVarDescriptor(int id) {
+    public VarDescriptor getVarDescriptor(int id) {
         return idsTable.get(id);
     }
 

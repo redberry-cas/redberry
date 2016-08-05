@@ -24,8 +24,8 @@
 package cc.redberry.physics.oneloopdiv;
 
 import cc.redberry.core.context.CC;
-import cc.redberry.core.context.NameDescriptor;
 import cc.redberry.core.context.OutputFormat;
+import cc.redberry.core.context.VarDescriptor;
 import cc.redberry.core.indices.*;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.parser.ParseTokenSimpleTensor;
@@ -374,7 +374,7 @@ public final class OneLoopInput {
             if (!(inputValues[i].get(0) instanceof SimpleTensor))
                 throw new IllegalArgumentException();
             SimpleTensor st = (SimpleTensor) inputValues[i].get(0);
-            NameDescriptor nd = CC.getVarDescriptor(st.getName());
+            VarDescriptor nd = CC.getVarDescriptor(st.getName());
             if (!nd.getName(null).equals(getStringInputName(i)))
                 throw new IllegalArgumentException();
         }

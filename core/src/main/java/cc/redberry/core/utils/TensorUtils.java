@@ -801,7 +801,7 @@ public final class TensorUtils {
 
     private static TIntHashSet addSimpleTensorsNames(Tensor t, TIntHashSet names) {
         if (t instanceof TensorField)
-            names.add(((TensorField) t).getNameDescriptor().getParent().getId());
+            names.add(((TensorField) t).getHead().getName());
         if (t instanceof SimpleTensor)
             names.add(((SimpleTensor) t).getName());
         for (Tensor tt : t)
@@ -816,7 +816,7 @@ public final class TensorUtils {
 
     private static boolean testContainsNames(Tensor t, TIntHashSet names) {
         if (t instanceof TensorField) {
-            if (names.contains(((TensorField) t).getNameDescriptor().getParent().getId())) return true;
+            if (names.contains(((TensorField) t).getHead().getName())) return true;
         } else if (t instanceof SimpleTensor)
             return names.contains(((SimpleTensor) t).getName());
 
@@ -825,18 +825,18 @@ public final class TensorUtils {
 
         return false;
     }
-
-    /**
-     * Generates a set of replacement rules for all scalar (but not symbolic) sub-tensors appearing in the specified
-     * tensor.
-     *
-     * @param tensor tensor
-     * @return set of replacement rules for all scalar (but not symbolic) sub-tensors appearing in the specified
-     * tensor
-     */
-    public static Expression[] generateReplacementsOfScalars(Tensor tensor) {
-        return generateReplacementsOfScalars(tensor, CC.getParametersGenerator());
-    }
+//
+//    /**
+//     * Generates a set of replacement rules for all scalar (but not symbolic) sub-tensors appearing in the specified
+//     * tensor.
+//     *
+//     * @param tensor tensor
+//     * @return set of replacement rules for all scalar (but not symbolic) sub-tensors appearing in the specified
+//     * tensor
+//     */
+//    public static Expression[] generateReplacementsOfScalars(Tensor tensor) {
+//        return generateReplacementsOfScalars(tensor, CC.getParametersGenerator());
+//    }
 
     /**
      * Generates a set of replacement rules for all scalar (but not symbolic) sub-tensors appearing in the specified
@@ -962,9 +962,9 @@ public final class TensorUtils {
             return ((Complex) el.get(1)).intValue() * match0(el.get(0), patt, false);
         else if (IndexMappings.anyMappingExists(patt, el))
             return 1;
-        else if (patt instanceof TensorField && el instanceof TensorField
-                && !((TensorField) patt).isDerivative())
-            return (((TensorField) el).getParentField().getName() == ((TensorField) patt).getName()) ? 1 : 0;
+//        else if (patt instanceof TensorField && el instanceof TensorField
+//                && !((TensorField) patt).isDerivative())
+//            return (((TensorField) el).getParentField().getName() == ((TensorField) patt).getName()) ? 1 : 0;
         return 0;
     }
 
@@ -972,11 +972,12 @@ public final class TensorUtils {
         for (Tensor patt : patterns) {
             if (IndexMappings.anyMappingExists(patt, el))
                 return 1;
-            else if (patt instanceof TensorField
-                    && el instanceof TensorField
-                    && !((TensorField) patt).isDerivative()
-                    && (((TensorField) el).getParentField().getName() == ((TensorField) patt).getName()))
-                return 1;
+//            else if (patt instanceof TensorField
+//                    && el instanceof TensorField
+//                    && !((TensorField) patt).isDerivative()
+//                    && (((TensorField) el).getParentField().getName() == ((TensorField) patt).getName())
+//                    )
+//                return 1;
         }
         return 0;
     }

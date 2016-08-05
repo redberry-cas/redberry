@@ -1347,10 +1347,10 @@ public class SubstitutionsTest extends RedberryTest {
         for (Tensor summand : R.get(1)) {
             if (summand instanceof Product) {
                 int m = 0;
-                for (Tensor multiplier : summand)
-                    if (multiplier instanceof TensorField
-                            && ((TensorField) multiplier).getNameDescriptor().getParent().getId() == id)
-                        ++m;
+//                for (Tensor multiplier : summand)
+//                    if (multiplier instanceof TensorField
+//                            && ((TensorField) multiplier).getNameDescriptor().getParent().getId() == id)
+//                        ++m;
                 if (m <= 2)
                     r.put(summand);
             }

@@ -379,6 +379,19 @@ public final class Tensors {
     }
 
     /**
+     * Replaces head of function with a new head
+     *
+     * @param field   function
+     * @param newHead new head
+     * @return
+     */
+    public static TensorField replaceHead(TensorField field, SimpleTensor newHead) {
+        if (!field.getHead().getIndices().getFree().equalsWithSymmetries(newHead.getIndices().getFree()))
+            throw new IllegalArgumentException();
+        return field0(newHead, field.args, field.argIndices);
+    }
+
+    /**
      * Returns function with specified head, args and argsIndices
      *
      * @param head       head of function
@@ -393,8 +406,7 @@ public final class Tensors {
             if (!args[i].getIndices().equalsRegardlessOrder(argIndices[i]))
                 throw new IllegalArgumentException("Inconsistent arg indices (arg = " + args[i] + ", argIndices = " + argIndices[i] + ")");
 
-        final SimpleIndices indices = head.getVarDescriptor().computeIndices(head.getIndices(), argIndices);
-        return new TensorField(indices, head, args, argIndices);
+        return field0(head, args, argIndices);
     }
 
     /**
@@ -409,6 +421,10 @@ public final class Tensors {
         for (int i = 0; i < args.length; ++i)
             argIndices[i] = IndicesFactory.createSimple(null, args[i].getIndices());
 
+        return field0(head, args, argIndices);
+    }
+
+    private static TensorField field0(SimpleTensor head, Tensor[] args, SimpleIndices[] argIndices){
         final SimpleIndices indices = head.getVarDescriptor().computeIndices(head.getIndices(), argIndices);
         return new TensorField(indices, head, args, argIndices);
     }

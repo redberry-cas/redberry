@@ -42,8 +42,11 @@ public final class ApplyDiracDeltasTransformation implements TransformationToStr
     private ApplyDiracDeltasTransformation() {
     }
 
+    private static boolean isDiracDelta(Tensor t){
+        return t instanceof TensorField && CC.current().Globals().isDiracDelta((TensorField) t);
+    }
     private static boolean containsDiracDeltas(Tensor t) {
-        if (t instanceof TensorField && ((TensorField) t).isDiracDelta()) {
+        if (isDiracDelta(t)) {
             if (t.get(0) instanceof SimpleTensor)
                 return true;
             else if (t.get(0) instanceof Product)
@@ -74,7 +77,7 @@ public final class ApplyDiracDeltasTransformation implements TransformationToStr
                     Product product = ((Product) current);
                     for (int i = 0; i < product.size(); i++) {
                         Tensor dd = current.get(i);
-                        if (dd instanceof TensorField && ((TensorField) dd).isDiracDelta()) {
+                        if (isDiracDelta(dd)) {
                             temp = product.remove(i);
                             temp = createSubstitution((TensorField) dd).transform(temp);
                             if (!intersects(getSimpleTensorsNames(temp), getSimpleTensorsNames(dd.get(0)))) {

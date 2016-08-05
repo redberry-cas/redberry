@@ -22,6 +22,6 @@ public class GroovyGlobalRunListener extends RunListener {
 
     @Override
     public void testFailure(Failure failure) throws Exception {
-        System.out.println("Test failed with name manager seed: " + CC.getNameManager().getSeed());
+        System.out.println("Test failed with name manager seed: " + CC.current().getSeed());
     }
 }

@@ -71,7 +71,7 @@ public class EqualsTest
             ParseTokenSimpleTensor sToken = (ParseTokenSimpleTensor) token;
             SimpleIndices indices = sToken.indices;
 
-            PermutationGroup pg = CC.getNameManager().mapNameDescriptor(((ParseTokenSimpleTensor) token).name,
+            PermutationGroup pg = CC.getNameManager().resolve(((ParseTokenSimpleTensor) token).name,
                     ((ParseTokenSimpleTensor) token).indices.getStructureOfIndices()).getSymmetries().getPermutationGroup();
             if (pg.isTrivial())
                 return;

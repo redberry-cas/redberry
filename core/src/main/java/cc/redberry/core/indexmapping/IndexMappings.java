@@ -351,7 +351,7 @@ public final class IndexMappings {
     static {
         map = new HashMap<>();
         map.put(SimpleTensor.class, ProviderSimpleTensor.FACTORY_SIMPLETENSOR);
-        map.put(TensorField.class, ProviderSimpleTensor.FACTORY_TENSORFIELD);
+        map.put(TensorField.class, ProviderTensorField.FACTORY_TENSORFIELD);
         map.put(Product.class, ProviderProduct.FACTORY);
         map.put(Sum.class, ProviderSum.FACTORY);
         map.put(Expression.class, ProviderSum.FACTORY);

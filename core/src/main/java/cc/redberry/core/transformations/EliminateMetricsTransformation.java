@@ -24,6 +24,7 @@ package cc.redberry.core.transformations;
 
 import cc.redberry.core.context.CC;
 import cc.redberry.core.context.OutputFormat;
+import cc.redberry.core.context.VarDescriptor;
 import cc.redberry.core.indexmapping.IndexMapping;
 import cc.redberry.core.indices.SimpleIndices;
 import cc.redberry.core.tensor.*;
@@ -66,21 +67,34 @@ public final class EliminateMetricsTransformation implements TransformationToStr
         //FUTURE if tensor is symbolic return tensor
         if (tensor instanceof SimpleTensor) {
             tensor = chain.apply((SimpleTensor) tensor);
-            if (tensor instanceof TensorField) {
-                boolean applied = false;
-                TensorBuilder builder = tensor.getBuilder();
-                Tensor temp, current;
-                for (int i = 0, size = tensor.size(); i < size; ++i) {
-                    current = tensor.get(i);
-                    temp = transform(current);
-                    if (current != temp)
-                        applied = true;
-                    builder.put(temp);
-                }
-                if (applied)
-                    tensor = builder.build();
-            }
             return tensor;
+        } else if (tensor instanceof TensorField) {
+            TensorField f = (TensorField) tensor;
+            SimpleTensor head = f.getHead(),
+                    newHead = chain.apply(head);
+
+            final VarDescriptor descriptor = head.getVarDescriptor();
+            if (!descriptor.propagatesIndices())
+                if (head == newHead)
+                    return tensor;
+                else
+                    return Tensors.replaceHead(f, newHead);
+
+            boolean transformed = head != newHead;
+            Tensor[] newArgs = new Tensor[f.size()];
+            for (int i = 0; i < f.size(); ++i) {
+                final Tensor arg = f.get(i);
+                if (descriptor.propagatesIndices(i))
+                    newArgs[i] = transform(arg, chain);
+                else
+                    newArgs[i] = transform(arg);
+                if (newArgs[i] != arg)
+                    transformed = true;
+            }
+            if (!transformed)
+                return tensor;
+
+            return Tensors.field(newHead, newArgs);
         } else if (tensor instanceof Product) {
             MetricsChainImpl tempContainer = new MetricsChainImpl(chain);
             List<Tensor> nonMetrics = new ArrayList<>();
@@ -328,10 +342,7 @@ public final class EliminateMetricsTransformation implements TransformationToStr
             SimpleIndices newIndices = oldIndices.applyIndexMapping(im);
             if (oldIndices == newIndices)
                 return t;
-            if (t.getClass() == SimpleTensor.class)
-                return Tensors.simpleTensor(t.getName(), newIndices);
-            TensorField ff = (TensorField) t;
-            return Tensors.field(ff.getName(), newIndices, ff.getArgIndices(), ff.getArguments());
+            return Tensors.simpleTensor(t.getName(), newIndices);
         }
 
         boolean apply(MetricWrapper mK) {

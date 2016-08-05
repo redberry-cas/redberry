@@ -144,7 +144,7 @@ public class LeviCivitaSimplifyTransformation implements TransformationToStringA
         this.numberOfIndices = leviCivita.getIndices().size();
         this.typeOfLeviCivitaIndices = IndicesUtils.getTypeEnum(leviCivita.getIndices().get(0));
 
-        final String leviCivitaName = CC.getNameManager().getNameDescriptor(leviCivita.getName()).getName(null);
+        final String leviCivitaName = CC.current().getVarDescriptor(leviCivita.getName()).getName(null);
 
         this.tokenTransformer = new ChangeIndicesTypesAndTensorNames(
                 new TypesAndNamesTransformer() {

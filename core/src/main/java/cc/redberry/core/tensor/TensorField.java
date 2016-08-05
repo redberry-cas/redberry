@@ -42,7 +42,7 @@ public final class TensorField extends Tensor {
      */
     final SimpleTensor head;
     /**
-     * Arguments
+     * Arguments //TODO REMOVE AND ADD CACHED NULL ARRAY
      */
     final Tensor[] args;
     /**

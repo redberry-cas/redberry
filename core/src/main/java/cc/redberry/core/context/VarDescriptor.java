@@ -196,6 +196,16 @@ public final class VarDescriptor {
         return nameFormatter.getVarName(baseName, aliases, indices, outputFormat);
     }
 
+    /**
+     * String representation of symbol name
+     *
+     * @param indices      self indices
+     * @return String representation of symbol name
+     */
+    public String getName(SimpleIndices indices) {
+        return getName(indices, CC.getDefaultOutputFormat());
+    }
+
     public NameAndStructureOfIndices getKey() {
         return new NameAndStructureOfIndices(baseName, varIndicesStructure);
     }

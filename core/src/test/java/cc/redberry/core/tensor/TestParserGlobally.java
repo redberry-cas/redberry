@@ -256,7 +256,7 @@ public class TestParserGlobally {
             }
             if (c instanceof TensorField) {
                 TensorField f = (TensorField) c;
-                iterator.set(Tensors.field(f.getName(), f.getIndices().getInverted(), f.argIndices, f.args));
+                iterator.set(Tensors.field((SimpleTensor) inverseIndices(f.getHead()), f.args));
             }
         }
         return iterator.result();

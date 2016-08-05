@@ -469,5 +469,9 @@ public final class Context {
             return Tensors.field(DiracDelta, a, b);
         }
 
+        public boolean isDiracDelta(TensorField d) {
+            return d.getHead() == DiracDelta && d.size() == 2 && d.get(0).getIndices().size() == d.get(1).getIndices().size();
+        }
+
     }
 }
