@@ -20,19 +20,11 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
-package cc.redberry.core.context2;
-
-import org.junit.Test;
-
-import static org.junit.Assert.*;
+package cc.redberry.core.context;
 
 /**
- * Created by poslavsky on 02/08/16.
+ * @author Stanislav Poslavsky
  */
-public class ContextConfigurationTest {
-    @Test
-    public void testClone() throws Exception {
-        System.out.println(new ContextConfiguration().clone());
-
-    }
+public enum Attribute {
+    Protected
 }

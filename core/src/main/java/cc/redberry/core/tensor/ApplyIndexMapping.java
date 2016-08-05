@@ -22,6 +22,7 @@
  */
 package cc.redberry.core.tensor;
 
+import cc.redberry.core.context.VarDescriptor;
 import cc.redberry.core.indexgenerator.IndexGeneratorFromData;
 import cc.redberry.core.indexgenerator.IndexGeneratorImpl;
 import cc.redberry.core.indexmapping.IndexMapping;
@@ -581,11 +582,22 @@ public final class ApplyIndexMapping {
                     newIndices = oldIndices.applyIndexMapping(indexMapper);
             if (oldIndices == newIndices)
                 return tensor;
-            if (tensor instanceof TensorField) {
-                TensorField field = (TensorField) simpleTensor;
-                return Tensors.field(field.name, newIndices, field.argIndices, field.args);
-            }
             return Tensors.simpleTensor(simpleTensor.name, newIndices);
+        }
+        if (tensor instanceof TensorField) {
+            TensorField tf = (TensorField) tensor;
+            SimpleTensor newHead = (SimpleTensor) applyIndexMapping(tf.getHead(), indexMapper, contractIndices);
+            final VarDescriptor descr = newHead.getVarDescriptor();
+            if (descr.propagatesIndices()) {
+                Tensor[] newArgs = new Tensor[tf.size()];
+                for (int i = tf.size() - 1; i >= 0; --i)
+                    if (descr.propagatesIndices(i))
+                        newArgs[i] = applyIndexMapping(tf.get(i), indexMapper, contractIndices);
+                    else newArgs[i] = tf.get(i);
+                return Tensors.field(newHead, newArgs);
+            } else
+                return Tensors.field(newHead, tf.args, tf.argIndices);
+
         }
         if (tensor instanceof Complex || tensor instanceof ScalarFunction)
             return tensor;
@@ -813,7 +825,7 @@ public final class ApplyIndexMapping {
         }
     }
 
-    //todo discuss with Dima
+    //todo revise usages
     public static Tensor renameIndicesOfFieldsArguments(Tensor tensor, TIntSet forbidden) {
         if (tensor instanceof TensorField) {
             TensorField field = (TensorField) tensor;
@@ -890,7 +902,7 @@ public final class ApplyIndexMapping {
 //            }
             if (args == null)
                 return tensor;
-            return Tensors.field(field.name, field.indices, argsIndices, args);
+            return Tensors.field(field.head, args, argsIndices);
         }
         //further straightforward
         if (tensor instanceof Product) {

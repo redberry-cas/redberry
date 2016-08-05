@@ -54,19 +54,6 @@ final class ProviderSimpleTensor extends IndexMappingProviderAbstractFT<SimpleTe
             return new ProviderSimpleTensor(opu, (SimpleTensor) from, (SimpleTensor) to);
         }
     };
-    public static final IndexMappingProviderFactory FACTORY_TENSORFIELD = new IndexMappingProviderFactory() {
-
-        @Override
-        public IndexMappingProvider create(IndexMappingProvider opu, Tensor from, Tensor to) {
-            if (((TensorField) from).getName() != ((TensorField) to).getName())
-                return IndexMappingProvider.Util.EMPTY_PROVIDER;
-            for (int i = 0; i < from.size(); ++i) {
-                if (!IndexMappings.positiveMappingExists(from.get(i), to.get(i)))
-                    return IndexMappingProvider.Util.EMPTY_PROVIDER;
-            }
-            return new ProviderSimpleTensor(opu, (SimpleTensor) from, (SimpleTensor) to);
-        }
-    };
     private Iterator<Permutation> searchForPermutations;
 
     private ProviderSimpleTensor(OutputPort<IndexMappingBuffer> opu, SimpleTensor from, SimpleTensor to) {

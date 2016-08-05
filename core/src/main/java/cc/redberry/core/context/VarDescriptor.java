@@ -148,6 +148,20 @@ public final class VarDescriptor {
         return provider.compute(self, indices);
     }
 
+    /**
+     * Whether i-th argument propagates indices to outer environment. For example, Expand[x_a*(y_b + z_b)] propagates
+     * indices as is, while for abstract f_ab[x_a] indices of argument are irrelevant
+     *
+     * @param i index of argument
+     */
+    public boolean propagatesIndices(int i) {return provider.propagatesIndices(i);}
+
+    /**
+     * Returns whether any of arguments should propagate its indices outside of the field scope (like e.g. Expand[x_a])
+     *
+     * @return whether any of arguments should propagate its indices outside of the field scope (like e.g. Expand[x_a])
+     */
+    public boolean propagatesIndices() {return provider.propagatesIndices();}
 
     @Override
     public boolean equals(Object o) {

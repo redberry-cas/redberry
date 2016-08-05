@@ -40,7 +40,7 @@ final class TraceUtils {
     static final IndexType[] extractTypesFromMatrix(SimpleTensor matrix) {
         if (matrix.getIndices().size() != 3)
             throw new IllegalArgumentException("Not a matrix: " + matrix + ".");
-        NameDescriptor descriptor = CC.getNameDescriptor(matrix.getName());
+        NameDescriptor descriptor = CC.getVarDescriptor(matrix.getName());
         StructureOfIndices typeStructure = descriptor.getStructureOfIndices();
         byte metricType = -1, matrixType = -1;
         int typeCount;

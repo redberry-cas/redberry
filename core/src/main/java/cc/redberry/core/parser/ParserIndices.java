@@ -23,6 +23,7 @@
 package cc.redberry.core.parser;
 
 import cc.redberry.core.context.CC;
+import cc.redberry.core.context.IndexConverterManager;
 import cc.redberry.core.indices.IndicesFactory;
 import cc.redberry.core.indices.IndicesUtils;
 import cc.redberry.core.indices.SimpleIndices;
@@ -124,7 +125,7 @@ public final class ParserIndices {
         String singleIndex;
         while (matcher.find()) {
             singleIndex = matcher.group();
-            indices.add(CC.getIndexConverterManager().getCode(singleIndex) | state);
+            indices.add(IndexConverterManager.DEFAULT.getCode(singleIndex) | state);
         }
         String remainder = matcher.replaceAll("");
         remainder = remainder.replaceAll("[\\{\\}\\s]*", "");

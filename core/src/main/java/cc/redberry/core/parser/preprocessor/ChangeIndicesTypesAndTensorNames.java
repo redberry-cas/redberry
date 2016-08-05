@@ -55,9 +55,7 @@ public class ChangeIndicesTypesAndTensorNames implements ParseTokenTransformer {
                 SimpleIndices[] newArgsIndices = new SimpleIndices[tf.argumentsIndices.length];
                 for (int i = newArgsIndices.length - 1; i >= 0; --i)
                     newArgsIndices[i] = IndicesFactory.createSimple(null, newContent[i].getIndices());
-                NameAndStructureOfIndices dsf = tf.getIndicesTypeStructureAndName();
-                return new ParseTokenTensorField(transformIndices(tf.getIndices(), dsf),
-                        transformer.newName(dsf.getName(), dsf), newContent, newArgsIndices);
+                return new ParseTokenTensorField((ParseTokenSimpleTensor) transform(tf.head), newContent, newArgsIndices);
             case Number:
                 return node;
             case ScalarFunction:

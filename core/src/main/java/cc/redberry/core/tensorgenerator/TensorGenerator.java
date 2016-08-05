@@ -25,7 +25,10 @@ package cc.redberry.core.tensorgenerator;
 import cc.redberry.core.context.CC;
 import cc.redberry.core.indexmapping.IndexMappings;
 import cc.redberry.core.indexmapping.Mapping;
-import cc.redberry.core.indices.*;
+import cc.redberry.core.indices.Indices;
+import cc.redberry.core.indices.IndicesFactory;
+import cc.redberry.core.indices.SimpleIndices;
+import cc.redberry.core.indices.StructureOfIndices;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.number.Rational;
 import cc.redberry.core.solver.frobenius.FrobeniusSolver;
@@ -136,8 +139,12 @@ public class TensorGenerator {
                 } else coefficient = Complex.ONE;
 
                 term = Tensors.multiply(coefficient, term, term instanceof Sum ? new Complex(new Rational(1, term.size())) : Complex.ONE);
-            } else if (withCoefficients)
-                term = FastTensors.multiplySumElementsOnFactors((Sum) term);
+            } else if (withCoefficients) {
+                TensorBuilder res = term.getBuilder();
+                for (Tensor tensor : term)
+                    res.put(Tensors.multiply(CC.generateNewSymbol(), tensor));
+                term = res.build();
+            }
             result.put(term);
         }
         this.result = indices.getSymmetries().isTrivial() ? result.build() : symmetrize(result.build());

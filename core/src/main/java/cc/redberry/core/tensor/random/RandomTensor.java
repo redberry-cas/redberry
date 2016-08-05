@@ -23,7 +23,7 @@
 package cc.redberry.core.tensor.random;
 
 import cc.redberry.core.context.CC;
-import cc.redberry.core.context.NameDescriptor;
+import cc.redberry.core.context.VarDescriptor;
 import cc.redberry.core.groups.permutations.Permutations;
 import cc.redberry.core.indexgenerator.IndexGeneratorImpl;
 import cc.redberry.core.indexmapping.Mapping;
@@ -60,7 +60,7 @@ public final class RandomTensor {
     private final int[] minIndices, maxIndices;
     private final int diffStringNames;
     private final boolean withSymmetries;
-    private final List<NameDescriptor> namespace;
+    private final List<VarDescriptor> namespace;
     private final int initialNamespaceSize;
 
     private final boolean generateNewDescriptors;
@@ -190,7 +190,7 @@ public final class RandomTensor {
             for (int j = 0; j < TYPES_COUNT; ++j)
                 typesCount[j] = minIndices[j] + nextInt(maxIndices[j] - minIndices[j]);
             StructureOfIndices typeStructure = StructureOfIndices.create(TYPES, typesCount);
-            NameDescriptor nameDescriptor = CC.getNameManager().mapNameDescriptor(nextName(), typeStructure);
+            VarDescriptor nameDescriptor = CC.getNameManager().resolve(nextName(), typeStructure);
             if (withSymmetries)
                 addRandomSymmetries(nameDescriptor);
             namespace.add(nameDescriptor);
@@ -210,7 +210,7 @@ public final class RandomTensor {
     public void addToNamespace(Tensor... tensors) {
         //todo check if contains
         for (SimpleTensor st : TensorUtils.getAllDiffSimpleTensors(tensors))
-            namespace.add(st.getNameDescriptor());
+            namespace.add(st.getVarDescriptor());
     }
 
     public int getInitialNamespaceSize() {
@@ -222,11 +222,11 @@ public final class RandomTensor {
         return namespace.size();
     }
 
-    public NameDescriptor nextNameDescriptor() {
+    public VarDescriptor nextNameDescriptor() {
         return namespace.get(nextInt(namespace.size()));
     }
 
-    private NameDescriptor nextNameDescriptor(StructureOfIndices typeStructure) {
+    private VarDescriptor nextNameDescriptor(StructureOfIndices typeStructure) {
         //search
         IntArrayList positions = new IntArrayList();
         for (int i = namespace.size() - 1; i >= 0; --i)
@@ -239,7 +239,7 @@ public final class RandomTensor {
             throw new IllegalArgumentException("No descriptor for such structure: " + typeStructure);
 
         //create new nameDescriptor
-        NameDescriptor nameDescriptor = CC.getNameManager().mapNameDescriptor(nextName(), typeStructure);
+        VarDescriptor nameDescriptor = CC.getNameManager().resolve(nextName(), typeStructure);
         if (withSymmetries)
             addRandomSymmetries(nameDescriptor);
         if (namespace.indexOf(nameDescriptor) == -1)
@@ -247,7 +247,7 @@ public final class RandomTensor {
         return nameDescriptor;
     }
 
-    private void addRandomSymmetries(NameDescriptor descriptor) {//TODO add antisymmetries
+    private void addRandomSymmetries(VarDescriptor descriptor) {//TODO add antisymmetries
         if (!descriptor.getSymmetries().isTrivial()) //todo <= review this moment
             return;
         StructureOfIndices typeStructure = descriptor.getStructureOfIndices();
@@ -265,14 +265,14 @@ public final class RandomTensor {
     }
 
     public SimpleTensor nextSimpleTensor(SimpleIndices indices) {
-        NameDescriptor nd = nextNameDescriptor(indices.getStructureOfIndices());
+        VarDescriptor nd = nextNameDescriptor(indices.getStructureOfIndices());
         StructureOfIndices structureOfIndices = nd.getStructureOfIndices();
         int[] _indices = nextIndices(structureOfIndices);
         return Tensors.simpleTensor(nd.getId(), IndicesFactory.createSimple(nd.getSymmetries(), _indices));
     }
 
     public SimpleTensor nextSimpleTensor() {
-        NameDescriptor nd = nextNameDescriptor();
+        VarDescriptor nd = nextNameDescriptor();
         StructureOfIndices structureOfIndices = nd.getStructureOfIndices();
         int[] indices = nextIndices(structureOfIndices);
         return Tensors.simpleTensor(nd.getId(), IndicesFactory.createSimple(nd.getSymmetries(), indices));

@@ -68,19 +68,33 @@ public final class HashingStrategy {
         return tensor.hashCode() + tensor.getIndices().contractionsHash();
     }
 
-    public static int iGraphHash(final SimpleTensor tensor, final int[] sortedNames) {
-        int hash = iGraphHashWithoutIndices(tensor);
-        if (sortedNames.length == 0)
-            return hash;
-        SimpleIndices si = tensor.getIndices();
+    public static int iGraphHashWithoutIndices(final TensorField tensor) {
+        return tensor.hashCode() + tensor.getIndices().contractionsHash();
+    }
+
+    private static int iGraphHash(int hash, final SimpleIndices si, final int[] sortedNames) {
         short[] orbits = si.getPositionsInOrbits();
         int pos;
         for (int i = 0; i < si.size(); ++i)
             if ((pos = Arrays.binarySearch(sortedNames, getNameWithType(si.get(i)))) >= 0)
                 hash += (JenkinWang32shift(orbits[i] + 1) ^ (JenkinWang32shift(pos + 1) * 37));
-        if (tensor instanceof TensorField)
-            for (Tensor t : tensor) //<- args order is important!
-                hash += hash * 7 + 13 * t.hashCode();
+        return hash;
+    }
+
+    public static int iGraphHash(final SimpleTensor tensor, final int[] sortedNames) {
+        int hash = iGraphHashWithoutIndices(tensor);
+        if (sortedNames.length == 0)
+            return hash;
+        return iGraphHash(hash, tensor.getIndices(), sortedNames);
+    }
+
+    public static int iGraphHash(final TensorField tensor, final int[] sortedNames) {
+        int hash = iGraphHashWithoutIndices(tensor.getHead());
+        if (sortedNames.length == 0)
+            return hash;
+        hash = iGraphHash(hash, tensor.getIndices(), sortedNames);
+        for (Tensor t : tensor) //<- args order is important!
+            hash += hash * 7 + 13 * t.hashCode();
         return hash;
     }
 
@@ -92,19 +106,10 @@ public final class HashingStrategy {
         if (freeIndices.size() == 0)
             return tensor.hashCode();
 
-        if (tensor instanceof SimpleTensor) {
-            SimpleIndices si = ((SimpleTensor) tensor).getIndices();
-            int hash = tensor.hashCode();
-            short[] orbits = si.getPositionsInOrbits();
-            int pos;
-            for (int i = 0; i < si.size(); ++i)
-                if ((pos = Arrays.binarySearch(sortedNames, getNameWithType(si.get(i)))) >= 0)
-                    hash += (JenkinWang32shift(orbits[i] + 1) ^ (JenkinWang32shift(pos + 1) * 37));
-            if (tensor instanceof TensorField)
-                for (Tensor t : tensor) //<- args order is important!
-                    hash += hash * 7 + t.hashCode();
-            return hash;
-        }
+        if (tensor instanceof SimpleTensor)
+            return iGraphHash(tensor.hashCode(), ((SimpleTensor) tensor).getIndices(), sortedNames);
+        if (tensor instanceof TensorField)
+            return iGraphHash(tensor.hashCode(), ((TensorField) tensor).getIndices(), sortedNames);
 
         final int[] sortedFree = sortedFree(freeIndices);
         if (!shareIndices(sortedFree, sortedNames))

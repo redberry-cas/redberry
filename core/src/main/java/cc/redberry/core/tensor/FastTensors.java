@@ -127,16 +127,16 @@ public final class FastTensors {
     }
 
 
-    /**
-     * @deprecated very unsafe method without checks
-     */
-    @Deprecated
-    public static Tensor multiplySumElementsOnFactors(Sum sum) {
-        final Tensor[] newSumData = new Tensor[sum.size()];
-        for (int i = newSumData.length - 1; i >= 0; --i)
-            newSumData[i] = multiply(CC.generateNewSymbol(), sum.get(i));
-        return new Sum(newSumData, IndicesFactory.create(newSumData[0].getIndices().getFree()));
-    }
+//    /**
+//     * @deprecated very unsafe method without checks
+//     */
+//    @Deprecated
+//    public static Tensor multiplySumElementsOnFactors(Sum sum) {
+//        final Tensor[] newSumData = new Tensor[sum.size()];
+//        for (int i = newSumData.length - 1; i >= 0; --i)
+//            newSumData[i] = multiply(CC.generateNewSymbol(), sum.get(i));
+//        return new Sum(newSumData, IndicesFactory.create(newSumData[0].getIndices().getFree()));
+//    }
 
     /**
      * Checks whether the resulting tensor was reduced to simplified form after multiply

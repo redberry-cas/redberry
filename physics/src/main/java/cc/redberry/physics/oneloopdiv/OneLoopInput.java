@@ -374,7 +374,7 @@ public final class OneLoopInput {
             if (!(inputValues[i].get(0) instanceof SimpleTensor))
                 throw new IllegalArgumentException();
             SimpleTensor st = (SimpleTensor) inputValues[i].get(0);
-            NameDescriptor nd = CC.getNameDescriptor(st.getName());
+            NameDescriptor nd = CC.getVarDescriptor(st.getName());
             if (!nd.getName(null).equals(getStringInputName(i)))
                 throw new IllegalArgumentException();
         }

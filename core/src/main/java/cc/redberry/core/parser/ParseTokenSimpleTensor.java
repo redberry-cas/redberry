@@ -25,8 +25,10 @@ package cc.redberry.core.parser;
 import cc.redberry.core.context.CC;
 import cc.redberry.core.context.NameAndStructureOfIndices;
 import cc.redberry.core.context.OutputFormat;
+import cc.redberry.core.indices.IndicesUtils;
 import cc.redberry.core.indices.SimpleIndices;
 import cc.redberry.core.indices.StructureOfIndices;
+import cc.redberry.core.tensor.SimpleTensor;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.tensor.Tensors;
 
@@ -49,12 +51,6 @@ public class ParseTokenSimpleTensor extends ParseToken {
      */
     public String name;
 
-    protected ParseTokenSimpleTensor(SimpleIndices indices, String name, TokenType type, ParseToken[] content) {
-        super(type, content);
-        this.indices = indices;
-        this.name = name;
-    }
-
     /**
      * @param indices indices of simple tensor
      * @param name    string name of simple tensor
@@ -69,7 +65,7 @@ public class ParseTokenSimpleTensor extends ParseToken {
      * @return {@link NameAndStructureOfIndices}
      */
     public NameAndStructureOfIndices getIndicesTypeStructureAndName() {
-        return new NameAndStructureOfIndices(name, new StructureOfIndices[]{StructureOfIndices.create(indices)});
+        return new NameAndStructureOfIndices(name, StructureOfIndices.create(indices));
     }
 
     @Override
@@ -83,7 +79,7 @@ public class ParseTokenSimpleTensor extends ParseToken {
     }
 
     @Override
-    public Tensor toTensor() {
+    public SimpleTensor toTensor() {
         return Tensors.simpleTensor(name, indices);
     }
 
@@ -98,12 +94,14 @@ public class ParseTokenSimpleTensor extends ParseToken {
     }
 
     public boolean isKroneckerOrMetric() {
-        return name.equals(CC.getNameManager().getKroneckerName()) ||
-                name.equals(CC.getNameManager().getMetricName());
+        return indices.size() == 2
+                && IndicesUtils.getRawTypeInt(indices.get(0)) == IndicesUtils.getRawTypeInt(indices.get(1))
+                && (name.equals(CC.current().getKroneckerName()) ||
+                name.equals(CC.current().getMetricName()));
     }
 
     public boolean isKronecker() {
-        return name.equals(CC.getNameManager().getKroneckerName());
+        return isKroneckerOrMetric() && name.equals(CC.current().getKroneckerName());
     }
 
     @Override

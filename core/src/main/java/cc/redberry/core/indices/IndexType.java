@@ -22,7 +22,6 @@
  */
 package cc.redberry.core.indices;
 
-import cc.redberry.core.context.ContextSettings;
 import cc.redberry.core.context.IndexSymbolConverter;
 import cc.redberry.core.context.defaults.IndexWithStrokeConverter;
 
@@ -33,9 +32,7 @@ import java.util.Map;
 import static cc.redberry.core.context.defaults.IndexConverterExtender.*;
 
 /**
- * This {@code enum} is a container of the information on all available index types and appropriate converters. This
- * {@code enum} is scanning at the initialization of {@link ContextSettings} and all the values are putting in the
- * Context as default indices types.
+ * Available index types.
  *
  * @author Dmitry Bolotin
  * @author Stanislav Poslavsky

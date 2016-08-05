@@ -24,6 +24,7 @@ package cc.redberry.core.indices;
 
 import cc.redberry.core.context.CC;
 import cc.redberry.core.context.Context;
+import cc.redberry.core.context.IndexConverterManager;
 import cc.redberry.core.context.OutputFormat;
 import cc.redberry.core.groups.permutations.Permutation;
 import cc.redberry.core.utils.IntArray;
@@ -420,7 +421,7 @@ public final class IndicesUtils {
     }
 
     public static String toString(int index, OutputFormat mode) {
-        return (getState(index) ? "^" : "_") + Context.get().getIndexConverterManager().getSymbol(index, mode) + "";
+        return (getState(index) ? "^" : "_") + IndexConverterManager.DEFAULT.getSymbol(index, mode) + "";
     }
 
     public static String toString(int index) {
@@ -450,9 +451,9 @@ public final class IndicesUtils {
             start = 1;
         int nameWithType;
         if (string.charAt(start) == '{')
-            nameWithType = Context.get().getIndexConverterManager().getCode(string.substring(start + 1, string.length() - 1));
+            nameWithType = IndexConverterManager.DEFAULT.getCode(string.substring(start + 1, string.length() - 1));
         else
-            nameWithType = Context.get().getIndexConverterManager().getCode(string.substring(start));
+            nameWithType = IndexConverterManager.DEFAULT.getCode(string.substring(start));
         return state ? (0x80000000 ^ nameWithType) : nameWithType;
     }
 

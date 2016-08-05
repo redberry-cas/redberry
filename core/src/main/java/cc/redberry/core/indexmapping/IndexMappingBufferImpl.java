@@ -23,7 +23,7 @@
 package cc.redberry.core.indexmapping;
 
 import cc.redberry.core.context.CC;
-import cc.redberry.core.context.Context;
+import cc.redberry.core.context.IndexConverterManager;
 import cc.redberry.core.context.OutputFormat;
 import cc.redberry.core.indices.IndicesUtils;
 import gnu.trove.iterator.TIntObjectIterator;
@@ -162,7 +162,7 @@ final class IndexMappingBufferImpl implements IndexMappingBuffer {
     }
 
     private static String toStringIndex(int index, OutputFormat mode) {
-        return (IndicesUtils.getState(index) ? "^" : "_") + Context.get().getIndexConverterManager().getSymbol(index, mode);
+        return (IndicesUtils.getState(index) ? "^" : "_") + IndexConverterManager.DEFAULT.getSymbol(index, mode);
     }
 
     /**

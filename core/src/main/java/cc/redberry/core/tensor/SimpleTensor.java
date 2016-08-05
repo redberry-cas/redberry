@@ -24,8 +24,8 @@ package cc.redberry.core.tensor;
 
 import cc.redberry.core.context.CC;
 import cc.redberry.core.context.ContextManager;
-import cc.redberry.core.context.NameDescriptor;
 import cc.redberry.core.context.OutputFormat;
+import cc.redberry.core.context.VarDescriptor;
 import cc.redberry.core.indices.IndexType;
 import cc.redberry.core.indices.IndicesUtils;
 import cc.redberry.core.indices.SimpleIndices;
@@ -43,7 +43,7 @@ import java.util.List;
  * @author Stanislav Poslavsky
  * @since 1.0
  */
-public class SimpleTensor extends Tensor {
+public final class SimpleTensor extends Tensor {
 
     protected final SimpleIndices indices;
     protected final int name;
@@ -57,7 +57,7 @@ public class SimpleTensor extends Tensor {
      * Returns the name (unique identifier) of this tensor.
      *
      * @return name of this tensor
-     * @see cc.redberry.core.context.NameDescriptor
+     * @see cc.redberry.core.context.VarDescriptor
      */
     public int getName() {
         return name;
@@ -67,7 +67,7 @@ public class SimpleTensor extends Tensor {
      * Returns the name (unique identifier) of this tensor
      *
      * @return name of this tensor
-     * @see cc.redberry.core.context.NameDescriptor
+     * @see cc.redberry.core.context.VarDescriptor
      */
     @Override
     protected int hash() {
@@ -143,7 +143,7 @@ public class SimpleTensor extends Tensor {
         //Initializing StringBuilder
         StringBuilder sb = new StringBuilder();
 
-        sb.append(CC.getNameDescriptor(name).getName(indices, mode));
+        sb.append(CC.getVarDescriptor(name).getName(indices, mode));
 
         //If there are no indices return builder content
         if (indices.size() == 0)
@@ -176,8 +176,8 @@ public class SimpleTensor extends Tensor {
         return new Factory(this);
     }
 
-    public NameDescriptor getNameDescriptor() {
-        return ContextManager.getCurrentContext().getNameDescriptor(name);
+    public VarDescriptor getVarDescriptor() {
+        return ContextManager.getCurrentContext().getVarDescriptor(name);
     }
 
     @Override
@@ -193,7 +193,7 @@ public class SimpleTensor extends Tensor {
     }
 
     public String getStringName() {
-        return CC.current().getNameDescriptor(name).getName(indices);
+        return getVarDescriptor().getName(indices, OutputFormat.Redberry);
     }
 
     private static final class Builder implements TensorBuilder {

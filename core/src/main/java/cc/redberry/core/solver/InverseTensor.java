@@ -187,7 +187,7 @@ public final class InverseTensor {
         Set<SimpleTensor> simpleTensors = TensorUtils.getAllSymbols(tensors);
         List<Character> forbidden = new ArrayList<>();
         for (SimpleTensor tensor : simpleTensors) {
-            String name = CC.getNameDescriptor(tensor.getName()).getName(tensor.getIndices());
+            String name = CC.getVarDescriptor(tensor.getName()).getName(tensor.getIndices(), CC.getDefaultOutputFormat());
             try {
                 Integer.parseInt(name.substring(1));
                 forbidden.add(name.charAt(0));

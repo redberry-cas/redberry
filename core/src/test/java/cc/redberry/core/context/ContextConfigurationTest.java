@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2015:
+ * Copyright (c) 2010-2016:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -20,32 +20,17 @@
  * You should have received a copy of the GNU General Public License
  * along with Redberry. If not, see <http://www.gnu.org/licenses/>.
  */
-package cc.redberry.core.tensor;
+package cc.redberry.core.context;
 
-import cc.redberry.core.context.CC;
-
-import java.util.Arrays;
+import org.junit.Test;
 
 /**
- *
- * @author Dmitry Bolotin
- * @author Stanislav Poslavsky
- * @since 1.0
+ * Created by poslavsky on 02/08/16.
  */
-public class TensorException extends RuntimeException {
+public class ContextConfigurationTest {
+    @Test
+    public void testClone() throws Exception {
+        System.out.println(new ContextConfiguration().clone());
 
-    Tensor[] tensors;
-
-    public TensorException(String message, Tensor... tensors) {
-        super("\"" + message + "\" in tensors " + Arrays.toString(tensors) + "\n random seed: " + CC.current().getSeed());
-        this.tensors = tensors;
-    }
-
-    public TensorException(String message) {
-        super(message + "\n random seed: " + CC.current().getSeed());
-    }
-
-    public TensorException(Tensor... tensor) {
-        this("Exception", tensor);
     }
 }

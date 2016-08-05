@@ -23,6 +23,7 @@
 package cc.redberry.core.indexmapping;
 
 import cc.redberry.core.context.CC;
+import cc.redberry.core.context.IndexConverterManager;
 import org.junit.Ignore;
 
 import java.util.Collections;
@@ -69,7 +70,7 @@ public class IndexMappingTestUtils {
     @SuppressWarnings("unchecked")
     private static int parseIndex(String str) {
         int state = str.charAt(0) == '^' ? 0x80000000 : 0;
-        int index = CC.getIndexConverterManager().getCode(str.substring(1));
+        int index = IndexConverterManager.DEFAULT.getCode(str.substring(1));
         index |= state;
         return index;
     }

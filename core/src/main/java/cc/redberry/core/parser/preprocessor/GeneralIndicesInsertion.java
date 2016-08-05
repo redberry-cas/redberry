@@ -24,7 +24,7 @@ package cc.redberry.core.parser.preprocessor;
 
 import cc.redberry.core.context.CC;
 import cc.redberry.core.context.NameAndStructureOfIndices;
-import cc.redberry.core.context.NameDescriptor;
+import cc.redberry.core.context.VarDescriptor;
 import cc.redberry.core.indexgenerator.IndexGeneratorImpl;
 import cc.redberry.core.indices.*;
 import cc.redberry.core.parser.*;
@@ -66,11 +66,11 @@ public class GeneralIndicesInsertion implements ParseTokenTransformer {
      * @param omittedIndexType type of indices that may be omitted
      */
     public void addInsertionRule(SimpleTensor tensor, IndexType omittedIndexType) {
-        addInsertionRule(CC.getNameDescriptor(tensor.getName()), omittedIndexType);
+        addInsertionRule(CC.getVarDescriptor(tensor.getName()), omittedIndexType);
     }
 
-    public void addInsertionRule(NameDescriptor nd, IndexType omittedIndexType) {
-        NameAndStructureOfIndices originalStructureAndName = NameDescriptor.extractKey(nd);
+    public void addInsertionRule(VarDescriptor nd, IndexType omittedIndexType) {
+        NameAndStructureOfIndices originalStructureAndName = nd.getKey();
         StructureOfIndices structure = nd.getStructureOfIndices();
 
         if (structure.getTypeData(omittedIndexType.getType()).length == 0)
@@ -187,18 +187,16 @@ public class GeneralIndicesInsertion implements ParseTokenTransformer {
             int[] allCounts;
             BitArray[] states;
             for (omitted = 1; omitted <= keys.length; ++omitted) {
-                allCounts = originalStructureAndName.getStructure()[0].getTypesCounts();
-                states = originalStructureAndName.getStructure()[0].getStates();
+                allCounts = originalStructureAndName.getStructureOfIndices().getTypesCounts();
+                states = originalStructureAndName.getStructureOfIndices().getStates();
                 for (i = 0; i < toOmit.length; ++i)
                     if ((omitted & (1 << i)) != 0) {
                         allCounts[toOmit[i].getType()] = 0;
                         states[toOmit[i].getType()] = states[toOmit[i].getType()] == null ?
                                 null : BitArray.EMPTY;
                     }
-                StructureOfIndices[] structures = originalStructureAndName.getStructure().clone();
-                structures[0] = StructureOfIndices.create(allCounts, states);
-                keys[omitted - 1] = new NameAndStructureOfIndices(originalStructureAndName.getName(),
-                        structures);
+                StructureOfIndices structures = StructureOfIndices.create(allCounts, states);
+                keys[omitted - 1] = new NameAndStructureOfIndices(originalStructureAndName.getName(), structures);
             }
             return keys;
         }
@@ -391,8 +389,8 @@ public class GeneralIndicesInsertion implements ParseTokenTransformer {
         public SimpleTransformer(ParseTokenSimpleTensor node, InsertionRule insertionRule) {
             this.node = node;
             //this.insertionRule = insertionRule;
-            StructureOfIndices originalStructure = insertionRule.originalStructureAndName.getStructure()[0];
-            StructureOfIndices currentStructure = node.getIndicesTypeStructureAndName().getStructure()[0];
+            StructureOfIndices originalStructure = insertionRule.originalStructureAndName.getStructureOfIndices();
+            StructureOfIndices currentStructure = node.getIndicesTypeStructureAndName().getStructureOfIndices();
             for (IndexType type : insertionRule.indicesAllowedToOmit)
                 if (currentStructure.getStates(type).size() == 0) {
                     BitArray originalStates = originalStructure.getStates(type);

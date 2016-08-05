@@ -40,13 +40,32 @@ public interface VarIndicesProvider {
     SimpleIndices compute(SimpleIndices self, Indices... indices);
 
     /**
+     * Whether i-th argument propagates indices to outer environment. For example, Expand[x_a*(y_b + z_b)] propagates
+     * indices as is, while for abstract f_ab[x_a] indices of argument are irrelevant
+     *
+     * @param i index of argument
+     */
+    boolean propagatesIndices(int i);
+
+    /**
+     * Returns whether any of arguments should propagate its indices outside of the field scope (like e.g. Expand[x_a])
+     *
+     * @return whether any of arguments should propagate its indices outside of the field scope (like e.g. Expand[x_a])
+     */
+    boolean propagatesIndices();
+
+    /**
      * Returns indices of head (indices of arguments are irrelevant)
      */
     VarIndicesProvider SelfIndices = new VarIndicesProvider() {
         @Override
-        public SimpleIndices compute(SimpleIndices self, Indices... indices) {
-            return self;
-        }
+        public SimpleIndices compute(SimpleIndices self, Indices... indices) {return self;}
+
+        @Override
+        public boolean propagatesIndices(int i) {return false;}
+
+        @Override
+        public boolean propagatesIndices() {return false;}
     };
 
     /**
@@ -60,5 +79,11 @@ public interface VarIndicesProvider {
             SimpleIndices argIndices = IndicesFactory.createSimple(null, indices[0]);
             return UnsafeIndicesFactory.createOfTensor(IndicesSymmetries.create(argIndices.getStructureOfIndices()), argIndices);
         }
+
+        @Override
+        public boolean propagatesIndices(int i) {return i == 0;}
+
+        @Override
+        public boolean propagatesIndices() {return true;}
     };
 }

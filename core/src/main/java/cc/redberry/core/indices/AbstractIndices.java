@@ -24,6 +24,7 @@ package cc.redberry.core.indices;
 
 import cc.redberry.core.context.CC;
 import cc.redberry.core.context.Context;
+import cc.redberry.core.context.IndexConverterManager;
 import cc.redberry.core.context.OutputFormat;
 import cc.redberry.core.utils.IntArray;
 import cc.redberry.core.utils.IntArrayList;
@@ -134,7 +135,7 @@ abstract class AbstractIndices implements Indices {
                 currentState = data[i] >>> 31;
                 if (currentState == 1) sb.append(format.upperIndexPrefix);
                 else sb.append(format.lowerIndexPrefix);
-                sb.append(Context.get().getIndexConverterManager().getSymbol(data[i], format));
+                sb.append(IndexConverterManager.DEFAULT.getSymbol(data[i], format));
                 if (i == data.length - 1)
                     break;
                 sb.append(",");
@@ -151,7 +152,7 @@ abstract class AbstractIndices implements Indices {
             if (!metricIndices.isEmpty()) {
                 sb.append("_{");
                 for (int i = 0, size = metricIndices.size() - 1; ; ++i) {
-                    sb.append(Context.get().getIndexConverterManager().getSymbol(metricIndices.get(i), format));
+                    sb.append(IndexConverterManager.DEFAULT.getSymbol(metricIndices.get(i), format));
                     if (i == size)
                         break;
                     sb.append(' ');
@@ -169,7 +170,7 @@ abstract class AbstractIndices implements Indices {
                         sb.append('}').append(format.getPrefixFromIntState(currentState)).append('{');
                         lastState = currentState;
                     }
-                    sb.append(Context.get().getIndexConverterManager().getSymbol(nonMetricIndices.get(i), format));
+                    sb.append(IndexConverterManager.DEFAULT.getSymbol(nonMetricIndices.get(i), format));
 
                     if (i == size)
                         break;
@@ -193,7 +194,7 @@ abstract class AbstractIndices implements Indices {
                     sb.append(latexBrackets).append(format.getPrefixFromIntState(currentState)).append('{');
                     lastState = currentState;
                 }
-                sb.append(Context.get().getIndexConverterManager().getSymbol(data[i], format));
+                sb.append(IndexConverterManager.DEFAULT.getSymbol(data[i], format));
                 ++totalToPrint;
             }
             sb.append('}');

@@ -901,6 +901,10 @@ public final class Product extends MultiTensor {
                 SimpleTensor st = (SimpleTensor) data[0];
                 hashCodes[0] = HashingStrategy.iGraphHashWithoutIndices(st);
                 iHashCodes[0] = HashingStrategy.iGraphHash(st, sortedIndices);
+            } else if (data[0] instanceof TensorField) {
+                TensorField st = (TensorField) data[0];
+                hashCodes[0] = HashingStrategy.iGraphHashWithoutIndices(st);
+                iHashCodes[0] = HashingStrategy.iGraphHash(st, sortedIndices);
             } else {
                 hashCodes[0] = data[0].hashCode();
                 iHashCodes[0] = HashingStrategy.iHash(data[0], sortedIndices);

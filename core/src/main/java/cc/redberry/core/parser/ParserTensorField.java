@@ -84,7 +84,7 @@ public class ParserTensorField implements TokenParser {
         String argString = expression.substring(expression.indexOf("[") + 1, expression.length() - 1);
 
         List<ParseToken> arguments = new ArrayList<>();
-        List<Indices> indices = new ArrayList<>();
+        List<SimpleIndices> indices = new ArrayList<>();
 
         int beginIndex = 0, level = 0;
         char[] argsChars = argString.toCharArray();
@@ -115,20 +115,12 @@ public class ParserTensorField implements TokenParser {
                 --level;
         }
 
-        //todo fix CORE-106
-        //Sqrt[x]
-        if (simpleTensorNode.name.toLowerCase().equals("sqrt")
-                && simpleTensorNode.indices.size() == 0
-                && arguments.size() == 1
-                && arguments.get(0).getIndices().getFree().size() == 0)
-            return new ParseToken(TokenType.Power, new ParseToken[]{arguments.get(0), new ParseTokenNumber(Complex.ONE_HALF)});
-
+        //TODO replace with TensorField
         if (simpleTensorNode.name.toLowerCase().equals("tr"))
             return new ParseToken(TokenType.Trace, arguments.toArray(new ParseToken[arguments.size()]));
 
         return new ParseTokenTensorField(
-                simpleTensorNode.indices,
-                simpleTensorNode.name,
+                simpleTensorNode,
                 arguments.toArray(new ParseToken[arguments.size()]),
                 indices.toArray(new SimpleIndices[indices.size()]));
     }

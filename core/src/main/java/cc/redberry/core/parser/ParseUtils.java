@@ -43,8 +43,7 @@ import java.util.Set;
  * @author Stanislav Poslavsky
  * @since 1.0
  */
-public class ParseUtils {
-
+public final class ParseUtils {
     private ParseUtils() {
     }
 
@@ -85,7 +84,7 @@ public class ParseUtils {
             int i = 0;
             for (Tensor t : tf)
                 content[i++] = tensor2AST(t);
-            return new ParseTokenTensorField(tf.getIndices(), tf.getStringName(), content, tf.getArgIndices());
+            return new ParseTokenTensorField((ParseTokenSimpleTensor) tensor2AST(tf.getHead()), content, tf.getArgIndices());
         }
         if (tensor instanceof SimpleTensor) {
             SimpleTensor st = (SimpleTensor) tensor;

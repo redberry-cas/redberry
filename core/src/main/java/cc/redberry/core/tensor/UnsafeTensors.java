@@ -1,7 +1,7 @@
 /*
  * Redberry: symbolic tensor computations.
  *
- * Copyright (c) 2010-2015:
+ * Copyright (c) 2010-2016:
  *   Stanislav Poslavsky   <stvlpos@mail.ru>
  *   Bolotin Dmitriy       <bolotin.dmitriy@gmail.com>
  *
@@ -22,30 +22,16 @@
  */
 package cc.redberry.core.tensor;
 
-import cc.redberry.core.context.CC;
-
-import java.util.Arrays;
+import cc.redberry.core.indices.IndicesFactory;
 
 /**
- *
- * @author Dmitry Bolotin
  * @author Stanislav Poslavsky
- * @since 1.0
  */
-public class TensorException extends RuntimeException {
-
-    Tensor[] tensors;
-
-    public TensorException(String message, Tensor... tensors) {
-        super("\"" + message + "\" in tensors " + Arrays.toString(tensors) + "\n random seed: " + CC.current().getSeed());
-        this.tensors = tensors;
+public final class UnsafeTensors {
+    private UnsafeTensors() {
     }
 
-    public TensorException(String message) {
-        super(message + "\n random seed: " + CC.current().getSeed());
-    }
-
-    public TensorException(Tensor... tensor) {
-        this("Exception", tensor);
+    public static SimpleTensor symbol(int id) {
+        return new SimpleTensor(id, IndicesFactory.EMPTY_SIMPLE_INDICES);
     }
 }
