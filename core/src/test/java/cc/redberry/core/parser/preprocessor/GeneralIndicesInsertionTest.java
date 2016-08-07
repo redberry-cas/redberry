@@ -25,7 +25,9 @@ package cc.redberry.core.parser.preprocessor;
 import cc.redberry.core.TAssert;
 import cc.redberry.core.context.CC;
 import cc.redberry.core.context.OutputFormat;
+import cc.redberry.core.context.VarIndicesProvider;
 import cc.redberry.core.indices.IndexType;
+import cc.redberry.core.indices.StructureOfIndices;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -112,8 +114,8 @@ public class GeneralIndicesInsertionTest {
     public void test5() {
         GeneralIndicesInsertion indicesInsertion = new GeneralIndicesInsertion();
         CC.current().getParseManager().defaultParserPreprocessors.add(indicesInsertion);
-        indicesInsertion.addInsertionRule(parseSimple("f^a'A'_b'B'[x]"), IndexType.Matrix1);
-        indicesInsertion.addInsertionRule(parseSimple("f^a'A'_b'B'[x]"), IndexType.Matrix2);
+        indicesInsertion.addInsertionRule(parseSimple("f^a'A'_b'B'"), IndexType.Matrix1);
+        indicesInsertion.addInsertionRule(parseSimple("f^a'A'_b'B'"), IndexType.Matrix2);
 
         System.out.println(parse("f[x] = 1 + c").toString(OutputFormat.Redberry));
         TAssert.assertEquals(parse("f[x] = 1 + c"), "f^{a'}_{b'}^{A'}_{B'}[x] = (c+1)*d^{a'}_{b'}*d^{A'}_{B'}");
@@ -145,8 +147,8 @@ public class GeneralIndicesInsertionTest {
         GeneralIndicesInsertion gii = new GeneralIndicesInsertion();
         CC.current().getParseManager().defaultParserPreprocessors.add(gii);
         gii.addInsertionRule(parseSimple("G_m^a'_b'"), IndexType.Matrix1);
-        gii.addInsertionRule(parseSimple("pv_a'[p2_m]"), IndexType.Matrix1);
-        gii.addInsertionRule(parseSimple("v^a'[p2_m]"), IndexType.Matrix1);
+        gii.addInsertionRule(parseSimple("pv_a'"), IndexType.Matrix1);
+        gii.addInsertionRule(parseSimple("v^a'"), IndexType.Matrix1);
         TAssert.assertEquals(parse("v[p2_m]*pv[p2_m] = m + p2^m*G_m"),
                 "v^a'[p2_m]*pv_b'[p2_m] = m*d^a'_b' + p2^m*G^a'_{b' m}");
     }
@@ -182,5 +184,15 @@ public class GeneralIndicesInsertionTest {
         indicesInsertion.addInsertionRule(parseSimple("A^a'_b'"), IndexType.Matrix1);
         indicesInsertion.addInsertionRule(parseSimple("B^a'b'_c'd'e'"), IndexType.Matrix1);
         TAssert.assertEquals(parse("A*B"), "A^{a'}_{f'}*B^{f'b'}_{c'd'e'}");
+    }
+
+    @Test
+    public void test11() throws Exception {
+        GeneralIndicesInsertion indicesInsertion = new GeneralIndicesInsertion();
+        CC.current().getParseManager().defaultParserPreprocessors.add(indicesInsertion);
+        indicesInsertion.addInsertionRule(parseSimple("A^a'_b'"), IndexType.Matrix1);
+        indicesInsertion.addInsertionRule(parseSimple("B^a'_b'"), IndexType.Matrix1);
+        CC.getNameManager().resolve("Expand", StructureOfIndices.getEmpty(), VarIndicesProvider.FirstArg);
+        TAssert.assertEquals(parse("A*Expand[A*B]*B"), "A^{a'}_{c'}*Expand[A^{c'}_{e'}*B^{e'}_{d'}]*B^{d'}_{b'}");
     }
 }

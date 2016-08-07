@@ -145,7 +145,12 @@ public class GeneralIndicesInsertion implements ParseTokenTransformer {
     private void transformInsideFieldsAndScalarFunctions(ParseToken pn) {
         if (pn.tokenType == TokenType.TensorField) {
             ParseTokenTensorField pntf = (ParseTokenTensorField) pn;
+            VarDescriptor headDescriptor = CC.getNameManager().getVarDescriptor(pntf.head.getIndicesTypeStructureAndName());
+            if (headDescriptor == null)
+                return;
             for (int i = 0; i < pn.content.length; ++i) {
+                if (headDescriptor.propagatesIndices(i))//this will be transformed directly in transformer
+                    continue;
                 ParseToken newArgNode = transform(pntf.content[i]);
                 pntf.content[i] = newArgNode;
                 newArgNode.parent = pntf;
@@ -319,11 +324,35 @@ public class GeneralIndicesInsertion implements ParseTokenTransformer {
                     return null;
                 return new TraceTransformer(innerTransformer, types);
             case TensorField:
+                List<IITransformer> list = new ArrayList<>();
+                ParseTokenTensorField fieldNode = (ParseTokenTensorField) node;
+                final IITransformer headTransformer = createTransformer(fieldNode.head);
+                if (headTransformer != null)
+                    list.add(headTransformer);
+
+                VarDescriptor headDescriptor = CC.getNameManager().getVarDescriptor(fieldNode.head.getIndicesTypeStructureAndName());
+                if (headDescriptor != null)
+                    for (int j = 0; j < node.content.length; ++j) {
+                        if (headDescriptor.propagatesIndices(j)) {
+                            ParseToken _node = node.content[j];
+                            if ((t = createTransformer(_node)) != null)
+                                list.add(t);
+                        }
+                    }
+
+                if (list.isEmpty())
+                    return null;
+                IITransformer transformer;
+                if (list.size() == 1)
+                    transformer = list.get(0);
+                else
+                    transformer = new ProductTransformer(list.toArray(new IITransformer[list.size()]));
+
+                return new TensorFieldTransformer(fieldNode, headDescriptor, transformer);
             case SimpleTensor:
                 InsertionRule rule = mappedRules.get(((ParseTokenSimpleTensor) node).getIndicesTypeStructureAndName());
                 if (rule != null)
-                    return new SimpleTransformer((ParseTokenSimpleTensor) node,
-                            rule);
+                    return new SimpleTransformer((ParseTokenSimpleTensor) node, rule);
                 else
                     return null;
             case Product:
@@ -381,6 +410,46 @@ public class GeneralIndicesInsertion implements ParseTokenTransformer {
         void apply(IndexGeneratorImpl generator, int[][] upper, int[][] lower);
     }
 
+//    private static class TensorFieldTransformer implements IITransformer {
+//        private final ParseTokenTensorField node;
+//        //private final InsertionRule insertionRule;
+//        private final OuterIndices outerIndices = new OuterIndices();
+//
+//        public TensorFieldTransformer(ParseTokenTensorField node, InsertionRule insertionRule) {
+//            this.node = node;
+//            //this.insertionRule = insertionRule;
+//            StructureOfIndices originalStructure = insertionRule.originalStructureAndName.getStructureOfIndices();
+//            StructureOfIndices currentStructure = node.getIndicesTypeStructureAndName().getStructureOfIndices();
+//            for (IndexType type : insertionRule.indicesAllowedToOmit)
+//                if (currentStructure.getStates(type).size() == 0) {
+//                    BitArray originalStates = originalStructure.getStates(type);
+//                    if (originalStates != null) {
+//                        outerIndices.upper[type.getType()] = originalStates.bitCount();
+//                        outerIndices.lower[type.getType()] = originalStates.size() - outerIndices.upper[type.getType()];
+//                    } else {
+//                        outerIndices.upper[type.getType()] = outerIndices.lower[type.getType()]
+//                                = originalStructure.typeCount(type.getType()) / 2;
+//                    }
+//                } else if (currentStructure.typeCount(type.getType()) !=
+//                        originalStructure.typeCount(type.getType()))
+//                    throw new IllegalArgumentException();
+//            outerIndices.init();
+//        }
+//
+//        @Override
+//        public OuterIndices getOuterIndices() {
+//            return outerIndices;
+//        }
+//
+//        @Override
+//        public void apply(IndexGeneratorImpl generator, int[][] upper, int[][] lower) {
+//            SimpleIndices oldIndices = node.indices;
+//            int[] result = ArraysUtils.addAll(oldIndices.getAllIndices().copy(), ArraysUtils.addAll(upper),
+//                    ArraysUtils.addAll(lower));
+//            node.indices = IndicesFactory.createSimple(null, result);
+//        }
+//    }
+
     private static class SimpleTransformer implements IITransformer {
         private final ParseTokenSimpleTensor node;
         //private final InsertionRule insertionRule;
@@ -418,6 +487,35 @@ public class GeneralIndicesInsertion implements ParseTokenTransformer {
             int[] result = ArraysUtils.addAll(oldIndices.getAllIndices().copy(), ArraysUtils.addAll(upper),
                     ArraysUtils.addAll(lower));
             node.indices = IndicesFactory.createSimple(null, result);
+        }
+    }
+
+    private static class TensorFieldTransformer implements IITransformer {
+        final ParseTokenTensorField tf;
+        final VarDescriptor headDescriptor;
+        final IITransformer productTransformer;
+
+        public TensorFieldTransformer(ParseTokenTensorField tf, VarDescriptor headDescriptor, IITransformer productTransformer) {
+            this.tf = tf;
+            this.headDescriptor = headDescriptor;
+            this.productTransformer = productTransformer;
+        }
+
+        @Override
+        public OuterIndices getOuterIndices() {
+            return productTransformer.getOuterIndices();
+        }
+
+        @Override
+        public void apply(IndexGeneratorImpl generator, int[][] upper, int[][] lower) {
+            productTransformer.apply(generator, upper, lower);
+            for (int i = 0; i < tf.argumentsIndices.length; ++i) {
+                if (!headDescriptor.propagatesIndices(i))
+                    continue;
+                SimpleIndices aI = tf.argumentsIndices[i];
+                if (!aI.getFree().equalsRegardlessOrder(tf.content[i].getIndices().getFree()))
+                    tf.argumentsIndices[i] = IndicesFactory.createSimple(null, tf.content[i].getIndices().getFree());
+            }
         }
     }
 

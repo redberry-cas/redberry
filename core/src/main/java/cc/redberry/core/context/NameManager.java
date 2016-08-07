@@ -112,6 +112,10 @@ public final class NameManager {
         return resolve(name, structureOfIndices, VarIndicesProvider.SelfIndices);
     }
 
+    public VarDescriptor getVarDescriptor(NameAndStructureOfIndices st) {
+        return namesTable.get(st);
+    }
+
     synchronized void addNameAlias(final VarDescriptor nd, String alias) {
         nd.aliases.add(alias);
         namesTable.put(new NameAndStructureOfIndices(alias, nd.varIndicesStructure), nd);

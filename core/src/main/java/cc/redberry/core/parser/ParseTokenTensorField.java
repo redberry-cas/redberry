@@ -61,6 +61,10 @@ public class ParseTokenTensorField extends ParseToken {
         super(TokenType.TensorField, content);
         this.head = head;
         this.argumentsIndices = argumentsIndices;
+        computeResultingIndices();
+    }
+
+    public void computeResultingIndices() {
         for (int i = 0; i < content.length; ++i)
             if (argumentsIndices[i] == null)
                 argumentsIndices[i] = IndicesFactory.createSimple(null, content[i].getIndices().getFree());
@@ -85,6 +89,7 @@ public class ParseTokenTensorField extends ParseToken {
 
     @Override
     public Tensor toTensor() {
+        computeResultingIndices();
 //        int i;
 //        if ((i = name.indexOf('~')) >= 0) {
 //            String ordersDescriptor = name.substring(i + 1);
