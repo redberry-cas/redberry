@@ -588,16 +588,23 @@ public final class ApplyIndexMapping {
             TensorField tf = (TensorField) tensor;
             SimpleTensor newHead = (SimpleTensor) applyIndexMapping(tf.getHead(), indexMapper, contractIndices);
             final VarDescriptor descr = newHead.getVarDescriptor();
-            if (descr.propagatesIndices()) {
-                Tensor[] newArgs = new Tensor[tf.size()];
+            Tensor[] newArgs = null;
+            if (descr.propagatesIndices())
                 for (int i = tf.size() - 1; i >= 0; --i)
-                    if (descr.propagatesIndices(i))
-                        newArgs[i] = applyIndexMapping(tf.get(i), indexMapper, contractIndices);
-                    else newArgs[i] = tf.get(i);
-                return Tensors.field(newHead, newArgs);
-            } else
-                return Tensors.field(newHead, tf.args, tf.argIndices);
+                    if (descr.propagatesIndices(i)) {
+                        Tensor newArg = applyIndexMapping(tf.args[i], indexMapper, contractIndices);
+                        if (newArg != tf.args[i]) {
+                            if (newArgs == null)
+                                newArgs = tf.args.clone();
+                            newArgs[i] = newArg;
+                        }
+                    }
 
+            if (tf.head == newHead && newArgs == null)
+                return tensor;
+            if (newArgs == null)
+                newArgs = tf.args;
+            return Tensors.field(newHead, newArgs);
         }
         if (tensor instanceof Complex || tensor instanceof ScalarFunction)
             return tensor;
@@ -703,24 +710,26 @@ public final class ApplyIndexMapping {
         }
 
         if (tensor instanceof TensorField) {
-            TensorField f = (TensorField) tensor;
-            SimpleTensor head = f.getHead(), newHead = (SimpleTensor) mapping.transform(head);
+            TensorField tf = (TensorField) tensor;
+            SimpleTensor head = tf.getHead(), newHead = (SimpleTensor) mapping.transform(head);
             final VarDescriptor descriptor = head.getVarDescriptor();
             Tensor[] args = null;
             if (descriptor.propagatesIndices())
-                for (int i = 0; i < f.size(); ++i)
+                for (int i = tf.size() - 1; i >= 0; --i)
                     if (descriptor.propagatesIndices(i)) {
-                        Tensor arg = f.args[i];
+                        Tensor arg = tf.args[i];
                         Tensor newArg = mapping.transform(arg);
                         if (arg != newArg) {
                             if (args == null)
-                                args = f.args.clone();
+                                args = tf.args.clone();
                             args[i] = newArg;
                         }
                     }
             if (head == newHead && args == null)
                 return tensor;
-            else return Tensors.field(newHead, args);
+            if (args == null)
+                args = tf.args;
+            return Tensors.field(newHead, args);
         }
 
         if (tensor instanceof Complex || tensor instanceof ScalarFunction)
@@ -851,15 +860,16 @@ public final class ApplyIndexMapping {
         if (tensor instanceof TensorField) {
             TensorField field = (TensorField) tensor;
             Tensor[] args = null;
-            SimpleIndices[] argsIndices = null;
             Tensor arg;
 
             //indices of arg to be renamed
             int[] _from, _to;
-            IndexMapper mapping;
             int j;
             int[] _forbidden = forbidden.toArray();
+            VarDescriptor headDescriptor = field.getHead().getVarDescriptor();
             for (int i = field.size() - 1; i >= 0; --i) {
+                if (headDescriptor.propagatesIndices(i))
+                    continue;
                 arg = field.args[i];
                 _from = TensorUtils.getAllIndicesNamesT(arg).toArray();
                 IndexGeneratorImpl ig = new IndexGeneratorImpl(ArraysUtils.addAll(_forbidden, _from));
@@ -871,14 +881,11 @@ public final class ApplyIndexMapping {
                     else _to[j] = _from[j];
                     forbidden.add(_to[j]);
                 }
-                arg = applyIndexMapping(arg, mapping = new IndexMapper(_from, _to));
+                arg = applyIndexMapping(arg, new IndexMapper(_from, _to));
                 if (arg != field.args[i]) {
-                    if (args == null) {
+                    if (args == null)
                         args = field.args.clone();
-                        argsIndices = field.argIndices.clone();
-                    }
                     args[i] = arg;
-                    argsIndices[i] = field.argIndices[i].applyIndexMapping(mapping);
                 }
             }
 
@@ -923,7 +930,7 @@ public final class ApplyIndexMapping {
 //            }
             if (args == null)
                 return tensor;
-            return Tensors.field(field.head, args, argsIndices);
+            return Tensors.field(field.head, args);
         }
         //further straightforward
         if (tensor instanceof Product) {
