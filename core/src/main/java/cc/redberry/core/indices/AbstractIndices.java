@@ -95,7 +95,17 @@ abstract class AbstractIndices implements Indices {
         return data[position];
     }
 
-//    @Override
+    /**
+     * Returns whether there are contracted indices
+     *
+     * @return whether there are contracted indices
+     */
+    @Override
+    public boolean hasContracted() {
+        return size() > 1 && size() != getFree().size();
+    }
+
+    //    @Override
 //    public boolean containsSubIndices(Indices subIndices) {
 //        int pointer = 0, index;
 //        for (int s = 0; s < subIndices.size(); ++s) {
@@ -115,7 +125,7 @@ abstract class AbstractIndices implements Indices {
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public final boolean equals(Object obj) {
         if (obj == null)
             return false;
         if (!(obj instanceof AbstractIndices))

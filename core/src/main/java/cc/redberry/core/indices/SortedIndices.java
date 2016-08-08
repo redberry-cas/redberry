@@ -121,7 +121,9 @@ final class SortedIndices extends AbstractIndices {
 
     @Override
     public Indices getFree() {
-        IntArrayList list = new IntArrayList();
+        if (data.length < 1)
+            return this;
+        IntArrayList list = new IntArrayList(data.length);
         int u, l;
         int iLower = firstLower, iUpper = 0;
         for (; iUpper < firstLower && iLower < data.length; ++iLower, ++iUpper) {
@@ -137,6 +139,8 @@ final class SortedIndices extends AbstractIndices {
         }
         list.add(data, iUpper, firstLower - iUpper);
         list.add(data, iLower, data.length - iLower);
+        if (list.size() == data.length)
+            return this;
         return IndicesFactory.create(list.toArray());
     }
 

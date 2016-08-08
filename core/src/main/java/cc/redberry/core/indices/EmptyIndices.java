@@ -156,6 +156,16 @@ class EmptyIndices implements Indices {
     }
 
     /**
+     * Returns whether there are contracted indices
+     *
+     * @return whether there are contracted indices
+     */
+    @Override
+    public boolean hasContracted() {
+        return false;
+    }
+
+    /**
      * Do nothing.
      *
      * @param mapping

@@ -144,6 +144,13 @@ public interface Indices {
     Indices getOfType(IndexType type);
 
     /**
+     * Returns whether there are contracted indices
+     *
+     * @return whether there are contracted indices
+     */
+    boolean hasContracted();
+
+    /**
      * Returns {@code true} if this {@code Indices} object contains exactly same
      * indices as specified one, without taking into account the relative ordering of indices.
      *

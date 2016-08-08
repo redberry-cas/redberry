@@ -68,7 +68,7 @@ abstract class AbstractSimpleIndices extends AbstractIndices implements SimpleIn
     }
 
     @Override
-    public SimpleIndices getUpper() {
+    public final SimpleIndices getUpper() {
         UpperLowerIndices ul = getUpperLowerIndices();
         if (ul.upper.length == 0)
             return EmptySimpleIndices.EMPTY_SIMPLE_INDICES_INSTANCE;
@@ -77,7 +77,7 @@ abstract class AbstractSimpleIndices extends AbstractIndices implements SimpleIn
     }
 
     @Override
-    public SimpleIndices getLower() {
+    public final SimpleIndices getLower() {
         UpperLowerIndices ul = getUpperLowerIndices();
         if (ul.lower.length == 0)
             return EmptySimpleIndices.EMPTY_SIMPLE_INDICES_INSTANCE;
@@ -86,7 +86,7 @@ abstract class AbstractSimpleIndices extends AbstractIndices implements SimpleIn
     }
 
     @Override
-    protected UpperLowerIndices calculateUpperLower() {
+    protected final UpperLowerIndices calculateUpperLower() {
         int upperCount = 0;
         for (int index : data)
             if ((index & 0x80000000) == 0x80000000)
@@ -103,7 +103,7 @@ abstract class AbstractSimpleIndices extends AbstractIndices implements SimpleIn
     }
 
     @Override
-    public int size(IndexType type) {
+    public final int size(IndexType type) {
         int type_ = type.getType() << 24;
         int i = 0;
         for (; i < data.length && (data[i] & 0x7F000000) != type_; ++i) ;
@@ -113,7 +113,7 @@ abstract class AbstractSimpleIndices extends AbstractIndices implements SimpleIn
     }
 
     @Override
-    public int get(IndexType type, int position) {
+    public final int get(IndexType type, int position) {
         int type_ = type.getType() << 24;
         int i;
         for (i = 0; i < data.length && (data[i] & 0x7F000000) != type_; ++i) ;
@@ -124,7 +124,7 @@ abstract class AbstractSimpleIndices extends AbstractIndices implements SimpleIn
     }
 
     @Override
-    public SimpleIndices getInverted() {
+    public final SimpleIndices getInverted() {
         int[] dataInv = new int[data.length];
         for (int i = 0; i < data.length; ++i)
             dataInv[i] = data[i] ^ 0x80000000;
@@ -132,8 +132,10 @@ abstract class AbstractSimpleIndices extends AbstractIndices implements SimpleIn
     }
 
     @Override
-    public SimpleIndices getFree() {
-        IntArrayList dataList = new IntArrayList();
+    public final SimpleIndices getFree() {
+        if (data.length == 1)
+            return UnsafeIndicesFactory.createIsolatedUnsafeWithoutSort(null, data);
+        final IntArrayList dataList = new IntArrayList();
         boolean y;
         for (int i = 0; i < data.length; i++) {
             y = true;
@@ -145,11 +147,13 @@ abstract class AbstractSimpleIndices extends AbstractIndices implements SimpleIn
             if (y)
                 dataList.add(data[i]);
         }
+        if (dataList.size() == size())//prevent additional memory allocation
+            return UnsafeIndicesFactory.createIsolatedUnsafeWithoutSort(null, data);
         return UnsafeIndicesFactory.createIsolatedUnsafeWithoutSort(null, dataList.toArray());
     }
 
     @Override
-    public int[] getNamesOfDummies() {
+    public final int[] getNamesOfDummies() {
         IntArrayList dataList = new IntArrayList();
         for (int i = 0; i < data.length; i++)
             for (int j = i + 1; j < data.length; ++j) {
@@ -162,7 +166,7 @@ abstract class AbstractSimpleIndices extends AbstractIndices implements SimpleIn
     }
 
     @Override
-    public SimpleIndices getOfType(IndexType type) {
+    public final SimpleIndices getOfType(IndexType type) {
         int type_ = type.getType() << 24;
         int i = 0;
         for (; i < data.length && (data[i] & 0x7F000000) != type_; ++i) ;
@@ -177,7 +181,7 @@ abstract class AbstractSimpleIndices extends AbstractIndices implements SimpleIn
     }
 
     @Override
-    public SimpleIndices applyIndexMapping(IndexMapping mapping) {
+    public final SimpleIndices applyIndexMapping(IndexMapping mapping) {
         boolean changed = false;
         int newIndex;
         int[] data_ = data.clone();
@@ -197,7 +201,7 @@ abstract class AbstractSimpleIndices extends AbstractIndices implements SimpleIn
     abstract SimpleIndices create(int[] data, IndicesSymmetries symmetries);
 
     @Override
-    int[] getSortedData() {
+    final int[] getSortedData() {
         int[] sorted = data.clone();
         Arrays.sort(sorted);
         return sorted;
@@ -212,7 +216,7 @@ abstract class AbstractSimpleIndices extends AbstractIndices implements SimpleIn
     }
 
     @Override
-    public boolean equalsWithSymmetries(SimpleIndices indices) {
+    public final boolean equalsWithSymmetries(SimpleIndices indices) {
         if (indices.getClass() != this.getClass())
             return false;
         if (data.length != indices.size())
@@ -237,17 +241,17 @@ abstract class AbstractSimpleIndices extends AbstractIndices implements SimpleIn
     }
 
     @Override
-    public short[] getPositionsInOrbits() {
+    public final short[] getPositionsInOrbits() {
         return symmetries.getPositionsInOrbits();
     }
 
     @Override
-    public StructureOfIndices getStructureOfIndices() {
+    public final StructureOfIndices getStructureOfIndices() {
         return StructureOfIndices.create(this);
     }
 
     @Override
-    public int contractionsHash() {
+    public final int contractionsHash() {
         if (data.length == 1)
             return 0;
         if (data.length == 2) {
