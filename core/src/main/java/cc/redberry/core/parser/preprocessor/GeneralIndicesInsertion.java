@@ -510,6 +510,8 @@ public class GeneralIndicesInsertion implements ParseTokenTransformer {
         public void apply(IndexGeneratorImpl generator, int[][] upper, int[][] lower) {
             productTransformer.apply(generator, upper, lower);
             for (int i = 0; i < tf.argumentsIndices.length; ++i) {
+                if (tf.argumentsIndices[i] == null)
+                    continue;
                 if (!headDescriptor.propagatesIndices(i))
                     continue;
                 SimpleIndices aI = tf.argumentsIndices[i];

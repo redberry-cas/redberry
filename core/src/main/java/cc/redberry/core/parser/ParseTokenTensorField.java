@@ -27,6 +27,7 @@ import cc.redberry.core.indices.IndicesFactory;
 import cc.redberry.core.indices.SimpleIndices;
 import cc.redberry.core.indices.StructureOfIndices;
 import cc.redberry.core.tensor.Tensor;
+import cc.redberry.core.tensor.TensorField;
 import cc.redberry.core.tensor.Tensors;
 
 /**
@@ -42,13 +43,22 @@ public class ParseTokenTensorField extends ParseToken {
      */
     public ParseTokenSimpleTensor head;
     /**
-     * Indices of arguments.
+     * Indices of arguments (may be null).
      */
     public SimpleIndices[] argumentsIndices;
     /**
      * Field indices
      */
     public SimpleIndices indices;
+
+    /**
+     * @param head    head of this function
+     * @param content child nodes
+     */
+    public ParseTokenTensorField(ParseTokenSimpleTensor head,
+                                 ParseToken[] content) {
+        this(head, content, TensorField.nullArray(content.length).clone());
+    }
 
     /**
      * @param head             head of this function
@@ -65,11 +75,14 @@ public class ParseTokenTensorField extends ParseToken {
     }
 
     public void computeResultingIndices() {
+        final SimpleIndices[] ai = new SimpleIndices[content.length];
         for (int i = 0; i < content.length; ++i)
-            if (argumentsIndices[i] == null)
-                argumentsIndices[i] = IndicesFactory.createSimple(null, content[i].getIndices().getFree());
+            if (argumentsIndices[i] != null)
+                ai[i] = argumentsIndices[i];
+            else
+                ai[i] = IndicesFactory.createSimple(null, content[i].getIndices());
         this.indices = CC.getNameManager().resolve(head.name,
-                StructureOfIndices.create(head.indices)).computeIndices(head.indices, this.argumentsIndices);
+                StructureOfIndices.create(head.indices)).computeIndices(head.indices, ai);
     }
 
     @Override
@@ -119,6 +132,9 @@ public class ParseTokenTensorField extends ParseToken {
 //            return Tensors.fieldDerivative(fieldName, indices, argumentsIndices, contentToTensors(), orders);
 //        } else
 //            return Tensors.field(name, indices, argumentsIndices, contentToTensors());
-        return Tensors.field(head.toTensor(), contentToTensors(), argumentsIndices);
+        for (SimpleIndices ai : argumentsIndices)
+            if (ai != null)
+                return Tensors.field(head.toTensor(), contentToTensors(), argumentsIndices);
+        return Tensors.field(head.toTensor(), contentToTensors());
     }
 }

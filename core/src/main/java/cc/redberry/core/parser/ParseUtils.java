@@ -84,7 +84,7 @@ public final class ParseUtils {
             int i = 0;
             for (Tensor t : tf)
                 content[i++] = tensor2AST(t);
-            return new ParseTokenTensorField((ParseTokenSimpleTensor) tensor2AST(tf.getHead()), content, tf.getArgIndices());
+            return new ParseTokenTensorField((ParseTokenSimpleTensor) tensor2AST(tf.getHead()), content);
         }
         if (tensor instanceof SimpleTensor) {
             SimpleTensor st = (SimpleTensor) tensor;

@@ -41,7 +41,6 @@ public final class Parser {
             ParserProduct.INSTANCE,
             ParserSimpleTensor.INSTANCE,
             ParserTensorField.INSTANCE,
-            ParserDerivative.INSTANCE,
             ParserPower.INSTANCE,
             ParserNumber.INSTANCE,
             ParserFunctions.INSTANCE,

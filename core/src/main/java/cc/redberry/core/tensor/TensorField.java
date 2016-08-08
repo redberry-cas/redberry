@@ -23,7 +23,7 @@
 package cc.redberry.core.tensor;
 
 import cc.redberry.core.context.OutputFormat;
-import cc.redberry.core.indices.Indices;
+import cc.redberry.core.indices.IndicesFactory;
 import cc.redberry.core.indices.SimpleIndices;
 
 import java.util.Arrays;
@@ -57,6 +57,13 @@ public final class TensorField extends Tensor {
         this.argIndices = argIndices;
     }
 
+    TensorField(SimpleIndices indices, SimpleTensor head, Tensor[] args) {
+        this.indices = indices;
+        this.head = head;
+        this.args = args;
+        this.argIndices = nullArray(args.length);
+    }
+
     /**
      * Returns head of this function
      *
@@ -66,23 +73,14 @@ public final class TensorField extends Tensor {
         return head;
     }
 
-    /**
-     * Return arguments array
-     *
-     * @return arguments array
-     */
-    public Tensor[] getArguments() {
-        return args.clone();
-    }
-
-    /**
-     * Returns array of arguments indices
-     *
-     * @return array of arguments indices
-     */
-    public SimpleIndices[] getArgIndices() {
-        return argIndices.clone();
-    }
+//    /**
+//     * Returns array of arguments indices
+//     *
+//     * @return array of arguments indices
+//     */
+//    public SimpleIndices[] getArgIndices() {
+//        return argIndices.clone();
+//    }
 
     /**
      * Returns indices of i-th argument
@@ -91,7 +89,7 @@ public final class TensorField extends Tensor {
      * @return indices of i-th argument
      */
     public SimpleIndices getArgIndices(int i) {
-        return argIndices[i];
+        return argIndices[i] == null ? IndicesFactory.createSimple(null, args[i].getIndices().getFree()) : argIndices[i];
     }
 
     @Override
@@ -231,5 +229,21 @@ public final class TensorField extends Tensor {
                 return new TensorField(newIndices, field.head, data, field.argIndices);
             }
         }
+    }
+
+    private static final int CACHE_SIZE = 32;
+    private static final SimpleIndices[][] cache;
+
+    static {
+        //load cache
+        cache = new SimpleIndices[CACHE_SIZE][];
+        for (int i = 0; i < CACHE_SIZE; ++i)
+            cache[i] = new SimpleIndices[i];
+    }
+
+    public static SimpleIndices[] nullArray(int size) {
+        if (size < CACHE_SIZE)
+            return cache[size];
+        return new SimpleIndices[size];
     }
 }
