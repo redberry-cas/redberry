@@ -22,6 +22,8 @@
  */
 package cc.redberry.core.parser;
 
+import cc.redberry.core.context.CC;
+import cc.redberry.core.context.VarDescriptor;
 import cc.redberry.core.indices.Indices;
 import cc.redberry.core.indices.IndicesFactory;
 import cc.redberry.core.indices.IndicesUtils;
@@ -70,8 +72,14 @@ public class ParserProduct extends ParserOperator {
         if (node == null || !parser.isAllowSameVariance())
             return node;
 
+        raiseLower(node.content);
+
+        return node;
+    }
+
+    public static void raiseLower(ParseToken... content) {
         TIntHashSet indices = new TIntHashSet();
-        for (ParseToken c : node.content) {
+        for (ParseToken c : content) {
             Indices free = c.getIndices().getFree();
             for (int i = 0; i < free.size(); i++) {
                 int ind = free.get(i);
@@ -80,8 +88,6 @@ public class ParserProduct extends ParserOperator {
                 else indices.add(ind);
             }
         }
-
-        return node;
     }
 
     @Override
@@ -101,6 +107,15 @@ public class ParserProduct extends ParserOperator {
                     break;
                 }
             }
+        } else if (token instanceof ParseTokenTensorField) {
+            ParseTokenTensorField tf = (ParseTokenTensorField) token;
+            revertIndex(tf.head, index);
+            final VarDescriptor headDescriptor = CC.getNameManager().getVarDescriptor(tf.head.getIndicesTypeStructureAndName());
+            if (headDescriptor != null && headDescriptor.propagatesIndices())
+                for (int i = 0; i < tf.content.length; i++)
+                    if (headDescriptor.propagatesIndices(i))
+                        revertIndex(tf.content[i], index);
+            tf.computeResultingIndices();
         } else if (token.tokenType == TokenType.Product
                 || token.tokenType == TokenType.Trace
                 || token.tokenType == TokenType.Sum)

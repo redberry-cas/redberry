@@ -36,7 +36,6 @@ import cc.redberry.core.utils.TensorUtils;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.util.Arrays;
 import java.util.Iterator;
 
 import static cc.redberry.core.tensor.Tensors.*;
@@ -428,6 +427,11 @@ public class TensorsTest {
         Tensor a = parse("f_i + R_ijk*F^kj - R_kij*F^jk +  R_ijk*F^jk ");
         Tensor b = parse("f_i + R_ijk*F^jk + R_ijk*F^kj - R_kij*F^jk");
         TAssert.assertEquals(a, b);
+    }
+
+    @Test
+    public void testSimple1() throws Exception {
+        Assert.assertTrue(parse("a") == parse("a"));
     }
 
     @Test

@@ -297,7 +297,7 @@ public class IndexMappingsTest {
         //Expand propagates indices
         CC.getNameManager().resolve("Expand", StructureOfIndices.getEmpty(), VarIndicesProvider.FirstArg);
 
-        Tensor a = parse("f_mn*Expand[f^ma, ]");
+        Tensor a = parse("f_mn*Expand[f^ma]");
         Tensor b = parse("f_pq*Expand[f^pj]");
 
         final Set<Mapping> m = IndexMappings.getAllMappings(a, b);

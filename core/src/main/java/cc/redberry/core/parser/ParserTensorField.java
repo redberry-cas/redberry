@@ -22,9 +22,9 @@
  */
 package cc.redberry.core.parser;
 
-import cc.redberry.core.indices.Indices;
+import cc.redberry.core.context.CC;
+import cc.redberry.core.context.VarDescriptor;
 import cc.redberry.core.indices.SimpleIndices;
-import cc.redberry.core.number.Complex;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -79,7 +79,7 @@ public class ParserTensorField implements TokenParser {
             return null;
 
         String tensorPart = expression.substring(0, expression.indexOf('['));
-        ParseTokenSimpleTensor simpleTensorNode = ParserSimpleTensor.INSTANCE.parseToken(tensorPart, parser);
+        ParseTokenSimpleTensor head = ParserSimpleTensor.INSTANCE.parseToken(tensorPart, parser);
 
         String argString = expression.substring(expression.indexOf("[") + 1, expression.length() - 1);
 
@@ -116,12 +116,23 @@ public class ParserTensorField implements TokenParser {
         }
 
         //TODO replace with TensorField
-        if (simpleTensorNode.name.toLowerCase().equals("tr"))
+        if (head.name.toLowerCase().equals("tr"))
             return new ParseToken(TokenType.Trace, arguments.toArray(new ParseToken[arguments.size()]));
 
+        final ParseToken[] content = arguments.toArray(new ParseToken[arguments.size()]);
+        if (parser.isAllowSameVariance() && content.length > 0) {
+            final VarDescriptor headDescriptor = CC.getNameManager().getVarDescriptor(head.getIndicesTypeStructureAndName());
+            if (headDescriptor != null) {
+                List<ParseToken> aContent = new ArrayList<>();
+                for (int i = 0; i < content.length; ++i)
+                    if (headDescriptor.propagatesIndices(i))
+                        aContent.add(content[i]);
+                ParserProduct.raiseLower(aContent.toArray(new ParseToken[aContent.size()]));
+            }
+        }
         return new ParseTokenTensorField(
-                simpleTensorNode,
-                arguments.toArray(new ParseToken[arguments.size()]),
+                head,
+                content,
                 indices.toArray(new SimpleIndices[indices.size()]));
     }
 }

@@ -26,6 +26,7 @@ import cc.redberry.core.TAssert;
 import cc.redberry.core.context.CC;
 import cc.redberry.core.context.OutputFormat;
 import cc.redberry.core.context.VarDescriptor;
+import cc.redberry.core.context.VarIndicesProvider;
 import cc.redberry.core.indices.*;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.tensor.*;
@@ -603,5 +604,21 @@ public class ParserTest {
 
         expr = expr.replace("^", "_");
         parse(expr);
+    }
+
+    @Test
+    public void testSameVariance4() throws Exception {
+        CC.getNameManager().resolve("Expand", StructureOfIndices.getEmpty(), VarIndicesProvider.AllArgs);
+        CC.setParserAllowsSameVariance(true);
+        parse("Expand[A_a, A_a]");
+        parse("Expand[A_aa + B_aa, A_a]");
+    }
+
+    @Test
+    public void testSameVariance5() throws Exception {
+        CC.getNameManager().resolve("Expand", StructureOfIndices.getEmpty(), VarIndicesProvider.AllArgs);
+        CC.setParserAllowsSameVariance(true);
+        parse("A_mn*Expand[U_mn]");
+        parse("Expand[U_mn]*A_mn");
     }
 }

@@ -23,9 +23,9 @@
 package cc.redberry.core.parser;
 
 import cc.redberry.core.context.CC;
+import cc.redberry.core.context.VarDescriptor;
 import cc.redberry.core.indices.IndicesFactory;
 import cc.redberry.core.indices.SimpleIndices;
-import cc.redberry.core.indices.StructureOfIndices;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.tensor.TensorField;
 import cc.redberry.core.tensor.Tensors;
@@ -46,10 +46,6 @@ public class ParseTokenTensorField extends ParseToken {
      * Indices of arguments (may be null).
      */
     public SimpleIndices[] argumentsIndices;
-    /**
-     * Field indices
-     */
-    public SimpleIndices indices;
 
     /**
      * @param head    head of this function
@@ -74,15 +70,17 @@ public class ParseTokenTensorField extends ParseToken {
         computeResultingIndices();
     }
 
-    public void computeResultingIndices() {
+    public SimpleIndices computeResultingIndices() {
+        final VarDescriptor headDescriptor = CC.getNameManager().getVarDescriptor(head.getIndicesTypeStructureAndName());
+        if (headDescriptor == null)
+            return head.getIndices();
         final SimpleIndices[] ai = new SimpleIndices[content.length];
         for (int i = 0; i < content.length; ++i)
             if (argumentsIndices[i] != null)
                 ai[i] = argumentsIndices[i];
             else
                 ai[i] = IndicesFactory.createSimple(null, content[i].getIndices());
-        this.indices = CC.getNameManager().resolve(head.name,
-                StructureOfIndices.create(head.indices)).computeIndices(head.indices, ai);
+        return headDescriptor.computeIndices(head.indices, ai);
     }
 
     @Override
@@ -97,12 +95,11 @@ public class ParseTokenTensorField extends ParseToken {
 
     @Override
     public SimpleIndices getIndices() {
-        return indices;
+        return computeResultingIndices();
     }
 
     @Override
     public Tensor toTensor() {
-        computeResultingIndices();
 //        int i;
 //        if ((i = name.indexOf('~')) >= 0) {
 //            String ordersDescriptor = name.substring(i + 1);

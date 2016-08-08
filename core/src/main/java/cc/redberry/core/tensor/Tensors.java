@@ -879,9 +879,7 @@ public final class Tensors {
      * @return {@code true} if specified tensor is Kronecker tensor
      */
     public static boolean isKronecker(Tensor t) {
-        if (!(t instanceof SimpleTensor))
-            return false;
-        return CC.current().isKronecker((SimpleTensor) t);
+        return t instanceof SimpleTensor && CC.current().isKronecker((SimpleTensor) t);
     }
 
     /**
@@ -891,9 +889,7 @@ public final class Tensors {
      * @return {@code true} if specified tensor is metric tensor
      */
     public static boolean isMetric(Tensor t) {
-        if (!(t instanceof SimpleTensor))
-            return false;
-        return CC.current().isMetric((SimpleTensor) t);
+        return t instanceof SimpleTensor && CC.current().isMetric((SimpleTensor) t);
     }
 
     /**
@@ -903,9 +899,7 @@ public final class Tensors {
      * @return {@code true} if specified tensor is metric or Kronecker tensor
      */
     public static boolean isKroneckerOrMetric(Tensor t) {
-        if (!(t instanceof SimpleTensor))
-            return false;
-        return CC.current().isKroneckerOrMetric((SimpleTensor) t);
+        return t instanceof SimpleTensor && CC.current().isKroneckerOrMetric((SimpleTensor) t);
     }
 
     /**

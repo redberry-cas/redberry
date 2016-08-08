@@ -95,7 +95,7 @@ public final class Sum extends MultiTensor {
         //indices are already checked
         if (t instanceof Complex)
             return true;
-        else if (t instanceof SimpleTensor)//todo if TensorField (when symmetries)?
+        else if (t instanceof SimpleTensor || t instanceof TensorField)
             return t.getIndices().size() <= 1;
         else if (t instanceof Product || t instanceof Power) {
             for (Tensor m : t)
