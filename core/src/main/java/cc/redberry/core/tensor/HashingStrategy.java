@@ -22,6 +22,7 @@
  */
 package cc.redberry.core.tensor;
 
+import cc.redberry.core.context.VarDescriptor;
 import cc.redberry.core.indices.Indices;
 import cc.redberry.core.indices.IndicesUtils;
 import cc.redberry.core.indices.SimpleIndices;
@@ -64,6 +65,12 @@ public final class HashingStrategy {
         return iGraphHash(tensor, sortedNames);
     }
 
+    public static int iGraphHash(final TensorField tensor) {
+        final int[] sortedNames = IndicesUtils.getIndicesNames(tensor.getIndices().getFree());
+        Arrays.sort(sortedNames);
+        return iGraphHash(tensor, sortedNames);
+    }
+
     public static int iGraphHashWithoutIndices(final SimpleTensor tensor) {
         return tensor.hashCode() + tensor.getIndices().contractionsHash();
     }
@@ -93,23 +100,30 @@ public final class HashingStrategy {
         if (sortedNames.length == 0)
             return hash;
         hash = iGraphHash(hash, tensor.getIndices(), sortedNames);
-        for (Tensor t : tensor) //<- args order is important!
-            hash += hash * 7 + 13 * t.hashCode();
+        VarDescriptor headDescriptor = tensor.getHead().getVarDescriptor();
+        for (int i = 0; i < tensor.size(); ++i) {
+            int h;
+            if (headDescriptor.propagatesIndices(i))
+                h = iHash(tensor.get(i), sortedNames);
+            else
+                h = tensor.get(i).hashCode();
+            hash += hash * 7 + 13 * h;
+        }
         return hash;
     }
 
     public static int iHash(final Tensor tensor, final int[] sortedNames) {
         if (sortedNames.length == 0)
             return tensor.hashCode();
+        if (tensor instanceof SimpleTensor)
+            return iGraphHash((SimpleTensor) tensor, sortedNames);
+        if (tensor instanceof TensorField)
+            return iGraphHash((TensorField) tensor, sortedNames);
 
         final Indices freeIndices = tensor.getIndices().getFree();
         if (freeIndices.size() == 0)
             return tensor.hashCode();
 
-        if (tensor instanceof SimpleTensor)
-            return iGraphHash(tensor.hashCode(), ((SimpleTensor) tensor).getIndices(), sortedNames);
-        if (tensor instanceof TensorField)
-            return iGraphHash(tensor.hashCode(), ((TensorField) tensor).getIndices(), sortedNames);
 
         final int[] sortedFree = sortedFree(freeIndices);
         if (!shareIndices(sortedFree, sortedNames))
