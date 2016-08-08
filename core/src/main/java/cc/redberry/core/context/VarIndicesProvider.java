@@ -24,6 +24,9 @@ package cc.redberry.core.context;
 
 import cc.redberry.core.indices.*;
 
+import static cc.redberry.core.groups.permutations.Permutations.createBlockCycle;
+import static cc.redberry.core.groups.permutations.Permutations.createBlockTransposition;
+
 /**
  * Computes indices and symmetries of function
  *
@@ -108,7 +111,7 @@ public interface VarIndicesProvider {
     /**
      * Joins indices of all arguments
      */
-    VarIndicesProvider AllArgs = new VarIndicesProvider() {
+    VarIndicesProvider JoinAll = new VarIndicesProvider() {
         @Override
         public SimpleIndices compute(SimpleIndices self, Indices... indices) {
             SimpleIndicesBuilder ib = new SimpleIndicesBuilder().append(self);
@@ -118,6 +121,44 @@ public interface VarIndicesProvider {
                 else
                     ib.append(IndicesFactory.createSimple(null, ii));
             return ib.getIndices();
+        }
+
+        @Override
+        public boolean propagatesIndices(int i) {
+            return true;
+        }
+
+        @Override
+        public boolean propagatesIndices() {
+            return true;
+        }
+    };
+
+    /**
+     * Indices of derivative argument DArg[x_m, x_a, x_b]
+     */
+    VarIndicesProvider DerivativeArg = new VarIndicesProvider() {
+        @Override
+        public SimpleIndices compute(final SimpleIndices self, final Indices... indices) {
+            SimpleIndicesBuilder sb = new SimpleIndicesBuilder();
+            for (int i = 0; i < indices.length; ++i)
+                if (indices[i] instanceof SimpleIndices)
+                    sb.append((SimpleIndices) indices[i]);
+            final SimpleIndices result = sb.getIndices();
+
+            if (result.size() == 0 || indices.length == 1 || (indices.length == 2 && indices[1].size() == 0))
+                return result;
+            //adding block symmetries
+
+            for (IndexType it : IndexType.values()) {
+                final int size = indices[0].size(it);
+                if (size == 0)
+                    continue;
+                result.getSymmetries().add(it, false, createBlockTransposition(size, size));
+                if (indices.length > 2)
+                    result.getSymmetries().add(it, false, createBlockCycle(size, indices.length));
+            }
+            return result;
         }
 
         @Override
