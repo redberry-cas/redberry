@@ -445,7 +445,7 @@ public class TensorsTest {
     @Test
     public void testField2() throws Exception {
         //Expand propagates indices
-        CC.getNameManager().resolve("Expand", StructureOfIndices.getEmpty(), VarIndicesProvider.AllArgs);
+        CC.getNameManager().resolve("Expand", StructureOfIndices.getEmpty(), VarIndicesProvider.JoinAll);
         Tensor t = parse("f_mn*Expand[f^ma, f_ab]");
         Assert.assertEquals(t.getIndices(), IndicesFactory.create(ParserIndices.parse("_mn^ma_ab")));
     }

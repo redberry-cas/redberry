@@ -309,7 +309,7 @@ public class ApplyIndexMappingTest {
 
     @Test
     public void testField6() {
-        CC.getNameManager().resolve("Expand", StructureOfIndices.getEmpty(), VarIndicesProvider.AllArgs);
+        CC.getNameManager().resolve("Expand", StructureOfIndices.getEmpty(), VarIndicesProvider.JoinAll);
         Tensor from = parse("Expand[A_ab*A^ab, f_cd*f^cd]");
         from = renameDummy(from, ParserIndices.parse("_ab"));
         Assert.assertTrue(TensorUtils.equalsExactly(from, "Expand[A_{fe}*A^{fe},f_{cd}*f^{cd}]"));

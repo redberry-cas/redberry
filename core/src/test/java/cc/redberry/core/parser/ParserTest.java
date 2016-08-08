@@ -608,7 +608,7 @@ public class ParserTest {
 
     @Test
     public void testSameVariance4() throws Exception {
-        CC.getNameManager().resolve("Expand", StructureOfIndices.getEmpty(), VarIndicesProvider.AllArgs);
+        CC.getNameManager().resolve("Expand", StructureOfIndices.getEmpty(), VarIndicesProvider.JoinAll);
         CC.setParserAllowsSameVariance(true);
         parse("Expand[A_a, A_a]");
         parse("Expand[A_aa + B_aa, A_a]");
@@ -616,7 +616,7 @@ public class ParserTest {
 
     @Test
     public void testSameVariance5() throws Exception {
-        CC.getNameManager().resolve("Expand", StructureOfIndices.getEmpty(), VarIndicesProvider.AllArgs);
+        CC.getNameManager().resolve("Expand", StructureOfIndices.getEmpty(), VarIndicesProvider.JoinAll);
         CC.setParserAllowsSameVariance(true);
         parse("A_mn*Expand[U_mn]");
         parse("Expand[U_mn]*A_mn");

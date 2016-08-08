@@ -425,7 +425,7 @@ public final class IndicesUtils {
     }
 
     public static String toString(int index) {
-        return toString(index, Context.get().getDefaultOutputFormat());
+        return toString(index, CC.current().getDefaultOutputFormat());
     }
 
     public static String toString(int[] indices, OutputFormat mode) {

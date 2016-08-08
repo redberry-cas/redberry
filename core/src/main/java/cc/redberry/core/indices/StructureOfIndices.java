@@ -26,7 +26,6 @@ import cc.redberry.core.context.CC;
 import cc.redberry.core.utils.BitArray;
 
 import java.util.Arrays;
-import java.util.Set;
 
 /**
  * The unique identification information about indices objects. This class contains information about types of indices
@@ -83,23 +82,6 @@ public final class StructureOfIndices {
         size = count;
         for (int i = 0; i < IndexType.TYPES_COUNT; ++i)
             if (!CC.isMetric((byte) i))
-                states[i] = BitArray.EMPTY;
-    }
-
-    /**
-     * Creates structure of indices, which contains indices only of specified metric type.
-     *
-     * @param type  index type
-     * @param count number of indices
-     * @throws IllegalArgumentException if type is non metric
-     */
-    private StructureOfIndices(IndexType type, int count, Set<IndexType> cc) {
-        if (!cc.contains(type))
-            throw new IllegalArgumentException("No states information provided for non metric type.");
-        typesCounts[type.getType()] = count;
-        size = count;
-        for (int i = 0; i < IndexType.TYPES_COUNT; ++i)
-            if (!cc.contains(IndexType.getType((byte) i)))
                 states[i] = BitArray.EMPTY;
     }
 
@@ -190,10 +172,6 @@ public final class StructureOfIndices {
         if (count == 0)
             return getEmpty();
         return new StructureOfIndices(type, count, states);
-    }
-
-    public static StructureOfIndices createOfMetric(IndexType type, Set<IndexType> metricTypes) {
-        return new StructureOfIndices(type, 2, metricTypes);
     }
 
     /**
@@ -581,12 +559,13 @@ public final class StructureOfIndices {
     /**
      * Singleton for empty structure.
      */
-    private static StructureOfIndices EMPTY;
+    private static ThreadLocal<StructureOfIndices> EMPTY = new ThreadLocal<>();
 
     public static StructureOfIndices getEmpty() {
-        if (EMPTY == null)
-            EMPTY = new StructureOfIndices();
-        return EMPTY;
+        StructureOfIndices empty = EMPTY.get();
+        if (empty == null)
+            EMPTY.set(empty = new StructureOfIndices());
+        return empty;
     }
 
     /**

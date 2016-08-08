@@ -24,8 +24,10 @@ package cc.redberry.core.transformations;
 
 import cc.redberry.core.TAssert;
 import cc.redberry.core.context.CC;
+import cc.redberry.core.context.VarIndicesProvider;
 import cc.redberry.core.indexgenerator.IndexGeneratorImpl;
 import cc.redberry.core.indices.IndicesUtils;
+import cc.redberry.core.indices.StructureOfIndices;
 import cc.redberry.core.tensor.Expression;
 import cc.redberry.core.tensor.ProductBuilder;
 import cc.redberry.core.tensor.Tensor;
@@ -556,8 +558,17 @@ public class EliminateMetricsTransformationTest {
     }
 
     @Test
-    public void testFieldArg() {
+    public void testFieldArg1() {
         Tensor t = parse("F[g_mn*A^m]");
+        t = contract(t);
+        Tensor expected = parse("F[A_n]");
+        assertTrue(TensorUtils.equals(t, expected));
+    }
+
+    @Test
+    public void testFieldArg2() {
+        CC.getNameManager().resolve("Expand", StructureOfIndices.getEmpty(), VarIndicesProvider.JoinFirst);
+        Tensor t = parse("g_mn*F[A^m]");
         t = contract(t);
         Tensor expected = parse("F[A_n]");
         assertTrue(TensorUtils.equals(t, expected));

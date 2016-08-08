@@ -60,7 +60,16 @@ public final class CC {
      * @return the current context of Redberry session.
      */
     public static Context current() {
-        return Context.get();
+        return ContextManager.getCurrentContext();
+    }
+
+    /**
+     * Returns the current context configuration
+     *
+     * @return the current context configuration
+     */
+    public static ContextConfiguration currentConfig() {
+        return ContextManager.getCurrentContextConfiguration();
     }
 
     /**
@@ -70,7 +79,7 @@ public final class CC {
      * @return true if metric is defined for specified index type
      */
     public static boolean isMetric(byte type) {
-        return current().isMetric(type);
+        return currentConfig().isMetric(type);
     }
 
     /**
@@ -80,7 +89,7 @@ public final class CC {
      * @return true if metric is defined for specified index type
      */
     public static boolean isMetric(IndexType type) {
-        return current().isMetric(type.getType());
+        return currentConfig().isMetric(type.getType());
     }
 
     /**
@@ -117,7 +126,7 @@ public final class CC {
      * @return all metric types
      */
     public static Set<IndexType> getMetricTypes() {
-        return current().getMetricTypes();
+        return currentConfig().metricTypes;
     }
 
     /**
@@ -126,7 +135,7 @@ public final class CC {
      * @return all matrix types
      */
     public static Set<IndexType> getMatrixTypes() {
-        return current().getMatrixTypes();
+        return currentConfig().getMatrixTypes();
     }
 
     /**

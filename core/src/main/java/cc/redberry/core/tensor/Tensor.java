@@ -22,7 +22,7 @@
  */
 package cc.redberry.core.tensor;
 
-import cc.redberry.core.context.Context;
+import cc.redberry.core.context.CC;
 import cc.redberry.core.context.OutputFormat;
 import cc.redberry.core.context.ToString;
 import cc.redberry.core.indices.Indices;
@@ -43,7 +43,7 @@ import java.util.Iterator;
 public abstract class Tensor
         implements Comparable<Tensor>,
         Iterable<Tensor>,
-        ToString{
+        ToString {
 
     /**
      * Hash code of this tensor.
@@ -149,7 +149,7 @@ public abstract class Tensor
      */
     @Override
     public final String toString() {
-        return toString(Context.get().getDefaultOutputFormat());
+        return toString(CC.current().getDefaultOutputFormat());
     }
 
     /**
@@ -164,7 +164,7 @@ public abstract class Tensor
      *
      * @param t tensor
      * @return 0 if hashes are equals, 1 if hash code of this greater the hash code of specified
-     *         tensor and -1 otherwise
+     * tensor and -1 otherwise
      */
     @Override
     public final int compareTo(Tensor t) {

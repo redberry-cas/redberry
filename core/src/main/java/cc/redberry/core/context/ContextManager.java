@@ -61,26 +61,35 @@ public final class ContextManager {
     private ContextManager() {
     }
 
+    public static Context createDefaultContext() {
+        return new Context(new ContextConfiguration());
+    }
+
     /**
-     * Returns the current context of Redberry session.
+     * Returns the current context
      *
-     * @return the current context of Redberry session.
+     * @return the current context
      */
     public static Context getCurrentContext() {
-        return threadLocalContainer.get().context;
+        return threadLocalContainer.get().get();
+    }
+
+    /**
+     * Returns the current context configuration
+     *
+     * @return the current context configuration
+     */
+    public static ContextConfiguration getCurrentContextConfiguration() {
+        return threadLocalContainer.get().contextConfiguration;
     }
 
     /**
      * This method initializes and sets current session context by the default
-     * value defined in {@link DefaultContextFactory}. After this step, all
+     * value defined in {@link #createDefaultContext()}. After this step, all
      * tensors that exist in the thread will be invalidated.
-     *
-     * @return created context
      */
-    public static Context initializeNew() {
-        Context context = DefaultContextFactory.INSTANCE.createContext();
-        threadLocalContainer.get().context = context;
-        return context;
+    public static void initializeNew() {
+        initializeNew(new ContextConfiguration());
     }
 
     /**
@@ -88,13 +97,10 @@ public final class ContextManager {
      * the specified {@code context settings} ({@link ContextConfiguration}).
      * After invocation of this method, all the tensors that exist in
      * the current thread will be invalidated.
-     *
-     * @return created context
      */
-    public static Context initializeNew(ContextConfiguration contextSettings) {
-        Context context = new Context(contextSettings);
-        threadLocalContainer.get().context = context;
-        return context;
+    public static void initializeNew(ContextConfiguration contextConfiguration) {
+        final ContextContainer cc = threadLocalContainer.get();
+        cc.newConfiguration(contextConfiguration.clone());
     }
 
     /**
@@ -117,8 +123,24 @@ public final class ContextManager {
         return executorService.get();
     }
 
-    private static class ContextContainer {
-        volatile Context context = DefaultContextFactory.INSTANCE.createContext();
+    private static final class ContextContainer {
+        volatile ContextConfiguration contextConfiguration = new ContextConfiguration();
+        private volatile Context context = null;
+
+        void newConfiguration(ContextConfiguration contextConfiguration) {
+            this.contextConfiguration = contextConfiguration;
+            this.context = null;
+        }
+
+        Context get() {
+            if (context == null) {
+                synchronized (this) {
+                    if (context == null)
+                        context = new Context(contextConfiguration);
+                }
+            }
+            return context;
+        }
     }
 
     private static class CThreadFactory implements ThreadFactory {

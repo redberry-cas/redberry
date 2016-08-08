@@ -48,6 +48,34 @@ public final class ContextConfiguration implements Cloneable {
 
     public NameManager.IdProvider idProvider = null;
 
+    /**
+     * Returns true if metric is defined for the specified index type.
+     *
+     * @param type index type
+     * @return true if metric is defined for the specified index type
+     */
+    public boolean isMetric(byte type) {
+        return metricTypes.contains(IndexType.getType(type));
+    }
+
+    /**
+     * Returns true if metric is defined for the specified index type.
+     *
+     * @param type index type
+     * @return true if metric is defined for the specified index type
+     */
+    public boolean isMetric(IndexType type) {
+        return metricTypes.contains(type);
+    }
+
+    private EnumSet<IndexType> matrixTypes = null;
+
+    public EnumSet<IndexType> getMatrixTypes() {
+        if (matrixTypes == null)
+            matrixTypes = EnumSet.complementOf(metricTypes);
+        return matrixTypes;
+    }
+
     @Override
     public ContextConfiguration clone() {
         try {

@@ -22,6 +22,7 @@
  */
 package cc.redberry.core.parser;
 
+import cc.redberry.core.context.CC;
 import cc.redberry.core.context.Context;
 import cc.redberry.core.indices.Indices;
 import cc.redberry.core.tensor.Tensor;
@@ -49,9 +50,9 @@ public class ParseTokenExpression extends ParseToken {
     public Tensor toTensor() {
         Tensor expression = Tensors.expression(content[0].toTensor(), content[1].toTensor());
         if (preprocess) {
-            for (Transformation tr : Context.get().getParseManager().defaultTensorPreprocessors)
+            for (Transformation tr : CC.current().getParseManager().defaultTensorPreprocessors)
                 expression = tr.transform(expression);
-            Context.get().getParseManager().defaultTensorPreprocessors.add((Transformation) expression);
+            CC.current().getParseManager().defaultTensorPreprocessors.add((Transformation) expression);
         }
         return expression;
     }

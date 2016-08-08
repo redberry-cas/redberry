@@ -54,15 +54,6 @@ public final class Context {
     private final Set<ContextListener> listeners = Collections.newSetFromMap(new ConcurrentHashMap<ContextListener, Boolean>());
 
     /**
-     * Holds information about metric types.
-     * This is a "map" from (byte) type to (bit) isMetric
-     */
-    private final boolean[] metricTypesBits = new boolean[128];
-    /**
-     * Metric & matrix types.
-     */
-    private final Set<IndexType> metricTypes, matrixTypes;
-    /**
      * Random generator instance
      */
     private final RandomGenerator randomGenerator;
@@ -87,15 +78,8 @@ public final class Context {
                 contextConfiguration.idProvider == null
                         ? contextConfiguration.idAlgorithm.create(contextConfiguration)
                         : contextConfiguration.idProvider);
-        this.metricTypes = contextConfiguration.metricTypes;
-        this.matrixTypes = EnumSet.allOf(IndexType.class);
-        matrixTypes.removeAll(metricTypes);
-        for (IndexType metricType : metricTypes)
-            metricTypesBits[metricType.getType()] = true;
-
         this.randomGenerator = contextConfiguration.randomGenerator;
         this.randomGenerator.setSeed(this.randomSeed = randomGenerator.nextLong());
-
         this.metricDescriptors = new EnumMap<>(IndexType.class);
         this.metricIds = new int[contextConfiguration.metricTypes.size()];
         updateHashes();
@@ -103,8 +87,8 @@ public final class Context {
 
     private void updateHashes() {
         int i = 0;
-        for (IndexType mt : metricTypes) {
-            final StructureOfIndices st = StructureOfIndices.createOfMetric(mt, metricTypes);
+        for (IndexType mt : contextConfiguration.metricTypes) {
+            final StructureOfIndices st = StructureOfIndices.create(mt, 2);
             final VarDescriptor nd = nameManager.resolve(
                     contextConfiguration.metricName, st);
             nd.setNameFormatter(new NameFormatter.MetricOrKronecker(
@@ -117,28 +101,14 @@ public final class Context {
             metricIds[i++] = nd.id;
         }
         Arrays.sort(this.metricIds);
+
+        //default for derivative
+        nameManager.resolve("DArg", StructureOfIndices.getEmpty(), VarIndicesProvider.DerivativeArg);
+        nameManager.resolve("D", StructureOfIndices.getEmpty(), VarIndicesProvider.JoinAll);
     }
 
     public RandomGenerator randomGenerator() {
         return randomGenerator;
-    }
-
-    /**
-     * Returns all metric types.
-     *
-     * @return all metric types
-     */
-    public Set<IndexType> getMetricTypes() {
-        return metricTypes;
-    }
-
-    /**
-     * Returns all matrix types.
-     *
-     * @return all matrix types
-     */
-    public Set<IndexType> getMatrixTypes() {
-        return matrixTypes;
     }
 
     /**
@@ -283,16 +253,6 @@ public final class Context {
     }
 
     /**
-     * Returns true if metric is defined for the specified index type.
-     *
-     * @param type index type
-     * @return true if metric is defined for the specified index type
-     */
-    public final boolean isMetric(byte type) {
-        return metricTypesBits[type];
-    }
-
-    /**
      * Register new context listener
      *
      * @param listener listener
@@ -391,7 +351,7 @@ public final class Context {
         byte type;
         if ((type = IndicesUtils.getType(index1)) != IndicesUtils.getType(index2) || IndicesUtils.getRawStateInt(index1) == IndicesUtils.getRawStateInt(index2))
             throw new IllegalArgumentException("This is not kronecker indices!");
-        if (!Context.this.isMetric(type) && IndicesUtils.getState(index2)) {
+        if (!contextConfiguration.isMetric(type) && IndicesUtils.getState(index2)) {
             int t = index1;
             index1 = index2;
             index2 = t;
@@ -414,7 +374,7 @@ public final class Context {
         byte type;
         if ((type = IndicesUtils.getType(index1)) != IndicesUtils.getType(index2)
                 || !IndicesUtils.haveEqualStates(index1, index2)
-                || !metricTypesBits[type])
+                || !contextConfiguration.isMetric(type))
             throw new IllegalArgumentException("Not metric indices.");
         SimpleIndices indices = IndicesFactory.createSimple(null, index1, index2);
         return Tensors.simpleTensor(metricDescriptors.get(IndexType.getType(type)).id, indices);

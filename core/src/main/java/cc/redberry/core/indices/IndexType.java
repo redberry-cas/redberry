@@ -173,8 +173,6 @@ public enum IndexType {
      * @return IndexType with specified byte type
      */
     public static IndexType getType(byte type) {
-        if (type >= TYPES_COUNT || type < 0)
-            throw new IllegalArgumentException("Now such type: " + type);
         return BYTE_TO_ENUM[type];
     }
 
