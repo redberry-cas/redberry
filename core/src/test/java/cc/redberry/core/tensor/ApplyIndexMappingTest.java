@@ -25,10 +25,13 @@ package cc.redberry.core.tensor;
 import cc.redberry.core.TAssert;
 import cc.redberry.core.combinatorics.IntCombinationsGenerator;
 import cc.redberry.core.combinatorics.IntPermutationsGenerator;
+import cc.redberry.core.context.CC;
+import cc.redberry.core.context.VarIndicesProvider;
 import cc.redberry.core.groups.permutations.Permutations;
 import cc.redberry.core.indexmapping.IndexMappings;
 import cc.redberry.core.indexmapping.Mapping;
 import cc.redberry.core.indices.IndexType;
+import cc.redberry.core.indices.StructureOfIndices;
 import cc.redberry.core.parser.ParserIndices;
 import cc.redberry.core.tensor.random.RandomTensor;
 import cc.redberry.core.utils.ArraysUtils;
@@ -270,6 +273,46 @@ public class ApplyIndexMappingTest {
         target = ApplyIndexMapping.applyIndexMapping(target, imb, usedIndices);
         Tensor standard = parse("F_xy[g_ab*f[h_wxyzabcdmn]]");
         Assert.assertTrue(TensorUtils.equals(target, standard));
+    }
+
+    @Test
+    public void testField3() {
+        CC.getNameManager().resolve("Expand", StructureOfIndices.getEmpty(), VarIndicesProvider.JoinFirst);
+
+        Tensor from = parse("Expand[A_ab, f_pq]");
+        Tensor to = parse("Expand[A_pq, f_pq]");
+        Mapping mapping = IndexMappings.getFirst(from, to);
+
+        assertAppyMapping(from, mapping, to);
+    }
+
+    @Test
+    public void testField4() {
+        CC.getNameManager().resolve("Expand", StructureOfIndices.getEmpty(), VarIndicesProvider.JoinFirst);
+
+        Tensor from = parse("Expand[A_ab, f_pq]");
+        Tensor to = parse("Expand[A^ab, f_pq]");
+        Mapping mapping = new Mapping(ParserIndices.parseSimple("_ab"), ParserIndices.parseSimple("^ab"));
+
+        assertAppyMapping(from, mapping, to);
+    }
+
+    @Test
+    public void testField5() {
+        CC.getNameManager().resolve("Expand", StructureOfIndices.getEmpty(), VarIndicesProvider.JoinFirst);
+
+        Tensor from = parse("Expand[A_ab*A^ab, f_ab]");
+        from = renameDummy(from, ParserIndices.parse("_ab"));
+
+        Assert.assertTrue(TensorUtils.equalsExactly(from, "Expand[A_dc*A^dc, f_ab]"));
+    }
+
+    @Test
+    public void testField6() {
+        CC.getNameManager().resolve("Expand", StructureOfIndices.getEmpty(), VarIndicesProvider.AllArgs);
+        Tensor from = parse("Expand[A_ab*A^ab, f_cd*f^cd]");
+        from = renameDummy(from, ParserIndices.parse("_ab"));
+        Assert.assertTrue(TensorUtils.equalsExactly(from, "Expand[A_{fe}*A^{fe},f_{cd}*f^{cd}]"));
     }
 
     @Test
@@ -574,6 +617,10 @@ public class ApplyIndexMappingTest {
         Mapping mapping = Mapping.valueOf("{_a' -> ^c', _b' -> ^d'}");
         System.out.println(mapping);
         System.out.println(mapping.transform(t));
+    }
+
+    static void assertAppyMapping(Tensor from, Mapping mapping, Tensor result) {
+        TAssert.assertEquals(mapping.transform(from), result);
     }
 
     //    @Test

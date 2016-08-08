@@ -370,4 +370,12 @@ public class IndicesTest {
             Assert.assertArrayEquals(_dummies, __dummies);
         }
     }
+
+    @Test
+    public void testContractionsHash() throws Exception {
+        SimpleIndices indices = ParserIndices.parseSimple("_ab^ac");
+        indices = IndicesFactory.createSimple(IndicesSymmetries.create(indices.getStructureOfIndices()), indices);
+        indices.getSymmetries().setSymmetric();
+        System.out.println(indices.contractionsHash());
+    }
 }

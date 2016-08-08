@@ -28,7 +28,6 @@ import cc.redberry.core.parser.Parser;
 import cc.redberry.core.tensor.SimpleTensor;
 import cc.redberry.core.tensor.Tensors;
 import org.apache.commons.math3.random.RandomGenerator;
-import org.apache.commons.math3.random.Well1024a;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -66,7 +65,7 @@ public final class Context {
     /**
      * Random generator instance
      */
-    private final RandomGenerator randomGenerator = new Well1024a();
+    private final RandomGenerator randomGenerator;
     /**
      * Random seed
      */
@@ -84,14 +83,18 @@ public final class Context {
     Context(ContextConfiguration cc) {
         this.contextConfiguration = cc.clone();
         this.parseManager = new ParseManager(Parser.DEFAULT);
-        this.nameManager = new NameManager(cc.idProvider);
-        this.metricTypes = cc.metricTypes;
+        this.nameManager = new NameManager(
+                contextConfiguration.idProvider == null
+                        ? contextConfiguration.idAlgorithm.create(contextConfiguration)
+                        : contextConfiguration.idProvider);
+        this.metricTypes = contextConfiguration.metricTypes;
         this.matrixTypes = EnumSet.allOf(IndexType.class);
         matrixTypes.removeAll(metricTypes);
         for (IndexType metricType : metricTypes)
             metricTypesBits[metricType.getType()] = true;
 
-        randomGenerator.setSeed(this.randomSeed = randomGenerator.nextLong());
+        this.randomGenerator = contextConfiguration.randomGenerator;
+        this.randomGenerator.setSeed(this.randomSeed = randomGenerator.nextLong());
 
         this.metricDescriptors = new EnumMap<>(IndexType.class);
         this.metricIds = new int[contextConfiguration.metricTypes.size()];

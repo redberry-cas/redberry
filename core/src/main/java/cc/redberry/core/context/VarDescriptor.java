@@ -142,8 +142,10 @@ public final class VarDescriptor {
      * @return resulting indices of function
      */
     public SimpleIndices computeIndices(SimpleIndices self, final Tensor... arguments) {
-        Indices[] indices = new Indices[arguments.length];
-        for (int i = 0; i < arguments.length; i++)
+        if(!propagatesIndices())
+            return self;
+        final Indices[] indices = new Indices[arguments.length];
+        for (int i = arguments.length - 1; i >= 0; --i)
             indices[i] = arguments[i].getIndices();
         return provider.compute(self, indices);
     }
@@ -199,7 +201,7 @@ public final class VarDescriptor {
     /**
      * String representation of symbol name
      *
-     * @param indices      self indices
+     * @param indices self indices
      * @return String representation of symbol name
      */
     public String getName(SimpleIndices indices) {

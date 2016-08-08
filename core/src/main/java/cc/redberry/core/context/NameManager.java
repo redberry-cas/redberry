@@ -129,7 +129,7 @@ public final class NameManager {
         int id(NameAndStructureOfIndices key, TIntObjectHashMap<VarDescriptor> generatedIds);
     }
 
-    static IdProvider HashBasedIdProvider = new IdProvider() {
+    static final IdProvider HashBasedIdProvider = new IdProvider() {
         @Override
         public int id(NameAndStructureOfIndices key, TIntObjectHashMap<VarDescriptor> generatedIds) {
             int id = key.hashCode();
@@ -139,15 +139,20 @@ public final class NameManager {
         }
     };
 
-    static IdProvider RandomIdProvider = new IdProvider() {
+    static final class RandomIdProvider implements IdProvider {
+        final RandomGenerator rnd;
+
+        public RandomIdProvider(RandomGenerator rnd) {
+            this.rnd = rnd;
+        }
+
         @Override
         public int id(NameAndStructureOfIndices key, TIntObjectHashMap<VarDescriptor> generatedIds) {
-            final RandomGenerator rnd = Context.get().randomGenerator();
             int id;
             do
                 id = rnd.nextInt();
             while (generatedIds.containsKey(id));
             return id;
         }
-    };
+    }
 }

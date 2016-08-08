@@ -109,9 +109,6 @@ final class PrimitiveTensorFieldSubstitution extends PrimitiveSubstitution {
         if (mapping == null)
             return currentNode;
 
-        Indices[] fromIndices = from.getArgIndices(),
-                currentIndices = currentField.getArgIndices();
-
         List<Tensor> argFrom = new ArrayList<>(), argTo = new ArrayList<>();
         Tensor fArg;
         int[] cIndices, fIndices;
@@ -120,8 +117,8 @@ final class PrimitiveTensorFieldSubstitution extends PrimitiveSubstitution {
             if (IndexMappings.positiveMappingExists(currentNode.get(i), from.get(i)))
                 continue;
 
-            fIndices = fromIndices[i].getAllIndices().copy();
-            cIndices = currentIndices[i].getAllIndices().copy();
+            fIndices = from.getArgIndices(i).getAllIndices().copy();
+            cIndices = currentField.getArgIndices(i).getAllIndices().copy();
 
             assert cIndices.length == fIndices.length;
 

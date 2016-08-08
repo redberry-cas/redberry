@@ -23,12 +23,11 @@
 package cc.redberry.core.tensor;
 
 import cc.redberry.core.TAssert;
-import cc.redberry.core.combinatorics.IntPermutationsGenerator;
 import cc.redberry.core.context.CC;
 import cc.redberry.core.context.OutputFormat;
+import cc.redberry.core.context.VarIndicesProvider;
 import cc.redberry.core.groups.permutations.Permutation;
 import cc.redberry.core.indices.IndicesFactory;
-import cc.redberry.core.indices.SimpleIndices;
 import cc.redberry.core.indices.StructureOfIndices;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.parser.ParserIndices;
@@ -37,6 +36,7 @@ import cc.redberry.core.utils.TensorUtils;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.util.Arrays;
 import java.util.Iterator;
 
 import static cc.redberry.core.tensor.Tensors.*;
@@ -428,5 +428,44 @@ public class TensorsTest {
         Tensor a = parse("f_i + R_ijk*F^kj - R_kij*F^jk +  R_ijk*F^jk ");
         Tensor b = parse("f_i + R_ijk*F^jk + R_ijk*F^kj - R_kij*F^jk");
         TAssert.assertEquals(a, b);
+    }
+
+    @Test
+    public void testField1() throws Exception {
+        //Expand propagates indices
+        CC.getNameManager().resolve("Expand", StructureOfIndices.getEmpty(), VarIndicesProvider.FirstArg);
+        Tensor t = parse("f_mn*Expand[f^ma]");
+        Assert.assertEquals(t.getIndices(), IndicesFactory.create(ParserIndices.parse("_mn^ma")));
+    }
+
+    @Test
+    public void testField2() throws Exception {
+        //Expand propagates indices
+        CC.getNameManager().resolve("Expand", StructureOfIndices.getEmpty(), VarIndicesProvider.AllArgs);
+        Tensor t = parse("f_mn*Expand[f^ma, f_ab]");
+        Assert.assertEquals(t.getIndices(), IndicesFactory.create(ParserIndices.parse("_mn^ma_ab")));
+    }
+
+    @Test
+    public void testField3() throws Exception {
+        //Expand propagates indices
+        CC.getNameManager().resolve("Expand", StructureOfIndices.getEmpty(), VarIndicesProvider.JoinFirst);
+        Tensor t = parse("f_mn*Expand[f^ma, f_ab]");
+        Assert.assertEquals(t.getIndices(), IndicesFactory.create(ParserIndices.parse("_mn^ma")));
+    }
+
+    @Test
+    public void testField6() {
+        CC.getNameManager().resolve("Expand", StructureOfIndices.getEmpty(), VarIndicesProvider.JoinFirst);
+        parse("t_ab*t^ab*Expand[A_ab*A^ab, f_ab*f^ab]");
+        //assert rename dummies
+    }
+
+    @Test
+    public void testField7() {
+        CC.getNameManager().resolve("Expand", StructureOfIndices.getEmpty(), VarIndicesProvider.JoinFirst);
+        final Tensor t = parse("t_ab*t^ab*Expand[A_ab*A^ab + B_ab*B^ab, f_ab*f^ab]");
+        Assert.assertEquals(4, IndicesFactory.create(TensorUtils.getAllIndicesNamesT(t).toArray()).size());
+        //assert rename dummies
     }
 }

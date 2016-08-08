@@ -23,6 +23,8 @@
 package cc.redberry.core.context;
 
 import cc.redberry.core.indices.IndexType;
+import org.apache.commons.math3.random.RandomGenerator;
+import org.apache.commons.math3.random.Well19937c;
 
 import java.util.EnumSet;
 
@@ -40,7 +42,11 @@ public final class ContextConfiguration implements Cloneable {
 
     public OutputFormat defaultOutputFormat = OutputFormat.Redberry;
 
-    public NameManager.IdProvider idProvider = NameManager.HashBasedIdProvider;
+    public RandomGenerator randomGenerator = new Well19937c(System.currentTimeMillis() + System.identityHashCode(this));
+
+    public IdAlgorithm idAlgorithm = IdAlgorithm.Random;
+
+    public NameManager.IdProvider idProvider = null;
 
     @Override
     public ContextConfiguration clone() {
@@ -48,6 +54,34 @@ public final class ContextConfiguration implements Cloneable {
             return (ContextConfiguration) super.clone();
         } catch (CloneNotSupportedException e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    private interface Factory {
+        NameManager.IdProvider create(ContextConfiguration cc);
+    }
+
+    public enum IdAlgorithm {
+        Random(new Factory() {
+            @Override
+            public NameManager.IdProvider create(ContextConfiguration cc) {
+                return new NameManager.RandomIdProvider(cc.randomGenerator);
+            }
+        }), Fixed(new Factory() {
+            @Override
+            public NameManager.IdProvider create(ContextConfiguration cc) {
+                return NameManager.HashBasedIdProvider;
+            }
+        });
+
+        private final Factory factory;
+
+        IdAlgorithm(Factory factory) {
+            this.factory = factory;
+        }
+
+        public NameManager.IdProvider create(ContextConfiguration cc) {
+            return factory.create(cc);
         }
     }
 }

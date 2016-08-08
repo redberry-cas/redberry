@@ -22,17 +22,20 @@
  */
 package cc.redberry.core.indexmapping;
 
-import cc.redberry.core.test.PerformanceTest;
-import cc.redberry.core.utils.OutputPort;
 import cc.redberry.core.TAssert;
 import cc.redberry.core.context.CC;
+import cc.redberry.core.context.VarIndicesProvider;
 import cc.redberry.core.groups.permutations.Permutations;
 import cc.redberry.core.indices.IndexType;
 import cc.redberry.core.indices.Indices;
 import cc.redberry.core.indices.IndicesUtils;
+import cc.redberry.core.indices.StructureOfIndices;
+import cc.redberry.core.parser.ParserIndices;
+import cc.redberry.core.tensor.HashingStrategy;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.tensor.Tensors;
-import cc.redberry.core.tensor.HashingStrategy;
+import cc.redberry.core.test.PerformanceTest;
+import cc.redberry.core.utils.OutputPort;
 import cc.redberry.core.utils.TensorUtils;
 import org.junit.Assert;
 import org.junit.Ignore;
@@ -271,6 +274,37 @@ public class IndexMappingsTest {
         Tensor from = parse("g_mn*f[x]");
         Tensor to = parse("g_ab*f[y]");
         Assert.assertTrue(IndexMappings.createPortOfBuffers(from, to).take() == null);
+    }
+
+    @Test
+    public void testField3() throws Exception {
+        //Expand propagates indices
+        CC.getNameManager().resolve("Expand", StructureOfIndices.getEmpty(), VarIndicesProvider.FirstArg);
+
+        Tensor a = parse("f_mn*Expand[f^ma]");
+        Tensor b = parse("f_pq*Expand[f^pj]");
+
+        final Set<Mapping> m = IndexMappings.getAllMappings(a, b);
+        Assert.assertEquals(m.size(), 1);
+        final Mapping mapping = m.iterator().next();
+        final Mapping expected = new Mapping(ParserIndices.parseSimple("_an"), ParserIndices.parseSimple("_jq"));
+        Assert.assertEquals(mapping, expected);
+    }
+
+
+    @Test
+    public void testField4() throws Exception {
+        //Expand propagates indices
+        CC.getNameManager().resolve("Expand", StructureOfIndices.getEmpty(), VarIndicesProvider.FirstArg);
+
+        Tensor a = parse("f_mn*Expand[f^ma, ]");
+        Tensor b = parse("f_pq*Expand[f^pj]");
+
+        final Set<Mapping> m = IndexMappings.getAllMappings(a, b);
+        Assert.assertEquals(m.size(), 1);
+        final Mapping mapping = m.iterator().next();
+        final Mapping expected = new Mapping(ParserIndices.parseSimple("_an"), ParserIndices.parseSimple("_jq"));
+        Assert.assertEquals(mapping, expected);
     }
 
     @Test

@@ -22,6 +22,7 @@
  */
 package cc.redberry.core.utils;
 
+import cc.redberry.core.context.VarDescriptor;
 import cc.redberry.core.groups.permutations.Permutation;
 import cc.redberry.core.groups.permutations.Permutations;
 import cc.redberry.core.indexmapping.IndexMappings;
@@ -425,12 +426,20 @@ public final class TensorUtils {
     }
 
     private static void appendAllIndicesNamesT(Tensor tensor, TIntHashSet set, boolean includeScalarFunctions) {
-        if (tensor instanceof SimpleTensor || tensor instanceof TensorField) {
+        if (tensor instanceof SimpleTensor) {
             Indices ind = tensor.getIndices();
             set.ensureCapacity(ind.size());
             final int size = ind.size();
             for (int i = 0; i < size; ++i)
                 set.add(IndicesUtils.getNameWithType(ind.get(i)));
+        } else if (tensor instanceof TensorField) {
+            TensorField tf = (TensorField) tensor;
+            appendAllIndicesNamesT(tf.getHead(), set, includeScalarFunctions);
+            VarDescriptor headDescriptor = tf.getHead().getVarDescriptor();
+            if (headDescriptor.propagatesIndices())
+                for (int i = tf.size() - 1; i >= 0; --i)
+                    if (headDescriptor.propagatesIndices(i))
+                        appendAllIndicesNamesT(tf.get(i), set, includeScalarFunctions);
         } else if (tensor instanceof Power) {
             appendAllIndicesNamesT(tensor.get(0), set);
         } else if (tensor instanceof ScalarFunction && !includeScalarFunctions)

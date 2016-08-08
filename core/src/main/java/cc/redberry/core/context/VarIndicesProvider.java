@@ -86,4 +86,48 @@ public interface VarIndicesProvider {
         @Override
         public boolean propagatesIndices() {return true;}
     };
+
+    /**
+     * Joins indices of the first argument
+     */
+    VarIndicesProvider JoinFirst = new VarIndicesProvider() {
+        @Override
+        public SimpleIndices compute(SimpleIndices self, Indices... indices) {
+            if (indices[0].size() == 0)
+                return self;
+            SimpleIndices argIndices = indices[0] instanceof SimpleIndices ? (SimpleIndices) indices[0] : IndicesFactory.createSimple(null, indices[0]);
+            return new SimpleIndicesBuilder().append(self).append(argIndices).getIndices();
+        }
+
+        @Override
+        public boolean propagatesIndices(int i) {return i == 0;}
+
+        @Override
+        public boolean propagatesIndices() {return true;}
+    };
+    /**
+     * Joins indices of all arguments
+     */
+    VarIndicesProvider AllArgs = new VarIndicesProvider() {
+        @Override
+        public SimpleIndices compute(SimpleIndices self, Indices... indices) {
+            SimpleIndicesBuilder ib = new SimpleIndicesBuilder().append(self);
+            for (Indices ii : indices)
+                if (ii instanceof SimpleIndices)
+                    ib.append((SimpleIndices) ii);
+                else
+                    ib.append(IndicesFactory.createSimple(null, ii));
+            return ib.getIndices();
+        }
+
+        @Override
+        public boolean propagatesIndices(int i) {
+            return true;
+        }
+
+        @Override
+        public boolean propagatesIndices() {
+            return true;
+        }
+    };
 }
