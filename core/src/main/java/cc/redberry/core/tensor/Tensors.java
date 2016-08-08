@@ -35,6 +35,7 @@ import gnu.trove.set.hash.TIntHashSet;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 /**
  * Factory methods to create tensors.
@@ -131,50 +132,6 @@ public final class Tensors {
      */
     public static Tensor multiplyAndRenameConflictingDummies(Tensor... factors) {
         return ProductFactory.FACTORY.create(resolveDummy(factors));
-//        Tensor t = ProductFactory.FACTORY.create(factors);
-//        if (!(t instanceof Product))
-//            return t;
-//
-//        //postprocessing product
-//        Product p = (Product) t;
-//        //all product indices
-//        Set<Integer> totalIndices = new HashSet<>();
-//        int i, j;
-//        Indices indices = p.indices;
-//        for (i = indices.size() - 1; i >= 0; --i)
-//            totalIndices.add(IndicesUtils.getNameWithType(indices.get(i)));
-//
-//        int[] forbidden;
-//        Tensor current;
-//        //processing indexless data
-//        for (i = 0; i < p.indexlessData.length; ++i) {
-//            current = p.indexlessData[i];
-//            if (current instanceof Sum || current instanceof Power) {
-//                forbidden = new int[totalIndices.size()];
-//                j = -1;
-//                for (Integer index : totalIndices)
-//                    forbidden[++j] = index;
-//                p.indexlessData[i] = ApplyIndexMapping.renameDummyFromClonedSource(current, forbidden);
-//                totalIndices.addAll(TensorUtils.getAllIndicesNames(p.indexlessData[i]));
-//            }
-//        }
-//        Set<Integer> free;
-//        for (i = 0; i < p.data.length; ++i) {
-//            current = p.data[i];
-//            if (current instanceof Sum || current instanceof Power) {
-//                free = new HashSet<>(current.getIndices().size());
-//                for (j = current.getIndices().size() - 1; j >= 0; --j)
-//                    free.add(IndicesUtils.getNameWithType(current.getIndices().get(j)));
-//                totalIndices.removeAll(free);
-//                forbidden = new int[totalIndices.size()];
-//                j = -1;
-//                for (Integer index : totalIndices)
-//                    forbidden[++j] = index;
-//                p.data[i] = ApplyIndexMapping.renameDummyFromClonedSource(current, forbidden);
-//                totalIndices.addAll(TensorUtils.getAllIndicesNames(p.data[i]));
-//            }
-//        }
-//        return p;
     }
 
     /**
@@ -212,15 +169,20 @@ public final class Tensors {
             }
         }
 
+        boolean changed = false;
         Tensor factor, newFactor;
         int toResolvePosition = toResolve.size();
         for (i = factors.length - 1; i >= 0; --i)
             if (result[i] == null) {
                 factor = toResolve.get(--toResolvePosition);
                 newFactor = ApplyIndexMapping.renameDummy(factor, forbidden.toArray());
+                if (!changed && newFactor != factor)
+                    changed = true;
                 forbidden.addAll(TensorUtils.getAllIndicesNamesT(newFactor));
                 result[i] = newFactor;
             }
+        if (!changed)
+            return factors;
 //        for (int i = toResolve.size() - 1; i >= 0; --i) {
 //            factor = toResolve.get(i);
 //            newFactor = ApplyIndexMapping.renameDummy(factor, forbidden.toArray());
@@ -230,16 +192,26 @@ public final class Tensors {
         return result;
     }
 
-    public static void resolveAllDummies(Tensor[] factors) {
+    /**
+     * @return true if indices were changed
+     */
+    public static boolean resolveAllDummies(final Tensor[] factors) {
+        if (factors.length < 2)
+            return false;
         TIntHashSet forbidden = new TIntHashSet();
         int i;
         for (i = factors.length - 1; i >= 0; --i)
             forbidden.addAll(TensorUtils.getAllIndicesNamesT(factors[i]));
 
+        boolean changed = false;
         for (i = factors.length - 1; i >= 0; --i) {
-            factors[i] = ApplyIndexMapping.renameDummy(factors[i], forbidden.toArray());
+            Tensor f = ApplyIndexMapping.renameDummy(factors[i], forbidden.toArray());
+            if (!changed && f != factors[i])
+                changed = true;
+            factors[i] = f;
             forbidden.addAll(TensorUtils.getAllIndicesNamesT(factors[i]));
         }
+        return changed;
     }
 
     /**
@@ -378,18 +350,18 @@ public final class Tensors {
                         indices));
     }
 
-    /**
-     * Replaces head of function with a new head
-     *
-     * @param field   function
-     * @param newHead new head
-     * @return
-     */
-    public static TensorField replaceHead(TensorField field, SimpleTensor newHead) {
-        if (!field.getHead().getIndices().getFree().equalsWithSymmetries(newHead.getIndices().getFree()))
-            throw new IllegalArgumentException();
-        return field0(newHead, field.args, field.argIndices);
-    }
+//    /**
+//     * Replaces head of function with a new head
+//     *
+//     * @param field   function
+//     * @param newHead new head
+//     * @return
+//     */
+//    public static TensorField replaceHead(TensorField field, SimpleTensor newHead) {
+//        if (!field.getHead().getIndices().getFree().equalsWithSymmetries(newHead.getIndices().getFree()))
+//            throw new IllegalArgumentException();
+//        return field0(newHead, field.args, field.argIndices);
+//    }
 
     /**
      * Returns function with specified head, args and argsIndices
@@ -402,11 +374,18 @@ public final class Tensors {
     public static TensorField field(SimpleTensor head, Tensor[] args, SimpleIndices[] argIndices) {
         if (args.length != argIndices.length)
             throw new IllegalArgumentException("args.length != argIndices.length");
-        for (int i = args.length - 1; i >= 0; --i)
-            if (!args[i].getIndices().getFree().equalsRegardlessOrder(argIndices[i]))
-                throw new IllegalArgumentException("Inconsistent arg indices (arg = " + args[i] + ", argIndices = " + argIndices[i] + ")");
-
-        return field0(head, args, argIndices);
+        final VarDescriptor headDescriptor = head.getVarDescriptor();
+        final Tensor[] newArgs = resolveArgsDummies(headDescriptor, args);
+        final SimpleIndices[] newArgIndices = argIndices.clone();
+        for (int i = args.length - 1; i >= 0; --i) {
+            final Indices ai = newArgs[i].getIndices();
+            if (newArgIndices[i] == null) {
+                newArgIndices[i] = ai instanceof SimpleIndices ? (SimpleIndices) ai : IndicesFactory.createSimple(null, ai);
+            } else if (!newArgIndices[i].getFree().equalsRegardlessOrder(ai.getFree()))
+                throw new IllegalArgumentException("Inconsistent arg indices (arg = " + args[i] + ", argIndices = " + newArgIndices[i] + ")");
+        }
+        final SimpleIndices indices = headDescriptor.computeIndices(head.getIndices(), newArgIndices);
+        return new TensorField(indices, head, newArgs, newArgIndices);
     }
 
     /**
@@ -416,17 +395,35 @@ public final class Tensors {
      * @param args arguments
      * @return
      */
-    public static TensorField field(SimpleTensor head, Tensor... args) {
-        SimpleIndices[] argIndices = new SimpleIndices[args.length];
-        for (int i = 0; i < args.length; ++i)
-            argIndices[i] = IndicesFactory.createSimple(null, args[i].getIndices());
-
-        return field0(head, args, argIndices);
+    public static TensorField field(final SimpleTensor head, final Tensor... args) {
+        //resolve dummies
+        final VarDescriptor headDescriptor = head.getVarDescriptor();
+        final Tensor[] newArgs = resolveArgsDummies(headDescriptor, args);
+        final SimpleIndices indices = headDescriptor.computeIndices(head.getIndices(), newArgs);
+        return new TensorField(indices, head, newArgs);
     }
 
-    private static TensorField field0(SimpleTensor head, Tensor[] args, SimpleIndices[] argIndices) {
-        final SimpleIndices indices = head.getVarDescriptor().computeIndices(head.getIndices(), argIndices);
-        return new TensorField(indices, head, args, argIndices);
+    private static Tensor[] resolveArgsDummies(VarDescriptor headDescriptor, Tensor[] args) {
+        Tensor[] newArgs = args;
+        if (headDescriptor.propagatesIndices() && args.length > 1) {
+            //resolve dummies
+            final List<Tensor> toResolveList = new ArrayList<>();
+            for (int i = args.length - 1; i >= 0; --i)
+                if (headDescriptor.propagatesIndices(i))
+                    toResolveList.add(args[i]);
+
+            final Tensor[] toResolve = toResolveList.toArray(new Tensor[toResolveList.size()]);
+            final Tensor[] resolved = resolveDummy(toResolve);
+            boolean changed = resolved != toResolve;
+            if (changed) {
+                newArgs = args.clone();
+                int j = 0;
+                for (int i = args.length - 1; i >= 0; --i)
+                    if (headDescriptor.propagatesIndices(i))
+                        newArgs[i] = toResolve[j++];
+            }
+        }
+        return newArgs;
     }
 
 //    /**
