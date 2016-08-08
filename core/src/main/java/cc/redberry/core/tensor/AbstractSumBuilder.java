@@ -181,6 +181,8 @@ public abstract class AbstractSumBuilder implements TensorBuilder {
             return ((Product) t).iHashCode();
         else if (t instanceof SimpleTensor)
             return HashingStrategy.iGraphHash((SimpleTensor) t, sortedNames);
+        else if (t instanceof TensorField)
+            return HashingStrategy.iGraphHash((TensorField) t, sortedNames);
         else
             return HashingStrategy.iHash(t, sortedNames);
     }
