@@ -481,6 +481,8 @@ public final class ApplyIndexMapping {
      * @return tensor with renamed indices
      */
     public static Tensor applyIndexMapping(Tensor tensor, Mapping mapping, int[] forbidden) {
+        if (TensorUtils.isZeroOrIndeterminate(tensor))
+            return tensor;
         if (mapping.isEmpty()) {
             if (tensor.getIndices().getFree().size() != 0)
                 throw new IllegalArgumentException("From length does not match free indices size.");
