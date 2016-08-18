@@ -26,6 +26,7 @@ import cc.redberry.core.TAssert;
 import cc.redberry.core.context.CC;
 import cc.redberry.core.context.OutputFormat;
 import cc.redberry.core.number.Complex;
+import cc.redberry.core.tensor.Expression;
 import cc.redberry.core.tensor.SimpleTensor;
 import cc.redberry.core.tensor.Tensor;
 import cc.redberry.core.tensor.iterator.FromChildToParentIterator;
@@ -33,6 +34,7 @@ import cc.redberry.core.test.LongTest;
 import cc.redberry.core.transformations.EliminateMetricsTransformation;
 import cc.redberry.core.transformations.Transformation;
 import cc.redberry.core.transformations.TransformationCollection;
+import cc.redberry.core.transformations.factor.FactorTransformation;
 import junit.framework.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -433,6 +435,23 @@ public class DiracTraceTransformationTest extends AbstractFeynCalcTest {
 
         testFeynCalcData("DiracTraceD_ppqrst5", new TransformationCollection(dSimplify, dTrace));
         testFeynCalcData("DiracTraceD_ppqqrrst5", new TransformationCollection(dSimplify, dTrace));
+    }
+
+    @Test
+    public void test23() throws Exception {
+        DiracOptions dOpts = new DiracOptions();
+        dOpts.dimension = parse("D");
+        dOpts.traceOfOne = Complex.FOUR;
+        dTrace = new DiracTraceTransformation(dOpts);
+        dSimplify = new DiracSimplifyTransformation(dOpts);
+        CC.setDefaultOutputFormat(OutputFormat.Redberry);
+
+        Tensor t = parse("Tr[G^{i}*G_{a}*G_{b}*G_{c}*G_{d}*G_{e}*G_{i}*G5*G^{e}]");
+
+        t = dTrace.transform(dSimplify.transform(t));
+        t = FactorTransformation.factor(t);
+
+        assertEquals("(4*I)*(64+D**2-18*D)*e_{abcd}", t);
     }
 
     @Ignore

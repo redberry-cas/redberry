@@ -43,7 +43,6 @@ import java.util.List;
 
 import static cc.redberry.core.indices.IndicesFactory.createSimple;
 import static cc.redberry.core.indices.IndicesUtils.*;
-import static cc.redberry.core.tensor.Tensors.parse;
 import static cc.redberry.core.tensor.Tensors.simpleTensor;
 
 /**
@@ -202,7 +201,7 @@ public abstract class AbstractTransformationWithGammas implements Transformation
         gammas[j + 1] = setMatrixIndices((SimpleTensor) t, gammas[j + 1].getIndices().getOfType(matrixType));
     }
 
-    protected Tensor[] cutAdj(Tensor[] original, int i) {
+    protected final Tensor[] cutAdj(Tensor[] original, int i) {
         if (original.length < 2)
             return original;
 
@@ -230,7 +229,7 @@ public abstract class AbstractTransformationWithGammas implements Transformation
         return n;
     }
 
-    protected Tensor[] createLine(final int length) {
+    protected final Tensor[] createLine(final int length) {
         Tensor[] gammas = new Tensor[length];
         int matrixIndex, u = matrixIndex = setType(matrixType, 0);
         for (int i = 0; i < length; ++i)
@@ -242,7 +241,7 @@ public abstract class AbstractTransformationWithGammas implements Transformation
         return gammas;
     }
 
-    protected Tensor[] del(Tensor[] arr, int i) {
+    protected final Tensor[] del(Tensor[] arr, int i) {
         Tensor t = arr[i];
         arr = ArraysUtils.remove(arr, i);
         if (arr.length == 0)
@@ -260,7 +259,7 @@ public abstract class AbstractTransformationWithGammas implements Transformation
     }
 
     //returns matrix Index
-    protected int del(List<Tensor> arr, int i) {
+    protected final int del(List<Tensor> arr, int i) {
         Tensor t = arr.remove(i);
         if (arr.isEmpty())
             return t.getIndices().getLower().get(matrixType, 0);

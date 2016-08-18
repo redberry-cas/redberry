@@ -387,7 +387,6 @@ public class TensorUtilsTest {
         assertEquals(9, Count(parse("h~(2)_{dpbz}[x_{d}]*h~(1)_{rcf}[x_{d}]*h^{j}_{k}[x_{a}]*h^{o}_{t}[x_{a}]*h^{u}_{v}[x_{a}]*h^{n}_{m}[x_{a}]*h^{p}_{o}[x_{a}]*h^{a}_{u}[x_{a}]*h^{q}_{j}[x_{a}]"), parse("h_ab[p_a]")));
     }
 
-
     @Test
     public void testExponent1() throws Exception {
         assertEquals(3, Exponent(parse("f[x] + a*f[x]**2*f[y]"), parse("f[y]")));

@@ -31,6 +31,7 @@ import cc.redberry.core.parser.Parser;
 import cc.redberry.core.tensor.*;
 import cc.redberry.core.transformations.Transformation;
 import cc.redberry.core.utils.IntArrayList;
+import cc.redberry.core.utils.TensorUtils;
 import gnu.trove.map.hash.TIntObjectHashMap;
 
 import static cc.redberry.core.indices.IndicesUtils.areContracted;
@@ -101,12 +102,55 @@ final class DiracSimplify1 extends AbstractFeynCalcTransformation {
         if (expr == null) {
             Tensor[] line = createLine(length);
             line[length - 1] = setMetricIndex((SimpleTensor) line[length - 1], IndicesUtils.inverseIndexState(line[0].getIndices().get(metricType, 0)));
-            substitutions.put(length, expr = expression(multiply(line), createSubstitution0(line)));
+            substitutions.put(length, expr = expression(multiply(line), createSubstitution(line)));
         }
         return expr;
     }
 
-    private Tensor createSubstitution0(Tensor[] gammas) {
+    private Tensor createSubstitution(final Tensor[] gammas) {
+        if (TensorUtils.equals(deltaTrace, Complex.FOUR))
+            return createSubstitution4(gammas);
+        else return createSubstitutionD(gammas);
+    }
+
+    private Tensor createSubstitutionD(Tensor[] gammas) {
+        if (gammas.length <= 4)
+            return createSubstitution4(gammas);
+
+        gammas = del(gammas, 0);
+        gammas = del(gammas, gammas.length - 1);
+        int length = gammas.length;
+        SumBuilder sb = new SumBuilder();
+        //equation from Sec. 3 in GAMATRICA by M. Veltman
+
+        final Complex mOne = length % 2 == 0 ? Complex.ONE : Complex.MINUS_ONE;
+        //d-4 term
+        sb.put(multiply(mOne, subtract(deltaTrace.get(1), Complex.FOUR), multiply(gammas)));
+        //3-reverse term
+        Tensor[] temp = gammas.clone();
+        reverseIndices(temp, 0, 3);
+        sb.put(multiply(Complex.TWO.multiply(mOne), multiply(temp)));
+
+        for (int i = 3; i < length; ++i) {
+            final Complex factor = Complex.TWO.multiply((length - i - 1) % 2 == 0 ? Complex.ONE : Complex.MINUS_ONE);
+            temp = gammas.clone();
+            for (int j = i - 1; j >= 0; --j)
+                swapAdj(temp, j);
+            sb.put(multiply(factor, multiply(temp)));
+        }
+        return sb.build();
+    }
+
+    private void reverseIndices(Tensor[] gammas, int begin, int end) {
+        //reverse term
+        int[] indices = new int[end - begin];
+        for (int i = begin; i < end; ++i)
+            indices[i] = gammas[i].getIndices().get(metricType, 0);
+        for (int i = begin; i < end; ++i)
+            gammas[i] = setMetricIndex((SimpleTensor) gammas[i], indices[end - i - 1]);
+    }
+
+    private Tensor createSubstitution4(Tensor[] gammas) {
         gammas = del(gammas, 0);
         gammas = del(gammas, gammas.length - 1);
         int length = gammas.length;
@@ -116,11 +160,7 @@ final class DiracSimplify1 extends AbstractFeynCalcTransformation {
             sb.put(multiply(subtract(Complex.FOUR, deltaTrace.get(1)), multiply(gammas)));
 
             //reverse term
-            int[] indices = new int[length];
-            for (int i = 0; i < length; ++i)
-                indices[i] = gammas[i].getIndices().get(metricType, 0);
-            for (int i = 0; i < length; ++i)
-                gammas[i] = setMetricIndex((SimpleTensor) gammas[i], indices[length - i - 1]);
+            reverseIndices(gammas, 0, gammas.length);
             sb.put(multiply(Complex.MINUS_TWO, multiply(gammas)));
 
         } else {//even

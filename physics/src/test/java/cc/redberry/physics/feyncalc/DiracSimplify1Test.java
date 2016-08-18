@@ -25,6 +25,7 @@ package cc.redberry.physics.feyncalc;
 import cc.redberry.core.TAssert;
 import cc.redberry.core.context.CC;
 import cc.redberry.core.context.OutputFormat;
+import cc.redberry.core.number.Complex;
 import cc.redberry.core.tensor.Tensor;
 import org.junit.Test;
 
@@ -107,6 +108,18 @@ public class DiracSimplify1Test extends AbstractFeynCalcTest {
 
         t = parse("G_{a}*G_{b}*G_c*G_d*G_e*G_f*G_g*G^{a}");
         assertEquals("2*G_f*G_e*G_d*G_c*G_b*G_g+2*G_g*G_b*G_c*G_d*G_e*G_f", dSimplify1.transform(t));
+    }
+
+    @Test
+    public void test5() throws Exception {
+        DiracOptions dOpts = new DiracOptions();
+        dOpts.dimension = parse("D");
+        dOpts.traceOfOne = Complex.FOUR;
+        dSimplify1 = new DiracSimplify1(dOpts);
+
+        Tensor t = parse("G_{o}*G_{a}*G_{b}*G_{c}*G_{d}*G_{e}*G_{o}");
+        assertEquals("(-D+4)*G_{a}*G_{b}*G_{c}*G_{d}*G_{e}+2*G_{e}*G_{a}*G_{b}*G_{c}*G_{d}-2*G_{d}*G_{a}*G_{b}*G_{c}*G_{e}-2*G_{c}*G_{b}*G_{a}*G_{d}*G_{e}",
+                dSimplify1.transform(t));
     }
 
     void testFeynCalcData(String resource) throws Exception {
