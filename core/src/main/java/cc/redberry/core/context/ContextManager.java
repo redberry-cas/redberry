@@ -41,24 +41,26 @@ import java.util.concurrent.ThreadFactory;
  * @since 1.0
  */
 public final class ContextManager {
-    /**
-     * Thread-local container for the current context
-     */
-    private final static ThreadLocal<ContextContainer> threadLocalContainer = new ThreadLocal<ContextContainer>() {
-        @Override
-        protected ContextContainer initialValue() {
-            return new ContextContainer();
-        }
-    };
-    /**
-     * Thread-local {@code ExecutorService}
-     */
-    private static final ThreadLocal<ExecutorService> executorService = new ThreadLocal<ExecutorService>() {
-        @Override
-        protected ExecutorService initialValue() {
-            return Executors.newCachedThreadPool(new CThreadFactory(threadLocalContainer.get()));
-        }
-    };
+//    /**
+//     * Thread-local container for the current context
+//     */
+//    private final static ThreadLocal<ContextContainer> threadLocalContainer = new ThreadLocal<ContextContainer>() {
+//        @Override
+//        protected ContextContainer initialValue() {
+//            return new ContextContainer();
+//        }
+//    };
+//    /**
+//     * Thread-local {@code ExecutorService}
+//     */
+//    private static final ThreadLocal<ExecutorService> executorService = new ThreadLocal<ExecutorService>() {
+//        @Override
+//        protected ExecutorService initialValue() {
+//            return Executors.newCachedThreadPool(new CThreadFactory(threadLocalContainer.get()));
+//        }
+//    };
+
+    private static volatile Context context = DefaultContextFactory.INSTANCE.createContext();
 
     private ContextManager() {
     }
@@ -69,7 +71,7 @@ public final class ContextManager {
      * @return the current context of Redberry session.
      */
     public static Context getCurrentContext() {
-        return threadLocalContainer.get().context;
+        return context;
     }
 
     /**
@@ -81,7 +83,7 @@ public final class ContextManager {
      */
     public static Context initializeNew() {
         Context context = DefaultContextFactory.INSTANCE.createContext();
-        threadLocalContainer.get().context = context;
+        ContextManager.context = context;
         return context;
     }
 
@@ -95,7 +97,7 @@ public final class ContextManager {
      */
     public static Context initializeNew(ContextSettings contextSettings) {
         Context context = new Context(contextSettings);
-        threadLocalContainer.get().context = context;
+        ContextManager.context = context;
         return context;
     }
 
@@ -106,49 +108,49 @@ public final class ContextManager {
      * @param context context
      */
     public static void setCurrentContext(Context context) {
-        threadLocalContainer.get().context = context;
+        ContextManager.context = context;
     }
 
-    /**
-     * Returns thread-local {@code ExecutorService} with fixed context. All threads linked
-     * to this {@code ExecutorService} will have same context.
-     *
-     * @return thread-local {@code ExecutorService} with fixed context
-     */
-    public static ExecutorService getExecutorService() {
-        return executorService.get();
-    }
+//    /**
+//     * Returns thread-local {@code ExecutorService} with fixed context. All threads linked
+//     * to this {@code ExecutorService} will have same context.
+//     *
+//     * @return thread-local {@code ExecutorService} with fixed context
+//     */
+//    public static ExecutorService getExecutorService() {
+//        return executorService.get();
+//    }
 
-    private static class ContextContainer {
-        volatile Context context = DefaultContextFactory.INSTANCE.createContext();
-    }
+//    private static class ContextContainer {
+//        volatile Context context = DefaultContextFactory.INSTANCE.createContext();
+//    }
 
-    private static class CThreadFactory implements ThreadFactory {
-        private final ContextContainer container;
-
-        public CThreadFactory(ContextContainer container) {
-            this.container = container;
-        }
-
-        @Override
-        public Thread newThread(Runnable r) {
-            return new Thread(new RunnableWrapper(container, r));
-        }
-    }
-
-    private static class RunnableWrapper implements Runnable {
-        private final ContextContainer container;
-        private final Runnable innerRunnable;
-
-        public RunnableWrapper(ContextContainer container, Runnable innerRunnable) {
-            this.container = container;
-            this.innerRunnable = innerRunnable;
-        }
-
-        @Override
-        public void run() {
-            threadLocalContainer.set(container);
-            innerRunnable.run();
-        }
-    }
+//    private static class CThreadFactory implements ThreadFactory {
+//        private final ContextContainer container;
+//
+//        public CThreadFactory(ContextContainer container) {
+//            this.container = container;
+//        }
+//
+//        @Override
+//        public Thread newThread(Runnable r) {
+//            return new Thread(new RunnableWrapper(container, r));
+//        }
+//    }
+//
+//    private static class RunnableWrapper implements Runnable {
+//        private final ContextContainer container;
+//        private final Runnable innerRunnable;
+//
+//        public RunnableWrapper(ContextContainer container, Runnable innerRunnable) {
+//            this.container = container;
+//            this.innerRunnable = innerRunnable;
+//        }
+//
+//        @Override
+//        public void run() {
+//            threadLocalContainer.set(container);
+//            innerRunnable.run();
+//        }
+//    }
 }
